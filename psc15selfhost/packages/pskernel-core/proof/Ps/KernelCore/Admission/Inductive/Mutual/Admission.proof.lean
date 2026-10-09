@@ -1,3 +1,5 @@
+import Ps.KernelCore.Metatheory.AdmissionMutualConstructorSemanticHistoryConfiguration
+import Ps.KernelCore.Metatheory.AdmissionMutualInductiveIndexConfiguration
 import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 
 theorem psKernelAddSimpleMutualInductive_empty_bundle
@@ -28,3 +30,7 @@ theorem psKernelAddSimpleMutualInductive_rejects_duplicate_universes
         fuel environment decl maxRecDepth maxNatSize =
       Except.error "duplicate universe parameter" := by
   simp [psKernelAddSimpleMutualInductive, h]
+
+#print axioms PsKernelCheckedMutualFamilyConstructorHistory.exact_extension
+#print axioms PsKernelCheckedMutualFamilyConstructorHistory.preserves_absent_names
+#print axioms psKernelReplaceMutualInductiveInfos_semantic_refines

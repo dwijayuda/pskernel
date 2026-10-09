@@ -1,3 +1,5 @@
+import Ps.KernelCore.Metatheory.EnvironmentReplaceIndexConfiguration
+import Ps.KernelCore.Metatheory.AdmissionInductiveNamesConfiguration
 import Ps.KernelCore.Admission.Inductive.Mutual.AdmissionLoops
 import Ps.KernelCore.Metatheory.AdmissionIndexConfiguration
 
@@ -121,3 +123,103 @@ theorem psKernelAddMutualRecursorInfos_refines_extension
         List.reverse_cons,
         List.append_assoc
       ] using hTail
+
+/-- Fresh provisional family insertion preserves original canonical lookups. -/
+theorem psKernelAddMutualInductiveInfos_semantic_extends
+    (infos : List PsKernelInductiveInfo) (environment : PsKernelEnvironment)
+    (hString : PsKernelStringEqSoundLaw)
+    (hAbsent : PsKernelInductiveNamesAbsent environment (infos.map (fun info => info.base.name)))
+    (hUnique : psKernelNameHasDuplicates (infos.map (fun info => info.base.name)) = false) :
+    PsKernelEnvironmentSemanticExtends environment (psKernelAddMutualInductiveInfos infos environment) := by
+  induction infos generalizing environment with
+  | nil => exact PsKernelEnvironmentSemanticExtends.refl environment
+  | cons info rest ih =>
+      cases hAbsent with
+      | cons _ _ hFresh hRest =>
+          simp only [List.map_cons] at hUnique
+          have hUniqueTail := psKernelNameHasDuplicates_cons_false_refines
+            info.base.name (rest.map (fun value : PsKernelInductiveInfo => value.base.name)) hUnique
+          let next := psKernelEnvironmentAddUnchecked environment (PsKernelConstantInfo.inductInfo info)
+          have hStep := psKernelEnvironmentAddUnchecked_fresh_semantic_extends
+            environment (PsKernelConstantInfo.inductInfo info) hString
+            (by simpa [psKernelConstantInfoName, psKernelConstantInfoBase] using hFresh)
+          have hRemaining := psKernelInductiveNamesAbsent_add_disjoint environment
+            (PsKernelConstantInfo.inductInfo info) (rest.map (fun value : PsKernelInductiveInfo => value.base.name)) hRest
+            (by simpa [psKernelConstantInfoName, psKernelConstantInfoBase] using hUniqueTail.1)
+          exact PsKernelEnvironmentSemanticExtends.trans environment next
+            (psKernelAddMutualInductiveInfos rest next) hStep
+            (ih next hRemaining hUniqueTail.2)
+
+/--
+Every replacement is justified by current canonical presence. Presence survives
+earlier replacements, so the loop needs no repeated unchecked lookup premise.
+Original declarations are protected by absence of each replacement name there.
+-/
+theorem psKernelReplaceMutualInductiveInfos_semantic_refines
+    (infos : List PsKernelInductiveInfo)
+    (isRecursive isReflexive : Bool)
+    (original : PsKernelEnvironment) (hString : PsKernelStringEqSoundLaw) :
+    ∀ work : PsKernelEnvironment,
+      PsKernelEnvironmentIndexRefines work ->
+      PsKernelEnvironmentSemanticExtends original work ->
+      (∀ info : PsKernelInductiveInfo, info ∈ infos ->
+        psKernelFindConstantInList info.base.name original.constants = none) ->
+      (∀ info : PsKernelInductiveInfo, info ∈ infos ->
+        ∃ old : PsKernelConstantInfo,
+          psKernelFindConstantInList info.base.name work.constants = some old) ->
+      PsKernelEnvironmentSemanticExtends original
+        (psKernelReplaceMutualInductiveInfos infos isRecursive isReflexive work) ∧
+      PsKernelEnvironmentIndexRefines
+        (psKernelReplaceMutualInductiveInfos infos isRecursive isReflexive work) := by
+  induction infos with
+  | nil =>
+      intro work hIndex hExt hFresh hPresent
+      exact ⟨hExt, hIndex⟩
+  | cons info rest ih =>
+      intro work hIndex hExt hFresh hPresent
+      let finalInfo := PsKernelInductiveInfo.mk info.base info.numParams info.numIndices
+        info.all info.ctors info.numNested isRecursive isReflexive info.isUnsafe
+      let replacement := PsKernelConstantInfo.inductInfo finalInfo
+      let next := psKernelEnvironmentReplaceUnchecked work replacement
+      obtain ⟨old, hOld⟩ := hPresent info (List.Mem.head rest)
+      have hExisting : psKernelFindConstantInList
+          (psKernelConstantInfoName replacement) work.constants = some old := hOld
+      have hNextIndex := psKernelEnvironmentReplaceUnchecked_index_refines
+        work replacement old hIndex hExisting
+      have hNextExt := psKernelEnvironmentReplaceUnchecked_fresh_origin_semantic_extends
+        original work replacement hString hExt (hFresh info (List.Mem.head rest))
+      have hRestFresh : ∀ other : PsKernelInductiveInfo, other ∈ rest ->
+          psKernelFindConstantInList other.base.name original.constants = none :=
+        fun other hMem => hFresh other (List.Mem.tail info hMem)
+      have hRestPresent : ∀ other : PsKernelInductiveInfo, other ∈ rest ->
+          ∃ old : PsKernelConstantInfo,
+            psKernelFindConstantInList other.base.name next.constants = some old := by
+        intro other hMem
+        obtain ⟨found, hFound⟩ := hPresent other (List.Mem.tail info hMem)
+        exact psKernelEnvironmentReplaceUnchecked_preserves_present
+          work replacement old hExisting other.base.name found hFound
+      exact ih next hNextIndex hNextExt hRestFresh hRestPresent
+
+/-- Reserved names remain absent throughout the metadata replacement loop. -/
+theorem psKernelReplaceMutualInductiveInfos_preserves_absent_names
+    (infos : List PsKernelInductiveInfo)
+    (isRecursive isReflexive : Bool) (hString : PsKernelStringEqSoundLaw)
+    (names : List PsKernelName) :
+    ∀ work : PsKernelEnvironment,
+      PsKernelInductiveNamesAbsent work names ->
+      (∀ info : PsKernelInductiveInfo, info ∈ infos ->
+        ∀ name : PsKernelName, name ∈ names -> name ≠ info.base.name) ->
+      PsKernelInductiveNamesAbsent
+        (psKernelReplaceMutualInductiveInfos infos isRecursive isReflexive work) names := by
+  induction infos with
+  | nil => intro work hAbsent _; exact hAbsent
+  | cons info rest ih =>
+      intro work hAbsent hDisjoint
+      let finalInfo := PsKernelInductiveInfo.mk info.base info.numParams info.numIndices
+        info.all info.ctors info.numNested isRecursive isReflexive info.isUnsafe
+      apply ih (psKernelEnvironmentReplaceUnchecked work (PsKernelConstantInfo.inductInfo finalInfo))
+      · apply psKernelInductiveNamesAbsent_replace_disjoint hString work
+          (PsKernelConstantInfo.inductInfo finalInfo) names hAbsent
+        exact hDisjoint info (List.Mem.head rest)
+      · intro other hMem
+        exact hDisjoint other (List.Mem.tail info hMem)

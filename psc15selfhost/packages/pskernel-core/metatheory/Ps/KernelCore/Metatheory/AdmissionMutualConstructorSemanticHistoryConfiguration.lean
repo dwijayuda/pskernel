@@ -446,3 +446,109 @@ theorem psKernelAddSimpleMutualTypesWorker_semantic_history
                 ownResult.shapes tailResult.shapes hSuffix.head hOwnHistory hTailHistory,
                 PsKernelEnvironmentSemanticExtends.trans work ownResult.environment
                   tailResult.environment hOwnExt hTailExt, hFinalIndex⟩
+
+/-- Exact constructor declarations in source order for one mutual owner. -/
+def psKernelMutualConstructorHistoryInfos
+    (typeShape : PsKernelSimpleMutualTypeShape) (levelParams : List PsKernelName)
+    (params : List PsKernelOpenBinder) (safety : PsKernelDefinitionSafety)
+    (index : Nat) (shapes : List PsKernelSimpleMutualConstructorShape) :
+    List PsKernelConstantInfo :=
+  match shapes with
+  | [] => []
+  | shape :: rest =>
+      PsKernelConstantInfo.ctorInfo
+        (PsKernelConstructorInfo.mk
+          (PsKernelConstantBase.mk shape.ctor.name levelParams shape.ctor.type)
+          typeShape.decl.name index (psKernelOpenBinderListLength params)
+          (psKernelOpenBinderListLength shape.fields) (psKernelDefinitionSafetyIsUnsafe safety)) ::
+      psKernelMutualConstructorHistoryInfos typeShape levelParams params safety
+        (Nat.succ index) rest
+
+/-- Source-order provenance, exact publication, and runtime/Quot preservation. -/
+theorem PsKernelCheckedMutualConstructorHistory.exact_extension
+    {targets : List PsKernelName} {typeShapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {resultLevel : PsKernelLevel} {typeShape : PsKernelSimpleMutualTypeShape}
+    {owner : Nat} {levelParams : List PsKernelName} {safety : PsKernelDefinitionSafety}
+    {headerLocal : PsKernelLocalContext} {work finalEnvironment : PsKernelEnvironment}
+    {index : Nat} {ctors : List PsKernelSimpleConstructorDecl}
+    {shapes : List PsKernelSimpleMutualConstructorShape}
+    (hHistory : PsKernelCheckedMutualConstructorHistory targets typeShapes levels params
+      resultLevel typeShape owner levelParams safety headerLocal work index ctors shapes finalEnvironment) :
+    PsKernelEnvironmentExtendsBy work finalEnvironment
+      (psKernelMutualConstructorHistoryInfos typeShape levelParams params safety index shapes).reverse ∧
+    finalEnvironment.quotInitialized = work.quotInitialized ∧
+    (psKernelMutualConstructorHistoryInfos typeShape levelParams params safety index shapes).map
+      psKernelConstantInfoName = psKernelSimpleCtorNames ctors := by
+  induction hHistory with
+  | done => exact ⟨psKernelEnvironmentExtendsBy_refl _, rfl, rfl⟩
+  | step work index ctor rest tailShapes finalEnvironment inferredType level
+      fields recursiveFields indices hFresh hTyped hSort hOpen hTail ih =>
+      refine ⟨?_, ih.2.1, ?_⟩
+      · simpa [PsKernelEnvironmentExtendsBy, psKernelMutualConstructorHistoryInfos,
+          psKernelEnvironmentAddUnchecked, List.reverse_cons, List.append_assoc] using ih.1
+      · simpa [psKernelMutualConstructorHistoryInfos, psKernelConstantInfoName,
+          psKernelConstantInfoBase, psKernelSimpleCtorNames] using congrArg (List.cons ctor.name) ih.2.2
+
+/-- Reserved recursor names survive the complete family constructor history. -/
+theorem PsKernelCheckedMutualFamilyConstructorHistory.preserves_absent_names
+    {targets : List PsKernelName} {allShapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {resultLevel : PsKernelLevel} {levelParams : List PsKernelName}
+    {safety : PsKernelDefinitionSafety} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {owner : Nat}
+    {types : List PsKernelSimpleMutualTypeShape}
+    {shapes : List PsKernelSimpleMutualConstructorShape}
+    (hHistory : PsKernelCheckedMutualFamilyConstructorHistory targets allShapes levels params
+      resultLevel levelParams safety headerLocal work owner types shapes finalEnvironment) :
+    ∀ names : List PsKernelName,
+      PsKernelInductiveNamesAbsent work names ->
+      (∀ name : PsKernelName, name ∈ psKernelMutualShapeConstructorNames types ->
+        psKernelNameListContains name names = false) ->
+      PsKernelInductiveNamesAbsent finalEnvironment names := by
+  induction hHistory with
+  | done => intro names hAbsent _; exact hAbsent
+  | step work ownEnvironment finalEnvironment owner shape rest ownShapes tailShapes
+      hOwner hOwn hTail ih =>
+      intro names hAbsent hDisjoint
+      apply ih names
+      · apply hOwn.preserves_absent_names names hAbsent
+        intro name hMember
+        apply hDisjoint name
+        exact List.mem_append_left _ hMember
+      · intro name hMember
+        apply hDisjoint name
+        exact List.mem_append_right _ hMember
+
+/-- The full family publishes exactly the source constructors, in reverse insertion order. -/
+theorem PsKernelCheckedMutualFamilyConstructorHistory.exact_extension
+    {targets : List PsKernelName} {allShapes : List PsKernelSimpleMutualTypeShape}
+    {levels : List PsKernelLevel} {params : List PsKernelOpenBinder}
+    {resultLevel : PsKernelLevel} {levelParams : List PsKernelName}
+    {safety : PsKernelDefinitionSafety} {headerLocal : PsKernelLocalContext}
+    {work finalEnvironment : PsKernelEnvironment} {owner : Nat}
+    {types : List PsKernelSimpleMutualTypeShape}
+    {shapes : List PsKernelSimpleMutualConstructorShape}
+    (hHistory : PsKernelCheckedMutualFamilyConstructorHistory targets allShapes levels params
+      resultLevel levelParams safety headerLocal work owner types shapes finalEnvironment) :
+    ∃ added : List PsKernelConstantInfo,
+      PsKernelEnvironmentExtendsBy work finalEnvironment added.reverse ∧
+      finalEnvironment.quotInitialized = work.quotInitialized ∧
+      added.map psKernelConstantInfoName = psKernelMutualShapeConstructorNames types := by
+  induction hHistory with
+  | done work owner => exact ⟨[], psKernelEnvironmentExtendsBy_refl work, rfl, rfl⟩
+  | step work ownEnvironment finalEnvironment owner shape rest ownShapes tailShapes
+      hOwner hOwn hTail ih =>
+      obtain ⟨tailInfos, hTailExt, hTailQuot, hTailNames⟩ := ih
+      let ownInfos := psKernelMutualConstructorHistoryInfos shape levelParams params safety 0 ownShapes
+      have hOwnExt := hOwn.exact_extension
+      refine ⟨ownInfos ++ tailInfos, ?_, hTailQuot.trans hOwnExt.2.1, ?_⟩
+      · constructor
+        · change finalEnvironment.constants = (ownInfos ++ tailInfos).reverse ++ work.constants
+          rw [hTailExt.1, hOwnExt.1.1]
+          simp [ownInfos, List.reverse_append, List.append_assoc]
+        · exact hTailExt.2.trans hOwnExt.1.2
+      · change (ownInfos ++ tailInfos).map psKernelConstantInfoName =
+          psKernelSimpleCtorNames shape.decl.ctors ++ psKernelMutualShapeConstructorNames rest
+        rw [List.map_append, hTailNames]
+        exact congrArg (fun names => names ++ psKernelMutualShapeConstructorNames rest) hOwnExt.2.2

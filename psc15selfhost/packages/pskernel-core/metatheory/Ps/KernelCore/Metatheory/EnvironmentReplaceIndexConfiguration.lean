@@ -277,3 +277,26 @@ theorem psKernelEnvironmentReplaceUnchecked_index_refines_from_lookup
       (hIndex (psKernelConstantInfoName replacement)).symm
     _ = Option.some old := by
       simpa [psKernelEnvironmentFind] using hLookup
+
+/-- Replacing an existing declaration preserves existence of every resolved name. -/
+theorem psKernelEnvironmentReplaceUnchecked_preserves_present
+    (environment : PsKernelEnvironment) (replacement old : PsKernelConstantInfo)
+    (hExisting : psKernelFindConstantInList
+      (psKernelConstantInfoName replacement) environment.constants = some old)
+    (query : PsKernelName) (found : PsKernelConstantInfo)
+    (hFound : psKernelFindConstantInList query environment.constants = some found) :
+    ∃ updated : PsKernelConstantInfo,
+      psKernelFindConstantInList query
+        (psKernelEnvironmentReplaceUnchecked environment replacement).constants = some updated := by
+  let target := psKernelConstantInfoName replacement
+  have hRefl := psKernelFindConstantInList_some_name_reflexive
+    target environment.constants old hExisting
+  change ∃ updated, psKernelFindConstantInList query
+    (psKernelReplaceEnvironmentConstant target replacement environment.constants) = some updated
+  rw [psKernelFindConstantInList_replace_matches_insert
+    target replacement environment.constants hRefl query old hExisting]
+  cases hMatch : psKernelNameEq (psKernelConstantInfoName replacement) query with
+  | true =>
+      exact ⟨replacement, by simp [psKernelFindConstantInList, hMatch]⟩
+  | false =>
+      exact ⟨found, by simpa [psKernelFindConstantInList, hMatch] using hFound⟩

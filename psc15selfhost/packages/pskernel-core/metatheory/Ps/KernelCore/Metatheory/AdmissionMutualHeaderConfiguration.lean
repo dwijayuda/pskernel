@@ -470,9 +470,10 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
     hParamEnv, hIndexEnv, hHistory⟩
 
 /--
-The independent remaining-header history certifies that each source datatype
-header has an independently checked Sort type in the original environment.
-This is strictly stronger than infer-only header acceptance.
+The independent remaining-header history proves every source datatype
+has an independently checked Sort type in the original environment.
+The statement uses structural list membership, supported by the pinned Lean
+baseline, rather than relying on an unavailable List.Forall abstraction.
 -/
 theorem PsKernelCheckedMutualRemainingHeaderHistory.all_headers_have_sorts
     {environment : PsKernelEnvironment} {headerLocal : PsKernelLocalContext}
@@ -481,21 +482,25 @@ theorem PsKernelCheckedMutualRemainingHeaderHistory.all_headers_have_sorts
     {shapes : List PsKernelSimpleMutualTypeShape}
     (hHistory : PsKernelCheckedMutualRemainingHeaderHistory environment headerLocal
       params resultLevel decls shapes) :
-    List.Forall (fun decl : PsKernelSimpleMutualTypeDecl =>
+    ∀ typeDecl : PsKernelSimpleMutualTypeDecl, List.Mem typeDecl decls ->
       ∃ level : PsKernelLevel,
         PsKernelTypingJudgment environment psKernelLocalContextEmpty
-          decl.type (PsKernelExpr.sort level)) decls := by
+          typeDecl.type (PsKernelExpr.sort level) := by
   induction hHistory with
-  | nil => exact List.Forall.nil
+  | nil =>
+      intro typeDecl hMember
+      cases hMember
   | cons decl rest tail headerLevel level afterParams indices finalLocal
       hTyping hParams hIndices hLevel hRest ih =>
-      exact List.Forall.cons ⟨headerLevel, hTyping⟩ ih
+      intro typeDecl hMember
+      cases hMember with
+      | head => exact ⟨headerLevel, hTyping⟩
+      | tail hTail => exact ih typeDecl hTail
 
 /--
 Successful actual mutual admission sort-types every source datatype header
-independently in the original environment. The witness is assembled from the
-checked first-header result and the checked remainder, without replacing
-either by an inferred-only certificate or assuming an unverified environment.
+independently in the original environment. The witness is assembled from
+checked first and remaining headers, without infer-only certificates.
 -/
 theorem psKernelAddSimpleMutualInductive_success_all_headers_sort_typed
     (fuel : Nat) (environment result : PsKernelEnvironment)
@@ -505,16 +510,18 @@ theorem psKernelAddSimpleMutualInductive_success_all_headers_sort_typed
     (hString : PsKernelStringEqSoundLaw)
     (hRun : psKernelAddSimpleMutualInductive
       fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
-    List.Forall (fun typeDecl : PsKernelSimpleMutualTypeDecl =>
+    ∀ typeDecl : PsKernelSimpleMutualTypeDecl, List.Mem typeDecl decl.types ->
       ∃ level : PsKernelLevel,
         PsKernelTypingJudgment environment psKernelLocalContextEmpty
-          typeDecl.type (PsKernelExpr.sort level)) decl.types := by
+          typeDecl.type (PsKernelExpr.sort level) := by
   obtain ⟨first, remaining, paramResult, indexResult, headerLevel, resultLevel,
     tailShapes, hTypes, hFirstTyping, hParamConfig, hIndexConfig, hParamEnv,
     hIndexEnv, hHistory⟩ :=
     psKernelAddSimpleMutualInductive_success_header_semantics
       fuel environment result decl maxRecDepth maxNatSize
       hIndex hNative hString hRun
-  rw [hTypes]
-  exact List.Forall.cons ⟨headerLevel, hFirstTyping⟩
-    hHistory.all_headers_have_sorts
+  intro typeDecl hMember
+  rw [hTypes] at hMember
+  cases hMember with
+  | head => exact ⟨headerLevel, hFirstTyping⟩
+  | tail hTail => exact hHistory.all_headers_have_sorts typeDecl hTail

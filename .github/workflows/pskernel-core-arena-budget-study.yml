@@ -1,0 +1,63 @@
+name: PSKernel Core bounded-cache budget study
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-budget-study-v1
+    paths:
+      - ".github/workflows/pskernel-core-arena-budget-study.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  same-runner-cap-sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Materialize identical pinned Init prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          (cd arena && uv run lka.py build-test init --cache)
+          head -n 380000 arena/_build/tests/init.ndjson > "$RUNNER_TEMP/init-sweep-380k.ndjson"
+          wc -l -c "$RUNNER_TEMP/init-sweep-380k.ndjson"
+      - name: Compare cache budgets with unchanged kernel validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_file=psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean
+          for budget in 256 128 64 32 256; do
+            echo "=== BUDGET_START $budget ==="
+            python3 - "$source_file" "$budget" <<'PY'
+          from pathlib import Path
+          import sys
+          file = Path(sys.argv[1])
+          budget = int(sys.argv[2])
+          content = file.read_text(encoding="utf-8")
+          import re
+          expr = r"(def psKernelSemanticCacheNodeBudget : Nat :=\n)  \d+"
+          next_content, changed = re.subn(expr, lambda match: match.group(1) + "  " + str(budget), content, count=1)
+          if changed != 1:
+              raise SystemExit("Cache budget definition is missing")
+          file.write_text(next_content, encoding="utf-8")
+          PY
+            (cd psc15selfhost && lake build psc_kernel_core_arena)
+            /usr/bin/time -f "BUDGET_RESULT budget=$budget wall_s=%e peak_rss_kb=%M exit=%x" \
+              timeout 240 psc15selfhost/.lake/build/bin/psc_kernel_core_arena \
+              < "$RUNNER_TEMP/init-sweep-380k.ndjson"
+            echo "=== BUDGET_END $budget ==="
+          done

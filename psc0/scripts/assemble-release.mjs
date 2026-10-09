@@ -13,6 +13,10 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export const releaseHostFiles = Object.freeze([
   'bin/psc.mjs',
   'scripts/release-manifest.mjs',
+  'scripts/project-init.mjs',
+  'scripts/command-extensions.mjs',
+  'scripts/command-extension-worker.mjs',
+  'scripts/command-wasm-profile.mjs',
   'scripts/checked-build.mjs',
   'scripts/checked-artifact-publication.mjs',
   'scripts/checked-prepared-session.mjs',
@@ -28,6 +32,19 @@ export const releaseHostFiles = Object.freeze([
   'scripts/workspace-layout.mjs',
   'scripts/sh1-source-snapshot.mjs',
   'scripts/typescript-cli.mjs',
+]);
+
+// Shipped source examples are data, never loaded as compiler or extension code.
+export const releaseExampleFiles = Object.freeze([
+  "examples/platform/README.md",
+  "examples/platform/checked-nat/package.json",
+  "examples/platform/checked-nat/src/Main.ps",
+  "examples/platform/existing-typescript/package.json",
+  "examples/platform/existing-typescript/tsconfig.json",
+  "examples/platform/existing-typescript/src/Main.ps",
+  "examples/platform/existing-typescript/src/consumer.ts",
+  "examples/platform/rejected-source/Main.ps",
+  "examples/platform/rejected-source/README.md"
 ]);
 
 async function absent(file) {
@@ -96,7 +113,7 @@ export async function assembleRelease({
     assertNativeImage(binary, key);
     return { key, binary };
   }));
-  const sources = await Promise.all(releaseHostFiles.map(async file => [
+  const sources = await Promise.all([...releaseHostFiles, ...releaseExampleFiles].map(async file => [
     file, await readFile(path.join(workspaceRoot, file)),
   ]));
   const [readme, leanLicense] = await Promise.all([
@@ -132,7 +149,7 @@ export async function assembleRelease({
     kind: 'proofscript-release-assembly', outputPath: output, version: release.version,
     compilerSha256: release.compiler.sha256, kernelArtifacts: release.kernel.artifacts,
     sourceClosureSha256: closure.sha256, moduleCount: closure.moduleCount,
-    hostFiles: releaseHostFiles, extensions: [],
+    hostFiles: releaseHostFiles, exampleFiles: releaseExampleFiles, extensions: [],
     runtimeExecuted: false, runtimeQualificationRequired: true,
   });
 }

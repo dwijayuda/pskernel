@@ -11,6 +11,7 @@ import { checkAdmissionsWithKernel, checkedKernelDescriptor, defaultCheckedKerne
 import { loadGeneratedCompiler } from './sh1-source-snapshot.mjs';
 import { expectedTypeScriptVersion, resolveTypeScriptCli, typeScriptProfileArgs } from './typescript-cli.mjs';
 import { checkedOutputPath, publishCheckedArtifacts } from './checked-artifact-publication.mjs';
+import { completedCommandRecords, assertCommandExtensionCurrent } from './command-extensions.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = data => createHash('sha256').update(data).digest('hex');
@@ -40,7 +41,7 @@ async function assertSnapshotCurrent(snapshot, signal) {
  */
 export async function buildChecked({
   entryPath, outputPath, compilerPath, compilerSha256, seedPath, checkOnly = false,
-  kernel = defaultCheckedKernel, nativeBinaryPath, profile = 'checked', signal,
+  kernel = defaultCheckedKernel, nativeBinaryPath, profile = 'checked', signal, extensionExecution,
 }) {
   if (profile !== 'checked') throw new Error('PSC0_PROFILE_UNAVAILABLE: ' + profile);
   if (typeof entryPath !== 'string' || entryPath.length === 0) throw new Error('PSC0_SOURCE_REQUIRED');
@@ -52,6 +53,11 @@ export async function buildChecked({
   // response cannot satisfy the protected same-original-IR emission contract.
   if (seedPath && !checkOnly) throw new Error('PSC0_NATIVE_SEED_EMISSION_UNQUALIFIED');
   const kernelDescriptor = checkedKernelDescriptor(kernel);
+  // Only a completed host-owned command execution can supply extension provenance.
+  // The guest returned one integer; it never supplied a receipt, source, or output.
+  const extensions = extensionExecution === undefined ? Object.freeze([])
+    : completedCommandRecords(extensionExecution);
+  if (extensionExecution !== undefined) await assertCommandExtensionCurrent(extensionExecution);
   signal?.throwIfAborted();
 
   let compiler, compilerIdentity, binary, parseImports;
@@ -118,12 +124,17 @@ export async function buildChecked({
       sha256: digest(Buffer.from(item.source, 'utf8')),
     })),
     canonicalAdmissionsSha256: digest(admissions),
-    kernelAdmissionAccepted: true, extensions: [],
+    kernelAdmissionAccepted: true, extensions,
     runtimeIr: irValidation ?? { status: 'not-requested' },
     semanticPreservationProved: false, pscvVerified: false, strictSh1Qualified: false,
   };
-  if (checkOnly) {
+  const assertCurrent = async () => {
     await assertSnapshotCurrent(snapshot, signal);
+    if (extensionExecution !== undefined) await assertCommandExtensionCurrent(extensionExecution);
+    signal?.throwIfAborted();
+  };
+  if (checkOnly) {
+    await assertCurrent();
     return Object.freeze(receipt);
   }
   if (typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
@@ -171,7 +182,7 @@ export async function buildChecked({
     }
     return await publishCheckedArtifacts({
       outputPath: output, entryPath: snapshot.entry, artifacts, receipt,
-      beforeCommit: () => assertSnapshotCurrent(snapshot, signal),
+      beforeCommit: assertCurrent,
     });
   } finally {
     await rm(staging, { recursive: true, force: true }).catch(() => {});

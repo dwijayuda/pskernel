@@ -14,6 +14,8 @@
 
 **Implementation follow-up:** 10 October 2026, Asia/Jakarta. [Draft PR90](https://github.com/dwijayuda/pskernel/pull/90) implements the initial protected compilation/publication route and an installable Linux/Windows x64 preview. The preview1 correction at `3fd25db1bbd8d508252682fd0efe5a948a5ea5fd` passed [all six qualification jobs](https://github.com/dwijayuda/pskernel/actions/runs/37993872945), including fresh Windows installation with Node26.7.0/npm12.0.2. One tarball contains the unchanged F compiler and separately authenticated native providers. Consumer Node22/26 support leaves the Node22/Lean4.34/TS7 bootstrap recipe and selected seed unchanged. The research observations below retain their original evidence cuts; [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) records the exact new package, platform/test limits and remaining proposals. No plugin execution or full compiler proof is inferred from this portability correction.
 
+**Onboarding and command-extension follow-up:** 10 October 2026, Asia/Jakarta. The next bounded milestone adds `psc init`, project entry/output defaults, shipped source/TypeScript/refusal examples, and a separately installed `psdev` command demo. Its initial operation is `psc dev --once`; full watch still follows T1 module/export and ABI work. The command guest uses a deliberately restricted V8 WebAssembly profile and the same checked host/publication path. Source e5c4a561 passed [all six jobs in run 37998655835](https://github.com/dwijayuda/pskernel/actions/runs/37998655835), including both independent command-package identities and the user's Windows/Node26 environment. Exact qualification is recorded in [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md); the dated research and full roadmap below are not retroactively claimed complete.
+
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 
 ## Decisions confirmed by the user
@@ -689,6 +691,12 @@ Use constrained Wasm guests in a pinned engine such as Wasmtime, preferably in a
 
 Budgets must also cover work induced in the host: queries, admission, kernel conversion, certificate validation, and approved services. Guest fuel alone does not bound those costs. Checking jobs that cannot be interrupted safely in-process should run in bounded workers; timeout or termination yields no acceptance result.
 
+**Narrow first command profile.** The initial `psc-command/1` slice uses V8 WebAssembly already included with the supported Node runtime, with a fixed trusted worker adapter. It admits one bounded `(i32) -> i32` function, no imports, memory, tables, globals, starts or calls, and accepts only a request for one host-selected checked build. It introduces no additional npm engine dependency. This is a smaller first profile than the general Wasmtime-based guest destination; a richer payload/data ABI still requires a separate engine/resource-policy decision and qualification. The WebAssembly JavaScript interface grants access through explicit imports, which this profile excludes. [E30]
+
+The worker provides termination on a parent wall deadline; it is not an OS sandbox or deterministic fuel meter. Node's worker heap limits do not bound all external allocations and cannot guarantee process-wide availability. The profile therefore excludes guest heap allocation and bounds its bytes, locals and control nesting as well. Node/V8, the small decoder and trusted adapter remain security assumptions; this does not constitute a mechanized isolation proof. [E31] [E32]
+
+The guest cannot provide source/output paths, admissions, certificates or receipt fields. An opaque host-owned completed request supplies the actual extension record; the ordinary checked build establishes every existing admission, IR, target and publication condition. Rechecking the captured project/lock/package/descriptor/module identity before publication binds provenance without making every command guest part of the compiler proof. Installation and explicit activation remain distinct, and an independently named npm package uses the same boundary. Read [the command SDK](docs/platform/command-extension-sdk.md) for the implemented shape and its limits.
+
 Node vm explicitly is not a security mechanism; Node’s permission model does not promise confinement against malicious code. Worker threads, Object.freeze, package manifests, and ordinary subprocesses therefore cannot satisfy this requirement alone. Do not ship an automatic unsandboxed fallback. [E09] [E10]
 
 ### Official output is a supervisor capability
@@ -1331,3 +1339,7 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 [E27]: https://www.typescriptlang.org/tsconfig/noEmitOnError.html
 [E28]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
 [E29]: https://code.visualstudio.com/api/extension-guides/workspace-trust
+
+[E30]: https://www.w3.org/TR/wasm-js-api-1/
+[E31]: https://nodejs.org/download/release/v22.23.3/docs/api/worker_threads.html
+[E32]: https://webassembly.org/docs/security/

@@ -1,32 +1,87 @@
-# PSC0 onboarding and isolated command demo — qualification in progress
+# PSC0 onboarding and isolated command demo — complete
 
-Updated: 2026-10-09 22:17:18 UTC. This section is active and supersedes the earlier completed Windows-preview checkpoint below.
+Updated: 2026-10-09 22:28:35 UTC. This section is active and supersedes the completed Windows-preview checkpoint below.
 
-The user requested psc init, runnable examples, and an extension demo such as the planned psdev package. The authorized bounded implementation adds a small initializer, default entry/output handling, shipped source examples, and a separately installed one-shot command extension. It does not implement full project watch/LSP or bypass the plan's module/export and ABI milestone.
+## Current result
 
-## Current integration scope
+The user's requested psc init, examples and psdev extension demo are implemented and qualified in **proofscript 0.1.0-preview.2**. The product adds init, examples, root entry/output defaults and a one-shot dev command. Optional private psdev and independently named @psc-demo/pshello packages are separate tarballs and require explicit root activation.
 
-- Upcoming product and demo version: 0.1.0-preview.2. The existing preview1 artifact remains the last completed qualification until the new Actions run passes.
-- Root host slice: psc0/platform-onboarding-host; initial review f354dd8410ac55fb8fe5b96b23cc58a9e06c3cea, followed by6972a20d5c090d9962e376fb0265d87663fc8852.
-- Init/examples slice: psc0/platform-init-examples atff176be2aa9291dc21ec9a984abeeb6e2b7d4e63.
-- Installed smoke slice: psc0/platform-dev-smoke atd564e8520597179220b5462647a2fea18953c468.
-- Command extension slice: psc0/platform-command-demo atb885371b9c17ab20e2da60091277e66ebdbd48ae; all3runtimefiles,18focusedtests and the SDK reviewed before integration. All repository reads/writes remain through GitHub connector/MCP; no source/build/test execution has run locally.
+Qualified runtime/package source: **e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1**, tree **d2baf328fbd3aab84335352c35a719f179da09cc**. [Run 37998655835](https://github.com/dwijayuda/pskernel/actions/runs/37998655835), attempt 1, passed all six jobs. Created 2026-10-09 22:20:19 UTC; final successful update 22:22:35 UTC (10 October 2026, 05:20–05:22 Asia/Jakarta).
 
-The new CLI provides init, examples, configured entry/output defaults, and dev --once. Initializing an existing npm project preserves its package.json, TypeScript configuration and unrelated sources, and refuses starter/output collisions. The product ships the examples, but psdev and the independently named @psc-demo/pshello are separate optional tarballs. No registry ownership/publication is inferred for these demo names.
+| Source scope | Passed | Failed | Skipped |
+| --- | ---: | ---: | ---: |
+| Linux22 host/init/CLI/extension/publication/assembly/smoke | 116 | 0 | 0 |
+| Linux22 real compiler/native integration | 17 | 0 | 0 |
+| Windows26 host/init/CLI/extension/publication/assembly/smoke | 120 | 0 | 1 |
+| Windows26 real compiler/native integration | 14 | 0 | 3 |
 
-The first extension protocol, psc-command/1, accepts a tightly bounded pure WebAssembly integer command. It has no imports, linear memory, tables, globals, start function, recursion/calls or ambient host capabilities. Node/V8 WebAssembly is the confinement implementation; a trusted worker supplies a wall deadline and cancellation. A worker alone is not the security boundary and its heap settings are not a process-wide memory bound. No Wasmtime or additional npm dependency is introduced for this narrow profile.
+The Windows skips are the inherited Unix permission cleanup fixture and three POSIX-shebang fake transport fixtures. All new initializer/command-extension tests and real Windows provider/compiler integration passed. No acceptance gate was weakened and no failure was waived.
 
-Only explicit root package.json activation and a matching installed direct dependency/npm v3 lock entry select a guest. The host never imports its JavaScript entrypoint. Status is host-owned; successful dev output includes the actual completed extension identity in its saved receipt. The private execution identity and root/config/package/lock/descriptor/module bytes are checked again before publication. General macros, tactics, backends, rich extension data APIs, workspace/hoisted packages and automatic default activation remain later work.
+Four fresh installed jobs passed: Linux22/npm10.9.9 and Linux26/npm12.0.2 each passed 39 observations; Windows22/npm10.9.9 and Windows26/npm12.0.2 each passed 37. All installed the same product and both demo tarballs with --ignore-scripts. They had no source checkout or Lean installation, and runtime PATH contained only Node. Windows used PowerShell7.6.6 and npm's actual psc.cmd. Total: 152 installed observations.
 
-## Preservation and qualification boundaries
+The full consumer instructions and precise boundaries are in [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) and [release/README.md](release/README.md). The complete command protocol is in [docs/platform/command-extension-sdk.md](docs/platform/command-extension-sdk.md).
 
-All61portable compiler source modules, F compiler bytes, selected seed R and native provider algorithms are unchanged. Bootstrap remains Node22.23.3/Lean4.34.0/TS7.0.2. The existing compiler fixed point is reused; this host/package change needs its own focused Actions qualification, not another C1/C2/C3 loop.
+## Candidate and retained evidence
 
-The platform workflow must qualify source tests and four fresh installed Windows/Linux Node22/Node26 jobs using the exact user-facing tarballs. It must exercise initialization, checked examples/default paths, unchanged-file protection, local no-script extension installation, explicit activation, compulsory actual identity/receipt disclosure, third-party operation through the same boundary and tampered payload refusal. Record exact outcomes and artifact identities here and in PLATFORM_IMPLEMENTATION.md after the run; do not describe pending tests as passed.
+[Download candidate artifact 11648008841](https://github.com/dwijayuda/pskernel/actions/runs/37998655835/artifacts/11648008841).
 
-Formal assurance remains a later gate. No compiler semantic-preservation theorem, logical-consistency theorem, PSCV verification or strict SH/1 result is claimed. Later proofs can model the bounded decoder, extension state/provenance and host-request composition without proving every scheduling guest.
+| Tarball within the extracted artifact | Bytes | SHA256 |
+| --- | ---: | --- |
+| platform/proofscript-0.1.0-preview.2.tgz | 3,639,614 | 9ceab476924c39f73cc6fd8fe4a92b91228b03455d3ff6e0c56e17bf075842d9 |
+| platform/psdev-0.1.0-preview.2.tgz | 1,791 | e3cd851c66a899e7d4fb4503becaab33df5e5b2db4ca71a51bc5b2ad67a46468 |
+| platform/psc-demo-pshello-0.1.0-preview.2.tgz | 1,805 | 07aadc3b41f007cee0eb6cfc92f9d41d5ba52bfe77083ced1c8edd1c6c80a95c |
 
-Use fresh head leases and non-force updates, preserve all slice ancestry, and do not modify kernel/provider/metatheory/defeq/cache algorithms. Do not promote F as seed, alter bootstrap pins, merge main or publish npm incidentally. Continue this authorized user task through qualification and a concrete downloadable preview.
+The product size excludes separately installed TypeScript dependencies. It adds 14,538 tarball bytes over preview1 with no new required npm dependency. Candidate ZIP SHA256 is 065d0652d8aa28077ad8f7e17eb2503e6ea139fed03b0d398a4ce793545e37e7, size 3,858,799 bytes. It expires 2026-11-08 22:21:28 UTC / 9 November 2026 05:21:28 Asia/Jakarta. Retained JSON is evidence, not executable archive retention.
+
+Installed artifacts: Windows26 11648223020, Windows22 11648631536, Linux26 11647723033, Linux22 11648706220. Exact parsed results are committed as docs/platform/installed-*-37998655835.json, with complete run/artifact/scope metadata in docs/platform/onboarding-command-preview-qualification-2026-10-09.json.
+
+The work remains on psc0/platform-v1, [draft PR90](https://github.com/dwijayuda/pskernel/pull/90), against psc0/architecture-plan-v1. Main was re-read at ed5d00aca0743bde583b45fe7756dd494ac3960f and was not changed. Nothing was published to npm. Owning proofscript does not establish ownership of the private demo names/scope. The product remains UNLICENSED pending the separate public-distribution decision.
+
+## Implemented behavior and security boundary
+
+- Init creates a new pinned project, or adds only src/Main.ps and PROOFSCRIPT.md to an existing npm project. Existing package.json/tsconfig/scripts/dependencies/unrelated sources remain byte-identical. Conflicts and directory links are refused; partial I/O failures report already-created files. It executes no npm/project code.
+- Root package.json remains the one configuration source. entry/out defaults are relative paths using forward slashes. Escape/absolute/Windows drive-relative forms are refused. An explicit entry without --out gets its own neighboring TS output.
+- Eleven example files ship inside examples/platform; psc examples lists their actual locations.
+- psdev is a one-shot command demo: dev --once. Full watch is explicitly refused with PSC_DEV_WATCH_UNSUPPORTED because T1 source ownership/export/ABI work remains incomplete. Do not relabel this as full T2 or generic extension-framework completion.
+- The psc-command/1 guest is a restricted no-import Wasm function. The 44-byte demo module SHA256 is 63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279. It receives only event 0 and returns 0/1 for no action/one host-selected checked build.
+- The profile bounds modules to 4096 bytes, locals to 32 and control depth to32, and forbids imports, memory, tables, globals, starts, calls, references/GC and other unsupported instructions. V8 performs full validation. A fixed trusted worker adapter supplies a two-second parent wall deadline and cancellation. Worker threads alone are not a JavaScript sandbox; heap limits are not a hard process-RSS guarantee. Node/V8, the decoder/adapter and OS remain assumptions.
+- Root activation plus a direct, nonlinked installed dependency and matching npm v3 lock entry selects a package. No JS entrypoint is imported, no ancestor/global/workspace fallback or download occurs, and no publisher-name allowlist gives privileged access.
+- Lock integrity is recorded archive provenance. It does not authenticate every installed file against the archive. Actual root/package/lock/descriptor/module bytes are hashed and disclosed; any changed captured input invalidates publication eligibility. Descriptor+module changes before selection can choose a different profile-valid module, whose actual digest is reported.
+- The supervisor owns all reporting. attempted/executing/instantiated/completed or failed records are immutable, escaped and emitted outside guest control. imports=[] states the grant policy; an unacknowledged instantiation after worker launch is reported as null.
+- Only a private host-owned completed request can supply receipt extension records. checked-build verifies it before compiler loading and rechecks captured inputs through the existing publication eligibility callbacks. Actual dev receipt.extensions equals the final execution record. The guest cannot supply sources, targets, kernel objects, proofs, receipts, flags or filesystem/network/process/terminal actions.
+- Ordinary check/build do not run command guests; extensions only inspects data. Default extension activation remains empty.
+
+The smoke qualifies both independent package names, ignored poisoned JS main entries, real npm lock integrity against the supplied archives, ordinary TS consumers returning 44/45 after guest-requested builds, invalid source and tampered module refusal preserving the prior output. This does not establish all OS versions, filesystem/shell policies, arbitrary Wasm features or complete third-party ecosystem support.
+
+## Preserved self-host and proof scope
+
+All **61 raw portable compiler modules** remain unchanged, with closure SHA256 6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7. F source remains fcd875c8f38db4b0524090bd10c7c2fd5024053d and JavaScript remains 5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15. Existing F fixed-point run 37947341800 remains applicable; no full compiler requalification was needed for host-only changes.
+
+Selected seed R remains fe2560aba0f347b1caf8d000d371464642d44f23. Bootstrap remains Node22.23.3/Lean4.34.0/TypeScript7.0.2, with no TS5/TS6 fallback. Node26 consumer support does not claim a Node26 bootstrap fixed point. Init and optional tooling do not enter the compiler's self-host import closure.
+
+Both native Core providers and algorithms remain exactly the preview1 inputs. Their source is 963030dc2d154008fccc82e7c8ed29331f138799; Linux binary 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec, Windows binary 8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2. Retain the previous source-root/subtree distinction, Windows PE timestamp/reproducibility limitation and retained-artifact recovery boundaries. No 4.35 Arena provider substitution.
+
+Formal assurance remains a **later gate** with proofs/**/*.proof.lean and full Lean outside bootstrap. No new compiler preservation, foundation consistency, PSCV verification or strict SH/1 theorem is claimed. Receipt assurance flags remain false. Later extension proofs should target the bounded decoder, exclusive authority, state/provenance and checked-request composition; each scheduling guest need not be proved.
+
+## Integration and next work
+
+The integrated implementation diff from 3a0d056 to e5c4a561 changes 40 files, adds 2,147 lines and deletes 199, mostly feature code, tests, examples, package data and documentation. The product has 21 maintained host files and 11 example files. No portable compiler file changed.
+
+Preserved slice branches/parents:
+- psc0/platform-onboarding-host:6972a20d5c090d9962e376fb0265d87663fc8852.
+- psc0/platform-init-examples:ff176be2aa9291dc21ec9a984abeeb6e2b7d4e63.
+- psc0/platform-dev-smoke:d564e8520597179220b5462647a2fea18953c468.
+- psc0/platform-command-demo:b885371b9c17ab20e2da60091277e66ebdbd48ae.
+
+This requested bounded task is complete. The containing final follow-up changes Markdown and retained JSON evidence only. Do not rerun the completed qualification for it, repeat compiler fixed-point testing, or automatically start another milestone.
+
+Future requested work should follow T1 module/export/ABI, then full psdev scheduling/invalidation/recovery/downstream coordination, richer producer/validator interfaces, explicit default activation, package/library/workspace organization, durable release inputs and separate LSP/VS Code integration.
+
+## Execution rules for continuation
+
+Read a fresh branch head and this active handoff before future writes. All repository reads/writes remain GitHub connector/MCP only; actual builds/tests run only in GitHub Actions. No local checkout/source execution/shell build/test/browser/DesktopCommander. Pure in-memory text/JSON transforms and evidence hashing are allowed. Git-backed deliverables stay in the repository.
+
+Use fresh head leases and non-force updates, preserve concurrent history and all slice ancestry. Do not modify kernel/provider/metatheory/defeq/cache algorithms, promote a seed, alter bootstrap pins, weaken acceptance, merge main or publish npm as incidental work. A new user request may authorize the next bounded milestone; completed proof work and historical TODOs do not authorize starting unrelated work automatically.
 
 ---
 

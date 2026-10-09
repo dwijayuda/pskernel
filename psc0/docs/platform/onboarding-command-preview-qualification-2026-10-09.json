@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-onboarding-command-preview-qualification",
+  "version": "0.1.0-preview.2",
+  "sourceRef": "e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1",
+  "sourceTree": "d2baf328fbd3aab84335352c35a719f179da09cc",
+  "runId": 37998655835,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37998655835",
+  "status": "completed",
+  "conclusion": "success",
+  "createdAt": "2026-10-09T22:20:19Z",
+  "updatedAt": "2026-10-09T22:22:35Z",
+  "candidateArtifactId": 11648008841,
+  "tarballs": [
+    {
+      "file": "platform/proofscript-0.1.0-preview.2.tgz",
+      "bytes": 3639614,
+      "sha256": "9ceab476924c39f73cc6fd8fe4a92b91228b03455d3ff6e0c56e17bf075842d9"
+    },
+    {
+      "file": "platform/psdev-0.1.0-preview.2.tgz",
+      "package": "psdev",
+      "bytes": 1791,
+      "sha256": "e3cd851c66a899e7d4fb4503becaab33df5e5b2db4ca71a51bc5b2ad67a46468"
+    },
+    {
+      "file": "platform/psc-demo-pshello-0.1.0-preview.2.tgz",
+      "package": "@psc-demo/pshello",
+      "bytes": 1805,
+      "sha256": "07aadc3b41f007cee0eb6cfc92f9d41d5ba52bfe77083ced1c8edd1c6c80a95c"
+    }
+  ],
+  "sourceTests": [
+    {
+      "jobId": 114051031602,
+      "scope": "Linux22 host/init/CLI/extension/publication/assembly/smoke",
+      "passed": 116,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "jobId": 114051031602,
+      "scope": "Linux22 actual compiler/native integration",
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "jobId": 114051410301,
+      "scope": "Windows26 host/init/CLI/extension/publication/assembly/smoke",
+      "passed": 120,
+      "failed": 0,
+      "skipped": 1,
+      "skipReason": "Existing Unix directory permission fixture does not model Windows ACLs."
+    },
+    {
+      "jobId": 114051410301,
+      "scope": "Windows26 actual compiler/native integration",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 3,
+      "skipReason": "Existing POSIX shebang fake transport fixtures; real Windows provider/compiler tests remain mandatory and passed."
+    }
+  ],
+  "installed": [
+    {
+      "jobId": 114051410335,
+      "file": "docs/platform/installed-win32-node26.7.0-37998655835.json",
+      "platform": "win32",
+      "node": "v26.7.0",
+      "npm": "12.0.2",
+      "observationsPassed": 37,
+      "passed": true,
+      "sourceCheckoutRequired": false,
+      "leanToolchainRequired": false,
+      "nodeOnlyExecutionPath": true
+    },
+    {
+      "jobId": 114051410455,
+      "file": "docs/platform/installed-win32-node22.23.3-37998655835.json",
+      "platform": "win32",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "observationsPassed": 37,
+      "passed": true,
+      "sourceCheckoutRequired": false,
+      "leanToolchainRequired": false,
+      "nodeOnlyExecutionPath": true
+    },
+    {
+      "jobId": 114051410398,
+      "file": "docs/platform/installed-linux-node26.7.0-37998655835.json",
+      "platform": "linux",
+      "node": "v26.7.0",
+      "npm": "12.0.2",
+      "observationsPassed": 39,
+      "passed": true,
+      "sourceCheckoutRequired": false,
+      "leanToolchainRequired": false,
+      "nodeOnlyExecutionPath": true
+    },
+    {
+      "jobId": 114051410492,
+      "file": "docs/platform/installed-linux-node22.23.3-37998655835.json",
+      "platform": "linux",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "observationsPassed": 39,
+      "passed": true,
+      "sourceCheckoutRequired": false,
+      "leanToolchainRequired": false,
+      "nodeOnlyExecutionPath": true
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 11648706220,
+      "name": "proofscript-preview-installed-ubuntu-24.04-node22.23.3-e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1",
+      "size_in_bytes": 10248,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648706220",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648706220/zip",
+      "expired": false,
+      "created_at": "2026-10-09T22:21:53Z",
+      "expires_at": "2026-11-08T22:21:52Z",
+      "updated_at": "2026-10-09T22:21:53Z",
+      "digest": "sha256:1199055a3be5fb874de1709ae0f76fb64468249ee33d19934043787271a07854",
+      "workflow_run": {
+        "id": 37998655835,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1"
+      }
+    },
+    {
+      "id": 11648631536,
+      "name": "proofscript-preview-installed-windows-2022-node22.23.3-e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1",
+      "size_in_bytes": 8954,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648631536",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648631536/zip",
+      "expired": false,
+      "created_at": "2026-10-09T22:22:28Z",
+      "expires_at": "2026-11-08T22:22:27Z",
+      "updated_at": "2026-10-09T22:22:28Z",
+      "digest": "sha256:6b2bbba5d1a7100862276067bddd3db1a3b6cba2e64d77435c614ef470eac748",
+      "workflow_run": {
+        "id": 37998655835,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1"
+      }
+    },
+    {
+      "id": 11648223020,
+      "name": "proofscript-preview-installed-windows-2022-node26.7.0-e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1",
+      "size_in_bytes": 8958,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648223020",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648223020/zip",
+      "expired": false,
+      "created_at": "2026-10-09T22:22:31Z",
+      "expires_at": "2026-11-08T22:22:30Z",
+      "updated_at": "2026-10-09T22:22:31Z",
+      "digest": "sha256:f52646014dc8075e6ac9ba789f8c8bb6dc1d5838b108e9a2d6273bf2786ae2bb",
+      "workflow_run": {
+        "id": 37998655835,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1"
+      }
+    },
+    {
+      "id": 11648008841,
+      "name": "proofscript-preview-candidate-e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1",
+      "size_in_bytes": 3858799,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648008841",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11648008841/zip",
+      "expired": false,
+      "created_at": "2026-10-09T22:21:29Z",
+      "expires_at": "2026-11-08T22:21:28Z",
+      "updated_at": "2026-10-09T22:21:29Z",
+      "digest": "sha256:065d0652d8aa28077ad8f7e17eb2503e6ea139fed03b0d398a4ce793545e37e7",
+      "workflow_run": {
+        "id": 37998655835,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1"
+      }
+    },
+    {
+      "id": 11647723033,
+      "name": "proofscript-preview-installed-ubuntu-24.04-node26.7.0-e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1",
+      "size_in_bytes": 10244,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11647723033",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11647723033/zip",
+      "expired": false,
+      "created_at": "2026-10-09T22:21:58Z",
+      "expires_at": "2026-11-08T22:21:57Z",
+      "updated_at": "2026-10-09T22:21:58Z",
+      "digest": "sha256:b9118b869251ad2a96508e3adfb5eef6ee8226dede8b0092844ecfa225d06ac0",
+      "workflow_run": {
+        "id": 37998655835,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/platform-v1",
+        "head_sha": "e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1"
+      }
+    }
+  ],
+  "unchanged": {
+    "compiler": {
+      "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
+      "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
+      "sha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+    },
+    "sourceClosureModuleCount": 61,
+    "selectedSeedRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "kernel": {
+      "selector": "pskernel-core",
+      "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+      "artifacts": {
+        "linux-x64": {
+          "sha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+          "dependencies": []
+        },
+        "win32-x64": {
+          "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+          "dependencies": []
+        }
+      }
+    },
+    "bootstrap": {
+      "node": "22.23.3",
+      "lean": "4.34.0",
+      "typescript": "7.0.2"
+    },
+    "compilerFixedPointRunId": 37947341800,
+    "compilerFixedPointRerun": false,
+    "kernelAlgorithmsChanged": false
+  },
+  "extensionScope": {
+    "protocol": "psc-command/1",
+    "operation": "command:dev",
+    "defaultExtensions": [],
+    "packages": [
+      "psdev",
+      "@psc-demo/pshello"
+    ],
+    "wasmBytes": 44,
+    "wasmSha256": "63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279",
+    "implementationBoundary": "V8 WebAssembly with no host imports and a restricted integer/control profile; fixed worker adapter provides wall deadline and cancellation.",
+    "engineFormallyVerified": false,
+    "hardProcessMemoryBound": false,
+    "watchImplemented": false,
+    "generalLanguagePluginsImplemented": false,
+    "installedTreeAuthenticatedAgainstArchive": false,
+    "actualModuleAndMetadataHashesDisclosed": true
+  },
+  "assurance": {
+    "semanticPreservationProved": false,
+    "pscvVerified": false,
+    "strictSh1Qualified": false,
+    "logicalConsistencyProved": false,
+    "formalAssuranceIsLaterGate": true
+  },
+  "changeScope": {
+    "files": 40,
+    "additions": 2147,
+    "deletions": 199,
+    "portableCompilerFilesChanged": 0,
+    "publicHostFiles": 21,
+    "shippedExampleFiles": 11,
+    "requiredNpmDependencies": {
+      "typescript": "7.0.2"
+    },
+    "newRequiredNpmDependencies": 0
+  },
+  "publication": {
+    "npmPublished": false,
+    "mainModified": false,
+    "mainLastObservedRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+    "draftPullRequest": 90
+  }
+}

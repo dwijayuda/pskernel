@@ -2,22 +2,15 @@
 
 ## Installable platform preview
 
-Preview1 is qualified on Linux and Windows x64 with Node22.23.3/npm10.9.9 and Node26.7.0/npm12.0.2. On Windows PowerShell, the tested command is `psc.cmd`. Download the new `proofscript-0.1.0-preview.1.tgz` from the [candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37993872945/artifacts/11646426537); preview0 was Linux-only. The compiler bootstrap toolchain and selected seed are unchanged.
+**Preview2 is qualified** on Linux and Windows x64 with Node22.23.3/npm10.9.9 and Node26.7.0/npm12.0.2. It adds `psc init`, project entry/output defaults, `psc examples`, and a separately installed **psdev** one-shot command extension. An independently named **@psc-demo/pshello** package uses the same confined command interface.
 
-The protected `proofscript` npm preview exposes `psc check`, `psc build`,
-version information and extension disclosure. Its public launcher is
-`bin/psc.mjs`; the repository-only bootstrap CLI remains in
-`packages/cli/bin/psc.mjs`.
+Download the three tarballs from the [preview2 candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37998655835/artifacts/11648008841). Windows PowerShell qualification uses `psc.cmd`. See [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) for exact installation, activation, results and remaining scope, and [release/README.md](release/README.md) for the consumer guide.
 
-See [PLATFORM_IMPLEMENTATION.md](PLATFORM_IMPLEMENTATION.md) for the exact cloud
-qualification, tarball workflow, existing-TypeScript-project example and
-remaining work. [PSC0_ARCHITECTURE_PLAN.md](PSC0_ARCHITECTURE_PLAN.md) is the
-accepted architectural plan. This preview is not yet published to npm.
+The protected public launcher is `bin/psc.mjs`; the repository bootstrap CLI remains `packages/cli/bin/psc.mjs`. `psc check` performs native PSKernel Core admission. `psc build` additionally validates the same original RuntimeIR and generated TypeScript with TS7.0.2 before owned publication. A `dev --once` request goes through that same path and records its actual extension identity in the saved receipt.
 
-`psc check` checks canonical declarations through the pinned native PSKernel
-Core provider. `psc build` additionally checks RuntimeIR, validates generated
-TypeScript with TS7.0.2, and publishes owned output with a completion receipt.
-Unsupported PSCV/contract profiles and external extensions are refused.
+The first [command extension SDK](docs/platform/command-extension-sdk.md) runs a tightly restricted no-import Wasm guest. Installation alone does not activate it. Full watch, module/export and checked ABI work, general language plugins, PSCV and LSP remain later milestones. Unsupported requests are refused explicitly.
+
+The [accepted architecture plan](PSC0_ARCHITECTURE_PLAN.md) and [active continuation state](AI_WORK_STATE.md) record these boundaries. The 61-module compiler closure, selected seed, native-provider algorithms and bootstrap toolchain are unchanged. This candidate is not yet published to npm.
 
 ## Compiler lineage
 

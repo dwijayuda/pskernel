@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.BootstrapStringObligations
 
 import Ps.KernelCore.Metatheory.AdmissionOrdinaryInductivePipelineConfiguration
 import Ps.KernelCore.Metatheory.AdmissionUniformPreflightConfiguration
@@ -15,9 +16,9 @@ def psKernelOrdinaryFinalInductiveInfo
 Independent full ordinary publication evidence: checked header/constructor/rule
 semantics, elimination policy, exact generated recursor publication, canonical
 lookup preservation, and runtime/Quot/index invariants.
-This certificate does not independently discharge generated recursor universe
-parameter freshness, and is not itself a complete environment well-formedness
-theorem.
+Generated recursor universe parameters are independently duplicate-free, using
+the checked fresh-name theorem. This remains a transaction certificate;
+a complete semantic environment well-formedness preservation theorem is separate.
 -/
 def PsKernelOrdinaryInductiveTransactionValid
     (environment result : PsKernelEnvironment) (decl : PsKernelSimpleInductiveDecl) : Prop :=
@@ -43,6 +44,8 @@ def PsKernelOrdinaryInductiveTransactionValid
     PsKernelOrdinaryRecursorSuffixValid decl paramResult.binders ctorResult.shapes
       (psKernelOrdinaryPrepareRecursor decl paramResult indexResult resultLevel ctorResult
         elimOnlyAtZero) result ∧
+    (psKernelOrdinaryPrepareRecursor decl paramResult indexResult resultLevel ctorResult
+      elimOnlyAtZero).info.base.levelParams.Nodup ∧
     (elimOnlyAtZero = false ->
       PsKernelSimpleLargeEliminationPolicyValid
         (psKernelOrdinaryConstructorFinalEnvironment decl paramResult indexResult ctorResult)
@@ -199,9 +202,11 @@ theorem psKernelAddSimpleInductive_success_transaction_refines
       decl.type decl.numParams paramResult hParams,
     psKernelAddSimpleInductive_success_uniform_occurrences_refines
       fuel environment result decl maxRecDepth maxNatSize hRun,
-    hHistory, hSuffix, ?_, ?_, hResultExt, ?_, ?_, hSuffix.2.2.2.2⟩
+    hHistory, hSuffix, ?_, ?_, ?_, hResultExt, ?_, ?_, hSuffix.2.2.2.2⟩
   · simpa [hSortedEnv, hSortedLocal] using hPipeline.1
   · simpa [hSortedEnv] using hPipeline.2.1
+  · simpa [psKernelOrdinaryPrepareRecursor] using
+      psKernelFreshEliminationUniverses_nodup hString decl.levelParams hNames.1 elimOnlyAtZero
   · intro hLarge
     have hPolicy := psKernelSimpleElimOnlyAtZero_false_semantic fuel hNative hString
       (psKernelSessionWithEnvironment paramResult.session work1) paramResult.binders
@@ -216,3 +221,17 @@ theorem psKernelAddSimpleInductive_success_transaction_refines
   · rw [hSuffix.1]
     simpa [prepared, psKernelOrdinaryPrepareRecursor, psKernelEnvironmentAddUnchecked,
       psKernelEnvironmentReplaceUnchecked] using hExact.2
+
+/-- Actual-source transaction refinement with no separate reflexivity premise. -/
+theorem psKernelAddSimpleInductive_concrete_transaction_refines
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleInductive fuel environment decl maxRecDepth maxNatSize =
+      Except.ok result) :
+    PsKernelOrdinaryInductiveTransactionValid environment result decl :=
+  psKernelAddSimpleInductive_success_transaction_refines
+    fuel environment result decl maxRecDepth maxNatSize hIndex hNative hString
+    psKernelStringEq_reflexive hRun

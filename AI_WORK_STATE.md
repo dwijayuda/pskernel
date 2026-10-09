@@ -1,5 +1,24 @@
 # AI Work State
 
+## Continuation handoff and composition submission — 2026-10-09
+- A copyable new-chat handoff prompt was provided at the user's request.
+  The user explicitly asked the current agent to keep working after giving it.
+- Authorized primitive migration: a0fcfd9549143b69797eb8fe010af9dbe828b9e6.
+  #787 TypeScript package/alias tests passed; Lean exposed cursor mismatch in
+  unconditional cache/environment hash compatibility proofs.
+- Dependency correction: 5c25d082616eae5c71727a1d32691dfd6bbe91ac
+  migrates the two hash workers' cursor calls identically, preserves existing
+  hash theorem statements, and adds legacy-hash native differential evidence.
+  #788 is running: https://github.com/dwijayuda/pskernel/actions/runs/37910550891.
+- This submission adds concrete structural occurrence/result-index exclusion,
+  duplicate-guard-to-Nodup and generated universe uniqueness, and strengthens
+  ordinary transaction evidence with recursor universe uniqueness.
+  The concrete ordinary theorem no longer asks for comparator reflexivity.
+- These changes are submitted for cloud validation, not yet claimed green.
+  Last complete green remains #786. Full semantic environment well-formedness,
+  mutual/nested transaction closure, final API/session, audit and integration
+  acceptance are still incomplete. Audit grades are unchanged.
+
 ## Authorized specified-primitive migration — 2026-10-09
 - User explicitly approved the narrow primitive API migration and required
   portable compiler support. Equality cursor calls and candidate append now

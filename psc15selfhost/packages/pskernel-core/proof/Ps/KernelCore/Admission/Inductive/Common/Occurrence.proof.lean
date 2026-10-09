@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.AdmissionNoTargetOccurrenceConfiguration
 import Ps.KernelCore.Metatheory.AdmissionUniformOccurrenceConfiguration
 
 /-
@@ -11,3 +12,6 @@ unchanged; all proofs retain their original names and statements.
 #check psKernelSimpleCheckUniformOccurrenceWithFuel_success_refines
 #check psKernelSimpleCheckUniformOccurrence_success_refines
 #check psKernelSimpleCheckUniformOccurrences_success_refines
+
+#print axioms psKernelExprContainsConst_false_concrete_absence
+#print axioms psKernelValidateSimpleConstructorResult_concrete_indices_absent

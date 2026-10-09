@@ -160,3 +160,31 @@ theorem psKernelSimpleFreshElimName_fresh
     hString psKernelStringEq_reflexive params
   intro i hi j hj hEqual
   exact psKernelSimpleElimNameCandidate_injective i j hEqual
+
+/-- The executable duplicate guard implies independent syntactic uniqueness. -/
+theorem psKernelNameHasDuplicates_false_nodup (names : List PsKernelName)
+    (hUnique : psKernelNameHasDuplicates names = false) : names.Nodup := by
+  revert hUnique
+  induction names with
+  | nil => intro _; simp
+  | cons head tail ih =>
+      intro hUnique
+      have hParts := psKernelNameHasDuplicates_cons_false_refines head tail hUnique
+      apply List.nodup_cons.mpr
+      constructor
+      · intro hMember
+        exact (psKernelNameListContains_false_excludes_equal
+          psKernelStringEq_reflexive head tail hParts.1 head hMember) rfl
+      · exact ih hParts.2
+
+/-- Both elimination policies preserve independent universe-parameter uniqueness. -/
+theorem psKernelFreshEliminationUniverses_nodup
+    (hString : PsKernelStringEqSoundLaw) (params : List PsKernelName)
+    (hUnique : psKernelNameHasDuplicates params = false) (onlyAtZero : Bool) :
+    (if onlyAtZero then params else psKernelSimpleFreshElimName params :: params).Nodup := by
+  have hParams := psKernelNameHasDuplicates_false_nodup params hUnique
+  cases onlyAtZero with
+  | true => simpa using hParams
+  | false =>
+      simpa using List.nodup_cons.mpr
+        ⟨psKernelSimpleFreshElimName_fresh hString params, hParams⟩

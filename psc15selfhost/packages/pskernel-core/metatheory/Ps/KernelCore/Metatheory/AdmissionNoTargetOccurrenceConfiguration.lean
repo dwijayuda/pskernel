@@ -1,4 +1,4 @@
-import Ps.KernelCore.Metatheory.Comparator
+import Ps.KernelCore.Metatheory.BootstrapStringObligations
 import Ps.KernelCore.Metatheory.AdmissionConstructorParamsConfiguration
 import Ps.KernelCore.Admission.Inductive.Common.Occurrence
 import Ps.KernelCore.Admission.Inductive.Ordinary.Constructor
@@ -10,8 +10,8 @@ An admissible negative-occurrence check must guarantee that the target name
 does not occur anywhere that psKernelExprContainsConst traverses, including
 projection type names. The proof needs reflexivity/completeness of name
 comparison, not merely the one-direction StringEq soundness law used to justify
-*positive* equality. This additional premise is explicit and remains a
-discharge obligation for final inductive-admission soundness.
+*positive* equality. The reusable conditional lemmas retain that interface; the concrete lemmas
+below discharge it with the checked comparator reflexivity theorem.
 
 This predicate does not by itself prove full strict positivity: positivity
 also depends on the field and recursive-argument checking phases.
@@ -419,3 +419,23 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_indices_absent
                           hWhnf, hApp, hShape, hContains] using hRun
                       cases hResult
                       cases hInfo
+
+/-- Structural absence for the concrete implementation, with no primitive premise. -/
+theorem psKernelExprContainsConst_false_concrete_absence
+    (target : PsKernelName) (expr : PsKernelExpr)
+    (hAbsent : psKernelExprContainsConst target expr = false) :
+    PsKernelNoTargetConstantOccurrence target expr :=
+  psKernelExprContainsConst_false_refines_absence
+    psKernelStringEq_reflexive target expr hAbsent
+
+/-- Accepted result indices independently exclude the target, unconditionally. -/
+theorem psKernelValidateSimpleConstructorResult_concrete_indices_absent
+    (target : PsKernelName) (levels : List PsKernelLevel)
+    (params : List PsKernelOpenBinder) (numIndices : Nat)
+    (result : PsKernelExpr) (indices : List PsKernelExpr)
+    (hRun : psKernelValidateSimpleConstructorResult
+      target levels params numIndices result = Except.ok indices) :
+    ∀ expr : PsKernelExpr, expr ∈ indices ->
+      PsKernelNoTargetConstantOccurrence target expr :=
+  psKernelValidateSimpleConstructorResult_success_indices_absent
+    psKernelStringEq_reflexive target levels params numIndices result indices hRun

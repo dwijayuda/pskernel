@@ -15,15 +15,27 @@ export const checkedKernelSelectors = Object.freeze(['pskernel-core', 'lean434-w
 
 // This pin identifies the unchanged PR84 provider independently of the local
 // kernel source. PR89's Lean 4.35 Arena replay binary has a different protocol.
+export const coreNativeArtifactPins = Object.freeze({
+  'linux-x64': Object.freeze({
+    expectedBinarySha256: '88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec',
+    dependencies: Object.freeze([]),
+    verificationRun: 37925722635,
+  }),
+  'win32-x64': Object.freeze({
+    expectedBinarySha256: '8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2',
+    dependencies: Object.freeze([]),
+    verificationRun: 37993071033,
+  }),
+});
+
 const descriptors = Object.freeze({
   'pskernel-core': Object.freeze({
     selector: 'pskernel-core', package: '@proofscript/pskernel-core',
     execution: 'native', ...coreCheckedIdentity,
     sourceCommit: '963030dc2d154008fccc82e7c8ed29331f138799',
     sourceTree: '38c8c55bd2b214753e56c58c15c4901c32c01b86',
-    expectedBinarySha256: '88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec',
-    platform: 'linux', architecture: 'x64',
-    verificationRun: 37925722635,
+    sourceTreePath: 'psc0',
+    repositoryTree: '80927150cbd6a5518762b4cc56e51ea24df8f374',
     kernelContract: kernelContractV1.id,
     contractSha256: kernelContractV1.sha256,
     resourcePolicy: Object.freeze({ fuel: 131072, maxTimeoutMs: 60000 }),
@@ -48,6 +60,16 @@ export function checkedKernelDescriptor(selector = defaultCheckedKernel) {
   if (!Object.hasOwn(descriptors, selector)) {
     throw new Error('PSC2_CHECKED_KERNEL_UNSUPPORTED: ' + selector);
   }
+  if (selector === 'pskernel-core') {
+    const key = process.platform + '-' + process.arch;
+    if (!Object.hasOwn(coreNativeArtifactPins, key)) {
+      throw new Error('PSC0_KERNEL_CORE_PLATFORM: qualified native artifacts are linux/x64 and win32/x64');
+    }
+    return Object.freeze({
+      ...descriptors[selector], ...coreNativeArtifactPins[key],
+      platform: process.platform, architecture: process.arch,
+    });
+  }
   return descriptors[selector];
 }
 
@@ -66,10 +88,7 @@ function bindCoreBinary(configuredPath) {
   if (typeof configuredPath !== 'string' || !path.isAbsolute(configuredPath)) {
     throw new Error('PSC0_KERNEL_CORE_PATH: require an absolute supervisor or release path');
   }
-  const expected = descriptors['pskernel-core'];
-  if (process.platform !== expected.platform || process.arch !== expected.architecture) {
-    throw new Error('PSC0_KERNEL_CORE_PLATFORM: qualified native artifact is linux/x64');
-  }
+  const expected = checkedKernelDescriptor('pskernel-core');
   let binaryPath;
   let binarySha256;
   try {
@@ -83,7 +102,7 @@ function bindCoreBinary(configuredPath) {
   if (binarySha256 !== expected.expectedBinarySha256) {
     throw new Error('PSC0_KERNEL_CORE_ARTIFACT_MISMATCH: ' + binarySha256);
   }
-  return Object.freeze({ binaryPath, binarySha256 });
+  return Object.freeze({ binaryPath, binarySha256, runtimeDependencies: expected.dependencies });
 }
 
 /**
@@ -106,7 +125,11 @@ export async function checkAdmissionsWithKernel(
     // Passing the path explicitly prevents the unchanged historical transport
     // from consulting PSC_KERNEL_CORE_PROVIDER_BIN or searching project paths.
     const binding = bindCoreBinary(options.nativeBinaryPath ?? defaultCoreProviderBinary);
-    result = checkCoreAdmissions(admissions, { binaryPath: binding.binaryPath, timeoutMs });
+    // Keep the native child's working directory outside the caller project.
+    result = checkCoreAdmissions(admissions, {
+      binaryPath: binding.binaryPath, timeoutMs,
+      workingDirectory: path.dirname(binding.binaryPath),
+    });
     // A changed or unavailable artifact cannot yield a retained checked receipt.
     const after = bindCoreBinary(binding.binaryPath);
     if (after.binaryPath !== binding.binaryPath || after.binarySha256 !== binding.binarySha256) {

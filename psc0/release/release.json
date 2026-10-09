@@ -1,11 +1,17 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "proofscript-release",
-  "version": "0.1.0-preview.0",
-  "platform": {
-    "os": "linux",
-    "arch": "x64"
-  },
+  "version": "0.1.0-preview.1",
+  "platforms": [
+    {
+      "os": "linux",
+      "arch": "x64"
+    },
+    {
+      "os": "win32",
+      "arch": "x64"
+    }
+  ],
   "compiler": {
     "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
     "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
@@ -14,7 +20,16 @@
   "kernel": {
     "selector": "pskernel-core",
     "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
-    "sha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec"
+    "artifacts": {
+      "linux-x64": {
+        "sha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+        "dependencies": []
+      },
+      "win32-x64": {
+        "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+        "dependencies": []
+      }
+    }
   },
   "typescriptVersion": "7.0.2",
   "defaultExtensions": []

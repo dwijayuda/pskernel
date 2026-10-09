@@ -1,3 +1,17 @@
+# Windows x64 preview correction — qualification in progress
+
+Updated: 2026-10-09 21:30 UTC. This active correction supersedes the Linux-only support description in the checkpoint below; its qualification is not yet complete.
+
+The user tried preview0 on Windows x64 with Node 26.7.0/npm 12.0.2. That tarball correctly refused installation because it contained only a Linux native provider and declared Node 22. The authorized correction prepares proofscript 0.1.0-preview.1 as one package containing separately authenticated Linux and Windows x64 providers, with the unchanged F compiler. Consumer Node 22 and 26 support is separate from the unchanged Node22/Lean4.34/TS7 bootstrap recipe.
+
+The exact Windows native build and fresh native smoke passed in run37993071033 at fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3. Windows executable SHA256: 8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2; 5,509,120 bytes. It imports only the twelve recorded Windows OS DLLs and requires no additional bundled DLL. Its PE link timestamp prevents claiming byte-identical reconstruction from a later ordinary build; reuse the retained exact artifact. Candidate artifact11646570443 expires 8 November. Source commit963030dc2d154008fccc82e7c8ed29331f138799 is unchanged. Its repository root tree is80927150cbd6a5518762b4cc56e51ea24df8f374; the historical sourceTree38c8c55bd2b214753e56c58c15c4901c32c01b86 refers specifically to the psc0 subtree. New metadata scopes this explicitly.
+
+The platform workflow must now qualify the integrated host, one assembled tarball, Windows source integration and all four fresh install combinations: Ubuntu24.04/Windows Server2022 x64 × Node22.23.3/npm10.9.9 or Node26.7.0/npm12.0.2. Windows user-flow tests exercise npm's psc.cmd from PowerShell with a Node-only PATH, no source checkout and no Lean installation. Do not call preview1 package-qualified until those jobs pass. No success result is inferred from the native-only probe.
+
+Runtime changes are confined to host selection, release assembly/paths, and early Windows output-path validation. The compiler closure, selected R seed, proof status, kernel algorithms and separate Lean4.35 work remain unchanged. External extensions remain unsupported. No main merge or npm publication is authorized as an incidental action. Continue using GitHub connector reads/writes, non-force expected-head updates and Actions-only execution.
+
+---
+
 # PSC0 platform — active continuation
 
 Updated: 2026-10-09 21:02 UTC. This section supersedes the historical handoff below for the newly authorized platform implementation.

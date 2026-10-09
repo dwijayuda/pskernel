@@ -11,6 +11,17 @@ import { readBootstrapClosure, bootstrapEntryRelative } from './sh1-source-snaps
 const root = fileURLToPath(new URL('../', import.meta.url));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
+function windowsPe() {
+  const bytes = Buffer.alloc(256);
+  bytes.write('MZ');
+  bytes.writeUInt32LE(128, 0x3c);
+  bytes.write('PE\0\0', 128, 'binary');
+  bytes.writeUInt16LE(0x8664, 132);
+  bytes.writeUInt16LE(0x0002, 150);
+  bytes.writeUInt16LE(0x20b, 152);
+  return bytes;
+}
+
 async function fixture(t) {
   const temporary = await mkdtemp(path.join(tmpdir(), 'psc-assembly-'));
   t.after(() => rm(temporary, { recursive: true, force: true }));
@@ -28,14 +39,25 @@ async function fixture(t) {
   provider.write('\x7fELF', 0, 'binary');
   provider[4] = 2; provider[5] = 1; provider.writeUInt16LE(62, 18);
   const compilerPath = path.join(temporary, 'input-compiler.js');
-  const nativeBinaryPath = path.join(temporary, 'input-provider');
-  await Promise.all([writeFile(compilerPath, compiler), writeFile(nativeBinaryPath, provider)]);
+  const windowsProvider = windowsPe();
+  const nativeBinaryPaths = {
+    'linux-x64': path.join(temporary, 'input-provider'),
+    'win32-x64': path.join(temporary, 'input-provider.exe'),
+  };
+  await Promise.all([
+    writeFile(compilerPath, compiler),
+    writeFile(nativeBinaryPaths['linux-x64'], provider),
+    writeFile(nativeBinaryPaths['win32-x64'], windowsProvider),
+  ]);
   await source(bootstrapEntryRelative, '-- synthetic source closure\n');
   const closure = await readBootstrapClosure(workspaceRoot);
   const release = JSON.parse(await readFile(path.join(root, 'release/release.json'), 'utf8'));
   release.compiler.sha256 = sha256(compiler);
   release.compiler.sourceClosureSha256 = closure.sha256;
-  release.kernel.sha256 = sha256(provider);
+  release.kernel.artifacts = {
+    'linux-x64': { sha256: sha256(provider), dependencies: [] },
+    'win32-x64': { sha256: sha256(windowsProvider), dependencies: [] },
+  };
   await source('release/release.json', JSON.stringify(release));
   await source('release/package.json', await readFile(path.join(root, 'release/package.json')));
   await source('release/README.md', 'Synthetic test package; not a release.\n');
@@ -43,7 +65,7 @@ async function fixture(t) {
   for (const file of releaseHostFiles) await source(file, '// maintained fixture: ' + file + '\n');
   await source('scripts/unlisted-test.mjs', 'throw new Error("must not be packaged");\n');
   await source('legacy/should-not-leak.txt', 'must not be packaged\n');
-  return { workspaceRoot, outputPath, compilerPath, nativeBinaryPath, source, release, compiler, provider };
+  return { workspaceRoot, outputPath, compilerPath, nativeBinaryPaths, source, release, compiler, provider, windowsProvider };
 }
 
 test('assembler copies exact pinned bytes and maintained host files without executing inputs', async t => {
@@ -53,6 +75,7 @@ test('assembler copies exact pinned bytes and maintained host files without exec
   assert.equal(result.runtimeQualificationRequired, true);
   assert.deepEqual(await readFile(path.join(context.outputPath, 'runtime/compiler/index.js')), context.compiler);
   assert.deepEqual(await readFile(path.join(context.outputPath, 'runtime/kernel/linux-x64/psc_kernel_core_provider')), context.provider);
+  assert.deepEqual(await readFile(path.join(context.outputPath, 'runtime/kernel/win32-x64/psc_kernel_core_provider.exe')), context.windowsProvider);
   for (const file of releaseHostFiles) {
     assert.deepEqual(await readFile(path.join(context.outputPath, file)),
       await readFile(path.join(context.workspaceRoot, file)));
@@ -73,11 +96,13 @@ test('assembler rejects compiler/provider tampering and source-closure drift bef
   for (const [kind, expected] of [
     ['compiler', /PSC_RELEASE_COMPILER_PIN/u],
     ['provider', /PSC_RELEASE_KERNEL_PIN/u],
+    ['windows', /PSC_RELEASE_KERNEL_PIN/u],
     ['source', /PSC_RELEASE_SOURCE_CLOSURE_MISMATCH/u],
   ]) {
     const context = await fixture(t);
     if (kind === 'compiler') await writeFile(context.compilerPath, 'different compiler');
-    if (kind === 'provider') await writeFile(context.nativeBinaryPath, 'different provider');
+    if (kind === 'provider') await writeFile(context.nativeBinaryPaths['linux-x64'], 'different provider');
+    if (kind === 'windows') await writeFile(context.nativeBinaryPaths['win32-x64'], 'different provider');
     if (kind === 'source') await context.source(bootstrapEntryRelative, '-- changed source\n');
     await assert.rejects(assembleRelease(context), expected);
     await assert.rejects(access(context.outputPath), { code: 'ENOENT' });
@@ -116,4 +141,43 @@ test('release compiler pin still describes the exact maintained self-host source
   const release = JSON.parse(await readFile(path.join(root, 'release/release.json'), 'utf8'));
   const closure = await readBootstrapClosure(root);
   assert.equal(closure.sha256, release.compiler.sourceClosureSha256);
+});
+
+test('assembler rejects missing platform inputs and the wrong native image architecture', async t => {
+  const context = await fixture(t);
+  await assert.rejects(assembleRelease({
+    ...context, nativeBinaryPaths: { 'linux-x64': context.nativeBinaryPaths['linux-x64'] },
+  }), /PSC_RELEASE_INPUTS/u);
+  const wrong = windowsPe();
+  wrong.writeUInt16LE(0xaa64, 132);
+  await writeFile(context.nativeBinaryPaths['win32-x64'], wrong);
+  context.release.kernel.artifacts['win32-x64'].sha256 = sha256(wrong);
+  await context.source('release/release.json', JSON.stringify(context.release));
+  await assert.rejects(assembleRelease(context), /PSC_RELEASE_KERNEL_PLATFORM/u);
+  await assert.rejects(access(context.outputPath), { code: 'ENOENT' });
+});
+
+test('release profile refuses unqualified native DLL declarations', async t => {
+  const context = await fixture(t);
+  context.release.kernel.artifacts['win32-x64'].dependencies = [
+    { name: 'unqualified.dll', sha256: '0'.repeat(64) },
+  ];
+  await context.source('release/release.json', JSON.stringify(context.release));
+  await assert.rejects(assembleRelease(context), /PSC_RELEASE_SCHEMA: native artifact/u);
+  await assert.rejects(access(context.outputPath), { code: 'ENOENT' });
+});
+
+test('assembler requires the declared OS and consumer Node support ranges', async t => {
+  const context = await fixture(t);
+  for (const mutation of [
+    metadata => { metadata.os = ['linux']; },
+    metadata => { metadata.cpu = ['arm64']; },
+    metadata => { metadata.engines.node = '>=22.23.3 <23'; },
+  ]) {
+    const metadata = JSON.parse(await readFile(path.join(root, 'release/package.json'), 'utf8'));
+    mutation(metadata);
+    await context.source('release/package.json', JSON.stringify(metadata));
+    await assert.rejects(assembleRelease(context), /PSC_RELEASE_PACKAGE_PROFILE/u);
+    await assert.rejects(access(context.outputPath), { code: 'ENOENT' });
+  }
 });

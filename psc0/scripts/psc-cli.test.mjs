@@ -13,7 +13,7 @@ const overrides = ['PSC0_TSC', 'PSC0_TYPESCRIPT_VERSION', 'PSC_KERNEL_CORE_PROVI
 // This fixture tests public CLI policy and path plumbing without executing a
 // compiler/provider. The cloud package smoke test checks the real runtimes.
 async function fixture(t, proofscript = { profile: 'checked', extensions: [] }) {
-  const temporary = await mkdtemp(path.join(tmpdir(), 'psc-cli-'));
+  const temporary = await mkdtemp(path.join(tmpdir(), 'psc cli spaces-'));
   t.after(() => rm(temporary, { recursive: true, force: true }));
   const installed = path.join(temporary, 'installed');
   const project = path.join(temporary, 'project');
@@ -65,7 +65,9 @@ test('public build preserves caller cwd and pins installed runtimes', async t =>
   assert.equal(call.entryPath, path.join(context.project, 'src/Main.ps'));
   assert.equal(call.outputPath, path.join(context.project, 'dist/Main.js'));
   assert.equal(call.compilerPath, path.join(context.installed, 'runtime/compiler/index.js'));
-  assert.equal(call.nativeBinaryPath, path.join(context.installed, 'runtime/kernel/linux-x64/psc_kernel_core_provider'));
+  assert.equal(call.nativeBinaryPath, path.join(context.installed, 'runtime/kernel',
+    process.platform + '-' + process.arch, 'psc_kernel_core_provider' +
+    (process.platform === 'win32' ? '.exe' : '')));
   assert.equal(call.compilerSha256, release.compiler.sha256);
   assert.equal(call.kernel, 'pskernel-core');
   assert.equal(call.profile, 'checked');
@@ -176,5 +178,18 @@ test('public build rejects missing or wrong installed TypeScript before invoking
   run = context.invoke(['build', 'src/Main.ps', '--out', 'dist/Main.js']);
   assert.notEqual(run.status, 0);
   assert.match(run.stderr, /PSC_RELEASE_TYPESCRIPT_MISSING/u);
+  await notCalled(context);
+});
+
+test('version reports the actual host and both packaged platforms', async t => {
+  const context = await fixture(t);
+  const run = context.invoke(['version', '--json']);
+  assert.equal(run.status, 0, run.stderr);
+  const version = JSON.parse(run.stdout);
+  assert.deepEqual(version.platform, { os: process.platform, arch: process.arch });
+  assert.deepEqual(version.supportedPlatforms, [
+    { os: 'linux', arch: 'x64' }, { os: 'win32', arch: 'x64' },
+  ]);
+  assert.deepEqual(Object.keys(version.kernel.artifacts), ['linux-x64', 'win32-x64']);
   await notCalled(context);
 });

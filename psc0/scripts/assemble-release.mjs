@@ -36,18 +36,34 @@ async function absent(file) {
   throw new Error('PSC_RELEASE_OUTPUT_EXISTS: ' + file);
 }
 
-function assertLinuxX64Elf(bytes) {
-  if (bytes.length < 64 || bytes[0] !== 0x7f || bytes.subarray(1, 4).toString() !== 'ELF' ||
-      bytes[4] !== 2 || bytes[5] !== 1 || bytes.readUInt16LE(18) !== 62) {
-    throw new Error('PSC_RELEASE_KERNEL_PLATFORM: expected Linux x64 ELF');
+function assertNativeImage(bytes, key) {
+  if (key === 'linux-x64') {
+    if (bytes.length < 64 || bytes[0] !== 0x7f || bytes.subarray(1, 4).toString() !== 'ELF' ||
+        bytes[4] !== 2 || bytes[5] !== 1 || bytes.readUInt16LE(18) !== 62) {
+      throw new Error('PSC_RELEASE_KERNEL_PLATFORM: expected Linux x64 ELF');
+    }
+    return;
+  }
+  const pe = bytes.length >= 64 ? bytes.readUInt32LE(0x3c) : 0;
+  if (bytes.length < 64 || bytes.subarray(0, 2).toString() !== 'MZ' ||
+      pe < 64 || pe + 26 > bytes.length ||
+      bytes.subarray(pe, pe + 4).toString('binary') !== 'PE\0\0' ||
+      bytes.readUInt16LE(pe + 4) !== 0x8664 ||
+      bytes.readUInt16LE(pe + 24) !== 0x20b ||
+      !(bytes.readUInt16LE(pe + 22) & 0x0002) ||
+      Boolean(bytes.readUInt16LE(pe + 22) & 0x2000)) {
+    throw new Error('PSC_RELEASE_KERNEL_PLATFORM: expected Windows x64 PE executable');
   }
 }
 
 export async function assembleRelease({
-  workspaceRoot = root, compilerPath, nativeBinaryPath, outputPath,
+  workspaceRoot = root, compilerPath, nativeBinaryPaths, outputPath,
 } = {}) {
-  if (!compilerPath || !nativeBinaryPath || !outputPath) {
-    throw new Error('PSC_RELEASE_INPUTS: require compiler, native provider, and output paths');
+  const keys = ['linux-x64', 'win32-x64'];
+  if (!compilerPath || !outputPath || !nativeBinaryPaths ||
+      Object.keys(nativeBinaryPaths).length !== keys.length ||
+      keys.some(key => typeof nativeBinaryPaths[key] !== 'string' || !nativeBinaryPaths[key])) {
+    throw new Error('PSC_RELEASE_INPUTS: require compiler, both native providers, and output paths');
   }
   workspaceRoot = path.resolve(workspaceRoot);
   const output = path.resolve(outputPath);
@@ -59,19 +75,27 @@ export async function assembleRelease({
       metadata.bin?.psc !== './bin/psc.mjs' || metadata.type !== 'module' ||
       metadata.dependencies?.typescript !== release.typescriptVersion ||
       Object.keys(metadata.dependencies).length !== 1 || Object.hasOwn(metadata, 'scripts') ||
-      Object.hasOwn(metadata, 'workspaces')) {
+      Object.hasOwn(metadata, 'workspaces') ||
+      JSON.stringify(metadata.os) !== JSON.stringify(['linux', 'win32']) ||
+      JSON.stringify(metadata.cpu) !== JSON.stringify(['x64']) ||
+      metadata.engines?.node !== '>=22.23.3 <23 || >=26.7.0 <27') {
     throw new Error('PSC_RELEASE_PACKAGE_PROFILE');
   }
   const closure = await readBootstrapClosure(workspaceRoot);
   if (closure.sha256 !== release.compiler.sourceClosureSha256) {
     throw new Error('PSC_RELEASE_SOURCE_CLOSURE_MISMATCH');
   }
-  // Authenticate the bytes before any runtime artifact is loaded or copied.
-  // In particular, this assembler never executes an input compiler or provider.
-  const [compiler, provider] = await Promise.all([readFile(compilerPath), readFile(nativeBinaryPath)]);
+  // Authenticate every byte before copying or executing an input. Both platforms
+  // are assembled together; this process does not execute either native image.
+  const compiler = await readFile(compilerPath);
   if (sha256(compiler) !== release.compiler.sha256) throw new Error('PSC_RELEASE_COMPILER_PIN');
-  if (sha256(provider) !== release.kernel.sha256) throw new Error('PSC_RELEASE_KERNEL_PIN');
-  assertLinuxX64Elf(provider);
+  const native = await Promise.all(keys.map(async key => {
+    const expected = release.kernel.artifacts[key];
+    const binary = await readFile(nativeBinaryPaths[key]);
+    if (sha256(binary) !== expected.sha256) throw new Error('PSC_RELEASE_KERNEL_PIN: ' + key);
+    assertNativeImage(binary, key);
+    return { key, binary };
+  }));
   const sources = await Promise.all(releaseHostFiles.map(async file => [
     file, await readFile(path.join(workspaceRoot, file)),
   ]));
@@ -91,11 +115,14 @@ export async function assembleRelease({
     await put(path.join(staging, 'release.json'), JSON.stringify(release, null, 2) + '\n');
     await put(path.join(staging, 'README.md'), readme);
     await put(path.join(staging, 'LEAN_LICENSE'), leanLicense);
-    const runtime = releaseRuntimePaths(staging);
-    await put(runtime.compilerPath, compiler);
-    await put(runtime.nativeBinaryPath, provider);
+    await put(path.join(staging, 'runtime/compiler/index.js'), compiler);
+    for (const artifact of native) {
+      const os = artifact.key === 'win32-x64' ? 'win32' : 'linux';
+      const runtime = releaseRuntimePaths(staging, os, 'x64');
+      await put(runtime.nativeBinaryPath, artifact.binary);
+      await chmod(runtime.nativeBinaryPath, 0o755);
+    }
     await chmod(path.join(staging, 'bin/psc.mjs'), 0o755);
-    await chmod(runtime.nativeBinaryPath, 0o755);
     await absent(output);
     await rename(staging, output);
   } finally {
@@ -103,7 +130,7 @@ export async function assembleRelease({
   }
   return Object.freeze({
     kind: 'proofscript-release-assembly', outputPath: output, version: release.version,
-    compilerSha256: release.compiler.sha256, kernelSha256: release.kernel.sha256,
+    compilerSha256: release.compiler.sha256, kernelArtifacts: release.kernel.artifacts,
     sourceClosureSha256: closure.sha256, moduleCount: closure.moduleCount,
     hostFiles: releaseHostFiles, extensions: [],
     runtimeExecuted: false, runtimeQualificationRequired: true,
@@ -111,16 +138,18 @@ export async function assembleRelease({
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const options = {};
+  const options = { nativeBinaryPaths: {} };
   const args = process.argv.slice(2);
   while (args.length) {
     const flag = args.shift();
-    const key = { '--compiler': 'compilerPath', '--kernel': 'nativeBinaryPath', '--out': 'outputPath' }[flag];
+    const key = { '--compiler': 'compilerPath', '--kernel-linux': 'linux-x64',
+      '--kernel-windows': 'win32-x64', '--out': 'outputPath' }[flag];
     const value = args.shift();
-    if (!key || !value || value.startsWith('--') || options[key] !== undefined) {
-      throw new Error('usage: assemble-release.mjs --compiler index.js --kernel provider --out new-directory');
+    const target = key?.endsWith('-x64') ? options.nativeBinaryPaths : options;
+    if (!key || !value || value.startsWith('--') || target[key] !== undefined) {
+      throw new Error('usage: assemble-release.mjs --compiler index.js --kernel-linux provider --kernel-windows provider.exe --out new-directory');
     }
-    options[key] = path.resolve(value);
+    target[key] = path.resolve(value);
   }
   console.log(JSON.stringify(await assembleRelease(options), null, 2));
 }

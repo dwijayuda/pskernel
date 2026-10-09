@@ -123,7 +123,8 @@ async function main() {
   const release = await readReleaseManifest(installedRoot);
   if (options.command === 'version') {
     process.stdout.write(options.json ? JSON.stringify({
-      name: 'proofscript', version: release.version, platform: release.platform,
+      name: 'proofscript', version: release.version,
+      platform: { os: process.platform, arch: process.arch }, supportedPlatforms: release.platforms,
       compiler: release.compiler, kernel: release.kernel,
       typescriptVersion: release.typescriptVersion, extensions: [],
     }, null, 2) + '\n' : 'psc ' + release.version + '\n');

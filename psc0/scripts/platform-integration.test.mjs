@@ -7,11 +7,14 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { before, test } from 'node:test';
 import { buildChecked } from './checked-build.mjs';
+import { coreNativeArtifactPins } from './checked-kernel-provider.mjs';
 
 // Dedicated cloud gate: absence of a real qualified input is a failure, never a
 // skip. No test double supplies compiler output or a kernel acceptance decision.
 const compilerSha256 = '5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15';
-const kernelSha256 = '88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec';
+const nativeArtifact = coreNativeArtifactPins[process.platform + '-' + process.arch];
+assert.ok(nativeArtifact, 'integration requires a qualified native platform');
+const kernelSha256 = nativeArtifact.expectedBinarySha256;
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 function requiredPath(name) {
   const value = process.env[name];
@@ -31,7 +34,7 @@ before(async () => {
 });
 
 async function project(t, kind, source = 'def answer : Nat := 42\n') {
-  const directory = await mkdtemp(path.join(tmpdir(), 'psc0-platform-real-'));
+  const directory = await mkdtemp(path.join(tmpdir(), 'psc platform real spaces-'));
   t.after(() => rm(directory, { recursive: true, force: true }));
   await writeFile(path.join(directory, 'package.json'), '{"type":"module"}\n');
   const entryPath = path.join(directory, 'main.' + kind);
@@ -54,6 +57,9 @@ function admissionReceipt(receipt) {
   assert.equal(receipt.provider.leanVersion, '4.34.0');
   assert.equal(receipt.kernel.sourceCommit, '963030dc2d154008fccc82e7c8ed29331f138799');
   assert.equal(receipt.kernel.binarySha256, kernelSha256);
+  assert.equal(receipt.kernel.platform, process.platform);
+  assert.equal(receipt.kernel.architecture, process.arch);
+  assert.deepEqual(receipt.kernel.runtimeDependencies, nativeArtifact.dependencies);
   assert.equal(receipt.kernel.canonicalAdmissionsSha256, receipt.canonicalAdmissionsSha256);
   for (const field of ['strictSh1Qualified', 'pscvVerified', 'semanticPreservationProved']) {
     assert.equal(receipt[field], false, field + ' must not be inferred from checked admission');

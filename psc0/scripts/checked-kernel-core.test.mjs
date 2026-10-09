@@ -6,7 +6,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { assertCoreProviderResponse, checkCoreAdmissions } from './checked-kernel-core.mjs';
 import { coreCheckedIdentity } from './checked-kernel-identity.mjs';
-import { checkAdmissionsWithKernel, checkedKernelDescriptor } from './checked-kernel-provider.mjs';
+import { checkAdmissionsWithKernel, checkedKernelDescriptor, coreNativeArtifactPins } from './checked-kernel-provider.mjs';
 
 const emptyAdmissions = JSON.stringify({
   format: 'proofscript-checked-admissions', version: 2, admissions: [],
@@ -14,7 +14,7 @@ const emptyAdmissions = JSON.stringify({
 const response = extra => ({ ...coreCheckedIdentity, ...extra });
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 const posix = process.platform !== 'win32';
-const qualifiedPlatform = process.platform === 'linux' && process.arch === 'x64';
+const qualifiedPlatform = ['linux', 'win32'].includes(process.platform) && process.arch === 'x64';
 
 // These executables exercise the unchanged transport only. The protected
 // selector must reject their bytes even when they forge all identity fields.
@@ -134,7 +134,14 @@ test('the exact native artifact binds decisions to its executable and input byte
   for (const [field, value] of Object.entries(coreCheckedIdentity)) assert.equal(checked.result[field], value);
   assert.equal(checked.descriptor.sourceCommit, '963030dc2d154008fccc82e7c8ed29331f138799');
   assert.equal(checked.descriptor.sourceTree, '38c8c55bd2b214753e56c58c15c4901c32c01b86');
-  assert.equal(checked.descriptor.binarySha256, '88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec');
+  assert.equal(checked.descriptor.sourceTreePath, 'psc0');
+  assert.equal(checked.descriptor.repositoryTree, '80927150cbd6a5518762b4cc56e51ea24df8f374');
+  assert.equal(checked.descriptor.binarySha256,
+    coreNativeArtifactPins[process.platform + '-' + process.arch].expectedBinarySha256);
+  assert.equal(checked.descriptor.platform, process.platform);
+  assert.equal(checked.descriptor.architecture, process.arch);
+  assert.deepEqual(checked.descriptor.runtimeDependencies,
+    coreNativeArtifactPins[process.platform + '-' + process.arch].dependencies);
   assert.equal(checked.descriptor.binarySha256, digest(readFileSync(nativeBinaryPath)));
   assert.equal(checked.descriptor.binaryPath, realpathSync(nativeBinaryPath));
   assert.equal(checked.descriptor.canonicalAdmissionsSha256, digest(Buffer.from(emptyAdmissions, 'utf8')));
@@ -156,4 +163,16 @@ test('the exact native artifact binds decisions to its executable and input byte
   assert.equal(rejected.result.errorKind, 'kernel-rejection');
   assert.equal(rejected.descriptor.canonicalAdmissionsSha256, digest(Buffer.from(invalid, 'utf8')));
   assert.equal((await checkAdmissionsWithKernel(emptyAdmissions, 'pskernel-core', { nativeBinaryPath })).result.accepted, true);
+});
+
+test('release metadata cannot replace either platform artifact pin', () => {
+  const release = JSON.parse(readFileSync(new URL('../release/release.json', import.meta.url), 'utf8'));
+  for (const key of ['linux-x64', 'win32-x64']) {
+    assert.equal(release.kernel.artifacts[key].sha256, coreNativeArtifactPins[key].expectedBinarySha256);
+    assert.deepEqual(release.kernel.artifacts[key].dependencies, coreNativeArtifactPins[key].dependencies);
+    assert.ok(Object.isFrozen(coreNativeArtifactPins[key]));
+    assert.ok(Object.isFrozen(coreNativeArtifactPins[key].dependencies));
+    for (const dependency of coreNativeArtifactPins[key].dependencies) assert.ok(Object.isFrozen(dependency));
+  }
+  assert.ok(Object.isFrozen(coreNativeArtifactPins));
 });

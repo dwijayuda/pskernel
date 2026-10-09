@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "kind": "psc0-windows-native-provider-candidate",
+  "claim": "Artifact discovery only; fresh-runner native smoke and final installed-package qualification are separate evidence.",
+  "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+  "sourceTree": "38c8c55bd2b214753e56c58c15c4901c32c01b86",
+  "sourceTreePath": "psc0",
+  "repositoryTree": "80927150cbd6a5518762b4cc56e51ea24df8f374",
+  "buildTarget": "psc_kernel_core_provider",
+  "toolchainArchive": {
+    "assetId": 563514503,
+    "url": "https://github.com/leanprover/lean4/releases/download/v4.34.0/lean-4.34.0-windows.zip",
+    "sha256": "d382797e1abb1becd1b22593c059c223bf0698f6593bb9cdeddbf7fe23f54ca0",
+    "bytes": 850488083
+  },
+  "identity": {
+    "protocol": "pskernel-core/1",
+    "provider": "pskernel-core-native",
+    "leanVersion": "4.34.0",
+    "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "profile": "lean4.34-core"
+  },
+  "executable": "psc_kernel_core_provider.exe",
+  "files": [
+    {
+      "name": "psc_kernel_core_provider.exe",
+      "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+      "bytes": 5509120,
+      "machine": "AMD64",
+      "format": "PE32+",
+      "coffTimeDateStamp": 1791581097,
+      "imports": [
+        "ADVAPI32.dll",
+        "IPHLPAPI.DLL",
+        "KERNEL32.dll",
+        "SHELL32.dll",
+        "USER32.dll",
+        "USERENV.dll",
+        "WS2_32.dll",
+        "bcrypt.dll",
+        "dbghelp.dll",
+        "icu.dll",
+        "ole32.dll",
+        "ucrtbase.dll"
+      ],
+      "origin": {
+        "kind": "pinned-provider-build",
+        "path": "psc0/.lake/build/bin/psc_kernel_core_provider.exe"
+      }
+    }
+  ],
+  "systemImports": [
+    {
+      "name": "ADVAPI32.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "c4a214f83beadb3655adf464877c8a81c4affa9a4acc2485eab2eaffc7ee719d"
+    },
+    {
+      "name": "bcrypt.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "663ac06ba31380fb8a9d096fa8d40df529e0461ccf6d469ab5d858c724dbafbb"
+    },
+    {
+      "name": "dbghelp.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "ee437eaccfe4543ce2ba1dbc4e9b8225c88b48a6b359a4ea4b3553228902874e"
+    },
+    {
+      "name": "icu.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "c56f594ec1e2aa203c502be45b2fce65112cf30c2540e73fa3bba8050a86364e"
+    },
+    {
+      "name": "IPHLPAPI.DLL",
+      "kind": "windows-os",
+      "buildHostSha256": "9899ef581e313c241ec93a10e9b50ceeed682d4f7f7b72aebb03f9b3443b7fbe"
+    },
+    {
+      "name": "KERNEL32.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "da41de8a936170f771f6f3b1543b93fdf6768d3b5b40ff8637820ca01ade9d82"
+    },
+    {
+      "name": "ole32.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "db56db677a1cca70e426f9a5a23768ed37ed9139f30d794ccb0de31bbf874b02"
+    },
+    {
+      "name": "SHELL32.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "8880171766756a3db2c7f64cf4545ca3d440948c7a0792b2408841f284729ba0"
+    },
+    {
+      "name": "ucrtbase.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "5e5ae0f8e4325ceb3ee767065dda6e03e980d401f00a2bdb8ca81ed90813920f"
+    },
+    {
+      "name": "USER32.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "97ba5b8837cd4d4ce76ea63132b547b979fb0499c2ffd579e51c6fafaf7fc431"
+    },
+    {
+      "name": "USERENV.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "3d2980aa5d1b6ea4e28f0da80b49a263ef75b440de25db553c2c515fdba76bb2"
+    },
+    {
+      "name": "WS2_32.dll",
+      "kind": "windows-os",
+      "buildHostSha256": "e38e526fa92e534bfbaac5676434d8a34b0ff66135e913d0b9d9592801562c65"
+    }
+  ],
+  "licenseFiles": [
+    {
+      "name": "LICENSE",
+      "sha256": "e872b4a399a9cd078babf679143a42d6277bc1ee152b6e286ea95b4cee8e227f"
+    },
+    {
+      "name": "LICENSES",
+      "sha256": "36d0568a131a975aa466e9e48e2af983e67a6607674b0ed536ea13141e7dbeb8"
+    }
+  ],
+  "runner": {
+    "platform": "win32",
+    "architecture": "x64",
+    "osRelease": "10.0.20348",
+    "osVersion": "Windows Server 2022 Datacenter",
+    "node": "v22.23.3",
+    "imageOS": "win22",
+    "imageVersion": "20261004.326.1",
+    "runId": "37993071033",
+    "runAttempt": "1",
+    "workflowCommit": "fbf06f94b9b13366ebd1e7a3fa9602b43ea386a3"
+  },
+  "releaseQualified": false,
+  "rebuildReproducibilityProved": false,
+  "compilerSemanticPreservationProved": false,
+  "logicalConsistencyProved": false
+}

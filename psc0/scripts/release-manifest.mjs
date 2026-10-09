@@ -1,6 +1,14 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+const platforms = Object.freeze([
+  Object.freeze({ os: 'linux', arch: 'x64' }),
+  Object.freeze({ os: 'win32', arch: 'x64' }),
+]);
+const platformKeys = Object.freeze(platforms.map(item => item.os + '-' + item.arch));
+const digest = value => typeof value === 'string' && /^[0-9a-f]{64}$/u.test(value);
+const sourceRef = value => typeof value === 'string' && /^[0-9a-f]{40}$/u.test(value);
+
 function exactKeys(value, keys, label) {
   if (value === null || typeof value !== 'object' || Array.isArray(value) ||
       Object.keys(value).length !== keys.length ||
@@ -10,33 +18,53 @@ function exactKeys(value, keys, label) {
 }
 
 export function assertReleaseManifest(value) {
-  exactKeys(value, ['schemaVersion', 'kind', 'version', 'platform', 'compiler',
+  exactKeys(value, ['schemaVersion', 'kind', 'version', 'platforms', 'compiler',
     'kernel', 'typescriptVersion', 'defaultExtensions'], 'release');
-  exactKeys(value.platform, ['os', 'arch'], 'platform');
   exactKeys(value.compiler, ['sourceRef', 'sourceClosureSha256', 'sha256'], 'compiler');
-  exactKeys(value.kernel, ['selector', 'sourceRef', 'sha256'], 'kernel');
-  if (value.schemaVersion !== 1 || value.kind !== 'proofscript-release' ||
+  exactKeys(value.kernel, ['selector', 'sourceRef', 'artifacts'], 'kernel');
+  exactKeys(value.kernel.artifacts, platformKeys, 'kernel artifacts');
+  if (value.schemaVersion !== 2 || value.kind !== 'proofscript-release' ||
+      typeof value.version !== 'string' ||
       !/^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/u.test(value.version) ||
-      value.platform.os !== 'linux' || value.platform.arch !== 'x64' ||
       value.kernel.selector !== 'pskernel-core' || value.typescriptVersion !== '7.0.2') {
     throw new Error('PSC_RELEASE_SCHEMA: unsupported release profile');
   }
-  for (const item of [value.compiler, value.kernel]) {
-    if (typeof item.sourceRef !== 'string' || !/^[0-9a-f]{40}$/u.test(item.sourceRef) ||
-        typeof item.sha256 !== 'string' || !/^[0-9a-f]{64}$/u.test(item.sha256)) {
-      throw new Error('PSC_RELEASE_SCHEMA: artifact identity');
-    }
+  if (!Array.isArray(value.platforms) || value.platforms.length !== platforms.length) {
+    throw new Error('PSC_RELEASE_SCHEMA: platforms');
   }
-  if (typeof value.compiler.sourceClosureSha256 !== 'string' ||
-      !/^[0-9a-f]{64}$/u.test(value.compiler.sourceClosureSha256)) {
+  for (let index = 0; index < platforms.length; index++) {
+    const actual = value.platforms[index];
+    const expected = platforms[index];
+    exactKeys(actual, ['os', 'arch'], 'platform');
+    if (actual.os !== expected.os || actual.arch !== expected.arch) {
+      throw new Error('PSC_RELEASE_SCHEMA: unsupported platform');
+    }
+    Object.freeze(actual);
+  }
+  if (!sourceRef(value.compiler.sourceRef) || !digest(value.compiler.sha256) ||
+      !sourceRef(value.kernel.sourceRef)) {
+    throw new Error('PSC_RELEASE_SCHEMA: artifact identity');
+  }
+  if (!digest(value.compiler.sourceClosureSha256)) {
     throw new Error('PSC_RELEASE_SCHEMA: source closure');
+  }
+  for (const key of platformKeys) {
+    const artifact = value.kernel.artifacts[key];
+    exactKeys(artifact, ['sha256', 'dependencies'], 'kernel artifact');
+    // Both qualified providers link their non-system runtimes statically.
+    // A future native dependency requires an explicit new qualification/profile.
+    if (!digest(artifact.sha256) || !Array.isArray(artifact.dependencies) ||
+        artifact.dependencies.length !== 0) {
+      throw new Error('PSC_RELEASE_SCHEMA: native artifact');
+    }
+    Object.freeze(artifact.dependencies);
+    Object.freeze(artifact);
   }
   if (!Array.isArray(value.defaultExtensions) || value.defaultExtensions.length !== 0) {
     throw new Error('PSC_RELEASE_EXTENSIONS_UNSUPPORTED');
   }
-  for (const item of [value.platform, value.compiler, value.kernel, value.defaultExtensions]) {
-    Object.freeze(item);
-  }
+  for (const item of [value.platforms, value.compiler, value.kernel.artifacts,
+    value.kernel, value.defaultExtensions]) Object.freeze(item);
   return Object.freeze(value);
 }
 
@@ -53,16 +81,22 @@ export async function readReleaseManifest(root) {
   return assertReleaseManifest(value);
 }
 
-// These are release-owned paths, never package/project-provided entrypoints.
-export function releaseRuntimePaths(root) {
+// Paths come from the release host, never a project or npm manifest entrypoint.
+// Explicit platforms are used by the assembler; execution selects process.platform.
+export function releaseRuntimePaths(root, os = process.platform, arch = process.arch) {
+  const key = os + '-' + arch;
+  if (!platformKeys.includes(key)) {
+    throw new Error('PSC_RELEASE_PLATFORM: this preview supports Linux x64 and Windows x64');
+  }
   return Object.freeze({
     compilerPath: path.join(root, 'runtime/compiler/index.js'),
-    nativeBinaryPath: path.join(root, 'runtime/kernel/linux-x64/psc_kernel_core_provider'),
+    nativeBinaryPath: path.join(root, 'runtime/kernel', key,
+      'psc_kernel_core_provider' + (os === 'win32' ? '.exe' : '')),
   });
 }
 
 export function assertReleasePlatform(release) {
-  if (process.platform !== release.platform.os || process.arch !== release.platform.arch) {
-    throw new Error('PSC_RELEASE_PLATFORM: this preview requires Linux x64');
+  if (!release.platforms.some(item => item.os === process.platform && item.arch === process.arch)) {
+    throw new Error('PSC_RELEASE_PLATFORM: this preview supports Linux x64 and Windows x64');
   }
 }

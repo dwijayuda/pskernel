@@ -28,6 +28,7 @@ export function assertCoreProviderResponse(result) {
 export function checkCoreAdmissions(admissions, {
   binaryPath = process.env.PSC_KERNEL_CORE_PROVIDER_BIN ?? defaultCoreProviderBinary,
   timeoutMs = 60000,
+  workingDirectory,
 } = {}) {
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0 || timeoutMs > 60000) {
     throw new Error('PSC_KERNEL_CORE_TIMEOUT_BUDGET: require 1..60000 ms');
@@ -36,7 +37,7 @@ export function checkCoreAdmissions(admissions, {
     throw new Error('PSC_KERNEL_CORE_PROVIDER_MISSING: build psc_kernel_core_provider or set PSC_KERNEL_CORE_PROVIDER_BIN');
   }
   const run = spawnSync(binaryPath, ['--check'], {
-    input: admissions, encoding: 'utf8', windowsHide: true,
+    input: admissions, encoding: 'utf8', windowsHide: true, cwd: workingDirectory,
     timeout: timeoutMs, killSignal: 'SIGKILL', maxBuffer: 16 * 1024 * 1024,
   });
   if (run.error || run.status !== 0) {

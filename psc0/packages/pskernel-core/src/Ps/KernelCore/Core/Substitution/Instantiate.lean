@@ -351,7 +351,7 @@ def psKernelExprInstantiateAtChanged
 
 namespace PsKernelSharing
 
-@[inline] def instantiateAlgebra (start : Nat) (subst : List PsKernelExpr) : Algebra Changed :=
+@[inline, instance_reducible] def instantiateAlgebra (start : Nat) (subst : List PsKernelExpr) : Algebra Changed :=
   changedAlgebra fun e offset =>
     match e with
     | .bvar index =>

@@ -339,7 +339,7 @@ def psKernelExprAbstractFVarsAtChanged
 
 namespace PsKernelSharing
 
-@[inline] def abstractAlgebra (fvars : List PsKernelName) : Algebra Changed :=
+@[inline, instance_reducible] def abstractAlgebra (fvars : List PsKernelName) : Algebra Changed :=
   changedAlgebra fun e offset =>
     match e with
     | .fvar name =>

@@ -127,13 +127,13 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
   · rfl
   · exact value_eq _
 
-@[inline] def countAlgebra : Algebra Nat where
+@[inline, instance_reducible] def countAlgebra : Algebra Nat where
   atom := fun _ _ => 1
   unary := fun _ _ n => Nat.succ n
   binary := fun _ _ l r => Nat.succ (l + r)
   ternary := fun _ _ t v b => Nat.succ (t + (v + b))
 
-@[inline] def looseAlgebra : Algebra Bool where
+@[inline, instance_reducible] def looseAlgebra : Algebra Bool where
   atom := fun e d => match e with
     | .bvar i => Nat.ble d i
     | _ => false
@@ -148,7 +148,7 @@ theorem run_eq (a : Algebra β) (e : PsKernelExpr) (cursor : Nat) :
   ternaryStop2 := fun _ _ t v =>
     if h : v = true then some ⟨true, by intro b; cases t <;> simp [h]⟩ else none
 
-@[inline] def fvarAlgebra : Algebra Bool where
+@[inline, instance_reducible] def fvarAlgebra : Algebra Bool where
   atom := fun e _ => match e with
     | .fvar _ => true
     | _ => false
@@ -255,14 +255,14 @@ abbrev Changed := PsKernelExpr × Bool
   else if b.2 then (rebuilt, true)
   else (e, false)
 
-@[inline] def changedAlgebra (atom : PsKernelExpr → Nat → Changed) : Algebra Changed :=
+@[inline, instance_reducible] def changedAlgebra (atom : PsKernelExpr → Nat → Changed) : Algebra Changed :=
   { atom := atom, unary := rebuildUnary, binary := rebuildBinary, ternary := rebuildTernary }
 
 end PsKernelSharing
 
 namespace PsKernelSharing
 
-@[inline] def levelAlgebra (params : List PsKernelName) (levels : List PsKernelLevel) : Algebra PsKernelExpr where
+@[inline, instance_reducible] def levelAlgebra (params : List PsKernelName) (levels : List PsKernelLevel) : Algebra PsKernelExpr where
   atom := fun e _ => match e with
     | .sort u => .sort (psKernelLevelInstantiateParams u params levels)
     | .const n us => .const n (psKernelInstantiateLevelList us params levels)

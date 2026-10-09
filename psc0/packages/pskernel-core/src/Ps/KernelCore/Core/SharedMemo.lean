@@ -33,25 +33,28 @@ theorem value_eq {α β : Type} {spec : α → Nat → β} {node : α} {cursor :
   induction result using Quotient.ind with
   | _ p => exact p.1.2
 
+@[inline] def probe {α β : Type} [DecidableEq α] {spec : α → Nat → β}
+    (key : USize × Nat) (node : @& α) (cursor : Nat) (memo : Memo α β spec)
+    (descend : Unit → Squash (Result spec node cursor)) :
+    Squash (Result spec node cursor) :=
+  let miss := fun _ : Unit =>
+    Squash.lift (descend ()) fun (result, next) =>
+      Squash.mk (result, next.insert key ⟨node, cursor, result.1, result.2⟩)
+  match memo[key]? with
+  | none => miss ()
+  | some entry =>
+    if hc : entry.cursor = cursor then
+      match withPtrEqDecEq entry.node node (fun _ => inferInstance) with
+      | isTrue hn =>
+          Squash.mk (⟨entry.value, by simpa [hn, hc] using entry.valid⟩, memo)
+      | isFalse _ => miss ()
+    else miss ()
+
 @[inline] def step {α β : Type} [DecidableEq α] {spec : α → Nat → β}
     (node : @& α) (cursor : Nat) (memo : Memo α β spec)
     (descend : Unit → Squash (Result spec node cursor)) :
     Squash (Result spec node cursor) :=
-  withPtrAddr node (fun address =>
-    let key := (address, cursor)
-    let miss := fun _ : Unit =>
-      Squash.lift (descend ()) fun (result, next) =>
-        Squash.mk (result, next.insert key
-          ⟨node, cursor, result.1, result.2⟩)
-    match memo[key]? with
-    | none => miss ()
-    | some entry =>
-      if hc : entry.cursor = cursor then
-        match withPtrEqDecEq entry.node node (fun _ => inferInstance) with
-        | isTrue hn =>
-            Squash.mk (⟨entry.value, by simpa [hn, hc] using entry.valid⟩, memo)
-        | isFalse _ => miss ()
-      else miss ())
+  withPtrAddr node (fun address => probe (address, cursor) node cursor memo descend)
     (fun _ _ => Subsingleton.elim _ _)
 
 end PsKernelSharing

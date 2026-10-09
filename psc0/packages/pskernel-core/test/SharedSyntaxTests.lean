@@ -36,6 +36,9 @@ def main : IO Unit := do
         PsKernelSharing.fold (PsKernelSharing.abstractAlgebra [n, n]) e d) "abstraction cursor"
     ensure (psKernelExprInstantiateLevelParamsShared e [p] [.zero] ==
       PsKernelSharing.fold (PsKernelSharing.levelAlgebra [p] [.zero]) e 0) "level substitution"
+  for e in examples do
+    for f in examples do
+      ensure (psKernelExprEq e f == PsKernelSharing.eqSpec (e, f) 0) "exact syntactic equality"
   let depth := 32
   let closed := dag depth (.sort .zero)
   ensure (psKernelExprNodeCount closed == 2 ^ (depth + 1) - 1) "shared node count"
@@ -51,4 +54,6 @@ def main : IO Unit := do
   ensure (psKernelExprHasLooseAt lifted 4) "shared lifting result"
   let levelResult := psKernelExprInstantiateLevelParams (dag depth (.sort (.param p))) [p] [.zero]
   ensure (psKernelExprNodeCount levelResult == 2 ^ (depth + 1) - 1) "shared universe result"
+  ensure (psKernelExprEq closed closed) "shared reflexivity"
+  ensure (psKernelExprEq closed levelResult) "independently rebuilt shared equality"
   IO.println "PSKERNEL_SHARED_SYNTAX: PASS cursors=4 variants=14 DAG-depth=32"

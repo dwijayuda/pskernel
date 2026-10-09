@@ -404,6 +404,10 @@
     {
       "area": "core-expr-shared",
       "module": "Ps.KernelCore.Core.Expr.Shared"
+    },
+    {
+      "area": "core-expr-equality",
+      "module": "Ps.KernelCore.Core.Expr.Equality"
     }
   ],
   "recursiveWiring": {

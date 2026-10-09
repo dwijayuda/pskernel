@@ -294,13 +294,17 @@ def liftAlgebra (amount : Nat) : Algebra Changed :=
       | .bvar i => if psKernelNatGe i start then (.bvar (i + amount), true) else (e, false)
       | _ => (e, false)
 
+theorem lift_zero (e : PsKernelExpr) (start : Nat) :
+    psKernelExprLiftLooseBVarsChanged e start 0 = (e, false) := by
+  cases e <;> rfl
+
 theorem lift_fold (e : PsKernelExpr) (start amount : Nat) :
     fold (liftAlgebra amount) e start = psKernelExprLiftLooseBVarsChanged e start amount := by
   by_cases h : amount = 0
   · subst amount
     induction e generalizing start <;> simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
       PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
-      PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged]
+      PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged, lift_zero]
   · induction e generalizing start <;> simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
       PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
       PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged, h]
@@ -318,8 +322,8 @@ def psKernelExprLiftLooseBVarsChangedShared (e : PsKernelExpr) (start amount : N
   cases amount with
   | zero => cases e <;> rfl
   | succ n =>
-    simp only [psKernelExprLiftLooseBVarsChangedShared, Nat.beq_eq_false_iff_ne.mpr (Nat.succ_ne_zero n),
-      Bool.false_eq_true, ↓reduceIte, PsKernelSharing.run_eq, PsKernelSharing.lift_fold]
+    simp [psKernelExprLiftLooseBVarsChangedShared,
+      PsKernelSharing.run_eq, PsKernelSharing.lift_fold]
 
 def psKernelExprLiftLooseBVars
     (expr : PsKernelExpr)

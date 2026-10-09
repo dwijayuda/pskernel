@@ -839,17 +839,17 @@ def psPreludeEnvText11 : PsEnvironment :=
 def psPreludeEnvText12 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText11
     (PsDeclaration.definitionDecl psStringSpecifiedAppendName [] psPreludeStringBinaryType
-      (PsExpr.constant psStringAppendName []))
+      (PsExpr.constE psStringAppendName []))
 
 def psPreludeEnvText13 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText12
     (PsDeclaration.definitionDecl psStringPosRawNextName [] psPreludeStringPositionType
-      (PsExpr.constant psStringNextName []))
+      (PsExpr.constE psStringNextName []))
 
 def psPreludeEnvText14 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText13
     (PsDeclaration.definitionDecl psStringPosRawAtEndName [] psPreludeStringAtEndType
-      (PsExpr.constant psStringAtEndName []))
+      (PsExpr.constE psStringAtEndName []))
 
 def psPreludeEnvList0 : PsEnvironment :=
   psPreludeAdd psPreludeEnvText14

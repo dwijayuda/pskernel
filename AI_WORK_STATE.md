@@ -1,5 +1,15 @@
 # AI Work State
 
+## Migration validation follow-up — 2026-10-09
+- #788 passed the complete 84-file proof gate, native foundation conformance
+  (including Unicode, candidate collisions and legacy-hash comparisons), and
+  TypeScript package tests.
+- The added portable Lean gate found an expression-constructor spelling error
+  in the new prelude aliases. The correct portable constructor is PsExpr.constE;
+  the aliases remain ordinary definition declarations, with no new axioms.
+- Full workflow #788 therefore failed and is not reported as fully green.
+  The correction and subsequent composition proofs require a fresh full run.
+
 ## Continuation handoff and composition submission — 2026-10-09
 - A copyable new-chat handoff prompt was provided at the user's request.
   The user explicitly asked the current agent to keep working after giving it.

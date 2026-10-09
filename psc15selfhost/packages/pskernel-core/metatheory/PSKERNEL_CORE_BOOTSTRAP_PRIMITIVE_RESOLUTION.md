@@ -138,3 +138,8 @@ The CacheHash and EnvironmentIndexHash theorem statements remain unchanged.
 Native differential tests compare both hash workers to the legacy cursor
 implementation. The TypeScript package/erasure suite passed in #787.
 This is migration dependency closure, not a claimed hash defect or a new trust law.
+
+Validation #788 passed full proofs, native foundation conformance and TypeScript
+packages. The added portable Lean gate exposed a prelude expression-constructor
+spelling mismatch; the aliases now use the actual portable `PsExpr.constE`.
+The full migration gate is pending a successful rerun.

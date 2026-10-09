@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.AdmissionMutualHeaderConfiguration
 import Ps.KernelCore.Metatheory.BootstrapStringObligations
 import Ps.KernelCore.Metatheory.AdmissionConstructorSemanticHistoryConfiguration
 import Ps.KernelCore.Metatheory.AdmissionMutualConstructorConfiguration
@@ -586,3 +587,151 @@ theorem psKernelAddSimpleMutualTypesWorker_concrete_semantic_history
     levels params typeNames allShapes headerSession work owner result
     hIndex hHeaderConfig hEnvExt hNames hUnique hSuffix
     psKernelStringEq_reflexive hNative hString hRun
+
+/--
+Source family names are the ordinary map of checked datatype declaration
+names. This identity is reused by all provisional constructor/recursor
+publication certificates.
+-/
+theorem psKernelSimpleMutualNames_map
+    (types : List PsKernelSimpleMutualTypeDecl) :
+    psKernelSimpleMutualNames types =
+      types.map (fun typeDecl : PsKernelSimpleMutualTypeDecl => typeDecl.name) := by
+  induction types with
+  | nil => rfl
+  | cons typeDecl rest ih =>
+      simpa [psKernelSimpleMutualNames] using congrArg (List.cons typeDecl.name) ih
+
+/-- Name provenance transfers from source declarations to their checked shapes. -/
+theorem psKernelMutualShapes_source_name_provenance
+    (shapes : List PsKernelSimpleMutualTypeShape)
+    (types : List PsKernelSimpleMutualTypeDecl)
+    (hDecl : shapes.map PsKernelSimpleMutualTypeShape.decl = types) :
+    shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name) =
+      psKernelSimpleMutualNames types := by
+  calc
+    shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name) =
+        (shapes.map PsKernelSimpleMutualTypeShape.decl).map
+          (fun typeDecl : PsKernelSimpleMutualTypeDecl => typeDecl.name) := by
+            simp [List.map_map]
+    _ = types.map (fun typeDecl : PsKernelSimpleMutualTypeDecl => typeDecl.name) :=
+      congrArg (fun decls : List PsKernelSimpleMutualTypeDecl =>
+        decls.map (fun typeDecl : PsKernelSimpleMutualTypeDecl => typeDecl.name)) hDecl
+    _ = psKernelSimpleMutualNames types := (psKernelSimpleMutualNames_map types).symm
+
+/-- Generated recursor-name order is determined solely by source type shapes. -/
+theorem psKernelMutualShapeRecursorNames_source
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    shapes.map (fun shape : PsKernelSimpleMutualTypeShape =>
+      psKernelSimpleRecName shape.decl.name) =
+      psKernelSimpleMutualRecNames (shapes.map PsKernelSimpleMutualTypeShape.decl) := by
+  induction shapes with
+  | nil => rfl
+  | cons shape rest ih =>
+      simpa [psKernelSimpleMutualRecNames] using
+        congrArg (List.cons (psKernelSimpleRecName shape.decl.name)) ih
+
+/-- Generated constructor-name order is determined solely by source type shapes. -/
+theorem psKernelMutualShapeConstructorNames_source
+    (shapes : List PsKernelSimpleMutualTypeShape) :
+    psKernelMutualShapeConstructorNames shapes =
+      psKernelSimpleMutualCtorNames (shapes.map PsKernelSimpleMutualTypeShape.decl) := by
+  induction shapes with
+  | nil => rfl
+  | cons shape rest ih =>
+      simpa [psKernelMutualShapeConstructorNames, psKernelSimpleMutualCtorNames,
+        psKernelMutualNameListAppend_eq_append] using
+        congrArg (fun names : List PsKernelName =>
+          psKernelSimpleCtorNames shape.decl.ctors ++ names) ih
+
+/--
+Independent joint certificate for the source's provisional mutual-header
+transaction, immediately before its checked constructor worker.
+
+Every premise needed to transfer canonical semantics, authoritative indexes,
+and source-family constructor/recursor reservations is derived from actual
+successful admission. The final conjunct retains independent checked Sort
+typing for every source type rather than a mere inference assertion.
+-/
+def PsKernelPreparedMutualConstructorInputsValid
+    (environment : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl)
+    (shapes : List PsKernelSimpleMutualTypeShape) : Prop :=
+  let work0 := psKernelAddMutualInductiveInfos
+    (psKernelMakeSimpleMutualBaseInfos
+      (psKernelSimpleMutualNames decl.types) decl shapes) environment
+  shapes.map PsKernelSimpleMutualTypeShape.decl = decl.types ∧
+  PsKernelEnvironmentSemanticExtends environment work0 ∧
+  PsKernelEnvironmentIndexRefines work0 ∧
+  PsKernelInductiveNamesAbsent work0 (psKernelMutualShapeConstructorNames shapes) ∧
+  psKernelNameHasDuplicates (psKernelMutualShapeConstructorNames shapes) = false ∧
+  PsKernelInductiveNamesAbsent work0 (shapes.map
+    (fun shape : PsKernelSimpleMutualTypeShape => psKernelSimpleRecName shape.decl.name)) ∧
+  psKernelNameHasDuplicates (shapes.map
+    (fun shape : PsKernelSimpleMutualTypeShape => psKernelSimpleRecName shape.decl.name)) = false ∧
+  (∀ typeDecl : PsKernelSimpleMutualTypeDecl, List.Mem typeDecl decl.types ->
+    ∃ level : PsKernelLevel,
+      PsKernelTypingJudgment environment psKernelLocalContextEmpty
+        typeDecl.type (PsKernelExpr.sort level))
+
+/--
+The concrete admission function provides all provisional work-environment
+constructor and recursor preconditions as one checked source-level witness.
+This intentionally does not assert completion of constructor checking,
+recursor validation, or the final mutual publication transaction.
+-/
+theorem psKernelAddSimpleMutualInductive_success_prepared_constructor_inputs
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualInductive
+      fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
+    ∃ shapes : List PsKernelSimpleMutualTypeShape,
+      PsKernelPreparedMutualConstructorInputsValid environment decl shapes := by
+  obtain ⟨shapes, hShapeDecls, hReserved⟩ :=
+    psKernelAddSimpleMutualInductive_success_reserved_names_after_headers
+      fuel environment result decl maxRecDepth maxNatSize hIndex hNative hString hRun
+  obtain ⟨hTypesAbsent, _, _, hTypesUnique, hRecUnique, hCtorUnique, _, _⟩ :=
+    psKernelAddSimpleMutualInductive_success_partitioned_name_guards
+      fuel environment result decl maxRecDepth maxNatSize hIndex hRun
+  have hShapeNames :=
+    psKernelMutualShapes_source_name_provenance shapes decl.types hShapeDecls
+  have hPrepared := psKernelPreparedMutualHeaders_semantic_refines
+    (psKernelSimpleMutualNames decl.types) decl shapes environment hIndex hString
+    (by simpa only [hShapeNames] using hTypesAbsent)
+    (by simpa only [hShapeNames] using hTypesUnique)
+  have hRecNames : shapes.map
+      (fun shape : PsKernelSimpleMutualTypeShape => psKernelSimpleRecName shape.decl.name) =
+      psKernelSimpleMutualRecNames decl.types := by
+    calc
+      _ = psKernelSimpleMutualRecNames
+            (shapes.map PsKernelSimpleMutualTypeShape.decl) :=
+              psKernelMutualShapeRecursorNames_source shapes
+      _ = psKernelSimpleMutualRecNames decl.types :=
+        congrArg psKernelSimpleMutualRecNames hShapeDecls
+  have hCtorNames : psKernelMutualShapeConstructorNames shapes =
+      psKernelSimpleMutualCtorNames decl.types := by
+    calc
+      _ = psKernelSimpleMutualCtorNames
+            (shapes.map PsKernelSimpleMutualTypeShape.decl) :=
+              psKernelMutualShapeConstructorNames_source shapes
+      _ = psKernelSimpleMutualCtorNames decl.types :=
+        congrArg psKernelSimpleMutualCtorNames hShapeDecls
+  let work0 := psKernelAddMutualInductiveInfos
+    (psKernelMakeSimpleMutualBaseInfos
+      (psKernelSimpleMutualNames decl.types) decl shapes) environment
+  have hReservedSplit := PsKernelInductiveNamesAbsent.append_split work0
+    (psKernelSimpleMutualRecNames decl.types)
+    (psKernelSimpleMutualCtorNames decl.types) hReserved
+  have hHeadersTyped :=
+    psKernelAddSimpleMutualInductive_success_all_headers_sort_typed
+      fuel environment result decl maxRecDepth maxNatSize hIndex hNative hString hRun
+  refine ⟨shapes, ?_⟩
+  dsimp only [PsKernelPreparedMutualConstructorInputsValid]
+  refine ⟨hShapeDecls, hPrepared.1, hPrepared.2.1, ?_, ?_, ?_, ?_, hHeadersTyped⟩
+  · simpa only [hCtorNames] using hReservedSplit.2
+  · simpa only [hCtorNames] using hCtorUnique
+  · simpa only [hRecNames] using hReservedSplit.1
+  · simpa only [hRecNames] using hRecUnique

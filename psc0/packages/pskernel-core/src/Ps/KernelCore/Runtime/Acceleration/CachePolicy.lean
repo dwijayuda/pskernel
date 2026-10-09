@@ -99,3 +99,58 @@ def psKernelInferCacheEligible
   else
     false
 
+
+/--
+Reduction caches live in a checker local scope. Unlike persistent closed-key
+inference/equality caches, they must also memoize bounded open expressions:
+repeated normalization of symbolic arithmetic can otherwise be exponential.
+The 256-node key bound still prevents hashing giant expanded expression trees.
+
+A caller must maintain the configuration invariant (the cache and local context
+belong together). Binder exit restores all parent caches with
+psKernelCheckerStateExitLocalScope; fresh declaration sessions start empty.
+-/
+def psKernelWhnfCacheRemaining :
+    PsKernelExpr -> Nat -> Option Nat
+  | _expr, Nat.zero =>
+      Option.none
+  | PsKernelExpr.app fn arg, Nat.succ remaining =>
+      match psKernelWhnfCacheRemaining fn remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelWhnfCacheRemaining arg next
+  | PsKernelExpr.lam _ type body _, Nat.succ remaining =>
+      match psKernelWhnfCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelWhnfCacheRemaining body next
+  | PsKernelExpr.forallE _ type body _, Nat.succ remaining =>
+      match psKernelWhnfCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some next =>
+          psKernelWhnfCacheRemaining body next
+  | PsKernelExpr.letE _ type value body _, Nat.succ remaining =>
+      match psKernelWhnfCacheRemaining type remaining with
+      | Option.none => Option.none
+      | Option.some afterType =>
+          match psKernelWhnfCacheRemaining value afterType with
+          | Option.none => Option.none
+          | Option.some afterValue =>
+              psKernelWhnfCacheRemaining body afterValue
+  | PsKernelExpr.mdata _ body, Nat.succ remaining =>
+      psKernelWhnfCacheRemaining body remaining
+  | PsKernelExpr.proj _ _ body, Nat.succ remaining =>
+      psKernelWhnfCacheRemaining body remaining
+  | _expr, Nat.succ remaining =>
+      Option.some remaining
+
+def psKernelWhnfCacheEligible
+    (expr : PsKernelExpr) :
+    Bool :=
+  match
+      psKernelWhnfCacheRemaining
+        expr
+        psKernelSemanticCacheNodeBudget with
+  | Option.some _ => true
+  | Option.none => false
+

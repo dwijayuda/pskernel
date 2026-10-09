@@ -364,7 +364,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                 PsKernelExpr.letE
                   name type value body nondep
               cases hEligible :
-                  psKernelSemanticCacheEligible original with
+                  psKernelWhnfCacheEligible original with
               | true =>
                   cases hGet :
                       psKernelExprMapGet
@@ -579,7 +579,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
                 PsKernelExpr.proj
                   typeName index structValue
               cases hEligible :
-                  psKernelSemanticCacheEligible original with
+                  psKernelWhnfCacheEligible original with
               | true =>
                   cases hGet :
                       psKernelExprMapGet
@@ -662,7 +662,7 @@ theorem psKernelWhnfCoreWithFuel_configuration_sound_contract
               let original :=
                 PsKernelExpr.app appFn appArg
               cases hEligible :
-                  psKernelSemanticCacheEligible original with
+                  psKernelWhnfCacheEligible original with
               | true =>
                   cases hGet :
                       psKernelExprMapGet

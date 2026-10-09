@@ -489,7 +489,7 @@ def psKernelWhnfCachedCoreRun
     (expr : PsKernelExpr) :
     Except String (Prod PsKernelExpr PsKernelCheckerState) :=
   match
-      if psKernelSemanticCacheEligible expr then
+      if psKernelWhnfCacheEligible expr then
         psKernelExprMapGet state.whnf expr
       else
         Option.none with
@@ -585,7 +585,7 @@ theorem psKernelWhnfCachedCore_configuration_refines
         hWhnf, _hUnfold, _hDefEq⟩
     exact hWhnf
   cases hEligible :
-      psKernelSemanticCacheEligible expr with
+      psKernelWhnfCacheEligible expr with
   | true =>
       cases hGet :
           psKernelExprMapGet state.whnf expr with

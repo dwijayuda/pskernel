@@ -792,7 +792,7 @@ theorem psKernelWhnfCoreApplication_configuration_refines
         Except.ok nextContext)
     (hMiss :
       (if
-          psKernelSemanticCacheEligible
+          psKernelWhnfCacheEligible
             (PsKernelExpr.app appFn appArg) then
         psKernelExprMapGet
           state.whnfCore

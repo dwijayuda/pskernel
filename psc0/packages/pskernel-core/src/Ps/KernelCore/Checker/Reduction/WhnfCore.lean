@@ -78,7 +78,7 @@ def psKernelWhnfCoreFinish
   if cheapProj then
     Except.ok
       (Prod.mk result state)
-  else if psKernelSemanticCacheEligible original then
+  else if psKernelWhnfCacheEligible original then
     let nextCache :=
       psKernelExprMapInsert
         state.whnfCore
@@ -100,7 +100,7 @@ def psKernelWhnfFinish
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  if psKernelSemanticCacheEligible original then
+  if psKernelWhnfCacheEligible original then
     let nextCache :=
       psKernelExprMapInsert
         state.whnf
@@ -244,7 +244,7 @@ def psKernelWhnfCoreWithFuel
                           cheapProj
             | _ =>
                 match
-                    if psKernelSemanticCacheEligible expr then
+                    if psKernelWhnfCacheEligible expr then
                       psKernelExprMapGet
                         state.whnfCore
                         expr

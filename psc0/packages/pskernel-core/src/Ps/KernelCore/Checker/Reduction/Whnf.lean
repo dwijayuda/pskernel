@@ -159,7 +159,7 @@ def psKernelWhnfWithFuel
                     Except.ok (Prod.mk expr state)
                 | Option.some _ =>
                     match
-                        if psKernelSemanticCacheEligible expr then
+                        if psKernelWhnfCacheEligible expr then
                           psKernelExprMapGet
                             state.whnf
                             expr
@@ -204,7 +204,7 @@ def psKernelWhnfWithFuel
                               core
         | _ =>
             match
-                if psKernelSemanticCacheEligible expr then
+                if psKernelWhnfCacheEligible expr then
                   psKernelExprMapGet
                     state.whnf
                     expr

@@ -1086,7 +1086,7 @@ theorem psKernelWhnfCoreFinish_success_refines
       exact ⟨rfl, hConfig⟩
   | false =>
       cases hEligible :
-          psKernelSemanticCacheEligible original with
+          psKernelWhnfCacheEligible original with
       | false =>
           simp [
             psKernelWhnfCoreFinish,
@@ -1137,7 +1137,7 @@ theorem psKernelWhnfFinish_success_refines
         context
         nextState := by
   cases hEligible :
-      psKernelSemanticCacheEligible original with
+      psKernelWhnfCacheEligible original with
   | false =>
       simp [
         psKernelWhnfFinish,
@@ -1194,7 +1194,7 @@ theorem psKernelWhnfCoreFinish_success_preserves_configuration
       exact hConfig
   | false =>
       cases hEligible :
-          psKernelSemanticCacheEligible original with
+          psKernelWhnfCacheEligible original with
       | false =>
           simp [
             psKernelWhnfCoreFinish,
@@ -1241,7 +1241,7 @@ theorem psKernelWhnfFinish_success_preserves_configuration
       context
       nextState := by
   cases hEligible :
-      psKernelSemanticCacheEligible original with
+      psKernelWhnfCacheEligible original with
   | false =>
       simp [
         psKernelWhnfFinish,

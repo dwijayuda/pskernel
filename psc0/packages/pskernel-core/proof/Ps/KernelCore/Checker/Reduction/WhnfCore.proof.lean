@@ -25,7 +25,7 @@ theorem psKernelWhnfFinish_result
        | Except.error _ => Prod.mk result state) =
       result := by
   cases hEligible :
-      psKernelSemanticCacheEligible original <;>
+      psKernelWhnfCacheEligible original <;>
     simp [
       psKernelWhnfFinish,
       hEligible
@@ -110,7 +110,7 @@ theorem psKernelWhnfCoreWithFuel_let_zeta
         result
         nextState := by
   cases hEligible :
-      psKernelSemanticCacheEligible
+      psKernelWhnfCacheEligible
         (PsKernelExpr.letE name type value body nondep) <;>
     simp [
       psKernelWhnfCoreWithFuel,
@@ -222,7 +222,7 @@ theorem psKernelWhnfCoreFinish_preserves_semantic_sound
           ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
   | false =>
       cases hEligible :
-          psKernelSemanticCacheEligible original with
+          psKernelWhnfCacheEligible original with
       | false =>
           refine ⟨state, ?_, ?_⟩
           · simp [psKernelWhnfCoreFinish, hEligible]
@@ -314,7 +314,7 @@ theorem psKernelWhnfFinish_preserves_semantic_sound
   rcases hState with
     ⟨hInferOnly, hChecked, hWhnfCore, hWhnf, hUnfold, hSuccess⟩
   cases hEligible :
-      psKernelSemanticCacheEligible original with
+      psKernelWhnfCacheEligible original with
   | false =>
       refine ⟨state, ?_, ?_⟩
       · simp [psKernelWhnfFinish, hEligible]

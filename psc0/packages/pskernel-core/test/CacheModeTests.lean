@@ -47,3 +47,40 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "zero remaining reduction fuel unexpectedly succeeded")
   IO.println "PSKERNEL_BOUNDED_SUCCESS_LOOKUP: PASS"
+
+  -- Cache an open reduction, then leave its scope and reuse the same raw name
+  -- for a different let. The second scope must not inherit the first result.
+  let parent := psKernelCheckerStateEmpty
+  let firstLocal := psKernelCheckerContextWithLet ctx name (.sort (.succ .zero)) (.sort .zero)
+  let openExpr := PsKernelExpr.app
+    (.lam .anonymous (.sort (.succ .zero)) (.bvar 0) .default)
+    (.fvar firstLocal.1)
+  let first ← match psKernelWhnfNoRecursor 32 firstLocal.2 parent openExpr with
+    | .error e => throw (IO.userError e)
+    | .ok pair => pure pair
+  unless psKernelExprEq first.1 (.sort .zero) do
+    throw (IO.userError "open reduction produced the wrong first result")
+  match psKernelExprMapGet first.2.whnf openExpr with
+  | .none => throw (IO.userError "open reduction was not memoized")
+  | .some cached =>
+    unless psKernelExprEq cached first.1 do
+      throw (IO.userError "open reduction cache contains the wrong result")
+  -- One unit of WHNF fuel is sufficient only because this lookup is cached.
+  match psKernelWhnfNoRecursor 1 firstLocal.2 first.2 openExpr with
+  | .error e => throw (IO.userError ("open cache lookup failed: " ++ e))
+  | .ok pair =>
+    unless psKernelExprEq pair.1 first.1 do
+      throw (IO.userError "open cache lookup changed the result")
+  let restored := psKernelCheckerStateExitLocalScope parent first.2
+  match psKernelExprMapGet restored.whnf openExpr with
+  | .some _ => throw (IO.userError "child reduction cache escaped its local scope")
+  | .none => pure ()
+  let secondLocal := psKernelCheckerContextWithLet ctx name (.sort (.succ (.succ .zero))) (.sort (.succ .zero))
+  match psKernelWhnfNoRecursor 32 secondLocal.2 restored openExpr with
+  | .error e => throw (IO.userError e)
+  | .ok pair =>
+    unless psKernelExprEq pair.1 (.sort (.succ .zero)) do
+      throw (IO.userError "second local scope reused the first scope's result")
+  if psKernelWhnfCacheEligible dag then
+    throw (IO.userError "giant reduction cache key escaped the node bound")
+  IO.println "PSKERNEL_OPEN_WHNF_SCOPE: PASS"

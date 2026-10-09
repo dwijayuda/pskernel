@@ -74,7 +74,7 @@ theorem psKernelWhnfCoreProjection_configuration_refines
         Except.ok nextContext)
     (hMiss :
       (if
-          psKernelSemanticCacheEligible
+          psKernelWhnfCacheEligible
             (PsKernelExpr.proj typeName index structValue) then
         psKernelExprMapGet
           state.whnfCore

@@ -121,3 +121,12 @@ theorem psKernelInferCacheEligible_fvar
         (PsKernelExpr.fvar name) =
       false := by
   rfl
+
+-- Reduction cache keys may mention locals, within the existing scope invariant.
+theorem psKernelWhnfCacheEligible_fvar (name : PsKernelName) :
+    psKernelWhnfCacheEligible (.fvar name) = true := by
+  rfl
+
+theorem psKernelWhnfCacheRemaining_zero (expr : PsKernelExpr) :
+    psKernelWhnfCacheRemaining expr 0 = none := by
+  cases expr <;> rfl

@@ -534,6 +534,10 @@ lean_exe psc1_kernel_core_foundation_tests where
   srcDir := "test"
   root := `PsKernelCoreFoundationTests
 
+lean_exe psc_kernel_core_arena_level_tests where
+  srcDir := "test"
+  root := `KernelCoreArenaLevelTests
+
 lean_exe psc1_kernel_core_bench where
   srcDir := "test"
   root := `PsKernelCoreBench
@@ -563,6 +567,21 @@ lean_lib PsKernelCoreProviderHost where
 lean_exe psc_kernel_core_provider where
   srcDir := "host/src"
   root := `Ps.Host.KernelCoreProvider.Main
+
+lean_lib PsKernelCoreArenaHost where
+  srcDir := "host/src"
+  roots := #[
+    `Ps.Host.KernelCoreArena.CoreIntern,
+    `Ps.Host.KernelCoreArena.Replay
+  ]
+
+lean_exe psc_kernel_core_arena where
+  srcDir := "host/src"
+  root := `Ps.Host.KernelCoreArena.Main
+
+lean_exe psc_kernel_legacy_arena where
+  srcDir := "host/src"
+  root := `Ps.Host.KernelCoreArena.LegacyMain
 
 lean_exe psc_kernel_core_provider_tests where
   srcDir := "test"

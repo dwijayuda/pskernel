@@ -378,26 +378,26 @@ theorem psKernelWhnfFinish_preserves_semantic_sound
 
 
 
-theorem psKernelWhnfCoreFinish_fvar_not_cached
+theorem psKernelWhnfCoreFinish_fvar_scoped_cache
     (state : PsKernelCheckerState)
     (name : PsKernelName)
     (result : PsKernelExpr)
     (cheapProj : Bool) :
-    psKernelWhnfCoreFinish
-        (PsKernelExpr.fvar name)
-        cheapProj
-        result
-        state =
-      Except.ok (Prod.mk result state) := by
+    psKernelWhnfCoreFinish (.fvar name) cheapProj result state =
+      if cheapProj then
+        Except.ok (Prod.mk result state)
+      else
+        Except.ok (Prod.mk result
+          (psKernelCheckerStateWithWhnfCore state
+            (psKernelExprMapInsert state.whnfCore (.fvar name) result))) := by
   cases cheapProj <;> rfl
 
-theorem psKernelWhnfFinish_fvar_not_cached
+theorem psKernelWhnfFinish_fvar_scoped_cache
     (state : PsKernelCheckerState)
     (name : PsKernelName)
     (result : PsKernelExpr) :
-    psKernelWhnfFinish
-        (PsKernelExpr.fvar name)
-        result
-        state =
-      Except.ok (Prod.mk result state) := by
+    psKernelWhnfFinish (.fvar name) result state =
+      Except.ok (Prod.mk result
+        (psKernelCheckerStateWithWhnf state
+          (psKernelExprMapInsert state.whnf (.fvar name) result))) := by
   rfl

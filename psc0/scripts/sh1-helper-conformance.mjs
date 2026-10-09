@@ -75,11 +75,13 @@ function sourceSpan(source, start, end) {
   return source.slice(first, last).trim() + '\n';
 }
 
-function checkHelpers(runtime, withProbes, sourceLabel = 'current') {
+function checkHelpers(runtime, withProbes, sourceLabel = 'current', fixtureProducer = 'current') {
   assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_HELPER_SOURCE_LABEL');
-  const returnedClosure = sourceLabel === 'reference';
-  // Source prefixes: reference workers stop before a match and return the last
-  // argument as a closure; the migrated workers have explicit full headers.
+  assert(['current', 'selected-R'].includes(fixtureProducer), 'PSC0_SH1_HELPER_FIXTURE_PRODUCER');
+  const returnedClosure = sourceLabel === 'reference' && fixtureProducer === 'current';
+  // Current producers keep each reference worker's computed result as a unary
+  // closure; authenticated selected R emits those same results in a flat entry.
+  // The migrated workers have explicit full headers under either producer.
   for (const [name, referenceArity, currentArity] of [
     ['psExprApplyManyWorker', 1, 2],
     ['psExprAppViewAccWorker', 1, 2],
@@ -205,6 +207,7 @@ export async function runHelperRuntimeConformance({ compiler, compilerSha256, ou
 
 export async function runHelperConformance({
   compiler, compilerSha256, executingCompiler, root, outDir, tsc,
+  fixtureProducer = 'current',
 }) {
   const reference = await readFile(path.join(root, 'test/fixtures/selfhost-sh1-helpers-reference.lean'), 'utf8');
   const bytes = Buffer.from(reference);
@@ -242,7 +245,7 @@ export async function runHelperConformance({
     const admissions = unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared), 'HELPER_ADMISSIONS');
     const typeScript = unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared), 'HELPER_EMIT');
     const outputJs = await compileTypeScript(typeScript, path.join(outDir, label), tsc, root);
-    const coverage = checkHelpers(await import(pathToFileURL(outputJs).href), true, label);
+    const coverage = checkHelpers(await import(pathToFileURL(outputJs).href), true, label, fixtureProducer);
     outputs.push({
       source: label, sourceSha256: sha256(source), coverage,
       admissionsSha256: sha256(admissions), typescriptSha256: sha256(typeScript),
@@ -253,7 +256,7 @@ export async function runHelperConformance({
   }
   const receipt = {
     schemaVersion: 1, evidence: 'bounded-compiler-helper-source-correspondence',
-    compilerSha256, executingCompiler, referenceSourceRef: referenceRef,
+    compilerSha256, executingCompiler, fixtureProducer, referenceSourceRef: referenceRef,
     referenceGitBlob: referenceBlob, currentSourceFiles, dependencies,
     authoredProbeSha256: sha256(probe),
     publicTypes: {

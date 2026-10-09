@@ -679,6 +679,138 @@ function bindZeroFieldSource(conformance, emptySource) {
     observationsSha256: hash(JSON.stringify(value)) };
 }
 
+function bindOptimizedTailIr(value, positive, typeScript, declarationText, artifacts) {
+  assert.equal(value.schemaVersion, 1);
+  assert.equal(value.feature, 'flat-original-ir-optimized-tail-loops');
+  assert.equal(value.status, 'pass');
+  assert.equal(value.originalIrBoundary, 'same-existing-accepted-fixture');
+  assert.equal(value.observationCount, 12);
+  assert.equal(value.valueObservations, 11);
+  assert.equal(value.faultObservations, 1);
+  assert.equal(value.exhaustiveForAllInputs, false);
+  assert.equal(value.semanticContractQualified, false);
+  assert.equal(value.providerChecked, false);
+  noStrictClaim(value, 'optimized tail IR evidence');
+  for (const key of ['additionalPreparations', 'additionalPortableIrChecks', 'additionalEmissions',
+    'additionalTypeScriptCompilations', 'additionalNativeExecutions']) assert.equal(value[key], 0);
+  assert.deepEqual(value.swapInputs, ['7', '11']);
+  assert.equal(value.fuelInitialAccumulator, '11');
+  assert.equal(value.reverseInput, 'descending-19999-through-0');
+  assert.deepEqual(value.layout, { name: 'TailList', typeParameters: 0, constructors: [
+    { name: 'nil', fields: [] },
+    { name: 'cons', fields: [{ name: 'head', type: 'nat' }, { name: 'tail', type: 'TailList' }] },
+  ] });
+  const specifications = [
+    { name: 'optimizedTailSwap', parameters: [['fuel', 'nat'], ['left', 'nat'], ['right', 'nat']], result: 'nat',
+      signature: 'export declare function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint;',
+      exportPrefix: 'export function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint { while (true) { ',
+      transitions: ['[fuel, left, right] = [nextFuel, right, left]; continue;'], capturedAlias: false },
+    { name: 'optimizedTailFuel', parameters: [['fuel', 'nat'], ['accumulator', 'nat']], result: 'nat',
+      signature: 'export declare function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint;',
+      exportPrefix: 'export function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint { while (true) { ',
+      transitions: ['[fuel, accumulator] = [nextFuel, (accumulator + 1n)]; continue;'], capturedAlias: true },
+    { name: 'optimizedTailReverse', parameters: [['items', 'TailList'], ['accumulator', 'TailList']], result: 'TailList',
+      signature: 'export declare function optimizedTailReverse(items: TailList, accumulator: TailList): TailList;',
+      exportPrefix: 'export function optimizedTailReverse(items: TailList, accumulator: TailList): TailList { while (true) { ',
+      transitions: ['[items, accumulator] = [tailValue, TailList["cons"](headValue, accumulator)]; continue;'],
+      capturedAlias: false },
+  ];
+  assert.equal(value.entries.length, specifications.length);
+  for (const [index, expected] of specifications.entries()) {
+    const { exportSha256, ...metadata } = value.entries[index];
+    assert.deepEqual(metadata, { ...expected, runtimeArity: expected.parameters.length,
+      route: 'tail-loop', implementationAbsent: true });
+    const exports = typeScript.split(/\r?\n/u)
+      .filter((line) => line.startsWith('export function ' + expected.name + '('));
+    assert.equal(exports.length, 1);
+    assert(exports[0].startsWith(expected.exportPrefix));
+    assert.equal(exportSha256, hash(exports[0]));
+    for (const transition of expected.transitions) assert(exports[0].includes(transition));
+    assert(!typeScript.includes('__ps$impl$' + expected.name));
+    if (expected.capturedAlias) assert(!/\bagain\b/u.test(exports[0]));
+    const signatures = declarationText.split(/\r?\n/u)
+      .filter((line) => line.startsWith('export declare function ' + expected.name + '('));
+    assert.deepEqual(signatures, [expected.signature]);
+  }
+  const expectedObservations = [
+    {
+      "id": "swap-0",
+      "fuel": "0",
+      "value": "7"
+    },
+    {
+      "id": "fuel-0",
+      "fuel": "0",
+      "value": "11"
+    },
+    {
+      "id": "swap-1",
+      "fuel": "1",
+      "value": "11"
+    },
+    {
+      "id": "fuel-1",
+      "fuel": "1",
+      "value": "12"
+    },
+    {
+      "id": "swap-2",
+      "fuel": "2",
+      "value": "7"
+    },
+    {
+      "id": "fuel-2",
+      "fuel": "2",
+      "value": "13"
+    },
+    {
+      "id": "swap-31",
+      "fuel": "31",
+      "value": "11"
+    },
+    {
+      "id": "fuel-31",
+      "fuel": "31",
+      "value": "42"
+    },
+    {
+      "id": "swap-20000",
+      "fuel": "20000",
+      "value": "7"
+    },
+    {
+      "id": "fuel-20000",
+      "fuel": "20000",
+      "value": "20011"
+    },
+    {
+      "id": "reverse-20000",
+      "length": 20000,
+      "first": "0",
+      "last": "19999",
+      "sequenceSha256": "300d3defc1ca97bc79059e953e46726b7be58c3e3ee69f838eb19350b234f627",
+      "checkedElements": 20000
+    },
+    {
+      "id": "reverse-invalid-tag",
+      "error": "Error",
+      "message": "invalid ProofScript constructor tag"
+    }
+  ];
+  assert.deepEqual(value.observations, expectedObservations);
+  assert.deepEqual(value.artifacts, {
+    typescript: 'accepted/index.ts', javascript: 'accepted/index.js', declarations: 'accepted/index.d.ts',
+    typescriptSha256: artifacts.typescript.sha256, javascriptSha256: artifacts.javascript.sha256,
+    declarationsSha256: artifacts.declarations.sha256,
+  });
+  return { receiptField: 'optimizedTail', observationCount: 12, valueObservations: 11, faultObservations: 1,
+    entriesSha256: hash(JSON.stringify(value.entries)), layoutSha256: hash(JSON.stringify(value.layout)),
+    observationsSha256: hash(JSON.stringify(expectedObservations)),
+    acceptedFixtureSha256: hash(JSON.stringify(positive)), sameAcceptedArtifacts: true, artifacts,
+    additionalPreparations: 0, additionalPortableIrChecks: 0, additionalEmissions: 0,
+    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0 };
+}
+
 async function bindEmptyIr({ outDir, directory, compilerSha256 }) {
   const receipt = await jsonFile(outDir, directory + '/receipt.json');
   const value = receipt.value;
@@ -734,6 +866,8 @@ async function bindEmptyIr({ outDir, directory, compilerSha256 }) {
   assert.equal(declarations.file.sha256, empty.declarationSha256);
   assert.equal(declarations.file.sha256, zero.declarationSha256);
   const typeScript = typescript.bytes.toString('utf8'), declarationText = declarations.bytes.toString('utf8');
+  const optimizedTail = bindOptimizedTailIr(value.optimizedTail, positive, typeScript, declarationText,
+    { typescript: typescript.file, javascript, declarations: declarations.file });
   for (const text of [typeScript, declarationText]) {
     assert.match(text, /export type Empty = never;/u);
     assert.match(text, /export type EmptyBox<T0> = never;/u);
@@ -769,6 +903,7 @@ async function bindEmptyIr({ outDir, directory, compilerSha256 }) {
     acceptedFixtureSha256: hash(JSON.stringify(positive)),
     rejectedCases: 38, rejectionsSha256: hash(JSON.stringify(value.rejected)),
     behaviorObservations: 61, behaviorSha256: hash(JSON.stringify(value.behavior)),
+    optimizedTail,
     emptyElimination: { receiptField: 'emptyElimination', emptyLayouts: 2, emptyEliminations: 5,
       signaturesSha256: hash(JSON.stringify(empty.signatures)), observationsSha256: hash(JSON.stringify(empty)),
       scrutinee: value.behavior.emptyScrutinee, nativeValueOracle: false },

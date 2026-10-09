@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-replay-canonical-host-correction",
+  "status": "unattached-readback-verified-awaiting-independent-review",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+  "committedCompilerSource": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+  "triggeringFailure": {
+    "runId": 38002284953,
+    "jobId": 114062934819,
+    "step": 22,
+    "evidenceBlob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
+    "logBlob": "adb2fb82490eb126064cfa83fadf3dfb2c39cb9c",
+    "assertion": "replayReturnedFunction(n, 11n) returned a function where 18n was expected"
+  },
+  "files": [
+    {
+      "path": "psc0/scripts/selfhost-replay-runtime.test.mjs",
+      "baseBlob": "516aaf641917f233757fb4badb1a6bb39774645f",
+      "baseSha256": "aaee8d0b4de65d7f4a7abf6f854d2826fd1f55063e3cf9446119373ee457e52b",
+      "baseBytes": 7729,
+      "candidateBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+      "candidateSha256": "254b04288c8880d3b16c9a51e372a8c99604d674d4a12174604eac1ac23bffab",
+      "candidateBytes": 8236,
+      "edits": [
+        {
+          "purpose": "require_actual_returned_function_entry_route",
+          "before": "      for (const name of ['replayTailSwap', 'replayTailReverse', 'replayTailFuel'])\n        assert(!source.includes(`__ps$impl$${name}`), `${name} must use a bounded tail loop`);",
+          "after": "      // These sources match their sole entry argument before returning state closures.\n      // Preserve that canonical result boundary with arity 1 and the general emitter.\n      // Eligible flat tail loops are checked separately by the IR conformance fixture.\n      for (const name of ['replayTailSwap', 'replayTailReverse', 'replayTailFuel']) {\n        assert(source.includes(`export function ${name}`), `${name} must retain its exported source entry`);\n        assert(source.includes(`__ps$impl$${name}`), `${name} must use the general returned-function route`);\n        assert.equal(compiled[name].length, 1, `${name} must expose only its actual source entry parameter`);\n      }"
+        },
+        {
+          "purpose": "tail_swap",
+          "before": "compiled.replayTailSwap(n, 11n, 23n)",
+          "after": "compiled.replayTailSwap(n)(11n)(23n)"
+        },
+        {
+          "purpose": "tail_fuel",
+          "before": "compiled.replayTailFuel(n, 7n)",
+          "after": "compiled.replayTailFuel(n)(7n)"
+        },
+        {
+          "purpose": "escaped_tail",
+          "before": "compiled.replayEscapedTail(n, 7n)",
+          "after": "compiled.replayEscapedTail(n)(7n)"
+        },
+        {
+          "purpose": "tail_reverse",
+          "before": "compiled.replayTailReverse(list, compiled.List.nil())",
+          "after": "compiled.replayTailReverse(list)(compiled.List.nil())"
+        },
+        {
+          "purpose": "tail_reverse_fault",
+          "before": "compiled.replayTailReverse({}, compiled.List.nil())",
+          "after": "compiled.replayTailReverse({})(compiled.List.nil())"
+        },
+        {
+          "purpose": "returned_function",
+          "before": "compiled.replayReturnedFunction(n, 11n)",
+          "after": "compiled.replayReturnedFunction(n)(11n)"
+        },
+        {
+          "purpose": "nested_function",
+          "before": "compiled.replayNestedFunction(31n, n, 11n)",
+          "after": "compiled.replayNestedFunction(31n, n)(11n)"
+        },
+        {
+          "purpose": "fuel_function",
+          "before": "compiled.replayFuelFunction(n, 11n)",
+          "after": "compiled.replayFuelFunction(n)(11n)"
+        },
+        {
+          "purpose": "partial_outer",
+          "before": "compiled.replayPartialOuter(n, 11n)",
+          "after": "compiled.replayPartialOuter(n)(11n)"
+        },
+        {
+          "purpose": "deep_fuel_function",
+          "before": "compiled.replayFuelFunction(20000n, 11n)",
+          "after": "compiled.replayFuelFunction(20000n)(11n)"
+        }
+      ]
+    }
+  ],
+  "unchangedFixtures": [
+    {
+      "path": "psc0/test/fixtures/selfhost-nat-recursion.lean",
+      "blob": "0ce8820e2f971d392a523ccd58ca5064a5ef7604",
+      "sha256": "50762c93af40a95087b66808a844333906422d33b2227e4f59099d3ee1236e12",
+      "bytes": 336
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-int-repr.lean",
+      "blob": "1ebbaad577fc203b1e187ce71e3164e8ae648f77",
+      "sha256": "d9bdc470f12e1f67bef3e0503e7cb52c644bea66e19759c3f931c5d40b4b0b7a",
+      "bytes": 55
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-function-results.lean",
+      "blob": "76477fe12f39ccb8cb033cd5fdb2a855495ed056",
+      "sha256": "379f5355ecec186130d4f8b1017feca96fdf15664da1f09d3895bb1de82eed35",
+      "bytes": 2235
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-text-position.lean",
+      "blob": "3d176db10cd06356c73500534e83f970dd479e19",
+      "sha256": "afe0fd3daff307e594f1e1704689929dcd5a4e99d7b9b72a0f2fccad5712097e",
+      "bytes": 454
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-count-fold.lean",
+      "blob": "20d0f426c40fd2e63621f9d10c91eebec500e390",
+      "sha256": "91491fe3c28924d13ac191e20027ce4782207e997a930f6426a8fba6ab4a16a6",
+      "bytes": 708
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-tail-loop.lean",
+      "blob": "daadbcc7896a8a18882a772877741a341091967c",
+      "sha256": "002daab9466e2907f5bd0bcc72d0813026a9e564b1918a550e3dd20ec51b5823",
+      "bytes": 1048
+    }
+  ],
+  "compilerSourcePins": {
+    "basic": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+    "expr": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+    "definition": "4c9d3878c01751239022e755e2860c6d49ddf301",
+    "elabDeclaration": "d191857ece760f307359d576dca2cef906dea8ec",
+    "recursion": "8b1c409244b9669224fc3caff796aea69eac1401",
+    "backendModule": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+  },
+  "rationale": [
+    "The current erasure preserves the actual aligned Core forall/lambda prefix as a known declaration's flat entry and represents returned function values with canonical unary groups. It no longer introduces arbitrary result-arrow eta parameters.",
+    "Ten JavaScript call sites passed returned-function arguments in the old flat entry call. Replace only their explicit parentheses/grouping according to the raw source prefix inventory below. No dynamic arity dispatch, retry or intermediate closure .length inspection is used.",
+    "The three tail fixture definitions inspect their sole fuel/list entry argument before returning state closures. Their unchanged source therefore has entry arity 1 and does not satisfy the flat tail-loop recognizer. The old no-general-implementation expectations depended on the removed result eta. The corrected assertions positively require an exported arity-1 entry and the general returned-function route.",
+    "Moving state lambdas in front of the source match would remove the frontend's raw-root structural recursion eligibility; adding state headers would invoke normalization to a private worker plus public call wrapper. Neither is an authorized assertion-preserving fixture substitution, so all six raw fixture files remain byte-identical.",
+    "Eligible tail optimization remains a separate requirement. Root assigned a companion additive flat-IR tail swap/fuel/reverse block to the existing IR conformance compilation. This replay candidate alone is not a claim that positive tail optimization was executed or qualified."
+  ],
+  "completeDeclarationGroupInventory": [
+    {
+      "fixture": "selfhost-nat-recursion",
+      "entries": [
+        {
+          "name": "replayNatCase",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayNatSum",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayNatSuccessor",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        }
+      ]
+    },
+    {
+      "fixture": "selfhost-int-repr",
+      "entries": [
+        {
+          "name": "renderInt",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        }
+      ]
+    },
+    {
+      "fixture": "selfhost-function-results",
+      "entries": [
+        {
+          "name": "replayReturnedFunction",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1
+          ],
+          "change": "one host call"
+        },
+        {
+          "name": "replayNestedFunction",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2,
+            1
+          ],
+          "change": "one host call",
+          "reason": "The immediate middle lambda is in the aligned prefix; the match before the last lambda ends that prefix."
+        },
+        {
+          "name": "replayPartialFunction",
+          "entryRuntimeArity": 0,
+          "hostGroups": [
+            1
+          ],
+          "change": "none",
+          "reason": "Monomorphic initialized unary function value; no synthetic empty entry call."
+        },
+        {
+          "name": "replayFuelFunction",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1
+          ],
+          "change": "two host calls including the existing 20000-step check"
+        },
+        {
+          "name": "replayReverseAcc",
+          "entryRuntimeArity": 1,
+          "erasedTypeArity": 1,
+          "hostGroups": null,
+          "sourceGroups": [
+            1,
+            1
+          ],
+          "change": "none; no direct host invocation"
+        },
+        {
+          "name": "replayReverse",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none",
+          "erasedTypeArity": 1
+        },
+        {
+          "name": "replayReversed",
+          "entryRuntimeArity": 0,
+          "hostGroups": [],
+          "change": "none",
+          "reason": "Initialized List value read through head and tail fields."
+        },
+        {
+          "name": "replayPairProjection",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayRecordFunction",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayPartialOuter",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1
+          ],
+          "change": "one host call"
+        },
+        {
+          "name": "replayIgnoredParameters",
+          "entryRuntimeArity": 3,
+          "hostGroups": [
+            3
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayStrictBindings",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayShadowedBinding",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayStructureShadow",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        }
+      ]
+    },
+    {
+      "fixture": "selfhost-text-position",
+      "entries": [
+        {
+          "name": "replayTextBytes",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayTextGet",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayTextNext",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayTextAtEnd",
+          "entryRuntimeArity": 2,
+          "hostGroups": [
+            2
+          ],
+          "change": "none"
+        }
+      ]
+    },
+    {
+      "fixture": "selfhost-count-fold",
+      "entries": [
+        {
+          "name": "countRenamed",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none",
+          "erasedTypeArity": 1
+        },
+        {
+          "name": "countSuccessor",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "offsetCount",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "doubleCount",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "headSum",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        }
+      ]
+    },
+    {
+      "fixture": "selfhost-tail-loop",
+      "entries": [
+        {
+          "name": "replayTailSwap",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1,
+            1
+          ],
+          "change": "one host call; source-route assertion corrected"
+        },
+        {
+          "name": "replayTailReverse",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1
+          ],
+          "change": "two host calls including invalid-tag throw; source-route assertion corrected"
+        },
+        {
+          "name": "replayTailFuel",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1
+          ],
+          "change": "one host call; source-route assertion corrected"
+        },
+        {
+          "name": "replayNonTail",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1
+          ],
+          "change": "none"
+        },
+        {
+          "name": "replayEscapedTail",
+          "entryRuntimeArity": 1,
+          "hostGroups": [
+            1,
+            1
+          ],
+          "change": "one host call"
+        }
+      ]
+    }
+  ],
+  "hostDataBoundary": [
+    {
+      "name": "List.nil",
+      "groups": [
+        0
+      ],
+      "reason": "Nullary generated constructor factory remains unchanged."
+    },
+    {
+      "name": "List.cons",
+      "groups": [
+        2
+      ],
+      "reason": "Generated constructor factory keeps its two runtime fields as a flat call."
+    },
+    {
+      "names": [
+        "head",
+        "tail",
+        "value"
+      ],
+      "reason": "Runtime immutable data-field reads remain unchanged; canonical function values do not change these fields."
+    },
+    {
+      "name": "replayRecordFunction",
+      "groups": [
+        2
+      ],
+      "reason": "Its immediate returned lambda extends the actual aligned prefix. Both host calls remain flat."
+    }
+  ],
+  "preservation": {
+    "compilerSourceChanges": 0,
+    "fixtureSourceChanges": 0,
+    "addedCompilerInvocations": 0,
+    "addedTypeScriptInvocations": 0,
+    "addedNativeInvocations": 0,
+    "oldSemanticAssertions": "All expected values, input sets, loops, large integer and UTF-8 cases, 20000-step checks and malformed-tag throws remain unchanged.",
+    "oldCountOptimizerAssertions": "Both positive count recognizer routes and all three distinct-semantics general-route checks remain byte-identical.",
+    "oldNonTailAssertion": "replayNonTail must keep its general implementation route; byte-identical.",
+    "strictQualification": false,
+    "semanticCorrespondenceClosed": false,
+    "finiteEvidenceOnly": true
+  },
+  "validation": {
+    "uniqueForwardGuards": 11,
+    "uniqueReverseGuards": 11,
+    "fullForwardEquality": true,
+    "fullReverseEquality": true,
+    "immutableCandidateReadback": true,
+    "projectExecutionPerformed": false,
+    "independentReview": "pending"
+  },
+  "integrationRequirement": "Integrate together with independently reviewed positive flat-IR tail optimizer route and stress coverage in the existing IR conformance invocation; do not advertise this unexecuted correction as qualification."
+}

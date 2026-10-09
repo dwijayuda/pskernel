@@ -50,11 +50,13 @@ function boundedLists() {
   return lists;
 }
 
-function checkLibrary(runtime, sourceLabel) {
+function checkLibrary(runtime, sourceLabel, fixtureProducer) {
   assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_LIBRARY_SOURCE_LABEL');
-  // The immutable reference definitions return a closure after their first
-  // structural argument. The migrated definitions put both values in headers.
-  const returnedClosure = sourceLabel === 'reference';
+  assert(['current', 'selected-R'].includes(fixtureProducer), 'PSC0_SH1_LIBRARY_FIXTURE_PRODUCER');
+  // Current producers retain the reference source's returned unary closure.
+  // Authenticated selected R emits that same reference with its flat result ABI.
+  // The migrated source has both values in its header under either producer.
+  const returnedClosure = sourceLabel === 'reference' && fixtureProducer === 'current';
   for (const name of ['psListReverseAcc', 'psListAppend', 'psListTake', 'psListZip']) {
     assert.equal(runtime[name].length, returnedClosure ? 1 : 2,
       'PSC0_SH1_LIBRARY_SOURCE_ENTRY_ARITY: ' + name);
@@ -102,6 +104,7 @@ function checkLibrary(runtime, sourceLabel) {
 
 export async function runFoundationConformance({
   compiler, compilerSha256, executingCompiler, root, outDir, tsc,
+  fixtureProducer = 'current',
 }) {
   const reference = await readFile(path.join(root, 'test/fixtures/selfhost-sh1-foundation-reference.lean'), 'utf8');
   const referenceBytes = Buffer.from(reference);
@@ -136,7 +139,7 @@ export async function runFoundationConformance({
     const admissions = unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared), 'FOUNDATION_ADMISSIONS');
     const typeScript = unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared), 'FOUNDATION_EMIT');
     const outputJs = await compileTypeScript(typeScript, path.join(outDir, label), tsc, root);
-    const coverage = checkLibrary(await import(pathToFileURL(outputJs).href), label);
+    const coverage = checkLibrary(await import(pathToFileURL(outputJs).href), label, fixtureProducer);
     outputs.push({
       source: label, sourceSha256: sha256(source),
       admissionsSha256: sha256(admissions),
@@ -150,7 +153,7 @@ export async function runFoundationConformance({
     schemaVersion: 1,
     evidence: 'bounded-foundation-source-correspondence',
     compilerSha256,
-    executingCompiler,
+    executingCompiler, fixtureProducer,
     referenceSourceRef: '37f63c39d4a07189938046c64152bba25d789450',
     referenceGitBlob: referenceBlob,
     authoredProbeSha256: sha256(probe),

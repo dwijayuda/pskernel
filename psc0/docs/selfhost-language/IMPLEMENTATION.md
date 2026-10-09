@@ -29,8 +29,10 @@ F is **compiler-qualified and independently provider-accepted** at `fcd875c8f38d
 Its own results are recorded below; R remains the selected authoring seed.
 
 The installed checker verifies its bounded runtime type contract before emitting
-the same IR. Strict SH/1 remains false because the remaining primitive/value,
-bounds/text-position and lowering correspondence contracts are separate.
+the same IR. Strict SH/1 remains false pending exact integrated-source qualification and
+explicit final disposition. The general primitive/value, bounds/text-position
+and lowering arguments and their interface reviews are now complete in their
+stated domain.
 No named PSC1 profile or new seed is selected by these qualifications.
 
 This document supplements [SPEC.md](SPEC.md). Exact receipts and historical
@@ -41,24 +43,35 @@ proof and measured TypeScript phase.
 ## Current strict SH/1 source integration
 
 The practical migration is merged in main at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
-The reviewed43-code-file batch was integrated at `656ed78db6a2c26feced9374cd7b251c062a42df`.
-Its [run38001282875](https://github.com/dwijayuda/pskernel/actions/runs/38001282875)
-stopped at the native compiler build because a new local used Lean's reserved
-word `variable`; no N1/C1/C2/C3 generation or provider check ran.
+The reviewed 43-file canonical/recursion batch is `656ed78db6a2c26feced9374cd7b251c062a42df`;
+the closed-local native-keyword repair is `45d314b970d9d76fce9387f6bc8108fb9fab611c`.
+That repaired compiler passed native build, regression, checked-seed and
+grammar/import/workspace gates in [run38002284953](https://github.com/dwijayuda/pskernel/actions/runs/38002284953).
+The run then failed at the old host call `replayReturnedFunction(n, 11n)`:
+the new actual entry returns a unary function, so the caller must use `(n)(11n)`.
+N1/C1/C2/C3 and provider qualification did not start. The exact failure and log
+are retained in [the attempt ledger](strict/qualification-attempts.json).
 
-The enclosing repair commit applies a reviewed two-file local alpha rename:
-four `variable` bindings and two `prefix` bindings become fresh non-keyword
-names. The downstream Expr cases were found by one bounded native-binder and
-helper-API audit before retrying. The [exact repair manifest](strict/reviewed-candidates/native-keyword-local-repair.json)
-composes with the [43-file source inventory](strict/reviewed-candidates/canonical-recursion-batch.json).
-Compiler algorithms, public source constructs and all existing assertions are
-unchanged by these six local renamings. Full qualification is requested again
-for this exact repaired source; the failed attempt remains in the ledger.
+The enclosing [host completion](strict/reviewed-candidates/host-function-entry-completion.json)
+changes seven host/test scripts, with production Lean and all six replay fixtures
+unchanged. It corrects ten replay calls, pairs reference calls with their actual
+authenticated R/current producer, and repairs the moved Basic source-slice boundary.
+Three replay tail-route assertions are explicitly reconciled with the canonical
+returned-function contract: these sources use exported arity1 general entries.
+Their expected values,20,000-step checks and invalid-tag faults remain.
+Positive flat-tail swap, captured-alias and reversal checks are added to the
+existing IR fixture/compilation, separately bound as12 observations; the old61
+IR observations and38 refusals remain. No extra compiler/TypeScript/native
+invocation is introduced. This does not claim a performance improvement or
+restore arbitrary computed-result eta. One full **[sh1-qualify]** run is requested.
 
-The [cross-family review](strict/CROSS_FAMILY_INTERFACE_REVIEW.md) now supplies
-a bounded independent CLEAR for all ten shared semantic interfaces. Its source
-inputs transport through the explicit alpha repair. Administrative row closure
-and strict activation still require the exact current-source qualification.
+The [cross-family review](strict/CROSS_FAMILY_INTERFACE_REVIEW.md) supplies
+all ten shared semantic interfaces; the [source/runtime review](strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md)
+supplies the11 S0/S1/S2 stage mappings. Both are independently reviewed and
+root-CLEAR in the stated source/value/proof/host domain. Final33-row/27-stage
+administrative disposition and strict activation require the actual integrated
+qualification and independent provider evidence.
+
 
 Function values use nested unary runtime arrows throughout generic arguments,
 returned values, record/data fields and arrays. Actual named declaration entries
@@ -114,9 +127,9 @@ The [canonical function argument](strict/CANONICAL_FUNCTION_ARGUMENTS.md)
 records the general entry, capture, activation, bridge and finite-placement
 arguments. The completed [erasure argument](strict/ERASURE_ARGUMENTS.md)
 supplies all nine source-derived ER rule interfaces, including actual root
-recursion and both structure-recursor routes. Final cross-family composition
-and all 33 administrative correspondence dispositions remain open until
-independently justified against the exact qualification. All strict/global/provider qualification
+recursion and both structure-recursor routes. Cross-family and source/runtime composition reviews are complete. All 33
+administrative correspondence dispositions and 27 stage dispositions remain
+pending the exact integrated-source qualification and explicit evidence mapping. All strict/global/provider qualification
 flags remain false until exact execution and required arguments are complete.
 Selected R, new-only ps-0.9-r3, Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2
 are unchanged. The passed isolated TS7 cold recipe does not need another run.

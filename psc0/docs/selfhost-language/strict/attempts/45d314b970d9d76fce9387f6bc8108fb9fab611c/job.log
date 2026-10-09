@@ -1,0 +1,2227 @@
+﻿2026-10-09T23:01:12.8853788Z Current runner version: '2.337.0'
+2026-10-09T23:01:12.8880502Z ##[group]Runner Image Provisioner
+2026-10-09T23:01:12.8881298Z Hosted Compute Agent
+2026-10-09T23:01:12.8881920Z Version: 20261002.596
+2026-10-09T23:01:12.8882507Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-09T23:01:12.8883591Z Build Date: 2026-10-02T22:28:27Z
+2026-10-09T23:01:12.8884248Z Worker ID: {f433c0f1-3ffa-4244-aa72-a5d20ab9eca6}
+2026-10-09T23:01:12.8884919Z Region: westus3
+2026-10-09T23:01:12.8885453Z Cloud: Azure
+2026-10-09T23:01:12.8885938Z ##[endgroup]
+2026-10-09T23:01:12.8887469Z ##[group]Operating System
+2026-10-09T23:01:12.8888049Z Ubuntu
+2026-10-09T23:01:12.8888519Z 24.04.5
+2026-10-09T23:01:12.8888998Z LTS
+2026-10-09T23:01:12.8889464Z ##[endgroup]
+2026-10-09T23:01:12.8889972Z ##[group]Runner Image
+2026-10-09T23:01:12.8890540Z Image: ubuntu-24.04
+2026-10-09T23:01:12.8891089Z Version: 20261004.327.1
+2026-10-09T23:01:12.8892335Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-09T23:01:12.8893896Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-09T23:01:12.8894811Z ##[endgroup]
+2026-10-09T23:01:12.8895900Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T23:01:12.8898086Z Actions: read
+2026-10-09T23:01:12.8898655Z Contents: read
+2026-10-09T23:01:12.8899208Z Metadata: read
+2026-10-09T23:01:12.8899709Z ##[endgroup]
+2026-10-09T23:01:12.8901827Z Secret source: Actions
+2026-10-09T23:01:12.8902786Z Cache mode: write
+2026-10-09T23:01:12.8903553Z Prepare workflow directory
+2026-10-09T23:01:12.9302249Z Prepare all required actions
+2026-10-09T23:01:12.9353911Z Getting action download info
+2026-10-09T23:01:13.3312725Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-09T23:01:13.4279568Z Download action repository 'actions/github-script@v7' (SHA:f28e40c7f34bde8b3046d885e986cb6290c5673b)
+2026-10-09T23:01:14.0119994Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-09T23:01:14.0885346Z Download action repository 'leanprover/lean-action@v1' (SHA:f061402b660e0c34644504b324e830f2991d4865)
+2026-10-09T23:01:14.3830249Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2026-10-09T23:01:14.4697599Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-09T23:01:14.7271296Z Getting action download info
+2026-10-09T23:01:14.8498120Z Download action repository 'actions/cache@caa296126883cff596d87d8935842f9db880ef25' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-10-09T23:01:15.0670090Z Complete job name: compiler
+2026-10-09T23:01:15.1471304Z ##[group]Run actions/checkout@v4
+2026-10-09T23:01:15.1471991Z with:
+2026-10-09T23:01:15.1472332Z   repository: dwijayuda/pskernel
+2026-10-09T23:01:15.1475180Z   token: ***
+2026-10-09T23:01:15.1475497Z   ssh-strict: true
+2026-10-09T23:01:15.1475815Z   ssh-user: git
+2026-10-09T23:01:15.1476180Z   persist-credentials: true
+2026-10-09T23:01:15.1476516Z   clean: true
+2026-10-09T23:01:15.1476845Z   sparse-checkout-cone-mode: true
+2026-10-09T23:01:15.1477214Z   fetch-depth: 1
+2026-10-09T23:01:15.1477545Z   fetch-tags: false
+2026-10-09T23:01:15.1477862Z   show-progress: true
+2026-10-09T23:01:15.1478175Z   lfs: false
+2026-10-09T23:01:15.1478463Z   submodules: false
+2026-10-09T23:01:15.1478780Z   set-safe-directory: true
+2026-10-09T23:01:15.1479131Z   allow-unsafe-pr-checkout: false
+2026-10-09T23:01:15.1479755Z ##[endgroup]
+2026-10-09T23:01:15.2540416Z Syncing repository: dwijayuda/pskernel
+2026-10-09T23:01:15.2542844Z ##[group]Getting Git version info
+2026-10-09T23:01:15.2544055Z Working directory is '/home/runner/work/pskernel/pskernel'
+2026-10-09T23:01:15.2545460Z [command]/usr/bin/git version
+2026-10-09T23:01:15.2624690Z git version 2.55.0
+2026-10-09T23:01:15.2645980Z ##[endgroup]
+2026-10-09T23:01:15.2675293Z Temporarily overriding HOME='/home/runner/work/_temp/8bd6ebbc-e2ee-475b-8d3c-9df43c699013' before making global git config changes
+2026-10-09T23:01:15.2678235Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T23:01:15.2682057Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T23:01:15.2722647Z Deleting the contents of '/home/runner/work/pskernel/pskernel'
+2026-10-09T23:01:15.2728004Z ##[group]Initializing the repository
+2026-10-09T23:01:15.2734061Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel
+2026-10-09T23:01:15.2852631Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T23:01:15.2854469Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T23:01:15.2855917Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T23:01:15.2857021Z hint: call:
+2026-10-09T23:01:15.2857714Z hint:
+2026-10-09T23:01:15.2858550Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T23:01:15.2859496Z hint:
+2026-10-09T23:01:15.2860368Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T23:01:15.2861656Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T23:01:15.2862764Z hint:
+2026-10-09T23:01:15.2974461Z hint: 	git branch -m <name>
+2026-10-09T23:01:15.2977609Z hint:
+2026-10-09T23:01:15.2978741Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T23:01:15.2980312Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/.git/
+2026-10-09T23:01:15.2983175Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-09T23:01:15.2985995Z ##[endgroup]
+2026-10-09T23:01:15.2986647Z ##[group]Disabling automatic garbage collection
+2026-10-09T23:01:15.2987163Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T23:01:15.2988156Z ##[endgroup]
+2026-10-09T23:01:15.2988684Z ##[group]Setting up auth
+2026-10-09T23:01:15.2989170Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T23:01:15.2995183Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T23:01:15.3375930Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T23:01:15.3409828Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T23:01:15.3616443Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T23:01:15.3647954Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T23:01:15.3837562Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T23:01:15.3872206Z ##[endgroup]
+2026-10-09T23:01:15.3872907Z ##[group]Fetching the repository
+2026-10-09T23:01:15.3882031Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +45d314b970d9d76fce9387f6bc8108fb9fab611c:refs/remotes/origin/psc0/strict-sh1-v1
+2026-10-09T23:01:27.1454377Z From https://github.com/dwijayuda/pskernel
+2026-10-09T23:01:27.1455018Z  * [new ref]           45d314b970d9d76fce9387f6bc8108fb9fab611c -> origin/psc0/strict-sh1-v1
+2026-10-09T23:01:27.1458390Z ##[endgroup]
+2026-10-09T23:01:27.1458944Z ##[group]Determining the checkout info
+2026-10-09T23:01:27.1461223Z ##[endgroup]
+2026-10-09T23:01:27.1468386Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T23:01:27.1524478Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T23:01:27.1557824Z ##[group]Checking out the ref
+2026-10-09T23:01:27.1564855Z [command]/usr/bin/git checkout --progress --force -B psc0/strict-sh1-v1 refs/remotes/origin/psc0/strict-sh1-v1
+2026-10-09T23:01:29.1328081Z Updating files:   7% (1495/20791)
+2026-10-09T23:01:29.1420238Z Updating files:   8% (1664/20791)
+2026-10-09T23:01:29.1631977Z Updating files:   9% (1872/20791)
+2026-10-09T23:01:29.1762357Z Updating files:  10% (2080/20791)
+2026-10-09T23:01:29.1805683Z Updating files:  11% (2288/20791)
+2026-10-09T23:01:29.2049237Z Updating files:  11% (2303/20791)
+2026-10-09T23:01:29.2136060Z Updating files:  12% (2495/20791)
+2026-10-09T23:01:30.2701327Z Updating files:  13% (2703/20791)
+2026-10-09T23:01:30.9616439Z Updating files:  13% (2843/20791)
+2026-10-09T23:01:30.9703734Z Updating files:  14% (2911/20791)
+2026-10-09T23:01:30.9767866Z Updating files:  15% (3119/20791)
+2026-10-09T23:01:30.9853577Z Updating files:  16% (3327/20791)
+2026-10-09T23:01:30.9979212Z Updating files:  17% (3535/20791)
+2026-10-09T23:01:31.0067461Z Updating files:  18% (3743/20791)
+2026-10-09T23:01:31.0258240Z Updating files:  19% (3951/20791)
+2026-10-09T23:01:31.0490539Z Updating files:  20% (4159/20791)
+2026-10-09T23:01:31.0679389Z Updating files:  21% (4367/20791)
+2026-10-09T23:01:31.0774697Z Updating files:  22% (4575/20791)
+2026-10-09T23:01:31.4361534Z Updating files:  23% (4782/20791)
+2026-10-09T23:01:32.5035749Z Updating files:  23% (4911/20791)
+2026-10-09T23:01:32.8427561Z Updating files:  23% (4914/20791)
+2026-10-09T23:01:32.8505601Z Updating files:  24% (4990/20791)
+2026-10-09T23:01:32.8562297Z Updating files:  25% (5198/20791)
+2026-10-09T23:01:32.8647094Z Updating files:  26% (5406/20791)
+2026-10-09T23:01:32.8730437Z Updating files:  27% (5614/20791)
+2026-10-09T23:01:32.8858560Z Updating files:  28% (5822/20791)
+2026-10-09T23:01:32.9648516Z Updating files:  29% (6030/20791)
+2026-10-09T23:01:32.9791653Z Updating files:  30% (6238/20791)
+2026-10-09T23:01:32.9909205Z Updating files:  31% (6446/20791)
+2026-10-09T23:01:33.0035988Z Updating files:  32% (6654/20791)
+2026-10-09T23:01:33.0171281Z Updating files:  33% (6862/20791)
+2026-10-09T23:01:33.0293993Z Updating files:  34% (7069/20791)
+2026-10-09T23:01:33.0413578Z Updating files:  35% (7277/20791)
+2026-10-09T23:01:33.0539676Z Updating files:  36% (7485/20791)
+2026-10-09T23:01:33.0658055Z Updating files:  37% (7693/20791)
+2026-10-09T23:01:33.0755809Z Updating files:  38% (7901/20791)
+2026-10-09T23:01:33.0886506Z Updating files:  39% (8109/20791)
+2026-10-09T23:01:33.1085439Z Updating files:  40% (8317/20791)
+2026-10-09T23:01:33.1184250Z Updating files:  41% (8525/20791)
+2026-10-09T23:01:33.1274476Z Updating files:  42% (8733/20791)
+2026-10-09T23:01:33.1369737Z Updating files:  43% (8941/20791)
+2026-10-09T23:01:33.1454138Z Updating files:  44% (9149/20791)
+2026-10-09T23:01:33.1812044Z Updating files:  45% (9356/20791)
+2026-10-09T23:01:33.1998316Z Updating files:  45% (9549/20791)
+2026-10-09T23:01:33.3032205Z Updating files:  46% (9564/20791)
+2026-10-09T23:01:33.3761357Z Updating files:  47% (9772/20791)
+2026-10-09T23:01:33.4664277Z Updating files:  48% (9980/20791)
+2026-10-09T23:01:33.6600188Z Updating files:  49% (10188/20791)
+2026-10-09T23:01:33.9641379Z Updating files:  50% (10396/20791)
+2026-10-09T23:01:34.1823314Z Updating files:  51% (10604/20791)
+2026-10-09T23:01:34.2755255Z Updating files:  51% (10723/20791)
+2026-10-09T23:01:34.5255124Z Updating files:  52% (10812/20791)
+2026-10-09T23:01:34.7942626Z Updating files:  53% (11020/20791)
+2026-10-09T23:01:35.0934195Z Updating files:  54% (11228/20791)
+2026-10-09T23:01:35.1804090Z Updating files:  55% (11436/20791)
+2026-10-09T23:01:35.2806547Z Updating files:  55% (11512/20791)
+2026-10-09T23:01:35.3562191Z Updating files:  56% (11643/20791)
+2026-10-09T23:01:35.4335769Z Updating files:  57% (11851/20791)
+2026-10-09T23:01:35.4400227Z Updating files:  58% (12059/20791)
+2026-10-09T23:01:35.4445391Z Updating files:  59% (12267/20791)
+2026-10-09T23:01:35.4486395Z Updating files:  60% (12475/20791)
+2026-10-09T23:01:35.4527713Z Updating files:  61% (12683/20791)
+2026-10-09T23:01:35.4574613Z Updating files:  62% (12891/20791)
+2026-10-09T23:01:35.4628543Z Updating files:  63% (13099/20791)
+2026-10-09T23:01:35.4681880Z Updating files:  64% (13307/20791)
+2026-10-09T23:01:35.4738222Z Updating files:  65% (13515/20791)
+2026-10-09T23:01:35.4805926Z Updating files:  66% (13723/20791)
+2026-10-09T23:01:35.4864646Z Updating files:  67% (13930/20791)
+2026-10-09T23:01:35.4923145Z Updating files:  68% (14138/20791)
+2026-10-09T23:01:35.4979043Z Updating files:  69% (14346/20791)
+2026-10-09T23:01:35.5033937Z Updating files:  70% (14554/20791)
+2026-10-09T23:01:35.5093793Z Updating files:  71% (14762/20791)
+2026-10-09T23:01:35.5152949Z Updating files:  72% (14970/20791)
+2026-10-09T23:01:35.5207785Z Updating files:  73% (15178/20791)
+2026-10-09T23:01:35.5296426Z Updating files:  74% (15386/20791)
+2026-10-09T23:01:35.5351597Z Updating files:  75% (15594/20791)
+2026-10-09T23:01:35.5408321Z Updating files:  76% (15802/20791)
+2026-10-09T23:01:35.5461945Z Updating files:  77% (16010/20791)
+2026-10-09T23:01:35.5522006Z Updating files:  78% (16217/20791)
+2026-10-09T23:01:35.5581605Z Updating files:  79% (16425/20791)
+2026-10-09T23:01:35.5661277Z Updating files:  80% (16633/20791)
+2026-10-09T23:01:35.5714348Z Updating files:  81% (16841/20791)
+2026-10-09T23:01:35.5761959Z Updating files:  82% (17049/20791)
+2026-10-09T23:01:35.5807381Z Updating files:  83% (17257/20791)
+2026-10-09T23:01:35.5855342Z Updating files:  84% (17465/20791)
+2026-10-09T23:01:35.5900299Z Updating files:  85% (17673/20791)
+2026-10-09T23:01:35.5944228Z Updating files:  86% (17881/20791)
+2026-10-09T23:01:35.5972906Z Updating files:  87% (18089/20791)
+2026-10-09T23:01:35.6005041Z Updating files:  88% (18297/20791)
+2026-10-09T23:01:35.6039951Z Updating files:  89% (18504/20791)
+2026-10-09T23:01:35.6270976Z Updating files:  90% (18712/20791)
+2026-10-09T23:01:35.6445461Z Updating files:  91% (18920/20791)
+2026-10-09T23:01:35.6498509Z Updating files:  92% (19128/20791)
+2026-10-09T23:01:35.6550065Z Updating files:  93% (19336/20791)
+2026-10-09T23:01:35.8102064Z Updating files:  94% (19544/20791)
+2026-10-09T23:01:35.8990175Z Updating files:  95% (19752/20791)
+2026-10-09T23:01:35.9588400Z Updating files:  96% (19960/20791)
+2026-10-09T23:01:35.9821104Z Updating files:  97% (20168/20791)
+2026-10-09T23:01:36.0526991Z Updating files:  98% (20376/20791)
+2026-10-09T23:01:36.0962878Z Updating files:  99% (20584/20791)
+2026-10-09T23:01:36.0963796Z Updating files: 100% (20791/20791)
+2026-10-09T23:01:36.0964210Z Updating files: 100% (20791/20791), done.
+2026-10-09T23:01:36.1188151Z Switched to a new branch 'psc0/strict-sh1-v1'
+2026-10-09T23:01:36.1188944Z branch 'psc0/strict-sh1-v1' set up to track 'origin/psc0/strict-sh1-v1'.
+2026-10-09T23:01:36.1254484Z ##[endgroup]
+2026-10-09T23:01:36.1301777Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T23:01:36.1327711Z 45d314b970d9d76fce9387f6bc8108fb9fab611c
+2026-10-09T23:01:36.1624259Z ##[group]Run actions/github-script@v7
+2026-10-09T23:01:36.1624552Z with:
+2026-10-09T23:01:36.1628820Z   script: const { mkdir, writeFile } = await import('node:fs/promises');
+const path = await import('node:path');
+const root = process.env.GITHUB_WORKSPACE + '/psc0';
+const recovery = await import(root + '/scripts/sh1-native-seed-recovery.mjs');
+const { selected, policySha256, recipeSha256 } = await recovery.readNativeSeedRecoveryPolicy({ root });
+const directory = path.join(root, 'dist/sh1-seed-selection');
+await mkdir(directory, { recursive: true });
+await writeFile(path.join(directory, 'selected-native-recovery.json'), JSON.stringify({
+  sourceRef: selected.sourceRef, identitySha256: selected.identitySha256,
+  policySha256, recipeSha256, recipe: recovery.nativeSeedRecoveryRecipe,
+  parentMetadataRetained: Boolean(selected.parent),
+  parentExecutionRequired: false, typescriptVersion: '7.0.2',
+}, null, 2) + '\n');
+for (const [name, value] of Object.entries({
+  mode: selected.mode,
+  'full-qualification': process.env.PSC0_SH1_FULL_QUALIFICATION === 'true',
+  'node-version': selected.nodeVersion,
+  'source-ref': selected.sourceRef,
+  'compiler-path': selected.compilerPath,
+  'cache-key': selected.cacheKey,
+  'cache-directory': selected.cacheDirectory,
+  'artifact-run-id': selected.artifactRunId,
+  'artifact-name': selected.artifactName,
+  'recovery-typescript-version': '7.0.2',
+  'has-parent': Boolean(selected.parent),
+})) core.setOutput(name, value);
+
+2026-10-09T23:01:36.1635715Z   github-token: ***
+2026-10-09T23:01:36.1635944Z   debug: false
+2026-10-09T23:01:36.1636168Z   user-agent: actions/github-script
+2026-10-09T23:01:36.1636439Z   result-encoding: json
+2026-10-09T23:01:36.1636672Z   retries: 0
+2026-10-09T23:01:36.1636901Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-10-09T23:01:36.1637179Z env:
+2026-10-09T23:01:36.1637380Z   PSC0_SH1_FULL_QUALIFICATION: true
+2026-10-09T23:01:36.1637631Z ##[endgroup]
+2026-10-09T23:01:36.2753535Z ##[group]Run actions/setup-node@v4
+2026-10-09T23:01:36.2753838Z with:
+2026-10-09T23:01:36.2754140Z   node-version: 22.23.3
+2026-10-09T23:01:36.2754526Z   always-auth: false
+2026-10-09T23:01:36.2754823Z   check-latest: false
+2026-10-09T23:01:36.2757551Z   token: ***
+2026-10-09T23:01:36.2757761Z ##[endgroup]
+2026-10-09T23:01:36.4145196Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-09T23:01:36.4149927Z (node:2247) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T23:01:36.4151012Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T23:01:36.4153508Z ##[group]Environment details
+2026-10-09T23:01:36.8357136Z node: v22.23.3
+2026-10-09T23:01:36.8357987Z npm: 10.9.9
+2026-10-09T23:01:36.8358767Z yarn: 1.22.22
+2026-10-09T23:01:36.8359711Z ##[endgroup]
+2026-10-09T23:01:36.8512305Z ##[group]Run node --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json
+2026-10-09T23:01:36.8513851Z [36;1mnode --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json[0m
+2026-10-09T23:01:36.8722518Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:01:36.8722825Z ##[endgroup]
+2026-10-09T23:01:36.9364374Z PSC0_SH1_RESOURCE_POLICY: {"schemaVersion":1,"evidence":"generated-qualification-resource-preflight","command":"workflow-preflight","policy":{"id":"psc0-sh1-generated-qualification-resources/1","node":"v22.23.3","platform":"linux","architecture":"x64","oldSpaceMiB":8192,"minimumAvailableBytes":12884901888,"minimumHeapLimitBytes":8589934592,"maximumHeapLimitBytes":8858370048,"checkBoundary":"process-entry-before-generated-compiler-loading","automaticFallback":false,"semanticContractQualified":false},"node":"v22.23.3","platform":"linux","architecture":"x64","pid":2279,"passed":true,"strictSh1Qualified":false,"semanticContractQualified":false,"heap":{"explicitOldSpaceMiB":8192,"observedHeapLimitBytes":8640266240,"inheritedHeapOverride":false},"physical":{"totalBytes":16765370368,"availableBytes":15228989440},"nodeMemory":{"availableBytes":15228989440,"constrainedBytes":"18446744073709552000","bindingConstraintBytes":null},"cgroup":{"version":2,"membership":"/system.slice/hosted-compute-agent.service","mountRoot":"/","mountPoint":"/sys/fs/cgroup","visibility":"current-and-visible-ancestor-cgroups","observations":[{"directory":"/sys/fs/cgroup/system.slice/hosted-compute-agent.service","limitFile":"memory.max","limitBytes":"max","currentBytes":"3376988160","capacityBytes":16765370368,"availableBytes":16765370368},{"directory":"/sys/fs/cgroup/system.slice/hosted-compute-agent.service","limitFile":"memory.high","limitBytes":"max","currentBytes":"3376988160","capacityBytes":16765370368,"availableBytes":16765370368},{"directory":"/sys/fs/cgroup/system.slice","limitFile":"memory.max","limitBytes":"max","currentBytes":"5939531776","capacityBytes":16765370368,"availableBytes":16765370368},{"directory":"/sys/fs/cgroup/system.slice","limitFile":"memory.high","limitBytes":"max","currentBytes":"5939531776","capacityBytes":16765370368,"availableBytes":16765370368},{"directory":"/sys/fs/cgroup","globalRootWithoutMemoryController":true}]},"effectiveCapacityBytes":16765370368,"effectiveAvailableBytes":15228989440}
+2026-10-09T23:01:36.9635571Z ##[group]Run leanprover/lean-action@v1
+2026-10-09T23:01:36.9635999Z with:
+2026-10-09T23:01:36.9636224Z   lake-package-directory: psc0
+2026-10-09T23:01:36.9636471Z   auto-config: false
+2026-10-09T23:01:36.9636686Z   build: false
+2026-10-09T23:01:36.9636888Z   test: false
+2026-10-09T23:01:36.9637090Z   use-github-cache: false
+2026-10-09T23:01:36.9637322Z   use-mathlib-cache: false
+2026-10-09T23:01:36.9637545Z   lint: default
+2026-10-09T23:01:36.9637745Z   mk_all-check: false
+2026-10-09T23:01:36.9637978Z   check-reservoir-eligibility: false
+2026-10-09T23:01:36.9638237Z   leanchecker: false
+2026-10-09T23:01:36.9638449Z   lean4checker: false
+2026-10-09T23:01:36.9638654Z   nanoda: false
+2026-10-09T23:01:36.9638859Z   nanoda-allow-sorry: true
+2026-10-09T23:01:36.9639086Z   axiom-audit: false
+2026-10-09T23:01:36.9639370Z   axiom-audit-allow: propext,Classical.choice,Quot.sound
+2026-10-09T23:01:36.9639716Z   reinstall-transient-toolchain: false
+2026-10-09T23:01:36.9639976Z ##[endgroup]
+2026-10-09T23:01:36.9707704Z ##[start-action display=install elan;id=__leanprover_lean-action.__run]
+2026-10-09T23:01:36.9733765Z ##[group]Run : Install Elan
+2026-10-09T23:01:36.9734071Z [36;1m: Install Elan[0m
+2026-10-09T23:01:36.9734361Z [36;1m${GITHUB_ACTION_PATH}/scripts/install_elan.sh[0m
+2026-10-09T23:01:36.9775201Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T23:01:36.9775555Z ##[endgroup]
+2026-10-09T23:01:36.9856759Z ##[group]Elan Installation Output
+2026-10-09T23:01:37.0427634Z info: downloading installer
+2026-10-09T23:01:38.2447729Z info: downloading https://releases.lean-lang.org/lean4/v4.34.0/lean-4.34.0-linux.tar.zst
+2026-10-09T23:01:41.6794274Z info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.34.0
+2026-10-09T23:01:47.8614863Z Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)
+2026-10-09T23:01:47.9063501Z Lake version 5.0.0-src+293d5d0 (Lean version 4.34.0)
+2026-10-09T23:01:47.9104569Z ##[endgroup]
+2026-10-09T23:01:47.9104824Z 
+2026-10-09T23:01:47.9127281Z ##[end-action id=__leanprover_lean-action.__run;outcome=success;conclusion=success;duration_ms=10941]
+2026-10-09T23:01:47.9131390Z ##[start-action display=configure `lean-action`;id=__leanprover_lean-action.config]
+2026-10-09T23:01:47.9194465Z ##[group]Run : Configure Lean Action
+2026-10-09T23:01:47.9194796Z [36;1m: Configure Lean Action[0m
+2026-10-09T23:01:47.9195097Z [36;1m${GITHUB_ACTION_PATH}/scripts/config.sh[0m
+2026-10-09T23:01:47.9232134Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T23:01:47.9232483Z env:
+2026-10-09T23:01:47.9232689Z   AUTO_CONFIG: false
+2026-10-09T23:01:47.9232902Z   BUILD: false
+2026-10-09T23:01:47.9233322Z   TEST: false
+2026-10-09T23:01:47.9233511Z   LINT: default
+2026-10-09T23:01:47.9233707Z ##[endgroup]
+2026-10-09T23:01:48.0334183Z ##[group]Configure lean-action
+2026-10-09T23:01:48.0364552Z ##[end-action id=__leanprover_lean-action.config;outcome=success;conclusion=success;duration_ms=123]
+2026-10-09T23:01:48.0366786Z ##[start-action display=reinstall transient toolchain;id=__leanprover_lean-action.__run_2]
+2026-10-09T23:01:48.0405908Z ##[end-action id=__leanprover_lean-action.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0411004Z ##[start-action display=ensure all files are imported;id=__leanprover_lean-action.mk_all]
+2026-10-09T23:01:48.0417254Z ##[end-action id=__leanprover_lean-action.mk_all;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0420653Z ##[start-action display=Run actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache]
+2026-10-09T23:01:48.0426016Z ##[end-action id=__leanprover_lean-action.__actions_cache;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0427942Z ##[start-action display=detect mathlib;id=__leanprover_lean-action.detect-mathlib]
+2026-10-09T23:01:48.0431366Z ##[end-action id=__leanprover_lean-action.detect-mathlib;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0433370Z ##[start-action display=get mathlib cache;id=__leanprover_lean-action.__run_3]
+2026-10-09T23:01:48.0444950Z ##[end-action id=__leanprover_lean-action.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0470029Z ##[start-action display=build dwijayuda/pskernel;id=__leanprover_lean-action.build]
+2026-10-09T23:01:48.0475003Z ##[end-action id=__leanprover_lean-action.build;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0477385Z ##[start-action display=Run actions/cache/save@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache_2]
+2026-10-09T23:01:48.0480990Z ##[end-action id=__leanprover_lean-action.__actions_cache_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0484432Z ##[start-action display=test dwijayuda/pskernel;id=__leanprover_lean-action.test]
+2026-10-09T23:01:48.0488658Z ##[end-action id=__leanprover_lean-action.test;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0491309Z ##[start-action display=lint dwijayuda/pskernel;id=__leanprover_lean-action.lint]
+2026-10-09T23:01:48.0495466Z ##[end-action id=__leanprover_lean-action.lint;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0497184Z ##[start-action display=check reservoir eligibility;id=__leanprover_lean-action.__run_4]
+2026-10-09T23:01:48.0500224Z ##[end-action id=__leanprover_lean-action.__run_4;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0502422Z ##[start-action display=check environment with leanchecker;id=__leanprover_lean-action.__run_5]
+2026-10-09T23:01:48.0507049Z ##[end-action id=__leanprover_lean-action.__run_5;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0509078Z ##[start-action display=check environment with nanoda;id=__leanprover_lean-action.nanoda]
+2026-10-09T23:01:48.0512018Z ##[end-action id=__leanprover_lean-action.nanoda;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.0514484Z ##[start-action display=audit axioms with axiom-audit;id=__leanprover_lean-action.axiom-audit]
+2026-10-09T23:01:48.0517569Z ##[end-action id=__leanprover_lean-action.axiom-audit;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T23:01:48.1264640Z ##[group]Run npm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+2026-10-09T23:01:48.1265583Z [36;1mnpm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2[0m
+2026-10-09T23:01:48.1266139Z [36;1mnode --input-type=module <<'NODE'[0m
+2026-10-09T23:01:48.1266458Z [36;1mimport assert from 'node:assert/strict';[0m
+2026-10-09T23:01:48.1266944Z [36;1mimport { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';[0m
+2026-10-09T23:01:48.1267406Z [36;1mimport path from 'node:path';[0m
+2026-10-09T23:01:48.1267705Z [36;1mimport { createRequire } from 'node:module';[0m
+2026-10-09T23:01:48.1268039Z [36;1mimport { spawnSync } from 'node:child_process';[0m
+2026-10-09T23:01:48.1268395Z [36;1mconst require = createRequire(import.meta.url);[0m
+2026-10-09T23:01:48.1268852Z [36;1mconst directory = path.resolve('dist/typescript-profile/install');[0m
+2026-10-09T23:01:48.1269252Z [36;1mmkdirSync(directory, { recursive: true });[0m
+2026-10-09T23:01:48.1269546Z [36;1mconst version = '7.0.2';[0m
+2026-10-09T23:01:48.1269934Z [36;1mconst prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-' + version);[0m
+2026-10-09T23:01:48.1270490Z [36;1mconst manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });[0m
+2026-10-09T23:01:48.1271000Z [36;1mconst manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));[0m
+2026-10-09T23:01:48.1271397Z [36;1massert.equal(manifest.name, 'typescript');[0m
+2026-10-09T23:01:48.1271721Z [36;1massert.equal(manifest.version, version);[0m
+2026-10-09T23:01:48.1272133Z [36;1mconst bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;[0m
+2026-10-09T23:01:48.1272779Z [36;1massert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');[0m
+2026-10-09T23:01:48.1273530Z [36;1mconst launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));[0m
+2026-10-09T23:01:48.1274096Z [36;1mconst result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });[0m
+2026-10-09T23:01:48.1274568Z [36;1massert.equal(result.status, 0, result.stderr);[0m
+2026-10-09T23:01:48.1274952Z [36;1massert.equal(result.stdout.trim(), 'Version ' + version);[0m
+2026-10-09T23:01:48.1275414Z [36;1mappendFileSync(process.env.GITHUB_OUTPUT, 'current-cli=' + launcher + '\n');[0m
+2026-10-09T23:01:48.1276027Z [36;1mcopyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, 'current-package-lock.json'));[0m
+2026-10-09T23:01:48.1276630Z [36;1mcopyFileSync(manifestPath, path.join(directory, 'current-package.json'));[0m
+2026-10-09T23:01:48.1277243Z [36;1mappendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=' + version + '\n');[0m
+2026-10-09T23:01:48.1277728Z [36;1mNODE[0m
+2026-10-09T23:01:48.1314148Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T23:01:48.1314524Z ##[endgroup]
+2026-10-09T23:01:52.3362696Z 
+2026-10-09T23:01:52.3363496Z added 2 packages in 4s
+2026-10-09T23:01:52.4444086Z ##[group]Run node scripts/check-typescript-profile.mjs --out dist/typescript-profile/contract
+2026-10-09T23:01:52.4444772Z [36;1mnode scripts/check-typescript-profile.mjs --out dist/typescript-profile/contract[0m
+2026-10-09T23:01:52.4482622Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:01:52.4482891Z env:
+2026-10-09T23:01:52.4483437Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:52.4483869Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:52.4484126Z ##[endgroup]
+2026-10-09T23:01:52.9096011Z PSC0_TYPESCRIPT_PROFILE: PASS {"mode":"installed-profile-contract","report":"/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json","timings":[{"phase":"positional-source-with-unrelated-config","version":"7.0.2","elapsedMs":94.56032399999998}]}
+2026-10-09T23:01:52.9185830Z ##[group]Run node --check scripts/typescript-cli.mjs
+2026-10-09T23:01:52.9186591Z [36;1mnode --check scripts/typescript-cli.mjs[0m
+2026-10-09T23:01:52.9187198Z [36;1mnode --check scripts/check-typescript-profile.mjs[0m
+2026-10-09T23:01:52.9187880Z [36;1mnode --check scripts/native-typescript-cli.test.mjs[0m
+2026-10-09T23:01:52.9188478Z [36;1mnode scripts/check-native-replay-host-source.mjs[0m
+2026-10-09T23:01:52.9189063Z [36;1mnode --check scripts/sh1-resource-policy.mjs[0m
+2026-10-09T23:01:52.9189557Z [36;1mnode --check scripts/sh1-qualify.mjs[0m
+2026-10-09T23:01:52.9190052Z [36;1mnode --check scripts/sh1-capabilities.mjs[0m
+2026-10-09T23:01:52.9193876Z [36;1mnode --check scripts/sh1-check-admissions.mjs[0m
+2026-10-09T23:01:52.9194571Z [36;1mnode --check scripts/generated-preparation-session.mjs[0m
+2026-10-09T23:01:52.9195255Z [36;1mnode --check scripts/original-ir-inventory.mjs[0m
+2026-10-09T23:01:52.9195883Z [36;1mnode --check scripts/original-ir-carrier.mjs[0m
+2026-10-09T23:01:52.9196536Z [36;1mnode --check scripts/sh1-ir-checker-conformance.mjs[0m
+2026-10-09T23:01:52.9197720Z [36;1mnode --check scripts/sh1-strict-source.mjs[0m
+2026-10-09T23:01:52.9198344Z [36;1mnode --check scripts/sh1-strict-source-conformance.mjs[0m
+2026-10-09T23:01:52.9199025Z [36;1mnode --check scripts/sh1-strict-target-conformance.mjs[0m
+2026-10-09T23:01:52.9199654Z [36;1mnode --check scripts/sh1-strict-evidence.mjs[0m
+2026-10-09T23:01:52.9200280Z [36;1mnode --check scripts/sh1-strict-runtime-conformance.mjs[0m
+2026-10-09T23:01:52.9200921Z [36;1mnode --check scripts/sh1-source-snapshot.mjs[0m
+2026-10-09T23:01:52.9201478Z [36;1mnode --check scripts/sh1-seed-manifest.mjs[0m
+2026-10-09T23:01:52.9202069Z [36;1mnode --check scripts/sh1-grammar-conformance.mjs[0m
+2026-10-09T23:01:52.9202725Z [36;1mnode --check scripts/sh1-fresh-name-conformance.mjs[0m
+2026-10-09T23:01:52.9203867Z [36;1mnode --check scripts/sh1-migration-worker-conformance.mjs[0m
+2026-10-09T23:01:52.9204593Z [36;1mnode --check scripts/sh1-migration-worker-abi.mjs[0m
+2026-10-09T23:01:52.9205217Z [36;1mnode --check scripts/sh1-projection-conformance.mjs[0m
+2026-10-09T23:01:52.9205787Z [36;1mnode --check scripts/sh1-successor-seed.mjs[0m
+2026-10-09T23:01:52.9206381Z [36;1mnode --check scripts/sh1-native-seed-recovery.mjs[0m
+2026-10-09T23:01:52.9206950Z [36;1mnode --check scripts/sh1-successor-seed.test.mjs[0m
+2026-10-09T23:01:52.9207507Z [36;1mnode --check scripts/proofscript-source.mjs[0m
+2026-10-09T23:01:52.9208369Z [36;1mnode --check scripts/proofscript-source.test.mjs[0m
+2026-10-09T23:01:52.9209001Z [36;1mnode --check scripts/checked-source-snapshot.mjs[0m
+2026-10-09T23:01:52.9210539Z [36;1mnode --check scripts/checked-source-snapshot.test.mjs[0m
+2026-10-09T23:01:52.9211156Z [36;1mnode --check scripts/checked-seed-session.test.mjs[0m
+2026-10-09T23:01:52.9212409Z [36;1mnode --check scripts/checked-build.mjs[0m
+2026-10-09T23:01:52.9212952Z [36;1mnode --check scripts/checked-build.test.mjs[0m
+2026-10-09T23:01:52.9213709Z [36;1mnode --check scripts/checked-algebraic-build.test.mjs[0m
+2026-10-09T23:01:52.9214354Z [36;1mnode --check scripts/checked-enum-build.test.mjs[0m
+2026-10-09T23:01:52.9214999Z [36;1mnode --check scripts/checked-projection-build.test.mjs[0m
+2026-10-09T23:01:52.9215653Z [36;1mnode --check scripts/checked-sum-build.test.mjs[0m
+2026-10-09T23:01:52.9216242Z [36;1mnode --check scripts/checked-text-build.test.mjs[0m
+2026-10-09T23:01:52.9216820Z [36;1mnode --check scripts/selfhost-source-workspace.mjs[0m
+2026-10-09T23:01:52.9217513Z [36;1mnode --check scripts/selfhost-source-isolation-tests.mjs[0m
+2026-10-09T23:01:52.9218186Z [36;1mnode --check scripts/native-workspace-isolation.test.mjs[0m
+2026-10-09T23:01:52.9219660Z [36;1mnode --check scripts/compile-with-generated.mjs[0m
+2026-10-09T23:01:52.9220331Z [36;1mnode --check scripts/emit-project-with-generated.mjs[0m
+2026-10-09T23:01:52.9221068Z [36;1mnode --check scripts/reemit-project-with-generated.mjs[0m
+2026-10-09T23:01:52.9222048Z [36;1mnode --check scripts/translate-with-generated.mjs[0m
+2026-10-09T23:01:52.9222814Z [36;1mnode --check scripts/check-elab-term-selfhost-source-syntax.mjs[0m
+2026-10-09T23:01:52.9223957Z [36;1mnode --check scripts/check-proofscript-binder-replay-source.mjs[0m
+2026-10-09T23:01:52.9224793Z [36;1mnode scripts/check-elab-term-selfhost-source-syntax.mjs[0m
+2026-10-09T23:01:52.9225846Z [36;1mnode scripts/check-proofscript-binder-replay-source.mjs[0m
+2026-10-09T23:01:52.9226523Z [36;1mnode --check scripts/sh1-iterate.mjs[0m
+2026-10-09T23:01:52.9227127Z [36;1mnode --check scripts/sh1-iteration-conformance.mjs[0m
+2026-10-09T23:01:52.9227844Z [36;1mnode --check scripts/sh1-foundation-conformance.mjs[0m
+2026-10-09T23:01:52.9228478Z [36;1mnode --check scripts/sh1-helper-conformance.mjs[0m
+2026-10-09T23:01:52.9229131Z [36;1mnode --check scripts/sh1-generic-erasure-conformance.mjs[0m
+2026-10-09T23:01:52.9229695Z [36;1mnode check-psc1-source.mjs[0m
+2026-10-09T23:01:52.9230220Z [36;1mnode scripts/bootstrap-root-minimality-tests.mjs[0m
+2026-10-09T23:01:52.9230843Z [36;1mnode scripts/check-modular-preparation-source.mjs[0m
+2026-10-09T23:01:52.9289709Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:01:52.9290148Z env:
+2026-10-09T23:01:52.9290762Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:52.9291539Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:52.9291936Z ##[endgroup]
+2026-10-09T23:01:53.0385231Z PSC2_NATIVE_REPLAY_HOST_SOURCE: PASS (installed TypeScript 7 profile, exact payload transport and emission integrity)
+2026-10-09T23:01:54.1187962Z PSC2_ELAB_TERM_SELFHOST_SOURCE_SYNTAX: PASS (invariant-safe projection, typed-binder accumulation and typed-binder closing recursion, typed projection-reference match, explicit projection-reference expectation, explicit character conversion, explicit typed-binder expectation, local list length, and explicit Option constructors)
+2026-10-09T23:01:54.1520668Z PSC2_PROOFSCRIPT_BINDER_REPLAY_SOURCE: PASS (decreasing type parser, nested binders and generated workspace boundary)
+2026-10-09T23:01:54.4126139Z PSC1_SOURCE_PROFILE: PASS (bootstrap; 69 portable modules across 12 source roots)
+2026-10-09T23:01:54.4895228Z PSC2_BOOTSTRAP_ROOT_MINIMALITY: PASS (1 direct imports; 64 ordered closure modules; compiler-only=64)
+2026-10-09T23:01:54.5272272Z PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, origin companions, retained admission output and unchanged raw prepared/kernel gates)
+2026-10-09T23:01:54.5370096Z ##[group]Run node --test scripts/sh1-successor-seed.test.mjs
+2026-10-09T23:01:54.5370549Z [36;1mnode --test scripts/sh1-successor-seed.test.mjs[0m
+2026-10-09T23:01:54.5408167Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:01:54.5408444Z env:
+2026-10-09T23:01:54.5408816Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:54.5409260Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:54.5409501Z ##[endgroup]
+2026-10-09T23:01:54.9348403Z TAP version 13
+2026-10-09T23:01:55.2243462Z # PSC0_SH1_SUCCESSOR_CONTRACT: PASS (14 descriptor refusals, generation ancestry, evidence-stable identity, gated selection, cache authentication, unchanged v1 routing)
+2026-10-09T23:01:55.2284429Z # Subtest: scripts/sh1-successor-seed.test.mjs
+2026-10-09T23:01:55.2297408Z ok 1 - scripts/sh1-successor-seed.test.mjs
+2026-10-09T23:01:55.2298115Z   ---
+2026-10-09T23:01:55.2299058Z   duration_ms: 296.904985
+2026-10-09T23:01:55.2299715Z   type: 'test'
+2026-10-09T23:01:55.2300329Z   ...
+2026-10-09T23:01:55.2300833Z 1..1
+2026-10-09T23:01:55.2301305Z # tests 1
+2026-10-09T23:01:55.2301789Z # suites 0
+2026-10-09T23:01:55.2302268Z # pass 1
+2026-10-09T23:01:55.2304537Z # fail 0
+2026-10-09T23:01:55.2305144Z # cancelled 0
+2026-10-09T23:01:55.2305812Z # skipped 0
+2026-10-09T23:01:55.2306396Z # todo 0
+2026-10-09T23:01:55.2307752Z # duration_ms 499.55231
+2026-10-09T23:01:55.2719188Z ##[group]Run actions/cache/restore@v4
+2026-10-09T23:01:55.2719560Z with:
+2026-10-09T23:01:55.2720143Z   path: psc0/.selfhost-seeds/successors/47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T23:01:55.2721111Z   key: psc0-sh1-successor-v1-47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T23:01:55.2721812Z   enableCrossOsArchive: false
+2026-10-09T23:01:55.2722229Z   fail-on-cache-miss: false
+2026-10-09T23:01:55.2722639Z   lookup-only: false
+2026-10-09T23:01:55.2723149Z env:
+2026-10-09T23:01:55.2724184Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:55.2725496Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:55.2725843Z ##[endgroup]
+2026-10-09T23:01:55.3812673Z (node:2900) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T23:01:55.3814190Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T23:01:55.6340805Z Cache hit for: psc0-sh1-successor-v1-47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T23:01:55.6454724Z (node:2900) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T23:01:56.2936459Z Received 487319 of 487319 (100.0%), 1.1 MBs/sec
+2026-10-09T23:01:56.2937076Z Cache Size: ~0 MB (487319 B)
+2026-10-09T23:01:56.2976086Z [command]/usr/bin/tar -xf /home/runner/work/_temp/b9e6ac31-ca39-40a1-9087-b5aed1d7d54e/cache.tzst -P -C /home/runner/work/pskernel/pskernel --use-compress-program unzstd
+2026-10-09T23:01:56.7339109Z Cache restored successfully
+2026-10-09T23:01:56.7415461Z Cache restored from key: psc0-sh1-successor-v1-47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T23:01:56.9211374Z ##[group]Run actions/github-script@v7
+2026-10-09T23:01:56.9212017Z with:
+2026-10-09T23:01:56.9214906Z   script: const root = process.env.GITHUB_WORKSPACE + '/psc0';
+const seeds = await import(root + '/scripts/sh1-successor-seed.mjs');
+const selected = await seeds.readSelectedAuthoringSeed();
+const valid = selected.mode === 'qualified' && await seeds.verifyAuthoringSeedCache(
+  root + '/' + selected.cacheDirectory, selected.manifest);
+core.setOutput('qualified-valid', valid);
+
+2026-10-09T23:01:56.9218682Z   github-token: ***
+2026-10-09T23:01:56.9218934Z   debug: false
+2026-10-09T23:01:56.9219164Z   user-agent: actions/github-script
+2026-10-09T23:01:56.9219455Z   result-encoding: json
+2026-10-09T23:01:56.9219683Z   retries: 0
+2026-10-09T23:01:56.9219926Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-10-09T23:01:56.9220213Z env:
+2026-10-09T23:01:56.9220569Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:56.9221061Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:56.9221328Z ##[endgroup]
+2026-10-09T23:01:57.0344385Z ##[group]Run node --input-type=module <<'NODE'
+2026-10-09T23:01:57.0345221Z [36;1mnode --input-type=module <<'NODE'[0m
+2026-10-09T23:01:57.0345660Z [36;1mimport assert from 'node:assert/strict';[0m
+2026-10-09T23:01:57.0346600Z [36;1mimport path from 'node:path';[0m
+2026-10-09T23:01:57.0347706Z [36;1mimport { spawnSync } from 'node:child_process';[0m
+2026-10-09T23:01:57.0349570Z [36;1mimport { readSelectedAuthoringSeed, verifyAuthoringSeedCache } from './scripts/sh1-successor-seed.mjs';[0m
+2026-10-09T23:01:57.0351329Z [36;1mconst selected = await readSelectedAuthoringSeed();[0m
+2026-10-09T23:01:57.0353243Z [36;1massert(await verifyAuthoringSeedCache(path.resolve(selected.cacheDirectory), selected.manifest),[0m
+2026-10-09T23:01:57.0354898Z [36;1m  'PSC0_SH1_SELECTED_CACHE_REQUIRED');[0m
+2026-10-09T23:01:57.0355638Z [36;1mconst capture = args => {[0m
+2026-10-09T23:01:57.0356165Z [36;1m  const result = spawnSync('lean', args, { encoding: 'utf8' });[0m
+2026-10-09T23:01:57.0356905Z [36;1m  assert.equal(result.status, 0, result.stderr);[0m
+2026-10-09T23:01:57.0357595Z [36;1m  return result.stdout.trim();[0m
+2026-10-09T23:01:57.0358019Z [36;1m};[0m
+2026-10-09T23:01:57.0358582Z [36;1mconst { typescript, ...expectedRuntime } = selected.manifest.toolchain;[0m
+2026-10-09T23:01:57.0359525Z [36;1massert.equal(typescript, 'Version ' + selected.recoveryTypeScriptVersion);[0m
+2026-10-09T23:01:57.0360203Z [36;1massert.deepEqual({[0m
+2026-10-09T23:01:57.0360861Z [36;1m  node: process.version, platform: process.platform, architecture: process.arch,[0m
+2026-10-09T23:01:57.0361692Z [36;1m  lean: capture(['--version']), leanGitHash: capture(['--githash']),[0m
+2026-10-09T23:01:57.0362415Z [36;1m}, expectedRuntime, 'PSC0_SH1_SELECTED_EXECUTION_RUNTIME');[0m
+2026-10-09T23:01:57.0362954Z [36;1mNODE[0m
+2026-10-09T23:01:57.0427537Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:01:57.0427843Z env:
+2026-10-09T23:01:57.0428272Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:57.0428737Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:57.0429002Z ##[endgroup]
+2026-10-09T23:01:57.3142855Z ##[group]Run actions/cache/restore@v4
+2026-10-09T23:01:57.3143469Z with:
+2026-10-09T23:01:57.3143681Z   path: psc0/.lake/build
+2026-10-09T23:01:57.3144366Z   key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c
+2026-10-09T23:01:57.3145335Z   restore-keys: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-
+
+2026-10-09T23:01:57.3146685Z   enableCrossOsArchive: false
+2026-10-09T23:01:57.3146978Z   fail-on-cache-miss: false
+2026-10-09T23:01:57.3147226Z   lookup-only: false
+2026-10-09T23:01:57.3147451Z env:
+2026-10-09T23:01:57.3147806Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:57.3148232Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:57.3148662Z ##[endgroup]
+2026-10-09T23:01:57.4232804Z (node:2970) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T23:01:57.4234358Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T23:01:57.6367521Z Cache hit for restore-key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T23:01:57.6458561Z (node:2970) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T23:01:58.8809371Z Received 15028936 of 23417544 (64.2%), 14.3 MBs/sec
+2026-10-09T23:01:58.9928431Z Received 23417544 of 23417544 (100.0%), 20.1 MBs/sec
+2026-10-09T23:01:58.9929125Z Cache Size: ~22 MB (23417544 B)
+2026-10-09T23:01:58.9964599Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d75b2677-758f-4b83-9589-657f977ca13a/cache.tzst -P -C /home/runner/work/pskernel/pskernel --use-compress-program unzstd
+2026-10-09T23:01:59.1645552Z Cache restored successfully
+2026-10-09T23:01:59.1736429Z Cache restored from key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df
+2026-10-09T23:01:59.1823117Z ##[group]Run lake build psc1 psc1_sh1_compile psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
+2026-10-09T23:01:59.1824204Z [36;1mlake build psc1 psc1_sh1_compile psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests[0m
+2026-10-09T23:01:59.1866811Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:01:59.1867099Z env:
+2026-10-09T23:01:59.1867480Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:01:59.1868215Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:01:59.1868471Z ##[endgroup]
+2026-10-09T23:02:00.6004743Z ⚠ [3/153] Replayed Ps.Syntax.Cursor
+2026-10-09T23:02:00.6006184Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.
+2026-10-09T23:02:00.6007018Z 
+2026-10-09T23:02:00.6008327Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6009575Z   [apply] _head
+2026-10-09T23:02:00.6009815Z 
+2026-10-09T23:02:00.6010366Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6011688Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:00.6012421Z 
+2026-10-09T23:02:00.6013553Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6014620Z   [apply] _tail
+2026-10-09T23:02:00.6014837Z 
+2026-10-09T23:02:00.6015379Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6016698Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:00.6017416Z 
+2026-10-09T23:02:00.6018391Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6019414Z   [apply] _rest
+2026-10-09T23:02:00.6019638Z 
+2026-10-09T23:02:00.6020373Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6021678Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.
+2026-10-09T23:02:00.6022391Z 
+2026-10-09T23:02:00.6023523Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6024556Z   [apply] _first
+2026-10-09T23:02:00.6024774Z 
+2026-10-09T23:02:00.6025711Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6027010Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:00.6027728Z 
+2026-10-09T23:02:00.6028700Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6029712Z   [apply] _tail
+2026-10-09T23:02:00.6029935Z 
+2026-10-09T23:02:00.6030458Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6031526Z ⚠ [5/153] Replayed Ps.Syntax.Lexer
+2026-10-09T23:02:00.6032574Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6033587Z 
+2026-10-09T23:02:00.6034381Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6035216Z   [apply] _depth
+2026-10-09T23:02:00.6035405Z 
+2026-10-09T23:02:00.6035905Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6037213Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:00.6037993Z 
+2026-10-09T23:02:00.6039409Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6040431Z   [apply] _remaining
+2026-10-09T23:02:00.6040660Z 
+2026-10-09T23:02:00.6041199Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6042557Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:00.6043435Z 
+2026-10-09T23:02:00.6044397Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6045398Z   [apply] _remaining
+2026-10-09T23:02:00.6045636Z 
+2026-10-09T23:02:00.6046160Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6047435Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:00.6048175Z 
+2026-10-09T23:02:00.6049130Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6050147Z   [apply] _charsRev
+2026-10-09T23:02:00.6050370Z 
+2026-10-09T23:02:00.6050897Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6051894Z ⚠ [8/153] Replayed Ps.Syntax.ParserState
+2026-10-09T23:02:00.6053159Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:00.6053929Z 
+2026-10-09T23:02:00.6054870Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6055882Z   [apply] _rest
+2026-10-09T23:02:00.6056111Z 
+2026-10-09T23:02:00.6056621Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6057530Z ⚠ [20/153] Replayed Ps.Core.Abstract
+2026-10-09T23:02:00.6058561Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6059271Z 
+2026-10-09T23:02:00.6060217Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6061220Z   [apply] _depth
+2026-10-09T23:02:00.6061442Z 
+2026-10-09T23:02:00.6061984Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6063440Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6064238Z 
+2026-10-09T23:02:00.6065008Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6065959Z   [apply] _depth
+2026-10-09T23:02:00.6066169Z 
+2026-10-09T23:02:00.6066752Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6068008Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6068705Z 
+2026-10-09T23:02:00.6069680Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6070702Z   [apply] _depth
+2026-10-09T23:02:00.6070922Z 
+2026-10-09T23:02:00.6071442Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6072719Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6073599Z 
+2026-10-09T23:02:00.6074574Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6075588Z   [apply] _depth
+2026-10-09T23:02:00.6075797Z 
+2026-10-09T23:02:00.6076534Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6077797Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6078488Z 
+2026-10-09T23:02:00.6079441Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6080430Z   [apply] _depth
+2026-10-09T23:02:00.6080638Z 
+2026-10-09T23:02:00.6081170Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6082132Z ⚠ [21/153] Replayed Ps.Core.Subst
+2026-10-09T23:02:00.6083275Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:00.6083976Z 
+2026-10-09T23:02:00.6084949Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6085972Z   [apply] _cutoff
+2026-10-09T23:02:00.6086195Z 
+2026-10-09T23:02:00.6086735Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6087973Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:00.6088664Z 
+2026-10-09T23:02:00.6089636Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6090654Z   [apply] _cutoff
+2026-10-09T23:02:00.6090867Z 
+2026-10-09T23:02:00.6091416Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6092671Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:00.6093574Z 
+2026-10-09T23:02:00.6094546Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6095550Z   [apply] _cutoff
+2026-10-09T23:02:00.6095774Z 
+2026-10-09T23:02:00.6096307Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6097563Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:00.6098258Z 
+2026-10-09T23:02:00.6099214Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6100215Z   [apply] _cutoff
+2026-10-09T23:02:00.6100446Z 
+2026-10-09T23:02:00.6101185Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6102450Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:00.6103278Z 
+2026-10-09T23:02:00.6104053Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6105017Z   [apply] _cutoff
+2026-10-09T23:02:00.6105246Z 
+2026-10-09T23:02:00.6105776Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6107014Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6107689Z 
+2026-10-09T23:02:00.6108682Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6109685Z   [apply] _depth
+2026-10-09T23:02:00.6109918Z 
+2026-10-09T23:02:00.6110437Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6111672Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6112354Z 
+2026-10-09T23:02:00.6113503Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6114429Z   [apply] _depth
+2026-10-09T23:02:00.6114615Z 
+2026-10-09T23:02:00.6115078Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6116146Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6116749Z 
+2026-10-09T23:02:00.6117607Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6118609Z   [apply] _depth
+2026-10-09T23:02:00.6118843Z 
+2026-10-09T23:02:00.6119374Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6120642Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6121325Z 
+2026-10-09T23:02:00.6122297Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6123456Z   [apply] _depth
+2026-10-09T23:02:00.6123675Z 
+2026-10-09T23:02:00.6124211Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6125462Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:00.6126162Z 
+2026-10-09T23:02:00.6127127Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6128148Z   [apply] _depth
+2026-10-09T23:02:00.6128371Z 
+2026-10-09T23:02:00.6128906Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6129910Z ⚠ [32/153] Replayed Ps.Core.LevelSubst
+2026-10-09T23:02:00.6131047Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.
+2026-10-09T23:02:00.6131785Z 
+2026-10-09T23:02:00.6132755Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6133876Z   [apply] _arguments
+2026-10-09T23:02:00.6134121Z 
+2026-10-09T23:02:00.6134657Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6135976Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.
+2026-10-09T23:02:00.6136689Z 
+2026-10-09T23:02:00.6137660Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6138910Z   [apply] _target
+2026-10-09T23:02:00.6139125Z 
+2026-10-09T23:02:00.6139642Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6140488Z ⚠ [33/153] Replayed Ps.Meta.LevelContext
+2026-10-09T23:02:00.6141567Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.
+2026-10-09T23:02:00.6142253Z 
+2026-10-09T23:02:00.6143287Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6144140Z   [apply] _assignment
+2026-10-09T23:02:00.6144357Z 
+2026-10-09T23:02:00.6144822Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6145581Z ⚠ [38/153] Replayed Ps.Meta.Unify
+2026-10-09T23:02:00.6146508Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.
+2026-10-09T23:02:00.6147143Z 
+2026-10-09T23:02:00.6147959Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6148885Z   [apply] _environment
+2026-10-09T23:02:00.6149093Z 
+2026-10-09T23:02:00.6149735Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6150948Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.
+2026-10-09T23:02:00.6151610Z 
+2026-10-09T23:02:00.6152484Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6153508Z   [apply] _localContext
+2026-10-09T23:02:00.6153725Z 
+2026-10-09T23:02:00.6154109Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6155045Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.
+2026-10-09T23:02:00.6155599Z 
+2026-10-09T23:02:00.6156365Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6157188Z   [apply] _left
+2026-10-09T23:02:00.6157360Z 
+2026-10-09T23:02:00.6157774Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6158735Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.
+2026-10-09T23:02:00.6159270Z 
+2026-10-09T23:02:00.6159987Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6160756Z   [apply] _right
+2026-10-09T23:02:00.6160931Z 
+2026-10-09T23:02:00.6161384Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6162555Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:00.6163391Z 
+2026-10-09T23:02:00.6164277Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6165214Z   [apply] _leftName
+2026-10-09T23:02:00.6165431Z 
+2026-10-09T23:02:00.6165913Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6167282Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:00.6168127Z 
+2026-10-09T23:02:00.6168920Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6169817Z   [apply] _leftName
+2026-10-09T23:02:00.6170335Z 
+2026-10-09T23:02:00.6170796Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6172166Z ⚠ [41/153] Replayed Ps.Elab.Literal
+2026-10-09T23:02:00.6173280Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.
+2026-10-09T23:02:00.6173876Z 
+2026-10-09T23:02:00.6174654Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6175613Z   [apply] _chars
+2026-10-09T23:02:00.6175828Z 
+2026-10-09T23:02:00.6176318Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6177411Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:00.6178003Z 
+2026-10-09T23:02:00.6178799Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6179633Z   [apply] _charsRev
+2026-10-09T23:02:00.6179844Z 
+2026-10-09T23:02:00.6180281Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6181009Z ⚠ [42/153] Replayed Ps.Elab.Term
+2026-10-09T23:02:00.6181908Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.
+2026-10-09T23:02:00.6182505Z 
+2026-10-09T23:02:00.6183623Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6184534Z   [apply] _context
+2026-10-09T23:02:00.6184723Z 
+2026-10-09T23:02:00.6185155Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6186320Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.
+2026-10-09T23:02:00.6186919Z 
+2026-10-09T23:02:00.6187756Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6188608Z   [apply] _recursion
+2026-10-09T23:02:00.6188802Z 
+2026-10-09T23:02:00.6189233Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6190306Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.
+2026-10-09T23:02:00.6190877Z 
+2026-10-09T23:02:00.6191712Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6192605Z   [apply] _index
+2026-10-09T23:02:00.6192786Z 
+2026-10-09T23:02:00.6193330Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6194119Z ⚠ [47/153] Replayed Ps.BackendTs.Expr
+2026-10-09T23:02:00.6195080Z warning: packages/backend-ts/src/Ps/BackendTs/Expr.lean:631:32: Variable name `fieldName` is not explicitly referenced.
+2026-10-09T23:02:00.6195775Z 
+2026-10-09T23:02:00.6196598Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6197441Z   [apply] _fieldName
+2026-10-09T23:02:00.6197637Z 
+2026-10-09T23:02:00.6198097Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6198867Z ⚠ [51/153] Replayed Ps.CompilerIr.Check
+2026-10-09T23:02:00.6199825Z warning: packages/compiler-ir/src/Ps/CompilerIr/Check.lean:690:27: Variable name `scope` is not explicitly referenced.
+2026-10-09T23:02:00.6200510Z 
+2026-10-09T23:02:00.6201305Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6202163Z   [apply] _scope
+2026-10-09T23:02:00.6202354Z 
+2026-10-09T23:02:00.6202797Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:00.6203757Z ⚠ [54/153] Replayed Ps.Host.TypeScriptCompiler
+2026-10-09T23:02:00.6205031Z warning: host/src/Ps/Host/TypeScriptCompiler.lean:15:10: `String.dropRight` has been deprecated: Use `String.dropEnd` instead
+2026-10-09T23:02:00.6205724Z 
+2026-10-09T23:02:00.6206004Z Note: The updated constant has a different type:
+2026-10-09T23:02:00.6206554Z   String → Nat → String.Slice
+2026-10-09T23:02:00.6206939Z instead of
+2026-10-09T23:02:00.6207283Z   String → Nat → String
+2026-10-09T23:02:00.6207765Z ⚠ [109/153] Replayed BootstrapTests
+2026-10-09T23:02:00.6208546Z warning: test/BootstrapTests.lean:335:10: Variable name `id` is not explicitly referenced.
+2026-10-09T23:02:00.6209081Z 
+2026-10-09T23:02:00.6209907Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:00.6210792Z   [apply] _id
+2026-10-09T23:02:00.6210976Z 
+2026-10-09T23:02:00.6211425Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:01.3016333Z ✔ [116/153] Built Ps.Erasure.Basic (724ms)
+2026-10-09T23:02:02.2094825Z ✔ [117/153] Built Ps.Erasure.Inductive (875ms)
+2026-10-09T23:02:02.4058479Z ✔ [119/153] Built Ps.Erasure.Basic:c.o (1.1s)
+2026-10-09T23:02:02.7063310Z ✔ [120/153] Built Ps.Erasure.Structure (508ms)
+2026-10-09T23:02:03.1081303Z ✔ [121/153] Built Ps.BackendTs.Sh1Target (1.4s)
+2026-10-09T23:02:03.1082682Z ✔ [124/153] Built Ps.Erasure.StructureRecursor (399ms)
+2026-10-09T23:02:03.4084929Z ✔ [125/153] Built Ps.Erasure.StructureRecursor:c.o (377ms)
+2026-10-09T23:02:03.8082290Z ⚠ [126/153] Built Ps.Erasure.Expr (2.5s)
+2026-10-09T23:02:03.8084040Z warning: packages/erasure/src/Ps/Erasure/Expr.lean:1074:21: Variable name `name` is not explicitly referenced.
+2026-10-09T23:02:03.8085273Z 
+2026-10-09T23:02:03.8099267Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:03.8101025Z   [apply] _name
+2026-10-09T23:02:03.8101514Z 
+2026-10-09T23:02:03.8102223Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:04.3118317Z ✔ [127/153] Built Ps.Erasure.Definition (524ms)
+2026-10-09T23:02:05.1184806Z ✔ [128/153] Built Ps.Compiler.Api (774ms)
+2026-10-09T23:02:05.4149427Z ✔ [130/153] Built Ps.Erasure.Definition:c.o (1.0s)
+2026-10-09T23:02:05.7148497Z ✔ [131/153] Built ErasureTests (1.4s)
+2026-10-09T23:02:05.8175204Z ✔ [133/153] Built Ps.BackendTs.Checked (469ms)
+2026-10-09T23:02:06.3184675Z ✔ [135/153] Built Ps.Compiler.Sh1 (1.2s)
+2026-10-09T23:02:06.6160091Z ⚠ [137/153] Built IrCheckerTests (753ms)
+2026-10-09T23:02:06.6161510Z warning: test/IrCheckerTests.lean:47:42: Variable name `emptyResult` is not explicitly referenced.
+2026-10-09T23:02:06.6162395Z 
+2026-10-09T23:02:06.6164321Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:06.6165463Z   [apply] _emptyResult
+2026-10-09T23:02:06.6165779Z 
+2026-10-09T23:02:06.6166358Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:06.7176404Z ✔ [139/153] Built Ps.BackendTs.Sh1 (408ms)
+2026-10-09T23:02:07.0187538Z ✔ [141/153] Built Ps.BackendTs.Compiler (357ms)
+2026-10-09T23:02:07.3183429Z ⚠ [143/153] Built StrictSourceCompile (656ms)
+2026-10-09T23:02:07.3184594Z warning: scripts/StrictSourceCompile.lean:111:38: `String.dropRight` has been deprecated: Use `String.dropEnd` instead
+2026-10-09T23:02:07.3185116Z 
+2026-10-09T23:02:07.3185547Z Note: The updated constant has a different type:
+2026-10-09T23:02:07.3185960Z   String → Nat → String.Slice
+2026-10-09T23:02:07.3186227Z instead of
+2026-10-09T23:02:07.3186479Z   String → Nat → String
+2026-10-09T23:02:07.5194881Z ⚠ [145/153] Built Ps.Host.CompilerDriver (443ms)
+2026-10-09T23:02:07.5196241Z warning: host/src/Ps/Host/CompilerDriver.lean:118:23: `String.dropRight` has been deprecated: Use `String.dropEnd` instead
+2026-10-09T23:02:07.5197058Z 
+2026-10-09T23:02:07.5197861Z Note: The updated constant has a different type:
+2026-10-09T23:02:07.5198563Z   String → Nat → String.Slice
+2026-10-09T23:02:07.5199026Z instead of
+2026-10-09T23:02:07.5199435Z   String → Nat → String
+2026-10-09T23:02:07.8190017Z ✔ [147/153] Built Main (284ms)
+2026-10-09T23:02:08.6214629Z ✔ [149/153] Built Ps.Erasure.Expr:c.o (4.8s)
+2026-10-09T23:02:08.9211477Z ✔ [150/153] Built psc1:exe (333ms)
+2026-10-09T23:02:08.9211986Z ✔ [151/153] Built psc1_sh1_compile:exe (355ms)
+2026-10-09T23:02:08.9212412Z ✔ [152/153] Built psc1_ir_check_tests:exe (348ms)
+2026-10-09T23:02:08.9212847Z ✔ [153/153] Built psc1_erasure_tests:exe (332ms)
+2026-10-09T23:02:08.9372416Z Build completed successfully (153 jobs).
+2026-10-09T23:02:08.9629429Z ##[group]Run regression_status=0
+2026-10-09T23:02:08.9629765Z [36;1mregression_status=0[0m
+2026-10-09T23:02:08.9630135Z [36;1mfor target in psc1_tests psc1_translation_tests psc1_erasure_tests; do[0m
+2026-10-09T23:02:08.9630599Z [36;1m  if ! lake exe "$target"; then regression_status=1; fi[0m
+2026-10-09T23:02:08.9630951Z [36;1mdone[0m
+2026-10-09T23:02:08.9631223Z [36;1mexit "$regression_status"[0m
+2026-10-09T23:02:08.9674028Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:02:08.9674316Z env:
+2026-10-09T23:02:08.9674707Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:02:08.9675155Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:02:08.9675421Z ##[endgroup]
+2026-10-09T23:02:09.4203295Z ⚠ [4/76] Replayed Ps.Syntax.Cursor
+2026-10-09T23:02:09.4204811Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.
+2026-10-09T23:02:09.4205810Z 
+2026-10-09T23:02:09.4206678Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4207383Z   [apply] _head
+2026-10-09T23:02:09.4207551Z 
+2026-10-09T23:02:09.4207912Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4208781Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:09.4209252Z 
+2026-10-09T23:02:09.4209869Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4210531Z   [apply] _tail
+2026-10-09T23:02:09.4210686Z 
+2026-10-09T23:02:09.4211042Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4211873Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:09.4212333Z 
+2026-10-09T23:02:09.4213095Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4213764Z   [apply] _rest
+2026-10-09T23:02:09.4213919Z 
+2026-10-09T23:02:09.4214267Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4215125Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.
+2026-10-09T23:02:09.4215594Z 
+2026-10-09T23:02:09.4216207Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4216862Z   [apply] _first
+2026-10-09T23:02:09.4217025Z 
+2026-10-09T23:02:09.4217373Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4218194Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:09.4218663Z 
+2026-10-09T23:02:09.4219271Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4219927Z   [apply] _tail
+2026-10-09T23:02:09.4220083Z 
+2026-10-09T23:02:09.4220433Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4221498Z ⚠ [6/76] Replayed Ps.Syntax.Lexer
+2026-10-09T23:02:09.4222193Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4222658Z 
+2026-10-09T23:02:09.4223366Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4224035Z   [apply] _depth
+2026-10-09T23:02:09.4224198Z 
+2026-10-09T23:02:09.4224531Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4225563Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:09.4226039Z 
+2026-10-09T23:02:09.4226638Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4227318Z   [apply] _remaining
+2026-10-09T23:02:09.4227496Z 
+2026-10-09T23:02:09.4227833Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4228700Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:09.4229183Z 
+2026-10-09T23:02:09.4229785Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4230454Z   [apply] _remaining
+2026-10-09T23:02:09.4230623Z 
+2026-10-09T23:02:09.4230954Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4231789Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:09.4232254Z 
+2026-10-09T23:02:09.4232849Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4233616Z   [apply] _charsRev
+2026-10-09T23:02:09.4233781Z 
+2026-10-09T23:02:09.4234113Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4234711Z ⚠ [8/76] Replayed Ps.Syntax.ParserState
+2026-10-09T23:02:09.4235680Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:09.4236315Z 
+2026-10-09T23:02:09.4237119Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4238024Z   [apply] _rest
+2026-10-09T23:02:09.4238236Z 
+2026-10-09T23:02:09.4238674Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4239307Z ⚠ [14/76] Replayed Ps.Core.Abstract
+2026-10-09T23:02:09.4240005Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4240463Z 
+2026-10-09T23:02:09.4241069Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4241726Z   [apply] _depth
+2026-10-09T23:02:09.4241882Z 
+2026-10-09T23:02:09.4242215Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4243204Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4243655Z 
+2026-10-09T23:02:09.4244261Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4244928Z   [apply] _depth
+2026-10-09T23:02:09.4245085Z 
+2026-10-09T23:02:09.4245414Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4246237Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4246839Z 
+2026-10-09T23:02:09.4247448Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4248106Z   [apply] _depth
+2026-10-09T23:02:09.4248265Z 
+2026-10-09T23:02:09.4248603Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4249409Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4249856Z 
+2026-10-09T23:02:09.4250671Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4251327Z   [apply] _depth
+2026-10-09T23:02:09.4251485Z 
+2026-10-09T23:02:09.4251826Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4252641Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4253230Z 
+2026-10-09T23:02:09.4253849Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4254562Z   [apply] _depth
+2026-10-09T23:02:09.4254721Z 
+2026-10-09T23:02:09.4255060Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4255666Z ⚠ [22/76] Replayed Ps.Meta.LevelContext
+2026-10-09T23:02:09.4256427Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.
+2026-10-09T23:02:09.4256909Z 
+2026-10-09T23:02:09.4257523Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4258196Z   [apply] _assignment
+2026-10-09T23:02:09.4258362Z 
+2026-10-09T23:02:09.4258701Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4259276Z ⚠ [24/76] Replayed Ps.Core.LevelSubst
+2026-10-09T23:02:09.4259986Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.
+2026-10-09T23:02:09.4260455Z 
+2026-10-09T23:02:09.4261061Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4261711Z   [apply] _arguments
+2026-10-09T23:02:09.4261878Z 
+2026-10-09T23:02:09.4262213Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4263132Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.
+2026-10-09T23:02:09.4263594Z 
+2026-10-09T23:02:09.4264203Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4264855Z   [apply] _target
+2026-10-09T23:02:09.4265020Z 
+2026-10-09T23:02:09.4265308Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4265764Z ⚠ [25/76] Replayed Ps.Core.Subst
+2026-10-09T23:02:09.4266315Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:09.4266669Z 
+2026-10-09T23:02:09.4267167Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4267715Z   [apply] _cutoff
+2026-10-09T23:02:09.4267838Z 
+2026-10-09T23:02:09.4268128Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4268791Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:09.4269144Z 
+2026-10-09T23:02:09.4269642Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4270342Z   [apply] _cutoff
+2026-10-09T23:02:09.4270465Z 
+2026-10-09T23:02:09.4270744Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4271419Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:09.4271773Z 
+2026-10-09T23:02:09.4272270Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4272824Z   [apply] _cutoff
+2026-10-09T23:02:09.4272947Z 
+2026-10-09T23:02:09.4273365Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4274039Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:09.4274397Z 
+2026-10-09T23:02:09.4274902Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4275464Z   [apply] _cutoff
+2026-10-09T23:02:09.4275588Z 
+2026-10-09T23:02:09.4275876Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4276545Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:09.4276900Z 
+2026-10-09T23:02:09.4277411Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4277965Z   [apply] _cutoff
+2026-10-09T23:02:09.4278086Z 
+2026-10-09T23:02:09.4278371Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4279039Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4279403Z 
+2026-10-09T23:02:09.4279986Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4280756Z   [apply] _depth
+2026-10-09T23:02:09.4281009Z 
+2026-10-09T23:02:09.4281313Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4282330Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4283125Z 
+2026-10-09T23:02:09.4283959Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4284752Z   [apply] _depth
+2026-10-09T23:02:09.4284945Z 
+2026-10-09T23:02:09.4285388Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4286241Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4286695Z 
+2026-10-09T23:02:09.4287403Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4303365Z   [apply] _depth
+2026-10-09T23:02:09.4303629Z 
+2026-10-09T23:02:09.4304085Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4305158Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4305549Z 
+2026-10-09T23:02:09.4306202Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4306923Z   [apply] _depth
+2026-10-09T23:02:09.4307077Z 
+2026-10-09T23:02:09.4307417Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4308292Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.4308684Z 
+2026-10-09T23:02:09.4309564Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4310292Z   [apply] _depth
+2026-10-09T23:02:09.4310425Z 
+2026-10-09T23:02:09.4310848Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4311550Z ⚠ [28/76] Replayed Ps.Meta.Unify
+2026-10-09T23:02:09.4312154Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.
+2026-10-09T23:02:09.4312647Z 
+2026-10-09T23:02:09.4313473Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4314129Z   [apply] _environment
+2026-10-09T23:02:09.4314283Z 
+2026-10-09T23:02:09.4314583Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4315414Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.
+2026-10-09T23:02:09.4315907Z 
+2026-10-09T23:02:09.4316497Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4317057Z   [apply] _localContext
+2026-10-09T23:02:09.4317292Z 
+2026-10-09T23:02:09.4317583Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4318335Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.
+2026-10-09T23:02:09.4318721Z 
+2026-10-09T23:02:09.4319309Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4319948Z   [apply] _left
+2026-10-09T23:02:09.4320087Z 
+2026-10-09T23:02:09.4320426Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4321239Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.
+2026-10-09T23:02:09.4321679Z 
+2026-10-09T23:02:09.4322277Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4322891Z   [apply] _right
+2026-10-09T23:02:09.4323160Z 
+2026-10-09T23:02:09.4323451Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4324262Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:09.4324739Z 
+2026-10-09T23:02:09.4325258Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4325947Z   [apply] _leftName
+2026-10-09T23:02:09.4326088Z 
+2026-10-09T23:02:09.4326375Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4327177Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:09.4327558Z 
+2026-10-09T23:02:09.4328069Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4328629Z   [apply] _leftName
+2026-10-09T23:02:09.4328769Z 
+2026-10-09T23:02:09.4329112Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4329689Z ⚠ [33/76] Replayed Ps.Elab.Literal
+2026-10-09T23:02:09.4330265Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.
+2026-10-09T23:02:09.4330653Z 
+2026-10-09T23:02:09.4331152Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4331720Z   [apply] _chars
+2026-10-09T23:02:09.4331855Z 
+2026-10-09T23:02:09.4332273Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4333244Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:09.4333686Z 
+2026-10-09T23:02:09.4334187Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4334743Z   [apply] _charsRev
+2026-10-09T23:02:09.4334879Z 
+2026-10-09T23:02:09.4335157Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4335655Z ⚠ [34/76] Replayed Ps.Elab.Term
+2026-10-09T23:02:09.4336294Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.
+2026-10-09T23:02:09.4336670Z 
+2026-10-09T23:02:09.4337180Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4337729Z   [apply] _context
+2026-10-09T23:02:09.4337863Z 
+2026-10-09T23:02:09.4338151Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4338828Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.
+2026-10-09T23:02:09.4339206Z 
+2026-10-09T23:02:09.4339711Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4340501Z   [apply] _recursion
+2026-10-09T23:02:09.4340710Z 
+2026-10-09T23:02:09.4341156Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4342195Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.
+2026-10-09T23:02:09.4342564Z 
+2026-10-09T23:02:09.4343440Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4344362Z   [apply] _index
+2026-10-09T23:02:09.4344575Z 
+2026-10-09T23:02:09.4345013Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4345545Z ⚠ [38/76] Replayed BootstrapTests
+2026-10-09T23:02:09.4346058Z warning: test/BootstrapTests.lean:335:10: Variable name `id` is not explicitly referenced.
+2026-10-09T23:02:09.4346394Z 
+2026-10-09T23:02:09.4346890Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.4347446Z   [apply] _id
+2026-10-09T23:02:09.4347573Z 
+2026-10-09T23:02:09.4347856Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.4348533Z PSC1_TEST_PASS: dual-source core elaboration
+2026-10-09T23:02:09.4349009Z PSC1_TEST_PASS: dual-source binder kinds elaboration
+2026-10-09T23:02:09.4349386Z PSC1_TEST_PASS: dual-source simple parse
+2026-10-09T23:02:09.4349772Z PSC1_TEST_PASS: dual-source binder application parse
+2026-10-09T23:02:09.4350170Z PSC1_TEST_PASS: dual-source binder kinds parse
+2026-10-09T23:02:09.4350535Z PSC1_TEST_PASS: dual-source typed lambda parse
+2026-10-09T23:02:09.4350920Z PSC1_TEST_PASS: dual-source typed lambda elaboration
+2026-10-09T23:02:09.4351311Z PSC1_TEST_PASS: structure stops before partial def
+2026-10-09T23:02:09.4351678Z PSC1_TEST_PASS: Lean list literal sugar
+2026-10-09T23:02:09.4352003Z PSC1_TEST_PASS: Lean list pattern sugar
+2026-10-09T23:02:09.4352357Z PSC1_TEST_PASS: repeated wildcard match binders
+2026-10-09T23:02:09.4352697Z PSC1_TEST_PASS: Lean Nat match sugar
+2026-10-09T23:02:09.4353287Z PSC1_TEST_PASS: Lean grouped typed binders
+2026-10-09T23:02:09.4353673Z PSC1_TEST_PASS: lambda match uses expected type
+2026-10-09T23:02:09.4354048Z PSC1_TEST_PASS: two-argument equation definition
+2026-10-09T23:02:09.4354407Z PSC1_TEST_PASS: dual-source Pi parse
+2026-10-09T23:02:09.4354764Z PSC1_TEST_PASS: dual-source Pi lambda declaration
+2026-10-09T23:02:09.4355335Z PSC1_TEST_PASS: dual-source annotated let
+2026-10-09T23:02:09.4355670Z PSC1_TEST_PASS: dual-source inferred let
+2026-10-09T23:02:09.4356010Z PSC1_TEST_PASS: dual-source Bool literal
+2026-10-09T23:02:09.4356329Z PSC1_TEST_PASS: dual-source if
+2026-10-09T23:02:09.4356648Z PSC1_TEST_PASS: inductive metadata lookup
+2026-10-09T23:02:09.4357064Z PSC1_TEST_PASS: bootstrap List/Option type constructors
+2026-10-09T23:02:09.4357760Z PSC1_TEST_PASS: positive nested recursive field
+2026-10-09T23:02:09.4358370Z PSC1_TEST_PASS: reject negative nested recursive field
+2026-10-09T23:02:09.4359026Z PSC1_TEST_PASS: Lean product inside application parse
+2026-10-09T23:02:09.4359585Z PSC1_TEST_PASS: dual-source basic match parse
+2026-10-09T23:02:09.4360181Z PSC1_TEST_PASS: Lean nested match dedent parse
+2026-10-09T23:02:09.4360621Z PSC1_TEST_PASS: constructor match pattern parse
+2026-10-09T23:02:09.4361043Z PSC1_TEST_PASS: dual-source basic match elaboration
+2026-10-09T23:02:09.4361452Z PSC1_TEST_PASS: dual-source field match elaboration
+2026-10-09T23:02:09.4361809Z PSC1_TEST_PASS: defeq beta under forall
+2026-10-09T23:02:09.4362352Z PSC1_TEST_PASS: dual-source inductive enum parse
+2026-10-09T23:02:09.4363190Z PSC1_TEST_PASS: dual-source inductive field parse
+2026-10-09T23:02:09.4363793Z PSC1_TEST_PASS: dual-source inductive enum elaboration
+2026-10-09T23:02:09.4364292Z PSC1_TEST_PASS: dual-source inductive field elaboration
+2026-10-09T23:02:09.4364685Z PSC1_TEST_PASS: dual-source Type Prop elaboration
+2026-10-09T23:02:09.4365076Z PSC1_TEST_PASS: dual-source parametric inductive
+2026-10-09T23:02:09.4365469Z PSC1_TEST_PASS: Lean implicit constructor elaborates
+2026-10-09T23:02:09.4365910Z PSC1_TEST_PASS: ProofScript implicit constructor elaborates
+2026-10-09T23:02:09.4366334Z PSC1_TEST_PASS: Lean implicit constructor application
+2026-10-09T23:02:09.4366773Z PSC1_TEST_PASS: ProofScript implicit constructor application
+2026-10-09T23:02:09.4367231Z PSC1_TEST_PASS: dual-source implicit constructor application
+2026-10-09T23:02:09.4367648Z PSC1_TEST_PASS: dual-source structural recursion
+2026-10-09T23:02:09.4368054Z PSC1_TEST_PASS: dual-source controlled partial definition
+2026-10-09T23:02:09.4368484Z PSC1_TEST_PASS: reject non-decreasing structural recursion
+2026-10-09T23:02:09.4368938Z PSC1_TEST_PASS: reject changed invariant structural recursion
+2026-10-09T23:02:09.4369326Z PSC1_TEST_PASS: dual-source String literal
+2026-10-09T23:02:09.4369679Z PSC1_TEST_PASS: reject invalid String escapes
+2026-10-09T23:02:09.4370015Z PSC1_TEST_PASS: dual-source grouping
+2026-10-09T23:02:09.4370337Z PSC1_TEST_PASS: dual-source Unit
+2026-10-09T23:02:09.4370668Z PSC1_TEST_PASS: Lean parenthesized application
+2026-10-09T23:02:09.4371021Z PSC1_TEST_PASS: dual-source Char literal
+2026-10-09T23:02:09.4371353Z PSC1_TEST_PASS: reject invalid Char escapes
+2026-10-09T23:02:09.4371709Z PSC1_TEST_PASS: ProofScript explicit Unit call
+2026-10-09T23:02:09.4372081Z PSC1_TEST_PASS: ProofScript accepts spaced call
+2026-10-09T23:02:09.4372506Z PSC1_TEST_PASS: ProofScript empty call preserves no arguments
+2026-10-09T23:02:09.4373110Z PSC1_TEST_PASS: ProofScript empty call rejected by elaboration
+2026-10-09T23:02:09.4373581Z PSC1_TEST_PASS: Lean interleaved binder kinds parse
+2026-10-09T23:02:09.4374015Z PSC1_TEST_PASS: Lean interleaved binder kinds elaboration
+2026-10-09T23:02:09.4374490Z PSC1_TEST_PASS: ProofScript rejects interleaved declaration binders
+2026-10-09T23:02:09.4374929Z PSC1_TEST_PASS: lexer UTF-8 byte offsets
+2026-10-09T23:02:09.4375252Z PSC1_TEST_PASS: lexer nested trivia
+2026-10-09T23:02:09.4375551Z PSC1_TEST_PASS: module graph
+2026-10-09T23:02:09.4375864Z PSC1_TEST_PASS: global instance synthesis
+2026-10-09T23:02:09.4376209Z PSC1_TEST_PASS: generic instance synthesis
+2026-10-09T23:02:09.4376727Z PSC1_TEST_PASS: dependent instance synthesis
+2026-10-09T23:02:09.4377074Z PSC1_TEST_PASS: local instance synthesis
+2026-10-09T23:02:09.4377415Z PSC1_TEST_PASS: transactional unification
+2026-10-09T23:02:09.4377751Z PSC1_TEST_PASS: binder-info unification
+2026-10-09T23:02:09.4378316Z PSC1_TEST_PASS: level metavariable unification
+2026-10-09T23:02:09.4378681Z PSC1_TEST_PASS: scoped metavariable assignment
+2026-10-09T23:02:09.4379055Z PSC1_TEST_PASS: reject out-of-scope assignment
+2026-10-09T23:02:09.4379433Z PSC1_TEST_PASS: beta WHNF
+2026-10-09T23:02:09.4379769Z PSC1_TEST_PASS: infer identity
+2026-10-09T23:02:09.4380047Z PSC1_BOOTSTRAP_TESTS: PASS
+2026-10-09T23:02:09.9136054Z ⚠ [3/32] Replayed Ps.Syntax.Cursor
+2026-10-09T23:02:09.9137075Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.
+2026-10-09T23:02:09.9137587Z 
+2026-10-09T23:02:09.9138593Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9139296Z   [apply] _head
+2026-10-09T23:02:09.9139467Z 
+2026-10-09T23:02:09.9139818Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9140688Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:09.9141183Z 
+2026-10-09T23:02:09.9141799Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9142477Z   [apply] _tail
+2026-10-09T23:02:09.9142627Z 
+2026-10-09T23:02:09.9142954Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9143997Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:09.9144476Z 
+2026-10-09T23:02:09.9145084Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9145769Z   [apply] _rest
+2026-10-09T23:02:09.9145905Z 
+2026-10-09T23:02:09.9146260Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9147118Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.
+2026-10-09T23:02:09.9147518Z 
+2026-10-09T23:02:09.9148018Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9148582Z   [apply] _first
+2026-10-09T23:02:09.9148715Z 
+2026-10-09T23:02:09.9149000Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9149678Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:09.9150056Z 
+2026-10-09T23:02:09.9150564Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9151100Z   [apply] _tail
+2026-10-09T23:02:09.9151227Z 
+2026-10-09T23:02:09.9151509Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9152052Z ⚠ [5/32] Replayed Ps.Syntax.Lexer
+2026-10-09T23:02:09.9152623Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:09.9153080Z 
+2026-10-09T23:02:09.9153586Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9154139Z   [apply] _depth
+2026-10-09T23:02:09.9154266Z 
+2026-10-09T23:02:09.9154551Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9155310Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:09.9155701Z 
+2026-10-09T23:02:09.9156197Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9156752Z   [apply] _remaining
+2026-10-09T23:02:09.9157086Z 
+2026-10-09T23:02:09.9157371Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9158092Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:09.9158491Z 
+2026-10-09T23:02:09.9158983Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9159555Z   [apply] _remaining
+2026-10-09T23:02:09.9159705Z 
+2026-10-09T23:02:09.9159980Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9160752Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:09.9161144Z 
+2026-10-09T23:02:09.9161633Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9162190Z   [apply] _charsRev
+2026-10-09T23:02:09.9162328Z 
+2026-10-09T23:02:09.9162599Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9163200Z ⚠ [8/32] Replayed Ps.Syntax.ParserState
+2026-10-09T23:02:09.9163817Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:09.9164226Z 
+2026-10-09T23:02:09.9164729Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:09.9165270Z   [apply] _rest
+2026-10-09T23:02:09.9165400Z 
+2026-10-09T23:02:09.9165690Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:09.9261279Z PSC1_TRANSLATION_PASS: unsupported ProofScript do rejected
+2026-10-09T23:02:09.9262299Z PSC1_TRANSLATION_PASS: explicit compiler effect calls preserve translation
+2026-10-09T23:02:09.9263487Z PSC1_TRANSLATION_PASS: explicit Unit argument survives canonical printing
+2026-10-09T23:02:09.9264818Z PSC1_TRANSLATION_PASS: grouped and dependent ProofScript binder types
+2026-10-09T23:02:09.9265656Z PSC1_TRANSLATION_PASS: nested function binder canonical round trip
+2026-10-09T23:02:09.9266531Z PSC1_TRANSLATION_PASS: complex application .lean <-> .ps
+2026-10-09T23:02:09.9267236Z PSC1_TRANSLATION_PASS: partial def .lean <-> .ps
+2026-10-09T23:02:09.9267907Z PSC1_TRANSLATION_PASS: structure .lean <-> .ps
+2026-10-09T23:02:09.9268960Z PSC1_TRANSLATION_PASS: .lean -> .ps -> .lean
+2026-10-09T23:02:09.9269678Z PSC1_TRANSLATION_PASS: .ps -> .lean -> .ps
+2026-10-09T23:02:10.3978720Z ⚠ [3/96] Replayed Ps.Syntax.Cursor
+2026-10-09T23:02:10.3980171Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.
+2026-10-09T23:02:10.3980630Z 
+2026-10-09T23:02:10.3981168Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3981767Z   [apply] _head
+2026-10-09T23:02:10.3981910Z 
+2026-10-09T23:02:10.3982216Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3982920Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:10.3983593Z 
+2026-10-09T23:02:10.3984115Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3984678Z   [apply] _tail
+2026-10-09T23:02:10.3984814Z 
+2026-10-09T23:02:10.3985172Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3985862Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:10.3986240Z 
+2026-10-09T23:02:10.3986731Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3987651Z   [apply] _rest
+2026-10-09T23:02:10.3987784Z 
+2026-10-09T23:02:10.3988063Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3988769Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.
+2026-10-09T23:02:10.3989173Z 
+2026-10-09T23:02:10.3989676Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3990250Z   [apply] _first
+2026-10-09T23:02:10.3990381Z 
+2026-10-09T23:02:10.3990751Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3991442Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:10.3991819Z 
+2026-10-09T23:02:10.3992313Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3992868Z   [apply] _tail
+2026-10-09T23:02:10.3993102Z 
+2026-10-09T23:02:10.3993379Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3993938Z ⚠ [5/96] Replayed Ps.Syntax.Lexer
+2026-10-09T23:02:10.3994501Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.3994883Z 
+2026-10-09T23:02:10.3995391Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3995944Z   [apply] _depth
+2026-10-09T23:02:10.3996080Z 
+2026-10-09T23:02:10.3996369Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3997052Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:10.3997465Z 
+2026-10-09T23:02:10.3997966Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.3998512Z   [apply] _remaining
+2026-10-09T23:02:10.3998653Z 
+2026-10-09T23:02:10.3998936Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.3999631Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:10.4000026Z 
+2026-10-09T23:02:10.4000533Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4001079Z   [apply] _remaining
+2026-10-09T23:02:10.4001219Z 
+2026-10-09T23:02:10.4001505Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4002187Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:10.4002575Z 
+2026-10-09T23:02:10.4004968Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4006758Z   [apply] _charsRev
+2026-10-09T23:02:10.4006936Z 
+2026-10-09T23:02:10.4007325Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4008270Z ⚠ [8/96] Replayed Ps.Syntax.ParserState
+2026-10-09T23:02:10.4010673Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:10.4011188Z 
+2026-10-09T23:02:10.4047588Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4048446Z   [apply] _rest
+2026-10-09T23:02:10.4048593Z 
+2026-10-09T23:02:10.4048925Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4049950Z ⚠ [19/96] Replayed Ps.Core.Abstract
+2026-10-09T23:02:10.4050541Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4050932Z 
+2026-10-09T23:02:10.4051453Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4052014Z   [apply] _depth
+2026-10-09T23:02:10.4052156Z 
+2026-10-09T23:02:10.4052452Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4053369Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4053777Z 
+2026-10-09T23:02:10.4054303Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4054881Z   [apply] _depth
+2026-10-09T23:02:10.4055007Z 
+2026-10-09T23:02:10.4055311Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4056016Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4056391Z 
+2026-10-09T23:02:10.4056899Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4057451Z   [apply] _depth
+2026-10-09T23:02:10.4057572Z 
+2026-10-09T23:02:10.4057859Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4058538Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4058902Z 
+2026-10-09T23:02:10.4059412Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4059958Z   [apply] _depth
+2026-10-09T23:02:10.4060082Z 
+2026-10-09T23:02:10.4060365Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4061041Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4061402Z 
+2026-10-09T23:02:10.4061903Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4062450Z   [apply] _depth
+2026-10-09T23:02:10.4062571Z 
+2026-10-09T23:02:10.4062853Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4063537Z ⚠ [20/96] Replayed Ps.Core.Subst
+2026-10-09T23:02:10.4064096Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:10.4064460Z 
+2026-10-09T23:02:10.4064961Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4065535Z   [apply] _cutoff
+2026-10-09T23:02:10.4065677Z 
+2026-10-09T23:02:10.4065955Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4066631Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:10.4066996Z 
+2026-10-09T23:02:10.4067493Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4068059Z   [apply] _cutoff
+2026-10-09T23:02:10.4068194Z 
+2026-10-09T23:02:10.4068473Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4069139Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:10.4069502Z 
+2026-10-09T23:02:10.4070001Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4070695Z   [apply] _cutoff
+2026-10-09T23:02:10.4070828Z 
+2026-10-09T23:02:10.4071103Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4072236Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:10.4072787Z 
+2026-10-09T23:02:10.4073805Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4074408Z   [apply] _cutoff
+2026-10-09T23:02:10.4074553Z 
+2026-10-09T23:02:10.4075226Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4076503Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:10.4077062Z 
+2026-10-09T23:02:10.4077851Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4078910Z   [apply] _cutoff
+2026-10-09T23:02:10.4079259Z 
+2026-10-09T23:02:10.4079875Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4084736Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4086029Z 
+2026-10-09T23:02:10.4087083Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4088267Z   [apply] _depth
+2026-10-09T23:02:10.4088624Z 
+2026-10-09T23:02:10.4089294Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4090482Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4091134Z 
+2026-10-09T23:02:10.4092033Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4093199Z   [apply] _depth
+2026-10-09T23:02:10.4093436Z 
+2026-10-09T23:02:10.4094292Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4095488Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4096129Z 
+2026-10-09T23:02:10.4097042Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4098025Z   [apply] _depth
+2026-10-09T23:02:10.4098280Z 
+2026-10-09T23:02:10.4098791Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4099992Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4100670Z 
+2026-10-09T23:02:10.4101611Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4102589Z   [apply] _depth
+2026-10-09T23:02:10.4102835Z 
+2026-10-09T23:02:10.4103500Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4104744Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:10.4105415Z 
+2026-10-09T23:02:10.4106348Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4107354Z   [apply] _depth
+2026-10-09T23:02:10.4107613Z 
+2026-10-09T23:02:10.4108145Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4109185Z ⚠ [23/96] Replayed Ps.Core.LevelSubst
+2026-10-09T23:02:10.4110226Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.
+2026-10-09T23:02:10.4111314Z 
+2026-10-09T23:02:10.4112202Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4113309Z   [apply] _arguments
+2026-10-09T23:02:10.4113537Z 
+2026-10-09T23:02:10.4114036Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4115235Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.
+2026-10-09T23:02:10.4115897Z 
+2026-10-09T23:02:10.4117051Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4118105Z   [apply] _target
+2026-10-09T23:02:10.4118313Z 
+2026-10-09T23:02:10.4118820Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4119772Z ⚠ [24/96] Replayed Ps.Meta.LevelContext
+2026-10-09T23:02:10.4120852Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.
+2026-10-09T23:02:10.4121599Z 
+2026-10-09T23:02:10.4122557Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4123728Z   [apply] _assignment
+2026-10-09T23:02:10.4123962Z 
+2026-10-09T23:02:10.4124464Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4125329Z ⚠ [29/96] Replayed Ps.Meta.Unify
+2026-10-09T23:02:10.4126402Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.
+2026-10-09T23:02:10.4127156Z 
+2026-10-09T23:02:10.4128228Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4129405Z   [apply] _environment
+2026-10-09T23:02:10.4129700Z 
+2026-10-09T23:02:10.4130314Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4131827Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.
+2026-10-09T23:02:10.4132708Z 
+2026-10-09T23:02:10.4134000Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4137537Z   [apply] _localContext
+2026-10-09T23:02:10.4137830Z 
+2026-10-09T23:02:10.4138479Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4140025Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.
+2026-10-09T23:02:10.4140827Z 
+2026-10-09T23:02:10.4141981Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4143329Z   [apply] _left
+2026-10-09T23:02:10.4143573Z 
+2026-10-09T23:02:10.4144172Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4145607Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.
+2026-10-09T23:02:10.4146386Z 
+2026-10-09T23:02:10.4147509Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4148685Z   [apply] _right
+2026-10-09T23:02:10.4148934Z 
+2026-10-09T23:02:10.4149532Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4151022Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:10.4151833Z 
+2026-10-09T23:02:10.4152953Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4154596Z   [apply] _leftName
+2026-10-09T23:02:10.4154851Z 
+2026-10-09T23:02:10.4155455Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4156934Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:10.4157741Z 
+2026-10-09T23:02:10.4158862Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4160046Z   [apply] _leftName
+2026-10-09T23:02:10.4160295Z 
+2026-10-09T23:02:10.4161059Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4162204Z ⚠ [32/96] Replayed Ps.Elab.Literal
+2026-10-09T23:02:10.4163517Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.
+2026-10-09T23:02:10.4164333Z 
+2026-10-09T23:02:10.4165463Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4166639Z   [apply] _chars
+2026-10-09T23:02:10.4166880Z 
+2026-10-09T23:02:10.4167487Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4180651Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:10.4181683Z 
+2026-10-09T23:02:10.4183085Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4184333Z   [apply] _charsRev
+2026-10-09T23:02:10.4184600Z 
+2026-10-09T23:02:10.4187318Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4195330Z ⚠ [33/96] Replayed Ps.Elab.Term
+2026-10-09T23:02:10.4198524Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.
+2026-10-09T23:02:10.4199390Z 
+2026-10-09T23:02:10.4200545Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4203142Z   [apply] _context
+2026-10-09T23:02:10.4203368Z 
+2026-10-09T23:02:10.4203808Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4206761Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.
+2026-10-09T23:02:10.4207328Z 
+2026-10-09T23:02:10.4208901Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4209761Z   [apply] _recursion
+2026-10-09T23:02:10.4209959Z 
+2026-10-09T23:02:10.4210376Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4211376Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.
+2026-10-09T23:02:10.4212084Z 
+2026-10-09T23:02:10.4213555Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4218945Z   [apply] _index
+2026-10-09T23:02:10.4219200Z 
+2026-10-09T23:02:10.4219754Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4221558Z ⚠ [39/96] Replayed Ps.Erasure.Expr
+2026-10-09T23:02:10.4222626Z warning: packages/erasure/src/Ps/Erasure/Expr.lean:1074:21: Variable name `name` is not explicitly referenced.
+2026-10-09T23:02:10.4224658Z 
+2026-10-09T23:02:10.4225724Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4226854Z   [apply] _name
+2026-10-09T23:02:10.4227093Z 
+2026-10-09T23:02:10.4227626Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4229972Z ⚠ [46/96] Replayed Ps.BackendTs.Expr
+2026-10-09T23:02:10.4231200Z warning: packages/backend-ts/src/Ps/BackendTs/Expr.lean:631:32: Variable name `fieldName` is not explicitly referenced.
+2026-10-09T23:02:10.4231908Z 
+2026-10-09T23:02:10.4235028Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:10.4236175Z   [apply] _fieldName
+2026-10-09T23:02:10.4236408Z 
+2026-10-09T23:02:10.4237787Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:10.4238712Z PSC1_ERASURE_PASS: dual-source Lean-native identity
+2026-10-09T23:02:10.4239791Z PSC1_ERASURE_PASS: dual-source Lean-native generic identity
+2026-10-09T23:02:10.4240591Z PSC1_ERASURE_PASS: dual-source Lean-native let
+2026-10-09T23:02:10.4242278Z PSC1_ERASURE_PASS: dual-source Lean-native if
+2026-10-09T23:02:10.4243394Z PSC1_ERASURE_PASS: dual-source Lean-native Maybe match
+2026-10-09T23:02:10.4244311Z PSC1_ERASURE_PASS: dual-source Lean-native structure projection
+2026-10-09T23:02:10.4245450Z PSC1_ERASURE_PASS: dual-source Lean-native structural recursion
+2026-10-09T23:02:10.4246585Z PSC1_ERASURE_PASS: dual-source Lean-native Int
+2026-10-09T23:02:10.4247394Z PSC1_ERASURE_PASS: dual-source Lean-native Array basics
+2026-10-09T23:02:10.4248184Z PSC1_ERASURE_PASS: dual-source Lean-native Array map
+2026-10-09T23:02:10.4249643Z PSC1_ERASURE_PASS: dual-source Lean-native Array foldl
+2026-10-09T23:02:10.4250448Z PSC1_ERASURE_PASS: dual-source Lean-native Array higher-order
+2026-10-09T23:02:10.4251324Z PSC1_ERASURE_PASS: dual-source Lean-native partial application
+2026-10-09T23:02:10.4254923Z PSC1_ERASURE_PASS: dual-source Lean-native text primitives
+2026-10-09T23:02:10.4256140Z PSC1_ERASURE_PASS: dual-source Lean-native String raw-position bridge
+2026-10-09T23:02:10.4269196Z PSC1_ERASURE_PASS: dual-source Lean-native controlled partial def
+2026-10-09T23:02:10.4269919Z PSC1_ERASURE_TESTS: PASS
+2026-10-09T23:02:10.4545191Z ##[group]Run lake build psc2_lean_checked_seed
+2026-10-09T23:02:10.4545570Z [36;1mlake build psc2_lean_checked_seed[0m
+2026-10-09T23:02:10.4582771Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:02:10.4583209Z env:
+2026-10-09T23:02:10.4583625Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:02:10.4584080Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:02:10.4584340Z ##[endgroup]
+2026-10-09T23:02:11.0096428Z info: psc2LeanChecked: no previous manifest, creating one from scratch
+2026-10-09T23:02:11.0097414Z info: updating toolchain to 'leanprover/lean4:v4.34.0'
+2026-10-09T23:02:11.0098068Z info: restarting Lake via Elan
+2026-10-09T23:02:11.3705011Z info: psc2LeanChecked: no previous manifest, creating one from scratch
+2026-10-09T23:02:11.3706284Z info: toolchain not updated; already up-to-date
+2026-10-09T23:02:12.4052585Z ⚠ [4/145] Replayed Ps.Syntax.Cursor
+2026-10-09T23:02:12.4054254Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:14: Variable name `head` is not explicitly referenced.
+2026-10-09T23:02:12.4055230Z 
+2026-10-09T23:02:12.4056363Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4057620Z   [apply] _head
+2026-10-09T23:02:12.4057964Z 
+2026-10-09T23:02:12.4068532Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4079816Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:51:19: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:12.4080578Z 
+2026-10-09T23:02:12.4081553Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4082546Z   [apply] _tail
+2026-10-09T23:02:12.4082768Z 
+2026-10-09T23:02:12.4083461Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4084790Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:56:19: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:12.4085880Z 
+2026-10-09T23:02:12.4086829Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4087803Z   [apply] _rest
+2026-10-09T23:02:12.4088018Z 
+2026-10-09T23:02:12.4088534Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4089817Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:89:14: Variable name `first` is not explicitly referenced.
+2026-10-09T23:02:12.4090510Z 
+2026-10-09T23:02:12.4091475Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4092485Z   [apply] _first
+2026-10-09T23:02:12.4092716Z 
+2026-10-09T23:02:12.4093366Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4094448Z warning: packages/syntax/src/Ps/Syntax/Cursor.lean:92:25: Variable name `tail` is not explicitly referenced.
+2026-10-09T23:02:12.4095023Z 
+2026-10-09T23:02:12.4095960Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4096959Z   [apply] _tail
+2026-10-09T23:02:12.4097178Z 
+2026-10-09T23:02:12.4097700Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4098806Z ⚠ [6/145] Replayed Ps.Syntax.Lexer
+2026-10-09T23:02:12.4099857Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4100559Z 
+2026-10-09T23:02:12.4101514Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4102535Z   [apply] _depth
+2026-10-09T23:02:12.4102764Z 
+2026-10-09T23:02:12.4108006Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4121227Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:89:25: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:12.4127396Z 
+2026-10-09T23:02:12.4154467Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4155530Z   [apply] _remaining
+2026-10-09T23:02:12.4155781Z 
+2026-10-09T23:02:12.4156310Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4157627Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:11: Variable name `remaining` is not explicitly referenced.
+2026-10-09T23:02:12.4158288Z 
+2026-10-09T23:02:12.4159231Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4160273Z   [apply] _remaining
+2026-10-09T23:02:12.4160567Z 
+2026-10-09T23:02:12.4161095Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4162393Z warning: packages/syntax/src/Ps/Syntax/Lexer.lean:406:82: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:12.4163260Z 
+2026-10-09T23:02:12.4164228Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4165247Z   [apply] _charsRev
+2026-10-09T23:02:12.4165480Z 
+2026-10-09T23:02:12.4166007Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4167111Z ⚠ [9/145] Replayed Ps.Syntax.ParserState
+2026-10-09T23:02:12.4168245Z warning: packages/syntax/src/Ps/Syntax/ParserState.lean:30:20: Variable name `rest` is not explicitly referenced.
+2026-10-09T23:02:12.4168974Z 
+2026-10-09T23:02:12.4169953Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4171374Z   [apply] _rest
+2026-10-09T23:02:12.4171581Z 
+2026-10-09T23:02:12.4172101Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4173136Z ⚠ [21/145] Replayed Ps.Core.Abstract
+2026-10-09T23:02:12.4174157Z warning: packages/core/src/Ps/Core/Abstract.lean:8:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4174848Z 
+2026-10-09T23:02:12.4175808Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4176815Z   [apply] _depth
+2026-10-09T23:02:12.4177034Z 
+2026-10-09T23:02:12.4177561Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4178824Z warning: packages/core/src/Ps/Core/Abstract.lean:16:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4179509Z 
+2026-10-09T23:02:12.4180479Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4181434Z   [apply] _depth
+2026-10-09T23:02:12.4181621Z 
+2026-10-09T23:02:12.4182070Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4183328Z warning: packages/core/src/Ps/Core/Abstract.lean:18:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4183971Z 
+2026-10-09T23:02:12.4184925Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4185925Z   [apply] _depth
+2026-10-09T23:02:12.4186140Z 
+2026-10-09T23:02:12.4186657Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4187923Z warning: packages/core/src/Ps/Core/Abstract.lean:20:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4188947Z 
+2026-10-09T23:02:12.4189892Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4190901Z   [apply] _depth
+2026-10-09T23:02:12.4191121Z 
+2026-10-09T23:02:12.4191642Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4192899Z warning: packages/core/src/Ps/Core/Abstract.lean:66:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4193682Z 
+2026-10-09T23:02:12.4194628Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4195642Z   [apply] _depth
+2026-10-09T23:02:12.4195848Z 
+2026-10-09T23:02:12.4196382Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4197360Z ⚠ [22/145] Replayed Ps.Core.Subst
+2026-10-09T23:02:12.4198398Z warning: packages/core/src/Ps/Core/Subst.lean:14:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:12.4199069Z 
+2026-10-09T23:02:12.4200029Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4201033Z   [apply] _cutoff
+2026-10-09T23:02:12.4201255Z 
+2026-10-09T23:02:12.4201793Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4203159Z warning: packages/core/src/Ps/Core/Subst.lean:16:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:12.4203850Z 
+2026-10-09T23:02:12.4204809Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4205795Z   [apply] _cutoff
+2026-10-09T23:02:12.4206027Z 
+2026-10-09T23:02:12.4206550Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4207793Z warning: packages/core/src/Ps/Core/Subst.lean:18:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:12.4208685Z 
+2026-10-09T23:02:12.4209631Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4210637Z   [apply] _cutoff
+2026-10-09T23:02:12.4210841Z 
+2026-10-09T23:02:12.4211341Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4212566Z warning: packages/core/src/Ps/Core/Subst.lean:20:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:12.4213355Z 
+2026-10-09T23:02:12.4214309Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4215336Z   [apply] _cutoff
+2026-10-09T23:02:12.4215525Z 
+2026-10-09T23:02:12.4216044Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4217367Z warning: packages/core/src/Ps/Core/Subst.lean:66:11: Variable name `cutoff` is not explicitly referenced.
+2026-10-09T23:02:12.4218056Z 
+2026-10-09T23:02:12.4218991Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4219998Z   [apply] _cutoff
+2026-10-09T23:02:12.4220221Z 
+2026-10-09T23:02:12.4220732Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4221943Z warning: packages/core/src/Ps/Core/Subst.lean:94:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4222585Z 
+2026-10-09T23:02:12.4223598Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4224612Z   [apply] _depth
+2026-10-09T23:02:12.4224830Z 
+2026-10-09T23:02:12.4225573Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4226853Z warning: packages/core/src/Ps/Core/Subst.lean:96:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4227497Z 
+2026-10-09T23:02:12.4228470Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4229466Z   [apply] _depth
+2026-10-09T23:02:12.4229693Z 
+2026-10-09T23:02:12.4230203Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4231400Z warning: packages/core/src/Ps/Core/Subst.lean:98:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4232046Z 
+2026-10-09T23:02:12.4233119Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4233935Z   [apply] _depth
+2026-10-09T23:02:12.4234135Z 
+2026-10-09T23:02:12.4234657Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4235904Z warning: packages/core/src/Ps/Core/Subst.lean:100:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4236581Z 
+2026-10-09T23:02:12.4237534Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4238525Z   [apply] _depth
+2026-10-09T23:02:12.4238729Z 
+2026-10-09T23:02:12.4239259Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4240471Z warning: packages/core/src/Ps/Core/Subst.lean:146:11: Variable name `depth` is not explicitly referenced.
+2026-10-09T23:02:12.4241118Z 
+2026-10-09T23:02:12.4242059Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4243164Z   [apply] _depth
+2026-10-09T23:02:12.4243365Z 
+2026-10-09T23:02:12.4243902Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4245112Z ⚠ [33/145] Replayed Ps.Core.LevelSubst
+2026-10-09T23:02:12.4246223Z warning: packages/core/src/Ps/Core/LevelSubst.lean:8:11: Variable name `arguments` is not explicitly referenced.
+2026-10-09T23:02:12.4246933Z 
+2026-10-09T23:02:12.4247891Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4248897Z   [apply] _arguments
+2026-10-09T23:02:12.4249126Z 
+2026-10-09T23:02:12.4249644Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4250911Z warning: packages/core/src/Ps/Core/LevelSubst.lean:9:13: Variable name `target` is not explicitly referenced.
+2026-10-09T23:02:12.4251607Z 
+2026-10-09T23:02:12.4252551Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4253855Z   [apply] _target
+2026-10-09T23:02:12.4254065Z 
+2026-10-09T23:02:12.4254581Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4255530Z ⚠ [34/145] Replayed Ps.Meta.LevelContext
+2026-10-09T23:02:12.4256648Z warning: packages/meta/src/Ps/Meta/LevelContext.lean:59:4: Variable name `assignment` is not explicitly referenced.
+2026-10-09T23:02:12.4257386Z 
+2026-10-09T23:02:12.4258349Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4259355Z   [apply] _assignment
+2026-10-09T23:02:12.4259586Z 
+2026-10-09T23:02:12.4260093Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4260935Z ⚠ [39/145] Replayed Ps.Meta.Unify
+2026-10-09T23:02:12.4261970Z warning: packages/meta/src/Ps/Meta/Unify.lean:90:11: Variable name `environment` is not explicitly referenced.
+2026-10-09T23:02:12.4262677Z 
+2026-10-09T23:02:12.4263829Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4264642Z   [apply] _environment
+2026-10-09T23:02:12.4264851Z 
+2026-10-09T23:02:12.4265349Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4266612Z warning: packages/meta/src/Ps/Meta/Unify.lean:91:11: Variable name `localContext` is not explicitly referenced.
+2026-10-09T23:02:12.4267311Z 
+2026-10-09T23:02:12.4268275Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4269280Z   [apply] _localContext
+2026-10-09T23:02:12.4269526Z 
+2026-10-09T23:02:12.4270045Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4271281Z warning: packages/meta/src/Ps/Meta/Unify.lean:93:11: Variable name `left` is not explicitly referenced.
+2026-10-09T23:02:12.4271945Z 
+2026-10-09T23:02:12.4272897Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4274018Z   [apply] _left
+2026-10-09T23:02:12.4274234Z 
+2026-10-09T23:02:12.4274747Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4275963Z warning: packages/meta/src/Ps/Meta/Unify.lean:94:11: Variable name `right` is not explicitly referenced.
+2026-10-09T23:02:12.4276640Z 
+2026-10-09T23:02:12.4277581Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4278556Z   [apply] _right
+2026-10-09T23:02:12.4278782Z 
+2026-10-09T23:02:12.4279305Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4280582Z warning: packages/meta/src/Ps/Meta/Unify.lean:178:17: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:12.4281460Z 
+2026-10-09T23:02:12.4282414Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4283535Z   [apply] _leftName
+2026-10-09T23:02:12.4283767Z 
+2026-10-09T23:02:12.4284302Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4285564Z warning: packages/meta/src/Ps/Meta/Unify.lean:207:21: Variable name `leftName` is not explicitly referenced.
+2026-10-09T23:02:12.4286262Z 
+2026-10-09T23:02:12.4287203Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4288218Z   [apply] _leftName
+2026-10-09T23:02:12.4288433Z 
+2026-10-09T23:02:12.4288952Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4289927Z ⚠ [42/145] Replayed Ps.Elab.Literal
+2026-10-09T23:02:12.4290969Z warning: packages/elab/src/Ps/Elab/Literal.lean:166:11: Variable name `chars` is not explicitly referenced.
+2026-10-09T23:02:12.4291675Z 
+2026-10-09T23:02:12.4292612Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4314601Z   [apply] _chars
+2026-10-09T23:02:12.4314917Z 
+2026-10-09T23:02:12.4315552Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4317066Z warning: packages/elab/src/Ps/Elab/Literal.lean:167:13: Variable name `charsRev` is not explicitly referenced.
+2026-10-09T23:02:12.4317841Z 
+2026-10-09T23:02:12.4318812Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4319835Z   [apply] _charsRev
+2026-10-09T23:02:12.4320078Z 
+2026-10-09T23:02:12.4320967Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4322063Z ⚠ [43/145] Replayed Ps.Elab.Term
+2026-10-09T23:02:12.4323229Z warning: packages/elab/src/Ps/Elab/Term.lean:2890:11: Variable name `context` is not explicitly referenced.
+2026-10-09T23:02:12.4323878Z 
+2026-10-09T23:02:12.4324912Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4325975Z   [apply] _context
+2026-10-09T23:02:12.4326200Z 
+2026-10-09T23:02:12.4326706Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4328016Z warning: packages/elab/src/Ps/Elab/Term.lean:2891:13: Variable name `recursion` is not explicitly referenced.
+2026-10-09T23:02:12.4328790Z 
+2026-10-09T23:02:12.4329763Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4330791Z   [apply] _recursion
+2026-10-09T23:02:12.4331129Z 
+2026-10-09T23:02:12.4331675Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4332953Z warning: packages/elab/src/Ps/Elab/Term.lean:2892:15: Variable name `index` is not explicitly referenced.
+2026-10-09T23:02:12.4333775Z 
+2026-10-09T23:02:12.4334730Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4335774Z   [apply] _index
+2026-10-09T23:02:12.4335983Z 
+2026-10-09T23:02:12.4336524Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4337554Z ⚠ [48/145] Replayed Ps.Erasure.Expr
+2026-10-09T23:02:12.4338659Z warning: packages/erasure/src/Ps/Erasure/Expr.lean:1074:21: Variable name `name` is not explicitly referenced.
+2026-10-09T23:02:12.4339413Z 
+2026-10-09T23:02:12.4340389Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4341881Z   [apply] _name
+2026-10-09T23:02:12.4342098Z 
+2026-10-09T23:02:12.4342625Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4344309Z ⚠ [55/145] Replayed Ps.BackendTs.Expr
+2026-10-09T23:02:12.4345497Z warning: packages/backend-ts/src/Ps/BackendTs/Expr.lean:631:32: Variable name `fieldName` is not explicitly referenced.
+2026-10-09T23:02:12.4346264Z 
+2026-10-09T23:02:12.4347237Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4348276Z   [apply] _fieldName
+2026-10-09T23:02:12.4348526Z 
+2026-10-09T23:02:12.4349065Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.4349922Z ⚠ [59/145] Replayed Ps.CompilerIr.Check
+2026-10-09T23:02:12.4351089Z warning: packages/compiler-ir/src/Ps/CompilerIr/Check.lean:690:27: Variable name `scope` is not explicitly referenced.
+2026-10-09T23:02:12.4351918Z 
+2026-10-09T23:02:12.4352880Z Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+2026-10-09T23:02:12.4354059Z   [apply] _scope
+2026-10-09T23:02:12.4354288Z 
+2026-10-09T23:02:12.4354813Z Note: This linter can be disabled with `set_option linter.unusedVariables false`
+2026-10-09T23:02:12.8080427Z ✔ [129/145] Built PsKernelLean.Error (411ms)
+2026-10-09T23:02:13.0078349Z ✔ [130/145] Built Ps.Bridge.Codec (671ms)
+2026-10-09T23:02:13.0078857Z ✔ [132/145] Built PsKernelLean.Error:c.o (232ms)
+2026-10-09T23:02:13.7106854Z ✔ [133/145] Built PsKernelLean.Convert (932ms)
+2026-10-09T23:02:14.1100727Z ✔ [134/145] Built PsKernelLean.Convert:c.o (357ms)
+2026-10-09T23:02:14.7114984Z ✔ [135/145] Built PsKernelLean.Protocol (989ms)
+2026-10-09T23:02:14.8135209Z ✔ [136/145] Built PsKernelLean.Prelude (1.1s)
+2026-10-09T23:02:15.2121113Z ✔ [137/145] Built PsKernelLean.Prelude:c.o (377ms)
+2026-10-09T23:02:15.4123462Z ✔ [138/145] Built PsKernelLean.Protocol:c.o (662ms)
+2026-10-09T23:02:15.7126973Z ✔ [139/145] Built PsKernelLean.Admission (919ms)
+2026-10-09T23:02:15.8128239Z ✔ [140/145] Built PsKernelLean.Admission:c.o (120ms)
+2026-10-09T23:02:16.5136857Z ✔ [141/145] Built Ps.Host.LeanChecked (779ms)
+2026-10-09T23:02:16.6137048Z ✔ [142/145] Built Ps.Host.LeanChecked:c.o (117ms)
+2026-10-09T23:02:17.5137528Z ⚠ [143/145] Built LeanCheckedSeed (1.1s)
+2026-10-09T23:02:17.5138288Z warning: ../scripts/LeanCheckedSeed.lean:108:13: `String.trim` has been deprecated: Use `String.trimAscii` instead
+2026-10-09T23:02:17.5138701Z 
+2026-10-09T23:02:17.5138897Z Note: The updated constant has a different type:
+2026-10-09T23:02:17.5139267Z   String → String.Slice
+2026-10-09T23:02:17.5139512Z instead of
+2026-10-09T23:02:17.5139755Z   String → String
+2026-10-09T23:02:17.5140304Z warning: ../scripts/LeanCheckedSeed.lean:111:18: `String.trim` has been deprecated: Use `String.trimAscii` instead
+2026-10-09T23:02:17.5140758Z 
+2026-10-09T23:02:17.5140968Z Note: The updated constant has a different type:
+2026-10-09T23:02:17.5141304Z   String → String.Slice
+2026-10-09T23:02:17.5141542Z instead of
+2026-10-09T23:02:17.5141768Z   String → String
+2026-10-09T23:02:18.0143692Z ✔ [144/145] Built LeanCheckedSeed:c.o (500ms)
+2026-10-09T23:02:18.7151638Z ✔ [145/145] Built psc2_lean_checked_seed:exe (678ms)
+2026-10-09T23:02:18.7307225Z Build completed successfully (145 jobs).
+2026-10-09T23:02:18.7777555Z ##[group]Run test -x lean-checked/.lake/build/bin/psc2_lean_checked_seed
+2026-10-09T23:02:18.7778421Z [36;1mtest -x lean-checked/.lake/build/bin/psc2_lean_checked_seed[0m
+2026-10-09T23:02:18.7779270Z [36;1mnpm run --workspace @proofscript/pskernel-lean-wasm verify:prebuilt[0m
+2026-10-09T23:02:18.7780593Z [36;1mnode --test scripts/proofscript-source.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-seed-session.test.mjs[0m
+2026-10-09T23:02:18.7782182Z [36;1mnode --test --test-name-pattern='^actual PS build (rejects|resolves|prepares)' scripts/checked-build.test.mjs[0m
+2026-10-09T23:02:18.7783721Z [36;1mnode scripts/selfhost-source-isolation-tests.mjs[0m
+2026-10-09T23:02:18.7784405Z [36;1mnode scripts/native-workspace-isolation.test.mjs[0m
+2026-10-09T23:02:18.7838809Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:02:18.7839268Z env:
+2026-10-09T23:02:18.7839922Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:02:18.7840897Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:02:18.7841360Z ##[endgroup]
+2026-10-09T23:02:18.9372756Z 
+2026-10-09T23:02:18.9374603Z > @proofscript/pskernel-lean-wasm@4.34.0 verify:prebuilt
+2026-10-09T23:02:18.9375640Z > node host/verify-prebuilt.mjs
+2026-10-09T23:02:18.9376040Z 
+2026-10-09T23:02:18.9910129Z PSC2_LEAN_KERNEL_WASM_PREBUILT_VERIFY: PASS 2177471 bytes 1b21b2483df7e8de7542873c24eaff2501539b1b
+2026-10-09T23:02:19.0625427Z TAP version 13
+2026-10-09T23:02:19.4405061Z # Subtest: real lean module session emits only after the explicit Wasm check
+2026-10-09T23:02:19.4410840Z ok 1 - real lean module session emits only after the explicit Wasm check
+2026-10-09T23:02:19.4411787Z   ---
+2026-10-09T23:02:19.4412184Z   duration_ms: 333.687444
+2026-10-09T23:02:19.4412562Z   type: 'test'
+2026-10-09T23:02:19.4412808Z   ...
+2026-10-09T23:02:19.4807769Z # Subtest: real lean module session blocks emission on rejection
+2026-10-09T23:02:19.4810910Z ok 2 - real lean module session blocks emission on rejection
+2026-10-09T23:02:19.4811412Z   ---
+2026-10-09T23:02:19.4811775Z   duration_ms: 40.530091
+2026-10-09T23:02:19.4812358Z   type: 'test'
+2026-10-09T23:02:19.4812703Z   ...
+2026-10-09T23:02:19.6814154Z # Subtest: real ps module session emits only after the explicit Wasm check
+2026-10-09T23:02:19.6814872Z ok 3 - real ps module session emits only after the explicit Wasm check
+2026-10-09T23:02:19.6815248Z   ---
+2026-10-09T23:02:19.6815478Z   duration_ms: 199.80409
+2026-10-09T23:02:19.6815809Z   type: 'test'
+2026-10-09T23:02:19.6816016Z   ...
+2026-10-09T23:02:19.7260060Z # Subtest: real ps module session blocks emission on rejection
+2026-10-09T23:02:19.7261306Z ok 4 - real ps module session blocks emission on rejection
+2026-10-09T23:02:19.7261894Z   ---
+2026-10-09T23:02:19.7267851Z   duration_ms: 41.898235
+2026-10-09T23:02:19.7268291Z   type: 'test'
+2026-10-09T23:02:19.7268753Z   ...
+2026-10-09T23:02:19.7269670Z # Subtest: module partition must exactly reproduce the immutable source
+2026-10-09T23:02:19.7270638Z ok 5 - module partition must exactly reproduce the immutable source
+2026-10-09T23:02:19.7271945Z   ---
+2026-10-09T23:02:19.7272355Z   duration_ms: 2.992103
+2026-10-09T23:02:19.7272759Z   type: 'test'
+2026-10-09T23:02:19.7273280Z   ...
+2026-10-09T23:02:19.7378972Z # Subtest: standalone source snapshot does not reread changed files
+2026-10-09T23:02:19.7381153Z ok 6 - standalone source snapshot does not reread changed files
+2026-10-09T23:02:19.7381730Z   ---
+2026-10-09T23:02:19.7382064Z   duration_ms: 21.588271
+2026-10-09T23:02:19.7382450Z   type: 'test'
+2026-10-09T23:02:19.7382826Z   ...
+2026-10-09T23:02:19.7383606Z # Subtest: PS dependency cannot be shadowed by Lean sibling
+2026-10-09T23:02:19.7384321Z ok 7 - PS dependency cannot be shadowed by Lean sibling
+2026-10-09T23:02:19.7386470Z   ---
+2026-10-09T23:02:19.7386845Z   duration_ms: 40.600931
+2026-10-09T23:02:19.7387220Z   type: 'test'
+2026-10-09T23:02:19.7387528Z   ...
+2026-10-09T23:02:19.7388499Z # Subtest: missing PS dependency cannot fall back to Lean
+2026-10-09T23:02:19.7389267Z ok 8 - missing PS dependency cannot fall back to Lean
+2026-10-09T23:02:19.7389748Z   ---
+2026-10-09T23:02:19.7390098Z   duration_ms: 4.883404
+2026-10-09T23:02:19.7390462Z   type: 'test'
+2026-10-09T23:02:19.7390830Z   ...
+2026-10-09T23:02:19.7391214Z # Subtest: cycles rejected
+2026-10-09T23:02:19.7391686Z ok 9 - cycles rejected
+2026-10-09T23:02:19.7392069Z   ---
+2026-10-09T23:02:19.7392396Z   duration_ms: 8.437225
+2026-10-09T23:02:19.7392793Z   type: 'test'
+2026-10-09T23:02:19.7393977Z   ...
+2026-10-09T23:02:19.7394485Z # Subtest: symlink dependency escape rejected
+2026-10-09T23:02:19.7395408Z ok 10 - symlink dependency escape rejected
+2026-10-09T23:02:19.7395938Z   ---
+2026-10-09T23:02:19.7396638Z   duration_ms: 5.596317
+2026-10-09T23:02:19.7397238Z   type: 'test'
+2026-10-09T23:02:19.7413939Z   ...
+2026-10-09T23:02:19.7414854Z # Subtest: generated manifest is verified by the same production resolver
+2026-10-09T23:02:19.7416171Z ok 11 - generated manifest is verified by the same production resolver
+2026-10-09T23:02:19.7416825Z   ---
+2026-10-09T23:02:19.7417192Z   duration_ms: 8.286288
+2026-10-09T23:02:19.7417604Z   type: 'test'
+2026-10-09T23:02:19.7417969Z   ...
+2026-10-09T23:02:19.7418539Z # Subtest: PS snapshot requires an actual parser adapter
+2026-10-09T23:02:19.7419318Z ok 12 - PS snapshot requires an actual parser adapter
+2026-10-09T23:02:19.7419859Z   ---
+2026-10-09T23:02:19.7420219Z   duration_ms: 3.663701
+2026-10-09T23:02:19.7420629Z   type: 'test'
+2026-10-09T23:02:19.7420977Z   ...
+2026-10-09T23:02:19.7421648Z # Subtest: PS snapshot validates raw import bytes before dependency access
+2026-10-09T23:02:19.7422685Z ok 13 - PS snapshot validates raw import bytes before dependency access
+2026-10-09T23:02:19.7423485Z   ---
+2026-10-09T23:02:19.7423845Z   duration_ms: 4.449449
+2026-10-09T23:02:19.7424247Z   type: 'test'
+2026-10-09T23:02:19.7424603Z   ...
+2026-10-09T23:02:19.7425164Z # Subtest: PS import cycles retain their dependency error
+2026-10-09T23:02:19.7425959Z ok 14 - PS import cycles retain their dependency error
+2026-10-09T23:02:19.7426488Z   ---
+2026-10-09T23:02:19.7426846Z   duration_ms: 8.969318
+2026-10-09T23:02:19.7427257Z   type: 'test'
+2026-10-09T23:02:19.7427626Z   ...
+2026-10-09T23:02:19.7428398Z # Subtest: generated source adapter delegates complete raw source and AST import names
+2026-10-09T23:02:19.7429576Z ok 15 - generated source adapter delegates complete raw source and AST import names
+2026-10-09T23:02:19.7430295Z   ---
+2026-10-09T23:02:19.7430648Z   duration_ms: 3.668596
+2026-10-09T23:02:19.7431049Z   type: 'test'
+2026-10-09T23:02:19.7431409Z   ...
+2026-10-09T23:02:19.7432187Z # Subtest: generated parser errors and missing parser API cannot become empty imports
+2026-10-09T23:02:19.7433491Z ok 16 - generated parser errors and missing parser API cannot become empty imports
+2026-10-09T23:02:19.7434197Z   ---
+2026-10-09T23:02:19.7434554Z   duration_ms: 0.9485
+2026-10-09T23:02:19.7434950Z   type: 'test'
+2026-10-09T23:02:19.7435332Z   ...
+2026-10-09T23:02:19.7436099Z # Subtest: generated import-list shape failure cannot silently hide a dependency
+2026-10-09T23:02:19.7437269Z ok 17 - generated import-list shape failure cannot silently hide a dependency
+2026-10-09T23:02:19.7437886Z   ---
+2026-10-09T23:02:19.7438191Z   duration_ms: 0.33981
+2026-10-09T23:02:19.7438486Z   type: 'test'
+2026-10-09T23:02:19.7438758Z   ...
+2026-10-09T23:02:19.7439516Z # Subtest: current PS host refuses historical and mismatched compiler grammar identities before parsing
+2026-10-09T23:02:19.7440737Z ok 18 - current PS host refuses historical and mismatched compiler grammar identities before parsing
+2026-10-09T23:02:19.7441481Z   ---
+2026-10-09T23:02:19.7441807Z   duration_ms: 0.501116
+2026-10-09T23:02:19.7442169Z   type: 'test'
+2026-10-09T23:02:19.7442490Z   ...
+2026-10-09T23:02:19.7443434Z # Subtest: reusable PS preparation rejects old and mismatched grammars before compiler operations
+2026-10-09T23:02:19.7444945Z ok 19 - reusable PS preparation rejects old and mismatched grammars before compiler operations
+2026-10-09T23:02:19.7445668Z   ---
+2026-10-09T23:02:19.7445992Z   duration_ms: 1.175648
+2026-10-09T23:02:19.7446370Z   type: 'test'
+2026-10-09T23:02:19.7446669Z   ...
+2026-10-09T23:02:19.7447312Z # Subtest: reusable current PS preparation binds grammar in cold and warm receipts
+2026-10-09T23:02:19.7448348Z ok 20 - reusable current PS preparation binds grammar in cold and warm receipts
+2026-10-09T23:02:19.7448978Z   ---
+2026-10-09T23:02:19.7449298Z   duration_ms: 1.762874
+2026-10-09T23:02:19.7449670Z   type: 'test'
+2026-10-09T23:02:19.7450013Z   ...
+2026-10-09T23:02:19.7451800Z # Subtest: reusable historical Lean preparation retains its receipt and warm state after PS refusal
+2026-10-09T23:02:19.7453346Z ok 21 - reusable historical Lean preparation retains its receipt and warm state after PS refusal
+2026-10-09T23:02:19.7465384Z   ---
+2026-10-09T23:02:19.7465728Z   duration_ms: 0.844177
+2026-10-09T23:02:19.7466071Z   type: 'test'
+2026-10-09T23:02:19.7466616Z   ...
+2026-10-09T23:02:19.7467511Z # Subtest: actual native parser discovers commented imports and preserves legal literal/comment bytes
+2026-10-09T23:02:19.7468587Z ok 22 - actual native parser discovers commented imports and preserves legal literal/comment bytes
+2026-10-09T23:02:19.7474557Z   ---
+2026-10-09T23:02:19.7474947Z   duration_ms: 51.310446
+2026-10-09T23:02:19.7475358Z   type: 'test'
+2026-10-09T23:02:19.7475697Z   ...
+2026-10-09T23:02:19.7476272Z # Subtest: actual native parser rejects semicolon import
+2026-10-09T23:02:19.7477047Z ok 23 - actual native parser rejects semicolon import
+2026-10-09T23:02:19.7477622Z   ---
+2026-10-09T23:02:19.7477967Z   duration_ms: 70.411515
+2026-10-09T23:02:19.7478351Z   type: 'test'
+2026-10-09T23:02:19.7478704Z   ...
+2026-10-09T23:02:19.7479192Z # Subtest: actual native parser rejects tab in import
+2026-10-09T23:02:19.7479895Z ok 24 - actual native parser rejects tab in import
+2026-10-09T23:02:19.7480364Z   ---
+2026-10-09T23:02:19.7480739Z   duration_ms: 49.507463
+2026-10-09T23:02:19.7481169Z   type: 'test'
+2026-10-09T23:02:19.7481546Z   ...
+2026-10-09T23:02:19.7482119Z # Subtest: actual native parser rejects lone CR in import
+2026-10-09T23:02:19.7482868Z ok 25 - actual native parser rejects lone CR in import
+2026-10-09T23:02:19.7483535Z   ---
+2026-10-09T23:02:19.7484121Z   duration_ms: 39.30195
+2026-10-09T23:02:19.7484532Z   type: 'test'
+2026-10-09T23:02:19.7484886Z   ...
+2026-10-09T23:02:19.7485490Z # Subtest: actual native parser rejects old declaration separator
+2026-10-09T23:02:19.7486330Z ok 26 - actual native parser rejects old declaration separator
+2026-10-09T23:02:19.7486875Z   ---
+2026-10-09T23:02:19.7487210Z   duration_ms: 55.104177
+2026-10-09T23:02:19.7487609Z   type: 'test'
+2026-10-09T23:02:19.7487947Z   ...
+2026-10-09T23:02:19.7488618Z # Subtest: PS file reads reject malformed UTF-8 and retain a leading BOM for the lexer
+2026-10-09T23:02:19.7489464Z ok 27 - PS file reads reject malformed UTF-8 and retain a leading BOM for the lexer
+2026-10-09T23:02:19.7489902Z   ---
+2026-10-09T23:02:19.7490125Z   duration_ms: 26.214888
+2026-10-09T23:02:19.7490401Z   type: 'test'
+2026-10-09T23:02:19.7490630Z   ...
+2026-10-09T23:02:19.7490883Z 1..27
+2026-10-09T23:02:19.7491252Z # tests 27
+2026-10-09T23:02:19.7491544Z # suites 0
+2026-10-09T23:02:19.7491871Z # pass 27
+2026-10-09T23:02:19.7492140Z # fail 0
+2026-10-09T23:02:19.7492414Z # cancelled 0
+2026-10-09T23:02:19.7492720Z # skipped 0
+2026-10-09T23:02:19.7493124Z # todo 0
+2026-10-09T23:02:19.7493467Z # duration_ms 697.844669
+2026-10-09T23:02:19.7992393Z TAP version 13
+2026-10-09T23:02:20.0737895Z # Subtest: actual PS build rejects semicolon import before dependency lookup
+2026-10-09T23:02:20.0747004Z ok 1 - actual PS build rejects semicolon import before dependency lookup
+2026-10-09T23:02:20.0747854Z   ---
+2026-10-09T23:02:20.0748473Z   duration_ms: 213.916552
+2026-10-09T23:02:20.0748882Z   type: 'test'
+2026-10-09T23:02:20.0749225Z   ...
+2026-10-09T23:02:20.2686192Z # Subtest: actual PS build rejects tab in import before dependency lookup
+2026-10-09T23:02:20.2687891Z ok 2 - actual PS build rejects tab in import before dependency lookup
+2026-10-09T23:02:20.2689163Z   ---
+2026-10-09T23:02:20.2689527Z   duration_ms: 195.255252
+2026-10-09T23:02:20.2689938Z   type: 'test'
+2026-10-09T23:02:20.2690162Z   ...
+2026-10-09T23:02:20.4568134Z # Subtest: actual PS build resolves a commented unused import and cannot ignore a missing file
+2026-10-09T23:02:20.4569666Z ok 3 - actual PS build resolves a commented unused import and cannot ignore a missing file
+2026-10-09T23:02:20.4570606Z   ---
+2026-10-09T23:02:20.4570885Z   duration_ms: 188.163369
+2026-10-09T23:02:20.4571580Z   type: 'test'
+2026-10-09T23:02:20.4571958Z   ...
+2026-10-09T23:02:20.8833514Z # Subtest: actual PS build prepares complete imported modules in dependency order
+2026-10-09T23:02:20.8838529Z ok 4 - actual PS build prepares complete imported modules in dependency order
+2026-10-09T23:02:20.8839081Z   ---
+2026-10-09T23:02:20.8839314Z   duration_ms: 426.551462
+2026-10-09T23:02:20.8839582Z   type: 'test'
+2026-10-09T23:02:20.8839830Z   ...
+2026-10-09T23:02:20.8918059Z 1..4
+2026-10-09T23:02:20.8918470Z # tests 4
+2026-10-09T23:02:20.8918848Z # suites 0
+2026-10-09T23:02:20.8919210Z # pass 4
+2026-10-09T23:02:20.8919555Z # fail 0
+2026-10-09T23:02:20.8919912Z # cancelled 0
+2026-10-09T23:02:20.8920294Z # skipped 0
+2026-10-09T23:02:20.8920647Z # todo 0
+2026-10-09T23:02:20.8921005Z # duration_ms 1106.74227
+2026-10-09T23:02:21.1187737Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS nested generated workspace without stdlib
+2026-10-09T23:02:21.3289282Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS isolated generated workspace without stdlib
+2026-10-09T23:02:21.5247623Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS stale Lean sibling cannot shadow canonical PS
+2026-10-09T23:02:21.5778173Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS tampered source bytes
+2026-10-09T23:02:21.6287590Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS missing PS cannot fall back to Lean
+2026-10-09T23:02:21.6801849Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS unlisted imported source
+2026-10-09T23:02:21.7293617Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS manifest includes unreachable source
+2026-10-09T23:02:21.7780788Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS manifest entry mismatch
+2026-10-09T23:02:21.8321394Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS malformed manifest cannot fall back to parent
+2026-10-09T23:02:21.8833701Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS generation tag mismatch
+2026-10-09T23:02:21.9322172Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS ambiguous generation manifests
+2026-10-09T23:02:21.9893535Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS symlink cannot escape generated root
+2026-10-09T23:02:22.0405698Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS cyclic source imports
+2026-10-09T23:02:22.2352486Z PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS selfhost generation manifest accepted
+2026-10-09T23:02:22.2376906Z PSC2_SELFHOST_SOURCE_ISOLATION: PASS (14 passed; 0 platform skips; compiler double and pinned TypeScript)
+2026-10-09T23:02:22.3216156Z PSC2_NATIVE_WORKSPACE_ISOLATION: PASS (bootstrap, selfhost and project roots without stdlib; original sources rejected)
+2026-10-09T23:02:22.3324705Z ##[group]Run node scripts/selfhost-replay-runtime.test.mjs
+2026-10-09T23:02:22.3325695Z [36;1mnode scripts/selfhost-replay-runtime.test.mjs[0m
+2026-10-09T23:02:22.3326516Z [36;1mnode scripts/checked-erasure-name-index.test.mjs[0m
+2026-10-09T23:02:22.3369264Z shell: /usr/bin/bash -e {0}
+2026-10-09T23:02:22.3369553Z env:
+2026-10-09T23:02:22.3369933Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:02:22.3370397Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:02:22.3370653Z ##[endgroup]
+2026-10-09T23:02:22.7334567Z PSC2_NATIVE_TYPESCRIPT_CLI: PASS (exact profile, unrelated config, installed override and PATH discovery, precompile rejection and no fallback)
+2026-10-09T23:02:22.7731295Z PSC2_NATIVE_WORKSPACE_ISOLATION: PASS (bootstrap, selfhost and project roots without stdlib; original sources rejected)
+2026-10-09T23:02:23.8780125Z node:internal/modules/run_main:123
+2026-10-09T23:02:23.8780754Z     triggerUncaughtException(
+2026-10-09T23:02:23.8781278Z     ^
+2026-10-09T23:02:23.8781419Z 
+2026-10-09T23:02:23.8781800Z AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+2026-10-09T23:02:23.8782426Z + actual - expected
+2026-10-09T23:02:23.8782629Z 
+2026-10-09T23:02:23.8782786Z + [Function: fn]
+2026-10-09T23:02:23.8783307Z - 18n
+2026-10-09T23:02:23.8783466Z 
+2026-10-09T23:02:23.8784042Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/selfhost-replay-runtime.test.mjs:103:16 {
+2026-10-09T23:02:23.8785125Z   generatedMessage: true,
+2026-10-09T23:02:23.8785537Z   code: 'ERR_ASSERTION',
+2026-10-09T23:02:23.8785917Z   actual: [Function: fn],
+2026-10-09T23:02:23.8786320Z   expected: 18n,
+2026-10-09T23:02:23.8786724Z   operator: 'strictEqual',
+2026-10-09T23:02:23.8787105Z   diff: 'simple'
+2026-10-09T23:02:23.8787455Z }
+2026-10-09T23:02:23.8787610Z 
+2026-10-09T23:02:23.8787761Z Node.js v22.23.3
+2026-10-09T23:02:23.8847936Z ##[error]Process completed with exit code 1.
+2026-10-09T23:02:23.8929488Z ##[group]Run actions/cache/save@v4
+2026-10-09T23:02:23.8929772Z with:
+2026-10-09T23:02:23.8929975Z   path: psc0/.lake/build
+2026-10-09T23:02:23.8930651Z   key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c
+2026-10-09T23:02:23.8931357Z   enableCrossOsArchive: false
+2026-10-09T23:02:23.8931604Z env:
+2026-10-09T23:02:23.8931946Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:02:23.8932391Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:02:23.8932647Z ##[endgroup]
+2026-10-09T23:02:24.0041144Z (node:4028) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T23:02:24.0041931Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T23:02:24.0194395Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/pskernel/pskernel --files-from manifest.txt --use-compress-program zstdmt
+2026-10-09T23:02:24.4862237Z (node:4028) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T23:02:25.4723570Z Sent 24185068 of 24185068 (100.0%), 23.2 MBs/sec
+2026-10-09T23:02:25.6026874Z Cache saved with key: psc0-sh1-current-v1-Linux-X64-345295c92e112d8a5f19f7c147c3db40b6f4598f2c2154577e66ac53440ca424-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c
+2026-10-09T23:02:25.6129017Z ##[group]Run actions/upload-artifact@v4
+2026-10-09T23:02:25.6129318Z with:
+2026-10-09T23:02:25.6129624Z   name: psc0-sh1-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c
+2026-10-09T23:02:25.6130288Z   path: psc0/dist/sh1
+psc0/.selfhost-seeds
+psc0/dist/sh1-native-seed-recovery
+psc0/dist/sh1-seed-selection
+psc0/dist/typescript-profile
+
+2026-10-09T23:02:25.6130935Z   include-hidden-files: true
+2026-10-09T23:02:25.6131245Z   if-no-files-found: ignore
+2026-10-09T23:02:25.6131493Z   retention-days: 30
+2026-10-09T23:02:25.6131749Z   compression-level: 6
+2026-10-09T23:02:25.6131994Z   overwrite: false
+2026-10-09T23:02:25.6132223Z env:
+2026-10-09T23:02:25.6132574Z   PSC0_TSC: /home/runner/work/_temp/psc0-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T23:02:25.6133264Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T23:02:25.6133532Z ##[endgroup]
+2026-10-09T23:02:25.7809115Z (node:4049) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T23:02:25.7810279Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T23:02:25.7967701Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-09T23:02:25.7971107Z The least common ancestor is /home/runner/work/pskernel/pskernel/psc0. This will be the root directory of the artifact
+2026-10-09T23:02:25.7972475Z With the provided path, there will be 39 files uploaded
+2026-10-09T23:02:25.7975354Z Artifact name is valid!
+2026-10-09T23:02:25.7977743Z Root directory input is valid!
+2026-10-09T23:02:26.1526634Z Beginning upload of artifact content to blob storage
+2026-10-09T23:02:26.3025970Z (node:4049) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T23:02:26.7407903Z Uploaded bytes 447724
+2026-10-09T23:02:26.7993533Z Finished uploading artifact content to blob storage!
+2026-10-09T23:02:26.7994607Z SHA256 digest of uploaded artifact zip is 18b26297bd37c23e4f762a093b2a09c595bc5676f314f7419060028cb6f75e2f
+2026-10-09T23:02:26.7995747Z Finalizing artifact upload
+2026-10-09T23:02:27.0317484Z Artifact psc0-sh1-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c.zip successfully finalized. Artifact ID 11649673654
+2026-10-09T23:02:27.0319421Z Artifact psc0-sh1-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c has been successfully uploaded! Final size is 447724 bytes. Artifact ID is 11649673654
+2026-10-09T23:02:27.0325219Z Artifact download URL: https://github.com/dwijayuda/pskernel/actions/runs/38002284953/artifacts/11649673654
+2026-10-09T23:02:27.0491662Z Post job cleanup.
+2026-10-09T23:02:27.1479889Z [command]/usr/bin/git version
+2026-10-09T23:02:27.1563539Z git version 2.55.0
+2026-10-09T23:02:27.1681902Z Temporarily overriding HOME='/home/runner/work/_temp/5ddf6e15-d76b-4c7b-b242-e02185a28662' before making global git config changes
+2026-10-09T23:02:27.1683994Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T23:02:27.1687942Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T23:02:27.1731073Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T23:02:27.1767927Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T23:02:27.2025901Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T23:02:27.2049085Z http.https://github.com/.extraheader
+2026-10-09T23:02:27.2059699Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T23:02:27.2094825Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T23:02:27.2339140Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T23:02:27.2374436Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T23:02:27.2841663Z Evaluate and set job outputs
+2026-10-09T23:02:27.2848012Z Set output 'qualified'
+2026-10-09T23:02:27.2849739Z Set output 'node-version'
+2026-10-09T23:02:27.2851008Z Cleaning up orphan processes
+2026-10-09T23:02:27.3157122Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache/restore@v4, actions/cache/save@v4, actions/checkout@v4, actions/github-script@v7, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

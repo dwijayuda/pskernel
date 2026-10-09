@@ -3,7 +3,7 @@
   "kind": "psc0-sh1-correspondence-obligations",
   "baseRevision": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "scope": "Current source-owned PSC0 original-IR TypeScript 7.0.2 / JavaScript lane",
-  "status": "candidate-ledger; no general preservation discharge",
+  "status": "general-source-reviews-complete; exact qualification and current row disposition pending",
   "normativeAuthority": [
     {
       "path": "psc0/docs/selfhost-language/SPEC.md",
@@ -41,7 +41,7 @@
     "typingIsSemanticPreservation": false,
     "fixedPointIsSemanticPreservation": false,
     "providerAdmissionIsRuntimePreservation": false,
-    "statement": "This ledger does not change the normative MUSTs. Rule arguments are source-grounded obligations and local reasoning, not a claim of completed general proof. Completed compiler/runtime/provider receipts must remain source- and scope-specific."
+    "statement": "Source-grounded local general arguments and cross-family/source-runtime interface reviews are complete in their stated domain. Current rows still await explicit final disposition with exact compiler/runtime/provider qualification. No machine-checked compiler-wide proof is claimed; finite execution, IR typing, fixed points and provider admission are distinct assurance axes."
   },
   "coverage": {
     "ruleCount": 33,
@@ -2058,9 +2058,10 @@
     "manifest": "reviewed-candidates/semantic-relations.json",
     "manifestBlob": "09c621ccba856c8906f24dcba5c9104fdfd08014",
     "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
-    "status": "independently-reviewed-definitions-source-facts-and-open-interfaces",
+    "status": "definitions-and-source-facts-composed-by-independent-ten-interface-review",
     "rowsClosed": 0,
-    "interactionBudget": "One residual is threaded through sequential computations, callbacks and runner reentry; each logical invocation consumes once; values use the remaining index and index0 cuts off before an unlicensed invocation. No callback budget reset or all-index adequacy claim."
+    "interactionBudget": "One residual is threaded through sequential computations, callbacks and runner reentry; each logical invocation consumes once; values use the remaining index and index0 cuts off before an unlicensed invocation. No callback budget reset or all-index adequacy claim.",
+    "compositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360"
   },
   "reviewedSourceCompletion": {
     "manifest": "post-review-source-completion.json",
@@ -2075,11 +2076,24 @@
     "observedRunId": 37986002380
   },
   "latestPartialExecution": {
-    "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
-    "runId": 37986002380,
-    "evidence": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json",
-    "evidenceBlob": "8faa56832c7db88ba3cf109ffe58c63c4ad8e1e8",
-    "meaning": "Exact-source finite native/source/target/runtime/IR observations; no general correspondence row discharged."
+    "sourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "runId": 38002284953,
+    "compilerJobId": 114062934819,
+    "status": "runtime-cli-host-call-failure-before-generations",
+    "failedStep": 22,
+    "nativeCompilerBuild": "success",
+    "nativeRegressionTargets": "success",
+    "nativeCheckedSeedBuild": "success",
+    "sourceGrammarImportsAndWorkspace": "success",
+    "evidence": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/runtime-cli-failure.json",
+    "evidenceBlob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
+    "providerJobId": 114063308633,
+    "providerStatus": "skipped",
+    "N1": "not-started",
+    "C1": "not-started",
+    "C2": "not-started",
+    "C3": "not-started",
+    "meaning": "Native build/regression/checked-seed and grammar passed; runtime CLI caller assertion failed before N1/C1/C2/C3. No correspondence row discharged."
   },
   "reviewedParserCorrection": {
     "manifest": "reviewed-candidates/nomatch-application-entry.json",
@@ -2114,7 +2128,9 @@
       "manifestBlob": "0b0e21e4c8b710aeee623c8a92b567e46d2d9bbc",
       "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
       "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
-      "rowsClosed": 0
+      "rowsClosed": 0,
+      "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
     },
     {
       "family": "TS",
@@ -2136,7 +2152,9 @@
       "manifestBlob": "833ec6592774e2c002701959614abe47213b3021",
       "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
       "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
-      "rowsClosed": 0
+      "rowsClosed": 0,
+      "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
     },
     {
       "family": "EV",
@@ -2160,7 +2178,9 @@
       "manifestBlob": "9f7d2bfe1161d23b8a3ee232f7e3845a47291fca",
       "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
       "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
-      "rowsClosed": 0
+      "rowsClosed": 0,
+      "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
     },
     {
       "family": "GROUP",
@@ -2171,7 +2191,9 @@
       "manifest": "reviewed-candidates/canonical-function-arguments.json",
       "manifestBlob": "30b8328b7e4158cd7279239dc34a4813240916d7",
       "status": "independently-reviewed-local-general-entry-and-finite-placement-arguments",
-      "rowsClosed": 0
+      "rowsClosed": 0,
+      "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
     },
     {
       "family": "ER",
@@ -2193,7 +2215,9 @@
       "manifestBlob": "22cc9d4721321eeac34979394a09fb5447524891",
       "status": "complete-local-source-derived-arguments-with-reviewed-producer-classifier-demand-and-structure-scopes",
       "rowsClosed": 0,
-      "finalCrossFamilyCompositionPending": true
+      "finalCrossFamilyCompositionPending": false,
+      "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
     }
   ],
   "pendingErasureClassCorrection": {
@@ -2208,7 +2232,7 @@
       "Function-valued generic parameter/layout/result representation and necessary adapters",
       "Ordinary partial capture, result eta and backend eta"
     ],
-    "next": "Observe one exact-source full qualification and complete the final cross-family composition of the attached N/GROUP/ER/EV/TS arguments.",
+    "next": "Qualify the exact integrated source and complete explicit current-source administrative disposition; local general arguments and all cross-family interfaces are independently reviewed.",
     "contractAndCheckerMustNotBeWeakened": true,
     "newColdRunRequired": false,
     "reviewedIntegration": {
@@ -2232,17 +2256,19 @@
       "newColdRunRequired": false,
       "strictSh1Qualified": false,
       "semanticContractQualified": false
-    }
+    },
+    "historicalCounterexampleSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
   },
   "currentQualificationRequest": {
-    "status": "enclosing-alpha-repair-commit-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "656ed78db6a2c26feced9374cd7b251c062a42df",
-    "priorCompilerSource": "656ed78db6a2c26feced9374cd7b251c062a42df",
-    "priorAttemptRunId": 38001282875,
-    "manifest": "reviewed-candidates/native-keyword-local-repair.json",
-    "manifestBlob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
-    "sourceFiles": 2,
-    "cumulativeReviewedSourceFiles": 43,
+    "status": "enclosing-host-completion-commit-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "priorCompilerSource": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "priorAttemptRunId": 38002284953,
+    "manifest": "reviewed-candidates/host-function-entry-completion.json",
+    "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
+    "sourceFiles": 7,
+    "productionLeanChanges": 0,
+    "cumulativeReviewedSourceFiles": 46,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -2300,7 +2326,7 @@
       "semanticContractQualified": false
     }
   },
-  "updatedAtUtc": "2026-10-09T22:59:59Z",
+  "updatedAtUtc": "2026-10-09T23:25:44Z",
   "reviewedRecursiveStructureCorrection": {
     "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
     "sourceManifest": "reviewed-candidates/recursive-structure-erasure.json",
@@ -2357,12 +2383,78 @@
     "formalPreservationProven": false
   },
   "latestExecution": {
-    "sourceRef": "656ed78db6a2c26feced9374cd7b251c062a42df",
-    "runId": 38001282875,
-    "status": "native-build-failure-before-generations",
-    "failedStep": 18,
-    "evidence": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
-    "evidenceBlob": "1d49d362273bed341efe25e205f0d37fb86436cc",
-    "providerStatus": "skipped"
+    "sourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "runId": 38002284953,
+    "compilerJobId": 114062934819,
+    "status": "runtime-cli-host-call-failure-before-generations",
+    "failedStep": 22,
+    "nativeCompilerBuild": "success",
+    "nativeRegressionTargets": "success",
+    "nativeCheckedSeedBuild": "success",
+    "sourceGrammarImportsAndWorkspace": "success",
+    "evidence": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/runtime-cli-failure.json",
+    "evidenceBlob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
+    "providerJobId": 114063308633,
+    "providerStatus": "skipped",
+    "N1": "not-started",
+    "C1": "not-started",
+    "C2": "not-started",
+    "C3": "not-started"
+  },
+  "reviewedHostFunctionEntryCompletion": {
+    "status": "reviewed-seven-host-script-completion-integrated-by-enclosing-commit",
+    "manifest": "reviewed-candidates/host-function-entry-completion.json",
+    "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
+    "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "files": 7,
+    "guards": 31,
+    "productionLeanChanges": 0,
+    "replayFixturesChanged": 0,
+    "replayCallGroupCorrections": 10,
+    "obsoleteRouteAssertionsReconciled": 3,
+    "positiveFlatTailEntries": 3,
+    "positiveFlatTailObservations": 12,
+    "positiveFlatTailManifest": "4fd43041addbf6d8f79083c372d4b3c006e7b6d0",
+    "oldIrBehaviorObservations": 61,
+    "oldIrRefusals": 38,
+    "additionalCompilerInvocations": 0,
+    "reviewers": [
+      "root",
+      "runtime_comparison_finish",
+      "artifact_inspection_review",
+      "empty_evidence_finish"
+    ],
+    "sourceReview": "CLEAR",
+    "executionQualification": false
+  },
+  "reviewedSourceRuntimeInterface": {
+    "document": "SOURCE_RUNTIME_INTERFACE_REVIEW.md",
+    "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+    "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+    "manifest": "reviewed-candidates/source-runtime-interface-review.json",
+    "manifestBlob": "81493683072c6e47a16b2ab292e496cb67162790",
+    "status": "bounded-independent-eleven-stage-source-review-and-root-CLEAR",
+    "sourceAnchor": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "stageRows": 11,
+    "rowsClosed": 0,
+    "qualificationPending": true,
+    "formalPreservationProven": false
+  },
+  "finalDisposition": {
+    "status": "pending-exact-integrated-qualification-and-current-row-disposition",
+    "correspondenceRows": 33,
+    "stageObligations": 27,
+    "completeGeneralSourceReview": true,
+    "sourceRuntimeStageReviewComplete": true,
+    "correspondenceRowsClosed": 0,
+    "stageObligationsClosed": 0,
+    "formalPreservationProven": false
+  },
+  "previousLatestPartialExecution": {
+    "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+    "runId": 37986002380,
+    "evidence": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/grammar-failure.json",
+    "evidenceBlob": "8faa56832c7db88ba3cf109ffe58c63c4ad8e1e8",
+    "meaning": "Exact-source finite native/source/target/runtime/IR observations; no general correspondence row discharged."
   }
 }

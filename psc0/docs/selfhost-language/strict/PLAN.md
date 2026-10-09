@@ -1,72 +1,43 @@
 # Strict PSC0-SH/1 implementation plan
 
-Status: active implementation from ed5d00aca0743bde583b45fe7756dd494ac3960f; not yet strict-qualified. The qualified practical checkpoint was merged to main on 2026-10-09 at 16:30:26 UTC. Work proceeds on psc0/strict-sh1-v1. [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) is the continuation authority; [merge-baseline.json](merge-baseline.json) records the verified integration.
+Status: implementation and general source reviews complete; final qualification/disposition pending from ed5d00aca0743bde583b45fe7756dd494ac3960f; not yet strict-qualified. The qualified practical checkpoint was merged to main on 2026-10-09 at 16:30:26 UTC. Work proceeds on psc0/strict-sh1-v1. [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) is the continuation authority; [merge-baseline.json](merge-baseline.json) records the verified integration.
 
 ## Latest execution boundary
 
-The43-file source batch **656ed78db6a2c26feced9374cd7b251c062a42df** failed
-native compilation in run **38001282875** / compiler job **114059689529**.
-Lean rejected a new local named `variable`; N1/C1/C2/C3 and provider did not run.
-The exact log and failure summary are retained in the attempt ledger.
+The repaired compiler source **45d314b970d9d76fce9387f6bc8108fb9fab611c** passed
+native build, native regressions, checked-seed build and grammar/import/workspace
+steps in **run38002284953** / compiler **114062934819**. Existing replay runtime
+step22 failed because `replayReturnedFunction(n, 11n)` passed a returned-function
+operand in the old flat call. N1/C1/C2/C3 did not start; provider114063308633
+skipped. The actual function-versus18n diagnostic and full log are retained.
 
-The enclosing source commit over656ed78 performs only the independently
-reviewed [native local-name repair](reviewed-candidates/native-keyword-local-repair.json):
-six closed let scopes in Basic and Expr,17 identifier occurrences, no behavior
-or gate change. The bounded audit included all new semantic/helper names and
-APIs and found the additional downstream `variable`/`prefix` cases before retry.
-It requests one full **[sh1-qualify]** run. Discover the actual enclosing head
-and Actions run before attributing results; no native-only or cold rerun.
+The enclosing [seven-script host completion](reviewed-candidates/host-function-entry-completion.json)
+leaves production Lean and the six replay fixtures unchanged. Ten replay calls
+now use the actual entry/returned-value groups. Three obsolete flattened-result
+tail-route expectations now positively require arity1 general entries, while
+all value/depth/fault assertions remain. Three explicit flat-IR tail functions
+retain positive optimizer/20,000-step coverage in the existing compilation.
+That separate12-observation receipt and its binding preserve the previous61
+IR behavior observations and38 refusals. The remaining four host changes select
+reference calls by authenticated producer and correct the moved Basic slice.
+A bounded audit covered66 host files/69 source files; no additional concrete
+same-class caller mismatch was found.
 
-The complete [cross-family interface review](CROSS_FAMILY_INTERFACE_REVIEW.md)
-is independently CLEAR. It reconciles all ten COMMON interfaces, cofinal
-application schedules, shared residuals, finite administrative progress,
-source-derived identities and the exact native-empty/identifier boundaries.
-All33 row dispositions and strict flags remain open/false pending the final
-current-source evidence and explicit activation decision.
+All local N/GROUP/ER/EV/TS arguments, the ten-interface
+[CROSS_FAMILY_INTERFACE_REVIEW.md](CROSS_FAMILY_INTERFACE_REVIEW.md), and the
+11-row [SOURCE_RUNTIME_INTERFACE_REVIEW.md](SOURCE_RUNTIME_INTERFACE_REVIEW.md)
+are complete and independently CLEAR in their stated domain. Final row flags
+remain open/false until exact-source qualification and explicit disposition.
+The compiler changes and general scope are described in [IMPLEMENTATION.md](../IMPLEMENTATION.md).
+The new-only grammar, TS7-only toolchain, selected R and passed frozen cold
+recipe are unchanged.
 
-The last compiler source **fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504** passed
-native development run **37988707250** / compiler job **114017088870**, including
-the corrected grouped-empty grammar gate. Full qualification stages and
-provider were skipped. The earlier full run37986002380 failed that grammar
-assertion and remains in the attempt ledger. The independently revised TS7
-cold recipe passed run37983663908 and is unchanged.
+The enclosing commit requests **one full [sh1-qualify]** run. Discover the
+actual source head and Actions run; do not infer success from this request.
+No additional native-only or cold rerun. Continue through N1/C1/C2/C3, exact
+products/native parity, independent provider, final evidence/ledger/AI state,
+and the already-authorized strict merge once all mandatory requirements pass.
 
-The complete source correction covers canonical unary function values with
-actual flat declaration entries, generic and computed result boundaries,
-partial capture and Unit activation; 102 finite Nat worker placements and
-three streaming-prefix List readers; final-meta constructor refinement of
-root recursive minors; and one-shot root-child eligibility in elaboration
-and erasure. The original complete telescope, including implicit and proof
-parameters, is checked for major dependence on actual self calls.
-
-Nested explicit control remains supported. A recursive reference may use an
-already established root-child identity there; a second match or descendant
-match cannot create a new self-call hypothesis. The previous implementation
-description claiming that matching result types were sufficient was unsound
-and is corrected in [IMPLEMENTATION.md](../IMPLEMENTATION.md).
-
-Evidence adds four separately labelled actual-prepared-Core / emitted /
-native-PSC-emitted Nat equations and five precisely staged source refusals.
-The source total is now **2 accepted / 38 refused / 2 carrier refusals**;
-the old33 refusal prefix and every existing assertion remain. Generic old
-19 observations and canonical19 observations remain separate. The new binder
-authenticates the actual Core snapshots and source-case artifact for each
-N1/C1/C2/C3 compiler, without extra compiler execution.
-
-The recursive-structure correction retains the actual field/IH minor, captures
-the major once and emits the original ordered typed record projections. The
-same generic fixture/gate/binder adds two record layouts, four compile-only
-functions, six projection checks and two used/two unused IH checks. No new
-compiler/check/TS/native invocation or runtime record value is added.
-
-The reviewed [CANONICAL_FUNCTION_ARGUMENTS.md](CANONICAL_FUNCTION_ARGUMENTS.md)
-and completed [ERASURE_ARGUMENTS.md](ERASURE_ARGUMENTS.md) supply the actual
-entry/type/capture and all nine ER source-derived rule interfaces. N/EV/TS
-packets retain their local results. The final independent cross-family
-source/Core/ghost/provenance/initialization composition is being completed.
-All **33** correspondence rows and strict/global assurance flags remain
-open/false until their complete general arguments and exact evidence justify
-closure.
 
 ## Goal and scope
 

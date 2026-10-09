@@ -1074,11 +1074,13 @@ if (command === 'native-candidate') {
   await writeJson(path.join(outDir, 'worker-migration-reference.json'), referenceWorkerReceipt);
   await runFoundationConformance({
     ...libraryCompiler,
+    fixtureProducer: 'selected-R',
     executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
     root, outDir: path.join(outDir, 'foundation'), tsc,
   });
   await runHelperConformance({
     ...libraryCompiler,
+    fixtureProducer: 'selected-R',
     executingCompiler: 'Same verified selected authoring seed consumes both raw helper source slices.',
     root, outDir: path.join(outDir, 'helpers'), tsc,
   });

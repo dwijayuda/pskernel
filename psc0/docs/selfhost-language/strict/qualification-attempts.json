@@ -1242,6 +1242,94 @@
       "scopeOfFailure": "Native compiler parse failure before any N1/C1/C2/C3 or provider qualification. The complete semantic fixtures and source replay did not run.",
       "strictSh1Qualified": false,
       "semanticContractQualified": false
+    },
+    {
+      "attempt": 9,
+      "sourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+      "runId": 38002284953,
+      "workflowId": 378853677,
+      "compilerJobId": 114062934819,
+      "providerJobId": 114063308633,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38002284953",
+      "status": "failure",
+      "failedStep": {
+        "number": 22,
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "compilerJobId": 114062934819,
+        "stepNumber": 22,
+        "path": "scripts/selfhost-replay-runtime.test.mjs",
+        "line": 103,
+        "column": 16,
+        "timestamp": "2026-10-09T23:02:23.8784042Z",
+        "assertion": "assert.equal(compiled.replayReturnedFunction(n, 11n), n === 0n ? 18n : n + 10n)",
+        "error": "AssertionError [ERR_ASSERTION]",
+        "actual": "[Function: fn]",
+        "expected": "18n",
+        "operator": "strictEqual",
+        "exitCode": 1,
+        "classification": "existing-host-call-result-arity-assertion"
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "not-started",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/runtime-cli-failure.json",
+        "blob": "57fe49c8a9421dd859ce15b5e50b7fe02e7f7c56",
+        "sha256": "9272322a204507cda4b336beebb37b9a9861d4ad4c245181a76596cffad5e6c3"
+      },
+      "log": {
+        "path": "attempts/45d314b970d9d76fce9387f6bc8108fb9fab611c/job.log",
+        "blob": "adb2fb82490eb126064cfa83fadf3dfb2c39cb9c",
+        "sha256": "8eebcf46d04d4a8c5d72dfa895609b70220b47ea515ebafc78f790481383ed42",
+        "bytes": 183576
+      },
+      "artifacts": [
+        {
+          "id": 11649673654,
+          "name": "psc0-sh1-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c",
+          "sizeBytes": 447724,
+          "digest": "sha256:18b26297bd37c23e4f762a093b2a09c595bc5676f314f7419060028cb6f75e2f",
+          "expired": false,
+          "sourceCommit": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+          "runId": 38002284953
+        }
+      ],
+      "resourcePreflight": {
+        "policy": "psc0-sh1-generated-qualification-resources/1",
+        "passed": true,
+        "node": "v22.23.3",
+        "oldSpaceMiB": 8192,
+        "minimumAvailableBytes": 12884901888,
+        "observedHeapLimitBytes": 8640266240,
+        "effectiveAvailableBytes": 15228989440,
+        "inheritedHeapOverride": false
+      },
+      "typescriptProfile": {
+        "mode": "installed-profile-contract",
+        "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+        "timings": [
+          {
+            "phase": "positional-source-with-unrelated-config",
+            "version": "7.0.2",
+            "elapsedMs": 94.56032399999998
+          }
+        ]
+      },
+      "coldRecovery": {
+        "runId": 38002284959,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The native keyword repair passed compilation and regressions. An existing host test still passed returned-function operands in one flat call. Actual returned function vs expected18n is preserved. N1/C1/C2/C3 and provider did not run. This is a caller-convention correction, not an observed compiler semantic or memory failure.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1249,14 +1337,15 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "enclosing-alpha-repair-commit-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "656ed78db6a2c26feced9374cd7b251c062a42df",
-    "priorCompilerSource": "656ed78db6a2c26feced9374cd7b251c062a42df",
-    "priorAttemptRunId": 38001282875,
-    "manifest": "reviewed-candidates/native-keyword-local-repair.json",
-    "manifestBlob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
-    "sourceFiles": 2,
-    "cumulativeReviewedSourceFiles": 43,
+    "status": "enclosing-host-completion-commit-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "priorCompilerSource": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "priorAttemptRunId": 38002284953,
+    "manifest": "reviewed-candidates/host-function-entry-completion.json",
+    "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
+    "sourceFiles": 7,
+    "productionLeanChanges": 0,
+    "cumulativeReviewedSourceFiles": 46,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -1300,5 +1389,6 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false
     }
-  ]
+  ],
+  "updatedAtUtc": "2026-10-09T23:25:44Z"
 }

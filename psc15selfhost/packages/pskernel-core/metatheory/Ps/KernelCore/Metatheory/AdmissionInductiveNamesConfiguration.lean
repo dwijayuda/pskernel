@@ -532,3 +532,21 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_recursor_disjoint
   exact psKernelNameListContains_reverse_false
     (psKernelSimpleMutualRecNames decl.types)
     (psKernelSimpleMutualCtorNames decl.types) hRecCtor
+
+/--
+Canonical absence of a finite name family entails absence of every syntactic
+member. This does not turn an accelerated-index negative result into a
+semantic fact: the input is already authoritative list-based absence.
+-/
+theorem PsKernelInductiveNamesAbsent.lookup_none_of_mem
+    {environment : PsKernelEnvironment} {names : List PsKernelName}
+    (hAbsent : PsKernelInductiveNamesAbsent environment names)
+    (name : PsKernelName) (hMember : List.Mem name names) :
+    psKernelFindConstantInList name environment.constants = none := by
+  induction hAbsent with
+  | nil =>
+      cases hMember
+  | cons head rest hHead hRest ih =>
+      cases hMember with
+      | head => exact hHead
+      | tail => exact ih name (by assumption)

@@ -6,6 +6,8 @@
 
 **Repository evidence cut:** 9 October 2026, approximately 17:57 UTC. Source and CI claims below are pinned to that audit; they are not assertions about unseen later branch state. Re-fetch live heads and lane handoffs before implementation.
 
+**Proof-organization follow-up:** the proof layout, imports, and runner were inspected at `pscv/prove-pskernel-core-v1` commit `85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62`. This supplements the dated audit with organizational evidence; it does not requalify the newer branch's theorem set or CI.
+
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 
 ## Decisions confirmed by the user
@@ -16,6 +18,9 @@
 - Make `psbackend-js`, `psbackend-wasm`, `psbackend-rust`, and other backends optional extensions. Replacing the required TS backend is not a goal of this plan.
 - Allow mature extension functionality to be adopted through explicit bundling, implementation-integration, or semantic-change decisions. Adoption never automatically waives kernel checks, required preservation evidence, isolation, or disclosure.
 - Preserve the selected seed and demonstrated compiler fixed point. A joint generated compiler/kernel closure remains a separate acceptance milestone.
+- Put compiler assurance companions in a separate `psc0/proofs/` tree, using `.proof.lean` filenames and ordinary `.lean` modules for reusable models and lemmas. Reuse the existing kernel proof approach without duplicating its proof library.
+- Allow full Lean and its tactics/libraries for proof development now, and full PSCV proof authoring when that capability is implemented. Assurance proofs and their development dependencies stay outside the ordinary runtime and self-host closure.
+- Complete architectural implementation, npm packaging, and the declared self-host milestone without waiting for the full compiler/architecture proof program. Formal assurance is a later, separately scoped gate for stronger claims. Required runtime kernel admission, validation, isolation, disclosure, and selected-profile PSCV checks remain mandatory.
 
 This document records research and planning. It does not implement package renames, change kernel semantics, promote a seed, or qualify a new compiler. Existing workstream ownership and execution handoffs continue to apply.
 
@@ -333,6 +338,8 @@ Here, core distribution means the required compiler product: psc, pscore, psfron
 
 Publish the supervisor and kernel at clear consumer boundaries. The compiler-core, frontend, and TS backend can initially be subpackages or subpaths under a shared version if separate publication would add only coordination work. Proof sources, docs, archives, and historical seeds remain in the repository without automatically entering release tarballs.
 
+Use one development-only compiler assurance workspace at `psc0/proofs/`, organized by package. This is a source/build boundary, not another mandatory npm package or compiler plugin framework. Its pinned Lean toolchain and optional proof libraries are installed by the assurance workflow only. Keep the kernel's canonical assurance library under its existing ownership and reuse its results at an explicit source/profile boundary; do not create a second kernel proof copy. Section 16 specifies the layout.
+
 ### Dependency direction
 
 The supervisor orchestrates the frontend, kernel, and reference backend. Frontends and extensions depend on data contracts, never on supervisor internals. The kernel is independently buildable. Compiler semantic modules are pure and reusable. Backends consume explicit IR stages; they do not own common transformations secretly.
@@ -581,7 +588,90 @@ Mechanize the logical foundation, checker/admission refinement, codec/bridge, ru
 
 Proofs about the supervisor should initially establish state transitions and exclusive authority. Refinement to its Node or later self-hosted implementation is a separate step. A state-machine proof does not prove Wasmtime or the OS secure. Keep those implementation/environment assumptions explicit.
 
-Maintain a machine-readable claim ledger linking each public theorem to its exact source/artifact/profile, exported axiom dependencies, quantified semantic assumptions, proof checkpoint, and test evidence. Do not report “percentage verified” from file counts. Begin three bounded proof pilots—primitive identity/erasure, bridge correspondence, and one pass validator—to measure proof effort and refactor sensitivity before projecting the full program.
+Maintain one small machine-readable claim ledger linking each public theorem to its exact source/artifact/profile, exported axiom dependencies, quantified semantic assumptions, proof checkpoint, and test evidence. Do not report “percentage verified” from file counts. Schedule three bounded proof pilots—primitive identity/erasure, bridge correspondence, and one pass validator—at the later assurance milestone to measure proof effort and refactor sensitivity before projecting the full program. Earlier proof work is useful when it clarifies a contract, but completing those pilots is not an exit condition for architectural implementation.
+
+
+### Proof layout: companion files outside the runtime closure
+
+The inspected kernel already separates production `src/`, companion `proof/.../*.proof.lean`, and importable `metatheory/.../*.lean` sources. Its npm proof command builds `PsKernelCore` and `PsKernelCoreMetatheory`, then invokes a small runner that directly checks every companion with `lake env lean <file>`. Changed companions run first, followed by the rest; this is not changed-files-only validation. [R36] [R37] [R38]
+
+Companions import actual production definitions. For example, `API/Kernel.proof.lean` imports `Ps.KernelCore.API.Kernel` and its judgments, and explicitly limits its local claims to API orchestration rather than all underlying checker semantics. That distinction should be preserved for the compiler. [R39]
+
+Use the requested plural `proofs/` for the new compiler workspace. The following paths are proposed, not existing implementation:
+
+| Purpose | Proposed path or mapping |
+| --- | --- |
+| Production module | `psc0/packages/<package>/src/<module>.lean` |
+| Companion for that module | `psc0/proofs/<package>/<module>.proof.lean` |
+| Example erasure implementation | `psc0/packages/pscore/src/Ps/Core/Erasure.lean` |
+| Example erasure companion | `psc0/proofs/pscore/Ps/Core/Erasure.proof.lean` |
+| Shared semantic models | `psc0/proofs/lib/Ps/CompilerProof/Semantics/*.lean` |
+| Reusable refinement/composition lemmas | `psc0/proofs/lib/Ps/CompilerProof/Refinement/*.lean` |
+| Cross-package transaction/isolation claims | `psc0/proofs/architecture/*.proof.lean` |
+| Compiler-chain and bootstrap claims | `psc0/proofs/bootstrap/*.proof.lean` |
+| Proof-only Lake project and dependency pins | `psc0/proofs/lakefile.lean`, `lean-toolchain`, and `lake-manifest.json` |
+| Claim, theorem, and source mapping | `psc0/proofs/CLAIMS.json` |
+
+Apply the companion mapping to `psfrontend`, `pscore`, `psbackend-ts`, and relevant `pscv` implementation modules. For the `psc` supervisor, proofs about Lean definitions may import those definitions; a Lean model of handwritten TypeScript or host IO still needs a separate implementation-refinement argument. A source path or a matching function name is not that argument.
+
+Start with the existing direct-file runner pattern adapted to `proofs/`. Keep shared results in ordinary importable `.lean` modules under the distinct `Ps.CompilerProof` namespace. The `.proof.lean` suffix is a discovery convention; it does not automatically establish reusable module artifacts or independent proof replay. If later assurance requires compiled/exported companions, qualify their filename/module/output mapping and retain the exact proof artifacts. Do not introduce a new proof build framework merely to change filenames.
+
+Each substantive theorem has one owner. A companion may reuse a shared theorem without copying its body. The ledger records intended semantic claims and named results; it does not require empty companions for every file or treat a wrapper lemma as full module correctness. Kernel assurance stays in its canonical source tree; integrating or renaming its existing singular `proof/` directory is a separate deliberate maintenance decision.
+
+### Full Lean now; full PSCV as an optional proof-authoring route
+
+Use the pinned host Lean toolchain to author and check compiler assurance proofs. Full Lean syntax, induction, tactics, metaprogramming, and useful proof libraries are permitted in this workspace. Mathlib may be added when it materially helps a proof; it is not a mandatory compiler dependency. This work does not wait for PSC0 to implement unrestricted Lean syntax or for full PSCV to exist.
+
+When a full PSCV proof language is available, it may provide another authoring route to the same reviewed theorem statements and acceptable proof evidence. Its lowering/elaboration, proof terms, dependencies, checker, and assumption policy must be recorded. A future PSCV-to-Lean route is an option, not an already implemented capability or a required new translator now.
+
+Keep authoring freedom separate from accepted evidence. The checking profile must audit the final theorem's transitive axioms and semantic premises. Incomplete proofs, arbitrary axioms, or native-evaluation assumptions cannot silently become unconditional assurance. Lean's validation guidance supports axiom inspection, replay, and stronger separation of proof construction from a trusted expected statement. The current companion runner's exit status alone is insufficient for this stronger claim. [E01] [R38]
+
+Run proof construction outside the protected compiler supervisor and its publication capabilities. For untrusted contributions, isolate proof-authoring execution from the trusted rechecker and expected claims. Heavy tactics may search freely within that environment; acceptance still concerns the exact elaborated statement and evidence.
+
+Initially, compiler assurance may be Lean-checked. Rechecking the same exported proof/dependency closure with PSKernel is a later corroboration milestone where the chosen kernel/profile supports it. A full Lean authoring environment does not guarantee full PSKernel compatibility. Do not require PSKernel to certify all compiler metaproofs before the architecture can be completed, and do not discard independent Lean checking when PSKernel rechecking becomes available.
+
+### Keep assurance independent of self-hosting
+
+The dependency direction is one-way: assurance modules import production modules and proof support; runtime production modules do not import the assurance tree or its tactic libraries. Bind imports to the exact source revision under examination, rebuilding those imports rather than accidentally using stale installed `Ps.*` artifacts. The current kernel's portable manifest names only `src` as its source root; the compiler should enforce its declared closure as well. [R40]
+
+The ordinary compiler build, npm install, and C1/C2/C3 loop must not run compiler metaproofs or fetch proof-only dependencies. Proof-only changes must leave the production source-closure digest and emitted TS/JS unchanged for identical declared production inputs. Proof receipts and repository provenance may change independently. Publishing proof sources or checkable proof artifacts separately is optional.
+
+This separation applies to external assurance theorems. A proof term or termination argument required to elaborate an implementation definition remains a real source dependency even if later erased. Keep such requirements within the accepted implementation profile or account for them in the closure; do not replace them with assumed lemmas to manufacture a smaller bootstrap.
+
+The same distinction applies at runtime: a compilation may still need to check a user's proof, a PSCV obligation, or a transformation certificate. Those checks are part of the selected production policy. They are different from rebuilding the metatheory proving that PSC0's implementation is correct.
+
+### Proof endpoints and remaining assumptions
+
+Organize the later proof program by semantic boundary, using section 15's composition theorem. Its statements should reference the real implementation when possible and independently specified semantics when needed.
+
+| Assurance result | Remaining boundary to state explicitly |
+| --- | --- |
+| Mathematical model and relative consistency of the logical foundation | Strength/consistency assumptions of the surrounding metatheory; this is separate from compiler correctness |
+| PSKernel checker/admission refinement | Exact logical profile, environment invariant, permitted axioms/reductions, checker execution chain |
+| Source-to-Core correspondence | Precisely supported language/extension semantics and source-contract interpretation |
+| Erasure and RuntimeIR transformations | Observable effects, representations, evaluation/resource policy, and supported certificate relation |
+| TS backend refinement | Specified TS output fragment/options, runtime/FFI contract, and execution through TS7/JS |
+| PSCV VCG/coverage soundness | The same executable semantics, correct obligation association, and preservation of the claimed property |
+| Supervisor transaction/isolation model | Refinement to the actual supervisor/codec/output operations; runner, OS, and host-binding assumptions |
+| Whole compiler and bootstrap composition | Each instantiated pass relation, exact source/seed/artifact identities, and the remaining toolchain/runtime assumptions |
+
+A theorem about a model needs a model-to-implementation relation. A theorem about imported Lean definitions still needs their execution through PSC0, `psbackend-ts`, TS7, and the JS runtime justified to certify the delivered executable. Target a narrow emitted TS fragment and explicit toolchain options; retaining TS7 as a stated external assumption is acceptable for an intermediate assurance result. Proving the entire TypeScript toolchain is not an architectural implementation prerequisite. [E02]
+
+Implement directly provable small validators where practical and reuse their soundness theorems across changing untrusted search strategies. For partial, external, or effectful operations, state the behavior/termination assumptions or prove an appropriate operational refinement; importing a definition does not by itself expose every runtime behavior to Lean's logic. Do not maintain a second easier compiler and quietly transfer its theorem to the production compiler.
+
+### Separate implementation completion from assurance qualification
+
+**Architectural implementation is complete when phases 0–4 meet their functional, trust-boundary, packaging, and declared self-host requirements. Completing the compiler/architecture proof program is a later assurance gate.** Establish clear contracts, source/proof separation, and an honest obligation inventory during implementation; allow unfinished future proofs to remain planned.
+
+| Gate | What must hold |
+| --- | --- |
+| Architectural implementation and ordinary release | Required admission/validation, isolation/disclosure, artifact binding, tests, packaging, and self-host qualification work; implementation assumptions are explicit |
+| Later assurance qualification | The selected model/refinement/composition theorems check for the exact claimed revision/profile, with reviewed statement meanings and recorded assumptions |
+| A build requesting a verified PSCV/executable profile | Every obligation promised by that profile is satisfied before successful publication; the request cannot silently downgrade because compiler assurance is unfinished |
+
+Small validators may initially remain explicitly trusted implementations backed by meaningful tests. Their later soundness proofs reduce that assumption. The validator and its required checks still exist and run from the first implementation milestone; deferring the proof does not authorize accepting unsupported evidence.
+
+Use `CLAIMS.json` for statuses such as `planned`, `in-progress`, `checked-under-assumptions`, and `stale`, with source modules/declarations, theorem names, scope, and dependencies. Generate or attach the exact source/proof/toolchain identities in checking receipts. A code change invalidates affected assurance claims until checked again; retain old evidence for its old revision. A broader ordinary release can proceed with explicit unproved assumptions, but a requested stronger verified profile must still refuse missing assurance. This policy changes the future milestone structure, not existing runtime gates or recorded historical qualifications.
 
 
 ## 17. Self-hosting and bootstrap strategy
@@ -618,7 +708,7 @@ Stage-two/stage-three equality proves a reproducibility property of those runs, 
 
 ### Fast development without weakening final gates
 
-Do not run the entire multi-generation qualification after every small edit. Use source-profile/import checks, affected-unit behavior tests, certificate validation, and focused proof recompilation during development. Run complete fixed-point, provider, cold-recovery, and publication gates at a coherent promotion checkpoint.
+Do not run the entire multi-generation qualification after every small edit. Use source-profile/import checks, affected-unit behavior tests, and certificate validation during development. Recompile affected existing proofs in the separate assurance job when relevant; missing future compiler/architecture proofs do not block ordinary implementation progress. Run complete fixed-point, provider, cold-recovery, and publication gates at a coherent promotion checkpoint.
 
 Measure preparation, encoding, erasure, validation, emission, runtime compilation, peak memory, and warm edit latency independently. Prioritize repeated preparation and encoding before adopting a new caching framework or promising a large speedup from direct JS.
 
@@ -636,10 +726,12 @@ These are planning envelopes, not measured implementation requirements or delive
 | 2. One isolated extension slice | Data-only descriptors, constrained Wasm runner, limits, actual-load reporting, three complete examples | External code cannot obtain admission, provider, reporting, or final-output authority |
 | 3. Stabilize contracts | Primitive identities, canonical bridge, narrow SDK, deterministic syntax dispatch; only supported rewrite certificates | Supported extension changes require no trusted-core source changes |
 | 4. Package and requalify | Minimal npm tarballs, coordinated versions, clean-install tests, cold recovery and complete new C1/C2/C3 checkpoint | Installable checked compiler and isolated examples without a repository checkout |
-| 5. Earn stronger guarantees | Finish kernel admission/model work; prove bridge/erasure/pass pilots; PSCV and reference-backend refinement | Claims promoted only when their exact obligations are discharged |
+| 5. Later formal assurance | Reuse kernel admission/model work; develop bridge/erasure/pass pilots, architecture refinement, PSCV and reference-backend proofs | Independently scoped claims promoted only when their exact obligations are discharged; not required to close phases 0–4 |
 | 6. Optional backend ecosystem | Reuse/evaluate direct JS, Wasm, Rust and other backends through extension contracts | Individually qualified optional targets; TS7 remains the required reference/self-host path |
 
-Phases 0–4 are the minimum protected platform. Phase 5 is a parallel formal program with checkpoints, not a small finishing task. Joint compiler/kernel qualification through TS7 is a separate explicit closure milestone. Phase 6 is optional, independently costed, and not a prerequisite for the core release or self-hosting.
+Phases 0–4 are the minimum protected platform and define completion of the architecture implementation. Set up the separate proof workspace, semantic contracts, and obligation inventory while stabilizing those interfaces; unfinished compiler/architecture proofs are not their closing gate. Phase 5 is a later formal-assurance program with its own budget and scoped checkpoints. Nonblocking research may run earlier, but completing the full formal program is not a prerequisite for npm packaging or the ordinary self-host release.
+
+Keep the existing canonical kernel proof work and its exact claims; avoid unrelated proof-tree churn during compiler restructuring. Joint compiler/kernel qualification through TS7 is a separate explicit closure milestone. Phase 6 is optional, independently costed, and not a prerequisite for the core release or self-hosting.
 
 ### Engineering envelope for phases 0–4
 
@@ -663,6 +755,8 @@ These estimates exclude complete mechanized proofs, a new Wasm compiler, full Le
 
 ## 19. Acceptance criteria
 
+Apply the implementation gates to the protected platform and the selected build policy. The formal-assurance gate applies when promoting the corresponding proof claim; unfinished future theorems do not block completion of phases 0–4. A profile promising verified execution remains accountable for its full advertised scope.
+
 | Gate | Measurable requirement |
 | --- | --- |
 | Kernel identity | Every accepted result identifies exact source, proof checkpoint, artifact digest, runtime, logical profile and assumptions; legacy selectors cannot silently replace it |
@@ -675,7 +769,8 @@ These estimates exclude complete mechanized proofs, a new Wasm compiler, full Le
 | Artifact/cache binding | Swapped target bytes, changed environments/profiles, incomplete decodes and forged cache acceptance are rejected or revalidated |
 | PSCV | Missing required VCs, wrong goal associations, incomplete dependency/effect coverage and unavailable required VCG block the promised verified executable |
 | Self-hosting | Preserve selected R; qualify exact source closure and C2/C3 equality for the declared products; cold recovery uses only declared inputs/toolchains |
-| Formal claims | The promised theorem set compiles at the referenced source; exported axiom dependencies and quantified semantic assumptions are audited; no ledger rule is promoted by test coverage alone |
+| Proof/runtime separation | Runtime imports and self-host inventories exclude compiler assurance modules and proof-only dependencies; a proof-only edit preserves production closure/output identities for fixed production inputs |
+| Formal claims — later assurance gate | The promised theorem set checks at the referenced source; exported axiom dependencies and quantified semantic assumptions are audited; no claim is promoted by test coverage or companion-file counts alone |
 | Cost and usability | Clean npm install runs checked builds and examples; no optional backend enters the mandatory closure; compare latency, memory, tarball size and dependencies to a measured baseline |
 
 Run failure-injection tests at each transaction boundary, including backend crash, receipt write failure, malformed guest responses, timeout, and a changed byte buffer after validation. Test actual denied operations; a manifest saying “sandboxed” is not a test.
@@ -688,7 +783,7 @@ For extension ergonomics, require the example macro, tactic, and command to be i
 
 A clean npm installation builds the declared bounded language through one checked publication transaction, selects an unambiguous kernel artifact, reports actual extension identities, runs constrained external examples without privileged access, and reproduces its selected compiler closure. It states the remaining source-fidelity, semantic-preservation, model, runtime, and bootstrap assumptions precisely.
 
-This is a useful complete platform milestone even while the stronger proof program continues. It must not be marketed as a fully verified compiler simply because its kernel accepts proof terms or its compiler reaches a fixed point.
+This is a complete architectural implementation milestone even while the later proof program remains unfinished. The obligation inventory can contain planned or in-progress proofs, and ordinary npm/self-host qualification does not need to execute that proof program. It must not be marketed as a fully verified compiler simply because its kernel accepts proof terms or its compiler reaches a fixed point.
 
 
 ## 20. Risks and decisions to keep explicit
@@ -717,6 +812,8 @@ This is a useful complete platform milestone even while the stronger proof progr
 - No mandatory full-Lean frontend or four-backend bootstrap.
 - No verification claim inferred from a filename, type wrapper, manifest, hash fixed point, or finite suite.
 - No forced mathematical model for routine UI, package UX, or every plugin search algorithm.
+- No full compiler/architecture proof requirement for closing architectural implementation; stronger assurance has separate, explicit gates.
+- No proof-library dependency silently added to the runtime/self-host closure, and no stale proof result silently applied to changed code.
 
 The architecture should make each future change answer a small set of questions: what data does it consume, what data/evidence does it produce, which semantics or invariant does it preserve, which capabilities does it need, and which existing theorem/checker establishes acceptance? When a feature needs a new trusted rule, that should be obvious and rare.
 
@@ -747,7 +844,7 @@ The integration cloud failure observed at the reviewed HEAD is a Node file-URL/p
 
 ## Source register
 
-Repository sources are pinned to the inspected commits. Workflow links identify specific runs. External sources are primary documentation or research.
+Repository sources are pinned to the inspected commits. Workflow links identify specific runs. External sources are primary documentation or research. R36–R40 are the later proof-organization inspection at `85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62`; they do not update the original audit's CI/theorem-completion claims.
 
 ### Repository sources
 
@@ -786,6 +883,11 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 - **[R33] - Proof runner.** Compilation exit status is not a comprehensive axiom gate.
 - **[R34] - PSC0 package manifest.** Private workspace; current script inventory.
 - **[R35] - Arena work state.** Native evidence and unfinished corpus scope.
+- **[R36] - Proof workspace npm command, follow-up.** Builds production/metatheory libraries before direct companion checks.
+- **[R37] - Proof library boundaries, follow-up.** Separate Lake source roots for production and reusable metatheory.
+- **[R38] - Companion proof runner, follow-up.** Direct `.proof.lean` checks, changed-first ordering, and full sweep.
+- **[R39] - Production-bound API companion, follow-up.** Actual implementation imports and explicitly limited orchestration claims.
+- **[R40] - Kernel production source roots, follow-up.** Portable package manifest names `src`; assurance sources are separate.
 
 ### Workflow evidence
 
@@ -876,3 +978,9 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 [E13]: https://www.cl.cam.ac.uk/~jrh13/papers/holhol.pdf
 [E14]: https://metarocq.github.io/
 [E15]: https://arxiv.org/html/2512.05262v1
+
+[R36]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/package.json
+[R37]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/lakefile.lean
+[R38]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/scripts/check-pskernel-core-proofs.mjs
+[R39]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/packages/pskernel-core/proof/Ps/KernelCore/API/Kernel.proof.lean
+[R40]: https://github.com/dwijayuda/pskernel/blob/85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62/psc15selfhost/packages/pskernel-core/package.json

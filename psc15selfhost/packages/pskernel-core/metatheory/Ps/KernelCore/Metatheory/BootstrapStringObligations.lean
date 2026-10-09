@@ -124,3 +124,16 @@ theorem psKernelSimpleFreshElimName_fresh_of_primitive_obligations
     (psKernelStringEqReflexiveLaw_of_cursor_progress hEnd hStep) params
   intro i hi j hj hEqual
   exact psKernelSimpleElimNameCandidate_injective_of_append_bridge hAppend i j hEqual
+
+/--
+Checked reference operations already satisfy the cursor obligations. These are
+facts about the specified standard operations, not bridges to Internal.*.
+-/
+theorem psKernelSpecifiedString_atEnd_of_bound (value : String) (pos : Nat)
+    (hBound : value.utf8ByteSize ≤ pos) :
+    String.Pos.Raw.atEnd value (String.Pos.Raw.mk pos) = true := by
+  simp [String.Pos.Raw.atEnd, hBound]
+
+theorem psKernelSpecifiedString_next_progress (value : String) (pos : Nat) :
+    pos < (String.Pos.Raw.next value (String.Pos.Raw.mk pos)).byteIdx :=
+  String.Pos.Raw.byteIdx_lt_byteIdx_next value (String.Pos.Raw.mk pos)

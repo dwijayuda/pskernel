@@ -17,14 +17,15 @@ theorem psKernelAddMutualRecursorInfos_semantic_extends
   | cons info rest ih =>
       cases hAbsent with
       | cons _ _ hFresh hRest =>
+          simp only [List.map_cons] at hUnique
           have hUniqueTail := psKernelNameHasDuplicates_cons_false_refines
-            info.base.name (rest.map (fun value => value.base.name)) hUnique
+            info.base.name (rest.map (fun value : PsKernelRecursorInfo => value.base.name)) hUnique
           let next := psKernelEnvironmentAddUnchecked environment (PsKernelConstantInfo.recInfo info)
           have hStep := psKernelEnvironmentAddUnchecked_fresh_semantic_extends
             environment (PsKernelConstantInfo.recInfo info) hString
             (by simpa [psKernelConstantInfoName, psKernelConstantInfoBase] using hFresh)
           have hRemaining := psKernelInductiveNamesAbsent_add_disjoint environment
-            (PsKernelConstantInfo.recInfo info) (rest.map (fun value => value.base.name)) hRest
+            (PsKernelConstantInfo.recInfo info) (rest.map (fun value : PsKernelRecursorInfo => value.base.name)) hRest
             (by simpa [psKernelConstantInfoName, psKernelConstantInfoBase] using hUniqueTail.1)
           exact PsKernelEnvironmentSemanticExtends.trans environment next
             (psKernelAddMutualRecursorInfos rest next) hStep

@@ -13,9 +13,9 @@ Status baseline: proof branch after the first independent typing metatheory and 
 
 | Grade | Modules |
 |---|---:|
-| A | 50 |
+| A | 51 |
 | B | 6 |
-| C | 17 |
+| C | 16 |
 | D | 6 |
 | **Total canonical source/proof pairs** | **79** |
 
@@ -37,10 +37,10 @@ The separate cross-module `Metatheory/Typing.proof.lean` is A-level evidence and
 | `Admission/Inductive/Common/Parameters.lean` | **A** | Cross-module checked header and raw constructor parameter-spine refinement (full proof/native #732). Independent binder typing, context/freshness and exact residual evidence; not full inductive admission. |
 | `Admission/Inductive/Common/RecursorValidation.lean` | **A** | Successful recursor-rule validation refines `PsKernelSimpleRecursorRulesValid`, proving each generated rule RHS is typed and definitionally equal to the expected closed motive application under explicit session soundness contracts. |
 | `Admission/Inductive/Mutual/Admission.lean` | **C** | Selected rejection/empty transaction behavior. |
-| `Admission/Inductive/Mutual/AdmissionLoops.lean` | **A** | Independent per-type and whole-family constructor publication histories (full proof/native #765): closed checked typing, owner-shape suffix provenance, positivity/result evidence, canonical freshness/lookup/index preservation. Mutual recursor loops and final transaction remain incomplete. |
+| `Admission/Inductive/Mutual/AdmissionLoops.lean` | **A** | Independent per-type and whole-family constructor publication histories (full proof/native #765): closed checked typing, owner-shape suffix provenance, positivity/result evidence, canonical freshness/lookup/index preservation. Full proof/native #779–#780 additionally validate ordered Sort-typed recursor headers, independent typed owner rules, and generated metadata. Final mutual transaction composition remains incomplete. |
 | `Admission/Inductive/Mutual/Analysis.lean` | **A** | Independent family-wide occurrence/index exclusion and recursive-argument positive grammar (#759), with distinct traversal/checker fuel and scope-history invariants. Comparator reflexivity is an explicit unresolved condition. |
 | `Admission/Inductive/Mutual/Header.lean` | **A** | Checked remaining-header history (#759): closed Sort typing, raw parameter and checked index spines, normalized universe equality, exact declaration/shape/name provenance. Full mutual transaction remains incomplete. |
-| `Admission/Inductive/Mutual/Recursor.lean` | **C** | Recursor worker base/control facts; semantic recursor construction incomplete. |
+| `Admission/Inductive/Mutual/Recursor.lean` | **A** | Full proof/native #779–#780: actual rule validation yields independent owner-filtered RHS typing with exact rule exhaustion, selected motive, and preserved context/configuration; generated rules have constructor-name and field-arity provenance. Complete mutual transaction and generated universe freshness remain open. |
 | `Admission/Inductive/Nested/Admission.lean` | **C** | Reserved-name failure propagation. |
 | `Admission/Inductive/Nested/Commit.lean` | **C** | Commit helper base cases. |
 | `Admission/Inductive/Nested/Discover.lean` | **B** | Discovery soundness for returned family template plus list laws. |
@@ -142,3 +142,12 @@ nested flatten/rebase/restore refinement, the final Kernel/API/session theorem
 family, integration reconciliation and final conformance gates remain open.
 
 The evidence refresh also removes stale infer-only typing claims and stale full-knot closure notes. These corrections do not change grade counts. Earlier green concrete checker work is preserved; it is not restarted or treated as an unresolved callback assumption.
+
+## Evidence refresh — 2026-10-09
+
+Full proof/native #779 and #780 justify one additional C→A upgrade for
+`Admission/Inductive/Mutual/Recursor.lean`. Counts are now **51/6/16/6**.
+Decimal injectivity, bounded search counting, and explicit cursor/append
+obligation decomposition are also checked at #780; they do not discharge the
+actual opaque primitive bridges or justify an unconditional admission claim.
+This remains a partial audit, not final acceptance.

@@ -1,93 +1,58 @@
-# PSKernel Core inductive closure: unresolved bootstrap primitive bridge
+# PSKernel Core inductive closure: bootstrap primitive boundary
 
-Status: **incomplete; no new trusted premise adopted**.
+Status: **partially resolved; no new trusted premise adopted**.
 
-## Concrete obligation
+## Proved progress
 
-The ordinary recursor appends a fresh elimination universe to declaration level
-parameters when large elimination is permitted. Complete universe scoping and
-name freshness require that the actual selected name is not already declared.
+Full proof/native [#779](https://github.com/dwijayuda/pskernel/actions/runs/37903458196)
+and [#780](https://github.com/dwijayuda/pskernel/actions/runs/37903951937) establish:
 
-Production `psKernelSimpleElimNameCandidate` constructs `u` and then
-`String.Internal.append "u_" (psKernelNatToString n)`.
-`psKernelNatToString n` is `Int.repr (Int.ofNat n)`.
-`psKernelSimpleFreshElimNameAux` searches with bounded fuel; at fuel zero it
-returns a candidate without checking membership. Its root fuel is one plus the
-number of declared universe parameters.
+- Exact skipped-candidate search history and a counting proof excluding fuel
+  exhaustion under explicit finite candidate distinctness.
+- Unconditional decimal representation injectivity:
+  `psKernelNatToString_injective`, using pinned Lean's checked digit round trip.
+- Candidate distinctness conditional only on append for the actual nonzero
+  prefixed decimal strings.
+- Comparator reflexivity conditional on end detection and strict cursor
+  advancement. It needs no additional character-equality specification.
+- Composition into
+  `psKernelSimpleFreshElimName_fresh_of_primitive_obligations`.
+  This theorem is **conditional**.
 
-The registered `AdmissionEliminationNameConfiguration.lean` candidate proves
-the exact search exit disjunction: an unchecked fuel-boundary candidate, or a
-candidate for which executable membership is false. This does not remove the
-boundary alternative and does not prove unconditional name freshness.
+## Remaining actual-source obligations
 
-## Why existing named laws do not discharge it
+The actual executable still calls opaque `String.Internal.append`,
+`String.Internal.atEnd`, and `String.Internal.next`.
+No kernel-checked bridge for those actual declarations has been established.
+Standard specified operations share their external native symbols, but that
+does not establish equality between the Lean declarations.
 
-In pinned Lean 4.34 commit
-`293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`,
-`src/Init/Data/String/Bootstrap.lean` declares
-`String.Internal.append` as an opaque external function
-(`lean_string_append`). The same file declares the opaque cursor
-`next`, `atEnd`, and `get` operations used by PSKernel's comparator.
-No checked append/distinctness bridge has been established in this proof tree.
+Existing trusted premises remain `PsKernelNativeReductionSoundLaw` and
+`PsKernelStringEqSoundLaw`. Neither comparator reflexivity nor the three
+primitive properties has been adopted as a new trusted law. No production
+semantic defect is asserted, and no acceptance criteria have been weakened.
 
-`PsKernelStringEqSoundLaw` restricts positive comparator results.
-`PsKernelStringEqReflexiveLaw` restricts comparison of a string with itself.
-Neither law specifies append or decimal representation, or says that generated
-candidates are distinct. It is unsound to infer those properties from the two
-comparator laws. Abstractly, an unspecified append operation could map every
-candidate suffix to the same string while equality itself remains sound and
-reflexive. This is a missing primitive specification, **not evidence of a bug
-in Lean's actual native append implementation**.
+## Concrete evaluated resolution
 
-A kernel-checked specification/representation bridge for these actual pinned
-bootstrap primitives is needed to prove candidate distinctness and discharge
-the bounded search non-exhaustion argument. It has not been supplied by adding
-an axiom, renaming a law, strengthening an existing trusted law, assuming
-distinctness, or changing production generation merely for proof convenience.
+See [PSKERNEL_CORE_BOOTSTRAP_PRIMITIVE_RESOLUTION.md](PSKERNEL_CORE_BOOTSTRAP_PRIMITIVE_RESOLUTION.md)
+for the exact three statements, checked reference operations, pinned primary
+sources, evaluated alternatives, and the proposed migration scope.
 
-## Trusted, conditional, and incomplete boundaries
+The recommended engineering route uses the specified standard operations,
+retaining the same native external symbols. The portable erasure registries
+currently recognize the opaque names, so primitive aliases/prelude support
+must also be checked before adoption.
 
-- Existing named trusted premises: `PsKernelNativeReductionSoundLaw` and
-  `PsKernelStringEqSoundLaw`.
-- Comparator reflexivity remains an **unresolved explicit conditional
-  obligation**. It is not an adopted additional TCB law.
-- Candidate distinctness, generated universe freshness, and their primitive
-  bridge remain **unproved**, rather than new trusted assumptions.
-- Independent ordinary publication evidence does not claim full environment
-  well-formedness while this obligation remains open.
-- Full mutual recursor/header transaction and nested flatten/rebase/restore
-  semantics, final Kernel/API/session family, full audit, integration
-  reconciliation and final acceptance gates remain incomplete.
+This would be a production primitive API migration for proof/specification
+closure. The user's existing instruction forbids changing production merely
+to simplify proofs unless correcting a confirmed semantic defect. Applying
+this route therefore needs an explicit exception to that source-change
+constraint; it is not authorized merely by the existence of the proof gap.
 
-## Pinned standard-library bridge check — 2026-10-09
+## Incomplete acceptance work
 
-The pinned `src/Init/Data/String/Defs.lean` defines `String.append`
-with a checked byte-array body and proves `String.toByteArray_append`,
-`String.append_left_inj`, and `String.append_right_inj`.
-These results concern the standard `String.append`/`++` operation.
-
-The executable candidate generator instead calls the separately declared
-opaque `String.Internal.append` from `Bootstrap.lean`. Both declarations
-carry the native symbol `lean_string_append`, but sharing an external symbol
-does not establish a kernel-checked equality of the Lean declarations.
-Consequently the standard append injectivity theorem cannot simply be applied
-to the actual candidate expression. The missing bridge must relate these
-specific declarations (or specify the internal operation directly).
-This check narrows the missing obligation; it does not prove that no bridge
-could exist elsewhere, prove freshness, or authorize a production rewrite.
-
-Pinned checked append definition and lemmas:
-https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Data/String/Defs.lean
-
-## Required intervention
-
-Identify/provide a kernel-checked bridge applicable to the pinned opaque
-bootstrap operations, or explicitly revise the permitted proof boundary.
-A new trusted primitive law or a production reimplementation is not authorized
-by the current constraints. No such change has been made.
-
-Primary source:
-https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Data/String/Bootstrap.lean
-
-Executable source:
-https://github.com/dwijayuda/pskernel/blob/dc7395c18a5536577dc2865bc44203e455f732c4/psc15selfhost/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Types.lean
+Complete ordinary well-formed extension, full mutual and nested admission
+transactions, final Kernel/API/session composition, full semantic audit,
+integration reconciliation, and final acceptance gates remain incomplete.
+The primitive gap does not imply that all independent transaction lemmas
+must stop; mutual recursor semantic work has continued alongside this research.

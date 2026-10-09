@@ -144,7 +144,29 @@ async function produce(providerRoot, compilerSearch, tsc, out) {
     for (const item of ordered) {
       currentSource=item.path;
       const start=performance.now();
-      state=unwrap(compiler.psCompilerPreparationStep(state,stripBootstrapImports(item.source)), 'PREPARE');
+      const source=stripBootstrapImports(item.source);
+      const attempted=compiler.psCompilerPreparationStep(state,source);
+      if (tag(attempted) !== 'ok') {
+        // Diagnose only the first failed module using the same pure API and
+        // unchanged prior environment. Never rewrite input or bypass refusal.
+        const parsed=unwrap(compiler.psCompilerParseSource(compiler.PsCompilerSourceKind.lean,source),'DIAGNOSTIC_PARSE');
+        let declarations=parsed.declarations; let prefix=state; let index=0;
+        while (tag(declarations)==='cons') {
+          const declaration=declarations.head;
+          const single=compiler.PsSyntaxModule.mk(parsed.imports,compiler.List.cons(declaration,compiler.List.nil()));
+          const next=compiler.psCompilerPreparationStepParsed(prefix,single);
+          if (tag(next)!=='ok') {
+            const parts=[]; let names=declaration.name?.segments;
+            while (tag(names)==='cons') { parts.push(names.head); names=names.tail; }
+            evidence.firstFailedDeclaration={index,name:parts.join('.'),kind:tag(declaration),
+              sourceSpan:diagnostic(declaration.span),error:diagnostic(next),value:diagnostic(declaration.value)};
+            process.stdout.write('PSC0_CORE_JS_FAILED_DECLARATION: ' + JSON.stringify(evidence.firstFailedDeclaration) + '\n');
+            break;
+          }
+          prefix=next.value; declarations=declarations.tail; index++;
+        }
+      }
+      state=unwrap(attempted, 'PREPARE');
       process.stdout.write('PSC0_CORE_JS_PREPARED: ' + item.path + ' ' + Math.round(performance.now()-start) + 'ms\n');
     }
     currentSource=undefined;

@@ -468,3 +468,53 @@ theorem psKernelAddSimpleMutualInductive_success_header_semantics
   exact ⟨first, remaining, paramResult, indexResult, sorted.1, resultLevel, tailShapes,
     hTypes, hHeaderTyping, hParamsConfig.1, hIndicesConfig.1,
     hParamEnv, hIndexEnv, hHistory⟩
+
+/--
+The independent remaining-header history certifies that each source datatype
+header has an independently checked Sort type in the original environment.
+This is strictly stronger than infer-only header acceptance.
+-/
+theorem PsKernelCheckedMutualRemainingHeaderHistory.all_headers_have_sorts
+    {environment : PsKernelEnvironment} {headerLocal : PsKernelLocalContext}
+    {params : List PsKernelOpenBinder} {resultLevel : PsKernelLevel}
+    {decls : List PsKernelSimpleMutualTypeDecl}
+    {shapes : List PsKernelSimpleMutualTypeShape}
+    (hHistory : PsKernelCheckedMutualRemainingHeaderHistory environment headerLocal
+      params resultLevel decls shapes) :
+    List.Forall (fun decl : PsKernelSimpleMutualTypeDecl =>
+      ∃ level : PsKernelLevel,
+        PsKernelTypingJudgment environment psKernelLocalContextEmpty
+          decl.type (PsKernelExpr.sort level)) decls := by
+  induction hHistory with
+  | nil => exact List.Forall.nil
+  | cons decl rest tail headerLevel level afterParams indices finalLocal
+      hTyping hParams hIndices hLevel hRest ih =>
+      exact List.Forall.cons ⟨headerLevel, hTyping⟩ ih
+
+/--
+Successful actual mutual admission sort-types every source datatype header
+independently in the original environment. The witness is assembled from the
+checked first-header result and the checked remainder, without replacing
+either by an inferred-only certificate or assuming an unverified environment.
+-/
+theorem psKernelAddSimpleMutualInductive_success_all_headers_sort_typed
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualInductive
+      fuel environment decl maxRecDepth maxNatSize = Except.ok result) :
+    List.Forall (fun typeDecl : PsKernelSimpleMutualTypeDecl =>
+      ∃ level : PsKernelLevel,
+        PsKernelTypingJudgment environment psKernelLocalContextEmpty
+          typeDecl.type (PsKernelExpr.sort level)) decl.types := by
+  obtain ⟨first, remaining, paramResult, indexResult, headerLevel, resultLevel,
+    tailShapes, hTypes, hFirstTyping, hParamConfig, hIndexConfig, hParamEnv,
+    hIndexEnv, hHistory⟩ :=
+    psKernelAddSimpleMutualInductive_success_header_semantics
+      fuel environment result decl maxRecDepth maxNatSize
+      hIndex hNative hString hRun
+  rw [hTypes]
+  exact List.Forall.cons ⟨headerLevel, hFirstTyping⟩
+    hHistory.all_headers_have_sorts

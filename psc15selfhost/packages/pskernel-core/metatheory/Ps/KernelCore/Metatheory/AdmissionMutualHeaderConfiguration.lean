@@ -1,5 +1,6 @@
 import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 import Ps.KernelCore.Metatheory.AdmissionInductiveHeaderConfiguration
+import Ps.KernelCore.Metatheory.AdmissionMutualHeaderSpineConfiguration
 
 /-
 Successful mutual-inductive admission includes a checked first datatype
@@ -369,3 +370,98 @@ theorem psKernelAddSimpleMutualInductive_success_header_pipeline
                                                             indexResult, resultLevel, tailShapes, rfl,
                                                             hChecked, hSort, hParams, hIndices, hResult, hTail⟩
                                                   | _ => simp only [hResult] at hRun; cases hRun
+
+
+/--
+Successful mutual admission carries an independently checked header history
+for every family member.  The theorem keeps the two executable session
+boundaries distinct: the remaining-header worker consumes the parameter-open
+session, while index opening produces a later configuration and environment
+projection.  No infer-only result is used.
+-/
+theorem psKernelAddSimpleMutualInductive_success_header_semantics
+    (fuel : Nat) (environment result : PsKernelEnvironment)
+    (decl : PsKernelSimpleMutualInductiveDecl) (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun : psKernelAddSimpleMutualInductive fuel environment decl maxRecDepth maxNatSize =
+      Except.ok result) :
+    ∃ (first : PsKernelSimpleMutualTypeDecl)
+      (remaining : List PsKernelSimpleMutualTypeDecl)
+      (paramResult indexResult : PsKernelOpenBindersResult)
+      (resultLevel : PsKernelLevel)
+      (tailShapes : List PsKernelSimpleMutualTypeShape),
+      decl.types = first :: remaining ∧
+      PsKernelTypingJudgment environment psKernelLocalContextEmpty
+        first.type (PsKernelExpr.sort resultLevel) ∧
+      PsKernelCheckerConfigurationSound
+        paramResult.session.context paramResult.session.state ∧
+      PsKernelCheckerConfigurationSound
+        indexResult.session.context indexResult.session.state ∧
+      paramResult.session.context.environment = environment ∧
+      indexResult.session.context.environment = environment ∧
+      PsKernelCheckedMutualRemainingHeaderHistory
+        environment paramResult.session.context.localContext
+        paramResult.binders resultLevel remaining tailShapes := by
+  obtain ⟨first, remaining, checked, sorted, paramResult, indexResult,
+    resultLevel, tailShapes, hTypes, hChecked, hSort, hParams, hIndices,
+    hResult, hTail⟩ :=
+    psKernelAddSimpleMutualInductive_success_header_pipeline
+      fuel environment result decl maxRecDepth maxNatSize hRun
+  let initial :=
+    psKernelMkCheckerSession environment decl.levelParams
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+       else PsKernelDefinitionSafety.safe) maxRecDepth maxNatSize
+  have hInitial := psKernelMkCheckerSession_configuration_sound
+    environment decl.levelParams
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+       else PsKernelDefinitionSafety.safe) maxRecDepth maxNatSize hIndex
+  have hCheck := psKernelSessionCheck_concrete_refines_typing
+    fuel hNative hString initial checked.2 first.type checked.1
+    hInitial hChecked
+  have hCheckConfig : PsKernelCheckerConfigurationSound
+      checked.2.context checked.2.state :=
+    hCheck.2
+  have hSortSound := psKernelSessionEnsureSort_concrete_refines_reduction
+    fuel hNative hString checked.2 sorted.2 checked.1 resultLevel
+    hCheckConfig hSort
+  have hCheckedContext :=
+    psKernelSessionCheck_success_preserves_context_core
+      fuel initial checked.2 first.type checked.1 hChecked
+  have hSortedContext :=
+    psKernelSessionEnsureSort_success_preserves_context_core
+      fuel checked.2 sorted.2 checked.1 resultLevel hSort
+  have hSortedEnv : sorted.2.context.environment = environment := by
+    rw [hSortedContext, hCheckedContext]
+    simp [initial, psKernelMkCheckerSession, psKernelCheckerContextEmpty]
+  have hParamsConfig := psKernelOpenSimpleHeaderParams_configuration_refines
+    fuel decl.numParams hNative hString sorted.2 first.type paramResult
+    hSortSound.2 hParams
+  have hParamEnv : paramResult.session.context.environment = environment := by
+    exact hParamsConfig.2.1.trans hSortedEnv
+  have hIndicesConfig := psKernelOpenSimpleHeaderIndices_configuration_refines
+    fuel hNative hString paramResult.session paramResult.result indexResult
+    hParamsConfig.1 hIndices
+  have hIndexEnv : indexResult.session.context.environment = environment := by
+    exact hIndicesConfig.2.1.trans hParamEnv
+  have hHistory := psKernelOpenSimpleMutualRemainingTypesWorker_header_history
+    remaining fuel environment decl.levelParams
+      (if decl.isUnsafe then PsKernelDefinitionSafety.unsafeDef
+       else PsKernelDefinitionSafety.safe)
+      maxRecDepth maxNatSize paramResult.session paramResult.binders
+      resultLevel tailShapes hIndex hParamsConfig.1 hParamEnv
+      hNative hString hTail
+  have hHeaderTyping :
+      PsKernelTypingJudgment environment psKernelLocalContextEmpty
+        first.type (PsKernelExpr.sort resultLevel) := by
+    apply PsKernelTypingJudgment.convert first.type hCheck.1
+      (PsKernelExpr.sort resultLevel)
+    · simpa [initial, psKernelMkCheckerSession, psKernelCheckerContextEmpty]
+        using hCheck.1
+    · apply PsKernelDefEqJudgment.reductionClosure
+      simpa [hCheckedContext, hSortedContext, initial,
+        psKernelMkCheckerSession, psKernelCheckerContextEmpty] using hSortSound.1
+  exact ⟨first, remaining, paramResult, indexResult, resultLevel, tailShapes,
+    hTypes, hHeaderTyping, hParamsConfig.1, hIndicesConfig.1,
+    hParamEnv, hIndexEnv, hHistory⟩

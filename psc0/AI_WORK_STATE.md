@@ -1,3 +1,37 @@
+# PSC0 onboarding and isolated command demo — qualification in progress
+
+Updated: 2026-10-09 22:17:18 UTC. This section is active and supersedes the earlier completed Windows-preview checkpoint below.
+
+The user requested psc init, runnable examples, and an extension demo such as the planned psdev package. The authorized bounded implementation adds a small initializer, default entry/output handling, shipped source examples, and a separately installed one-shot command extension. It does not implement full project watch/LSP or bypass the plan's module/export and ABI milestone.
+
+## Current integration scope
+
+- Upcoming product and demo version: 0.1.0-preview.2. The existing preview1 artifact remains the last completed qualification until the new Actions run passes.
+- Root host slice: psc0/platform-onboarding-host; initial review f354dd8410ac55fb8fe5b96b23cc58a9e06c3cea, followed by6972a20d5c090d9962e376fb0265d87663fc8852.
+- Init/examples slice: psc0/platform-init-examples atff176be2aa9291dc21ec9a984abeeb6e2b7d4e63.
+- Installed smoke slice: psc0/platform-dev-smoke atd564e8520597179220b5462647a2fea18953c468.
+- Command extension slice: psc0/platform-command-demo atb885371b9c17ab20e2da60091277e66ebdbd48ae; all3runtimefiles,18focusedtests and the SDK reviewed before integration. All repository reads/writes remain through GitHub connector/MCP; no source/build/test execution has run locally.
+
+The new CLI provides init, examples, configured entry/output defaults, and dev --once. Initializing an existing npm project preserves its package.json, TypeScript configuration and unrelated sources, and refuses starter/output collisions. The product ships the examples, but psdev and the independently named @psc-demo/pshello are separate optional tarballs. No registry ownership/publication is inferred for these demo names.
+
+The first extension protocol, psc-command/1, accepts a tightly bounded pure WebAssembly integer command. It has no imports, linear memory, tables, globals, start function, recursion/calls or ambient host capabilities. Node/V8 WebAssembly is the confinement implementation; a trusted worker supplies a wall deadline and cancellation. A worker alone is not the security boundary and its heap settings are not a process-wide memory bound. No Wasmtime or additional npm dependency is introduced for this narrow profile.
+
+Only explicit root package.json activation and a matching installed direct dependency/npm v3 lock entry select a guest. The host never imports its JavaScript entrypoint. Status is host-owned; successful dev output includes the actual completed extension identity in its saved receipt. The private execution identity and root/config/package/lock/descriptor/module bytes are checked again before publication. General macros, tactics, backends, rich extension data APIs, workspace/hoisted packages and automatic default activation remain later work.
+
+## Preservation and qualification boundaries
+
+All61portable compiler source modules, F compiler bytes, selected seed R and native provider algorithms are unchanged. Bootstrap remains Node22.23.3/Lean4.34.0/TS7.0.2. The existing compiler fixed point is reused; this host/package change needs its own focused Actions qualification, not another C1/C2/C3 loop.
+
+The platform workflow must qualify source tests and four fresh installed Windows/Linux Node22/Node26 jobs using the exact user-facing tarballs. It must exercise initialization, checked examples/default paths, unchanged-file protection, local no-script extension installation, explicit activation, compulsory actual identity/receipt disclosure, third-party operation through the same boundary and tampered payload refusal. Record exact outcomes and artifact identities here and in PLATFORM_IMPLEMENTATION.md after the run; do not describe pending tests as passed.
+
+Formal assurance remains a later gate. No compiler semantic-preservation theorem, logical-consistency theorem, PSCV verification or strict SH/1 result is claimed. Later proofs can model the bounded decoder, extension state/provenance and host-request composition without proving every scheduling guest.
+
+Use fresh head leases and non-force updates, preserve all slice ancestry, and do not modify kernel/provider/metatheory/defeq/cache algorithms. Do not promote F as seed, alter bootstrap pins, merge main or publish npm incidentally. Continue this authorized user task through qualification and a concrete downloadable preview.
+
+---
+
+# Previous completed Windows-preview checkpoint
+
 # PSC0 platform — Windows and Node26 correction complete
 
 Updated: 2026-10-09 21:38:25 UTC. This section is the active continuation and supersedes the earlier Linux-only preview checkpoint below.

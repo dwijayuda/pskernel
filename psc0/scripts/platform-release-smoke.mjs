@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { access, copyFile, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, mkdtemp, readFile, realpath, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir, release as operatingSystemRelease } from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -160,10 +160,12 @@ async function existingFile(candidates, label) {
 // No checkout, Lean toolchain, bootstrap seed or source compiler is required.
 // Windows invokes the real npm psc.cmd shim through the installed PowerShell;
 // its absolute executable is recorded and is not searched for on runtime PATH.
-export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
-  assert(tarballArgument && outputArgument, 'usage: platform-release-smoke.mjs <tarball> <evidence-directory>');
+export async function qualifyInstalledPackage(tarballArgument, outputArgument, psdevTarballArgument, thirdPartyTarballArgument) {
+  assert(tarballArgument && outputArgument && psdevTarballArgument,
+    'usage: platform-release-smoke.mjs <proofscript-tarball> <evidence-directory> <psdev-tarball> [third-party-tarball]');
   const tarball = path.resolve(tarballArgument);
   const evidence = path.resolve(outputArgument);
+  const extensionTarballs = [psdevTarballArgument, thirdPartyTarballArgument].filter(Boolean).map(file => path.resolve(file));
   await mkdir(evidence, { recursive: true });
   const temporary = await mkdtemp(path.join(tmpdir(), 'proofscript installed-'));
   const prefix = path.join(temporary, 'global tools');
@@ -179,6 +181,7 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
   let npmRuntime = null;
   let shellRuntime = null;
   let nodeOnlyExecutionPath = false;
+  const extensionDemos = [];
 
   function run(command, args, options = {}) {
     const result = spawnSync(command, args, {
@@ -215,8 +218,19 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
     await mkdir(path.join(project, 'src'), { recursive: true });
     await writeFile(path.join(project, 'package.json'), JSON.stringify({
       name: 'proofscript-installed-fixture', private: true, type: 'module',
+      scripts: { existing: 'node dist/consumer.js' },
+      existingProjectSentinel: 'preserve this project metadata',
       proofscript: { profile: 'checked', extensions: [] },
     }, null, 2) + '\n');
+    await writeConsumer(42);
+    await writeFile(path.join(project, 'tsconfig.json'), JSON.stringify({
+      compilerOptions: {
+        target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext',
+        strict: true, noEmitOnError: true, rootDir: 'src', outDir: 'dist',
+      }, include: ['src/**/*.ts'],
+    }, null, 2) + '\n');
+    const existingProjectFiles = await Promise.all(['package.json', 'tsconfig.json', 'src/consumer.ts']
+      .map(async file => ({ file, bytes: await readFile(path.join(project, file)) })));
 
     // Execute npm's JS entry with this exact Node. npm.cmd cannot be executed
     // with spawnSync shell:false on Windows, and needs no shell here.
@@ -280,12 +294,12 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
       assert.equal(shellVersion.status, 0, shellVersion.stderr);
       assert.match(shellVersion.stdout.trim(), /^7\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?$/u);
       shellRuntime = { executable: shell, version: shellVersion.stdout.trim(), route: 'npm psc.cmd via PowerShell' };
-      invoke = args => {
+      invoke = (args, cwd = project) => {
         const request = powershellCmdInvocation(shell, command, args, env);
-        return run(request.command, request.args, { env: request.env });
+        return run(request.command, request.args, { env: request.env, cwd });
       };
     } else {
-      invoke = args => run(command, args, { env });
+      invoke = (args, cwd = project) => run(command, args, { env, cwd });
     }
     const version = success(invoke(['version', '--json']), 'installed executable and version');
     const versionInfo = JSON.parse(version.stdout);
@@ -296,11 +310,68 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
     assert.equal(version.stderr, 'PSC_EXTENSIONS: []\n');
     const extensions = success(invoke(['extensions', '--json']), 'supervisor extension disclosure');
     assert.deepEqual(JSON.parse(extensions.stdout), {
-      defaultExtensions: [], loadedExtensions: [], executionSupported: false,
+      defaultExtensions: [], configuredExtensions: [], loadedExtensions: [],
+      executionSupported: true, protocol: 'psc-command/1',
     });
 
+    const initialized = path.join(temporary, 'initialized project');
+    const initializedResult = JSON.parse(success(invoke(['init', initialized, '--json']),
+      'new project initialization from the installed executable').stdout);
+    assert.equal(initializedResult.mode, 'new');
+    assert.equal(path.resolve(initializedResult.projectRoot), initialized);
+    assert.deepEqual([...initializedResult.createdFiles].sort(), ['PROOFSCRIPT.md', 'package.json', 'src/Main.ps']);
+    const initializedMetadata = JSON.parse(await readFile(path.join(initialized, 'package.json'), 'utf8'));
+    assert.equal(initializedMetadata.devDependencies.proofscript, release.version);
+    assert.deepEqual(initializedMetadata.proofscript, {
+      profile: 'checked', entry: 'src/Main.ps', out: 'src/Main.ts', extensions: [],
+    });
+    await missing(path.join(initialized, 'node_modules'));
+    const initializedFiles = await Promise.all(initializedResult.createdFiles
+      .map(async file => ({ file, bytes: await readFile(path.join(initialized, file)) })));
+    const repeatedInit = invoke(['init', initialized, '--json']);
+    assert.notEqual(repeatedInit.status, 0);
+    assert.equal(repeatedInit.stdout, '');
+    assert.match(repeatedInit.stderr, /PSC_INIT_CONFLICT/u);
+    for (const file of initializedFiles) {
+      assert.deepEqual(await readFile(path.join(initialized, file.file)), file.bytes);
+    }
+    observations.push('repeated initialization refuses conflicts without replacing files');
+
+    const exampleList = JSON.parse(success(invoke(['examples', '--json']),
+      'installed example catalog is available').stdout);
+    assert.deepEqual(exampleList.examples.map(item => item.name),
+      ['checked-nat', 'existing-typescript', 'rejected-source']);
+    for (const item of exampleList.examples) {
+      assert.equal(item.path, path.join(installed, 'examples/platform', item.name));
+      assert.equal(typeof item.description, 'string');
+      assert(item.description.length > 0);
+      await access(path.join(item.path, 'README.md'));
+    }
+    const checkedExample = await readFile(path.join(installed, 'examples/platform/checked-nat/src/Main.ps'));
+    assert.deepEqual(await readFile(path.join(initialized, 'src/Main.ps')), checkedExample);
+    const initializedCheck = JSON.parse(success(invoke(['check', '--json'], initialized),
+      'initialized project defaults admit the bundled Nat example').stdout);
+    assert.equal(initializedCheck.kernelAdmissionAccepted, true);
+    const initializedBuild = JSON.parse(success(invoke(['build', '--json'], initialized),
+      'initialized project defaults publish checked neighboring TypeScript').stdout);
+    assert.equal(initializedBuild.runtimeIr.runtimeIrTypingAccepted, true);
+    assert.equal(initializedBuild.kernel.binarySha256, kernelArtifact.sha256);
+    assert.equal(initializedBuild.targetValidation.version, '7.0.2');
+    assert.equal(initializedBuild.semanticPreservationProved, false);
+    assert.deepEqual(initializedBuild.extensions, []);
+    assert.equal(digest(await readFile(path.join(initialized, 'src/Main.ts'))), initializedBuild.artifacts[0].sha256);
+
+    const existingInit = JSON.parse(success(invoke(['init', '--json']),
+      'initialization adds ProofScript to an existing TypeScript project').stdout);
+    assert.equal(existingInit.mode, 'existing');
+    assert.deepEqual([...existingInit.createdFiles].sort(), ['PROOFSCRIPT.md', 'src/Main.ps']);
+    for (const file of existingProjectFiles) {
+      assert.deepEqual(await readFile(path.join(project, file.file)), file.bytes);
+    }
+    observations.push('existing package scripts, TypeScript configuration and consumer source are unchanged');
+
     const source = path.join(project, 'src/Main.ps');
-    await writeFile(source, 'def answer : Nat := 42\n');
+    assert.equal(await readFile(source, 'utf8'), 'def answer : Nat := 42\n');
     const check = JSON.parse(success(invoke(['check', 'src/Main.ps', '--json']),
       'packaged compiler and native Core admission').stdout);
     assert.equal(check.kernelAdmissionAccepted, true);
@@ -328,13 +399,7 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
     assert.equal(digest(generated), receipt.artifacts[0].sha256);
     await missing(path.join(project, 'src/Main.js'));
     await missing(path.join(project, 'src/Main.d.ts'));
-    await writeConsumer(42);
-    await writeFile(path.join(project, 'tsconfig.json'), JSON.stringify({
-      compilerOptions: {
-        target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext',
-        strict: true, noEmitOnError: true, rootDir: 'src', outDir: 'dist',
-      }, include: ['src/**/*.ts'],
-    }, null, 2) + '\n');
+
     const require = createRequire(path.join(installed, 'package.json'));
     const tsPackage = require.resolve('typescript/package.json');
     const tsMetadata = JSON.parse(await readFile(tsPackage, 'utf8'));
@@ -364,7 +429,7 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
       'existing TypeScript project executes rebuilt neighbor');
     assert.equal(changedConsumer.stdout.trim(), 'PSC_INSTALLED_CONSUMER: 43');
 
-    await writeFile(source, 'def answer : Nat := Type\n');
+    await writeFile(source, await readFile(path.join(installed, 'examples/platform/rejected-source/Main.ps')));
     const refused = invoke(['build', 'src/Main.ps', '--out', 'src/Main.ts', '--json']);
     assert.notEqual(refused.status, 0);
     assert.equal(refused.stdout, '');
@@ -372,6 +437,168 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
     assert.deepEqual(await readFile(path.join(project, 'src/Main.ts')), generated);
     assert.deepEqual(await readFile(path.join(project, 'src/Main.checked.json')), savedReceipt);
     observations.push('invalid source cannot replace the previous completed output');
+
+
+    for (const [extensionIndex, extensionTarball] of extensionTarballs.entries()) {
+      const packageName = extensionIndex === 0 ? 'psdev' : '@psc-demo/pshello';
+      const packageVersion = release.version;
+      const packageRoot = path.join(project, 'node_modules', packageName);
+      const archive = await readFile(extensionTarball);
+      const inactiveMetadata = JSON.parse(await readFile(path.join(project, 'package.json'), 'utf8'));
+      inactiveMetadata.proofscript.extensions = [];
+      await writeFile(path.join(project, 'package.json'), JSON.stringify(inactiveMetadata, null, 2) + '\n');
+      await writeFile(source, 'def answer : Nat := ' + (44 + extensionIndex) + '\n');
+      success(run(process.execPath, [npmCli, 'install', '--save-dev', '--save-exact',
+        '--ignore-scripts', '--no-audit', '--no-fund', extensionTarball], { env }),
+      'local ' + packageName + ' tarball installs without lifecycle scripts');
+      const packageJsonPath = path.join(packageRoot, 'package.json');
+      const packageMetadata = JSON.parse(await readFile(packageJsonPath, 'utf8'));
+      assert.equal(packageMetadata.name, packageName);
+      assert.equal(packageMetadata.version, packageVersion);
+      assert.equal(Object.hasOwn(packageMetadata, 'scripts'), false);
+      assert.equal(Object.keys(packageMetadata.dependencies ?? {}).length, 0);
+      const lockBytes = await readFile(path.join(project, 'package-lock.json'));
+      const lock = JSON.parse(lockBytes.toString('utf8'));
+      assert.equal(lock.lockfileVersion, 3);
+      const lockedPackage = lock.packages['node_modules/' + packageName];
+      assert.equal(lockedPackage.version, packageVersion);
+      assert.equal(lockedPackage.link, undefined);
+      assert.equal(lockedPackage.integrity, 'sha512-' + createHash('sha512').update(archive).digest('base64'));
+      const inactive = JSON.parse(success(invoke(['extensions', '--json']),
+        'installing ' + packageName + ' alone leaves extensions inactive').stdout);
+      assert.deepEqual(inactive.configuredExtensions, []);
+      assert.deepEqual(inactive.loadedExtensions, []);
+      const inactiveDev = invoke(['dev', 'src/Main.ps', '--once', '--out', 'src/Main.ts', '--json']);
+      assert.notEqual(inactiveDev.status, 0);
+      assert.equal(inactiveDev.stdout, '');
+      assert.match(inactiveDev.stderr, /PSC_DEV_EXTENSION_REQUIRED/u);
+      assert.deepEqual(await readFile(path.join(project, 'src/Main.ts')), generated);
+      assert.deepEqual(await readFile(path.join(project, 'src/Main.checked.json')), savedReceipt);
+      observations.push('unactivated ' + packageName + ' cannot run a dev build');
+
+      // npm package metadata may advertise executable JS. The command loader
+      // reads only its data descriptor and authenticated Wasm bytes. This poison
+      // entry is an observable assertion that Node package loading never occurs.
+      const poisonSentinel = path.join(temporary, 'poison-' + extensionIndex + '.txt');
+      await writeFile(path.join(packageRoot, 'ignored-main.mjs'),
+        "import { writeFileSync } from 'node:fs';\n" +
+        'writeFileSync(' + JSON.stringify(poisonSentinel) + ", 'executed');\n" +
+        "throw new Error('PSC_SMOKE_JAVASCRIPT_ENTRYPOINT_EXECUTED');\n");
+      packageMetadata.main = './ignored-main.mjs';
+      await writeFile(packageJsonPath, JSON.stringify(packageMetadata, null, 2) + '\n');
+      const activeMetadata = JSON.parse(await readFile(path.join(project, 'package.json'), 'utf8'));
+      activeMetadata.proofscript.extensions = [{ package: packageName, enable: ['command:dev'] }];
+      await writeFile(path.join(project, 'package.json'), JSON.stringify(activeMetadata, null, 2) + '\n');
+      const descriptorBytes = await readFile(path.join(packageRoot, 'proofscript-extension.json'));
+      const descriptor = JSON.parse(descriptorBytes.toString('utf8'));
+      const modulePath = path.join(packageRoot, 'command.wasm');
+      const moduleBytes = await readFile(modulePath);
+      assert.equal(digest(moduleBytes), descriptor.sha256);
+      const configured = JSON.parse(success(invoke(['extensions', '--json']),
+        'root activation resolves ' + packageName + ' without executing it').stdout);
+      assert.equal(configured.configuredExtensions.length, 1);
+      assert.deepEqual(configured.loadedExtensions, []);
+      assert.equal(configured.configuredExtensions[0].package, packageName);
+      assert.equal(configured.configuredExtensions[0].status, 'configured');
+      assert.equal(configured.configuredExtensions[0].instantiated, false);
+      await missing(poisonSentinel);
+      if (extensionIndex === 0) {
+        const watch = invoke(['dev', 'src/Main.ps', '--watch', '--json']);
+        assert.notEqual(watch.status, 0);
+        assert.equal(watch.stdout, '');
+        assert.match(watch.stderr, /PSC_DEV_WATCH_UNSUPPORTED/u);
+        assert.deepEqual(await readFile(path.join(project, 'src/Main.ts')), generated);
+        assert.deepEqual(await readFile(path.join(project, 'src/Main.checked.json')), savedReceipt);
+        observations.push('watch is explicitly refused without changing the previous output');
+      }
+      const dev = success(invoke(['dev', 'src/Main.ps', '--once', '--out', 'src/Main.ts', '--json']),
+        'isolated ' + packageName + ' requests the ordinary checked build');
+      const devResult = JSON.parse(dev.stdout);
+      assert.equal(devResult.command, 'dev');
+      assert.equal(devResult.extensions.length, 1);
+      const record = devResult.extensions[0];
+      assert.equal(record.package, packageName);
+      assert.equal(record.version, packageVersion);
+      assert.equal(record.origin, 'project');
+      assert.equal(record.packageRoot, await realpath(packageRoot));
+      assert.equal(record.entry, 'command.wasm');
+      assert.equal(record.packageJsonSha256, digest(await readFile(packageJsonPath)));
+      assert.equal(record.descriptorSha256, digest(descriptorBytes));
+      assert.equal(record.moduleSha256, digest(moduleBytes));
+      assert.equal(record.projectPackageSha256, digest(await readFile(path.join(project, 'package.json'))));
+      assert.equal(record.lockfileSha256, digest(lockBytes));
+      assert.equal(record.lockResolved, lockedPackage.resolved);
+      assert.equal(record.lockIntegrity, lockedPackage.integrity);
+      assert.equal(record.protocol, 'psc-command/1');
+      assert.equal(record.operation, 'command:dev');
+      assert.deepEqual(record.grants, ['command:dev']);
+      assert.deepEqual(record.imports, []);
+      assert.deepEqual(record.engine, {
+        name: 'v8-webassembly', node: process.versions.node, v8: process.versions.v8,
+      });
+      assert.deepEqual(record.limits, {
+        moduleBytes: 4096, linearMemoryBytes: 0, locals: 32, controlDepth: 32, wallTimeMs: 2000,
+      });
+      assert.equal(record.status, 'completed');
+      assert.equal(record.instantiated, true);
+      assert.equal(record.requestBuild, true);
+      const disclosures = dev.stderr.split('\n')
+        .filter(line => line.startsWith('PSC_EXTENSIONS: '))
+        .map(line => JSON.parse(line.slice('PSC_EXTENSIONS: '.length)));
+      assert.deepEqual(disclosures[0], []);
+      assert(disclosures.some(items => items.some(item =>
+        item.status === 'executing' && item.package === packageName && item.moduleSha256 === record.moduleSha256)),
+      'PSC_SMOKE_EXTENSION_IDENTITY_DISCLOSED_BEFORE_EXECUTION');
+      assert.deepEqual(disclosures.at(-1), devResult.extensions);
+      const devReceipt = devResult.receipt;
+      assert.equal(devReceipt.schemaVersion, 4);
+      assert.deepEqual(devReceipt.extensions, devResult.extensions);
+      assert.equal(devReceipt.compiler.sha256, release.compiler.sha256);
+      assert.equal(devReceipt.kernel.binarySha256, kernelArtifact.sha256);
+      assert.equal(devReceipt.runtimeIr.runtimeIrTypingAccepted, true);
+      assert.equal(devReceipt.runtimeIr.sameOriginalIrCheckedBeforeEmission, true);
+      assert.equal(devReceipt.targetValidation.version, '7.0.2');
+      for (const field of ['pscvVerified', 'strictSh1Qualified', 'semanticPreservationProved']) {
+        assert.equal(devReceipt[field], false);
+      }
+      savedReceipt = await readFile(path.join(project, 'src/Main.checked.json'));
+      assert.deepEqual(JSON.parse(savedReceipt.toString('utf8')), devReceipt);
+      generated = await readFile(path.join(project, 'src/Main.ts'));
+      assert.equal(digest(generated), devReceipt.artifacts[0].sha256);
+      assert.equal(devReceipt.artifacts[0].name, 'Main.ts');
+      await missing(poisonSentinel);
+      await writeConsumer(44 + extensionIndex);
+      success(run(process.execPath, [tsLauncher, '--project', 'tsconfig.json'], { env }),
+        'TypeScript checks the ' + packageName + ' requested output');
+      const devConsumer = success(run(process.execPath, ['dist/consumer.js'], { env }),
+        'TypeScript consumer executes the ' + packageName + ' requested output');
+      assert.equal(devConsumer.stdout.trim(), 'PSC_INSTALLED_CONSUMER: ' + (44 + extensionIndex));
+
+      const corruptedModule = Buffer.from(moduleBytes);
+      corruptedModule[0] ^= 0xff;
+      await writeFile(modulePath, corruptedModule);
+      const tampered = invoke(['dev', 'src/Main.ps', '--once', '--out', 'src/Main.ts', '--json']);
+      assert.notEqual(tampered.status, 0);
+      assert.equal(tampered.stdout, '');
+      assert.match(tampered.stderr, /PSC_EXTENSION_MODULE_HASH/u);
+      assert(tampered.stderr.startsWith('PSC_EXTENSIONS: []\n'));
+      assert.deepEqual(await readFile(path.join(project, 'src/Main.ts')), generated);
+      assert.deepEqual(await readFile(path.join(project, 'src/Main.checked.json')), savedReceipt);
+      await missing(poisonSentinel);
+      await writeFile(modulePath, moduleBytes);
+      observations.push('altered ' + packageName + ' module is refused without replacing the checked output');
+      extensionDemos.push({
+        package: packageName, version: packageVersion,
+        tarballSha256: digest(archive), tarballBytes: archive.length,
+        installedWithIgnoreScripts: true, installedLocally: true,
+        installationAutoActivated: false, javascriptEntrypointExecuted: false,
+        tamperedModuleRefused: true, configuredRecord: configured.configuredExtensions[0],
+        executedRecord: record, receiptTransactionId: devReceipt.transactionId,
+        outputSha256: devReceipt.artifacts[0].sha256, consumerResult: 44 + extensionIndex,
+        semanticPreservationProved: false, pscvVerified: false,
+      });
+    }
+    await writeFile(path.join(evidence, 'installed-extension-demos.json'), JSON.stringify(extensionDemos, null, 2) + '\n');
 
     await writeFile(path.join(project, 'package.json'), JSON.stringify({
       name: 'proofscript-installed-fixture', type: 'module', proofscript: { profile: 'pscv' },
@@ -429,6 +656,7 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument) {
       schemaVersion: 2, kind: 'proofscript-installed-package-qualification',
       sourceRef: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID,
       tarballSha256, tarballBytes, releaseIdentity, providerRuntime, npmRuntime, shellRuntime,
+      extensionDemos,
       nodeOnlyExecutionPath, nodeVersion: process.version,
       platform: process.platform, architecture: process.arch, operatingSystemRelease: operatingSystemRelease(),
       runnerImage: process.env.ImageOS ?? null, runnerImageVersion: process.env.ImageVersion ?? null,

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { assembleRelease, releaseHostFiles } from './assemble-release.mjs';
+import { assembleRelease, releaseHostFiles, releaseExampleFiles } from './assemble-release.mjs';
 import { readBootstrapClosure, bootstrapEntryRelative } from './sh1-source-snapshot.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -62,7 +62,9 @@ async function fixture(t) {
   await source('release/package.json', await readFile(path.join(root, 'release/package.json')));
   await source('release/README.md', 'Synthetic test package; not a release.\n');
   await source('packages/pskernel-lean-wasm/LEAN_LICENSE', 'Synthetic fixture attribution.\n');
-  for (const file of releaseHostFiles) await source(file, '// maintained fixture: ' + file + '\n');
+  for (const file of [...releaseHostFiles, ...releaseExampleFiles]) {
+    await source(file, '// maintained fixture: ' + file + '\n');
+  }
   await source('scripts/unlisted-test.mjs', 'throw new Error("must not be packaged");\n');
   await source('legacy/should-not-leak.txt', 'must not be packaged\n');
   return { workspaceRoot, outputPath, compilerPath, nativeBinaryPaths, source, release, compiler, provider, windowsProvider };
@@ -76,7 +78,7 @@ test('assembler copies exact pinned bytes and maintained host files without exec
   assert.deepEqual(await readFile(path.join(context.outputPath, 'runtime/compiler/index.js')), context.compiler);
   assert.deepEqual(await readFile(path.join(context.outputPath, 'runtime/kernel/linux-x64/psc_kernel_core_provider')), context.provider);
   assert.deepEqual(await readFile(path.join(context.outputPath, 'runtime/kernel/win32-x64/psc_kernel_core_provider.exe')), context.windowsProvider);
-  for (const file of releaseHostFiles) {
+  for (const file of [...releaseHostFiles, ...releaseExampleFiles]) {
     assert.deepEqual(await readFile(path.join(context.outputPath, file)),
       await readFile(path.join(context.workspaceRoot, file)));
   }
@@ -85,6 +87,8 @@ test('assembler copies exact pinned bytes and maintained host files without exec
   const metadata = JSON.parse(await readFile(path.join(context.outputPath, 'package.json'), 'utf8'));
   assert.equal(metadata.bin.psc, './bin/psc.mjs');
   assert.equal(metadata.dependencies.typescript, '7.0.2');
+  assert.equal(metadata.files.includes('examples/'), true);
+  assert.deepEqual(result.exampleFiles, releaseExampleFiles);
   assert.equal(Object.hasOwn(metadata, 'scripts'), false);
   if (process.platform !== 'win32') {
     assert.equal((await stat(path.join(context.outputPath, 'bin/psc.mjs'))).mode & 0o111, 0o111);

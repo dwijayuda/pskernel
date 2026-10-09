@@ -1,0 +1,13 @@
+{
+  "name": "psdev",
+  "version": "0.1.0-preview.2",
+  "private": true,
+  "description": "psdev isolated one-shot checked-build command demo",
+  "license": "UNLICENSED",
+  "files": [
+    "command.wasm",
+    "command.wat",
+    "proofscript-extension.json",
+    "README.md"
+  ]
+}

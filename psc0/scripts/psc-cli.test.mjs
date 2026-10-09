@@ -26,6 +26,9 @@ async function fixture(t, proofscript = { profile: 'checked', extensions: [] }) 
   await Promise.all([
     copyFile(path.join(root, 'bin/psc.mjs'), path.join(installed, 'bin/psc.mjs')),
     copyFile(path.join(root, 'scripts/release-manifest.mjs'), path.join(installed, 'scripts/release-manifest.mjs')),
+    ...['project-init.mjs', 'command-extensions.mjs', 'command-wasm-profile.mjs',
+      'command-extension-worker.mjs', 'checked-artifact-publication.mjs'].map(file =>
+      copyFile(path.join(root, 'scripts', file), path.join(installed, 'scripts', file))),
     copyFile(path.join(root, 'release/release.json'), path.join(installed, 'release.json')),
     writeFile(path.join(installed, 'node_modules/typescript/package.json'), JSON.stringify({ name: 'typescript', version: '7.0.2' })),
     writeFile(path.join(project, 'package.json'), JSON.stringify({ name: 'fixture', proofscript })),
@@ -85,7 +88,8 @@ test('check needs no output and help/version/extensions do not run the compiler'
   }
   const extensions = context.invoke(['extensions', '--json']);
   assert.deepEqual(JSON.parse(extensions.stdout), {
-    defaultExtensions: [], loadedExtensions: [], executionSupported: false,
+    defaultExtensions: [], configuredExtensions: [], loadedExtensions: [], executionSupported: true,
+    protocol: 'psc-command/1',
   });
   const run = context.invoke(['check', 'src/Main.lean', '--json']);
   assert.equal(run.status, 0, run.stderr);
@@ -105,7 +109,7 @@ test('nested source package cannot weaken caller PSCV policy', async t => {
   await notCalled(context);
 });
 
-test('unknown verification configuration and requested extensions fail closed', async t => {
+test('unknown verification configuration and invalid extension requests fail closed', async t => {
   for (const proofscript of [
     { profile: 'checked', verification: { pscv: true } },
     { profile: 'contracts' },
@@ -115,7 +119,7 @@ test('unknown verification configuration and requested extensions fail closed', 
     const context = await fixture(t, proofscript);
     const run = context.invoke(['check', 'src/Main.ps']);
     assert.notEqual(run.status, 0);
-    assert.match(run.stderr, /PSC_(?:PROJECT_CONFIGURATION|PROJECT_PROFILE|EXTENSIONS)_UNSUPPORTED/u);
+    assert.match(run.stderr, /PSC_(?:(?:PROJECT_CONFIGURATION|PROJECT_PROFILE)_UNSUPPORTED|EXTENSION_CONFIGURATION)/u);
     await notCalled(context);
   }
 });
@@ -126,7 +130,7 @@ test('public CLI refuses alternate code, unimplemented commands, and environment
     ['check', 'src/Main.ps', '--compiler', '/tmp/untrusted.mjs'],
     ['check', 'src/Main.ps', '--kernel', 'lean434'],
     ['check', 'src/Main.ps', '--profile', 'pscv'],
-    ['build', 'src/Main.ps'],
+    ['build'], ['dev', 'src/Main.ps'], ['dev', 'src/Main.ps', '--watch'],
     ['watch'], ['lsp'],
   ]) {
     const run = context.invoke(args);
@@ -191,5 +195,95 @@ test('version reports the actual host and both packaged platforms', async t => {
     { os: 'linux', arch: 'x64' }, { os: 'win32', arch: 'x64' },
   ]);
   assert.deepEqual(Object.keys(version.kernel.artifacts), ['linux-x64', 'win32-x64']);
+  await notCalled(context);
+});
+
+test('init routes through the installed release and creates no compiler activity', async t => {
+  const context = await fixture(t);
+  const run = context.invoke(['init', 'new project', '--json']);
+  assert.equal(run.status, 0, run.stderr);
+  const result = JSON.parse(run.stdout);
+  assert.equal(result.projectRoot, path.join(context.project, 'new project'));
+  const metadata = JSON.parse(await readFile(path.join(result.projectRoot, 'package.json'), 'utf8'));
+  const release = JSON.parse(await readFile(path.join(context.installed, 'release.json'), 'utf8'));
+  assert.equal(metadata.devDependencies.proofscript, release.version);
+  assert.equal(metadata.proofscript.entry, 'src/Main.ps');
+  assert.equal(metadata.proofscript.out, 'src/Main.ts');
+  assert.match(await readFile(path.join(result.projectRoot, 'src/Main.ps'), 'utf8'), /Nat/u);
+  assert.equal(run.stderr, 'PSC_EXTENSIONS: []\n');
+  await notCalled(context);
+});
+
+test('project defaults resolve from the selected root and explicit entry gets its own adjacent output', async t => {
+  const context = await fixture(t, {
+    profile: 'checked', entry: 'src/Main.ps', out: 'dist/Bundle.ts', extensions: [],
+  });
+  let run = context.invoke(['build', '--json'], { cwd: path.join(context.project, 'src') });
+  assert.equal(run.status, 0, run.stderr);
+  let call = JSON.parse(await readFile(context.marker, 'utf8'));
+  assert.equal(call.entryPath, path.join(context.project, 'src/Main.ps'));
+  assert.equal(call.outputPath, path.join(context.project, 'dist/Bundle.ts'));
+  run = context.invoke(['build', 'src/Main.ps']);
+  assert.equal(run.status, 0, run.stderr);
+  call = JSON.parse(await readFile(context.marker, 'utf8'));
+  assert.equal(call.outputPath, path.join(context.project, 'src/Main.ts'));
+  run = context.invoke(['check', '--json']);
+  assert.equal(run.status, 0, run.stderr);
+  call = JSON.parse(await readFile(context.marker, 'utf8'));
+  assert.equal(call.checkOnly, true);
+  assert.equal(Object.hasOwn(call, 'outputPath'), false);
+});
+
+test('project path settings cannot escape or silently select unsupported source/output kinds', async t => {
+  for (const config of [
+    { entry: '../Outside.ps' }, { entry: '/outside/Main.ps' },
+    { entry: 'C:/outside/Main.ps' }, { entry: 'D:Outside.ps' }, { entry: 'src/Main.ts' },
+    { entry: 'src/Main.ps', out: '../Outside.ts' }, { entry: 'src/Main.ps', out: 'D:Other.ts' },
+    { entry: 'src/Main.ps', out: 'dist/Main.wasm' },
+    { entry: 'src\\Main.ps' },
+  ]) {
+    const context = await fixture(t, { profile: 'checked', ...config });
+    const run = context.invoke(['build']);
+    assert.notEqual(run.status, 0);
+    assert.match(run.stderr, /PSC_PROJECT_PATH/u);
+    await notCalled(context);
+  }
+});
+
+test('enabled command packages are not executed or resolved by ordinary check and build', async t => {
+  const context = await fixture(t, { profile: 'checked', extensions: [
+    { package: 'psdev', enable: ['command:dev'] },
+  ] });
+  const run = context.invoke(['check', 'src/Main.ps', '--json']);
+  assert.equal(run.status, 0, run.stderr);
+  assert.equal(run.stderr, 'PSC_EXTENSIONS: []\n');
+  assert.deepEqual(JSON.parse(run.stdout).extensions, []);
+});
+
+test('dev requires explicit activation and refuses watch before requesting a build', async t => {
+  const context = await fixture(t);
+  let run = context.invoke(['dev', 'src/Main.ps', '--once']);
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /PSC_DEV_EXTENSION_REQUIRED/u);
+  await notCalled(context);
+  run = context.invoke(['dev', 'src/Main.ps', '--watch']);
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /PSC_DEV_WATCH_UNSUPPORTED/u);
+  await notCalled(context);
+  run = context.invoke(['dev', 'src/Main.ps', '--once', '--out', 'src/Main.js']);
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /PSC_DEV_OUTPUT_KIND/u);
+  await notCalled(context);
+});
+
+test('examples lists shipped source locations without invoking compiler or npm code', async t => {
+  const context = await fixture(t);
+  const run = context.invoke(['examples', '--json']);
+  assert.equal(run.status, 0, run.stderr);
+  const { examples } = JSON.parse(run.stdout);
+  assert.deepEqual(examples.map(item => item.name), ['checked-nat', 'existing-typescript', 'rejected-source']);
+  for (const example of examples) {
+    assert.equal(example.path, path.join(context.installed, 'examples/platform', example.name));
+  }
   await notCalled(context);
 });

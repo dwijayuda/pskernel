@@ -1,0 +1,18 @@
+{
+  "name": "proofscript-checked-nat",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node ./node_modules/proofscript/bin/psc.mjs check src/Main.ps",
+    "build": "node ./node_modules/proofscript/bin/psc.mjs build src/Main.ps --out src/Main.ts"
+  },
+  "devDependencies": {
+    "proofscript": "0.1.0-preview.2"
+  },
+  "proofscript": {
+    "profile": "checked",
+    "entry": "src/Main.ps",
+    "out": "src/Main.ts",
+    "extensions": []
+  }
+}

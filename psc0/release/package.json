@@ -1,7 +1,7 @@
 {
   "name": "proofscript",
-  "version": "0.1.0-preview.1",
-  "description": "ProofScript compiler platform: protected PSKernel Core admission and TypeScript output (Linux and Windows x64 preview)",
+  "version": "0.1.0-preview.2",
+  "description": "ProofScript compiler platform with protected admission, project initialization, TypeScript examples and isolated command extensions",
   "type": "module",
   "bin": {
     "psc": "./bin/psc.mjs"
@@ -28,7 +28,8 @@
     "runtime/",
     "release.json",
     "README.md",
-    "LEAN_LICENSE"
+    "LEAN_LICENSE",
+    "examples/"
   ],
   "dependencies": {
     "typescript": "7.0.2"

@@ -1,0 +1,21 @@
+{
+  "name": "proofscript-typescript-consumer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "ps:check": "node ./node_modules/proofscript/bin/psc.mjs check src/Main.ps",
+    "ps:build": "node ./node_modules/proofscript/bin/psc.mjs build src/Main.ps --out src/Main.ts",
+    "build": "node ./node_modules/proofscript/bin/psc.mjs build src/Main.ps --out src/Main.ts && node ./node_modules/typescript/bin/tsc --project tsconfig.json",
+    "start": "node dist/consumer.js"
+  },
+  "devDependencies": {
+    "proofscript": "0.1.0-preview.2",
+    "typescript": "7.0.2"
+  },
+  "proofscript": {
+    "profile": "checked",
+    "entry": "src/Main.ps",
+    "out": "src/Main.ts",
+    "extensions": []
+  }
+}

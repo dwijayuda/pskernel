@@ -549,4 +549,4 @@ theorem PsKernelInductiveNamesAbsent.lookup_none_of_mem
   | cons head rest hHead hRest ih =>
       cases hMember with
       | head => exact hHead
-      | tail => exact ih name (by assumption)
+      | tail => exact ih (by assumption)

@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const sourceRef = '963030dc2d154008fccc82e7c8ed29331f138799';
 const sourceTree = '38c8c55bd2b214753e56c58c15c4901c32c01b86';
+const repositoryTree = '80927150cbd6a5518762b4cc56e51ea24df8f374';
 const identity = Object.freeze({
   protocol: 'pskernel-core/1', provider: 'pskernel-core-native',
   leanVersion: '4.34.0', leanCommit: '293d5d0c0c3f3dded4688b3ccd6a33939ac5102b',
@@ -151,7 +152,7 @@ function collect(providerDirectory, toolchainDirectory, outputDirectory, readobj
   const manifest = {
     schema: 1, kind: 'psc0-windows-native-provider-candidate',
     claim: 'Artifact discovery only; fresh-runner native smoke and final installed-package qualification are separate evidence.',
-    sourceRef, sourceTree, buildTarget: 'psc_kernel_core_provider', toolchainArchive: archive,
+    sourceRef, sourceTree, sourceTreePath: 'psc0', repositoryTree, buildTarget: 'psc_kernel_core_provider', toolchainArchive: archive,
     identity, executable: 'psc_kernel_core_provider.exe', files,
     systemImports: [...systemImports.values()].sort((a, b) => a.name.localeCompare(b.name)),
     licenseFiles, runner: runner(), releaseQualified: false, rebuildReproducibilityProved: false,
@@ -169,6 +170,8 @@ function verify(candidateDirectory, evidenceDirectory) {
   assert.equal(manifest.kind, 'psc0-windows-native-provider-candidate');
   assert.equal(manifest.sourceRef, sourceRef);
   assert.equal(manifest.sourceTree, sourceTree);
+  assert.equal(manifest.sourceTreePath, 'psc0');
+  assert.equal(manifest.repositoryTree, repositoryTree);
   assert.deepEqual(manifest.identity, identity);
   assert.equal(manifest.releaseQualified, false);
   const payload = path.join(candidate, 'payload');
@@ -225,7 +228,7 @@ function verify(candidateDirectory, evidenceDirectory) {
   mkdirSync(evidenceDirectory, { recursive: true });
   const evidence = {
     schema: 1, kind: 'psc0-windows-native-provider-clean-runner',
-    candidateManifestSha256: sha256(manifestBytes), sourceRef, sourceTree,
+    candidateManifestSha256: sha256(manifestBytes), sourceRef, sourceTree, sourceTreePath: 'psc0', repositoryTree,
     executableSha256: manifest.files.find(file => file.name === manifest.executable).sha256,
     payloadFiles: manifest.files.map(({ name, sha256, bytes }) => ({ name, sha256, bytes })),
     identity, runner: runner(), executionPath: env.PATH, executionCwd: payload,

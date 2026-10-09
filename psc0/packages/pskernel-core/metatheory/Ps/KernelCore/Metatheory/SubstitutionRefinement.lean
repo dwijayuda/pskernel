@@ -8,7 +8,7 @@ theorem psKernelExprLiftLooseBVarsChanged_zero_amount_core
     (start : Nat) :
     psKernelExprLiftLooseBVarsChanged expr start 0 =
       Prod.mk expr false := by
-  simp [psKernelExprLiftLooseBVarsChanged]
+  cases expr <;> rfl
 
 theorem psKernelExprLiftLooseBVarsChangedWithFuel_refines_reference_core
     (expr : PsKernelExpr)

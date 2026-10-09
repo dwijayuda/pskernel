@@ -296,12 +296,14 @@ def liftAlgebra (amount : Nat) : Algebra Changed :=
 
 theorem lift_fold (e : PsKernelExpr) (start amount : Nat) :
     fold (liftAlgebra amount) e start = psKernelExprLiftLooseBVarsChanged e start amount := by
-  induction e generalizing start <;>
-    simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
+  by_cases h : amount = 0
+  · subst amount
+    induction e generalizing start <;> simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
       PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
-      PsKernelSharing.rebuildTernary, liftAlgebra,
-      psKernelExprLiftLooseBVarsChanged] <;>
-    try (split <;> simp_all [psKernelExprLiftLooseBVarsChanged])
+      PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged]
+  · induction e generalizing start <;> simp_all [PsKernelSharing.fold, PsKernelSharing.changedAlgebra,
+      PsKernelSharing.rebuildUnary, PsKernelSharing.rebuildBinary,
+      PsKernelSharing.rebuildTernary, liftAlgebra, psKernelExprLiftLooseBVarsChanged, h]
 
 end PsKernelSharing
 
@@ -313,11 +315,11 @@ def psKernelExprLiftLooseBVarsChangedShared (e : PsKernelExpr) (start amount : N
 @[csimp] theorem psKernelExprLiftLooseBVarsChanged_shared_eq :
     psKernelExprLiftLooseBVarsChanged = psKernelExprLiftLooseBVarsChangedShared := by
   funext e start amount
-  unfold psKernelExprLiftLooseBVarsChangedShared
-  split
-  next h => simp [psKernelExprLiftLooseBVarsChanged, h]
-  next h => rw [PsKernelSharing.run_eq, PsKernelSharing.lift_fold]
-
+  cases amount with
+  | zero => cases e <;> rfl
+  | succ n =>
+    simp only [psKernelExprLiftLooseBVarsChangedShared, Nat.beq_eq_false_iff_ne.mpr (Nat.succ_ne_zero n),
+      Bool.false_eq_true, ↓reduceIte, PsKernelSharing.run_eq, PsKernelSharing.lift_fold]
 
 def psKernelExprLiftLooseBVars
     (expr : PsKernelExpr)

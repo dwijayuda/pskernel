@@ -14,7 +14,7 @@ theorem psKernelExprLiftLooseBVarsChanged_zero_amount
     (start : Nat) :
     psKernelExprLiftLooseBVarsChanged expr start 0 =
       Prod.mk expr false := by
-  simp [psKernelExprLiftLooseBVarsChanged]
+  cases expr <;> rfl
 
 theorem psKernelExprLiftLooseBVars_zero_amount
     (expr : PsKernelExpr)

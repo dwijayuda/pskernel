@@ -10,6 +10,8 @@
 
 **Distribution/user-experience follow-up:** 10 October 2026, Asia/Jakarta. The npm product name comes from the user; scoped names and CLI examples are proposed. Package-manager observations use the cited npm v12 documentation, not a newly executed installation.
 
+**Incremental-tooling follow-up:** 10 October 2026, Asia/Jakarta. The TS emitter, runtime identities, erased type representations, preparation state, and IR module shape were inspected at `3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7`. The default-package, neighboring-TS, watch, and editor workflows below are proposals, not demonstrated current functionality or a new qualification run.
+
 **Canonical plan format:** this Markdown file. It supersedes the earlier PDF draft for future plan revisions.
 
 ## Decisions confirmed by the user
@@ -19,6 +21,8 @@
 - Keep `psbackend-ts` in the required compiler distribution and self-host source closure. Use the pinned TypeScript 7 toolchain to produce executable JavaScript.
 - Keep compiler implementation in the supported `.lean`/`.ps` source profile. Keep `pscore` backend-neutral and the logical kernel independent of backend code.
 - Make `psbackend-js`, `psbackend-wasm`, `psbackend-rust`, and other backends optional extensions. Replacing the required TS backend is not a goal of this plan.
+- One `proofscript` installation should provide all five required compiler components. Develop watch and language-server functionality incrementally as separate ps-prefixed tooling packages that can become release defaults without entering the compiler's self-host source closure.
+- Support gradual adoption in existing TypeScript projects: users write `.ps` beside handwritten `.ts`, and the compiler publishes owned neighboring `.ts` outputs only after the checks required by the selected profile succeed. VS Code integration can follow separately.
 - Allow mature extension functionality to be adopted through explicit bundling, implementation-integration, or semantic-change decisions. Adoption never automatically waives kernel checks, required preservation evidence, isolation, or disclosure.
 - Preserve the selected seed and demonstrated compiler fixed point. A joint generated compiler/kernel closure remains a separate acceptance milestone.
 - Put compiler assurance companions in a separate `psc0/proofs/` tree, using `.proof.lean` filenames and ordinary `.lean` modules for reusable models and lemmas. Reuse the existing kernel proof approach without duplicating its proof library.
@@ -58,7 +62,7 @@ This document records research and planning. It does not implement package renam
 
 **Adopt a fixed semantic backbone with isolated extension producers and one explicitly trusted admission supervisor.** Keep the existing small composition root and most compiler algorithms. Consolidate the maintained kernel, close publication bypasses, specify runtime meaning, and expose narrow data interfaces. This is a structural refactor, followed by targeted proof work, rather than a new compiler framework.
 
-The desired platform has three different kinds of smallness. The logical kernel should be small enough to specify and audit. The compiler’s self-host closure should include only one reference compilation path. The installed product should keep optional backends, full-Lean integration, and extension execution machinery out of the default dependency closure when unused. These sizes must be measured separately.
+The desired platform has three different kinds of smallness. The logical kernel should be small enough to specify and audit. The compiler’s self-host closure should include only one reference compilation path. The installed product should exclude unselected optional backends and full-Lean development dependencies, and load tool/extension execution machinery lazily. A small, deliberately chosen set of development tools may ship as release defaults without joining the compiler source closure. Installed size, startup cost, host TCB, and self-host closure must be measured separately.
 
 Most extensions need no universal proof of their implementation. A tactic can propose a term that the kernel checks. A restricted optimizer can propose a transformation certificate that a smaller validator checks. This does not make an arbitrary well-typed optimization or backend correct: preserving types and preserving program behavior are different properties.
 
@@ -334,10 +338,13 @@ Names below follow the user's selected ps-prefixed basename convention. The user
 | psc, distributed through proofscript | Trusted supervisor, CLI, policy, kernel service, resolver, extension runner, receipts, publication | Owns capabilities and decisions; does not import external package code |
 | psbackend-ts | Required reference backend for the core distribution and self-hosting; TS7 runtime adapters | Consumes pipeline data; cannot publish; target-specific code stays outside pscore |
 | pscv | Optional approved VCG/coverage implementation and obligation schema | Activation and final coverage decision stay in supervisor |
+| psdev | Watch scheduling and development-command policy | Uses supervisor snapshots/build requests; cannot admit, publish, or start arbitrary processes |
+| pslsp | ProofScript language-server computations | Reuses compiler analysis/query results; unsaved analysis cannot publish build artifacts |
+| psvscode, proposed editor-client basename | Thin VS Code integration and server selection | Separate Marketplace/VSIX distribution; no compiler/kernel implementation |
 | Optional psbackend-js, psbackend-wasm, psbackend-rust, Lean adapter | Target-specific or compatibility functionality | Outside the required compiler/self-host closure; individually qualified |
 | proofscript/sdk or development-only SDK package | Typed clients, schemas, fixture runner, examples | Convenience only; no authority or general service registry |
 
-Here, core distribution means the required compiler product: psc, pscore, psfrontend, pskernel-core, and psbackend-ts with their declared runtime/toolchain dependencies. It does not mean putting TypeScript lowering or TypeScript-specific concepts inside pscore or the logical kernel. The source compiler remains written in its supported .lean/.ps profile.
+Here, core distribution means the required compiler product: psc, pscore, psfrontend, pskernel-core, and psbackend-ts with their declared runtime/toolchain dependencies. Thus `npm install -g proofscript` should provide all five components without five manual installs. They can be bundled modules or actual required npm dependencies; this plan does not assume ownership or separate publication of every unscoped name. It does not mean putting TypeScript lowering or TypeScript-specific concepts inside pscore or the logical kernel. The source compiler remains written in its supported .lean/.ps profile.
 
 Publish the supervisor and kernel at clear consumer boundaries. The compiler-core, frontend, and TS backend can initially be subpackages or subpaths under a shared version if separate publication would add only coordination work. Proof sources, docs, archives, and historical seeds remain in the repository without automatically entering release tarballs.
 
@@ -360,7 +367,26 @@ The target quick-start is `npm install -g proofscript`, followed by the `psc` co
 
 The npm scoped spelling is `@proofscript/psbackend-rust`. npm scopes belong to users or organizations; owning the unscoped package `proofscript` does not establish ownership of `@proofscript`. Use a controlled scope, and identify the actual resolved package origin. A name inside a package's manifest or an npm alias does not establish official provenance. [E17]
 
-Optional extensions are independently installed project dependencies. Do not list every optional backend in the main product's default dependency closure. Most users should install one compiler product, then only the additional packages their project needs. Third-party publishers may use their own scoped or unscoped names; the `ps...` convention is useful naming guidance, not an authorization rule.
+Non-default extensions are independently installed project dependencies. Do not list every optional backend in the main product's default dependency closure. Most users should install one compiler product, then only the additional packages their project needs. Third-party publishers may use their own scoped or unscoped names; the `ps...` convention is useful naming guidance, not an authorization rule.
+
+### Adding standard features through later releases
+
+Use the existing extension loader and one small release-owned defaults table. Each entry records the exact shipped component identity, supported operation, activation trigger, and bounded grants. This is internal release metadata using the same operation/identity contracts as project extensions, not another user configuration system or plugin framework.
+
+To include a ready `psdev` or `pslsp` in a future `proofscript` release, include its prepared payload in the release bundle or its required runtime dependency closure, then add the corresponding default entry. A dependency needed by installed users cannot exist only in the product's development dependencies. A feature promised in every supported installation should not rely on an optional dependency whose absence is silently tolerated. Qualify the assembled installation. npm provides dependency and bundling mechanisms; PSC supplies the activation policy. [E16]
+
+| Component | Available after installing a release that includes it | When work starts |
+| --- | --- | --- |
+| Required compiler components | `psc check` and `psc build`, supported default language and TS backend | The requested compiler operation |
+| Default psdev | Proposed `psc dev --watch` | Only when that command is invoked |
+| Default pslsp | Proposed `psc lsp --stdio` | Only when an editor or user requests a server session |
+| Non-default backend or third-party extension | After project installation and explicit operation activation | When the enabled operation is requested |
+
+Installing or running `psc --version` must not start a watcher, language server, prover, or background update service. Distinguish shipped, enabled, loaded, and executed components in status/provenance. Default extensions still use the qualified isolation boundary and mandatory actual-load reporting; official status is not a same-process exception.
+
+The project may disable an optional default in its existing root configuration, and host restrictions may further reduce grants. It cannot disable kernel admission, required validation, disclosure, or obligations of its selected profile. Project packages cannot override a release default merely by sharing its name; replacements require an explicit compatible selection with no ambiguous registration. Resolve shipped defaults from the compiler's release-controlled installation and project additions from the selected project's graph.
+
+Users receive newly included defaults when they intentionally install/update that `proofscript` release. A globally updated compiler does not change a project's pinned local compiler. Builds never fetch a newly discovered default or activate arbitrary installed dependencies. This preserves incremental product development and reproducible project behavior.
 
 ### User journey: global convenience and reproducible projects
 
@@ -455,6 +481,51 @@ The current generated JS compiler may remain a pinned first-party implementation
 The destination is to run candidate-producing frontend work through a qualified confined runner as well, then let the authority validate exact returned data. Moving the default JS frontend into an ordinary subprocess is useful organization but is not, by itself, a malicious-code security boundary. A qualified Wasm or OS-sandboxed route is required to make that stronger claim.
 
 
+### User journey: adopt ProofScript inside an existing TypeScript project
+
+The intended workflow is a local, pinned `proofscript` development dependency, one root project configuration, and the existing TypeScript application's normal build. A release containing default `psdev` needs no separate watch-package installation. The proposed command is `psc dev --watch`, or the project script invoking the documented local launcher with those arguments. Adjacent TypeScript emission is the selected output mode for this project; it need not also emit JavaScript into `src`.
+
+| File | Role |
+| --- | --- |
+| `src/app.ts` | Existing handwritten TypeScript |
+| `src/domain/quantity.ps` | New ProofScript implementation and contracts |
+| `src/domain/quantity.ts` | PSC-owned generated module entry beside its source |
+| Configured generated directory within the TS source root | Shared project bundle/runtime and maps where the chosen output mode requires them |
+
+An existing TS module imports the generated entry through its ordinary supported module-resolution configuration. Users can migrate a pure function or library at a time. This does not mean arbitrary TypeScript becomes supported ProofScript by renaming its extension, nor that the surrounding application automatically becomes verified.
+
+Save a `.ps` file; PSC checks a complete immutable project snapshot, discharges the selected contract obligations, validates the target, then publishes the accepted output generation. A failed or unavailable required check blocks publication. Section 14 defines ownership, pending/error behavior, and how a downstream build obtains a coherent generation.
+
+Use two accurate assurance descriptions. An ordinary checked build reports admission and the validations it performed. A contract-checked profile additionally requires the selected PSCV obligations and coverage, with explicit assumptions. That can ship before the compiler's full formal proof program, while identifying the compiler/runtime relations still trusted. A stronger profile promising verified executable semantics additionally requires the corresponding preservation evidence. Neither successful typechecking nor a proof of a weak/incomplete specification means arbitrary application correctness. TypeScript's `noEmitOnError` concerns TypeScript diagnostics; it does not enforce PSC admission or contract obligations. [E27]
+
+### Neighboring output: fix module semantics before promising separate compilation
+
+The targeted implementation review found a whole-IR emitter: `psTsEmitModule` emits all supplied layouts/declarations and embeds runtime support. The same implementation creates private symbol identities and a local generator-function registry. [R41] Preparation accumulates declarations without retaining their source-module partition in its admission-ready result. [R42] The IR module has imports/layouts/declarations, but no source ownership/export graph. [R43]
+
+Consequently, independently emitting each file's complete closure would duplicate runtime/type identities. This is an architectural inference from those representations, not an observed integration-test failure. Watch mode is not just a filesystem wrapper around the current emitter.
+
+The smallest useful first stage is **one qualified ProofScript project bundle plus mechanically thin neighboring re-export modules**. Preserve an explicit source-to-public-export map; each neighbor exports its declarations from that bundle. Derive the types from accepted export information. Do not infer ownership from mangled names, duplicate initialization/runtime state, or add another type checker. This is an output layout with a bounded public ABI, not a second module system.
+
+The long-term module-output design preserves declaration ownership, generated-name ownership, imports/exports, and initialization meaning through preparation and lowering. Each runtime type has one canonical owning module; other modules import its identities. Shared calling support has a versioned ABI. Start with pure libraries, a qualified acyclic module graph, and supported TS module/target settings; arbitrary cross-language initialization cycles and independently loaded duplicate runtimes need explicit later semantics. Do not turn temporary bundle layout into a permanent compatibility constraint or split emitted strings to simulate linking.
+
+Keep the first interop boundary small. Current erasure maps `Nat`/`Int` to `bigint`, `Char`/`String` to `string`, and `Unit` to `undefined`; these target types do not express every source invariant. [R44] Calls from handwritten TS/JS need the supported runtime boundary checks and a representation/ownership policy, including mutable aliases. For example, a `Nat` boundary must not accept an arbitrary negative `bigint`. TS `readonly` or a cast does not enforce runtime immutability.
+
+Calls from ProofScript into TS need an explicit FFI contract and checked implementation evidence, supported runtime enforcement for the particular decidable property, or a profile-approved disclosed assumption. A `.d.ts` signature or implementation hash proves neither postconditions nor termination/effects. Initial TS-to-pure-PS exports offer useful incremental adoption before broad FFI support.
+
+### Language-server and VS Code delivery
+
+Develop `pslsp` after the compiler exposes small snapshot/query services. Start with versioned diagnostics, hover, and definition lookup; add completion, rename, and richer actions when their source/origin mappings are adequate. Reuse parser, elaborator, environment queries, and admission status. Recovery analysis may describe incomplete code, but cannot manufacture a publishable accepted result.
+
+The LSP architecture supports a server shared by editor clients; a thin VS Code extension starts/selects it. npm can distribute the server. Install the VS Code client through its normal Marketplace or VSIX route, separately from `npm install -g proofscript`; do not modify the editor through npm lifecycle scripts. [E26] [E28]
+
+Select the compatible pinned local compiler in a trusted workspace, or an explicitly selected installation. Display the selected compiler and server identities; do not silently substitute/download another version. Honor editor Workspace Trust before executing workspace-selected components. It does not replace PSC's own extension boundary. [E29]
+
+Keep unsaved-buffer analysis in memory and label results with document version and dependency snapshot; saved build outputs have a different identity. Do not publish neighboring TS from unsaved analysis. Route full-Lean `proofs/**/*.proof.lean` companions to their normal Lean tooling unless the user explicitly selects another supported route. A ProofScript editor extension must not claim all `.lean` files merely because the compiler supports a bounded Lean source profile.
+
+Ordinary TS source maps relate emitted JavaScript to TypeScript. PSC additionally needs its own generated-TS-to-PS origins and qualified map composition for debugging through both stages; emitting a `.ts.map` alone does not guarantee consumer support. Diagnostics and refactoring need compiler source mappings too. [E25]
+
+The pinned TS7.0 line does not expose the old programmatic compiler API: Microsoft's documentation marks the older examples as TS6-and-earlier, and the TS7 release describes the missing/new API boundary. Use the pinned CLI and supported protocols initially; do not base `psdev` on old `createWatchCompilerHost` examples or introduce TS5/TS6 as a hidden fallback. Rich virtual-file integrations can follow a separately qualified supported API. [E23] [E24]
+
 ## 11. Trust belongs to claims, not package names
 
 | Claimed property | Trusted implementation or assumptions until proved / independently checked |
@@ -537,7 +608,7 @@ Offer a narrow SDK with schemas, a fixture runner, canonical test inputs, and th
 
 ### Ecosystem policy: open participation with project-controlled execution
 
-Recommend an open third-party ecosystem with a small supported official distribution and an optional curated compatibility catalog. A project's enabled-extension list authorizes compilation-time use. A project or organization may deliberately restrict that list to official or approved versions, but a central catalog is not required for every user or every build.
+Recommend an open third-party ecosystem with a small supported official distribution and an optional curated compatibility catalog. The release defaults and the project's explicit enabled-extension list authorize the selected operations, subject to project/host restrictions. A project or organization may deliberately restrict that list to official or approved versions, but a central catalog is not required for every user or every build.
 
 | Policy | Benefit | Cost or limit | Recommendation |
 | --- | --- | --- | --- |
@@ -569,17 +640,25 @@ Ordinary source/runtime dependencies belong in build provenance. The mandatory e
 
 ### Activation, dependency closure, and compatibility
 
-Installation alone does not authorize compiler execution. Use the root project's data-only configuration, npm's existing lockfile, and the fixed operation contracts. Resolve package identity and bytes through the selected installed dependency graph without evaluating package entry modules. Do not discover plugins by package-name prefixes, by scanning all of `node_modules`, or by executing imported configuration.
+Installing an arbitrary package alone does not authorize compiler execution. The effective activation set comes from release-owned defaults plus explicit project entries, reduced by configured restrictions and explicit disabling of optional defaults. Use the root project's data-only configuration, npm's existing lockfile, and the fixed operation contracts. Resolve shipped defaults from the release-controlled product and project entries from the selected installed dependency graph, without evaluating package entry modules. Do not discover plugins by package-name prefixes, by scanning all of `node_modules`, or by executing imported configuration.
 
 The illustrative `enable: ["backend:rust"]` grant permits that operation only. It does not authorize new tactic/command handlers, filesystem/network/process services, kernel mutation, or reporting changes. Record grants in the project configuration; changed or additional grants require an explicit configuration change. Repeated builds use those grants without interactive permission prompts. Lockfile updates change artifact identities and must be reflected in receipts and any affected assurance claims.
 
-If organization/host restrictions are configured, effective grants are the intersection of those restrictions, project activation, and the fixed protocol. Packages cannot widen them. Ordinary users do not need a separate organization policy layer.
+If organization/host restrictions are configured, effective grants are the intersection of those restrictions, the selected release/project activation grants, and the fixed protocol. Packages cannot widen them. Ordinary users do not need a separate organization policy layer.
 
-A bundled helper remains inside its parent's isolated artifact and capability limits. A separately executing extension dependency must be explicitly present in the resolved project activation set; a parent or library dependency declaration is not authorization. Dynamic resource access goes through bounded host services with actual resource identities recorded. Guests cannot independently load another host-side plugin, fetch new code, or start a process.
+A bundled helper remains inside its parent's isolated artifact and capability limits. A separately executing extension dependency must be explicitly present in the resolved release/project activation set; a parent or library dependency declaration is not authorization. Dynamic resource access goes through bounded host services with actual resource identities recorded. Guests cannot independently load another host-side plugin, fetch new code, or start a process.
 
 Treat compatibility as explicit protocol, Core schema, runtime ABI, source-profile, and operation support. Reject unsupported combinations and ambiguous registrations. A new package may extend documented syntax/operations; it cannot shadow protected CLI commands, replace the kernel, reinterpret a fixed primitive, or add an unvalidated trusted IR instruction.
 
 Extension packages should carry their prepared isolated payload and data descriptor. Their implementation may use any toolchain producing the supported payload; they need not all be formally verified or self-hosted. A plain npm JavaScript callback does not meet the strict isolation contract. Additional native/full-Lean compatibility modes need their own qualified boundary rather than an automatic fallback.
+
+### Development services reuse the same authority boundary
+
+Keep filesystem notifications, immutable snapshot capture, authoritative cancellation/status, process launching, LSP framing, and publication in small release-controlled host adapters. These adapters are part of the relevant host TCB, outside the logical kernel and compiler source closure. Optional tool algorithms can run as isolated producers receiving events/data and requesting the same checked-build or read-only query operations.
+
+For `psdev`, the guest may request another build or present bounded diagnostics; only the supervisor validates inputs, establishes a generation, and publishes outputs. A downstream command runs only through an explicit user-configured host tool service, never through an extension's arbitrary process request. For `pslsp`, the host owns protocol transport and authoritative status, while analysis reuses compiler services.
+
+Do not describe ordinary Node filesystem/LSP adapter code as sandboxed extension logic. Conversely, shipping an official npm package does not authorize importing its JavaScript entry point into the authority process. A release decision to incorporate host implementation is recorded as trusted host adoption under the following policy. No second admission service, general daemon framework, or independent watch dependency engine is needed.
 
 ### Adopting mature extension functionality
 
@@ -619,6 +698,8 @@ Node vm explicitly is not a security mechanism; Node’s permission model does n
 - Include the list in machine-readable results and a concise mandatory CLI summary. Quiet/formatting options cannot remove the record; report an empty set explicitly when appropriate.
 - Protect final output paths and the admission service from guest access. A killed or exhausted guest cannot turn its partial output into a successful build.
 
+For `psc lsp --stdio`, keep stdout valid protocol traffic. Carry compulsory disclosure through supervisor-owned framed status/notifications and durable receipts, with stderr for suitable human logs; never insert a raw CLI banner into protocol stdout. Client presentation remains outside the compiler's control.
+
 The host can attest which modules it loaded. It cannot infer every source library compiled inside an opaque binary, prove the truth of its publisher metadata from a name alone, or ensure a human reads output after external redirection. Record bundled dependency declarations separately from byte identities. Do not promise resistance to an attacker who replaces the launcher, engine, OS, or entire installation.
 
 ### Installation is part of the boundary
@@ -654,6 +735,33 @@ Cache identity must include source and imported environments, the canonical sche
 Every compilation-affecting host query reads the transaction’s immutable input/environment snapshot. Any additional file, service response, or tool result becomes an exact recorded dependency; otherwise its output is not eligible for reusable acceptance caching. The simplest first release should prohibit such extra compilation-time reads and keep read-only tool commands separate from cached transformations.
 
 External cache entries carrying accepted:true are proposals. Recheck proof/certificate evidence, or rely only on an explicitly authenticated own-cache policy whose trust assumptions are disclosed. A receipt is an audit record; it does not become a portable kernel certificate just because it is serialized or signed.
+
+### Watch generations and neighboring-file publication
+
+Watch mode is a repeated use of this transaction, not a weaker checker or a second authoritative environment. Start with one ProofScript project as the publication unit. Reuse qualified prefix work conservatively; a sound fine-grained dependency engine is not a prerequisite.
+
+Capture saved source/dependency bytes, contract/proof inputs, profile, compiler/backend/runtime identities, enabled extensions, and any admitted resource dependencies in an immutable snapshot. Give each attempt a generation identity and stage output privately. Failed/cancelled generations must not mutate accepted state. Delayed tasks retain their original identity, and cannot publish or clear a newer error after being superseded.
+
+Recheck generation and relevant input identities before committing, and serialize publication with observed invalidations. Watch events schedule work; they are not evidence of input equality. Rescan after watcher errors and reconcile outputs at startup. A watcher cannot detect every filesystem edit instantaneously: promise exact validity for the recorded snapshot and rejection of work known to be superseded, not permanent simultaneity with a changing disk.
+
+Invalidate on changed source bodies, imported definitions, contracts, proof dependencies, foreign bindings, profiles, extension identities/resources, or relevant runtime configuration. An unchanged TS signature does not justify reuse of proofs that depended on a transparent definition's body. Conservative whole-project invalidation is acceptable initially.
+
+For a strict contract-checked watch session, an observed saved-input invalidation marks the current generation pending and withdraws affected owned neighboring outputs. Failed checks keep them withdrawn. Retain the last successful generation privately if useful; an already running application may continue only as visibly belonging to that older generation. Withdrawing source output does not retract previously emitted JS or stop a running server. A last-successful convenience mode may retain visible old files, but must label them stale and cannot claim the strict freshness behavior.
+
+Keep one output-ownership record containing canonical source/target, accepted content digest, and generation, plus a single-writer lease for each output root. Refuse handwritten targets and user-modified generated files. Reconcile renames/deletions only for still-owned bytes; check symlink/case/path collisions; exclude outputs from input watching. A comment saying “generated” is informative, not deletion authority. Avoid rewriting equal bytes while still updating snapshot/evidence identities.
+
+Per-file atomic replacement does not provide whole-project atomicity. Independently running `tsc` or a bundler can observe mixed generations; a final manifest or debounce cannot fix a consumer that ignores the generation. Support these modes explicitly:
+
+| Consumption mode | Guarantee |
+| --- | --- |
+| One-shot PSC build, then downstream build | Downstream starts after completed publication; controlled builds must also keep selected inputs stable |
+| Watch with a coordinated downstream build | Start it only after complete publication, keep generated inputs stable while it reads, and do not promote an application build for a superseded generation |
+| Independent existing TS/bundler watcher | Convenient neighboring updates, with possible intermediate mixed generations; no graph-atomicity claim |
+| Later consumer integration pinned to an immutable generation | Coherent graph when the consumer pins that generation for its entire read/build |
+
+On partial publication or a crash, block coordinated consumption until recovery completes. A mutable “current” directory pointer is insufficient if a consumer resolves it repeatedly while it changes. Do not advertise arbitrary live-server integrations as verified merely because PSC emitted checked files.
+
+The minimal dev integration owns sequencing, not another build system. The existing application's build may remain responsible for TS/bundling, but a strict successful build/reload is conditional on the matching PSC generation. Developer examples and CI must run the PSC gate before consuming generated outputs, or explicitly validate a matching completed generation.
 
 ### Evidence fields, not a universal verified flag
 
@@ -847,6 +955,16 @@ Qualify the exact declared products, including the canonical source/admissions a
 
 The existing demonstrated closure is compiler-only. A joint compiler-plus-kernel source closure remains a separate milestone, now explicitly using the same required TS7 path. The plan must not imply that the native kernel provider used in current evidence already demonstrates generated-kernel self-hosting. Proof sources and the supervisor/runtime also have separately declared scopes.
 
+### Tool delivery does not determine the compiler source closure
+
+The npm installation graph and self-host import graph are different. `proofscript` may ship `psdev` and `pslsp` without compiler/kernel source importing them. Keep Node/OS/editor adapters, watch policy, LSP sessions, and the VS Code client outside the minimal compiler manifest. Tooling consumes compiler/supervisor services; the compiler has no reverse dependency on tooling.
+
+A tooling-only change with unchanged compiler inputs/closure needs its affected integration checks and a closure-identity check, not an automatic complete C1/C2/C3 run. Build/reproduce the minimal compiler with tool packages omitted from the bootstrap inputs to demonstrate this separation.
+
+This is not a promise that module-output work cannot affect self-hosting. Adding export ownership, shared-runtime linking, an ABI, or compiler query APIs can change the compiler itself. Develop those changes within the accepted source profile and requalify the changed closure at a coherent checkpoint, preserving the selected seed. Only subsequent independent tooling changes inherit the unchanged compiler baseline.
+
+Full compiler/architecture proofs in `psc0/proofs/` remain a later assurance gate. Required proof/contract evidence for a user's selected program build is a separate runtime acceptance requirement; excluding metatheory from bootstrap never authorizes bypassing it.
+
 ### Direct JS and other backends remain optional
 
 Reuse the integration branch's JS/Wasm/Rust work where useful as psbackend-js, psbackend-wasm, and psbackend-rust extensions. Each backend needs its own target contract and evidence appropriate to the requested assurance profile. It must not add dependencies or qualification work to the required TS self-host path.
@@ -899,8 +1017,23 @@ Broader extension ergonomics and capability coverage could reach 9–18k total n
 
 Potential deletion of 2–5k current lines is plausible but not a commitment. Historical receipts, source restrictions, and recovery evidence should usually remain in Git even when absent from release packages. The credible first objective is fewer maintained authority paths and less shipped duplication.
 
-These estimates exclude complete mechanized proofs, a new Wasm compiler, full Lean compatibility, a portable native-worker sandbox, a broad language server, an online plugin marketplace/approval service, and external runtime binary/dependency size. The approximately 80.9k existing assurance lines already demonstrate why proof work deserves its own budget.
+These estimates exclude complete mechanized proofs, a new Wasm compiler, full Lean compatibility, a portable native-worker sandbox, the neighboring-module/interop and development-tooling workstream below, an online plugin marketplace/approval service, and external runtime binary/dependency size. The approximately 80.9k existing assurance lines already demonstrate why proof work deserves its own budget.
 
+
+### Independent incremental-adoption workstream
+
+This can proceed after the corresponding phase-1/phase-3 interfaces stabilize and does not depend on completing phase 5. It is additional product scope, not a new closing gate for the minimal architecture release.
+
+| Milestone | Smallest useful change | Qualification boundary |
+| --- | --- | --- |
+| T1. TS library adoption | Accepted export map, one project bundle, thin neighboring modules, narrow checked ABI, one-shot build ordering | Cross-file datatype identity, initialization and calling behavior; qualified TS settings; changed compiler closure |
+| T2. psdev | Repeated checked transaction, ownership/generation state, conservative invalidation, explicit downstream sequencing | Failed/stale/cancelled work cannot become current; crash and collision cases; no new kernel path |
+| T3. pslsp and editor client | Saved/unsaved snapshot separation, diagnostics/hover/definition, mappings, thin VS Code client | Protocol-safe reporting, local compiler identity, incomplete-code analysis cannot publish |
+| T4. True module emission and richer tooling | Ownership/import/export preservation, shared versioned runtime, additional ABI/FFI and editor features where useful | Explicit linking/initialization semantics and assurance scope; deliberate compiler requalification |
+
+Develop these as independently releasable tooling/source modules. Add a finished optional tool to the product's required payload/dependency closure and release defaults only after its integration gate passes. A default `psdev` release need not include a language server or optional backend. Measure installed bytes, cold startup, warm-edit latency, affected source files, and proof maintenance before expanding the default set.
+
+Do the T1 ownership/ABI pilot before estimating T2–T4 line counts or promising support for arbitrary TS frameworks. Reuse the existing transaction and compiler services; budget no separate parser, kernel, proof database, generic service registry, or package manager. Broad FFI, arbitrary module cycles, and universal bundler/debugger compatibility are independently scoped future work.
 
 ## 19. Acceptance criteria
 
@@ -922,6 +1055,7 @@ Apply the implementation gates to the protected platform and the selected build 
 | Formal claims — later assurance gate | The promised theorem set checks at the referenced source; exported axiom dependencies and quantified semantic assumptions are audited; no claim is promoted by test coverage or companion-file counts alone |
 | npm product and project workflow | On qualified platforms, global installation of proofscript exposes psc; exact local installation plus committed lockfile reproduces the selected compiler/extension versions; controlled CI requires no extension lifecycle execution and cannot be redirected by dependency bins named psc or node |
 | Open extension activation | An independently named conforming extension works without a central allowlist; an installed but disabled extension never executes; new transitive operations/grants and conflicting registrations are refused |
+| Release defaults | A qualified product install provides all required components and chosen default tools; version/check operations do not start watch/LSP work; project dependencies cannot impersonate defaults; optional disabling and mandatory disclosure work |
 | Ordinary libraries | A supported third-party source/proof library imports without plugin approval; its assumptions are checked, and embedded executable hooks cannot activate through a normal import |
 | Backend claim scope | Installing/selecting Rust adds only its permitted target operation; unsupported toolchains fail clearly and missing preservation evidence cannot satisfy a stronger verified profile |
 | Cost and usability | Clean npm install runs checked builds and examples; no optional backend enters the mandatory closure; compare latency, memory, tarball size and dependencies to a measured baseline |
@@ -931,6 +1065,20 @@ Run failure-injection tests at each transaction boundary, including backend cras
 For performance, use repeated measurements on the same runner and workload. A provisional no-more-than-20% median regression budget without an accepted explanation is a reviewable planning gate, not a current performance result. Record warm edits and peak memory as well as full generations.
 
 For extension ergonomics, require the example macro, tactic, and command to be implemented through the documented SDK only. Kernel and supervisor source should not need per-extension changes. Later optimizer/backend examples must demonstrate the exact evidence they support rather than an unsupported generic verified label.
+
+### Additional gates when incremental TS/tooling features ship
+
+| Gate | Measurable requirement |
+| --- | --- |
+| Neighboring TS interoperability | An existing TS application imports two generated neighbors; a shared PS datatype crosses their boundary with one type/runtime identity and qualified calling/initialization behavior |
+| Contract profile | Missing, rejected, timed-out, or incomplete required obligations block the matching publication; foreign assumptions and unproved compiler relations remain explicit |
+| Watch identity and races | Delay older prover/backend tasks and edit during checking/staging/publication; superseded results cannot publish as current or clear newer diagnostics |
+| Semantic invalidation | Imported body/contract/assumption/extension changes invalidate dependent acceptance even when the exported TS type is unchanged |
+| Stale output and consumption | Strict invalidation withdraws owned outputs; failed checks block coordinated builds; a downstream consumer sees a completed generation; independent-watch limits are documented |
+| File ownership and recovery | Handwritten/modified TS survives; rename/delete, case/symlink collisions, competing writers, interrupted publication, and watcher rescan behave predictably |
+| ABI | Invalid incoming values and mutable-alias cases obey the supported boundary policy; unsupported foreign contracts cannot silently acquire proof status |
+| Editor isolation | Unsaved diagnostics carry versions and cannot emit files; LSP stdout remains valid protocol; disclosure survives errors; full-Lean proof companions retain their chosen editor route |
+| Tooling/bootstrap independence | The minimal compiler reproduces without psdev/pslsp/editor inputs; tooling-only edits preserve its closure identity; compiler module/ABI changes receive appropriate requalification |
 
 ### Definition of the first successful release
 
@@ -955,6 +1103,8 @@ This is a complete architectural implementation milestone even while the later p
 
 **Bootstrap disruption.** Introducing unsupported source constructs or promoting a new backend too early can lose reproducibility. Mitigation: preserve R, stage language changes, keep one mandatory target, and separate compiler-only from joint-kernel claims.
 
+**Incremental-adoption overclaim.** Neighboring files can hide stale or mixed generations, duplicated runtime identities, or unchecked TS callers. Mitigation: accepted export ownership, one qualified runtime identity, a bounded ABI, snapshot receipts and coordinated consumption; qualify real module emission separately.
+
 **Resource and runtime mismatch.** Demand, string positions, arrays, exceptions, and stack behavior can invalidate proofs about source programs. Mitigation: a finite runtime specification, primitive identities, conformance, and refinement obligations grounded in that specification.
 
 ### Deliberate architectural decisions
@@ -962,7 +1112,8 @@ This is a complete architectural implementation milestone even while the later p
 - No whole-compiler rewrite as the default migration strategy.
 - No arbitrary same-process third-party JavaScript execution.
 - Open third-party participation through documented isolated interfaces; an official catalog is optional and never replaces kernel/validator checks.
-- One user-facing `proofscript` product and `psc` command, with explicit project extension activation and ordinary library imports.
+- One user-facing `proofscript` product and `psc` command, with release-owned lazy defaults, explicit project additions, and ordinary library imports.
+- Incremental TS adoption through owned neighboring outputs and a bounded ABI; watch and editor tools remain outside compiler bootstrap dependencies.
 - No general compiler framework, extensible trusted IR, or universal equivalence validator.
 - No mandatory full-Lean frontend or four-backend bootstrap.
 - No verification claim inferred from a filename, type wrapper, manifest, hash fixed point, or finite suite.
@@ -999,7 +1150,7 @@ The integration cloud failure observed at the reviewed HEAD is a Node file-URL/p
 
 ## Source register
 
-Repository sources are pinned to the inspected commits. Workflow links identify specific runs. External sources are primary documentation or research. R36–R40 are the later proof-organization inspection at `85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62`; they do not update the original audit's CI/theorem-completion claims.
+Repository sources are pinned to the inspected commits. Workflow links identify specific runs. External sources are primary documentation or research. R36–R40 are the later proof-organization inspection at `85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62`. R41–R44 are the targeted neighboring-output/interop inspection at `3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7`. Neither follow-up updates the original audit's CI/theorem-completion claims.
 
 ### Repository sources
 
@@ -1043,6 +1194,10 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 - **[R38] - Companion proof runner, follow-up.** Direct `.proof.lean` checks, changed-first ordering, and full sweep.
 - **[R39] - Production-bound API companion, follow-up.** Actual implementation imports and explicitly limited orchestration claims.
 - **[R40] - Kernel production source roots, follow-up.** Portable package manifest names `src`; assurance sources are separate.
+- **[R41] - TS whole-module emitter/runtime, tooling follow-up.** Complete layouts/declarations, embedded runtime, private symbol identities and generator registry.
+- **[R42] - Compiler preparation, tooling follow-up.** Accumulated declarations and admission-ready preparation result.
+- **[R43] - IR module shape, tooling follow-up.** Imports, layouts and declarations; no source-ownership/export graph.
+- **[R44] - TS erased representations, tooling follow-up.** Numeric, character/string and unit target types.
 
 ### Workflow evidence
 
@@ -1080,6 +1235,13 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 - **[E20] - npm ci.** Locked project installation and manifest/lockfile consistency.
 - **[E21] - npm package-lock.json.** Project lockfile semantics and npm v12 shrinkwrap behavior.
 - **[E22] - ESLint plugin configuration.** Explicit extension configuration, including local unpublished plugins.
+- **[E23] - TypeScript 7.0 announcement.** No programmatic compiler API in 7.0; separately evolving integration boundary.
+- **[E24] - TypeScript Compiler API wiki.** Examples explicitly target TS6-and-earlier APIs.
+- **[E25] - TypeScript sourceMap.** JavaScript-to-TypeScript mapping behavior.
+- **[E26] - VS Code language-server extension guide.** Server/client architecture and LSP reuse.
+- **[E27] - TypeScript noEmitOnError.** TypeScript diagnostic-based emission policy, not proof checking.
+- **[E28] - VS Code extension publication.** Marketplace and VSIX distribution.
+- **[E29] - VS Code Workspace Trust extension guide.** Workspace-sensitive editor execution.
 
 [R01]: https://github.com/dwijayuda/pskernel/blob/ed5d00aca0743bde583b45fe7756dd494ac3960f/psc0/AI_WORK_STATE.md
 [R02]: https://github.com/dwijayuda/pskernel/blob/ed5d00aca0743bde583b45fe7756dd494ac3960f/psc0/docs/selfhost-language/worker-migration-qualification.json
@@ -1154,3 +1316,16 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 [E20]: https://docs.npmjs.com/cli/v12/commands/npm-ci/
 [E21]: https://docs.npmjs.com/cli/v12/configuring-npm/package-lock-json/
 [E22]: https://eslint.org/docs/latest/use/configure/plugins
+
+[R41]: https://github.com/dwijayuda/pskernel/blob/3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7/psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean
+[R42]: https://github.com/dwijayuda/pskernel/blob/3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7/psc0/packages/compiler/src/Ps/Compiler/Api.lean
+[R43]: https://github.com/dwijayuda/pskernel/blob/3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7/psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean
+[R44]: https://github.com/dwijayuda/pskernel/blob/3fbf7f778ab20aaeaafe87ae07b04c00ab2d29f7/psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean
+
+[E23]: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/
+[E24]: https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API
+[E25]: https://www.typescriptlang.org/tsconfig/sourceMap.html
+[E26]: https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+[E27]: https://www.typescriptlang.org/tsconfig/noEmitOnError.html
+[E28]: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
+[E29]: https://code.visualstudio.com/api/extension-guides/workspace-trust

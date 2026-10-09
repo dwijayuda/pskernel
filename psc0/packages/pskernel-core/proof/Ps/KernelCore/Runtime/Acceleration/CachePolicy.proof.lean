@@ -82,7 +82,9 @@ theorem psKernelInferCacheEligible_app
         inferOnly
       else
         false := by
-  rfl
+  cases inferOnly <;>
+    cases h : psKernelSemanticCacheEligible (PsKernelExpr.app fn arg) <;>
+    simp [psKernelInferCacheEligible, h]
 
 theorem psKernelInferCacheEligible_lam
     (inferOnly : Bool)
@@ -102,7 +104,9 @@ theorem psKernelInferCacheEligible_lam
         inferOnly
       else
         false := by
-  rfl
+  cases inferOnly <;>
+    cases h : psKernelSemanticCacheEligible (PsKernelExpr.lam name type body binderInfo) <;>
+    simp [psKernelInferCacheEligible, h]
 
 theorem psKernelInferCacheEligible_bvar
     (inferOnly : Bool)
@@ -130,3 +134,15 @@ theorem psKernelWhnfCacheEligible_fvar (name : PsKernelName) :
 theorem psKernelWhnfCacheRemaining_zero (expr : PsKernelExpr) :
     psKernelWhnfCacheRemaining expr 0 = none := by
   cases expr <;> rfl
+
+-- Mode refusal is independent of the expression's size and local variables.
+theorem psKernelInferCacheEligible_checked_app
+    (fn arg : PsKernelExpr) :
+    psKernelInferCacheEligible false (.app fn arg) = false := by
+  rfl
+
+theorem psKernelInferCacheEligible_checked_forall
+    (name : PsKernelName) (type body : PsKernelExpr)
+    (bi : PsKernelBinderInfo) :
+    psKernelInferCacheEligible false (.forallE name type body bi) = false := by
+  rfl

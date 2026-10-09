@@ -84,21 +84,17 @@ def psKernelInferCacheEligible
     (inferOnly : Bool)
     (expr : PsKernelExpr) :
     Bool :=
-  if psKernelSemanticCacheEligible expr then
-    match expr with
-    | PsKernelExpr.lit _ =>
-        false
-    | PsKernelExpr.app _ _ =>
-        inferOnly
-    | PsKernelExpr.lam _ _ _ _ =>
-        inferOnly
-    | PsKernelExpr.forallE _ _ _ _ =>
-        inferOnly
-    | _ =>
-        true
-  else
-    false
-
+  match expr with
+  | PsKernelExpr.lit _ =>
+      false
+  | PsKernelExpr.app _ _ =>
+      if inferOnly then psKernelSemanticCacheEligible expr else false
+  | PsKernelExpr.lam _ _ _ _ =>
+      if inferOnly then psKernelSemanticCacheEligible expr else false
+  | PsKernelExpr.forallE _ _ _ _ =>
+      if inferOnly then psKernelSemanticCacheEligible expr else false
+  | _ =>
+      psKernelSemanticCacheEligible expr
 
 /--
 Reduction caches live in a checker local scope. Unlike persistent closed-key

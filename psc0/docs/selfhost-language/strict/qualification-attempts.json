@@ -580,6 +580,227 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "scopeOfFailure": "The unchanged 186-case runtime fixture reached TypeScript 7 after native source, source conformance, target conformance and native reference production passed. Six direct equality/inequality templates preserve disjoint literal types and cause TS2367. Correct the emitted static operand types without weakening the checks or substituting fixture values."
+    },
+    {
+      "attempt": 4,
+      "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "runId": 37971952859,
+      "workflowId": 378853677,
+      "runAttempt": 1,
+      "compilerJobId": 113960540944,
+      "providerJobId": 113979513794,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/37971952859",
+      "startedAt": "2026-10-09T18:15:01Z",
+      "completedAt": "2026-10-09T19:03:06Z",
+      "status": "failure",
+      "failedStep": {
+        "number": 25,
+        "name": "Qualify exact current-source C2/C3 at a promotion checkpoint"
+      },
+      "actualRefusal": {
+        "stage": "fixed-point",
+        "code": "javascript-heap-out-of-memory",
+        "exitCode": 134,
+        "fatalAt": "2026-10-09T19:02:29Z",
+        "processEndedAt": "2026-10-09T19:02:59Z",
+        "diagnostic": "FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory",
+        "lastGc": {
+          "usedMb": 3680.6,
+          "totalMb": 4123.7,
+          "averageMutatorUtilization": 0.135,
+          "currentMutatorUtilization": 0.084
+        },
+        "firstUncompletedGeneration": "C2",
+        "internalPhase": "Not determined from the existing log; buildGeneration has no internal phase markers and logged no C2 generation receipt."
+      },
+      "successfulSteps": [
+        {
+          "number": 1,
+          "name": "Set up job"
+        },
+        {
+          "number": 2,
+          "name": "Run actions/checkout@v4"
+        },
+        {
+          "number": 3,
+          "name": "Authenticate the selected R seed and TS7-only recovery policy"
+        },
+        {
+          "number": 4,
+          "name": "Run actions/setup-node@v4"
+        },
+        {
+          "number": 5,
+          "name": "Run leanprover/lean-action@v1"
+        },
+        {
+          "number": 6,
+          "name": "Install the pinned current TypeScript 7 profile"
+        },
+        {
+          "number": 7,
+          "name": "Verify the installed TypeScript 7 profile before compiler generation"
+        },
+        {
+          "number": 8,
+          "name": "Verify host syntax and bootstrap source restrictions"
+        },
+        {
+          "number": 9,
+          "name": "Verify successor seed descriptor and cache contracts"
+        },
+        {
+          "number": 10,
+          "name": "Restore the selected qualified compiler bytes"
+        },
+        {
+          "number": 11,
+          "name": "Verify the restored selected compiler bytes"
+        },
+        {
+          "number": 14,
+          "name": "Verify selected authoring cache and execution runtime before current generation"
+        },
+        {
+          "number": 16,
+          "name": "Restore incremental current compiler build"
+        },
+        {
+          "number": 17,
+          "name": "Build current native compiler"
+        },
+        {
+          "number": 18,
+          "name": "Run native parser, translation, and erasure regression targets"
+        },
+        {
+          "number": 19,
+          "name": "Build the actual native checked seed for source and import tests"
+        },
+        {
+          "number": 20,
+          "name": "Verify new grammar source loading, imports, and native workspace boundaries"
+        },
+        {
+          "number": 21,
+          "name": "Verify native and generated TypeScript CLI boundaries"
+        },
+        {
+          "number": 22,
+          "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler"
+        },
+        {
+          "number": 23,
+          "name": "Run the bounded native development gate before qualification"
+        },
+        {
+          "number": 24,
+          "name": "Build the selected-seed candidate before full qualification"
+        },
+        {
+          "number": 27,
+          "name": "Retain incremental native outputs"
+        },
+        {
+          "number": 28,
+          "name": "Retain compiler evidence and exact generated artifacts"
+        },
+        {
+          "number": 56,
+          "name": "Post Run actions/checkout@v4"
+        },
+        {
+          "number": 57,
+          "name": "Complete job"
+        }
+      ],
+      "successfulSubgates": {
+        "nativeSource": {
+          "moduleCount": 64,
+          "sourceBytes": 1178903,
+          "importCount": 149,
+          "sourceDeclarations": 1623,
+          "originalIrExpressions": 60937,
+          "originalIrVisitedSteps": 777667,
+          "originalIrFindings": 0,
+          "traversalComplete": true
+        },
+        "nativeAndC1": {
+          "sourceAccepted": 2,
+          "sourceRefused": 33,
+          "sourceCarrierRefused": 2,
+          "targetAccepted": 9,
+          "targetRefused": 20,
+          "enabledRuntimeOperations": 45,
+          "nativeAndGeneratedObservations": 186,
+          "rawSourceNatEqualityObservations": 6,
+          "defensiveBoundsCases": 8,
+          "operandCases": 9,
+          "carrierCases": 5,
+          "textPositionFamilies": 2
+        },
+        "selectedRToC1": {
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "6b487b9b62cc749cc08b9a1e5f03686178fb8e9e4f31f0330aa0396146c5ebad",
+            "normalizedCanonicalAdmissionsSha256": "c8d1da127a519c8e8b4ecd73730d362b48aeb573fcba3dd820298d3347e1cd16",
+            "typescriptSha256": "2235b3cab6dd9bc034cbe5c84ea16d4a1c6c265aa9dde4451741a85c320b8c50",
+            "javascriptSha256": "ccdfb5f1c226dce25776b817a391a09c783a71e695ea30ca3702df198bd1d23b"
+          },
+          "workerObservations": 87,
+          "publicWorkerSignatures": 12,
+          "candidatePassed": true
+        },
+        "nativeArtifacts": {
+          "javascriptSha256": "4cc5c2561937ccafa440a3c2eb698b3b359e0a58eada682cc846eb31bc8858b7",
+          "typescriptSha256": "112a36d2e94c97f34cfe7be07f1ac90dac53a541455d55ab573c60c883f66db2"
+        }
+      },
+      "nativeSourceReceipt": {
+        "path": "attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/native-source.json",
+        "blob": "49db2db65f5ca25cf7624b98659ab3e3cf30a96c",
+        "sha256": "a69f300947b32fbb908085fde7798f19f6c03f9185c2646c9dbb691f760626ee",
+        "byteIdentity": "Exact native JSON marker plus writer newline; independently matches nativeSourceReceiptSha256 in actual native IR evidence."
+      },
+      "logDerivedEvidence": {
+        "path": "attempts/05f37fc04e52bfaed70389291a0fcdeda819f71f/log-derived-evidence.json",
+        "blob": "6ad2813cdefeb3b726498da2598c386ae487cea0",
+        "sha256": "daf8ee081c5da9cf40bfcee9398eccdb2631ff26352d3ef15ed562793708e401",
+        "markerCount": 16,
+        "meaning": "Actual successful marker payloads retained as data; not a substitute for a complete qualification receipt."
+      },
+      "providerStatus": "skipped",
+      "currentGenerationQualification": "C1-passed-no-C2-receipt-logged-C3-not-reached",
+      "strictRuntimeReference": "native-reference-produced-and-compared-at-N1-and-C1",
+      "strictRuntimeGeneratedComparison": "N1-and-C1-passed-45-operations-186-observations-plus-six-raw-source-equalities",
+      "log": {
+        "retrieval": "GitHub Actions job-log API decoded text",
+        "sha256": "ba246485c1297ee3631ffbf30547f6801ef665587eae9867b0646dee93f330ed",
+        "characters": 719267
+      },
+      "artifacts": [
+        {
+          "id": 11639377985,
+          "name": "psc0-sh1-ts7.0.2-05f37fc04e52bfaed70389291a0fcdeda819f71f",
+          "size_in_bytes": 3182763,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11639377985",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11639377985/zip",
+          "expired": false,
+          "created_at": "2026-10-09T19:03:02Z",
+          "expires_at": "2026-11-08T19:03:00Z",
+          "updated_at": "2026-10-09T19:03:02Z",
+          "digest": "sha256:2efaf91d57973103e53288140b2adeca3f13c53267138b228c25079d82dc287e",
+          "workflow_run": {
+            "id": 37971952859,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "05f37fc04e52bfaed70389291a0fcdeda819f71f"
+          }
+        }
+      ],
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "scopeOfFailure": "Native development and the selected-R C1 candidate passed, including the equality correction. A fresh fixed-point process exhausted its approximately 4 GiB default JavaScript heap before the first C2 generation receipt. The exact internal allocation phase is not logged. The separately reviewed reuse/semantic/empty-data candidates were not executed in this source; do not claim they already fix this peak.",
+      "nextInvestigation": "Authenticate retained artifact 11639377985 and inspect C2 file inventory plus actual C1 preparation/encoder text in a read-only cloud job. Review retained graphs and the already planned one-encode/zero-reconstruction path before the next coherent compiler qualification."
     }
   ],
   "selectedSeedChanged": false,

@@ -21,10 +21,12 @@ This does not add language syntax, operations, source effects, or an FFI. It doe
 |---|---|---|
 | Erasure/Expr | `28e14f991df68c4a7d49f09120a42c85c919d6a8` | `3e11222a620cd044c9a5d48243c9b33421b5d5dc` |
 | BackendTs/Expr | `9628e3c9def09c487abb5b8859a79c7be735acf9` | `dfd58154826c892d18b97b84303abbce6a622d7b` |
-| Runtime conformance gate | `8838155fb80ef28f7bf5c3916c207c6c94451634` | `2b25f896d25689b6a432ad0d8a60d23aec47063c` |
+| Runtime conformance gate | `8838155fb80ef28f7bf5c3916c207c6c94451634` | `df55eb56e9ce5c7f26a134b48de5114feeaaaad6` |
 | Existing application sequencing source guard | `a8c352d39fbfccc3b477e7d693407cf9513c8a8f` | `852240e14ed49ce01b1f835133492fd117db4327` |
 
 The backend base already includes the six TypeScript equality operand widenings. The runtime gate base already includes the six-declaration raw Nat equality regression. Those changes are preserved.
+
+A pre-execution grammar review caught a fixture error after the preceding source-review packet: its PS conditional used Lean's `if ... then ... else ...` spelling. The corrected PS line is `if (useSaved) { Nat.add(saved(next), saved(next)) } else { next }`, matching the existing PS parser and printer. The runtime gate above supersedes `2b25f896d25689b6a432ad0d8a60d23aec47063c` by exactly that source line and its raw-PS SHA-256 constant. The old gate's PS grammar clearance is withdrawn; its unchanged production, native-value, host-probe, and evidence-shape reviews remain applicable. This guide replaces published guide blob `917d49b4028edcf8ec8d3ee71e057c45c4692fc0`, and its accompanying manifest replaces published manifest `6bb5580da3073cb5bb0636bb876702918d69aae5`. Both preceding documents were checkpointed by root at `818a1a5`; the implementation had not been qualified by the preparing agent. No fixture counts, other source/reference pins, production changes, or strict qualification flags change in this correction.
 
 The Erasure/Expr candidate combines the Nat-major correction with application operand capture and fresh completion parameters. Its intermediate Nat-only blob was `3153b38e9a85e00932cac7cad59440dede218899`; the final candidate supersedes the initially reviewed partial-application blob `0476a750353a72d7bf565f13e6621da87a5914db` by preserving computed callees with erased proof binders. The exact four-region refinement is `35ab1d9ef8faca77d919af2e8c4a52f270710add`.
 
@@ -204,7 +206,23 @@ def strictPartialGeneric {p : Prop} (Alpha : Type) (h : p)
   saved next
 ```
 
-The PS fixture uses typed comma-separated parameter groups, adjacent calls, newlines for lets, and braced match/structure bodies. In particular the array result is `Array(Nat)`. It contains no legacy syntax or compatibility fallback.
+### Bounded PS grammar review
+
+The corrected raw PS blob is `035490708cea146509d748fd58310a64bf3bed70` (2,416 UTF-8 bytes). Its entire twelve-declaration text was reviewed against the current source productions, without executing a parser or compiler. The PS parser is `psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean`, blob `e91415c66fec9115a281c93c9459189bb919f121`; the matching printer is `PrintProofScript.lean`, blob `4ab23fcc1ae2ef70bd90a997319e421f5744a723`. The common names, terms, binders and patterns come from `ParseCommon.lean`, blob `45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b`; lexical checks use `Lexer.lean`, blob `335a78cad3eda53c9dd8687064002c9313901964`.
+
+| Construct in this exact PS fixture | Bounded count or shape | Source production and review |
+|---|---|---|
+| Definitions and declaration parameter groups | Eleven typed `def` declarations; eleven nonempty explicit comma-separated groups; two preceding `{p : Prop}` binders | `psParseProofScriptDeclaration`, `psParseProofScriptDeclarationBindersWithFuel`, and `psParseProofScriptExplicitEntriesWithFuel` require a result type and `:=`, preserve prefix binder order, and accept each comma-separated typed entry. The common binder parser classifies the two brace prefixes as implicit. |
+| Structure declaration | One structure, one `apply` field | `psParseProofScriptStructureDeclaration` and its field parser accept `where { ... }`, the typed function field, and its closing brace. |
+| Named and function types | `Nat`, `Bool`, `String`, `Unit`, `Prop`, `Type`, `Alpha`, `StrictPartialFn`; right-associated `->` chains; `Array(Nat)` | The common simple-term/name parser handles references, while the PS binder/type and arrow-tail productions build the same ordered domains. `Array(Nat)` is an adjacent application in type position. No grouped dependent domain occurs here. |
+| Calls and qualified names | Adjacent parenthesized calls, comma arguments, nested calls, `Unit.unit`, and two `_psAppFn.apply` callee occurrences | `psParseProofScriptPostfixTailWithFuel` checks byte adjacency; `psParseProofScriptCallArgsWithFuel` preserves argument order and consumes the closing parenthesis. Common qualified-name parsing accepts both constant names and the local-root field names; local-root projection elaboration is a separate existing step. There is no arbitrary grouped expression callee in this shared fixture. |
+| Nat matches | Six matches; six `Nat.zero` alternatives and six `Nat.succ name` alternatives, including one match inside a successor branch | `psParseProofScriptTermWithFuel` requires `match ... with { ... }`; `psParseProofScriptMatchAlternativesWithFuel` consumes each bar, common constructor pattern, arrow and body, stopping at the matching brace. All matches are nonempty. `with`, bars and braces stop the preceding application at the correct boundary. |
+| Local bindings and layout | Eight typed `let` expressions in three bodies | The term parser accepts `let name : type := value` and calls `psParseProofScriptBodySeparator` for the following line. Every following let/body starts on a later line, with no semicolon; the reserved-word and indentation checks stop the preceding value application. |
+| Conditional | One `if (useSaved) { ... } else { ... }` | The term parser requires the condition parentheses and both branch braces. The printer's `ifE` case emits that same spelling. The preceding unparenthesized `if ... then ...` fixture spelling was invalid in this grammar. |
+| Top-level separation and lexical names | Twelve commands separated by later lines; ASCII identifiers including underscore-prefixed capture names; no tabs, lone carriage returns or semicolons | `psParseProofScriptCommandSeparator`, `psProofScriptCanStartNativeArgument`, and the lexer rules preserve command boundaries and permit the fixture's identifier spellings. |
+| Typed lambda and grouped-expression forms | Zero raw PS `fun` terms and zero arbitrary grouped callees | The parser's typed-lambda and grouped-continuation productions were inspected to establish the boundary of this review. No PS lambda/grouped-callee acceptance is claimed from this fixture. Typed lambdas occur only in the independent native Lean wrapper and host functions. |
+
+This is an inventory and source-level grammar argument for these exact bytes, not an executed parse result or a general grammar-conformance theorem. The fixture contains no legacy syntax or compatibility fallback. Parser, elaborator, atomic source, IR and generated-execution results still require the root-owned qualification run.
 
 The computed callee is a function-valued structure projection, a form supported by both existing frontends. The bounded Lean parser cannot apply an arbitrary grouped expression as a callee, so the shared fixture does not rely on that syntax. Current PS grouped lambdas can also contain erased proof binders; the retained-arrow construction above addresses that general type-erasure case without changing the frozen shared fixture.
 
@@ -266,7 +284,7 @@ The root-owned evidence binder must read the actual files, verify these identiti
 | Exported pin | SHA-256 |
 |---|---|
 | Lean raw source | `aa068f731e363494a42127e33fc8fc292de66de62075593f5c29ffb2af45748e` |
-| PS raw source | `2a9ffece8b7dbbec066e0f540c074d6d88b9bf6aecdd6974c70ca1fa119f07f2` |
+| PS raw source | `27d9877bdd05f2189735047edf33b509ae6adab028fb7ebb128509e96b6cab1e` |
 | New native wrapper | `75486abeb314702a573b84c473e8fc8c4659b29ae8793f0ee7f89539e4c4a131` |
 | Twenty-four canonical observations | `9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f` |
 | Twenty-one diagnostic host observations | `76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91` |

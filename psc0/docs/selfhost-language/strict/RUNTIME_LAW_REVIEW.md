@@ -30,13 +30,15 @@ No obligation ledger row is closed by this review. Kernel, provider, definitiona
 | Installed source prelude | `d862ba8c806595fbf11237724089bd2282af9866` | Source capability boundary |
 | Separate Nat-major prerequisite | `3153b38e9a85e00932cac7cad59440dede218899` | Separate Erasure/Expr change; not included in the two-operation diff |
 | Combined Nat-major and partial-application candidate | `3e11222a620cd044c9a5d48243c9b33421b5d5dc` | Eager capture of supplied computations, with proof-erased runtime annotations |
-| Combined regression gate | `2b25f896d25689b6a432ad0d8a60d23aec47063c` | Eleven definitions and one structure, 24 native values and 21 diagnostic host probes |
+| Combined regression gate | `df55eb56e9ce5c7f26a134b48de5114feeaaaad6` | Eleven definitions and one structure, 24 native values and 21 diagnostic host probes |
 | Native Lean | `4.34.0`, commit `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b` | Pinned native definitions and runtime |
 | JavaScript lane | Node `22.23.3`, TypeScript `7.0.2` | Explicit trusted compiler/runtime boundary |
 
 The candidate expression file SHA-256 is `6412739b8ff585f8dda07109ad986802e1006d78e35bdb1051497ad452410095`. The equality-corrected base SHA-256 is `ad3315ec4e54cf7a1cb80b100202000f34e7f69cef2d7b99fb73b459bcb96766`. A second reviewer reconstructed the candidate from exactly the two guarded case replacements and reversed it to the base. That review covers source structure; qualification still belongs to the root-owned exact-source run. [P3] [P4]
 
 The combined gate's Nat/runtime predecessor `4651b0a8c9a32bd4129a641e3dfd9e64c23a3a8f` independently reverses through seven edit regions to `8838155fb80ef28f7bf5c3916c207c6c94451634`. The reviewed partial-application extension preserves the predecessor's 18 value rows and 11 diagnostic rows as exact prefixes; its additional changes are limited to the bounded raw fixture, native wrapper, diagnostic dispatch and corresponding counts. Its raw Lean and current new-only `ps-0.9-r3` PS fixtures, native reference wrapper, fixed value rows and host trace rows have independently reconstructed hashes. Its existing 186 cases, 45-operation inventory, eight bounds refusals, nine prior operand observations, five malformed-carrier cases, two text-position families and six raw-source equality declarations are preserved. [P5]
+
+A subsequent complete fixture grammar audit found that its first expanded PS conditional used Lean's if/then/else spelling. The installed parser and printer require `if (condition) { thenBranch } else { elseBranch }`. The reviewed gate corrects that single PS line and its raw-PS digest; production code, raw Lean, native reference, pure observations, diagnostic traces and all counts remain unchanged. The audit checked all twelve declarations against the actual lexer, common name/pattern rules, declaration binders, arrow/application rules, braced matches and structure, eight newline-separated typed lets, and the corrected conditional. This is static source review, not a parser or compiler execution. [P11] [P12] [P13] [P14]
 
 ## 2. Relations and assumptions needed by every law
 
@@ -308,12 +310,16 @@ PSC0 references use immutable Git blob endpoints so that unattached candidates c
 [P2]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/eedc40474f88183243b40d3ab6e4f9ea9090507e
 [P3]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/dfd58154826c892d18b97b84303abbce6a622d7b
 [P4]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/9628e3c9def09c487abb5b8859a79c7be735acf9
-[P5]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/2b25f896d25689b6a432ad0d8a60d23aec47063c
+[P5]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/df55eb56e9ce5c7f26a134b48de5114feeaaaad6
 [P6]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/8c9dcf6b0168dcb1edc49d87130fbee09a47cd79
 [P7]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/fa6491f4861ddc59caba51c03a29790fc6e8653b
 [P8]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/d862ba8c806595fbf11237724089bd2282af9866
 [P9]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/74289d66a4366eaed59d679721272c1c29b89ea9
 [P10]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/3e11222a620cd044c9a5d48243c9b33421b5d5dc
+[P11]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/e91415c66fec9115a281c93c9459189bb919f121
+[P12]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/4ab23fcc1ae2ef70bd90a997319e421f5744a723
+[P13]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b
+[P14]: https://api.github.com/repos/dwijayuda/pskernel/git/blobs/335a78cad3eda53c9dd8687064002c9313901964
 [N1]: https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Prelude.lean
 [N2]: https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Data/Int/Basic.lean
 [N3]: https://github.com/leanprover/lean4/blob/293d5d0c0c3f3dded4688b3ccd6a33939ac5102b/src/Init/Data/Int/Repr.lean

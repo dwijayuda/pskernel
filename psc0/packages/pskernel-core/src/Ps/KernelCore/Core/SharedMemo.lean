@@ -1,3 +1,4 @@
+import Std.Data.HashMap
 import Lean.Data.PersistentHashMap
 import Init.Util
 
@@ -17,11 +18,36 @@ structure Entry (α β : Type) (spec : α → Nat → β) where
   value : β
   valid : value = spec node cursor
 
-/-- The checker retains parent cache states across recursive calls. A persistent
-hash trie copies a bounded-width path when aliased; an array-backed mutable map
-can copy its complete bucket array on every insertion in those retained states. -/
-abbrev Memo (α β : Type) (spec : α → Nat → β) :=
-  Lean.PersistentHashMap Nat (Entry α β spec)
+/-- A traversal owns its scratch delta. Checkpointed metadata is persistent
+because callers retain parent checker states. Keeping these lifetimes separate
+avoids path copying for every temporary syntax result and whole-table copying
+when a retained checkpoint is extended. Neither store needs a logical invariant:
+every entry already certifies the result it stores. -/
+structure Memo (α β : Type) (spec : α → Nat → β) where
+  checkpoint : Lean.PersistentHashMap Nat (Entry α β spec) := {}
+  scratch : Std.HashMap Nat (Entry α β spec) := {}
+
+instance : EmptyCollection (Memo α β spec) :=
+  ⟨{ checkpoint := {}, scratch := {} }⟩
+
+@[inline] def Memo.find? (memo : @& Memo α β spec) (key : Nat) :
+    Option (Entry α β spec) :=
+  match memo.scratch[key]? with
+  | some entry => some entry
+  | none => memo.checkpoint.find? key
+
+@[inline] def Memo.insert (memo : Memo α β spec) (key : Nat)
+    (entry : Entry α β spec) : Memo α β spec :=
+  { memo with scratch := memo.scratch.insert key entry }
+
+/-- Freeze only when metadata must outlive this operation. Read-only cache
+queries can consume the result without paying for a persistent checkpoint. -/
+def Memo.freeze (memo : Memo α β spec) : Memo α β spec :=
+  if memo.scratch.isEmpty then memo else
+    { checkpoint := memo.scratch.fold
+        (fun (table : Lean.PersistentHashMap Nat (Entry α β spec)) key entry =>
+          table.insert key entry) memo.checkpoint
+      scratch := {} }
 
 abbrev Result {α β : Type} (spec : α → Nat → β) (node : α) (cursor : Nat) :=
   { value : β // value = spec node cursor } × Memo α β spec

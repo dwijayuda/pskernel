@@ -105,6 +105,9 @@ def main : IO Unit := do
   let (closedHash, hashMemo) := PsKernelSharing.hashCached closed (Squash.mk {})
   ensure (closedHash == expectedDagHash depth (psKernelExprHash (.sort .zero)))
     "DAG hash preserves the existing structural hash"
+  ensure (PsKernelSharing.hashRead closed hashMemo == closedHash) "read-only checkpoint hit"
+  ensure (PsKernelSharing.hashRead openDag hashMemo ==
+    expectedDagHash depth (psKernelExprHash (.bvar 1))) "read-only checkpoint miss"
   let (openHash, hashMemo) := PsKernelSharing.hashCached openDag hashMemo
   ensure (openHash == expectedDagHash depth (psKernelExprHash (.bvar 1)))
     "persistent hash memo handles a different input"

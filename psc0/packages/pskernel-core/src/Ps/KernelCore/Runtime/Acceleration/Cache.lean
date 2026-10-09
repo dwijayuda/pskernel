@@ -256,9 +256,24 @@ theorem hash_fold (e : PsKernelExpr) (cursor : Nat) :
 
 abbrev HashMemo := Squash (Memo PsKernelExpr Nat (fold hashAlgebra))
 
+def hashWalk (e : @& PsKernelExpr) (memo : HashMemo) :
+    Squash (Result (fold hashAlgebra) e 0) :=
+  Squash.lift memo fun m =>
+    step e 0 m (fun _ => walk hashAlgebra e 0 m)
+
+/-- A read-only query needs the exact hash but does not publish new metadata. -/
+def hashRead (e : @& PsKernelExpr) (memo : HashMemo) : Nat :=
+  value (hashWalk e memo)
+
+theorem hashRead_eq (e : PsKernelExpr) (memo : HashMemo) :
+    hashRead e memo = psKernelExprHash e := by
+  unfold hashRead
+  rw [value_eq, hash_fold]
+
+/-- Publish the operation's scratch entries once, at the lifetime boundary. -/
 def hashCached (e : @& PsKernelExpr) (memo : HashMemo) : Nat × HashMemo :=
-  valueAndMemo (Squash.lift memo fun m =>
-    step e 0 m (fun _ => walk hashAlgebra e 0 m))
+  let (hash, next) := valueAndMemo (hashWalk e memo)
+  (hash, Squash.lift next fun m => Squash.mk m.freeze)
 
 theorem hashCached_eq (e : PsKernelExpr) (memo : HashMemo) :
     (hashCached e memo).1 = psKernelExprHash e := by
@@ -816,13 +831,13 @@ def psKernelExprMapGetShared (cache : PsKernelExprMap) (expr : PsKernelExpr) :
   | none => psKernelExprMapGetIn expr cache.small
   | some index =>
       psKernelExprMapGetIn expr (psKernelExprMapIndexBucket 16 index
-        (PsKernelSharing.hashCached expr cache.hashMemo).1)
+        (PsKernelSharing.hashRead expr cache.hashMemo))
 
 @[csimp] theorem psKernelExprMapGet_shared_eq :
     psKernelExprMapGet = psKernelExprMapGetShared := by
   funext cache expr
   simp only [psKernelExprMapGet, psKernelExprMapGetShared,
-    PsKernelSharing.hashCached_eq]
+    PsKernelSharing.hashRead_eq]
 
 def psKernelExprMapInsertShared (cache : PsKernelExprMap)
     (expr value : PsKernelExpr) : PsKernelExprMap :=
@@ -865,13 +880,15 @@ def psKernelExprPairSetContainsShared (set : PsKernelExprPairSet)
   | some index =>
       psKernelExprPairSetContainsIn left right
         (psKernelExprPairSetIndexBucket 16 index
-          (PsKernelSharing.pairHashCached left right set.hashMemo).1)
+          (Nat.mod
+            (PsKernelSharing.hashRead left set.hashMemo +
+              PsKernelSharing.hashRead right set.hashMemo) psKernelCacheHashModulus))
 
 @[csimp] theorem psKernelExprPairSetContains_shared_eq :
     psKernelExprPairSetContains = psKernelExprPairSetContainsShared := by
   funext set left right
   simp only [psKernelExprPairSetContains, psKernelExprPairSetContainsShared,
-    PsKernelSharing.pairHashCached_eq]
+    PsKernelSharing.hashRead_eq, psKernelExprPairHash]
 
 def psKernelExprPairSetInsertShared (set : PsKernelExprPairSet)
     (left right : PsKernelExpr) : PsKernelExprPairSet :=

@@ -1,0 +1,87 @@
+name: PSKernel Core Arena focused UTF8 theorem diagnostic
+
+on:
+  push:
+    branches:
+      - pscv/pskernel-core-arena-optimized-v3
+    paths:
+      - ".github/workflows/pskernel-core-arena-utf8-hotspot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-utf8-theorem:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PSKERNEL_SHA: ${{ github.sha }}
+    steps:
+      - name: Install pinned Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Clone pinned upstream Lean Kernel Arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+      - name: Export the exact slow Init theorem
+        working-directory: arena
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > tests/init-utf8-assemble3.lean <<'EOF'
+          import Init
+          EOF
+          cat > tests/init-utf8-assemble3.yaml <<'EOF'
+          description: Focused UTF8 theorem admission at exported Init record 407876.
+          leanfile: tests/init-utf8-assemble3.lean
+          export-decls:
+            - _private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec
+          outcome: accept
+          EOF
+          cat > checkers/pskernel-core-hot.yaml <<EOF
+          description: Canonical PSKernel Core hot theorem diagnostic, not an acceptance replacement.
+          url: https://github.com/dwijayuda/pskernel
+          ref: pscv/pskernel-core-arena-optimized-v3
+          rev: $PSKERNEL_SHA
+          build: |
+            cd psc15selfhost
+            lake build psc_kernel_core_arena psc_kernel_legacy_arena
+          run: |
+            ulimit -s 65536
+            psc15selfhost/.lake/build/bin/psc_kernel_core_arena < "\$IN"
+          EOF
+          uv run lka.py build-test init-utf8-assemble3 --cache
+          uv run lka.py build-checker pskernel-core-hot
+          wc -l -c _build/tests/init-utf8-assemble3.ndjson
+      - name: Measure native PSKernel without changing the checking algorithm
+        working-directory: arena
+        shell: bash
+        run: |
+          set +e
+          kernel=_build/checkers/pskernel-core-hot/src/psc15selfhost/.lake/build/bin/psc_kernel_core_arena
+          /usr/bin/time -f 'UTF8_CANONICAL wall_s=%e peak_rss_kb=%M exit=%x' \
+            timeout 360 "$kernel" --profile < _build/tests/init-utf8-assemble3.ndjson
+          result=$?
+          echo "UTF8_CANONICAL_RESULT=$result (124 means diagnostic timed out; not acceptance)"
+          exit 0
+      - name: Compare archived reference checker for diagnostic performance only
+        working-directory: arena
+        shell: bash
+        run: |
+          set +e
+          legacy=_build/checkers/pskernel-core-hot/src/psc15selfhost/.lake/build/bin/psc_kernel_legacy_arena
+          /usr/bin/time -f 'UTF8_LEGACY wall_s=%e peak_rss_kb=%M exit=%x' \
+            timeout 180 "$legacy" < _build/tests/init-utf8-assemble3.ndjson
+          result=$?
+          echo "UTF8_LEGACY_DIAGNOSTIC_RESULT=$result (never semantic authority)"
+          exit 0

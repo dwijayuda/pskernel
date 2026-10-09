@@ -43,16 +43,7 @@ theorem psKernelNameComponents_anonymous :
     psKernelNameComponents PsKernelName.anonymous = List.nil := by
   rfl
 
-theorem psKernelNameListLength_eq_length
-    (values : List PsKernelName) :
-    psKernelNameListLength values = List.length values := by
-  induction values with
-  | nil =>
-      rfl
-  | cons head tail ih =>
-      simp [psKernelNameListLength, ih]
-
-
+-- psKernelNameListLength_eq_length is provided by the shared admission metatheory.
 
 theorem psKernelNatBeq_symm
     (left right : Nat) :

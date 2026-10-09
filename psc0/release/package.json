@@ -1,0 +1,35 @@
+{
+  "name": "proofscript",
+  "version": "0.1.0-preview.0",
+  "description": "ProofScript compiler platform: protected PSKernel Core admission and TypeScript output (Linux x64 preview)",
+  "type": "module",
+  "bin": {
+    "psc": "./bin/psc.mjs"
+  },
+  "engines": {
+    "node": ">=22.23.3 <23"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ],
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc0"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "runtime/",
+    "release.json",
+    "README.md",
+    "LEAN_LICENSE"
+  ],
+  "dependencies": {
+    "typescript": "7.0.2"
+  }
+}

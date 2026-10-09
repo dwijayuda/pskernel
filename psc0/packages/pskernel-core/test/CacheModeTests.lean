@@ -30,3 +30,11 @@ def main : IO Unit := do
   unless psKernelExprEq full.1 reduced do
     throw (IO.userError "full recursor reduction reused a cheap result")
   IO.println "PSKERNEL_WHNF_CACHE_MODES: PASS"
+  -- Forty shared app layers contain over a trillion tree nodes, but selecting
+  -- one lambda must inspect only the lambda spine, never its type/body.
+  let dag := (List.range 40).foldl (fun e _ => PsKernelExpr.app e e) (.sort .zero)
+  let lambda := PsKernelExpr.lam .anonymous dag dag .default
+  let counted := psKernelWhnfCountLambdas lambda 1
+  unless counted.2 == 1 do
+    throw (IO.userError "lambda spine consumed the wrong number of arguments")
+  IO.println "PSKERNEL_LAMBDA_SPINE_BOUND: PASS"

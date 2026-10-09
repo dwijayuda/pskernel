@@ -38,6 +38,19 @@ jobs:
           lake exe pskernel_cache_mode_tests
           .lake/build/bin/psc_kernel_core_arena --version
           sha256sum .lake/build/bin/psc_kernel_core_arena
+          python3 - <<'PY'
+          import pathlib, re
+          p = pathlib.Path(".lake/build/ir/Ps/KernelCore/Core/Expr.c")
+          if p.exists():
+              source = p.read_text()
+              for name in ["psKernelExprEq", "psKernelExprHasLooseAt", "psKernelExprNodeCount"]:
+                  match = re.search(r"LEAN_EXPORT [^\n]+ l_" + name + r"\([^\n]*\) \{", source)
+                  print("COMPILED_FUNCTION", name)
+                  if match:
+                      print("\n".join(source[match.start():].splitlines()[:70]))
+                  else:
+                      print("definition not found")
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: pskernel-435-binary
@@ -377,11 +390,25 @@ jobs:
           uv run lka.py build-test init --cache
           ulimit -s 65536
           set +e
-          /usr/bin/time -v timeout 600 ../kernel/psc_kernel_core_arena --profile-historical < _build/tests/init.ndjson > profile.stdout 2> profile.log
+          /usr/bin/time -v timeout 600 ../kernel/psc_kernel_core_arena --profile-historical < _build/tests/init.ndjson > profile.stdout 2> profile.log &
+          timer=$!
+          if command -v gdb >/dev/null; then
+            for sample in 1 2 3 4 5 6 7 8 9; do
+              sleep 60
+              limiter=$(pgrep -P "$timer" | head -n 1)
+              if test -z "$limiter"; then break; fi
+              checker=$(pgrep -P "$limiter" | head -n 1)
+              if test -z "$checker"; then break; fi
+              echo "STACK_SAMPLE=$sample" >> profile.stacks
+              timeout 15 sudo gdb -q -n -batch -ex 'set pagination off' -ex 'set print frame-arguments none' -ex 'bt 24' -ex detach -p "$checker" >> profile.stacks 2>&1
+            done
+          fi
+          wait "$timer"
           code=$?
           set -e
           echo "PROFILE_INIT_EXIT=$code"
           tail -n 70 profile.log
+          if test -f profile.stacks; then cat profile.stacks; fi
           printf '%s\n' "$code" > profile.exit
       - uses: actions/upload-artifact@v4
         if: always()

@@ -63,7 +63,7 @@ def psKernelWhnfCountLambdas
     (argCount : Nat) :
     Prod PsKernelExpr Nat :=
   psKernelWhnfCountLambdasWithFuel
-    (Nat.succ (psKernelExprNodeCount current))
+    (Nat.succ argCount)
     current
     argCount
     0

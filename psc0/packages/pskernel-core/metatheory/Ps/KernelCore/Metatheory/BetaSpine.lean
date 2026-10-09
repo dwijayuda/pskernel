@@ -2065,14 +2065,14 @@ inductive PsKernelWhnfCountLambdasRelation :
         consumed
 
 
-theorem psKernelWhnfCountLambdasWithFuel_refines_relation
+theorem psKernelWhnfCountLambdasWithFuel_refines_relation_of_bound
     (fuel : Nat)
     (current : PsKernelExpr)
     (argCount count : Nat)
     (lastLam : PsKernelExpr)
     (consumed : Nat)
     (hFuel :
-      psKernelExprNodeCount current < fuel)
+      psKernelExprNodeCount current < fuel ∨ argCount - count < fuel)
     (hRun :
       psKernelWhnfCountLambdasWithFuel
           fuel current argCount count =
@@ -2081,7 +2081,7 @@ theorem psKernelWhnfCountLambdasWithFuel_refines_relation
       current argCount count lastLam consumed := by
   induction fuel generalizing current count lastLam consumed with
   | zero =>
-      exact (Nat.not_lt_zero _ hFuel).elim
+      rcases hFuel with hFuel | hFuel <;> omega
   | succ remaining ih =>
       cases current with
       | bvar index =>
@@ -2217,49 +2217,20 @@ theorem psKernelWhnfCountLambdasWithFuel_refines_relation
               | true =>
                   cases body with
                   | lam bodyName bodyType bodyBody bodyInfo =>
-                      have hOuterLe :
-                          psKernelExprNodeCount
-                              (PsKernelExpr.lam
-                                name
-                                type
-                                (PsKernelExpr.lam
-                                  bodyName
-                                  bodyType
-                                  bodyBody
-                                  bodyInfo)
-                                binderInfo) ≤
-                            remaining :=
-                        Nat.le_of_lt_succ hFuel
-                      have hBodyLt :
-                          psKernelExprNodeCount
-                              (PsKernelExpr.lam
-                                bodyName
-                                bodyType
-                                bodyBody
-                                bodyInfo) <
-                            psKernelExprNodeCount
-                              (PsKernelExpr.lam
-                                name
-                                type
-                                (PsKernelExpr.lam
-                                  bodyName
-                                  bodyType
-                                  bodyBody
-                                  bodyInfo)
-                                binderInfo) := by
-                        simp [psKernelExprNodeCount]
-                        omega
                       have hBodyFuel :
                           psKernelExprNodeCount
-                              (PsKernelExpr.lam
-                                bodyName
-                                bodyType
-                                bodyBody
-                                bodyInfo) <
-                            remaining :=
-                        Nat.lt_of_lt_of_le
-                          hBodyLt
-                          hOuterLe
+                            (PsKernelExpr.lam bodyName bodyType bodyBody bodyInfo)
+                              < remaining ∨
+                            argCount - nextCount < remaining := by
+                        rcases hFuel with hSize | hArgs
+                        · left
+                          simp only [psKernelExprNodeCount] at hSize ⊢
+                          omega
+                        · right
+                          have hNextLt : nextCount < argCount :=
+                            psKernelNatLt_lt_of_true _ _ hNext
+                          dsimp [nextCount] at *
+                          omega
                       have hRecursive :
                           psKernelWhnfCountLambdasWithFuel
                               remaining
@@ -2474,6 +2445,17 @@ theorem psKernelWhnfCountLambdasWithFuel_refines_relation
                           rfl
 
 
+-- Compatibility theorem for clients using a structural bound.
+theorem psKernelWhnfCountLambdasWithFuel_refines_relation
+    (fuel : Nat) (current : PsKernelExpr) (argCount count : Nat)
+    (lastLam : PsKernelExpr) (consumed : Nat)
+    (hFuel : psKernelExprNodeCount current < fuel)
+    (hRun : psKernelWhnfCountLambdasWithFuel fuel current argCount count =
+      Prod.mk lastLam consumed) :
+    PsKernelWhnfCountLambdasRelation current argCount count lastLam consumed :=
+  psKernelWhnfCountLambdasWithFuel_refines_relation_of_bound
+    fuel current argCount count lastLam consumed (Or.inl hFuel) hRun
+
 theorem psKernelWhnfCountLambdas_refines_relation
     (current : PsKernelExpr)
     (argCount : Nat)
@@ -2486,15 +2468,14 @@ theorem psKernelWhnfCountLambdas_refines_relation
       current argCount 0 lastLam consumed := by
   unfold psKernelWhnfCountLambdas at hRun
   exact
-    psKernelWhnfCountLambdasWithFuel_refines_relation
-      (Nat.succ (psKernelExprNodeCount current))
+    psKernelWhnfCountLambdasWithFuel_refines_relation_of_bound
+      (Nat.succ argCount)
       current
       argCount
       0
       lastLam
       consumed
-      (Nat.lt_succ_self
-        (psKernelExprNodeCount current))
+      (Or.inr (by omega))
       hRun
 
 

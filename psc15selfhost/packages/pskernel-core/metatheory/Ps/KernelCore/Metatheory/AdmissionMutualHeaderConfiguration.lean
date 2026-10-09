@@ -382,7 +382,6 @@ theorem psKernelAddSimpleMutualInductive_success_constructor_pipeline
                                                           simp only [hTail] at hRun
                                                           cases hRun
                                                       | ok tailShapes =>
-                                                          simp only [hTail] at hRun
                                                           let shapes : List PsKernelSimpleMutualTypeShape :=
                                                             PsKernelSimpleMutualTypeShape.mk first indexResult.binders :: tailShapes
                                                           let work0 := psKernelAddMutualInductiveInfos

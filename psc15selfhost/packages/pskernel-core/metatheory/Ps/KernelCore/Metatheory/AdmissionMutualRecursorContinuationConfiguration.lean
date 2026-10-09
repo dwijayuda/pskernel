@@ -63,7 +63,7 @@ theorem psKernelAddSimpleMutualInductive_success_minors_stage
       (psKernelMutualNameListAppend
         (psKernelSimpleMutualRecNames (first :: remaining))
         (psKernelSimpleMutualCtorNames (first :: remaining)))
-  simp only [hDuplicate, hMinTypes, hUnique] at hRun
+  simp [hDuplicate, hMinTypes, hUnique] at hRun
   cases hFresh : psKernelCheckFreshInductiveNames allNames environment with
   | error message =>
       simp only [hFresh] at hRun

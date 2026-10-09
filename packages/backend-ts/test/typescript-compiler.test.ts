@@ -29,8 +29,7 @@ try {
   assert.match(basic.javascript,/export const fresh = 42;/);
   assert.match(basic.declaration,/export declare const fresh: number;/);
   assert.ok(!basic.javascript.includes('stale'));
-  assert.ok(basic.javascript.endsWith('//# sourceMappingURL=logical%20source.js.map\n')||
-    basic.javascript.endsWith('//# sourceMappingURL=logical%20source.js.map\r\n'));
+  assert.match(basic.javascript,/\/\/# sourceMappingURL=logical%20source\.js\.map(?:\r\n|\n)?$/);
   assert.ok(basic.sourceMap!==undefined);
   const map=JSON.parse(basic.sourceMap) as {
     version:number;file:string;sources:string[];sourceRoot:string;mappings:string;

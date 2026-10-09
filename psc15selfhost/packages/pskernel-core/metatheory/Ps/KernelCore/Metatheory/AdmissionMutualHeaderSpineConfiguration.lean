@@ -170,3 +170,19 @@ theorem PsKernelCheckedMutualRemainingHeaderHistory.family_alignment
       hParams hIndices hLevel hRest ih =>
       simpa [PsKernelMutualFamilyNamesAligned, psKernelSimpleMutualNames]
         using congrArg (List.cons decl.name) ih
+
+/-- The checked remaining-header shapes preserve all source type names in order. -/
+theorem PsKernelCheckedMutualRemainingHeaderHistory.source_name_provenance
+    {environment : PsKernelEnvironment} {headerLocal : PsKernelLocalContext}
+    {params : List PsKernelOpenBinder} {resultLevel : PsKernelLevel}
+    {decls : List PsKernelSimpleMutualTypeDecl}
+    {shapes : List PsKernelSimpleMutualTypeShape}
+    (hHistory : PsKernelCheckedMutualRemainingHeaderHistory environment headerLocal
+      params resultLevel decls shapes) :
+    shapes.map (fun shape : PsKernelSimpleMutualTypeShape => shape.decl.name) =
+      psKernelSimpleMutualNames decls := by
+  induction hHistory with
+  | nil => rfl
+  | cons decl rest tail headerLevel level afterParams indices finalLocal
+      hTyping hParams hIndices hLevel hRest ih =>
+      simpa [psKernelSimpleMutualNames] using congrArg (List.cons decl.name) ih

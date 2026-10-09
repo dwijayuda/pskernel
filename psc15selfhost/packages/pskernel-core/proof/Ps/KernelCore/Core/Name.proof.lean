@@ -97,3 +97,8 @@ theorem psKernelNameEq_true_iff_of_string_laws
       psKernelNameEq_refl_of_string_law
         hRefl
         left
+
+import Ps.KernelCore.Metatheory.BootstrapStringObligations
+
+#print axioms psKernelNatToString_injective
+#print axioms psKernelSimpleFreshElimName_fresh_of_primitive_obligations

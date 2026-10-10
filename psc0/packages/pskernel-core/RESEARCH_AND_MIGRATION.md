@@ -1,5 +1,59 @@
 # PSKernel Core: Lean 4.35 repairs and architecture review
 
+## Bounded local-frame and actual binder opening — 2026-10-10
+
+Proof-only source commits
+[`7f2ff1c8`](https://github.com/dwijayuda/pskernel/commit/7f2ff1c87a3d5f7369243eb5448b1bcf03e12194),
+[`93145917`](https://github.com/dwijayuda/pskernel/commit/9314591744c822b68507d438f192a35002839a41)
+and parser-only correction
+[`bd32e4fc`](https://github.com/dwijayuda/pskernel/commit/bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a)
+add a syntax-level frame invariant over the **actual shared lookup**. `BoundFrame`
+bounds numeric identities in the semantic binder list without incorrectly
+requiring a dependent context to be closed. `LocalFrame` bounds the selected
+stored name, type and let value, and preserves `Scoped 0` for the selected
+stored type/value. Empty, weakening, real local/let insertion and native
+scope exit are covered.
+
+`boundFrame_fresh` and `localFrame_fresh` derive the actual allocator's
+`FreshBoundContext` and `FreshLocalContext` premises syntactically.
+`binderChild_localContext_frame`, `letScope_localContext_frame` and
+`binderChild_fvar_frame_result` connect those to the existing reference
+checker context/model and exact fvar results. `binderChild_opened_frame`
+combines the same production fresh-name result, native body instantiation,
+`Scoped 0`, and the updated local frame at the advanced counter.
+None of these theorems assumes semantic validity to choose an annotation.
+
+**Validated source**: workflow commit
+[`37ab7783`](https://github.com/dwijayuda/pskernel/commit/37ab7783212018c5ed1c0b8d43328006c32931ba)
+at [run 38066007090](https://github.com/dwijayuda/pskernel/actions/runs/38066007090)
+passed 266 build jobs, 84 companion proof files, 298 semantic axiom targets,
+the 152-module model import audit (12 pinned pure-math modules) and seven
+native test executables. This validation covers the initial bounded-frame
+slice through `7f2ff1c8`, **not** the subsequent opening theorem.
+
+**Most recent code candidate**: `bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a`,
+workflow audit trigger
+`566d1c88dc3ac997a2f4d1f76810036529db8d2a`,
+[run 38066810266](https://github.com/dwijayuda/pskernel/actions/runs/38066810266):
+pending at this documentary checkpoint. The preceding
+[run 38066469877](https://github.com/dwijayuda/pskernel/actions/runs/38066469877)
+failed because `scoped` was used as a Lean proof-variable identifier in
+`binderChild_opened_frame`; this was renamed to `openedScoped` in the
+candidate. Do not claim the candidate is green before completed logs confirm it.
+
+**Important remaining obligations:** This is a conditional *binder-entry*
+invariant, not a proof that arbitrary successful public checker executions
+establish or preserve the frame. First establish public-context initialization
+and the graded recursive frame invariant across actual infer, WHNF and defeq
+callbacks, including allocator, parent restoration and scope exit. Then carry
+identical selected annotated readings and provenance through recursive
+results, all accepting equality shortcuts and admission transactions.
+The allowed-axiom/model policy and the public `False` consistency corollary
+remain open. No production checker or model foundation was changed; existing
+reference Int64 and full-corpus timeouts remain unresolved. No latest Arena
+binary was built by these focused workflows.
+
+
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
 ## Owned local contexts and sort-visit provenance — 2026-10-10

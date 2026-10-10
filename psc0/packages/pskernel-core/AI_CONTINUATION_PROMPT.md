@@ -32,7 +32,12 @@ Read applicable AGENTS files, GITHUB_FIRST_WORKFLOW.md,
 psc0/docs/selfhost-language/CURRENT.md, REFERENCE_CORRECTNESS_PLAN.md and the
 current evidence before edits. Generated PSC0 kernel qualification is open.
 
-Last fully validated source/audit trigger: 35cef8c29358ecac8a3e89df540e0fdce72fcbca.
+Last fully validated source/audit trigger: 37ab7783212018c5ed1c0b8d43328006c32931ba
+(run 38066007090, bounded frame). The newer binder-opening theorem source
+bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a has an audit at
+https://github.com/dwijayuda/pskernel/actions/runs/38066810266.
+Read its completed result and full logs before calling it validated. An earlier
+attempt failed from reserved Lean identifier `scoped`, fixed at bd32e4fc.
 Later documentation commits may follow it. Verify completed logs and inspect
 any intervening source changes before assuming the current branch is green.
 Recovery checkpoint before this architecture slice:
@@ -53,10 +58,13 @@ use raw specializations; lambda's observed carrier is projected at return.
 Global annotation transport/guards, joint infer/WHNF/defeq soundness, allocator
 and scope preservation, full admission and public consistency remain open.
 
-Resume the smallest concrete slice in AI_WORK_STATE.md: derive binder-entry
-freshness from a maintained syntactic local-frame invariant using existing
-NamesBelow/allocator/opening lemmas, then carry the same produced readings and
-provenance through the shared recursive interfaces and stored declarations.
+The bounded-frame binder-entry theorem has now been implemented. Resume with
+the **global graded invariant**: connect empty public context and current
+`LocalFrame`/`BoundFrame` to every successful recursive
+`psKernelInferCoreWithFuel`, WHNF and DefEq transition, tracking monotone
+allocator and scope; then carry the same produced readings and provenance
+through the shared recursive interfaces and stored declarations.
+The frame theorems cannot be treated as whole-checker soundness.
 Do not select an arbitrary annotation from a vacuous semantic predicate.
 
 [ConLeche.SetTheory V] is an explicit relative assumption, not a constructed

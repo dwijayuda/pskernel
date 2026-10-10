@@ -42,6 +42,34 @@ private def recordSimproc (p : Name × Array Meta.SimpTheoremKey) : Json :=
   ]
 
 /--
+The only direct overloaded-surface IDs identified by the normative source
+are Bool.not, Bool.and and Bool.or. This probe observes their *actual Lean
+declaration identities*, separately records their executable Bool.Internal
+counterparts and csimp equality theorems, and never authorizes source lowering
+or backend publication on that basis.
+-/
+private def observeDirectBool (env : Environment)
+    (id : String) (logical implementation witness : Name) : Json :=
+  let present (n : Name) := (env.find? n).isSome
+  let theoremPresent := match env.find? witness with
+    | some (.thmInfo _) => true
+    | _ => false
+  Json.mkObj [
+    ("snapshotId", toJson id),
+    ("logicalDeclaration", recordName logical),
+    ("internalDeclaration", recordName implementation),
+    ("equalityTheorem", recordName witness),
+    ("logicalPresent", toJson (present logical)),
+    ("internalPresent", toJson (present implementation)),
+    ("equalityTheoremPresent", toJson theoremPresent),
+    ("logicalNoncomputable", toJson (Lean.isNoncomputable env logical)),
+    ("internalNoncomputable", toJson (Lean.isNoncomputable env implementation)),
+    ("sourceLineProvenanceChecked", toJson false),
+    ("runtimeEquivalenceQualified", toJson false),
+    ("pscvVerified", toJson false)
+  ]
+
+/--
 Capture directly observed extension membership from the actual imported
 Lean environment, retaining explicitly false conformance/authority flags.
 Priority/order and source-line provenance must be independently audited.
@@ -66,6 +94,11 @@ def observedRegistryData (env : Environment) : Json := Id.run do
     ("grindExtNames", toJson (grind.extThms.set.toList.map fun (name, _) => recordName name)),
     ("grindCases", toJson (grind.casesTypes.casesMap.toList.map fun (name, eager) =>
       Json.mkObj [("name", recordName name), ("eager", toJson eager)])),
+    ("directBool", toJson (#[
+      observeDirectBool env "Bool.not" ``Bool.not ``Bool.Internal.not ``Bool.not_eq_internalNot,
+      observeDirectBool env "Bool.and" ``Bool.and ``Bool.Internal.and ``Bool.and_eq_internalAnd,
+      observeDirectBool env "Bool.or" ``Bool.or ``Bool.Internal.or ``Bool.or_eq_internalOr
+    ])),
     ("rawStateOrderPreserved", toJson false),
     ("sourceLineProvenanceResolved", toJson false),
     ("standardRegistryComplete", toJson false),

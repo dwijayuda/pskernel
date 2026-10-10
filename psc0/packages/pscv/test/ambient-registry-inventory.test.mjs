@@ -15,6 +15,26 @@ const base = () => ({
   simprocLocal:[],
   grindExtNames:['List.ext'],
   grindCases:[{name:'Option',eager:false}],
+  directBool:[
+    {snapshotId:'Bool.not',logicalDeclaration:'Bool.not',
+      internalDeclaration:'Bool.Internal.not',equalityTheorem:'Bool.not_eq_internalNot',
+      logicalPresent:true,internalPresent:true,equalityTheoremPresent:true,
+      logicalNoncomputable:true,internalNoncomputable:false,
+      sourceLineProvenanceChecked:false,runtimeEquivalenceQualified:false,
+      pscvVerified:false},
+    {snapshotId:'Bool.and',logicalDeclaration:'Bool.and',
+      internalDeclaration:'Bool.Internal.and',equalityTheorem:'Bool.and_eq_internalAnd',
+      logicalPresent:true,internalPresent:true,equalityTheoremPresent:true,
+      logicalNoncomputable:true,internalNoncomputable:false,
+      sourceLineProvenanceChecked:false,runtimeEquivalenceQualified:false,
+      pscvVerified:false},
+    {snapshotId:'Bool.or',logicalDeclaration:'Bool.or',
+      internalDeclaration:'Bool.Internal.or',equalityTheorem:'Bool.or_eq_internalOr',
+      logicalPresent:true,internalPresent:true,equalityTheoremPresent:true,
+      logicalNoncomputable:true,internalNoncomputable:false,
+      sourceLineProvenanceChecked:false,runtimeEquivalenceQualified:false,
+      pscvVerified:false}
+  ],
   rawStateOrderPreserved:false,
   sourceLineProvenanceResolved:false,
   standardRegistryComplete:false,
@@ -31,6 +51,7 @@ test('observed Lean environment inventory is never PSCV Standard certification',
   assert.equal(output.kind,registryInventoryProtocol);
   assert.equal(output.state,'observed-lean-registries-not-pscv-standard');
   assert.equal(output.counts.instances,2);
+  assert.equal(output.counts.directBool,3);
   assert.equal(output.counts.defaultInstances,1);
   for (const flag of [
     'standardEnvironmentFrozen','registryOrderSemanticsQualified',
@@ -64,6 +85,12 @@ test('fake authority, missing registries, bogus versions and invented source lin
     {extTheoremsEnumerated:true},
     {grindEmatchComplete:true},
     {pscvVerified:true},
+    {directBool:[]},
+    {directBool:base().directBool.map(x=>({...x,logicalNoncomputable:false}))},
+    {directBool:base().directBool.map(x=>({...x,equalityTheoremPresent:false}))},
+    {directBool:base().directBool.map(x=>({...x,runtimeEquivalenceQualified:true}))},
+    {directBool:base().directBool.map(x=>({...x,sourceLineProvenanceChecked:true}))},
+    {directBool:base().directBool.map(x=>({...x,pscvVerified:true}))},
     {selectedLeanVersion:'4.35.0-rc4'},
     {sourceLineProvenance:{'Nat.add_zero':'fake'}},
     {instances:[]},

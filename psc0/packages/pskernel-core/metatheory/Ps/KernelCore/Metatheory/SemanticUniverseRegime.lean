@@ -177,7 +177,7 @@ be used for the semantic regime of binder annotations. -/
 theorem same_regime_not_same_level :
     check (.succ .zero) (.succ (.succ .zero)) = true ∧
       ∀ p m, evalLevel p m (.succ .zero) ≠ evalLevel p m (.succ (.succ .zero)) := by
-  exact ⟨rfl, fun _ _ => by decide⟩
+  exact ⟨rfl, fun _ _ => by simp [evalLevel]⟩
 
 def isNever : Profile → Bool
   | .never => true

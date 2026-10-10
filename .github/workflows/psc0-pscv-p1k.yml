@@ -1,0 +1,124 @@
+name: PSC0 PSCV P1K arithmetic selected instance types
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1k-batch-declaration-types-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1j-arithmetic-matrix-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Selected-declaration review shape and refusal tests
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/arithmetic-instance-types.mjs
+          node --check packages/pscv/scripts/arithmetic-instance-types.mjs
+          node --test packages/pscv/test/arithmetic-instance-types.test.mjs
+      - name: Self-host/compiler/Core/seed/release/certificate gate unchanged
+        shell: bash
+        run: |
+          git diff --exit-code d924c2376f670b99694671438c713e6a25dac588 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+
+  actual-selected-declarations:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Run pinned 84-query matrix, then inspect all actually selected constants
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1k-types
+          node ../psc0/packages/pscv/scripts/arithmetic-surface-batch.mjs generate \
+            ../psc0/dist/pscv-p1k-types/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1k-types/plan.json
+          lake env lean ../psc0/dist/pscv-p1k-types/ArithmeticBatch.lean \
+            > ../psc0/dist/pscv-p1k-types/transcript.txt 2>&1
+          node ../psc0/packages/pscv/scripts/arithmetic-surface-batch.mjs review \
+            ../psc0/dist/pscv-p1k-types/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1k-types/transcript.txt \
+            ../psc0/dist/pscv-p1k-types/imported-selections.json
+          node ../psc0/packages/pscv/scripts/arithmetic-instance-types.mjs names \
+            ../psc0/dist/pscv-p1k-types/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1k-types/transcript.txt \
+            ../psc0/dist/pscv-p1k-types/names.json
+          lake env lean --run ArithmeticInstanceTypes.lean \
+            ../psc0/dist/pscv-p1k-types/names.json \
+            ../psc0/dist/pscv-p1k-types/raw-types.json
+          node ../psc0/packages/pscv/scripts/arithmetic-instance-types.mjs review \
+            ../psc0/dist/pscv-p1k-types/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1k-types/transcript.txt \
+            ../psc0/dist/pscv-p1k-types/names.json \
+            ../psc0/dist/pscv-p1k-types/raw-types.json \
+            ../psc0/dist/pscv-p1k-types/selected-types.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const dir='../psc0/dist/pscv-p1k-types/';
+          const result=JSON.parse(await readFile(dir+'selected-types.json','utf8'));
+          const names=JSON.parse(await readFile(dir+'names.json','utf8'));
+          const raw=JSON.parse(await readFile(dir+'raw-types.json','utf8'));
+          assert.equal(result.arithmeticGoalsReviewed,84);
+          assert.equal(result.normativeRowsReviewed,42);
+          assert.equal(result.selectedDeclarationCount,names.length);
+          assert(names.length>3 && names.length<=90);
+          assert(raw.declarations.every(x=>x.present===true && x.importedModule));
+          assert.equal(result.remainingRequiredStandardIds,191);
+          assert.equal(result.completeStandardEnvironment,false);
+          assert.equal(result.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1K_PINNED_BATCH_IMPORTED_DECLARATION_TYPES: PASS count='+names.length);
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1k-arithmetic-selected-types-${{ github.sha }}
+          path: psc0/dist/pscv-p1k-types
+          if-no-files-found: error
+          retention-days: 30

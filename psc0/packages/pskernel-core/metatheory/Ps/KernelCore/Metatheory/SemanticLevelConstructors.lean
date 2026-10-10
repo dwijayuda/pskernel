@@ -93,84 +93,123 @@ private theorem explicit_choice_eval (a b : PsKernelLevel)
       max (evalLevel params metavariables a) (evalLevel params metavariables b) := by
   have ea := explicit_eval params metavariables ha
   have eb := explicit_eval params metavariables hb
-  simp only [psKernelNatGe]
-  split
-  · next h => have := Nat.le_of_ble_eq_true h; omega
-  · next h =>
-      have hn : ¬ (psKernelLevelToOffset b).2 ≤ (psKernelLevelToOffset a).2 := by
-        intro hl
-        exact h (Nat.ble_eq_true_of_le hl)
+  by_cases h : psKernelNatGe (psKernelLevelToOffset a).2 (psKernelLevelToOffset b).2 = true
+  · rw [if_pos h]
+    have hl := Nat.le_of_ble_eq_true h
+    omega
+  · rw [if_neg h]
+    have hn : ¬ (psKernelLevelToOffset b).2 ≤ (psKernelLevelToOffset a).2 := by
+      intro hl
+      exact h (Nat.ble_eq_true_of_le hl)
+    omega
+
+private def maxContains (a b : PsKernelLevel) : Bool :=
+  match a with
+  | .max x y => if psKernelLevelEq x b then true else psKernelLevelEq y b
+  | _ => false
+
+private theorem maxContains_eval {a b : PsKernelLevel}
+    (h : maxContains a b = true) :
+    evalLevel params metavariables b ≤ evalLevel params metavariables a := by
+  cases a <;> simp only [maxContains, Bool.false_eq_true] at h
+  rename_i x y
+  cases hx : psKernelLevelEq x b with
+  | true =>
+      have he := levelEq_eval params metavariables hx
+      simp only [evalLevel]
+      omega
+  | false =>
+      have hy : psKernelLevelEq y b = true := by simpa [hx] using h
+      have he := levelEq_eval params metavariables hy
+      simp only [evalLevel]
       omega
 
-private theorem bool_or_true {a b : Bool}
-    (h : (if a then true else b) = true) : a = true ∨ b = true := by
-  cases a <;> simp_all
+private def maxChoice (a b : PsKernelLevel) : PsKernelLevel :=
+  if maxContains b a then b
+  else if maxContains a b then a
+  else
+    if psKernelLevelEq (psKernelLevelToOffset a).1 (psKernelLevelToOffset b).1 then
+      if psKernelNatGt (psKernelLevelToOffset a).2 (psKernelLevelToOffset b).2
+        then a else b
+    else .max a b
+
+private theorem maxChoice_eval (a b : PsKernelLevel) :
+    evalLevel params metavariables (maxChoice a b) =
+      max (evalLevel params metavariables a) (evalLevel params metavariables b) := by
+  unfold maxChoice
+  by_cases hb : maxContains b a = true
+  · rw [if_pos hb]
+    exact (Nat.max_eq_right (maxContains_eval params metavariables hb)).symm
+  · rw [if_neg hb]
+    by_cases ha : maxContains a b = true
+    · rw [if_pos ha]
+      exact (Nat.max_eq_left (maxContains_eval params metavariables ha)).symm
+    · rw [if_neg ha]
+      exact offset_choice_eval params metavariables a b
 
 theorem mkMax_eval (a b : PsKernelLevel) :
     evalLevel params metavariables (psKernelLevelMkMax a b) =
       max (evalLevel params metavariables a) (evalLevel params metavariables b) := by
   unfold psKernelLevelMkMax
-  split
-  · next h =>
-      have hs : psKernelLevelIsExplicit a = true ∧ psKernelLevelIsExplicit b = true := by
-        cases ha : psKernelLevelIsExplicit a <;> simp_all
-      exact explicit_choice_eval params metavariables a b hs.1 hs.2
-  · split
-    · next h => rw [levelEq_eval params metavariables h, Nat.max_self]
-    · split
-      · next h => rw [isZero_eval params metavariables h, Nat.zero_max]
-      · split
-        · next h => rw [isZero_eval params metavariables h, Nat.max_zero]
-        · cases b <;> cases a <;>
-            simp only [offset_choice_eval]
-          all_goals repeat' first
-            | (solve | rfl)
-            | (solve | apply offset_choice_eval)
-            | split
-          all_goals
-            first
-            | (solve | apply offset_choice_eval)
-            | (solve |
-                rename_i h
-                rcases bool_or_true h with h | h <;>
-                  have he := levelEq_eval params metavariables h <;>
-                  simp only [evalLevel] at he ⊢ <;> omega)
+  by_cases hex : (if psKernelLevelIsExplicit a then psKernelLevelIsExplicit b else false) = true
+  · rw [if_pos hex]
+    have hs : psKernelLevelIsExplicit a = true ∧ psKernelLevelIsExplicit b = true := by
+      cases ha : psKernelLevelIsExplicit a <;> simp_all
+    exact explicit_choice_eval params metavariables a b hs.1 hs.2
+  · rw [if_neg hex]
+    by_cases he : psKernelLevelEq a b = true
+    · rw [if_pos he, levelEq_eval params metavariables he, Nat.max_self]
+    · rw [if_neg he]
+      by_cases ha : psKernelLevelIsZero a = true
+      · rw [if_pos ha, isZero_eval params metavariables ha, Nat.zero_max]
+      · rw [if_neg ha]
+        by_cases hb : psKernelLevelIsZero b = true
+        · rw [if_pos hb, isZero_eval params metavariables hb, Nat.max_zero]
+        · rw [if_neg hb]
+          cases a <;> cases b <;> exact maxChoice_eval params metavariables _ _
+
+private theorem imaxEqChoice_eval (a b : PsKernelLevel) :
+    evalLevel params metavariables
+      (if psKernelLevelEq a b then a else .imax a b) =
+      evalLevel params metavariables (.imax a b) := by
+  by_cases h : psKernelLevelEq a b = true
+  · rw [if_pos h]
+    change evalLevel params metavariables a =
+      (if evalLevel params metavariables b = 0 then 0
+       else max (evalLevel params metavariables a) (evalLevel params metavariables b))
+    rw [levelEq_eval params metavariables h]
+    split <;> simp_all
+  · rw [if_neg h]
 
 theorem mkIMax_eval (a b : PsKernelLevel) :
     evalLevel params metavariables (psKernelLevelMkIMax a b) =
       evalLevel params metavariables (.imax a b) := by
   unfold psKernelLevelMkIMax
-  split
-  · next h =>
-      rw [mkMax_eval]
-      simp [evalLevel, isNotZero_eval params metavariables h]
-  · split
-    · next h =>
-        have hz := isZero_eval params metavariables h
+  by_cases hn : psKernelLevelIsNotZero b = true
+  · rw [if_pos hn, mkMax_eval]
+    simp [evalLevel, isNotZero_eval params metavariables hn]
+  · rw [if_neg hn]
+    by_cases hb : psKernelLevelIsZero b = true
+    · rw [if_pos hb]
+      have hz := isZero_eval params metavariables hb
+      simp [evalLevel, hz]
+    · rw [if_neg hb]
+      by_cases ha : psKernelLevelIsZero a = true
+      · rw [if_pos ha]
+        have hz := isZero_eval params metavariables ha
         simp [evalLevel, hz]
-    · split
-      · next h =>
-          have hz := isZero_eval params metavariables h
-          simp [evalLevel, hz]
-      · cases a with
+      · rw [if_neg ha]
+        cases a with
         | succ a =>
-            cases a <;> simp only
-            case zero =>
-              simp only [evalLevel]
-              split <;> omega
-            all_goals
-              split
-              · next h =>
-                  have he := levelEq_eval params metavariables h
-                  simp only [evalLevel] at he ⊢
-                  split <;> omega
-              · rfl
-        | zero | max _ _ | imax _ _ | param _ | mvar _ =>
-            split
-            · next h =>
-                have he := levelEq_eval params metavariables h
-                simp only [evalLevel] at he ⊢
+            cases a with
+            | zero =>
+                change evalLevel params metavariables b =
+                  (if evalLevel params metavariables b = 0 then 0
+                    else max 1 (evalLevel params metavariables b))
                 split <;> omega
-            · rfl
+            | succ _ | max _ _ | imax _ _ | param _ | mvar _ =>
+                exact imaxEqChoice_eval params metavariables _ _
+        | zero | max _ _ | imax _ _ | param _ | mvar _ =>
+            exact imaxEqChoice_eval params metavariables _ _
 
 end PsKernelSemantics

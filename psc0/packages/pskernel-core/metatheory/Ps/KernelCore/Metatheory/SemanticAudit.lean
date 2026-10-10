@@ -10,6 +10,7 @@ import Ps.KernelCore.Metatheory.SemanticStructuralEquality
 import Ps.KernelCore.Metatheory.SemanticAbstraction
 import Ps.KernelCore.Metatheory.SemanticScope
 import Ps.KernelCore.Metatheory.SemanticLevelConstructors
+import Ps.KernelCore.Metatheory.SemanticUniverseSubstitution
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -131,7 +132,13 @@ run_cmd do
     ``PsKernelSemantics.addOffset_eval,
     ``PsKernelSemantics.explicit_eval,
     ``PsKernelSemantics.mkMax_eval,
-    ``PsKernelSemantics.mkIMax_eval
+    ``PsKernelSemantics.mkIMax_eval,
+    ``PsKernelSemantics.instantiateParams_eval,
+    ``PsKernelSemantics.AnnotatedExpr.erase_instLevels,
+    ``PsKernelSemantics.SetModel.interp_instLevels,
+    ``PsKernelSemantics.SetModel.satisfies_instLevels,
+    ``PsKernelSemantics.SetModel.modelsType_instLevels,
+    ``PsKernelSemantics.SetModel.instantiateLevelParams_has_reading
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

@@ -1,88 +1,143 @@
 {
-  "schemaVersion": 6,
-  "stage": "Correctness priority: relative set model, sound dependent-function fragment and concrete kernel-operation bridges",
-  "status": "relative-fragment-consistency-established-full-kernel-proof-unfinished",
-  "candidateCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
-  "assuranceRevision": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+  "schemaVersion": 7,
+  "stage": "Correctness priority: cache-disabled reference specialization of the shared kernel",
+  "status": "reference-cache-isolation-validated-full-kernel-proof-unfinished",
+  "candidateCommit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+  "assuranceRevision": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38007755710,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38007755710",
-  "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+  "workflowRun": 38034714932,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932",
+  "nativeBinarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
   "checks": {
     "build": {
-      "status": "passed",
-      "jobs": 241,
-      "jobId": 114080390584
+      "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+      "run": 38034307491,
+      "binaryJob": 114161461962,
+      "binaryBuildJobs": 218,
+      "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114161786213,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114161786252,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": false
     },
     "metatheory": {
+      "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+      "run": 38034714932,
+      "job": 114162647958,
+      "buildJobs": 238,
+      "companionFiles": 84,
+      "axiomDeclarations": 136,
+      "pureMathModules": 12,
+      "closureModules": 124,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
       "status": "passed",
-      "jobs": 200,
-      "jobId": 114080390702
+      "checkedAt": "2026-10-10 07:35:54 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "jobId": 114080390702
+      "run": 38034714932,
+      "job": 114162647958
     },
-    "foundationRegressions": "passed",
-    "tutorial": {
+    "nativeRegression": {
+      "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+      "run": 38033599176,
+      "job": 114159374353,
       "status": "passed",
-      "correct": 141,
-      "declined": 0,
-      "jobId": 114080872802
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false
     },
-    "bugs": {
-      "status": "passed",
-      "correct": 18,
-      "declined": 0,
-      "jobId": 114080872756
-    },
-    "freshPreludeUtf8XorInt64": "passed",
-    "originalBudgetCorpora": {
-      "status": "completed-with-timeouts",
-      "runId": 38007755710,
-      "checkedAt": "2026-10-10 00:23:05 UTC",
-      "init": {
-        "status": "timeout",
-        "jobId": 114080872766,
-        "exitCode": -9,
-        "elapsedSeconds": 500.0116081237793,
-        "originalLimitSeconds": 500,
-        "lastProgress": {
-          "records": 1699999,
-          "declarations": 14005
+    "smallArena": {
+      "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+      "run": 38034307491,
+      "binaryJob": 114161461962,
+      "binaryBuildJobs": 218,
+      "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114161786213,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
         }
       },
-      "std": {
-        "status": "timeout",
-        "jobId": 114080872785,
-        "exitCode": -9,
-        "elapsedSeconds": 590.0852546691895,
-        "originalLimitSeconds": 590,
-        "lastProgress": {
-          "records": 1999999,
-          "declarations": 14314
+      "reference": {
+        "job": 114161786252,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
         }
       },
-      "mathlib": {
-        "status": "skipped",
-        "jobId": 114083516556,
-        "reason": "Original-budget Init/Std prerequisite gates timed out"
-      },
-      "profileInit": {
-        "status": "timeout",
-        "jobId": 114080872733,
-        "workflowJobConclusion": "success",
-        "explanation": "Diagnostic workflow preserves timeout as data; green job is not corpus acceptance",
-        "exitCode": 124,
-        "elapsedSeconds": 600,
-        "maxRssKiB": 174868,
-        "lastEnteredRecord": 2414950,
-        "lastEnteredDeclaration": "_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList"
-      }
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": false
+    },
+    "fullCorpora": {
+      "status": "not-run-this-stage"
     }
   },
   "claims": {
@@ -100,7 +155,11 @@
     "fullKernelSemanticModelConstructed": false,
     "relativeSetModelConstructed": true,
     "independentDeclarativeFragmentSound": true,
-    "relativeDeclarativeFragmentConsistencyProved": true
+    "relativeDeclarativeFragmentConsistencyProved": true,
+    "referenceCacheOperationsIgnoreStoredAnswers": true,
+    "referenceWholeCheckerStateIndependenceProved": false,
+    "cachedAcceptanceRefinesReference": false,
+    "referenceFullCorpusConformance": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -440,20 +499,19 @@
     "status": "completed"
   },
   "remaining": [
-    "Derive coherent binder annotations, scope and hereditary validity from all actual checked/infer-only inference runs; membership alone is insufficient",
-    "Prove complete recursive reduction/equality and context-indexed cache preservation/publication",
-    "Construct the initial safe environment and interpretations of allowed axioms, with the relative mathematical foundation explicit",
-    "Complete model-preserving ordinary/mutual/nested inductive and quotient admission",
-    "Prove public API/adapter correspondence and derive the relative no-False corollary",
-    "Complete historical and fresh Init/Std/Mathlib conformance at original limits",
-    "Stored constructor metadata and costed portable graph storage",
-    "Batched telescope/context/fuel correspondence",
-    "Exact-source generated PSC0 compiler/kernel qualification"
+    "Derive coherent binder annotations from actual reference checking, including universe substitutions and infer-only validity.",
+    "Prove all mutually recursive reference inference, WHNF and equality cases against the same model.",
+    "Complete ordinary/mutual/nested inductive, quotient and primitive admission models.",
+    "Connect initial safe environment and an explicit allowed-axiom/model policy.",
+    "Connect reference public acceptance and input translation to the original statement and empty False model.",
+    "Prove cached mode separately by refinement or its own sound semantic invariants.",
+    "Full Init/Std/Mathlib acceptance and performance remain unestablished.",
+    "Generated PSC0 compiler/runtime correspondence and provider qualification remain open."
   ],
   "nextStage": {
-    "status": "correctness-work-required",
-    "scope": "Actual checked-run annotation/hereditary validity, complete checker/cache semantics and admission-model preservation; scope and term/universe transport foundations are proved",
-    "performancePriority": "Secondary; only justified correctness-preserving changes"
+    "status": "open",
+    "scope": "Validated annotation readings at the actual forall/lambda/application inference boundary",
+    "performancePriority": "deferred"
   },
   "promotionDecision": {
     "status": "not-eligible",
@@ -1571,7 +1629,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 06:31:50 UTC",
+  "recordedAt": "2026-10-10 07:35:54 UTC",
   "semanticFoundation": {
     "sourceCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f",
     "validationCommit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
@@ -1878,6 +1936,235 @@
       "customSoundnessAxiomsAdded": false,
       "localSetFoundationExplicit": true,
       "localCallbackAndValidityPremisesExplicit": true
+    }
+  },
+  "priorRelativeSetModelReceipt": {
+    "candidateCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+    "assuranceRevision": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+    "workflowRun": 38007755710,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38007755710",
+    "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+    "checks": {
+      "build": {
+        "status": "passed",
+        "jobs": 241,
+        "jobId": 114080390584
+      },
+      "metatheory": {
+        "status": "passed",
+        "jobs": 200,
+        "jobId": 114080390702
+      },
+      "companionProofs": {
+        "status": "passed",
+        "files": 84,
+        "jobId": 114080390702
+      },
+      "foundationRegressions": "passed",
+      "tutorial": {
+        "status": "passed",
+        "correct": 141,
+        "declined": 0,
+        "jobId": 114080872802
+      },
+      "bugs": {
+        "status": "passed",
+        "correct": 18,
+        "declined": 0,
+        "jobId": 114080872756
+      },
+      "freshPreludeUtf8XorInt64": "passed",
+      "originalBudgetCorpora": {
+        "status": "completed-with-timeouts",
+        "runId": 38007755710,
+        "checkedAt": "2026-10-10 00:23:05 UTC",
+        "init": {
+          "status": "timeout",
+          "jobId": 114080872766,
+          "exitCode": -9,
+          "elapsedSeconds": 500.0116081237793,
+          "originalLimitSeconds": 500,
+          "lastProgress": {
+            "records": 1699999,
+            "declarations": 14005
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114080872785,
+          "exitCode": -9,
+          "elapsedSeconds": 590.0852546691895,
+          "originalLimitSeconds": 590,
+          "lastProgress": {
+            "records": 1999999,
+            "declarations": 14314
+          }
+        },
+        "mathlib": {
+          "status": "skipped",
+          "jobId": 114083516556,
+          "reason": "Original-budget Init/Std prerequisite gates timed out"
+        },
+        "profileInit": {
+          "status": "timeout",
+          "jobId": 114080872733,
+          "workflowJobConclusion": "success",
+          "explanation": "Diagnostic workflow preserves timeout as data; green job is not corpus acceptance",
+          "exitCode": 124,
+          "elapsedSeconds": 600,
+          "maxRssKiB": 174868,
+          "lastEnteredRecord": 2414950,
+          "lastEnteredDeclaration": "_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList"
+        }
+      }
+    }
+  },
+  "referenceCheckerStage": {
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-cache-free-reference-20261010",
+      "commit": "32fb55d651cc8228794216ae298872978f3be0f9",
+      "priorValidatedCode": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd"
+    },
+    "policy": "Fixed reference specialization; semantic caches disabled; certified structural sharing retained",
+    "sourceRoot": "src/Ps/KernelCore/API/Reference.lean",
+    "roadmap": "REFERENCE_CORRECTNESS_PLAN.md",
+    "sameCheckingAndAdmissionRules": true,
+    "sourceClosure": {
+      "parameterizedFunctions": 101,
+      "initialFiles": 29
+    },
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "cacheRefinementProved": false,
+    "wholeStateIndependenceProved": false,
+    "constantInferenceStillRequiresEnvironmentModel": true,
+    "defaultProviderChanged": false,
+    "compilerSeedChanged": false,
+    "psc0GeneratedQualified": false,
+    "nativeRegression": {
+      "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+      "run": 38033599176,
+      "job": 114159374353,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false,
+      "laterComparison": {
+        "base": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+        "head": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+        "runtimeSourceChanges": 0,
+        "scope": [
+          "src/",
+          "host/",
+          "test/",
+          "reference/"
+        ],
+        "changedFiles": "Only metatheory, one companion proof and workflow"
+      }
+    },
+    "arena": {
+      "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+      "run": 38034307491,
+      "binaryJob": 114161461962,
+      "binaryBuildJobs": 218,
+      "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114161786213,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114161786252,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": false
+    },
+    "validationAttempts": [
+      {
+        "run": 38033120465,
+        "commit": "d1135f8dbd9e6400cc384c3c0a58d80c2e0fcc0e",
+        "status": "failed",
+        "note": "Production build passed; cached proof simplification needed explicit policy equations"
+      },
+      {
+        "run": 38033599176,
+        "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+        "status": "failed-proofs-native-tests-passed",
+        "note": "Native checker regressions and Arena binary passed; cached proof projection simplifications and audit counter type needed repairs"
+      },
+      {
+        "run": 38033984177,
+        "commit": "2588f96f48a64afe60d10940b4359e18417356d1",
+        "status": "failed",
+        "note": "Reference call-graph audit passed; reference sort simplification and legacy cache-hit proof remained"
+      },
+      {
+        "run": 38034307491,
+        "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+        "status": "failed-one-companion",
+        "note": "238 library/metatheory jobs, 136-axiom target audit and import fence passed; 83/84 companions passed; both Arena modes passed all 159 cases"
+      },
+      {
+        "run": 38034714932,
+        "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+        "status": "passed",
+        "note": "238 library/metatheory jobs, all 84 companions, 136-declaration axiom gate, 124-module import closure, 1821-definition reference policy audit"
+      }
+    ],
+    "checksScope": "Exact identities above; full corpus and fresh 4.35 exporter receipts remain historical.",
+    "validation": {
+      "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+      "run": 38034714932,
+      "job": 114162647958,
+      "buildJobs": 238,
+      "companionFiles": 84,
+      "axiomDeclarations": 136,
+      "pureMathModules": 12,
+      "closureModules": 124,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 07:35:54 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
     }
   }
 }

@@ -2,6 +2,63 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
+## Correctness-first reference specialization — 2026-10-10
+
+The pre-refactor state is preserved on
+`checkpoint/pskernel-core-before-cache-free-reference-20261010` at
+`32fb55d651cc8228794216ae298872978f3be0f9`.
+
+The shared checker now takes an explicit semantic-cache policy throughout
+inference, reduction, equality, callbacks, sessions and declaration admission
+(101 functions in the initial 29-file dependency closure). Fixed reference API
+aliases supply the disabled policy. Cache lookups miss and insertions are
+no-ops even for an incoming state containing forged entries. Cached mode stays
+available with its existing obligations. No rule weakening or fallback kernel
+was added; structural sharing and lookup indexes remain.
+
+`SemanticReference.lean` proves actual reference sort and constant inference
+bridges without cache-coherence premises. The latter still requires the selected
+declaration's semantic model at its actual universe instantiation.
+`ReferencePolicyAudit.lean` checks the elaborated call graph for default-policy
+fallbacks and direct bypasses of the cache gates. It is a structural audit.
+
+This follows the reference-first separation documented by pinned Con Leche and
+Con Ron. It does not import their checker soundness or establish equivalent
+acceptance. In particular, Con Leche's annotation validity comes from actual
+checker visits; our existing annotation counterexamples remain unresolved
+requirements for the next stage. The complete sources, proof milestones and
+relative assumptions are in [REFERENCE_CORRECTNESS_PLAN.md](REFERENCE_CORRECTNESS_PLAN.md).
+
+Native regressions at `6b7395c1af7cc85181bc8ada4b9feb975fea8bb9`
+([run 38033599176](https://github.com/dwijayuda/pskernel/actions/runs/38033599176))
+passed all existing executable suites plus forged inference/reduction/equality
+cache checks, dependent binder traversal, valid and invalid admission, empty
+ordinary-inductive admission and fuel-exhaustion classification. That run's
+proof step failed; later proof repairs are recorded separately.
+
+The reference-capable binary at `c0c02dd2a8c73eeca9b12256c6773064342f36a8`
+([run 38034307491](https://github.com/dwijayuda/pskernel/actions/runs/38034307491))
+built in 218 jobs; SHA-256
+`06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02`.
+Both cache policies passed the same pinned historical Arena tutorial 141/141
+and bugs 18/18, with zero declines. This stage did not rerun full Init, Std,
+Mathlib or the fresh 4.35 exporter corpus. Earlier receipts retain their
+original executable identities.
+
+The final [proof run 38034714932](https://github.com/dwijayuda/pskernel/actions/runs/38034714932)
+at `f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0` passed all **238 build jobs**,
+all **84 companion files**, the **136-declaration** semantic axiom gate and the
+dependency fence (12 pure mathematical modules, 124-module closure, no legacy
+judgments or production assurance imports). The elaborated reference audit
+traced **1,821 definitions**, with zero cached-default fallbacks or raw bypasses.
+Only proofs/workflow changed after the passing native regression; no runtime
+source changed. No theorem statement was weakened to accommodate the policy.
+
+**Full recursive checker soundness, inductive/quotient admission, allowed
+axioms and public end-to-end consistency remain open.** Cached refinement,
+large-corpus throughput and generated PSC0 qualification remain separate.
+Performance is not an exit condition for the reference model proof.
+
 ## Relative set model and dependent-function metatheory — 2026-10-10
 
 The assurance layer now uses actual universe sets and dependent functions,

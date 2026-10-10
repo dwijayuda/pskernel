@@ -26,10 +26,38 @@ of universes and dependent functions relative to an explicit set-theory
 foundation. Its declarative dependent-function fragment has proved soundness
 and relative consistency, and production term/universe substitution and binder opening/closing have
 exact semantic correspondences. Concrete sort and constant inference cases are
-covered under their stated cache/environment premises. Full checker validity, recursive reduction/equality, semantic
-caches and complete admission model preservation remain open. The fragment
+covered under their stated cache/environment premises; the new reference
+specialization removes the cache premise. Full checker validity, recursive
+reduction/equality and complete admission model preservation remain open.
+Cached mode additionally requires semantic cache invariants. The fragment
 consistency theorem is not a consistency theorem for the complete kernel.
 See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
+
+## Correctness-first reference mode
+
+[Reference checker plan](REFERENCE_CORRECTNESS_PLAN.md) is the active roadmap.
+One checking/admission implementation now has an explicit cache-disabled
+specialization. Import `Ps.KernelCore.API.Reference` for the fixed
+`psKernelReference*` API; use `--reference` for exact 4.35 Arena exports or
+`--reference-historical` for the pinned historical regression corpus.
+Ordinary invocation retains the existing cached policy.
+
+Reference mode ignores semantic cache entries and does not publish new ones.
+Its sort/constant inference bridges eliminate cache-coherence premises.
+The full recursive checker/admission theorem is still open. Certified syntax
+sharing and environment indexes remain; generated PSC0 qualification remains
+open. Runtime performance and acceptance equivalence of the two modes are
+separate obligations.
+
+The [final proof suite](https://github.com/dwijayuda/pskernel/actions/runs/38034714932)
+passed 238 build jobs, all 84 companion files and the 136-declaration axiom audit.
+[Both modes](https://github.com/dwijayuda/pskernel/actions/runs/38034307491)
+passed tutorial 141/141 and bugs 18/18 with zero declines. Full-corpus behavior
+was not requalified by this small-suite result.
+
+The recoverable pre-refactor branch is
+`checkpoint/pskernel-core-before-cache-free-reference-20261010` at
+`32fb55d651cc8228794216ae298872978f3be0f9`.
 
 ## Authoring and ownership
 

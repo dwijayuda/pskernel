@@ -10,7 +10,8 @@
     "oneProductionSemanticImplementation": true,
     "failClosed": true,
     "semanticFallbackForbidden": true,
-    "accelerationIntentDoesNotRemoveTrust": true
+    "accelerationIntentDoesNotRemoveTrust": true,
+    "referenceSoundnessBeforeCacheRefinement": true
   },
   "logicalTCB": [
     {
@@ -29,7 +30,8 @@
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "trusted",
       "canAffectAcceptanceIfBuggy": true,
-      "refinementStatus": "conditional-refinement-proofs-present; final-kernel-semantic-closure-not-complete"
+      "refinementStatus": "conditional-refinement-proofs-present; final-kernel-semantic-closure-not-complete",
+      "referenceMode": "Bypassed by fixed cache policy; operation-level miss/no-op equations proved; whole-checker state independence and model soundness not yet proved."
     },
     {
       "component": "Environment lookup index",
@@ -163,13 +165,14 @@
         "metatheory/Ps/KernelCore/Metatheory/SemanticScope.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevelConstructors.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseSubstitution.lean",
-        "metatheory/Ps/KernelCore/Metatheory/SemanticConstantInference.lean"
+        "metatheory/Ps/KernelCore/Metatheory/SemanticConstantInference.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReference.lean"
       ],
       "legacyJudgmentsReplacedEverywhere": false,
       "fullUniverseModel": true,
       "fullDependentFunctionModel": true,
       "admissionModel": false,
-      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution.",
+      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required.",
       "conditionalBridges": [
         "actual proposition classifier",
         "proof-irrelevance call sequence"
@@ -178,14 +181,14 @@
         "derive coherent binder readings from actual checked runs; semantic membership alone is insufficient",
         "hereditary validity and infer-only skip preconditions",
         "recursive WHNF and defeq including projections, primitives, eta, unit, quotient and recursors",
-        "context-indexed cache invariants, publication and scope/environment transport",
+        "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
         "full safe declaration admission and interpretations of allowed axioms",
         "public API and generated PSC0 correspondence"
       ],
       "customSoundnessAxiomsAdded": false,
       "axiomAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
-        "declarations": 125,
+        "declarations": 136,
         "allowedHostAxioms": [
           "propext",
           "Classical.choice",
@@ -194,17 +197,19 @@
         "localHypothesesAuditedSeparately": true
       },
       "validation": {
-        "commit": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
-        "run": 38031021780,
-        "job": 114151806260,
-        "buildJobs": 234,
+        "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+        "run": 38034714932,
+        "job": 114162647958,
+        "buildJobs": 238,
         "companionFiles": 84,
-        "axiomDeclarations": 125,
+        "axiomDeclarations": 136,
         "pureMathModules": 12,
-        "closureModules": 82,
+        "closureModules": 124,
+        "referenceDefinitions": 1821,
+        "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 06:31:50 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38031021780"
+        "checkedAt": "2026-10-10 07:35:54 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
       },
       "fullUniverseModelQualification": "Relative mathematical universe chain under explicit SetTheory V, not a model of full kernel acceptance.",
       "relativeFoundation": {
@@ -235,6 +240,47 @@
     },
     "relativeSetModelConstructed": true,
     "relativeDeclarativeFragmentConsistencyProved": true,
-    "fullKernelModelConstructed": false
-  }
+    "fullKernelModelConstructed": false,
+    "referenceChecker": {
+      "root": "Ps.KernelCore.API.Reference",
+      "policy": "psKernelReferenceCachePolicy",
+      "mechanism": "Shared algorithm specialized to semantic cache misses and no-op insertion",
+      "separateSemanticImplementation": false,
+      "cachedModeDefaultChanged": false,
+      "checkerStateCacheFieldsRemoved": false,
+      "cacheOperationEquations": true,
+      "wholeCheckerStateIndependenceProved": false,
+      "fullRecursiveSoundnessProved": false,
+      "cachedAcceptanceRefinementProved": false,
+      "structuralSharingRetained": true,
+      "unconditionalConsistencyClaimed": false,
+      "roadmap": "REFERENCE_CORRECTNESS_PLAN.md",
+      "checkpoint": {
+        "branch": "checkpoint/pskernel-core-before-cache-free-reference-20261010",
+        "commit": "32fb55d651cc8228794216ae298872978f3be0f9"
+      },
+      "callGraphAudit": {
+        "file": "metatheory/Ps/KernelCore/Metatheory/ReferencePolicyAudit.lean",
+        "definitions": 1821,
+        "cachedFallbacks": 0,
+        "kind": "structural executable-dependency audit; not a semantic theorem"
+      },
+      "validation": {
+        "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+        "run": 38034714932,
+        "job": 114162647958,
+        "buildJobs": 238,
+        "companionFiles": 84,
+        "axiomDeclarations": 136,
+        "pureMathModules": 12,
+        "closureModules": 124,
+        "referenceDefinitions": 1821,
+        "cachedFallbacks": 0,
+        "status": "passed",
+        "checkedAt": "2026-10-10 07:35:54 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
+      }
+    }
+  },
+  "referenceSemanticRoot": "Ps.KernelCore.API.Reference"
 }

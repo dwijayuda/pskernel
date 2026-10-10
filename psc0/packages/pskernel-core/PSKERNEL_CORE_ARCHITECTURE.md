@@ -37,6 +37,22 @@ Its checker and soundness theorem are not used as a PSKernel fallback.
 `SemanticAudit.lean` audits proof dependencies. Relative set-theory assumptions
 must remain explicit even when the global axiom audit passes.
 
+## Reference specialization
+
+`PsKernelSemanticCachePolicy` selects whether the shared algorithm can read or
+publish semantic caches. `API/Reference` explicitly fixes its disabled value
+through checking, callbacks, sessions and declaration admission. It is a
+specialization of the same rules, not an independently evolving implementation.
+The correctness proof targets this reference entry point first; cache refinement
+is deferred. See [the proof roadmap](REFERENCE_CORRECTNESS_PLAN.md).
+
+The reference state currently retains dormant cache fields. Operation-level
+miss/no-op equations and an elaborated call-graph audit are established checks;
+they are not a proof of whole-checker state independence or soundness.
+Structural sharing has exact-result refinements and is retained. The source
+interpreter, compiler simplifications and native runtime have distinct trust
+boundaries.
+
 ## Source and semantic authority
 
 Keep one production semantic implementation rooted at `Ps.KernelCore.SelfHost`.

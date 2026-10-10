@@ -12,11 +12,20 @@ The current goal is full semantic metatheory and a relative model/consistency
 proof. It is **not complete**. Universe/function modeling, scoped substitution,
 production term/universe substitution and binder-frame correspondence, and a
 sound declarative function fragment are now constructed. The actual constant
-inference case is connected under explicit environment/cache premises. Full validity/annotation, checker/cache,
-inductive/quotient admission and public API correspondence remain open.
+inference case is connected under explicit environment/cache premises; its
+reference specialization removes the cache premise. Full validity/annotation,
+recursive checking, inductive/quotient admission and public API correspondence
+remain open. Cached refinement is separate.
 See `RESEARCH_AND_MIGRATION.md` for the active proof obligations and evidence.
 The historical Phase D wording below does not make these current user-requested
 correctness obligations optional.
+
+The active implementation route is now the fixed cache-disabled reference
+specialization described in [REFERENCE_CORRECTNESS_PLAN.md](REFERENCE_CORRECTNESS_PLAN.md).
+Complete the semantic reading and recursive checking/admission proofs there
+before taking on cached refinement or further performance work. Removing
+semantic caching does not discharge annotation validity, primitive rules,
+inductive/quotient admission or the public statement-preservation boundary.
 
 ## Historical phase status
 

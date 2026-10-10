@@ -18,6 +18,13 @@ mathematical dependency and local foundation assumptions are explicit.
 Full checker/inductive-admission correspondence remains open. The conceptual
 judgments below are explanatory; they are not the completed kernel theorem.
 
+The current proof target is the fixed cache-disabled reference specialization
+of the shared production algorithm. Cache coherence is unnecessary for its
+primitive cache operations and first inference bridges. No full recursive
+soundness or acceptance-equivalence result is inferred from that simplification.
+[REFERENCE_CORRECTNESS_PLAN.md](REFERENCE_CORRECTNESS_PLAN.md) defines the
+milestones and exact completion claim.
+
 Historical 4.34 reference artifacts (not current certification):
 
 - compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`

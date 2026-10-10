@@ -46,6 +46,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.AnnotatedExpr,
     `Ps.KernelCore.Core.UniverseRegime,
     `Ps.KernelCore.Core.AnnotatedEquality,
+    `Ps.KernelCore.Core.AnnotatedSpines,
     `Ps.KernelCore.Core.Substitution.ListOps,
     `Ps.KernelCore.Core.Substitution.Lift,
     `Ps.KernelCore.Core.Substitution.Instantiate,

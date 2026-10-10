@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticAnnotatedSpines
 import Ps.KernelCore.Metatheory.SemanticCoherentValidity
 import Ps.KernelCore.Metatheory.SemanticAnnotationCoherence
 import Ps.KernelCore.Metatheory.SemanticLambdaCodomain
@@ -275,7 +276,20 @@ run_cmd do
     ``PsKernelSemantics.Declarative.fragmentReading,
     ``PsKernelSemantics.Declarative.relative_consistency,
     ``PsKernelSemantics.Reference.lambda_trace_codomain_sort,
-    ``PsKernelSemantics.Reference.lambda_trace_checked_reading
+    ``PsKernelSemantics.Reference.lambda_trace_checked_reading,
+    ``PsKernelSemantics.AnnotatedExpr.instManyAt_nil,
+    ``PsKernelSemantics.AnnotatedExpr.erase_instManyAt,
+    ``PsKernelSemantics.AnnotatedExpr.erase_instantiateAt,
+    ``PsKernelSemantics.AnnotatedExpr.erase_instantiateRev,
+    ``PsKernelSemantics.AnnotatedExpr.erase_applyArgs,
+    ``PsKernelSemantics.AnnotatedExpr.erase_consumeLambdas,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.instManyAt,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.instantiateRev,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.applyArgs,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.consumeLambdas,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_instManyAt,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_instantiateRev,
+    ``PsKernelSemantics.AnnotatedExpr.simultaneous_is_not_sequential
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

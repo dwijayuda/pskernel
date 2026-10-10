@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.AnnotatedEquality
+import Ps.KernelCore.Core.AnnotatedSpines
 
 /-! Native checks of the same syntax/guards imported by the semantic model.
 No semantic theorem or Con Leche module is linked by this test. -/
@@ -40,4 +41,34 @@ def main : IO Unit := do
     (.proj (n "S") 0 a) (.proj (n "S") 1 b))
   require "constant universe levels retained" (!checkedExprEq
     (.const (n "c") [.succ .zero]) (.const (n "c") [.succ (.succ .zero)]))
-  IO.println "PSKERNEL_ANNOTATED_SYNTAX: PASS cases=12 modelImports=0"
+  require "simultaneous replacements are not rewritten" (checkedExprEq
+    (instManyAt (.bvar 0) 0 [.bvar 0, .fvar (n "x")] 0) (.bvar 0))
+  require "simultaneous order" (checkedExprEq
+    (instManyAt (.app (.bvar 0) (.bvar 1)) 0 [.fvar (n "x"), .fvar (n "y")] 0)
+    (.app (.fvar (n "x")) (.fvar (n "y"))))
+  let openBody : AnnotatedExpr := .lam (n "z") (.bvar 1)
+    (.app (.bvar 1) (.app (.bvar 2) (.bvar 0))) .default p
+  let expected : AnnotatedExpr := .lam (n "z") (.fvar (n "y"))
+    (.app (.bvar 1) (.app (.fvar (n "y")) (.bvar 0))) .default p
+  require "open replacement lifted under binder" (checkedExprEq
+    (instManyAt openBody 0 [.bvar 0, .fvar (n "y")] 0) expected)
+  require "indices above substitution descend" (checkedExprEq
+    (instManyAt (.bvar 4) 0 [a, b] 0) (.bvar 2))
+  require "nonzero start and depth" (checkedExprEq
+    (instManyAt (.app (.bvar 1) (.app (.bvar 3) (.bvar 5))) 1 [.bvar 0] 2)
+    (.app (.bvar 1) (.app (.bvar 2) (.bvar 4))))
+  require "reverse binder order" (checkedExprEq
+    (instantiateRev (.app (.bvar 1) (.bvar 0)) [.fvar (n "x"), .fvar (n "y")])
+    (.app (.fvar (n "x")) (.fvar (n "y"))))
+  require "argument order retained" (checkedExprEq
+    (applyArgs (.fvar (n "f")) [a, b])
+    (.app (.app (.fvar (n "f")) a) b))
+  let spine : AnnotatedExpr := .lam (n "x") dom
+    (.lam (n "y") dom (.bvar 1) .default q) .default p
+  let bounded : AnnotatedExpr × Nat := consumeLambdas 1 spine 2 0
+  require "lambda-spine fuel bound" (bounded.2 == 1 && checkedExprEq bounded.1
+    (.lam (n "y") dom (.bvar 1) .default q))
+  let exhausted : AnnotatedExpr × Nat := consumeLambdas 5 spine 1 0
+  require "lambda-spine argument bound" (exhausted.2 == 1 && checkedExprEq exhausted.1
+    (.lam (n "y") dom (.bvar 1) .default q))
+  IO.println "PSKERNEL_ANNOTATED_SYNTAX: PASS cases=21 modelImports=0"

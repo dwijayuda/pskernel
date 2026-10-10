@@ -2,7 +2,169 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
-## Semantic foundation stage — 2026-10-10
+## Relative set model and dependent-function metatheory — 2026-10-10
+
+The assurance layer now uses actual universe sets and dependent functions,
+relative to an explicit mathematical foundation. It contains a proved
+declarative dependent-function fragment and exact bridges for production
+substitution. **Full kernel metatheory and public kernel consistency remain
+unproved.** This result must not be substituted for those remaining obligations.
+
+### Constructed results
+
+| Module | Result and boundary |
+| --- | --- |
+| `SemanticSetDomain.lean` | Instantiates `ProofDomain` using actual set membership. Derives sort successors, non-self-membership, dependent-product closure at `imax`, impredicative Prop, typed beta, eta, and emptiness of the contradictory product. |
+| `SemanticAnnotatedExpr.lean` | PSKernel-owned annotated readings retain every original constructor, name, binder flag, symbolic level, let, metadata and projection. Binders gain a semantic codomain-sort annotation. Erasure preserves the original expression representation. |
+| `SemanticInterpretation.lean` | Total interpretation under explicit universe/local/global/projection tables; proved weakening, single substitution at every binder depth, scoped valuation independence and closed valuation independence. Arbitrary tables or arbitrary annotations are not certified models. |
+| `SemanticContext.lean` | Satisfying dependent contexts; derived sort, function, application, let, conversion, proof-irrelevance, beta/eta/zeta, weakening and typed substitution rules. Empty-context satisfiability is constructed explicitly. |
+| `SemanticErasure.lean` | All-constructor correspondence with actual `psKernelExprLiftLooseBVars` and `psKernelExprInstantiateAtChanged`; public `psKernelExprInstantiate1` includes its closed-expression fast path. These do not rely on the legacy judgments. |
+| `SemanticDeclarative.lean` | A syntactic dependent-function judgment with actual typing premises. `Declarative.sound` is proved by induction over its rules. `identity_derives` supplies a closed derivation. `no_allProps` and `no_empty` establish relative consistency for this fragment. `fragmentReading` constructs a reading and `relative_consistency` discharges the interpretation parameter, leaving the explicit set foundation. |
+| `SemanticConstantInference.lean` | Actual constant-inference result sources and semantic typing, in both modes and including cache hits, under explicit selected-cache and instantiated-declaration membership facts. Environment admission and state publication remain separate. |
+| `SemanticConcrete.lean` | Actual uncached sort-inference success has a reading in the set model. Production single substitution supplies typed beta/zeta readings with the required term/type premises. Complete WHNF and cache publication are not inferred from these results. |
+| `SemanticExtension.lean` | Constructs a one-constant interpretation extension and proves preservation of existing readings, dependent contexts and typings under explicit non-occurrence conditions. A new constant requires actual membership of its supplied value in its declared type, at the stated universe instantiation. |
+| `SemanticAbstraction.lean` | Exact singleton free-variable abstraction, semantic opening under explicit freshness, and closing locally closed inferred types. |
+| `SemanticScope.lean` | Scope preservation for lifting/substitution/abstraction; actual allocation yields freshness under a counter bound; allocation plus opening preserves the child frame. |
+| `SemanticLevelConstructors.lean` | Production zero/nonzero tests, successor offsets, and `mkMax`/`mkIMax` preserve universe valuations. Full normalization is still separate. |
+| `SemanticUniverseSubstitution.lean` | Production level substitution commutes with valuation and full-expression interpretation, including binder annotations; exact erasure and dependent-context typing transport. |
+| `SemanticStructuralEquality.lean` | The actual structural expression comparator preserves interpretation when corresponding binder annotations agree on their Prop/Type regime. Deriving that agreement from checker validity remains open. |
+| `SemanticModelAdequacy.lean` | A valid closed identity interpretation; checked counterexamples show that erasure equality alone, or even semantic typing plus universe-valued types, does not establish binder-annotation coherence. |
+
+The new declarative fragment has **no rules for global constants, free-variable
+declarations, literals, projections, quotients or inductive admission**. Those
+constructors exist in the annotated representation and the structural transport
+proofs, but that is not a proof of their typing or admission. The fragment's
+semantic equality is transitive; PSKernel's algorithmic equality and pair cache
+are not claimed transitive.
+
+### Mathematical assumptions and dependency boundary
+
+The Lake dependency is pinned to Con Leche commit
+`65e74db49e89ad2bbd1e90aa4f784954db41fa3a` (Apache-2.0).
+The imported closure is only [SetTheory](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/SetTheory/Core.lean)
+and the [two-regime function constructions](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/SetModel/Ops.lean):
+12 pure mathematical modules. Con Leche's checker, acceptance theorem,
+preprocessor and executable are not imported into the semantic proof closure.
+
+The theorem parameter `[ConLeche.SetTheory V]` supplies membership,
+extensionality, pairing, union, power sets, regularity, a Lean-level replacement
+scheme and an omega-chain of Grothendieck universes. **Existence of such a
+foundation is assumed, not constructed inside this package.** Choice,
+propositional extensionality and quotient soundness are the allowed host
+foundation. No custom axiom assumes checker soundness or the final consistency
+theorem. The axiom audit checks global dependencies; local theorem parameters,
+including the set foundation, remain separate and explicit.
+
+The dependency's upstream toolchain is 4.35.0-rc3. The imported mathematical
+closure is rebuilt and checked with this package's exact 4.35.0-rc4 target.
+`check-model-dependencies.mjs` checks the dependency commit, forbids assurance
+imports from production source, and excludes the legacy collapsed judgments
+and non-mathematical Con Leche modules from the new proof closure.
+This is an assurance dependency, not a runtime kernel fallback.
+
+### Architectural consequences of the research
+
+Con Leche's [inference proof](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Rules/InferSound.lean)
+carries framing, coherent contexts and hereditary grading. Its binder reading
+chooses between erased proofs and function graphs using validated annotations.
+Our checked `erasure_is_not_semantic_coherence` counterexample demonstrates why
+that distinction matters in PSKernel too: identical erased syntax is not enough
+to pick arbitrary annotations safely. The new representation is assurance-only;
+a future proof may justify ghost annotations or require an implementation
+change, but no annotation validation is claimed from the current checker.
+
+The [official Lean reference](https://lean-lang.org/doc/reference/latest/The-Type-System/)
+also distinguishes the actual algorithm from ideal conversion properties.
+The new proofs use on-domain typed beta and explicit validity premises; they
+do not assume unrestricted subject reduction, termination or transitivity of
+the executable equality algorithm. Increasing a timeout supplies none of these
+proof obligations.
+
+### Remaining route to full completion
+
+1. Establish scope, coherent annotations and hereditary valid-input evidence
+   for every actual checked-inference constructor. Use the now-proved
+   free-variable opening/closing, allocator frame and universe-substitution
+   transport; derive inferred-type and annotation validity from actual runs.
+2. Prove infer-only inference on the actual valid inputs, including application
+   skipping, telescope transport and all selected-cache invariants.
+3. Prove the complete recursive WHNF/reduction and defeq knot, including primitive
+   computation, projections, function/structure eta, unit shortcuts, quotients,
+   recursors, level normalization and semantic cache publication/restoration.
+4. Construct the initial safe environment model and satisfy its trusted axiom
+   interpretations; prove full ordinary/mutual/nested inductive and quotient
+   admission, positivity, generated constructors/recursors and universe rules.
+5. Connect those results to the public admission/checking API and Arena
+   transport. Only then derive the public no-False corollary, relative to
+   satisfying interpretations of admitted axioms and the mathematical foundation.
+
+A proof of a rule, a callback contract, a model-side extension, or a passing
+corpus run does not discharge the other items. The legacy-collapse counterexample
+remains checked and intentionally visible. Production behavior, corpus budgets,
+compiler seed, default provider and merge status have not changed.
+
+### Why semantic membership is not the checker-validity invariant
+
+The stronger checked counterexample
+`membership_is_not_annotation_coherence` gives two readings with the same
+erased term and the same erased type. Both have semantic typing, and both types
+belong to a universe. Their lambda values nevertheless differ: one is a graph
+and one is the proof point. Thus even "term has a semantic type and that type
+has a universe" does not establish the annotation coherence needed by
+structural comparison. This is a counterexample to a proposed proof interface,
+not an executable false-acceptance example.
+
+The pinned Con Leche implementation has additional validated binder data:
+[Bit.lean](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Annot/Bit.lean)
+reads canonical `PropWhen` annotations from stored expressions, and
+[Valid.lean](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Annot/Valid.lean)
+establishes their semantic validity at concrete checker visit sites. Its
+[WellDenoted.lean](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Semantics/WellDenoted.lean)
+also carries hereditary application and lambda-fibre facts.
+[Frame.lean](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Semantics/Frame.lean)
+separates scope transport from semantic facts. These proof structures are
+research references; none of these modules is imported by PSKernel.
+
+PSKernel's current expression representation has no such validated binder
+datum. The new proof-only annotations therefore cannot simply be treated as
+Con Leche certificates. The next bridge must derive and preserve a coherent
+reading from actual checked runs, across local contexts, type conversion,
+universe substitution, structural comparison and cache publication. The existing
+`I.WellTyped` callback contracts are local interfaces, not a proof that plain
+set membership suffices to instantiate the full checker contract. There is no
+claim that generic type validity or subject reduction discharges this gap.
+
+The current design keeps these obligations in the assurance layer. A future
+proposal to add validated metadata or rechecks to production must additionally
+prove its correspondence with the pinned Lean behavior; importing the other
+checker's theorem or adding an unchecked annotation cannot discharge it.
+
+### Validation
+
+[Cloud proof run 38031021780](https://github.com/dwijayuda/pskernel/actions/runs/38031021780) checked commit
+`1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd` with the exact pinned Lean hash. The full metatheory
+build passed **234 build jobs**, all **84 companion files** passed, and the
+semantic axiom gate passed **125 declarations**. The source-import gate checked
+the 12 pure mathematical dependencies and 82-module proof closure, with zero
+production assurance imports and zero legacy-judgment imports.
+
+Failed proof attempts are retained in `MIGRATION_EVIDENCE.json`; the repairs
+changed proofs rather than weakening their conclusions or changing production
+acceptance. The final source comparison against executable repair
+`c78590556fca75f9ee080e32cbb0d0cd82f16b92` has no production `src/` changes.
+
+A fresh [executable regression run 38029044702](https://github.com/dwijayuda/pskernel/actions/runs/38029044702)
+rebuilt the same binary hash
+`a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827`.
+It passed the 241-job executable build, focused regressions, tutorial 141/141,
+bugs 18/18, and fresh Prelude/UTF8/XOR/Int64. Full historical Init timed out at
+500.03 seconds (last progress: 2,799,999 records and 21,944 declarations); Std
+timed out at 590.08 seconds (1,999,999 records and 14,314 declarations).
+Mathlib was skipped by the failed prerequisites. The diagnostic profile job
+completed, recording a 600-second checker timeout, exit 124 and 174,696 KiB
+maximum RSS. These are separate corpus limits, not semantic proof results.
+
+## Earlier local semantic foundation — 2026-10-10
 
 The new `PsKernelSemantics` modules begin a replacement semantic target.
 They do not import the legacy typing/equality judgments, and they do not remove

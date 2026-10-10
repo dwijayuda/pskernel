@@ -21,12 +21,14 @@ operational refinement theorems cannot be used as a model-soundness proof.
 
 The active string comparator now has a specified equality decision and a proof
 of its positive-result law. This closes one primitive obligation; it does not
-repair the inadequate judgments. The new semantic layer constructs a nontrivial proposition/sort algebra and
-connects the actual sort-inference case to it. The proposition-classifier and
-proof-irrelevance bridges retain explicit, still-open semantic callback
-obligations. Dependent functions, complete checker correspondence, and declaration
-model preservation remain unfinished; the local empty-denotation theorem is not
-a consistency theorem for the complete kernel.
+repair the inadequate judgments. The new semantic layer constructs a set model
+of universes and dependent functions relative to an explicit set-theory
+foundation. Its declarative dependent-function fragment has proved soundness
+and relative consistency, and production term/universe substitution and binder opening/closing have
+exact semantic correspondences. Concrete sort and constant inference cases are
+covered under their stated cache/environment premises. Full checker validity, recursive reduction/equality, semantic
+caches and complete admission model preservation remain open. The fragment
+consistency theorem is not a consistency theorem for the complete kernel.
 See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
 
 ## Authoring and ownership
@@ -46,6 +48,11 @@ differs from that 4.34 oracle. Native evaluator callbacks are inert in the
 production checker; their legacy helper and record types remain for source
 compatibility and historical proofs.
 
+The assurance build uses a pinned Con Leche dependency only for 12 pure
+set-theoretic modules. Its checker is not a runtime dependency or fallback.
+The mathematical foundation is an explicit theorem parameter, not an internal
+proof of its own existence. Dependency and axiom gates run with the proof suite.
+
 ## Commands
 
 - `lake build psc_kernel_core_arena`
@@ -53,7 +60,7 @@ compatibility and historical proofs.
 - `npm run test:proofs`
 
 The cloud workflow `psc0-pskernel-core-435.yml` checks the exact toolchain,
-builds the full metatheory and all 84 companion proofs, runs foundations and
+builds the existing metatheory suite and all 84 companion proofs, runs foundations and
 evaluation-order regressions, and gates Arena verdicts and case counts.
 Historical Arena 4.34 exports require explicit `--check-historical`;
 the default adapter requires the exact 4.35.0-rc4 metadata identity.

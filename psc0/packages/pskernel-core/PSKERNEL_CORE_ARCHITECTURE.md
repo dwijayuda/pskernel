@@ -24,6 +24,19 @@ execution TCB; generated PSC0 qualification remains open. Performance work
 must preserve the specified behavior and cannot substitute for these proofs.
 See `RESEARCH_AND_MIGRATION.md` for exact upstream comparisons and obligations.
 
+The assurance-only annotated expression reading preserves every production
+constructor and carries binder codomain-sort annotations. Set interpretation,
+scoped substitution, exact production erasure correspondence, dependent-context
+rules and a declarative dependent-function fragment are proved independently
+of the legacy judgment. Annotation validity and the full checker/admission
+correspondence remain mandatory obligations.
+
+The pinned Con Leche dependency supplies only mathematical set constructions.
+Its checker and soundness theorem are not used as a PSKernel fallback.
+`scripts/check-model-dependencies.mjs` enforces the import and revision boundary;
+`SemanticAudit.lean` audits proof dependencies. Relative set-theory assumptions
+must remain explicit even when the global axiom audit passes.
+
 ## Source and semantic authority
 
 Keep one production semantic implementation rooted at `Ps.KernelCore.SelfHost`.
@@ -72,7 +85,7 @@ is claimed while the final semantic refinement obligations remain open.
 
 ## Evidence and next stage
 
-Require the full metatheory, all 84 companion proofs, foundation tests and
+Require the entire metatheory suite, all 84 companion proofs, foundation tests and
 evaluation-order regressions for coherent kernel changes. Report complete Arena
 coverage and verdicts, including declines and timeouts. Historical exports use an
 explicit adapter mode; fresh 4.35 exports use exact version and commit checks.

@@ -6,7 +6,19 @@ precedence: see `README.md`, `PSKERNEL_CORE_ARCHITECTURE.md`, and
 `RESEARCH_AND_MIGRATION.md`. Completion statements below are historical and do
 not certify this migrated revision.
 
-## Active phase status
+## Current correctness priority
+
+The current goal is full semantic metatheory and a relative model/consistency
+proof. It is **not complete**. Universe/function modeling, scoped substitution,
+production term/universe substitution and binder-frame correspondence, and a
+sound declarative function fragment are now constructed. The actual constant
+inference case is connected under explicit environment/cache premises. Full validity/annotation, checker/cache,
+inductive/quotient admission and public API correspondence remain open.
+See `RESEARCH_AND_MIGRATION.md` for the active proof obligations and evidence.
+The historical Phase D wording below does not make these current user-requested
+correctness obligations optional.
+
+## Historical phase status
 
 - **Phase A — Semantic closure: COMPLETE.**
   - Lean 4.34 compatibility matrix: 34/34 required rules implemented.

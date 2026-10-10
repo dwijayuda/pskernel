@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 5,
-  "stage": "Correctness priority: independent local semantic algebra, concrete sort inference, and conditional proof-irrelevance bridge",
-  "status": "local-semantic-foundation-established-full-kernel-model-unfinished",
+  "schemaVersion": 6,
+  "stage": "Correctness priority: relative set model, sound dependent-function fragment and concrete kernel-operation bridges",
+  "status": "relative-fragment-consistency-established-full-kernel-proof-unfinished",
   "candidateCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
-  "assuranceRevision": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
+  "assuranceRevision": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
@@ -97,7 +97,10 @@
     "semanticJudgmentsAdequate": false,
     "noExecutableUnsoundnessClaimedByAdequacyAudit": true,
     "newLocalSemanticRelationNontrivial": true,
-    "fullKernelSemanticModelConstructed": false
+    "fullKernelSemanticModelConstructed": false,
+    "relativeSetModelConstructed": true,
+    "independentDeclarativeFragmentSound": true,
+    "relativeDeclarativeFragmentConsistencyProved": true
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -437,10 +440,11 @@
     "status": "completed"
   },
   "remaining": [
-    "Extend the independent semantic target to scoped dependent functions and prove complete checked/infer-only semantic correspondence; legacy judgment collapse remains audited",
-    "Construct the model with explicit foundation, axiom interpretation and safety boundary",
+    "Derive coherent binder annotations, scope and hereditary validity from all actual checked/infer-only inference runs; membership alone is insufficient",
+    "Prove complete recursive reduction/equality and context-indexed cache preservation/publication",
+    "Construct the initial safe environment and interpretations of allowed axioms, with the relative mathematical foundation explicit",
     "Complete model-preserving ordinary/mutual/nested inductive and quotient admission",
-    "Prove public API/adapter correspondence and derive no-False corollary",
+    "Prove public API/adapter correspondence and derive the relative no-False corollary",
     "Complete historical and fresh Init/Std/Mathlib conformance at original limits",
     "Stored constructor metadata and costed portable graph storage",
     "Batched telescope/context/fuel correspondence",
@@ -448,7 +452,7 @@
   ],
   "nextStage": {
     "status": "correctness-work-required",
-    "scope": "Scoped contexts, dependent function interpretation and substitution/valuation transport, then remaining checker and admission model preservation",
+    "scope": "Actual checked-run annotation/hereditary validity, complete checker/cache semantics and admission-model preservation; scope and term/universe transport foundations are proved",
     "performancePriority": "Secondary; only justified correctness-preserving changes"
   },
   "promotionDecision": {
@@ -1567,7 +1571,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 05:07:25 UTC",
+  "recordedAt": "2026-10-10 06:31:50 UTC",
   "semanticFoundation": {
     "sourceCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f",
     "validationCommit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
@@ -1633,5 +1637,247 @@
     "companionFiles": 84,
     "axiomAudit": "passed",
     "checkedAt": "2026-10-10 05:07:25 UTC"
+  },
+  "relativeSetModelStage": {
+    "status": "passed-relative-foundation-full-kernel-unfinished",
+    "proofScope": "Relative universe-set/dependent-function model; full-constructor parameterized interpretation; sound declarative dependent-function fragment; exact production syntax transport. Not a full checker or admission model.",
+    "productionCodeChanged": false,
+    "compilerSeedChanged": false,
+    "defaultProviderChanged": false,
+    "relativeFoundation": {
+      "kind": "SetTheory V",
+      "globalInstancePostulated": false,
+      "existenceConstructed": false,
+      "assumptions": [
+        "membership and extensionality",
+        "pairing, union and powerset",
+        "regularity",
+        "replacement for Lean-level functions",
+        "omega-indexed increasing chain of Grothendieck universes"
+      ],
+      "source": "ConLeche/SetTheory/Core.lean",
+      "dependencyCommit": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a"
+    },
+    "completeKernelMetatheory": false,
+    "fullKernelModelConstructed": false,
+    "endToEndPublicKernelConsistencyProved": false,
+    "relativeDependentFunctionFragmentConsistency": true,
+    "legacyJudgmentsReplacedEverywhere": false,
+    "proofImportFence": {
+      "pureMathModules": 12,
+      "conLecheCheckerImported": false,
+      "legacyJudgmentsImported": false,
+      "productionImportsAssurance": false
+    },
+    "remaining": [
+      "derive coherent binder readings from actual checked runs; semantic membership alone is insufficient",
+      "hereditary validity and infer-only skip preconditions",
+      "recursive WHNF and defeq including projections, primitives, eta, unit, quotient and recursors",
+      "context-indexed cache invariants, publication and scope/environment transport",
+      "full safe declaration admission and interpretations of allowed axioms",
+      "public API and generated PSC0 correspondence"
+    ],
+    "validationAttempts": [
+      {
+        "run": 38027107361,
+        "commit": "3585c3be034e2fabaaf11ce856ed0d8aeabaac72",
+        "status": "failed",
+        "note": "Implicit set-domain argument in zero-universe product proof"
+      },
+      {
+        "run": 38027363458,
+        "commit": "6ee25f6de9d95e426589b8a9749318470c795d94",
+        "status": "failed",
+        "note": "Unavailable congruence helper in the interpretation proof"
+      },
+      {
+        "run": 38027593662,
+        "commit": "13071d4e448c282231bc54277825f998b5c905d0",
+        "status": "failed",
+        "note": "Native erasure proof tactic and arithmetic obligations"
+      },
+      {
+        "run": 38027811884,
+        "commit": "607221aa4ec78fd93d6fa912e2db02db35c57c1c",
+        "status": "failed",
+        "note": "Remaining false-flag and substitution arithmetic obligations"
+      },
+      {
+        "run": 38027988316,
+        "commit": "a7b3fd160ce56be0f2cee2d959c1c77fbcc051dd",
+        "status": "passed",
+        "note": "225 build jobs, 84 companions, 73 semantic declarations"
+      },
+      {
+        "run": 38028207219,
+        "commit": "c1c06243516a3073366a7cba0f503da5ee734571",
+        "status": "passed",
+        "note": "226 build jobs, 84 companions, 79 semantic declarations"
+      },
+      {
+        "run": 38028510281,
+        "commit": "36cd56233e7bb7b14c2411cb88f71696d2252063",
+        "status": "failed",
+        "note": "Function-valued universe reading rewrite in conservative extension"
+      },
+      {
+        "run": 38028738270,
+        "commit": "f686da042259d11d1b9d28f735a70bd4962be148",
+        "status": "failed",
+        "note": "Projection congruence elaboration in structural equality proof"
+      },
+      {
+        "run": 38029044734,
+        "commit": "899d3e58142887ee05af424fd2e66c029603eaca",
+        "status": "passed",
+        "note": "229 build jobs, 84 companions, 88 semantic declarations"
+      },
+      {
+        "run": 38029237379,
+        "commit": "04f9bd594aa464756fd6bd6505860d34423f8712",
+        "status": "passed",
+        "note": "230 build jobs, 84 companions, 95 semantic declarations"
+      },
+      {
+        "run": 38029451186,
+        "commit": "90b50c80d27f3c577d3dedcde8c3d1ce37869f07",
+        "status": "failed",
+        "note": "Explicit annotated fvar erasure needed for native scope rewrite"
+      },
+      {
+        "run": 38029720585,
+        "commit": "336e8083eb6a9f7d0a91aea567d24decb9a32544",
+        "status": "failed",
+        "note": "Universe proof split matched inner conditions instead of outer guards"
+      },
+      {
+        "run": 38029975716,
+        "commit": "793cda6fae35495447df3455a16ad67b3a15587d",
+        "status": "failed",
+        "note": "Universe helper arguments not determined after constructor cases"
+      },
+      {
+        "run": 38030201492,
+        "commit": "8868e938df8ac6c565dcbb52b5372132deff93cd",
+        "status": "failed",
+        "note": "Six universe smart-constructor case conversion obligations"
+      },
+      {
+        "run": 38030387563,
+        "commit": "23c65ffc287542edd5a45288f7a926f7c5c9d8d5",
+        "status": "passed",
+        "note": "233 build jobs, 84 companions, 121 semantic declarations"
+      },
+      {
+        "run": 38030596256,
+        "commit": "2900e6190bb22904b894f52ad6a9a6245c988b0c",
+        "status": "failed",
+        "note": "Recursion-depth environment-preservation helper did not simplify its inner guard"
+      },
+      {
+        "run": 38030793952,
+        "commit": "9555fc8ce78db8675bc4311aa4af2aaca7935e36",
+        "status": "failed",
+        "note": "Raw Nat guard normalization and Boolean false simplification in recursion-entry helper"
+      },
+      {
+        "run": 38030925565,
+        "commit": "95fe299df6b741f3c1b03556dfcaaa9d33b7eddc",
+        "status": "failed",
+        "note": "Same recursion-entry helper failure; constructed fragment reading compiled"
+      },
+      {
+        "run": 38031021780,
+        "commit": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+        "status": "passed",
+        "note": "234 build jobs, 84 companions, 125 declarations; dependency fence passed"
+      }
+    ],
+    "validation": {
+      "commit": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+      "run": 38031021780,
+      "job": 114151806260,
+      "buildJobs": 234,
+      "companionFiles": 84,
+      "axiomDeclarations": 125,
+      "pureMathModules": 12,
+      "closureModules": 82,
+      "status": "passed",
+      "checkedAt": "2026-10-10 06:31:50 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38031021780"
+    },
+    "executableRegression": {
+      "commit": "899d3e58142887ee05af424fd2e66c029603eaca",
+      "run": 38029044702,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38029044702",
+      "status": "failed-corpus-timeouts",
+      "binarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+      "sameBinaryAsPriorStage": true,
+      "buildJobs": 241,
+      "tutorial": {
+        "job": 114146225099,
+        "correct": 141,
+        "total": 141,
+        "declined": 0
+      },
+      "bugs": {
+        "job": 114146225135,
+        "correct": 18,
+        "total": 18,
+        "declined": 0
+      },
+      "freshFocused": {
+        "lean435Job": 114146225068,
+        "prelude": "accepted",
+        "utf8": "accepted",
+        "stdJob": 114146225125,
+        "xor": "accepted",
+        "int64": "accepted"
+      },
+      "corpus": {
+        "init": {
+          "job": 114146225050,
+          "status": "timeout",
+          "seconds": 500.0286748409271,
+          "lastReportedRecords": 2799999,
+          "lastReportedDeclarations": 21944
+        },
+        "std": {
+          "job": 114146225075,
+          "status": "timeout",
+          "seconds": 590.0843160152435,
+          "lastReportedRecords": 1999999,
+          "lastReportedDeclarations": 14314
+        },
+        "mathlib": {
+          "status": "skipped",
+          "reason": "Init/Std prerequisite gates failed"
+        }
+      },
+      "profile": {
+        "job": 114146225239,
+        "workflowJobStatus": "success",
+        "checkerExitCode": 124,
+        "checkerStatus": "timeout",
+        "limitSeconds": 600,
+        "maxRssKiB": 174696
+      },
+      "performanceImprovementClaimed": false
+    },
+    "sourceCommit": "c1b0f21ce17b1ee6506b0d2eb4e6ea812f130032",
+    "changedProductionSourceSinceExecutableRepair": false,
+    "comparisonBase": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+    "fragmentReadingConstructed": true,
+    "foundationExistenceConstructed": false,
+    "proofDependencies": {
+      "allowedHostAxioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "customSoundnessAxiomsAdded": false,
+      "localSetFoundationExplicit": true,
+      "localCallbackAndValidityPremisesExplicit": true
+    }
   }
 }

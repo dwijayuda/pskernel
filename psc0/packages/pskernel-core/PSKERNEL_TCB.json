@@ -97,6 +97,20 @@
       "component": "Conformance, benchmark, future independent-checker and formal verification tooling",
       "semanticRole": "assurance-only",
       "productionFallback": false
+    },
+    {
+      "component": "Pinned Con Leche pure set mathematics",
+      "semanticRole": "assurance-only",
+      "productionFallback": false,
+      "repository": "https://github.com/leanprover/con-leche",
+      "commit": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+      "license": "Apache-2.0",
+      "allowedModules": [
+        "ConLeche.SetTheory.*",
+        "ConLeche.SetModel.Ops"
+      ],
+      "checkerAndModelTheoremsImported": false,
+      "foundation": "Explicit [ConLeche.SetTheory V] parameter; no instance or existence theorem postulated."
     }
   ],
   "legacyCapabilities": [
@@ -129,32 +143,49 @@
       "soundnessLawAxioms": []
     },
     "semanticFoundation": {
-      "scope": "local proposition, conversion, impredicative-Prop-product, and sort-successor algebra; partial local valuation",
+      "scope": "Relative universe-set/dependent-function model; full-constructor parameterized interpretation; sound declarative dependent-function fragment; exact production syntax transport. Not a full checker or admission model.",
       "modules": [
         "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticClassifier.lean",
-        "metatheory/Ps/KernelCore/Metatheory/SemanticSortInference.lean"
+        "metatheory/Ps/KernelCore/Metatheory/SemanticSortInference.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticSetDomain.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotatedExpr.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticInterpretation.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticContext.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticErasure.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticModelAdequacy.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticDeclarative.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticConcrete.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticExtension.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticStructuralEquality.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticAbstraction.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticScope.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticLevelConstructors.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseSubstitution.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticConstantInference.lean"
       ],
       "legacyJudgmentsReplacedEverywhere": false,
-      "fullUniverseModel": false,
-      "fullDependentFunctionModel": false,
+      "fullUniverseModel": true,
+      "fullDependentFunctionModel": true,
       "admissionModel": false,
-      "concreteImplementationCase": "core sort inference; cache-hit result requires semantic cache coherence",
+      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution.",
       "conditionalBridges": [
         "actual proposition classifier",
         "proof-irrelevance call sequence"
       ],
       "unprovedCallbackObligations": [
-        "infer-only semantic typing and validity of returned types",
-        "WHNF denotation/validity preservation",
-        "recursive defeq semantic equality",
-        "state semantic invariants and publication"
+        "derive coherent binder readings from actual checked runs; semantic membership alone is insufficient",
+        "hereditary validity and infer-only skip preconditions",
+        "recursive WHNF and defeq including projections, primitives, eta, unit, quotient and recursors",
+        "context-indexed cache invariants, publication and scope/environment transport",
+        "full safe declaration admission and interpretations of allowed axioms",
+        "public API and generated PSC0 correspondence"
       ],
       "customSoundnessAxiomsAdded": false,
       "axiomAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
-        "declarations": 35,
+        "declarations": 125,
         "allowedHostAxioms": [
           "propext",
           "Classical.choice",
@@ -163,12 +194,47 @@
         "localHypothesesAuditedSeparately": true
       },
       "validation": {
-        "commit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
-        "run": 38026130891,
+        "commit": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+        "run": 38031021780,
+        "job": 114151806260,
+        "buildJobs": 234,
+        "companionFiles": 84,
+        "axiomDeclarations": 125,
+        "pureMathModules": 12,
+        "closureModules": 82,
         "status": "passed",
-        "buildJobs": 206,
-        "companionFiles": 84
-      }
-    }
+        "checkedAt": "2026-10-10 06:31:50 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38031021780"
+      },
+      "fullUniverseModelQualification": "Relative mathematical universe chain under explicit SetTheory V, not a model of full kernel acceptance.",
+      "relativeFoundation": {
+        "kind": "SetTheory V",
+        "globalInstancePostulated": false,
+        "existenceConstructed": false,
+        "assumptions": [
+          "membership and extensionality",
+          "pairing, union and powerset",
+          "regularity",
+          "replacement for Lean-level functions",
+          "omega-indexed increasing chain of Grothendieck universes"
+        ],
+        "source": "ConLeche/SetTheory/Core.lean",
+        "dependencyCommit": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a"
+      },
+      "declarativeFragment": {
+        "module": "metatheory/Ps/KernelCore/Metatheory/SemanticDeclarative.lean",
+        "soundness": "PsKernelSemantics.Declarative.sound",
+        "relativeConsistency": "PsKernelSemantics.Declarative.relative_consistency",
+        "constantsAndInductivesCovered": false,
+        "interpretationConstructed": true
+      },
+      "adequacyChecks": [
+        "erasure_is_not_semantic_coherence",
+        "membership_is_not_annotation_coherence"
+      ]
+    },
+    "relativeSetModelConstructed": true,
+    "relativeDeclarativeFragmentConsistencyProved": true,
+    "fullKernelModelConstructed": false
   }
 }

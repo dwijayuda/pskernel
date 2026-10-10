@@ -1,0 +1,131 @@
+name: PSC0 PSCV P1L batch selected Lean pinned Git blobs
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1l-batch-source-provenance-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1k-batch-declaration-types-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Validate immutable source locator and exact-byte contracts
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/batch-source-provenance.mjs
+          node --check packages/pscv/scripts/batch-source-provenance.mjs
+          node --test packages/pscv/test/batch-source-provenance.test.mjs
+      - name: Exclude compiler/Core/seed/release and PSCV authority changes
+        shell: bash
+        run: |
+          git diff --exit-code e23f7454651909a846dcabba745b6733d15b23e0 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+
+  actual-lean-and-upstream:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Checkout immutable upstream RC3 Init and Std sources
+        uses: actions/checkout@v4
+        with:
+          repository: leanprover/lean4
+          ref: 470d5ce1400764999581fd26d5d72b00d990b0f4
+          path: lean435-upstream
+          fetch-depth: 1
+          sparse-checkout: |
+            src/Init
+            src/Std
+      - name: Recheck exact arithmetic batch, imported declarations and their Git source blobs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1l-provenance
+          node ../psc0/packages/pscv/scripts/arithmetic-surface-batch.mjs generate \
+            ../psc0/dist/pscv-p1l-provenance/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1l-provenance/plan.json
+          lake env lean ../psc0/dist/pscv-p1l-provenance/ArithmeticBatch.lean \
+            > ../psc0/dist/pscv-p1l-provenance/transcript.txt 2>&1
+          node ../psc0/packages/pscv/scripts/arithmetic-instance-types.mjs names \
+            ../psc0/dist/pscv-p1l-provenance/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1l-provenance/transcript.txt \
+            ../psc0/dist/pscv-p1l-provenance/names.json
+          lake env lean --run ArithmeticInstanceTypes.lean \
+            ../psc0/dist/pscv-p1l-provenance/names.json \
+            ../psc0/dist/pscv-p1l-provenance/raw-types.json
+          node ../psc0/packages/pscv/scripts/arithmetic-instance-types.mjs review \
+            ../psc0/dist/pscv-p1l-provenance/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1l-provenance/transcript.txt \
+            ../psc0/dist/pscv-p1l-provenance/names.json \
+            ../psc0/dist/pscv-p1l-provenance/raw-types.json \
+            ../psc0/dist/pscv-p1l-provenance/typed-report.json
+          node ../psc0/packages/pscv/scripts/batch-source-provenance.mjs \
+            ../psc0/dist/pscv-p1l-provenance/typed-report.json \
+            ../lean435-upstream \
+            ../psc0/dist/pscv-p1l-provenance/pinned-source-review.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const r=JSON.parse(await readFile('../psc0/dist/pscv-p1l-provenance/pinned-source-review.json','utf8'));
+          assert.equal(r.importedDeclarations,45);
+          assert(r.sourceModulesFound>0);
+          assert(r.lexicallyNamedInstanceCandidates>0);
+          assert.equal(r.normativeSnapshotIDs,194);
+          assert.equal(r.unresolvedStandardIDs,191);
+          assert(r.selectedConstants.every(x=>!x.semanticSnapshotIDMappingApproved));
+          assert.equal(r.closedStandardRegistryQualified,false);
+          assert.equal(r.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1L_PINNED_SOURCE_BLOBS_NO_STANDARD_AUTHORITY: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1l-batch-provenance-${{ github.sha }}
+          path: psc0/dist/pscv-p1l-provenance
+          if-no-files-found: error
+          retention-days: 30

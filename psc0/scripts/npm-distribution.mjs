@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { cp, mkdir, mkdtemp, readFile, writeFile, readdir, rm, stat } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, extname, join, relative, resolve, basename } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -202,7 +202,7 @@ async function bundleVariant(variant,compiler) {
   };
   await writeFile(join(umbrella,'MANIFEST.json'),JSON.stringify(manifest,null,2)+'\n');
   const packageResult=JSON.parse(run('npm',['pack',umbrella,'--pack-destination',tarballs,
-    '--json','--ignore-scripts'],root,{quiet:true}))[0===1?1:0];
+    '--json','--ignore-scripts'],root,{quiet:true}));
   const actual=packageResult[0]?.filename;
   if(!actual)throw Error('PSC_NPM_UMBRELLA_PACK_NO_FILENAME');
   const rootTgz=join(tarballs,actual);
@@ -249,8 +249,8 @@ async function main() {
     JSON.stringify(result.map(({archivePath,manifest})=>({
       archive:basename(archivePath),variant:manifest.sourceVariant,
       commit:manifest.sourceCommit,packageCount:manifest.scope,
-      sha256:hash(requireNoOp()),
+      sha256:hashFileSync(archivePath),
     })),null,2)+'\n');
 }
-function requireNoOp(){return Buffer.from('release-names-only');}
+function hashFileSync(p){return createHash('sha256').update(readFileSync(p)).digest('hex');}
 await main();

@@ -1,3 +1,107 @@
+# PSC0 PSCV P0 modular ownership and verification preflight — qualified
+
+**Date:** 10 October 2026 (UTC). **Exact qualified source and metadata HEAD:**
+`c6e65c7b2333cb1ff634bdcf2f867a1c62510832`. **Cloud evidence:**
+[PSC0 PSCV P0 run 38036616386](https://github.com/dwijayuda/pskernel/actions/runs/38036616386)
+(attempt 1, all four jobs successful), plus
+[pscv-p0-qualification-2026-10-10.json](docs/platform/pscv-p0-qualification-2026-10-10.json).
+**Branch:** `psc0/platform-pscv-foundation-v1`, stacked on the T3 platform
+branch `psc0/platform-t3-lsp-v1`. Draft [PR #95](https://github.com/dwijayuda/pskernel/pull/95).
+No main merge, npm registry publication or changes to compiler/kernel logic.
+
+## Decision and implemented P0 scope
+
+- **Keep all existing source folders.** `core/`, `syntax/`, `environment/`, `meta/`,
+  `elab/`, `compiler-ir/`, `erasure/`, `backend-ts/`, `pskernel-core/` etc remain
+  canonical maintained paths. `pscore`, `psfrontend`, `psc`, `psbackend-ts`
+  remain *logical* ownership/distribution design names. No bulk rename,
+  bootstrap closure churn or forced npm package consolidation.
+- [Complete feature-owner and authority map](docs/platform/PSCV_PROFILE_AND_PACKAGE_BOUNDARIES.md):
+  general type theory and language forms stay in base compiler/kernel,
+  proof goals/tactics belong to reusable prover/tactic components when needed,
+  VC/WP and termination/effect semantics to reusable verification services,
+  approved specification tooling separately, `@proofscript/pscv` as the optional
+  **official closed profile composition**, and final certificate/evidence/
+  executable authorization solely in the release supervisor.
+- **New `psc0/packages/verification/`:** private `@proofscript/verification-internal`
+  non-authoritative `psc-required-obligations/0`, proof-proposal and preflight
+  contracts. Rejects duplicate/mismatched/unknown goals, fake authority fields
+  and malformed/empty obligations. Even all supplied proof candidate SHA hashes
+  matching a caller-provided obligation set yield **uncertified** because list
+  completeness, kernel replay, approved specifications, imported/effect trust
+  closure and compiler preservation have not been validated.
+- **New `psc0/packages/pscv/`:** `@proofscript/pscv@0.0.0-experimental.1`
+  private, data-only candidate; npm `pack --dry-run` verified only
+  `README.md`, `package.json`, `profile.json` are included. `private:true`,
+  no JavaScript executable/entry/install scripts. `profile.json` binds the
+  existing PSCV RC-v2/reference hash and Lean4.35.0-rc3 source pin; freezes
+  **no** fictitious Standard registry digest; lists no verified features and
+  `allowedToEmitVerifiedExecutable:false`. Installation cannot activate
+  language syntax or claim PSCV.
+- **New supervisor-owned `scripts/pscv-certification-gate.mjs`:** policy
+  state `unqualified`; `authorizePSCVExecutable()` **always rejects**.
+  Current production `scripts/checked-build.mjs` separately still refuses
+  `profile !== 'checked'`. No issued `PSCV-CERT-v1`, private
+  `VerifiedExecutableModule`, proof handoff or verified executable artifacts.
+
+## Qualified executed evidence
+
+Cloud workflow [`psc0-pscv-foundation.yml`](../.github/workflows/psc0-pscv-foundation.yml)
+(at runtime commit c6e65c7) passed all 4 jobs:
+1. Linux/Node22.23.3: 10 proposal/gate unit tests passed, no failures;
+   inspected private npm tarball inclusion and unchanged compiler/kernel pins.
+2. Linux/Node26.7.0: same 10 passed; all invariant/packaging checks succeeded.
+3. Windows/Node26.7.0: same 10 passed; all invariant/packaging checks succeeded.
+4. Pinned Lean4.35.0-rc3 `PSCVL/`: `check-preview`
+   `examples/pass_contract.ps` admitted real intrinsic/WP contract preflight
+   (still UNCERTIFIED); `fail_unproved_contract.ps` rejected with
+   **unproved verification conditions** and **disallowed axiom sorryAx**;
+   strict bounded `check examples/normative/pass_minimal.ps` succeeded
+   while reporting UNCERTIFIED. No generated PSCV executable/certificate.
+
+**This is P0 only.** Prototype `check-preview` includes some source syntax
+not conforming to the PSCV closed Standard grammar. Three passing examples
+and 30 JavaScript tests do not establish complete VCG correctness,
+specification coverage, PSCV v1 conformance, executable semantics or
+logical consistency. Refuse publication rather than infer any of these.
+
+Existing T3 (preview5) qualified compiler fixed point **62 modules**,
+source closure `3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea`,
+selected JS `6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617`,
+selected native Core source `963030dc2d154008fccc82e7c8ed29331f138799`,
+TS7.0.2 and authoring seed remain exactly unchanged. PSCVL reference is
+Lean4.35rc3 but the separately evolving Core work targets rc4; **never
+silently switch** pin/kernel/environment.
+
+## Next milestones
+
+**P1:** explicit rc3 versus rc4 semantic/version decision, generate/freeze
+ordered Standard environment and verification registry manifests, qualify
+source/profile/goal interfaces and official package activation without
+letting arbitrary npm modules execute as compiler code.
+
+**P2:** one actually **certified** pure contract, with approved formal spec,
+independently justified complete VC set, kernel admitted proof, exact
+axiom/effect/import/erasure closures, protected token and verified artifact
+handoff. Both wrong and omitted proofs MUST block output. Do not implement
+P2 by changing the Boolean in `profile.json` or by adding an unvalidated
+`accept` branch to the current preflight.
+
+**P3+** full PSCV-RC-v2 normative Appendix A grammar, complete Standard
+tactics, pure/mutable control flow, effects, invariants/ghost/termination,
+certified imports, general proof-service integrations, backend preservation
+and conformance/proof replay. Create new folders only for concrete reusable
+algorithms, not empty package placeholders.
+
+**Workflow:** GitHub remains source of truth; use GitHub connector/MCP only
+for repository mutations and Actions cloud tests. Always re-fetch HEAD,
+lease writes, preserve remote history and concurrent kernel metatheory lanes.
+Do not use Desktop Commander or local source checkouts/build/tests. Keep
+this AI_WORK_STATE current on each checkpoint.
+
+---
+
+
 # PSC0 T3 checked editor diagnostics — completed
 
 ## T3 qualified editor queries and optional pslsp

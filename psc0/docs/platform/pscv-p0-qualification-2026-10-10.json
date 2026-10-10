@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-pscv-foundation-p0-qualification",
+  "milestone": "P0-architecture-and-preflight-only",
+  "status": "qualified-experimental-preflight",
+  "qualifiedSource": "c6e65c7b2333cb1ff634bdcf2f867a1c62510832",
+  "priorQualifiedPlatform": "d6e37c5d4caeaed545b1dcb53b4d3655c804e99d",
+  "qualificationRun": {
+    "id": 38036616386,
+    "attempt": 1,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38036616386",
+    "status": "completed",
+    "conclusion": "success",
+    "updatedAt": "2026-10-10T08:05:29Z"
+  },
+  "jobs": [
+    {
+      "id": 114168253910,
+      "name": "proposal-and-gate (ubuntu-24.04, 22.23.3)",
+      "conclusion": "success",
+      "unitTests": 10,
+      "failed": 0,
+      "packageDataOnly": true,
+      "unchangedBaseline": true
+    },
+    {
+      "id": 114168254132,
+      "name": "proposal-and-gate (ubuntu-24.04, 26.7.0)",
+      "conclusion": "success",
+      "unitTests": 10,
+      "failed": 0,
+      "packageDataOnly": true,
+      "unchangedBaseline": true
+    },
+    {
+      "id": 114168254016,
+      "name": "proposal-and-gate (windows-2022, 26.7.0)",
+      "conclusion": "success",
+      "unitTests": 10,
+      "failed": 0,
+      "packageDataOnly": true,
+      "unchangedBaseline": true
+    },
+    {
+      "id": 114168254065,
+      "name": "lean-pure-contract-preflight",
+      "conclusion": "success",
+      "leanSemanticPin": "4.35.0-rc3",
+      "tests": [
+        {
+          "path": "PSCVL/examples/pass_contract.ps",
+          "invocation": "check-preview",
+          "result": "success-UNCERTIFIED",
+          "verifiedExecutable": false
+        },
+        {
+          "path": "PSCVL/examples/fail_unproved_contract.ps",
+          "invocation": "check-preview",
+          "result": "rejected-unproved-verification-conditions-and-sorryAx",
+          "verifiedExecutable": false
+        },
+        {
+          "path": "PSCVL/examples/normative/pass_minimal.ps",
+          "invocation": "check",
+          "result": "success-UNCERTIFIED",
+          "verifiedExecutable": false
+        }
+      ]
+    }
+  ],
+  "files": {
+    "new": [
+      "psc0/packages/verification/src/preflight.mjs",
+      "psc0/packages/verification/test/preflight.test.mjs",
+      "psc0/packages/verification/package.json",
+      "psc0/packages/verification/README.md",
+      "psc0/packages/pscv/package.json",
+      "psc0/packages/pscv/profile.json",
+      "psc0/packages/pscv/README.md",
+      "psc0/scripts/pscv-certification-gate.mjs",
+      "psc0/scripts/pscv-certification-gate.test.mjs",
+      "psc0/docs/platform/PSCV_PROFILE_AND_PACKAGE_BOUNDARIES.md",
+      ".github/workflows/psc0-pscv-foundation.yml"
+    ],
+    "updated": [
+      "psc0/PSC0_ARCHITECTURE_PLAN.md"
+    ]
+  },
+  "trust": {
+    "canIssuePSCV_CERT_v1": false,
+    "canAuthorizeVerifiedExecutableModule": false,
+    "canEmitPSCVVerifiedArtifact": false,
+    "ordinaryCheckedBuildProfileUnchanged": true,
+    "untrustedProposalCanClaimProofAuthority": false,
+    "currentOfficialProfile": "checked",
+    "previewProfilePackagePrivate": true,
+    "implicitProfileActivation": false,
+    "exactStandardEnvironmentManifestFrozen": false,
+    "proofCandidateDigestsNotKernelProofEvidence": true
+  },
+  "pins": {
+    "normativeReference": "PSCV-RC-v2",
+    "normativeReferenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "normativeSemanticLean": "4.35.0-rc3",
+    "normativeLeanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+    "independentCoreRefinementSemanticLean": "4.35.0-rc4",
+    "ordinaryPlatformLean": "4.34.0",
+    "selectedCoreSourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "compilerPortableClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+    "selectedCompilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+    "typescriptVersion": "7.0.2",
+    "sourceSeedChanged": false
+  },
+  "exclusions": [
+    "not full PSCV grammar or normative compilation",
+    "not approved specification coverage",
+    "not full VC generation",
+    "not kernel replay of proposal digests",
+    "not complete effect/axiom/import closure",
+    "not compiler/erasure/backend preservation proof",
+    "no changed compiler fixed-point",
+    "no kernel default promotion",
+    "no npm registry publication",
+    "no merged main"
+  ],
+  "notes": "The advisory proposal preflight can only report uncertified. The current production host independently rejects profile !== checked. The Lean proof slice exercises PSCVL check-preview and bounded strict check, not a PSCV-CERT-v1 implementation."
+}

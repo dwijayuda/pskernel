@@ -1,3 +1,11 @@
+# PSC0 PSCV P1-H — imported declaration type and module origin evidence qualified
+
+Qualified source `f5a5322db8f9493df6be27a425239cd5e5f6d43c`, [run 38058186775](https://github.com/dwijayuda/pskernel/actions/runs/38058186775): four jobs passed (Linux22, Linux26, Windows26, actual Lean4.35.0-rc3). Eleven imported constant types and module identities observed; nine arise from `Init.Prelude`, one each from `Init.Data.String.Defs` and `Init.Data.Int.Basic`. Report SHA256 `8246970bdb3a79da9879bca1b191c5ddcd552589a54e4ef11a33cca6447925c5`; [artifact 11671233631](https://github.com/dwijayuda/pskernel/actions/runs/38058186775/artifacts/11671233631). [Qualification JSON](docs/platform/pscv-p1h-qualification-2026-10-10.json). Branch `psc0/platform-pscv-p1h-declaration-types-v1`, [draft PR103](https://github.com/dwijayuda/pskernel/pull/103) stacked on P1-G.
+
+P1-H does not establish exact source file/blob/line for individual instances or their generic dependencies, complete Standard instance search, source-to-runtime refinement, or any P2 certificate. Normative requirements still: 230 rows /194 snapshot IDs, only previous three direct Bool source-located, 191 unresolved. Continue with exact pinned Lean Git file/blob source provenance for the observed modules and lexically explicit declarations, then a scalable elaborator-driven resolver. Compiler, kernel, TS7 release, authoring seed and certification gate unchanged. P2–P5 remain sound-gated. Use GitHub/cloud only, expected-HEAD ref updates, no history rewrites.
+
+---
+
 # PSC0 PSCV P1-G — exact required-ID work ledger qualified
 
 Source commit `76bcf6f01cec41e36b736e548f98bca862ec5877`, [run 38057594392](https://github.com/dwijayuda/pskernel/actions/runs/38057594392): **all 4 cloud jobs passed**, including pinned Lean4.35.0-rc3 P1-E/P1-F witness regeneration and Linux22/Linux26/Windows26 negative tests. Artifact [11671753807](https://github.com/dwijayuda/pskernel/actions/runs/38057594392/artifacts/11671753807), ledger digest `e562efe944af9a55eff7c2960fd2a143877cf9ec6c85a5e7b826983ade74b8c0`.

@@ -1,6 +1,6 @@
-# PSC0 T1 checked TypeScript library adoption — platform qualification active
+# PSC0 T1 checked TypeScript library adoption — completed
 
-Updated: 2026-10-10 03:01 UTC. Full compiler qualification is complete. Preview3 now selects the exact qualified successor and is being qualified as source and as an installed package. Do not report installed preview3 success until its six platform jobs pass.
+Updated: 2026-10-10 03:14:33 UTC. T1 implementation, exact current-source compiler qualification and all six preview3 platform jobs are complete. This handoff records the qualified release source and exact artifacts; subsequent documentation commits do not replace those identities. No npm publication, main merge, seed promotion, kernel algorithm change or default-provider switch was performed.
 
 ## User-authorized scope and implementation
 
@@ -36,14 +36,32 @@ Run38019185667 at10fb98c3a3aab466073d210dd7f160da756c33eb passed Linux source130
 
 The remaining Windows source job114116349238 passed135 discovered unit tests (134pass,0fail,1existing Unix-permission skip), then failed check-modular-preparation-source.mjs:82. The closed-emitter marker contains a literal LF; the only cross-platform correction is CRLF→LF in that script's read-only session-source inspection view. Keep every exact marker, the two checked emitter names, punctuation/indentation, ordering/readback and no-raw-fallback checks unchanged. Runtime source bytes, canonical admissions, receipts, compiler/backend code and release/kernel pins are not normalized or modified. The retry must reach and pass Windows native source integration and record one coherent completed platform run. Do not call the previous5/6 run wholly qualified.
 
-## Current next actions
+## Completed preview3 platform qualification
 
-1. Run the prepared [platform-qualify] workflow at this release checkpoint: Linux Node22 source, Windows Node26 source, and four clean installed Windows/Linux × Node22.23.3/26.7.0 jobs. Read actual new counts and every installed receipt; never reuse preview2 counts.
-2. Record exact source/tree/run/artifact identities, tarball hashes and bytes, native library admission, consumer answer42, imported-source rebuild43, invalid-source preservation, handwritten-output refusal, extension disclosure and PowerShell shim behavior. Complete PLATFORM_IMPLEMENTATION.md and the preview3 qualification JSON only after success.
-3. Update draft PR91 and final handoff with measured evidence. No main merge, npm publication or authoring-seed promotion is authorized incidentally.
-4. Preserve exact bootstrap/release executables durably as parallel public-release work; a JSON hash or an expiring Actions artifact does not itself retain the bytes.
+Final release source b01281b46aa62cbb09ed47a24ebad08b72c6265f, tree d54208569a708fef53fab913ad3b11ac5a496f00. Run38019471955, attempt1, completed SUCCESS in all six jobs; GitHub run updated at2026-10-10T03:10:04Z. Root and the independent qualification reviewer read the actual completed logs and all four installed records.
 
-Preview3 release/release.json now pins the actual successor source/closure/JS hash above. The source archive currently distributes one proofscript product bundle and two optional command-demo tarballs (psdev and @psc-demo/pshello), rather than five independently published core packages. TypeScript7.0.2 is its only required npm dependency. Full watch, broad npm/workspace library resolution and LSP remain subsequent milestones. project-init guide and release README explain the checked-library example and safe migration from a previously owned single-file output generation.
+- Linux Node22.23.3 source job114117024606:130 host/policy tests passed;18 real native/integration tests passed.
+- Windows Node26.7.0 source job114117239372:134 host/policy tests passed,1 Unix-permission fixture skipped;15 native/integration tests passed,3 POSIX shebang transport fixtures skipped. No failures. New T1 and actual packaged native admission ran. The closed-emitter source-shape guard now passes with its exact assertions unchanged.
+- Four clean installed jobs: Linux Node22/npm10.9.9 and Node26/npm12.0.2 each48 recorded observations; Windows Node22/npm10.9.9 and Node26/npm12.0.2 each46. Windows routes through PowerShell7.6.6 and npm psc.cmd. No source checkout or Lean toolchain is needed in these installed tests.
+- Every installed record matches qualified compiler6ab7d603..., the proper pinned native artifact, two source modules, one bundle/two facades and shared opaque identity. Consumer starts42, imported-body edit produces43, invalid source preserves all3 artifacts and completed receipt, and handwritten facade collision refuses the whole new generation. Both optional command demos disclose actual bytes, remain inactive until configured, execute only their restricted Wasm request and refuse tampering.
+- Candidate artifact11657608168:3,887,650bytes, ZIP SHA2560a202234723940b86b9370303a3ab0d952003f41a6970b332c30117afb222f04; expires2026-11-09T03:08:56Z.
+- proofscript-0.1.0-preview.3.tgz:3,656,980bytes, SHA2560273e5f18a3cea66b0f4deaa44fbfe1214510fd59d146956355985e555c4db7e.
+- psdev-0.1.0-preview.3.tgz:1,914bytes, SHA25620e6270726247f559129fa496aa0ae51cd0a8bf4ad679bfc99d91cb9b136e34e.
+- psc-demo-pshello-0.1.0-preview.3.tgz:1,933bytes, SHA25665adbd54131fc69e4e73df08501e5f59f82fbee29b8965bde5f27f2b577c4ded.
+- The product tarball is byte-identical to the preceding run's artifact. Test fixture and source-inspection EOL corrections changed no shipped runtime.
+- Exact final records: docs/platform/t1-checked-library-preview-qualification-2026-10-10.json and installed-{linux,win32}-node{22.23.3,26.7.0}-38019471955.json. Compiler/native receipts retain run38013991001 in their filenames. PLATFORM_IMPLEMENTATION.md and PSC0_ARCHITECTURE_PLAN.md distinguish completed bounded features, exact qualifications, proposals and unproved claims. Final wording review passed interface/ABI/publication/proof/JS scope.
+
+The installed product remains one proofscript bundle with TypeScript7.0.2 as its only required npm dependency. The two command tarballs are optional local demonstrations, not claims of registry name ownership. Four examples ship: checked-nat, existing-typescript, rejected-source and checked-library. psc init is available; full watch is not. Use a fresh copied checked-library example; an old single-file receipt cannot silently transfer ownership to the new library receipt. The guide explains explicit archival of still-owned generated files while preserving handwritten or edited bytes.
+
+## Next milestones after this completed slice
+
+1. Real psdev watch over the existing checked transaction: import invalidation, cancellation, generation identity, receipt/recovery and downstream sequencing. Keep unsupported PSCV/contracts and unproved semantic claims explicit.
+2. The proposed ordinary Nat.max support-unit diagnostic in KERNEL_JS_PLAN.md, then same-source JS generation/adapter/parity/budget/artifact/Windows/Linux qualification. It is not executed or qualified by T1; native remains selected.
+3. Durable retention of exact bootstrap/release executable inputs and clean recovery before intentional public npm release. Expiring Actions artifacts and JSON identities do not supply durable binary storage.
+4. Broader local/npm/workspace library resolution, final ps-prefixed package boundaries, deliberate default extensions and concrete producer/validator protocols. LSP/VS Code remain outside bootstrap.
+5. Full Lean and later PSCV assurance work in proofs/**/*.proof.lean outside bootstrap, without turning full formal completion into the closing gate for every bounded implementation milestone.
+
+Do not rerun or modify the completed T1 compiler merely to prove its metadata again. Re-fetch live HEAD and relevant handoffs before any new slice. Existing selected R/native pins and pending Core refinement remain independent.
 
 ## Core-JS finding and planned next diagnostic
 

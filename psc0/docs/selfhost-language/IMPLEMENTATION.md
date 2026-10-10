@@ -1,10 +1,24 @@
 # PSC0 SH/1 implementation and qualification
 
+## Current strict SH/1 disposition
+
+The declared bounded PSC0-SH/1 source, runtime and TypeScript target are qualified at [compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`](https://github.com/dwijayuda/pskernel/commit/1fa5559a72b293defc56ef7e7020cf82d4b44b79). The [release qualification record](strict/release-qualification.json) binds the exact compiler evidence, eight independently reviewed source and composition argument packets, all **33 correspondence dispositions** and **27 stage dispositions**, and separate provider acceptance.
+
+[Original run 38015134511](https://github.com/dwijayuda/pskernel/actions/runs/38015134511) remains cancelled; it owns the retained completed native/N1/C1 evidence and named successful prerequisite gates. [Continuation 38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), orchestrated at `43fa000c4adbc9d4754e20c213595c1449f00961`, completed C2/C3 and their conformance gates using the same compiled source and unchanged 48-file recipe, then failed on native IR pass-marker extraction in the evidence binder. Its failure and skipped provider remain recorded.
+
+[Evidence-completion run 38027413274](https://github.com/dwijayuda/pskernel/actions/runs/38027413274), orchestrated at `719f5ec4225baf51d1969cc3b5e4cbc6959fad4a`, authenticated both archives and all 446 imported files, applied the reviewed `slice(pass.length)` binder correction as a separate evidence producer, and completed the original qualification construction without rebuilding any generation or repeating conformance. The compiled checkout and its original 48 recipe inputs remained unchanged. Compiler job `114141103218` completed evidence binding and the complete 135-file catalog with 24 exact returned JSON values. Independent provider job `114141265302` accepted all four deduplicated admission streams covering eight C2/C3 roles. The complete four-product C2/C3 tuple matches, and N1/C2/C3 TypeScript and JavaScript agree. Final 33/27 dispositions are explicitly bound to these exact receipts and their declared source arguments in the release record.
+
+Qualification applies to the explicit `psCompilerSh1TypeScriptSources` entry and the recorded strict development/qualification lane. Generic compiler APIs do not implicitly select strict SH/1, and `selectedByPsconfig` remains false. Reviewed source arguments retain their declared canonical-input, primitive, platform and successful-allocation premises. Finite conformance, original-IR typing, fixed-point equality and provider admission retain their separate meanings; `generalPreservationProven` and the original narrow producer flags remain false.
+
+R remains selected. Handwritten `.lean` remains authoritative through the owned frontend, current `.ps` uses only the `ps-0.9-r3` bounded subset, and current development/recovery uses TypeScript 7.0.2. Node 22.23.3, Lean 4.34.0 and the independently pinned provider are unchanged. Earlier attempt requests and pending statuses below describe their recorded historical checkpoints; they do not restart completed work. The linked release record defines the current strict disposition.
+
+## Prior implementation and qualification checkpoints
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 That initial attempt stopped at a new test-helper construction error (`PsErasureScope.mk` was not a generated runtime export). C1/C2/C3 and provider qualification were not reached; its passing native checks do not establish completed F qualification.
 
-Status: bounded runtime IR typing M6 is compiler-qualified with independent
+Historical M6 status: bounded runtime IR typing M6 is compiler-qualified with independent
 selected-provider acceptance in both its TypeScript 5 baseline and the current
 TypeScript 7.0.2 integration. The exact qualifying source checkpoints are:
 
@@ -40,7 +54,7 @@ A/B/H/E records are indexed in [qualification-evidence.json](qualification-evide
 [TYPESCRIPT7.md](TYPESCRIPT7.md) records the exact compiler profiles, recovery
 proof and measured TypeScript phase.
 
-## Current host observation correction and qualification request
+## Historical host observation correction and qualification request
 
 [Attempt14](https://github.com/dwijayuda/pskernel/actions/runs/38011068208) at **138fe57a6adeddfe875f1fbf4cc3a7de6e406a91** completed N1 development and **built C1**. C1 passed source, target, runtime, IR-checker fixtures, helper runtime, generic-erasure, session and capabilities checks before the post-generation migration-report comparison failed. C1 iteration, C2/C3, fixed point, strict binder and provider were not run. The complete native source check covered64 modules,1708 declarations,50 normalizations and64911 original-IR expressions with zero findings.
 
@@ -62,7 +76,7 @@ The [closed-universe correction](strict/reviewed-candidates/closed-universe-infe
 
 The enclosing source commit requests one full **[sh1-qualify]** execution. N1/C1/C2/C3, fixed point/native parity, the exact evidence binder and independent provider must pass before the current 33 correspondence rows and 27 stage obligations are discharged. The previous attempt13 failed after six passing N1 conformance stages; it has no completed N1 receipt. Passed cold recovery remains reusable because its seven inputs are unchanged. See [AI_WORK_STATE.md](../../AI_WORK_STATE.md) for the active continuation and exact evidence identities.
 
-## Current strict SH/1 source integration
+## Historical strict SH/1 source integration
 
 The practical migration is already merged at **ed5d00aca0743bde583b45fe7756dd494ac3960f**. Continue the authorized strict SH/1 qualification and merge; do not repeat the practical merge or promote a seed.
 
@@ -151,8 +165,7 @@ records the exact supplied reference SHA-256, finite enabled grammar and
 unsupported forms. R2 has its own completed compiler/provider, cold-recovery and
 explicit selection records below. F used that authenticated selected R compiler
 and earned its own separate source/runtime qualification.
-Full Standard/PSCV conformance and strict SH/1 remain unearned, and Lean remains
-4.34.0.
+Full Standard/PSCV conformance remains unearned, and Lean remains 4.34.0. The current explicit strict SH/1 disposition is recorded at the start of this document.
 
 The implementation paths are:
 

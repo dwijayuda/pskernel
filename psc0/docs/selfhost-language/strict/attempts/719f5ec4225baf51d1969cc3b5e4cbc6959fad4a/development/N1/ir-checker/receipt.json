@@ -1,0 +1,807 @@
+{
+  "schemaVersion": 1,
+  "evidence": "portable-original-ir-checker-conformance",
+  "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+  "acceptedFixture": {
+    "schemaVersion": 2,
+    "kind": "psc0-original-ir-inventory",
+    "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+    "status": "runtime-ir-types-accepted",
+    "strictSh1Qualified": false,
+    "runtimeIrTypingAccepted": true,
+    "traversalComplete": true,
+    "visitedNodes": 2590,
+    "carrier": {
+      "accepted": true,
+      "traversalComplete": true,
+      "visitedNodes": 1283
+    },
+    "carrierObservation": "before-portable-check",
+    "counts": {
+      "expressions": 222
+    },
+    "findingCount": 0,
+    "findingCounts": {},
+    "findingCountsCoverage": "all-findings",
+    "findings": [],
+    "omittedFindingDetails": 0,
+    "portableChecker": {
+      "status": "accepted",
+      "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+      "options": {
+        "maxSteps": 5000000,
+        "maxTypeSteps": 65536,
+        "maxFindings": 1000
+      }
+    },
+    "coverage": [
+      "Canonical own-namespace JS carriers before portable code",
+      "Portable module signatures, scoped type substitution and compositional expression typing",
+      "The host report serializes portable diagnostics without a second semantic checker"
+    ],
+    "unqualifiedObligations": [
+      "Enabled primitive laws, text positions and bounds semantics beyond runtime typing",
+      "Erasure preservation, evaluation order and backend semantic correspondence",
+      "Import ABI qualification for unsupported external imports",
+      "Strict SH/1 profile activation and provider decisions remain separate"
+    ],
+    "notes": [
+      "A capped diagnostics list does not cap the portable finding count.",
+      "Findings count failed checking obligations; a type operation reports its first failure, not every malformed descendant.",
+      "visitedNodes combines portable input preflight and dispatcher steps, each with its own maxSteps allowance.",
+      "Structural IR paths identify owners and expressions; they are not original source line numbers.",
+      "Runtime IR typing acceptance does not establish Core provider acceptance or strict SH/1."
+    ]
+  },
+  "artifacts": {
+    "typescriptSha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+    "javascriptSha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633"
+  },
+  "behavior": {
+    "status": "pass",
+    "observations": 61,
+    "exhaustiveForAllInputs": false,
+    "zeroFieldRecord": {
+      "ownStringFields": 0,
+      "ownBrandSymbols": 1,
+      "inhabited": true
+    },
+    "emptyScrutinee": {
+      "callbackCalls": 1,
+      "propagatedOriginalFailure": true,
+      "noEmptyInhabitantConstructed": true
+    },
+    "letScopeCases": [
+      {
+        "name": "shadowOldScope",
+        "observations": 8
+      },
+      {
+        "name": "shadowWrappedCall",
+        "observations": 8
+      },
+      {
+        "name": "shadowClosure",
+        "observations": 8
+      },
+      {
+        "name": "shadowNestedTail",
+        "observations": 5
+      }
+    ]
+  },
+  "rejected": [
+    {
+      "name": "false-let-annotation",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "false-lambda-result",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "false-declaration-result",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "incompatible-if-branches",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "non-boolean-condition",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "flattened-function-grouping",
+      "expectedCode": "call-runtime-arity",
+      "findingCount": 2,
+      "findingCounts": {
+        "call-runtime-arity": 1,
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "false-function-group-annotation",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "global-literal-is-not-zero-argument-function",
+      "expectedCode": "non-function-callee",
+      "findingCount": 1,
+      "findingCounts": {
+        "non-function-callee": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "generic-arguments-missing",
+      "expectedCode": "call-type-arity",
+      "findingCount": 1,
+      "findingCounts": {
+        "call-type-arity": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "monomorphic-value-with-type-arguments",
+      "expectedCode": "call-type-arity",
+      "findingCount": 1,
+      "findingCounts": {
+        "call-type-arity": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "generic-scheme-escape",
+      "expectedCode": "generic-value-reference",
+      "findingCount": 1,
+      "findingCounts": {
+        "generic-value-reference": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "zero-runtime-generic-value",
+      "expectedCode": "generic-value-unsupported",
+      "findingCount": 1,
+      "findingCounts": {
+        "generic-value-unsupported": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "unknown-runtime-type",
+      "expectedCode": "unknown-type",
+      "findingCount": 2,
+      "findingCounts": {
+        "unknown-type": 2
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "unscoped-type-parameter",
+      "expectedCode": "unbound-type-parameter",
+      "findingCount": 2,
+      "findingCounts": {
+        "unbound-type-parameter": 1,
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "named-type-arity",
+      "expectedCode": "named-type-arity",
+      "findingCount": 1,
+      "findingCounts": {
+        "named-type-arity": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "unresolved-variable",
+      "expectedCode": "unresolved-value-name",
+      "findingCount": 1,
+      "findingCounts": {
+        "unresolved-value-name": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "duplicate-runtime-binder",
+      "expectedCode": "duplicate-binder",
+      "findingCount": 1,
+      "findingCounts": {
+        "duplicate-binder": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "duplicate-type-binder",
+      "expectedCode": "duplicate-type-parameter",
+      "findingCount": 1,
+      "findingCounts": {
+        "duplicate-type-parameter": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "duplicate-global-name",
+      "expectedCode": "duplicate-value-name",
+      "findingCount": 1,
+      "findingCounts": {
+        "duplicate-value-name": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "Nat-and-Int-are-distinct",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "Char-and-String-are-distinct",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "intrinsic-type-arity",
+      "expectedCode": "intrinsic-type-arity",
+      "findingCount": 1,
+      "findingCounts": {
+        "intrinsic-type-arity": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "constructor-positional-field-order",
+      "expectedCode": "constructor-field-order",
+      "findingCount": 1,
+      "findingCounts": {
+        "constructor-field-order": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "record-missing-field",
+      "expectedCode": "missing-field",
+      "findingCount": 1,
+      "findingCounts": {
+        "missing-field": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "record-duplicate-field",
+      "expectedCode": "duplicate-field",
+      "findingCount": 1,
+      "findingCounts": {
+        "duplicate-field": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "record-extra-field",
+      "expectedCode": "unexpected-field",
+      "findingCount": 1,
+      "findingCounts": {
+        "unexpected-field": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "projection-owner-mismatch",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "projection-instantiation-mismatch",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "match-binding-type-mismatch",
+      "expectedCode": "type-mismatch",
+      "findingCount": 3,
+      "findingCounts": {
+        "type-mismatch": 2,
+        "non-function-callee": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "match-missing-alternative",
+      "expectedCode": "match-coverage",
+      "findingCount": 1,
+      "findingCounts": {
+        "match-coverage": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "match-duplicate-alternative",
+      "expectedCode": "duplicate-match-alternative",
+      "findingCount": 1,
+      "findingCounts": {
+        "duplicate-match-alternative": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "optional-scalar-capability",
+      "expectedCode": "scalar-capability-unqualified",
+      "findingCount": 3,
+      "findingCounts": {
+        "scalar-capability-unqualified": 3
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "external-import-ABI",
+      "expectedCode": "external-import-abi-unqualified",
+      "findingCount": 1,
+      "findingCounts": {
+        "external-import-abi-unqualified": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "empty-match-missing-result-hint",
+      "expectedCode": "empty-match-result-type-required",
+      "findingCount": 1,
+      "findingCounts": {
+        "empty-match-result-type-required": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "empty-match-wrong-scrutinee",
+      "expectedCode": "type-mismatch",
+      "findingCount": 1,
+      "findingCounts": {
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "empty-match-type-argument-arity",
+      "expectedCode": "layout-type-arity",
+      "findingCount": 2,
+      "findingCounts": {
+        "layout-type-arity": 1,
+        "type-mismatch": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "empty-match-inhabited-layout",
+      "expectedCode": "match-coverage",
+      "findingCount": 2,
+      "findingCounts": {
+        "match-coverage": 2
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    },
+    {
+      "name": "runtime-layout-name-collision",
+      "expectedCode": "duplicate-layout-name",
+      "findingCount": 1,
+      "findingCounts": {
+        "duplicate-layout-name": 1
+      },
+      "traversalComplete": true,
+      "checkedEmitter": "rejected-before-emission"
+    }
+  ],
+  "exhausted": [
+    {
+      "name": "input-preflight-budget",
+      "findingCounts": {
+        "checker-input-resource-limit": 1
+      },
+      "traversalComplete": false
+    },
+    {
+      "name": "type-work-budget",
+      "findingCounts": {
+        "type-resource-limit": 304
+      },
+      "traversalComplete": false
+    }
+  ],
+  "directTypeOperations": [
+    {
+      "name": "simultaneous-nested-generic-swap",
+      "status": "pass"
+    },
+    {
+      "name": "substitution-budget",
+      "code": "type-resource-limit",
+      "detail": "substitution"
+    },
+    {
+      "name": "equality-budget",
+      "code": "type-resource-limit",
+      "detail": "equality"
+    }
+  ],
+  "carrierRejections": [
+    {
+      "name": "negative-natural-carrier",
+      "findingCounts": {
+        "invalid-ir-scalar-carrier": 1
+      },
+      "portableChecker": "not-run-invalid-carrier"
+    },
+    {
+      "name": "number-natural-carrier",
+      "findingCounts": {
+        "invalid-ir-scalar-carrier": 1
+      },
+      "portableChecker": "not-run-invalid-carrier"
+    },
+    {
+      "name": "string-boolean-carrier",
+      "findingCounts": {
+        "invalid-ir-scalar-carrier": 1
+      },
+      "portableChecker": "not-run-invalid-carrier"
+    },
+    {
+      "name": "cyclic-list-carrier",
+      "findingCounts": {
+        "cyclic-ir-carrier": 1
+      },
+      "portableChecker": "not-run-invalid-carrier"
+    },
+    {
+      "name": "foreign-compiler-brand",
+      "findingCounts": {
+        "malformed-or-foreign-constructor": 1
+      },
+      "portableChecker": "not-run-invalid-carrier"
+    }
+  ],
+  "emptyElimination": {
+    "emptyLayoutCount": 2,
+    "emptyEliminationCount": 5,
+    "signatures": [
+      {
+        "name": "eliminateEmptyNat",
+        "signature": "export declare function eliminateEmptyNat(empty: Empty): bigint;"
+      },
+      {
+        "name": "eliminateEmptyFunction",
+        "signature": "export declare function eliminateEmptyFunction(empty: Empty): (_arg0: bigint) => bigint;"
+      },
+      {
+        "name": "eliminateEmptyGeneric",
+        "signature": "export declare function eliminateEmptyGeneric<T0>(empty: EmptyBox<T0>): T0;"
+      },
+      {
+        "name": "eliminateEmptyTypedCall",
+        "signature": "export declare function eliminateEmptyTypedCall(empty: Empty): bigint;"
+      },
+      {
+        "name": "eliminateEmptyComputed",
+        "signature": "export declare function eliminateEmptyComputed(makeEmpty: () => Empty): bigint;"
+      }
+    ],
+    "declarationArtifact": "accepted/index.d.ts",
+    "declarationSha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+    "additionalTypeScriptCompilations": 0,
+    "nativeValueOracle": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "zeroFieldRecords": {
+    "structureCount": 1,
+    "fieldCount": 0,
+    "valueCount": 1,
+    "declarationArtifact": "accepted/index.d.ts",
+    "declarationSha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df",
+    "inhabited": true,
+    "additionalTypeScriptCompilations": 0,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "optimizedTail": {
+    "schemaVersion": 1,
+    "feature": "flat-original-ir-optimized-tail-loops",
+    "status": "pass",
+    "originalIrBoundary": "same-existing-accepted-fixture",
+    "layout": {
+      "name": "TailList",
+      "typeParameters": 0,
+      "constructors": [
+        {
+          "name": "nil",
+          "fields": []
+        },
+        {
+          "name": "cons",
+          "fields": [
+            {
+              "name": "head",
+              "type": "nat"
+            },
+            {
+              "name": "tail",
+              "type": "TailList"
+            }
+          ]
+        }
+      ]
+    },
+    "entries": [
+      {
+        "name": "optimizedTailSwap",
+        "parameters": [
+          [
+            "fuel",
+            "nat"
+          ],
+          [
+            "left",
+            "nat"
+          ],
+          [
+            "right",
+            "nat"
+          ]
+        ],
+        "result": "nat",
+        "signature": "export declare function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint;",
+        "exportPrefix": "export function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint { while (true) { ",
+        "transitions": [
+          "[fuel, left, right] = [nextFuel, right, left]; continue;"
+        ],
+        "capturedAlias": false,
+        "runtimeArity": 3,
+        "route": "tail-loop",
+        "implementationAbsent": true,
+        "exportSha256": "b7cdde763bacc80e23e19578ea2cf760a2c04d1807aca212436561f0904bd98a"
+      },
+      {
+        "name": "optimizedTailFuel",
+        "parameters": [
+          [
+            "fuel",
+            "nat"
+          ],
+          [
+            "accumulator",
+            "nat"
+          ]
+        ],
+        "result": "nat",
+        "signature": "export declare function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint;",
+        "exportPrefix": "export function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint { while (true) { ",
+        "transitions": [
+          "[fuel, accumulator] = [nextFuel, (accumulator + 1n)]; continue;"
+        ],
+        "capturedAlias": true,
+        "runtimeArity": 2,
+        "route": "tail-loop",
+        "implementationAbsent": true,
+        "exportSha256": "59f06598bff11fbe31102f730925573ff4ec44591f369eee807cd3b924062291"
+      },
+      {
+        "name": "optimizedTailReverse",
+        "parameters": [
+          [
+            "items",
+            "TailList"
+          ],
+          [
+            "accumulator",
+            "TailList"
+          ]
+        ],
+        "result": "TailList",
+        "signature": "export declare function optimizedTailReverse(items: TailList, accumulator: TailList): TailList;",
+        "exportPrefix": "export function optimizedTailReverse(items: TailList, accumulator: TailList): TailList { while (true) { ",
+        "transitions": [
+          "[items, accumulator] = [tailValue, TailList[\"cons\"](headValue, accumulator)]; continue;"
+        ],
+        "capturedAlias": false,
+        "runtimeArity": 2,
+        "route": "tail-loop",
+        "implementationAbsent": true,
+        "exportSha256": "b547ddbeb96238a22524a0f80c0d2efb419859d1fb1e3a8a8b1bb6dfe691b017"
+      }
+    ],
+    "observations": [
+      {
+        "id": "swap-0",
+        "fuel": "0",
+        "value": "7"
+      },
+      {
+        "id": "fuel-0",
+        "fuel": "0",
+        "value": "11"
+      },
+      {
+        "id": "swap-1",
+        "fuel": "1",
+        "value": "11"
+      },
+      {
+        "id": "fuel-1",
+        "fuel": "1",
+        "value": "12"
+      },
+      {
+        "id": "swap-2",
+        "fuel": "2",
+        "value": "7"
+      },
+      {
+        "id": "fuel-2",
+        "fuel": "2",
+        "value": "13"
+      },
+      {
+        "id": "swap-31",
+        "fuel": "31",
+        "value": "11"
+      },
+      {
+        "id": "fuel-31",
+        "fuel": "31",
+        "value": "42"
+      },
+      {
+        "id": "swap-20000",
+        "fuel": "20000",
+        "value": "7"
+      },
+      {
+        "id": "fuel-20000",
+        "fuel": "20000",
+        "value": "20011"
+      },
+      {
+        "id": "reverse-20000",
+        "length": 20000,
+        "first": "0",
+        "last": "19999",
+        "sequenceSha256": "300d3defc1ca97bc79059e953e46726b7be58c3e3ee69f838eb19350b234f627",
+        "checkedElements": 20000
+      },
+      {
+        "id": "reverse-invalid-tag",
+        "error": "Error",
+        "message": "invalid ProofScript constructor tag"
+      }
+    ],
+    "observationCount": 12,
+    "valueObservations": 11,
+    "faultObservations": 1,
+    "swapInputs": [
+      "7",
+      "11"
+    ],
+    "fuelInitialAccumulator": "11",
+    "reverseInput": "descending-19999-through-0",
+    "artifacts": {
+      "typescript": "accepted/index.ts",
+      "javascript": "accepted/index.js",
+      "declarations": "accepted/index.d.ts",
+      "typescriptSha256": "ec8caef7b25aefe1a5f0268d9bd5dba341a355711442856bbb9fd46ec851ae83",
+      "javascriptSha256": "34c6ff758918f2f473f11782ca6e254f5e861ee7f68af4846b0c82bf8f9a6633",
+      "declarationsSha256": "9ac9040410a1417b6a767e46a3227b38a7679b6c1873a825750fce2413b665df"
+    },
+    "additionalPreparations": 0,
+    "additionalPortableIrChecks": 0,
+    "additionalEmissions": 0,
+    "additionalTypeScriptCompilations": 0,
+    "additionalNativeExecutions": 0,
+    "exhaustiveForAllInputs": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "diagnosticsCap": {
+    "limit": 0,
+    "findingCount": 1,
+    "omittedFindingDetails": 1
+  },
+  "checkedPreparedEntry": {
+    "sourceSha256": "b05ec9c46f150c05b7249ee48bc3b1bdfcb2f60d851b4af81ff7298df49b5626",
+    "typescriptSha256": "027735f4d196d1c92d0868320d9313d4cabe9841a90566f433e2ff71d4350a36",
+    "status": "pass"
+  },
+  "instanceOwnership": "All IR constructors and neutral record factories belong to the checked compiler namespace.",
+  "strictSh1Qualified": false,
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

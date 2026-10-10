@@ -1,0 +1,2466 @@
+{
+  "schemaVersion": 1,
+  "evidence": "portable-source-boundary-conformance",
+  "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+  "accepted": [
+    {
+      "id": "lean-raw-imports-and-ordinary-do-spellings",
+      "schemaVersion": 1,
+      "evidence": "portable-atomic-source-and-target-enforcement",
+      "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+      "sourceKind": "lean",
+      "sourceInputs": [
+        {
+          "moduleName": [
+            "Ps",
+            "Compiler",
+            "StrictLibrary"
+          ],
+          "sourceSha256": "f05f697f9defd99c1db8288659008a6d7b14bb19b1b973b73e1d85b36661d795",
+          "sourceBytes": 364
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "Compiler",
+            "StrictEmpty"
+          ],
+          "sourceSha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+          "sourceBytes": 345
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "Compiler",
+            "StrictEntry"
+          ],
+          "sourceSha256": "282aa4aa993bc60f4a6272217c8c0b0d00efba755e010bae1a501fe8d9c5c58d",
+          "sourceBytes": 86
+        }
+      ],
+      "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+      "sourceGrammar": {
+        "edition": "ps-0.9-r3",
+        "mode": "new-only",
+        "support": "bounded-selfhost-subset",
+        "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+        "fullStandardConformance": false,
+        "fullPscvConformance": false
+      },
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "moduleCount": 3,
+        "sourceBytes": 795,
+        "inputBytes": 860,
+        "importCount": 1,
+        "stats": {
+          "visitedSteps": 124,
+          "typeSteps": 34,
+          "termSteps": 16,
+          "declarationCount": 11,
+          "theoremCount": 0
+        },
+        "accepted": true,
+        "traversalComplete": true,
+        "strictSh1Qualified": false
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 939
+      },
+      "originalIr": {
+        "accepted": true,
+        "traversalComplete": true,
+        "findingCount": 0,
+        "expressions": 25,
+        "visitedSteps": 505,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "carrierObservation": "after-atomic-source-emission"
+      },
+      "sourceOrigins": {
+        "policy": "psc0-declaration-origins/1",
+        "actualParsedModulesRetained": 3,
+        "moduleCount": 3,
+        "sourceDeclarationCount": 11,
+        "coreDeclarationCount": 16,
+        "normalizationCount": 0,
+        "modules": [
+          {
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictLibrary"
+            ],
+            "coreStart": 0,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "Sh1DoField"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 0,
+                    "line": 1,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 37,
+                    "line": 2,
+                    "column": 11
+                  }
+                },
+                "coreStart": 0,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1DoField"
+                      ]
+                    ],
+                    "role": "structureType"
+                  },
+                  {
+                    "index": 1,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1DoField"
+                      ],
+                      [
+                        "str",
+                        "mk"
+                      ]
+                    ],
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1DoField"
+                      ],
+                      [
+                        "str",
+                        "rec"
+                      ]
+                    ],
+                    "role": "recursor"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "sh1ExplicitHelpers"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 38,
+                    "line": 3,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 172,
+                    "line": 3,
+                    "column": 135
+                  }
+                },
+                "coreStart": 3,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1ExplicitHelpers"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "sh1OriginWords"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 224,
+                    "line": 5,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 285,
+                    "line": 5,
+                    "column": 62
+                  }
+                },
+                "coreStart": 4,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1OriginWords"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "Sh1EmptyRecord"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 286,
+                    "line": 6,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 316,
+                    "line": 6,
+                    "column": 31
+                  }
+                },
+                "coreStart": 5,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1EmptyRecord"
+                      ]
+                    ],
+                    "role": "structureType"
+                  },
+                  {
+                    "index": 1,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1EmptyRecord"
+                      ],
+                      [
+                        "str",
+                        "mk"
+                      ]
+                    ],
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1EmptyRecord"
+                      ],
+                      [
+                        "str",
+                        "rec"
+                      ]
+                    ],
+                    "role": "recursor"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "sh1EmptyRecordValue"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 317,
+                    "line": 7,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 363,
+                    "line": 7,
+                    "column": 47
+                  }
+                },
+                "coreStart": 8,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyRecordValue"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictEmpty"
+            ],
+            "coreStart": 9,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "Sh1Empty"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 0,
+                    "line": 1,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 39,
+                    "line": 1,
+                    "column": 40
+                  }
+                },
+                "coreStart": 9,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1Empty"
+                      ]
+                    ],
+                    "role": "inductiveType"
+                  },
+                  {
+                    "index": 1,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1Empty"
+                      ],
+                      [
+                        "str",
+                        "rec"
+                      ]
+                    ],
+                    "role": "recursor"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "sh1EmptyNat"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 40,
+                    "line": 2,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 101,
+                    "line": 2,
+                    "column": 62
+                  }
+                },
+                "coreStart": 11,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyNat"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "sh1EmptyFunction"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 102,
+                    "line": 3,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 175,
+                    "line": 3,
+                    "column": 74
+                  }
+                },
+                "coreStart": 12,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyFunction"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "sh1EmptyGeneric"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 176,
+                    "line": 4,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 260,
+                    "line": 4,
+                    "column": 85
+                  }
+                },
+                "coreStart": 13,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyGeneric"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "sh1EmptyFresh"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 261,
+                    "line": 5,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 344,
+                    "line": 5,
+                    "column": 84
+                  }
+                },
+                "coreStart": 14,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyFresh"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictEntry"
+            ],
+            "coreStart": 15,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "sh1ReadDo"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 33,
+                    "line": 2,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 85,
+                    "line": 2,
+                    "column": 53
+                  }
+                },
+                "coreStart": 15,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1ReadDo"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              }
+            ]
+          }
+        ],
+        "semanticCorrespondenceDischarged": false,
+        "observationsSha256": "ae4af46bb826137c357f7820e3720248b2b401af178cb321a20aad520a96ddb5",
+        "observationBoundary": "after-atomic-source-emission"
+      },
+      "artifacts": {
+        "typescriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+        "admissionsSha256": "7349084e1a69ec8df2552d3cd5d1b6f897dbfafa4572fbb4d233f2e7d498282c"
+      },
+      "preparationCount": 1,
+      "canonicalAdmissionEncodingCount": 1,
+      "environmentReconstructionCount": 0,
+      "portableIrCheckCount": 1,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    {
+      "id": "ps-raw-imports-and-ordinary-do-spellings",
+      "schemaVersion": 1,
+      "evidence": "portable-atomic-source-and-target-enforcement",
+      "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+      "sourceKind": "ps",
+      "sourceInputs": [
+        {
+          "moduleName": [
+            "Ps",
+            "Compiler",
+            "StrictLibrary"
+          ],
+          "sourceSha256": "e1bb231c6e8c9aa5cfb7077567e490d5853d16509665ee2fed27abadfce3d9d8",
+          "sourceBytes": 368
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "Compiler",
+            "StrictEmpty"
+          ],
+          "sourceSha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+          "sourceBytes": 369
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "Compiler",
+            "StrictEntry"
+          ],
+          "sourceSha256": "fa3103aa5bf3fad4203d0e8a6ecb2e8bdf671b5ed80292cf433633d350b30815",
+          "sourceBytes": 85
+        }
+      ],
+      "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+      "sourceGrammar": {
+        "edition": "ps-0.9-r3",
+        "mode": "new-only",
+        "support": "bounded-selfhost-subset",
+        "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+        "fullStandardConformance": false,
+        "fullPscvConformance": false
+      },
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "ps",
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "moduleCount": 3,
+        "sourceBytes": 822,
+        "inputBytes": 887,
+        "importCount": 1,
+        "stats": {
+          "visitedSteps": 124,
+          "typeSteps": 34,
+          "termSteps": 16,
+          "declarationCount": 11,
+          "theoremCount": 0
+        },
+        "accepted": true,
+        "traversalComplete": true,
+        "strictSh1Qualified": false
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 939
+      },
+      "originalIr": {
+        "accepted": true,
+        "traversalComplete": true,
+        "findingCount": 0,
+        "expressions": 25,
+        "visitedSteps": 505,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "carrierObservation": "after-atomic-source-emission"
+      },
+      "sourceOrigins": {
+        "policy": "psc0-declaration-origins/1",
+        "actualParsedModulesRetained": 3,
+        "moduleCount": 3,
+        "sourceDeclarationCount": 11,
+        "coreDeclarationCount": 16,
+        "normalizationCount": 0,
+        "modules": [
+          {
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictLibrary"
+            ],
+            "coreStart": 0,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "Sh1DoField"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 0,
+                    "line": 1,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 41,
+                    "line": 3,
+                    "column": 2
+                  }
+                },
+                "coreStart": 0,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1DoField"
+                      ]
+                    ],
+                    "role": "structureType"
+                  },
+                  {
+                    "index": 1,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1DoField"
+                      ],
+                      [
+                        "str",
+                        "mk"
+                      ]
+                    ],
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1DoField"
+                      ],
+                      [
+                        "str",
+                        "rec"
+                      ]
+                    ],
+                    "role": "recursor"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "sh1ExplicitHelpers"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 42,
+                    "line": 4,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 174,
+                    "line": 4,
+                    "column": 133
+                  }
+                },
+                "coreStart": 3,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1ExplicitHelpers"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "sh1OriginWords"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 225,
+                    "line": 6,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 286,
+                    "line": 6,
+                    "column": 62
+                  }
+                },
+                "coreStart": 4,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1OriginWords"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "Sh1EmptyRecord"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 287,
+                    "line": 7,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 320,
+                    "line": 7,
+                    "column": 34
+                  }
+                },
+                "coreStart": 5,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1EmptyRecord"
+                      ]
+                    ],
+                    "role": "structureType"
+                  },
+                  {
+                    "index": 1,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1EmptyRecord"
+                      ],
+                      [
+                        "str",
+                        "mk"
+                      ]
+                    ],
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1EmptyRecord"
+                      ],
+                      [
+                        "str",
+                        "rec"
+                      ]
+                    ],
+                    "role": "recursor"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "sh1EmptyRecordValue"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 321,
+                    "line": 8,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 367,
+                    "line": 8,
+                    "column": 47
+                  }
+                },
+                "coreStart": 8,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyRecordValue"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictEmpty"
+            ],
+            "coreStart": 9,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "Sh1Empty"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 0,
+                    "line": 1,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 41,
+                    "line": 1,
+                    "column": 42
+                  }
+                },
+                "coreStart": 9,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1Empty"
+                      ]
+                    ],
+                    "role": "inductiveType"
+                  },
+                  {
+                    "index": 1,
+                    "name": [
+                      [
+                        "str",
+                        "Sh1Empty"
+                      ],
+                      [
+                        "str",
+                        "rec"
+                      ]
+                    ],
+                    "role": "recursor"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "sh1EmptyNat"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 42,
+                    "line": 2,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 109,
+                    "line": 2,
+                    "column": 68
+                  }
+                },
+                "coreStart": 11,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyNat"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "sh1EmptyFunction"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 110,
+                    "line": 3,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 189,
+                    "line": 3,
+                    "column": 80
+                  }
+                },
+                "coreStart": 12,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyFunction"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "sh1EmptyGeneric"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 190,
+                    "line": 4,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 279,
+                    "line": 4,
+                    "column": 90
+                  }
+                },
+                "coreStart": 13,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyGeneric"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "sh1EmptyFresh"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 280,
+                    "line": 5,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 368,
+                    "line": 5,
+                    "column": 89
+                  }
+                },
+                "coreStart": 14,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1EmptyFresh"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictEntry"
+            ],
+            "coreStart": 15,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "sh1ReadDo"
+                ],
+                "span": {
+                  "start": {
+                    "byteOffset": 33,
+                    "line": 2,
+                    "column": 1
+                  },
+                  "stop": {
+                    "byteOffset": 84,
+                    "line": 2,
+                    "column": 52
+                  }
+                },
+                "coreStart": 15,
+                "members": [
+                  {
+                    "index": 0,
+                    "name": [
+                      [
+                        "str",
+                        "sh1ReadDo"
+                      ]
+                    ],
+                    "role": "sourceDeclaration"
+                  }
+                ],
+                "normalization": null
+              }
+            ]
+          }
+        ],
+        "semanticCorrespondenceDischarged": false,
+        "observationsSha256": "caf683b2831a68ee44f34837af9e265f271a20c09ede67a661ac85d61d0ea0e0",
+        "observationBoundary": "after-atomic-source-emission"
+      },
+      "artifacts": {
+        "typescriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+        "admissionsSha256": "7349084e1a69ec8df2552d3cd5d1b6f897dbfafa4572fbb4d233f2e7d498282c"
+      },
+      "preparationCount": 1,
+      "canonicalAdmissionEncodingCount": 1,
+      "environmentReconstructionCount": 0,
+      "portableIrCheckCount": 1,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    }
+  ],
+  "refused": [
+    {
+      "id": "empty-bundle",
+      "sourceKind": "lean",
+      "inputSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-empty-bundle",
+        "detail": "at least one source module is required",
+        "moduleName": "<input>",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "duplicate-module",
+      "sourceKind": "lean",
+      "inputSha256": "db210eed0eb9b9d0b5167f94f7cd64e32b2e1e37a2dd7aff20b739efb4876b1b",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-module-duplicate",
+        "detail": "Ps.Compiler.StrictCase",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "forbidden-module",
+      "sourceKind": "lean",
+      "inputSha256": "a2c12cadebb667739588e89c5572d6fff8af0d5e77b481e08a799d176fd0e25c",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-module-package",
+        "detail": "Ps.Kernel.StrictCase",
+        "moduleName": "Ps.Kernel.StrictCase",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "empty-module-segment",
+      "sourceKind": "lean",
+      "inputSha256": "d398ee5089dc92353b0ce96c87597678cfdb1fba3b2b3d564bc913979af5450f",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-module-name",
+        "detail": "empty module name segment",
+        "moduleName": "<input>",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "missing-import",
+      "sourceKind": "lean",
+      "inputSha256": "410586cc015dbc6d7b98dd24679b1190b4392d5a0140de83d2770aab28c78cb9",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-import-unresolved",
+        "detail": "Ps.Compiler.Missing",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 26,
+            "line": 1,
+            "column": 27
+          }
+        }
+      }
+    },
+    {
+      "id": "forward-import",
+      "sourceKind": "lean",
+      "inputSha256": "ff6ed085b22df53735f3922cb35a370e462333093ffa6057b9c2458247350403",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-import-unresolved",
+        "detail": "Ps.Compiler.Later",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 24,
+            "line": 1,
+            "column": 25
+          }
+        }
+      }
+    },
+    {
+      "id": "self-import",
+      "sourceKind": "lean",
+      "inputSha256": "b0790936ec408aea1037e93099ee360c960925ac29dff894f02e93a7079e9ea8",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-import-unresolved",
+        "detail": "Ps.Compiler.StrictCase",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 29,
+            "line": 1,
+            "column": 30
+          }
+        }
+      }
+    },
+    {
+      "id": "forbidden-import",
+      "sourceKind": "lean",
+      "inputSha256": "16ece2a0c09038c97c628c6a7fe7c524f826188330b4843a82a09f822973fcf4",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-import-package",
+        "detail": "Ps.Kernel.Forbidden",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 26,
+            "line": 1,
+            "column": 27
+          }
+        }
+      }
+    },
+    {
+      "id": "non-package-import",
+      "sourceKind": "lean",
+      "inputSha256": "59137ee480b36d25c2313888ede1dbcbe2f7b172f3d7cde886ddb639a9e6949f",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-import-package",
+        "detail": "Lean",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 11,
+            "line": 1,
+            "column": 12
+          }
+        }
+      }
+    },
+    {
+      "id": "partial-definition",
+      "sourceKind": "lean",
+      "inputSha256": "af1c8b6f13935820ea5529e9370c5465cb78601d446a2836af4d7b2538ba9bcc",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-partial-definition",
+        "detail": "general partial definitions are outside the enabled source profile",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "sh1Partial",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 51,
+            "line": 1,
+            "column": 52
+          }
+        }
+      }
+    },
+    {
+      "id": "do-expansion",
+      "sourceKind": "lean",
+      "inputSha256": "e22fd7f73526bcddccf618a07f8a8c33fe66b5d6332c2944d73c5589821de616",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-do-unsupported",
+        "detail": "do semantics are outside the enabled source profile",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "sh1Do",
+        "span": {
+          "start": {
+            "byteOffset": 19,
+            "line": 1,
+            "column": 20
+          },
+          "stop": {
+            "byteOffset": 21,
+            "line": 1,
+            "column": 22
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-result-signature",
+      "sourceKind": "lean",
+      "inputSha256": "a4ebdacd43116ecb1a441d3fb4c04414e537750e6f1318a0abe5739ac202d548",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "leanFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "axiom-command",
+      "sourceKind": "lean",
+      "inputSha256": "f7efcfe8860c23eb83859dd14d0a95744534493077a434871238b61e68690b36",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "leanFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "opaque-command",
+      "sourceKind": "lean",
+      "inputSha256": "81c78b22aa34cc2d8afe73a5a6e44b79426a0be6da97fcc83814bde0c9da288f",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "leanFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "old-ps-semicolon",
+      "sourceKind": "ps",
+      "inputSha256": "5d2d279fcaba32e754f693f249dde819697f8744ca5a42ebe773e51f1015f376",
+      "limits": {},
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "module-budget",
+      "sourceKind": "lean",
+      "inputSha256": "33b7acd1214aa44137facf715cc6746cdfb3e98b6544fbec98d30da6cb3b65c4",
+      "limits": {
+        "maxModules": 0
+      },
+      "failure": {
+        "stage": "source",
+        "code": "source-module-limit",
+        "detail": "module count exceeds limit",
+        "moduleName": "<input>",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "input-byte-budget",
+      "sourceKind": "lean",
+      "inputSha256": "33b7acd1214aa44137facf715cc6746cdfb3e98b6544fbec98d30da6cb3b65c4",
+      "limits": {
+        "maxInputBytes": 25
+      },
+      "failure": {
+        "stage": "source",
+        "code": "source-input-byte-limit",
+        "detail": "raw source bundle exceeds input limit",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "name-traversal-budget",
+      "sourceKind": "lean",
+      "inputSha256": "33b7acd1214aa44137facf715cc6746cdfb3e98b6544fbec98d30da6cb3b65c4",
+      "limits": {
+        "maxSyntaxSteps": 0
+      },
+      "failure": {
+        "stage": "source",
+        "code": "source-name-limit",
+        "detail": "module name traversal exhausted",
+        "moduleName": "<input>",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "syntax-budget",
+      "sourceKind": "lean",
+      "inputSha256": "33b7acd1214aa44137facf715cc6746cdfb3e98b6544fbec98d30da6cb3b65c4",
+      "limits": {
+        "maxSyntaxSteps": 3
+      },
+      "failure": {
+        "stage": "source",
+        "code": "source-syntax-limit",
+        "detail": "syntax task traversal exhausted",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "",
+        "span": null
+      }
+    },
+    {
+      "id": "type-position-budget",
+      "sourceKind": "lean",
+      "inputSha256": "33b7acd1214aa44137facf715cc6746cdfb3e98b6544fbec98d30da6cb3b65c4",
+      "limits": {
+        "maxTypeSteps": 0
+      },
+      "failure": {
+        "stage": "source",
+        "code": "source-type-limit",
+        "detail": "type-position traversal exhausted",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "sh1Literal",
+        "span": {
+          "start": {
+            "byteOffset": 17,
+            "line": 1,
+            "column": 18
+          },
+          "stop": {
+            "byteOffset": 20,
+            "line": 1,
+            "column": 21
+          }
+        }
+      }
+    },
+    {
+      "id": "term-position-budget",
+      "sourceKind": "lean",
+      "inputSha256": "33b7acd1214aa44137facf715cc6746cdfb3e98b6544fbec98d30da6cb3b65c4",
+      "limits": {
+        "maxTermSteps": 0
+      },
+      "failure": {
+        "stage": "source",
+        "code": "source-term-limit",
+        "detail": "term-position traversal exhausted",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "sh1Literal",
+        "span": {
+          "start": {
+            "byteOffset": 24,
+            "line": 1,
+            "column": 25
+          },
+          "stop": {
+            "byteOffset": 25,
+            "line": 1,
+            "column": 26
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Bool.and-lean",
+      "sourceKind": "lean",
+      "inputSha256": "ff4d9ae5d94fc327168911e4cea3ee75220d586a51a21a09b789d84de431ffb3",
+      "limits": {},
+      "boundary": "portable-source-name-policy",
+      "failure": {
+        "stage": "source",
+        "code": "source-intrinsic-name-reserved",
+        "detail": "source declarations cannot redefine a reserved erasure intrinsic symbol",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "Bool.and",
+        "span": {
+          "start": {
+            "byteOffset": 4,
+            "line": 1,
+            "column": 5
+          },
+          "stop": {
+            "byteOffset": 12,
+            "line": 1,
+            "column": 13
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Bool.and-ps",
+      "sourceKind": "ps",
+      "inputSha256": "ba93b64e45f801caa9dcbe7677e0a4c5570752993c3737600835c0fe02da7256",
+      "limits": {},
+      "boundary": "new-only-ps-declared-name-grammar",
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Bool.or-lean",
+      "sourceKind": "lean",
+      "inputSha256": "517532ed9f7648c57983720de7d2114b3d441921927b8f21a26df39f2e69d66f",
+      "limits": {},
+      "boundary": "portable-source-name-policy",
+      "failure": {
+        "stage": "source",
+        "code": "source-intrinsic-name-reserved",
+        "detail": "source declarations cannot redefine a reserved erasure intrinsic symbol",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "Bool.or",
+        "span": {
+          "start": {
+            "byteOffset": 4,
+            "line": 1,
+            "column": 5
+          },
+          "stop": {
+            "byteOffset": 11,
+            "line": 1,
+            "column": 12
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Bool.or-ps",
+      "sourceKind": "ps",
+      "inputSha256": "cb3ac1bc88be252ca74592781ec4c411272455fd7b22feb04822f531916c3d2d",
+      "limits": {},
+      "boundary": "new-only-ps-declared-name-grammar",
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Bool.not-lean",
+      "sourceKind": "lean",
+      "inputSha256": "e8b91a08e8922e9761a38e47bf077a10a8fea2739474026467917f69fcebad23",
+      "limits": {},
+      "boundary": "portable-source-name-policy",
+      "failure": {
+        "stage": "source",
+        "code": "source-intrinsic-name-reserved",
+        "detail": "source declarations cannot redefine a reserved erasure intrinsic symbol",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "Bool.not",
+        "span": {
+          "start": {
+            "byteOffset": 4,
+            "line": 1,
+            "column": 5
+          },
+          "stop": {
+            "byteOffset": 12,
+            "line": 1,
+            "column": 13
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Bool.not-ps",
+      "sourceKind": "ps",
+      "inputSha256": "eb071c67041387c81158b33f2b73b28ccb61d56fdb76adab7e3f2e5bf3a004e2",
+      "limits": {},
+      "boundary": "new-only-ps-declared-name-grammar",
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Array.getInternal-lean",
+      "sourceKind": "lean",
+      "inputSha256": "92617be56dc671a67419cb5d6745380d1906933e3d9e78943e1495a0d8df72ed",
+      "limits": {},
+      "boundary": "portable-source-name-policy",
+      "failure": {
+        "stage": "source",
+        "code": "source-intrinsic-name-reserved",
+        "detail": "source declarations cannot redefine a reserved erasure intrinsic symbol",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "Array.getInternal",
+        "span": {
+          "start": {
+            "byteOffset": 4,
+            "line": 1,
+            "column": 5
+          },
+          "stop": {
+            "byteOffset": 21,
+            "line": 1,
+            "column": 22
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Array.getInternal-ps",
+      "sourceKind": "ps",
+      "inputSha256": "4fc5afa795ef34af2ee5ffeeaf4a212c84442775bbe9a1d70afd454035e2553f",
+      "limits": {},
+      "boundary": "new-only-ps-declared-name-grammar",
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Array.set-lean",
+      "sourceKind": "lean",
+      "inputSha256": "57a7419b68a767b9c8b396656115f7f09b2ed9e661de28e13cc60b3253ed8e17",
+      "limits": {},
+      "boundary": "portable-source-name-policy",
+      "failure": {
+        "stage": "source",
+        "code": "source-intrinsic-name-reserved",
+        "detail": "source declarations cannot redefine a reserved erasure intrinsic symbol",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "Array.set",
+        "span": {
+          "start": {
+            "byteOffset": 4,
+            "line": 1,
+            "column": 5
+          },
+          "stop": {
+            "byteOffset": 13,
+            "line": 1,
+            "column": 14
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-Array.set-ps",
+      "sourceKind": "ps",
+      "inputSha256": "98825f91e3ac6140448b8ca2cc9a5f588d626abb5e1f7a0b7b30fc7716021fd1",
+      "limits": {},
+      "boundary": "new-only-ps-declared-name-grammar",
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "reserved-runtime-name-String.Pos.Raw-lean",
+      "sourceKind": "lean",
+      "inputSha256": "2e3822a01e740803f6abce3cbc5b7b50b310ff254c526177e7ed5ddd8d0fed01",
+      "limits": {},
+      "boundary": "portable-source-name-policy",
+      "failure": {
+        "stage": "source",
+        "code": "source-builtin-type-name-reserved",
+        "detail": "source declarations cannot redefine the fixed raw string position type",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "owner": "String.Pos.Raw",
+        "span": {
+          "start": {
+            "byteOffset": 10,
+            "line": 1,
+            "column": 11
+          },
+          "stop": {
+            "byteOffset": 24,
+            "line": 1,
+            "column": 25
+          }
+        }
+      }
+    },
+    {
+      "id": "reserved-runtime-name-String.Pos.Raw-ps",
+      "sourceKind": "ps",
+      "inputSha256": "970a49954981ba057738fd89c9468e4376381ea5104108b7c2b20595913710c0",
+      "limits": {},
+      "boundary": "new-only-ps-declared-name-grammar",
+      "failure": {
+        "stage": "source",
+        "code": "source-compiler",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "proofScriptFrontend",
+        "detail": "The owned frontend or existing preparation refused the source."
+      }
+    },
+    {
+      "id": "nested-major-alias-lean",
+      "sourceKind": "lean",
+      "inputSha256": "f79fbfdbb2d0f19d74242f7c7f8395c95cf8646cf233d9588e9226a3273c6eb8",
+      "limits": {},
+      "boundary": "structural-recursion-provenance",
+      "failure": {
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedMajorAlias",
+        "sourceIndex": 0,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 192,
+            "line": 7,
+            "column": 56
+          }
+        }
+      }
+    },
+    {
+      "id": "nested-major-alias-ps",
+      "sourceKind": "ps",
+      "inputSha256": "a69c438a49e2dfb519744a018d514f71270a60f3703d3fe49a286ba9a3ee5bda",
+      "limits": {},
+      "boundary": "structural-recursion-provenance",
+      "failure": {
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedMajorAlias",
+        "sourceIndex": 0,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 208,
+            "line": 9,
+            "column": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "nested-descendant-lean",
+      "sourceKind": "lean",
+      "inputSha256": "9a26a9d572d348f8380d547ac73779d2c85deb1aefb33cd71e654e3a51697bf8",
+      "limits": {},
+      "boundary": "structural-recursion-provenance",
+      "failure": {
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedDescendant",
+        "sourceIndex": 0,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 190,
+            "line": 7,
+            "column": 56
+          }
+        }
+      }
+    },
+    {
+      "id": "nested-descendant-ps",
+      "sourceKind": "ps",
+      "inputSha256": "6e312e78fc3f13fa359ca715947ea175ddbe38e544ad2660dddd3730547fb8f4",
+      "limits": {},
+      "boundary": "structural-recursion-provenance",
+      "failure": {
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "elaboration",
+        "detail": "structuralRecursionNotDecreasing",
+        "owner": "sh1NestedDescendant",
+        "sourceIndex": 0,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 206,
+            "line": 9,
+            "column": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "implicit-major-dependent-proof",
+      "sourceKind": "lean",
+      "inputSha256": "8cb1ca86bca4886e47a11eba364c77790a49bb3cc2bdb1644aabe021c1e0948c",
+      "limits": {},
+      "boundary": "structural-recursion-original-telescope",
+      "failure": {
+        "stage": "source",
+        "code": "source-elaboration",
+        "moduleName": "Ps.Compiler.StrictCase",
+        "compilerStage": "elaboration",
+        "detail": "structuralRecursionDependentParameter",
+        "owner": "sh1ImplicitMajorProof",
+        "sourceIndex": 0,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 0,
+            "line": 1,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 147,
+            "line": 4,
+            "column": 42
+          }
+        }
+      }
+    }
+  ],
+  "carrierRefusals": [
+    {
+      "id": "lone-high-surrogate",
+      "boundary": "host-source-carrier-before-portable-call",
+      "refused": true
+    },
+    {
+      "id": "lone-low-surrogate",
+      "boundary": "host-source-carrier-before-portable-call",
+      "refused": true
+    }
+  ],
+  "ingressSnapshots": {
+    "boundary": "host-ingress-before-real-portable-call",
+    "malformedOptions": [
+      {
+        "id": "negative-source-maxModules",
+        "option": "sourceOptions.maxModules",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-source-maxInputBytes",
+        "option": "sourceOptions.maxInputBytes",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-source-maxSyntaxSteps",
+        "option": "sourceOptions.maxSyntaxSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-source-maxTypeSteps",
+        "option": "sourceOptions.maxTypeSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-source-maxTermSteps",
+        "option": "sourceOptions.maxTermSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-ir-maxSteps",
+        "option": "irOptions.maxSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-ir-maxTypeSteps",
+        "option": "irOptions.maxTypeSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "negative-ir-maxFindings",
+        "option": "irOptions.maxFindings",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "number-source-maxModules",
+        "option": "sourceOptions.maxModules",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "number-ir-maxTypeSteps",
+        "option": "irOptions.maxTypeSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "missing-source-maxSyntaxSteps",
+        "option": "sourceOptions.maxSyntaxSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "missing-ir-maxSteps",
+        "option": "irOptions.maxSteps",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "unsafe-source-maxInputBytes",
+        "option": "sourceOptions.maxInputBytes",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      },
+      {
+        "id": "unsafe-ir-maxFindings",
+        "option": "irOptions.maxFindings",
+        "refused": true,
+        "sourceGetterReads": 0,
+        "atomicInterceptions": 0
+      }
+    ],
+    "snapshotProbe": {
+      "optionGetterReads": {
+        "source.maxModules": 1,
+        "source.maxInputBytes": 1,
+        "source.maxSyntaxSteps": 1,
+        "source.maxTypeSteps": 1,
+        "source.maxTermSteps": 1,
+        "ir.maxSteps": 1,
+        "ir.maxTypeSteps": 1,
+        "ir.maxFindings": 1
+      },
+      "inputReads": {
+        "length": 1,
+        "element": 1,
+        "moduleName": 1,
+        "moduleLength": 1,
+        "segments": [
+          1,
+          1,
+          1
+        ],
+        "source": 1
+      },
+      "atomicInterceptions": 1,
+      "portableInputSourceSha256": "36d4e763a8b19e7165930cf70eceb55ddc8249884e483144e37e232bcb0519f3",
+      "zeroBudgetCarriersRetained": true,
+      "irTypeBudget": "9007199254740992",
+      "realPortableCompilerCalls": 0,
+      "preparationCount": 0,
+      "portableIrCheckCount": 0
+    },
+    "emittedSourceCaptures": [
+      {
+        "sourceKind": "lean",
+        "inputReads": [
+          {
+            "moduleName": 1,
+            "source": 1,
+            "segments": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "moduleName": 1,
+            "source": 1,
+            "segments": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "moduleName": 1,
+            "source": 1,
+            "segments": [
+              1,
+              1,
+              1
+            ]
+          }
+        ],
+        "sourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+        "manifestMatchesCapturedSources": true,
+        "additionalPreparations": 0
+      },
+      {
+        "sourceKind": "ps",
+        "inputReads": [
+          {
+            "moduleName": 1,
+            "source": 1,
+            "segments": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "moduleName": 1,
+            "source": 1,
+            "segments": [
+              1,
+              1,
+              1
+            ]
+          },
+          {
+            "moduleName": 1,
+            "source": 1,
+            "segments": [
+              1,
+              1,
+              1
+            ]
+          }
+        ],
+        "sourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+        "manifestMatchesCapturedSources": true,
+        "additionalPreparations": 0
+      }
+    ]
+  },
+  "emptyElimination": {
+    "feature": "regular-empty-data-and-single-scrutinee-elimination",
+    "sourceEdition": "ps-0.9-r3",
+    "sourceMode": "new-only",
+    "observations": [
+      {
+        "sourceKind": "lean",
+        "path": "test/fixtures/selfhost-sh1-empty.lean",
+        "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+        "bytes": 345,
+        "sourceArtifact": "empty.lean",
+        "typeScriptArtifact": "accepted-lean.ts",
+        "typeScriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+        "atomicAcceptedId": "lean-raw-imports-and-ordinary-do-spellings",
+        "atomicSourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictEmpty"
+        ],
+        "sourceDeclarationCount": 5,
+        "coreDeclarationCount": 6,
+        "originMemberCounts": [
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        "emptyLayoutCount": 1,
+        "emptyEliminationCount": 4,
+        "typedResultCount": 4,
+        "eliminations": [
+          {
+            "name": "sh1EmptyNat",
+            "resultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "declarationResultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "resultName": "emptyResult",
+            "runtimeParameters": [
+              "value"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          },
+          {
+            "name": "sh1EmptyFunction",
+            "resultType": {
+              "kind": "function",
+              "parameters": [
+                {
+                  "kind": "primitive",
+                  "name": "nat"
+                }
+              ],
+              "result": {
+                "kind": "primitive",
+                "name": "nat"
+              }
+            },
+            "declarationResultType": {
+              "kind": "function",
+              "parameters": [
+                {
+                  "kind": "primitive",
+                  "name": "nat"
+                }
+              ],
+              "result": {
+                "kind": "primitive",
+                "name": "nat"
+              }
+            },
+            "resultName": "emptyResult",
+            "runtimeParameters": [
+              "value"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          },
+          {
+            "name": "sh1EmptyGeneric",
+            "resultType": {
+              "kind": "typeParameter",
+              "name": "T0"
+            },
+            "declarationResultType": {
+              "kind": "typeParameter",
+              "name": "T0"
+            },
+            "resultName": "emptyResult",
+            "runtimeParameters": [
+              "value"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          },
+          {
+            "name": "sh1EmptyFresh",
+            "resultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "declarationResultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "resultName": "emptyResult$2",
+            "runtimeParameters": [
+              "value",
+              "emptyResult"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          }
+        ],
+        "capturedFixtureSha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5"
+      },
+      {
+        "sourceKind": "ps",
+        "path": "test/fixtures/selfhost-sh1-empty.ps",
+        "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+        "bytes": 369,
+        "sourceArtifact": "empty.ps",
+        "typeScriptArtifact": "accepted-ps.ts",
+        "typeScriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+        "atomicAcceptedId": "ps-raw-imports-and-ordinary-do-spellings",
+        "atomicSourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictEmpty"
+        ],
+        "sourceDeclarationCount": 5,
+        "coreDeclarationCount": 6,
+        "originMemberCounts": [
+          2,
+          1,
+          1,
+          1,
+          1
+        ],
+        "emptyLayoutCount": 1,
+        "emptyEliminationCount": 4,
+        "typedResultCount": 4,
+        "eliminations": [
+          {
+            "name": "sh1EmptyNat",
+            "resultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "declarationResultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "resultName": "emptyResult",
+            "runtimeParameters": [
+              "value"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          },
+          {
+            "name": "sh1EmptyFunction",
+            "resultType": {
+              "kind": "function",
+              "parameters": [
+                {
+                  "kind": "primitive",
+                  "name": "nat"
+                }
+              ],
+              "result": {
+                "kind": "primitive",
+                "name": "nat"
+              }
+            },
+            "declarationResultType": {
+              "kind": "function",
+              "parameters": [
+                {
+                  "kind": "primitive",
+                  "name": "nat"
+                }
+              ],
+              "result": {
+                "kind": "primitive",
+                "name": "nat"
+              }
+            },
+            "resultName": "emptyResult",
+            "runtimeParameters": [
+              "value"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          },
+          {
+            "name": "sh1EmptyGeneric",
+            "resultType": {
+              "kind": "typeParameter",
+              "name": "T0"
+            },
+            "declarationResultType": {
+              "kind": "typeParameter",
+              "name": "T0"
+            },
+            "resultName": "emptyResult",
+            "runtimeParameters": [
+              "value"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          },
+          {
+            "name": "sh1EmptyFresh",
+            "resultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "declarationResultType": {
+              "kind": "primitive",
+              "name": "nat"
+            },
+            "resultName": "emptyResult$2",
+            "runtimeParameters": [
+              "value",
+              "emptyResult"
+            ],
+            "bodyIsTypedEmptyResult": true,
+            "alternatives": 0,
+            "typeArgumentCount": 1,
+            "freshResultName": true
+          }
+        ],
+        "capturedFixtureSha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390"
+      }
+    ],
+    "emittedTypeScriptEqual": true,
+    "typeScriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+    "additionalPreparations": 0,
+    "additionalPortableIrChecks": 0,
+    "nativeValueOracle": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "zeroFieldRecords": {
+    "feature": "inhabited-zero-field-structures",
+    "observations": [
+      {
+        "sourceKind": "lean",
+        "structureName": "Sh1EmptyRecord",
+        "valueName": "sh1EmptyRecordValue",
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictLibrary"
+        ],
+        "sourceDeclarationCount": 2,
+        "coreDeclarationCount": 4,
+        "constructorCount": 1,
+        "fieldCount": 0,
+        "recordFieldCount": 0,
+        "actualRecordValueRetained": true,
+        "inhabited": true,
+        "atomicAcceptedId": "lean-raw-imports-and-ordinary-do-spellings",
+        "atomicSourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+        "typeScriptArtifact": "accepted-lean.ts",
+        "typeScriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165"
+      },
+      {
+        "sourceKind": "ps",
+        "structureName": "Sh1EmptyRecord",
+        "valueName": "sh1EmptyRecordValue",
+        "moduleName": [
+          "Ps",
+          "Compiler",
+          "StrictLibrary"
+        ],
+        "sourceDeclarationCount": 2,
+        "coreDeclarationCount": 4,
+        "constructorCount": 1,
+        "fieldCount": 0,
+        "recordFieldCount": 0,
+        "actualRecordValueRetained": true,
+        "inhabited": true,
+        "atomicAcceptedId": "ps-raw-imports-and-ordinary-do-spellings",
+        "atomicSourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+        "typeScriptArtifact": "accepted-ps.ts",
+        "typeScriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165"
+      }
+    ],
+    "emittedTypeScriptEqual": true,
+    "typeScriptSha256": "c65445404e270e5ccca9c49d6bd6c9bd0ce098642aba9db777fef0822e9a5165",
+    "observationBoundary": "actual-original-ir-after-atomic-emission",
+    "additionalPreparations": 0,
+    "additionalPortableIrChecks": 0,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "sourcePolicyGenerations": "This exact executing compiler only; full current closure has its separate generation receipt.",
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

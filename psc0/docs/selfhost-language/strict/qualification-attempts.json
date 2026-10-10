@@ -3035,170 +3035,542 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 17,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+      "runId": 38027413274,
+      "runAttempt": 1,
+      "workflowId": 380282667,
+      "compilerJobId": 114141103218,
+      "providerJobId": 114141265302,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38027413274",
+      "status": "success",
+      "execution": {
+        "runStatus": "completed",
+        "runConclusion": "success",
+        "runStartedAt": "2026-10-10T05:24:47Z",
+        "runUpdatedAt": "2026-10-10T05:27:17Z",
+        "compilerStartedAt": "2026-10-10T05:24:50Z",
+        "compilerCompletedAt": "2026-10-10T05:25:45Z",
+        "compilerConclusion": "success",
+        "providerStartedAt": "2026-10-10T05:25:48Z",
+        "providerCompletedAt": "2026-10-10T05:27:16Z",
+        "providerConclusion": "success",
+        "compiledCheckoutRemains": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "orchestrationSource": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "mode": "authenticated-retained-generation-evidence-only-completion"
+      },
+      "generationOwnership": [
+        {
+          "generation": "N1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "development/N1/receipt.json"
+        },
+        {
+          "generation": "C1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "C1/receipt.json"
+        },
+        {
+          "generation": "C2",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C2/receipt.json"
+        },
+        {
+          "generation": "C3",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C3/receipt.json"
+        }
+      ],
+      "evidenceProducer": {
+        "sourceRef": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "finisher": {
+          "sourcePath": "psc0/scripts/sh1-finish-evidence.mjs",
+          "path": "scripts/sh1-finish-evidence.mjs",
+          "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+          "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+          "bytes": 38509
+        },
+        "binder": {
+          "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+          "path": "scripts/sh1-strict-evidence-finish.mjs",
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "workflow": {
+          "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+          "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+          "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+          "bytes": 55773
+        },
+        "currentExecution": {
+          "runId": 38027413274,
+          "workflowId": 380282667,
+          "runAttempt": 1,
+          "compilerJobId": 114141103218,
+          "headSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      },
+      "historicalExecutions": {
+        "nativeAndCandidate": {
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "compilerConclusion": "cancelled",
+          "providerJobId": 114120597914,
+          "providerConclusion": "skipped"
+        },
+        "secondAndThird": {
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "compilerConclusion": "failure",
+          "providerJobId": 114136283916,
+          "providerConclusion": "skipped"
+        }
+      },
+      "preservedHistoricalAttempts": {
+        "count": 16,
+        "compactArraySha256": "557a694fb4e41826e9b11a6ca69b7e8131aec91090436ff8262fa0b70552c8a2"
+      },
+      "completed": {
+        "authenticatedArchives": true,
+        "all446ImportedFilesPreserved": true,
+        "correctedStrictEvidenceBinder": true,
+        "originalQualificationFinalization": true,
+        "complete135FileCompilerInventory": true,
+        "all24ReturnedJsonValuesAuthenticated": true,
+        "independentProviderAccepted": true
+      },
+      "generationsRebuiltByThisExecution": [],
+      "conformanceExecutionsRepeatedByThisExecution": [],
+      "sourceAndRecipe": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "allOriginalGenerationRecipeInputsPreserved": true,
+        "generationRecipesNotRelabeledAsEvidenceProducer": true,
+        "canonicalBinderChangedForFutureRuns": true
+      },
+      "generatedProducts": {
+        "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+        "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+        "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+        "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      "fixedPoint": {
+        "status": "all-four-C2-C3-products-identical",
+        "nativeParity": "N1-C2-C3-TypeScript-and-JavaScript-identical",
+        "sourceOfGenerationReceipts": "Authenticated retained original N1/C1 and later C2/C3 receipts; evidence finish did not regenerate them."
+      },
+      "strictEvidenceBinder": {
+        "status": "completed",
+        "report": {
+          "path": "strict-enforcement-evidence.json",
+          "blob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+          "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+          "bytes": 149717
+        },
+        "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+        "sourceEnforcementQualified": true,
+        "targetAdmissionQualified": true,
+        "enabledRuntimeFiniteConformanceQualified": true,
+        "genericFunctionValueFiniteConformanceQualified": true,
+        "producedStrictSh1Qualified": false,
+        "producedSemanticContractQualified": false,
+        "producedProviderChecked": false
+      },
+      "provider": {
+        "status": "accepted",
+        "accepted": true,
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "uniqueStreams": 4,
+        "labeledInputs": 8,
+        "allStreamsAccepted": true,
+        "scope": "Exact eight labeled C2/C3 admission inputs only; not N1, all examples or a whole-compiler preservation theorem.",
+        "emissionWasGatedByThisCheck": false,
+        "receipt": {
+          "path": "kernel-admissions.json",
+          "blob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526
+        }
+      },
+      "rawEvidence": {
+        "qualification": {
+          "path": "qualification.json",
+          "blob": "96be5e6ed93773353a4e084ad7f525af78cd21ad",
+          "sha256": "093b7c3a3016399b1000c05fb01a3cddb2e45ea415fdbc0bdef2009f9c5c25d3",
+          "bytes": 164959
+        },
+        "strictBinder": {
+          "path": "strict-enforcement-evidence.json",
+          "blob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+          "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+          "bytes": 149717
+        },
+        "inputs": {
+          "path": "dist/sh1-evidence-finish-inputs/inputs.json",
+          "blob": "f922f1865b8d83f97c6e8ff5bf0720d2e2776ce0",
+          "sha256": "6244a785d54b0acdcb31ae93784f1985bbff5e49912042b7a93e97746f91ae22",
+          "bytes": 330480
+        },
+        "inventory": {
+          "path": "dist/sh1-evidence-finish-inputs/evidence-inventory.json",
+          "blob": "b45fb963d72b72426be5135b9b4612eb150e2c16",
+          "sha256": "addfaa6074bbc5afa8ffd91c5065fee565cfc33aac42ddfed8911e2560de3559",
+          "bytes": 74318
+        },
+        "completion": {
+          "path": "dist/sh1/evidence-completion.json",
+          "blob": "62baf773b1da5516c148a21db9682633ecc71c63",
+          "sha256": "b846dfbd8447334ec80e897b39c2271adb87e77599897392c60e4a9109004227",
+          "bytes": 17685
+        },
+        "provider": {
+          "path": "kernel-admissions.json",
+          "blob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526
+        }
+      },
+      "configuredCompilerGateOutcomes": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-10T05:24:50Z",
+          "completed_at": "2026-10-10T05:24:52Z"
+        },
+        {
+          "name": "Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-10T05:24:52Z",
+          "completed_at": "2026-10-10T05:25:10Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-10T05:25:10Z",
+          "completed_at": "2026-10-10T05:25:12Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-10T05:25:12Z",
+          "completed_at": "2026-10-10T05:25:28Z"
+        },
+        {
+          "name": "Authenticate completed generations and install the reviewed evidence producers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-10T05:25:28Z",
+          "completed_at": "2026-10-10T05:25:35Z"
+        },
+        {
+          "name": "Install the pinned current TypeScript 7 profile",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-10T05:25:35Z",
+          "completed_at": "2026-10-10T05:25:36Z"
+        },
+        {
+          "name": "Verify the actual TypeScript 7 evidence-finishing runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-10T05:25:36Z",
+          "completed_at": "2026-10-10T05:25:37Z"
+        },
+        {
+          "name": "Complete binding from the authenticated retained generations",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-10T05:25:37Z",
+          "completed_at": "2026-10-10T05:25:40Z"
+        },
+        {
+          "name": "Retain exact evidence and any remaining failure context",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-10T05:25:40Z",
+          "completed_at": "2026-10-10T05:25:41Z"
+        },
+        {
+          "name": "Retain completed evidence and all authenticated original inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-10T05:25:41Z",
+          "completed_at": "2026-10-10T05:25:43Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-10T05:25:43Z",
+          "completed_at": "2026-10-10T05:25:44Z"
+        },
+        {
+          "name": "Post Check out the exact previously compiled source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-10T05:25:44Z",
+          "completed_at": "2026-10-10T05:25:44Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-10T05:25:44Z",
+          "completed_at": "2026-10-10T05:25:44Z"
+        }
+      ],
+      "configuredProviderGateOutcomes": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-10T05:25:48Z",
+          "completed_at": "2026-10-10T05:25:50Z"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-10T05:25:50Z",
+          "completed_at": "2026-10-10T05:26:11Z"
+        },
+        {
+          "name": "Read the independently qualified native provider at its exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-10T05:26:11Z",
+          "completed_at": "2026-10-10T05:26:19Z"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-10T05:26:19Z",
+          "completed_at": "2026-10-10T05:26:21Z"
+        },
+        {
+          "name": "Run leanprover/lean-action@v1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-10T05:26:21Z",
+          "completed_at": "2026-10-10T05:26:33Z"
+        },
+        {
+          "name": "Restore pinned native provider build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-10T05:26:33Z",
+          "completed_at": "2026-10-10T05:26:33Z"
+        },
+        {
+          "name": "Build the existing provider target without editing its implementation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-10T05:26:33Z",
+          "completed_at": "2026-10-10T05:27:09Z"
+        },
+        {
+          "name": "Retain the pinned provider build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-10T05:27:09Z",
+          "completed_at": "2026-10-10T05:27:10Z"
+        },
+        {
+          "name": "Read exact compiler qualification artifacts from this run",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-10T05:27:10Z",
+          "completed_at": "2026-10-10T05:27:11Z"
+        },
+        {
+          "name": "Obtain actual provider decisions for the qualified admission streams",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-10T05:27:11Z",
+          "completed_at": "2026-10-10T05:27:13Z"
+        },
+        {
+          "name": "Retain provider acceptance or the exact rejection evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-10T05:27:13Z",
+          "completed_at": "2026-10-10T05:27:14Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-10T05:27:14Z",
+          "completed_at": "2026-10-10T05:27:14Z"
+        },
+        {
+          "name": "Post Read the independently qualified native provider at its exact source revision",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-10T05:27:14Z",
+          "completed_at": "2026-10-10T05:27:14Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-10T05:27:14Z",
+          "completed_at": "2026-10-10T05:27:15Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23,
+          "started_at": "2026-10-10T05:27:15Z",
+          "completed_at": "2026-10-10T05:27:15Z"
+        }
+      ],
+      "compilerSourceChanged": false,
+      "fixtureChanged": false,
+      "selectedSeedChanged": false,
+      "generalPreservationProven": false,
+      "strictSh1Qualified": true,
+      "semanticContractQualified": true,
+      "providerChecked": true,
+      "finalDispositionPending": false,
+      "finalDisposition": {
+        "status": "qualified-for-declared-strict-entry-and-lane",
+        "correspondenceRows": 33,
+        "stageObligations": 27,
+        "releaseRecordReference": {
+          "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+          "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+          "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+          "bytes": 1858477
+        },
+        "generalPreservationProven": false
+      },
+      "finalEvidenceIndex": {
+        "blob": "b42f79e53715f47c3ee6b4d429527c5636b65c3e",
+        "sha256": "c708a697c85ff3d3f83a669664b77bbacd18e846ea218bb4ae5af08fd0fe1cbb",
+        "bytes": 17239
+      },
+      "metadata": {
+        "blob": "76b220b996b08821c3e5a410eb19e3f6ead4394d",
+        "sha256": "171cbf2cefb774df9bf5f584ae0ab339cf0047b0f830c66a8d2890fdb1433219",
+        "bytes": 29091
+      },
+      "logs": {
+        "compiler": {
+          "blob": "57de287608f465a4749704302311e9351a6285b3",
+          "sha256": "203c63d40cb6f3cd1f7d5ae8231e40ae0e3e8f92a319893261d46f0274da6723",
+          "bytes": 1659322
+        },
+        "provider": {
+          "blob": "a7b739b3197c0d9baf520e0f8333034d894ead92",
+          "sha256": "d8210e0c935c70db7f65da8804378fa525a11f1f7cca94564bace7669cb58d35",
+          "bytes": 83472
+        }
+      },
+      "separateNormalNativeDevelopment": {
+        "runId": 38027413267,
+        "workflowId": 378853677,
+        "compilerJobId": 114141103207,
+        "providerJobId": 114142374674,
+        "status": "completed",
+        "conclusion": "success",
+        "compilerConclusion": "success",
+        "providerConclusion": "skipped",
+        "nativeDevelopmentStep": 24,
+        "nativeDevelopmentStepConclusion": "success",
+        "nativeDevelopmentStartedAt": "2026-10-10T05:25:52Z",
+        "nativeDevelopmentCompletedAt": "2026-10-10T05:32:14Z",
+        "completedAt": "2026-10-10T05:32:19Z",
+        "fullGenerationStepsSkipped": [
+          25,
+          26,
+          27
+        ],
+        "separateFromRetainedGenerationRecipe": true,
+        "normalNativeReceiptAndRecipeNotRead": true,
+        "terminalMetadata": {
+          "blob": "db6dc36dd59e5992bfc741bc56e90060b9177285",
+          "sha256": "e4f35bdc0ff784c7d16f59796ed80a3a709b24e5f9c8ec52c4d55178a4215b74",
+          "bytes": 44310
+        },
+        "coldRun": {
+          "runId": 38027413234,
+          "workflowId": 379723916,
+          "conclusion": "skipped"
+        }
+      }
     }
   ],
   "selectedSeedChanged": false,
   "mainAtLastVerified": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
-  "strictSh1Qualified": false,
-  "semanticContractQualified": false,
+  "strictSh1Qualified": true,
+  "semanticContractQualified": true,
   "nextQualification": {
-    "status": "authenticated-evidence-only-completion-requested-after-reviewed-marker-binding-correction",
-    "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
-    "sourceRefToRecordFromEnclosingCommit": false,
-    "orchestrationSourceRefToRecordFromEnclosingCommit": true,
-    "previousFailedRunId": 38021634599,
-    "previousCompilerJobId": 114123691566,
-    "previousProviderJobId": 114136283916,
-    "workflow": ".github/workflows/psc0-sh1-finish-evidence.yml",
-    "workflowBlob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
-    "workflowSha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
-    "workflowBytes": 55773,
-    "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
-    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
-    "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
-    "expectedRecipeFileCount": 48,
-    "recipeObservedInOriginalGenerations": true,
-    "evidenceProducer": {
-      "finisher": {
-        "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
-        "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
-        "bytes": 38509
-      },
-      "binder": {
-        "blob": "7700fef35acd06789b94f72078869fdef489214f",
-        "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
-        "bytes": 91977
-      }
+    "status": "none-required-for-this-qualified-source-checkpoint",
+    "qualifiedSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "releaseRecordReference": {
+      "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+      "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+      "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+      "bytes": 1858477
     },
-    "generationOwnership": {
-      "N1": {
-        "runId": 38015134511,
-        "compilerJobId": 114103608774
-      },
-      "C1": {
-        "runId": 38015134511,
-        "compilerJobId": 114103608774
-      },
-      "C2": {
-        "runId": 38021634599,
-        "compilerJobId": 114123691566
-      },
-      "C3": {
-        "runId": 38021634599,
-        "compilerJobId": 114123691566
-      }
-    },
-    "reusedGenerations": [
-      "N1",
-      "C1",
-      "C2",
-      "C3"
-    ],
-    "requiredPhases": [
-      "authenticate complete archive and all actual generation/gate receipts",
-      "execute corrected binder and original qualification finalization",
-      "retain135-file catalog and24returnedJSONvalues",
-      "obtain independent provider acceptance"
-    ],
-    "jobTimeoutMinutes": 45,
-    "providerTimeoutMinutes": 45,
-    "actualRunId": null,
-    "actualCompilerJobId": null,
-    "actualProviderJobId": null,
-    "repeatColdRecovery": false,
-    "repeatNativeCandidate": false,
-    "repeatSelectedSeedCandidate": false,
-    "repeatC2C3": false,
-    "productionSourceChanged": false,
-    "fixtureChanged": false,
-    "generationRecipeChanged": false,
-    "canonicalEvidenceBinderChanged": true,
-    "predictedFutureNormalRecipeSha256": "18bfaff7d1d107a95f54733abcd624e5f43cb60dd25be827c764e488b82725fc",
-    "predictedFutureNormalRecipeHasNotGeneratedTheseArtifacts": true,
-    "qualificationChecksBypassed": false,
-    "previousRequest": {
-      "status": "supported-exact-source-fixed-point-continuation-requested-after-c3-cancellation",
-      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
-      "sourceRefToRecordFromEnclosingCommit": false,
-      "orchestrationSourceRefToRecordFromEnclosingCommit": true,
-      "previousCancelledRunId": 38015134511,
-      "previousCompilerJobId": 114103608774,
-      "workflow": ".github/workflows/psc0-sh1-continue.yml",
-      "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
-      "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
-      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
-      "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
-      "expectedRecipeFileCount": 48,
-      "recipeObservedInOriginalN1C1C2": true,
-      "expectedRecipeIsPredictionUntilExecuted": false,
-      "reusedGenerations": [
-        "N1",
-        "C1"
-      ],
-      "requiredPhases": [
-        "authenticate original cancelled run/jobs and complete archive",
-        "verify all imported files and48recipe sources",
-        "existing fixed-point command rebuildsC2 thenC3",
-        "all original C2/C3 conformance and four-product equality",
-        "exact strict evidence binder",
-        "preserved-input and complete-file inventory",
-        "independent selected-provider acceptance"
-      ],
-      "jobTimeoutMinutes": 300,
-      "providerTimeoutMinutes": 45,
-      "actualRunId": null,
-      "actualCompilerJobId": null,
-      "actualProviderJobId": null,
-      "repeatColdRecovery": false,
-      "repeatNativeCandidate": false,
-      "repeatSelectedSeedCandidate": false,
-      "productionSourceChanged": false,
-      "fixtureChanged": false,
-      "hostRecipeChanged": false,
-      "qualificationChecksBypassed": false,
-      "previousRequest": {
-        "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
-        "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
-        "sourceRefToRecordFromEnclosingCommit": true,
-        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
-        "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
-        "expectedRecipeFileCount": 48,
-        "expectedRecipeIsPredictionUntilExecuted": true,
-        "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
-        "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
-        "workflow": ".github/workflows/psc0-sh1.yml",
-        "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
-        "workflowId": 378853677,
-        "fullQualificationRequested": true,
-        "commitMarker": "[sh1-qualify]",
-        "requiredPhases": [
-          "N1 native candidate and conformance",
-          "data-only authenticated R/N1 worker comparison",
-          "selected-R to C1 and all existing candidate gates",
-          "C1 to C2",
-          "C2 to C3",
-          "four-product fixed point and native parity",
-          "exact strict evidence binder",
-          "independent selected-provider acceptance"
-        ],
-        "repeatColdRecovery": false,
-        "repeatRetainedN1Diagnostic": false,
-        "productionSourceChanged": false,
-        "fixtureChanged": false,
-        "hostConformanceChanged": true,
-        "addedCompilerExecutions": 0,
-        "priorReceiptsReusedAsNewQualification": false,
-        "strictSh1Qualified": false,
-        "semanticContractQualified": false,
-        "providerChecked": false
-      },
-      "strictSh1Qualified": false,
-      "semanticContractQualified": false,
-      "providerChecked": false
-    },
-    "strictSh1Qualified": false,
-    "semanticContractQualified": false,
-    "providerChecked": false
+    "futurePolicy": "Use the development and resident iteration paths for ordinary edits. Run complete exact-source qualification at a deliberate promotion checkpoint after source or recipe changes."
   },
   "nativeCheckpoints": [
     {
@@ -3237,7 +3609,7 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T05:14:00Z",
+  "updatedAtUtc": "2026-10-10T05:45:24Z",
   "completedDiagnostics": [
     {
       "status": "completed-localization-only",
@@ -3305,5 +3677,18 @@
       "semanticContractQualified": false,
       "providerChecked": false
     }
-  ]
+  ],
+  "previousQualificationRequestReference": {
+    "path": "psc0/docs/selfhost-language/strict/qualification-attempts.json",
+    "blob": "f6a9005b7914b3f9d102f45535df8e3813f9c579",
+    "sha256": "9f9d535dae8eca1d3c28a57053cd56fe2ccbf5e1fd2b36426892d1505289c68b",
+    "bytes": 140876,
+    "jsonPointer": "/nextQualification"
+  },
+  "currentStrictReleaseRecordReference": {
+    "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+    "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+    "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+    "bytes": 1858477
+  }
 }

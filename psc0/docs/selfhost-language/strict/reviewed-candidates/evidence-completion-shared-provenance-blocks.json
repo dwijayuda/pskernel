@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-correspondence-evidence-completion-provenance-block-draft",
+  "status": "source-reviewed-against-exact-workflow-success-schema-pending-current-identities",
+  "sourceBase": {
+    "blob": "01b68d0c3f1495327ff432bd7425218440d39d18",
+    "sha256": "a4271d718037eaad90193b1a7085ea5cb026aef37ee232a69d84631f7c056522",
+    "bytes": 32487
+  },
+  "sharedPending": {
+    "blob": "2b53fed7fd1429585885bbd555dbc6a59eca4fde",
+    "sha256": "b5a2f5815065b8acfdc321d88a33d55c337d3d09c5328cf794ab9f2be3c8bd84",
+    "bytes": 31008,
+    "role": "Historical schema draft; final shared value additionally reorders producer fields and adds exact import-constants hash."
+  },
+  "constantFields": {
+    "orchestrationHeadSha": null,
+    "runId": null,
+    "runAttempt": 1,
+    "workflowId": null,
+    "compilerJobId": null,
+    "sourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+    "authenticatedArchives": [
+      {
+        "runId": 38015134511,
+        "artifactId": 11658430459,
+        "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+        "bytes": 5147944,
+        "fileCount": 344,
+        "rawArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+      },
+      {
+        "runId": 38021634599,
+        "artifactId": 11659939542,
+        "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+        "sha256": "599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+        "bytes": 11739089,
+        "fileCount": 444,
+        "rawArchivePath": "dist/sh1-evidence-finish-inputs/predecessor-verified.zip"
+      }
+    ],
+    "generationOwners": {
+      "N1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C2": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      },
+      "C3": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      }
+    },
+    "generationLog": {
+      "path": "dist/sh1-evidence-finish-inputs/source-generation-job.log",
+      "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+      "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+      "bytes": 875228
+    },
+    "generationReceipts": {
+      "N1": {
+        "path": "dist/sh1/development/N1/receipt.json",
+        "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+        "bytes": 15827
+      },
+      "C1": {
+        "path": "dist/sh1/C1/receipt.json",
+        "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+        "bytes": 169531
+      },
+      "C2": {
+        "path": "dist/sh1/C2/receipt.json",
+        "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+        "bytes": 166707
+      },
+      "C3": {
+        "path": "dist/sh1/C3/receipt.json",
+        "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+        "bytes": 166709
+      }
+    },
+    "originalQualifier": {
+      "path": "scripts/sh1-qualify.mjs",
+      "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+      "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+      "bytes": 73618
+    },
+    "originalBinder": {
+      "path": "scripts/sh1-strict-evidence.mjs",
+      "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+      "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+      "bytes": 91970
+    }
+  },
+  "executionBlock": "  const expectedExecution = P.currentInput.continuationExecution;\n  same(expectedExecution, T.continuationExecution, \"shared evidence-completion execution contract\");\n  const execution = R.execution;\n  need(hexBlob(K.orchestrationHeadSha) && K.orchestrationHeadSha !== K.sourceRef &&\n       [K.runId, K.runAttempt, K.workflowId, K.compilerJobId].every(value =>\n         Number.isSafeInteger(value) && value > 0),\n       \"actual evidence-completion identity is still pending\");\n  same(execution.expectedHeadSha, K.orchestrationHeadSha, \"evidence-producer orchestration head\");\n  same(execution.requiredSourceRef, K.sourceRef, \"unchanged compiled source\");\n  same(execution.expectedRunId, K.runId, \"actual evidence-completion run\");\n  same(execution.runAttempt, K.runAttempt, \"actual evidence-completion run attempt\");\n  same(execution.expectedWorkflowId, K.workflowId, \"actual evidence-completion workflow\");\n  same(execution.compilerJobId, K.compilerJobId, \"actual evidence-completion job\");\n  same(execution.compilerConclusion, \"success\", \"actual evidence-completion job conclusion\");\n  same(execution.providerConclusion, \"success\", \"actual separate provider conclusion\");\n  for (const field of [\n    \"expectedRunId\", \"expectedWorkflowId\", \"expectedHeadSha\", \"requiredSourceRef\",\n    \"runAttempt\", \"compilerJobId\", \"workflowSourceBlob\", \"orchestration\",\n    \"priorExecution\", \"continuationInputs\", \"continuationInputsRole\",\n    \"generationExecution\", \"evidenceProducer\", \"evidenceProducerRepair\",\n    \"generationOwnership\", \"logOnlyGateOwnership\", \"currentOutputOwnership\"\n  ]) same(execution[field], expectedExecution[field], \"execution provenance \" + field);\n  same(execution.priorExecution.expectedRunId, 38015134511, \"original generation run\");\n  same(execution.priorExecution.compilerJobId, 114103608774, \"original generation compiler\");\n  same(execution.priorExecution.compilerConclusion, \"cancelled\", \"original cancellation preserved\");\n  same(execution.priorExecution.providerConclusion, \"skipped\", \"original provider skip preserved\");\n  same(execution.generationExecution.expectedRunId, 38021634599, \"completed generation run\");\n  same(execution.generationExecution.compilerJobId, 114123691566, \"completed generation compiler\");\n  same(execution.generationExecution.compilerConclusion, \"failure\", \"generation-run failure preserved\");\n  same(execution.generationExecution.providerConclusion, \"skipped\", \"generation-run provider skip preserved\");\n  same(execution.evidenceProducer.sourceRef, K.orchestrationHeadSha, \"actual separate producer source\");\n  same(execution.evidenceProducer.currentExecution, {\n    runId: K.runId, workflowId: K.workflowId, runAttempt: K.runAttempt,\n    compilerJobId: K.compilerJobId, headSha: K.orchestrationHeadSha\n  }, \"actual separate producer execution\");\n  need(Number.isSafeInteger(execution.providerJobId) && execution.providerJobId > 0 &&\n       execution.providerJobId !== execution.priorExecution.providerJobId &&\n       execution.providerJobId !== execution.generationExecution.providerJobId &&\n       K.compilerJobId !== execution.priorExecution.compilerJobId &&\n       K.compilerJobId !== execution.generationExecution.compilerJobId &&\n       K.runId !== execution.priorExecution.expectedRunId &&\n       K.runId !== execution.generationExecution.expectedRunId,\n       \"evidence finish and provider identities must be distinct from generation origins\");\n  const carried = execution.evidenceCompletionInputs;\n  for (const [field, value] of Object.entries(expectedExecution.evidenceCompletionInputs)) {\n    if (![\"inputsFile\", \"evidenceInventoryFile\", \"completionFile\"].includes(field))\n      same(carried[field], value, \"evidence-completion input contract \" + field);\n  }\n",
+  "evidenceFilesBlock": "  for (const [key, field, valueKey] of [\n    [\"evidenceFinishInputs\", \"inputsFile\", \"evidenceFinishInputsValue\"],\n    [\"evidenceInventory\", \"evidenceInventoryFile\", \"evidenceInventoryValue\"],\n    [\"evidenceCompletion\", \"completionFile\", \"evidenceCompletionValue\"]\n  ]) {\n    const file = expectedExecution.evidenceCompletionInputs[field];\n    checkEnvelope(A[key], file.path, \"actual \" + key + \" envelope\");\n    same(carried[field], A[key], \"actual \" + key + \" release-envelope binding\");\n    need(A[valueKey] !== null && typeof A[valueKey] === \"object\",\n         \"actual \" + key + \" parsed JSON absent\");\n    const text = pretty(A[valueKey]);\n    hashText(text, A[key].sha256, \"actual \" + key + \" producer serialization\");\n    same(bytes(text), A[key].bytes, \"actual \" + key + \" producer bytes\");\n  }\n  const imported = A.evidenceFinishInputsValue, inventory = A.evidenceInventoryValue;\n  const completion = A.evidenceCompletionValue;\n  for (const [field, value] of Object.entries({\n    schemaVersion: 1, kind: \"psc0-authenticated-retained-fixed-point-finish-inputs\",\n    compiledSourceRef: K.sourceRef, sourceRoot: K.sourceRoot,\n    outputRoot: K.sourceRoot + \"/dist/sh1\", sourceClosureSha256: K.sourceClosureSha256,\n    recipeSha256: K.recipeSha256, evidenceProducer: execution.evidenceProducer,\n    generationOwnership: K.generationOwners, reusedGenerations: [\"N1\", \"C1\", \"C2\", \"C3\"],\n    generatedThisCommand: [], archiveFileCount: 444,\n    currentSourceAndAll48RecipeInputsUnchanged: true, allImportedEvidenceUnchanged: true,\n    compilerExecutedByThisImport: false, strictSh1Qualified: false,\n    semanticContractQualified: false, providerChecked: false\n  })) same(imported[field], value, \"authenticated evidence-finish input \" + field);\n  digest(imported.expected, carried.requiredInputExpectedConstantsSha256,\n         \"exact reviewed workflow import requirements\");\n  same(carried.requiredInputExpectedConstantsSha256,\n       \"6da2382a06b079e8b6469c43d721ce3753b2e2a83f74333c08bc62593f302c96\",\n       \"pinned evidence-finish import constants\");\n  for (const [key, producer] of [\n    [\"nativeAndCandidate\", execution.priorExecution],\n    [\"secondAndThird\", execution.generationExecution]\n  ]) {\n    const observed = imported.generationExecutions[key];\n    for (const [field, value] of Object.entries({\n      id: producer.expectedRunId, workflow_id: producer.expectedWorkflowId,\n      head_sha: producer.expectedHeadSha, run_attempt: producer.runAttempt,\n      status: \"completed\", conclusion: producer.compilerConclusion\n    })) same(observed.run[field], value, \"actual generation-origin run \" + key + \"/\" + field);\n    for (const [field, value] of Object.entries({\n      id: producer.compilerJobId, status: \"completed\", conclusion: producer.compilerConclusion\n    })) same(observed.compilerJob[field], value, \"actual generation-origin compiler \" + key + \"/\" + field);\n    for (const [field, value] of Object.entries({\n      id: producer.providerJobId, status: \"completed\", conclusion: \"skipped\"\n    })) same(observed.providerJob[field], value, \"actual historical provider skip \" + key + \"/\" + field);\n  }\n  same(imported.generationExecutions.secondAndThird.artifact.id, 11659939542,\n       \"actual completed-generation artifact\");\n  same(imported.generationExecutions.secondAndThird.artifact.digest,\n       \"sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80\",\n       \"actual completed-generation artifact digest\");\n  const earlierInputs = imported.originalContinuationInputs;\n  const earlierEnvelope = execution.generationExecution.importInputs;\n  same(earlierInputs.path, earlierEnvelope.path, \"earlier continuation input path\");\n  same(earlierInputs.blob, earlierEnvelope.retainedBlob, \"earlier continuation input blob\");\n  same(earlierInputs.sha256, earlierEnvelope.sha256, \"earlier continuation input digest\");\n  same(earlierInputs.bytes, earlierEnvelope.bytes, \"earlier continuation input byte count\");\n  hashText(pretty(earlierInputs.value), earlierEnvelope.sha256,\n           \"unchanged authentic earlier continuation input bytes\");\n  same(bytes(pretty(earlierInputs.value)), earlierEnvelope.bytes,\n       \"unchanged authentic earlier continuation input length\");\n  need(Array.isArray(imported.authenticatedArchives) &&\n       imported.authenticatedArchives.length === K.authenticatedArchives.length,\n       \"two authenticated source-generation archives\");\n  for (let index = 0; index < K.authenticatedArchives.length; index++) {\n    for (const [field, value] of Object.entries(K.authenticatedArchives[index]))\n      same(imported.authenticatedArchives[index][field], value,\n           \"pinned source-generation archive \" + index + \"/\" + field);\n  }\n  for (const [field, value] of Object.entries(K.generationLog))\n    same(imported.generationLog[field], value, \"pinned source-generation log \" + field);\n  digest(imported.recipeFiles, K.recipeSha256, \"unchanged original generation recipe files\");\n  same(imported.recipeFiles.length, 48, \"original generation recipe file count\");\n  need(Array.isArray(imported.importedFiles) && imported.importedFiles.length >= 446 &&\n       new Set(imported.importedFiles.map(file => file.path)).size === imported.importedFiles.length,\n       \"unique actual imported file set and retained archives/log\");\n  const inputManifest = {\n    path: A.evidenceFinishInputs.path,\n    sha256: A.evidenceFinishInputs.sha256, bytes: A.evidenceFinishInputs.bytes\n  };\n  for (const [field, value] of Object.entries({\n    schemaVersion: 1, kind: \"psc0-authenticated-retained-fixed-point-evidence-completion\",\n    status: \"evidence-completed\", compiledSourceRef: K.sourceRef,\n    sourceClosureSha256: K.sourceClosureSha256, moduleCount: 64,\n    originalQualifier: K.originalQualifier, originalBinder: K.originalBinder,\n    evidenceProducer: execution.evidenceProducer, inputManifest,\n    authenticatedArchives: imported.authenticatedArchives, generationOwnership: K.generationOwners,\n    sourceGenerationLog: imported.generationLog,\n    compilerGenerationsRebuilt: [], conformanceExecutionsRepeated: [],\n    selectedAuthoringSeedChanged: false, generationReceiptBytesChanged: false,\n    generationRecipeRelabeledAsEvidenceProducer: false, priorExecutionConclusionsChanged: false,\n    strictSh1Qualified: false, semanticContractQualified: false,\n    generalPreservationProven: false, provider: {status: \"not-attempted\", kernelChecked: false}\n  })) same(completion[field], value, \"authenticated evidence completion \" + field);\n  same(completion.markerBindingCorrection, {\n    original: \".map((line) => line.slice(pass))\",\n    repaired: \".map((line) => line.slice(pass.length))\",\n    sameOrdered15NativeFixtureNamesRequired: true, otherBinderBytesUnchanged: true\n  }, \"bounded native-marker extraction correction\");\n  same(completion.preservedInputs, {\n    files: imported.importedFiles.length, catalogSha256: H(imported.importedFiles),\n    beforeAndAfterExact: true\n  }, \"all authenticated input files retained exactly\");\n  same(completion.generationRecipe, {\n    files: imported.recipeFiles, sha256: K.recipeSha256\n  }, \"completion original generation recipe\");\n  for (const archive of K.authenticatedArchives) {\n    same(imported.importedFiles.find(file => file.path === archive.rawArchivePath),\n         {path: archive.rawArchivePath, sha256: archive.sha256, bytes: archive.bytes},\n         \"retained authenticated archive \" + archive.runId);\n  }\n  same(imported.importedFiles.find(file => file.path === K.generationLog.path),\n       {path: K.generationLog.path, sha256: K.generationLog.sha256, bytes: K.generationLog.bytes},\n       \"retained exact source-generation job log\");\n  same(Object.keys(completion.generationReceipts), [\"N1\", \"C1\", \"C2\", \"C3\"],\n       \"ordered four-generation receipt ownership\");\n  for (const [generation, pin] of Object.entries(K.generationReceipts)) {\n    same(imported.importedFiles.find(file => file.path === pin.path), pin,\n         \"unchanged retained generation receipt \" + generation);\n    same(completion.generationReceipts[generation], pin,\n         \"completion retained generation receipt \" + generation);\n  }\n  const gateFiles = [\n    [\"PSC0_SH1_GENERATION\", \"receipt.json\"],\n    [\"PSC0_SH1_STRICT_SOURCE\", \"strict-source/receipt.json\"],\n    [\"PSC0_SH1_STRICT_TARGET\", \"strict-target/receipt.json\"],\n    [\"PSC0_SH1_STRICT_RUNTIME\", \"strict-runtime/receipt.json\"],\n    [\"PSC0_SH1_IR_CHECKER\", \"ir-checker/receipt.json\"],\n    [\"PSC0_SH1_CAPABILITIES\", \"capabilities/receipt.json\"],\n    [\"PSC0_SH1_HELPER_RUNTIME\", \"helper-runtime.json\"],\n    [\"PSC0_SH1_GENERIC_ERASURE\", \"generic-erasure/receipt.json\"]\n  ];\n  const expectedGateReports = [\"C2\", \"C3\"].flatMap(generation => gateFiles.map(([marker, relative]) => {\n    const path = \"dist/sh1/\" + generation + \"/\" + relative;\n    const file = imported.importedFiles.find(file => file.path === path);\n    need(file, \"authenticated completed generation gate file absent: \" + path);\n    return {generation, marker, file};\n  }));\n  same(completion.actualCompletedGenerationGateReports, expectedGateReports,\n       \"actual completed C2/C3 generation and seven conformance gate kinds\");\n  same(Object.keys(completion.outputs),\n       [\"strict-enforcement-evidence.json\", \"qualification.json\", \"seed-selection.json\"],\n       \"current evidence outputs\");\n  for (const key of [\"qualification\", \"strictBinder\"])\n    same(completion.outputs[A[key].path], {\n      path: \"dist/sh1/\" + A[key].path, sha256: A[key].sha256, bytes: A[key].bytes\n    }, \"new evidence output \" + key);\n",
+  "inventoryBlock": "  for (const [field, value] of Object.entries({\n    schemaVersion: 1, kind: \"psc0-exact-source-evidence-completion-inventory\",\n    status: \"complete\", complete: true, finishOutcome: \"success\",\n    sourceRef: K.sourceRef, orchestrationHeadSha: K.orchestrationHeadSha,\n    runId: K.runId, runAttempt: K.runAttempt,\n    predecessorRunId: 38021634599, predecessorArtifactId: 11659939542,\n    predecessorArchiveSha256: \"599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80\",\n    evidenceProducer: execution.evidenceProducer, generationOwnership: K.generationOwners,\n    inputManifest, completionFile: {\n      path: \"evidence-completion.json\", sourcePath: A.evidenceCompletion.path,\n      sha256: A.evidenceCompletion.sha256, bytes: A.evidenceCompletion.bytes\n    },\n    reusedGenerations: [\"N1\", \"C1\", \"C2\", \"C3\"], generatedThisCommand: [],\n    importedEvidenceUnchanged: true, missingFiles: [], validationErrors: [],\n    compilerExecutedByThisInventory: false, strictSh1Qualified: false,\n    semanticContractQualified: false, providerChecked: false\n  })) same(inventory[field], value, \"authenticated evidence-completion inventory \" + field);\n  need(Array.isArray(inventory.files) && inventory.files.length === carried.requiredInventoryFileCount &&\n       new Set(inventory.files.map(file => file.path)).size === inventory.files.length,\n       \"complete unique current catalog file inventory\");\n  same(carried.requiredInventoryFileCount, 135, \"exact compiler catalog file count\");\n  same(carried.requiredReturnedJsonFileCount, 24, \"required exact returned JSON file count\");\n  need(Array.isArray(inventory.supplementalFiles) &&\n       new Set(inventory.supplementalFiles.map(file => file.path)).size === inventory.supplementalFiles.length,\n       \"unique supplemental input/completion/profile envelope inventory\");\n  for (const [key, relative] of [\n    [\"evidenceFinishInputs\", \"../sh1-evidence-finish-inputs/inputs.json\"],\n    [\"evidenceCompletion\", \"evidence-completion.json\"]\n  ]) same(inventory.supplementalFiles.find(file => file.sourcePath === A[key].path), {\n    path: relative, sourcePath: A[key].path, sha256: A[key].sha256, bytes: A[key].bytes\n  }, \"actual supplemental envelope \" + key);\n  digest(inventory.sourceClosureManifest, K.sourceClosureSha256, \"inventory source closure\");\n  same(inventory.recipe, completion.generationRecipe, \"inventory unchanged generation recipe\");\n  digest(inventory.recipe.files, K.recipeSha256, \"inventory exact original recipe files\");\n  same(inventory.recipe.files.length, 48, \"inventory original recipe file count\");\n  for (const [generation, pin] of Object.entries(K.generationReceipts)) {\n    const relative = pin.path.slice(\"dist/sh1/\".length);\n    same(inventory.files.find(file => file.path === relative),\n         {path: relative, sha256: pin.sha256, bytes: pin.bytes},\n         \"inventoried unchanged generation receipt \" + generation);\n  }\n  for (const key of [\"qualification\", \"strictBinder\"])\n    same(inventory.files.find(file => file.path === A[key].path),\n         {path: A[key].path, sha256: A[key].sha256, bytes: A[key].bytes},\n         \"actual evidence-only output inventory \" + key);\n  const currentBinderGroup = R.receiptGroups.find(group => group.id === \"strict-binder\");\n  need(currentBinderGroup, \"strict-binder receipt group absent\");\n  same(currentBinderGroup.currentEvidenceProducer, {\n    executionPointer: \"/execution/evidenceProducer\",\n    executionValueSha256: H(execution.evidenceProducer),\n    binderPointer: \"/execution/evidenceProducer/binder\",\n    repairPointer: \"/execution/evidenceProducerRepair\",\n    repairValueSha256: H(execution.evidenceProducerRepair),\n    sourceBlobMeaning: \"Original generation-recipe source retained as the reviewed base of the exact evidence-producer correction.\"\n  }, \"current strict-binder group producer correction reference\");\n\n",
+  "pendingChecks": [
+    "Final workflow blob's diagnostic-only revision; require unchanged success/input/producer schemas.",
+    "Actual workflow blob/head/run/job identity after publication.",
+    "Final shared execution object and projected T/P full hashes."
+  ],
+  "scope": "Pure in-memory metadata validation blocks only. No source/catalog/row tail edits, no compiler/test calls, and no final33 invocation.",
+  "final33Invocations": 0,
+  "workflowSuccessSchemaReview": {
+    "blob": "e3bb16a479346fcb8214c6be59bc1aa54935d409",
+    "sha256": "3f03aab373c10e9f30a03023c38883f1e33125e16a89869dc2c14327bc7dc56a",
+    "bytes": 55564,
+    "expectedConstantsSha256": "6da2382a06b079e8b6469c43d721ce3753b2e2a83f74333c08bc62593f302c96",
+    "actualProducerPropertyOrder": [
+      "sourceRef",
+      "finisher",
+      "binder",
+      "workflow",
+      "currentExecution"
+    ],
+    "compilerExecutedByThisInventoryFieldConfirmed": true
+  }
+}

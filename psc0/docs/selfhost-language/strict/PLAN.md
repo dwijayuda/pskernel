@@ -1,8 +1,20 @@
 # Strict PSC0-SH/1 implementation plan
 
-Status: implementation and general source reviews complete; final qualification/disposition pending from ed5d00aca0743bde583b45fe7756dd494ac3960f; not yet strict-qualified. The qualified practical checkpoint was merged to main on 2026-10-09 at 16:30:26 UTC. Work proceeds on psc0/strict-sh1-v1. [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) is the continuation authority; [merge-baseline.json](merge-baseline.json) records the verified integration.
+Status: the declared strict PSC0-SH/1 checkpoint is qualified at compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`, with all 33 correspondence rows and 27 stages discharged in [release-qualification.json](release-qualification.json). The earlier practical checkpoint remains merged at `ed5d00aca0743bde583b45fe7756dd494ac3960f`. [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) records current integration status and exact evidence identities.
 
-## Current host observation correction and qualification request
+## Current strict SH/1 disposition
+
+The declared bounded PSC0-SH/1 source, runtime and TypeScript target are qualified at [compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`](https://github.com/dwijayuda/pskernel/commit/1fa5559a72b293defc56ef7e7020cf82d4b44b79). The [release qualification record](release-qualification.json) binds the exact compiler evidence, eight independently reviewed source and composition argument packets, all **33 correspondence dispositions** and **27 stage dispositions**, and separate provider acceptance.
+
+[Original run 38015134511](https://github.com/dwijayuda/pskernel/actions/runs/38015134511) remains cancelled; it owns the retained completed native/N1/C1 evidence and named successful prerequisite gates. [Continuation 38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), orchestrated at `43fa000c4adbc9d4754e20c213595c1449f00961`, completed C2/C3 and their conformance gates using the same compiled source and unchanged 48-file recipe, then failed on native IR pass-marker extraction in the evidence binder. Its failure and skipped provider remain recorded.
+
+[Evidence-completion run 38027413274](https://github.com/dwijayuda/pskernel/actions/runs/38027413274), orchestrated at `719f5ec4225baf51d1969cc3b5e4cbc6959fad4a`, authenticated both archives and all 446 imported files, applied the reviewed `slice(pass.length)` binder correction as a separate evidence producer, and completed the original qualification construction without rebuilding any generation or repeating conformance. The compiled checkout and its original 48 recipe inputs remained unchanged. Compiler job `114141103218` completed evidence binding and the complete 135-file catalog with 24 exact returned JSON values. Independent provider job `114141265302` accepted all four deduplicated admission streams covering eight C2/C3 roles. The complete four-product C2/C3 tuple matches, and N1/C2/C3 TypeScript and JavaScript agree. Final 33/27 dispositions are explicitly bound to these exact receipts and their declared source arguments in the release record.
+
+Qualification applies to the explicit `psCompilerSh1TypeScriptSources` entry and the recorded strict development/qualification lane. Generic compiler APIs do not implicitly select strict SH/1, and `selectedByPsconfig` remains false. Reviewed source arguments retain their declared canonical-input, primitive, platform and successful-allocation premises. Finite conformance, original-IR typing, fixed-point equality and provider admission retain their separate meanings; `generalPreservationProven` and the original narrow producer flags remain false.
+
+R remains selected. Handwritten `.lean` remains authoritative through the owned frontend, current `.ps` uses only the `ps-0.9-r3` bounded subset, and current development/recovery uses TypeScript 7.0.2. Node 22.23.3, Lean 4.34.0 and the independently pinned provider are unchanged. Earlier attempt requests and pending statuses below describe their recorded historical checkpoints; they do not restart completed work. The linked release record defines the current strict disposition.
+
+## Historical host observation correction and qualification request
 
 [Attempt14](https://github.com/dwijayuda/pskernel/actions/runs/38011068208) at **138fe57a6adeddfe875f1fbf4cc3a7de6e406a91** completed N1 development and **built C1**. C1 passed source, target, runtime, IR-checker fixtures, helper runtime, generic-erasure, session and capabilities checks before the post-generation migration-report comparison failed. C1 iteration, C2/C3, fixed point, strict binder and provider were not run. The complete native source check covered64 modules,1708 declarations,50 normalizations and64911 original-IR expressions with zero findings.
 
@@ -72,7 +84,7 @@ The specification does not require one monolithic machine-checked compiler theor
 | S5 | TS/JS lowering | Name/freshness/layout assumptions and generator, eta, count-loop and tail-loop routes have complete supported dispositions under exact TS7/Node identities |
 | S6 | Qualification and activation | One coherent exact-source native/N1/C1/C2/C3 qualification and separate provider evidence; every enabled mandatory row closed before strict activation |
 
-S1 and S2 form the first substantive implementation checkpoint. Qualifying that checkpoint does not close S3–S5 by implication. The [obligation ledger](obligations.json) and companion correspondence ledger record what remains.
+S1 and S2 formed the first substantive implementation checkpoint. Qualifying that checkpoint alone did not close S3–S5. The [obligation ledger](obligations.json) and companion correspondence ledger now record the completed declared-scope dispositions; the exit conditions above remain requirements for future changes.
 
 ## Source boundary design
 

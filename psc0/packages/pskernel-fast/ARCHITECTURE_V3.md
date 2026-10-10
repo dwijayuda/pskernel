@@ -6,7 +6,7 @@
 >
 > **Compatibility authority:** pinned Lean **4.35.0-rc4**, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 >
-> **Status:** architecture with a cloud-validated G0–G2 *representation and toy closure* prototype; not a complete kernel. No complete checker, qualified speed improvement, consistency theorem, or self-host milestone claimed.
+> **Status:** architecture plus CI-validated G0–G9 restricted syntax, raw/closure evaluators, partial typed-inference and initial universe-equivalence proofs; not a complete Lean checker. No complete checker, qualified speed improvement, consistency theorem, or self-host milestone claimed.
 >
 > **GitHub source of truth:** `dwijayuda/pskernel`, `research/pskernel-fast-v3-greenfield-20261011`.
 
@@ -226,3 +226,12 @@ This is **not** a benchmark or a successful Lean proof checker. Never infer full
 ## 12. Evidence-based evaluator priority after G6–G7
 
 [Detailed G6 benchmark evidence](EVALUATOR_BENCHMARK_G6.md) supports lazy closures as the provisional preferred evaluator: 0.88 s substitution versus 0.08 s closure+reification median on one 64-deep **untyped** synthetic beta/let workload with identical checksums (six timed process runs). [G7 CI](https://github.com/dwijayuda/pskernel/actions/runs/38095713290) passed 256 generated closed syntax/evaluator agreements. This is promising but **does not establish a Lean kernel speedup, broad compatibility or soundness**. Next choose on full typed/dependent/DefEq/admission workload and formally justified positive decisions; keep substitution as independent reference only.
+
+## 13. G8–G9 proof-guided fast-path checkpoint
+
+- [G8 proof run 38096024227](https://github.com/dwijayuda/pskernel/actions/runs/38096024227) compiled `LevelSemantics.lean` and its six basic `max`/`imax` valuation identities in Lean 4.35-rc4.
+- [G9 validated run 38096226518](https://github.com/dwijayuda/pskernel/actions/runs/38096226518) compiled `Level.simplifyTop_evalAt` and `Level.quickEquivalent_sound` after an initial unproved [run 38096140397](https://github.com/dwijayuda/pskernel/actions/runs/38096140397) was corrected without changing the quick-equality rule.
+- The executable accepts extra Sort-equality cases *only* when the root-normalized levels are structurally equal. The G9 theorem establishes that every resulting **positive** comparison denotes equal levels for all numeric valuations. Negative comparisons are deliberately incomplete and cannot be used as a proof of universal level inequality.
+- This is one small proof-backed operation in an **experimental restricted checker**; it does not prove the whole checker, imported Lean environments, recursor correctness or model consistency.
+
+Next decisive G10 work: faithful Lean 4.35 exporter/metadata mapping, fully scoped universe-context handling, more complete **proved** symbolic-level decisions, sound typed DefEq with real constant environments and ordinary/invalid declaration admission. Run matched official-Lean differential tests on the same fully represented terms, followed by typed-workload native performance measurements. No proof-preservation constraints from the old kernel.

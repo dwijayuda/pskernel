@@ -165,3 +165,13 @@ Proceed with a genuinely Lean-semantic G8: full universe-level equivalence (incl
 ### G9 first CI failure — unproved obligations, not accepted
 
 [Run 38096140397](https://github.com/dwijayuda/pskernel/actions/runs/38096140397), source `27934ad2a7488f8dbba01da3f53a62c00f2306e9`: runtime modules compiled, but the proof module failed at uncovered `imax` constructor arithmetic goals and use of an unavailable `by_contra` tactic. No runtime quick-equality acceptance is qualified. The new proof uses explicit unfolding of `Level.evalAt` for the root constructor cases and ordinary `by_cases`/contradiction reasoning for equality of normal forms. No new axiom, admitted theorem, or change to the proposed equality rule. Revalidate the exact replacement source.
+
+## Verified G9 — proved semantic rewrite integrated, 2026-10-11
+
+[Successful cloud run 38096226518](https://github.com/dwijayuda/pskernel/actions/runs/38096226518), code `df8589d6aabb4e66831e82a4b2f0d79c87b4789f`: the full library and focused executable built and passed. GitHub logs explicitly show `PSKernelFast.LevelSemantics`, `PSKernelFast.TinyTyping`, both native object modules, and the G9 integration tests succeeded.
+
+The previous failed [run 38096140397](https://github.com/dwijayuda/pskernel/actions/runs/38096140397) exposed missing simplifier steps for several `imax` constructors and an unavailable proof tactic, **not a runtime acceptance**. Corrected with explicit evaluation arithmetic and case reasoning; no new axioms or external semantic authority. New theorems `Level.simplifyTop_evalAt` and `Level.quickEquivalent_sound` connect runtime positive quick matches to **all** universe valuations under the G8 numeric model. TinyTyping applies this only to Sort equality, while remaining conservatively incomplete.
+
+**Current G0–G9 scope:** expanded raw syntax/closed export preflight; hash-consed syntax, two toy beta/let evaluators with finite agreement tests; restricted checked inference; local universe arithmetic and proof-backed quick positive root equality; one narrow performance benchmark (11x only on untyped beta/let synthetic terms). There is **no** general Lean 4.35 export importer, complete DefEq, constant environment/admission, inductive/quotient verifier, full kernel soundness theorem, official-Lean differential qualification or verified self-host target.
+
+**Next:** G10 exact semantic input and environment foundation, then modeled runtime positive-result soundness and real Lean compatibility gates. Do not equate source type-checking with validated proof admission or general soundness.

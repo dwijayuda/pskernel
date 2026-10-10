@@ -1,6 +1,6 @@
 # PSKernel-Fast — New-generation kernel research
 
-**Current implementation status: G0–G2 focused representation and toy closure prototype, cloud-validated under Lean 4.35-rc4.** It cannot type-check a Lean expression, verify a theorem, or accept a declaration. No performance gains or soundness proofs have been established.
+**Current status: G0–G9 independent research prototype, cloud-validated on pinned Lean 4.35.0-rc4.** It has a conservative checked-inference fragment for Sort/Pi/lambda/application/let, two beta/let evaluators, proved universe-level root identities and reproducible toy benchmark evidence. It **cannot** check arbitrary Lean proofs or admit declarations. No complete Lean kernel, full soundness theorem, production provider, or verified kernel-level speedup has been established.
 
 This is an independent greenfield project. Its design **is not constrained by preserving** the old `pskernel-core` implementation, existing metatheory proof interfaces, old self-host source restrictions or old checked provider implementation. Existing branches and proof documents are archived references only.
 

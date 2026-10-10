@@ -1,5 +1,7 @@
 # PSC0 PSCV P1-L — selected-instance pinned Git blob evidence
 
+**Qualified:** [run 38060694489](https://github.com/dwijayuda/pskernel/actions/runs/38060694489), all four jobs passed at implementation source `965cbc3c5b3809f4f63c4fd28a76233c1abe0ff5`. All **45** selected imported constants belong to **7** upstream modules, whose exact pinned Git source files/blobs were all found. Only **6** names have unique explicit `instance` lexical lines; 39 remain without exact explicit named lines. This is not a source-to-elaboration proof or normative mapping. Observation SHA256 `134bc8acdfdb6ea7e57cb5b4effc4f74ea928f39839cc7a0050e8281fa4c469a`. [Artifact 11672956734](https://github.com/dwijayuda/pskernel/actions/runs/38060694489/artifacts/11672956734) · [qualification receipt](pscv-p1l-qualification-2026-10-10.json).
+
 P1-J generated **84** typed arithmetic class queries from the exact
 PSCV-RC-v2 required surface, and P1-K checked the **45 distinct**
 selected imported Lean constants and their type/module provenance.

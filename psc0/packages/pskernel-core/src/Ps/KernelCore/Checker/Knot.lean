@@ -4,13 +4,15 @@ import Ps.KernelCore.Checker.DefEq.FullShape
 /-
 Single owner of cross-component checker recursion.
 
-The existing curried fuel workers are preserved verbatim: recursor callbacks use
-remaining fuel; the defeq continuation uses its own remaining fuel; the projection
-shortcut retains its expression-derived budget. Exhaustion still rejects.
+Recursor callbacks and the defeq continuation use their remaining fuel. The
+projection shortcut receives the caller's remaining reduction fuel as well:
+expression size does not bound the length of definition unfolding. Exhaustion
+still returns a resource error.
 The inference-only and fully checked entry points remain distinct.
 -/
 
 def psKernelReduceRecursorBoundedWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -125,6 +127,7 @@ def psKernelReduceRecursorBoundedWithFuel
           cheapProj
 
 def psKernelWhnfWithRecursorFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (defeq :
       PsKernelCheckerContext ->
@@ -148,6 +151,7 @@ def psKernelWhnfWithRecursorFuel
     expr
 
 def psKernelWhnfCoreWithRecursorFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (defeq :
       PsKernelCheckerContext ->
@@ -180,6 +184,7 @@ def psKernelWhnfCoreWithRecursorFuel
     cheapProj
 
 def psKernelInferWithRecursorFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (defeq :
       PsKernelCheckerContext ->
@@ -204,6 +209,8 @@ def psKernelInferWithRecursorFuel
     expr
 
 def psKernelDefEqProjectionShortcut
+    [cachePolicy : PsKernelSemanticCachePolicy]
+    (fuel : Nat)
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -264,16 +271,10 @@ def psKernelDefEqProjectionShortcut
                 false then
             match
                 psKernelDefEqLazyProjReductionWithFuel
-                  (Nat.succ
-                    (Nat.add
-                      (psKernelExprNodeCount leftExpr)
-                      (psKernelExprNodeCount rightExpr)))
+                  fuel
                   defeq
                   (psKernelWhnfCoreWithRecursorFuel
-                    (Nat.succ
-                      (Nat.add
-                        (psKernelExprNodeCount leftExpr)
-                        (psKernelExprNodeCount rightExpr)))
+                    fuel
                     defeq)
                   context
                   state
@@ -304,7 +305,19 @@ def psKernelDefEqProjectionShortcut
       Except.ok
         (Prod.mk Option.none state)
 
+-- Use the same bounded key policy for lookup and publication. In particular,
+-- hashing a key that can never enter this cache defeats the traversal budget.
+def psKernelDefEqSuccessCacheHit
+    [cachePolicy : PsKernelSemanticCachePolicy]
+    (state : PsKernelCheckerState)
+    (left right : PsKernelExpr) : Bool :=
+  if psKernelSemanticPairCacheEligible left right then
+    psKernelSemanticCacheContains state.success left right
+  else
+    false
+
 def psKernelIsDefEqWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerContext ->
     PsKernelCheckerState ->
@@ -349,8 +362,8 @@ def psKernelIsDefEqWithFuel
                   right
                   true)
             else if
-                psKernelExprPairSetContains
-                  state.success
+                psKernelDefEqSuccessCacheHit
+                  state
                   left
                   right then
               Except.ok
@@ -516,6 +529,7 @@ def psKernelIsDefEqWithFuel
                                                             | PsKernelDeltaResult.residual leftDelta rightDelta =>
                                                                 match
                                                                     psKernelDefEqProjectionShortcut
+                                                                      remaining
                                                                       defeq
                                                                       nextContext
                                                                       (Prod.snd deltaResult)
@@ -621,6 +635,7 @@ def psKernelIsDefEqWithFuel
                                                                                             rightFull
 
 def psKernelIsDefEq
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
@@ -639,6 +654,7 @@ def psKernelIsDefEq
 /- Concrete operations let Session avoid allocating an entire callback record
 on each cache hit. They share the same fuel wiring as the Ops constructor. -/
 def psKernelCheckerWhnf
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
@@ -648,6 +664,7 @@ def psKernelCheckerWhnf
   psKernelWhnfWithRecursorFuel fuel defeq context state expr
 
 def psKernelCheckerInfer
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
@@ -657,6 +674,7 @@ def psKernelCheckerInfer
   psKernelInferWithRecursorFuel fuel defeq context state expr
 
 def psKernelCheckerCheck
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
@@ -667,6 +685,7 @@ def psKernelCheckerCheck
   psKernelCheckWithFuel fuel whnf defeq context state expr
 
 def psKernelCheckerOpsWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) : PsKernelCheckerOps :=
   let defeq := psKernelIsDefEqWithFuel fuel;
   {

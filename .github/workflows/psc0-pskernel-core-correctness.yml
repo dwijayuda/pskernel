@@ -1,0 +1,184 @@
+name: PSC0 PSKernel semantic foundation audit
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths: [".github/workflows/psc0-pskernel-core-correctness.yml"]
+  workflow_dispatch:
+    inputs:
+      runtime_checks:
+        description: Run native regressions, both small Arena modes and focused 4.35 closures
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: psc0-kernel-correctness-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      # Public empty-session environment and initial binder frames enter the axiom audit.
+      - name: Validate full semantic and companion proof compatibility
+        working-directory: psc0/packages/pskernel-core
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lake build Ps.KernelCore.Metatheory.SemanticScope Ps.KernelCore.Metatheory.SemanticLocalContextExtension Ps.KernelCore.Metatheory.SemanticReferenceBinders Ps.KernelCore.Metatheory.SemanticReferenceBinderContext Ps.KernelCore.Metatheory.SemanticPublicEntry Ps.KernelCore.Metatheory.SemanticSortVisitProvenance Ps.KernelCore.Metatheory.SemanticAudit Ps.KernelCore.Metatheory.AdmissionHeaderSpineConfiguration
+          npm run test:proofs
+      - name: Run native checker, stored-reading, and binder-visit regressions
+        if: ${{ !cancelled() }}
+        working-directory: psc0/packages/pskernel-core
+        run: npm test
+
+  binary:
+    if: github.event_name == 'workflow_dispatch' && inputs.runtime_checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Run native checker regressions
+        working-directory: psc0/packages/pskernel-core
+        run: npm test
+      - name: Build reference-capable Arena binary
+        working-directory: psc0/packages/pskernel-core
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lake build psc_kernel_core_arena
+          .lake/build/bin/psc_kernel_core_arena --version
+          sha256sum .lake/build/bin/psc_kernel_core_arena
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reference-capable-arena-binary
+          path: psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena
+  arena:
+    needs: binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [cached, reference]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: reference-capable-arena-binary
+          path: kernel
+      - name: Prepare pinned Arena and selected checking mode
+        env:
+          CHECKING_MODE: ${{ matrix.mode }}
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          mkdir -p arena/checkers/pskernel-435
+          cp kernel/psc_kernel_core_arena arena/checkers/pskernel-435/kernel
+          flag=--check-historical
+          if test "$CHECKING_MODE" = reference; then flag=--reference-historical; fi
+          cat > arena/checkers/pskernel-435.yaml <<EOF
+          description: PSKernel Core $CHECKING_MODE historical regression mode
+          dir: pskernel-435
+          build: chmod +x kernel
+          run: |
+            ulimit -s 65536
+            ./kernel $flag < "\$IN"
+          EOF
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/no-perf/perf"
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+      - name: Tutorial verdict gate
+        working-directory: arena
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test tutorial --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'tutorial/*'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py tutorial
+      - name: Kernel bug verdict gate
+        if: ${{ !cancelled() }}
+        working-directory: arena
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test 'bugs/*' --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'bugs/*'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py bugs
+      - name: Preserve every verdict
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-small-${{ matrix.mode }}
+          path: arena/_results
+          if-no-files-found: error
+  fresh:
+    needs: binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [cached, reference]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: reference-capable-arena-binary
+          path: kernel
+      - name: Export and check focused exact 4.35 closures
+        env:
+          CHECKING_MODE: ${{ matrix.mode }}
+        run: |
+          set -euo pipefail
+          chmod +x kernel/psc_kernel_core_arena
+          sha256sum kernel/psc_kernel_core_arena
+          git clone https://github.com/leanprover/lean4export.git exporter
+          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
+          cd exporter
+          lake build
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          flag=--check
+          if test "$CHECKING_MODE" = reference; then flag=--reference; fi
+          lake env .lake/build/bin/lean4export Init.Prelude > prelude.ndjson
+          /usr/bin/time -v timeout 120 ../kernel/psc_kernel_core_arena "$flag" < prelude.ndjson
+          lake env .lake/build/bin/lean4export Init -- '_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec' > utf8.ndjson
+          /usr/bin/time -v timeout 360 ../kernel/psc_kernel_core_arena "$flag" < utf8.ndjson
+          lake env .lake/build/bin/lean4export Std -- Std.Sat.AIG.mkXorCached > xor.ndjson
+          /usr/bin/time -v timeout 360 ../kernel/psc_kernel_core_arena "$flag" < xor.ndjson
+          lake env .lake/build/bin/lean4export Init -- Int64.toBitVec_div > int64.ndjson
+          /usr/bin/time -v timeout 180 ../kernel/psc_kernel_core_arena "$flag" < int64.ndjson
+          sha256sum *.ndjson
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focused-435-${{ matrix.mode }}
+          path: exporter/*.ndjson

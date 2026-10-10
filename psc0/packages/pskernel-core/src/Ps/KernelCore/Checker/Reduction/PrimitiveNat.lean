@@ -379,3 +379,21 @@ def psKernelReduceNatBinary
               right))))
   else
     Except.ok Option.none
+
+/-- Match the official kernel's dispatch before evaluating any operands. -/
+def psKernelNatBinarySupported (name : PsKernelName) : Bool :=
+  if psKernelNameEq name psKernelNatAddName then true
+  else if psKernelNameEq name psKernelNatSubName then true
+  else if psKernelNameEq name psKernelNatMulName then true
+  else if psKernelNameEq name psKernelNatPowName then true
+  else if psKernelNameEq name psKernelNatGcdName then true
+  else if psKernelNameEq name psKernelNatModName then true
+  else if psKernelNameEq name psKernelNatDivName then true
+  else if psKernelNameEq name psKernelNatBeqName then true
+  else if psKernelNameEq name psKernelNatBleName then true
+  else if psKernelNameEq name psKernelNatLandName then true
+  else if psKernelNameEq name psKernelNatLorName then true
+  else if psKernelNameEq name psKernelNatXorName then true
+  else if psKernelNameEq name psKernelNatShiftLeftName then true
+  else if psKernelNameEq name psKernelNatShiftRightName then true
+  else false

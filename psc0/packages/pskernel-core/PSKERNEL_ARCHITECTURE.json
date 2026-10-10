@@ -3,8 +3,8 @@
   "reference": "PSKERNEL_REFERENCE.md",
   "target": {
     "product": "Lean",
-    "version": "4.34.0",
-    "gitCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    "version": "4.35.0-rc4",
+    "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
   "semanticRootModule": "Ps.KernelCore.SelfHost",
   "semanticRootPath": "packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
@@ -16,7 +16,7 @@
     "compatibilityShimsAllowedDuringMigration": false,
     "compatibilityShimsAllowedInSemanticRoot": false,
     "migrationShims": [],
-    "completionScope": "Phase B production architecture; long-term Assurance Plane and provider promotion remain separate",
+    "completionScope": "Historical Phase B ownership/import-fence migration only; native syntax sharing, portable representation, complete conformance, final assurance and provider promotion are separate.",
     "compatibilityShimsRetired": true
   },
   "semanticRoles": [
@@ -392,6 +392,54 @@
     {
       "area": "selfhost",
       "module": "Ps.KernelCore.SelfHost"
+    },
+    {
+      "area": "core-shared-memo",
+      "module": "Ps.KernelCore.Core.SharedMemo"
+    },
+    {
+      "area": "core-expr-basic",
+      "module": "Ps.KernelCore.Core.Expr.Basic"
+    },
+    {
+      "area": "core-expr-shared",
+      "module": "Ps.KernelCore.Core.Expr.Shared"
+    },
+    {
+      "area": "core-expr-equality",
+      "module": "Ps.KernelCore.Core.Expr.Equality"
+    },
+    {
+      "area": "annotated-expression-syntax",
+      "module": "Ps.KernelCore.Core.AnnotatedExpr"
+    },
+    {
+      "area": "binder-universe-regime",
+      "module": "Ps.KernelCore.Core.UniverseRegime"
+    },
+    {
+      "area": "annotated-structural-comparison",
+      "module": "Ps.KernelCore.Core.AnnotatedEquality"
+    },
+    {
+      "area": "annotated-syntax-spines",
+      "module": "Ps.KernelCore.Core.AnnotatedSpines"
+    },
+    {
+      "area": "annotated-local-storage-specialization",
+      "module": "Ps.KernelCore.Core.AnnotatedLocalContext"
+    },
+    {
+      "area": "shared-inference-result-and-forall-view",
+      "module": "Ps.KernelCore.Core.InferenceBoundary"
+    },
+    {
+      "area": "annotated-inference-data-constructors",
+      "module": "Ps.KernelCore.Core.AnnotatedInference"
+    },
+    {
+      "area": "actual-binder-sort-visit-carriers",
+      "module": "Ps.KernelCore.Checker.Inference.Helpers"
     }
   ],
   "recursiveWiring": {
@@ -479,5 +527,140 @@
   ],
   "lakeLibrary": "PsKernelCore",
   "ruleInventory": "LEAN_4_34_KERNEL_RULES.json",
-  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json"
+  "diagnosticInventory": "KERNEL_DIAGNOSTICS.json",
+  "psc0Migration": {
+    "sourceCommit": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+    "arenaCommit": "132d817071cd62c23a70c15984d6c73e14d6e856",
+    "authoringGuide": "../../docs/selfhost-language/CURRENT.md",
+    "jointSelfhostQualified": false,
+    "defaultProviderPromoted": false,
+    "historicalRuleInventory": "LEAN_4_34_KERNEL_RULES.json",
+    "targetDelta": "RESEARCH_AND_MIGRATION.md",
+    "nativeSharingExperimental": true,
+    "nativeSharingGeneratedQualified": false,
+    "nativeSharing": {
+      "status": "native-proof-verified-corpus-timeouts-and-controlled-performance-regression",
+      "codeCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+      "pureSpecification": "Ps.KernelCore.Core.Expr.Basic",
+      "executionModules": [
+        "Ps.KernelCore.Core.SharedMemo",
+        "Ps.KernelCore.Core.Expr.Shared",
+        "Ps.KernelCore.Core.Expr.Equality"
+      ],
+      "storage": "Certified scratch delta in Std.HashMap; retained checkpoints in Lean.PersistentHashMap; validated scalar hints",
+      "scopeExit": "restore complete parent caches and metadata; optional exact retention theorem is not a compiler rewrite",
+      "generatedPsc0Qualified": false,
+      "remaining": [
+        "portable graph/backend qualification",
+        "stored variable summaries",
+        "batched telescopes with context/fuel correspondence",
+        "complete Init, Std and Mathlib"
+      ],
+      "memoCursor": "advance only for binding-sensitive operations; fixed for count, hash, free-variable query and universe substitution",
+      "eligibilityScan": "one scalar-code traversal with exact Option-Nat specification refinement; budget remains 256",
+      "promotionDecision": "not-eligible: corpus timeouts and controlled performance regression"
+    },
+    "correctnessPriority": {
+      "modelConsistencyProved": false,
+      "semanticJudgmentsAdequate": false,
+      "blocker": "proofIrrelevanceAlgorithmic omits term-to-inferred-type connections; the legacy relation is universal.",
+      "primitiveRepair": "Specified string equality; native runtime correspondence and generated PSC0 qualification remain explicit.",
+      "semanticFoundation": {
+        "status": "relative-function-model-owned-local-context-and-sort-visit-support",
+        "namespace": "PsKernelSemantics",
+        "independentOfLegacyJudgments": true,
+        "concreteModelScope": "Relative universe/function model and sound declarative dependent-function fragment",
+        "concreteCheckerCoverage": "Previous sort/constant/binder/application bridges plus exact reference fvar retrieval and binder/let context models under explicit parent, reading, freshness and scope premises; actual helper projection and same-visit provenance.",
+        "next": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
+        "fullKernelModel": false,
+        "validation": {
+          "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+          "run": 38062528401,
+          "job": 114243521453,
+          "buildJobs": 266,
+          "focusedBuildJobs": 221,
+          "companionFiles": 84,
+          "axiomDeclarations": 298,
+          "pureMathModules": 12,
+          "closureModules": 152,
+          "productionAssuranceImports": 0,
+          "legacyJudgmentImports": 0,
+          "referenceDefinitions": 1840,
+          "cachedFallbacks": 0,
+          "status": "passed",
+          "checkedAt": "2026-10-10 15:17:00 UTC",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+          "runConclusion": "success"
+        },
+        "priorValidation": {
+          "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+          "run": 38057387016,
+          "job": 114228540945,
+          "buildJobs": 254,
+          "focusedBuildJobs": 127,
+          "companionFiles": 84,
+          "axiomDeclarations": 242,
+          "pureMathModules": 12,
+          "closureModules": 140,
+          "referenceDefinitions": 1824,
+          "cachedFallbacks": 0,
+          "status": "passed",
+          "checkedAt": "2026-10-10 13:57:20 UTC",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+          "runConclusion": "success"
+        }
+      }
+    }
+  },
+  "annotatedSyntaxMigration": {
+    "status": "owned-local-storage-and-actual-sort-visit-support",
+    "singleDefinitionUsedByModel": true,
+    "publicAcceptanceMigrated": false,
+    "publicCheckerStillUsesRawExpressions": true,
+    "typingCertifiedByRepresentation": false,
+    "modelImportsInNewRuntimeModules": false,
+    "validation": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "buildJobs": 266,
+      "focusedBuildJobs": 221,
+      "companionFiles": 84,
+      "axiomDeclarations": 298,
+      "pureMathModules": 12,
+      "closureModules": 152,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 15:17:00 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+      "runConclusion": "success"
+    },
+    "priorValidation": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "buildJobs": 254,
+      "focusedBuildJobs": 127,
+      "companionFiles": 84,
+      "axiomDeclarations": 242,
+      "pureMathModules": 12,
+      "closureModules": 140,
+      "referenceDefinitions": 1824,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 13:57:20 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+      "runConclusion": "success"
+    },
+    "sharedRawAnnotatedLocalStorage": true,
+    "actualBinderSortObservationsCarriedLocally": true,
+    "actualVisitProvenanceForSameCall": true,
+    "completeCrossVisitCoherence": false,
+    "allocatorAndScopePreservationComplete": false,
+    "fullRecursiveAndAdmissionSoundness": false,
+    "next": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary."
+  }
 }

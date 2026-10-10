@@ -1,12 +1,84 @@
 # PSKernel Theory and Implementation Guide
 
-PSKernel is an independent executable implementation of the Lean 4.34 kernel
-semantics written in the PSC1-compatible subset of Lean.
+The active PSC0 package targets Lean **4.35.0-rc4** at
+`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. It currently uses the Lean-native
+experimental execution profile; the current PSC0 self-host profile is the
+separate qualification target. Old PSC1 restrictions are historical.
 
-Target:
+**Correctness status:** the legacy metatheory is not an adequate semantic
+specification. `JudgmentAdequacy.lean` proves its algorithmic equality universal
+and its typing relation capable of assigning every type to `Sort 0`.
+This is not an executable checker exploit. Full semantic metatheory and the
+model/consistency proof remain unproved. See
+[the current audit, model target and assumptions](RESEARCH_AND_MIGRATION.md).
+The new `PsKernelSemantics` modules construct a relative set model of universes
+and dependent functions, prove a declarative fragment sound and consistent,
+and connect production substitution to that interpretation. The pinned
+mathematical dependency and local foundation assumptions are explicit.
+Full checker/inductive-admission correspondence remains open. The conceptual
+judgments below are explanatory; they are not the completed kernel theorem.
 
-- Lean version: 4.34.0
-- Lean commit: `293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`
+The current proof target is the fixed cache-disabled reference specialization
+of the shared production algorithm. Cache coherence is unnecessary for its
+primitive cache operations and first inference bridges. No full recursive
+soundness or acceptance-equivalence result is inferred from that simplification.
+[REFERENCE_CORRECTNESS_PLAN.md](REFERENCE_CORRECTNESS_PLAN.md) defines the
+milestones and exact completion claim.
+
+The binder/function layer now proves hereditary validity transport and local
+model bridges from actual reference forall, checked application and checked
+lambda executions. The structural-comparison coherence premise, recursive
+calls and global annotation coherence remain explicit.
+A checked empty-domain counterexample shows that even both hereditary validity
+predicates do not establish coherent interpretations of identical raw syntax.
+
+The checked-annotation layer now supplies an executable sufficient guard for
+structural comparison. It decides whether two binder annotations have the same
+zero condition for every universe-parameter and metavariable assignment,
+preserves that agreement through universe substitution, and derives semantic
+regime agreement on successful guarded comparison. It also validates annotations
+against actual sort-exposure visits and characterizes the existing native
+positive-universe test exactly.
+
+The executable representation and guards now live in runtime Core, with
+coherence and validity transport proved in metatheory. Public raw-expression acceptance
+does not yet run the extra guard or produce validated annotations. Recursive
+typing/reduction/equality, global annotation coherence and full admission
+soundness remain open. No new axiom or stronger foundation assumption was added.
+
+Lambda inference now closes its recursively inferred body type directly. The
+extra cheap-beta normalization of that type was removed from the shared
+production branch in both cache modes and both inference modes. The lambda
+model bridge therefore no longer assumes preservation by that extra pass.
+`SemanticValidityScope.lean` transports both hereditary invariants across
+scoped environments and fresh-variable closing; the returned lambda type
+inherits them under explicit recursive and regime premises. Let-body
+normalization and ordinary WHNF/beta reduction are unchanged.
+
+This removes one operation and its proof obligation. It does not establish
+checked annotation provenance, recursive checking soundness, or consistency of
+the full kernel. The new checked lambda bridge derives its level from actual codomain-sort
+visits; their recursive soundness and global annotation coherence remain open. No new axiom or stronger foundation assumption was
+added.
+
+Checked lambda inference now obtains its codomain sort from an additional
+infer-only visit to the actual body type followed by sort exposure. The
+reference lambda trace records these calls. The new
+`lambda_trace_checked_reading` theorem fixes that actual level on both the
+lambda and its returned type and proves typing plus their four hereditary
+validity facts under the local recursive obligations. It no longer asks for an
+arbitrary lambda level or a separate proof-valued-fibre premise.
+
+This certification runs in the shared checked lambda rule in both cache modes.
+Infer-only retains its validity precondition, and cached hits retain their
+separate cache invariant. Non-resource certification failures decline;
+resource failures keep their resource classification. Globally coherent
+annotations through raw comparison, joint recursive soundness, and full safe
+admission remain open. The public API does not yet return or carry a complete
+validated annotated expression.
+
+Historical 4.34 reference artifacts (not current certification):
+
 - compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`
 - conformance matrix: `LEAN_4_34_CONFORMANCE.json`
 - generated rule reference: `KERNEL_RULE_REFERENCE.md`
@@ -27,6 +99,27 @@ Ps.KernelCore/*.lean
 ```
 
 No separate Rust or C++ kernel is required.
+
+## Runtime annotations and proof handoff
+
+The annotated syntax, universe-regime test and guarded structural comparator
+now have a single owner in runtime Core. The model imports those exact
+operations. Their structural equivalence and transport through lifting,
+substitution, free-name closing and universe instantiation are proved, together
+with hereditary-validity transport. The application bridge fixes one concrete
+term/result reading with all four validity facts under explicit recursive and
+guard premises. Public checking and admission still exchange raw expressions;
+carrying and validating these annotations throughout those paths is unfinished.
+See [the work state](AI_WORK_STATE.md) and
+[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+
+[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
+the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
+The 140-module dependency closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,824 definitions with zero cached
+fallbacks. The complete workflow passed.
 
 ## 1. Trust model
 

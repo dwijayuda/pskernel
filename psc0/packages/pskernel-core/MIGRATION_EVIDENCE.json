@@ -1,0 +1,3953 @@
+{
+  "schemaVersion": 9,
+  "stage": "Proof-guided Lean 4.35: public empty-session frame",
+  "status": "validated-public-entry-frame-full-kernel-consistency-unfinished",
+  "candidateCommit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+  "assuranceRevision": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+  "target": {
+    "version": "4.35.0-rc4",
+    "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "workflowRun": 38071595259,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38071595259/job/114269936326",
+  "nativeBinarySha256": null,
+  "checks": {
+    "build": {
+      "status": "not-measured-final-source",
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
+    },
+    "metatheory": {
+      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+      "run": 38071595259,
+      "job": 114269936326,
+      "buildJobs": 267,
+      "focusedBuildJobs": 222,
+      "companionFiles": 84,
+      "axiomDeclarations": 323,
+      "pureMathModules": 12,
+      "closureModules": 153,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 16:18:17 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38071595259/job/114269936326",
+      "runConclusion": "success"
+    },
+    "companionProofs": {
+      "status": "passed",
+      "files": 84,
+      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+      "run": 38071595259,
+      "job": 114269936326
+    },
+    "nativeRegression": {
+      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+      "run": 38071595259,
+      "job": 114269936326,
+      "status": "passed",
+      "executables": 7,
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_SORT_VISIT_CARRIERS",
+        "PSKERNEL_LAMBDA_CODOMAIN_GATE",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
+        "PSKERNEL_REFERENCE_TESTS",
+        "PSKERNEL_ANNOTATED_SYNTAX"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
+      "lambdaCodomainCases": {
+        "cacheModes": 2,
+        "unsupportedDeclines": 2,
+        "inferOnlyGrade": 2,
+        "resourceExhaustion": 2,
+        "deliberatelyMalformedLowLevelContexts": true,
+        "publicExploitClaimed": false
+      },
+      "sharedSyntax": {
+        "cursors": 4,
+        "variants": 14,
+        "dagDepth": 32
+      },
+      "annotatedSyntax": {
+        "commit": "3fe5058e847d8b99242da1c087cb658079596393",
+        "run": 38071399079,
+        "job": 114269368491,
+        "status": "passed",
+        "cases": 31,
+        "modelImports": 0
+      },
+      "sortVisitCarriers": {
+        "commit": "3fe5058e847d8b99242da1c087cb658079596393",
+        "run": 38071399079,
+        "job": 114269368491,
+        "status": "passed",
+        "cases": 8,
+        "unchecked": 1,
+        "observed": 2,
+        "failures": 5
+      },
+      "qualification": "Case counts are per named group, not an aggregate assertion count or a proof of public acceptance soundness."
+    },
+    "smallArena": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "binaryJob": 114220568884,
+      "binaryBuildJobs": 218,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114221065854,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114221065799,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": true
+    },
+    "fullCorpora": {
+      "status": "not-run-final-source",
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "priorInitStdTimeoutsUnresolved": true,
+      "mathlibQualification": "unestablished",
+      "latestIntermediateSource": {
+        "commit": "df830e7cd8b39c699210e631889539f43c064092",
+        "run": 38060658283,
+        "init": "timeout500s",
+        "std": "timeout590s",
+        "profileInit": "checker timeout600s; job green",
+        "mathlib": "skipped"
+      },
+      "receipt": "intermediateSourceValidation38060658283"
+    },
+    "fresh435": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "sameExportedInputBetweenModesVerified": false,
+      "cached": {
+        "job": 114221065867,
+        "workflowConclusion": "success",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 1.22,
+            "maxRssKiB": 75944
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 11.66,
+            "maxRssKiB": 84884
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 27.36,
+            "maxRssKiB": 88928
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.42,
+            "maxRssKiB": 72864
+          }
+        ]
+      },
+      "reference": {
+        "job": 114221065827,
+        "workflowConclusion": "failure",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.87,
+            "maxRssKiB": 73948
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 10.55,
+            "maxRssKiB": 77356
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 34.96,
+            "maxRssKiB": 87164
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "timeout",
+            "exitCode": 124,
+            "seconds": 180,
+            "maxRssKiB": 69740
+          }
+        ]
+      }
+    },
+    "referenceInt64Baseline": {
+      "run": 38052827877,
+      "job": 114215267947,
+      "workflowConclusion": "success",
+      "checkerAcceptance": false,
+      "status": "both-timeout",
+      "budgetSeconds": 180,
+      "inputSha256": "e0c31b69ad4013f80b732b5eac9484948a6d4a469d0452d44f0c43f6b2ac1df8",
+      "sameRunner": true,
+      "sameInput": true,
+      "baseline": {
+        "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb",
+        "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70784
+      },
+      "candidate": {
+        "commit": "0aa3d403324e8a339a8a0c07253b0e10f6dff1ae",
+        "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70356
+      },
+      "conclusion": "Reference Int64 timeout predates lambda simplification. The experiment does not establish equal performance or acceptance.",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947",
+      "historicalQualification": "This controlled comparison predates the codomain-sort certification change. It establishes the prior timeout, not current performance equivalence."
+    },
+    "binaryIdentity": {
+      "status": "not-measured-final-source",
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "priorReceiptsRetained": true,
+      "qualification": "Storage generalization and actual sort-helper extraction change runtime source after the historical matching binary."
+    },
+    "annotatedSyntax": {
+      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
+      "run": 38071399079,
+      "job": 114269368491,
+      "status": "passed",
+      "cases": 31,
+      "modelImports": 0
+    },
+    "runtimeValidationScope": "The current focused gate runs the entire production/metatheory build, all companion files, semantic-axiom/import/reference-policy audits and all seven native test executables. Current standalone Arena binary, small Arena and fresh-export jobs are not run. Historical and intermediate-source corpus/binary receipts retain their original revision and do not qualify the current runtime.",
+    "sortVisitCarriers": {
+      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
+      "run": 38071399079,
+      "job": 114269368491,
+      "status": "passed",
+      "cases": 8,
+      "unchecked": 1,
+      "observed": 2,
+      "failures": 5
+    }
+  },
+  "claims": {
+    "completeArenaConformance": false,
+    "jointSelfhostQualified": false,
+    "endToEndConsistencyProved": false,
+    "defaultProviderPromoted": false,
+    "compilerSeedChanged": false,
+    "wholeCorpusSpeedupEstablished": false,
+    "generatedSourcePortable": false,
+    "semanticMetatheoryComplete": false,
+    "semanticJudgmentsAdequate": false,
+    "noExecutableUnsoundnessClaimedByAdequacyAudit": true,
+    "newLocalSemanticRelationNontrivial": true,
+    "fullKernelSemanticModelConstructed": false,
+    "relativeSetModelConstructed": true,
+    "independentDeclarativeFragmentSound": true,
+    "relativeDeclarativeFragmentConsistencyProved": true,
+    "referenceCacheOperationsIgnoreStoredAnswers": true,
+    "referenceWholeCheckerStateIndependenceProved": false,
+    "cachedAcceptanceRefinesReference": false,
+    "referenceFullCorpusConformance": false,
+    "executableAnnotationGuardSound": true,
+    "publicAcceptanceUsesAnnotationGuard": false,
+    "acceptedAnnotationProvenanceProved": false,
+    "newAxiomsAdded": false,
+    "lambdaExtraBodyTypeNormalizationRemoved": true,
+    "lambdaSelectedRegimeJustified": false,
+    "publicCheckedLambdaComputesCodomainSort": true,
+    "lambdaReadingUsesVisitedLevel": true,
+    "lambdaSelectedRegimeQualification": "The checked-lambda bridge fixes the actual visited level under recursive soundness/validity premises; global accepted annotation provenance remains unproved.",
+    "runtimeAnnotatedRepresentationSharedWithModel": true,
+    "guardedStructuralEquivalenceAndTransportProved": true,
+    "hereditaryValidityTransportAcrossCoherenceProved": true,
+    "applicationConcreteReadingProvedUnderExplicitPremises": true,
+    "sharedRawAnnotatedLocalStorageImplementation": true,
+    "exactStoredLocalReadingFromActualReferenceFvar": true,
+    "binderAndLetContextModelsUnderExplicitPremises": true,
+    "actualBinderSortVisitCarriers": true,
+    "sameActualVisitProvenanceIndependentOfValuation": true,
+    "conflictingRegimesFromSameVisitImpossible": true,
+    "crossVisitRawEqualityImpliesCoherence": false,
+    "publicRecursiveResultUsesAnnotatedReadings": false,
+    "fullAllocatorAndScopeInvariantProved": false,
+    "latestRuntimeArenaBinaryHashMeasured": false,
+    "boundedLocalFrameSyntacticPreservationProved": true,
+    "binderFreshnessDerivedFromBoundedFrame": true,
+    "productionOpenedBodyFrameProvedUnderScopeAndBounds": true,
+    "publicRecursiveFramePreservationProved": false,
+    "publicEntryGuardNameBoundsProved": true,
+    "publicCheckerSessionInitialFrameProved": true,
+    "guardedLambdaForallLetFirstFrameUnderScopeProved": true,
+    "semanticAxiomAuditCoversNewPublicFrameTheorems": true,
+    "actualPublicEmptySessionEnvironmentProved": true,
+    "actualPublicEmptySessionInitialFrameProved": true,
+    "initialEnvironmentSemanticModelProved": false
+  },
+  "correctnessAudit": {
+    "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+    "workflowRun": 38007755710,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38007755710",
+    "adequacy": {
+      "status": "counterexample-checked",
+      "file": "metatheory/Ps/KernelCore/Metatheory/JudgmentAdequacy.lean",
+      "results": [
+        "Legacy DefEq relates all terms in every environment/context",
+        "Legacy typing assigns every type to Sort zero",
+        "No interpretation with an empty type validates all legacy typing derivations"
+      ],
+      "cause": "proofIrrelevanceAlgorithmic lacks term-to-inferred-type premises; convert consumes the resulting universal relation",
+      "executableFalseAcceptanceDemonstrated": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "primitiveRepair": {
+      "status": "proved",
+      "definition": "psKernelStringEq uses decide (left = right)",
+      "law": "psKernelStringEq_sound_lean435",
+      "lawAxioms": [],
+      "equivalence": "psKernelStringEq_true_iff",
+      "equivalenceAxioms": [
+        "propext"
+      ],
+      "freshNameCorollary": "psKernelSimpleFreshElimName_fresh_lean435",
+      "freshNameCorollaryAxioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "hashCoherence": "derived by equality substitution",
+      "runtimeBoundary": "Lean String.decEq native override remains in compiler/runtime TCB",
+      "oldOpaqueWorkerEquivalenceClaimed": false
+    },
+    "validation": {
+      "build": {
+        "status": "passed",
+        "jobs": 241,
+        "jobId": 114080390584
+      },
+      "metatheory": {
+        "status": "passed",
+        "jobs": 200,
+        "jobId": 114080390702
+      },
+      "companionProofs": {
+        "status": "passed",
+        "files": 84,
+        "jobId": 114080390702
+      },
+      "foundationRegressions": "passed",
+      "tutorial": {
+        "status": "passed",
+        "correct": 141,
+        "declined": 0,
+        "jobId": 114080872802
+      },
+      "bugs": {
+        "status": "passed",
+        "correct": 18,
+        "declined": 0,
+        "jobId": 114080872756
+      },
+      "freshPreludeUtf8XorInt64": "passed",
+      "originalBudgetCorpora": {
+        "status": "completed-with-timeouts",
+        "runId": 38007755710,
+        "checkedAt": "2026-10-10 00:23:05 UTC",
+        "init": {
+          "status": "timeout",
+          "jobId": 114080872766,
+          "exitCode": -9,
+          "elapsedSeconds": 500.0116081237793,
+          "originalLimitSeconds": 500,
+          "lastProgress": {
+            "records": 1699999,
+            "declarations": 14005
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114080872785,
+          "exitCode": -9,
+          "elapsedSeconds": 590.0852546691895,
+          "originalLimitSeconds": 590,
+          "lastProgress": {
+            "records": 1999999,
+            "declarations": 14314
+          }
+        },
+        "mathlib": {
+          "status": "skipped",
+          "jobId": 114083516556,
+          "reason": "Original-budget Init/Std prerequisite gates timed out"
+        },
+        "profileInit": {
+          "status": "timeout",
+          "jobId": 114080872733,
+          "workflowJobConclusion": "success",
+          "explanation": "Diagnostic workflow preserves timeout as data; green job is not corpus acceptance",
+          "exitCode": 124,
+          "elapsedSeconds": 600,
+          "maxRssKiB": 174868,
+          "lastEnteredRecord": 2414950,
+          "lastEnteredDeclaration": "_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList"
+        }
+      }
+    },
+    "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+    "traceRefinement": {
+      "sourceCommit": "efe1d0b197afdba89b134ac24870eac80c8bf237",
+      "file": "metatheory/Ps/KernelCore/Metatheory/DefEqClassifierTrace.lean",
+      "status": "proved",
+      "theorem": "psKernelDefEqIsPropWith_true_iff_trace",
+      "scope": "Exact infer/WHNF/state/level evidence; not semantic typing",
+      "legacyJudgmentCollapseRepaired": false,
+      "validationCommit": "aea996799b986091a4c8fbf6e1ce28f578609348",
+      "workflowRun": 38008230732,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38008230732",
+      "jobId": 114081909804,
+      "metatheoryBuildJobs": 201,
+      "companionProofFiles": 84,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "model": {
+      "status": "not-constructed",
+      "proofStatus": "not-complete",
+      "requiredScope": "Safe logical environment, valid starting model, satisfying interpretation of admitted axioms, successful actual admission, explicit set-theoretic foundation",
+      "arbitraryAxiomAdmissionProhibitsUnconditionalAllInputConsistency": true,
+      "customSoundnessAxiomsAdded": false
+    },
+    "researchPins": {
+      "lean4": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+      "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+      "conRon": "64a2172a01276aa049220200bac11c075316230f",
+      "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+      "lean4lean": "8223d223ed98661882e95d9d6a7126df7097cd76",
+      "lean4leanModel": "27fb3b656c0d536469f6817cf277904dee8eb5ca"
+    }
+  },
+  "extendedCorpusDiagnostics": {
+    "runId": 38004337520,
+    "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+    "monitorFixCommit": "a3c9436e0b4a89c9434a72594e810aeccb1e93a0",
+    "results": [
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "fresh435-init",
+        "mode": "fresh",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
+          "records": 6452982,
+          "bytes": 345690186,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"c29b6dda4f7c20e3eeaa717c4e565663c5cfa364\",\"version\":\"4.35.0-rc4\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "accepted-complete-under-extended-limit",
+        "startedAt": "2026-10-09T23:26:04.493915+00:00",
+        "elapsedSeconds": 1647.02,
+        "lastOutput": "pskernel-core arena progress: records=6399999 declarations=57388 names=293592/293592 levels=574/574 exprs=6048446/6048446",
+        "exitCode": 0,
+        "completedAt": "2026-10-09T23:53:31.514621+00:00",
+        "maxRssKiB": 319028,
+        "lastProgress": {
+          "records": 6399999,
+          "declarations": 57388
+        },
+        "acceptance": {
+          "lean": "4.35.0-rc4",
+          "records": 6452982,
+          "declarations": 57919,
+          "constants": 59349
+        },
+        "reportingCorrection": {
+          "originalJobConclusion": "failure",
+          "originalReceiptStatus": "protocol-error-missing-or-incomplete-acceptance",
+          "reason": "The monitor searched stdout only; the complete acceptance line is in stderr. The checker exited 0 with every input record covered.",
+          "method": "Reconciled complete job logs; no checker rerun or acceptance relaxation.",
+          "jobId": 114069538858,
+          "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538858"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "historical-init",
+        "mode": "historical",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "620502ac9e63ba4a2dea9d46386c2f6aebc49faf8848ea3aaa18a77a09491a6a",
+          "records": 6487065,
+          "bytes": 347555345,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"5045d0056413266e57c625dcd7c365b10e377c52\",\"version\":\"4.34.1\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "accepted-complete-under-extended-limit",
+        "startedAt": "2026-10-09T23:26:11.926766+00:00",
+        "elapsedSeconds": 2141.76,
+        "lastOutput": "pskernel-core arena progress: records=6399999 declarations=57416 names=293339/293339 levels=574/574 exprs=6048671/6048671",
+        "exitCode": 0,
+        "completedAt": "2026-10-10T00:01:53.687326+00:00",
+        "maxRssKiB": 317308,
+        "lastProgress": {
+          "records": 6399999,
+          "declarations": 57416
+        },
+        "acceptance": {
+          "lean": "4.34.1",
+          "records": 6487065,
+          "declarations": 58170,
+          "constants": 59626
+        },
+        "reportingCorrection": {
+          "originalJobConclusion": "failure",
+          "originalReceiptStatus": "protocol-error-missing-or-incomplete-acceptance",
+          "reason": "The monitor searched stdout only; the complete acceptance line is in stderr. The checker exited 0 with every input record covered.",
+          "method": "Reconciled complete job logs; no checker rerun or acceptance relaxation.",
+          "jobId": 114069538925,
+          "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538925"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "fresh435-std",
+        "mode": "fresh",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
+          "records": 10193568,
+          "bytes": 562170999,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"c29b6dda4f7c20e3eeaa717c4e565663c5cfa364\",\"version\":\"4.35.0-rc4\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "timeout",
+        "startedAt": "2026-10-09T23:26:17.973478+00:00",
+        "elapsedSeconds": 3600.04,
+        "lastOutput": "pskernel-core arena progress: records=2899999 declarations=20723 names=149929/149929 levels=372/372 exprs=2728976/2728976",
+        "exitCode": 124,
+        "completedAt": "2026-10-10T00:26:18.015857+00:00",
+        "maxRssKiB": 189208,
+        "lastProgress": {
+          "records": 2899999,
+          "declarations": 20723
+        },
+        "acceptance": null,
+        "jobId": 114069538959,
+        "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538959"
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "historical-std",
+        "mode": "historical",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "289ed65a367abdc7388a855d2acf59cc1f401f5e06295acbb8a420682d9f00bd",
+          "records": 10826639,
+          "bytes": 596655086,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"5045d0056413266e57c625dcd7c365b10e377c52\",\"version\":\"4.34.1\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "timeout",
+        "startedAt": "2026-10-09T23:26:07.408041+00:00",
+        "elapsedSeconds": 3600.03,
+        "lastOutput": "pskernel-core arena progress: records=2999999 declarations=21381 names=153764/153764 levels=368/368 exprs=2824487/2824487",
+        "exitCode": 124,
+        "completedAt": "2026-10-10T00:26:07.442936+00:00",
+        "maxRssKiB": 189460,
+        "lastProgress": {
+          "records": 2999999,
+          "declarations": 21381
+        },
+        "acceptance": null,
+        "jobId": 114069538968,
+        "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538968"
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "historical-mathlib",
+        "mode": "historical",
+        "checkerWallLimitSeconds": 14400,
+        "input": {
+          "sha256": "22c5de83469408950005589a3bc5ef5157c65549b5a802f85d567c29151306a6",
+          "records": 109790519,
+          "bytes": 6184415052,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"5045d0056413266e57c625dcd7c365b10e377c52\",\"version\":\"4.34.1\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "timeout",
+        "startedAt": "2026-10-09T23:34:28.276268+00:00",
+        "elapsedSeconds": 14400.09,
+        "lastOutput": "pskernel-core arena progress: records=6499999 declarations=49946 names=329827/329827 levels=3957/3957 exprs=6116270/6116270",
+        "exitCode": 124,
+        "completedAt": "2026-10-10T03:34:28.362555+00:00",
+        "maxRssKiB": 328588,
+        "lastProgress": {
+          "records": 6499999,
+          "declarations": 49946
+        },
+        "acceptance": null,
+        "jobId": 114069538668,
+        "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538668"
+      }
+    ],
+    "pending": [],
+    "newStringEqualityBinaryTested": false,
+    "checkedAt": "2026-10-10 05:07:25 UTC",
+    "status": "completed"
+  },
+  "remaining": [
+    "Carry the exact selected annotated readings and intensional provenance through the actual shared recursive APIs, raw checker context and admitted declarations; install/prove every actual accepting guard. Same-visit provenance alone is insufficient for cross-visit comparison.",
+    "Derive binder-entry freshness and scope from an initialized, maintained syntactic local-frame invariant and actual allocator/scope operations.",
+    "Prove all mutually recursive reference inference, WHNF and equality cases against the same model.",
+    "Complete ordinary/mutual/nested inductive, quotient and primitive admission models.",
+    "Connect initial safe environment and an explicit allowed-axiom/model policy.",
+    "Connect reference public acceptance and input translation to the original statement and empty False model.",
+    "Prove cached mode separately by refinement or its own sound semantic invariants.",
+    "Full Init/Std/Mathlib acceptance and performance remain unestablished.",
+    "Generated PSC0 compiler/runtime correspondence and provider qualification remain open."
+  ],
+  "nextStage": {
+    "status": "open",
+    "scope": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
+    "performancePriority": "deferred"
+  },
+  "promotionDecision": {
+    "status": "not-eligible",
+    "reason": "Confirmed metatheory specification inadequacy; end-to-end model proof and generated PSC0 qualification absent; original corpus/performance gates remain separate.",
+    "prState": "draft",
+    "defaultProviderChanged": false
+  },
+  "priorNativeSharingStage": {
+    "schemaVersion": 3,
+    "stage": "Certified native syntax sharing and storage-lifetime refinement",
+    "status": "native-proof-verified-corpus-timeouts-and-controlled-performance-regression",
+    "candidateCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+    "sourceProvenance": {
+      "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+      "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
+      "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
+    },
+    "target": {
+      "version": "4.35.0-rc4",
+      "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+    },
+    "workflowRun": 38001623085,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38001623085",
+    "nativeBinarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+    "checks": {
+      "build": {
+        "status": "passed",
+        "jobs": 241,
+        "jobId": 114060790096
+      },
+      "foundations": "passed",
+      "dispatchProjectionAndCacheRegressions": "passed",
+      "certifiedSyntax": {
+        "status": "passed",
+        "jobId": 114060790096,
+        "constructors": 14,
+        "binderCursors": [
+          0,
+          1,
+          2,
+          5
+        ],
+        "sharedDagDepth": 32,
+        "expandedDagNodes": 8589934591,
+        "mixedBinderDepthExpandedNodes": 17179869181,
+        "coverage": [
+          "term/universe instantiation",
+          "lifting",
+          "free-variable abstraction",
+          "positive and negative exact bound-variable occurrence",
+          "exact syntactic equality",
+          "forced key collisions and cursor mismatch",
+          "closed substitution argument preparation",
+          "read-only hash hits/misses",
+          "indexed map/pairset and scoped semantic cache isolation"
+        ]
+      },
+      "metatheoryBuild": {
+        "status": "passed",
+        "jobs": 199,
+        "jobId": 114060790270
+      },
+      "companionProofs": {
+        "status": "passed",
+        "files": 84,
+        "jobId": 114060790270
+      },
+      "tutorial": {
+        "status": "passed",
+        "cases": 141,
+        "correct": 141,
+        "declined": 0,
+        "jobId": 114061310480
+      },
+      "bugs": {
+        "status": "passed",
+        "cases": 18,
+        "correctRejections": 18,
+        "accepted": 0,
+        "declined": 0,
+        "jobId": 114061310456
+      },
+      "fresh435": {
+        "status": "passed",
+        "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+        "prelude": {
+          "jobId": 114061310515,
+          "records": 65406,
+          "declarations": 1840,
+          "constants": 2121,
+          "wallSeconds": 1.12,
+          "maxRssKiB": 74556
+        },
+        "utf8": {
+          "jobId": 114061310515,
+          "records": 159345,
+          "declarations": 2146,
+          "constants": 2353,
+          "wallSeconds": 13.5,
+          "maxRssKiB": 84540
+        },
+        "xor": {
+          "jobId": 114061310486,
+          "records": 333731,
+          "declarations": 3413,
+          "constants": 3752,
+          "wallSeconds": 16.75,
+          "maxRssKiB": 89140
+        },
+        "int64": {
+          "jobId": 114061310486,
+          "records": 16206,
+          "declarations": 405,
+          "constants": 497,
+          "wallSeconds": 0.28,
+          "maxRssKiB": 72348
+        }
+      },
+      "init": {
+        "status": "timeout",
+        "jobId": 114061310518,
+        "limitSeconds": 500,
+        "arenaCorrectness": "error",
+        "exitCode": -9,
+        "wallSeconds": 500.01415371894836,
+        "lastProgress": {
+          "records": 2399999,
+          "declarations": 18883
+        }
+      },
+      "std": {
+        "status": "timeout",
+        "jobId": 114061310560,
+        "limitSeconds": 590,
+        "arenaCorrectness": "error",
+        "exitCode": -9,
+        "wallSeconds": 590.0730633735657,
+        "lastProgress": {
+          "records": 1999999,
+          "declarations": 14314
+        }
+      },
+      "mathlib": {
+        "status": "not-run",
+        "reason": "Init and Std prerequisite gates failed",
+        "jobId": 114064421139,
+        "workflowConclusion": "skipped"
+      },
+      "fullFresh435": {
+        "status": "timeout",
+        "workflowRun": 38001895321,
+        "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+        "init": {
+          "jobId": 114061681732,
+          "status": "timeout",
+          "limitSeconds": 500,
+          "exitCode": 124,
+          "inputRecords": 6452982,
+          "inputSha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
+          "maxRssKiB": 175280,
+          "lastProgress": {
+            "records": 2299999,
+            "declarations": 18434
+          }
+        },
+        "std": {
+          "jobId": 114061681707,
+          "status": "timeout",
+          "limitSeconds": 590,
+          "exitCode": 124,
+          "inputRecords": 10193568,
+          "inputSha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
+          "maxRssKiB": 161416,
+          "lastProgress": {
+            "records": 1999999,
+            "declarations": 14186
+          }
+        }
+      },
+      "scalarCacheScan": {
+        "status": "passed",
+        "theorem": "PsKernelCacheScan.remaining_eq",
+        "quantification": "every expression and Nat budget",
+        "scope": "exact remaining-budget result and all four eligibility entry points",
+        "nodeBudget": 256
+      }
+    },
+    "claims": {
+      "completeArenaConformance": false,
+      "jointSelfhostQualified": false,
+      "endToEndConsistencyProved": false,
+      "defaultProviderPromoted": false,
+      "compilerSeedChanged": false,
+      "wholeCorpusSpeedupEstablished": false,
+      "generatedSourcePortable": false
+    },
+    "architecture": {
+      "proofBoundary": "Intrinsic exact-result entries, full input/cursor validation, proved compiler substitutions, no project-defined unsafe primitive or axiom",
+      "scratchStorage": "Std.HashMap operation-local delta",
+      "retainedStorage": "Lean.PersistentHashMap checkpoint; publish at operation boundary",
+      "memoCursor": "Algebra-controlled: advance at binders only when the result depends on binder depth",
+      "scopeExit": "Restore entire parent caches; exact cross-scope hash-retention theorem exists but is not activated",
+      "executionProfile": "Lean-4.35-native-experimental",
+      "portableTarget": "PSC0 current bounded self-host profile; not restricted to the historical PSC1 profiles",
+      "dependencies": [
+        "Lean pointer-hint contracts",
+        "Lean compiler simplification and proof erasure",
+        "Squash",
+        "Std.HashMap",
+        "Lean.PersistentHashMap"
+      ],
+      "scalarEligibility": "Zero-exhausted/successor-remaining code; exact decode refinement to the original bounded Option worker; no budget change"
+    },
+    "architecturalExperiments": [
+      {
+        "candidate": "de1ad1993286d642575cf35b4842b6633501a634",
+        "run": 37997784610,
+        "design": "retained metadata in a Std.HashMap",
+        "outcome": "regressed",
+        "init": {
+          "timeoutSeconds": 500,
+          "lastProgressRecords": 499999
+        },
+        "std": {
+          "timeoutSeconds": 590,
+          "lastProgressRecords": 499999
+        },
+        "diagnosticRun": 37998116131,
+        "workerSamples": {
+          "job": 114049222923,
+          "samples": 11,
+          "wholeArrayCopySamples": 4,
+          "note": "Sparse samples identify a mechanism, not statistical time percentages."
+        },
+        "controlledPrefix": {
+          "job": 114049222697,
+          "records": 500000,
+          "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+          "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+          "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+          "baselineSeconds": [
+            143.14,
+            144.51
+          ],
+          "candidateTimeoutSeconds": [
+            180,
+            180
+          ],
+          "fullConformance": false
+        }
+      },
+      {
+        "candidate": "7154935f67b614129d9d547d88c0b28213e56034",
+        "run": 37998880424,
+        "design": "persistent trie for all memos plus cross-scope hash retention",
+        "outcome": "proofs passed; corpus timeouts and controlled performance regression",
+        "init": {
+          "timeoutSeconds": 500,
+          "lastProgressRecords": 1099999
+        },
+        "std": {
+          "timeoutSeconds": 590,
+          "lastProgressRecords": 1799999
+        },
+        "controlledPrefix": {
+          "run": 37999324549,
+          "job": 114053267452,
+          "records": 500000,
+          "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+          "baselineSeconds": [
+            143.09,
+            143.59
+          ],
+          "candidateTimeoutSeconds": [
+            180,
+            180
+          ],
+          "fullConformance": false
+        },
+        "profile": {
+          "job": 114052375468,
+          "seconds": 600,
+          "maxRssKiB": 982096,
+          "lastEnteredRecord": 2414950
+        },
+        "storageControl": {
+          "candidate": "7d54f5672b5c1f12f153ef2ceb82a80db75aa07f",
+          "run": 37998638649,
+          "job": 114051519449,
+          "seconds": 600,
+          "maxRssKiB": 153152,
+          "lastEnteredRecord": 2028388,
+          "note": "Different runner and traversal endpoint; memory evidence, not a controlled timing comparison."
+        }
+      }
+    ],
+    "diagnostics": {
+      "run": 38001895321,
+      "status": "completed",
+      "worker": {
+        "job": 114061681289,
+        "limitSeconds": 180,
+        "exitCode": 124,
+        "maxRssKiB": 108552,
+        "lastEnteredRecord": 497392,
+        "lastEnteredDeclaration": "_private.Init.Data.Array.Extract.0.Array.extract_append._proof_1_4",
+        "samples": 11,
+        "findings": [
+          "scalar cache-eligibility worker appears in three top-frame samples",
+          "shared variable-query/substitution allocation and reference-count work",
+          "name/string hash and equality",
+          "persistent hash checkpoint lookup",
+          "list traversal and inference"
+        ],
+        "note": "Sparse samples identify mechanisms, not time percentages; profile execution is diagnostic, not full acceptance."
+      },
+      "profile": {
+        "job": 114061310482,
+        "limitSeconds": 600,
+        "exitCode": 124,
+        "maxRssKiB": 175428,
+        "lastEnteredRecord": 2414950,
+        "lastEnteredDeclaration": "theorem _private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList",
+        "completeAcceptance": false
+      },
+      "controlledPrefix": {
+        "job": 114061681597,
+        "records": 500000,
+        "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+        "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+        "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+        "executionOrder": [
+          "baseline-1",
+          "candidate-1",
+          "candidate-2",
+          "baseline-2"
+        ],
+        "baselineSeconds": [
+          143.53,
+          142.83
+        ],
+        "candidateTimeoutSeconds": [
+          180,
+          180
+        ],
+        "baselineMaxRssKiB": [
+          331876,
+          332012
+        ],
+        "candidateMaxRssKiB": [
+          99232,
+          98552
+        ],
+        "baselineExitCodes": [
+          0,
+          0
+        ],
+        "candidateExitCodes": [
+          124,
+          124
+        ],
+        "fullConformance": false,
+        "conclusion": "Candidate failed the performance comparison: both candidate runs timed out while both paired baseline runs accepted the prefix.",
+        "memoryCaveat": "Candidate measurements end at timeout, so they are not peak-memory comparisons for equal completed work.",
+        "scalarIsolation": "This experiment compares the entire final sharing layer with the repair baseline; it does not isolate the scalar-scan change."
+      }
+    },
+    "researchPins": {
+      "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+      "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
+      "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+      "conRon": "64a2172a01276aa049220200bac11c075316230f",
+      "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+      "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
+      "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
+      "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
+    },
+    "researchFindings": {
+      "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
+      "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
+      "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
+      "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
+    },
+    "remaining": [
+      "Complete historical and fresh Init/Std/Mathlib conformance at original limits",
+      "Stored constructor metadata and costed portable graph storage",
+      "Batched telescope/context/fuel correspondence",
+      "Exact-source generated PSC0 compiler/kernel qualification"
+    ],
+    "nextStage": {
+      "status": "not-qualified",
+      "scope": "Portable representation/backend and batched telescope transport; no compiler-seed or default-provider change"
+    },
+    "priorRepairStage": {
+      "schemaVersion": 2,
+      "stage": "PSC0 Lean 4.35 kernel conformance and timeout repairs",
+      "candidateCommit": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+      "sourceProvenance": {
+        "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+        "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
+        "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
+      },
+      "target": {
+        "version": "4.35.0-rc4",
+        "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+      },
+      "workflowRun": 37990758789,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37990758789",
+      "nativeBinarySha256": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+      "checks": {
+        "build": "passed",
+        "foundations": "passed",
+        "natDispatchRegressions": "passed",
+        "metatheoryBuild": "passed",
+        "companionProofs": {
+          "status": "passed",
+          "files": 84,
+          "jobId": 114023997923
+        },
+        "tutorial": {
+          "status": "passed",
+          "cases": 141,
+          "correct": 141,
+          "declined": 0,
+          "jobId": 114024555586
+        },
+        "bugs": {
+          "status": "passed",
+          "cases": 18,
+          "correctRejections": 18,
+          "accepted": 0,
+          "declined": [],
+          "jobId": 114024555482
+        },
+        "fresh435": {
+          "status": "passed",
+          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+          "prelude": {
+            "jobId": 114024555438,
+            "records": 65406,
+            "declarations": 1840,
+            "constants": 2121,
+            "wallSeconds": 0.62,
+            "maxRssKiB": 72052
+          },
+          "utf8": {
+            "jobId": 114024555438,
+            "records": 159345,
+            "declarations": 2146,
+            "constants": 2353,
+            "wallSeconds": 8.5,
+            "maxRssKiB": 84620
+          },
+          "xor": {
+            "jobId": 114024555540,
+            "records": 333731,
+            "declarations": 3413,
+            "constants": 3752,
+            "wallSeconds": 14.57,
+            "maxRssKiB": 108484
+          },
+          "int64": {
+            "jobId": 114024555540,
+            "records": 16206,
+            "declarations": 405,
+            "constants": 497,
+            "wallSeconds": 0.21,
+            "maxRssKiB": 72204
+          }
+        },
+        "init": {
+          "status": "timeout",
+          "jobId": 114024555588,
+          "limitSeconds": 500,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 500.02263927459717,
+          "lastProgress": {
+            "records": 2099999,
+            "declarations": 17010
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114024555480,
+          "limitSeconds": 590,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 590.0111389160156,
+          "lastProgress": {
+            "records": 2599999,
+            "declarations": 19259
+          }
+        },
+        "mathlib": {
+          "status": "not-run",
+          "reason": "Init and Std prerequisite gates failed",
+          "jobId": 114028656587,
+          "workflowConclusion": "skipped"
+        },
+        "projectionFuelRegressions": "passed",
+        "cacheModeRegressions": "passed",
+        "lambdaSpineBoundRegression": "passed",
+        "boundedSuccessLookupRegression": "passed",
+        "openWhnfScopeRegression": "passed",
+        "openInferenceAndEqualityScopeRegression": "passed",
+        "structuralInstantiationReferenceRefinement": "passed",
+        "freshUnknownLocalRejectionTheorem": "passed"
+      },
+      "claims": {
+        "completeArenaConformance": false,
+        "jointSelfhostQualified": false,
+        "endToEndConsistencyProved": false,
+        "defaultProviderPromoted": false,
+        "compilerSeedChanged": false
+      },
+      "nextStage": {
+        "status": "not-started",
+        "design": "RESEARCH_AND_MIGRATION.md",
+        "scope": "Proved portable expression graph, metadata, cursor-aware traversals, batched telescopes, complete Init/Std/Mathlib and separately qualified generated PSC0 products"
+      },
+      "status": "stage-checkpoint-with-open-corpus-timeouts",
+      "diagnostics": {
+        "trace": {
+          "run": 37986278855,
+          "source": "ad13026571931c0151b7ae53f468cd5363bef391",
+          "finding": "Int64.toBitVec_div unfolds symbolic Nat.shiftRight/div/ble repeatedly"
+        },
+        "experiment": {
+          "run": 37986835891,
+          "source": "ad13026571931c0151b7ae53f468cd5363bef391",
+          "temporaryPatch": "remove fvar exclusion for all bounded caches",
+          "cases": [
+            {
+              "budget": 256,
+              "wallSeconds": 0.3,
+              "records": 16206,
+              "declarations": 405,
+              "constants": 497,
+              "rssKiB": 72864
+            },
+            {
+              "budget": 4096,
+              "wallSeconds": 0.38,
+              "records": 16206,
+              "declarations": 405,
+              "constants": 497,
+              "rssKiB": 74208
+            }
+          ],
+          "productionEquivalent": false
+        },
+        "before": {
+          "run": 37985420337,
+          "focusedInt64TimeoutSeconds": 180,
+          "initTimeoutSeconds": 500.04527711868286,
+          "stdTimeoutSeconds": 590.1057589054108
+        },
+        "productionCandidate": "4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9",
+        "productionFocused": {
+          "commit": "4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9",
+          "run": 37987163057,
+          "job": 114012502799,
+          "int64WallSeconds": 0.37,
+          "xorWallSeconds": 39.6,
+          "binarySha256": "f35c048484ac392eb0a13ac48ee8485d79d27cabde4170e9326e2e4729702589"
+        },
+        "proofRepair": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
+        "traversalExperiment": {
+          "run": 37988845542,
+          "source": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
+          "inputKind": "first 1000000 records of pinned historical Init, not full conformance",
+          "inputSha256": "735d43733b70c51d86d9c4365ea433abcdb76a9f94dfe09a7a7dfc4605699878",
+          "variants": [
+            {
+              "name": "baseline",
+              "job": 114017555255,
+              "timeoutSeconds": 240
+            },
+            {
+              "name": "structural",
+              "job": 114017555100,
+              "timeoutSeconds": 240
+            },
+            {
+              "name": "open-all",
+              "job": 114017554738,
+              "timeoutSeconds": 240
+            },
+            {
+              "name": "combined",
+              "job": 114017554959,
+              "wallSeconds": 203.3,
+              "records": 1000000,
+              "declarations": 8507,
+              "constants": 9199,
+              "maxRssKiB": 332508
+            }
+          ],
+          "diagnosticOnly": true
+        },
+        "workerSampling": {
+          "run": 37988687879,
+          "job": 114017023739,
+          "samples": 11,
+          "source": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
+          "finding": "Repeated structural substitution, node counting, equality, universe substitution, cache eligibility allocation and scope cleanup; not a statistical percentage profile"
+        },
+        "profileReport": {
+          "run": 37989139275,
+          "job": 114018530778,
+          "profileSourceRun": 37987163057,
+          "slowDeclarations": 366,
+          "reportedSlowDeclarationMilliseconds": 446874
+        },
+        "historicalDagAnalysis": {
+          "run": 37933228241,
+          "job": 113828816249,
+          "record": 361999,
+          "proofUniqueNodes": 24520,
+          "proofExpandedTreeNodes": 12501779,
+          "depth": 85
+        },
+        "runtimeEquivalentPreviousRun": {
+          "run": 37989857541,
+          "commit": "d9b2e3e2da53406aeb727c05333f9ae0fe8e6127",
+          "comparison": "d9b2e3e2da53406aeb727c05333f9ae0fe8e6127...e8ed888bb4f16153b9aac335872d770ac19bbb11",
+          "onlyChangedPaths": [
+            "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SubstitutionRefinement.lean",
+            "psc0/packages/pskernel-core/proof/Ps/KernelCore/Checker/Inference/Core.proof.lean"
+          ],
+          "proofs": "failed at this earlier source; final proof repairs verified separately",
+          "init": {
+            "status": "timeout",
+            "wallSeconds": 500.01244497299194,
+            "lastProgressRecords": 3199999,
+            "lastProgressDeclarations": 25276
+          },
+          "std": {
+            "status": "timeout",
+            "wallSeconds": 590.0140829086304,
+            "lastProgressRecords": 2699999,
+            "lastProgressDeclarations": 19730
+          },
+          "mathlib": "skipped"
+        },
+        "finalProfile": {
+          "run": 37990758789,
+          "job": 114024555610,
+          "exitCode": 124,
+          "timeoutSeconds": 600,
+          "lastEnteredRecord": 4188018,
+          "lastEnteredDeclaration": "BitVec.getLsbD_srem",
+          "maxRssKiB": 518552,
+          "completeAcceptance": false
+        }
+      },
+      "researchPins": {
+        "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+        "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
+        "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+        "conRon": "64a2172a01276aa049220200bac11c075316230f",
+        "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+        "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
+        "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
+        "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
+      },
+      "researchFindings": {
+        "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
+        "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
+        "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
+        "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
+      },
+      "scope": {
+        "activePackage": "psc0/packages/pskernel-core",
+        "authoringPolicy": "PSC0 current bounded-selfhost-subset",
+        "oldPSC1ProfilesAreCurrentConstraints": false,
+        "representationRedesignStarted": false,
+        "defaultProviderPromoted": false,
+        "selectedCompilerSeedChanged": false
+      },
+      "historicalMigrationCheckpoint": {
+        "candidateCommit": "05542332ab589314917cd67a7eb7b74e80557770",
+        "workflowRun": 37979868377,
+        "checks": {
+          "build": "passed",
+          "foundations": "passed",
+          "natDispatchRegressions": "passed",
+          "metatheoryBuild": "passed",
+          "companionProofs": {
+            "status": "passed",
+            "files": 84
+          },
+          "tutorial": {
+            "status": "passed",
+            "cases": 141,
+            "correct": 141,
+            "declined": 0
+          },
+          "bugs": {
+            "status": "known-decline-remains",
+            "cases": 18,
+            "correctRejections": 17,
+            "accepted": 0,
+            "declined": [
+              "bugs/rec-missing-ih"
+            ]
+          },
+          "fresh435": {
+            "status": "passed",
+            "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+            "prelude": {
+              "records": 65406,
+              "declarations": 1840,
+              "constants": 2121,
+              "wallSeconds": 0.68,
+              "maxRssKiB": 71976
+            },
+            "utf8": {
+              "records": 159345,
+              "declarations": 2146,
+              "constants": 2353,
+              "wallSeconds": 9.29,
+              "maxRssKiB": 84336
+            }
+          },
+          "init": {
+            "status": "timeout",
+            "arenaCorrectness": "error",
+            "wallSeconds": 500.08234429359436,
+            "lastProgress": {
+              "records": 1099999,
+              "declarations": 9330
+            },
+            "jobId": 113988156376
+          },
+          "std": {
+            "status": "resource-exhaustion",
+            "arenaStatus": "declined",
+            "wallSeconds": 396.22881841659546,
+            "record": 1227585,
+            "declaration": "Std.Sat.AIG.mkXorCached",
+            "diagnostic": "kernel reduction budget exhausted",
+            "jobId": 113988156164
+          },
+          "mathlib": {
+            "status": "not-run",
+            "reason": "Init and Std prerequisite gates failed",
+            "jobId": 113991896616
+          }
+        },
+        "status": "stage-checkpoint-with-open-corpus-failures"
+      }
+    },
+    "priorSharingCheckpoint": {
+      "schemaVersion": 3,
+      "stage": "Certified native syntax sharing and storage-lifetime refinement",
+      "status": "native-proof-verified-corpus-timeouts-and-performance-regression",
+      "candidateCommit": "2e2068774b73b9affcc0852ed14caf96319d29e8",
+      "sourceProvenance": {
+        "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+        "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
+        "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
+      },
+      "target": {
+        "version": "4.35.0-rc4",
+        "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+      },
+      "workflowRun": 38000328227,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38000328227",
+      "nativeBinarySha256": "f8d651cb42880708c29805f2823465a14b031a47f8bdbb2aa09983994d4dac97",
+      "checks": {
+        "build": {
+          "status": "passed",
+          "jobs": 241,
+          "jobId": 114056572271
+        },
+        "foundations": "passed",
+        "dispatchProjectionAndCacheRegressions": "passed",
+        "certifiedSyntax": {
+          "status": "passed",
+          "jobId": 114056572271,
+          "constructors": 14,
+          "binderCursors": [
+            0,
+            1,
+            2,
+            5
+          ],
+          "sharedDagDepth": 32,
+          "expandedDagNodes": 8589934591,
+          "mixedBinderDepthExpandedNodes": 17179869181,
+          "coverage": [
+            "term/universe instantiation",
+            "lifting",
+            "free-variable abstraction",
+            "positive and negative exact bound-variable occurrence",
+            "exact syntactic equality",
+            "forced key collisions and cursor mismatch",
+            "closed substitution argument preparation",
+            "read-only hash hits/misses",
+            "indexed map/pairset and scoped semantic cache isolation"
+          ]
+        },
+        "metatheoryBuild": {
+          "status": "passed",
+          "jobs": 199,
+          "jobId": 114056571993
+        },
+        "companionProofs": {
+          "status": "passed",
+          "files": 84,
+          "jobId": 114056571993
+        },
+        "tutorial": {
+          "status": "passed",
+          "cases": 141,
+          "correct": 141,
+          "declined": 0,
+          "jobId": 114057151502
+        },
+        "bugs": {
+          "status": "passed",
+          "cases": 18,
+          "correctRejections": 18,
+          "accepted": 0,
+          "declined": 0,
+          "jobId": 114057151542
+        },
+        "fresh435": {
+          "status": "passed",
+          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+          "prelude": {
+            "jobId": 114057151433,
+            "records": 65406,
+            "declarations": 1840,
+            "constants": 2121,
+            "wallSeconds": 1.28,
+            "maxRssKiB": 75656
+          },
+          "utf8": {
+            "jobId": 114057151433,
+            "records": 159345,
+            "declarations": 2146,
+            "constants": 2353,
+            "wallSeconds": 14.09,
+            "maxRssKiB": 83920
+          },
+          "xor": {
+            "jobId": 114057151442,
+            "records": 333731,
+            "declarations": 3413,
+            "constants": 3752,
+            "wallSeconds": 29.7,
+            "maxRssKiB": 87648
+          },
+          "int64": {
+            "jobId": 114057151442,
+            "records": 16206,
+            "declarations": 405,
+            "constants": 497,
+            "wallSeconds": 0.49,
+            "maxRssKiB": 71548
+          }
+        },
+        "init": {
+          "status": "timeout",
+          "jobId": 114057151477,
+          "limitSeconds": 500,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 500.02821946144104,
+          "lastProgress": {
+            "records": 1699999,
+            "declarations": 14005
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114057151538,
+          "limitSeconds": 590,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 590.0085060596466,
+          "lastProgress": {
+            "records": 2999999,
+            "declarations": 21381
+          }
+        },
+        "mathlib": {
+          "status": "not-run",
+          "reason": "Init and Std prerequisite gates failed",
+          "jobId": 114060314113,
+          "workflowConclusion": "skipped"
+        },
+        "fullFresh435": {
+          "status": "timeout",
+          "workflowRun": 38000670791,
+          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+          "init": {
+            "jobId": 114057683540,
+            "limitSeconds": 500,
+            "exitCode": 124,
+            "inputRecords": 6452982,
+            "inputSha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
+            "maxRssKiB": 139200,
+            "lastProgress": {
+              "records": 1599999,
+              "declarations": 13243
+            }
+          },
+          "std": {
+            "jobId": 114057683532,
+            "limitSeconds": 590,
+            "exitCode": 124,
+            "inputRecords": 10193568,
+            "inputSha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
+            "maxRssKiB": 162552,
+            "lastProgress": {
+              "records": 1999999,
+              "declarations": 14186
+            }
+          }
+        }
+      },
+      "claims": {
+        "completeArenaConformance": false,
+        "jointSelfhostQualified": false,
+        "endToEndConsistencyProved": false,
+        "defaultProviderPromoted": false,
+        "compilerSeedChanged": false,
+        "wholeCorpusSpeedupEstablished": false,
+        "generatedSourcePortable": false
+      },
+      "architecture": {
+        "proofBoundary": "Intrinsic exact-result entries, full input/cursor validation, proved compiler substitutions, no project-defined unsafe primitive or axiom",
+        "scratchStorage": "Std.HashMap operation-local delta",
+        "retainedStorage": "Lean.PersistentHashMap checkpoint; publish at operation boundary",
+        "memoCursor": "Algebra-controlled: advance at binders only when the result depends on binder depth",
+        "scopeExit": "Restore entire parent caches; exact cross-scope hash-retention theorem exists but is not activated",
+        "executionProfile": "Lean-4.35-native-experimental",
+        "portableTarget": "PSC0 current bounded self-host profile; not restricted to the historical PSC1 profiles",
+        "dependencies": [
+          "Lean pointer-hint contracts",
+          "Lean compiler simplification and proof erasure",
+          "Squash",
+          "Std.HashMap",
+          "Lean.PersistentHashMap"
+        ]
+      },
+      "architecturalExperiments": [
+        {
+          "candidate": "de1ad1993286d642575cf35b4842b6633501a634",
+          "run": 37997784610,
+          "design": "retained metadata in a Std.HashMap",
+          "outcome": "regressed",
+          "init": {
+            "timeoutSeconds": 500,
+            "lastProgressRecords": 499999
+          },
+          "std": {
+            "timeoutSeconds": 590,
+            "lastProgressRecords": 499999
+          },
+          "diagnosticRun": 37998116131,
+          "workerSamples": {
+            "job": 114049222923,
+            "samples": 11,
+            "wholeArrayCopySamples": 4,
+            "note": "Sparse samples identify a mechanism, not statistical time percentages."
+          },
+          "controlledPrefix": {
+            "job": 114049222697,
+            "records": 500000,
+            "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+            "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+            "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+            "baselineSeconds": [
+              143.14,
+              144.51
+            ],
+            "candidateTimeoutSeconds": [
+              180,
+              180
+            ],
+            "fullConformance": false
+          }
+        },
+        {
+          "candidate": "7154935f67b614129d9d547d88c0b28213e56034",
+          "run": 37998880424,
+          "design": "persistent trie for all memos plus cross-scope hash retention",
+          "outcome": "proofs passed; corpus timeouts and controlled performance regression",
+          "init": {
+            "timeoutSeconds": 500,
+            "lastProgressRecords": 1099999
+          },
+          "std": {
+            "timeoutSeconds": 590,
+            "lastProgressRecords": 1799999
+          },
+          "controlledPrefix": {
+            "run": 37999324549,
+            "job": 114053267452,
+            "records": 500000,
+            "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+            "baselineSeconds": [
+              143.09,
+              143.59
+            ],
+            "candidateTimeoutSeconds": [
+              180,
+              180
+            ],
+            "fullConformance": false
+          },
+          "profile": {
+            "job": 114052375468,
+            "seconds": 600,
+            "maxRssKiB": 982096,
+            "lastEnteredRecord": 2414950
+          },
+          "storageControl": {
+            "candidate": "7d54f5672b5c1f12f153ef2ceb82a80db75aa07f",
+            "run": 37998638649,
+            "job": 114051519449,
+            "seconds": 600,
+            "maxRssKiB": 153152,
+            "lastEnteredRecord": 2028388,
+            "note": "Different runner and traversal endpoint; memory evidence, not a controlled timing comparison."
+          }
+        }
+      ],
+      "diagnostics": {
+        "run": 38000670791,
+        "controlledPrefix": {
+          "job": 114057683494,
+          "records": 500000,
+          "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+          "baselineSeconds": [
+            109.06,
+            109.74
+          ],
+          "candidateSeconds": [
+            160.39,
+            163.55
+          ],
+          "baselineMaxRssKiB": [
+            332416,
+            332024
+          ],
+          "candidateMaxRssKiB": [
+            100708,
+            99772
+          ],
+          "allFourExitCodes": 0,
+          "fullConformance": false
+        },
+        "worker": {
+          "job": 114057683226,
+          "limitSeconds": 180,
+          "exitCode": 124,
+          "samples": 11,
+          "findings": [
+            "bounded cache eligibility scans and allocations",
+            "name/string hashing",
+            "semantic index lookup",
+            "substitution and free-variable traversal allocation",
+            "scope cleanup"
+          ],
+          "note": "No top-frame whole-table copy in these eleven sparse samples; not a statistical absence claim."
+        },
+        "profile": {
+          "job": 114057151483,
+          "limitSeconds": 600,
+          "exitCode": 124,
+          "maxRssKiB": 189004,
+          "lastEntered": [
+            "3104596",
+            "theorem Std.IterM.step_filter._proof_1"
+          ]
+        }
+      },
+      "researchPins": {
+        "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+        "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
+        "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+        "conRon": "64a2172a01276aa049220200bac11c075316230f",
+        "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+        "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
+        "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
+        "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
+      },
+      "researchFindings": {
+        "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
+        "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
+        "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
+        "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
+      },
+      "remaining": [
+        "Complete historical and fresh Init/Std/Mathlib conformance at original limits",
+        "Stored constructor metadata and costed portable graph storage",
+        "Batched telescope/context/fuel correspondence",
+        "Exact-source generated PSC0 compiler/kernel qualification"
+      ],
+      "nextStage": {
+        "status": "not-qualified",
+        "scope": "Portable representation/backend and batched telescope transport; no compiler-seed or default-provider change"
+      }
+    },
+    "promotionDecision": {
+      "status": "not-eligible",
+      "reason": "Full corpus timeouts and controlled native performance regression; generated PSC0 qualification absent.",
+      "prState": "draft",
+      "defaultProviderChanged": false
+    }
+  },
+  "recordedAt": "2026-10-10 17:29:53 UTC",
+  "semanticFoundation": {
+    "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+    "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+    "validationStatus": "passed",
+    "workflowRun": 38057387016,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+    "scope": "Relative universe/function model and sound declarative fragment; runtime-owned annotated syntax and guarded structural coherence, syntax/hereditary-validity transport, execution-derived lambda codomain and exact application readings under explicit recursive premises. Full public checking/admission remains unproved.",
+    "modules": [
+      "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticClassifier.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticSortInference.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticSetDomain.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotatedExpr.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticInterpretation.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticContext.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticErasure.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticModelAdequacy.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticDeclarative.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticConcrete.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticExtension.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticStructuralEquality.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAbstraction.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticScope.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticLevelConstructors.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseSubstitution.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticConstantInference.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReference.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticLambdaCodomain.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationCoherence.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCoherentValidity.lean"
+    ],
+    "semanticEqualityRequiresDefinedValue": true,
+    "genericEmptyTheoremIsFullKernelConsistency": false,
+    "completeKernelMetatheory": false,
+    "fullUniverseFunctionClosureConstructed": true,
+    "scopedDependentFunctionsConstructed": true,
+    "admissionModelConstructed": false,
+    "productionCodeChanged": true,
+    "conditionalCallbackBridge": [
+      "Establish checked annotation provenance through actual public acceptance; the new executable guard discharges structural regime agreement when performed, but the public raw checker does not yet perform it.",
+      "establishment of hereditary validity by the joint checker and infer-only preconditions",
+      "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
+      "recursive soundness/validity at lambda's actual body-type inference and sort exposure; global coherence of readings through checking and comparison",
+      "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
+      "full safe declaration admission and interpretations of allowed axioms",
+      "public API and generated PSC0 correspondence"
+    ],
+    "concreteCheckerCoverage": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda direct body-type closing, actual codomain-sort visits, and a specific shared term/type reading with all four hereditary facts; local semantic obligations remain explicit.",
+    "proofDependencies": {
+      "genericProofIrrelevance": [],
+      "genericEmptyDenotation": [],
+      "concreteEmptyWitness": [
+        "propext"
+      ],
+      "allowedHostAxioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "auditTargets": 242,
+      "customAxiomsAdded": false,
+      "localHypotheses": "Exposed explicitly in theorem statements; not included in #print axioms"
+    },
+    "priorValidation": [
+      {
+        "run": 38025522545,
+        "commit": "51c11cf37405c375eefbde58f9aeed6ceb91f2e8",
+        "status": "passed",
+        "buildJobs": 204,
+        "companionFiles": 84
+      },
+      {
+        "run": 38025865536,
+        "commit": "ef5ae6a6ade60b12e2a6f0ea86c1a946128b7e4a",
+        "status": "failed",
+        "reason": "Sort-inference cache-hit proof reused a lookup equality already rewritten by case analysis",
+        "repairCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f"
+      },
+      {
+        "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
+        "run": 38055104083,
+        "job": 114221834109,
+        "buildJobs": 249,
+        "companionFiles": 84,
+        "axiomDeclarations": 221,
+        "pureMathModules": 12,
+        "closureModules": 135,
+        "referenceDefinitions": 1824,
+        "cachedFallbacks": 0,
+        "status": "passed",
+        "checkedAt": "2026-10-10 13:20:56 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
+        "runConclusion": "success"
+      }
+    ],
+    "jobId": 114228540945,
+    "buildJobs": 254,
+    "companionFiles": 84,
+    "axiomAudit": "passed",
+    "checkedAt": "2026-10-10 13:57:20 UTC",
+    "axiomDeclarations": 242,
+    "mathematicalModelQualification": "Relative universe/function mathematics under explicit SetTheory V; full kernel admission and public acceptance remain outside the constructed model."
+  },
+  "relativeSetModelStage": {
+    "status": "passed-relative-foundation-full-kernel-unfinished",
+    "proofScope": "Relative universe-set/dependent-function model; full-constructor parameterized interpretation; sound declarative dependent-function fragment; exact production syntax transport. Not a full checker or admission model.",
+    "productionCodeChanged": false,
+    "compilerSeedChanged": false,
+    "defaultProviderChanged": false,
+    "relativeFoundation": {
+      "kind": "SetTheory V",
+      "globalInstancePostulated": false,
+      "existenceConstructed": false,
+      "assumptions": [
+        "membership and extensionality",
+        "pairing, union and powerset",
+        "regularity",
+        "replacement for Lean-level functions",
+        "omega-indexed increasing chain of Grothendieck universes"
+      ],
+      "source": "ConLeche/SetTheory/Core.lean",
+      "dependencyCommit": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a"
+    },
+    "completeKernelMetatheory": false,
+    "fullKernelModelConstructed": false,
+    "endToEndPublicKernelConsistencyProved": false,
+    "relativeDependentFunctionFragmentConsistency": true,
+    "legacyJudgmentsReplacedEverywhere": false,
+    "proofImportFence": {
+      "pureMathModules": 12,
+      "conLecheCheckerImported": false,
+      "legacyJudgmentsImported": false,
+      "productionImportsAssurance": false
+    },
+    "remaining": [
+      "derive coherent binder readings from actual checked runs; semantic membership alone is insufficient",
+      "hereditary validity and infer-only skip preconditions",
+      "recursive WHNF and defeq including projections, primitives, eta, unit, quotient and recursors",
+      "context-indexed cache invariants, publication and scope/environment transport",
+      "full safe declaration admission and interpretations of allowed axioms",
+      "public API and generated PSC0 correspondence"
+    ],
+    "validationAttempts": [
+      {
+        "run": 38027107361,
+        "commit": "3585c3be034e2fabaaf11ce856ed0d8aeabaac72",
+        "status": "failed",
+        "note": "Implicit set-domain argument in zero-universe product proof"
+      },
+      {
+        "run": 38027363458,
+        "commit": "6ee25f6de9d95e426589b8a9749318470c795d94",
+        "status": "failed",
+        "note": "Unavailable congruence helper in the interpretation proof"
+      },
+      {
+        "run": 38027593662,
+        "commit": "13071d4e448c282231bc54277825f998b5c905d0",
+        "status": "failed",
+        "note": "Native erasure proof tactic and arithmetic obligations"
+      },
+      {
+        "run": 38027811884,
+        "commit": "607221aa4ec78fd93d6fa912e2db02db35c57c1c",
+        "status": "failed",
+        "note": "Remaining false-flag and substitution arithmetic obligations"
+      },
+      {
+        "run": 38027988316,
+        "commit": "a7b3fd160ce56be0f2cee2d959c1c77fbcc051dd",
+        "status": "passed",
+        "note": "225 build jobs, 84 companions, 73 semantic declarations"
+      },
+      {
+        "run": 38028207219,
+        "commit": "c1c06243516a3073366a7cba0f503da5ee734571",
+        "status": "passed",
+        "note": "226 build jobs, 84 companions, 79 semantic declarations"
+      },
+      {
+        "run": 38028510281,
+        "commit": "36cd56233e7bb7b14c2411cb88f71696d2252063",
+        "status": "failed",
+        "note": "Function-valued universe reading rewrite in conservative extension"
+      },
+      {
+        "run": 38028738270,
+        "commit": "f686da042259d11d1b9d28f735a70bd4962be148",
+        "status": "failed",
+        "note": "Projection congruence elaboration in structural equality proof"
+      },
+      {
+        "run": 38029044734,
+        "commit": "899d3e58142887ee05af424fd2e66c029603eaca",
+        "status": "passed",
+        "note": "229 build jobs, 84 companions, 88 semantic declarations"
+      },
+      {
+        "run": 38029237379,
+        "commit": "04f9bd594aa464756fd6bd6505860d34423f8712",
+        "status": "passed",
+        "note": "230 build jobs, 84 companions, 95 semantic declarations"
+      },
+      {
+        "run": 38029451186,
+        "commit": "90b50c80d27f3c577d3dedcde8c3d1ce37869f07",
+        "status": "failed",
+        "note": "Explicit annotated fvar erasure needed for native scope rewrite"
+      },
+      {
+        "run": 38029720585,
+        "commit": "336e8083eb6a9f7d0a91aea567d24decb9a32544",
+        "status": "failed",
+        "note": "Universe proof split matched inner conditions instead of outer guards"
+      },
+      {
+        "run": 38029975716,
+        "commit": "793cda6fae35495447df3455a16ad67b3a15587d",
+        "status": "failed",
+        "note": "Universe helper arguments not determined after constructor cases"
+      },
+      {
+        "run": 38030201492,
+        "commit": "8868e938df8ac6c565dcbb52b5372132deff93cd",
+        "status": "failed",
+        "note": "Six universe smart-constructor case conversion obligations"
+      },
+      {
+        "run": 38030387563,
+        "commit": "23c65ffc287542edd5a45288f7a926f7c5c9d8d5",
+        "status": "passed",
+        "note": "233 build jobs, 84 companions, 121 semantic declarations"
+      },
+      {
+        "run": 38030596256,
+        "commit": "2900e6190bb22904b894f52ad6a9a6245c988b0c",
+        "status": "failed",
+        "note": "Recursion-depth environment-preservation helper did not simplify its inner guard"
+      },
+      {
+        "run": 38030793952,
+        "commit": "9555fc8ce78db8675bc4311aa4af2aaca7935e36",
+        "status": "failed",
+        "note": "Raw Nat guard normalization and Boolean false simplification in recursion-entry helper"
+      },
+      {
+        "run": 38030925565,
+        "commit": "95fe299df6b741f3c1b03556dfcaaa9d33b7eddc",
+        "status": "failed",
+        "note": "Same recursion-entry helper failure; constructed fragment reading compiled"
+      },
+      {
+        "run": 38031021780,
+        "commit": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+        "status": "passed",
+        "note": "234 build jobs, 84 companions, 125 declarations; dependency fence passed"
+      }
+    ],
+    "validation": {
+      "commit": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+      "run": 38031021780,
+      "job": 114151806260,
+      "buildJobs": 234,
+      "companionFiles": 84,
+      "axiomDeclarations": 125,
+      "pureMathModules": 12,
+      "closureModules": 82,
+      "status": "passed",
+      "checkedAt": "2026-10-10 06:31:50 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38031021780"
+    },
+    "executableRegression": {
+      "commit": "899d3e58142887ee05af424fd2e66c029603eaca",
+      "run": 38029044702,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38029044702",
+      "status": "failed-corpus-timeouts",
+      "binarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+      "sameBinaryAsPriorStage": true,
+      "buildJobs": 241,
+      "tutorial": {
+        "job": 114146225099,
+        "correct": 141,
+        "total": 141,
+        "declined": 0
+      },
+      "bugs": {
+        "job": 114146225135,
+        "correct": 18,
+        "total": 18,
+        "declined": 0
+      },
+      "freshFocused": {
+        "lean435Job": 114146225068,
+        "prelude": "accepted",
+        "utf8": "accepted",
+        "stdJob": 114146225125,
+        "xor": "accepted",
+        "int64": "accepted"
+      },
+      "corpus": {
+        "init": {
+          "job": 114146225050,
+          "status": "timeout",
+          "seconds": 500.0286748409271,
+          "lastReportedRecords": 2799999,
+          "lastReportedDeclarations": 21944
+        },
+        "std": {
+          "job": 114146225075,
+          "status": "timeout",
+          "seconds": 590.0843160152435,
+          "lastReportedRecords": 1999999,
+          "lastReportedDeclarations": 14314
+        },
+        "mathlib": {
+          "status": "skipped",
+          "reason": "Init/Std prerequisite gates failed"
+        }
+      },
+      "profile": {
+        "job": 114146225239,
+        "workflowJobStatus": "success",
+        "checkerExitCode": 124,
+        "checkerStatus": "timeout",
+        "limitSeconds": 600,
+        "maxRssKiB": 174696
+      },
+      "performanceImprovementClaimed": false
+    },
+    "sourceCommit": "c1b0f21ce17b1ee6506b0d2eb4e6ea812f130032",
+    "changedProductionSourceSinceExecutableRepair": false,
+    "comparisonBase": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+    "fragmentReadingConstructed": true,
+    "foundationExistenceConstructed": false,
+    "proofDependencies": {
+      "allowedHostAxioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "customSoundnessAxiomsAdded": false,
+      "localSetFoundationExplicit": true,
+      "localCallbackAndValidityPremisesExplicit": true
+    }
+  },
+  "priorRelativeSetModelReceipt": {
+    "candidateCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+    "assuranceRevision": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd",
+    "workflowRun": 38007755710,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38007755710",
+    "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+    "checks": {
+      "build": {
+        "status": "passed",
+        "jobs": 241,
+        "jobId": 114080390584
+      },
+      "metatheory": {
+        "status": "passed",
+        "jobs": 200,
+        "jobId": 114080390702
+      },
+      "companionProofs": {
+        "status": "passed",
+        "files": 84,
+        "jobId": 114080390702
+      },
+      "foundationRegressions": "passed",
+      "tutorial": {
+        "status": "passed",
+        "correct": 141,
+        "declined": 0,
+        "jobId": 114080872802
+      },
+      "bugs": {
+        "status": "passed",
+        "correct": 18,
+        "declined": 0,
+        "jobId": 114080872756
+      },
+      "freshPreludeUtf8XorInt64": "passed",
+      "originalBudgetCorpora": {
+        "status": "completed-with-timeouts",
+        "runId": 38007755710,
+        "checkedAt": "2026-10-10 00:23:05 UTC",
+        "init": {
+          "status": "timeout",
+          "jobId": 114080872766,
+          "exitCode": -9,
+          "elapsedSeconds": 500.0116081237793,
+          "originalLimitSeconds": 500,
+          "lastProgress": {
+            "records": 1699999,
+            "declarations": 14005
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114080872785,
+          "exitCode": -9,
+          "elapsedSeconds": 590.0852546691895,
+          "originalLimitSeconds": 590,
+          "lastProgress": {
+            "records": 1999999,
+            "declarations": 14314
+          }
+        },
+        "mathlib": {
+          "status": "skipped",
+          "jobId": 114083516556,
+          "reason": "Original-budget Init/Std prerequisite gates timed out"
+        },
+        "profileInit": {
+          "status": "timeout",
+          "jobId": 114080872733,
+          "workflowJobConclusion": "success",
+          "explanation": "Diagnostic workflow preserves timeout as data; green job is not corpus acceptance",
+          "exitCode": 124,
+          "elapsedSeconds": 600,
+          "maxRssKiB": 174868,
+          "lastEnteredRecord": 2414950,
+          "lastEnteredDeclaration": "_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList"
+        }
+      }
+    }
+  },
+  "referenceCheckerStage": {
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-cache-free-reference-20261010",
+      "commit": "32fb55d651cc8228794216ae298872978f3be0f9",
+      "priorValidatedCode": "1442f3242dea69ac50a6020cca4ebf7fd5cbc1cd"
+    },
+    "policy": "Fixed reference specialization; semantic caches disabled; certified structural sharing retained",
+    "sourceRoot": "src/Ps/KernelCore/API/Reference.lean",
+    "roadmap": "REFERENCE_CORRECTNESS_PLAN.md",
+    "sameCheckingAndAdmissionRules": true,
+    "sourceClosure": {
+      "parameterizedFunctions": 101,
+      "initialFiles": 29
+    },
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "cacheRefinementProved": false,
+    "wholeStateIndependenceProved": false,
+    "constantInferenceStillRequiresEnvironmentModel": true,
+    "defaultProviderChanged": false,
+    "compilerSeedChanged": false,
+    "psc0GeneratedQualified": false,
+    "nativeRegression": {
+      "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+      "run": 38033599176,
+      "job": 114159374353,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false,
+      "laterComparison": {
+        "base": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+        "head": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+        "runtimeSourceChanges": 0,
+        "scope": [
+          "src/",
+          "host/",
+          "test/",
+          "reference/"
+        ],
+        "changedFiles": "Only metatheory, one companion proof and workflow"
+      }
+    },
+    "arena": {
+      "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+      "run": 38034307491,
+      "binaryJob": 114161461962,
+      "binaryBuildJobs": 218,
+      "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114161786213,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114161786252,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": false
+    },
+    "validationAttempts": [
+      {
+        "run": 38033120465,
+        "commit": "d1135f8dbd9e6400cc384c3c0a58d80c2e0fcc0e",
+        "status": "failed",
+        "note": "Production build passed; cached proof simplification needed explicit policy equations"
+      },
+      {
+        "run": 38033599176,
+        "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
+        "status": "failed-proofs-native-tests-passed",
+        "note": "Native checker regressions and Arena binary passed; cached proof projection simplifications and audit counter type needed repairs"
+      },
+      {
+        "run": 38033984177,
+        "commit": "2588f96f48a64afe60d10940b4359e18417356d1",
+        "status": "failed",
+        "note": "Reference call-graph audit passed; reference sort simplification and legacy cache-hit proof remained"
+      },
+      {
+        "run": 38034307491,
+        "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
+        "status": "failed-one-companion",
+        "note": "238 library/metatheory jobs, 136-axiom target audit and import fence passed; 83/84 companions passed; both Arena modes passed all 159 cases"
+      },
+      {
+        "run": 38034714932,
+        "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+        "status": "passed",
+        "note": "238 library/metatheory jobs, all 84 companions, 136-declaration axiom gate, 124-module import closure, 1821-definition reference policy audit"
+      }
+    ],
+    "checksScope": "Exact identities above; full corpus and fresh 4.35 exporter receipts remain historical.",
+    "validation": {
+      "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+      "run": 38034714932,
+      "job": 114162647958,
+      "buildJobs": 238,
+      "companionFiles": 84,
+      "axiomDeclarations": 136,
+      "pureMathModules": 12,
+      "closureModules": 124,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 07:35:54 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
+    }
+  },
+  "referenceBinderModelStage": {
+    "status": "passed-local-model-bridges-full-kernel-unfinished",
+    "comparisonBase": "22b638ec91d0dd58f49da109d7c22994790646fd",
+    "sourceModules": [
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean"
+    ],
+    "productionCodeChanged": false,
+    "compilerSeedChanged": false,
+    "defaultProviderChanged": false,
+    "localResults": [
+      "hereditary annotation and function evidence preserved through binding and universe operations",
+      "actual reference forall visits in both inference modes and model construction from its visited sort checks",
+      "actual checked application branches and production-instantiated modeled result under explicit local premises",
+      "actual checked lambda body-type reduction and closing, with local semantic premises explicit",
+      "positive-regime beta recovers the original lambda domain; proof-regime beta keeps the on-domain obligation",
+      "counterexample: both hereditary predicates plus equal raw erasure do not imply equal interpretation"
+    ],
+    "conditionalBridgesAreFullCheckerSoundness": false,
+    "hereditaryValidityImpliesErasureCoherence": false,
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "foundationExistenceConstructed": false,
+    "customSoundnessAxiomsAdded": false,
+    "localSetFoundationExplicit": true,
+    "localRecursiveAndAnnotationPremisesExplicit": true,
+    "upstreamCheckerTheoremsImported": false,
+    "legacyJudgmentsImported": false,
+    "remaining": [
+      "checked annotation provenance and coherent interpretations across raw structural comparison; both hereditary predicates are insufficient",
+      "establishment of hereditary validity by the joint checker and infer-only preconditions",
+      "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
+      "lambda body-type reduction preservation and justification of its selected regime",
+      "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
+      "full safe declaration admission and interpretations of allowed axioms",
+      "public API and generated PSC0 correspondence"
+    ],
+    "runtimeEvidencePolicy": "No new runtime or full-corpus claim; previous native/Arena receipts keep their exact binary and commit identities.",
+    "validationAttempts": [
+      {
+        "run": 38035829278,
+        "commit": "e26a01eec662dcefdc311c5b16167b38d33a6ef2",
+        "status": "failed",
+        "note": "Substitution equality-branch arithmetic simplification"
+      },
+      {
+        "run": 38036044155,
+        "commit": "2b354df3876e2e4539378d192876142ae292a800",
+        "status": "failed",
+        "note": "Explicit result-universe evaluation rewrite"
+      },
+      {
+        "run": 38036281786,
+        "commit": "83d1b21d4bcdd15a6579bcdf972be99a8575635c",
+        "status": "failed",
+        "note": "Sort-source case substitution and opened-reading rewrite"
+      },
+      {
+        "run": 38036596326,
+        "commit": "dc536083a4fcc4890a294472cdd4b2627b6ddb92",
+        "status": "failed",
+        "note": "Sort-source equality already substituted by case split"
+      },
+      {
+        "run": 38036985579,
+        "commit": "c0c5e95adc7dca38de4484beead4554d497ed9bc",
+        "status": "failed",
+        "note": "Application result equality dependent rewrite; function-validity proofs passed"
+      },
+      {
+        "run": 38037243819,
+        "commit": "7ef3f9d300122bdfebd6b6164cd5a97d7869eeb9",
+        "status": "failed",
+        "note": "Lambda fibre transport needed explicit beta-reduced goal; other local model bridges and transports passed"
+      },
+      {
+        "run": 38037441580,
+        "commit": "e617c0379e88b0cd3579ceda1b4de62191e8c4bb",
+        "status": "failed",
+        "note": "New combined-validity counterexample passed; prior lambda fibre rewrite issue remained"
+      },
+      {
+        "run": 38037497460,
+        "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
+        "status": "passed",
+        "note": "244 builds, 84 companions, 175 audit targets, 130-module dependency closure and 1821-definition policy audit"
+      }
+    ],
+    "additionalDeclarationsCoveredByAxiomAudit": 39,
+    "validation": {
+      "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
+      "run": 38037497460,
+      "job": 114170897748,
+      "buildJobs": 244,
+      "companionFiles": 84,
+      "axiomDeclarations": 175,
+      "pureMathModules": 12,
+      "closureModules": 130,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 08:25:36 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38037497460"
+    },
+    "runtimeComparison": {
+      "base": "22b638ec91d0dd58f49da109d7c22994790646fd",
+      "head": "44e4f1a7d0385343309895138a896ef156cb7666",
+      "runtimeSourceChanges": 0,
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/lakefile.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean"
+      ]
+    }
+  },
+  "checkedAnnotationStage": {
+    "status": "passed-assurance-guard-full-kernel-unfinished",
+    "comparisonBase": "9943eed674b6de039e70fdde355aad248a6bfff4",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-checked-annotations-20261010",
+      "commit": "9943eed674b6de039e70fdde355aad248a6bfff4"
+    },
+    "sourceModules": [
+      "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean"
+    ],
+    "productionCodeChanged": false,
+    "publicAcceptanceRunsGuard": false,
+    "compilerSeedChanged": false,
+    "defaultProviderChanged": false,
+    "localResults": [
+      "Exact executable comparison of universe-zero conditions over all parameter/metavariable assignments",
+      "Agreement preserved by actual universe substitution, lifting and closing",
+      "Guarded raw structural comparison implies semantic equality without assumed RegimesAgree",
+      "Actual sort-exposure validation success characterized, with forall trace/model bridges",
+      "Existing native positivity test is exactly uniform positivity and supplies positive beta's regime premise",
+      "Formal distinction between zero-regime agreement and universe-level equality"
+    ],
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "acceptedAnnotationProvenanceProved": false,
+    "foundationExistenceConstructed": false,
+    "customSoundnessAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "localSetFoundationExplicit": true,
+    "localRecursivePremisesExplicit": true,
+    "upstreamCheckerTheoremsImported": false,
+    "legacyJudgmentsImported": false,
+    "validationAttempts": [
+      {
+        "run": 38049764544,
+        "commit": "ccd724e2d97bad1ff07859f9b13f379ed6ad0d94",
+        "status": "failed",
+        "note": "Unavailable by_contra tactic; replaced with constructive case split."
+      },
+      {
+        "run": 38050047665,
+        "commit": "1c1e10c7d18a89a6ce9d0b38f1e0ba9c1d92e04d",
+        "status": "failed",
+        "note": "Broad simplification exceeded heartbeat limit; Bool equality lemma used as iff. Replaced with focused induction and rewrites."
+      },
+      {
+        "run": 38050525362,
+        "commit": "3dd1117fdd013b557b2bfecad1ab148629fb44ac",
+        "status": "failed",
+        "note": "Closed level arithmetic needed explicit evaluation simplification before numeric decision."
+      },
+      {
+        "run": 38050725364,
+        "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+        "status": "passed",
+        "note": "247 builds, 84 companion proofs, 212 axiom targets; 133-module dependency closure; 1821-definition reference-policy audit."
+      }
+    ],
+    "additionalDeclarationsCoveredByAxiomAudit": 37,
+    "runtimeEvidencePolicy": "No new runtime, corpus or performance claim; prior executable receipts retain exact identities.",
+    "validation": {
+      "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+      "run": 38050725364,
+      "job": 114209132602,
+      "buildJobs": 247,
+      "companionFiles": 84,
+      "axiomDeclarations": 212,
+      "pureMathModules": 12,
+      "closureModules": 133,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 12:10:43 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
+    },
+    "runtimeComparison": {
+      "base": "9943eed674b6de039e70fdde355aad248a6bfff4",
+      "head": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+      "runtimeSourceChanges": 0,
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/lakefile.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean"
+      ]
+    }
+  },
+  "lambdaTypeStage": {
+    "status": "proved-local-bridges-full-kernel-unfinished",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-lambda-type-simplification-20261010",
+      "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb"
+    },
+    "productionCodeChanged": true,
+    "sourceCommit": "b3cbd95709cad77bc0e6fe476d4f2fa9e2bb01a3",
+    "productionChange": "Close recursively inferred lambda body type directly; remove extra cheap-beta pass in both cache and inference modes",
+    "semanticModel": "Exact result erasure and model membership; scope-locality and hereditary type validity under explicit recursive/regime premises",
+    "eliminatedPremise": "Preservation by the retired lambda body-type normalization",
+    "remainingPremises": [
+      "recursive opened-body typing",
+      "recursive type validity and scope",
+      "selected annotation regime"
+    ],
+    "normalizationElsewhereUnchanged": true,
+    "customSoundnessAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelConsistencyProved": false,
+    "research": {
+      "leanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+      "conLecheCommit": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+      "note": "Con Leche closes inferred lambda type directly, but also validates annotations through extra checks not yet integrated in PSKernel."
+    },
+    "validationAttempts": [
+      {
+        "run": 38051925196,
+        "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+        "status": "mixed",
+        "note": "247 metatheory builds and 212 axiom targets passed; one of 84 companions retained the old lambda result. Native and both Arena modes passed; fresh reference Int64 timed out."
+      },
+      {
+        "run": 38052257213,
+        "commit": "9c8f172d5e9d8ce25b7eb740f0eb229f2c3219ed",
+        "status": "failed",
+        "note": "New validity-scope module used reserved identifier scoped; renamed binder. No new source acceptance change."
+      },
+      {
+        "run": 38052617458,
+        "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+        "status": "proofs-passed-diagnostic-setup-failed",
+        "note": "248 builds, all 84 companions, 219 axiom targets, 134-module import closure and 1821-definition policy audit passed. Baseline diagnostic initially selected the root toolchain and stopped at the version assertion."
+      },
+      {
+        "run": 38052827877,
+        "commit": "0aa3d403324e8a339a8a0c07253b0e10f6dff1ae",
+        "status": "diagnostic-completed-both-timeout",
+        "note": "Both 218-job binaries built; identical input, runner and 180-second budgets. Both exit 124, so no acceptance/performance-equivalence claim."
+      }
+    ],
+    "additionalDeclarationsCoveredByAxiomAudit": 7,
+    "runtime": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "binaryJob": 114212616925,
+      "binaryBuildJobs": 218,
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114213076273,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114213076357,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": true
+    },
+    "nativeRegression": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "job": 114212616925,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false
+    },
+    "fresh435": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "sameExportedInputBetweenModesVerified": false,
+      "cached": {
+        "job": 114213076297,
+        "workflowConclusion": "success",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 1.2,
+            "maxRssKiB": 74668
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 13.29,
+            "maxRssKiB": 84044
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 28.95,
+            "maxRssKiB": 88380
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.5,
+            "maxRssKiB": 72848
+          }
+        ]
+      },
+      "reference": {
+        "job": 114213076323,
+        "workflowConclusion": "failure",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.92,
+            "maxRssKiB": 74352
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 13.51,
+            "maxRssKiB": 75916
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 43.71,
+            "maxRssKiB": 87604
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "timeout",
+            "exitCode": 124,
+            "seconds": 180,
+            "maxRssKiB": 70652
+          }
+        ]
+      }
+    },
+    "validation": {
+      "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+      "run": 38052617458,
+      "job": 114214647274,
+      "buildJobs": 248,
+      "companionFiles": 84,
+      "axiomDeclarations": 219,
+      "pureMathModules": 12,
+      "closureModules": 134,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 12:41:40 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+      "runConclusion": "failure",
+      "runQualification": "Proof job passed; separate baseline diagnostic setup failed before checking and was rerun independently."
+    },
+    "runtimeComparison": {
+      "base": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "head": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/lakefile.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean",
+        "psc0/packages/pskernel-core/proof/Ps/KernelCore/Metatheory/Typing.proof.lean"
+      ],
+      "runtimeSourceChanges": 0
+    },
+    "int64BaselineComparison": {
+      "run": 38052827877,
+      "job": 114215267947,
+      "workflowConclusion": "success",
+      "checkerAcceptance": false,
+      "status": "both-timeout",
+      "budgetSeconds": 180,
+      "inputSha256": "e0c31b69ad4013f80b732b5eac9484948a6d4a469d0452d44f0c43f6b2ac1df8",
+      "sameRunner": true,
+      "sameInput": true,
+      "baseline": {
+        "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb",
+        "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70784
+      },
+      "candidate": {
+        "commit": "0aa3d403324e8a339a8a0c07253b0e10f6dff1ae",
+        "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70356
+      },
+      "conclusion": "Reference Int64 timeout predates lambda simplification. The experiment does not establish equal performance or acceptance.",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947"
+    },
+    "binaryCorrespondence": {
+      "nativeRun": 38051925196,
+      "diagnosticRun": 38052827877,
+      "candidateSha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "equal": true
+    }
+  },
+  "lambdaCodomainStage": {
+    "status": "validated-local-checked-reading-full-kernel-unfinished",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-lambda-sort-evidence-20261010",
+      "commit": "ffd56473b9c42ff641a29e94094920e3322c4fef"
+    },
+    "sourceCommit": "13bd0cdeb470099b4c6add1e40ee9035542a90d4",
+    "productionCodeChanged": true,
+    "oneProductionSemanticImplementation": true,
+    "newProofModule": "metatheory/Ps/KernelCore/Metatheory/SemanticLambdaCodomain.lean",
+    "newResults": [
+      "actual reference lambda trace includes body-type re-inference and codomain sort exposure",
+      "codomain set membership follows from those visits and their local induction hypotheses",
+      "the same actual codomain level labels both term/type readings, with exact erasure, typing and all four hereditary facts"
+    ],
+    "arbitrarySelectedLevelRemovedFromNewBridge": true,
+    "proofValuedFibrePremiseRemovedFromNewBridge": true,
+    "fullRecursiveCheckerSoundness": false,
+    "acceptedAnnotationCoherence": false,
+    "fullKernelConsistencyProved": false,
+    "customAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "foundationExistenceConstructed": false,
+    "inferOnlyValidityPreconditionsRetained": true,
+    "generatedPSC0Qualified": false,
+    "validationAttempts": [
+      {
+        "commit": "e600c3ac862e68009511f778203758415838a9df",
+        "run": 38054667785,
+        "status": "proofs-native-arena-passed-reference-int64-timeout",
+        "note": "249 builds, all 84 companions, 221 semantic axiom targets, 135-module closure and 1824-definition policy audit passed. Both Arena modes passed 159 cases with no declines. Four cached fresh closures passed; reference Int64 timed out at 180s."
+      },
+      {
+        "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
+        "run": 38055104083,
+        "status": "passed",
+        "note": "Explicit codomainCheck type annotation checked by all 249 proof-build jobs, 84 companions, 221 axiom targets, 135-module import fence, 1824-definition policy audit; rebuilt native binary matched the tested candidate hash."
+      }
+    ],
+    "nativeRegression": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "job": 114220568884,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_LAMBDA_CODOMAIN_GATE",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false,
+      "lambdaCodomainCases": {
+        "cacheModes": 2,
+        "deliberatelyMalformedLowLevelContexts": true,
+        "unsupportedDeclines": 2,
+        "inferOnlyGrade": 2,
+        "resourceExhaustion": 2,
+        "publicExploitClaimed": false
+      }
+    },
+    "runtime": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "binaryJob": 114220568884,
+      "binaryBuildJobs": 218,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114221065854,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114221065799,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": true
+    },
+    "fresh435": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "sameExportedInputBetweenModesVerified": false,
+      "cached": {
+        "job": 114221065867,
+        "workflowConclusion": "success",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 1.22,
+            "maxRssKiB": 75944
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 11.66,
+            "maxRssKiB": 84884
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 27.36,
+            "maxRssKiB": 88928
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.42,
+            "maxRssKiB": 72864
+          }
+        ]
+      },
+      "reference": {
+        "job": 114221065827,
+        "workflowConclusion": "failure",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.87,
+            "maxRssKiB": 73948
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 10.55,
+            "maxRssKiB": 77356
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 34.96,
+            "maxRssKiB": 87164
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "timeout",
+            "exitCode": 124,
+            "seconds": 180,
+            "maxRssKiB": 69740
+          }
+        ]
+      }
+    },
+    "finalSourceCommit": "445f97b3509b89bad755c7377dcae3fe2d1dd3d2",
+    "validation": {
+      "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
+      "run": 38055104083,
+      "job": 114221834109,
+      "buildJobs": 249,
+      "companionFiles": 84,
+      "axiomDeclarations": 221,
+      "pureMathModules": 12,
+      "closureModules": 135,
+      "referenceDefinitions": 1824,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 13:20:56 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
+      "runConclusion": "success"
+    },
+    "binaryIdentity": {
+      "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
+      "run": 38055104083,
+      "job": 114221834301,
+      "status": "passed",
+      "buildJobs": 218,
+      "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
+      "testedRun": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "hashesEqual": true,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834301"
+    },
+    "runtimeComparison": {
+      "base": "e600c3ac862e68009511f778203758415838a9df",
+      "head": "2baa33e165f914d14f635d68934293e3fcea89ed",
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.lean"
+      ],
+      "sourcePatch": "@@ -486,7 +486,7 @@ def psKernelInferCoreWithFuel\n                             -- Checked lambda inference establishes its codomain\n                             -- sort by a real infer-only visit and sort exposure.\n                             -- Infer-only callers retain their validity precondition.\n-                            let codomainCheck :=\n+                            let codomainCheck : Except String PsKernelCheckerState :=\n                               if inferOnly then\n                                 Except.ok (Prod.snd bodyResult)\n                               else",
+      "binaryHashMatched": true,
+      "binaryIdentityJob": 114221834301
+    },
+    "additionalDeclarationsCoveredByAxiomAudit": 2
+  },
+  "runtimeAnnotatedSyntaxStage": {
+    "status": "validated-runtime-annotation-representation-full-kernel-unfinished",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-runtime-annotations-20261010",
+      "commit": "0c7f63b446bfd4b0847ece437b76bccd40ac3fb9"
+    },
+    "representationModules": [
+      "Ps.KernelCore.Core.AnnotatedExpr",
+      "Ps.KernelCore.Core.UniverseRegime",
+      "Ps.KernelCore.Core.AnnotatedEquality"
+    ],
+    "proofModules": [
+      "Ps.KernelCore.Metatheory.SemanticAnnotationCoherence",
+      "Ps.KernelCore.Metatheory.SemanticCoherentValidity"
+    ],
+    "unchangedRelocatedDeclarations": [
+      {
+        "definition": "AnnotatedExpr",
+        "identical": true
+      },
+      {
+        "definition": "erase",
+        "identical": true
+      },
+      {
+        "definition": "Scoped",
+        "identical": true
+      },
+      {
+        "definition": "liftN",
+        "identical": true
+      },
+      {
+        "definition": "inst",
+        "identical": true
+      },
+      {
+        "definition": "close",
+        "identical": true
+      },
+      {
+        "definition": "instLevels",
+        "identical": true
+      },
+      {
+        "definition": "Atom",
+        "identical": true
+      },
+      {
+        "definition": "Profile",
+        "identical": true
+      },
+      {
+        "definition": "inter",
+        "identical": true
+      },
+      {
+        "definition": "ofLevel",
+        "identical": true
+      },
+      {
+        "definition": "subset",
+        "identical": true
+      },
+      {
+        "definition": "compare",
+        "identical": true
+      },
+      {
+        "definition": "check",
+        "identical": true
+      },
+      {
+        "definition": "isNever",
+        "identical": true
+      },
+      {
+        "definition": "checkRegimes",
+        "identical": true
+      },
+      {
+        "definition": "checkedExprEq",
+        "identical": true
+      }
+    ],
+    "productionAndModelUseSameSyntaxDefinitions": true,
+    "publicAcceptanceUsesAnnotatedExpressions": false,
+    "publicAcceptanceUsesAnnotationGuard": false,
+    "actualAnnotationProvenanceProved": false,
+    "guardTransport": [
+      "lifting",
+      "term substitution",
+      "free-variable closing",
+      "universe instantiation"
+    ],
+    "rawAcceptanceImplementationChanged": false,
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "customAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "foundationExistenceConstructed": false,
+    "binaryIdentity": {
+      "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "run": 38057087757,
+      "job": 114227668195,
+      "status": "passed",
+      "buildJobs": 218,
+      "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
+      "testedRun": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "hashesEqual": true,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195"
+    },
+    "earlierFailures": [
+      {
+        "commit": "c217d10b601b3b4643a83f471d3c22ac7811cc07",
+        "run": 38056276397,
+        "job": 114225352796,
+        "reason": "Moved UniverseRegime lacked the existing PsKernelName DecidableEq import",
+        "nativeSyntax": "not-built"
+      },
+      {
+        "commit": "0e7311b0fc775eb99849046971e2c24468dd3838",
+        "run": 38056606291,
+        "job": 114226291815,
+        "reason": "Coherent.inst and Coherent.close contained non-progressing simplifier steps",
+        "nativeSyntax": "12 cases passed"
+      },
+      {
+        "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+        "run": 38057087757,
+        "job": 114227668013,
+        "reason": "Coherent.inst equal-index branch required explicit Nat.lt_irrefl normalization",
+        "nativeSyntax": "12 cases passed",
+        "rawBinaryIdentity": "passed"
+      }
+    ],
+    "remaining": "Carry and validate actual readings across the shared checker, local context and admission; discharge joint recursive and full environment-model preservation; connect public acceptance and intended False.",
+    "validation": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "buildJobs": 254,
+      "focusedBuildJobs": 127,
+      "companionFiles": 84,
+      "axiomDeclarations": 242,
+      "pureMathModules": 12,
+      "closureModules": 140,
+      "referenceDefinitions": 1824,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 13:57:20 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+      "runConclusion": "success"
+    },
+    "guardedStructuralEquivalenceProved": true,
+    "hereditaryValidityTransportProved": true,
+    "concreteApplicationReadingProvedUnderExplicitPremises": true,
+    "nativeSyntax": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "status": "passed",
+      "cases": 12,
+      "modelImports": 0
+    },
+    "binaryIdentitySourceComparison": {
+      "identityCommit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "validatedCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationCoherence.lean"
+      ],
+      "runtimeSourceChanged": false
+    }
+  },
+  "priorTopLevelRuntimeReceipts": {
+    "source": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+    "workflowRun": 38057387016,
+    "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+    "build": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "job": 114220568884,
+      "status": "passed",
+      "binaryBuildJobs": 218,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6"
+    },
+    "nativeRegression": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "job": 114220568884,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_LAMBDA_CODOMAIN_GATE",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false,
+      "lambdaCodomainCases": {
+        "cacheModes": 2,
+        "deliberatelyMalformedLowLevelContexts": true,
+        "unsupportedDeclines": 2,
+        "inferOnlyGrade": 2,
+        "resourceExhaustion": 2,
+        "publicExploitClaimed": false
+      }
+    },
+    "binaryIdentity": {
+      "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "run": 38057087757,
+      "job": 114227668195,
+      "status": "passed",
+      "buildJobs": 218,
+      "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
+      "testedRun": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "hashesEqual": true,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195"
+    },
+    "annotatedSyntax": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "status": "passed",
+      "cases": 12,
+      "modelImports": 0
+    },
+    "runtimeValidationScope": "This representation/proof stage reran annotated-syntax tests and checked raw-binary identity. Other native, Arena and fresh-export receipts below retain their original source and were not rerun."
+  },
+  "ownedLocalContextAndSortVisitStage": {
+    "status": "validated-owned-context-and-sort-visit-support-full-acceptance-open",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-owned-acceptance-20261010",
+      "commit": "4a162b2056658155001828d0c17a426b000a3a2d"
+    },
+    "runtimeModules": [
+      "Ps.KernelCore.Core.LocalContext",
+      "Ps.KernelCore.Core.AnnotatedLocalContext",
+      "Ps.KernelCore.Core.InferenceBoundary",
+      "Ps.KernelCore.Core.AnnotatedInference",
+      "Ps.KernelCore.Checker.Inference.Helpers",
+      "Ps.KernelCore.Checker.Inference.Core"
+    ],
+    "proofModules": [
+      "Ps.KernelCore.Metatheory.AnnotatedLocalContextErasure",
+      "Ps.KernelCore.Metatheory.SemanticInferenceBoundary",
+      "Ps.KernelCore.Metatheory.SemanticCheckedReading",
+      "Ps.KernelCore.Metatheory.SemanticReferenceLocalContext",
+      "Ps.KernelCore.Metatheory.SemanticLocalContextExtension",
+      "Ps.KernelCore.Metatheory.SemanticReferenceBinderContext",
+      "Ps.KernelCore.Metatheory.SemanticSortVisitProvenance"
+    ],
+    "oneSharedLocalStorageImplementation": true,
+    "rawAndAnnotatedLookupAndInsertionShared": true,
+    "erasurePreservesFirstStoredLookupAndMetadata": true,
+    "erasurePreservesShadowingAndAllocationIndex": true,
+    "fixedExpressionTypeAndForallViewCarriers": true,
+    "constructorsAreTypingCertificates": false,
+    "fvarActualReferenceRunBothGrades": true,
+    "fvarExactStoredAnnotatedType": true,
+    "fvarRequiresRecursiveCallbackOrCacheCorrectnessPremise": false,
+    "parentAnnotatedContextWitnessSelectedByPublicChecker": false,
+    "localAndLetContextModelConstruction": true,
+    "actualBinderChildErasureConnection": true,
+    "actualBinderChildFvarRunConnection": true,
+    "wholeBinderInferenceSoundnessProved": false,
+    "explicitContextPremises": [
+      "fixed annotated parent context with exact erasure of the raw context",
+      "parent ModelsLocalContext",
+      "fixed domain/value CheckedReading",
+      "syntactic freshness of the generated name in context, domain and value",
+      "Scoped 0 domain for local insertion or stored value for let insertion",
+      "chosen local model element membership, or let assignment constructed from value interpretation"
+    ],
+    "checkedLambdaAndForallUseActualSortVisitHelper": true,
+    "retainedSortVisitFields": [
+      "actual inferred type before WHNF",
+      "exposed symbolic universe level"
+    ],
+    "returnedStateIsExactSortExposureState": true,
+    "inferOnlyLambdaVisit": "unchecked; no selected level and callbacks skipped",
+    "helperProjectionAllInputs": true,
+    "helperProjectionPreserves": [
+      "success results",
+      "both grades",
+      "original and classified errors",
+      "full returned states"
+    ],
+    "sortVisitSelectionOutsideSemanticValuations": true,
+    "sameVisitRegimeAgreementAndNoClash": true,
+    "noClashRemainsValidOnEmptyDomains": true,
+    "crossVisitRawEqualityImpliesCoherence": false,
+    "pairedUniverseInstantiationAgreement": true,
+    "instantiatedExecutionRerunClaimed": false,
+    "runtimeRecursiveResultStillRaw": true,
+    "actualCheckerContextStillRaw": true,
+    "admittedDeclarationsStillRaw": true,
+    "lambdaVisitCarrierProjectedAtRawReturn": true,
+    "publicAcceptanceUsesCompleteAnnotatedResults": false,
+    "publicAcceptanceRunsAnnotationGuard": false,
+    "globalAcceptedAnnotationProvenanceProved": false,
+    "allocatorAndRecursiveScopePreservationProved": false,
+    "jointInferWhnfDefeqSoundnessProved": false,
+    "fullSafeAdmissionModelProved": false,
+    "fullKernelConsistencyProved": false,
+    "customAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "foundationExistenceConstructed": false,
+    "generatedPsc0Qualified": false,
+    "binaryIdentityForFinalRuntimeMeasured": false,
+    "externalSourceCompatibilityQualification": "Generic operations add an implicit expression-type parameter; explicit @applications or old generated eliminator names in unseen clients may require adjustments.",
+    "failedAttempts": [
+      {
+        "commit": "4261bce16f58903b23ebe7e5863c286d717369ea",
+        "run": 38060275600,
+        "job": 114236961042,
+        "status": "failed",
+        "reason": "Two older admission ordinal proofs did not unfold the new raw local-context nextIndex projection.",
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "newSemanticModules": "compiled",
+        "semanticAxiomTargets": 270,
+        "referenceDefinitions": 1834
+      },
+      {
+        "commit": "df830e7cd8b39c699210e631889539f43c064092",
+        "run": 38060658281,
+        "job": 114238075339,
+        "status": "failed",
+        "reason": "The downstream AdmissionHeaderSpineConfiguration ordinal proof exposed the same folded raw projection; shared projection aliases subsequently received simp rules.",
+        "focusedBuildJobs": 196,
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31
+      },
+      {
+        "commit": "74b5373985ccccf1187f636ad1595bda23135988",
+        "run": 38061081280,
+        "job": 114239308257,
+        "status": "failed",
+        "reason": "Reserved identifier matches in four context-extension proofs; explicit Except result types and source-equation simplification needed in two visit projection proofs.",
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "sortVisitCarrierCases": 8
+      },
+      {
+        "commit": "cea161d65321a9ca1bde7cd2ad5fe2c979bc8f33",
+        "run": 38061552694,
+        "job": 114240674028,
+        "status": "failed",
+        "reason": "Four false Boolean lookup branches required explicit Bool.false_eq_true in SemanticLocalContextExtension. SemanticSortVisitProvenance compiled; all native tests passed.",
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "sortVisitCarrierCases": 8,
+        "repair": "4e1e923e50e86158939e48db2f5d4f15a5100ac3"
+      },
+      {
+        "commit": "93261b77efe5951100a38b80192dd487a9af30ee",
+        "run": 38061999713,
+        "job": 114241971001,
+        "status": "failed",
+        "reason": "All production/metatheory builds and semantic/import/reference audits passed; 2 of 84 companion files required source-compatibility repairs: empty lookup needed an explicit Expr specialization; two Typing lambda/forall proofs needed the new helper definitions unfolded.",
+        "focusedBuildJobs": 221,
+        "buildJobs": 266,
+        "semanticAxiomTargets": 298,
+        "closureModules": 152,
+        "pureMathModules": 12,
+        "referenceDefinitions": 1840,
+        "cachedFallbacks": 0,
+        "companionFiles": 84,
+        "failedCompanionFiles": 2,
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "sortVisitCarrierCases": 8,
+        "repair": "87a128d64fa3c91301028e58c1092d8cfd620369"
+      }
+    ],
+    "remaining": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
+    "validation": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "buildJobs": 266,
+      "focusedBuildJobs": 221,
+      "companionFiles": 84,
+      "axiomDeclarations": 298,
+      "pureMathModules": 12,
+      "closureModules": 152,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 15:17:00 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+      "runConclusion": "success"
+    },
+    "sourceComparison": {
+      "base": "4a162b2056658155001828d0c17a426b000a3a2d",
+      "head": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "url": "https://github.com/dwijayuda/pskernel/compare/4a162b2056658155001828d0c17a426b000a3a2d...35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "changedFiles": 27,
+      "additions": 1862,
+      "deletions": 245,
+      "newMetatheoryModules": 7,
+      "newRuntimeModules": 3,
+      "scope": "Package and its semantic-audit workflow only; textual diff counts are not an effort, soundness or performance measure."
+    },
+    "nativeSyntax": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "status": "passed",
+      "cases": 31,
+      "modelImports": 0
+    },
+    "nativeSortVisits": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "status": "passed",
+      "cases": 8,
+      "unchecked": 1,
+      "observed": 2,
+      "failures": 5
+    },
+    "workflowSkippedJobs": [
+      {
+        "name": "binary",
+        "job": 114243522545,
+        "status": "skipped"
+      },
+      {
+        "name": "fresh",
+        "job": 114243522590,
+        "status": "skipped"
+      },
+      {
+        "name": "arena",
+        "job": 114243522702,
+        "status": "skipped"
+      }
+    ]
+  },
+  "intermediateSourceValidation38060658283": {
+    "source": "df830e7cd8b39c699210e631889539f43c064092",
+    "run": 38060658283,
+    "runNumber": 48,
+    "runConclusion": "failure",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38060658283",
+    "scope": "Earlier intermediate source before actual sort-visit helper integration; not a final-source conformance, binary-identity or performance receipt.",
+    "build": {
+      "job": 114238075998,
+      "status": "passed",
+      "buildJobs": 247,
+      "binarySha256": "68cf183cd8980a2fcf0d75409cba655e9ff33688cf9a37856b0608a7fbeea8c4"
+    },
+    "proof": {
+      "job": 114238076146,
+      "status": "failed",
+      "reason": "AdmissionHeaderSpineConfiguration raw nextIndex projection required simplifier compatibility repair; subsequently fixed."
+    },
+    "cachedHistoricalArena": {
+      "corpusCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "mode": "cached",
+      "adapter": "historical",
+      "tutorial": {
+        "job": 114238519900,
+        "correct": 141,
+        "total": 141,
+        "declined": 0,
+        "status": "passed"
+      },
+      "bugs": {
+        "job": 114238519918,
+        "correct": 18,
+        "total": 18,
+        "declined": 0,
+        "status": "passed"
+      }
+    },
+    "fresh435Cached": {
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "mode": "cached",
+      "cases": [
+        {
+          "name": "prelude",
+          "selection": "Init.Prelude",
+          "job": 114238519854,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 65406,
+          "exportDeclarations": 1840,
+          "exportConstants": 2121
+        },
+        {
+          "name": "utf8",
+          "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+          "job": 114238519854,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 159345,
+          "exportDeclarations": 2146,
+          "exportConstants": 2353
+        },
+        {
+          "name": "xor",
+          "selection": "Std.Sat.AIG.mkXorCached",
+          "job": 114238519915,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 333731,
+          "exportDeclarations": 3413,
+          "exportConstants": 3752
+        },
+        {
+          "name": "int64",
+          "selection": "Int64.toBitVec_div",
+          "job": 114238519915,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 16206,
+          "exportDeclarations": 405,
+          "exportConstants": 497
+        }
+      ]
+    },
+    "fullCorpora": {
+      "mode": "cached",
+      "adapter": "historical",
+      "init": {
+        "job": 114238519884,
+        "status": "timeout",
+        "checkerExitCode": -9,
+        "budgetSeconds": 500,
+        "seconds": 500.0315704345703,
+        "lastReportedRecords": 2099999,
+        "lastReportedDeclarations": 17010,
+        "acceptedPrefixIsWholeCorpusAcceptance": false
+      },
+      "std": {
+        "job": 114238519974,
+        "status": "timeout",
+        "checkerExitCode": -9,
+        "budgetSeconds": 590,
+        "seconds": 590.0513577461243,
+        "lastReportedRecords": 2899999,
+        "lastReportedDeclarations": 20951,
+        "acceptedPrefixIsWholeCorpusAcceptance": false
+      },
+      "profileInit": {
+        "job": 114238519906,
+        "jobConclusion": "success",
+        "checkerStatus": "timeout",
+        "checkerExitCode": 124,
+        "budgetSeconds": 600,
+        "checkerAcceptance": false
+      },
+      "mathlib": {
+        "job": 114240661843,
+        "status": "skipped",
+        "reason": "Prerequisite full Init/Std validation failed."
+      }
+    },
+    "referenceModeRerun": false,
+    "referenceInt64TimeoutResolved": false,
+    "latestRuntimeBinaryIdentityEstablished": false,
+    "performanceEquivalenceClaimed": false
+  },
+  "priorLiveSourceValidation": {
+    "commit": "4a162b2056658155001828d0c17a426b000a3a2d",
+    "run": 38059022897,
+    "job": 114233292177,
+    "buildJobs": 256,
+    "companionFiles": 84,
+    "axiomDeclarations": 255,
+    "annotatedSyntaxCases": 21,
+    "closureModules": 142,
+    "pureMathModules": 12,
+    "referenceDefinitions": 1824,
+    "cachedFallbacks": 0,
+    "status": "passed",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38059022897/job/114233292177",
+    "qualification": "Live source at the start of this milestone; preceding docs still described the earlier 9cf6d802 stage."
+  },
+  "boundedLocalFrameStage": {
+    "candidateSource": "bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a",
+    "sourceCommits": [
+      "7f2ff1c87a3d5f7369243eb5448b1bcf03e12194",
+      "9314591744c822b68507d438f192a35002839a41",
+      "bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a"
+    ],
+    "validationCommit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+    "run": 38066810266,
+    "job": 114256009792,
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38066810266/job/114256009792",
+    "previousValidatedRun": 38066007090,
+    "intermediateParserFailure": {
+      "run": 38066469877,
+      "status": "failed",
+      "cause": "Lean-reserved scoped proof-variable name",
+      "fixedIn": "bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a"
+    },
+    "proofScope": [
+      "BoundFrame numeric identity bounds without unjustified closed-context requirement",
+      "LocalFrame selected query/type/let-value bounds with Scoped 0 for local declarations",
+      "empty and weakening, shared local/let insertion and scope exit preserve frame",
+      "allocator freshness derived for semantic binder context and actual local context",
+      "actual reference binder and fvar semantic-model corollaries under checked-reading and model premises",
+      "actual binder opening and local insertion share the same fresh name and advanced counter"
+    ],
+    "retainedOpenObligations": [
+      "public initial-session invariant connection",
+      "joint graded recursive frame preservation through infer/WHNF/defeq callbacks",
+      "cross-visit annotation coherence and accepting-guard soundness",
+      "complete semantic environment/admission model",
+      "allowed-axiom policy and public successful-acceptance to False consistency corollary"
+    ],
+    "conLecheFoundation": "explicit [ConLeche.SetTheory V], pure mathematical dependency only",
+    "newCustomAxioms": false,
+    "fullKernelConsistencyProved": false,
+    "scopeNotes": "Focused semantic proof workflow only; latest Arena binary, full corpora, cached whole-checker refinement and generated PSC0 qualification were not run or proved."
+  },
+  "publicEntryStrategyStage": {
+    "pinnedLean": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "pureMathConLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+    "strategyDoc": "psc0/packages/pskernel-core/PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md",
+    "source": [
+      "89292f667c42d208884e1705a4383a72e67367d1",
+      "ab8952001cc95a7804e2462e41b40e3c5cf17b8c",
+      "29e3ad5e276a15fe9d2ad046c2286245dfd77688",
+      "3fe5058e847d8b99242da1c087cb658079596393"
+    ],
+    "focusedVerifiedSource": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+    "run": 38071595259,
+    "job": 114269936326,
+    "status": "passed",
+    "axiomDeclarations": 323,
+    "modelModules": 153,
+    "buildJobs": 267,
+    "companionFiles": 84,
+    "nativeExecutables": 7,
+    "pendingSource": null,
+    "pendingRun": null,
+    "pendingTheorems": [],
+    "exactScope": [
+      "actual no-mvar/no-fvar declaration guard to numeric-name bounds",
+      "actual checker-session initialization",
+      "guarded initial lambda/forall/let frame under explicit scoped premises",
+      "public checker-session wrapper frame"
+    ],
+    "fullKernelConsistencyProved": false,
+    "open": [
+      "initial environment model and pinned False/axiom policy",
+      "global recursive inference/WHNF/DefEq soundness and annotation provenance",
+      "complete declaration and induction/quotient admission",
+      "public acceptance model composition",
+      "cached/runtime/backend refinement"
+    ],
+    "conformance": {
+      "run": 38070188607,
+      "overall": "failure",
+      "init": "timeout",
+      "std": "timeout",
+      "profileInitChecker": "timeout",
+      "mathlib": "skipped",
+      "qualification": "not full Lean compatibility"
+    },
+    "newRuntimeRuleChanges": false,
+    "newlyVerifiedTheorems": [
+      "emptyKernelSession_environment",
+      "emptyKernelSession_checker_initial_frame"
+    ],
+    "evidence": "psc0/packages/pskernel-core/PUBLIC_ENTRY_EVIDENCE_2026-10-10.md"
+  }
+}

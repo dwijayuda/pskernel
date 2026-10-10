@@ -1,0 +1,229 @@
+name: PSC0 PSKernel extended corpus diagnostics
+on:
+  push:
+    branches: [psc0/pskernel-core-lean435-arena-v1]
+    paths: [".github/workflows/psc0-pskernel-core-long-corpus.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc0-kernel-long-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  corpus:
+    name: ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case: historical-init
+            mode: historical
+            test: init
+            seconds: 3600
+          - case: historical-std
+            mode: historical
+            test: std
+            seconds: 3600
+          - case: historical-mathlib
+            mode: historical
+            test: mathlib
+            seconds: 14400
+          - case: fresh435-init
+            mode: fresh
+            test: Init
+            seconds: 3600
+          - case: fresh435-std
+            mode: fresh
+            test: Std
+            seconds: 3600
+    steps:
+      - name: Install pinned Lean and uv
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-435-binary
+          path: kernel
+          run-id: 38001623085
+          github-token: ${{ github.token }}
+      - name: Verify the exact previously proved executable
+        run: |
+          set -euo pipefail
+          echo "BINARY_SOURCE_SHA=e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4"
+          echo "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e  kernel/psc_kernel_core_arena" | sha256sum -c -
+          chmod +x kernel/psc_kernel_core_arena
+          kernel/psc_kernel_core_arena --version
+          df -h .
+      - name: Prepare complete pinned historical Arena input
+        if: matrix.mode == 'historical'
+        timeout-minutes: 75
+        env:
+          ARENA_TEST: ${{ matrix.test }}
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          cd arena
+          uv run lka.py build-test "$ARENA_TEST" --cache
+          test -s "_build/tests/$ARENA_TEST.ndjson"
+          echo "CORPUS_INPUT=arena/_build/tests/$ARENA_TEST.ndjson" >> "$GITHUB_ENV"
+      - name: Prepare complete fresh Lean 4.35 input
+        if: matrix.mode == 'fresh'
+        timeout-minutes: 30
+        env:
+          LEAN_MODULE: ${{ matrix.test }}
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean4export.git exporter
+          git -C exporter checkout 05d43a2bc773b40ecfdebb32294192a5ef756951
+          cd exporter
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lake build
+          lake env .lake/build/bin/lean4export "$LEAN_MODULE" > fresh.ndjson
+          test -s fresh.ndjson
+          echo "CORPUS_INPUT=exporter/fresh.ndjson" >> "$GITHUB_ENV"
+      - name: Check the entire stream with live progress and an extended wall limit
+        env:
+          CASE_NAME: ${{ matrix.case }}
+          CASE_MODE: ${{ matrix.mode }}
+          CHECK_SECONDS: ${{ matrix.seconds }}
+        run: |
+          set -euo pipefail
+          ulimit -s 65536
+          python3 -u - <<'PY'
+          import hashlib
+          import json
+          import os
+          import re
+          import subprocess
+          import time
+          from datetime import datetime, timezone
+          from pathlib import Path
+          
+          source = "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4"
+          binary_hash = "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e"
+          input_path = Path(os.environ["CORPUS_INPUT"])
+          out = Path("long-result")
+          out.mkdir(exist_ok=True)
+          limit = int(os.environ["CHECK_SECONDS"])
+          name = os.environ["CASE_NAME"]
+          mode = os.environ["CASE_MODE"]
+          if mode not in ("historical", "fresh"):
+              raise SystemExit("invalid mode")
+          kernel = Path("kernel/psc_kernel_core_arena").resolve()
+          assert hashlib.sha256(kernel.read_bytes()).hexdigest() == binary_hash
+          h = hashlib.sha256()
+          records = 0
+          with input_path.open("rb") as stream:
+              while chunk := stream.read(8 * 1024 * 1024):
+                  h.update(chunk)
+                  records += chunk.count(b"\n")
+          with input_path.open("rb") as stream:
+              header = stream.readline().decode("utf-8").rstrip("\n")
+          receipt = {
+              "schemaVersion": 1,
+              "diagnosticOnly": True,
+              "originalArenaBudgetPass": False,
+              "sourceCommit": source,
+              "binarySha256": binary_hash,
+              "case": name,
+              "mode": mode,
+              "checkerWallLimitSeconds": limit,
+              "input": {"sha256": h.hexdigest(), "records": records, "bytes": input_path.stat().st_size, "header": header},
+              "internalFuelAndRecursionLimitsChanged": False,
+              "status": "running",
+              "startedAt": datetime.now(timezone.utc).isoformat()
+          }
+          print("LONG_CORPUS_START " + json.dumps(receipt), flush=True)
+          (out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          
+          def tail(path, count=65536):
+              if not path.exists():
+                  return ""
+              with path.open("rb") as stream:
+                  stream.seek(max(0, path.stat().st_size - count))
+                  return stream.read().decode("utf-8", errors="replace")
+          
+          stdout = out / "checker.stdout"
+          stderr = out / "checker.stderr"
+          timing = out / "time.txt"
+          args = [str(kernel)]
+          if mode == "historical":
+              args.append("--check-historical")
+          started = time.monotonic()
+          with input_path.open("rb") as inp, stdout.open("wb") as out_stream, stderr.open("wb") as err_stream:
+              proc = subprocess.Popen(
+                  ["/usr/bin/time", "-v", "-o", str(timing), "timeout", "--kill-after=30s", str(limit)] + args,
+                  stdin=inp, stdout=out_stream, stderr=err_stream, start_new_session=True
+              )
+              while True:
+                  try:
+                      code = proc.wait(timeout=60)
+                      break
+                  except subprocess.TimeoutExpired:
+                      last = tail(stderr).splitlines()
+                      elapsed = round(time.monotonic() - started, 2)
+                      progress = last[-1] if last else "No progress line emitted yet"
+                      print("LONG_CORPUS_PROGRESS " + json.dumps({"case": name, "elapsedSeconds": elapsed, "lastOutput": progress}), flush=True)
+                      receipt.update({"elapsedSeconds": elapsed, "lastOutput": progress})
+                      (out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          elapsed = round(time.monotonic() - started, 2)
+          output = tail(stdout)
+          errors = tail(stderr)
+          times = timing.read_text() if timing.exists() else ""
+          # The adapter emits its final acceptance on stderr. Accept exactly one complete
+          # protocol line from either stream; exit status and record coverage remain mandatory.
+          acceptances = re.findall(
+              r"^accepted lean=(\S+) records=(\d+) declarations=(\d+) constants=(\d+)\r?$",
+              output + "\n" + errors, re.MULTILINE
+          )
+          accepted = (None,) + acceptances[0] if len(acceptances) == 1 else None
+          if code == 0 and accepted and int(accepted[2]) == records:
+              status = "accepted-complete-under-extended-limit"
+          elif code == 0:
+              status = "protocol-error-missing-or-incomplete-acceptance"
+          elif code == 124 or (code == 137 and elapsed >= limit):
+              status = "timeout"
+          elif code == 1:
+              status = "rejected-valid-corpus"
+          elif code == 2:
+              status = "declined"
+          else:
+              status = "checker-error"
+          rss = re.search(r"Maximum resident set size \(kbytes\): (\d+)", times)
+          progress = list(re.finditer(r"arena progress: records=(\d+) declarations=(\d+)", errors))
+          receipt.update({
+              "status": status, "exitCode": code, "elapsedSeconds": elapsed,
+              "completedAt": datetime.now(timezone.utc).isoformat(),
+              "maxRssKiB": int(rss[1]) if rss else None,
+              "lastProgress": {"records": int(progress[-1][1]), "declarations": int(progress[-1][2])} if progress else None,
+              "acceptance": {"lean": accepted[1], "records": int(accepted[2]), "declarations": int(accepted[3]), "constants": int(accepted[4])} if accepted else None
+          })
+          (out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+          print("LONG_CORPUS_RESULT " + json.dumps(receipt), flush=True)
+          print("CHECKER_STDOUT\n" + output, flush=True)
+          print("CHECKER_STDERR_TAIL\n" + errors[-12000:], flush=True)
+          print("CHECKER_RESOURCE_USAGE\n" + times, flush=True)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write(f"### {name}\n\n**{status}** after {elapsed}s; checker limit {limit}s.\n\n")
+              summary.write("Extended diagnostic only. Original Arena limits and internal checker resources are unchanged.\n\n")
+              summary.write("\n".join("    " + line for line in json.dumps(receipt, indent=2).splitlines()) + "\n")
+          raise SystemExit(0 if status == "accepted-complete-under-extended-limit" else 1)
+          PY
+      - name: Preserve exact result and checker logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: long-corpus-${{ matrix.case }}
+          path: |
+            long-result/
+            arena/_build/tests/*.stats.json
+          if-no-files-found: warn
+          retention-days: 30

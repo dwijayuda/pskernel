@@ -291,6 +291,7 @@ def psKernelCheckLevelParams
       Except.ok ()
 
 def psKernelCheckConstantBaseWithSession
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (base : PsKernelConstantBase) :
@@ -337,6 +338,7 @@ def psKernelCheckConstantBaseWithSession
                       (Prod.snd result)
 
 def psKernelCheckDefinitionBodyWithSession
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (value : PsKernelDefinitionInfo) :

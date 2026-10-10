@@ -93,7 +93,7 @@ def psKernelSimpleElimNameCandidate
   | Nat.succ _ =>
       PsKernelName.str
         PsKernelName.anonymous
-        (String.Internal.append
+        (String.append
           "u_"
           (psKernelNatToString value))
 

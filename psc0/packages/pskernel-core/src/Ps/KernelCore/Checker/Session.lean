@@ -53,6 +53,7 @@ def psKernelMkCheckerSessionWithNativeEvaluator
   }
 
 def psKernelSessionWhnf
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (expr : PsKernelExpr) :
@@ -77,6 +78,7 @@ def psKernelSessionWhnf
           nextSession)
 
 def psKernelSessionInfer
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (expr : PsKernelExpr) :
@@ -101,6 +103,7 @@ def psKernelSessionInfer
           nextSession)
 
 def psKernelSessionCheck
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (expr : PsKernelExpr) :
@@ -125,6 +128,7 @@ def psKernelSessionCheck
           nextSession)
 
 def psKernelSessionEnsureSort
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (expr : PsKernelExpr) :
@@ -144,6 +148,7 @@ def psKernelSessionEnsureSort
           Except.error "expected sort"
 
 def psKernelSessionIsProp
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (expr : PsKernelExpr) :
@@ -168,6 +173,7 @@ def psKernelSessionIsProp
               (Prod.snd sortResult))
 
 def psKernelSessionIsDefEq
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (left : PsKernelExpr)

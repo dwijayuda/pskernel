@@ -1,0 +1,353 @@
+import Ps.KernelCore.Metatheory.AdmissionIndexConfiguration
+import Ps.KernelCore.Metatheory.AdmissionHeaderConfiguration
+import Ps.KernelCore.Metatheory.AdmissionDefinitionConfiguration
+import Ps.KernelCore.Metatheory.CheckerInitialConfiguration
+
+/-
+The mutual-declaration transaction checks every header in the *original*
+environment and every body in the completed recursive work environment.
+This file records those two distinct independently checked facts. Neither
+infer-only callbacks nor environment extension alone are used as typing
+certificates.  Native-reduction and StringEq laws remain explicit.
+-/
+
+/-
+Explicit Prop-valued list evidence independent of Std/List extensions. Each
+successful recursive checker pass yields one certificate per list member.
+-/
+inductive PsKernelMutualAll (P : PsKernelDefinitionInfo -> Prop) :
+    List PsKernelDefinitionInfo -> Prop where
+  | nil : PsKernelMutualAll P List.nil
+  | cons
+      (head : PsKernelDefinitionInfo)
+      (rest : List PsKernelDefinitionInfo)
+      (hHead : P head)
+      (hRest : PsKernelMutualAll P rest) :
+      PsKernelMutualAll P (List.cons head rest)
+
+
+def PsKernelMutualHeaderEvidence
+    (environment : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo) : Prop :=
+  ∃ (inferredType : PsKernelExpr) (level : PsKernelLevel),
+    PsKernelTypingJudgment
+      environment psKernelLocalContextEmpty
+      value.base.type inferredType ∧
+    PsKernelReductionClosure
+      environment psKernelLocalContextEmpty
+      inferredType (PsKernelExpr.sort level)
+
+def PsKernelMutualBodyEvidence
+    (environment : PsKernelEnvironment)
+    (value : PsKernelDefinitionInfo) : Prop :=
+  ∃ inferredType : PsKernelExpr,
+    PsKernelTypingJudgment
+      environment psKernelLocalContextEmpty
+      value.value inferredType ∧
+    PsKernelDefEqJudgment
+      environment psKernelLocalContextEmpty
+      inferredType value.base.type
+
+
+theorem psKernelMutualWorkEnvironment_refines_extension
+    (values : List PsKernelDefinitionInfo)
+    (environment : PsKernelEnvironment) :
+    PsKernelEnvironmentExtendsBy
+      environment
+      (psKernelMutualWorkEnvironment values environment)
+      (List.reverse
+        (List.map
+          (fun value : PsKernelDefinitionInfo =>
+            PsKernelConstantInfo.defnInfo value)
+          values)) := by
+  induction values generalizing environment with
+  | nil =>
+      exact psKernelEnvironmentExtendsBy_refl environment
+  | cons value rest ih =>
+      have hTail :=
+        ih
+          (psKernelEnvironmentAddUnchecked
+            environment
+            (PsKernelConstantInfo.defnInfo value))
+      simpa [
+        psKernelMutualWorkEnvironment,
+        PsKernelEnvironmentExtendsBy,
+        psKernelEnvironmentAddUnchecked,
+        List.map,
+        List.reverse_cons,
+        List.append_assoc
+      ] using hTail
+
+
+theorem psKernelCheckMutualHeaders_configuration_refines
+    (values : List PsKernelDefinitionInfo) :
+    ∀ (fuel : Nat)
+      (environment : PsKernelEnvironment)
+      (first : PsKernelDefinitionInfo)
+      (maxRecDepth maxNatSize : Nat)
+      (seen : List PsKernelName),
+      PsKernelEnvironmentIndexRefines environment ->
+      PsKernelNativeReductionSoundLaw ->
+      PsKernelStringEqSoundLaw ->
+      psKernelCheckMutualHeaders
+          values fuel environment first
+          maxRecDepth maxNatSize seen =
+        Except.ok () ->
+      PsKernelMutualAll (PsKernelMutualHeaderEvidence environment) values := by
+  induction values with
+  | nil =>
+      intro fuel environment first maxRecDepth maxNatSize
+        seen hIndex hNative hString hRun
+      exact PsKernelMutualAll.nil
+  | cons value rest ih =>
+      intro fuel environment first maxRecDepth maxNatSize
+        seen hIndex hNative hString hRun
+      cases hSafety :
+          psKernelSafetyEq value.safety first.safety with
+      | false =>
+          simp [psKernelCheckMutualHeaders, hSafety] at hRun
+      | true =>
+          cases hLevels :
+              psKernelNameListsEq
+                value.base.levelParams
+                first.base.levelParams with
+          | false =>
+              simp [
+                psKernelCheckMutualHeaders,
+                hSafety, hLevels
+              ] at hRun
+          | true =>
+              cases hSeen :
+                  psKernelNameMember value.base.name seen with
+              | true =>
+                  simp [
+                    psKernelCheckMutualHeaders,
+                    hSafety, hLevels, hSeen
+                  ] at hRun
+              | false =>
+                  let session :=
+                    psKernelMkCheckerSession
+                      environment
+                      value.base.levelParams
+                      first.safety
+                      maxRecDepth
+                      maxNatSize
+                  have hInitial :
+                      PsKernelCheckerConfigurationSound
+                        session.context session.state :=
+                    psKernelMkCheckerSession_configuration_sound
+                      environment value.base.levelParams
+                      first.safety maxRecDepth maxNatSize hIndex
+                  cases hHeader :
+                      psKernelCheckConstantBaseWithSession
+                        fuel session value.base with
+                  | error error =>
+                      simp [
+                        psKernelCheckMutualHeaders,
+                        hSafety, hLevels, hSeen,
+                        session, hHeader
+                      ] at hRun
+                  | ok afterHeader =>
+                      obtain ⟨inferredType, level, hTyped, hSort, _⟩ :=
+                        psKernelCheckConstantBaseWithSession_configuration_refines
+                          fuel hNative hString
+                          session afterHeader value.base
+                          hInitial hHeader
+                      have hRestRun :
+                          psKernelCheckMutualHeaders
+                              rest fuel environment first
+                              maxRecDepth maxNatSize
+                              (List.cons value.base.name seen) =
+                            Except.ok () := by
+                        simpa [
+                          psKernelCheckMutualHeaders,
+                          hSafety, hLevels, hSeen,
+                          session, hHeader
+                        ] using hRun
+                      refine PsKernelMutualAll.cons value rest ?_ ?_
+                      · refine ⟨inferredType, level, ?_, ?_⟩
+                        · simpa [
+                            session, psKernelMkCheckerSession,
+                            psKernelCheckerContextEmpty
+                          ] using hTyped
+                        · simpa [
+                            session, psKernelMkCheckerSession,
+                            psKernelCheckerContextEmpty
+                          ] using hSort
+                      · exact
+                          ih fuel environment first
+                            maxRecDepth maxNatSize
+                            (List.cons value.base.name seen)
+                            hIndex hNative hString hRestRun
+
+
+theorem psKernelCheckMutualBodies_configuration_refines
+    (values : List PsKernelDefinitionInfo) :
+    ∀ (fuel : Nat)
+      (environment : PsKernelEnvironment)
+      (safety : PsKernelDefinitionSafety)
+      (maxRecDepth maxNatSize : Nat),
+      PsKernelEnvironmentIndexRefines environment ->
+      PsKernelNativeReductionSoundLaw ->
+      PsKernelStringEqSoundLaw ->
+      psKernelCheckMutualBodies
+          values fuel environment safety
+          maxRecDepth maxNatSize =
+        Except.ok () ->
+      PsKernelMutualAll (PsKernelMutualBodyEvidence environment) values := by
+  induction values with
+  | nil =>
+      intro fuel environment safety maxRecDepth maxNatSize
+        hIndex hNative hString hRun
+      exact PsKernelMutualAll.nil
+  | cons value rest ih =>
+      intro fuel environment safety maxRecDepth maxNatSize
+        hIndex hNative hString hRun
+      let session :=
+        psKernelMkCheckerSession
+          environment
+          value.base.levelParams
+          safety
+          maxRecDepth
+          maxNatSize
+      have hInitial :
+          PsKernelCheckerConfigurationSound
+            session.context session.state :=
+        psKernelMkCheckerSession_configuration_sound
+          environment value.base.levelParams safety
+          maxRecDepth maxNatSize hIndex
+      cases hBody :
+          psKernelCheckDefinitionBodyWithSession
+            fuel session value with
+      | error error =>
+          simp [
+            psKernelCheckMutualBodies, session, hBody
+          ] at hRun
+      | ok afterBody =>
+          obtain ⟨bodyType, hBodyTyping, hBodyEq, _⟩ :=
+            psKernelCheckDefinitionBodyWithSession_configuration_refines
+              fuel hNative hString
+              session afterBody value
+              hInitial hBody
+          have hRestRun :
+              psKernelCheckMutualBodies
+                  rest fuel environment safety
+                  maxRecDepth maxNatSize =
+                Except.ok () := by
+            simpa [
+              psKernelCheckMutualBodies,
+              session, hBody
+            ] using hRun
+          refine PsKernelMutualAll.cons value rest ?_ ?_
+          · refine ⟨bodyType, ?_, ?_⟩
+            · simpa [
+                session, psKernelMkCheckerSession,
+                psKernelCheckerContextEmpty
+              ] using hBodyTyping
+            · simpa [
+                session, psKernelMkCheckerSession,
+                psKernelCheckerContextEmpty
+              ] using hBodyEq
+          · exact
+              ih fuel environment safety
+                maxRecDepth maxNatSize
+                hIndex hNative hString hRestRun
+
+
+theorem psKernelAddMutualDefinitions_configuration_refines
+    (fuel : Nat)
+    (environment result : PsKernelEnvironment)
+    (values : List PsKernelDefinitionInfo)
+    (maxRecDepth maxNatSize : Nat)
+    (hIndex : PsKernelEnvironmentIndexRefines environment)
+    (hNative : PsKernelNativeReductionSoundLaw)
+    (hString : PsKernelStringEqSoundLaw)
+    (hRun :
+      psKernelAddMutualDefinitions
+          fuel environment values maxRecDepth maxNatSize =
+        Except.ok result) :
+    PsKernelEnvironmentExtendsBy
+        environment
+        result
+        (List.reverse
+          (List.map
+            (fun value : PsKernelDefinitionInfo =>
+              PsKernelConstantInfo.defnInfo value)
+            values)) ∧
+      PsKernelEnvironmentIndexRefines result ∧
+      PsKernelMutualAll
+        (PsKernelMutualHeaderEvidence environment) values ∧
+      PsKernelMutualAll
+        (PsKernelMutualBodyEvidence result) values := by
+  cases values with
+  | nil =>
+      simp [psKernelAddMutualDefinitions] at hRun
+  | cons first rest =>
+      cases hSafe :
+          psKernelDefinitionSafetyIsSafe first.safety with
+      | true =>
+          simp [psKernelAddMutualDefinitions, hSafe] at hRun
+      | false =>
+          cases hHeaders :
+              psKernelCheckMutualHeaders
+                (List.cons first rest)
+                fuel environment first
+                maxRecDepth maxNatSize List.nil with
+          | error error =>
+              simp [
+                psKernelAddMutualDefinitions,
+                hSafe, hHeaders
+              ] at hRun
+          | ok headerResult =>
+              cases headerResult
+              let work :=
+                psKernelMutualWorkEnvironment
+                  (List.cons first rest) environment
+              have hWorkIndex :
+                  PsKernelEnvironmentIndexRefines work :=
+                psKernelMutualWorkEnvironment_index_refines
+                  (List.cons first rest) environment hIndex
+              cases hBodies :
+                  psKernelCheckMutualBodies
+                    (List.cons first rest)
+                    fuel work first.safety
+                    maxRecDepth maxNatSize with
+              | error error =>
+                  simp [
+                    psKernelAddMutualDefinitions,
+                    hSafe, hHeaders, work, hBodies
+                  ] at hRun
+              | ok bodyResult =>
+                  cases bodyResult
+                  have hResult :
+                      work = result := by
+                    simpa [
+                      psKernelAddMutualDefinitions,
+                      hSafe, hHeaders, work, hBodies
+                    ] using hRun
+                  subst result
+                  have hExtension :
+                      PsKernelEnvironmentExtendsBy
+                        environment
+                        work
+                        (List.reverse
+                          (List.map
+                            (fun value : PsKernelDefinitionInfo =>
+                              PsKernelConstantInfo.defnInfo value)
+                            (List.cons first rest))) :=
+                    psKernelMutualWorkEnvironment_refines_extension
+                      (List.cons first rest)
+                      environment
+                  refine ⟨hExtension, hWorkIndex, ?_, ?_⟩
+                  · exact
+                      psKernelCheckMutualHeaders_configuration_refines
+                        (List.cons first rest)
+                        fuel environment first
+                        maxRecDepth maxNatSize List.nil
+                        hIndex hNative hString hHeaders
+                  · exact
+                      psKernelCheckMutualBodies_configuration_refines
+                        (List.cons first rest)
+                        fuel work first.safety
+                        maxRecDepth maxNatSize
+                        hWorkIndex hNative hString hBodies

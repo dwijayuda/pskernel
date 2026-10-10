@@ -68,9 +68,12 @@ def psPscv0JoinTermLists (values : List (List PsSyntaxTerm)) : List PsSyntaxTerm
 
 def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxTerm :=
   match declaration with
-  | .definition _ binders type value _ => type :: value :: psListMap psPscv0BinderType binders
-  | .partialDefinition _ binders type value _ => type :: value :: psListMap psPscv0BinderType binders
-  | .theoremDecl _ binders type value _ => type :: value :: psListMap psPscv0BinderType binders
+  | .definition _ binders type value _ =>
+      List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .partialDefinition _ binders type value _ =>
+      List.cons type (List.cons value (psListMap psPscv0BinderType binders))
+  | .theoremDecl _ binders type value _ =>
+      List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .structureDecl _ params fields _ =>
       psListMap psPscv0BinderType (psListAppend params fields)
   | .inductiveDecl _ params result constructors _ =>
@@ -78,7 +81,7 @@ def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxT
         (psPscv0JoinTermLists (psListMap psPscv0ConstructorTerms constructors));
       match result with
       | none => terms
-      | some type => type :: terms
+      | some type => List.cons type terms
 
 def psPscv0AttachDeclaration (proofScript : Bool) (tokens : List PsToken)
     (blocks : List PsPscv0DoBlock) (errorName discardName : PsSyntaxName)
@@ -137,7 +140,7 @@ def psPscv0ParseSource (proofScript : Bool) (source : String) :
                 else psParseLeanTokens rewritten.tokens;
               match parsed with
               | Except.error error => Except.error (psPscv0ParseError error)
-              | Except.ok syntax =>
+              | Except.ok sourceModule =>
                   let pos := PsSourcePos.mk 0 1 1;
                   let span := PsSourceSpan.mk pos pos;
                   match psPscv0FreshName tokens "pscv0InternalError" span with
@@ -148,14 +151,14 @@ def psPscv0ParseSource (proofScript : Bool) (source : String) :
                       | Except.ok discardName =>
                           let attach : PsSyntaxDeclaration -> Except String PsPscv0SurfaceDeclaration :=
                             psPscv0AttachDeclaration proofScript tokens rewritten.blocks errorName discardName;
-                          match psListMapExcept attach syntax.declarations with
+                          match psListMapExcept attach sourceModule.declarations with
                           | Except.error error => Except.error error
                           | Except.ok declarations =>
                               if Nat.beq (psPscv0CountDoBodies declarations) (psListLength rewritten.blocks) then
                                 let cursor := psLexCursorFromString source;
                                 Except.ok (PsPscv0SurfaceModule.mk source proofScript
                                   (psPscv0CommentTriviaWorker cursor.remaining cursor.position tokens)
-                                  syntax.imports declarations errorName discardName)
+                                  sourceModule.imports declarations errorName discardName)
                               else Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
         else Except.error "PSCV0-SOURCE-TOKEN-BUDGET"
   else Except.error "PSCV0-SOURCE-BYTE-BUDGET"
@@ -231,9 +234,9 @@ def psPscv0PrintSurfaceModule (proofScript : Bool) (surface : PsPscv0SurfaceModu
     | Except.error error => Except.error error
     | Except.ok declarations =>
         let imports := psListMap psPscv0PrintImport surface.imports;
-        let prefix := if psListIsEmpty imports then ""
+        let importPrefix := if psListIsEmpty imports then ""
           else psPscv0Cat [psPrintJoin "\n" imports, "\n\n"];
-        Except.ok (psPscv0Cat [prefix, psPrintJoin "\n\n" declarations, "\n"])
+        Except.ok (psPscv0Cat [importPrefix, psPrintJoin "\n\n" declarations, "\n"])
 
 -- Semantic intermediary, deliberately distinct from the readable source view.
 -- The caller still must elaborate/check it; parser/lowering success is not proof.
@@ -243,8 +246,8 @@ def psPscv0LowerToLean (proofScript : Bool) (source : String) : Except String St
   | Except.ok surface =>
       match psPscv0LowerModule surface with
       | Except.error error => Except.error error
-      | Except.ok syntax =>
-          match psPrintLeanModule syntax with
+      | Except.ok sourceModule =>
+          match psPrintLeanModule sourceModule with
           | Except.error _ => Except.error "PSCV0-LOWERED-PRINT-UNSUPPORTED"
           | Except.ok text => Except.ok text
 

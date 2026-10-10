@@ -13,8 +13,7 @@ structure PsPscv0Rewritten where
   tokens : List PsToken
   blocks : List PsPscv0DoBlock
 
-def psPscv0Expect (cursor : PsTokenCursor) (text : String) :
-    Except String PsTokenRead :=
+def psPscv0Expect (cursor : PsTokenCursor) (text : String) : Except String PsTokenRead :=
   match psTokenCursorExpectText cursor text with
   | Except.error error => Except.error (psPscv0ParseError error)
   | Except.ok value => Except.ok value
@@ -30,9 +29,7 @@ def psPscv0IsClosing (text : String) : Bool :=
   else if psStringEq text "}" then true
   else psStringEq text "]"
 
--- Partition by token positions and balanced delimiters, never by source regex.
--- The first slice requires a new top-level line between do items. Parenthesized
--- or braced subterms may span lines. Native continuation indentation is retained.
+-- Partition by token positions and balanced delimiters, not source regex.
 def psPscv0CollectItem (braced : Bool) (indent : Nat) (fuel : Nat)
     (cursor : PsTokenCursor) (closing : List String) (tokensRev : List PsToken)
     (stop : PsSourcePos) : Except String PsPscv0Collected :=
@@ -60,17 +57,14 @@ def psPscv0CollectItem (braced : Bool) (indent : Nat) (fuel : Nat)
                 else if hasTokens then lineBoundary else false
               else false;
             if boundary then finished
-            else if psStringEq token.text ";" then
-              Except.error "PSCV0-DO-NEWLINE-REQUIRED"
-            else if psStringEq token.text "do" then
-              Except.error "PSCV0-DO-NESTING-NOT-YET-SUPPORTED"
+            else if psStringEq token.text ";" then Except.error "PSCV0-DO-NEWLINE-REQUIRED"
+            else if psStringEq token.text "do" then Except.error "PSCV0-DO-NESTING-NOT-YET-SUPPORTED"
             else
               match psPscv0ClosingFor token.text with
               | some close =>
-                  if Nat.ble 64 (psListLength closing) then
-                    Except.error "PSCV0-DO-DELIMITER-BUDGET"
+                  if Nat.ble 64 (psListLength closing) then Except.error "PSCV0-DO-DELIMITER-BUDGET"
                   else psPscv0CollectItem braced indent remaining next.cursor
-                    (close :: closing) (token :: tokensRev) token.span.stop
+                    (List.cons close closing) (List.cons token tokensRev) token.span.stop
               | none =>
                   if psPscv0IsClosing token.text then
                     match closing with
@@ -78,10 +72,10 @@ def psPscv0CollectItem (braced : Bool) (indent : Nat) (fuel : Nat)
                     | expected :: rest =>
                         if psStringEq expected token.text then
                           psPscv0CollectItem braced indent remaining next.cursor
-                            rest (token :: tokensRev) token.span.stop
+                            rest (List.cons token tokensRev) token.span.stop
                         else Except.error "PSCV0-DO-MISMATCHED-DELIMITER"
                   else psPscv0CollectItem braced indent remaining next.cursor
-                    closing (token :: tokensRev) token.span.stop
+                    closing (List.cons token tokensRev) token.span.stop
 
 def psPscv0DoUnsupportedHead (text : String) : Bool :=
   if psStringEq text "mut" then true
@@ -101,8 +95,7 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
   match psTokenCursorExpectKind cursor PsTokenKind.identifier with
   | Except.error error => Except.error (psPscv0ParseError error)
   | Except.ok nameToken =>
-      if psStringEq nameToken.token.text "mut" then
-        Except.error "PSCV0-DO-MUTATION-NOT-YET-SUPPORTED"
+      if psStringEq nameToken.token.text "mut" then Except.error "PSCV0-DO-MUTATION-NOT-YET-SUPPORTED"
       else
         let name := PsSyntaxName.mk [nameToken.token.text] nameToken.token.span;
         if psTokenCursorAtText nameToken.cursor ":" then
@@ -117,8 +110,7 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
                   | Except.ok assign =>
                       match psPscv0ReadCompleteTerm proofScript assign.cursor with
                       | Except.error error => Except.error error
-                      | Except.ok value =>
-                          Except.ok (PsPscv0DoItem.letValue name (some annotation.value) value span)
+                      | Except.ok value => Except.ok (PsPscv0DoItem.letValue name (some annotation.value) value span)
         else
           match psTokenCursorAdvance nameToken.cursor with
           | none => Except.error "PSCV0-DO-BINDING-OPERATOR"
@@ -126,27 +118,20 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
               match psPscv0ReadCompleteTerm proofScript operator.cursor with
               | Except.error error => Except.error error
               | Except.ok value =>
-                  if psStringEq operator.token.text ":=" then
-                    Except.ok (PsPscv0DoItem.letValue name none value span)
-                  else if psStringEq operator.token.text "←" then
-                    Except.ok (PsPscv0DoItem.bind name value span)
-                  else if psStringEq operator.token.text "<-" then
-                    Except.ok (PsPscv0DoItem.bind name value span)
+                  if psStringEq operator.token.text ":=" then Except.ok (PsPscv0DoItem.letValue name none value span)
+                  else if psStringEq operator.token.text "←" then Except.ok (PsPscv0DoItem.bind name value span)
+                  else if psStringEq operator.token.text "<-" then Except.ok (PsPscv0DoItem.bind name value span)
                   else Except.error "PSCV0-DO-BINDING-OPERATOR"
 
-def psPscv0ReadDoItem (proofScript : Bool) (collected : PsPscv0Collected) :
-    Except String PsPscv0DoItem :=
+def psPscv0ReadDoItem (proofScript : Bool) (collected : PsPscv0Collected) : Except String PsPscv0DoItem :=
   let cursor := PsTokenCursor.mk collected.tokens;
   match psTokenCursorAdvance cursor with
   | none => Except.error "PSCV0-DO-EMPTY-ITEM"
   | some first =>
       let span := PsSourceSpan.mk first.token.span.start collected.stop;
-      if psPscv0TokenNamesContain first.cursor.remaining "return" then
-        Except.error "PSCV0-DO-NESTED-RETURN-NOT-YET-SUPPORTED"
-      else if psPscv0DoUnsupportedHead first.token.text then
-        Except.error (psPscv0Cat ["PSCV0-DO-UNSUPPORTED: ", first.token.text])
-      else if psStringEq first.token.text "let" then
-        psPscv0ReadDoBinding proofScript span first.cursor
+      if psPscv0TokenNamesContain first.cursor.remaining "return" then Except.error "PSCV0-DO-NESTED-RETURN-NOT-YET-SUPPORTED"
+      else if psPscv0DoUnsupportedHead first.token.text then Except.error (psPscv0Cat ["PSCV0-DO-UNSUPPORTED: ", first.token.text])
+      else if psStringEq first.token.text "let" then psPscv0ReadDoBinding proofScript span first.cursor
       else if psStringEq first.token.text "return" then
         match psPscv0ReadCompleteTerm proofScript first.cursor with
         | Except.error error => Except.error error
@@ -190,9 +175,8 @@ def psPscv0ReadDoSeq (proofScript braced : Bool) (declarationColumn indent : Nat
         | Except.ok collected =>
             match psPscv0ReadDoItem proofScript collected with
             | Except.error error => Except.error error
-            | Except.ok item =>
-                psPscv0ReadDoSeq proofScript braced declarationColumn indent start
-                  remaining collected.cursor (item :: itemsRev) collected.stop
+            | Except.ok item => psPscv0ReadDoSeq proofScript braced declarationColumn indent start
+                remaining collected.cursor (List.cons item itemsRev) collected.stop
 
 def psPscv0ReadDo (proofScript : Bool) (declarationColumn : Nat)
     (keyword : PsTokenRead) : Except String PsPscv0DoRead :=
@@ -201,16 +185,14 @@ def psPscv0ReadDo (proofScript : Bool) (declarationColumn : Nat)
     if hasBrace then
       match psPscv0Expect keyword.cursor "{" with
       | Except.error error => Except.error error
-      | Except.ok opening =>
-          psPscv0ReadDoSeq true true declarationColumn 0 keyword.token.span.start
-            513 opening.cursor [] opening.token.span.stop
+      | Except.ok opening => psPscv0ReadDoSeq true true declarationColumn 0 keyword.token.span.start
+          513 opening.cursor [] opening.token.span.stop
     else Except.error "PSCV0-DO-BRACES-REQUIRED"
   else if hasBrace then
     match psPscv0Expect keyword.cursor "{" with
     | Except.error error => Except.error error
-    | Except.ok opening =>
-        psPscv0ReadDoSeq false true declarationColumn 0 keyword.token.span.start
-          513 opening.cursor [] opening.token.span.stop
+    | Except.ok opening => psPscv0ReadDoSeq false true declarationColumn 0 keyword.token.span.start
+        513 opening.cursor [] opening.token.span.stop
   else
     match psTokenCursorPeek keyword.cursor with
     | none => Except.error "PSCV0-DO-EMPTY"
@@ -220,22 +202,17 @@ def psPscv0ReadDo (proofScript : Bool) (declarationColumn : Nat)
             keyword.token.span.start 513 keyword.cursor [] keyword.token.span.stop
         else Except.error "PSCV0-DO-NATIVE-LAYOUT-REQUIRED"
 
--- A token with this identifier cannot originate from the selected source lexer.
--- It is only a temporary parser slot. Module validation requires every slot to
--- be an entire definition body; no hidden expression-level fallback is enabled.
+-- Unlexable temporary parser slot: validation requires a whole definition body.
 def psPscv0DoSlot : String := "$pscv0Do"
 
 def psPscv0RewriteTokens (proofScript : Bool) (fuel : Nat)
     (cursor : PsTokenCursor) (previous : String) (declarationColumn : Nat)
-    (tokensRev : List PsToken) (blocksRev : List PsPscv0DoBlock) :
-    Except String PsPscv0Rewritten :=
+    (tokensRev : List PsToken) (blocksRev : List PsPscv0DoBlock) : Except String PsPscv0Rewritten :=
   match fuel with
   | 0 => Except.error "PSCV0-SOURCE-TOKEN-BUDGET"
   | remaining + 1 =>
-      if psTokenCursorDone cursor then
-        Except.ok (PsPscv0Rewritten.mk
-          (psListAppend (psListReverse tokensRev) cursor.remaining)
-          (psListReverse blocksRev))
+      if psTokenCursorDone cursor then Except.ok (PsPscv0Rewritten.mk
+          (psListAppend (psListReverse tokensRev) cursor.remaining) (psListReverse blocksRev))
       else
         match psTokenCursorAdvance cursor with
         | none => Except.error "PSCV0-SOURCE-UNEXPECTED-END"
@@ -248,7 +225,7 @@ def psPscv0RewriteTokens (proofScript : Bool) (fuel : Nat)
                 | Except.ok parsed =>
                     let marker := PsToken.mk PsTokenKind.identifier psPscv0DoSlot parsed.block.span;
                     psPscv0RewriteTokens proofScript remaining parsed.cursor "do-body"
-                      declarationColumn (marker :: tokensRev) (parsed.block :: blocksRev)
+                      declarationColumn (List.cons marker tokensRev) (List.cons parsed.block blocksRev)
               else Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
             else
               let column :=
@@ -258,4 +235,4 @@ def psPscv0RewriteTokens (proofScript : Bool) (fuel : Nat)
                 else if psStringEq token.text "theorem" then token.span.start.column
                 else declarationColumn;
               psPscv0RewriteTokens proofScript remaining next.cursor token.text column
-                (token :: tokensRev) blocksRev
+                (List.cons token tokensRev) blocksRev

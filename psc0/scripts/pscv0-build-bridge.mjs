@@ -1,5 +1,6 @@
-// Cloud bootstrap: the retained self-hosted JS compiler compiles the portable
-// syntax-only bridge closure. No native Lean fallback or kernel generation.
+// Compile only the portable syntax bridge using the retained self-hosted PSC0.
+// Preflight all new raw source before expensive prefix preparation. Module-level
+// observations report failures precisely, without an alternative parser/builder.
 import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -24,7 +25,6 @@ function unwrap(result,phase){
   if(tag(result)!=='ok')throw Error('PSCV0_BRIDGE_'+phase+': '+JSON.stringify(printable(result),null,2));
   return result.value;
 }
-// Pathspecs below are repository-root paths, independent of the invocation cwd.
 const git=args=>execFileSync('git',args,{cwd:path.dirname(root),encoding:'utf8',maxBuffer:8*1024*1024});
 const base='b64a95e4537dade93462e0232b5da54d79f9cb25';
 const compilerPackages=['foundation','syntax','core','environment','meta','elab','bridge','compiler-ir','erasure','compiler','backend-ts','bootstrap'];
@@ -44,12 +44,10 @@ const order=[],seen=new Set(),active=new Set();
 async function visit(module){
   if(active.has(module))throw Error('bridge import cycle: '+module);
   if(seen.has(module))return;
-  const parts=module.split('.');
-  const owner={Syntax:'syntax',Foundation:'foundation'}[parts[1]];
+  const parts=module.split('.'),owner={Syntax:'syntax',Foundation:'foundation'}[parts[1]];
   assert(parts[0]==='Ps'&&owner,'bridge imports non-syntax compiler or kernel: '+module);
   const file=path.join(root,'packages',owner,'src',...parts)+'.lean';
-  const source=await readFile(file,'utf8');
-  active.add(module);
+  const source=await readFile(file,'utf8'); active.add(module);
   for(const line of source.split(/\r?\n/u)){
     const m=line.match(/^\s*import\s+([A-Za-z_][A-Za-z_0-9.]*)\s*$/u);
     if(m)await visit(m[1]);
@@ -60,23 +58,46 @@ async function visit(module){
 }
 await visit('Ps.Syntax.Pscv0.Module');
 await mkdir(output,{recursive:true});
+const progress={source:git(['rev-parse','HEAD']).trim(),preflight:[],prepared:[],phase:'preflight',closure:order.map(({source,...r})=>r)};
+async function checkpoint(){await writeFile(path.join(output,'progress.json'),JSON.stringify(progress,null,2)+'\n');}
 const start=Date.now();
-console.log('PSCV0_BRIDGE_PREPARING: '+order.length+' syntax-only modules, '+order.reduce((n,x)=>n+Buffer.byteLength(x.source),0)+' bytes');
-let inputs=compiler.List.nil();
-for(let i=order.length-1;i>=0;i--)inputs=compiler.List.cons(order[i].source,inputs);
-const prepared=unwrap(compiler.psCompilerPrepareSources(compiler.PsCompilerSourceKind.lean,inputs),'PREPARE');
-const admissions=unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared),'ADMISSIONS');
-const ts=unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared),'EMIT');
-await writeFile(path.join(output,'index.ts'),ts);
-await writeFile(path.join(output,'bridge.admissions.json'),admissions);
-await writeFile(path.join(output,'package.json'),'{"type":"module","private":true}\n');
-const req=createRequire(path.join(installed,'package.json'));
-const tsMetaFile=req.resolve('typescript/package.json');
-const tsMeta=JSON.parse(await readFile(tsMetaFile,'utf8'));
-assert.equal(tsMeta.version,'7.0.2');
-const bin=path.join(path.dirname(tsMetaFile),typeof tsMeta.bin==='string'?tsMeta.bin:tsMeta.bin.tsc);
-const result=spawnSync(process.execPath,[bin,'--ignoreConfig',path.join(output,'index.ts'),'--target','ES2022','--module','ES2022','--moduleResolution','bundler','--strict','--declaration','--sourceMap','--skipLibCheck','--noEmitOnError','--pretty','false'],{encoding:'utf8',timeout:180000,maxBuffer:8*1024*1024});
-assert(!result.error&&result.status===0,String(result.error||result.stderr||result.stdout));
-const report={schema:'psc0-pscv0-portable-bridge-build/1',source:git(['rev-parse','HEAD']).trim(),baseSource:base,referenceSha256:'a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0',builder:'retained self-hosted JavaScript PSC0 compiler',builderRuntimeSource:'2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a',builderJsSha256:sha(await readFile(compilerFile)),existingCompilerSourceFilesUnchanged:old.length,newPortableSourceFiles:added,closure:order.map(({source,...r})=>r),bridgeTypeScriptSha256:sha(ts),bridgeJsSha256:sha(await readFile(path.join(output,'index.js'))),admissionsSha256:sha(admissions),typescript:'7.0.2',elapsedMs:Date.now()-start,kernelRegenerated:false,existingCompilerRebuilt:false,newInstalledFixedPoint:false,bridgeKernelAdmitted:false};
-await writeFile(path.join(output,'build-report.json'),JSON.stringify(report,null,2)+'\n');
-console.log('PSCV0_PORTABLE_BRIDGE_BUILD: PASS '+JSON.stringify({...report,closureModules:order.length,closure:undefined}));
+try {
+  await checkpoint();
+  for(const module of order.filter(x=>x.module.startsWith('Ps.Syntax.Pscv0.'))){
+    const begin=Date.now();
+    unwrap(compiler.psCompilerParseSource(compiler.PsCompilerSourceKind.lean,module.source),'PREFLIGHT '+module.module);
+    progress.preflight.push({module:module.module,elapsedMs:Date.now()-begin});
+    console.log('PSCV0_BRIDGE_PREFLIGHT: PASS '+module.module);await checkpoint();
+  }
+  let state=compiler.psCompilerPreparationStart(compiler.PsCompilerSourceKind.lean);
+  for(const module of order){
+    progress.phase='prepare '+module.module;await checkpoint();
+    console.log('PSCV0_BRIDGE_PREPARING: '+module.module);
+    const begin=Date.now();
+    state=unwrap(compiler.psCompilerPreparationStep(state,module.source),'PREPARE '+module.module);
+    progress.prepared.push({module:module.module,elapsedMs:Date.now()-begin});
+    console.log('PSCV0_BRIDGE_PREPARED: '+module.module+' '+(Date.now()-begin)+'ms');
+    await checkpoint();
+  }
+  progress.phase='finish';await checkpoint();
+  const prepared=unwrap(compiler.psCompilerPreparationFinish(state),'FINISH');
+  const admissions=unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared),'ADMISSIONS');
+  progress.phase='emit';await checkpoint();
+  const ts=unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared),'EMIT');
+  await writeFile(path.join(output,'index.ts'),ts);
+  await writeFile(path.join(output,'bridge.admissions.json'),admissions);
+  await writeFile(path.join(output,'package.json'),'{"type":"module","private":true}\n');
+  const req=createRequire(path.join(installed,'package.json'));
+  const tsMetaFile=req.resolve('typescript/package.json'),tsMeta=JSON.parse(await readFile(tsMetaFile,'utf8'));
+  assert.equal(tsMeta.version,'7.0.2');
+  const bin=path.join(path.dirname(tsMetaFile),typeof tsMeta.bin==='string'?tsMeta.bin:tsMeta.bin.tsc);
+  const result=spawnSync(process.execPath,[bin,'--ignoreConfig',path.join(output,'index.ts'),'--target','ES2022','--module','ES2022','--moduleResolution','bundler','--strict','--declaration','--sourceMap','--skipLibCheck','--noEmitOnError','--pretty','false'],{encoding:'utf8',timeout:180000,maxBuffer:8*1024*1024});
+  assert(!result.error&&result.status===0,String(result.error||result.stderr||result.stdout));
+  const report={schema:'psc0-pscv0-portable-bridge-build/1',source:progress.source,baseSource:base,referenceSha256:'a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0',builder:'retained self-hosted JavaScript PSC0 compiler',builderRuntimeSource:'2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a',builderJsSha256:sha(await readFile(compilerFile)),existingCompilerSourceFilesUnchanged:old.length,newPortableSourceFiles:added,closure:progress.closure,bridgeTypeScriptSha256:sha(ts),bridgeJsSha256:sha(await readFile(path.join(output,'index.js'))),admissionsSha256:sha(admissions),typescript:'7.0.2',elapsedMs:Date.now()-start,kernelRegenerated:false,existingCompilerRebuilt:false,newInstalledFixedPoint:false,bridgeKernelAdmitted:false};
+  await writeFile(path.join(output,'build-report.json'),JSON.stringify(report,null,2)+'\n');
+  progress.phase='complete';await checkpoint();
+  console.log('PSCV0_PORTABLE_BRIDGE_BUILD: PASS '+JSON.stringify({...report,closureModules:order.length,closure:undefined}));
+} catch(error) {
+  await writeFile(path.join(output,'failure.json'),JSON.stringify({source:progress.source,phase:progress.phase,message:error.message,elapsedMs:Date.now()-start},null,2)+'\n');
+  throw error;
+}

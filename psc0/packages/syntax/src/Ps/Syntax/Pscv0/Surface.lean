@@ -106,15 +106,15 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .bool _ _ => []
   | .unit _ => []
   | .record fields _ => psListMap psPscv0RecordTerm fields
-  | .app fn args _ => fn :: args
-  | .lambda binders body _ => body :: psListMap psPscv0TermBinderType binders
-  | .forallE binders body _ => body :: psListMap psPscv0TermBinderType binders
+  | .app fn args _ => List.cons fn args
+  | .lambda binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
+  | .forallE binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
   | .letE _ type value body _ =>
       match type with
       | none => [value, body]
       | some annotation => [annotation, value, body]
   | .ifE condition yes no _ => [condition, yes, no]
-  | .matchE scrutinee alternatives _ => scrutinee :: psListMap psPscv0AlternativeTerm alternatives
+  | .matchE scrutinee alternatives _ => List.cons scrutinee (psListMap psPscv0AlternativeTerm alternatives)
 
 def psPscv0ValidateTermWithFuel (tokens : List PsToken) (fuel : Nat)
     (term : PsSyntaxTerm) : Except String Unit :=

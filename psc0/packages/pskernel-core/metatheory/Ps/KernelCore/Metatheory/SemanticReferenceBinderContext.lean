@@ -202,10 +202,10 @@ theorem binderChild_opened_frame (s : PsKernelCheckerState)
       LocalFrame next.nextFresh child ∧
       opened.erase = psKernelExprInstantiate1 body.erase (.fvar name) ∧
       opened.Scoped 0 ∧ NamesBelow next.nextFresh opened := by
-  obtain ⟨opened, erasure, scoped, bounded⟩ :=
+  obtain ⟨opened, erasure, openedScoped, bounded⟩ :=
     allocated_open_frame s n body scopedBody boundBody
   exact ⟨opened,
     localFrame_addLocal s.nextFresh locals n n A bi frame boundA scopedA,
-    erasure, scoped, bounded⟩
+    erasure, openedScoped, bounded⟩
 
 end PsKernelSemantics.Reference

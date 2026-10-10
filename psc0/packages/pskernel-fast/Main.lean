@@ -9,6 +9,29 @@ def check (condition : Bool) (description : String) : IO Unit := do
   unless condition do
     throw (IO.userError description)
 
+/-- Deterministic well-scoped raw-expression family for evaluator regression.
+    The terms are not claimed to be Lean-well-typed. -/
+def generatedClosed : Nat → Nat → RawExpr
+  | 0, seed => .const (.num (Name.simple "leaf") (seed % 13)) []
+  | Nat.succ rest, seed =>
+      let child := generatedClosed rest (seed / 2 + 7)
+      let x := Name.simple "x"
+      let y := Name.simple "y"
+      let ty : RawExpr := .sort .zero
+      match seed % 8 with
+      | 0 => .app (.lam x ty (.bvar 0) .default) child
+      | 1 => .letE x ty child (.bvar 0) false
+      | 2 => .app (.const (Name.simple "f") []) child
+      | 3 => .mdata "neutral-metadata" child
+      | 4 =>
+          .lam x ty (.app (.const (Name.simple "g") []) (.bvar 0)) .implicit
+      | 5 =>
+          .app (.lam x ty (.lam y ty (.bvar 1) .default) .default) child
+      | 6 =>
+          .app (.app (.lam x ty (.lam y ty (.bvar 0) .default) .default)
+            child) (.const (Name.simple "other") [])
+      | _ => .proj (Name.simple "P") (seed % 3) child
+
 def main : IO Unit := do
   let term : RawExpr :=
     .lam (Name.simple "x") (.sort .zero) (.app (.bvar 0) (.const (Name.simple "x") [])) .default
@@ -229,4 +252,23 @@ def main : IO Unit := do
   | .error .typeMismatch => pure ()
   | other => throw (IO.userError s!"wrong universe type accepted: {repr other}")
 
-  IO.println "PSKernel-Fast G5: conservative Sort/Pi/lambda/app/let typing cases passed (NO proof admission)"
+  for seed in [:256] do
+    let candidate := generatedClosed 6 seed
+    match referenceAgreesWithClosure candidate with
+    | .ok true => pure ()
+    | .ok false =>
+        throw (IO.userError s!"generated evaluator disagreement, seed={seed}")
+    | .error err =>
+        throw (IO.userError s!"generated evaluator error, seed={seed}: {repr err}")
+    let (id, store) ←
+      match encodeClosed candidate with
+      | .ok output => pure output
+      | .error err =>
+          throw (IO.userError s!"generated scope/interner error, seed={seed}: {repr err}")
+    match decodeClosed store id with
+    | .ok restored =>
+        check (restored == candidate) s!"generated interner changed seed={seed}"
+    | .error err =>
+        throw (IO.userError s!"generated reification error, seed={seed}: {repr err}")
+
+  IO.println "PSKernel-Fast G7: 256 deterministic closed-term interner/evaluator cases passed (NOT Lean kernel acceptance)"

@@ -25,3 +25,5 @@ G3 extends raw expression syntax toward Lean 4.35 (`Name`, symbolic levels, lite
 G4 adds an independent substitution-reference evaluator and closure reification comparison for **untyped beta/let only**. G5 starts `PSKernelFast/TinyTyping.lean`: a conservative **checked-only partial inference experiment** covering explicit Sort/Pi/lambda/app/let with exact type matches after beta/let WHNF. No existing proof checker, constant environments, proof admission, full Lean DefEq or soundness theorem is imported or claimed.
 
 G6 adds a **separate untyped evaluator diagnostic** (`Bench.lean`) with three time/memory samples per mode on cloud CI. It explicitly includes closure reification; the results are not Lean kernel throughput claims. The benchmark has its own workflow and does not run on ordinary documentation edits.
+
+G7 adds 256 deterministic closed-term generator tests, requiring independent substitution/closure agreement and exact syntax interning. These are **untyped evaluation tests**, not proof checking or formal verification.

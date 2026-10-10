@@ -1,5 +1,6 @@
 import Ps.KernelCore.Metatheory.SemanticCheckedReading
 import Ps.KernelCore.Metatheory.SemanticValidityScope
+import Ps.KernelCore.Metatheory.SemanticScope
 
 /-!
 Semantic local-context extension through the shared production operations.
@@ -284,5 +285,212 @@ theorem freshLocalContext_addLet (future : PsKernelName)
   · apply freshLocals query decl
     simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
       psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, Bool.false_eq_true, ite_false] using found
+
+
+/-!
+An executable-context frame invariant independent of semantic valuations.
+Every *selected* stored declaration has a bounded numeric name, bounded
+annotated type/value, and no loose bound variables. The lookup-only form
+matches the checker and the semantic model: shadowed entries cannot be selected.
+This is the syntactic binder-entry slice; preserving the frame across arbitrary
+recursive checker callbacks is still an outstanding graded invariant.
+-/
+
+def NameBelow (limit : Nat) : PsKernelName → Prop
+  | .num _ index => index < limit
+  | _ => True
+
+theorem nameBelow_mono (name : PsKernelName) {n m : Nat}
+    (h : NameBelow n name) (hn : n ≤ m) : NameBelow m name := by
+  cases name with
+  | anonymous | str _ _ => trivial
+  | num _ i => exact Nat.lt_of_lt_of_le h hn
+
+theorem nameBelow_fresh (name : PsKernelName) (limit : Nat)
+    (h : NameBelow limit name) (base : PsKernelName) :
+    psKernelNameEq name (.num base limit) = false := by
+  cases he : psKernelNameEq name (.num base limit) with
+  | false => rfl
+  | true =>
+      have same : name = .num base limit :=
+        psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435
+          name (.num base limit) he
+      subst name
+      change limit < limit at h
+      exact False.elim (Nat.lt_irrefl _ h)
+
+/-- The semantic bound context remains closed and cannot mention the next
+numeric identity allocated by the checker. -/
+def BoundFrame (limit : Nat) (Γ : List AnnotatedExpr) : Prop :=
+  ∀ A, A ∈ Γ → NamesBelow limit A ∧ A.Scoped 0
+
+theorem boundFrame_empty (limit : Nat) : BoundFrame limit [] := by
+  intro A h
+  cases h
+
+theorem boundFrame_mono (limit next : Nat) (Γ : List AnnotatedExpr)
+    (frame : BoundFrame limit Γ) (le : limit ≤ next) :
+    BoundFrame next Γ := by
+  intro A h
+  exact ⟨namesBelow_mono A (frame A h).1 le, (frame A h).2⟩
+
+theorem boundFrame_fresh (limit : Nat) (Γ : List AnnotatedExpr)
+    (base : PsKernelName) (frame : BoundFrame limit Γ) :
+    FreshBoundContext (.num base limit) Γ := by
+  induction Γ with
+  | nil => trivial
+  | cons A Γ ih =>
+      refine ⟨namesBelow_fresh A limit (frame A (by simp)).1 base, ?_⟩
+      apply ih
+      intro B hB
+      exact frame B (by simp [hB])
+
+/-- A frame fact is stored about the actual first lookup result, not merely
+some expression with the same erasure. -/
+structure LocalDeclFrame (limit : Nat) (query : PsKernelName)
+    (decl : AnnotatedLocalDecl) : Prop where
+  queryBelow : NameBelow limit query
+  typeBelow : NamesBelow limit (psKernelLocalDeclType decl)
+  typeScoped : (psKernelLocalDeclType decl).Scoped 0
+  valueBelow : ∀ value, psKernelLocalDeclValue decl = some value →
+    NamesBelow limit value
+  valueScoped : ∀ value, psKernelLocalDeclValue decl = some value →
+    value.Scoped 0
+
+def LocalFrame (limit : Nat) (locals : AnnotatedLocalContext) : Prop :=
+  ∀ query decl, psKernelLocalContextFind locals query = some decl →
+    LocalDeclFrame limit query decl
+
+theorem localFrame_empty (limit : Nat) :
+    LocalFrame limit annotatedLocalContextEmpty := by
+  intro query decl found
+  simp [annotatedLocalContextEmpty, psKernelLocalContextEmptyOf,
+    psKernelLocalContextFind, psKernelLocalContextFindIn] at found
+
+theorem localFrame_mono (limit next : Nat) (locals : AnnotatedLocalContext)
+    (frame : LocalFrame limit locals) (le : limit ≤ next) :
+    LocalFrame next locals := by
+  intro query decl found
+  have old := frame query decl found
+  exact {
+    queryBelow := nameBelow_mono query old.queryBelow le
+    typeBelow := namesBelow_mono _ old.typeBelow le
+    typeScoped := old.typeScoped
+    valueBelow := fun value stored =>
+      namesBelow_mono value (old.valueBelow value stored) le
+    valueScoped := old.valueScoped
+  }
+
+theorem localFrame_fresh (limit : Nat) (locals : AnnotatedLocalContext)
+    (base : PsKernelName) (frame : LocalFrame limit locals) :
+    FreshLocalContext (.num base limit) locals := by
+  intro query decl found
+  have entry := frame query decl found
+  exact {
+    queryFresh := nameBelow_fresh query limit entry.queryBelow base
+    typeFresh := namesBelow_fresh _ limit entry.typeBelow base
+    valueFresh := fun value stored =>
+      namesBelow_fresh value limit (entry.valueBelow value stored) base
+  }
+
+/-- The shared production local insertion retains the frame at the advanced
+allocator counter; both scope and name bounds are explicit input invariants. -/
+theorem localFrame_addLocal (limit : Nat)
+    (locals : AnnotatedLocalContext) (base userName : PsKernelName)
+    (A : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (frame : LocalFrame limit locals)
+    (boundedA : NamesBelow limit A) (scopedA : A.Scoped 0) :
+    LocalFrame (limit + 1)
+      (psKernelLocalContextAddLocal locals (.num base limit) userName A bi) := by
+  intro query decl found
+  by_cases hMatches : psKernelNameEq (.num base limit) query = true
+  · have same : (.num base limit : PsKernelName) = query :=
+      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435
+        (.num base limit) query hMatches
+    subst query
+    have selected :
+        PsKernelLocalDeclOf.localDecl locals.nextIndex (.num base limit)
+          userName A bi = decl := by
+      simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_true,
+        Option.some.injEq] using found
+    subst decl
+    refine {
+      queryBelow := ?_
+      typeBelow := namesBelow_mono A boundedA (Nat.le_succ _)
+      typeScoped := scopedA
+      valueBelow := ?_
+      valueScoped := ?_
+    }
+    · change limit < limit + 1
+      omega
+    · intro value stored
+      cases stored
+    · intro value stored
+      cases stored
+  · have oldFound : psKernelLocalContextFind locals query = some decl := by
+      simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches,
+        Bool.false_eq_true, ite_false] using found
+    exact (localFrame_mono limit (limit + 1) locals frame
+      (Nat.le_succ _)) query decl oldFound
+
+/-- A let insertion also retains the checked value's exact syntactic frame. -/
+theorem localFrame_addLet (limit : Nat)
+    (locals : AnnotatedLocalContext) (base userName : PsKernelName)
+    (A value : AnnotatedExpr)
+    (frame : LocalFrame limit locals)
+    (boundedA : NamesBelow limit A) (scopedA : A.Scoped 0)
+    (boundedValue : NamesBelow limit value) (scopedValue : value.Scoped 0) :
+    LocalFrame (limit + 1)
+      (psKernelLocalContextAddLet locals (.num base limit) userName A value) := by
+  intro query decl found
+  by_cases hMatches : psKernelNameEq (.num base limit) query = true
+  · have same : (.num base limit : PsKernelName) = query :=
+      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435
+        (.num base limit) query hMatches
+    subst query
+    have selected :
+        PsKernelLocalDeclOf.letDecl locals.nextIndex (.num base limit)
+          userName A value = decl := by
+      simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_true,
+        Option.some.injEq] using found
+    subst decl
+    refine {
+      queryBelow := ?_
+      typeBelow := namesBelow_mono A boundedA (Nat.le_succ _)
+      typeScoped := scopedA
+      valueBelow := ?_
+      valueScoped := ?_
+    }
+    · change limit < limit + 1
+      omega
+    · intro stored foundValue
+      have sameValue : value = stored := Option.some.inj foundValue
+      subst stored
+      exact namesBelow_mono value boundedValue (Nat.le_succ _)
+    · intro stored foundValue
+      have sameValue : value = stored := Option.some.inj foundValue
+      subst stored
+      exact scopedValue
+  · have oldFound : psKernelLocalContextFind locals query = some decl := by
+      simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches,
+        Bool.false_eq_true, ite_false] using found
+    exact (localFrame_mono limit (limit + 1) locals frame
+      (Nat.le_succ _)) query decl oldFound
+
+/-- Exiting a binder restores its parent locals. The production state exit
+keeps a monotone counter, so no restored declaration becomes newly forgeable. -/
+theorem localFrame_exitLocalScope
+    (parent child : PsKernelCheckerState)
+    (locals : AnnotatedLocalContext)
+    (frame : LocalFrame parent.nextFresh locals) :
+    LocalFrame (psKernelCheckerStateExitLocalScope parent child).nextFresh locals := by
+  change LocalFrame (Nat.max parent.nextFresh child.nextFresh) locals
+  exact localFrame_mono parent.nextFresh
+    (Nat.max parent.nextFresh child.nextFresh) locals frame
+    (Nat.le_max_left _ _)
 
 end PsKernelSemantics.SetModel

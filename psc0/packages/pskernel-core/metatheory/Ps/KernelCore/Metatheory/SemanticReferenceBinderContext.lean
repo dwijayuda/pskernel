@@ -101,4 +101,87 @@ theorem binderChild_fvar_checked_result (M : Reading V) (Γ : List AnnotatedExpr
     (psKernelLocalContextAddLocal locals (psKernelCheckerStateFreshName s n).1 n A bi)
     childErasure childModel run
 
+
+/-- Derive the three independent binder freshness premises directly from
+syntactic frame invariants for the *actual* production allocator identity.
+The checked domain, its membership and its scope remain explicit. -/
+theorem binderChild_localContext_frame (M : Reading V) (Γ : List AnnotatedExpr)
+    (c : PsKernelCheckerContext) (s : PsKernelCheckerState)
+    (locals : AnnotatedLocalContext) (n : PsKernelName)
+    (A U : AnnotatedExpr) (bi : PsKernelBinderInfo) (ρ₀ : Nat → V) (x : V)
+    (erasure : eraseLocalContext locals = c.localContext)
+    (boundFrame : BoundFrame s.nextFresh Γ)
+    (localFrame : LocalFrame s.nextFresh locals)
+    (boundedA : NamesBelow s.nextFresh A) (scopedA : A.Scoped 0)
+    (model : ModelsLocalContext M Γ locals) (domain : CheckedReading M Γ A U)
+    (member : x ∈ˢ interp M ρ₀ A) :
+    let name := (psKernelCheckerStateFreshName s n).1
+    let child := psKernelLocalContextAddLocal locals name n A bi
+    eraseLocalContext child = (binderChild c s n A.erase bi).localContext ∧
+      ModelsLocalContext (M.withFree name x) Γ child := by
+  exact binderChild_localContext_model M Γ c s locals n A U bi ρ₀ x
+    erasure (boundFrame_fresh s.nextFresh Γ n boundFrame)
+    (localFrame_fresh s.nextFresh locals n localFrame)
+    (namesBelow_fresh A s.nextFresh boundedA n)
+    scopedA model domain member
+
+/-- The let binder gets the same freshness discharge for both its stored
+type and its actually checked stored value. -/
+theorem letScope_localContext_frame (M : Reading V) (Γ : List AnnotatedExpr)
+    (c : PsKernelCheckerContext) (s : PsKernelCheckerState)
+    (locals : AnnotatedLocalContext) (n : PsKernelName)
+    (A value : AnnotatedExpr) (ρ₀ : Nat → V)
+    (erasure : eraseLocalContext locals = c.localContext)
+    (boundFrame : BoundFrame s.nextFresh Γ)
+    (localFrame : LocalFrame s.nextFresh locals)
+    (boundedA : NamesBelow s.nextFresh A)
+    (boundedValue : NamesBelow s.nextFresh value)
+    (scopedValue : value.Scoped 0)
+    (model : ModelsLocalContext M Γ locals) (checked : CheckedReading M Γ value A) :
+    let name := (psKernelCheckerStateFreshName s n).1
+    let child := psKernelLocalContextAddLet locals name n A value
+    let rawChild := psKernelCheckerContextWithLocalContext c
+      (psKernelLocalContextAddLet c.localContext name n A.erase value.erase)
+    eraseLocalContext child = rawChild.localContext ∧
+      ModelsLocalContext (M.withFree name (interp M ρ₀ value)) Γ child := by
+  exact letScope_localContext_model M Γ c s locals n A value ρ₀
+    erasure (boundFrame_fresh s.nextFresh Γ n boundFrame)
+    (localFrame_fresh s.nextFresh locals n localFrame)
+    (namesBelow_fresh A s.nextFresh boundedA n)
+    (namesBelow_fresh value s.nextFresh boundedValue n)
+    scopedValue model checked
+
+/-- Concrete reference inference of a child fvar inherits syntactic freshness
+from the parent frame instead of postulating it per queried declaration. -/
+theorem binderChild_fvar_frame_result (M : Reading V) (Γ : List AnnotatedExpr)
+    (fuel : Nat) (whnf : InferOperation) (defeq : DefEqOperation)
+    (c : PsKernelCheckerContext) (s next : PsKernelCheckerState)
+    (locals : AnnotatedLocalContext) (n query : PsKernelName)
+    (A U : AnnotatedExpr) (bi : PsKernelBinderInfo) (ρ₀ : Nat → V) (x : V)
+    (result : PsKernelExpr) (io : Bool)
+    (erasure : eraseLocalContext locals = c.localContext)
+    (boundFrame : BoundFrame s.nextFresh Γ)
+    (localFrame : LocalFrame s.nextFresh locals)
+    (boundedA : NamesBelow s.nextFresh A) (scopedA : A.Scoped 0)
+    (model : ModelsLocalContext M Γ locals) (domain : CheckedReading M Γ A U)
+    (member : x ∈ˢ interp M ρ₀ A)
+    (run : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy fuel whnf defeq
+      (binderChild c s n A.erase bi) (psKernelCheckerStateFreshName s n).2
+      (.fvar query) io = .ok (result, next)) :
+    let name := (psKernelCheckerStateFreshName s n).1
+    let child := psKernelLocalContextAddLocal locals name n A bi
+    ∃ decl : AnnotatedLocalDecl,
+      psKernelLocalContextFind child query = some decl ∧
+      let carried : AnnotatedInferenceResult :=
+        { expr := .fvar query, type := psKernelLocalDeclType decl }
+      carried.expr.erase = .fvar query ∧ eraseInferenceType carried = result ∧
+        CheckedInferenceResult (M.withFree name x) Γ carried ∧
+        next = (psKernelCheckerStateFreshName s n).2 := by
+  exact binderChild_fvar_checked_result M Γ fuel whnf defeq c s next
+    locals n query A U bi ρ₀ x result io erasure
+    (boundFrame_fresh s.nextFresh Γ n boundFrame)
+    (localFrame_fresh s.nextFresh locals n localFrame)
+    (namesBelow_fresh A s.nextFresh boundedA n)
+    scopedA model domain member run
+
 end PsKernelSemantics.Reference

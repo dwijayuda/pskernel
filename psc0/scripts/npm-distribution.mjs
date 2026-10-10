@@ -100,6 +100,8 @@ async function producePackage(variant,name,compiler) {
     // All future npm releases must preserve the existing WASM identity.
     metadata.proofscript={...metadata.proofscript,sourceVariant:'native-provider'};
   } else {
+    const conversion={schemaVersion:1,package:outname(name),requestedVariant:variant,
+      translated:0,preservedLean:0,preservedNonLean:0,exceptions:[]};
     const from=join(source,'src'),to=join(stage,'src');
     if(!existsSync(from))throw Error('PSC_NPM_PACKAGE_SOURCE_MISSING '+name);
     if(variant==='lean')await cp(from,to,{recursive:true});
@@ -109,20 +111,41 @@ async function producePackage(variant,name,compiler) {
         const rel=relative(from,file);
         if(!file.endsWith('.lean')) {
           await mkdir(dirname(join(to,rel)),{recursive:true});
-          await cp(file,join(to,rel)); continue;
+          await cp(file,join(to,rel));
+          conversion.preservedNonLean++; continue;
         }
         const text=await readFile(file,'utf8');
-        const transformed=unwrap(compiler.psCompilerTranslateSource(
-          compiler.PsCompilerSourceKind.lean,
-          compiler.PsCompilerSourceKind.proofScript,text),name+'/'+rel);
-        const candidate=rel.replace(/\.lean$/u,'.ps');
-        assert.equal(typeof transformed,'string');
-        const parsed=compiler.psParseProofScriptSource(transformed);
-        if(exceptTag(parsed)!=='ok')throw Error('PSC_NPM_GENERATED_PS_INVALID '+name+'/'+candidate);
-        const output=join(to,candidate);
-        await mkdir(dirname(output),{recursive:true});
-        await writeFile(output,transformed);
+        let transformed, reason;
+        try {
+          transformed=unwrap(compiler.psCompilerTranslateSource(
+            compiler.PsCompilerSourceKind.lean,
+            compiler.PsCompilerSourceKind.proofScript,text),name+'/'+rel);
+          assert.equal(typeof transformed,'string');
+          const parsed=compiler.psParseProofScriptSource(transformed);
+          if(exceptTag(parsed)!=='ok')throw Error('PSC_NPM_GENERATED_PS_INVALID: '+rel);
+        } catch(error) {
+          reason=String(error?.message||error).slice(0,900);
+        }
+        if(reason) {
+          // This is a deliberately visible *original Lean* source, not fake PS.
+          const fallback=join(to,rel);
+          await mkdir(dirname(fallback),{recursive:true});
+          await cp(file,fallback);
+          conversion.preservedLean++;
+          conversion.exceptions.push({path:rel,reason});
+          console.log('PSC_NPM_PS_CONVERSION_LIMIT: '+name+'/'+rel+' ('+reason.slice(0,180)+')');
+        } else {
+          const output=join(to,rel.replace(/\.lean$/u,'.ps'));
+          await mkdir(dirname(output),{recursive:true});
+          await writeFile(output,transformed);
+          conversion.translated++;
+        }
       }
+    }
+    if(variant==='ps'){
+      await writeFile(join(stage,'SOURCE_CONVERSION.json'),JSON.stringify(conversion,null,2)+'\n');
+      console.log('PSC_NPM_SOURCE_COVERAGE '+name+' translated='+conversion.translated+
+        ' retainedLean='+conversion.preservedLean);
     }
     const lib=join(stage,'dist');
     await mkdir(lib,{recursive:true});
@@ -139,6 +162,7 @@ async function producePackage(variant,name,compiler) {
   }
   metadata.version=external?'4.34.0':V;
   metadata.private=false;
+  if(!external)metadata.files=['dist/','src/','README.md','SOURCE_CONVERSION.json'];
   metadata.proofscript={...metadata.proofscript,sourceVariant:external?'native-provider':variant,
     runtimeModel:directNames.has(name)?'compiled-psc0-js':'shared-psc0-js-facade',
     verifiedIndependentPackageCompilation:false};
@@ -169,8 +193,12 @@ async function bundleVariant(variant,compiler) {
   const tarballs=join(target,'tarballs');
   await mkdir(tarballs,{recursive:true});
   const packages=[];
+  const conversions=[];
   for(const name of names) {
     const staged=await producePackage(variant,name,compiler);
+    if(variant==='ps'&&!providerNames.has(name)){
+      conversions.push(await safeRead(join(staged,'SOURCE_CONVERSION.json')));
+    }
     const tarName=run('npm',['pack',staged,'--pack-destination',tarballs,'--json',
       '--ignore-scripts'],root,{quiet:true});
     const desc=JSON.parse(tarName);
@@ -199,6 +227,9 @@ async function bundleVariant(variant,compiler) {
     coreAuthority:'js-core-qualified-scope-only',scope:packages.length,
     sourceCommit:process.env.GITHUB_SHA||'unknown',
     packageNames:names.map(outname),
+    sourceConversion:{translated:conversions.reduce((s,x)=>s+x.translated,0),
+      preservedLean:conversions.reduce((s,x)=>s+x.preservedLean,0),
+      exceptions:conversions.flatMap(x=>x.exceptions.map(e=>({package:x.package,...e})))},
   };
   await writeFile(join(umbrella,'MANIFEST.json'),JSON.stringify(manifest,null,2)+'\n');
   const packageResult=JSON.parse(run('npm',['pack',umbrella,'--pack-destination',tarballs,

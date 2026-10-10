@@ -1,5 +1,10 @@
 # PSKernel Core architecture for PSC0
 
+### Semantic-model extension boundary — 2026-10-11
+
+The only executable checker remains the original `Checker/Knot`-owned reference path. The audited proof-only `SemanticReferenceSessionMData.lean` source at `f7d00c2c` closes ONE actual, grade-preserving, fuel-decreasing recursive interpretation case. It does **not** certify arbitrary unchecked/DefEq branches or global acceptance. The next architecture-critical proof boundary is constructive extension of `Reading.constants` for newly admitted fresh names. The current `EnvironmentModel M env` assumes selected constants already interpreted by fixed `M`; its conditional `StoredConstantModeled M info` cannot be inferred for all arbitrary M from runtime acceptance. Formulate `M'` extension preserving interpretations at old names, and prove `EnvironmentModel M' (add env info)` with a proved model interpretation of the new actual declaration and preservation of pinned `False`. This is necessary for genuine end-to-end consistency without smuggling new consistency assumptions.
+
+
 ## Proof-only public session grade/recursive interface — October 11, 2026
 
 The public proof modules `SemanticReferenceSessionGrade.lean` (source green at `a5e7dd29`) and current unqualified `SemanticReferenceSessionMData.lean` (`cc95288a`) are under `metatheory/`, not production compiler/runtime code. Their statements invert the *existing* public `psKernelSessionCheck` / `psKernelSessionInfer` down through `Checker/Knot` into the ONE `psKernelInferCoreWithFuel`, with its original WHNF and DefEq functions and exact states. The grade-specific dependent-product, fully checked application/lambda, free-variable, sort and constant cases retain execution provenance but not yet an end-to-end semantic checker invariant. `mdata` adds a strict smaller-fuel semantic induction step once validated. There is no parallel checker, new TCB oracle, or revised acceptance rule. Con Leche's pure set mathematics remains the visible relative assumption; admission soundness and global consistency are not proven.

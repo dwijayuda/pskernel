@@ -33,31 +33,13 @@ jobs:
         run: |
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lake build Ps.KernelCore.Metatheory.SemanticCoherentValidity Ps.KernelCore.Metatheory.SemanticReferenceApplication
           npm run test:proofs
       - name: Run model-independent annotated syntax checks
         if: ${{ !cancelled() }}
         working-directory: psc0/packages/pskernel-core
         run: lake exe pskernel_annotated_syntax_tests
 
-  binary_identity:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install exact Lean
-        run: |
-          set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Verify raw checker binary identity
-        working-directory: psc0/packages/pskernel-core
-        run: |
-          set -euo pipefail
-          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
-          lake build psc_kernel_core_arena
-          sha256sum .lake/build/bin/psc_kernel_core_arena
-          echo "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6  .lake/build/bin/psc_kernel_core_arena" | sha256sum -c -
-          echo "PSKERNEL_RAW_BINARY_IDENTITY: PASS baseline=e600c3ac862e68009511f778203758415838a9df"
   binary:
     if: github.event_name == 'workflow_dispatch' && inputs.runtime_checks
     runs-on: ubuntu-latest

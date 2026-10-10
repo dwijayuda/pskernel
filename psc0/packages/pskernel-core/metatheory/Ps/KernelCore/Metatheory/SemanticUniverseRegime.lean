@@ -172,4 +172,53 @@ theorem check_zero_succ (a : PsKernelLevel) : check .zero (.succ a) = false := r
 theorem check_param_mvar (n : PsKernelName) : check (.param n) (.mvar n) = false := by
   simp [check, compare, subset, ofLevel]
 
+/-- Equal zero conditions do not equate universe levels. This check must only
+be used for the semantic regime of binder annotations. -/
+theorem same_regime_not_same_level :
+    check (.succ .zero) (.succ (.succ .zero)) = true ∧
+      ∀ p m, evalLevel p m (.succ .zero) ≠ evalLevel p m (.succ (.succ .zero)) := by
+  exact ⟨rfl, fun _ _ => by decide⟩
+
+def isNever : Profile → Bool
+  | .never => true
+  | .allZero _ => false
+
+theorem isNever_inter (a b : Profile) :
+    isNever (inter a b) = (isNever a || isNever b) := by
+  cases a <;> cases b <;> rfl
+
+theorem isNever_ofLevel (l : PsKernelLevel) :
+    isNever (ofLevel l) = psKernelLevelIsNotZero l := by
+  induction l with
+  | zero | succ _ | param _ | mvar _ => rfl
+  | imax a b iha ihb => exact ihb
+  | max a b iha ihb =>
+      rw [ofLevel, isNever_inter, iha, ihb]
+      cases ha : psKernelLevelIsNotZero a <;> simp [psKernelLevelIsNotZero, ha]
+
+/-- The existing production test is the exact uniform positive-regime gate.
+Failure of this test does not mean zero at every valuation. -/
+theorem native_positive_spec (l : PsKernelLevel) :
+    psKernelLevelIsNotZero l = true ↔
+      ∀ p m : PsKernelName → Nat, evalLevel p m l ≠ 0 := by
+  rw [← isNever_ofLevel]
+  cases hp : ofLevel l with
+  | never =>
+      constructor
+      · intro _ p m hz
+        have impossible := (ofLevel_spec l p m).mpr hz
+        simpa only [hp, Holds] using impossible
+      · intro _; rfl
+  | allZero xs =>
+      constructor
+      · intro h; cases h
+      · intro h
+        have zero : evalLevel (fun _ => 0) (fun _ => 0) l = 0 := by
+          apply (ofLevel_spec l _ _).mp
+          rw [hp]
+          intro x _
+          cases x <;> rfl
+        exact False.elim (h _ _ zero)
+
+
 end PsKernelSemantics.UniverseRegime

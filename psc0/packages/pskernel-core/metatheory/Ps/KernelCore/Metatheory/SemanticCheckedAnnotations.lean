@@ -35,23 +35,72 @@ theorem checkRegimes_refl (a : AnnotatedExpr) : checkRegimes a a = true := by
 theorem checkedExprEq_refl (a : AnnotatedExpr) : checkedExprEq a a = true := by
   simp [checkedExprEq, checkRegimes_refl, PsKernelSharing.expr_reflexive]
 
+private theorem checkRegimes_liftN_eq (a b : AnnotatedExpr) (amount cut : Nat) :
+    checkRegimes (liftN amount a cut) (liftN amount b cut) = checkRegimes a b := by
+  induction a generalizing b cut with
+  | bvar _ | fvar _ | mvar _ | sort _ | const _ _ | lit _ =>
+      cases b <;> rfl
+  | app f a ihf iha =>
+      cases b <;> try rfl
+      simp only [liftN, checkRegimes, ihf, iha]
+  | lam n A body bi v ihA ihb | forallE n A body bi v ihA ihb =>
+      cases b <;> try rfl
+      simp only [liftN, checkRegimes, ihA, ihb]
+  | letE n A a body nd ihA iha ihb =>
+      cases b <;> try rfl
+      simp only [liftN, checkRegimes, ihA, iha, ihb]
+  | mdata md e ih | proj n i e ih =>
+      cases b <;> try rfl
+      exact ih _ _
+
 theorem checkRegimes_liftN (a b : AnnotatedExpr) (amount cut : Nat)
     (h : checkRegimes a b = true) :
     checkRegimes (liftN amount a cut) (liftN amount b cut) = true := by
-  induction a generalizing b cut <;> cases b <;> simp_all [liftN, checkRegimes]
+  rw [checkRegimes_liftN_eq]
+  exact h
 
 theorem checkRegimes_instLevels (a b : AnnotatedExpr)
     (names : List PsKernelName) (values : List PsKernelLevel)
     (h : checkRegimes a b = true) :
     checkRegimes (instLevels names values a) (instLevels names values b) = true := by
-  induction a generalizing b <;> cases b <;>
-    simp_all [instLevels, checkRegimes, UniverseRegime.check_instParams]
+  induction a generalizing b with
+  | bvar _ | fvar _ | mvar _ | sort _ | const _ _ | lit _ =>
+      cases b <;> rfl
+  | app f a ihf iha =>
+      cases b <;> try rfl
+      rename_i f' a'
+      simp only [checkRegimes, Bool.and_eq_true] at h
+      simp only [instLevels, checkRegimes, Bool.and_eq_true]
+      exact ⟨ihf f' h.1, iha a' h.2⟩
+  | lam n A body bi v ihA ihb | forallE n A body bi v ihA ihb =>
+      cases b <;> try rfl
+      rename_i n' A' body' bi' v'
+      simp only [checkRegimes, Bool.and_eq_true] at h
+      simp only [instLevels, checkRegimes, Bool.and_eq_true]
+      exact ⟨UniverseRegime.check_instParams v v' names values h.1,
+        ihA A' h.2.1, ihb body' h.2.2⟩
+  | letE n A a body nd ihA iha ihb =>
+      cases b <;> try rfl
+      rename_i n' A' a' body' nd'
+      simp only [checkRegimes, Bool.and_eq_true] at h
+      simp only [instLevels, checkRegimes, Bool.and_eq_true]
+      exact ⟨ihA A' h.1, iha a' h.2.1, ihb body' h.2.2⟩
+  | mdata md e ih | proj n i e ih =>
+      cases b <;> try rfl
+      exact ih _ h
+
+private theorem checkRegimes_close_eq (a b : AnnotatedExpr)
+    (name : PsKernelName) (cut : Nat) :
+    checkRegimes (close name a cut) (close name b cut) = checkRegimes a b := by
+  induction a generalizing b cut <;> cases b <;>
+    simp_all only [close, checkRegimes]
+  all_goals repeat' first | (solve | rfl) | split
 
 theorem checkRegimes_close (a b : AnnotatedExpr) (name : PsKernelName) (cut : Nat)
     (h : checkRegimes a b = true) :
     checkRegimes (close name a cut) (close name b cut) = true := by
-  induction a generalizing b cut <;> cases b <;> simp_all [close, checkRegimes]
-  all_goals split <;> simp_all [checkRegimes]
+  rw [checkRegimes_close_eq]
+  exact h
 
 theorem checkRegimes_rejects_conflicting_lambdas
     (n n' : PsKernelName) (A b A' b' : AnnotatedExpr)
@@ -63,6 +112,15 @@ theorem checkRegimes_rejects_conflicting_products
     (bi bi' : PsKernelBinderInfo) (v : PsKernelLevel) :
     checkRegimes (.forallE n A B bi .zero)
       (.forallE n' A' B' bi' (.succ v)) = false := rfl
+
+theorem checkedExprEq_distinguishes_sorts :
+    checkedExprEq (.sort (.succ .zero)) (.sort (.succ (.succ .zero))) = false := rfl
+
+theorem checkedExprEq_rejects_conflicting_lambdas
+    (n n' : PsKernelName) (A b A' b' : AnnotatedExpr)
+    (bi bi' : PsKernelBinderInfo) (v : PsKernelLevel) :
+    checkedExprEq (.lam n A b bi .zero) (.lam n' A' b' bi' (.succ v)) = false := by
+  simp [checkedExprEq, checkRegimes_rejects_conflicting_lambdas]
 
 end PsKernelSemantics.AnnotatedExpr
 
@@ -79,7 +137,8 @@ theorem checkRegimes_sound (M : Reading V) (a b : AnnotatedExpr)
   | app f a ihf iha =>
       cases b <;> try trivial
       rename_i f' a'
-      obtain ⟨hf, ha⟩ := Bool.and_eq_true.mp h
+      obtain ⟨hf, ha⟩ : checkRegimes f f' = true ∧ checkRegimes a a' = true := by
+        simpa only [checkRegimes, Bool.and_eq_true] using h
       exact ⟨ihf f' hf, iha a' ha⟩
   | lam n A body bi v ihA ihb | forallE n A body bi v ihA ihb =>
       cases b <;> try trivial
@@ -106,7 +165,9 @@ reference checker performed the extra guard. -/
 theorem checkedExprEq_sound (M : Reading V) (a b : AnnotatedExpr)
     (h : checkedExprEq a b = true) (ρ : Nat → V) :
     interp M ρ a = interp M ρ b := by
-  obtain ⟨raw, regimes⟩ := Bool.and_eq_true.mp h
+  obtain ⟨raw, regimes⟩ : psKernelExprEq a.erase b.erase = true ∧
+      checkRegimes a b = true := by
+    simpa only [checkedExprEq, Bool.and_eq_true] using h
   exact exprEq_preserves_interp M a b raw (checkRegimes_sound M a b regimes) ρ
 
 theorem checkedExprEq_models_equal (M : Reading V) (Γ : List AnnotatedExpr)

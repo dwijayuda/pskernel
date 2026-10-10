@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticCheckedAnnotationVisits
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotations
 import Ps.KernelCore.Metatheory.SemanticUniverseRegime
 import Ps.KernelCore.Metatheory.SemanticReferenceLambda
@@ -29,6 +30,17 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.UniverseRegime.isNever_inter,
+    ``PsKernelSemantics.UniverseRegime.isNever_ofLevel,
+    ``PsKernelSemantics.UniverseRegime.native_positive_spec,
+    ``PsKernelSemantics.Reference.beta_of_native_positive,
+    ``PsKernelSemantics.UniverseRegime.same_regime_not_same_level,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_distinguishes_sorts,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_rejects_conflicting_lambdas,
+    ``PsKernelSemantics.Reference.validateSortAnnotationWith_ok_iff,
+    ``PsKernelSemantics.Reference.validateSortAnnotationWith_zero_mem,
+    ``PsKernelSemantics.Reference.forall_trace_checked_sort,
+    ``PsKernelSemantics.Reference.forall_trace_model_checked_annotation,
     ``PsKernelSemantics.AnnotatedExpr.checkRegimes_refl,
     ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_refl,
     ``PsKernelSemantics.AnnotatedExpr.checkRegimes_liftN,

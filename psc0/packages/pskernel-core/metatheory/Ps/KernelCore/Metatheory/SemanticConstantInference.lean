@@ -13,8 +13,14 @@ namespace PsKernelSemantics
 private theorem entered_environment (context entered : PsKernelCheckerContext)
     (h : psKernelCheckerContextEnterRecDepth context = .ok entered) :
     entered.environment = context.environment := by
-  unfold psKernelCheckerContextEnterRecDepth at h
-  repeat' first | (solve | simp_all) | split at h
+  by_cases hz : Nat.beq context.maxRecDepth 0 = true
+  · simp only [psKernelCheckerContextEnterRecDepth, hz, ite_true, Except.ok.injEq] at h
+    exact (congrArg PsKernelCheckerContext.environment h).symm
+  · by_cases hl : psKernelNatGt (Nat.succ context.recDepth)
+        (Nat.mul context.maxRecDepth psKernelRecDepthFactor) = true
+    · simp [psKernelCheckerContextEnterRecDepth, hz, hl] at h
+    · simp only [psKernelCheckerContextEnterRecDepth, hz, hl, ite_false, Except.ok.injEq] at h
+      exact (congrArg PsKernelCheckerContext.environment h).symm
 
 theorem inferCore_const_result
     (fuel : Nat) (whnf : InferOperation) (defeq : DefEqOperation)

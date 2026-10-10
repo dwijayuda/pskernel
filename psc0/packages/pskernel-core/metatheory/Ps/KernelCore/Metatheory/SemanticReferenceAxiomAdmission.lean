@@ -54,10 +54,25 @@ theorem referenceAddAxiom_returns_insert
     (run : @psKernelAddAxiom psKernelReferenceCachePolicy
       fuel env value maxDepth maxNatSize = .ok next) :
     psKernelEnvironmentAdd env (.axiomInfo value) = .ok next := by
-  unfold psKernelAddAxiom at run
-  split at run
-  · cases run
-  · exact run
+  cases hUnsafe : value.isUnsafe with
+  | false =>
+      cases hHeader : psKernelCheckConstantBaseWithSession fuel
+          (psKernelMkCheckerSession env value.base.levelParams
+            PsKernelDefinitionSafety.safe maxDepth maxNatSize)
+          value.base with
+      | error err =>
+          simp [psKernelAddAxiom, hUnsafe, hHeader] at run
+      | ok checked =>
+          simpa [psKernelAddAxiom, hUnsafe, hHeader] using run
+  | true =>
+      cases hHeader : psKernelCheckConstantBaseWithSession fuel
+          (psKernelMkCheckerSession env value.base.levelParams
+            PsKernelDefinitionSafety.unsafeDef maxDepth maxNatSize)
+          value.base with
+      | error err =>
+          simp [psKernelAddAxiom, hUnsafe, hHeader] at run
+      | ok checked =>
+          simpa [psKernelAddAxiom, hUnsafe, hHeader] using run
 
 /-- An actual successful reference axiom check preserves the modeled history
 *provided* the caller independently models the axiom. Mere success of the

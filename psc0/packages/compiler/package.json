@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/compiler",
-  "version": "0.1.0-psc0.0",
+  "version": "0.1.0-psc0.1",
   "description": "ProofScript PSC0 compiler source and JavaScript runtime package",
   "type": "module",
   "private": false,

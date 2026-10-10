@@ -1,4 +1,4 @@
-import Ps.KernelCore.Core.Level
+import Ps.KernelCore.Core.Expr.Shared
 
 /-!
 Executable comparison of binder Prop/Type regimes. This is not universe

@@ -258,4 +258,70 @@ theorem checkedExprEq_instLevels {a b : AnnotatedExpr}
     checkedExprEq (instLevels names values a) (instLevels names values b) = true :=
   ((coherent_of_checkedExprEq h).instLevels names values).checked
 
+theorem Coherent.refl (a : AnnotatedExpr) : Coherent a a :=
+  coherent_of_checkedExprEq (checkedExprEq_refl a)
+
+theorem Coherent.symm {a b : AnnotatedExpr} (h : Coherent a b) : Coherent b a := by
+  induction h with
+  | bvar i => exact .bvar i
+  | fvar n => exact .fvar n
+  | mvar n => exact .mvar n
+  | sort v => exact .sort v
+  | const n vs => exact .const n vs
+  | lit v => exact .lit v
+  | app hf ha ihf iha => exact .app ihf iha
+  | lam hv hA ha ihA iha => exact .lam (UniverseRegime.check_symm hv) ihA iha
+  | forallE hv hA ha ihA iha => exact .forallE (UniverseRegime.check_symm hv) ihA iha
+  | letE hA ha he ihA iha ihe => exact .letE ihA iha ihe
+  | mdata he ih => exact .mdata ih
+  | proj he ih => exact .proj ih
+
+theorem Coherent.trans {a b c : AnnotatedExpr}
+    (hab : Coherent a b) (hbc : Coherent b c) : Coherent a c := by
+  induction hab generalizing c with
+  | bvar i => cases hbc; exact .bvar i
+  | fvar n => cases hbc; exact .fvar n
+  | mvar n => cases hbc; exact .mvar n
+  | sort v => cases hbc; exact .sort v
+  | const n vs => cases hbc; exact .const n vs
+  | lit v => cases hbc; exact .lit v
+  | app hf ha ihf iha =>
+      cases hbc with
+      | app hf' ha' => exact .app (ihf hf') (iha ha')
+  | lam hv hA ha ihA iha =>
+      cases hbc with
+      | lam hw hA' ha' => exact .lam (UniverseRegime.check_trans hv hw) (ihA hA') (iha ha')
+  | forallE hv hA ha ihA iha =>
+      cases hbc with
+      | forallE hw hA' ha' => exact .forallE (UniverseRegime.check_trans hv hw) (ihA hA') (iha ha')
+  | letE hA ha he ihA iha ihe =>
+      cases hbc with
+      | letE hA' ha' he' => exact .letE (ihA hA') (iha ha') (ihe he')
+  | mdata he ih =>
+      cases hbc with
+      | mdata he' => exact .mdata (ih he')
+  | proj he ih =>
+      cases hbc with
+      | proj he' => exact .proj (ih he')
+
+theorem checkedExprEq_symm {a b : AnnotatedExpr}
+    (h : checkedExprEq a b = true) : checkedExprEq b a = true :=
+  (coherent_of_checkedExprEq h).symm.checked
+
+/-- This is transitivity of guarded structural comparison, not of the kernel's
+recursive definitional-equality algorithm. -/
+theorem checkedExprEq_trans {a b c : AnnotatedExpr}
+    (hab : checkedExprEq a b = true) (hbc : checkedExprEq b c = true) :
+    checkedExprEq a c = true :=
+  ((coherent_of_checkedExprEq hab).trans (coherent_of_checkedExprEq hbc)).checked
+
+/-- The regime guard by itself has no shape premise and is NOT a substitution
+invariant. Coherent/checkedExprEq supply the indispensable raw-shape check. -/
+theorem regimes_alone_not_substitution_stable :
+    let a : AnnotatedExpr := .lam .anonymous (.sort .zero) (.bvar 0) .default .zero
+    let b : AnnotatedExpr := .lam .anonymous (.sort .zero) (.bvar 0) .default (.succ .zero)
+    checkRegimes (.bvar 0) b = true ∧
+      checkRegimes (inst a (.bvar 0) 0) (inst a b 0) = false := by
+  exact ⟨rfl, rfl⟩
+
 end PsKernelSemantics.AnnotatedExpr

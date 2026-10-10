@@ -8,7 +8,7 @@ import { dirname, join, resolve, extname, relative, isAbsolute } from 'node:path
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import * as compiler from '@proofscript/compiler';
-import { checkCanonicalAdmissions } from '@proofscript/pskernel-lean-wasm';
+import { checkCanonicalAdmissions } from '@proofscript/pskernel-core/check';
 
 const require = createRequire(import.meta.url);
 const meta = JSON.parse(readFileSync(fileURLToPath(new URL('../package.json', import.meta.url)), 'utf8'));
@@ -20,8 +20,8 @@ const help = [
   '       psc check <entry.ps|entry.lean> [--json]',
   '       psc build <entry.ps|entry.lean> [--out output.js|output.ts] [--json]',
   '       psc packages [--json]',
-  'Builds use pinned Lean 4.34 WASM checking and TypeScript 7.0.2.',
-  'The shipped JavaScript PSKernel Core is a separate unpromoted candidate.',
+  'Builds use the qualified generated JavaScript PSKernel Core and TypeScript 7.0.2.',
+  'Lean-WASM is an optional independent comparator; there is no automatic fallback.',
 ].join('\n');
 const packageSections = {
   BackendJs:'backend-js', BackendRust:'backend-rust', BackendTs:'backend-ts',
@@ -181,8 +181,8 @@ async function main(args) {
     const result = { name: 'proofscript', version: meta.version,
       distribution: meta.proofscript?.sourceVariant || 'unknown',
       compiler: 'PSC0 ps-0.9-r3 new-only bounded self-host subset',
-      checker: '@proofscript/pskernel-lean-wasm / Lean 4.34.0',
-      jsCore: '@proofscript/pskernel-core (unpromoted candidate)',
+      checker: '@proofscript/pskernel-core/check / JS Core (qualified-scope only)',
+      leanWasm: '@proofscript/pskernel-lean-wasm (optional comparison)',
       packageCount: 19 };
     console.log(rest.includes('--json')||command==='packages'?JSON.stringify(result,null,2):'psc '+result.version); return;
   }

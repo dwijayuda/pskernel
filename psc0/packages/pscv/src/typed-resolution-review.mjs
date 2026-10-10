@@ -23,11 +23,19 @@ export function reviewTypedResolution({normativeReference,source,transcript}) {
       Buffer.byteLength(source)>32768||Buffer.byteLength(transcript)>100000)
     fail('INPUT_BOUNDS');
   const src=norm(source),out=norm(transcript);
-  const synth=src.split('\n').filter(x=>x.startsWith('#synth ')).map(x=>x.slice(7));
-  const instances=src.split('\n').filter(x=>x.startsWith('example : '));
-  if(JSON.stringify(synth)!==JSON.stringify(typedWitnessGoals.map(x=>x.leanGoal))||
-     JSON.stringify(instances)!==JSON.stringify(typedWitnessGoals.map(x=>
-       'example : '+x.leanGoal+' := inferInstance'))) fail('SOURCE_GOALS');
+  // The witness source is a tiny fixed top-level program: importing any
+  // other module, installing an instance or setting search options would
+  // change the observed environment even if the #synth lines stayed intact.
+  // Reject all such extra commands before accepting the review transcript.
+  const statements=src.replace(/\\/-![\\s\\S]*?-\\//gu,'')
+    .split('\n').map(line=>line.replace(/--.*$/u,'').trim()).filter(Boolean);
+  const requiredStatements=[
+    'import PSCVL.Policy','set_option autoImplicit false',
+    ...typedWitnessGoals.map(x=>'#synth '+x.leanGoal),
+    ...typedWitnessGoals.map(x=>'example : '+x.leanGoal+' := inferInstance'),
+  ];
+  if(JSON.stringify(statements)!==JSON.stringify(requiredStatements))
+    fail('SOURCE_GOALS');
   if(/\berror:|\bsorryAx\b|\badmit\b/iu.test(out))fail('LEAN_FAILURE_OR_ADMISSION');
   // Lean 4.35.0-rc3 prints each #synth result as a bare line when
   // invoked in batch mode. Exact golden selections pin this observation;

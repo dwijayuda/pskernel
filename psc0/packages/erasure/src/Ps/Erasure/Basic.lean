@@ -77,17 +77,24 @@ structure PsErasureDeclarationNames where
   byCore : PsErasureNameIndex String
   byOutput : PsErasureNameIndex Bool
   count : Nat
+  runtimePrefix : String
 
-def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
+-- The selected backend namespace follows the authoritative name index through
+-- every nested scope. Ordinary lowering keeps its existing empty prefix.
+def psErasureDeclarationNameIndexWithPrefix
+    (runtimePrefix : String) (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
   match entries with
-  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0
+  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0 runtimePrefix
   | List.cons entry rest =>
-      let tail := psErasureDeclarationNameIndex rest;
+      let tail := psErasureDeclarationNameIndexWithPrefix runtimePrefix rest;
       match entry with
       | Prod.mk name value => PsErasureDeclarationNames.mk
           (psErasureIndexInsert String tail.byCore name value)
           (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)
-          (Nat.succ tail.count)
+          (Nat.succ tail.count) runtimePrefix
+
+def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
+  psErasureDeclarationNameIndexWithPrefix "" entries
 
 
 inductive PsErasedBinderKind where
@@ -169,15 +176,15 @@ def psErasureNatRecursor : PsRuntimeInductiveInfo :=
           (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil))
         List.nil))
 
-def psErasureScopeEmpty
-    (declarationNames : List (PsName × String)) :
+def psErasureScopeEmptyWithPrefix
+    (runtimePrefix : String) (declarationNames : List (PsName × String)) :
     PsErasureScope :=
   {
     localContext := psLocalEmpty
     runtimeLocals := []
     typeLocals := []
     erasedLocals := []
-    declarationNames := psErasureDeclarationNameIndex declarationNames
+    declarationNames := psErasureDeclarationNameIndexWithPrefix runtimePrefix declarationNames
     runtimeConstructors := PsErasureNameIndex.empty
     runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor
     runtimeStructures := PsErasureNameIndex.empty
@@ -185,6 +192,9 @@ def psErasureScopeEmpty
     runtimeExpressions := []
     currentDefinition := Option.none
   }
+
+def psErasureScopeEmpty (declarationNames : List (PsName × String)) : PsErasureScope :=
+  psErasureScopeEmptyWithPrefix "" declarationNames
 
 def psErasureLookupRuntimeExpression
     (entries : List (Prod Nat PsVerifiedIrExpr)) :
@@ -343,6 +353,9 @@ def psErasureSafeIdentifier
     else if Nat.beq (Char.toNat first) (Char.toNat '$') then base
     else String.Internal.append "_" base
 
+def psErasureScopedIdentifier (scope : PsErasureScope) (raw fallback : String) : String :=
+  String.Internal.append scope.declarationNames.runtimePrefix (psErasureSafeIdentifier raw fallback)
+
 def psErasureLocalNameUsed (scope : PsErasureScope) (candidate : String) : Bool :=
   let localUses : (Nat × String) -> Bool :=
     fun (entry : Nat × String) =>
@@ -371,10 +384,12 @@ def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Na
     if psStringEq sanitized "arguments" then "_arguments"
     else if psStringEq sanitized "eval" then "_eval"
     else sanitized;
+  let scopedBase := String.Internal.append scope.declarationNames.runtimePrefix base;
+  let scopedFallback := String.Internal.append scope.declarationNames.runtimePrefix fallback;
   let fuel := Nat.succ (Nat.add (psListLength scope.runtimeLocals) scope.declarationNames.count);
-  if psStringEq base "_" then psErasureLocalNameWithFuel scope fallback fuel id
-  else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id
-  else base
+  if psStringEq base "_" then psErasureLocalNameWithFuel scope scopedFallback fuel id
+  else if psErasureLocalNameUsed scope scopedBase then psErasureLocalNameWithFuel scope scopedBase fuel id
+  else scopedBase
 
 structure PsErasureAppView where
   head : PsExpr
@@ -545,7 +560,7 @@ def psEraseRuntimeTypeWithFuelWorker
                       name with
                   | Option.some known => known
                   | Option.none =>
-                      psErasureSafeIdentifier
+                      psErasureScopedIdentifier scope
                         (psNameToString name)
                         "Type";
                 Except.ok
@@ -560,7 +575,7 @@ def psEraseRuntimeTypeWithFuelWorker
                       name with
                   | Option.some known => known
                   | Option.none =>
-                      psErasureSafeIdentifier
+                      psErasureScopedIdentifier scope
                         (psNameToString name)
                         "Type";
                 match psErasureMapRuntimeTypes (smaller scope) view.args with
@@ -585,7 +600,7 @@ def psEraseRuntimeTypeWithFuelWorker
                     domain
                     binder;
                 let runtimeName :=
-                  psErasureSafeIdentifier
+                  psErasureScopedIdentifier scope
                     (psNameToString name)
                     "_arg";
                 let nextScope : PsErasureScope := {

@@ -494,7 +494,9 @@ def psCompilerCheckedTypeScriptProjectFromPrepared
   match psCompilerEnvironmentFromPrepared project.prepared with
   | Except.error error => Except.error (PsCompilerCheckedTypeScriptProjectError.compiler error)
   | Except.ok environment =>
-      match psEraseCoreModuleWithRuntimePreludeAndNames
+      -- Source bindings and property keys occupy a namespace disjoint from
+      -- backend helpers and host intrinsics, including private dependencies.
+      match psEraseCoreModuleWithRuntimePrefix "__ps$source$"
           environment psSelfHostRuntimePreludeDeclarationsWithProd project.prepared.declarations with
       | Except.error error =>
           Except.error (PsCompilerCheckedTypeScriptProjectError.compiler (PsCompilerError.erasure error))

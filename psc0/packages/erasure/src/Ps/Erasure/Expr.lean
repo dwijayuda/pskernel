@@ -149,12 +149,16 @@ def psEraseFinishApplicationWithFuelWorker
                           name
                           domain
                           binder;
+                      let rawParameterName :=
+                        String.Internal.append
+                          (String.Internal.append (psNameToString name) "$")
+                          (psNatToString pushed.id);
+                      let fallbackParameterName := String.Internal.append "arg$" (psNatToString pushed.id);
                       let parameterName :=
-                        psErasureSafeIdentifier
-                          (String.Internal.append
-                            (String.Internal.append (psNameToString name) "$")
-                            (psNatToString pushed.id))
-                          (String.Internal.append "arg$" (psNatToString pushed.id));
+                        if psStringEq scope.declarationNames.runtimePrefix "" then
+                          psErasureSafeIdentifier rawParameterName fallbackParameterName
+                        else
+                          psErasureLocalName scope rawParameterName fallbackParameterName pushed.id;
                       let nextScope : PsErasureScope := {
                         localContext := pushed.context
                         runtimeLocals :=

@@ -36,6 +36,7 @@ jobs:
       # The safe theorem's execution evidence is Type-valued with a Nonempty theorem witness.
       # Prove both checked and infer-only reference-session fvar readings against real stored locals.
       # Audit one exact shared session-grade-to-core execution trace and atomic model cases.
+      # Lift real forall, checked app and checked lambda recursion traces into public sessions.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

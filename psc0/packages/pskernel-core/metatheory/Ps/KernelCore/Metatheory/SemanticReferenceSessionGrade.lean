@@ -1,5 +1,7 @@
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionFVar
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionConst
+import Ps.KernelCore.Metatheory.SemanticReferenceApplication
+import Ps.KernelCore.Metatheory.SemanticReferenceLambda
 
 /-!
 A shared, proof-only execution interface for both PUBLIC reference-session
@@ -226,5 +228,96 @@ theorem referenceSessionGrade_const_models (M : Reading V)
       (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy fuel))
     (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy fuel)
     session.context session.state returnedState name levels result io model coreRun
+
+
+/-- Lift the executed dependent-product trace into EITHER public session grade.
+The selected domain/body inference and sort checks retain their actual
+states; no annotation or semantic soundness has been postulated. -/
+theorem referenceSessionGrade_forall_trace
+    (io : Bool) (remaining : Nat)
+    (session next : PsKernelCheckerSession)
+    (name : PsKernelName) (domain body : PsKernelExpr)
+    (bi : PsKernelBinderInfo) (result : PsKernelExpr)
+    (run : referenceSessionGrade io (remaining + 1) session
+      (.forallE name domain body bi) = .ok (result, next)) :
+    ∃ returnedState : PsKernelCheckerState,
+      Nonempty (ForallTrace remaining
+        (@psKernelWhnfWithRecursorFuel psKernelReferenceCachePolicy (remaining + 1)
+          (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1)))
+        (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1))
+        session.context session.state name domain body bi io result returnedState) ∧
+      next = PsKernelCheckerSession.mk session.context returnedState := by
+  obtain ⟨returnedState, coreRun, nextEq⟩ :=
+    referenceSessionGrade_core_trace io (remaining + 1)
+      session next (.forallE name domain body bi) result run
+  exact ⟨returnedState,
+    inferCore_forall_trace remaining
+      (@psKernelWhnfWithRecursorFuel psKernelReferenceCachePolicy (remaining + 1)
+        (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1)))
+      (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1))
+      session.context session.state returnedState
+      name domain body bi result io coreRun,
+    nextEq⟩
+
+/-- A successful FULLY CHECKED public application selects the exact recursive
+function inference, exposed product view, argument inference, and one of the
+executed equality comparison branches. Inference-only application is not
+silently awarded the checked argument-comparison trace. -/
+theorem referenceSessionCheck_app_trace
+    (remaining : Nat) (session next : PsKernelCheckerSession)
+    (fn arg result : PsKernelExpr)
+    (run : @psKernelSessionCheck psKernelReferenceCachePolicy
+      (remaining + 1) session (.app fn arg) = .ok (result, next)) :
+    ∃ returnedState : PsKernelCheckerState,
+      Nonempty (ApplicationTrace remaining
+        (@psKernelWhnfWithRecursorFuel psKernelReferenceCachePolicy (remaining + 1)
+          (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1)))
+        (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1))
+        session.context session.state fn arg result returnedState) ∧
+      next = PsKernelCheckerSession.mk session.context returnedState := by
+  have graded : referenceSessionGrade false (remaining + 1) session
+      (.app fn arg) = .ok (result, next) := by
+    simpa [referenceSessionGrade] using run
+  obtain ⟨returnedState, coreRun, nextEq⟩ :=
+    referenceSessionGrade_core_trace false (remaining + 1)
+      session next (.app fn arg) result graded
+  exact ⟨returnedState,
+    inferCore_app_trace remaining
+      (@psKernelWhnfWithRecursorFuel psKernelReferenceCachePolicy (remaining + 1)
+        (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1)))
+      (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1))
+      session.context session.state returnedState fn arg result coreRun,
+    nextEq⟩
+
+/-- A successful FULLY CHECKED public lambda retains the exact visited
+domain sort, body inference and body-type sort exposure, including the
+actual allocator and scope exit. Infer-only lambda remains unchecked. -/
+theorem referenceSessionCheck_lambda_trace
+    (remaining : Nat) (session next : PsKernelCheckerSession)
+    (name : PsKernelName) (domain body : PsKernelExpr)
+    (bi : PsKernelBinderInfo) (result : PsKernelExpr)
+    (run : @psKernelSessionCheck psKernelReferenceCachePolicy
+      (remaining + 1) session (.lam name domain body bi) = .ok (result, next)) :
+    ∃ returnedState : PsKernelCheckerState,
+      Nonempty (LambdaTrace remaining
+        (@psKernelWhnfWithRecursorFuel psKernelReferenceCachePolicy (remaining + 1)
+          (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1)))
+        (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1))
+        session.context session.state name domain body bi result returnedState) ∧
+      next = PsKernelCheckerSession.mk session.context returnedState := by
+  have graded : referenceSessionGrade false (remaining + 1) session
+      (.lam name domain body bi) = .ok (result, next) := by
+    simpa [referenceSessionGrade] using run
+  obtain ⟨returnedState, coreRun, nextEq⟩ :=
+    referenceSessionGrade_core_trace false (remaining + 1)
+      session next (.lam name domain body bi) result graded
+  exact ⟨returnedState,
+    inferCore_lam_trace remaining
+      (@psKernelWhnfWithRecursorFuel psKernelReferenceCachePolicy (remaining + 1)
+        (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1)))
+      (@psKernelIsDefEqWithFuel psKernelReferenceCachePolicy (remaining + 1))
+      session.context session.state returnedState
+      name domain body bi result coreRun,
+    nextEq⟩
 
 end PsKernelSemantics.Reference

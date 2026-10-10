@@ -182,6 +182,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticEnvironmentModel,
     `Ps.KernelCore.Metatheory.SemanticEnvironmentConsistency,
     `Ps.KernelCore.Metatheory.SemanticEnvironmentAdmission,
+    `Ps.KernelCore.Metatheory.SemanticReferenceAxiomAdmission,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

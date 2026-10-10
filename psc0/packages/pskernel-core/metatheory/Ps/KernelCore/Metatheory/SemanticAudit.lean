@@ -34,6 +34,7 @@ import Ps.KernelCore.Metatheory.SemanticConstantInference
 import Ps.KernelCore.Metatheory.SemanticEnvironmentModel
 import Ps.KernelCore.Metatheory.SemanticEnvironmentConsistency
 import Ps.KernelCore.Metatheory.SemanticEnvironmentAdmission
+import Ps.KernelCore.Metatheory.SemanticReferenceAxiomAdmission
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -50,6 +51,11 @@ run_cmd do
     ``PsKernelSemantics.SetModel.addUnchecked_lookupCanonical,
     ``PsKernelSemantics.SetModel.addUnchecked_model,
     ``PsKernelSemantics.SetModel.add_success_is_unchecked,
+    ``PsKernelSemantics.SetModel.environmentModel_withNativeEvaluator,
+    ``PsKernelSemantics.SetModel.referenceAddAxiom_returns_insert,
+    ``PsKernelSemantics.SetModel.referenceAddAxiom_preserves_model,
+    ``PsKernelSemantics.SetModel.referenceDispatchAxiom_returns_add,
+    ``PsKernelSemantics.SetModel.referenceDispatchAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.add_success_preserves_model,
     ``PsKernelSemantics.SetModel.no_stored_constant_of_literalFalse,
     ``PsKernelSemantics.SetModel.environmentEmpty_find,

@@ -61,6 +61,8 @@ run_cmd do
     ``PsKernelSemantics.admittedInput_namesBelow_zero,
     ``PsKernelSemantics.publicSession_initial_frame,
     ``PsKernelSemantics.publicKernelSession_checker_initial_frame,
+    ``PsKernelSemantics.emptyKernelSession_environment,
+    ``PsKernelSemantics.emptyKernelSession_checker_initial_frame,
     ``PsKernelSemantics.admittedInput_initial_frame,
     ``PsKernelSemantics.admittedLambda_firstBinderFrame,
     ``PsKernelSemantics.admittedForall_firstBinderFrame,

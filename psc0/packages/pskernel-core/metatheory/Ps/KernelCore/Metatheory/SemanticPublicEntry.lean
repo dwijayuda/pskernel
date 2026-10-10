@@ -190,4 +190,36 @@ theorem publicKernelSession_checker_initial_frame
     (publicSession_initial_frame (psKernelKernelSessionEnvironment session)
       levelParams safety session.resources.maxRecDepth session.resources.maxNatSize)
 
+
+/-- The real public empty-kernel-session constructor returns the exact
+empty semantic environment, regardless of the accepted compatible provider.
+This is not yet a set-theoretic model of the empty environment: that
+initialization/modeled-basis theorem belongs to the later admission fold. -/
+theorem emptyKernelSession_environment (resources : PsKernelResourcePolicy)
+    (provider : PsKernelProviderCapability) (session : PsKernelKernelSession)
+    (accepted : psKernelKernelSessionEmpty resources provider = .ok session) :
+    session.environment = psKernelEnvironmentEmpty := by
+  unfold psKernelKernelSessionEmpty at accepted
+  split at accepted
+  · cases accepted
+    rfl
+  · cases accepted
+
+/-- Connect the actual successful public constructor to the actual checker
+session's first syntactic frame, with no premise that the externally chosen
+provider or environment has magically been proved semantically sound. -/
+theorem emptyKernelSession_checker_initial_frame
+    (resources : PsKernelResourcePolicy)
+    (provider : PsKernelProviderCapability) (session : PsKernelKernelSession)
+    (params : List PsKernelName) (safety : PsKernelDefinitionSafety)
+    (accepted : psKernelKernelSessionEmpty resources provider = .ok session) :
+    session.environment = psKernelEnvironmentEmpty ∧
+    (let checker := psKernelKernelSessionChecker session params safety
+     checker.context.localContext = eraseLocalContext annotatedLocalContextEmpty ∧
+     checker.state.nextFresh = 0 ∧
+     LocalFrame checker.state.nextFresh annotatedLocalContextEmpty ∧
+     BoundFrame checker.state.nextFresh []) := by
+  exact ⟨emptyKernelSession_environment resources provider session accepted,
+    publicKernelSession_checker_initial_frame session params safety⟩
+
 end PsKernelSemantics

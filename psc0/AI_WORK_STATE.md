@@ -1,3 +1,13 @@
+# PSC0 PSCV P1-E — typed instance witnesses qualified
+
+**Qualified P1-E source:** `07daca7e83950a5ad242369dd2f131aa7c249d86`. [Run 38055826619](https://github.com/dwijayuda/pskernel/actions/runs/38055826619), attempt 1: all **four jobs successful** (Linux Node22, Linux Node26, Windows Node26 strict tests, plus actual Lean4.35.0-rc3 witness elaboration). Typed observation digest `0a5cdad32ace1492158fab973a9da60d9b430ff529c71a9804e415e80efea712`. [Observed Lean transcript and non-authoritative review](https://github.com/dwijayuda/pskernel/actions/runs/38055826619/artifacts/11671591053); artifact ZIP SHA256 `12d4d529be5c4783c119f0f62d485ad39e730872606c97cbb82cd90090b0a10a`.
+
+Actual imported selections: `instHAdd`, `instHMul`, `instHSub`, `instHAdd`, `instAppendString`, `instBEqOfDecidableEq`, `instBEqOfDecidableEq`. Generic selection is not a proof of the underlying concrete `Add Nat`, `Mul Nat`, or `DecidableEq Nat` dictionary mapping to a required PSCV `std.*` ID. **3** direct Boolean IDs remain source-located; **191** required IDs remain unresolved. No Standard freeze, P2 certificate, or verified executable.
+
+Branch `psc0/platform-pscv-p1e-typed-resolution-v1`, [draft PR #100](https://github.com/dwijayuda/pskernel/pull/100), stacked on P1-D PR99. No compiler, release, selected kernel, self-host seed or certification gate changes. The full P1 closure and P2–P5 work remain outstanding. For sound gating see [P1_TO_P5_SOUND_GATES.md](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md).
+
+---
+
 # PSC0 PSCV P1-D — imported instance result-class review index qualified
 
 **Qualified source:** `80570393844e08876c3356c553845b6f89846b88`. [GitHub Actions run 38053043569](https://github.com/dwijayuda/pskernel/actions/runs/38053043569), attempt 1, all six jobs passed: Linux Node22, Linux Node26, Windows Node26 each **29/29** tests (87 unit tests), actual Lean4.35.0-rc3 imported environment/class-head probe, 40-root source provenance and positive/negative Lean contract preflight. Branch `psc0/platform-pscv-p1d-classes-v1`, [draft PR99](https://github.com/dwijayuda/pskernel/pull/99) stacked on qualified P1-C PR98. No npm publication/merges/core/seed/compiler changes.

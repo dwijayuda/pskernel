@@ -1,3 +1,13 @@
+# PSC0 PSCV P1-E typed Lean resolution observation — qualified
+
+**Qualified P1-E source:** `07daca7e83950a5ad242369dd2f131aa7c249d86`. [Run 38055826619](https://github.com/dwijayuda/pskernel/actions/runs/38055826619), attempt 1: all **four jobs successful** (Linux Node22, Linux Node26, Windows Node26 strict tests, plus actual Lean4.35.0-rc3 witness elaboration). Typed observation digest `0a5cdad32ace1492158fab973a9da60d9b430ff529c71a9804e415e80efea712`. [Observed Lean transcript and non-authoritative review](https://github.com/dwijayuda/pskernel/actions/runs/38055826619/artifacts/11671591053); artifact ZIP SHA256 `12d4d529be5c4783c119f0f62d485ad39e730872606c97cbb82cd90090b0a10a`.
+
+Actual imported selections: `instHAdd`, `instHMul`, `instHSub`, `instHAdd`, `instAppendString`, `instBEqOfDecidableEq`, `instBEqOfDecidableEq`. Generic selection is not a proof of the underlying concrete `Add Nat`, `Mul Nat`, or `DecidableEq Nat` dictionary mapping to a required PSCV `std.*` ID. **3** direct Boolean IDs remain source-located; **191** required IDs remain unresolved. No Standard freeze, P2 certificate, or verified executable.
+
+P1-E is a non-authoritative addendum in the experimental PSCV lane, not a new npm product or changed checked build. Next steps require transitive concrete instance dictionary selection, source locators, normative closed registry semantics and the remaining 191 mappings. P2–P5 may proceed only under the [sound gates](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md).
+
+---
+
 # PSC0 platform implementation
 
 ## PSC0 PSCV P1-D — imported instance result-class review index qualified

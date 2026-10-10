@@ -38,7 +38,7 @@ These decisions **supersede** conflicting proof-preservation language in `PSKERN
 
 ## 2. Reference algorithms and design options
 
-**External, current research** (see [original source analysis](../psc0/packages/pskernel-core/PSKERNEL_FAST_ARCHITECTURE.md) on the earlier research branch; V3 treats all numbers as date-scoped):
+**External, current research** (see [original source analysis](https://github.com/dwijayuda/pskernel/blob/research/pskernel-fast-architecture-20261011/psc0/packages/pskernel-core/PSKERNEL_FAST_ARCHITECTURE.md) on the earlier research branch; V3 treats all numbers as date-scoped):
 
 | Candidate / source | Valuable idea | Limit/independence |
 |---|---|---|

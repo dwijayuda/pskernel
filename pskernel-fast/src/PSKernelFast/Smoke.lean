@@ -8,7 +8,7 @@ private def assertIO (condition : Bool) (description : String) : IO Unit :=
   else
     throw <| IO.userError description
 
-def main : IO Unit := do
+def smoke : IO Unit := do
   let t : RawExpr := .lam (.sort 0) (.app (.bvar 0) (.bvar 0))
   match encodeClosed 32 t with
   | .error e => throw <| IO.userError s!"closed encode failed: {repr e}"
@@ -56,3 +56,5 @@ def main : IO Unit := do
 
   IO.println "PSKernel-Fast V3 term-store prototype: focused safety smoke passed"
 end PSKernelFast
+
+def main : IO Unit := PSKernelFast.smoke

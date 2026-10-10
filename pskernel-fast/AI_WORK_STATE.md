@@ -33,3 +33,7 @@ The first G1 term-store experiment consists of:
 ## Operating rules
 
 GitHub and cloud CI only, no local checkout or Desktop Commander. Re-read live HEAD before write; preserve branch history and concurrent work; no force update. Use small fast tests for ordinary changes and budgeted broad Init/Std/Mathlib only at stated release gates. Do not claim green CI, self-host, Lean-compatibility or consistency without matching evidence.
+
+## Cloud CI evidence, October 11, 2026
+
+Initial source commit `0a4f0ce48aa421be8df92fdc09ed6f6c204f80d5`: [run 38093827666](https://github.com/dwijayuda/pskernel/actions/runs/38093827666), job 114335503566 **failed during lean-action configuration** because this new package had no `lake-manifest.json` and the workflow used `auto-config: false`. **No source compilation, smoke or kernel proof checking ran.** The next workflow sets `auto-config: true` so Lake may generate the manifest. It also exposes a top-level `main` for the executable. The corrected revision must be validated by its own completed workflow; do not convert the first failure into a pass.

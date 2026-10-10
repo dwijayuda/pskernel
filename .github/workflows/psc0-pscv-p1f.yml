@@ -1,0 +1,97 @@
+name: PSC0 PSCV P1F concrete dictionary witnesses
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1f-concrete-dictionaries-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Negative and positive concrete-witness data checks
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/concrete-dictionary-review.mjs
+          node --check packages/pscv/scripts/generate-concrete-dictionary-review.mjs
+          node --test packages/pscv/test/concrete-dictionary-review.test.mjs
+      - name: Preserve compiler, Core, source seed and production certificate boundary
+        shell: bash
+        run: |
+          git diff --exit-code 852442f03e5833910e378acf450c97738ba874a3 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+  lean-dictionaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Real pinned-Lean concrete class dictionary synthesis
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1f-dictionaries
+          lake env lean ConcreteDictionaryWitness.lean > ../psc0/dist/pscv-p1f-dictionaries/transcript.txt 2>&1
+          echo '--- Observed concrete dictionary selections: not verified mappings ---'
+          sed -n '1,30p' ../psc0/dist/pscv-p1f-dictionaries/transcript.txt
+          node ../psc0/packages/pscv/scripts/generate-concrete-dictionary-review.mjs \
+            ../psc0/dist/pscv-p1f-dictionaries/transcript.txt \
+            ../psc0/dist/pscv-p1f-dictionaries/review.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const d=JSON.parse(await readFile('../psc0/dist/pscv-p1f-dictionaries/review.json','utf8'));
+          assert.equal(d.count,7);
+          assert.equal(d.unresolvedStandardIds,191);
+          assert.equal(d.exactGenericDependencyGraphQualified,false);
+          assert.equal(d.completeStandardManifest,false);
+          assert.equal(d.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1F_CONCRETE_DICTIONARY_OBSERVATION_ONLY: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1f-concrete-${{ github.sha }}
+          path: psc0/dist/pscv-p1f-dictionaries
+          retention-days: 30
+          if-no-files-found: error

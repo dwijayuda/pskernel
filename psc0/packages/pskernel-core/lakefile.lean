@@ -199,6 +199,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticFreshAdmission,
     `Ps.KernelCore.Metatheory.SemanticGrowingAxiomTrace,
     `Ps.KernelCore.Metatheory.SemanticHereditaryEnvironment,
+    `Ps.KernelCore.Metatheory.SemanticHereditaryExtension,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

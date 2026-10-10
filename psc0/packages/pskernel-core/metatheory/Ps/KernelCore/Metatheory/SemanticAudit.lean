@@ -50,6 +50,7 @@ import Ps.KernelCore.Metatheory.SemanticReadingExtension
 import Ps.KernelCore.Metatheory.SemanticFreshAdmission
 import Ps.KernelCore.Metatheory.SemanticGrowingAxiomTrace
 import Ps.KernelCore.Metatheory.SemanticHereditaryEnvironment
+import Ps.KernelCore.Metatheory.SemanticHereditaryExtension
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -92,6 +93,10 @@ run_cmd do
     ``PsKernelSemantics.SetModel.hereditaryEnvironmentEmpty,
     ``PsKernelSemantics.SetModel.publicEmptySession_has_hereditary_model,
     ``PsKernelSemantics.Reference.referenceSessionGrade_const_checked_reading,
+    ``PsKernelSemantics.SetModel.annotationValid_extendConstant,
+    ``PsKernelSemantics.SetModel.functionValid_extendConstant,
+    ``PsKernelSemantics.SetModel.hereditaryStored_extendConstant,
+    ``PsKernelSemantics.SetModel.hereditaryEnvironment_extendConstant,
     ``PsKernelSemantics.SetModel.referenceAdmitAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.ModeledReferenceAxiomTrace.preserves,
     ``PsKernelSemantics.SetModel.modeledPublicAxiomTrace_no_literalFalse,

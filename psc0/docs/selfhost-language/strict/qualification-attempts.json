@@ -2277,6 +2277,236 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 15,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runId": 38015134511,
+      "runAttempt": 1,
+      "workflowId": 378853677,
+      "compilerJobId": 114103608774,
+      "providerJobId": 114120597914,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38015134511",
+      "status": "cancelled",
+      "execution": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceRootTree": "600c031e9235d20baa8bf074aba8c550509f50a4",
+        "psc0Tree": "54b05a1c135ad5c7aff0902658465159a223757c",
+        "workflowId": 378853677,
+        "workflowPath": ".github/workflows/psc0-sh1.yml",
+        "runId": 38015134511,
+        "runAttempt": 1,
+        "runConclusion": "cancelled",
+        "compilerJobId": 114103608774,
+        "compilerJobStartedAt": "2026-10-10T01:57:08Z",
+        "compilerJobCompletedAt": "2026-10-10T03:27:29Z",
+        "compilerJobConclusion": "cancelled",
+        "providerJobId": 114120597914,
+        "providerJobConclusion": "skipped"
+      },
+      "termination": {
+        "step": 27,
+        "stepName": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+        "stepStartedAt": "2026-10-10T02:23:55Z",
+        "stepCompletedAt": "2026-10-10T03:27:21Z",
+        "apiConclusion": "cancelled",
+        "exactLogLine": "2026-10-10T03:27:21.0690769Z ##[error]The operation was canceled.",
+        "logLine": 2335,
+        "explicitCompilerAssertionAtTermination": false,
+        "explicitOutOfMemoryMarkerAtTermination": false,
+        "causeScope": "The returned log explicitly records cancellation. A workflow deadline or external cancellation attribution requires separate workflow/API evidence; no cause is inferred from elapsed time alone.",
+        "compilerElapsedMs": 5421000
+      },
+      "completed": {
+        "N1": "passed-complete-native-development-gate",
+        "earlyRNativeReferenceComparison": "passed-exact-complete87-report-equality",
+        "C1": "passed-full-candidate-step-including-migration-and-iteration",
+        "C2": "generation-and-all-configured-conformance-markers-complete"
+      },
+      "C3": {
+        "status": "incomplete",
+        "lastPhase": "atomic-source-wrapper-start",
+        "lastPhaseAt": "2026-10-10T02:42:13.3037499Z",
+        "resourceCheckpoints": 4,
+        "generationReceiptProduced": false
+      },
+      "fixedPoint": "not-produced",
+      "strictEvidenceBinder": "not-run",
+      "providerStatus": "skipped",
+      "sourceAndRecipe": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "moduleCount": 64,
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        }
+      },
+      "generatedProducts": {
+        "N1": {
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+        },
+        "C1": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52",
+          "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+          "javascriptSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+        },
+        "C2": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+        },
+        "C3": null
+      },
+      "timings": {
+        "N1": {
+          "total": 322716.780849
+        },
+        "C1": {
+          "loadAndPrepare": 657332.101536,
+          "admissions": 111020.54231699998,
+          "canonicalSurface": 47339.713931999984,
+          "emit": 358131.0270860001,
+          "tscAndWrite": 3091.758210999891,
+          "total": 1176915.145596
+        },
+        "C2": {
+          "loadAndPrepare": 1005408.06429,
+          "admissions": 0.20195800007786602,
+          "canonicalSurface": 45793.650664999965,
+          "emit": 939.952045999933,
+          "tscAndWrite": 2789.8532180001494,
+          "total": 1054931.723118
+        },
+        "C3CompletedDuration": null
+      },
+      "nativeSourceOrigins": {
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1708,
+        "coreDeclarationCount": 2571,
+        "normalizationCount": 50,
+        "independentlyCountedNonNullNormalizations": 50
+      },
+      "evidence": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/qualification-cancellation.json",
+        "blob": "7b47d247c5e7712c3823511924eced7c126fe452",
+        "sha256": "6e8f4bc35d7729d8d3645e99c2554b44857fe28534c880fa13184b4dc2223720",
+        "bytes": 27767
+      },
+      "log": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+        "blob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+        "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+        "bytes": 1917726
+      },
+      "runMetadata": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/run-metadata.json",
+        "blob": "e94bbd61407e7f30211c3350726a6014a2e619b8",
+        "sha256": "5c7bb0997ad6219eb767c97e952e1463aee27596c77642986046d77de78e906a",
+        "bytes": 28490
+      },
+      "markerIndex": {
+        "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/markers-index.json",
+        "blob": "495516acab02a1d636109b9af60fe330c9b15acf",
+        "sha256": "356634e7acefb07d8ecfc942f3738f9fe40fa9d2408305980335488838ac0b12",
+        "bytes": 8528
+      },
+      "markerChunks": [
+        {
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/markers-01.json",
+          "blob": "f46d7be3119fa4da530cff06a56a1f6b46b49b6e",
+          "sha256": "c55fb773867b23cebe9e9bfcc37a73640cfe1fa56b8fa136cf15185628b834ea",
+          "bytes": 1007894
+        },
+        {
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/markers-02.json",
+          "blob": "74163d5834c4ddabadb39783a164509da423a189",
+          "sha256": "d8af9160bdc7da6c311a4223ca5a5af725056524596199760c2971591752a4b8",
+          "bytes": 963169
+        }
+      ],
+      "completeReceipts": [
+        {
+          "generation": "N1",
+          "sourceArtifactPath": "development/N1/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/native-candidate-receipt.json",
+          "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+          "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+          "bytes": 15827,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        },
+        {
+          "generation": "C1",
+          "sourceArtifactPath": "C1/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c1-receipt.json",
+          "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+          "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+          "bytes": 169531,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        },
+        {
+          "generation": "C2",
+          "sourceArtifactPath": "C2/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c2-receipt.json",
+          "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+          "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+          "bytes": 166700,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11658430459,
+          "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "bytes": 5147944,
+          "digest": "sha256:6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+          "runId": 38015134511,
+          "sourceCommit": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "archiveInspectedByThisRecord": false
+        }
+      ],
+      "scopeOfCancellation": "The actual run conclusion is cancelled. The original workflow allowed90 minutes and the job was cancelled during C3's synchronous atomic compilation. Completed N1/C1/C2 results are retained; no assertion or out-of-memory failure was logged at termination. Partial C3 boundary observations do not establish progress within the atomic call or a remaining-time estimate.",
+      "supportedContinuation": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "command": [
+          "node",
+          "--max-old-space-size=8192",
+          "scripts/sh1-qualify.mjs",
+          "fixed-point",
+          "--out",
+          "dist/sh1"
+        ],
+        "reusedGenerations": [
+          "N1",
+          "C1"
+        ],
+        "rebuiltGenerations": [
+          "C2",
+          "C3"
+        ],
+        "requiresAuthenticatedFullArchive": true,
+        "sourceAndRecipeUnchanged": true,
+        "qualifierEdited": false,
+        "nativeExecutableRequired": false,
+        "exactOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "jobTimeoutMinutes": 300,
+        "timeoutIsNotCompletionEstimate": true,
+        "providerRequired": true,
+        "oldRunRemainsCancelled": true
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -2284,37 +2514,81 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
-    "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
-    "sourceRefToRecordFromEnclosingCommit": true,
+    "status": "supported-exact-source-fixed-point-continuation-requested-after-c3-cancellation",
+    "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "sourceRefToRecordFromEnclosingCommit": false,
+    "orchestrationSourceRefToRecordFromEnclosingCommit": true,
+    "previousCancelledRunId": 38015134511,
+    "previousCompilerJobId": 114103608774,
+    "workflow": ".github/workflows/psc0-sh1-continue.yml",
+    "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+    "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
     "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
     "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
     "expectedRecipeFileCount": 48,
-    "expectedRecipeIsPredictionUntilExecuted": true,
-    "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
-    "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
-    "workflow": ".github/workflows/psc0-sh1.yml",
-    "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
-    "workflowId": 378853677,
-    "fullQualificationRequested": true,
-    "commitMarker": "[sh1-qualify]",
+    "recipeObservedInOriginalN1C1C2": true,
+    "expectedRecipeIsPredictionUntilExecuted": false,
+    "reusedGenerations": [
+      "N1",
+      "C1"
+    ],
     "requiredPhases": [
-      "N1 native candidate and conformance",
-      "data-only authenticated R/N1 worker comparison",
-      "selected-R to C1 and all existing candidate gates",
-      "C1 to C2",
-      "C2 to C3",
-      "four-product fixed point and native parity",
+      "authenticate original cancelled run/jobs and complete archive",
+      "verify all imported files and48recipe sources",
+      "existing fixed-point command rebuildsC2 thenC3",
+      "all original C2/C3 conformance and four-product equality",
       "exact strict evidence binder",
+      "preserved-input and complete-file inventory",
       "independent selected-provider acceptance"
     ],
+    "jobTimeoutMinutes": 300,
+    "providerTimeoutMinutes": 45,
+    "actualRunId": null,
+    "actualCompilerJobId": null,
+    "actualProviderJobId": null,
     "repeatColdRecovery": false,
-    "repeatRetainedN1Diagnostic": false,
+    "repeatNativeCandidate": false,
+    "repeatSelectedSeedCandidate": false,
     "productionSourceChanged": false,
     "fixtureChanged": false,
-    "hostConformanceChanged": true,
-    "addedCompilerExecutions": 0,
-    "priorReceiptsReusedAsNewQualification": false,
+    "hostRecipeChanged": false,
+    "qualificationChecksBypassed": false,
+    "previousRequest": {
+      "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
+      "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "sourceRefToRecordFromEnclosingCommit": true,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "expectedRecipeFileCount": 48,
+      "expectedRecipeIsPredictionUntilExecuted": true,
+      "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+      "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+      "workflow": ".github/workflows/psc0-sh1.yml",
+      "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+      "workflowId": 378853677,
+      "fullQualificationRequested": true,
+      "commitMarker": "[sh1-qualify]",
+      "requiredPhases": [
+        "N1 native candidate and conformance",
+        "data-only authenticated R/N1 worker comparison",
+        "selected-R to C1 and all existing candidate gates",
+        "C1 to C2",
+        "C2 to C3",
+        "four-product fixed point and native parity",
+        "exact strict evidence binder",
+        "independent selected-provider acceptance"
+      ],
+      "repeatColdRecovery": false,
+      "repeatRetainedN1Diagnostic": false,
+      "productionSourceChanged": false,
+      "fixtureChanged": false,
+      "hostConformanceChanged": true,
+      "addedCompilerExecutions": 0,
+      "priorReceiptsReusedAsNewQualification": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
     "strictSh1Qualified": false,
     "semanticContractQualified": false,
     "providerChecked": false
@@ -2356,7 +2630,7 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T01:55:27.602Z",
+  "updatedAtUtc": "2026-10-10T03:40:11Z",
   "completedDiagnostics": [
     {
       "status": "completed-localization-only",

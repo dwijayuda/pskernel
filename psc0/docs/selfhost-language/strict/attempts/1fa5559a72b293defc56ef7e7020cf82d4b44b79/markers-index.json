@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "kind": "complete-compiler-log-marker-index",
+  "repository": "dwijayuda/pskernel",
+  "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "workflowRun": 38015134511,
+  "runAttempt": 1,
+  "jobId": 114103608774,
+  "completeMarkerCount": 145,
+  "markerCounts": {
+    "PSC0_SH1_FULL_QUALIFICATION": 1,
+    "PSC0_SH1_RESOURCE_POLICY": 3,
+    "PSC0_TSC": 19,
+    "PSC0_TYPESCRIPT_VERSION": 19,
+    "PSC0_TYPESCRIPT_PROFILE": 1,
+    "PSC0_SH1_WORKER_HARNESS_REFERENCE": 1,
+    "PSC0_SH1_STRICT_SOURCE_NATIVE": 1,
+    "PSC0_SH1_IR_NATIVE_PASS": 15,
+    "PSC0_SH1_IR_NATIVE": 1,
+    "PSC0_SH1_IR_NATIVE_EVIDENCE": 1,
+    "PSC0_SH1_STRICT_NATIVE": 1,
+    "PSC0_SH1_STRICT_SOURCE": 3,
+    "PSC0_SH1_STRICT_TARGET": 3,
+    "PSC0_SH1_STRICT_RUNTIME": 3,
+    "PSC0_SH1_GRAMMAR_CLOSURE": 1,
+    "PSC0_SH1_IR_CHECKER": 3,
+    "PSC0_SH1_HELPER_RUNTIME": 3,
+    "PSC0_SH1_GENERIC_ERASURE": 3,
+    "PSC0_SH1_SESSION_CONFORMANCE": 2,
+    "PSC0_SH1_CAPABILITIES": 3,
+    "PSC0_SH1_ITERATION_CONFORMANCE": 2,
+    "PSC0_SH1_FOUNDATION_CONFORMANCE": 2,
+    "PSC0_SH1_HELPER_CONFORMANCE": 2,
+    "PSC0_SH1_NATIVE_CANDIDATE": 1,
+    "PSC0_SH1_NATIVE_WORKER_REFERENCE": 1,
+    "PSC0_SH1_RESOURCE": 46,
+    "PSC0_SH1_GENERATION": 2,
+    "PSC0_SH1_MIGRATION_CORRESPONDENCE": 1,
+    "PSC0_SH1_CANDIDATE": 1
+  },
+  "chunks": [
+    {
+      "chunkIndex": 1,
+      "firstMarkerIndex": 0,
+      "markerCount": 59,
+      "firstLine": 251,
+      "lastLine": 2211,
+      "sha256": "c55fb773867b23cebe9e9bfcc37a73640cfe1fa56b8fa136cf15185628b834ea",
+      "bytes": 1007894,
+      "blob": "f46d7be3119fa4da530cff06a56a1f6b46b49b6e",
+      "gitObjectSha1Verified": true,
+      "path": "markers-01.json",
+      "readbackExact": true
+    },
+    {
+      "chunkIndex": 2,
+      "firstMarkerIndex": 59,
+      "markerCount": 86,
+      "firstLine": 2212,
+      "lastLine": 2368,
+      "sha256": "d8af9160bdc7da6c311a4223ca5a5af725056524596199760c2971591752a4b8",
+      "bytes": 963169,
+      "blob": "74163d5834c4ddabadb39783a164509da423a189",
+      "gitObjectSha1Verified": true,
+      "path": "markers-02.json",
+      "readbackExact": true
+    }
+  ],
+  "completeArchive": {
+    "sha256": "de1a33a70e3ade40c605a4cee80a93a6474a00eb210dbb1c6af429784c929fdc",
+    "bytes": 1971296,
+    "header": {
+      "schemaVersion": 1,
+      "kind": "complete-compiler-log-marker-archive",
+      "repository": "dwijayuda/pskernel",
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "workflowRun": 38015134511,
+      "runAttempt": 1,
+      "jobId": 114103608774,
+      "sourceLog": {
+        "blob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+        "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+        "bytes": 1917726,
+        "gitObjectSha1Verified": true,
+        "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+        "readbackExact": true
+      },
+      "markerEncoding": "Each text value is the exact marker body returned in the once-fetched completed compiler log. Parse JSON bodies directly; PASS/FAIL-prefixed JSON includes that prefix. Plain text and duplicate marker names are retained.",
+      "markerCount": 145
+    },
+    "reconstruction": "Read chunks in chunkIndex order; concatenate their markers arrays; serialize {...header, markers} with JSON.stringify and one LF. This reconstructs the full archive exactly. Marker text is retained once, without truncation; JSON bodies can be JSON.parse'd. Environment/configuration and plain PASS marker lines are included."
+  },
+  "completeReceipts": [
+    {
+      "generation": "N1",
+      "path": "development/N1/receipt.json",
+      "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+      "bytes": 15827,
+      "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+      "line": 2216,
+      "timestamp": "2026-10-10T02:03:42.2010927Z",
+      "markerRoundTripExact": true,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+      "gitObjectSha1Verified": true,
+      "serialization": "JSON.stringify(value,null,2)+'\\n'",
+      "serializationSource": {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "bytes": 73618
+      },
+      "readbackExact": true
+    },
+    {
+      "generation": "C1",
+      "path": "C1/receipt.json",
+      "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+      "bytes": 169531,
+      "marker": "PSC0_SH1_GENERATION",
+      "line": 2282,
+      "timestamp": "2026-10-10T02:23:29.3450246Z",
+      "markerRoundTripExact": true,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+      "gitObjectSha1Verified": true,
+      "serialization": "JSON.stringify(value,null,2)+'\\n'",
+      "serializationSource": {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "bytes": 73618
+      },
+      "readbackExact": true
+    },
+    {
+      "generation": "C2",
+      "path": "C2/receipt.json",
+      "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+      "bytes": 166700,
+      "marker": "PSC0_SH1_GENERATION",
+      "line": 2323,
+      "timestamp": "2026-10-10T02:41:31.2318065Z",
+      "markerRoundTripExact": true,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+      "gitObjectSha1Verified": true,
+      "serialization": "JSON.stringify(value,null,2)+'\\n'",
+      "serializationSource": {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "bytes": 73618
+      },
+      "readbackExact": true
+    }
+  ],
+  "serializationChecks": {
+    "resources": [
+      {
+        "generation": "C1",
+        "checkpoints": 21,
+        "sha256": "5ff3a16ba628b4404ad6e72d4ac2217092d9cdddc777fa781bde2637e05431b7",
+        "bytes": 11292,
+        "sourceMarkerTextPlusLf": true,
+        "expectedReceiptDigest": "5ff3a16ba628b4404ad6e72d4ac2217092d9cdddc777fa781bde2637e05431b7"
+      },
+      {
+        "generation": "C2",
+        "checkpoints": 21,
+        "sha256": "b79a27a06444646a52a3d602f969b5ce912656189b24112cca56f02f1348d9d7",
+        "bytes": 11380,
+        "sourceMarkerTextPlusLf": true,
+        "expectedReceiptDigest": "b79a27a06444646a52a3d602f969b5ce912656189b24112cca56f02f1348d9d7"
+      }
+    ],
+    "nativeSource": {
+      "path": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/strict-source-native.json",
+      "sha256": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0",
+      "bytes": 608846,
+      "serialization": "exact compact marker text plus LF",
+      "digestAuthenticatedBy": "PSC0_SH1_IR_NATIVE_EVIDENCE/nativeSourceReceiptSha256"
+    },
+    "partialC3": {
+      "checkpoints": 4,
+      "fileDigestAuthenticated": false
+    }
+  },
+  "partialGeneration": {
+    "generation": "C3",
+    "observedCheckpointCount": 4,
+    "completedReceiptObserved": false,
+    "fixedPointObserved": false
+  },
+  "sourceLog": {
+    "blob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+    "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+    "bytes": 1917726,
+    "gitObjectSha1Verified": true,
+    "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+    "readbackExact": true
+  },
+  "terminalMetadata": {
+    "blob": "e94bbd61407e7f30211c3350726a6014a2e619b8",
+    "sha256": "5c7bb0997ad6219eb767c97e952e1463aee27596c77642986046d77de78e906a",
+    "bytes": 28490,
+    "path": "run-metadata.json",
+    "gitObjectSha1Verified": true,
+    "readbackExact": true
+  }
+}

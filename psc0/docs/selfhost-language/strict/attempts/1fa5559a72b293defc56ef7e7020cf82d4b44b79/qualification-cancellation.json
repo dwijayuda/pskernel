@@ -1,0 +1,692 @@
+{
+  "schemaVersion": 1,
+  "kind": "exact-source-qualification-cancellation-evidence",
+  "repository": "dwijayuda/pskernel",
+  "execution": {
+    "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "sourceRootTree": "600c031e9235d20baa8bf074aba8c550509f50a4",
+    "psc0Tree": "54b05a1c135ad5c7aff0902658465159a223757c",
+    "workflowId": 378853677,
+    "workflowPath": ".github/workflows/psc0-sh1.yml",
+    "runId": 38015134511,
+    "runAttempt": 1,
+    "runConclusion": "cancelled",
+    "compilerJobId": 114103608774,
+    "compilerJobStartedAt": "2026-10-10T01:57:08Z",
+    "compilerJobCompletedAt": "2026-10-10T03:27:29Z",
+    "compilerJobConclusion": "cancelled",
+    "providerJobId": 114120597914,
+    "providerJobConclusion": "skipped"
+  },
+  "termination": {
+    "step": 27,
+    "stepName": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+    "stepStartedAt": "2026-10-10T02:23:55Z",
+    "stepCompletedAt": "2026-10-10T03:27:21Z",
+    "apiConclusion": "cancelled",
+    "exactLogLine": "2026-10-10T03:27:21.0690769Z ##[error]The operation was canceled.",
+    "logLine": 2335,
+    "explicitCompilerAssertionAtTermination": false,
+    "explicitOutOfMemoryMarkerAtTermination": false,
+    "causeScope": "The returned log explicitly records cancellation. A workflow deadline or external cancellation attribution requires separate workflow/API evidence; no cause is inferred from elapsed time alone.",
+    "compilerElapsedMs": 5421000
+  },
+  "completed": {
+    "native": {
+      "generation": "N1",
+      "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+      "line": 2216,
+      "timestamp": "2026-10-10T02:03:42.2010927Z",
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "executingCompilerSha256": null,
+      "artifacts": {
+        "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+      },
+      "timingsMs": {
+        "total": 322716.780849
+      },
+      "receipt": {
+        "generation": "N1",
+        "path": "development/N1/receipt.json",
+        "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+        "bytes": 15827,
+        "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+        "line": 2216,
+        "timestamp": "2026-10-10T02:03:42.2010927Z",
+        "markerRoundTripExact": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+        "gitObjectSha1Verified": true,
+        "serialization": "JSON.stringify(value,null,2)+'\\n'",
+        "serializationSource": {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "readbackExact": true
+      }
+    },
+    "c1": {
+      "generation": "C1",
+      "marker": "PSC0_SH1_GENERATION",
+      "line": 2282,
+      "timestamp": "2026-10-10T02:23:29.3450246Z",
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+        "normalizedCanonicalAdmissionsSha256": "24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52",
+        "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+        "javascriptSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+      },
+      "timingsMs": {
+        "loadAndPrepare": 657332.101536,
+        "admissions": 111020.54231699998,
+        "canonicalSurface": 47339.713931999984,
+        "emit": 358131.0270860001,
+        "tscAndWrite": 3091.758210999891,
+        "total": 1176915.145596
+      },
+      "receipt": {
+        "generation": "C1",
+        "path": "C1/receipt.json",
+        "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+        "bytes": 169531,
+        "marker": "PSC0_SH1_GENERATION",
+        "line": 2282,
+        "timestamp": "2026-10-10T02:23:29.3450246Z",
+        "markerRoundTripExact": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+        "gitObjectSha1Verified": true,
+        "serialization": "JSON.stringify(value,null,2)+'\\n'",
+        "serializationSource": {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "readbackExact": true
+      }
+    },
+    "c2": {
+      "generation": "C2",
+      "marker": "PSC0_SH1_GENERATION",
+      "line": 2323,
+      "timestamp": "2026-10-10T02:41:31.2318065Z",
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+        "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+        "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+        "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      "timingsMs": {
+        "loadAndPrepare": 1005408.06429,
+        "admissions": 0.20195800007786602,
+        "canonicalSurface": 45793.650664999965,
+        "emit": 939.952045999933,
+        "tscAndWrite": 2789.8532180001494,
+        "total": 1054931.723118
+      },
+      "receipt": {
+        "generation": "C2",
+        "path": "C2/receipt.json",
+        "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+        "bytes": 166700,
+        "marker": "PSC0_SH1_GENERATION",
+        "line": 2323,
+        "timestamp": "2026-10-10T02:41:31.2318065Z",
+        "markerRoundTripExact": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+        "gitObjectSha1Verified": true,
+        "serialization": "JSON.stringify(value,null,2)+'\\n'",
+        "serializationSource": {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "readbackExact": true
+      }
+    },
+    "nativeSourceOrigins": {
+      "moduleCount": 64,
+      "sourceDeclarationCount": 1708,
+      "coreDeclarationCount": 2571,
+      "normalizationCount": 50,
+      "independentlyCountedNonNullNormalizations": 50
+    },
+    "completedC2ConformanceMarkers": [
+      {
+        "line": 2324,
+        "timestamp": "2026-10-10T02:41:33.4042750Z",
+        "marker": "PSC0_SH1_STRICT_SOURCE",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      {
+        "line": 2325,
+        "timestamp": "2026-10-10T02:41:39.2455272Z",
+        "marker": "PSC0_SH1_STRICT_TARGET",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      {
+        "line": 2326,
+        "timestamp": "2026-10-10T02:41:45.7580494Z",
+        "marker": "PSC0_SH1_STRICT_RUNTIME",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      {
+        "line": 2327,
+        "timestamp": "2026-10-10T02:41:47.9507927Z",
+        "marker": "PSC0_SH1_IR_CHECKER",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      {
+        "line": 2328,
+        "timestamp": "2026-10-10T02:42:07.1690445Z",
+        "marker": "PSC0_SH1_CAPABILITIES",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      {
+        "line": 2329,
+        "timestamp": "2026-10-10T02:42:07.2030982Z",
+        "marker": "PSC0_SH1_HELPER_RUNTIME",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      },
+      {
+        "line": 2330,
+        "timestamp": "2026-10-10T02:42:13.1128616Z",
+        "marker": "PSC0_SH1_GENERIC_ERASURE",
+        "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+      }
+    ],
+    "earlierStepResults": [
+      {
+        "name": "Build current native compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18,
+        "started_at": "2026-10-10T01:58:00Z",
+        "completed_at": "2026-10-10T01:58:02Z"
+      },
+      {
+        "name": "Run native parser, translation, and erasure regression targets",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-10-10T01:58:02Z",
+        "completed_at": "2026-10-10T01:58:03Z"
+      },
+      {
+        "name": "Build the actual native checked seed for source and import tests",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20,
+        "started_at": "2026-10-10T01:58:03Z",
+        "completed_at": "2026-10-10T01:58:11Z"
+      },
+      {
+        "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21,
+        "started_at": "2026-10-10T01:58:11Z",
+        "completed_at": "2026-10-10T01:58:14Z"
+      },
+      {
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22,
+        "started_at": "2026-10-10T01:58:14Z",
+        "completed_at": "2026-10-10T01:58:17Z"
+      },
+      {
+        "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23,
+        "started_at": "2026-10-10T01:58:17Z",
+        "completed_at": "2026-10-10T01:58:19Z"
+      },
+      {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 24,
+        "started_at": "2026-10-10T01:58:19Z",
+        "completed_at": "2026-10-10T02:03:42Z"
+      },
+      {
+        "name": "Compare native worker observations before candidate generation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 25,
+        "started_at": "2026-10-10T02:03:42Z",
+        "completed_at": "2026-10-10T02:03:42Z"
+      },
+      {
+        "name": "Build the selected-seed candidate before full qualification",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 26,
+        "started_at": "2026-10-10T02:03:42Z",
+        "completed_at": "2026-10-10T02:23:55Z"
+      }
+    ]
+  },
+  "incompleteC3": {
+    "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+    "generationStart": "2026-10-10T02:42:13.1160125Z",
+    "lastObservedPhase": "atomic-source-wrapper-start",
+    "lastObservedTimestamp": "2026-10-10T02:42:13.3037499Z",
+    "lastObservedLogLine": 2334,
+    "observedCheckpointCount": 4,
+    "resourceCheckpoints": [
+      {
+        "line": 2331,
+        "timestamp": "2026-10-10T02:42:13.1160125Z",
+        "payload": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sequence": 1,
+          "phase": "generation-start",
+          "pid": 4815,
+          "elapsedMs": 0.05631299992091954,
+          "rss": 2875420672,
+          "heapTotal": 1153904640,
+          "heapUsed": 770005464,
+          "external": 2458380,
+          "arrayBuffers": 179058,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9325445120
+        }
+      },
+      {
+        "line": 2332,
+        "timestamp": "2026-10-10T02:42:13.1163407Z",
+        "payload": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sequence": 2,
+          "phase": "compiler-load-start",
+          "pid": 4815,
+          "elapsedMs": 0.15252499980852008,
+          "rss": 2875420672,
+          "heapTotal": 1153904640,
+          "heapUsed": 770014576,
+          "external": 2458380,
+          "arrayBuffers": 179058,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9325445120
+        }
+      },
+      {
+        "line": 2333,
+        "timestamp": "2026-10-10T02:42:13.2989999Z",
+        "payload": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sequence": 3,
+          "phase": "compiler-load-complete",
+          "pid": 4815,
+          "elapsedMs": 189.4967619997915,
+          "rss": 2930348032,
+          "heapTotal": 1177505792,
+          "heapUsed": 811624616,
+          "external": 16968776,
+          "arrayBuffers": 10499730,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9325445120
+        }
+      },
+      {
+        "line": 2334,
+        "timestamp": "2026-10-10T02:42:13.3037499Z",
+        "payload": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "scope": "ingress-portable-atomic-compilation-and-post-emission-host-readback",
+          "sequence": 4,
+          "phase": "atomic-source-wrapper-start",
+          "pid": 4815,
+          "elapsedMs": 194.36128499987535,
+          "rss": 2930741248,
+          "heapTotal": 1177874432,
+          "heapUsed": 818171832,
+          "external": 16968776,
+          "arrayBuffers": 10499730,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9325445120
+        }
+      }
+    ],
+    "millisecondsFromLastObservedPhaseToCancellation": 2707766,
+    "completedGenerationReceiptObserved": false,
+    "postAtomicCheckpointObserved": false,
+    "generatedProductsAuthenticated": false
+  },
+  "notCompleted": {
+    "c3GenerationReceipt": true,
+    "c3Conformance": true,
+    "c2C3ProductEquality": true,
+    "strictEvidenceBinder": true,
+    "fixedPointQualification": true,
+    "qualifiedSeedRetention": true,
+    "kernelAdmissionsProvider": true
+  },
+  "observations": {
+    "n1AndC2ProductHashesEqual": {
+      "typescript": true,
+      "javascript": true
+    },
+    "noInferenceOfC3ProductEquality": true,
+    "atomicStartResourceSnapshots": [
+      {
+        "line": 2305,
+        "timestamp": "2026-10-10T02:23:56.4338600Z",
+        "payload": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C2",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "scope": "ingress-portable-atomic-compilation-and-post-emission-host-readback",
+          "sequence": 4,
+          "phase": "atomic-source-wrapper-start",
+          "pid": 4815,
+          "elapsedMs": 152.5283,
+          "rss": 152502272,
+          "heapTotal": 74366976,
+          "heapUsed": 44597064,
+          "external": 20984512,
+          "arrayBuffers": 11010536,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 152502272
+        }
+      },
+      {
+        "line": 2334,
+        "timestamp": "2026-10-10T02:42:13.3037499Z",
+        "payload": {
+          "schemaVersion": 1,
+          "evidence": "host-resource-boundary-observation",
+          "command": "fixed-point",
+          "generation": "C3",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "scope": "ingress-portable-atomic-compilation-and-post-emission-host-readback",
+          "sequence": 4,
+          "phase": "atomic-source-wrapper-start",
+          "pid": 4815,
+          "elapsedMs": 194.36128499987535,
+          "rss": 2930741248,
+          "heapTotal": 1177874432,
+          "heapUsed": 818171832,
+          "external": 16968776,
+          "arrayBuffers": 10499730,
+          "heapLimitBytes": 8640266240,
+          "maxRssBytes": 9325445120
+        }
+      }
+    ],
+    "resourceScope": "Snapshots are at host boundaries only. maxRssBytes is the same process's lifetime high-water mark and must not be interpreted as a measured C3 peak. Atomic internals were not observed.",
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "recipeFileCount": 48
+  },
+  "retained": {
+    "log": {
+      "blob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+      "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+      "bytes": 1917726,
+      "gitObjectSha1Verified": true,
+      "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+      "readbackExact": true
+    },
+    "metadata": {
+      "blob": "e94bbd61407e7f30211c3350726a6014a2e619b8",
+      "sha256": "5c7bb0997ad6219eb767c97e952e1463aee27596c77642986046d77de78e906a",
+      "bytes": 28490,
+      "path": "run-metadata.json",
+      "gitObjectSha1Verified": true,
+      "readbackExact": true
+    },
+    "markerIndex": {
+      "blob": "495516acab02a1d636109b9af60fe330c9b15acf",
+      "sha256": "356634e7acefb07d8ecfc942f3738f9fe40fa9d2408305980335488838ac0b12",
+      "bytes": 8528,
+      "path": "markers-index.json",
+      "gitObjectSha1Verified": true,
+      "readbackExact": true
+    },
+    "markerChunks": [
+      {
+        "chunkIndex": 1,
+        "firstMarkerIndex": 0,
+        "markerCount": 59,
+        "firstLine": 251,
+        "lastLine": 2211,
+        "sha256": "c55fb773867b23cebe9e9bfcc37a73640cfe1fa56b8fa136cf15185628b834ea",
+        "bytes": 1007894,
+        "blob": "f46d7be3119fa4da530cff06a56a1f6b46b49b6e",
+        "gitObjectSha1Verified": true,
+        "path": "markers-01.json",
+        "readbackExact": true
+      },
+      {
+        "chunkIndex": 2,
+        "firstMarkerIndex": 59,
+        "markerCount": 86,
+        "firstLine": 2212,
+        "lastLine": 2368,
+        "sha256": "d8af9160bdc7da6c311a4223ca5a5af725056524596199760c2971591752a4b8",
+        "bytes": 963169,
+        "blob": "74163d5834c4ddabadb39783a164509da423a189",
+        "gitObjectSha1Verified": true,
+        "path": "markers-02.json",
+        "readbackExact": true
+      }
+    ],
+    "completeReceipts": [
+      {
+        "generation": "N1",
+        "path": "development/N1/receipt.json",
+        "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+        "bytes": 15827,
+        "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+        "line": 2216,
+        "timestamp": "2026-10-10T02:03:42.2010927Z",
+        "markerRoundTripExact": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+        "gitObjectSha1Verified": true,
+        "serialization": "JSON.stringify(value,null,2)+'\\n'",
+        "serializationSource": {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "readbackExact": true
+      },
+      {
+        "generation": "C1",
+        "path": "C1/receipt.json",
+        "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+        "bytes": 169531,
+        "marker": "PSC0_SH1_GENERATION",
+        "line": 2282,
+        "timestamp": "2026-10-10T02:23:29.3450246Z",
+        "markerRoundTripExact": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+        "gitObjectSha1Verified": true,
+        "serialization": "JSON.stringify(value,null,2)+'\\n'",
+        "serializationSource": {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "readbackExact": true
+      },
+      {
+        "generation": "C2",
+        "path": "C2/receipt.json",
+        "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+        "bytes": 166700,
+        "marker": "PSC0_SH1_GENERATION",
+        "line": 2323,
+        "timestamp": "2026-10-10T02:41:31.2318065Z",
+        "markerRoundTripExact": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+        "gitObjectSha1Verified": true,
+        "serialization": "JSON.stringify(value,null,2)+'\\n'",
+        "serializationSource": {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "ref": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "readbackExact": true
+      }
+    ],
+    "serializationChecks": {
+      "resources": [
+        {
+          "generation": "C1",
+          "checkpoints": 21,
+          "sha256": "5ff3a16ba628b4404ad6e72d4ac2217092d9cdddc777fa781bde2637e05431b7",
+          "bytes": 11292,
+          "sourceMarkerTextPlusLf": true,
+          "expectedReceiptDigest": "5ff3a16ba628b4404ad6e72d4ac2217092d9cdddc777fa781bde2637e05431b7"
+        },
+        {
+          "generation": "C2",
+          "checkpoints": 21,
+          "sha256": "b79a27a06444646a52a3d602f969b5ce912656189b24112cca56f02f1348d9d7",
+          "bytes": 11380,
+          "sourceMarkerTextPlusLf": true,
+          "expectedReceiptDigest": "b79a27a06444646a52a3d602f969b5ce912656189b24112cca56f02f1348d9d7"
+        }
+      ],
+      "nativeSource": {
+        "path": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/strict-source-native.json",
+        "sha256": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0",
+        "bytes": 608846,
+        "serialization": "exact compact marker text plus LF",
+        "digestAuthenticatedBy": "PSC0_SH1_IR_NATIVE_EVIDENCE/nativeSourceReceiptSha256"
+      },
+      "partialC3": {
+        "checkpoints": 4,
+        "fileDigestAuthenticated": false
+      }
+    }
+  },
+  "artifactAvailability": {
+    "metadata": [
+      {
+        "id": 11658430459,
+        "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "size_in_bytes": 5147944,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11658430459",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11658430459/zip",
+        "expired": false,
+        "created_at": "2026-10-10T03:27:26Z",
+        "expires_at": "2026-11-09T03:27:23Z",
+        "updated_at": "2026-10-10T03:27:26Z",
+        "digest": "sha256:6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+        "workflow_run": {
+          "id": 38015134511,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/strict-sh1-v1",
+          "head_sha": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        }
+      }
+    ],
+    "uploadReportedFileCount": 344,
+    "uploadArchiveRoot": "psc0",
+    "archiveDownloaded": false,
+    "innerFileInventoryObserved": false,
+    "scope": "Metadata authenticates the uploaded archive identity, not unreturned inner-file contents. Completed receipt bytes above are reconstructed from exact logged payloads and the pinned producer serializer."
+  },
+  "futureQualification": {
+    "requiresActualC3Completion": true,
+    "requiresActualProductEquality": true,
+    "requiresActualBinder": true,
+    "requiresSeparateProvider": true,
+    "final136FileCatalogNotComplete": true,
+    "releaseDispositionUnchanged": true
+  },
+  "claims": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "sourceCorrespondenceQualified": false,
+    "stageObligationsQualified": false,
+    "currentSourceFixedPointProven": false,
+    "providerChecked": false
+  },
+  "collection": {
+    "compilerJobLogRequests": 1,
+    "providerJobLogRequests": 0,
+    "artifactArchiveDownloads": 0,
+    "workflowDispatches": 0,
+    "reruns": 0,
+    "localExecution": false
+  },
+  "toolchainProfileObserved": {
+    "marker": "PSC0_TYPESCRIPT_PROFILE",
+    "line": 385,
+    "mode": "installed-profile-contract",
+    "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+    "reportedVersion": "7.0.2",
+    "actualReportFileBytesReturned": false,
+    "lockfilePathPrinted": false
+  }
+}

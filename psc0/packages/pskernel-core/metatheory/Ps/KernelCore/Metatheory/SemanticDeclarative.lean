@@ -133,4 +133,24 @@ theorem no_empty (M : Reading V) (e A : AnnotatedExpr)
     ¬ Derives [] (.typing e A) :=
   fun h => no_closed_empty_type M e A hA (sound M h)
 
+/-- A reading is actually constructed for the constant-free fragment. Its
+unused global tables are empty-valued; this is not a model of the production
+initial environment or of global constant admission. -/
+noncomputable def fragmentReading (V : Type u) [SetTheory V] : Reading V where
+  levelParams := fun _ => 0
+  levelMetavariables := fun _ => 0
+  freeVars := fun _ => ConLeche.SetTheory.empty
+  metavariables := fun _ => ConLeche.SetTheory.empty
+  constants := fun _ _ => ConLeche.SetTheory.empty
+  literals := fun _ => ConLeche.SetTheory.empty
+  projections := fun _ _ _ => ConLeche.SetTheory.empty
+
+/-- Relative consistency with the interpretation parameter discharged by
+construction. The only remaining mathematical parameter is the explicit set
+foundation; full-kernel inference and admission are not part of this fragment. -/
+theorem relative_consistency (V : Type u) [SetTheory V] :
+    ¬ ∃ e : AnnotatedExpr, Derives [] (.typing e allProps) := by
+  rintro ⟨e, he⟩
+  exact no_allProps (fragmentReading V) e he
+
 end PsKernelSemantics.Declarative

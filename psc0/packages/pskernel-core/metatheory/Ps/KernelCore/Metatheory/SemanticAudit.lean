@@ -145,7 +145,9 @@ run_cmd do
     ``PsKernelSemantics.AnnotatedExpr.namesBelow_inst,
     ``PsKernelSemantics.AnnotatedExpr.allocated_open_frame,
     ``PsKernelSemantics.inferCore_const_result,
-    ``PsKernelSemantics.SetModel.const_inference_has_set_model
+    ``PsKernelSemantics.SetModel.const_inference_has_set_model,
+    ``PsKernelSemantics.Declarative.fragmentReading,
+    ``PsKernelSemantics.Declarative.relative_consistency
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

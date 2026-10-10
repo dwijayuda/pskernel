@@ -153,6 +153,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticReferenceLocalContext,
     `Ps.KernelCore.Metatheory.SemanticLocalContextExtension,
     `Ps.KernelCore.Metatheory.SemanticReferenceBinderContext,
+    `Ps.KernelCore.Metatheory.SemanticPublicEntry,
     `Ps.KernelCore.Metatheory.SemanticSortVisitProvenance,
     `Ps.KernelCore.Metatheory.SemanticCheckedAnnotationVisits,
     `Ps.KernelCore.Metatheory.SemanticReferenceBinders,

@@ -175,6 +175,7 @@ theorem application_trace_has_model
     fun ρ hρ => ⟨hfValid ρ hρ, haValid ρ hρ⟩,
     application_result_annotationValid M Γ trace.view.name a A B trace.view.binderInfo v
       ha' haValid piValid⟩
-  rw [erase_instantiate1, bodyErasure, trace.resultEq]
+  rw [erase_instantiate1, bodyErasure]
+  exact trace.resultEq.symm
 
 end PsKernelSemantics.Reference

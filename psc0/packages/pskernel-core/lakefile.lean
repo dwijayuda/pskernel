@@ -138,6 +138,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticReferenceBinders,
     `Ps.KernelCore.Metatheory.SemanticReferenceSortChecks,
     `Ps.KernelCore.Metatheory.SemanticReferenceApplication,
+    `Ps.KernelCore.Metatheory.SemanticReferenceLambda,
     `Ps.KernelCore.Metatheory.SemanticReference,
     `Ps.KernelCore.Metatheory.ReferencePolicyAudit,
     `Ps.KernelCore.Metatheory.SemanticSetDomain,

@@ -179,4 +179,94 @@ theorem functionValid_beta_on_domain (M : Reading V) (ρ : Nat → V)
   intro hz x hx
   simpa only [univ_zero] using truthValues hz x hx
 
+theorem functionValid_withFree_fresh (M : Reading V) (e : AnnotatedExpr)
+    (name : PsKernelName) (h : Fresh name e) (x : V) (ρ : Nat → V) :
+    FunctionValid (M.withFree name x) ρ e ↔ FunctionValid M ρ e := by
+  induction e generalizing ρ with
+  | bvar _ | fvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
+  | app f a ihf iha =>
+      simp only [FunctionValid, ihf h.1, iha h.2,
+        interp_withFree_fresh M f name h.1 x, interp_withFree_fresh M a name h.2 x]
+  | lam n A b bi v ihA ihb =>
+      simp only [FunctionValid, ihA h.1, Reading.withFree_level,
+        interp_withFree_fresh M A name h.1 x, ihb h.2,
+        interp_withFree_fresh M b name h.2 x]
+  | forallE n A B bi v ihA ihB =>
+      simp only [FunctionValid, ihA h.1,
+        interp_withFree_fresh M A name h.1 x, ihB h.2]
+  | letE n A a b nd ihA iha ihb =>
+      simp only [FunctionValid, ihA h.1, iha h.2.1,
+        interp_withFree_fresh M a name h.2.1 x, ihb h.2.2]
+  | mdata _ e ih | proj _ _ e ih => exact ih h ρ
+
+theorem functionValid_close (M : Reading V) (e : AnnotatedExpr)
+    (name : PsKernelName) (cut : Nat) (ρ : Nat → V) :
+    FunctionValid M ρ (close name e cut) ↔
+      FunctionValid (M.withFree name (ρ cut)) ρ e := by
+  induction e generalizing cut ρ with
+  | bvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
+  | fvar n =>
+      cases h : psKernelNameEq n name <;> simp [close, h, FunctionValid]
+  | app f a ihf iha =>
+      simp only [close, FunctionValid, ihf, iha, interp_close]
+  | lam n A b bi v ihA ihb =>
+      simp only [close, FunctionValid, ihA, interp_close, ihb,
+        Reading.withFree_level, extend]
+  | forallE n A B bi v ihA ihB =>
+      simp only [close, FunctionValid, ihA, interp_close, ihB, extend]
+  | letE n A a b nd ihA iha ihb =>
+      simp only [close, FunctionValid, ihA, iha, interp_close, ihb, extend]
+  | mdata _ e ih | proj _ _ e ih => exact ih cut ρ
+
+theorem functionValid_inst_iff (M : Reading V) (e a : AnnotatedExpr)
+    (cut : Nat) (ρ : Nat → V)
+    (ha : FunctionValid M (shift cut 0 ρ) a) :
+    FunctionValid M ρ (inst a e cut) ↔
+      FunctionValid M (insert cut (interp M (shift cut 0 ρ) a) ρ) e := by
+  constructor
+  · intro h
+    induction e generalizing cut ρ with
+    | bvar _ | fvar _ | mvar _ | sort _ | const _ _ | lit _ => trivial
+    | app f b ihf ihb =>
+        refine ⟨ihf cut ρ ha h.1, ihb cut ρ ha h.2.1, ?_⟩
+        simpa only [interp_inst] using h.2.2
+    | lam n A b bi v ihA ihb =>
+        refine ⟨ihA cut ρ ha h.1, ?_, ?_⟩
+        · intro x hx
+          have hx' : x ∈ˢ interp M ρ (inst a A cut) := by
+            rwa [interp_inst]
+          have ha' : FunctionValid M (shift (cut + 1) 0 (extend x ρ)) a := by
+            simpa only [shift_extend] using ha
+          simpa only [shift_extend, ← extend_insert] using
+            ihb (cut + 1) (extend x ρ) ha' (h.2.1 x hx')
+        · simpa only [interp_inst, shift_extend, ← extend_insert] using h.2.2
+    | forallE n A B bi v ihA ihB =>
+        refine ⟨ihA cut ρ ha h.1, ?_⟩
+        intro x hx
+        have hx' : x ∈ˢ interp M ρ (inst a A cut) := by
+          rwa [interp_inst]
+        have ha' : FunctionValid M (shift (cut + 1) 0 (extend x ρ)) a := by
+          simpa only [shift_extend] using ha
+        simpa only [shift_extend, ← extend_insert] using
+          ihB (cut + 1) (extend x ρ) ha' (h.2 x hx')
+    | letE n A b c nd ihA ihb ihc =>
+        refine ⟨ihA cut ρ ha h.1, ihb cut ρ ha h.2.1, ?_⟩
+        have ha' : FunctionValid M
+            (shift (cut + 1) 0 (extend (interp M ρ (inst a b cut)) ρ)) a := by
+          simpa only [shift_extend] using ha
+        simpa only [shift_extend, ← extend_insert, interp_inst] using
+          ihc (cut + 1) (extend (interp M ρ (inst a b cut)) ρ) ha' h.2.2
+    | mdata _ e ih | proj _ _ e ih => exact ih cut ρ ha h
+  · exact functionValid_inst M e a cut ρ ha
+
+theorem functionValid_open_fresh (M : Reading V) (e : AnnotatedExpr)
+    (name : PsKernelName) (fresh : Fresh name e) (x : V) (ρ : Nat → V) :
+    FunctionValid (M.withFree name x) ρ (inst (.fvar name) e 0) ↔
+      FunctionValid M (extend x ρ) e := by
+  rw [functionValid_inst_iff (M.withFree name x) e (.fvar name) 0 ρ True.intro]
+  have hn : psKernelNameEq name name = true :=
+    psKernelNameEq_refl_of_string_law (fun s => by simp [psKernelStringEq]) name
+  simp only [interp, Reading.withFree, hn, ite_true, insert_zero]
+  exact functionValid_withFree_fresh M e name fresh x (extend x ρ)
+
 end PsKernelSemantics.SetModel

@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticReferenceLambda
 import Ps.KernelCore.Metatheory.SemanticFunctionValidity
 import Ps.KernelCore.Metatheory.SemanticReference
 import Ps.KernelCore.Metatheory.SemanticReferenceApplication
@@ -26,6 +27,12 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.functionValid_withFree_fresh,
+    ``PsKernelSemantics.SetModel.functionValid_close,
+    ``PsKernelSemantics.SetModel.functionValid_inst_iff,
+    ``PsKernelSemantics.SetModel.functionValid_open_fresh,
+    ``PsKernelSemantics.Reference.inferCore_lam_trace,
+    ``PsKernelSemantics.Reference.lambda_trace_model_from_visits,
     ``PsKernelSemantics.SetModel.functionValid_liftN,
     ``PsKernelSemantics.SetModel.functionValid_inst,
     ``PsKernelSemantics.SetModel.functionValid_inst_zero,

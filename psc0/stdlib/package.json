@@ -1,5 +1,5 @@
 {
-  "name": "@proofscript/stdlib",
+  "name": "@proofscript/stdlib-authoring",
   "version": "0.1.0-psc0.1",
   "private": true,
   "type": "module",

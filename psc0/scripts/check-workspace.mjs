@@ -6,6 +6,8 @@ import { forbiddenBootstrapPackages } from "./bootstrap-closure-contract.mjs";
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptsDir, "..");
 const nonWorkspacePackageDirs = new Set(["pskernel-lean"]);
+const stagedNpmPackageDirs = new Set(['proofscript', 'stdlib']);
+
 
 async function exists(file) {
   try {
@@ -34,6 +36,7 @@ for (const workspace of expectedWorkspaces) {
   }
 }
 
+const uniqueWorkspaceNames = new Map();
 const packageDirs = [];
 for (const entry of await readdir(path.join(root, "packages"), { withFileTypes: true })) {
   if (entry.isDirectory() && !nonWorkspacePackageDirs.has(entry.name)) {
@@ -50,7 +53,27 @@ for (const packageDir of packageDirs) {
   }
 
   const manifest = await readJson(manifestPath);
+  const existing = uniqueWorkspaceNames.get(manifest.name);
+  if(existing)throw new Error('PSC_NPM_DUPLICATE_WORKSPACE_NAME: '+manifest.name+' at '+existing+' and '+packageDir);
+  uniqueWorkspaceNames.set(manifest.name,packageDir);
   const config = manifest.proofscript;
+  if(stagedNpmPackageDirs.has(path.basename(packageDir))) {
+    if(manifest.private !== false || !config ||
+       manifest.publishConfig?.access !== 'public') {
+      throw new Error('PSC_NPM_WORKSPACE_PUBLISHABLE_MANIFEST: '+manifest.name);
+    }
+    if(path.basename(packageDir) === 'proofscript') {
+      if(manifest.name !== 'proofscript' || manifest.bin?.psc !== './bin/psc.js') {
+        throw new Error('PSC_NPM_WORKSPACE_ROOT_CLI');
+      }
+    } else if(manifest.name !== '@proofscript/stdlib' ||
+              config.library?.modulePrefix !== 'ProofScript' ||
+              config.library?.sourceRoot !== 'src' ||
+              !(await exists(path.join(root,'stdlib','ProofScript')))) {
+      throw new Error('PSC_NPM_WORKSPACE_STDLIB_SOURCE');
+    }
+    continue;
+  }
   if (!config) {
     throw new Error(`PSC1_WORKSPACE_PROOFSCRIPT_METADATA: ${manifest.name}`);
   }

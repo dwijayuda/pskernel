@@ -1,0 +1,48 @@
+name: PSC0 npm workspace/package graph contract
+
+on:
+  push:
+    branches: [psc0/npm-modular-packages-v1]
+    paths:
+      - psc0/scripts/check-workspace.mjs
+      - psc0/stdlib/package.json
+      - psc0/packages/stdlib/package.json
+      - .github/workflows/psc0-npm-workspace-contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Validate original PSC0 closures and npm-only package boundaries
+        run: node scripts/check-workspace.mjs
+      - name: Validate npm workspaces have distinct published/authoring identities
+        run: |
+          node --input-type=module <<'NODE'
+          import {readdirSync,readFileSync,existsSync} from 'node:fs';
+          const files=['host/package.json','stdlib/package.json',
+            ...readdirSync('packages',{withFileTypes:true})
+              .filter(x=>x.isDirectory()&&existsSync('packages/'+x.name+'/package.json'))
+              .map(x=>'packages/'+x.name+'/package.json')];
+          const names=new Map();
+          for(const file of files){
+            const p=JSON.parse(readFileSync(file,'utf8'));
+            if(names.has(p.name))throw Error('PSC_NPM_DUPLICATE_NAME '+p.name+
+              ' in '+file+' and '+names.get(p.name));
+            names.set(p.name,file);
+          }
+          if(!names.has('proofscript')||!names.has('@proofscript/stdlib')||
+             !names.has('@proofscript/stdlib-authoring'))throw Error('PSC_NPM_EXPECTED_PACKAGES');
+          console.log('PSC_NPM_UNIQUE_WORKSPACES: PASS '+names.size);
+          NODE

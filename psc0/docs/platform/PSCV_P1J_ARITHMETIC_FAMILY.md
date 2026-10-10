@@ -1,5 +1,7 @@
 # PSC0 PSCV P1-J — normative arithmetic family typed resolution
 
+**Qualification:** [run 38059638556](https://github.com/dwijayuda/pskernel/actions/runs/38059638556), all four jobs successful at implementation commit `7aad0f4b9dab40d2e77a238de63b419e0a38c531`. Report identity `364b16cbf5b972411cb00006fc1bcf596671ba57dfcbc7ad23f8517fb63b3c4b`; [machine record](pscv-p1j-qualification-2026-10-10.json), [artifact](https://github.com/dwijayuda/pskernel/actions/runs/38059638556/artifacts/11672412593). The artifact records actual Lean observations, **not** approved Standard declarations or executable proof certification.
+
 **Scope:** actual Lean instance-synthesis observations for all 42 §24.3
 addition, subtraction, and multiplication operator/type requirements
 across 14 listed standard numeric basis types, with 84 independent

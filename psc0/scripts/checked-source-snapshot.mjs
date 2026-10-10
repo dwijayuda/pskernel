@@ -1,4 +1,5 @@
 import { readFile, realpath } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { packageBySection, parseImports } from './workspace-layout.mjs';
@@ -13,9 +14,15 @@ function inside(root, file) {
     throw new Error(`PSC2_CHECKED_SOURCE_ESCAPE: ${file}`);
   }
 }
-export async function readCheckedSourceSnapshot(entryPath, { readProofScriptImports } = {}) {
+export async function readCheckedSourceSnapshot(entryPath, { readProofScriptImports, sourceOverlay } = {}) {
   const entry = path.resolve(entryPath);
   const extension = path.extname(entry);
+  // Only in-memory check/query requests may supply this opaque editor buffer.
+  // No source override is permitted in a generated bootstrap manifest.
+  if (sourceOverlay !== undefined && (extension !== '.ps' ||
+      typeof sourceOverlay !== 'string' || Buffer.byteLength(sourceOverlay, 'utf8') > 1024 * 1024)) {
+    throw new Error('PSC_QUERY_OVERLAY_PROFILE');
+  }
   if (!['.lean', '.ps'].includes(extension)) throw new Error('PSC2_CHECKED_SOURCE_KIND');
   let root;
   try { root = findSourceWorkspaceRoot(entry); }
@@ -25,6 +32,10 @@ export async function readCheckedSourceSnapshot(entryPath, { readProofScriptImpo
   }
   if (extension === '.ps' && typeof readProofScriptImports !== 'function') {
     throw new Error('PSC2_SOURCE_PARSER_REQUIRED');
+  }
+  if (sourceOverlay !== undefined && ['.proofscript-bootstrap.json',
+      '.proofscript-selfhost.json'].some(name => existsSync(path.join(root, name)))) {
+    throw new Error('PSC_QUERY_GENERATED_CLOSURE_UNSUPPORTED');
   }
   const generated = await readGeneratedSourceClosure(entry, root, readProofScriptImports);
   let ordered;
@@ -37,8 +48,9 @@ export async function readCheckedSourceSnapshot(entryPath, { readProofScriptImpo
       const actual = await realpath(file); inside(realRoot, actual);
       if (active.has(file)) throw new Error(`PSC2_CHECKED_IMPORT_CYCLE: ${file}`);
       if (visited.has(file)) return;
-      const source = extension === '.ps'
-        ? await readProofScriptSource(actual) : await readFile(actual, 'utf8');
+      const source = sourceOverlay !== undefined && path.resolve(file) === entry
+        ? sourceOverlay : extension === '.ps'
+          ? await readProofScriptSource(actual) : await readFile(actual, 'utf8');
       active.add(file);
       const imports = extension === '.ps'
         ? await readProofScriptImports(source, file) : parseImports(source);
@@ -72,5 +84,6 @@ export async function readCheckedSourceSnapshot(entryPath, { readProofScriptImpo
     ? ordered.map(item => item.source)
     : ordered.map(item => stripImports(item.source)).filter(Boolean));
   return Object.freeze({ root, entry, kind: extension === '.ps' ? 'ps' : 'lean',
-    ordered, closureSha256, sources, source: sources.join('\n\n') + '\n' });
+    ordered, closureSha256, sources, source: sources.join('\n\n') + '\n',
+    overlayEntry: sourceOverlay === undefined ? undefined : entry });
 }

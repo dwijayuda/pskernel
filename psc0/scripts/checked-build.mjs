@@ -27,6 +27,7 @@ export const defaultCheckedCompiler = checkedCompilerPath();
 async function assertSnapshotCurrent(snapshot, signal) {
   signal?.throwIfAborted();
   for (const item of snapshot.ordered) {
+    if (snapshot.overlayEntry === item.path) continue; // editor buffer, never disk publication
     const bytes = await readFile(item.path);
     if (!bytes.equals(Buffer.from(item.source, 'utf8'))) {
       throw new Error('PSC0_SOURCE_CHANGED_DURING_BUILD: ' + item.path);
@@ -43,8 +44,13 @@ async function assertSnapshotCurrent(snapshot, signal) {
 export async function buildChecked({
   entryPath, outputPath, compilerPath, compilerSha256, seedPath, checkOnly = false,
   kernel = defaultCheckedKernel, nativeBinaryPath, profile = 'checked', signal, extensionExecution, libraryConfig,
+  sourceOverlay,
 }) {
   if (profile !== 'checked') throw new Error('PSC0_PROFILE_UNAVAILABLE: ' + profile);
+  if (sourceOverlay !== undefined && (!checkOnly || libraryConfig !== undefined ||
+      extensionExecution !== undefined || seedPath !== undefined)) {
+    throw new Error('PSC_QUERY_OVERLAY_CHECK_ONLY');
+  }
   if (typeof entryPath !== 'string' || entryPath.length === 0) throw new Error('PSC0_SOURCE_REQUIRED');
   if (compilerPath && seedPath) throw new Error('PSC2_CHECKED_SELECT_ONE_COMPILER');
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
@@ -88,7 +94,9 @@ export async function buildChecked({
     };
     parseImports = (source, file) => readProofScriptImports(compiler, source, file);
   }
-  const snapshot = await readCheckedSourceSnapshot(entryPath, { readProofScriptImports: parseImports });
+  const snapshot = await readCheckedSourceSnapshot(entryPath, {
+    readProofScriptImports: parseImports, sourceOverlay,
+  });
   const projectUnits = library ? captureProjectUnits(snapshot, projectRoot, libraryConfig.exports) : undefined;
   const exportSelection = projectUnits?.map(unit => ({ sourceId: unit.sourceId, exports: unit.exports }));
   let admissions, typeScript, irValidation, libraryEmission;
@@ -142,6 +150,9 @@ export async function buildChecked({
     })),
     canonicalAdmissionsSha256: digest(admissions),
     kernelAdmissionAccepted: true, extensions,
+    ...(sourceOverlay === undefined ? {} : {
+      editorBuffer: { notPublished: true, sourceSha256: digest(sourceOverlay) },
+    }),
     ...(library ? { library: {
       profile: 'psc-ts-library/1', exportSelectionSha256: digest(JSON.stringify(exportSelection)),
       configSha256: projectConfigSource === undefined ? null : digest(projectConfigSource),

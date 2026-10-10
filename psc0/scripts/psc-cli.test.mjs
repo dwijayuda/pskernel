@@ -44,6 +44,17 @@ export async function buildChecked(options) {
   return { schemaVersion: 4, kind: 'psc-checked-fixture', extensions: [], semanticPreservationProved: false };
 }
 `);
+  await writeFile(path.join(installed, 'scripts/checked-query.mjs'), `
+import { writeFile } from 'node:fs/promises';
+export async function queryCheckedSource(options) {
+  await writeFile(new URL('../called.json', import.meta.url), JSON.stringify({
+    ...options, callerCwd: process.cwd(), signalIsAbort: options.signal instanceof AbortSignal,
+  }));
+  return { schemaVersion: 1, kind: 'psc-source-query/1', status: 'accepted',
+    sourceSha256: 'f'.repeat(64), scope: 'document-with-saved-import-closure',
+    kernelAdmissionAccepted: true, diagnostics: [] };
+}
+`);
   const env = { ...process.env };
   for (const key of overrides) delete env[key];
   const invoke = (args, options = {}) => spawnSync(process.execPath,
@@ -295,4 +306,29 @@ test('examples lists shipped source locations without invoking compiler or npm c
     assert.equal(example.path, path.join(context.installed, 'examples/platform', example.name));
   }
   await notCalled(context);
+});
+
+test('editor query reads unsaved input and calls only the read-only query contract', async t => {
+  const context = await fixture(t);
+  const overlay = 'def answer : Nat := 43\n';
+  const run = context.invoke(['query', 'src/Main.ps', '--stdin', '--json'], { input: overlay });
+  assert.equal(run.status, 0, run.stderr);
+  assert.equal(run.stderr, 'PSC_EXTENSIONS: []\n');
+  assert.equal(JSON.parse(run.stdout).kind, 'psc-source-query/1');
+  const received = JSON.parse(await readFile(context.marker, 'utf8'));
+  assert.equal(received.sourceText, overlay);
+  assert.equal(received.entryPath, path.join(context.project, 'src/Main.ps'));
+  assert.equal(received.signalIsAbort, true);
+  assert.equal(received.compilerSha256.length, 64);
+  assert.equal(received.kernel, 'pskernel-core');
+  assert.equal(received.callerCwd, context.project);
+  assert.equal(Object.hasOwn(received, 'outputPath'), false);
+  for (const args of [
+    ['query', 'src/Main.ps'],
+    ['query', 'src/Main.ps', '--stdin', '--out', 'src/forbidden.ts'],
+    ['query', 'src/Main.lean', '--stdin'],
+  ]) {
+    const rejected = context.invoke(args, { input: overlay });
+    assert.notEqual(rejected.status, 0);
+  }
 });

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtemp, writeFile, mkdir, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, mkdir, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
@@ -132,3 +132,36 @@ if (process.platform === 'win32') {
       parsedFixtures([[mainSource, ['lib']], [libSource, ['MAIN']]])), /IMPORT_CYCLE/);
   }));
 }
+
+test('editor source overlay checks the in-memory entry and preserves disk bytes', () => fixture(async dir => {
+  const entry = path.join(dir, 'Main.ps');
+  const saved = 'def answer : Nat := 42\n';
+  const overlay = 'def answer : Nat := 43\n';
+  await writeFile(entry, saved);
+  const old = await readCheckedSourceSnapshot(entry, parsedFixtures([[saved, []]]));
+  const snapshot = await readCheckedSourceSnapshot(entry, {
+    ...parsedFixtures([[overlay, []]]), sourceOverlay: overlay,
+  });
+  assert.deepEqual(snapshot.sources, [overlay]);
+  assert.equal(snapshot.overlayEntry, path.resolve(entry));
+  assert.notEqual(snapshot.closureSha256, old.closureSha256);
+  assert.equal(await readFile(entry, 'utf8'), saved);
+  await assert.rejects(readCheckedSourceSnapshot(entry, {
+    sourceOverlay: overlay, readProofScriptImports: () => { throw Error('unexpected parser'); },
+  }), /unexpected parser/u);
+  assert.deepEqual((await readCheckedSourceSnapshot(entry,
+    parsedFixtures([[saved, []]]))).sources, [saved]);
+}));
+
+test('editor overlay never applies to generated closure or non-PS input', () => fixture(async dir => {
+  const lean = path.join(dir, 'Main.lean');
+  await writeFile(lean, 'def answer : Nat := 42');
+  await assert.rejects(readCheckedSourceSnapshot(lean, { sourceOverlay: 'def x := 4' }),
+    /PSC_QUERY_OVERLAY_PROFILE/u);
+  const source = path.join(dir, 'Main.ps');
+  await writeFile(source, 'def answer : Nat := 42');
+  await writeFile(path.join(dir, '.proofscript-bootstrap.json'), '{}');
+  await assert.rejects(readCheckedSourceSnapshot(source, {
+    sourceOverlay: 'def answer : Nat := 43', readProofScriptImports: () => [],
+  }), /PSC_QUERY_GENERATED_CLOSURE_UNSUPPORTED/u);
+}));

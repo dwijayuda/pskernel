@@ -1,7 +1,7 @@
 {
   "name": "proofscript",
-  "version": "0.1.0-preview.4",
-  "description": "ProofScript compiler platform with protected admission, checked TypeScript libraries, project watch, and isolated command extensions",
+  "version": "0.1.0-preview.5",
+  "description": "ProofScript compiler platform with protected admission, checked TypeScript libraries, project watch, and bounded source diagnostics",
   "type": "module",
   "bin": {
     "psc": "./bin/psc.mjs"

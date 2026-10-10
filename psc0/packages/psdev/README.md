@@ -2,10 +2,10 @@
 
 This private, unpublished npm extension carries a prepared 44-byte WebAssembly command module; the supervisor handles optional watch scheduling. It demonstrates the same protected extension contract used for independently named packages. Neither the unscoped name nor the illustrated scope is claimed to be available or owned on npm.
 
-Install the matching preview.4 candidate archive from its actual downloaded path:
+Install the matching preview.5 candidate archive from its actual downloaded path:
 
 ```sh
-npm install --save-dev --save-exact --ignore-scripts "/absolute/path/psdev-0.1.0-preview.4.tgz"
+npm install --save-dev --save-exact --ignore-scripts "/absolute/path/psdev-0.1.0-preview.5.tgz"
 ```
 
 On Windows, use your actual drive path. Use the matching proofscript preview.3 compiler. Enable the package explicitly in the root project's existing `package.json`:

@@ -23,7 +23,7 @@ Init creates package.json, src/Main.ps, and PROOFSCRIPT.md. It installs nothing.
 For a published version, the generated exact dependency can be installed with `npm install --ignore-scripts`. For this unpublished preview, install the downloaded candidate tarball from its actual path:
 
 ```sh
-npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.4.tgz"
+npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.5.tgz"
 npm run check
 npm run build
 ```
@@ -55,7 +55,7 @@ To adopt the same approach in an existing project, preserve its package metadata
 
 ## checked-library
 
-Copy checked-library into a working directory and install the preview.4 candidate tarball as above. The project also pins TypeScript 7.0.2. Run `npm run ps:check` for kernel admission only, or `npm run build` followed by `npm start` for the complete example.
+Copy checked-library into a working directory and install the preview.5 candidate tarball as above. The project also pins TypeScript 7.0.2. Run `npm run ps:check` for kernel admission only, or `npm run build` followed by `npm start` for the complete example.
 
 Its root `proofscript.exports` map selects `Quantity` and `makeQuantity` from src/Quantity.ps, and `readQuantity` and `sameQuantity` from src/Main.ps. The entry imports the first module. The compiler checks the complete source closure, then publishes src/generated/library.ts as one shared implementation plus the thin src/Quantity.ts and src/Main.ts facades. The completed receipt is src/generated/library.checked.json. The handwritten consumer imports the two neighboring modules and prints `ProofScript library answer: 42`.
 
@@ -69,4 +69,4 @@ The rejected-source directory contains `def answer : Nat := Type`. Its check/bui
 
 ## Optional extension demo
 
-The separately built psdev candidate is outside the compiler self-host closure. The generated PROOFSCRIPT.md explains how to install its exact tarball, explicitly enable `command:dev` in package.json, and run `psc dev --once`. This demo uses the same protected checked-build route. It is a bounded one-shot command. The same command can use the checked-library project's configured entry, bundle and export selection; enabling it does not grant direct access to those files. Try `psc dev --watch --tsc` with installed/activated psdev in a copied checked-library project. LSP and broader ABI support remain later work.
+The separately built psdev candidate is outside the compiler self-host closure. The generated PROOFSCRIPT.md explains how to install its exact tarball, explicitly enable `command:dev` in package.json, and run `psc dev --once`. This demo uses the same protected checked-build route. It is a bounded one-shot command. The same command can use the checked-library project's configured entry, bundle and export selection; enabling it does not grant direct access to those files. Try `psc dev --watch --tsc` with installed/activated psdev in a copied checked-library project. The optional pslsp preview5 provides in-memory document diagnostics; semantic hover/definition and broader ABI support remain later work.

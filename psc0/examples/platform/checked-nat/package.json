@@ -7,7 +7,7 @@
     "build": "node ./node_modules/proofscript/bin/psc.mjs build src/Main.ps --out src/Main.ts"
   },
   "devDependencies": {
-    "proofscript": "0.1.0-preview.4"
+    "proofscript": "0.1.0-preview.5"
   },
   "proofscript": {
     "profile": "checked",

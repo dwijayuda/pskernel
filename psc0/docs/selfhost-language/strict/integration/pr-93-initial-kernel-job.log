@@ -1,0 +1,525 @@
+﻿2026-10-10T05:58:07.9730027Z Current runner version: '2.337.0'
+2026-10-10T05:58:07.9755069Z ##[group]Runner Image Provisioner
+2026-10-10T05:58:07.9755925Z Hosted Compute Agent
+2026-10-10T05:58:07.9756860Z Version: 20261002.596
+2026-10-10T05:58:07.9757513Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-10T05:58:07.9758303Z Build Date: 2026-10-02T22:28:27Z
+2026-10-10T05:58:07.9759080Z Worker ID: {632f8d6b-af18-4e7b-ab1a-acaf46c0a0bd}
+2026-10-10T05:58:07.9759806Z Region: westus2
+2026-10-10T05:58:07.9760403Z Cloud: Azure
+2026-10-10T05:58:07.9760942Z ##[endgroup]
+2026-10-10T05:58:07.9762499Z ##[group]Operating System
+2026-10-10T05:58:07.9763211Z Ubuntu
+2026-10-10T05:58:07.9763734Z 24.04.5
+2026-10-10T05:58:07.9764303Z LTS
+2026-10-10T05:58:07.9764831Z ##[endgroup]
+2026-10-10T05:58:07.9765377Z ##[group]Runner Image
+2026-10-10T05:58:07.9766068Z Image: ubuntu-24.04
+2026-10-10T05:58:07.9767030Z Version: 20261004.327.1
+2026-10-10T05:58:07.9768408Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-10T05:58:07.9770002Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-10T05:58:07.9771090Z ##[endgroup]
+2026-10-10T05:58:07.9772191Z ##[group]GITHUB_TOKEN Permissions
+2026-10-10T05:58:07.9774343Z Contents: read
+2026-10-10T05:58:07.9775042Z Metadata: read
+2026-10-10T05:58:07.9775755Z ##[endgroup]
+2026-10-10T05:58:07.9778184Z Secret source: Actions
+2026-10-10T05:58:07.9779197Z Cache mode: write
+2026-10-10T05:58:07.9779921Z Prepare workflow directory
+2026-10-10T05:58:08.0115970Z Prepare all required actions
+2026-10-10T05:58:08.0164766Z Getting action download info
+2026-10-10T05:58:08.3986291Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-10T05:58:08.5071029Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-10T05:58:08.6937594Z Complete job name: kernel
+2026-10-10T05:58:08.7703334Z ##[group]Run actions/checkout@v4
+2026-10-10T05:58:08.7704228Z with:
+2026-10-10T05:58:08.7704698Z   repository: dwijayuda/pskernel
+2026-10-10T05:58:08.7708640Z   token: ***
+2026-10-10T05:58:08.7709088Z   ssh-strict: true
+2026-10-10T05:58:08.7709526Z   ssh-user: git
+2026-10-10T05:58:08.7709982Z   persist-credentials: true
+2026-10-10T05:58:08.7710477Z   clean: true
+2026-10-10T05:58:08.7710930Z   sparse-checkout-cone-mode: true
+2026-10-10T05:58:08.7711458Z   fetch-depth: 1
+2026-10-10T05:58:08.7711897Z   fetch-tags: false
+2026-10-10T05:58:08.7712345Z   show-progress: true
+2026-10-10T05:58:08.7712792Z   lfs: false
+2026-10-10T05:58:08.7713202Z   submodules: false
+2026-10-10T05:58:08.7713651Z   set-safe-directory: true
+2026-10-10T05:58:08.7714161Z   allow-unsafe-pr-checkout: false
+2026-10-10T05:58:08.7714940Z ##[endgroup]
+2026-10-10T05:58:08.8701909Z Syncing repository: dwijayuda/pskernel
+2026-10-10T05:58:08.8704727Z ##[group]Getting Git version info
+2026-10-10T05:58:08.8705940Z Working directory is '/home/runner/work/pskernel/pskernel'
+2026-10-10T05:58:08.8707897Z [command]/usr/bin/git version
+2026-10-10T05:58:08.8790206Z git version 2.55.0
+2026-10-10T05:58:08.8811665Z ##[endgroup]
+2026-10-10T05:58:08.8864063Z Temporarily overriding HOME='/home/runner/work/_temp/760e1e91-0726-4db7-88fe-6075bf0d6a61' before making global git config changes
+2026-10-10T05:58:08.8866740Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T05:58:08.8870511Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-10T05:58:08.8927031Z Deleting the contents of '/home/runner/work/pskernel/pskernel'
+2026-10-10T05:58:08.8932036Z ##[group]Initializing the repository
+2026-10-10T05:58:08.8937722Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel
+2026-10-10T05:58:08.9081276Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-10T05:58:08.9082960Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-10T05:58:08.9084231Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-10T05:58:08.9084989Z hint: call:
+2026-10-10T05:58:08.9085413Z hint:
+2026-10-10T05:58:08.9085944Z hint: 	git config --global init.defaultBranch <name>
+2026-10-10T05:58:08.9086865Z hint:
+2026-10-10T05:58:08.9087477Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-10T05:58:08.9088435Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-10T05:58:08.9089190Z hint:
+2026-10-10T05:58:08.9089624Z hint: 	git branch -m <name>
+2026-10-10T05:58:08.9090101Z hint:
+2026-10-10T05:58:08.9090741Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-10T05:58:08.9097180Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/.git/
+2026-10-10T05:58:08.9108593Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-10T05:58:08.9173270Z ##[endgroup]
+2026-10-10T05:58:08.9174606Z ##[group]Disabling automatic garbage collection
+2026-10-10T05:58:08.9177765Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-10T05:58:08.9215870Z ##[endgroup]
+2026-10-10T05:58:08.9217501Z ##[group]Setting up auth
+2026-10-10T05:58:08.9225564Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T05:58:08.9257505Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T05:58:08.9672934Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T05:58:08.9710981Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T05:58:08.9934885Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T05:58:08.9972229Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T05:58:09.0196727Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-10T05:58:09.0250231Z ##[endgroup]
+2026-10-10T05:58:09.0251707Z ##[group]Fetching the repository
+2026-10-10T05:58:09.0262638Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +d7149c896eb1ae574677ac58fc42d9b4de02bd54:refs/remotes/pull/93/merge
+2026-10-10T05:58:19.9843356Z From https://github.com/dwijayuda/pskernel
+2026-10-10T05:58:19.9845636Z  * [new ref]           d7149c896eb1ae574677ac58fc42d9b4de02bd54 -> pull/93/merge
+2026-10-10T05:58:19.9851423Z ##[endgroup]
+2026-10-10T05:58:19.9853772Z ##[group]Determining the checkout info
+2026-10-10T05:58:19.9856266Z ##[endgroup]
+2026-10-10T05:58:19.9858400Z [command]/usr/bin/git sparse-checkout disable
+2026-10-10T05:58:19.9914530Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-10T05:58:19.9950035Z ##[group]Checking out the ref
+2026-10-10T05:58:19.9953374Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/93/merge
+2026-10-10T05:58:21.8237036Z Updating files:   7% (1625/20922)
+2026-10-10T05:58:21.8340037Z Updating files:   8% (1674/20922)
+2026-10-10T05:58:21.8502402Z Updating files:   9% (1883/20922)
+2026-10-10T05:58:21.8744043Z Updating files:  10% (2093/20922)
+2026-10-10T05:58:21.8966117Z Updating files:  11% (2302/20922)
+2026-10-10T05:58:21.9187316Z Updating files:  12% (2511/20922)
+2026-10-10T05:58:21.9377479Z Updating files:  13% (2720/20922)
+2026-10-10T05:58:22.2311635Z Updating files:  14% (2930/20922)
+2026-10-10T05:58:23.1613663Z Updating files:  14% (2972/20922)
+2026-10-10T05:58:23.4671873Z Updating files:  14% (2975/20922)
+2026-10-10T05:58:23.4792064Z Updating files:  15% (3139/20922)
+2026-10-10T05:58:23.4900395Z Updating files:  16% (3348/20922)
+2026-10-10T05:58:23.5079965Z Updating files:  17% (3557/20922)
+2026-10-10T05:58:23.5241108Z Updating files:  18% (3766/20922)
+2026-10-10T05:58:23.5382939Z Updating files:  19% (3976/20922)
+2026-10-10T05:58:23.5758658Z Updating files:  20% (4185/20922)
+2026-10-10T05:58:23.5887801Z Updating files:  21% (4394/20922)
+2026-10-10T05:58:23.6126919Z Updating files:  22% (4603/20922)
+2026-10-10T05:58:23.6312823Z Updating files:  23% (4813/20922)
+2026-10-10T05:58:24.2387069Z Updating files:  24% (5022/20922)
+2026-10-10T05:58:25.1672324Z Updating files:  24% (5043/20922)
+2026-10-10T05:58:25.1781727Z Updating files:  24% (5046/20922)
+2026-10-10T05:58:25.1887866Z Updating files:  25% (5231/20922)
+2026-10-10T05:58:25.1993050Z Updating files:  26% (5440/20922)
+2026-10-10T05:58:25.2114939Z Updating files:  27% (5649/20922)
+2026-10-10T05:58:25.2230710Z Updating files:  28% (5859/20922)
+2026-10-10T05:58:25.2807734Z Updating files:  29% (6068/20922)
+2026-10-10T05:58:25.3215350Z Updating files:  30% (6277/20922)
+2026-10-10T05:58:25.3339853Z Updating files:  31% (6486/20922)
+2026-10-10T05:58:25.3535963Z Updating files:  32% (6696/20922)
+2026-10-10T05:58:25.3720269Z Updating files:  33% (6905/20922)
+2026-10-10T05:58:25.3885211Z Updating files:  34% (7114/20922)
+2026-10-10T05:58:25.4028921Z Updating files:  35% (7323/20922)
+2026-10-10T05:58:25.4197136Z Updating files:  36% (7532/20922)
+2026-10-10T05:58:25.4356904Z Updating files:  37% (7742/20922)
+2026-10-10T05:58:25.4490797Z Updating files:  38% (7951/20922)
+2026-10-10T05:58:25.4633087Z Updating files:  39% (8160/20922)
+2026-10-10T05:58:25.4815114Z Updating files:  40% (8369/20922)
+2026-10-10T05:58:25.5016390Z Updating files:  41% (8579/20922)
+2026-10-10T05:58:25.5153868Z Updating files:  42% (8788/20922)
+2026-10-10T05:58:25.5285142Z Updating files:  43% (8997/20922)
+2026-10-10T05:58:25.5387263Z Updating files:  44% (9206/20922)
+2026-10-10T05:58:25.5514553Z Updating files:  45% (9415/20922)
+2026-10-10T05:58:25.6734646Z Updating files:  46% (9625/20922)
+2026-10-10T05:58:25.7188282Z Updating files:  47% (9834/20922)
+2026-10-10T05:58:25.8000725Z Updating files:  48% (10043/20922)
+2026-10-10T05:58:25.9535904Z Updating files:  49% (10252/20922)
+2026-10-10T05:58:26.0172916Z Updating files:  50% (10461/20922)
+2026-10-10T05:58:26.1619057Z Updating files:  50% (10522/20922)
+2026-10-10T05:58:26.4944037Z Updating files:  51% (10671/20922)
+2026-10-10T05:58:26.7196338Z Updating files:  52% (10880/20922)
+2026-10-10T05:58:26.9466934Z Updating files:  53% (11089/20922)
+2026-10-10T05:58:27.0166921Z Updating files:  54% (11298/20922)
+2026-10-10T05:58:27.1991425Z Updating files:  54% (11347/20922)
+2026-10-10T05:58:27.4514064Z Updating files:  55% (11508/20922)
+2026-10-10T05:58:27.5197681Z Updating files:  56% (11717/20922)
+2026-10-10T05:58:27.6091906Z Updating files:  57% (11926/20922)
+2026-10-10T05:58:27.6374698Z Updating files:  58% (12135/20922)
+2026-10-10T05:58:27.6449665Z Updating files:  59% (12344/20922)
+2026-10-10T05:58:27.6525380Z Updating files:  60% (12554/20922)
+2026-10-10T05:58:27.6629772Z Updating files:  61% (12763/20922)
+2026-10-10T05:58:27.6711094Z Updating files:  62% (12972/20922)
+2026-10-10T05:58:27.6801602Z Updating files:  63% (13181/20922)
+2026-10-10T05:58:27.6895094Z Updating files:  64% (13391/20922)
+2026-10-10T05:58:27.6991691Z Updating files:  65% (13600/20922)
+2026-10-10T05:58:27.7098861Z Updating files:  66% (13809/20922)
+2026-10-10T05:58:27.7197053Z Updating files:  67% (14018/20922)
+2026-10-10T05:58:27.7293050Z Updating files:  68% (14227/20922)
+2026-10-10T05:58:27.7382885Z Updating files:  69% (14437/20922)
+2026-10-10T05:58:27.7478575Z Updating files:  70% (14646/20922)
+2026-10-10T05:58:27.7574702Z Updating files:  71% (14855/20922)
+2026-10-10T05:58:27.7670410Z Updating files:  72% (15064/20922)
+2026-10-10T05:58:27.7763477Z Updating files:  73% (15274/20922)
+2026-10-10T05:58:27.7855028Z Updating files:  74% (15483/20922)
+2026-10-10T05:58:27.7974345Z Updating files:  75% (15692/20922)
+2026-10-10T05:58:27.8067530Z Updating files:  76% (15901/20922)
+2026-10-10T05:58:27.8158227Z Updating files:  77% (16110/20922)
+2026-10-10T05:58:27.8255069Z Updating files:  78% (16320/20922)
+2026-10-10T05:58:27.8352916Z Updating files:  79% (16529/20922)
+2026-10-10T05:58:27.8462988Z Updating files:  80% (16738/20922)
+2026-10-10T05:58:27.8570307Z Updating files:  81% (16947/20922)
+2026-10-10T05:58:27.8653000Z Updating files:  82% (17157/20922)
+2026-10-10T05:58:27.8734316Z Updating files:  83% (17366/20922)
+2026-10-10T05:58:27.8821018Z Updating files:  84% (17575/20922)
+2026-10-10T05:58:27.8905498Z Updating files:  85% (17784/20922)
+2026-10-10T05:58:27.8992406Z Updating files:  86% (17993/20922)
+2026-10-10T05:58:27.9052957Z Updating files:  87% (18203/20922)
+2026-10-10T05:58:27.9113521Z Updating files:  88% (18412/20922)
+2026-10-10T05:58:27.9176203Z Updating files:  89% (18621/20922)
+2026-10-10T05:58:27.9420149Z Updating files:  90% (18830/20922)
+2026-10-10T05:58:27.9617557Z Updating files:  91% (19040/20922)
+2026-10-10T05:58:27.9706243Z Updating files:  92% (19249/20922)
+2026-10-10T05:58:27.9792408Z Updating files:  93% (19458/20922)
+2026-10-10T05:58:28.0340710Z Updating files:  94% (19667/20922)
+2026-10-10T05:58:28.1136791Z Updating files:  94% (19813/20922)
+2026-10-10T05:58:28.1938035Z Updating files:  95% (19876/20922)
+2026-10-10T05:58:28.2580554Z Updating files:  96% (20086/20922)
+2026-10-10T05:58:28.2826362Z Updating files:  97% (20295/20922)
+2026-10-10T05:58:28.3488440Z Updating files:  98% (20504/20922)
+2026-10-10T05:58:28.3927780Z Updating files:  99% (20713/20922)
+2026-10-10T05:58:28.3928662Z Updating files: 100% (20922/20922)
+2026-10-10T05:58:28.3929129Z Updating files: 100% (20922/20922), done.
+2026-10-10T05:58:28.4134477Z Note: switching to 'refs/remotes/pull/93/merge'.
+2026-10-10T05:58:28.4134785Z 
+2026-10-10T05:58:28.4135053Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-10T05:58:28.4135836Z changes and commit them, and you can discard any commits you make in this
+2026-10-10T05:58:28.4137222Z state without impacting any branches by switching back to a branch.
+2026-10-10T05:58:28.4137768Z 
+2026-10-10T05:58:28.4138110Z If you want to create a new branch to retain commits you create, you may
+2026-10-10T05:58:28.4138651Z do so (now or later) by using -c with the switch command. Example:
+2026-10-10T05:58:28.4138956Z 
+2026-10-10T05:58:28.4139079Z   git switch -c <new-branch-name>
+2026-10-10T05:58:28.4139283Z 
+2026-10-10T05:58:28.4139396Z Or undo this operation with:
+2026-10-10T05:58:28.4139585Z 
+2026-10-10T05:58:28.4139680Z   git switch -
+2026-10-10T05:58:28.4139821Z 
+2026-10-10T05:58:28.4140068Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-10T05:58:28.4140442Z 
+2026-10-10T05:58:28.4140866Z HEAD is now at d7149c89 Merge e023fd450f29ef66457b40e11bb143496f1c95ff into ed5d00aca0743bde583b45fe7756dd494ac3960f
+2026-10-10T05:58:28.4317394Z ##[endgroup]
+2026-10-10T05:58:28.4319637Z [command]/usr/bin/git log -1 --format=%H
+2026-10-10T05:58:28.4335947Z d7149c896eb1ae574677ac58fc42d9b4de02bd54
+2026-10-10T05:58:28.4604375Z ##[group]Run actions/setup-node@v4
+2026-10-10T05:58:28.4604681Z with:
+2026-10-10T05:58:28.4604878Z   node-version: 22
+2026-10-10T05:58:28.4605092Z   always-auth: false
+2026-10-10T05:58:28.4605322Z   check-latest: false
+2026-10-10T05:58:28.4608001Z   token: ***
+2026-10-10T05:58:28.4608225Z ##[endgroup]
+2026-10-10T05:58:28.6059260Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-10T05:58:28.6063430Z (node:2309) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-10T05:58:28.6064398Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-10T05:58:28.6066406Z ##[group]Environment details
+2026-10-10T05:58:29.0459967Z node: v22.23.3
+2026-10-10T05:58:29.0460437Z npm: 10.9.9
+2026-10-10T05:58:29.0460921Z yarn: 1.22.22
+2026-10-10T05:58:29.0462090Z ##[endgroup]
+2026-10-10T05:58:29.0615769Z ##[group]Run npm ci --no-audit --no-fund
+2026-10-10T05:58:29.0616180Z [36;1mnpm ci --no-audit --no-fund[0m
+2026-10-10T05:58:29.0913425Z shell: /usr/bin/bash -e {0}
+2026-10-10T05:58:29.0913968Z ##[endgroup]
+2026-10-10T05:58:30.4788727Z 
+2026-10-10T05:58:30.4799246Z added 25 packages in 1s
+2026-10-10T05:58:30.5227534Z ##[group]Run npm test
+2026-10-10T05:58:30.5227824Z [36;1mnpm test[0m
+2026-10-10T05:58:30.5292998Z shell: /usr/bin/bash -e {0}
+2026-10-10T05:58:30.5293260Z ##[endgroup]
+2026-10-10T05:58:30.6381561Z 
+2026-10-10T05:58:30.6382280Z > lean-ts-kernel@0.1.0 test
+2026-10-10T05:58:30.6382901Z > npm run test:outer && npm run test:kernel
+2026-10-10T05:58:30.6383157Z 
+2026-10-10T05:58:30.7437172Z 
+2026-10-10T05:58:30.7437909Z > lean-ts-kernel@0.1.0 test:outer
+2026-10-10T05:58:30.7439172Z > npm run build:src && npm run test:packages && npm run test:package-integration && npm run check:packages
+2026-10-10T05:58:30.7439938Z 
+2026-10-10T05:58:30.8424262Z 
+2026-10-10T05:58:30.8425009Z > lean-ts-kernel@0.1.0 build:src
+2026-10-10T05:58:30.8425529Z > tsc -p tsconfig.src.json
+2026-10-10T05:58:30.8425743Z 
+2026-10-10T05:58:31.1523215Z 
+2026-10-10T05:58:31.1523938Z > lean-ts-kernel@0.1.0 test:packages
+2026-10-10T05:58:31.1533291Z > npm run test:syntax && tsc -p packages/browser/tsconfig.json && node packages/browser/dist/test/index.test.js && tsc -p packages/pretty/tsconfig.json && node packages/pretty/dist/test/index.test.js && tsc -p packages/meta/tsconfig.json && node packages/meta/dist/test/index.test.js && tsc -p packages/environment/tsconfig.json && node packages/environment/dist/test/index.test.js && tsc -p packages/checked-core/tsconfig.json && node packages/checked-core/dist/test/index.test.js && tsc -p packages/tactic/tsconfig.json && node packages/tactic/dist/test/index.test.js && tsc -p packages/elab/tsconfig.json && node packages/elab/dist/test/index.test.js && tsc -p packages/compiler-ir/tsconfig.json && node packages/compiler-ir/dist/test/index.test.js && tsc -p packages/erasure/tsconfig.json && node packages/erasure/dist/test/index.test.js && tsc -p packages/runtime/tsconfig.json && node packages/runtime/dist/test/index.test.js && tsc -p packages/backend-ts/tsconfig.json && node packages/backend-ts/dist/test/index.test.js && node packages/backend-ts/dist/test/typescript-compiler.test.js && tsc -p packages/compiler/tsconfig.json && node packages/compiler/dist/test/index.test.js && tsc -p packages/project/tsconfig.json && node packages/project/dist/test/index.test.js && tsc -p packages/language-service/tsconfig.json && node packages/language-service/dist/test/index.test.js && tsc -p packages/lsp/tsconfig.json && node packages/lsp/dist/test/index.test.js && tsc -p packages/module/tsconfig.json && tsc -p packages/cli/tsconfig.json && node packages/cli/dist/test/cli.test.js
+2026-10-10T05:58:31.1540307Z 
+2026-10-10T05:58:31.2465679Z 
+2026-10-10T05:58:31.2466367Z > lean-ts-kernel@0.1.0 test:syntax
+2026-10-10T05:58:31.2467790Z > tsc -p packages/syntax/tsconfig.json && node packages/syntax/dist/test/syntax.test.js && node packages/syntax/dist/test/v061-conformance.test.js
+2026-10-10T05:58:31.2468486Z 
+2026-10-10T05:58:31.4979217Z ok - @proofscript/syntax lexer MVP
+2026-10-10T05:58:31.5114171Z ok - @proofscript/syntax DS2 complete emitted-subset frontend
+2026-10-10T05:58:31.5118773Z ok - @proofscript/syntax explicit runtime external declaration
+2026-10-10T05:58:31.5119617Z ok - @proofscript/syntax inherited instance declarations
+2026-10-10T05:58:31.5755639Z ok - v0.6.1 feature-complete lowering corpus (12 registered features)
+2026-10-10T05:58:31.6930662Z ok - @proofscript/browser foundation
+2026-10-10T05:58:31.8050131Z ok - @proofscript/pretty foundation
+2026-10-10T05:58:31.9621012Z ok - @proofscript/meta foundation
+2026-10-10T05:58:31.9664240Z ok - @proofscript/meta Expr metavariable context
+2026-10-10T05:58:31.9666315Z ok - @proofscript/meta Lean-style metavariable depth discipline
+2026-10-10T05:58:31.9700083Z ok - @proofscript/meta structural application unification with rollback
+2026-10-10T05:58:31.9701653Z ok - @proofscript/meta structural Pi unification
+2026-10-10T05:58:31.9709360Z ok - @proofscript/meta mixed universe/application unification
+2026-10-10T05:58:31.9714462Z ok - @proofscript/meta bounded universe metavariable solving
+2026-10-10T05:58:33.8903406Z ok - @proofscript/environment certified self-host compiler base
+2026-10-10T05:58:33.8905341Z ok - @proofscript/environment replay and fail-closed provider
+2026-10-10T05:58:34.0873862Z ok - @proofscript/checked-core kernel admission boundary
+2026-10-10T05:58:34.0973926Z ok - @proofscript/checked-core mixed inductive admission
+2026-10-10T05:58:34.0994028Z ok - @proofscript/checked-core class metadata admission
+2026-10-10T05:58:34.1017498Z ok - @proofscript/checked-core instance registry metadata
+2026-10-10T05:58:34.1030513Z ok - @proofscript/checked-core persistent admission codec
+2026-10-10T05:58:34.1033276Z ok - @proofscript/checked-core external admission codec
+2026-10-10T05:58:34.1036192Z ok - @proofscript/checked-core Char runtime external
+2026-10-10T05:58:34.1038244Z ok - @proofscript/checked-core rejects proof-valued external
+2026-10-10T05:58:34.2348044Z ok - @proofscript/tactic ordered multi-goal state
+2026-10-10T05:58:34.5016348Z ok - @proofscript/elab foundation
+2026-10-10T05:58:34.5091795Z ok - @proofscript/elab Lean-style application elaboration
+2026-10-10T05:58:34.5258569Z ok - @proofscript/elab kernel-facing non-recursive definitions
+2026-10-10T05:58:34.5274065Z ok - @proofscript/elab implicit declaration binders
+2026-10-10T05:58:34.5287727Z ok - @proofscript/elab dependent type application path
+2026-10-10T05:58:34.5307322Z ok - @proofscript/elab kernel theorem proof-term admission
+2026-10-10T05:58:34.5326093Z ok - @proofscript/elab expected-type lambda elaboration
+2026-10-10T05:58:34.5349133Z ok - @proofscript/elab annotated lambda solves generic expected metas
+2026-10-10T05:58:34.5368723Z ok - @proofscript/elab core let elaboration
+2026-10-10T05:58:34.5403512Z ok - @proofscript/elab exact and assumption tactic terms
+2026-10-10T05:58:34.5419379Z ok - @proofscript/elab declaration expected-type propagation
+2026-10-10T05:58:34.5434217Z ok - @proofscript/elab intro tactic proof-term construction
+2026-10-10T05:58:34.5454804Z ok - @proofscript/elab bounded apply tactic proof-term construction
+2026-10-10T05:58:34.5479461Z ok - @proofscript/elab ordered multi-goal apply tactic
+2026-10-10T05:58:34.5515941Z ok - @proofscript/elab bounded synthetic-hole refine tactic
+2026-10-10T05:58:34.5567845Z ok - @proofscript/elab bounded constructor via apply
+2026-10-10T05:58:34.5615441Z ok - @proofscript/elab bounded cases via recursor
+2026-10-10T05:58:34.5697401Z ok - @proofscript/elab parameterized bounded cases
+2026-10-10T05:58:34.5841974Z ok - @proofscript/elab bounded induction via recursor
+2026-10-10T05:58:34.6127662Z ok - @proofscript/elab induction preserves field/IH source names
+2026-10-10T05:58:34.6128903Z ok - @proofscript/elab rw syntax reaches tactic AST
+2026-10-10T05:58:34.6130040Z ok - @proofscript/elab multi-rule simp-only syntax reaches tactic AST
+2026-10-10T05:58:34.6187973Z ok - @proofscript/elab direct polymorphic Eq.symm application
+2026-10-10T05:58:34.6227465Z ok - @proofscript/elab bounded exact search
+2026-10-10T05:58:34.6243361Z ok - @proofscript/elab bounded Eq-only rfl tactic
+2026-10-10T05:58:34.6297299Z ok - @proofscript/elab bounded Nat notation
+2026-10-10T05:58:34.6325015Z ok - @proofscript/elab dependent structure field admission
+2026-10-10T05:58:34.6373722Z ok - @proofscript/elab record construction and kernel projection
+2026-10-10T05:58:34.6497523Z ok - @proofscript/elab unparameterized inductive admission
+2026-10-10T05:58:34.6576310Z ok - @proofscript/elab verified match recursor elaboration
+2026-10-10T05:58:34.6643393Z ok - @proofscript/elab parameterized inductive constructor inference
+2026-10-10T05:58:34.6848503Z ok - @proofscript/elab expected-type propagation into nested calls
+2026-10-10T05:58:34.6927552Z ok - @proofscript/elab parameterized verified match recursor elaboration
+2026-10-10T05:58:34.6964144Z ok - @proofscript/elab match branch Nat notation meta instantiation
+2026-10-10T05:58:34.6992769Z ok - @proofscript/elab verified Bool literal match recursor
+2026-10-10T05:58:34.7063054Z ok - @proofscript/elab direct recursive inductive + recursor match
+2026-10-10T05:58:34.7138083Z ok - @proofscript/elab structural recursion via recursor
+2026-10-10T05:58:34.7190070Z ok - @proofscript/elab structural recursion with invariant parameters
+2026-10-10T05:58:34.7217304Z ok - @proofscript/elab generic structure admission
+2026-10-10T05:58:34.7244957Z ok - @proofscript/elab acyclic where local helpers
+2026-10-10T05:58:34.7307364Z ok - @proofscript/elab class admission as kernel inductive
+2026-10-10T05:58:34.7348596Z ok - @proofscript/elab local class instance synthesis
+2026-10-10T05:58:34.7474775Z ok - @proofscript/elab global class instance synthesis
+2026-10-10T05:58:34.7537311Z ok - @proofscript/elab imported structure/class/instance metadata seed
+2026-10-10T05:58:34.7554992Z ok - @proofscript/elab proof-valued external fails closed
+2026-10-10T05:58:34.7555711Z ok - @proofscript/elab explicit runtime external admission
+2026-10-10T05:58:34.8793375Z ok - @proofscript/compiler-ir foundation
+2026-10-10T05:58:34.8800113Z ok - @proofscript/compiler-ir verified dependent-core IR schema
+2026-10-10T05:58:34.8801063Z ok - @proofscript/compiler-ir verified Nat intrinsic
+2026-10-10T05:58:34.8801923Z ok - @proofscript/compiler-ir verified intrinsic contract
+2026-10-10T05:58:34.8802809Z ok - @proofscript/compiler-ir external import boundary
+2026-10-10T05:58:35.1022068Z ok - @proofscript/erasure generic identity
+2026-10-10T05:58:35.1059739Z ok - @proofscript/erasure flattened runtime callback convention
+2026-10-10T05:58:35.1073301Z ok - @proofscript/erasure Prop and proof binder erasure
+2026-10-10T05:58:35.1080383Z ok - @proofscript/erasure Nat intrinsic lowering
+2026-10-10T05:58:35.1086246Z ok - @proofscript/erasure checked Char.ofNat lowering
+2026-10-10T05:58:35.1108902Z ok - @proofscript/erasure certified text intrinsic lowering
+2026-10-10T05:58:35.1113032Z ok - @proofscript/erasure semantic primitive type identity
+2026-10-10T05:58:35.1183481Z ok - @proofscript/erasure primitive Bool recursor lowering
+2026-10-10T05:58:35.1222179Z ok - @proofscript/erasure verified runtime structures
+2026-10-10T05:58:35.1249503Z ok - @proofscript/erasure verified ADT constructors
+2026-10-10T05:58:35.1307547Z ok - @proofscript/erasure verified ADT recursor match lowering
+2026-10-10T05:58:35.1365107Z ok - @proofscript/erasure generic nonrecursive ADT constructor erasure
+2026-10-10T05:58:35.1422248Z ok - @proofscript/erasure generic ADT recursor parameter substitution
+2026-10-10T05:58:35.1442901Z ok - @proofscript/erasure recursive ADT metadata erasure
+2026-10-10T05:58:35.1469926Z ok - @proofscript/erasure generic structure metadata
+2026-10-10T05:58:35.1478029Z ok - @proofscript/erasure external import lowering
+2026-10-10T05:58:35.2684973Z ok - @proofscript/runtime foundation
+2026-10-10T05:58:35.4424496Z ok - @proofscript/backend-ts foundation
+2026-10-10T05:58:35.6068350Z ok - @proofscript/backend-ts verified generic TypeScript emission
+2026-10-10T05:58:35.7288106Z ok - @proofscript/backend-ts explicit generic call type arguments
+2026-10-10T05:58:35.8528074Z ok - @proofscript/backend-ts verified Nat intrinsic emission
+2026-10-10T05:58:35.9726241Z ok - @proofscript/backend-ts Lean-faithful Char.ofNat emission
+2026-10-10T05:58:36.0945899Z ok - @proofscript/backend-ts certified text intrinsic emission
+2026-10-10T05:58:36.2138187Z ok - @proofscript/backend-ts verified String equality emission
+2026-10-10T05:58:36.3368896Z ok - @proofscript/backend-ts canonical Array intrinsic emission
+2026-10-10T05:58:36.4605806Z ok - @proofscript/backend-ts verified nominal structure emission
+2026-10-10T05:58:36.5826986Z ok - @proofscript/backend-ts verified ADT constructor emission
+2026-10-10T05:58:36.7070951Z ok - @proofscript/backend-ts verified ADT match emission
+2026-10-10T05:58:36.8315529Z ok - @proofscript/backend-ts verified generic ADT TypeScript emission
+2026-10-10T05:58:36.9543273Z ok - @proofscript/backend-ts generic structure TypeScript emission
+2026-10-10T05:58:36.9544623Z ok - @proofscript/backend-ts external ESM import emission
+2026-10-10T05:58:37.5246785Z PS_ROOT_TYPESCRIPT7_CONTRACT {"schema":"psc-root-typescript7-contract-v1","typescript":"7.0.2","passed":true,"cases":["virtual-source-and-existing-products","logical-map-name","config-independent-positional","relative-typescript-import","package-export-import","root-output-selection","logical-diagnostic-position","self-reference-refusal","declaration-input-refusal","missing-directory-refusal","stage-cleanup"]}
+2026-10-10T05:58:37.8889494Z ok - @proofscript/compiler checked-core orchestration
+2026-10-10T05:58:37.8891671Z ok - @proofscript/compiler IR keeps language primitive identity upstream of TS mapping
+2026-10-10T05:58:38.0385079Z ok - @proofscript/project mixed-source graph foundation
+2026-10-10T05:58:38.0401968Z ok - @proofscript/project shared Node source-root resolver
+2026-10-10T05:58:38.0407080Z ok - @proofscript/project exact runtime dependency policy parser
+2026-10-10T05:58:38.2745571Z ok - @proofscript/language-service proof-aware document analysis
+2026-10-10T05:58:38.2760984Z ok - @proofscript/language-service Lean-subset source routing
+2026-10-10T05:58:38.2869261Z ok - @proofscript/language-service navigation and completion
+2026-10-10T05:58:38.2888898Z ok - @proofscript/language-service sequential document environment
+2026-10-10T05:58:38.2920371Z ok - @proofscript/language-service mixed-source import environment
+2026-10-10T05:58:38.2925429Z ok - @proofscript/language-service project failure is fail-closed
+2026-10-10T05:58:38.2960523Z ok - @proofscript/language-service cross-source navigation
+2026-10-10T05:58:38.2973290Z ok - @proofscript/language-service document translation
+2026-10-10T05:58:38.3048805Z ok - @proofscript/language-service importer buffer invalidation
+2026-10-10T05:58:38.5427875Z ok - @proofscript/lsp foundation
+2026-10-10T05:58:38.5525251Z ok - @proofscript/lsp proof-aware protocol surface
+2026-10-10T05:58:38.5547896Z ok - @proofscript/lsp dual-source document routing
+2026-10-10T05:58:38.5564502Z ok - @proofscript/lsp shared project source-root resolver
+2026-10-10T05:58:38.5569680Z ok - @proofscript/lsp translation service surface
+2026-10-10T05:58:38.5570597Z ok - @proofscript/lsp importer diagnostic refresh targets
+2026-10-10T05:58:39.0395865Z ok - psc CLI argument/UX contract
+2026-10-10T05:58:40.9570817Z ok - psc verified checked-core compiler pipeline
+2026-10-10T05:58:40.9613201Z ok - psc verified runtime external assurance
+2026-10-10T05:58:40.9730741Z ok - psc verified project assurance reports source externals
+2026-10-10T05:58:40.9750922Z ok - psc verified check rejects undeclared runtime dependency
+2026-10-10T05:58:41.1270618Z ok - psc verified source FFI resolves exact package and runs
+2026-10-10T05:58:41.1287828Z ok - psc runtime lock rejects missing required transitive entry
+2026-10-10T05:58:41.2987926Z ok - psc verified Nat source pipeline
+2026-10-10T05:58:41.4323544Z ok - psc checked Char.ofNat source pipeline
+2026-10-10T05:58:41.5713307Z ok - psc checked character literal source pipeline
+2026-10-10T05:58:41.7134762Z ok - psc checked Char/String equality source pipeline
+2026-10-10T05:58:41.7135480Z ok - psc verified runtime ABI
+2026-10-10T05:58:42.3099047Z ok - psc Lean-faithful Char.ofNat runtime pipeline
+2026-10-10T05:58:42.4506094Z ok - psc verified run filesystem pipeline
+2026-10-10T05:58:42.6012125Z ok - psc verified Lean-subset run filesystem pipeline
+2026-10-10T05:58:42.9124061Z ok - psc SH1 dual-source Unicode String.length runtime
+2026-10-10T05:58:43.1966010Z ok - psc SH1 dual-source UTF-8 next/get/extract runtime
+2026-10-10T05:58:43.4965136Z ok - psc SH1 dual-source UTF-8 atEnd runtime
+2026-10-10T05:58:43.8051182Z ok - psc SH2 dual-source canonical Prod runtime
+2026-10-10T05:58:44.1197735Z ok - psc SH2 dual-source canonical Array runtime
+2026-10-10T05:58:44.5922702Z ok - psc SH2 deterministic ordered Map/Set runtime
+2026-10-10T05:58:44.7601997Z ok - psc verified structure JSON ABI round-trip
+2026-10-10T05:58:44.9358442Z ok - psc verified generic ADT JSON ABI round-trip
+2026-10-10T05:58:45.0940983Z ok - psc verified structural recursion run filesystem pipeline
+2026-10-10T05:58:45.2496633Z ok - psc verified proposition-based if pipeline
+2026-10-10T05:58:45.4055624Z ok - psc verified nominal structure pipeline
+2026-10-10T05:58:45.5611297Z ok - psc verified ADT constructor pipeline
+2026-10-10T05:58:45.7135925Z ok - psc verified ADT match pipeline
+2026-10-10T05:58:45.8644337Z ok - psc verified generic ADT constructor pipeline
+2026-10-10T05:58:46.0126245Z ok - psc verified generic ADT match pipeline
+2026-10-10T05:58:46.1523205Z ok - psc verified recursive ADT match pipeline
+2026-10-10T05:58:46.2864571Z ok - psc verified structural recursive function pipeline
+2026-10-10T05:58:46.4060955Z ok - psc verified invariant structural recursion pipeline
+2026-10-10T05:58:46.5500613Z ok - psc verified invariant structural recursion run
+2026-10-10T05:58:46.6832797Z ok - psc verified generic map structural recursion pipeline
+2026-10-10T05:58:46.8328898Z ok - psc verified generic map run filesystem pipeline
+2026-10-10T05:58:46.9638262Z ok - psc verified generic structure source pipeline
+2026-10-10T05:58:47.0857343Z ok - psc verified acyclic where source pipeline
+2026-10-10T05:58:47.2172099Z ok - psc verified local class instance pipeline
+2026-10-10T05:58:47.3466294Z ok - psc verified global class instance pipeline
+2026-10-10T05:58:47.3484146Z ok - psc emit-lean uses source/target dispatch
+2026-10-10T05:58:47.3504898Z ok - psc translate ps/lean canonical round-trip
+2026-10-10T05:58:47.3564091Z ok - psc canonical source hash is source-kind neutral
+2026-10-10T05:58:47.4867045Z ok - psc mixed ProofScript -> Lean import run
+2026-10-10T05:58:47.6155452Z ok - psc mixed Lean -> ProofScript import run
+2026-10-10T05:58:47.7948427Z ok - psc mixed imports preserve structure/class/instance metadata
+2026-10-10T05:58:47.8075498Z ok - psc checked-module cache uses dependency integrity keys
+2026-10-10T05:58:47.9381586Z ok - psc emits replay-gated checked-admission .psmodule v2 artifacts
+2026-10-10T05:58:48.0703610Z ok - psc configured source roots resolve mixed-source imports
+2026-10-10T05:58:48.0735266Z ok - psc configured source roots reject duplicate logical modules
+2026-10-10T05:58:48.0756738Z ok - psc mixed-source module ambiguity fails closed
+2026-10-10T05:58:48.0807358Z ok - psc has one checked-core semantic lane
+2026-10-10T05:58:48.1943125Z 
+2026-10-10T05:58:48.1943741Z > lean-ts-kernel@0.1.0 test:package-integration
+2026-10-10T05:58:48.1944288Z > node scripts/package-integration-smoke.mjs
+2026-10-10T05:58:48.1944566Z 
+2026-10-10T05:58:55.5262874Z package integration smoke: PASS
+2026-10-10T05:58:59.0351858Z 
+2026-10-10T05:58:59.0352483Z > lean-ts-kernel@0.1.0 check:packages
+2026-10-10T05:58:59.0353793Z > node scripts/package-map-check.mjs && npm run check:source-shape && npm run check:vscode && npm run check:architecture
+2026-10-10T05:58:59.0354642Z 
+2026-10-10T05:58:59.0735220Z package-map: PASS (21 packages; dependency graph acyclic)
+2026-10-10T05:58:59.1711971Z 
+2026-10-10T05:58:59.1712622Z > lean-ts-kernel@0.1.0 check:source-shape
+2026-10-10T05:58:59.1713246Z > node scripts/source-shape-check.mjs
+2026-10-10T05:58:59.1713513Z 
+2026-10-10T05:58:59.2118183Z source-shape: PASS (syntax, meta, environment, checked-core, elab, language-service, erasure, compiler-ir, backend-ts, compiler, lsp, cli)
+2026-10-10T05:58:59.3136130Z 
+2026-10-10T05:58:59.3137239Z > lean-ts-kernel@0.1.0 check:vscode
+2026-10-10T05:58:59.3137930Z > node scripts/vscode-shape-check.mjs && node editors/vscode/test/smoke.mjs
+2026-10-10T05:58:59.3138343Z 
+2026-10-10T05:58:59.3462162Z vscode-shape: PASS (5 modules; <=300 lines each)
+2026-10-10T05:58:59.3785095Z vscode-shape: PASS
+2026-10-10T05:58:59.4827466Z 
+2026-10-10T05:58:59.4828099Z > lean-ts-kernel@0.1.0 check:architecture
+2026-10-10T05:58:59.4828661Z > node scripts/proofscript-architecture-check.mjs
+2026-10-10T05:58:59.4828955Z 
+2026-10-10T05:58:59.5181675Z proofscript-architecture: PASS (source -> elab -> checked-core -> erasure -> IR -> TS -> JS)
+2026-10-10T05:58:59.6341969Z 
+2026-10-10T05:58:59.6342481Z > lean-ts-kernel@0.1.0 test:kernel
+2026-10-10T05:58:59.6343293Z > npm run check:oracle-syntax && npm run build && npm run test:oracle-tools && node dist/test/all.test.js
+2026-10-10T05:58:59.6344086Z 
+2026-10-10T05:58:59.7332005Z 
+2026-10-10T05:58:59.7333033Z > lean-ts-kernel@0.1.0 check:oracle-syntax
+2026-10-10T05:58:59.7336111Z > node --check scripts/module-stream-oracle.mjs && node --check scripts/full-std-oracle.mjs && node --check scripts/std-hot-oracle.mjs && node --check scripts/std-bisect-oracle.mjs && node --check scripts/std-bisect-oracle-test.mjs && node --check scripts/adaptive-root-oracle.mjs && node --check scripts/kernel-study-regression-matrix.mjs && node --check scripts/official-oracle.mjs && node --check scripts/defeq-differential.mjs && node --check scripts/adversarial-oracle.mjs && node --check scripts/native-oracle-smoke.mjs
+2026-10-10T05:58:59.7340308Z 
+2026-10-10T05:59:00.0884136Z 
+2026-10-10T05:59:00.0884662Z > lean-ts-kernel@0.1.0 build
+2026-10-10T05:59:00.0885212Z > tsc -p tsconfig.json
+2026-10-10T05:59:00.0885401Z 
+2026-10-10T05:59:00.4654131Z 
+2026-10-10T05:59:00.4654765Z > lean-ts-kernel@0.1.0 test:oracle-tools
+2026-10-10T05:59:00.4655909Z > node scripts/std-bisect-oracle-test.mjs && node scripts/lean-native-evaluator-test.mjs && npm run test:kernel-study-matrix
+2026-10-10T05:59:00.4656864Z 
+2026-10-10T05:59:00.8842609Z ok - Std semantic bisection tool
+2026-10-10T05:59:00.9162421Z ok - cached bounded Lean native oracle provider
+2026-10-10T05:59:01.0176821Z 
+2026-10-10T05:59:01.0177848Z > lean-ts-kernel@0.1.0 test:kernel-study-matrix
+2026-10-10T05:59:01.0178722Z > node scripts/kernel-study-regression-matrix.mjs
+2026-10-10T05:59:01.0179182Z 
+2026-10-10T05:59:01.0911210Z file:///home/runner/work/pskernel/pskernel/scripts/kernel-study-regression-matrix.mjs:229
+2026-10-10T05:59:01.0912425Z       throw new Error('workspace lock drift: '+field+' mismatch for '+path);
+2026-10-10T05:59:01.0913152Z             ^
+2026-10-10T05:59:01.0913585Z 
+2026-10-10T05:59:01.0914075Z Error: workspace lock drift: bin mismatch for packages/cli
+2026-10-10T05:59:01.0915314Z     at file:///home/runner/work/pskernel/pskernel/scripts/kernel-study-regression-matrix.mjs:229:13
+2026-10-10T05:59:01.0916328Z     at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+2026-10-10T05:59:01.0917530Z     at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+2026-10-10T05:59:01.0918572Z     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+2026-10-10T05:59:01.0919097Z 
+2026-10-10T05:59:01.0919242Z Node.js v22.23.3
+2026-10-10T05:59:01.1233793Z ##[error]Process completed with exit code 1.
+2026-10-10T05:59:01.1405753Z Post job cleanup.
+2026-10-10T05:59:01.2274014Z [command]/usr/bin/git version
+2026-10-10T05:59:01.2323997Z git version 2.55.0
+2026-10-10T05:59:01.2370670Z Temporarily overriding HOME='/home/runner/work/_temp/e6722992-f2d7-4d65-8aeb-a579fd95e7c6' before making global git config changes
+2026-10-10T05:59:01.2372309Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-10T05:59:01.2377092Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-10T05:59:01.2419683Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-10T05:59:01.2456893Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-10T05:59:01.2741557Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-10T05:59:01.2767769Z http.https://github.com/.extraheader
+2026-10-10T05:59:01.2780472Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-10T05:59:01.2817894Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-10T05:59:01.3109443Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-10T05:59:01.3155572Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-10T05:59:01.3576298Z Cleaning up orphan processes
+2026-10-10T05:59:01.4009150Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

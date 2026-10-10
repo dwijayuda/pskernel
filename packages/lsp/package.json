@@ -25,7 +25,7 @@
     "typescript": "7.0.2"
   },
   "bin": {
-    "proofscript-lsp": "./dist/src/bin.js"
+    "proofscript-lsp": "dist/src/bin.js"
   },
   "dependencies": {
     "@proofscript/language-service": "file:../language-service",

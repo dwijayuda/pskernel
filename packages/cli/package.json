@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "bin": {
-    "pskernel": "./dist/bin/pskernel.js",
-    "psc": "./dist/bin/psc.js"
+    "pskernel": "dist/bin/pskernel.js",
+    "psc": "dist/bin/psc.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

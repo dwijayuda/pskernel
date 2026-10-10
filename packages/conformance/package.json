@@ -17,7 +17,7 @@
     }
   },
   "bin": {
-    "pskernel-conformance": "./dist/bin/pskernel-conformance.js"
+    "pskernel-conformance": "dist/bin/pskernel-conformance.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

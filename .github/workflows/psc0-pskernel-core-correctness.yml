@@ -1,4 +1,4 @@
-name: PSC0 PSKernel correctness audit
+name: PSC0 PSKernel semantic foundation audit
 on:
   push:
     branches: [psc0/pskernel-core-lean435-arena-v1]
@@ -23,7 +23,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Check existing metatheory, exact traces, and companion proofs
+      - name: Check semantic foundation, callback bridges, and companion proofs
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail

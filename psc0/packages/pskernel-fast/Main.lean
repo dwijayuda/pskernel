@@ -148,7 +148,7 @@ def main : IO Unit := do
     .letE x ty (.lam y ty (.bvar 0) .default)
       (.app (.bvar 0) a) false,
     .mdata "informational" betaTerm,
-    .lam x ty (.letE y ty a (.bvar 0) false)
+    .lam x ty (.letE y ty a (.bvar 0) false) .default
   ]
   for e in cases do
     match referenceAgreesWithClosure e with

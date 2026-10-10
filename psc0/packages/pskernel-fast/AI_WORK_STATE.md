@@ -93,3 +93,7 @@ Added pure `PSKernelFast/Substitution.lean` (de Bruijn lifting, capture-avoiding
 This is **untyped beta/let fragment testing only**. Do NOT call successful agreement a Lean proof of correctness or DefEq soundness. Runtime resource outcomes depend on budget placement; this slice compares successful closed cases, not identical fuel consumption.
 
 G4 cloud CI must pass for the exact new source before promotion.
+
+### G4 initial cloud result — failed test harness construction, retained
+
+[Run 38095097366](https://github.com/dwijayuda/pskernel/actions/runs/38095097366), source `62a442660fc51079d384517779622f280650f3e6`, failed compiling `Main.lean`: one lambda fixture supplied three of four required fields; its binder info was missing. All G4 implementation modules (`Substitution` and `Quote`) compiled in that run. Added the missing `BinderInfo.default` argument without changing evaluator rules. No G4 test outcome may be claimed before the replacement run completes.

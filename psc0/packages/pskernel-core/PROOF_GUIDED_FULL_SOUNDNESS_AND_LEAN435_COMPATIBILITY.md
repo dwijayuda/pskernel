@@ -1,5 +1,33 @@
 # PSKernel Core — Proof-Guided Full Soundness and Lean 4.35 Compatibility
 
+## Proof-first checkpoint — October 11, 2026
+
+The user explicitly postponed full Init, Std, Mathlib and full-Init profiling
+until the executable/model relative-consistency theorem is proved. [Commit
+`10d4bf84`](https://github.com/dwijayuda/pskernel/commit/10d4bf84ffbb91f048cd5e7afc22ace2218c3613)
+hard-gated the corpus jobs. Focused metatheory, dependency fences, axiom
+audits, companion proof files and native regressions remain active.
+
+[`SemanticEnvironmentModel.lean`](metatheory/Ps/KernelCore/Metatheory/SemanticEnvironmentModel.lean)
+connects actual PSKernel environment lookup and declaration history to fixed,
+uniform annotated type readings. It constructs a model of the *empty* public
+environment under explicit `[SetTheory V]` and a separate
+`False`-as-empty modeled-axiom policy. Green [run 38075788368](https://github.com/dwijayuda/pskernel/actions/runs/38075788368)
+at `f644cef8` checked 268 builds, 331 semantic axiom targets, all 84 companion
+files, 154 dependency modules (12 pinned pure-math and zero checker-assurance
+imports), 1,840 reference definitions with zero cached fallbacks and seven
+native regression executables.
+
+This is **not yet the modeled initial Lean prelude**, global annotation
+coherence, actual admission preservation, full infer/WHNF/DefEq soundness,
+or the public relative-consistency theorem. A follow-on candidate
+[`902f902b`](https://github.com/dwijayuda/pskernel/commit/902f902b96361a8b14943b02bef503671893b3c0)
+attempts the first modeled no-stored-`False` corollary and derives
+constant-universe arity from actual reference success. Its cloud audit is
+[run 38076656535](https://github.com/dwijayuda/pskernel/actions/runs/38076656535);
+do not promote it without green evidence.
+
+
 **Decision:** keep Lean 4.35 compatibility authoritative; define the *successful-acceptance implies model* theorem first, then modify the existing executable implementation only where that theorem requires maintained evidence. Preserve a single checking/admission algorithm. This is a technical execution reference, **not** a claim that full soundness or consistency has already been proved.
 
 **Repository:** [dwijayuda/pskernel](https://github.com/dwijayuda/pskernel). **Development branch:** `psc0/pskernel-core-lean435-arena-v1`; **draft PR:** [#89](https://github.com/dwijayuda/pskernel/pull/89). **Code:** `psc0/packages/pskernel-core`.

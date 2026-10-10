@@ -389,7 +389,10 @@
     "semanticAxiomAuditCoversNewPublicFrameTheorems": true,
     "actualPublicEmptySessionEnvironmentProved": true,
     "actualPublicEmptySessionInitialFrameProved": true,
-    "initialEnvironmentSemanticModelProved": false
+    "initialEnvironmentSemanticModelProved": false,
+    "actualEmptyEnvironmentModelProved": true,
+    "modeledStoredFalseCorollaryProved": false,
+    "constantUniverseArityDerivedFromRunProved": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -3949,5 +3952,91 @@
       "emptyKernelSession_checker_initial_frame"
     ],
     "evidence": "psc0/packages/pskernel-core/PUBLIC_ENTRY_EVIDENCE_2026-10-10.md"
+  },
+  "proofFirst20261011": {
+    "objective": "Successful reference acceptance implies a correctly modeled declaration history, then no derived literal False under a named, separately modeled axiom policy.",
+    "executionMode": "GitHub/cloud only; proof-first. No full Init/Std/Mathlib/Init profiling until end-to-end model and consistency obligations are closed.",
+    "ciSuspension": {
+      "commit": "10d4bf84ffbb91f048cd5e7afc22ace2218c3613",
+      "mainWorkflowRun": 38075260577,
+      "mainWorkflowConclusion": "success",
+      "extendedCorpusRun": 38075260478,
+      "extendedCorpusConclusion": "skipped",
+      "focusedInitDiagnosticRun": 38075260457,
+      "focusedInitDiagnosticConclusion": "skipped",
+      "sharingDiagnosticRun": 38075260411,
+      "sharingDiagnosticConclusion": "skipped",
+      "testsStillEnabled": [
+        "native Lean 4.35 build",
+        "focused regression",
+        "full metatheory modules",
+        "semantic axiom audit",
+        "84 companion proof files",
+        "dependency fence"
+      ]
+    },
+    "lastVerifiedSource": {
+      "sha": "f644cef8c183bcb8bb0ec395828171077118bcee",
+      "run": 38075788368,
+      "job": 114282343622,
+      "conclusion": "success",
+      "builds": 268,
+      "focusedBuilds": 223,
+      "companionFiles": 84,
+      "auditedDeclarations": 331,
+      "modelClosureModules": 154,
+      "pureMathModules": 12,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "nativeTestExecutables": 7,
+      "proofScope": [
+        "EnvironmentModel requires actual index lookup to return recorded declarations under exact names",
+        "each stored declaration fixes one annotated type witness before all valid universe instances",
+        "explicit False-as-empty policy for the modeled acceptance profile",
+        "construct an explicit SetTheory-relative model of the actual empty environment",
+        "successful public empty-session creation receives that model",
+        "reference constant inference derives membership from modeled declaration history when arity is established"
+      ],
+      "notProved": [
+        "complete modeled Lean logical basis",
+        "public acceptance soundness",
+        "all declaration admission preservation",
+        "full recursive infer/WHNF/DefEq model",
+        "full-kernel relative consistency"
+      ]
+    },
+    "unvalidatedContinuation": {
+      "latestProofSource": "902f902b96361a8b14943b02bef503671893b3c0",
+      "run": 38076656535,
+      "statusAtDocumentation": "in_progress",
+      "intendedClaims": [
+        "modeled history implies no stored zero-parameter constant literally typed False",
+        "universe arity from actual successful reference const inference, not caller premise"
+      ],
+      "failedAttempts": [
+        {
+          "run": 38076107666,
+          "cause": "Missing empty-level List.map normalization in modeled-False theorem"
+        },
+        {
+          "run": 38076280819,
+          "cause": "Unavailable Nat.beq_eq_true.mp theorem and unchecked false-arity branch"
+        },
+        {
+          "run": 38076396352,
+          "cause": "Same constant-arity theorem failure; empty List.map fixes already present"
+        }
+      ],
+      "userVisibleStatus": "Do not call these latter claims verified until a completed green focused cloud run is inspected."
+    },
+    "unchangedTrust": {
+      "setTheoryHypothesis": "[ConLeche.SetTheory V]",
+      "noNewCustomAxioms": true,
+      "runtimeCheckerLogicChanged": false,
+      "fullConsistencyProved": false,
+      "cachedOrGeneratedKernelCertified": false
+    }
   }
 }

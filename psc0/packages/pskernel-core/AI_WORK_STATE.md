@@ -20,6 +20,14 @@ Source commits: [`89292f66`](https://github.com/dwijayuda/pskernel/commit/89292f
 Snapshot: 2026-10-10 UTC. Read the live branch before continuing; this document
 is a handoff, not a claim that the full proof is finished.
 
+## Current validated public-entry checkpoint
+
+**Source:** `63cdc22d339f821be6bdcfa25b5f15e936aafdbf`. [Cloud run 38071595259](https://github.com/dwijayuda/pskernel/actions/runs/38071595259), job 114269936326, **passed**. Exactly 267 build jobs, 84 companion files, 323 reviewed semantic declaration axiom targets, 153 dependency modules (12 pinned mathematical modules, no checker-assurance imports), zero cached fallbacks in 1,840 reference definitions and seven native executables passed. The binary, Arena and fresh-export jobs were not run in that focused workflow.
+
+[Public-entry evidence](PUBLIC_ENTRY_EVIDENCE_2026-10-10.md) contains the exact proof scope, source identity, and separately recorded Init/Std timeouts. The accepted public empty-kernel-session constructor has a proved empty environment and initial checker frame. **This is not yet a semantic model of the initial environment, full recursive inference/reduction/equality soundness, complete admission soundness or the public relative-consistency theorem.** The new architecture decision is [proof-guided co-design](PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md), with Lean 4.35.0-rc4 compatibility authoritative and an explicit modeled-axiom policy.
+
+**Next actual proof obligations:** model the real initial environment and reserved logical basis; retain the exact annotated term/type, universe regimes, environment snapshot and syntactic frame through the shared graded recursive inference/WHNF/DefEq operations; prove all admission extensions; compose real reference acceptance with the environment model. Do not infer validity from an empty semantic context, drop the allowed-axiom premise, or promote optimized/generated backends without independent refinement.
+
 ## Objective and authority
 
 Continue toward successful-checking soundness, full-kernel metatheory and an

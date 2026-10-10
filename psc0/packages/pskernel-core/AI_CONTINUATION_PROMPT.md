@@ -37,6 +37,24 @@ despite green proof/build/smaller conformance jobs; Mathlib skipped.
 Do not claim full corpus acceptance or resolve resource issues by patching
 soundness assumptions.
 
+Latest validated proof source: `63cdc22d339f821be6bdcfa25b5f15e936aafdbf`,
+[focused run 38071595259](https://github.com/dwijayuda/pskernel/actions/runs/38071595259)
+(green, 323 audited semantic declarations, 267 builds, 84 companion
+proofs, 153 dependency modules and all seven native regressions).
+Current separate evidence file:
+`psc0/packages/pskernel-core/PUBLIC_ENTRY_EVIDENCE_2026-10-10.md`.
+Canonical theorem-guided Lean 4.35-compatible strategy:
+`psc0/packages/pskernel-core/PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md`.
+The public empty-session environment and syntactic checker frame are now proved,
+but *not* the environment model or accepting-direction recursive-checker
+soundness. Model the actual initial environment, close the joint graded
+infer/WHNF/defeq and explicit annotation-provenance invariant, complete
+admission, then prove the public relative-consistency corollary. Keep the
+Lean-compatible axiom mode distinct from the restricted modeled-axiom
+consistency theorem. Prior broad Lean Init/Std corpus runs timed out; do
+not present them as accepted corpora. No changes to default provider/seed
+or draft PR #89.
+
 Repository: dwijayuda/pskernel.
 Branch: psc0/pskernel-core-lean435-arena-v1.
 Package: psc0/packages/pskernel-core.

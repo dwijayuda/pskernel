@@ -3,6 +3,10 @@ open Lake DSL
 
 package pskernelCore
 
+-- Assurance-only mathematical dependency, pinned by commit. No production imports.
+require «con-leche» from git
+  "https://github.com/leanprover/con-leche.git" @ "65e74db49e89ad2bbd1e90aa4f784954db41fa3a"
+
 lean_lib PSC1KernelReferenceFoundations where
   srcDir := "reference"
   roots := #[
@@ -127,6 +131,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticClassifier,
     `Ps.KernelCore.Metatheory.SemanticSortInference,
     `Ps.KernelCore.Metatheory.SemanticAudit,
+    `Ps.KernelCore.Metatheory.SemanticSetDomain,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

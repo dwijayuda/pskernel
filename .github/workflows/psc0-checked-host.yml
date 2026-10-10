@@ -21,6 +21,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   host:
+    # No OIDC or attestation-writing permission in compiler/test processes.
     strategy:
       fail-fast: false
       matrix:
@@ -36,8 +37,9 @@ jobs:
         working-directory: psc0
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, previously qualified
         with:
+          persist-credentials: false
           fetch-depth: 0
           filter: blob:none
           sparse-checkout-cone-mode: false
@@ -47,7 +49,7 @@ jobs:
             !/psc0/packages/pskernel-lean/prebuilt/
             !/psc0/legacy/
             /psc0/legacy/packages/pskernel-core/manifests/BUILD.json
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: ${{ matrix.node }}
       - name: Preserve qualified compiler, language and kernel source by exact Git identity
@@ -55,9 +57,9 @@ jobs:
       - name: Validate complete workspace and checked-host invariants
         run: |
           node scripts/check-workspace.mjs
-          node --test scripts/checked-prepared-session.test.mjs scripts/architecture-host.test.mjs scripts/architecture-frontend.test.mjs scripts/architecture-target.test.mjs scripts/architecture-library.test.mjs
+          node --test --test-reporter=tap scripts/checked-prepared-session.test.mjs scripts/architecture-host.test.mjs scripts/architecture-frontend.test.mjs scripts/architecture-target.test.mjs scripts/architecture-library.test.mjs scripts/architecture-evidence.test.mjs | tee dist/architecture-evidence/host-tests.tap
       - name: Retrieve immutable, already-qualified runtime (no rebuild)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           github-token: ${{ github.token }}
           repository: dwijayuda/pskernel
@@ -94,11 +96,125 @@ jobs:
             node scripts/architecture-target-installed.mjs "$PREFIX" "$EDITION" "$RUNNER_TEMP/psc0-project-$EDITION"
             node scripts/architecture-library-installed.mjs "$PREFIX" "$EDITION" "$RUNNER_TEMP/psc0-project-$EDITION"
           done
+      - name: Seal complete platform evidence for this exact run attempt
+        run: node scripts/architecture-evidence.mjs seal-platform dist/architecture-evidence
       - name: Retain exact preservation and installed-host evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: psc0-checked-host-${{ runner.os }}-${{ github.sha }}
+          name: psc0-checked-host-${{ runner.os }}-${{ github.sha }}-${{ github.run_attempt }}
           path: psc0/dist/architecture-evidence/
+          if-no-files-found: error
+          retention-days: 30
+  qualification:
+    name: Attest complete two-platform qualification report
+    needs: host
+    if: ${{ needs.host.result == 'success' && github.repository == 'dwijayuda/pskernel' && github.ref == 'refs/heads/psc0/npm-modular-packages-v1' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /psc0/scripts/architecture-evidence.mjs
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: psc0-checked-host-Linux-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/psc0-qualification-input/Linux
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: psc0-checked-host-Windows-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/psc0-qualification-input/Windows
+      - name: Validate reports against actual completed host jobs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/jobs?filter=latest&per_page=100" > "$RUNNER_TEMP/psc0-jobs.json"
+          node psc0/scripts/architecture-evidence.mjs assemble "$RUNNER_TEMP/psc0-qualification-input" qualification "$RUNNER_TEMP/psc0-jobs.json"
+      - name: Authenticate the report, not the reused compiler binary
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4, node24
+        with:
+          subject-path: ${{ github.workspace }}/qualification/qualification.json
+          push-to-registry: false
+          create-storage-record: false
+      - name: Retain the portable signature bundle
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          test -s "$BUNDLE_PATH"
+          cp "$BUNDLE_PATH" qualification/attestation.jsonl
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: psc0-attested-qualification-${{ github.sha }}-${{ github.run_attempt }}
+          path: qualification/
+          if-no-files-found: error
+          retention-days: 30
+  verify-qualification:
+    name: Independently verify report origin and refusal controls
+    needs: qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: /psc0/scripts/architecture-evidence.mjs
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: psc0-attested-qualification-${{ github.sha }}-${{ github.run_attempt }}
+          path: qualification
+      - name: Verify in a fresh read-only job with exact signer and source policy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir verification
+          gh version > verification/gh-version.txt
+          node psc0/scripts/architecture-evidence.mjs verify qualification
+          verify() {
+            gh attestation verify "$1" --bundle qualification/attestation.jsonl \
+              --repo "$GITHUB_REPOSITORY" --signer-workflow "$3" \
+              --signer-digest "$2" --source-digest "$2" --source-ref "$GITHUB_REF" \
+              --deny-self-hosted-runners --format json
+          }
+          SIGNER="$GITHUB_REPOSITORY/.github/workflows/psc0-checked-host.yml"
+          verify qualification/qualification.json "$GITHUB_SHA" "$SIGNER" > verification/verified-attestation.json
+          cp qualification/qualification.json "$RUNNER_TEMP/psc0-tampered.json"
+          printf '\n' >> "$RUNNER_TEMP/psc0-tampered.json"
+          if verify "$RUNNER_TEMP/psc0-tampered.json" "$GITHUB_SHA" "$SIGNER" > verification/tampered.stdout 2> verification/tampered.stderr; then
+            echo 'PSC_ATTESTATION_TAMPER_ACCEPTED'; exit 1
+          fi
+          if verify qualification/qualification.json '0000000000000000000000000000000000000000' "$SIGNER" > verification/source.stdout 2> verification/source.stderr; then
+            echo 'PSC_ATTESTATION_WRONG_SOURCE_ACCEPTED'; exit 1
+          fi
+          if verify qualification/qualification.json "$GITHUB_SHA" "$GITHUB_REPOSITORY/.github/workflows/not-the-signer.yml" > verification/signer.stdout 2> verification/signer.stderr; then
+            echo 'PSC_ATTESTATION_WRONG_SIGNER_ACCEPTED'; exit 1
+          fi
+          verify qualification/qualification.json "$GITHUB_SHA" "$SIGNER" > verification/final-positive.json
+          node psc0/scripts/architecture-evidence.mjs verify qualification
+          printf '%s\n' 'PSC_ATTESTED_QUALIFICATION: PASS; exact origin verified; modified bytes, wrong source and wrong signer refused; no correctness promotion' | tee verification/result.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: psc0-qualification-verification-${{ github.sha }}-${{ github.run_attempt }}
+          path: verification/
           if-no-files-found: error
           retention-days: 30

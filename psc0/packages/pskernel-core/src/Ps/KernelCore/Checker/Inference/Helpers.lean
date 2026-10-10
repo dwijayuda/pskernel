@@ -1,3 +1,4 @@
+import Ps.KernelCore.Core.InferenceBoundary
 import Ps.KernelCore.Checker.Projection
 import Ps.KernelCore.Checker.ResourcePolicy
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
@@ -17,11 +18,6 @@ to the checker state.
 -/
 
 
-structure PsKernelForallView where
-  name : PsKernelName
-  domain : PsKernelExpr
-  body : PsKernelExpr
-  binderInfo : PsKernelBinderInfo
 
 def psKernelCacheInferResult
     [cachePolicy : PsKernelSemanticCachePolicy]

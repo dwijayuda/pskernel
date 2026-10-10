@@ -1,3 +1,6 @@
+import Ps.KernelCore.Metatheory.AnnotatedLocalContextErasure
+import Ps.KernelCore.Metatheory.SemanticInferenceBoundary
+import Ps.KernelCore.Metatheory.SemanticReferenceLocalContext
 import Ps.KernelCore.Metatheory.SemanticAnnotatedSpines
 import Ps.KernelCore.Metatheory.SemanticCoherentValidity
 import Ps.KernelCore.Metatheory.SemanticAnnotationCoherence
@@ -35,6 +38,21 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``psKernelLocalContextMap_find_some,
+    ``psKernelLocalContextMap_addLocal,
+    ``psKernelLocalContextMap_addLet,
+    ``PsKernelSemantics.eraseLocalContext_find_some,
+    ``PsKernelSemantics.eraseLocalContext_addLocal,
+    ``PsKernelSemantics.eraseLocalContext_addLet,
+    ``PsKernelSemantics.annotatedForallView_roundtrip,
+    ``PsKernelSemantics.annotatedForallView_source,
+    ``PsKernelSemantics.erase_annotatedLambdaResult,
+    ``PsKernelSemantics.erase_annotatedApplicationResult_type,
+    ``PsKernelSemantics.SetModel.LocalDeclModel.checkedReading,
+    ``PsKernelSemantics.SetModel.modelsLocalContext_empty,
+    ``PsKernelSemantics.Reference.inferCore_fvar_result,
+    ``PsKernelSemantics.Reference.fvar_inference_checked_reading,
+    ``PsKernelSemantics.Reference.fvar_inference_checked_result,
     ``PsKernelSemantics.Reference.application_trace_checked_reading,
     ``PsKernelSemantics.AnnotatedExpr.Coherent.refl,
     ``PsKernelSemantics.AnnotatedExpr.Coherent.symm,

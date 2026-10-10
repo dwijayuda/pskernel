@@ -1,3 +1,5 @@
+import Ps.KernelCore.Core.AnnotatedLocalContext
+import Ps.KernelCore.Core.AnnotatedInference
 import Ps.KernelCore.Core.AnnotatedEquality
 import Ps.KernelCore.Core.AnnotatedSpines
 
@@ -71,4 +73,52 @@ def main : IO Unit := do
   let exhausted : AnnotatedExpr × Nat := consumeLambdas 5 spine 1 0
   require "lambda-spine argument bound" (exhausted.2 == 1 && checkedExprEq exhausted.1
     (.lam (n "y") dom (.bvar 1) .default q))
-  IO.println "PSKERNEL_ANNOTATED_SYNTAX: PASS cases=21 modelImports=0"
+  let locals0 : AnnotatedLocalContext := annotatedLocalContextEmpty
+  require "empty annotated local lookup" ((psKernelLocalContextFind locals0 (n "local")).isNone)
+  let locals1 : AnnotatedLocalContext :=
+    psKernelLocalContextAddLocal locals0 (n "local") (n "display") a .implicit
+  require "stored annotated type retained" (match psKernelLocalContextFind locals1 (n "local") with
+    | some decl => checkedExprEq (psKernelLocalDeclType decl) a
+    | none => false)
+  require "local allocation index retained" (locals1.nextIndex == 1 &&
+    (eraseLocalContext locals1).nextIndex == 1)
+  let proofTag : AnnotatedExpr := .lam (n "x") dom (.bvar 0) .default .zero
+  let dataTag : AnnotatedExpr := .lam (n "x") dom (.bvar 0) .default (.succ .zero)
+  let locals2 : AnnotatedLocalContext :=
+    psKernelLocalContextAddLet locals1 (n "let") (n "letDisplay") a proofTag
+  require "stored let value retains annotation" (match psKernelLocalContextFind locals2 (n "let") with
+    | some decl => match psKernelLocalDeclValue decl with
+      | some value => checkedExprEq value proofTag && !checkedExprEq value dataTag
+      | none => false
+    | none => false)
+  let shadow : AnnotatedLocalContext :=
+    psKernelLocalContextAddLocal locals2 (n "local") (n "newDisplay") dataTag .default
+  require "lookup selects newest annotated declaration" (match psKernelLocalContextFind shadow (n "local") with
+    | some decl => checkedExprEq (psKernelLocalDeclType decl) dataTag &&
+      !checkedExprEq (psKernelLocalDeclType decl) proofTag &&
+      psKernelNameEq (psKernelLocalDeclUserName decl) (n "newDisplay")
+    | none => false)
+  require "erased lookup preserves let fields" (match psKernelLocalContextFind (eraseLocalContext locals2) (n "let") with
+    | some decl => psKernelExprEq (psKernelLocalDeclType decl) a.erase &&
+      (match psKernelLocalDeclValue decl with
+       | some value => psKernelExprEq value proofTag.erase
+       | none => false)
+    | none => false)
+  require "erased local metadata preserved" (match psKernelLocalContextFind (eraseLocalContext locals1) (n "local") with
+    | some (.localDecl index name userName _ .implicit) =>
+      index == 0 && psKernelNameEq name (n "local") &&
+        psKernelNameEq userName (n "display")
+    | _ => false)
+  let carried : AnnotatedInferenceResult :=
+    annotatedLambdaResult (n "x") dom (.bvar 0) (.bvar 0) .default p
+  require "lambda and inferred product retain chosen tag" (match carried.expr, annotatedForallView? carried.type with
+    | .lam _ _ _ _ tag, some view =>
+      UniverseRegime.check tag p && UniverseRegime.check view.rangeSort p &&
+        checkedExprEq (annotatedForallViewExpr view) carried.type
+    | _, _ => false)
+  require "non-function syntax has no product view" ((annotatedForallView? carried.expr).isNone)
+  let argument : AnnotatedInferenceResult := { expr := .fvar (n "arg"), type := dom }
+  require "application substitutes carried argument expression" (match annotatedForallView? carried.type with
+    | some view => checkedExprEq (annotatedApplicationResult carried argument view).type argument.expr
+    | none => false)
+  IO.println "PSKERNEL_ANNOTATED_SYNTAX: PASS cases=31 modelImports=0"

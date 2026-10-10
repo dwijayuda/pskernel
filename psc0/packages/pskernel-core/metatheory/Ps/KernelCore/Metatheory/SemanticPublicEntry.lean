@@ -106,4 +106,70 @@ theorem admittedInput_initial_frame (env : PsKernelEnvironment)
     NamesBelow session.state.nextFresh e ∧ e.Scoped 0 := by
   exact ⟨admittedInput_namesBelow_zero e acceptedGuard, scope⟩
 
+
+/-- A submitted lambda with no free-variable/metavariable syntax enters its
+first *actual* native binder opening under the advanced syntactic frame.
+The displayed annotation is fixed input data, not inferred from a model.
+This is an input/binder bridge, not full lambda inference soundness. -/
+theorem admittedLambda_firstBinderFrame (n : PsKernelName)
+    (A body : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (rangeSort : PsKernelLevel)
+    (guard : psKernelCheckNoMVarNoFVar
+      (AnnotatedExpr.lam n A body bi rangeSort).erase = .ok ())
+    (domainScope : A.Scoped 0) (bodyScope : body.Scoped 1) :
+    let s := psKernelCheckerStateEmpty
+    let name := (psKernelCheckerStateFreshName s n).1
+    let next := (psKernelCheckerStateFreshName s n).2
+    let child := psKernelLocalContextAddLocal annotatedLocalContextEmpty name n A bi
+    ∃ opened : AnnotatedExpr,
+      LocalFrame next.nextFresh child ∧
+      opened.erase = psKernelExprInstantiate1 body.erase (.fvar name) ∧
+      opened.Scoped 0 ∧ NamesBelow next.nextFresh opened := by
+  have bound := admittedInput_namesBelow_zero (.lam n A body bi rangeSort) guard
+  change NamesBelow 0 A ∧ NamesBelow 0 body at bound
+  exact Reference.binderChild_opened_frame psKernelCheckerStateEmpty
+    annotatedLocalContextEmpty n A body bi (localFrame_empty 0)
+    bound.1 domainScope bound.2 bodyScope
+
+/-- A submitted dependent product obeys the same binder/capture invariant.
+Its universe level is still an untrusted source annotation until justified
+by the actual inference/sort visits. -/
+theorem admittedForall_firstBinderFrame (n : PsKernelName)
+    (A body : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (rangeSort : PsKernelLevel)
+    (guard : psKernelCheckNoMVarNoFVar
+      (AnnotatedExpr.forallE n A body bi rangeSort).erase = .ok ())
+    (domainScope : A.Scoped 0) (bodyScope : body.Scoped 1) :
+    let s := psKernelCheckerStateEmpty
+    let name := (psKernelCheckerStateFreshName s n).1
+    let next := (psKernelCheckerStateFreshName s n).2
+    let child := psKernelLocalContextAddLocal annotatedLocalContextEmpty name n A bi
+    ∃ opened : AnnotatedExpr,
+      LocalFrame next.nextFresh child ∧
+      opened.erase = psKernelExprInstantiate1 body.erase (.fvar name) ∧
+      opened.Scoped 0 ∧ NamesBelow next.nextFresh opened := by
+  have bound := admittedInput_namesBelow_zero (.forallE n A body bi rangeSort) guard
+  change NamesBelow 0 A ∧ NamesBelow 0 body at bound
+  exact Reference.binderChild_opened_frame psKernelCheckerStateEmpty
+    annotatedLocalContextEmpty n A body bi (localFrame_empty 0)
+    bound.1 domainScope bound.2 bodyScope
+
+/-- Even a let declaration with a stored value preserves the actual local
+frame after its first name allocation, provided both accepted stored readings
+have no loose bound indices. Checking the value's *type* is separate. -/
+theorem admittedLet_firstLocalFrame (n : PsKernelName)
+    (A value body : AnnotatedExpr) (nd : Bool)
+    (guard : psKernelCheckNoMVarNoFVar
+      (AnnotatedExpr.letE n A value body nd).erase = .ok ())
+    (domainScope : A.Scoped 0) (valueScope : value.Scoped 0) :
+    let s := psKernelCheckerStateEmpty
+    let name := (psKernelCheckerStateFreshName s n).1
+    let next := (psKernelCheckerStateFreshName s n).2
+    LocalFrame next.nextFresh
+      (psKernelLocalContextAddLet annotatedLocalContextEmpty name n A value) := by
+  have bound := admittedInput_namesBelow_zero (.letE n A value body nd) guard
+  change NamesBelow 0 A ∧ NamesBelow 0 value ∧ NamesBelow 0 body at bound
+  exact localFrame_addLet 0 annotatedLocalContextEmpty n n A value
+    (localFrame_empty 0) bound.1 domainScope bound.2.1 valueScope
+
 end PsKernelSemantics

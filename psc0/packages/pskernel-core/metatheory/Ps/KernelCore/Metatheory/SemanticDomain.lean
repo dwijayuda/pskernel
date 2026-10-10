@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Expr
+import Ps.KernelCore.Metatheory.SemanticLevel
 
 /-!
 The semantic algebra needed by conversion and proof irrelevance.
@@ -112,7 +113,8 @@ end Interpretation
 A concrete proposition algebra: propositions are truth conditions, proofs have
 one erased value, and Prop contains the proposition values. This witnesses the
 local interface's consistency and supports impredicative products into Prop.
-It is NOT a model of higher universes or of all PSKernel expressions.
+It also represents the successor chain of sorts. It does NOT construct the
+function spaces or inductives needed for a model of all PSKernel expressions.
 -/
 namespace PropositionDomain
 
@@ -120,10 +122,13 @@ inductive Value where
   | proof
   | proposition (truth : Prop)
   | propSort
+  | typeSort (index : Nat)
 
 def mem : Value → Value → Prop
   | .proof, .proposition truth => truth
   | .proposition _, .propSort => True
+  | .propSort, .typeSort 0 => True
+  | .typeSort n, .typeSort m => m = n + 1
   | _, _ => False
 
 def isType : Value → Prop
@@ -167,11 +172,24 @@ theorem no_proof_of_all_props :
   intro h
   exact h (.proposition False) True.intro
 
+def sortValue : Nat → Value
+  | 0 => .propSort
+  | n + 1 => .typeSort n
+
+theorem sortValue_isType (n : Nat) : isType (sortValue n) := by
+  cases n <;> trivial
+
+theorem sortValue_mem_succ (n : Nat) : mem (sortValue n) (sortValue (n + 1)) := by
+  cases n <;> simp [sortValue, mem]
+
+theorem sortValue_not_mem_self (n : Nat) : ¬ mem (sortValue n) (sortValue n) := by
+  cases n <;> simp [sortValue, mem]
+
 /-- A small local valuation, used only to establish adequacy of the interface. -/
 def witness : Interpretation domain where
   denote
     | .sort level =>
-        if psKernelLevelNormalizesToZero level then some .propSort else none
+        some (sortValue (evalLevel (fun _ => 0) (fun _ => 0) level))
     | .bvar 0 => some (.proposition True)
     | .bvar 1 => some .proof
     | .bvar 2 => some (.proposition False)
@@ -180,7 +198,26 @@ def witness : Interpretation domain where
 
 theorem witness_propCompatible : witness.PropCompatible := by
   intro level h
-  simp [witness, h, domain]
+  simp [witness, normalizesToZero_eval (fun _ => 0) (fun _ => 0) level h,
+    sortValue, domain]
+
+/-- Concrete interpretation of the kernel's sort-successor typing rule. -/
+theorem witness_sort_hasType (level : PsKernelLevel) :
+    witness.HasType (.sort level) (.sort (.succ level)) := by
+  let n := evalLevel (fun _ => 0) (fun _ => 0) level
+  exact ⟨sortValue n, sortValue (n + 1), rfl, rfl,
+    sortValue_isType (n + 1), sortValue_mem_succ n⟩
+
+theorem witness_no_type_in_type (level : PsKernelLevel) :
+    ¬ witness.HasType (.sort level) (.sort level) := by
+  rintro ⟨v, a, hv, ha, _, hmem⟩
+  have hv' : v = sortValue (evalLevel (fun _ => 0) (fun _ => 0) level) :=
+    (Option.some.inj hv).symm
+  have ha' : a = sortValue (evalLevel (fun _ => 0) (fun _ => 0) level) :=
+    (Option.some.inj ha).symm
+  cases hv'
+  cases ha'
+  exact sortValue_not_mem_self _ hmem
 
 theorem witness_proposition : witness.IsProp (.bvar 0) :=
   ⟨.proposition True, rfl, True.intro⟩
@@ -213,6 +250,8 @@ end PsKernelSemantics
 
 #print axioms PsKernelSemantics.Interpretation.proof_irrelevance
 #print axioms PsKernelSemantics.Interpretation.no_empty_inhabitant
+#print axioms PsKernelSemantics.PropositionDomain.witness_sort_hasType
+#print axioms PsKernelSemantics.PropositionDomain.witness_no_type_in_type
 #print axioms PsKernelSemantics.PropositionDomain.witness_empty
 #print axioms PsKernelSemantics.PropositionDomain.witness_not_universal
 #print axioms PsKernelSemantics.PropositionDomain.no_proof_of_all_props

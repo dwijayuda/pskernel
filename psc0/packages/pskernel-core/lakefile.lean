@@ -125,6 +125,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticDomain,
     `Ps.KernelCore.Metatheory.SemanticLevel,
     `Ps.KernelCore.Metatheory.SemanticClassifier,
+    `Ps.KernelCore.Metatheory.SemanticSortInference,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

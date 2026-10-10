@@ -56,7 +56,7 @@ theorem referenceAddAxiom_returns_insert
     psKernelEnvironmentAdd env (.axiomInfo value) = .ok next := by
   cases hUnsafe : value.isUnsafe with
   | false =>
-      cases hHeader : psKernelCheckConstantBaseWithSession fuel
+      cases hHeader : @psKernelCheckConstantBaseWithSession psKernelReferenceCachePolicy fuel
           (psKernelMkCheckerSession env value.base.levelParams
             PsKernelDefinitionSafety.safe maxDepth maxNatSize)
           value.base with
@@ -65,7 +65,7 @@ theorem referenceAddAxiom_returns_insert
       | ok checked =>
           simpa [psKernelAddAxiom, hUnsafe, hHeader] using run
   | true =>
-      cases hHeader : psKernelCheckConstantBaseWithSession fuel
+      cases hHeader : @psKernelCheckConstantBaseWithSession psKernelReferenceCachePolicy fuel
           (psKernelMkCheckerSession env value.base.levelParams
             PsKernelDefinitionSafety.unsafeDef maxDepth maxNatSize)
           value.base with

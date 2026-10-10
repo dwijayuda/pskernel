@@ -1,5 +1,7 @@
 # PSCV P1-G — Required Standard review inventory
 
+**Qualified (non-authoritative):** [run 38057594392](https://github.com/dwijayuda/pskernel/actions/runs/38057594392) passed all four jobs, including actual Lean4.35.0-rc3 witness execution and Linux/Windows review tests. [Machine qualification](pscv-p1g-qualification-2026-10-10.json), [ledger artifact](https://github.com/dwijayuda/pskernel/actions/runs/38057594392/artifacts/11671753807), identity SHA256 `e562efe944af9a55eff7c2960fd2a143877cf9ec6c85a5e7b826983ade74b8c0`. Nothing is approved for PSCV Standard or certified execution.
+
 This experimental tool enumerates the **230** required rows and **194**
 snapshot IDs from the pinned PSCV-RC-v2 reference. It attaches seven
 observations from actual Lean 4.35.0-rc3 instance queries.

@@ -1,0 +1,66 @@
+{
+  "milestone": "PSCV-P1H-TYPED-IMPORTED-CONSTANTS",
+  "status": "qualified-non-authoritative",
+  "qualifiedSourceCommit": "f5a5322db8f9493df6be27a425239cd5e5f6d43c",
+  "ci": {
+    "runId": 38058186775,
+    "attempt": 1,
+    "allFourJobsPassed": true,
+    "artifactId": 11671233631,
+    "artifactZipSha256": "df1f1c1d20dc2963e131f4e3f8d918afb7daa83f4180fd1b6532c7d113983e0b"
+  },
+  "importedNames": [
+    [
+      "instHAdd",
+      "Init.Prelude"
+    ],
+    [
+      "instHMul",
+      "Init.Prelude"
+    ],
+    [
+      "instHSub",
+      "Init.Prelude"
+    ],
+    [
+      "instAppendString",
+      "Init.Data.String.Defs"
+    ],
+    [
+      "instBEqOfDecidableEq",
+      "Init.Prelude"
+    ],
+    [
+      "instAddNat",
+      "Init.Prelude"
+    ],
+    [
+      "instMulNat",
+      "Init.Prelude"
+    ],
+    [
+      "instSubNat",
+      "Init.Prelude"
+    ],
+    [
+      "Int.instAdd",
+      "Init.Data.Int.Basic"
+    ],
+    [
+      "instDecidableEqNat",
+      "Init.Prelude"
+    ],
+    [
+      "instDecidableEqBool",
+      "Init.Prelude"
+    ]
+  ],
+  "observationSha256": "8246970bdb3a79da9879bca1b191c5ddcd552589a54e4ef11a33cca6447925c5",
+  "normativeIds": 194,
+  "unresolvedMappings": 191,
+  "sourceModuleBlobAndLineVerified": false,
+  "closedStandard": false,
+  "protectedCertificationAvailable": false,
+  "verifiedExecutableAuthorized": false,
+  "compilerKernelSeedAndReleaseUnchanged": true
+}

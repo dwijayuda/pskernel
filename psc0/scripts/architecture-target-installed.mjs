@@ -40,8 +40,8 @@ const original = {};
 for (const extension of ['.ts', '.js', '.d.ts', '.js.map']) original[extension] = await readFile(input.slice(0, -3) + extension, 'utf8');
 for (const extension of ['.js', '.d.ts', '.js.map']) await rm(input.slice(0, -3) + extension);
 // TS6+ defaults types to []; do not assume TS5-era automatic enumeration.
-// Use an explicit --types request as a positive control proving that the
-// malformed external declaration is real, then keep it out of the owned plan.
+// Controls cannot emit: the owned target must create all products from scratch,
+// rather than accidentally reading products left by a preceding control.
 const noise = path.join(project, 'node_modules/@types/psc-target-noise');
 const config = path.join(inputDir, 'tsconfig.json');
 await mkdir(noise, { recursive: true });
@@ -49,14 +49,15 @@ await writeFile(path.join(noise, 'package.json'), JSON.stringify({ name: '@types
 await writeFile(path.join(noise, 'index.d.ts'), 'export declare const malformed: ;\n');
 let target, generated;
 try {
-  const implicit = legacy();
+  const implicit = legacy(['--noEmit']);
   assert(!implicit.error && implicit.status === 0, 'pinned TypeScript default unexpectedly selected ambient types: ' + implicit.stdout + implicit.stderr);
-  const selected = legacy(['--types', 'psc-target-noise']);
+  const selected = legacy(['--types', 'psc-target-noise', '--noEmit']);
   const diagnostic = selected.stdout + selected.stderr;
   assert(!selected.error && selected.status !== 0 && diagnostic.includes('psc-target-noise') && /Type expected|TS1110/u.test(diagnostic), 'explicit foreign-type control must diagnose the malformed declaration: ' + diagnostic);
   // The checked monolithic target must not consume a surrounding project's
   // types/noEmit policy. Its own plan remains the sole option source.
   await writeFile(config, JSON.stringify({ compilerOptions: { types: ['psc-target-noise'], noEmit: true }, files: ['Equivalent.ts'] }) + '\n');
+  for (const extension of ['.js', '.d.ts', '.js.map']) await assert.rejects(readFile(input.slice(0, -3) + extension), { code: 'ENOENT' });
   target = await createTypeScriptTarget();
   generated = await target.compile(input);
   for (const extension of Object.keys(original)) assert.equal(generated.products[extension], original[extension], 'native target differs from original launcher: ' + extension);
@@ -85,7 +86,7 @@ try {
   await appendFile(file, '\n// changed after capture\n');
   await assert.rejects(libraryTarget.revalidate(), /IDENTITY_CHANGED/);
 } finally { await writeFile(file, saved); }
-const evidence = { schema: 'psc0-target-installed-qualification/1', source: process.env.GITHUB_SHA, platform: process.platform, node: process.version, variant, toolchain: installation.identity, actualCompilerEmittedFixture: true, originalLauncherProductsEqual: ['ts','js','d.ts','js.map'], pinnedDefaultExcludesAmbientTypes: true, explicitForeignTypeControlRejected: true, surroundingProjectConfigIgnored: true, ambientTypesExcludedFromOwnedTarget: true, planBoundToCheckedHandle: true, nativeDriftRefusesPublication: true, previousExecutablePreserved: true, libraryDriftRefused: true, toolchainBytesRestored: true, compilerRegenerated: false, kernelRegenerated: false, fullFixedPointExecuted: false };
+const evidence = { schema: 'psc0-target-installed-qualification/1', source: process.env.GITHUB_SHA, platform: process.platform, node: process.version, variant, toolchain: installation.identity, actualCompilerEmittedFixture: true, originalLauncherProductsEqual: ['ts','js','d.ts','js.map'], pinnedDefaultExcludesAmbientTypes: true, explicitForeignTypeControlRejected: true, surroundingProjectConfigIgnored: true, freshTargetProductsRequired: true, ambientTypesExcludedFromOwnedTarget: true, planBoundToCheckedHandle: true, nativeDriftRefusesPublication: true, previousExecutablePreserved: true, libraryDriftRefused: true, toolchainBytesRestored: true, compilerRegenerated: false, kernelRegenerated: false, fullFixedPointExecuted: false };
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 await writeFile(path.join(repoRoot, 'dist/architecture-evidence/target-' + variant + '.json'), JSON.stringify(evidence, null, 2) + '\n');
 console.log('PSC_TARGET_INSTALLED: PASS ' + JSON.stringify(evidence));

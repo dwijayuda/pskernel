@@ -119,3 +119,7 @@ Cloud CI must pass the exact source before claiming G5 compiled/tests green.
 `Bench.lean` and isolated `.github/workflows/pskernel-fast-benchmark.yml` evaluate the SAME already-constructed closed untyped beta/let raw terms under (1) reference substitution WHNF and (2) lazy closure WHNF plus full reification. Benchmark workloads, memory and wall time are NOT official Lean export or proof-checking measurements. Report each mode's three samples, medians and identical checksums; run on a single pinned cloud runner. Source commit is unqualified until the exact G6 job completes. Do not infer kernel speedups from its results.
 
 Benchmarking and large-corpus conformance remain separate from G5 correctness and eventual formal soundness. If a mode is slower, report it and use the evidence to guide architecture selection; don't hide it.
+
+### G6 first cloud attempt — failed benchmark CLI API, not semantic regression
+
+[Run 38095463586](https://github.com/dwijayuda/pskernel/actions/runs/38095463586), source `de38c283e8e1ed22f9ba724f7c92506100c988f6`, failed compiling `Bench.lean`: `IO.getArgs` is not a constant in pinned Lean 4.35.0-rc4. All evaluator/quote/source modules built. Changed only CLI input to Lean's supported `main (cliArgs : List String)` signature. Do not claim benchmark data before re-running the corrected source and recording its measurements.

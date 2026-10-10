@@ -19,8 +19,8 @@ def makeWorkload (depth : Nat) (leaf : RawExpr) : RawExpr :=
     else
       .letE (Name.simple "x") (.sort .zero) expr (.bvar 0) false) leaf
 
-def main : IO Unit := do
-  let args ← IO.getArgs
+def main (cliArgs : List String) : IO Unit := do
+  let args := cliArgs.toArray
   let mode := (args[0]?).getD "reference"
   let depth := ((args[1]?).getD "24").toNat?.getD 24
   let repetitions := ((args[2]?).getD "1500").toNat?.getD 1500

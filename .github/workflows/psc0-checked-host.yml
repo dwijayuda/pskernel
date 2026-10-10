@@ -55,7 +55,7 @@ jobs:
       - name: Validate complete workspace and checked-host invariants
         run: |
           node scripts/check-workspace.mjs
-          node --test scripts/checked-prepared-session.test.mjs scripts/architecture-host.test.mjs scripts/architecture-frontend.test.mjs
+          node --test scripts/checked-prepared-session.test.mjs scripts/architecture-host.test.mjs scripts/architecture-frontend.test.mjs scripts/architecture-target.test.mjs
       - name: Retrieve immutable, already-qualified runtime (no rebuild)
         uses: actions/download-artifact@v4
         with:
@@ -91,6 +91,7 @@ jobs:
             npm install -g --prefix "$PREFIX" --cache "$RUNNER_TEMP/psc0-cache-$EDITION" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$PACK/proofscript-0.1.0-psc0.1.tgz" "$INPUT/typescript-7.0.2.tgz" "$INPUT/typescript-typescript-$NATIVE-x64-7.0.2.tgz"
             node scripts/architecture-installed-smoke.mjs "$PREFIX" "$EDITION" "$RUNNER_TEMP/psc0-project-$EDITION"
             node scripts/architecture-frontend-installed.mjs "$PREFIX" "$EDITION" "$RUNNER_TEMP/psc0-project-$EDITION"
+            node scripts/architecture-target-installed.mjs "$PREFIX" "$EDITION" "$RUNNER_TEMP/psc0-project-$EDITION"
           done
       - name: Retain exact preservation and installed-host evidence
         if: always()

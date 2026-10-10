@@ -1,15 +1,15 @@
 {
   "schemaVersion": 9,
-  "stage": "Proof-first: actual empty environment model, conditional modeled False, reference arity",
-  "status": "validated-relative-empty-environment-and-conditional-False-model-full-kernel-consistency-open",
-  "candidateCommit": "902f902b96361a8b14943b02bef503671893b3c0",
-  "assuranceRevision": "902f902b96361a8b14943b02bef503671893b3c0",
+  "stage": "Proof-first: indexed environment admission and explicit new-declaration model boundary",
+  "status": "validated-indexed-insertion-conditional-model-full-kernel-consistency-unfinished",
+  "candidateCommit": "d61d5695996c7bb0b400ad86db403e8052d35f1e",
+  "assuranceRevision": "d61d5695996c7bb0b400ad86db403e8052d35f1e",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38076656535,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38076656535/job/114284940996",
+  "workflowRun": 38078110204,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38078110204/job/114289230884",
   "nativeBinarySha256": null,
   "checks": {
     "build": {
@@ -18,22 +18,22 @@
       "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "902f902b96361a8b14943b02bef503671893b3c0",
-      "run": 38076656535,
-      "job": 114284940996,
-      "buildJobs": 269,
-      "focusedBuildJobs": 224,
+      "commit": "d61d5695996c7bb0b400ad86db403e8052d35f1e",
+      "run": 38078110204,
+      "job": 114289230884,
+      "buildJobs": 270,
+      "focusedBuildJobs": 225,
       "companionFiles": 84,
-      "axiomDeclarations": 334,
+      "axiomDeclarations": 338,
       "pureMathModules": 12,
-      "closureModules": 155,
+      "closureModules": 159,
       "productionAssuranceImports": 0,
       "legacyJudgmentImports": 0,
       "referenceDefinitions": 1840,
       "cachedFallbacks": 0,
       "status": "passed",
       "checkedAt": "2026-10-10 18:45:09 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38076656535/job/114284940996",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38078110204/job/114289230884",
       "runConclusion": "success"
     },
     "companionProofs": {
@@ -393,7 +393,12 @@
     "actualEmptyEnvironmentModelProved": true,
     "modeledStoredFalseCorollaryProved": true,
     "constantUniverseArityDerivedFromRunProved": true,
-    "publicAcceptancePreservesEnvironmentModel": false
+    "publicAcceptancePreservesEnvironmentModel": false,
+    "exactEnvironmentIndexedLookupModeled": true,
+    "indexedInsertionPreservesEnvironmentModelConditionally": true,
+    "realAddSuccessPreservesEnvironmentModelConditionally": true,
+    "fullAdmissionModelPreservationProved": false,
+    "referenceAxiomDispatchModelPreservationProved": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -4078,5 +4083,27 @@
       "completedAt": "2026-10-10 18:45:09 UTC",
       "validation": "Full focused proof/audit plus seven native regressions succeeded; full Init/Std/Mathlib deliberately skipped."
     }
+  },
+  "environmentAdmissionPhase20261011": {
+    "validatedSource": "d61d5695996c7bb0b400ad86db403e8052d35f1e",
+    "run": 38078110204,
+    "job": 114289230884,
+    "status": "passed",
+    "buildJobs": 270,
+    "axiomDeclarations": 338,
+    "modelClosureModules": 159,
+    "companionFiles": 84,
+    "nativeExecutables": 7,
+    "conditionalNewDeclarationModelRequired": true,
+    "axiomDispatchCandidate": "78ed51858950c94928d74fac0c9858f0f5b2006b",
+    "candidateRun": 38079074283,
+    "candidateStatus": "pending",
+    "failedIntermediateRuns": [
+      38078529719,
+      38078823819
+    ],
+    "fullKernelModelAndConsistencyProved": false,
+    "fullInitStdMathlibDisabled": true,
+    "documentationScope": "Proof-only conditional extension and actual indexed lookup; no inferred new declaration model, no recursive checker soundness, no public whole-stream consistency."
   }
 }

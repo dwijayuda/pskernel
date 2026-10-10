@@ -1,0 +1,104 @@
+name: PSC0 PSCV P1G normative work ledger
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1g-coverage-ledger-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1f-concrete-dictionaries-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Preserve original source bytes
+        shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Require exact 194-ID source coverage and refusal tests
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/standard-work-ledger.mjs
+          node --check packages/pscv/scripts/generate-standard-work-ledger.mjs
+          node --test packages/pscv/test/standard-work-ledger.test.mjs
+      - name: Protect compiler, seed, kernel and certification supervisor
+        shell: bash
+        run: |
+          git diff --exit-code 663ef25fef5c7f4f6a45900893912aaf70a1008f -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+  actual-lean-observations:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Re-execute real pinned Lean4.35rc3 witnesses and build full review ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-standard-work-ledger
+          lake env lean TypedInstanceWitness.lean > ../psc0/dist/pscv-standard-work-ledger/typed.txt 2>&1
+          lake env lean ConcreteDictionaryWitness.lean > ../psc0/dist/pscv-standard-work-ledger/concrete.txt 2>&1
+          node ../psc0/packages/pscv/scripts/generate-standard-work-ledger.mjs \
+            ../psc0/dist/pscv-standard-work-ledger/typed.txt \
+            ../psc0/dist/pscv-standard-work-ledger/concrete.txt \
+            ../psc0/dist/pscv-standard-work-ledger/standard-work-ledger.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const x=JSON.parse(await readFile('../psc0/dist/pscv-standard-work-ledger/standard-work-ledger.json','utf8'));
+          assert.equal(x.requiredRowsCount,230);
+          assert.equal(x.requiredIdsCount,194);
+          assert.equal(x.observedPilotSurfaces,7);
+          assert.equal(x.previousDirectSourceLocations,3);
+          assert.equal(x.unresolvedIdsCount,191);
+          assert(x.snapshotIds.every(v=>v.selectedLeanDeclaration===null));
+          assert.equal(x.orderedStandardFrozen,false);
+          assert.equal(x.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1G_FULL_REQUIREMENT_LEDGER_NOT_STANDARD: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1g-requirement-ledger-${{ github.sha }}
+          path: psc0/dist/pscv-standard-work-ledger
+          retention-days: 30
+          if-no-files-found: error

@@ -34,6 +34,7 @@ jobs:
       # Explicit Except error type in public checked-axiom proof inversion.
       # Validate complete guarded theorem admission (header, Prop, scope, levels, check, DefEq).
       # The safe theorem's execution evidence is Type-valued with a Nonempty theorem witness.
+      # Prove both checked and infer-only reference-session fvar readings against real stored locals.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

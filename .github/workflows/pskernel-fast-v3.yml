@@ -1,0 +1,38 @@
+name: PSKernel-Fast V3 standalone prototype
+
+on:
+  push:
+    branches: [research/pskernel-fast-clean-v3-20261011]
+    paths:
+      - 'pskernel-fast/**'
+      - '.github/workflows/pskernel-fast-v3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pskernel-fast-v3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lean435-term-store-smoke:
+    name: Lean 4.35 scoped term-store smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: pskernel-fast
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Build standalone experimental package
+        working-directory: pskernel-fast
+        run: lake build pskernel_fast_smoke
+      - name: Run fail-closed representation tests
+        working-directory: pskernel-fast
+        run: lake exe pskernel_fast_smoke

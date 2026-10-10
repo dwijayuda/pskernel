@@ -17,3 +17,5 @@ lake exe pskernel_fast_mvp
 ~~~
 
 The cloud workflow `.github/workflows/pskernel-fast-v3.yml` performs these checks on the isolated research branch. Future progress must state precisely which full Lean 4.35 core rules, negative tests, resource outcomes and model obligations are implemented and verified. Self-hosting is a future qualification, not an architecture-preservation constraint.
+
+G2 research adds a **toy lazy closure view** in `PSKernelFast/EvalPrototype.lean` for simple beta/let/neutral evaluation. It cannot establish Lean type correctness, equivalence, or proof acceptance. All G2 tests are representation/evaluator behavior only.

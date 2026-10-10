@@ -1,4 +1,4 @@
-import PSKernelFast.Core
+import PSKernelFast.EvalPrototype
 
 open PSKernelFast
 
@@ -69,4 +69,37 @@ def main : IO Unit := do
   | .error err =>
       throw (IO.userError s!"failed to decode symbolic universe: {repr err}")
 
-  IO.println "PSKernel-Fast G1: representation, imax syntax and scope checks passed (NOT proof checking)"
+  let betaTerm : RawExpr :=
+    .app (.lam (.sort .zero) (.bvar 0)) (.const "identity" [])
+  check (betaTerm.scoped 0) "beta input is unexpectedly unscoped"
+  let betaValue ←
+    match whnfFuel 64 (.term betaTerm []) with
+    | .ok result => pure result
+    | .error err => throw (IO.userError s!"beta closure failed: {repr err}")
+  match betaValue with
+  | .term (.const name _) _ =>
+      check (name == "identity") "beta closure evaluation returned the wrong head"
+  | _ => throw (IO.userError "beta closure did not reach rigid head")
+
+  let letTerm : RawExpr :=
+    .letE (.sort .zero) (.const "letResult" []) (.bvar 0)
+  let letValue ←
+    match whnfFuel 64 (.term letTerm []) with
+    | .ok result => pure result
+    | .error err => throw (IO.userError s!"let closure failed: {repr err}")
+  match letValue with
+  | .term (.const name _) _ =>
+      check (name == "letResult") "let closure returned wrong head"
+  | _ => throw (IO.userError "let closure did not expose a rigid head")
+
+  let neutralTerm : RawExpr :=
+    .app (.const "f" []) (.const "argument" [])
+  match whnfFuel 64 (.term neutralTerm []) with
+  | .ok (.app (.term (.const "f" _) _) _) => pure ()
+  | _ => throw (IO.userError "stuck neutral application did not retain spine")
+
+  match whnfFuel 0 (.term betaTerm []) with
+  | .error .reductionBudget => pure ()
+  | _ => throw (IO.userError "zero reduction fuel did not fail closed")
+
+  IO.println "PSKernel-Fast G2: raw DAG, symbolic levels and toy closure beta/let checks passed (NOT proof checking)"

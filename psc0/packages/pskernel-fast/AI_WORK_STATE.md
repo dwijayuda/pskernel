@@ -51,3 +51,12 @@ New `PSKernelFast/Level.lean` represents raw `zero`, `succ`, `max`, `imax`, `par
 ### G1 first cloud attempt — FAILED, retained
 
 [Run 38093952606](https://github.com/dwijayuda/pskernel/actions/runs/38093952606), source `c2a182de91d1916b0f31e422ef89d5e9000d87ba`, job `114335872910`, failed before Lean elaboration of the new level grammar: Lake reported missing `PSKernelFast/Level.olean`, because `lean_lib PSKernelFast` listed only `PSKernelFast.Core` as explicit root. **Architectural root cause:** the package dependency graph failed to include its newly imported module. Corrected by registering both modules in `lakefile.lean`. Requalify the whole G1 focused test from the corrected source before calling any part of G1 passed.
+
+## Verified G1 evidence
+
+**Source:** `5e47d1dcf1d9ee6a82b49148f95511a6d2d267cb`.
+[Successful G1 run 38094023391](https://github.com/dwijayuda/pskernel/actions/runs/38094023391), job `114336090132`. Lean 4.35.0-rc4 pinned SHA validated; eight build jobs passed; executable reported symbolic imax syntax and scope checks passed. **G1 is only a representation checkpoint**, not universe equality soundness.
+
+## G2 candidate — toy lazy closure evaluator
+
+`PSKernelFast/EvalPrototype.lean` introduces a standalone closure view and fuel-bounded head evaluation of beta/let, preserving stuck neutrals and refusing zero-fuel execution. It intentionally has no public proof acceptance. The accompanying tests exercise identity beta, let-binding, stuck neutral application and resource failure. This is an architecture experiment, not a real Lean WHNF or type checker. CI must confirm its exact commit before marking G2 qualified.

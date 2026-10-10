@@ -210,3 +210,7 @@ Do not do “test-fix-patch” without tracing the shared semantic cause. Work a
 ## 10. Summary decision
 
 **Adopt an independent, performance-and-correctness-first PSKernel-Fast V3.** Discard old proof-preservation constraints, explore a clean compact DAG/closure architecture, select engines from measured parity and speed, and formally verify the chosen executable kernel on its own merits. The only architectural restrictions are the real requirements of correctness, exact Lean 4.35 compatibility, auditable trust, reliability and eventually qualified deployment.
+
+## 11. Prototype checkpoint clarification
+
+G0/G1 builds test the new representation and symbolic universe syntax. G2 introduces a **non-authoritative** lazy closure beta/let head evaluator, to make the design's main hypothesis executable. It is deliberately not a Lean type checker, verified WHNF, DefEq engine or proof-accepting kernel. Only CI-validated commits can earn the narrow claim that this prototype compiles and passes those specific tests.

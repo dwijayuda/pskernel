@@ -52,6 +52,7 @@ inductive Failure where
   | invalidHandle (index : Nat)
   | corruptIndex
   | decodeBudget
+  | reductionBudget
 deriving Repr, BEq, Inhabited
 
 structure Store where

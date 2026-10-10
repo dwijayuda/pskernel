@@ -1,4 +1,10 @@
-# PSCV P1-F — concrete instance witness candidates, not a class dependency proof
+# PSCV P1-F — qualified concrete instance witnesses, not a class dependency proof
+
+**Qualified P1-F source:** `d8a8e2a9b5d4ab2294316af74671a02af1815ce0`. [Run 38056463990](https://github.com/dwijayuda/pskernel/actions/runs/38056463990), attempt 1, all four jobs passed: Linux Node22/Node26, Windows Node26 unit and negative review, plus real pinned Lean 4.35.0-rc3 synthesis/typechecking. Seven selected terms: `instAddNat`, `instMulNat`, `instSubNat`, `Int.instAdd`, `instDecidableEqNat`, `instDecidableEqBool`, `instAppendString`. Non-authoritative evidence SHA256 `215f6e60a0319320690035dbbfa34deb812c53466f53f6dd8892daa99757cc29`; [artifact 11670981656](https://github.com/dwijayuda/pskernel/actions/runs/38056463990/artifacts/11670981656), ZIP SHA256 `fb38e67c7eb9cdf9dd26ba17eb0b7f910f35c42c4641aed25e4d3e47e777237a`.
+
+No generic→concrete dependency graph, class/basis/source-line proof, scoped tie resolution, backend equivalence or closed normative PSCV registry is claimed. The 191 remaining required snapshot IDs are **still unresolved**. Compiler/kernel/seed and production PSCV refusal are unchanged.
+
+
 
 The P1-E Lean 4.35.0-rc3 `#synth` results were generic for `HAdd`,
 `HMul`, `HSub` and `BEq`. A generic implementation name does not show

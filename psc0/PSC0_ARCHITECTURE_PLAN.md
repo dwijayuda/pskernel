@@ -1404,3 +1404,12 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 ## PSCV P1–P5 progress and promotion limits (10 October 2026)
 
 The accepted P0 [feature ownership map](docs/platform/PSCV_PROFILE_AND_PACKAGE_BOUNDARIES.md) remains in force. The qualified P1-E typed-witness observation is documented in [PSCV_P1E_TYPED_RESOLUTION.md](docs/platform/PSCV_P1E_TYPED_RESOLUTION.md); it does not freeze the Standard environment. The explicit [P1–P5 sound gates](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md) separate pure-source certification (P2) from executable backend preservation (P4). No production core/backend/bootstrap change or verified executable certification is authorized by these planning documents.
+
+
+## P1-F imported concrete Lean dictionaries (qualified observations)
+
+**Qualified P1-F source:** `d8a8e2a9b5d4ab2294316af74671a02af1815ce0`. [Run 38056463990](https://github.com/dwijayuda/pskernel/actions/runs/38056463990), attempt 1, all four jobs passed: Linux Node22/Node26, Windows Node26 unit and negative review, plus real pinned Lean 4.35.0-rc3 synthesis/typechecking. Seven selected terms: `instAddNat`, `instMulNat`, `instSubNat`, `Int.instAdd`, `instDecidableEqNat`, `instDecidableEqBool`, `instAppendString`. Non-authoritative evidence SHA256 `215f6e60a0319320690035dbbfa34deb812c53466f53f6dd8892daa99757cc29`; [artifact 11670981656](https://github.com/dwijayuda/pskernel/actions/runs/38056463990/artifacts/11670981656), ZIP SHA256 `fb38e67c7eb9cdf9dd26ba17eb0b7f910f35c42c4641aed25e4d3e47e777237a`.
+
+No generic→concrete dependency graph, class/basis/source-line proof, scoped tie resolution, backend equivalence or closed normative PSCV registry is claimed. The 191 remaining required snapshot IDs are **still unresolved**. Compiler/kernel/seed and production PSCV refusal are unchanged.
+
+This is a diagnostic companion to [P1–P5 sound gates](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md), not a source/profile activation or kernel authority change.

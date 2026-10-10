@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 0,
+  "milestone": "PSC0-PSCV-P1F-CONCRETE-IMPORTED-DICTIONARY-WITNESSES",
+  "branch": "psc0/platform-pscv-p1f-concrete-dictionaries-v1",
+  "baseHead": "852442f03e5833910e378acf450c97738ba874a3",
+  "qualifiedSourceCommit": "d8a8e2a9b5d4ab2294316af74671a02af1815ce0",
+  "ci": {
+    "runId": 38056463990,
+    "attempt": 1,
+    "allFourJobsPassed": true,
+    "jobs": [
+      "ubuntu-node22",
+      "ubuntu-node26",
+      "windows-node26",
+      "lean-rc3-concrete-dictionaries"
+    ],
+    "artifactId": 11670981656,
+    "artifactZipSha256": "fb38e67c7eb9cdf9dd26ba17eb0b7f910f35c42c4641aed25e4d3e47e777237a"
+  },
+  "normative": {
+    "reference": "PSCV-RC-v2",
+    "leanVersion": "4.35.0-rc3",
+    "snapshotIds": 194,
+    "sourceLocatedDirectBooleanIds": 3,
+    "unresolvedIds": 191
+  },
+  "selectedTerms": [
+    "instAddNat",
+    "instMulNat",
+    "instSubNat",
+    "Int.instAdd",
+    "instDecidableEqNat",
+    "instDecidableEqBool",
+    "instAppendString"
+  ],
+  "nonAuthoritativeReportDigest": "215f6e60a0319320690035dbbfa34deb812c53466f53f6dd8892daa99757cc29",
+  "soundnessClaims": {
+    "genericToConcreteDependencyProven": false,
+    "sourceDeclsAndLinesVerified": false,
+    "scopedInstanceSearchProven": false,
+    "standardEnvironmentFrozen": false,
+    "pscvCertificateAvailable": false,
+    "verifiedExecutableAuthorized": false
+  },
+  "compilerKernelReleaseSeedUnchanged": true,
+  "status": "qualified-observational-data-only"
+}

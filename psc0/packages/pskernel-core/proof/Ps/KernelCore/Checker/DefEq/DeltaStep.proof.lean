@@ -146,6 +146,9 @@ theorem psKernelDefEqFinishLazyStep_success_cache_refines
   · simp [
       psKernelDefEqFinishLazyStep,
       psKernelDefEqQuick,
+      psKernelCachedCacheContains_eq,
+      PsKernelSemanticCachePolicy.enabled,
+      psKernelCachedCachePolicy,
       hEq,
       hEligible,
       hCache

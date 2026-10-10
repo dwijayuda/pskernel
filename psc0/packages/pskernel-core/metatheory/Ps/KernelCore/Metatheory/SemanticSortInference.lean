@@ -37,7 +37,7 @@ theorem inferCore_sort_result
           | ok entered =>
               simp only [psKernelInferCoreWithFuel, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
-                psKernelSemanticCacheNodeBudget, Bool.true_eq, if_true, hc, he,
+                psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run
               exact Or.inr run.1.symm
       | some cached =>
@@ -49,9 +49,9 @@ theorem inferCore_sort_result
           | ok entered =>
               simp only [psKernelInferCoreWithFuel, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
-                psKernelSemanticCacheNodeBudget, Bool.true_eq, if_true, hc, he,
+                psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run
-              exact Or.inl (hc.trans (congrArg some run.1))
+              exact Or.inl (congrArg some run.1)
 
 theorem inferCore_sort_sound (I : Interpretation D)
     (fuel : Nat) (whnf : InferOperation) (defeq : DefEqOperation)

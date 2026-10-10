@@ -527,6 +527,12 @@
       "memoCursor": "advance only for binding-sensitive operations; fixed for count, hash, free-variable query and universe substitution",
       "eligibilityScan": "one scalar-code traversal with exact Option-Nat specification refinement; budget remains 256",
       "promotionDecision": "not-eligible: corpus timeouts and controlled performance regression"
+    },
+    "correctnessPriority": {
+      "modelConsistencyProved": false,
+      "semanticJudgmentsAdequate": false,
+      "blocker": "proofIrrelevanceAlgorithmic omits term-to-inferred-type connections; the legacy relation is universal.",
+      "primitiveRepair": "Specified string equality; native runtime correspondence and generated PSC0 qualification remain explicit."
     }
   }
 }

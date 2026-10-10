@@ -10,6 +10,22 @@ The target is **Lean 4.35.0-rc4**, commit
 the package has its own toolchain and does not replace PSC0's selected compiler
 seed or its historical provider receipts.
 
+## Correctness status
+
+The metatheory and model/consistency proof are **unfinished**. The checked audit
+in `metatheory/Ps/KernelCore/Metatheory/JudgmentAdequacy.lean` shows that the
+legacy algorithmic equality rule permits arbitrary equality, and its typing
+relation consequently inhabits every type. This is a defect in the proof
+specification, not an exhibited executable acceptance of False. Existing
+operational refinement theorems cannot be used as a model-soundness proof.
+
+The active string comparator now has a specified equality decision and a proof
+of its positive-result law. This closes one primitive obligation; it does not
+repair the inadequate judgments. The next correctness work must reconnect
+checked inference and equality to a valid semantic relation and establish
+complete declaration model preservation with explicit axiom assumptions.
+See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
+
 ## Authoring and ownership
 
 Use [PSC0's current bounded self-host profile](../../docs/selfhost-language/CURRENT.md).
@@ -43,11 +59,11 @@ The preserved LEAN_4_34 documents and M3/M4 receipts describe historical
 checkpoints. They do not certify this migration. Current research, changes,
 and outstanding evidence are recorded in [RESEARCH_AND_MIGRATION.md](RESEARCH_AND_MIGRATION.md).
 
-## Current architectural stage
+## Prior native sharing stage and its measured results
 
 [Run 38001623085](https://github.com/dwijayuda/pskernel/actions/runs/38001623085) at
 `e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4` verifies the native sharing layer,
-the complete metatheory and all 84 companion proof files. Foundations,
+the existing metatheory proof suite and all 84 companion proof files. Foundations,
 scope/cache regressions and the depth-32 shared-expression family pass.
 Fresh 4.35 Prelude, UTF8, XOR and Int64 dependency closures also pass.
 

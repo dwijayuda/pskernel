@@ -2,7 +2,185 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
-## Decision and scope
+## Correctness audit and model-proof direction — 2026-10-10
+
+Correctness now takes priority over performance. The metatheory is **not
+complete**, and the present operational judgments cannot support a consistency
+proof. This is stronger than an unfilled lemma: the current specification
+admits a machine-checked counterexample.
+
+### Confirmed specification failure
+
+`JudgmentAdequacy.lean` proves, for every environment and local context:
+
+- `PsKernelDefEqJudgment environment context left right` for arbitrary terms.
+- `PsKernelTypingJudgment environment context (sort zero) type` for every type.
+- Consequently, no interpretation with an empty type can validate all these
+  typing derivations.
+
+The cause is `proofIrrelevanceAlgorithmic` in `Judgments.lean`. It accepts
+candidate types and a proposition-classification reduction, but has no premise
+connecting the left term to its candidate type, the right term to its candidate
+type, or the left candidate type to the second inferred type. Choose the candidate
+types identically, choose the second type to be `Sort 0`, and its premises are
+reflexive. The unrestricted conversion constructor then collapses typing.
+Environment well-formedness alone cannot fix this counterexample, because the
+construction works in every environment.
+
+These are theorems **about the specification**, not successful runs of
+`psKernelV1CheckExpression`. Existing refinement results establish only the
+forward implication from executable success to the legacy judgment. Their
+converse is neither stated nor proved. This audit therefore does not exhibit
+an executable proof of False; it invalidates using those relations as evidence
+that the executable is semantically sound.
+
+The other algorithmic shortcuts, including unit-like structures and structure
+eta, also need a typed-input and inference-connection audit. Repairing only the
+single demonstrated constructor would not justify declaring the theory sound.
+
+### Comparison with the actual reference proofs
+
+| Implementation and exact research revision | What was checked | Consequence for PSKernel |
+| --- | --- | --- |
+| Official Lean `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364` | [Proof irrelevance calls actual type inference, proposition classification, and type comparison](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/kernel/type_checker.cpp). | Keep the actual term-to-type connections in the proof. An implementation-shaped rule with omitted inference premises is insufficient. |
+| Lean4Lean `8223d223ed98661882e95d9d6a7126df7097cd76` | [The typed rule](https://github.com/digama0/lean4lean/blob/8223d223ed98661882e95d9d6a7126df7097cd76/Lean4Lean/Theory/Typing/Basic.lean) requires a proposition and both terms to inhabit it; [the checker proof](https://github.com/digama0/lean4lean/blob/8223d223ed98661882e95d9d6a7126df7097cd76/Lean4Lean/Verify/TypeChecker/IsDefEq.lean) carries translated, well-formed input evidence into infer-only calls. | Separate typed semantic equality from the incomplete comparison algorithm. This pinned verification file still contains unfinished structure-eta and unit-like proofs; it is not a completed proof we can import wholesale. |
+| Con Leche `65e74db49e89ad2bbd1e90aa4f784954db41fa3a` | [Rule soundness](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Rules/Sound.lean) recursively retains inference premises. [Infer-only application](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Rules/InferSound.lean) uses semantic input evidence and binder classification; not every application may skip its argument check. | A model-directed checker may need justified annotations or extra checks. Its syntax, inductive treatment, and axiom policy differ from PSKernel, so its model theorem does not transfer by similarity. |
+| Con Ron `64a2172a01276aa049220200bac11c075316230f` | [The capstone](https://github.com/leanprover/con-ron/blob/64a2172a01276aa049220200bac11c075316230f/proof/ConRon/Capstone.lean) composes Rust-to-twin and twin-to-Con-Leche refinement, with explicit successful pipeline calls, complete worker coverage, chunk-source correspondence, and a set-theory foundation. | A storage rewrite needs its own simulation and input/output correspondence. Hash-consing performance does not establish kernel correctness. The extraction and runtime boundary remains distinct from the mathematical model. |
+| Nanoda `4c544ed4099c8227f07d5de77ad1e69fb0740a27` | [Infer/check separation and proof irrelevance](https://github.com/ammkrn/nanoda_lib/blob/4c544ed4099c8227f07d5de77ad1e69fb0740a27/src/tc.rs) and [configurable axiom admission](https://github.com/ammkrn/nanoda_lib/blob/4c544ed4099c8227f07d5de77ad1e69fb0740a27/README.md). | Useful independent implementation evidence, not a substitute for the missing PSKernel model proof. |
+
+The separate [Lean4Lean model target](https://github.com/digama0/lean4lean-model/blob/27fb3b656c0d536469f6817cf277904dee8eb5ca/Lean4LeanModel/Consistency.lean),
+at `27fb3b656c0d536469f6817cf277904dee8eb5ca`, explicitly contains an unfinished
+consistency theorem. Its statement and foundation are useful references;
+the unfinished theorem cannot be used as a proof dependency.
+
+### Actual primitive repair
+
+The active `psKernelStringEq` now uses `decide (left = right)`, whose
+[Lean 4.35 definition](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Prelude.lean)
+decides equality of the represented UTF-8 bytes. The all-input theorem
+`psKernelStringEq_true_iff` connects a positive result to actual string
+equality, discharging `PsKernelStringEqSoundLaw` without a custom axiom.
+Fresh-name and universe-parameter uniqueness consequences can now instantiate
+that law with a theorem. Hash-coherence proofs use equality substitution, so
+they no longer need the old cursor implementation to establish equal hashes.
+
+This deliberately replaces the old implementation's opaque-read proof
+obligation with a specified operation; equivalence to the old opaque worker
+is not claimed. The worker remains for compatibility proofs but is no longer
+called by public string equality. Native execution uses Lean's
+`lean_string_dec_eq` runtime override, which remains in the existing
+compiler/runtime TCB. Generated PSC0 qualification has not been established for
+this implementation. No independent speedup is claimed from this change.
+
+
+Validation for the specified string equality and adequacy audit is recorded at
+`c78590556fca75f9ee080e32cbb0d0cd82f16b92`:
+[run 38007755710](https://github.com/dwijayuda/pskernel/actions/runs/38007755710)
+passed the 241-job executable build, the 200-job existing metatheory build,
+all 84 companion files, foundation/cache/sharing regressions, all 141 tutorial
+verdicts and all 18 Arena bug verdicts with no declines. Fresh Prelude, UTF8,
+XOR and Int64 exports passed. The positive StringEq soundness theorem reports
+**no axioms**; the equivalence lemma reports `propext`, and the freshness
+corollary reports only the three standard host axioms. The classifier trace and its refactored caller subsequently passed
+[run 38008230732](https://github.com/dwijayuda/pskernel/actions/runs/38008230732)
+at `aea996799b986091a4c8fbf6e1ce28f578609348`: 201 build jobs and all 84
+companion files. This later change affects assurance code and Lake registration,
+not the production implementation tested at `c7859055`.
+
+### Retained classifier evidence
+
+`DefEqClassifierTrace.lean` now states the exact positive proposition-classifier
+contract as an equivalence with an operational trace. That trace includes the
+input expression's inference result, the intermediate checker state, the
+WHNF call on that exact inferred type, the final state, and the zero-level
+sort result. The legacy refinement helper derives its weaker result through
+this trace. The primary trace interface therefore preserves the connections
+needed for a future model proof instead of throwing them away.
+
+This remains operational evidence. The trace's inference operation must still
+be proved semantically sound on its actual valid inputs. The legacy equality
+constructor is not repaired by adding this interface, and the adequacy
+counterexample remains an intentional build target.
+
+### Required model theorem and explicit assumptions
+
+The compatibility API admits well-typed user axioms. Such an axiom need not
+be true: admitting an axiom of type False cannot imply unconditional consistency.
+The model theorem must therefore preserve a model of the safe logical
+environment **relative to a satisfying interpretation of admitted axioms**.
+A separate restricted consistency mode could instead enforce an exact axiom
+policy with proved interpretations; changing that policy is not part of this
+primitive repair. Unsafe/partial declarations and their accessibility from
+safe checking also require an explicit semantic boundary.
+
+The intended theorem is: given the mathematical foundation, a model of the
+initial safe environment, interpretations of the admitted axioms, and a
+successful actual safe admission run, construct a model of the resulting
+safe environment which preserves earlier interpretations and validates the
+new declarations. The no-False corollary additionally fixes the intended empty
+interpretation of False. This is a target, not a theorem currently implemented.
+
+Con Leche's [actual model theorem](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/MainTheorem.lean)
+has a `SetTheory V` hypothesis. Its
+[foundation interface](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/SetTheory/Core.lean)
+includes an increasing countable hierarchy of universes. This is a stated
+relative-consistency assumption, not an implementation soundness axiom.
+The standard host axioms reported by `#print axioms` do not list such local
+hypotheses, so both must be audited. PSKernel has not constructed this model
+or adopted an extra foundation axiom in the kernel.
+
+### Architecture and completion gates
+
+1. Define an independent typed or semantic relation with scoped contexts,
+   universe valuations, sound constant lookup, and valid environments.
+   Retain inference connections and input validity at every shortcut.
+2. Prove checked inference establishes that relation. Prove infer-only results
+   under their actual well-typed-input premises; configuration preservation
+   alone is insufficient. Carry the obligations through reduction, caches,
+   proof irrelevance, eta, projection, quotient and recursor paths.
+3. Establish complete admission model preservation, including ordinary,
+   mutual and nested inductive transactions, positivity, generated recursors,
+   quotient bootstrap, safety restrictions, and axiom interpretation.
+4. Connect the exact public checker and stream adapter to those results.
+   Prove input fidelity and complete coverage. Construct the model and derive
+   the no-False corollary; audit all assumptions and runtime dependencies.
+
+Do not assume generic subject reduction or transitivity of the executable
+comparison. A semantic equality can be transitive without making the
+algorithm's positive cache a transitive closure. Resource exhaustion may
+reject or decline; the consistency proof concerns successful checking and
+does not require proving all inputs terminate within an Arena budget.
+
+These gates are unfinished. A successful build of the existing proof files
+does not close them. No shortcut rule, arbitrary model-soundness premise,
+`sorry`, custom axiom, unchecked cast, or fallback checker is an acceptable
+substitute.
+
+### Extended Init results and reporting correction
+
+The old executable `e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4`, SHA256
+`74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e`,
+accepted both full Init exports in
+[extended run 38004337520](https://github.com/dwijayuda/pskernel/actions/runs/38004337520):
+
+| Input | Records | Declarations | Wall seconds | Peak RSS KiB |
+| --- | ---: | ---: | ---: | ---: |
+| Fresh 4.35-rc4 Init | 6,452,982 | 57,919 | 1,647.02 | 319,028 |
+| Historical 4.34.1 Init | 6,487,065 | 58,170 | 2,141.76 | 317,308 |
+
+Both checker processes exited zero and emitted a final acceptance covering
+every input record. The workflow jobs are recorded as failures because the
+original monitor searched stdout while the adapter emits acceptance on stderr.
+The monitor is corrected in `a3c9436e0b4a89c9434a72594e810aeccb1e93a0`.
+The evidence receipt preserves the original job status and raw-log provenance
+alongside the corrected interpretation; it does not relabel the original run
+green or weaken the exit/coverage requirements.
+
+These runs precede the specified string-equality repair. They do not validate
+the new binary, prove semantic soundness, or pass the unchanged 500-second
+Arena Init budget. Std and Mathlib results are recorded separately when known.
+
+## Prior sharing stage: decision and scope
 
 The active package is `psc0/packages/pskernel-core`, targeting the user-selected
 Lean **4.35.0-rc4**, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
@@ -499,7 +677,7 @@ Code/proof revision: `e8ed888bb4f16153b9aac335872d770ac19bbb11`.
 | Check | Result |
 |---|---|
 | Native foundations and reduction/cache/scope regressions | Passed |
-| Complete metatheory | Passed, 195 build jobs |
+| Existing metatheory proof suite | Passed, 195 build jobs |
 | Companion proofs | 84/84 files passed |
 | Tutorial | 141 correct verdicts, zero declines |
 | Historical bugs | 18 correct rejections, zero accepts or declines |

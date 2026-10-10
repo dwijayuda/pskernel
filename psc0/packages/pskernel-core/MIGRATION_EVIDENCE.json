@@ -1,181 +1,70 @@
 {
-  "schemaVersion": 3,
-  "stage": "Certified native syntax sharing and storage-lifetime refinement",
-  "status": "native-proof-verified-corpus-timeouts-and-controlled-performance-regression",
-  "candidateCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
-  "sourceProvenance": {
-    "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
-    "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
-    "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
-  },
+  "schemaVersion": 4,
+  "stage": "Correctness priority: judgment adequacy audit, specified StringEq, and exact classifier traces",
+  "status": "semantic-specification-inadequate-model-proof-unfinished",
+  "candidateCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+  "assuranceRevision": "aea996799b986091a4c8fbf6e1ce28f578609348",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38001623085,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38001623085",
-  "nativeBinarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+  "workflowRun": 38007755710,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38007755710",
+  "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
   "checks": {
     "build": {
       "status": "passed",
       "jobs": 241,
-      "jobId": 114060790096
+      "jobId": 114080390584
     },
-    "foundations": "passed",
-    "dispatchProjectionAndCacheRegressions": "passed",
-    "certifiedSyntax": {
+    "metatheory": {
       "status": "passed",
-      "jobId": 114060790096,
-      "constructors": 14,
-      "binderCursors": [
-        0,
-        1,
-        2,
-        5
-      ],
-      "sharedDagDepth": 32,
-      "expandedDagNodes": 8589934591,
-      "mixedBinderDepthExpandedNodes": 17179869181,
-      "coverage": [
-        "term/universe instantiation",
-        "lifting",
-        "free-variable abstraction",
-        "positive and negative exact bound-variable occurrence",
-        "exact syntactic equality",
-        "forced key collisions and cursor mismatch",
-        "closed substitution argument preparation",
-        "read-only hash hits/misses",
-        "indexed map/pairset and scoped semantic cache isolation"
-      ]
-    },
-    "metatheoryBuild": {
-      "status": "passed",
-      "jobs": 199,
-      "jobId": 114060790270
+      "jobs": 200,
+      "jobId": 114080390702
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "jobId": 114060790270
+      "jobId": 114080390702
     },
+    "foundationRegressions": "passed",
     "tutorial": {
       "status": "passed",
-      "cases": 141,
       "correct": 141,
       "declined": 0,
-      "jobId": 114061310480
+      "jobId": 114080872802
     },
     "bugs": {
       "status": "passed",
-      "cases": 18,
-      "correctRejections": 18,
-      "accepted": 0,
+      "correct": 18,
       "declined": 0,
-      "jobId": 114061310456
+      "jobId": 114080872756
     },
-    "fresh435": {
-      "status": "passed",
-      "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
-      "prelude": {
-        "jobId": 114061310515,
-        "records": 65406,
-        "declarations": 1840,
-        "constants": 2121,
-        "wallSeconds": 1.12,
-        "maxRssKiB": 74556
-      },
-      "utf8": {
-        "jobId": 114061310515,
-        "records": 159345,
-        "declarations": 2146,
-        "constants": 2353,
-        "wallSeconds": 13.5,
-        "maxRssKiB": 84540
-      },
-      "xor": {
-        "jobId": 114061310486,
-        "records": 333731,
-        "declarations": 3413,
-        "constants": 3752,
-        "wallSeconds": 16.75,
-        "maxRssKiB": 89140
-      },
-      "int64": {
-        "jobId": 114061310486,
-        "records": 16206,
-        "declarations": 405,
-        "constants": 497,
-        "wallSeconds": 0.28,
-        "maxRssKiB": 72348
-      }
-    },
-    "init": {
-      "status": "timeout",
-      "jobId": 114061310518,
-      "limitSeconds": 500,
-      "arenaCorrectness": "error",
-      "exitCode": -9,
-      "wallSeconds": 500.01415371894836,
-      "lastProgress": {
-        "records": 2399999,
-        "declarations": 18883
-      }
-    },
-    "std": {
-      "status": "timeout",
-      "jobId": 114061310560,
-      "limitSeconds": 590,
-      "arenaCorrectness": "error",
-      "exitCode": -9,
-      "wallSeconds": 590.0730633735657,
-      "lastProgress": {
-        "records": 1999999,
-        "declarations": 14314
-      }
-    },
-    "mathlib": {
-      "status": "not-run",
-      "reason": "Init and Std prerequisite gates failed",
-      "jobId": 114064421139,
-      "workflowConclusion": "skipped"
-    },
-    "fullFresh435": {
-      "status": "timeout",
-      "workflowRun": 38001895321,
-      "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
-      "init": {
-        "jobId": 114061681732,
-        "status": "timeout",
-        "limitSeconds": 500,
-        "exitCode": 124,
-        "inputRecords": 6452982,
-        "inputSha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
-        "maxRssKiB": 175280,
-        "lastProgress": {
-          "records": 2299999,
-          "declarations": 18434
+    "freshPreludeUtf8XorInt64": "passed",
+    "originalBudgetCorpora": {
+      "status": "running",
+      "runId": 38007755710,
+      "checkedAt": "2026-10-10 00:19:59 UTC",
+      "jobs": [
+        {
+          "jobId": 114080872733,
+          "name": "profile-init",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "jobId": 114080872766,
+          "name": "corpus (init)",
+          "status": "in_progress",
+          "conclusion": null
+        },
+        {
+          "jobId": 114080872785,
+          "name": "corpus (std)",
+          "status": "in_progress",
+          "conclusion": null
         }
-      },
-      "std": {
-        "jobId": 114061681707,
-        "status": "timeout",
-        "limitSeconds": 590,
-        "exitCode": 124,
-        "inputRecords": 10193568,
-        "inputSha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
-        "maxRssKiB": 161416,
-        "lastProgress": {
-          "records": 1999999,
-          "declarations": 14186
-        }
-      }
-    },
-    "scalarCacheScan": {
-      "status": "passed",
-      "theorem": "PsKernelCacheScan.remaining_eq",
-      "quantification": "every expression and Nat budget",
-      "scope": "exact remaining-budget result and all four eligibility entry points",
-      "nodeBudget": 256
+      ]
     }
   },
   "claims": {
@@ -185,571 +74,266 @@
     "defaultProviderPromoted": false,
     "compilerSeedChanged": false,
     "wholeCorpusSpeedupEstablished": false,
-    "generatedSourcePortable": false
+    "generatedSourcePortable": false,
+    "semanticMetatheoryComplete": false,
+    "semanticJudgmentsAdequate": false,
+    "noExecutableUnsoundnessClaimedByAdequacyAudit": true
   },
-  "architecture": {
-    "proofBoundary": "Intrinsic exact-result entries, full input/cursor validation, proved compiler substitutions, no project-defined unsafe primitive or axiom",
-    "scratchStorage": "Std.HashMap operation-local delta",
-    "retainedStorage": "Lean.PersistentHashMap checkpoint; publish at operation boundary",
-    "memoCursor": "Algebra-controlled: advance at binders only when the result depends on binder depth",
-    "scopeExit": "Restore entire parent caches; exact cross-scope hash-retention theorem exists but is not activated",
-    "executionProfile": "Lean-4.35-native-experimental",
-    "portableTarget": "PSC0 current bounded self-host profile; not restricted to the historical PSC1 profiles",
-    "dependencies": [
-      "Lean pointer-hint contracts",
-      "Lean compiler simplification and proof erasure",
-      "Squash",
-      "Std.HashMap",
-      "Lean.PersistentHashMap"
+  "correctnessAudit": {
+    "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+    "workflowRun": 38007755710,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38007755710",
+    "adequacy": {
+      "status": "counterexample-checked",
+      "file": "metatheory/Ps/KernelCore/Metatheory/JudgmentAdequacy.lean",
+      "results": [
+        "Legacy DefEq relates all terms in every environment/context",
+        "Legacy typing assigns every type to Sort zero",
+        "No interpretation with an empty type validates all legacy typing derivations"
+      ],
+      "cause": "proofIrrelevanceAlgorithmic lacks term-to-inferred-type premises; convert consumes the resulting universal relation",
+      "executableFalseAcceptanceDemonstrated": false,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "primitiveRepair": {
+      "status": "proved",
+      "definition": "psKernelStringEq uses decide (left = right)",
+      "law": "psKernelStringEq_sound_lean435",
+      "lawAxioms": [],
+      "equivalence": "psKernelStringEq_true_iff",
+      "equivalenceAxioms": [
+        "propext"
+      ],
+      "freshNameCorollary": "psKernelSimpleFreshElimName_fresh_lean435",
+      "freshNameCorollaryAxioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "hashCoherence": "derived by equality substitution",
+      "runtimeBoundary": "Lean String.decEq native override remains in compiler/runtime TCB",
+      "oldOpaqueWorkerEquivalenceClaimed": false
+    },
+    "validation": {
+      "build": {
+        "status": "passed",
+        "jobs": 241,
+        "jobId": 114080390584
+      },
+      "metatheory": {
+        "status": "passed",
+        "jobs": 200,
+        "jobId": 114080390702
+      },
+      "companionProofs": {
+        "status": "passed",
+        "files": 84,
+        "jobId": 114080390702
+      },
+      "foundationRegressions": "passed",
+      "tutorial": {
+        "status": "passed",
+        "correct": 141,
+        "declined": 0,
+        "jobId": 114080872802
+      },
+      "bugs": {
+        "status": "passed",
+        "correct": 18,
+        "declined": 0,
+        "jobId": 114080872756
+      },
+      "freshPreludeUtf8XorInt64": "passed",
+      "originalBudgetCorpora": {
+        "status": "running",
+        "runId": 38007755710,
+        "checkedAt": "2026-10-10 00:19:59 UTC",
+        "jobs": [
+          {
+            "jobId": 114080872733,
+            "name": "profile-init",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "jobId": 114080872766,
+            "name": "corpus (init)",
+            "status": "in_progress",
+            "conclusion": null
+          },
+          {
+            "jobId": 114080872785,
+            "name": "corpus (std)",
+            "status": "in_progress",
+            "conclusion": null
+          }
+        ]
+      }
+    },
+    "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
+    "traceRefinement": {
+      "sourceCommit": "efe1d0b197afdba89b134ac24870eac80c8bf237",
+      "file": "metatheory/Ps/KernelCore/Metatheory/DefEqClassifierTrace.lean",
+      "status": "proved",
+      "theorem": "psKernelDefEqIsPropWith_true_iff_trace",
+      "scope": "Exact infer/WHNF/state/level evidence; not semantic typing",
+      "legacyJudgmentCollapseRepaired": false,
+      "validationCommit": "aea996799b986091a4c8fbf6e1ce28f578609348",
+      "workflowRun": 38008230732,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38008230732",
+      "jobId": 114081909804,
+      "metatheoryBuildJobs": 201,
+      "companionProofFiles": 84,
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ]
+    },
+    "model": {
+      "status": "not-constructed",
+      "proofStatus": "not-complete",
+      "requiredScope": "Safe logical environment, valid starting model, satisfying interpretation of admitted axioms, successful actual admission, explicit set-theoretic foundation",
+      "arbitraryAxiomAdmissionProhibitsUnconditionalAllInputConsistency": true,
+      "customSoundnessAxiomsAdded": false
+    },
+    "researchPins": {
+      "lean4": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+      "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+      "conRon": "64a2172a01276aa049220200bac11c075316230f",
+      "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+      "lean4lean": "8223d223ed98661882e95d9d6a7126df7097cd76",
+      "lean4leanModel": "27fb3b656c0d536469f6817cf277904dee8eb5ca"
+    }
+  },
+  "extendedCorpusDiagnostics": {
+    "runId": 38004337520,
+    "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+    "monitorFixCommit": "a3c9436e0b4a89c9434a72594e810aeccb1e93a0",
+    "results": [
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "fresh435-init",
+        "mode": "fresh",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
+          "records": 6452982,
+          "bytes": 345690186,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"c29b6dda4f7c20e3eeaa717c4e565663c5cfa364\",\"version\":\"4.35.0-rc4\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "accepted-complete-under-extended-limit",
+        "startedAt": "2026-10-09T23:26:04.493915+00:00",
+        "elapsedSeconds": 1647.02,
+        "lastOutput": "pskernel-core arena progress: records=6399999 declarations=57388 names=293592/293592 levels=574/574 exprs=6048446/6048446",
+        "exitCode": 0,
+        "completedAt": "2026-10-09T23:53:31.514621+00:00",
+        "maxRssKiB": 319028,
+        "lastProgress": {
+          "records": 6399999,
+          "declarations": 57388
+        },
+        "acceptance": {
+          "lean": "4.35.0-rc4",
+          "records": 6452982,
+          "declarations": 57919,
+          "constants": 59349
+        },
+        "reportingCorrection": {
+          "originalJobConclusion": "failure",
+          "originalReceiptStatus": "protocol-error-missing-or-incomplete-acceptance",
+          "reason": "The monitor searched stdout only; the complete acceptance line is in stderr. The checker exited 0 with every input record covered.",
+          "method": "Reconciled complete job logs; no checker rerun or acceptance relaxation.",
+          "jobId": 114069538858,
+          "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538858"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "historical-init",
+        "mode": "historical",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "620502ac9e63ba4a2dea9d46386c2f6aebc49faf8848ea3aaa18a77a09491a6a",
+          "records": 6487065,
+          "bytes": 347555345,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"5045d0056413266e57c625dcd7c365b10e377c52\",\"version\":\"4.34.1\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "accepted-complete-under-extended-limit",
+        "startedAt": "2026-10-09T23:26:11.926766+00:00",
+        "elapsedSeconds": 2141.76,
+        "lastOutput": "pskernel-core arena progress: records=6399999 declarations=57416 names=293339/293339 levels=574/574 exprs=6048671/6048671",
+        "exitCode": 0,
+        "completedAt": "2026-10-10T00:01:53.687326+00:00",
+        "maxRssKiB": 317308,
+        "lastProgress": {
+          "records": 6399999,
+          "declarations": 57416
+        },
+        "acceptance": {
+          "lean": "4.34.1",
+          "records": 6487065,
+          "declarations": 58170,
+          "constants": 59626
+        },
+        "reportingCorrection": {
+          "originalJobConclusion": "failure",
+          "originalReceiptStatus": "protocol-error-missing-or-incomplete-acceptance",
+          "reason": "The monitor searched stdout only; the complete acceptance line is in stderr. The checker exited 0 with every input record covered.",
+          "method": "Reconciled complete job logs; no checker rerun or acceptance relaxation.",
+          "jobId": 114069538925,
+          "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538925"
+        }
+      }
     ],
-    "scalarEligibility": "Zero-exhausted/successor-remaining code; exact decode refinement to the original bounded Option worker; no budget change"
-  },
-  "architecturalExperiments": [
-    {
-      "candidate": "de1ad1993286d642575cf35b4842b6633501a634",
-      "run": 37997784610,
-      "design": "retained metadata in a Std.HashMap",
-      "outcome": "regressed",
-      "init": {
-        "timeoutSeconds": 500,
-        "lastProgressRecords": 499999
-      },
-      "std": {
-        "timeoutSeconds": 590,
-        "lastProgressRecords": 499999
-      },
-      "diagnosticRun": 37998116131,
-      "workerSamples": {
-        "job": 114049222923,
-        "samples": 11,
-        "wholeArrayCopySamples": 4,
-        "note": "Sparse samples identify a mechanism, not statistical time percentages."
-      },
-      "controlledPrefix": {
-        "job": 114049222697,
-        "records": 500000,
-        "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
-        "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
-        "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
-        "baselineSeconds": [
-          143.14,
-          144.51
-        ],
-        "candidateTimeoutSeconds": [
-          180,
-          180
-        ],
-        "fullConformance": false
-      }
-    },
-    {
-      "candidate": "7154935f67b614129d9d547d88c0b28213e56034",
-      "run": 37998880424,
-      "design": "persistent trie for all memos plus cross-scope hash retention",
-      "outcome": "proofs passed; corpus timeouts and controlled performance regression",
-      "init": {
-        "timeoutSeconds": 500,
-        "lastProgressRecords": 1099999
-      },
-      "std": {
-        "timeoutSeconds": 590,
-        "lastProgressRecords": 1799999
-      },
-      "controlledPrefix": {
-        "run": 37999324549,
-        "job": 114053267452,
-        "records": 500000,
-        "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
-        "baselineSeconds": [
-          143.09,
-          143.59
-        ],
-        "candidateTimeoutSeconds": [
-          180,
-          180
-        ],
-        "fullConformance": false
-      },
-      "profile": {
-        "job": 114052375468,
-        "seconds": 600,
-        "maxRssKiB": 982096,
-        "lastEnteredRecord": 2414950
-      },
-      "storageControl": {
-        "candidate": "7d54f5672b5c1f12f153ef2ceb82a80db75aa07f",
-        "run": 37998638649,
-        "job": 114051519449,
-        "seconds": 600,
-        "maxRssKiB": 153152,
-        "lastEnteredRecord": 2028388,
-        "note": "Different runner and traversal endpoint; memory evidence, not a controlled timing comparison."
-      }
-    }
-  ],
-  "diagnostics": {
-    "run": 38001895321,
-    "status": "completed",
-    "worker": {
-      "job": 114061681289,
-      "limitSeconds": 180,
-      "exitCode": 124,
-      "maxRssKiB": 108552,
-      "lastEnteredRecord": 497392,
-      "lastEnteredDeclaration": "_private.Init.Data.Array.Extract.0.Array.extract_append._proof_1_4",
-      "samples": 11,
-      "findings": [
-        "scalar cache-eligibility worker appears in three top-frame samples",
-        "shared variable-query/substitution allocation and reference-count work",
-        "name/string hash and equality",
-        "persistent hash checkpoint lookup",
-        "list traversal and inference"
-      ],
-      "note": "Sparse samples identify mechanisms, not time percentages; profile execution is diagnostic, not full acceptance."
-    },
-    "profile": {
-      "job": 114061310482,
-      "limitSeconds": 600,
-      "exitCode": 124,
-      "maxRssKiB": 175428,
-      "lastEnteredRecord": 2414950,
-      "lastEnteredDeclaration": "theorem _private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList",
-      "completeAcceptance": false
-    },
-    "controlledPrefix": {
-      "job": 114061681597,
-      "records": 500000,
-      "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
-      "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
-      "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
-      "executionOrder": [
-        "baseline-1",
-        "candidate-1",
-        "candidate-2",
-        "baseline-2"
-      ],
-      "baselineSeconds": [
-        143.53,
-        142.83
-      ],
-      "candidateTimeoutSeconds": [
-        180,
-        180
-      ],
-      "baselineMaxRssKiB": [
-        331876,
-        332012
-      ],
-      "candidateMaxRssKiB": [
-        99232,
-        98552
-      ],
-      "baselineExitCodes": [
-        0,
-        0
-      ],
-      "candidateExitCodes": [
-        124,
-        124
-      ],
-      "fullConformance": false,
-      "conclusion": "Candidate failed the performance comparison: both candidate runs timed out while both paired baseline runs accepted the prefix.",
-      "memoryCaveat": "Candidate measurements end at timeout, so they are not peak-memory comparisons for equal completed work.",
-      "scalarIsolation": "This experiment compares the entire final sharing layer with the repair baseline; it does not isolate the scalar-scan change."
-    }
-  },
-  "researchPins": {
-    "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
-    "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
-    "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
-    "conRon": "64a2172a01276aa049220200bac11c075316230f",
-    "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
-    "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
-    "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
-    "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
-  },
-  "researchFindings": {
-    "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
-    "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
-    "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
-    "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
+    "pending": [
+      "historical-mathlib",
+      "fresh435-std",
+      "historical-std"
+    ],
+    "newStringEqualityBinaryTested": false,
+    "checkedAt": "2026-10-10 00:19:59 UTC"
   },
   "remaining": [
+    "Replace inadequate legacy semantic target and prove actual checked/infer-only semantic correspondence",
+    "Construct the model with explicit foundation, axiom interpretation and safety boundary",
+    "Complete model-preserving ordinary/mutual/nested inductive and quotient admission",
+    "Prove public API/adapter correspondence and derive no-False corollary",
     "Complete historical and fresh Init/Std/Mathlib conformance at original limits",
     "Stored constructor metadata and costed portable graph storage",
     "Batched telescope/context/fuel correspondence",
     "Exact-source generated PSC0 compiler/kernel qualification"
   ],
   "nextStage": {
-    "status": "not-qualified",
-    "scope": "Portable representation/backend and batched telescope transport; no compiler-seed or default-provider change"
+    "status": "correctness-work-required",
+    "scope": "Adequate semantic judgments and checker-to-model bridge; model construction and complete admission preservation remain open",
+    "performancePriority": "Secondary; only justified correctness-preserving changes"
   },
-  "priorRepairStage": {
-    "schemaVersion": 2,
-    "stage": "PSC0 Lean 4.35 kernel conformance and timeout repairs",
-    "candidateCommit": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
-    "sourceProvenance": {
-      "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
-      "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
-      "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
-    },
-    "target": {
-      "version": "4.35.0-rc4",
-      "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
-    },
-    "workflowRun": 37990758789,
-    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37990758789",
-    "nativeBinarySha256": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
-    "checks": {
-      "build": "passed",
-      "foundations": "passed",
-      "natDispatchRegressions": "passed",
-      "metatheoryBuild": "passed",
-      "companionProofs": {
-        "status": "passed",
-        "files": 84,
-        "jobId": 114023997923
-      },
-      "tutorial": {
-        "status": "passed",
-        "cases": 141,
-        "correct": 141,
-        "declined": 0,
-        "jobId": 114024555586
-      },
-      "bugs": {
-        "status": "passed",
-        "cases": 18,
-        "correctRejections": 18,
-        "accepted": 0,
-        "declined": [],
-        "jobId": 114024555482
-      },
-      "fresh435": {
-        "status": "passed",
-        "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
-        "prelude": {
-          "jobId": 114024555438,
-          "records": 65406,
-          "declarations": 1840,
-          "constants": 2121,
-          "wallSeconds": 0.62,
-          "maxRssKiB": 72052
-        },
-        "utf8": {
-          "jobId": 114024555438,
-          "records": 159345,
-          "declarations": 2146,
-          "constants": 2353,
-          "wallSeconds": 8.5,
-          "maxRssKiB": 84620
-        },
-        "xor": {
-          "jobId": 114024555540,
-          "records": 333731,
-          "declarations": 3413,
-          "constants": 3752,
-          "wallSeconds": 14.57,
-          "maxRssKiB": 108484
-        },
-        "int64": {
-          "jobId": 114024555540,
-          "records": 16206,
-          "declarations": 405,
-          "constants": 497,
-          "wallSeconds": 0.21,
-          "maxRssKiB": 72204
-        }
-      },
-      "init": {
-        "status": "timeout",
-        "jobId": 114024555588,
-        "limitSeconds": 500,
-        "arenaCorrectness": "error",
-        "exitCode": -9,
-        "wallSeconds": 500.02263927459717,
-        "lastProgress": {
-          "records": 2099999,
-          "declarations": 17010
-        }
-      },
-      "std": {
-        "status": "timeout",
-        "jobId": 114024555480,
-        "limitSeconds": 590,
-        "arenaCorrectness": "error",
-        "exitCode": -9,
-        "wallSeconds": 590.0111389160156,
-        "lastProgress": {
-          "records": 2599999,
-          "declarations": 19259
-        }
-      },
-      "mathlib": {
-        "status": "not-run",
-        "reason": "Init and Std prerequisite gates failed",
-        "jobId": 114028656587,
-        "workflowConclusion": "skipped"
-      },
-      "projectionFuelRegressions": "passed",
-      "cacheModeRegressions": "passed",
-      "lambdaSpineBoundRegression": "passed",
-      "boundedSuccessLookupRegression": "passed",
-      "openWhnfScopeRegression": "passed",
-      "openInferenceAndEqualityScopeRegression": "passed",
-      "structuralInstantiationReferenceRefinement": "passed",
-      "freshUnknownLocalRejectionTheorem": "passed"
-    },
-    "claims": {
-      "completeArenaConformance": false,
-      "jointSelfhostQualified": false,
-      "endToEndConsistencyProved": false,
-      "defaultProviderPromoted": false,
-      "compilerSeedChanged": false
-    },
-    "nextStage": {
-      "status": "not-started",
-      "design": "RESEARCH_AND_MIGRATION.md",
-      "scope": "Proved portable expression graph, metadata, cursor-aware traversals, batched telescopes, complete Init/Std/Mathlib and separately qualified generated PSC0 products"
-    },
-    "status": "stage-checkpoint-with-open-corpus-timeouts",
-    "diagnostics": {
-      "trace": {
-        "run": 37986278855,
-        "source": "ad13026571931c0151b7ae53f468cd5363bef391",
-        "finding": "Int64.toBitVec_div unfolds symbolic Nat.shiftRight/div/ble repeatedly"
-      },
-      "experiment": {
-        "run": 37986835891,
-        "source": "ad13026571931c0151b7ae53f468cd5363bef391",
-        "temporaryPatch": "remove fvar exclusion for all bounded caches",
-        "cases": [
-          {
-            "budget": 256,
-            "wallSeconds": 0.3,
-            "records": 16206,
-            "declarations": 405,
-            "constants": 497,
-            "rssKiB": 72864
-          },
-          {
-            "budget": 4096,
-            "wallSeconds": 0.38,
-            "records": 16206,
-            "declarations": 405,
-            "constants": 497,
-            "rssKiB": 74208
-          }
-        ],
-        "productionEquivalent": false
-      },
-      "before": {
-        "run": 37985420337,
-        "focusedInt64TimeoutSeconds": 180,
-        "initTimeoutSeconds": 500.04527711868286,
-        "stdTimeoutSeconds": 590.1057589054108
-      },
-      "productionCandidate": "4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9",
-      "productionFocused": {
-        "commit": "4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9",
-        "run": 37987163057,
-        "job": 114012502799,
-        "int64WallSeconds": 0.37,
-        "xorWallSeconds": 39.6,
-        "binarySha256": "f35c048484ac392eb0a13ac48ee8485d79d27cabde4170e9326e2e4729702589"
-      },
-      "proofRepair": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
-      "traversalExperiment": {
-        "run": 37988845542,
-        "source": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
-        "inputKind": "first 1000000 records of pinned historical Init, not full conformance",
-        "inputSha256": "735d43733b70c51d86d9c4365ea433abcdb76a9f94dfe09a7a7dfc4605699878",
-        "variants": [
-          {
-            "name": "baseline",
-            "job": 114017555255,
-            "timeoutSeconds": 240
-          },
-          {
-            "name": "structural",
-            "job": 114017555100,
-            "timeoutSeconds": 240
-          },
-          {
-            "name": "open-all",
-            "job": 114017554738,
-            "timeoutSeconds": 240
-          },
-          {
-            "name": "combined",
-            "job": 114017554959,
-            "wallSeconds": 203.3,
-            "records": 1000000,
-            "declarations": 8507,
-            "constants": 9199,
-            "maxRssKiB": 332508
-          }
-        ],
-        "diagnosticOnly": true
-      },
-      "workerSampling": {
-        "run": 37988687879,
-        "job": 114017023739,
-        "samples": 11,
-        "source": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
-        "finding": "Repeated structural substitution, node counting, equality, universe substitution, cache eligibility allocation and scope cleanup; not a statistical percentage profile"
-      },
-      "profileReport": {
-        "run": 37989139275,
-        "job": 114018530778,
-        "profileSourceRun": 37987163057,
-        "slowDeclarations": 366,
-        "reportedSlowDeclarationMilliseconds": 446874
-      },
-      "historicalDagAnalysis": {
-        "run": 37933228241,
-        "job": 113828816249,
-        "record": 361999,
-        "proofUniqueNodes": 24520,
-        "proofExpandedTreeNodes": 12501779,
-        "depth": 85
-      },
-      "runtimeEquivalentPreviousRun": {
-        "run": 37989857541,
-        "commit": "d9b2e3e2da53406aeb727c05333f9ae0fe8e6127",
-        "comparison": "d9b2e3e2da53406aeb727c05333f9ae0fe8e6127...e8ed888bb4f16153b9aac335872d770ac19bbb11",
-        "onlyChangedPaths": [
-          "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SubstitutionRefinement.lean",
-          "psc0/packages/pskernel-core/proof/Ps/KernelCore/Checker/Inference/Core.proof.lean"
-        ],
-        "proofs": "failed at this earlier source; final proof repairs verified separately",
-        "init": {
-          "status": "timeout",
-          "wallSeconds": 500.01244497299194,
-          "lastProgressRecords": 3199999,
-          "lastProgressDeclarations": 25276
-        },
-        "std": {
-          "status": "timeout",
-          "wallSeconds": 590.0140829086304,
-          "lastProgressRecords": 2699999,
-          "lastProgressDeclarations": 19730
-        },
-        "mathlib": "skipped"
-      },
-      "finalProfile": {
-        "run": 37990758789,
-        "job": 114024555610,
-        "exitCode": 124,
-        "timeoutSeconds": 600,
-        "lastEnteredRecord": 4188018,
-        "lastEnteredDeclaration": "BitVec.getLsbD_srem",
-        "maxRssKiB": 518552,
-        "completeAcceptance": false
-      }
-    },
-    "researchPins": {
-      "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
-      "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
-      "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
-      "conRon": "64a2172a01276aa049220200bac11c075316230f",
-      "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
-      "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
-      "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
-      "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
-    },
-    "researchFindings": {
-      "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
-      "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
-      "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
-      "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
-    },
-    "scope": {
-      "activePackage": "psc0/packages/pskernel-core",
-      "authoringPolicy": "PSC0 current bounded-selfhost-subset",
-      "oldPSC1ProfilesAreCurrentConstraints": false,
-      "representationRedesignStarted": false,
-      "defaultProviderPromoted": false,
-      "selectedCompilerSeedChanged": false
-    },
-    "historicalMigrationCheckpoint": {
-      "candidateCommit": "05542332ab589314917cd67a7eb7b74e80557770",
-      "workflowRun": 37979868377,
-      "checks": {
-        "build": "passed",
-        "foundations": "passed",
-        "natDispatchRegressions": "passed",
-        "metatheoryBuild": "passed",
-        "companionProofs": {
-          "status": "passed",
-          "files": 84
-        },
-        "tutorial": {
-          "status": "passed",
-          "cases": 141,
-          "correct": 141,
-          "declined": 0
-        },
-        "bugs": {
-          "status": "known-decline-remains",
-          "cases": 18,
-          "correctRejections": 17,
-          "accepted": 0,
-          "declined": [
-            "bugs/rec-missing-ih"
-          ]
-        },
-        "fresh435": {
-          "status": "passed",
-          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
-          "prelude": {
-            "records": 65406,
-            "declarations": 1840,
-            "constants": 2121,
-            "wallSeconds": 0.68,
-            "maxRssKiB": 71976
-          },
-          "utf8": {
-            "records": 159345,
-            "declarations": 2146,
-            "constants": 2353,
-            "wallSeconds": 9.29,
-            "maxRssKiB": 84336
-          }
-        },
-        "init": {
-          "status": "timeout",
-          "arenaCorrectness": "error",
-          "wallSeconds": 500.08234429359436,
-          "lastProgress": {
-            "records": 1099999,
-            "declarations": 9330
-          },
-          "jobId": 113988156376
-        },
-        "std": {
-          "status": "resource-exhaustion",
-          "arenaStatus": "declined",
-          "wallSeconds": 396.22881841659546,
-          "record": 1227585,
-          "declaration": "Std.Sat.AIG.mkXorCached",
-          "diagnostic": "kernel reduction budget exhausted",
-          "jobId": 113988156164
-        },
-        "mathlib": {
-          "status": "not-run",
-          "reason": "Init and Std prerequisite gates failed",
-          "jobId": 113991896616
-        }
-      },
-      "status": "stage-checkpoint-with-open-corpus-failures"
-    }
+  "promotionDecision": {
+    "status": "not-eligible",
+    "reason": "Confirmed metatheory specification inadequacy; end-to-end model proof and generated PSC0 qualification absent; original corpus/performance gates remain separate.",
+    "prState": "draft",
+    "defaultProviderChanged": false
   },
-  "priorSharingCheckpoint": {
+  "priorNativeSharingStage": {
     "schemaVersion": 3,
     "stage": "Certified native syntax sharing and storage-lifetime refinement",
-    "status": "native-proof-verified-corpus-timeouts-and-performance-regression",
-    "candidateCommit": "2e2068774b73b9affcc0852ed14caf96319d29e8",
+    "status": "native-proof-verified-corpus-timeouts-and-controlled-performance-regression",
+    "candidateCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
     "sourceProvenance": {
       "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
       "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
@@ -759,20 +343,20 @@
       "version": "4.35.0-rc4",
       "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
     },
-    "workflowRun": 38000328227,
-    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38000328227",
-    "nativeBinarySha256": "f8d651cb42880708c29805f2823465a14b031a47f8bdbb2aa09983994d4dac97",
+    "workflowRun": 38001623085,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38001623085",
+    "nativeBinarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
     "checks": {
       "build": {
         "status": "passed",
         "jobs": 241,
-        "jobId": 114056572271
+        "jobId": 114060790096
       },
       "foundations": "passed",
       "dispatchProjectionAndCacheRegressions": "passed",
       "certifiedSyntax": {
         "status": "passed",
-        "jobId": 114056572271,
+        "jobId": 114060790096,
         "constructors": 14,
         "binderCursors": [
           0,
@@ -798,19 +382,19 @@
       "metatheoryBuild": {
         "status": "passed",
         "jobs": 199,
-        "jobId": 114056571993
+        "jobId": 114060790270
       },
       "companionProofs": {
         "status": "passed",
         "files": 84,
-        "jobId": 114056571993
+        "jobId": 114060790270
       },
       "tutorial": {
         "status": "passed",
         "cases": 141,
         "correct": 141,
         "declined": 0,
-        "jobId": 114057151502
+        "jobId": 114061310480
       },
       "bugs": {
         "status": "passed",
@@ -818,102 +402,111 @@
         "correctRejections": 18,
         "accepted": 0,
         "declined": 0,
-        "jobId": 114057151542
+        "jobId": 114061310456
       },
       "fresh435": {
         "status": "passed",
         "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
         "prelude": {
-          "jobId": 114057151433,
+          "jobId": 114061310515,
           "records": 65406,
           "declarations": 1840,
           "constants": 2121,
-          "wallSeconds": 1.28,
-          "maxRssKiB": 75656
+          "wallSeconds": 1.12,
+          "maxRssKiB": 74556
         },
         "utf8": {
-          "jobId": 114057151433,
+          "jobId": 114061310515,
           "records": 159345,
           "declarations": 2146,
           "constants": 2353,
-          "wallSeconds": 14.09,
-          "maxRssKiB": 83920
+          "wallSeconds": 13.5,
+          "maxRssKiB": 84540
         },
         "xor": {
-          "jobId": 114057151442,
+          "jobId": 114061310486,
           "records": 333731,
           "declarations": 3413,
           "constants": 3752,
-          "wallSeconds": 29.7,
-          "maxRssKiB": 87648
+          "wallSeconds": 16.75,
+          "maxRssKiB": 89140
         },
         "int64": {
-          "jobId": 114057151442,
+          "jobId": 114061310486,
           "records": 16206,
           "declarations": 405,
           "constants": 497,
-          "wallSeconds": 0.49,
-          "maxRssKiB": 71548
+          "wallSeconds": 0.28,
+          "maxRssKiB": 72348
         }
       },
       "init": {
         "status": "timeout",
-        "jobId": 114057151477,
+        "jobId": 114061310518,
         "limitSeconds": 500,
         "arenaCorrectness": "error",
         "exitCode": -9,
-        "wallSeconds": 500.02821946144104,
+        "wallSeconds": 500.01415371894836,
         "lastProgress": {
-          "records": 1699999,
-          "declarations": 14005
+          "records": 2399999,
+          "declarations": 18883
         }
       },
       "std": {
         "status": "timeout",
-        "jobId": 114057151538,
+        "jobId": 114061310560,
         "limitSeconds": 590,
         "arenaCorrectness": "error",
         "exitCode": -9,
-        "wallSeconds": 590.0085060596466,
+        "wallSeconds": 590.0730633735657,
         "lastProgress": {
-          "records": 2999999,
-          "declarations": 21381
+          "records": 1999999,
+          "declarations": 14314
         }
       },
       "mathlib": {
         "status": "not-run",
         "reason": "Init and Std prerequisite gates failed",
-        "jobId": 114060314113,
+        "jobId": 114064421139,
         "workflowConclusion": "skipped"
       },
       "fullFresh435": {
         "status": "timeout",
-        "workflowRun": 38000670791,
+        "workflowRun": 38001895321,
         "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
         "init": {
-          "jobId": 114057683540,
+          "jobId": 114061681732,
+          "status": "timeout",
           "limitSeconds": 500,
           "exitCode": 124,
           "inputRecords": 6452982,
           "inputSha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
-          "maxRssKiB": 139200,
+          "maxRssKiB": 175280,
           "lastProgress": {
-            "records": 1599999,
-            "declarations": 13243
+            "records": 2299999,
+            "declarations": 18434
           }
         },
         "std": {
-          "jobId": 114057683532,
+          "jobId": 114061681707,
+          "status": "timeout",
           "limitSeconds": 590,
           "exitCode": 124,
           "inputRecords": 10193568,
           "inputSha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
-          "maxRssKiB": 162552,
+          "maxRssKiB": 161416,
           "lastProgress": {
             "records": 1999999,
             "declarations": 14186
           }
         }
+      },
+      "scalarCacheScan": {
+        "status": "passed",
+        "theorem": "PsKernelCacheScan.remaining_eq",
+        "quantification": "every expression and Nat budget",
+        "scope": "exact remaining-budget result and all four eligibility entry points",
+        "nodeBudget": 256
       }
     },
     "claims": {
@@ -939,7 +532,8 @@
         "Squash",
         "Std.HashMap",
         "Lean.PersistentHashMap"
-      ]
+      ],
+      "scalarEligibility": "Zero-exhausted/successor-remaining code; exact decode refinement to the original bounded Option worker; no budget change"
     },
     "architecturalExperiments": [
       {
@@ -1025,53 +619,74 @@
       }
     ],
     "diagnostics": {
-      "run": 38000670791,
-      "controlledPrefix": {
-        "job": 114057683494,
-        "records": 500000,
-        "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
-        "baselineSeconds": [
-          109.06,
-          109.74
-        ],
-        "candidateSeconds": [
-          160.39,
-          163.55
-        ],
-        "baselineMaxRssKiB": [
-          332416,
-          332024
-        ],
-        "candidateMaxRssKiB": [
-          100708,
-          99772
-        ],
-        "allFourExitCodes": 0,
-        "fullConformance": false
-      },
+      "run": 38001895321,
+      "status": "completed",
       "worker": {
-        "job": 114057683226,
+        "job": 114061681289,
         "limitSeconds": 180,
         "exitCode": 124,
+        "maxRssKiB": 108552,
+        "lastEnteredRecord": 497392,
+        "lastEnteredDeclaration": "_private.Init.Data.Array.Extract.0.Array.extract_append._proof_1_4",
         "samples": 11,
         "findings": [
-          "bounded cache eligibility scans and allocations",
-          "name/string hashing",
-          "semantic index lookup",
-          "substitution and free-variable traversal allocation",
-          "scope cleanup"
+          "scalar cache-eligibility worker appears in three top-frame samples",
+          "shared variable-query/substitution allocation and reference-count work",
+          "name/string hash and equality",
+          "persistent hash checkpoint lookup",
+          "list traversal and inference"
         ],
-        "note": "No top-frame whole-table copy in these eleven sparse samples; not a statistical absence claim."
+        "note": "Sparse samples identify mechanisms, not time percentages; profile execution is diagnostic, not full acceptance."
       },
       "profile": {
-        "job": 114057151483,
+        "job": 114061310482,
         "limitSeconds": 600,
         "exitCode": 124,
-        "maxRssKiB": 189004,
-        "lastEntered": [
-          "3104596",
-          "theorem Std.IterM.step_filter._proof_1"
-        ]
+        "maxRssKiB": 175428,
+        "lastEnteredRecord": 2414950,
+        "lastEnteredDeclaration": "theorem _private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList",
+        "completeAcceptance": false
+      },
+      "controlledPrefix": {
+        "job": 114061681597,
+        "records": 500000,
+        "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+        "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+        "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+        "executionOrder": [
+          "baseline-1",
+          "candidate-1",
+          "candidate-2",
+          "baseline-2"
+        ],
+        "baselineSeconds": [
+          143.53,
+          142.83
+        ],
+        "candidateTimeoutSeconds": [
+          180,
+          180
+        ],
+        "baselineMaxRssKiB": [
+          331876,
+          332012
+        ],
+        "candidateMaxRssKiB": [
+          99232,
+          98552
+        ],
+        "baselineExitCodes": [
+          0,
+          0
+        ],
+        "candidateExitCodes": [
+          124,
+          124
+        ],
+        "fullConformance": false,
+        "conclusion": "Candidate failed the performance comparison: both candidate runs timed out while both paired baseline runs accepted the prefix.",
+        "memoryCaveat": "Candidate measurements end at timeout, so they are not peak-memory comparisons for equal completed work.",
+        "scalarIsolation": "This experiment compares the entire final sharing layer with the repair baseline; it does not isolate the scalar-scan change."
       }
     },
     "researchPins": {
@@ -1099,12 +714,730 @@
     "nextStage": {
       "status": "not-qualified",
       "scope": "Portable representation/backend and batched telescope transport; no compiler-seed or default-provider change"
+    },
+    "priorRepairStage": {
+      "schemaVersion": 2,
+      "stage": "PSC0 Lean 4.35 kernel conformance and timeout repairs",
+      "candidateCommit": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+      "sourceProvenance": {
+        "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+        "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
+        "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
+      },
+      "target": {
+        "version": "4.35.0-rc4",
+        "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+      },
+      "workflowRun": 37990758789,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37990758789",
+      "nativeBinarySha256": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+      "checks": {
+        "build": "passed",
+        "foundations": "passed",
+        "natDispatchRegressions": "passed",
+        "metatheoryBuild": "passed",
+        "companionProofs": {
+          "status": "passed",
+          "files": 84,
+          "jobId": 114023997923
+        },
+        "tutorial": {
+          "status": "passed",
+          "cases": 141,
+          "correct": 141,
+          "declined": 0,
+          "jobId": 114024555586
+        },
+        "bugs": {
+          "status": "passed",
+          "cases": 18,
+          "correctRejections": 18,
+          "accepted": 0,
+          "declined": [],
+          "jobId": 114024555482
+        },
+        "fresh435": {
+          "status": "passed",
+          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+          "prelude": {
+            "jobId": 114024555438,
+            "records": 65406,
+            "declarations": 1840,
+            "constants": 2121,
+            "wallSeconds": 0.62,
+            "maxRssKiB": 72052
+          },
+          "utf8": {
+            "jobId": 114024555438,
+            "records": 159345,
+            "declarations": 2146,
+            "constants": 2353,
+            "wallSeconds": 8.5,
+            "maxRssKiB": 84620
+          },
+          "xor": {
+            "jobId": 114024555540,
+            "records": 333731,
+            "declarations": 3413,
+            "constants": 3752,
+            "wallSeconds": 14.57,
+            "maxRssKiB": 108484
+          },
+          "int64": {
+            "jobId": 114024555540,
+            "records": 16206,
+            "declarations": 405,
+            "constants": 497,
+            "wallSeconds": 0.21,
+            "maxRssKiB": 72204
+          }
+        },
+        "init": {
+          "status": "timeout",
+          "jobId": 114024555588,
+          "limitSeconds": 500,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 500.02263927459717,
+          "lastProgress": {
+            "records": 2099999,
+            "declarations": 17010
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114024555480,
+          "limitSeconds": 590,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 590.0111389160156,
+          "lastProgress": {
+            "records": 2599999,
+            "declarations": 19259
+          }
+        },
+        "mathlib": {
+          "status": "not-run",
+          "reason": "Init and Std prerequisite gates failed",
+          "jobId": 114028656587,
+          "workflowConclusion": "skipped"
+        },
+        "projectionFuelRegressions": "passed",
+        "cacheModeRegressions": "passed",
+        "lambdaSpineBoundRegression": "passed",
+        "boundedSuccessLookupRegression": "passed",
+        "openWhnfScopeRegression": "passed",
+        "openInferenceAndEqualityScopeRegression": "passed",
+        "structuralInstantiationReferenceRefinement": "passed",
+        "freshUnknownLocalRejectionTheorem": "passed"
+      },
+      "claims": {
+        "completeArenaConformance": false,
+        "jointSelfhostQualified": false,
+        "endToEndConsistencyProved": false,
+        "defaultProviderPromoted": false,
+        "compilerSeedChanged": false
+      },
+      "nextStage": {
+        "status": "not-started",
+        "design": "RESEARCH_AND_MIGRATION.md",
+        "scope": "Proved portable expression graph, metadata, cursor-aware traversals, batched telescopes, complete Init/Std/Mathlib and separately qualified generated PSC0 products"
+      },
+      "status": "stage-checkpoint-with-open-corpus-timeouts",
+      "diagnostics": {
+        "trace": {
+          "run": 37986278855,
+          "source": "ad13026571931c0151b7ae53f468cd5363bef391",
+          "finding": "Int64.toBitVec_div unfolds symbolic Nat.shiftRight/div/ble repeatedly"
+        },
+        "experiment": {
+          "run": 37986835891,
+          "source": "ad13026571931c0151b7ae53f468cd5363bef391",
+          "temporaryPatch": "remove fvar exclusion for all bounded caches",
+          "cases": [
+            {
+              "budget": 256,
+              "wallSeconds": 0.3,
+              "records": 16206,
+              "declarations": 405,
+              "constants": 497,
+              "rssKiB": 72864
+            },
+            {
+              "budget": 4096,
+              "wallSeconds": 0.38,
+              "records": 16206,
+              "declarations": 405,
+              "constants": 497,
+              "rssKiB": 74208
+            }
+          ],
+          "productionEquivalent": false
+        },
+        "before": {
+          "run": 37985420337,
+          "focusedInt64TimeoutSeconds": 180,
+          "initTimeoutSeconds": 500.04527711868286,
+          "stdTimeoutSeconds": 590.1057589054108
+        },
+        "productionCandidate": "4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9",
+        "productionFocused": {
+          "commit": "4a006bd9a59c2a4ad98a1a13bb47bfb6aa9edbd9",
+          "run": 37987163057,
+          "job": 114012502799,
+          "int64WallSeconds": 0.37,
+          "xorWallSeconds": 39.6,
+          "binarySha256": "f35c048484ac392eb0a13ac48ee8485d79d27cabde4170e9326e2e4729702589"
+        },
+        "proofRepair": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
+        "traversalExperiment": {
+          "run": 37988845542,
+          "source": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
+          "inputKind": "first 1000000 records of pinned historical Init, not full conformance",
+          "inputSha256": "735d43733b70c51d86d9c4365ea433abcdb76a9f94dfe09a7a7dfc4605699878",
+          "variants": [
+            {
+              "name": "baseline",
+              "job": 114017555255,
+              "timeoutSeconds": 240
+            },
+            {
+              "name": "structural",
+              "job": 114017555100,
+              "timeoutSeconds": 240
+            },
+            {
+              "name": "open-all",
+              "job": 114017554738,
+              "timeoutSeconds": 240
+            },
+            {
+              "name": "combined",
+              "job": 114017554959,
+              "wallSeconds": 203.3,
+              "records": 1000000,
+              "declarations": 8507,
+              "constants": 9199,
+              "maxRssKiB": 332508
+            }
+          ],
+          "diagnosticOnly": true
+        },
+        "workerSampling": {
+          "run": 37988687879,
+          "job": 114017023739,
+          "samples": 11,
+          "source": "dbfa7fed68e40fe878129610c00d9afd5e399ed4",
+          "finding": "Repeated structural substitution, node counting, equality, universe substitution, cache eligibility allocation and scope cleanup; not a statistical percentage profile"
+        },
+        "profileReport": {
+          "run": 37989139275,
+          "job": 114018530778,
+          "profileSourceRun": 37987163057,
+          "slowDeclarations": 366,
+          "reportedSlowDeclarationMilliseconds": 446874
+        },
+        "historicalDagAnalysis": {
+          "run": 37933228241,
+          "job": 113828816249,
+          "record": 361999,
+          "proofUniqueNodes": 24520,
+          "proofExpandedTreeNodes": 12501779,
+          "depth": 85
+        },
+        "runtimeEquivalentPreviousRun": {
+          "run": 37989857541,
+          "commit": "d9b2e3e2da53406aeb727c05333f9ae0fe8e6127",
+          "comparison": "d9b2e3e2da53406aeb727c05333f9ae0fe8e6127...e8ed888bb4f16153b9aac335872d770ac19bbb11",
+          "onlyChangedPaths": [
+            "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SubstitutionRefinement.lean",
+            "psc0/packages/pskernel-core/proof/Ps/KernelCore/Checker/Inference/Core.proof.lean"
+          ],
+          "proofs": "failed at this earlier source; final proof repairs verified separately",
+          "init": {
+            "status": "timeout",
+            "wallSeconds": 500.01244497299194,
+            "lastProgressRecords": 3199999,
+            "lastProgressDeclarations": 25276
+          },
+          "std": {
+            "status": "timeout",
+            "wallSeconds": 590.0140829086304,
+            "lastProgressRecords": 2699999,
+            "lastProgressDeclarations": 19730
+          },
+          "mathlib": "skipped"
+        },
+        "finalProfile": {
+          "run": 37990758789,
+          "job": 114024555610,
+          "exitCode": 124,
+          "timeoutSeconds": 600,
+          "lastEnteredRecord": 4188018,
+          "lastEnteredDeclaration": "BitVec.getLsbD_srem",
+          "maxRssKiB": 518552,
+          "completeAcceptance": false
+        }
+      },
+      "researchPins": {
+        "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+        "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
+        "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+        "conRon": "64a2172a01276aa049220200bac11c075316230f",
+        "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+        "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
+        "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
+        "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
+      },
+      "researchFindings": {
+        "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
+        "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
+        "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
+        "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
+      },
+      "scope": {
+        "activePackage": "psc0/packages/pskernel-core",
+        "authoringPolicy": "PSC0 current bounded-selfhost-subset",
+        "oldPSC1ProfilesAreCurrentConstraints": false,
+        "representationRedesignStarted": false,
+        "defaultProviderPromoted": false,
+        "selectedCompilerSeedChanged": false
+      },
+      "historicalMigrationCheckpoint": {
+        "candidateCommit": "05542332ab589314917cd67a7eb7b74e80557770",
+        "workflowRun": 37979868377,
+        "checks": {
+          "build": "passed",
+          "foundations": "passed",
+          "natDispatchRegressions": "passed",
+          "metatheoryBuild": "passed",
+          "companionProofs": {
+            "status": "passed",
+            "files": 84
+          },
+          "tutorial": {
+            "status": "passed",
+            "cases": 141,
+            "correct": 141,
+            "declined": 0
+          },
+          "bugs": {
+            "status": "known-decline-remains",
+            "cases": 18,
+            "correctRejections": 17,
+            "accepted": 0,
+            "declined": [
+              "bugs/rec-missing-ih"
+            ]
+          },
+          "fresh435": {
+            "status": "passed",
+            "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+            "prelude": {
+              "records": 65406,
+              "declarations": 1840,
+              "constants": 2121,
+              "wallSeconds": 0.68,
+              "maxRssKiB": 71976
+            },
+            "utf8": {
+              "records": 159345,
+              "declarations": 2146,
+              "constants": 2353,
+              "wallSeconds": 9.29,
+              "maxRssKiB": 84336
+            }
+          },
+          "init": {
+            "status": "timeout",
+            "arenaCorrectness": "error",
+            "wallSeconds": 500.08234429359436,
+            "lastProgress": {
+              "records": 1099999,
+              "declarations": 9330
+            },
+            "jobId": 113988156376
+          },
+          "std": {
+            "status": "resource-exhaustion",
+            "arenaStatus": "declined",
+            "wallSeconds": 396.22881841659546,
+            "record": 1227585,
+            "declaration": "Std.Sat.AIG.mkXorCached",
+            "diagnostic": "kernel reduction budget exhausted",
+            "jobId": 113988156164
+          },
+          "mathlib": {
+            "status": "not-run",
+            "reason": "Init and Std prerequisite gates failed",
+            "jobId": 113991896616
+          }
+        },
+        "status": "stage-checkpoint-with-open-corpus-failures"
+      }
+    },
+    "priorSharingCheckpoint": {
+      "schemaVersion": 3,
+      "stage": "Certified native syntax sharing and storage-lifetime refinement",
+      "status": "native-proof-verified-corpus-timeouts-and-performance-regression",
+      "candidateCommit": "2e2068774b73b9affcc0852ed14caf96319d29e8",
+      "sourceProvenance": {
+        "proofKernel": "85ccb4e1103d77ed77c09c5795fc48ae4ea8ea62",
+        "arenaKernel": "132d817071cd62c23a70c15984d6c73e14d6e856",
+        "psc0Base": "e356162ddf1d0780337b2f510925455c70fb658d"
+      },
+      "target": {
+        "version": "4.35.0-rc4",
+        "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+      },
+      "workflowRun": 38000328227,
+      "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38000328227",
+      "nativeBinarySha256": "f8d651cb42880708c29805f2823465a14b031a47f8bdbb2aa09983994d4dac97",
+      "checks": {
+        "build": {
+          "status": "passed",
+          "jobs": 241,
+          "jobId": 114056572271
+        },
+        "foundations": "passed",
+        "dispatchProjectionAndCacheRegressions": "passed",
+        "certifiedSyntax": {
+          "status": "passed",
+          "jobId": 114056572271,
+          "constructors": 14,
+          "binderCursors": [
+            0,
+            1,
+            2,
+            5
+          ],
+          "sharedDagDepth": 32,
+          "expandedDagNodes": 8589934591,
+          "mixedBinderDepthExpandedNodes": 17179869181,
+          "coverage": [
+            "term/universe instantiation",
+            "lifting",
+            "free-variable abstraction",
+            "positive and negative exact bound-variable occurrence",
+            "exact syntactic equality",
+            "forced key collisions and cursor mismatch",
+            "closed substitution argument preparation",
+            "read-only hash hits/misses",
+            "indexed map/pairset and scoped semantic cache isolation"
+          ]
+        },
+        "metatheoryBuild": {
+          "status": "passed",
+          "jobs": 199,
+          "jobId": 114056571993
+        },
+        "companionProofs": {
+          "status": "passed",
+          "files": 84,
+          "jobId": 114056571993
+        },
+        "tutorial": {
+          "status": "passed",
+          "cases": 141,
+          "correct": 141,
+          "declined": 0,
+          "jobId": 114057151502
+        },
+        "bugs": {
+          "status": "passed",
+          "cases": 18,
+          "correctRejections": 18,
+          "accepted": 0,
+          "declined": 0,
+          "jobId": 114057151542
+        },
+        "fresh435": {
+          "status": "passed",
+          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+          "prelude": {
+            "jobId": 114057151433,
+            "records": 65406,
+            "declarations": 1840,
+            "constants": 2121,
+            "wallSeconds": 1.28,
+            "maxRssKiB": 75656
+          },
+          "utf8": {
+            "jobId": 114057151433,
+            "records": 159345,
+            "declarations": 2146,
+            "constants": 2353,
+            "wallSeconds": 14.09,
+            "maxRssKiB": 83920
+          },
+          "xor": {
+            "jobId": 114057151442,
+            "records": 333731,
+            "declarations": 3413,
+            "constants": 3752,
+            "wallSeconds": 29.7,
+            "maxRssKiB": 87648
+          },
+          "int64": {
+            "jobId": 114057151442,
+            "records": 16206,
+            "declarations": 405,
+            "constants": 497,
+            "wallSeconds": 0.49,
+            "maxRssKiB": 71548
+          }
+        },
+        "init": {
+          "status": "timeout",
+          "jobId": 114057151477,
+          "limitSeconds": 500,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 500.02821946144104,
+          "lastProgress": {
+            "records": 1699999,
+            "declarations": 14005
+          }
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114057151538,
+          "limitSeconds": 590,
+          "arenaCorrectness": "error",
+          "exitCode": -9,
+          "wallSeconds": 590.0085060596466,
+          "lastProgress": {
+            "records": 2999999,
+            "declarations": 21381
+          }
+        },
+        "mathlib": {
+          "status": "not-run",
+          "reason": "Init and Std prerequisite gates failed",
+          "jobId": 114060314113,
+          "workflowConclusion": "skipped"
+        },
+        "fullFresh435": {
+          "status": "timeout",
+          "workflowRun": 38000670791,
+          "exporter": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+          "init": {
+            "jobId": 114057683540,
+            "limitSeconds": 500,
+            "exitCode": 124,
+            "inputRecords": 6452982,
+            "inputSha256": "42a17cf35c87380eb76c483de4cf3205d278a5a612047a6f90e8bd35c0a10164",
+            "maxRssKiB": 139200,
+            "lastProgress": {
+              "records": 1599999,
+              "declarations": 13243
+            }
+          },
+          "std": {
+            "jobId": 114057683532,
+            "limitSeconds": 590,
+            "exitCode": 124,
+            "inputRecords": 10193568,
+            "inputSha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
+            "maxRssKiB": 162552,
+            "lastProgress": {
+              "records": 1999999,
+              "declarations": 14186
+            }
+          }
+        }
+      },
+      "claims": {
+        "completeArenaConformance": false,
+        "jointSelfhostQualified": false,
+        "endToEndConsistencyProved": false,
+        "defaultProviderPromoted": false,
+        "compilerSeedChanged": false,
+        "wholeCorpusSpeedupEstablished": false,
+        "generatedSourcePortable": false
+      },
+      "architecture": {
+        "proofBoundary": "Intrinsic exact-result entries, full input/cursor validation, proved compiler substitutions, no project-defined unsafe primitive or axiom",
+        "scratchStorage": "Std.HashMap operation-local delta",
+        "retainedStorage": "Lean.PersistentHashMap checkpoint; publish at operation boundary",
+        "memoCursor": "Algebra-controlled: advance at binders only when the result depends on binder depth",
+        "scopeExit": "Restore entire parent caches; exact cross-scope hash-retention theorem exists but is not activated",
+        "executionProfile": "Lean-4.35-native-experimental",
+        "portableTarget": "PSC0 current bounded self-host profile; not restricted to the historical PSC1 profiles",
+        "dependencies": [
+          "Lean pointer-hint contracts",
+          "Lean compiler simplification and proof erasure",
+          "Squash",
+          "Std.HashMap",
+          "Lean.PersistentHashMap"
+        ]
+      },
+      "architecturalExperiments": [
+        {
+          "candidate": "de1ad1993286d642575cf35b4842b6633501a634",
+          "run": 37997784610,
+          "design": "retained metadata in a Std.HashMap",
+          "outcome": "regressed",
+          "init": {
+            "timeoutSeconds": 500,
+            "lastProgressRecords": 499999
+          },
+          "std": {
+            "timeoutSeconds": 590,
+            "lastProgressRecords": 499999
+          },
+          "diagnosticRun": 37998116131,
+          "workerSamples": {
+            "job": 114049222923,
+            "samples": 11,
+            "wholeArrayCopySamples": 4,
+            "note": "Sparse samples identify a mechanism, not statistical time percentages."
+          },
+          "controlledPrefix": {
+            "job": 114049222697,
+            "records": 500000,
+            "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+            "baselineCode": "e8ed888bb4f16153b9aac335872d770ac19bbb11",
+            "baselineBinary": "9490526abc27b5a5e57f931613b027d1deeb72ae22787f5bf4189265f389660f",
+            "baselineSeconds": [
+              143.14,
+              144.51
+            ],
+            "candidateTimeoutSeconds": [
+              180,
+              180
+            ],
+            "fullConformance": false
+          }
+        },
+        {
+          "candidate": "7154935f67b614129d9d547d88c0b28213e56034",
+          "run": 37998880424,
+          "design": "persistent trie for all memos plus cross-scope hash retention",
+          "outcome": "proofs passed; corpus timeouts and controlled performance regression",
+          "init": {
+            "timeoutSeconds": 500,
+            "lastProgressRecords": 1099999
+          },
+          "std": {
+            "timeoutSeconds": 590,
+            "lastProgressRecords": 1799999
+          },
+          "controlledPrefix": {
+            "run": 37999324549,
+            "job": 114053267452,
+            "records": 500000,
+            "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+            "baselineSeconds": [
+              143.09,
+              143.59
+            ],
+            "candidateTimeoutSeconds": [
+              180,
+              180
+            ],
+            "fullConformance": false
+          },
+          "profile": {
+            "job": 114052375468,
+            "seconds": 600,
+            "maxRssKiB": 982096,
+            "lastEnteredRecord": 2414950
+          },
+          "storageControl": {
+            "candidate": "7d54f5672b5c1f12f153ef2ceb82a80db75aa07f",
+            "run": 37998638649,
+            "job": 114051519449,
+            "seconds": 600,
+            "maxRssKiB": 153152,
+            "lastEnteredRecord": 2028388,
+            "note": "Different runner and traversal endpoint; memory evidence, not a controlled timing comparison."
+          }
+        }
+      ],
+      "diagnostics": {
+        "run": 38000670791,
+        "controlledPrefix": {
+          "job": 114057683494,
+          "records": 500000,
+          "inputSha256": "0d32781169f0374862e712910eb062568a8f1263aad42608b847ac353a91eb2c",
+          "baselineSeconds": [
+            109.06,
+            109.74
+          ],
+          "candidateSeconds": [
+            160.39,
+            163.55
+          ],
+          "baselineMaxRssKiB": [
+            332416,
+            332024
+          ],
+          "candidateMaxRssKiB": [
+            100708,
+            99772
+          ],
+          "allFourExitCodes": 0,
+          "fullConformance": false
+        },
+        "worker": {
+          "job": 114057683226,
+          "limitSeconds": 180,
+          "exitCode": 124,
+          "samples": 11,
+          "findings": [
+            "bounded cache eligibility scans and allocations",
+            "name/string hashing",
+            "semantic index lookup",
+            "substitution and free-variable traversal allocation",
+            "scope cleanup"
+          ],
+          "note": "No top-frame whole-table copy in these eleven sparse samples; not a statistical absence claim."
+        },
+        "profile": {
+          "job": 114057151483,
+          "limitSeconds": 600,
+          "exitCode": 124,
+          "maxRssKiB": 189004,
+          "lastEntered": [
+            "3104596",
+            "theorem Std.IterM.step_filter._proof_1"
+          ]
+        }
+      },
+      "researchPins": {
+        "official": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+        "officialDevelopment": "5e96ee1153f945234f126ed024043a0697c9d6f3",
+        "conLeche": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+        "conRon": "64a2172a01276aa049220200bac11c075316230f",
+        "nanoda": "4c544ed4099c8227f07d5de77ad1e69fb0740a27",
+        "lean4leanArena": "bce3448115f7819fc12d647fadd3bb090666637e",
+        "lean4leanBundle": "456abe5015fc8f54ea595561fc39523d7733c93f",
+        "arena": "b83254de5146ef34147ab82a48edbe1856b0edcc"
+      },
+      "researchFindings": {
+        "dominantCostModel": "Shared DAGs are repeatedly traversed as trees; one-million-record experiment is only a prefix.",
+        "cacheInvariant": "Context/mode validity plus query repeatability; semantic equality alone does not justify changing algorithmic answers.",
+        "proofBoundary": "All-input substitution refinement and checker configuration preservation are not end-to-end consistency.",
+        "portableStorageConstraint": "Current PSC0 TS Array updates copy; explicit DAG adoption needs a measured and qualified storage model."
+      },
+      "remaining": [
+        "Complete historical and fresh Init/Std/Mathlib conformance at original limits",
+        "Stored constructor metadata and costed portable graph storage",
+        "Batched telescope/context/fuel correspondence",
+        "Exact-source generated PSC0 compiler/kernel qualification"
+      ],
+      "nextStage": {
+        "status": "not-qualified",
+        "scope": "Portable representation/backend and batched telescope transport; no compiler-seed or default-provider change"
+      }
+    },
+    "promotionDecision": {
+      "status": "not-eligible",
+      "reason": "Full corpus timeouts and controlled native performance regression; generated PSC0 qualification absent.",
+      "prState": "draft",
+      "defaultProviderChanged": false
     }
   },
-  "promotionDecision": {
-    "status": "not-eligible",
-    "reason": "Full corpus timeouts and controlled native performance regression; generated PSC0 qualification absent.",
-    "prState": "draft",
-    "defaultProviderChanged": false
-  }
+  "recordedAt": "2026-10-10 00:19:59 UTC"
 }

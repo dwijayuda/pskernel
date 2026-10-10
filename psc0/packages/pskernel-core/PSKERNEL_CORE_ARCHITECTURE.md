@@ -8,6 +8,22 @@ the current certified sharing layer is a Lean-native experiment.
 The former PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1 profiles do not
 constrain this migration.
 
+## Correctness architecture
+
+The legacy operational judgment is inadequate as a semantic target:
+`JudgmentAdequacy.lean` proves arbitrary equality and arbitrary typing in it.
+Do not equate the existing checker-configuration proofs with kernel soundness.
+The repair must retain actual inference connections and valid-input premises,
+introduce a justified typed or semantic target, and prove model preservation
+for complete admission transactions. Axiom interpretations and safe/unsafe
+accessibility belong in the model theorem's explicit scope.
+
+The specified Lean 4.35 string equality decision closes the positive StringEq
+law without a custom axiom. Its native runtime override remains in the Lean
+execution TCB; generated PSC0 qualification remains open. Performance work
+must preserve the specified behavior and cannot substitute for these proofs.
+See `RESEARCH_AND_MIGRATION.md` for exact upstream comparisons and obligations.
+
 ## Source and semantic authority
 
 Keep one production semantic implementation rooted at `Ps.KernelCore.SelfHost`.

@@ -52,7 +52,7 @@
       "path": "src/Ps/KernelCore/Core/SharedMemo.lean",
       "semanticRole": "semantic-preserving-acceleration",
       "trustStatus": "derived",
-      "refinementStatus": "intrinsic exact-result proofs, full-operation csimp equations, complete metatheory and 84 companion files verified at e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+      "refinementStatus": "intrinsic exact-result proofs, full-operation csimp equations, existing metatheory suite and 84 companion files checked at e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
       "executionProfile": "lean-native experiment only; generated PSC0 not qualified",
       "dependencies": [
         "Lean withPtrAddr and withPtrEqDecEq contracts",
@@ -107,5 +107,26 @@
       "canAffect435Acceptance": false,
       "evidence": "psKernelReduceNative_disabled_lean435; psKernelNativeReductionSound_lean435"
     }
-  ]
+  ],
+  "assuranceStatus": {
+    "semanticMetatheoryComplete": false,
+    "modelConstructed": false,
+    "endToEndConsistencyProved": false,
+    "legacyJudgments": "inadequate: checked counterexample shows universal defeq and arbitrary typing",
+    "audit": "metatheory/Ps/KernelCore/Metatheory/JudgmentAdequacy.lean",
+    "implication": "Operational refinement does not establish semantic soundness; no executable False acceptance is exhibited by this audit.",
+    "customSoundnessAxiomsAdded": false,
+    "modelScope": "safe logical environment, explicit interpretations of admitted axioms, and an explicit mathematical foundation",
+    "stringEquality": {
+      "implementation": "decide (left = right), using the pinned Lean 4.35 String.decEq definition",
+      "property": "psKernelStringEq_true_iff",
+      "law": "psKernelStringEq_sound_lean435",
+      "status": "proved-at-c78590556fca75f9ee080e32cbb0d0cd82f16b92",
+      "nativeOverride": "lean_string_dec_eq",
+      "nativeRuntimeCorrespondence": "part of existing compiler/runtime TCB",
+      "oldOpaqueWorkerEquivalenceClaimed": false,
+      "psc0GeneratedQualified": false,
+      "soundnessLawAxioms": []
+    }
+  }
 }

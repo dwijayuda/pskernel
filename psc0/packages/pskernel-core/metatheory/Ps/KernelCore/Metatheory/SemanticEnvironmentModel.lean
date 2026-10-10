@@ -34,6 +34,12 @@ def StoredConstantModeled (M : Reading V) (info : PsKernelConstantInfo) : Prop :
 /-- Actual indexed lookup may not manufacture or misidentify stored records.
 Every stored constant must possess a uniform semantic type reading. -/
 structure EnvironmentModel (M : Reading V) (env : PsKernelEnvironment) : Prop where
+  /-- Exact executable indexed lookup equals the actual declaration history.
+  This is stronger than requiring each returned item to be in the list: it
+  also rules out silently missing a stored constant. -/
+  lookupCanonical : ∀ name,
+    psKernelEnvironmentFind env name =
+      psKernelFindConstantInList name env.constants
   lookupInHistory : ∀ name info, psKernelEnvironmentFind env name = some info →
     info ∈ env.constants
   lookupName : ∀ name info, psKernelEnvironmentFind env name = some info →
@@ -66,6 +72,9 @@ theorem environmentEmpty_find (name : PsKernelName) :
 theorem environmentEmpty_model (M : Reading V)
     (pin : M.constants falseConstantName [] = (empty : V)) :
     EnvironmentModel M psKernelEnvironmentEmpty where
+  lookupCanonical := by
+    intro name
+    rfl
   lookupInHistory := by
     intro name info found
     rw [environmentEmpty_find] at found

@@ -235,6 +235,7 @@ run_cmd do
     ``PsKernelSemantics.Reference.unfold_uncached,
     ``PsKernelSemantics.Reference.inferCore_sort_result,
     ``PsKernelSemantics.Reference.inferCore_const_result,
+    ``PsKernelSemantics.Reference.inferCore_const_success_valid_arity,
     ``PsKernelSemantics.Reference.sort_inference_has_set_model,
     ``PsKernelSemantics.Reference.const_inference_has_set_model,
     ``PsKernelSemantics.Interpretation.equal_symm,

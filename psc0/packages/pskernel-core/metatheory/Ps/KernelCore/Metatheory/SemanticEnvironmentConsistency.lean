@@ -40,13 +40,13 @@ theorem no_stored_constant_of_literalFalse (M : Reading V)
   have interpretedFalse : ∀ ρ : Nat → V,
       interp M ρ (.const falseConstantName []) = (empty : V) := by
     intro ρ
-    simpa only [interp] using model.falsePinned
+    simpa only [interp, List.map_nil] using model.falsePinned
   have typed : ModelsType M []
       (.const (psKernelConstantInfoName info) [])
       (.const falseConstantName []) := by
     intro ρ _
     have h := instances [] arity ρ
-    simpa only [exactType, interp, Reading.substLevels] using h
+    simpa only [exactType, interp, Reading.substLevels, List.map_nil] using h
   exact (no_closed_empty_type M (.const (psKernelConstantInfoName info) [])
     (.const falseConstantName []) interpretedFalse) typed
 

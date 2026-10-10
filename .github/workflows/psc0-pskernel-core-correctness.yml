@@ -28,7 +28,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      # Reference constant universe arity is extracted from execution, not assumed.
+      # Audit successful constant-arity extraction and the modeled False corollary.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

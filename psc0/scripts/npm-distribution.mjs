@@ -40,6 +40,18 @@ async function walk(p) {
   return files.sort();
 }
 const safeRead=async p=>JSON.parse(await readFile(p,'utf8'));
+async function packedRegistryToolchain(tarballs) {
+  const packs=[];
+  for(const name of ['typescript@7.0.2',
+    '@typescript/typescript-linux-x64@7.0.2','@typescript/typescript-win32-x64@7.0.2']) {
+    const response=JSON.parse(run('npm',['pack',name,'--pack-destination',tarballs,
+      '--ignore-scripts','--json'],root,{quiet:true}));
+    if(!Array.isArray(response)||response.length!==1)throw Error('PSC_NPM_TOOLCHAIN_TARBALL: '+name);
+    packs.push(join(tarballs,response[0].filename));
+  }
+  return packs;
+}
+
 const exceptTag=o=>o&&typeof o==='object'?Object.getOwnPropertySymbols(o).map(s=>o[s]).find(v=>typeof v==='string'):undefined;
 const unwrap=(x,what)=>{
   if(exceptTag(x)==='ok')return x.value;
@@ -240,6 +252,7 @@ async function bundleVariant(variant,compiler) {
   const manifest={schemaVersion:1,version:V,sourceVariant:variant,
     coreAuthority:'js-core-qualified-scope-only',scope:coreNames.length,
     corePackages:coreNames.map(outname),optionalPackages:optionalNames.map(outname),
+    toolchainPackages:['typescript@7.0.2','@typescript/typescript-linux-x64@7.0.2','@typescript/typescript-win32-x64@7.0.2'],
     explicitlyNotBundled:['typescript',...optionalNames.map(outname)],
     sourceCommit:process.env.GITHUB_SHA||'unknown',
     packageNames:names.map(outname),
@@ -253,10 +266,14 @@ async function bundleVariant(variant,compiler) {
   const actual=packageResult[0]?.filename;
   if(!actual)throw Error('PSC_NPM_UMBRELLA_PACK_NO_FILENAME');
   const rootTgz=join(tarballs,actual);
-  // Install exactly the final public tarball offline. Do not resolve unpublished packages.
+  const toolchains=await packedRegistryToolchain(tarballs);
+  // A fresh, empty cache proves the ZIP's local toolchain tarballs can be installed
+  // without an npm registry and without a Linux-only bundled TypeScript.
   const prefix=join(target,'installed');
-  run('npm',['install','--global','--prefix',prefix,'--offline','--ignore-scripts',
-    '--no-audit','--no-fund','--no-package-lock',rootTgz],root,{timeout:600000});
+  const cache=join(target,'isolated-npm-cache');
+  run('npm',['install','--global','--prefix',prefix,'--cache',cache,'--offline','--ignore-scripts',
+    '--no-audit','--no-fund','--no-package-lock',rootTgz,toolchains[0],toolchains[1]],
+    root,{timeout:600000});
   const cli=join(prefix,'lib','node_modules','proofscript','bin','psc.js');
   if(!existsSync(cli))throw Error('PSC_NPM_GLOBAL_BIN_MISSING');
   run(process.execPath,[cli,'version','--json'],root,{timeout:120000});
@@ -273,16 +290,45 @@ async function bundleVariant(variant,compiler) {
   const negative=spawnSync(process.execPath,[cli,'build','IllTyped'+ext,'--out','Bad.js'],{
     cwd:example,encoding:'utf8',timeout:120000});
   if(negative.status===0||existsSync(join(example,'Bad.js'))) throw Error('PSC_NPM_FAILED_OPEN_ON_BAD_SOURCE');
-  const files=await Promise.all([rootTgz,...packages].map(async f=>({
+  const files=await Promise.all([rootTgz,...packages,...toolchains].map(async f=>({
     name:basename(f),sha256:hash(await readFile(f)),bytes:(await stat(f)).size,
   })));
   const index={...manifest,packages:files,installedCanary:{checked:true,built:true,
       output42n:true,negativeRefusal:true},sourceType:variant};
   await writeFile(join(target,'manifest.json'),JSON.stringify(index,null,2)+'\n');
   const zipName='proofscript-psc0-'+variant+'-npm-packages.zip';
-  // Artifact contains installable tarballs, manifest and complete source variants, but not build temp files.
+  const installGuide=join(target,'INSTALL.md');
+  await writeFile(installGuide,[
+    '# ProofScript PSC0 npm '+variant+' edition',
+    '',
+    'The root proofscript tarball bundles ONLY the core self-host compiler closure and JS checker.',
+    'Other backend/provider/stdlib tarballs in this ZIP are independent OPTIONAL packages.',
+    'TypeScript 7.0.2 is not bundled: its native platform package must match the target OS.',
+    '',
+    '## Windows x64 offline installation (PowerShell)',
+    'npm install -g --offline --ignore-scripts .\\proofscript-'+V+'.tgz .\\typescript-7.0.2.tgz .\\typescript-typescript-win32-x64-7.0.2.tgz',
+    'psc.cmd version',
+    'psc.cmd init my-app --syntax '+variant,
+    '',
+    '## Linux x64 offline installation',
+    'npm install -g --offline --ignore-scripts ./proofscript-'+V+'.tgz ./typescript-7.0.2.tgz ./typescript-typescript-linux-x64-7.0.2.tgz',
+    'psc version',
+    '',
+    '## Registry-backed installation',
+    'npm install -g ./proofscript-'+V+'.tgz',
+    'npm installs the exact TypeScript 7.0.2 binary for your operating system automatically.',
+    'Once published, npm install -g proofscript will work the same way.',
+    '',
+    'Optional modules after publishing: npm install @proofscript/backend-rust,',
+    '@proofscript/backend-wasm, @proofscript/backend-js or @proofscript/stdlib as needed.',
+    'Third-party ProofScript libraries are configured declaratively in project package.json.',
+    '',
+  ].join('\n'));
+  // The ZIP holds all independently installable tarballs; installing proofscript
+  // itself never pulls the optional backends or provider packages.
   const archivePath=join(dist,zipName);
-  run('zip',['-q','-j',archivePath,...packages,rootTgz,join(target,'manifest.json')],root,{timeout:120000});
+  run('zip',['-q','-j',archivePath,...packages,rootTgz,...toolchains,
+    join(target,'manifest.json'),installGuide],root,{timeout:120000});
   console.log('PSC_NPM_VARIANT_PASS '+variant+' '+zipName);
   return {archivePath,manifest:index};
 }

@@ -73,7 +73,7 @@ theorem annotationValid_inst (M : Reading V) (e a : AnnotatedExpr)
       by_cases h : i < cut
       · simp [inst, h, AnnotationValid]
       · by_cases hi : i = cut
-        · simp only [inst, h, hi, ite_false, ite_true]
+        · simp only [inst, hi, Nat.lt_irrefl, ite_false, ite_true]
           exact (annotationValid_liftN M a cut 0 ρ).mpr ha
         · simp [inst, h, hi, AnnotationValid]
   | fvar _ | mvar _ | sort _ | const _ _ | lit _ => trivial
@@ -139,5 +139,63 @@ theorem forged_product_annotation_invalid (M : Reading V) (ρ : Nat → V) :
   intro h
   have bad := h.2.2 rfl (empty : V) (empty_mem_univ 0)
   exact not_mem_self (univ 0 : V) bad
+
+
+/-- A genuinely fresh free-variable assignment also preserves the hereditary
+validity condition; this is needed when entering a production local scope. -/
+theorem annotationValid_withFree_fresh (M : Reading V) (e : AnnotatedExpr)
+    (name : PsKernelName) (h : Fresh name e) (x : V) (ρ : Nat → V) :
+    AnnotationValid (M.withFree name x) ρ e ↔ AnnotationValid M ρ e := by
+  induction e generalizing ρ with
+  | bvar _ | fvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
+  | app f a ihf iha =>
+      simp only [AnnotationValid, ihf h.1, iha h.2]
+  | lam n A b bi v ihA ihb =>
+      simp only [AnnotationValid, ihA h.1,
+        interp_withFree_fresh M A name h.1 x, ihb h.2]
+  | forallE n A B bi v ihA ihB =>
+      simp only [AnnotationValid, ihA h.1, Reading.withFree_level,
+        interp_withFree_fresh M A name h.1 x, ihB h.2,
+        interp_withFree_fresh M B name h.2 x]
+  | letE n A a b nd ihA iha ihb =>
+      simp only [AnnotationValid, ihA h.1, iha h.2.1,
+        interp_withFree_fresh M a name h.2.1 x, ihb h.2.2]
+  | mdata _ e ih | proj _ _ e ih => exact ih h ρ
+
+theorem annotationValid_close (M : Reading V) (e : AnnotatedExpr)
+    (name : PsKernelName) (cut : Nat) (ρ : Nat → V) :
+    AnnotationValid M ρ (close name e cut) ↔
+      AnnotationValid (M.withFree name (ρ cut)) ρ e := by
+  induction e generalizing cut ρ with
+  | bvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
+  | fvar n =>
+      cases h : psKernelNameEq n name <;> simp [close, h, AnnotationValid]
+  | app f a ihf iha =>
+      simp only [close, AnnotationValid, ihf, iha]
+  | lam n A b bi v ihA ihb =>
+      simp only [close, AnnotationValid, ihA, interp_close, ihb, extend]
+  | forallE n A B bi v ihA ihB =>
+      simp only [close, AnnotationValid, ihA, interp_close, ihB,
+        Reading.withFree_level, extend]
+  | letE n A a b nd ihA iha ihb =>
+      simp only [close, AnnotationValid, ihA, iha, interp_close, ihb, extend]
+  | mdata _ e ih | proj _ _ e ih => exact ih cut ρ
+
+/-- Product-bit validity alone cannot replace lambda typing or coherent
+readings. Both readings here satisfy this predicate but denote different sets. -/
+theorem annotationValidity_alone_not_coherence (M : Reading V) (ρ : Nat → V) :
+    ∃ a b : AnnotatedExpr, a.erase = b.erase ∧
+      AnnotationValid M ρ a ∧ AnnotationValid M ρ b ∧
+      interp M ρ a ≠ interp M ρ b := by
+  let a : AnnotatedExpr :=
+    .lam .anonymous (.sort .zero) (.sort .zero) .default (.succ .zero)
+  let b : AnnotatedExpr :=
+    .lam .anonymous (.sort .zero) (.sort .zero) .default .zero
+  refine ⟨a, b, rfl, ⟨True.intro, fun _ _ => True.intro⟩,
+    ⟨True.intro, fun _ _ => True.intro⟩, ?_⟩
+  change lamR 1 (univ 0 : V) (fun _ => univ 0) ≠
+    lamR 0 (univ 0 : V) (fun _ => univ 0)
+  rw [lamR_zero]
+  exact lamR_ne_pt (by decide)
 
 end PsKernelSemantics.SetModel

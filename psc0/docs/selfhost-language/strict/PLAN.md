@@ -2,11 +2,13 @@
 
 Status: implementation and general source reviews complete; final qualification/disposition pending from ed5d00aca0743bde583b45fe7756dd494ac3960f; not yet strict-qualified. The qualified practical checkpoint was merged to main on 2026-10-09 at 16:30:26 UTC. Work proceeds on psc0/strict-sh1-v1. [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) is the continuation authority; [merge-baseline.json](merge-baseline.json) records the verified integration.
 
-## Latest generic preparation diagnostic checkpoint
+## Latest closed-universe inference correction
 
-[Run38008721677](https://github.com/dwijayuda/pskernel/actions/runs/38008721677) at b3fac087 passed the corrected source-return gate, target/runtime/grammar/IR/helper checks, including all12 optimized-tail observations. Generic fixture preparation then returned elaboration/infer/applicationTypeMismatch at gate076d line667. The first source owner is not retained by the raw error API. N1 has no final receipt and C1/C2/C3/provider did not run.
+The [retained-N1 diagnostic](https://github.com/dwijayuda/pskernel/actions/runs/38010024282) successfully reproduced and located the failed generic preparation at **sourceIndex 6, sh1GroupLet, stableDeclaration**. It used the unchanged b3fac compiler/fixture with one parse and one origin-preserving preparation. The diagnostic reports the owner and error; the universe-expression explanation is separately reviewed source analysis.
 
-The enclosing commit adds one independently pinned retained-N1 diagnostic: one parse and one origin-preserving preparation of the unchanged fixture, without compiler build/TS compilation/erasure/emission or a full qualification repeat. See [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) for exact source/artifact/compiler/fixture pins and the tentative universe-level construction trace. No source correction or semantic qualification is claimed by requesting the diagnostic. All33/27 dispositions remain pending.
+The [closed-universe correction](reviewed-candidates/closed-universe-inference-repair.json), blob **f71b09c33a574e6868b193afac946355008b4d61**, changes only Meta/Infer.lean from cad2c470d5c7682ffdc4caa111dafb5f076b27b3 to **160a4ae9fb8e5ae00729752463d5c42d4e9f8889**. Three local pure helpers normalize the closed levels freshly constructed by the sort-successor and Pi-imax rules. Every symbolic level is returned unchanged. This resolves the source-derived imax(1,1)-versus-1 construction mismatch without changing equality, unification, kernel/provider, grammar, fixtures or conformance hosts. Complete 106-file construction audit and exact three-guard root/independent review are retained. Finite proper levels and required allocation are explicit premises; no resource-equivalence claim is made.
+
+The enclosing source commit requests one full **[sh1-qualify]** execution. N1/C1/C2/C3, fixed point/native parity, the exact evidence binder and independent provider must pass before the current 33 correspondence rows and 27 stage obligations are discharged. The previous attempt13 failed after six passing N1 conformance stages; it has no completed N1 receipt. Passed cold recovery remains reusable because its seven inputs are unchanged. See [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) for the active continuation and exact evidence identities.
 
 ## Prior execution boundary — b3fac request
 

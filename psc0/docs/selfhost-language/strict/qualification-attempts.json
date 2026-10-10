@@ -1931,25 +1931,30 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "one-bounded-retained-N1-origin-diagnostic-requested-no-new-full-qualification",
-    "expectedParent": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
-    "priorAttemptRunId": 38008721677,
-    "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
-    "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
-    "workflowSha256": "d3bf915fc479c5d6b1b57410e62643a6e7a5b8826f303b830e27e62d3997200c",
-    "retainedArtifactId": 11652692106,
-    "retainedN1Sha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
-    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
-    "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
-    "parserCalls": 1,
-    "originPreservingPreparationCalls": 1,
-    "productionCodeChanges": 0,
-    "hostConformanceChanges": 0,
-    "nativeBuilds": 0,
-    "typeScriptCompilations": 0,
-    "erasureCalls": 0,
-    "compilerEmissions": 0,
+    "status": "one-full-exact-source-qualification-requested-after-reviewed-closed-universe-constructor-correction",
+    "expectedParent": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "sourceRefToRecordFromEnclosingCommit": true,
+    "compilerSource": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+    "compilerSourceBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+    "compilerSourceSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+    "reviewManifest": "f71b09c33a574e6868b193afac946355008b4d61",
+    "workflow": ".github/workflows/psc0-sh1.yml",
+    "workflowId": 378853677,
+    "fullQualificationRequested": true,
+    "commitMarker": "[sh1-qualify]",
+    "requiredPhases": [
+      "N1 native candidate and conformance",
+      "selected-R to C1",
+      "C1 to C2",
+      "C2 to C3",
+      "four-product fixed point and native parity",
+      "exact strict evidence binder",
+      "independent selected-provider acceptance"
+    ],
     "repeatColdRecovery": false,
+    "repeatRetainedN1Diagnostic": false,
+    "fixtureChanged": false,
+    "hostConformanceChanged": false,
     "strictSh1Qualified": false,
     "semanticContractQualified": false,
     "providerChecked": false
@@ -1991,5 +1996,73 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T00:37:41Z"
+  "updatedAtUtc": "2026-10-10T00:51:10Z",
+  "completedDiagnostics": [
+    {
+      "status": "completed-localization-only",
+      "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "diagnosticSourceRef": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+      "runId": 38010024282,
+      "jobId": 114087631048,
+      "workflowId": 380146660,
+      "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+      "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+      "evidence": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+        "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+        "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+        "bytes": 8051
+      },
+      "report": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin.json",
+        "blob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+        "sha256": "46a60edd579402eca2ebf1a42aace7635d245b16a6472c4d3e00523c2054ef0b",
+        "bytes": 2756
+      },
+      "log": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-job.log",
+        "blob": "a5df35ba3795f9823fcb5b0c787a57f1baa19db8",
+        "sha256": "fe14d35b49b421b7cf11b337f78d23a80238f309037870e3068711081e04afcf",
+        "bytes": 36865
+      },
+      "sourceIndex": 6,
+      "sourceName": "sh1GroupLet",
+      "phase": "stableDeclaration",
+      "span": {
+        "start": {
+          "byteOffset": "1611",
+          "line": "37",
+          "column": "1"
+        },
+        "stop": {
+          "byteOffset": "1708",
+          "line": "39",
+          "column": "9"
+        }
+      },
+      "error": {
+        "tag": "elaboration",
+        "error": {
+          "tag": "infer",
+          "error": {
+            "tag": "applicationTypeMismatch"
+          }
+        }
+      },
+      "compilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+      "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "parseCalls": 1,
+      "originPreservingPreparationCalls": 1,
+      "nativeBuilds": 0,
+      "typeScriptCompilations": 0,
+      "erasureCalls": 0,
+      "compilerEmissions": 0,
+      "observedExpectedAndActualUniverseExpressions": false,
+      "qualificationMeaning": "The execution locates the existing error; the universe mismatch explanation comes from the separately reviewed source trace.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    }
+  ]
 }

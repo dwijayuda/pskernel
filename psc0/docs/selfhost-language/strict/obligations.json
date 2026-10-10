@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-10T00:37:41Z",
+  "updatedAtUtc": "2026-10-10T00:51:10Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -757,25 +757,30 @@
     "historicalCounterexampleSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
   },
   "currentQualificationRequest": {
-    "status": "one-bounded-retained-N1-origin-diagnostic-requested-no-new-full-qualification",
-    "expectedParent": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
-    "priorAttemptRunId": 38008721677,
-    "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
-    "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
-    "workflowSha256": "d3bf915fc479c5d6b1b57410e62643a6e7a5b8826f303b830e27e62d3997200c",
-    "retainedArtifactId": 11652692106,
-    "retainedN1Sha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
-    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
-    "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
-    "parserCalls": 1,
-    "originPreservingPreparationCalls": 1,
-    "productionCodeChanges": 0,
-    "hostConformanceChanges": 0,
-    "nativeBuilds": 0,
-    "typeScriptCompilations": 0,
-    "erasureCalls": 0,
-    "compilerEmissions": 0,
+    "status": "one-full-exact-source-qualification-requested-after-reviewed-closed-universe-constructor-correction",
+    "expectedParent": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "sourceRefToRecordFromEnclosingCommit": true,
+    "compilerSource": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+    "compilerSourceBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+    "compilerSourceSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+    "reviewManifest": "f71b09c33a574e6868b193afac946355008b4d61",
+    "workflow": ".github/workflows/psc0-sh1.yml",
+    "workflowId": 378853677,
+    "fullQualificationRequested": true,
+    "commitMarker": "[sh1-qualify]",
+    "requiredPhases": [
+      "N1 native candidate and conformance",
+      "selected-R to C1",
+      "C1 to C2",
+      "C2 to C3",
+      "four-product fixed point and native parity",
+      "exact strict evidence binder",
+      "independent selected-provider acceptance"
+    ],
     "repeatColdRecovery": false,
+    "repeatRetainedN1Diagnostic": false,
+    "fixtureChanged": false,
+    "hostConformanceChanged": false,
     "strictSh1Qualified": false,
     "semanticContractQualified": false,
     "providerChecked": false
@@ -907,7 +912,13 @@
     "irChecker": "pass-61-baseline-and-12-optimized-tail-observations",
     "helperRuntime": "pass",
     "genericErasure": "prepare-refused-elaboration-infer-applicationTypeMismatch",
-    "responsibleSourceDeclaration": "pending-origin-preserving-diagnostic",
+    "responsibleSourceDeclaration": {
+      "sourceIndex": 6,
+      "name": "sh1GroupLet",
+      "phase": "stableDeclaration",
+      "observedDiagnosticRunId": 38010024282,
+      "reportBlob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666"
+    },
     "evidence": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/development-gate-failure.json",
     "evidenceBlob": "8cc02b87983f44339fb4e8156ee791f6d33ee4e9",
     "markerArchive": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/stage-markers.json",
@@ -1135,30 +1146,6 @@
     "providerChecked": false,
     "passedSourceRun": 38008721677
   },
-  "pendingGenericPreparationDiagnostic": {
-    "status": "one-bounded-retained-N1-origin-diagnostic-requested-no-new-full-qualification",
-    "expectedParent": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
-    "priorAttemptRunId": 38008721677,
-    "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
-    "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
-    "workflowSha256": "d3bf915fc479c5d6b1b57410e62643a6e7a5b8826f303b830e27e62d3997200c",
-    "retainedArtifactId": 11652692106,
-    "retainedN1Sha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
-    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
-    "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
-    "parserCalls": 1,
-    "originPreservingPreparationCalls": 1,
-    "productionCodeChanges": 0,
-    "hostConformanceChanges": 0,
-    "nativeBuilds": 0,
-    "typeScriptCompilations": 0,
-    "erasureCalls": 0,
-    "compilerEmissions": 0,
-    "repeatColdRecovery": false,
-    "strictSh1Qualified": false,
-    "semanticContractQualified": false,
-    "providerChecked": false
-  },
   "pendingFinalDrafts": {
     "correspondence": {
       "path": "strict/reviewed-candidates/correspondence-current-transport.json",
@@ -1168,7 +1155,136 @@
       "path": "strict/reviewed-candidates/release-qualification-draft.json",
       "blob": "e8023de73e4956c0217de5044950404705fedcea"
     },
-    "status": "frozen-pending-b3-source-no-rows-applied-no-successful-receipts",
-    "note": "These drafts record the then-reported step24 failure without its later detailed diagnostic. Use the retained attempt13 evidence and this current request; transport any subsequent source changes explicitly."
+    "status": "historical-b3-source-drafts-preserved; closed-universe-source-overlay-and-actual-qualification-pending",
+    "note": "Keep the original ac274/e802 draft source and evidence pins historical. Compose the closed-universe Infer transport from f71b09c33a574e6868b193afac946355008b4d61 and exact successful resulting-source qualification/provider receipts before final disposition; no row is closed by this integration."
+  },
+  "completedGenericPreparationDiagnostic": {
+    "status": "completed-localization-only",
+    "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "diagnosticSourceRef": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "runId": 38010024282,
+    "jobId": 114087631048,
+    "workflowId": 380146660,
+    "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+    "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+    "evidence": {
+      "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+      "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+      "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+      "bytes": 8051
+    },
+    "report": {
+      "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin.json",
+      "blob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+      "sha256": "46a60edd579402eca2ebf1a42aace7635d245b16a6472c4d3e00523c2054ef0b",
+      "bytes": 2756
+    },
+    "log": {
+      "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-job.log",
+      "blob": "a5df35ba3795f9823fcb5b0c787a57f1baa19db8",
+      "sha256": "fe14d35b49b421b7cf11b337f78d23a80238f309037870e3068711081e04afcf",
+      "bytes": 36865
+    },
+    "sourceIndex": 6,
+    "sourceName": "sh1GroupLet",
+    "phase": "stableDeclaration",
+    "span": {
+      "start": {
+        "byteOffset": "1611",
+        "line": "37",
+        "column": "1"
+      },
+      "stop": {
+        "byteOffset": "1708",
+        "line": "39",
+        "column": "9"
+      }
+    },
+    "error": {
+      "tag": "elaboration",
+      "error": {
+        "tag": "infer",
+        "error": {
+          "tag": "applicationTypeMismatch"
+        }
+      }
+    },
+    "compilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+    "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+    "parseCalls": 1,
+    "originPreservingPreparationCalls": 1,
+    "nativeBuilds": 0,
+    "typeScriptCompilations": 0,
+    "erasureCalls": 0,
+    "compilerEmissions": 0,
+    "observedExpectedAndActualUniverseExpressions": false,
+    "qualificationMeaning": "The execution locates the existing error; the universe mismatch explanation comes from the separately reviewed source trace.",
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "reviewedClosedUniverseInference": {
+    "status": "reviewed-source-correction-full-qualification-requested",
+    "expectedParent": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "manifest": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
+      "blob": "f71b09c33a574e6868b193afac946355008b4d61",
+      "sha256": "6131cefd6461284b35560dd1fa21e267cadb10f77785e2f3b90fb61b1a9936bf",
+      "bytes": 63632
+    },
+    "independentReview": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
+      "blob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+      "sha256": "4f2e24e8add150073d2070d1e7a9ab0526c6d4ce5d882dcc0adf1015309281c1",
+      "bytes": 13986,
+      "verdict": "CLEAR"
+    },
+    "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+    "baseBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+    "baseSha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+    "candidateBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+    "candidateSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+    "candidateBytes": 21458,
+    "sourceFilesChanged": 1,
+    "exactEditGuards": 3,
+    "helpers": [
+      "psInferClosedLevelValue",
+      "psInferLevelFromNat",
+      "psInferNormalizeClosedLevel"
+    ],
+    "producerSites": [
+      "psInferTypeWithFuelWorker.sortE: canonicalize the newly constructed successor level",
+      "psInferTypeWithFuelWorker.forallE: canonicalize the newly constructed imax level"
+    ],
+    "constructionAudit": {
+      "files": 106,
+      "beforeSha256": "164e2296bddb1c7cfcad88be53bd2f2e14a3864b0b29527457f11ff8d8e37272",
+      "afterSha256": "760fd509644fcb342c535879f9ea967043190d2395021ed5617e2e5b3a4e2a76",
+      "beforeBytes": 2179554,
+      "afterBytes": 2181532,
+      "rootCompleteTreeCoverage": true
+    },
+    "sourceArgument": "Every finite closed level evaluates under zero/succ/max/imax arithmetic and reifies to its unique Peano numeral; any param/mvar makes the normalizer return the original whole level. The newly returned sort remains convertible by the unchanged kernel's universe identities. Proof/runtime zero classification is preserved.",
+    "resourceBoundary": "Expression-inference fuel arguments, recursive calls and exhaustion are unchanged. Helpers add finite structural work and allocation on proper acyclic level trees; no equal timing, allocation, machine-stack or all-input resource claim.",
+    "rootAndIndependentSourceReview": "CLEAR",
+    "diagnosticEvidence": {
+      "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+      "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+      "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+      "bytes": 8051
+    },
+    "noFixtureOrHostChanges": true,
+    "kernelChanged": false,
+    "providerChanged": false,
+    "defeqChanged": false,
+    "unifierChanged": false,
+    "cacheChanged": false,
+    "theoryChanged": false,
+    "grammarChanged": false,
+    "selectedSeedChanged": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
   }
 }

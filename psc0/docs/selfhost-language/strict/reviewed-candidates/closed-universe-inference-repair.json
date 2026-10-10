@@ -1,0 +1,1398 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-reviewed-closed-universe-inference-repair",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
+  "repository": "dwijayuda/pskernel",
+  "status": "source-and-finite-domain-review-clear; candidate-unattached; full-qualification-pending",
+  "sourceBase": {
+    "commit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "rootTree": "21592550b9016a8e5e7627d59dcdf261df72d2ad",
+    "psc0Tree": "d99e085157331fcf5db74e7ab207f848ee724a13"
+  },
+  "scope": "One Meta.Infer source file; canonicalize only newly constructed closed universe arithmetic at the sort-successor and Pi-imax inference rules.",
+  "observedFailure": {
+    "qualificationRunId": 38008721677,
+    "originDiagnosticRunId": 38010024282,
+    "diagnosticCommit": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "evidenceManifest": {
+      "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+      "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+      "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+      "utf8Bytes": 8051
+    },
+    "report": {
+      "blob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+      "sha256": "46a60edd579402eca2ebf1a42aace7635d245b16a6472c4d3e00523c2054ef0b",
+      "utf8Bytes": 2756,
+      "encoding": "JSON.stringify(completeReportedValue, null, 2) + '\\n'",
+      "matchesLoggedReportSha256": true,
+      "exactBlobReadbackVerified": true
+    },
+    "completeJobLog": {
+      "blob": "a5df35ba3795f9823fcb5b0c787a57f1baa19db8",
+      "sha256": "fe14d35b49b421b7cf11b337f78d23a80238f309037870e3068711081e04afcf",
+      "utf8Bytes": 36865,
+      "fetchedCompletedJobLogOnce": true,
+      "unchangedDecodedContents": true,
+      "exactBlobReadbackVerified": true
+    },
+    "compiler": {
+      "pathInArtifact": "dist/sh1/development/N1/index.js",
+      "bytes": 3137707,
+      "sha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+      "digestVerifiedByDiagnostic": true,
+      "changed": false
+    },
+    "fixture": {
+      "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+      "blob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "bytes": 6340,
+      "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "digestVerifiedByDiagnostic": true,
+      "changed": false
+    },
+    "observedOwner": {
+      "sourceIndex": 6,
+      "name": "sh1GroupLet",
+      "phase": "stableDeclaration",
+      "error": {
+        "tag": "elaboration",
+        "error": {
+          "tag": "infer",
+          "error": {
+            "tag": "applicationTypeMismatch"
+          }
+        }
+      },
+      "declaration": {
+        "startByte": 1611,
+        "stopByte": 1708,
+        "sha256": "dc8a8a71fc5268303448b80ac69cb0555e8b6e81c8cbfb4659541b0ac6c419b3",
+        "bytes": 97,
+        "text": "def sh1GroupLet (f : Nat -> Nat) : Nat :=\n  let next : Nat -> Nat := sh1GroupIdentity f;\n  next 7"
+      }
+    },
+    "boundary": "Observed diagnostic identifies owner, phase, span and error projection; it does not print expected/actual universe expressions. The following universe-expression explanation is independently reviewed static source reasoning.",
+    "diagnosticScope": {
+      "parseCalls": 1,
+      "originPreservingPreparationCalls": 1,
+      "nativeBuilds": 0,
+      "typeScriptCompilations": 0,
+      "erasureCalls": 0,
+      "compilerEmissions": 0,
+      "fixtureChanged": false,
+      "compilerChanged": false
+    }
+  },
+  "staticRootCause": {
+    "fixtureOwner": "sh1GroupLet",
+    "initializerCoreApplication": "sh1GroupIdentity (Nat -> Nat) f",
+    "identityAlphaBinderDomain": "Sort (succ zero)",
+    "typeOfFunctionTypeBeforeRepair": "Sort (imax (succ zero) (succ zero))",
+    "comparison": "psInferTypeWithFuelWorker .app compares inferred explicit argument type with forall domain using psDefEqReadOnlyWithEnv; levels are structurally unequal.",
+    "whyThisOwner": "psElabLetAfterValue sends the completed let through psElabResolvedTerm and re-infers the initializer. Application elaboration can construct the earlier sh1GroupDirect spine using expected-type unification without this assembled-term re-inference.",
+    "class": "Noncanonical closed universe arithmetic newly constructed by inference, then consumed by unchanged structural universe comparison.",
+    "builtinAudit": "Array.map and Array.foldl telescopes and fixture argument order were statically checked and are unchanged; no fixture/signature workaround is involved.",
+    "predictedBeforeDiagnostic": true,
+    "ownerIndependentlyObserved": true
+  },
+  "candidate": {
+    "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+    "base": {
+      "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+      "sha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+      "bytes": 19480
+    },
+    "candidate": {
+      "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+      "bytes": 21458,
+      "blob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889"
+    },
+    "changes": [
+      {
+        "id": "closed-universe-helpers",
+        "before": "def psInferEnsureSort\n",
+        "after": "-- Canonicalize only closed universe arithmetic produced by inference.\n-- Any parameter or metavariable preserves the original whole level.\ndef psInferClosedLevelValue\n    (level : PsLevel) : Option Nat :=\n  match level with\n  | PsLevel.zero =>\n      Option.some 0\n  | PsLevel.succ inner =>\n      match psInferClosedLevelValue inner with\n      | Option.none => Option.none\n      | Option.some value => Option.some (Nat.succ value)\n  | PsLevel.max left right =>\n      match psInferClosedLevelValue left with\n      | Option.none => Option.none\n      | Option.some leftValue =>\n          match psInferClosedLevelValue right with\n          | Option.none => Option.none\n          | Option.some rightValue =>\n              if Nat.ble leftValue rightValue then\n                Option.some rightValue\n              else\n                Option.some leftValue\n  | PsLevel.imax left right =>\n      match psInferClosedLevelValue left with\n      | Option.none => Option.none\n      | Option.some leftValue =>\n          match psInferClosedLevelValue right with\n          | Option.none => Option.none\n          | Option.some rightValue =>\n              if Nat.beq rightValue 0 then\n                Option.some 0\n              else if Nat.ble leftValue rightValue then\n                Option.some rightValue\n              else\n                Option.some leftValue\n  | PsLevel.param _ =>\n      Option.none\n  | PsLevel.mvar _ =>\n      Option.none\n\ndef psInferLevelFromNat\n    (value : Nat) : PsLevel :=\n  match value with\n  | Nat.zero => PsLevel.zero\n  | Nat.succ remaining =>\n      PsLevel.succ (psInferLevelFromNat remaining)\n\ndef psInferNormalizeClosedLevel\n    (level : PsLevel) : PsLevel :=\n  match psInferClosedLevelValue level with\n  | Option.none => level\n  | Option.some value => psInferLevelFromNat value\n\ndef psInferEnsureSort\n",
+        "beforeBytes": 22,
+        "afterBytes": 1820,
+        "beforeSha256": "ffadfa7bfb0eca1ca7656eb3b43456724b34bb608cf1749621e86fb59a117331",
+        "afterSha256": "954e2209b90dd159bd4cb3c6e8dd4b9d218b214dcbb1506471121e9bb7807963"
+      },
+      {
+        "id": "sort-universe-producer",
+        "before": "              | .sortE level =>\n                  Except.ok (PsExpr.sortE (PsLevel.succ level))\n",
+        "after": "              | .sortE level =>\n                  Except.ok\n                    (PsExpr.sortE\n                      (psInferNormalizeClosedLevel (PsLevel.succ level)))\n",
+        "beforeBytes": 96,
+        "afterBytes": 168,
+        "beforeSha256": "903466860f4e88201e3ea5ff2794f2981cf6956f7656087679c5362b892d368d",
+        "afterSha256": "5c0740322485b4e4f1e66c90ded825a55cb0642a44e1ed7384504f1fba854cb1"
+      },
+      {
+        "id": "pi-universe-producer",
+        "before": "                                  Except.ok\n                                    (PsExpr.sortE (PsLevel.imax domainLevel bodyLevel))\n",
+        "after": "                                  Except.ok\n                                    (PsExpr.sortE\n                                      (psInferNormalizeClosedLevel\n                                        (PsLevel.imax domainLevel bodyLevel)))\n",
+        "beforeBytes": 132,
+        "afterBytes": 240,
+        "beforeSha256": "bba3b306f9862459fd0447156b2da8a121b22b7741c5b82fedeaea9487c486e7",
+        "afterSha256": "1bec7e9a73c7dd10eca26d1417b454b6db45175ea1b4560bf0679f70f9c32f08"
+      }
+    ],
+    "freshNameCounts": [
+      {
+        "name": "psInferClosedLevelValue",
+        "before": 0,
+        "after": 7
+      },
+      {
+        "name": "psInferLevelFromNat",
+        "before": 0,
+        "after": 3
+      },
+      {
+        "name": "psInferNormalizeClosedLevel",
+        "before": 0,
+        "after": 3
+      }
+    ],
+    "fullForwardReverseVerified": true,
+    "completeReadbackVerified": true
+  },
+  "helperInsertion": {
+    "bytes": 1798,
+    "sha256": "5c8fa6848e87164a0e637e83a876084ce421ec1bae6c1d6e2013f19a532ce811",
+    "text": "-- Canonicalize only closed universe arithmetic produced by inference.\n-- Any parameter or metavariable preserves the original whole level.\ndef psInferClosedLevelValue\n    (level : PsLevel) : Option Nat :=\n  match level with\n  | PsLevel.zero =>\n      Option.some 0\n  | PsLevel.succ inner =>\n      match psInferClosedLevelValue inner with\n      | Option.none => Option.none\n      | Option.some value => Option.some (Nat.succ value)\n  | PsLevel.max left right =>\n      match psInferClosedLevelValue left with\n      | Option.none => Option.none\n      | Option.some leftValue =>\n          match psInferClosedLevelValue right with\n          | Option.none => Option.none\n          | Option.some rightValue =>\n              if Nat.ble leftValue rightValue then\n                Option.some rightValue\n              else\n                Option.some leftValue\n  | PsLevel.imax left right =>\n      match psInferClosedLevelValue left with\n      | Option.none => Option.none\n      | Option.some leftValue =>\n          match psInferClosedLevelValue right with\n          | Option.none => Option.none\n          | Option.some rightValue =>\n              if Nat.beq rightValue 0 then\n                Option.some 0\n              else if Nat.ble leftValue rightValue then\n                Option.some rightValue\n              else\n                Option.some leftValue\n  | PsLevel.param _ =>\n      Option.none\n  | PsLevel.mvar _ =>\n      Option.none\n\ndef psInferLevelFromNat\n    (value : Nat) : PsLevel :=\n  match value with\n  | Nat.zero => PsLevel.zero\n  | Nat.succ remaining =>\n      PsLevel.succ (psInferLevelFromNat remaining)\n\ndef psInferNormalizeClosedLevel\n    (level : PsLevel) : PsLevel :=\n  match psInferClosedLevelValue level with\n  | Option.none => level\n  | Option.some value => psInferLevelFromNat value\n\n"
+  },
+  "changeBoundary": {
+    "sourceFilesChanged": 1,
+    "helperDefinitionsAdded": [
+      "psInferClosedLevelValue",
+      "psInferLevelFromNat",
+      "psInferNormalizeClosedLevel"
+    ],
+    "existingDefinitionChanged": "psInferTypeWithFuelWorker",
+    "producerSites": [
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+        "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+        "definition": "psInferTypeWithFuelWorker",
+        "line": 358,
+        "kind": "type of sort",
+        "expression": "PsExpr.sortE (PsLevel.succ level)"
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+        "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+        "definition": "psInferTypeWithFuelWorker",
+        "line": 446,
+        "kind": "type of Pi",
+        "expression": "PsExpr.sortE (PsLevel.imax domainLevel bodyLevel)"
+      }
+    ],
+    "callSitesAfterRepair": [
+      {
+        "line": 105,
+        "text": "def psInferNormalizeClosedLevel"
+      },
+      {
+        "line": 413,
+        "text": "                      (psInferNormalizeClosedLevel (PsLevel.succ level)))"
+      },
+      {
+        "line": 502,
+        "text": "                                      (psInferNormalizeClosedLevel"
+      }
+    ],
+    "importsUnchanged": true,
+    "allOtherSourceBytesUnchanged": true,
+    "noFixturesOrHostScriptsChanged": true,
+    "noKernelProviderDefeqUnifierCacheSubstitutionCodecChanged": true
+  },
+  "implementation": {
+    "evaluator": "psInferClosedLevelValue : PsLevel -> Option Nat",
+    "reifier": "psInferLevelFromNat : Nat -> PsLevel",
+    "normalizer": "psInferNormalizeClosedLevel : PsLevel -> PsLevel",
+    "closedMeaning": "A finite, proper, acyclic PsLevel value built only from zero, succ, max and imax.",
+    "evaluationRules": [
+      {
+        "constructor": "zero",
+        "result": "some 0"
+      },
+      {
+        "constructor": "succ u",
+        "result": "if E(u)=some n then some(n+1), otherwise none"
+      },
+      {
+        "constructor": "max u v",
+        "result": "if E(u)=some n and E(v)=some m then some(max(n,m)), otherwise none"
+      },
+      {
+        "constructor": "imax u v",
+        "result": "first require both operand evaluations to succeed; then some 0 if m=0, otherwise some(max(n,m))"
+      },
+      {
+        "constructor": "param _",
+        "result": "none"
+      },
+      {
+        "constructor": "mvar _",
+        "result": "none"
+      }
+    ],
+    "symbolicFallback": "If any param or mvar occurs, evaluation returns none and the normalizer returns its original entire input level. In particular imax(param u,zero) and imax(mvar id,zero) are not simplified.",
+    "natOperations": "Existing Nat.succ, Nat.beq and Nat.ble; max selects an existing operand value via Nat.ble.",
+    "producerBoundary": "Only the freshly formed PsLevel.succ and PsLevel.imax inference results are normalized. Stored/substituted/decoded levels are not globally rewritten."
+  },
+  "finiteDomainProof": {
+    "statement": "On finite proper acyclic levels, under the existing unbounded mathematical Nat semantics and an execution domain permitting the required finite allocation, normalization preserves universe denotation, produces the unique Peano form for closed levels, and preserves entire symbolic input levels unchanged.",
+    "denotation": "D(zero)=0; D(succ u)=D(u)+1; D(max u v)=max(D(u),D(v)); D(imax u v)=0 if D(v)=0, otherwise max(D(u),D(v)).",
+    "evaluatorSoundness": "Induction on the input constructor proves that E(l)=some n implies l has no symbolic leaf and n=D(l). Both operands are required before max/imax arithmetic is selected.",
+    "evaluatorCompleteness": "Induction on closed l proves E(l)=some D(l).",
+    "symbolicCompleteness": "Induction on l containing a param or mvar proves E(l)=none. Left-operand failure may short-circuit the remaining subtree, but the final result is still none and no partially normalized value escapes.",
+    "reifier": "Induction on n proves psInferLevelFromNat n is precisely succ^n zero and has denotation n.",
+    "normalizer": "The successful branch composes evaluator and reifier; the none branch returns the original function argument.",
+    "idempotence": "A Peano level evaluates to its numeral and reifies to the same constructor tree; symbolic input is returned unchanged on both passes.",
+    "conversion": "Unchanged owned-kernel MkMax/MkIMax and vendored Lean mk_max/mk_imax agree with these ground arithmetic identities. Therefore the freshly returned Sort has a universe convertible to the old raw arithmetic universe, without extending kernel theory or its checker.",
+    "zeroRecognition": "For closed l, the existing psLevelNormalizesToZero and psElabRecursionLevelIsProp predicates hold exactly when D(l)=0; canonicalization preserves that result. Symbolic levels are unchanged. This transport does not change proof/runtime binder classification by changing zero status.",
+    "recursionTermination": "Five evaluator self calls are on direct PsLevel child fields; one reifier self call is on the direct predecessor Nat field.",
+    "finiteBounds": {
+      "evaluator": "At most one visit per input tree occurrence, with possible early failure at a symbolic leaf.",
+      "numeral": "For closed l, D(l) is at most the number of succ constructors in l.",
+      "reification": "D(l)+1 level constructors, including zero; no expansion exponential in the input tree.",
+      "allocation": "Adds finite Option/Nat/intermediate-level work and a finite canonical level. No claim of allocation identity or constant-time arithmetic is made.",
+      "stackAndTime": "No wall-clock, machine-stack, memory-limit, or exception-equivalence guarantee is claimed beyond the stated finite proper allocation domain.",
+      "inferenceFuel": "The expression inference worker's fuel argument, recursive calls and failure branch are byte-for-byte unchanged. The level helpers do not decrement that fuel; they add explicit finite structural work with no separate cutoff."
+    },
+    "staticExamplesNotExecuted": [
+      {
+        "input": "imax(1,1)",
+        "output": "1"
+      },
+      {
+        "input": "imax(2,1)",
+        "output": "2"
+      },
+      {
+        "input": "imax(2,0)",
+        "output": "0"
+      },
+      {
+        "input": "succ(imax(1,1))",
+        "output": "2"
+      },
+      {
+        "input": "imax(param(u),0)",
+        "output": "same entire input tree"
+      },
+      {
+        "input": "succ(max(mvar(i),1))",
+        "output": "same entire input tree"
+      }
+    ]
+  },
+  "strictSourceAdmissibility": {
+    "newDeclarations": 3,
+    "flatConstructorMatchesOnly": true,
+    "selfCallAudit": [
+      {
+        "definition": "psInferClosedLevelValue",
+        "explicitDeclarationParameters": [
+          "level"
+        ],
+        "recursiveSites": [
+          {
+            "constructor": "PsLevel.succ",
+            "argument": "inner"
+          },
+          {
+            "constructor": "PsLevel.max",
+            "argument": "left"
+          },
+          {
+            "constructor": "PsLevel.max",
+            "argument": "right"
+          },
+          {
+            "constructor": "PsLevel.imax",
+            "argument": "left"
+          },
+          {
+            "constructor": "PsLevel.imax",
+            "argument": "right"
+          }
+        ],
+        "selfArgumentsAtEachSite": 1,
+        "establishedRootChildIdsRetainedAcrossNestedOptionMatches": true
+      },
+      {
+        "definition": "psInferLevelFromNat",
+        "explicitDeclarationParameters": [
+          "value"
+        ],
+        "recursiveSites": [
+          {
+            "constructor": "Nat.succ",
+            "argument": "remaining"
+          }
+        ],
+        "selfArgumentsAtEachSite": 1
+      }
+    ],
+    "freshNames": [
+      {
+        "name": "psInferClosedLevelValue",
+        "before": 0,
+        "after": 7
+      },
+      {
+        "name": "psInferLevelFromNat",
+        "before": 0,
+        "after": 3
+      },
+      {
+        "name": "psInferNormalizeClosedLevel",
+        "before": 0,
+        "after": 3
+      }
+    ],
+    "freshnessScope": "All 106 audited current non-kernel production sources had zero occurrences of each new helper name.",
+    "noMutualRecursion": true,
+    "noChangingStateRecursion": true,
+    "noHigherOrderEscapingSelfReference": true,
+    "noNestedConstructorPatterns": true,
+    "noNewSyntaxOrAdmissionException": true,
+    "noForwardReferences": true
+  },
+  "constructionClassAudit": {
+    "sourceTree": "d99e085157331fcf5db74e7ab207f848ee724a13",
+    "selection": "All current tree blobs matching packages/*/src/**/*.lean, excluding packages/pskernel-core/src/**.",
+    "files": 106,
+    "bytes": 2179554,
+    "vectorEncoding": "JSON.stringify(vector)",
+    "vectorSha256": "164e2296bddb1c7cfcad88be53bd2f2e14a3864b0b29527457f11ff8d8e37272",
+    "allReadBytesMatchGitTreeSizes": true,
+    "arithmeticProducerCount": 2,
+    "classification": {
+      "auditFiles": 106,
+      "auditBytes": 2179554,
+      "vectorSha256": "164e2296bddb1c7cfcad88be53bd2f2e14a3864b0b29527457f11ff8d8e37272",
+      "scope": "all current packages/*/src/*.lean production sources except separately typed pskernel-core; owned kernel and vendored Lean smart constructors separately read as semantic references",
+      "arithmeticProducers": [
+        {
+          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+          "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+          "definition": "psInferTypeWithFuelWorker",
+          "line": 358,
+          "kind": "type of sort",
+          "expression": "PsExpr.sortE (PsLevel.succ level)"
+        },
+        {
+          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+          "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+          "definition": "psInferTypeWithFuelWorker",
+          "line": 446,
+          "kind": "type of Pi",
+          "expression": "PsExpr.sortE (PsLevel.imax domainLevel bodyLevel)"
+        }
+      ],
+      "nonProducerSites": [
+        {
+          "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+          "blob": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+          "purpose": "datatype and unused raw psLevelSucc wrapper; no simplifier"
+        },
+        {
+          "path": "psc0/packages/core/src/Ps/Core/LevelSubst.lean",
+          "blob": "48f0d7b821fe0c09e14de126cbf4df40cba7559a",
+          "purpose": "parameter substitution reconstruction"
+        },
+        {
+          "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+          "blob": "b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882",
+          "purpose": "metavariable substitution reconstruction and structural unification"
+        },
+        {
+          "path": "psc0/packages/bridge/src/Ps/Bridge/Codec.lean",
+          "blob": "6143b486196ecd596d5a52df5cfe7e263df1e818",
+          "purpose": "format-preserving decoding"
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+          "blob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+          "purpose": "zero recognizer only, not a level constructor"
+        },
+        {
+          "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+          "blob": "8b1c409244b9669224fc3caff796aea69eac1401",
+          "purpose": "Prop recognizer only"
+        }
+      ],
+      "otherSites": "literal zero/succ zero for Prop/Type and param/mvar producers; no additional arithmetic inference rule"
+    },
+    "afterCandidate": {
+      "files": 106,
+      "bytes": 2181532,
+      "vectorSha256": "760fd509644fcb342c535879f9ea967043190d2395021ed5617e2e5b3a4e2a76",
+      "onlyChangedPath": "psc0/packages/meta/src/Ps/Meta/Infer.lean"
+    },
+    "vector": [
+      {
+        "path": "psc0/packages/backend-js/src/Ps/BackendJs/Encode.lean",
+        "blob": "fe136db157df238ed01a7456f17cf8631e878032",
+        "sha256": "ed893e70a3c047c15b268dfc1280e45a6c180c009ea77b7e4d1af377c8ae10ec",
+        "bytes": 13069
+      },
+      {
+        "path": "psc0/packages/backend-js/src/Ps/BackendJs/Lower.lean",
+        "blob": "6dd461b7f079549dc4d8014b1e69fee35d2f2602",
+        "sha256": "240f3782a4e3583bddc1dd3b55039ff46244450d21195ff6d858f80d6591a88c",
+        "bytes": 59242
+      },
+      {
+        "path": "psc0/packages/backend-js/src/Ps/BackendJs/Model.lean",
+        "blob": "9a4f36c9b96785057555de613d7b83ccb0f33c3b",
+        "sha256": "4a61273a1fc1bdc8da55aa8b513eedb7631b7f83887a5c0df3c4b2006935580e",
+        "bytes": 3246
+      },
+      {
+        "path": "psc0/packages/backend-js/src/Ps/BackendJs/Print.lean",
+        "blob": "e817e15906bee8b39d1646aa7bc5e6bcd699cde8",
+        "sha256": "1a67ad9ff3c860bb1882baf4a9b1f8304c67ac166491ee9bb8d9470621fd32cd",
+        "bytes": 59776
+      },
+      {
+        "path": "psc0/packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
+        "blob": "310563f6d857e60aeb3a3a4a841208051c5dbf21",
+        "sha256": "07cf281c6b4ad8213db31b3dc4124cad937f481780c57fef96768097965782fd",
+        "bytes": 10594
+      },
+      {
+        "path": "psc0/packages/backend-js/src/Ps/BackendJs/Validate.lean",
+        "blob": "bd828bca0f6749c6b710e16f85ac2b138671504b",
+        "sha256": "5894159029f4036a9ad3ff5d96d569beba70ffd7d22f79e7abe7d458230b8d33",
+        "bytes": 16649
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Captures.lean",
+        "blob": "b45a891c52e017f31337d7acfa22b16ddb825c91",
+        "sha256": "1a37f97a95343faf0f72102e9a5f83c4c1e2bb21c6fdb45ab7f517dd379452cd",
+        "bytes": 7247
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Expr.lean",
+        "blob": "e44755718459f660ebd7592904a409e0d4a1690f",
+        "sha256": "cc658268ef62f2fc9f7a66319f9cc03745e719ce7439be5b637885a7b61d5433",
+        "bytes": 44790
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Identifier.lean",
+        "blob": "6511e8785b4d723a313dc114d6aa64bd1b5c2c59",
+        "sha256": "d19235781e047fc74f20922210e69a51b65e277f54fd51f6e117376e96357c7a",
+        "bytes": 4822
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Module.lean",
+        "blob": "4693655f9319144a432208329b9831034a2296a6",
+        "sha256": "f5b9f19533fe89a3c42396298e8dac7daf795bf5de3952e4cf772607fd4793aa",
+        "bytes": 41706
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Runtime.lean",
+        "blob": "6a6def3924caac5c3761f9bb5a4e1e57c826824d",
+        "sha256": "dc3fa685fa635a9639861d0c9179082be449c0222311fcff168304a5a1d889cd",
+        "bytes": 5693
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Tail.lean",
+        "blob": "cd0bbfc46c3b19bdb47280d5f28aea200529b969",
+        "sha256": "85535c4ab27ad12d48c9b4a13bca38b2ffbc6b62bd014ba72e44794189516674",
+        "bytes": 8505
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
+        "blob": "4b244c1c8b50bd3655adde96eac0cf9ef8588b77",
+        "sha256": "3549bd1f353620b64c21d0a4b3f55e299ebd63a64e5450145d99d3c250c8c5d4",
+        "bytes": 7902
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/Type.lean",
+        "blob": "50b62546257d89d70c1c00095720ae17e33a779a",
+        "sha256": "532a44fe64e054f62bf5a96bf09d2e13b0cb9f82a8cab7c571b83a00e5aabfa6",
+        "bytes": 11595
+      },
+      {
+        "path": "psc0/packages/backend-rust/src/Ps/BackendRust/ValueRefs.lean",
+        "blob": "9a5b3c096808709cae260c108e81501a44800fb3",
+        "sha256": "c5e6444cb437972e7da10498a1ed1584f017b96193eb8b32fde54426d7950ee0",
+        "bytes": 10911
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+        "blob": "b9b073b7ec341be105895817a6ddda441020e351",
+        "sha256": "87a9d0a89871644a1a3cf4fa3629d7326077b227e49d0c8f0777c4379f314bd8",
+        "bytes": 2595
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+        "blob": "9b6f62bc9b55f1d1ad2ea06a129df11d7e554e44",
+        "sha256": "853731d4c15e6cf894548a841186ae1dfe6bc67ca28141c2b0b3b71336719db7",
+        "bytes": 1398
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "blob": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+        "sha256": "b488587a271702fe336ccacc8e5bda976f835b59be9b0419e697850cead9e46e",
+        "bytes": 35639
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "blob": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+        "sha256": "efbf0a1365f27da7d1fd05a67e21e50b8d8aaf852d0f22132c1ff6ad518331e3",
+        "bytes": 40409
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+        "blob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53",
+        "sha256": "4c35232a7b70a4addb60111300d2266a410759d63c6eb7ca825ab24cafc24e29",
+        "bytes": 3405
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+        "blob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139",
+        "sha256": "36387a384b31a22a3bcbeb3766a1c725c8c4afac4964b76f4d1d51a234cc3abc",
+        "bytes": 30077
+      },
+      {
+        "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+        "blob": "074bf2b838994d2af375a20ef1600941d21e956c",
+        "sha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf",
+        "bytes": 4202
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/Binary.lean",
+        "blob": "83a13d0cc24965a3a23f9415870e7af1aff813a9",
+        "sha256": "011cd2deb0bc6547d74c39c70696b482676071faadaddd21a148402cd4def436",
+        "bytes": 41281
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
+        "blob": "d4bc0c588145b9ccf37abc3b35a9f94c78b9e925",
+        "sha256": "8644ff55fe9b4d94428f66ad25f4a0fb802bf013e5baf1ae0e23903fd53484aa",
+        "bytes": 12970
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+        "blob": "8219318db442c7fa191479f7bbf90064c3ba24b6",
+        "sha256": "f780016396707ac6ecd55a513493b299fa5bba26477f346faecfbb89413e56dc",
+        "bytes": 6038
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
+        "blob": "2e21f6bb4c712be1d4b1d638d6f690a54110b887",
+        "sha256": "d23d305dcdd7bf0618966743b0d2debc6896e7ac4e767f4e976f6c8fc0b9c11b",
+        "bytes": 13738
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/IntUtil.lean",
+        "blob": "2870dc70009598e16450f5b0c09e5b37eb356ad0",
+        "sha256": "6c52173a7117b9aa82cf7a1b052b46cc1c67fc709c7a47a24b2febf56876262f",
+        "bytes": 3376
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/LiteralEvidence.lean",
+        "blob": "04be7b5b8c3785ff031168ce0e09697998e42095",
+        "sha256": "712dab2fecd7f32e2ab00776454967f8895009154a8f1f094303c2ee8c60699f",
+        "bytes": 2702
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+        "blob": "27d683b37501ec05cefd62f18a7b164f04885cc5",
+        "sha256": "db09b122d1f776b8ccabdb732870ff4de775e0e7c5393c4b7f9d9fe7dab98bcc",
+        "bytes": 269506
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.lean",
+        "blob": "977c2b5514d4be199ff0235bb8ca12e818985ce9",
+        "sha256": "25402ccc924c09affc1a8a9a7b1aea01d53d2ca8219a1cd878c66ba767068977",
+        "bytes": 1353
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/LowerInt.lean",
+        "blob": "888c6511a5d13b406b76c621bf0721fcceb11b17",
+        "sha256": "3b99d06e6602c94e97efba2fbd51d52033445de35983a628943c2c3d2494b06b",
+        "bytes": 3984
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/Model.lean",
+        "blob": "d656093c250e38c939f69284d45f6039cad05d49",
+        "sha256": "3be408cbc70a9924477333b022bd3fe3a2a4d2026211f3e8d9afdec5c5753d21",
+        "bytes": 3218
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean",
+        "blob": "843a6d5d972b2fa062a0b0998ccda8a4d52f4b0d",
+        "sha256": "fac8ab5fa7595a9eae85ae509acd698f48ac4eca930411ec43ea1e07eb0e5671",
+        "bytes": 10575
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.lean",
+        "blob": "9fc834d86a5f6217f02835409824c57976434246",
+        "sha256": "a41a79dbf3c76b1ec6709007f7fc6dc39353eb77c9fc8123ebdf163d9777f04a",
+        "bytes": 3707
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean",
+        "blob": "2a25483d569f21b392d31a4268860eecfae0efbe",
+        "sha256": "5b9aa547ceb5b07200ef6280221e67f488bf5141ef3516c832521fc17c5d8bdf",
+        "bytes": 23707
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.lean",
+        "blob": "4a448eb457a3857f2f8c189c538e9751aa62ff71",
+        "sha256": "65e0f48276e7f2ad4b4379810360f1644287a1660fab257abdbbf342ef270477",
+        "bytes": 35270
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/SelfHostAbi.lean",
+        "blob": "8e3d379500f339453e0fd6812ff5e4f230d036d1",
+        "sha256": "dee9a196db5f68bbdfcddcf0af136c09e11a4b71ad516d2a386f84718f04f372",
+        "bytes": 4994
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/TailCalls.lean",
+        "blob": "93929f443a3f8f463e4dca2db612b700b2bcd2e1",
+        "sha256": "c9a109dc36453cf2e467f65ebd3e019dda67c6cc09515b956601934dd3e38d21",
+        "bytes": 4781
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/Type.lean",
+        "blob": "b14da6e26568fa13f02500ac6e910360f5177c80",
+        "sha256": "a8c009390536290f204ff14cefb5b3344a7c4ce7ac90f5b7f551623376a32b24",
+        "bytes": 9037
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
+        "blob": "aa518148f0095ce68aebda5d6895bc7adfef981b",
+        "sha256": "51e90c2b2b20b058d559c38d2867b6ebfdb7b9144f9cdf10cc9dd5f0c444ee2c",
+        "bytes": 8004
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean",
+        "blob": "7a862f559b90e3307a0217918b16133c675cf453",
+        "sha256": "543a2d89156f5bae4a6ae0357179ec26dc97755c5d5c63c6232643f5f9f227a5",
+        "bytes": 614
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.lean",
+        "blob": "427a062bd7dfb3cd4b6eacf22b5f33e49ecacf5d",
+        "sha256": "6dcb6db3056f4959471ca32488c4d8e22182da696035d7e766a626f3baeb008e",
+        "bytes": 25704
+      },
+      {
+        "path": "psc0/packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.lean",
+        "blob": "ea1f21bb13409ee24d15fd9b66dc0609ebb7041d",
+        "sha256": "412af1a49451349195cf735a16b2d8b132c2a3b5b5007a487af643cb1d6b5ac1",
+        "bytes": 33756
+      },
+      {
+        "path": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+        "blob": "c88f449644e3caf966c19f01e9534345bbb8c831",
+        "sha256": "1ff1e99ef3f2a53faadc995e27515721800e1ec8739003341287a072316f4ba9",
+        "bytes": 242
+      },
+      {
+        "path": "psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+        "blob": "a9b2c3f4184a5c20b46c97354f2a44c04b978851",
+        "sha256": "fc8976ef9821753f1c575062c7fee0c2abc8cf28e422088691678f49fae7bbab",
+        "bytes": 45383
+      },
+      {
+        "path": "psc0/packages/bridge/src/Ps/Bridge/Codec.lean",
+        "blob": "6143b486196ecd596d5a52df5cfe7e263df1e818",
+        "sha256": "bb2e162fe817d723f9ca861fb36a4f4a6ea6ce50383c0fb1c427fb7b17bd1f1c",
+        "bytes": 16713
+      },
+      {
+        "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+        "blob": "1b4ff4efcf78be15221514f8eea0dd47fe43be0e",
+        "sha256": "bea85555e39544b1768f660a72595447c8fda088b4eff1c0731a5b37da446e1e",
+        "bytes": 35383
+      },
+      {
+        "path": "psc0/packages/bridge/src/Ps/Bridge/Protocol.lean",
+        "blob": "a7e914a1394af43f156c2e7664c1366ad9ded4f5",
+        "sha256": "67f88f77519c6157933aa75d3dfc7606791d1cb456d5c9ab19050067d3344bf9",
+        "bytes": 7522
+      },
+      {
+        "path": "psc0/packages/cli/src/Main.lean",
+        "blob": "7d350fdf6773961478906927a90cf2da15081e06",
+        "sha256": "582e02b9e246b12ca4bd5c63550355224af26239f8591c6b4e9d878ccaebb127",
+        "bytes": 1899
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "blob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+        "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef",
+        "bytes": 46479
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+        "blob": "49f267282ea27f978eaa522e6038d8787676994e",
+        "sha256": "50c24e57441c028ca0768fac83c966cb5d8b534a68f2f55ca8384983b32fae7d",
+        "bytes": 18919
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+        "blob": "71a4231fe23c7049c0930976c383fbc60cc5c24f",
+        "sha256": "3ccce22596959fa12d084bb25279c686a4d534ec627a2067c4c9da13e29f9cad",
+        "bytes": 26018
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+        "blob": "154cc013b692a449a6a47e6e4270957856d5bc0b",
+        "sha256": "c268a4095bf4b98491c4fbc2d3ed43fb57a47ee99cda3cff802115f11b6c00c1",
+        "bytes": 2510
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3",
+        "sha256": "01927c6c6bb88c4a77bd5fb623e9426eb3edb4ea1b0e62447915afe27da5b70a",
+        "bytes": 5378
+      },
+      {
+        "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+        "blob": "fa3708007a21442c3b864f1e3c3feb8304ed0c43",
+        "sha256": "ed04e940bef50265973ad0ebc9f3e7fda3bc4681a4e383473d8c5d4d5a5fe789",
+        "bytes": 63108
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler.lean",
+        "blob": "cd70a1f23af11022cb19b1b6e01f82de8391f5cd",
+        "sha256": "26e7fdbaad5fd297d98dcc8b5c19213c3fedc42a97d0b99e98a3467def538231",
+        "bytes": 23
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+        "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18",
+        "sha256": "5d28f057f52ea735f48d3dd6067c582dcb7fe112d4b7fb50ca1c19b204c6e53f",
+        "bytes": 12189
+      },
+      {
+        "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "blob": "a947a4058e3d91a02d4f8120a3d86556100c8555",
+        "sha256": "3ad94c5c6a57819f7c744591a074482e00bb5309b931d6e87356adc191552843",
+        "bytes": 33241
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Abstract.lean",
+        "blob": "8ac0f21d92538502ee14fc6932eb0f48fda48a85",
+        "sha256": "3f439e71312493714010cfe09feb9ecd14cfc7b5f611162a3ae4dfa5c5507095",
+        "bytes": 2618
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Builtin.lean",
+        "blob": "c64025ddc515c47a4d661076d779e0bccada5046",
+        "sha256": "a5af06f7b4ee8b0e76a04b72df863c691382c45a830c49598ed691b2525c7e06",
+        "bytes": 4949
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+        "blob": "c34c280b1c42f23138cfec79f4e448db17071952",
+        "sha256": "1e08932d0251abc18ee8f3b1175fbbe5acd5a1d1db158204ba4dfa285609b3c6",
+        "bytes": 1349
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Equality.lean",
+        "blob": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4",
+        "sha256": "4e60e5eb112538fdc9021fca11cb879725b385c267937bb1b569c27189684226",
+        "bytes": 6468
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+        "blob": "eac8f1a8f883f87af78cc68317644c843ba40fd2",
+        "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6",
+        "bytes": 753
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+        "blob": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+        "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4",
+        "bytes": 286
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/LevelSubst.lean",
+        "blob": "48f0d7b821fe0c09e14de126cbf4df40cba7559a",
+        "sha256": "1393726ff7b45bb3adfcfb5e12ab79c3e344803e44777c9c67c4560af5373698",
+        "bytes": 3613
+      },
+      {
+        "path": "psc0/packages/core/src/Ps/Core/Subst.lean",
+        "blob": "c8439e444e38b642043f2d18561a77a2bdd420a2",
+        "sha256": "e1924d10d70f71fc191130ec45fa22e5866691a5422f59edb5897cd2cc52f38f",
+        "bytes": 5297
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+        "blob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+        "sha256": "0b17fd57d07b25b60ed656ec290903ad2f8a829c9107900805707ef805d06e27",
+        "bytes": 2763
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+        "blob": "d191857ece760f307359d576dca2cef906dea8ec",
+        "sha256": "600da64269038375ab62fdc0d0fab572bfa028b60bc6caec730f5dff1dd3f1bf",
+        "bytes": 60290
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Literal.lean",
+        "blob": "dae4980c822dae5c9170638ee51ef8525635ce01",
+        "sha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71",
+        "bytes": 10490
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+        "blob": "8b1c409244b9669224fc3caff796aea69eac1401",
+        "sha256": "e93aed0fe805385ff6dfcaf6ac190894254a34746f4c60002e33fbb561f80efe",
+        "bytes": 35801
+      },
+      {
+        "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+        "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+        "sha256": "c6b1c1d9c444a34824a25f7e04df4d5ffc6b1466d7ccbe11a5b900204db93a6a",
+        "bytes": 109738
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Basic.lean",
+        "blob": "26016c3e4a460358fa34d34a3b4e2966744912a7",
+        "sha256": "6290401a7cdb3111b0b4557532e6eabde1848d39608d1415659e631cf165493b",
+        "bytes": 9104
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Instances.lean",
+        "blob": "75b0d66c402b2807149cd2c832207a2d311c2db3",
+        "sha256": "63a0fabc0e88e90b647074379e62d4ff2ebd7252676e3703ed06a9cfaefad2bc",
+        "bytes": 1616
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+        "blob": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6",
+        "sha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9",
+        "bytes": 2690
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+        "blob": "d862ba8c806595fbf11237724089bd2282af9866",
+        "sha256": "7335bd4df435c626ec3c6e32cd91472e0cce9b217cca42e3e961148445841146",
+        "bytes": 24355
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/Resolve.lean",
+        "blob": "4dcad8f12689b21d640fe192ff81191fe506fe10",
+        "sha256": "b93898d7b5d8744ae0c78f319831c48a3117a061e421f2146869524843f1ae16",
+        "bytes": 592
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+        "blob": "b9127717d5685ae0de6e10251ba1d8d02b6e647d",
+        "sha256": "02353953cc05213b346ecf5e27075ee52219f86d280d8b82e9b0f68de5fdc156",
+        "bytes": 17298
+      },
+      {
+        "path": "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+        "blob": "38485851a30f024d973392c6c8e1d86916e31466",
+        "sha256": "a064a50d684fb1fd5e0f3316b7cac3e3a363e22acf5c2a2bd2b7cde6fa0899ba",
+        "bytes": 4407
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "blob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+        "sha256": "3cfcea753582afd703f7f48c6c247f708fe2d197dedffcd708eb128d7f177c5d",
+        "bytes": 29672
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+        "blob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+        "sha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+        "bytes": 22534
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "blob": "b4af2687c1b94e85014e323e5325385f139d4015",
+        "sha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+        "bytes": 138189
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "blob": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+        "sha256": "06f584ff2d4bae2c16d70e899d255a16155df3cf774830ebc99ecd24ac574af6",
+        "bytes": 17652
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+        "blob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+        "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af",
+        "bytes": 6731
+      },
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+        "blob": "57e76a17858b3f4333a44ed880326ac33695351e",
+        "sha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+        "bytes": 10378
+      },
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Diagnostic.lean",
+        "blob": "eba5727643e6e3c553e6fa23d7d037c5bcba977e",
+        "sha256": "69bebd854dcb757f820e18747eb60e8211db93771ded02f59b8fabcc55201412",
+        "bytes": 202
+      },
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/List.lean",
+        "blob": "29e4e59c271c1a26604cc738a8794f9bb70a2e83",
+        "sha256": "0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680",
+        "bytes": 2386
+      },
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+        "blob": "b907616cb4cbf65089ba0c9a8e13f57b220008cf",
+        "sha256": "9f8c895567542c90ac9088b3ce25ccda6f374e016069faa4068feca0e28b7092",
+        "bytes": 3984
+      },
+      {
+        "path": "psc0/packages/foundation/src/Ps/Foundation/Source.lean",
+        "blob": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd",
+        "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+        "bytes": 148
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Context.lean",
+        "blob": "dd69906bb92ffbae9a4f8541d9941c10eb239771",
+        "sha256": "2121f70e32299107ffdd3a91e4d73943db6d2be3388a982d539e433bcbe690b9",
+        "bytes": 9092
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+        "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+        "sha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+        "bytes": 19480
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+        "blob": "b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882",
+        "sha256": "9d8cf3cd5bb840d1b2a979df7b784b2eea632964ac7882266ef72340420a7718",
+        "bytes": 8701
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+        "blob": "1a547f20911ac23a1f0a9368839593383f9c31e0",
+        "sha256": "c3ae3055299a13d9ac409450c1682ae202a97ec6a7b6a4e0c12e4a384d2ca51e",
+        "bytes": 6230
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/SynthInstance.lean",
+        "blob": "9d64e65a7e3ca2a9d55b575bbdfa7003c4686f55",
+        "sha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6",
+        "bytes": 12794
+      },
+      {
+        "path": "psc0/packages/meta/src/Ps/Meta/Unify.lean",
+        "blob": "18f904b9d2d06fbe9b5330fc2d30e04a4dba1848",
+        "sha256": "79562973eaad71b335f2c6104f1beea911ed1056618bc9adba9541a3a7238396",
+        "bytes": 11105
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "blob": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7",
+        "sha256": "c22fa56b6a76b10d4d0b271f03bb4cd6612779b647f85f5088264fc95e949011",
+        "bytes": 3088
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+        "blob": "cde16d84dc7a088bf7b9f74c65303b22b991fe85",
+        "sha256": "eb80cd45e1df4072cac276d16d26c07ef6e37ae1ddb8769ff534e0a5b54f6c2e",
+        "bytes": 2808
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+        "blob": "598b8d75d0d1bf1b6ea7ec05a62814343e33599a",
+        "sha256": "adab283e1881058bfed285a62478f1f4d55bce73b8373a4017353529e479d372",
+        "bytes": 36625
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "blob": "717882ba07d3fc463d08259bf1d3035d484917ef",
+        "sha256": "d12d8b22c2ea21180ea575f0cde3393a6d3409e6e92552585490904b46ce58e8",
+        "bytes": 22448
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "blob": "6c9056bb03424fb73667e9c74d59432e05cf0a71",
+        "sha256": "601ea280e3f6aafad69abf150afde89fbdade582b796ce1b4de49ffd43baad41",
+        "bytes": 107433
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "blob": "b569a73ef70e8cf2bfb81b7737c990e8e3b2374a",
+        "sha256": "9a69a130171bc9fcefc6a040bde659da77f050ebdf65ed56fd879c1781c1c5fd",
+        "bytes": 77046
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/ParserState.lean",
+        "blob": "e784c5836a37e522a21f67db0d52653d5ab12a57",
+        "sha256": "c7027009e9ac372690f62a9c33dfbb613e98f4dc48e4cfa516af5b41ab5d3617",
+        "bytes": 2516
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+        "blob": "03f7f576375a72e2ff6c3beaa04363f5839b7bd6",
+        "sha256": "717344d3f97937fb2daa93aa8a7ecf15c44d6be83b013656baa317231fb906d0",
+        "bytes": 3403
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+        "blob": "2a98cf0d24b73343defff9824a991b57270b9723",
+        "sha256": "b039b4b5b91f43fa3653a75c8f861f734e9a2cafa74affcb6e032a4baad38c19",
+        "bytes": 29048
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+        "blob": "01c006d2c243676f47e29cd14949f4019e002d59",
+        "sha256": "c9fa8c42789c1cc6b5b9611580cacfe0a63158eccbd552bce0f64c76326d24c7",
+        "bytes": 31557
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Token.lean",
+        "blob": "5bc9895dbe7a9ba9157b00f6e184da6d16af738f",
+        "sha256": "a690a4bc7c7138f732346155cd985bd5412d9e60e1d04d67c2fd3f46d42c77df",
+        "bytes": 959
+      },
+      {
+        "path": "psc0/packages/syntax/src/Ps/Syntax/Translate.lean",
+        "blob": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b",
+        "sha256": "c73ef5027b5108bc81b555fc4fcf2f0547e32a7a03aa8db0f136b155099a0c9c",
+        "bytes": 2074
+      }
+    ]
+  },
+  "referenceSources": [
+    {
+      "role": "frontend-level",
+      "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+      "blob": "2607a00d69cb0299de20aecb6b94a00adc7852a2",
+      "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4",
+      "bytes": 286,
+      "definitions": [
+        "PsLevel",
+        "psLevelSucc"
+      ]
+    },
+    {
+      "role": "frontend-equality",
+      "path": "psc0/packages/core/src/Ps/Core/Equality.lean",
+      "blob": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4",
+      "sha256": "4e60e5eb112538fdc9021fca11cb879725b385c267937bb1b569c27189684226",
+      "bytes": 6468,
+      "definitions": [
+        "psLevelStructuralEq",
+        "psExprAlphaEq"
+      ]
+    },
+    {
+      "role": "frontend-reduction",
+      "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+      "blob": "1a547f20911ac23a1f0a9368839593383f9c31e0",
+      "sha256": "c3ae3055299a13d9ac409450c1682ae202a97ec6a7b6a4e0c12e4a384d2ca51e",
+      "bytes": 6230,
+      "definitions": [
+        "psWhnf",
+        "psDefEqReadOnlyWithEnv"
+      ]
+    },
+    {
+      "role": "frontend-level-meta",
+      "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+      "blob": "b0fcde267d2a9dd07f7de9fc12f57ca5b3a38882",
+      "sha256": "9d8cf3cd5bb840d1b2a979df7b784b2eea632964ac7882266ef72340420a7718",
+      "bytes": 8701,
+      "definitions": [
+        "psLevelInstantiateWithFuel",
+        "psLevelUnifyWithFuelWorker"
+      ]
+    },
+    {
+      "role": "let-origin",
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+      "sha256": "c6b1c1d9c444a34824a25f7e04df4d5ffc6b1466d7ccbe11a5b900204db93a6a",
+      "bytes": 109738,
+      "definitions": [
+        "psElabResolvedTerm",
+        "psElabLetAfterValue",
+        "psElabApplyArgsWithFuelWorker"
+      ]
+    },
+    {
+      "role": "declaration-boundary",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blob": "d191857ece760f307359d576dca2cef906dea8ec",
+      "sha256": "600da64269038375ab62fdc0d0fab572bfa028b60bc6caec730f5dff1dd3f1bf",
+      "bytes": 60290,
+      "definitions": [
+        "psElabDeclarationParts"
+      ]
+    },
+    {
+      "role": "builtin-types",
+      "path": "psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+      "blob": "d862ba8c806595fbf11237724089bd2282af9866",
+      "sha256": "7335bd4df435c626ec3c6e32cd91472e0cce9b217cca42e3e961148445841146",
+      "bytes": 24355,
+      "definitions": [
+        "psPreludeArrayMapType",
+        "psPreludeArrayFoldlType"
+      ]
+    },
+    {
+      "role": "owned-kernel-smart-constructor",
+      "path": "psc0/packages/pskernel-core/src/Ps/KernelCore/Core/Level.lean",
+      "blob": "95f2ba0220a753c49a3bd485bb9c9e8034067b7a",
+      "sha256": "83c8b2c60c7183bf17f11478cf36e61bb83ea3c2d17e0a46b95446d507deff98",
+      "bytes": 26441,
+      "definitions": [
+        "psKernelLevelMkMax",
+        "psKernelLevelMkIMax",
+        "psKernelLevelNormalize"
+      ]
+    },
+    {
+      "role": "owned-kernel-pi-rule",
+      "path": "psc0/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.lean",
+      "blob": "25181cb4bb887dcb871d58d7f6b81c6a847ce617",
+      "sha256": "b523f3dbe42b1202fac335113a59da2fca981982dbc64b4c54b9b2f90454d94c",
+      "bytes": 32001,
+      "definitions": []
+    },
+    {
+      "role": "lean-smart-constructor",
+      "path": "psc0/packages/pskernel-lean/kernel/level.cpp",
+      "blob": "8171e16706f550a0cea4fa198671a7bd5d12329f",
+      "sha256": "7cb927c6fabd9fb843f548443494d3673a08074e26fe32b679e80f4664fc7f25",
+      "bytes": 18351,
+      "definitions": [
+        "mk_max",
+        "mk_imax"
+      ]
+    }
+  ],
+  "existingNormalizerDecision": {
+    "frontend": "none",
+    "frontendLevelType": "PsLevel",
+    "ownedKernelLevelType": "PsKernelLevel",
+    "directReuse": "would add cross-layer dependency/conversion; not recommended for this repair",
+    "references": [
+      {
+        "path": "psc0/packages/pskernel-core/src/Ps/KernelCore/Core/Level.lean",
+        "blob": "95f2ba0220a753c49a3bd485bb9c9e8034067b7a",
+        "definitions": [
+          "psKernelLevelMkMax",
+          "psKernelLevelMkIMax",
+          "psKernelLevelNormalize"
+        ]
+      },
+      {
+        "path": "psc0/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.lean",
+        "blob": "25181cb4bb887dcb871d58d7f6b81c6a847ce617",
+        "lines": [
+          572,
+          576
+        ],
+        "finding": "Pi sort is constructed with psKernelLevelMkIMax"
+      },
+      {
+        "path": "psc0/packages/pskernel-lean/kernel/level.cpp",
+        "blob": "8171e16706f550a0cea4fa198671a7bd5d12329f",
+        "lines": [
+          81,
+          122
+        ],
+        "finding": "mk_max and mk_imax implement the same arithmetic identities"
+      }
+    ]
+  },
+  "proofAndSourceTransport": {
+    "scope": "A supplemental closed-universe producer lemma and source pin update; no reopening of unrelated settled general arguments.",
+    "historicalPaperPinsRetained": [
+      {
+        "id": "COMMON",
+        "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+        "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+        "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+        "presentUnchanged": true
+      },
+      {
+        "id": "N",
+        "path": "psc0/docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md",
+        "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+        "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+        "presentUnchanged": true
+      },
+      {
+        "id": "EV",
+        "path": "psc0/docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md",
+        "blob": "7e90465301005a395a871a0563b19c164dcda750",
+        "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+        "presentUnchanged": true
+      },
+      {
+        "id": "TS",
+        "path": "psc0/docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md",
+        "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+        "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+        "presentUnchanged": true
+      },
+      {
+        "id": "GROUP",
+        "path": "psc0/docs/selfhost-language/strict/CANONICAL_FUNCTION_ARGUMENTS.md",
+        "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+        "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+        "presentUnchanged": true
+      },
+      {
+        "id": "ER",
+        "path": "psc0/docs/selfhost-language/strict/ERASURE_ARGUMENTS.md",
+        "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+        "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+        "presentUnchanged": true
+      },
+      {
+        "id": "CROSS",
+        "path": "psc0/docs/selfhost-language/strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+        "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "sha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+        "presentUnchanged": true
+      },
+      {
+        "id": "SOURCE_RUNTIME",
+        "path": "psc0/docs/selfhost-language/strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md",
+        "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+        "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+        "presentUnchanged": true
+      }
+    ],
+    "historicalFinalDispositionMap": {
+      "blob": "697c94b2722a6191537b714f71f629713637b30a",
+      "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+      "unchanged": true
+    },
+    "historicalCorrespondenceReview": {
+      "blob": "20f0116df23d4304e3b7e8f9da5ff39599eaf037",
+      "sha256": "580a9f11ec273ea8a9bebfb396932ecb19fac3a94df663b4979ce949df50f61e",
+      "unchanged": true
+    },
+    "currentActiveCorrespondence": {
+      "blob": "4cadf1fbcceecce23b1e37cf093b6269c61026be",
+      "changedByThisReview": false
+    },
+    "preparedPendingTransport": {
+      "blob": "ac2741ebe7dd4065dcfc08d01a3be445671c4e05",
+      "sha256": "8fa14635cc18c6fe59b597ce96cfa9f4a2c9e28f7702d13ca0b0c96d6f58a337",
+      "unchanged": true
+    },
+    "preparedLedgerSourceDelta": {
+      "appliesOnlyAfterPreparedTransportSourcePatch": true,
+      "sourceRow": "ER-02",
+      "patch": [
+        {
+          "op": "test",
+          "path": "/rows/1/id",
+          "value": "ER-02"
+        },
+        {
+          "op": "test",
+          "path": "/rows/1/sources/3/path",
+          "value": "psc0/packages/meta/src/Ps/Meta/Infer.lean"
+        },
+        {
+          "op": "test",
+          "path": "/rows/1/sources/3/blob",
+          "value": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3"
+        },
+        {
+          "op": "replace",
+          "path": "/rows/1/sources/3/blob",
+          "value": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889"
+        },
+        {
+          "op": "test",
+          "path": "/rows/1/sources/3/definitions",
+          "value": [
+            "psInferType",
+            "psInferProjectionType"
+          ]
+        },
+        {
+          "op": "replace",
+          "path": "/rows/1/sources/3/definitions",
+          "value": [
+            "psInferType",
+            "psInferProjectionType",
+            "psInferTypeWithFuelWorker",
+            "psInferClosedLevelValue",
+            "psInferLevelFromNat",
+            "psInferNormalizeClosedLevel"
+          ]
+        }
+      ],
+      "sha256": "b321c5d48c8180efb33ee8cd8ddf0c0c2d2116ce53a2525d3f9f93fafda23933"
+    },
+    "historicalSourceMeaning": "All frozen papers, advisory maps, review vectors and prior evidence retain the source pins they actually reviewed. This manifest records cad2 -> 160a as an additional candidate transport; it must not retroactively relabel historical receipts.",
+    "semanticTransport": "The existing prepared-type/provider boundary continues to require actual checking. The new producer's closed sort result is convertible by unchanged kernel universe identities; no term body, generic telescope, runtime grouping, proof classifier, erasure operation or target operation is altered by these three guards.",
+    "correspondenceFlagsChanged": 0,
+    "stageFlagsChanged": 0,
+    "finalDisposition": "All 33 correspondence rows and all 27 stage obligations remain pending actual full qualification and required provider PASS."
+  },
+  "reviews": [
+    {
+      "reviewer": "/root/correspondence_disposition_review",
+      "verdict": "CLEAR",
+      "scope": "source class inventory, exact candidate guard/readback, root-cause derivation, finite-domain arithmetic proof and deferred source transport"
+    },
+    {
+      "reviewer": "/root",
+      "verdict": "CLEAR",
+      "scope": "independent complete candidate read/hash, unique three-guard forward/reverse, 1,798-byte helper insertion hash, preserved expression-fuel placement, ground denotation/idempotence/exact symbolic fallback in finite proper allocation domain"
+    },
+    {
+      "reviewer": "/root/stage_activation_review",
+      "verdict": "CLEAR",
+      "scope": "independent complete candidate read/hash and forward/reverse; five evaluator and one reifier unary direct-child self calls, retained outer child metadata across Option matches, all ground cases, exact whole symbolic fallback, finite bounds and no resource-equivalence overclaim"
+    }
+  ],
+  "validation": {
+    "exactBaseHashVerified": true,
+    "exactCandidateHashVerified": true,
+    "completeCandidateBlobReadbackVerified": true,
+    "uniqueForwardReverseGuardsVerified": true,
+    "allOtherSourceBytesVerifiedUnchanged": true,
+    "diagnosticReportReadAndHashVerified": true,
+    "diagnosticEvidenceManifestReadAndHashVerified": true,
+    "diagnosticFixtureHashVerified": true,
+    "inventoryContentHashesComputed": true,
+    "repositoryCodeExecutedByThisReview": false,
+    "testsRunByThisReview": false,
+    "sourceOrRefCommitMadeByThisReview": false,
+    "writes": "Only unattached Git blobs for the reviewable source candidate and this review manifest."
+  },
+  "releaseConditions": [
+    "Root must guard the current Infer.lean source blob against cad2 before attaching this exact candidate; unrelated source changes require a new source-vector check.",
+    "Attach this manifest and retained observed failure/origin evidence with the source correction; do not claim a completed qualification from the diagnostic's success.",
+    "Run the already required full qualification on the exact resulting source and bind complete actual receipts, including provider PASS, before any final correspondence/stage disposition.",
+    "Transport current source pins using this supplemental manifest while retaining all historical proof and evidence anchors.",
+    "Keep runtime contract and selected psconfig semantics unchanged; this is no new language profile or symbolic universe feature."
+  ],
+  "limits": [
+    "Closed-only arithmetic producer repair; general symbolic universe equality/inference incompleteness remains unchanged.",
+    "No provider/qualification execution is performed or certified by this static review.",
+    "The observed origin report confirms the owner/error class, while the universe-expression explanation is source-derived evidence.",
+    "Finite proper input/allocation assumptions are explicit; no equivalence of machine resources or exception traces outside that domain is claimed."
+  ]
+}

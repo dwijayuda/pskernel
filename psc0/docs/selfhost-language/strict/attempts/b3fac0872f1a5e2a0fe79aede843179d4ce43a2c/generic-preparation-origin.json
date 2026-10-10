@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-retained-N1-generic-preparation-origin-diagnostic",
+  "diagnosticSourceRef": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+  "expected": {
+    "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "runId": 38008721677,
+    "artifactId": 11652692106,
+    "artifactName": "psc0-sh1-ts7.0.2-b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "archiveBytes": 1841093,
+    "archiveSha256": "a90181c130536359774816775acc74ebcae1a2c773e735fd3d55bd7ada273b8f",
+    "compilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+    "fixturePath": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+    "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+    "fixtureBytes": 6340
+  },
+  "archiveDigestVerified": true,
+  "compilerDigestVerified": true,
+  "fixtureDigestVerified": true,
+  "compilerArchivePath": "dist/sh1/development/N1/index.js",
+  "compilerBytes": 3137707,
+  "parseCalls": 1,
+  "originPreservingPreparationCalls": 1,
+  "nativeBuilds": 0,
+  "typeScriptCompilations": 0,
+  "erasureCalls": 0,
+  "compilerEmissions": 0,
+  "fixtureChanged": false,
+  "compilerChanged": false,
+  "sourceIndex": 6,
+  "sourceName": "sh1GroupLet",
+  "phase": "stableDeclaration",
+  "origin": {
+    "error": {
+      "tag": "infer",
+      "error": {
+        "tag": "applicationTypeMismatch"
+      }
+    },
+    "sourceIndex": "6",
+    "sourceName": {
+      "segments": {
+        "tag": "cons",
+        "head": "sh1GroupLet",
+        "tail": {
+          "tag": "nil"
+        }
+      },
+      "span": {
+        "start": {
+          "byteOffset": "1615",
+          "line": "37",
+          "column": "5"
+        },
+        "stop": {
+          "byteOffset": "1626",
+          "line": "37",
+          "column": "16"
+        }
+      }
+    },
+    "span": {
+      "start": {
+        "byteOffset": "1611",
+        "line": "37",
+        "column": "1"
+      },
+      "stop": {
+        "byteOffset": "1708",
+        "line": "39",
+        "column": "9"
+      }
+    },
+    "phase": {
+      "tag": "stableDeclaration"
+    }
+  },
+  "declaration": {
+    "startByte": 1611,
+    "stopByte": 1708,
+    "sha256": "dc8a8a71fc5268303448b80ac69cb0555e8b6e81c8cbfb4659541b0ac6c419b3",
+    "bytes": 97,
+    "text": "def sh1GroupLet (f : Nat -> Nat) : Nat :=\n  let next : Nat -> Nat := sh1GroupIdentity f;\n  next 7"
+  },
+  "errorProjection": {
+    "tag": "elaboration",
+    "error": {
+      "tag": "infer",
+      "error": {
+        "tag": "applicationTypeMismatch"
+      }
+    }
+  },
+  "qualification": {
+    "N1Complete": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  }
+}

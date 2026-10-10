@@ -30,7 +30,9 @@ import { runFoundationConformance } from './sh1-foundation-conformance.mjs';
 import { runHelperConformance, runHelperRuntimeConformance } from './sh1-helper-conformance.mjs';
 import { runGenericErasureConformance } from './sh1-generic-erasure-conformance.mjs';
 import { runIterationConformance } from './sh1-iteration-conformance.mjs';
-import { runMigrationWorkerConformance } from './sh1-migration-worker-conformance.mjs';
+import {
+  runMigrationWorkerConformance, compareMigrationWorkerReportObservations,
+} from './sh1-migration-worker-conformance.mjs';
 import { runMigrationWorkerAbi } from './sh1-migration-worker-abi.mjs';
 import {
   compileTypeScript, runCommand, runSh1Capabilities, sha256, unwrap, valueTag,
@@ -986,7 +988,8 @@ if (command === 'native-candidate') {
     ...loaded, root, outDir: path.join(outDir, 'C1/capabilities'), tsc,
     nativeCompiler: nativeArg ? path.resolve(root, nativeArg) : undefined,
   });
-  assert.deepEqual(candidateCapabilities.workerMigration, referenceWorkerReport,
+  const workerComparison = compareMigrationWorkerReportObservations(
+    referenceWorkerReport, candidateCapabilities.workerMigration,
     'PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE');
   const migrationCorrespondence = {
     schemaVersion: 1,
@@ -997,6 +1000,7 @@ if (command === 'native-candidate') {
     afterCompilerSha256: loaded.compilerSha256,
     casesPerCompiler: referenceWorkerReport.cases,
     observationSha256: referenceWorkerReport.observationSha256,
+    comparison: workerComparison,
     referenceReport: 'worker-migration-reference.json',
     referenceReportSha256: sha256(await readFile(path.join(outDir, 'worker-migration-reference.json'))),
     candidateReport: 'C1/capabilities/receipt.json',
@@ -1052,7 +1056,10 @@ if (command === 'native-candidate') {
   assert.equal(migrationCorrespondence.candidateReportSha256,
     sha256(await readFile(path.join(firstDir, 'capabilities/receipt.json'))));
   assert.equal(migrationReference.report.cases, 87);
-  assert.deepEqual(capabilityReceipt.workerMigration, migrationReference.report);
+  const firstWorkerComparison = compareMigrationWorkerReportObservations(
+    migrationReference.report, capabilityReceipt.workerMigration);
+  assert.deepEqual(migrationCorrespondence.comparison, firstWorkerComparison,
+    'PSC0_SH1_C1_WORKER_COMPARISON_RECEIPT');
   const nativeGrammarFile = path.join(outDir, 'development/N1/grammar-closure.json');
   const nativeGrammar = JSON.parse(await readFile(nativeGrammarFile, 'utf8'));
   const nativeReceipt = JSON.parse(await readFile(path.join(outDir, 'development/N1/receipt.json'), 'utf8'));
@@ -1087,8 +1094,11 @@ if (command === 'native-candidate') {
   const secondCapabilities = await runSh1Capabilities({
     ...secondCompiler, root, outDir: path.join(outDir, 'C2/capabilities'), tsc,
   });
-  assert.deepEqual(secondCapabilities.workerMigration, migrationReference.report,
+  const secondWorkerComparison = compareMigrationWorkerReportObservations(
+    migrationReference.report, secondCapabilities.workerMigration,
     'PSC0_SH1_C2_WORKER_REFERENCE_CORRESPONDENCE');
+  assert.deepEqual(secondWorkerComparison, firstWorkerComparison,
+    'PSC0_SH1_C2_WORKER_COMPARISON_RECEIPT');
   await runHelperRuntimeConformance({ ...secondCompiler, outDir: path.join(outDir, 'C2') });
   await runGenericErasureConformance({
     ...secondCompiler, root, outDir: path.join(outDir, 'C2/generic-erasure'), tsc,
@@ -1114,8 +1124,11 @@ if (command === 'native-candidate') {
   const thirdCapabilities = await runSh1Capabilities({
     ...thirdCompiler, root, outDir: path.join(outDir, 'C3/capabilities'), tsc,
   });
-  assert.deepEqual(thirdCapabilities.workerMigration, migrationReference.report,
+  const thirdWorkerComparison = compareMigrationWorkerReportObservations(
+    migrationReference.report, thirdCapabilities.workerMigration,
     'PSC0_SH1_C3_WORKER_REFERENCE_CORRESPONDENCE');
+  assert.deepEqual(thirdWorkerComparison, firstWorkerComparison,
+    'PSC0_SH1_C3_WORKER_COMPARISON_RECEIPT');
   await runHelperRuntimeConformance({ ...thirdCompiler, outDir: path.join(outDir, 'C3') });
   await runGenericErasureConformance({
     ...thirdCompiler, root, outDir: path.join(outDir, 'C3/generic-erasure'), tsc,
@@ -1156,6 +1169,7 @@ if (command === 'native-candidate') {
       workers: 12, families: { F1: 4, F2: 8 }, removedTypedIdentityAliases: 3,
       runtimeGenerations: ['C1', 'C2', 'C3'], casesPerCompiler: migrationReference.report.cases,
       observationSha256: migrationReference.report.observationSha256,
+      comparison: firstWorkerComparison,
       completePublicTypeAndOriginalIrBuilds: ['C1', 'C2', 'C3'],
       abiObservationSha256: firstReceipt.migrationWorkerAbi.observationSha256,
       referenceSourceRef: authoring.provenance.sourceRef,

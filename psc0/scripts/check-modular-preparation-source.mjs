@@ -72,9 +72,17 @@ assert.deepEqual(structureFields('PsCompilerPreparationState'),
   ['sourceKind', 'environment', 'declarationsRev']);
 assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from the declarations, never a cached serialization');
 const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
-assert(session.indexOf('freezeGraph(prepared);') < session.indexOf('const admissions = admissionsFrom(compiler, prepared);'));
-assert(session.includes('admissionsFrom(compiler, item.prepared) !== item.admissions'));
-assert(session.includes('compiler.psCompilerCheckedTypeScriptFromPrepared(irPolicy.options, item.prepared)'));
+const freezeIndex = session.indexOf('freezeGraph(prepared);');
+const admissionsIndex = session.indexOf(
+  'const admissions = admissionsFrom(compiler, prepared, projectUnits !== undefined);');
+assert(freezeIndex !== -1 && admissionsIndex !== -1,
+  'prepared graph freezing and project-aware admission serialization must both be present');
+assert(freezeIndex < admissionsIndex, 'freeze the prepared graph before serializing admission');
+assert(session.includes('admissionsFrom(compiler, item.prepared, project) !== item.admissions'));
+assert(session.includes("const emitter = project ? 'psCompilerCheckedTypeScriptProjectFromPrepared'\n" +
+  "      : 'psCompilerCheckedTypeScriptFromPrepared';"),
+  'emission selection must remain closed over the two checked emitters');
+assert(session.includes('compiler[emitter](irPolicy.options, item.prepared)'));
 assert(!session.includes('psCompilerTypeScriptFromPrepared'),
   'protected prepared sessions must not retain a raw TypeScript emission fallback');
 console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, combined admission and checked IR emission)');

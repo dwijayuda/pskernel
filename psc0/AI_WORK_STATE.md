@@ -1,6 +1,6 @@
 # PSC0 T1 checked TypeScript library adoption — self-host qualification active
 
-Updated: 2026-10-10 00:48 UTC. Focused generated-compiler conformance passed; the first full run exposed a preexisting recovery-runner pin drift. This checkpoint restores the exact authenticated runner and retries full qualification.
+Updated: 2026-10-10 00:52 UTC. Focused generated conformance passed. Authenticated recovery was restored; the next full run exposed stale source-shape assertions. This checkpoint aligns those guards with the implemented checked project path and retries full qualification.
 
 ## User-authorized scope
 
@@ -30,6 +30,12 @@ The publisher reuses its existing transaction with fixed next/, previous/ and re
 Full run38010366876 at c9fa06aecc48d9bd4f9b6c5d6b6aac245e76fabe stopped before compiler execution: scripts/sh1-grammar-conformance.mjs had actual git blob6a4085cc0aea031ff96c7bd5915f82093f0f0345 but the selected native recovery policy pins48efa9b0c90e7904a1df49f43253395841bff90c. Root traced this to prior platform commit033f1c6e20459cdb89a24d861697a06f64eca225, outside T1: it replaced one inline immutable grammar-profile constant with import/re-export from source-grammar-profile.mjs.
 
 Restore exact pinned blob48efa9b0c90e7904a1df49f43253395841bff90c. The grammar/conformance algorithm is identical; only the original metadata location is restored. The runtime host keeps its lightweight metadata file with exactly matching values, while the recovery runner again has its authenticated closed import set. Both selfhost-seed.json and selfhost-seed-recovery.json remain byte-identical. Do not repin policy files, remove authentication or substitute a new seed. This is a recovery of the existing recipe, not a newly qualified recovery route.
+
+## Checked-session source guard correction
+
+Retry run38010642642 at61f45ef2f1a182910e3e421543968a2d81e56720 passed the selected R/policy authentication, exact TS7 contract and portable-source/root checks, then stopped before compiler generation on three stale source-shape assertions in check-modular-preparation-source.mjs. The live session still freezes the prepared graph before serialization, binds reserialization to its private project mode and selects only the two checked emitters. The assertions still expected the earlier two-argument serializer and direct single-emitter call.
+
+Align those three guard forms with the actual closed checked paths and require both freeze/serialization markers to exist before comparing order. The former index-only comparison could accept a missing freeze marker as -1. The existing63 host tests already exercise frozen graph ownership, mode/handle forgery, refusal and publication; no session behavior, compiler, kernel, seed policy or acceptance expectation changes here. The full retry remains mandatory.
 
 ## Next required work
 

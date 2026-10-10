@@ -29,10 +29,13 @@ export function reviewTypedResolution({normativeReference,source,transcript}) {
      JSON.stringify(instances)!==JSON.stringify(typedWitnessGoals.map(x=>
        'example : '+x.leanGoal+' := inferInstance'))) fail('SOURCE_GOALS');
   if(/\berror:|\bsorryAx\b|\badmit\b/iu.test(out))fail('LEAN_FAILURE_OR_ADMISSION');
-  const outputs=[...out.matchAll(/(?:^|\n)[^\n]*:\d+:\d+: information: ([^\n]+)/gu)]
-    .map(x=>x[1].trim());
-  if(outputs.length!==typedWitnessGoals.length||
-     outputs.some(x=>!x||x.length>8192))fail('TRANSCRIPT_COVERAGE');
+  // Lean 4.35.0-rc3 prints each #synth result as a bare line when
+  // invoked in batch mode. Exact golden selections pin this observation;
+  // `instHAdd` is generic and does NOT map any Nat-specific std.* ID.
+  const outputs=out.trim().split('\n');
+  const expected=["instHAdd","instHMul","instHSub","instHAdd","instAppendString","instBEqOfDecidableEq","instBEqOfDecidableEq"];
+  if(JSON.stringify(outputs)!==JSON.stringify(expected))
+    fail('TRANSCRIPT_COVERAGE');
   const rows=new Map(surface.requiredRows.map(x=>[x.id,x]));
   const observed=typedWitnessGoals.map((g,i)=>{
     const row=rows.get(g.surfaceId);

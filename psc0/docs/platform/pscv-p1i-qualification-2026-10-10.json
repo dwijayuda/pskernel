@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 0,
+  "milestone": "PSC0-PSCV-P1I-EXACT-PINNED-LEAN-SOURCE-BLOBS",
+  "qualifiedSourceCommit": "f408f374ab6b4484dd79923806b01094b9364b8a",
+  "ci": {
+    "runId": 38058712867,
+    "attempt": 1,
+    "allFourJobsPassed": true,
+    "platforms": [
+      "linux-node22",
+      "linux-node26",
+      "windows-node26",
+      "upstream-source-and-pinned-Lean-rc3"
+    ],
+    "artifactId": 11671518917,
+    "artifactZipSha256": "65b316cd8f7a7cb3aa54ff1ef47badd92353ea2e3a56503214a3116440df7960"
+  },
+  "sourceIdentity": {
+    "upstreamLeanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+    "pinnedModules": [
+      {
+        "path": "src/Init/Prelude.lean",
+        "gitBlobSha1": "f87ee970af5149d74434f09a89aedff1a8fdb2d2"
+      },
+      {
+        "path": "src/Init/Data/String/Defs.lean",
+        "gitBlobSha1": "f2502b701ef21070b4eaaefe6642ee8d7e58cede"
+      },
+      {
+        "path": "src/Init/Data/Int/Basic.lean",
+        "gitBlobSha1": "13eb3c86d79160bb9bda2edd33772d6d4439ce0c"
+      }
+    ]
+  },
+  "lexicalInstanceCandidates": [
+    [
+      "instHAdd",
+      1787
+    ],
+    [
+      "instHSub",
+      1791
+    ],
+    [
+      "instHMul",
+      1795
+    ],
+    [
+      "instAddNat",
+      1894
+    ],
+    [
+      "instMulNat",
+      1915
+    ],
+    [
+      "instSubNat",
+      2263
+    ]
+  ],
+  "selectedImportedDeclarationCount": 11,
+  "lexicalNamedInstanceCandidates": 6,
+  "selectedEvidenceIdentitySha256": "b640f6295926272724fb922f55d4d433bdfe23f5f7971713c219a99ba7da748a",
+  "normativeStandardIds": 194,
+  "unresolvedStandardIds": 191,
+  "sourceToElaboratorLineProven": false,
+  "closedStandardApproved": false,
+  "generalCompilerPreservationProven": false,
+  "certifiedExecutableAvailable": false,
+  "productionCompilerKernelReleaseSeedChanged": false,
+  "status": "qualified-immutable-source-blob-lexical-candidates-only"
+}

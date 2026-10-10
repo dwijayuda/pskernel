@@ -5,7 +5,7 @@ This example defines `answer : Nat` as 42. The generated TypeScript exports it a
 Copy this directory from the compiler's examples/platform location into your own workspace. Install the exact candidate tarball from its actual path:
 
 ```sh
-npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.2.tgz"
+npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.3.tgz"
 npm run check
 npm run build
 ```
@@ -18,4 +18,4 @@ A successful build creates src/Main.ts and src/Main.checked.json. The checking b
 
 Do not edit generated output or the receipt. Change the .ps source instead. An invalid source cannot replace the previous completed output; a manually changed generated file causes a refusal.
 
-The sibling existing-typescript example demonstrates a handwritten TypeScript consumer.
+The sibling existing-typescript example demonstrates a handwritten TypeScript consumer. The checked-library example adds two ProofScript modules, selected public exports and shared opaque values.

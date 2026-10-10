@@ -136,7 +136,7 @@ def psPrepareConstructorFieldsWithFuel
                   | Except.error error => Except.error error
                   | Except.ok fieldType =>
                       let fieldName :=
-                        psErasureSafeIdentifier
+                        psErasureScopedIdentifier scope
                           (psNameToString name)
                           (String.Internal.append "field" (psNatToString index));
                       let pushed :=
@@ -251,7 +251,7 @@ def psPrepareRuntimeConstructors
                   let runtimeInfo : PsRuntimeConstructorInfo := {
                     inductiveName := inductiveName
                     name :=
-                      psErasureSafeIdentifier
+                      psErasureScopedIdentifier parameterScope
                         (psNameLastComponent coreName)
                         "constructor"
                     coreName := coreName
@@ -282,7 +282,7 @@ def psPrepareRuntimeInductive
       match psErasureLookupName scope.declarationNames info.name with
       | Option.some known => known
       | Option.none =>
-          psErasureSafeIdentifier
+          psErasureScopedIdentifier scope
             (psNameToString info.name)
             "Inductive";
     match

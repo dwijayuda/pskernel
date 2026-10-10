@@ -79,7 +79,7 @@ def psTsNameSequence (namePrefix : String) (count : Nat) : Nat -> List String :=
       let smaller : Nat -> List String := psTsNameSequence namePrefix remaining;
       fun (index : Nat) => List.cons (String.Internal.append namePrefix (psNatToString index)) (smaller (Nat.succ index))
 
-def psTsEmitStructure
+def psTsEmitStructureWithPrefix (exportPrefix : String)
     (brands : List (String × String))
     (structureInfo : PsVerifiedIrStructure) :
     Except PsTsEmitError (List String) :=
@@ -100,8 +100,14 @@ def psTsEmitStructure
           let generic :=
             psTsGenericNames structureInfo.typeParameters;
           let brandLine := psTsJoin "" ["const ", brand, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", structureInfo.name]), ");"];
-          let interfaceLine := psTsJoin "" ["export interface ", structureInfo.name, generic, " { readonly [", brand, "]: true; ", psTsJoin " " fields, " }"];
+          let interfaceLine := psTsJoin "" [exportPrefix, "interface ", structureInfo.name, generic, " { readonly [", brand, "]: true; ", psTsJoin " " fields, " }"];
           Except.ok [brandLine, interfaceLine]
+
+
+def psTsEmitStructure
+    (brands : List (String × String))
+    (structureInfo : PsVerifiedIrStructure) : Except PsTsEmitError (List String) :=
+  psTsEmitStructureWithPrefix "export " brands structureInfo
 
 def psTsEmitConstructorVariant
     (tag : String)
@@ -157,7 +163,7 @@ def psTsEmitConstructorValue
         Except.ok
           (psTsJoin "" ["  ", psJsonQuote constructorInfo.name, ": ", generic, "(", psTsJoin ", " parameters, "): ", resultType, " => ({ [", tag, "]: ", psJsonQuote constructorInfo.name, suffix, " } as ", resultType, "),"])
 
-def psTsEmitInductive
+def psTsEmitInductiveWithPrefix (exportPrefix : String)
     (tags : List (String × String))
     (inductiveInfo : PsVerifiedIrInductive) :
     Except PsTsEmitError (List String) :=
@@ -174,10 +180,16 @@ def psTsEmitInductive
               let generic :=
                 psTsGenericNames inductiveInfo.typeParameters;
               let typeLine :=
-                psTsJoin "" ["export type ", inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
+                psTsJoin "" [exportPrefix, "type ", inductiveInfo.name, generic, " =\n  | ", psTsJoin "\n  | " variants, ";"];
               let tagLine := psTsJoin "" ["const ", tag, ": unique symbol = Symbol(", psJsonQuote (psTsJoin "" ["ProofScript.", inductiveInfo.name, ".tag"]), ");"];
-              let exportLine := psTsJoin "" ["export const ", inductiveInfo.name, " = {"];
+              let exportLine := psTsJoin "" [exportPrefix, "const ", inductiveInfo.name, " = {"];
               Except.ok (psTsAppendLines [tagLine, typeLine, exportLine] (psTsAppendLines constructorValues ["} as const;"]))
+
+
+def psTsEmitInductive
+    (tags : List (String × String))
+    (inductiveInfo : PsVerifiedIrInductive) : Except PsTsEmitError (List String) :=
+  psTsEmitInductiveWithPrefix "export " tags inductiveInfo
 
 def psTsEmitImport (item : PsVerifiedIrExternalImport) : String :=
   let alias := if psStringEq item.importedName item.localName then ""
@@ -274,7 +286,7 @@ def psTsInlineEtaApplication (expr : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
       else expr
   | _ => expr
 
-def psTsEmitDeclarationGeneral
+def psTsEmitDeclarationGeneralWithPrefix (exportPrefix : String)
     (brands : List (String × String))
     (tags : List (String × String))
     (declaration : PsVerifiedIrDeclaration) :
@@ -289,7 +301,7 @@ def psTsEmitDeclarationGeneral
           if psListIsEmpty declaration.parameters then
             if psListIsEmpty declaration.typeParameters then
               Except.ok
-                (psTsJoin "" ["export const ", declaration.name, ": ", resultType, " = __ps$run((function*(): __ps$Computation<", resultType, "> { return ", body, "; })());"])
+                (psTsJoin "" [exportPrefix, "const ", declaration.name, ": ", resultType, " = __ps$run((function*(): __ps$Computation<", resultType, "> { return ", body, "; })());"])
             else
               Except.error
                 (PsTsEmitError.genericValueUnsupported declaration.name)
@@ -309,11 +321,17 @@ def psTsEmitDeclarationGeneral
                 let arguments := psTsJoin ", " (psListMap parameterName declaration.parameters);
                 let implementation := String.Internal.append "__ps$impl$" declaration.name;
                 Except.ok
-                  (psTsJoin "" ["export function ", declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return __ps$run(", implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic, "(", psTsJoin ", " parameters, "): __ps$Computation<", resultType, "> { return ", body, "; }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");"])
+                  (psTsJoin "" [exportPrefix, "function ", declaration.name, generic, "(", psTsJoin ", " parameters, "): ", resultType, " { return __ps$run(", implementation, generic, "(", arguments, ")); }\nfunction* ", implementation, generic, "(", psTsJoin ", " parameters, "): __ps$Computation<", resultType, "> { return ", body, "; }\n__ps$implementations.set(", declaration.name, ", ", implementation, ");"])
 
 -- A zero/successor fold over one recursive field is a count. Emit its exact
 -- computation as a loop, avoiding a suspended generator for every list cell.
 -- Recognition uses the IR shape, not a source function or inductive name.
+
+def psTsEmitDeclarationGeneral
+    (brands tags : List (String × String))
+    (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
+  psTsEmitDeclarationGeneralWithPrefix "export " brands tags declaration
+
 def psTsCountLiteral (expected : Nat) (expr : PsVerifiedIrExpr) : Bool :=
   match expr with
   | PsVerifiedIrExpr.literal literal =>
@@ -380,7 +398,7 @@ def psTsEmitCountCases (tag : String) (name : String)
               ": __ps$cursor = __ps$cursor.", field, "; __ps$count += 1n; break; default: throw new Error(\"invalid ProofScript constructor tag\"); } }"])
   else Option.none
 
-def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+def psTsEmitCountLoopWithPrefix (exportPrefix : String) (tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
   match declaration.resultType with
   | PsVerifiedIrType.primitive primitive =>
       match primitive with
@@ -410,7 +428,7 @@ def psTsEmitCountLoop (tags : List (Prod String String)) (declaration : PsVerifi
                                             match psTsEmitType parameter.type with
                                             | Except.error _ => Option.none
                                             | Except.ok type =>
-                                                Option.some (psTsJoin "" ["export function ", declaration.name,
+                                                Option.some (psTsJoin "" [exportPrefix, "function ", declaration.name,
                                                   psTsGenericNames declaration.typeParameters, "(", parameter.name, ": ", type,
                                                   "): bigint { let __ps$cursor = ", parameter.name, "; ", printed, " }"])
                                       else Option.none
@@ -430,6 +448,11 @@ structure PsTsTailAlias where
   name : String
   captured : List PsVerifiedIrExpr
   arity : Nat
+
+
+def psTsEmitCountLoop
+    (tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+  psTsEmitCountLoopWithPrefix "export " tags declaration
 
 def psTsTailMap {alpha beta : Type} (convert : alpha -> Option beta) (values : List alpha) : Option (List beta) :=
   match values with
@@ -644,7 +667,7 @@ def psTsTailEmitWithFuel (brands tags : List (Prod String String)) (declaration 
             | Option.none => Option.none
             | Option.some printed => Option.some (psTsJoin "" ["return ", printed, ";"])
 
-def psTsEmitTailLoop (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+def psTsEmitTailLoopWithPrefix (exportPrefix : String) (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
   if psListIsEmpty declaration.typeParameters then
     if psListIsEmpty declaration.parameters then Option.none
     else
@@ -661,39 +684,55 @@ def psTsEmitTailLoop (brands tags : List (Prod String String)) (declaration : Ps
           | Option.some parameters =>
               match psTsEmitType declaration.resultType with
               | Except.error _ => Option.none
-              | Except.ok resultType => Option.some (psTsJoin "" ["export function ", declaration.name, "(",
+              | Except.ok resultType => Option.some (psTsJoin "" [exportPrefix, "function ", declaration.name, "(",
                   psTsJoin ", " parameters, "): ", resultType, " { while (true) { ", printedBody, " } }"])
   else Option.none
 
 
-def psTsEmitDeclaration (brands tags : List (Prod String String))
+
+def psTsEmitTailLoop
+    (brands tags : List (Prod String String)) (declaration : PsVerifiedIrDeclaration) : Option String :=
+  psTsEmitTailLoopWithPrefix "export " brands tags declaration
+
+def psTsEmitDeclarationWithPrefix (exportPrefix : String) (brands tags : List (Prod String String))
     (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
-  match psTsEmitCountLoop tags declaration with
+  match psTsEmitCountLoopWithPrefix exportPrefix tags declaration with
   | Option.some loop => Except.ok loop
   | Option.none =>
-      match psTsEmitTailLoop brands tags declaration with
+      match psTsEmitTailLoopWithPrefix exportPrefix brands tags declaration with
       | Option.some loop => Except.ok loop
-      | Option.none => psTsEmitDeclarationGeneral brands tags declaration
+      | Option.none => psTsEmitDeclarationGeneralWithPrefix exportPrefix brands tags declaration
+
+
+def psTsEmitDeclaration
+    (brands tags : List (Prod String String))
+    (declaration : PsVerifiedIrDeclaration) : Except PsTsEmitError String :=
+  psTsEmitDeclarationWithPrefix "export " brands tags declaration
 
 def psTsFlattenLines (groups : List (List String)) : List String :=
   match groups with
   | List.nil => List.nil
   | List.cons lines rest => psTsAppendLines lines (psTsFlattenLines rest)
 
-def psTsEmitModule
+def psTsEmitModuleWithPrefix (exportPrefix : String)
     (module : PsVerifiedIrModule) :
     Except PsTsEmitError String :=
   let brands := psTsBuildBrandMap module;
   let tags := psTsBuildTagMap module;
-  match psListMapExcept (psTsEmitStructure brands) module.structures with
+  match psListMapExcept (psTsEmitStructureWithPrefix exportPrefix brands) module.structures with
   | Except.error error => Except.error error
   | Except.ok structures =>
-      match psListMapExcept (psTsEmitInductive tags) module.inductives with
+      match psListMapExcept (psTsEmitInductiveWithPrefix exportPrefix tags) module.inductives with
       | Except.error error => Except.error error
       | Except.ok inductives =>
-          match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
+          match psListMapExcept (psTsEmitDeclarationWithPrefix exportPrefix brands tags) module.declarations with
           | Except.error error => Except.error error
           | Except.ok declarations =>
               let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
+
+def psTsEmitModule
+    (module : PsVerifiedIrModule) : Except PsTsEmitError String :=
+  psTsEmitModuleWithPrefix "export " module
+

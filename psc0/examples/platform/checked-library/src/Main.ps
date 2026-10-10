@@ -1,0 +1,7 @@
+import Quantity
+
+def readQuantity(value : Quantity) : Nat := match value with {
+  | Quantity.mk amount => amount
+}
+
+def sameQuantity(value : Quantity) : Quantity := value

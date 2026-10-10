@@ -43,12 +43,99 @@ function ownedNames(receipt, owner) {
   }
   const names = new Set();
   for (const item of receipt.artifacts) {
-    if (typeof item?.name !== 'string' || path.basename(item.name) !== item.name ||
-        item.name === '.' || item.name === '..' || !/^[a-f0-9]{64}$/.test(item.sha256) ||
+    if (typeof item?.name !== 'string' || !item.name || item.name.split('/').some(part => !part || part === '.' || part === '..') ||
+        /[\\:\u0000-\u001f]/u.test(item.name) || path.posix.isAbsolute(item.name) || !/^[a-f0-9]{64}$/.test(item.sha256) ||
         names.has(item.name)) throw new Error('PSC0_OUTPUT_OWNERSHIP_SHAPE');
     names.add(item.name);
   }
   return names;
+}
+
+
+function relativeArtifact(value) {
+  if (typeof value !== 'string' || value.length === 0 || value.length > 1024 ||
+      /[\\:\u0000-\u001f]/u.test(value) || path.posix.isAbsolute(value) ||
+      value.split('/').some(part => !part || part === '.' || part === '..' ||
+        part === '.psc-output-lock' || /^\.psc-(?:stage|target)-/u.test(part))) {
+    throw new Error('PSC0_OUTPUT_ARTIFACT_NAME: ' + value);
+  }
+  return value;
+}
+function insideName(directory, file) {
+  return relativeArtifact(path.relative(directory, checkedOutputPath(file)).split(path.sep).join('/'));
+}
+function libraryNames(bundle, sources) {
+  relativeArtifact(bundle);
+  if (!bundle.endsWith('.ts') || !Array.isArray(sources) || sources.length === 0) {
+    throw new Error('PSC0_OUTPUT_LIBRARY_LAYOUT');
+  }
+  const allowed = new Set([bundle]);
+  const folded = new Set([bundle.toLowerCase()]);
+  for (const source of sources) {
+    relativeArtifact(source);
+    if (!source.endsWith('.ps')) throw new Error('PSC0_OUTPUT_LIBRARY_SOURCE: ' + source);
+    const name = source.slice(0, -3) + '.ts';
+    if (folded.has(name.toLowerCase())) throw new Error('PSC0_OUTPUT_LIBRARY_COLLISION: ' + name);
+    folded.add(name.toLowerCase()); allowed.add(name);
+  }
+  return allowed;
+}
+function previousNames(receipt, owner, allowed, layout) {
+  const names = ownedNames(receipt, owner);
+  let previousAllowed = allowed;
+  if (layout) {
+    const previous = receipt.publication;
+    if (previous?.layout !== 'psc-ts-library/1' || previous.bundle !== layout.bundle) {
+      throw new Error('PSC0_OUTPUT_OWNERSHIP_CONFLICT');
+    }
+    previousAllowed = libraryNames(previous.bundle, previous.facadeSources);
+    if (names.size !== previousAllowed.size) throw new Error('PSC0_OUTPUT_OWNERSHIP_SHAPE');
+  } else if (receipt.publication !== undefined) {
+    throw new Error('PSC0_OUTPUT_OWNERSHIP_CONFLICT');
+  }
+  for (const name of names) {
+    if (!previousAllowed.has(name)) throw new Error('PSC0_OUTPUT_OWNERSHIP_SHAPE');
+  }
+  return names;
+}
+async function ensureDirectory(directory) {
+  const parent = path.dirname(directory);
+  if (parent !== directory) await ensureDirectory(parent);
+  let status;
+  try { status = await lstat(directory); }
+  catch (error) {
+    if (!absent(error)) throw error;
+    try { await mkdir(directory); }
+    catch (cause) { if (cause.code !== 'EEXIST') throw cause; }
+    status = await lstat(directory);
+  }
+  if (!status.isDirectory() || status.isSymbolicLink()) {
+    throw new Error('PSC0_OUTPUT_DIRECTORY_LINK: ' + directory);
+  }
+}
+export async function prepareCheckedOutputDirectory(outputPath) {
+  const output = checkedOutputPath(outputPath);
+  await ensureDirectory(path.dirname(output));
+  return output;
+}
+async function assertDirectories(directories) {
+  for (const directory of directories) {
+    let current = directory;
+    for (;;) {
+      const status = await lstat(current);
+      if (!status.isDirectory() || status.isSymbolicLink()) {
+        throw new Error('PSC0_OUTPUT_DIRECTORY_LINK: ' + current);
+      }
+      const parent = path.dirname(current);
+      if (parent === current) break;
+      current = parent;
+    }
+  }
+}
+async function stageBytes(staging, name, bytes) {
+  const file = path.join(staging, name);
+  await mkdir(path.dirname(file), { recursive: true });
+  await writeFile(file, bytes);
 }
 
 /**
@@ -56,16 +143,25 @@ function ownedNames(receipt, owner) {
  * This is a local multi-file transaction with a completion receipt, not a claim
  * that independent filesystem consumers observe several renames atomically.
  */
-export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts, receipt, beforeCommit }) {
+export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts, receipt, beforeCommit,
+  projectRoot, facadeSources }) {
   const output = checkedOutputPath(outputPath);
-  const directory = path.dirname(output);
+  const library = facadeSources !== undefined;
+  const directory = library ? path.resolve(projectRoot ?? '') : path.dirname(output);
+  if (library && typeof projectRoot !== 'string') throw new Error('PSC0_OUTPUT_LIBRARY_ROOT');
+  const bundle = library ? insideName(directory, output) : path.basename(output);
   const stem = path.basename(output).replace(/\.(?:ts|js)$/u, '');
   if (!/\.(?:ts|js)$/u.test(output) || !stem) throw new Error('PSC0_OUTPUT_KIND');
-  const receiptName = stem + '.checked.json';
+  const receiptName = library ? bundle.slice(0, -3) + '.checked.json' : stem + '.checked.json';
+  if (library && !Array.isArray(facadeSources)) throw new Error('PSC0_OUTPUT_LIBRARY_LAYOUT');
+  const layout = library ? { layout: 'psc-ts-library/1', bundle,
+    facadeSources: [...facadeSources] } : undefined;
   const owner = path.relative(directory, path.resolve(entryPath)).split(path.sep).join('/');
-  const allowed = new Set(['.ts', '.js', '.d.ts', '.js.map', '.admissions.json'].map(suffix => stem + suffix));
+  const allowed = library ? libraryNames(bundle, facadeSources)
+    : new Set(['.ts', '.js', '.d.ts', '.js.map', '.admissions.json'].map(suffix => stem + suffix));
+  for (const name of allowed) checkedOutputPath(path.join(directory, name));
   if (!(artifacts instanceof Map) || artifacts.size === 0 ||
-      !artifacts.has(path.basename(output))) throw new Error('PSC0_OUTPUT_ARTIFACTS');
+      !artifacts.has(bundle) || library && artifacts.size !== allowed.size) throw new Error('PSC0_OUTPUT_ARTIFACTS');
   const buffers = new Map();
   for (const [name, bytes] of artifacts) {
     if (!allowed.has(name) || (!Buffer.isBuffer(bytes) && typeof bytes !== 'string')) {
@@ -73,14 +169,46 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     }
     buffers.set(name, Buffer.from(bytes));
   }
-  await mkdir(directory, { recursive: true });
-  const lock = path.join(directory, '.psc-output-lock');
-  try { await mkdir(lock); }
-  catch (error) {
-    if (error.code === 'EEXIST') throw new Error('PSC0_OUTPUT_BUSY: ' + lock);
-    throw error;
+  await ensureDirectory(path.dirname(output));
+  const receiptPath = path.join(directory, receiptName);
+  const initialReceipt = await regularBytes(receiptPath);
+  let initialPrevious;
+  if (initialReceipt !== undefined) {
+    try { initialPrevious = JSON.parse(initialReceipt.toString('utf8')); }
+    catch { throw new Error('PSC0_OUTPUT_OWNERSHIP_SHAPE'); }
   }
+  const priorNames = initialPrevious ? previousNames(initialPrevious, owner, allowed, layout) : new Set();
+  const allNames = new Set([...priorNames, ...buffers.keys(), receiptName]);
+  const folded = new Map();
+  const directorySpellings = new Map();
+  for (const name of allNames) {
+    checkedOutputPath(path.join(directory, name));
+    const key = name.toLowerCase();
+    if (folded.has(key) && folded.get(key) !== name) throw new Error('PSC0_OUTPUT_LIBRARY_COLLISION: ' + name);
+    folded.set(key, name);
+    let prefix = '';
+    for (const part of name.split('/').slice(0, -1)) {
+      prefix = prefix ? prefix + '/' + part : part;
+      const spelling = directorySpellings.get(prefix.toLowerCase());
+      if (spelling !== undefined && spelling !== prefix) {
+        throw new Error('PSC0_OUTPUT_DIRECTORY_ALIAS: ' + spelling + ' / ' + prefix);
+      }
+      directorySpellings.set(prefix.toLowerCase(), prefix);
+    }
+  }
+  const directories = [...new Set([directory, ...[...allNames].map(name =>
+    path.dirname(path.join(directory, name)))])].sort();
+  for (const target of directories) await ensureDirectory(target);
+  const lock = path.join(directory, '.psc-output-lock');
+  const locks = [];
   const transactionId = randomUUID();
+  async function assertLeases() {
+    await assertDirectories(directories);
+    for (const acquired of locks) {
+      const lease = JSON.parse((await regularBytes(path.join(acquired, 'owner.json')))?.toString('utf8') ?? 'null');
+      if (lease?.transactionId !== transactionId) throw new Error('PSC0_OUTPUT_LEASE_CHANGED');
+    }
+  }
   let staging;
   const previous = new Map();
   const changes = [];
@@ -89,17 +217,32 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
   let completed = false;
   let rollbackComplete = true;
   try {
-    await writeFile(path.join(lock, 'owner.json'), JSON.stringify({ transactionId, pid: process.pid, entryPath: owner }) + '\n');
+    // Lock every destination directory, including retired facade directories.
+    // This shares leases with ordinary builds and overlapping project outputs.
+    for (const target of directories) {
+      const acquired = path.join(target, '.psc-output-lock');
+      try { await mkdir(acquired); }
+      catch (error) {
+        if (error.code === 'EEXIST') throw new Error('PSC0_OUTPUT_BUSY: ' + acquired);
+        throw error;
+      }
+      locks.push(acquired);
+      await writeFile(path.join(acquired, 'owner.json'),
+        JSON.stringify({ transactionId, pid: process.pid, entryPath: owner, primary: lock }) + '\n');
+    }
+    await assertLeases();
     staging = await mkdtemp(path.join(directory, '.psc-stage-'));
-    const receiptPath = path.join(directory, receiptName);
     oldReceipt = await regularBytes(receiptPath);
+    if ((initialReceipt === undefined) !== (oldReceipt === undefined) ||
+        initialReceipt !== undefined && !initialReceipt.equals(oldReceipt)) {
+      throw new Error('PSC0_OUTPUT_CHANGED_DURING_BUILD: ' + receiptName);
+    }
     let previousReceipt;
     if (oldReceipt !== undefined) {
       try { previousReceipt = JSON.parse(oldReceipt.toString('utf8')); }
       catch { throw new Error('PSC0_OUTPUT_OWNERSHIP_SHAPE'); }
-      const names = ownedNames(previousReceipt, owner);
+      const names = previousNames(previousReceipt, owner, allowed, layout);
       for (const item of previousReceipt.artifacts) {
-        if (!allowed.has(item.name)) throw new Error('PSC0_OUTPUT_OWNERSHIP_SHAPE');
         const bytes = await regularBytes(path.join(directory, item.name));
         if (bytes === undefined || digest(bytes) !== item.sha256) {
           throw new Error('PSC0_OUTPUT_MODIFIED: ' + item.name);
@@ -121,23 +264,26 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     const published = {
       ...receipt, schemaVersion: 4, kind: 'psc0-checked-build', outputOwner: owner,
       transactionId,
+      ...(layout ? { publication: layout } : {}),
       artifacts: [...buffers].map(([name, bytes]) => ({ name, sha256: digest(bytes), bytes: bytes.length })),
     };
     await mkdir(path.join(staging, 'previous'));
-    for (const [name, bytes] of previous) await writeFile(path.join(staging, 'previous', name), bytes);
-    if (oldReceipt !== undefined) await writeFile(path.join(staging, 'previous', receiptName), oldReceipt);
-    for (const [name, bytes] of buffers) await writeFile(path.join(staging, name), bytes);
+    for (const [name, bytes] of previous) await stageBytes(staging, 'previous/' + name, bytes);
+    if (oldReceipt !== undefined) await stageBytes(staging, 'previous/' + receiptName, oldReceipt);
+    // Project-relative names stay inside fixed buckets, including names such
+    // as previous/Foo.ts or Foo.ts.restore/Bar.ts. They cannot alias backups.
+    for (const [name, bytes] of buffers) await stageBytes(staging, 'next/' + name, bytes);
     const finalReceipt = Buffer.from(JSON.stringify(published, null, 2) + '\n');
-    await writeFile(path.join(staging, receiptName), finalReceipt);
+    await stageBytes(staging, 'next/' + receiptName, finalReceipt);
     await writeFile(path.join(lock, 'journal.json'), JSON.stringify({
-      transactionId, directory, staging, receiptName, outputOwner: owner,
+      transactionId, directory, staging, stagingLayout: 'next-previous-restore/1',
+      receiptName, outputOwner: owner, locks,
       previousArtifacts: [...previous].map(([name, bytes]) => ({ name, sha256: digest(bytes) })),
       nextArtifacts: published.artifacts, oldReceiptSha256: oldReceipt === undefined ? null : digest(oldReceipt),
       newReceiptSha256: digest(finalReceipt), phase: 'prepared',
     }) + '\n');
     await beforeCommit?.();
-    const lease = JSON.parse((await regularBytes(path.join(lock, 'owner.json')))?.toString('utf8') ?? 'null');
-    if (lease?.transactionId !== transactionId) throw new Error('PSC0_OUTPUT_LEASE_CHANGED');
+    await assertLeases();
 
     // Recheck observed ownership after asynchronous validation. This is not an
     // OS-level compare-and-swap against arbitrary concurrent filesystem writers.
@@ -160,7 +306,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     for (const [name, bytes] of buffers) {
       const old = previous.get(name);
       if (old !== undefined && old.equals(bytes)) continue;
-      await rename(path.join(staging, name), path.join(directory, name));
+      await rename(path.join(staging, 'next', name), path.join(directory, name));
       changes.push({ name, now: bytes, old });
     }
     for (const [name, bytes] of previous) {
@@ -172,8 +318,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     // Observe known invalidation again after the awaited artifact operations.
     // This does not claim an instantaneous snapshot against arbitrary writers.
     await beforeCommit?.();
-    const finalLease = JSON.parse((await regularBytes(path.join(lock, 'owner.json')))?.toString('utf8') ?? 'null');
-    if (finalLease?.transactionId !== transactionId) throw new Error('PSC0_OUTPUT_LEASE_CHANGED');
+    await assertLeases();
     if (await regularBytes(receiptPath) !== undefined) {
       throw new Error('PSC0_OUTPUT_CHANGED_DURING_BUILD: ' + receiptName);
     }
@@ -189,7 +334,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
       }
     }
     // This audit receipt is never a portable proof or a transferable capability.
-    await rename(path.join(staging, receiptName), receiptPath);
+    await rename(path.join(staging, 'next', receiptName), receiptPath);
     completed = true;
     return Object.freeze(published);
   } catch (error) {
@@ -198,6 +343,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     rollbackComplete = true;
     for (const item of changes.reverse()) {
       try {
+        await assertDirectories(directories);
         const file = path.join(directory, item.name);
         const current = await regularBytes(file);
         const matches = item.now === undefined ? current === undefined
@@ -205,14 +351,15 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
         if (!matches) { rollbackComplete = false; continue; }
         if (item.old === undefined) await rm(file, { force: true });
         else {
-          const restore = path.join(staging, item.name + '.restore');
-          await writeFile(restore, item.old);
+          const restore = path.join(staging, 'restore', item.name);
+          await stageBytes(staging, 'restore/' + item.name, item.old);
           await rename(restore, file);
         }
       } catch { rollbackComplete = false; }
     }
     if (removedReceipt && rollbackComplete) {
       try {
+        await assertDirectories(directories);
         for (const [name, old] of previous) {
           const current = await regularBytes(path.join(directory, name));
           if (current === undefined || !current.equals(old)) {
@@ -229,11 +376,12 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     }
     if (removedReceipt && rollbackComplete) {
       try {
+        await assertDirectories(directories);
         const receiptPath = path.join(directory, receiptName);
         if (await regularBytes(receiptPath) !== undefined) rollbackComplete = false;
         else {
-          const restore = path.join(staging, receiptName + '.restore');
-          await writeFile(restore, oldReceipt);
+          const restore = path.join(staging, 'restore', receiptName);
+          await stageBytes(staging, 'restore/' + receiptName, oldReceipt);
           await rename(restore, receiptPath);
         }
       } catch { rollbackComplete = false; }
@@ -249,18 +397,20 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     if (completed || rollbackComplete) {
       const cleanupFailures = [];
       if (staging) await rm(staging, { recursive: true, force: true }).catch(() => cleanupFailures.push(staging));
-      const lease = await regularBytes(path.join(lock, 'owner.json')).catch(() => undefined);
-      let owned = false;
-      try { owned = JSON.parse(lease?.toString('utf8') ?? 'null')?.transactionId === transactionId; } catch {}
-      if (owned) await rm(lock, { recursive: true, force: true }).catch(() => cleanupFailures.push(lock));
-      else cleanupFailures.push(lock);
+      for (const acquired of [...locks].reverse()) {
+        const lease = await regularBytes(path.join(acquired, 'owner.json')).catch(() => undefined);
+        let owned = false;
+        try { owned = JSON.parse(lease?.toString('utf8') ?? 'null')?.transactionId === transactionId; } catch {}
+        if (owned) await rm(acquired, { recursive: true, force: true }).catch(() => cleanupFailures.push(acquired));
+        else cleanupFailures.push(acquired);
+      }
       if (cleanupFailures.length && completed) {
         process.stderr.write('PSC0_OUTPUT_COMMITTED_CLEANUP_REQUIRED: ' +
           JSON.stringify({ committed: true, transactionId, lock, staging, paths: cleanupFailures }) + '\n');
       }
     } else if (staging) {
       await writeFile(path.join(lock, 'recovery.json'), JSON.stringify({
-        staging, output, entryPath: owner, state: 'recovery-required',
+        staging, output, entryPath: owner, state: 'recovery-required', locks,
       }) + '\n').catch(() => {});
     }
   }

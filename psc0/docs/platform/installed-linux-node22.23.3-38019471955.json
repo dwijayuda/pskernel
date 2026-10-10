@@ -1,0 +1,340 @@
+{
+  "schemaVersion": 2,
+  "kind": "proofscript-installed-package-qualification",
+  "sourceRef": "b01281b46aa62cbb09ed47a24ebad08b72c6265f",
+  "runId": "38019471955",
+  "tarballSha256": "0273e5f18a3cea66b0f4deaa44fbfe1214510fd59d146956355985e555c4db7e",
+  "tarballBytes": 3656980,
+  "releaseIdentity": {
+    "version": "0.1.0-preview.3",
+    "platforms": [
+      {
+        "os": "linux",
+        "arch": "x64"
+      },
+      {
+        "os": "win32",
+        "arch": "x64"
+      }
+    ],
+    "compiler": {
+      "sourceRef": "5fe0045dcb0bf30e1d2519f900458d1407822eed",
+      "sourceClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+      "sha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617"
+    },
+    "kernel": {
+      "selector": "pskernel-core",
+      "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+      "artifacts": {
+        "linux-x64": {
+          "sha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+          "dependencies": []
+        },
+        "win32-x64": {
+          "sha256": "8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2",
+          "dependencies": []
+        }
+      }
+    },
+    "selectedPlatform": "linux-x64",
+    "typescriptVersion": "7.0.2"
+  },
+  "providerRuntime": {
+    "kind": "linux-elf",
+    "linkedLibraries": [
+      "linux-vdso.so.1 (0x00007f1bc3d2b000)",
+      "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f1bc3400000)",
+      "/lib64/ld-linux-x86-64.so.2 (0x00007f1bc3d2d000)",
+      "libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007f1bc3d14000)",
+      "libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f1bc3d0f000)",
+      "librt.so.1 => /lib/x86_64-linux-gnu/librt.so.1 (0x00007f1bc3d0a000)",
+      "libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007f1bc3c21000)"
+    ],
+    "interpreter": "/lib64/ld-linux-x86-64.so.2",
+    "requiredGlibcVersions": [
+      "GLIBC_2.10",
+      "GLIBC_2.12",
+      "GLIBC_2.14",
+      "GLIBC_2.16",
+      "GLIBC_2.17",
+      "GLIBC_2.2.5",
+      "GLIBC_2.3",
+      "GLIBC_2.3.2",
+      "GLIBC_2.3.3",
+      "GLIBC_2.3.4",
+      "GLIBC_2.4",
+      "GLIBC_2.6",
+      "GLIBC_2.7",
+      "GLIBC_2.9"
+    ]
+  },
+  "npmRuntime": {
+    "cliPath": "/home/runner/work/_temp/psc0-smoke-npm/node_modules/npm/bin/npm-cli.js",
+    "version": "10.9.9",
+    "nodeVersion": "v22.23.3"
+  },
+  "shellRuntime": null,
+  "extensionDemos": [
+    {
+      "package": "psdev",
+      "version": "0.1.0-preview.3",
+      "tarballSha256": "20e6270726247f559129fa496aa0ae51cd0a8bf4ad679bfc99d91cb9b136e34e",
+      "tarballBytes": 1914,
+      "installedWithIgnoreScripts": true,
+      "installedLocally": true,
+      "installationAutoActivated": false,
+      "javascriptEntrypointExecuted": false,
+      "tamperedModuleRefused": true,
+      "configuredRecord": {
+        "package": "psdev",
+        "version": "0.1.0-preview.3",
+        "origin": "project",
+        "packageRoot": "/tmp/proofscript installed-iOyFUm/consumer project/node_modules/psdev",
+        "entry": "command.wasm",
+        "packageJsonSha256": "81e49109e5c88c76745db02756a98d915c25ec2f76fbbc9f10aee90ecb179d61",
+        "descriptorSha256": "5e4ada4fb2ff41bb574a6fe59a67116297c89b727ec246ec875941302e62efa3",
+        "moduleSha256": "63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279",
+        "projectPackageSha256": "46624ec121d1aad0e07db69b4fe77871e734be7d34418189e15d5379ac08f899",
+        "lockfileSha256": "5661d46158105ea1edaa1ac1c0e6a31cb682f95b5d3222dc15186d62eec9793b",
+        "lockResolved": "file:../../../home/runner/work/pskernel/pskernel/candidate/platform/psdev-0.1.0-preview.3.tgz",
+        "lockIntegrity": "sha512-Q4QiRAk0bOQ+TfKULJjyKm9SFzuy27bUpOExqVTZAqIsedwyu5ed8pSJ0wzjXTA3k0T7a+hRuRzWKQ0jsJeJXA==",
+        "protocol": "psc-command/1",
+        "operation": "command:dev",
+        "grants": [
+          "command:dev"
+        ],
+        "imports": [],
+        "engine": {
+          "name": "v8-webassembly",
+          "node": "22.23.3",
+          "v8": "12.4.254.21-node.57"
+        },
+        "limits": {
+          "moduleBytes": 4096,
+          "linearMemoryBytes": 0,
+          "locals": 32,
+          "controlDepth": 32,
+          "wallTimeMs": 2000
+        },
+        "status": "configured",
+        "instantiated": false
+      },
+      "executedRecord": {
+        "package": "psdev",
+        "version": "0.1.0-preview.3",
+        "origin": "project",
+        "packageRoot": "/tmp/proofscript installed-iOyFUm/consumer project/node_modules/psdev",
+        "entry": "command.wasm",
+        "packageJsonSha256": "81e49109e5c88c76745db02756a98d915c25ec2f76fbbc9f10aee90ecb179d61",
+        "descriptorSha256": "5e4ada4fb2ff41bb574a6fe59a67116297c89b727ec246ec875941302e62efa3",
+        "moduleSha256": "63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279",
+        "projectPackageSha256": "46624ec121d1aad0e07db69b4fe77871e734be7d34418189e15d5379ac08f899",
+        "lockfileSha256": "5661d46158105ea1edaa1ac1c0e6a31cb682f95b5d3222dc15186d62eec9793b",
+        "lockResolved": "file:../../../home/runner/work/pskernel/pskernel/candidate/platform/psdev-0.1.0-preview.3.tgz",
+        "lockIntegrity": "sha512-Q4QiRAk0bOQ+TfKULJjyKm9SFzuy27bUpOExqVTZAqIsedwyu5ed8pSJ0wzjXTA3k0T7a+hRuRzWKQ0jsJeJXA==",
+        "protocol": "psc-command/1",
+        "operation": "command:dev",
+        "grants": [
+          "command:dev"
+        ],
+        "imports": [],
+        "engine": {
+          "name": "v8-webassembly",
+          "node": "22.23.3",
+          "v8": "12.4.254.21-node.57"
+        },
+        "limits": {
+          "moduleBytes": 4096,
+          "linearMemoryBytes": 0,
+          "locals": 32,
+          "controlDepth": 32,
+          "wallTimeMs": 2000
+        },
+        "status": "completed",
+        "instantiated": true,
+        "requestBuild": true
+      },
+      "receiptTransactionId": "40f95223-3f63-441a-8022-1cf95312d0ce",
+      "outputSha256": "be47725daaca43b5ddcbbadf3e4fa6fc680ebdd84952dd241e845bc10221d0f9",
+      "consumerResult": 44,
+      "semanticPreservationProved": false,
+      "pscvVerified": false
+    },
+    {
+      "package": "@psc-demo/pshello",
+      "version": "0.1.0-preview.3",
+      "tarballSha256": "65adbd54131fc69e4e73df08501e5f59f82fbee29b8965bde5f27f2b577c4ded",
+      "tarballBytes": 1933,
+      "installedWithIgnoreScripts": true,
+      "installedLocally": true,
+      "installationAutoActivated": false,
+      "javascriptEntrypointExecuted": false,
+      "tamperedModuleRefused": true,
+      "configuredRecord": {
+        "package": "@psc-demo/pshello",
+        "version": "0.1.0-preview.3",
+        "origin": "project",
+        "packageRoot": "/tmp/proofscript installed-iOyFUm/consumer project/node_modules/@psc-demo/pshello",
+        "entry": "command.wasm",
+        "packageJsonSha256": "1f613d2458a160ed8a63e3669bb03654204b40ebc4f4476c078e24731c49f360",
+        "descriptorSha256": "5e4ada4fb2ff41bb574a6fe59a67116297c89b727ec246ec875941302e62efa3",
+        "moduleSha256": "63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279",
+        "projectPackageSha256": "0ff2d22cb110431d1004512291bc5c767c7151175e727d5aeee359be0707c28b",
+        "lockfileSha256": "df76655a7641d158c4c5676eaba5fb79b6e2f9a7209d8f18af292bbe10e46e7f",
+        "lockResolved": "file:../../../home/runner/work/pskernel/pskernel/candidate/platform/psc-demo-pshello-0.1.0-preview.3.tgz",
+        "lockIntegrity": "sha512-EcU0B56QJhpoHleIkBRJq5zWv2iQZqVTIrFjV3q7Zp4GaEs+ydJgIszi9qLc5RENyaJ1uO/qVNkAUcghnxIjcA==",
+        "protocol": "psc-command/1",
+        "operation": "command:dev",
+        "grants": [
+          "command:dev"
+        ],
+        "imports": [],
+        "engine": {
+          "name": "v8-webassembly",
+          "node": "22.23.3",
+          "v8": "12.4.254.21-node.57"
+        },
+        "limits": {
+          "moduleBytes": 4096,
+          "linearMemoryBytes": 0,
+          "locals": 32,
+          "controlDepth": 32,
+          "wallTimeMs": 2000
+        },
+        "status": "configured",
+        "instantiated": false
+      },
+      "executedRecord": {
+        "package": "@psc-demo/pshello",
+        "version": "0.1.0-preview.3",
+        "origin": "project",
+        "packageRoot": "/tmp/proofscript installed-iOyFUm/consumer project/node_modules/@psc-demo/pshello",
+        "entry": "command.wasm",
+        "packageJsonSha256": "1f613d2458a160ed8a63e3669bb03654204b40ebc4f4476c078e24731c49f360",
+        "descriptorSha256": "5e4ada4fb2ff41bb574a6fe59a67116297c89b727ec246ec875941302e62efa3",
+        "moduleSha256": "63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279",
+        "projectPackageSha256": "0ff2d22cb110431d1004512291bc5c767c7151175e727d5aeee359be0707c28b",
+        "lockfileSha256": "df76655a7641d158c4c5676eaba5fb79b6e2f9a7209d8f18af292bbe10e46e7f",
+        "lockResolved": "file:../../../home/runner/work/pskernel/pskernel/candidate/platform/psc-demo-pshello-0.1.0-preview.3.tgz",
+        "lockIntegrity": "sha512-EcU0B56QJhpoHleIkBRJq5zWv2iQZqVTIrFjV3q7Zp4GaEs+ydJgIszi9qLc5RENyaJ1uO/qVNkAUcghnxIjcA==",
+        "protocol": "psc-command/1",
+        "operation": "command:dev",
+        "grants": [
+          "command:dev"
+        ],
+        "imports": [],
+        "engine": {
+          "name": "v8-webassembly",
+          "node": "22.23.3",
+          "v8": "12.4.254.21-node.57"
+        },
+        "limits": {
+          "moduleBytes": 4096,
+          "linearMemoryBytes": 0,
+          "locals": 32,
+          "controlDepth": 32,
+          "wallTimeMs": 2000
+        },
+        "status": "completed",
+        "instantiated": true,
+        "requestBuild": true
+      },
+      "receiptTransactionId": "3ad49a89-045a-4872-b694-51d9c11c4ff3",
+      "outputSha256": "2ed1026ebb3672a8a5fd1296e7180445c6fe33a7751b7ac4575189501b99017d",
+      "consumerResult": 45,
+      "semanticPreservationProved": false,
+      "pscvVerified": false
+    }
+  ],
+  "libraryEvidence": {
+    "profile": "psc-ts-library/1",
+    "sourceCount": 2,
+    "projectConfigSha256": "7498f857a6d0e1db60e396ac0008e5b8ff0cc2ad03da557b42042ceb82571a5d",
+    "compilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+    "kernelSha256": "88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec",
+    "bundle": "src/generated/library.ts",
+    "facadeSources": [
+      "src/Quantity.ps",
+      "src/Main.ps"
+    ],
+    "artifacts": [
+      "src/Main.ts",
+      "src/Quantity.ts",
+      "src/generated/library.ts"
+    ],
+    "firstTransactionId": "d9f97b03-c4e1-4c8e-bafe-3575d7bf5fbb",
+    "changedTransactionId": "81ed2e48-0d76-428d-b06d-c60b56b5fdf6",
+    "publicInterfaceSha256": "79137c117ca18c42b9f9a7a159667d9bf14d3513958c85171bdb4694326b5ed2",
+    "firstConsumer": "ProofScript library answer: 42",
+    "changedConsumer": "PSC_INSTALLED_LIBRARY: 43",
+    "handwrittenFilesPreserved": true,
+    "rejectedBuildPreservedCompletedGeneration": true,
+    "handwrittenCollisionRefused": true,
+    "passed": true
+  },
+  "nodeOnlyExecutionPath": true,
+  "nodeVersion": "v22.23.3",
+  "platform": "linux",
+  "architecture": "x64",
+  "operatingSystemRelease": "6.17.0-1022-azure",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261004.327.1",
+  "observations": [
+    "fresh global tarball install without lifecycle scripts",
+    "installed executable and version",
+    "supervisor extension disclosure",
+    "new project initialization from the installed executable",
+    "repeated initialization refuses conflicts without replacing files",
+    "installed example catalog is available",
+    "initialized project defaults admit the bundled Nat example",
+    "initialized project defaults publish checked neighboring TypeScript",
+    "initialization adds ProofScript to an existing TypeScript project",
+    "existing package scripts, TypeScript configuration and consumer source are unchanged",
+    "packaged compiler and native Core admission",
+    "neighboring TypeScript publication from the installed package",
+    "existing TypeScript project typechecks generated neighbor",
+    "existing TypeScript project executes generated neighbor",
+    "valid rebuild replaces owned TypeScript and receipt",
+    "existing TypeScript project typechecks rebuilt neighbor",
+    "existing TypeScript project executes rebuilt neighbor",
+    "invalid source cannot replace the previous completed output",
+    "installed T1 project checks both source modules without publication",
+    "installed T1 build publishes one bundle and both owned neighboring facades",
+    "installed T1 neighbors typecheck in a handwritten TypeScript project",
+    "installed T1 consumer shares opaque identity and rejects malformed boundary values",
+    "installed T1 imported-body edit replaces one complete owned generation",
+    "installed T1 changed generation typechecks before downstream execution",
+    "installed T1 changed consumer observes the imported-body result",
+    "invalid T1 source preserves every artifact and the last completed project receipt",
+    "T1 refuses a handwritten neighbor before publishing any project artifact",
+    "local psdev tarball installs without lifecycle scripts",
+    "installing psdev alone leaves extensions inactive",
+    "unactivated psdev cannot run a dev build",
+    "root activation resolves psdev without executing it",
+    "watch is explicitly refused without changing the previous output",
+    "isolated psdev requests the ordinary checked build",
+    "TypeScript checks the psdev requested output",
+    "TypeScript consumer executes the psdev requested output",
+    "altered psdev module is refused without replacing the checked output",
+    "local @psc-demo/pshello tarball installs without lifecycle scripts",
+    "installing @psc-demo/pshello alone leaves extensions inactive",
+    "unactivated @psc-demo/pshello cannot run a dev build",
+    "root activation resolves @psc-demo/pshello without executing it",
+    "isolated @psc-demo/pshello requests the ordinary checked build",
+    "TypeScript checks the @psc-demo/pshello requested output",
+    "TypeScript consumer executes the @psc-demo/pshello requested output",
+    "altered @psc-demo/pshello module is refused without replacing the checked output",
+    "requested PSCV is explicitly refused",
+    "packaged provider linked-library inspection",
+    "packaged provider ELF interpreter inspection",
+    "packaged provider ABI version inspection"
+  ],
+  "passed": true,
+  "leanToolchainRequired": false,
+  "sourceCheckoutRequired": false,
+  "semanticPreservationProved": false,
+  "pscvVerified": false,
+  "strictSh1Qualified": false,
+  "selectedSeedChanged": false,
+  "npmPublished": false
+}

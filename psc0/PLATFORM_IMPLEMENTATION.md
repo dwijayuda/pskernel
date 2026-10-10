@@ -1,197 +1,194 @@
 # PSC0 platform implementation
 
-## Current result: preview2 is qualified
+## Current result: preview3 checked-library qualification
 
-The protected npm preview now includes **psc init**, project entry/output defaults, three runnable example directories, and a separately installed **psdev** one-shot command demo. An independently named **@psc-demo/pshello** package exercises the same extension boundary.
+T1 adds checked library adoption for existing TypeScript projects: explicit public exports from pure acyclic `.ps` modules, one shared checked bundle, thin neighboring TypeScript facades and a handwritten TypeScript consumer. The installed product keeps `psc init`, the earlier examples, and separately installed `psdev` and `@psc-demo/pshello` command demonstrations.
 
-Qualified source: [e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1](https://github.com/dwijayuda/pskernel/commit/e5c4a561b98ed9e2ae96c7da3f85ed6d844bf1d1), tree d2baf328fbd3aab84335352c35a719f179da09cc. [Run 37998655835](https://github.com/dwijayuda/pskernel/actions/runs/37998655835), attempt 1, passed all six jobs. It ran from 2026-10-09 22:20:19 UTC to the final successful update at 22:22:35 UTC, or 10 October 2026, 05:20–05:22 Asia/Jakarta.
+**Qualification status:** **Passed: all six jobs**. Source: [b01281b46aa62cbb09ed47a24ebad08b72c6265f](https://github.com/dwijayuda/pskernel/commit/b01281b46aa62cbb09ed47a24ebad08b72c6265f), tree `d54208569a708fef53fab913ad3b11ac5a496f00`. [Platform run 38019471955](https://github.com/dwijayuda/pskernel/actions/runs/38019471955). The changed compiler has separate exact-source qualification described below; the old F artifact is not reused as evidence for new compiler source.
 
-This implements the requested onboarding/examples/command-demo slice. It does not finish the architecture plan, full psdev watch, T1 module/export and checked ABI, general language plugins, LSP or the formal-assurance program. The containing follow-up records evidence and documentation only; the qualified package source stays at e5c4a561.
-
-The work remains on psc0/platform-v1 in [draft PR90](https://github.com/dwijayuda/pskernel/pull/90). Main was read at ed5d00aca0743bde583b45fe7756dd494ac3960f and was not changed. Nothing was published to npm.
+The work is on `psc0/platform-t1-v1`, based on platform-v1 commit 4265f1d614d15fc9e6ed133a923779ba7af16db8. It is reviewable in [draft PR91](https://github.com/dwijayuda/pskernel/pull/91), stacked on [PR90](https://github.com/dwijayuda/pskernel/pull/90). Main, the selected R authoring seed, and the native Core selection are unchanged. Nothing was published to npm. This completes the bounded T1 milestone; it does not finish full watch, general language/backend extensions, final package decomposition, LSP or the formal-assurance program.
 
 ## Download and install
 
-Download the [preview2 candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/37998655835/artifacts/11648008841). It contains these three tarballs:
+Download the [preview3 candidate artifact](https://github.com/dwijayuda/pskernel/actions/runs/38019471955/artifacts/11657608168). It contains three tarballs:
 
-| Archive inside the artifact | Bytes | SHA256 |
+| Tarball | Bytes | SHA256 |
 | --- | ---: | --- |
-| platform/proofscript-0.1.0-preview.2.tgz | 3,639,614 | 9ceab476924c39f73cc6fd8fe4a92b91228b03455d3ff6e0c56e17bf075842d9 |
-| platform/psdev-0.1.0-preview.2.tgz | 1,791 | e3cd851c66a899e7d4fb4503becaab33df5e5b2db4ca71a51bc5b2ad67a46468 |
-| platform/psc-demo-pshello-0.1.0-preview.2.tgz | 1,805 | 07aadc3b41f007cee0eb6cfc92f9d41d5ba52bfe77083ced1c8edd1c6c80a95c |
+| `proofscript-0.1.0-preview.3.tgz` | 3,656,980 | `0273e5f18a3cea66b0f4deaa44fbfe1214510fd59d146956355985e555c4db7e` |
+| `psdev-0.1.0-preview.3.tgz` | 1,914 | `20e6270726247f559129fa496aa0ae51cd0a8bf4ad679bfc99d91cb9b136e34e` |
+| `psc-demo-pshello-0.1.0-preview.3.tgz` | 1,933 | `65adbd54131fc69e4e73df08501e5f59f82fbee29b8965bde5f27f2b577c4ded` |
 
-The product archive size excludes separately installed TypeScript dependencies. It is 14,538 bytes larger than preview1 and introduces no new required npm dependency. The candidate ZIP has 3,858,799 bytes and SHA256 065d0652d8aa28077ad8f7e17eb2503e6ea139fed03b0d398a4ce793545e37e7. Archive and inner-tarball hashes are different identities.
-
-The Actions artifact expires at 2026-11-08 22:21:28 UTC, which is **9 November 2026, 05:21:28 Asia/Jakarta**. Keep the downloaded candidate if you need it beyond that time. Committed JSON retains evidence, not executable archive bytes.
+The product archive excludes its separately installed TypeScript dependency. The candidate ZIP has 3,887,650 bytes and SHA256 `0a202234723940b86b9370303a3ab0d952003f41a6970b332c30117afb222f04`; its ZIP identity differs from the inner tarball identities. Artifact expiry is 2026-11-09 03:08:56 UTC. Retain exact executable inputs if they are needed beyond that date; committed JSON is evidence, not archive retention. Durable release-input storage remains public-release work.
 
 From the extracted candidate directory in Windows PowerShell:
 
 ```powershell
 $candidate = (Resolve-Path .\platform).Path
-npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.2.tgz"
+npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.3.tgz"
 psc.cmd version --json
 psc.cmd init my-app
 Set-Location my-app
-npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.2.tgz"
+npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.3.tgz"
 npm run check
 npm run build
 ```
 
-The global compiler provides a convenient initial command. The second installation pins the compiler in the new project so its generated scripts can use the explicit local launcher. Since this preview is unpublished, installing the local candidate is necessary before those npm scripts run; a global install alone does not satisfy the generated local dependency.
+The global install supplies the initial command; the local install pins the compiler used by generated project scripts. For this unpublished preview, the generated local dependency must be satisfied from the actual tarball. A global install alone does not satisfy it. Future `npm install -g proofscript` registry distribution still requires an intentional publication.
 
-Linux users use psc and an absolute tarball path. Windows qualification uses npm's psc.cmd from PowerShell 7.6.6. Bare psc can resolve to psc.ps1 and depends on local execution policy; no policy bypass was used.
+Linux uses `psc` and an absolute tarball path. Windows tests use npm's `psc.cmd` in PowerShell; bare `psc` may select `psc.ps1` and depends on the user's execution policy. Installing the prebuilt package requires no Lean installation or source checkout.
 
-The full consumer guide is [release/README.md](release/README.md). The initializer also creates PROOFSCRIPT.md in the user project. Ordinary future registry installation remains npm install -g proofscript after an intentional public release; that command does not select this unpublished candidate.
+## What T1 changes
 
-## What changed
-
-| Feature | Implemented behavior |
+| Component | Implemented behavior |
 | --- | --- |
-| psc init [directory] | Create package.json, src/Main.ps and PROOFSCRIPT.md for a new/empty directory; add only source and guide to an existing npm project. |
-| Root defaults | package.json proofscript.entry and proofscript.out allow check/build/dev without repeated file arguments. |
-| Neighboring default | An explicit entry without --out produces its neighboring .ts file and checked receipt. |
-| psc examples | List installed checked-nat, existing-typescript and rejected-source example directories. |
-| psc extensions | Resolve explicitly configured command package data; report configured identities with no guest execution. |
-| psc dev --once | Run one enabled command guest, then honor its bounded request through the existing protected checked build. |
-| Third-party package | @psc-demo/pshello uses the same protocol, resolver, validation, grants and disclosure as psdev. |
-| Receipts | A dev build's saved receipt includes the exact completed extension record, and publication rechecks its captured inputs. |
+| Project preparation | The compiler retains authored declaration ownership across the ordered local import closure. Explicit source/name selections cannot claim another module's declarations or generated elaboration workers. |
+| Public ABI | The `psc-ts-library/1` emitter checks original RuntimeIR, agrees on Core/IR signatures and authored arity, and produces a bounded public descriptor. Unsupported public signatures are refused. |
+| Shared runtime | One project bundle owns the runtime. Neighboring facades only re-export selected bindings; datatype handles retain one identity across modules. |
+| Runtime names | Project declarations, locals, constructors and fields use one structural source namespace in the existing erasure name map. This avoids backend-name capture and special `__proto__`/discriminator behavior. The legacy empty-prefix route remains separately scoped. |
+| Protected host | One immutable preparation, the pinned native admission provider, the same original checked IR, exact descriptor coverage, captured configuration and TS7 target validation precede publication. |
+| Publication | The existing publisher owns the whole bundle/facade generation across directories. It checks prior owned bytes, prevents handwritten overwrite, retires only owned old facades, rolls back still-owned partial writes and commits the receipt last. |
+| User example | `checked-library` contains two `.ps` modules and a handwritten strict TypeScript consumer. The installed catalog now has four examples. |
+| Optional tooling | The existing `psc dev --once` command guest can request the same configured library build. No separate kernel or publication path is added. |
 
-Init executes no npm or project code. It preserves existing package.json, tsconfig.json, unrelated source, scripts and dependencies. Starter/output collisions are preflight refusals; writes create only absent files. Symlink/junction ancestors and ambiguous Windows path forms are refused. A partial I/O failure reports already-created starter files rather than claiming atomic creation. Suggested existing-project package additions are data in the guide and JSON result.
+The implementation adds one portable compiler module, `Ps.BackendTs.Project`, to the 62-module closure. The other compiler changes extend existing preparation and erasure metadata. Installed host and tooling code stays outside the self-host source closure. The product still has only one required npm dependency, TypeScript7.0.2. These are implementation boundaries, not a measured formal trusted-computing-base size.
 
-Project configuration uses package.json only; no competing proofscript.json was added. Configured paths are relative to the root and use forward slashes. Absolute, escaping and Windows drive-relative paths such as D:other.ts are rejected. Explicit CLI paths remain intentional user selections subject to the existing source-containment/output-ownership checks.
+## Try the checked-library example
 
-An implicit entry uses the configured root entry and output. An explicit source with no explicit output gets its own neighboring TS path; it does not accidentally reuse another entry's configured bundle. The CLI preserves caller cwd and never silently imports or switches to a local/global replacement compiler.
+Run `psc examples --json` (or `psc.cmd`) to locate the installed examples. Copy `checked-library` to a working directory outside the package, then run:
 
-### Examples
-
-There are eleven shipped example files, including a README in each example directory.
-
-- [checked-nat](examples/platform/checked-nat/README.md) uses def answer : Nat := 42, the supported checked profile and local build scripts.
-- [existing-typescript](examples/platform/existing-typescript/README.md) imports the generated answer as bigint under ES2022/NodeNext and executes it from handwritten TS.
-- [rejected-source](examples/platform/rejected-source/README.md) gives answer the invalid value Type, exercising refusal and preservation of the previous completed output.
-
-These are one-bundle examples. They do not claim cross-file datatype/runtime identity, inbound Nat argument validation, arbitrary FFI or separately compiled module compatibility. Copy examples into a user project before building; psc examples itself performs no code execution or file generation.
-
-## Try the optional psdev demo
-
-Within the initialized project, using the candidate variable established above:
-
-```powershell
-npm install --save-dev --save-exact --ignore-scripts "$candidate\psdev-0.1.0-preview.2.tgz"
-npm pkg set 'proofscript.extensions[0].package=psdev' 'proofscript.extensions[0].enable[0]=command:dev'
-node .\node_modules\proofscript\bin\psc.mjs extensions --json
-node .\node_modules\proofscript\bin\psc.mjs dev --once --json
+```sh
+npm install --ignore-scripts --save-dev --save-exact /absolute/path/to/proofscript-0.1.0-preview.3.tgz typescript@7.0.2
+npm run build
+npm start
 ```
 
-The npm pkg set shorthand uses npm's documented nested-object/array syntax and changes only the indicated configuration entries. [npm package editing reference](https://docs.npmjs.com/cli/v12/commands/npm-pkg/). The resulting configuration is:
+Start the example in a fresh copied directory. When converting an already-built single-source starter, `src/Main.ts` belongs to `src/Main.checked.json`; the new library receipt does not automatically adopt it. Stop build/watch processes, confirm which files are generated and still match that receipt, and archive those old generated outputs together with the receipt before the first library build. Preserve handwritten or edited files.
+
+The expected output is `ProofScript library answer: 42`. The build script runs PSC first and only starts TypeScript if PSC succeeds. The example's package.json contains:
 
 ```json
 {
   "proofscript": {
     "profile": "checked",
     "entry": "src/Main.ps",
-    "out": "src/Main.ts",
-    "extensions": [
-      { "package": "psdev", "enable": ["command:dev"] }
-    ]
+    "out": "src/generated/library.ts",
+    "exports": {
+      "src/Quantity.ps": ["Quantity", "makeQuantity"],
+      "src/Main.ps": ["readQuantity", "sameQuantity"]
+    },
+    "extensions": []
   }
 }
 ```
 
-Keep the existing package's other fields. The demo must be physically installed as a direct root npm dependency with its lockfile; installation alone does not activate it. The generated new project's compiler dependency must be installed from the product candidate first, as shown above, so npm does not attempt to fetch an unpublished version from the registry.
+`Quantity.ps` owns the datatype and constructor function. `Main.ps` imports it and owns the reader and identity functions. A successful build publishes `src/generated/library.ts`, `src/Quantity.ts` and `src/Main.ts`. The handwritten `src/consumer.ts` imports both neighboring modules and shares one opaque Quantity identity. `internalValue` remains private.
 
-The result has command, extensions and receipt. src/Main.checked.json contains the same executed extension record. The guest can request one normal checked build; it cannot change entry/output paths or the assurance profile. A guest that declines, traps, times out or returns an unsupported value cannot authorize publication.
+A standalone TypeScript cast does not manufacture an accepted opaque value. The example and generated conformance checks exercise forged objects, proxies, handles from another loaded bundle, negative Nat values and wrong call arity. A failed subsequent ProofScript revision preserves the previous completed output; downstream tools must honor the failed build status rather than treating last-good output as proof that the new source revision is accepted.
 
-To try independent naming, install psc-demo-pshello-0.1.0-preview.2.tgz locally and replace the single configured package with @psc-demo/pshello. Then run dev --once again. This fixture demonstrates equal treatment of an independently named package; it is not a claim that the npm scope is owned or published. Neither demo is part of proofscript's required dependency closure. There is no publisher-name allowlist for this constrained protocol.
+### Public boundary and qualified TS settings
 
-Only one provider of command:dev may be enabled. npm aliases, directory links, workspace/ancestor/global package search, floating version ranges and automatic downloads are outside this first resolver. Actual root package, lockfile, installed metadata, descriptor, module and engine identities are reported. The recorded npm SHA512 integrity is archive provenance, not a proof that the installed package tree still equals the archive. Editing a descriptor and module together before selection can select a different permitted module; its actual digest is disclosed and the same confinement checks apply.
-
-## Protected extension and compilation boundaries
-
-The [command SDK](docs/platform/command-extension-sdk.md) specifies the exact package shape and host API. Its essential boundary is deliberately small:
-
-| Component | Authority |
+| Source type | Public representation |
 | --- | --- |
-| Command package | Supplies a 4 KiB maximum restricted Wasm module. Receives initial integer 0 and returns integer 0 or 1. |
-| command-wasm-profile.mjs | Bounds binary structure and rejects imports, memory, tables, globals, starts, calls, references/GC and unsupported opcodes. |
-| command-extension-worker.mjs | Fixed trusted adapter; validates/instantiates those bytes with V8 and no imports. No npm JavaScript is loaded. |
-| command-extensions.mjs | Owns resolution, captured identities, private selections/completions, bounded execution and state records. |
-| bin/psc.mjs | Owns activation, official disclosure, caller-selected files, fixed checked profile and invoking the protected build. |
-| checked-build.mjs | Performs the unchanged admission/IR/TS checks, supplies actual extension provenance, rechecks eligibility and requests owned publication. |
+| Nat | Nonnegative JavaScript bigint |
+| Int | JavaScript bigint |
+| Bool | JavaScript boolean |
+| String | JavaScript string without isolated UTF-16 surrogates; astral Unicode is supported |
+| Unit | undefined |
+| Supported monomorphic datatype/structure | Frozen opaque handle from that same bundle, tracked by private maps |
 
-The supplied module is 44 bytes, with SHA256 63b9c0f41bfc46a06b148a92b370c73f950d1b89b544b290cc7e83e15998e279. Both demo names deliberately use those same bytes. There is no new dependency or WAT compiler in ordinary installation.
+Implicit, dependent, erased-proof, generic, callback/function and array public signatures are outside this profile. Internal compiler-supported representations do not automatically become public FFI types. Public nullary definitions remain constants. Pure acyclic local imports, explicit project-root export configuration, strict TS7/NodeNext/ES2022 and one shared bundle are the pilot's supported scope.
 
-The guest has no filesystem, network, process, environment, terminal, source, kernel, admission or publication capability. Its one integer cannot contain a proof, receipt, target path or arbitrary diagnostic. Only the host serializes PSC_EXTENSIONS records; it does so before execution and records attempted/instantiated/completed or failed state. Empty imports in those records describe the granted import policy. A failed worker with unacknowledged instantiation reports unknown status as null.
+`psc check` performs admission without claiming a checked public ABI; its library receipt says `abiStatus: "not-requested"`. `psc build` validates the descriptor, ABI and staged TypeScript before a completed library receipt says `"checked-bounded"`. Admission, ABI acceptance, RuntimeIR typing, TS acceptance and semantic preservation are distinct claims.
 
-WebAssembly is the confinement boundary; the worker provides cancellation and a two-second parent wall deadline. It is not a general JavaScript sandbox or an OS boundary. Node/V8 and the small adapter/decoder remain implementation assumptions. The profile forbids guest memory and calls and limits locals/control nesting; Node worker heap limits do not establish a hard process-RSS or availability bound. This is not deterministic fuel, an engine-security proof or a side-channel guarantee. See [WebAssembly security](https://webassembly.org/docs/security/) and [Node worker limits](https://nodejs.org/download/release/v22.23.3/docs/api/worker_threads.html).
+## Initializer, examples and command packages
 
-Completed command requests are private host-owned objects, not serializable guest capabilities. The builder rejects forged or declined results before loading the compiler. It rechecks root package, lockfile, package metadata, descriptor and module identities at build entry and through the existing publication eligibility callbacks. Altered or stale inputs cannot be represented as the current successful dev generation. An arbitrary local process that can replace the host installation remains outside this guest-confinement claim.
+`psc init` remains a small initializer: it creates package.json, src/Main.ps and PROOFSCRIPT.md in a new project, or adds the absent source/guide to an existing npm project while preserving that project's existing package metadata and build scripts. It installs nothing and executes no project code. Init uses exclusive file creation; it is not the checked publisher's multi-file transaction.
 
-Ordinary check/build validate the root configuration but do not load command guests. extensions only inspects package data. The release's default extension list remains empty; no default watcher, server, prover or updater is started. A later release can adopt ready tooling explicitly, with its own default metadata and qualification.
+The four examples are `checked-nat`, `existing-typescript`, `rejected-source` and `checked-library`. The earlier TypeScript example demonstrates a constant from one source bundle; use checked-library for selected functions and shared datatype identities across modules.
 
-### The checked path is preserved
+Install the optional matching psdev tarball locally and add `{ "package": "psdev", "enable": ["command:dev"] }` to the root `proofscript.extensions` array. Preserve entry, out and exports. Then `psc dev --once` requests the configured checked build. The independently named `@psc-demo/pshello` demonstrates the same protocol. Installing a package alone does not activate it; check/build do not load a guest. The demo names/scopes are not claimed as owned registry names.
 
-The public host authenticates the exact F compiler bytes, reads an immutable source snapshot, admits canonical declarations through the pinned native Core provider, and emits only after validating the same original RuntimeIR. TypeScript 7.0.2 validates staged output before publication.
+The `psc-command/1` guest is a restricted prepared WebAssembly module with no imports, filesystem, network, process, terminal, kernel or publication authority. It supplies a bounded request, while the host owns execution status, disclosure and any checked action. It cannot replace admission, inject a successful receipt or execute the package's JavaScript entrypoint in the authority process. Third-party identities use the same validation rather than a publisher-name allowlist. See [the command SDK](docs/platform/command-extension-sdk.md) for the precise restricted profile.
 
-The publisher retains its existing ownership/lease/staging/recovery protocol. It refuses unowned or manually edited output, checks eligibility before publication and before receipt commitment, and writes the new receipt last. Rejected work preserves the last completed generation. It does not provide atomic multi-file visibility to arbitrary watchers or prove power-loss durability.
+Full live watch and arbitrary extension APIs remain future work. An approved generated JS kernel would be a separate trusted provider artifact, not permission to load arbitrary npm JavaScript into the authority process.
 
-The guest can neither replace this path nor supply its successful result. Native provider algorithms, compiler algorithms and validators were not modified to support the demo.
+## Exact compiler qualification
 
-## Exact qualification
+[SH1 run 38013991001, attempt2](https://github.com/dwijayuda/pskernel/actions/runs/38013991001) passed at source `5fe0045dcb0bf30e1d2519f900458d1407822eed`, tree `23dfb56a84cdce585e5c4b1a5ccff3b2de92f0e5`. Its compiler job 114101357176 and separate native replay job 114114935728 both succeeded.
 
-| Source qualification | Passed | Failed | Skipped |
-| --- | ---: | ---: | ---: |
-| Linux22 host, init, CLI, extension, publication, assembly and smoke harness | 116 | 0 | 0 |
-| Linux22 actual compiler/native integration | 17 | 0 | 0 |
-| Windows26 host, init, CLI, extension, publication, assembly and smoke harness | 120 | 0 | 1 |
-| Windows26 actual compiler/native integration | 14 | 0 | 3 |
+The authoritative portable closure has **62 modules**, SHA256 `3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea`. C1 was generated by the selected authoring seed from current raw source; C1 generated C2 from the same source, and C2 generated C3. The qualification compared the C2/C3 products. All four recorded products also match across C1/C2/C3:
 
-The eighteen focused command-extension tests run within both host suites. They exercise genuine valid-Wasm import/memory fixtures being refused, other denied features/bounds, infinite-loop termination, cancellation, traps, invalid replies, opaque completions, stale metadata and compulsory disclosure. No failure was waived or acceptance gate weakened.
+| Product | SHA256 |
+| --- | --- |
+| Canonical surface source | `e91f3bfaaedf755b0fb027a3c6ffe752784c2f19cd41641ba8b015a90e37fe3e` |
+| Normalized canonical admissions | `403d7b83ab62150a6f059cd5ed9dcfe18fd68e18f1c54cd8527abf173e20e1d5` |
+| Generated TypeScript | `8923672fbc4b78a8bc1e25ab172162356ae4ffae6179eddc930c7955c73c1b3d` |
+| Generated JavaScript | `6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617` |
 
-The Windows skips are inherited fixtures: one Unix directory-write-permission cleanup test and three POSIX-shebang fake transport tests. The actual Windows native provider/compiler tests and all new initializer/extension tests are mandatory and passed.
+The existing original RuntimeIR checker and all 12 complete public Core-type/IR ABI checks passed. The 87-case migration correspondence uses the explicit `empty-legacy-erasure-namespace/1` comparison: only two named current `runtimePrefix` fields are projected, after their presence and empty value and both raw report hashes are checked. Raw reports are preserved, and seven regression groups protect against other differences. This is a narrowly described cross-revision comparison, not blanket normalization.
 
-| Fresh installed job | npm | Passed observations |
-| --- | --- | ---: |
-| Linux / Node22.23.3 | 10.9.9 | 39 |
-| Linux / Node26.7.0 | 12.0.2 | 39 |
-| Windows / Node22.23.3 | 10.9.9 | 37 |
-| Windows / Node26.7.0 | 12.0.2 | 37 |
+The exact C3 compiler passed all 11 recorded T1 conformance observations. Its example admissions hash is `6920fe26543ce11c9454d92154f1ee347c791bcd55bdbfdadbbcdacb296255fc`; its emitted TS bundle hash is `c3829e8032a2c48a633607c66499105f234feff88ffbe877723c516021cc2a40`. That conformance receipt explicitly says kernel admission was not attempted. The separate SH1 native job accepts four deduplicated exact streams covering C2/C3 compiler source, Lean and ProofScript capability source, and recursive-generic fixtures. It is additional acceptance after compiler-only generation (`emissionWasGatedByThisCheck: false`), rather than retroactive admission-before-emission. Real T1 library admission is exercised by the source and installed platform gates below.
 
-All four jobs installed the same three exact tarballs. They had no source checkout or Lean installation and ran through a Node-only PATH. Windows used PowerShell7.6.6 and npm's actual psc.cmd. The tested Windows image is Windows Server2022, win22/20261004.326.1; Linux is Ubuntu24.04, ubuntu24/20261004.327.1.
+The release workflow selects successful compiler artifact **11657766675 by ID** from run 38013991001. Its uploaded ZIP is 5,567,845 bytes, SHA256 `8d6309b0a526b6987922ebb34cb4d5892ad48ca9e31f3bbb7dfb30ae7319754d`. The failed first attempt has another artifact with the same name, so name alone is insufficient. The successful native replay log explicitly selected this new artifact; release assembly independently authenticates the compiler payload and source-closure hashes.
 
-The 152 installed observations cover initialization/default paths/examples, unchanged existing project files, native admission, checked neighboring TS, an ordinary changed rebuild, invalid-source preservation, both optional package installations and explicit activation, JavaScript entrypoint nonexecution, actual identity/disclosure/receipt binding, TypeScript consumer results 44/45 after guest-requested builds, tampered payload refusal and explicit unavailable-PSCV refusal. Linux additionally retains ELF library/interpreter/version inspection. Windows verifies the provider's twelve previously qualified system DLL imports. These are execution observations on the stated environments, not a theorem for every OS release, filesystem or shell policy.
+Retained exact receipts: [fixed point](docs/platform/compiler-t1-qualification-38013991001.json), [C3 T1 conformance](docs/platform/compiler-t1-conformance-38013991001.json), and [native acceptance](docs/platform/kernel-t1-admissions-38013991001.json). Native receipt file SHA256 is `4f40bdaa0088fa95c5512b1d7347fa3e651c858dd9562f77cf384cfb0cb4eeec`, 3,530 bytes. Attempt 1 hit the existing native full-IR 180-second process limit; the unchanged-head rerun passed without raising budgets. The authenticated R reproduction receipt remains `cold:false`, not a new isolated cold-recovery qualification.
 
-Evidence is committed in:
+The preserved authoring seed is R `fe2560aba0f347b1caf8d000d371464642d44f23`. Bootstrap stays Node22.23.3, Lean4.34.0 and TypeScript7.0.2. Consumer Node26 installation checks do not establish a Node26 bootstrap fixed point. The original F compiler at fcd875c8f38db4b0524090bd10c7c2fd5024053d remains historical evidence for its exact 61-module closure.
 
-- [Aggregate run, artifact and scope record](docs/platform/onboarding-command-preview-qualification-2026-10-09.json).
-- [Windows26 installed result](docs/platform/installed-win32-node26.7.0-37998655835.json).
-- [Windows22 installed result](docs/platform/installed-win32-node22.23.3-37998655835.json).
-- [Linux26 installed result](docs/platform/installed-linux-node26.7.0-37998655835.json).
-- [Linux22 installed result](docs/platform/installed-linux-node22.23.3-37998655835.json).
+C2/C3 equality concerns the exact compared artifacts. It is not a compiler semantic-preservation theorem, a logical-consistency theorem or proof that the compiler was jointly bootstrapped with a generated kernel. The protected native provider's full admission replay is a separate gate.
 
-The implementation diff from 3a0d056 to e5c4a561 contains 40 files, 2,147 added lines and 199 deleted lines, including tests, examples, package data and documentation. The assembled product uses 21 maintained host files and 11 example files, one compiler and two platform-native artifacts. Its only required npm dependency remains TypeScript7.0.2. These counts are measured implementation scope, not a formal TCB-size or proof-cost claim.
+## Exact platform qualification
 
-## Self-host, native payloads and proof scope
+| Source job | Host/policy tests | Real native/integration tests |
+| --- | --- | --- |
+| Linux / Node22.23.3 | 130 passed, 0 skipped (130 discovered) | 18 passed, 0 skipped (18 discovered) |
+| Windows / Node26.7.0 | 134 passed, 1 skipped (135 discovered) | 15 passed, 3 skipped (18 discovered) |
 
-The compiler's 61 raw portable source modules remain unchanged. Their closure SHA256 is 6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7. F source remains fcd875c8f38db4b0524090bd10c7c2fd5024053d; its JavaScript remains 5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15. [F fixed-point run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800) remains the applicable compiler evidence; no redundant C1/C2/C3 qualification was run for these host-only changes.
+| Clean installed job | npm | Recorded observations | Result |
+| --- | --- | ---: | --- |
+| Linux / Node22.23.3 | 10.9.9 | 48 | Passed |
+| Linux / Node26.7.0 | 12.0.2 | 48 | Passed |
+| Windows / Node22.23.3 | 10.9.9 | 46 | Passed |
+| Windows / Node26.7.0 | 12.0.2 | 46 | Passed |
 
-The selected authoring seed R remains fe2560aba0f347b1caf8d000d371464642d44f23. Bootstrap stays Node22.23.3/Lean4.34.0/TypeScript7.0.2. Consumer Node26 qualification does not claim a new Node26 bootstrap fixed point. Init, npm/OS adapters and optional command packages are outside the compiler's self-host import graph.
+The four installed jobs consume the same three tarballs without repository checkout or Lean. They test initialization, examples, actual native admission, checked builds, source refusal and last-good preservation, optional package installation/activation and compulsory disclosure. The new library observations exercise admission-only checks, one-bundle publication, the handwritten consumer, an imported-module change from 42 to 43, failed-source preservation and a handwritten facade collision. Linux also inspects ELF requirements; Windows checks the previously qualified native system DLL imports and the actual npm command shim.
 
-Native Core source remains 963030dc2d154008fccc82e7c8ed29331f138799: repository tree 80927150cbd6a5518762b4cc56e51ea24df8f374, psc0 subtree 38c8c55bd2b214753e56c58c15c4901c32c01b86. Linux binary SHA256 remains 88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec; Windows remains 8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2. The previous [Windows native probe](https://github.com/dwijayuda/pskernel/actions/runs/37993071033) remains its artifact qualification. Separate Lean4.35 Arena work has a different protocol and is not substituted.
+The source suites include cross-directory publication, real partial-write rollback, retired facades, overlapping leases, parent links, Windows path spelling, staging/backup namespace collisions and exact descriptor coverage. Windows skips one Unix-permission cleanup fixture and three POSIX shebang transport fixtures; all new T1 cases and the actual packaged Windows native admission ran. These are execution observations on the stated environments, not a theorem for every filesystem, OS version or shell policy.
 
-The Windows PE contains its ordinary link timestamp 1791581097. Its current recipe does not promise byte-identical later rebuilds. Exact F and Windows inputs are retained Actions artifacts; durable nonexpiring input retention and clean release recovery remain public-release work. Existing selected-R recovery evidence is preserved. No timestamp patch, invented replacement hash, seed promotion or kernel change was made.
+The [complete preview3 qualification record](docs/platform/t1-checked-library-preview-qualification-2026-10-10.json) retains source/tree/run identities, job counts, tarball and artifact hashes, preserved compiler/kernel inputs and the remaining assurance limits. Full installed records: [Linux Node22.23.3](docs/platform/installed-linux-node22.23.3-38019471955.json), [Linux Node26.7.0](docs/platform/installed-linux-node26.7.0-38019471955.json), [Windows Node22.23.3](docs/platform/installed-win32-node22.23.3-38019471955.json), [Windows Node26.7.0](docs/platform/installed-win32-node26.7.0-38019471955.json).
 
-Formal assurance remains a later gate, with psc0/proofs/**/*.proof.lean and full Lean tooling outside bootstrap. No new compiler/kernel theorem is claimed. The existing false receipt flags remain semanticPreservationProved, pscvVerified and strictSh1Qualified. Kernel acceptance does not establish logical consistency; RuntimeIR typing and TS7 acceptance do not prove executable semantic preservation.
+Two earlier runs exposed test-harness omissions: a missing module in the synthetic CLI fixture and a CRLF-sensitive source-shape assertion. Both corrections preserve runtime behavior and validation expectations. The final six-job run repeats every platform gate; its product tarball is identical to the preceding run's tarball that passed all four installed jobs.
 
-For this extension slice, later proofs should concentrate on the restricted decoder, exclusive status/request authority, captured-input freshness and composition with the checked publication state machine. A pure scheduling function need not itself be proved when all it can request is an already checked host action. Refinement to Node/V8/OS behavior still requires explicit assumptions; a Lean state-machine proof alone would not verify the engine.
+## Kernel selection and the JavaScript-before-Wasm route
 
-## Next milestones
+Native Core source stays `963030dc2d154008fccc82e7c8ed29331f138799`, repository tree 80927150cbd6a5518762b4cc56e51ea24df8f374 and psc0 subtree 38c8c55bd2b214753e56c58c15c4901c32c01b86. The selected binary SHA256 values stay:
 
-1. Complete T1 source ownership/export mapping, one canonical runtime identity and the bounded checked TS ABI before full project watch or neighboring facades.
-2. Develop real psdev scheduling, cancellation/invalidation/recovery and coherent downstream build coordination against that interface. The present --once demo proves the extension route is usable, not that T2 is finished.
-3. Expand producer/validator extension protocols only for concrete macro/tactic/backend needs, with appropriate resource and admission contracts. A richer Wasm/Wasmtime or native compatibility profile earns separate qualification.
-4. Add workspace/hoisting and ordinary ProofScript library resolution, deliberate default-package activation, final ps-prefixed source/package boundaries and durable release inputs.
-5. Build pslsp and the VS Code client outside bootstrap, with analysis snapshots distinct from publishable accepted generations.
-6. Continue mathematical/implementation proofs in their separate assurance workspace without making full proof completion an implementation-closing gate.
+- Linux x64: `88f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec`.
+- Windows x64: `8264a5e8551a1040d81956fa5b2a7f429355b365df06b9b705e20df8640419e2`.
 
-The accepted [architecture plan](PSC0_ARCHITECTURE_PLAN.md) retains its dated repository research and the complete proposed direction. Historical Linux-only preview0 and Windows preview1 records remain in Git history and docs/platform; this page describes preview2.
+The current Windows recipe contains an ordinary PE link timestamp and does not promise byte-identical later rebuilds. Preserve the authenticated executable. The separate Lean4.35 Arena work is not substituted. No native evaluator or rejection fallback is enabled.
+
+**The same Core can in principle be emitted through PSC → TS7 → JS.** Historical bounded work demonstrated that route for an older snapshot. The new [J0 probe](https://github.com/dwijayuda/pskernel/actions/runs/38007233891) used the previously qualified F compiler with unchanged currently selected Core sources and passed a seven-case native public-admission baseline, then stopped during preparation at `psKernelCheckerStateExitLocalScope` in Checker/State.lean: `Nat.max` is missing from the compiler's standard environment. No current JS kernel executable was produced, and no JS provider passed admission parity.
+
+[KERNEL_JS_PLAN.md](KERNEL_JS_PLAN.md) records a concrete **proposed, unexecuted** next diagnostic: admit an explicit ordinary PSC Lean-syntax `Nat.max` definition using `Nat.add a (Nat.sub b a)` before each fresh batch, qualify its emitted behavior, and then retry all 79 unchanged Core modules. The source review indicates that this can use the current compiler and existing native provider without a new trusted primitive. The support fixture belongs outside the Core tree, compiler bootstrap closure and full-Lean targets; full Lean already has that name. Kernel acceptance of its type would not prove that it computes maximum, and no claim is made that it resolves subsequent Core gaps.
+
+After whole-Core generation works, the provider still needs a qualified canonical adapter, native/JS decision parity, resource limits, artifact authentication and Windows/Linux installation. Only a separately qualified explicit `pskernel-core-js` artifact may become an interim default before Wasm work. The current provider remains native.
+
+JavaScript memory management does not establish logical soundness or make a Node child an arbitrary-code sandbox. Source-level Core proofs may transfer only through a justified source-to-executable refinement chain. The planned Wasm provider remains another execution option over one semantic Core.
+
+## Proof scope and next milestones
+
+Full assurance companions belong in `psc0/proofs/**/*.proof.lean`, with ordinary Lean model/lemma modules and full Lean tactics outside bootstrap. Full PSCV authoring can follow when available. The [architecture plan](PSC0_ARCHITECTURE_PLAN.md) names T1 ownership, descriptor/admission correspondence, name hygiene, public ABI, bundle/facade, publication and executable-refinement obligations. They are later theorem scopes, not proofs claimed by these tests.
+
+The receipt flags `semanticPreservationProved`, `pscvVerified` and `strictSh1Qualified` remain false. Kernel admission does not prove logical consistency. RuntimeIR typing and TS7 acceptance do not prove that the emitted executable preserves every source behavior or contract.
+
+Next work:
+
+1. Implement real psdev watch using the established checked transaction: dependency invalidation, cancellation, generation identity, ownership/recovery and downstream build sequencing.
+2. Continue same-source Core-JS qualification before a default change; keep Core refinement work and its trusted assumptions explicitly versioned.
+3. Preserve exact bootstrap/release inputs durably and establish clean recovery before public npm release.
+4. Add broader library resolution, final ps-prefixed package boundaries, deliberate release-default extensions and concrete producer/validator protocols incrementally.
+5. Build pslsp and the VS Code client outside bootstrap, with editor analysis snapshots distinct from publishable generations.
+6. Develop the separated proof program without making full formal completion a closing gate for bounded implementation milestones.
+
+Preview2 qualification remains in [its retained record](docs/platform/onboarding-command-preview-qualification-2026-10-09.json), [run 37998655835](https://github.com/dwijayuda/pskernel/actions/runs/37998655835) and Git history. This page records T1's separately qualified successor and preview3.

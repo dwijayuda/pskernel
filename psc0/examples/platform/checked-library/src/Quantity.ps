@@ -1,0 +1,7 @@
+inductive Quantity where {
+  | mk(value : Nat)
+}
+
+def makeQuantity(value : Nat) : Quantity := Quantity.mk(value)
+
+def internalValue : Nat := 7

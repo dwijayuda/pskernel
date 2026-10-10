@@ -1,5 +1,7 @@
 # PSKernel Core: Wasm default, optional native execution
 
+**Execution-order update — 10 October 2026:** investigate and qualify same-source Core → PSC → TS7 → JS before implementing this Wasm provider. [KERNEL_JS_PLAN.md](../../KERNEL_JS_PLAN.md) records the current J0 blocker and J1 gates. Native admission remains selected. This document retains the later Wasm design and qualification obligations; no Wasm or JS default has been promoted.
+
 **Status:** researched architectural recommendation for the user's Wasm-first request. Implementation and default promotion are pending. This document does not announce a new compiler release or a qualified Core Wasm artifact.
 
 **Date:** 10 October 2026, Asia/Jakarta (9 October UTC).

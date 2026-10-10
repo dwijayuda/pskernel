@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-t1-compiler-conformance",
+  "phase": "c3",
+  "sourceRef": "5fe0045dcb0bf30e1d2519f900458d1407822eed",
+  "sourceClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+  "moduleCount": 62,
+  "compilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+  "toolchain": {
+    "node": "v22.23.3",
+    "typescript": "7.0.2"
+  },
+  "kernelAdmission": "not-attempted",
+  "selfHostFixedPoint": "not-established-by-this-check",
+  "semanticPreservationProved": false,
+  "observations": [
+    "actual compiler prepares exact imported sources and retains selected export ownership",
+    "strict TS7 consumer imports both facades and shares one frozen opaque identity",
+    "only selected checked value bindings are available from the bundle",
+    "malformed Nat, wrong arity, forged, mutable and foreign-runtime handles are rejected",
+    "exhausted RuntimeIR checking refuses emission",
+    "unknown and wrong-owner exports cannot enter the public API",
+    "accepted implicit-Prop/proof-premise, generic and returned-function signatures are refused at the public ABI",
+    "authored top-level names and local binders cannot capture undefined or the BigInt string intrinsic",
+    "opaque __proto__ and tag fields preserve both Nat values without object or discriminator collisions",
+    "private Prod construction and projection preserve namespaced builtin fields without widening the public ABI",
+    "the bounded Nat, Int, Bool, String and Unit ABI validates runtime values"
+  ],
+  "passed": true,
+  "sources": [
+    {
+      "sourceId": "src/Quantity.ps",
+      "sha256": "cce1dab19ec5f3c97c0f995abee1af70445758f8fb5af37a5b27dc8932c8a4de"
+    },
+    {
+      "sourceId": "src/Main.ps",
+      "sha256": "53ef403e52a0984b594755473715e0e6f2ff0ddc6c4ed26c5109a31f20f62e80"
+    }
+  ],
+  "canonicalAdmissionsSha256": "6920fe26543ce11c9454d92154f1ee347c791bcd55bdbfdadbbcdacb296255fc",
+  "bundleSha256": "c3829e8032a2c48a633607c66499105f234feff88ffbe877723c516021cc2a40"
+}

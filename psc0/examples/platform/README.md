@@ -8,6 +8,7 @@ The examples use the current bounded source profile and checked TypeScript build
 | --- | --- |
 | checked-nat | A single ProofScript definition admitted and emitted beside its source |
 | existing-typescript | An ES2022/NodeNext TypeScript project importing that generated neighbor |
+| checked-library | Two ProofScript modules exposing a selected API, shared opaque values, and neighboring TypeScript facades |
 | rejected-source | An ill-typed definition that cannot produce a successful build |
 
 ## Start without copying an example
@@ -22,7 +23,7 @@ Init creates package.json, src/Main.ps, and PROOFSCRIPT.md. It installs nothing.
 For a published version, the generated exact dependency can be installed with `npm install --ignore-scripts`. For this unpublished preview, install the downloaded candidate tarball from its actual path:
 
 ```sh
-npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.2.tgz"
+npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.3.tgz"
 npm run check
 npm run build
 ```
@@ -52,10 +53,20 @@ The build script runs the checked ProofScript build before the TypeScript projec
 
 To adopt the same approach in an existing project, preserve its package metadata and TypeScript configuration, add a .ps source under src, and run the checked source build before the existing TypeScript build. Init does not rewrite the project's existing build command.
 
+## checked-library
+
+Copy checked-library into a working directory and install the preview.3 candidate tarball as above. The project also pins TypeScript 7.0.2. Run `npm run ps:check` for kernel admission only, or `npm run build` followed by `npm start` for the complete example.
+
+Its root `proofscript.exports` map selects `Quantity` and `makeQuantity` from src/Quantity.ps, and `readQuantity` and `sameQuantity` from src/Main.ps. The entry imports the first module. The compiler checks the complete source closure, then publishes src/generated/library.ts as one shared implementation plus the thin src/Quantity.ts and src/Main.ts facades. The completed receipt is src/generated/library.checked.json. The handwritten consumer imports the two neighboring modules and prints `ProofScript library answer: 42`.
+
+The public interface uses bigint for Nat and frozen opaque handles for Quantity. A handle created through one facade retains its identity through the other; forged objects and malformed scalar values are refused. This bounded first-order interface excludes dependent, generic, callback, array and erased-proof parameters. The [checked-library guide](checked-library/README.md) explains the build order and current boundaries.
+
+Keep the project bundle at a distinct output path and keep generated facades separate from handwritten .ts files. The checked transaction refuses unowned or manually modified destinations. A rejected source build preserves the last completed generation. Run the downstream TypeScript build only after the checked project command succeeds; coordination with an independent TypeScript watcher remains later work.
+
 ## Rejected build
 
 The rejected-source directory contains `def answer : Nat := Type`. Its check/build must return a nonzero exit status. See that directory's README for a last-good-output experiment.
 
 ## Optional extension demo
 
-The separately built psdev candidate is outside the compiler self-host closure. The generated PROOFSCRIPT.md explains how to install its exact tarball, explicitly enable `command:dev` in package.json, and run `psc dev --once`. This demo uses the same protected checked-build route. It is a bounded one-shot command; live watch and broader module/ABI support remain later work.
+The separately built psdev candidate is outside the compiler self-host closure. The generated PROOFSCRIPT.md explains how to install its exact tarball, explicitly enable `command:dev` in package.json, and run `psc dev --once`. This demo uses the same protected checked-build route. It is a bounded one-shot command. The same command can use the checked-library project's configured entry, bundle and export selection; enabling it does not grant direct access to those files. Live watch, LSP and broader ABI support remain later work.

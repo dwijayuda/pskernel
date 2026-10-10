@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { buildChecked } from '../scripts/checked-build.mjs';
 import { initProject } from '../scripts/project-init.mjs';
+import { validateProjectExports } from '../scripts/checked-project.mjs';
 import {
   validateCommandExtensionConfig, discoverCommandExtensions, executeCommandExtension,
 } from '../scripts/command-extensions.mjs';
@@ -21,12 +22,14 @@ const help = `Usage: psc init [directory] [--json]
        psc extensions [--json]
        psc version [--json]
 
-A root package.json can set proofscript.entry and proofscript.out.
-Without an output setting, build writes neighboring .ts plus a checked receipt.
+A root package.json can set proofscript.entry, proofscript.out and proofscript.exports.
+Explicit exports select the checked library profile: one .ts bundle at out and
+thin .ts modules beside selected .ps sources. Library builds require out.
+Without exports or an output setting, build writes one neighboring .ts bundle.
 init never installs packages; existing package.json and tsconfig.json are preserved.
 dev requires an explicitly enabled, locally installed psc-command/1 Wasm extension.
 This preview supports one-shot dev requests. Watch, LSP, PSCV, general language
-extensions, and neighboring module facades remain later milestones.
+extensions remain later milestones.
 `;
 
 function fail(message) { throw new Error(message); }
@@ -46,7 +49,7 @@ async function nearestPackage(start) {
       if (metadata === null || typeof metadata !== 'object' || Array.isArray(metadata)) {
         fail('PSC_PROJECT_PACKAGE_JSON: ' + file);
       }
-      return { root: directory, file, metadata };
+      return { root: directory, file, metadata, source };
     }
     const parent = path.dirname(directory);
     if (parent === directory) return null;
@@ -67,9 +70,9 @@ function checkProjectPolicy(project) {
   if (!project || !Object.hasOwn(project.metadata, 'proofscript')) return;
   const config = project.metadata.proofscript;
   if (config === null || typeof config !== 'object' || Array.isArray(config) ||
-      Object.keys(config).some(key => !['profile', 'entry', 'out', 'extensions'].includes(key))) {
+      Object.keys(config).some(key => !['profile', 'entry', 'out', 'exports', 'extensions'].includes(key))) {
     fail('PSC_PROJECT_CONFIGURATION_UNSUPPORTED: ' + project.file +
-      ' supports proofscript.profile="checked", entry, out, and command extensions');
+      ' supports proofscript.profile="checked", entry, out, exports, and command extensions');
   }
   if (Object.hasOwn(config, 'profile') && config.profile !== 'checked') {
     fail('PSC_PROJECT_PROFILE_UNSUPPORTED: ' + project.file);
@@ -79,6 +82,7 @@ function checkProjectPolicy(project) {
       fail('PSC_PROJECT_PATH: proofscript.' + key + ' must be a relative project file path using /');
     }
   }
+  validateProjectExports(config.exports);
   validateCommandExtensionConfig(config.extensions);
 }
 
@@ -183,6 +187,7 @@ async function main() {
       { name: 'checked-nat', description: 'A checked Nat constant and neighboring TypeScript output.' },
       { name: 'existing-typescript', description: 'A handwritten TypeScript consumer of one generated module.' },
       { name: 'rejected-source', description: 'An ill-typed source that must not publish output.' },
+      { name: 'checked-library', description: 'Two checked .ps modules with a shared opaque datatype and a handwritten TS consumer.' },
     ].map(item => ({ ...item, path: path.join(installedRoot, 'examples/platform', item.name) }));
     process.stdout.write(options.json ? JSON.stringify({ examples }, null, 2) + '\n'
       : examples.map(item => item.name + ': ' + item.description + '\n  ' + item.path).join('\n') + '\n');
@@ -208,8 +213,14 @@ async function main() {
   await assertEntryProject(project, entryPath);
   const outputPath = options.command === 'check' ? undefined : options.output
     ? path.resolve(cwd, options.output)
-    : !explicitEntry && config?.out ? path.resolve(project.root, config.out)
+    : (!explicitEntry || config?.exports !== undefined) && config?.out ? path.resolve(project.root, config.out)
       : entryPath.replace(/\.(?:ps|lean)$/u, '.ts');
+  if (config?.exports !== undefined) {
+    if (!entryPath.endsWith('.ps') || options.command !== 'check' &&
+        (!options.output && !config.out || !outputPath.endsWith('.ts'))) {
+      fail('PSC_LIBRARY_OUTPUT: select a separate .ts bundle with --out or proofscript.out');
+    }
+  }
   if (options.command === 'dev' && !outputPath.endsWith('.ts')) {
     fail('PSC_DEV_OUTPUT_KIND: the one-shot command demo publishes a .ts project bundle');
   }
@@ -260,6 +271,10 @@ async function main() {
       kernel: release.kernel.selector, profile: 'checked',
       checkOnly: options.command === 'check', signal: controller.signal,
       ...(extensionExecution ? { extensionExecution } : {}),
+      ...(config?.exports === undefined ? {} : { libraryConfig: {
+        projectRoot: project.root, exports: config.exports,
+        configPath: project.file, configSource: project.source,
+      } }),
     });
     const result = options.command === 'dev'
       ? { command: 'dev', extensions: receipt.extensions, receipt } : receipt;

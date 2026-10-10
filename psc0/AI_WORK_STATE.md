@@ -1,3 +1,129 @@
+# PSC0 T1 checked TypeScript library adoption — completed
+
+Updated: 2026-10-10 03:14:33 UTC. T1 implementation, exact current-source compiler qualification and all six preview3 platform jobs are complete. This handoff records the qualified release source and exact artifacts; subsequent documentation commits do not replace those identities. No npm publication, main merge, seed promotion, kernel algorithm change or default-provider switch was performed.
+
+## User-authorized scope and implementation
+
+The user accepted T1: pure acyclic local ProofScript modules, explicit source-owned public exports, one checked project bundle, mechanically thin neighboring TypeScript facades, a handwritten TypeScript consumer, a bounded runtime ABI, and protected publication before full psdev watch. This is implemented as psc-ts-library/1. The user also asks whether the same PSKernel Core can execute as generated JavaScript before Wasm; investigate and qualify that route separately without an automatic provider switch.
+
+Integration branch: psc0/platform-t1-v1, based on platform-v1 HEAD 4265f1d614d15fc9e6ed133a923779ba7af16db8. Draft PR91 targets platform-v1 and is stacked on PR90. Preserve the compiler and qualification slice histories.
+
+One preparation retains exact authored source, import order and export ownership. Mandatory native admission feeds checked original RuntimeIR, an exact public descriptor, one TS bundle and neighboring facades. The ABI covers Nat/Int bigint, Bool, scalar-valid String, Unit and supported monomorphic opaque datatype/structure handles. Implicit, dependent, generic and higher-order public signatures fail explicitly. Project erasure structurally applies __ps$source$ through the existing name index; actual generated tests cover top-level/local intrinsic capture, __proto__/tag fields and private Prod construction/projection. Legacy lowering retains its empty-prefix route.
+
+The existing publication transaction covers bundle/facade destinations, source/configuration/extension freshness, exact descriptor coverage and globally unique bindings, directory capitalization, old/new directory leases, previously owned bytes, retired facades and rollback. Its fixed staging buckets are next/, previous/ and restore/. It preserves handwritten or concurrently edited outputs; incomplete rollback retains its journal/leases/backups and no success receipt. Receipt-last publication does not establish atomic multi-file visibility, protection against arbitrary same-user filesystem races, or power-loss durability.
+
+## Completed compiler qualification
+
+Run 38013991001, attempt 2, at source 5fe0045dcb0bf30e1d2519f900458d1407822eed and tree 23dfb56a84cdce585e5c4b1a5ccff3b2de92f0e5 passed both compiler job114101357176 and native replay job114114935728. The first attempt stopped at the existing 180-second native full-IR process timeout; the unchanged-head rerun passed without increasing budgets or changing source. C1 passed at 02:13:19 UTC; C2/C3 fixed point passed at 02:56:18; exact-C3 T1 conformance passed at 02:56:20; native replay completed at 02:57:54.
+
+- Portable closure: 62 modules, SHA256 3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea.
+- C1/C2/C3 all retain equal canonical surface e91f3bfaaedf755b0fb027a3c6ffe752784c2f19cd41641ba8b015a90e37fe3e, normalized admissions 403d7b83ab62150a6f059cd5ed9dcfe18fd68e18f1c54cd8527abf173e20e1d5, TS 8923672fbc4b78a8bc1e25ab172162356ae4ffae6179eddc930c7955c73c1b3d and JS 6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617.
+- Original RuntimeIR checking and all 12 complete public Core/IR ABI builds passed. The 87-case migration comparison retains raw reports and projects only the two exact empty legacy runtimePrefix fields under empty-legacy-erasure-namespace/1. Seven negative regression groups protect that comparison.
+- Exact-C3 conformance passed all 11 recorded ownership, shared opaque identity, selected binding, runtime guard, unsupported ABI, name/field and IR-budget observations. Its canonical admissions hash is 6920fe26543ce11c9454d92154f1ee347c791bcd55bdbfdadbbcdacb296255fc and TS bundle hash is c3829e8032a2c48a633607c66499105f234feff88ffbe877723c516021cc2a40.
+- Native replay accepted four deduplicated streams covering C2/C3 compiler sources, raw Lean and ProofScript capabilities, and recursive-generic fixtures. Logs identify the successful artifact11657766675 and its current C3 hash. This replay does not cover the separate T1 conformance stream; actual T1 native admission is required in platform source and installed example tests.
+- Successful compiler artifact: 11657766675, 5,567,845 bytes, uploaded ZIP SHA256 8d6309b0a526b6987922ebb34cb4d5892ad48ca9e31f3bbb7dfb30ae7319754d. Older failed-attempt artifact11654548418 has the same name; release workflow pins the exact successful ID. Native replay artifact11656759460 is separate.
+- The selected R reproduction is cold:false, not a new isolated cold-recovery qualification. Fixed-point equality is not a compiler semantic-preservation or logical-consistency proof; strictSh1Qualified remains false.
+
+Exact fixed-point, generated-conformance and native-admission receipts are retained in docs/platform with run38013991001 in their filenames. Earlier focused run38010115595 at e698a663b7b86ea89987beb757c35eb555fe653c passed 63 host tests and 11 native-generated conformance observations; the current full qualification independently supplies successor evidence.
+
+## First platform fixture correction
+
+Release checkpoint49ab05830e34c35e8df0f51389d430e88a046b8d / run38019059404 stopped before artifact download or native assembly: the synthetic installed CLI fixture omitted checked-project.mjs from its copy list. All15 CLI cases failed at module loading, while115 other source tests passed. The actual release assembler already includes the module, whose only dependencies are node:path and node:crypto. Add that one fixture copy entry; retain all15 CLI expectations, including the already correct four-example catalog. Compiler qualification, release pins and production behavior are unchanged. Retry all platform gates.
+
+## Windows source-shape correction
+
+Run38019185667 at10fb98c3a3aab466073d210dd7f160da756c33eb passed Linux source130/130 host tests and18/18 real native integration, package assembly, and all four clean installed jobs (48 Linux observations each,46 Windows observations each). Both Windows jobs use PowerShell7.6.6 through npm psc.cmd with Node22.23.3/npm10.9.9 and Node26.7.0/npm12.0.2. All record real native T1 library admission,42→43 consumer rebuild, whole-generation refusal/preservation and both isolated command demos. Candidate11656994979 contains proofscript tarball SHA2560273e5f18a3cea66b0f4deaa44fbfe1214510fd59d146956355985e555c4db7e,3,656,980bytes.
+
+The remaining Windows source job114116349238 passed135 discovered unit tests (134pass,0fail,1existing Unix-permission skip), then failed check-modular-preparation-source.mjs:82. The closed-emitter marker contains a literal LF; the only cross-platform correction is CRLF→LF in that script's read-only session-source inspection view. Keep every exact marker, the two checked emitter names, punctuation/indentation, ordering/readback and no-raw-fallback checks unchanged. Runtime source bytes, canonical admissions, receipts, compiler/backend code and release/kernel pins are not normalized or modified. The retry must reach and pass Windows native source integration and record one coherent completed platform run. Do not call the previous5/6 run wholly qualified.
+
+## Completed preview3 platform qualification
+
+Final release source b01281b46aa62cbb09ed47a24ebad08b72c6265f, tree d54208569a708fef53fab913ad3b11ac5a496f00. Run38019471955, attempt1, completed SUCCESS in all six jobs; GitHub run updated at2026-10-10T03:10:04Z. Root and the independent qualification reviewer read the actual completed logs and all four installed records.
+
+- Linux Node22.23.3 source job114117024606:130 host/policy tests passed;18 real native/integration tests passed.
+- Windows Node26.7.0 source job114117239372:134 host/policy tests passed,1 Unix-permission fixture skipped;15 native/integration tests passed,3 POSIX shebang transport fixtures skipped. No failures. New T1 and actual packaged native admission ran. The closed-emitter source-shape guard now passes with its exact assertions unchanged.
+- Four clean installed jobs: Linux Node22/npm10.9.9 and Node26/npm12.0.2 each48 recorded observations; Windows Node22/npm10.9.9 and Node26/npm12.0.2 each46. Windows routes through PowerShell7.6.6 and npm psc.cmd. No source checkout or Lean toolchain is needed in these installed tests.
+- Every installed record matches qualified compiler6ab7d603..., the proper pinned native artifact, two source modules, one bundle/two facades and shared opaque identity. Consumer starts42, imported-body edit produces43, invalid source preserves all3 artifacts and completed receipt, and handwritten facade collision refuses the whole new generation. Both optional command demos disclose actual bytes, remain inactive until configured, execute only their restricted Wasm request and refuse tampering.
+- Candidate artifact11657608168:3,887,650bytes, ZIP SHA2560a202234723940b86b9370303a3ab0d952003f41a6970b332c30117afb222f04; expires2026-11-09T03:08:56Z.
+- proofscript-0.1.0-preview.3.tgz:3,656,980bytes, SHA2560273e5f18a3cea66b0f4deaa44fbfe1214510fd59d146956355985e555c4db7e.
+- psdev-0.1.0-preview.3.tgz:1,914bytes, SHA25620e6270726247f559129fa496aa0ae51cd0a8bf4ad679bfc99d91cb9b136e34e.
+- psc-demo-pshello-0.1.0-preview.3.tgz:1,933bytes, SHA25665adbd54131fc69e4e73df08501e5f59f82fbee29b8965bde5f27f2b577c4ded.
+- The product tarball is byte-identical to the preceding run's artifact. Test fixture and source-inspection EOL corrections changed no shipped runtime.
+- Exact final records: docs/platform/t1-checked-library-preview-qualification-2026-10-10.json and installed-{linux,win32}-node{22.23.3,26.7.0}-38019471955.json. Compiler/native receipts retain run38013991001 in their filenames. PLATFORM_IMPLEMENTATION.md and PSC0_ARCHITECTURE_PLAN.md distinguish completed bounded features, exact qualifications, proposals and unproved claims. Final wording review passed interface/ABI/publication/proof/JS scope.
+
+The installed product remains one proofscript bundle with TypeScript7.0.2 as its only required npm dependency. The two command tarballs are optional local demonstrations, not claims of registry name ownership. Four examples ship: checked-nat, existing-typescript, rejected-source and checked-library. psc init is available; full watch is not. Use a fresh copied checked-library example; an old single-file receipt cannot silently transfer ownership to the new library receipt. The guide explains explicit archival of still-owned generated files while preserving handwritten or edited bytes.
+
+## Next milestones after this completed slice
+
+1. Real psdev watch over the existing checked transaction: import invalidation, cancellation, generation identity, receipt/recovery and downstream sequencing. Keep unsupported PSCV/contracts and unproved semantic claims explicit.
+2. The proposed ordinary Nat.max support-unit diagnostic in KERNEL_JS_PLAN.md, then same-source JS generation/adapter/parity/budget/artifact/Windows/Linux qualification. It is not executed or qualified by T1; native remains selected.
+3. Durable retention of exact bootstrap/release executable inputs and clean recovery before intentional public npm release. Expiring Actions artifacts and JSON identities do not supply durable binary storage.
+4. Broader local/npm/workspace library resolution, final ps-prefixed package boundaries, deliberate default extensions and concrete producer/validator protocols. LSP/VS Code remain outside bootstrap.
+5. Full Lean and later PSCV assurance work in proofs/**/*.proof.lean outside bootstrap, without turning full formal completion into the closing gate for every bounded implementation milestone.
+
+Do not rerun or modify the completed T1 compiler merely to prove its metadata again. Re-fetch live HEAD and relevant handoffs before any new slice. Existing selected R/native pins and pending Core refinement remain independent.
+
+## Core-JS finding and planned next diagnostic
+
+The four-file Core-JS plan/probe from psc0/kernel-js-probe-v1 commit6a51a209410bf81d5ab6d8cdf6688be211889e7d is integrated with history. Its workflow remains scoped to the diagnostic branch. Original J0 source b94a6c552d8cc208ce2202527f7f30e28e8836ee / run38007233891 authenticates the previously qualified F compiler and current selected Core, passes seven native public-admission cases, and prepares20 unchanged Core modules before refusing psKernelCheckerStateExitLocalScope in Checker/State.lean. F has no Nat.max in its standard environment. No current Core-JS artifact or qualified JS provider was produced.
+
+KERNEL_JS_PLAN.md now contains a reviewed, unexecuted next diagnostic: retain an explicit ordinary PSC Lean-syntax definition Nat.max(a,b) = Nat.add a (Nat.sub b a) before each fresh canonical batch, admit it with the existing native provider, test its emitted runtime behavior, then retry the79 unchanged Core modules. Existing Nat/add/sub admission avoids a new trusted primitive; source review indicates the current compiler and provider can remain pinned for that diagnostic. Qualified definition names require PSC Lean syntax because the current .ps declaration parser consumes one identifier. Full Lean already owns Nat.max, so this fixture must be outside full-Lean targets and the compiler/Core bootstrap closure. Typing Nat→Nat→Nat does not prove maximum equivalence; the mathematical model proof and source-to-executable refinement remain later obligations. The plan does not claim this diagnostic has run or that it clears later Core gaps.
+
+Intended order: qualified native today; separately qualified same-source pskernel-core-js; qualified Wasm option. JS provider qualification needs canonical codec, native parity, budgets, artifact authentication and installation evidence. A Node child process is not an arbitrary npm-JS sandbox. Do not remove the scope-exit algorithm, add a hidden runtime helper, change the default, or infer current qualification from the historical older three-case JS demonstration.
+
+## Preserved identities and proof scope
+
+Selected authoring seed R remains fe2560aba0f347b1caf8d000d371464642d44f23; both seed manifests are byte-identical. Bootstrap remains Node22.23.3 / Lean4.34.0 / TypeScript7.0.2. Native Core source remains963030dc2d154008fccc82e7c8ed29331f138799 with its qualified Linux and Windows artifacts. No implicit4.35 Arena substitution, native evaluator, semantic fallback, kernel algorithm/cache change or selected-seed promotion.
+
+Formal work remains later in psc0/proofs/**/*.proof.lean, outside self-host bootstrap. Proposed obligations cover source ownership, admission/emission correspondence, name hygiene, guarded ABI, shared bundle/facades, publication state and executable bootstrap refinement. Runtime admission and validation are mandatory now. No new formal theorem, full PSCV assurance, compiler semantic-preservation proof or logical-consistency proof is claimed.
+
+## Execution and ownership
+
+GitHub connector/MCP exclusively for repository reads/writes; builds/tests/source execution only in GitHub Actions. No local files, checkout, shell/source execution, browser or Desktop Commander. Pure in-memory text/JSON transformation and evidence hashing are permitted. Before every ref update read live HEAD and use a non-force expected-HEAD lease. Preserve concurrent changes and slice histories. Avoid branch pushes while qualification is active because concurrency can cancel runs.
+
+Root owns integration/release/evidence/docs; the compiler slice owns portable preparation/erasure/emission; the qualification slice owns generated conformance, the example and installed smoke. Core-JS work is separately scoped. Finish the authorized T1 release qualification and document concrete limits.
+
+## Historical qualification corrections
+
+The following retains the earlier failure analysis; current success is recorded above.
+
+## Recovery authentication correction
+
+Full run38010366876 at c9fa06aecc48d9bd4f9b6c5d6b6aac245e76fabe stopped before compiler execution: scripts/sh1-grammar-conformance.mjs had actual git blob6a4085cc0aea031ff96c7bd5915f82093f0f0345 but the selected native recovery policy pins48efa9b0c90e7904a1df49f43253395841bff90c. Root traced this to prior platform commit033f1c6e20459cdb89a24d861697a06f64eca225, outside T1: it replaced one inline immutable grammar-profile constant with import/re-export from source-grammar-profile.mjs.
+
+Restore exact pinned blob48efa9b0c90e7904a1df49f43253395841bff90c. The grammar/conformance algorithm is identical; only the original metadata location is restored. The runtime host keeps its lightweight metadata file with exactly matching values, while the recovery runner again has its authenticated closed import set. Both selfhost-seed.json and selfhost-seed-recovery.json remain byte-identical. Do not repin policy files, remove authentication or substitute a new seed. This is a recovery of the existing recipe, not a newly qualified recovery route.
+
+## Checked-session source guard correction
+
+Retry run38010642642 at61f45ef2f1a182910e3e421543968a2d81e56720 passed the selected R/policy authentication, exact TS7 contract and portable-source/root checks, then stopped before compiler generation on three stale source-shape assertions in check-modular-preparation-source.mjs. The live session still freezes the prepared graph before serialization, binds reserialization to its private project mode and selects only the two checked emitters. The assertions still expected the earlier two-argument serializer and direct single-emitter call.
+
+Align those three guard forms with the actual closed checked paths and require both freeze/serialization markers to exist before comparing order. The former index-only comparison could accept a missing freeze marker as -1. The existing63 host tests already exercise frozen graph ownership, mode/handle forgery, refusal and publication; no session behavior, compiler, kernel, seed policy or acceptance expectation changes here. The full retry remains mandatory.
+
+
+## Authenticated recovery and source-isolation harness
+
+Run38010922748 at dbcf9d9a6f4ed3a8e9a4f75550bf99d99cb3bbf4 passed selected-R authentication, source/host guards, successor/cache contracts and exact native-TS7 reproduction of all four pinned R products. Its receipt is explicitly cold:false; this is not a new isolated cold-recovery qualification. Identity47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225 and JS70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061 match the preserved selection. Both seed policy files remain unchanged.
+
+The current native compiler build (146 jobs), native parser/translation/erasure regressions and native seed build (141 jobs) passed. The run stopped before candidate/C2/C3 because the old filesystem-isolation double lacked psCompilerPrepareSource, which the protected compile-with-generated path now requires. Do not reopen raw emission to satisfy a filesystem fixture.
+
+Integrate qualification commit2a3f51cd8360ae8d359787ac93ebeaf4f216cc17: retain all14 original isolation scenarios and expected diagnostics, but exercise readProofScriptImports and readCheckedSourceSnapshot directly with the existing bounded parser double. Success verifies raw source bytes, parser inputs, closure order/digest, entry/root and frozen records; refusal must return no snapshot. This harness claims filesystem/snapshot isolation only. Actual native/generated compiler, target TypeScript, admission and self-host checks remain separate mandatory gates. The downstream actual-native replay/name-index harnesses were reviewed and need no speculative fixture rewrite.
+
+
+## C1 generation and migration report compatibility
+
+Full run38011957573 at e81ec3baeec0e9a46d2e50ea255afe96259a6fac passed all preceding host/native/grammar/CLI gates, used the authenticated R cache and generated C1. C1's62-module closure remains3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea. TS8923672fbc4b78a8bc1e25ab172162356ae4ffae6179eddc930c7955c73c1b3d and JS6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617 equal the actual native-generated candidate. C1 canonical surface e91f3bfaaedf755b0fb027a3c6ffe752784c2f19cd41641ba8b015a90e37fe3e and normalized admissions403d7b83ab62150a6f059cd5ed9dcfe18fd68e18f1c54cd8527abf173e20e1d5 are recorded, but C2/C3 have not run. All12 complete worker Core/IR ABI checks passed, observation hashb23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49.
+
+The failure is PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE at sh1-qualify.mjs:989 after generation and capability execution. Root and compiler agent recursively compared the actual JSON reports. Only F2 cases structures-empty-reverse-accumulator and inductives-empty-reverse-accumulator gain result.scope.declarationNames.runtimePrefix with exact value empty string; the F2 and aggregate hashes consequently differ. All other87-case report values match. Keep raw reports/hashes; assert these exact new fields before a narrow cross-revision comparison view. Do not generically discard fields, bypass ABI or change compiler/Core algorithms. Candidate and later C1/C2/C3 behavioral comparisons must use the same explicit compatibility rule. The isolated ABI runner stays unchanged.
+
+Failed-run artifact11655101607 contains3036362bytes, ZIP SHA2569ba4c9c738a87f95770adb10d32e8a0481c548dd959c8908edebc6f36d857ca6. It is diagnostic evidence, not a qualified successor/release artifact. C1 generation took869718.580168ms; prior successful F candidate13.10min/C2-C3 comparison26.12min explains the long checkpoint. Do not substitute this failed-checkpoint C1 into a new receipt or skip required regeneration.
+
+The reviewed harness follow-up ab10f55660efb97b1cc4017aa26a321f6781594b adds an explicit empty-legacy-erasure-namespace/1 comparison view. It validates raw family/whole-report hashes and case coverage, requires the two exact current fields to exist and equal empty string, preserves every other field, and records both raw hashes plus the comparison hash. C1/C2/C3 recompute and compare this receipt. The ABI harness is unchanged. Seven data-only test groups use the already retained immutable R report, reproduce the exact logged current hash, and reject missing/nonempty fields, unrelated same-named fields, changed observations, dropped cases and invalid raw hashes. The existing early SH1 host step runs them before any long generation. The three harness files and workflow are outside the immutable seven-file native recovery recipe. The remaining iteration gate was reviewed and uses same-compiler comparisons, with no old scope-layout assumption. The next full run still regenerates C1 and must establish C2/C3 and native replay.
+
+
+---
+
+# Previous completed Wasm planning checkpoint
+
 # PSC0 Wasm Core direction — research complete, implementation pending
 
 Updated: 2026-10-09 22:52:02 UTC. This section is active and supersedes the completed onboarding checkpoint below.

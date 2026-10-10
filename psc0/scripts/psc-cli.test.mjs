@@ -27,7 +27,7 @@ async function fixture(t, proofscript = { profile: 'checked', extensions: [] }) 
     copyFile(path.join(root, 'bin/psc.mjs'), path.join(installed, 'bin/psc.mjs')),
     copyFile(path.join(root, 'scripts/release-manifest.mjs'), path.join(installed, 'scripts/release-manifest.mjs')),
     ...['project-init.mjs', 'command-extensions.mjs', 'command-wasm-profile.mjs',
-      'command-extension-worker.mjs', 'checked-artifact-publication.mjs'].map(file =>
+      'command-extension-worker.mjs', 'checked-artifact-publication.mjs', 'checked-project.mjs'].map(file =>
       copyFile(path.join(root, 'scripts', file), path.join(installed, 'scripts', file))),
     copyFile(path.join(root, 'release/release.json'), path.join(installed, 'release.json')),
     writeFile(path.join(installed, 'node_modules/typescript/package.json'), JSON.stringify({ name: 'typescript', version: '7.0.2' })),
@@ -281,7 +281,8 @@ test('examples lists shipped source locations without invoking compiler or npm c
   const run = context.invoke(['examples', '--json']);
   assert.equal(run.status, 0, run.stderr);
   const { examples } = JSON.parse(run.stdout);
-  assert.deepEqual(examples.map(item => item.name), ['checked-nat', 'existing-typescript', 'rejected-source']);
+  assert.deepEqual(examples.map(item => item.name).sort(),
+    ['checked-library', 'checked-nat', 'existing-typescript', 'rejected-source']);
   for (const example of examples) {
     assert.equal(example.path, path.join(context.installed, 'examples/platform', example.name));
   }

@@ -1,0 +1,73 @@
+name: PSKernel-Fast G6 evaluator diagnostic benchmark
+
+on:
+  push:
+    branches: [research/pskernel-fast-v3-greenfield-20261011]
+    paths:
+      - "psc0/packages/pskernel-fast/Bench.lean"
+      - "psc0/packages/pskernel-fast/lakefile.lean"
+      - ".github/workflows/pskernel-fast-benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evaluator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.35-rc4
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build and measure identical closed beta/let workloads
+        working-directory: psc0/packages/pskernel-fast
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lake build pskernel_fast_bench
+          : > metrics.txt
+          for mode in reference closure; do
+            for sample in 1 2 3; do
+              echo "MEASUREMENT mode=$mode sample=$sample"
+              /usr/bin/time -f "COST mode=$mode sample=$sample elapsed_s=%e peak_rss_kb=%M" \
+                .lake/build/bin/pskernel_fast_bench "$mode" 24 1200 \
+                >> metrics.txt 2>&1
+            done
+          done
+          cat metrics.txt
+          python3 - <<'PY'
+          import re, statistics
+          from pathlib import Path
+          lines = Path("metrics.txt").read_text().splitlines()
+          results = {}
+          checksums = {}
+          for line in lines:
+              m = re.search(r"mode=(reference|closure) depth=24 iterations=1200 checksum=(\d+)", line)
+              if m:
+                  checksums.setdefault(m[1], []).append(int(m[2]))
+              m = re.search(r"COST mode=(reference|closure) sample=(\d+) elapsed_s=([\d.]+) peak_rss_kb=(\d+)", line)
+              if m:
+                  results.setdefault(m[1], []).append((float(m[3]), int(m[4])))
+          if sorted(results) != ["closure", "reference"] or any(len(x)!=3 for x in results.values()):
+              raise SystemExit("benchmark samples missing")
+          if sorted(checksums) != ["closure", "reference"] or any(len(x)!=3 for x in checksums.values()):
+              raise SystemExit("checksum samples missing")
+          if len(set(checksums["closure"] + checksums["reference"])) != 1:
+              raise SystemExit("different observable evaluator result")
+          for mode in ("reference", "closure"):
+              vals = results[mode]
+              print(f"SUMMARY {mode} median_elapsed_s={statistics.median(x[0] for x in vals)} median_peak_rss_kb={statistics.median(x[1] for x in vals)} checksum={checksums[mode][0]}")
+          print("SCOPE: untyped beta/let syntax, shared process build, separate timed executions; NOT Lean kernel speed")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-fast-g6-toy-evaluator-metrics
+          path: psc0/packages/pskernel-fast/metrics.txt
+          if-no-files-found: warn

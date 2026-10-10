@@ -8,3 +8,6 @@ lean_lib PSKernelFast where
 
 lean_exe pskernel_fast_mvp where
   root := `Main
+
+lean_exe pskernel_fast_bench where
+  root := `Bench

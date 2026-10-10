@@ -109,3 +109,13 @@ New `PSKernelFast/TinyTyping.lean` implements conservative **checked-only** infe
 This is an intentionally **incomplete checker**, not full Lean DefEq, not a proof kernel/provider and not a formal soundness theorem. Positive results are still experimental and must not grant actual declaration admission. Its first tests check Sort universe elevation, dependent identity, application, let, wrong domain, undeclared levels, budget and unsupported constants.
 
 Cloud CI must pass the exact source before claiming G5 compiled/tests green.
+
+## G5 verified
+
+[Run 38095343896](https://github.com/dwijayuda/pskernel/actions/runs/38095343896), source `15979f9e065afd18c69533584b107a9c2b74d357`, job `114339976555`: Lean 4.35-rc4 pinned CI succeeded, 18 Lake build jobs, focused conservative checked-inference cases passed. **No declaration or proof acceptance**.
+
+## G6 diagnostic benchmark candidate — no measurements yet
+
+`Bench.lean` and isolated `.github/workflows/pskernel-fast-benchmark.yml` evaluate the SAME already-constructed closed untyped beta/let raw terms under (1) reference substitution WHNF and (2) lazy closure WHNF plus full reification. Benchmark workloads, memory and wall time are NOT official Lean export or proof-checking measurements. Report each mode's three samples, medians and identical checksums; run on a single pinned cloud runner. Source commit is unqualified until the exact G6 job completes. Do not infer kernel speedups from its results.
+
+Benchmarking and large-corpus conformance remain separate from G5 correctness and eventual formal soundness. If a mode is slower, report it and use the evidence to guide architecture selection; don't hide it.

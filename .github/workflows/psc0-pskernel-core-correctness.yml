@@ -31,6 +31,7 @@ jobs:
       # Match the reference checker arity guard after normalizing Nat.beq to equality.
       # Pin the reference policy at nested header checks, including proof inversion.
       # Audit repaired public axiom dispatch inversion and semantic-reading extension.
+      # Explicit Except error type in public checked-axiom proof inversion.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

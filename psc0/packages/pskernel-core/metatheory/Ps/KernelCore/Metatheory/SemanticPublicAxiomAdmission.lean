@@ -45,8 +45,9 @@ theorem referenceCheckedAxiom_dispatch_result
           | true =>
               refine ⟨dispatched, rfl, ?_⟩
               have equality :
-                  Except.ok (psKernelEnvironmentWithNativeEvaluator
-                    dispatched none) = Except.ok result := by
+                  (Except.ok (psKernelEnvironmentWithNativeEvaluator
+                    dispatched none) : Except PsKernelError PsKernelEnvironment) =
+                    Except.ok result := by
                 simpa [psKernelV1CheckedEnvironment, hPreflight,
                   hDispatch, hResource] using run
               exact (Except.ok.inj equality).symm

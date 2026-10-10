@@ -33,6 +33,7 @@ import Ps.KernelCore.Metatheory.SemanticUniverseSubstitution
 import Ps.KernelCore.Metatheory.SemanticConstantInference
 import Ps.KernelCore.Metatheory.SemanticEnvironmentModel
 import Ps.KernelCore.Metatheory.SemanticEnvironmentConsistency
+import Ps.KernelCore.Metatheory.SemanticEnvironmentAdmission
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -46,6 +47,10 @@ run_cmd do
   let targets : Array Name := #[
     ``PsKernelSemantics.SetModel.EnvironmentModel.constantInstance,
     ``PsKernelSemantics.SetModel.erase_const_injective_at,
+    ``PsKernelSemantics.SetModel.addUnchecked_lookupCanonical,
+    ``PsKernelSemantics.SetModel.addUnchecked_model,
+    ``PsKernelSemantics.SetModel.add_success_is_unchecked,
+    ``PsKernelSemantics.SetModel.add_success_preserves_model,
     ``PsKernelSemantics.SetModel.no_stored_constant_of_literalFalse,
     ``PsKernelSemantics.SetModel.environmentEmpty_find,
     ``PsKernelSemantics.SetModel.environmentEmpty_model,

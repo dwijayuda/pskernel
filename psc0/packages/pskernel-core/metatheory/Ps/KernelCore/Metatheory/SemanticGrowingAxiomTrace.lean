@@ -40,19 +40,19 @@ interpretation. No step assumes a fresh name's value had been fortuitously
 modeled in the pre-admission Reading. -/
 theorem referenceAdmitAxiom_constructs_reading
     (M : Reading V) (session : PsKernelKernelSession)
-    (axiom : PsKernelAxiomInfo) (outcome : PsKernelAdmissionResult)
+    (axiomValue : PsKernelAxiomInfo) (outcome : PsKernelAdmissionResult)
     (chosen : List Nat → V)
     (model : EnvironmentModel M session.environment)
     (noForward : ∀ prev, prev ∈ session.environment.constants →
-      RawAvoidsConstant (psKernelConstantInfoName (.axiomInfo axiom))
+      RawAvoidsConstant (psKernelConstantInfoName (.axiomInfo axiomValue))
         (psKernelConstantInfoType prev))
-    (notReserved : psKernelConstantInfoName (.axiomInfo axiom) ≠
+    (notReserved : psKernelConstantInfoName (.axiomInfo axiomValue) ≠
       falseConstantName)
-    (allowed : FreshAxiomValueModeled M (.axiomInfo axiom) chosen)
+    (allowed : FreshAxiomValueModeled M (.axiomInfo axiomValue) chosen)
     (run : @psKernelV1AdmitDeclaration psKernelReferenceCachePolicy
-      session (.axiomDecl axiom) = .ok outcome) :
+      session (.axiomDecl axiomValue) = .ok outcome) :
     EnvironmentModel
-      (M.extendConstant (psKernelConstantInfoName (.axiomInfo axiom)) chosen)
+      (M.extendConstant (psKernelConstantInfoName (.axiomInfo axiomValue)) chosen)
       outcome.session.environment := by
   obtain ⟨A, erased, selfFree, assignment⟩ := allowed
   have sourceModel : EnvironmentModel M
@@ -61,24 +61,24 @@ theorem referenceAdmitAxiom_constructs_reading
       session.provider.nativeEvaluator model
   have sourcePrior : ∀ prev,
       prev ∈ (psKernelKernelSessionEnvironment session).constants →
-      RawAvoidsConstant (psKernelConstantInfoName (.axiomInfo axiom))
+      RawAvoidsConstant (psKernelConstantInfoName (.axiomInfo axiomValue))
         (psKernelConstantInfoType prev) := by
     simpa only [psKernelKernelSessionEnvironment,
       psKernelEnvironmentWithNativeEvaluator] using noForward
   apply referenceAdmit_of_dispatch_model
-    (M.extendConstant (psKernelConstantInfoName (.axiomInfo axiom)) chosen)
-    session (.axiomDecl axiom) outcome ?_ run
+    (M.extendConstant (psKernelConstantInfoName (.axiomInfo axiomValue)) chosen)
+    session (.axiomDecl axiomValue) outcome ?_ run
   intro dispatched dispatchedRun
   have axiomRun := referenceDispatchAxiom_returns_add
-    session axiom dispatched dispatchedRun
+    session axiomValue dispatched dispatchedRun
   have inserted := referenceAddAxiom_returns_insert
     session.resources.fuel
     (psKernelKernelSessionEnvironment session)
-    dispatched axiom session.resources.maxRecDepth
+    dispatched axiomValue session.resources.maxRecDepth
     session.resources.maxNatSize axiomRun
   exact successfulAdd_model_with_fresh_reading M
     (psKernelKernelSessionEnvironment session) dispatched
-    (.axiomInfo axiom) chosen A sourceModel
+    (.axiomInfo axiomValue) chosen A sourceModel
     sourcePrior notReserved erased selfFree assignment inserted
 
 /-- Every constructor step is an ACTUAL public reference API success,
@@ -90,19 +90,19 @@ inductive GrowingModeledAxiomTrace :
   | empty (M : Reading V) (session : PsKernelKernelSession) :
       GrowingModeledAxiomTrace M session M session
   | append (M : Reading V) (session : PsKernelKernelSession)
-      (axiom : PsKernelAxiomInfo) (outcome : PsKernelAdmissionResult)
+      (axiomValue : PsKernelAxiomInfo) (outcome : PsKernelAdmissionResult)
       (chosen : List Nat → V) (finalReading : Reading V)
       (finalSession : PsKernelKernelSession)
       (noForward : ∀ prev, prev ∈ session.environment.constants →
-        RawAvoidsConstant (psKernelConstantInfoName (.axiomInfo axiom))
+        RawAvoidsConstant (psKernelConstantInfoName (.axiomInfo axiomValue))
           (psKernelConstantInfoType prev))
-      (notReserved : psKernelConstantInfoName (.axiomInfo axiom) ≠
+      (notReserved : psKernelConstantInfoName (.axiomInfo axiomValue) ≠
         falseConstantName)
-      (allowed : FreshAxiomValueModeled M (.axiomInfo axiom) chosen)
+      (allowed : FreshAxiomValueModeled M (.axiomInfo axiomValue) chosen)
       (accepted : @psKernelV1AdmitDeclaration psKernelReferenceCachePolicy
-        session (.axiomDecl axiom) = .ok outcome)
+        session (.axiomDecl axiomValue) = .ok outcome)
       (rest : GrowingModeledAxiomTrace
-        (M.extendConstant (psKernelConstantInfoName (.axiomInfo axiom)) chosen)
+        (M.extendConstant (psKernelConstantInfoName (.axiomInfo axiomValue)) chosen)
         outcome.session finalReading finalSession) :
       GrowingModeledAxiomTrace M session finalReading finalSession
 
@@ -119,12 +119,12 @@ theorem GrowingModeledAxiomTrace.preserves
   | empty M session =>
       intro model
       exact model
-  | append M session axiom outcome chosen finalReading finalSession
+  | append M session axiomValue outcome chosen finalReading finalSession
         noForward notReserved allowed accepted rest ih =>
       intro model
       apply ih
       exact referenceAdmitAxiom_constructs_reading
-        M session axiom outcome chosen model noForward
+        M session axiomValue outcome chosen model noForward
         notReserved allowed accepted
 
 /-- The evolving model of an ACTUAL public axiom-only admission sequence

@@ -149,11 +149,12 @@ async function produce(providerRoot, compilerSearch, tsc, out) {
       if (tag(attempted) !== 'ok') {
         // Diagnose only the first failed module using the same pure API and
         // unchanged prior environment. Never rewrite input or bypass refusal.
+        try {
         const parsed=unwrap(compiler.psCompilerParseSource(compiler.PsCompilerSourceKind.lean,source),'DIAGNOSTIC_PARSE');
         let declarations=parsed.declarations; let prefix=state; let index=0;
         while (tag(declarations)==='cons') {
           const declaration=declarations.head;
-          const single=compiler.PsSyntaxModule.mk(parsed.imports,compiler.List.cons(declaration,compiler.List.nil()));
+          const single={imports:parsed.imports,declarations:compiler.List.cons(declaration,compiler.List.nil())};
           const next=compiler.psCompilerPreparationStepParsed(prefix,single);
           if (tag(next)!=='ok') {
             const parts=[]; let names=declaration.name?.segments;
@@ -164,6 +165,9 @@ async function produce(providerRoot, compilerSearch, tsc, out) {
             break;
           }
           prefix=next.value; declarations=declarations.tail; index++;
+        }
+        } catch (diagnosticError) {
+          evidence.declarationLocatorError=diagnosticError.message;
         }
       }
       state=unwrap(attempted, 'PREPARE');

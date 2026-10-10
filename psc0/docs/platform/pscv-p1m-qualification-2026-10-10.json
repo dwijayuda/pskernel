@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 0,
+  "milestone": "PSC0-PSCV-P1M-EXPLICIT-IMPORTED-DICTIONARY-APPLICATIONS",
+  "qualifiedSourceCommit": "ba5d74e6283695e003b6856716bdb1da87c726f6",
+  "ci": {
+    "runId": 38061137248,
+    "attempt": 1,
+    "allFourJobsPassed": true,
+    "platforms": [
+      "ubuntu-node22.23.3",
+      "ubuntu-node26.7.0",
+      "windows-node26.7.0",
+      "lean4.35rc3-real-typechecking"
+    ],
+    "artifactId": 11673675052,
+    "artifactZipSha256": "c6978da8ef34e5bbd1688add9ccef4717b7b3ca77e5f7ce632c667beabfcf778"
+  },
+  "observations": {
+    "normativeArithmeticRows": 42,
+    "attemptedExplicitDictionaryTerms": 42,
+    "successfulLeanTypechecks": 42,
+    "specializedGenericsExcluded": 0,
+    "explicitDictionaryWitnessSha256": "63e684be8ce9163ea076c99b1146d108b6d8bb62be8056566baa28be89099ec7",
+    "priorArithmeticObservationSha256": "364b16cbf5b972411cb00006fc1bcf596671ba57dfcbc7ad23f8517fb63b3c4b",
+    "normativeSurfaceRows": 230,
+    "normativeSnapshotIDs": 194,
+    "unresolvedStandardIDs": 191
+  },
+  "claims": {
+    "importedLeanDictionaryApplicationsTypechecked": true,
+    "closedStandardInstanceResolutionProved": false,
+    "sourceToCoreElaborationRefinementProved": false,
+    "backendRuntimeSemanticsProved": false,
+    "pscvVerified": false,
+    "verifiedExecutableAuthorized": false
+  },
+  "selectedCompilerKernelTS7ReleaseSeedChanged": false,
+  "status": "qualified-imported-Lean-typeclass-dependency-witnesses-not-Standard"
+}

@@ -208,3 +208,216 @@ According to active [AI_WORK_STATE](https://github.com/dwijayuda/pskernel/blob/p
 The old `Judgments.lean` equality/typing model was shown inadequate in `JudgmentAdequacy.lean`: that is a defect in proof specification, **not evidence of executable false acceptance**. New annotated-expression/universe-regime semantic work remains unfinished. In particular, successful admission of a fresh constant needs a **constructive semantic-model extension** preserving previously interpreted constants and the pinned False interpretation. Assuming `StoredConstantModeled` for an arbitrary fixed model would silently bypass this real proof obligation.
 
 **Do not invalidate the proof work.** Keep PR #89, active `AI_WORK_STATE.md` and proof branch unchanged; prototype on an isolated branch. P0 profiling needs no semantic rewrite. P1 implementation in `Checker/Knot` or shared inference should only merge with proof-owner coordination. Lean-native proof/source work is not automatically qualified for the latest PSC0 self-host compiler or generated JS/Wasm; those are separate explicit gates.
+
+## 6. Optimization selection matrix: gain versus semantic and size cost
+
+These ratings are **architectural hypotheses**, not PSKernel measurements.
+
+| Optimization | Potential benefit | New TCB/LOC burden | Semantic proof risk | Portability risk | Decision |
+| --- | --- | --- | --- | --- | --- |
+| Observation-only instruction/alloc/cache counters | Identifies real hotspots | Very low | None if fully observational | Low | **P0: adopt now** |
+| Faster existing expression lookup/index | Fewer repeated traversals | Low | Low/medium: exact key comparison | Low | P1 if measured |
+| Cache boundedness and session lifetimes | Less retained memory | Low/medium | Medium: scope/expiry | Low | P1 |
+| Same-head app spine inspection before expensive expansions | Less DefEq work | Low/medium | Medium: official ordering | Low | P1 |
+| Avoid unnecessary beta/let syntax rebuilding | Fewer allocations | Medium | Medium/high: scope/erasure | Low/medium | P1/P2 |
+| Small internal closure view | Faster beta/let-heavy work | Medium | High: evaluator equivalence | Medium | P2 pilot |
+| Memoize with exact free-variable environment projection | Higher cache hit rate | Medium/high | High: mask/scope proof | Medium | P2/P3 |
+| Tagged compact DAG handles and scratch pools | Lower memory/allocations | High | High: alias/lifetime | High | P3 if RSS bound |
+| Shift-homomorphic de Bruijn / OSNF | Sharing across binder depths | High | Very high | High | Research only |
+| Full NbE + call-by-need machine | Huge potential for reflective proofs | Very high | Very high | Very high | P5 only |
+| Separate handwritten Rust/C++ proof checker | May be fast | Duplicates semantics | Very high | Violates target | **Reject** |
+
+**Optimization priority law:** first remove duplicated work, then avoid allocation, then reduce retained memory, then specialize computation. Every extra table or runtime representation has a continuing code, maintenance, portability and formal-proof cost.
+
+## 7. PSKernel-Fast architecture
+
+### 7.1 One checker, separate non-authoritative acceleration
+
+~~~text
+Untrusted Lean export / ProofScript proof terms
+                     |
+             host reader/decoder
+                     |
+       validated typed request and axioms
+                     |
+       existing checked admission/session API
+                     |
+              Checker/Knot.lean
+              /           \
+       inference       DefEq + WHNF
+                             |
+                 optional Fast acceleration
+                   /        |        \
+               cheap       exact     optional
+               spines      caches    closure view
+                             |
+                  one canonical semantic result
+                             |
+                atomic successful admission
+~~~
+
+No optimizer or npm extension may issue proof acceptance independently, introduce a new trusted DefEq rule, define new kernel axioms, approve a foreign native evaluator, or change result classification without an explicit semantic-version and TCB decision.
+
+**Suggested layout (conditional additions, not new required packages):**
+
+~~~text
+src/Ps/KernelCore/
+  Checker/
+    Knot.lean                       # current ONE recursion/semantic owner
+    DefEq/*                         # optimize existing rules, not FastDefEq clone
+    Reduction/*                     # optimize existing WHNF, not a new reducer
+  Runtime/Acceleration/
+    Cache.lean                      # current exact-key cache
+    CachePolicy.lean                # current reference/cached policy
+    EnvironmentIndex.lean          # current
+    Fast/
+      Counters.lean                 # P0 optional, semantic-neutral
+      SpineView.lean                # P1 non-owning application spine
+      ClosedMemo.lean               # P1 exact closed-term memo
+      ClosureView.lean              # P2 scoped delayed substitution
+      SessionStorage.lean           # P3 conditional scratch storage
+      Profile.lean                  # bounded strategy flags, no proof rules
+  API/
+    Fast.lean                       # OPTIONAL thin preset of existing API
+~~~
+
+The **`pskernel-fast` name** denotes the fast execution profile. A future `@proofscript/pskernel-fast` npm package may be a thin deployment wrapper over `@proofscript/pskernel-core`, not a metapackage of all ProofScript packages and not a second semantic checker. A fast-profile wrapper may change memory limits, diagnostics and acceleration flags, but may not redefine the checked admission judgment.
+
+### 7.2 Evaluate a closure **view**, not an independent kernel
+
+Minimal internal view:
+
+~~~text
+ClosureView = {
+  term: RawExpr,
+  values: ScopedImmutableEnvironment,
+  levelSubstitution: ExactUniverseParameters,
+  binderDepth: Nat,
+  originatingEnvironmentGeneration: EnvGeneration,
+  checkedContextIdentity: ContextIdentity
+}
+~~~
+
+Conceptual code only; this is NOT a claim about currently accepted PSC0 syntax.
+
+~~~text
+inspectHead(view):
+  check fuel, recursion, stack and memory policy
+  if head == bound variable:
+       use exact binder-indexed environment lookup
+  if head == application:
+       flatten spine without eagerly rebuilding syntax
+  if head == lambda applied to argument:
+       extend environment lazily
+  if head == let:
+       extend environment lazily, forcing only when needed
+  if head == constant:
+       stay folded unless official-style unfolding is demanded
+  if head == recursor / projection / literal:
+       invoke canonical rule owner with exact checked arguments
+  otherwise:
+       yield neutral/unknown head
+~~~
+
+The view must be **internally scoped and opaque to untrusted callers**. Terms/values exposed at admission boundaries must use the validated raw expression representation or a proved erasure. An accelerator that cannot establish a fact returns **UNKNOWN**, not “equal”.
+
+An unconditional alternative semantic evaluator used to accept declarations would create a second kernel in effect, even if placed in a helper module. Stage P2 should use the view either to produce results rechecked by canonical code or to replace a raw operation only after a semantic refinement theorem supports it.
+
+### 7.3 Conversion scheduling without changing the kernel's rules
+
+Official 4.35 behavior has precisely ordered cheap and expensive operations. P1 should be a **surgical improvement of existing `Checker/DefEq` and `Reduction` owners**, not a brand-new algorithm that tries “faster” shortcuts by guessing validity.
+
+Conceptual outline:
+
+~~~text
+defeq(a, b, context):
+  check resource and version policy
+  if exact_proven_raw_identity(a,b): return Equal
+  if exact_checked_positive_cache(context,a,b): return Equal
+
+  a0 = cheap_weak_head(a)
+  b0 = cheap_weak_head(b)
+
+  if guarded_quick_equality(a0,b0): return Equal
+  if type_justified_proof_irrelevance(a0,b0): return Equal
+
+  # Continue precisely the pinned official-compatible rules:
+  # permitted lazy delta; recursor/projection computation;
+  # rigid same-head spine; full WHNF when needed;
+  # function and structure eta; literals; unit-like structures.
+  r = canonical_remaining_defeq(a0,b0,context)
+
+  if r == Equal:
+     store a positive entry only under valid exact keys
+  return r
+~~~
+
+A **quick false** is *not* a safe reason to declare unequal: another valid Lean reduction may make the expressions convertible. Preserve the existing DefEq continuation, local context, reduction hints, and fuel outcomes. A quick **true** is trustworthy only if structural equality is exact and properly guarded, proof irrelevance is type-justified, or a verified refinement covers the branch.
+
+**Annotation warning:** the current `UniverseRegime.check` work matters here. Raw structural equality and hereditary validity alone cannot justify equating differently interpreted binder annotations over an empty domain. Any shortcut must preserve the current exact annotation/universe-regime invariant.
+
+### 7.4 Cache law: indexes are not proofs
+
+Proposed per-cache identity, assuming any optimization is adopted:
+
+| Cache entry | Required stable identity / premises | Lifetime |
+| --- | --- | --- |
+| Interned raw expression | Constructor tag, exact child IDs, binder/level/literal metadata; collision-checked equality | Permanent or uniquely tagged scratch |
+| Infer-only type | Term, local context/scope, universe parameters, environment generation, *infer-only mode* | Proven context/session |
+| Fully checked type | All above plus actual checked judgment; never infer-only-as-checked | Proven checked session |
+| WHNF / constant unfolding | Expr or closure environment, level substitution, transparency/opaque policy, target version, environment generation | Controlled immutable environment epoch |
+| Positive DefEq | Both terms, exact well-typed context, checking mode, universe/transparency rules, valid positive reasoning | Context-safe, bounded |
+| Negative DefEq | **Do not enable initially**; negative results can be strategy/incompleteness/resource-dependent | Off unless separately proved |
+| Inductive metadata | Checked constructor/recursor info, declaration fingerprint, generated identity and target version | After atomic checked admission |
+| Proof-irrelevant argument relevance | Type and annotation provenance established by checked inference | Exact typed environment and term |
+
+Machine hashes only accelerate lookup. Equal hash values do **not** establish equal kernel expressions. Pointer equality is only meaningful if unique canonicalization of *live* interned values has already been proven and each handle carries a valid lifetime/generation.
+
+Cache eviction, missing entries, capacity caps, hash collisions, timeouts or host GC events must not change which proof is accepted. A poisoned cache is a semantic hazard, not an optional “optimization result”. A cache-disabled reference specialization remains essential as an executable differential baseline.
+
+**Acceptance caveat:** the checker must not switch to a different provider after a declined/failed check and announce an accepted proof. An internal speculative optimization may return UNKNOWN so the **same canonical checker call** continues ordinary checking, but an unsupported target/resource failure cannot be turned into acceptance by an ad-hoc provider fallback.
+
+### 7.5 Resource and memory lifecycle
+
+Suggested storage separation:
+
+1. **Immutable admitted environment:** validated declarations, canonical name/level/expression IDs, checked recursor metadata; commit only after all checks complete.
+2. **Session-local exact caches:** WHNF/inference/DefEq values with immutable environment identity and bounded size; evict only where correctness says absence is harmless.
+3. **Per-declaration scratch:** closure values, reconstructed app spines, provisional recursor metadata and allocated intermediate terms; reclaim after accepted transaction or failure.
+
+For P0/P1 use existing Lean arrays/maps and GC unless a profile proves they are a bottleneck. A custom arena in P3 must prove ID bounds, constructor tag, arena generation, no stale alias and no scratch object escaping into an admitted environment.
+
+Compact handles or separate arrays may be useful in native builds, but must not require handwritten per-backend semantics. If current PSC0 self-host language cannot qualify the new representation, defer it or keep it in a clearly **non-production native experiment**.
+
+### 7.6 What the fast profile must never control
+
+- Axiom whitelist or verified consistency policy.
+- Kernel semantic version or exporter protocol without a pinned migration.
+- Proved-versus-unchecked annotations and inference grade.
+- Recursor positivity, constructor types, quotient or induction admission.
+- Declaration transaction commit/rollback.
+- The trusted status of a foreign evaluator or kernel extension.
+- Proof acceptance after internal errors, unsupported input or exhausted resources.
+
+This security boundary keeps extensibility outside soundness-critical authority while still allowing source-to-source compiler plugins, nontrusted tactics, package-specific diagnostics, or alternative backend packaging.
+
+## 8. Semantic compatibility and negative-conformance matrix
+
+Each row should have: pinned official 4.35 source locator, at least one valid and one invalid term, current PSKernel owner, reference/cached/fast verdicts, resource outcome and the corresponding proof or assumption status.
+
+| Semantics | Mandatory detail | Optimization failure mode |
+| --- | --- | --- |
+| Universes and `Prop` | Impredicative `Prop`, `imax`, `max`, level equality, proper substitution | Treating zero and positive universe assignments as interchangeable |
+| Bindings and scope | de Bruijn shifts, capture-avoiding substitutions, free/local variables | Wrong environment projection, shift overflow |
+| Checked vs infer-only | Separate cache grades and infer-only assumptions | False acceptance by treating inferred type as verified |
+| Beta, zeta, delta, iota | Exact reductions, transparency, recursors and resource behavior | Eager unfolding that changes termination or consistency |
+| DefEq | Rigid heads, eta, structure eta, proof irrelevance, special unit-like and string cases | Early false/true shortcut bypassing canonical checks |
+| Inductive declarations | Strict positivity, uniform parameters, constructor typing | Accepting unvalidated exported recursor tables |
+| Mutual/nested inductives | Verified generation and elimination conditions | Partially committing generated declaration auxiliaries |
+| Quotients | Exact permitted eliminators and quotient reduction | Treating quotient proof as unrestricted data |
+| Primitive computation | Actual Lean 4.35 Nat/String/literal semantics and size limits | Deleting all Nat reduction because old compiler-backed op was removed |
+| Axioms and unsafe declarations | Explicit policy, no unsafe evaluator as logical rule | Untrusted foreign computation certifying proofs |
+| Environment | Fresh names, opaque definitions, source/policy epochs and atomic commit | Reusing cached type/DefEq for a changed declaration |
+| Resource failure | Separate declinedUnsupported, rejectedInvalid, resourceExhausted, internalError | Retrying as success, ignoring budget |
+
+**Full compatibility is different from modeled-axiom safe mode.** The latter may intentionally decline a valid Lean proof relying on arbitrary foreign axioms. Advertise separately; neither a full-score Arena suite nor con-leche's limited axiom profile establishes “all Lean proofs supported”.

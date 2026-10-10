@@ -1,3 +1,5 @@
+> **SUPERSEDED ON THIS BRANCH — 11 OCTOBER 2026.** The authoritative new-generation architecture is [PSKernel-Fast V3](../../../pskernel-fast/PSKERNEL_FAST_ARCHITECTURE_V3.md). The user explicitly removed the requirement to preserve prior kernel implementation and metatheory. **Do not apply** any V2 proof-continuity, Checker/Knot interface-preservation, migration-refinement-to-V1, or current self-host-subset requirements as architectural vetoes for V3. Reuse old source/proofs only when independently beneficial. Preserve their Git history, not their constraints. This V2 document is historical background only.
+
 # PSKernel-Fast V2 — Major Architecture Redesign for Performance and Correctness
 
 > **Decision status:** architectural proposal / research, not a production checker implementation or completed soundness proof.

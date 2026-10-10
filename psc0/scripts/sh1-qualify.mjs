@@ -1062,7 +1062,9 @@ if (command === 'native-candidate') {
   const libraryCompiler = await loadCompiler(authoring.compilerPath, {
     expectedSha256: authoring.expectedSha256,
   });
-  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag);
+  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag, {
+    declarationNamesSchema: 'selected-r-names-only/1',
+  });
   const referenceWorkerReceipt = {
     schemaVersion: 1,
     evidence: 'selected-successor-migration-worker-reference',

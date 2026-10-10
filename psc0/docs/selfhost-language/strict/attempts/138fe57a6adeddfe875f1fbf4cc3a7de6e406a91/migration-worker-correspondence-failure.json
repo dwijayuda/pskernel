@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 1,
+  "evidence": "observed-selected-seed-candidate-migration-comparison-failure",
+  "repository": "dwijayuda/pskernel",
+  "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+  "publishedIntegrationPins": {
+    "rootTree": "c7903f7b30b45f08f7c311869681b4ca1a9908c9",
+    "psc0Tree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+    "provenance": "Root integrator's published exact-tree verification; Actions head independently matched."
+  },
+  "workflow": {
+    "id": 378853677,
+    "path": ".github/workflows/psc0-sh1.yml",
+    "runId": 38011068208,
+    "runAttempt": 1,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38011068208",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-10-10T00:55:05Z",
+    "updatedAt": "2026-10-10T01:22:35Z"
+  },
+  "compilerJob": {
+    "id": 114090942895,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38011068208/job/114090942895",
+    "status": "completed",
+    "conclusion": "failure",
+    "startedAt": "2026-10-10T00:55:08Z",
+    "completedAt": "2026-10-10T01:22:34Z",
+    "steps18Through29": [
+      {
+        "name": "Build current native compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18,
+        "started_at": "2026-10-10T00:55:57Z",
+        "completed_at": "2026-10-10T00:56:05Z"
+      },
+      {
+        "name": "Run native parser, translation, and erasure regression targets",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19,
+        "started_at": "2026-10-10T00:56:05Z",
+        "completed_at": "2026-10-10T00:56:07Z"
+      },
+      {
+        "name": "Build the actual native checked seed for source and import tests",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20,
+        "started_at": "2026-10-10T00:56:07Z",
+        "completed_at": "2026-10-10T00:56:14Z"
+      },
+      {
+        "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21,
+        "started_at": "2026-10-10T00:56:14Z",
+        "completed_at": "2026-10-10T00:56:17Z"
+      },
+      {
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22,
+        "started_at": "2026-10-10T00:56:17Z",
+        "completed_at": "2026-10-10T00:56:22Z"
+      },
+      {
+        "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23,
+        "started_at": "2026-10-10T00:56:22Z",
+        "completed_at": "2026-10-10T00:56:23Z"
+      },
+      {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 24,
+        "started_at": "2026-10-10T00:56:23Z",
+        "completed_at": "2026-10-10T01:01:48Z"
+      },
+      {
+        "name": "Build the selected-seed candidate before full qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 25,
+        "started_at": "2026-10-10T01:01:48Z",
+        "completed_at": "2026-10-10T01:22:28Z"
+      },
+      {
+        "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 26,
+        "started_at": "2026-10-10T01:22:28Z",
+        "completed_at": "2026-10-10T01:22:28Z"
+      },
+      {
+        "name": "Retain the newly qualified seed without activating a source migration",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 27,
+        "started_at": "2026-10-10T01:22:28Z",
+        "completed_at": "2026-10-10T01:22:28Z"
+      },
+      {
+        "name": "Retain incremental native outputs",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 28,
+        "started_at": "2026-10-10T01:22:28Z",
+        "completed_at": "2026-10-10T01:22:30Z"
+      },
+      {
+        "name": "Retain compiler evidence and exact generated artifacts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29,
+        "started_at": "2026-10-10T01:22:30Z",
+        "completed_at": "2026-10-10T01:22:32Z"
+      }
+    ]
+  },
+  "providerJob": {
+    "id": 114096798112,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38011068208/job/114096798112",
+    "status": "completed",
+    "conclusion": "skipped",
+    "startedAt": "2026-10-10T01:22:35Z",
+    "completedAt": "2026-10-10T01:22:34Z",
+    "logFetched": false,
+    "receiptObserved": false
+  },
+  "firstFailure": {
+    "timestamp": "2026-10-10T01:22:28.0070824Z",
+    "stepNumber": 25,
+    "stepName": "Build the selected-seed candidate before full qualification",
+    "kind": "AssertionError",
+    "code": "ERR_ASSERTION",
+    "assertion": "PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE",
+    "stack": "at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1115:10",
+    "phase": "After completed C1 generation and its logged conformance stages, at the R-versus-C1 migration-worker report comparison.",
+    "exitCode": 1,
+    "logRange": {
+      "startLine": 2281,
+      "endLine": 2719
+    },
+    "excerptSerialization": "Exact log lines in the stated one-based range, including their timestamps, plus their existing final LF.",
+    "excerptSha256": "c61ed11998c0fcb9c871a831ede507493e43bc99aa32f598d035db865424fd8d",
+    "excerptBytes": 30889,
+    "excerpt": "2026-10-10T01:22:28.0070824Z AssertionError [ERR_ASSERTION]: PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE\n2026-10-10T01:22:28.0071186Z + actual - expected\n2026-10-10T01:22:28.0071381Z ... Skipped lines\n2026-10-10T01:22:28.0071491Z \n2026-10-10T01:22:28.0071563Z   {\n2026-10-10T01:22:28.0071721Z     cases: 87,\n2026-10-10T01:22:28.0072025Z     evidence: 'finite-migration-worker-generated-export-conformance',\n2026-10-10T01:22:28.0072357Z     families: [\n2026-10-10T01:22:28.0072536Z       {\n2026-10-10T01:22:28.0072689Z ...\n2026-10-10T01:22:28.0072860Z         family: 'F2',\n2026-10-10T01:22:28.0073294Z +       observationSha256: 'f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2',\n2026-10-10T01:22:28.0073870Z -       observationSha256: '8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59',\n2026-10-10T01:22:28.0074235Z         observations: [\n2026-10-10T01:22:28.0074416Z           {\n2026-10-10T01:22:28.0074634Z             name: 'preparation-empty-state',\n2026-10-10T01:22:28.0074871Z             result: {\n2026-10-10T01:22:28.0075076Z               declarationsRev: [\n2026-10-10T01:22:28.0075281Z ...\n2026-10-10T01:22:28.0075443Z                   count: '4',\n2026-10-10T01:22:28.0075653Z +                 entries: {\n2026-10-10T01:22:28.0076032Z +                   tag: 'empty'\n2026-10-10T01:22:28.0076235Z +                 }\n2026-10-10T01:22:28.0076402Z                 },\n2026-10-10T01:22:28.0076986Z                 erasedLocals: [],\n2026-10-10T01:22:28.0077211Z                 localContext: {\n2026-10-10T01:22:28.0077430Z                   declarations: [\n2026-10-10T01:22:28.0077632Z                     {\n2026-10-10T01:22:28.0077798Z ...\n2026-10-10T01:22:28.0077952Z                   count: '4',\n2026-10-10T01:22:28.0078151Z +                 entries: {\n2026-10-10T01:22:28.0078364Z +                   tag: 'empty'\n2026-10-10T01:22:28.0078555Z +                 }\n2026-10-10T01:22:28.0078719Z                 },\n2026-10-10T01:22:28.0078902Z                 erasedLocals: [],\n2026-10-10T01:22:28.0079114Z                 localContext: {\n2026-10-10T01:22:28.0079320Z                   declarations: [\n2026-10-10T01:22:28.0079509Z                     {\n2026-10-10T01:22:28.0079678Z ...\n2026-10-10T01:22:28.0079821Z     ],\n2026-10-10T01:22:28.0080191Z +   observationSha256: 'a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8',\n2026-10-10T01:22:28.0080748Z -   observationSha256: '697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be',\n2026-10-10T01:22:28.0081098Z     schemaVersion: 1,\n2026-10-10T01:22:28.0081277Z     scope: {\n2026-10-10T01:22:28.0081522Z       completePublicTypes: 'separate migration ABI gate',\n2026-10-10T01:22:28.0081853Z       copiedRecordsRetainOwningCompilerBrands: true,\n2026-10-10T01:22:28.0082155Z       eachCompilerOwnsAllTaggedInputs: true,\n2026-10-10T01:22:28.0082314Z \n2026-10-10T01:22:28.0082557Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1115:10 {\n2026-10-10T01:22:28.0082910Z   generatedMessage: false,\n2026-10-10T01:22:28.0083109Z   code: 'ERR_ASSERTION',\n2026-10-10T01:22:28.0083291Z   actual: {\n2026-10-10T01:22:28.0083457Z     schemaVersion: 1,\n2026-10-10T01:22:28.0083758Z     evidence: 'finite-migration-worker-generated-export-conformance',\n2026-10-10T01:22:28.0084060Z     cases: 87,\n2026-10-10T01:22:28.0084224Z     families: [\n2026-10-10T01:22:28.0084390Z       {\n2026-10-10T01:22:28.0084545Z         family: 'F1',\n2026-10-10T01:22:28.0084733Z         workerCases: 44,\n2026-10-10T01:22:28.0084917Z         wrapperCases: 7,\n2026-10-10T01:22:28.0085100Z         observations: [\n2026-10-10T01:22:28.0085475Z           { name: 'local-zero-fresh', result: 'x$0' },\n2026-10-10T01:22:28.0085898Z           { name: 'local-zero-colliding', result: 'x$7' },\n2026-10-10T01:22:28.0086202Z           { name: 'local-first-free', result: 'x$7' },\n2026-10-10T01:22:28.0086513Z           { name: 'local-exhaustion-can-collide', result: 'x$8' },\n2026-10-10T01:22:28.0086848Z           { name: 'local-global-collision-chain', result: 'x$9' },\n2026-10-10T01:22:28.0087178Z           { name: 'local-global-only-collision', result: 'x$5' },\n2026-10-10T01:22:28.0087448Z           {\n2026-10-10T01:22:28.0087687Z             name: 'local-duplicates-consume-one-candidate',\n2026-10-10T01:22:28.0087944Z             result: 'x$6'\n2026-10-10T01:22:28.0088130Z           },\n2026-10-10T01:22:28.0088283Z           {\n2026-10-10T01:22:28.0088527Z             name: 'local-future-collision-does-not-skip-free',\n2026-10-10T01:22:28.0088791Z             result: 'x$7'\n2026-10-10T01:22:28.0088974Z           },\n2026-10-10T01:22:28.0089455Z           { name: 'local-arbitrary-base', result: 'é_$3' },\n2026-10-10T01:22:28.0089692Z           {\n2026-10-10T01:22:28.0089888Z             name: 'local-large-nat-index',\n2026-10-10T01:22:28.0090131Z             result: 'x$9007199254740993'\n2026-10-10T01:22:28.0090340Z           },\n2026-10-10T01:22:28.0090538Z           { name: 'eta-zero', result: [Array] },\n2026-10-10T01:22:28.0090814Z           { name: 'eta-first-free', result: [Array] },\n2026-10-10T01:22:28.0091092Z           { name: 'eta-used-exhausts', result: [Array] },\n2026-10-10T01:22:28.0091386Z           { name: 'eta-used-collision', result: [Array] },\n2026-10-10T01:22:28.0091672Z           { name: 'eta-body-collision', result: [Array] },\n2026-10-10T01:22:28.0091977Z           { name: 'eta-used-and-body-chain', result: [Array] },\n2026-10-10T01:22:28.0092415Z           { name: 'eta-lambda-binder-counts', result: [Array] },\n2026-10-10T01:22:28.0092745Z           { name: 'eta-let-binder-counts', result: [Array] },\n2026-10-10T01:22:28.0093092Z           { name: 'eta-record-label-does-not-count', result: [Array] },\n2026-10-10T01:22:28.0093439Z           { name: 'eta-last-inspected-depth', result: [Array] },\n2026-10-10T01:22:28.0093691Z           {\n2026-10-10T01:22:28.0093902Z             name: 'eta-conservative-depth-exhaustion',\n2026-10-10T01:22:28.0094147Z             result: [Array]\n2026-10-10T01:22:28.0094329Z           },\n2026-10-10T01:22:28.0094562Z           { name: 'eta-zero-with-deep-body', result: [Array] },\n2026-10-10T01:22:28.0094863Z           { name: 'eta-large-nat-index', result: [Array] },\n2026-10-10T01:22:28.0095175Z           { name: 'match-zero', result: '__ps$match$overflow' },\n2026-10-10T01:22:28.0095420Z           {\n2026-10-10T01:22:28.0095628Z             name: 'match-zero-colliding-overflow',\n2026-10-10T01:22:28.0096039Z             result: '__ps$match$overflow'\n2026-10-10T01:22:28.0096261Z           },\n2026-10-10T01:22:28.0096480Z           { name: 'match-first-free', result: '__ps$match$7' },\n2026-10-10T01:22:28.0096721Z           {\n2026-10-10T01:22:28.0096920Z             name: 'match-collision-exhausts',\n2026-10-10T01:22:28.0097173Z             result: '__ps$match$overflow'\n2026-10-10T01:22:28.0097384Z           },\n2026-10-10T01:22:28.0097626Z           { name: 'match-collision-chain', result: '__ps$match$9' },\n2026-10-10T01:22:28.0097886Z           {\n2026-10-10T01:22:28.0098084Z             name: 'match-lambda-binder-counts',\n2026-10-10T01:22:28.0098338Z             result: '__ps$match$8'\n2026-10-10T01:22:28.0098536Z           },\n2026-10-10T01:22:28.0098686Z           {\n2026-10-10T01:22:28.0098899Z             name: 'match-record-label-does-not-count',\n2026-10-10T01:22:28.0099156Z             result: '__ps$match$7'\n2026-10-10T01:22:28.0099351Z           },\n2026-10-10T01:22:28.0099502Z           {\n2026-10-10T01:22:28.0099724Z             name: 'match-last-inspected-depth',\n2026-10-10T01:22:28.0099968Z             result: '__ps$match$7'\n2026-10-10T01:22:28.0100162Z           },\n2026-10-10T01:22:28.0100336Z           {\n2026-10-10T01:22:28.0100682Z             name: 'match-conservative-depth-exhaustion',\n2026-10-10T01:22:28.0100956Z             result: '__ps$match$overflow'\n2026-10-10T01:22:28.0101160Z           },\n2026-10-10T01:22:28.0101313Z           {\n2026-10-10T01:22:28.0101493Z             name: 'match-large-nat-index',\n2026-10-10T01:22:28.0101747Z             result: '__ps$match$9007199254740993'\n2026-10-10T01:22:28.0101964Z           },\n2026-10-10T01:22:28.0102174Z           { name: 'internal-zero', result: [Array] },\n2026-10-10T01:22:28.0102500Z           { name: 'internal-zero-colliding-overflow', result: [Array] },\n2026-10-10T01:22:28.0102842Z           { name: 'internal-first-free', result: [Array] },\n2026-10-10T01:22:28.0103177Z           { name: 'internal-one-collision-exhausts', result: [Array] },\n2026-10-10T01:22:28.0103538Z           { name: 'internal-all-collisions-exhaust', result: [Array] },\n2026-10-10T01:22:28.0103885Z           { name: 'internal-first-free-after-chain', result: [Array] },\n2026-10-10T01:22:28.0104239Z           { name: 'internal-duplicate-used-names', result: [Array] },\n2026-10-10T01:22:28.0104500Z           {\n2026-10-10T01:22:28.0104741Z             name: 'internal-future-collision-does-not-skip-free',\n2026-10-10T01:22:28.0105019Z             result: [Array]\n2026-10-10T01:22:28.0105200Z           },\n2026-10-10T01:22:28.0105429Z           { name: 'internal-empty-prefix', result: [Array] },\n2026-10-10T01:22:28.0105891Z           { name: 'internal-arbitrary-prefix', result: [Array] },\n2026-10-10T01:22:28.0106225Z           { name: 'internal-large-nat-index', result: [Array] },\n2026-10-10T01:22:28.0106566Z           { name: 'wrapper-reserved-arguments', result: '_arguments' },\n2026-10-10T01:22:28.0106831Z           {\n2026-10-10T01:22:28.0107042Z             name: 'wrapper-reserved-eval-collision',\n2026-10-10T01:22:28.0107293Z             result: '_eval$3'\n2026-10-10T01:22:28.0107590Z           },\n2026-10-10T01:22:28.0107847Z           { name: 'wrapper-underscore-fallback', result: 'tmp$12' },\n2026-10-10T01:22:28.0108121Z           {\n2026-10-10T01:22:28.0108337Z             name: 'wrapper-sanitized-global-collision',\n2026-10-10T01:22:28.0108592Z             result: 'x_y$3'\n2026-10-10T01:22:28.0108771Z           },\n2026-10-10T01:22:28.0108925Z           {\n2026-10-10T01:22:28.0109127Z             name: 'wrapper-match-argument-order',\n2026-10-10T01:22:28.0109386Z             result: '__ps$match$8'\n2026-10-10T01:22:28.0109583Z           },\n2026-10-10T01:22:28.0109832Z           { name: 'wrapper-internal-argument-order', result: [Array] },\n2026-10-10T01:22:28.0110181Z           { name: 'wrapper-eta-parameter-order', result: [Array] }\n2026-10-10T01:22:28.0110434Z         ],\n2026-10-10T01:22:28.0110758Z         observationSha256: '637829f32a117a029b9f95bb7e19313239ca3ea42977f62961102534c785aa2b'\n2026-10-10T01:22:28.0111096Z       },\n2026-10-10T01:22:28.0111250Z       {\n2026-10-10T01:22:28.0111414Z         family: 'F2',\n2026-10-10T01:22:28.0111595Z         cases: 36,\n2026-10-10T01:22:28.0111770Z         observations: [\n2026-10-10T01:22:28.0112044Z           { name: 'preparation-empty-state', result: [Object] },\n2026-10-10T01:22:28.0112297Z           {\n2026-10-10T01:22:28.0112515Z             name: 'preparation-ordered-dependencies',\n2026-10-10T01:22:28.0112772Z             result: [Object]\n2026-10-10T01:22:28.0112961Z           },\n2026-10-10T01:22:28.0113220Z           { name: 'preparation-first-parse-error', result: [Object] },\n2026-10-10T01:22:28.0113487Z           {\n2026-10-10T01:22:28.0113720Z             name: 'preparation-middle-elaboration-error',\n2026-10-10T01:22:28.0113976Z             result: [Object]\n2026-10-10T01:22:28.0114163Z           },\n2026-10-10T01:22:28.0114313Z           {\n2026-10-10T01:22:28.0114548Z             name: 'preparation-parsed-step-correspondence',\n2026-10-10T01:22:28.0114806Z             result: [Object]\n2026-10-10T01:22:28.0114987Z           },\n2026-10-10T01:22:28.0115223Z           { name: 'add-empty-environment', result: [Object] },\n2026-10-10T01:22:28.0115547Z           { name: 'add-ordered-declarations', result: [Object] },\n2026-10-10T01:22:28.0116156Z           { name: 'add-duplicate-initial', result: [Object] },\n2026-10-10T01:22:28.0116484Z           { name: 'add-duplicate-earlier-input', result: [Object] },\n2026-10-10T01:22:28.0116847Z           { name: 'add-owned-bootstrap-replacement', result: [Array] },\n2026-10-10T01:22:28.0117202Z           { name: 'elab-empty-reverse-accumulator', result: [Object] },\n2026-10-10T01:22:28.0117534Z           { name: 'elab-ordered-batches', result: [Object] },\n2026-10-10T01:22:28.0117835Z           { name: 'elab-first-failure', result: [Object] },\n2026-10-10T01:22:28.0118069Z           {\n2026-10-10T01:22:28.0118285Z             name: 'elab-duplicate-before-tail-failure',\n2026-10-10T01:22:28.0118533Z             result: [Object]\n2026-10-10T01:22:28.0118714Z           },\n2026-10-10T01:22:28.0118934Z           { name: 'names-empty-state', result: [Object] },\n2026-10-10T01:22:28.0119237Z           { name: 'names-kind-whitelist', result: [Object] },\n2026-10-10T01:22:28.0119563Z           { name: 'names-sanitizing-collisions', result: [Object] },\n2026-10-10T01:22:28.0119905Z           { name: 'names-prefix-and-fallback', result: [Object] },\n2026-10-10T01:22:28.0120250Z           { name: 'erase-empty-reverse-accumulator', result: [Array] },\n2026-10-10T01:22:28.0120595Z           { name: 'erase-definition-and-partial', result: [Array] },\n2026-10-10T01:22:28.0120911Z           { name: 'erase-proof-omission', result: [Array] },\n2026-10-10T01:22:28.0121219Z           { name: 'erase-skipped-variants', result: [Array] },\n2026-10-10T01:22:28.0121514Z           { name: 'erase-first-refusal', result: [Object] },\n2026-10-10T01:22:28.0121749Z           {\n2026-10-10T01:22:28.0121970Z             name: 'structures-empty-reverse-accumulator',\n2026-10-10T01:22:28.0122226Z             result: [Object]\n2026-10-10T01:22:28.0122406Z           },\n2026-10-10T01:22:28.0122751Z           { name: 'structures-mixed-stream', result: [Object] },\n2026-10-10T01:22:28.0123085Z           { name: 'structures-threaded-scope', result: [Object] },\n2026-10-10T01:22:28.0123452Z           { name: 'structures-first-refusal', result: [Object] },\n2026-10-10T01:22:28.0123702Z           {\n2026-10-10T01:22:28.0123913Z             name: 'inductives-empty-reverse-accumulator',\n2026-10-10T01:22:28.0124160Z             result: [Object]\n2026-10-10T01:22:28.0124340Z           },\n2026-10-10T01:22:28.0124569Z           { name: 'inductives-mixed-stream', result: [Object] },\n2026-10-10T01:22:28.0124888Z           { name: 'inductives-threaded-scope', result: [Object] },\n2026-10-10T01:22:28.0125211Z           { name: 'inductives-first-refusal', result: [Object] },\n2026-10-10T01:22:28.0125519Z           { name: 'symbols-empty-state', result: [Object] },\n2026-10-10T01:22:28.0126007Z           { name: 'symbols-collision-and-index', result: [Object] },\n2026-10-10T01:22:28.0126859Z           { name: 'symbols-duplicate-source-names', result: [Object] },\n2026-10-10T01:22:28.0127299Z           { name: 'symbols-brand-wrapper', result: [Array] },\n2026-10-10T01:22:28.0127781Z           { name: 'symbols-tag-wrapper', result: [Array] }\n2026-10-10T01:22:28.0128122Z         ],\n2026-10-10T01:22:28.0128616Z         observationSha256: 'f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2'\n2026-10-10T01:22:28.0129114Z       }\n2026-10-10T01:22:28.0129390Z     ],\n2026-10-10T01:22:28.0129874Z     observationSha256: 'a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8',\n2026-10-10T01:22:28.0130355Z     scope: {\n2026-10-10T01:22:28.0130743Z       eachCompilerOwnsAllTaggedInputs: true,\n2026-10-10T01:22:28.0131160Z       irRecordsUseExistingCompilerFactories: true,\n2026-10-10T01:22:28.0147491Z       copiedRecordsRetainOwningCompilerBrands: true,\n2026-10-10T01:22:28.0147918Z       hostStructuralFixtureRecords: [\n2026-10-10T01:22:28.0148183Z         'PsErasureNameState',\n2026-10-10T01:22:28.0148426Z         'PsTsSymbolMapState',\n2026-10-10T01:22:28.0148759Z         'PsErasureCurrentDefinition'\n2026-10-10T01:22:28.0149278Z       ],\n2026-10-10T01:22:28.0150403Z       hostStructuralFixtureBoundary: 'Explicit unbranded non-IR host records with owning-compiler tagged children; their exercised paths project fields or reset the marker, and do not inspect brands. They are not compiler-created branded records and never enter original-IR carrier checking.',\n2026-10-10T01:22:28.0151425Z       independentExplicitExpectations: true,\n2026-10-10T01:22:28.0151744Z       saturatedPublicArgumentOrderChecked: true,\n2026-10-10T01:22:28.0152057Z       completePublicTypes: 'separate migration ABI gate',\n2026-10-10T01:22:28.0152424Z       pscPartialApplications: 'separate typed migration ABI probes',\n2026-10-10T01:22:28.0152764Z       performanceImprovementClaimed: false,\n2026-10-10T01:22:28.0153031Z       exhaustiveForAllInputs: false,\n2026-10-10T01:22:28.0153266Z       kernelChecked: false\n2026-10-10T01:22:28.0153458Z     }\n2026-10-10T01:22:28.0153619Z   },\n2026-10-10T01:22:28.0153777Z   expected: {\n2026-10-10T01:22:28.0153959Z     schemaVersion: 1,\n2026-10-10T01:22:28.0154471Z     evidence: 'finite-migration-worker-generated-export-conformance',\n2026-10-10T01:22:28.0154792Z     cases: 87,\n2026-10-10T01:22:28.0154958Z     families: [\n2026-10-10T01:22:28.0155120Z       {\n2026-10-10T01:22:28.0155284Z         family: 'F1',\n2026-10-10T01:22:28.0155468Z         workerCases: 44,\n2026-10-10T01:22:28.0155667Z         wrapperCases: 7,\n2026-10-10T01:22:28.0156226Z         observations: [\n2026-10-10T01:22:28.0156476Z           { name: 'local-zero-fresh', result: 'x$0' },\n2026-10-10T01:22:28.0156781Z           { name: 'local-zero-colliding', result: 'x$7' },\n2026-10-10T01:22:28.0157078Z           { name: 'local-first-free', result: 'x$7' },\n2026-10-10T01:22:28.0157435Z           { name: 'local-exhaustion-can-collide', result: 'x$8' },\n2026-10-10T01:22:28.0157781Z           { name: 'local-global-collision-chain', result: 'x$9' },\n2026-10-10T01:22:28.0158259Z           { name: 'local-global-only-collision', result: 'x$5' },\n2026-10-10T01:22:28.0158515Z           {\n2026-10-10T01:22:28.0158765Z             name: 'local-duplicates-consume-one-candidate',\n2026-10-10T01:22:28.0159024Z             result: 'x$6'\n2026-10-10T01:22:28.0159209Z           },\n2026-10-10T01:22:28.0159365Z           {\n2026-10-10T01:22:28.0159608Z             name: 'local-future-collision-does-not-skip-free',\n2026-10-10T01:22:28.0159873Z             result: 'x$7'\n2026-10-10T01:22:28.0160059Z           },\n2026-10-10T01:22:28.0160450Z           { name: 'local-arbitrary-base', result: 'é_$3' },\n2026-10-10T01:22:28.0160693Z           {\n2026-10-10T01:22:28.0160896Z             name: 'local-large-nat-index',\n2026-10-10T01:22:28.0161144Z             result: 'x$9007199254740993'\n2026-10-10T01:22:28.0161357Z           },\n2026-10-10T01:22:28.0161555Z           { name: 'eta-zero', result: [Array] },\n2026-10-10T01:22:28.0161837Z           { name: 'eta-first-free', result: [Array] },\n2026-10-10T01:22:28.0162129Z           { name: 'eta-used-exhausts', result: [Array] },\n2026-10-10T01:22:28.0162427Z           { name: 'eta-used-collision', result: [Array] },\n2026-10-10T01:22:28.0162723Z           { name: 'eta-body-collision', result: [Array] },\n2026-10-10T01:22:28.0163033Z           { name: 'eta-used-and-body-chain', result: [Array] },\n2026-10-10T01:22:28.0163359Z           { name: 'eta-lambda-binder-counts', result: [Array] },\n2026-10-10T01:22:28.0163680Z           { name: 'eta-let-binder-counts', result: [Array] },\n2026-10-10T01:22:28.0164023Z           { name: 'eta-record-label-does-not-count', result: [Array] },\n2026-10-10T01:22:28.0164368Z           { name: 'eta-last-inspected-depth', result: [Array] },\n2026-10-10T01:22:28.0164611Z           {\n2026-10-10T01:22:28.0164827Z             name: 'eta-conservative-depth-exhaustion',\n2026-10-10T01:22:28.0165077Z             result: [Array]\n2026-10-10T01:22:28.0165260Z           },\n2026-10-10T01:22:28.0165494Z           { name: 'eta-zero-with-deep-body', result: [Array] },\n2026-10-10T01:22:28.0165946Z           { name: 'eta-large-nat-index', result: [Array] },\n2026-10-10T01:22:28.0166383Z           { name: 'match-zero', result: '__ps$match$overflow' },\n2026-10-10T01:22:28.0166627Z           {\n2026-10-10T01:22:28.0166838Z             name: 'match-zero-colliding-overflow',\n2026-10-10T01:22:28.0167103Z             result: '__ps$match$overflow'\n2026-10-10T01:22:28.0167321Z           },\n2026-10-10T01:22:28.0167542Z           { name: 'match-first-free', result: '__ps$match$7' },\n2026-10-10T01:22:28.0167780Z           {\n2026-10-10T01:22:28.0167982Z             name: 'match-collision-exhausts',\n2026-10-10T01:22:28.0168231Z             result: '__ps$match$overflow'\n2026-10-10T01:22:28.0168440Z           },\n2026-10-10T01:22:28.0168678Z           { name: 'match-collision-chain', result: '__ps$match$9' },\n2026-10-10T01:22:28.0168938Z           {\n2026-10-10T01:22:28.0169136Z             name: 'match-lambda-binder-counts',\n2026-10-10T01:22:28.0169402Z             result: '__ps$match$8'\n2026-10-10T01:22:28.0169602Z           },\n2026-10-10T01:22:28.0169756Z           {\n2026-10-10T01:22:28.0169969Z             name: 'match-record-label-does-not-count',\n2026-10-10T01:22:28.0170223Z             result: '__ps$match$7'\n2026-10-10T01:22:28.0170421Z           },\n2026-10-10T01:22:28.0170570Z           {\n2026-10-10T01:22:28.0170774Z             name: 'match-last-inspected-depth',\n2026-10-10T01:22:28.0171017Z             result: '__ps$match$7'\n2026-10-10T01:22:28.0171211Z           },\n2026-10-10T01:22:28.0171362Z           {\n2026-10-10T01:22:28.0171587Z             name: 'match-conservative-depth-exhaustion',\n2026-10-10T01:22:28.0171857Z             result: '__ps$match$overflow'\n2026-10-10T01:22:28.0172087Z           },\n2026-10-10T01:22:28.0172254Z           {\n2026-10-10T01:22:28.0172441Z             name: 'match-large-nat-index',\n2026-10-10T01:22:28.0172700Z             result: '__ps$match$9007199254740993'\n2026-10-10T01:22:28.0172918Z           },\n2026-10-10T01:22:28.0173251Z           { name: 'internal-zero', result: [Array] },\n2026-10-10T01:22:28.0173583Z           { name: 'internal-zero-colliding-overflow', result: [Array] },\n2026-10-10T01:22:28.0173932Z           { name: 'internal-first-free', result: [Array] },\n2026-10-10T01:22:28.0174262Z           { name: 'internal-one-collision-exhausts', result: [Array] },\n2026-10-10T01:22:28.0174619Z           { name: 'internal-all-collisions-exhaust', result: [Array] },\n2026-10-10T01:22:28.0174967Z           { name: 'internal-first-free-after-chain', result: [Array] },\n2026-10-10T01:22:28.0175323Z           { name: 'internal-duplicate-used-names', result: [Array] },\n2026-10-10T01:22:28.0175581Z           {\n2026-10-10T01:22:28.0175975Z             name: 'internal-future-collision-does-not-skip-free',\n2026-10-10T01:22:28.0176281Z             result: [Array]\n2026-10-10T01:22:28.0176466Z           },\n2026-10-10T01:22:28.0176703Z           { name: 'internal-empty-prefix', result: [Array] },\n2026-10-10T01:22:28.0177038Z           { name: 'internal-arbitrary-prefix', result: [Array] },\n2026-10-10T01:22:28.0177368Z           { name: 'internal-large-nat-index', result: [Array] },\n2026-10-10T01:22:28.0177713Z           { name: 'wrapper-reserved-arguments', result: '_arguments' },\n2026-10-10T01:22:28.0177981Z           {\n2026-10-10T01:22:28.0178194Z             name: 'wrapper-reserved-eval-collision',\n2026-10-10T01:22:28.0178443Z             result: '_eval$3'\n2026-10-10T01:22:28.0178629Z           },\n2026-10-10T01:22:28.0178879Z           { name: 'wrapper-underscore-fallback', result: 'tmp$12' },\n2026-10-10T01:22:28.0179138Z           {\n2026-10-10T01:22:28.0179354Z             name: 'wrapper-sanitized-global-collision',\n2026-10-10T01:22:28.0179606Z             result: 'x_y$3'\n2026-10-10T01:22:28.0179785Z           },\n2026-10-10T01:22:28.0179962Z           {\n2026-10-10T01:22:28.0180172Z             name: 'wrapper-match-argument-order',\n2026-10-10T01:22:28.0180429Z             result: '__ps$match$8'\n2026-10-10T01:22:28.0180629Z           },\n2026-10-10T01:22:28.0180887Z           { name: 'wrapper-internal-argument-order', result: [Array] },\n2026-10-10T01:22:28.0181234Z           { name: 'wrapper-eta-parameter-order', result: [Array] }\n2026-10-10T01:22:28.0181609Z         ],\n2026-10-10T01:22:28.0181942Z         observationSha256: '637829f32a117a029b9f95bb7e19313239ca3ea42977f62961102534c785aa2b'\n2026-10-10T01:22:28.0182275Z       },\n2026-10-10T01:22:28.0182432Z       {\n2026-10-10T01:22:28.0182587Z         family: 'F2',\n2026-10-10T01:22:28.0182768Z         cases: 36,\n2026-10-10T01:22:28.0182939Z         observations: [\n2026-10-10T01:22:28.0183199Z           { name: 'preparation-empty-state', result: [Object] },\n2026-10-10T01:22:28.0183448Z           {\n2026-10-10T01:22:28.0183660Z             name: 'preparation-ordered-dependencies',\n2026-10-10T01:22:28.0183904Z             result: [Object]\n2026-10-10T01:22:28.0184087Z           },\n2026-10-10T01:22:28.0184343Z           { name: 'preparation-first-parse-error', result: [Object] },\n2026-10-10T01:22:28.0184611Z           {\n2026-10-10T01:22:28.0184840Z             name: 'preparation-middle-elaboration-error',\n2026-10-10T01:22:28.0185096Z             result: [Object]\n2026-10-10T01:22:28.0185281Z           },\n2026-10-10T01:22:28.0185433Z           {\n2026-10-10T01:22:28.0185660Z             name: 'preparation-parsed-step-correspondence',\n2026-10-10T01:22:28.0186062Z             result: [Object]\n2026-10-10T01:22:28.0186239Z           },\n2026-10-10T01:22:28.0186476Z           { name: 'add-empty-environment', result: [Object] },\n2026-10-10T01:22:28.0186792Z           { name: 'add-ordered-declarations', result: [Object] },\n2026-10-10T01:22:28.0187110Z           { name: 'add-duplicate-initial', result: [Object] },\n2026-10-10T01:22:28.0187428Z           { name: 'add-duplicate-earlier-input', result: [Object] },\n2026-10-10T01:22:28.0187776Z           { name: 'add-owned-bootstrap-replacement', result: [Array] },\n2026-10-10T01:22:28.0188123Z           { name: 'elab-empty-reverse-accumulator', result: [Object] },\n2026-10-10T01:22:28.0188555Z           { name: 'elab-ordered-batches', result: [Object] },\n2026-10-10T01:22:28.0188853Z           { name: 'elab-first-failure', result: [Object] },\n2026-10-10T01:22:28.0189088Z           {\n2026-10-10T01:22:28.0189299Z             name: 'elab-duplicate-before-tail-failure',\n2026-10-10T01:22:28.0189543Z             result: [Object]\n2026-10-10T01:22:28.0189720Z           },\n2026-10-10T01:22:28.0189940Z           { name: 'names-empty-state', result: [Object] },\n2026-10-10T01:22:28.0190240Z           { name: 'names-kind-whitelist', result: [Object] },\n2026-10-10T01:22:28.0190557Z           { name: 'names-sanitizing-collisions', result: [Object] },\n2026-10-10T01:22:28.0190894Z           { name: 'names-prefix-and-fallback', result: [Object] },\n2026-10-10T01:22:28.0191232Z           { name: 'erase-empty-reverse-accumulator', result: [Array] },\n2026-10-10T01:22:28.0191575Z           { name: 'erase-definition-and-partial', result: [Array] },\n2026-10-10T01:22:28.0191889Z           { name: 'erase-proof-omission', result: [Array] },\n2026-10-10T01:22:28.0192194Z           { name: 'erase-skipped-variants', result: [Array] },\n2026-10-10T01:22:28.0192489Z           { name: 'erase-first-refusal', result: [Object] },\n2026-10-10T01:22:28.0192720Z           {\n2026-10-10T01:22:28.0192936Z             name: 'structures-empty-reverse-accumulator',\n2026-10-10T01:22:28.0193188Z             result: [Object]\n2026-10-10T01:22:28.0193372Z           },\n2026-10-10T01:22:28.0193609Z           { name: 'structures-mixed-stream', result: [Object] },\n2026-10-10T01:22:28.0193940Z           { name: 'structures-threaded-scope', result: [Object] },\n2026-10-10T01:22:28.0194275Z           { name: 'structures-first-refusal', result: [Object] },\n2026-10-10T01:22:28.0194521Z           {\n2026-10-10T01:22:28.0194738Z             name: 'inductives-empty-reverse-accumulator',\n2026-10-10T01:22:28.0195023Z             result: [Object]\n2026-10-10T01:22:28.0195205Z           },\n2026-10-10T01:22:28.0195439Z           { name: 'inductives-mixed-stream', result: [Object] },\n2026-10-10T01:22:28.0195910Z           { name: 'inductives-threaded-scope', result: [Object] },\n2026-10-10T01:22:28.0196352Z           { name: 'inductives-first-refusal', result: [Object] },\n2026-10-10T01:22:28.0196657Z           { name: 'symbols-empty-state', result: [Object] },\n2026-10-10T01:22:28.0196988Z           { name: 'symbols-collision-and-index', result: [Object] },\n2026-10-10T01:22:28.0197340Z           { name: 'symbols-duplicate-source-names', result: [Object] },\n2026-10-10T01:22:28.0197675Z           { name: 'symbols-brand-wrapper', result: [Array] },\n2026-10-10T01:22:28.0197977Z           { name: 'symbols-tag-wrapper', result: [Array] }\n2026-10-10T01:22:28.0198218Z         ],\n2026-10-10T01:22:28.0198546Z         observationSha256: '8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59'\n2026-10-10T01:22:28.0198902Z       }\n2026-10-10T01:22:28.0199055Z     ],\n2026-10-10T01:22:28.0199384Z     observationSha256: '697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be',\n2026-10-10T01:22:28.0199733Z     scope: {\n2026-10-10T01:22:28.0199942Z       eachCompilerOwnsAllTaggedInputs: true,\n2026-10-10T01:22:28.0200243Z       irRecordsUseExistingCompilerFactories: true,\n2026-10-10T01:22:28.0200554Z       copiedRecordsRetainOwningCompilerBrands: true,\n2026-10-10T01:22:28.0200843Z       hostStructuralFixtureRecords: [\n2026-10-10T01:22:28.0201072Z         'PsErasureNameState',\n2026-10-10T01:22:28.0201280Z         'PsTsSymbolMapState',\n2026-10-10T01:22:28.0201501Z         'PsErasureCurrentDefinition'\n2026-10-10T01:22:28.0201712Z       ],\n2026-10-10T01:22:28.0202634Z       hostStructuralFixtureBoundary: 'Explicit unbranded non-IR host records with owning-compiler tagged children; their exercised paths project fields or reset the marker, and do not inspect brands. They are not compiler-created branded records and never enter original-IR carrier checking.',\n2026-10-10T01:22:28.0203542Z       independentExplicitExpectations: true,\n2026-10-10T01:22:28.0203929Z       saturatedPublicArgumentOrderChecked: true,\n2026-10-10T01:22:28.0204245Z       completePublicTypes: 'separate migration ABI gate',\n2026-10-10T01:22:28.0204605Z       pscPartialApplications: 'separate typed migration ABI probes',\n2026-10-10T01:22:28.0204936Z       performanceImprovementClaimed: false,\n2026-10-10T01:22:28.0205192Z       exhaustiveForAllInputs: false,\n2026-10-10T01:22:28.0205406Z       kernelChecked: false\n2026-10-10T01:22:28.0205596Z     }\n2026-10-10T01:22:28.0205865Z   },\n2026-10-10T01:22:28.0206060Z   operator: 'deepStrictEqual',\n2026-10-10T01:22:28.0206262Z   diff: 'simple'\n2026-10-10T01:22:28.0206426Z }\n2026-10-10T01:22:28.0206508Z \n2026-10-10T01:22:28.0206586Z Node.js v22.23.3\n2026-10-10T01:22:28.3137549Z ##[error]Process completed with exit code 1.\n",
+    "assertionInspectionLimit": "Node's printed assertion includes abbreviated [Array]/[Object] values. The complete logged reference, N1 and C1 report payloads are preserved in markers.json and used for the structural comparison below."
+  },
+  "completedProducts": {
+    "nativeCandidate": {
+      "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+      "logLine": 2236,
+      "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "moduleCount": 64,
+      "artifacts": {
+        "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+        "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+      },
+      "receiptFile": "native-candidate-receipt.json",
+      "timingsMs": {
+        "total": 324962.12823699997
+      },
+      "selectedSeedBootstrapProven": false,
+      "currentSourceFixedPointProven": false,
+      "provider": {
+        "status": "not-attempted",
+        "kernelChecked": false
+      }
+    },
+    "c1Generation": {
+      "marker": "PSC0_SH1_GENERATION",
+      "logLine": 2268,
+      "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "moduleCount": 64,
+      "sourceBytes": 1268003,
+      "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "artifacts": {
+        "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+        "normalizedCanonicalAdmissionsSha256": "24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52",
+        "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+        "javascriptSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+      },
+      "receiptFile": "c1-receipt.json",
+      "timingMode": "selected-R staged preparation and emission",
+      "timingsMs": {
+        "loadAndPrepare": 661103.464022,
+        "admissions": 113865.20337200002,
+        "canonicalSurface": 46189.708675,
+        "emit": 378334.42475799995,
+        "tscAndWrite": 3171.6653810001444,
+        "total": 1202664.468491
+      },
+      "resourceObservation": {
+        "report": "resource-usage.jsonl",
+        "sha256": "2ed63f19987fb4a084878b50d3f121d166c7db8182bf8e7ac2481f61ebaf065c",
+        "checkpoints": 21,
+        "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+        "atomicInternalsObserved": false,
+        "semanticContractQualified": false
+      },
+      "resourcePolicy": {
+        "report": "../resource-policy-candidate.json",
+        "sha256": "7179c6ec439897c7381cdfd952581b6ad3a5f1f90c6941dc0dd3b442bf69b62a",
+        "policy": "psc0-sh1-generated-qualification-resources/1",
+        "passed": true
+      },
+      "provider": {
+        "status": "not-attempted",
+        "kernelChecked": false
+      }
+    },
+    "c1MarkersAfterGeneration": [
+      {
+        "marker": "PSC0_SH1_SESSION_CONFORMANCE",
+        "logLine": 2269,
+        "payloadPresent": false
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_SOURCE",
+        "logLine": 2270,
+        "payloadPresent": true
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_TARGET",
+        "logLine": 2271,
+        "payloadPresent": true
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_RUNTIME",
+        "logLine": 2272,
+        "payloadPresent": true
+      },
+      {
+        "marker": "PSC0_SH1_IR_CHECKER",
+        "logLine": 2273,
+        "payloadPresent": true
+      },
+      {
+        "marker": "PSC0_SH1_HELPER_RUNTIME",
+        "logLine": 2274,
+        "payloadPresent": true
+      },
+      {
+        "marker": "PSC0_SH1_GENERIC_ERASURE",
+        "logLine": 2275,
+        "payloadPresent": true
+      },
+      {
+        "marker": "PSC0_SH1_CAPABILITIES",
+        "logLine": 2276,
+        "payloadPresent": true
+      }
+    ],
+    "c1CandidateStepPassed": false
+  },
+  "completeObservedWorkerComparison": {
+    "referenceCases": 87,
+    "nativeCases": 87,
+    "c1Cases": 87,
+    "nativeAndC1CompleteReportsEqual": true,
+    "referenceToC1Changes": [
+      {
+        "pointer": "/families/1/observations/23/result/scope/declarationNames/entries",
+        "referenceAbsent": true,
+        "current": {
+          "tag": "empty"
+        }
+      },
+      {
+        "pointer": "/families/1/observations/27/result/scope/declarationNames/entries",
+        "referenceAbsent": true,
+        "current": {
+          "tag": "empty"
+        }
+      },
+      {
+        "pointer": "/families/1/observationSha256",
+        "reference": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59",
+        "current": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2"
+      },
+      {
+        "pointer": "/observationSha256",
+        "reference": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+        "current": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8"
+      }
+    ],
+    "observationLabels": [
+      {
+        "family": "F2",
+        "zeroBasedObservationIndex": 23,
+        "name": "structures-empty-reverse-accumulator"
+      },
+      {
+        "family": "F2",
+        "zeroBasedObservationIndex": 27,
+        "name": "inductives-empty-reverse-accumulator"
+      }
+    ],
+    "scope": "Exact structural comparison of the complete logged JSON report objects only. No claim about the semantic permissibility of a comparison projection.",
+    "selectors": {
+      "reference": "events.find(e => e.marker === 'PSC0_SH1_WORKER_HARNESS_REFERENCE').payload.report",
+      "native": "events.find(e => e.marker === 'PSC0_SH1_CAPABILITIES' && e.occurrence === 1).payload.workerMigration",
+      "c1": "events.find(e => e.marker === 'PSC0_SH1_CAPABILITIES' && e.occurrence === 2).payload.workerMigration"
+    },
+    "interpretation": "These are observed data differences. This record does not authorize or assume that the added declaration-entry metadata may be discarded, nor does it revise the comparison or any stored receipt."
+  },
+  "receiptSerializationProvenance": {
+    "source": {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "ref": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193",
+      "writeJson": "JSON.stringify(value, null, 2) + '\\n'"
+    },
+    "completedReceipts": [
+      {
+        "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+        "logLine": 2236,
+        "path": "dist/sh1/development/N1/receipt.json",
+        "serialization": "JSON.stringify(payload, null, 2) plus LF",
+        "sha": "7eae1470ff67697f67bf20074acd2837d21c1e14",
+        "sha256": "f87ebe4b4ac7c5200e1f876e6cf84df09a8df73731a0a521f9987b81ef7592d0",
+        "bytes": 15832
+      },
+      {
+        "marker": "PSC0_SH1_GENERATION",
+        "logLine": 2268,
+        "generation": "C1",
+        "path": "dist/sh1/C1/receipt.json",
+        "serialization": "JSON.stringify(payload, null, 2) plus LF",
+        "sha": "07da15195e0fa8ebcb6d3ec8db1260fb98c44743",
+        "sha256": "a7122ebca525fc37ca245161ebdb8e8d78fae3fa17139e1de5e166e384dafe7d",
+        "bytes": 169538
+      }
+    ],
+    "nativeSourceReceipt": {
+      "serialization": "compact JSON plus LF",
+      "sha256": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0",
+      "bytes": 608846,
+      "markerLine": 2205,
+      "authenticatedBy": {
+        "marker": "PSC0_SH1_IR_NATIVE_EVIDENCE",
+        "field": "nativeSourceReceiptSha256",
+        "value": "9c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0"
+      }
+    },
+    "resourceObservations": {
+      "marker": "PSC0_SH1_RESOURCE",
+      "count": 21,
+      "serialization": "Each exact compact logged JSON payload plus LF, concatenated in occurrence order.",
+      "sha256": "2ed63f19987fb4a084878b50d3f121d166c7db8182bf8e7ac2481f61ebaf065c",
+      "bytes": 11306,
+      "authenticatedBy": "PSC0_SH1_GENERATION.resourceObservation.sha256"
+    },
+    "otherMarkerFiles": "The archive preserves complete observed payloads. It does not assume an original receipt-file serialization for any other marker."
+  },
+  "retainedArtifacts": [
+    {
+      "file": "job.log",
+      "sha": "04e02ab7269388aeb114b918e0c8ddca0e2c9958",
+      "sha256": "7910b7597ffc2ec735d95a199c101c4a49f86c4680bcaeabb0a45e07558d1714",
+      "bytes": 1599026,
+      "exactReadback": true,
+      "role": "Complete decoded job log exactly as returned by the sole terminal compiler-log request."
+    },
+    {
+      "file": "markers.json",
+      "sha": "b3a7d3283137369315c7801a287f02a9080a4410",
+      "sha256": "1d3227b2a36f621d2303bf1613681932d5d8a0a6bd1796c527d0d9c511b25821",
+      "bytes": 1399405,
+      "exactReadback": true,
+      "losslessObjectEqualityToPrettyArchive": true,
+      "role": "All 68 complete logged marker events, preserving duplicate names and their order; compact lossless JSON transport."
+    },
+    {
+      "file": "run-metadata.json",
+      "sha": "aaef7b60abbe2ceb99de3c0e1d975798cb1bf8d5",
+      "sha256": "159bf3d8bd7e918f0449359b582336062e8b17963f3e87a2aa308fc5576b2df9",
+      "bytes": 29217,
+      "exactReadback": true,
+      "role": "Complete terminal run/jobs/artifact metadata and the separate skipped cold workflow observation."
+    },
+    {
+      "file": "native-candidate-receipt.json",
+      "sha": "7eae1470ff67697f67bf20074acd2837d21c1e14",
+      "sha256": "f87ebe4b4ac7c5200e1f876e6cf84df09a8df73731a0a521f9987b81ef7592d0",
+      "bytes": 15832,
+      "exactReadback": true,
+      "role": "Complete N1 receipt reconstructed with the exact producer file serialization."
+    },
+    {
+      "file": "c1-receipt.json",
+      "sha": "07da15195e0fa8ebcb6d3ec8db1260fb98c44743",
+      "sha256": "a7122ebca525fc37ca245161ebdb8e8d78fae3fa17139e1de5e166e384dafe7d",
+      "bytes": 169538,
+      "exactReadback": true,
+      "role": "Complete C1 generation receipt reconstructed with the exact producer file serialization."
+    }
+  ],
+  "uploadedArtifactMetadata": [
+    {
+      "id": 11654446484,
+      "name": "psc0-sh1-ts7.0.2-138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "size_in_bytes": 3599676,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11654446484",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11654446484/zip",
+      "expired": false,
+      "created_at": "2026-10-10T01:22:32Z",
+      "expires_at": "2026-11-09T01:22:30Z",
+      "updated_at": "2026-10-10T01:22:32Z",
+      "digest": "sha256:ebd0118a78f6713073823f225f3353a7257d1df2d575dfbf5a12c5d2fc4b40f9",
+      "workflow_run": {
+        "id": 38011068208,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "psc0/strict-sh1-v1",
+        "head_sha": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+      }
+    }
+  ],
+  "boundaries": {
+    "c2Started": false,
+    "c3Started": false,
+    "fixedPointMarkerObserved": false,
+    "qualificationReceiptObserved": false,
+    "strictEnforcementBinderObserved": false,
+    "providerCheckExecuted": false,
+    "providerReceiptObserved": false,
+    "compilerLogRequests": 1,
+    "providerLogRequests": 0,
+    "artifactArchiveRequests": 0,
+    "workflowDispatches": 0,
+    "rerunsRequested": 0,
+    "localExecution": false,
+    "sourceOrHostEdits": false,
+    "refChanges": false
+  },
+  "disposition": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "selectedSeedBootstrapQualified": false,
+    "currentSourceFixedPointQualified": false,
+    "correspondenceRowsClosedByThisAttempt": 0,
+    "stageObligationsClosedByThisAttempt": 0,
+    "reason": "The exact attempt failed after C1 generation. Completed products and finite stage evidence are retained without substituting them for full qualification or provider admission."
+  }
+}

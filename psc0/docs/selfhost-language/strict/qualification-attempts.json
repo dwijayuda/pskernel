@@ -1924,6 +1924,359 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 14,
+      "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "runId": 38011068208,
+      "workflowId": 378853677,
+      "compilerJobId": 114090942895,
+      "providerJobId": 114096798112,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38011068208",
+      "status": "failure",
+      "failedStep": {
+        "number": 25,
+        "name": "Build the selected-seed candidate before full qualification",
+        "stage": "PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE",
+        "diagnostic": {
+          "kind": "AssertionError",
+          "code": "ERR_ASSERTION"
+        },
+        "owner": "selected-seed candidate migration-worker comparison",
+        "script": "psc0/scripts/sh1-qualify.mjs",
+        "line": 1115,
+        "column": 10,
+        "nodeVersion": "22.23.3",
+        "exitCode": 1,
+        "after": "Complete N1 development gate, C1 generation, and the listed C1 conformance stages.",
+        "excerpt": "2026-10-10T01:22:28.0070824Z AssertionError [ERR_ASSERTION]: PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE\n2026-10-10T01:22:28.0082557Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1115:10 {\n2026-10-10T01:22:28.3137549Z ##[error]Process completed with exit code 1.\n"
+      },
+      "stageSummaryBeforeFailure": {
+        "nativeFullSource": {
+          "moduleCount": 64,
+          "sourceDeclarationCount": 1708,
+          "coreDeclarationCount": 2571,
+          "normalizationCount": 50,
+          "normalizationCountProvenance": {
+            "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE",
+            "pointer": "/sourceOrigins/normalizationCount",
+            "independentlyCountedNonNullNormalizationRecords": 50,
+            "moduleRecordsVisited": 64
+          },
+          "originalIr": {
+            "schemaVersion": 1,
+            "kind": "psc0-native-original-ir-check",
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedSteps": 829139,
+            "expressionCount": 64911,
+            "findingCount": 0,
+            "retainedFindingCount": 0,
+            "omittedFindingDetails": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "strictSh1Qualified": false
+          }
+        },
+        "N1": {
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "sourceConformance": {
+            "status": "pass",
+            "acceptedRoutes": 2,
+            "refusedCases": 38
+          },
+          "targetConformance": {
+            "status": "pass",
+            "fullPayloadRetained": true
+          },
+          "runtimeConformance": {
+            "status": "pass",
+            "observations": 186
+          },
+          "irChecker": {
+            "status": "pass",
+            "behaviorObservations": 61,
+            "optimizedTailObservations": 12,
+            "optimizedTailStatus": "pass"
+          },
+          "helperRuntime": {
+            "status": "pass",
+            "observations": 1568
+          },
+          "genericErasure": {
+            "status": "pass",
+            "originalBehaviorObservations": 19,
+            "functionValueObservations": 19,
+            "pureFunctionValueCases": 14,
+            "hostCallbackDiagnostics": 5,
+            "preparedCoreRecursionObservations": 4,
+            "recursiveStructures": {
+              "compileOnly": true,
+              "structures": 2,
+              "declarations": 4,
+              "projections": 6,
+              "usedHypotheses": 2,
+              "unusedHypotheses": 2
+            }
+          },
+          "sessionConformance": {
+            "status": "pass"
+          },
+          "capabilities": {
+            "status": "pass",
+            "workerMigrationCases": 87
+          },
+          "fullMarkerPayloadsRetained": true,
+          "grammarClosure": {
+            "status": "pass",
+            "moduleCount": 64
+          },
+          "iterationConformance": {
+            "status": "pass"
+          },
+          "foundationConformance": {
+            "status": "pass"
+          },
+          "helperSourceConformance": {
+            "status": "pass"
+          },
+          "finalNativeCandidateReceipt": {
+            "status": "emitted",
+            "marker": "PSC0_SH1_NATIVE_CANDIDATE",
+            "logLine": 2236
+          }
+        },
+        "C1": {
+          "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "sourceConformance": {
+            "status": "pass",
+            "acceptedRoutes": 2,
+            "refusedCases": 38
+          },
+          "targetConformance": {
+            "status": "pass",
+            "fullPayloadRetained": true
+          },
+          "runtimeConformance": {
+            "status": "pass",
+            "observations": 186
+          },
+          "irChecker": {
+            "status": "pass",
+            "behaviorObservations": 61,
+            "optimizedTailObservations": 12,
+            "optimizedTailStatus": "pass"
+          },
+          "helperRuntime": {
+            "status": "pass",
+            "observations": 1568
+          },
+          "genericErasure": {
+            "status": "pass",
+            "originalBehaviorObservations": 19,
+            "functionValueObservations": 19,
+            "pureFunctionValueCases": 14,
+            "hostCallbackDiagnostics": 5,
+            "preparedCoreRecursionObservations": 4,
+            "recursiveStructures": {
+              "compileOnly": true,
+              "structures": 2,
+              "declarations": 4,
+              "projections": 6,
+              "usedHypotheses": 2,
+              "unusedHypotheses": 2
+            }
+          },
+          "sessionConformance": {
+            "status": "pass"
+          },
+          "capabilities": {
+            "status": "pass",
+            "workerMigrationCases": 87
+          },
+          "fullMarkerPayloadsRetained": true,
+          "generationReceipt": {
+            "status": "emitted",
+            "marker": "PSC0_SH1_GENERATION",
+            "logLine": 2268
+          },
+          "migrationWorkerCorrespondence": {
+            "status": "failed"
+          },
+          "iterationConformance": {
+            "status": "not-run",
+            "reason": "The R/C1 report equality assertion precedes runIterationConformance in the candidate command."
+          },
+          "finalCandidatePassMarker": {
+            "status": "not-emitted"
+          }
+        }
+      },
+      "sourceAndRecipe": {
+        "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "moduleCount": 64,
+        "c1SourceBytes": 1268003,
+        "n1RecipeSha256": "b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1",
+        "c1RecipeSha256": "b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1",
+        "recipeFileCount": 48,
+        "completeRecipeFilesRetainedInBothReceipts": true,
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        }
+      },
+      "generatedProducts": {
+        "N1": {
+          "nativeCompilerBinarySha256": "be28aed5164ffa0661369e424dd8d315278de396fec4c22ce3d73ff567e81012",
+          "artifacts": {
+            "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+            "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+          },
+          "totalMs": 324962.12823699997
+        },
+        "C1": {
+          "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "selectedAuthoringSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+            "normalizedCanonicalAdmissionsSha256": "24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52",
+            "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+            "javascriptSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"
+          },
+          "timingMode": "selected-R staged preparation and emission",
+          "timingsMs": {
+            "loadAndPrepare": 661103.464022,
+            "admissions": 113865.20337200002,
+            "canonicalSurface": 46189.708675,
+            "emit": 378334.42475799995,
+            "tscAndWrite": 3171.6653810001444,
+            "total": 1202664.468491
+          }
+        }
+      },
+      "workerReportComparison": {
+        "referenceCases": 87,
+        "nativeCases": 87,
+        "c1Cases": 87,
+        "nativeAndC1CompleteReportsEqual": true,
+        "referenceToC1Changes": [
+          {
+            "pointer": "/families/1/observations/23/result/scope/declarationNames/entries",
+            "referenceAbsent": true,
+            "current": {
+              "tag": "empty"
+            }
+          },
+          {
+            "pointer": "/families/1/observations/27/result/scope/declarationNames/entries",
+            "referenceAbsent": true,
+            "current": {
+              "tag": "empty"
+            }
+          },
+          {
+            "pointer": "/families/1/observationSha256",
+            "reference": "8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59",
+            "current": "f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2"
+          },
+          {
+            "pointer": "/observationSha256",
+            "reference": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+            "current": "a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8"
+          }
+        ],
+        "observationLabels": [
+          {
+            "family": "F2",
+            "zeroBasedObservationIndex": 23,
+            "name": "structures-empty-reverse-accumulator"
+          },
+          {
+            "family": "F2",
+            "zeroBasedObservationIndex": 27,
+            "name": "inductives-empty-reverse-accumulator"
+          }
+        ],
+        "scope": "Exact structural comparison of the complete logged JSON report objects only. No claim about the semantic permissibility of a comparison projection.",
+        "completeReports": "All three reports remain intact in the compact marker archive; no historical receipt or hash was resealed."
+      },
+      "N1": "pass-complete-native-development-receipt",
+      "currentGenerationCandidate": "c1-generated-and-listed-conformance-passed-final-candidate-comparison-failed",
+      "C1Iteration": "not-run",
+      "C2": "not-started",
+      "C3": "not-started",
+      "fixedPoint": "not-started",
+      "strictEvidenceBinder": "not-run",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/migration-worker-correspondence-failure.json",
+        "blob": "d5b2c58713ddc50f128f885f9457275e7397cb98",
+        "sha256": "aab18c1d5745c92aa1c8b9c4cd8cea2a9c166b6e686c88720d467fad806c7dbb",
+        "bytes": 48973
+      },
+      "log": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/job.log",
+        "blob": "04e02ab7269388aeb114b918e0c8ddca0e2c9958",
+        "sha256": "7910b7597ffc2ec735d95a199c101c4a49f86c4680bcaeabb0a45e07558d1714",
+        "bytes": 1599026
+      },
+      "stageMarkers": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/markers.json",
+        "blob": "b3a7d3283137369315c7801a287f02a9080a4410",
+        "sha256": "1d3227b2a36f621d2303bf1613681932d5d8a0a6bd1796c527d0d9c511b25821",
+        "bytes": 1399405,
+        "markerEvents": 68,
+        "duplicateNamesPreserved": true,
+        "encoding": "Compact lossless JSON archive; exact logged JSON payload reconstruction checked for all JSON events."
+      },
+      "runMetadata": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/run-metadata.json",
+        "blob": "aaef7b60abbe2ceb99de3c0e1d975798cb1bf8d5",
+        "sha256": "159bf3d8bd7e918f0449359b582336062e8b17963f3e87a2aa308fc5576b2df9",
+        "bytes": 29217
+      },
+      "nativeCandidateReceipt": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/native-candidate-receipt.json",
+        "blob": "7eae1470ff67697f67bf20074acd2837d21c1e14",
+        "sha256": "f87ebe4b4ac7c5200e1f876e6cf84df09a8df73731a0a521f9987b81ef7592d0",
+        "bytes": 15832,
+        "serialization": "JSON.stringify(payload, null, 2) + LF, as written by sh1-qualify.mjs writeJson."
+      },
+      "c1GenerationReceipt": {
+        "path": "attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/c1-receipt.json",
+        "blob": "07da15195e0fa8ebcb6d3ec8db1260fb98c44743",
+        "sha256": "a7122ebca525fc37ca245161ebdb8e8d78fae3fa17139e1de5e166e384dafe7d",
+        "bytes": 169538,
+        "serialization": "JSON.stringify(payload, null, 2) + LF, as written by sh1-qualify.mjs writeJson."
+      },
+      "artifacts": [
+        {
+          "id": 11654446484,
+          "name": "psc0-sh1-ts7.0.2-138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+          "bytes": 3599676,
+          "digest": "sha256:ebd0118a78f6713073823f225f3353a7257d1df2d575dfbf5a12c5d2fc4b40f9",
+          "runId": 38011068208,
+          "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+          "archiveInspected": false
+        }
+      ],
+      "coldRecovery": {
+        "runId": 38011068114,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "Native N1 and generated C1 report the same 87 migration-worker cases. R/current differ only by two empty entries metadata fields and the resulting F2/aggregate hashes. C1 iteration, C2/C3, fixed-point binding and provider admission were not executed. The run remains failed; evidence does not classify entry metadata as disposable.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1931,20 +2284,24 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "one-full-exact-source-qualification-requested-after-reviewed-closed-universe-constructor-correction",
-    "expectedParent": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
+    "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
     "sourceRefToRecordFromEnclosingCommit": true,
-    "compilerSource": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-    "compilerSourceBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
-    "compilerSourceSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
-    "reviewManifest": "f71b09c33a574e6868b193afac946355008b4d61",
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "expectedRecipeFileCount": 48,
+    "expectedRecipeIsPredictionUntilExecuted": true,
+    "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+    "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
     "workflow": ".github/workflows/psc0-sh1.yml",
+    "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
     "workflowId": 378853677,
     "fullQualificationRequested": true,
     "commitMarker": "[sh1-qualify]",
     "requiredPhases": [
       "N1 native candidate and conformance",
-      "selected-R to C1",
+      "data-only authenticated R/N1 worker comparison",
+      "selected-R to C1 and all existing candidate gates",
       "C1 to C2",
       "C2 to C3",
       "four-product fixed point and native parity",
@@ -1953,8 +2310,11 @@
     ],
     "repeatColdRecovery": false,
     "repeatRetainedN1Diagnostic": false,
+    "productionSourceChanged": false,
     "fixtureChanged": false,
-    "hostConformanceChanged": false,
+    "hostConformanceChanged": true,
+    "addedCompilerExecutions": 0,
+    "priorReceiptsReusedAsNewQualification": false,
     "strictSh1Qualified": false,
     "semanticContractQualified": false,
     "providerChecked": false
@@ -1996,7 +2356,7 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T00:51:10Z",
+  "updatedAtUtc": "2026-10-10T01:55:27.602Z",
   "completedDiagnostics": [
     {
       "status": "completed-localization-only",

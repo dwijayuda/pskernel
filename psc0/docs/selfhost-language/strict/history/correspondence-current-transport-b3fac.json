@@ -1,38 +1,23 @@
 {
   "schemaVersion": 1,
   "kind": "strict-sh1-correspondence-current-source-transport-and-deferred-final-dispositions",
-  "status": "current-source-transport-reviewed; pending-exact-full-qualification-and-provider",
+  "status": "pending-after-current-qualification-failure-not-applied",
   "repository": "dwijayuda/pskernel",
   "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-transport.json",
   "scope": "Reuse the completed 33-row mapping and review; associate only the subsequent two Expr spelling transports and two host evidence-consumer updates. No new general argument review, language capability or proof scope. The pattern/callback/host transports are already published; the reused final common conditions' source-integration portion is satisfied by those exact pins, while all actual qualification/provider references are still deferred.",
   "base": {
-    "commit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
-    "rootTree": "c7903f7b30b45f08f7c311869681b4ca1a9908c9",
-    "psc0Tree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
-    "psc0Blobs": 1410,
+    "commit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "rootTree": "21592550b9016a8e5e7627d59dcdf261df72d2ad",
+    "psc0Tree": "d99e085157331fcf5db74e7ab207f848ee724a13",
+    "psc0Blobs": 1398,
     "treeTruncated": false,
     "ledger": {
       "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
-      "blob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
-      "sha256": "88699d32fc09e0350d79f36bc9d005a3dfd5dedfd52f22c60da8cb4d4ec2fafb",
-      "bytes": 136640,
+      "blob": "4cadf1fbcceecce23b1e37cf093b6269c61026be",
+      "sha256": "2565bef23301869688d28fa7556b2bf2bb81d32a89680066870f64c28eca628b",
+      "bytes": 128452,
       "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
-    },
-    "previousSourceBase": {
-      "commit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
-      "rootTree": "21592550b9016a8e5e7627d59dcdf261df72d2ad",
-      "psc0Tree": "d99e085157331fcf5db74e7ab207f848ee724a13",
-      "psc0Blobs": 1398,
-      "treeTruncated": false,
-      "ledger": {
-        "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
-        "blob": "4cadf1fbcceecce23b1e37cf093b6269c61026be",
-        "sha256": "2565bef23301869688d28fa7556b2bf2bb81d32a89680066870f64c28eca628b",
-        "bytes": 128452,
-        "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
-      }
-    },
-    "currentBindingStatus": "published-source-commit-tree-and-current-ledger-verified"
+    }
   },
   "reviewReuse": {
     "map": {
@@ -123,18 +108,6 @@
         "blob": "a89fb7324afb820b2df077a26608d71cc11d644c",
         "sha256": "0836d42bdfaf55fd11c433bb7ac8c6056636296b36805f1b3188cc8111112c49",
         "bytes": 24846
-      },
-      {
-        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
-        "blob": "f71b09c33a574e6868b193afac946355008b4d61",
-        "sha256": "6131cefd6461284b35560dd1fa21e267cadb10f77785e2f3b90fb61b1a9936bf",
-        "bytes": 63632
-      },
-      {
-        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
-        "blob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
-        "sha256": "4f2e24e8add150073d2070d1e7a9ab0526c6d4ce5d882dcc0adf1015309281c1",
-        "bytes": 13986
       }
     ],
     "expression": [
@@ -183,19 +156,7 @@
         "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c"
       }
     ],
-    "historicalAdvisoryTreatment": "Frozen map697c94 retains observed e3ed and proposed a4d; its pending-manifest fields are historical. Active current rows and the ER-08 added source use b4af. Frozen paper/source proof anchors are not rewritten. Frozen ac274 retains its cad2 Infer source addition; this pending transport records the separately reviewed cad2 -> 160a delta without rewriting old evidence.",
-    "inference": [
-      {
-        "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-        "baseBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
-        "currentBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
-        "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
-        "bytes": 21458,
-        "manifestBlob": "f71b09c33a574e6868b193afac946355008b4d61",
-        "independentReviewBlob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
-        "semanticScope": "Only newly constructed closed sort-successor and Pi-imax levels are canonicalized, preserving ground universe denotation and zero classification. Any param/mvar preserves the original entire input level. Finite proper input/allocation and unchanged expression-fuel limits are those stated in the exact reviewed manifest. Symbolic universe algorithms, kernel/provider, defeq/cache, fixtures, runtime and erasure are unchanged."
-      }
-    ]
+    "historicalAdvisoryTreatment": "Frozen map697c94 retains observed e3ed and proposed a4d; its pending-manifest fields are historical. Active current rows and the ER-08 added source use b4af. Frozen paper/source proof anchors are not rewritten."
   },
   "sourcePatch": {
     "format": "RFC6902",
@@ -945,14 +906,10 @@
         "path": "/rows/1/sources/3",
         "value": {
           "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-          "blob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+          "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
           "definitions": [
             "psInferType",
-            "psInferProjectionType",
-            "psInferTypeWithFuelWorker",
-            "psInferClosedLevelValue",
-            "psInferLevelFromNat",
-            "psInferNormalizeClosedLevel"
+            "psInferProjectionType"
           ]
         }
       },
@@ -1158,10 +1115,9 @@
     "definitionListReplacements": 3,
     "sourceAdditions": 6,
     "domainReplacements": 1,
-    "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+    "preparedRowsSha256": "4e4cf1bdd0a2f021adc84b7c95dfc545c66f6feead6e5a403d0095fe8793a2e5",
     "all33RowSourcePinsMatchCurrentTree": true,
-    "activeFlagsUnchanged": true,
-    "currentTreeVerification": "verified-against-published-PSC-tree-3cb88a6ee17b429cfde8215819fb789c3c2910ca"
+    "activeFlagsUnchanged": true
   },
   "requiredMetadataCorrection": {
     "document": "correspondence",
@@ -1179,12 +1135,11 @@
       "etaTokenOccurrencesInExpr": 1,
       "etaCallSitesInExpr": 0,
       "retiredFinishTokenOccurrences": 0,
-      "globalUnusedClaim": "Preserved from review20f011 through exact one-guard Expr transport4c5 and host-only a89; not a newly repeated global source audit. The closed-universe repair f71 changes only Meta.Infer and preserves Expr bytes."
+      "globalUnusedClaim": "Preserved from review20f011 through exact one-guard Expr transport4c5 and host-only a89; not a newly repeated global source audit."
     },
     "ER08": "Retain both the nonrecursive Core projection rewrite and the exact p+3 recursive-record Expr route; current Expr is b4af. Uninhabited-parameter declarations still require compilation.",
     "TS07": "Retain direct-self one-logical-call and captured-alias two-logical-call accounting with intermediate cutoff. Positive flat original-IR tail evidence remains required; returned-function replay entries may use the general route.",
-    "emptyCallee": "Current source-empty fixtures return their typed elimination directly. The separate explicitly authored eliminateEmptyTypedCall in IR gate521d1d2fdd6d22edeb1d9e521386d3a90ab954d7 remains genuine callee-position coverage.",
-    "closedUniverse": "Only newly constructed closed sort-successor and Pi-imax levels are canonicalized, preserving ground universe denotation and zero classification. Any param/mvar preserves the original entire input level. Finite proper input/allocation and unchanged expression-fuel limits are those stated in the exact reviewed manifest. Symbolic universe algorithms, kernel/provider, defeq/cache, fixtures, runtime and erasure are unchanged."
+    "emptyCallee": "Current source-empty fixtures return their typed elimination directly. The separate explicitly authored eliminateEmptyTypedCall in IR gate521d1d2fdd6d22edeb1d9e521386d3a90ab954d7 remains genuine callee-position coverage."
   },
   "receiptPathConvention": "Receipt/artifact paths are relative to psc0/dist/sh1 from the full qualification artifact unless explicitly marked otherwise. N1 is development/N1; generation indices in the binder are0=N1,1=C1,2=C2,3=C3. The actual output key is generations, not the local variable generationEvidence.",
   "receiptCatalogBase": {
@@ -2588,7 +2543,7 @@
       "id": "ER-02",
       "jsonPointer": "/rows/1",
       "currentRowSha256": "b40d8de6f60639ca1f957674d7ce7eae1e8d11d7f4ed6db0d6abab95a202d5cc",
-      "sourcePreparedRowSha256": "75d4d4a6710c8d0a61414a9c4fcf78b71f67c8dbffb1078643bab8a9804b914f",
+      "sourcePreparedRowSha256": "d0c8f0edc0dddcf7638211d07ff3da1fec10f94c9687a9aadb53c37384cdb72d",
       "frozenDisposition": {
         "mapRowPointer": "/correspondenceRows/1",
         "reviewRowPointer": "/rows/1",
@@ -2600,7 +2555,7 @@
       },
       "sourcePins": {
         "jsonPointer": "/rows/1/sources",
-        "preparedValueSha256": "48d3a0093e016dc5abaa4a143a71bc052ab8312c21d5871627ba52ec3521bef3"
+        "preparedValueSha256": "c350d5af394605720416113626c4ea21c965bc31efb926486cfe5c07930e0260"
       },
       "domain": {
         "jsonPointer": "/rows/1/domain",
@@ -3730,7 +3685,7 @@
     }
   ],
   "finalBindingConditions": [
-    "Bind the actual integrated source commit containing every reviewed repair, including the closed-universe Meta.Infer correction, its complete raw source closure, recipe/profile/toolchain identity and every relevant product, with any later documentation-only transport stated explicitly.",
+    "Integrate exactly the reviewed source pattern candidate and final manifest; bind the actual integrated commit, complete raw source closure, recipe/profile/toolchain identity and every relevant product, with any later documentation-only transport stated explicitly.",
     "Observe the complete current-source Actions compiler job succeed, including N1 native source/target/original-IR path, R-derived C1, current C2/C3, N1=C2 TypeScript/JavaScript and full compared C2=C3 artifacts. No failed or partial historical run substitutes for this result.",
     "Authenticate the exact qualification.json and strict-enforcement-evidence.json plus the mapped subreceipt/artifact digests and compiler identities. Retain actual output-file bytes or correctly hash-bound reconstruction provenance; passing log markers alone must not be relabeled as uninspected artifact contents.",
     "Require every mapped current conformance group, including empty and zero-field coverage, recursive-record compilation, corrected recursion reference, canonical function values, strict source refusals, runtime laws/diagnostics, optimizer cases and original-IR/target typing. Their finite evidence supplements the scoped paper arguments.",
@@ -3781,8 +3736,8 @@
       "strictSh1Discharged": false
     },
     "evidenceBindingTemplate": {
-      "status": "deferred-until-actual-artifacts-return-for-bound-source-commit",
-      "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "status": "deferred-until-actual-artifacts-return",
+      "sourceCommit": null,
       "sourceClosureSha256": null,
       "qualificationReference": null,
       "strictBinderReference": null,
@@ -3794,8 +3749,8 @@
     "baseSourceGuardsMatch": true,
     "all49MappedSourcesAnd6AddedSourcesMatchPublishedTree": true,
     "independentRfc6902SimulationMatchesPreparedDocument": true,
-    "guardedSourcePatchSha256": "ab6db5609bd2567f195ca152f9ceb356c35fdc329337bfcfe5ff89a51997d6f0",
-    "preparedRowArraySha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
+    "guardedSourcePatchSha256": "7f2c3cd85dd66a27b36f08377a1e36f6f4cf33678aa5034228aa2721c3bf7e18",
+    "preparedRowArraySha256": "4e4cf1bdd0a2f021adc84b7c95dfc545c66f6feead6e5a403d0095fe8793a2e5",
     "all33ProposedDispositionRowsResolved": true,
     "all25ReceiptGroupsResolved": true,
     "newEmptyBoundarySelectors": 8,
@@ -3852,189 +3807,14 @@
       }
     ],
     "allActiveFlagsRemainFalse": true,
-    "noNewQualificationEvidenceClaimed": true,
-    "currentTreeVerification": "verified-against-published-PSC-tree-3cb88a6ee17b429cfde8215819fb789c3c2910ca",
-    "currentSourceDefinitionAudit": {
-      "sourceReferences": 72,
-      "uniqueSourcePins": 19,
-      "uniqueSourceDefinitionPairs": 111,
-      "everyReferencedDefinitionExistsExactlyOnce": true,
-      "allPreparedRowFlagsRemainFalse": true,
-      "baseAndCandidateContentAuditOnly": true,
-      "currentPublishedTreeVerificationPending": false,
-      "currentPublishedTreeVerified": true
-    },
-    "composedOldPatchPlusSixOpOverlayMatchesDirect151OperationPatch": true,
-    "onlyPreparedRowSourceChangeFromAc274": "ER-02",
-    "all33FrozenDispositionMappingsUnchanged": true,
-    "er06DomainReplacementUnchanged": true,
-    "currentActiveRowArrayIdenticalToAc274Base": true,
-    "publishedRepairAndIndependentReviewPinsMatch": true,
-    "all8FrozenPaperPinsUnchanged": true,
-    "frozenMapAndReviewPinsUnchanged": true,
-    "finalPendingPacketAudit": {
-      "frozenMapRows": 33,
-      "rowSourceReferenceCount": 72,
-      "uniqueSourcePins": 19,
-      "resolvedSourceDefinitionPairs": 111,
-      "unchangedFrozenMappings": true,
-      "unchangedReceiptSelectors": true,
-      "unchangedER06DomainCorrection": true,
-      "allPreparedRowHashesVerified": true,
-      "allPreparedSourceHashesVerified": true,
-      "publishedTreeAndLedgerBound": true,
-      "actualQualificationArtifactStillPending": true,
-      "actualProviderArtifactStillPending": true,
-      "noClosureAssignment": true
-    }
+    "noNewQualificationEvidenceClaimed": true
   },
   "latestQualificationNotice": {
-    "previousFailedQualification": {
-      "runId": 38008721677,
-      "sourceCommit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
-      "status": "failed",
-      "step": 24
-    },
-    "retainedOriginDiagnostic": {
-      "runId": 38010024282,
-      "sourceCommit": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
-      "status": "successfully-localized-existing-error",
-      "evidenceManifestBlob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
-      "reportBlob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
-      "sourceIndex": 6,
-      "name": "sh1GroupLet",
-      "phase": "stableDeclaration",
-      "error": "infer/applicationTypeMismatch",
-      "notQualification": true
-    },
-    "nextQualification": {
-      "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
-      "runId": null,
-      "status": "requested-pending-actual-run-and-artifact-bindings",
-      "qualificationArtifactReference": null,
-      "providerArtifactReference": null
-    }
-  },
-  "previousPendingDraft": {
-    "blob": "ac2741ebe7dd4065dcfc08d01a3be445671c4e05",
-    "sha256": "8fa14635cc18c6fe59b597ce96cfa9f4a2c9e28f7702d13ca0b0c96d6f58a337",
-    "bytes": 141189,
-    "unchanged": true
-  },
-  "supplementalClosedUniverseTransport": {
-    "status": "review-clear-published-source-bound; actual-qualification-pending",
-    "repairManifest": {
-      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
-      "blob": "f71b09c33a574e6868b193afac946355008b4d61",
-      "sha256": "6131cefd6461284b35560dd1fa21e267cadb10f77785e2f3b90fb61b1a9936bf",
-      "bytes": 63632
-    },
-    "independentReview": {
-      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
-      "blob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
-      "sha256": "4f2e24e8add150073d2070d1e7a9ab0526c6d4ce5d882dcc0adf1015309281c1",
-      "bytes": 13986
-    },
-    "source": {
-      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-      "baseBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
-      "currentBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
-      "sha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
-      "bytes": 21458
-    },
-    "previousDraftComposition": {
-      "operations": [
-        {
-          "op": "test",
-          "path": "/rows/1/id",
-          "value": "ER-02"
-        },
-        {
-          "op": "test",
-          "path": "/rows/1/sources/3/path",
-          "value": "psc0/packages/meta/src/Ps/Meta/Infer.lean"
-        },
-        {
-          "op": "test",
-          "path": "/rows/1/sources/3/blob",
-          "value": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3"
-        },
-        {
-          "op": "replace",
-          "path": "/rows/1/sources/3/blob",
-          "value": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889"
-        },
-        {
-          "op": "test",
-          "path": "/rows/1/sources/3/definitions",
-          "value": [
-            "psInferType",
-            "psInferProjectionType"
-          ]
-        },
-        {
-          "op": "replace",
-          "path": "/rows/1/sources/3/definitions",
-          "value": [
-            "psInferType",
-            "psInferProjectionType",
-            "psInferTypeWithFuelWorker",
-            "psInferClosedLevelValue",
-            "psInferLevelFromNat",
-            "psInferNormalizeClosedLevel"
-          ]
-        }
-      ],
-      "operationCount": 6,
-      "sha256": "b321c5d48c8180efb33ee8cd8ddf0c0c2d2116ce53a2525d3f9f93fafda23933",
-      "equivalentDirectPatchChange": {
-        "operationIndex": 138,
-        "path": "/rows/1/sources/3",
-        "before": {
-          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-          "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
-          "definitions": [
-            "psInferType",
-            "psInferProjectionType"
-          ]
-        },
-        "after": {
-          "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-          "blob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
-          "definitions": [
-            "psInferType",
-            "psInferProjectionType",
-            "psInferTypeWithFuelWorker",
-            "psInferClosedLevelValue",
-            "psInferLevelFromNat",
-            "psInferNormalizeClosedLevel"
-          ]
-        }
-      },
-      "verifiedComposedAndDirectDocumentsEqual": true
-    },
-    "argument": "Only newly constructed closed sort-successor and Pi-imax levels are canonicalized, preserving ground universe denotation and zero classification. Any param/mvar preserves the original entire input level. Finite proper input/allocation and unchanged expression-fuel limits are those stated in the exact reviewed manifest. Symbolic universe algorithms, kernel/provider, defeq/cache, fixtures, runtime and erasure are unchanged.",
-    "preparedSourceRow": "ER-02",
-    "previousPreparedRowsSha256": "4e4cf1bdd0a2f021adc84b7c95dfc545c66f6feead6e5a403d0095fe8793a2e5",
-    "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c",
-    "changedSourcePreparedRows": [
-      {
-        "index": 1,
-        "id": "ER-02"
-      }
-    ],
-    "all33FrozenDispositionMappingsUnchanged": true,
-    "newReceiptGroupsRequired": false,
-    "activeFlagsChanged": 0,
-    "stageFlagsChanged": 0
-  },
-  "proofTransportApplication": {
-    "currentSourceHead": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
-    "currentLedgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
-    "scope": "Use this pending source patch and immutable frozen disposition references only when root performs the explicitly scoped final current-ledger disposition after the actual exact-source qualification and provider receipts return.",
-    "closedUniverseSupplement": "f71b09c33a574e6868b193afac946355008b4d61",
-    "independentSupplement": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
-    "alteredPreparedRow": "ER-02",
-    "historicalRowsAndFlags": "No active row or produced receipt was changed by this preparation."
+    "runId": 38008721677,
+    "sourceCommit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "status": "failed",
+    "step": 24,
+    "diagnostic": "awaiting-retained-completed-log",
+    "source": "Root-reported actual Actions result; no cause inferred and no new review scope opened."
   }
 }

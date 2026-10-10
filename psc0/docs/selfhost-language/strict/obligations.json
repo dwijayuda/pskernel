@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-10T00:51:10Z",
+  "updatedAtUtc": "2026-10-10T01:55:27.602Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -757,20 +757,24 @@
     "historicalCounterexampleSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
   },
   "currentQualificationRequest": {
-    "status": "one-full-exact-source-qualification-requested-after-reviewed-closed-universe-constructor-correction",
-    "expectedParent": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+    "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
+    "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
     "sourceRefToRecordFromEnclosingCommit": true,
-    "compilerSource": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
-    "compilerSourceBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
-    "compilerSourceSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
-    "reviewManifest": "f71b09c33a574e6868b193afac946355008b4d61",
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "expectedRecipeFileCount": 48,
+    "expectedRecipeIsPredictionUntilExecuted": true,
+    "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+    "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
     "workflow": ".github/workflows/psc0-sh1.yml",
+    "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
     "workflowId": 378853677,
     "fullQualificationRequested": true,
     "commitMarker": "[sh1-qualify]",
     "requiredPhases": [
       "N1 native candidate and conformance",
-      "selected-R to C1",
+      "data-only authenticated R/N1 worker comparison",
+      "selected-R to C1 and all existing candidate gates",
       "C1 to C2",
       "C2 to C3",
       "four-product fixed point and native parity",
@@ -779,8 +783,11 @@
     ],
     "repeatColdRecovery": false,
     "repeatRetainedN1Diagnostic": false,
+    "productionSourceChanged": false,
     "fixtureChanged": false,
-    "hostConformanceChanged": false,
+    "hostConformanceChanged": true,
+    "addedCompilerExecutions": 0,
+    "priorReceiptsReusedAsNewQualification": false,
     "strictSh1Qualified": false,
     "semanticContractQualified": false,
     "providerChecked": false
@@ -893,42 +900,55 @@
     "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
   },
   "latestExecution": {
-    "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
-    "runId": 38008721677,
-    "compilerJobId": 114083480442,
-    "status": "N1-generic-fixture-preparation-failed-after-six-completed-conformance-stages",
-    "failedStep": 24,
-    "N1CompilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
-    "nativeCompilerBuild": "success",
-    "nativeRegressionTargets": "success",
-    "sourceGrammarImportsAndWorkspace": "success",
-    "replayCli": "success",
-    "authenticatedRMigrationPreflight": "success",
-    "nativeFullSourceAccepted": true,
-    "strictSource": "pass-2-accepted-38-refused",
-    "strictTarget": "pass",
-    "strictRuntime": "pass-186-observations",
-    "grammarClosure": "pass",
-    "irChecker": "pass-61-baseline-and-12-optimized-tail-observations",
-    "helperRuntime": "pass",
-    "genericErasure": "prepare-refused-elaboration-infer-applicationTypeMismatch",
-    "responsibleSourceDeclaration": {
-      "sourceIndex": 6,
-      "name": "sh1GroupLet",
-      "phase": "stableDeclaration",
-      "observedDiagnosticRunId": 38010024282,
-      "reportBlob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666"
+    "attempt": 14,
+    "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "runId": 38011068208,
+    "status": "failure",
+    "compilerJobId": 114090942895,
+    "providerJobId": 114096798112,
+    "failureStage": "PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE",
+    "failureStep": 25,
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "recipeSha256": "b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1",
+    "nativeFullSource": {
+      "modules": 64,
+      "sourceDeclarations": 1708,
+      "coreDeclarations": 2571,
+      "normalizationCount": 50,
+      "normalizationCountRecountedFromCurrentMarker": true
     },
-    "evidence": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/development-gate-failure.json",
-    "evidenceBlob": "8cc02b87983f44339fb4e8156ee791f6d33ee4e9",
-    "markerArchive": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/stage-markers.json",
-    "markerArchiveBlob": "1e8c4b673586f1ff2422de7b0ab14b1dfec286b6",
-    "providerJobId": 114084996315,
-    "providerStatus": "skipped",
-    "N1": "generated-loaded-six-stages-completed-no-final-N1-receipt",
-    "C1": "not-started",
+    "N1": {
+      "status": "pass-complete-development-gate",
+      "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+      "receiptBlob": "7eae1470ff67697f67bf20074acd2837d21c1e14"
+    },
+    "C1": {
+      "build": "pass",
+      "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+      "receiptBlob": "07da15195e0fa8ebcb6d3ec8db1260fb98c44743",
+      "completedConformance": "source, target, runtime, IR checker, helper runtime, generic erasure, session, capabilities",
+      "postGenerationReferenceEquality": "failure",
+      "iteration": "not-run",
+      "finalCandidatePassMarker": "not-emitted"
+    },
+    "migrationReports": {
+      "casesEach": 87,
+      "N1EqualsC1": true,
+      "referenceDifferences": "Two empty entries metadata fields at F2 observations 23/27 and the resulting F2/aggregate hashes; complete reports retained."
+    },
     "C2": "not-started",
-    "C3": "not-started"
+    "C3": "not-started",
+    "fixedPoint": "not-started",
+    "strictEvidenceBinder": "not-run",
+    "provider": "skipped-not-run",
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "evidence": {
+      "failureBlob": "d5b2c58713ddc50f128f885f9457275e7397cb98",
+      "markerArchiveBlob": "b3a7d3283137369315c7801a287f02a9080a4410",
+      "terminalMetadataBlob": "aaef7b60abbe2ceb99de3c0e1d975798cb1bf8d5"
+    }
   },
   "reviewedHostFunctionEntryCompletion": {
     "status": "integrated-replay-cli-passed-full-native-and-generation-qualification-pending",
@@ -1148,15 +1168,40 @@
   },
   "pendingFinalDrafts": {
     "correspondence": {
-      "path": "strict/reviewed-candidates/correspondence-current-transport.json",
-      "blob": "ac2741ebe7dd4065dcfc08d01a3be445671c4e05"
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-transport.json",
+      "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+      "sha256": "593af3fbe36132afa5e3e6b733c811946d3aed3f4b4a4b8e575e516026b41619",
+      "bytes": 151758
     },
-    "release": {
-      "path": "strict/reviewed-candidates/release-qualification-draft.json",
-      "blob": "e8023de73e4956c0217de5044950404705fedcea"
+    "releaseBase": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/release-qualification-draft.json",
+      "blob": "e8023de73e4956c0217de5044950404705fedcea",
+      "sha256": "92dc055ffcdb2b3709164532d9a991437b401803d484c55f932ddd241ab285d3",
+      "bytes": 286885
     },
-    "status": "historical-b3-source-drafts-preserved; closed-universe-source-overlay-and-actual-qualification-pending",
-    "note": "Keep the original ac274/e802 draft source and evidence pins historical. Compose the closed-universe Infer transport from f71b09c33a574e6868b193afac946355008b4d61 and exact successful resulting-source qualification/provider receipts before final disposition; no row is closed by this integration."
+    "releaseCurrentSourceOverlay": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/release-qualification-current-source-overlay.json",
+      "blob": "f38f814fdba7af53c147e0f1d68cafcd8e0b74b3",
+      "sha256": "6389403a228f204dbfdcc0107318e2bff47906a9c03b57ca55461eb80afc1196",
+      "bytes": 48947
+    },
+    "correspondenceAssemblyProcedure": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-final-assembly-procedure.json",
+      "blob": "1e590688c1d6c87970caa4e22388310a2664b234",
+      "sha256": "fb0439106ef5b6e6afc39e9e63bb29e888260fd2ecd3ca6ff83c387126f0a9c1",
+      "bytes": 148777
+    },
+    "stageAssemblyPlan": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-stage-obligation-assembly-plan.json",
+      "blob": "b8c498a5035b9d8f4d7db77c74643f1d2b5a7e4a",
+      "sha256": "25a1697cd5563fc8db413ab1ce6ca18f7422891be6f78d319e28ffd48ad0f4d4",
+      "bytes": 252093
+    },
+    "status": "reviewed-drafts-preserved-at-failed-138fe-run; host-recipe-current-run-overlay-and-actual-PASS-pending",
+    "historicalSourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "historicalRunId": 38011068208,
+    "historicalRunConclusion": "failure",
+    "note": "These planning packets close no rows. Retain frozen source mappings and general arguments, but refresh exact source/host/workflow/48-file recipe/run metadata and bind actual complete qualification and provider receipts before applying final dispositions. Do not apply the stage plan's 138fe conditional SPEC success insertion."
   },
   "completedGenericPreparationDiagnostic": {
     "status": "completed-localization-only",
@@ -1279,6 +1324,115 @@
     "providerChanged": false,
     "defeqChanged": false,
     "unifierChanged": false,
+    "cacheChanged": false,
+    "theoryChanged": false,
+    "grammarChanged": false,
+    "selectedSeedChanged": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
+  },
+  "reviewedWorkerObservationSchema": {
+    "status": "reviewed-host-observation-correction-full-qualification-requested",
+    "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "manifest": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json",
+      "blob": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+      "sha256": "7604f87bf95b202663619d47efedb9114bbf91873534e8725bcca5409c601244",
+      "bytes": 90952
+    },
+    "independentReview": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+      "blob": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+      "sha256": "98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33",
+      "bytes": 27661,
+      "verdict": "CLEAR"
+    },
+    "executableFiles": [
+      {
+        "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+        "baseBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+        "candidateBlob": "d08d8c622f68314db32ef38d03539a8130abf3f6",
+        "candidateSha256": "7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472",
+        "bytes": 41494
+      },
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "baseBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+        "candidateBlob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+        "candidateSha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "bytes": 73618
+      },
+      {
+        "path": ".github/workflows/psc0-sh1.yml",
+        "baseBlob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+        "candidateBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+        "candidateSha256": "2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5",
+        "bytes": 25735
+      }
+    ],
+    "sourceOwner": "PsErasureDeclarationNames.entries is semantic declaration-entry ABI metadata. Finite names-only scope construction gives an empty index; both nil-input metadata workers return their input scope.",
+    "observationPolicy": {
+      "currentDefault": "entry-metadata/1: exactly four fields and canonical empty entries required",
+      "historicalReference": "selected-r-names-only/1: exactly three historical fields, with a proven-empty fourth field added only to the fresh observation",
+      "legacyOptInCallers": 2,
+      "automaticLegacyDetection": false,
+      "currentMetadataDropped": false,
+      "nonemptyMetadataRefused": true,
+      "liveCompilerInputsChanged": false,
+      "exactSameGenerationAssertionsRetained": true,
+      "casesPerCompiler": 87,
+      "additionalCases": 0
+    },
+    "preflight": {
+      "placement": "after completed N1 and before selected-R C1 generation, full qualification only",
+      "inputs": [
+        "dist/sh1/worker-harness-reference.json",
+        "dist/sh1/development/N1/receipt.json",
+        "dist/sh1/development/N1/capabilities/receipt.json"
+      ],
+      "binds": [
+        "current GITHUB_SHA",
+        "selected-R source/compiler/identity",
+        "N1 source/compiler identity"
+      ],
+      "comparison": "complete 87-case workerMigration report equality",
+      "originalPostC1ComparisonRetained": true,
+      "additionalCompilerExecutions": 0
+    },
+    "review": {
+      "exactTextGuards": 12,
+      "hostScripts": 51,
+      "workflows": 17,
+      "auditedFiles": 68,
+      "auditedBytes": 971542,
+      "rootAndIndependentVerdict": "CLEAR"
+    },
+    "retainedReportReplay": {
+      "status": "pure-data-only",
+      "reports": [
+        "R",
+        "N1",
+        "C1"
+      ],
+      "all87ProjectedReportsIdentical": true,
+      "projectedReportSha256": "2850f574fee1141fe3e96eee88be8010179e46108a23677d568e1fff701071c8",
+      "projectedReportBytes": 51437,
+      "repositoryCodeExecuted": false,
+      "fullQualificationEstablished": false
+    },
+    "productionSourceChanged": false,
+    "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+    "expectedRecipe": {
+      "fileCount": 48,
+      "sha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "changedRecipeFiles": 2,
+      "predictedNotExecuted": true
+    },
+    "fixtureChanged": false,
+    "kernelChanged": false,
+    "providerChanged": false,
+    "defeqChanged": false,
     "cacheChanged": false,
     "theoryChanged": false,
     "grammarChanged": false,

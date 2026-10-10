@@ -2,7 +2,21 @@
 
 Status: implementation and general source reviews complete; final qualification/disposition pending from ed5d00aca0743bde583b45fe7756dd494ac3960f; not yet strict-qualified. The qualified practical checkpoint was merged to main on 2026-10-09 at 16:30:26 UTC. Work proceeds on psc0/strict-sh1-v1. [AI_WORK_STATE.md](../../../AI_WORK_STATE.md) is the continuation authority; [merge-baseline.json](merge-baseline.json) records the verified integration.
 
-## Latest closed-universe inference correction
+## Current host observation correction and qualification request
+
+[Attempt14](https://github.com/dwijayuda/pskernel/actions/runs/38011068208) at **138fe57a6adeddfe875f1fbf4cc3a7de6e406a91** completed N1 development and **built C1**. C1 passed source, target, runtime, IR-checker fixtures, helper runtime, generic-erasure, session and capabilities checks before the post-generation migration-report comparison failed. C1 iteration, C2/C3, fixed point, strict binder and provider were not run. The complete native source check covered64 modules,1708 declarations,50 normalizations and64911 original-IR expressions with zero findings.
+
+The complete87-case N1 and C1 reports agree. R differs only because its older declaration-name record lacks the empty function-entry metadata field in two nil-input scope observations; the F2 and aggregate hashes consequently differ. That field is semantic ABI metadata. The source-reviewed invariant proves that these names-only scopes have an empty index; nonempty metadata is never discarded.
+
+The [reviewed correction](reviewed-candidates/worker-migration-observation-schema-repair.json) and [independent review](reviewed-candidates/migration-worker-metadata-independent-review.json) change two host scripts and the strict workflow. Current observations strictly require the four-field schema and canonical empty entries. Exactly two authenticated selected-R callers explicitly use the historical three-field schema and add the proven-empty field to a fresh observation. All87 cases, live compiler objects, exact same-generation checks and the original post-C1 comparison remain. This is an observation boundary, not a legacy grammar mode.
+
+A full-only data comparison now reuses the completed N1 report and authenticated R report **before C1 generation**. It adds no compiler invocation or fixture. The complete68-file host/workflow audit, twelve exact edit guards, and retained-report projection are independently reviewed. Actual new-recipe compiler qualification remains required.
+
+The enclosing commit requests one full **[sh1-qualify]** run. Production source and source closure **46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5** are unchanged. The expected48-file recipe is **a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba**, changing exactly two host hashes; the workflow is bound separately. Do not relabel the failed attempt14 receipts as new qualification. All33 correspondence and27 stage obligations remain pending until actual complete compiler/provider PASS and explicit final disposition. R selection, new-only ps-0.9-r3, TypeScript7.0.2, kernel/provider and .lean authority are unchanged.
+
+Retained attempt14 [failure and stage evidence](attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/migration-worker-correspondence-failure.json) includes complete N1/C1 receipts and the compact68-event marker archive. The first13 attempts are preserved unchanged. Passed TypeScript7 cold recovery remains valid because its seven inputs are unchanged. The final33/27 assembly drafts are retained as conditional planning; their failed138fe/run14 expectations must be refreshed before use.
+
+## Historical closed-universe inference correction request
 
 The [retained-N1 diagnostic](https://github.com/dwijayuda/pskernel/actions/runs/38010024282) successfully reproduced and located the failed generic preparation at **sourceIndex 6, sh1GroupLet, stableDeclaration**. It used the unchanged b3fac compiler/fixture with one parse and one origin-preserving preparation. The diagnostic reports the owner and error; the universe-expression explanation is separately reviewed source analysis.
 

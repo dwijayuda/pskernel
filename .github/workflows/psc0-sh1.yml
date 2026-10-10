@@ -318,7 +318,9 @@ jobs:
           await mkdir('dist/sh1', { recursive: true });
           await writeFile('dist/sh1/worker-abi-probe.lean', migrationWorkerAbiProbeSource, 'utf8');
           const started = performance.now();
-          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);
+          const report = runMigrationWorkerConformance(loaded.compiler, valueTag, {
+            declarationNamesSchema: 'selected-r-names-only/1',
+          });
           assert.equal(report.cases, 87);
           const abiProbe = runMigrationWorkerAbiProbe(loaded.compiler, valueTag);
           assert.equal(abiProbe.signatureTypeAnnotations, 12);
@@ -339,6 +341,36 @@ jobs:
       - name: Run the bounded native development gate before qualification
         id: native-gate
         run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development' || 'dist/sh1' }}
+      - name: Compare native worker observations before candidate generation
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';
+          const readJson = async (file) => JSON.parse(await readFile(file, 'utf8'));
+          const selected = await readSelectedAuthoringSeed();
+          assert.equal(selected.mode, 'qualified');
+          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');
+          const reference = await readJson('dist/sh1/worker-harness-reference.json');
+          const native = await readJson('dist/sh1/development/N1/receipt.json');
+          const capabilities = await readJson('dist/sh1/development/N1/capabilities/receipt.json');
+          assert.equal(reference.evidence, 'migration-fixture-authenticated-reference-preflight');
+          assert.equal(reference.passed, true);
+          assert.equal(reference.recipeSourceRef, process.env.GITHUB_SHA);
+          assert.equal(reference.referenceSourceRef, selected.sourceRef);
+          assert.equal(reference.referenceCompilerSha256, selected.manifest.expectedArtifacts.javascriptSha256);
+          assert.equal(reference.selectedSeedIdentitySha256, selected.identitySha256);
+          assert.equal(native.evidence, 'native-seeded-generated-compiler-candidate');
+          assert.equal(native.sourceRef, process.env.GITHUB_SHA);
+          assert.equal(capabilities.evidence, 'raw-source-generated-execution');
+          assert.equal(capabilities.compilerSha256, native.artifacts.javascriptSha256);
+          assert.equal(reference.report.cases, 87);
+          assert.equal(capabilities.workerMigration.cases, 87);
+          assert.deepEqual(capabilities.workerMigration, reference.report,
+            'PSC0_SH1_NATIVE_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE');
+          console.log('PSC0_SH1_NATIVE_WORKER_REFERENCE: PASS (authenticated R and completed N1; 87 cases; no compiler execution)');
+          NODE
       - name: Build the selected-seed candidate before full qualification
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
         run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1

@@ -1,0 +1,3179 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-correspondence-final-assembly-procedure",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-final-assembly-procedure.json",
+  "repository": "dwijayuda/pskernel",
+  "status": "planning-only; exact-PASS-and-final-release-references-required",
+  "isExecutableFinalPatch": false,
+  "finalLedgerCreated": false,
+  "activeRowsChanged": 0,
+  "stageRowsChanged": 0,
+  "scope": "Pure-data planning for33 final correspondence-row edits after authentic exact-source qualification and separate provider acceptance. Reuse settled frozen arguments and current source transport; do not change code, run tests, or close/write a final ledger now.",
+  "currentInput": {
+    "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+    "sourceRootTree": "c7903f7b30b45f08f7c311869681b4ca1a9908c9",
+    "psc0Tree": "3cb88a6ee17b429cfde8215819fb789c3c2910ca",
+    "ledger": {
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+      "sha256": "88699d32fc09e0350d79f36bc9d005a3dfd5dedfd52f22c60da8cb4d4ec2fafb",
+      "bytes": 136640,
+      "rowsSha256": "39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55"
+    },
+    "transport": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-transport.json",
+      "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+      "sha256": "593af3fbe36132afa5e3e6b733c811946d3aed3f4b4a4b8e575e516026b41619",
+      "bytes": 151758,
+      "sourcePatchSha256": "ab6db5609bd2567f195ca152f9ceb356c35fdc329337bfcfe5ff89a51997d6f0",
+      "preparedRowsSha256": "aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c"
+    },
+    "releaseOverlay": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/release-qualification-current-source-overlay.json",
+      "blob": "f38f814fdba7af53c147e0f1d68cafcd8e0b74b3",
+      "sha256": "6389403a228f204dbfdcc0107318e2bff47906a9c03b57ca55461eb80afc1196",
+      "bytes": 48947
+    },
+    "qualificationIdentity": {
+      "runId": 38011068208,
+      "compilerJobId": 114090942895,
+      "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "provenance": "root-reported active run identity; this preparation makes no terminal success claim"
+    },
+    "futureFinalReleaseRecord": {
+      "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+      "blob": null,
+      "sha256": null,
+      "bytes": null,
+      "status": "not-yet-bound"
+    }
+  },
+  "assuranceInterpretation": {
+    "conclusion": "Keeping generalPreservationProven=false while later setting strictSh1Discharged=true is a conservative current-ledger encoding consistent with the documented assurance strategy, provided the scoped source arguments and exact qualification/provider requirements have actually been discharged. It is not a claim that finite tests establish a general theorem.",
+    "supportedBySources": [
+      "SPEC distinguishes Core typing, runtime IR typing, compiler qualification, semantic correspondence and selected-provider acceptance; none of the finite implementation axes alone grants strict qualification.",
+      "COMMON section6.2 permits complete independently reviewed general source arguments without requiring a machine-checked theorem.",
+      "The active ledger explicitly says a complete general source argument over actual reachable metadata can discharge a rule, and rejects finite tests, unproved invariants or circular lemmas as substitutes.",
+      "The frozen map requires root's explicit combined current disposition, retains argument/execution as separate assurance axes, and protects produced narrow false flags and immutable history."
+    ],
+    "importantPrecision": "SPEC and the frozen map do not normatively define the exact legacy field generalPreservationProven as meaning machine-checked-only. Do not invent or silently adopt that definition. Preserve its false value conservatively and describe the actual reviewed source-argument evidence in separate explicit fields.",
+    "perRowRecommendedFields": {
+      "generalPreservationProven": "false, unchanged",
+      "generalArgumentReviewStatus": "independently-reviewed-on-declared-domain",
+      "strictSh1Discharged": "true only in the later completed current-row disposition after all evidence prerequisites",
+      "assuranceStatus": "strict-sh1-discharged-with-reviewed-source-arguments-and-exact-qualification"
+    },
+    "suggestedFinalStatement": "The mandatory SH/1 obligations for the declared current-source/runtime/target domain have explicit dispositions supported by independently reviewed source-rule and composition arguments, their exact source transports, authenticated current-source compiler/runtime qualification, and separate selected-provider acceptance. The existing generalPreservationProven Boolean remains false; no machine-checked compiler-wide theorem is claimed. Finite conformance, typing, fixed points, source arguments and provider admission retain their separate meanings.",
+    "sources": [
+      {
+        "path": "psc0/docs/selfhost-language/SPEC.md",
+        "blob": "61f0f36ffe7880144f60845084e8be6a61b91eed",
+        "sha256": "6338e00a4bed1c35aef59ee71326d4bf38e5af952800422579284ae74077ebc6",
+        "sections": [
+          "6: separation of Core typing, IR typing, compiler qualification and semantic correspondence",
+          "8: independent compiler/strict/provider evidence axes"
+        ]
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+        "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+        "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+        "sections": [
+          "6.2: complete independently reviewed general source arguments need not be machine-checked"
+        ]
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+        "blob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+        "sha256": "88699d32fc09e0350d79f36bc9d005a3dfd5dedfd52f22c60da8cb4d4ec2fafb",
+        "jsonPointers": [
+          "/relationPlan/assuranceStrategyClarification",
+          "/assurance",
+          "/finalDisposition"
+        ]
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-disposition-map.json",
+        "blob": "697c94b2722a6191537b714f71f629713637b30a",
+        "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+        "jsonPointers": [
+          "/sharedDisposition",
+          "/protectedDisposition",
+          "/globalRowMaintenanceRule"
+        ]
+      }
+    ]
+  },
+  "fixedMappings": {
+    "map": {
+      "blob": "697c94b2722a6191537b714f71f629713637b30a",
+      "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07"
+    },
+    "review": {
+      "blob": "20f0116df23d4304e3b7e8f9da5ff39599eaf037",
+      "sha256": "580a9f11ec273ea8a9bebfb396932ecb19fac3a94df663b4979ce949df50f61e"
+    },
+    "paperPins": [
+      {
+        "id": "COMMON",
+        "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+        "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+        "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+        "presentUnchanged": true
+      },
+      {
+        "id": "N",
+        "path": "psc0/docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md",
+        "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+        "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+        "presentUnchanged": true
+      },
+      {
+        "id": "EV",
+        "path": "psc0/docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md",
+        "blob": "7e90465301005a395a871a0563b19c164dcda750",
+        "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+        "presentUnchanged": true
+      },
+      {
+        "id": "TS",
+        "path": "psc0/docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md",
+        "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+        "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+        "presentUnchanged": true
+      },
+      {
+        "id": "GROUP",
+        "path": "psc0/docs/selfhost-language/strict/CANONICAL_FUNCTION_ARGUMENTS.md",
+        "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+        "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+        "presentUnchanged": true
+      },
+      {
+        "id": "ER",
+        "path": "psc0/docs/selfhost-language/strict/ERASURE_ARGUMENTS.md",
+        "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+        "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+        "presentUnchanged": true
+      },
+      {
+        "id": "CROSS",
+        "path": "psc0/docs/selfhost-language/strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+        "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "sha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+        "presentUnchanged": true
+      },
+      {
+        "id": "SOURCE_RUNTIME",
+        "path": "psc0/docs/selfhost-language/strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md",
+        "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+        "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+        "presentUnchanged": true
+      }
+    ],
+    "correspondenceRowIds": [
+      "ER-01",
+      "ER-02",
+      "ER-03",
+      "ER-04",
+      "ER-05",
+      "ER-06",
+      "ER-07",
+      "ER-08",
+      "ER-09",
+      "N-01",
+      "N-02",
+      "N-03",
+      "N-04",
+      "EV-01",
+      "EV-02",
+      "EV-03",
+      "EV-04",
+      "EV-05",
+      "EV-06",
+      "EV-07",
+      "EV-08",
+      "EV-09",
+      "EV-10",
+      "EV-11",
+      "TS-01",
+      "TS-02",
+      "TS-03",
+      "TS-04",
+      "TS-05",
+      "TS-06",
+      "TS-07",
+      "TS-08",
+      "TS-09"
+    ],
+    "commonReceiptGroups": [
+      "generations",
+      "strict-binder",
+      "grammar",
+      "resource",
+      "toolchain",
+      "provider"
+    ],
+    "allReceiptGroupIds": [
+      "generations",
+      "strict-binder",
+      "atomic",
+      "origins",
+      "source",
+      "source-empty",
+      "source-recursion",
+      "target",
+      "ir",
+      "ir-empty",
+      "native-ir",
+      "generic",
+      "generic-recursion",
+      "generic-structures",
+      "runtime",
+      "runtime-evaluation",
+      "capabilities",
+      "migration",
+      "optimized-tail",
+      "grammar",
+      "host-boundary",
+      "name-index",
+      "resource",
+      "toolchain",
+      "provider"
+    ],
+    "frozenArgumentsReopened": false,
+    "legacyDraftScopeNote": "Frozen c5a's top-level scope sentence lists its earlier Expr/host transports; its supplementalClosedUniverseTransport records the additional Infer repair. Use the complete structured transport set, including f71/8ac34, and leave c5a's historical bytes unchanged.",
+    "receiptSelectorPlan": {
+      "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+      "jsonPointer": "/receiptSelectors",
+      "joinKey": "id"
+    },
+    "receiptLimits": {
+      "blob": "697c94b2722a6191537b714f71f629713637b30a",
+      "jsonPointer": "/receiptCatalog",
+      "joinKey": "id",
+      "valueKey": "limit"
+    }
+  },
+  "completionPrerequisites": {
+    "exactSourceAndRecipe": "Actual receipts and product identities bind the reviewed source commit/closure, selected authoring seed, exact recipe/profile/toolchain and source transports.",
+    "wholeCompilerQualification": "Complete native/N1/C1/C2/C3, N1=C2 TypeScript/JavaScript, C2=C3 full compared products and every required current conformance stage; no partial/historical/diagnostic success substitution.",
+    "strictBinder": "Authenticate the exact qualification and strict-enforcement-evidence artifacts and all required subreceipt selectors from c5a, retaining each produced nonclaim.",
+    "provider": "Separate actual selected-provider acceptance of every required deduplicated admission stream, with stream/compiler/source identity and emissionWasGatedByThisCheck=false retained.",
+    "sourceArguments": "Reuse the already completed independent source-rule, cross-family and source-runtime reviews on their declared domain, including all reviewed producer transports; no Boolean based on finite PASS stands in for these arguments.",
+    "actualData": "Every required future reference is populated from actual inspected bytes or correctly authenticated hash-bound reconstruction provenance.",
+    "stageConjunction": "All27 mandatory stage obligations have compatible explicit completed dispositions before aggregate strict/semantic activation.",
+    "receiptVerificationIsNotPerformedHere": true
+  },
+  "procedure": [
+    {
+      "step": 1,
+      "name": "Authenticate the immutable inputs",
+      "action": "Read/hash the exact current correspondence ledger cdaf9, current source transport c5a, frozen map697c94, independent map review20f, all referenced paper/repair/review artifacts, and the independently assembled actual final release record and artifact inspections. Refuse stale/missing hashes, pointers or source identities; do not silently rebase.",
+      "effects": "Read-only."
+    },
+    {
+      "step": 2,
+      "name": "Require actual completed evidence and the existing reviewed arguments",
+      "action": "Before generating any closed row, root must have the complete exact-source full qualification, strict evidence binder, all required mapped receipt groups, and separate selected-provider acceptance with the exact deduplicated streams. Bind actual bytes or authenticated hash-bound reconstruction provenance. The source/composition reviews remain separate prerequisites, never inferred from a passing run.",
+      "effects": "No Boolean or row change. An in-progress run, provider-pending run, log marker, unfilled template or diagnostic success is insufficient."
+    },
+    {
+      "step": 3,
+      "name": "Finalize the combined release record first",
+      "action": "Use the stage agent's current-source release overlay and actual returned evidence to make a complete release-qualification.json record, including its33 correspondence and27 stage dispositions. Retain its source commit, raw-source closure, exact recipe, compiler/product and receipt identities. Create/read/hash its blob before a current ledger refers to it.",
+      "effects": "This is a future root action only. Avoid a hash cycle: the release record may bind the immutable pre-disposition ledger and proposed row dispositions; it must not require its own blob or the final ledger blob that points back to it."
+    },
+    {
+      "step": 4,
+      "name": "Apply only the reviewed source/domain preparation",
+      "action": "In memory, apply c5a.sourcePatch.operations to the exact authenticated active ledger. Verify all151 operations,92 tests, the resulting prepared row-array SHA256aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c, all33 row IDs and every source/domain guard. This stage still has all33 strict/general flags false.",
+      "effects": "Use a fresh copy. Preserve all unrelated fields and historical source/review metadata."
+    },
+    {
+      "step": 5,
+      "name": "Copy the immutable per-row argument fields",
+      "action": "For each of the33 row plans in order, resolve/copy requiredRelation, ruleArgument and paperEvidence through its exact frozen JSON pointers; verify the per-field canonical JSON hashes. Resolve paper packet IDs through the shared pinned paper table. Do not regenerate arguments, reword their scope, infer a theorem from the table or re-open a settled proof family.",
+      "effects": "Only the specified current prose/evidence fields change."
+    },
+    {
+      "step": 6,
+      "name": "Refresh stale pending prose while retaining limits",
+      "action": "Keep perCompilation.availableOrCandidate unchanged. Construct perCompilation.notEstablished as the shared commonPerCompilationLimits, then the exact selected original statements in index order, then appendScopedLimits. Verify each resultingNotEstablishedSha256. This retains37 valid original strings across the rows. Add required receipt groups' exact catalog limit references, preserve every original full array through its pinned historical pointer, and do not copy stale 'still open' assertions into current discharged status.",
+      "effects": "No unsupported capability or proof method is silently admitted. Source domains remain the source-prepared domains, including the exact ER-06 replacement."
+    },
+    {
+      "step": 7,
+      "name": "Attach reviewed-source and actual-evidence associations",
+      "action": "Populate the shared generalArgumentReview and dischargeEvidence templates for each row with its exact frozen map/review/paper pointers, current source transports and row-specific supplement. Bind the actual release blob/hash/path and /correspondenceDispositions/i, source-closure/recipe digests, qualification/binder/provider artifacts, and every required group's actual references. ER-02 also binds f71/8ac34. All deferred references remain unbound in this planning artifact.",
+      "effects": "All deferred reference slots must be populated from the authenticated returned evidence. Never invent artifact hashes, positive observations or compiler identities."
+    },
+    {
+      "step": 8,
+      "name": "Apply the narrowly stated current-row disposition",
+      "action": "Only after steps1–7 succeed for the whole required set, set each current row's assuranceStatus to strict-sh1-discharged-with-reviewed-source-arguments-and-exact-qualification and strictSh1Discharged to true. Preserve generalPreservationProven=false exactly. The separate generalArgumentReview describes the completed scoped source review; the legacy false Boolean is not relabeled as a SPEC-defined machine-checking flag.",
+      "effects": "This step is deferred and has not been executed by this preparation."
+    },
+    {
+      "step": 9,
+      "name": "Check the completed row projection mechanically",
+      "action": "Verify exactly33 unique expected IDs, all33 current strict discharges, generalPreservationProven stillfalse, exact mapped relation/argument/paper fields, source pins from the published qualified source, all domains/valid limits, and no unbound required references. Validate every release row pointer and row-specific receipt group against the final release record.",
+      "effects": "Data/hashing/pointer verification only; no compiler tests or new proof review."
+    },
+    {
+      "step": 10,
+      "name": "Compose the stage and top-level disposition",
+      "action": "Root separately verifies the27 stage dispositions and refreshes the current aggregate status/counters and assurance statement using the final combined release record. Do not set aggregate strict/semantic qualification from the33-row array alone. Apply the frozen map's stale-active-metadata maintenance while retaining historical proof and attempt snapshots.",
+      "effects": "No source/compiler change. Produced per-compilation nonclaim flags, runtime-contract bytes, selected seed R and psconfig/recipe semantics remain unchanged."
+    },
+    {
+      "step": 11,
+      "name": "Publish only after the complete reviewable metadata result exists",
+      "action": "Root may then attach the complete final release and current ledgers in one guarded documentation publication. If a later documentation-only commit differs from the qualified source commit, state that transport explicitly and preserve the qualified compiler-source closure/product identities.",
+      "effects": "No commits/ref writes are performed by this procedure artifact."
+    }
+  ],
+  "fieldMaintenance": {
+    "exactCopiedFields": [
+      "requiredRelation",
+      "ruleArgument",
+      "paper evidence"
+    ],
+    "preservedFields": [
+      "id",
+      "stage",
+      "title",
+      "forms",
+      "relatedObligations",
+      "implementationReview history",
+      "perCompilation.availableOrCandidate",
+      "generalPreservationProven=false"
+    ],
+    "sourceAndDomainChanges": "Only c5a's reviewed source/definition updates and exact ER-06 domain replacement.",
+    "newEvidenceFields": [
+      "generalArgumentReview",
+      "dischargeEvidence",
+      "perCompilation.receiptLimitReferences"
+    ],
+    "refreshedFields": [
+      "perCompilation.notEstablished",
+      "assuranceStatus"
+    ],
+    "solePerRowBooleanPromotion": "strictSh1Discharged, deferred until all completion prerequisites and actual references are satisfied",
+    "aggregateFlags": "Handled by root only after the33-row and27-stage conjunction, not by this row-planning artifact.",
+    "historicalProse": "Each full original notEstablished array stays addressable through the immutable current-ledger blob and exact pointer/hash.",
+    "commonPerCompilationLimits": [
+      "Finite compilation, runtime observations, original-IR typing, fixed-point equality and selected-provider admission do not by themselves establish this row's general semantic relation.",
+      "This disposition supplies no new serialized Core-to-IR certificate or machine-checked compiler-wide theorem; it relies on the cited independently reviewed source arguments within their stated domain.",
+      "No equality of wall-clock time, physical stack, heap use, allocation schedule or resource-failure behavior is claimed; the declared canonical-input, primitive, platform and successful-allocation premises remain in force."
+    ],
+    "generalArgumentReviewTemplate": {
+      "status": "independently-reviewed-on-declared-domain",
+      "mapBlob": "697c94b2722a6191537b714f71f629713637b30a",
+      "independentMapReviewBlob": "20f0116df23d4304e3b7e8f9da5ff39599eaf037",
+      "paperEvidence": "Copy each row's exact frozen paperEvidence; resolve packet IDs through fixedMappings.paperPins.",
+      "currentSourceTransport": {
+        "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "sourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91"
+      },
+      "supplementalClosedUniverse": "Use only the explicit per-row supplementalClosedUniverse field; ER-02 carries f71/8ac34."
+    },
+    "dischargeEvidenceTemplate": {
+      "status": "PENDING_DO_NOT_APPLY",
+      "releaseRecordPath": "psc0/docs/selfhost-language/strict/release-qualification.json",
+      "releaseRecordReference": null,
+      "releaseRecordCorrespondenceRowPointer": "Take from the row plan.",
+      "qualificationSourceCommit": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "exactSourceClosureSha256": null,
+      "exactRecipeSha256": null,
+      "qualificationArtifactReference": null,
+      "strictBinderArtifactReference": null,
+      "providerArtifactReference": null,
+      "requiredGroupReferences": "Populate every ID in row.requiredReceiptGroups with actual authenticated artifact/pointer/hash references, retaining its catalog limit.",
+      "ordinaryScope": "Only the declared source-owned PSC0 SH/1 language/runtime/target and canonical-value/resource domain.",
+      "method": "Independently reviewed source-rule/composition arguments and exact source transports combined with authenticated exact compiler/runtime conformance and separate selected-provider acceptance."
+    }
+  },
+  "criticalPreservation": {
+    "er06": {
+      "document": "correspondence",
+      "jsonPointer": "/rows/5/domain/1",
+      "expected": "The current checked lane refuses empty layouts and unsupported recursor shapes; these refusals remain explicit coverage obligations under the normative profile.",
+      "proposed": "Zero-constructor inductive layouts are admitted under the checked empty-elimination rules; unsupported family and recursor shapes still refuse. Inhabited zero-field structures are covered separately.",
+      "reason": "ER-06's mapping correctly requires empty coverage and notes stale text, but its explicit staleText pointer list omits this contradictory current-domain sentence. Update it as part of root's final guarded ledger refresh."
+    },
+    "er04": "psErasureEtaFunction remains defined but unused; do not describe it as removed or active, and do not restore computed-result eta.",
+    "er08": "Retain both the nonrecursive Core projection route and recursive p+3 Expr route, including compilation coverage for uninhabited-parameter recursive structures.",
+    "ts07": "Preserve direct-self one-logical-call and alias-then-self two-logical-call accounting and intermediate cutoff.",
+    "inference": "Only closed inference universe arithmetic is canonicalized; imax(symbolic,zero) preserves the original whole level. The finite proper-input/allocation/fuel domain of f71/8ac34 remains explicit.",
+    "runtimeContract": {
+      "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+      "sha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89",
+      "mustRemainUnchanged": true
+    },
+    "authoring": {
+      "selectedSeed": "R",
+      "authoritativeSource": ".lean",
+      "proofScriptEdition": "ps-0.9-r3",
+      "mode": "new-only",
+      "typeScript": "7.0.2",
+      "selectedByPsconfig": false
+    },
+    "producedFlags": "Preserve false strict/semantic/provider/formal/proof-reconstruction/exhaustiveness fields in generated narrow receipts and all immutable argument-era artifacts.",
+    "scope": "Eventual enforcementInstalled applies only to the explicit strict source API and exact strict development/qualification lane; it does not switch psconfig or promote a seed."
+  },
+  "rowPlans": [
+    {
+      "index": 0,
+      "id": "ER-01",
+      "rowPointer": "/rows/0",
+      "guards": {
+        "activeRowSha256": "e7e7e73bc42890dad30b4e5df5a8099eda112869c7a8bfb60a772e9e2140b3f4",
+        "sourcePreparedRowSha256": "7246edf4e61776cdae15d9f96e043e0ac79f537c41a9f35cf98f2fb17ab90fb3",
+        "sourcesSha256": "a429e391bc84472435c896d05d07c86711cd9ce3d0cdd58024aa49f0e0249120",
+        "perCompilationSha256": "a122f45187d5472c3408bdcdd9889d82421add6cc542f1d089d3a19d3a130d1f",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "7246edf4e61776cdae15d9f96e043e0ac79f537c41a9f35cf98f2fb17ab90fb3",
+        "sourceArraySha256": "a429e391bc84472435c896d05d07c86711cd9ce3d0cdd58024aa49f0e0249120",
+        "domainSha256": "181e315900bd0f4776b45f506f869b219c4c1f38bb39ba9f6ad515dcfa0f3c7d"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/0/relationUpdate/proposed"
+        },
+        "exactValueSha256": "d7b57d6eb124c426d57d160b341d7ca8a81914bfc2aeff89cb10f3fc5251ef84"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/0/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "c1bdb1a98c9c7e5212469369c4820e2a89169b88215ca613bad8a234562ec842"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/0/paperEvidence"
+        },
+        "exactValueSha256": "c0211795c5b7f0ee60bc86157332459c1ec81be5dc9814709f81d1a53f276b2c",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/0/perCompilation/notEstablished",
+          "sha256": "893e68d46a6a02ed68a43259681b94f5c3ba80ac8224b1d40bcfdbeee33b8e59"
+        },
+        "retainExactOriginalIndices": [
+          0,
+          1
+        ],
+        "retainedStatementsSha256": "668d76de88fd46599aa6b5921c72e3d0a8423dd1360bf228658252da8e1b072f",
+        "supersededPendingOrMixedAssertionIndices": [
+          2
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "b79fd9a20549ab0cfb2be35615284da72d9b0a812089fcdca8b0ef7c8729f6a3"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "atomic",
+        "origins"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/0",
+        "independentMapReviewRowPointer": "/rows/0",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/0"
+      }
+    },
+    {
+      "index": 1,
+      "id": "ER-02",
+      "rowPointer": "/rows/1",
+      "guards": {
+        "activeRowSha256": "b40d8de6f60639ca1f957674d7ce7eae1e8d11d7f4ed6db0d6abab95a202d5cc",
+        "sourcePreparedRowSha256": "75d4d4a6710c8d0a61414a9c4fcf78b71f67c8dbffb1078643bab8a9804b914f",
+        "sourcesSha256": "48d3a0093e016dc5abaa4a143a71bc052ab8312c21d5871627ba52ec3521bef3",
+        "perCompilationSha256": "5a5b49868be1228a0bf627afd121d7f32cb8f91a307f44f4b8369356625758a3",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "75d4d4a6710c8d0a61414a9c4fcf78b71f67c8dbffb1078643bab8a9804b914f",
+        "sourceArraySha256": "48d3a0093e016dc5abaa4a143a71bc052ab8312c21d5871627ba52ec3521bef3",
+        "domainSha256": "9d8cca32da83e378371f1265f36a9a88ff7566aeffd8b7c507689df250007dca"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/1/relationUpdate/proposed"
+        },
+        "exactValueSha256": "a92f9dd37e5f361de07b853b0352d54708eaeb0c198ff87b92fa658cd94ed320"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/1/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "681f4c5939e7ecf47bc46023c300befc61ee70518a2e442f4c7980da0196670d"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/1/paperEvidence"
+        },
+        "exactValueSha256": "3d3805b1cc6f4451e27a5b4b0b1d7a9748676d136925e092b5b6a4831016fe9f",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/1/perCompilation/notEstablished",
+          "sha256": "68b9bcc0434146ef1d986a4c9263a86ef471732e3b9ac5ca2779c3318b4c5813"
+        },
+        "retainExactOriginalIndices": [
+          0
+        ],
+        "retainedStatementsSha256": "b3293bd5b632429b60e888cf4924ff3de5b3fbf03d08914653ccfa89cb71803a",
+        "supersededPendingOrMixedAssertionIndices": [
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "0251fcbab9a7e14e0ed14b0140c3f4c2950b408866b1901988a0db5a9f5d17d6"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "ir",
+        "atomic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/1",
+        "independentMapReviewRowPointer": "/rows/1",
+        "supplementalClosedUniverse": {
+          "repairBlob": "f71b09c33a574e6868b193afac946355008b4d61",
+          "independentReviewBlob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+          "scope": "closed universe arithmetic producer and unchanged symbolic/zero-classification boundary"
+        }
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/1"
+      }
+    },
+    {
+      "index": 2,
+      "id": "ER-03",
+      "rowPointer": "/rows/2",
+      "guards": {
+        "activeRowSha256": "fe56a4af52da7d086b9845dfd4f43be538d0f95ad2cee4d6bdb4be78206ad207",
+        "sourcePreparedRowSha256": "20e4492888e41eddbfe8776f95c66d7eedc3702c4614b173ba6eda06ed2369df",
+        "sourcesSha256": "3429b90dfb07508670de0a4b6a55d5acbc50045bc8674f2514dd6b2db7da1639",
+        "perCompilationSha256": "bab2263177e032a119704556682dc41a4e7e7beab98a136f127347642fc59b11",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "20e4492888e41eddbfe8776f95c66d7eedc3702c4614b173ba6eda06ed2369df",
+        "sourceArraySha256": "3429b90dfb07508670de0a4b6a55d5acbc50045bc8674f2514dd6b2db7da1639",
+        "domainSha256": "d6f24a9bfcf15e9b5da8bca7fb6269013852c98723c95189b228070d01ee7533"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/2/relationUpdate/proposed"
+        },
+        "exactValueSha256": "346207da18c6e71a5e55230f68ff4e9f7805468d9df7f7e31fe84380c9413b36"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/2/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "00dbc5217b3dd6947ec20c5a444a19c7f99ff31590a102354017d4869253f984"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/2/paperEvidence"
+        },
+        "exactValueSha256": "2da4e1b825c52bca246c192cd96316419b11d184dcacf84fde5e652863f4c528",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/2/perCompilation/notEstablished",
+          "sha256": "6af1cdeda9b848731c7caa4552d09692cd3c302119654d90c1daecd357b64a9f"
+        },
+        "retainExactOriginalIndices": [
+          1,
+          2
+        ],
+        "retainedStatementsSha256": "aafd0f410bb9803277ad663a820c27741e947daf133cdd0bbaab39c23022ea69",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "59bb0ea778f049fd8dd844cd3602cea28e2ea55710fedb1b2c5e77e4f40eb7fc"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "runtime",
+        "source"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/2",
+        "independentMapReviewRowPointer": "/rows/2",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/2"
+      }
+    },
+    {
+      "index": 3,
+      "id": "ER-04",
+      "rowPointer": "/rows/3",
+      "guards": {
+        "activeRowSha256": "f6c03d13d4cfdd3ac37e9c7f3a38f61e1419530e629ce1fbeeec32d2d2f04ac7",
+        "sourcePreparedRowSha256": "edf76173a68388d2e6000a38bec81e70e65ce2361af719b59eb36a12cf1f452c",
+        "sourcesSha256": "41f125c1bfcecd8ce4ec86b477be7c8e06a180104a691b473598148da6476a7d",
+        "perCompilationSha256": "ba7bc812a13f304cd3f3c696b028bbf7a1a2b76603d579b6e9cd4e70928cbe44",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "edf76173a68388d2e6000a38bec81e70e65ce2361af719b59eb36a12cf1f452c",
+        "sourceArraySha256": "41f125c1bfcecd8ce4ec86b477be7c8e06a180104a691b473598148da6476a7d",
+        "domainSha256": "9df0df19e6047922cd44ee71ea61addbd69174266e1517da7144dde3f7a9fd86"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/3/relationUpdate/proposed"
+        },
+        "exactValueSha256": "1f7af511aae5acd469294c3a7e43efe67f12579981dac612d8abf55d69724efe"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/3/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "e1faa1b5270e11a1d6b8bc4d2f274807adebf7b549b19c030cc1ab98a07b0020"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/3/paperEvidence"
+        },
+        "exactValueSha256": "34c1478198accae280d61eede7230c38725eba830284255f10a7fb9fed6d8902",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/3/perCompilation/notEstablished",
+          "sha256": "8ff4764fdad44de69cc94076d82c9a25986e37638de9030b26c315eb06f0342c"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "59b665a5999ef7e06f8669360fb6864e2389a5232707b98259eaf76dca35ef7f",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "109d124c3f05798be86d63e001c8a00733d8636c4abb94069ac74f832ee2e59e"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "runtime-evaluation",
+        "migration",
+        "host-boundary"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/3",
+        "independentMapReviewRowPointer": "/rows/3",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/3"
+      }
+    },
+    {
+      "index": 4,
+      "id": "ER-05",
+      "rowPointer": "/rows/4",
+      "guards": {
+        "activeRowSha256": "dcecba63696690c3689ff68f9af7cbc9b7f01048c653b0caa618903fe37d8834",
+        "sourcePreparedRowSha256": "109e3fba91668ec853d94d1ec91699eabdc26568c112638ac0e1e4c712fa563a",
+        "sourcesSha256": "704cacc95d5263638f4fe423695d1c72964b9667fe9e4e4e6685b82d6efc4434",
+        "perCompilationSha256": "5d9c7b93feb32bed56a453be5f28341a772bd6395b8c1fcefbfa429cdc77903e",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "109e3fba91668ec853d94d1ec91699eabdc26568c112638ac0e1e4c712fa563a",
+        "sourceArraySha256": "704cacc95d5263638f4fe423695d1c72964b9667fe9e4e4e6685b82d6efc4434",
+        "domainSha256": "c2192e02c46ed6e78e32f0b20871f2765b5f37c6d0d028852c97ac9c26988a7c"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/4/relationUpdate/proposed"
+        },
+        "exactValueSha256": "d5560520ce72fa6bedbd9be8b4956df6e24fb8adfbe55a50654442bbb92e8203"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/4/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "1ba7aee35d28c600d9d897859c5f76291811e3135a4417c645dfcb9b985aa2eb"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/4/paperEvidence"
+        },
+        "exactValueSha256": "d797f2207f7a38b0da7cd6518119b40c84d4b4c2a8fa24e64d76672f1c5d2f0c",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/4/perCompilation/notEstablished",
+          "sha256": "f9c3bea2e4adbd8880fa0a8c06de410379183b9e16af5c8ba3247965172cdda2"
+        },
+        "retainExactOriginalIndices": [
+          2
+        ],
+        "retainedStatementsSha256": "15fd2c99671a2fb82d9decc4df464b173885f6ef98badee7555692a6a3abc13f",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "56c74f4b2803a79e0418ff2ea2651386b53be5174b0bc6b065c03ca8dbbd6c6a"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "capabilities"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/4",
+        "independentMapReviewRowPointer": "/rows/4",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/4"
+      }
+    },
+    {
+      "index": 5,
+      "id": "ER-06",
+      "rowPointer": "/rows/5",
+      "guards": {
+        "activeRowSha256": "6f77c74447bd75f2926782f8b18228d1d6a3659fdcbe491c61d563d723ef5edd",
+        "sourcePreparedRowSha256": "af11ad9e0829bd4c99663bedc3bf997476c1d60fdf11e66ff9d54670323c3421",
+        "sourcesSha256": "ca5f9a10e9a0bfe4f1da4bfd1b9ea45ef47c163aac5ced24e2da657c4036d33a",
+        "perCompilationSha256": "b03ca296cd1c0b1f1e3f0cdaa10ebb26acbfad1f9fb48f1c6a50766fbb8e13a2",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "af11ad9e0829bd4c99663bedc3bf997476c1d60fdf11e66ff9d54670323c3421",
+        "sourceArraySha256": "ca5f9a10e9a0bfe4f1da4bfd1b9ea45ef47c163aac5ced24e2da657c4036d33a",
+        "domainSha256": "12ca1790380f9f90113964fec2012e6bf433d3d5e1522ee9f69f4f554478c08b"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/5/relationUpdate/proposed"
+        },
+        "exactValueSha256": "f97694b309690e05105d64dea76d1da730f30880b38b499084bd1e1eb90b7437"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/5/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "b72b8461dc3d0a266efe7d632044b53f78982bb3af2dde2e2a42c02b9d308702"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/5/paperEvidence"
+        },
+        "exactValueSha256": "998b8c42f0e7e6ee3a6afbc2cc6b8476d9553bcc3d65bbc3620046aaeb2b7429",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/5/perCompilation/notEstablished",
+          "sha256": "ff485c73af24432684c5c9e9e0b3c328e77f2295ca825d45b95c350f93655767"
+        },
+        "retainExactOriginalIndices": [
+          0
+        ],
+        "retainedStatementsSha256": "99bf009ef5361d451101d40722384ecbd193a1ca694063f27017dd4f52cc9bb0",
+        "supersededPendingOrMixedAssertionIndices": [
+          1,
+          2
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "ed814ba0d7cc9cd888d9e351de08fad35a730ed9d09b65e3ce7b7f874375846e"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "native-ir"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/5",
+        "independentMapReviewRowPointer": "/rows/5",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/5"
+      }
+    },
+    {
+      "index": 6,
+      "id": "ER-07",
+      "rowPointer": "/rows/6",
+      "guards": {
+        "activeRowSha256": "909f16192f55e0365f77e732f2618bfc48d45a2c47851299716c4a71bff4a87f",
+        "sourcePreparedRowSha256": "f33079359d574c00c884daa98c7323b0587f6f480dc91b272a9f11b2835570e7",
+        "sourcesSha256": "75c38b02ce5f2aa4b8543238dc8e852b8c6d8ac305086a3393e9f46cb348d3c4",
+        "perCompilationSha256": "a7e4dd0cd76dddeeea4058062dbcc61a2ef5011619ae3604729a945cf76acb93",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "f33079359d574c00c884daa98c7323b0587f6f480dc91b272a9f11b2835570e7",
+        "sourceArraySha256": "75c38b02ce5f2aa4b8543238dc8e852b8c6d8ac305086a3393e9f46cb348d3c4",
+        "domainSha256": "69431897e16aecd8413a99e640c4c54f73a31e47d13ad6e60d5967de95504524"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/6/relationUpdate/proposed"
+        },
+        "exactValueSha256": "92e35215cbdf026cdf45df09a4b824b8565b08009878ca6ce0309d696992a23b"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/6/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "2bccd77e8c9a5168513be44a6cd499da6b6baff9b848494966fa1a0617d5ac13"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/6/paperEvidence"
+        },
+        "exactValueSha256": "3a0c48b417f9badb663520ec5c01329975a7e7c7a1e43a0fdb290514c6130727",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/6/perCompilation/notEstablished",
+          "sha256": "70c82d8e17e88f3426c4496fa68209e19c98aa6b2e69b2c35472e20a19892ecb"
+        },
+        "retainExactOriginalIndices": [],
+        "retainedStatementsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          1,
+          2
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [
+          "The native closed-empty argument remains restricted to the reviewed closed source/generated-function and successful-resource domain; it does not cover arbitrary foreign divergent or aborting Empty producers."
+        ],
+        "resultingNotEstablishedSha256": "c5280e309cb3ba563cd9c712bffe2085668cdc5023e7a1611043a80a157f4462"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic-recursion",
+        "source-recursion",
+        "runtime-evaluation",
+        "source-empty",
+        "native-ir",
+        "origins"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/6",
+        "independentMapReviewRowPointer": "/rows/6",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/6"
+      }
+    },
+    {
+      "index": 7,
+      "id": "ER-08",
+      "rowPointer": "/rows/7",
+      "guards": {
+        "activeRowSha256": "a7b02a77df07a3b7f9cb1a6ddedcd69deb6d41f8eb78ac5e5f26087e1d6bfdc2",
+        "sourcePreparedRowSha256": "19687cec29a423a9374e70ad511c5b9634176f875280322f0cf87712e6659d03",
+        "sourcesSha256": "4c71f06a58566cba3637a551c39274c428b0757fd2a9cfd356df933318f8eba7",
+        "perCompilationSha256": "9e34bbaf6649ad6530213951ffcf3415751b58eeae63dfd2a69cebdbdabc61b9",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "19687cec29a423a9374e70ad511c5b9634176f875280322f0cf87712e6659d03",
+        "sourceArraySha256": "4c71f06a58566cba3637a551c39274c428b0757fd2a9cfd356df933318f8eba7",
+        "domainSha256": "b765a48add1a8dba3a3ca432cad2a59cc29d677bb0c1ba6b9f520406398a031d"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/7/relationUpdate/proposed"
+        },
+        "exactValueSha256": "b23eecc074b9632046feac3f6a6a7ed279e3a0a6cfb0f12882fff926ded94fd1"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/7/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "fcd76553a7a199b5a559fc8c035de1949b51cd9916bdd71d20a19f2da64b1f9d"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/7/paperEvidence"
+        },
+        "exactValueSha256": "65fd350e788dbd2244d4e1b1c3bbc072cb938d252860f58a4cd9811ba5eb2b93",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/7/perCompilation/notEstablished",
+          "sha256": "58633ccee1ab163f9037440c2ca1489da454f592122631b0c9284eb03f4b81cb"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "24d4cb9f0ca9d36bebcf1cbac8ac6f778b3a27346d752a4a0f4a55a17b8b9ded",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "7a267a237e3ec2fa4c3218f91a91b2139f2f414b6d18d434a5d6f8339b8d3c6d"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/7",
+        "independentMapReviewRowPointer": "/rows/7",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/7"
+      }
+    },
+    {
+      "index": 8,
+      "id": "ER-09",
+      "rowPointer": "/rows/8",
+      "guards": {
+        "activeRowSha256": "56a82c9dc93a62feb31974c4130cb3151a9fe14f0f3cfd8cc054038a41c436ca",
+        "sourcePreparedRowSha256": "3dbad611784298e1f7a80b5a6029d224628c60a6905dbce95f1b9381dacee027",
+        "sourcesSha256": "60f35c14b2e7cc1fb401803f1f6f8e70e90792c7605bea0640732c7d55b440e0",
+        "perCompilationSha256": "fb39eb5a89575da1aa82dfd9f29719364edf9912a26b3c58c958a26e0fa97559",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "3dbad611784298e1f7a80b5a6029d224628c60a6905dbce95f1b9381dacee027",
+        "sourceArraySha256": "60f35c14b2e7cc1fb401803f1f6f8e70e90792c7605bea0640732c7d55b440e0",
+        "domainSha256": "37bd91b0dad5525188084fead388d3359c211a15ce8a1c81b6dc585b8846dfea"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/8/relationUpdate/proposed"
+        },
+        "exactValueSha256": "c07eab82022db8f3f183bc16d1809561dcb09cd8202beea671464c58c77af411"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/8/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "ac507494680cb78213b9c115e84b7daee41ba5f94da8118ef1779b442206e1f2"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/8/paperEvidence"
+        },
+        "exactValueSha256": "e2730c69532d3db69bf968d3c596de64d55a2837b47208e686df52627c041e84",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/8/perCompilation/notEstablished",
+          "sha256": "714c2c8f6d89e524d5a88f101a4a861922c1b7869c9d4c1a029b4c461a30ee96"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "9d489fd071c7175bd1743dea5da5ad40b33d982ab0c9b323712c61aa4baaf195",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          2
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [
+          "Truthful source origin and binding association use the actual retained source/preparation metadata and the cited source argument; display-name inference alone cannot establish them."
+        ],
+        "resultingNotEstablishedSha256": "c2325e9a4b2e21ec00a8e45b9f1eec0fb9e7c9fb22773cccde1c9f3e042ca09f"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "atomic",
+        "origins",
+        "generic",
+        "target",
+        "name-index"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/8",
+        "independentMapReviewRowPointer": "/rows/8",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/8"
+      }
+    },
+    {
+      "index": 9,
+      "id": "N-01",
+      "rowPointer": "/rows/9",
+      "guards": {
+        "activeRowSha256": "2445a1456f6464910256bfb3b026f50385ed68fe7523366ea53278b764669b6c",
+        "sourcePreparedRowSha256": "d6f890251b3595e240302fd17c6fc22fa11983dd61471674313871b956b19501",
+        "sourcesSha256": "d29191c2902d65115d5262b6fb0c95be9997b89eb35a9ef579cf0fbbb5739844",
+        "perCompilationSha256": "2df3ee9fb3ca0fc5292f0b14e1f097efd8d2a5b23e8153c7f623607b758922d7",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "d6f890251b3595e240302fd17c6fc22fa11983dd61471674313871b956b19501",
+        "sourceArraySha256": "d29191c2902d65115d5262b6fb0c95be9997b89eb35a9ef579cf0fbbb5739844",
+        "domainSha256": "7c894d0753054b32b5b1c334de1ab5f0d78910ce19fa42ad52b61264d3cc9310"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/9/relationUpdate/proposed"
+        },
+        "exactValueSha256": "9334ec7f155ce3751895573afa0ce3d0fde728703e89531c19aee1bfd60bd82b"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/9/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "8cddd67d323b7ded4430e27a8bb7f98b90902efcc9ad66cc19ca910fe26d4da6"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/9/paperEvidence"
+        },
+        "exactValueSha256": "02dea45df9f6a5a5c50ec881e79a120a8543aac7c753c024d2045721a2b48143",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/9/perCompilation/notEstablished",
+          "sha256": "86045fc91b28680bda56e488ba45c6b5e9e4fdd9ec5b06082d9b172aa9ff75fa"
+        },
+        "retainExactOriginalIndices": [
+          0
+        ],
+        "retainedStatementsSha256": "a63ba0c030902534e5f524deafe22b96affdde681ba69f8fc65f75535b3e0759",
+        "supersededPendingOrMixedAssertionIndices": [
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "c9f1899a967603dcaf94cbebc5bd4d3da380b173e79006dad89e5c2181f40cd5"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "origins",
+        "capabilities",
+        "migration"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/9",
+        "independentMapReviewRowPointer": "/rows/9",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/9"
+      }
+    },
+    {
+      "index": 10,
+      "id": "N-02",
+      "rowPointer": "/rows/10",
+      "guards": {
+        "activeRowSha256": "8ec770ccbd73e0e3589f02f20e2d7146eefd58de73eb5b933af1f59de44434f3",
+        "sourcePreparedRowSha256": "b1f72f38ad9d759b5167719bbcb3f5bf29d8170e507e47bfb2e822ee496de47b",
+        "sourcesSha256": "2f448d8e8f37cc01d2ce399d38a60364ed7bff2e26311c2cb35151b619d09682",
+        "perCompilationSha256": "17a5f61e6d2fb8951a6e377653b9b48661850bad0eac0a822b3425833f0b7dad",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "b1f72f38ad9d759b5167719bbcb3f5bf29d8170e507e47bfb2e822ee496de47b",
+        "sourceArraySha256": "2f448d8e8f37cc01d2ce399d38a60364ed7bff2e26311c2cb35151b619d09682",
+        "domainSha256": "e55e9da783e0cacf54beecf2070f6df5e51c52bf0b7303a63c330776d2900891"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/10/relationUpdate/proposed"
+        },
+        "exactValueSha256": "17c215aca039d35c802e204607f65b7e04c8d782752641206997e2db6412dc3d"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/10/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "5b61f9a77f1d0a0a3fe25480fecdec7edd5845094cbfc4a9f05534800b63cc50"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/10/paperEvidence"
+        },
+        "exactValueSha256": "4c429d39d75c10e268bf230c474b185d248331bf603b61ff21bf6d747badfa12",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/10/perCompilation/notEstablished",
+          "sha256": "09316d495ccc35ecd60dc58bbbadf271fbebbebf476001d09656583ec715973a"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "1a83345aa7bde417bbebbb3b60294b3491854bcd89e99ecba490e799b4279641",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "95e75c0f9a30d4c1a991999e92707bacf08c7c2d51e5791e319e55fc543a9cd4"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "source-recursion",
+        "capabilities",
+        "origins",
+        "migration"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/10",
+        "independentMapReviewRowPointer": "/rows/10",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/10"
+      }
+    },
+    {
+      "index": 11,
+      "id": "N-03",
+      "rowPointer": "/rows/11",
+      "guards": {
+        "activeRowSha256": "fed95495415f5fdee09fc10df73f713fce4d3c8d2db93abd65266bb575bc037b",
+        "sourcePreparedRowSha256": "2671dd95521f19d3382f5fe8c7de7780fd0aa059fbb84bacbaf19e1099e1e72c",
+        "sourcesSha256": "701afbdffbed8f20465a53a4f23b8a8317d6a964fdf9ba8c029021a3b52a3288",
+        "perCompilationSha256": "f6c05e8c3b6c3892aa09a222dd7ddcd6b157229f9e50e48e7204e2c8bcf993f5",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "2671dd95521f19d3382f5fe8c7de7780fd0aa059fbb84bacbaf19e1099e1e72c",
+        "sourceArraySha256": "701afbdffbed8f20465a53a4f23b8a8317d6a964fdf9ba8c029021a3b52a3288",
+        "domainSha256": "530f5bc3cd79dfdabe8eb03f23dc981985df28cb4f8ad7bac02b923f8bb6f4d8"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/11/relationUpdate/proposed"
+        },
+        "exactValueSha256": "7a2915d166058c2947c8accfdb46330edb9f4c8669b7427ddf012a75ea9e2824"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/11/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "cf3f5862f2204ca17f73fec79edbf59084d23bc9aa44c5fdc748389ede4948e9"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/11/paperEvidence"
+        },
+        "exactValueSha256": "b62d6e0e750948b9366cb4968e92651729d9dd29c79169d1098fe6fbbfc63050",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/11/perCompilation/notEstablished",
+          "sha256": "ddddf6cee1d81e0dee75c3eb348cb5ae8688394061d7103558b0f4cda9a7ef88"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "6bfd35c0aa89ab0f1530a3318fc9d409b3a44799844f4ac7a5b4d9139cf9403e",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          2
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "ae78d251ff620ffa37610f7fb1825831b2b306e3049925583d57432b7c935a04"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "capabilities",
+        "generic-recursion",
+        "migration",
+        "runtime-evaluation"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/11",
+        "independentMapReviewRowPointer": "/rows/11",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/11"
+      }
+    },
+    {
+      "index": 12,
+      "id": "N-04",
+      "rowPointer": "/rows/12",
+      "guards": {
+        "activeRowSha256": "8d60ef67e2175ea84f0ade1c8cf416d23a507651b25d8eb36410e1157c63de8e",
+        "sourcePreparedRowSha256": "a787b04da2ac558a4b0a560a93912f0b9e920ab87da389b9b959f682f110c0a1",
+        "sourcesSha256": "f87405aaf3d270d5aace95be235d9aefda06b4e815f8085359cdbb2de181e1be",
+        "perCompilationSha256": "810df060e2abbd6ccf7f4f841f734587e18a0764a2085a115cdffb495068017c",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "a787b04da2ac558a4b0a560a93912f0b9e920ab87da389b9b959f682f110c0a1",
+        "sourceArraySha256": "f87405aaf3d270d5aace95be235d9aefda06b4e815f8085359cdbb2de181e1be",
+        "domainSha256": "f76bc216f4be1097a5f7e1284c916f66749230d18cb382925276b4ee2afad6bb"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/12/relationUpdate/proposed"
+        },
+        "exactValueSha256": "3129fa66ff35fc63e62d1c1d4844e5d822681221b55f8e17a0da11e5a416a25c"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/12/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "37e19505ff98904c485bb0f02ac66f53217e153c3427e9b7cc911edfb3d20fb3"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/12/paperEvidence"
+        },
+        "exactValueSha256": "2fdf52b7fa1d56bed0fd28aa324b021ab05a610bc39c4765955951cda243ded0",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/12/perCompilation/notEstablished",
+          "sha256": "5d1486cb2b4fc4dd518a5e2fb0cd5b916270f22c04fa8d0fa1b772d7d0842de9"
+        },
+        "retainExactOriginalIndices": [
+          0
+        ],
+        "retainedStatementsSha256": "a3966499bea7184be1aff57d0ed63fe21a8f5d5163ac50e3a35d884a37229a8c",
+        "supersededPendingOrMixedAssertionIndices": [
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "8fa41a6fd467085233687fd2e8cc08f21b10ffb47dd09d5721b4000bc677d900"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "migration",
+        "capabilities",
+        "generic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/12",
+        "independentMapReviewRowPointer": "/rows/12",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/12"
+      }
+    },
+    {
+      "index": 13,
+      "id": "EV-01",
+      "rowPointer": "/rows/13",
+      "guards": {
+        "activeRowSha256": "c8c0416ee02e7c702950764c0fb946250bc2a5cb4f5d89fbeef703744cd4397d",
+        "sourcePreparedRowSha256": "6b9f9d94deb2a6a6dd6718a30b5c9f94d0644d0b1ef04e83a59e9656db87802a",
+        "sourcesSha256": "b96abb1c763678e2223d777f5717b837b6a2f703a3b2e3086e0cfee19e6203e3",
+        "perCompilationSha256": "e55dd514535e5f3961bb8c8920d360ecdd17c4c3753e87a1b8a9f0ccc639b000",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "6b9f9d94deb2a6a6dd6718a30b5c9f94d0644d0b1ef04e83a59e9656db87802a",
+        "sourceArraySha256": "b96abb1c763678e2223d777f5717b837b6a2f703a3b2e3086e0cfee19e6203e3",
+        "domainSha256": "00196f537e1a7dd2404145abb1d61fbfb80a530a4e2c4e7b3e6e49a7af1bd675"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/13/relationUpdate/proposed"
+        },
+        "exactValueSha256": "6a7c8d138bfc0a442244ea8d8b59b2bf5e5cff6cdab107f896affb2c9e9e92c9"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/13/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "1f77071c1c780f4051a7687cefaec51f0235258416ad35dd4bcbdf73f6b0cfeb"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/13/paperEvidence"
+        },
+        "exactValueSha256": "26e990464afe1961f2d8b9470e7f5957799679ee87a7b9aba078256a73c403d8",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/13/perCompilation/notEstablished",
+          "sha256": "e26aaad7463ea15fc33488fc0a754671b45adc42791e88bea606ebc13c595d59"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "2aa8b8c652920cabd89a56b0dee4745420d95a34bb73928eecaaeeaf39a2da89",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "9ff3f9661f7bf8ee3709b8547a14188682c460f3298ddc71144043ff011e0fa7"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "ir",
+        "runtime"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/13",
+        "independentMapReviewRowPointer": "/rows/13",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/13"
+      }
+    },
+    {
+      "index": 14,
+      "id": "EV-02",
+      "rowPointer": "/rows/14",
+      "guards": {
+        "activeRowSha256": "ddc4d347ae4a9257abed956a8c0479c10a4bd14b507a3c274275e11dbf7edc14",
+        "sourcePreparedRowSha256": "72145a243f924d14ef1d3d8ece354c1a52f99f5d73a5e3754f2873837c434e1e",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "5a1dad44dad83e086359e38d2aadb6d5e1c18de5ea83dfa70b5e0682f5458973",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "72145a243f924d14ef1d3d8ece354c1a52f99f5d73a5e3754f2873837c434e1e",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "63e4d7b5754a710beac25a15dd05be0268685a7ec36c7a79173784a4a0fc152d"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/14/relationUpdate/proposed"
+        },
+        "exactValueSha256": "2d225163842ba546787dc966803f1ba751f55cd0bb19361162b15b11136795fb"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/14/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "e7c9b45ef112a38ba03993b4ddb6cb0d5aaee09ef6023a6fef14b1cb0bfc63dd"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/14/paperEvidence"
+        },
+        "exactValueSha256": "8f31a2114b610d7e58e36133794461d2d957b0341439f6501aaf780742fde87b",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/14/perCompilation/notEstablished",
+          "sha256": "0466456ae84736f2d7a9d2ec44171bc9ab7439536098207558abc91c6e8b5675"
+        },
+        "retainExactOriginalIndices": [
+          0
+        ],
+        "retainedStatementsSha256": "ddd7f7c7e0a3414cd23cad2cec542eb605cf11c47f591da0e90851ff035d61e7",
+        "supersededPendingOrMixedAssertionIndices": [
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "f11d73385d5848a7a1fe2fa0d46f7449c7dbd701299145ebc57b645347d73c27"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "atomic",
+        "target",
+        "origins"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/14",
+        "independentMapReviewRowPointer": "/rows/14",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/14"
+      }
+    },
+    {
+      "index": 15,
+      "id": "EV-03",
+      "rowPointer": "/rows/15",
+      "guards": {
+        "activeRowSha256": "aec2b43c70dc4d64374c3afa7510641814d0b5bf27f94ef8fbed32247b9af811",
+        "sourcePreparedRowSha256": "b21cbeada04dbd42ea21521faeb348ba826623e0258ce3fd69cc1e999064327b",
+        "sourcesSha256": "70d67d640a61d032d28065d5f7250695579e228241f48c85322c3702b654fddc",
+        "perCompilationSha256": "d4e34d3a2ade1648afdc0f3528696022054be7e17d0f5f7921a38923a9637f9d",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "b21cbeada04dbd42ea21521faeb348ba826623e0258ce3fd69cc1e999064327b",
+        "sourceArraySha256": "70d67d640a61d032d28065d5f7250695579e228241f48c85322c3702b654fddc",
+        "domainSha256": "f29e7dc93f459c57a35857db83d8c00a1d707bca9fc9612ef74f8c0e7151327b"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/15/relationUpdate/proposed"
+        },
+        "exactValueSha256": "8ac91381f2d1db1a1a9c9465f009881a1e27570d8da4aa507b7cd8ea7ed01466"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/15/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "ead216a29ddf5d56c9f7944d2fe51a73175cea772965d6f87a2312c9c6478db1"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/15/paperEvidence"
+        },
+        "exactValueSha256": "9bf449651f6069ab0aae47f65fa41068e98ba7400d4eff3c44bb14711c3cca61",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/15/perCompilation/notEstablished",
+          "sha256": "01504ffa2eb0ac40911a2824b1450507275750dbb331287c230988e79330fcee"
+        },
+        "retainExactOriginalIndices": [
+          1,
+          2
+        ],
+        "retainedStatementsSha256": "a2038cd1c9fa23d66612cd9ceade16c97cc750e82ff8554c9a80cd303f23ff42",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "e05c316f5590ce5a0c8d6a7c0c925e0db21001d0beada4a986ee4480bf2f1a2f"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "runtime",
+        "runtime-evaluation",
+        "generic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/15",
+        "independentMapReviewRowPointer": "/rows/15",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/15"
+      }
+    },
+    {
+      "index": 16,
+      "id": "EV-04",
+      "rowPointer": "/rows/16",
+      "guards": {
+        "activeRowSha256": "85e09c6383b9de18b8c1d620fb0dec67fd6b778660f19015701e07c24e9418d2",
+        "sourcePreparedRowSha256": "30cab711fd3db05e6f53d2f0ef125b13931a2d33f2271926743fd3f7303ae0b0",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "a0e4538a21fc2e291a3ca961748307c10145aca8ccaf65e51d5c794d2b462610",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "30cab711fd3db05e6f53d2f0ef125b13931a2d33f2271926743fd3f7303ae0b0",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "6c893407dd4ee3b7e35835af2225ead685958403a7a9ead4dc3ea6bdd4e1041c"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/16/relationUpdate/proposed"
+        },
+        "exactValueSha256": "aecdc79f56a034e1aee118ffc241a1f7d27d669d71123892e726c1fccc6f1279"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/16/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "b9d0b6727264a186c28810add09993dc5b36d40bffed46822c12b7702dc90212"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/16/paperEvidence"
+        },
+        "exactValueSha256": "5f8833e365d8d7ac54680aa8ac97e9d795328053b0de7a375edc24247181539a",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/16/perCompilation/notEstablished",
+          "sha256": "79b4ea216ec198ca95c581129f54da839fdf3ead924ff8c6d39b362dc3149138"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "36ce271aea1f1ccd5d35757d73045fa990f4b8c5a826eb4ec5144cfc3b9761a5",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "9bd968e6386b2030a8eca4802316ca33780020e4496895a4d3ab2788cb24069e"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/16",
+        "independentMapReviewRowPointer": "/rows/16",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/16"
+      }
+    },
+    {
+      "index": 17,
+      "id": "EV-05",
+      "rowPointer": "/rows/17",
+      "guards": {
+        "activeRowSha256": "2ea29bbe92a6ffb7ee02c9a62a2e483e0a259208ef4dcc90fab0af25eaf60c9d",
+        "sourcePreparedRowSha256": "8627b08d84948ed1c309b9f57a4bcd1b127b28fcbe1b6692e0f20e7858cda760",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "1517102b6b8706a75d29042a720349647c07e0a2597e8acc301e778c135196a3",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "8627b08d84948ed1c309b9f57a4bcd1b127b28fcbe1b6692e0f20e7858cda760",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "d42d79e6f73989d815f0f7eadec9eef3f1ac6082726218e2d865564a58f6f941"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/17/relationUpdate/proposed"
+        },
+        "exactValueSha256": "833347138cf15af3e1e7d7b06885f8b41f9ebae799d951b147a9e740735b76dc"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/17/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "eba7be13cf4da88d60924e25befed0d3e93a4cdbec8d931ee93bc0861e30c527"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/17/paperEvidence"
+        },
+        "exactValueSha256": "e1e804566f2201e677d2c8649a72be2c3cc9ae0ec93370654ac38815d5604d79",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/17/perCompilation/notEstablished",
+          "sha256": "52f1e19565076f348ec235256cb69d0530f3f04738796716be566936e5a707c1"
+        },
+        "retainExactOriginalIndices": [],
+        "retainedStatementsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "068c82cae4fc7337d01009f0df79c7ccc7d69fa87ddc2f193ffd7bd311c72f9d"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "runtime-evaluation",
+        "ir",
+        "host-boundary"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/17",
+        "independentMapReviewRowPointer": "/rows/17",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/17"
+      }
+    },
+    {
+      "index": 18,
+      "id": "EV-06",
+      "rowPointer": "/rows/18",
+      "guards": {
+        "activeRowSha256": "1a17a37b82732c628e4bc264d7be8924acc7ffd42fe92eed34ef38732ce9b571",
+        "sourcePreparedRowSha256": "cf8db7af0ae428124cb6b79bf4439f8f27d9575cba9d35775be2095be2cbdfa9",
+        "sourcesSha256": "882fbcb4112e2027f192c43ee46929863a09d1394d6e950f00e8a346b42853a9",
+        "perCompilationSha256": "d9347921f7f56eb5beef6a3f8fce98f835340223e2565146df687a2d8d5b1471",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "cf8db7af0ae428124cb6b79bf4439f8f27d9575cba9d35775be2095be2cbdfa9",
+        "sourceArraySha256": "882fbcb4112e2027f192c43ee46929863a09d1394d6e950f00e8a346b42853a9",
+        "domainSha256": "7e526505b3c7dafd814aeceb93b769e332976bf95693fd0bf5fb6da59632977b"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/18/relationUpdate/proposed"
+        },
+        "exactValueSha256": "dc5470a7b8729d515fdc7001e157498bb78ddef3d40d3602950175da804a9527"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/18/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "0ea8fbf96df2b34d39ad9816dd2db12f8436e56d5063e33d3fb70ce92f03d515"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/18/paperEvidence"
+        },
+        "exactValueSha256": "43c55284a22146cabe44ddeb3ef233274a3c376dc727b5766430146bbfe33437",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/18/perCompilation/notEstablished",
+          "sha256": "f4f6274142fd7457cb677e3e8d8410c134dc11b9e90abc2bb4c6d851ce7b0708"
+        },
+        "retainExactOriginalIndices": [
+          0
+        ],
+        "retainedStatementsSha256": "ba2a5caa0594c56e42237d3b869716f6078b72dd7412856e6314e709be565076",
+        "supersededPendingOrMixedAssertionIndices": [
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "ed2f9905f976b37e6663ec462898aa847600b6089fc961db4ad8e674f3db88ce"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "runtime-evaluation",
+        "ir",
+        "target",
+        "generic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/18",
+        "independentMapReviewRowPointer": "/rows/18",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/18"
+      }
+    },
+    {
+      "index": 19,
+      "id": "EV-07",
+      "rowPointer": "/rows/19",
+      "guards": {
+        "activeRowSha256": "ce395bd33560fed939f73f7567fc3cefa321b15996ab3be25fbe5c1aea0247ff",
+        "sourcePreparedRowSha256": "ca7297b4cd46f039fd854404cd158562192950172659310ce4352d9146da2271",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "a253823055b98ca098e2fef1dabf0031b65bf37d383b42911a60f5c123cb8133",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "ca7297b4cd46f039fd854404cd158562192950172659310ce4352d9146da2271",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "0236e8173b015ad06e8ff9504d7add44e7dbafa4c3124b80d7ce4edbc5666cb1"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/19/relationUpdate/proposed"
+        },
+        "exactValueSha256": "6fe8d5cf2a6ed006f91faf97c046244a235d32a5180cb0becdc92fbcaf7047a6"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/19/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "717c87783d878a3bdbe26167850dcd3edaee59300bebc260b5b972ebcdcf3804"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/19/paperEvidence"
+        },
+        "exactValueSha256": "83395166a250b6ebfcb40ca13608b416a7ba225b222fb2eee621213cc4b1cfbf",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/19/perCompilation/notEstablished",
+          "sha256": "12c90871ca1b2a1f945ce6c672331ff6a8bdc6a85722d1fc346a6ed6599d5bec"
+        },
+        "retainExactOriginalIndices": [],
+        "retainedStatementsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "068c82cae4fc7337d01009f0df79c7ccc7d69fa87ddc2f193ffd7bd311c72f9d"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "runtime",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/19",
+        "independentMapReviewRowPointer": "/rows/19",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/19"
+      }
+    },
+    {
+      "index": 20,
+      "id": "EV-08",
+      "rowPointer": "/rows/20",
+      "guards": {
+        "activeRowSha256": "d098083d2811102a4bec21477e89d228f4428a8cbad6fbe8f35fe8a38e04d0ec",
+        "sourcePreparedRowSha256": "285f0ab70c9aeb545f980cb0b69a637df1e304d0c0ed7fbd06af269948f562a0",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "e27c6c7be585de4c3ffa39cf46cb316294d2126074a9de779a34d9e1a829bd1f",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "285f0ab70c9aeb545f980cb0b69a637df1e304d0c0ed7fbd06af269948f562a0",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "02405f2430654f57a901e043b193efff64c694c58725c883d230633d03254d83"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/20/relationUpdate/proposed"
+        },
+        "exactValueSha256": "1d17cc7952c08aac48897351257f9973ed477174de1552ef572ae456ca03a993"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/20/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "82786e925b2e0cd853dab2da6ba9a8173e066e5ed599834508c6d186ecaa21a2"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/20/paperEvidence"
+        },
+        "exactValueSha256": "294daf5b7849f2f1ebce9272edcadcbcedb995671851423a73b251838698050d",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/20/perCompilation/notEstablished",
+          "sha256": "0f684d9a06f605704aaa130204122723c9134a89c56bfa9b19b23b399ee132c0"
+        },
+        "retainExactOriginalIndices": [
+          0,
+          1
+        ],
+        "retainedStatementsSha256": "0f684d9a06f605704aaa130204122723c9134a89c56bfa9b19b23b399ee132c0",
+        "supersededPendingOrMixedAssertionIndices": [],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "b8c55b65c2a425308be2d04f11309a50c20facd3ef015fa5d49426bbabf5f8f7"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic-structures",
+        "source-empty",
+        "ir-empty",
+        "generic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/20",
+        "independentMapReviewRowPointer": "/rows/20",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/20"
+      }
+    },
+    {
+      "index": 21,
+      "id": "EV-09",
+      "rowPointer": "/rows/21",
+      "guards": {
+        "activeRowSha256": "66b97219f375b57e31023f30feabadfc43084ebcd11378bc3c4bac32b83fe1fc",
+        "sourcePreparedRowSha256": "19a8379ed6f682a60f1b23a8eec5be1fc8f913a119bfca91eaa65544ff2f9f89",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "41ffa475d92912622004ef715252fa3af8748af23027cb8fff4bfa20c4fb4c7a",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "19a8379ed6f682a60f1b23a8eec5be1fc8f913a119bfca91eaa65544ff2f9f89",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "39b1a81cd9a4310607fece40373f2aab8a48542c00a6f5baf78b2d8d41ea524b"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/21/relationUpdate/proposed"
+        },
+        "exactValueSha256": "e473a8b38d2fa27e9fcca19b498898136bf1b6f7a4556f7c4e22b9548d335812"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/21/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "7595cf8679ec7f17db4494065f28469d7ec39e29194bf09d179ad2d4860a10c2"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/21/paperEvidence"
+        },
+        "exactValueSha256": "031dbe635bf39af1df08df26de709bc85fd894d8b0809d30a7e281e91929f4ab",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/21/perCompilation/notEstablished",
+          "sha256": "a289c4f36f7ee0e41c9455a84ea110271f16270f425bd0aacdfbf0ebf8c8fb1d"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "fa40745b68e43be31133e5e99e9e34fb4461d01abf408bb391044312bccb6e36",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "82f4e7984e5b3c4977b5bf4d1a07d3fc5cfcbcaeb780cffd161edbe9a0963ef6"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "generic-structures",
+        "capabilities",
+        "ir"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/21",
+        "independentMapReviewRowPointer": "/rows/21",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/21"
+      }
+    },
+    {
+      "index": 22,
+      "id": "EV-10",
+      "rowPointer": "/rows/22",
+      "guards": {
+        "activeRowSha256": "aab3f3b9dacc278616bbb5680c8884c13714c223f05a7b4defd508c834635c01",
+        "sourcePreparedRowSha256": "580d54f74debe707abb7e6a54a0994076e9a2138eddb1207014f5a22ebfc41ef",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "33931b89f8b2fbd484f5d7141c966c9817eb07f9a556ef461541b0f788737c4c",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "580d54f74debe707abb7e6a54a0994076e9a2138eddb1207014f5a22ebfc41ef",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "8e0c4013073125d2c07b68782bf59c6f5c5707e746b9cabf46889d9f30f1899d"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/22/relationUpdate/proposed"
+        },
+        "exactValueSha256": "416d34f3b548e1f4c492fbd3a05b74ba44c994d96891549ba64fc525962eaa00"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/22/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "9dd71e6a58d0912840a99eb96ebeccdbb79df54ff0c5e5a94dcfced742b8404a"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/22/paperEvidence"
+        },
+        "exactValueSha256": "35142c408f47511042abd8346d8eceac7d5a115cfbc38cbdd2c8bfaf57aac3dd",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/22/perCompilation/notEstablished",
+          "sha256": "53298d650e65dc50ba09cd4cc4fa2e4cfef0f7e08f3bc778e2e84b7a8176caba"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "e67e7edbe43cb5947b9eba7907f7778c1bbc52b6e55d6e5a0dcb88ad88204409",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "eac010ac7865c664f3402cb8100647b41562ecad6beca5d1ccc62012baec2938"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "generic",
+        "ir",
+        "source-empty"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/22",
+        "independentMapReviewRowPointer": "/rows/22",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/22"
+      }
+    },
+    {
+      "index": 23,
+      "id": "EV-11",
+      "rowPointer": "/rows/23",
+      "guards": {
+        "activeRowSha256": "ec4309eb957102cef9ac7e4e18b332515fc15787eb8e95fc128958e2f91a0c2a",
+        "sourcePreparedRowSha256": "3af292d342348b82ac8cbd16846278648d7d0e034f4fc30fa3a51daf5f8859bd",
+        "sourcesSha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "perCompilationSha256": "6809074ff93d5820173394ff4c1936143260b577dbd4a9c1616bd9b7fc2f6a91",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "3af292d342348b82ac8cbd16846278648d7d0e034f4fc30fa3a51daf5f8859bd",
+        "sourceArraySha256": "30ae38a40f3af0603c82b8c85975ce33e565578383b4c4317068fd98cf728d04",
+        "domainSha256": "ebb145b2c671eab01f3473a5334bc85497d96d6602467267682563422f948a50"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/23/relationUpdate/proposed"
+        },
+        "exactValueSha256": "b84dec40ec4aababe331a5dc18c68288767930e6d5a6f79df8ac142617529b67"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/23/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "984e9e45c61cb11442f1f0392289919b91214ba95efd0f6a669b2d7b457f54cf"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/23/paperEvidence"
+        },
+        "exactValueSha256": "3774e1b3ac9ff8e44f310a0fd1ad9b3cbecab44db723448011cf67af15c38273",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/23/perCompilation/notEstablished",
+          "sha256": "a70407581c8a4bcfc96f4de8749d0ea7ce3e9ed991227e401b884c0fcd5aa5a8"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "5f59d780a2adee0ac411a2d7ddb571bec35542d23a981e016ac1ed309232de05",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "7f1f863fc4e948ef01f7a001e4df056c075c63196ab9ed57a160619d0856d57c"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "ir-empty",
+        "source-empty",
+        "native-ir",
+        "generic-recursion",
+        "generic-structures"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/23",
+        "independentMapReviewRowPointer": "/rows/23",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/23"
+      }
+    },
+    {
+      "index": 24,
+      "id": "TS-01",
+      "rowPointer": "/rows/24",
+      "guards": {
+        "activeRowSha256": "bf5fb41d09ed15272b36afbbd12022f67ac2c24bd423eb7c70e8402db9c1af64",
+        "sourcePreparedRowSha256": "a1b7854f2c2dbb3baccc142446612262631a539b5c7948d3d1398c3e536eb8c9",
+        "sourcesSha256": "3ac5df9e3fed005a634f8a65205fb3a56ab114e12a0b22ea0ba3167dd9e23570",
+        "perCompilationSha256": "71873793c8a211b66b5134b569b39497f0f2e5f65f4469f7b2925227f61f23d9",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "a1b7854f2c2dbb3baccc142446612262631a539b5c7948d3d1398c3e536eb8c9",
+        "sourceArraySha256": "3ac5df9e3fed005a634f8a65205fb3a56ab114e12a0b22ea0ba3167dd9e23570",
+        "domainSha256": "3ae0c3abb9d890a13c76aafa4a1b785e25c0d8b752ddc0f6f748695bc7f3c11d"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/24/relationUpdate/proposed"
+        },
+        "exactValueSha256": "d83b8398594c927a10fb229d1531dd788b13f12d8a77a6c076272564c4b2ce97"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/24/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "1c87bdb451f00617039eff8ecbd0dfabcba0a31f8ea560f1d1fb6a66f0562d77"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/24/paperEvidence"
+        },
+        "exactValueSha256": "3f8636d6928605a4f6f5016061942b30a92c8513a1910d675b9cd191e02859b6",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/24/perCompilation/notEstablished",
+          "sha256": "65a6346571be50544fcce5a5ad1cbb938039d8fe9395ead22bde7fb25a382aa5"
+        },
+        "retainExactOriginalIndices": [
+          0,
+          1,
+          2
+        ],
+        "retainedStatementsSha256": "65a6346571be50544fcce5a5ad1cbb938039d8fe9395ead22bde7fb25a382aa5",
+        "supersededPendingOrMixedAssertionIndices": [],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "85b791efdf0f862645d5ce56222dca2bba4bd637fe4461f1c8160c4257d332e8"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "target",
+        "name-index",
+        "ir",
+        "atomic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/24",
+        "independentMapReviewRowPointer": "/rows/24",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/24"
+      }
+    },
+    {
+      "index": 25,
+      "id": "TS-02",
+      "rowPointer": "/rows/25",
+      "guards": {
+        "activeRowSha256": "6db149ee56c62da44bc8df3a03f7edf956525730ab3d31b2cfd51ceef5e20e5b",
+        "sourcePreparedRowSha256": "5fd6b7d758fd541540b2f45f8837d704565af31f67d7401889690d8ed6565bc0",
+        "sourcesSha256": "b057d6882bc8839dfcbe11f68a715a9483eea9ec971150806fa6f0f9c6dd6cac",
+        "perCompilationSha256": "f691147f59c89cf70b4099891781511fe3b55fd09cf186807ea2bd3e1bb8165c",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "5fd6b7d758fd541540b2f45f8837d704565af31f67d7401889690d8ed6565bc0",
+        "sourceArraySha256": "b057d6882bc8839dfcbe11f68a715a9483eea9ec971150806fa6f0f9c6dd6cac",
+        "domainSha256": "372af450ff7f10d339bca9189dca7c85853ad4a37adff66b2078d09022668ce9"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/25/relationUpdate/proposed"
+        },
+        "exactValueSha256": "94cb4bf8942b9d641177eb0f103b8fd2db4f670d074d9c9da94b6108f474f357"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/25/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "5b01aa8d83b39109c65664e32127bffac31c6878d82d727440dbb68be77a62a6"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/25/paperEvidence"
+        },
+        "exactValueSha256": "3442fa9329f01b27d41552ee93a3b1d21330e74fad82ad28c9cc89000ac0db7d",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/25/perCompilation/notEstablished",
+          "sha256": "d2c29c1a06d5b01a3babf62bd66736d7cd697a183cc9c08d27499bb764baf467"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "27168a1f28dda9bc3977f823baa99d1fa239b78ab4e4fbc41c373b5d4ed2f98f",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "41ae085ddb4fc9fb16037d3aaaf0f1d88b08eccdf6830ab1d8b9ced4100fcc64"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "ir-empty",
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/25",
+        "independentMapReviewRowPointer": "/rows/25",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/25"
+      }
+    },
+    {
+      "index": 26,
+      "id": "TS-03",
+      "rowPointer": "/rows/26",
+      "guards": {
+        "activeRowSha256": "0fa8409d85dc6289e75cfa343aa30fe1af64cfee85d72e11e09c8f82eab7ad9a",
+        "sourcePreparedRowSha256": "67bdea3422811439134a82868ebd65d1dd603d283fb4738486940682184092eb",
+        "sourcesSha256": "f615ad514a8b4e7cb074f9d1014f4e8c04e5cc3a4b016dc462fd409edb536f41",
+        "perCompilationSha256": "9460f2aafc7502ec76012f35d7d2d6f2b90b3b766cb70d001be531a4e83c3f85",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "67bdea3422811439134a82868ebd65d1dd603d283fb4738486940682184092eb",
+        "sourceArraySha256": "f615ad514a8b4e7cb074f9d1014f4e8c04e5cc3a4b016dc462fd409edb536f41",
+        "domainSha256": "e875492a84a59885fc5d36910d1ce9084fc94fa44bc4d98f543028febde64341"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/26/relationUpdate/proposed"
+        },
+        "exactValueSha256": "bb0dfdf1d28b2f566d3d61d199556390c7e2b6b058c9438d4de2cd5e119f9676"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/26/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "bd414aa75f2fca7d9ed684a3fd23ebe7925c1b134d51c45f307a214e25f5c3b8"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/26/paperEvidence"
+        },
+        "exactValueSha256": "57881ac0441d7d8bd736398cf57aceaa08bcf0c4580c84eafa9ef36b56011880",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/26/perCompilation/notEstablished",
+          "sha256": "21aff455d0af64350caad8c4adf7d0ab9d7044c36b78924fcdb1817343ac1679"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "376a0ebb7612fe1d0ad55b1a5866e6e8e1b2fecb4b3a8a7fd53738cd37a9c28a",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "2755511c2fc247f756a698d547ddf253cb933b8d7e2fa185cd65fb3d26f9b342"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "ir",
+        "runtime",
+        "runtime-evaluation"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/26",
+        "independentMapReviewRowPointer": "/rows/26",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/26"
+      }
+    },
+    {
+      "index": 27,
+      "id": "TS-04",
+      "rowPointer": "/rows/27",
+      "guards": {
+        "activeRowSha256": "0d7ee39c58af8879ddd43b86cb106dc7a7f35756f3bf60681404ec72fcc2d980",
+        "sourcePreparedRowSha256": "70ff744d72555cb03e40cfcd824e6caec2c77f3412b76b4524e8ffd4e6a2277b",
+        "sourcesSha256": "ec9fc53c6a41b564b2ab74ab256a427889a519b694037a984158746bd6c8f87f",
+        "perCompilationSha256": "0e28055989676eb554e8a695e90a13140a4d934f397c3c6dfd30c264e8c47461",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "70ff744d72555cb03e40cfcd824e6caec2c77f3412b76b4524e8ffd4e6a2277b",
+        "sourceArraySha256": "ec9fc53c6a41b564b2ab74ab256a427889a519b694037a984158746bd6c8f87f",
+        "domainSha256": "db55dec498ccd7cb47471c316799ae78056a37e7cb54faece391e8a8f6736eba"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/27/relationUpdate/proposed"
+        },
+        "exactValueSha256": "d8793e4e95b974d6d88a9081e873d2770baf3e8a63fe503545460e6b99822c0a"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/27/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "e508a8a54ed41faede6017b666e865f1c2a7d88ce04c8d4feffcacd6a44a852c"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/27/paperEvidence"
+        },
+        "exactValueSha256": "dcfbd22437611846c40dcb4e04074d2820e6a7e91a7649a22df58c1fe2b16260",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/27/perCompilation/notEstablished",
+          "sha256": "0c96e52fc9cb9c102630efdb4ef0c4b7351ef3a28f3f6442130abc82373a8b3d"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "a05306dabaff3d3e96aeacfce5a06728c3f30b3432db699353f32ce74275bfb6",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "d18348719f56a99bad423a4994b7653ac52b02cbc3ed82b97731e9b08e662800"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "runtime-evaluation",
+        "generic",
+        "ir"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/27",
+        "independentMapReviewRowPointer": "/rows/27",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/27"
+      }
+    },
+    {
+      "index": 28,
+      "id": "TS-05",
+      "rowPointer": "/rows/28",
+      "guards": {
+        "activeRowSha256": "aa1da52c5bcb0123f6d3f6e1ef61f17535e8d695377ab3556cbe37e59a1266fd",
+        "sourcePreparedRowSha256": "bf4d2a056811aae4e41376ddcb31706749494c528256ee7f2ba818a0e51b4bfe",
+        "sourcesSha256": "e95ef74854ddfcd85b3b4e7bc4d9ee8e6f5cb7ccbd9b9d2ec400602ae283f0bd",
+        "perCompilationSha256": "c7e89409155f86abcd2daca00772b659c662b8289f7827d9081773d090248169",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "bf4d2a056811aae4e41376ddcb31706749494c528256ee7f2ba818a0e51b4bfe",
+        "sourceArraySha256": "e95ef74854ddfcd85b3b4e7bc4d9ee8e6f5cb7ccbd9b9d2ec400602ae283f0bd",
+        "domainSha256": "1ea74c012a4d555d7906d136e9086fd8d9744e53141f23035c1d2bf067647ff4"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/28/relationUpdate/proposed"
+        },
+        "exactValueSha256": "ddc1f806332ee18786a44ebc732684add6550f5e18dc7090df60c01da0087772"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/28/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "eb02ddb981997afb902a3ac77e153669d77babd1c1043ae2c6812a7e5014dabf"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/28/paperEvidence"
+        },
+        "exactValueSha256": "b1ad758f54621da0f66dce1052b352dc7f93d1c5857e3bac4b958a78633c543a",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/28/perCompilation/notEstablished",
+          "sha256": "ad25ed5806e16e7f6b001533e4ad84aed1580c0d5066631c02b7c69acef26ca8"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "3add8d20210ba639a2b8012f429fcac11489a3ae7ca988bd37860b555fde53cc",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "a87ae4ad08c568b426b7748350e0aab3b0ba0e2c7a288d5e90c467403300d6f2"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "ir",
+        "target",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/28",
+        "independentMapReviewRowPointer": "/rows/28",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/28"
+      }
+    },
+    {
+      "index": 29,
+      "id": "TS-06",
+      "rowPointer": "/rows/29",
+      "guards": {
+        "activeRowSha256": "e93317427cbdcb9c80a18d94407085c55048e452474a9ddd271136c21739890d",
+        "sourcePreparedRowSha256": "c047490d87ae57e70cd66f8c6219cc02f51082dc6776ec521c84c6ffc1f15d87",
+        "sourcesSha256": "02d4653dcebff94c2dd97fd1246310f5278bbd689926daf09fa7bc355cef8f5f",
+        "perCompilationSha256": "554349dc81599a33aa91bf6333a78db576a9a1b8f84998fbdf8ad950ebf2e6a7",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "c047490d87ae57e70cd66f8c6219cc02f51082dc6776ec521c84c6ffc1f15d87",
+        "sourceArraySha256": "02d4653dcebff94c2dd97fd1246310f5278bbd689926daf09fa7bc355cef8f5f",
+        "domainSha256": "cd25d6c3c4981317b8c071edd291ac5db8b4b740b93e6887c24ce8e9415979f9"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/29/relationUpdate/proposed"
+        },
+        "exactValueSha256": "f7fefa06df1919ac8a9887c0b83bd59ec0a2a6a07605649f4a5eadadd5bde583"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/29/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "fcfca0f6731a6c31b0c5b59ddccf38266713941d4b405ef2d6695399c9d0be60"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/29/paperEvidence"
+        },
+        "exactValueSha256": "c5f1a513ccbb1cb806123a92f03763a455b24f9ce40acbb0dd52b55d0d097eb0",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/29/perCompilation/notEstablished",
+          "sha256": "6cace3a96148f8a7cf546a89c1af9c62ef22b609cc708e76597fb1f200eae770"
+        },
+        "retainExactOriginalIndices": [
+          1
+        ],
+        "retainedStatementsSha256": "928befb331400f8caab38e973edf38c86a0c2092c9bbb6d897713ef902f582d3",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "f4ce751ac476cc61658f6fadc9d5827848d4b2c6b1d6584f6a0f04c83f7bb986"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "ir",
+        "capabilities",
+        "runtime-evaluation"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/29",
+        "independentMapReviewRowPointer": "/rows/29",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/29"
+      }
+    },
+    {
+      "index": 30,
+      "id": "TS-07",
+      "rowPointer": "/rows/30",
+      "guards": {
+        "activeRowSha256": "d6c29856e2d3a04c50e54152b17f247dad30d8fa2108a81020f8a42584535f54",
+        "sourcePreparedRowSha256": "5d4c052a2dd39822d701a8a7666a5cc63c060407a754364831884c1d0aafc725",
+        "sourcesSha256": "89f550b02cbb8ac789879cd006cf4d2340c255bda88bceb37e4e1bddb9815365",
+        "perCompilationSha256": "8a970982d83ba288b8592130d46089f79cd7ac2b156c0c1aff245df941144a21",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "5d4c052a2dd39822d701a8a7666a5cc63c060407a754364831884c1d0aafc725",
+        "sourceArraySha256": "89f550b02cbb8ac789879cd006cf4d2340c255bda88bceb37e4e1bddb9815365",
+        "domainSha256": "322a2779784eb9ac10905ecf7ceeee01057f64e5f689496bd52bc2f08664ba36"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/30/relationUpdate/proposed"
+        },
+        "exactValueSha256": "aae44b3699d433c9f7d719cc95fcaadef4e4948f0440defd21b0f0c75175e2d5"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/30/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "7653c0f8f355ac123a316d8f88baaefb461c6d107044071c789f816fce890116"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/30/paperEvidence"
+        },
+        "exactValueSha256": "86a7000364bad5a598dd60a5baf2f5741da96f9c3ebe08ad900370dee369a787",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/30/perCompilation/notEstablished",
+          "sha256": "de67917f6929506662d3fcfb03e28302626aae1874bc8dafb4b30f2134e438e6"
+        },
+        "retainExactOriginalIndices": [],
+        "retainedStatementsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "supersededPendingOrMixedAssertionIndices": [
+          0,
+          1
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [
+          "Direct self calls and captured-alias self calls retain the reviewed distinct logical call accounting, including the intermediate cutoff; a finite optimizer pass does not establish this relation by itself."
+        ],
+        "resultingNotEstablishedSha256": "001e1dae3f1cf628e6841494ffd6606d666dfd911a394fc271d4118fefdc46a9"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "optimized-tail",
+        "ir",
+        "runtime-evaluation",
+        "target"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/30",
+        "independentMapReviewRowPointer": "/rows/30",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/30"
+      }
+    },
+    {
+      "index": 31,
+      "id": "TS-08",
+      "rowPointer": "/rows/31",
+      "guards": {
+        "activeRowSha256": "be714cd9829a5af3f135880f53a7eb03affc38c1543b0bad6c5bd2867a18ebda",
+        "sourcePreparedRowSha256": "cb4b475a90540e2c9b5866d79fda918d3bf02adb1400f16d52329eca41184337",
+        "sourcesSha256": "03c6f5c37a45e051a80d5198480c772fc12391438f9854dce1791cfe49c35ab8",
+        "perCompilationSha256": "063aa6e8fe5ef973a48b3be78ae0078fb1e8010a75712d293cf914c14d99acef",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "cb4b475a90540e2c9b5866d79fda918d3bf02adb1400f16d52329eca41184337",
+        "sourceArraySha256": "03c6f5c37a45e051a80d5198480c772fc12391438f9854dce1791cfe49c35ab8",
+        "domainSha256": "894e80c16563dac1f2ec244bfde40808566c06847067c4d9d857a2067da6ec02"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/31/relationUpdate/proposed"
+        },
+        "exactValueSha256": "1b83ac6340930cb98fc1d0189743cab0dff3d86f3a6224193d7b9f3a5bc4f526"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/31/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "927a9ab6271f0b47af700947bb33a146442dc503bd752ee04d917d9a941025a8"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/31/paperEvidence"
+        },
+        "exactValueSha256": "9b01e82b65ca5b82afefeecaf2d1895a77a881091f8cd3a0e0adae3a9b38e376",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/31/perCompilation/notEstablished",
+          "sha256": "5d3bb9fc99e109c097cdb6d7618acab3c020e0ae3962c23d5774bf786b20b967"
+        },
+        "retainExactOriginalIndices": [
+          1,
+          2
+        ],
+        "retainedStatementsSha256": "7ea1840c6c8c2ff27e6f08bfb6c41ef36abb3196922e57a7840f12431c1ff0f9",
+        "supersededPendingOrMixedAssertionIndices": [
+          0
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "6d36cd3ec76c2cf5e3556fb4615cb999d4b198a1b6693e632a9c07a9ddb40689"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "target",
+        "atomic",
+        "generic"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/31",
+        "independentMapReviewRowPointer": "/rows/31",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/31"
+      }
+    },
+    {
+      "index": 32,
+      "id": "TS-09",
+      "rowPointer": "/rows/32",
+      "guards": {
+        "activeRowSha256": "f0924f99993a5b81ac9d186e349642899363e8b6c14eee3140e84c3ec1422bc7",
+        "sourcePreparedRowSha256": "07a6207ac537a33e6d64d3b7b26ed3d87e4d12dd6212649959e004f93ee2e459",
+        "sourcesSha256": "ec0902d18ebcae6fc4d019408b28cee4c8036b155492d430b30afeb6859de96d",
+        "perCompilationSha256": "6a1df23435e1bec3a55841af680a3b6d8bfb4ed6a26720d4e391aca6eb4c6673",
+        "generalPreservationProven": false,
+        "strictSh1Discharged": false
+      },
+      "sourcePreparation": {
+        "transportBlob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "preparedRowSha256": "07a6207ac537a33e6d64d3b7b26ed3d87e4d12dd6212649959e004f93ee2e459",
+        "sourceArraySha256": "ec0902d18ebcae6fc4d019408b28cee4c8036b155492d430b30afeb6859de96d",
+        "domainSha256": "7e90babb3ef579a538f78e139e20e65928dea1b480b39a9f2117aae0f7ac7327"
+      },
+      "relation": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/32/relationUpdate/proposed"
+        },
+        "exactValueSha256": "6775286b963a6ecff81d1ced9aaa47738454adcc7c21e7327f42ffc0c88dcb15"
+      },
+      "argument": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/32/argumentUpdate/proposed"
+        },
+        "exactValueSha256": "80053c82ef3042c45c54a366f432e04206284fa36d043db0d6a5f15f2daf3884"
+      },
+      "paperEvidence": {
+        "source": {
+          "blob": "697c94b2722a6191537b714f71f629713637b30a",
+          "jsonPointer": "/correspondenceRows/32/paperEvidence"
+        },
+        "exactValueSha256": "2ea7026218cf9b2c01c28841d6cdc92e104be03dab4a38f51b8eaaa68957321a",
+        "resolvePacketIdsThrough": "/fixedMappings/paperPins"
+      },
+      "perCompilationMaintenance": {
+        "availableOrCandidate": "preserve existing value exactly",
+        "historicalNotEstablished": {
+          "ledgerBlob": "cdaf9ef0178d21f7eb5a5781380eac825301bf8a",
+          "jsonPointer": "/rows/32/perCompilation/notEstablished",
+          "sha256": "70ee4e768a56ff0447bb135604759c4281b8a3fddca6c3e02c0b173ee7bf6104"
+        },
+        "retainExactOriginalIndices": [
+          0,
+          1
+        ],
+        "retainedStatementsSha256": "fe80a3b1c05b89a51d2734f17547d63ea566f11e44ab4ed61884a18f138f71b7",
+        "supersededPendingOrMixedAssertionIndices": [
+          2
+        ],
+        "construction": "Concatenate commonPerCompilationLimits, the exact selected original statements in listed index order, and appendScopedLimits; preserve that order.",
+        "commonLimitSetPointer": "/fieldMaintenance/commonPerCompilationLimits",
+        "appendScopedLimits": [],
+        "resultingNotEstablishedSha256": "c3957a78762a629fc17e14d05f52d42c58a3bb25950b5d97c62f34ea15a16ee6"
+      },
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "grammar",
+        "resource",
+        "toolchain",
+        "provider",
+        "runtime"
+      ],
+      "reviewedArgument": {
+        "sharedTemplatePointer": "/fieldMaintenance/generalArgumentReviewTemplate",
+        "mapRowPointer": "/correspondenceRows/32",
+        "independentMapReviewRowPointer": "/rows/32",
+        "supplementalClosedUniverse": null
+      },
+      "deferredDischarge": {
+        "status": "PENDING_DO_NOT_APPLY",
+        "sharedTemplatePointer": "/fieldMaintenance/dischargeEvidenceTemplate",
+        "releaseRecordCorrespondenceRowPointer": "/correspondenceDispositions/32"
+      }
+    }
+  ],
+  "preparationChecks": {
+    "rows": 33,
+    "receiptGroups": 25,
+    "exactOriginalLimitStringsRetained": 37,
+    "actualLedgerRowsModified": 0,
+    "allRowDischargeTemplatesPending": true,
+    "finalReleaseReferenceStillNull": true,
+    "finalClosedLedgerProduced": false,
+    "compilerInvocations": 0,
+    "testsRun": 0,
+    "sourceChanges": 0,
+    "commitsCreated": 0,
+    "refsUpdated": 0,
+    "serializationStrategy": "Immutable field values are referenced by exact blob/JSON pointer plus canonical JSON SHA256; common row templates and receipt catalogs are shared to avoid duplicating frozen arguments."
+  }
+}

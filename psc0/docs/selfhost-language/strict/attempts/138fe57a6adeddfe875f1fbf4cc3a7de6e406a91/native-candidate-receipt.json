@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "evidence": "native-seeded-generated-compiler-candidate",
+  "sourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+  "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+  "sourceKind": "raw-authoritative-lean",
+  "moduleCount": 64,
+  "nativeCompiler": {
+    "binarySha256": "be28aed5164ffa0661369e424dd8d315278de396fec4c22ce3d73ff567e81012",
+    "path": ".lake/build/bin/psc1_sh1_compile",
+    "command": [
+      "--kind",
+      "lean",
+      "--out",
+      "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/index.ts",
+      "--admissions",
+      "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/admissions.json",
+      "--report",
+      "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/strict-source-native.json",
+      "--sources",
+      "packages/foundation/src/Ps/Foundation/Source.lean",
+      "packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "packages/syntax/src/Ps/Syntax/Token.lean",
+      "packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "packages/syntax/src/Ps/Syntax/Ast.lean",
+      "packages/foundation/src/Ps/Foundation/Name.lean",
+      "packages/syntax/src/Ps/Syntax/ParserState.lean",
+      "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+      "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+      "packages/syntax/src/Ps/Syntax/Translate.lean",
+      "packages/bridge/src/Ps/Bridge/Json.lean",
+      "packages/core/src/Ps/Core/Level.lean",
+      "packages/core/src/Ps/Core/Expr.lean",
+      "packages/core/src/Ps/Core/Declaration.lean",
+      "packages/core/src/Ps/Core/Abstract.lean",
+      "packages/core/src/Ps/Core/Subst.lean",
+      "packages/core/src/Ps/Core/Equality.lean",
+      "packages/foundation/src/Ps/Foundation/List.lean",
+      "packages/environment/src/Ps/Environment/Basic.lean",
+      "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+      "packages/core/src/Ps/Core/Builtin.lean",
+      "packages/environment/src/Ps/Environment/Prelude.lean",
+      "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+      "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "packages/environment/src/Ps/Environment/LocalContext.lean",
+      "packages/environment/src/Ps/Environment/Resolve.lean",
+      "packages/core/src/Ps/Core/LevelSubst.lean",
+      "packages/meta/src/Ps/Meta/LevelContext.lean",
+      "packages/meta/src/Ps/Meta/Context.lean",
+      "packages/meta/src/Ps/Meta/Reduce.lean",
+      "packages/meta/src/Ps/Meta/Infer.lean",
+      "packages/environment/src/Ps/Environment/Instances.lean",
+      "packages/meta/src/Ps/Meta/Unify.lean",
+      "packages/meta/src/Ps/Meta/SynthInstance.lean",
+      "packages/elab/src/Ps/Elab/Context.lean",
+      "packages/elab/src/Ps/Elab/Literal.lean",
+      "packages/elab/src/Ps/Elab/Term.lean",
+      "packages/elab/src/Ps/Elab/Recursion.lean",
+      "packages/elab/src/Ps/Elab/Declaration.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "packages/erasure/src/Ps/Erasure/Basic.lean",
+      "packages/erasure/src/Ps/Erasure/Expr.lean",
+      "packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "packages/erasure/src/Ps/Erasure/Structure.lean",
+      "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "packages/erasure/src/Ps/Erasure/Definition.lean",
+      "packages/compiler/src/Ps/Compiler/Api.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+      "packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+      "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean"
+    ],
+    "generalCompilerBinarySha256": "d23b05332e1d64195dd0b677a3f3a779e8867338996bde7956ebebfdbc36fba3",
+    "buildContext": "CI builds psc1_sh1_compile and psc1; the atomic source executable builds N1, while the general CLI is a separate capability reference."
+  },
+  "artifacts": {
+    "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+    "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"
+  },
+  "recipe": {
+    "files": [
+      {
+        "path": "scripts/sh1-qualify.mjs",
+        "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193"
+      },
+      {
+        "path": "scripts/sh1-capabilities.mjs",
+        "sha256": "171316bbe186ff91ac055a1171e27e86f5e605d2082d5d7ffcf90de6a68749eb"
+      },
+      {
+        "path": "scripts/sh1-resource-policy.mjs",
+        "sha256": "76647884ed3f451ebd429c89c480113e88f88c60a673f8d5456b9418fd4fb998"
+      },
+      {
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "sha256": "4daafb21cc121532bb0bb549305babc8987b9ca8554e5864a8bdc59b5ceadc58"
+      },
+      {
+        "path": "scripts/sh1-grammar-profile.mjs",
+        "sha256": "8107c4b1f3f5dc8a74b2c999443659a43242c5e0879e8d6921571805f89e71ae"
+      },
+      {
+        "path": "scripts/sh1-projection-conformance.mjs",
+        "sha256": "64f60f538a01fe288153d3df7a12725854a7dbf9e10a308fe1e3dab2d342fa64"
+      },
+      {
+        "path": "scripts/sh1-successor-seed.mjs",
+        "sha256": "00b5dbfae38715df2888d3b3577897010fe98e65fc4268302d7253397e0067e2"
+      },
+      {
+        "path": "psconfig.json",
+        "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+      },
+      {
+        "path": "scripts/sh1-function-entry.mjs",
+        "sha256": "b38c4ef844068aae4cb0373785dc5401f72d59e0016dd3e0f3e343ac96348bc4"
+      },
+      {
+        "path": "scripts/sh1-fresh-name-conformance.mjs",
+        "sha256": "330e3c53401d3912f092ecf9f6457c67db6852f73b4cf715eb3a92364459d7d5"
+      },
+      {
+        "path": "scripts/sh1-migration-worker-conformance.mjs",
+        "sha256": "3e43c4ee676c3aea2f5f68b24799a991a72fa608ef65b6371833fafcfe7dc808"
+      },
+      {
+        "path": "scripts/sh1-migration-worker-abi.mjs",
+        "sha256": "f520b3d033462e41a87d1aac3db6ed2f75290c05b4f106451919886234352cc7"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-accumulators.lean",
+        "sha256": "45d7948c21431670d89762f97a6679a371b37defbfcc9d15138639c5f926d9e6"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-accumulators.ps",
+        "sha256": "e0619554ac2384922ebe1739fa208114b08229118c6a995b7ee7ab2da9a28e65"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-empty.lean",
+        "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-empty.ps",
+        "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390"
+      },
+      {
+        "path": "scripts/proofscript-source.mjs",
+        "sha256": "98474e8d1d1629b93aec608ef7263e5c959f02703ca23a55a46327d1f43d9608"
+      },
+      {
+        "path": "scripts/checked-source-snapshot.mjs",
+        "sha256": "1082b5e817a973a1eae0731543f7f6b419dfa13c574d051b845c11659be7134c"
+      },
+      {
+        "path": "scripts/selfhost-source-workspace.mjs",
+        "sha256": "ec6707a4b12fa605cdcf7cdf1db829f281990fbb8c9b2dc5b9638d37e6fbb1f8"
+      },
+      {
+        "path": "scripts/LeanCheckedSeed.lean",
+        "sha256": "f5af4cb73002682ab0e43f78a22d79c6d1006f5f4a0fd8b980c0a7bb3ac91ad1"
+      },
+      {
+        "path": "scripts/typescript-cli.mjs",
+        "sha256": "7aac5da80abb8a407efce3e72f3ffb88f1fc60a64d1dd5a78b6ec16f37b3dec1"
+      },
+      {
+        "path": "scripts/check-typescript-profile.mjs",
+        "sha256": "8bec81395a8faa3c4dd5f354b2fac6492d027a6ba6b610cac2880c21741645e5"
+      },
+      {
+        "path": "scripts/workspace-layout.mjs",
+        "sha256": "f6d2b4d5f82e3d3c125c2d6131d625ca64b698ac10c03648c8914fbcbbdf75b1"
+      },
+      {
+        "path": "scripts/generated-preparation-session.mjs",
+        "sha256": "44ab11ab36862d229c3b74bdd84b58d8cd1eb20b30ac245ade3eb21c09c0a926"
+      },
+      {
+        "path": "scripts/original-ir-inventory.mjs",
+        "sha256": "190a1d216b89c775b7195433ff7caed1407a382b25175f74e7525ee3a7e345a0"
+      },
+      {
+        "path": "scripts/original-ir-carrier.mjs",
+        "sha256": "5e153c67c5a08ac475962da0a14ea04fe5f996449f81bf071787e11af33515c2"
+      },
+      {
+        "path": "scripts/sh1-ir-checker-conformance.mjs",
+        "sha256": "c7bc6fff33decea880595023367a5e6d73249226d5002b9810e56bae876ad1f9"
+      },
+      {
+        "path": "test/IrCheckerTests.lean",
+        "sha256": "79092d4ad9c97a83e884df0dac3dc0667b070d91e7df14b597272d30c6550b85"
+      },
+      {
+        "path": "scripts/sh1-strict-source.mjs",
+        "sha256": "b993d66ef955fb4359f6f472667a0ddc572afcb51501283a4ddcd8ba38d97519"
+      },
+      {
+        "path": "scripts/sh1-strict-source-conformance.mjs",
+        "sha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089"
+      },
+      {
+        "path": "scripts/sh1-strict-target-conformance.mjs",
+        "sha256": "a87af12e769804db86f53b38ec5d105f140e74999a84e7d55eecf385418377fc"
+      },
+      {
+        "path": "scripts/sh1-strict-evidence.mjs",
+        "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+      },
+      {
+        "path": "scripts/sh1-strict-runtime-conformance.mjs",
+        "sha256": "a6ff98ba27c458d26761b65dc2ea6ae9ea8042d390981a63a8ec22522ec4647c"
+      },
+      {
+        "path": "scripts/StrictSourceCompile.lean",
+        "sha256": "65629711d2d49795c3bc455bc6d0e85415cade18d8abbe8fe864d67aad0bc217"
+      },
+      {
+        "path": "test/StrictRuntimeReference.lean",
+        "sha256": "3a4ada94e66ce4bc8a18bf0417c2a9660c06e326b4de312c8ee83ba831bda008"
+      },
+      {
+        "path": "docs/selfhost-language/strict/enabled-runtime-contract.json",
+        "sha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89"
+      },
+      {
+        "path": "scripts/sh1-source-snapshot.mjs",
+        "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8"
+      },
+      {
+        "path": "scripts/sh1-seed-manifest.mjs",
+        "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f"
+      },
+      {
+        "path": "scripts/sh1-iterate.mjs",
+        "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8"
+      },
+      {
+        "path": "scripts/sh1-iteration-conformance.mjs",
+        "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4"
+      },
+      {
+        "path": "scripts/sh1-foundation-conformance.mjs",
+        "sha256": "d0c139a4a907ef5e35908379b04d8983ee889218791c8ac7f2361fc080d46f9a"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-foundation-reference.lean",
+        "sha256": "e5293a49180f7f1354284b26a9bf10df27749a8e22e6646bdee62ad29a5a19a9"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-foundation-probe.lean",
+        "sha256": "633a4b0a85cc42533067e0f9b51e5b60d320c44709e5b3f65247b622d0faa819"
+      },
+      {
+        "path": "scripts/sh1-helper-conformance.mjs",
+        "sha256": "412b79ebffc1b65f6d06d5a15b277207cc21df1e1a28e1a8a857c06ee4b1682b"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-helpers-reference.lean",
+        "sha256": "1db8d3fa490d53d7cfc1d1dc03b052f291b7e5a44ecbed8bddcc8ae6101a5909"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-helpers-probe.lean",
+        "sha256": "072e8ed62cf7ac65f60c9c7667eca536359fc478b8caf983187ae3ac4a826cf9"
+      },
+      {
+        "path": "scripts/sh1-generic-erasure-conformance.mjs",
+        "sha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332"
+      },
+      {
+        "path": "test/fixtures/selfhost-sh1-generic-erasure.lean",
+        "sha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5"
+      }
+    ],
+    "sha256": "b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1"
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "typescriptProfile": {
+    "version": "7.0.2",
+    "purpose": "current-emission",
+    "arguments": [
+      "--ignoreConfig"
+    ]
+  },
+  "candidateClaim": "Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.",
+  "selectedSeedBootstrapProven": false,
+  "currentSourceFixedPointProven": false,
+  "strictSourceEnforcement": {
+    "nativeReport": "strict-source-native.json",
+    "sourceConformance": "strict-source/receipt.json",
+    "targetConformance": "strict-target/receipt.json",
+    "runtimeConformance": "strict-runtime/receipt.json",
+    "nativeRuntimeReference": "strict-runtime-reference/reference.json",
+    "fullSourcePreparations": 1,
+    "portableIrChecks": 1,
+    "strictSh1Qualified": false
+  },
+  "sourceGrammar": {
+    "edition": "ps-0.9-r3",
+    "mode": "new-only",
+    "support": "bounded-selfhost-subset",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "canonicalSourceCorrespondence": {
+    "report": "grammar-closure.json",
+    "reportSha256": "677c1d1f261e6540a64c1a58ab5316c5623ed92f8947a812c2b185c26d396a58",
+    "moduleCount": 64
+  },
+  "runtimeIrTyping": {
+    "nativeCurrentSource": {
+      "report": "ir-checker-native/receipt.json",
+      "schemaVersion": 1,
+      "kind": "psc0-native-original-ir-check",
+      "accepted": true,
+      "traversalComplete": true,
+      "visitedSteps": 829139,
+      "expressionCount": 64911,
+      "findingCount": 0,
+      "retainedFindingCount": 0,
+      "omittedFindingDetails": 0,
+      "sameOriginalIrCheckedBeforeEmission": true,
+      "strictSh1Qualified": false
+    },
+    "generatedConformance": {
+      "report": "ir-checker/receipt.json",
+      "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+      "negativeCases": 38,
+      "behavior": {
+        "status": "pass",
+        "observations": 61,
+        "exhaustiveForAllInputs": false,
+        "zeroFieldRecord": {
+          "ownStringFields": 0,
+          "ownBrandSymbols": 1,
+          "inhabited": true
+        },
+        "emptyScrutinee": {
+          "callbackCalls": 1,
+          "propagatedOriginalFailure": true,
+          "noEmptyInhabitantConstructed": true
+        },
+        "letScopeCases": [
+          {
+            "name": "shadowOldScope",
+            "observations": 8
+          },
+          {
+            "name": "shadowWrappedCall",
+            "observations": 8
+          },
+          {
+            "name": "shadowClosure",
+            "observations": 8
+          },
+          {
+            "name": "shadowNestedTail",
+            "observations": 5
+          }
+        ]
+      }
+    },
+    "generatedFullCompilerIrChecked": false,
+    "strictSh1Qualified": false
+  },
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  },
+  "timingsMs": {
+    "total": 324962.12823699997
+  }
+}

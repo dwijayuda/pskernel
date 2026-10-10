@@ -412,3 +412,167 @@ The active branch has extensive formal evidence but incomplete global theorems. 
 - Promote the new V2 kernel only when its accepted proof domain has adequate verified/differential evidence and explicitly documented remaining gaps. Archive/retire the old production semantics at promotion; do not indefinitely maintain two competing authorities.
 
 The existing PR #89 and live proof branch must remain intact. A performance experiment should not rewrite the current proof files or claim that a major schema migration has already closed full consistency.
+
+## 7. Large-scale migration plan: architecture-first, bounded vertical slices
+
+The project should allow major conceptual change, but **not a big-bang unqualified replacement**. The goal is to implement the new architecture family-by-family, with precise retained evidence and no test-specific rule patches.
+
+| Phase | Work | Proof/checking exit gate | Perf/portability exit gate |
+| --- | --- | --- | --- |
+| **M0 — Design freeze and baseline** | Pin active HEAD, list trusted dependencies, recover precise source rule map and selected test corpus | No executable changes; proof obligations and axiom policy written | Reproducible native reference/cached profile, parse vs kernel split |
+| **M1 — Correctness-shaped interface** | Introduce typed KernelFailure, explicit check grades, scope+annotation result carrier and atomic EnvTxn API | Erasure to existing checker results; fixed readings preserve actual observations; no new accepting shortcut | Minimal overhead/no major slowdown; source still builds |
+| **M2 — Compact immutable CoreExpr store** | Add interned DAG behind RawExpr, canonical IDs, checked scratch/permanent lifetime | Round-trip, collision-safe injectivity, scope and scratch-escape invariants | Measured memory/lookup benefit; no claimed selfhost without gate |
+| **M3 — Lazy WHNF and exact values** | Replace eager beta/let reconstruction with closure-backed WHNF; same canonical reduction owner | WHNF erasure/positive-result refinement; all official-compatible reductions and resource outcomes | Meaningful beta/let gain, bounded peak RSS |
+| **M4 — Conversion engine rewrite** | Typed proof-irrel, lazy delta, rigid-spine comparison, eta, recursor and primitive handling; consider explicit work scheduler only if measured | No unsafe Equal; precise accepted DefEq theorem and checked annotation/coherence | Full focused conversion corpus and matched speedup |
+| **M5 — Admission/model integration** | Preserve old checked API, integrate actual declaration model extension, induction and quotient proof | Conditional modeled public acceptance, exact axiom policy; remaining obligations auditable | Fresh pinned Lean 4.35 Init/Std and, eventually, Mathlib |
+| **M6 — Portable self-host & release** | Qualify one source on Lean native and available PSC0-generated JS/Wasm paths; remove obsolete old semantic copy | Source/artifact parity, independent external checking and TCB audit | Exact-version full supported corpus, peak-RSS and throughput targets |
+
+### M0 is mandatory even for an aggressive redesign
+
+A major architecture should be selected on evidence. Profile today’s cost of:
+
+- structural recursive expression equality, hash recursion and multi-level maps;
+- actual memoized shared traversals (the certified fold already exists);
+- beta/let instantiation, de Bruijn lifts and annotated-term reconstruction;
+- higher-order fuel callbacks in `Checker/Knot` and repeated state copying;
+- DefEq source-rule order, repeated infer-only versus checked exposure, local-context cache invalidation;
+- induction and recursor checking, large Nat values, export parsing, GC and host serialization.
+
+Only the top observed costs deserve replacement. If the current recursively boxed RawExpr already benefits greatly from structural sharing, V2 may discover that improving conversion scheduling or binder reading provides more value than switching to tagged IDs.
+
+### M1: do not lose proofs while changing checked contracts
+
+The **first correctness migration** should carry actual annotations and checked/infer-only grade through the existing runtime and prove the result agrees with old execution. Replacing raw expressions and DefEq in the same commit would entangle several proof failures and make source-level diagnosis difficult. Once M1 is stable, the new DAG can be behind an unchanged judgment boundary, making M2 representation proof more mechanical.
+
+### M2–M4: new algorithm can coexist temporarily in tests
+
+During redesign, keep `KernelV1` frozen in test/reference-only code, compare full typed outcomes and resource results with `KernelV2`, and link both to the pinned official Lean oracle. This **does not** require production builds to bundle two semantics. Once V2 has proven and measured acceptability, remove V1 from the runtime import closure.
+
+### M5: do not postpone model correctness forever
+
+The original project’s unfinished joint recursive soundness and fresh constant model-extension work are not solved simply by optimizing memory. Make them explicit phase gates; if runtime implementation advances beyond currently provable model cases, label the status **unverified**, not “model-sound”.
+
+### M6: portable self-host constraints are real
+
+The current PSC0 selected compiler/source reference and host toolchain are separately versioned from the experimental Lean 4.35 kernel. Do **not** assume that Lean 4.35 features such as specialized proof traversals, new packed arrays, `Squash`-dependent extracted algorithms or native pointer tricks are accepted by its bounded self-host language. Protect the future one-source goal using a plain, explicit CoreExpr interface and isolate backend-specific storage behind a narrow module.
+
+Prefer Lean-native 4.35 first for algorithmic evidence. Generate/qualify JS and future Wasm **from the same maintained semantics**, and document any unsupported source feature or trusted native capability. The project must not claim self-host success without the actual current-source compiler qualification.
+
+## 8. Benchmark and conformance plan
+
+### 8.1 Provenance and measurement structure
+
+Every benchmark reports:
+
+~~~text
+active PSKernel branch/commit; V2 branch/commit
+Lean target version and Git SHA; exporter/tool version and schema
+input hash and declaration count, including attempted/declined inputs
+axiom/semantic profiles and resource limits
+native compiler flags, CPU/core count, memory/OS details
+parse/import time versus kernel-only inference/WHNF/DefEq/admission time
+3+ repeated samples, median/variance, cold versus warm
+retired instructions if available, wall time, peak RSS, scratch high-water
+allocation count/bytes, GC cost, cache hit/miss/eviction, work budget
+accepted/rejected/unsupported/resource/internal counts
+proof compile status and exact theorem dependency/assumption inventory
+~~~
+
+Measure unmodified V1 and experimental V2 on the **same runner, corpus, exporter and semantic policy**. Arena virtual CPU time (instructions normalized at 6B/s) is not actual elapsed time. Upstream Rust benchmark speedups are **not forecasts** for a Lean-native or generated-JS build.
+
+### 8.2 Required corpora and systematic corner cases
+
+1. Existing cheap tutorial, raw scope/inference, and Arena negative corpus.
+2. Pinned fresh Lean 4.35 Prelude and focused Std/Init imports, with full imports reserved for milestones.
+3. Large beta/let ladders; variable capture and binder-shift cascades.
+4. Same rigid-head arguments versus expensive unfolding; projection order and guarded proof irrelevance.
+5. Repeated conversion subproblems; memory reuse and cache eviction.
+6. Symbolic/max/imax universes including zero versus positive regime and annotation coherence.
+7. Safe/unsafe/partial definitions and malformed or untrusted recursor metadata.
+8. Ordinary, mutual and nested inductives, positivity, projections, quotients.
+9. Explicit host resources, unknown exporter version, oversized numeral, illegal type/level arity and cancellation.
+10. Reflective `decide` / large computational proofs and peak heap behavior.
+11. Full pinned Init, Std, Mathlib **only on a separately budgeted acceptance milestone**.
+
+Test outcomes must distinguish (a) disagreement with official behavior, (b) restricted verified axiom mode decline, (c) resource exhaustion, and (d) actual false acceptance. An internal fallback should never make a foreign checker’s success count as kernel acceptance.
+
+### 8.3 Decision thresholds (proposed targets; no measurement performed)
+
+| Area | V2 **proposal**, not a measured fact |
+| --- | --- |
+| Semantic correctness | Zero known-invalid accepts; typed failures accurate; all pinned focused supported checks match official result |
+| Kernel-only throughput | Seek at least **2x** improvement on beta/let/convert-intensive hot workloads versus frozen V1 |
+| General library speed | Target a meaningful sustained gain, e.g. **≥1.5x on a pinned Init/Std corpus**, after coverage is stable |
+| Memory | Target at least **30% lower peak or retained heap** on a measured allocation-heavy corpus, if compact handles are justified |
+| Source smallness | Prefer reduced *net* trusted semantic LOC and imported runtime primitives; no unconditional LOC number |
+| Formal status | Proved exact representation/refinement for all **promoted** positive optimizations; explicit unfinished global theorems |
+| Self-host | Only announce backend support after exact source/backend fixed-point or designated canonical qualification passes |
+| Interop | Official Lean exports and source versions pinned; no silent conversion of old Lean 4.34 assumptions |
+
+If the redesign fails to achieve improvements sufficient to offset code/proof burden, fall back to incremental V1 optimization. Failure to hit an aspirational speed target does not authorize changing semantic acceptance criteria.
+
+## 9. Size and implementation cost — uncertainty-aware
+
+**Current observations:** 92 production `.lean` source modules containing about 0.94 MB (Git tree only), plus 182 formal-metatheory `.lean` files containing about 3.18 MB (not runtime TCB). These are not a valid measured LOC or compile time baseline. Tests, host tooling and external runtime dependencies are excluded.
+
+**Pure planning envelopes, not estimates supported by prototype data:**
+
+| Work family | Illustrative gross new semantic LOC | Opportunity for deleting/replacing old code | Main uncertainty |
+| --- | ---: | --- | --- |
+| M1 typed checking/scope/error contracts | 600–2,000 | Obsolete raw-state adapters and string errors | Amount of recursive checker signature churn |
+| M2 DAG and storage | 1,000–3,500 | Some repeated lookup/hash and substitution scaffolding | Lean native data layout vs portable source |
+| M3 lazy closure evaluator | 1,500–4,500 | Eager instantiation and reconstruction helpers | Exact Lean recursor/eta behavior |
+| M4 typed DefEq engine | 1,500–5,000 | Current callback wrapper/shortcut family | Proof-irrelevance and unfold scheduling |
+| M5–M6 admission/model/backend | Highly dependent on proof completion | Legacy checking/storage modules | Very large mathematical/portability scope |
+
+**Do not sum these bands and call the result “estimated new LOC”.** Some modules overlap; a true prototype may reuse far more existing code, and important existing proofs may require major revision. Produce an exact count of **net maintained source lines and transitive trusted dependencies** at each pilot gate.
+
+The most expensive component is likely **the correctness bridge**, not writing the first compact DAG. The current 182 metatheory modules mean a big-bang checker rewrite has a high validation cost. Using incremental representation erasure and theorem-level interface stability may be cheaper than patching each old proof after the rewrite, but we need actual staged experiment results to confirm.
+
+## 10. Architecture review criteria
+
+| Criterion | Desired V2 result | What would make V2 worse |
+| --- | --- | --- |
+| Soundness/fidelity | Real public checker with explicit guarded valid results, mapped to Lean 4.35 | Unsupported positive equality shortcuts |
+| Trusted computing base | One small inspected runtime authority, explicit native caps | Duplicated Rust/JS kernel or hidden FFI |
+| Adversarial malformed-input robustness | Checked bounds/scope/levels/recursors, atomic env and typed errors | Untrusted IDs or pointers accepted as proof |
+| Source smallness/extendibility | Minimal logical rules, nonsemantic plugins | Large framework with custom proof rules |
+| Architecture | Distinct raw decode, semantic core, evaluation, admission and proof | Circular module ownership and parallel runtimes |
+| Independent evidence | Official replay and separately implemented checker audits | Mistaking checker majority for theorem proof |
+| Performance/resource behavior | Matched kernel-only gains, bounded heap/fuel, deterministic failures | Faster parser only, hidden out-of-memory acceptance |
+| Portability/interoperability | One source, pinned exports, verified native/JS/Wasm profiles | Native-only unqualified pointers |
+| Longevity/auditability | Versioned rule matrix, per-phase dependency/TCB manifests | Silent changing semantics between Lean releases |
+| Formal assurance | Spec/model + executable refinement + constructive fresh model | Theorem about an unused spec or axiom-smuggled model |
+| Self-host/bootstrap | Preserve canonical self-host target with source feature gates | Announcing self-host without generated qualification |
+| Extension soundness security | Untrusted extensions cannot mutate checker/admission or axiom policy | Plugin-supplied “fast Equal” accepted directly |
+
+## 11. Non-negotiable decision and stop rules
+
+1. Lean `4.35.0-rc4` is the exact target until separately retargeted. Backward compatibility with obsolete 4.34 trusted reducers is not a hidden feature requirement.
+2. A real **major** architectural improvement may replace internal data structures and algorithms; old `Checker/Knot` is an oracle/compatibility bridge, not a sacred end-state.
+3. **No second independent production checker**, unchecked shortcut, foreign plugin trust rule, silent axiom import, `sorry` or new consistency assumption.
+4. Prefer **proof-guided vertical slices** over test-specific patching and big-bang rewriting. Keep accepted cases and rejected malformed cases.
+5. No phase may claim full soundness or Lean compatibility while public model/refinement cases, Init/Std/Mathlib, or portable backend qualification remain open.
+6. GitHub branch history and active proof PR are preserved. Re-read live HEAD before any future code migration; do not force-update concurrent work.
+7. If source simplification and performance do not improve jointly, prefer the cleaner provable design, but do not trade genuine compatibility for aesthetics.
+8. Stop/revert a candidate when typed scope/annotation coherence, exact positive equality, whole-transaction admission or resources become harder to justify without a measured benefit.
+
+## 12. Recommended first executable task
+
+**Build a research-only M0+M1 vertical slice**, not the entire new kernel. Use actual pinned source from the current 4.35 branch, independently validate the full supported small corpus, and measure:
+
+1. An optional exact interned CoreExpr representation round-tripping the first few expression constructors.
+2. An explicit checked/infer-only result carrier with actual stored observation provenance.
+3. A single small beta/let closure WHNF experiment (not yet authoritative for declaration acceptance).
+4. Exact differential comparison with original checker and official Lean 4.35 on a bounded test set.
+5. Source-line, proof-obligation, CPU and memory deltas that decide if an M2/M3 full migration has positive value.
+
+**The first promotion gate should demand real exact erasure/grade evidence, not a headline speedup.** If this slice is clean and faster, expand to Pi/lambda/application and all expressions; if not, preserve V1 and optimize its existing certified sharing.
+
+## 13. Final recommendation
+
+**Choose V2 architecture B: an internal compact immutable expression DAG + provenance-carrying checked results + lazy closure evaluation + Lean-compatible typed conversion + atomic modeled admission, implemented as a single kernel with explicit formal refinement.**
+
+Keep the old source as a temporary frozen oracle, do not overwrite ongoing proof work, and earn promotion through bounded semantic and performance gates. A full rewrite of every module before validating the representation and formal contract would jeopardize correctness, smallness and self-hostability.
+
+This is a **design commit only**. No V2 kernel behavior, speedup, proof of full consistency, complete Mathlib compatibility or self-host qualification is claimed.

@@ -28,7 +28,7 @@ milestones and exact completion claim.
 The binder/function layer now proves hereditary validity transport and local
 model bridges from actual reference forall, checked application and checked
 lambda executions. The structural-comparison coherence premise, recursive
-calls and justification of lambda regimes remain explicit.
+calls and global annotation coherence remain explicit.
 A checked empty-domain counterexample shows that even both hereditary validity
 predicates do not establish coherent interpretations of identical raw syntax.
 
@@ -42,7 +42,7 @@ positive-universe test exactly.
 
 These operations are assurance infrastructure. Public raw-expression acceptance
 does not yet run the extra guard or produce validated annotations. Recursive
-typing/reduction/equality, justification of lambda regimes and full admission
+typing/reduction/equality, global annotation coherence and full admission
 soundness remain open. No new axiom or stronger foundation assumption was added.
 
 Lambda inference now closes its recursively inferred body type directly. The
@@ -56,9 +56,25 @@ normalization and ordinary WHNF/beta reduction are unchanged.
 
 This removes one operation and its proof obligation. It does not establish
 checked annotation provenance, recursive checking soundness, or consistency of
-the full kernel. The selected lambda regime still needs justification from
-actual checking evidence. No new axiom or stronger foundation assumption was
+the full kernel. The new checked lambda bridge derives its level from actual codomain-sort
+visits; their recursive soundness and global annotation coherence remain open. No new axiom or stronger foundation assumption was
 added.
+
+Checked lambda inference now obtains its codomain sort from an additional
+infer-only visit to the actual body type followed by sort exposure. The
+reference lambda trace records these calls. The new
+`lambda_trace_checked_reading` theorem fixes that actual level on both the
+lambda and its returned type and proves typing plus their four hereditary
+validity facts under the local recursive obligations. It no longer asks for an
+arbitrary lambda level or a separate proof-valued-fibre premise.
+
+This certification runs in the shared checked lambda rule in both cache modes.
+Infer-only retains its validity precondition, and cached hits retain their
+separate cache invariant. Non-resource certification failures decline;
+resource failures keep their resource classification. Globally coherent
+annotations through raw comparison, joint recursive soundness, and full safe
+admission remain open. The public API does not yet return or carry a complete
+validated annotated expression.
 
 Historical 4.34 reference artifacts (not current certification):
 

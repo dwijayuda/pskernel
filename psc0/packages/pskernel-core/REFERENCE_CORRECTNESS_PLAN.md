@@ -1,47 +1,39 @@
 # Reference checker and the full correctness target
 
-Status: reference cache isolation, checked annotation guards, direct lambda-type
-model bridges and hereditary validity transport validated. Public annotation provenance,
+Status: reference cache isolation, checked annotation guards, execution-derived
+lambda codomain readings and hereditary validity transport validated. Public annotation provenance,
 full-kernel metatheory and relative consistency remain unfinished.
 
 ## Validated evidence
 
-[Proof job 114214647274](https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274) at
-`52eb8e72c2f20b5328cbf531a6be119947efb946` passed **248 build jobs**, all
-**84 companion files** and the **219-declaration** semantic axiom audit.
-The **134-module** dependency closure contains only the 12 allowed Con Leche
-pure-math modules, with zero legacy judgment or production assurance imports.
-The reference-policy audit checked **1,821 definitions** with zero cached-default
-fallbacks. The overall workflow failed only its separate baseline-diagnostic
-setup; this proof job passed. The diagnostic was rerun independently.
+[Proof job 114221834109](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109)
+at `2baa33e165f914d14f635d68934293e3fcea89ed` passed **249 build jobs**,
+all **84 companion files** and the **221-declaration** semantic axiom audit.
+The **135-module** dependency closure contains only the 12 allowed Con Leche
+pure-math modules, zero legacy judgment imports and zero production assurance
+imports. The reference-policy audit checked **1,824 definitions** with zero
+cached-default fallbacks. The complete final audit workflow passed.
 
-[Native tests and focused runtime checks](https://github.com/dwijayuda/pskernel/actions/runs/38051925196)
-at `2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf` passed the existing native
-suites plus lambda raw-type, conversion and admission tests in all four
-cache-mode/sort-regime combinations. Both Arena modes passed **141/141
-tutorial and 18/18 bug cases**, with zero declines. The binary SHA-256 was
-`51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d`.
+[Native and conformance run 38054667785](https://github.com/dwijayuda/pskernel/actions/runs/38054667785)
+at `e600c3ac862e68009511f778203758415838a9df` passed the native suites,
+lambda type/conversion/admission tests and the new checked-only certification,
+decline and resource-classification cases. Both Arena modes passed
+**141/141 tutorial and 18/18 bug cases**, with zero declines.
 
-Fresh exact 4.35 Prelude, UTF8, XOR and Int64 closures all passed in cached
-mode. Reference mode passed Prelude, UTF8 and XOR, then **timed out on Int64
-at 180 seconds (exit 124)**. That is an unresolved check, not acceptance or
-a logical rejection. The runtime workflow therefore failed overall; its
-native/Arena jobs passed. Its old lambda companion-proof failure was repaired
-in the proof job above. No runtime source changed between the native-tested
-revision and the final proof revision.
+Fresh exact 4.35 Prelude/UTF8/XOR/Int64 closures all passed in cached mode.
+Reference mode passed Prelude/UTF8/XOR, then **timed out on Int64 at 180 seconds,
+exit 124**. That check remains unresolved; the runtime workflow failed overall
+on this timeout. Full Init/Std/Mathlib were not rerun, and their earlier
+qualification gaps remain open. No general compatibility, mode-equivalence or
+performance claim follows from these focused checks.
 
-Full Init/Std/Mathlib were not rerun. Their earlier timeouts and missing
-qualification remain open. Small-suite success does not prove cached/reference
-equivalence, universal Lean compatibility, or full-kernel soundness.
-
-The [controlled Int64 comparison](https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947)
-built checkpoint `5e3fa749` and candidate `0aa3d403` on the same runner and
-fed both the identical export. **Both reference checks timed out at 180
-seconds**, exit 124. Their binary hashes match the recorded pre-change and
-new runtime binaries. The timeout therefore predates the lambda change; this
-bounded experiment does not establish equal performance or acceptance.
-The diagnostic job is green because it preserved both timeout results as data,
-not because Int64 passed.
+The final source adds an explicit local type annotation required by PSC0's
+authoring guide. Its [cloud rebuild](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834301)
+matched the runtime-tested binary's SHA-256 exactly:
+`dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
+The final audit above therefore applies to the final typed source, with
+executable evidence tied to the matching binary. Generated PSC0 qualification
+remains separate.
 
 The earlier cache-isolation and executable receipts remain historical:
 
@@ -68,6 +60,10 @@ The correctness workflow runs proofs on its push trigger. Its manual
 Arena modes plus focused exact Lean 4.35 exports. Full-corpus performance is not a gate for this milestone.
 
 ## Recovery point
+
+Before adding checked lambda codomain certification, checkpoint
+`checkpoint/pskernel-core-before-lambda-sort-evidence-20261010` was created at
+`ffd56473b9c42ff641a29e94094920e3322c4fef`.
 
 Before simplifying lambda inference, the recovery branch
 `checkpoint/pskernel-core-before-lambda-type-simplification-20261010` was created
@@ -98,9 +94,25 @@ normalization and ordinary WHNF/beta reduction are unchanged.
 
 This removes one operation and its proof obligation. It does not establish
 checked annotation provenance, recursive checking soundness, or consistency of
-the full kernel. The selected lambda regime still needs justification from
-actual checking evidence. No new axiom or stronger foundation assumption was
+the full kernel. The new checked lambda bridge derives its level from actual codomain-sort
+visits; their recursive soundness and global annotation coherence remain open. No new axiom or stronger foundation assumption was
 added.
+
+Checked lambda inference now obtains its codomain sort from an additional
+infer-only visit to the actual body type followed by sort exposure. The
+reference lambda trace records these calls. The new
+`lambda_trace_checked_reading` theorem fixes that actual level on both the
+lambda and its returned type and proves typing plus their four hereditary
+validity facts under the local recursive obligations. It no longer asks for an
+arbitrary lambda level or a separate proof-valued-fibre premise.
+
+This certification runs in the shared checked lambda rule in both cache modes.
+Infer-only retains its validity precondition, and cached hits retain their
+separate cache invariant. Non-resource certification failures decline;
+resource failures keep their resource classification. Globally coherent
+annotations through raw comparison, joint recursive soundness, and full safe
+admission remain open. The public API does not yet return or carry a complete
+validated annotated expression.
 
 ## Architectural decision
 
@@ -192,8 +204,9 @@ No upstream checker or acceptance theorem is used as a PSKernel proof.
 2. **Validated semantic readings — in progress.** Hereditary annotation/function
    transport and local forall/application/lambda execution bridges are proved.
    Symbolic annotation agreement now has an executable exact decision procedure,
-   semantic soundness and actual sort-visit bridges. The public checker does not
-   yet invoke this guard or produce validated annotation readings.
+   semantic soundness and actual sort-visit bridges. The checked lambda rule now computes its codomain sort, and its model bridge
+   chooses that actual level. The public raw comparator still does not invoke
+   the agreement guard or carry globally coherent validated readings.
    Connect actual checked terms to coherent
    Prop/Type binder annotations under all legal universe substitutions. Establish
    frame/freshness and hereditary validity where infer-only operations need them.
@@ -248,7 +261,7 @@ positive-universe test exactly.
 
 These operations are assurance infrastructure. Public raw-expression acceptance
 does not yet run the extra guard or produce validated annotations. Recursive
-typing/reduction/equality, justification of lambda regimes and full admission
+typing/reduction/equality, global annotation coherence and full admission
 soundness remain open. No new axiom or stronger foundation assumption was added.
 
 The next task is to derive coherent readings from checker visits across the
@@ -259,14 +272,16 @@ free-variable context. Existence of an arbitrary positive annotation is
 insufficient: it would make the proof-regime premise vacuous while failing to
 justify later comparison and proof-irrelevance steps. In particular, discharge the application bridge's
 structural `RegimesAgree` premise at its actual accepting path and the lambda
-bridge's regime premise. The extra lambda body-type reduction was retired;
-its preservation premise is no longer part of the current bridge. `checkedExprEq_sound` now
+bridge's recursive type-of-body-type obligations at its new codomain-sort
+visit. The selected level is now fixed by execution in
+`lambda_trace_checked_reading`. The extra lambda body-type reduction was
+retired; its preservation premise is no longer part of the current bridge. `checkedExprEq_sound` now
 removes the former semantic premise when its executable guard succeeds, but the
 public raw comparator's success alone does not imply that guard succeeded.
-Do not infer a body-sort visit that lambda inference never performs, or assume
-every inferred type has a sort. If explicit runtime
-annotation validation is needed, it must be specified, proved, and checked
-against the pinned Lean corpus with any declines visible.
+Use the actual checked lambda codomain visit, rather than assuming every
+inferred type has a sort. Infer-only still needs its validity preconditions.
+Extending annotation validation across other operations must keep the exact
+execution, failure/decline classification, and pinned Lean conformance visible.
 
 The economical claim is successful-checking soundness and relative consistency.
 Strong normalization, totality of every equality run, equality completeness,

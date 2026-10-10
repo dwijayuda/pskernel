@@ -2,7 +2,89 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
+## Checked lambda codomain evidence — 2026-10-10
+
+Checked lambda inference now re-infers its returned body type at the infer-only
+grade, then exposes that result as a sort before returning the function type.
+This is part of the shared checked lambda rule in both cache modes. The
+reference specialization cannot bypass it through a cache hit. Infer-only
+lambda inference retains its separate validity precondition; cached hits still
+require the separate cache invariant.
+
+The new visit computes the information that the prior local proof had to take
+as an arbitrary selected regime and a proof-valued-fibre premise. It does not
+assume that every inferred type always has a sort. A failed extra certification
+declines conservatively, while resource failures preserve their existing
+resource-exhaustion classification. Scope exit uses the state after the new
+visit and retains the existing parent-cache restoration discipline.
+
+`LambdaTrace` now records both the actual inference of the body type and its
+sort exposure, including their contexts, states and returned level.
+`SemanticLambdaCodomain.lean` derives the codomain's set membership from those
+visits. Its `lambda_trace_checked_reading` theorem fixes **the same concrete
+execution-derived level** on the lambda and its returned function type and
+establishes their exact raw erasures, typing, and all four hereditary
+annotation/function validity facts. It has no caller-chosen lambda level and no
+separate proof-valued-fibre hypothesis.
+
+The remaining local premises are the soundness/validity facts at recorded
+recursive calls and the scope/freshness invariant. These have not yet been
+discharged by a joint checker induction. The runtime does not yet carry
+validated annotated expressions through every operation, and the raw
+structural-equality path does not run the annotation-agreement guard. This
+stage therefore does not establish global annotation coherence or full-kernel
+metatheory/consistency.
+
+The design follows the explicit codomain-sort visit in
+[pinned Con Leche](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Kernel/Core.lean#L1216).
+Its source rejects assuming universal inferred-type validity. PSKernel currently
+performs this extra check at every checked lambda, without Con Leche's
+annotation-carrying chain optimization. The
+[pinned Lean implementation](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/kernel/type_checker.cpp#L125)
+does not perform this certification visit; stricter behavior and additional
+work are real compatibility/performance boundaries and must be reported.
+
+Before changing production, checkpoint
+`checkpoint/pskernel-core-before-lambda-sort-evidence-20261010` was created at
+`ffd56473b9c42ff641a29e94094920e3322c4fef`. No new axiom or stronger foundation
+assumption is introduced; all mathematical foundation assumptions remain
+explicit. Full recursive checking, admission, allowed-axiom models, public
+statement preservation and generated PSC0 qualification remain open.
+
+[Proof job 114221834109](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109)
+at `2baa33e165f914d14f635d68934293e3fcea89ed` passed **249 build jobs**,
+all **84 companion files** and the **221-declaration** semantic axiom audit.
+The **135-module** dependency closure contains only the 12 allowed Con Leche
+pure-math modules, zero legacy judgment imports and zero production assurance
+imports. The reference-policy audit checked **1,824 definitions** with zero
+cached-default fallbacks. The complete final audit workflow passed.
+
+[Native and conformance run 38054667785](https://github.com/dwijayuda/pskernel/actions/runs/38054667785)
+at `e600c3ac862e68009511f778203758415838a9df` passed the native suites,
+lambda type/conversion/admission tests and the new checked-only certification,
+decline and resource-classification cases. Both Arena modes passed
+**141/141 tutorial and 18/18 bug cases**, with zero declines.
+
+Fresh exact 4.35 Prelude/UTF8/XOR/Int64 closures all passed in cached mode.
+Reference mode passed Prelude/UTF8/XOR, then **timed out on Int64 at 180 seconds,
+exit 124**. That check remains unresolved; the runtime workflow failed overall
+on this timeout. Full Init/Std/Mathlib were not rerun, and their earlier
+qualification gaps remain open. No general compatibility, mode-equivalence or
+performance claim follows from these focused checks.
+
+The final source adds an explicit local type annotation required by PSC0's
+authoring guide. Its [cloud rebuild](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834301)
+matched the runtime-tested binary's SHA-256 exactly:
+`dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
+The final audit above therefore applies to the final typed source, with
+executable evidence tied to the matching binary. Generated PSC0 qualification
+remains separate.
+
 ## Direct lambda types and validity transport — 2026-10-10
+
+Historical receipt: the subsequently added checked codomain-sort visit is
+documented above. The earlier missing-visit statements below describe the
+pre-certification revision.
 
 The shared production lambda branch now closes the body type returned by its
 recursive inference directly. Previously it first applied

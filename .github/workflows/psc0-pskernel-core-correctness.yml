@@ -28,7 +28,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate typed codomain evidence and exact native identity
+      - name: Validate execution-derived lambda codomain evidence
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail
@@ -176,23 +176,3 @@ jobs:
         with:
           name: focused-435-${{ matrix.mode }}
           path: exporter/*.ndjson
-  binary_identity:
-    if: github.event_name == 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install exact Lean
-        run: |
-          set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Build and compare the tested native identity
-        working-directory: psc0/packages/pskernel-core
-        run: |
-          set -euo pipefail
-          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
-          lake build psc_kernel_core_arena
-          sha256sum .lake/build/bin/psc_kernel_core_arena
-          echo 'dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6  .lake/build/bin/psc_kernel_core_arena' | sha256sum --check --strict
-          echo 'PSKERNEL_CODOMAIN_BINARY_IDENTITY: PASS identical to native/Arena/fresh runtime candidate e600c3ac'

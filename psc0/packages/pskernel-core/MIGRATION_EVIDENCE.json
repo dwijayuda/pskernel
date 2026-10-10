@@ -4135,5 +4135,40 @@
     ],
     "fullKernelConsistencyProved": false,
     "fullInitStdMathlibSkipped": true
+  },
+  "referenceSessionFVarStage": {
+    "validatedCheckedSource": "02e7f7295d6fdc721ac2365203d223ca76d9d60b",
+    "validatedCheckedRun": 38083664164,
+    "validatedCheckedJob": 114305561682,
+    "validatedCheckedStatus": "passed",
+    "validatedCheckedMetatheory": {
+      "buildJobs": 281,
+      "focusedBuildJobs": 236,
+      "axiomDeclarations": 363,
+      "companionFiles": 84,
+      "closureModules": 169,
+      "approvedPureMathModules": 12,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "nativeExecutables": 7
+    },
+    "companion435Run": 38083664157,
+    "companion435Conclusion": "success",
+    "latestUnvalidatedSource": "a0b83ee8018db473e719f10303500d9e5725c135",
+    "latestAuditCommit": "ebe24d510ec29981b17591b89d601ae835763f45",
+    "latestAuditRun": 38084042997,
+    "latestAuditStatus": "pending-at-doc-checkpoint",
+    "scope": [
+      "reference-mode psKernelSessionCheck fvar exact stored type/state",
+      "fixed stored annotation CheckedReading given concrete local-model and erasure evidence",
+      "initial checker session rejects unbound fvar",
+      "infer-only grade proof committed but its audit is pending"
+    ],
+    "publicAcceptanceSoundnessProved": false,
+    "fullKernelRelativeConsistencyProved": false,
+    "noNewCustomAxioms": true,
+    "auditQualification": "Prior first-grade audit does not validate later infer-only additions; full Init/Std/Mathlib and profiling are intentionally deferred."
   }
 }

@@ -1,5 +1,47 @@
 # Reference checker and the full correctness target
 
+## Concrete public-session FVar typing — October 11, 2026
+
+New proof module
+[`SemanticReferenceSessionFVar.lean`](metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSessionFVar.lean)
+follows the actual `psKernelSessionCheck` through Checker/Knot and the
+cache-disabled shared inference core. It recovers the exact **first stored**
+local type and unchanged state, then derives `CheckedReading` for the
+**same stored annotated reading** under explicit `eraseLocalContext` and
+`ModelsLocalContext` witnesses. The actual initially empty public
+checker session cannot successfully check an unbound free variable.
+There is no independently guessed annotation, substitute checker,
+new custom axiom or `sorry`.
+
+**Validated checked grade:** source
+[`02e7f729`](https://github.com/dwijayuda/pskernel/commit/02e7f7295d6fdc721ac2365203d223ca76d9d60b),
+[focused run 38083664164](https://github.com/dwijayuda/pskernel/actions/runs/38083664164)
+passed **281 build jobs (236 focused), 363-declaration semantic axiom
+audit, 169 model dependency modules (12 approved Con Leche pure math,
+zero checker-assurance/legacy imports), 1,840 reference definitions with
+zero cached fallbacks, all 84 companion-proof files and all seven native
+regression executables**. Separate Lean 4.35
+[run 38083664157](https://github.com/dwijayuda/pskernel/actions/runs/38083664157)
+passed the executed build/proof/tutorial/bug/focused gates; full corpora,
+profiling and Mathlib were correctly skipped.
+
+**Next same-module source**:
+[`a0b83ee8`](https://github.com/dwijayuda/pskernel/commit/a0b83ee8018db473e719f10303500d9e5725c135)
+also transports the same selected stored reading through the actual
+**infer-only** session grade; the focused audit trigger is
+[`ebe24d51`](https://github.com/dwijayuda/pskernel/commit/ebe24d510ec29981b17591b89d601ae835763f45)
+at [run 38084042997](https://github.com/dwijayuda/pskernel/actions/runs/38084042997).
+That later source is **not claimed validated** until its completed job/log
+is inspected. No new executable checker behavior is introduced.
+
+**Exact soundness boundary:** This closes only concrete fvar base cases
+conditional on the stored local-context model. The global mutually
+recursive proof establishing/preserving those models and identical
+annotation provenance through application, binders, let, WHNF and DefEq,
+theorem/definition/inductive/quotient admission, modeled-axiom policy
+and the public relative-consistency theorem remain open.
+
+
 ## Proof-first model milestone — verified October 11, 2026
 
 **Updated verification (final proof-only source):** [`902f902b`](https://github.com/dwijayuda/pskernel/commit/902f902b96361a8b14943b02bef503671893b3c0) passed [focused cloud audit 38076656535](https://github.com/dwijayuda/pskernel/actions/runs/38076656535), job 114284940996: **269 build jobs (224 focused), 334 explicitly axiom-audited semantic declarations, 84 companion proof files, 155 dependency modules** (12 Con Leche pinned pure-math, zero production-assurance/legacy-judgment imports), **1,840 audited reference definitions with zero cached fallbacks**, and all **seven native test executables**. Separate binary/Arena/fresh-export jobs were skipped. The prior attempts 38076107666, 38076280819 and 38076396352 were *failed revisions* fixed at the final source; these remain in the historical log.

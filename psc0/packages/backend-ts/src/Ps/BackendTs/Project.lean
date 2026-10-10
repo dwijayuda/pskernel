@@ -171,9 +171,9 @@ def psTsProjectBuildOpaqueTypes
         let used4 := List.cons pack.name used3;
         let unpack := psTsFreshInternal used4 "__ps$opaque$" pack.nextIndex;
         let names := [brand.name, inputs.name, outputs.name, pack.name, unpack.name];
-        let distinct : String -> Bool :=
-          fun (name : String) => if psErasureStringInList state.used name then false else true;
-        let conflict := psListAny (fun (name : String) => if distinct name then false else true) names;
+        let conflicts : String -> Bool :=
+          fun (name : String) => psErasureStringInList state.used name;
+        let conflict := psListAny conflicts names;
         if if conflict then true else if psTsProjectNamesDistinct names then false else true then
           Except.error (PsCompilerCheckedTypeScriptProjectError.abi "opaque name allocation")
         else
@@ -419,9 +419,10 @@ def psTsProjectEmitValues
             | Except.ok tail => Except.ok (List.cons printed tail)
 
 def psTsProjectBindingJson (binding : PsTsProjectBinding) : String :=
+  let kind := if binding.typeOnly then "type" else "value";
   psJsonObject
     [(Prod.mk "binding" (psJsonQuote binding.binding)),
-     (Prod.mk "kind" (psJsonQuote (if binding.typeOnly then "type" else "value"))),
+     (Prod.mk "kind" (psJsonQuote kind)),
      (Prod.mk "name" (psJsonQuote (psNameToString binding.name)))]
 
 def psTsProjectOwnerExportsJson (sourceId : String)

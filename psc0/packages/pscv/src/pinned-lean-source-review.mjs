@@ -26,6 +26,16 @@ const exact=(x,keys)=>x!==null&&typeof x==='object'&&
  !Array.isArray(x)&&Object.getPrototypeOf(x)===Object.prototype&&
  Object.keys(x).length===keys.length&&keys.every(k=>Object.hasOwn(x,k));
 
+
+/** Lexical candidates only. Generated/anonymously named declarations have no hit. */
+export function literalInstanceLineCandidates(text,name) {
+ if(typeof text!=='string'||typeof name!=='string'||name.length>100)
+  fail('LOCATOR_ARGUMENTS');
+ const escaped=name.replace(/[.*+?^${}()|[\]\\]/gu,'\\export function reviewPinnedLeanSource(');
+ const expression=new RegExp('^\\s*instance\\s+'+escaped+'(?=\\s|\\[|:|\\()','u');
+ return text.split('\n').flatMap((line,i)=>expression.test(line)?[i+1]:[]);
+}
+
 export function reviewPinnedLeanSource({typedDeclarations,upstreamCommit,sourceFiles}) {
  if(typedDeclarations?.identitySha256!==
     '8246970bdb3a79da9879bca1b191c5ddcd552589a54e4ef11a33cca6447925c5'||
@@ -49,12 +59,7 @@ export function reviewPinnedLeanSource({typedDeclarations,upstreamCommit,sourceF
   const module=byModule.get(selected.importedModule);
   if(!module||typeof selected.name!=='string'||selected.name.length>100)
     fail('UNMAPPED_IMPORTED_MODULE');
-  const escaped=selected.name.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&');
-  const expression=new RegExp('^\\s*instance\\s+'+escaped+'(?=\\s|\\[|:|\\()','u');
-  const matches=[];
-  for(const [i,line] of module.sourceText.split('\n').entries()){
-   if(expression.test(line))matches.push(i+1);
-  }
+  const matches=literalInstanceLineCandidates(module.sourceText,selected.name);
   if(matches.length>1)fail('AMBIGUOUS_LEXICAL_DECLARATION');
   return {
    importedConstant:selected.name,

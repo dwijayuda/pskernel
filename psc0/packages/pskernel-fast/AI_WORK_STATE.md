@@ -97,3 +97,15 @@ G4 cloud CI must pass for the exact new source before promotion.
 ### G4 initial cloud result — failed test harness construction, retained
 
 [Run 38095097366](https://github.com/dwijayuda/pskernel/actions/runs/38095097366), source `62a442660fc51079d384517779622f280650f3e6`, failed compiling `Main.lean`: one lambda fixture supplied three of four required fields; its binder info was missing. All G4 implementation modules (`Substitution` and `Quote`) compiled in that run. Added the missing `BinderInfo.default` argument without changing evaluator rules. No G4 test outcome may be claimed before the replacement run completes.
+
+## G4 verified (11 October 2026)
+
+[Run 38095187930](https://github.com/dwijayuda/pskernel/actions/runs/38095187930), source `8db99be379ffe355477c0f559c85033e51897be3`, job `114339535847`: 16 Lake build jobs succeeded and the closed beta/let reference-versus-closure agreement corpus passed. Earlier [run 38095097366](https://github.com/dwijayuda/pskernel/actions/runs/38095097366) failed because a test lambda fixture omitted the required binder info field; the implementation modules compiled, and the fixture was corrected without changing evaluator behavior.
+
+## G5 conservative closed typed fragment — candidate, not yet qualified
+
+New `PSKernelFast/TinyTyping.lean` implements conservative **checked-only** inference for a tiny Lean-like kernel fragment: `Sort`, explicit `Pi`, lambda, application, let and transparent metadata, with bvar scope handling, declared universe parameter checks and type-match tests using exact raw syntax after **beta/zeta WHNF only**. It rejects constants, inductives, quotients, literals, projections, free/metavariables, unsupported equality and declaration admission.
+
+This is an intentionally **incomplete checker**, not full Lean DefEq, not a proof kernel/provider and not a formal soundness theorem. Positive results are still experimental and must not grant actual declaration admission. Its first tests check Sort universe elevation, dependent identity, application, let, wrong domain, undeclared levels, budget and unsupported constants.
+
+Cloud CI must pass the exact source before claiming G5 compiled/tests green.

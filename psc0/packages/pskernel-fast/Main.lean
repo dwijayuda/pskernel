@@ -1,4 +1,5 @@
 import PSKernelFast.Quote
+import PSKernelFast.TinyTyping
 
 open PSKernelFast
 
@@ -166,4 +167,66 @@ def main : IO Unit := do
   | .error .reductionBudget => pure ()
   | _ => throw (IO.userError "reference WHNF ignored zero fuel")
 
-  IO.println "PSKernel-Fast G4: two beta/let evaluators agreed on bounded closed raw corpus (NOT Lean DefEq)"
+  let sort0 : RawExpr := .sort .zero
+  let sort1 : RawExpr := .sort (.succ .zero)
+  let sort2 : RawExpr := .sort (.succ (.succ .zero))
+  let typeIdentity : RawExpr := .lam x sort1 (.bvar 0) .default
+  match tinyInferClosed 128 [] sort0 with
+  | .ok typeResult => check (typeResult == sort1) "Sort 0 must have type Sort 1"
+  | .error err => throw (IO.userError s!"Sort 0 inference failed: {repr err}")
+  match tinyInferClosed 128 [] typeIdentity with
+  | .ok (.pi _ dom codomain _) =>
+      check (dom == sort1 && codomain == sort1)
+        "Lambda type has incorrect Pi domain/codomain"
+  | result => throw (IO.userError s!"lambda typing unexpected: {repr result}")
+
+  let appliedIdentity : RawExpr := .app typeIdentity sort0
+  match tinyInferClosed 128 [] appliedIdentity with
+  | .ok inferred =>
+      check (inferred == sort1) "identity application should have type Sort 1"
+  | .error err => throw (IO.userError s!"identity application declined: {repr err}")
+
+  let polymorphicIdentity : RawExpr :=
+    .lam (Name.simple "A") sort1
+      (.lam x (.bvar 0) (.bvar 0) .default) .default
+  match tinyInferClosed 128 [] polymorphicIdentity with
+  | .ok (.pi _ firstDom (.pi _ secondDom secondCodomain _) _) =>
+      check (firstDom == sort1) "outer dependent Pi domain changed"
+      check (secondDom == (.bvar 0)) "dependent inner domain was shifted"
+      check (secondCodomain == (.bvar 1)) "dependent inner codomain was shifted"
+  | result => throw (IO.userError s!"dependent identity typing failed: {repr result}")
+
+  let wellTypedLet : RawExpr :=
+    .letE x sort1 sort0 (.bvar 0) false
+  match tinyInferClosed 128 [] wellTypedLet with
+  | .ok inferred => check (inferred == sort1) "let result type is incorrect"
+  | .error err => throw (IO.userError s!"typed let declined: {repr err}")
+
+  match tinyInferClosed 128 [] (.app typeIdentity sort1) with
+  | .error .typeMismatch => pure ()
+  | other => throw (IO.userError s!"mismatched application accepted: {repr other}")
+
+  match tinyInferClosed 128 [] (.app sort0 sort0) with
+  | .error .expectedPi => pure ()
+  | other => throw (IO.userError s!"applying a non-function was accepted: {repr other}")
+
+  match tinyInferClosed 128 [] (.sort (.param (Name.simple "u"))) with
+  | .error .invalidUniverseParam => pure ()
+  | other => throw (IO.userError s!"undeclared level param allowed: {repr other}")
+  match tinyInferClosed 128 [Name.simple "u"] (.sort (.param (Name.simple "u"))) with
+  | .ok (.sort (.succ (.param _))) => pure ()
+  | other => throw (IO.userError s!"declared universe parameter declined: {repr other}")
+
+  match tinyInferClosed 0 [] sort0 with
+  | .error .budget => pure ()
+  | other => throw (IO.userError s!"type checker accepted with zero fuel: {repr other}")
+
+  match tinyInferClosed 128 [] (.const (Name.simple "unspecified") []) with
+  | .error .unsupported => pure ()
+  | other => throw (IO.userError s!"untrusted constant accepted: {repr other}")
+
+  match tinyInferClosed 128 [] (.app typeIdentity sort2) with
+  | .error .typeMismatch => pure ()
+  | other => throw (IO.userError s!"wrong universe type accepted: {repr other}")
+
+  IO.println "PSKernel-Fast G5: conservative Sort/Pi/lambda/app/let typing cases passed (NO proof admission)"

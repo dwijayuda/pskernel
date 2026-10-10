@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticCoherentValidity
 import Ps.KernelCore.Metatheory.SemanticReferenceSortChecks
 import Ps.KernelCore.Metatheory.SemanticStructuralEquality
 
@@ -177,5 +178,65 @@ theorem application_trace_has_model
       ha' haValid piValid⟩
   rw [erase_instantiate1, bodyErasure]
   exact trace.resultEq.symm
+
+/-- Fix the particular application and result-type readings, including both
+hereditary predicates. The structural branch needs the executable annotation
+guard in addition to the raw comparison recorded by the trace. Establishing
+that guard at every public acceptance path remains a checker-migration
+obligation; it is not inferred from erasure or validity alone. -/
+theorem application_trace_checked_reading
+    (M : Reading V) (Γ : List AnnotatedExpr)
+    (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOperation)
+    (c : PsKernelCheckerContext) (s next : PsKernelCheckerState)
+    (f a A B argType : AnnotatedExpr) (v : PsKernelLevel) (result : PsKernelExpr)
+    (trace : ApplicationTrace remaining whnf defeq c s f.erase a.erase result next)
+    (domainErasure : A.erase = trace.view.domain)
+    (bodyErasure : B.erase = trace.view.body)
+    (argTypeErasure : argType.erase = trace.argType)
+    (hf : ModelsType M Γ f (.forallE trace.view.name A B trace.view.binderInfo v))
+    (ha : ModelsType M Γ a argType)
+    (guard : psKernelExprEq trace.argType trace.view.domain = true →
+      checkRegimes argType A = true)
+    (conversion : defeq (applicationEqContext trace.entered a.erase)
+      trace.argState trace.argType trace.view.domain = .ok (true, next) →
+      ModelsEqual M Γ argType A)
+    (hfValid : ∀ ρ, Satisfies M Γ ρ → AnnotationValid M ρ f ∧ FunctionValid M ρ f)
+    (haValid : ∀ ρ, Satisfies M Γ ρ → AnnotationValid M ρ a ∧ FunctionValid M ρ a)
+    (piValid : ∀ ρ, Satisfies M Γ ρ →
+      AnnotationValid M ρ (.forallE trace.view.name A B trace.view.binderInfo v) ∧
+      FunctionValid M ρ (.forallE trace.view.name A B trace.view.binderInfo v)) :
+    let term : AnnotatedExpr := .app f a
+    let type : AnnotatedExpr := inst a B 0
+    term.erase = .app f.erase a.erase ∧ type.erase = result ∧
+      ModelsType M Γ term type ∧
+      ∀ ρ, Satisfies M Γ ρ →
+        AnnotationValid M ρ term ∧ FunctionValid M ρ term ∧
+        AnnotationValid M ρ type ∧ FunctionValid M ρ type := by
+  have comparison : ApplicationComparison defeq trace.entered trace.argState
+      a.erase argType.erase A.erase next := by
+    rw [argTypeErasure, domainErasure]
+    exact trace.comparison
+  have hCompare := applicationComparison_models_equal M Γ defeq trace.entered
+    trace.argState next a.erase argType A comparison
+    (fun h => checkRegimes_sound M argType A
+      (guard (by simpa only [argTypeErasure, domainErasure] using h)))
+    (fun h => conversion (by simpa only [argTypeErasure, domainErasure] using h))
+  have typedArg := models_convert M Γ a argType A ha hCompare
+  refine ⟨rfl, ?_, models_app_of_annotationValid M Γ trace.view.name f a A B
+    trace.view.binderInfo v hf typedArg (fun ρ hρ => (piValid ρ hρ).1), ?_⟩
+  · rw [erase_instantiate1, bodyErasure]
+    exact trace.resultEq.symm
+  · intro ρ hρ
+    have fValid := hfValid ρ hρ
+    have aValid := haValid ρ hρ
+    have pValid := piValid ρ hρ
+    refine ⟨⟨fValid.1, aValid.1⟩,
+      functionValid_app_of_type M ρ trace.view.name f a A B trace.view.binderInfo v
+        fValid.2 aValid.2 (hf ρ hρ) (typedArg ρ hρ) pValid.1,
+      ?_, ?_⟩
+    · exact annotationValid_inst_zero M B a ρ aValid.1
+        (pValid.1.2.1 _ (typedArg ρ hρ))
+    · exact functionValid_inst_zero M B a ρ aValid.2
+        (pValid.2.2 _ (typedArg ρ hρ))
 
 end PsKernelSemantics.Reference

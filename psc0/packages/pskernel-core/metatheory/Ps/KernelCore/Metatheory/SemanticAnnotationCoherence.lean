@@ -181,12 +181,13 @@ theorem Coherent.inst {e f a b : AnnotatedExpr}
     Coherent (inst a e cut) (inst b f cut) := by
   induction bodies generalizing cut with
   | bvar i =>
-      simp only [inst]
-      split
-      · exact .bvar _
-      · split
-        · exact args.liftN cut 0
-        · exact .bvar _
+      by_cases hlt : i < cut
+      · simpa only [AnnotatedExpr.inst, hlt, ite_true] using (Coherent.bvar i)
+      · by_cases heq : i = cut
+        · simpa only [AnnotatedExpr.inst, hlt, heq, ite_false, ite_true] using
+            args.liftN cut 0
+        · simpa only [AnnotatedExpr.inst, hlt, heq, ite_false] using
+            (Coherent.bvar (i - 1))
   | fvar n => exact .fvar n
   | mvar n => exact .mvar n
   | sort v => exact .sort v
@@ -203,10 +204,9 @@ theorem Coherent.close {a b : AnnotatedExpr} (h : Coherent a b)
     (name : PsKernelName) (cut : Nat) : Coherent (close name a cut) (close name b cut) := by
   induction h generalizing cut with
   | fvar n =>
-      simp only [close]
-      split
-      · exact .bvar _
-      · exact .fvar _
+      cases hn : psKernelNameEq n name with
+      | true => simpa [AnnotatedExpr.close, hn] using (Coherent.bvar cut)
+      | false => simpa [AnnotatedExpr.close, hn] using (Coherent.fvar n)
   | bvar i => exact .bvar i
   | mvar n => exact .mvar n
   | sort v => exact .sort v

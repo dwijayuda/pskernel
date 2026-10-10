@@ -34,6 +34,7 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.Reference.application_trace_checked_reading,
     ``PsKernelSemantics.AnnotatedExpr.Coherent.refl,
     ``PsKernelSemantics.AnnotatedExpr.Coherent.symm,
     ``PsKernelSemantics.AnnotatedExpr.Coherent.trans,

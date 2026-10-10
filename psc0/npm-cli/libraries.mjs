@@ -2,6 +2,7 @@
 import { realpath } from 'node:fs/promises';
 import path from 'node:path';
 import { createSnapshotReader, contained } from './snapshot.mjs';
+import { assertSourceOnlyConfiguration, describeSourceLibrary } from './library-disclosure.mjs';
 const namespacePattern = /^[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*$/u;
 const packagePattern = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/u;
 const fail = (code, detail = '') => { throw new Error('PSC_LIBRARY_' + code + (detail ? ': ' + detail : '')); };
@@ -40,14 +41,16 @@ export async function findPackage(packageName, directory, io, { optional = false
   fail('PACKAGE_NOT_INSTALLED', packageName);
 }
 
-function declaredLibraries(project) {
+export function declaredLibraries(project) {
   const cfg = project.meta.proofscript;
+  assertSourceOnlyConfiguration(cfg);
   if (cfg === undefined) return [];
-  if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) fail('PROJECT_POLICY');
   const libs = cfg.libraries;
   if (libs === undefined) return [];
   if (!libs || typeof libs !== 'object' || Array.isArray(libs)) fail('LIBRARIES_SHAPE');
-  return Object.entries(libs).map(([namespace, packageName]) => {
+  const entries = Object.entries(libs);
+  if (entries.length > 256) fail('COUNT_LIMIT');
+  return entries.map(([namespace, packageName]) => {
     if (!namespacePattern.test(namespace) || namespace === 'Ps' || namespace.startsWith('Ps.')) fail('RESERVED_NAMESPACE', namespace);
     if ((namespace === 'ProofScript' || namespace.startsWith('ProofScript.')) && packageName !== '@proofscript/stdlib') fail('RESERVED_STDLIB', namespace);
     if (typeof packageName !== 'string' || !packagePattern.test(packageName)) fail('PACKAGE_NAME', namespace);
@@ -72,11 +75,10 @@ export async function resolveSourceDescriptor(moduleName, sourceKind, project, i
     fail('MODULE_NOT_FOUND', moduleName);
   }
   const pkg = await findPackage(mapping.packageName, project.root, io);
-  const library = pkg.meta.proofscript?.library;
-  if (library?.schemaVersion !== 1 || library.modulePrefix !== mapping.namespace || library.sourceRoot !== 'src') fail('PACKAGE_MANIFEST', mapping.packageName);
+  const library = describeSourceLibrary(pkg.meta, mapping, io.fileEvidence(pkg.file));
   const filename = path.join(pkg.root, 'src', ...parts) + '.' + sourceKind;
   if (!contained(await realpath(pkg.root), await realpath(filename))) fail('PACKAGE_SOURCE_ESCAPE', filename);
-  return { path: filename, root: pkg.root };
+  return { path: filename, root: pkg.root, library };
 }
 export async function resolveSourceModule(moduleName, sourceKind, project, io) {
   return (await resolveSourceDescriptor(moduleName, sourceKind, project, io)).path;

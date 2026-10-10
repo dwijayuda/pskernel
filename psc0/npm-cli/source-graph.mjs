@@ -3,7 +3,8 @@ import path from 'node:path';
 import { realpath } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { createSnapshotReader } from './snapshot.mjs';
-import { nearestProject, resolveSourceDescriptor, findPackage } from './libraries.mjs';
+import { nearestProject, resolveSourceDescriptor, findPackage, declaredLibraries } from './libraries.mjs';
+import { createLibraryDisclosure } from './library-disclosure.mjs';
 import { unwrapCompilerResult } from './checked-session.mjs';
 const hostDirectory = path.dirname(fileURLToPath(import.meta.url));
 const sections = Object.freeze({ BackendJs: 'backend-js', BackendRust: 'backend-rust', BackendTs: 'backend-ts', BackendWasm: 'backend-wasm', Bootstrap: 'bootstrap', Bridge: 'bridge', CompilerIr: 'compiler-ir', Compiler: 'compiler', Core: 'core', KernelCore: 'pskernel-core', Elab: 'elab', Environment: 'environment', Erasure: 'erasure', Foundation: 'foundation', Meta: 'meta', Syntax: 'syntax' });
@@ -33,6 +34,7 @@ export async function captureSourceGraph(compiler, entry, { limits, trustedFiles
   if (compiler.psProofScriptGrammarEdition !== 'ps-0.9-r3' || compiler.psProofScriptGrammarMode !== 'new-only') throw new Error('PSC_COMPILER_GRAMMAR_MISMATCH');
   const io = createSnapshotReader(limits);
   const project = await nearestProject(path.dirname(path.resolve(entry)), io);
+  const libraries = createLibraryDisclosure(declaredLibraries(project));
   for (const name of ['package-lock.json', 'npm-shrinkwrap.json']) await io.readText(path.join(project.root, name), { optional: true, id: 'lock/' + name, maxBytes: 8 * 1024 * 1024 });
   for (const [id, file] of trustedFiles) await io.readText(file, { id: 'trusted/' + id, maxBytes: 8 * 1024 * 1024 });
   const visited = new Set(), active = new Set(), sources = [], edges = [];
@@ -49,8 +51,11 @@ export async function captureSourceGraph(compiler, entry, { limits, trustedFiles
     if (depth > io.limits.maxDepth) throw new Error('PSC_IMPORT_DEPTH_LIMIT');
     const actual = await realpath(descriptor.path);
     if (active.has(actual)) throw new Error('PSC_IMPORT_CYCLE: ' + logical);
-    if (visited.has(actual)) return;
     const source = await io.readText(descriptor.path, { root: descriptor.root, id: 'source/' + logical });
+    if (descriptor.library) libraries.record(descriptor.library, logical, kind, io.fileEvidence(descriptor.path));
+    // Record every resolved alias before deduplicating compilation by realpath.
+    // A second alias cannot escape snapshot revalidation or library disclosure.
+    if (visited.has(actual)) return;
     active.add(actual);
     // Production delegates synchronous parser work to the owned child. Direct
     // compiler callers remain supported for source-only inventory qualification.
@@ -65,7 +70,8 @@ export async function captureSourceGraph(compiler, entry, { limits, trustedFiles
     sources.push(kind === 'lean' ? source.split(/\r?\n/u).filter(s => !leanImport.test(s)).join('\n').trim() : source);
   }
   await visit({ path: path.resolve(entry), root: project.root }, 'entry', 0);
-  const snapshot = io.seal({ kind, entry: path.relative(project.root, path.resolve(entry)).split(path.sep).join('/'), grammar: 'ps-0.9-r3/new-only', profile: 'bounded-compiler', policy: project.meta.proofscript || {}, edges, limits: io.limits });
+  const libraryDisclosure = libraries.seal();
+  const snapshot = io.seal({ kind, entry: path.relative(project.root, path.resolve(entry)).split(path.sep).join('/'), grammar: 'ps-0.9-r3/new-only', profile: 'bounded-compiler', policy: project.meta.proofscript || {}, edges, limits: io.limits, libraryDisclosureSha256: libraryDisclosure.sha256 });
   await snapshot.revalidate();
-  return Object.freeze({ kind, sources: Object.freeze(sources), sourceCount: sources.length, snapshot });
+  return Object.freeze({ kind, sources: Object.freeze(sources), sourceCount: sources.length, snapshot, libraryDisclosure });
 }

@@ -65,6 +65,13 @@ export function createSnapshotReader(options = {}) {
     if (!json || typeof json !== 'object' || Array.isArray(json)) throw new Error('PSC_SNAPSHOT_METADATA_SHAPE');
     return freezeDataGraph(json);
   }
+  function fileEvidence(filename) {
+    const entry = observed.get(path.resolve(filename));
+    if (!entry || entry.missing) throw new Error('PSC_SNAPSHOT_UNOBSERVED_FILE');
+    // Raw captured bytes, including any BOM; never re-hash decoded text or
+    // perform a second filesystem read to describe an already captured input.
+    return Object.freeze({ inputId: entry.id, bytes: entry.bytes, sha256: entry.sha256 });
+  }
   function seal(data = {}) {
     if (sealed) throw new Error('PSC_SNAPSHOT_SEALED');
     sealed = true;
@@ -82,5 +89,5 @@ export function createSnapshotReader(options = {}) {
     }
     return Object.freeze({ sourceClosureSha256, binding, protectedPaths, revalidate });
   }
-  return Object.freeze({ limits, readText, readJson, seal });
+  return Object.freeze({ limits, readText, readJson, fileEvidence, seal });
 }

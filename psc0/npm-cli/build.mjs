@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { checkCanonicalAdmissions } from '@proofscript/pskernel-core/check';
 import { createCompilerProcess } from './frontend-session.mjs';
 import { captureSourceGraph } from './source-graph.mjs';
+import { reportLibraryDisclosure } from './library-disclosure.mjs';
 import { publishGeneration } from './publication.mjs';
 import { createTypeScriptTarget } from './target-toolchain.mjs';
 const require = createRequire(import.meta.url);
@@ -33,11 +34,12 @@ export async function runCheckedBuild({ entry, output, checkOnly = false, versio
   let stage;
   try {
     const graph = await captureSourceGraph(frontend, entry, { trustedFiles });
+    await reportLibraryDisclosure(graph.libraryDisclosure);
     if (hash(await readFile(compilerPath)) !== compilerIdentity) throw new Error('PSC_COMPILER_IDENTITY_CHANGED');
-    const binding = { sourceClosureSha256: graph.snapshot.sourceClosureSha256, compilerSha256: compilerIdentity, grammar: 'ps-0.9-r3/new-only', kernel: expectedKernel, profile: 'bounded-compiler', frontendLimits: frontend.stats().limits, targetPlanSha256: target?.planSha256 ?? null };
+    const binding = { sourceClosureSha256: graph.snapshot.sourceClosureSha256, compilerSha256: compilerIdentity, grammar: 'ps-0.9-r3/new-only', kernel: expectedKernel, profile: 'bounded-compiler', frontendLimits: frontend.stats().limits, targetPlanSha256: target?.planSha256 ?? null, libraryDisclosureSha256: graph.libraryDisclosure.sha256 };
     const handle = await frontend.checkSources(graph.kind, graph.sources, binding);
     await graph.snapshot.revalidate();
-    const audit = { schemaVersion: 3, kind: checkOnly ? 'psc0-npm-checked' : 'psc0-npm-checked-build', version, entry: path.resolve(entry), sourceCount: graph.sourceCount, sourceClosureSha256: graph.snapshot.sourceClosureSha256, canonicalAdmissionsSha256: handle.canonicalAdmissionsSha256, compilerSha256: compilerIdentity, kernel: expectedKernel, inputs: graph.snapshot.binding, checkedBinding: binding, claims: { kernelAdmitted: true, fullPscvVerified: false, compilerSemanticsProven: false, newSelfhostFixedPoint: false }, receiptIsAuthority: false };
+    const audit = { schemaVersion: 4, kind: checkOnly ? 'psc0-npm-checked' : 'psc0-npm-checked-build', version, entry: path.resolve(entry), sourceCount: graph.sourceCount, sourceClosureSha256: graph.snapshot.sourceClosureSha256, canonicalAdmissionsSha256: handle.canonicalAdmissionsSha256, compilerSha256: compilerIdentity, kernel: expectedKernel, inputs: graph.snapshot.binding, checkedBinding: binding, libraryDisclosure: graph.libraryDisclosure, claims: { kernelAdmitted: true, fullPscvVerified: false, compilerSemanticsProven: false, newSelfhostFixedPoint: false }, receiptIsAuthority: false };
     if (checkOnly) {
       await frontend.assertCurrent(handle);
       const evidence = frontend.stats();

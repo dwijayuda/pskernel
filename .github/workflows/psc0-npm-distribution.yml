@@ -1,0 +1,101 @@
+name: PSC0 npm source variants and JS Core default qualification
+
+on:
+  push:
+    branches: [psc0/npm-modular-packages-v1]
+    paths:
+      - .github/workflows/psc0-npm-distribution.yml
+      - psc0/npm-cli/**
+      - psc0/npm-runtime/**
+      - psc0/scripts/npm-distribution.mjs
+      - psc0/scripts/npm-core-qualification.mjs
+      - psc0/scripts/JointClosureInventory.lean
+      - psc0/packages/*/package.json
+      - psc0/packages/proofscript/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: psc0-npm-distribution-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    name: Build npm packages, qualify JS Core, install and execute both editions
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    defaults:
+      run:
+        working-directory: psc0
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Install pinned TypeScript without private workspace registry resolution
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-npm-ts7" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import {appendFileSync,readFileSync,realpathSync} from 'node:fs';
+          import path from 'node:path';
+          import {spawnSync} from 'node:child_process';
+          const root=path.join(process.env.RUNNER_TEMP,'psc0-npm-ts7/node_modules/typescript');
+          const meta=JSON.parse(readFileSync(path.join(root,'package.json'),'utf8'));
+          if(meta.name!=='typescript'||meta.version!=='7.0.2')throw Error('PSC0_TSC_VERSION');
+          const bin=typeof meta.bin==='string'?meta.bin:meta.bin.tsc;
+          const cli=realpathSync(path.join(root,bin));
+          const result=spawnSync(process.execPath,[cli,'--version'],{encoding:'utf8'});
+          if(result.status!==0||result.stdout.trim()!=='Version 7.0.2')throw Error('PSC0_TSC_CLI');
+          appendFileSync(process.env.GITHUB_ENV,'PSC0_TSC='+cli+'\n');
+          NODE
+      - name: Build authoritative Lean-native PSC0 frontend and structured prelude exporter
+        run: lake build psc1 psc2_joint_closure_inventory
+      - name: Check full compiler and newer PSKernel Core source roots
+        run: |
+          lake exe psc1 check packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean
+          lake exe psc1 check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean
+      - name: Compile two JavaScript runtimes with the actual PSC0 compiler
+        run: |
+          mkdir -p dist/npm-build/compiler dist/npm-build/pskernel-core
+          lake exe psc1 build packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean --out dist/npm-build/compiler/index.js
+          lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean --out dist/npm-build/pskernel-core/index.js
+          lake exe psc2_joint_closure_inventory --prelude dist/npm-build/pskernel-core/prelude.json
+      - name: Require JS-Core and Lean-WASM observational parity before default selection
+        run: node scripts/npm-core-qualification.mjs
+      - name: Stage, translate, pack, install and execute both npm editions
+        run: node scripts/npm-distribution.mjs
+      - name: Upload independently installable source editions
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-psc0-npm-ps-and-lean
+          path: |
+            psc0/dist/npm-distribution/proofscript-psc0-ps-npm-packages.zip
+            psc0/dist/npm-distribution/proofscript-psc0-lean-npm-packages.zip
+            psc0/dist/npm-distribution/npm-release-manifest.json
+            psc0/dist/npm-build/qualification/js-core-parity.json
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+      - name: Upload diagnostics if release fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-npm-diagnostics
+          path: |
+            psc0/dist/npm-build/qualification/
+            psc0/dist/npm-distribution/*/manifest.json
+          if-no-files-found: ignore
+          retention-days: 7

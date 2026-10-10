@@ -152,6 +152,7 @@ theorem lambda_trace_model_from_visits
     · intro x hx
       exact (functionValid_open_fresh M b name fresh x ρ).mp (bodyValid ρ hρ x hx)
     · intro hz x hx
+      change interp M (extend x ρ) (close name C 0) ∈ˢ (univ 0 : V)
       rw [abstractFVar_closed_input M C name scopedC ρ x]
       exact truthValues hz ρ hρ x hx
 

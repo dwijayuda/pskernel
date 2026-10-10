@@ -4,7 +4,7 @@
   "contract": "PSC0-SH/1",
   "baselineSourceRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
   "workBranch": "psc0/strict-sh1-v1",
-  "updatedAtUtc": "2026-10-10T00:03:34Z",
+  "updatedAtUtc": "2026-10-10T00:20:34Z",
   "strictSh1Qualified": false,
   "sourceCheckpointQualified": false,
   "enabledScope": {
@@ -450,16 +450,16 @@
     "generalRulesDischarged": 0
   },
   "cloudExecution": {
-    "status": "eleventh-attempt-parser-repair-passed-worker-self-call-arity-refused",
-    "sourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "runId": 38006688264,
+    "status": "twelfth-attempt-full-native-source-passed-N1-host-empty-return-assertion-failed",
+    "sourceRef": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "runId": 38007714076,
     "workflowId": 378853677,
-    "compilerJobId": 114076987396,
-    "providerJobId": 114077308038,
+    "compilerJobId": 114080256053,
+    "providerJobId": 114080662313,
     "providerStatus": "skipped",
-    "attempts": 11,
+    "attempts": 12,
     "failedStep": 24,
-    "diagnostic": "Ps.Erasure.Expr.psEraseRuntimeExprWithFuelWorker: structuralRecursionArity",
+    "diagnostic": "observeEmptySource: actual letE, obsolete expected call",
     "nativeCompilerBuilt": true,
     "nativeRegressionsPassed": true,
     "nativeCheckedSeedBuilt": true,
@@ -467,11 +467,17 @@
     "replayCliPassed": true,
     "authenticatedRMigrationPreflightPassed": true,
     "resourcePreflightPassed": true,
+    "nativeFullSourceAccepted": true,
+    "nativeOriginalIrAccepted": true,
     "nativeStrictConformanceCompleted": false,
+    "N1Generated": true,
+    "N1TypeScriptCompiled": true,
+    "N1Loaded": true,
+    "N1Completed": false,
     "c1Started": false,
     "fixedPointStarted": false,
-    "failureEvidence": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/source-elaboration-failure.json",
-    "failureEvidenceBlob": "315c45511a8272a08a8c5aceacc834d313336767"
+    "failureEvidence": "attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/development-gate-failure.json",
+    "failureEvidenceBlob": "ff69f080d6fa1421e36e7db99a60ea4276d3e701"
   },
   "sourceBoundaryCorrection": "source-boundary-correction.json",
   "qualificationAttempts": "qualification-attempts.json",
@@ -760,16 +766,16 @@
     "historicalCounterexampleSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
   },
   "currentQualificationRequest": {
-    "status": "enclosing-callback-local-self-prefix-correction-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "priorCompilerSource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "priorAttemptRunId": 38006688264,
-    "manifest": "reviewed-candidates/worker-self-call-prefix-repair.json",
-    "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
-    "sourceFiles": 1,
-    "productionLeanChanges": 1,
+    "status": "enclosing-empty-source-return-assertion-correction-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "priorCompilerSource": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "priorAttemptRunId": 38007714076,
+    "manifest": "strict/reviewed-candidates/empty-source-return-boundary.json",
+    "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c",
+    "sourceFiles": 2,
+    "productionLeanChanges": 0,
     "cumulativeReviewedSourceFiles": 46,
-    "hostChanges": 0,
+    "hostChanges": 2,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -885,10 +891,10 @@
     "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
   },
   "latestExecution": {
-    "sourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "runId": 38006688264,
-    "compilerJobId": 114076987396,
-    "status": "owned-source-structural-self-call-arity-refusal-before-N1-generation",
+    "sourceRef": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "runId": 38007714076,
+    "compilerJobId": 114080256053,
+    "status": "native-full-source-accepted-N1-generated-host-empty-return-assertion-failed",
     "failedStep": 24,
     "nativeCompilerBuild": "success",
     "nativeRegressionTargets": "success",
@@ -896,16 +902,23 @@
     "sourceGrammarImportsAndWorkspace": "success",
     "replayCli": "success",
     "authenticatedRMigrationPreflight": "success",
-    "priorNestedPatternRefusalCleared": true,
-    "evidence": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/source-elaboration-failure.json",
-    "evidenceBlob": "315c45511a8272a08a8c5aceacc834d313336767",
-    "providerJobId": 114077308038,
+    "nativeSourcePolicy": "accepted-complete",
+    "nativeSourceModules": 64,
+    "nativeSourceDeclarations": 1705,
+    "nativeNormalizations": 50,
+    "nativeOriginalIrExpressions": 64829,
+    "nativeOriginalIrFindings": 0,
+    "nativeIrCases": 15,
+    "priorWorkerArityRefusalCleared": true,
+    "evidence": "attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/development-gate-failure.json",
+    "evidenceBlob": "ff69f080d6fa1421e36e7db99a60ea4276d3e701",
+    "providerJobId": 114080662313,
     "providerStatus": "skipped",
-    "N1": "source-elaboration-refused-no-success-receipt",
+    "N1": "generated-TypeScript7-compiled-and-loaded-conformance-incomplete-no-success-receipt",
     "C1": "not-started",
     "C2": "not-started",
     "C3": "not-started",
-    "positiveFlatTailExecution": "not-reached-before-owned-source-elaboration-refusal"
+    "positiveFlatTailExecution": "not-reached-before-source-conformance-assertion"
   },
   "reviewedHostFunctionEntryCompletion": {
     "status": "integrated-replay-cli-passed-full-native-and-generation-qualification-pending",
@@ -934,7 +947,7 @@
     "executionQualification": false,
     "passedReplayRun": 38006688264,
     "passedReplaySource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "positiveFlatTailExecution": "not-reached-before-owned-source-elaboration-refusal"
+    "positiveFlatTailExecution": "not-reached-before-source-conformance-assertion"
   },
   "reviewedSourceRuntimeInterface": {
     "document": "SOURCE_RUNTIME_INTERFACE_REVIEW.md",
@@ -1009,7 +1022,7 @@
     "subsequentObservedRun": 38006688264
   },
   "reviewedWorkerSelfCallCompletion": {
-    "status": "callback-local-exact-self-prefix-correction-awaiting-exact-source-full-run",
+    "status": "integrated-full-native-source-and-original-IR-accepted-current-N1-conformance-pending",
     "manifest": "reviewed-candidates/worker-self-call-prefix-repair.json",
     "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
     "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
@@ -1053,7 +1066,8 @@
     "semanticContractQualified": false,
     "providerChecked": false,
     "manifestSha256": "d964cfc99eda53cd9fefaa833a0ffbded9f3d5f907c06f21ffe63bf33b467fab",
-    "manifestBytes": 48828
+    "manifestBytes": 48828,
+    "subsequentObservedRun": 38007714076
   },
   "reviewedFinalDispositionMap": {
     "status": "complete-independent-mapping-review-current-execution-disposition-pending",
@@ -1073,6 +1087,51 @@
     "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
     "rowsClosed": 0,
     "requiredMetadataCorrection": "ER-06 /rows/5/domain/1 must describe admitted zero-constructor layouts separately from inhabited zero-field structures.",
-    "evidenceBoundary": "Frozen advisory maps keep their historical pending/source pins. Active final disposition must bind the full current transport chain and actual successful exact-source compiler/provider evidence. No row closes by attaching these review packets."
+    "evidenceBoundary": "Frozen advisory maps keep their historical pending/source pins. Active final disposition must bind the full current transport chain and actual successful exact-source compiler/provider evidence. No row closes by attaching these review packets.",
+    "currentHostReturnBoundaryTransportManifest": "a89fb7324afb820b2df077a26608d71cc11d644c"
+  },
+  "reviewedEmptyResultBoundary": {
+    "status": "reviewed-exact-source-return-boundary-and-binder-correction-awaiting-full-run",
+    "manifest": "strict/reviewed-candidates/empty-source-return-boundary.json",
+    "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c",
+    "expectedParent": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "files": [
+      {
+        "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+        "baseBlob": "c28507666a3c46892c6fc155c66e1842a8954150",
+        "candidateBlob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+        "candidateSha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+        "candidateBytes": 31555
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-evidence.mjs",
+        "baseBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+        "candidateBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "candidateSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+        "candidateBytes": 91970
+      }
+    ],
+    "productionLeanChanges": 0,
+    "fixtureChanges": 0,
+    "guards": 2,
+    "sourceDeclarationsPerKind": 5,
+    "typedEmptyEliminationsPerKind": 4,
+    "sourceKinds": 2,
+    "retiredAssertion": "sh1EmptyFunction expected an outer call and callee-position typed let although the raw fixture returns nomatch directly.",
+    "currentAssertion": "All four declarations return their unique typed empty let directly, retain the exact authored runtime parameter prefix and carry the exact declaration and local result type. The binder checks these recorded facts and hashes the entire observation.",
+    "explicitTypedEmptyCalleePreserved": true,
+    "irGateBlob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+    "audit": {
+      "hostScripts": 34,
+      "sh1Scripts": 27,
+      "activeDependencies": 7,
+      "obsoleteComputedResultEtaAssertions": 1
+    },
+    "sourceReview": "root-and-independent-exact-source-review-CLEAR",
+    "newCompilerInvocations": 0,
+    "newWorkflowSteps": 0,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false
   }
 }

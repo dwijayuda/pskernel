@@ -1169,10 +1169,11 @@ async function bindEmptySource({ outDir, directory, compilerSha256, conformance 
       assert.equal(entry.freshResultName, true);
       assert.equal(typeof entry.resultName, 'string');
       assert(entry.resultName.length > 0);
-      assert(Array.isArray(entry.runtimeParameters));
-      assert(entry.runtimeParameters.every((name) => typeof name === 'string' && name.length > 0));
+      assert.deepEqual(entry.declarationResultType, entry.resultType);
+      assert.equal(entry.bodyIsTypedEmptyResult, true);
+      assert.deepEqual(entry.runtimeParameters,
+        entry.name === 'sh1EmptyFresh' ? ['value', 'emptyResult'] : ['value']);
       assert(!entry.runtimeParameters.includes(entry.resultName));
-      if (entry.name === 'sh1EmptyFresh') assert(entry.runtimeParameters.includes('emptyResult'));
     }
     const raw = await artifact(outDir, directory + '/' + item.sourceArtifact, pin.sha256);
     assert.equal(raw.bytes, pin.bytes);

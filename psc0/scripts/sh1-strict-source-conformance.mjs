@@ -88,14 +88,15 @@ function observeEmptySource(result, sourceKind, fixture) {
     assert.equal(emptyTag(local.body), 'var');
     assert.equal(local.body.name, local.name);
     const runtimeParameters = emptyItems(declaration.parameters).map((item) => item.name);
+    const declarationResultType = emptyResultType(declaration.resultType);
+    assert.deepEqual(declarationResultType, type, name + ': declaration result type');
+    assert.deepEqual(runtimeParameters, name === 'sh1EmptyFresh' ? ['value', 'emptyResult'] : ['value'],
+      name + ': authored runtime parameter prefix');
+    assert.equal(declaration.body, local, name + ': direct typed empty result');
     assert(!runtimeParameters.includes(local.name), name + ': fresh result binding');
-    if (name === 'sh1EmptyFresh') assert(runtimeParameters.includes('emptyResult'));
-    if (name === 'sh1EmptyFunction') {
-      assert.equal(emptyTag(declaration.body), 'call');
-      assert.equal(declaration.body.fn, local, 'typed empty result is retained in a callee position');
-    }
-    return { name, resultType: type, resultName: local.name,
-      runtimeParameters, alternatives: 0, typeArgumentCount: 1, freshResultName: true };
+    return { name, resultType: type, declarationResultType, resultName: local.name,
+      runtimeParameters, bodyIsTypedEmptyResult: true,
+      alternatives: 0, typeArgumentCount: 1, freshResultName: true };
   });
   const origin = result.evidence.sourceOrigins.modules[1];
   assert.deepEqual(origin.moduleName, ['Ps', 'Compiler', 'StrictEmpty']);

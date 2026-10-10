@@ -1565,6 +1565,173 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 12,
+      "sourceRef": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+      "runId": 38007714076,
+      "workflowId": 378853677,
+      "compilerJobId": 114080256053,
+      "providerJobId": 114080662313,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38007714076",
+      "status": "failure",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification",
+        "kind": "host-conformance-assertion",
+        "code": "ERR_ASSERTION",
+        "actual": "letE",
+        "expected": "call",
+        "operator": "strictEqual",
+        "owner": "observeEmptySource",
+        "script": "psc0/scripts/sh1-strict-source-conformance.mjs",
+        "line": 94,
+        "column": 14,
+        "nodeVersion": "22.23.3",
+        "exitCode": 1,
+        "excerpt": "2026-10-10T00:09:49.0557375Z AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n2026-10-10T00:09:49.0557891Z \n2026-10-10T00:09:49.0558153Z 'letE' !== 'call'\n2026-10-10T00:09:49.0558405Z \n2026-10-10T00:09:49.0558976Z     at file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:94:14\n2026-10-10T00:09:49.0559697Z     at Array.map (<anonymous>)\n2026-10-10T00:09:49.0560911Z     at observeEmptySource (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:67:33)\n2026-10-10T00:09:49.0562372Z     at runStrictSourceConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-strict-source-conformance.mjs:535:28)\n2026-10-10T00:09:49.0563675Z     at async nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:936:3)\n2026-10-10T00:09:49.0564810Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1058:3 {\n2026-10-10T00:09:49.0565470Z   generatedMessage: true,\n2026-10-10T00:09:49.0565832Z   code: 'ERR_ASSERTION',\n2026-10-10T00:09:49.0566155Z   actual: 'letE',\n2026-10-10T00:09:49.0566468Z   expected: 'call',\n2026-10-10T00:09:49.0566783Z   operator: 'strictEqual',\n2026-10-10T00:09:49.0567112Z   diff: 'simple'\n2026-10-10T00:09:49.0567396Z }\n2026-10-10T00:09:49.0567576Z \n2026-10-10T00:09:49.0567687Z Node.js v22.23.3\n2026-10-10T00:09:49.0687574Z ##[error]Process completed with exit code 1.\n"
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "replayCliPassed": true,
+      "authenticatedRMigrationPreflightPassed": true,
+      "priorWorkerArityRefusalCleared": true,
+      "nativeSourceEvidenceBeforeFailure": {
+        "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE",
+        "evidence": "native-atomic-source-and-target-enforcement",
+        "sourceKind": "lean",
+        "sourcePolicy": {
+          "profile": "PSC0-SH/1",
+          "enforcementVersion": 1,
+          "sourceKind": "lean",
+          "accepted": true,
+          "traversalComplete": true,
+          "moduleCount": 64,
+          "sourceBytes": 1266025,
+          "inputBytes": 1267104,
+          "importCount": 149,
+          "options": {
+            "maxModules": 1024,
+            "maxInputBytes": 16777216,
+            "maxSyntaxSteps": 5000000,
+            "maxTypeSteps": 1000000,
+            "maxTermSteps": 5000000
+          },
+          "stats": {
+            "visitedSteps": 148646,
+            "typeSteps": 17937,
+            "termSteps": 58252,
+            "declarationCount": 1705,
+            "theoremCount": 0
+          }
+        },
+        "targetPolicy": {
+          "policy": "psc0-sh1-ts-target/1",
+          "accepted": true,
+          "traversalComplete": true,
+          "visitedSteps": 1663720
+        },
+        "originalIr": {
+          "schemaVersion": 1,
+          "kind": "psc0-native-original-ir-check",
+          "accepted": true,
+          "traversalComplete": true,
+          "visitedSteps": 828190,
+          "expressionCount": 64829,
+          "findingCount": 0,
+          "retainedFindingCount": 0,
+          "omittedFindingDetails": 0,
+          "sameOriginalIrCheckedBeforeEmission": true,
+          "strictSh1Qualified": false
+        },
+        "sourceOrigins": {
+          "policy": "psc0-declaration-origins/1",
+          "actualParsedModulesRetained": 64,
+          "moduleCount": 64,
+          "sourceDeclarationCount": 1705,
+          "coreDeclarationCount": 2568,
+          "normalizationCount": 50,
+          "semanticCorrespondenceDischarged": false
+        },
+        "preparationCount": 1,
+        "canonicalAdmissionEncodingCount": 1,
+        "environmentReconstructionCount": 0,
+        "portableIrCheckCount": 1,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      },
+      "nativeIrPassMessages": [
+        "PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type",
+        "PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR",
+        "PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected",
+        "PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR",
+        "PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved",
+        "PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit",
+        "PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit",
+        "PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count",
+        "PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted",
+        "PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity",
+        "PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype",
+        "PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant"
+      ],
+      "N1": {
+        "typeScriptGenerated": true,
+        "typeScript7CompilationCompleted": true,
+        "generatedCompilerLoaded": true,
+        "conformanceCompleted": false,
+        "successReceiptProduced": false,
+        "basis": "The exact stack reaches nativeCandidate line936 only after compileTypeScript at924 and loadCompiler at932 in sh1-qualify.mjs blob562f8c0e60a599fadde581f4a6deca502e9202b5. The final N1 receipt is constructed after the uncompleted conformance calls."
+      },
+      "currentGenerationCandidate": "native-generated-N1-host-conformance-incomplete",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "positiveFlatTailExecution": "not-reached-before-source-conformance-assertion",
+      "failureEvidence": {
+        "path": "attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/development-gate-failure.json",
+        "blob": "ff69f080d6fa1421e36e7db99a60ea4276d3e701",
+        "sha256": "09af088183bef10081851fcb1b498aab51a5d58507629e19b11413fe71b67ce2",
+        "bytes": 14727
+      },
+      "log": {
+        "path": "attempts/fb8f8076df3ed8708f927f88aa2d32febbfa89dc/compiler-job.log",
+        "blob": "0239d0ea507f23f560afd3ca84ec8dda3108c935",
+        "sha256": "a2344d5a49a849f5795998ce04fa265e4ebc3800d0dc834feeeffc1fc51da9af",
+        "bytes": 893300
+      },
+      "artifacts": [
+        {
+          "id": 11652425108,
+          "name": "psc0-sh1-ts7.0.2-fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+          "bytes": 1752868,
+          "digest": "sha256:35060aaceff9dd6366d961bd6f92737cffe0d5366ab8fce3140e63aba3bc6224",
+          "createdAt": "2026-10-10T00:09:51Z",
+          "expiresAt": "2026-11-09T00:09:50Z",
+          "sourceCommit": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+          "runId": 38007714076,
+          "archiveInspected": false
+        }
+      ],
+      "coldRecovery": {
+        "runId": 38007714034,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "typescriptProfile": {
+        "version": "7.0.2",
+        "status": "passed-step8"
+      },
+      "scopeOfFailure": "The full native compiler source/target/original-IR checks pass and N1 is generated, TS7-compiled and loaded. Its bounded source conformance rejects the obsolete empty-function outer-call expectation. No completed N1 receipt or C1/C2/C3/provider result exists.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1572,16 +1739,16 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "enclosing-callback-local-self-prefix-correction-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "priorCompilerSource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
-    "priorAttemptRunId": 38006688264,
-    "manifest": "reviewed-candidates/worker-self-call-prefix-repair.json",
-    "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
-    "sourceFiles": 1,
-    "productionLeanChanges": 1,
+    "status": "enclosing-empty-source-return-assertion-correction-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "priorCompilerSource": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "priorAttemptRunId": 38007714076,
+    "manifest": "reviewed-candidates/empty-source-return-boundary.json",
+    "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c",
+    "sourceFiles": 2,
+    "productionLeanChanges": 0,
     "cumulativeReviewedSourceFiles": 46,
-    "hostChanges": 0,
+    "hostChanges": 2,
     "trigger": "[sh1-qualify]",
     "repeatColdRecovery": false,
     "repeatNativeOnlyCheckpoint": false,
@@ -1626,5 +1793,5 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T00:03:34Z"
+  "updatedAtUtc": "2026-10-10T00:20:34Z"
 }

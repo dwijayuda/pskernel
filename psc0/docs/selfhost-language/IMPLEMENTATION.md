@@ -42,55 +42,21 @@ proof and measured TypeScript phase.
 
 ## Current strict SH/1 source integration
 
-The practical migration remains merged at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
-Canonical/recursion source656ed78, native alpha45d314b, seven-host completion00e963b,
-and flat-pattern correction9640e4 are integrated on psc0/strict-sh1-v1.
+The practical migration is already merged at **ed5d00aca0743bde583b45fe7756dd494ac3960f**. Continue the authorized strict SH/1 qualification and merge; do not repeat the practical merge or promote a seed.
 
-[Run38006688264](https://github.com/dwijayuda/pskernel/actions/runs/38006688264)
-at9640e4 passed steps18–23, including native build/regressions/checked seed,
-grammar/import/workspace, replay and authenticated R migration. The prior nested
-pattern refusal is cleared. Step24 then refused source elaboration of
-Ps.Erasure.Expr.psEraseRuntimeExprWithFuelWorker with structuralRecursionArity.
-The two explicit declaration parameters were followed by two returned-function
-arguments in the same flattened self application. N1 was not generated,
-C1/C2/C3 did not start, provider114077308038 skipped, and positive flat-tail
-IR coverage was not reached. Exact attempt11 evidence and log are retained.
+Latest published source before this enclosing host correction is **fb8f8076df3ed8708f927f88aa2d32febbfa89dc**, root **b93eaa340ff8955596ddc0376835386dd7f7c0d0**, PSC0 tree **30758899192080d3f6ffc5182f53a2c65a6d1c8a**. Production Expr remains **b4af2687c1b94e85014e323e5325385f139d4015**, SHA256 **88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15**, 138189 bytes. This correction changes only the source-conformance host and its evidence binder.
 
-The enclosing [callback-local self-prefix correction](strict/reviewed-candidates/worker-self-call-prefix-repair.json)
-changes only that worker. It binds the recursive function using exactly
-environment and remaining inside the existing smaller callback, then applies
-the local to the same nested scope and expression. The original construction
-and argument/error demand schedule is retained; no work crosses a lambda,
-no cross-callback result is shared, and no eager remaining-fuel closure chain
-is introduced. Parentheses cannot supply the boundary because the parser
-flattens application spines. The actual header, root-child IDs, scope clearing,
-zero case and body are unchanged. No validator or syntax is relaxed.
-Final Expr is b4af2687c1b94e85014e323e5325385f139d4015,138189 bytes.
+[Run 38007714076](https://github.com/dwijayuda/pskernel/actions/runs/38007714076), compiler job **114080256053**, passed steps 18–23 and then the full native strict source, target and original-IR checks: **64 modules, 1705 source declarations, 50 normalizations, 64829 IR expressions, zero findings**, plus all 15 native IR cases. The previous worker self-call arity refusal is cleared. **N1 was generated, TypeScript 7 compiled and loaded.** Step 24 subsequently failed in observeEmptySource at the obsolete assertion `letE !== call`. N1 conformance and its final receipt were not completed; C1/C2/C3 did not start. Provider **114080662313** and cold **38007714034** skipped. Attempt 12 retains exact failure blob **ff69f080d6fa1421e36e7db99a60ea4276d3e701** and full log **0239d0ea507f23f560afd3ca84ec8dda3108c935**; the first eleven attempts remain unchanged.
 
-The complete30-production-file source audit covers980 declarations,
-382recursive declarations,539direct self references and109 parenthesized self
-calls. This is the only mismatch; there are no bare/undersaturated self references
-or other grouped overapplications. The correction leaves the previously reviewed
-Array.foldl pattern/body and all hosts/fixtures unchanged. Exact source transport
-composes the original46-code-file inventory with e91's e3ed→a4d pattern repair
-and the current a4d→b4af callback-local repair.
+The frozen sh1EmptyFunction source returns `nomatch value` with result `Nat -> Nat`; it contains no authored application. The current compiler opens only the actual lambda prefix, so the declaration has one runtime parameter `value` and directly returns the typed empty `letE`. Its result arrow must not be converted into a new parameter and call. The [empty source return review](strict/reviewed-candidates/empty-source-return-boundary.json) binds the two exact host changes: gate **fec9c43e4bd792aef81983d1dbf100a5b6b2beaa**, binder **b0b080eea2c353640f12d744e599737d71f9c4f6**. All four empty-source declarations now require direct body identity, exact declaration/local result types and exact runtime parameter lists; Fresh alone retains the second `emptyResult` parameter. The binder authenticates the added declarationResultType/bodyIsTypedEmptyResult observations. There is no wrapper peeling or new compilation. The complete 34-host-script assertion-class audit found this one obsolete computed-result eta assertion. Separate directly authored typed-empty-callee IR, untyped-callee refusal, five empty ABI signatures and computed-scrutinee once/original-fault coverage remain unchanged.
 
-The [final33-row/27-stage disposition map](strict/reviewed-candidates/final-disposition-map.json)
-and independent correspondence/stage/activation reviews are attached. All source,
-argument and receipt mappings are CLEAR in the stated domain; no new source or
-gate requirement emerged. ER-06's stale empty-layout domain sentence will be
-updated with final disposition. The existing N/GROUP/ER/EV/TS, ten-interface
-cross-family and11-stage source/runtime arguments remain frozen and transported.
-All row flags remain open pending exact successful qualification and provider.
+The production correction chain remains frozen: the flat List-pattern packet **e91fcacaa7c5a73c1d1fba8c30d213faee3fda83** maps Expr e3ed to a4d; the callback-local self-prefix packet **4c5d8ecca42e10c6da6f19f6118a829c173c9d4d** maps a4d to b4af. The latter binds the two-parameter recursive result inside the original callback, before the unchanged nested-scope/value application. No computation crosses a lambda and no eager remaining-fuel factory is introduced. Its complete 30-file self-call audit remains valid. The cumulative canonical/recursion inventory stays **46 code files: 30 production Lean and 16 hosts/fixtures**, with the two new host overlays. It is not the entire strict branch diff from main.
 
-The current source requests one full **[sh1-qualify]** run. No new workflow step,
-compiler call site, native-only checkpoint or cold rerun is added. Replay fixes
-have passed; the separate3-entry/12-observation optimized-tail block still awaits
-execution alongside61 old IR behavior observations and38 refusals. This source
-correction claims no measured speed/heap result or machine-checked theorem.
-Keep produced receipt nonclaims and hashed runtime-contract/psconfig bytes
-unchanged; compose justified release claims externally. R stays selected,
-authoritative .lean/new-only ps-0.9-r3/TS7-only tooling remain.
+The general N/GROUP/ER/EV/TS arguments, ten-interface cross-family review and eleven-stage source/runtime review are complete in their stated domain. The final mapping **697c94b2722a6191537b714f71f629713637b30a**, manifest **419564764abc492816833a643af40b027b0fd897**, correspondence review **20f0116df23d4304e3b7e8f9da5ff39599eaf037** and stage/activation review **f6cc608044094aebe90609cb140d9cd00825ebf4** are attached. All **33 correspondence rows and 27 stage obligations remain open** pending exact successful execution and the supported final disposition. ER-06's stale empty-layout domain sentence must be corrected at disposition. Frozen advisory maps keep their historical pins; the active final record must compose all current source and host transports.
+
+The enclosing commit requests one full **[sh1-qualify]** run. Discover the actual commit and matching Actions head_sha, then continue N1/C1/C2/C3, four fixed-point products/native parity, independent provider, retained evidence, explicit 33/27 dispositions and authorized merge. The three-entry/twelve-observation positive flat-tail block still awaits execution alongside the original 61 IR behaviors and 38 refusals. No extra native-only or cold run is needed; passed cold run 37983663908 and its seven inputs are unchanged.
+
+Compose justified final claims in a separate release-qualification record. Preserve produced narrow false flags, runtime-contract and psconfig recipe bytes, historical proof anchors, selected R and the frozen provider. Keep authoritative handwritten **.lean through the owned frontend**, **ps-0.9-r3/new-only**, **Lean 4.34.0 / Node 22.23.3 / TypeScript 7.0.2**. TypeScript 5 is retired. Bulk refactoring, new syntax/deeper recursion, .ps source-authority migration and seed promotion stay deferred. No machine-checked compiler-wide theorem or measured speed/heap improvement is claimed.
 
 
 Function values use nested unary runtime arrows throughout generic arguments,

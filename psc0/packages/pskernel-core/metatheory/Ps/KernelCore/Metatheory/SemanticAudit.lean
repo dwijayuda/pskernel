@@ -25,6 +25,10 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.annotationValid_inst_iff,
+    ``PsKernelSemantics.SetModel.annotationValid_open_fresh,
+    ``PsKernelSemantics.Reference.ensureSort_mem,
+    ``PsKernelSemantics.Reference.forall_trace_model_from_visits,
     ``PsKernelSemantics.SetModel.models_app_of_annotationValid,
     ``PsKernelSemantics.SetModel.models_beta_of_annotationValid,
     ``PsKernelSemantics.SetModel.application_result_annotationValid,

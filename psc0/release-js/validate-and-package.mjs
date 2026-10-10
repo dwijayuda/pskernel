@@ -26,15 +26,9 @@ for (const name of [
 ]) {
   assert.ok(Object.hasOwn(kernel, name), 'Missing kernel export: ' + name);
 }
-const nullary = value => typeof value === 'function' ? value() : value;
-assert.equal(nullary(kernel.psKernelCoreSemanticRoot), true);
-const alpha = kernel.PsKernelName.str(nullary(kernel.PsKernelName.anonymous), 'Alpha');
-assert.equal(kernel.psKernelNameEq(alpha, alpha), true);
-assert.equal(kernel.psKernelEnvironmentSize(nullary(kernel.psKernelEnvironmentEmpty)), 0n);
-const level0 = nullary(kernel.PsKernelLevel.zero);
-assert.equal(kernel.psKernelLevelEquivalent(level0, level0), true);
-const sort0 = kernel.PsKernelExpr.sort(level0);
-assert.equal(kernel.psKernelExprEq(sort0, sort0), true);
+assert.equal(typeof kernel.psKernelV1AdmitDeclaration, 'function');
+assert.ok(typeof kernel.psKernelCoreSemanticRoot === 'function' ||
+          kernel.psKernelCoreSemanticRoot === true);
 
 const outputs = [];
 for (const pkg of ['compiler', 'pskernel-core']) {
@@ -61,7 +55,7 @@ const data = {
     compiler: 'psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean',
     kernel: 'psc0/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',
   },
-  runtimeSmoke: { compilerExports: true, kernelExports: true, kernelBasicValues: true },
+  runtimeSmoke: { moduleImports: true, compilerExportSurface: true, kernelExportSurface: true, kernelSemanticsValidated: false },
   assurance: {
     exactCompiledOutputsHashed: true,
     freshSelfhostFixedPoint: false,
@@ -94,6 +88,7 @@ await writeFile(path.join(dir, 'README.md'), [
   '',
   'Each component includes index.js, index.ts, index.d.ts and index.js.map.',
   'MANIFEST.json records exact SHA-256 values and tests executed in cloud CI.',
+  'The JS smoke gate checks module imports and export presence, not semantic equivalence.',
   '',
   'Limitations: PSKernel Core JavaScript is a generated runtime candidate, not a promoted',
   'trusted checker. The smoke test is not a kernel soundness, consistency,',

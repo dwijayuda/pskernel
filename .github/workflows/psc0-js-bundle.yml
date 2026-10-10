@@ -71,7 +71,7 @@ jobs:
           mkdir -p dist/js-bundle/psc0-js-release/pskernel-core
           lake exe psc1 build packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean --out dist/js-bundle/psc0-js-release/compiler/index.js
           lake exe psc1 build packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean --out dist/js-bundle/psc0-js-release/pskernel-core/index.js
-      - name: Smoke-test executable JS exports, kernel basics, and record exact hashes
+      - name: Smoke-test executable JS module imports/exports and record exact hashes
         run: node release-js/validate-and-package.mjs
       - name: Upload bundle as a GitHub Actions ZIP artifact
         uses: actions/upload-artifact@v4

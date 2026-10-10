@@ -13,11 +13,12 @@ routing for the existing KernelCore source root; no kernel source is altered.
 
 GitHub Actions uploads one ZIP artifact containing compiler/, pskernel-core/,
 package.json, README.md and MANIFEST.json. Before upload it verifies the
-compiled exports and basic kernel environment/name/type constructors, and
+compiled module imports and required exported APIs, and
 hashes every output. It fails instead of publishing if compilation or smoke
 testing fails.
 
 This is an executable candidate, not a formally qualified runtime checker.
+The smoke gate does not claim kernel operation-level or differential conformance.
 The workflow does not assert kernel metatheory, native-versus-JS differential
 compatibility, new self-host fixed point, full PSCV support, or checker promotion.
 

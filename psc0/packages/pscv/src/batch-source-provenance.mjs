@@ -34,6 +34,24 @@ export function reviewBatchSourceBlobs({typedReport,upstreamCommit,sourceFiles})
    typedReport?.verifiedExecutableAuthorized!==false||
    upstreamCommit!==leanCommit||
    !Array.isArray(sourceFiles)||sourceFiles.length>100)fail('PINNED_REPORT');
+ // Recompute the previous typed report's own identity. A caller may not
+ // preserve its printed digest while substituting names, modules or types.
+ const originalIdentity={
+   protocol:typedReport.kind,
+   leanVersion:typedReport.leanVersion,
+   normativeSha256:typedReport.normativeSha256,
+   arithmeticObservationSha256:typedReport.arithmeticObservationSha256,
+   selectedNames:typedReport.selectedNames,
+   selectedDeclarations:typedReport.selectedDeclarations,
+ };
+ if(sha(JSON.stringify(originalIdentity))!==expectedImportTypes||
+    typedReport.selectedNames?.length!==45||
+    typedReport.selectedDeclarations?.length!==45||
+    typedReport.selectedDeclarations.some((x,i)=>x.name!==typedReport.selectedNames[i]||
+      x.standardRegistrationApproved!==false||
+      x.genericToConcreteDependencyProved!==false) ||
+    typedReport.completeStandardEnvironment!==false||
+    typedReport.pscvVerified!==false)fail('TYPED_REPORT_MUTATION');
  const declarations=typedReport.selectedDeclarations;
  const modules=[...new Set(declarations.map(x=>x.importedModule))].sort(compare);
  if(modules.length<1||sourceFiles.length!==modules.length)fail('MODULE_COVERAGE');

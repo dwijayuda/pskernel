@@ -36,6 +36,7 @@ import Ps.KernelCore.Metatheory.SemanticEnvironmentConsistency
 import Ps.KernelCore.Metatheory.SemanticEnvironmentAdmission
 import Ps.KernelCore.Metatheory.SemanticReferenceAxiomAdmission
 import Ps.KernelCore.Metatheory.SemanticPublicAxiomAdmission
+import Ps.KernelCore.Metatheory.SemanticReadingExtension
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -57,6 +58,11 @@ run_cmd do
     ``PsKernelSemantics.SetModel.referenceAddAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.referenceDispatchAxiom_returns_add,
     ``PsKernelSemantics.SetModel.referenceCheckedAxiom_dispatch_result,
+    ``PsKernelSemantics.SetModel.substLevels_extendConstant,
+    ``PsKernelSemantics.SetModel.StoredConstantAvoids,
+    ``PsKernelSemantics.SetModel.storedConstant_extendConstant,
+    ``PsKernelSemantics.SetModel.environmentModel_extendConstant,
+    ``PsKernelSemantics.SetModel.addUnchecked_model_with_new_reading,
     ``PsKernelSemantics.SetModel.referenceAdmitAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.referenceDispatchAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.add_success_preserves_model,

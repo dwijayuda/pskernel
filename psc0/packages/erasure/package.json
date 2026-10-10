@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/erasure",
-  "version": "0.1.0-psc0.0",
+  "version": "0.1.0-psc0.1",
   "description": "ProofScript PSC0 erasure source and JavaScript runtime package",
   "type": "module",
   "private": false,
@@ -28,11 +28,11 @@
     "README.md"
   ],
   "dependencies": {
-    "@proofscript/compiler-ir": "0.1.0-psc0.0",
-    "@proofscript/core": "0.1.0-psc0.0",
-    "@proofscript/environment": "0.1.0-psc0.0",
-    "@proofscript/meta": "0.1.0-psc0.0",
-    "@proofscript/compiler": "0.1.0-psc0.0"
+    "@proofscript/compiler-ir": "0.1.0-psc0.1",
+    "@proofscript/core": "0.1.0-psc0.1",
+    "@proofscript/environment": "0.1.0-psc0.1",
+    "@proofscript/meta": "0.1.0-psc0.1",
+    "@proofscript/compiler": "0.1.0-psc0.1"
   },
   "proofscript": {
     "npmArchitecture": "psc0-monolithic-runtime-with-scoped-source-packages/1",

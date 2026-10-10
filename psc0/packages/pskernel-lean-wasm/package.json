@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-lean-wasm",
-  "version": "0.1.0-psc0.0",
+  "version": "4.34.0",
   "description": "ProofScript PSC0 pskernel-lean-wasm kernel provider",
   "type": "module",
   "private": false,

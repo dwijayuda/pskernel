@@ -34,6 +34,7 @@
       "lean"
     ],
     "publishingRequiresBuild": true,
-    "runtimeTrust": "qualified bounded JavaScript admission candidate; formal soundness not proven"
+    "runtimeTrust": "qualified bounded JavaScript admission candidate; formal soundness not proven",
+    "kernelQualification": "release-gated JS checker; not a formal soundness proof"
   }
 }

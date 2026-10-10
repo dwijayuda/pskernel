@@ -26,11 +26,53 @@ theorem referenceAddTheorem_returns_insert
     (run : @psKernelAddTheorem psKernelReferenceCachePolicy
       fuel env value maxDepth maxNatSize = .ok next) :
     psKernelEnvironmentAdd env (.thmInfo value) = .ok next := by
-  unfold psKernelAddTheorem at run
-  repeat' first
-    | exact run
-    | (solve | simp_all)
-    | split at run
+  cases hHeader : @psKernelCheckConstantBaseWithSession
+      psKernelReferenceCachePolicy fuel
+      (psKernelMkCheckerSession env value.base.levelParams
+        PsKernelDefinitionSafety.safe maxDepth maxNatSize) value.base with
+  | error err =>
+      simp [psKernelAddTheorem, hHeader] at run
+  | ok afterHeader =>
+      cases hProp : @psKernelSessionIsProp psKernelReferenceCachePolicy
+          fuel afterHeader value.base.type with
+      | error err =>
+          simp [psKernelAddTheorem, hHeader, hProp] at run
+      | ok propResult =>
+          by_cases hIsProp : Prod.fst propResult = true
+          · cases hGuard : psKernelCheckNoMVarNoFVar value.value with
+            | error err =>
+                simp [psKernelAddTheorem, hHeader, hProp, hIsProp,
+                  hGuard] at run
+            | ok valid =>
+                cases hLevels : psKernelCheckLevelParams
+                    value.value value.base.levelParams with
+                | error err =>
+                    simp [psKernelAddTheorem, hHeader, hProp, hIsProp,
+                      hGuard, hLevels] at run
+                | ok levels =>
+                    cases hProof : @psKernelSessionCheck psKernelReferenceCachePolicy
+                        fuel (Prod.snd propResult) value.value with
+                    | error err =>
+                        simp [psKernelAddTheorem, hHeader, hProp, hIsProp,
+                          hGuard, hLevels, hProof] at run
+                    | ok valueType =>
+                        cases hDefEq : @psKernelSessionIsDefEq
+                            psKernelReferenceCachePolicy fuel
+                            (Prod.snd valueType) (Prod.fst valueType)
+                            value.base.type with
+                        | error err =>
+                            simp [psKernelAddTheorem, hHeader, hProp,
+                              hIsProp, hGuard, hLevels, hProof,
+                              hDefEq] at run
+                        | ok equal =>
+                            by_cases hEqual : Prod.fst equal = true
+                            · simpa [psKernelAddTheorem, hHeader, hProp,
+                                hIsProp, hGuard, hLevels, hProof,
+                                hDefEq, hEqual] using run
+                            · simp [psKernelAddTheorem, hHeader, hProp,
+                                hIsProp, hGuard, hLevels, hProof,
+                                hDefEq, hEqual] at run
+          · simp [psKernelAddTheorem, hHeader, hProp, hIsProp] at run
 
 /-- The actual reference theorem-admission transaction preserves indexed
 declaration history WHEN its accepted proof's type already has the exact

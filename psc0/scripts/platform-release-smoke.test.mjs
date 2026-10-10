@@ -159,5 +159,6 @@ test('missing tarballs still produce failed evidence without claiming the clean 
   assert.equal(result.shellRuntime, null);
   assert.deepEqual(result.observations, []);
   assert.deepEqual(result.extensionDemos, []);
+  assert.equal(result.libraryEvidence, null);
   assert.match(result.failure.message, /ENOENT/u);
 });

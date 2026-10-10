@@ -47,3 +47,7 @@ Log: Lean `4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; six s
 ## G1 in progress (unqualified until separately completed CI)
 
 New `PSKernelFast/Level.lean` represents raw `zero`, `succ`, `max`, `imax`, `param`, `mvar` syntactically, without implementing semantic level equivalence, cumulativity or checking. `RawExpr.sort` and constant universe args carry this representation. Add a negative-regression-style structural distinction between `imax 0 u` and `succ (imax 0 u)`, a known dangerous comparison class. Do NOT claim this syntactic test establishes universe soundness. Cloud validation requires a new exact SHA run.
+
+### G1 first cloud attempt — FAILED, retained
+
+[Run 38093952606](https://github.com/dwijayuda/pskernel/actions/runs/38093952606), source `c2a182de91d1916b0f31e422ef89d5e9000d87ba`, job `114335872910`, failed before Lean elaboration of the new level grammar: Lake reported missing `PSKernelFast/Level.olean`, because `lean_lib PSKernelFast` listed only `PSKernelFast.Core` as explicit root. **Architectural root cause:** the package dependency graph failed to include its newly imported module. Corrected by registering both modules in `lakefile.lean`. Requalify the whole G1 focused test from the corrected source before calling any part of G1 passed.

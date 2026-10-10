@@ -38,6 +38,7 @@ jobs:
       # Audit one exact shared session-grade-to-core execution trace and atomic model cases.
       # Lift real forall, checked app and checked lambda recursion traces into public sessions.
       # Close the transparent metadata accepting case over exact smaller-fuel inference.
+      # Context entry case already rewrites to reflexivity in the successful mdata branch.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

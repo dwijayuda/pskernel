@@ -52,7 +52,7 @@ theorem inferCore_mdata_trace
               ite_self, hd, hb, infer_publication_noop,
               Except.ok.injEq, Prod.mk.injEq] using run
           rcases same with ⟨rfl, rfl⟩
-          exact ⟨entered, hd, hb⟩
+          exact ⟨entered, rfl, hb⟩
 
 /-- Metadata carries the same exact interpreted term, selected type and
 hereditary validity facts; it is semantically transparent by construction. -/

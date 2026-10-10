@@ -48,6 +48,7 @@ import Ps.KernelCore.Metatheory.SemanticReferenceSessionMData
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionAtomic
 import Ps.KernelCore.Metatheory.SemanticReadingExtension
 import Ps.KernelCore.Metatheory.SemanticFreshAdmission
+import Ps.KernelCore.Metatheory.SemanticGrowingAxiomTrace
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -81,6 +82,9 @@ run_cmd do
     ``PsKernelSemantics.SetModel.newConstant_from_assignment,
     ``PsKernelSemantics.SetModel.successfulAdd_model_with_fresh_reading,
     ``PsKernelSemantics.SetModel.successfulAdd_no_stored_literalFalse,
+    ``PsKernelSemantics.SetModel.referenceAdmitAxiom_constructs_reading,
+    ``PsKernelSemantics.SetModel.GrowingModeledAxiomTrace.preserves,
+    ``PsKernelSemantics.SetModel.growingPublicAxiomTrace_no_literalFalse,
     ``PsKernelSemantics.SetModel.referenceAdmitAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.ModeledReferenceAxiomTrace.preserves,
     ``PsKernelSemantics.SetModel.modeledPublicAxiomTrace_no_literalFalse,

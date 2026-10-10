@@ -44,6 +44,7 @@ import Ps.KernelCore.Metatheory.SemanticReferenceTheoremTrace
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionSort
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionConst
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionGrade
+import Ps.KernelCore.Metatheory.SemanticReferenceSessionMData
 import Ps.KernelCore.Metatheory.SemanticReadingExtension
 
 /-!
@@ -96,6 +97,10 @@ run_cmd do
     ``PsKernelSemantics.Reference.referenceSessionGrade_forall_trace,
     ``PsKernelSemantics.Reference.referenceSessionCheck_app_trace,
     ``PsKernelSemantics.Reference.referenceSessionCheck_lambda_trace,
+    ``PsKernelSemantics.Reference.inferCore_mdata_trace,
+    ``PsKernelSemantics.Reference.checkedReading_mdata,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_mdata_trace,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_mdata_checked_reading,
     ``PsKernelSemantics.SetModel.referenceDispatchAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.add_success_preserves_model,
     ``PsKernelSemantics.SetModel.no_stored_constant_of_literalFalse,

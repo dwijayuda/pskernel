@@ -1,5 +1,7 @@
 # PSC0 npm distribution — AI work state
 
+**Architecture design checkpoint (2026-10-11):** [`PSC0-ARCH/1`](docs/PSC0_SOUNDNESS_SECURE_EXTENSIBLE_ARCHITECTURE.md) was committed at `18fae4c991098ea4ffb86c8796a9a97053529b7b` as a *design-only target*. No compiler/kernel implementation or proof acceptance changed. Follow P0/P1/P2 before asserting unified checked-emission or installed npm self-hosting. Preserve separate Lean 4.35 kernel-proof work. 
+
 Repository: https://github.com/dwijayuda/pskernel
 Branch: psc0/npm-modular-packages-v1
 Base: psc0/selfhost-compiler-kernel-js-bundle-v1 @ 230a69d038c238347d3fe0de5de72f979fb98205

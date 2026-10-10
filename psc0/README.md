@@ -1,5 +1,7 @@
 # PSC0 compiler and self-host implementation
 
+**New normative target (design only):** [PSC0 soundness and secure extensibility target architecture](docs/PSC0_SOUNDNESS_SECURE_EXTENSIBLE_ARCHITECTURE.md). The design specifies a single checked-build authority, independent JS-kernel proof obligations, secure npm extension boundaries, and exact P0–P6 migration gates. Its target design is not evidence that those gates are implemented. Existing historical receipts retain their original meaning.
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 This directory began as the preserved 2026-10-03 compiler-only bootstrap snapshot, copied from

@@ -1,5 +1,7 @@
 # ProofScript PSC0 npm packaging and libraries
 
+> **Architecture target:** [PSC0 soundness, secure and extensible compiler architecture](PSC0_SOUNDNESS_SECURE_EXTENSIBLE_ARCHITECTURE.md) (PSC0-ARCH/1). This packaging guide describes the present npm plan; the linked target sets the future checked-artifact authority, plugin isolation, assumption policy and independent verification gates. It is **not** a claim that P0–P6 have already passed.
+
 ## Installation principle
 
 An npm installation of `proofscript` supplies the usable `psc` compiler, the bounded self-host compiler

@@ -53,6 +53,7 @@ test('project descriptors bind exact selected source and public name coverage', 
     item => { item.modules[0].exports[0].name = 'unselected'; },
     item => { item.modules[0].exports[0].binding = 'x; process.exit()'; },
     item => { item.modules[0].exports[0].kind = 'proof'; },
+    item => { item.modules[1].exports[0].binding = item.modules[0].exports[1].binding; },
     item => { item.extra = true; },
   ];
   for (const change of malformed) {

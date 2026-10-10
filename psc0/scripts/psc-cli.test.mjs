@@ -281,7 +281,8 @@ test('examples lists shipped source locations without invoking compiler or npm c
   const run = context.invoke(['examples', '--json']);
   assert.equal(run.status, 0, run.stderr);
   const { examples } = JSON.parse(run.stdout);
-  assert.deepEqual(examples.map(item => item.name), ['checked-nat', 'existing-typescript', 'rejected-source']);
+  assert.deepEqual(examples.map(item => item.name).sort(),
+    ['checked-library', 'checked-nat', 'existing-typescript', 'rejected-source']);
   for (const example of examples) {
     assert.equal(example.path, path.join(context.installed, 'examples/platform', example.name));
   }

@@ -1,21 +1,29 @@
 # PSC0 T1 checked TypeScript library adoption — implementation active
 
-Updated: 2026-10-09 23:47 UTC / 10 October 2026 Asia/Jakarta.
+Updated: 2026-10-10 UTC. T1 implementation is committed; qualification is active.
 
 ## User-authorized scope
 
 The user accepted the next milestone: two pure acyclic ProofScript modules, one checked project bundle, mechanically thin neighboring TypeScript facades, and one handwritten TypeScript consumer. Preserve explicit source ownership and selected public exports through preparation/lowering; enforce a bounded runtime ABI; publish the complete bundle/facade generation through the existing protected supervisor. This is T1, before full psdev watch. The user also asks whether the same PSKernel Core can execute as generated JavaScript before Wasm. Investigate the existing TS7 path and qualify any proposed provider separately; do not equate historical bounded JS demonstrations with a qualified current provider.
 
-Integration branch: psc0/platform-t1-v1, created from fresh platform-v1 HEAD 4265f1d614d15fc9e6ed133a923779ba7af16db8. No implementation or runtime qualification has completed at this checkpoint.
+Integration branch: psc0/platform-t1-v1, created from fresh platform-v1 HEAD 4265f1d614d15fc9e6ed133a923779ba7af16db8. Initial implementation c40070a6c0afb4b92fdf29f7294f3d25c80f2f0e is committed. The first focused run38007382367 passed 61 protected host/session/publication/interface tests and source-profile checks, then failed before compiler conformance because Ps.BackendTs.Project was omitted from the explicit Lake root list. Compiler-slice fix ea89d869f4a49efa16e9c9248a29bc7f3a743164 registers the module; this follow-up integrates it with review corrections. No T1 compiler fixed point or installed release has yet qualified.
 
-## Planned implementation and ownership
+## Implementation and ownership
 
 - Root owns checked host/session/source snapshot, CLI policy, output ownership/publication, integration and this handoff.
 - Compiler slice owns explicit owned-project preparation and checked export/ABI emission. Existing self-host entry points remain available; new metadata must stay in the supported portable source profile. One bundle provides shared runtime identity now; true separate compilation and separately packaged shared runtime are later work.
 - Qualification slice owns focused cloud compilation, successor fixed-point qualification, the shipped two-module example and installed Windows/Linux integration evidence.
 - Core-JS slice audits same-source generation, historical evidence and a bounded cloud feasibility probe. Kernel algorithms/metatheory/provider capabilities are not incidental implementation scope.
 
-Define the concrete export/ABI contract first. Start with pure acyclic local modules and documented TypeScript settings. Unsupported exports or foreign values must fail explicitly. Extend receipt and ownership coverage to every generated file; handwritten files survive, and no successful receipt may describe a partial generation. A failed source revision must not become a newly accepted output. Full watch scheduling, broader npm/workspace library resolution, LSP, complete package renaming and Wasm default promotion are subsequent milestones.
+The implemented profile is psc-ts-library/1: explicit proofscript.exports in the project package.json selects names from each source's own authored/elaborated declarations. One project preparation and native admission produce a checked original IR, an exact public descriptor, one TS bundle and selected neighboring facades. The bounded ABI covers Nat/Int bigint, Bool, scalar-valid String, Unit and monomorphic opaque datatype handles; implicit/dependent/generic/higher-order public signatures fail explicitly. The host owns source/config freshness, descriptor coverage, target validation and the completion receipt. Use pure acyclic local modules and the example's documented TypeScript settings. Unsupported exports or foreign values must fail explicitly. Extend receipt and ownership coverage to every generated file; handwritten files survive, and no successful receipt may describe a partial generation. A failed source revision must not become a newly accepted output. Full watch scheduling, broader npm/workspace library resolution, LSP, complete package renaming and Wasm default promotion are subsequent milestones.
+
+## Review corrections and pending gates
+
+- Separate publisher staging into fixed next/, previous/ and restore/ buckets. Project-relative names must never overwrite old backup bytes or alias rollback paths. A real rollback fixture covers previous/Quantity.ts and Quantity.ts.restore/Main.ts together.
+- Refuse conflicting directory capitalization in the portable project layout before acquiring leases. Validate globally unique generated public bindings.
+- Integrate installed smoke/source integration from c43f36491a00c7c05c791e04f597492f15941e4e. These tests are implemented, not yet passing evidence. Update the CLI catalog test to four examples.
+- Next: pass focused native-generated compiler conformance, then one coherent [sh1-qualify] checkpoint for the changed closure and C3 project API, then pin the new qualified artifact and build/qualify preview.3 on Windows/Linux Node22/26. Do not reuse old F qualification for changed source.
+- Core-JS J0 is separate on psc0/kernel-js-probe-v1, exact diagnostic b94a6c552d8cc208ce2202527f7f30e28e8836ee / run38007233891. It authenticates F/current native Core, passes a seven-case native public admission baseline, and prepares 20 Core modules before refusing psKernelCheckerStateExitLocalScope in Checker/State.lean. Nat.max is absent from F's standard environment. No current JS kernel artifact exists. Align admitted standard definitions, elaboration/runtime and pinned provider prelude before another unchanged-Core probe; do not modify the scope-exit kernel algorithm to pass generation. Historical run37333010780 demonstrates older same-source TS7->JS feasibility only.
 
 ## Preserved baseline and acceptance
 

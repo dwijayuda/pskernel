@@ -182,6 +182,7 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument, p
   let shellRuntime = null;
   let nodeOnlyExecutionPath = false;
   const extensionDemos = [];
+  let libraryEvidence = null;
 
   function run(command, args, options = {}) {
     const result = spawnSync(command, args, {
@@ -339,8 +340,8 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument, p
 
     const exampleList = JSON.parse(success(invoke(['examples', '--json']),
       'installed example catalog is available').stdout);
-    assert.deepEqual(exampleList.examples.map(item => item.name),
-      ['checked-nat', 'existing-typescript', 'rejected-source']);
+    assert.deepEqual(exampleList.examples.map(item => item.name).sort(),
+      ['checked-library', 'checked-nat', 'existing-typescript', 'rejected-source']);
     for (const item of exampleList.examples) {
       assert.equal(item.path, path.join(installed, 'examples/platform', item.name));
       assert.equal(typeof item.description, 'string');
@@ -438,6 +439,166 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument, p
     assert.deepEqual(await readFile(path.join(project, 'src/Main.checked.json')), savedReceipt);
     observations.push('invalid source cannot replace the previous completed output');
 
+
+    const libraryExample = path.join(installed, 'examples/platform/checked-library');
+    const libraryFiles = ['README.md', 'package.json', 'tsconfig.json',
+      'src/Quantity.ps', 'src/Main.ps', 'src/consumer.ts'];
+    async function copyLibrary(directory) {
+      for (const file of libraryFiles) {
+        const target = path.join(directory, file);
+        await mkdir(path.dirname(target), { recursive: true });
+        await copyFile(path.join(libraryExample, file), target);
+      }
+    }
+    const libraryProject = path.join(temporary, 'checked library project');
+    await copyLibrary(libraryProject);
+    const libraryMetadataBytes = await readFile(path.join(libraryProject, 'package.json'));
+    const libraryMetadata = JSON.parse(libraryMetadataBytes.toString('utf8'));
+    assert.equal(libraryMetadata.devDependencies.proofscript, release.version);
+    assert.equal(libraryMetadata.devDependencies.typescript, '7.0.2');
+    const libraryConfig = libraryMetadata.proofscript;
+    assert.equal(libraryConfig.entry, 'src/Main.ps');
+    assert.deepEqual(libraryConfig.exports, {
+      'src/Quantity.ps': ['Quantity', 'makeQuantity'],
+      'src/Main.ps': ['readQuantity', 'sameQuantity'],
+    });
+    const libraryBundle = libraryConfig.out;
+    const libraryReceiptPath = libraryBundle.replace(/\.ts$/u, '.checked.json');
+    const facadeSources = Object.keys(libraryConfig.exports);
+    const facadeFiles = facadeSources.map(file => file.replace(/\.ps$/u, '.ts'));
+    const libraryArtifactNames = [libraryBundle, ...facadeFiles].sort();
+    const handwritten = await Promise.all(['README.md', 'package.json', 'tsconfig.json', 'src/consumer.ts']
+      .map(async file => ({ file, bytes: await readFile(path.join(libraryProject, file)) })));
+    const libraryCheck = JSON.parse(success(invoke(['check', '--json'], libraryProject),
+      'installed T1 project checks both source modules without publication').stdout);
+    assert.equal(libraryCheck.kernelAdmissionAccepted, true);
+    assert.equal(libraryCheck.kernel.binarySha256, kernelArtifact.sha256);
+    assert.equal(libraryCheck.sourceCount, 2);
+    assert.equal(libraryCheck.library.profile, 'psc-ts-library/1');
+    assert.equal(libraryCheck.library.abiStatus, 'not-requested');
+    assert.equal(Object.hasOwn(libraryCheck, 'artifacts'), false);
+    for (const file of [...libraryArtifactNames, libraryReceiptPath]) {
+      await missing(path.join(libraryProject, file));
+    }
+    async function verifyLibraryReceipt(value) {
+      assert.equal(value.schemaVersion, 4);
+      assert.equal(value.kind, 'psc0-checked-build');
+      assert.equal(value.compiler.sha256, release.compiler.sha256);
+      assert.equal(value.kernel.binarySha256, kernelArtifact.sha256);
+      assert.equal(value.kernelAdmissionAccepted, true);
+      assert.equal(value.sourceCount, 2);
+      assert.equal(value.outputOwner, 'src/Main.ps');
+      assert.equal(value.library.profile, 'psc-ts-library/1');
+      assert.equal(value.library.abiStatus, 'checked-bounded');
+      assert.match(value.library.exportSelectionSha256, /^[a-f0-9]{64}$/u);
+      assert.equal(value.library.configSha256, digest(libraryMetadataBytes));
+      assert.match(value.library.publicInterfaceSha256, /^[a-f0-9]{64}$/u);
+      assert.equal(value.runtimeIr.publicInterfaceSha256, value.library.publicInterfaceSha256);
+      assert.equal(value.runtimeIr.emitter, 'psCompilerCheckedTypeScriptProjectFromPrepared');
+      assert.equal(value.runtimeIr.runtimeIrTypingAccepted, true);
+      assert.equal(value.runtimeIr.traversalComplete, true);
+      assert.equal(value.runtimeIr.sameOriginalIrCheckedBeforeEmission, true);
+      assert.equal(value.targetValidation.version, '7.0.2');
+      assert.equal(value.targetValidation.strict, true);
+      assert.equal(value.targetValidation.noEmitOnError, true);
+      assert.equal(value.publication.layout, 'psc-ts-library/1');
+      assert.equal(value.publication.bundle, libraryBundle);
+      assert.deepEqual([...value.publication.facadeSources].sort(), [...facadeSources].sort());
+      assert.deepEqual(value.artifacts.map(item => item.name).sort(), libraryArtifactNames);
+      assert.deepEqual(value.extensions, []);
+      for (const field of ['pscvVerified', 'strictSh1Qualified', 'semanticPreservationProved']) {
+        assert.equal(value[field], false);
+      }
+      const files = new Map();
+      for (const artifact of value.artifacts) {
+        const bytes = await readFile(path.join(libraryProject, artifact.name));
+        assert.equal(digest(bytes), artifact.sha256, artifact.name + ' T1 digest');
+        assert.equal(bytes.length, artifact.bytes, artifact.name + ' T1 byte length');
+        files.set(artifact.name, bytes);
+      }
+      assert.equal(digest(files.get(libraryBundle)), value.typeScriptSha256);
+      const saved = await readFile(path.join(libraryProject, libraryReceiptPath));
+      assert.deepEqual(JSON.parse(saved.toString('utf8')), value);
+      files.set(libraryReceiptPath, saved);
+      for (const item of handwritten) {
+        assert.deepEqual(await readFile(path.join(libraryProject, item.file)), item.bytes);
+      }
+      return files;
+    }
+    const firstLibrary = JSON.parse(success(invoke(['build', '--json'], libraryProject),
+      'installed T1 build publishes one bundle and both owned neighboring facades').stdout);
+    await verifyLibraryReceipt(firstLibrary);
+    success(run(process.execPath, [tsLauncher, '--project', 'tsconfig.json'],
+      { env, cwd: libraryProject }), 'installed T1 neighbors typecheck in a handwritten TypeScript project');
+    const libraryConsumer = success(run(process.execPath, ['dist/consumer.js'], { env, cwd: libraryProject }),
+      'installed T1 consumer shares opaque identity and rejects malformed boundary values');
+    assert.equal(libraryConsumer.stdout.trim(), 'ProofScript library answer: 42');
+    await writeFile(path.join(evidence, 'installed-library-first-receipt.json'),
+      JSON.stringify(firstLibrary, null, 2) + '\n');
+
+    const quantityPath = path.join(libraryProject, 'src/Quantity.ps');
+    const initialQuantity = await readFile(quantityPath, 'utf8');
+    const changedQuantity = initialQuantity.replace('Quantity.mk(value)', 'Quantity.mk(Nat.succ(value))');
+    assert.notEqual(changedQuantity, initialQuantity);
+    await writeFile(quantityPath, changedQuantity);
+    const rebuiltLibrary = JSON.parse(success(invoke(['build', '--json'], libraryProject),
+      'installed T1 imported-body edit replaces one complete owned generation').stdout);
+    assert.notEqual(rebuiltLibrary.transactionId, firstLibrary.transactionId);
+    assert.notEqual(rebuiltLibrary.typeScriptSha256, firstLibrary.typeScriptSha256);
+    const acceptedLibraryFiles = await verifyLibraryReceipt(rebuiltLibrary);
+    success(run(process.execPath, [tsLauncher, '--project', 'tsconfig.json'],
+      { env, cwd: libraryProject }), 'installed T1 changed generation typechecks before downstream execution');
+    const changedLibraryConsumer = success(run(process.execPath, ['--input-type=module', '--eval',
+      "import { makeQuantity } from './dist/Quantity.js';\n" +
+      "import { readQuantity, sameQuantity } from './dist/Main.js';\n" +
+      "const q = makeQuantity(42n);\n" +
+      "if (readQuantity(q) !== 43n || sameQuantity(q) !== q) throw new Error('changed library result');\n" +
+      "console.log('PSC_INSTALLED_LIBRARY: 43');\n"], { env, cwd: libraryProject }),
+    'installed T1 changed consumer observes the imported-body result');
+    assert.equal(changedLibraryConsumer.stdout.trim(), 'PSC_INSTALLED_LIBRARY: 43');
+
+    const mainPath = path.join(libraryProject, 'src/Main.ps');
+    const initialMain = await readFile(mainPath, 'utf8');
+    const invalidMain = initialMain.replace(
+      'def readQuantity(value : Quantity) : Nat', 'def readQuantity(value : Quantity) : Quantity');
+    assert.notEqual(invalidMain, initialMain);
+    await writeFile(mainPath, invalidMain);
+    const rejectedLibrary = invoke(['build', '--json'], libraryProject);
+    assert.notEqual(rejectedLibrary.status, 0);
+    assert.equal(rejectedLibrary.stdout, '');
+    assert.match(rejectedLibrary.stderr,
+      /PSC2_(?:CHECKED_(?:PROJECT_)?(?:PREPARE|EMIT)_FAILED|KERNEL_REJECTED)/u);
+    for (const [file, bytes] of acceptedLibraryFiles) {
+      assert.deepEqual(await readFile(path.join(libraryProject, file)), bytes);
+    }
+    observations.push('invalid T1 source preserves every artifact and the last completed project receipt');
+
+    const collisionProject = path.join(temporary, 'library collision project');
+    await copyLibrary(collisionProject);
+    const handwrittenFacade = 'export const handwritten = true;\n';
+    await writeFile(path.join(collisionProject, 'src/Main.ts'), handwrittenFacade);
+    const collision = invoke(['build', '--json'], collisionProject);
+    assert.notEqual(collision.status, 0);
+    assert.equal(collision.stdout, '');
+    assert.match(collision.stderr, /PSC0_OUTPUT_UNOWNED/u);
+    assert.equal(await readFile(path.join(collisionProject, 'src/Main.ts'), 'utf8'), handwrittenFacade);
+    for (const file of [libraryBundle, 'src/Quantity.ts', libraryReceiptPath]) {
+      await missing(path.join(collisionProject, file));
+    }
+    observations.push('T1 refuses a handwritten neighbor before publishing any project artifact');
+    libraryEvidence = {
+      profile: 'psc-ts-library/1', sourceCount: 2,
+      projectConfigSha256: digest(libraryMetadataBytes),
+      compilerSha256: release.compiler.sha256, kernelSha256: kernelArtifact.sha256,
+      bundle: libraryBundle, facadeSources, artifacts: libraryArtifactNames,
+      firstTransactionId: firstLibrary.transactionId, changedTransactionId: rebuiltLibrary.transactionId,
+      publicInterfaceSha256: rebuiltLibrary.library.publicInterfaceSha256,
+      firstConsumer: libraryConsumer.stdout.trim(), changedConsumer: changedLibraryConsumer.stdout.trim(),
+      handwrittenFilesPreserved: true, rejectedBuildPreservedCompletedGeneration: true,
+      handwrittenCollisionRefused: true, passed: true,
+    };
+    await writeFile(path.join(evidence, 'installed-library-build-receipt.json'),
+      JSON.stringify(rebuiltLibrary, null, 2) + '\n');
 
     for (const [extensionIndex, extensionTarball] of extensionTarballs.entries()) {
       const packageName = extensionIndex === 0 ? 'psdev' : '@psc-demo/pshello';
@@ -656,7 +817,7 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument, p
       schemaVersion: 2, kind: 'proofscript-installed-package-qualification',
       sourceRef: process.env.GITHUB_SHA, runId: process.env.GITHUB_RUN_ID,
       tarballSha256, tarballBytes, releaseIdentity, providerRuntime, npmRuntime, shellRuntime,
-      extensionDemos,
+      extensionDemos, libraryEvidence,
       nodeOnlyExecutionPath, nodeVersion: process.version,
       platform: process.platform, architecture: process.arch, operatingSystemRelease: operatingSystemRelease(),
       runnerImage: process.env.ImageOS ?? null, runnerImageVersion: process.env.ImageVersion ?? null,

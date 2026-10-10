@@ -95,7 +95,7 @@ test('a real partial rename failure restores the complete preceding generation',
       // staged file. This uses the real filesystem, not a replaceable fs adapter.
       const [stage] = (await readdir(directory)).filter(name => name.startsWith('.psc-stage-'));
       assert.ok(stage);
-      await rm(path.join(directory, stage, 'answer.js'));
+      await rm(path.join(directory, stage, 'next/answer.js'));
     },
   }), /ENOENT/);
   assert.equal(await readFile(path.join(directory, 'answer.ts'), 'utf8'), 'first');
@@ -108,7 +108,7 @@ test('a first-generation partial failure leaves no new output or completion rece
     outputPath: path.join(directory, 'answer.js'),
     beforeCommit: async () => {
       const [stage] = (await readdir(directory)).filter(name => name.startsWith('.psc-stage-'));
-      await rm(path.join(directory, stage, 'answer.js'));
+      await rm(path.join(directory, stage, 'next/answer.js'));
     },
   }), /ENOENT/);
   assert.equal(existsSync(path.join(directory, 'answer.ts')), false);
@@ -353,7 +353,7 @@ test('partial library publication restores the old bundle and every facade', () 
   const previous = await readFile(receiptPath);
   await assert.rejects(publish('second', { beforeCommit: async () => {
     const [stage] = (await readdir(directory)).filter(name => name.startsWith('.psc-stage-'));
-    await rm(path.join(directory, stage, 'src/Main.ts'));
+    await rm(path.join(directory, stage, 'next/src/Main.ts'));
   } }), /ENOENT/);
   for (const name of names) assert.equal(await readFile(path.join(directory, name), 'utf8'), 'first:' + name);
   assert.deepEqual(await readFile(receiptPath), previous);
@@ -390,4 +390,41 @@ test('library publication refuses parent directory links before writing target f
   await assert.rejects(publish('first'), /OUTPUT_DIRECTORY_LINK/);
   assert.deepEqual(await readdir(outside), []);
   assert.equal(existsSync(receiptPath), false);
+}));
+
+test('project names cannot overwrite staged backups or collide with rollback paths', () => fixture(async ({ directory, entryPath }) => {
+  const names = ['previous/Quantity.ts', 'Quantity.ts', 'Quantity.ts.restore/Main.ts'];
+  const publish = (label, options = {}) => publishCheckedArtifacts({
+    projectRoot: directory, entryPath,
+    outputPath: path.join(directory, names[0]),
+    facadeSources: ['Quantity.ps', 'Quantity.ts.restore/Main.ps'],
+    artifacts: new Map(names.map(name => [name, label + ':' + name])), receipt: {}, ...options,
+  });
+  const receiptPath = path.join(directory, 'previous/Quantity.checked.json');
+  await publish('first');
+  const oldReceipt = await readFile(receiptPath);
+  let checks = 0;
+  await assert.rejects(publish('second', { beforeCommit: async () => {
+    if (++checks === 2) throw new Error('force rollback after writes');
+    const journal = JSON.parse(await readFile(path.join(directory, '.psc-output-lock/journal.json'), 'utf8'));
+    assert.equal(journal.stagingLayout, 'next-previous-restore/1');
+    for (const artifact of journal.previousArtifacts) {
+      const backup = await readFile(path.join(journal.staging, 'previous', artifact.name));
+      assert.equal(hash(backup), artifact.sha256, artifact.name);
+    }
+    assert.deepEqual(await readFile(path.join(journal.staging, 'previous', journal.receiptName)), oldReceipt);
+  } }), /force rollback after writes/);
+  assert.equal(checks, 2);
+  for (const name of names) assert.equal(await readFile(path.join(directory, name), 'utf8'), 'first:' + name);
+  assert.deepEqual(await readFile(receiptPath), oldReceipt);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock')), false);
+}));
+test('portable library paths reject conflicting directory capitalization before leasing', () => libraryFixture(async ({ directory, publish }) => {
+  const names = ['src/generated/library.ts', 'src/Folder/A.ts', 'src/folder/B.ts'];
+  await assert.rejects(publish('first', {
+    facadeSources: ['src/Folder/A.ps', 'src/folder/B.ps'],
+    artifacts: new Map(names.map(name => [name, name])),
+  }), /OUTPUT_DIRECTORY_ALIAS/);
+  assert.equal(existsSync(path.join(directory, '.psc-output-lock')), false);
+  for (const name of names) assert.equal(existsSync(path.join(directory, name)), false);
 }));

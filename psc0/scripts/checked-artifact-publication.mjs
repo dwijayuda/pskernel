@@ -180,11 +180,21 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
   const priorNames = initialPrevious ? previousNames(initialPrevious, owner, allowed, layout) : new Set();
   const allNames = new Set([...priorNames, ...buffers.keys(), receiptName]);
   const folded = new Map();
+  const directorySpellings = new Map();
   for (const name of allNames) {
     checkedOutputPath(path.join(directory, name));
     const key = name.toLowerCase();
     if (folded.has(key) && folded.get(key) !== name) throw new Error('PSC0_OUTPUT_LIBRARY_COLLISION: ' + name);
     folded.set(key, name);
+    let prefix = '';
+    for (const part of name.split('/').slice(0, -1)) {
+      prefix = prefix ? prefix + '/' + part : part;
+      const spelling = directorySpellings.get(prefix.toLowerCase());
+      if (spelling !== undefined && spelling !== prefix) {
+        throw new Error('PSC0_OUTPUT_DIRECTORY_ALIAS: ' + spelling + ' / ' + prefix);
+      }
+      directorySpellings.set(prefix.toLowerCase(), prefix);
+    }
   }
   const directories = [...new Set([directory, ...[...allNames].map(name =>
     path.dirname(path.join(directory, name)))])].sort();
@@ -260,11 +270,14 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     await mkdir(path.join(staging, 'previous'));
     for (const [name, bytes] of previous) await stageBytes(staging, 'previous/' + name, bytes);
     if (oldReceipt !== undefined) await stageBytes(staging, 'previous/' + receiptName, oldReceipt);
-    for (const [name, bytes] of buffers) await stageBytes(staging, name, bytes);
+    // Project-relative names stay inside fixed buckets, including names such
+    // as previous/Foo.ts or Foo.ts.restore/Bar.ts. They cannot alias backups.
+    for (const [name, bytes] of buffers) await stageBytes(staging, 'next/' + name, bytes);
     const finalReceipt = Buffer.from(JSON.stringify(published, null, 2) + '\n');
-    await stageBytes(staging, receiptName, finalReceipt);
+    await stageBytes(staging, 'next/' + receiptName, finalReceipt);
     await writeFile(path.join(lock, 'journal.json'), JSON.stringify({
-      transactionId, directory, staging, receiptName, outputOwner: owner, locks,
+      transactionId, directory, staging, stagingLayout: 'next-previous-restore/1',
+      receiptName, outputOwner: owner, locks,
       previousArtifacts: [...previous].map(([name, bytes]) => ({ name, sha256: digest(bytes) })),
       nextArtifacts: published.artifacts, oldReceiptSha256: oldReceipt === undefined ? null : digest(oldReceipt),
       newReceiptSha256: digest(finalReceipt), phase: 'prepared',
@@ -293,7 +306,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
     for (const [name, bytes] of buffers) {
       const old = previous.get(name);
       if (old !== undefined && old.equals(bytes)) continue;
-      await rename(path.join(staging, name), path.join(directory, name));
+      await rename(path.join(staging, 'next', name), path.join(directory, name));
       changes.push({ name, now: bytes, old });
     }
     for (const [name, bytes] of previous) {
@@ -321,7 +334,7 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
       }
     }
     // This audit receipt is never a portable proof or a transferable capability.
-    await rename(path.join(staging, receiptName), receiptPath);
+    await rename(path.join(staging, 'next', receiptName), receiptPath);
     completed = true;
     return Object.freeze(published);
   } catch (error) {
@@ -338,8 +351,8 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
         if (!matches) { rollbackComplete = false; continue; }
         if (item.old === undefined) await rm(file, { force: true });
         else {
-          const restore = path.join(staging, item.name + '.restore');
-          await stageBytes(staging, item.name + '.restore', item.old);
+          const restore = path.join(staging, 'restore', item.name);
+          await stageBytes(staging, 'restore/' + item.name, item.old);
           await rename(restore, file);
         }
       } catch { rollbackComplete = false; }
@@ -367,8 +380,8 @@ export async function publishCheckedArtifacts({ outputPath, entryPath, artifacts
         const receiptPath = path.join(directory, receiptName);
         if (await regularBytes(receiptPath) !== undefined) rollbackComplete = false;
         else {
-          const restore = path.join(staging, receiptName + '.restore');
-          await stageBytes(staging, receiptName + '.restore', oldReceipt);
+          const restore = path.join(staging, 'restore', receiptName);
+          await stageBytes(staging, 'restore/' + receiptName, oldReceipt);
           await rename(restore, receiptPath);
         }
       } catch { rollbackComplete = false; }

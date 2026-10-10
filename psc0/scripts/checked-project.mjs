@@ -63,6 +63,7 @@ export function validateLibraryEmission(encoded, units) {
       value.modules.length !== selected.length) fail('result shape');
   const expected = new Map(selected.map(unit => [unit.sourceId, unit]));
   const modules = [];
+  const bindings = new Set();
   for (const module of value.modules) {
     if (!ownKeys(module, ['sourceId', 'exports']) || !expected.has(module.sourceId) ||
         !Array.isArray(module.exports)) fail('module identity');
@@ -71,9 +72,11 @@ export function validateLibraryEmission(encoded, units) {
     if (module.exports.length !== names.size) fail('public export coverage');
     const exports = module.exports.map(item => {
       if (!ownKeys(item, ['name', 'kind', 'binding']) || !names.delete(item.name) ||
-          !identifier(item.name) || !identifier(item.binding) || !['type', 'value'].includes(item.kind)) {
+          !identifier(item.name) || !identifier(item.binding) || bindings.has(item.binding) ||
+          !['type', 'value'].includes(item.kind)) {
         fail('public export descriptor');
       }
+      bindings.add(item.binding);
       return Object.freeze({ name: item.name, kind: item.kind, binding: item.binding });
     });
     modules.push(Object.freeze({ sourceId: module.sourceId, exports: Object.freeze(exports) }));

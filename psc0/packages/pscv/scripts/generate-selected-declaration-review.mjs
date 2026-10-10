@@ -20,6 +20,7 @@ const report=reviewSelectedDeclarationTypes({
 await writeFile(path.resolve(process.argv[5]),JSON.stringify(report)+'\n');
 console.log(JSON.stringify({status:report.status,
   declarations:report.observedDeclarationCount,
+  selectedModules:report.selectedDeclarations.map(x=>({name:x.name,module:x.importedModule})),
   unresolved:report.remainingUnresolvedIDs,
   identitySha256:report.identitySha256,
   verifiedExecutableAuthorized:false}));

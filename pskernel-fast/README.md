@@ -18,7 +18,7 @@ lake build pskernel_fast_smoke
 lake exe pskernel_fast_smoke
 ```
 
-Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel proof branch and PR #89 are not changed. GitHub Actions workflow `pskernel-fast-v3.yml` is the cloud validation gate for this prototype.
+Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel proof branch and PR #89 are not changed. GitHub Actions workflow `pskernel-fast-v3.yml` is the cloud validation gate for this prototype. The [first successful source checkpoint](https://github.com/dwijayuda/pskernel/actions/runs/38094070233) built six targets and passed the focused smoke; the source still cannot accept proofs.
 
 ## Next
 

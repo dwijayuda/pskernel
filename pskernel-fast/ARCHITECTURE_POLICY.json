@@ -1,0 +1,42 @@
+{
+  "schema": "pskernel-fast-architecture-policy/v3",
+  "date": "2026-10-11",
+  "target": {
+    "language": "Lean",
+    "version": "4.35.0-rc4",
+    "commit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "design": {
+    "implementation": "new-generation",
+    "performancePriority": true,
+    "soundnessPriority": true,
+    "leanSemanticCompatibilityPriority": true,
+    "legacyImplementationCompatibilityRequired": false,
+    "legacyProofPreservationRequired": false,
+    "currentPSC0SourceSubsetRequiredForG1": false,
+    "oneProductionSemanticAuthority": true,
+    "externalCheckersAreProofOracles": false
+  },
+  "prototype": {
+    "stage": "G1-experimental",
+    "proofCheckerImplemented": false,
+    "acceptingAdmissionAPIImplemented": false,
+    "formalProofComplete": false,
+    "kernelBenchmarkRun": false,
+    "fullLeanCompatibilityDemonstrated": false
+  },
+  "source": {
+    "root": "pskernel-fast/src/PSKernelFast",
+    "forbiddenRuntimeImportPrefixes": [
+      "Ps.KernelCore",
+      "PSC1Kernel",
+      "ConLeche",
+      "Aeneas"
+    ]
+  },
+  "evidence": {
+    "validatedSourceCommit": "6fd4d9f5d7a3ec2277e2f194dab77db8a106763c",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38094070233",
+    "scope": "six native builds and focused representation smoke only"
+  }
+}

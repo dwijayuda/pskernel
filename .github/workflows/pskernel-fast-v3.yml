@@ -25,6 +25,8 @@ jobs:
         with:
           sparse-checkout: pskernel-fast
           sparse-checkout-cone-mode: true
+      - name: Audit independent kernel import boundary
+        run: python3 pskernel-fast/scripts/audit_boundary.py
       - name: Install pinned Lean via elan
         shell: bash
         run: |

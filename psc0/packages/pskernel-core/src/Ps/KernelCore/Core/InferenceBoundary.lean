@@ -28,16 +28,16 @@ namespace PsKernelForallView
     (binderInfo : PsKernelBinderInfo) : PsKernelForallView :=
   PsKernelForallViewOf.mk name domain body binderInfo
 
-abbrev name (view : PsKernelForallView) : PsKernelName :=
+@[simp] abbrev name (view : PsKernelForallView) : PsKernelName :=
   PsKernelForallViewOf.name view
 
-abbrev domain (view : PsKernelForallView) : PsKernelExpr :=
+@[simp] abbrev domain (view : PsKernelForallView) : PsKernelExpr :=
   PsKernelForallViewOf.domain view
 
-abbrev body (view : PsKernelForallView) : PsKernelExpr :=
+@[simp] abbrev body (view : PsKernelForallView) : PsKernelExpr :=
   PsKernelForallViewOf.body view
 
-abbrev binderInfo (view : PsKernelForallView) : PsKernelBinderInfo :=
+@[simp] abbrev binderInfo (view : PsKernelForallView) : PsKernelBinderInfo :=
   PsKernelForallViewOf.binderInfo view
 
 end PsKernelForallView

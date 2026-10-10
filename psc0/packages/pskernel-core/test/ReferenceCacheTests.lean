@@ -90,6 +90,97 @@ private def checkLambdaCodomainGate (policy : PsKernelSemanticCachePolicy) : IO 
       | .resourceExhausted .fuel _ => pure ()
       | _ => throw (IO.userError "codomain certification lost resource classification")
 
+
+private abbrev SortVisitOperation :=
+  PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
+    Except String (Prod PsKernelExpr PsKernelCheckerState)
+
+private def expectLambdaVisitFailure (infer whnf : SortVisitOperation)
+    (expected : String) (resource : Bool) : IO Unit := do
+  let c := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  match psKernelLambdaCodomainVisitWith infer whnf c psKernelCheckerStateEmpty
+      (.sort .zero) false with
+  | .ok _ => throw (IO.userError "failing codomain visit unexpectedly succeeded")
+  | .error message =>
+      require (psKernelStringEq message expected) "codomain visit changed its error message"
+      match psKernelErrorFromMessage message with
+      | .resourceExhausted .fuel _ =>
+          require resource "non-resource codomain failure became resource exhaustion"
+      | .declinedUnsupported _ =>
+          require (!resource) "resource codomain failure became an unsupported decline"
+      | _ => throw (IO.userError "codomain visit changed its public error classification")
+
+/-- Exercise the actual shared visit boundary: skipped callbacks, exact
+symbolic observations, state sequencing, and both failure stages. -/
+private def checkSortVisitCarriers : IO Unit := do
+  let c := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let start := { psKernelCheckerStateEmpty with nextFresh := 17 }
+  let bodyType := PsKernelExpr.fvar (.str .anonymous "visitSubject")
+  let reject : SortVisitOperation := fun _ _ _ =>
+    .error "a skipped visit callback ran"
+  match psKernelLambdaCodomainVisitWith reject reject c start bodyType true with
+  | .ok (.unchecked, after) =>
+      require (Nat.beq after.nextFresh 17) "unchecked visit changed state"
+      require (psKernelLambdaCodomainVisitLevel .unchecked).isNone
+        "unchecked visit manufactured a level"
+  | _ => throw (IO.userError "infer-only codomain visit called a rejecting callback")
+
+  let inferredType := PsKernelExpr.const (.str .anonymous "visitNeedsWhnf") []
+  let symbolicLevel := PsKernelLevel.imax
+    (.param (.str .anonymous "u"))
+    (.max (.param (.str .anonymous "v")) (.mvar (.str .anonymous "w")))
+  let infer : SortVisitOperation := fun _ state expr =>
+    if psKernelExprEq expr bodyType && Nat.beq state.nextFresh 17 then
+      .ok (inferredType, { state with nextFresh := 29 })
+    else
+      .error "codomain inference received the wrong expression or state"
+  let expose : SortVisitOperation := fun _ state expr =>
+    if psKernelExprEq expr inferredType && Nat.beq state.nextFresh 29 then
+      .ok (.sort symbolicLevel, { state with nextFresh := 41 })
+    else
+      .error "codomain sort exposure received the wrong expression or state"
+  match psKernelLambdaCodomainVisitWith infer expose c start bodyType false with
+  | .ok (.observed visit, after) =>
+      require (psKernelExprEq visit.inferredType inferredType)
+        "codomain visit replaced the actual inferred type by its normal form"
+      require (psKernelExprEq (.sort visit.level) (.sort symbolicLevel))
+        "codomain visit lost the actual symbolic sort level"
+      match psKernelLambdaCodomainVisitLevel (.observed visit) with
+      | .none => throw (IO.userError "observed visit lost its selected level")
+      | .some level =>
+          require (psKernelExprEq (.sort level) (.sort symbolicLevel))
+            "observed level accessor changed the selected level"
+      require (Nat.beq after.nextFresh 41) "codomain visit lost the sort-exposure state"
+  | .ok (.unchecked, _) => throw (IO.userError "checked visit returned unchecked evidence")
+  | .error message => throw (IO.userError ("symbolic codomain visit failed: " ++ message))
+
+  let directType := PsKernelExpr.sort symbolicLevel
+  let direct : SortVisitOperation := fun _ state _ => .ok (directType, state)
+  match psKernelLambdaCodomainVisitWith direct reject c start bodyType false with
+  | .ok (.observed visit, after) =>
+      require (psKernelExprEq visit.inferredType directType &&
+        psKernelExprEq (.sort visit.level) (.sort symbolicLevel) &&
+        Nat.beq after.nextFresh 17)
+        "direct-sort visit changed its observation or state"
+  | _ => throw (IO.userError "direct-sort visit called a rejecting WHNF callback")
+
+  let unresolved : SortVisitOperation := fun _ state _ => .ok (inferredType, state)
+  expectLambdaVisitFailure
+    (fun _ _ _ => .error "kernel inference budget exhausted")
+    reject "kernel inference budget exhausted" true
+  expectLambdaVisitFailure
+    (fun _ _ _ => .error "invalid inferred codomain")
+    reject "lambda codomain sort could not be certified" false
+  expectLambdaVisitFailure unresolved
+    (fun _ _ _ => .error "kernel reduction budget exhausted")
+    "kernel reduction budget exhausted" true
+  expectLambdaVisitFailure unresolved
+    (fun _ _ _ => .error "invalid codomain exposure")
+    "lambda codomain sort could not be certified" false
+  expectLambdaVisitFailure unresolved
+    (fun _ state expr => .ok (expr, state))
+    "lambda codomain sort could not be certified" false
+
 def main : IO Unit := do
   let c := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
   let p := PsKernelExpr.sort .zero
@@ -163,6 +254,8 @@ def main : IO Unit := do
   checkLambdaTypeTransport psKernelReferenceCachePolicy (.succ .zero) "lambdaTypeReference"
   checkLambdaCodomainGate psKernelCachedCachePolicy
   checkLambdaCodomainGate psKernelReferenceCachePolicy
+  checkSortVisitCarriers
+  IO.println "PSKERNEL_SORT_VISIT_CARRIERS: PASS unchecked=1 observed=2 failures=5"
   IO.println "PSKERNEL_LAMBDA_CODOMAIN_GATE: PASS modes=2 declined=2 inferOnly=2 resource=2"
   IO.println "PSKERNEL_LAMBDA_TYPE_TRANSPORT: PASS modes=2 regimes=2 checked=4 inferOnly=4 conversion=4 validAdmission=4 invalidAdmission=4"
   IO.println "PSKERNEL_REFERENCE_TESTS: PASS poison=3 dependent-binders=1 admission=3 resource=1"

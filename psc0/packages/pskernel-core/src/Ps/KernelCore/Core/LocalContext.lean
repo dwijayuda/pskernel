@@ -83,10 +83,10 @@ namespace PsKernelLocalContext
     PsKernelLocalContext :=
   PsKernelLocalContextOf.mk decls nextIndex
 
-abbrev decls (context : PsKernelLocalContext) : List PsKernelLocalDecl :=
+@[simp] abbrev decls (context : PsKernelLocalContext) : List PsKernelLocalDecl :=
   PsKernelLocalContextOf.decls context
 
-abbrev nextIndex (context : PsKernelLocalContext) : Nat :=
+@[simp] abbrev nextIndex (context : PsKernelLocalContext) : Nat :=
   PsKernelLocalContextOf.nextIndex context
 
 end PsKernelLocalContext

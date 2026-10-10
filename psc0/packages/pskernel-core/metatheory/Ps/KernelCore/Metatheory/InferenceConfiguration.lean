@@ -457,7 +457,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                       true with
                 | error error =>
                     simp [
-                      psKernelInferCoreWithFuel,
+                      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                       hMiss,
                       hDepth,
                       freshResult,
@@ -510,7 +510,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                           bodyState
                           hState1Config
                     simp [
-                      psKernelInferCoreWithFuel,
+                      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                       hMiss,
                       hDepth,
                       freshResult,
@@ -545,7 +545,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                       true with
                 | error error =>
                     simp [
-                      psKernelInferCoreWithFuel,
+                      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                       hMiss,
                       hDepth,
                       hDomain
@@ -572,7 +572,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                           domainType with
                     | error error =>
                         simp [
-                          psKernelInferCoreWithFuel,
+                          psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                           hMiss,
                           hDepth,
                           hDomain,
@@ -629,7 +629,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                               true with
                         | error error =>
                             simp [
-                              psKernelInferCoreWithFuel,
+                              psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                               hMiss,
                               hDepth,
                               hDomain,
@@ -653,7 +653,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                                   bodyType with
                             | error error =>
                                 simp [
-                                  psKernelInferCoreWithFuel,
+                                  psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                                   hMiss,
                                   hDepth,
                                   hDomain,
@@ -703,7 +703,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                                       bodySortState
                                       hState1Config
                                 simp [
-                                  psKernelInferCoreWithFuel,
+                                  psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                                   hMiss,
                                   hDepth,
                                   hDomain,

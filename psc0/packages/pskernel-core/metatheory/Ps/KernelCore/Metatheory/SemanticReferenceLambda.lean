@@ -58,21 +58,21 @@ theorem inferCore_lam_trace (remaining : Nat)
     Nonempty (LambdaTrace remaining whnf defeq c s n A b bi result next) := by
   cases hd : psKernelCheckerContextEnterRecDepth c with
   | error error =>
-      simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+      simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
         ite_self, hd] at run
       cases run
   | ok entered =>
       cases hA : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy
           remaining whnf defeq entered s A false with
       | error error =>
-          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+          simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
             ite_self, hd, Bool.false_eq_true, ite_false, hA] at run
           cases run
       | ok a =>
           rcases a with ⟨aType, aState⟩
           cases hAS : psKernelEnsureSortWith whnf entered aState aType with
           | error error =>
-              simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+              simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
                 ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS] at run
               cases run
           | ok ua =>
@@ -84,7 +84,7 @@ theorem inferCore_lam_trace (remaining : Nat)
                   false with
               | error error =>
                   simp only [binderChild] at hB
-                  simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                  simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
                     ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB] at run
                   cases run
               | ok body =>
@@ -94,7 +94,7 @@ theorem inferCore_lam_trace (remaining : Nat)
                       bState bType true with
                   | error error =>
                       simp only [binderChild] at hB hT
-                      simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                      simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
                         ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB, hT] at run
                       cases run
                   | ok typeRun =>
@@ -103,13 +103,13 @@ theorem inferCore_lam_trace (remaining : Nat)
                           (binderChild entered us n A bi) tState tType with
                       | error error =>
                           simp only [binderChild] at hB hT hS
-                          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                          simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
                             ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB, hT, hS] at run
                           cases run
                       | ok sortRun =>
                           rcases sortRun with ⟨v, vState⟩
                           simp only [binderChild] at hB hT hS
-                          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                          simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, psKernelReferenceCacheGet_miss,
                             ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB, hT, hS,
                             infer_publication_noop, Except.ok.injEq, Prod.mk.injEq] at run
                           exact ⟨⟨entered, aType, aState, u, us, bType, bState,

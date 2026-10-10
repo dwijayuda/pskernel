@@ -745,7 +745,7 @@ theorem psKernelInferCore_lam_checked_refines_typing
   dsimp
   constructor
   · simp [
-      psKernelInferCoreWithFuel,
+      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
       psKernelInferCacheEligible,
       psKernelCacheInferResult,
       hDepth,
@@ -876,7 +876,7 @@ theorem psKernelInferCore_forall_checked_refines_typing
           bodyLevel)) := by
   constructor
   · simp [
-      psKernelInferCoreWithFuel,
+      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
       psKernelInferCacheEligible,
       psKernelCacheInferResult,
       hDepth,

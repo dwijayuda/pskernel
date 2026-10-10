@@ -483,30 +483,21 @@ def psKernelInferCoreWithFuel
                         | Except.error error =>
                             Except.error error
                         | Except.ok bodyResult =>
-                            -- Checked lambda inference establishes its codomain
-                            -- sort by a real infer-only visit and sort exposure.
-                            -- Infer-only callers retain their validity precondition.
-                            let codomainCheck : Except String PsKernelCheckerState :=
-                              if inferOnly then
-                                Except.ok (Prod.snd bodyResult)
-                              else
-                                match
-                                    smaller whnf defeq child
-                                      (Prod.snd bodyResult)
-                                      (Prod.fst bodyResult) true with
-                                | Except.error error =>
-                                    Except.error (psKernelLambdaCodomainSortFailure error)
-                                | Except.ok typeResult =>
-                                    match
-                                        psKernelEnsureSortWith whnf child
-                                          (Prod.snd typeResult) (Prod.fst typeResult) with
-                                    | Except.error error =>
-                                        Except.error (psKernelLambdaCodomainSortFailure error)
-                                    | Except.ok sortResult =>
-                                        Except.ok (Prod.snd sortResult);
+                            -- Retain the actual codomain visit; infer-only callers
+                            -- explicitly receive the unchecked case with no level.
+                            let codomainCheck :
+                                Except String
+                                  (Prod PsKernelLambdaCodomainVisit PsKernelCheckerState) :=
+                              psKernelLambdaCodomainVisitWith
+                                (fun
+                                  (visitContext : PsKernelCheckerContext)
+                                  (visitState : PsKernelCheckerState)
+                                  (visitExpr : PsKernelExpr) =>
+                                  smaller whnf defeq visitContext visitState visitExpr true)
+                                whnf child (Prod.snd bodyResult) (Prod.fst bodyResult) inferOnly;
                             match codomainCheck with
                             | Except.error error => Except.error error
-                            | Except.ok codomainState =>
+                            | Except.ok codomainResult =>
                                 -- Return the recursively inferred type unchanged. Closing
                                 -- fresh names is semantic transport; opportunistic beta
                                 -- reduction here would need an additional soundness proof.
@@ -527,7 +518,7 @@ def psKernelInferCoreWithFuel
                                 let scopedState :=
                                   psKernelCheckerStateExitLocalScope
                                     state1
-                                    codomainState;
+                                    (Prod.snd codomainResult);
                                 Except.ok
                                   (Prod.mk
                                     result
@@ -538,85 +529,67 @@ def psKernelInferCoreWithFuel
                                       result))
                 | PsKernelExpr.forallE name domain body binderInfo =>
                     match
-                        smaller
-                          whnf
-                          defeq
-                          nextContext
-                          state
-                          domain
-                          inferOnly with
+                        psKernelInferSortWith
+                          (fun
+                            (visitContext : PsKernelCheckerContext)
+                            (visitState : PsKernelCheckerState)
+                            (visitExpr : PsKernelExpr) =>
+                            smaller whnf defeq visitContext visitState visitExpr inferOnly)
+                          whnf nextContext state domain with
                     | Except.error error =>
                         Except.error error
-                    | Except.ok domainResult =>
+                    | Except.ok domainSort =>
+                        let freshResult :=
+                          psKernelCheckerStateFreshName
+                            (Prod.snd domainSort)
+                            name;
+                        let fresh :=
+                          Prod.fst freshResult;
+                        let state1 :=
+                          Prod.snd freshResult;
+                        let childLocal :=
+                          psKernelLocalContextAddLocal
+                            nextContext.localContext
+                            fresh
+                            name
+                            domain
+                            binderInfo;
+                        let child :=
+                          psKernelCheckerContextWithLocalContext
+                            nextContext
+                            childLocal;
+                        let openedBody :=
+                          psKernelExprInstantiate1
+                            body
+                            (PsKernelExpr.fvar fresh);
                         match
-                            psKernelEnsureSortWith
-                              whnf
-                              nextContext
-                              (Prod.snd domainResult)
-                              (Prod.fst domainResult) with
+                            psKernelInferSortWith
+                              (fun
+                                (visitContext : PsKernelCheckerContext)
+                                (visitState : PsKernelCheckerState)
+                                (visitExpr : PsKernelExpr) =>
+                                smaller whnf defeq visitContext visitState visitExpr inferOnly)
+                              whnf child state1 openedBody with
                         | Except.error error =>
                             Except.error error
-                        | Except.ok domainSort =>
-                            let freshResult :=
-                              psKernelCheckerStateFreshName
-                                (Prod.snd domainSort)
-                                name;
-                            let fresh :=
-                              Prod.fst freshResult;
-                            let state1 :=
-                              Prod.snd freshResult;
-                            let childLocal :=
-                              psKernelLocalContextAddLocal
-                                nextContext.localContext
-                                fresh
-                                name
-                                domain
-                                binderInfo;
-                            let child :=
-                              psKernelCheckerContextWithLocalContext
-                                nextContext
-                                childLocal;
-                            let openedBody :=
-                              psKernelExprInstantiate1
-                                body
-                                (PsKernelExpr.fvar fresh);
-                            match
-                                smaller
-                                  whnf
-                                  defeq
-                                  child
-                                  state1
-                                  openedBody
-                                  inferOnly with
-                            | Except.error error =>
-                                Except.error error
-                            | Except.ok bodyResult =>
-                                match
-                                    psKernelEnsureSortWith
-                                      whnf
-                                      child
-                                      (Prod.snd bodyResult)
-                                      (Prod.fst bodyResult) with
-                                | Except.error error =>
-                                    Except.error error
-                                | Except.ok bodySort =>
-                                    let result :=
-                                      PsKernelExpr.sort
-                                        (psKernelLevelMkIMax
-                                          (Prod.fst domainSort)
-                                          (Prod.fst bodySort));
-                                    let scopedState :=
-                                      psKernelCheckerStateExitLocalScope
-                                        state1
-                                        (Prod.snd bodySort);
-                                    Except.ok
-                                      (Prod.mk
-                                        result
-                                        (psKernelCacheInferResult
-                                          scopedState
-                                          inferOnly
-                                          expr
-                                          result))
+                        | Except.ok bodySort =>
+                            let result :=
+                              PsKernelExpr.sort
+                                (psKernelLevelMkIMax
+                                  (Prod.fst domainSort).level
+                                  (Prod.fst bodySort).level);
+                            let scopedState :=
+                              psKernelCheckerStateExitLocalScope
+                                state1
+                                (Prod.snd bodySort);
+                            Except.ok
+                              (Prod.mk
+                                result
+                                (psKernelCacheInferResult
+                                  scopedState
+                                  inferOnly
+                                  expr
+                                  result))
                 | PsKernelExpr.letE name type value body nondep =>
                     let checked :=
                       if inferOnly then

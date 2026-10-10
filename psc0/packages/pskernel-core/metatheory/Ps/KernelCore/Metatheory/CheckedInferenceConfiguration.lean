@@ -874,7 +874,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                       false with
                 | error error =>
                     simp [
-                      psKernelInferCoreWithFuel,
+                      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                       hMiss,
                       hDepth,
                       hDomain
@@ -898,7 +898,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                           domainType with
                     | error error =>
                         simp [
-                          psKernelInferCoreWithFuel,
+                          psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                           hMiss,
                           hDepth,
                           hDomain,
@@ -1015,7 +1015,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                               false with
                         | error error =>
                             simp [
-                              psKernelInferCoreWithFuel,
+                              psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                               hMiss,
                               hDepth,
                               hDomain,
@@ -1033,14 +1033,14 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                             cases hTypeRun : psKernelInferCoreWithFuel remaining whnf defeq
                                 child bodyState rawBodyType true with
                             | error error =>
-                                simp [psKernelInferCoreWithFuel, hMiss, hDepth, hDomain, hDomainSort,
+                                simp [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, hMiss, hDepth, hDomain, hDomainSort,
                                   freshResult, fresh, state1, childLocal, child, openedBody, hBody, hTypeRun] at hSuccess
                             | ok typeRun =>
                                 rcases typeRun with ⟨typeOfBodyType, typeState⟩
                                 cases hCodomainSort : psKernelEnsureSortWith whnf child
                                     typeState typeOfBodyType with
                                 | error error =>
-                                    simp [psKernelInferCoreWithFuel, hMiss, hDepth, hDomain, hDomainSort,
+                                    simp [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith, hMiss, hDepth, hDomain, hDomainSort,
                                   freshResult, fresh, state1, childLocal, child, openedBody, hBody, hTypeRun, hCodomainSort] at hSuccess
                                 | ok sortRun =>
                                     rcases sortRun with ⟨codomainLevel, codomainState⟩
@@ -1100,7 +1100,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                                           codomainState
                                           hState1Config
                                     simp [
-                                      psKernelInferCoreWithFuel,
+                                      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                                       hMiss,
                                       hDepth,
                                       hDomain,
@@ -1147,7 +1147,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                       false with
                 | error error =>
                     simp [
-                      psKernelInferCoreWithFuel,
+                      psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                       hMiss,
                       hDepth,
                       hDomain
@@ -1171,7 +1171,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                           domainType with
                     | error error =>
                         simp [
-                          psKernelInferCoreWithFuel,
+                          psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                           hMiss,
                           hDepth,
                           hDomain,
@@ -1289,7 +1289,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                               false with
                         | error error =>
                             simp [
-                              psKernelInferCoreWithFuel,
+                              psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                               hMiss,
                               hDepth,
                               hDomain,
@@ -1321,7 +1321,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                                   bodyType with
                             | error error =>
                                 simp [
-                                  psKernelInferCoreWithFuel,
+                                  psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                                   hMiss,
                                   hDepth,
                                   hDomain,
@@ -1404,7 +1404,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                                       bodySortState
                                       hState1Config
                                 simp [
-                                  psKernelInferCoreWithFuel,
+                                  psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelLambdaCodomainVisitWith,
                                   hMiss,
                                   hDepth,
                                   hDomain,

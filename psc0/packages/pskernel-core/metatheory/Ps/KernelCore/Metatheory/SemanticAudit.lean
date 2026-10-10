@@ -1,3 +1,6 @@
+import Ps.KernelCore.Metatheory.SemanticLocalContextExtension
+import Ps.KernelCore.Metatheory.SemanticReferenceBinderContext
+import Ps.KernelCore.Metatheory.SemanticSortVisitProvenance
 import Ps.KernelCore.Metatheory.AnnotatedLocalContextErasure
 import Ps.KernelCore.Metatheory.SemanticInferenceBoundary
 import Ps.KernelCore.Metatheory.SemanticReferenceLocalContext
@@ -38,6 +41,34 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.freshLocalContext_empty,
+    ``PsKernelSemantics.SetModel.satisfies_withFree_fresh,
+    ``PsKernelSemantics.SetModel.checkedReading_withFree_fresh,
+    ``PsKernelSemantics.SetModel.modelsLocalContext_withFree_fresh,
+    ``PsKernelSemantics.SetModel.modelsLocalContext_addLocal,
+    ``PsKernelSemantics.SetModel.modelsLocalContext_addLet,
+    ``PsKernelSemantics.SetModel.modelsLocalContext_addLocal_fresh,
+    ``PsKernelSemantics.SetModel.modelsLocalContext_addLet_fresh,
+    ``PsKernelSemantics.SetModel.freshLocalContext_addLocal,
+    ``PsKernelSemantics.SetModel.freshLocalContext_addLet,
+    ``PsKernelSemantics.Reference.binderChild_localContext_model,
+    ``PsKernelSemantics.Reference.letScope_localContext_model,
+    ``PsKernelSemantics.Reference.binderChild_fvar_checked_result,
+    ``PsKernelSemantics.Reference.inferSortWith_forget_type,
+    ``PsKernelSemantics.Reference.lambdaCodomainVisitWith_forget,
+    ``PsKernelSemantics.Reference.inferSortWith_ok_iff,
+    ``PsKernelSemantics.Reference.lambdaCodomainVisitWith_observed_iff,
+    ``PsKernelSemantics.Reference.lambdaCodomainVisitWith_unchecked_iff,
+    ``PsKernelSemantics.Reference.lambdaCodomainVisitWith_selected_level,
+    ``PsKernelSemantics.Reference.SortVisitSelected.of_produced,
+    ``PsKernelSemantics.Reference.SortVisitSelected.of_observed,
+    ``PsKernelSemantics.Reference.SortVisitSelected.agrees,
+    ``PsKernelSemantics.Reference.SortVisitSelected.instantiated_regime,
+    ``PsKernelSemantics.Reference.selected_sort_not_zero_and_succ,
+    ``PsKernelSemantics.Reference.annotatedLambdaResult_same_visit_coherent,
+    ``PsKernelSemantics.Reference.lambda_trace_selected_sort,
+    ``PsKernelSemantics.Reference.forall_trace_domain_selected_sort,
+    ``PsKernelSemantics.Reference.forall_trace_range_selected_sort,
     ``psKernelLocalContextMap_find_some,
     ``psKernelLocalContextMap_addLocal,
     ``psKernelLocalContextMap_addLet,

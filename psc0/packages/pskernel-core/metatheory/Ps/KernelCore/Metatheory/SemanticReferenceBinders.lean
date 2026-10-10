@@ -58,21 +58,21 @@ theorem inferCore_forall_trace (remaining : Nat)
     Nonempty (ForallTrace remaining whnf defeq c s n A B bi io result next) := by
   cases hd : psKernelCheckerContextEnterRecDepth c with
   | error error =>
-      simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+      simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelReferenceCacheGet_miss,
         ite_self, hd] at run
       cases run
   | ok entered =>
       cases hA : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy
           remaining whnf defeq entered s A io with
       | error error =>
-          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+          simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelReferenceCacheGet_miss,
             ite_self, hd, hA] at run
           cases run
       | ok a =>
           rcases a with ⟨aType, aState⟩
           cases hAS : psKernelEnsureSortWith whnf entered aState aType with
           | error error =>
-              simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+              simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelReferenceCacheGet_miss,
                 ite_self, hd, hA, hAS] at run
               cases run
           | ok ua =>
@@ -84,7 +84,7 @@ theorem inferCore_forall_trace (remaining : Nat)
                   io with
               | error error =>
                   simp only [binderChild] at hB
-                  simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                  simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelReferenceCacheGet_miss,
                     ite_self, hd, hA, hAS, hB] at run
                   cases run
               | ok b =>
@@ -94,13 +94,13 @@ theorem inferCore_forall_trace (remaining : Nat)
                       (binderChild entered us n A bi) bState bType with
                   | error error =>
                       simp only [binderChild] at hBS
-                      simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                      simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelReferenceCacheGet_miss,
                         ite_self, hd, hA, hAS, hB, hBS] at run
                       cases run
                   | ok vb =>
                       rcases vb with ⟨v, vs⟩
                       simp only [binderChild] at hBS
-                      simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                      simp only [psKernelInferCoreWithFuel, psKernelInferSortWith, psKernelReferenceCacheGet_miss,
                         ite_self, hd, hA, hAS, hB, hBS,
                         infer_publication_noop, Except.ok.injEq, Prod.mk.injEq] at run
                       exact ⟨⟨entered, aType, aState, u, us, bType, bState, v, vs,

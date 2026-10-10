@@ -15,13 +15,18 @@ const manifest = JSON.parse(await readFile(path.join(archiveDirectory, 'manifest
 assert.equal(manifest.sourceCommit, '2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a');
 assert.equal(manifest.sourceVariant, variant);
 const selected = ['proofscript-0.1.0-psc0.1.tgz', 'typescript-7.0.2.tgz', 'typescript-typescript-' + process.platform + '-x64-7.0.2.tgz'];
+let rootTarball;
 for (const filename of selected) {
   const record = manifest.packages.find(p => p.name === filename);
   assert(record && /^[a-f0-9]{64}$/u.test(record.sha256), 'missing artifact digest: ' + filename);
-  assert.equal(sha(await readFile(path.join(archiveDirectory, filename))), record.sha256, 'artifact digest mismatch: ' + filename);
+  const bytes = await readFile(path.join(archiveDirectory, filename));
+  assert.equal(sha(bytes), record.sha256, 'artifact digest mismatch: ' + filename);
+  if (filename === selected[0]) rootTarball = bytes;
 }
 await mkdir(stageDirectory, { recursive: true });
-execFileSync('tar', ['-xzf', path.join(archiveDirectory, selected[0]), '-C', stageDirectory]);
+// Stream the exact verified bytes, not a platform-specific archive pathname.
+// GNU tar under Git Bash otherwise treats a Windows drive colon as host:path.
+execFileSync('tar', ['-xzf', '-'], { cwd: path.resolve(stageDirectory), input: rootTarball, timeout: 120000, maxBuffer: 4 * 1024 * 1024 });
 const target = path.join(stageDirectory, 'package');
 const runtimePaths = ['node_modules/@proofscript/compiler/dist/index.js', 'node_modules/@proofscript/pskernel-core/dist/index.js'];
 const before = await Promise.all(runtimePaths.map(async p => sha(await readFile(path.join(target, p)))));

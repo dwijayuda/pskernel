@@ -4,7 +4,11 @@ on:
   push:
     branches: [research/pskernel-fast-clean-v3-20261011]
     paths:
-      - 'pskernel-fast/**'
+      - 'pskernel-fast/lean-toolchain'
+      - 'pskernel-fast/lakefile.lean'
+      - 'pskernel-fast/src/**'
+      - 'pskernel-fast/scripts/**'
+      - 'pskernel-fast/ARCHITECTURE_POLICY.json'
       - '.github/workflows/pskernel-fast-v3.yml'
   workflow_dispatch:
 

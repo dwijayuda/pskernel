@@ -5,6 +5,7 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [Authoritative V3 architecture](PSKERNEL_FAST_ARCHITECTURE_V3.md)
 - [MVP scope / correctness contract](MVP_SCOPE.md)
 - [Live work state and evidence](AI_WORK_STATE.md)
+- [Machine-readable no-legacy constraint and CI guard](ARCHITECTURE_POLICY.json)
 
 ## Current executable state
 
@@ -18,7 +19,7 @@ lake build pskernel_fast_smoke
 lake exe pskernel_fast_smoke
 ```
 
-Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel proof branch and PR #89 are not changed. GitHub Actions workflow `pskernel-fast-v3.yml` is the cloud validation gate for this prototype. The [first successful source checkpoint](https://github.com/dwijayuda/pskernel/actions/runs/38094070233) built six targets and passed the focused smoke; the source still cannot accept proofs.
+Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel proof branch and PR #89 are not changed. GitHub Actions workflow `pskernel-fast-v3.yml` is the cloud validation gate for this prototype. The [latest green policy-fenced checkpoint](https://github.com/dwijayuda/pskernel/actions/runs/38094207080) built six targets, validated the independent import boundary, and passed the focused smoke; the source still cannot accept proofs.
 
 ## Next
 

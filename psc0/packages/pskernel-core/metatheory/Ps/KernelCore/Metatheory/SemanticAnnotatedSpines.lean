@@ -12,6 +12,12 @@ reduction without the semantic argument-domain obligations.
 -/
 namespace PsKernelSemantics.AnnotatedExpr
 
+/-- Pairwise coherence of the actual substitution or application arguments. -/
+inductive CoherentArgs : List AnnotatedExpr → List AnnotatedExpr → Prop where
+  | nil : CoherentArgs [] []
+  | cons {a b : AnnotatedExpr} {xs ys : List AnnotatedExpr} :
+      Coherent a b → CoherentArgs xs ys → CoherentArgs (a :: xs) (b :: ys)
+
 private theorem erase_lookup (xs : List AnnotatedExpr) (i : Nat) :
     psKernelExprListGet (xs.map erase) i = (xs[i]?).map erase := by
   induction xs generalizing i with
@@ -47,7 +53,7 @@ theorem erase_instManyAt (e : AnnotatedExpr) (start : Nat)
           | some a => simp [hlt, hs, erase_liftN]
           | none =>
               cases xs <;>
-                simp [hlt, hs, erase, erase_length, psKernelExprListIsEmpty]
+                simp [erase, erase_length, psKernelExprListIsEmpty, psKernelExprListLength]
   | fvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
   | app f a ihf iha =>
       have h0 := ihf offset
@@ -132,11 +138,11 @@ theorem erase_consumeLambdas (fuel : Nat) (fn : AnnotatedExpr)
         · rfl
 
 private theorem coherent_list_length {xs ys : List AnnotatedExpr}
-    (h : List.Forall₂ Coherent xs ys) : xs.length = ys.length := by
+    (h : CoherentArgs xs ys) : xs.length = ys.length := by
   induction h <;> simp_all
 
 private theorem coherent_list_lookup {xs ys : List AnnotatedExpr}
-    (h : List.Forall₂ Coherent xs ys) (i : Nat) :
+    (h : CoherentArgs xs ys) (i : Nat) :
     match xs[i]?, ys[i]? with
     | none, none => True
     | some a, some b => Coherent a b
@@ -146,7 +152,7 @@ private theorem coherent_list_lookup {xs ys : List AnnotatedExpr}
   | cons ha hs ih => cases i <;> simp_all
 
 theorem Coherent.instManyAt {e f : AnnotatedExpr} (bodies : Coherent e f)
-    {xs ys : List AnnotatedExpr} (args : List.Forall₂ Coherent xs ys)
+    {xs ys : List AnnotatedExpr} (args : CoherentArgs xs ys)
     (start offset : Nat) :
     Coherent (instManyAt e start xs offset) (instManyAt f start ys offset) := by
   have hlen := coherent_list_length args
@@ -177,14 +183,14 @@ theorem Coherent.instManyAt {e f : AnnotatedExpr} (bodies : Coherent e f)
   | proj he ih => exact .proj (ih offset)
 
 private theorem coherent_list_append {xs ys as bs : List AnnotatedExpr}
-    (h : List.Forall₂ Coherent xs ys) (k : List.Forall₂ Coherent as bs) :
-    List.Forall₂ Coherent (xs ++ as) (ys ++ bs) := by
+    (h : CoherentArgs xs ys) (k : CoherentArgs as bs) :
+    CoherentArgs (xs ++ as) (ys ++ bs) := by
   induction h with
   | nil => exact k
   | cons ha hs ih => exact .cons ha ih
 
 private theorem coherent_list_reverse {xs ys : List AnnotatedExpr}
-    (h : List.Forall₂ Coherent xs ys) : List.Forall₂ Coherent xs.reverse ys.reverse := by
+    (h : CoherentArgs xs ys) : CoherentArgs xs.reverse ys.reverse := by
   induction h with
   | nil => exact .nil
   | cons ha hs ih =>
@@ -192,12 +198,12 @@ private theorem coherent_list_reverse {xs ys : List AnnotatedExpr}
         coherent_list_append ih (.cons ha .nil)
 
 theorem Coherent.instantiateRev {e f : AnnotatedExpr} (bodies : Coherent e f)
-    {xs ys : List AnnotatedExpr} (args : List.Forall₂ Coherent xs ys) :
+    {xs ys : List AnnotatedExpr} (args : CoherentArgs xs ys) :
     Coherent (instantiateRev e xs) (instantiateRev f ys) :=
   bodies.instManyAt (coherent_list_reverse args) 0 0
 
 theorem Coherent.applyArgs {f g : AnnotatedExpr} (fn : Coherent f g)
-    {xs ys : List AnnotatedExpr} (args : List.Forall₂ Coherent xs ys) :
+    {xs ys : List AnnotatedExpr} (args : CoherentArgs xs ys) :
     Coherent (applyArgs f xs) (applyArgs g ys) := by
   induction args generalizing f g with
   | nil => exact fn
@@ -210,7 +216,7 @@ theorem Coherent.consumeLambdas {f g : AnnotatedExpr} (fn : Coherent f g)
   induction fuel generalizing f g count with
   | zero => exact ⟨fn, rfl⟩
   | succ fuel ih =>
-      cases fn <;> simp only [consumeLambdas]
+      cases fn <;> try simp only [AnnotatedExpr.consumeLambdas]
       all_goals try exact ⟨by constructor <;> assumption, rfl⟩
       case lam hv hA hb =>
         split
@@ -219,13 +225,13 @@ theorem Coherent.consumeLambdas {f g : AnnotatedExpr} (fn : Coherent f g)
 
 theorem checkedExprEq_instManyAt {e f : AnnotatedExpr}
     (bodies : checkedExprEq e f = true) {xs ys : List AnnotatedExpr}
-    (args : List.Forall₂ Coherent xs ys) (start offset : Nat) :
+    (args : CoherentArgs xs ys) (start offset : Nat) :
     checkedExprEq (instManyAt e start xs offset) (instManyAt f start ys offset) = true :=
   ((coherent_of_checkedExprEq bodies).instManyAt args start offset).checked
 
 theorem checkedExprEq_instantiateRev {e f : AnnotatedExpr}
     (bodies : checkedExprEq e f = true) {xs ys : List AnnotatedExpr}
-    (args : List.Forall₂ Coherent xs ys) :
+    (args : CoherentArgs xs ys) :
     checkedExprEq (instantiateRev e xs) (instantiateRev f ys) = true :=
   ((coherent_of_checkedExprEq bodies).instantiateRev args).checked
 

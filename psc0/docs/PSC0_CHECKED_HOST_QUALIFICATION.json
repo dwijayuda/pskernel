@@ -1,0 +1,72 @@
+{
+  "schema": "psc0-checked-host-qualification/1",
+  "milestone": "bounded-P0-P1-P2-host-integration",
+  "implementationSource": "2c48a6cca20f081c9d1785d56d3c67d637651a78",
+  "startingSource": "58234f52f15f961f599799e2e93ec1f1f0f86962",
+  "qualifiedCompilerSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "grammar": "ps-0.9-r3/new-only",
+  "strictEntry": "psCompilerSh1TypeScriptSources",
+  "genericApiSelectsStrictProfile": false,
+  "typescript": "7.0.2",
+  "compilerSourceFiles": 69,
+  "compilerClosureModules": 64,
+  "compilerSourceInventorySha256": "fc08090151979be64458352a030a2aaa11bc0df5aab6a3e8cc71b3c4213ad0de",
+  "compilerSourceUnchanged": true,
+  "kernelSourceAndAdapterUnchanged": true,
+  "seedGrammarAndToolchainUnchanged": true,
+  "retainedRuntime": {
+    "source": "2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a",
+    "runId": 38075437516,
+    "artifactId": 11678641329,
+    "artifactSha256": "3b89239132db2003a3ee0cc01c2c4c9795be4d4ae0097d86a62616fc48fa122a",
+    "compilerAndKernelBytesMatchedBeforeAndAfterRepack": true
+  },
+  "validationRun": 38082117579,
+  "jobs": [
+    {
+      "platform": "linux-x64",
+      "node": "22.23.3",
+      "jobId": 114301005999,
+      "conclusion": "success",
+      "hostTestsPassed": 30,
+      "workspaceCount": 23,
+      "installedSourceEditions": ["ps", "lean"],
+      "evidenceArtifactId": 11680682736,
+      "evidenceArtifactSha256": "ababa0b4e0ac0e867d1fcdceaee80ec043b11c8e38addbbeb6fa558db0f8e0b3"
+    },
+    {
+      "platform": "windows-x64",
+      "node": "26.7.0",
+      "jobId": 114301006107,
+      "conclusion": "success",
+      "hostTestsPassed": 30,
+      "workspaceCount": 23,
+      "installedSourceEditions": ["ps", "lean"],
+      "evidenceArtifactId": 11680573015,
+      "evidenceArtifactSha256": "64b825cd10bd183d36e9c5618389d5bbc22033bcdff1c87bf93b27d7f2f30181"
+    }
+  ],
+  "installedChecks": {
+    "compilerClosureReadAndParsed": true,
+    "checkedSourceLibraryBuild": true,
+    "generatedAnswer42": true,
+    "previousExecutablePreservedAfterInvalidInput": true,
+    "unexpectedUncheckedFlagRefused": true,
+    "optionalPackagesNotBundled": true
+  },
+  "notClaimed": {
+    "newC2C3FixedPoint": true,
+    "kernelSelfHosting": true,
+    "formalKernelSoundness": true,
+    "fullPscvVerification": true,
+    "arbitraryExecutablePluginSandbox": true,
+    "authenticatedPublicRelease": true
+  },
+  "fullCompilerFixedPointExecuted": false,
+  "compilerRegenerated": false,
+  "kernelRegenerated": false,
+  "manualReleaseWorkflowExecuted": false,
+  "npmPublished": false,
+  "historicalFailureRuns": [38081492032, 38081879291],
+  "receiptIsProofAuthority": false
+}

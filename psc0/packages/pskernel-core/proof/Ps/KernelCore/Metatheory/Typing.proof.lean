@@ -746,6 +746,8 @@ theorem psKernelInferCore_lam_checked_refines_typing
   constructor
   · simp [
       psKernelInferCoreWithFuel,
+      psKernelInferSortWith,
+      psKernelLambdaCodomainVisitWith,
       psKernelInferCacheEligible,
       psKernelCacheInferResult,
       hDepth,
@@ -877,6 +879,7 @@ theorem psKernelInferCore_forall_checked_refines_typing
   constructor
   · simp [
       psKernelInferCoreWithFuel,
+      psKernelInferSortWith,
       psKernelInferCacheEligible,
       psKernelCacheInferResult,
       hDepth,

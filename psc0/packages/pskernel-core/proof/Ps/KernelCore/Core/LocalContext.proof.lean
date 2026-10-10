@@ -3,7 +3,7 @@ import Ps.KernelCore.Metatheory.Context
 
 theorem psKernelLocalContextFindIn_nil
     (name : PsKernelName) :
-    psKernelLocalContextFindIn name List.nil = Option.none := by
+    psKernelLocalContextFindIn (Expr := PsKernelExpr) name List.nil = Option.none := by
   rfl
 
 theorem psKernelLocalContextEmpty_find

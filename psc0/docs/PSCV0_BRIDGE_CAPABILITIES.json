@@ -1,0 +1,21 @@
+{
+  "schema": "psc0-pscv0-bridge-capabilities/1",
+  "status": "candidate-unqualified-until-CI",
+  "language": "pscv0",
+  "referenceSha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
+  "referenceLeanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "referenceSection": "3 / Base do; 2 / application grammar",
+  "bootstrapRuntimeLean": "4.34.0",
+  "capability": "declaration-except-do/1",
+  "portableOwner": "@proofscript/syntax",
+  "newKernelConstructors": [],
+  "sourceIntent": ["do items", "declaration alias", "spans", "verbatim original source"],
+  "selectedForms": ["declaration-body Except do", "identifier/wildcard bind", "immutable let", "typed immutable let", "term action", "terminal return", "PS braces/newlines", "native Lean do layout"],
+  "explicitLimits": ["result is explicitly the builtin Except applied to two types", "no do nesting", "no nonterminal return", "no mutation/loops/try/throw", "no binder shadowing of the selected Except effect", "no general class-directed monads", "commented-source canonical printing declines; original replay remains lossless", "old leaf-term capability limits still apply"],
+  "notYetImplemented": ["empty-call Unit completion", "expected-type untyped lambdas", "result projections", "record updates", "nested patterns", "trivia-anchored formatting", "full source authority migration"],
+  "publicCliReplaced": false,
+  "oldGrammarCompatibilityModeAdded": false,
+  "fullPscv0Conformance": false,
+  "newSelfhostFixedPoint": false,
+  "testsExecuted": false
+}

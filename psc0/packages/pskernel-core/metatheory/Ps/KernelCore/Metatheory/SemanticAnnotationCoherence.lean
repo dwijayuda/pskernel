@@ -184,7 +184,7 @@ theorem Coherent.inst {e f a b : AnnotatedExpr}
       by_cases hlt : i < cut
       · simpa only [AnnotatedExpr.inst, hlt, ite_true] using (Coherent.bvar i)
       · by_cases heq : i = cut
-        · simpa only [AnnotatedExpr.inst, hlt, heq, ite_false, ite_true] using
+        · simpa only [AnnotatedExpr.inst, hlt, heq, Nat.lt_irrefl, ite_false, ite_true] using
             args.liftN cut 0
         · simpa only [AnnotatedExpr.inst, hlt, heq, ite_false] using
             (Coherent.bvar (i - 1))

@@ -222,3 +222,7 @@ G0/G1 builds test the new representation and symbolic universe syntax. G2 introd
 - G2: [run 38094155908](https://github.com/dwijayuda/pskernel/actions/runs/38094155908) at `313af551`: beta/let closure *prototype*, neutral-head and resource tests built and passed (10 Lake jobs).
 
 This is **not** a benchmark or a successful Lean proof checker. Never infer full universe equivalence, actual DefEq, inductive admission, mathematical soundness or future self-host compatibility from these tests.
+
+## 12. Evidence-based evaluator priority after G6–G7
+
+[Detailed G6 benchmark evidence](EVALUATOR_BENCHMARK_G6.md) supports lazy closures as the provisional preferred evaluator: 0.88 s substitution versus 0.08 s closure+reification median on one 64-deep **untyped** synthetic beta/let workload with identical checksums (six timed process runs). [G7 CI](https://github.com/dwijayuda/pskernel/actions/runs/38095713290) passed 256 generated closed syntax/evaluator agreements. This is promising but **does not establish a Lean kernel speedup, broad compatibility or soundness**. Next choose on full typed/dependent/DefEq/admission workload and formally justified positive decisions; keep substitution as independent reference only.

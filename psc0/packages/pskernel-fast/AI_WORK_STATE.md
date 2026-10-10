@@ -133,3 +133,15 @@ The matched workload has been expanded from depth 24 / 1,200 evaluations / 16 un
 ## G7 deterministic finite closed-term family — candidate
 
 Generated 256 deterministic, **untyped but syntactically closed**, deeply nested expressions (beta, let, neutral applications, lambdas, metadata, projections). Each test requires exact closure/reference WHNF result agreement and raw expression interning/decode reconstruction. This tests families rather than patching individual names. It is **not** a Lean model proof and does not certify a general DefEq implementation, nor benchmark speed. Cloud CI for the exact commit is mandatory.
+
+## G6 confirmed measured toy evaluator result
+
+[Run 38095648308](https://github.com/dwijayuda/pskernel/actions/runs/38095648308) at source `80506642c3f2b8cb778d99de4265a12efc3cc29a` passed with three samples each: substitution wall seconds [0.90, 0.88, 0.85] (median 0.88), closure+full reification [0.08, 0.08, 0.07] (median 0.08). The 25,000-evaluation, depth-64, 128-distinct-input corpus had identical checksum 1,610,740 in all six samples. Median whole-process peak RSS: 10,144 KB reference, 10,244 KB closure. **This is approximately 11x on an untyped toy beta/let evaluator, NOT a Lean compatible kernel/DefEq benchmark**. The complete methodology is [EVALUATOR_BENCHMARK_G6.md](EVALUATOR_BENCHMARK_G6.md). Architecture candidate A (lazy closures) is now the priority hypothesis **only**, not an unqualified final selection.
+
+## G7 confirmed broader evaluator regression
+
+[Run 38095713290](https://github.com/dwijayuda/pskernel/actions/runs/38095713290) at source `f4f0b905325caeedff46032a187ea5d56aba9dd2` passed: 18 successful Lake build jobs and 256 deterministic generated closed-term equality/round-trip cases. This does not establish formal soundness or real Lean typing.
+
+## Immediate continuation
+
+Proceed with a genuinely Lean-semantic G8: full universe-level equivalence (including symbolic imax, zero/positive substitutions, scope), faithful term/export decoding (not placeholder metadata), typed environment/declaration definitions and exact official 4.35 differential corpus for the currently supported fragment. Extend closed-substitution and closure tests to *well-typed* dependent proofs before any kernel-performance comparison. Keep old proof preservation irrelevant, but make new correctness arguments for every accepting rule. Never promote a G0–G7 prototype to a proof checker based on raw tests.

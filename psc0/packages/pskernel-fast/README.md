@@ -27,3 +27,5 @@ G4 adds an independent substitution-reference evaluator and closure reification 
 G6 adds a **separate untyped evaluator diagnostic** (`Bench.lean`) with three time/memory samples per mode on cloud CI. It explicitly includes closure reification; the results are not Lean kernel throughput claims. The benchmark has its own workflow and does not run on ordinary documentation edits.
 
 G7 adds 256 deterministic closed-term generator tests, requiring independent substitution/closure agreement and exact syntax interning. These are **untyped evaluation tests**, not proof checking or formal verification.
+
+**Measured prototype scope:** [G6 evaluator benchmark](EVALUATOR_BENCHMARK_G6.md) recorded median 0.88 s substitution versus 0.08 s closure with reification on a *synthetic untyped* 64-depth beta/let workload; this is **not** a Lean-kernel speedup or full correctness claim. G7's 256 generated closed-term agreement cases passed on cloud CI.

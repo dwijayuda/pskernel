@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 0,
+  "milestone": "PSC0-PSCV-P1L-PINNED-LEAN-ALL-IMPORTED-SOURCE-MODULES",
+  "qualifiedSourceCommit": "965cbc3c5b3809f4f63c4fd28a76233c1abe0ff5",
+  "ci": {
+    "runId": 38060694489,
+    "attempt": 1,
+    "allFourJobsPassed": true,
+    "platforms": [
+      "linux-node22.23.3",
+      "linux-node26.7.0",
+      "windows-node26.7.0",
+      "lean435rc3-and-exact-upstream-git"
+    ],
+    "artifactId": 11672956734,
+    "artifactZipSha256": "ed47f26816faf60a01be4acacd2035b48eae6bbb62cca225158a3dc1cffb0c89"
+  },
+  "observations": {
+    "arithmeticTypeclassQueries": 84,
+    "selectedDeclarations": 45,
+    "importedSourceModules": 7,
+    "locatedSourceModules": 7,
+    "sourceModulesUnlocated": 0,
+    "uniqueLiteralNamedInstanceCandidates": 6,
+    "reportSha256": "134bc8acdfdb6ea7e57cb5b4effc4f74ea928f39839cc7a0050e8281fa4c469a"
+  },
+  "normative": {
+    "requiredSnapshotIDs": 194,
+    "unresolvedSnapshotIDs": 191
+  },
+  "claims": {
+    "sourceToElaboratedDeclarationLineProven": false,
+    "standardRegistryApproved": false,
+    "genericConcreteDependenciesProved": false,
+    "executablePreservationProven": false,
+    "verifiedExecutableAuthorized": false,
+    "pscvVerified": false
+  },
+  "compilerKernelTS7ReleaseAndSeedUnchanged": true,
+  "status": "qualified-immutable-source-blob-candidate-evidence"
+}

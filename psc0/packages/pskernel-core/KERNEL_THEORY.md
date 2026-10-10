@@ -28,7 +28,7 @@ milestones and exact completion claim.
 The binder/function layer now proves hereditary validity transport and local
 model bridges from actual reference forall, checked application and checked
 lambda executions. The structural-comparison coherence premise, recursive
-calls and lambda body-type reduction/regime obligations remain explicit.
+calls and justification of lambda regimes remain explicit.
 A checked empty-domain counterexample shows that even both hereditary validity
 predicates do not establish coherent interpretations of identical raw syntax.
 
@@ -42,8 +42,23 @@ positive-universe test exactly.
 
 These operations are assurance infrastructure. Public raw-expression acceptance
 does not yet run the extra guard or produce validated annotations. Recursive
-typing/reduction/equality, lambda body-type preservation and full admission
+typing/reduction/equality, justification of lambda regimes and full admission
 soundness remain open. No new axiom or stronger foundation assumption was added.
+
+Lambda inference now closes its recursively inferred body type directly. The
+extra cheap-beta normalization of that type was removed from the shared
+production branch in both cache modes and both inference modes. The lambda
+model bridge therefore no longer assumes preservation by that extra pass.
+`SemanticValidityScope.lean` transports both hereditary invariants across
+scoped environments and fresh-variable closing; the returned lambda type
+inherits them under explicit recursive and regime premises. Let-body
+normalization and ordinary WHNF/beta reduction are unchanged.
+
+This removes one operation and its proof obligation. It does not establish
+checked annotation provenance, recursive checking soundness, or consistency of
+the full kernel. The selected lambda regime still needs justification from
+actual checking evidence. No new axiom or stronger foundation assumption was
+added.
 
 Historical 4.34 reference artifacts (not current certification):
 

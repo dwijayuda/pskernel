@@ -2,7 +2,96 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
-## Checked annotation agreement — 2026-10-10
+## Direct lambda types and validity transport — 2026-10-10
+
+The shared production lambda branch now closes the body type returned by its
+recursive inference directly. Previously it first applied
+`psKernelExprCheapBetaReduce`. This change applies to checked and infer-only
+inference under both cache policies. It removes that extra normalization and
+the preservation premise it required in the lambda model bridge. It does not
+prove the old pass sound or remove reduction obligations elsewhere.
+
+`SemanticValidityScope.lean` proves that `AnnotationValid` and
+`FunctionValid` depend only on the variables within a term's scope, and
+transports both invariants through closing a fresh free variable.
+`lambda_trace_type_validity` then constructs the actual returned function
+type with both invariants from recursive domain/body-type evidence and an
+explicit selected-regime premise. The existing lambda term model theorem no
+longer accepts a separately reduced body type or its preservation assumption.
+
+The production regression uses
+`fun (P : Sort u) (h : (fun (Q : Sort u) => Q) P) => h`.
+It checks that checked and infer-only inference retain the raw codomain redex,
+that conversion to `forall P, P -> P` succeeds, that public admission accepts
+this declared type, and that the invalid `forall P, P` type is rejected.
+All four combinations of cached/reference and Prop/Type are checked.
+
+**Research basis.** The pinned
+[Lean lambda implementation](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/kernel/type_checker.cpp#L125)
+performs this extra cheap reduction. The
+[pinned Con Leche checked lambda](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Kernel/Core.lean#L1216)
+returns the abstracted inferred type directly. That supports the architectural
+choice; it does not prove PSKernel compatible. Our inferred raw syntax can now
+differ from Lean's, and fuel/timeout behavior can differ. Actual conversion and
+declaration acceptance are tested separately.
+
+Con Leche also checks the lambda annotation against a computed codomain sort,
+once at the innermost lambda of a chain, and checks agreement along the chain.
+Its source explicitly rejects assuming that every inferred type has a sort.
+PSKernel does not yet perform those annotation checks. The next substantial
+architecture task is to connect actual checking evidence, validated annotations,
+and the shared inference/WHNF/equality recursion. Merely adding a sort check
+without carrying coherent annotations would leave the main proof gap open.
+
+No new axiom or stronger foundation assumption was added. The proofs remain
+relative to explicit `SetTheory V`; foundation existence is unconstructed.
+Full recursive checking, accepted annotation provenance, safe admission,
+allowed-axiom models and public statement preservation remain unfinished.
+The legacy operational judgments were adjusted to the new return syntax only;
+they remain quarantined and inadequate as a soundness specification.
+
+A recovery branch was created before the production edit:
+`checkpoint/pskernel-core-before-lambda-type-simplification-20261010` at
+`5e3fa749d18441d7d35d1be9555c93cad78974cb`.
+
+[Proof job 114214647274](https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274) at
+`52eb8e72c2f20b5328cbf531a6be119947efb946` passed **248 build jobs**, all
+**84 companion files** and the **219-declaration** semantic axiom audit.
+The **134-module** dependency closure contains only the 12 allowed Con Leche
+pure-math modules, with zero legacy judgment or production assurance imports.
+The reference-policy audit checked **1,821 definitions** with zero cached-default
+fallbacks. The overall workflow failed only its separate baseline-diagnostic
+setup; this proof job passed. The diagnostic was rerun independently.
+
+[Native tests and focused runtime checks](https://github.com/dwijayuda/pskernel/actions/runs/38051925196)
+at `2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf` passed the existing native
+suites plus lambda raw-type, conversion and admission tests in all four
+cache-mode/sort-regime combinations. Both Arena modes passed **141/141
+tutorial and 18/18 bug cases**, with zero declines. The binary SHA-256 was
+`51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d`.
+
+Fresh exact 4.35 Prelude, UTF8, XOR and Int64 closures all passed in cached
+mode. Reference mode passed Prelude, UTF8 and XOR, then **timed out on Int64
+at 180 seconds (exit 124)**. That is an unresolved check, not acceptance or
+a logical rejection. The runtime workflow therefore failed overall; its
+native/Arena jobs passed. Its old lambda companion-proof failure was repaired
+in the proof job above. No runtime source changed between the native-tested
+revision and the final proof revision.
+
+Full Init/Std/Mathlib were not rerun. Their earlier timeouts and missing
+qualification remain open. Small-suite success does not prove cached/reference
+equivalence, universal Lean compatibility, or full-kernel soundness.
+
+The [controlled Int64 comparison](https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947)
+built checkpoint `5e3fa749` and candidate `0aa3d403` on the same runner and
+fed both the identical export. **Both reference checks timed out at 180
+seconds**, exit 124. Their binary hashes match the recorded pre-change and
+new runtime binaries. The timeout therefore predates the lambda change; this
+bounded experiment does not establish equal performance or acceptance.
+The diagnostic job is green because it preserved both timeout results as data,
+not because Int64 passed.
+
+## Checked annotation agreement (previous stage) — 2026-10-10
 
 Three assurance modules remove an assumed coherence premise from guarded
 structural comparison and connect the guard to actual sort-exposure visits.
@@ -60,6 +149,10 @@ axiom/initial-model policy and public statement preservation remain required.
 These obligations must be proved, not postulated.
 
 ## Binder and function proof boundary — 2026-10-10
+
+Historical receipt: the lambda reduction described in this stage was later
+retired by the direct-lambda-type change documented above. Its old preservation
+premise is not an outstanding premise of the current lambda bridge.
 
 Six new assurance modules connect the set interpretation to additional reference
 checker branches. These are checked local theorems, not a completed recursive

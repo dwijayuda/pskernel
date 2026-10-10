@@ -46,9 +46,24 @@ positive-universe test exactly.
 
 These operations are assurance infrastructure. Public raw-expression acceptance
 does not yet run the extra guard or produce validated annotations. Recursive
-typing/reduction/equality, lambda body-type preservation and full admission
+typing/reduction/equality, justification of lambda regimes and full admission
 soundness remain open. No new axiom or stronger foundation assumption was added.
 See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
+
+Lambda inference now closes its recursively inferred body type directly. The
+extra cheap-beta normalization of that type was removed from the shared
+production branch in both cache modes and both inference modes. The lambda
+model bridge therefore no longer assumes preservation by that extra pass.
+`SemanticValidityScope.lean` transports both hereditary invariants across
+scoped environments and fresh-variable closing; the returned lambda type
+inherits them under explicit recursive and regime premises. Let-body
+normalization and ordinary WHNF/beta reduction are unchanged.
+
+This removes one operation and its proof obligation. It does not establish
+checked annotation provenance, recursive checking soundness, or consistency of
+the full kernel. The selected lambda regime still needs justification from
+actual checking evidence. No new axiom or stronger foundation assumption was
+added.
 
 ## Correctness-first reference mode
 
@@ -66,15 +81,41 @@ sharing and environment indexes remain; generated PSC0 qualification remains
 open. Runtime performance and acceptance equivalence of the two modes are
 separate obligations.
 
-[Proof run 38050725364](https://github.com/dwijayuda/pskernel/actions/runs/38050725364) at
-`06a488e20f9ae0215d1c77e94a195b9e988f072c` passed **247 build jobs**, all **84 companion files** and the
-**212-declaration** semantic axiom audit. The **133-module** dependency closure
-contains only the 12 allowed Con Leche pure-math modules, with zero legacy
-judgment or production assurance imports. The reference-policy audit again
-checked **1,821 definitions** with zero cached-default fallbacks.
-[Both modes](https://github.com/dwijayuda/pskernel/actions/runs/38034307491)
-passed tutorial 141/141 and bugs 18/18 with zero declines. Full-corpus behavior
-was not requalified by this small-suite result.
+[Proof job 114214647274](https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274) at
+`52eb8e72c2f20b5328cbf531a6be119947efb946` passed **248 build jobs**, all
+**84 companion files** and the **219-declaration** semantic axiom audit.
+The **134-module** dependency closure contains only the 12 allowed Con Leche
+pure-math modules, with zero legacy judgment or production assurance imports.
+The reference-policy audit checked **1,821 definitions** with zero cached-default
+fallbacks. The overall workflow failed only its separate baseline-diagnostic
+setup; this proof job passed. The diagnostic was rerun independently.
+[Native tests and focused runtime checks](https://github.com/dwijayuda/pskernel/actions/runs/38051925196)
+at `2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf` passed the existing native
+suites plus lambda raw-type, conversion and admission tests in all four
+cache-mode/sort-regime combinations. Both Arena modes passed **141/141
+tutorial and 18/18 bug cases**, with zero declines. The binary SHA-256 was
+`51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d`.
+
+Fresh exact 4.35 Prelude, UTF8, XOR and Int64 closures all passed in cached
+mode. Reference mode passed Prelude, UTF8 and XOR, then **timed out on Int64
+at 180 seconds (exit 124)**. That is an unresolved check, not acceptance or
+a logical rejection. The runtime workflow therefore failed overall; its
+native/Arena jobs passed. Its old lambda companion-proof failure was repaired
+in the proof job above. No runtime source changed between the native-tested
+revision and the final proof revision.
+
+Full Init/Std/Mathlib were not rerun. Their earlier timeouts and missing
+qualification remain open. Small-suite success does not prove cached/reference
+equivalence, universal Lean compatibility, or full-kernel soundness.
+
+The [controlled Int64 comparison](https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947)
+built checkpoint `5e3fa749` and candidate `0aa3d403` on the same runner and
+fed both the identical export. **Both reference checks timed out at 180
+seconds**, exit 124. Their binary hashes match the recorded pre-change and
+new runtime binaries. The timeout therefore predates the lambda change; this
+bounded experiment does not establish equal performance or acceptance.
+The diagnostic job is green because it preserved both timeout results as data,
+not because Int64 passed.
 
 The recoverable pre-refactor branch is
 `checkpoint/pskernel-core-before-cache-free-reference-20261010` at

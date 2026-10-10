@@ -1,81 +1,52 @@
 {
   "schemaVersion": 8,
-  "stage": "Correctness priority: executable checked annotation agreement and actual sort visits",
-  "status": "checked-annotation-guard-validated-full-kernel-proof-unfinished",
-  "candidateCommit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
-  "assuranceRevision": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+  "stage": "Correctness priority: direct lambda types and hereditary validity",
+  "status": "lambda-simplification-and-validity-validated-full-kernel-unfinished",
+  "candidateCommit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+  "assuranceRevision": "52eb8e72c2f20b5328cbf531a6be119947efb946",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38050725364,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364",
-  "nativeBinarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+  "workflowRun": 38052617458,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+  "nativeBinarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
   "checks": {
     "build": {
-      "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
-      "run": 38034307491,
-      "binaryJob": 114161461962,
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "job": 114212616925,
+      "status": "passed",
       "binaryBuildJobs": 218,
-      "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
-      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
-      "exportMode": "historical",
-      "cached": {
-        "job": 114161786213,
-        "tutorial": {
-          "correct": 141,
-          "total": 141,
-          "declined": 0
-        },
-        "bugs": {
-          "correct": 18,
-          "total": 18,
-          "declined": 0
-        }
-      },
-      "reference": {
-        "job": 114161786252,
-        "tutorial": {
-          "correct": 141,
-          "total": 141,
-          "declined": 0
-        },
-        "bugs": {
-          "correct": 18,
-          "total": 18,
-          "declined": 0
-        }
-      },
-      "sameBinaryForBothModes": true,
-      "comparativePerformanceClaimed": false,
-      "fullCorporaRun": false,
-      "fresh435ExportsRun": false
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d"
     },
     "metatheory": {
-      "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
-      "run": 38050725364,
-      "job": 114209132602,
-      "buildJobs": 247,
+      "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+      "run": 38052617458,
+      "job": 114214647274,
+      "buildJobs": 248,
       "companionFiles": 84,
-      "axiomDeclarations": 212,
+      "axiomDeclarations": 219,
       "pureMathModules": 12,
-      "closureModules": 133,
+      "closureModules": 134,
       "referenceDefinitions": 1821,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 12:10:43 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
+      "checkedAt": "2026-10-10 12:41:40 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+      "runConclusion": "failure",
+      "runQualification": "Proof job passed; separate baseline diagnostic setup failed before checking and was rerun independently."
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "run": 38050725364,
-      "job": 114209132602
+      "run": 38052617458,
+      "job": 114214647274
     },
     "nativeRegression": {
-      "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
-      "run": 38033599176,
-      "job": 114159374353,
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "job": 114212616925,
       "status": "passed",
       "suiteMarkers": [
         "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
@@ -87,6 +58,7 @@
         "PSKERNEL_OPEN_WHNF_SCOPE",
         "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
         "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
         "PSKERNEL_REFERENCE_TESTS"
       ],
       "referenceCases": {
@@ -95,18 +67,27 @@
         "admission": 3,
         "resourceExhaustion": 1
       },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
       "poisonedLowLevelStateIsPublicApiExploit": false
     },
     "smallArena": {
-      "commit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
-      "run": 38034307491,
-      "binaryJob": 114161461962,
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "binaryJob": 114212616925,
       "binaryBuildJobs": 218,
-      "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
       "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
       "exportMode": "historical",
       "cached": {
-        "job": 114161786213,
+        "job": 114213076273,
         "tutorial": {
           "correct": 141,
           "total": 141,
@@ -119,7 +100,7 @@
         }
       },
       "reference": {
-        "job": 114161786252,
+        "job": 114213076357,
         "tutorial": {
           "correct": 141,
           "total": 141,
@@ -134,10 +115,154 @@
       "sameBinaryForBothModes": true,
       "comparativePerformanceClaimed": false,
       "fullCorporaRun": false,
-      "fresh435ExportsRun": false
+      "fresh435ExportsRun": true
     },
     "fullCorpora": {
-      "status": "not-run-this-stage"
+      "status": "not-run-this-stage",
+      "priorInitStdTimeoutsUnresolved": true,
+      "mathlibQualification": "unestablished"
+    },
+    "fresh435": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "sameExportedInputBetweenModesVerified": false,
+      "cached": {
+        "job": 114213076297,
+        "workflowConclusion": "success",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 1.2,
+            "maxRssKiB": 74668
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 13.29,
+            "maxRssKiB": 84044
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 28.95,
+            "maxRssKiB": 88380
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.5,
+            "maxRssKiB": 72848
+          }
+        ]
+      },
+      "reference": {
+        "job": 114213076323,
+        "workflowConclusion": "failure",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.92,
+            "maxRssKiB": 74352
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 13.51,
+            "maxRssKiB": 75916
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 43.71,
+            "maxRssKiB": 87604
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "timeout",
+            "exitCode": 124,
+            "seconds": 180,
+            "maxRssKiB": 70652
+          }
+        ]
+      }
+    },
+    "referenceInt64Baseline": {
+      "run": 38052827877,
+      "job": 114215267947,
+      "workflowConclusion": "success",
+      "checkerAcceptance": false,
+      "status": "both-timeout",
+      "budgetSeconds": 180,
+      "inputSha256": "e0c31b69ad4013f80b732b5eac9484948a6d4a469d0452d44f0c43f6b2ac1df8",
+      "sameRunner": true,
+      "sameInput": true,
+      "baseline": {
+        "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb",
+        "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70784
+      },
+      "candidate": {
+        "commit": "0aa3d403324e8a339a8a0c07253b0e10f6dff1ae",
+        "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70356
+      },
+      "conclusion": "Reference Int64 timeout predates lambda simplification. The experiment does not establish equal performance or acceptance.",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947"
     }
   },
   "claims": {
@@ -163,7 +288,9 @@
     "executableAnnotationGuardSound": true,
     "publicAcceptanceUsesAnnotationGuard": false,
     "acceptedAnnotationProvenanceProved": false,
-    "newAxiomsAdded": false
+    "newAxiomsAdded": false,
+    "lambdaExtraBodyTypeNormalizationRemoved": true,
+    "lambdaSelectedRegimeJustified": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -514,7 +641,7 @@
   ],
   "nextStage": {
     "status": "open",
-    "scope": "Integrate coherent checked readings with joint reference inference, WHNF and equality, including infer-only and lambda body-type obligations",
+    "scope": "Integrate coherent checked readings with joint reference inference, WHNF and equality, including infer-only preconditions and justified lambda regimes",
     "performancePriority": "deferred"
   },
   "promotionDecision": {
@@ -1633,20 +1760,45 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 12:10:43 UTC",
+  "recordedAt": "2026-10-10 12:50:10 UTC",
   "semanticFoundation": {
-    "sourceCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f",
-    "validationCommit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
+    "sourceCommit": "2fe992645a357dfb3b738c5c6f7b3256d9984966",
+    "validationCommit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
     "validationStatus": "passed",
-    "workflowRun": 38026130891,
-    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38026130891",
-    "scope": "Concrete local proof/conversion/Prop-product/sort-successor algebra and partial valuation; not a full expression/environment model",
+    "workflowRun": 38052617458,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+    "scope": "Relative universe-set/dependent-function model; sound declarative fragment; syntax/hereditary-validity transport; exact annotation guards; direct lambda type model/validity bridges. Not full recursive checker or admission soundness.",
     "modules": [
       "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
       "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
       "metatheory/Ps/KernelCore/Metatheory/SemanticClassifier.lean",
       "metatheory/Ps/KernelCore/Metatheory/SemanticSortInference.lean",
-      "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean"
+      "metatheory/Ps/KernelCore/Metatheory/SemanticSetDomain.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotatedExpr.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticInterpretation.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticContext.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticErasure.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticModelAdequacy.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticDeclarative.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticConcrete.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticExtension.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticStructuralEquality.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAbstraction.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticScope.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticLevelConstructors.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseSubstitution.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticConstantInference.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReference.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean"
     ],
     "semanticEqualityRequiresDefinedValue": true,
     "genericEmptyTheoremIsFullKernelConsistency": false,
@@ -1654,15 +1806,17 @@
     "fullUniverseFunctionClosureConstructed": false,
     "scopedDependentFunctionsConstructed": false,
     "admissionModelConstructed": false,
-    "productionCodeChanged": false,
+    "productionCodeChanged": true,
     "conditionalCallbackBridge": [
-      "InferOnlySoundOn",
-      "WhnfSoundOn",
-      "DefEqSoundOn",
-      "StateValid",
-      "PropCompatible"
+      "Establish checked annotation provenance through actual public acceptance; the new executable guard discharges structural regime agreement when performed, but the public raw checker does not yet perform it.",
+      "establishment of hereditary validity by the joint checker and infer-only preconditions",
+      "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
+      "justification of lambda's selected regime from actual checking evidence; recursive body/type evidence",
+      "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
+      "full safe declaration admission and interpretations of allowed axioms",
+      "public API and generated PSC0 correspondence"
     ],
-    "concreteCheckerCoverage": "psKernelInferCoreWithFuel sort result: selected-cache coherence or uncached sort-successor rule",
+    "concreteCheckerCoverage": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda direct body-type closing and hereditary result-type validity; local semantic obligations remain explicit.",
     "proofDependencies": {
       "genericProofIrrelevance": [],
       "genericEmptyDenotation": [],
@@ -1694,11 +1848,12 @@
         "repairCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f"
       }
     ],
-    "jobId": 114137241185,
-    "buildJobs": 206,
+    "jobId": 114214647274,
+    "buildJobs": 248,
     "companionFiles": 84,
     "axiomAudit": "passed",
-    "checkedAt": "2026-10-10 05:07:25 UTC"
+    "checkedAt": "2026-10-10 12:41:40 UTC",
+    "axiomDeclarations": 219
   },
   "relativeSetModelStage": {
     "status": "passed-relative-foundation-full-kernel-unfinished",
@@ -2387,6 +2542,312 @@
         "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
         "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean"
       ]
+    }
+  },
+  "lambdaTypeStage": {
+    "status": "proved-local-bridges-full-kernel-unfinished",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-lambda-type-simplification-20261010",
+      "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb"
+    },
+    "productionCodeChanged": true,
+    "sourceCommit": "b3cbd95709cad77bc0e6fe476d4f2fa9e2bb01a3",
+    "productionChange": "Close recursively inferred lambda body type directly; remove extra cheap-beta pass in both cache and inference modes",
+    "semanticModel": "Exact result erasure and model membership; scope-locality and hereditary type validity under explicit recursive/regime premises",
+    "eliminatedPremise": "Preservation by the retired lambda body-type normalization",
+    "remainingPremises": [
+      "recursive opened-body typing",
+      "recursive type validity and scope",
+      "selected annotation regime"
+    ],
+    "normalizationElsewhereUnchanged": true,
+    "customSoundnessAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelConsistencyProved": false,
+    "research": {
+      "leanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+      "conLecheCommit": "65e74db49e89ad2bbd1e90aa4f784954db41fa3a",
+      "note": "Con Leche closes inferred lambda type directly, but also validates annotations through extra checks not yet integrated in PSKernel."
+    },
+    "validationAttempts": [
+      {
+        "run": 38051925196,
+        "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+        "status": "mixed",
+        "note": "247 metatheory builds and 212 axiom targets passed; one of 84 companions retained the old lambda result. Native and both Arena modes passed; fresh reference Int64 timed out."
+      },
+      {
+        "run": 38052257213,
+        "commit": "9c8f172d5e9d8ce25b7eb740f0eb229f2c3219ed",
+        "status": "failed",
+        "note": "New validity-scope module used reserved identifier scoped; renamed binder. No new source acceptance change."
+      },
+      {
+        "run": 38052617458,
+        "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+        "status": "proofs-passed-diagnostic-setup-failed",
+        "note": "248 builds, all 84 companions, 219 axiom targets, 134-module import closure and 1821-definition policy audit passed. Baseline diagnostic initially selected the root toolchain and stopped at the version assertion."
+      },
+      {
+        "run": 38052827877,
+        "commit": "0aa3d403324e8a339a8a0c07253b0e10f6dff1ae",
+        "status": "diagnostic-completed-both-timeout",
+        "note": "Both 218-job binaries built; identical input, runner and 180-second budgets. Both exit 124, so no acceptance/performance-equivalence claim."
+      }
+    ],
+    "additionalDeclarationsCoveredByAxiomAudit": 7,
+    "runtime": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "binaryJob": 114212616925,
+      "binaryBuildJobs": 218,
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "arenaCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "exportMode": "historical",
+      "cached": {
+        "job": 114213076273,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "reference": {
+        "job": 114213076357,
+        "tutorial": {
+          "correct": 141,
+          "total": 141,
+          "declined": 0
+        },
+        "bugs": {
+          "correct": 18,
+          "total": 18,
+          "declined": 0
+        }
+      },
+      "sameBinaryForBothModes": true,
+      "comparativePerformanceClaimed": false,
+      "fullCorporaRun": false,
+      "fresh435ExportsRun": true
+    },
+    "nativeRegression": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "job": 114212616925,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false
+    },
+    "fresh435": {
+      "commit": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "run": 38051925196,
+      "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "sameExportedInputBetweenModesVerified": false,
+      "cached": {
+        "job": 114213076297,
+        "workflowConclusion": "success",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 1.2,
+            "maxRssKiB": 74668
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 13.29,
+            "maxRssKiB": 84044
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 28.95,
+            "maxRssKiB": 88380
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.5,
+            "maxRssKiB": 72848
+          }
+        ]
+      },
+      "reference": {
+        "job": 114213076323,
+        "workflowConclusion": "failure",
+        "cases": [
+          {
+            "name": "prelude",
+            "selection": "Init.Prelude",
+            "exportRecords": 65406,
+            "exportDeclarations": 1840,
+            "exportConstants": 2121,
+            "budgetSeconds": 120,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 0.92,
+            "maxRssKiB": 74352
+          },
+          {
+            "name": "utf8",
+            "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+            "exportRecords": 159345,
+            "exportDeclarations": 2146,
+            "exportConstants": 2353,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 13.51,
+            "maxRssKiB": 75916
+          },
+          {
+            "name": "xor",
+            "selection": "Std.Sat.AIG.mkXorCached",
+            "exportRecords": 333731,
+            "exportDeclarations": 3413,
+            "exportConstants": 3752,
+            "budgetSeconds": 360,
+            "status": "accepted",
+            "exitCode": 0,
+            "seconds": 43.71,
+            "maxRssKiB": 87604
+          },
+          {
+            "name": "int64",
+            "selection": "Int64.toBitVec_div",
+            "exportRecords": 16206,
+            "exportDeclarations": 405,
+            "exportConstants": 497,
+            "budgetSeconds": 180,
+            "status": "timeout",
+            "exitCode": 124,
+            "seconds": 180,
+            "maxRssKiB": 70652
+          }
+        ]
+      }
+    },
+    "validation": {
+      "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+      "run": 38052617458,
+      "job": 114214647274,
+      "buildJobs": 248,
+      "companionFiles": 84,
+      "axiomDeclarations": 219,
+      "pureMathModules": 12,
+      "closureModules": 134,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 12:41:40 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+      "runConclusion": "failure",
+      "runQualification": "Proof job passed; separate baseline diagnostic setup failed before checking and was rerun independently."
+    },
+    "runtimeComparison": {
+      "base": "2a34f8299060fc6e91d2fc79a18ab8fcd9d4f0cf",
+      "head": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/lakefile.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean",
+        "psc0/packages/pskernel-core/proof/Ps/KernelCore/Metatheory/Typing.proof.lean"
+      ],
+      "runtimeSourceChanges": 0
+    },
+    "int64BaselineComparison": {
+      "run": 38052827877,
+      "job": 114215267947,
+      "workflowConclusion": "success",
+      "checkerAcceptance": false,
+      "status": "both-timeout",
+      "budgetSeconds": 180,
+      "inputSha256": "e0c31b69ad4013f80b732b5eac9484948a6d4a469d0452d44f0c43f6b2ac1df8",
+      "sameRunner": true,
+      "sameInput": true,
+      "baseline": {
+        "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb",
+        "binarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70784
+      },
+      "candidate": {
+        "commit": "0aa3d403324e8a339a8a0c07253b0e10f6dff1ae",
+        "binarySha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+        "exitCode": 124,
+        "seconds": 180,
+        "maxRssKiB": 70356
+      },
+      "conclusion": "Reference Int64 timeout predates lambda simplification. The experiment does not establish equal performance or acceptance.",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052827877/job/114215267947"
+    },
+    "binaryCorrespondence": {
+      "nativeRun": 38051925196,
+      "diagnosticRun": 38052827877,
+      "candidateSha256": "51383d1c27a78d0496b99ec29b710d9e0491c6bea1211237b436145efc87f77d",
+      "equal": true
     }
   }
 }

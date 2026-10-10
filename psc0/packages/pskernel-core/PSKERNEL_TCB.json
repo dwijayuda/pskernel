@@ -145,7 +145,7 @@
       "soundnessLawAxioms": []
     },
     "semanticFoundation": {
-      "scope": "Relative universe-set/dependent-function model; sound declarative fragment; syntax and hereditary-validity transport; local reference binder/function bridges; exact executable annotation-regime agreement and actual sort-visit guards. Not full checker or admission soundness.",
+      "scope": "Relative universe-set/dependent-function model; sound declarative fragment; syntax/hereditary-validity transport; exact annotation guards; direct lambda type model/validity bridges. Not full recursive checker or admission soundness.",
       "modules": [
         "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
@@ -175,25 +175,26 @@
         "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
-        "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean"
+        "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean"
       ],
       "legacyJudgmentsReplacedEverywhere": false,
       "fullUniverseModel": true,
       "fullDependentFunctionModel": true,
       "admissionModel": false,
-      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda body-type reduction/closing; local semantic obligations remain explicit.",
+      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda direct body-type closing and hereditary result-type validity; local semantic obligations remain explicit.",
       "conditionalBridges": [
         "actual proposition classifier",
         "proof-irrelevance call sequence",
         "forall model from actual recursive type readings and visited sort checks",
         "checked application model with exposed function type, actual comparison obligations and product validity",
-        "checked lambda model with actual opened-body typing, cheap-beta preservation and regime obligation"
+        "checked lambda model and returned-type validity with actual opened-body typing, direct closing and selected-regime obligation"
       ],
       "unprovedCallbackObligations": [
         "Establish checked annotation provenance through actual public acceptance; the new executable guard discharges structural regime agreement when performed, but the public raw checker does not yet perform it.",
         "establishment of hereditary validity by the joint checker and infer-only preconditions",
         "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
-        "lambda body-type reduction preservation and justification of its selected regime",
+        "justification of lambda's selected regime from actual checking evidence; recursive body/type evidence",
         "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
         "full safe declaration admission and interpretations of allowed axioms",
         "public API and generated PSC0 correspondence"
@@ -201,7 +202,7 @@
       "customSoundnessAxiomsAdded": false,
       "axiomAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
-        "declarations": 212,
+        "declarations": 219,
         "allowedHostAxioms": [
           "propext",
           "Classical.choice",
@@ -210,19 +211,21 @@
         "localHypothesesAuditedSeparately": true
       },
       "validation": {
-        "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
-        "run": 38050725364,
-        "job": 114209132602,
-        "buildJobs": 247,
+        "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+        "run": 38052617458,
+        "job": 114214647274,
+        "buildJobs": 248,
         "companionFiles": 84,
-        "axiomDeclarations": 212,
+        "axiomDeclarations": 219,
         "pureMathModules": 12,
-        "closureModules": 133,
+        "closureModules": 134,
         "referenceDefinitions": 1821,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 12:10:43 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
+        "checkedAt": "2026-10-10 12:41:40 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+        "runConclusion": "failure",
+        "runQualification": "Proof job passed; separate baseline diagnostic setup failed before checking and was rerun independently."
       },
       "fullUniverseModelQualification": "Relative mathematical universe chain under explicit SetTheory V, not a model of full kernel acceptance.",
       "relativeFoundation": {
@@ -262,7 +265,10 @@
           "universe substitution",
           "fresh-name updates",
           "opening",
-          "closing"
+          "closing",
+          "scoped-environment locality",
+          "closed-expression environment independence",
+          "closing a scoped inferred type into a fresh binder"
         ],
         "positiveBetaRecoversOwnDomain": true,
         "zeroRegimeBetaRequiresArgumentDomain": true,
@@ -281,6 +287,23 @@
         "completeRecursiveCheckerSoundness": false,
         "strongerFoundationAssumptionsAdded": false,
         "moduleScope": "assurance only"
+      },
+      "lambdaTypeSimplification": {
+        "sharedProductionBranch": true,
+        "cacheModes": [
+          "cached",
+          "reference"
+        ],
+        "inferenceModes": [
+          "checked",
+          "infer-only"
+        ],
+        "extraTypeNormalizationRemoved": true,
+        "rawTypeSyntaxMatchesOfficialLean": false,
+        "rawTypeSyntaxQualification": "May retain beta redexes that official Lean cheaply reduces; declaration conversion remains responsible for comparison.",
+        "letNormalizationRemoved": false,
+        "recursiveAndAnnotationPremisesDischarged": false,
+        "retiredOperationSoundnessProved": false
       }
     },
     "relativeSetModelConstructed": true,
@@ -311,19 +334,21 @@
         "kind": "structural executable-dependency audit; not a semantic theorem"
       },
       "validation": {
-        "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
-        "run": 38050725364,
-        "job": 114209132602,
-        "buildJobs": 247,
+        "commit": "52eb8e72c2f20b5328cbf531a6be119947efb946",
+        "run": 38052617458,
+        "job": 114214647274,
+        "buildJobs": 248,
         "companionFiles": 84,
-        "axiomDeclarations": 212,
+        "axiomDeclarations": 219,
         "pureMathModules": 12,
-        "closureModules": 133,
+        "closureModules": 134,
         "referenceDefinitions": 1821,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 12:10:43 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
+        "checkedAt": "2026-10-10 12:41:40 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38052617458/job/114214647274",
+        "runConclusion": "failure",
+        "runQualification": "Proof job passed; separate baseline diagnostic setup failed before checking and was rerun independently."
       },
       "localSemanticBridges": {
         "forallBothInferenceModes": true,
@@ -331,11 +356,17 @@
         "lambdaCheckedMode": true,
         "recursivePremisesDischarged": false,
         "checkedAnnotationCoherenceProved": false,
-        "lambdaCheapBetaPreservationProved": false
+        "lambdaExtraBetaRemoved": true,
+        "lambdaDirectResultTypeValidity": true,
+        "lambdaNormalizationPreservationClaimed": false
       },
       "checkedAnnotationCheckpoint": {
         "branch": "checkpoint/pskernel-core-before-checked-annotations-20261010",
         "commit": "9943eed674b6de039e70fdde355aad248a6bfff4"
+      },
+      "lambdaTypeCheckpoint": {
+        "branch": "checkpoint/pskernel-core-before-lambda-type-simplification-20261010",
+        "commit": "5e3fa749d18441d7d35d1be9555c93cad78974cb"
       }
     }
   },

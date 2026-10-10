@@ -21,8 +21,8 @@ private theorem native_inst_unchanged (e : PsKernelExpr) (cut : Nat)
     (a : PsKernelExpr) :
     (psKernelExprInstantiateAtChanged e 0 [a] cut).2 = false →
       (psKernelExprInstantiateAtChanged e 0 [a] cut).1 = e := by
-  cases e <;> simp only [psKernelExprInstantiateAtChanged] <;>
-    repeat' split <;> simp_all
+  cases e <;> simp only [psKernelExprInstantiateAtChanged]
+  all_goals repeat' first | (solve | simp_all [psKernelExprListIsEmpty]) | split
 
 theorem AnnotatedExpr.liftN_zero (e : AnnotatedExpr) (cut : Nat) :
     liftN 0 e cut = e := by
@@ -122,12 +122,18 @@ theorem AnnotatedExpr.erase_inst (e a : AnnotatedExpr) (cut : Nat) :
           simp [inst, erase, psKernelExprInstantiateAtChanged, psKernelNatLt,
             psKernelExprListGet, erase_liftN]
         · have hdiff : i - cut = (i - cut - 1) + 1 := by omega
+          have hble : Nat.ble i cut = false := by
+            cases hble : Nat.ble i cut with
+            | false => rfl
+            | true => have hle := Nat.le_of_ble_eq_true hble; omega
           have hn : psKernelNatLt i cut = false := by
-            simp [psKernelNatLt, he, show ¬ i ≤ cut by omega]
+            simp [psKernelNatLt, he, hble]
+          have hzero : Nat.add 0 cut = cut := Nat.zero_add cut
+          have hdiff' : Nat.sub i cut = Nat.succ (i - cut - 1) := hdiff
           simp only [inst, ite_eq_right hi, ite_eq_right he, erase,
-            psKernelExprInstantiateAtChanged, Nat.zero_add, hn,
+            psKernelExprInstantiateAtChanged, hzero, hn,
             Bool.false_eq_true, ite_false]
-          rw [hdiff]
+          rw [hdiff']
           rfl
   | fvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
   | app f b ihf ihb =>

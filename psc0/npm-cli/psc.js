@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve, extname, relative, isAbsolute } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { nearestProject, resolveSourceModule } from './libraries.mjs';
 import * as compiler from '@proofscript/compiler';
 import { checkCanonicalAdmissions } from '@proofscript/pskernel-core/check';
 
@@ -57,32 +58,39 @@ function parseImports(source, kind) {
   if (ctorTag(cur) !== 'nil') fail('PSC_IMPORT_LIST_INVALID');
   return result;
 }
-function packageRoot(name) {
-  const fullName = '@proofscript/' + name;
-  return dirname(require.resolve(fullName + '/package.json'));
+function packageRoot(name,project) {
+  const fullName='@proofscript/'+name;
+  const projectReq=createRequire(project.file||join(project.root,'package.json'));
+  let location;
+  try {location=projectReq.resolve(fullName+'/package.json');}
+  catch {
+    try {location=require.resolve(fullName+'/package.json');}
+    catch {fail('PSC_OFFICIAL_PACKAGE_NOT_INSTALLED: '+fullName);}
+  }
+  return dirname(location);
 }
-function resolveSourceImport(name, kind, parentFile, projectRoot) {
-  if (!/^[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*$/u.test(name)) fail('PSC_IMPORT_NAME: ' + name);
-  const parts = name.split('.');
-  const extension = '.' + kind;
-  const candidate = parts[0] === 'Ps' && packageSections[parts[1]]
-    ? join(packageRoot(packageSections[parts[1]]), 'src', ...parts) + extension
-    : parts[0] === 'ProofScript'
-      ? join(packageRoot('foundation'), 'src', ...parts) + extension
-      : join(projectRoot, ...parts) + extension;
-  if (!existsSync(candidate)) fail('PSC_IMPORT_MISSING: ' + name + ' (' + candidate + ')');
-  return candidate;
+async function resolveSourceImport(name,kind,parentFile,project) {
+  if(!/^[A-Za-z_][A-Za-z_0-9]*(?:\.[A-Za-z_][A-Za-z_0-9]*)*$/u.test(name))fail('PSC_IMPORT_NAME: '+name);
+  const parts=name.split('.'),extension='.'+kind;
+  if(parts[0]==='Ps'){
+    const section=packageSections[parts[1]];
+    if(!section)fail('PSC_OFFICIAL_MODULE_UNSUPPORTED: '+name);
+    const location=join(packageRoot(section,project),'src',...parts)+extension;
+    if(!existsSync(location))fail('PSC_OFFICIAL_MODULE_MISSING: '+name+' ('+location+')');
+    return location;
+  }
+  return resolveSourceModule(name,kind,project);
 }
 async function sourceClosure(entry, kind) {
   const seen = new Set(), active = new Set(), sources = [];
-  const projectRoot = process.cwd();
+  const project = await nearestProject(process.cwd());
   async function visit(location) {
     const absolute = resolve(location);
     if (active.has(absolute)) fail('PSC_IMPORT_CYCLE: ' + absolute);
     if (seen.has(absolute)) return;
     const source = await readFile(absolute, 'utf8');
     active.add(absolute);
-    for (const name of parseImports(source, kind)) await visit(resolveSourceImport(name, kind, absolute, projectRoot));
+    for (const name of parseImports(source, kind)) await visit(await resolveSourceImport(name, kind, absolute, project));
     active.delete(absolute);
     seen.add(absolute);
     sources.push(kind === 'lean'
@@ -120,7 +128,13 @@ function tscCLI() {
   if (manifest.name !== 'typescript' || manifest.version !== '7.0.2') fail('PSC_TYPESCRIPT_PIN');
   const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;
   if (!bin) fail('PSC_TYPESCRIPT_BIN_MISSING');
-  return resolve(dirname(pkg), bin);
+  const launcher=resolve(dirname(pkg),bin);
+  const probe=spawnSync(process.execPath,[launcher,'--version'],{encoding:'utf8',timeout:15000});
+  if(probe.error || probe.status!==0 || probe.stdout.trim()!=='Version 7.0.2'){
+    const native='@typescript/typescript-'+process.platform+'-'+process.arch;
+    fail('PSC_TYPESCRIPT_PLATFORM_BINARY_MISSING: expected '+native+'@7.0.2; reinstall proofscript with npm optional dependencies enabled, or install the matching TypeScript platform package. '+String(probe.stderr||probe.error?.message||'').slice(0,500));
+  }
+  return launcher;
 }
 async function build(entry, out) {
   const checked = await prepare(entry);
@@ -163,7 +177,7 @@ async function init(directory='.', syntax='ps') {
   const configPath = join(where, 'package.json');
   if (!existsSync(configPath)) await writeFile(configPath, JSON.stringify({
     name: 'proofscript-app', private: true, type: 'module',
-    proofscript: { entry: 'src/Main.'+syntax, out: 'src/Main.js' },
+    proofscript: { entry: 'src/Main.'+syntax, out: 'src/Main.js', libraries: {} },
     scripts: { check:'psc check src/Main.'+syntax, build:'psc build src/Main.'+syntax+' --out src/Main.js' },
   },null,2)+'\n',{flag:'wx'});
   return { projectRoot: where, source: sourcePath, initialized: true };
@@ -183,7 +197,9 @@ async function main(args) {
       compiler: 'PSC0 ps-0.9-r3 new-only bounded self-host subset',
       checker: '@proofscript/pskernel-core/check / JS Core (qualified-scope only)',
       leanWasm: '@proofscript/pskernel-lean-wasm (optional comparison)',
-      packageCount: 19 };
+      installedCorePackages: meta.proofscript?.corePackages || [],
+      optionalPackages: meta.proofscript?.optionalPackages || [],
+      packageCount: (meta.proofscript?.corePackages||[]).length };
     console.log(rest.includes('--json')||command==='packages'?JSON.stringify(result,null,2):'psc '+result.version); return;
   }
   if (command==='init') {

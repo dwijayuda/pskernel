@@ -1,5 +1,20 @@
 # PSKernel Core proof work state
 
+## Shared public-session grades and recursive trace bridge — October 11, 2026
+
+**Green public grade-to-core source:** [`f18c34d4`](https://github.com/dwijayuda/pskernel/commit/f18c34d4c6512bc8398cf8f12a6dbaeaea241c3f), [focused run 38086165867](https://github.com/dwijayuda/pskernel/actions/runs/38086165867) and separate [Lean 4.35 run 38086165868](https://github.com/dwijayuda/pskernel/actions/runs/38086165868).
+The focused proof and all seven native regressions passed: **282 build jobs (237 focused), 371 explicitly audited semantic declarations, all 84 companion proofs, 171 model dependency modules, 12 pinned Con Leche pure-math dependencies, no production-assurance or legacy-judgment imports, and 1,840 reference definitions with zero cached fallback**. Lean 4.35 build, proofs, tutorials, negative conformance, and focused exports passed on the same revision. Broad Init/Std/Mathlib/profiling stayed deliberately disabled.
+
+**Latest validated source:** [`a5e7dd29`](https://github.com/dwijayuda/pskernel/commit/a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68), [focused audit 38086514621/job 114314046194](https://github.com/dwijayuda/pskernel/actions/runs/38086514621/job/114314046194).
+**282 build jobs (237 focused), 374 semantic declarations, 171 model closure modules, 84 companion proof files, 1,840 reference-policy definitions and zero cache fallbacks, seven native regression executables** all passed; 12 Con Leche pure-math modules, zero production-assurance/legacy imports.
+
+[`SemanticReferenceSessionGrade.lean`](metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSessionGrade.lean) proves `referenceSessionGrade_core_trace`: BOTH actual public checked and infer-only reference-session calls, for *arbitrary input expressions*, reduce to the **same executed** `psKernelInferCoreWithFuel` under the actual WHNF/DefEq callbacks and return precisely its selected state/session. The interface is proof-only and not a replacement checker. The module lifts existing concrete sort, first-stored-local, and modeled-constant base cases and public initial-unbound-FVar rejection. Checked application and lambda and BOTH-grade dependent-product cases now yield their exact existing recursive execution traces at the public API, retaining produced intermediate state, binder/sort visits, and equality path rather than guessing a model annotation. Lambda infer-only is not silently awarded checked codomain-sort certification.
+
+**Unqualified current candidate:** [`cc95288a`](https://github.com/dwijayuda/pskernel/commit/cc95288a27d8e7832baceecb08b0e99b9a253bb6) introduces `SemanticReferenceSessionMData.lean`, extracting the precise one-less-fuel metadata-body checker run and the semantic `CheckedReading` preservation case (with its exact recursive-call model obligation explicit). **DO NOT call this code validated** unless focused [run 38086880659](https://github.com/dwijayuda/pskernel/actions/runs/38086880659) and Lean 4.35 [run 38086880582](https://github.com/dwijayuda/pskernel/actions/runs/38086880582) have passed.
+
+**Hard open obligations:** This is not yet a joint recursive checker-soundness theorem: prove closure of annotated/local frames, selected annotations and universe regimes, and state/counter monotonicity through actual checked/infer-only inference, WHNF, DefEq, all shortcuts, and binder/let scopes. Convert the executed admission traces into modeled **theorem and definition** declarations (rather than assuming `StoredConstantModeled`); then complete inductive, recursor, primitive/quotient admission and the explicit modeled-axiom policy. Only then derive the public relative-consistency/no-derived-`False` corollary under `[ConLeche.SetTheory V]`. **No cached-mode refinement, unrestricted Lean equivalence, runtime checker soundness, absolute consistency, or completion claim.** Preserve single production kernel and existing draft PR #89; do not merge or promote.
+
+
 ## Concrete public-session FVar typing — October 11, 2026
 
 New proof module

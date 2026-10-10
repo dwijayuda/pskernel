@@ -1,15 +1,15 @@
 {
   "schemaVersion": 9,
-  "stage": "Proof-first: concrete public checker-session fvar model, checked and infer-only",
-  "status": "validated-session-fvar-two-grades-full-kernel-consistency-open",
-  "candidateCommit": "ebe24d510ec29981b17591b89d601ae835763f45",
-  "assuranceRevision": "ebe24d510ec29981b17591b89d601ae835763f45",
+  "stage": "Proof-first: concrete public reference grades, atomic readings, and actual forall/application/lambda recursive traces",
+  "status": "validated-public-graded-traces-metadata-semantic-transport-candidate-full-kernel-consistency-open",
+  "candidateCommit": "cc95288a27d8e7832baceecb08b0e99b9a253bb6",
+  "assuranceRevision": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38084042997,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38084042997/job/114306675070",
+  "workflowRun": 38086514621,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38086514621/job/114314046194",
   "nativeBinarySha256": null,
   "checks": {
     "build": {
@@ -18,35 +18,35 @@
       "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
-      "run": 38084042997,
-      "job": 114306675070,
-      "buildJobs": 281,
-      "focusedBuildJobs": 236,
+      "commit": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
+      "run": 38086514621,
+      "job": 114314046194,
+      "buildJobs": 282,
+      "focusedBuildJobs": 237,
       "companionFiles": 84,
-      "axiomDeclarations": 363,
+      "axiomDeclarations": 374,
       "pureMathModules": 12,
-      "closureModules": 169,
+      "closureModules": 171,
       "productionAssuranceImports": 0,
       "legacyJudgmentImports": 0,
       "referenceDefinitions": 1840,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 20:37:09 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38084042997/job/114306675070",
+      "checkedAt": "2026-10-10 21:13:53 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38086514621/job/114314046194",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
-      "run": 38084042997,
-      "job": 114306675070
+      "commit": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
+      "run": 38086514621,
+      "job": 114314046194
     },
     "nativeRegression": {
-      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
-      "run": 38084042997,
-      "job": 114306675070,
+      "commit": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
+      "run": 38086514621,
+      "job": 114314046194,
       "status": "passed",
       "executables": 7,
       "suiteMarkers": [
@@ -94,17 +94,17 @@
         "dagDepth": 32
       },
       "annotatedSyntax": {
-        "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
-        "run": 38084042997,
-        "job": 114306675070,
+        "commit": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
+        "run": 38086514621,
+        "job": 114314046194,
         "status": "passed",
         "cases": 31,
         "modelImports": 0
       },
       "sortVisitCarriers": {
-        "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
-        "run": 38084042997,
-        "job": 114306675070,
+        "commit": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
+        "run": 38086514621,
+        "job": 114314046194,
         "status": "passed",
         "cases": 8,
         "unchecked": 1,
@@ -4184,5 +4184,38 @@
       "cachedFallbacks": 0,
       "nativeExecutables": 7
     }
+  },
+  "referenceProofMilestone": {
+    "lastValidatedSource": "a5e7dd29eba3bd5f4bea174ebef39c9df72aaa68",
+    "lastValidatedSemanticRun": 38086514621,
+    "currentUnqualifiedSource": "cc95288a27d8e7832baceecb08b0e99b9a253bb6",
+    "currentUnqualifiedSemanticRun": 38086880659,
+    "currentUnqualifiedLean435Run": 38086880582,
+    "proofOnlyModules": [
+      "SemanticReferenceSessionGrade.lean",
+      "SemanticReferenceSessionMData.lean"
+    ],
+    "validatedBranches": [
+      "shared public session grade-to-reference core state and result",
+      "exact sort reading for either grade",
+      "selected fvar type/checked reading conditional on exact local model",
+      "modeled constant conditional on EnvironmentModel",
+      "actual forall trace for either grade",
+      "actual checked application trace",
+      "actual checked lambda trace"
+    ],
+    "unvalidatedCandidate": [
+      "actual metadata-to-smaller-fuel trace",
+      "metadata hereditary checked-reading semantic induction case"
+    ],
+    "outstanding": [
+      "joint recursive checked/infer-only inference and WHNF/DefEq model and scope preservation",
+      "annotations/provenance across all accepting shortcuts",
+      "definition/theorem/inductive/quotient model admission",
+      "allowed-axiom policy and end-to-end no-derived-False relative consistency"
+    ],
+    "consistencyComplete": false,
+    "checkerSoundnessComplete": false,
+    "changesRuntimeChecker": false
   }
 }

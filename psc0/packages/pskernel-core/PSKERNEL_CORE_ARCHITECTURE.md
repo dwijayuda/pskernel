@@ -1,5 +1,10 @@
 # PSKernel Core architecture for PSC0
 
+## Proof-only public session grade/recursive interface — October 11, 2026
+
+The public proof modules `SemanticReferenceSessionGrade.lean` (source green at `a5e7dd29`) and current unqualified `SemanticReferenceSessionMData.lean` (`cc95288a`) are under `metatheory/`, not production compiler/runtime code. Their statements invert the *existing* public `psKernelSessionCheck` / `psKernelSessionInfer` down through `Checker/Knot` into the ONE `psKernelInferCoreWithFuel`, with its original WHNF and DefEq functions and exact states. The grade-specific dependent-product, fully checked application/lambda, free-variable, sort and constant cases retain execution provenance but not yet an end-to-end semantic checker invariant. `mdata` adds a strict smaller-fuel semantic induction step once validated. There is no parallel checker, new TCB oracle, or revised acceptance rule. Con Leche's pure set mathematics remains the visible relative assumption; admission soundness and global consistency are not proven.
+
+
 ## Proof-guided Lean 4.35 model strategy and public checker entry — October 10, 2026
 
 Canonical proof strategy: [PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md](PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md). Pinned official Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`) determines actual compatibility. The pinned Con Leche source (`65e74db49e89ad2bbd1e90aa4f784954db41fa3a`) supplies **only pure set mathematics**, not its verified checker or main soundness proof. Con Ron's two-step Rust refinement is a later-stage template for optimized backends, not a present PSKernel correctness theorem.

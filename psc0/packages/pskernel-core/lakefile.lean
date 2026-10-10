@@ -122,6 +122,9 @@ lean_lib PsKernelCoreMetatheory where
   roots := #[
     `Ps.KernelCore.Metatheory.Judgments,
     `Ps.KernelCore.Metatheory.JudgmentAdequacy,
+    `Ps.KernelCore.Metatheory.SemanticDomain,
+    `Ps.KernelCore.Metatheory.SemanticLevel,
+    `Ps.KernelCore.Metatheory.SemanticClassifier,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

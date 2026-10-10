@@ -61,7 +61,9 @@ jobs:
           node --check packages/pscv/scripts/audit-pinned-lean.mjs
           node --check packages/pscv/src/ambient-registry-inventory.mjs
           node --check packages/pscv/scripts/validate-ambient-registry.mjs
-          node --test packages/verification/test/preflight.test.mjs scripts/pscv-certification-gate.test.mjs packages/pscv/test/pin-and-profile.test.mjs packages/pscv/test/ambient-registry-inventory.test.mjs
+          node --check packages/pscv/scripts/generate-required-standard-surface.mjs
+          node --check packages/pscv/src/required-standard-surface.mjs
+          node --test packages/verification/test/preflight.test.mjs scripts/pscv-certification-gate.test.mjs packages/pscv/test/pin-and-profile.test.mjs packages/pscv/test/ambient-registry-inventory.test.mjs packages/pscv/test/required-standard-surface.test.mjs
       - name: Inspect private PSCV npm package without executing or installing it
         shell: bash
         run: |
@@ -175,6 +177,8 @@ jobs:
           node ../psc0/packages/pscv/scripts/validate-ambient-registry.mjs \
             ../psc0/dist/pscv-registry-observation/ambient-lean-raw.json \
             ../psc0/dist/pscv-registry-observation/observed-inventory.json
+          node ../psc0/packages/pscv/scripts/generate-required-standard-surface.mjs \
+            ../psc0/dist/pscv-registry-observation/required-standard-surface.json
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
           import { readFile } from 'node:fs/promises';
@@ -186,6 +190,11 @@ jobs:
           assert.equal(audit.standardEnvironmentFrozen,false);
           assert.equal(audit.verifiedExecutableAuthorized,false);
           assert.equal(audit.standardManifestDigest,null);
+          const surface=JSON.parse(await readFile('../psc0/dist/pscv-registry-observation/required-standard-surface.json','utf8'));
+          assert.equal(surface.sourceRowsCount,230);
+          assert(surface.uniqueReferencedIdsCount>50);
+          assert.equal(surface.allowedSemanticRegistry,null);
+          assert.equal(surface.completeStandardEnvironment,false);
           console.log('PSC_PSCV_OBSERVED_AMBIENT_REGISTRIES_UNCERTIFIED: PASS');
           NODE
       - name: Retain non-normative raw and reviewed registry inventory

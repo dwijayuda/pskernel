@@ -319,10 +319,10 @@ theorem nameBelow_fresh (name : PsKernelName) (limit : Nat)
       change limit < limit at h
       exact False.elim (Nat.lt_irrefl _ h)
 
-/-- The semantic bound context remains closed and cannot mention the next
+/-- The semantic bound context cannot mention the next
 numeric identity allocated by the checker. -/
 def BoundFrame (limit : Nat) (Γ : List AnnotatedExpr) : Prop :=
-  ∀ A, A ∈ Γ → NamesBelow limit A ∧ A.Scoped 0
+  ∀ A, A ∈ Γ → NamesBelow limit A
 
 theorem boundFrame_empty (limit : Nat) : BoundFrame limit [] := by
   intro A h
@@ -332,7 +332,7 @@ theorem boundFrame_mono (limit next : Nat) (Γ : List AnnotatedExpr)
     (frame : BoundFrame limit Γ) (le : limit ≤ next) :
     BoundFrame next Γ := by
   intro A h
-  exact ⟨namesBelow_mono A (frame A h).1 le, (frame A h).2⟩
+  exact namesBelow_mono A (frame A h) le
 
 theorem boundFrame_fresh (limit : Nat) (Γ : List AnnotatedExpr)
     (base : PsKernelName) (frame : BoundFrame limit Γ) :
@@ -340,7 +340,7 @@ theorem boundFrame_fresh (limit : Nat) (Γ : List AnnotatedExpr)
   induction Γ with
   | nil => trivial
   | cons A Γ ih =>
-      refine ⟨namesBelow_fresh A limit (frame A (by simp)).1 base, ?_⟩
+      refine ⟨namesBelow_fresh A limit (frame A (by simp)) base, ?_⟩
       apply ih
       intro B hB
       exact frame B (by simp [hB])

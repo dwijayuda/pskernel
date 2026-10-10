@@ -184,4 +184,28 @@ theorem binderChild_fvar_frame_result (M : Reading V) (Γ : List AnnotatedExpr)
     (namesBelow_fresh A s.nextFresh boundedA n)
     scopedA model domain member run
 
+
+/-- The native binder opening and local insertion share exactly the same
+fresh-name result. Both operations preserve the syntactic child frame with
+the advanced counter, independently of semantic valuation and checker
+callback assumptions. Full recursive preservation is still open. -/
+theorem binderChild_opened_frame (s : PsKernelCheckerState)
+    (locals : AnnotatedLocalContext) (n : PsKernelName)
+    (A body : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (frame : LocalFrame s.nextFresh locals)
+    (boundA : NamesBelow s.nextFresh A) (scopedA : A.Scoped 0)
+    (boundBody : NamesBelow s.nextFresh body) (scopedBody : body.Scoped 1) :
+    let name := (psKernelCheckerStateFreshName s n).1
+    let next := (psKernelCheckerStateFreshName s n).2
+    let child := psKernelLocalContextAddLocal locals name n A bi
+    ∃ opened : AnnotatedExpr,
+      LocalFrame next.nextFresh child ∧
+      opened.erase = psKernelExprInstantiate1 body.erase (.fvar name) ∧
+      opened.Scoped 0 ∧ NamesBelow next.nextFresh opened := by
+  obtain ⟨opened, erasure, scoped, bounded⟩ :=
+    allocated_open_frame s n body scopedBody boundBody
+  exact ⟨opened,
+    localFrame_addLocal s.nextFresh locals n n A bi frame boundA scopedA,
+    erasure, scoped, bounded⟩
+
 end PsKernelSemantics.Reference

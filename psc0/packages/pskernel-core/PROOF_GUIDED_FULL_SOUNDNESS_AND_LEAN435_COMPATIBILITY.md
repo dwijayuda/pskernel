@@ -1,5 +1,13 @@
 # PSKernel Core — Proof-Guided Full Soundness and Lean 4.35 Compatibility
 
+## Proof-first model milestone — verified October 11, 2026
+
+**Updated verification (final proof-only source):** [`902f902b`](https://github.com/dwijayuda/pskernel/commit/902f902b96361a8b14943b02bef503671893b3c0) passed [focused cloud audit 38076656535](https://github.com/dwijayuda/pskernel/actions/runs/38076656535), job 114284940996: **269 build jobs (224 focused), 334 explicitly axiom-audited semantic declarations, 84 companion proof files, 155 dependency modules** (12 Con Leche pinned pure-math, zero production-assurance/legacy-judgment imports), **1,840 audited reference definitions with zero cached fallbacks**, and all **seven native test executables**. Separate binary/Arena/fresh-export jobs were skipped. The prior attempts 38076107666, 38076280819 and 38076396352 were *failed revisions* fixed at the final source; these remain in the historical log.
+
+The model of the **actual empty environment**, the *conditional* model-implies-no-stored-literal-`False` lemma, and the *actual reference constant-branch universe arity* proof are now checked. **Not proved:** that all successful public admission operations preserve this environment model, that all recursive inference/WHNF/DefEq paths carry coherent annotated readings, or that public PSKernel acceptance implies relative consistency. Con Leche `[SetTheory V]` remains a visible mathematical assumption; normal Lean-compatible axioms are not silently prohibited.
+
+
+
 ## Proof-first checkpoint — October 11, 2026
 
 The user explicitly postponed full Init, Std, Mathlib and full-Init profiling

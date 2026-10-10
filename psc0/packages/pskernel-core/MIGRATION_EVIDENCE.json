@@ -1,15 +1,15 @@
 {
   "schemaVersion": 9,
-  "stage": "Proof-guided Lean 4.35: public empty-session frame",
-  "status": "validated-public-entry-frame-full-kernel-consistency-unfinished",
-  "candidateCommit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
-  "assuranceRevision": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+  "stage": "Proof-first: actual empty environment model, conditional modeled False, reference arity",
+  "status": "validated-relative-empty-environment-and-conditional-False-model-full-kernel-consistency-open",
+  "candidateCommit": "902f902b96361a8b14943b02bef503671893b3c0",
+  "assuranceRevision": "902f902b96361a8b14943b02bef503671893b3c0",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38071595259,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38071595259/job/114269936326",
+  "workflowRun": 38076656535,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38076656535/job/114284940996",
   "nativeBinarySha256": null,
   "checks": {
     "build": {
@@ -18,35 +18,35 @@
       "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
-      "run": 38071595259,
-      "job": 114269936326,
-      "buildJobs": 267,
-      "focusedBuildJobs": 222,
+      "commit": "902f902b96361a8b14943b02bef503671893b3c0",
+      "run": 38076656535,
+      "job": 114284940996,
+      "buildJobs": 269,
+      "focusedBuildJobs": 224,
       "companionFiles": 84,
-      "axiomDeclarations": 323,
+      "axiomDeclarations": 334,
       "pureMathModules": 12,
-      "closureModules": 153,
+      "closureModules": 155,
       "productionAssuranceImports": 0,
       "legacyJudgmentImports": 0,
       "referenceDefinitions": 1840,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 16:18:17 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38071595259/job/114269936326",
+      "checkedAt": "2026-10-10 18:45:09 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38076656535/job/114284940996",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
-      "run": 38071595259,
-      "job": 114269936326
+      "commit": "902f902b96361a8b14943b02bef503671893b3c0",
+      "run": 38076656535,
+      "job": 114284940996
     },
     "nativeRegression": {
-      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
-      "run": 38071595259,
-      "job": 114269936326,
+      "commit": "902f902b96361a8b14943b02bef503671893b3c0",
+      "run": 38076656535,
+      "job": 114284940996,
       "status": "passed",
       "executables": 7,
       "suiteMarkers": [
@@ -391,8 +391,9 @@
     "actualPublicEmptySessionInitialFrameProved": true,
     "initialEnvironmentSemanticModelProved": false,
     "actualEmptyEnvironmentModelProved": true,
-    "modeledStoredFalseCorollaryProved": false,
-    "constantUniverseArityDerivedFromRunProved": false
+    "modeledStoredFalseCorollaryProved": true,
+    "constantUniverseArityDerivedFromRunProved": true,
+    "publicAcceptancePreservesEnvironmentModel": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -1863,7 +1864,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 17:29:53 UTC",
+  "recordedAt": "2026-10-10 18:45:09 UTC",
   "semanticFoundation": {
     "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
     "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
@@ -3976,6 +3977,48 @@
       ]
     },
     "lastVerifiedSource": {
+      "sha": "902f902b96361a8b14943b02bef503671893b3c0",
+      "run": 38076656535,
+      "job": 114284940996,
+      "conclusion": "success",
+      "builds": 269,
+      "focusedBuilds": 224,
+      "companionFiles": 84,
+      "auditedDeclarations": 334,
+      "modelClosureModules": 155,
+      "pureMathModules": 12,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "nativeTestExecutables": 7,
+      "proofScope": [
+        "EnvironmentModel requires actual index lookup to return recorded declarations under exact names",
+        "each stored declaration fixes one annotated type witness before all valid universe instances",
+        "explicit False-as-empty policy for the modeled acceptance profile",
+        "construct an explicit SetTheory-relative model of the actual empty environment",
+        "successful public empty-session creation receives that model",
+        "reference constant inference derives membership from modeled declaration history when arity is established",
+        "conditional no-stored-literal-False corollary under a modeled declaration history and explicit False pin",
+        "successful reference constant inference establishes exact universe-arity check",
+        "reference constant inference consumes a single environment model with no external arity hypothesis"
+      ],
+      "notProved": [
+        "actual public admission of ordinary or inductive/quotient declarations preserves EnvironmentModel",
+        "successful full infer/WHNF/DefEq recursion preserves fixed annotated readings and validity",
+        "modeled Lean prelude and allowed axiom policy",
+        "end-to-end relative consistency from public acceptance",
+        "cached and shipping backend acceptance refinement"
+      ]
+    },
+    "unchangedTrust": {
+      "setTheoryHypothesis": "[ConLeche.SetTheory V]",
+      "noNewCustomAxioms": true,
+      "runtimeCheckerLogicChanged": false,
+      "fullConsistencyProved": false,
+      "cachedOrGeneratedKernelCertified": false
+    },
+    "previousVerifiedSource": {
       "sha": "f644cef8c183bcb8bb0ec395828171077118bcee",
       "run": 38075788368,
       "job": 114282343622,
@@ -4007,7 +4050,7 @@
         "full-kernel relative consistency"
       ]
     },
-    "unvalidatedContinuation": {
+    "validatedContinuation": {
       "latestProofSource": "902f902b96361a8b14943b02bef503671893b3c0",
       "run": 38076656535,
       "statusAtDocumentation": "in_progress",
@@ -4029,14 +4072,11 @@
           "cause": "Same constant-arity theorem failure; empty List.map fixes already present"
         }
       ],
-      "userVisibleStatus": "Do not call these latter claims verified until a completed green focused cloud run is inspected."
-    },
-    "unchangedTrust": {
-      "setTheoryHypothesis": "[ConLeche.SetTheory V]",
-      "noNewCustomAxioms": true,
-      "runtimeCheckerLogicChanged": false,
-      "fullConsistencyProved": false,
-      "cachedOrGeneratedKernelCertified": false
+      "userVisibleStatus": "Do not call these latter claims verified until a completed green focused cloud run is inspected.",
+      "status": "passed",
+      "job": 114284940996,
+      "completedAt": "2026-10-10 18:45:09 UTC",
+      "validation": "Full focused proof/audit plus seven native regressions succeeded; full Init/Std/Mathlib deliberately skipped."
     }
   }
 }

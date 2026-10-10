@@ -34,12 +34,12 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
-      - name: Build only existing syntax dependencies, never compiler or kernel
+      - name: Build only existing syntax and foundation dependencies
         run: |
           mkdir -p dist/pscv0-source-check
           lean --version | tee dist/pscv0-source-check/lean-version.txt
           grep -F '4.34.0' dist/pscv0-source-check/lean-version.txt
-          lake build PsSyntax | tee dist/pscv0-source-check/dependencies.txt
+          lake build PsSyntax PsFoundation | tee dist/pscv0-source-check/dependencies.txt
       - name: Native type-check all new portable source modules
         run: |
           mkdir -p .lake/build/lib/lean/Ps/Syntax/Pscv0

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 0,
+  "milestone": "PSCV-P1G-NORMATIVE-WORK-LEDGER",
+  "branch": "psc0/platform-pscv-p1g-coverage-ledger-v1",
+  "qualifiedSourceCommit": "76bcf6f01cec41e36b736e548f98bca862ec5877",
+  "ci": {
+    "runId": 38057594392,
+    "attempt": 1,
+    "allFourJobsPassed": true,
+    "platformMatrix": [
+      "ubuntu-node22.23.3",
+      "ubuntu-node26.7.0",
+      "windows-node26.7.0"
+    ],
+    "actualLean435RC3WitnessesRun": true,
+    "artifactId": 11671753807,
+    "artifactZipSha256": "e7d3dfa42bb464f6d9bf398713701a62400fde383bd70ed0ae04293cd5232068"
+  },
+  "requirements": {
+    "normativeSource": "PSCV-RC-v2",
+    "surfaceRows": 230,
+    "snapshotIds": 194,
+    "priorDirectSourceLocatedBoolIds": 3,
+    "remainingUnresolvedIds": 191,
+    "pilotWitnessSurfaceRows": 7,
+    "workLedgerSha256": "e562efe944af9a55eff7c2960fd2a143877cf9ec6c85a5e7b826983ade74b8c0"
+  },
+  "claims": {
+    "closedStandard": false,
+    "instanceLookupSemanticsQualified": false,
+    "sourceToDeclarationMappingsQualified": false,
+    "pscvCertificateAvailable": false,
+    "verifiedExecutableAuthorized": false
+  },
+  "compilerKernelReleaseSeedUnchanged": true,
+  "status": "qualified-requirement-work-inventory-only"
+}

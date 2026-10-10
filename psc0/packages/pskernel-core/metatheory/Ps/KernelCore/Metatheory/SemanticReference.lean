@@ -97,6 +97,59 @@ theorem inferCore_const_result
                   ite_self, he, hi] at run
                 repeat' first | (solve | simp_all) | split at run
 
+
+/-- The actual reference constant-inference success branch has passed its
+universe-arity guard. Unlike a hypothesis supplied by a model caller, this
+is derived from the production checker run in both inference grades. -/
+theorem inferCore_const_success_valid_arity
+    (fuel : Nat) (whnf : InferOperation) (defeq : DefEqOperation)
+    (c : PsKernelCheckerContext) (s next : PsKernelCheckerState)
+    (name : PsKernelName) (levels : List PsKernelLevel)
+    (result : PsKernelExpr) (io : Bool)
+    (run : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy
+      fuel whnf defeq c s (.const name levels) io = .ok (result, next)) :
+    ∀ info, psKernelEnvironmentFind c.environment name = some info →
+      psKernelNameListLength (psKernelConstantInfoLevelParams info) =
+        psKernelLevelListLength levels := by
+  cases fuel with
+  | zero =>
+      simp [psKernelInferCoreWithFuel] at run
+  | succ remaining =>
+      cases he : psKernelCheckerContextEnterRecDepth c with
+      | error error =>
+          simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet,
+            psKernelReferenceCachePolicy, he] at run
+      | ok entered =>
+          have henv := entered_environment c entered he
+          cases hi : psKernelEnvironmentFind entered.environment name with
+          | none =>
+              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet,
+                psKernelReferenceCachePolicy, he, hi] at run
+          | some selected =>
+              have arity :
+                  psKernelNameListLength
+                    (psKernelConstantInfoLevelParams selected) =
+                  psKernelLevelListLength levels := by
+                cases hc : Nat.beq
+                    (psKernelNameListLength
+                      (psKernelConstantInfoLevelParams selected))
+                    (psKernelLevelListLength levels) with
+                | true =>
+                    exact Nat.beq_eq_true.mp hc
+                | false =>
+                    simp [psKernelInferCoreWithFuel,
+                      psKernelReferenceCacheGet_miss,
+                      psKernelSemanticCacheGet, psKernelReferenceCachePolicy,
+                      he, hi, hc] at run
+              intro info found
+              have actual :
+                  psKernelEnvironmentFind c.environment name = some selected := by
+                simpa only [henv] using hi
+              have same : info = selected :=
+                Option.some.inj (found.symm.trans actual)
+              subst info
+              exact arity
+
 open ConLeche SetModel AnnotatedExpr
 universe w
 variable {V : Type w} [SetTheory V]

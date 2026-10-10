@@ -109,8 +109,8 @@ theorem publicEmptySession_has_model (V : Type u) [SetTheory V]
     resources provider session run]
   exact initialEnvironment_has_model V
 
-/-- The precise inference consumer; the arity premise remains explicit
-until its derivation from actual checker success is proved. -/
+/-- The actual checker run now establishes the arity premise itself;
+the caller supplies only a modeled semantic environment. -/
 theorem referenceConstant_from_environmentModel (M : Reading V)
     (Γ : List AnnotatedExpr) (fuel : Nat)
     (whnf : InferOperation) (defeq : DefEqOperation)
@@ -118,11 +118,11 @@ theorem referenceConstant_from_environmentModel (M : Reading V)
     (name : PsKernelName) (levels : List PsKernelLevel)
     (result : PsKernelExpr) (inferOnly : Bool)
     (model : EnvironmentModel M c.environment)
-    (arity : ∀ info, psKernelEnvironmentFind c.environment name = some info →
-      CorrectUniverseArity info levels)
     (run : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy
       fuel whnf defeq c s (.const name levels) inferOnly = .ok (result, next)) :
     ∃ A : AnnotatedExpr, A.erase = result ∧ ModelsType M Γ (.const name levels) A := by
+  have arity := PsKernelSemantics.Reference.inferCore_const_success_valid_arity
+    fuel whnf defeq c s next name levels result inferOnly run
   exact PsKernelSemantics.Reference.const_inference_has_set_model
     M Γ fuel whnf defeq c s next name levels result inferOnly
     (fun info found => EnvironmentModel.constantInstance M c.environment Γ

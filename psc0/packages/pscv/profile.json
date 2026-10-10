@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 0,
+  "kind": "psc-profile-candidate/0",
+  "sourceProfile": "pscv-v1",
+  "assurancePolicies": [
+    "pscv-closed-v1",
+    "pscv-boundary-v1"
+  ],
+  "normativeReference": "PSCV-RC-v2",
+  "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+  "leanSemanticReference": {
+    "version": "4.35.0-rc3",
+    "commit": "470d5ce1400764999581fd26d5d72b00d990b0f4"
+  },
+  "standardEnvironment": {
+    "identity": "STD-ENV-PSCV-V1-L435RC3-RC1",
+    "registrySha256": null,
+    "status": "not-generated-or-frozen"
+  },
+  "verificationSemantics": "PSCV-VERIFY-v1",
+  "certificateContract": "PSCV-CERT-v1",
+  "status": "experimental-preflight-only",
+  "allowedToEmitVerifiedExecutable": false,
+  "installedPackageGrantsAuthority": false,
+  "runtimeCodeEntry": null,
+  "implementationReference": "PSCVL",
+  "operation": "offline-preflight-proposal",
+  "packageCapabilities": [],
+  "verifiedFeatures": []
+}

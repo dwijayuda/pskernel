@@ -24,52 +24,60 @@ open AnnotatedExpr
 including every failure string and the complete returned state. -/
 theorem inferSortWith_forget_type (infer whnf : InferOperation)
     (c : PsKernelCheckerContext) (s : PsKernelCheckerState) (input : PsKernelExpr) :
-    (match psKernelInferSortWith infer whnf c s input with
-      | .error error => .error error
-      | .ok (visit, next) => Except.ok (visit.level, next)) =
-      (match infer c s input with
-        | .error error => .error error
-        | .ok (inferredType, intermediate) =>
-            psKernelEnsureSortWith whnf c intermediate inferredType) := by
-  unfold psKernelInferSortWith
+    ((match psKernelInferSortWith infer whnf c s input with
+      | Except.error error => Except.error error
+      | Except.ok (visit, next) => Except.ok (visit.level, next)) :
+      Except String (PsKernelLevel × PsKernelCheckerState)) =
+      ((match infer c s input with
+        | Except.error error => Except.error error
+        | Except.ok (inferredType, intermediate) =>
+            psKernelEnsureSortWith whnf c intermediate inferredType) :
+        Except String (PsKernelLevel × PsKernelCheckerState)) := by
   cases hi : infer c s input with
-  | error error => rfl
+  | error error =>
+      simp [psKernelInferSortWith, hi]
   | ok inferred =>
       rcases inferred with ⟨inferredType, intermediate⟩
       cases hs : psKernelEnsureSortWith whnf c intermediate inferredType with
-      | error error => rfl
+      | error error =>
+          simp [psKernelInferSortWith, hi, hs]
       | ok exposed =>
-          cases exposed
-          rfl
+          rcases exposed with ⟨level, next⟩
+          simp [psKernelInferSortWith, hi, hs]
 
 /-- Forgetting the codomain carrier recovers the previous state-only lambda
 check exactly. Its inference grade and established error mapping are unchanged. -/
 theorem lambdaCodomainVisitWith_forget (infer whnf : InferOperation)
     (c : PsKernelCheckerContext) (s : PsKernelCheckerState)
     (bodyType : PsKernelExpr) (io : Bool) :
-    (match psKernelLambdaCodomainVisitWith infer whnf c s bodyType io with
-      | .error error => .error error
-      | .ok (_, next) => Except.ok next) =
-      (if io then Except.ok s else
+    ((match psKernelLambdaCodomainVisitWith infer whnf c s bodyType io with
+      | Except.error error => Except.error error
+      | Except.ok (_, next) => Except.ok next) :
+      Except String PsKernelCheckerState) =
+      ((if io then Except.ok s else
         match infer c s bodyType with
-        | .error error => .error (psKernelLambdaCodomainSortFailure error)
-        | .ok (inferredType, intermediate) =>
+        | Except.error error => Except.error (psKernelLambdaCodomainSortFailure error)
+        | Except.ok (inferredType, intermediate) =>
             match psKernelEnsureSortWith whnf c intermediate inferredType with
-            | .error error => .error (psKernelLambdaCodomainSortFailure error)
-            | .ok (_, next) => Except.ok next) := by
+            | Except.error error =>
+                Except.error (psKernelLambdaCodomainSortFailure error)
+            | Except.ok (_, next) => Except.ok next) :
+        Except String PsKernelCheckerState) := by
   cases io with
-  | true => rfl
+  | true =>
+      simp [psKernelLambdaCodomainVisitWith]
   | false =>
-      unfold psKernelLambdaCodomainVisitWith psKernelInferSortWith
       cases hi : infer c s bodyType with
-      | error error => rfl
+      | error error =>
+          simp [psKernelLambdaCodomainVisitWith, psKernelInferSortWith, hi]
       | ok inferred =>
           rcases inferred with ⟨inferredType, intermediate⟩
           cases hs : psKernelEnsureSortWith whnf c intermediate inferredType with
-          | error error => rfl
+          | error error =>
+              simp [psKernelLambdaCodomainVisitWith, psKernelInferSortWith, hi, hs]
           | ok exposed =>
-              cases exposed
-              rfl
+              rcases exposed with ⟨level, next⟩
+              simp [psKernelLambdaCodomainVisitWith, psKernelInferSortWith, hi, hs]
 
 /-- The retained fields are exactly those produced by the two actual visits. -/
 theorem inferSortWith_ok_iff (infer whnf : InferOperation)

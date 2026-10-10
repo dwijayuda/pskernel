@@ -125,14 +125,14 @@ theorem modelsLocalContext_addLocal (M : Reading V) (Γ : List AnnotatedExpr)
     (function : ∀ ρ, Satisfies M Γ ρ → FunctionValid M ρ A) :
     ModelsLocalContext M Γ (psKernelLocalContextAddLocal locals name userName A bi) := by
   intro query decl found
-  by_cases matches : psKernelNameEq name query = true
+  by_cases hMatches : psKernelNameEq name query = true
   · have same : name = query :=
-      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query matches
+      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query hMatches
     subst query
     have selected :
         PsKernelLocalDeclOf.localDecl locals.nextIndex name userName A bi = decl := by
       simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_true,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_true,
         Option.some.injEq] using found
     subst decl
     exact {
@@ -143,7 +143,7 @@ theorem modelsLocalContext_addLocal (M : Reading V) (Γ : List AnnotatedExpr)
     }
   · have oldFound : psKernelLocalContextFind locals query = some decl := by
       simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_false] using found
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
     exact model query decl oldFound
 
 theorem modelsLocalContext_addLet (M : Reading V) (Γ : List AnnotatedExpr)
@@ -153,14 +153,14 @@ theorem modelsLocalContext_addLet (M : Reading V) (Γ : List AnnotatedExpr)
     (valueEq : ModelsEqual M Γ (.fvar name) value) :
     ModelsLocalContext M Γ (psKernelLocalContextAddLet locals name userName A value) := by
   intro query decl found
-  by_cases matches : psKernelNameEq name query = true
+  by_cases hMatches : psKernelNameEq name query = true
   · have same : name = query :=
-      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query matches
+      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query hMatches
     subst query
     have selected :
         PsKernelLocalDeclOf.letDecl locals.nextIndex name userName A value = decl := by
       simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_true,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_true,
         Option.some.injEq] using found
     subst decl
     refine {
@@ -179,7 +179,7 @@ theorem modelsLocalContext_addLet (M : Reading V) (Γ : List AnnotatedExpr)
       exact ⟨checked, valueEq⟩
   · have oldFound : psKernelLocalContextFind locals query = some decl := by
       simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_false] using found
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
     exact model query decl oldFound
 
 private theorem withFree_self (M : Reading V) (name : PsKernelName) (x : V) :
@@ -244,20 +244,20 @@ theorem freshLocalContext_addLocal (future : PsKernelName)
     (freshName : psKernelNameEq name future = false) (freshA : Fresh future A) :
     FreshLocalContext future (psKernelLocalContextAddLocal locals name userName A bi) := by
   intro query decl found
-  by_cases matches : psKernelNameEq name query = true
+  by_cases hMatches : psKernelNameEq name query = true
   · have same : name = query :=
-      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query matches
+      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query hMatches
     subst query
     have selected :
         PsKernelLocalDeclOf.localDecl locals.nextIndex name userName A bi = decl := by
       simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_true,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_true,
         Option.some.injEq] using found
     subst decl
     exact ⟨freshName, freshA, by intro value stored; cases stored⟩
   · apply freshLocals query decl
     simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
-      psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_false] using found
+      psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
 
 theorem freshLocalContext_addLet (future : PsKernelName)
     (locals : AnnotatedLocalContext) (name userName : PsKernelName)
@@ -266,14 +266,14 @@ theorem freshLocalContext_addLet (future : PsKernelName)
     (freshA : Fresh future A) (freshValue : Fresh future value) :
     FreshLocalContext future (psKernelLocalContextAddLet locals name userName A value) := by
   intro query decl found
-  by_cases matches : psKernelNameEq name query = true
+  by_cases hMatches : psKernelNameEq name query = true
   · have same : name = query :=
-      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query matches
+      psKernelNameEq_sound_of_string_law psKernelStringEq_sound_lean435 name query hMatches
     subst query
     have selected :
         PsKernelLocalDeclOf.letDecl locals.nextIndex name userName A value = decl := by
       simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_true,
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_true,
         Option.some.injEq] using found
     subst decl
     refine ⟨freshName, freshA, ?_⟩
@@ -283,6 +283,6 @@ theorem freshLocalContext_addLet (future : PsKernelName)
     exact freshValue
   · apply freshLocals query decl
     simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
-      psKernelLocalContextFindIn, psKernelLocalDeclName, matches, ite_false] using found
+      psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
 
 end PsKernelSemantics.SetModel

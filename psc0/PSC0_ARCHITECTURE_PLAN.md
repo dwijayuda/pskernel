@@ -1413,3 +1413,11 @@ The accepted P0 [feature ownership map](docs/platform/PSCV_PROFILE_AND_PACKAGE_B
 No generic→concrete dependency graph, class/basis/source-line proof, scoped tie resolution, backend equivalence or closed normative PSCV registry is claimed. The 191 remaining required snapshot IDs are **still unresolved**. Compiler/kernel/seed and production PSCV refusal are unchanged.
 
 This is a diagnostic companion to [P1–P5 sound gates](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md), not a source/profile activation or kernel authority change.
+
+
+## PSCV P1 arithmetic instance-resolution progress (P1-J–P1-M)
+
+The P1-J–P1-M draft stack implements a source-derived typeclass evidence route from exact PSCV-RC-v2 Standard requirements without modifying the portable compiler: **42** normative arithmetic rows, **84** actual pinned Lean4.35rc3 typed class queries, **45** distinct selected declaration types, **7** immutable upstream source module blobs, and **42** explicit concrete-dictionary-to-generic-instance applications typechecked in Lean. P1-J, P1-K, P1-L and P1-M each passed all four respective Linux/Windows/actual-Lean cloud jobs. The current source-qualified [P1-M PR108](https://github.com/dwijayuda/pskernel/pull/108) records exact artifacts and identity digests in [P1-M qualification JSON](docs/platform/pscv-p1m-qualification-2026-10-10.json).
+
+**These are imported-Lean observations, not closed PSCV Standard approval.** The three prior direct Boolean source-location IDs remain the only specifically located required IDs; **191 normative IDs are unresolved**. Source-to-Core elaboration, closed scope/priority/tie instance selection, effect/WP and prover registries, runtime/backends and verification-condition completeness remain separate evidence gates. No `PSCV-CERT-v1`, `VerifiedExecutableModule` or verified executable can be emitted. The selected native kernel provider, 62-module self-host compiler, TypeScript7 toolchain, source seed, npm release and production certificate refusal remain unchanged.
+

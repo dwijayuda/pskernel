@@ -52,6 +52,7 @@ import Ps.KernelCore.Metatheory.SemanticGrowingAxiomTrace
 import Ps.KernelCore.Metatheory.SemanticHereditaryEnvironment
 import Ps.KernelCore.Metatheory.SemanticHereditaryExtension
 import Ps.KernelCore.Metatheory.SemanticClosedTheoremValue
+import Ps.KernelCore.Metatheory.SemanticHereditaryAdmission
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -101,6 +102,10 @@ run_cmd do
     ``PsKernelSemantics.SetModel.Reading.substLevels_nil,
     ``PsKernelSemantics.SetModel.checkedClosedProof_monomorphic_assignment,
     ``PsKernelSemantics.SetModel.referenceAddTheorem_monomorphic_constructs_reading,
+    ``PsKernelSemantics.SetModel.freshHereditaryValue_extends,
+    ``PsKernelSemantics.SetModel.successfulAdd_hereditary_model,
+    ``PsKernelSemantics.SetModel.checkedClosedProof_hereditary_assignment,
+    ``PsKernelSemantics.SetModel.referenceAddTheorem_monomorphic_hereditary_model,
     ``PsKernelSemantics.SetModel.referenceAdmitAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.ModeledReferenceAxiomTrace.preserves,
     ``PsKernelSemantics.SetModel.modeledPublicAxiomTrace_no_literalFalse,

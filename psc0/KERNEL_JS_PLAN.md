@@ -55,6 +55,33 @@ Investigate a proper standard-library solution:
 
 There may be further gaps after this first refusal; J0 does not establish that `Nat.max` is the only remaining issue.
 
+### Next diagnostic: one ordinary admitted definition
+
+**Source review follow-up, 10 October 2026; proposed and not executed.** The narrowest next probe can retain an explicit standard-definition unit before the unchanged Core:
+
+```lean
+-- PSC-targeted Lean-syntax support unit, outside Lean library targets.
+def Nat.max (a : Nat) (b : Nat) : Nat :=
+  Nat.add a (Nat.sub b a)
+```
+
+Natural-number subtraction is truncated at zero, so the proposed meaning is maximum: when b is at most a, the result is a; otherwise a + (b - a) is b. This mathematical argument assumes the stated Nat operations. Admission of a safe definition with type Nat → Nat → Nat checks its body and type; it does not prove that an arbitrary implementation computes maximum. Preserve the exact approved source and its hash, compare execution with native Lean, and leave its mathematical and executable-refinement obligations explicit. A later companion such as `psc0/proofs/standard/NatMax.proof.lean` can define a fresh model name and prove correspondence with Lean's existing Nat.max. That proposed proof is outside bootstrap and is not supplied by this diagnostic.
+
+The required compiler preparation path already exists. [The resolver](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/elab/src/Ps/Elab/Term.lean) checks an exact complete name before projection fallback. [Preparation](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/compiler/src/Ps/Compiler/Api.lean) retains ordered source declarations. [The canonical encoder](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean) carries safe definition bodies, and [the pinned provider](https://github.com/dwijayuda/pskernel/blob/963030dc2d154008fccc82e7c8ed29331f138799/psc0/host/src/Ps/Host/KernelCoreProvider/Admission.lean) admits request declarations sequentially into a fresh checked-prelude session. Its Prelude/SelfHostPrelude/SelfHostProd closure supplies Nat, addition and subtraction, with no Nat.max declaration. [Core validation](https://github.com/dwijayuda/pskernel/blob/963030dc2d154008fccc82e7c8ed29331f138799/psc0/packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Validation.lean) rejects duplicate names; this route does not authorize replacing existing declarations.
+
+The [TS emitter](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean) already lowers Nat addition to bigint addition and Nat subtraction to subtraction truncated at zero. Nat.max would remain an ordinary emitted function. No new primitive or provider rebuild is indicated by this source review; successful preparation, admission, IR validation, TS7 emission and execution still require the next probe.
+
+There is a deliberate naming limitation. [PSC's Lean-syntax parser](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean) accepts qualified declaration names, while [the current .ps declaration-name parser](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean) consumes one identifier. The support fixture is PSC-targeted Lean syntax. Full Lean already defines Nat.max, so do not add this fixture to Lean's Init environment or library targets. A later production standard-library/naming decision remains separate; extensional agreement with maximum does not by itself establish identical definitional-reduction behavior to every Lean prelude definition.
+
+The future patch can stay within one new fixture, for example `test/fixtures/kernel-js-standard/NatMax.lean`, and the existing `scripts/kernel-js-probe.mjs`:
+
+1. Run a standalone support-plus-consumer stage first. Retain the bare missing-name refusal as the negative baseline, then prepare the exact support definition before a small consumer. Retain source identities, declaration order, canonical admissions, original IR and generated TS/JS.
+2. Admit that complete batch through the unchanged native provider, use the checked-IR/TS7 path, and compare generated results with native Lean for zero, equal arguments, both orders and values above 2^53. Exercise missing/reordered support, duplicate names and an ill-typed body. Do not expect type checking alone to reject a well-typed but mathematically wrong implementation.
+3. Only after that standalone stage succeeds, preload the same retained unit before all 79 unchanged Core modules and resume J0. Every fresh canonical batch that depends on Nat.max must include its definition before consumers. Report Core modules, the support unit and test fixtures separately.
+4. Stop at the next substantive failure. Preserve the chosen compiler artifact, pinned Core/provider, budgets, native selection and no-fallback policy. This is an explicit diagnostic input, not permission for npm packages to alter a trusted standard environment.
+
+Adding the definition only to a shared prelude is more coupled. The existing provider would retain its old prelude, and [erasure](https://github.com/dwijayuda/pskernel/blob/5fe0045dcb0bf30e1d2519f900458d1407822eed/psc0/packages/erasure/src/Ps/Erasure/Definition.lean) uses runtime-prelude declarations for metadata while lowering value bodies from the supplied source-declaration list. A type-only registration or hidden environment insertion therefore does not establish emitted runtime behavior. Keeping this support definition in the ordinary visible source/admission/emission stream is the recommended next diagnostic.
+
 ## 4. J0 and J1 gates
 
 | Gate | Required result |

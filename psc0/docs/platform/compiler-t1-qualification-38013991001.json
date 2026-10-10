@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "sourceRef": "5fe0045dcb0bf30e1d2519f900458d1407822eed",
+  "sourceClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+  "moduleCount": 62,
+  "evidence": "compiler-qualified-current-source-fixed-point",
+  "equation": "Q is the pinned qualified compiler from A; C1=Q(B); C2=C1(B); C3=C2(B); compare C2 and C3 products",
+  "authoringSeed": {
+    "kind": "previous-qualified-authoring-seed",
+    "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+    "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "independentAlgorithm": false,
+    "priorQualification": {
+      "evidence": "compiler-qualified-current-source-fixed-point",
+      "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "compilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "c1CompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "c2CompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "c3CompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "runId": 37925722635,
+      "artifactName": "psc0-sh1-ts7.0.2-fe2560aba0f347b1caf8d000d371464642d44f23",
+      "claim": "Compiler-qualified successor; cold recovery and selected-provider acceptance are separate evidence."
+    },
+    "producerToolchain": {
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+      "typescript": "Version 7.0.2"
+    },
+    "executionRuntime": {
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+      "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    }
+  },
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "typescriptProfile": {
+    "version": "7.0.2",
+    "purpose": "current-emission",
+    "arguments": [
+      "--ignoreConfig"
+    ]
+  },
+  "rawAuthoringSourceConsumedEveryGeneration": true,
+  "artifacts": {
+    "canonicalSurfaceSourceSha256": "e91f3bfaaedf755b0fb027a3c6ffe752784c2f19cd41641ba8b015a90e37fe3e",
+    "normalizedCanonicalAdmissionsSha256": "403d7b83ab62150a6f059cd5ed9dcfe18fd68e18f1c54cd8527abf173e20e1d5",
+    "typescriptSha256": "8923672fbc4b78a8bc1e25ab172162356ae4ffae6179eddc930c7955c73c1b3d",
+    "javascriptSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617"
+  },
+  "c1CompilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+  "c2CompilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+  "c3CompilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+  "rawCapabilityKinds": [
+    "lean",
+    "proofScript"
+  ],
+  "helperSourceCorrespondence": "helpers/receipt.json",
+  "helperRuntimeGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "recursiveGenericErasureGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "sourceGrammar": {
+    "edition": "ps-0.9-r3",
+    "mode": "new-only",
+    "support": "bounded-selfhost-subset",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "fullStandardConformance": false,
+    "fullPscvConformance": false
+  },
+  "grammarGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "projectionResolutionGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "canonicalSourceContract": "C2/C3 emit and consume the bounded new-only ps-0.9-r3 grammar. The pinned parent may emit its historical canonical form as the C1 build artifact; it is not a current parser mode.",
+  "nativeCanonicalSourceCorrespondence": {
+    "report": "development/N1/grammar-closure.json",
+    "reportSha256": "9cf87f1c3d74b16a042eddca36ce331064d5708a98f40eb0d7723e53046c5c9e",
+    "compilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+    "moduleCount": 62
+  },
+  "workerMigration": {
+    "workers": 12,
+    "families": {
+      "F1": 4,
+      "F2": 8
+    },
+    "removedTypedIdentityAliases": 3,
+    "runtimeGenerations": [
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "casesPerCompiler": 87,
+    "observationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+    "comparison": {
+      "profile": "empty-legacy-erasure-namespace/1",
+      "cases": 87,
+      "projectedPaths": [
+        "F2/structures-empty-reverse-accumulator/result/scope/declarationNames/runtimePrefix",
+        "F2/inductives-empty-reverse-accumulator/result/scope/declarationNames/runtimePrefix"
+      ],
+      "runtimePrefix": "",
+      "referenceRuntimePrefixPresent": false,
+      "referenceObservationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be",
+      "currentObservationSha256": "7928373c18de754fe152341d159c0f2e9d1880eb645177b25217071c91a22740",
+      "comparisonObservationSha256": "697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be"
+    },
+    "completePublicTypeAndOriginalIrBuilds": [
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "abiObservationSha256": "b23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49",
+    "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+    "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+    "correspondence": "worker-migration-correspondence.json",
+    "correspondenceSha256": "182b97effa9142175c548b6128d4a9e33bb7b3ff1b65b2f901a8753b8429818c",
+    "fullBaselineClosurePreparedAgain": false
+  },
+  "portableIrCheckerGenerations": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "originalIrCheckedBuilds": [
+    "C2",
+    "C3"
+  ],
+  "originalIrChecking": "C1 checks the exact current-source IR emitted as C2; C2 checks the exact IR emitted as C3.",
+  "immutableSeedBoundary": {
+    "status": "accepted",
+    "implementation": "Ps.CompilerIr.Check.psCheckVerifiedIrModule",
+    "options": {
+      "maxSteps": 5000000,
+      "maxTypeSteps": 65536,
+      "maxFindings": 1000
+    }
+  },
+  "runtimeIrTypingEnforced": true,
+  "runtimeIrStrictQualification": "not-claimed",
+  "provider": {
+    "status": "not-attempted",
+    "kernelChecked": false
+  }
+}

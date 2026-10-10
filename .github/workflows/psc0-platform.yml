@@ -2,7 +2,7 @@ name: PSC0 platform preview qualification
 
 on:
   push:
-    branches: ['psc0/platform-v1']
+    branches: ['psc0/platform-v1', 'psc0/platform-t1-v1']
     paths:
       - 'psc0/bin/**'
       - 'psc0/release/**'
@@ -24,6 +24,7 @@ concurrency:
 
 jobs:
   qualify:
+    if: ${{ github.ref != 'refs/heads/psc0/platform-t1-v1' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[platform-qualify]') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     defaults:
@@ -36,18 +37,18 @@ jobs:
           node-version: '22.23.3'
       - name: Check host/session/publication and release policy before native build
         run: |
-          node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
+          node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-project.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
           node scripts/check-modular-preparation-source.mjs
           node --check scripts/platform-release-smoke.mjs
           node --check scripts/platform-integration.test.mjs
-      - name: Obtain the existing qualified F compiler artifact
+      - name: Obtain the qualified T1 compiler artifact
         uses: actions/download-artifact@v4
         with:
           github-token: ${{ github.token }}
-          run-id: 37947341800
-          name: psc0-sh1-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d
-          path: qualified-f
-      - name: Authenticate exact F bytes and the unchanged portable source closure
+          run-id: 38013991001
+          artifact-ids: 11657766675
+          path: qualified-compiler
+      - name: Authenticate exact compiler bytes and the qualified portable source closure
         run: |
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
@@ -58,7 +59,7 @@ jobs:
           const release = JSON.parse(await readFile('release/release.json', 'utf8'));
           const closure = await readBootstrapClosure(process.cwd());
           assert.equal(closure.sha256, release.compiler.sourceClosureSha256);
-          assert.equal(closure.moduleCount, 61);
+          assert.equal(closure.moduleCount, 62);
           const expected = release.compiler.sha256;
           let candidate;
           async function find(directory) {
@@ -71,8 +72,8 @@ jobs:
               }
             }
           }
-          await find(path.resolve('../qualified-f'));
-          assert(candidate, 'PSC0_PLATFORM_F_ARTIFACT_MISSING');
+          await find(path.resolve('../qualified-compiler'));
+          assert(candidate, 'PSC0_PLATFORM_QUALIFIED_COMPILER_MISSING');
           const directory = path.resolve('dist/platform');
           await mkdir(directory, { recursive: true });
           const compiler = path.join(directory, 'compiler.js');
@@ -80,7 +81,7 @@ jobs:
           await appendFile(process.env.GITHUB_ENV, 'PSC0_PLATFORM_COMPILER=' + compiler + '\n');
           await writeFile(path.join(directory, 'compiler-input.json'), JSON.stringify({
             sourceRef: release.compiler.sourceRef, compilerSha256: expected,
-            artifactRunId: 37947341800, artifactId: 11627040677,
+            artifactRunId: 38013991001, artifactId: 11657766675,
             sourceClosureSha256: closure.sha256, moduleCount: closure.moduleCount,
             selectedSeedChanged: false, compilerRebuiltByThisRun: false,
           }, null, 2) + '\n');
@@ -219,7 +220,7 @@ jobs:
           node-version: '26.7.0'
       - name: Check Windows host/session/publication and release policy
         run: |
-          node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
+          node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-project.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
           node scripts/check-modular-preparation-source.mjs
       - uses: actions/download-artifact@v4
         with:
@@ -227,7 +228,7 @@ jobs:
           path: candidate
       - name: Install the candidate inputs without any Lean toolchain
         run: |
-          npm install --prefix "$RUNNER_TEMP/psc0-source-inputs" --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/candidate/platform/proofscript-0.1.0-preview.2.tgz"
+          npm install --prefix "$RUNNER_TEMP/psc0-source-inputs" --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/candidate/platform/proofscript-0.1.0-preview.3.tgz"
           node --input-type=module <<'NODE'
           import assert from 'node:assert/strict';
           import { appendFile, readFile } from 'node:fs/promises';
@@ -286,7 +287,7 @@ jobs:
           name: proofscript-preview-candidate-${{ github.sha }}
           path: candidate
       - name: Qualify installed init, examples, checked builds and isolated command packages
-        run: node candidate/platform/platform-release-smoke.mjs candidate/platform/proofscript-0.1.0-preview.2.tgz installed-evidence candidate/platform/psdev-0.1.0-preview.2.tgz candidate/platform/psc-demo-pshello-0.1.0-preview.2.tgz
+        run: node candidate/platform/platform-release-smoke.mjs candidate/platform/proofscript-0.1.0-preview.3.tgz installed-evidence candidate/platform/psdev-0.1.0-preview.3.tgz candidate/platform/psc-demo-pshello-0.1.0-preview.3.tgz
       - name: Retain installed-package and native dependency evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,29 +1,63 @@
-# PSC0 T1 checked TypeScript library adoption — self-host qualification active
+# PSC0 T1 checked TypeScript library adoption — platform qualification active
 
-Updated: 2026-10-10 01:38 UTC. C1 generated from authenticated R and matched native-generated TS/JS. The exact two-field migration-report compatibility fix is reviewed and integrated with seven cheap negative regression groups before generation. This checkpoint retries full successor qualification; preview3 is still pending its actual qualified artifact.
+Updated: 2026-10-10 03:01 UTC. Full compiler qualification is complete. Preview3 now selects the exact qualified successor and is being qualified as source and as an installed package. Do not report installed preview3 success until its six platform jobs pass.
 
-## User-authorized scope
+## User-authorized scope and implementation
 
-The user accepted T1: pure acyclic ProofScript modules, explicit public ownership/exports, one checked project bundle, mechanically thin neighboring TypeScript facades and a handwritten TypeScript consumer. Enforce a bounded runtime ABI and publish the complete generation through the existing protected supervisor before full psdev watch. The user also asks whether the same PSKernel Core can execute as generated JavaScript before Wasm. Investigate and qualify that route separately; do not infer current-provider qualification from historical bounded JS demonstrations.
+The user accepted T1: pure acyclic local ProofScript modules, explicit source-owned public exports, one checked project bundle, mechanically thin neighboring TypeScript facades, a handwritten TypeScript consumer, a bounded runtime ABI, and protected publication before full psdev watch. This is implemented as psc-ts-library/1. The user also asks whether the same PSKernel Core can execute as generated JavaScript before Wasm; investigate and qualify that route separately without an automatic provider switch.
 
-Integration branch: psc0/platform-t1-v1, based on platform-v1 HEAD4265f1d614d15fc9e6ed133a923779ba7af16db8. Initial implementation c40070a6c0afb4b92fdf29f7294f3d25c80f2f0e and compiler/qualification slice histories are preserved. Latest focused source e698a663b7b86ea89987beb757c35eb555fe653c passed run38010115595, job114087917386. This checkpoint starts one coherent [sh1-qualify] run; it does not yet claim its result.
+Integration branch: psc0/platform-t1-v1, based on platform-v1 HEAD 4265f1d614d15fc9e6ed133a923779ba7af16db8. Draft PR91 targets platform-v1 and is stacked on PR90. Preserve the compiler and qualification slice histories.
 
-## Implemented boundary
+One preparation retains exact authored source, import order and export ownership. Mandatory native admission feeds checked original RuntimeIR, an exact public descriptor, one TS bundle and neighboring facades. The ABI covers Nat/Int bigint, Bool, scalar-valid String, Unit and supported monomorphic opaque datatype/structure handles. Implicit, dependent, generic and higher-order public signatures fail explicitly. Project erasure structurally applies __ps$source$ through the existing name index; actual generated tests cover top-level/local intrinsic capture, __proto__/tag fields and private Prod construction/projection. Legacy lowering retains its empty-prefix route.
 
-The profile is psc-ts-library/1. Explicit proofscript.exports in package.json selects names from each source's own authored/elaborated declarations. One project preparation and mandatory native admission feed checked original RuntimeIR, an exact public descriptor, one TS bundle and neighboring facades. The bounded ABI covers Nat/Int bigint, Bool, scalar-valid String, Unit and supported monomorphic opaque datatype handles. Implicit/dependent/generic/higher-order public signatures fail explicitly. The host owns source/configuration freshness, descriptor coverage, TS7 validation, output ownership and the completion receipt.
+The existing publication transaction covers bundle/facade destinations, source/configuration/extension freshness, exact descriptor coverage and globally unique bindings, directory capitalization, old/new directory leases, previously owned bytes, retired facades and rollback. Its fixed staging buckets are next/, previous/ and restore/. It preserves handwritten or concurrently edited outputs; incomplete rollback retains its journal/leases/backups and no success receipt. Receipt-last publication does not establish atomic multi-file visibility, protection against arbitrary same-user filesystem races, or power-loss durability.
 
-Project-mode declarations, types, locals, synthetic binders, fields and constructors use a structural __ps$source$ namespace through the existing erasure name index. The independent review found no remaining blocker in the scoped fix; actual generated conformance exercises undefined/BigInt name capture, __proto__/tag fields and private Prod construction/projection. Ordinary lowering keeps its empty-prefix compatibility route; no global claim about inherited legacy emitter hygiene is made.
+## Completed compiler qualification
 
-The publisher reuses its existing transaction with fixed next/, previous/ and restore/ staging buckets. It covers all bundle/facade destinations, source/config freshness, globally unique public bindings, directory capitalization, old/new directory leases, prior owned bytes, retired facades and rollback. It preserves handwritten/concurrently edited files. Receipt-last publication does not claim atomic multi-file visibility, arbitrary same-user filesystem-race protection or power-loss durability.
+Run 38013991001, attempt 2, at source 5fe0045dcb0bf30e1d2519f900458d1407822eed and tree 23dfb56a84cdce585e5c4b1a5ccff3b2de92f0e5 passed both compiler job114101357176 and native replay job114114935728. The first attempt stopped at the existing 180-second native full-IR process timeout; the unchanged-head rerun passed without increasing budgets or changing source. C1 passed at 02:13:19 UTC; C2/C3 fixed point passed at 02:56:18; exact-C3 T1 conformance passed at 02:56:20; native replay completed at 02:57:54.
 
-## Demonstrated focused evidence
+- Portable closure: 62 modules, SHA256 3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea.
+- C1/C2/C3 all retain equal canonical surface e91f3bfaaedf755b0fb027a3c6ffe752784c2f19cd41641ba8b015a90e37fe3e, normalized admissions 403d7b83ab62150a6f059cd5ed9dcfe18fd68e18f1c54cd8527abf173e20e1d5, TS 8923672fbc4b78a8bc1e25ab172162356ae4ffae6179eddc930c7955c73c1b3d and JS 6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617.
+- Original RuntimeIR checking and all 12 complete public Core/IR ABI builds passed. The 87-case migration comparison retains raw reports and projects only the two exact empty legacy runtimePrefix fields under empty-legacy-erasure-namespace/1. Seven negative regression groups protect that comparison.
+- Exact-C3 conformance passed all 11 recorded ownership, shared opaque identity, selected binding, runtime guard, unsupported ABI, name/field and IR-budget observations. Its canonical admissions hash is 6920fe26543ce11c9454d92154f1ee347c791bcd55bdbfdadbbcdacb296255fc and TS bundle hash is c3829e8032a2c48a633607c66499105f234feff88ffbe877723c516021cc2a40.
+- Native replay accepted four deduplicated streams covering C2/C3 compiler sources, raw Lean and ProofScript capabilities, and recursive-generic fixtures. Logs identify the successful artifact11657766675 and its current C3 hash. This replay does not cover the separate T1 conformance stream; actual T1 native admission is required in platform source and installed example tests.
+- Successful compiler artifact: 11657766675, 5,567,845 bytes, uploaded ZIP SHA256 8d6309b0a526b6987922ebb34cb4d5892ad48ca9e31f3bbb7dfb30ae7319754d. Older failed-attempt artifact11654548418 has the same name; release workflow pins the exact successful ID. Native replay artifact11656759460 is separate.
+- The selected R reproduction is cold:false, not a new isolated cold-recovery qualification. Fixed-point equality is not a compiler semantic-preservation or logical-consistency proof; strictSh1Qualified remains false.
 
-- Run38010115595 at e698a663b7b86ea89987beb757c35eb555fe653c passed all63 host/session/publication/interface tests, source inventory/root minimality, exact TS7 profile, native compiler build and native backend regressions.
-- Native-generated compiler conformance passed11 recorded observations: exact ownership, strict TS consumer/shared identity, public-only exports, malformed/forged/foreign values, exhausted IR budget, wrong-owner selection, supported-source public ABI refusals, scoped runtime names, constructor fields, private Prod and scalar values.
-- Portable closure:62 modules, SHA2563932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea. Native-generated JS SHA2566ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617. This is not yet the qualified C3 artifact selection.
-- Focused artifact11652698988,713686bytes, ZIP SHA2562d14ccba2e5ba369db91c58c03833a2b4b1a5b2a39ea35343edefe1765907a5c.
-- Earlier runs exposed missing explicit Lake registration, unsupported portable source grouping/lambda forms and test-only Eq syntax/universe assumptions. Fixes preserved runtime validation and admission gates. The proof refusal fixture now uses the already qualified implicit-Prop/proof-premise telescope; it is not isolated monomorphic proof-only coverage.
-- Focused evidence explicitly says kernelAdmission=not-attempted and selfHostFixedPoint=not-established-by-this-check. Full successor qualification and separate native replay remain required.
+Exact fixed-point, generated-conformance and native-admission receipts are retained in docs/platform with run38013991001 in their filenames. Earlier focused run38010115595 at e698a663b7b86ea89987beb757c35eb555fe653c passed 63 host tests and 11 native-generated conformance observations; the current full qualification independently supplies successor evidence.
+
+## Current next actions
+
+1. Run the prepared [platform-qualify] workflow at this release checkpoint: Linux Node22 source, Windows Node26 source, and four clean installed Windows/Linux × Node22.23.3/26.7.0 jobs. Read actual new counts and every installed receipt; never reuse preview2 counts.
+2. Record exact source/tree/run/artifact identities, tarball hashes and bytes, native library admission, consumer answer42, imported-source rebuild43, invalid-source preservation, handwritten-output refusal, extension disclosure and PowerShell shim behavior. Complete PLATFORM_IMPLEMENTATION.md and the preview3 qualification JSON only after success.
+3. Update draft PR91 and final handoff with measured evidence. No main merge, npm publication or authoring-seed promotion is authorized incidentally.
+4. Preserve exact bootstrap/release executables durably as parallel public-release work; a JSON hash or an expiring Actions artifact does not itself retain the bytes.
+
+Preview3 release/release.json now pins the actual successor source/closure/JS hash above. The source archive currently distributes one proofscript product bundle and two optional command-demo tarballs (psdev and @psc-demo/pshello), rather than five independently published core packages. TypeScript7.0.2 is its only required npm dependency. Full watch, broad npm/workspace library resolution and LSP remain subsequent milestones. project-init guide and release README explain the checked-library example and safe migration from a previously owned single-file output generation.
+
+## Core-JS finding and planned next diagnostic
+
+The four-file Core-JS plan/probe from psc0/kernel-js-probe-v1 commit6a51a209410bf81d5ab6d8cdf6688be211889e7d is integrated with history. Its workflow remains scoped to the diagnostic branch. Original J0 source b94a6c552d8cc208ce2202527f7f30e28e8836ee / run38007233891 authenticates the previously qualified F compiler and current selected Core, passes seven native public-admission cases, and prepares20 unchanged Core modules before refusing psKernelCheckerStateExitLocalScope in Checker/State.lean. F has no Nat.max in its standard environment. No current Core-JS artifact or qualified JS provider was produced.
+
+KERNEL_JS_PLAN.md now contains a reviewed, unexecuted next diagnostic: retain an explicit ordinary PSC Lean-syntax definition Nat.max(a,b) = Nat.add a (Nat.sub b a) before each fresh canonical batch, admit it with the existing native provider, test its emitted runtime behavior, then retry the79 unchanged Core modules. Existing Nat/add/sub admission avoids a new trusted primitive; source review indicates the current compiler and provider can remain pinned for that diagnostic. Qualified definition names require PSC Lean syntax because the current .ps declaration parser consumes one identifier. Full Lean already owns Nat.max, so this fixture must be outside full-Lean targets and the compiler/Core bootstrap closure. Typing Nat→Nat→Nat does not prove maximum equivalence; the mathematical model proof and source-to-executable refinement remain later obligations. The plan does not claim this diagnostic has run or that it clears later Core gaps.
+
+Intended order: qualified native today; separately qualified same-source pskernel-core-js; qualified Wasm option. JS provider qualification needs canonical codec, native parity, budgets, artifact authentication and installation evidence. A Node child process is not an arbitrary npm-JS sandbox. Do not remove the scope-exit algorithm, add a hidden runtime helper, change the default, or infer current qualification from the historical older three-case JS demonstration.
+
+## Preserved identities and proof scope
+
+Selected authoring seed R remains fe2560aba0f347b1caf8d000d371464642d44f23; both seed manifests are byte-identical. Bootstrap remains Node22.23.3 / Lean4.34.0 / TypeScript7.0.2. Native Core source remains963030dc2d154008fccc82e7c8ed29331f138799 with its qualified Linux and Windows artifacts. No implicit4.35 Arena substitution, native evaluator, semantic fallback, kernel algorithm/cache change or selected-seed promotion.
+
+Formal work remains later in psc0/proofs/**/*.proof.lean, outside self-host bootstrap. Proposed obligations cover source ownership, admission/emission correspondence, name hygiene, guarded ABI, shared bundle/facades, publication state and executable bootstrap refinement. Runtime admission and validation are mandatory now. No new formal theorem, full PSCV assurance, compiler semantic-preservation proof or logical-consistency proof is claimed.
+
+## Execution and ownership
+
+GitHub connector/MCP exclusively for repository reads/writes; builds/tests/source execution only in GitHub Actions. No local files, checkout, shell/source execution, browser or Desktop Commander. Pure in-memory text/JSON transformation and evidence hashing are permitted. Before every ref update read live HEAD and use a non-force expected-HEAD lease. Preserve concurrent changes and slice histories. Avoid branch pushes while qualification is active because concurrency can cancel runs.
+
+Root owns integration/release/evidence/docs; the compiler slice owns portable preparation/erasure/emission; the qualification slice owns generated conformance, the example and installed smoke. Core-JS work is separately scoped. Finish the authorized T1 release qualification and document concrete limits.
+
+## Historical qualification corrections
+
+The following retains the earlier failure analysis; current success is recorded above.
 
 ## Recovery authentication correction
 
@@ -57,34 +91,6 @@ Failed-run artifact11655101607 contains3036362bytes, ZIP SHA2569ba4c9c738a87f957
 
 The reviewed harness follow-up ab10f55660efb97b1cc4017aa26a321f6781594b adds an explicit empty-legacy-erasure-namespace/1 comparison view. It validates raw family/whole-report hashes and case coverage, requires the two exact current fields to exist and equal empty string, preserves every other field, and records both raw hashes plus the comparison hash. C1/C2/C3 recompute and compare this receipt. The ABI harness is unchanged. Seven data-only test groups use the already retained immutable R report, reproduce the exact logged current hash, and reject missing/nonempty fields, unrelated same-named fields, changed observations, dropped cases and invalid raw hashes. The existing early SH1 host step runs them before any long generation. The three harness files and workflow are outside the immutable seven-file native recovery recipe. The remaining iteration gate was reviewed and uses same-compiler comparisons, with no old scope-layout assumption. The next full run still regenerates C1 and must establish C2/C3 and native replay.
 
-## Next required work
-
-1. Let this coherent full [sh1-qualify] checkpoint finish. It must authenticate R/recovery, build/compare current-source C2/C3 products, pass existing compiler regressions, exercise T1 on exact C3 and pass separate pinned native admission replay. The SH1 replay covers its compiler/capability/generic streams, not the T1 conformance stream; real native admission of the checked-library example is additionally required in platform source and clean installed qualification. The only workflow optimization here is a fallback to the focused native cache; mandatory native rebuilding remains.
-2. Pin release/release.json to the actual qualified successor source/closure/JS hash; do not reuse old F evidence for changed source. Assemble proofscript0.1.0-preview.3 with matching psdev/pshello and the checked-library example. Qualify source and clean installed jobs on Windows/Linux Node22/26, including the actual PowerShell/npm command shim.
-3. Commit exact qualification/evidence and updated consumer docs, then update draft PR91 against platform-v1 (stacked on PR90). The reviewed Core-JS plan/probe, architecture and Wasm-order updates are integrated at this checkpoint. Do not merge main, publish npm or promote the authoring seed.
-4. Preserve exact bootstrap/release inputs durably as parallel public-release work; metadata is not executable archive retention.
-
-The release manifest intentionally still selects preview2/oldF until step2. Example/demo package versions are already preview3. Full watch, broad npm/workspace library resolution, LSP and complete source/package naming remain subsequent milestones.
-
-## Core-JS finding and execution order
-
-The four-file Core-JS plan/probe from branch psc0/kernel-js-probe-v1 commit6a51a209410bf81d5ab6d8cdf6688be211889e7d is integrated here with its history preserved. Its workflow remains scoped to its diagnostic branch; integrating the plan does not rerun the probe or change the selected kernel provider. Its exact diagnostic b94a6c552d8cc208ce2202527f7f30e28e8836ee / run38007233891 authenticates oldF/current native Core, passes seven native public-admission cases and prepares20 unchanged Core modules before refusing psKernelCheckerStateExitLocalScope in Checker/State.lean. Nat.max is absent from F's standard environment. No current JS kernel artifact exists. Align admitted standard definitions, elaboration/runtime and the pinned provider prelude before another unchanged-Core probe; do not remove the scope-exit algorithm or introduce a compiler-only trusted primitive. Historical run37333010780 demonstrates older same-source TS7→JS feasibility only.
-
-The intended order is qualified native today, separately qualified same-source pskernel-core-js before Wasm, then the Wasm provider when its gates are met. JS is a trusted provider artifact with canonical codec/parity/budget/artifact/installation obligations; a Node subprocess is not an arbitrary npm-code sandbox. Core-JS code/proof refinement remains separate from this T1 implementation.
-
-## Preserved identities and proof scope
-
-Selected seed R remains fe2560aba0f347b1caf8d000d371464642d44f23. OldF source fcd875c8f38db4b0524090bd10c7c2fd5024053d has61modules, closure6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7, JS5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15, run37947341800. Bootstrap remains Node22.23.3 / Lean4.34.0 / TypeScript7.0.2.
-
-Native Core source remains963030dc2d154008fccc82e7c8ed29331f138799 with its qualified Linux/Windows artifacts. No implicit4.35 Arena substitution, native evaluator, semantic fallback, seed promotion or kernel algorithm/cache change.
-
-Full compiler/architecture proofs remain later work in psc0/proofs/**/*.proof.lean, outside bootstrap. Record ownership, export correspondence, name hygiene, ABI, publication and source-to-executable obligations. Runtime admission/validation is mandatory now. No new formal theorem, full PSCV claim, compiler semantic-preservation proof or logical-consistency proof follows from these tests.
-
-## Execution and ownership
-
-GitHub connector/MCP exclusively for repository reads/writes; builds/tests/source execution only in GitHub Actions. No local files, checkout, shell/source execution, browser or Desktop Commander. Pure in-memory text/JSON transformations and evidence hashing are permitted. Before every ref update read live HEAD and use a non-force expected-HEAD lease. Preserve concurrent changes and slice histories. Avoid integration-branch pushes while qualification is active because workflow concurrency cancels earlier runs.
-
-Root owns host/publication/release/integration/docs; compiler slice owns portable preparation/erasure/emission; qualification slice owns generated conformance/example/installed smoke. Core-JS slice is independently scoped. Continue authorized T1 through acceptance or document a concrete remaining blocker.
 
 ---
 

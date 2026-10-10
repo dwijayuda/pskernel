@@ -2,7 +2,7 @@
 
 This package installs **psc**: the ProofScript command-line compiler with pinned PSKernel Core admission, checked RuntimeIR emission, and TypeScript 7.0.2 validation.
 
-Version **0.1.0-preview.2** adds project initialization, three shipped examples, project entry/output defaults, and the narrow **psc-command/1** extension protocol. The separately packed **psdev** demo requests one ordinary checked build. It is not watch mode.
+Version **0.1.0-preview.3** adds the **psc-ts-library/1** checked project profile: selected exports from pure acyclic `.ps` modules, one shared TypeScript bundle, neighboring TypeScript facades, and a bounded runtime interface. Four examples ship with the existing initializer and **psc-command/1** extension protocol. The separately packed **psdev** demo requests one ordinary checked build; full watch scheduling remains later work.
 
 This candidate supports Linux x64 and Windows x64. Consumer Node ranges are >=22.23.3 <23 or >=26.7.0 <27; the installation qualification exercises Node22.23.3 and Node26.7.0. Bootstrap remains Node22.23.3/Lean4.34.0/TS7.0.2. Installing the prebuilt package requires no Lean toolchain or repository checkout.
 
@@ -14,11 +14,11 @@ From an extracted candidate on Windows PowerShell:
 
 ```powershell
 $candidate = (Resolve-Path .\platform).Path
-npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.2.tgz"
+npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.3.tgz"
 psc.cmd version
 psc.cmd init my-app
 Set-Location my-app
-npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.2.tgz"
+npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.3.tgz"
 npm run check
 npm run build
 ```
@@ -50,7 +50,7 @@ This avoids selecting a different package's psc executable from node_modules/.bi
 | psc check [entry.ps or entry.lean] | Check canonical declarations with the pinned native Core provider. |
 | psc build [entry] [--out file.ts or file.js] | Check admission and the original RuntimeIR, validate with TS7, then publish owned output. |
 | psc dev [entry] --once [--out file.ts] | Execute one explicitly enabled command guest and honor a permitted build request through the same checked host. |
-| psc examples | Show the installed locations of the three examples. |
+| psc examples | Show the installed locations of the four examples. |
 | psc extensions | Inspect configured command packages without executing a guest. |
 | psc version | Report this compiler's version and installed runtime identities. |
 
@@ -69,7 +69,7 @@ The only root project configuration is package.json:
 }
 ```
 
-With no explicit entry, check/build/dev use proofscript.entry relative to that root. For a build using the configured entry, proofscript.out supplies the output. An explicit --out is relative to the caller's working directory. An explicitly supplied entry without --out writes a neighboring .ts file. This avoids directing a different entry into the configured bundle by accident.
+With no explicit entry, check/build/dev use proofscript.entry relative to that root. For a build using the configured entry, proofscript.out supplies the output. An explicit --out is relative to the caller's working directory. An explicitly supplied entry without --out writes a neighboring .ts file. For a project with explicit `proofscript.exports`, the configured output always denotes its shared library bundle, including when an entry argument is supplied. Library builds require an explicit `.ts` bundle path distinct from their neighboring facades.
 
 Configuration paths use forward slashes and stay within the project. Source containment, Windows path validation and existing output ownership checks still apply. Unsupported profiles, verification settings, flags or ambiguous extension registrations fail explicitly.
 
@@ -96,7 +96,80 @@ if (value !== 42n) throw new Error("unexpected result");
 console.log(value);
 ```
 
-Run PSC before your TypeScript build. The example covers one source bundle and a constant export. It does not establish general cross-file datatype identity, checked inbound Nat arguments, arbitrary FFI, or separate compilation. Do not independently compile every .ps file's full import closure and assume their runtime identities can be mixed.
+Run PSC before your TypeScript build. The original existing-typescript example covers one source bundle and a constant export. Use the checked-library profile below when exported functions and datatypes cross module boundaries. Do not independently compile every `.ps` file's full import closure and mix the resulting opaque identities.
+
+## Checked libraries in an existing TypeScript project
+
+The `examples/platform/checked-library` directory contains `src/Quantity.ps`, `src/Main.ps` and a handwritten `src/consumer.ts`. Quantity defines a datatype and a constructor function; Main imports Quantity and exposes reader and identity functions.
+
+Start the example in a fresh copied directory. When converting an already-built single-source starter, `src/Main.ts` belongs to `src/Main.checked.json`; the new library receipt does not automatically adopt it. Stop build/watch processes, confirm which files are generated and still match that receipt, and archive those old generated outputs together with the receipt before the first library build. Preserve handwritten or edited files.
+
+Select public names explicitly in the project package.json:
+
+```json
+{
+  "proofscript": {
+    "profile": "checked",
+    "entry": "src/Main.ps",
+    "out": "src/generated/library.ts",
+    "exports": {
+      "src/Quantity.ps": ["Quantity", "makeQuantity"],
+      "src/Main.ps": ["readQuantity", "sameQuantity"]
+    }
+  }
+}
+```
+
+Run the locally pinned PSC build, then run the existing TypeScript build only if PSC succeeds. The shipped example provides scripts using the exact local compiler launcher and TypeScript 7.0.2. It targets ES2022 with strict NodeNext module settings:
+
+```sh
+node ./node_modules/proofscript/bin/psc.mjs build
+node ./node_modules/typescript/bin/tsc --project tsconfig.json
+```
+
+In automation, join these steps with a success dependency such as `&&`; independent file watching does not establish build ordering.
+
+One successful library generation owns:
+
+- `src/generated/library.ts`: the entire checked runtime and public wrappers.
+- `src/Quantity.ts` and `src/Main.ts`: thin re-exports from that same bundle.
+- `src/generated/library.checked.json`: one completed-generation receipt covering all generated TypeScript bytes.
+
+The handwritten consumer uses ordinary neighboring imports:
+
+```ts
+import { makeQuantity, type Quantity } from "./Quantity.js";
+import { readQuantity, sameQuantity } from "./Main.js";
+
+const quantity: Quantity = makeQuantity(42n);
+if (readQuantity(quantity) !== 42n) throw new Error("unexpected quantity");
+if (sameQuantity(quantity) !== quantity) throw new Error("identity changed");
+```
+
+Only selected names owned by their authored source become public. Importing a declaration does not let another source claim it as its own export. Unselected dependencies participate in preparation and admission but receive no public facade.
+
+### Bounded public interface
+
+| ProofScript type | TypeScript interface and runtime rule |
+| --- | --- |
+| Nat | `bigint`; negative and non-bigint arguments are refused. |
+| Int | `bigint`; non-bigint arguments are refused. |
+| Bool | `boolean`. |
+| String | `string` without isolated UTF-16 surrogates; valid astral characters are accepted. |
+| Unit | `undefined`. |
+| Selected monomorphic datatype or structure | An opaque frozen handle, recognized by bundle-private maps. |
+
+Functions check their exact argument count and supported inbound values. A handle can be passed between facades from the same bundle; returning the same underlying value preserves its handle identity. Forged objects, lookalikes, proxies and handles from another bundle are refused. Raw runtime constructors and internal definitions are not exposed by this profile.
+
+The first profile refuses public implicit, proof-dependent, generic, higher-order, callback and array signatures. Authored nullary definitions become constants. Unsupported public interfaces fail the build rather than weakening its checks. No arbitrary TypeScript FFI is admitted.
+
+These guards protect the application value boundary under ordinary trusted JavaScript runtime assumptions. They do not provide proof authority or isolation from arbitrary code running in the same JavaScript realm. The npm extension boundary remains the separate constrained Wasm protocol described below.
+
+`psc check` checks declarations without publishing output or requesting the public ABI/target-emission checks. Its library receipt reports `abiStatus: "not-requested"`; successful library builds report `"checked-bounded"`. A check-only receipt does not authorize generation.
+
+Every selected source must be in the entry's local acyclic `.ps` closure. Bundle and facade paths remain inside the project, with one consistent directory capitalization. Npm/workspace source resolution and true separate compilation remain later work.
+
+The publisher leases the old and new destination directories, checks prior ownership and source/configuration freshness, stages new files and backups in separate namespaces, and writes the receipt last. It refuses handwritten neighbors and modified generated files. Failed checks retain the last completed generation. That old generation is not evidence for an invalid new source revision, so downstream TypeScript builds must depend on PSC success.
 
 ## Examples
 
@@ -106,18 +179,19 @@ Use psc examples --json to obtain exact installed paths.
 | --- | --- |
 | examples/platform/checked-nat | Nat42, default entry/output configuration, local check/build scripts. |
 | examples/platform/existing-typescript | Checked Main.ps, a handwritten consumer.ts, ES2022/NodeNext configuration. |
+| examples/platform/checked-library | Two .ps modules, explicit exports, a shared opaque datatype and checked neighboring TS facades. |
 | examples/platform/rejected-source | An ill-typed source that must be refused without publishing output. |
 
 Copy an example to a project you own before building. Do not generate output into the compiler's installation directory. The example READMEs explain installation and expected behavior.
 
 ## Install and activate the psdev command demo
 
-The candidate also includes psdev-0.1.0-preview.2.tgz. It is an optional, separately installable npm package. The compiler does not depend on it, and installation alone does not activate it.
+The candidate also includes psdev-0.1.0-preview.3.tgz. It is an optional, separately installable npm package. The compiler does not depend on it, and installation alone does not activate it.
 
 In the initialized project, using the PowerShell candidate variable from above:
 
 ```powershell
-npm install --save-dev --save-exact --ignore-scripts "$candidate\psdev-0.1.0-preview.2.tgz"
+npm install --save-dev --save-exact --ignore-scripts "$candidate\psdev-0.1.0-preview.3.tgz"
 ```
 
 Set the existing root proofscript.extensions array to:
@@ -141,7 +215,7 @@ Only direct, physically installed root node_modules dependencies with a matching
 
 ## Third-party demo
 
-The independently named package @psc-demo/pshello uses the same protocol and authority boundary. Its candidate filename is psc-demo-pshello-0.1.0-preview.2.tgz. It is an illustrative private package, not a claim that this npm scope is owned or published.
+The independently named package @psc-demo/pshello uses the same protocol and authority boundary. Its candidate filename is psc-demo-pshello-0.1.0-preview.3.tgz. It is an illustrative private package, not a claim that this npm scope is owned or published.
 
 Install that candidate locally with --save-dev --save-exact --ignore-scripts, and replace the single command:dev entry with:
 
@@ -169,12 +243,14 @@ A successful build checks native kernel admission, the current RuntimeIR invaria
 
 The output publisher refuses unowned or manually edited destinations. Failed checks preserve the previous completed generation. It uses a staged ownership and recovery protocol with receipt commitment last, not atomic visibility of multiple files to arbitrary watchers. Follow its recovery-required diagnostics if cleanup or rollback cannot finish safely.
 
-Full watch scheduling, coherent downstream builds, source export maps/facades, checked ABI, general macros/tactics/backends, library/workspace resolution and LSP remain later milestones. This package implements a command extension demo, not the complete extension framework.
+Full watch scheduling, automatically coordinated downstream builds, broader ABI/FFI, general macros/tactics/backends, npm/workspace library resolution and LSP remain later milestones. This package implements a command extension demo, not the complete extension framework.
 
 ## Self-host and later proofs
 
-The qualified F compiler and its 61-module source closure are unchanged. The selected authoring seed, native provider algorithms and bootstrap pins are unchanged. Init, CLI orchestration and the optional demos stay outside the compiler's self-host import graph. Adding these npm packages does not require making them part of bootstrap.
+T1 adds portable compiler code for owned project preparation and checked public emission, so it requires a newly qualified source closure and generated compiler. The assembled release records their exact identities. The selected authoring seed, native provider algorithms and bootstrap pins remain unchanged. Init, publication, CLI orchestration and the optional demos stay outside the compiler's self-host import graph.
 
-Full assurance remains a later gate. The accepted proof layout is psc0/proofs/**/*.proof.lean, with full Lean outside the bootstrap cycle. The new obligations concern the bounded command decoder, execution/provenance state machine and host request composition; they do not require a theorem about each third-party scheduling function.
+Full assurance remains a later gate. The accepted proof layout is psc0/proofs/**/*.proof.lean, with full Lean outside the bootstrap cycle. The obligations include authored export ownership, Core/IR/public signature correspondence, runtime value guards and opaque identity, source/configuration binding, complete-generation publication, and preservation through compiler generation. The command decoder and host request composition remain separate obligations; every third-party scheduler need not have its own theorem when the host validates its bounded requests.
 
-For the precise current qualification, platform limits, pinned identities and architecture roadmap, see the repository's psc0/PLATFORM_IMPLEMENTATION.md and psc0/PSC0_ARCHITECTURE_PLAN.md.
+JavaScript is a planned intermediate target for the same PSKernel Core before Wasm. It is not the selected provider in this preview. The current Core probe identified a standard-environment compatibility gap before JS generation; current native admission remains mandatory. See [KERNEL_JS_PLAN.md](https://github.com/dwijayuda/pskernel/blob/psc0/platform-t1-v1/psc0/KERNEL_JS_PLAN.md) for the exact evidence and promotion gates.
+
+For the precise current qualification, platform limits, pinned identities and architecture roadmap, see [PLATFORM_IMPLEMENTATION.md](https://github.com/dwijayuda/pskernel/blob/psc0/platform-t1-v1/psc0/PLATFORM_IMPLEMENTATION.md) and [PSC0_ARCHITECTURE_PLAN.md](https://github.com/dwijayuda/pskernel/blob/psc0/platform-t1-v1/psc0/PSC0_ARCHITECTURE_PLAN.md).

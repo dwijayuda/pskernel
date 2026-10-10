@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "kind": "proofscript-release",
-  "version": "0.1.0-preview.2",
+  "version": "0.1.0-preview.3",
   "platforms": [
     {
       "os": "linux",
@@ -13,9 +13,9 @@
     }
   ],
   "compiler": {
-    "sourceRef": "fcd875c8f38db4b0524090bd10c7c2fd5024053d",
-    "sourceClosureSha256": "6306cdac131f849a9a96de3dc4d628a48b953072b45fc6cc829075bd90b67ac7",
-    "sha256": "5eeecb1bfa00f11f1691f5ee4b437ecebe5c9a45b4e4256ab1bde23b0771df15"
+    "sourceRef": "5fe0045dcb0bf30e1d2519f900458d1407822eed",
+    "sourceClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+    "sha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617"
   },
   "kernel": {
     "selector": "pskernel-core",

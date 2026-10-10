@@ -92,6 +92,7 @@ def psKernelSimpleCtorTypes
         (psKernelSimpleCtorTypes rest)
 
 def psKernelOpenSimpleConstructorParamsWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerSession ->
     List PsKernelOpenBinder ->
@@ -146,6 +147,7 @@ def psKernelOpenSimpleConstructorParamsWithFuel
                   "simple inductive constructor has fewer parameters than the datatype"
 
 def psKernelOpenSimpleConstructorParams
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (params : List PsKernelOpenBinder)
@@ -252,6 +254,7 @@ def psKernelSimpleRecursiveOccurrenceDiagnostic
     "simple inductive admission does not yet support nested recursive occurrences"
 
 def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelName ->
@@ -406,6 +409,7 @@ def psKernelAnalyzeSimpleRecursiveArgumentWithFuel
                           Option.none)
 
 def psKernelAnalyzeSimpleRecursiveArgument
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (target : PsKernelName)
@@ -425,6 +429,7 @@ def psKernelAnalyzeSimpleRecursiveArgument
     List.nil
 
 def psKernelOpenSimpleConstructorFieldsWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelName ->
@@ -559,6 +564,7 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                 type)
 
 def psKernelOpenSimpleConstructorFields
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (target : PsKernelName)

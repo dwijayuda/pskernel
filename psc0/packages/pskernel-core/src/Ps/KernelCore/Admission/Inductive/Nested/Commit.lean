@@ -52,6 +52,7 @@ def psKernelSimpleNestedMakeRenames
     1
 
 def psKernelSimpleNestedAddWithoutAux
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (decl : PsKernelSimpleMutualInductiveDecl)

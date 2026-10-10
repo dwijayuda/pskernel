@@ -7,6 +7,7 @@ def psKernelV1EnvironmentOutcome
   | Except.error message => Except.error (psKernelErrorFromMessage message)
 
 def psKernelV1DispatchDeclaration
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (request : PsKernelDeclarationRequest) : Except PsKernelError PsKernelEnvironment :=
   let fuel := session.resources.fuel;
@@ -36,6 +37,7 @@ def psKernelV1DispatchDeclaration
       Except.error (PsKernelError.declinedUnsupported feature)
 
 def psKernelV1CheckedEnvironment
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (request : PsKernelDeclarationRequest) : Except PsKernelError PsKernelEnvironment :=
   match psKernelKernelSessionPreflight session with
@@ -57,6 +59,7 @@ def psKernelV1Receipt
     (psKernelEnvironmentSize session.environment) (psKernelEnvironmentSize environment)
 
 def psKernelV1CheckDeclaration
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (request : PsKernelDeclarationRequest) : Except PsKernelError PsKernelCheckedDeclaration :=
   match psKernelV1CheckedEnvironment session request with
@@ -65,6 +68,7 @@ def psKernelV1CheckDeclaration
       Except.ok (PsKernelCheckedDeclaration.mk request (psKernelV1Receipt session environment))
 
 def psKernelV1AdmitDeclaration
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (request : PsKernelDeclarationRequest) : Except PsKernelError PsKernelAdmissionResult :=
   match psKernelV1CheckedEnvironment session request with
@@ -75,11 +79,13 @@ def psKernelV1AdmitDeclaration
         (PsKernelCheckedDeclaration.mk request (psKernelV1Receipt session environment)))
 
 def psKernelV1AdmitChecked
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (checked : PsKernelCheckedDeclaration) : Except PsKernelError PsKernelAdmissionResult :=
   psKernelV1AdmitDeclaration session checked.request
 
 def psKernelV1CheckExpression
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)
@@ -94,6 +100,7 @@ def psKernelV1CheckExpression
           Except.ok (PsKernelCheckedExpression.mk expression (Prod.fst result))
 
 def psKernelV1Whnf
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)
@@ -107,6 +114,7 @@ def psKernelV1Whnf
       | Except.ok result => Except.ok (Prod.fst result)
 
 def psKernelV1IsDefEq
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (session : PsKernelKernelSession)
     (levelParams : List PsKernelName)
     (safety : PsKernelDefinitionSafety)

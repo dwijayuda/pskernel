@@ -17,6 +17,7 @@ No transitive equivalence closure is permitted.
 -/
 
 def psKernelDefEqQuick
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -42,7 +43,7 @@ def psKernelDefEqQuick
           psKernelSemanticPairCacheEligible
             left
             right then
-        psKernelExprPairSetContains
+        psKernelSemanticCacheContains
           state.success
           left
           right

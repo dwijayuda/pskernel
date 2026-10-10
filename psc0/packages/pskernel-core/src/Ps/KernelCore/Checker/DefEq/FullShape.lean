@@ -170,6 +170,7 @@ def psKernelDefEqFullShapeWith
                 (Prod.mk Option.none state)
 
 def psKernelIsDefEqAfterFullShape
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->

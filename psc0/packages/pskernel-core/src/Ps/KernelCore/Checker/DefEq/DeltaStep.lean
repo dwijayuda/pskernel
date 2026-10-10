@@ -72,6 +72,7 @@ def psKernelAppHeadLevelsEquivalent
       false
 
 def psKernelDefEqUnfold
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr) :
@@ -80,7 +81,7 @@ def psKernelDefEqUnfold
     psKernelSemanticCacheEligible expr;
   let cached :=
     if eligible then
-      psKernelExprMapGet
+      psKernelSemanticCacheGet
         state.unfold
         expr
     else
@@ -100,7 +101,7 @@ def psKernelDefEqUnfold
       | Option.some value =>
           if eligible then
             let cache :=
-              psKernelExprMapInsert
+              psKernelSemanticCacheInsert
                 state.unfold
                 expr
                 value;
@@ -115,6 +116,7 @@ def psKernelDefEqUnfold
               state
 
 def psKernelDefEqDeltaOnce
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (coreWhnf :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -192,6 +194,7 @@ def psKernelDefEqTryUnfoldProjApp
         (Prod.mk Option.none state)
 
 def psKernelDefEqFinishLazyStep
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -240,6 +243,7 @@ def psKernelDefEqFinishLazyStep
               (Prod.snd quickResult))
 
 def psKernelDefEqLazyStepLeftOnly
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -296,6 +300,7 @@ def psKernelDefEqLazyStepLeftOnly
                 right
 
 def psKernelDefEqLazyStepRightOnly
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -352,6 +357,7 @@ def psKernelDefEqLazyStepRightOnly
                 (Prod.fst rightResult)
 
 def psKernelDefEqLazyStepBoth
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -449,7 +455,7 @@ def psKernelDefEqLazyStepBoth
               left
               right then
           if
-              psKernelExprPairSetContains
+              psKernelSemanticCacheContains
                 state.failure
                 left
                 right then
@@ -496,7 +502,7 @@ def psKernelDefEqLazyStepBoth
                     right then
                 psKernelCheckerStateWithFailure
                   comparedState
-                  (psKernelExprPairSetInsert
+                  (psKernelSemanticCacheInsertPair
                     comparedState.failure
                     left
                     right)
@@ -530,6 +536,7 @@ def psKernelDefEqLazyStepBoth
                     (Prod.fst rightResult)
 
 def psKernelDefEqLazyStep
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->

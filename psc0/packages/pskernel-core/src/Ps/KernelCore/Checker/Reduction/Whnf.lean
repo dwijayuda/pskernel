@@ -11,6 +11,7 @@ core algorithm is reused by the recursor checker without circular semantics.
 -/
 
 def psKernelWhnfAfterCore
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (continueWhnf :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -77,6 +78,7 @@ def psKernelWhnfAfterCore
                             (Prod.snd result)
 
 def psKernelWhnfWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -160,7 +162,7 @@ def psKernelWhnfWithFuel
                 | Option.some _ =>
                     match
                         if psKernelWhnfCacheEligible expr then
-                          psKernelExprMapGet
+                          psKernelSemanticCacheGet
                             state.whnf
                             expr
                         else
@@ -205,7 +207,7 @@ def psKernelWhnfWithFuel
         | _ =>
             match
                 if psKernelWhnfCacheEligible expr then
-                  psKernelExprMapGet
+                  psKernelSemanticCacheGet
                     state.whnf
                     expr
                 else
@@ -249,6 +251,7 @@ def psKernelWhnfWithFuel
                       core
 
 def psKernelWhnfNoRecursor
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

@@ -386,6 +386,7 @@ def psKernelReverseMutualRecursiveFields
     List.nil
 
 def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (checkerFuel : Nat) :
     PsKernelCheckerSession ->
@@ -537,6 +538,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                           Option.none)
 
 def psKernelAnalyzeSimpleMutualRecursiveArgument
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (checkerFuel : Nat)
     (session : PsKernelCheckerSession)
     (targets : List PsKernelName)
@@ -560,6 +562,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgument
     (PsKernelExpr.fvar field.internalName)
 
 def psKernelOpenSimpleMutualConstructorFieldsWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerSession ->
     List PsKernelName ->
@@ -702,6 +705,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                 type)
 
 def psKernelOpenSimpleMutualConstructorFields
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (targets : List PsKernelName)

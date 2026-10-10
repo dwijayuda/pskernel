@@ -69,6 +69,7 @@ def psKernelOpenBindersResult
       result)
 
 def psKernelFinishOpenBindersWithWhnf
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (type : PsKernelExpr)
@@ -88,6 +89,7 @@ def psKernelFinishOpenBindersWithWhnf
         (Prod.fst reduced)
 
 def psKernelOpenSimpleHeaderParamStep
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (type : PsKernelExpr) :
@@ -151,6 +153,7 @@ def psKernelOpenSimpleHeaderParamStep
             "simple inductive declaration has fewer parameters than declared"
 
 def psKernelOpenSimpleHeaderParamsWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (remainingParams : Nat) :
     Nat ->
     PsKernelCheckerSession ->
@@ -205,6 +208,7 @@ def psKernelOpenSimpleHeaderParamsWorker
               (List.cons binder revParams)
 
 def psKernelOpenSimpleHeaderParams
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (type : PsKernelExpr)
@@ -218,6 +222,7 @@ def psKernelOpenSimpleHeaderParams
     List.nil
 
 def psKernelOpenSimpleHeaderIndicesWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelExpr ->
@@ -296,6 +301,7 @@ def psKernelOpenSimpleHeaderIndicesWithFuel
                   current
 
 def psKernelOpenSimpleHeaderIndices
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (type : PsKernelExpr) :

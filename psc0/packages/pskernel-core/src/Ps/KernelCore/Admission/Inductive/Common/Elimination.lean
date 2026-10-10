@@ -40,6 +40,7 @@ def psKernelSimpleAllExprsMember
         false
 
 def psKernelSimpleCtorAllowsLargeElimWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelCheckerSession ->
     PsKernelExpr ->
@@ -122,6 +123,7 @@ def psKernelSimpleCtorAllowsLargeElimWithFuel
                     resultArgs)
 
 def psKernelSimpleCtorAllowsLargeElim
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (params : List PsKernelOpenBinder)
@@ -143,6 +145,7 @@ def psKernelSimpleCtorAllowsLargeElim
         List.nil
 
 def psKernelSimpleElimOnlyAtZero
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (params : List PsKernelOpenBinder)

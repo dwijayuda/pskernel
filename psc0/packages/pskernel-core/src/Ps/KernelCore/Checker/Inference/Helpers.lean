@@ -23,6 +23,7 @@ structure PsKernelForallView where
   binderInfo : PsKernelBinderInfo
 
 def psKernelCacheInferResult
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (state : PsKernelCheckerState)
     (inferOnly : Bool)
     (expr : PsKernelExpr)
@@ -34,7 +35,7 @@ def psKernelCacheInferResult
         expr then
     if inferOnly then
       let cache :=
-        psKernelExprMapInsert
+        psKernelSemanticCacheInsert
           state.inferOnly
           expr
           result;
@@ -43,7 +44,7 @@ def psKernelCacheInferResult
         cache
     else
       let cache :=
-        psKernelExprMapInsert
+        psKernelSemanticCacheInsert
           state.checkedInfer
           expr
           result;

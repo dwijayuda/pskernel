@@ -1,6 +1,7 @@
 import Ps.KernelCore.Admission.Inductive.Ordinary.Recursor
 
 def psKernelValidateSimpleRecursorRulesWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (shapes : List PsKernelSimpleConstructorShape) :
     Nat ->
     PsKernelCheckerSession ->
@@ -96,6 +97,7 @@ def psKernelValidateSimpleRecursorRulesWorker
                         "generated simple recursor rule is not type preserving"
 
 def psKernelValidateSimpleRecursorRules
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (params : List PsKernelOpenBinder)

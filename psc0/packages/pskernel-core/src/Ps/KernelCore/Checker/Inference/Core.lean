@@ -10,6 +10,7 @@ is cached separately.
 -/
 
 def psKernelInferCoreWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -81,7 +82,7 @@ def psKernelInferCoreWithFuel
               psKernelInferCacheEligible
                 inferOnly
                 expr then
-            psKernelExprMapGet
+            psKernelSemanticCacheGet
               cache
               expr
           else

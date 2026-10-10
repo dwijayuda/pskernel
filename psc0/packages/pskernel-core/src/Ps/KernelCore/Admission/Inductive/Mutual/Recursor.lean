@@ -385,6 +385,7 @@ def psKernelMakeSimpleMutualRules
     0
 
 def psKernelValidateSimpleMutualRulesWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (shapes : List PsKernelSimpleMutualConstructorShape) :
     Nat ->
     PsKernelCheckerSession ->
@@ -496,6 +497,7 @@ def psKernelValidateSimpleMutualRulesWorker
             pending
 
 def psKernelValidateSimpleMutualRules
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (levels : List PsKernelLevel)

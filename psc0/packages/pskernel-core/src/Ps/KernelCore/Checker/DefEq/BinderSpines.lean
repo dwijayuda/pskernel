@@ -16,6 +16,7 @@ algorithmic and intentionally incomplete.
 -/
 
 def psKernelDefEqFinish
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (state : PsKernelCheckerState)
     (left : PsKernelExpr)
     (right : PsKernelExpr)
@@ -30,7 +31,7 @@ def psKernelDefEqFinish
         true
         (psKernelCheckerStateWithSuccess
           state
-          (psKernelExprPairSetInsert
+          (psKernelSemanticCacheInsertPair
             state.success
             left
             right))

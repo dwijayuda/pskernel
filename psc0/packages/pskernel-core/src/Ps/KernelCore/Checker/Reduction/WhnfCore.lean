@@ -69,6 +69,7 @@ def psKernelWhnfCountLambdas
     0
 
 def psKernelWhnfCoreFinish
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (original : PsKernelExpr)
     (cheapProj : Bool)
     (result : PsKernelExpr)
@@ -80,7 +81,7 @@ def psKernelWhnfCoreFinish
       (Prod.mk result state)
   else if psKernelWhnfCacheEligible original then
     let nextCache :=
-      psKernelExprMapInsert
+      psKernelSemanticCacheInsert
         state.whnfCore
         original
         result;
@@ -95,6 +96,7 @@ def psKernelWhnfCoreFinish
       (Prod.mk result state)
 
 def psKernelWhnfFinish
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (original : PsKernelExpr)
     (result : PsKernelExpr)
     (state : PsKernelCheckerState) :
@@ -102,7 +104,7 @@ def psKernelWhnfFinish
       (Prod PsKernelExpr PsKernelCheckerState) :=
   if psKernelWhnfCacheEligible original then
     let nextCache :=
-      psKernelExprMapInsert
+      psKernelSemanticCacheInsert
         state.whnf
         original
         result;
@@ -117,6 +119,7 @@ def psKernelWhnfFinish
       (Prod.mk result state)
 
 def psKernelWhnfCoreWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -245,7 +248,7 @@ def psKernelWhnfCoreWithFuel
             | _ =>
                 match
                     if psKernelWhnfCacheEligible expr then
-                      psKernelExprMapGet
+                      psKernelSemanticCacheGet
                         state.whnfCore
                         expr
                     else

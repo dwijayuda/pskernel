@@ -11,6 +11,7 @@ Detailed setup and loops live in `Header.lean` and `AdmissionLoops.lean`.
 -/
 
 def psKernelAddSimpleMutualInductive
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (decl : PsKernelSimpleMutualInductiveDecl)

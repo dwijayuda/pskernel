@@ -10,6 +10,7 @@ explicit and small.
 -/
 
 def psKernelInferWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (whnf :
       PsKernelCheckerContext ->
@@ -39,6 +40,7 @@ def psKernelInferWithFuel
     true
 
 def psKernelCheckWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (whnf :
       PsKernelCheckerContext ->

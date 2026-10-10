@@ -54,6 +54,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Environment.Operations,
     `Ps.KernelCore.Runtime.Acceleration.Cache,
     `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
+    `Ps.KernelCore.Runtime.Acceleration.SemanticCache,
     `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
     `Ps.KernelCore.Checker.State,
     `Ps.KernelCore.Checker.Context,
@@ -118,6 +119,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.Provider,
     `Ps.KernelCore.API.Session,
     `Ps.KernelCore.API.Kernel,
+    `Ps.KernelCore.API.Reference,
     `Ps.KernelCore.SelfHost
   ]
 

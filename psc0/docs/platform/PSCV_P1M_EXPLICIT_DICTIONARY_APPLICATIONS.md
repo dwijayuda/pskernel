@@ -1,5 +1,7 @@
 # PSCV P1-M — explicit imported generic/concrete dictionary applications
 
+**Qualified:** [GitHub Actions 38061137248](https://github.com/dwijayuda/pskernel/actions/runs/38061137248) passed all four jobs at source `ba5d74e6283695e003b6856716bdb1da87c726f6`. All **42** source-derived generic-to-concrete terms were typechecked by actual Lean4.35.0-rc3; **zero** specialized instances excluded. Evidence fingerprint `63e684be8ce9163ea076c99b1146d108b6d8bb62be8056566baa28be89099ec7`. [Machine receipt](pscv-p1m-qualification-2026-10-10.json) · [output artifact](https://github.com/dwijayuda/pskernel/actions/runs/38061137248/artifacts/11673675052). These are typed imported-Lean witnesses, not closed-Standard or runtime correctness proofs.
+
 The preceding P1-J batch observed actual generic and concrete selected
 Lean typeclass instances for 42 arithmetic operator/type rows in the
 pinned Lean **4.35.0-rc3** environment. Independent `#synth` results

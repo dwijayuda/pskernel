@@ -9,6 +9,8 @@ permissions:
   actions: read
 jobs:
   init:
+    # Full Init sampling suspended during proof-first formal metatheory work.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

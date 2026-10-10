@@ -3,7 +3,12 @@ on:
   push:
     branches: [psc0/pskernel-core-lean435-arena-v1]
     paths:
-      - "psc0/packages/pskernel-core/**"
+      - "psc0/packages/pskernel-core/src/**"
+      - "psc0/packages/pskernel-core/reference/**"
+      - "psc0/packages/pskernel-core/test/**"
+      - "psc0/packages/pskernel-core/lakefile.lean"
+      - "psc0/packages/pskernel-core/package.json"
+      - "psc0/packages/pskernel-core/scripts/**"
       - ".github/workflows/psc0-pskernel-core-435.yml"
   workflow_dispatch:
 permissions:
@@ -185,6 +190,9 @@ jobs:
           path: arena/_results
           if-no-files-found: error
   corpus:
+    # User-requested proof-first gate: do not run full Init/Std/Mathlib or Init profiling
+    # until successful checker model/relative-consistency metatheory is achieved.
+    if: ${{ false }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -243,6 +251,9 @@ jobs:
           path: arena/_results
           if-no-files-found: error
   mathlib:
+    # User-requested proof-first gate: do not run full Init/Std/Mathlib or Init profiling
+    # until successful checker model/relative-consistency metatheory is achieved.
+    if: ${{ false }}
     needs: [proofs, tutorial, bugs, corpus]
     runs-on: ubuntu-latest
     timeout-minutes: 180
@@ -369,6 +380,9 @@ jobs:
           name: focused-std-export
           path: exporter/*.ndjson
   profile-init:
+    # User-requested proof-first gate: do not run full Init/Std/Mathlib or Init profiling
+    # until successful checker model/relative-consistency metatheory is achieved.
+    if: ${{ false }}
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30

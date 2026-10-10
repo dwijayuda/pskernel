@@ -12,6 +12,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   corpus:
+    # Disabled until the complete checker model and relative-consistency theorem are proved.
+    if: ${{ false }}
     name: ${{ matrix.case }}
     runs-on: ubuntu-latest
     timeout-minutes: 330

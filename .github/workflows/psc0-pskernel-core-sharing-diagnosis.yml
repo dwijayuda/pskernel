@@ -9,6 +9,8 @@ permissions:
   actions: read
 jobs:
   init:
+    # Suspend full-corpus diagnostics until full model/consistency proof.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -78,6 +80,8 @@ jobs:
             arena/profile.*
 
   controlled-prefix:
+    # Suspend corpus-level diagnostics until full model/consistency proof.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -136,6 +140,8 @@ jobs:
             arena/candidate-*.stdout
 
   fresh-corpus:
+    # Suspend full-corpus diagnostics until full model/consistency proof.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:

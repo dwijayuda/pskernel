@@ -179,6 +179,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticLevelConstructors,
     `Ps.KernelCore.Metatheory.SemanticUniverseSubstitution,
     `Ps.KernelCore.Metatheory.SemanticConstantInference,
+    `Ps.KernelCore.Metatheory.SemanticEnvironmentModel,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

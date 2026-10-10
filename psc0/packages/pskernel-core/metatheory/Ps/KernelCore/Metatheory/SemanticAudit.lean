@@ -31,6 +31,7 @@ import Ps.KernelCore.Metatheory.SemanticScope
 import Ps.KernelCore.Metatheory.SemanticLevelConstructors
 import Ps.KernelCore.Metatheory.SemanticUniverseSubstitution
 import Ps.KernelCore.Metatheory.SemanticConstantInference
+import Ps.KernelCore.Metatheory.SemanticEnvironmentModel
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -42,6 +43,14 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.EnvironmentModel.constantInstance,
+    ``PsKernelSemantics.SetModel.environmentEmpty_find,
+    ``PsKernelSemantics.SetModel.environmentEmpty_model,
+    ``PsKernelSemantics.SetModel.initialReading,
+    ``PsKernelSemantics.SetModel.initialReading_falsePinned,
+    ``PsKernelSemantics.SetModel.initialEnvironment_has_model,
+    ``PsKernelSemantics.SetModel.publicEmptySession_has_model,
+    ``PsKernelSemantics.SetModel.referenceConstant_from_environmentModel,
     ``PsKernelSemantics.SetModel.nameBelow_mono,
     ``PsKernelSemantics.SetModel.nameBelow_fresh,
     ``PsKernelSemantics.SetModel.boundFrame_empty,

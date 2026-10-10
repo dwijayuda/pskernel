@@ -68,6 +68,8 @@ export async function runCheckedBuild({ entry, output, checkOnly = false, versio
     return await publishGeneration({ output: target, products, snapshot: graph.snapshot, receipt: { ...audit, typescript: '7.0.2', outputSha256: hash(products['.js']) } });
   } finally {
     session.revoke(handle);
-    if (stage) await rm(stage, { recursive: true, force: true });
+    // The executable switch is the commit boundary. Cleanup failure must not
+    // report that a committed build failed or mask the original refusal.
+    if (stage) await rm(stage, { recursive: true, force: true }).catch(error => console.warn('PSC_STAGING_CLEANUP: ' + error.message));
   }
 }

@@ -8,6 +8,18 @@ async function absentOrRegular(file) {
   try { const s = await lstat(file); if (!s.isFile() || s.isSymbolicLink()) throw new Error('PSC_OUTPUT_UNSAFE_PATH: ' + file); }
   catch (error) { if (error.code !== 'ENOENT') throw error; }
 }
+async function assertNotInput(primary, protectedPaths) {
+  // Both sides must use the same canonical filesystem representation. Windows
+  // drive casing, short names and parent aliases can spell the same file
+  // differently; string equality against a canonical parent is insufficient.
+  let actual;
+  try { actual = await realpath(primary); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; actual = primary; }
+  for (const input of protectedPaths) {
+    const canonical = await realpath(input);
+    if (path.relative(canonical, actual) === '') throw new Error('PSC_OUTPUT_OVERWRITES_INPUT');
+  }
+}
 export async function publishGeneration({ output, products, receipt, snapshot }) {
   if (!/\.(js|ts)$/u.test(output)) throw new Error('PSC_OUTPUT_EXTENSION');
   const requested = path.resolve(output);
@@ -16,8 +28,8 @@ export async function publishGeneration({ output, products, receipt, snapshot })
   const stem = path.basename(requested).replace(/\.(js|ts)$/u, '');
   if (!/^[A-Za-z_][A-Za-z_0-9.-]*$/u.test(stem)) throw new Error('PSC_OUTPUT_NAME');
   const primary = path.join(parent, path.basename(requested));
-  if (snapshot.protectedPaths.includes(primary)) throw new Error('PSC_OUTPUT_OVERWRITES_INPUT');
   await absentOrRegular(primary);
+  await assertNotInput(primary, snapshot.protectedPaths);
   const lockName = primary + '.psc-lock';
   const lock = await open(lockName, 'wx', 0o600);
   let directory, committed = false;
@@ -44,6 +56,7 @@ export async function publishGeneration({ output, products, receipt, snapshot })
     await snapshot.revalidate();
     if (await realpath(path.dirname(requested)) !== parent) throw new Error('PSC_OUTPUT_PARENT_CHANGED');
     await absentOrRegular(primary);
+    await assertNotInput(primary, snapshot.protectedPaths);
     await rename(switchFile, primary); // The single public commit point.
     committed = true;
     return Object.freeze(audit);

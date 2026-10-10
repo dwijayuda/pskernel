@@ -1,9 +1,18 @@
 # Reference checker and the full correctness target
 
-Status: reference cache-isolation milestone validated. Full-kernel metatheory
-and relative consistency remain unfinished.
+Status: reference cache isolation and local binder/function model bridges
+validated. Full-kernel metatheory and relative consistency remain unfinished.
 
 ## Validated evidence
+
+[Proof run 38037497460](https://github.com/dwijayuda/pskernel/actions/runs/38037497460) at
+`44e4f1a7d0385343309895138a896ef156cb7666` passed **244 build jobs**, all **84 companion files** and the
+**175-declaration** semantic axiom audit. The **130-module** dependency closure
+contains only the 12 allowed Con Leche pure-math modules, with zero legacy
+judgment or production assurance imports. The reference-policy audit again
+checked **1,821 definitions** with zero cached-default fallbacks.
+
+The earlier cache-isolation and executable receipts remain:
 
 - [Final proof run 38034714932](https://github.com/dwijayuda/pskernel/actions/runs/38034714932),
   `f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0`: 238 build jobs and all
@@ -124,7 +133,9 @@ No upstream checker or acceptance theorem is used as a PSKernel proof.
    through all checking/admission calls; kernel-checked miss/no-op equations;
    poisoning, binder, declaration and exhaustion regressions. Preserve all
    existing default-mode proof statements and behavioral tests.
-2. **Validated semantic readings.** Connect actual checked terms to coherent
+2. **Validated semantic readings — in progress.** Hereditary annotation/function
+   transport and local forall/application/lambda execution bridges are proved.
+   Connect actual checked terms to coherent
    Prop/Type binder annotations under all legal universe substitutions. Establish
    frame/freshness and hereditary validity where infer-only operations need them.
    Use the existing counterexamples as requirements: equal raw erasures and
@@ -152,17 +163,30 @@ claim must state an axiom policy or a model hypothesis for those axioms.
 Existence of the current set-theoretic universe hierarchy is also an explicit
 relative assumption, not a newly hidden soundness axiom.
 
-## Smallest next proof task
+## Current local results and smallest next proof task
 
-Start with the forall/lambda/application boundary of reference inference.
-Specify the validity witness needed by the existing set interpretation, invert
-the actual successful checker branches to obtain its sort facts, and prove
-preservation through opening, substitution and universe instantiation. The
-current erasure and membership counterexamples rule out simply adding a
-coherence hypothesis and calling the bridge complete. If additional validation
-is required, implement it as an explicit checked condition and measure its
-compatibility against the pinned Lean cases; do not silently assume the input
-already has the desired annotation.
+The six modules documented in
+[the binder/function proof boundary](RESEARCH_AND_MIGRATION.md#binder-and-function-proof-boundary--2026-10-10)
+establish annotation/function validity transport and exact successful
+forall, checked application and checked lambda traces. Forall validity is built
+from the actual visited sort checks. Application follows its actual comparison
+route. Lambda follows its cheap-beta-reduced body type and actual fresh-name
+closing. Each semantic bridge exposes its remaining recursive hypotheses.
+
+The new checked counterexample
+`hereditary_validity_not_erasure_coherence` rules out using the conjunction of
+the hereditary predicates as a replacement for checked annotation provenance.
+Even both predicates plus identical raw syntax do not determine a unique
+interpretation over an empty domain.
+
+The next task is to derive coherent readings from checker visits across the
+joint inference/reduction/equality recursion, including type exposure and
+infer-only preconditions. In particular, discharge the application bridge's
+structural `RegimesAgree` premise and the lambda bridge's regime and body-type
+reduction premises. Do not infer a body-sort visit that lambda inference never
+performs, or assume every inferred type has a sort. If explicit runtime
+annotation validation is needed, it must be specified, proved, and checked
+against the pinned Lean corpus with any declines visible.
 
 The economical claim is successful-checking soundness and relative consistency.
 Strong normalization, totality of every equality run, equality completeness,

@@ -27,6 +27,13 @@ before taking on cached refinement or further performance work. Removing
 semantic caching does not discharge annotation validity, primitive rules,
 inductive/quotient admission or the public statement-preservation boundary.
 
+The binder/function layer now proves hereditary validity transport and local
+model bridges from actual reference forall, checked application and checked
+lambda executions. The structural-comparison coherence premise, recursive
+calls and lambda body-type reduction/regime obligations remain explicit.
+A checked empty-domain counterexample shows that even both hereditary validity
+predicates do not establish coherent interpretations of identical raw syntax.
+
 ## Historical phase status
 
 - **Phase A — Semantic closure: COMPLETE.**

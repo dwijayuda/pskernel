@@ -31,6 +31,11 @@ specialization removes the cache premise. Full checker validity, recursive
 reduction/equality and complete admission model preservation remain open.
 Cached mode additionally requires semantic cache invariants. The fragment
 consistency theorem is not a consistency theorem for the complete kernel.
+The next layer now proves hereditary product/function validity transport and
+local model bridges for actual forall, checked application and checked lambda
+runs. Recursive callback soundness and checked annotation coherence remain
+explicit obligations. A formal counterexample shows that hereditary validity
+alone cannot replace that coherence.
 See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
 
 ## Correctness-first reference mode
@@ -49,8 +54,12 @@ sharing and environment indexes remain; generated PSC0 qualification remains
 open. Runtime performance and acceptance equivalence of the two modes are
 separate obligations.
 
-The [final proof suite](https://github.com/dwijayuda/pskernel/actions/runs/38034714932)
-passed 238 build jobs, all 84 companion files and the 136-declaration axiom audit.
+[Proof run 38037497460](https://github.com/dwijayuda/pskernel/actions/runs/38037497460) at
+`44e4f1a7d0385343309895138a896ef156cb7666` passed **244 build jobs**, all **84 companion files** and the
+**175-declaration** semantic axiom audit. The **130-module** dependency closure
+contains only the 12 allowed Con Leche pure-math modules, with zero legacy
+judgment or production assurance imports. The reference-policy audit again
+checked **1,821 definitions** with zero cached-default fallbacks.
 [Both modes](https://github.com/dwijayuda/pskernel/actions/runs/38034307491)
 passed tutorial 141/141 and bugs 18/18 with zero declines. Full-corpus behavior
 was not requalified by this small-suite result.

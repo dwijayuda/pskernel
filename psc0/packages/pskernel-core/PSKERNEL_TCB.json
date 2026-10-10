@@ -145,7 +145,7 @@
       "soundnessLawAxioms": []
     },
     "semanticFoundation": {
-      "scope": "Relative universe-set/dependent-function model; full-constructor parameterized interpretation; sound declarative dependent-function fragment; exact production syntax transport. Not a full checker or admission model.",
+      "scope": "Relative universe-set/dependent-function model; sound declarative fragment; syntax and hereditary-validity transport; exact local reference forall/application/lambda traces and conditional semantic bridges. Not full checker or admission soundness.",
       "modules": [
         "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
@@ -166,21 +166,31 @@
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevelConstructors.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseSubstitution.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticConstantInference.lean",
-        "metatheory/Ps/KernelCore/Metatheory/SemanticReference.lean"
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReference.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean"
       ],
       "legacyJudgmentsReplacedEverywhere": false,
       "fullUniverseModel": true,
       "fullDependentFunctionModel": true,
       "admissionModel": false,
-      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required.",
+      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda body-type reduction/closing; local semantic obligations remain explicit.",
       "conditionalBridges": [
         "actual proposition classifier",
-        "proof-irrelevance call sequence"
+        "proof-irrelevance call sequence",
+        "forall model from actual recursive type readings and visited sort checks",
+        "checked application model with exposed function type, actual comparison obligations and product validity",
+        "checked lambda model with actual opened-body typing, cheap-beta preservation and regime obligation"
       ],
       "unprovedCallbackObligations": [
-        "derive coherent binder readings from actual checked runs; semantic membership alone is insufficient",
-        "hereditary validity and infer-only skip preconditions",
-        "recursive WHNF and defeq including projections, primitives, eta, unit, quotient and recursors",
+        "checked annotation provenance and coherent interpretations across raw structural comparison; both hereditary predicates are insufficient",
+        "establishment of hereditary validity by the joint checker and infer-only preconditions",
+        "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
+        "lambda body-type reduction preservation and justification of its selected regime",
         "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
         "full safe declaration admission and interpretations of allowed axioms",
         "public API and generated PSC0 correspondence"
@@ -188,7 +198,7 @@
       "customSoundnessAxiomsAdded": false,
       "axiomAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
-        "declarations": 136,
+        "declarations": 175,
         "allowedHostAxioms": [
           "propext",
           "Classical.choice",
@@ -197,19 +207,19 @@
         "localHypothesesAuditedSeparately": true
       },
       "validation": {
-        "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
-        "run": 38034714932,
-        "job": 114162647958,
-        "buildJobs": 238,
+        "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
+        "run": 38037497460,
+        "job": 114170897748,
+        "buildJobs": 244,
         "companionFiles": 84,
-        "axiomDeclarations": 136,
+        "axiomDeclarations": 175,
         "pureMathModules": 12,
-        "closureModules": 124,
+        "closureModules": 130,
         "referenceDefinitions": 1821,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 07:35:54 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
+        "checkedAt": "2026-10-10 08:25:36 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38037497460"
       },
       "fullUniverseModelQualification": "Relative mathematical universe chain under explicit SetTheory V, not a model of full kernel acceptance.",
       "relativeFoundation": {
@@ -235,8 +245,27 @@
       },
       "adequacyChecks": [
         "erasure_is_not_semantic_coherence",
-        "membership_is_not_annotation_coherence"
-      ]
+        "membership_is_not_annotation_coherence",
+        "forged_product_annotation_invalid",
+        "annotationValidity_alone_not_coherence",
+        "hereditary_validity_not_erasure_coherence"
+      ],
+      "hereditaryValidity": {
+        "productBitPredicate": "AnnotationValid",
+        "functionPredicate": "FunctionValid",
+        "transportProved": [
+          "lifting",
+          "single substitution forward and reverse",
+          "universe substitution",
+          "fresh-name updates",
+          "opening",
+          "closing"
+        ],
+        "positiveBetaRecoversOwnDomain": true,
+        "zeroRegimeBetaRequiresArgumentDomain": true,
+        "establishedForAllAcceptedTerms": false,
+        "impliesErasureCoherence": false
+      }
     },
     "relativeSetModelConstructed": true,
     "relativeDeclarativeFragmentConsistencyProved": true,
@@ -266,19 +295,27 @@
         "kind": "structural executable-dependency audit; not a semantic theorem"
       },
       "validation": {
-        "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
-        "run": 38034714932,
-        "job": 114162647958,
-        "buildJobs": 238,
+        "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
+        "run": 38037497460,
+        "job": 114170897748,
+        "buildJobs": 244,
         "companionFiles": 84,
-        "axiomDeclarations": 136,
+        "axiomDeclarations": 175,
         "pureMathModules": 12,
-        "closureModules": 124,
+        "closureModules": 130,
         "referenceDefinitions": 1821,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 07:35:54 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
+        "checkedAt": "2026-10-10 08:25:36 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38037497460"
+      },
+      "localSemanticBridges": {
+        "forallBothInferenceModes": true,
+        "applicationCheckedMode": true,
+        "lambdaCheckedMode": true,
+        "recursivePremisesDischarged": false,
+        "checkedAnnotationCoherenceProved": false,
+        "lambdaCheapBetaPreservationProved": false
       }
     }
   },

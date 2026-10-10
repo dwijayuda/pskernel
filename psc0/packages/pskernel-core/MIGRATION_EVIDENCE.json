@@ -1,9 +1,9 @@
 {
   "schemaVersion": 7,
-  "stage": "Correctness priority: cache-disabled reference specialization of the shared kernel",
-  "status": "reference-cache-isolation-validated-full-kernel-proof-unfinished",
+  "stage": "Correctness priority: reference binder and function semantic foundations",
+  "status": "local-reference-model-bridges-validated-full-kernel-proof-unfinished",
   "candidateCommit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
-  "assuranceRevision": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
+  "assuranceRevision": "44e4f1a7d0385343309895138a896ef156cb7666",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
@@ -1629,7 +1629,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 07:35:54 UTC",
+  "recordedAt": "2026-10-10 08:25:36 UTC",
   "semanticFoundation": {
     "sourceCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f",
     "validationCommit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
@@ -2165,6 +2165,132 @@
       "status": "passed",
       "checkedAt": "2026-10-10 07:35:54 UTC",
       "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
+    }
+  },
+  "referenceBinderModelStage": {
+    "status": "passed-local-model-bridges-full-kernel-unfinished",
+    "comparisonBase": "22b638ec91d0dd58f49da109d7c22994790646fd",
+    "sourceModules": [
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean"
+    ],
+    "productionCodeChanged": false,
+    "compilerSeedChanged": false,
+    "defaultProviderChanged": false,
+    "localResults": [
+      "hereditary annotation and function evidence preserved through binding and universe operations",
+      "actual reference forall visits in both inference modes and model construction from its visited sort checks",
+      "actual checked application branches and production-instantiated modeled result under explicit local premises",
+      "actual checked lambda body-type reduction and closing, with local semantic premises explicit",
+      "positive-regime beta recovers the original lambda domain; proof-regime beta keeps the on-domain obligation",
+      "counterexample: both hereditary predicates plus equal raw erasure do not imply equal interpretation"
+    ],
+    "conditionalBridgesAreFullCheckerSoundness": false,
+    "hereditaryValidityImpliesErasureCoherence": false,
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "foundationExistenceConstructed": false,
+    "customSoundnessAxiomsAdded": false,
+    "localSetFoundationExplicit": true,
+    "localRecursiveAndAnnotationPremisesExplicit": true,
+    "upstreamCheckerTheoremsImported": false,
+    "legacyJudgmentsImported": false,
+    "remaining": [
+      "checked annotation provenance and coherent interpretations across raw structural comparison; both hereditary predicates are insufficient",
+      "establishment of hereditary validity by the joint checker and infer-only preconditions",
+      "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
+      "lambda body-type reduction preservation and justification of its selected regime",
+      "cached mode only: context-indexed cache invariants, publication and scope/environment transport",
+      "full safe declaration admission and interpretations of allowed axioms",
+      "public API and generated PSC0 correspondence"
+    ],
+    "runtimeEvidencePolicy": "No new runtime or full-corpus claim; previous native/Arena receipts keep their exact binary and commit identities.",
+    "validationAttempts": [
+      {
+        "run": 38035829278,
+        "commit": "e26a01eec662dcefdc311c5b16167b38d33a6ef2",
+        "status": "failed",
+        "note": "Substitution equality-branch arithmetic simplification"
+      },
+      {
+        "run": 38036044155,
+        "commit": "2b354df3876e2e4539378d192876142ae292a800",
+        "status": "failed",
+        "note": "Explicit result-universe evaluation rewrite"
+      },
+      {
+        "run": 38036281786,
+        "commit": "83d1b21d4bcdd15a6579bcdf972be99a8575635c",
+        "status": "failed",
+        "note": "Sort-source case substitution and opened-reading rewrite"
+      },
+      {
+        "run": 38036596326,
+        "commit": "dc536083a4fcc4890a294472cdd4b2627b6ddb92",
+        "status": "failed",
+        "note": "Sort-source equality already substituted by case split"
+      },
+      {
+        "run": 38036985579,
+        "commit": "c0c5e95adc7dca38de4484beead4554d497ed9bc",
+        "status": "failed",
+        "note": "Application result equality dependent rewrite; function-validity proofs passed"
+      },
+      {
+        "run": 38037243819,
+        "commit": "7ef3f9d300122bdfebd6b6164cd5a97d7869eeb9",
+        "status": "failed",
+        "note": "Lambda fibre transport needed explicit beta-reduced goal; other local model bridges and transports passed"
+      },
+      {
+        "run": 38037441580,
+        "commit": "e617c0379e88b0cd3579ceda1b4de62191e8c4bb",
+        "status": "failed",
+        "note": "New combined-validity counterexample passed; prior lambda fibre rewrite issue remained"
+      },
+      {
+        "run": 38037497460,
+        "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
+        "status": "passed",
+        "note": "244 builds, 84 companions, 175 audit targets, 130-module dependency closure and 1821-definition policy audit"
+      }
+    ],
+    "additionalDeclarationsCoveredByAxiomAudit": 39,
+    "validation": {
+      "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
+      "run": 38037497460,
+      "job": 114170897748,
+      "buildJobs": 244,
+      "companionFiles": 84,
+      "axiomDeclarations": 175,
+      "pureMathModules": 12,
+      "closureModules": 130,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 08:25:36 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38037497460"
+    },
+    "runtimeComparison": {
+      "base": "22b638ec91d0dd58f49da109d7c22994790646fd",
+      "head": "44e4f1a7d0385343309895138a896ef156cb7666",
+      "runtimeSourceChanges": 0,
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/lakefile.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationValidity.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticFunctionValidity.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean"
+      ]
     }
   }
 }

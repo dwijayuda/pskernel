@@ -2,6 +2,65 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
+## Binder and function proof boundary — 2026-10-10
+
+Six new assurance modules connect the set interpretation to additional reference
+checker branches. These are checked local theorems, not a completed recursive
+soundness or full-kernel consistency theorem.
+
+| Module | Proved result | Remaining premise |
+| --- | --- | --- |
+| `SemanticAnnotationValidity.lean` | Hereditary product-bit condition; preservation through lifting, substitution, opening/closing and universe substitution; application and typed beta under that condition. | Establish valid annotations from the entire successful checker, including infer-only paths. |
+| `SemanticFunctionValidity.lean` | Hereditary application/lambda evidence; preservation under syntax transport; positive-regime beta recovers the lambda domain; general beta retains an explicit argument-domain premise. | Full term validity, recursor/projection meaning and coherent readings of raw syntax. |
+| `SemanticReferenceBinders.lean` | Inverts successful reference forall inference in both modes, recording the exact recursive calls, two sort checks and fresh local context. | Semantic validity of the recursive calls. |
+| `SemanticReferenceSortChecks.lean` | Identifies actual sort-exposure paths and constructs the product model from the returned type readings and visited sort results. | Preservation by the particular WHNF calls, recursive typing, freshness and opened-body validity. |
+| `SemanticReferenceApplication.lean` | Inverts checked application; follows its structural/equality comparison and exact production substitution to a typed result. | Function-type exposure, recursive typing, regime agreement on the structural route and semantic equality on the actual defeq route. |
+| `SemanticReferenceLambda.lean` | Inverts checked lambda inference and models its actual cheap-beta-reduced, freshly closed body type; constructs hereditary lambda evidence. | Recursive body typing/validity, preservation by that type reduction, closedness and justification of the selected regime. |
+
+The lambda branch does **not** visit a sort check on its inferred body type.
+The theorem records the extra obligation instead of claiming that such a visit
+occurred. The application theorem covers checked inference; the infer-only
+application spine is a separate remaining proof.
+
+### Why another validity predicate is not a completion shortcut
+
+`hereditary_validity_not_erasure_coherence` proves a stronger adequacy
+counterexample: two annotated lambdas can erase to exactly the same expression
+and satisfy both new hereditary predicates, yet have different interpretations.
+Its domain is the empty product `Π P : Prop, P`; the fibre premises are then
+vacuous. This does not exhibit acceptance of False by the executable. It proves
+that the two predicates alone cannot discharge the structural comparator's
+`RegimesAgree` requirement.
+
+Annotation provenance must therefore remain tied to actual checked visits and
+universe substitution. Adding a blanket coherence hypothesis to the final
+acceptance theorem would leave the requested proof unfinished. The immediate
+remaining task is a checked-reading invariant that supplies this evidence and
+is preserved through the joint inference/reduction/equality recursion.
+
+The design follows the distinct bit and function obligations in pinned
+[Con Leche annotation validity](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Annot/Valid.lean)
+and [kinded hereditary denotation](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Semantics/WellDenoted.lean).
+Only the existing pure mathematics dependency is imported. No upstream
+checker theorem, custom soundness axiom, or global set-model instance was added.
+
+### Validation boundary
+
+[Proof run 38037497460](https://github.com/dwijayuda/pskernel/actions/runs/38037497460) at
+`44e4f1a7d0385343309895138a896ef156cb7666` passed **244 build jobs**, all **84 companion files** and the
+**175-declaration** semantic axiom audit. The **130-module** dependency closure
+contains only the 12 allowed Con Leche pure-math modules, with zero legacy
+judgment or production assurance imports. The reference-policy audit again
+checked **1,821 definitions** with zero cached-default fallbacks.
+
+This stage changes assurance modules, their Lake registration, the correctness
+workflow label and documentation. It changes no production checker, host,
+native tests, frozen reference, compiler seed or provider selection. Previous
+native/Arena receipts retain their original identities; this proof stage makes
+no new full-corpus or performance claim. The pre-refactor checkpoint remains
+available. Full semantic metatheory, admission-model preservation and public
+relative consistency remain open.
+
 ## Correctness-first reference specialization — 2026-10-10
 
 The pre-refactor state is preserved on

@@ -25,6 +25,13 @@ soundness or acceptance-equivalence result is inferred from that simplification.
 [REFERENCE_CORRECTNESS_PLAN.md](REFERENCE_CORRECTNESS_PLAN.md) defines the
 milestones and exact completion claim.
 
+The binder/function layer now proves hereditary validity transport and local
+model bridges from actual reference forall, checked application and checked
+lambda executions. The structural-comparison coherence premise, recursive
+calls and lambda body-type reduction/regime obligations remain explicit.
+A checked empty-domain counterexample shows that even both hereditary validity
+predicates do not establish coherent interpretations of identical raw syntax.
+
 Historical 4.34 reference artifacts (not current certification):
 
 - compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`

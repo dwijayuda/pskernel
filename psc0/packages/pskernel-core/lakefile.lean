@@ -190,6 +190,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticPublicAdmissionSequence,
     `Ps.KernelCore.Metatheory.SemanticReferenceTheoremTrace,
     `Ps.KernelCore.Metatheory.SemanticReferenceSessionSort,
+    `Ps.KernelCore.Metatheory.SemanticReferenceSessionConst,
     `Ps.KernelCore.Metatheory.SemanticReadingExtension,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,

@@ -42,6 +42,7 @@ import Ps.KernelCore.Metatheory.SemanticPublicAdmissionBoundary
 import Ps.KernelCore.Metatheory.SemanticPublicAdmissionSequence
 import Ps.KernelCore.Metatheory.SemanticReferenceTheoremTrace
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionSort
+import Ps.KernelCore.Metatheory.SemanticReferenceSessionConst
 import Ps.KernelCore.Metatheory.SemanticReadingExtension
 
 /-!
@@ -82,6 +83,7 @@ run_cmd do
     ``PsKernelSemantics.SetModel.referenceAddTheorem_success_trace,
     ``PsKernelSemantics.Reference.referenceSessionCheck_sort_result,
     ``PsKernelSemantics.Reference.referenceSessionCheck_sort_models,
+    ``PsKernelSemantics.Reference.referenceSessionCheck_const_models,
     ``PsKernelSemantics.SetModel.referenceDispatchAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.add_success_preserves_model,
     ``PsKernelSemantics.SetModel.no_stored_constant_of_literalFalse,

@@ -26,7 +26,7 @@ async function fixture(t, proofscript = { profile: 'checked', extensions: [] }) 
   await Promise.all([
     copyFile(path.join(root, 'bin/psc.mjs'), path.join(installed, 'bin/psc.mjs')),
     copyFile(path.join(root, 'scripts/release-manifest.mjs'), path.join(installed, 'scripts/release-manifest.mjs')),
-    ...['project-init.mjs', 'command-extensions.mjs', 'command-wasm-profile.mjs',
+    ...['project-init.mjs', 'project-watch.mjs', 'typescript-cli.mjs', 'command-extensions.mjs', 'command-wasm-profile.mjs',
       'command-extension-worker.mjs', 'checked-artifact-publication.mjs', 'checked-project.mjs'].map(file =>
       copyFile(path.join(root, 'scripts', file), path.join(installed, 'scripts', file))),
     copyFile(path.join(root, 'release/release.json'), path.join(installed, 'release.json')),
@@ -260,7 +260,7 @@ test('enabled command packages are not executed or resolved by ordinary check an
   assert.deepEqual(JSON.parse(run.stdout).extensions, []);
 });
 
-test('dev requires explicit activation and refuses watch before requesting a build', async t => {
+test('dev requires activation and rejects conflicting watch flags before requesting a build', async t => {
   const context = await fixture(t);
   let run = context.invoke(['dev', 'src/Main.ps', '--once']);
   assert.notEqual(run.status, 0);
@@ -268,7 +268,15 @@ test('dev requires explicit activation and refuses watch before requesting a bui
   await notCalled(context);
   run = context.invoke(['dev', 'src/Main.ps', '--watch']);
   assert.notEqual(run.status, 0);
-  assert.match(run.stderr, /PSC_DEV_WATCH_UNSUPPORTED/u);
+  assert.match(run.stderr, /PSC_DEV_EXTENSION_REQUIRED/u);
+  await notCalled(context);
+  run = context.invoke(['dev', 'src/Main.ps', '--watch', '--once']);
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /PSC_DEV_MODE_REQUIRED/u);
+  await notCalled(context);
+  run = context.invoke(['dev', 'src/Main.ps', '--once', '--tsc']);
+  assert.notEqual(run.status, 0);
+  assert.match(run.stderr, /PSC_DEV_TSC_MODE/u);
   await notCalled(context);
   run = context.invoke(['dev', 'src/Main.ps', '--once', '--out', 'src/Main.js']);
   assert.notEqual(run.status, 0);

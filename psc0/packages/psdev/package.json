@@ -1,6 +1,6 @@
 {
   "name": "psdev",
-  "version": "0.1.0-preview.3",
+  "version": "0.1.0-preview.4",
   "private": true,
   "description": "psdev isolated one-shot checked-build command demo",
   "license": "UNLICENSED",

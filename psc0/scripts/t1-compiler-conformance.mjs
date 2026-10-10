@@ -221,6 +221,42 @@ export async function runT1CompilerConformance({ compilerPath, outputDirectory, 
     }
     observations.push('well-formed erased-proof, generic and returned-function signatures are refused at the public ABI');
 
+
+    const namingSources = [{
+      sourceId: 'src/Naming.ps',
+      source: 'def undefined : Unit := Unit.unit\n' +
+        'def toUnit(undefined : Nat) : Unit := Unit.unit\n' +
+        'def pairRoundTrip(value : Nat) : Nat := Prod.fst(Prod.mk(value, value))\n' +
+        'def lengthWithShadow(BigInt : Nat, text : String) : Nat := String.Internal.length(text)\n' +
+        'def safeLength(text : String) : Nat := lengthWithShadow(0, text)\n' +
+        'inductive Hygienic where {\n  | mk(__proto__ : Nat, tag : Nat)\n}\n' +
+        'def makeHygienic(payload : Nat, marker : Nat) : Hygienic := Hygienic.mk(payload, marker)\n' +
+        'def readPayload(value : Hygienic) : Nat := match value with {\n' +
+        '  | Hygienic.mk payload marker => payload\n}\n' +
+        'def readTag(value : Hygienic) : Nat := match value with {\n' +
+        '  | Hygienic.mk payload marker => marker\n}\n',
+      exports: ['undefined', 'toUnit', 'safeLength', 'pairRoundTrip', 'Hygienic', 'makeHygienic', 'readPayload', 'readTag'],
+    }];
+    const namingPrepared = unwrap(prepare(compiler, namingSources), 'T1_NAMING_PREPARE');
+    const namingEmission = inspectEmission(
+      unwrap(checkedEmission(compiler, namingPrepared), 'T1_NAMING_EMIT'), namingSources);
+    const namingDirectory = path.join(output, 'naming');
+    await compileProject(namingEmission, namingDirectory, tsc, tsconfig);
+    const naming = await import(pathToFileURL(path.join(namingDirectory, 'dist/Naming.js')).href);
+    assert.equal(Object.hasOwn(naming, 'undefined'), true);
+    assert.equal(naming.undefined, undefined);
+    assert.equal(naming.toUnit(1n), undefined);
+    assert.throws(() => naming.toUnit(-1n));
+    assert.equal(naming.safeLength(String.fromCodePoint(0x1f600) + 'a'), 2n);
+    observations.push('authored top-level names and local binders cannot capture undefined or the BigInt string intrinsic');
+    const hygienic = naming.makeHygienic(42n, 7n);
+    assert.equal(Object.isFrozen(hygienic), true);
+    assert.equal(naming.readPayload(hygienic), 42n);
+    assert.equal(naming.readTag(hygienic), 7n);
+    observations.push('opaque __proto__ and tag fields preserve both Nat values without object or discriminator collisions');
+    assert.equal(naming.pairRoundTrip(42n), 42n);
+    observations.push('private Prod construction and projection preserve namespaced builtin fields without widening the public ABI');
+
     const scalarSources = [{
       sourceId: 'src/Scalars.ps',
       source: 'def natIdentity(value : Nat) : Nat := value\n' +

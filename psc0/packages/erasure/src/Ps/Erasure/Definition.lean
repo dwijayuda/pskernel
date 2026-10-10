@@ -35,8 +35,8 @@ structure PsErasureNameState where
   used : List String
   entriesRev : List (PsName × String)
 
-def psBuildErasureDeclarationNamesWorker
-    (declarations : List PsDeclaration)
+def psBuildErasureDeclarationNamesWorkerWithPrefix
+    (runtimePrefix : String) (declarations : List PsDeclaration)
     (state : PsErasureNameState) : PsErasureNameState :=
   match declarations with
   | List.nil =>
@@ -50,17 +50,21 @@ def psBuildErasureDeclarationNamesWorker
         | PsDeclaration.inductiveDecl info => Option.some info.name
         | _ => Option.none;
       match sourceName with
-      | Option.none => psBuildErasureDeclarationNamesWorker rest state
+      | Option.none => psBuildErasureDeclarationNamesWorkerWithPrefix runtimePrefix rest state
       | Option.some name =>
           let raw :=
-            psErasureSafeIdentifier (psNameToString name) "decl";
+            String.Internal.append runtimePrefix (psErasureSafeIdentifier (psNameToString name) "decl");
           let candidate :=
             psErasureAddUniqueString state.used raw 4096;
-          psBuildErasureDeclarationNamesWorker
-            rest
+          psBuildErasureDeclarationNamesWorkerWithPrefix
+            runtimePrefix rest
             (PsErasureNameState.mk
               (List.cons candidate state.used)
               (List.cons (Prod.mk name candidate) state.entriesRev))
+
+def psBuildErasureDeclarationNamesWorker
+    (declarations : List PsDeclaration) (state : PsErasureNameState) : PsErasureNameState :=
+  psBuildErasureDeclarationNamesWorkerWithPrefix "" declarations state
 
 def psBuildErasureDeclarationNames
     (declarations : List PsDeclaration)
@@ -79,14 +83,18 @@ def psErasureReverseDeclarationNamesAcc
       fun (acc : List (PsName × String)) =>
         smaller (List.cons entry acc)
 
-def psErasureDeclarationNames
-    (declarations : List PsDeclaration) :
+def psErasureDeclarationNamesWithPrefix
+    (runtimePrefix : String) (declarations : List PsDeclaration) :
     List (PsName × String) :=
   let state :=
-    psBuildErasureDeclarationNames
-      declarations
+    psBuildErasureDeclarationNamesWorkerWithPrefix
+      runtimePrefix declarations
       (PsErasureNameState.mk List.nil List.nil);
   psErasureReverseDeclarationNamesAcc state.entriesRev List.nil
+
+def psErasureDeclarationNames
+    (declarations : List PsDeclaration) : List (PsName × String) :=
+  psErasureDeclarationNamesWithPrefix "" declarations
 
 def psErasureReverseTypeParametersAcc
     (parameters : List PsVerifiedIrTypeParameter) :
@@ -347,7 +355,7 @@ def psEraseDefinition
           name with
       | Option.some known => known
       | Option.none =>
-          psErasureSafeIdentifier
+          psErasureScopedIdentifier scope
             (psNameToString name)
             "decl";
     let definitionScope : PsErasureScope :=
@@ -450,15 +458,15 @@ structure PsErasedNamedModule where
   ir : PsVerifiedIrModule
   names : List (Prod PsName String)
 
-def psEraseCoreModuleWithRuntimePreludeAndNames
-    (environment : PsEnvironment)
+def psEraseCoreModuleWithRuntimePrefix
+    (runtimePrefix : String) (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     Except PsErasureError PsErasedNamedModule :=
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
-  let names := psErasureDeclarationNames runtimeDeclarations;
-  let baseScope := psErasureScopeEmpty names;
+  let names := psErasureDeclarationNamesWithPrefix runtimePrefix runtimeDeclarations;
+  let baseScope := psErasureScopeEmptyWithPrefix runtimePrefix names;
   match
       psPrepareRuntimeStructures
         environment
@@ -489,6 +497,12 @@ def psEraseCoreModuleWithRuntimePreludeAndNames
                 (PsErasedNamedModule.mk
                   (PsVerifiedIrModule.mk List.nil preparedStructures.ir preparedInductives.ir lowered)
                   names)
+
+def psEraseCoreModuleWithRuntimePreludeAndNames
+    (environment : PsEnvironment)
+    (runtimePreludeDeclarations : List PsDeclaration)
+    (declarations : List PsDeclaration) : Except PsErasureError PsErasedNamedModule :=
+  psEraseCoreModuleWithRuntimePrefix "" environment runtimePreludeDeclarations declarations
 
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)

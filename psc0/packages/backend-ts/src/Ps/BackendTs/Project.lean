@@ -420,10 +420,11 @@ def psTsProjectEmitValues
 
 def psTsProjectBindingJson (binding : PsTsProjectBinding) : String :=
   let kind := if binding.typeOnly then "type" else "value";
-  psJsonObject
-    [(Prod.mk "binding" (psJsonQuote binding.binding)),
-     (Prod.mk "kind" (psJsonQuote kind)),
-     (Prod.mk "name" (psJsonQuote (psNameToString binding.name)))]
+  psJsonObject [
+    Prod.mk "binding" (psJsonQuote binding.binding),
+    Prod.mk "kind" (psJsonQuote kind),
+    Prod.mk "name" (psJsonQuote (psNameToString binding.name))
+  ]
 
 def psTsProjectOwnerExportsJson (sourceId : String)
     (bindings : List PsTsProjectBinding) : List String :=
@@ -442,9 +443,10 @@ def psTsProjectOwnersJson (bindings : List PsTsProjectBinding)
       if psListIsEmpty owner.exports then psTsProjectOwnersJson bindings rest
       else
         List.cons
-          (psJsonObject
-            [(Prod.mk "exports" (psJsonArray (psTsProjectOwnerExportsJson owner.sourceId bindings))),
-             (Prod.mk "sourceId" (psJsonQuote owner.sourceId))])
+          (psJsonObject [
+            Prod.mk "exports" (psJsonArray (psTsProjectOwnerExportsJson owner.sourceId bindings)),
+            Prod.mk "sourceId" (psJsonQuote owner.sourceId)
+          ])
           (psTsProjectOwnersJson bindings rest)
 
 def psTsProjectEmitCheckedLowered
@@ -477,10 +479,11 @@ def psTsProjectEmitCheckedLowered
                           [internalModule, psTsJoin "\n" (psListMap psTsProjectEmitOpaque types),
                            psTsJoin "\n" values, ""];
                         Except.ok
-                          (psJsonObject
-                            [(Prod.mk "bundle" (psJsonQuote bundle)),
-                             (Prod.mk "modules" (psJsonArray (psTsProjectOwnersJson bindings project.owners))),
-                             (Prod.mk "profile" (psJsonQuote "psc-ts-library/1"))])
+                          (psJsonObject [
+                            Prod.mk "bundle" (psJsonQuote bundle),
+                            Prod.mk "modules" (psJsonArray (psTsProjectOwnersJson bindings project.owners)),
+                            Prod.mk "profile" (psJsonQuote "psc-ts-library/1")
+                          ])
       else Except.error (PsCompilerCheckedTypeScriptProjectError.abi "external runtime imports")
     else Except.error (PsCompilerCheckedTypeScriptProjectError.check report)
   else Except.error (PsCompilerCheckedTypeScriptProjectError.check report)
@@ -491,7 +494,9 @@ def psCompilerCheckedTypeScriptProjectFromPrepared
   match psCompilerEnvironmentFromPrepared project.prepared with
   | Except.error error => Except.error (PsCompilerCheckedTypeScriptProjectError.compiler error)
   | Except.ok environment =>
-      match psEraseCoreModuleWithRuntimePreludeAndNames
+      -- Source bindings and property keys occupy a namespace disjoint from
+      -- backend helpers and host intrinsics, including private dependencies.
+      match psEraseCoreModuleWithRuntimePrefix "__ps$source$"
           environment psSelfHostRuntimePreludeDeclarationsWithProd project.prepared.declarations with
       | Except.error error =>
           Except.error (PsCompilerCheckedTypeScriptProjectError.compiler (PsCompilerError.erasure error))

@@ -35,7 +35,7 @@ def psPrepareRuntimeStructure
                           info.name with
                     | Option.some known => known
                     | Option.none =>
-                        psErasureSafeIdentifier
+                        psErasureScopedIdentifier scope
                           (psNameToString info.name)
                           "Structure";
                   match

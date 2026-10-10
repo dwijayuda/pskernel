@@ -172,7 +172,7 @@ theorem psKernelAnalyzeSimpleRecursiveArgumentWithFuel_configuration_history_pre
                                         opened.2.context.localContext.nextIndex := by
                                     simp [opened, psKernelSessionWithLocal,
                                       psKernelCheckerContextWithLocalContext,
-                                      psKernelLocalContextAddLocal,
+                                      psKernelLocalContextAddLocal, PsKernelLocalContext.nextIndex,
                                       hSortContext, hCheckContext,
                                       hDomainContext, hReducedContext]
                                   exact ⟨hRest.1,

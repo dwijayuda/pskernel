@@ -497,7 +497,8 @@ theorem psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel_configuration_histo
                           have hOpenedOrdinal : session.context.localContext.nextIndex ≤
                               opened.2.context.localContext.nextIndex := by
                             simp [opened, psKernelSessionWithLocal,
-                              psKernelCheckerContextWithLocalContext, psKernelLocalContextAddLocal, hContext]
+                              psKernelCheckerContextWithLocalContext, psKernelLocalContextAddLocal,
+                              PsKernelLocalContext.nextIndex, hContext]
                           exact ⟨hRest.1, Eq.trans hRest.2.1 hOpenedEnv,
                             Nat.le_trans hOpenedOrdinal hRest.2.2⟩
                   | _ =>

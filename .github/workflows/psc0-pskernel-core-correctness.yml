@@ -28,7 +28,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate complete reference metatheory and all companion files
+      - name: Validate hereditary annotations and reference binder traces
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail

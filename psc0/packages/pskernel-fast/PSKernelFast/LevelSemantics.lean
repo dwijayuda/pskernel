@@ -58,4 +58,34 @@ theorem Level.evalAt_max_comm
       (Level.max v u).evalAt ρ := by
   simp [Level.evalAt, Nat.max_comm]
 
+/-- Every root rewrite preserves universe arithmetic for every valuation. -/
+theorem Level.simplifyTop_evalAt
+    (ρ : Name → Nat) (l : Level) :
+    l.simplifyTop.evalAt ρ = l.evalAt ρ := by
+  cases l with
+  | zero => rfl
+  | succ _ => rfl
+  | param _ => rfl
+  | mvar _ => rfl
+  | max a b =>
+      cases a <;> cases b <;> simp [Level.simplifyTop]
+  | imax a b =>
+      cases a <;> cases b <;> simp [Level.simplifyTop]
+
+/--
+An affirmative quick comparison implies equal numeric valuations universally.
+Negative results do NOT imply nonequivalence; full Lean completeness is open.
+-/
+theorem Level.quickEquivalent_sound
+    (ρ : Name → Nat) (a b : Level)
+    (h : a.quickEquivalent b = true) :
+    a.evalAt ρ = b.evalAt ρ := by
+  have hEq : a.simplifyTop = b.simplifyTop := by
+    by_contra hNe
+    simp [Level.quickEquivalent, hNe] at h
+  calc
+    a.evalAt ρ = a.simplifyTop.evalAt ρ := (Level.simplifyTop_evalAt ρ a).symm
+    _ = b.simplifyTop.evalAt ρ := by rw [hEq]
+    _ = b.evalAt ρ := Level.simplifyTop_evalAt ρ b
+
 end PSKernelFast

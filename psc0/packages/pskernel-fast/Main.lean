@@ -272,4 +272,23 @@ def main : IO Unit := do
     | .error err =>
         throw (IO.userError s!"generated reification error, seed={seed}: {repr err}")
 
-  IO.println "PSKernel-Fast G7: 256 deterministic closed-term interner/evaluator cases passed (NOT Lean kernel acceptance)"
+  let levelU : Level := .param (Name.simple "u")
+  check ((Level.imax .zero levelU).quickEquivalent levelU)
+    "imax 0 u and u must be quick equivalent"
+  check ((Level.imax levelU .zero).quickEquivalent .zero)
+    "imax u 0 and zero must be quick equivalent"
+  check ((Level.max levelU .zero).quickEquivalent levelU)
+    "max u 0 and u must be quick equivalent"
+  check (!(Level.imax levelU .zero).quickEquivalent (.succ .zero))
+    "quick equality must not return an unproven positive"
+
+  let domainImax : RawExpr := .sort (.imax .zero (.succ .zero))
+  let levelProofFunction : RawExpr :=
+    .lam (Name.simple "X") domainImax (.bvar 0) .default
+  match tinyInferClosed 128 [] (.app levelProofFunction (.sort .zero)) with
+  | .ok result =>
+      check (result == domainImax) "proved universe shortcut returned unexpected type"
+  | .error err =>
+      throw (IO.userError s!"proved imax equal-type application was declined: {repr err}")
+
+  IO.println "PSKernel-Fast G9: proof-backed positive universe root rewrites and focused tests passed (NO declaration admission)"

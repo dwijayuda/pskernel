@@ -8,7 +8,7 @@ explicit universe parameter names. No constants, free/metavariables, literals,
 projections, inductives, axioms, proof irrelevance or theorem admission.
 
 The equality check is intentionally INCOMPLETE: exact syntax after beta/zeta
-WHNF only, and exact syntactic universe levels. It may reject Lean-valid
+WHNF, with only the proven small root-level universe identities for Sorts. It may reject Lean-valid
 convertible types; it never returns equality from a guessed heuristic.
 This implementation is an experimental executable judgment, NOT a verified
 Lean 4.35 kernel or an externally trusted proof certificate.
@@ -45,7 +45,9 @@ def tinySameType (fuel : Nat) (a b : RawExpr) :
     Except TinyFailure Bool := do
   let a' ← tinyWhnf fuel a
   let b' ← tinyWhnf fuel b
-  pure (a' == b')
+  match a', b' with
+  | .sort ua, .sort ub => pure (ua.quickEquivalent ub)
+  | _, _ => pure (a' == b')
 
 /--
 De Bruijn context convention: stored Γ[i] is the type of variable i

@@ -153,3 +153,11 @@ Proceed with a genuinely Lean-semantic G8: full universe-level equivalence (incl
 ### G8 first CI scope caveat — no theorem compilation evidence
 
 [Run 38095941458](https://github.com/dwijayuda/pskernel/actions/runs/38095941458), source `8f5d898a3ae9040537252cdc076bac83890b68d6` passed 18 jobs for the focused G0–G7 executable, but logs **do not show compilation of `PSKernelFast.LevelSemantics`**. Lake's executable target compiled only imported modules despite the library roots list. Therefore this run is NOT proof evidence for the new universe identities. CI is strengthened to build the complete `PSKernelFast` library and import `LevelSemantics` into the test root. Require exact-source completed logs before claiming the new lemmas pass.
+
+## Verified G8 universe valuation lemmas
+
+[Successful focused run 38096024227](https://github.com/dwijayuda/pskernel/actions/runs/38096024227), source `10422672e8f39b79d34f824363ac5e7c7a5616bb`: the build explicitly compiled `PSKernelFast.LevelSemantics`, the complete `PSKernelFast` library and all focused tests (including 256 generated G7 cases). Six independent universe valuation identities (`max`/`imax`) were machine-checked without project-specific assumed axioms. This is not an operational Lean level-equivalence or soundness theorem.
+
+## G9 theorem-backed *positive* root-level universe equivalence candidate
+
+`Level.simplifyTop` rewrites four universally valid root identities: `imax u 0` -> 0, `imax 0 u` -> u, `max 0 u` -> u and `max u 0` -> u. `Level.quickEquivalent` returns true only if simplified syntactic levels match. New `Level.simplifyTop_evalAt` and `Level.quickEquivalent_sound` theorems are intended to prove such **positive** matches have equal meanings under all valuations. Only Sort-vs-Sort equality in the tiny **partial** checker uses this shortcut; all other types use the previous conservative structural rule. G9 must pass the new fully rooted proof/module and runtime gate before being called validated. This is not a complete Lean universe constraint/equivalence algorithm.

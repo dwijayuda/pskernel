@@ -10,7 +10,7 @@ inductive Name where
   | anonymous
   | str (parent : Name) (value : String)
   | num (parent : Name) (index : Nat)
-deriving Repr, BEq, Hashable, Inhabited
+deriving Repr, BEq, Hashable, Inhabited, DecidableEq
 
 def Name.simple (value : String) : Name := .str .anonymous value
 

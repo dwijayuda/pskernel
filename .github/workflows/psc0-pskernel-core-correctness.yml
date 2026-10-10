@@ -30,6 +30,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       # Match the reference checker arity guard after normalizing Nat.beq to equality.
       # Pin the reference policy at nested header checks, including proof inversion.
+      # Audit repaired public axiom dispatch inversion and semantic-reading extension.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

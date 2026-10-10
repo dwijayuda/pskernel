@@ -43,7 +43,7 @@ theorem referenceCheckedAxiom_dispatch_result
               simp [psKernelV1CheckedEnvironment, hPreflight,
                 hDispatch, hResource] at run
           | true =>
-              refine ⟨dispatched, hDispatch, ?_⟩
+              refine ⟨dispatched, rfl, ?_⟩
               have equality :
                   Except.ok (psKernelEnvironmentWithNativeEvaluator
                     dispatched none) = Except.ok result := by
@@ -75,7 +75,6 @@ theorem referenceAdmitAxiom_preserves_model
         simpa [psKernelV1AdmitDeclaration, hCheck] using run
       have hEnv : outcome.session.environment = next := by
         rw [← returned]
-        rfl
       obtain ⟨dispatched, hDispatch, hNext⟩ :=
         referenceCheckedAxiom_dispatch_result session value next hCheck
       have hModeled : EnvironmentModel M dispatched :=

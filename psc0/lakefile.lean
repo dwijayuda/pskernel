@@ -99,6 +99,7 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
     `Ps.BackendTs.Checked,
+    `Ps.BackendTs.Project,
     `Ps.BackendTs.Compiler
   ]
 

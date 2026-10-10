@@ -1,0 +1,113 @@
+{
+  "schema": "psc0-source-library-qualification/1",
+  "milestone": "source-only-library-identity-and-host-disclosure",
+  "implementationSource": "5dcd90cbf62dff278e9cd1294f18e4f1faf98138",
+  "startingSource": "8c100a74f9724f39e55d3e707484a7e1be75de8a",
+  "validationRun": 38087964327,
+  "firstImplementationRunPassed": true,
+  "jobs": [
+    {
+      "platform": "linux-x64",
+      "node": "22.23.3",
+      "jobId": 114318345926,
+      "conclusion": "success",
+      "hostTestsPassed": 85,
+      "workspaceCount": 23,
+      "sourceEditions": ["ps", "lean"],
+      "evidenceFiles": 11,
+      "evidenceArtifactId": 11683070444,
+      "evidenceArtifactSha256": "32e46fbc605e36c56aefc4d2bfcd431fc6a3c499e25528caf0c93ab3dbbe05ec"
+    },
+    {
+      "platform": "windows-x64",
+      "node": "26.7.0",
+      "jobId": 114318346027,
+      "conclusion": "success",
+      "hostTestsPassed": 85,
+      "workspaceCount": 23,
+      "sourceEditions": ["ps", "lean"],
+      "evidenceFiles": 11,
+      "evidenceArtifactId": 11683800367,
+      "evidenceArtifactSha256": "d45bef696107de9e56059f09ae9a04973359cd9d1c7580a2c0088db469b4e80b"
+    }
+  ],
+  "preservedCompiler": {
+    "qualifiedSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "sourceFiles": 69,
+    "closureModules": 64,
+    "sourceInventorySha256": "fc08090151979be64458352a030a2aaa11bc0df5aab6a3e8cc71b3c4213ad0de",
+    "grammar": "ps-0.9-r3/new-only",
+    "typescript": "7.0.2",
+    "compilerSourceUnchanged": true,
+    "seedGrammarToolchainPinsUnchanged": true,
+    "kernelSourceAndAdapterUnchanged": true,
+    "guardAndQualificationBaselinesUnchanged": true
+  },
+  "retainedRuntime": {
+    "source": "2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a",
+    "runId": 38075437516,
+    "artifactId": 11678641329,
+    "archiveSha256": "3b89239132db2003a3ee0cc01c2c4c9795be4d4ae0097d86a62616fc48fa122a",
+    "compilerJsSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+    "kernelJsSha256": "c3912cdbc078d8a56736ef2790221567f2fab8b129a0a26e80b437b79f95ba27"
+  },
+  "disclosureContract": {
+    "schema": "psc0-source-library-disclosure/1",
+    "buildReceiptSchemaVersion": 4,
+    "mode": "source-only",
+    "recordedInputs": "consumed-modules-and-captured-manifests",
+    "rawCapturedByteHashes": true,
+    "declaredAndLoadedLibrariesDistinguished": true,
+    "scriptCommandBodiesNotExecutedOrPrinted": true,
+    "parentOwnedStderrNotice": true,
+    "jsonStdoutPreserved": true,
+    "boundToSourceSnapshotAndCheckedHandle": true,
+    "proofAuthority": "none",
+    "registryAuthenticityVerified": false,
+    "installationHistory": "not-observed",
+    "executableExtensionMetadataSupported": false,
+    "maximumDeclaredLibraries": 256,
+    "maximumRecordedModules": 2048,
+    "maximumScriptNamesPerPackage": 128,
+    "maximumNoticeBytes": 262144
+  },
+  "installedChecks": {
+    "receiptAndCheckedBindingAgree": true,
+    "sourceAndManifestRawHashesMatch": true,
+    "canonicalAdmissionsUnchangedAfterNonsemanticMetadataChange": true,
+    "hostDisclosureNotSuppressedByPackageMetadata": true,
+    "packageEntrypointNotExecuted": true,
+    "declaredLifecycleScriptsNotExecutedByCompiler": true,
+    "invalidLibrarySourceRefused": true,
+    "executableExtensionRequestRefused": true,
+    "previousExecutablePreserved": true,
+    "isolatedFixturesRestored": true,
+    "fixtureDisclosureHashesMatchAcrossTestedPlatforms": {
+      "ps": "066a801ad67d56e46d94446536c048fef5f12b8a052cfc8e82462a80f1ab3ae2",
+      "lean": "f51d6abe8eda2e839d6b3ba7b188389717ab6d3940cc1c2d8543e4a075cd718b"
+    }
+  },
+  "sizeDelta": {
+    "netProductionHostPhysicalLines": 91,
+    "newTestPhysicalLines": 243,
+    "newFocusedTests": 19,
+    "earlierTestsUnchanged": 66,
+    "portableCompilerLinesChanged": 0,
+    "kernelLinesChanged": 0,
+    "newNpmDependencies": 0
+  },
+  "compilerRegenerated": false,
+  "kernelRegenerated": false,
+  "fullC2C3Executed": false,
+  "newInstalledFixedPointClaimed": false,
+  "fullP3GuestIsolationImplemented": false,
+  "fullPscvVerificationClaimed": false,
+  "formalKernelSoundnessClaimed": false,
+  "wholePackageSbomClaimed": false,
+  "npmInstallSandboxClaimed": false,
+  "universalReproducibilityClaimed": false,
+  "manualReleaseExecuted": false,
+  "npmPublished": false,
+  "mainMerged": false,
+  "receiptIsProofAuthority": false
+}

@@ -174,17 +174,13 @@ def psKernelEagerReduceName : PsKernelName :=
     PsKernelName.anonymous
     "eagerReduce"
 
+/- Lean 4.35 removed compiler-backed reduction from the logical kernel.
+The old capability record is retained for source compatibility only. -/
 def psKernelReduceNative
-    (context : PsKernelCheckerContext)
-    (expr : PsKernelExpr) :
+    (_context : PsKernelCheckerContext)
+    (_expr : PsKernelExpr) :
     Except String (Option PsKernelExpr) :=
-  psKernelReduceNativeWith
-    context.nativeEvaluator
-    psKernelReduceBoolName
-    psKernelReduceNatName
-    psKernelBoolTrueName
-    psKernelBoolFalseName
-    expr
+  Except.ok Option.none
 
 def psKernelNatZeroName : PsKernelName :=
   PsKernelName.str

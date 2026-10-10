@@ -13,6 +13,7 @@ The final all-or-nothing bundle transaction remains in `Admission.lean`.
 -/
 
 def psKernelAddSimpleMutualConstructorsForTypeWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (ctors : List PsKernelSimpleConstructorDecl) :
     Nat ->
     PsKernelDefinitionSafety ->
@@ -189,6 +190,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                                         "mutual constructor returns the wrong datatype"
 
 def psKernelAddSimpleMutualTypesWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (types : List PsKernelSimpleMutualTypeShape) :
     Nat ->
     PsKernelDefinitionSafety ->
@@ -436,6 +438,7 @@ def psKernelAddMutualRecursorInfos
               info))
 
 def psKernelValidateMutualRecursorInfosWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (infos : List PsKernelRecursorInfo) :
     Nat ->
     PsKernelEnvironment ->

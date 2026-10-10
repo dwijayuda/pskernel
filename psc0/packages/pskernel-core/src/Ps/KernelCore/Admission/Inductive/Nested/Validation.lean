@@ -62,6 +62,7 @@ def psKernelSimpleNestedSessionWithParams
       maxNatSize)
 
 def psKernelSimpleNestedValidateTemplates
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (finalEnvironment : PsKernelEnvironment)
     (levelParams : List PsKernelName)
@@ -102,6 +103,7 @@ def psKernelSimpleNestedValidateTemplates
             rest
 
 def psKernelSimpleNestedValidateRulesWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (rules : List PsKernelRecursorRule) :
     Nat ->
     PsKernelCheckerSession ->
@@ -132,6 +134,7 @@ def psKernelSimpleNestedValidateRulesWorker
               (Prod.snd checked)
 
 def psKernelSimpleNestedValidateRules
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (session : PsKernelCheckerSession)
     (rules : List PsKernelRecursorRule) :
@@ -147,6 +150,7 @@ def psKernelSimpleNestedValidateRules
       Except.ok ()
 
 def psKernelSimpleNestedValidateConstructorTypes
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (levelParams : List PsKernelName)
@@ -197,6 +201,7 @@ def psKernelSimpleNestedValidateConstructorTypes
                 "restored constructor missing during validation"
 
 def psKernelSimpleNestedValidateOriginals
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (finalEnvironment : PsKernelEnvironment)
     (decl : PsKernelSimpleMutualInductiveDecl)
@@ -302,6 +307,7 @@ def psKernelSimpleNestedRuleListLength
           rest)
 
 def psKernelSimpleNestedCompareValidatedRuleTypesWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (steps : Nat) :
     Nat ->
     PsKernelEnvironment ->
@@ -456,6 +462,7 @@ def psKernelSimpleNestedCompareValidatedRuleTypesWithFuel
                                     "restored nested recursor rule is not type preserving"
 
 def psKernelSimpleNestedCompareValidatedRuleTypes
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (transformed : PsKernelEnvironment)
     (finalEnvironment : PsKernelEnvironment)
@@ -491,6 +498,7 @@ def psKernelSimpleNestedCompareValidatedRuleTypes
     newRules
 
 def psKernelSimpleNestedCompareRuleTypes
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (transformed : PsKernelEnvironment)
     (finalEnvironment : PsKernelEnvironment)
@@ -538,6 +546,7 @@ def psKernelSimpleNestedCompareRuleTypes
         newRules
 
 def psKernelSimpleNestedValidateAux
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (transformed : PsKernelEnvironment)
     (finalEnvironment : PsKernelEnvironment)
@@ -647,6 +656,7 @@ def psKernelSimpleNestedValidateAux
                     "transformed nested auxiliary recursor missing"
 
 def psKernelSimpleNestedValidateRestored
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (transformed : PsKernelEnvironment)
     (finalEnvironment : PsKernelEnvironment)

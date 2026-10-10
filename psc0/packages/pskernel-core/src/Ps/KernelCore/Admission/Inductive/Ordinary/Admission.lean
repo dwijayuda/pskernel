@@ -32,6 +32,7 @@ def psKernelCheckFreshInductiveNames
           smaller environment
 
 def psKernelAddSimpleInductive
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (decl : PsKernelSimpleInductiveDecl)

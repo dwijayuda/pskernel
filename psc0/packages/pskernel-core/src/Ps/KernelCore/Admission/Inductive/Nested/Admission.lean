@@ -12,6 +12,7 @@ Detailed validation and commit helpers live in preceding theory modules.
 -/
 
 def psKernelAddSimpleNestedInductive
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (decl : PsKernelSimpleMutualInductiveDecl)

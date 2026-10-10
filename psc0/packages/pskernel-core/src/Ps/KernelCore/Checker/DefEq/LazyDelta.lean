@@ -18,6 +18,7 @@ Lean 4.34:
 -/
 
 def psKernelDefEqNativeThenLazyStep
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (resume :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -125,6 +126,7 @@ def psKernelDefEqNativeThenLazyStep
                               (Prod.snd stepResult))
 
 def psKernelDefEqLazyReductionAfterPred
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (resume :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -250,6 +252,7 @@ def psKernelDefEqLazyReductionAfterPred
                     right
 
 def psKernelDefEqLazyReductionWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -444,6 +447,7 @@ def psKernelDefEqLazyProjFinish
         right
 
 def psKernelDefEqLazyProjReductionWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->

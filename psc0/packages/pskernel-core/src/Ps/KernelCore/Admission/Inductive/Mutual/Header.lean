@@ -97,6 +97,7 @@ def psKernelSimpleMutualCtorTypes
           rest)
 
 def psKernelOpenSimpleMutualRemainingTypesWorker
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (types : List PsKernelSimpleMutualTypeDecl) :
     Nat ->
     PsKernelEnvironment ->

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.WhnfCore
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Public weak-head normalization pipeline.
@@ -10,6 +11,7 @@ core algorithm is reused by the recursor checker without circular semantics.
 -/
 
 def psKernelWhnfAfterCore
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (continueWhnf :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -76,6 +78,7 @@ def psKernelWhnfAfterCore
                             (Prod.snd result)
 
 def psKernelWhnfWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -158,9 +161,12 @@ def psKernelWhnfWithFuel
                     Except.ok (Prod.mk expr state)
                 | Option.some _ =>
                     match
-                        psKernelExprMapGet
-                          state.whnf
-                          expr with
+                        if psKernelWhnfCacheEligible expr then
+                          psKernelSemanticCacheGet
+                            state.whnf
+                            expr
+                        else
+                          Option.none with
                     | Option.some cached =>
                         Except.ok
                           (Prod.mk cached state)
@@ -200,9 +206,12 @@ def psKernelWhnfWithFuel
                               core
         | _ =>
             match
-                psKernelExprMapGet
-                  state.whnf
-                  expr with
+                if psKernelWhnfCacheEligible expr then
+                  psKernelSemanticCacheGet
+                    state.whnf
+                    expr
+                else
+                  Option.none with
             | Option.some cached =>
                 Except.ok
                   (Prod.mk cached state)
@@ -242,6 +251,7 @@ def psKernelWhnfWithFuel
                       core
 
 def psKernelWhnfNoRecursor
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (state : PsKernelCheckerState)

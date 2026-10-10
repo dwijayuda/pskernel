@@ -42,84 +42,6 @@ def psKernelDefEqFullShapeWith
         (Option Bool)
         PsKernelCheckerState) :=
   match left with
-  | PsKernelExpr.sort leftLevel =>
-      match right with
-      | PsKernelExpr.sort rightLevel =>
-          Except.ok
-            (Prod.mk
-              (Option.some
-                (psKernelLevelEquivalent
-                  leftLevel
-                  rightLevel))
-              state)
-      | _ =>
-          Except.ok
-            (Prod.mk Option.none state)
-  | PsKernelExpr.lit leftLiteral =>
-      match right with
-      | PsKernelExpr.lit rightLiteral =>
-          Except.ok
-            (Prod.mk
-              (Option.some
-                (psKernelLiteralEq
-                  leftLiteral
-                  rightLiteral))
-              state)
-      | _ =>
-          Except.ok
-            (Prod.mk Option.none state)
-  | PsKernelExpr.app _ _ =>
-      match right with
-      | PsKernelExpr.app _ _ =>
-          match
-              psKernelDefEqApp
-                defeq
-                context
-                state
-                left
-                right with
-          | Except.error error =>
-              Except.error error
-          | Except.ok result =>
-              if Prod.fst result then
-                Except.ok
-                  (Prod.mk
-                    (Option.some true)
-                    (Prod.snd result))
-              else
-                Except.ok
-                  (Prod.mk
-                    Option.none
-                    (Prod.snd result))
-      | _ =>
-          Except.ok
-            (Prod.mk Option.none state)
-  | PsKernelExpr.forallE _ _ _ _ =>
-      match right with
-      | PsKernelExpr.forallE _ _ _ _ =>
-          match
-              psKernelDefEqForallSpine
-                defeq
-                context
-                state
-                left
-                right with
-          | Except.error error =>
-              Except.error error
-          | Except.ok result =>
-              if Prod.fst result then
-                Except.ok
-                  (Prod.mk
-                    (Option.some true)
-                    (Prod.snd result))
-              else
-                Except.ok
-                  (Prod.mk
-                    Option.none
-                    (Prod.snd result))
-      | _ =>
-          Except.ok
-            (Prod.mk Option.none state)
   | PsKernelExpr.lam _ _ _ _ =>
       match right with
       | PsKernelExpr.lam _ _ _ _ =>
@@ -164,10 +86,91 @@ def psKernelDefEqFullShapeWith
             left
             right
       | _ =>
-          Except.ok
-            (Prod.mk Option.none state)
+          match left with
+          | PsKernelExpr.sort leftLevel =>
+              match right with
+              | PsKernelExpr.sort rightLevel =>
+                  Except.ok
+                    (Prod.mk
+                      (Option.some
+                        (psKernelLevelEquivalent
+                          leftLevel
+                          rightLevel))
+                      state)
+              | _ =>
+                  Except.ok
+                    (Prod.mk Option.none state)
+          | PsKernelExpr.lit leftLiteral =>
+              match right with
+              | PsKernelExpr.lit rightLiteral =>
+                  Except.ok
+                    (Prod.mk
+                      (Option.some
+                        (psKernelLiteralEq
+                          leftLiteral
+                          rightLiteral))
+                      state)
+              | _ =>
+                  Except.ok
+                    (Prod.mk Option.none state)
+          | PsKernelExpr.app _ _ =>
+              match right with
+              | PsKernelExpr.app _ _ =>
+                  match
+                      psKernelDefEqApp
+                        defeq
+                        context
+                        state
+                        left
+                        right with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok result =>
+                      if Prod.fst result then
+                        Except.ok
+                          (Prod.mk
+                            (Option.some true)
+                            (Prod.snd result))
+                      else
+                        Except.ok
+                          (Prod.mk
+                            Option.none
+                            (Prod.snd result))
+              | _ =>
+                  Except.ok
+                    (Prod.mk Option.none state)
+          | PsKernelExpr.forallE _ _ _ _ =>
+              match right with
+              | PsKernelExpr.forallE _ _ _ _ =>
+                  match
+                      psKernelDefEqForallSpine
+                        defeq
+                        context
+                        state
+                        left
+                        right with
+                  | Except.error error =>
+                      Except.error error
+                  | Except.ok result =>
+                      if Prod.fst result then
+                        Except.ok
+                          (Prod.mk
+                            (Option.some true)
+                            (Prod.snd result))
+                      else
+                        Except.ok
+                          (Prod.mk
+                            Option.none
+                            (Prod.snd result))
+              | _ =>
+                  Except.ok
+                    (Prod.mk Option.none state)
+          | _ =>
+              Except.ok
+                (Prod.mk Option.none state)
 
 def psKernelIsDefEqAfterFullShape
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (defeq :
       PsKernelCheckerContext ->
       PsKernelCheckerState ->

@@ -10,6 +10,7 @@ kernel admission boundary.
 -/
 
 def psKernelAddAxiom
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (value : PsKernelAxiomInfo)
@@ -41,6 +42,7 @@ def psKernelAddAxiom
         (PsKernelConstantInfo.axiomInfo value)
 
 def psKernelAddDefinition
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (value : PsKernelDefinitionInfo)
@@ -143,6 +145,7 @@ def psKernelAddDefinition
                 (PsKernelConstantInfo.defnInfo value)
 
 def psKernelAddTheorem
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (value : PsKernelTheoremInfo)
@@ -214,6 +217,7 @@ def psKernelAddTheorem
               "theorem type is not a proposition"
 
 def psKernelAddOpaque
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (value : PsKernelOpaqueInfo)
@@ -290,6 +294,7 @@ def psKernelMutualWorkEnvironment
             (PsKernelConstantInfo.defnInfo value))
 
 def psKernelCheckMutualHeaders
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (values : List PsKernelDefinitionInfo) :
     Nat ->
     PsKernelEnvironment ->
@@ -363,6 +368,7 @@ def psKernelCheckMutualHeaders
             "invalid mutual definition, declarations must have the same safety annotation"
 
 def psKernelCheckMutualBodies
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (values : List PsKernelDefinitionInfo) :
     Nat ->
     PsKernelEnvironment ->
@@ -411,6 +417,7 @@ def psKernelCheckMutualBodies
               maxNatSize
 
 def psKernelAddMutualDefinitions
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat)
     (environment : PsKernelEnvironment)
     (values : List PsKernelDefinitionInfo)

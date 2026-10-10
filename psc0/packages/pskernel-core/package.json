@@ -5,7 +5,7 @@
   "type": "module",
   "proofscript": {
     "bootstrap": false,
-    "portable": true,
+    "portable": false,
     "sourceRoots": [
       "src"
     ],
@@ -14,6 +14,24 @@
     ],
     "outDir": "dist",
     "role": "owned-kernel-core",
-    "authoritative": false
+    "authoritative": false,
+    "implementationProfile": "Lean-4.35-native-experimental",
+    "profileReference": "../../docs/selfhost-language/CURRENT.md",
+    "leanTarget": "4.35.0-rc4",
+    "jointSelfhostQualified": false,
+    "portableTargetProfile": "PSC0-current-bounded-selfhost",
+    "nativeSharingFeatures": [
+      "withPtrAddr",
+      "withPtrEqDecEq",
+      "Squash",
+      "Std.HashMap operation-local scratch",
+      "Lean.PersistentHashMap",
+      "proof-directed compiler simplification"
+    ]
+  },
+  "scripts": {
+    "build": "lake build PsKernelCore",
+    "test": "lake exe psc1_kernel_core_foundation_tests && lake exe pskernel_nat_dispatch_tests && lake exe pskernel_projection_fuel_tests && lake exe pskernel_cache_mode_tests && lake exe pskernel_shared_syntax_tests && lake exe pskernel_reference_cache_tests && lake exe pskernel_annotated_syntax_tests",
+    "test:proofs": "lake build PsKernelCore PsKernelCoreMetatheory && node scripts/check-model-dependencies.mjs && node scripts/check-proofs.mjs"
   }
 }

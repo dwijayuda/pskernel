@@ -17,6 +17,7 @@ The top-level bundle transaction remains in `InductiveAdmission.lean`.
 -/
 
 def psKernelAddSimpleConstructorsWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     PsKernelSimpleInductiveDecl ->
     PsKernelDefinitionSafety ->

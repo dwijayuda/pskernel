@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.KernelReductions
+import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
 Core weak-head reduction.
@@ -62,12 +63,13 @@ def psKernelWhnfCountLambdas
     (argCount : Nat) :
     Prod PsKernelExpr Nat :=
   psKernelWhnfCountLambdasWithFuel
-    (Nat.succ (psKernelExprNodeCount current))
+    (Nat.succ argCount)
     current
     argCount
     0
 
 def psKernelWhnfCoreFinish
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (original : PsKernelExpr)
     (cheapProj : Bool)
     (result : PsKernelExpr)
@@ -77,9 +79,9 @@ def psKernelWhnfCoreFinish
   if cheapProj then
     Except.ok
       (Prod.mk result state)
-  else
+  else if psKernelWhnfCacheEligible original then
     let nextCache :=
-      psKernelExprMapInsert
+      psKernelSemanticCacheInsert
         state.whnfCore
         original
         result;
@@ -89,26 +91,35 @@ def psKernelWhnfCoreFinish
         (psKernelCheckerStateWithWhnfCore
           state
           nextCache))
+  else
+    Except.ok
+      (Prod.mk result state)
 
 def psKernelWhnfFinish
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (original : PsKernelExpr)
     (result : PsKernelExpr)
     (state : PsKernelCheckerState) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  let nextCache :=
-    psKernelExprMapInsert
-      state.whnf
-      original
-      result;
-  Except.ok
-    (Prod.mk
-      result
-      (psKernelCheckerStateWithWhnf
-        state
-        nextCache))
+  if psKernelWhnfCacheEligible original then
+    let nextCache :=
+      psKernelSemanticCacheInsert
+        state.whnf
+        original
+        result;
+    Except.ok
+      (Prod.mk
+        result
+        (psKernelCheckerStateWithWhnf
+          state
+          nextCache))
+  else
+    Except.ok
+      (Prod.mk result state)
 
 def psKernelWhnfCoreWithFuel
+    [cachePolicy : PsKernelSemanticCachePolicy]
     (fuel : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
@@ -236,9 +247,12 @@ def psKernelWhnfCoreWithFuel
                           cheapProj
             | _ =>
                 match
-                    psKernelExprMapGet
-                      state.whnfCore
-                      expr with
+                    if psKernelWhnfCacheEligible expr then
+                      psKernelSemanticCacheGet
+                        state.whnfCore
+                        expr
+                    else
+                      Option.none with
                 | Option.some cached =>
                     Except.ok
                       (Prod.mk cached state)
@@ -263,7 +277,7 @@ def psKernelWhnfCoreWithFuel
                         | Except.ok result =>
                             psKernelWhnfCoreFinish
                               expr
-                              cheapProj
+                              (Bool.or cheapRec cheapProj)
                               (Prod.fst result)
                               (Prod.snd result)
                     | PsKernelExpr.proj typeName index structValue =>
@@ -331,7 +345,7 @@ def psKernelWhnfCoreWithFuel
                                 | Option.none =>
                                     psKernelWhnfCoreFinish
                                       expr
-                                      cheapProj
+                                      (Bool.or cheapRec cheapProj)
                                       expr
                                       state2
                                 | Option.some value =>
@@ -349,7 +363,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          cheapProj
+                                          (Bool.or cheapRec cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                     | PsKernelExpr.app _ _ =>
@@ -415,7 +429,7 @@ def psKernelWhnfCoreWithFuel
                                     | Except.ok result =>
                                         psKernelWhnfCoreFinish
                                           expr
-                                          cheapProj
+                                          (Bool.or cheapRec cheapProj)
                                           (Prod.fst result)
                                           (Prod.snd result)
                                 | _ =>
@@ -468,7 +482,7 @@ def psKernelWhnfCoreWithFuel
                                   | Except.ok result =>
                                       psKernelWhnfCoreFinish
                                         expr
-                                        cheapProj
+                                        (Bool.or cheapRec cheapProj)
                                         (Prod.fst result)
                                         (Prod.snd result)
                     | _ =>

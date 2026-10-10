@@ -1,7 +1,7 @@
 # KernelContract-v1
 
-Target: Lean 4.34.0, source commit
-`293d5d0c0c3f3dded4688b3ccd6a33939ac5102b`. Import
+Target: Lean 4.35.0-rc4, source commit
+`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Import
 `Ps.KernelCore.API.Kernel` for the stable checked-session entry points.
 The existing low-level APIs remain available for compatibility. This contract
 adds checked wrappers around the same semantic implementation; it does not
@@ -16,8 +16,8 @@ explicitly and are declined.
 
 Create a `PsKernelKernelSession` with `psKernelKernelSessionEmpty`, a
 `PsKernelResourcePolicy`, and a `PsKernelProviderCapability`. The default provider
-has no native evaluator. A supplied native evaluator is an explicit trusted
-capability; its correctness can affect acceptance. Provider target identity must
+has no native evaluator. Legacy evaluator fields remain source-compatible,
+but the 4.35 checker never invokes them and they cannot authorize reduction. Provider target identity must
 match the contract, Lean version, and source commit, including on every operation.
 
 | Entry point | Successful payload | State effect |
@@ -48,7 +48,7 @@ Every entry point returns `Except PsKernelError Payload`. `Except.ok` means
 - `internalError`: a checker invariant failure or unrecognized diagnostic,
   including unknown provider failures.
 
-The implementation uses the existing PSC1-supported `Except` type instead of a
+The implementation uses the PSC0-supported `Except` type instead of a
 new datatype with runtime type parameters. `KERNEL_DIAGNOSTICS.json` records the
 exact mapping of existing checker diagnostics. Unknown messages are conservative
 internal failures. Every non-accepted outcome fails closed; no alternate checker,
@@ -81,7 +81,7 @@ counts. It is not signed, cryptographic, serializable admission authority, or a
 proof certificate. Checked values never bypass admission: `psKernelV1AdmitChecked`
 rechecks, so stale or manufactured receipts cannot authorize an invalid request.
 
-The PSC1 source profile exposes record constructors. Directly constructing a
+The current PSC0 source profile exposes record constructors. Directly constructing a
 session with an unchecked low-level environment belongs to the trusted
 integration boundary. Callers handling untrusted inputs must start with the empty
 session and extend it only through successful admission. This contract is an API
@@ -95,4 +95,5 @@ they must not implement another semantic checker or fallback after failure.
 classification, checking versus admission, stale and fabricated receipts, invalid
 applications (including reflexive equality), cancellation, zero fuel, declaration
 limits, target mismatch and unknown provider failure. It is included in the
-foundation executable and the existing portable/native/differential CI gates.
+foundation executable in the 4.35 cloud workflow. Historical portable and
+differential receipts do not qualify the migrated package.

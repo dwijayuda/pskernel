@@ -1,6 +1,106 @@
-# PSKernel Self-Host Development Plan
+# Historical PSKernel Self-Host Development Plan
 
-## Active phase status
+This document preserves the pre-migration 4.34 milestones and receipts. Current
+PSC0 authoring, the user-selected 4.35 target, and current-stage evidence take
+precedence: see `README.md`, `PSKERNEL_CORE_ARCHITECTURE.md`, and
+`RESEARCH_AND_MIGRATION.md`. Completion statements below are historical and do
+not certify this migrated revision.
+
+## Runtime annotations and proof handoff
+
+The annotated syntax, universe-regime test and guarded structural comparator
+now have a single owner in runtime Core. The model imports those exact
+operations. Their structural equivalence and transport through lifting,
+substitution, free-name closing and universe instantiation are proved, together
+with hereditary-validity transport. The application bridge fixes one concrete
+term/result reading with all four validity facts under explicit recursive and
+guard premises. Public checking and admission still exchange raw expressions;
+carrying and validating these annotations throughout those paths is unfinished.
+See [the work state](AI_WORK_STATE.md) and
+[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+
+[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
+the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
+The 140-module dependency closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,824 definitions with zero cached
+fallbacks. The complete workflow passed.
+
+## Current correctness priority
+
+The current goal is full semantic metatheory and a relative model/consistency
+proof. It is **not complete**. Universe/function modeling, scoped substitution,
+production term/universe substitution and binder-frame correspondence, and a
+sound declarative function fragment are now constructed. The actual constant
+inference case is connected under explicit environment/cache premises; its
+reference specialization removes the cache premise. Full validity/annotation,
+recursive checking, inductive/quotient admission and public API correspondence
+remain open. Cached refinement is separate.
+See `RESEARCH_AND_MIGRATION.md` for the active proof obligations and evidence.
+The historical Phase D wording below does not make these current user-requested
+correctness obligations optional.
+
+The active implementation route is now the fixed cache-disabled reference
+specialization described in [REFERENCE_CORRECTNESS_PLAN.md](REFERENCE_CORRECTNESS_PLAN.md).
+Complete the semantic reading and recursive checking/admission proofs there
+before taking on cached refinement or further performance work. Removing
+semantic caching does not discharge annotation validity, primitive rules,
+inductive/quotient admission or the public statement-preservation boundary.
+
+The binder/function layer now proves hereditary validity transport and local
+model bridges from actual reference forall, checked application and checked
+lambda executions. The structural-comparison coherence premise, recursive
+calls and global annotation coherence remain explicit.
+A checked empty-domain counterexample shows that even both hereditary validity
+predicates do not establish coherent interpretations of identical raw syntax.
+
+The checked-annotation layer now supplies an executable sufficient guard for
+structural comparison. It decides whether two binder annotations have the same
+zero condition for every universe-parameter and metavariable assignment,
+preserves that agreement through universe substitution, and derives semantic
+regime agreement on successful guarded comparison. It also validates annotations
+against actual sort-exposure visits and characterizes the existing native
+positive-universe test exactly.
+
+The executable representation and guards now live in runtime Core, with
+coherence and validity transport proved in metatheory. Public raw-expression acceptance
+does not yet run the extra guard or produce validated annotations. Recursive
+typing/reduction/equality, global annotation coherence and full admission
+soundness remain open. No new axiom or stronger foundation assumption was added.
+
+Lambda inference now closes its recursively inferred body type directly. The
+extra cheap-beta normalization of that type was removed from the shared
+production branch in both cache modes and both inference modes. The lambda
+model bridge therefore no longer assumes preservation by that extra pass.
+`SemanticValidityScope.lean` transports both hereditary invariants across
+scoped environments and fresh-variable closing; the returned lambda type
+inherits them under explicit recursive and regime premises. Let-body
+normalization and ordinary WHNF/beta reduction are unchanged.
+
+This removes one operation and its proof obligation. It does not establish
+checked annotation provenance, recursive checking soundness, or consistency of
+the full kernel. The new checked lambda bridge derives its level from actual codomain-sort
+visits; their recursive soundness and global annotation coherence remain open. No new axiom or stronger foundation assumption was
+added.
+
+Checked lambda inference now obtains its codomain sort from an additional
+infer-only visit to the actual body type followed by sort exposure. The
+reference lambda trace records these calls. The new
+`lambda_trace_checked_reading` theorem fixes that actual level on both the
+lambda and its returned type and proves typing plus their four hereditary
+validity facts under the local recursive obligations. It no longer asks for an
+arbitrary lambda level or a separate proof-valued-fibre premise.
+
+This certification runs in the shared checked lambda rule in both cache modes.
+Infer-only retains its validity precondition, and cached hits retain their
+separate cache invariant. Non-resource certification failures decline;
+resource failures keep their resource classification. Globally coherent
+annotations through raw comparison, joint recursive soundness, and full safe
+admission remain open. The public API does not yet return or carry a complete
+validated annotated expression.
+
+## Historical phase status
 
 - **Phase A — Semantic closure: COMPLETE.**
   - Lean 4.34 compatibility matrix: 34/34 required rules implemented.

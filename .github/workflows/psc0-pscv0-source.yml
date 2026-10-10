@@ -4,6 +4,7 @@ on:
     branches: [psc0/pscv0-readable-selfhost-v1]
     paths:
       - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
+      - 'psc0/scripts/Pscv0BridgeSourceSmoke.lean'
       - '.github/workflows/psc0-pscv0-source.yml'
   workflow_dispatch:
 permissions:
@@ -26,6 +27,7 @@ jobs:
           sparse-checkout: |
             psc0/packages/syntax
             psc0/packages/foundation
+            psc0/scripts
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0
@@ -48,6 +50,8 @@ jobs:
           done
           git rev-parse HEAD > dist/pscv0-source-check/commit.txt
           sha256sum packages/syntax/src/Ps/Syntax/Pscv0/*.lean > dist/pscv0-source-check/source-sha256.txt
+      - name: Fast native round trips and negative source cases
+        run: lake env lean --run scripts/Pscv0BridgeSourceSmoke.lean | tee dist/pscv0-source-check/surface-smoke.txt
       - name: Retain source validation, distinct from generated compiler behavior
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

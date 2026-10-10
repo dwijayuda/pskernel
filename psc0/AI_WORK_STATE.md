@@ -1,3 +1,13 @@
+# PSC0 PSCV P1-G — exact required-ID work ledger qualified
+
+Source commit `76bcf6f01cec41e36b736e548f98bca862ec5877`, [run 38057594392](https://github.com/dwijayuda/pskernel/actions/runs/38057594392): **all 4 cloud jobs passed**, including pinned Lean4.35.0-rc3 P1-E/P1-F witness regeneration and Linux22/Linux26/Windows26 negative tests. Artifact [11671753807](https://github.com/dwijayuda/pskernel/actions/runs/38057594392/artifacts/11671753807), ledger digest `e562efe944af9a55eff7c2960fd2a143877cf9ec6c85a5e7b826983ade74b8c0`.
+
+P1-G supplies a reusable requirements ledger of **230 source surface rows / 194 snapshot IDs**, 7 observed pilot rows, three previously source-located direct Bool IDs and **191 still unresolved** mappings. The source-scope and instance-mapping flags remain false and no PSCV-CERT-v1 or verified executable is available. Compiler, selected native kernel, TypeScript7, seed and release source unchanged. Working branch `psc0/platform-pscv-p1g-coverage-ledger-v1`, draft [PR102](https://github.com/dwijayuda/pskernel/pull/102), stacked on P1-F. [Qualification JSON](docs/platform/pscv-p1g-qualification-2026-10-10.json) and [work ledger technical summary](docs/platform/PSCV_P1G_STANDARD_WORK_LEDGER.md).
+
+**Next root cause:** actual machine-readable Lean declaration type and pinned source-module/line provenance for selected dictionaries, followed by scalable typed resolution of all 191 unresolved IDs and close-scoped ordered Standard registries. Never map a normative ID by name alone. P2–P5 stay subject to [the sound gates](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md). GitHub cloud only, preserve concurrent branch history, verify HEAD/lease before writes. No bulk package renaming or kernel changes.
+
+---
+
 # PSC0 PSCV P1-F — concrete imported Lean dictionary selections qualified
 
 **Qualified P1-F source:** `d8a8e2a9b5d4ab2294316af74671a02af1815ce0`. [Run 38056463990](https://github.com/dwijayuda/pskernel/actions/runs/38056463990), attempt 1, all four jobs passed: Linux Node22/Node26, Windows Node26 unit and negative review, plus real pinned Lean 4.35.0-rc3 synthesis/typechecking. Seven selected terms: `instAddNat`, `instMulNat`, `instSubNat`, `Int.instAdd`, `instDecidableEqNat`, `instDecidableEqBool`, `instAppendString`. Non-authoritative evidence SHA256 `215f6e60a0319320690035dbbfa34deb812c53466f53f6dd8892daa99757cc29`; [artifact 11670981656](https://github.com/dwijayuda/pskernel/actions/runs/38056463990/artifacts/11670981656), ZIP SHA256 `fb38e67c7eb9cdf9dd26ba17eb0b7f910f35c42c4641aed25e4d3e47e777237a`.

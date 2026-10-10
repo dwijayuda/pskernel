@@ -172,4 +172,22 @@ theorem admittedLet_firstLocalFrame (n : PsKernelName)
   exact localFrame_addLet 0 annotatedLocalContextEmpty n n A value
     (localFrame_empty 0) bound.1 domainScope bound.2.1 valueScope
 
+
+/-- All public kernel sessions—including the trusted low-level construction
+boundary—create a checker with the same empty local frame and allocator
+origin. This is independent of whether an arbitrary supplied environment is
+well modeled; the latter is a separate admission/soundness obligation. -/
+theorem publicKernelSession_checker_initial_frame
+    (session : PsKernelKernelSession)
+    (levelParams : List PsKernelName)
+    (safety : PsKernelDefinitionSafety) :
+    let checker := psKernelKernelSessionChecker session levelParams safety
+    checker.context.localContext = eraseLocalContext annotatedLocalContextEmpty ∧
+    checker.state.nextFresh = 0 ∧
+    LocalFrame checker.state.nextFresh annotatedLocalContextEmpty ∧
+    BoundFrame checker.state.nextFresh [] := by
+  simpa only [psKernelKernelSessionChecker] using
+    (publicSession_initial_frame (psKernelKernelSessionEnvironment session)
+      levelParams safety session.resources.maxRecDepth session.resources.maxNatSize)
+
 end PsKernelSemantics

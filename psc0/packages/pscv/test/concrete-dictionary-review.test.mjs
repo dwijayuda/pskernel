@@ -10,7 +10,7 @@ const git=p=>execFileSync('git',['-C',root,'show','HEAD:'+p],
 const input=()=>({
   normativeReference:git('pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md'),
   source:git('PSCVL/ConcreteDictionaryWitness.lean'),
-  transcript:concreteGoals.map((_,i)=>'candidate'+i).join('\n')+'\n',
+  transcript:["instAddNat","instMulNat","instSubNat","Int.instAdd","instDecidableEqNat","instDecidableEqBool","instAppendString"].join('\n')+'\n',
 });
 test('concrete dictionaries remain unapproved diagnostic observations',()=>{
   const r=inspectConcreteDictionaries(input());
@@ -30,14 +30,14 @@ test('invalid input/source and fabricated authority are refused',()=>{
     {...f,source:f.source.replace('example : DecidableEq Bool := inferInstance','')},
     {...f,normativeReference:f.normativeReference+'\n'},
     {...f,transcript:f.transcript+'\nverifiedExecutableAuthorized:true'},
-    {...f,transcript:f.transcript.replace('candidate0','sorryAx')},
+    {...f,transcript:f.transcript.replace('instAddNat','sorryAx')},
   ]) assert.throws(()=>inspectConcreteDictionaries(alt),
     /PSC_PSCV_(CONCRETE_DICT|REQUIRED_SURFACE)_/u);
 });
 test('changing the observed concrete selection changes the non-authoritative evidence identity',()=>{
  const one=input(),two=input();
- two.transcript=two.transcript.replace('candidate3','alternateCandidate3');
- const a=inspectConcreteDictionaries(one),b=inspectConcreteDictionaries(two);
- assert.notEqual(a.identitySha256,b.identitySha256);
- assert.equal(b.proofCertificateAvailable,false);
+ two.transcript=two.transcript.replace('Int.instAdd','Int.forgedAdd');
+ const a=inspectConcreteDictionaries(one);
+ assert.throws(()=>inspectConcreteDictionaries(two),/PSC_PSCV_CONCRETE_DICT_TRANSCRIPT/u);
+ assert.equal(a.proofCertificateAvailable,false);
 });

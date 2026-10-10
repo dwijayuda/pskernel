@@ -30,9 +30,12 @@ export function inspectConcreteDictionaries({normativeReference,source,transcrip
     ...concreteGoals.map(x=>'example : '+x.leanGoal+' := inferInstance'),
   ];
   if(JSON.stringify(statements)!==JSON.stringify(expected))fail('SOURCE_GOALS');
+  // Observed from the actual pinned Lean RC3 #synth output, not guessed
+  // from normative std.* identifiers. Refuse any changed selection rather
+  // than accepting a plausible spelling or 'sorryAx' as proof evidence.
   const printed=stdout.split('\n').map(x=>x.trim());
-  if(printed.length!==concreteGoals.length ||
-      printed.some(x=>!/^[A-Za-z0-9_.]+$/u.test(x)))fail('TRANSCRIPT');
+  const exactObserved=["instAddNat","instMulNat","instSubNat","Int.instAdd","instDecidableEqNat","instDecidableEqBool","instAppendString"];
+  if(JSON.stringify(printed)!==JSON.stringify(exactObserved))fail('TRANSCRIPT');
   const rows=new Map(matrix.requiredRows.map(x=>[x.id,x]));
   const observations=concreteGoals.map((g,i)=>{
     const row=rows.get(g.surfaceId);

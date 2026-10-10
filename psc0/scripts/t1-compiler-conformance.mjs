@@ -209,7 +209,9 @@ export async function runT1CompilerConformance({ compilerPath, outputDirectory, 
     observations.push('unknown and wrong-owner exports cannot enter the public API');
 
     for (const source of [
-      'def forbidden (n : Nat) (h : Eq n n) : Nat := n\n',
+      // Same accepted Prop/proof telescope as selfhost-sh1-generic-erasure.lean;
+      // the implicit proposition parameter is part of this coverage.
+      'def forbidden {p : Prop} (n : Nat) (h : p) : Nat := n\n',
       'def forbidden (a : Type) (x : a) : a := x\n',
       'def forbidden (x : Nat) : Nat -> Nat := fun (y : Nat) => Nat.add x y\n',
     ]) {
@@ -219,7 +221,7 @@ export async function runT1CompilerConformance({ compilerPath, outputDirectory, 
       assert.equal(valueTag(checkedEmission(compiler, unsupported)), 'error',
         'unsupported ABI must fail after valid preparation');
     }
-    observations.push('well-formed erased-proof, generic and returned-function signatures are refused at the public ABI');
+    observations.push('accepted implicit-Prop/proof-premise, generic and returned-function signatures are refused at the public ABI');
 
 
     const namingSources = [{

@@ -1,0 +1,58 @@
+name: PSC0 PSCV0 portable bridge native source check
+on:
+  push:
+    branches: [psc0/pscv0-readable-selfhost-v1]
+    paths:
+      - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
+      - '.github/workflows/psc0-pscv0-source.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc0-pscv0-source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc0
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/packages/syntax
+            psc0/packages/foundation
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Build only existing syntax dependencies, never compiler or kernel
+        run: |
+          mkdir -p dist/pscv0-source-check
+          lean --version | tee dist/pscv0-source-check/lean-version.txt
+          grep -F '4.34.0' dist/pscv0-source-check/lean-version.txt
+          lake build PsSyntax | tee dist/pscv0-source-check/dependencies.txt
+      - name: Native type-check all new portable source modules
+        run: |
+          mkdir -p .lake/build/lib/lean/Ps/Syntax/Pscv0
+          for MODULE in Surface Read Module; do
+            lake env lean -o ".lake/build/lib/lean/Ps/Syntax/Pscv0/$MODULE.olean" "packages/syntax/src/Ps/Syntax/Pscv0/$MODULE.lean" | tee "dist/pscv0-source-check/$MODULE.txt"
+          done
+          git rev-parse HEAD > dist/pscv0-source-check/commit.txt
+          sha256sum packages/syntax/src/Ps/Syntax/Pscv0/*.lean > dist/pscv0-source-check/source-sha256.txt
+      - name: Retain source validation, distinct from generated compiler behavior
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-native-source-${{ github.sha }}
+          path: psc0/dist/pscv0-source-check/
+          if-no-files-found: warn
+          retention-days: 30

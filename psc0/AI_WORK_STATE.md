@@ -19,6 +19,8 @@ The implemented profile is psc-ts-library/1: explicit proofscript.exports in the
 
 ## Review corrections and pending gates
 
+Second focused run38007930750 at ff4453402639d5e9edfd7400bd10d9857d772c82 passed all 63 host tests, source-profile checks, native compiler compilation and backend regressions. Native-generated self-compilation then refused an inline typed lambda in Project.lean176:46. Compiler follow-up e15bca005a4c67e2f7205007711a205d21a6bbc1 uses typed locals for the complete observed inline-argument family without changing grammar or ABI semantics. The next focused run must pass actual generated compiler conformance before full qualification. An independent ABI/source-ownership review is also active.
+
 - Separate publisher staging into fixed next/, previous/ and restore/ buckets. Project-relative names must never overwrite old backup bytes or alias rollback paths. A real rollback fixture covers previous/Quantity.ts and Quantity.ts.restore/Main.ts together.
 - Refuse conflicting directory capitalization in the portable project layout before acquiring leases. Validate globally unique generated public bindings.
 - Integrate installed smoke/source integration from c43f36491a00c7c05c791e04f597492f15941e4e. These tests are implemented, not yet passing evidence. Update the CLI catalog test to four examples.

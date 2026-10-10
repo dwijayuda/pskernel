@@ -15,7 +15,7 @@ const identifier = /^[A-Za-z_$][A-Za-z0-9_$]*$/u;
 const sorted = values => [...values].sort();
 
 function compilerList(compiler, values) {
-  return values.reduceRight((tail, head) => compiler.List.cons(head, tail), compiler.List.nil);
+  return values.reduceRight((tail, head) => compiler.List.cons(head, tail), compiler.List.nil());
 }
 
 function options(compiler) {
@@ -211,6 +211,7 @@ export async function runT1CompilerConformance({ compilerPath, outputDirectory, 
     for (const source of [
       'def forbidden (n : Nat) (h : n = n) : Nat := n\n',
       'def forbidden (a : Type) (x : a) : a := x\n',
+      'def forbidden (x : Nat) : Nat -> Nat := fun (y : Nat) => Nat.add x y\n',
     ]) {
       const unsupported = unwrap(prepare(compiler, [
         { sourceId: 'src/Unsupported.lean', source, exports: ['forbidden'] },
@@ -218,7 +219,7 @@ export async function runT1CompilerConformance({ compilerPath, outputDirectory, 
       assert.equal(valueTag(checkedEmission(compiler, unsupported)), 'error',
         'unsupported ABI must fail after valid preparation');
     }
-    observations.push('well-formed erased-proof and generic functions are refused at the public ABI');
+    observations.push('well-formed erased-proof, generic and returned-function signatures are refused at the public ABI');
 
     const scalarSources = [{
       sourceId: 'src/Scalars.ps',

@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-t2-project-watch-qualification",
+  "version": "0.1.0-preview.4",
+  "sourceRef": "130e9501ccb39b11fe20bfe762718c9df896ebdd",
+  "sourceRunId": 38026670864,
+  "runAttempt": 1,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38026670864",
+  "status": "completed",
+  "conclusion": "success",
+  "completedAt": "2026-10-10T05:14:26Z",
+  "stackedOn": "psc0/platform-t1-v1",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/92",
+  "candidate": {
+    "artifactId": 11659064861,
+    "bytes": 3896027,
+    "archiveSha256": "0c066d5ceb6b3b0e81124a41d782b63f52f4bd78a54626e45d1fb96f575dbff6",
+    "expiresAt": "2026-11-09T05:12:54Z"
+  },
+  "packages": [
+    {
+      "name": "proofscript",
+      "file": "proofscript-0.1.0-preview.4.tgz",
+      "bytes": 3661914,
+      "sha256": "652aa526f71f1111ee4292b73c3c888840c8ece921a6aeff5e20718c71800ab2"
+    },
+    {
+      "name": "psdev",
+      "file": "psdev-0.1.0-preview.4.tgz",
+      "bytes": 1996,
+      "sha256": "d569a61af0f9161aa04bcc79650e903f38191c9fc69fe8d12d17f259cbf64d27"
+    },
+    {
+      "name": "@psc-demo/pshello",
+      "file": "psc-demo-pshello-0.1.0-preview.4.tgz",
+      "bytes": 1934,
+      "sha256": "66b773f77d2a2deaa968ff08617a90d7fe991fceb856d3f3c08190bef5d57b50"
+    }
+  ],
+  "jobs": [
+    {
+      "id": 114138858862,
+      "name": "qualify",
+      "status": "success",
+      "platform": "linux",
+      "node": "22.23.3",
+      "hostTests": {
+        "passed": 136,
+        "failed": 0,
+        "skipped": 0
+      },
+      "nativeTests": {
+        "passed": 18,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "id": 114139088118,
+      "name": "windows-source",
+      "status": "success",
+      "platform": "windows",
+      "node": "26.7.0",
+      "hostTests": {
+        "passed": 140,
+        "failed": 0,
+        "skipped": 1
+      },
+      "nativeTests": {
+        "passed": 15,
+        "failed": 0,
+        "skipped": 3
+      }
+    },
+    {
+      "id": 114139088128,
+      "name": "installed (windows-2022, 26.7.0)",
+      "status": "success",
+      "platform": "windows",
+      "node": "26.7.0",
+      "npm": "12.0.2",
+      "installedObservations": 46,
+      "watchObservations": 5,
+      "watchStatuses": 18,
+      "artifactId": 11660701221
+    },
+    {
+      "id": 114139088152,
+      "name": "installed (ubuntu-24.04, 22.23.3)",
+      "status": "success",
+      "platform": "linux",
+      "node": "22.23.3",
+      "npm": "10.9.9",
+      "installedObservations": 48,
+      "watchObservations": 5,
+      "watchStatuses": 22,
+      "artifactId": 11660846055
+    },
+    {
+      "id": 114139088191,
+      "name": "installed (windows-2022, 22.23.3)",
+      "status": "success",
+      "platform": "windows",
+      "node": "22.23.3",
+      "npm": "10.9.9",
+      "installedObservations": 46,
+      "watchObservations": 5,
+      "watchStatuses": 18,
+      "artifactId": 11660561293
+    },
+    {
+      "id": 114139088228,
+      "name": "installed (ubuntu-24.04, 26.7.0)",
+      "status": "success",
+      "platform": "linux",
+      "node": "26.7.0",
+      "npm": "12.0.2",
+      "installedObservations": 48,
+      "watchObservations": 5,
+      "watchStatuses": 22,
+      "artifactId": 11659349740
+    }
+  ],
+  "behavior": [
+    "Install proofscript and optional psdev with ignored npm lifecycle scripts and direct lockfile dependency",
+    "Initial dev --watch --tsc accepted generation and checked TypeScript consumer outputs 42",
+    "Imported Quantity.ps edit produces a distinct generation with consumer value 43",
+    "Invalid Main.ps edit reports rejected and preserves all previously accepted bundle/facade bytes and receipt",
+    "Restored valid Main.ps produces a new accepted generation",
+    "Tampered psdev command.wasm is refused and previous checked artifacts and receipt remain unchanged",
+    "Linux uses recursive fs.watch plus periodic known-input freshness checks",
+    "Windows uses bounded 110ms content polling to avoid a reproducible Node/libuv fs-event native assertion with aliased Windows paths"
+  ],
+  "provenance": {
+    "selectedCompilerSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+    "portableClosureModuleCount": 62,
+    "sourceClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+    "selectedNativeKernelSource": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "typeScriptVersion": "7.0.2",
+    "compilerOrKernelAlgorithmChanged": false,
+    "seedPromoted": false,
+    "npmPublished": false,
+    "wasmKernelQualified": false,
+    "semanticPreservationProved": false,
+    "pscvVerified": false,
+    "strictSH1Qualified": false
+  },
+  "limitations": [
+    "fs.watch and polling are development scheduling signals, not instantaneous filesystem freshness proofs",
+    "The watcher preserves last good output on failure but independent TS/watch processes do not observe multi-file writes atomically",
+    "The optional --tsc launches a qualified pinned TypeScript project build after PSC publication, and a subsequent TS failure does not promote application ready",
+    "Full PSCV, LSP, arbitrary compiler extensions, independent npm publication, or a Wasm PSKernel default remain outside this milestone",
+    "Current checked package retains native Core and does not establish verified compiler semantics"
+  ]
+}

@@ -1,6 +1,6 @@
 # PSC0 T1 checked TypeScript library adoption — self-host qualification active
 
-Updated: 2026-10-10 00:42 UTC. Focused generated-compiler conformance passed; full successor qualification is the next active gate.
+Updated: 2026-10-10 00:48 UTC. Focused generated-compiler conformance passed; the first full run exposed a preexisting recovery-runner pin drift. This checkpoint restores the exact authenticated runner and retries full qualification.
 
 ## User-authorized scope
 
@@ -24,6 +24,12 @@ The publisher reuses its existing transaction with fixed next/, previous/ and re
 - Focused artifact11652698988,713686bytes, ZIP SHA2562d14ccba2e5ba369db91c58c03833a2b4b1a5b2a39ea35343edefe1765907a5c.
 - Earlier runs exposed missing explicit Lake registration, unsupported portable source grouping/lambda forms and test-only Eq syntax/universe assumptions. Fixes preserved runtime validation and admission gates. The proof refusal fixture now uses the already qualified implicit-Prop/proof-premise telescope; it is not isolated monomorphic proof-only coverage.
 - Focused evidence explicitly says kernelAdmission=not-attempted and selfHostFixedPoint=not-established-by-this-check. Full successor qualification and separate native replay remain required.
+
+## Recovery authentication correction
+
+Full run38010366876 at c9fa06aecc48d9bd4f9b6c5d6b6aac245e76fabe stopped before compiler execution: scripts/sh1-grammar-conformance.mjs had actual git blob6a4085cc0aea031ff96c7bd5915f82093f0f0345 but the selected native recovery policy pins48efa9b0c90e7904a1df49f43253395841bff90c. Root traced this to prior platform commit033f1c6e20459cdb89a24d861697a06f64eca225, outside T1: it replaced one inline immutable grammar-profile constant with import/re-export from source-grammar-profile.mjs.
+
+Restore exact pinned blob48efa9b0c90e7904a1df49f43253395841bff90c. The grammar/conformance algorithm is identical; only the original metadata location is restored. The runtime host keeps its lightweight metadata file with exactly matching values, while the recovery runner again has its authenticated closed import set. Both selfhost-seed.json and selfhost-seed-recovery.json remain byte-identical. Do not repin policy files, remove authentication or substitute a new seed. This is a recovery of the existing recipe, not a newly qualified recovery route.
 
 ## Next required work
 

@@ -1,0 +1,193 @@
+name: PSC0 PSCV P1 semantic pin and source provenance audit (NO emission)
+
+on:
+  push:
+    branches: ['psc0/platform-pscv-p1-v1']
+    paths:
+      - 'psc0/packages/verification/**'
+      - 'psc0/packages/pscv/**'
+      - 'psc0/scripts/pscv-profile-inspection.mjs'
+      - 'psc0/scripts/pscv-certification-gate*'
+      - 'psc0/docs/platform/PSCV_PROFILE_AND_PACKAGE_BOUNDARIES.md'
+      - '.github/workflows/psc0-pscv-p1.yml'
+  pull_request:
+    branches: ['psc0/platform-pscv-foundation-v1']
+    paths:
+      - 'psc0/packages/verification/**'
+      - 'psc0/packages/pscv/**'
+      - 'psc0/scripts/pscv-profile-inspection.mjs'
+      - 'psc0/scripts/pscv-certification-gate*'
+      - '.github/workflows/psc0-pscv-p1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  proposal-and-gate:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - name: Preserve tracked LF source bytes
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Test non-authoritative verification protocols and fail-closed gate
+        run: |
+          node --check packages/verification/src/preflight.mjs
+          node --check scripts/pscv-certification-gate.mjs
+          node --check scripts/pscv-profile-inspection.mjs
+          node --check packages/pscv/src/lean-provenance.mjs
+          node --check packages/pscv/scripts/audit-pinned-lean.mjs
+          node --test packages/verification/test/preflight.test.mjs scripts/pscv-certification-gate.test.mjs packages/pscv/test/pin-and-profile.test.mjs
+      - name: Inspect private PSCV npm package without executing or installing it
+        shell: bash
+        run: |
+          npm pack --ignore-scripts --json --dry-run ./packages/pscv > pscv-package-inspection.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          const entry = JSON.parse(await readFile('pscv-package-inspection.json', 'utf8'))[0];
+          const names = entry.files.map(f => f.path).sort();
+          assert.deepEqual(names, ['README.md', 'package.json', 'profile.json']);
+          const descriptor = JSON.parse(await readFile('packages/pscv/profile.json', 'utf8'));
+          assert.equal(descriptor.allowedToEmitVerifiedExecutable, false);
+          assert.equal(descriptor.installedPackageGrantsAuthority, false);
+          assert.deepEqual(descriptor.verifiedFeatures, []);
+          assert.equal(descriptor.standardEnvironment.registrySha256, null);
+          assert.equal(descriptor.runtimeCodeEntry, null);
+          console.log('PSC_PSCV_PROFILE_DATA_ONLY: PASS');
+          NODE
+      - name: Assert no changes to self-host Core, seed, kernel or release
+        shell: bash
+        run: |
+          git diff --exit-code d6e37c5d4caeaed545b1dcb53b4d3655c804e99d -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/lean-toolchain psc0/lakefile.lean \
+            psc0/selfhost-seed.json psc0/release psc0/bin/psc.mjs psc0/scripts/checked-build.mjs
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          const release = JSON.parse(await readFile('release/release.json', 'utf8'));
+          assert.equal(release.compiler.sourceClosureSha256,
+            '3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea');
+          assert.equal(release.kernel.sourceRef, '963030dc2d154008fccc82e7c8ed29331f138799');
+          assert.equal(release.typescriptVersion, '7.0.2');
+          console.log('PSC_PSCV_BASELINE_UNCHANGED: PASS');
+          NODE
+
+  lean-rc3-source-provenance-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      # This pinned upstream checkout is read-only; it never supplies
+      # code to the production compiler or any proof admission.
+      - name: Fetch immutable upstream Lean 4.35.0-rc3 provenance source
+        uses: actions/checkout@v4
+        with:
+          repository: leanprover/lean4
+          ref: 470d5ce1400764999581fd26d5d72b00d990b0f4
+          path: lean435-upstream
+          fetch-depth: 1
+          sparse-checkout: |
+            src/Init
+            src/Lean/Elab/Tactic
+      - name: Verify all 40 normative Appendix K pinned Git blobs
+        run: node psc0/packages/pscv/scripts/audit-pinned-lean.mjs lean435-upstream psc0/dist/pscv-lean435rc3-provenance
+      - name: Refuse to conflate source roots with a frozen Standard registry
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          const audit=JSON.parse(await readFile('psc0/dist/pscv-lean435rc3-provenance/source-provenance-audit.json','utf8'));
+          const blueprint=JSON.parse(await readFile('psc0/dist/pscv-lean435rc3-provenance/source-provenance-blueprint.json','utf8'));
+          assert.equal(audit.immutableSourceBlobsChecked,40);
+          assert.equal(blueprint.roots.length,40);
+          assert.equal(audit.status,'source-provenance-checked-not-standard-registry');
+          assert.equal(audit.registrySnapshotGenerated,false);
+          assert.equal(audit.registrySnapshotCanonicalSha256,null);
+          assert.equal(audit.verifiedExecutableAuthorized,false);
+          console.log('PSC_PSCV_RC3_40_BLOBS_AUDITED_REGISTRIES_NOT_FROZEN: PASS');
+          NODE
+      - name: Retain exact source-only provenance audit (NOT a Standard manifest)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pscv-lean435rc3-source-provenance-${{ github.sha }}
+          path: psc0/dist/pscv-lean435rc3-provenance
+          if-no-files-found: error
+          retention-days: 30
+
+  lean-pure-contract-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check exact PSCV normative reference and toolchain isolation
+        shell: bash
+        run: |
+          test "$(git hash-object ../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md)" = \
+            "208f128c13be2e07fde25ca413641a48df214324"
+          grep -Fxq 'leanprover/lean4:v4.35.0-rc3' lean-toolchain
+          test "$(cat ../psc0/lean-toolchain)" = 'leanprover/lean4:v4.34.0'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Real Lean WP/contract positive and negative preflight; NO PSCV certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          valid=$(lake exe pscvl check-preview examples/pass_contract.ps 2>&1)
+          printf '%s\n' "$valid"
+          grep -Fq 'UNCERTIFIED' <<< "$valid"
+          set +e
+          invalid=$(lake exe pscvl check-preview examples/fail_unproved_contract.ps 2>&1)
+          rc=$?
+          set -e
+          printf '%s\n' "$invalid"
+          test "$rc" -ne 0
+          grep -Fq 'unproved verification conditions' <<< "$invalid"
+          grep -Fq 'depends on disallowed axiom sorryAx' <<< "$invalid"
+          strict=$(lake exe pscvl check examples/normative/pass_minimal.ps 2>&1)
+          printf '%s\n' "$strict"
+          grep -Fq 'UNCERTIFIED' <<< "$strict"
+          test ! -e examples/pass_contract.js
+          test ! -e examples/pass_contract.ts
+          test ! -e examples/pass_contract.exe
+          test ! -e examples/pass_contract.pscv-cert.json
+          echo 'PSC_PSCV_LEAN_CONTRACT_PREFLIGHT: PASS UNCERTIFIED'

@@ -25,14 +25,21 @@ regression executables**. Separate Lean 4.35
 passed the executed build/proof/tutorial/bug/focused gates; full corpora,
 profiling and Mathlib were correctly skipped.
 
-**Next same-module source**:
+**Validated two-grade source**:
 [`a0b83ee8`](https://github.com/dwijayuda/pskernel/commit/a0b83ee8018db473e719f10303500d9e5725c135)
-also transports the same selected stored reading through the actual
-**infer-only** session grade; the focused audit trigger is
+also transports the **same first stored annotation** through the actual
+**infer-only** session grade, without claiming general unchecked inference
+soundness. The matching workflow commit
 [`ebe24d51`](https://github.com/dwijayuda/pskernel/commit/ebe24d510ec29981b17591b89d601ae835763f45)
-at [run 38084042997](https://github.com/dwijayuda/pskernel/actions/runs/38084042997).
-That later source is **not claimed validated** until its completed job/log
-is inspected. No new executable checker behavior is introduced.
+passed [focused run 38084042997, job 114306675070](https://github.com/dwijayuda/pskernel/actions/runs/38084042997/job/114306675070):
+**281 builds (236 focused), 363 audited semantic declarations,
+84 companion proof files, 169 model dependency modules** (12 permitted
+Con Leche pure-math modules, no production assurance/legacy judgments),
+**1,840 reference definitions, zero cached fallbacks, and seven native
+regression executables**. The separate binary, Arena and fresh-export
+jobs were skipped by this focused run. The executable proof source of
+this final focused audit is `a0b83ee8`; the workflow-only commit does
+not add semantic code. No new runtime checker behavior was introduced.
 
 **Exact soundness boundary:** This closes only concrete fvar base cases
 conditional on the stored local-context model. The global mutually

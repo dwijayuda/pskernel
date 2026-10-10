@@ -1,15 +1,15 @@
 {
   "schemaVersion": 9,
-  "stage": "Proof-first: modeled actual public axiom sequence and general admission bridge",
-  "status": "validated-modeled-public-axiom-sequence-full-kernel-consistency-open",
-  "candidateCommit": "217ded97d9bb74533daa9c935c1f8987ec599824",
-  "assuranceRevision": "217ded97d9bb74533daa9c935c1f8987ec599824",
+  "stage": "Proof-first: concrete public checker-session fvar model, checked and infer-only",
+  "status": "validated-session-fvar-two-grades-full-kernel-consistency-open",
+  "candidateCommit": "ebe24d510ec29981b17591b89d601ae835763f45",
+  "assuranceRevision": "ebe24d510ec29981b17591b89d601ae835763f45",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38081617925,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38081617925/job/114299526473",
+  "workflowRun": 38084042997,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38084042997/job/114306675070",
   "nativeBinarySha256": null,
   "checks": {
     "build": {
@@ -18,35 +18,35 @@
       "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "217ded97d9bb74533daa9c935c1f8987ec599824",
-      "run": 38081617925,
-      "job": 114299526473,
-      "buildJobs": 274,
-      "focusedBuildJobs": 229,
+      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+      "run": 38084042997,
+      "job": 114306675070,
+      "buildJobs": 281,
+      "focusedBuildJobs": 236,
       "companionFiles": 84,
-      "axiomDeclarations": 352,
+      "axiomDeclarations": 363,
       "pureMathModules": 12,
-      "closureModules": 163,
+      "closureModules": 169,
       "productionAssuranceImports": 0,
       "legacyJudgmentImports": 0,
       "referenceDefinitions": 1840,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 18:45:09 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38081617925/job/114299526473",
+      "checkedAt": "2026-10-10 20:37:09 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38084042997/job/114306675070",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "commit": "902f902b96361a8b14943b02bef503671893b3c0",
-      "run": 38076656535,
-      "job": 114284940996
+      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+      "run": 38084042997,
+      "job": 114306675070
     },
     "nativeRegression": {
-      "commit": "902f902b96361a8b14943b02bef503671893b3c0",
-      "run": 38076656535,
-      "job": 114284940996,
+      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+      "run": 38084042997,
+      "job": 114306675070,
       "status": "passed",
       "executables": 7,
       "suiteMarkers": [
@@ -94,17 +94,17 @@
         "dagDepth": 32
       },
       "annotatedSyntax": {
-        "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-        "run": 38071399079,
-        "job": 114269368491,
+        "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+        "run": 38084042997,
+        "job": 114306675070,
         "status": "passed",
         "cases": 31,
         "modelImports": 0
       },
       "sortVisitCarriers": {
-        "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-        "run": 38071399079,
-        "job": 114269368491,
+        "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+        "run": 38084042997,
+        "job": 114306675070,
         "status": "passed",
         "cases": 8,
         "unchecked": 1,
@@ -317,18 +317,18 @@
       "qualification": "Storage generalization and actual sort-helper extraction change runtime source after the historical matching binary."
     },
     "annotatedSyntax": {
-      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-      "run": 38071399079,
-      "job": 114269368491,
+      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+      "run": 38084042997,
+      "job": 114306675070,
       "status": "passed",
       "cases": 31,
       "modelImports": 0
     },
     "runtimeValidationScope": "The current focused gate runs the entire production/metatheory build, all companion files, semantic-axiom/import/reference-policy audits and all seven native test executables. Current standalone Arena binary, small Arena and fresh-export jobs are not run. Historical and intermediate-source corpus/binary receipts retain their original revision and do not qualify the current runtime.",
     "sortVisitCarriers": {
-      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-      "run": 38071399079,
-      "job": 114269368491,
+      "commit": "ebe24d510ec29981b17591b89d601ae835763f45",
+      "run": 38084042997,
+      "job": 114306675070,
       "status": "passed",
       "cases": 8,
       "unchecked": 1,
@@ -1873,7 +1873,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 18:45:09 UTC",
+  "recordedAt": "2026-10-10 20:37:09 UTC",
   "semanticFoundation": {
     "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
     "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
@@ -4156,19 +4156,33 @@
     },
     "companion435Run": 38083664157,
     "companion435Conclusion": "success",
-    "latestUnvalidatedSource": "a0b83ee8018db473e719f10303500d9e5725c135",
     "latestAuditCommit": "ebe24d510ec29981b17591b89d601ae835763f45",
     "latestAuditRun": 38084042997,
-    "latestAuditStatus": "pending-at-doc-checkpoint",
+    "latestAuditStatus": "passed",
     "scope": [
       "reference-mode psKernelSessionCheck fvar exact stored type/state",
       "fixed stored annotation CheckedReading given concrete local-model and erasure evidence",
       "initial checker session rejects unbound fvar",
-      "infer-only grade proof committed but its audit is pending"
+      "real infer-only session fvar exact stored selected type and checked reading under explicit local-model premise"
     ],
     "publicAcceptanceSoundnessProved": false,
     "fullKernelRelativeConsistencyProved": false,
     "noNewCustomAxioms": true,
-    "auditQualification": "Prior first-grade audit does not validate later infer-only additions; full Init/Std/Mathlib and profiling are intentionally deferred."
+    "auditQualification": "Focused semantic proof, axioms, import audit, companion and native regressions passed at the exact source. Full Init/Std/Mathlib and profiling were intentionally deferred; end-to-end acceptance/consistency remains open.",
+    "latestValidatedSource": "a0b83ee8018db473e719f10303500d9e5725c135",
+    "latestAuditJob": 114306675070,
+    "latestAuditMetatheory": {
+      "buildJobs": 281,
+      "focusedBuildJobs": 236,
+      "axiomDeclarations": 363,
+      "companionFiles": 84,
+      "closureModules": 169,
+      "approvedPureMathModules": 12,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "nativeExecutables": 7
+    }
   }
 }

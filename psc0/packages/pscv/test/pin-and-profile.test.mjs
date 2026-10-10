@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import {
   normativeSha256, pinnedLeanCommit, pinnedLeanVersion,
   extractLeanProvenanceBlueprint, evaluateLeanProvenance, canonicalJSON,
@@ -9,9 +12,13 @@ import {
   inspectPSCVProfile, activatePSCVProfile, profileInspectionProtocol,
 } from '../../../scripts/pscv-profile-inspection.mjs';
 
-const refFile = new URL('../../../../pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md', import.meta.url);
+const root = path.resolve(fileURLToPath(new URL('../../../../', import.meta.url)));
 const profileFile = new URL('../profile.json', import.meta.url);
-const ref = () => readFile(refFile, 'utf8');
+// Git's committed blob is the canonical normative byte sequence.
+// Windows worktree line-ending conversion must not redefine that SHA256.
+const ref = async () => execFileSync('git', [
+  '-C', root, 'show', 'HEAD:pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md',
+], { encoding: 'utf8', timeout: 15000, maxBuffer: 2 * 1024 * 1024 });
 const descriptor = async () => JSON.parse(await readFile(profileFile, 'utf8'));
 const req = async () => ({
   rootProjectProfile: 'pscv-v1',

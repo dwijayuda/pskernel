@@ -198,4 +198,51 @@ theorem annotationValidity_alone_not_coherence (M : Reading V) (ρ : Nat → V) 
   rw [lamR_zero]
   exact lamR_ne_pt (by decide)
 
+
+/-- Application needs the proposition-bit condition on the exposed product;
+it does not need a blanket theorem that its codomain has an inferred sort. -/
+theorem models_app_of_annotationValid (M : Reading V) (Γ : List AnnotatedExpr)
+    (n : PsKernelName) (f a A B : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (v : PsKernelLevel)
+    (hf : ModelsType M Γ f (.forallE n A B bi v))
+    (ha : ModelsType M Γ a A)
+    (hvalid : ∀ ρ, Satisfies M Γ ρ →
+      AnnotationValid M ρ (.forallE n A B bi v)) :
+    ModelsType M Γ (.app f a) (inst a B 0) := by
+  intro ρ hρ
+  rw [interp_inst_zero]
+  apply app_mem_piR (hf ρ hρ) (ha ρ hρ)
+  intro hz x hx
+  simpa only [univ_zero] using (hvalid ρ hρ).2.2 hz x hx
+
+/-- The same local product validity is sufficient for beta on a typed body. -/
+theorem models_beta_of_annotationValid (M : Reading V) (Γ : List AnnotatedExpr)
+    (n : PsKernelName) (A a b B : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (v : PsKernelLevel)
+    (ha : ModelsType M Γ a A)
+    (hb : ModelsType M (A :: Γ) b B)
+    (hvalid : ∀ ρ, Satisfies M Γ ρ →
+      AnnotationValid M ρ (.forallE n A B bi v)) :
+    ModelsEqual M Γ (.app (.lam n A b bi v) a) (inst a b 0) := by
+  intro ρ hρ
+  rw [interp_inst_zero]
+  apply app_lamR (ha ρ hρ)
+    (fun x hx => hb (extend x ρ) (satisfies_extend M Γ A ρ x hρ hx))
+  intro hz x hx
+  simpa only [univ_zero] using (hvalid ρ hρ).2.2 hz x hx
+
+/-- Valid argument substitution also carries the hereditary annotation
+condition into the dependent result type selected by application. -/
+theorem application_result_annotationValid (M : Reading V) (Γ : List AnnotatedExpr)
+    (n : PsKernelName) (a A B : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (v : PsKernelLevel)
+    (ha : ModelsType M Γ a A)
+    (haValid : ∀ ρ, Satisfies M Γ ρ → AnnotationValid M ρ a)
+    (hvalid : ∀ ρ, Satisfies M Γ ρ →
+      AnnotationValid M ρ (.forallE n A B bi v)) :
+    ∀ ρ, Satisfies M Γ ρ → AnnotationValid M ρ (inst a B 0) := by
+  intro ρ hρ
+  exact annotationValid_inst_zero M B a ρ (haValid ρ hρ)
+    ((hvalid ρ hρ).2.1 (interp M ρ a) (ha ρ hρ))
+
 end PsKernelSemantics.SetModel

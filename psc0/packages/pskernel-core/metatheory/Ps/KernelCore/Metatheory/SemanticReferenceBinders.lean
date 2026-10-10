@@ -135,7 +135,10 @@ theorem forall_trace_has_model
     change piR (M.level trace.rangeLevel) (interp M ρ A)
       (fun x => interp M (extend x ρ) B) ∈ˢ
       univ (M.level (psKernelLevelMkIMax trace.domainLevel trace.rangeLevel))
-    rw [Reading.level, mkIMax_eval]
+    have hl : M.level (psKernelLevelMkIMax trace.domainLevel trace.rangeLevel) =
+        SetModel.imax (M.level trace.domainLevel) (M.level trace.rangeLevel) :=
+      mkIMax_eval M.levelParams M.levelMetavariables trace.domainLevel trace.rangeLevel
+    rw [hl]
     exact pi_mem_sort (hA ρ hρ)
       (fun x hx => hB (extend x ρ) (satisfies_extend M Γ A ρ x hρ hx))
   · intro ρ hρ

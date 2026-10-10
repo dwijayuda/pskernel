@@ -43,6 +43,7 @@ import Ps.KernelCore.Metatheory.SemanticPublicAdmissionSequence
 import Ps.KernelCore.Metatheory.SemanticReferenceTheoremTrace
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionSort
 import Ps.KernelCore.Metatheory.SemanticReferenceSessionConst
+import Ps.KernelCore.Metatheory.SemanticReferenceSessionGrade
 import Ps.KernelCore.Metatheory.SemanticReadingExtension
 
 /-!
@@ -84,6 +85,14 @@ run_cmd do
     ``PsKernelSemantics.Reference.referenceSessionCheck_sort_result,
     ``PsKernelSemantics.Reference.referenceSessionCheck_sort_models,
     ``PsKernelSemantics.Reference.referenceSessionCheck_const_models,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_core_trace,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_context_fixed,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_sort_result,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_sort_models,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_fvar_selected,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_fvar_checked_reading,
+    ``PsKernelSemantics.Reference.referenceInitialSessionGrade_fvar_cannot_succeed,
+    ``PsKernelSemantics.Reference.referenceSessionGrade_const_models,
     ``PsKernelSemantics.SetModel.referenceDispatchAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.add_success_preserves_model,
     ``PsKernelSemantics.SetModel.no_stored_constant_of_literalFalse,

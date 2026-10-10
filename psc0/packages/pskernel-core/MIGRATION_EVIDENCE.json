@@ -1,15 +1,15 @@
 {
   "schemaVersion": 9,
-  "stage": "Proof-guided Lean 4.35 compatibility: public input and kernel-session frame",
-  "status": "validated-public-session-initial-frame-full-kernel-consistency-unfinished",
-  "candidateCommit": "3fe5058e847d8b99242da1c087cb658079596393",
-  "assuranceRevision": "3fe5058e847d8b99242da1c087cb658079596393",
+  "stage": "Proof-guided Lean 4.35: public empty-session frame",
+  "status": "validated-public-entry-frame-full-kernel-consistency-unfinished",
+  "candidateCommit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+  "assuranceRevision": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38071399079,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38071399079/job/114269368491",
+  "workflowRun": 38071595259,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38071595259/job/114269936326",
   "nativeBinarySha256": null,
   "checks": {
     "build": {
@@ -18,13 +18,13 @@
       "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-      "run": 38071399079,
-      "job": 114269368491,
+      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+      "run": 38071595259,
+      "job": 114269936326,
       "buildJobs": 267,
       "focusedBuildJobs": 222,
       "companionFiles": 84,
-      "axiomDeclarations": 321,
+      "axiomDeclarations": 323,
       "pureMathModules": 12,
       "closureModules": 153,
       "productionAssuranceImports": 0,
@@ -33,20 +33,20 @@
       "cachedFallbacks": 0,
       "status": "passed",
       "checkedAt": "2026-10-10 16:18:17 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38071399079/job/114269368491",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38071595259/job/114269936326",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-      "run": 38071399079,
-      "job": 114269368491
+      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+      "run": 38071595259,
+      "job": 114269936326
     },
     "nativeRegression": {
-      "commit": "3fe5058e847d8b99242da1c087cb658079596393",
-      "run": 38071399079,
-      "job": 114269368491,
+      "commit": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+      "run": 38071595259,
+      "job": 114269936326,
       "status": "passed",
       "executables": 7,
       "suiteMarkers": [
@@ -386,7 +386,10 @@
     "publicEntryGuardNameBoundsProved": true,
     "publicCheckerSessionInitialFrameProved": true,
     "guardedLambdaForallLetFirstFrameUnderScopeProved": true,
-    "semanticAxiomAuditCoversNewPublicFrameTheorems": true
+    "semanticAxiomAuditCoversNewPublicFrameTheorems": true,
+    "actualPublicEmptySessionEnvironmentProved": true,
+    "actualPublicEmptySessionInitialFrameProved": true,
+    "initialEnvironmentSemanticModelProved": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -1857,7 +1860,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 16:18:17 UTC",
+  "recordedAt": "2026-10-10 17:29:53 UTC",
   "semanticFoundation": {
     "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
     "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
@@ -3905,21 +3908,18 @@
       "29e3ad5e276a15fe9d2ad046c2286245dfd77688",
       "3fe5058e847d8b99242da1c087cb658079596393"
     ],
-    "focusedVerifiedSource": "3fe5058e847d8b99242da1c087cb658079596393",
-    "run": 38071399079,
-    "job": 114269368491,
+    "focusedVerifiedSource": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
+    "run": 38071595259,
+    "job": 114269936326,
     "status": "passed",
-    "axiomDeclarations": 321,
+    "axiomDeclarations": 323,
     "modelModules": 153,
     "buildJobs": 267,
     "companionFiles": 84,
     "nativeExecutables": 7,
-    "pendingSource": "63cdc22d339f821be6bdcfa25b5f15e936aafdbf",
-    "pendingRun": 38071595259,
-    "pendingTheorems": [
-      "emptyKernelSession_environment",
-      "emptyKernelSession_checker_initial_frame"
-    ],
+    "pendingSource": null,
+    "pendingRun": null,
+    "pendingTheorems": [],
     "exactScope": [
       "actual no-mvar/no-fvar declaration guard to numeric-name bounds",
       "actual checker-session initialization",
@@ -3943,6 +3943,11 @@
       "mathlib": "skipped",
       "qualification": "not full Lean compatibility"
     },
-    "newRuntimeRuleChanges": false
+    "newRuntimeRuleChanges": false,
+    "newlyVerifiedTheorems": [
+      "emptyKernelSession_environment",
+      "emptyKernelSession_checker_initial_frame"
+    ],
+    "evidence": "psc0/packages/pskernel-core/PUBLIC_ENTRY_EVIDENCE_2026-10-10.md"
   }
 }

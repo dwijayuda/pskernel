@@ -29,3 +29,5 @@ G6 adds a **separate untyped evaluator diagnostic** (`Bench.lean`) with three ti
 G7 adds 256 deterministic closed-term generator tests, requiring independent substitution/closure agreement and exact syntax interning. These are **untyped evaluation tests**, not proof checking or formal verification.
 
 **Measured prototype scope:** [G6 evaluator benchmark](EVALUATOR_BENCHMARK_G6.md) recorded median 0.88 s substitution versus 0.08 s closure with reification on a *synthetic untyped* 64-depth beta/let workload; this is **not** a Lean-kernel speedup or full correctness claim. G7's 256 generated closed-term agreement cases passed on cloud CI.
+
+G8 adds initial **machine-checked universe arithmetic lemmas** over the independent V3 `Level.evalAt` mathematical valuation, including `imax` zero/positive cases. These lemmas are not an implementation of full Lean universe equivalence or proof admission.

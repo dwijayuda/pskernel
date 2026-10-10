@@ -145,3 +145,7 @@ Generated 256 deterministic, **untyped but syntactically closed**, deeply nested
 ## Immediate continuation
 
 Proceed with a genuinely Lean-semantic G8: full universe-level equivalence (including symbolic imax, zero/positive substitutions, scope), faithful term/export decoding (not placeholder metadata), typed environment/declaration definitions and exact official 4.35 differential corpus for the currently supported fragment. Extend closed-substitution and closure tests to *well-typed* dependent proofs before any kernel-performance comparison. Keep old proof preservation irrelevant, but make new correctness arguments for every accepting rule. Never promote a G0–G7 prototype to a proof checker based on raw tests.
+
+## G8 universe-level arithmetic model candidate
+
+`PSKernelFast/LevelSemantics.lean` defines `Level.evalAt` under symbolic natural-level valuations, including the defining conditional meaning of `imax`, and attempts Lean-checked theorems for `max` zero/commutativity and `imax` zero/positive successor branches. This is **new independent V3 mathematical assurance**; no old proof interface is imported or preserved. It does not implement decidable universal level equivalence or trusted kernel acceptance. CI must validate the exact source and disclose any proof elaboration failure before calling G8 complete.

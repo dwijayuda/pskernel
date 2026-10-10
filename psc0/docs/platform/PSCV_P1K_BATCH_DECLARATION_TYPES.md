@@ -1,5 +1,7 @@
 # PSC0 PSCV P1-K — imported arithmetic selected instance types
 
+**Qualified:** [run 38060194301](https://github.com/dwijayuda/pskernel/actions/runs/38060194301) passed all four jobs at source `a18d46e2934c9bcdc2b908470e70687418141a86`: 42 normative rows, 84 actual Lean queries and **45 distinct selected constant declarations with imported types/modules**. Machine observation identity `abc06182e2875b15f150fabd567fa7a3c86ccb783030bf0ac04dc635fe41a372`. [Actual-Lean output artifact](https://github.com/dwijayuda/pskernel/actions/runs/38060194301/artifacts/11672643189); [qualification JSON](pscv-p1k-qualification-2026-10-10.json). No approved Standard instance mapping or certified artifact is implied.
+
 **Purpose:** scale imported constant type/module observation from the 11
 handpicked P1-H names to **every distinct instance name** selected by
 the P1-J source-derived 84 typeclass queries.

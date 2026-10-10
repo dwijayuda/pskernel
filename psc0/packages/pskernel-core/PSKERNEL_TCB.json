@@ -127,6 +127,48 @@
       "oldOpaqueWorkerEquivalenceClaimed": false,
       "psc0GeneratedQualified": false,
       "soundnessLawAxioms": []
+    },
+    "semanticFoundation": {
+      "scope": "local proposition, conversion, impredicative-Prop-product, and sort-successor algebra; partial local valuation",
+      "modules": [
+        "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticClassifier.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticSortInference.lean"
+      ],
+      "legacyJudgmentsReplacedEverywhere": false,
+      "fullUniverseModel": false,
+      "fullDependentFunctionModel": false,
+      "admissionModel": false,
+      "concreteImplementationCase": "core sort inference; cache-hit result requires semantic cache coherence",
+      "conditionalBridges": [
+        "actual proposition classifier",
+        "proof-irrelevance call sequence"
+      ],
+      "unprovedCallbackObligations": [
+        "infer-only semantic typing and validity of returned types",
+        "WHNF denotation/validity preservation",
+        "recursive defeq semantic equality",
+        "state semantic invariants and publication"
+      ],
+      "customSoundnessAxiomsAdded": false,
+      "axiomAudit": {
+        "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "declarations": 35,
+        "allowedHostAxioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "localHypothesesAuditedSeparately": true
+      },
+      "validation": {
+        "commit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
+        "run": 38026130891,
+        "status": "passed",
+        "buildJobs": 206,
+        "companionFiles": 84
+      }
     }
   }
 }

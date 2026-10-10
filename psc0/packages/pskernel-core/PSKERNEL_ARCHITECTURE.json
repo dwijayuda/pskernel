@@ -532,7 +532,20 @@
       "modelConsistencyProved": false,
       "semanticJudgmentsAdequate": false,
       "blocker": "proofIrrelevanceAlgorithmic omits term-to-inferred-type connections; the legacy relation is universal.",
-      "primitiveRepair": "Specified string equality; native runtime correspondence and generated PSC0 qualification remain explicit."
+      "primitiveRepair": "Specified string equality; native runtime correspondence and generated PSC0 qualification remain explicit.",
+      "semanticFoundation": {
+        "status": "local-algebra-and-modular-bridges",
+        "namespace": "PsKernelSemantics",
+        "independentOfLegacyJudgments": true,
+        "concreteModelScope": "propositions, impredicative products into Prop, and sort-successor membership only",
+        "concreteCheckerCoverage": "core sort-inference result, with explicit semantic cache coherence",
+        "conditionalCheckerCoverage": [
+          "positive proposition classifier",
+          "proof-irrelevance branch call sequence"
+        ],
+        "next": "scoped contexts, dependent function interpretation and substitution transport",
+        "fullKernelModel": false
+      }
     }
   }
 }

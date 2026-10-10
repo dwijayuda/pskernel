@@ -2,6 +2,81 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
+## Semantic foundation stage — 2026-10-10
+
+The new `PsKernelSemantics` modules begin a replacement semantic target.
+They do not import the legacy typing/equality judgments, and they do not remove
+or conceal the checked legacy-collapse counterexample.
+
+- `SemanticDomain.lean` defines typing by actual denotation and type membership.
+  Equality requires a shared **defined** value; two undefined expressions do not
+  compare equal. Conversion and proof irrelevance are proved with both terms'
+  actual typing premises. A concrete proposition algebra interprets truth,
+  falsity, erased proofs, impredicative products into Prop, and the successor
+  chain of sorts. Checked adequacy witnesses distinguish True from False, exclude
+  an inhabitant of the empty denotation, and exclude a sort inhabiting itself.
+- `SemanticLevel.lean` interprets levels under arbitrary parameter/metavariable
+  valuations and proves the executable zero-level test sound, including `imax`.
+- `SemanticClassifier.lean` proves the actual proposition classifier's positive
+  result semantically meaningful **under explicit semantic callback contracts**.
+  The proof-irrelevance call sequence threads every intermediate state and
+  connects both terms to the types actually returned by inference. A deliberately
+  dishonest inference callback gives a checked counterexample to the claim that
+  an operational trace alone suffices.
+- `SemanticSortInference.lean` connects the actual core sort-inference case to
+  this target, for both checked and infer-only modes. Cache hits require semantic
+  correctness of the selected cache's answer; misses use the sort-successor rule.
+  The uncached case is instantiated with the concrete proposition/sort algebra
+  without any callback-soundness assumption.
+
+### Scope and assumptions
+
+The concrete algebra is a model of the **local proof/conversion/sort fragment**,
+not of the complete dependent type theory. Its sort tokens do not construct
+universe sets closed under dependent functions or inductives. The interpretation
+witness is a partial local valuation; it is not an interpretation of an admitted
+PSKernel environment. The theorem about the empty denotation is therefore not
+the final theorem that the public checker rejects every proof of Lean's False.
+
+`ProofDomain` has value-level membership and proof-irrelevance laws and an empty
+value; its inhabitant is constructed in the file. It has no field asserting
+checker soundness. Generic theorems expose their domain/interpretation hypotheses.
+The classifier bridge additionally exposes the missing inference, WHNF and
+recursive-defeq semantic obligations. Existing configuration preservation
+theorems cannot discharge these hypotheses. No custom axioms or unfinished
+proof declarations are introduced.
+
+No production checker behavior, timeout, admitted-axiom policy, compiler seed,
+or default provider changes in this stage. The previous executable evidence
+continues to refer to its original source and binary hash.
+
+### Next semantic construction
+
+Extend the interpretation to scoped contexts and dependent functions, prove
+substitution/valuation transport, then prove lambda/application/forall inference
+against it. Infer-only shortcuts must receive their actual validity evidence;
+if that evidence cannot be established, add justified checks or annotations.
+Only after the remaining reduction/equality rules and declaration-admission
+transactions preserve this interpretation can the full model theorem and
+public no-False corollary be claimed. Full metatheory completion remains false.
+
+### Checked validation
+
+[Cloud run 38026130891](https://github.com/dwijayuda/pskernel/actions/runs/38026130891)
+at `2248f88b61c9f8f311e6e980db91995e9d45c2bc` passed all **206 build jobs**
+and **84 companion proof files**, using the exact pinned Lean hash.
+`SemanticAudit.lean` checked **35 declarations** and rejected any dependency
+outside `propext`, `Classical.choice` and `Quot.sound`; the audit passed.
+The generic conversion-fragment proof-irrelevance and empty-denotation lemmas
+report no axiom dependencies. The concrete empty witness uses `propext`.
+The full printed dependency inventory and local callback assumptions remain
+distinct: absence of custom axioms does not discharge theorem parameters.
+
+The sort-inference proof source is `6b28936c94f61575afb8d7083fe22f91d9f5368f`;
+the subsequent validation commit changes only the dedicated CI workflow label.
+The executable remains the previously tested source/binary documented below.
+
+
 ## Correctness audit and model-proof direction — 2026-10-10
 
 Correctness now takes priority over performance. The metatheory is **not
@@ -186,7 +261,24 @@ green or weaken the exit/coverage requirements.
 
 These runs precede the specified string-equality repair. They do not validate
 the new binary, prove semantic soundness, or pass the unchanged 500-second
-Arena Init budget. Std and Mathlib results are recorded separately when known.
+Arena Init budget.
+
+The remaining extended jobs have now completed on that same **older binary**:
+
+| Input | Wall limit / elapsed seconds | Result | Last reported records / declarations |
+| --- | --- | --- | --- |
+| Fresh 4.35 Std | 3600 / 3600.04 | Timeout, exit 124 | 2,899,999 / 20,723 |
+| Historical Std | 3600 / 3600.03 | Timeout, exit 124 | 2,999,999 / 21,381 |
+| Historical Mathlib | 14400 / 14400.09 | Timeout, exit 124 | 6,499,999 / 49,946 |
+
+Their full raw-log receipts, input hashes and job IDs are preserved in
+`MIGRATION_EVIDENCE.json`. Mathlib's input contains 109,790,519 records;
+the progress counter is not a completed-corpus result. Raising the wall limit
+allowed Init to finish, but did not establish complete Std or Mathlib acceptance.
+These timeout conclusions come from actual exit code 124, not the earlier
+stdout/stderr acceptance-reporting bug. No new performance experiment was run
+for the semantic foundation stage.
+
 
 ## Prior sharing stage: decision and scope
 

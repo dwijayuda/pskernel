@@ -1,9 +1,9 @@
 {
-  "schemaVersion": 4,
-  "stage": "Correctness priority: judgment adequacy audit, specified StringEq, and exact classifier traces",
-  "status": "semantic-specification-inadequate-model-proof-unfinished",
+  "schemaVersion": 5,
+  "stage": "Correctness priority: independent local semantic algebra, concrete sort inference, and conditional proof-irrelevance bridge",
+  "status": "local-semantic-foundation-established-full-kernel-model-unfinished",
   "candidateCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
-  "assuranceRevision": "aea996799b986091a4c8fbf6e1ce28f578609348",
+  "assuranceRevision": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
@@ -95,7 +95,9 @@
     "generatedSourcePortable": false,
     "semanticMetatheoryComplete": false,
     "semanticJudgmentsAdequate": false,
-    "noExecutableUnsoundnessClaimedByAdequacyAudit": true
+    "noExecutableUnsoundnessClaimedByAdequacyAudit": true,
+    "newLocalSemanticRelationNontrivial": true,
+    "fullKernelSemanticModelConstructed": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -334,18 +336,108 @@
           "jobId": 114069538925,
           "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538925"
         }
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "fresh435-std",
+        "mode": "fresh",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "c12663bb14aba57c4bd01699c4c90634a4432921d08f794b6736429522126dc3",
+          "records": 10193568,
+          "bytes": 562170999,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"c29b6dda4f7c20e3eeaa717c4e565663c5cfa364\",\"version\":\"4.35.0-rc4\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "timeout",
+        "startedAt": "2026-10-09T23:26:17.973478+00:00",
+        "elapsedSeconds": 3600.04,
+        "lastOutput": "pskernel-core arena progress: records=2899999 declarations=20723 names=149929/149929 levels=372/372 exprs=2728976/2728976",
+        "exitCode": 124,
+        "completedAt": "2026-10-10T00:26:18.015857+00:00",
+        "maxRssKiB": 189208,
+        "lastProgress": {
+          "records": 2899999,
+          "declarations": 20723
+        },
+        "acceptance": null,
+        "jobId": 114069538959,
+        "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538959"
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "historical-std",
+        "mode": "historical",
+        "checkerWallLimitSeconds": 3600,
+        "input": {
+          "sha256": "289ed65a367abdc7388a855d2acf59cc1f401f5e06295acbb8a420682d9f00bd",
+          "records": 10826639,
+          "bytes": 596655086,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"5045d0056413266e57c625dcd7c365b10e377c52\",\"version\":\"4.34.1\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "timeout",
+        "startedAt": "2026-10-09T23:26:07.408041+00:00",
+        "elapsedSeconds": 3600.03,
+        "lastOutput": "pskernel-core arena progress: records=2999999 declarations=21381 names=153764/153764 levels=368/368 exprs=2824487/2824487",
+        "exitCode": 124,
+        "completedAt": "2026-10-10T00:26:07.442936+00:00",
+        "maxRssKiB": 189460,
+        "lastProgress": {
+          "records": 2999999,
+          "declarations": 21381
+        },
+        "acceptance": null,
+        "jobId": 114069538968,
+        "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538968"
+      },
+      {
+        "schemaVersion": 1,
+        "diagnosticOnly": true,
+        "originalArenaBudgetPass": false,
+        "sourceCommit": "e9b0cdae39ea9a2ff0d7da841e0faacbf7943df4",
+        "binarySha256": "74609c21967988d5cee861001a3a3334bd204a381b4cfa4b928e5aff4457c54e",
+        "case": "historical-mathlib",
+        "mode": "historical",
+        "checkerWallLimitSeconds": 14400,
+        "input": {
+          "sha256": "22c5de83469408950005589a3bc5ef5157c65549b5a802f85d567c29151306a6",
+          "records": 109790519,
+          "bytes": 6184415052,
+          "header": "{\"meta\":{\"exporter\":{\"name\":\"lean4export\",\"version\":\"3.1.0\"},\"format\":{\"version\":\"3.1.0\"},\"lean\":{\"githash\":\"5045d0056413266e57c625dcd7c365b10e377c52\",\"version\":\"4.34.1\"}}}"
+        },
+        "internalFuelAndRecursionLimitsChanged": false,
+        "status": "timeout",
+        "startedAt": "2026-10-09T23:34:28.276268+00:00",
+        "elapsedSeconds": 14400.09,
+        "lastOutput": "pskernel-core arena progress: records=6499999 declarations=49946 names=329827/329827 levels=3957/3957 exprs=6116270/6116270",
+        "exitCode": 124,
+        "completedAt": "2026-10-10T03:34:28.362555+00:00",
+        "maxRssKiB": 328588,
+        "lastProgress": {
+          "records": 6499999,
+          "declarations": 49946
+        },
+        "acceptance": null,
+        "jobId": 114069538668,
+        "jobUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38004337520/job/114069538668"
       }
     ],
-    "pending": [
-      "historical-mathlib",
-      "fresh435-std",
-      "historical-std"
-    ],
+    "pending": [],
     "newStringEqualityBinaryTested": false,
-    "checkedAt": "2026-10-10 00:19:59 UTC"
+    "checkedAt": "2026-10-10 05:07:25 UTC",
+    "status": "completed"
   },
   "remaining": [
-    "Replace inadequate legacy semantic target and prove actual checked/infer-only semantic correspondence",
+    "Extend the independent semantic target to scoped dependent functions and prove complete checked/infer-only semantic correspondence; legacy judgment collapse remains audited",
     "Construct the model with explicit foundation, axiom interpretation and safety boundary",
     "Complete model-preserving ordinary/mutual/nested inductive and quotient admission",
     "Prove public API/adapter correspondence and derive no-False corollary",
@@ -356,7 +448,7 @@
   ],
   "nextStage": {
     "status": "correctness-work-required",
-    "scope": "Adequate semantic judgments and checker-to-model bridge; model construction and complete admission preservation remain open",
+    "scope": "Scoped contexts, dependent function interpretation and substitution/valuation transport, then remaining checker and admission model preservation",
     "performancePriority": "Secondary; only justified correctness-preserving changes"
   },
   "promotionDecision": {
@@ -1475,5 +1567,71 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 00:23:05 UTC"
+  "recordedAt": "2026-10-10 05:07:25 UTC",
+  "semanticFoundation": {
+    "sourceCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f",
+    "validationCommit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
+    "validationStatus": "passed",
+    "workflowRun": 38026130891,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38026130891",
+    "scope": "Concrete local proof/conversion/Prop-product/sort-successor algebra and partial valuation; not a full expression/environment model",
+    "modules": [
+      "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticClassifier.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticSortInference.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean"
+    ],
+    "semanticEqualityRequiresDefinedValue": true,
+    "genericEmptyTheoremIsFullKernelConsistency": false,
+    "completeKernelMetatheory": false,
+    "fullUniverseFunctionClosureConstructed": false,
+    "scopedDependentFunctionsConstructed": false,
+    "admissionModelConstructed": false,
+    "productionCodeChanged": false,
+    "conditionalCallbackBridge": [
+      "InferOnlySoundOn",
+      "WhnfSoundOn",
+      "DefEqSoundOn",
+      "StateValid",
+      "PropCompatible"
+    ],
+    "concreteCheckerCoverage": "psKernelInferCoreWithFuel sort result: selected-cache coherence or uncached sort-successor rule",
+    "proofDependencies": {
+      "genericProofIrrelevance": [],
+      "genericEmptyDenotation": [],
+      "concreteEmptyWitness": [
+        "propext"
+      ],
+      "allowedHostAxioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "auditTargets": 35,
+      "customAxiomsAdded": false,
+      "localHypotheses": "Exposed explicitly in theorem statements; not included in #print axioms"
+    },
+    "priorValidation": [
+      {
+        "run": 38025522545,
+        "commit": "51c11cf37405c375eefbde58f9aeed6ceb91f2e8",
+        "status": "passed",
+        "buildJobs": 204,
+        "companionFiles": 84
+      },
+      {
+        "run": 38025865536,
+        "commit": "ef5ae6a6ade60b12e2a6f0ea86c1a946128b7e4a",
+        "status": "failed",
+        "reason": "Sort-inference cache-hit proof reused a lookup equality already rewritten by case analysis",
+        "repairCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f"
+      }
+    ],
+    "jobId": 114137241185,
+    "buildJobs": 206,
+    "companionFiles": 84,
+    "axiomAudit": "passed",
+    "checkedAt": "2026-10-10 05:07:25 UTC"
+  }
 }

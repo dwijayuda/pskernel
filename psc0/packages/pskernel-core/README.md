@@ -21,9 +21,12 @@ operational refinement theorems cannot be used as a model-soundness proof.
 
 The active string comparator now has a specified equality decision and a proof
 of its positive-result law. This closes one primitive obligation; it does not
-repair the inadequate judgments. The next correctness work must reconnect
-checked inference and equality to a valid semantic relation and establish
-complete declaration model preservation with explicit axiom assumptions.
+repair the inadequate judgments. The new semantic layer constructs a nontrivial proposition/sort algebra and
+connects the actual sort-inference case to it. The proposition-classifier and
+proof-irrelevance bridges retain explicit, still-open semantic callback
+obligations. Dependent functions, complete checker correspondence, and declaration
+model preservation remain unfinished; the local empty-denotation theorem is not
+a consistency theorem for the complete kernel.
 See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
 
 ## Authoring and ownership

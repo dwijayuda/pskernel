@@ -11,7 +11,10 @@ and its typing relation capable of assigning every type to `Sort 0`.
 This is not an executable checker exploit. Full semantic metatheory and the
 model/consistency proof remain unproved. See
 [the current audit, model target and assumptions](RESEARCH_AND_MIGRATION.md).
-The conceptual judgments below are explanatory, not established model theorems.
+The new `PsKernelSemantics` modules establish a local proposition/conversion/sort
+fragment and a concrete sort-inference bridge. They are not a full environment
+model. The conceptual judgments below are explanatory, not established model
+theorems.
 
 Historical 4.34 reference artifacts (not current certification):
 

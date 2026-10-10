@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticUniverseRegime
 import Ps.KernelCore.Metatheory.SemanticReferenceLambda
 import Ps.KernelCore.Metatheory.SemanticFunctionValidity
 import Ps.KernelCore.Metatheory.SemanticReference
@@ -27,6 +28,19 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.UniverseRegime.holds_inter,
+    ``PsKernelSemantics.UniverseRegime.ofLevel_spec,
+    ``PsKernelSemantics.UniverseRegime.subset_spec,
+    ``PsKernelSemantics.UniverseRegime.compare_spec,
+    ``PsKernelSemantics.UniverseRegime.check_spec,
+    ``PsKernelSemantics.UniverseRegime.check_refl,
+    ``PsKernelSemantics.UniverseRegime.check_symm,
+    ``PsKernelSemantics.UniverseRegime.check_trans,
+    ``PsKernelSemantics.UniverseRegime.check_instParams,
+    ``PsKernelSemantics.UniverseRegime.check_imax_right,
+    ``PsKernelSemantics.UniverseRegime.check_max_comm,
+    ``PsKernelSemantics.UniverseRegime.check_zero_succ,
+    ``PsKernelSemantics.UniverseRegime.check_param_mvar,
     ``PsKernelSemantics.SetModel.hereditary_validity_not_erasure_coherence,
     ``PsKernelSemantics.SetModel.functionValid_withFree_fresh,
     ``PsKernelSemantics.SetModel.functionValid_close,

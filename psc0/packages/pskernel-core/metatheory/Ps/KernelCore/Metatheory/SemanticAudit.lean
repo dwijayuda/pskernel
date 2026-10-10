@@ -6,6 +6,7 @@ import Ps.KernelCore.Metatheory.SemanticModelAdequacy
 import Ps.KernelCore.Metatheory.SemanticDeclarative
 import Ps.KernelCore.Metatheory.SemanticConcrete
 import Ps.KernelCore.Metatheory.SemanticExtension
+import Ps.KernelCore.Metatheory.SemanticStructuralEquality
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -103,7 +104,8 @@ run_cmd do
     ``PsKernelSemantics.SetModel.interp_extendConstant,
     ``PsKernelSemantics.SetModel.satisfies_extendConstant,
     ``PsKernelSemantics.SetModel.modelsType_extendConstant,
-    ``PsKernelSemantics.SetModel.newConstant_modelsType
+    ``PsKernelSemantics.SetModel.newConstant_modelsType,
+    ``PsKernelSemantics.SetModel.exprEq_preserves_interp
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

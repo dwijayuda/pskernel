@@ -33,6 +33,10 @@ noncomputable def Reading.extendConstant (M : Reading V) (fresh : PsKernelName)
   exact { M with constants := fun name levels =>
     if name = fresh then value levels else M.constants name levels }
 
+@[simp] theorem Reading.extendConstant_level (M : Reading V) (fresh : PsKernelName)
+    (value : List Nat → V) :
+    (M.extendConstant fresh value).level = M.level := rfl
+
 theorem interp_extendConstant (M : Reading V) (fresh : PsKernelName)
     (value : List Nat → V) (e : AnnotatedExpr)
     (h : AvoidsConstant fresh e) (ρ : Nat → V) :
@@ -43,7 +47,8 @@ theorem interp_extendConstant (M : Reading V) (fresh : PsKernelName)
   | const name levels =>
       intro h
       simp only [AvoidsConstant] at h
-      simp [interp, Reading.extendConstant, Reading.level, h]
+      simp only [interp, Reading.extendConstant_level]
+      simp [Reading.extendConstant, h]
   | app f a ihf iha =>
       intro h
       simp only [interp, ihf ρ h.1, iha ρ h.2]
@@ -105,6 +110,7 @@ theorem newConstant_modelsType (M : Reading V) (fresh : PsKernelName)
     ModelsType (M.extendConstant fresh value) Γ (.const fresh levels) A := by
   intro ρ _
   rw [interp_extendConstant M fresh value A hA]
-  simpa [interp, Reading.extendConstant, Reading.level] using hValue ρ
+  simp only [interp, Reading.extendConstant_level]
+  simpa [Reading.extendConstant] using hValue ρ
 
 end PsKernelSemantics.SetModel

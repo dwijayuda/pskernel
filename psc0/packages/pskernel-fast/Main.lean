@@ -1,0 +1,55 @@
+import PSKernelFast.Core
+
+open PSKernelFast
+
+/-! Focused G0 runtime checks. NOT soundness or Lean compatibility evidence. -/
+
+def check (condition : Bool) (description : String) : IO Unit := do
+  unless condition do
+    throw (IO.userError description)
+
+def main : IO Unit := do
+  let term : RawExpr :=
+    .lam (.sort 0) (.app (.bvar 0) (.const "x"))
+
+  let (root, store) ←
+    match encodeClosed term with
+    | .ok result => pure result
+    | .error err =>
+        throw (IO.userError s!"failed to encode closed expression: {repr err}")
+
+  check (store.nodes.size == 5) "incorrect hash-consed node count"
+
+  let decoded ←
+    match decodeClosed store root with
+    | .ok value => pure value
+    | .error err =>
+        throw (IO.userError s!"failed to decode expression: {repr err}")
+  check (decoded == term) "round-trip erased expression differs"
+
+  let (secondRoot, secondStore) ←
+    match encode term store with
+    | .ok result => pure result
+    | .error err =>
+        throw (IO.userError s!"re-encoding failed: {repr err}")
+  check (secondRoot == root) "identical syntax did not share its root ID"
+  check (secondStore.nodes.size == store.nodes.size)
+    "re-encoding allocated duplicate nodes"
+
+  match encodeClosed (.bvar 0) with
+  | .error .unscopedInput => pure ()
+  | _ => throw (IO.userError "unbound variable was not rejected")
+
+  match store.intern (.app (root + 100) root) with
+  | .error .invalidChild => pure ()
+  | _ => throw (IO.userError "invalid child reference was not rejected")
+
+  match decodeClosed store (root + 100) with
+  | .error (.invalidHandle _) => pure ()
+  | _ => throw (IO.userError "invalid handle was not rejected")
+
+  match decodeFuel 0 store root with
+  | .error .decodeBudget => pure ()
+  | _ => throw (IO.userError "exhausted decode budget was not rejected")
+
+  IO.println "PSKernel-Fast G0: representation/scoping checks passed (NOT proof-checker certification)"

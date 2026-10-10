@@ -27,7 +27,7 @@ async function fixture(t, proofscript = { profile: 'checked', extensions: [] }) 
     copyFile(path.join(root, 'bin/psc.mjs'), path.join(installed, 'bin/psc.mjs')),
     copyFile(path.join(root, 'scripts/release-manifest.mjs'), path.join(installed, 'scripts/release-manifest.mjs')),
     ...['project-init.mjs', 'command-extensions.mjs', 'command-wasm-profile.mjs',
-      'command-extension-worker.mjs', 'checked-artifact-publication.mjs'].map(file =>
+      'command-extension-worker.mjs', 'checked-artifact-publication.mjs', 'checked-project.mjs'].map(file =>
       copyFile(path.join(root, 'scripts', file), path.join(installed, 'scripts', file))),
     copyFile(path.join(root, 'release/release.json'), path.join(installed, 'release.json')),
     writeFile(path.join(installed, 'node_modules/typescript/package.json'), JSON.stringify({ name: 'typescript', version: '7.0.2' })),

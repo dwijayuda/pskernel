@@ -26,6 +26,10 @@ Run 38013991001, attempt 2, at source 5fe0045dcb0bf30e1d2519f900458d1407822eed a
 
 Exact fixed-point, generated-conformance and native-admission receipts are retained in docs/platform with run38013991001 in their filenames. Earlier focused run38010115595 at e698a663b7b86ea89987beb757c35eb555fe653c passed 63 host tests and 11 native-generated conformance observations; the current full qualification independently supplies successor evidence.
 
+## First platform fixture correction
+
+Release checkpoint49ab05830e34c35e8df0f51389d430e88a046b8d / run38019059404 stopped before artifact download or native assembly: the synthetic installed CLI fixture omitted checked-project.mjs from its copy list. All15 CLI cases failed at module loading, while115 other source tests passed. The actual release assembler already includes the module, whose only dependencies are node:path and node:crypto. Add that one fixture copy entry; retain all15 CLI expectations, including the already correct four-example catalog. Compiler qualification, release pins and production behavior are unchanged. Retry all platform gates.
+
 ## Current next actions
 
 1. Run the prepared [platform-qualify] workflow at this release checkpoint: Linux Node22 source, Windows Node26 source, and four clean installed Windows/Linux × Node22.23.3/26.7.0 jobs. Read actual new counts and every installed receipt; never reuse preview2 counts.

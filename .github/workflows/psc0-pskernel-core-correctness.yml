@@ -23,7 +23,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate declarative fragment soundness and relative consistency
+      - name: Validate concrete set-model bridges and conservative extension
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail

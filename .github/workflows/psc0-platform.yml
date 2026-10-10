@@ -37,6 +37,8 @@ jobs:
           node-version: '22.23.3'
       - name: Check host/session/publication and release policy before native build
         run: |
+          node --check packages/pslsp/bin/pslsp.mjs
+          node --check scripts/checked-query.mjs
           node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-project.test.mjs scripts/project-watch.test.mjs scripts/checked-query.test.mjs packages/pslsp/test/pslsp.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
           node scripts/check-modular-preparation-source.mjs
           node --check scripts/platform-release-smoke.mjs
@@ -225,6 +227,8 @@ jobs:
           node-version: '26.7.0'
       - name: Check Windows host/session/publication and release policy
         run: |
+          node --check packages/pslsp/bin/pslsp.mjs
+          node --check scripts/checked-query.mjs
           node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-source-snapshot.test.mjs scripts/checked-project.test.mjs scripts/project-watch.test.mjs scripts/checked-query.test.mjs packages/pslsp/test/pslsp.test.mjs scripts/psc-cli.test.mjs scripts/assemble-release.test.mjs scripts/platform-release-smoke.test.mjs scripts/project-init.test.mjs scripts/command-extensions.test.mjs
           node scripts/check-modular-preparation-source.mjs
       - uses: actions/download-artifact@v4

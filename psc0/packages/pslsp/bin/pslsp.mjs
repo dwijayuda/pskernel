@@ -145,7 +145,7 @@ async function runQuery(doc, generation) {
     if (docs.get(doc.uri) !== doc || doc.generation !== generation || shuttingDown) return;
     if (cause || code !== 0) {
       publish(doc.uri, currentVersion, [safeDiagnostic('Checking unavailable: ' +
-        (cause?.message ?? errors.slice(-260) || ('compiler exited ' + code)))]);
+        (cause?.message ?? (errors.slice(-260) || ('compiler exited ' + code))))]);
       return;
     }
     let result;

@@ -41,6 +41,7 @@ jobs:
     steps:
       - name: Preserve tracked LF source bytes
         shell: bash
+        working-directory: ${{ github.workspace }}
         run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         with:
@@ -128,7 +129,8 @@ jobs:
           set -e
           printf '%s\n' "$invalid"
           test "$rc" -ne 0
-          grep -Eq 'unsolved goals|unsolved goal|type mismatch|failed to synthesize' <<< "$invalid"
+          grep -Fq 'unproved verification conditions' <<< "$invalid"
+          grep -Fq 'depends on disallowed axiom sorryAx' <<< "$invalid"
           strict=$(lake exe pscvl check examples/normative/pass_minimal.ps 2>&1)
           printf '%s\n' "$strict"
           grep -Fq 'UNCERTIFIED' <<< "$strict"

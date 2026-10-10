@@ -171,7 +171,8 @@ theorem interp_scoped (M : Reading V) (e : AnnotatedExpr) (n : Nat)
   | bvar i => exact h i hscope
   | fvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
   | app f a ihf iha =>
-      exact congrArg₂ app (ihf n hscope.1 ρ σ h) (iha n hscope.2 ρ σ h)
+      simp only [interp]
+      rw [ihf n hscope.1 ρ σ h, iha n hscope.2 ρ σ h]
   | lam name A b bi v ihA ihb =>
       simp only [interp]
       rw [ihA n hscope.1 ρ σ h]

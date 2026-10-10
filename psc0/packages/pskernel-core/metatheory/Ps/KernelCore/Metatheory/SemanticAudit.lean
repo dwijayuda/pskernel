@@ -1,6 +1,7 @@
 import Lean
 import Ps.KernelCore.Metatheory.SemanticSortInference
 import Ps.KernelCore.Metatheory.SemanticContext
+import Ps.KernelCore.Metatheory.SemanticErasure
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -74,7 +75,13 @@ run_cmd do
     ``PsKernelSemantics.SetModel.models_weaken,
     ``PsKernelSemantics.SetModel.empty_context_satisfiable,
     ``PsKernelSemantics.SetModel.no_closed_empty_type,
-    ``PsKernelSemantics.SetModel.no_closed_allProps
+    ``PsKernelSemantics.SetModel.no_closed_allProps,
+    ``PsKernelSemantics.AnnotatedExpr.erase_liftN,
+    ``PsKernelSemantics.AnnotatedExpr.scoped_iff_noLoose,
+    ``PsKernelSemantics.AnnotatedExpr.inst_scoped,
+    ``PsKernelSemantics.AnnotatedExpr.erase_inst,
+    ``PsKernelSemantics.AnnotatedExpr.erase_instantiate1,
+    ``PsKernelSemantics.SetModel.instantiate1_has_reading
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

@@ -486,7 +486,7 @@ def psKernelInferCoreWithFuel
                             -- Checked lambda inference establishes its codomain
                             -- sort by a real infer-only visit and sort exposure.
                             -- Infer-only callers retain their validity precondition.
-                            let codomainCheck :=
+                            let codomainCheck : Except String PsKernelCheckerState :=
                               if inferOnly then
                                 Except.ok (Prod.snd bodyResult)
                               else

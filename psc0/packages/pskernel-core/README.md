@@ -10,26 +10,43 @@ The target is **Lean 4.35.0-rc4**, commit
 the package has its own toolchain and does not replace PSC0's selected compiler
 seed or its historical provider receipts.
 
-## Runtime annotations and proof handoff
+## Owned checker/model progress
 
-The annotated syntax, universe-regime test and guarded structural comparator
-now have a single owner in runtime Core. The model imports those exact
-operations. Their structural equivalence and transport through lifting,
-substitution, free-name closing and universe instantiation are proved, together
-with hereditary-validity transport. The application bridge fixes one concrete
-term/result reading with all four validity facts under explicit recursive and
-guard premises. Public checking and admission still exchange raw expressions;
-carrying and validating these annotations throughout those paths is unfinished.
-See [the work state](AI_WORK_STATE.md) and
-[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+Shared local declarations and contexts now have one implementation
+parameterized by their expression representation. The model uses the same
+lookup, shadowing and insertion operations as the raw checker. Exact erasure
+and fixed stored-reading theorems connect an actual reference free-variable
+visit to its stored annotated type. Binder/let context model construction
+still requires the parent's model, fixed checked domain/value, freshness and
+scope premises.
 
-[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
-`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
-the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
-The 140-module dependency closure contains exactly 12 allowed Con Leche
+Actual checked-lambda and forall sort visits use a shared helper carrying the
+type and level produced by inference and sort exposure. Infer-only lambda is
+explicitly unchecked, with no fabricated level. Projection theorems recover
+the old helper pipelines, including errors and full state; same-visit
+provenance prevents conflicting universe regimes even on empty domains.
+
+Public recursive results and admitted declarations still use raw expressions.
+The local lambda visit carrier is projected at that boundary. Full annotation
+transport, guarded accepting shortcuts, joint inference/WHNF/defeq soundness,
+full admission and public relative consistency remain unfinished.
+
+[Final cloud job 114243521453](https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453) at
+`35cef8c29358ecac8a3e89df540e0fdce72fcbca` passed **266 build jobs**, all **84
+companion-proof files**, the **298-declaration semantic axiom audit** and
+all **seven native test executables**. This includes **31 annotated-syntax
+cases** and **8 sort-visit cases** (1 unchecked, 2 observed, 5 failure cases).
+The 152-module model closure contains exactly 12 allowed Con Leche
 pure-math modules, zero legacy-judgment imports and zero production-assurance
-imports. The reference-policy audit checked 1,824 definitions with zero cached
-fallbacks. The complete workflow passed.
+imports. The reference-policy audit checked 1,840 definitions with zero
+cached fallbacks. The complete focused workflow passed; standalone binary,
+Arena and fresh-export jobs were skipped. These checks validate the stated
+local results and dependencies, not the open public-acceptance theorem.
+
+See [the work state](AI_WORK_STATE.md), [continuation prompt](AI_CONTINUATION_PROMPT.md)
+and [exact evidence](MIGRATION_EVIDENCE.json) for the source-specific history
+and next local-frame/recursive-carrier obligations. The final focused audit
+does not identify a current Arena binary or qualify full Init/Std/Mathlib.
 
 ## Correctness status
 
@@ -135,17 +152,19 @@ decline and resource-classification cases. Both Arena modes passed
 Fresh exact 4.35 Prelude/UTF8/XOR/Int64 closures all passed in cached mode.
 Reference mode passed Prelude/UTF8/XOR, then **timed out on Int64 at 180 seconds,
 exit 124**. That check remains unresolved; the runtime workflow failed overall
-on this timeout. Full Init/Std/Mathlib were not rerun, and their earlier
-qualification gaps remain open. No general compatibility, mode-equivalence or
+on this timeout. Full Init/Std/Mathlib were not rerun at that historical source. The later
+intermediate-source full Init/Std timeouts are retained in the current evidence;
+the qualification gaps remain open. No general compatibility, mode-equivalence or
 performance claim follows from these focused checks.
 
-The final source adds an explicit local type annotation required by PSC0's
-authoring guide. Its [cloud rebuild](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834301)
+That historical lambda-codomain source added an explicit local type annotation
+required by PSC0's authoring guide. Its [cloud rebuild](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834301)
 matched the runtime-tested binary's SHA-256 exactly:
 `dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
-The final audit above therefore applies to the final typed source, with
-executable evidence tied to the matching binary. Generated PSC0 qualification
-remains separate.
+That identity applies to the historical lambda-codomain stage. Later runtime
+storage and sort-helper changes are not covered by that hash; the latest focused
+audit does not measure a current Arena binary identity. Generated PSC0
+qualification remains separate.
 
 The recoverable pre-refactor branch is
 `checkpoint/pskernel-core-before-cache-free-reference-20261010` at

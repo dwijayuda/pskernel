@@ -4,14 +4,16 @@ Copy the text below into the new chat.
 
 ---
 
-Continue the PSKernel Core correctness project autonomously. Correctness is the
-priority over performance. Work toward full-kernel successful-checking soundness,
-metatheory and an end-to-end relative model/consistency proof. Repair bugs and
-change architecture when necessary, with a recoverable checkpoint first. Do not
-add custom axioms, sorry, hidden stronger assumptions or a fallback checker.
-Do not report fragment theorems or conditional lemmas as full-kernel completion.
+Continue the PSKernel Core correctness project autonomously on the second
+route: a PSKernel-owned reference checker and semantic model, reusing only
+pinned Con Leche pure mathematics. Correctness has priority over performance.
+Work toward full-kernel successful-checking soundness and an end-to-end
+relative model/consistency theorem. Repair code and proofs when necessary,
+with a recoverable checkpoint before architecture changes. Do not add custom
+axioms, sorry, hidden stronger assumptions or a fallback checker. Do not call
+fragment or conditional theorems full-kernel completion.
 
-First read the current work state from this exact active branch:
+First read the live work state:
 https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/AI_WORK_STATE.md
 
 Repository: dwijayuda/pskernel.
@@ -22,34 +24,54 @@ Lean target: 4.35.0-rc4 at c29b6dda4f7c20e3eeaa717c4e565663c5cfa364.
 
 GitHub/cloud only: use repository APIs and GitHub Actions; do not use a local
 filesystem, shell, checkout or local execution. Read the live head before work
-and before every update; use expected_sha and preserve concurrent changes.
-Keep the PR draft. Do not merge, promote the default provider, change PSC0's
-compiler seed, create recurring automations or open a new task.
+and immediately before each update; use expected_sha and preserve concurrent
+changes. Keep the PR draft. Do not merge, promote the default provider, change
+PSC0's compiler seed, or create a recurring automation or new task.
 
 Read applicable AGENTS files, GITHUB_FIRST_WORKFLOW.md,
 psc0/docs/selfhost-language/CURRENT.md, REFERENCE_CORRECTNESS_PLAN.md and the
-current evidence before edits. PSC0 has a newer self-host profile than the old
-PSC1 profiles, but generated kernel qualification remains unproved.
+current evidence before edits. Generated PSC0 kernel qualification is open.
 
-Resume the exact pending step recorded in AI_WORK_STATE.md. Verify completed
-cloud logs rather than assuming the latest branch is green. If the document is
-older than the branch, inspect the intervening commits and reconcile the state.
-The last validated stage established one runtime annotated representation,
-guarded structural coherence, syntax/validity transport and a concrete checked
-application reading under explicit local premises. The next architectural step
-is to carry and validate actual readings throughout the shared recursive
-checker, local context and admission. Checkpoint before that migration. Global public annotation
-provenance, joint infer/WHNF/defeq soundness, full admission models and public
-consistency are still open unless later verified evidence establishes them.
+Last fully validated source/audit trigger: 35cef8c29358ecac8a3e89df540e0fdce72fcbca.
+Later documentation commits may follow it. Verify completed logs and inspect
+any intervening source changes before assuming the current branch is green.
+Recovery checkpoint before this architecture slice:
+checkpoint/pskernel-core-before-owned-acceptance-20261010
+at 4a162b2056658155001828d0c17a426b000a3a2d.
 
-The explicit [ConLeche.SetTheory V] foundation is a relative assumption, not a
-constructed instance. Only pinned pure set mathematics is imported from
-Con Leche. Never import its checker theorem as a PSKernel proof. Preserve the
-recorded Int64 reference timeout and full-corpus gaps; passing small Arena tests
-does not establish soundness or Mathlib compatibility.
+The completed milestone shares raw/annotated local storage and fixed result/view
+constructors, proves exact erasure and actual reference fvar retrieval, and
+constructs binder/let context models under explicit parent, checked-reading,
+freshness and scope premises. Actual checked-lambda/forall sort helpers retain
+the real inferred type and symbolic level. Infer-only lambda is explicitly
+unchecked. SortVisitSelected fixes same-visit provenance outside semantic
+valuations and rules out conflicting zero/positive selections for that call.
+Same-visit provenance does not establish cross-visit coherence.
 
-Continue useful implementation/proof work and run appropriate cloud checks.
-Keep AI_WORK_STATE.md and this prompt current for the next handoff. Report exact
-proved scope, validation evidence and remaining internal hypotheses honestly.
-If this chat lacks the required GitHub write/Actions capabilities, explain that
-specific limitation; do not silently switch to local work or pretend edits ran.
+The public recursive result, checker context and admitted declarations still
+use raw specializations; lambda's observed carrier is projected at return.
+Global annotation transport/guards, joint infer/WHNF/defeq soundness, allocator
+and scope preservation, full admission and public consistency remain open.
+
+Resume the smallest concrete slice in AI_WORK_STATE.md: derive binder-entry
+freshness from a maintained syntactic local-frame invariant using existing
+NamesBelow/allocator/opening lemmas, then carry the same produced readings and
+provenance through the shared recursive interfaces and stored declarations.
+Do not select an arbitrary annotation from a vacuous semantic predicate.
+
+[ConLeche.SetTheory V] is an explicit relative assumption, not a constructed
+instance. Only pure set mathematics at
+65e74db49e89ad2bbd1e90aa4f784954db41fa3a is imported. Its checker/acceptance
+theorem is not a PSKernel proof. Preserve the reference Int64 180-second
+timeout and the intermediate df830e7 Init/Std/profile timeouts; a green
+profiling job is not checker acceptance. The latest focused audit does not
+supply a current Arena binary hash or full-corpus qualification.
+
+Continue useful implementation and cloud validation. Source commits use
+[skip ci], followed by a meaningful workflow-only audit trigger. Run full
+proof/axiom/import/companion gates and native regressions; keep failures tied
+to their actual source. Update AI_WORK_STATE.md, this prompt, the plan,
+architecture/TCB/evidence and draft PR after the next validated stage. Report
+exact proved scope and remaining theorem hypotheses. If required GitHub
+capabilities are absent, explain the specific limitation instead of silently
+switching to local work or claiming the proof is complete.

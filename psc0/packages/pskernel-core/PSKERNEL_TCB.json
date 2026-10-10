@@ -145,7 +145,7 @@
       "soundnessLawAxioms": []
     },
     "semanticFoundation": {
-      "scope": "Relative universe/function model and sound declarative fragment; runtime-owned annotated syntax and guarded structural coherence, syntax/hereditary-validity transport, execution-derived lambda codomain and exact application readings under explicit recursive premises. Full public checking/admission remains unproved.",
+      "scope": "Relative universe/function model and sound declarative fragment; runtime-owned annotated syntax, coherent syntax/validity transport, exact stored local readings, context-model construction and actual same-visit sort provenance. Public annotation transport, joint recursive checking and full admission/consistency remain unproved.",
       "modules": [
         "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
@@ -179,19 +179,28 @@
         "metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLambdaCodomain.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationCoherence.lean",
-        "metatheory/Ps/KernelCore/Metatheory/SemanticCoherentValidity.lean"
+        "metatheory/Ps/KernelCore/Metatheory/SemanticCoherentValidity.lean",
+        "metatheory/Ps/KernelCore/Metatheory/AnnotatedLocalContextErasure.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticInferenceBoundary.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedReading.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLocalContext.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticLocalContextExtension.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinderContext.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticSortVisitProvenance.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotatedSpines.lean"
       ],
       "legacyJudgmentsReplacedEverywhere": false,
       "fullUniverseModel": true,
       "fullDependentFunctionModel": true,
       "admissionModel": false,
-      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda direct body-type closing, actual codomain-sort visits, and a specific shared term/type reading with all four hereditary facts; local semantic obligations remain explicit.",
+      "concreteImplementationCase": "Core sort and constant inference (selected-cache/environment premises explicit), structural comparison under regime agreement, lifting, single substitution, fresh-name allocation/opening/closing, universe constructors and substitution. Reference core sort and constant cases remove the cache-coherence premise; selected environment models remain required. Exact reference forall visits in either mode, checked application comparison/substitution and checked lambda direct body-type closing, actual codomain-sort visits, and a specific shared term/type reading with all four hereditary facts; local semantic obligations remain explicit. Actual free-variable inference in either reference grade retrieves a fixed stored annotated type without callback/cache premises for that branch. Shared local/let insertion constructs context models under explicit freshness/scope/checked-reading premises; actual helper result equations and same-call sort provenance are proved.",
       "conditionalBridges": [
         "actual proposition classifier",
         "proof-irrelevance call sequence",
         "forall model from actual recursive type readings and visited sort checks",
         "checked application model with exposed function type, actual comparison obligations and product validity",
-        "checked lambda at the execution-derived codomain level, with recursive typing/reduction/validity, scope and freshness obligations"
+        "checked lambda at the execution-derived codomain level, with recursive typing/reduction/validity, scope and freshness obligations",
+        "binder-child context model and actual fvar run, with parent modeled annotated context, fixed checked domain/value, syntactic freshness and scope premises"
       ],
       "unprovedCallbackObligations": [
         "Establish checked annotation provenance through actual public acceptance; the new executable guard discharges structural regime agreement when performed, but the public raw checker does not yet perform it.",
@@ -205,7 +214,7 @@
       "customSoundnessAxiomsAdded": false,
       "axiomAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
-        "declarations": 242,
+        "declarations": 298,
         "allowedHostAxioms": [
           "propext",
           "Classical.choice",
@@ -214,20 +223,22 @@
         "localHypothesesAuditedSeparately": true
       },
       "validation": {
-        "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
-        "run": 38057387016,
-        "job": 114228540945,
-        "buildJobs": 254,
-        "focusedBuildJobs": 127,
+        "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+        "run": 38062528401,
+        "job": 114243521453,
+        "buildJobs": 266,
+        "focusedBuildJobs": 221,
         "companionFiles": 84,
-        "axiomDeclarations": 242,
+        "axiomDeclarations": 298,
         "pureMathModules": 12,
-        "closureModules": 140,
-        "referenceDefinitions": 1824,
+        "closureModules": 152,
+        "productionAssuranceImports": 0,
+        "legacyJudgmentImports": 0,
+        "referenceDefinitions": 1840,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 13:57:20 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+        "checkedAt": "2026-10-10 15:17:00 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
         "runConclusion": "success"
       },
       "fullUniverseModelQualification": "Relative mathematical universe chain under explicit SetTheory V, not a model of full kernel acceptance.",
@@ -291,10 +302,12 @@
         "acceptedTermAnnotationProvenanceProved": false,
         "completeRecursiveCheckerSoundness": false,
         "strongerFoundationAssumptionsAdded": false,
-        "moduleScope": "One runtime Core definition shared by syntax tests and model; public raw checking still does not run the guard or carry annotated expressions.",
+        "moduleScope": "One runtime syntax/guard definition shared by model and tests. Actual binder sort helper results retain inferred types and symbolic levels, but public recursive results/context/admission remain raw and accepting raw shortcuts do not yet run the annotation guard.",
         "publicCheckedLambdaComputesCodomainSort": true,
         "lambdaReadingSelectsActualVisitedLevel": true,
-        "runtimeCarriesValidatedAnnotatedExpressions": false
+        "runtimeCarriesValidatedAnnotatedExpressions": false,
+        "actualSortVisitCarrierAndProvenance": true,
+        "provenanceScope": "Same actual call; no global accepted annotation or cross-visit coherence theorem."
       },
       "lambdaTypeSimplification": {
         "sharedProductionBranch": true,
@@ -354,19 +367,20 @@
         }
       },
       "priorValidation": {
-        "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
-        "run": 38055104083,
-        "job": 114221834109,
-        "buildJobs": 249,
+        "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+        "run": 38057387016,
+        "job": 114228540945,
+        "buildJobs": 254,
+        "focusedBuildJobs": 127,
         "companionFiles": 84,
-        "axiomDeclarations": 221,
+        "axiomDeclarations": 242,
         "pureMathModules": 12,
-        "closureModules": 135,
+        "closureModules": 140,
         "referenceDefinitions": 1824,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 13:20:56 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
+        "checkedAt": "2026-10-10 13:57:20 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
         "runConclusion": "success"
       },
       "runtimeAnnotatedSyntax": {
@@ -545,6 +559,192 @@
           ],
           "runtimeSourceChanged": false
         }
+      },
+      "ownedAcceptanceStage": {
+        "status": "validated-owned-context-and-sort-visit-support-full-acceptance-open",
+        "checkpoint": {
+          "branch": "checkpoint/pskernel-core-before-owned-acceptance-20261010",
+          "commit": "4a162b2056658155001828d0c17a426b000a3a2d"
+        },
+        "runtimeModules": [
+          "Ps.KernelCore.Core.LocalContext",
+          "Ps.KernelCore.Core.AnnotatedLocalContext",
+          "Ps.KernelCore.Core.InferenceBoundary",
+          "Ps.KernelCore.Core.AnnotatedInference",
+          "Ps.KernelCore.Checker.Inference.Helpers",
+          "Ps.KernelCore.Checker.Inference.Core"
+        ],
+        "proofModules": [
+          "Ps.KernelCore.Metatheory.AnnotatedLocalContextErasure",
+          "Ps.KernelCore.Metatheory.SemanticInferenceBoundary",
+          "Ps.KernelCore.Metatheory.SemanticCheckedReading",
+          "Ps.KernelCore.Metatheory.SemanticReferenceLocalContext",
+          "Ps.KernelCore.Metatheory.SemanticLocalContextExtension",
+          "Ps.KernelCore.Metatheory.SemanticReferenceBinderContext",
+          "Ps.KernelCore.Metatheory.SemanticSortVisitProvenance"
+        ],
+        "oneSharedLocalStorageImplementation": true,
+        "rawAndAnnotatedLookupAndInsertionShared": true,
+        "erasurePreservesFirstStoredLookupAndMetadata": true,
+        "erasurePreservesShadowingAndAllocationIndex": true,
+        "fixedExpressionTypeAndForallViewCarriers": true,
+        "constructorsAreTypingCertificates": false,
+        "fvarActualReferenceRunBothGrades": true,
+        "fvarExactStoredAnnotatedType": true,
+        "fvarRequiresRecursiveCallbackOrCacheCorrectnessPremise": false,
+        "parentAnnotatedContextWitnessSelectedByPublicChecker": false,
+        "localAndLetContextModelConstruction": true,
+        "actualBinderChildErasureConnection": true,
+        "actualBinderChildFvarRunConnection": true,
+        "wholeBinderInferenceSoundnessProved": false,
+        "explicitContextPremises": [
+          "fixed annotated parent context with exact erasure of the raw context",
+          "parent ModelsLocalContext",
+          "fixed domain/value CheckedReading",
+          "syntactic freshness of the generated name in context, domain and value",
+          "Scoped 0 domain for local insertion or stored value for let insertion",
+          "chosen local model element membership, or let assignment constructed from value interpretation"
+        ],
+        "checkedLambdaAndForallUseActualSortVisitHelper": true,
+        "retainedSortVisitFields": [
+          "actual inferred type before WHNF",
+          "exposed symbolic universe level"
+        ],
+        "returnedStateIsExactSortExposureState": true,
+        "inferOnlyLambdaVisit": "unchecked; no selected level and callbacks skipped",
+        "helperProjectionAllInputs": true,
+        "helperProjectionPreserves": [
+          "success results",
+          "both grades",
+          "original and classified errors",
+          "full returned states"
+        ],
+        "sortVisitSelectionOutsideSemanticValuations": true,
+        "sameVisitRegimeAgreementAndNoClash": true,
+        "noClashRemainsValidOnEmptyDomains": true,
+        "crossVisitRawEqualityImpliesCoherence": false,
+        "pairedUniverseInstantiationAgreement": true,
+        "instantiatedExecutionRerunClaimed": false,
+        "runtimeRecursiveResultStillRaw": true,
+        "actualCheckerContextStillRaw": true,
+        "admittedDeclarationsStillRaw": true,
+        "lambdaVisitCarrierProjectedAtRawReturn": true,
+        "publicAcceptanceUsesCompleteAnnotatedResults": false,
+        "publicAcceptanceRunsAnnotationGuard": false,
+        "globalAcceptedAnnotationProvenanceProved": false,
+        "allocatorAndRecursiveScopePreservationProved": false,
+        "jointInferWhnfDefeqSoundnessProved": false,
+        "fullSafeAdmissionModelProved": false,
+        "fullKernelConsistencyProved": false,
+        "customAxiomsAdded": false,
+        "strongerFoundationAssumptionsAdded": false,
+        "foundationExistenceConstructed": false,
+        "generatedPsc0Qualified": false,
+        "binaryIdentityForFinalRuntimeMeasured": false,
+        "externalSourceCompatibilityQualification": "Generic operations add an implicit expression-type parameter; explicit @applications or old generated eliminator names in unseen clients may require adjustments.",
+        "failedAttempts": [
+          {
+            "commit": "4261bce16f58903b23ebe7e5863c286d717369ea",
+            "run": 38060275600,
+            "job": 114236961042,
+            "status": "failed",
+            "reason": "Two older admission ordinal proofs did not unfold the new raw local-context nextIndex projection.",
+            "nativeRegressions": "passed",
+            "annotatedSyntaxCases": 31,
+            "newSemanticModules": "compiled",
+            "semanticAxiomTargets": 270,
+            "referenceDefinitions": 1834
+          },
+          {
+            "commit": "df830e7cd8b39c699210e631889539f43c064092",
+            "run": 38060658281,
+            "job": 114238075339,
+            "status": "failed",
+            "reason": "The downstream AdmissionHeaderSpineConfiguration ordinal proof exposed the same folded raw projection; shared projection aliases subsequently received simp rules.",
+            "focusedBuildJobs": 196,
+            "nativeRegressions": "passed",
+            "annotatedSyntaxCases": 31
+          },
+          {
+            "commit": "74b5373985ccccf1187f636ad1595bda23135988",
+            "run": 38061081280,
+            "job": 114239308257,
+            "status": "failed",
+            "reason": "Reserved identifier matches in four context-extension proofs; explicit Except result types and source-equation simplification needed in two visit projection proofs.",
+            "nativeRegressions": "passed",
+            "annotatedSyntaxCases": 31,
+            "sortVisitCarrierCases": 8
+          },
+          {
+            "commit": "cea161d65321a9ca1bde7cd2ad5fe2c979bc8f33",
+            "run": 38061552694,
+            "job": 114240674028,
+            "status": "failed",
+            "reason": "Four false Boolean lookup branches required explicit Bool.false_eq_true in SemanticLocalContextExtension. SemanticSortVisitProvenance compiled; all native tests passed.",
+            "nativeRegressions": "passed",
+            "annotatedSyntaxCases": 31,
+            "sortVisitCarrierCases": 8,
+            "repair": "4e1e923e50e86158939e48db2f5d4f15a5100ac3"
+          },
+          {
+            "commit": "93261b77efe5951100a38b80192dd487a9af30ee",
+            "run": 38061999713,
+            "job": 114241971001,
+            "status": "failed",
+            "reason": "All production/metatheory builds and semantic/import/reference audits passed; 2 of 84 companion files required source-compatibility repairs: empty lookup needed an explicit Expr specialization; two Typing lambda/forall proofs needed the new helper definitions unfolded.",
+            "focusedBuildJobs": 221,
+            "buildJobs": 266,
+            "semanticAxiomTargets": 298,
+            "closureModules": 152,
+            "pureMathModules": 12,
+            "referenceDefinitions": 1840,
+            "cachedFallbacks": 0,
+            "companionFiles": 84,
+            "failedCompanionFiles": 2,
+            "nativeRegressions": "passed",
+            "annotatedSyntaxCases": 31,
+            "sortVisitCarrierCases": 8,
+            "repair": "87a128d64fa3c91301028e58c1092d8cfd620369"
+          }
+        ],
+        "remaining": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
+        "validation": {
+          "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+          "run": 38062528401,
+          "job": 114243521453,
+          "buildJobs": 266,
+          "focusedBuildJobs": 221,
+          "companionFiles": 84,
+          "axiomDeclarations": 298,
+          "pureMathModules": 12,
+          "closureModules": 152,
+          "productionAssuranceImports": 0,
+          "legacyJudgmentImports": 0,
+          "referenceDefinitions": 1840,
+          "cachedFallbacks": 0,
+          "status": "passed",
+          "checkedAt": "2026-10-10 15:17:00 UTC",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+          "runConclusion": "success"
+        },
+        "nativeSyntax": {
+          "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+          "run": 38062528401,
+          "job": 114243521453,
+          "status": "passed",
+          "cases": 31,
+          "modelImports": 0
+        },
+        "nativeSortVisits": {
+          "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+          "run": 38062528401,
+          "job": 114243521453,
+          "status": "passed",
+          "cases": 8,
+          "unchecked": 1,
+          "observed": 2,
+          "failures": 5
+        }
       }
     },
     "relativeSetModelConstructed": true,
@@ -570,25 +770,27 @@
       },
       "callGraphAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/ReferencePolicyAudit.lean",
-        "definitions": 1824,
+        "definitions": 1840,
         "cachedFallbacks": 0,
         "kind": "structural executable-dependency audit; not a semantic theorem"
       },
       "validation": {
-        "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
-        "run": 38057387016,
-        "job": 114228540945,
-        "buildJobs": 254,
-        "focusedBuildJobs": 127,
+        "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+        "run": 38062528401,
+        "job": 114243521453,
+        "buildJobs": 266,
+        "focusedBuildJobs": 221,
         "companionFiles": 84,
-        "axiomDeclarations": 242,
+        "axiomDeclarations": 298,
         "pureMathModules": 12,
-        "closureModules": 140,
-        "referenceDefinitions": 1824,
+        "closureModules": 152,
+        "productionAssuranceImports": 0,
+        "legacyJudgmentImports": 0,
+        "referenceDefinitions": 1840,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 13:57:20 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+        "checkedAt": "2026-10-10 15:17:00 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
         "runConclusion": "success"
       },
       "localSemanticBridges": {
@@ -603,7 +805,12 @@
         "lambdaCodomainSortVisits": true,
         "lambdaReadingUsesVisitedLevel": true,
         "applicationExactReadingAndHereditaryValidity": true,
-        "applicationGuardAndRecursivePremisesDischarged": false
+        "applicationGuardAndRecursivePremisesDischarged": false,
+        "exactStoredReferenceFvarReading": true,
+        "localAndLetContextModelConstruction": true,
+        "actualBinderChildFvarRun": true,
+        "actualSortVisitSameCallProvenance": true,
+        "parentContextWitnessAndFreshnessScopePremisesDischarged": false
       },
       "checkedAnnotationCheckpoint": {
         "branch": "checkpoint/pskernel-core-before-checked-annotations-20261010",
@@ -620,6 +827,27 @@
       "runtimeAnnotationCheckpoint": {
         "branch": "checkpoint/pskernel-core-before-runtime-annotations-20261010",
         "commit": "0c7f63b446bfd4b0847ece437b76bccd40ac3fb9"
+      },
+      "priorValidation": {
+        "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+        "run": 38057387016,
+        "job": 114228540945,
+        "buildJobs": 254,
+        "focusedBuildJobs": 127,
+        "companionFiles": 84,
+        "axiomDeclarations": 242,
+        "pureMathModules": 12,
+        "closureModules": 140,
+        "referenceDefinitions": 1824,
+        "cachedFallbacks": 0,
+        "status": "passed",
+        "checkedAt": "2026-10-10 13:57:20 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+        "runConclusion": "success"
+      },
+      "ownedAcceptanceCheckpoint": {
+        "branch": "checkpoint/pskernel-core-before-owned-acceptance-20261010",
+        "commit": "4a162b2056658155001828d0c17a426b000a3a2d"
       }
     }
   },

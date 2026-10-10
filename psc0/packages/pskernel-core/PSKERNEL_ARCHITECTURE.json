@@ -420,6 +420,26 @@
     {
       "area": "annotated-structural-comparison",
       "module": "Ps.KernelCore.Core.AnnotatedEquality"
+    },
+    {
+      "area": "annotated-syntax-spines",
+      "module": "Ps.KernelCore.Core.AnnotatedSpines"
+    },
+    {
+      "area": "annotated-local-storage-specialization",
+      "module": "Ps.KernelCore.Core.AnnotatedLocalContext"
+    },
+    {
+      "area": "shared-inference-result-and-forall-view",
+      "module": "Ps.KernelCore.Core.InferenceBoundary"
+    },
+    {
+      "area": "annotated-inference-data-constructors",
+      "module": "Ps.KernelCore.Core.AnnotatedInference"
+    },
+    {
+      "area": "actual-binder-sort-visit-carriers",
+      "module": "Ps.KernelCore.Checker.Inference.Helpers"
     }
   ],
   "recursiveWiring": {
@@ -546,14 +566,33 @@
       "blocker": "proofIrrelevanceAlgorithmic omits term-to-inferred-type connections; the legacy relation is universal.",
       "primitiveRepair": "Specified string equality; native runtime correspondence and generated PSC0 qualification remain explicit.",
       "semanticFoundation": {
-        "status": "relative-function-model-and-local-execution-bridges",
+        "status": "relative-function-model-owned-local-context-and-sort-visit-support",
         "namespace": "PsKernelSemantics",
         "independentOfLegacyJudgments": true,
         "concreteModelScope": "Relative universe/function model and sound declarative dependent-function fragment",
-        "concreteCheckerCoverage": "Local sort/constant/binder/application bridges with explicit recursive/environment premises; guarded structural coherence and validity transport",
-        "next": "Carry and validate selected annotations throughout shared checking/context/admission, then discharge joint recursive soundness and full environment preservation",
+        "concreteCheckerCoverage": "Previous sort/constant/binder/application bridges plus exact reference fvar retrieval and binder/let context models under explicit parent, reading, freshness and scope premises; actual helper projection and same-visit provenance.",
+        "next": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
         "fullKernelModel": false,
         "validation": {
+          "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+          "run": 38062528401,
+          "job": 114243521453,
+          "buildJobs": 266,
+          "focusedBuildJobs": 221,
+          "companionFiles": 84,
+          "axiomDeclarations": 298,
+          "pureMathModules": 12,
+          "closureModules": 152,
+          "productionAssuranceImports": 0,
+          "legacyJudgmentImports": 0,
+          "referenceDefinitions": 1840,
+          "cachedFallbacks": 0,
+          "status": "passed",
+          "checkedAt": "2026-10-10 15:17:00 UTC",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+          "runConclusion": "success"
+        },
+        "priorValidation": {
           "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
           "run": 38057387016,
           "job": 114228540945,
@@ -574,13 +613,32 @@
     }
   },
   "annotatedSyntaxMigration": {
-    "status": "runtime-representation-and-guard-transport",
+    "status": "owned-local-storage-and-actual-sort-visit-support",
     "singleDefinitionUsedByModel": true,
     "publicAcceptanceMigrated": false,
     "publicCheckerStillUsesRawExpressions": true,
     "typingCertifiedByRepresentation": false,
     "modelImportsInNewRuntimeModules": false,
     "validation": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "buildJobs": 266,
+      "focusedBuildJobs": 221,
+      "companionFiles": 84,
+      "axiomDeclarations": 298,
+      "pureMathModules": 12,
+      "closureModules": 152,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 15:17:00 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+      "runConclusion": "success"
+    },
+    "priorValidation": {
       "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
       "run": 38057387016,
       "job": 114228540945,
@@ -596,6 +654,13 @@
       "checkedAt": "2026-10-10 13:57:20 UTC",
       "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
       "runConclusion": "success"
-    }
+    },
+    "sharedRawAnnotatedLocalStorage": true,
+    "actualBinderSortObservationsCarriedLocally": true,
+    "actualVisitProvenanceForSameCall": true,
+    "completeCrossVisitCoherence": false,
+    "allocatorAndScopePreservationComplete": false,
+    "fullRecursiveAndAdmissionSoundness": false,
+    "next": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary."
   }
 }

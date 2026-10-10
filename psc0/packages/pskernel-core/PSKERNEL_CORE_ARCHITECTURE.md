@@ -8,23 +8,57 @@ the current certified sharing layer is a Lean-native experiment.
 The former PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1 profiles do not
 constrain this migration.
 
-## Runtime annotation ownership
+## Runtime annotation and observation ownership
 
-The annotated syntax, universe-regime test and guarded structural comparator
-now have a single owner in runtime Core. The model imports those exact
-operations. Their structural equivalence and transport through lifting,
-substitution, free-name closing and universe instantiation are proved, together
-with hereditary-validity transport. The application bridge fixes one concrete
-term/result reading with all four validity facts under explicit recursive and
-guard premises. Public checking and admission still exchange raw expressions;
-carrying and validating these annotations throughout those paths is unfinished.
-See [the work state](AI_WORK_STATE.md) and
-[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+Shared local declarations and contexts now have one implementation
+parameterized by their expression representation. The model uses the same
+lookup, shadowing and insertion operations as the raw checker. Exact erasure
+and fixed stored-reading theorems connect an actual reference free-variable
+visit to its stored annotated type. Binder/let context model construction
+still requires the parent's model, fixed checked domain/value, freshness and
+scope premises.
 
-Canonical owners: `Core/AnnotatedExpr.lean`, `Core/UniverseRegime.lean`, and
-`Core/AnnotatedEquality.lean`. None imports the semantic model. Stored annotations
-are not certified merely by construction; provenance must come from actual
-checking and be preserved by all transformations and admission.
+Actual checked-lambda and forall sort visits use a shared helper carrying the
+type and level produced by inference and sort exposure. Infer-only lambda is
+explicitly unchecked, with no fabricated level. Projection theorems recover
+the old helper pipelines, including errors and full state; same-visit
+provenance prevents conflicting universe regimes even on empty domains.
+
+Public recursive results and admitted declarations still use raw expressions.
+The local lambda visit carrier is projected at that boundary. Full annotation
+transport, guarded accepting shortcuts, joint inference/WHNF/defeq soundness,
+full admission and public relative consistency remain unfinished.
+
+Canonical runtime owners:
+`Core/AnnotatedExpr.lean`, `Core/UniverseRegime.lean`,
+`Core/AnnotatedEquality.lean`, `Core/AnnotatedSpines.lean`,
+`Core/LocalContext.lean`, `Core/AnnotatedLocalContext.lean`,
+`Core/InferenceBoundary.lean`, and `Core/AnnotatedInference.lean`.
+Actual sort-observation carriers/helpers belong to
+`Checker/Inference/Helpers.lean` and are called by the existing
+`Checker/Inference/Core.lean` recursion. These modules import no semantic model.
+
+Same-visit selection is an intensional invariant recorded outside satisfying
+valuations. `CheckedReading` and `ModelsLocalContext` remain semantic
+predicates on fixed syntax and cannot replace provenance. The binder-context
+constructors retain parent model, scope and freshness requirements; they are
+not whole-binder checking theorems.
+
+[Final cloud job 114243521453](https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453) at
+`35cef8c29358ecac8a3e89df540e0fdce72fcbca` passed **266 build jobs**, all **84
+companion-proof files**, the **298-declaration semantic axiom audit** and
+all **seven native test executables**. This includes **31 annotated-syntax
+cases** and **8 sort-visit cases** (1 unchecked, 2 observed, 5 failure cases).
+The 152-module model closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,840 definitions with zero
+cached fallbacks. The complete focused workflow passed; standalone binary,
+Arena and fresh-export jobs were skipped. These checks validate the stated
+local results and dependencies, not the open public-acceptance theorem.
+
+See [the work state](AI_WORK_STATE.md) for exact remaining ownership and proof
+entry points, and [evidence](MIGRATION_EVIDENCE.json) for failed attempts and
+source-qualified native/corpus results.
 
 ## Correctness architecture
 
@@ -109,12 +143,15 @@ coverage and verdicts, including declines and timeouts. Historical exports use a
 explicit adapter mode; fresh 4.35 exports use exact version and commit checks.
 An accepted prefix does not certify Init, Std or Mathlib.
 
-The migration includes target-compatibility and dispatch repairs. The active
-architectural stage adds proved sharing-sensitive syntax walks, prepared
-substitution arguments and persistent certified hash metadata. Portable stored
-variable summaries, graph lifetimes and telescope/context transport remain open;
-their representation and erasure invariants must accompany implementation. Generated
-JavaScript must never be patched to change kernel semantics.
+The migration includes target-compatibility, dispatch and certified-sharing
+repairs. The current correctness stage connects exact stored readings and
+actual sort observations to the owned model. Its next small proof obligation
+is a maintained syntactic local-frame invariant; the wider integration must
+transport selected readings through the shared recursive checker and admission.
+Portable stored variable summaries, graph lifetimes and generated execution
+remain separate work. Their representation and erasure invariants must
+accompany implementation. Generated JavaScript must never be patched to change
+kernel semantics.
 
 ## Sharing execution experiment
 

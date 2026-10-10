@@ -34,7 +34,7 @@ documents current after subsequent validated stages.
   selected compiler seed, or repin its separate compiler-recovery toolchain.
 - No new custom axioms, `sorry`, hidden stronger foundation, fallback checker,
   or falsified validation evidence. Preserve failures and declines.
-- No new chat/thread, recurring automation, goal or subagent has been requested.
+- Do not create a new chat/thread or recurring automation without a user request.
 - Read applicable AGENTS files, package `GITHUB_FIRST_WORKFLOW.md`, and
   `psc0/docs/selfhost-language/CURRENT.md` before substantive work.
   Root/PSC0/package AGENTS were absent at the preceding inspection.
@@ -46,55 +46,135 @@ documents current after subsequent validated stages.
 ## Exact resume point
 
 Latest fully validated source/audit trigger:
-`9cf6d802ea9bc33fabd220abfb38b3fe432495ba`.
+`35cef8c29358ecac8a3e89df540e0fdce72fcbca`.
 Documentation-only commits may follow it; read the live branch and comparison.
 
-[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
-`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
-the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
-The 140-module dependency closure contains exactly 12 allowed Con Leche
+[Final cloud job 114243521453](https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453) at
+`35cef8c29358ecac8a3e89df540e0fdce72fcbca` passed **266 build jobs**, all **84
+companion-proof files**, the **298-declaration semantic axiom audit** and
+all **seven native test executables**. This includes **31 annotated-syntax
+cases** and **8 sort-visit cases** (1 unchecked, 2 observed, 5 failure cases).
+The 152-module model closure contains exactly 12 allowed Con Leche
 pure-math modules, zero legacy-judgment imports and zero production-assurance
-imports. The reference-policy audit checked 1,824 definitions with zero cached
-fallbacks. The complete workflow passed.
+imports. The reference-policy audit checked 1,840 definitions with zero
+cached fallbacks. The complete focused workflow passed; standalone binary,
+Arena and fresh-export jobs were skipped. These checks validate the stated
+local results and dependencies, not the open public-acceptance theorem.
 
-[Raw-binary identity job 114227668195](https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195)
-at `ec410d5ff6614c815ba8d640f148cbeb133e2dc6` rebuilt the raw Arena
-checker in 218 jobs and matched the runtime-tested `e600c3ac` binary exactly:
-`dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
-Only a proof file and the workflow changed between that identity source and
-the green source above; runtime/host source did not change. The identity run's
-proof job failed before the final proof repair; its binary job passed.
-Native regressions, Arena and fresh exports were not rerun in this stage.
-Their earlier source-specific receipts, including the reference Int64 timeout,
-remain below. Binary identity does not establish generated PSC0 qualification.
+## Current owned-checker milestone
 
-The completed stage moved 17 unchanged executable definitions from metatheory
-into runtime Core, proved guarded structural coherence/transport and hereditary
-validity transport, and strengthened `application_trace_checked_reading`.
-The public checker and admission remain raw-expression based. Full-kernel
-metatheory and consistency remain unfinished.
+The reference-checker route now has one local-declaration/context implementation
+parameterized by its expression representation. Raw and annotated contexts use
+the same lookup, shadowing, local insertion and let insertion operations.
+Erasure preserves the exact first selected declaration, its metadata and
+allocation index. Shared inference-result and forall-view data retain fixed
+expression/type readings; storing them is not a typing certificate.
 
-Three earlier attempts failed before this green source: missing the existing
-name-equality import (run 38056276397), non-progressing simplification
-(run 38056606291), and an equal-index substitution branch needing
-`Nat.lt_irrefl` (run 38057087757). All were repaired; retain them as historical
-evidence, not current instructions to fix already-corrected code.
+The actual reference free-variable branch is connected to that exact stored
+annotated type in both inference grades, without WHNF, equality, recursion or
+cache-correctness premises for that branch. Semantic context extension is
+constructed through the production insertion operations and connected to the
+actual binder-child context. Let assignments are constructed from the checked
+stored value. Parent models, fixed checked readings, syntactic freshness and
+Scoped 0 remain explicit; allocator and recursive scope preservation are open.
 
-**Next task:** checkpoint the validated state, then migrate carried annotations
-through the shared recursive interfaces, local context and admitted environment.
-Tie selected binder tags to actual sort visits and preserve them through every
-accepting shortcut and synthesized term. The focused source inventory below
-identifies several paths; it is not exhaustive. Do not create a second checker
-or treat an isolated Quick guard as completion. Afterwards discharge the joint
-recursive/admission obligations and the public-acceptance theorem.
+The actual checked-lambda and forall sort visits now use a shared runtime
+infer-then-sort helper. Its carrier retains the actual inferred type and level;
+infer-only lambda has an explicit unchecked constructor with no level.
+All-input projection equations recover the previous sort/lambda pipelines,
+including failures and complete returned states. Native tests exercise callback
+skipping, symbolic levels, state sequencing and failure classification.
+
+SortVisitSelected records the actual successful call and symbolic regime
+agreement outside every satisfying-valuation premise. Actual LambdaTrace and
+ForallTrace fields construct this provenance. Two claims tied to the same call
+cannot select conflicting zero/successor regimes, even over an empty domain.
+This does not establish coherence between different calls with equal raw inputs.
+
+The public recursive result and admitted declarations still carry raw expressions.
+The lambda's local visit carrier is projected at that raw result boundary.
+Complete annotation transport, actual guarded accepting shortcuts, joint
+infer/WHNF/defeq soundness, full safe admission and the public relative-consistency
+theorem remain unfinished. The explicit SetTheory V foundation is unchanged.
+
+| Module | Checked scope |
+| --- | --- |
+| `AnnotatedLocalContextErasure` | Shared maps, exact first lookup, shadowing, indices and local/let insertion commute with erasure. |
+| `SemanticInferenceBoundary` | Fixed expression/type results and forall views erase exactly; lambda construction reuses one tag; application substitutes the argument expression. |
+| `SemanticCheckedReading` | Typing plus both hereditary predicates for fixed term/type readings; local-context model definition. These predicates alone do not certify provenance. |
+| `SemanticReferenceLocalContext` | Actual reference fvar success in both grades returns the exact stored annotated type, given parent context erasure/model. |
+| `SemanticLocalContextExtension` | Construct local and let context models using checked fixed readings, syntactic freshness, scope and value interpretation. |
+| `SemanticReferenceBinderContext` | Connect constructed context models to actual binder-child erasure and the actual fvar run in that child; not whole-binder soundness. |
+| `SemanticSortVisitProvenance` | All-input projection equations and execution-derived, valuation-independent same-visit selection and non-clash. |
+
+The preceding live source `4a162b2056658155001828d0c17a426b000a3a2d`
+already passed [run 38059022897, job 114233292177](https://github.com/dwijayuda/pskernel/actions/runs/38059022897/job/114233292177):
+256 build jobs, all 84 companion files, 255 semantic axiom targets, 21 syntax
+cases, a 142-module model closure with 12 allowed pure-math modules, and 1,824
+reference definitions with zero cached fallbacks. The documentation then
+lagged the code at the earlier `9cf6d802` representation stage; this handoff
+reconciles that gap.
+
+Five failed attempts preceded the current green gate:
+runs 38060275600 and 38060658281 exposed folded raw projection aliases in old
+admission ordinal proofs; run 38061081280 exposed a reserved identifier and
+two projection proof reductions; run 38061552694 required explicit Boolean
+false reduction in four context-extension branches. Run 38061999713 passed
+all 266 production/metatheory build jobs and the 298-target semantic audit, but
+two companion files needed explicit raw specialization/helper unfolding.
+All native suites passed in those attempts. The exact failures, source revisions and repairs remain in
+`MIGRATION_EVIDENCE.json`. The compatibility repairs restore elaboration of the original mathematical
+claims; they do not weaken assumptions or alter checker rules.
+
+## Next implementation/proof task
+
+The smallest proof-only continuation is to derive the binder-entry freshness
+premises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,
+`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,
+types and let values, empty initialization, local/let insertion at the advanced
+counter, opening and scope exit. Preserve `Scoped 0` as part of the graded
+recursive invariant. Do not infer freshness merely from semantic satisfaction.
+
+The coordinated representation continuation is then to carry the SAME produced
+annotated expression/type readings and their intensional provenance across the
+existing InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve
+them through application argument substitution, exposed forall views, beta
+spines, eta synthesis and every accepting structural shortcut. An unchecked
+lambda visit cannot supply a default tag. Different visits with equal raw inputs
+need an actual coherence guard or an additional proved cross-visit invariant.
+Then close joint recursion, admission and the public empty-False corollary.
+
+
+## Source-specific broader validation
+
+A separate, earlier-source validation ran at
+`df830e7cd8b39c699210e631889539f43c064092`:
+[workflow 38060658283](https://github.com/dwijayuda/pskernel/actions/runs/38060658283)
+built the Arena binary in 247 jobs, SHA-256
+`68cf183cd8980a2fcf0d75409cba655e9ff33688cf9a37856b0608a7fbeea8c4`.
+Cached historical Arena passed 141/141 tutorial and 18/18 bugs, with zero
+declines. Fresh cached Prelude/UTF8/XOR/Int64 exports were accepted. Full Init
+timed out at 500 seconds (exit -9), Full Std at 590 seconds (exit -9), and the
+Init profiling checker timed out at 600 seconds (exit 124), despite a green
+profiling job. Mathlib was skipped. That workflow failed overall, including the
+then-unrepaired projection proof. These are intermediate-source receipts:
+binder helper integration followed them, so this binary hash and these corpus
+results do not identify or qualify the final current runtime. No final Arena
+binary hash was measured in the focused semantic workflow.
+
+The older reference Int64 timeout at 180 seconds (exit 124) remains unresolved.
+The full corpus, cached/reference refinement, generated PSC0 qualification and
+performance claims remain open.
 
 ## Recovery checkpoints
 
-Most recent checkpoint, before the active representation change:
-`checkpoint/pskernel-core-before-runtime-annotations-20261010`
-at **0c7f63b446bfd4b0847ece437b76bccd40ac3fb9**.
+Most recent checkpoint, before shared storage and actual sort-visit integration:
+`checkpoint/pskernel-core-before-owned-acceptance-20261010`
+at **4a162b2056658155001828d0c17a426b000a3a2d**.
 
 Earlier checkpoints:
+- `checkpoint/pskernel-core-before-runtime-annotations-20261010`
+  at `0c7f63b446bfd4b0847ece437b76bccd40ac3fb9`.
 - `checkpoint/pskernel-core-before-lambda-sort-evidence-20261010`
   at `ffd56473b9c42ff641a29e94094920e3322c4fef`.
 - `checkpoint/pskernel-core-before-lambda-type-simplification-20261010`
@@ -108,8 +188,8 @@ Recover by a recovery branch or reviewed revert; no force push is needed.
 
 ## Prior validated lambda-codomain stage
 
-The preceding completed stage is lambda codomain-sort certification, preserved by
-the current checkpoint at `0c7f63b4`.
+This historical stage is lambda codomain-sort certification, preserved by
+the representation checkpoint at `0c7f63b4`.
 
 Shared checked lambda inference now:
 1. Checks the domain and infers the opened body.
@@ -153,8 +233,9 @@ Validated receipts:
   Reference job **114221065827** passed Prelude/UTF8/XOR, then
   **Int64.toBitVec_div timed out at 180 seconds, exit 124**.
   The runtime workflow therefore failed overall. Do not hide this.
-- Full Init/Std/Mathlib were not rerun; full-corpus qualification remains open.
-  Historical timeout comparisons do not prove current performance equivalence.
+- Full Init/Std/Mathlib were not rerun at that historical revision. The later
+  intermediate-source Init/Std timeouts are recorded above; full-corpus
+  qualification and current performance equivalence remain unestablished.
 
 ## Architecture and proof boundaries
 
@@ -255,8 +336,10 @@ scope must be distinguished. PSKernel cannot borrow its acceptance theorem.
 Workflow: `.github/workflows/psc0-pskernel-core-correctness.yml`.
 Its push trigger watches its own path on the active branch. Source changes use
 `[skip ci]` to avoid unrelated expensive workflows; then a meaningful workflow
-update triggers the audit. The manual runtime_checks input enables native,
-Arena and focused exports. Do not bypass proof or axiom gates.
+update triggers the audit. The proof job now runs the full native regression command even if its proof
+step fails (unless canceled), so failures preserve both kinds of evidence.
+The manual runtime_checks input additionally enables the standalone binary,
+both small Arena modes and focused exports. Do not bypass proof or axiom gates.
 
 Core commands run **only in GitHub Actions**:
 - `npm run test:proofs`: build production/metatheory, check dependency fence,
@@ -277,26 +360,28 @@ TCB/evidence documents and the draft PR description. Keep unfinished claims
 false, preserve historical evidence with its original revision, and identify
 the smallest genuine next proof obligation.
 
-## Next migration entry points inspected in the current source
+## Remaining migration entry points
 
-This is a focused inventory, not an exhaustive checker-coverage claim. Paths
-below are under src/Ps/KernelCore; they were read at the active branch's
-9cf6d802ea9bc33fabd220abfb38b3fe432495ba revision.
+This focused inventory describes the validated source above; it is not an
+exhaustive checker-coverage claim. Paths are under `src/Ps/KernelCore`.
 
-| Site | Why an isolated guard patch is insufficient |
+| Site | Remaining obligation |
 | --- | --- |
-| Checker/Ops.lean and Checker/Knot.lean | All callbacks still exchange raw expressions. Knot has its own accepting raw-equality shortcut (line 357), before Quick is called. |
-| Checker/DefEq/Quick.lean:36 | A second direct structural-accept path also needs carried readings. Updating this function alone leaves the Knot shortcut. |
-| Checker/DefEq/BinderSpines.lean:140 and :313 | Lambda/forall domain shortcuts compare before opening. Coherent substitution transport is needed through their shared instantiation spine, plus binder-regime agreement. |
-| Checker/Inference/Core.lean | Checked applications have their own raw-type shortcut. Lambda/forall visits already compute useful sort evidence, but discard the annotation from runtime results. |
-| Checker/DefEq/Shortcuts.lean:126 and :201 | Both eta directions fabricate a lambda from an exposed forall. The chosen range annotation must follow that actual forall reading and pass the lambda-versus-product regime obligation. |
-| Core/LocalContext.lean | Local declarations store raw types and optional values. Converting expression nodes alone will not preserve the types retrieved at free-variable visits. |
-| Admission/Declaration/Admission.lean | Definitions/theorems/opaques and mutual work environments store raw types/values. Stored readings must survive actual admission transactions. |
-| Checker/Reduction/WhnfCore.lean | Beta consumes an application spine through InstantiateRev and ApplyArgsCheap. Carry the chosen annotations through these transformations and justify the proof-regime argument checks. |
+| `Checker/Ops.lean` and `Checker/Knot.lean` | Callbacks still exchange raw expressions. The Knot has an accepting raw-equality shortcut before Quick. Preserve fixed readings across the existing recursion. |
+| `Checker/DefEq/Quick.lean` | Its own direct structural-accept path also needs carried readings and an actual coherence guard. |
+| `Checker/DefEq/BinderSpines.lean` | Domain shortcuts compare before opening. Preserve coherence through shared instantiation and obtain binder-regime agreement. |
+| `Checker/Inference/Core.lean` | Application has a raw-type shortcut. Actual lambda/forall sort helpers now retain observations locally, but the recursive return remains raw. |
+| `Checker/DefEq/Shortcuts.lean` | Both eta directions synthesize a lambda from an exposed forall. Its tag must follow that exact reading and satisfy the lambda/product regime obligation. |
+| `Core/LocalContext.lean` and `Core/AnnotatedLocalContext.lean` | One generic storage implementation and exact erasure are proved; the actual checker context still chooses its raw specialization. |
+| `Core/InferenceBoundary.lean` and `Core/AnnotatedInference.lean` | Fixed carried result/view constructors exist; constructing their data does not certify recursive provenance or typing. |
+| `Admission/Declaration/Admission.lean` | Definitions, theorems, opaques and mutual work environments still store raw types/values. Preserve readings and models across whole transactions. |
+| `Checker/Reduction/WhnfCore.lean` | Beta consumes an application spine through InstantiateRev and ApplyArgsCheap. Transport annotations and justify proof-regime argument checks. |
+| `Checker/State.lean` and `SemanticScope.lean` | Derive and maintain freshness, name bounds and scope for actual storage, allocator, opening and scope exit. |
 
-Proceed with a coordinated representation/recursive-interface migration in the
-shared implementation, with exact input erasure and trace connections. Do not
-create an independent fallback checker or insert a superficial guard in only
-one entry point. Audit synthesized terms, stored types/rules, eta and recursors
-alongside imported expressions. A whole-kernel consistency claim still needs
-the joint recursive and admission theorems after the migration.
+Proceed within the shared implementation with exact input erasure and execution
+connections. Audit stored types/rules, synthesized terms, eta and recursors
+alongside imported expressions. The public consistency theorem still requires
+joint recursive and admission soundness, an allowed-axiom/model policy and the
+original-statement connection. No cached-mode or generated-PSC0 promotion is
+part of this milestone.
+

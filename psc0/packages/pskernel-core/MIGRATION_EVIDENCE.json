@@ -1,54 +1,54 @@
 {
-  "schemaVersion": 8,
-  "stage": "Correctness priority: runtime annotated syntax and coherent transport",
-  "status": "validated-runtime-annotation-representation-full-kernel-unfinished",
-  "candidateCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
-  "assuranceRevision": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+  "schemaVersion": 9,
+  "stage": "Correctness priority: owned local contexts and actual sort-visit provenance",
+  "status": "validated-owned-context-and-sort-visit-support-full-kernel-unfinished",
+  "candidateCommit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+  "assuranceRevision": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38057387016,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
-  "nativeBinarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+  "workflowRun": 38062528401,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+  "nativeBinarySha256": null,
   "checks": {
     "build": {
-      "commit": "e600c3ac862e68009511f778203758415838a9df",
-      "run": 38054667785,
-      "job": 114220568884,
-      "status": "passed",
-      "binaryBuildJobs": 218,
-      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6"
+      "status": "not-measured-final-source",
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
-      "run": 38057387016,
-      "job": 114228540945,
-      "buildJobs": 254,
-      "focusedBuildJobs": 127,
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "buildJobs": 266,
+      "focusedBuildJobs": 221,
       "companionFiles": 84,
-      "axiomDeclarations": 242,
+      "axiomDeclarations": 298,
       "pureMathModules": 12,
-      "closureModules": 140,
-      "referenceDefinitions": 1824,
+      "closureModules": 152,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 13:57:20 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+      "checkedAt": "2026-10-10 15:17:00 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
-      "run": 38057387016,
-      "job": 114228540945
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453
     },
     "nativeRegression": {
-      "commit": "e600c3ac862e68009511f778203758415838a9df",
-      "run": 38054667785,
-      "job": 114220568884,
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
       "status": "passed",
+      "executables": 7,
       "suiteMarkers": [
         "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
         "PSKERNEL_NAT_DISPATCH_435",
@@ -59,9 +59,11 @@
         "PSKERNEL_OPEN_WHNF_SCOPE",
         "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
         "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_SORT_VISIT_CARRIERS",
         "PSKERNEL_LAMBDA_CODOMAIN_GATE",
         "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
-        "PSKERNEL_REFERENCE_TESTS"
+        "PSKERNEL_REFERENCE_TESTS",
+        "PSKERNEL_ANNOTATED_SYNTAX"
       ],
       "referenceCases": {
         "poisonedCaches": 3,
@@ -78,15 +80,38 @@
         "validAdmission": 4,
         "invalidAdmission": 4
       },
-      "poisonedLowLevelStateIsPublicApiExploit": false,
       "lambdaCodomainCases": {
         "cacheModes": 2,
-        "deliberatelyMalformedLowLevelContexts": true,
         "unsupportedDeclines": 2,
         "inferOnlyGrade": 2,
         "resourceExhaustion": 2,
+        "deliberatelyMalformedLowLevelContexts": true,
         "publicExploitClaimed": false
-      }
+      },
+      "sharedSyntax": {
+        "cursors": 4,
+        "variants": 14,
+        "dagDepth": 32
+      },
+      "annotatedSyntax": {
+        "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+        "run": 38062528401,
+        "job": 114243521453,
+        "status": "passed",
+        "cases": 31,
+        "modelImports": 0
+      },
+      "sortVisitCarriers": {
+        "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+        "run": 38062528401,
+        "job": 114243521453,
+        "status": "passed",
+        "cases": 8,
+        "unchecked": 1,
+        "observed": 2,
+        "failures": 5
+      },
+      "qualification": "Case counts are per named group, not an aggregate assertion count or a proof of public acceptance soundness."
     },
     "smallArena": {
       "commit": "e600c3ac862e68009511f778203758415838a9df",
@@ -128,9 +153,19 @@
       "fresh435ExportsRun": true
     },
     "fullCorpora": {
-      "status": "not-run-this-stage",
+      "status": "not-run-final-source",
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
       "priorInitStdTimeoutsUnresolved": true,
-      "mathlibQualification": "unestablished"
+      "mathlibQualification": "unestablished",
+      "latestIntermediateSource": {
+        "commit": "df830e7cd8b39c699210e631889539f43c064092",
+        "run": 38060658283,
+        "init": "timeout500s",
+        "std": "timeout590s",
+        "profileInit": "checker timeout600s; job green",
+        "mathlib": "skipped"
+      },
+      "receipt": "intermediateSourceValidation38060658283"
     },
     "fresh435": {
       "commit": "e600c3ac862e68009511f778203758415838a9df",
@@ -276,26 +311,30 @@
       "historicalQualification": "This controlled comparison predates the codomain-sort certification change. It establishes the prior timeout, not current performance equivalence."
     },
     "binaryIdentity": {
-      "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
-      "run": 38057087757,
-      "job": 114227668195,
-      "status": "passed",
-      "buildJobs": 218,
-      "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
-      "testedRun": 38054667785,
-      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
-      "hashesEqual": true,
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195"
+      "status": "not-measured-final-source",
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "priorReceiptsRetained": true,
+      "qualification": "Storage generalization and actual sort-helper extraction change runtime source after the historical matching binary."
     },
     "annotatedSyntax": {
-      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
-      "run": 38057387016,
-      "job": 114228540945,
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
       "status": "passed",
-      "cases": 12,
+      "cases": 31,
       "modelImports": 0
     },
-    "runtimeValidationScope": "This representation/proof stage reran annotated-syntax tests and checked raw-binary identity. Other native, Arena and fresh-export receipts below retain their original source and were not rerun."
+    "runtimeValidationScope": "The current focused gate runs the entire production/metatheory build, all companion files, semantic-axiom/import/reference-policy audits and all seven native test executables. Current standalone Arena binary, small Arena and fresh-export jobs are not run. Historical and intermediate-source corpus/binary receipts retain their original revision and do not qualify the current runtime.",
+    "sortVisitCarriers": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "status": "passed",
+      "cases": 8,
+      "unchecked": 1,
+      "observed": 2,
+      "failures": 5
+    }
   },
   "claims": {
     "completeArenaConformance": false,
@@ -329,7 +368,17 @@
     "runtimeAnnotatedRepresentationSharedWithModel": true,
     "guardedStructuralEquivalenceAndTransportProved": true,
     "hereditaryValidityTransportAcrossCoherenceProved": true,
-    "applicationConcreteReadingProvedUnderExplicitPremises": true
+    "applicationConcreteReadingProvedUnderExplicitPremises": true,
+    "sharedRawAnnotatedLocalStorageImplementation": true,
+    "exactStoredLocalReadingFromActualReferenceFvar": true,
+    "binderAndLetContextModelsUnderExplicitPremises": true,
+    "actualBinderSortVisitCarriers": true,
+    "sameActualVisitProvenanceIndependentOfValuation": true,
+    "conflictingRegimesFromSameVisitImpossible": true,
+    "crossVisitRawEqualityImpliesCoherence": false,
+    "publicRecursiveResultUsesAnnotatedReadings": false,
+    "fullAllocatorAndScopeInvariantProved": false,
+    "latestRuntimeArenaBinaryHashMeasured": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -669,7 +718,8 @@
     "status": "completed"
   },
   "remaining": [
-    "Carry and validate runtime annotations throughout actual shared checking, contexts, declarations and all accepting shortcuts; a guard available in Core alone does not establish accepted provenance.",
+    "Carry the exact selected annotated readings and intensional provenance through the actual shared recursive APIs, raw checker context and admitted declarations; install/prove every actual accepting guard. Same-visit provenance alone is insufficient for cross-visit comparison.",
+    "Derive binder-entry freshness and scope from an initialized, maintained syntactic local-frame invariant and actual allocator/scope operations.",
     "Prove all mutually recursive reference inference, WHNF and equality cases against the same model.",
     "Complete ordinary/mutual/nested inductive, quotient and primitive admission models.",
     "Connect initial safe environment and an explicit allowed-axiom/model policy.",
@@ -680,7 +730,7 @@
   ],
   "nextStage": {
     "status": "open",
-    "scope": "Coordinated carried-annotation migration in the shared checker and environment; joint graded inference/WHNF/defeq soundness; full safe admission; original-statement preservation and relative consistency.",
+    "scope": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
     "performancePriority": "deferred"
   },
   "promotionDecision": {
@@ -1799,7 +1849,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 13:57:20 UTC",
+  "recordedAt": "2026-10-10 15:17:00 UTC",
   "semanticFoundation": {
     "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
     "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
@@ -3364,5 +3414,438 @@
       ],
       "runtimeSourceChanged": false
     }
+  },
+  "priorTopLevelRuntimeReceipts": {
+    "source": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+    "workflowRun": 38057387016,
+    "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+    "build": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "job": 114220568884,
+      "status": "passed",
+      "binaryBuildJobs": 218,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6"
+    },
+    "nativeRegression": {
+      "commit": "e600c3ac862e68009511f778203758415838a9df",
+      "run": 38054667785,
+      "job": 114220568884,
+      "status": "passed",
+      "suiteMarkers": [
+        "PSC1_KERNEL_CORE_FOUNDATION_DIFFERENTIAL",
+        "PSKERNEL_NAT_DISPATCH_435",
+        "PSKERNEL_PROJECTION_CALLER_FUEL",
+        "PSKERNEL_WHNF_CACHE_MODES",
+        "PSKERNEL_LAMBDA_SPINE_BOUND",
+        "PSKERNEL_BOUNDED_SUCCESS_LOOKUP",
+        "PSKERNEL_OPEN_WHNF_SCOPE",
+        "PSKERNEL_OPEN_INFERENCE_EQUALITY_SCOPE",
+        "PSKERNEL_SHARED_SYNTAX",
+        "PSKERNEL_LAMBDA_CODOMAIN_GATE",
+        "PSKERNEL_LAMBDA_TYPE_TRANSPORT",
+        "PSKERNEL_REFERENCE_TESTS"
+      ],
+      "referenceCases": {
+        "poisonedCaches": 3,
+        "dependentBinders": 1,
+        "admission": 3,
+        "resourceExhaustion": 1
+      },
+      "lambdaCases": {
+        "cacheModes": 2,
+        "sortRegimes": 2,
+        "checkedInference": 4,
+        "inferOnly": 4,
+        "conversion": 4,
+        "validAdmission": 4,
+        "invalidAdmission": 4
+      },
+      "poisonedLowLevelStateIsPublicApiExploit": false,
+      "lambdaCodomainCases": {
+        "cacheModes": 2,
+        "deliberatelyMalformedLowLevelContexts": true,
+        "unsupportedDeclines": 2,
+        "inferOnlyGrade": 2,
+        "resourceExhaustion": 2,
+        "publicExploitClaimed": false
+      }
+    },
+    "binaryIdentity": {
+      "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "run": 38057087757,
+      "job": 114227668195,
+      "status": "passed",
+      "buildJobs": 218,
+      "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
+      "testedRun": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "hashesEqual": true,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195"
+    },
+    "annotatedSyntax": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "status": "passed",
+      "cases": 12,
+      "modelImports": 0
+    },
+    "runtimeValidationScope": "This representation/proof stage reran annotated-syntax tests and checked raw-binary identity. Other native, Arena and fresh-export receipts below retain their original source and were not rerun."
+  },
+  "ownedLocalContextAndSortVisitStage": {
+    "status": "validated-owned-context-and-sort-visit-support-full-acceptance-open",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-owned-acceptance-20261010",
+      "commit": "4a162b2056658155001828d0c17a426b000a3a2d"
+    },
+    "runtimeModules": [
+      "Ps.KernelCore.Core.LocalContext",
+      "Ps.KernelCore.Core.AnnotatedLocalContext",
+      "Ps.KernelCore.Core.InferenceBoundary",
+      "Ps.KernelCore.Core.AnnotatedInference",
+      "Ps.KernelCore.Checker.Inference.Helpers",
+      "Ps.KernelCore.Checker.Inference.Core"
+    ],
+    "proofModules": [
+      "Ps.KernelCore.Metatheory.AnnotatedLocalContextErasure",
+      "Ps.KernelCore.Metatheory.SemanticInferenceBoundary",
+      "Ps.KernelCore.Metatheory.SemanticCheckedReading",
+      "Ps.KernelCore.Metatheory.SemanticReferenceLocalContext",
+      "Ps.KernelCore.Metatheory.SemanticLocalContextExtension",
+      "Ps.KernelCore.Metatheory.SemanticReferenceBinderContext",
+      "Ps.KernelCore.Metatheory.SemanticSortVisitProvenance"
+    ],
+    "oneSharedLocalStorageImplementation": true,
+    "rawAndAnnotatedLookupAndInsertionShared": true,
+    "erasurePreservesFirstStoredLookupAndMetadata": true,
+    "erasurePreservesShadowingAndAllocationIndex": true,
+    "fixedExpressionTypeAndForallViewCarriers": true,
+    "constructorsAreTypingCertificates": false,
+    "fvarActualReferenceRunBothGrades": true,
+    "fvarExactStoredAnnotatedType": true,
+    "fvarRequiresRecursiveCallbackOrCacheCorrectnessPremise": false,
+    "parentAnnotatedContextWitnessSelectedByPublicChecker": false,
+    "localAndLetContextModelConstruction": true,
+    "actualBinderChildErasureConnection": true,
+    "actualBinderChildFvarRunConnection": true,
+    "wholeBinderInferenceSoundnessProved": false,
+    "explicitContextPremises": [
+      "fixed annotated parent context with exact erasure of the raw context",
+      "parent ModelsLocalContext",
+      "fixed domain/value CheckedReading",
+      "syntactic freshness of the generated name in context, domain and value",
+      "Scoped 0 domain for local insertion or stored value for let insertion",
+      "chosen local model element membership, or let assignment constructed from value interpretation"
+    ],
+    "checkedLambdaAndForallUseActualSortVisitHelper": true,
+    "retainedSortVisitFields": [
+      "actual inferred type before WHNF",
+      "exposed symbolic universe level"
+    ],
+    "returnedStateIsExactSortExposureState": true,
+    "inferOnlyLambdaVisit": "unchecked; no selected level and callbacks skipped",
+    "helperProjectionAllInputs": true,
+    "helperProjectionPreserves": [
+      "success results",
+      "both grades",
+      "original and classified errors",
+      "full returned states"
+    ],
+    "sortVisitSelectionOutsideSemanticValuations": true,
+    "sameVisitRegimeAgreementAndNoClash": true,
+    "noClashRemainsValidOnEmptyDomains": true,
+    "crossVisitRawEqualityImpliesCoherence": false,
+    "pairedUniverseInstantiationAgreement": true,
+    "instantiatedExecutionRerunClaimed": false,
+    "runtimeRecursiveResultStillRaw": true,
+    "actualCheckerContextStillRaw": true,
+    "admittedDeclarationsStillRaw": true,
+    "lambdaVisitCarrierProjectedAtRawReturn": true,
+    "publicAcceptanceUsesCompleteAnnotatedResults": false,
+    "publicAcceptanceRunsAnnotationGuard": false,
+    "globalAcceptedAnnotationProvenanceProved": false,
+    "allocatorAndRecursiveScopePreservationProved": false,
+    "jointInferWhnfDefeqSoundnessProved": false,
+    "fullSafeAdmissionModelProved": false,
+    "fullKernelConsistencyProved": false,
+    "customAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "foundationExistenceConstructed": false,
+    "generatedPsc0Qualified": false,
+    "binaryIdentityForFinalRuntimeMeasured": false,
+    "externalSourceCompatibilityQualification": "Generic operations add an implicit expression-type parameter; explicit @applications or old generated eliminator names in unseen clients may require adjustments.",
+    "failedAttempts": [
+      {
+        "commit": "4261bce16f58903b23ebe7e5863c286d717369ea",
+        "run": 38060275600,
+        "job": 114236961042,
+        "status": "failed",
+        "reason": "Two older admission ordinal proofs did not unfold the new raw local-context nextIndex projection.",
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "newSemanticModules": "compiled",
+        "semanticAxiomTargets": 270,
+        "referenceDefinitions": 1834
+      },
+      {
+        "commit": "df830e7cd8b39c699210e631889539f43c064092",
+        "run": 38060658281,
+        "job": 114238075339,
+        "status": "failed",
+        "reason": "The downstream AdmissionHeaderSpineConfiguration ordinal proof exposed the same folded raw projection; shared projection aliases subsequently received simp rules.",
+        "focusedBuildJobs": 196,
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31
+      },
+      {
+        "commit": "74b5373985ccccf1187f636ad1595bda23135988",
+        "run": 38061081280,
+        "job": 114239308257,
+        "status": "failed",
+        "reason": "Reserved identifier matches in four context-extension proofs; explicit Except result types and source-equation simplification needed in two visit projection proofs.",
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "sortVisitCarrierCases": 8
+      },
+      {
+        "commit": "cea161d65321a9ca1bde7cd2ad5fe2c979bc8f33",
+        "run": 38061552694,
+        "job": 114240674028,
+        "status": "failed",
+        "reason": "Four false Boolean lookup branches required explicit Bool.false_eq_true in SemanticLocalContextExtension. SemanticSortVisitProvenance compiled; all native tests passed.",
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "sortVisitCarrierCases": 8,
+        "repair": "4e1e923e50e86158939e48db2f5d4f15a5100ac3"
+      },
+      {
+        "commit": "93261b77efe5951100a38b80192dd487a9af30ee",
+        "run": 38061999713,
+        "job": 114241971001,
+        "status": "failed",
+        "reason": "All production/metatheory builds and semantic/import/reference audits passed; 2 of 84 companion files required source-compatibility repairs: empty lookup needed an explicit Expr specialization; two Typing lambda/forall proofs needed the new helper definitions unfolded.",
+        "focusedBuildJobs": 221,
+        "buildJobs": 266,
+        "semanticAxiomTargets": 298,
+        "closureModules": 152,
+        "pureMathModules": 12,
+        "referenceDefinitions": 1840,
+        "cachedFallbacks": 0,
+        "companionFiles": 84,
+        "failedCompanionFiles": 2,
+        "nativeRegressions": "passed",
+        "annotatedSyntaxCases": 31,
+        "sortVisitCarrierCases": 8,
+        "repair": "87a128d64fa3c91301028e58c1092d8cfd620369"
+      }
+    ],
+    "remaining": "The smallest proof-only continuation is to derive the binder-entry freshness\npremises from a maintained local-frame invariant. Reuse `SemanticScope.NamesBelow`,\n`allocator_fresh` and `allocated_open_frame`; cover the actual stored names,\ntypes and let values, empty initialization, local/let insertion at the advanced\ncounter, opening and scope exit. Preserve `Scoped 0` as part of the graded\nrecursive invariant. Do not infer freshness merely from semantic satisfaction.\n\nThe coordinated representation continuation is then to carry the SAME produced\nannotated expression/type readings and their intensional provenance across the\nexisting InferOperation/WHNF/DefEq interfaces and stored declarations. Preserve\nthem through application argument substitution, exposed forall views, beta\nspines, eta synthesis and every accepting structural shortcut. An unchecked\nlambda visit cannot supply a default tag. Different visits with equal raw inputs\nneed an actual coherence guard or an additional proved cross-visit invariant.\nThen close joint recursion, admission and the public empty-False corollary.",
+    "validation": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "buildJobs": 266,
+      "focusedBuildJobs": 221,
+      "companionFiles": 84,
+      "axiomDeclarations": 298,
+      "pureMathModules": 12,
+      "closureModules": 152,
+      "productionAssuranceImports": 0,
+      "legacyJudgmentImports": 0,
+      "referenceDefinitions": 1840,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 15:17:00 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+      "runConclusion": "success"
+    },
+    "sourceComparison": {
+      "base": "4a162b2056658155001828d0c17a426b000a3a2d",
+      "head": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "url": "https://github.com/dwijayuda/pskernel/compare/4a162b2056658155001828d0c17a426b000a3a2d...35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "changedFiles": 27,
+      "additions": 1862,
+      "deletions": 245,
+      "newMetatheoryModules": 7,
+      "newRuntimeModules": 3,
+      "scope": "Package and its semantic-audit workflow only; textual diff counts are not an effort, soundness or performance measure."
+    },
+    "nativeSyntax": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "status": "passed",
+      "cases": 31,
+      "modelImports": 0
+    },
+    "nativeSortVisits": {
+      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+      "run": 38062528401,
+      "job": 114243521453,
+      "status": "passed",
+      "cases": 8,
+      "unchecked": 1,
+      "observed": 2,
+      "failures": 5
+    },
+    "workflowSkippedJobs": [
+      {
+        "name": "binary",
+        "job": 114243522545,
+        "status": "skipped"
+      },
+      {
+        "name": "fresh",
+        "job": 114243522590,
+        "status": "skipped"
+      },
+      {
+        "name": "arena",
+        "job": 114243522702,
+        "status": "skipped"
+      }
+    ]
+  },
+  "intermediateSourceValidation38060658283": {
+    "source": "df830e7cd8b39c699210e631889539f43c064092",
+    "run": 38060658283,
+    "runNumber": 48,
+    "runConclusion": "failure",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38060658283",
+    "scope": "Earlier intermediate source before actual sort-visit helper integration; not a final-source conformance, binary-identity or performance receipt.",
+    "build": {
+      "job": 114238075998,
+      "status": "passed",
+      "buildJobs": 247,
+      "binarySha256": "68cf183cd8980a2fcf0d75409cba655e9ff33688cf9a37856b0608a7fbeea8c4"
+    },
+    "proof": {
+      "job": 114238076146,
+      "status": "failed",
+      "reason": "AdmissionHeaderSpineConfiguration raw nextIndex projection required simplifier compatibility repair; subsequently fixed."
+    },
+    "cachedHistoricalArena": {
+      "corpusCommit": "b83254de5146ef34147ab82a48edbe1856b0edcc",
+      "mode": "cached",
+      "adapter": "historical",
+      "tutorial": {
+        "job": 114238519900,
+        "correct": 141,
+        "total": 141,
+        "declined": 0,
+        "status": "passed"
+      },
+      "bugs": {
+        "job": 114238519918,
+        "correct": 18,
+        "total": 18,
+        "declined": 0,
+        "status": "passed"
+      }
+    },
+    "fresh435Cached": {
+      "exporterCommit": "05d43a2bc773b40ecfdebb32294192a5ef756951",
+      "mode": "cached",
+      "cases": [
+        {
+          "name": "prelude",
+          "selection": "Init.Prelude",
+          "job": 114238519854,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 65406,
+          "exportDeclarations": 1840,
+          "exportConstants": 2121
+        },
+        {
+          "name": "utf8",
+          "selection": "_private.Init.Data.String.Decode.0.ByteArray.utf8DecodeChar?.assemble₃_eq_some_of_toBitVec",
+          "job": 114238519854,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 159345,
+          "exportDeclarations": 2146,
+          "exportConstants": 2353
+        },
+        {
+          "name": "xor",
+          "selection": "Std.Sat.AIG.mkXorCached",
+          "job": 114238519915,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 333731,
+          "exportDeclarations": 3413,
+          "exportConstants": 3752
+        },
+        {
+          "name": "int64",
+          "selection": "Int64.toBitVec_div",
+          "job": 114238519915,
+          "status": "accepted",
+          "exitCode": 0,
+          "exportRecords": 16206,
+          "exportDeclarations": 405,
+          "exportConstants": 497
+        }
+      ]
+    },
+    "fullCorpora": {
+      "mode": "cached",
+      "adapter": "historical",
+      "init": {
+        "job": 114238519884,
+        "status": "timeout",
+        "checkerExitCode": -9,
+        "budgetSeconds": 500,
+        "seconds": 500.0315704345703,
+        "lastReportedRecords": 2099999,
+        "lastReportedDeclarations": 17010,
+        "acceptedPrefixIsWholeCorpusAcceptance": false
+      },
+      "std": {
+        "job": 114238519974,
+        "status": "timeout",
+        "checkerExitCode": -9,
+        "budgetSeconds": 590,
+        "seconds": 590.0513577461243,
+        "lastReportedRecords": 2899999,
+        "lastReportedDeclarations": 20951,
+        "acceptedPrefixIsWholeCorpusAcceptance": false
+      },
+      "profileInit": {
+        "job": 114238519906,
+        "jobConclusion": "success",
+        "checkerStatus": "timeout",
+        "checkerExitCode": 124,
+        "budgetSeconds": 600,
+        "checkerAcceptance": false
+      },
+      "mathlib": {
+        "job": 114240661843,
+        "status": "skipped",
+        "reason": "Prerequisite full Init/Std validation failed."
+      }
+    },
+    "referenceModeRerun": false,
+    "referenceInt64TimeoutResolved": false,
+    "latestRuntimeBinaryIdentityEstablished": false,
+    "performanceEquivalenceClaimed": false
+  },
+  "priorLiveSourceValidation": {
+    "commit": "4a162b2056658155001828d0c17a426b000a3a2d",
+    "run": 38059022897,
+    "job": 114233292177,
+    "buildJobs": 256,
+    "companionFiles": 84,
+    "axiomDeclarations": 255,
+    "annotatedSyntaxCases": 21,
+    "closureModules": 142,
+    "pureMathModules": 12,
+    "referenceDefinitions": 1824,
+    "cachedFallbacks": 0,
+    "status": "passed",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38059022897/job/114233292177",
+    "qualification": "Live source at the start of this milestone; preceding docs still described the earlier 9cf6d802 stage."
   }
 }

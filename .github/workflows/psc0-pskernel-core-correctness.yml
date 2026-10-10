@@ -28,14 +28,14 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate carried readings and shared-context admission proofs
+      - name: Validate actual binder provenance and context extension
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
-          lake build Ps.KernelCore.Metatheory.SemanticReferenceLocalContext Ps.KernelCore.Metatheory.SemanticInferenceBoundary Ps.KernelCore.Metatheory.AdmissionRecursiveArgumentConfiguration Ps.KernelCore.Metatheory.AdmissionMutualOccurrenceConfiguration
+          lake build Ps.KernelCore.Metatheory.SemanticReferenceBinderContext Ps.KernelCore.Metatheory.SemanticSortVisitProvenance Ps.KernelCore.Metatheory.AdmissionHeaderSpineConfiguration
           npm run test:proofs
-      - name: Run native checker and annotated-context regressions
+      - name: Run native checker, stored-reading, and binder-visit regressions
         if: ${{ !cancelled() }}
         working-directory: psc0/packages/pskernel-core
         run: npm test

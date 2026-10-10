@@ -66,8 +66,8 @@ theorem psKernelDefEqKnot_success_cache_sound
     exact hSuccessCache
   have hRaw : psKernelExprPairSetContains state.success left right = true := by
     cases hEligible : psKernelSemanticPairCacheEligible left right with
-    | false => simp [psKernelDefEqSuccessCacheHit, hEligible] at hHit
-    | true => simpa [psKernelDefEqSuccessCacheHit, hEligible] using hHit
+    | false => simp [psKernelDefEqSuccessCacheHit, psKernelCachedCacheContains_eq, PsKernelSemanticCachePolicy.enabled, psKernelCachedCachePolicy, hEligible] at hHit
+    | true => simpa [psKernelDefEqSuccessCacheHit, psKernelCachedCacheContains_eq, PsKernelSemanticCachePolicy.enabled, psKernelCachedCachePolicy, hEligible] using hHit
   exact ⟨hConfig, hCache left right hRaw⟩
 
 

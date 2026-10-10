@@ -46,9 +46,10 @@ theorem inferCore_sort_result
           simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet,
             psKernelReferenceCachePolicy, he] at run
       | ok entered =>
-          simpa [psKernelInferCoreWithFuel, psKernelSemanticCacheGet,
-            psKernelReferenceCachePolicy, he, infer_publication_noop,
-            eq_comm] using run
+          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+            ite_self, he, infer_publication_noop,
+            Except.ok.injEq, Prod.mk.injEq] at run
+          exact ⟨run.1.symm, run.2.symm⟩
 
 private theorem entered_environment (c entered : PsKernelCheckerContext)
     (h : psKernelCheckerContextEnterRecDepth c = .ok entered) :

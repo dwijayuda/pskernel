@@ -149,3 +149,7 @@ Proceed with a genuinely Lean-semantic G8: full universe-level equivalence (incl
 ## G8 universe-level arithmetic model candidate
 
 `PSKernelFast/LevelSemantics.lean` defines `Level.evalAt` under symbolic natural-level valuations, including the defining conditional meaning of `imax`, and attempts Lean-checked theorems for `max` zero/commutativity and `imax` zero/positive successor branches. This is **new independent V3 mathematical assurance**; no old proof interface is imported or preserved. It does not implement decidable universal level equivalence or trusted kernel acceptance. CI must validate the exact source and disclose any proof elaboration failure before calling G8 complete.
+
+### G8 first CI scope caveat — no theorem compilation evidence
+
+[Run 38095941458](https://github.com/dwijayuda/pskernel/actions/runs/38095941458), source `8f5d898a3ae9040537252cdc076bac83890b68d6` passed 18 jobs for the focused G0–G7 executable, but logs **do not show compilation of `PSKernelFast.LevelSemantics`**. Lake's executable target compiled only imported modules despite the library roots list. Therefore this run is NOT proof evidence for the new universe identities. CI is strengthened to build the complete `PSKernelFast` library and import `LevelSemantics` into the test root. Require exact-source completed logs before claiming the new lemmas pass.

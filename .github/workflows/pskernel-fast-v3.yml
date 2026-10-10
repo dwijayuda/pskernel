@@ -1,4 +1,4 @@
-name: PSKernel-Fast V3 greenfield G0
+name: PSKernel-Fast V3 focused correctness
 
 on:
   push:
@@ -24,12 +24,13 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Verify pinned compiler and run focused G0-G2 research checks
+      - name: Build all core/proof roots and run focused G0-G8 checks
         shell: bash
         working-directory: psc0/packages/pskernel-fast
         run: |
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
           lean --version
+          lake build PSKernelFast
           lake build pskernel_fast_mvp
           lake exe pskernel_fast_mvp

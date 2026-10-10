@@ -1,5 +1,6 @@
 import PSKernelFast.Quote
 import PSKernelFast.TinyTyping
+import PSKernelFast.LevelSemantics
 
 open PSKernelFast
 

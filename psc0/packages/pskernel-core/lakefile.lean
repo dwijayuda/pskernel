@@ -43,6 +43,9 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.Core.Level,
     `Ps.KernelCore.Core.SharedMemo,
     `Ps.KernelCore.Core.Expr,
+    `Ps.KernelCore.Core.AnnotatedExpr,
+    `Ps.KernelCore.Core.UniverseRegime,
+    `Ps.KernelCore.Core.AnnotatedEquality,
     `Ps.KernelCore.Core.Substitution.ListOps,
     `Ps.KernelCore.Core.Substitution.Lift,
     `Ps.KernelCore.Core.Substitution.Instantiate,
@@ -137,6 +140,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticFunctionValidity,
     `Ps.KernelCore.Metatheory.SemanticUniverseRegime,
     `Ps.KernelCore.Metatheory.SemanticCheckedAnnotations,
+    `Ps.KernelCore.Metatheory.SemanticAnnotationCoherence,
     `Ps.KernelCore.Metatheory.SemanticCheckedAnnotationVisits,
     `Ps.KernelCore.Metatheory.SemanticReferenceBinders,
     `Ps.KernelCore.Metatheory.SemanticReferenceSortChecks,
@@ -324,3 +328,7 @@ lean_exe pskernel_shared_syntax_tests where
 lean_exe pskernel_reference_cache_tests where
   srcDir := "test"
   root := `ReferenceCacheTests
+
+lean_exe pskernel_annotated_syntax_tests where
+  srcDir := "test"
+  root := `AnnotatedSyntaxTests

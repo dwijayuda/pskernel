@@ -21,19 +21,6 @@ def Fresh (name : PsKernelName) : AnnotatedExpr → Prop
   | .mdata _ e | .proj _ _ e => Fresh name e
   | _ => True
 
-/-- Close a single free variable at the current binder depth. Just as in the
-production operation, pre-existing bound indices are not shifted. -/
-def close (name : PsKernelName) : AnnotatedExpr → Nat → AnnotatedExpr
-  | .fvar n, k => if psKernelNameEq n name then .bvar k else .fvar n
-  | .app f a, k => .app (close name f k) (close name a k)
-  | .lam n A b bi v, k => .lam n (close name A k) (close name b (k + 1)) bi v
-  | .forallE n A B bi v, k => .forallE n (close name A k) (close name B (k + 1)) bi v
-  | .letE n A a b nd, k =>
-      .letE n (close name A k) (close name a k) (close name b (k + 1)) nd
-  | .mdata md e, k => .mdata md (close name e k)
-  | .proj n i e, k => .proj n i (close name e k)
-  | e, _ => e
-
 private theorem native_abstract_unchanged (e : PsKernelExpr)
     (names : List PsKernelName) (cut : Nat) :
     (psKernelExprAbstractFVarsAtChanged e names cut).2 = false →

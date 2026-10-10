@@ -1,3 +1,4 @@
+import Ps.KernelCore.Core.UniverseRegime
 import Ps.KernelCore.Metatheory.SemanticUniverseSubstitution
 
 /-!
@@ -12,22 +13,9 @@ This is annotation-comparison infrastructure, not checker soundness.
 -/
 namespace PsKernelSemantics.UniverseRegime
 
-inductive Atom where
-  | param (name : PsKernelName)
-  | mvar (name : PsKernelName)
-  deriving DecidableEq
-
-inductive Profile where
-  | never
-  | allZero (variables : List Atom)
-
 def Holds : Profile → (Atom → Nat) → Prop
   | .never, _ => False
   | .allZero xs, ν => ∀ x, x ∈ xs → ν x = 0
-
-def inter : Profile → Profile → Profile
-  | .allZero xs, .allZero ys => .allZero (xs ++ ys)
-  | _, _ => .never
 
 theorem holds_inter (a b : Profile) (ν : Atom → Nat) :
     Holds (inter a b) ν ↔ Holds a ν ∧ Holds b ν := by
@@ -39,14 +27,6 @@ theorem holds_inter (a b : Profile) (ν : Atom → Nat) :
   · rintro ⟨ha, hb⟩ x (hx | hx)
     · exact ha x hx
     · exact hb x hx
-
-def ofLevel : PsKernelLevel → Profile
-  | .zero => .allZero []
-  | .succ _ => .never
-  | .max a b => inter (ofLevel a) (ofLevel b)
-  | .imax _ b => ofLevel b
-  | .param n => .allZero [.param n]
-  | .mvar n => .allZero [.mvar n]
 
 def valuation (params metavariables : PsKernelName → Nat) : Atom → Nat
   | .param n => params n
@@ -65,14 +45,6 @@ theorem ofLevel_spec (l : PsKernelLevel) (params metavariables : PsKernelName �
   | imax a b iha ihb =>
       simp only [ofLevel, ihb, evalLevel]
       split <;> omega
-
-def subset (xs ys : List Atom) : Bool :=
-  xs.all (fun x => decide (x ∈ ys))
-
-def compare : Profile → Profile → Bool
-  | .never, .never => true
-  | .allZero xs, .allZero ys => subset xs ys && subset ys xs
-  | _, _ => false
 
 theorem subset_spec (xs ys : List Atom) :
     subset xs ys = true ↔ ∀ x, x ∈ xs → x ∈ ys := by
@@ -117,8 +89,6 @@ theorem compare_spec (a b : Profile) :
             exact ⟨fun hx y hy => hx y (hyx y hy), fun hy x hx => hy x (hxy x hx)⟩
           · intro h
             exact ⟨separating xs ys h, separating ys xs (fun ν => (h ν).symm)⟩
-
-def check (a b : PsKernelLevel) : Bool := compare (ofLevel a) (ofLevel b)
 
 /-- A successful comparison is exactly uniform Prop/Type-regime agreement.
 Parameters and metavariables remain distinct even when they share a name. -/
@@ -178,10 +148,6 @@ theorem same_regime_not_same_level :
     check (.succ .zero) (.succ (.succ .zero)) = true ∧
       ∀ p m, evalLevel p m (.succ .zero) ≠ evalLevel p m (.succ (.succ .zero)) := by
   exact ⟨rfl, fun _ _ => by simp [evalLevel]⟩
-
-def isNever : Profile → Bool
-  | .never => true
-  | .allZero _ => false
 
 theorem isNever_inter (a b : Profile) :
     isNever (inter a b) = (isNever a || isNever b) := by

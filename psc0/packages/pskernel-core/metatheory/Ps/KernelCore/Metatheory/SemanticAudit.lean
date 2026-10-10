@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticAnnotationCoherence
 import Ps.KernelCore.Metatheory.SemanticLambdaCodomain
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotationVisits
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotations
@@ -32,6 +33,17 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.AnnotatedExpr.coherent_of_checkedExprEq,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.checked,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_iff_coherent,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.liftN,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.inst,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.close,
+    ``PsKernelSemantics.AnnotatedExpr.Coherent.instLevels,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_liftN,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_inst,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_close,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_instLevels,
     ``PsKernelSemantics.UniverseRegime.isNever_inter,
     ``PsKernelSemantics.UniverseRegime.isNever_ofLevel,
     ``PsKernelSemantics.UniverseRegime.native_positive_spec,

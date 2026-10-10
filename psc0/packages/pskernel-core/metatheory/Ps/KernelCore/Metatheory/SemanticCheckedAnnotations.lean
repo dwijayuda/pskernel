@@ -1,3 +1,4 @@
+import Ps.KernelCore.Core.AnnotatedEquality
 import Ps.KernelCore.Metatheory.SemanticAbstraction
 import Ps.KernelCore.Metatheory.SemanticUniverseRegime
 import Ps.KernelCore.Metatheory.SemanticStructuralEquality
@@ -13,21 +14,6 @@ It validates agreement between supplied readings, not their typing or the
 correctness of their annotation provenance.
 -/
 namespace PsKernelSemantics.AnnotatedExpr
-
-def checkRegimes : AnnotatedExpr → AnnotatedExpr → Bool
-  | .lam _ A b _ v, .lam _ A' b' _ v'
-  | .forallE _ A b _ v, .forallE _ A' b' _ v' =>
-      UniverseRegime.check v v' && (checkRegimes A A' && checkRegimes b b')
-  | .app f a, .app f' a' => checkRegimes f f' && checkRegimes a a'
-  | .letE _ A a b _, .letE _ A' a' b' _ =>
-      checkRegimes A A' && (checkRegimes a a' && checkRegimes b b')
-  | .mdata _ e, .mdata _ e' | .proj _ _ e, .proj _ _ e' => checkRegimes e e'
-  | _, _ => true
-
-/-- The raw production comparison still checks shape and payloads. The new
-guard checks only the additional binder annotation information. -/
-def checkedExprEq (a b : AnnotatedExpr) : Bool :=
-  psKernelExprEq a.erase b.erase && checkRegimes a b
 
 theorem checkRegimes_refl (a : AnnotatedExpr) : checkRegimes a a = true := by
   induction a <;> simp_all [checkRegimes, UniverseRegime.check_refl]

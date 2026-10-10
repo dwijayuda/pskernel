@@ -75,24 +75,6 @@ theorem instantiateParams_eval (params metavariables : PsKernelName → Nat)
 
 namespace AnnotatedExpr
 
-def instLevels (names : List PsKernelName) (values : List PsKernelLevel) :
-    AnnotatedExpr → AnnotatedExpr
-  | .sort l => .sort (psKernelLevelInstantiateParams l names values)
-  | .const n ls => .const n (psKernelInstantiateLevelList ls names values)
-  | .app f a => .app (instLevels names values f) (instLevels names values a)
-  | .lam n A b bi v =>
-      .lam n (instLevels names values A) (instLevels names values b) bi
-        (psKernelLevelInstantiateParams v names values)
-  | .forallE n A B bi v =>
-      .forallE n (instLevels names values A) (instLevels names values B) bi
-        (psKernelLevelInstantiateParams v names values)
-  | .letE n A a b nd =>
-      .letE n (instLevels names values A) (instLevels names values a)
-        (instLevels names values b) nd
-  | .mdata md e => .mdata md (instLevels names values e)
-  | .proj n i e => .proj n i (instLevels names values e)
-  | e => e
-
 theorem erase_instLevels (e : AnnotatedExpr)
     (names : List PsKernelName) (values : List PsKernelLevel) :
     (instLevels names values e).erase =

@@ -19,6 +19,7 @@ export const releaseHostFiles = Object.freeze([
   'scripts/command-extension-worker.mjs',
   'scripts/command-wasm-profile.mjs',
   'scripts/checked-build.mjs',
+  'scripts/checked-query.mjs',
   'scripts/checked-project.mjs',
   'scripts/checked-artifact-publication.mjs',
   'scripts/checked-prepared-session.mjs',

@@ -9,7 +9,7 @@
     "start": "node dist/consumer.js"
   },
   "devDependencies": {
-    "proofscript": "0.1.0-preview.4",
+    "proofscript": "0.1.0-preview.5",
     "typescript": "7.0.2"
   },
   "proofscript": {

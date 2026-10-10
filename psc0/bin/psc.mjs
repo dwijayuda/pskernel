@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { readFile, realpath } from 'node:fs/promises';
+import { TextDecoder } from 'node:util';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -21,6 +22,7 @@ const help = `Usage: psc init [directory] [--json]
        psc build [entry.ps|entry.lean] [--out file.ts|file.js] [--json]
        psc dev [entry.ps|entry.lean] --once [--out file.ts] [--json]
        psc dev [entry.ps] --watch [--out file.ts] [--tsc] [--json]
+       psc query entry.ps --stdin [--json]
        psc examples [--json]
        psc extensions [--json]
        psc version [--json]
@@ -33,7 +35,9 @@ init never installs packages; existing package.json and tsconfig.json are preser
 dev requires an explicitly enabled, locally installed psc-command/1 Wasm extension.
 Watch runs the same checked one-shot dev command on saved source changes.
 Optional --tsc runs pinned TypeScript after successful PSC publication.
-LSP, PSCV, and general language extensions remain later milestones.
+query returns machine-readable, admission-only diagnostics for an editor buffer
+without emitting executable artifacts. LSP, PSCV and general language extensions
+remain separately qualified tooling.
 `;
 
 function fail(message) { throw new Error(message); }
@@ -131,6 +135,20 @@ function parseCommand(args) {
     }
     return { command, directory: directory ?? '.', json };
   }
+  if (command === 'query') {
+    let entry;
+    let input = false;
+    let json = false;
+    for (const argument of rest) {
+      if (argument === '--stdin' && !input) input = true;
+      else if (argument === '--json' && !json) json = true;
+      else if (!argument.startsWith('-') && entry === undefined &&
+               argument.endsWith('.ps')) entry = argument;
+      else fail('PSC_QUERY_ARGUMENT_UNSUPPORTED: ' + argument);
+    }
+    if (!entry || !input) fail('PSC_QUERY_USAGE: query entry.ps --stdin [--json]');
+    return { command, entry, input, json: true };
+  }
   if (['watch', 'lsp'].includes(command)) fail('PSC_COMMAND_UNSUPPORTED: ' + command);
   if (!['check', 'build', 'dev'].includes(command)) fail('PSC_CLI_COMMAND: ' + command);
   let entry;
@@ -220,11 +238,11 @@ async function main() {
   const entryPath = explicitEntry ?? (config?.entry ? path.resolve(project.root, config.entry) : undefined);
   if (!entryPath) fail('PSC_CLI_ENTRY_REQUIRED: provide an entry or set proofscript.entry in package.json');
   await assertEntryProject(project, entryPath);
-  const outputPath = options.command === 'check' ? undefined : options.output
+  const outputPath = ['check', 'query'].includes(options.command) ? undefined : options.output
     ? path.resolve(cwd, options.output)
     : (!explicitEntry || config?.exports !== undefined) && config?.out ? path.resolve(project.root, config.out)
       : entryPath.replace(/\.(?:ps|lean)$/u, '.ts');
-  if (config?.exports !== undefined) {
+  if (config?.exports !== undefined && options.command !== 'query') {
     if (!entryPath.endsWith('.ps') || options.command !== 'check' &&
         (!options.output && !config.out || !outputPath.endsWith('.ts'))) {
       fail('PSC_LIBRARY_OUTPUT: select a separate .ts bundle with --out or proofscript.out');
@@ -238,7 +256,7 @@ async function main() {
     'PSC_LEAN_KERNEL_PROVIDER_BIN']) {
     if (Object.hasOwn(process.env, variable)) fail('PSC_RELEASE_OVERRIDE_UNSUPPORTED: ' + variable);
   }
-  if (options.command !== 'check') {
+  if (!['check', 'query'].includes(options.command)) {
     let metadata;
     try {
       const installed = createRequire(import.meta.url).resolve('typescript/package.json');
@@ -261,6 +279,28 @@ async function main() {
   process.once('SIGINT', onInterrupt);
   process.once('SIGTERM', onTerminate);
   try {
+    if (options.command === 'query') {
+      const chunks = [];
+      let size = 0;
+      for await (const chunk of process.stdin) {
+        size += chunk.length;
+        if (size > 1024 * 1024) fail('PSC_QUERY_STDIN_LIMIT');
+        chunks.push(chunk);
+      }
+      let sourceText;
+      try { sourceText = new TextDecoder('utf-8', {
+        fatal: true, ignoreBOM: true,
+      }).decode(Buffer.concat(chunks)); }
+      catch { fail('PSC_QUERY_STDIN_UTF8'); }
+      const { queryCheckedSource } = await import('../scripts/checked-query.mjs');
+      const query = await queryCheckedSource({
+        entryPath, sourceText, ...releaseRuntimePaths(installedRoot),
+        compilerSha256: release.compiler.sha256,
+        kernel: release.kernel.selector, signal: controller.signal,
+      });
+      process.stdout.write(JSON.stringify(query) + '\n');
+      return;
+    }
     if (options.command === 'dev' && options.watch) {
       if (!project) fail('PSC_DEV_WATCH_PROJECT_REQUIRED');
       if (!entryPath.endsWith('.ps')) fail('PSC_DEV_WATCH_SOURCE_PROFILE');

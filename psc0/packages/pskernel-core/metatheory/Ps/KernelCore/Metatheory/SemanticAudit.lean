@@ -27,6 +27,7 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.hereditary_validity_not_erasure_coherence,
     ``PsKernelSemantics.SetModel.functionValid_withFree_fresh,
     ``PsKernelSemantics.SetModel.functionValid_close,
     ``PsKernelSemantics.SetModel.functionValid_inst_iff,

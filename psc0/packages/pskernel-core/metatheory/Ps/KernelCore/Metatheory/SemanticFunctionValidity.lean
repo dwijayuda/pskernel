@@ -269,4 +269,36 @@ theorem functionValid_open_fresh (M : Reading V) (e : AnnotatedExpr)
   simp only [interp, Reading.withFree, hn, ite_true, insert_zero]
   exact functionValid_withFree_fresh M e name fresh x (extend x ρ)
 
+/-- Hereditary semantic validity still cannot choose the erased binder regime.
+Over the empty type Π P : Prop, P both fibre conditions are vacuous, while
+proof-regime and graph-regime lambdas denote different sets. This is a
+counterexample to a proof interface, not an executable checker exploit. -/
+theorem hereditary_validity_not_erasure_coherence (M : Reading V) (ρ : Nat → V) :
+    ∃ a b : AnnotatedExpr, a.erase = b.erase ∧
+      AnnotationValid M ρ a ∧ AnnotationValid M ρ b ∧
+      FunctionValid M ρ a ∧ FunctionValid M ρ b ∧
+      interp M ρ a ≠ interp M ρ b := by
+  let A : AnnotatedExpr :=
+    .forallE .anonymous (.sort .zero) (.bvar 0) .default .zero
+  have noDomain (x : V) (hx : x ∈ˢ interp M ρ A) : False :=
+    no_proof_of_all_props ⟨x, hx⟩
+  have hA : AnnotationValid M ρ A :=
+    ⟨True.intro, fun _ _ => True.intro, fun _ _ hx => hx⟩
+  have fA : FunctionValid M ρ A :=
+    ⟨True.intro, fun _ _ => True.intro⟩
+  have valid (v : PsKernelLevel) :
+      AnnotationValid M ρ (.lam .anonymous A (.sort .zero) .default v) ∧
+      FunctionValid M ρ (.lam .anonymous A (.sort .zero) .default v) :=
+    ⟨⟨hA, fun _ _ => True.intro⟩,
+      fA, (fun _ _ => True.intro), (fun _ => (empty : V)),
+      (fun x hx => False.elim (noDomain x hx)),
+      (fun _ x hx => False.elim (noDomain x hx))⟩
+  refine ⟨.lam .anonymous A (.sort .zero) .default (.succ .zero),
+    .lam .anonymous A (.sort .zero) .default .zero, rfl,
+    (valid _).1, (valid _).1, (valid _).2, (valid _).2, ?_⟩
+  change lamR 1 (interp M ρ A) (fun _ => univ 0) ≠
+    lamR 0 (interp M ρ A) (fun _ => univ 0)
+  rw [lamR_zero]
+  exact lamR_ne_pt (by decide)
+
 end PsKernelSemantics.SetModel

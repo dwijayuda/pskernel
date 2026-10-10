@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-pscv-p1d-imported-instance-class-index-qualification",
+  "status": "qualified-candidate-typeclass-index-NOT-PSC-Standard",
+  "branch": "psc0/platform-pscv-p1d-classes-v1",
+  "baseBranch": "psc0/platform-pscv-p1c-mapping-v1",
+  "draftPR": "https://github.com/dwijayuda/pskernel/pull/99",
+  "qualifiedSource": "80570393844e08876c3356c553845b6f89846b88",
+  "qualifiedRun": {
+    "id": 38053043569,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38053043569",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "updatedAt": "2026-10-10T12:45:07Z"
+  },
+  "jobResults": [
+    {
+      "id": 114215886694,
+      "name": "lean-pure-contract-preflight",
+      "conclusion": "success",
+      "certified": false
+    },
+    {
+      "id": 114215886796,
+      "name": "proposal-and-gate (windows-2022, 26.7.0)",
+      "conclusion": "success",
+      "passed": 29
+    },
+    {
+      "id": 114215886921,
+      "name": "lean-rc3-source-provenance-audit",
+      "conclusion": "success",
+      "pinnedRootCount": 40
+    },
+    {
+      "id": 114215886961,
+      "name": "proposal-and-gate (ubuntu-24.04, 26.7.0)",
+      "conclusion": "success",
+      "passed": 29
+    },
+    {
+      "id": 114215887016,
+      "name": "lean-observed-registry-inventory",
+      "conclusion": "success"
+    },
+    {
+      "id": 114215887032,
+      "name": "proposal-and-gate (ubuntu-24.04, 22.23.3)",
+      "conclusion": "success",
+      "passed": 29
+    }
+  ],
+  "model": {
+    "normativeReferenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "leanVersion": "4.35.0-rc3",
+    "leanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+    "actualAmbientSource": "PSCVL.Policy imported environment",
+    "indexedInstanceDeclarations": 9742,
+    "distinctSyntacticClassHeads": 411,
+    "noSyntacticClassHeadCount": 0,
+    "importedInstanceObservations": 9742,
+    "hasPriorityMetadata": true,
+    "hasSynthOrderMetadata": true,
+    "hasModuleImportMetadata": true,
+    "exactLeanScopedResolutionQualified": false,
+    "normativeSurfaceRows": 230,
+    "normativeSnapshotIds": 194,
+    "sourceLocatedDirectBoolIds": 3,
+    "unresolvedNormativeSnapshotIds": 191,
+    "classHeadIndexSha256": "e9512a596111f2fb095698d0704d3122e0ac1aa1074922acb18ffae5c9dc63db",
+    "ambientRegistrySha256": "c4710a375287b8b45884b0030f1fd8055020b1e849543fae3c837ec0fca0e17c",
+    "directBooleanSourceMappingSha256": "c9e5dce7f97646779dc8a00d5c441226550a353190c9ebbe7c9b1aac70c70b9d"
+  },
+  "artifacts": [
+    {
+      "id": 11670241857,
+      "name": "pscv-ambient-registry-observation",
+      "bytes": 600369,
+      "zipSha256": "d015f8b3ec6b67b652b50a06ff44c2004af19f728e859fe7b030411b91425481",
+      "expiresAt": "2026-11-09T12:45:02Z"
+    },
+    {
+      "id": 11670701127,
+      "name": "pscv-lean435rc3-source-provenance",
+      "bytes": 2598,
+      "zipSha256": "f91dbd38b7069412cd6e264c7b5539fe21f5ca44071405348e0d503a01ae6698",
+      "expiresAt": "2026-11-09T12:44:30Z"
+    }
+  ],
+  "assurance": {
+    "closedStandardRegistryFrozen": false,
+    "selectedScopeAndImportOrderQualified": false,
+    "sourceToClassInstanceMappingApproved": false,
+    "classParameterModesQualified": false,
+    "fullCoercionSimpExtGrindRegistriesQualified": false,
+    "verificationEffectWPRegistryQualified": false,
+    "verifiedExecutableAuthorized": false,
+    "pscvVerified": false,
+    "privateProfileCanGrantExecutableCapability": false,
+    "changedQualifiedSelfhostCompiler": false,
+    "changedSelectedCoreProvider": false,
+    "npmPublished": false,
+    "mergedIntoMain": false
+  },
+  "next": "Qualify 191 normative source snapshot IDs by exact class/tactic/type, chosen source declaration, observed priority and scoped import order and pinned source line provenance. Freeze closed Standard registry and independent effects only through an approved normative revision before PSCV-CERT-v1."
+}

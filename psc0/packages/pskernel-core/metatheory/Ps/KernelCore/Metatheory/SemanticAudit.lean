@@ -138,7 +138,11 @@ run_cmd do
     ``PsKernelSemantics.SetModel.interp_instLevels,
     ``PsKernelSemantics.SetModel.satisfies_instLevels,
     ``PsKernelSemantics.SetModel.modelsType_instLevels,
-    ``PsKernelSemantics.SetModel.instantiateLevelParams_has_reading
+    ``PsKernelSemantics.SetModel.instantiateLevelParams_has_reading,
+    ``PsKernelSemantics.AnnotatedExpr.namesBelow_mono,
+    ``PsKernelSemantics.AnnotatedExpr.namesBelow_liftN,
+    ``PsKernelSemantics.AnnotatedExpr.namesBelow_inst,
+    ``PsKernelSemantics.AnnotatedExpr.allocated_open_frame
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

@@ -166,7 +166,9 @@ theorem mkMax_eval (a b : PsKernelLevel) :
         by_cases hb : psKernelLevelIsZero b = true
         · rw [if_pos hb, isZero_eval params metavariables hb, Nat.max_zero]
         · rw [if_neg hb]
-          cases a <;> cases b <;> exact maxChoice_eval params metavariables _ _
+          have hc := maxChoice_eval params metavariables a b
+          cases a <;> cases b <;>
+            simpa only [maxChoice, maxContains, Bool.false_eq_true, ite_false] using hc
 
 private theorem imaxEqChoice_eval (a b : PsKernelLevel) :
     evalLevel params metavariables

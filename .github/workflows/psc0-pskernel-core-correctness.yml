@@ -23,10 +23,100 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate reference policy proof repair 3
+      - name: Validate reference policy and full proof suite
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
           npm run test:proofs
 
+  binary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact Lean
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build reference-capable Arena binary
+        working-directory: psc0/packages/pskernel-core
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
+          lake build psc_kernel_core_arena
+          .lake/build/bin/psc_kernel_core_arena --version
+          sha256sum .lake/build/bin/psc_kernel_core_arena
+      - uses: actions/upload-artifact@v4
+        with:
+          name: reference-capable-arena-binary
+          path: psc0/packages/pskernel-core/.lake/build/bin/psc_kernel_core_arena
+  arena:
+    needs: binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [cached, reference]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean and uv
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: reference-capable-arena-binary
+          path: kernel
+      - name: Prepare pinned Arena and selected checking mode
+        env:
+          CHECKING_MODE: ${{ matrix.mode }}
+        run: |
+          set -euo pipefail
+          git clone https://github.com/leanprover/lean-kernel-arena.git arena
+          git -C arena checkout b83254de5146ef34147ab82a48edbe1856b0edcc
+          mkdir -p arena/checkers/pskernel-435
+          cp kernel/psc_kernel_core_arena arena/checkers/pskernel-435/kernel
+          flag=--check-historical
+          if test "$CHECKING_MODE" = reference; then flag=--reference-historical; fi
+          cat > arena/checkers/pskernel-435.yaml <<EOF
+          description: PSKernel Core $CHECKING_MODE historical regression mode
+          dir: pskernel-435
+          build: chmod +x kernel
+          run: |
+            ulimit -s 65536
+            ./kernel $flag < "\$IN"
+          EOF
+          mkdir -p "$RUNNER_TEMP/no-perf"
+          printf '#!/bin/sh\nexit 1\n' > "$RUNNER_TEMP/no-perf/perf"
+          chmod +x "$RUNNER_TEMP/no-perf/perf"
+          echo "$RUNNER_TEMP/no-perf" >> "$GITHUB_PATH"
+      - name: Tutorial verdict gate
+        working-directory: arena
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test tutorial --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'tutorial/*'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py tutorial
+      - name: Kernel bug verdict gate
+        if: ${{ !cancelled() }}
+        working-directory: arena
+        run: |
+          set -euo pipefail
+          uv run lka.py build-test 'bugs/*' --cache
+          uv run lka.py build-checker pskernel-435
+          uv run lka.py run --checker pskernel-435 --test 'bugs/*'
+          python3 ../psc0/packages/pskernel-core/scripts/check-arena-results.py bugs
+      - name: Preserve every verdict
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-small-${{ matrix.mode }}
+          path: arena/_results
+          if-no-files-found: error

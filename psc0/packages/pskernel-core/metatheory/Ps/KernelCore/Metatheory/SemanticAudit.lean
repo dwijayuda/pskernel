@@ -11,6 +11,7 @@ import Ps.KernelCore.Metatheory.SemanticAbstraction
 import Ps.KernelCore.Metatheory.SemanticScope
 import Ps.KernelCore.Metatheory.SemanticLevelConstructors
 import Ps.KernelCore.Metatheory.SemanticUniverseSubstitution
+import Ps.KernelCore.Metatheory.SemanticConstantInference
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -142,7 +143,9 @@ run_cmd do
     ``PsKernelSemantics.AnnotatedExpr.namesBelow_mono,
     ``PsKernelSemantics.AnnotatedExpr.namesBelow_liftN,
     ``PsKernelSemantics.AnnotatedExpr.namesBelow_inst,
-    ``PsKernelSemantics.AnnotatedExpr.allocated_open_frame
+    ``PsKernelSemantics.AnnotatedExpr.allocated_open_frame,
+    ``PsKernelSemantics.inferCore_const_result,
+    ``PsKernelSemantics.SetModel.const_inference_has_set_model
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

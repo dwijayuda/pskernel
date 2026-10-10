@@ -408,6 +408,18 @@
     {
       "area": "core-expr-equality",
       "module": "Ps.KernelCore.Core.Expr.Equality"
+    },
+    {
+      "area": "annotated-expression-syntax",
+      "module": "Ps.KernelCore.Core.AnnotatedExpr"
+    },
+    {
+      "area": "binder-universe-regime",
+      "module": "Ps.KernelCore.Core.UniverseRegime"
+    },
+    {
+      "area": "annotated-structural-comparison",
+      "module": "Ps.KernelCore.Core.AnnotatedEquality"
     }
   ],
   "recursiveWiring": {
@@ -534,18 +546,56 @@
       "blocker": "proofIrrelevanceAlgorithmic omits term-to-inferred-type connections; the legacy relation is universal.",
       "primitiveRepair": "Specified string equality; native runtime correspondence and generated PSC0 qualification remain explicit.",
       "semanticFoundation": {
-        "status": "local-algebra-and-modular-bridges",
+        "status": "relative-function-model-and-local-execution-bridges",
         "namespace": "PsKernelSemantics",
         "independentOfLegacyJudgments": true,
-        "concreteModelScope": "propositions, impredicative products into Prop, and sort-successor membership only",
-        "concreteCheckerCoverage": "core sort-inference result, with explicit semantic cache coherence",
-        "conditionalCheckerCoverage": [
-          "positive proposition classifier",
-          "proof-irrelevance branch call sequence"
-        ],
-        "next": "scoped contexts, dependent function interpretation and substitution transport",
-        "fullKernelModel": false
+        "concreteModelScope": "Relative universe/function model and sound declarative dependent-function fragment",
+        "concreteCheckerCoverage": "Local sort/constant/binder/application bridges with explicit recursive/environment premises; guarded structural coherence and validity transport",
+        "next": "Carry and validate selected annotations throughout shared checking/context/admission, then discharge joint recursive soundness and full environment preservation",
+        "fullKernelModel": false,
+        "validation": {
+          "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+          "run": 38057387016,
+          "job": 114228540945,
+          "buildJobs": 254,
+          "focusedBuildJobs": 127,
+          "companionFiles": 84,
+          "axiomDeclarations": 242,
+          "pureMathModules": 12,
+          "closureModules": 140,
+          "referenceDefinitions": 1824,
+          "cachedFallbacks": 0,
+          "status": "passed",
+          "checkedAt": "2026-10-10 13:57:20 UTC",
+          "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+          "runConclusion": "success"
+        }
       }
+    }
+  },
+  "annotatedSyntaxMigration": {
+    "status": "runtime-representation-and-guard-transport",
+    "singleDefinitionUsedByModel": true,
+    "publicAcceptanceMigrated": false,
+    "publicCheckerStillUsesRawExpressions": true,
+    "typingCertifiedByRepresentation": false,
+    "modelImportsInNewRuntimeModules": false,
+    "validation": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "buildJobs": 254,
+      "focusedBuildJobs": 127,
+      "companionFiles": 84,
+      "axiomDeclarations": 242,
+      "pureMathModules": 12,
+      "closureModules": 140,
+      "referenceDefinitions": 1824,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 13:57:20 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+      "runConclusion": "success"
     }
   }
 }

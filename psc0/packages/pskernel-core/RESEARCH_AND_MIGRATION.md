@@ -2,6 +2,87 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
+## Runtime annotation representation and coherent transport — 2026-10-10
+
+The annotated expression representation, binder-regime decision procedure and
+guarded structural comparator now live in the production Core library:
+`Core/AnnotatedExpr.lean`, `Core/UniverseRegime.lean` and
+`Core/AnnotatedEquality.lean`. The metatheory imports those exact definitions;
+it no longer owns a second implementation of their executable operations.
+The new modules import no model, legacy judgments or upstream checker.
+
+This is a representation migration, not migration of public acceptance.
+`Checker/Inference`, WHNF, equality and admitted environments still exchange
+raw `PsKernelExpr`. Moving a sound guard into `src` does not establish that
+an accepting raw comparison actually ran it. Binder annotations remain
+untrusted data until tied to the actual sort checks. The next architectural
+step must carry these particular readings through the shared recursive
+operations and environment storage, and validate binder tags at their visits.
+
+`SemanticAnnotationCoherence.lean` proves that guarded structural equality is
+exactly the constructor-by-constructor `Coherent` relation. The relation is
+reflexive, symmetric and transitive, and the executable comparator remains
+successful after lifting, term substitution, local-name closing and universe
+instantiation. Binder names and binder-info fields are ignored just as in the
+existing raw comparator; ordinary sort levels, constant universe lists,
+metadata, let nondependency flags and projection names/indices remain checked.
+These are structural-equality laws, not transitivity of kernel definitional
+equality, subject reduction or equality completeness.
+
+The proof also exposes a necessary boundary:
+`regimes_alone_not_substitution_stable` is a formal counterexample to using
+the annotation guard without the raw shape check. Substitution can replace a
+variable with a binder and reveal conflicting tags that the old shape-mismatched
+guard did not compare. The combined comparator includes the required shape
+evidence. This is an invalid prospective proof shortcut, not an exhibited
+public-kernel exploit.
+
+`SemanticCoherentValidity.lean` proves that guarded comparison preserves both
+hereditary annotation and function validity, as well as the existing denotation
+equality. `application_trace_checked_reading` fixes the exact application and
+substituted result type and proves typing plus all four hereditary validity
+facts together. Its structural branch still explicitly requires the annotation
+guard; its conversion branch still needs preservation by the recorded recursive
+equality call. No arbitrary annotation witness, cache validity or global
+checker-soundness axiom discharges those remaining obligations.
+
+The representation design follows the pinned Con Leche
+[annotated expression](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Kernel/Expr.lean)
+and [annotation/checker pipeline](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Kernel/Core.lean).
+PSKernel retains its own raw syntax, annotations, guards and proofs; only the
+previously allowed pure set mathematics is imported. Con Leche's annotation
+pipeline is design evidence, not a proof of PSKernel's acceptance behavior.
+
+Cloud validation: [Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
+the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
+The 140-module dependency closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,824 definitions with zero cached
+fallbacks. The complete workflow passed. The first attempt failed because the moved
+universe-regime code had relied on an indirectly imported name-equality
+instance; the source now imports its existing runtime owner explicitly.
+Two subsequent attempts exposed proof-script reduction issues; explicit index/name
+cases and Nat.lt_irrefl repaired them. All failed runs and the final success are
+preserved in MIGRATION_EVIDENCE.json. [Raw-binary identity job 114227668195](https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195)
+at `ec410d5ff6614c815ba8d640f148cbeb133e2dc6` rebuilt the raw Arena
+checker in 218 jobs and matched the runtime-tested `e600c3ac` binary exactly:
+`dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
+Only a proof file and the workflow changed between that identity source and
+the green source above; runtime/host source did not change. The identity run's
+proof job failed before the final proof repair; its binary job passed.
+Native regressions, Arena and fresh exports were not rerun in this stage.
+Their earlier source-specific receipts, including the reference Int64 timeout,
+remain below. Binary identity does not establish generated PSC0 qualification.
+
+Recovery branch: `checkpoint/pskernel-core-before-runtime-annotations-20261010`
+at `0c7f63b446bfd4b0847ece437b76bccd40ac3fb9`.
+No new axiom or stronger foundation is introduced. The explicit
+`[ConLeche.SetTheory V]` relative assumption remains, without a constructed
+instance or existence theorem. Full-kernel checker/admission soundness and
+public consistency remain unfinished. Generated PSC0 qualification, full
+Init/Std/Mathlib conformance and the reference Int64 timeout remain open.
+
 ## Checked lambda codomain evidence — 2026-10-10
 
 Checked lambda inference now re-infers its returned body type at the infer-only
@@ -417,9 +498,9 @@ carries framing, coherent contexts and hereditary grading. Its binder reading
 chooses between erased proofs and function graphs using validated annotations.
 Our checked `erasure_is_not_semantic_coherence` counterexample demonstrates why
 that distinction matters in PSKernel too: identical erased syntax is not enough
-to pick arbitrary annotations safely. The new representation is assurance-only;
-a future proof may justify ghost annotations or require an implementation
-change, but no annotation validation is claimed from the current checker.
+to pick arbitrary annotations safely. At this historical stage the representation was assurance-only.
+It now lives in runtime Core as described above; actual public annotation
+carriage and validation remain unfinished.
 
 The [official Lean reference](https://lean-lang.org/doc/reference/latest/The-Type-System/)
 also distinguishes the actual algorithm from ideal conversion properties.

@@ -34,9 +34,11 @@ PSC1 profiles, but generated kernel qualification remains unproved.
 Resume the exact pending step recorded in AI_WORK_STATE.md. Verify completed
 cloud logs rather than assuming the latest branch is green. If the document is
 older than the branch, inspect the intervening commits and reconcile the state.
-The current work concerns one runtime annotated representation, coherent
-structural comparison, transport through syntax operations and connecting
-particular checked readings to recursive inference. Global public annotation
+The last validated stage established one runtime annotated representation,
+guarded structural coherence, syntax/validity transport and a concrete checked
+application reading under explicit local premises. The next architectural step
+is to carry and validate actual readings throughout the shared recursive
+checker, local context and admission. Checkpoint before that migration. Global public annotation
 provenance, joint infer/WHNF/defeq soundness, full admission models and public
 consistency are still open unless later verified evidence establishes them.
 

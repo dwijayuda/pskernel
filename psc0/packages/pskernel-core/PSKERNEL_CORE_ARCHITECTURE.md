@@ -8,6 +8,24 @@ the current certified sharing layer is a Lean-native experiment.
 The former PSC1-selfhost-stable/1 and PSC1-portable-selfhost/1 profiles do not
 constrain this migration.
 
+## Runtime annotation ownership
+
+The annotated syntax, universe-regime test and guarded structural comparator
+now have a single owner in runtime Core. The model imports those exact
+operations. Their structural equivalence and transport through lifting,
+substitution, free-name closing and universe instantiation are proved, together
+with hereditary-validity transport. The application bridge fixes one concrete
+term/result reading with all four validity facts under explicit recursive and
+guard premises. Public checking and admission still exchange raw expressions;
+carrying and validating these annotations throughout those paths is unfinished.
+See [the work state](AI_WORK_STATE.md) and
+[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+
+Canonical owners: `Core/AnnotatedExpr.lean`, `Core/UniverseRegime.lean`, and
+`Core/AnnotatedEquality.lean`. None imports the semantic model. Stored annotations
+are not certified merely by construction; provenance must come from actual
+checking and be preserved by all transformations and admission.
+
 ## Correctness architecture
 
 The legacy operational judgment is inadequate as a semantic target:
@@ -24,7 +42,7 @@ execution TCB; generated PSC0 qualification remains open. Performance work
 must preserve the specified behavior and cannot substitute for these proofs.
 See `RESEARCH_AND_MIGRATION.md` for exact upstream comparisons and obligations.
 
-The assurance-only annotated expression reading preserves every production
+The runtime Core annotated expression representation preserves every production
 constructor and carries binder codomain-sort annotations. Set interpretation,
 scoped substitution, exact production erasure correspondence, dependent-context
 rules and a declarative dependent-function fragment are proved independently
@@ -36,22 +54,6 @@ Its checker and soundness theorem are not used as a PSKernel fallback.
 `scripts/check-model-dependencies.mjs` enforces the import and revision boundary;
 `SemanticAudit.lean` audits proof dependencies. Relative set-theory assumptions
 must remain explicit even when the global axiom audit passes.
-
-## Reference specialization
-
-`PsKernelSemanticCachePolicy` selects whether the shared algorithm can read or
-publish semantic caches. `API/Reference` explicitly fixes its disabled value
-through checking, callbacks, sessions and declaration admission. It is a
-specialization of the same rules, not an independently evolving implementation.
-The correctness proof targets this reference entry point first; cache refinement
-is deferred. See [the proof roadmap](REFERENCE_CORRECTNESS_PLAN.md).
-
-The reference state currently retains dormant cache fields. Operation-level
-miss/no-op equations and an elaborated call-graph audit are established checks;
-they are not a proof of whole-checker state independence or soundness.
-Structural sharing has exact-result refinements and is retained. The source
-interpreter, compiler simplifications and native runtime have distinct trust
-boundaries.
 
 ## Source and semantic authority
 

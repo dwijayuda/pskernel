@@ -45,42 +45,48 @@ documents current after subsequent validated stages.
 
 ## Exact resume point
 
-Current source/audit-trigger head at this snapshot:
-`0e7311b0fc775eb99849046971e2c24468dd3838`.
+Latest fully validated source/audit trigger:
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba`.
+Documentation-only commits may follow it; read the live branch and comparison.
 
-The active stage has moved the annotated syntax and guards into runtime Core,
-then added structural-coherence and hereditary-validity proofs. It is **not
-fully validated yet**. The latest cloud run failed on two proof-script errors;
-the new native syntax tests passed.
+[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
+the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
+The 140-module dependency closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,824 definitions with zero cached
+fallbacks. The complete workflow passed.
 
-- Representation source commit:
-  `9ed7e37017c637d5182b0d0f13ef21f0cde55a92`.
-- First audit: run **38056276397**, job **114225352796**,
-  source `c217d10b601b3b4643a83f471d3c22ac7811cc07`.
-  Failed because the moved UniverseRegime module lacked the existing
-  DecidableEq instance for PsKernelName.
-- Fix plus coherence/validity extension:
-  `ffdfe75c680dec701beffcd7613dd8c0a33257cf`.
-  UniverseRegime now imports its existing runtime equality owner,
-  `Ps.KernelCore.Core.Expr.Shared`.
-- Second audit: [run 38056606291](https://github.com/dwijayuda/pskernel/actions/runs/38056606291),
-  job **114226291815**, source `0e7311b0fc775eb99849046971e2c24468dd3838`.
-  Failed only at the reported compilation stage; it did not complete the
-  semantic axiom gate or all companion proofs.
-  `SemanticAnnotationCoherence.lean` lines 184 and 206 report
-  **simp made no progress**, in the bound-variable case of `Coherent.inst`
-  and the free-variable case of `Coherent.close`.
-  Replace those fragile simplifier steps with explicit cases on the index/name
-  tests and qualified `AnnotatedExpr.inst`/`AnnotatedExpr.close` reductions.
-  Do not treat downstream modules as validated merely because no diagnostic
-  reached them before this dependency failed.
-- The same second run passed
-  `PSKERNEL_ANNOTATED_SYNTAX: PASS cases=12 modelImports=0`.
-  Reference-policy audit remained 1,824 definitions, zero cached fallbacks.
-- No new public-checker behavior or conformance result is claimed by this stage.
-- A stronger exact `application_trace_checked_reading` theorem was being
-  drafted but is not included at the source head above. Read the live source:
-  later commits may already contain it and the compilation repairs.
+[Raw-binary identity job 114227668195](https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195)
+at `ec410d5ff6614c815ba8d640f148cbeb133e2dc6` rebuilt the raw Arena
+checker in 218 jobs and matched the runtime-tested `e600c3ac` binary exactly:
+`dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
+Only a proof file and the workflow changed between that identity source and
+the green source above; runtime/host source did not change. The identity run's
+proof job failed before the final proof repair; its binary job passed.
+Native regressions, Arena and fresh exports were not rerun in this stage.
+Their earlier source-specific receipts, including the reference Int64 timeout,
+remain below. Binary identity does not establish generated PSC0 qualification.
+
+The completed stage moved 17 unchanged executable definitions from metatheory
+into runtime Core, proved guarded structural coherence/transport and hereditary
+validity transport, and strengthened `application_trace_checked_reading`.
+The public checker and admission remain raw-expression based. Full-kernel
+metatheory and consistency remain unfinished.
+
+Three earlier attempts failed before this green source: missing the existing
+name-equality import (run 38056276397), non-progressing simplification
+(run 38056606291), and an equal-index substitution branch needing
+`Nat.lt_irrefl` (run 38057087757). All were repaired; retain them as historical
+evidence, not current instructions to fix already-corrected code.
+
+**Next task:** checkpoint the validated state, then migrate carried annotations
+through the shared recursive interfaces, local context and admitted environment.
+Tie selected binder tags to actual sort visits and preserve them through every
+accepting shortcut and synthesized term. The focused source inventory below
+identifies several paths; it is not exhaustive. Do not create a second checker
+or treat an isolated Quick guard as completion. Afterwards discharge the joint
+recursive/admission obligations and the public-acceptance theorem.
 
 ## Recovery checkpoints
 
@@ -100,14 +106,14 @@ Earlier checkpoints:
 
 Recover by a recovery branch or reviewed revert; no force push is needed.
 
-## Last fully validated stage
+## Prior validated lambda-codomain stage
 
-The last completed stage is lambda codomain-sort certification, preserved by
+The preceding completed stage is lambda codomain-sort certification, preserved by
 the current checkpoint at `0c7f63b4`.
 
 Shared checked lambda inference now:
 1. Checks the domain and infers the opened body.
-2. Re-inferrs the actual returned body type at infer-only grade.
+2. Re-infers the actual returned body type at infer-only grade.
 3. Exposes that result's sort.
 4. Closes the unchanged body type and returns the corresponding forall.
 
@@ -197,7 +203,7 @@ Active new files:
 - metatheory/Ps/KernelCore/Metatheory/SemanticCoherentValidity.lean
 - test/AnnotatedSyntaxTests.lean
 
-The coherence relation mirrors the executable comparator and aims to establish
+The coherence relation mirrors the executable comparator and establishes
 its equivalence laws and closure under lifting, substitution, local closing
 and universe instantiation. Its transitivity is structural equality, not kernel
 definitional equality. A new counterexample shows that checkRegimes alone,
@@ -270,3 +276,27 @@ REFERENCE_CORRECTNESS_PLAN.md, RESEARCH_AND_MIGRATION.md, relevant architecture/
 TCB/evidence documents and the draft PR description. Keep unfinished claims
 false, preserve historical evidence with its original revision, and identify
 the smallest genuine next proof obligation.
+
+## Next migration entry points inspected in the current source
+
+This is a focused inventory, not an exhaustive checker-coverage claim. Paths
+below are under src/Ps/KernelCore; they were read at the active branch's
+9cf6d802ea9bc33fabd220abfb38b3fe432495ba revision.
+
+| Site | Why an isolated guard patch is insufficient |
+| --- | --- |
+| Checker/Ops.lean and Checker/Knot.lean | All callbacks still exchange raw expressions. Knot has its own accepting raw-equality shortcut (line 357), before Quick is called. |
+| Checker/DefEq/Quick.lean:36 | A second direct structural-accept path also needs carried readings. Updating this function alone leaves the Knot shortcut. |
+| Checker/DefEq/BinderSpines.lean:140 and :313 | Lambda/forall domain shortcuts compare before opening. Coherent substitution transport is needed through their shared instantiation spine, plus binder-regime agreement. |
+| Checker/Inference/Core.lean | Checked applications have their own raw-type shortcut. Lambda/forall visits already compute useful sort evidence, but discard the annotation from runtime results. |
+| Checker/DefEq/Shortcuts.lean:126 and :201 | Both eta directions fabricate a lambda from an exposed forall. The chosen range annotation must follow that actual forall reading and pass the lambda-versus-product regime obligation. |
+| Core/LocalContext.lean | Local declarations store raw types and optional values. Converting expression nodes alone will not preserve the types retrieved at free-variable visits. |
+| Admission/Declaration/Admission.lean | Definitions/theorems/opaques and mutual work environments store raw types/values. Stored readings must survive actual admission transactions. |
+| Checker/Reduction/WhnfCore.lean | Beta consumes an application spine through InstantiateRev and ApplyArgsCheap. Carry the chosen annotations through these transformations and justify the proof-regime argument checks. |
+
+Proceed with a coordinated representation/recursive-interface migration in the
+shared implementation, with exact input erasure and trace connections. Do not
+create an independent fallback checker or insert a superficial guard in only
+one entry point. Audit synthesized terms, stored types/rules, eta and recursors
+alongside imported expressions. A whole-kernel consistency claim still needs
+the joint recursive and admission theorems after the migration.

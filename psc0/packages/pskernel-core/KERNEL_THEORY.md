@@ -40,7 +40,8 @@ regime agreement on successful guarded comparison. It also validates annotations
 against actual sort-exposure visits and characterizes the existing native
 positive-universe test exactly.
 
-These operations are assurance infrastructure. Public raw-expression acceptance
+The executable representation and guards now live in runtime Core, with
+coherence and validity transport proved in metatheory. Public raw-expression acceptance
 does not yet run the extra guard or produce validated annotations. Recursive
 typing/reduction/equality, global annotation coherence and full admission
 soundness remain open. No new axiom or stronger foundation assumption was added.
@@ -98,6 +99,27 @@ Ps.KernelCore/*.lean
 ```
 
 No separate Rust or C++ kernel is required.
+
+## Runtime annotations and proof handoff
+
+The annotated syntax, universe-regime test and guarded structural comparator
+now have a single owner in runtime Core. The model imports those exact
+operations. Their structural equivalence and transport through lifting,
+substitution, free-name closing and universe instantiation are proved, together
+with hereditary-validity transport. The application bridge fixes one concrete
+term/result reading with all four validity facts under explicit recursive and
+guard premises. Public checking and admission still exchange raw expressions;
+carrying and validating these annotations throughout those paths is unfinished.
+See [the work state](AI_WORK_STATE.md) and
+[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+
+[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
+the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
+The 140-module dependency closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,824 definitions with zero cached
+fallbacks. The complete workflow passed.
 
 ## 1. Trust model
 

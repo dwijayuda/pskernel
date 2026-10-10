@@ -1,10 +1,43 @@
 # Reference checker and the full correctness target
 
 Status: reference cache isolation, checked annotation guards, execution-derived
-lambda codomain readings and hereditary validity transport validated. Public annotation provenance,
+lambda codomain readings, runtime annotated syntax, guarded structural coherence
+and hereditary validity transport validated. Public annotation provenance,
 full-kernel metatheory and relative consistency remain unfinished.
 
-## Validated evidence
+## Validated runtime-representation evidence
+
+[Proof job 114228540945](https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945) at
+`9cf6d802ea9bc33fabd220abfb38b3fe432495ba` passed **254 build jobs**, all **84 companion files**,
+the **242-declaration** semantic axiom audit and **12 native annotated-syntax cases**.
+The 140-module dependency closure contains exactly 12 allowed Con Leche
+pure-math modules, zero legacy-judgment imports and zero production-assurance
+imports. The reference-policy audit checked 1,824 definitions with zero cached
+fallbacks. The complete workflow passed.
+
+[Raw-binary identity job 114227668195](https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195)
+at `ec410d5ff6614c815ba8d640f148cbeb133e2dc6` rebuilt the raw Arena
+checker in 218 jobs and matched the runtime-tested `e600c3ac` binary exactly:
+`dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6`.
+Only a proof file and the workflow changed between that identity source and
+the green source above; runtime/host source did not change. The identity run's
+proof job failed before the final proof repair; its binary job passed.
+Native regressions, Arena and fresh exports were not rerun in this stage.
+Their earlier source-specific receipts, including the reference Int64 timeout,
+remain below. Binary identity does not establish generated PSC0 qualification.
+
+The annotated syntax, universe-regime test and guarded structural comparator
+now have a single owner in runtime Core. The model imports those exact
+operations. Their structural equivalence and transport through lifting,
+substitution, free-name closing and universe instantiation are proved, together
+with hereditary-validity transport. The application bridge fixes one concrete
+term/result reading with all four validity facts under explicit recursive and
+guard premises. Public checking and admission still exchange raw expressions;
+carrying and validating these annotations throughout those paths is unfinished.
+See [the work state](AI_WORK_STATE.md) and
+[the continuation prompt](AI_CONTINUATION_PROMPT.md) for an exact handoff.
+
+## Prior lambda-codomain evidence
 
 [Proof job 114221834109](https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109)
 at `2baa33e165f914d14f635d68934293e3fcea89ed` passed **249 build jobs**,
@@ -60,6 +93,11 @@ The correctness workflow runs proofs on its push trigger. Its manual
 Arena modes plus focused exact Lean 4.35 exports. Full-corpus performance is not a gate for this milestone.
 
 ## Recovery point
+
+Before the runtime representation migration, checkpoint
+`checkpoint/pskernel-core-before-runtime-annotations-20261010` was created at
+`0c7f63b446bfd4b0847ece437b76bccd40ac3fb9`.
+
 
 Before adding checked lambda codomain certification, checkpoint
 `checkpoint/pskernel-core-before-lambda-sort-evidence-20261010` was created at
@@ -259,7 +297,8 @@ regime agreement on successful guarded comparison. It also validates annotations
 against actual sort-exposure visits and characterizes the existing native
 positive-universe test exactly.
 
-These operations are assurance infrastructure. Public raw-expression acceptance
+The executable representation and guards now live in runtime Core, with
+coherence and validity transport proved in metatheory. Public raw-expression acceptance
 does not yet run the extra guard or produce validated annotations. Recursive
 typing/reduction/equality, global annotation coherence and full admission
 soundness remain open. No new axiom or stronger foundation assumption was added.

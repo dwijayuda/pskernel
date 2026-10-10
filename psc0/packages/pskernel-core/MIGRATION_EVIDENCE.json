@@ -1,15 +1,15 @@
 {
   "schemaVersion": 8,
-  "stage": "Correctness priority: execution-derived checked lambda codomain evidence",
-  "status": "checked-lambda-codomain-evidence-validated-full-kernel-unfinished",
-  "candidateCommit": "e600c3ac862e68009511f778203758415838a9df",
-  "assuranceRevision": "2baa33e165f914d14f635d68934293e3fcea89ed",
+  "stage": "Correctness priority: runtime annotated syntax and coherent transport",
+  "status": "validated-runtime-annotation-representation-full-kernel-unfinished",
+  "candidateCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+  "assuranceRevision": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38055104083,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
+  "workflowRun": 38057387016,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
   "nativeBinarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
   "checks": {
     "build": {
@@ -21,26 +21,28 @@
       "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6"
     },
     "metatheory": {
-      "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
-      "run": 38055104083,
-      "job": 114221834109,
-      "buildJobs": 249,
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "buildJobs": 254,
+      "focusedBuildJobs": 127,
       "companionFiles": 84,
-      "axiomDeclarations": 221,
+      "axiomDeclarations": 242,
       "pureMathModules": 12,
-      "closureModules": 135,
+      "closureModules": 140,
       "referenceDefinitions": 1824,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 13:20:56 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
+      "checkedAt": "2026-10-10 13:57:20 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "run": 38055104083,
-      "job": 114221834109
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945
     },
     "nativeRegression": {
       "commit": "e600c3ac862e68009511f778203758415838a9df",
@@ -274,17 +276,26 @@
       "historicalQualification": "This controlled comparison predates the codomain-sort certification change. It establishes the prior timeout, not current performance equivalence."
     },
     "binaryIdentity": {
-      "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
-      "run": 38055104083,
-      "job": 114221834301,
+      "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "run": 38057087757,
+      "job": 114227668195,
       "status": "passed",
       "buildJobs": 218,
       "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
       "testedRun": 38054667785,
       "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
       "hashesEqual": true,
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834301"
-    }
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195"
+    },
+    "annotatedSyntax": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "status": "passed",
+      "cases": 12,
+      "modelImports": 0
+    },
+    "runtimeValidationScope": "This representation/proof stage reran annotated-syntax tests and checked raw-binary identity. Other native, Arena and fresh-export receipts below retain their original source and were not rerun."
   },
   "claims": {
     "completeArenaConformance": false,
@@ -314,7 +325,11 @@
     "lambdaSelectedRegimeJustified": false,
     "publicCheckedLambdaComputesCodomainSort": true,
     "lambdaReadingUsesVisitedLevel": true,
-    "lambdaSelectedRegimeQualification": "The checked-lambda bridge fixes the actual visited level under recursive soundness/validity premises; global accepted annotation provenance remains unproved."
+    "lambdaSelectedRegimeQualification": "The checked-lambda bridge fixes the actual visited level under recursive soundness/validity premises; global accepted annotation provenance remains unproved.",
+    "runtimeAnnotatedRepresentationSharedWithModel": true,
+    "guardedStructuralEquivalenceAndTransportProved": true,
+    "hereditaryValidityTransportAcrossCoherenceProved": true,
+    "applicationConcreteReadingProvedUnderExplicitPremises": true
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -654,7 +669,7 @@
     "status": "completed"
   },
   "remaining": [
-    "Thread checked annotations through actual public acceptance and prove their provenance/preservation through joint checking; the assurance guard alone does not do this.",
+    "Carry and validate runtime annotations throughout actual shared checking, contexts, declarations and all accepting shortcuts; a guard available in Core alone does not establish accepted provenance.",
     "Prove all mutually recursive reference inference, WHNF and equality cases against the same model.",
     "Complete ordinary/mutual/nested inductive, quotient and primitive admission models.",
     "Connect initial safe environment and an explicit allowed-axiom/model policy.",
@@ -665,7 +680,7 @@
   ],
   "nextStage": {
     "status": "open",
-    "scope": "Connect actual checked readings across all shared recursive operations and raw equality; prove the joint reference inference/WHNF/defeq invariant, then complete safe admission and public statement preservation",
+    "scope": "Coordinated carried-annotation migration in the shared checker and environment; joint graded inference/WHNF/defeq soundness; full safe admission; original-statement preservation and relative consistency.",
     "performancePriority": "deferred"
   },
   "promotionDecision": {
@@ -1784,14 +1799,14 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 13:20:56 UTC",
+  "recordedAt": "2026-10-10 13:57:20 UTC",
   "semanticFoundation": {
-    "sourceCommit": "445f97b3509b89bad755c7377dcae3fe2d1dd3d2",
-    "validationCommit": "2baa33e165f914d14f635d68934293e3fcea89ed",
+    "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+    "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
     "validationStatus": "passed",
-    "workflowRun": 38055104083,
-    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
-    "scope": "Relative universe/function model and sound declarative fragment; syntax/validity transport, annotation guards, and checked lambda readings whose codomain level comes from actual execution. Full recursive checking/admission remains unproved.",
+    "workflowRun": 38057387016,
+    "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+    "scope": "Relative universe/function model and sound declarative fragment; runtime-owned annotated syntax and guarded structural coherence, syntax/hereditary-validity transport, execution-derived lambda codomain and exact application readings under explicit recursive premises. Full public checking/admission remains unproved.",
     "modules": [
       "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
       "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
@@ -1823,13 +1838,15 @@
       "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
       "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean",
       "metatheory/Ps/KernelCore/Metatheory/SemanticValidityScope.lean",
-      "metatheory/Ps/KernelCore/Metatheory/SemanticLambdaCodomain.lean"
+      "metatheory/Ps/KernelCore/Metatheory/SemanticLambdaCodomain.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationCoherence.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCoherentValidity.lean"
     ],
     "semanticEqualityRequiresDefinedValue": true,
     "genericEmptyTheoremIsFullKernelConsistency": false,
     "completeKernelMetatheory": false,
-    "fullUniverseFunctionClosureConstructed": false,
-    "scopedDependentFunctionsConstructed": false,
+    "fullUniverseFunctionClosureConstructed": true,
+    "scopedDependentFunctionsConstructed": true,
     "admissionModelConstructed": false,
     "productionCodeChanged": true,
     "conditionalCallbackBridge": [
@@ -1853,7 +1870,7 @@
         "Classical.choice",
         "Quot.sound"
       ],
-      "auditTargets": 35,
+      "auditTargets": 242,
       "customAxiomsAdded": false,
       "localHypotheses": "Exposed explicitly in theorem statements; not included in #print axioms"
     },
@@ -1871,14 +1888,31 @@
         "status": "failed",
         "reason": "Sort-inference cache-hit proof reused a lookup equality already rewritten by case analysis",
         "repairCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f"
+      },
+      {
+        "commit": "2baa33e165f914d14f635d68934293e3fcea89ed",
+        "run": 38055104083,
+        "job": 114221834109,
+        "buildJobs": 249,
+        "companionFiles": 84,
+        "axiomDeclarations": 221,
+        "pureMathModules": 12,
+        "closureModules": 135,
+        "referenceDefinitions": 1824,
+        "cachedFallbacks": 0,
+        "status": "passed",
+        "checkedAt": "2026-10-10 13:20:56 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38055104083/job/114221834109",
+        "runConclusion": "success"
       }
     ],
-    "jobId": 114221834109,
-    "buildJobs": 249,
+    "jobId": 114228540945,
+    "buildJobs": 254,
     "companionFiles": 84,
     "axiomAudit": "passed",
-    "checkedAt": "2026-10-10 13:20:56 UTC",
-    "axiomDeclarations": 221
+    "checkedAt": "2026-10-10 13:57:20 UTC",
+    "axiomDeclarations": 242,
+    "mathematicalModelQualification": "Relative universe/function mathematics under explicit SetTheory V; full kernel admission and public acceptance remain outside the constructed model."
   },
   "relativeSetModelStage": {
     "status": "passed-relative-foundation-full-kernel-unfinished",
@@ -3153,5 +3187,182 @@
       "binaryIdentityJob": 114221834301
     },
     "additionalDeclarationsCoveredByAxiomAudit": 2
+  },
+  "runtimeAnnotatedSyntaxStage": {
+    "status": "validated-runtime-annotation-representation-full-kernel-unfinished",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-runtime-annotations-20261010",
+      "commit": "0c7f63b446bfd4b0847ece437b76bccd40ac3fb9"
+    },
+    "representationModules": [
+      "Ps.KernelCore.Core.AnnotatedExpr",
+      "Ps.KernelCore.Core.UniverseRegime",
+      "Ps.KernelCore.Core.AnnotatedEquality"
+    ],
+    "proofModules": [
+      "Ps.KernelCore.Metatheory.SemanticAnnotationCoherence",
+      "Ps.KernelCore.Metatheory.SemanticCoherentValidity"
+    ],
+    "unchangedRelocatedDeclarations": [
+      {
+        "definition": "AnnotatedExpr",
+        "identical": true
+      },
+      {
+        "definition": "erase",
+        "identical": true
+      },
+      {
+        "definition": "Scoped",
+        "identical": true
+      },
+      {
+        "definition": "liftN",
+        "identical": true
+      },
+      {
+        "definition": "inst",
+        "identical": true
+      },
+      {
+        "definition": "close",
+        "identical": true
+      },
+      {
+        "definition": "instLevels",
+        "identical": true
+      },
+      {
+        "definition": "Atom",
+        "identical": true
+      },
+      {
+        "definition": "Profile",
+        "identical": true
+      },
+      {
+        "definition": "inter",
+        "identical": true
+      },
+      {
+        "definition": "ofLevel",
+        "identical": true
+      },
+      {
+        "definition": "subset",
+        "identical": true
+      },
+      {
+        "definition": "compare",
+        "identical": true
+      },
+      {
+        "definition": "check",
+        "identical": true
+      },
+      {
+        "definition": "isNever",
+        "identical": true
+      },
+      {
+        "definition": "checkRegimes",
+        "identical": true
+      },
+      {
+        "definition": "checkedExprEq",
+        "identical": true
+      }
+    ],
+    "productionAndModelUseSameSyntaxDefinitions": true,
+    "publicAcceptanceUsesAnnotatedExpressions": false,
+    "publicAcceptanceUsesAnnotationGuard": false,
+    "actualAnnotationProvenanceProved": false,
+    "guardTransport": [
+      "lifting",
+      "term substitution",
+      "free-variable closing",
+      "universe instantiation"
+    ],
+    "rawAcceptanceImplementationChanged": false,
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "customAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "foundationExistenceConstructed": false,
+    "binaryIdentity": {
+      "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "run": 38057087757,
+      "job": 114227668195,
+      "status": "passed",
+      "buildJobs": 218,
+      "testedCommit": "e600c3ac862e68009511f778203758415838a9df",
+      "testedRun": 38054667785,
+      "binarySha256": "dc710ab555596a973a1bb301e52da1f5adf414ade63aeb691ba2cb6717016ce6",
+      "hashesEqual": true,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057087757/job/114227668195"
+    },
+    "earlierFailures": [
+      {
+        "commit": "c217d10b601b3b4643a83f471d3c22ac7811cc07",
+        "run": 38056276397,
+        "job": 114225352796,
+        "reason": "Moved UniverseRegime lacked the existing PsKernelName DecidableEq import",
+        "nativeSyntax": "not-built"
+      },
+      {
+        "commit": "0e7311b0fc775eb99849046971e2c24468dd3838",
+        "run": 38056606291,
+        "job": 114226291815,
+        "reason": "Coherent.inst and Coherent.close contained non-progressing simplifier steps",
+        "nativeSyntax": "12 cases passed"
+      },
+      {
+        "commit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+        "run": 38057087757,
+        "job": 114227668013,
+        "reason": "Coherent.inst equal-index branch required explicit Nat.lt_irrefl normalization",
+        "nativeSyntax": "12 cases passed",
+        "rawBinaryIdentity": "passed"
+      }
+    ],
+    "remaining": "Carry and validate actual readings across the shared checker, local context and admission; discharge joint recursive and full environment-model preservation; connect public acceptance and intended False.",
+    "validation": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "buildJobs": 254,
+      "focusedBuildJobs": 127,
+      "companionFiles": 84,
+      "axiomDeclarations": 242,
+      "pureMathModules": 12,
+      "closureModules": 140,
+      "referenceDefinitions": 1824,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 13:57:20 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38057387016/job/114228540945",
+      "runConclusion": "success"
+    },
+    "guardedStructuralEquivalenceProved": true,
+    "hereditaryValidityTransportProved": true,
+    "concreteApplicationReadingProvedUnderExplicitPremises": true,
+    "nativeSyntax": {
+      "commit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "run": 38057387016,
+      "job": 114228540945,
+      "status": "passed",
+      "cases": 12,
+      "modelImports": 0
+    },
+    "binaryIdentitySourceComparison": {
+      "identityCommit": "ec410d5ff6614c815ba8d640f148cbeb133e2dc6",
+      "validatedCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAnnotationCoherence.lean"
+      ],
+      "runtimeSourceChanged": false
+    }
   }
 }

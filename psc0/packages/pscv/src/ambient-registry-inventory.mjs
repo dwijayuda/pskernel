@@ -60,7 +60,11 @@ export function validateAmbientRegistryInventory(input) {
           !additional(x)) fail('INVALID_' + key.toUpperCase());
     }
   };
-  objectEntries('instances',['name','priority'],x=>num(x.priority));
+  objectEntries('instances',[
+    'name','priority','resultClassHead','synthOrder','imported',
+  ],x=>num(x.priority) && (x.resultClassHead===null || name(x.resultClassHead)) &&
+    Array.isArray(x.synthOrder) && x.synthOrder.length<=128 &&
+    x.synthOrder.every(num) && typeof x.imported==='boolean');
   for (const entry of input.defaultInstances) {
     if (!exact(entry,['class','instances']) ||
         !name(entry.class) || !Array.isArray(entry.instances) ||
@@ -128,6 +132,8 @@ export function validateAmbientRegistryInventory(input) {
     identitySha256:sha256,
     environment:input.environment,
     counts:Object.freeze(Object.fromEntries(groupKeys.map(k=>[k,input[k].length]))),
+    instancesWithoutSyntacticClassHead:input.instances.filter(x=>x.resultClassHead===null).length,
+    importedInstanceCount:input.instances.filter(x=>x.imported===true).length,
     // No form of "complete" flag may be set by any caller-supplied inventory.
     standardEnvironmentFrozen:false,
     registryOrderSemanticsQualified:false,

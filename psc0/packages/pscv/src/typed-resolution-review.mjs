@@ -27,7 +27,7 @@ export function reviewTypedResolution({normativeReference,source,transcript}) {
   // other module, installing an instance or setting search options would
   // change the observed environment even if the #synth lines stayed intact.
   // Reject all such extra commands before accepting the review transcript.
-  const statements=src.replace(/\\/-![\\s\\S]*?-\\//gu,'')
+  const statements=src.replace(/\/-![\s\S]*?-\//gu,'')
     .split('\n').map(line=>line.replace(/--.*$/u,'').trim()).filter(Boolean);
   const requiredStatements=[
     'import PSCVL.Policy','set_option autoImplicit false',

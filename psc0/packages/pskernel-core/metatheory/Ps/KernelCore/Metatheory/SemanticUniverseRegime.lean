@@ -82,14 +82,15 @@ private theorem separating (xs ys : List Atom)
     (h : ∀ ν, Holds (.allZero xs) ν ↔ Holds (.allZero ys) ν) :
     ∀ x, x ∈ xs → x ∈ ys := by
   intro x hx
-  by_contra hn
-  let ν : Atom → Nat := fun y => if y = x then 1 else 0
-  have hy : Holds (.allZero ys) ν := by
-    intro y hy
-    have ne : y ≠ x := by intro he; subst y; exact hn hy
-    simp [ν, ne]
-  have impossible := (h ν).mpr hy x hx
-  simp [ν] at impossible
+  by_cases hn : x ∈ ys
+  · exact hn
+  · let ν : Atom → Nat := fun y => if y = x then 1 else 0
+    have hy : Holds (.allZero ys) ν := by
+      intro y hy
+      have ne : y ≠ x := by intro he; subst y; exact hn hy
+      simp [ν, ne]
+    have impossible := (h ν).mpr hy x hx
+    simp [ν] at impossible
 
 theorem compare_spec (a b : Profile) :
     compare a b = true ↔ ∀ ν, Holds a ν ↔ Holds b ν := by

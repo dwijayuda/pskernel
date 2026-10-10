@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticCheckedAnnotations
 import Ps.KernelCore.Metatheory.SemanticUniverseRegime
 import Ps.KernelCore.Metatheory.SemanticReferenceLambda
 import Ps.KernelCore.Metatheory.SemanticFunctionValidity
@@ -28,6 +29,19 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.AnnotatedExpr.checkRegimes_refl,
+    ``PsKernelSemantics.AnnotatedExpr.checkedExprEq_refl,
+    ``PsKernelSemantics.AnnotatedExpr.checkRegimes_liftN,
+    ``PsKernelSemantics.AnnotatedExpr.checkRegimes_instLevels,
+    ``PsKernelSemantics.AnnotatedExpr.checkRegimes_close,
+    ``PsKernelSemantics.AnnotatedExpr.checkRegimes_rejects_conflicting_lambdas,
+    ``PsKernelSemantics.AnnotatedExpr.checkRegimes_rejects_conflicting_products,
+    ``PsKernelSemantics.SetModel.checkRegimes_sound,
+    ``PsKernelSemantics.SetModel.checkedExprEq_sound,
+    ``PsKernelSemantics.SetModel.checkedExprEq_models_equal,
+    ``PsKernelSemantics.SetModel.models_convert_checked,
+    ``PsKernelSemantics.SetModel.checkedExprEq_substitution_sound,
+    ``PsKernelSemantics.SetModel.checkedExprEq_instLevels_sound,
     ``PsKernelSemantics.UniverseRegime.holds_inter,
     ``PsKernelSemantics.UniverseRegime.ofLevel_spec,
     ``PsKernelSemantics.UniverseRegime.subset_spec,

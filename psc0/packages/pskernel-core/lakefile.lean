@@ -136,6 +136,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticAnnotationValidity,
     `Ps.KernelCore.Metatheory.SemanticFunctionValidity,
     `Ps.KernelCore.Metatheory.SemanticUniverseRegime,
+    `Ps.KernelCore.Metatheory.SemanticCheckedAnnotations,
     `Ps.KernelCore.Metatheory.SemanticReferenceBinders,
     `Ps.KernelCore.Metatheory.SemanticReferenceSortChecks,
     `Ps.KernelCore.Metatheory.SemanticReferenceApplication,

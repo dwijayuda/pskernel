@@ -76,6 +76,8 @@ jobs:
           test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
           mkdir -p ../psc0/dist/pscv-p1e-witness
           lake env lean TypedInstanceWitness.lean > ../psc0/dist/pscv-p1e-witness/transcript.txt 2>&1
+          echo '--- Exact Lean #synth witness output (diagnostic only) ---'
+          sed -n '1,100p' ../psc0/dist/pscv-p1e-witness/transcript.txt
           node ../psc0/packages/pscv/scripts/generate-typed-resolution-review.mjs \
             ../psc0/dist/pscv-p1e-witness/transcript.txt \
             ../psc0/dist/pscv-p1e-witness/review.json
@@ -92,6 +94,7 @@ jobs:
           console.log('PSC_P1E_LEAN_TYPED_WITNESSES_NOT_STANDARD: PASS');
           NODE
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: pscv-p1e-typed-observations-${{ github.sha }}
           path: psc0/dist/pscv-p1e-witness

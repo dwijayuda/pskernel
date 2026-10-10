@@ -56,18 +56,16 @@ def psKernelStringEqFromWithFuel
           else
             false
 
+/--
+Specified string equality for the Lean 4.35 native profile. Its logical
+definition decides equality of the UTF-8 bytes; Lean supplies the native
+runtime implementation. Unlike the legacy cursor worker above, the positive
+result carries a checked equality specification without an opaque get law.
+-/
 def psKernelStringEq
     (left : String)
     (right : String) : Bool :=
-  if Nat.beq (String.utf8ByteSize left) (String.utf8ByteSize right) then
-    psKernelStringEqFromWithFuel
-      (Nat.succ (String.utf8ByteSize left))
-      left
-      right
-      0
-      0
-  else
-    false
+  decide (left = right)
 
 def psKernelNatCmp
     (left : Nat)

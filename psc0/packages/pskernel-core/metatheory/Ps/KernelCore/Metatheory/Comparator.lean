@@ -96,34 +96,8 @@ theorem psKernelStringEqFromWithFuel_symm_core
 
 theorem psKernelStringEq_symm_core
     (left right : String) :
-    psKernelStringEq left right =
-      psKernelStringEq right left := by
-  unfold psKernelStringEq
-  rw [
-    psKernelNatBeq_symm_core
-      (String.utf8ByteSize left)
-      (String.utf8ByteSize right)
-  ]
-  cases hSize :
-      Nat.beq
-        (String.utf8ByteSize right)
-        (String.utf8ByteSize left) with
-  | false =>
-      simp [hSize]
-  | true =>
-      have hSizeEq :
-          String.utf8ByteSize right =
-            String.utf8ByteSize left := by
-        simpa using hSize
-      rw [hSizeEq]
-      simp
-      exact
-        psKernelStringEqFromWithFuel_symm_core
-          (Nat.succ (String.utf8ByteSize left))
-          left
-          right
-          0
-          0
+    psKernelStringEq left right = psKernelStringEq right left := by
+  simp only [psKernelStringEq, eq_comm]
 
 theorem psKernelNameEq_symm_core
     (left right : PsKernelName) :
@@ -606,77 +580,14 @@ theorem psKernelStringEqFromWithFuel_trans_core
 
 theorem psKernelStringEq_trans_core
     (left middle right : String)
-    (hLeft :
-      psKernelStringEq left middle = true)
-    (hRight :
-      psKernelStringEq middle right = true) :
+    (hLeft : psKernelStringEq left middle = true)
+    (hRight : psKernelStringEq middle right = true) :
     psKernelStringEq left right = true := by
-  unfold psKernelStringEq at hLeft hRight ⊢
-  cases hLMSize :
-      Nat.beq
-        (String.utf8ByteSize left)
-        (String.utf8ByteSize middle) with
-  | false =>
-      simp [hLMSize] at hLeft
-  | true =>
-      cases hMRSize :
-          Nat.beq
-            (String.utf8ByteSize middle)
-            (String.utf8ByteSize right) with
-      | false =>
-          simp [hMRSize] at hRight
-      | true =>
-          have hLMSizeEq :
-              String.utf8ByteSize left =
-                String.utf8ByteSize middle := by
-            simpa using hLMSize
-          have hMRSizeEq :
-              String.utf8ByteSize middle =
-                String.utf8ByteSize right := by
-            simpa using hMRSize
-          have hLRSizeEq :
-              String.utf8ByteSize left =
-                String.utf8ByteSize right :=
-            Eq.trans hLMSizeEq hMRSizeEq
-          have hLRSize :
-              Nat.beq
-                  (String.utf8ByteSize left)
-                  (String.utf8ByteSize right) =
-                true := by
-            simpa [hLRSizeEq]
-          have hLeftWorker :
-              psKernelStringEqFromWithFuel
-                  (Nat.succ
-                    (String.utf8ByteSize left))
-                  left
-                  middle
-                  0
-                  0 =
-                true := by
-            simpa [hLMSize] using hLeft
-          have hRightWorker :
-              psKernelStringEqFromWithFuel
-                  (Nat.succ
-                    (String.utf8ByteSize left))
-                  middle
-                  right
-                  0
-                  0 =
-                true := by
-            simpa [hMRSize, hLMSizeEq] using hRight
-          simp [hLRSize]
-          exact
-            psKernelStringEqFromWithFuel_trans_core
-              (Nat.succ
-                (String.utf8ByteSize left))
-              left
-              middle
-              right
-              0
-              0
-              0
-              hLeftWorker
-              hRightWorker
+  have hLM : left = middle := of_decide_eq_true hLeft
+  have hMR : middle = right := of_decide_eq_true hRight
+  subst middle
+  subst right
+  simp [psKernelStringEq]
 
 theorem psKernelNameEq_trans_core
     (left middle right : PsKernelName)
@@ -936,15 +847,26 @@ theorem psKernelExprEq_refl_of_string_law
 
 
 /-
-The portable String comparator ultimately depends on opaque Lean runtime string
-primitives.  Soundness is therefore named explicitly as a TCB law rather than
-being silently assumed by higher layers.
+The existing refinements accept a modular String equality law. The current
+Lean 4.35 native comparator discharges this interface below from its checked
+DecidableEq definition. The runtime/compiler correspondence remains a separate
+TCB boundary, as with the other native primitive operations.
 -/
 
 def PsKernelStringEqSoundLaw : Prop :=
   ∀ (left right : String),
     psKernelStringEq left right = true ->
       left = right
+
+/-- The actual 4.35 comparator decides string equality without a soundness premise. -/
+theorem psKernelStringEq_true_iff (left right : String) :
+    psKernelStringEq left right = true ↔ left = right := by
+  simp [psKernelStringEq]
+
+/-- Discharges the compatibility interface consumed by the existing refinements. -/
+theorem psKernelStringEq_sound_lean435 : PsKernelStringEqSoundLaw := by
+  intro left right h
+  exact of_decide_eq_true h
 
 theorem psKernelNameEq_sound_of_string_law
     (hString : PsKernelStringEqSoundLaw)

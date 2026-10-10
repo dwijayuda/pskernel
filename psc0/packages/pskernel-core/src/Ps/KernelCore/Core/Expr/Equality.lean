@@ -151,9 +151,7 @@ theorem psKernelStringEq_self_of_cursor_progress
       String.Pos.Raw.atEnd value (String.Pos.Raw.mk pos) = false ->
         pos < (String.Pos.Raw.next value (String.Pos.Raw.mk pos)).byteIdx) :
     psKernelStringEq value value = true := by
-  have h := psKernelStringEqFromWithFuel_self_of_cursor_progress value hEnd hStep
-    (Nat.succ value.utf8ByteSize) 0 (by omega) (by omega)
-  simpa [psKernelStringEq] using h
+  simp [psKernelStringEq]
 
 /-- Explicit conditional reduction of comparator reflexivity to two cursor properties. -/
 theorem psKernelStringEqReflexiveLaw_of_cursor_progress

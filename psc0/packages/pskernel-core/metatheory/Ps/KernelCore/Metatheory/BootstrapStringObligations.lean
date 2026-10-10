@@ -42,9 +42,7 @@ theorem psKernelStringEq_self_of_cursor_progress
       String.Pos.Raw.atEnd value (String.Pos.Raw.mk pos) = false ->
         pos < (String.Pos.Raw.next value (String.Pos.Raw.mk pos)).byteIdx) :
     psKernelStringEq value value = true := by
-  have h := psKernelStringEqFromWithFuel_self_of_cursor_progress value hEnd hStep
-    (Nat.succ value.utf8ByteSize) 0 (by omega) (by omega)
-  simpa [psKernelStringEq] using h
+  simp [psKernelStringEq]
 
 /-- Explicit conditional reduction of comparator reflexivity to two cursor properties. -/
 theorem psKernelStringEqReflexiveLaw_of_cursor_progress
@@ -188,3 +186,20 @@ theorem psKernelFreshEliminationUniverses_nodup
   | false =>
       simpa using List.nodup_cons.mpr
         ⟨psKernelSimpleFreshElimName_fresh hString params, hParams⟩
+
+/-- Freshness of the actual 4.35 name generator, without a StringEq assumption. -/
+theorem psKernelSimpleFreshElimName_fresh_lean435 (params : List PsKernelName) :
+    psKernelSimpleFreshElimName params ∉ params :=
+  psKernelSimpleFreshElimName_fresh psKernelStringEq_sound_lean435 params
+
+/-- Universe parameter freshness with the actual specified comparator. -/
+theorem psKernelFreshEliminationUniverses_nodup_lean435
+    (params : List PsKernelName)
+    (hUnique : psKernelNameHasDuplicates params = false) (onlyAtZero : Bool) :
+    (if onlyAtZero then params else psKernelSimpleFreshElimName params :: params).Nodup :=
+  psKernelFreshEliminationUniverses_nodup
+    psKernelStringEq_sound_lean435 params hUnique onlyAtZero
+
+#print axioms psKernelStringEq_true_iff
+#print axioms psKernelStringEq_sound_lean435
+#print axioms psKernelSimpleFreshElimName_fresh_lean435

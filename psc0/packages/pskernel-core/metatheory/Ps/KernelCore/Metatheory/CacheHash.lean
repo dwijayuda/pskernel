@@ -127,30 +127,9 @@ theorem psKernelCacheStringHash_of_stringEq_true
     (hEq : psKernelStringEq left right = true) :
     psKernelCacheStringHash left =
       psKernelCacheStringHash right := by
-  unfold psKernelStringEq at hEq
-  cases hSize :
-      Nat.beq
-        (String.utf8ByteSize left)
-        (String.utf8ByteSize right) with
-  | false =>
-      simp [hSize] at hEq
-  | true =>
-      have hSizeEq :
-          String.utf8ByteSize left =
-            String.utf8ByteSize right := by
-        simpa using hSize
-      have hWorker :
-          psKernelStringEqFromWithFuel
-              (Nat.succ (String.utf8ByteSize left))
-              left right 0 0 =
-            true := by
-        simpa [hSize] using hEq
-      unfold psKernelCacheStringHash
-      rw [← hSizeEq]
-      exact
-        psKernelCacheStringHashWorker_of_stringEqFrom_true
-          (Nat.succ (String.utf8ByteSize left))
-          left right 0 0 0 hWorker
+  have hSame : left = right := psKernelStringEq_sound_lean435 left right hEq
+  subst right
+  rfl
 
 theorem psKernelCacheNameHash_of_nameEq_true
     (left right : PsKernelName)

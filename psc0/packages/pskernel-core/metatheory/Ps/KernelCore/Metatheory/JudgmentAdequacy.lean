@@ -77,8 +77,6 @@ theorem legacy_typing_cannot_validate_an_empty_type
 
 end PsKernelJudgmentAdequacy
 
-set_option pp.width 200
-
 /-- info: 'PsKernelJudgmentAdequacy.legacy_defeq_is_universal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms PsKernelJudgmentAdequacy.legacy_defeq_is_universal
@@ -87,6 +85,10 @@ set_option pp.width 200
 #guard_msgs in
 #print axioms PsKernelJudgmentAdequacy.legacy_typing_has_every_type
 
-/-- info: 'PsKernelJudgmentAdequacy.legacy_typing_cannot_validate_an_empty_type' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/--
+info: 'PsKernelJudgmentAdequacy.legacy_typing_cannot_validate_an_empty_type' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
 #guard_msgs in
 #print axioms PsKernelJudgmentAdequacy.legacy_typing_cannot_validate_an_empty_type

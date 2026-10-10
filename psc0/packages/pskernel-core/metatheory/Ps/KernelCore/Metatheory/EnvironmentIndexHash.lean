@@ -137,32 +137,9 @@ theorem psKernelEnvironmentStringHash_of_stringEq_true
         right
         0
         seed := by
-  unfold psKernelStringEq at hEq
-  cases hSize :
-      Nat.beq
-        (String.utf8ByteSize left)
-        (String.utf8ByteSize right) with
-  | false =>
-      simp [hSize] at hEq
-  | true =>
-      have hSizeEq :
-          String.utf8ByteSize left =
-            String.utf8ByteSize right := by
-        simpa using hSize
-      have hWorker :
-          psKernelStringEqFromWithFuel
-              (Nat.succ (String.utf8ByteSize left))
-              left
-              right
-              0
-              0 =
-            true := by
-        simpa [hSize] using hEq
-      rw [← hSizeEq]
-      exact
-        psKernelEnvironmentHashStringWorker_of_stringEqFrom_true
-          (Nat.succ (String.utf8ByteSize left))
-          left right 0 0 seed hWorker
+  have hSame : left = right := psKernelStringEq_sound_lean435 left right hEq
+  subst right
+  rfl
 
 theorem psKernelEnvironmentNameHash_of_nameEq_true
     (left right : PsKernelName)

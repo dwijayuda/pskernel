@@ -2,6 +2,63 @@
 
 Date: 2026-10-10 (Asia/Jakarta). Work was performed through GitHub and cloud CI.
 
+## Checked annotation agreement — 2026-10-10
+
+Three assurance modules remove an assumed coherence premise from guarded
+structural comparison and connect the guard to actual sort-exposure visits.
+They do not yet change the public checker.
+
+| Module | Checked result | Boundary still open |
+| --- | --- | --- |
+| `SemanticUniverseRegime.lean` | An executable exact decision procedure for equality of universe-zero conditions over all parameter and metavariable assignments; preserved by the production universe substitution. The production `psKernelLevelIsNotZero` test is exactly uniform positivity. | A zero-condition comparison does not equate universe levels; it is used only for binder annotations. |
+| `SemanticCheckedAnnotations.lean` | Raw structural comparison plus the annotation guard implies equal interpretations for every reading, without an assumed `RegimesAgree` premise. Guard transport through lifting, closing and universe substitution is proved. | The public raw comparator does not run this guard, and the guard alone does not establish typing or annotation provenance. |
+| `SemanticCheckedAnnotationVisits.lean` | The executable validation step succeeds exactly when the actual sort exposure succeeds and its returned level matches the annotation's zero condition. Forall trace/model and positive-beta bridges use this evidence. | Recursive inference/reduction soundness and hereditary validity remain explicit premises. No fictional lambda body-sort visit is assumed. |
+
+The universe-zero condition is either impossible or a finite conjunction saying
+that selected variables are zero. The implementation compares those finite
+variable lists by mutual membership, ignoring order and duplicates. Parameters
+and metavariables with the same name stay distinct. This follows the mathematical
+boundary of pinned [Con Leche PropWhen](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Kernel/PropWhen.lean)
+and its [checked bit semantics](https://github.com/leanprover/con-leche/blob/65e74db49e89ad2bbd1e90aa4f784954db41fa3a/ConLeche/Model/Annot/Bit.lean),
+without importing either checker module.
+
+The exactness proof covers every valuation, including absent or duplicate
+universe-substitution entries as handled by the production lookup. It does not
+rely on finite example tests. The checked sort comparator still rejects distinct
+sort levels even when both have the same nonzero regime. Conflicting zero and
+positive binder annotations are formally rejected, including the class of
+empty-domain counterexamples found in the preceding stage.
+
+No custom axiom, `sorry`, global foundation instance, or stronger mathematical
+foundation assumption was added. The existing explicit `SetTheory V` parameter
+remains the basis of relative model claims. Its existence is not constructed by
+this stage.
+
+### Validation and completion boundary
+
+[Proof run 38050725364](https://github.com/dwijayuda/pskernel/actions/runs/38050725364) at
+`06a488e20f9ae0215d1c77e94a195b9e988f072c` passed **247 build jobs**, all **84 companion files** and the
+**212-declaration** semantic axiom audit. The **133-module** dependency closure
+contains only the 12 allowed Con Leche pure-math modules, with zero legacy
+judgment or production assurance imports. The reference-policy audit again
+checked **1,821 definitions** with zero cached-default fallbacks.
+
+The recovery branch
+`checkpoint/pskernel-core-before-checked-annotations-20261010` at
+`9943eed674b6de039e70fdde355aad248a6bfff4` preserves the preceding state.
+
+Only assurance source, Lake registration, the correctness-workflow label and
+documentation change. Prior native/Arena binary receipts remain unchanged.
+There is no new whole-corpus, performance or generated-PSC0 claim.
+
+**Full-kernel metatheory and relative consistency remain unfinished.** The next
+architectural obligation is to make successful public checking produce coherent
+annotated readings and preserve them through the joint inference/WHNF/equality
+recursion. A theorem conditional on the new guard is not evidence that the
+existing raw checker performs it. Full safe environment admission, the allowed
+axiom/initial-model policy and public statement preservation remain required.
+These obligations must be proved, not postulated.
+
 ## Binder and function proof boundary — 2026-10-10
 
 Six new assurance modules connect the set interpretation to additional reference

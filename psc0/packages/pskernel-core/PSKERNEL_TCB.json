@@ -145,7 +145,7 @@
       "soundnessLawAxioms": []
     },
     "semanticFoundation": {
-      "scope": "Relative universe-set/dependent-function model; sound declarative fragment; syntax and hereditary-validity transport; exact local reference forall/application/lambda traces and conditional semantic bridges. Not full checker or admission soundness.",
+      "scope": "Relative universe-set/dependent-function model; sound declarative fragment; syntax and hereditary-validity transport; local reference binder/function bridges; exact executable annotation-regime agreement and actual sort-visit guards. Not full checker or admission soundness.",
       "modules": [
         "metatheory/Ps/KernelCore/Metatheory/SemanticDomain.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticLevel.lean",
@@ -172,7 +172,10 @@
         "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean",
         "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceApplication.lean",
-        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean"
+        "metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+        "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean"
       ],
       "legacyJudgmentsReplacedEverywhere": false,
       "fullUniverseModel": true,
@@ -187,7 +190,7 @@
         "checked lambda model with actual opened-body typing, cheap-beta preservation and regime obligation"
       ],
       "unprovedCallbackObligations": [
-        "checked annotation provenance and coherent interpretations across raw structural comparison; both hereditary predicates are insufficient",
+        "Establish checked annotation provenance through actual public acceptance; the new executable guard discharges structural regime agreement when performed, but the public raw checker does not yet perform it.",
         "establishment of hereditary validity by the joint checker and infer-only preconditions",
         "function-type exposure and recursive WHNF/defeq soundness, including projections, primitives, eta, unit, quotient and recursors",
         "lambda body-type reduction preservation and justification of its selected regime",
@@ -198,7 +201,7 @@
       "customSoundnessAxiomsAdded": false,
       "axiomAudit": {
         "file": "metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
-        "declarations": 175,
+        "declarations": 212,
         "allowedHostAxioms": [
           "propext",
           "Classical.choice",
@@ -207,19 +210,19 @@
         "localHypothesesAuditedSeparately": true
       },
       "validation": {
-        "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
-        "run": 38037497460,
-        "job": 114170897748,
-        "buildJobs": 244,
+        "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+        "run": 38050725364,
+        "job": 114209132602,
+        "buildJobs": 247,
         "companionFiles": 84,
-        "axiomDeclarations": 175,
+        "axiomDeclarations": 212,
         "pureMathModules": 12,
-        "closureModules": 130,
+        "closureModules": 133,
         "referenceDefinitions": 1821,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 08:25:36 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38037497460"
+        "checkedAt": "2026-10-10 12:10:43 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
       },
       "fullUniverseModelQualification": "Relative mathematical universe chain under explicit SetTheory V, not a model of full kernel acceptance.",
       "relativeFoundation": {
@@ -265,6 +268,19 @@
         "zeroRegimeBetaRequiresArgumentDomain": true,
         "establishedForAllAcceptedTerms": false,
         "impliesErasureCoherence": false
+      },
+      "checkedAnnotations": {
+        "universeZeroComparison": "exact for every parameter and metavariable valuation",
+        "productionUniverseSubstitutionPreservesAgreement": true,
+        "structuralGuardDerivesRegimesAgree": true,
+        "actualSortExposureValidationCharacterized": true,
+        "nativePositivePredicateExact": true,
+        "equatesDifferentUniverseLevels": false,
+        "publicAcceptanceRunsGuard": false,
+        "acceptedTermAnnotationProvenanceProved": false,
+        "completeRecursiveCheckerSoundness": false,
+        "strongerFoundationAssumptionsAdded": false,
+        "moduleScope": "assurance only"
       }
     },
     "relativeSetModelConstructed": true,
@@ -295,19 +311,19 @@
         "kind": "structural executable-dependency audit; not a semantic theorem"
       },
       "validation": {
-        "commit": "44e4f1a7d0385343309895138a896ef156cb7666",
-        "run": 38037497460,
-        "job": 114170897748,
-        "buildJobs": 244,
+        "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+        "run": 38050725364,
+        "job": 114209132602,
+        "buildJobs": 247,
         "companionFiles": 84,
-        "axiomDeclarations": 175,
+        "axiomDeclarations": 212,
         "pureMathModules": 12,
-        "closureModules": 130,
+        "closureModules": 133,
         "referenceDefinitions": 1821,
         "cachedFallbacks": 0,
         "status": "passed",
-        "checkedAt": "2026-10-10 08:25:36 UTC",
-        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38037497460"
+        "checkedAt": "2026-10-10 12:10:43 UTC",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
       },
       "localSemanticBridges": {
         "forallBothInferenceModes": true,
@@ -316,6 +332,10 @@
         "recursivePremisesDischarged": false,
         "checkedAnnotationCoherenceProved": false,
         "lambdaCheapBetaPreservationProved": false
+      },
+      "checkedAnnotationCheckpoint": {
+        "branch": "checkpoint/pskernel-core-before-checked-annotations-20261010",
+        "commit": "9943eed674b6de039e70fdde355aad248a6bfff4"
       }
     }
   },

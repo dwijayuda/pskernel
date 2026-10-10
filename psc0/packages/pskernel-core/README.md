@@ -36,6 +36,18 @@ local model bridges for actual forall, checked application and checked lambda
 runs. Recursive callback soundness and checked annotation coherence remain
 explicit obligations. A formal counterexample shows that hereditary validity
 alone cannot replace that coherence.
+The checked-annotation layer now supplies an executable sufficient guard for
+structural comparison. It decides whether two binder annotations have the same
+zero condition for every universe-parameter and metavariable assignment,
+preserves that agreement through universe substitution, and derives semantic
+regime agreement on successful guarded comparison. It also validates annotations
+against actual sort-exposure visits and characterizes the existing native
+positive-universe test exactly.
+
+These operations are assurance infrastructure. Public raw-expression acceptance
+does not yet run the extra guard or produce validated annotations. Recursive
+typing/reduction/equality, lambda body-type preservation and full admission
+soundness remain open. No new axiom or stronger foundation assumption was added.
 See [the current audit and reference comparison](RESEARCH_AND_MIGRATION.md).
 
 ## Correctness-first reference mode
@@ -54,9 +66,9 @@ sharing and environment indexes remain; generated PSC0 qualification remains
 open. Runtime performance and acceptance equivalence of the two modes are
 separate obligations.
 
-[Proof run 38037497460](https://github.com/dwijayuda/pskernel/actions/runs/38037497460) at
-`44e4f1a7d0385343309895138a896ef156cb7666` passed **244 build jobs**, all **84 companion files** and the
-**175-declaration** semantic axiom audit. The **130-module** dependency closure
+[Proof run 38050725364](https://github.com/dwijayuda/pskernel/actions/runs/38050725364) at
+`06a488e20f9ae0215d1c77e94a195b9e988f072c` passed **247 build jobs**, all **84 companion files** and the
+**212-declaration** semantic axiom audit. The **133-module** dependency closure
 contains only the 12 allowed Con Leche pure-math modules, with zero legacy
 judgment or production assurance imports. The reference-policy audit again
 checked **1,821 definitions** with zero cached-default fallbacks.

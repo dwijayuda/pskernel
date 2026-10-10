@@ -1,13 +1,14 @@
 # Reference checker and the full correctness target
 
-Status: reference cache isolation and local binder/function model bridges
-validated. Full-kernel metatheory and relative consistency remain unfinished.
+Status: reference cache isolation, local binder/function model bridges, and
+checked symbolic annotation agreement validated. Public annotation provenance,
+full-kernel metatheory and relative consistency remain unfinished.
 
 ## Validated evidence
 
-[Proof run 38037497460](https://github.com/dwijayuda/pskernel/actions/runs/38037497460) at
-`44e4f1a7d0385343309895138a896ef156cb7666` passed **244 build jobs**, all **84 companion files** and the
-**175-declaration** semantic axiom audit. The **130-module** dependency closure
+[Proof run 38050725364](https://github.com/dwijayuda/pskernel/actions/runs/38050725364) at
+`06a488e20f9ae0215d1c77e94a195b9e988f072c` passed **247 build jobs**, all **84 companion files** and the
+**212-declaration** semantic axiom audit. The **133-module** dependency closure
 contains only the 12 allowed Con Leche pure-math modules, with zero legacy
 judgment or production assurance imports. The reference-policy audit again
 checked **1,821 definitions** with zero cached-default fallbacks.
@@ -37,6 +38,12 @@ The correctness workflow runs proofs on its push trigger. Its manual
 Arena modes. Full-corpus performance is not a gate for this milestone.
 
 ## Recovery point
+
+Before checked-annotation work, a second recovery branch
+`checkpoint/pskernel-core-before-checked-annotations-20261010` was created at
+`9943eed674b6de039e70fdde355aad248a6bfff4`. It preserves the previously validated
+binder/function stage and its documentation.
+
 
 Before this refactor, the remote branch
 `checkpoint/pskernel-core-before-cache-free-reference-20261010` was created at
@@ -135,6 +142,9 @@ No upstream checker or acceptance theorem is used as a PSKernel proof.
    existing default-mode proof statements and behavioral tests.
 2. **Validated semantic readings — in progress.** Hereditary annotation/function
    transport and local forall/application/lambda execution bridges are proved.
+   Symbolic annotation agreement now has an executable exact decision procedure,
+   semantic soundness and actual sort-visit bridges. The public checker does not
+   yet invoke this guard or produce validated annotation readings.
    Connect actual checked terms to coherent
    Prop/Type binder annotations under all legal universe substitutions. Establish
    frame/freshness and hereditary validity where infer-only operations need them.
@@ -179,12 +189,28 @@ the hereditary predicates as a replacement for checked annotation provenance.
 Even both predicates plus identical raw syntax do not determine a unique
 interpretation over an empty domain.
 
+The checked-annotation layer now supplies an executable sufficient guard for
+structural comparison. It decides whether two binder annotations have the same
+zero condition for every universe-parameter and metavariable assignment,
+preserves that agreement through universe substitution, and derives semantic
+regime agreement on successful guarded comparison. It also validates annotations
+against actual sort-exposure visits and characterizes the existing native
+positive-universe test exactly.
+
+These operations are assurance infrastructure. Public raw-expression acceptance
+does not yet run the extra guard or produce validated annotations. Recursive
+typing/reduction/equality, lambda body-type preservation and full admission
+soundness remain open. No new axiom or stronger foundation assumption was added.
+
 The next task is to derive coherent readings from checker visits across the
 joint inference/reduction/equality recursion, including type exposure and
 infer-only preconditions. In particular, discharge the application bridge's
-structural `RegimesAgree` premise and the lambda bridge's regime and body-type
-reduction premises. Do not infer a body-sort visit that lambda inference never
-performs, or assume every inferred type has a sort. If explicit runtime
+structural `RegimesAgree` premise at its actual accepting path and the lambda
+bridge's regime and body-type reduction premises. `checkedExprEq_sound` now
+removes the former semantic premise when its executable guard succeeds, but the
+public raw comparator's success alone does not imply that guard succeeded.
+Do not infer a body-sort visit that lambda inference never performs, or assume
+every inferred type has a sort. If explicit runtime
 annotation validation is needed, it must be specified, proved, and checked
 against the pinned Lean corpus with any declines visible.
 

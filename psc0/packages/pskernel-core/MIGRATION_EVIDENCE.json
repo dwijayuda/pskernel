@@ -1,15 +1,15 @@
 {
-  "schemaVersion": 7,
-  "stage": "Correctness priority: reference binder and function semantic foundations",
-  "status": "local-reference-model-bridges-validated-full-kernel-proof-unfinished",
+  "schemaVersion": 8,
+  "stage": "Correctness priority: executable checked annotation agreement and actual sort visits",
+  "status": "checked-annotation-guard-validated-full-kernel-proof-unfinished",
   "candidateCommit": "c0c02dd2a8c73eeca9b12256c6773064342f36a8",
-  "assuranceRevision": "44e4f1a7d0385343309895138a896ef156cb7666",
+  "assuranceRevision": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38034714932,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932",
+  "workflowRun": 38050725364,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364",
   "nativeBinarySha256": "06ef88828d72bc705787f8aa9613d243313389a62e4b4d3ae6a625b38fbfba02",
   "checks": {
     "build": {
@@ -52,25 +52,25 @@
       "fresh435ExportsRun": false
     },
     "metatheory": {
-      "commit": "f635419041d4a2e0da133c5c5b6c24fdaa2d3ce0",
-      "run": 38034714932,
-      "job": 114162647958,
-      "buildJobs": 238,
+      "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+      "run": 38050725364,
+      "job": 114209132602,
+      "buildJobs": 247,
       "companionFiles": 84,
-      "axiomDeclarations": 136,
+      "axiomDeclarations": 212,
       "pureMathModules": 12,
-      "closureModules": 124,
+      "closureModules": 133,
       "referenceDefinitions": 1821,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 07:35:54 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38034714932"
+      "checkedAt": "2026-10-10 12:10:43 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "run": 38034714932,
-      "job": 114162647958
+      "run": 38050725364,
+      "job": 114209132602
     },
     "nativeRegression": {
       "commit": "6b7395c1af7cc85181bc8ada4b9feb975fea8bb9",
@@ -159,7 +159,11 @@
     "referenceCacheOperationsIgnoreStoredAnswers": true,
     "referenceWholeCheckerStateIndependenceProved": false,
     "cachedAcceptanceRefinesReference": false,
-    "referenceFullCorpusConformance": false
+    "referenceFullCorpusConformance": false,
+    "executableAnnotationGuardSound": true,
+    "publicAcceptanceUsesAnnotationGuard": false,
+    "acceptedAnnotationProvenanceProved": false,
+    "newAxiomsAdded": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -499,7 +503,7 @@
     "status": "completed"
   },
   "remaining": [
-    "Derive coherent binder annotations from actual reference checking, including universe substitutions and infer-only validity.",
+    "Thread checked annotations through actual public acceptance and prove their provenance/preservation through joint checking; the assurance guard alone does not do this.",
     "Prove all mutually recursive reference inference, WHNF and equality cases against the same model.",
     "Complete ordinary/mutual/nested inductive, quotient and primitive admission models.",
     "Connect initial safe environment and an explicit allowed-axiom/model policy.",
@@ -510,7 +514,7 @@
   ],
   "nextStage": {
     "status": "open",
-    "scope": "Validated annotation readings at the actual forall/lambda/application inference boundary",
+    "scope": "Integrate coherent checked readings with joint reference inference, WHNF and equality, including infer-only and lambda body-type obligations",
     "performancePriority": "deferred"
   },
   "promotionDecision": {
@@ -1629,7 +1633,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 08:25:36 UTC",
+  "recordedAt": "2026-10-10 12:10:43 UTC",
   "semanticFoundation": {
     "sourceCommit": "6b28936c94f61575afb8d7083fe22f91d9f5368f",
     "validationCommit": "2248f88b61c9f8f311e6e980db91995e9d45c2bc",
@@ -2290,6 +2294,98 @@
         "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceBinders.lean",
         "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceLambda.lean",
         "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticReferenceSortChecks.lean"
+      ]
+    }
+  },
+  "checkedAnnotationStage": {
+    "status": "passed-assurance-guard-full-kernel-unfinished",
+    "comparisonBase": "9943eed674b6de039e70fdde355aad248a6bfff4",
+    "checkpoint": {
+      "branch": "checkpoint/pskernel-core-before-checked-annotations-20261010",
+      "commit": "9943eed674b6de039e70fdde355aad248a6bfff4"
+    },
+    "sourceModules": [
+      "metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+      "metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean"
+    ],
+    "productionCodeChanged": false,
+    "publicAcceptanceRunsGuard": false,
+    "compilerSeedChanged": false,
+    "defaultProviderChanged": false,
+    "localResults": [
+      "Exact executable comparison of universe-zero conditions over all parameter/metavariable assignments",
+      "Agreement preserved by actual universe substitution, lifting and closing",
+      "Guarded raw structural comparison implies semantic equality without assumed RegimesAgree",
+      "Actual sort-exposure validation success characterized, with forall trace/model bridges",
+      "Existing native positivity test is exactly uniform positivity and supplies positive beta's regime premise",
+      "Formal distinction between zero-regime agreement and universe-level equality"
+    ],
+    "fullKernelMetatheoryComplete": false,
+    "fullKernelModelConstructed": false,
+    "fullKernelConsistencyProved": false,
+    "acceptedAnnotationProvenanceProved": false,
+    "foundationExistenceConstructed": false,
+    "customSoundnessAxiomsAdded": false,
+    "strongerFoundationAssumptionsAdded": false,
+    "localSetFoundationExplicit": true,
+    "localRecursivePremisesExplicit": true,
+    "upstreamCheckerTheoremsImported": false,
+    "legacyJudgmentsImported": false,
+    "validationAttempts": [
+      {
+        "run": 38049764544,
+        "commit": "ccd724e2d97bad1ff07859f9b13f379ed6ad0d94",
+        "status": "failed",
+        "note": "Unavailable by_contra tactic; replaced with constructive case split."
+      },
+      {
+        "run": 38050047665,
+        "commit": "1c1e10c7d18a89a6ce9d0b38f1e0ba9c1d92e04d",
+        "status": "failed",
+        "note": "Broad simplification exceeded heartbeat limit; Bool equality lemma used as iff. Replaced with focused induction and rewrites."
+      },
+      {
+        "run": 38050525362,
+        "commit": "3dd1117fdd013b557b2bfecad1ab148629fb44ac",
+        "status": "failed",
+        "note": "Closed level arithmetic needed explicit evaluation simplification before numeric decision."
+      },
+      {
+        "run": 38050725364,
+        "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+        "status": "passed",
+        "note": "247 builds, 84 companion proofs, 212 axiom targets; 133-module dependency closure; 1821-definition reference-policy audit."
+      }
+    ],
+    "additionalDeclarationsCoveredByAxiomAudit": 37,
+    "runtimeEvidencePolicy": "No new runtime, corpus or performance claim; prior executable receipts retain exact identities.",
+    "validation": {
+      "commit": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+      "run": 38050725364,
+      "job": 114209132602,
+      "buildJobs": 247,
+      "companionFiles": 84,
+      "axiomDeclarations": 212,
+      "pureMathModules": 12,
+      "closureModules": 133,
+      "referenceDefinitions": 1821,
+      "cachedFallbacks": 0,
+      "status": "passed",
+      "checkedAt": "2026-10-10 12:10:43 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38050725364"
+    },
+    "runtimeComparison": {
+      "base": "9943eed674b6de039e70fdde355aad248a6bfff4",
+      "head": "06a488e20f9ae0215d1c77e94a195b9e988f072c",
+      "runtimeSourceChanges": 0,
+      "changedFiles": [
+        ".github/workflows/psc0-pskernel-core-correctness.yml",
+        "psc0/packages/pskernel-core/lakefile.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticAudit.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotationVisits.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticCheckedAnnotations.lean",
+        "psc0/packages/pskernel-core/metatheory/Ps/KernelCore/Metatheory/SemanticUniverseRegime.lean"
       ]
     }
   }

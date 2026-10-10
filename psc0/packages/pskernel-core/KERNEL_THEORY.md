@@ -32,6 +32,19 @@ calls and lambda body-type reduction/regime obligations remain explicit.
 A checked empty-domain counterexample shows that even both hereditary validity
 predicates do not establish coherent interpretations of identical raw syntax.
 
+The checked-annotation layer now supplies an executable sufficient guard for
+structural comparison. It decides whether two binder annotations have the same
+zero condition for every universe-parameter and metavariable assignment,
+preserves that agreement through universe substitution, and derives semantic
+regime agreement on successful guarded comparison. It also validates annotations
+against actual sort-exposure visits and characterizes the existing native
+positive-universe test exactly.
+
+These operations are assurance infrastructure. Public raw-expression acceptance
+does not yet run the extra guard or produce validated annotations. Recursive
+typing/reduction/equality, lambda body-type preservation and full admission
+soundness remain open. No new axiom or stronger foundation assumption was added.
+
 Historical 4.34 reference artifacts (not current certification):
 
 - compatibility matrix: `LEAN_4_34_COMPATIBILITY.json`

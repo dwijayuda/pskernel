@@ -31,3 +31,31 @@ P1-B: implement a real ordered Standard registry extractor from the RC3 elaborat
 P2: independently approved specification; syntax/meaning validated against selected PSCV semantics; independently justified complete mandatory VC plan; kernel-admitted proof terms; trust/axiom/import/effect/ghost/erasure closure; protected VerifiedExecutableModule; and tested fail-closed verified artifact publication. No acceptance based solely on matching proof hashes or self-reported complete=true.
 
 Do not use Desktop Commander or local builds/tests. Work only with GitHub connector source writes and cloud GitHub Actions qualification. Keep concurrent kernel/assurance branches untouched.
+
+## Actual P1-A qualification
+
+### PSC0 PSCV P1-A semantic source pin and read-only profile identity — qualified
+
+**Source commit:** `829a1945a78965ed87ae3835a48642b6dcff013b`, 10 October 2026. [Run 38049559622](https://github.com/dwijayuda/pskernel/actions/runs/38049559622) passed **all five** jobs on attempt 1. Branch `psc0/platform-pscv-p1-v1`, stacked on P0 at [draft PR96](https://github.com/dwijayuda/pskernel/pull/96). Runtime/core/compiler/seed and selected release paths are unchanged. This is P1-A, not a complete P1 Standard environment or a PSCV-certified build.
+
+## Implemented and qualified
+
+- Exact PSCV-RC-v2 semantic source reference `4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71`, Lean **4.35.0-rc3** commit `470d5ce1400764999581fd26d5d72b00d990b0f4`. Preserve the independently advancing PSKernel RC4 work as separate and explicitly unqualified for this normative profile; no silent re-pin from current PSC0 4.34 provider.
+- `packages/pscv/src/lean-provenance.mjs` extracts Appendix K.1's 23 semantic and K.2's 17 prover roots, with entire normative document SHA verification and exact canonical JSON. `packages/pscv/scripts/audit-pinned-lean.mjs` verifies the upstream pinned Lean commit's actual 40 Git tree path/blob identities and reads their bytes/line counts in an isolated official Lean read-only source checkout. It does NOT activate registrations or issue a Standard registry manifest.
+- Exact source audit from GitHub Actions: provenance blueprint SHA256 `23f633fa3089794fa6b3e7a34c23df2ed9ca4fa1a425afd84f5d53b43135eafb`, source audit SHA256 `d913a29822d19158c69dfd8a6bf5ac2e16a53ba2aa8a8370fc12d977df2965c0`, 40/40 pinned blobs validated. The archived source-only audit is [artifact 11669400259](https://github.com/dwijayuda/pskernel/actions/runs/38049559622/artifacts/11669400259), ZIP SHA256 `b1cc83cd212301ec01de180fbcfa4965cee508deaa9d7ff53d535ff23f263d41`, expires 9 November 2026.
+- `scripts/pscv-profile-inspection.mjs`: strictly checks explicit root `pscv-v1` selection, closed/boundary policy, private candidate descriptor and normative RC3/manifest-absent identity. Rejects forged executable fields, changed semantic pin, fake registry digest, unknown keys, nonempty package capabilities, source-profile downgrades, and implicit activation. Every valid inspection reports **blocked-unqualified**, and `activatePSCVProfile` always throws.
+- Previously qualified P0 proof preflight and publisher remain unchanged: only the historical production `checked` profile is accepted; no `PSCV-CERT-v1`, `VerifiedExecutableModule`, or verified executable is issued.
+
+**Cloud tests:** Linux Node22.23.3 **16/16 passed**; Linux Node26.7.0 **16/16 passed**; Windows Node26.7.0 **16/16 passed**. Additional source audit and pinned Lean contract-preflight jobs also passed. The Windows test now reads the exact normative **Git blob** rather than a possibly CRLF-converted checkout file; no relaxation of source hash policy. The Lean preflight accepted a valid contract as UNCERTIFIED and rejected a wrong postcondition with unresolved VCs and disallowed `sorryAx`. Total five successful jobs, zero failures.
+
+Machine evidence: [pscv-p1a-qualification-2026-10-10.json](docs/platform/pscv-p1a-qualification-2026-10-10.json). Interface and semantics notes: [PSCV_P1_SEMANTIC_PIN_AND_PROVENANCE.md](docs/platform/PSCV_P1_SEMANTIC_PIN_AND_PROVENANCE.md). P0 feature-owner map and protected supervisor boundaries remain authoritative design notes.
+
+## Remaining P1-B and P2 blockers
+
+**P1-B** must extract/validate/freeze actual ordered `instances`, `default_instances`, `coercions`, `simp`, `simprocs`, `ext`, and `grind` registrations; non-default class-parameter-mode provenance; and versioned verification/WP-effect registry. It must bind all entries to pinned Lean source path, Git blob and source line, test observable instance/notation/prover behavior and publish canonical SHA256 into an approved subsequent PSCV normative revision. Checking 40 source Git blobs does **not** establish those semantic registries.
+
+**P2** needs at least one real approved source specification; independently justified completeness of pure-contract VCs; exact kernel-admitted proof evidence; axioms/effect/import/totality/erasure closure; a protected `VerifiedExecutableModule` constructor; and checked output policy. Existing PSCVL demonstrates real Lean proof preflight but does not authorize PSCV executable output, because source grammar and environment semantics remain incomplete. Do NOT promote P0/P1 advisory proposal hashes or booleans to proof authority.
+
+**No local checkout/tests/Desktop Commander**. GitHub and cloud Actions exclusively. Preserve current proof/kernel branches and history, and check remote HEAD before any non-force leased write. Do not publish npm or merge PR96 automatically.
+
+---

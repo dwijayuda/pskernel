@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-pscv-p1a-semantic-provenance-qualification",
+  "status": "qualified-source-provenance-not-standard-environment",
+  "milestone": "P1-A",
+  "sourceCommit": "829a1945a78965ed87ae3835a48642b6dcff013b",
+  "base": "386fa74c977a1692688660bccb42933973f0535e",
+  "branch": "psc0/platform-pscv-p1-v1",
+  "pr": "https://github.com/dwijayuda/pskernel/pull/96",
+  "run": {
+    "id": 38049559622,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38049559622",
+    "updatedAt": "2026-10-10T11:46:37Z"
+  },
+  "jobs": [
+    {
+      "id": 114205761756,
+      "name": "proposal-and-gate (ubuntu-24.04, 22.23.3)",
+      "passed": 16,
+      "failed": 0,
+      "conclusion": "success"
+    },
+    {
+      "id": 114205761767,
+      "name": "proposal-and-gate (ubuntu-24.04, 26.7.0)",
+      "passed": 16,
+      "failed": 0,
+      "conclusion": "success"
+    },
+    {
+      "id": 114205761640,
+      "name": "proposal-and-gate (windows-2022, 26.7.0)",
+      "passed": 16,
+      "failed": 0,
+      "conclusion": "success"
+    },
+    {
+      "id": 114205761723,
+      "name": "lean-pure-contract-preflight",
+      "conclusion": "success",
+      "semanticPin": "4.35.0-rc3",
+      "validContract": "UNCERTIFIED",
+      "invalidContract": "unproved verification conditions and sorryAx refusal",
+      "normativeStrictExample": "UNCERTIFIED"
+    },
+    {
+      "id": 114205761833,
+      "name": "lean-rc3-source-provenance-audit",
+      "conclusion": "success",
+      "sourceRoots": 40,
+      "semanticRoots": 23,
+      "proverRoots": 17
+    }
+  ],
+  "provenance": {
+    "referenceGitBlob": "208f128c13be2e07fde25ca413641a48df214324",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "leanCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+    "version": "4.35.0-rc3",
+    "rootCounts": {
+      "semantic": 23,
+      "prover": 17,
+      "total": 40
+    },
+    "blueprintSha256": "23f633fa3089794fa6b3e7a34c23df2ed9ca4fa1a425afd84f5d53b43135eafb",
+    "sourceAuditDigest": "d913a29822d19158c69dfd8a6bf5ac2e16a53ba2aa8a8370fc12d977df2965c0",
+    "githubArtifact": {
+      "id": 11669400259,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38049559622/artifacts/11669400259",
+      "zipSha256": "b1cc83cd212301ec01de180fbcfa4965cee508deaa9d7ff53d535ff23f263d41",
+      "zipSizeBytes": 2598,
+      "expiresAt": "2026-11-09T11:46:19Z"
+    }
+  },
+  "profile": {
+    "protocol": "psc-profile-inspection/0",
+    "activation": "blocked-unqualified",
+    "normativePin": "RC3-only",
+    "rc4KernelRefinementAutomaticallyUsed": false,
+    "sourceAuditOnly": true,
+    "standardRegistrySnapshotGenerated": false,
+    "classParameterModesFrozen": false,
+    "effectVerificationRegistryFrozen": false,
+    "certificateIssuerQualified": false,
+    "verifiedExecutableAvailable": false,
+    "ordinaryCheckedBuildUnchanged": true
+  },
+  "invariant": {
+    "nativeCoreSource": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "compilerClosureModules": 62,
+    "compilerClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+    "compiledJsSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+    "typescript": "7.0.2",
+    "compilerOrKernelSourceChanged": false,
+    "seedChanged": false,
+    "publishedToNpm": false,
+    "mergedToMain": false
+  },
+  "statusNotes": [
+    "Appendix K source-provenance roots do NOT activate the complete ordered Standard environment registries.",
+    "The missing full registry_snapshot, class_parameter_modes and effect/verification registry remain release blockers.",
+    "The source audit cannot justify a genuine PSCV-CERT-v1 claim, complete VCs, proof replay or translation preservation.",
+    "P2 certified pure-contract emission remains blocked until an independent coverage/certificate gate and qualified semantics exist.",
+    "Actions audit artifact expires and is not a durable executable toolchain archive."
+  ]
+}

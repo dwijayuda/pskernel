@@ -1,6 +1,6 @@
 import Lean
 import Ps.KernelCore.Metatheory.SemanticSortInference
-import Ps.KernelCore.Metatheory.SemanticInterpretation
+import Ps.KernelCore.Metatheory.SemanticContext
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -60,7 +60,21 @@ run_cmd do
     ``PsKernelSemantics.SetModel.interp_inst,
     ``PsKernelSemantics.SetModel.interp_inst_zero,
     ``PsKernelSemantics.SetModel.interp_scoped,
-    ``PsKernelSemantics.SetModel.interp_closed
+    ``PsKernelSemantics.SetModel.interp_closed,
+    ``PsKernelSemantics.SetModel.models_sort,
+    ``PsKernelSemantics.SetModel.models_forall,
+    ``PsKernelSemantics.SetModel.models_lam,
+    ``PsKernelSemantics.SetModel.models_app,
+    ``PsKernelSemantics.SetModel.models_let,
+    ``PsKernelSemantics.SetModel.models_convert,
+    ``PsKernelSemantics.SetModel.models_proof_irrelevance,
+    ``PsKernelSemantics.SetModel.models_beta,
+    ``PsKernelSemantics.SetModel.models_zeta,
+    ``PsKernelSemantics.SetModel.models_eta,
+    ``PsKernelSemantics.SetModel.models_weaken,
+    ``PsKernelSemantics.SetModel.empty_context_satisfiable,
+    ``PsKernelSemantics.SetModel.no_closed_empty_type,
+    ``PsKernelSemantics.SetModel.no_closed_allProps
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

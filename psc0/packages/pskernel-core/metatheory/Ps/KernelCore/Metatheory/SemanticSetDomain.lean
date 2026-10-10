@@ -50,9 +50,11 @@ theorem pi_mem_sort {a b : Nat} {A : V} {B : V → V}
     piR b A B ∈ˢ univ (imax a b) := by
   by_cases hb : b = 0
   · subst b
-    exact piR_zero_mem_univZero
+    change piR 0 A B ∈ˢ (univ 0 : V)
+    rw [univ_zero]
+    exact piR_zero_mem_univZero (V := V) (A := A) (B := B)
   · have hm : max a b ≠ 0 := by omega
-    rw [imax, if_neg hb, piR_pos hb]
+    rw [imax, ite_eq_right hb, piR_pos hb]
     exact (univ_isTGUniverse hm).piSet_mem
       (univ_mono (Nat.le_max_left a b) _ hA)
       (fun x hx => univ_mono (Nat.le_max_right a b) _ (hB x hx))

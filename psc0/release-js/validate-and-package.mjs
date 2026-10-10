@@ -26,11 +26,12 @@ for (const name of [
 ]) {
   assert.ok(Object.hasOwn(kernel, name), 'Missing kernel export: ' + name);
 }
-assert.equal(kernel.psKernelCoreSemanticRoot, true);
-const alpha = kernel.PsKernelName.str(kernel.PsKernelName.anonymous, 'Alpha');
+const nullary = value => typeof value === 'function' ? value() : value;
+assert.equal(nullary(kernel.psKernelCoreSemanticRoot), true);
+const alpha = kernel.PsKernelName.str(nullary(kernel.PsKernelName.anonymous), 'Alpha');
 assert.equal(kernel.psKernelNameEq(alpha, alpha), true);
-assert.equal(kernel.psKernelEnvironmentSize(kernel.psKernelEnvironmentEmpty), 0n);
-const level0 = kernel.PsKernelLevel.zero;
+assert.equal(kernel.psKernelEnvironmentSize(nullary(kernel.psKernelEnvironmentEmpty)), 0n);
+const level0 = nullary(kernel.PsKernelLevel.zero);
 assert.equal(kernel.psKernelLevelEquivalent(level0, level0), true);
 const sort0 = kernel.PsKernelExpr.sort(level0);
 assert.equal(kernel.psKernelExprEq(sort0, sort0), true);

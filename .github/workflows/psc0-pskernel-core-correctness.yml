@@ -23,7 +23,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate set universes, dependent products, semantic audit, and companion proofs
+      - name: Validate set model, scoped substitution, dependent contexts, and companion proofs
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail

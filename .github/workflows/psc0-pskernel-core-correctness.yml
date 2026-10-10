@@ -42,6 +42,7 @@ jobs:
       # Verify executed fuel exhaustion, loose-bound-variable/metavariable rejection and guarded Nat/String literals.
       # Prove actual add freshness and transport exact old readings through new model assignments.
       # Compose genuine public axiom receipts with an evolving (not fixed) semantic Reading.
+      # Normalize already-resolved case equations and explicit level-map transport in fresh-model proof.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

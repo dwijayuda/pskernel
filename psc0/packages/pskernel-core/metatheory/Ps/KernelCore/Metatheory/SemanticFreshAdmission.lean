@@ -78,7 +78,7 @@ theorem findConstant_none_namesFresh (fresh : PsKernelName)
       have hNoMatch :
           psKernelNameEq (psKernelConstantInfoName head) fresh = false := by
         cases heq : psKernelNameEq (psKernelConstantInfoName head) fresh with
-        | false => exact heq
+        | false => rfl
         | true =>
             simp [psKernelFindConstantInList, heq] at missing
       have hHeadName : psKernelConstantInfoName head ≠ fresh := by
@@ -113,12 +113,12 @@ theorem successfulAdd_oldNamesFresh (M : Reading V)
   have absent :
       psKernelEnvironmentContains env (psKernelConstantInfoName info) = false := by
     cases h : psKernelEnvironmentContains env (psKernelConstantInfoName info) with
-    | false => exact h
+    | false => rfl
     | true => simp [psKernelEnvironmentAdd, h] at run
   have notFound :
       psKernelEnvironmentFind env (psKernelConstantInfoName info) = none := by
     cases h : psKernelEnvironmentFind env (psKernelConstantInfoName info) with
-    | none => exact h
+    | none => rfl
     | some selected =>
         simp [psKernelEnvironmentContains, h] at absent
   have missing : psKernelFindConstantInList
@@ -157,8 +157,17 @@ theorem newConstant_from_assignment (M : Reading V)
   rw [interp_extendConstant
     (M.substLevels (psKernelConstantInfoLevelParams info) levels)
     fresh value A avoids ρ]
-  simpa [Reading.extendConstant, Reading.extendConstant_level, fresh] using
-    assignment levels arity ρ
+  have hLevels :
+      levels.map (M.extendConstant fresh value).level =
+        levels.map M.level := by
+    simp only [Reading.extendConstant_level]
+  rw [hLevels]
+  have hConstant :
+      (M.extendConstant fresh value).constants fresh (levels.map M.level) =
+        value (levels.map M.level) := by
+    simp [Reading.extendConstant]
+  rw [hConstant]
+  exact assignment levels arity ρ
 
 /-- Actual guarded environment insertion admits a CONSTRUCTED extended
 interpretation, preserving indexed history, fixed old annotated readings,

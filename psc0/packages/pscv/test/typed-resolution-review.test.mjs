@@ -30,7 +30,7 @@ test('forged transcript, proof authority, or source drift are refused',()=>{
     {...x,source:x.source.replace('#synth HAdd Nat Nat Nat','#synth HAdd Int Int Int')},
     {...x,source:x.source.replace('example : BEq Nat := inferInstance','')},
     {...x,normativeReference:x.normativeReference+'\n'},
-    {...x,transcript:x.transcript.replace(' information:',' warning:')},
+    {...x,transcript:x.transcript.replace('instHMul','bogusSynthTerm')},
     {...x,transcript:x.transcript+'\nfile:1:0: information: extra'},
     {...x,transcript:x.transcript+'\nerror: unacceptable'},
     {...x,transcript:x.transcript.replace('instHAdd','sorryAx')},

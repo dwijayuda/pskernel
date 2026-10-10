@@ -27,7 +27,7 @@ run_cmd do
   let gates : Array Name := #[``psKernelSemanticCacheGet, ``psKernelSemanticCacheInsert,
     ``psKernelSemanticCacheContains, ``psKernelSemanticCacheInsertPair]
   let mut seen : NameSet := {}
-  let mut count := 0
+  let mut count : Nat := 0
   while !todo.isEmpty do
     let n := todo.back!
     todo := todo.pop

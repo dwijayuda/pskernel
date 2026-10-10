@@ -885,7 +885,9 @@ theorem psKernelWhnfCoreApplication_configuration_refines
         cheapRec
         cheapProj with
   | error error =>
-      simp [
+      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
         psKernelWhnfCoreWithFuel,
         hDepth,
         hMiss,
@@ -963,7 +965,9 @@ theorem psKernelWhnfCoreApplication_configuration_refines
             hBackConfig nextState hPair.2
           ⟩
       have hTailSuccess := hSuccess
-      simp only [
+      simp only [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
         psKernelWhnfCoreWithFuel,
         hDepth,
         hMiss,

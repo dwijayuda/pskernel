@@ -34,7 +34,9 @@ theorem psKernelDefEqQuick_configuration_sound
     exact hCache
   cases hEq : psKernelExprEq left right with
   | true =>
-      simp [
+      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
         psKernelDefEqQuick,
         hEq
       ] at hSuccess
@@ -82,7 +84,9 @@ theorem psKernelDefEqQuick_configuration_sound
                   right =
                 true := by
             simpa [hEligible] using hFast
-          simp [
+          simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
             psKernelDefEqQuick,
             hEq,
             hEligible,
@@ -109,7 +113,9 @@ theorem psKernelDefEqQuick_configuration_sound
                         (PsKernelExpr.lam
                           rightName rightDomain rightBody rightInfo) with
                   | error error =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -128,7 +134,9 @@ theorem psKernelDefEqQuick_configuration_sound
                           value
                           hConfig
                           hRun
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -141,47 +149,69 @@ theorem psKernelDefEqQuick_configuration_sound
                       | true =>
                           exact ⟨hSemantic.1, hSemantic.2 rfl⟩
               | bvar index =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | fvar name =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | mvar name =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | sort level =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | const name levels =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | app fn arg =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | forallE name type body info =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | letE name type value body nondep =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | lit literal =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | mdata metadata body =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | proj typeName index body =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
           | forallE leftName leftDomain leftBody leftInfo =>
@@ -197,7 +227,9 @@ theorem psKernelDefEqQuick_configuration_sound
                         (PsKernelExpr.forallE
                           rightName rightDomain rightBody rightInfo) with
                   | error error =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -216,7 +248,9 @@ theorem psKernelDefEqQuick_configuration_sound
                           value
                           hConfig
                           hRun
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -229,47 +263,69 @@ theorem psKernelDefEqQuick_configuration_sound
                       | true =>
                           exact ⟨hSemantic.1, hSemantic.2 rfl⟩
               | bvar index =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | fvar name =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | mvar name =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | sort level =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | const name levels =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | app fn arg =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | lam name type body info =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | letE name type value body nondep =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | lit literal =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | mdata metadata body =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
               | proj typeName index body =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
           | sort leftLevel =>
@@ -278,7 +334,9 @@ theorem psKernelDefEqQuick_configuration_sound
                   cases hLevel :
                       psKernelLevelEquivalent leftLevel rightLevel with
                   | false =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -287,7 +345,9 @@ theorem psKernelDefEqQuick_configuration_sound
                       rcases hSuccess with ⟨rfl, rfl⟩
                       exact ⟨hConfig, trivial⟩
                   | true =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -301,7 +361,9 @@ theorem psKernelDefEqQuick_configuration_sound
                             leftLevel rightLevel hLevel
                         ⟩
               | _ =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
           | mdata leftMetadata leftBody =>
@@ -310,7 +372,9 @@ theorem psKernelDefEqQuick_configuration_sound
                   cases hRun :
                       defeq context state leftBody rightBody with
                   | error error =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -323,7 +387,9 @@ theorem psKernelDefEqQuick_configuration_sound
                           context state runState
                           leftBody rightBody value
                           hConfig hRun
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -350,7 +416,9 @@ theorem psKernelDefEqQuick_configuration_sound
                                   (hSemantic.2 rfl))
                             ⟩
               | _ =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
           | lit leftLiteral =>
@@ -359,7 +427,9 @@ theorem psKernelDefEqQuick_configuration_sound
                   cases hLiteral :
                       psKernelLiteralEq leftLiteral rightLiteral with
                   | false =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -368,7 +438,9 @@ theorem psKernelDefEqQuick_configuration_sound
                       rcases hSuccess with ⟨rfl, rfl⟩
                       exact ⟨hConfig, trivial⟩
                   | true =>
-                      simp [
+                      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
                         psKernelDefEqQuick,
                         hEq,
                         hFast,
@@ -382,35 +454,51 @@ theorem psKernelDefEqQuick_configuration_sound
                             leftLiteral rightLiteral hLiteral
                         ⟩
               | _ =>
-                  simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
                   rcases hSuccess with ⟨rfl, rfl⟩
                   exact ⟨hConfig, trivial⟩
           | bvar index =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
           | fvar name =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
           | mvar name =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
           | const name levels =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
           | app fn arg =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
           | letE name type value body nondep =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
           | proj typeName index body =>
-              simp [psKernelDefEqQuick, hEq, hFast] at hSuccess
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelDefEqQuick, hEq, hFast] at hSuccess
               rcases hSuccess with ⟨rfl, rfl⟩
               exact ⟨hConfig, trivial⟩
 

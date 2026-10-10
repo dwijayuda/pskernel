@@ -790,7 +790,9 @@ theorem psKernelDefEqLazyStepBoth_equal_hint_configuration_sound
         psKernelReducibilityHintsIsRegular leftDef.hints <;>
       cases hLevels :
         psKernelAppHeadLevelsEquivalent left right <;>
-      simp [
+      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
         psKernelDefEqLazyStepBoth,
         hNoLeft, hNoRight,
         sameShortcut, argsResult,

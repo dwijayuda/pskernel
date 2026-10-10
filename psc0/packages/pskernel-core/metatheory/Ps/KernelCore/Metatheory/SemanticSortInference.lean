@@ -24,18 +24,24 @@ theorem inferCore_sort_result
         (.sort level) = some result ∨
       result = .sort (.succ level) := by
   cases fuel with
-  | zero => simp [psKernelInferCoreWithFuel] at run
+  | zero => simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel] at run
   | succ fuel =>
       cases hc : psKernelExprMapGet
           (if inferOnly then state.inferOnly else state.checkedInfer) (.sort level) with
       | none =>
           cases he : psKernelCheckerContextEnterRecDepth context with
           | error error =>
-              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, hc, he] at run
           | ok entered =>
-              simp only [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp only [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run
@@ -43,11 +49,15 @@ theorem inferCore_sort_result
       | some cached =>
           cases he : psKernelCheckerContextEnterRecDepth context with
           | error error =>
-              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, hc, he] at run
           | ok entered =>
-              simp only [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp only [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run

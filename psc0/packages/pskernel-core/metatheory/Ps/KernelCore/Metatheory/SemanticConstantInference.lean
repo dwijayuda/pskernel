@@ -38,18 +38,24 @@ theorem inferCore_const_result
       result = psKernelExprInstantiateLevelParams (psKernelConstantInfoType info)
         (psKernelConstantInfoLevelParams info) levels := by
   cases fuel with
-  | zero => simp [psKernelInferCoreWithFuel] at run
+  | zero => simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel] at run
   | succ fuel =>
       cases hc : psKernelExprMapGet
           (if inferOnly then state.inferOnly else state.checkedInfer) (.const name levels) with
       | some cached =>
           cases he : psKernelCheckerContextEnterRecDepth context with
           | error error =>
-              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, hc, he] at run
           | ok entered =>
-              simp only [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp only [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run
@@ -57,20 +63,26 @@ theorem inferCore_const_result
       | none =>
           cases he : psKernelCheckerContextEnterRecDepth context with
           | error error =>
-              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+              simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, hc, he] at run
           | ok entered =>
               have henv := entered_environment context entered he
               cases hi : psKernelEnvironmentFind entered.environment name with
               | none =>
-                  simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+                  simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                     psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                     psKernelSemanticCacheNodeBudget, hc, he, hi] at run
               | some info =>
                   refine Or.inr ⟨info, ?_, ?_⟩
                   · simpa only [henv] using hi
-                  · simp only [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
+                  · simp only [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                       psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                       psKernelSemanticCacheNodeBudget, ite_true, hc, he, hi] at run
                     repeat' first | (solve | simp_all) | split at run

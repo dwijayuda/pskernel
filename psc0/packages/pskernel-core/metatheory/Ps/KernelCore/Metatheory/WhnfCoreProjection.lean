@@ -168,7 +168,9 @@ theorem psKernelWhnfCoreProjection_configuration_refines
         structValue
   cases hStruct : structResult with
   | error error =>
-      simp [
+      simp [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
         psKernelWhnfCoreWithFuel,
         hDepth,
         hMiss,
@@ -277,7 +279,9 @@ theorem psKernelWhnfCoreProjection_configuration_refines
                          (Prod.snd reduced)) =
             Except.ok (Prod.mk result nextState) := by
         have hMain := hSuccess
-        simp only [
+        simp only [psKernelCachedCacheGet_eq, psKernelCachedCacheContains_eq,
+        psKernelCachedCacheInsert_eq, psKernelCachedCacheInsertPair_eq,
+        PsKernelSemanticCachePolicy.enabled, 
           psKernelWhnfCoreWithFuel,
           hDepth,
           hMiss,

@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticLambdaCodomain
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotationVisits
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotations
 import Ps.KernelCore.Metatheory.SemanticUniverseRegime
@@ -249,7 +250,9 @@ run_cmd do
     ``PsKernelSemantics.inferCore_const_result,
     ``PsKernelSemantics.SetModel.const_inference_has_set_model,
     ``PsKernelSemantics.Declarative.fragmentReading,
-    ``PsKernelSemantics.Declarative.relative_consistency
+    ``PsKernelSemantics.Declarative.relative_consistency,
+    ``PsKernelSemantics.Reference.lambda_trace_codomain_sort,
+    ``PsKernelSemantics.Reference.lambda_trace_checked_reading
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

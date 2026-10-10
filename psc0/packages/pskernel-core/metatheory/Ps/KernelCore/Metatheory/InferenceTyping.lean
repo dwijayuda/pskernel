@@ -644,11 +644,11 @@ theorem psKernelInferCore_lam_checked_refines_typing
       PsKernelExpr ->
       Except String (Prod Bool PsKernelCheckerState))
     (context nextContext : PsKernelCheckerContext)
-    (state domainState sortState state1 bodyState : PsKernelCheckerState)
+    (state domainState sortState state1 bodyState typeState codomainState : PsKernelCheckerState)
     (name fresh : PsKernelName)
-    (domain body domainType bodyType : PsKernelExpr)
+    (domain body domainType bodyType typeOfBodyType : PsKernelExpr)
     (binderInfo : PsKernelBinderInfo)
-    (domainLevel : PsKernelLevel)
+    (domainLevel codomainLevel : PsKernelLevel)
     (hDepth :
       psKernelCheckerContextEnterRecDepth context =
         Except.ok nextContext)
@@ -682,6 +682,18 @@ theorem psKernelInferCore_lam_checked_refines_typing
             (PsKernelExpr.fvar fresh))
           false =
         Except.ok (Prod.mk bodyType bodyState))
+    (hTypeRun :
+      psKernelInferCoreWithFuel remaining whnf defeq
+          (psKernelCheckerContextWithLocalContext nextContext
+            (psKernelLocalContextAddLocal nextContext.localContext fresh name domain binderInfo))
+          bodyState bodyType true =
+        Except.ok (Prod.mk typeOfBodyType typeState))
+    (hCodomainSort :
+      psKernelEnsureSortWith whnf
+          (psKernelCheckerContextWithLocalContext nextContext
+            (psKernelLocalContextAddLocal nextContext.localContext fresh name domain binderInfo))
+          typeState typeOfBodyType =
+        Except.ok (Prod.mk codomainLevel codomainState))
     (hFresh :
       psKernelLocalContextFind
           nextContext.localContext
@@ -724,7 +736,7 @@ theorem psKernelInferCore_lam_checked_refines_typing
           result
           (psKernelCheckerStateExitLocalScope
             state1
-            bodyState)) ∧
+            codomainState)) ∧
     PsKernelTypingJudgment
       nextContext.environment
       nextContext.localContext
@@ -740,7 +752,9 @@ theorem psKernelInferCore_lam_checked_refines_typing
       hDomainRun,
       hDomainSort,
       hFreshState,
-      hBodyRun
+      hBodyRun,
+      hTypeRun,
+      hCodomainSort
     ]
   · exact
       PsKernelTypingJudgment.lam

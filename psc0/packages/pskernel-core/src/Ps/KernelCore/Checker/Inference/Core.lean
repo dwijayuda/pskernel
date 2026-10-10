@@ -3,7 +3,7 @@ import Ps.KernelCore.Checker.Inference.Helpers
 /-
 Syntax-directed core inference.
 
-This module implements the Lean 4.34 inference cases for core expressions and
+This module implements inference for the pinned Lean 4.35 core expressions and
 threads checker state through recursive calls. The public distinction between
 "infer only" and fully checked inference is supplied as an explicit Boolean and
 is cached separately.
@@ -483,35 +483,59 @@ def psKernelInferCoreWithFuel
                         | Except.error error =>
                             Except.error error
                         | Except.ok bodyResult =>
-                            -- Return the recursively inferred type unchanged. Closing
-                            -- fresh names is semantic transport; opportunistic beta
-                            -- reduction here would need an additional soundness proof.
-                            let bodyType :=
-                              Prod.fst bodyResult;
-                            let closedBody :=
-                              psKernelExprAbstractFVars
-                                bodyType
-                                (List.cons
-                                  fresh
-                                  List.nil);
-                            let result :=
-                              PsKernelExpr.forallE
-                                name
-                                domain
-                                closedBody
-                                binderInfo;
-                            let scopedState :=
-                              psKernelCheckerStateExitLocalScope
-                                state1
-                                (Prod.snd bodyResult);
-                            Except.ok
-                              (Prod.mk
-                                result
-                                (psKernelCacheInferResult
-                                  scopedState
-                                  inferOnly
-                                  expr
-                                  result))
+                            -- Checked lambda inference establishes its codomain
+                            -- sort by a real infer-only visit and sort exposure.
+                            -- Infer-only callers retain their validity precondition.
+                            let codomainCheck :=
+                              if inferOnly then
+                                Except.ok (Prod.snd bodyResult)
+                              else
+                                match
+                                    smaller whnf defeq child
+                                      (Prod.snd bodyResult)
+                                      (Prod.fst bodyResult) true with
+                                | Except.error error =>
+                                    Except.error (psKernelLambdaCodomainSortFailure error)
+                                | Except.ok typeResult =>
+                                    match
+                                        psKernelEnsureSortWith whnf child
+                                          (Prod.snd typeResult) (Prod.fst typeResult) with
+                                    | Except.error error =>
+                                        Except.error (psKernelLambdaCodomainSortFailure error)
+                                    | Except.ok sortResult =>
+                                        Except.ok (Prod.snd sortResult);
+                            match codomainCheck with
+                            | Except.error error => Except.error error
+                            | Except.ok codomainState =>
+                                -- Return the recursively inferred type unchanged. Closing
+                                -- fresh names is semantic transport; opportunistic beta
+                                -- reduction here would need an additional soundness proof.
+                                let bodyType :=
+                                  Prod.fst bodyResult;
+                                let closedBody :=
+                                  psKernelExprAbstractFVars
+                                    bodyType
+                                    (List.cons
+                                      fresh
+                                      List.nil);
+                                let result :=
+                                  PsKernelExpr.forallE
+                                    name
+                                    domain
+                                    closedBody
+                                    binderInfo;
+                                let scopedState :=
+                                  psKernelCheckerStateExitLocalScope
+                                    state1
+                                    codomainState;
+                                Except.ok
+                                  (Prod.mk
+                                    result
+                                    (psKernelCacheInferResult
+                                      scopedState
+                                      inferOnly
+                                      expr
+                                      result))
                 | PsKernelExpr.forallE name domain body binderInfo =>
                     match
                         smaller

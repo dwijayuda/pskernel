@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Projection
+import Ps.KernelCore.Checker.ResourcePolicy
 import Ps.KernelCore.Runtime.Acceleration.CachePolicy
 
 /-
@@ -83,6 +84,13 @@ def psKernelEnsureSortWith
                   (Prod.snd result))
           | _ =>
               Except.error "expected sort"
+
+/-- Extra annotation certification is conservative: inability to certify is
+a decline, not a logical rejection. Preserve resource exhaustion exactly. -/
+def psKernelLambdaCodomainSortFailure (message : String) : String :=
+  match psKernelResourceMessage message with
+  | Option.some _ => message
+  | Option.none => "lambda codomain sort could not be certified"
 
 def psKernelEnsureForallWith
     (whnf :

@@ -5,8 +5,9 @@ import Ps.KernelCore.Metatheory.SemanticValidityScope
 The actual checked lambda branch closes the allocator's fresh name in the
 recursively inferred body type without applying an extra beta-reduction pass.
 The model bridge therefore needs no body-type reduction-preservation premise.
-Unlike forall inference, lambda inference does not visit a body-sort check;
-the proof-valued fibre obligation remains explicit.
+Checked lambda inference now visits the inferred body's type and exposes its
+sort. The generic model helpers below are also specialized to those actual
+visits in SemanticLambdaCodomain; infer-only lambda retains its precondition.
 -/
 namespace PsKernelSemantics.Reference
 
@@ -21,6 +22,10 @@ structure LambdaTrace (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOp
   domainSortState : PsKernelCheckerState
   bodyType : PsKernelExpr
   bodyState : PsKernelCheckerState
+  typeOfBodyType : PsKernelExpr
+  typeState : PsKernelCheckerState
+  codomainLevel : PsKernelLevel
+  codomainState : PsKernelCheckerState
   depth : psKernelCheckerContextEnterRecDepth c = .ok entered
   domainRun : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy
     remaining whnf defeq entered s A false = .ok (domainType, domainState)
@@ -31,11 +36,17 @@ structure LambdaTrace (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOp
     (psKernelCheckerStateFreshName domainSortState n).2
     (psKernelExprInstantiate1 b (.fvar (psKernelCheckerStateFreshName domainSortState n).1))
     false = .ok (bodyType, bodyState)
+  typeRun : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy remaining whnf defeq
+    (binderChild entered domainSortState n A bi)
+    bodyState bodyType true = .ok (typeOfBodyType, typeState)
+  codomainSortRun : psKernelEnsureSortWith whnf
+    (binderChild entered domainSortState n A bi)
+    typeState typeOfBodyType = .ok (codomainLevel, codomainState)
   resultEq : result = .forallE n A
     (psKernelExprAbstractFVars bodyType
       [(psKernelCheckerStateFreshName domainSortState n).1]) bi
   stateEq : next = psKernelCheckerStateExitLocalScope
-    (psKernelCheckerStateFreshName domainSortState n).2 bodyState
+    (psKernelCheckerStateFreshName domainSortState n).2 codomainState
 
 theorem inferCore_lam_trace (remaining : Nat)
     (whnf : InferOperation) (defeq : DefEqOperation)
@@ -78,12 +89,32 @@ theorem inferCore_lam_trace (remaining : Nat)
                   cases run
               | ok body =>
                   rcases body with ⟨bType, bState⟩
-                  simp only [binderChild] at hB
-                  simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
-                    ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB,
-                    infer_publication_noop, Except.ok.injEq, Prod.mk.injEq] at run
-                  exact ⟨⟨entered, aType, aState, u, us, bType, bState,
-                    hd, hA, hAS, hB, run.1.symm, run.2.symm⟩⟩
+                  cases hT : @psKernelInferCoreWithFuel psKernelReferenceCachePolicy
+                      remaining whnf defeq (binderChild entered us n A bi)
+                      bState bType true with
+                  | error error =>
+                      simp only [binderChild] at hB hT
+                      simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                        ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB, hT] at run
+                      cases run
+                  | ok typeRun =>
+                      rcases typeRun with ⟨tType, tState⟩
+                      cases hS : psKernelEnsureSortWith whnf
+                          (binderChild entered us n A bi) tState tType with
+                      | error error =>
+                          simp only [binderChild] at hB hT hS
+                          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                            ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB, hT, hS] at run
+                          cases run
+                      | ok sortRun =>
+                          rcases sortRun with ⟨v, vState⟩
+                          simp only [binderChild] at hB hT hS
+                          simp only [psKernelInferCoreWithFuel, psKernelReferenceCacheGet_miss,
+                            ite_self, hd, Bool.false_eq_true, ite_false, hA, hAS, hB, hT, hS,
+                            infer_publication_noop, Except.ok.injEq, Prod.mk.injEq] at run
+                          exact ⟨⟨entered, aType, aState, u, us, bType, bState,
+                            tType, tState, v, vState, hd, hA, hAS, hB, hT, hS,
+                            run.1.symm, run.2.symm⟩⟩
 
 open ConLeche ConLeche.SetTheory ConLeche.SetModel SetModel AnnotatedExpr
 universe w

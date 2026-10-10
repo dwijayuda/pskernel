@@ -1030,95 +1030,111 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                             ] at hSuccess
                         | ok bodyRun =>
                             rcases bodyRun with ⟨rawBodyType, bodyState⟩
-                            have hBodySemantic :=
-                              ih
-                                child
-                                state1
-                                bodyState
-                                openedBody
-                                rawBodyType
-                                hChildConfig
-                                hBody
-                            let bodyType :=
-                              rawBodyType
-                            let closedBody :=
-                              psKernelExprAbstractFVars
-                                bodyType
-                                (List.cons fresh List.nil)
-                            let inferred :=
-                              PsKernelExpr.forallE
-                                name
-                                domain
-                                closedBody
-                                binderInfo
-                            have hTyping :
-                                PsKernelTypingJudgment
-                                  nextContext.environment
-                                  nextContext.localContext
-                                  (PsKernelExpr.lam
-                                    name domain body binderInfo)
-                                  inferred := by
-                              dsimp [inferred, closedBody, bodyType]
-                              exact
-                                PsKernelTypingJudgment.lam
-                                  name
-                                  fresh
-                                  domain
-                                  body
-                                  rawBodyType
-                                  binderInfo
-                                  domainLevel
-                                  hFresh
-                                  hDomainTyping
-                                  hBodySemantic.1
-                            let scopedState :=
-                              psKernelCheckerStateExitLocalScope
-                                state1
-                                bodyState
-                            have hScopedConfig :
-                                PsKernelCheckerConfigurationSound
-                                  nextContext
-                                  scopedState := by
-                              simpa [scopedState] using
-                                psKernelCheckerStateExitLocalScope_preserves_configuration
-                                  nextContext
-                                  state1
-                                  bodyState
-                                  hState1Config
-                            simp [
-                              psKernelInferCoreWithFuel,
-                              hMiss,
-                              hDepth,
-                              hDomain,
-                              hDomainSort,
-                              freshResult,
-                              fresh,
-                              state1,
-                              childLocal,
-                              child,
-                              openedBody,
-                              hBody,
-                              bodyType,
-                              closedBody,
-                              inferred,
-                              scopedState
-                            ] at hSuccess
-                            rcases hSuccess with ⟨rfl, rfl⟩
-                            exact
-                              ⟨
-                                hBackTyping
-                                  (PsKernelExpr.lam
-                                    name domain body binderInfo)
-                                  inferred
-                                  hTyping,
-                                hPublish
-                                  scopedState
-                                  (PsKernelExpr.lam
-                                    name domain body binderInfo)
-                                  inferred
-                                  hScopedConfig
-                                  hTyping
-                              ⟩
+                            cases hTypeRun : psKernelInferCoreWithFuel remaining whnf defeq
+                                child bodyState rawBodyType true with
+                            | error error =>
+                                simp [psKernelInferCoreWithFuel, hMiss, hDepth, hDomain, hDomainSort,
+                                  freshResult, fresh, state1, childLocal, child, openedBody, hBody, hTypeRun] at hSuccess
+                            | ok typeRun =>
+                                rcases typeRun with ⟨typeOfBodyType, typeState⟩
+                                cases hCodomainSort : psKernelEnsureSortWith whnf child
+                                    typeState typeOfBodyType with
+                                | error error =>
+                                    simp [psKernelInferCoreWithFuel, hMiss, hDepth, hDomain, hDomainSort,
+                                  freshResult, fresh, state1, childLocal, child, openedBody, hBody, hTypeRun, hCodomainSort] at hSuccess
+                                | ok sortRun =>
+                                    rcases sortRun with ⟨codomainLevel, codomainState⟩
+                                    have hBodySemantic :=
+                                      ih
+                                        child
+                                        state1
+                                        bodyState
+                                        openedBody
+                                        rawBodyType
+                                        hChildConfig
+                                        hBody
+                                    let bodyType :=
+                                      rawBodyType
+                                    let closedBody :=
+                                      psKernelExprAbstractFVars
+                                        bodyType
+                                        (List.cons fresh List.nil)
+                                    let inferred :=
+                                      PsKernelExpr.forallE
+                                        name
+                                        domain
+                                        closedBody
+                                        binderInfo
+                                    have hTyping :
+                                        PsKernelTypingJudgment
+                                          nextContext.environment
+                                          nextContext.localContext
+                                          (PsKernelExpr.lam
+                                            name domain body binderInfo)
+                                          inferred := by
+                                      dsimp [inferred, closedBody, bodyType]
+                                      exact
+                                        PsKernelTypingJudgment.lam
+                                          name
+                                          fresh
+                                          domain
+                                          body
+                                          rawBodyType
+                                          binderInfo
+                                          domainLevel
+                                          hFresh
+                                          hDomainTyping
+                                          hBodySemantic.1
+                                    let scopedState :=
+                                      psKernelCheckerStateExitLocalScope
+                                        state1
+                                        codomainState
+                                    have hScopedConfig :
+                                        PsKernelCheckerConfigurationSound
+                                          nextContext
+                                          scopedState := by
+                                      simpa [scopedState] using
+                                        psKernelCheckerStateExitLocalScope_preserves_configuration
+                                          nextContext
+                                          state1
+                                          codomainState
+                                          hState1Config
+                                    simp [
+                                      psKernelInferCoreWithFuel,
+                                      hMiss,
+                                      hDepth,
+                                      hDomain,
+                                      hDomainSort,
+                                      freshResult,
+                                      fresh,
+                                      state1,
+                                      childLocal,
+                                      child,
+                                      openedBody,
+                                      hBody,
+                                      hTypeRun,
+                                      hCodomainSort,
+                                      bodyType,
+                                      closedBody,
+                                      inferred,
+                                      scopedState
+                                    ] at hSuccess
+                                    rcases hSuccess with ⟨rfl, rfl⟩
+                                    exact
+                                      ⟨
+                                        hBackTyping
+                                          (PsKernelExpr.lam
+                                            name domain body binderInfo)
+                                          inferred
+                                          hTyping,
+                                        hPublish
+                                          scopedState
+                                          (PsKernelExpr.lam
+                                            name domain body binderInfo)
+                                          inferred
+                                          hScopedConfig
+                                          hTyping
+                                      ⟩
             | forallE name domain body binderInfo =>
                 cases hDomain :
                     psKernelInferCoreWithFuel

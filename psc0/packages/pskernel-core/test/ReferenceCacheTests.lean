@@ -56,6 +56,40 @@ private def checkLambdaTypeTransport (policy : PsKernelSemanticCachePolicy)
   | .error (.rejectedInvalid _) => pure ()
   | _ => throw (IO.userError (tag ++ ": invalid all-types inhabitant was not rejected"))
 
+/-- Deliberately malformed LOW-LEVEL contexts exercise the new certification
+boundary. They are not admitted public environments or checker exploits. -/
+private def checkLambdaCodomainGate (policy : PsKernelSemanticCachePolicy) : IO Unit := do
+  let x := PsKernelName.str .anonymous "x"
+  let y := PsKernelName.str .anonymous "uncertifiedLocal"
+  let base := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let withType := fun ty =>
+    psKernelCheckerContextWithLocalContext base
+      (psKernelLocalContextAddLocal base.localContext y y ty .default)
+  let term := PsKernelExpr.lam x (.sort .zero) (.fvar y) .default
+  -- Re-inference of this body's supplied type encounters a loose variable.
+  match @psKernelCheckerCheck policy 64 (withType (.bvar 0))
+      psKernelCheckerStateEmpty term with
+  | .ok _ => throw (IO.userError "checked lambda skipped codomain certification")
+  | .error msg =>
+      match psKernelErrorFromMessage msg with
+      | .declinedUnsupported _ => pure ()
+      | _ => throw (IO.userError "uncertified codomain was not a decline")
+  -- Infer-only is intentionally a separate grade with validity preconditions.
+  match @psKernelCheckerInfer policy 64 (withType (.bvar 0))
+      psKernelCheckerStateEmpty term with
+  | .ok _ => pure ()
+  | .error _ => throw (IO.userError "infer-only grade acquired the checked-only gate")
+  let mut deepType := PsKernelExpr.sort .zero
+  for _ in [:32] do
+    deepType := .forallE x (.sort .zero) deepType .default
+  match @psKernelCheckerCheck policy 8 (withType deepType)
+      psKernelCheckerStateEmpty term with
+  | .ok _ => throw (IO.userError "codomain fixture did not exhaust its inference budget")
+  | .error msg =>
+      match psKernelErrorFromMessage msg with
+      | .resourceExhausted .fuel _ => pure ()
+      | _ => throw (IO.userError "codomain certification lost resource classification")
+
 def main : IO Unit := do
   let c := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
   let p := PsKernelExpr.sort .zero
@@ -127,5 +161,8 @@ def main : IO Unit := do
   checkLambdaTypeTransport psKernelReferenceCachePolicy .zero "lambdaPropReference"
   checkLambdaTypeTransport psKernelCachedCachePolicy (.succ .zero) "lambdaTypeCached"
   checkLambdaTypeTransport psKernelReferenceCachePolicy (.succ .zero) "lambdaTypeReference"
+  checkLambdaCodomainGate psKernelCachedCachePolicy
+  checkLambdaCodomainGate psKernelReferenceCachePolicy
+  IO.println "PSKERNEL_LAMBDA_CODOMAIN_GATE: PASS modes=2 declined=2 inferOnly=2 resource=2"
   IO.println "PSKERNEL_LAMBDA_TYPE_TRANSPORT: PASS modes=2 regimes=2 checked=4 inferOnly=4 conversion=4 validAdmission=4 invalidAdmission=4"
   IO.println "PSKERNEL_REFERENCE_TESTS: PASS poison=3 dependent-binders=1 admission=3 resource=1"

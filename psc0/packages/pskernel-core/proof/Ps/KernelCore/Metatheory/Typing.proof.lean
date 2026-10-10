@@ -711,7 +711,7 @@ theorem psKernelInferCore_lam_checked_refines_typing
         name
         domain
         (psKernelExprAbstractFVars
-          (psKernelExprCheapBetaReduce bodyType)
+          bodyType
           (List.cons fresh List.nil))
         binderInfo
     psKernelInferCoreWithFuel

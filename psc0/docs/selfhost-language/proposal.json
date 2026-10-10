@@ -1779,7 +1779,7 @@
     }
   },
   "strictEnforcementCheckpoint": {
-    "status": "reviewed-flat-source-pattern-completion-awaiting-full-qualification",
+    "status": "reviewed-callback-local-self-prefix-completion-awaiting-full-qualification",
     "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
     "branch": "psc0/strict-sh1-v1",
     "implementationManifest": "strict/implementation-checkpoint.json",
@@ -1816,16 +1816,16 @@
     "selectedSeedUnchanged": "R",
     "sourceAuthority": ".lean",
     "cloudExecution": {
-      "status": "tenth-attempt-native-replay-passed-owned-source-pattern-refused",
-      "sourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-      "runId": 38004581681,
+      "status": "eleventh-attempt-parser-repair-passed-worker-self-call-arity-refused",
+      "sourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "runId": 38006688264,
       "workflowId": 378853677,
-      "compilerJobId": 114070320734,
-      "providerJobId": 114070642522,
+      "compilerJobId": 114076987396,
+      "providerJobId": 114077308038,
       "providerStatus": "skipped",
-      "attempts": 10,
+      "attempts": 11,
       "failedStep": 24,
-      "diagnostic": "Ps.Erasure.Expr:641:31: expected '=>', got '('",
+      "diagnostic": "Ps.Erasure.Expr.psEraseRuntimeExprWithFuelWorker: structuralRecursionArity",
       "nativeCompilerBuilt": true,
       "nativeRegressionsPassed": true,
       "nativeCheckedSeedBuilt": true,
@@ -1836,8 +1836,8 @@
       "nativeStrictConformanceCompleted": false,
       "c1Started": false,
       "fixedPointStarted": false,
-      "failureEvidence": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/source-parse-failure.json",
-      "failureEvidenceBlob": "fb9c40b2c5c8fbceed61302624e27fdac223fad4"
+      "failureEvidence": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/source-elaboration-failure.json",
+      "failureEvidenceBlob": "315c45511a8272a08a8c5aceacc834d313336767"
     },
     "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
     "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
@@ -2091,7 +2091,8 @@
         "rowsClosed": 0,
         "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
         "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition",
-        "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
+        "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+        "currentSourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
       },
       {
         "family": "ER",
@@ -2116,7 +2117,8 @@
         "finalCrossFamilyCompositionPending": false,
         "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
         "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition",
-        "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
+        "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+        "currentSourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
       }
     ],
     "pendingErasureClassCorrection": {
@@ -2203,12 +2205,12 @@
       }
     },
     "currentQualificationRequest": {
-      "status": "enclosing-flat-pattern-source-completion-requests-full-qualification-awaiting-run-discovery",
-      "expectedParent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-      "priorCompilerSource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-      "priorAttemptRunId": 38004581681,
-      "manifest": "strict/reviewed-candidates/foldl-flat-pattern-repair.json",
-      "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "status": "enclosing-callback-local-self-prefix-correction-requests-full-qualification-awaiting-run-discovery",
+      "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "priorCompilerSource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "priorAttemptRunId": 38006688264,
+      "manifest": "strict/reviewed-candidates/worker-self-call-prefix-repair.json",
+      "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
       "sourceFiles": 1,
       "productionLeanChanges": 1,
       "cumulativeReviewedSourceFiles": 46,
@@ -2324,14 +2326,15 @@
       "rowsClosed": 0,
       "qualificationPending": true,
       "formalPreservationProven": false,
-      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
+      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
     },
-    "updatedAtUtc": "2026-10-09T23:52:00Z",
+    "updatedAtUtc": "2026-10-10T00:03:34Z",
     "latestExecution": {
-      "sourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-      "runId": 38004581681,
-      "compilerJobId": 114070320734,
-      "status": "owned-source-parser-refusal-before-N1-generation",
+      "sourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "runId": 38006688264,
+      "compilerJobId": 114076987396,
+      "status": "owned-source-structural-self-call-arity-refusal-before-N1-generation",
       "failedStep": 24,
       "nativeCompilerBuild": "success",
       "nativeRegressionTargets": "success",
@@ -2339,15 +2342,16 @@
       "sourceGrammarImportsAndWorkspace": "success",
       "replayCli": "success",
       "authenticatedRMigrationPreflight": "success",
-      "evidence": "attempts/00e963bb8c84fc9b29f7cc8228f1520de5ca2081/source-parse-failure.json",
-      "evidenceBlob": "fb9c40b2c5c8fbceed61302624e27fdac223fad4",
-      "providerJobId": 114070642522,
+      "priorNestedPatternRefusalCleared": true,
+      "evidence": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/source-elaboration-failure.json",
+      "evidenceBlob": "315c45511a8272a08a8c5aceacc834d313336767",
+      "providerJobId": 114077308038,
       "providerStatus": "skipped",
-      "N1": "source-preparation-refused-no-success-receipt",
+      "N1": "source-elaboration-refused-no-success-receipt",
       "C1": "not-started",
       "C2": "not-started",
       "C3": "not-started",
-      "positiveFlatTailExecution": "not-reached-before-owned-source-parse-refusal"
+      "positiveFlatTailExecution": "not-reached-before-owned-source-elaboration-refusal"
     },
     "reviewedHostFunctionEntryCompletion": {
       "status": "integrated-replay-cli-passed-full-native-and-generation-qualification-pending",
@@ -2374,9 +2378,9 @@
       ],
       "sourceReview": "CLEAR",
       "executionQualification": false,
-      "passedReplayRun": 38004581681,
-      "passedReplaySource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-      "positiveFlatTailExecution": "not-reached-before-owned-source-parse-refusal"
+      "passedReplayRun": 38006688264,
+      "passedReplaySource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "positiveFlatTailExecution": "not-reached-before-owned-source-elaboration-refusal"
     },
     "reviewedSourceRuntimeInterface": {
       "document": "strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md",
@@ -2390,7 +2394,8 @@
       "rowsClosed": 0,
       "qualificationPending": true,
       "formalPreservationProven": false,
-      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
+      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
     },
     "finalDisposition": {
       "status": "pending-exact-integrated-qualification-and-current-row-disposition",
@@ -2416,7 +2421,7 @@
       "executedOnThisIntegration": false
     },
     "reviewedPortablePatternCompletion": {
-      "status": "one-helper-flat-pattern-correction-integrated-by-enclosing-commit-awaiting-exact-source-run",
+      "status": "integrated-parser-refusal-cleared-next-observed-failure-is-worker-elaboration",
       "manifest": "strict/reviewed-candidates/foldl-flat-pattern-repair.json",
       "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
       "manifestSha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88",
@@ -2459,7 +2464,75 @@
       "newWorkflowSteps": 0,
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
-      "providerChecked": false
+      "providerChecked": false,
+      "subsequentObservedRun": 38006688264
+    },
+    "reviewedWorkerSelfCallCompletion": {
+      "status": "callback-local-exact-self-prefix-correction-awaiting-exact-source-full-run",
+      "manifest": "strict/reviewed-candidates/worker-self-call-prefix-repair.json",
+      "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+      "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "definition": "psEraseRuntimeExprWithFuelWorker",
+      "baseBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+      "baseSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+      "baseBytes": 138060,
+      "candidateBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+      "candidateSha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+      "candidateBytes": 138189,
+      "files": 1,
+      "guards": 1,
+      "helperDefinitions": 1,
+      "headerExplicitArguments": 2,
+      "oldFlattenedSelfArguments": 4,
+      "currentSelfArguments": 2,
+      "freshBinder": "eraseAtRemainingFuel",
+      "placement": "Inside the original smaller callback. The original two-argument recursive result is bound before the unchanged nested-scope/value application. No work crosses a lambda and no result is shared across separate callback invocations.",
+      "argument": "The exact declaration-prefix call selects the same root-child IH. Context extensions preserve original parameter IDs and the structural child. Callback construction, fuel dispatch, nested-scope clearing, returned-function application, body/error demand and canonical entry boundary remain. Parentheses alone do not create this syntax boundary because the parser flattens application spines.",
+      "audit": {
+        "productionLeanFiles": 30,
+        "declarations": 980,
+        "selfRecursiveDeclarations": 382,
+        "directSelfReferences": 539,
+        "parenthesizedSelfCalls": 109,
+        "arityMismatchesBefore": 1,
+        "arityMismatchesAfter": 0,
+        "bareOrUndersaturatedSelfReferences": 0,
+        "scope": "Complete current production Lean inventory of the canonical/recursion batch; not every file in the whole compiler closure."
+      },
+      "sourceReview": "root-and-two-independent-reviewers-CLEAR",
+      "syntaxCapabilityAdded": false,
+      "structuralValidatorChanged": false,
+      "publicSignatureChanged": false,
+      "newWorkflowSteps": 0,
+      "newCompilerCallSites": 0,
+      "hostScriptsChanged": 0,
+      "fixturesChanged": 0,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "manifestSha256": "d964cfc99eda53cd9fefaa833a0ffbded9f3d5f907c06f21ffe63bf33b467fab",
+      "manifestBytes": 48828
+    },
+    "reviewedFinalDispositionMap": {
+      "status": "complete-independent-mapping-review-current-execution-disposition-pending",
+      "map": "strict/reviewed-candidates/final-disposition-map.json",
+      "mapBlob": "697c94b2722a6191537b714f71f629713637b30a",
+      "mapSha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+      "manifest": "strict/reviewed-candidates/final-disposition-map-review.json",
+      "manifestBlob": "419564764abc492816833a643af40b027b0fd897",
+      "correspondenceReview": "strict/reviewed-candidates/correspondence-disposition-map-review.json",
+      "correspondenceReviewBlob": "20f0116df23d4304e3b7e8f9da5ff39599eaf037",
+      "stageReview": "strict/reviewed-candidates/stage-activation-review.json",
+      "stageReviewBlob": "f6cc608044094aebe90609cb140d9cd00825ebf4",
+      "correspondenceRows": 33,
+      "stageObligations": 27,
+      "receiptGroups": 25,
+      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+      "rowsClosed": 0,
+      "requiredMetadataCorrection": "ER-06 /rows/5/domain/1 must describe admitted zero-constructor layouts separately from inhabited zero-field structures.",
+      "evidenceBoundary": "Frozen advisory maps keep their historical pending/source pins. Active final disposition must bind the full current transport chain and actual successful exact-source compiler/provider evidence. No row closes by attaching these review packets."
     }
   }
 }

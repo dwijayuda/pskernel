@@ -4,54 +4,57 @@ Status: implementation and general source reviews complete; final qualification/
 
 ## Latest execution boundary
 
-The practical migration is merged in main at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
-The canonical/recursion source656ed78, closed-local alpha repair45d314b and
-seven-host completion00e963b are integrated on psc0/strict-sh1-v1.
+The practical migration remains merged at `ed5d00aca0743bde583b45fe7756dd494ac3960f`.
+Canonical/recursion source656ed78, native alpha45d314b, seven-host completion00e963b,
+and flat-pattern correction9640e4 are integrated on psc0/strict-sh1-v1.
 
-[Run38004581681](https://github.com/dwijayuda/pskernel/actions/runs/38004581681)
-at00e963b / compiler114070320734 passed steps18–23, including native build/regressions/checked seed,
-grammar/import/workspace, all six replay fixtures and authenticated R migration.
-Step24 then refused Ps.Erasure.Expr641:31: expected '=>', got '('.
-Native Lean accepts the nested List pattern there; the owned source parser
-requires the supported flat form. N1 was not generated, C1/C2/C3 did not start,
-and provider114070642522 skipped. The new positive flat-tail IR block was not
-reached. TS7 and resource preflights passed. The exact attempt10 failure and
-full log are retained in [qualification-attempts.json](qualification-attempts.json).
+[Run38006688264](https://github.com/dwijayuda/pskernel/actions/runs/38006688264)
+at9640e4 passed steps18–23, including native build/regressions/checked seed,
+grammar/import/workspace, replay and authenticated R migration. The prior nested
+pattern refusal is cleared. Step24 then refused source elaboration of
+Ps.Erasure.Expr.psEraseRuntimeExprWithFuelWorker with structuralRecursionArity.
+The two explicit declaration parameters were followed by two returned-function
+arguments in the same flattened self application. N1 was not generated,
+C1/C2/C3 did not start, provider114077308038 skipped, and positive flat-tail
+IR coverage was not reached. Exact attempt11 evidence and log are retained.
 
-The enclosing [one-helper flat-pattern repair](reviewed-candidates/foldl-flat-pattern-repair.json)
-changes only Expr.psEraseArrayFoldl from e3ed96f to a4d296a.
-Existing flat List matches cover lengths0,1,2 and greater than2. Every non-two
-case returns the same error before runtime operand erasure. The length-two case
-executes the same sole2,801-byte body with eight added indentation spaces,
-retaining the whole original typeArguments, operand order, errors, captures,
-fresh names and canonical-to-flat fold bridge. Both new binders are fresh.
-Root and independent reviews verify all exact guards, hashes and whole-file
-forward/reverse reconstruction. The complete31-file canonical/recursion Lean
-audit found one unsupported pattern before this correction and none after.
-Its4,664 heads become4,668; the independent pass also inspected2,124 scrutinees.
-The audit does not claim every64-file closure source. No parser, new syntax,
-host script or fixture changes are included.
+The enclosing [callback-local self-prefix correction](reviewed-candidates/worker-self-call-prefix-repair.json)
+changes only that worker. It binds the recursive function using exactly
+environment and remaining inside the existing smaller callback, then applies
+the local to the same nested scope and expression. The original construction
+and argument/error demand schedule is retained; no work crosses a lambda,
+no cross-callback result is shared, and no eager remaining-fuel closure chain
+is introduced. Parentheses cannot supply the boundary because the parser
+flattens application spines. The actual header, root-child IDs, scope clearing,
+zero case and body are unchanged. No validator or syntax is relaxed.
+Final Expr is b4af2687c1b94e85014e323e5325385f139d4015,138189 bytes.
 
-The [seven-host completion](reviewed-candidates/host-function-entry-completion.json)
-remains unchanged and its replay fixes now have observed PASS evidence.
-The three general returned-function routes retain their value/depth/fault checks.
-Separate swap, captured-alias and reversal flat-IR functions supply12 positive
-optimizer observations alongside the old61 behaviors and38 refusals in the
-existing gate; execution of that block remains pending.
-No extra workflow step or compiler call site is added; the changed source
-requests one full **[sh1-qualify]** run.
+The complete30-production-file source audit covers980 declarations,
+382recursive declarations,539direct self references and109 parenthesized self
+calls. This is the only mismatch; there are no bare/undersaturated self references
+or other grouped overapplications. The correction leaves the previously reviewed
+Array.foldl pattern/body and all hosts/fixtures unchanged. Exact source transport
+composes the original46-code-file inventory with e91's e3ed→a4d pattern repair
+and the current a4d→b4af callback-local repair.
 
-The [cross-family review](CROSS_FAMILY_INTERFACE_REVIEW.md) supplies all
-ten semantic interfaces; the [source/runtime review](SOURCE_RUNTIME_INTERFACE_REVIEW.md)
-supplies all11 S0/S1/S2 mappings. Both are independently CLEAR in the stated
-domain. The flat-pattern case argument transports the affected ER/GROUP/fold
-interface without rewriting historical proof or execution pins.
-Final33-row/27-stage disposition still requires exact qualification and
-independent provider evidence. Strict/global/semantic/provider flags remain
-false. No machine-checked theorem, allocation/timing equality or speed gain
-is claimed by this source correction. No cold/native-only repeat is required.
+The [final33-row/27-stage disposition map](reviewed-candidates/final-disposition-map.json)
+and independent correspondence/stage/activation reviews are attached. All source,
+argument and receipt mappings are CLEAR in the stated domain; no new source or
+gate requirement emerged. ER-06's stale empty-layout domain sentence will be
+updated with final disposition. The existing N/GROUP/ER/EV/TS, ten-interface
+cross-family and11-stage source/runtime arguments remain frozen and transported.
+All row flags remain open pending exact successful qualification and provider.
 
-Discover the enclosing commit's actual source head and Actions run. Continue through native/N1/C1/C2/C3, exact products/native parity, independent provider, final evidence/ledger/AI state, and the already-authorized strict merge once all mandatory requirements pass. Selected R, new-only grammar, TS7-only tooling and the passed frozen cold recipe remain unchanged.
+The current source requests one full **[sh1-qualify]** run. No new workflow step,
+compiler call site, native-only checkpoint or cold rerun is added. Replay fixes
+have passed; the separate3-entry/12-observation optimized-tail block still awaits
+execution alongside61 old IR behavior observations and38 refusals. This source
+correction claims no measured speed/heap result or machine-checked theorem.
+Keep produced receipt nonclaims and hashed runtime-contract/psconfig bytes
+unchanged; compose justified release claims externally. R stays selected,
+authoritative .lean/new-only ps-0.9-r3/TS7-only tooling remain.
+
+Discover the enclosing commit's actual source head and Actions run. Continue through exact native/N1/C1/C2/C3 and provider receipts, the33/27final disposition, and the already-authorized strict merge only when all mandatory requirements pass.
 
 ## Goal and scope
 

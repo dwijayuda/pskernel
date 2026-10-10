@@ -1438,6 +1438,133 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 11,
+      "sourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "runId": 38006688264,
+      "workflowId": 378853677,
+      "compilerJobId": 114076987396,
+      "providerJobId": 114077308038,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38006688264",
+      "status": "failure",
+      "failedStep": {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24,
+        "started_at": "2026-10-09T23:55:56Z",
+        "completed_at": "2026-10-09T23:55:58Z",
+        "timestamp": "2026-10-09T23:55:58.5812764Z",
+        "moduleName": "Ps.Erasure.Expr",
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "owner": "psEraseRuntimeExprWithFuelWorker",
+        "detail": "structuralRecursionArity",
+        "sourceIndex": 76,
+        "phase": "stableDeclaration",
+        "span": {
+          "start": {
+            "byteOffset": 116469,
+            "line": 2311,
+            "column": 1
+          },
+          "stop": {
+            "byteOffset": 137615,
+            "line": 2710,
+            "column": 41
+          }
+        },
+        "classification": "owned-source-recursive-call-spine-exceeds-explicit-declaration-prefix",
+        "exitCode": 1
+      },
+      "nativeCompilerBuilt": true,
+      "nativeRegressionsPassed": true,
+      "nativeCheckedSeedBuilt": true,
+      "sourceGrammarImportsAndWorkspacePassed": true,
+      "replayCliPassed": true,
+      "authenticatedRMigrationPreflightPassed": true,
+      "priorNestedPatternRefusalCleared": true,
+      "sourceReplay": "not-started",
+      "currentGenerationCandidate": "native-owned-source-elaboration-refused",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "positiveFlatTailExecution": "not-reached-before-owned-source-elaboration-refusal",
+      "failureEvidence": {
+        "path": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/source-elaboration-failure.json",
+        "blob": "315c45511a8272a08a8c5aceacc834d313336767",
+        "sha256": "6f8baff27517a4f018767e28a58ba114d1b31bc23c1375e680eccb72042ccef8",
+        "bytes": 14964
+      },
+      "log": {
+        "path": "attempts/9640e4ba5c89ebfb3dd0adf6783530212ae27409/job.log",
+        "blob": "b3001bbf41d8d846f4e77a3bd764494b994c9557",
+        "sha256": "8da67cd469d51d3666580f485ea60c2c0c9c5797eeda5505b269453c56b9fe0c",
+        "bytes": 257687
+      },
+      "artifacts": [
+        {
+          "id": 11651676864,
+          "name": "psc0-sh1-ts7.0.2-9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+          "bytes": 464191,
+          "digest": "sha256:3c138eb9b66f63d9b8825abbb8e5c6c9bdfb38fe6fa5a28e523fcebe05c53969",
+          "createdAt": "2026-10-09T23:56:01Z",
+          "expiresAt": "2026-11-08T23:56:00Z",
+          "sourceCommit": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+          "runId": 38006688264,
+          "uploadFileCountFromLog": 44,
+          "archiveInspected": false
+        }
+      ],
+      "resourcePreflight": {
+        "timestamp": "2026-10-09T23:55:07.8959315Z",
+        "logLine": 273,
+        "passed": true,
+        "policyId": "psc0-sh1-generated-qualification-resources/1",
+        "node": "v22.23.3",
+        "oldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "effectiveAvailableBytes": 15351889920,
+        "minimumAvailableBytes": 12884901888
+      },
+      "typescriptProfile": {
+        "version": "7.0.2",
+        "status": "passed-step8"
+      },
+      "passedEvidence": {
+        "replay": {
+          "timestamp": "2026-10-09T23:55:53.7209889Z",
+          "logLine": 2129,
+          "marker": "PSC2_SELFHOST_REPLAY_RUNTIME",
+          "text": "PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)",
+          "scriptBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+          "scope": "Existing six-fixture replay runtime gate passed at this source, including the recorded 20000-step behavior; this is separate from N1 and full current-source qualification."
+        },
+        "authenticatedReference": {
+          "timestamp": "2026-10-09T23:55:56.1837484Z",
+          "logLine": 2188,
+          "recipeSourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+          "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+          "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+          "cases": 87,
+          "signatureTypeAnnotations": 12,
+          "typedGenericPartialWrappers": 12,
+          "passed": true,
+          "currentSourceQualifiedByThisCheck": false,
+          "fullPayloadLocation": "Exact JSON is preserved at the PSC0_SH1_WORKER_HARNESS_REFERENCE line in the complete log."
+        }
+      },
+      "coldRecovery": {
+        "runId": 38006688280,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "The flat-pattern parser refusal is cleared. The worker's four flattened self arguments exceed its two explicit header parameters. The observed refusal happens in source elaboration, before N1 generation or conformance; C1/C2/C3/provider are skipped. No memory failure or automatic retry.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1445,12 +1572,12 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "enclosing-flat-pattern-source-completion-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-    "priorCompilerSource": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
-    "priorAttemptRunId": 38004581681,
-    "manifest": "reviewed-candidates/foldl-flat-pattern-repair.json",
-    "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+    "status": "enclosing-callback-local-self-prefix-correction-requests-full-qualification-awaiting-run-discovery",
+    "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+    "priorCompilerSource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+    "priorAttemptRunId": 38006688264,
+    "manifest": "reviewed-candidates/worker-self-call-prefix-repair.json",
+    "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
     "sourceFiles": 1,
     "productionLeanChanges": 1,
     "cumulativeReviewedSourceFiles": 46,
@@ -1499,5 +1626,5 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-09T23:52:00Z"
+  "updatedAtUtc": "2026-10-10T00:03:34Z"
 }

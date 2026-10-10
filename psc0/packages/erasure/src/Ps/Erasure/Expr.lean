@@ -2317,8 +2317,9 @@ def psEraseRuntimeExprWithFuelWorker
     fun (scope : PsErasureScope) (expr : PsExpr) =>
       let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=
         fun (nextScope : PsErasureScope) (value : PsExpr) =>
-          psEraseRuntimeExprWithFuelWorker environment remaining
-            (psErasureNestedRuntimeScope nextScope) value;
+          let eraseAtRemainingFuel : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr :=
+            psEraseRuntimeExprWithFuelWorker environment remaining;
+          eraseAtRemainingFuel (psErasureNestedRuntimeScope nextScope) value;
       match expr with
       | .lit literal =>
           match literal with

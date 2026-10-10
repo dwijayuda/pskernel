@@ -1,0 +1,852 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-stage-disposition-and-release-activation-review",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/stage-activation-review.json",
+  "repository": "dwijayuda/pskernel",
+  "reviewer": "stage_activation_review",
+  "status": "bounded-review-CLEAR; exact final execution and root disposition pending",
+  "observedSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+  "verdict": "The proposed 27 stage dispositions and 25 receipt groups have complete references and correctly separate general source arguments, finite implementation qualification, independent provider decisions and activation. No additional source proof prerequisite, new capability or extra compiler/test/cold gate was identified within the declared strict PSC0-SH/1 scope. Actual final-source execution, exact receipt authentication and explicit 33+27 disposition remain required; this review closes no row.",
+  "inputs": [
+    {
+      "role": "final-disposition-map",
+      "blob": "697c94b2722a6191537b714f71f629713637b30a",
+      "sha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+      "utf8Bytes": 191711
+    },
+    {
+      "role": "final-disposition-map-manifest",
+      "blob": "419564764abc492816833a643af40b027b0fd897",
+      "sha256": "b2e001be62f5e0ef38ff006c0040b1257b003e54cbb5cfcb483305d8e88dcc5f",
+      "utf8Bytes": 9539
+    },
+    {
+      "role": "stage-ledger",
+      "blob": "de7867dd7bdb299c402bf336ec9d2b488a57df8b",
+      "sha256": "0a8447be8091bb70fcc97f765710431b4ae805263230e6d30f5f92207bc167fd",
+      "rowArrayJsonSha256": "9bab4ee9cdf1dc7305402ebe09d3b1e0375d0992227ebae4999e79820922eea5",
+      "rows": 27
+    },
+    {
+      "role": "source-runtime-interface-review",
+      "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+      "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+      "utf8Bytes": 22429,
+      "reviewSourceRef": "45d314b970d9d76fce9387f6bc8108fb9fab611c"
+    },
+    {
+      "role": "flat-pattern-source-transport",
+      "blob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88",
+      "utf8Bytes": 48534,
+      "candidateBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "role": "current-binder",
+      "blob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+      "sha256": "c522c41263e7931b83777242d77c2e7f355ce82832e72f152879645f96f31326"
+    },
+    {
+      "role": "current-qualification-runner",
+      "blob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+      "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193"
+    },
+    {
+      "role": "provider-admissions-runner",
+      "blob": "750fe59f317056bfe76b2c77ffd7d09a82aac342",
+      "sha256": "608dd25cc513d9160df05424218c99d02f0c0d681a6b3f137b645e6893fabde6"
+    },
+    {
+      "role": "immutable-runtime-contract",
+      "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+      "sha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89"
+    },
+    {
+      "role": "immutable-psconfig",
+      "blob": "25ce42bd1c585d926dee097575fd337274f619e5",
+      "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+    }
+  ],
+  "checks": {
+    "all27StageIdsAndObligationStringsMatchCurrentLedger": true,
+    "all27StageJsonPointersAndStrictDischargedPointersMatch": true,
+    "everyStagePaperReferenceResolves": true,
+    "everyStageCorrespondenceReferenceResolves": true,
+    "everyStageReceiptReferenceResolves": true,
+    "all25ReceiptGroupsRead": true,
+    "sourceRuntimeSourceIndexEntriesCompared": 33,
+    "sourceRuntimeIndexAt00e": "Exactly 30 of 33 source/proof/document pins remain equal. QUALIFY changes from e6fe221 to 562f8c under the seven-host manifest 2d0a961; only the two ledger metadata blobs are the other differences. The final Expr change is separately transported by e91, leaving the other indexed production sources unchanged.",
+    "sourceRuntimeExtraStageRows": 11,
+    "sourcePatternTransport": "Exhaustive List-length cases in e91 preserve the original selected-type work, early shape errors, unchanged 2801-byte success body, callback order, capture and original whole typeArguments list. It changes authored implementation spelling only and supplies the S1.syntax source-compatibility correction without enabling general nested patterns. This review consumes root/runtime's exact candidate reconstruction rather than claiming another compiler execution.",
+    "currentBinderAndQualificationSourceRead": true,
+    "providerSourceReadInFull": true,
+    "immutableContractAndConfigHashVerified": true
+  },
+  "stages": [
+    {
+      "id": "S0.enabled",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME"
+      ],
+      "correspondenceRows": [],
+      "receiptGroups": [
+        "runtime",
+        "ir",
+        "strict-binder"
+      ],
+      "sourceArgument": "Finite enabled inventory is source-reviewed against exact IR signatures; retain the hashed contract unchanged. Final disposition records that digest externally, not by rewriting its per-compilation nonclaims."
+    },
+    {
+      "id": "S1.imports",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "ER"
+      ],
+      "correspondenceRows": [
+        "ER-01"
+      ],
+      "receiptGroups": [
+        "source",
+        "atomic",
+        "grammar",
+        "origins"
+      ],
+      "sourceArgument": "Actual parsed segment identities, earlier-only imports and complete ordered module traversal are reviewed; exact closure/source receipts remain required."
+    },
+    {
+      "id": "S1.syntax",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "CROSS"
+      ],
+      "correspondenceRows": [
+        "N-01",
+        "N-02",
+        "ER-02",
+        "ER-03"
+      ],
+      "receiptGroups": [
+        "source",
+        "grammar",
+        "capabilities",
+        "host-boundary"
+      ],
+      "sourceArgument": "All source declaration/term cases and explicit type/signature rules are reviewed on native-compatible authored syntax; current owned-parser source compatibility must pass after the pending narrow Expr source-shape correction."
+    },
+    {
+      "id": "S1.do",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME"
+      ],
+      "correspondenceRows": [],
+      "receiptGroups": [
+        "source",
+        "grammar"
+      ],
+      "sourceArgument": "Source do refusal is origin-sensitive and complete over reached term children, without rejecting ordinary helper/field spellings."
+    },
+    {
+      "id": "S1.resource",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "GROUP"
+      ],
+      "correspondenceRows": [],
+      "receiptGroups": [
+        "source",
+        "resource",
+        "generations"
+      ],
+      "sourceArgument": "Declared independent budgets and exhaustion refusal are source-reviewed. Exact measured policy receipts remain required; finite pure placement proves semantic transport, not memory/time equivalence or sufficient headroom."
+    },
+    {
+      "id": "S1.atomic",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "ER"
+      ],
+      "correspondenceRows": [
+        "ER-01",
+        "ER-09",
+        "TS-01",
+        "TS-08"
+      ],
+      "receiptGroups": [
+        "atomic",
+        "origins",
+        "strict-binder"
+      ],
+      "sourceArgument": "The current raw-source operation produces and consumes its exact prepared/original-IR objects once. C1 construction by selected R is explicitly weaker; current C2/C3 and native paths require complete atomic evidence."
+    },
+    {
+      "id": "S1.host",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "GROUP"
+      ],
+      "correspondenceRows": [
+        "ER-04",
+        "TS-09"
+      ],
+      "receiptGroups": [
+        "host-boundary",
+        "atomic",
+        "generations"
+      ],
+      "sourceArgument": "Ingress snapshots and exact selected-R identity are reviewed. Native/current unary returned-value invocation and historical R flattened reference calls have distinct fixed producer contracts; no generalized compatibility or fn.length retry is admitted."
+    },
+    {
+      "id": "S2.carrier",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "ER"
+      ],
+      "correspondenceRows": [
+        "ER-02",
+        "EV-01",
+        "TS-02",
+        "TS-09"
+      ],
+      "receiptGroups": [
+        "runtime",
+        "source",
+        "ir"
+      ],
+      "sourceArgument": "Bounded scalar/brand/list/cycle/name validation and canonical immutable values are established on the declared domain; arbitrary foreign objects, sparse arrays/accessors/cyclic values are not admitted."
+    },
+    {
+      "id": "S2.operations",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "EV",
+        "TS"
+      ],
+      "correspondenceRows": [
+        "EV-03",
+        "TS-03",
+        "TS-04"
+      ],
+      "receiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "strict-binder"
+      ],
+      "sourceArgument": "General operation/callback laws are supplied and bound to unchanged current templates. Await the exact 45-operation native/generated conformance receipts;186 observations remain finite."
+    },
+    {
+      "id": "S2.bounds",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "ER",
+        "EV"
+      ],
+      "correspondenceRows": [
+        "ER-03",
+        "EV-03"
+      ],
+      "receiptGroups": [
+        "runtime",
+        "generic",
+        "strict-binder"
+      ],
+      "sourceArgument": "The genuine source bounds proof plus actual omitted slots and retained operand laws establish the rule. Defensive guards diagnose invalid host inputs but never reconstruct the erased proof."
+    },
+    {
+      "id": "S2.text",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "SOURCE_RUNTIME",
+        "EV"
+      ],
+      "correspondenceRows": [
+        "EV-01",
+        "EV-03",
+        "TS-09"
+      ],
+      "receiptGroups": [
+        "runtime",
+        "grammar",
+        "strict-binder"
+      ],
+      "sourceArgument": "Pinned scalar widths, raw positions and finite cache/cursor behavior are source-reviewed. No normalization/grapheme/allocation-schedule equivalence is claimed."
+    },
+    {
+      "id": "S3.origin",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "ER",
+        "N"
+      ],
+      "correspondenceRows": [
+        "ER-01",
+        "N-01",
+        "N-04"
+      ],
+      "receiptGroups": [
+        "origins",
+        "capabilities",
+        "source-recursion",
+        "migration"
+      ],
+      "sourceArgument": "Actual batches, source ordinals, roles and normalization plans are retained and the general association is supplied; native/C2/C3 and capability origin parity receipts bind actual productions."
+    },
+    {
+      "id": "S3.binders",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "ER",
+        "GROUP"
+      ],
+      "correspondenceRows": [
+        "ER-01",
+        "ER-02",
+        "ER-03",
+        "ER-04",
+        "ER-09"
+      ],
+      "receiptGroups": [
+        "atomic",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "sourceArgument": "Mode-indexed actual scope, omission and entry-slot arguments replace the unspecified open binder relation. Mathematical source association does not add a serialized certificate requirement."
+    },
+    {
+      "id": "S3.layout",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "ER",
+        "TS"
+      ],
+      "correspondenceRows": [
+        "ER-05",
+        "ER-06",
+        "ER-08",
+        "EV-08",
+        "EV-09",
+        "EV-10",
+        "EV-11",
+        "TS-02"
+      ],
+      "receiptGroups": [
+        "generic-structures",
+        "source-empty",
+        "ir-empty",
+        "native-ir"
+      ],
+      "sourceArgument": "Both recursive-record and field-only routes, empty inductives and inhabited zero-field records are covered by actual metadata rules; all matching compile/artifact receipts are required."
+    },
+    {
+      "id": "S3.abi",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "GROUP",
+        "ER"
+      ],
+      "correspondenceRows": [
+        "ER-02",
+        "ER-04",
+        "N-04",
+        "EV-04",
+        "EV-05"
+      ],
+      "receiptGroups": [
+        "generic",
+        "migration",
+        "host-boundary",
+        "generations"
+      ],
+      "sourceArgument": "Canonical unary function values coexist with flat actual entry prefixes and exact generic order. Physical Unit transport applies only to logical generic-zero-runtime definitions, not constructors or ordinary initialized values."
+    },
+    {
+      "id": "S4.normalization",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "N",
+        "ER",
+        "CROSS"
+      ],
+      "correspondenceRows": [
+        "N-01",
+        "N-02",
+        "N-03",
+        "N-04",
+        "ER-07"
+      ],
+      "receiptGroups": [
+        "capabilities",
+        "migration",
+        "generic-recursion",
+        "source-recursion",
+        "origins"
+      ],
+      "sourceArgument": "Legal telescope/identity/worker/readiness/public relation composes with the actual corrected producer. Direct structural minimum is enforced; unproved descendant aliases are not advertised as mandatory supported execution."
+    },
+    {
+      "id": "S4.ir",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "COMMON",
+        "EV",
+        "CROSS"
+      ],
+      "correspondenceRows": [
+        "EV-01",
+        "EV-02",
+        "EV-03",
+        "EV-04",
+        "EV-05",
+        "EV-06",
+        "EV-07",
+        "EV-08",
+        "EV-09",
+        "EV-10",
+        "EV-11"
+      ],
+      "receiptGroups": [
+        "ir",
+        "atomic",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "sourceArgument": "All eleven original-IR constructors have the completed structural/index argument with actual erasure producers and TS realization; full IR typing is supporting admission, not that proof."
+    },
+    {
+      "id": "S4.errors",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "COMMON",
+        "EV",
+        "ER",
+        "TS"
+      ],
+      "correspondenceRows": [
+        "ER-03",
+        "ER-07",
+        "EV-03",
+        "EV-05",
+        "EV-06",
+        "EV-07",
+        "EV-11",
+        "TS-04"
+      ],
+      "receiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "generic-recursion",
+        "ir-empty"
+      ],
+      "sourceArgument": "Ordered demand, short-circuit control and outward abort are related at the returned residual. Except.error is data; foreign first-fault probes are diagnostics; allocation/stack/time failures remain outside the semantic error alphabet."
+    },
+    {
+      "id": "S4.capture",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "GROUP",
+        "ER",
+        "EV",
+        "TS"
+      ],
+      "correspondenceRows": [
+        "ER-04",
+        "ER-09",
+        "EV-04",
+        "EV-05",
+        "EV-06",
+        "TS-04",
+        "TS-05"
+      ],
+      "receiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "host-boundary",
+        "optimized-tail"
+      ],
+      "sourceArgument": "Ordered supplied captures, returned canonical functions, old-scope lets and reentrant callbacks share the corrected lower-index residual relation; arbitrary result eta is inactive."
+    },
+    {
+      "id": "S5.initialization",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "ER",
+        "TS",
+        "GROUP"
+      ],
+      "correspondenceRows": [
+        "ER-01",
+        "TS-08"
+      ],
+      "receiptGroups": [
+        "target",
+        "atomic",
+        "generic",
+        "generations"
+      ],
+      "sourceArgument": "Actual complete target earlier/self checks and ordered module prefix establish initialization and registration; exact current compiled artifacts remain required."
+    },
+    {
+      "id": "S5.names",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "ER",
+        "TS",
+        "CROSS"
+      ],
+      "correspondenceRows": [
+        "ER-09",
+        "N-01",
+        "TS-01"
+      ],
+      "receiptGroups": [
+        "target",
+        "name-index",
+        "origins",
+        "grammar"
+      ],
+      "sourceArgument": "Source/Core identities, finite index/freshness and target namespace checks have actual producer proofs. Historical/native-valid source spelling boundaries and closed-local alpha transports are explicit."
+    },
+    {
+      "id": "S5.generator",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "EV",
+        "TS",
+        "CROSS"
+      ],
+      "correspondenceRows": [
+        "EV-04",
+        "EV-05",
+        "TS-03",
+        "TS-04"
+      ],
+      "receiptGroups": [
+        "runtime-evaluation",
+        "ir",
+        "generic",
+        "generations"
+      ],
+      "sourceArgument": "Registered, direct and reentrant runner paths preserve results/captures/abort and finite progress without same-index cycles or callback budget reset."
+    },
+    {
+      "id": "S5.eta",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "GROUP",
+        "ER",
+        "TS"
+      ],
+      "correspondenceRows": [
+        "ER-04",
+        "TS-05"
+      ],
+      "receiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "target",
+        "ir"
+      ],
+      "sourceArgument": "Use the three separated boundaries: canonical partial completion, immediate raw entry-prefix control, and restricted backend eta. No active arbitrary computed-result eta argument remains."
+    },
+    {
+      "id": "S5.loops",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "TS",
+        "CROSS"
+      ],
+      "correspondenceRows": [
+        "TS-06",
+        "TS-07"
+      ],
+      "receiptGroups": [
+        "optimized-tail",
+        "ir",
+        "capabilities",
+        "runtime-evaluation"
+      ],
+      "sourceArgument": "Count proper-child progress and tail simultaneous updates have general rules. Direct self accounts for1IRcall; alias-mediated transition accounts for2 with intermediate cutoff. Incoming12observations retain positive flat-tail coverage separately from replay general routes."
+    },
+    {
+      "id": "S6.qualification",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "CROSS",
+        "SOURCE_RUNTIME"
+      ],
+      "correspondenceRows": [],
+      "receiptGroups": [
+        "host-boundary",
+        "toolchain",
+        "resource",
+        "generations",
+        "strict-binder"
+      ],
+      "sourceArgument": "Requires a successful exact final source run with native/N1/C1/C2/C3 and every configured gate, raw-source/product/recipe hashes and final binder. Latest00e run38004581681 failed before N1; no execution qualification can be inferred from completed papers or earlier partial passes."
+    },
+    {
+      "id": "S6.provider",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "CROSS"
+      ],
+      "correspondenceRows": [],
+      "receiptGroups": [
+        "provider"
+      ],
+      "sourceArgument": "Requires the actual frozen provider963030dc decision receipt for exact C2/C3 full-closure, Lean/PS capability and generic-fixture streams after compiler qualification. No other per-compilation object is retroactively provider-checked."
+    },
+    {
+      "id": "S6.activation",
+      "verdict": "CLEAR for mapped prerequisites; final disposition remains conditional",
+      "paperPackets": [
+        "CROSS",
+        "SOURCE_RUNTIME"
+      ],
+      "correspondenceRows": [],
+      "receiptGroups": [
+        "generations",
+        "strict-binder",
+        "provider"
+      ],
+      "sourceArgument": "Root alone may record a complete explicit33+27disposition after exact execution/provider evidence and reviewed source transport. Preserve immutable per-compilation false flags, R selection, new-only grammar and hashed contract/recipe inputs; do not turn finite passes into formal theorem claims."
+    }
+  ],
+  "receiptGroups": [
+    {
+      "id": "generations",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Fixed-point equality, native parity and typed IR are qualification evidence, not a substitute for the reviewed general arguments."
+    },
+    {
+      "id": "strict-binder",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Do not change embedded strictSh1Qualified/semanticContractQualified/providerChecked=false: the binder intentionally requires those per-compilation nonclaims."
+    },
+    {
+      "id": "atomic",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "C1 is built through the authenticated selected-R exception; do not retrospectively call that build a current atomic API operation."
+    },
+    {
+      "id": "origins",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Origins identify the association used by the source proof; they are not a separate expression-preservation certificate."
+    },
+    {
+      "id": "source",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Finite admission/refusal evidence over the implemented domain; does not replace the exhaustive source worklist argument."
+    },
+    {
+      "id": "source-empty",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Empty elimination and zero-field inhabitation remain separate observations. Preserve exact recorded artifact filenames from the subreceipts."
+    },
+    {
+      "id": "source-recursion",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "No blanket nested-match refusal, descendant-alias coverage waiver or arbitrary raw-Core root theorem is inferred."
+    },
+    {
+      "id": "target",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "The target judgment does not by itself reconstruct source binding or implicit-owner provenance."
+    },
+    {
+      "id": "ir",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Do not present the finite accepted IR fixture or61 behavior observations as the eleven-constructor proof."
+    },
+    {
+      "id": "ir-empty",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "General empty-major demand is the Core/IR/JS relation; native empty equivalence has its separately proved closed domain."
+    },
+    {
+      "id": "native-ir",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "The native executable's own assertions/receipt are execution evidence, not a general demand theorem."
+    },
+    {
+      "id": "generic",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Host demand diagnostics do not enable arbitrary source effects. Exact source-domain and entry proof is GROUP/ER."
+    },
+    {
+      "id": "generic-recursion",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "The bounded reference checks those closed total Nat equations; it is not the selective-recursion/callback/divergence adequacy proof."
+    },
+    {
+      "id": "generic-structures",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Lack of finite inhabitants does not waive compilation. Zero runtime invocations is deliberate evidence scope, not a preservation proof by vacuity."
+    },
+    {
+      "id": "runtime",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "The45laws and callback schemas come from the reviewed arguments. Keep formalPreservationProven and sourceProofProvenanceReconstructed=false in the receipts."
+    },
+    {
+      "id": "runtime-evaluation",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Throwing/callback probes are explicitly diagnostic; they do not become inhabitants of the closed source-origin native domain."
+    },
+    {
+      "id": "capabilities",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Source-specific finite capability execution supplements N/ER/EV/TS rule arguments."
+    },
+    {
+      "id": "migration",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Reference/current explicit producer groups remain separate. The finite12 worker corpus does not replace normalization preservation."
+    },
+    {
+      "id": "optimized-tail",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "The new block preserves positive optimizer evidence while canonical returned-function replay entries legitimately take the general route. It does not alter TS-TAIL's direct1/alias2 logical-call proof."
+    },
+    {
+      "id": "grammar",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Native-compatible identifier restrictions and owned-parser overacceptance are not upgraded to general syntax equivalence; latest fold pattern source-shape failure must be corrected and this gate rerun."
+    },
+    {
+      "id": "host-boundary",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "The replay test and checked-name-index test are workflow-log gates; do not fabricate dedicated receipt files. Selected-R convention support is specific to the authenticated producer, not an old-language compatibility API."
+    },
+    {
+      "id": "name-index",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "This test writes no required standalone receipt. Its finite cases supplement INDEX/FRESH/EXEC-SCOPE, not prove them."
+    },
+    {
+      "id": "resource",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Resource evidence measures this run; it does not enlarge the semantic error alphabet or promise universal resource use."
+    },
+    {
+      "id": "toolchain",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Trusted TS/native/JS semantics remain explicit. Do not claim a theorem about the implementation of TypeScript itself."
+    },
+    {
+      "id": "provider",
+      "verdict": "CLEAR for scoped artifact/selector plan",
+      "limit": "Independent exact-stream acceptance is a separate post-compiler claim. It does not assert every source/runtime/IR example was checked by the provider or that emission was gated by it."
+    }
+  ],
+  "receiptCorrectionsAndBoundaries": [
+    "Use strict-enforcement-evidence.json /generations/0..3, in N1,C1,C2,C3 order; generationEvidence is only a local implementation variable.",
+    "The optimized tail block is /generations/i/emptyIr/optimizedTail and the corresponding IR conformance receipt's /optimizedTail. It is 3 flat entries and 12 observations, separate from the existing 61 behavior observations and 38 IR refusals.",
+    "Actual full source conformance is 2 accepted bundles, 38 source refusals and 2 carrier refusals. The earlier 33 refusal count is historical, not the current whole-gate count.",
+    "Native-candidate writes no resource-policy-native-candidate.json. Authenticate the actual preflight/candidate/fixed-point policy receipts and generation resourceObservation/resourcePolicy.",
+    "N1 performs full compiler IR checking with the native checker. It does not claim that the generated N1 compiler checks its own full compiler IR; C1 and C2 perform that check on the objects emitted as C2 and C3.",
+    "C1 construction uses the explicit authenticated selected-R exception, while C1's current generated compiler runs the strict conformance corpus. Native-N1/C1-produces-C2/C2-produces-C3 are the three current atomic full-closure operations.",
+    "The name-index and replay CLI checks are workflow-log gates. Do not invent standalone receipt files; bind the final job log/run/workflow/head and actual step outcome.",
+    "Native/C2/C3 TypeScript and JavaScript parity plus C2/C3 compared artifact-tuple equality are required. N1 receipt itself records only TS/JS compiler products; canonical grammar correspondence is separately bound by grammar-closure.json.",
+    "Do not equate zero runtime invocations for the recursive-record compile-only fixture with waived compilation or a universal preservation proof."
+  ],
+  "releaseRecordGuidance": {
+    "pathSuggestion": "psc0/docs/selfhost-language/strict/release-qualification.json",
+    "role": "Separate externally composed qualification against exact immutable products, contract and source; it is not a replacement for or edit to compiler-produced evidence.",
+    "identityFields": [
+      "qualifiedSourceRef and full ordered raw source closure digest",
+      "current implementation/fixture/host manifest chain including 2d0a961 and e91",
+      "exact recipe object/digest, pinned Lean source/version, Node and TypeScript profile identity",
+      "workflow run, attempt, compiler/provider job IDs and successful conclusions",
+      "all actual N1/C1/C2/C3 receipt file digests and executing/output compiler identities",
+      "qualification.json exact file digest and strict-enforcement-evidence.json exact file digest",
+      "N1 TS/JS and each C1/C2/C3 artifact tuple, including canonical source and admissions as applicable",
+      "all eight frozen argument/review packets with current source transport and the explicit 33+27 disposition records",
+      "kernel-admissions.json exact file digest/envelope, provider identity and every actual unique stream decision with labels",
+      "immutable runtime contract and psconfig digests, unchanged selected R identity and recovery evidence"
+    ],
+    "positiveClaimRule": "Only after complete authenticated execution/provider evidence and actual root disposition may active release/ledger/proposal fields record compilerQualified, sourceCheckpointQualified, semanticContractQualified or strictSh1Qualified as true for this declared profile/domain. Record 33 correspondence rows and 27 stage obligations with explicit argument and receipt references; S6.activation summarizes the already completed prerequisites rather than using its own asserted flag as evidence.",
+    "proposedActiveLedgerShape": "For each stage row, preserve id/stage/obligation; update status and current explanatory evidence to the reviewed argument plus exact final receipt selectors; set strictDischarged only when its mapped prerequisites are actually met. Retain original paper/source review pins as history and associate current transport separately.",
+    "proposalMaintenance": [
+      "Update qualification.strictSh1.activeImplementation.strictSh1Qualified and strictEnforcementCheckpoint from final explicit disposition.",
+      "Update active pending/open prose, including S3/S4/S5 implementationUpdate fields and final counts; retain historical failed attempts and their false flags.",
+      "Remove or revise the active nonclaim of absent strict runtime enforcement once explicit strict-path enforcement is qualified, while preserving unrestricted PSC1/Lean, full Standard/PSCV, universal platform, measured speed and kernel/metatheory nonclaims.",
+      "Do not rewrite old seed/checkpoint records or frozen review packets merely to make all statuses read current."
+    ],
+    "activation": {
+      "enforcementInstalledMeaning": "May be true for the explicit psCompilerSh1TypeScriptSources entry and current strict qualification/development path once that scope is precisely stated.",
+      "selectedByPsconfig": false,
+      "selectedByPsconfigReason": "The immutable psconfig acceptedLanguageProfile remains PSC2-bootstrap and implementationProfile remains PSC1. Generic compiler APIs are not thereby strict SH/1 entry points.",
+      "seedSelection": "R remains selected; retain a newly qualified candidate without promoting/selecting it.",
+      "currentLanguage": "Authoritative .lean; new-only ps-0.9-r3 bounded selfhost syntax; TypeScript 7.0.2 current toolchain. This is not unrestricted PSC1/Lean or full Standard/PSCV."
+    }
+  },
+  "providerBoundary": {
+    "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "labeledInputs": 8,
+    "labels": "C2 and C3 each supply full compiler source, raw Lean capabilities, raw PS capabilities and raw recursive-generic fixture source.",
+    "uniqueCalls": "Read actual returned streams; exact matching bytes plus SHA256 deduplicate labels and may yield fewer than 8 checks.",
+    "success": "receipt.accepted must be true and every stream.result.accepted true, with each stream digest matching its actual generation/capability/generic admissions digest.",
+    "qualificationFileHash": "The provider runner copies qualification.sourceRef, sourceClosureSha256 and c2 compiler hash and authenticates input products. It does not put qualification.json's file hash in kernel-admissions.json. The external release record must bind both exact file hashes and their matching identities, rather than claim an existing provider-to-qualification file-hash field.",
+    "noRetroactiveClaims": "Do not label N1, every runtime or arbitrary IR example provider-checked. emissionWasGatedByThisCheck remains false."
+  },
+  "protectedBytesAndClaims": {
+    "neverRewriteProducedReceipts": true,
+    "unchangedRecipeInputs": [
+      {
+        "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+        "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+        "sha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89"
+      },
+      {
+        "path": "psc0/psconfig.json",
+        "blob": "25ce42bd1c585d926dee097575fd337274f619e5",
+        "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+      }
+    ],
+    "perCompilationFlagsToPreserve": [
+      "strictSh1Qualified:false",
+      "semanticContractQualified:false",
+      "providerChecked:false",
+      "sourceOrigins.semanticCorrespondenceDischarged:false",
+      "formalPreservationProven:false",
+      "sourceProofProvenanceReconstructed:false",
+      "exhaustiveForAllInputs:false",
+      "arbitraryTypedIrIsStrictSource:false",
+      "semanticPreservationProven:false"
+    ],
+    "releaseFormalPreservationProven": false,
+    "noMachineCheckedCompilerWideTheorem": true,
+    "semanticPremises": "Well-typed source/Core, canonical immutable runtime values and source-owned functions, genuine source proof/primitive premises, pinned Lean/TS/Node ordinary semantics and successful representable allocations. Foreign malformed callbacks/objects, capacity/timing/stack equality and allocation failure correspondence remain outside the claim."
+  },
+  "outstanding": [
+    "Integrate and authenticate the final e91 source-pattern correction at the actual next source head.",
+    "Observe the complete final configured compiler qualification and independent provider success; this review has not observed them.",
+    "Authenticate and retain exact final artifact/receipt evidence and bind identities across compiler and provider outputs.",
+    "Root records explicit 33+27 disposition and scoped release activation; do not close rows solely because this mapping is complete."
+  ],
+  "changes": {
+    "sourceFiles": 0,
+    "tests": 0,
+    "compilerInvocations": 0,
+    "workflows": 0,
+    "ledgerRowsClosed": 0,
+    "refs": 0
+  },
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "formalPreservationProven": false
+  },
+  "reviewMethod": "GitHub immutable blob/tree reads and pure in-memory JSON/text/hash verification only. Root owns source publication, execution disposition and final merge."
+}

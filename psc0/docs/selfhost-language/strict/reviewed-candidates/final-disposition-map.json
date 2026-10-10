@@ -1,0 +1,5041 @@
+{
+  "schemaVersion": 1,
+  "kind": "proposed-final-disposition-map-not-a-ledger-update",
+  "repository": "dwijayuda/pskernel",
+  "proposedPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-disposition-map.json",
+  "scope": "Read-only mapping of the already reviewed paper arguments and existing qualification artifacts to33 correspondence rows and27 stage obligations. No proof/source/test/workflow/obligation changes and no execution claim.",
+  "status": "mapping-ready; proposed Expra4d296 transport manifest and exact qualification/provider receipts pending",
+  "inputs": {
+    "currentSourceRef": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "productionSourceAnchor": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+    "productionPsc0Tree": "b45e8d0af4785d8fd1b443b58e9a228dd82161e9",
+    "ledgers": [
+      {
+        "id": "correspondence",
+        "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+        "blob": "8a33f7d27760aea546041cf8df3907532b458696",
+        "sha256": "babb23499e668fa572f327b0d47e125be09d3afb7543be46ed701ed7cee7e7e7",
+        "previousBlob": "4e2d5ed4dc75ddf705b86bc133ecbd99d934ce6a",
+        "parsedRowArrayExactEqualityToPriorCheckpoint": true
+      },
+      {
+        "id": "stage",
+        "path": "psc0/docs/selfhost-language/strict/obligations.json",
+        "blob": "de7867dd7bdb299c402bf336ec9d2b488a57df8b",
+        "sha256": "0a8447be8091bb70fcc97f765710431b4ae805263230e6d30f5f92207bc167fd",
+        "previousBlob": "33991ff64f68590d903bc03cdc281179f89b1327",
+        "parsedRowArrayExactEqualityToPriorCheckpoint": true
+      }
+    ],
+    "paperPackets": [
+      {
+        "id": "COMMON",
+        "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+        "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+        "sha256": "852b55f66b9fc2b387cc88d9999c781f70bd65e6f6d524ca157aee0391fa8c90",
+        "manifestBlob": "09c621ccba856c8906f24dcba5c9104fdfd08014"
+      },
+      {
+        "id": "N",
+        "path": "psc0/docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md",
+        "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+        "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+        "manifestBlob": "0b0e21e4c8b710aeee623c8a92b567e46d2d9bbc"
+      },
+      {
+        "id": "EV",
+        "path": "psc0/docs/selfhost-language/strict/EV_RULE_ARGUMENTS.md",
+        "blob": "7e90465301005a395a871a0563b19c164dcda750",
+        "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+        "manifestBlob": "9f7d2bfe1161d23b8a3ee232f7e3845a47291fca"
+      },
+      {
+        "id": "TS",
+        "path": "psc0/docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md",
+        "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+        "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+        "manifestBlob": "833ec6592774e2c002701959614abe47213b3021"
+      },
+      {
+        "id": "GROUP",
+        "path": "psc0/docs/selfhost-language/strict/CANONICAL_FUNCTION_ARGUMENTS.md",
+        "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+        "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+        "manifestBlob": "30b8328b7e4158cd7279239dc34a4813240916d7"
+      },
+      {
+        "id": "ER",
+        "path": "psc0/docs/selfhost-language/strict/ERASURE_ARGUMENTS.md",
+        "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+        "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+        "manifestBlob": "22cc9d4721321eeac34979394a09fb5447524891"
+      },
+      {
+        "id": "CROSS",
+        "path": "psc0/docs/selfhost-language/strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+        "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "sha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+        "manifestBlob": "74d3b5f93f631efb3135728842afdfd6b3ccb3c4"
+      },
+      {
+        "id": "SOURCE_RUNTIME",
+        "path": "psc0/docs/selfhost-language/strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md",
+        "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+        "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+        "manifestBlob": "81493683072c6e47a16b2ab292e496cb67162790"
+      }
+    ],
+    "sourceTransports": [
+      {
+        "blob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+        "role": "reviewed coherent source inventory"
+      },
+      {
+        "blob": "1530f2bec9a7b66bddd317ff94409297c39adaca",
+        "role": "102 finite pure Nat placement movements"
+      },
+      {
+        "blob": "b6407ad9b00b69dbe9f9db99f557793657a96bd1",
+        "role": "three finite lexical List-tail construction movements"
+      },
+      {
+        "blob": "895081aaa285af545c635e7211c51508c81acb93",
+        "role": "root IH registration, complete telescope guard and major refinement"
+      },
+      {
+        "blob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+        "role": "recursive-record lowering actual Expr7498/SR57e route"
+      },
+      {
+        "blob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+        "role": "closed-local native-keyword alpha repair, Basic013239/Expre3ed"
+      },
+      {
+        "blob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
+        "role": "seven host-only exact producer call/positive-tail corrections at00e"
+      }
+    ],
+    "pendingSourceTransport": {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "baseBlob": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "candidateBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+      "manifestBlob": null,
+      "reason": "Root reviewed the equivalent flat-match correction for the owned parser's rejection of the nested two-element List pattern. The length2 success body is unchanged modulo indentation; lengths0/1/>2 retain early unsupportedApplication. This map stages the candidate as proposedFinal, distinct from observed e3ed at current00e. Attach Artifact's final guarded manifest and peer review before final source disposition; no new semantic row is introduced.",
+      "rootSourceSemanticReview": "CLEAR; final peer/manifest attachment pending",
+      "successBody": {
+        "sha256": "d5b48e271188de232c3014a49fdace9a1bddc612e063e35ca41b56da4a797ea8",
+        "bytes": 2801,
+        "transport": "identical after removing only the added8-space indentation"
+      }
+    }
+  },
+  "sharedDisposition": {
+    "paperArguments": "The eight frozen packets supply actual local producer/rule arguments and a reviewed mutual composition on their declared domain. This mapping does not add a theorem or infer proof from its table.",
+    "tenCommonInterfaces": {
+      "O-SUB": [
+        "ER§2/SUBST",
+        "ER§5positiveinference/annotation",
+        "GROUP/U-SUBST",
+        "CROSS§1"
+      ],
+      "O-GHOST": [
+        "ER/TYPE-CARRIER",
+        "ER/GHOST-READ",
+        "SOURCE_RUNTIME/S2.bounds",
+        "CROSS§1"
+      ],
+      "O-SCOPE": [
+        "ER/INDEX/FRESH/EXEC-SCOPE/EMITTED-OCCURRENCE",
+        "TS-NAMES",
+        "CROSS§1"
+      ],
+      "O-LAYOUT": [
+        "ER/STRUCTURE-MAP/DATA-MAP/STRUCTURE-REC",
+        "EV§§9–12",
+        "TS-LAYOUT",
+        "CROSS§1"
+      ],
+      "O-NORMALIZE": [
+        "N§§3–7",
+        "ER/ROOT-PRODUCER/MAJOR-REFINEMENT",
+        "CROSS§5nativeidentifierboundary"
+      ],
+      "O-CORE-DEMAND": [
+        "GROUP§6ordinaryclosure/ENTRY-PI",
+        "ER§§6,10–11designatedoperation/generatedrecursor",
+        "N/readiness",
+        "CROSS§1"
+      ],
+      "O-GROUP": [
+        "GROUP/ENTRY-PREFIX/ENTRY-CALL/LAMBDA-ADMIN/GHOST-UNIT/SPECIAL-BOUNDARY/FOLD-BRIDGE/ENTRY-PI",
+        "ER§7",
+        "TS-ETA"
+      ],
+      "O-IR-JS": [
+        "EVelevenrules/mapfold",
+        "TS-TEMPLATES/TS-RUNNER",
+        "SOURCE_RUNTIME45laws"
+      ],
+      "O-OPT": [
+        "TS-ETA/TS-COUNT/TS-TAIL",
+        "ER/EMITTED-OCCURRENCE",
+        "CROSS§1"
+      ],
+      "O-INIT/HOST": [
+        "ER/MODULE-IDENTITY",
+        "TS-INIT/TS-HOST",
+        "SOURCE_RUNTIME§2",
+        "CROSS§1"
+      ]
+    },
+    "compositionQualifications": [
+      "V/E function and capture edges decrease the index; structural W records identities/edges without assuming semantic relatedness. Child typing and related environments are ordinary induction premises, not missing implementation invariants.",
+      "Each C computation threads one residual through callee/operands, initializer/body, branches, callbacks and runner reentry; cutoff occurs before an unlicensed zero-budget invocation. Terminal values are related at the residue. No callback/reset or independent fresh budget is permitted.",
+      "Core entry stages align per supplied slot, including simple captures elided from IR. Completion/Unit/fold administrative transfers retain actual lower-index body/callback computation; no second collective partial-call charge is introduced.",
+      "N's actual origin/readiness projection, GROUP's Core/IR entry projection and EV/TS's IR/JS projection use cofinal finite prefixes on all-index related input families. They are not equal-physical-call-count or same-finite-index transitivity claims.",
+      "Finite progress has actual owners: N readiness, GROUP entry/bridge/placement, ER major/field/IH setup, EV contexts and TS runner/optimizer cases. Authored body work is never called administrative merely because a physical call disappears.",
+      "TS-TAIL direct self transitions represent one logical IR application; alias transitions represent alias then self, with the intermediate cutoff. Count/tail physical loops retain those logical events.",
+      "Native CLOSED-EMPTY applies only to closed well-typed source-origin/generated-function canonical inputs, positive finite data, actual source computability/primitive premises and successful allocation. It does not cover arbitrary divergent/aborting host Empty producers and does not waive compiling uninhabited-parameter declarations. Open Core-to-IR empty-major demand remains stronger.",
+      "Ordinary Except.error is a related value. Host abort diagnostics are distinct from admitted source effects; resource failures/time/stack/allocation schedules are outside the semantic error relation.",
+      "R remains selected; authoritative .lean and new-only ps-0.9-r3 remain unchanged. Supporting authenticated R-produced helper entry conventions does not introduce a compatibility language mode."
+    ],
+    "currentExecution": "Run38004581681 at00e963 passed native/replay/migration preflight steps18–23 but failed native-candidate source replay at step24 before an N1 result; C1/C2/C3/provider did not start. This newest status is reported by root with completed log35de2a9c845a4af0d445319fede4ee3556b6610a. No success is inferred from previous runs or reviewed source.",
+    "ordinaryPrerequisites": "Valid actual typed Core environment/local closure, related input value families, genuine pre-erasure proof/primitive laws, pinned native/TS/Node semantics and successful representable allocations. Actual scope/layout/IH/name/entry facts are proved in the cited packets rather than left here as assumptions.",
+    "requiredFinalAction": "Root attaches the reviewed final source-shape transport and exact successful current-source compiler/runtime/provider artifacts, then records explicit row/stage dispositions externally. The completed argument inventory and finite execution evidence remain separate assurance axes."
+  },
+  "correspondenceRows": [
+    {
+      "id": "ER-01",
+      "jsonPointer": "/rows/0",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§4,13",
+          "exports": "MODULE-IDENTITY"
+        },
+        {
+          "packet": "TS",
+          "section": "§9,§11.1",
+          "exports": "TS-INIT"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-INIT/HOST"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/0/requiredRelation",
+        "proposed": "Retained runtime declarations denote their actual prepared declarations under the admitted prelude and preserve ordered environment extension."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/0/ruleArgument",
+        "proposed": "MODULE-IDENTITY relates the actual prepared batches, executable subsequence, name/entry/layout preparation and initialization prefix. Ordinary body induction and TS-INIT compose this source fact; object provenance alone is not the preservation argument."
+      },
+      "staleText": {
+        "note": "Replace the outstanding declaration/environment-proof wording with the supplied MODULE-IDENTITY/TS-INIT argument; keep provenance-versus-proof limits.",
+        "jsonPointers": [
+          "/rows/0/ruleArgument",
+          "/rows/0/perCompilation/notEstablished",
+          "/rows/0/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "generations"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/0/sources/1/blob"
+      ]
+    },
+    {
+      "id": "ER-02",
+      "jsonPointer": "/rows/1",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§2.3,5,13",
+          "exports": "TYPE-CARRIER; TYPE-SUBST-BOUND"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§3,§10,§13",
+          "exports": "U-SUBST"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-SUB/O-GHOST"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/1/requiredRelation",
+        "proposed": "Every accepted retained Core type has its type-indexed carrier; function values use canonical unary arrows, and admitted rank-1 substitution commutes structurally through those arrows and nominal arguments."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/1/ruleArgument",
+        "proposed": "Positive empty-meta inference, ground-level classification, the recursively accepted carrier, actual layout checks and checked-Core annotation derivation supply soundness on reached typed inputs. A classifier default is not itself a runtime proof. Stored inductive and structure field substitution is bounded by the same admitted target depth."
+      },
+      "staleText": {
+        "note": "Clarify canonical unary value types versus flat known entries; add checked-Core annotation and actual-field substitution evidence without claiming inference completeness.",
+        "jsonPointers": [
+          "/rows/1/ruleArgument",
+          "/rows/1/perCompilation/notEstablished",
+          "/rows/1/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [
+        {
+          "jsonPointer": "/rows/1/sources/3",
+          "value": {
+            "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+            "blob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+            "definitions": [
+              "psInferType",
+              "psInferProjectionType"
+            ]
+          }
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "ir",
+        "atomic"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/1/sources/0/blob"
+      ]
+    },
+    {
+      "id": "ER-03",
+      "jsonPointer": "/rows/2",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§5–6,13",
+          "exports": "TYPE-CARRIER; GHOST-READ"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§7–9",
+          "exports": "GHOST-UNIT; SPECIAL-BOUNDARY; FOLD-BRIDGE"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S2.bounds"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/2/requiredRelation",
+        "proposed": "Erased proof/type components cannot affect retained runtime observations on checked source inputs satisfying the declared proof and operation domains."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/2/ruleArgument",
+        "proposed": "Actual telescope slots distinguish runtime values, types and proofs; direct erased-local reads refuse, accepted runtime carriers establish negative classifier branches, and unsupported constructor proof/type fields refuse. Bounds retain their genuine pre-erasure proof premise. A type-only generic entry uses its narrow physical Unit activation without exposing a zero-argument value function."
+      },
+      "staleText": {
+        "note": "Retain proof-domain limitations; replace the generic open noninterference claim with GHOST-READ and the actual slot/Unit cases.",
+        "jsonPointers": [
+          "/rows/2/ruleArgument",
+          "/rows/2/perCompilation/notEstablished",
+          "/rows/2/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [
+        {
+          "jsonPointer": "/rows/2/sources/2/definitions",
+          "expected": [
+            "psEraseApplicationArgumentsWorker",
+            "psEraseRuntimeExprWithFuelWorker"
+          ],
+          "proposed": [
+            "psEraseKnownEntryApplication",
+            "psEraseCanonicalArguments",
+            "psEraseSpecialBoundary",
+            "psEraseRuntimeExprWithFuelWorker"
+          ]
+        }
+      ],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime",
+        "source"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/2/sources/0/blob",
+        "/rows/2/sources/1/blob",
+        "/rows/2/sources/2/blob"
+      ]
+    },
+    {
+      "id": "ER-04",
+      "jsonPointer": "/rows/3",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§7,§13",
+          "exports": "actual telescope/order/capture association"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§3–10,13",
+          "exports": "U-SUBST; ENTRY-PREFIX; ENTRY-CALL; LAMBDA-ADMIN; GHOST-UNIT; SPECIAL-BOUNDARY; FOLD-BRIDGE; ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-GROUP,3"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/3/requiredRelation",
+        "proposed": "Known flat entries stop at their actual uninstantiated aligned Core lambda prefix; ordinary function values and returned functions apply one canonical unary stage at a time, with ordered once-only supplied-value capture and matching cofinal observations."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/3/ruleArgument",
+        "proposed": "The prepared entry catalogue and cache-miss derivation, exact logical-slot stopping, complete/partial/overapplication splitting, ordered captures, canonical lambdas, type-only Unit activation, special-head boundaries and fold callback bridge implement this relation. Only immediate lambda control is contracted. Computed result-arrow eta exposure is not active."
+      },
+      "staleText": {
+        "note": "Replace retired FinishApplication and inactive arbitrary result-eta evidence with current entry/canonical helpers. psErasureEtaFunction remains defined but has no call sites; do not say it was deleted. R-generated reference helpers retain their authenticated historical entry convention separately.",
+        "jsonPointers": [
+          "/rows/3/ruleArgument",
+          "/rows/3/perCompilation/notEstablished",
+          "/rows/3/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [
+        {
+          "jsonPointer": "/rows/3/sources/0/definitions",
+          "expected": [
+            "psEraseApplicationArgumentsWorker",
+            "psEraseFinishApplicationWithFuelWorker",
+            "psErasureEtaFunction"
+          ],
+          "proposed": [
+            "psErasureApplyCoreType",
+            "psErasureCheckedTypeViewWithFuel",
+            "psEraseCanonicalArguments",
+            "psErasureEntryCall",
+            "psEraseFinishEntryWithFuel",
+            "psEraseKnownEntryApplication",
+            "psErasureCurryParameters",
+            "psEraseSpecialBoundary",
+            "psEraseCanonicalApplication",
+            "psErasureResolveEntry",
+            "psEraseArrayFoldl"
+          ]
+        },
+        {
+          "jsonPointer": "/rows/3/sources/1/definitions",
+          "expected": [
+            "psEraseOpenDefinitionWithFuel"
+          ],
+          "proposed": [
+            "psEraseOpenDefinitionWithFuel",
+            "psErasureEnsureDefinitionEntry",
+            "psEraseCoreModuleWithRuntimePrelude"
+          ]
+        }
+      ],
+      "sourceAdditions": [
+        {
+          "jsonPointer": "/rows/3/sources/2",
+          "value": {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+            "blob": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+            "definitions": [
+              "psErasureEntryInfoWithFuel",
+              "psErasurePrepareDeclarationEntries",
+              "psErasureLookupEntry"
+            ]
+          }
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "migration",
+        "host-boundary",
+        "generations"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/3/sources/0/blob",
+        "/rows/3/sources/1/blob"
+      ]
+    },
+    {
+      "id": "ER-05",
+      "jsonPointer": "/rows/4",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§8,§13",
+          "exports": "STRUCTURE-MAP"
+        },
+        {
+          "packet": "EV",
+          "section": "§§9–10",
+          "exports": "record/projection rules"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/4/requiredRelation",
+        "proposed": "Each prepared record field, constructor argument and projection denotes the related component of the same owner under its actual generic instantiation and source evaluation order."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/4/ruleArgument",
+        "proposed": "STRUCTURE-MAP derives parameter order and source/projection positions from the actual preparation records; EV and TS preserve ordered fields and projection reads. Zero-field structures retain an actual inhabited record value."
+      },
+      "staleText": {
+        "note": "Replace open layout-association wording with STRUCTURE-MAP while preserving runtime-only field/type-only parameter admission.",
+        "jsonPointers": [
+          "/rows/4/ruleArgument",
+          "/rows/4/perCompilation/notEstablished",
+          "/rows/4/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "capabilities"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/4/sources/1/blob"
+      ]
+    },
+    {
+      "id": "ER-06",
+      "jsonPointer": "/rows/5",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§9,§13",
+          "exports": "DATA-MAP"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§3",
+          "exports": "U-SUBST"
+        },
+        {
+          "packet": "EV",
+          "section": "§§11–12",
+          "exports": "constructor/match rules"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/5/requiredRelation",
+        "proposed": "Prepared regular families preserve constructor identity, ordered runtime fields, generic instantiation and direct-recursive field associations through original IR and immutable target data."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/5/ruleArgument",
+        "proposed": "DATA-MAP derives actual owner/constructor identities and positional fields. Empty inductives have no value clause; inhabited zero-field records are separate. Complete original-IR checks validate the same emitted layouts, with ordinary EV/TS cases preserving construction and dispatch."
+      },
+      "staleText": {
+        "note": "Empty-family implementation and general layout arguments are now supplied; execution of their exact gates remains pending. Do not retain the old unresolved-empty-coverage statement as current.",
+        "jsonPointers": [
+          "/rows/5/ruleArgument",
+          "/rows/5/perCompilation/notEstablished",
+          "/rows/5/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "source-empty",
+        "ir-empty",
+        "native-ir"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/5/sources/0/blob",
+        "/rows/5/sources/1/blob"
+      ]
+    },
+    {
+      "id": "ER-07",
+      "jsonPointer": "/rows/6",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§10,§13",
+          "exports": "GENERATED-ORIGIN; ROOT-PRODUCER; MAJOR-REFINEMENT; IH-RECURRENCE; ROOT-ERASURE; CLOSED-EMPTY"
+        },
+        {
+          "packet": "N",
+          "section": "§6",
+          "exports": "worker readiness"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§6.3–6.4",
+          "exports": "ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-CORE-DEMAND,3–4"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/6/requiredRelation",
+        "proposed": "Generated recursors evaluate the major once, select its actual minor and bind nonmemoizing delayed IH computations for the same recurrence; source self-call reconstruction is restricted to the proved whole-entry root origin."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/6/ruleArgument",
+        "proposed": "One-shot source IH registration, the complete original telescope check, final-meta constructor refinement and erasure root eligibility establish the actual recurrence. Nested control retains valid outer-child mappings but cannot invent a nested recurrence alias. Nat captures its computed major once. Native empty adequacy is the closed-source/generated-function corollary; the open Core-to-IR demand rule is stronger."
+      },
+      "staleText": {
+        "note": "Replace currentDefinition-only justification with the producer/refinement/root proof. Preserve generated-match-only source origin, independent native selective-case fact and closed native-empty scope; raw prepared/Core APIs are not universally upgraded.",
+        "jsonPointers": [
+          "/rows/6/ruleArgument",
+          "/rows/6/perCompilation/notEstablished",
+          "/rows/6/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [
+        {
+          "jsonPointer": "/rows/6/sources/1",
+          "value": {
+            "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+            "blob": "9a6a9c01a8a9e9503046f11e5f6e9dfb5a242d31",
+            "definitions": [
+              "psElabContextAfterStructuralFields"
+            ]
+          }
+        },
+        {
+          "jsonPointer": "/rows/6/sources/2",
+          "value": {
+            "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+            "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+            "definitions": [
+              "psElabCheckStructuralTelescope",
+              "psElabRefineStructuralMatch",
+              "psElabMatchConstructorMinor",
+              "psTryElabStructuralSelfCall"
+            ]
+          }
+        },
+        {
+          "jsonPointer": "/rows/6/sources/3",
+          "value": {
+            "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+            "blob": "d191857ece760f307359d576dca2cef906dea8ec",
+            "definitions": [
+              "psElabStructuralRecursionFromSource"
+            ]
+          }
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic-recursion",
+        "source-recursion",
+        "runtime-evaluation",
+        "source-empty",
+        "native-ir",
+        "origins"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/6/sources/0/blob"
+      ]
+    },
+    {
+      "id": "ER-08",
+      "jsonPointer": "/rows/7",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§11,§13",
+          "exports": "STRUCTURE-REC; STRUCTURE-MAP; IH-RECURRENCE"
+        },
+        {
+          "packet": "EV",
+          "section": "§§7,9–10",
+          "exports": "let/record/projection rules"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-LAYOUT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/7/requiredRelation",
+        "proposed": "Both admitted structure-recursion routes preserve the complete field/IH minor, its capture meaning and one major evaluation without changing the immutable record representation."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/7/ruleArgument",
+        "proposed": "Nonrecursive structures use the existing field-only Core let/projection rewrite. Constructors with recursive fields bypass that rewrite and use Expr's exact p+3 saturated record-recursion route: one reserved major let, ordered projection lets, full field/IH opening and valid root/outer IH association. Returned canonical functions apply after the original boundary."
+      },
+      "staleText": {
+        "note": "Add the recursive-record Expr route and exact current pins. Do not treat the field-only prepass as exhaustive, exclude recursive structures by terminology, or waive compiling uninhabited-parameter declarations.",
+        "jsonPointers": [
+          "/rows/7/ruleArgument",
+          "/rows/7/perCompilation/notEstablished",
+          "/rows/7/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [
+        {
+          "jsonPointer": "/rows/7/sources/1",
+          "value": {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+            "definitions": [
+              "psErasureLookupStructureRecursor",
+              "psErasureStructureRecursorFields",
+              "psEraseStructureRecursorMinor",
+              "psEraseRuntimeStructureRecursorApplication",
+              "psEraseSpecialBoundary"
+            ]
+          },
+          "transport": "pending fold-pattern manifest: same successful fold bridge body and exact length-case refusal decision tree; root/artifact bounded review"
+        }
+      ],
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/7/sources/0/blob"
+      ]
+    },
+    {
+      "id": "ER-09",
+      "jsonPointer": "/rows/8",
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§2–3,12–13",
+          "exports": "INDEX; FRESH; SUBST; EXEC-SCOPE; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,6.3",
+          "exports": "TS-NAMES"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-SUB/O-SCOPE"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/8/requiredRelation",
+        "proposed": "Every actual local/global/IH occurrence has the correct mode-indexed binding association, and emitted names preserve that association without implicit namespace or self-callee capture."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/8/ruleArgument",
+        "proposed": "Exact index equality/search/update and finite fresh-name laws compose with Core open/close/substitution. EXEC-SCOPE proves each reached value, erased, type, IH-computation and reservation path; EMITTED-OCCURRENCE supplies the producer-sensitive implicit-owner and printed-self conditions. Backend eta uses occurrence provenance, not blanket global disjointness."
+      },
+      "staleText": {
+        "note": "Replace an assumed stronger scope invariant with the proved actual producer cases. No extra serialized Core-to-IR certificate is required by SPEC when the source invariant supplies the association.",
+        "jsonPointers": [
+          "/rows/8/ruleArgument",
+          "/rows/8/perCompilation/notEstablished",
+          "/rows/8/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "generic",
+        "target",
+        "name-index"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/8/sources/0/blob",
+        "/rows/8/sources/1/blob",
+        "/rows/8/sources/2/blob"
+      ]
+    },
+    {
+      "id": "N-01",
+      "jsonPointer": "/rows/9",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§§3–4,8",
+          "exports": "ordinary alpha/origin argument"
+        },
+        {
+          "packet": "ER",
+          "section": "§§2,4,10.2,12",
+          "exports": "SUBST; MODULE-IDENTITY; GENERATED-ORIGIN"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-NORMALIZE,5",
+          "exports": "reserved-sort boundary"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/9/requiredRelation",
+        "proposed": "Normalization changes exactly the resolved ordinary binder/self identities selected by its actual plan and retains truthful source/batch/worker origins on native-compatible admitted syntax."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/9/ruleArgument",
+        "proposed": "The full original local-ID counter is reserved before domain walking; actual resolver identity and scope traversal justify alpha transport. Source-to-Core batches retain their actual plan/roles. Prop/Type sort spellings are outside the ordinary-reference alpha lemma at the proved native-compatible identifier boundary; owned-parser overacceptance/refusal is not portable syntax equivalence."
+      },
+      "staleText": {
+        "note": "Add the concrete full-counter hygiene and reserved-sort qualification; do not leave N's deliberately excluded reserved references as an unnamed residual.",
+        "jsonPointers": [
+          "/rows/9/ruleArgument",
+          "/rows/9/perCompilation/notEstablished",
+          "/rows/9/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "origins",
+        "capabilities",
+        "migration"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/9/sources/0/blob",
+        "/rows/9/sources/1/blob"
+      ]
+    },
+    {
+      "id": "N-02",
+      "jsonPointer": "/rows/10",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§5,§8",
+          "exports": "G/order/free-variable/legal-telescope argument"
+        },
+        {
+          "packet": "ER",
+          "section": "§§2,5–6,10.2–10.3",
+          "exports": "SUBST; TYPE-CARRIER; ROOT-PRODUCER; MAJOR-REFINEMENT"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-NORMALIZE"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/10/requiredRelation",
+        "proposed": "Every accepted normalization retains a legal fixed/state telescope and direct structural major, with selected state independent of forbidden runtime dependencies."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/10/ruleArgument",
+        "proposed": "The source-derived changed-argument set, original order, binder classification and free-variable checks justify the telescope permutation. Corrected direct-child producer provenance and the complete original implicit/explicit telescope guard supply the actual recursive domain; unrelated failures remain failures."
+      },
+      "staleText": {
+        "note": "Use the corrected direct-child/root producer; do not retain advertised unproved descendant/second-match alias coverage or require general inference completeness.",
+        "jsonPointers": [
+          "/rows/10/ruleArgument",
+          "/rows/10/perCompilation/notEstablished",
+          "/rows/10/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "source-recursion",
+        "capabilities",
+        "origins",
+        "migration"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/10/sources/0/blob",
+        "/rows/10/sources/1/blob"
+      ]
+    },
+    {
+      "id": "N-03",
+      "jsonPointer": "/rows/11",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§6,§8",
+          "exports": "worker equation; finite readiness; simultaneous state"
+        },
+        {
+          "packet": "ER",
+          "section": "§§10–11,13.2",
+          "exports": "IH-RECURRENCE; ROOT-ERASURE"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§6.3–6.4",
+          "exports": "ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§3",
+          "exports": "cofinal composition"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/11/requiredRelation",
+        "proposed": "The worker's function-valued structural fold preserves each changed state operand in original order and environment, and readiness exposes only its finite state-lambda prefix before the selected body."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/11/ruleArgument",
+        "proposed": "Actual normalized origins identify fixed/state positions and the original body boundary. The generated selective recursor supplies the readiness instance without forcing IH/body/callback work. Source worker events and Core/IR events compose through cofinal finite projections on all-index related inputs."
+      },
+      "staleText": {
+        "note": "Replace an intended-equation placeholder with N's rule argument and ER's actual recurrence. Do not compose at an identical finite index or reset a budget across worker readiness.",
+        "jsonPointers": [
+          "/rows/11/ruleArgument",
+          "/rows/11/perCompilation/notEstablished",
+          "/rows/11/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "capabilities",
+        "generic-recursion",
+        "migration",
+        "runtime-evaluation"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/11/sources/0/blob"
+      ]
+    },
+    {
+      "id": "N-04",
+      "jsonPointer": "/rows/12",
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§7,§8",
+          "exports": "public wrapper argument"
+        },
+        {
+          "packet": "ER",
+          "section": "§§4,7",
+          "exports": "MODULE-IDENTITY; actual entry association"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§4–7",
+          "exports": "ENTRY-PREFIX; ENTRY-CALL; ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§3"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/12/requiredRelation",
+        "proposed": "The public wrapper retains the original full source telescope and operand order while the actual worker/public batch and canonical runtime entry conventions realize its related call."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/12/ruleArgument",
+        "proposed": "The worker is inserted before the public wrapper, and retained origins identify the checked batch. Full type/IR signatures follow the actual entry-prefix mapping rather than JS underapplication; the wrapper/body join uses finite cofinal control transport."
+      },
+      "staleText": {
+        "note": "Keep 12-worker ABI and87 observations as supporting finite evidence; add the general wrapper/group proof and authenticated R/current distinction.",
+        "jsonPointers": [
+          "/rows/12/ruleArgument",
+          "/rows/12/perCompilation/notEstablished",
+          "/rows/12/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "migration",
+        "capabilities",
+        "generic",
+        "generations"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/12/sources/0/blob",
+        "/rows/12/sources/1/blob"
+      ]
+    },
+    {
+      "id": "EV-01",
+      "jsonPointer": "/rows/13",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§2",
+          "exports": "literal rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§5",
+          "exports": "TYPE-CARRIER"
+        },
+        {
+          "packet": "TS",
+          "section": "§10",
+          "exports": "TS-HOST"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/13/requiredRelation",
+        "proposed": "Every admitted literal produces its exact related canonical scalar or Unit value without consuming an invocation budget."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/13/ruleArgument",
+        "proposed": "Actual literal templates preserve the indexed Nat/Int, Char/String, Bool and Unit interpretations, even when JS carriers coincide. Source/IR typing and declared host/carrier laws are the premises."
+      },
+      "staleText": {
+        "note": "Attach the completed literal case, retaining the pinned carrier and host boundary.",
+        "jsonPointers": [
+          "/rows/13/ruleArgument",
+          "/rows/13/perCompilation/notEstablished",
+          "/rows/13/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "ir",
+        "runtime"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/13/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-02",
+      "jsonPointer": "/rows/14",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§3",
+          "exports": "variable rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§§3,12",
+          "exports": "EXEC-SCOPE; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,9",
+          "exports": "TS-NAMES; TS-INIT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/14/requiredRelation",
+        "proposed": "An IR variable reads the value associated with the same actual lexical or initialized global binding at the current residual index."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/14/ruleArgument",
+        "proposed": "EXEC-SCOPE and initialization supply the environment association; target acceptance and producer-sensitive name facts justify the printed lookup. An IH runtime expression is treated by its computation relation at the erasure boundary, not silently as an ordinary value."
+      },
+      "staleText": {
+        "note": "Replace the missing environment-injection premise with the actual ER/TS construction.",
+        "jsonPointers": [
+          "/rows/14/ruleArgument",
+          "/rows/14/perCompilation/notEstablished",
+          "/rows/14/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "atomic",
+        "target",
+        "origins"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/14/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-03",
+      "jsonPointer": "/rows/15",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§4",
+          "exports": "45 operation and map/fold cases"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§1 S2.operations/S2.bounds/S2.text,3",
+          "exports": "runtime-law completion and exact template transport"
+        },
+        {
+          "packet": "ER",
+          "section": "§§6–7",
+          "exports": "GHOST-READ; primitive slots"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§9",
+          "exports": "FOLD-BRIDGE"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/15/requiredRelation",
+        "proposed": "Each enabled intrinsic preserves its declared value, operand demand, callback, proof and abort law, threading one residual budget through ordered operands and every callback."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/15/ruleArgument",
+        "proposed": "Forty-three first-order laws and two callback schemas compose with EV's map/fold induction, the canonical fold bridge and actual reentrant runner. Source Except.error remains an ordinary tagged value; invalid-bounds/foreign fault probes remain scoped diagnostics. Finite native observations do not replace the laws."
+      },
+      "staleText": {
+        "note": "Attach SOURCE_RUNTIME06b5's resolution of historical runtime-law premises and exact unchanged template/cache slices.",
+        "jsonPointers": [
+          "/rows/15/ruleArgument",
+          "/rows/15/perCompilation/notEstablished",
+          "/rows/15/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "generic"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/15/sources/0/blob",
+        "/rows/15/sources/1/blob"
+      ]
+    },
+    {
+      "id": "EV-04",
+      "jsonPointer": "/rows/16",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§5",
+          "exports": "lambda rule"
+        },
+        {
+          "packet": "COMMON",
+          "section": "§§1.3,2.1",
+          "exports": "lower-index value/environment relation"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§4–6",
+          "exports": "LAMBDA-ADMIN; ENTRY-PI"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/16/requiredRelation",
+        "proposed": "Lambda construction captures the associated environment without evaluating its body; each licensed application binds the related group and continues at the remaining lower index."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/16/ruleArgument",
+        "proposed": "The structural world records identities/capture edges only. Behavioral capture assumptions decrease on function edges, and invocation budget is charged before the actual body. Canonical source values and flat known entries are joined by GROUP, not arbitrary result eta."
+      },
+      "staleText": {
+        "note": "Use the corrected lower-index/capture and interaction-budget relation; keep construction distinct from body evaluation.",
+        "jsonPointers": [
+          "/rows/16/ruleArgument",
+          "/rows/16/perCompilation/notEstablished",
+          "/rows/16/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/16/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-05",
+      "jsonPointer": "/rows/17",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§6",
+          "exports": "call rule"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§5–6",
+          "exports": "ENTRY-CALL; ENTRY-PI"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§2–3"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/17/requiredRelation",
+        "proposed": "Callee and arguments evaluate in order exactly once, carrying their residual into one original-IR invocation of the already established group."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/17/ruleArgument",
+        "proposed": "General invoke/runner and direct/canonical entry proofs use the same mutual index/syntax construction. Core stage cutoffs are aligned per supplied slot, including elided literal/variable captures; introduced transfers do not restart or silently erase authored computation."
+      },
+      "staleText": {
+        "note": "Separate actual IR group semantics from source/Core cofinal refinement; preserve zero-budget cutoff and direct/reentrant routes.",
+        "jsonPointers": [
+          "/rows/17/ruleArgument",
+          "/rows/17/perCompilation/notEstablished",
+          "/rows/17/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "ir",
+        "host-boundary"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/17/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-06",
+      "jsonPointer": "/rows/18",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§7",
+          "exports": "let rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§12",
+          "exports": "EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,6,8",
+          "exports": "TS-NAMES; TS-ETA; TS-TAIL"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/18/requiredRelation",
+        "proposed": "The initializer runs once in the old environment, then the body sees the related bound value with the initializer's residual and without temporal-dead-zone or implicit-owner capture."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/18/ruleArgument",
+        "proposed": "The explicit-name scan selects the parameterized-generator route for old-name uses. When it does not, actual ordinary allocator and eta occurrence construction establish that implicit owner/helper references remain uncaptured in the const block. Shadowing-sensitive optimizer paths satisfy their separate guards."
+      },
+      "staleText": {
+        "note": "Keep occurrence-sensitive producer hygiene; do not replace it with a false all-eta-local/global-disjointness premise.",
+        "jsonPointers": [
+          "/rows/18/ruleArgument",
+          "/rows/18/perCompilation/notEstablished",
+          "/rows/18/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "ir",
+        "target",
+        "generic"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/18/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-07",
+      "jsonPointer": "/rows/19",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§8",
+          "exports": "conditional rule"
+        },
+        {
+          "packet": "TS",
+          "section": "§4",
+          "exports": "TS-TEMPLATES"
+        },
+        {
+          "packet": "ER",
+          "section": "§6",
+          "exports": "operation-specific demand"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/19/requiredRelation",
+        "proposed": "The condition evaluates once and only its selected branch computes the related result or abort at the returned residual."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/19/ruleArgument",
+        "proposed": "The conditional template and designated source conditional/Boolean demand rules preserve branch selection. Printing both branch strings during compilation is not runtime branch demand."
+      },
+      "staleText": {
+        "note": "Retain designated conditional/primitive demand separately from ordinary strict function application.",
+        "jsonPointers": [
+          "/rows/19/ruleArgument",
+          "/rows/19/perCompilation/notEstablished",
+          "/rows/19/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "ir"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/19/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-08",
+      "jsonPointer": "/rows/20",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§9",
+          "exports": "record rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§8",
+          "exports": "STRUCTURE-MAP"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/20/requiredRelation",
+        "proposed": "Record construction evaluates fields in original IR order and returns one immutable owner-branded related record, including the actual zero-field value."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/20/ruleArgument",
+        "proposed": "STRUCTURE-MAP provides actual field identity/type order; object construction and silent brand setup preserve those components. Direct recursive structure declarations remain supported even when no closed canonical record can be constructed."
+      },
+      "staleText": {
+        "note": "Keep construction coverage separate from closed-domain inhabitation and recursive-record elimination.",
+        "jsonPointers": [
+          "/rows/20/ruleArgument",
+          "/rows/20/perCompilation/notEstablished",
+          "/rows/20/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "source-empty",
+        "ir-empty",
+        "generic"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/20/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-09",
+      "jsonPointer": "/rows/21",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§10",
+          "exports": "projection rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§§5.4,8,11",
+          "exports": "TYPE-CARRIER; STRUCTURE-MAP; STRUCTURE-REC"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/21/requiredRelation",
+        "proposed": "The target evaluates once and its admitted immutable field yields the value at the actual owner/projection position."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/21/ruleArgument",
+        "proposed": "Checked-Core annotation recovery and prepared structure metadata identify the field, full IR typing confirms it, and target projection reads are total on related canonical records. New recursive-record projection lets read the one captured major."
+      },
+      "staleText": {
+        "note": "Use current checked annotation and recursive-record field association; retain canonical ownership premise.",
+        "jsonPointers": [
+          "/rows/21/ruleArgument",
+          "/rows/21/perCompilation/notEstablished",
+          "/rows/21/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "generic-structures",
+        "capabilities",
+        "ir"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/21/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-10",
+      "jsonPointer": "/rows/22",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§11",
+          "exports": "constructor rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§9",
+          "exports": "DATA-MAP"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/22/requiredRelation",
+        "proposed": "Construction returns the same constructor identity with ordered related fields under the actual generic instantiation."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/22/ruleArgument",
+        "proposed": "Monomorphic nullary constructors are stored values; other constructors use their actual factories. Field expressions evaluate outside factory scopes in the IR order; implicit namespace references use ER's occurrence hygiene."
+      },
+      "staleText": {
+        "note": "Keep value-versus-factory ABI exact, including the new monomorphic TailList.nil evidence.",
+        "jsonPointers": [
+          "/rows/22/ruleArgument",
+          "/rows/22/perCompilation/notEstablished",
+          "/rows/22/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "generic",
+        "ir",
+        "source-empty"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/22/sources/0/blob"
+      ]
+    },
+    {
+      "id": "EV-11",
+      "jsonPointer": "/rows/23",
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§12",
+          "exports": "match/empty rules"
+        },
+        {
+          "packet": "ER",
+          "section": "§§9–11",
+          "exports": "DATA-MAP; IH-RECURRENCE; CLOSED-EMPTY; STRUCTURE-REC"
+        },
+        {
+          "packet": "TS",
+          "section": "§§3–4,12",
+          "exports": "TS-LAYOUT; TS-TEMPLATES"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/23/requiredRelation",
+        "proposed": "The IR major evaluates once and exactly the matching constructor alternative executes with related field bindings; an empty match preserves major demand without manufacturing an inhabitant."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/23/ruleArgument",
+        "proposed": "Nonempty tag dispatch and branch binding follow actual layouts. Empty generator lowering reads no tag and evaluates the major before its unreachable abort. Native equivalence for empty elimination is only the independently established closed-source/generated-function corollary; open divergent/aborting extensions retain the stronger Core-to-IR clause."
+      },
+      "staleText": {
+        "note": "Preserve the precise closed native-empty boundary and the general empty IR fallback, including optimizer fallback.",
+        "jsonPointers": [
+          "/rows/23/ruleArgument",
+          "/rows/23/perCompilation/notEstablished",
+          "/rows/23/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "ir-empty",
+        "source-empty",
+        "native-ir",
+        "generic-recursion",
+        "generic-structures"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/23/sources/0/blob"
+      ]
+    },
+    {
+      "id": "TS-01",
+      "jsonPointer": "/rows/24",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§2,§6.3,§11.1",
+          "exports": "TS-NAMES"
+        },
+        {
+          "packet": "ER",
+          "section": "§§2,12",
+          "exports": "INDEX; FRESH; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-SCOPE"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/24/requiredRelation",
+        "proposed": "Every admitted emitted binding/reference/property preserves its intended entity, with complete finite name scans and safe implicit namespace and private-name scope."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/24/ruleArgument",
+        "proposed": "Actual target worklist/depth admission, exact name-index algebra and producer occurrence facts establish complete scans and first-candidate private freshness. This is actual source/target association, not a theorem for arbitrary typed IR with shadowed implicit owners."
+      },
+      "staleText": {
+        "note": "Current target blob a0e703 is already correct; keep its historical1c5 normalization evidence separate. Refresh Module/Expr row pins.",
+        "jsonPointers": [
+          "/rows/24/ruleArgument",
+          "/rows/24/perCompilation/notEstablished",
+          "/rows/24/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "target",
+        "name-index",
+        "ir",
+        "atomic"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/24/sources/0/blob",
+        "/rows/24/sources/1/blob"
+      ]
+    },
+    {
+      "id": "TS-02",
+      "jsonPointer": "/rows/25",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§3,§11.1",
+          "exports": "TS-LAYOUT"
+        },
+        {
+          "packet": "ER",
+          "section": "§§8–11",
+          "exports": "STRUCTURE-MAP; DATA-MAP; STRUCTURE-REC"
+        },
+        {
+          "packet": "EV",
+          "section": "§§9–12"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/25/requiredRelation",
+        "proposed": "Brands, tags, constructor objects and property accesses realize the same indexed immutable record/inductive representation."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/25/ruleArgument",
+        "proposed": "Actual layout ordering and generic substitution determine brands/tags/fields; nullary value/factory conventions are distinct. Recursive-record lowering adds no representation conversion, and empty families remain separate from zero-field records."
+      },
+      "staleText": {
+        "note": "Attach the recursive structure source transport in62a/ER§11 rather than treating TS's older erasure anchor as current.",
+        "jsonPointers": [
+          "/rows/25/ruleArgument",
+          "/rows/25/perCompilation/notEstablished",
+          "/rows/25/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "ir-empty",
+        "generic-structures",
+        "generic",
+        "source-empty"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/25/sources/0/blob",
+        "/rows/25/sources/1/blob"
+      ]
+    },
+    {
+      "id": "TS-03",
+      "jsonPointer": "/rows/26",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§4,§11.1",
+          "exports": "TS-TEMPLATES"
+        },
+        {
+          "packet": "EV",
+          "section": "§§2–13",
+          "exports": "all eleven constructors"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§1,3",
+          "exports": "45 laws and current template transport"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/26/requiredRelation",
+        "proposed": "Every successful general expression template preserves its IR evaluation/abort rule at the residual returned by its child computations."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/26/ruleArgument",
+        "proposed": "The exhaustive EV cases and operation-specific laws form a structural/index induction with the call/runner theorem. No generic CBV claim overrides short-circuit primitives, conditionals or generated eliminators."
+      },
+      "staleText": {
+        "note": "Replace unresolved template-composition wording with EV/TS mutual induction and the completed source/runtime law interface.",
+        "jsonPointers": [
+          "/rows/26/ruleArgument",
+          "/rows/26/perCompilation/notEstablished",
+          "/rows/26/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "ir",
+        "runtime",
+        "runtime-evaluation"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/26/sources/0/blob"
+      ]
+    },
+    {
+      "id": "TS-04",
+      "jsonPointer": "/rows/27",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§5,§11.1",
+          "exports": "TS-RUNNER"
+        },
+        {
+          "packet": "EV",
+          "section": "§§5–6,13",
+          "exports": "lambda/call/machine composition"
+        },
+        {
+          "packet": "COMMON",
+          "section": "§§1.3,3",
+          "exports": "interaction budget"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§2–3"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/27/requiredRelation",
+        "proposed": "Registered/direct/closure/reentrant calls preserve actual captured values, argument groups, returns and permitted aborts while carrying one shared residual and making finite administrative progress."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/27/ruleArgument",
+        "proposed": "Actual emitted callable/registry associations and the mutual body/runner induction discharge capture and lower-index calls. Runner abort abandons pending frames without injecting generator.throw; wrappers, registry lookup and helper frames are administrative realizations of a logical invocation, not extra source calls."
+      },
+      "staleText": {
+        "note": "Keep arbitrary host callbacks outside the source domain; diagnostic reentry/fault probes do not expand it.",
+        "jsonPointers": [
+          "/rows/27/ruleArgument",
+          "/rows/27/perCompilation/notEstablished",
+          "/rows/27/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "generic",
+        "ir",
+        "generations"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/27/sources/0/blob",
+        "/rows/27/sources/1/blob"
+      ]
+    },
+    {
+      "id": "TS-05",
+      "jsonPointer": "/rows/28",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§6,§11.1",
+          "exports": "TS-ETA"
+        },
+        {
+          "packet": "ER",
+          "section": "§12",
+          "exports": "EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§6",
+          "exports": "ENTRY-PI"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-GROUP/O-OPT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/28/requiredRelation",
+        "proposed": "Each recognized backend eta transformation preserves the already fixed original-IR call, callee control/captures and its logical invocation boundary."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/28/ruleArgument",
+        "proposed": "Freshness/arity/name scanning and occurrence-sensitive let/self provenance justify pushing fresh available arguments through the actual let/if/match callee structure. Weighted target depth covers new lets. This optimizer is separate from canonical source completion and the now-inactive arbitrary result-arrow eta producer."
+      },
+      "staleText": {
+        "note": "Delete conflation of all eta paths; retain logical call charge even when a physical call is removed.",
+        "jsonPointers": [
+          "/rows/28/ruleArgument",
+          "/rows/28/perCompilation/notEstablished",
+          "/rows/28/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "ir",
+        "target",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/28/sources/0/blob"
+      ]
+    },
+    {
+      "id": "TS-06",
+      "jsonPointer": "/rows/29",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§7,§11.1",
+          "exports": "TS-COUNT"
+        },
+        {
+          "packet": "ER",
+          "section": "§§9,12",
+          "exports": "DATA-MAP; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-OPT"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/29/requiredRelation",
+        "proposed": "A successful count recognizer implements the same Nat fold on canonical finite data, accounting for each logical recursive application and finite proper-child progress."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/29/ruleArgument",
+        "proposed": "Actual self/field identity, recognized zero/one-plus-child shape and reserved internal names establish the loop relation. The decreasing stored-child measure prevents introduced silent divergence; allocation/time equivalence is not claimed."
+      },
+      "staleText": {
+        "note": "Preserve logical call accounting and finite-data premise; do not infer optimizer correctness from runtime output alone.",
+        "jsonPointers": [
+          "/rows/29/ruleArgument",
+          "/rows/29/perCompilation/notEstablished",
+          "/rows/29/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "ir",
+        "capabilities",
+        "runtime-evaluation"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/29/sources/0/blob"
+      ]
+    },
+    {
+      "id": "TS-07",
+      "jsonPointer": "/rows/30",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§8,§11.1",
+          "exports": "TS-TAIL"
+        },
+        {
+          "packet": "EV",
+          "section": "§7",
+          "exports": "old-environment let rule"
+        },
+        {
+          "packet": "ER",
+          "section": "§12",
+          "exports": "EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1 O-OPT,3"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/30/requiredRelation",
+        "proposed": "Each recognized loop update preserves old-environment argument/capture values and simultaneous rebinding. A direct self transition represents one original-IR call; a captured-alias transition represents the alias call followed by the self call, including the intermediate cutoff."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/30/ruleArgument",
+        "proposed": "Actual self/alias identity, purity, nonescape and binding guards justify the step; arguments are evaluated before the destructuring update. The residual budget is threaded through both alias events, and every continuing loop accounts for observable logical progress. Rejected recognition falls through to the independently related general emitter."
+      },
+      "staleText": {
+        "note": "Replace the current one-original-tail-call sentence. New positive flat-tail IR entries preserve optimizer coverage; the three match-before-returned-lambda replay exports now correctly use the general route and arity1.",
+        "jsonPointers": [
+          "/rows/30/ruleArgument",
+          "/rows/30/perCompilation/notEstablished",
+          "/rows/30/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "optimized-tail",
+        "ir",
+        "runtime-evaluation",
+        "target"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/30/sources/0/blob"
+      ]
+    },
+    {
+      "id": "TS-08",
+      "jsonPointer": "/rows/31",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§9,§11.1",
+          "exports": "TS-INIT"
+        },
+        {
+          "packet": "ER",
+          "section": "§4,§7",
+          "exports": "MODULE-IDENTITY; actual Unit entry"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§7",
+          "exports": "GHOST-UNIT"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-INIT/HOST"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/31/requiredRelation",
+        "proposed": "Every emitted prefix supplies initialized support/layout/value bindings and the callable implementations/registrations required by its admitted earlier/self references."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/31/ruleArgument",
+        "proposed": "Full target all-occurrence checking and the actual ordered declaration list justify initialization. Monomorphic zero-runtime values are eager; positive-arity calls use the call relation; type-only generics are positive physical Unit entries. Deferred safe-looking forward references remain conservatively refused."
+      },
+      "staleText": {
+        "note": "Refresh active declaration/Module pins; distinguish initialized values from type-only generic activation.",
+        "jsonPointers": [
+          "/rows/31/ruleArgument",
+          "/rows/31/perCompilation/notEstablished",
+          "/rows/31/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "target",
+        "atomic",
+        "generic",
+        "generations"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/31/sources/0/blob",
+        "/rows/31/sources/1/blob",
+        "/rows/31/sources/2/blob"
+      ]
+    },
+    {
+      "id": "TS-09",
+      "jsonPointer": "/rows/32",
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§10,§11.1",
+          "exports": "TS-HOST"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§2–3",
+          "exports": "declared host/resource and exact runtime slices"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§3–4,7",
+          "exports": "trusted boundary and limits"
+        }
+      ],
+      "relationUpdate": {
+        "jsonPointer": "/rows/32/requiredRelation",
+        "proposed": "The reviewed generated TypeScript fragment retains its proved behavior in the exact successfully compiled JavaScript under TypeScript7.0.2, Node22.23.3 and the declared ordinary built-in/carrier/resource boundary."
+      },
+      "argumentUpdate": {
+        "jsonPointer": "/rows/32/ruleArgument",
+        "proposed": "Actual profile/toolchain/product identities bind the emitted-fragment proof to its compilation. The trusted TS/JS/native boundary is explicit; no mechanized correctness theorem for those implementations or equivalence of resource-failure schedules is claimed."
+      },
+      "staleText": {
+        "note": "Separate general fragment argument, trusted toolchain premise, exact execution receipts and independent provider acceptance.",
+        "jsonPointers": [
+          "/rows/32/ruleArgument",
+          "/rows/32/perCompilation/notEstablished",
+          "/rows/32/assuranceStatus"
+        ]
+      },
+      "sourceDefinitionUpdates": [],
+      "sourceAdditions": [],
+      "requiredReceiptGroups": [
+        "toolchain",
+        "generations",
+        "runtime",
+        "provider"
+      ],
+      "sourceBlobUpdatePointers": [
+        "/rows/32/sources/0/blob",
+        "/rows/32/sources/1/blob"
+      ]
+    }
+  ],
+  "stageObligations": [
+    {
+      "id": "S0.enabled",
+      "jsonPointer": "/rows/0",
+      "obligation": "Enabled capability/value/operation/transformation ledger",
+      "correspondenceRows": [],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S0.enabled",
+          "exports": "finite contract/45-operation inventory"
+        }
+      ],
+      "currentDispositionText": "Finite enabled inventory is source-reviewed against exact IR signatures; retain the hashed contract unchanged. Final disposition records that digest externally, not by rewriting its per-compilation nonclaims.",
+      "requiredReceiptGroups": [
+        "runtime",
+        "ir",
+        "strict-binder"
+      ],
+      "statusUpdateTarget": "/rows/0/status",
+      "evidenceUpdateTarget": "/rows/0/evidence",
+      "protectedFlagPointer": "/rows/0/strictDischarged"
+    },
+    {
+      "id": "S1.imports",
+      "jsonPointer": "/rows/1",
+      "obligation": "Actual parsed ordered module/import closure",
+      "correspondenceRows": [
+        "ER-01"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S1.imports",
+          "exports": "actual parsed ordered import closure"
+        },
+        {
+          "packet": "ER",
+          "section": "§4",
+          "exports": "MODULE-IDENTITY"
+        }
+      ],
+      "currentDispositionText": "Actual parsed segment identities, earlier-only imports and complete ordered module traversal are reviewed; exact closure/source receipts remain required.",
+      "requiredReceiptGroups": [
+        "source",
+        "atomic",
+        "grammar",
+        "origins"
+      ],
+      "statusUpdateTarget": "/rows/1/status",
+      "evidenceUpdateTarget": "/rows/1/evidence",
+      "protectedFlagPointer": "/rows/1/strictDischarged"
+    },
+    {
+      "id": "S1.syntax",
+      "jsonPointer": "/rows/2",
+      "obligation": "Explicit source signatures, declarations, typed lambdas and supported forms",
+      "correspondenceRows": [
+        "N-01",
+        "N-02",
+        "ER-02",
+        "ER-03"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S1.syntax",
+          "exports": "exhaustive source AST traversal"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§5",
+          "exports": "native-compatible identifier boundary"
+        }
+      ],
+      "currentDispositionText": "All source declaration/term cases and explicit type/signature rules are reviewed on native-compatible authored syntax; current owned-parser source compatibility must pass after the pending narrow Expr source-shape correction.",
+      "requiredReceiptGroups": [
+        "source",
+        "grammar",
+        "capabilities",
+        "host-boundary"
+      ],
+      "statusUpdateTarget": "/rows/2/status",
+      "evidenceUpdateTarget": "/rows/2/evidence",
+      "protectedFlagPointer": "/rows/2/strictDischarged"
+    },
+    {
+      "id": "S1.do",
+      "jsonPointer": "/rows/3",
+      "obligation": "Reject source do while accepting ordinary helper/field spellings",
+      "correspondenceRows": [],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S1.do",
+          "exports": "token-origin/span rule"
+        }
+      ],
+      "currentDispositionText": "Source do refusal is origin-sensitive and complete over reached term children, without rejecting ordinary helper/field spellings.",
+      "requiredReceiptGroups": [
+        "source",
+        "grammar"
+      ],
+      "statusUpdateTarget": "/rows/3/status",
+      "evidenceUpdateTarget": "/rows/3/evidence",
+      "protectedFlagPointer": "/rows/3/strictDischarged"
+    },
+    {
+      "id": "S1.resource",
+      "jsonPointer": "/rows/4",
+      "obligation": "Bounded source work and diagnostic spans",
+      "correspondenceRows": [],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S1.resource",
+          "exports": "finite worklist/span argument"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§11–12",
+          "exports": "FINITE-PLACEMENT"
+        }
+      ],
+      "currentDispositionText": "Declared independent budgets and exhaustion refusal are source-reviewed. Exact measured policy receipts remain required; finite pure placement proves semantic transport, not memory/time equivalence or sufficient headroom.",
+      "requiredReceiptGroups": [
+        "source",
+        "resource",
+        "generations"
+      ],
+      "statusUpdateTarget": "/rows/4/status",
+      "evidenceUpdateTarget": "/rows/4/evidence",
+      "protectedFlagPointer": "/rows/4/strictDischarged"
+    },
+    {
+      "id": "S1.atomic",
+      "jsonPointer": "/rows/5",
+      "obligation": "One raw-source→prepared→originalIR→checked TS operation",
+      "correspondenceRows": [
+        "ER-01",
+        "ER-09",
+        "TS-01",
+        "TS-08"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S1.atomic",
+          "exports": "same prepared/original IR/checked emission"
+        },
+        {
+          "packet": "ER",
+          "section": "§§3–4",
+          "exports": "EXEC-SCOPE; MODULE-IDENTITY"
+        }
+      ],
+      "currentDispositionText": "The current raw-source operation produces and consumes its exact prepared/original-IR objects once. C1 construction by selected R is explicitly weaker; current C2/C3 and native paths require complete atomic evidence.",
+      "requiredReceiptGroups": [
+        "atomic",
+        "origins",
+        "strict-binder"
+      ],
+      "statusUpdateTarget": "/rows/5/status",
+      "evidenceUpdateTarget": "/rows/5/evidence",
+      "protectedFlagPointer": "/rows/5/strictDischarged"
+    },
+    {
+      "id": "S1.host",
+      "jsonPointer": "/rows/6",
+      "obligation": "Current native/generated strict consumers and selected-R exception",
+      "correspondenceRows": [
+        "ER-04",
+        "TS-09"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S1.host",
+          "exports": "snapshot/authenticated selected-R boundary"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§4–7",
+          "exports": "ENTRY-PREFIX; ENTRY-CALL"
+        }
+      ],
+      "currentDispositionText": "Ingress snapshots and exact selected-R identity are reviewed. Native/current unary returned-value invocation and historical R flattened reference calls have distinct fixed producer contracts; no generalized compatibility or fn.length retry is admitted.",
+      "requiredReceiptGroups": [
+        "host-boundary",
+        "atomic",
+        "generations"
+      ],
+      "statusUpdateTarget": "/rows/6/status",
+      "evidenceUpdateTarget": "/rows/6/evidence",
+      "protectedFlagPointer": "/rows/6/strictDischarged"
+    },
+    {
+      "id": "S2.carrier",
+      "jsonPointer": "/rows/7",
+      "obligation": "Canonical Unicode scalar strings including names",
+      "correspondenceRows": [
+        "ER-02",
+        "EV-01",
+        "TS-02",
+        "TS-09"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S2.carrier,§2",
+          "exports": "canonical scalar/array/object domain"
+        },
+        {
+          "packet": "ER",
+          "section": "§5",
+          "exports": "TYPE-CARRIER"
+        }
+      ],
+      "currentDispositionText": "Bounded scalar/brand/list/cycle/name validation and canonical immutable values are established on the declared domain; arbitrary foreign objects, sparse arrays/accessors/cyclic values are not admitted.",
+      "requiredReceiptGroups": [
+        "runtime",
+        "source",
+        "ir"
+      ],
+      "statusUpdateTarget": "/rows/7/status",
+      "evidenceUpdateTarget": "/rows/7/evidence",
+      "protectedFlagPointer": "/rows/7/strictDischarged"
+    },
+    {
+      "id": "S2.operations",
+      "jsonPointer": "/rows/8",
+      "obligation": "45 enabled intrinsic domains and primitive laws",
+      "correspondenceRows": [
+        "EV-03",
+        "TS-03",
+        "TS-04"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S2.operations,§3",
+          "exports": "43 laws plus2 callback schemas"
+        },
+        {
+          "packet": "EV",
+          "section": "§4",
+          "exports": "operation/map/fold argument"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        }
+      ],
+      "currentDispositionText": "General operation/callback laws are supplied and bound to unchanged current templates. Await the exact 45-operation native/generated conformance receipts;186 observations remain finite.",
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "strict-binder"
+      ],
+      "statusUpdateTarget": "/rows/8/status",
+      "evidenceUpdateTarget": "/rows/8/evidence",
+      "protectedFlagPointer": "/rows/8/strictDischarged"
+    },
+    {
+      "id": "S2.bounds",
+      "jsonPointer": "/rows/9",
+      "obligation": "Proof-required array access/update domain",
+      "correspondenceRows": [
+        "ER-03",
+        "EV-03"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S2.bounds",
+          "exports": "proof-required read/update domain"
+        },
+        {
+          "packet": "ER",
+          "section": "§6",
+          "exports": "GHOST-READ"
+        },
+        {
+          "packet": "EV",
+          "section": "§4.4",
+          "exports": "array law"
+        }
+      ],
+      "currentDispositionText": "The genuine source bounds proof plus actual omitted slots and retained operand laws establish the rule. Defensive guards diagnose invalid host inputs but never reconstruct the erased proof.",
+      "requiredReceiptGroups": [
+        "runtime",
+        "generic",
+        "strict-binder"
+      ],
+      "statusUpdateTarget": "/rows/9/status",
+      "evidenceUpdateTarget": "/rows/9/evidence",
+      "protectedFlagPointer": "/rows/9/strictDischarged"
+    },
+    {
+      "id": "S2.text",
+      "jsonPointer": "/rows/10",
+      "obligation": "Pinned scalar/UTF-8/raw String.Pos behavior",
+      "correspondenceRows": [
+        "EV-01",
+        "EV-03",
+        "TS-09"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§1 S2.text,§3",
+          "exports": "Unicode/scalar/UTF8/cursor/cache laws"
+        },
+        {
+          "packet": "EV",
+          "section": "§4",
+          "exports": "operation demand"
+        }
+      ],
+      "currentDispositionText": "Pinned scalar widths, raw positions and finite cache/cursor behavior are source-reviewed. No normalization/grapheme/allocation-schedule equivalence is claimed.",
+      "requiredReceiptGroups": [
+        "runtime",
+        "grammar",
+        "strict-binder"
+      ],
+      "statusUpdateTarget": "/rows/10/status",
+      "evidenceUpdateTarget": "/rows/10/evidence",
+      "protectedFlagPointer": "/rows/10/strictDischarged"
+    },
+    {
+      "id": "S3.origin",
+      "jsonPointer": "/rows/11",
+      "obligation": "Source/normalization origin retained through diagnostics",
+      "correspondenceRows": [
+        "ER-01",
+        "N-01",
+        "N-04"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§4,10.2",
+          "exports": "MODULE-IDENTITY; GENERATED-ORIGIN"
+        },
+        {
+          "packet": "N",
+          "section": "§§3–4,7",
+          "exports": "origin/alpha/wrapper"
+        }
+      ],
+      "currentDispositionText": "Actual batches, source ordinals, roles and normalization plans are retained and the general association is supplied; native/C2/C3 and capability origin parity receipts bind actual productions.",
+      "requiredReceiptGroups": [
+        "origins",
+        "capabilities",
+        "source-recursion",
+        "migration"
+      ],
+      "statusUpdateTarget": "/rows/11/status",
+      "evidenceUpdateTarget": "/rows/11/evidence",
+      "implementationUpdateTarget": "/rows/11/implementationUpdate",
+      "protectedFlagPointer": "/rows/11/strictDischarged"
+    },
+    {
+      "id": "S3.binders",
+      "jsonPointer": "/rows/12",
+      "obligation": "Runtime/type/proof binder and declaration omission",
+      "correspondenceRows": [
+        "ER-01",
+        "ER-02",
+        "ER-03",
+        "ER-04",
+        "ER-09"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§2–7,12",
+          "exports": "SUBST; TYPE-CARRIER; GHOST-READ; EXEC-SCOPE"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§§3–7",
+          "exports": "U-SUBST; ENTRY-PREFIX; GHOST-UNIT"
+        }
+      ],
+      "currentDispositionText": "Mode-indexed actual scope, omission and entry-slot arguments replace the unspecified open binder relation. Mathematical source association does not add a serialized certificate requirement.",
+      "requiredReceiptGroups": [
+        "atomic",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "statusUpdateTarget": "/rows/12/status",
+      "evidenceUpdateTarget": "/rows/12/evidence",
+      "protectedFlagPointer": "/rows/12/strictDischarged"
+    },
+    {
+      "id": "S3.layout",
+      "jsonPointer": "/rows/13",
+      "obligation": "Constructor/record field/projection correspondence",
+      "correspondenceRows": [
+        "ER-05",
+        "ER-06",
+        "ER-08",
+        "EV-08",
+        "EV-09",
+        "EV-10",
+        "EV-11",
+        "TS-02"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§8–11",
+          "exports": "STRUCTURE-MAP; DATA-MAP; STRUCTURE-REC"
+        },
+        {
+          "packet": "TS",
+          "section": "§3",
+          "exports": "TS-LAYOUT"
+        }
+      ],
+      "currentDispositionText": "Both recursive-record and field-only routes, empty inductives and inhabited zero-field records are covered by actual metadata rules; all matching compile/artifact receipts are required.",
+      "requiredReceiptGroups": [
+        "generic-structures",
+        "source-empty",
+        "ir-empty",
+        "native-ir"
+      ],
+      "statusUpdateTarget": "/rows/13/status",
+      "evidenceUpdateTarget": "/rows/13/evidence",
+      "implementationUpdateTarget": "/rows/13/implementationUpdate",
+      "protectedFlagPointer": "/rows/13/strictDischarged"
+    },
+    {
+      "id": "S3.abi",
+      "jsonPointer": "/rows/14",
+      "obligation": "Generic order, function groups and public signatures",
+      "correspondenceRows": [
+        "ER-02",
+        "ER-04",
+        "N-04",
+        "EV-04",
+        "EV-05"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "GROUP",
+          "section": "§§3–10,13",
+          "exports": "U-SUBST; ENTRY-PREFIX; ENTRY-CALL; GHOST-UNIT; ENTRY-PI"
+        },
+        {
+          "packet": "ER",
+          "section": "§7",
+          "exports": "actual slot/capture association"
+        }
+      ],
+      "currentDispositionText": "Canonical unary function values coexist with flat actual entry prefixes and exact generic order. Physical Unit transport applies only to logical generic-zero-runtime definitions, not constructors or ordinary initialized values.",
+      "requiredReceiptGroups": [
+        "generic",
+        "migration",
+        "host-boundary",
+        "generations"
+      ],
+      "statusUpdateTarget": "/rows/14/status",
+      "evidenceUpdateTarget": "/rows/14/evidence",
+      "protectedFlagPointer": "/rows/14/strictDischarged"
+    },
+    {
+      "id": "S4.normalization",
+      "jsonPointer": "/rows/15",
+      "obligation": "Worker/wrapper, structural decrease and simultaneous updates",
+      "correspondenceRows": [
+        "N-01",
+        "N-02",
+        "N-03",
+        "N-04",
+        "ER-07"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "N",
+          "section": "§§3–8",
+          "exports": "all four normalization arguments"
+        },
+        {
+          "packet": "ER",
+          "section": "§10,§13.2",
+          "exports": "ROOT-PRODUCER; MAJOR-REFINEMENT; IH-RECURRENCE"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§3",
+          "exports": "cofinal composition"
+        }
+      ],
+      "currentDispositionText": "Legal telescope/identity/worker/readiness/public relation composes with the actual corrected producer. Direct structural minimum is enforced; unproved descendant aliases are not advertised as mandatory supported execution.",
+      "requiredReceiptGroups": [
+        "capabilities",
+        "migration",
+        "generic-recursion",
+        "source-recursion",
+        "origins"
+      ],
+      "statusUpdateTarget": "/rows/15/status",
+      "evidenceUpdateTarget": "/rows/15/evidence",
+      "protectedFlagPointer": "/rows/15/strictDischarged"
+    },
+    {
+      "id": "S4.ir",
+      "jsonPointer": "/rows/16",
+      "obligation": "Eleven IR forms and source/IR evaluation relation",
+      "correspondenceRows": [
+        "EV-01",
+        "EV-02",
+        "EV-03",
+        "EV-04",
+        "EV-05",
+        "EV-06",
+        "EV-07",
+        "EV-08",
+        "EV-09",
+        "EV-10",
+        "EV-11"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "COMMON",
+          "section": "§§1–3",
+          "exports": "indexed value/computation relation"
+        },
+        {
+          "packet": "EV",
+          "section": "§§2–15",
+          "exports": "all eleven rules and composition"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§1–3",
+          "exports": "completed interfaces"
+        }
+      ],
+      "currentDispositionText": "All eleven original-IR constructors have the completed structural/index argument with actual erasure producers and TS realization; full IR typing is supporting admission, not that proof.",
+      "requiredReceiptGroups": [
+        "ir",
+        "atomic",
+        "generic",
+        "runtime-evaluation"
+      ],
+      "statusUpdateTarget": "/rows/16/status",
+      "evidenceUpdateTarget": "/rows/16/evidence",
+      "protectedFlagPointer": "/rows/16/strictDischarged"
+    },
+    {
+      "id": "S4.errors",
+      "jsonPointer": "/rows/17",
+      "obligation": "Short-circuit demand, first error and state-on-error",
+      "correspondenceRows": [
+        "ER-03",
+        "ER-07",
+        "EV-03",
+        "EV-05",
+        "EV-06",
+        "EV-07",
+        "EV-11",
+        "TS-04"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "COMMON",
+          "section": "§2.3",
+          "exports": "value/error/resource distinction"
+        },
+        {
+          "packet": "EV",
+          "section": "§§4,6–8,12–13",
+          "exports": "demand and abort rules"
+        },
+        {
+          "packet": "ER",
+          "section": "§10",
+          "exports": "generated recursor demand"
+        },
+        {
+          "packet": "TS",
+          "section": "§5",
+          "exports": "TS-RUNNER"
+        }
+      ],
+      "currentDispositionText": "Ordered demand, short-circuit control and outward abort are related at the returned residual. Except.error is data; foreign first-fault probes are diagnostics; allocation/stack/time failures remain outside the semantic error alphabet.",
+      "requiredReceiptGroups": [
+        "runtime",
+        "runtime-evaluation",
+        "generic-recursion",
+        "ir-empty"
+      ],
+      "statusUpdateTarget": "/rows/17/status",
+      "evidenceUpdateTarget": "/rows/17/evidence",
+      "protectedFlagPointer": "/rows/17/strictDischarged"
+    },
+    {
+      "id": "S4.capture",
+      "jsonPointer": "/rows/18",
+      "obligation": "Application order, let scope, callbacks and returned functions",
+      "correspondenceRows": [
+        "ER-04",
+        "ER-09",
+        "EV-04",
+        "EV-05",
+        "EV-06",
+        "TS-04",
+        "TS-05"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "GROUP",
+          "section": "§§5–9",
+          "exports": "ENTRY-CALL; ENTRY-PI; FOLD-BRIDGE"
+        },
+        {
+          "packet": "ER",
+          "section": "§§3,7,12",
+          "exports": "EXEC-SCOPE; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "EV",
+          "section": "§§5–7",
+          "exports": "closure/call/let"
+        },
+        {
+          "packet": "TS",
+          "section": "§§5–6",
+          "exports": "TS-RUNNER; TS-ETA"
+        }
+      ],
+      "currentDispositionText": "Ordered supplied captures, returned canonical functions, old-scope lets and reentrant callbacks share the corrected lower-index residual relation; arbitrary result eta is inactive.",
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "host-boundary",
+        "optimized-tail"
+      ],
+      "statusUpdateTarget": "/rows/18/status",
+      "evidenceUpdateTarget": "/rows/18/evidence",
+      "implementationUpdateTarget": "/rows/18/implementationUpdate",
+      "protectedFlagPointer": "/rows/18/strictDischarged"
+    },
+    {
+      "id": "S5.initialization",
+      "jsonPointer": "/rows/19",
+      "obligation": "Eager globals and initialization demand order",
+      "correspondenceRows": [
+        "ER-01",
+        "TS-08"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§4",
+          "exports": "MODULE-IDENTITY"
+        },
+        {
+          "packet": "TS",
+          "section": "§9",
+          "exports": "TS-INIT"
+        },
+        {
+          "packet": "GROUP",
+          "section": "§7",
+          "exports": "GHOST-UNIT"
+        }
+      ],
+      "currentDispositionText": "Actual complete target earlier/self checks and ordered module prefix establish initialization and registration; exact current compiled artifacts remain required.",
+      "requiredReceiptGroups": [
+        "target",
+        "atomic",
+        "generic",
+        "generations"
+      ],
+      "statusUpdateTarget": "/rows/19/status",
+      "evidenceUpdateTarget": "/rows/19/evidence",
+      "protectedFlagPointer": "/rows/19/strictDischarged"
+    },
+    {
+      "id": "S5.names",
+      "jsonPointer": "/rows/20",
+      "obligation": "Target identifier domain and generated-name freshness",
+      "correspondenceRows": [
+        "ER-09",
+        "N-01",
+        "TS-01"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "ER",
+          "section": "§§2,12",
+          "exports": "INDEX; FRESH; EMITTED-OCCURRENCE"
+        },
+        {
+          "packet": "TS",
+          "section": "§§2,6.3",
+          "exports": "TS-NAMES"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§5",
+          "exports": "reserved-sort boundary"
+        }
+      ],
+      "currentDispositionText": "Source/Core identities, finite index/freshness and target namespace checks have actual producer proofs. Historical/native-valid source spelling boundaries and closed-local alpha transports are explicit.",
+      "requiredReceiptGroups": [
+        "target",
+        "name-index",
+        "origins",
+        "grammar"
+      ],
+      "statusUpdateTarget": "/rows/20/status",
+      "evidenceUpdateTarget": "/rows/20/evidence",
+      "protectedFlagPointer": "/rows/20/strictDischarged"
+    },
+    {
+      "id": "S5.generator",
+      "jsonPointer": "/rows/21",
+      "obligation": "Generator/trampoline lowering",
+      "correspondenceRows": [
+        "EV-04",
+        "EV-05",
+        "TS-03",
+        "TS-04"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "EV",
+          "section": "§13",
+          "exports": "mutual expression/call construction"
+        },
+        {
+          "packet": "TS",
+          "section": "§5,§11.1",
+          "exports": "TS-RUNNER"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§§2–3",
+          "exports": "index/progress composition"
+        }
+      ],
+      "currentDispositionText": "Registered, direct and reentrant runner paths preserve results/captures/abort and finite progress without same-index cycles or callback budget reset.",
+      "requiredReceiptGroups": [
+        "runtime-evaluation",
+        "ir",
+        "generic",
+        "generations"
+      ],
+      "statusUpdateTarget": "/rows/21/status",
+      "evidenceUpdateTarget": "/rows/21/evidence",
+      "protectedFlagPointer": "/rows/21/strictDischarged"
+    },
+    {
+      "id": "S5.eta",
+      "jsonPointer": "/rows/22",
+      "obligation": "Eta expansion/simplification and application grouping",
+      "correspondenceRows": [
+        "ER-04",
+        "TS-05"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "GROUP",
+          "section": "§§4–6",
+          "exports": "LAMBDA-ADMIN; ENTRY-PI"
+        },
+        {
+          "packet": "ER",
+          "section": "§7,§12",
+          "exports": "current entry and occurrence association"
+        },
+        {
+          "packet": "TS",
+          "section": "§6",
+          "exports": "TS-ETA"
+        }
+      ],
+      "currentDispositionText": "Use the three separated boundaries: canonical partial completion, immediate raw entry-prefix control, and restricted backend eta. No active arbitrary computed-result eta argument remains.",
+      "requiredReceiptGroups": [
+        "generic",
+        "runtime-evaluation",
+        "target",
+        "ir"
+      ],
+      "statusUpdateTarget": "/rows/22/status",
+      "evidenceUpdateTarget": "/rows/22/evidence",
+      "protectedFlagPointer": "/rows/22/strictDischarged"
+    },
+    {
+      "id": "S5.loops",
+      "jsonPointer": "/rows/23",
+      "obligation": "Count-loop and tail-loop routes",
+      "correspondenceRows": [
+        "TS-06",
+        "TS-07"
+      ],
+      "paperEvidence": [
+        {
+          "packet": "TS",
+          "section": "§§7–8,11.1",
+          "exports": "TS-COUNT; TS-TAIL"
+        },
+        {
+          "packet": "CROSS",
+          "section": "§1 O-OPT,§3",
+          "exports": "cofinal logical events"
+        }
+      ],
+      "currentDispositionText": "Count proper-child progress and tail simultaneous updates have general rules. Direct self accounts for1IRcall; alias-mediated transition accounts for2 with intermediate cutoff. Incoming12observations retain positive flat-tail coverage separately from replay general routes.",
+      "requiredReceiptGroups": [
+        "optimized-tail",
+        "ir",
+        "capabilities",
+        "runtime-evaluation"
+      ],
+      "statusUpdateTarget": "/rows/23/status",
+      "evidenceUpdateTarget": "/rows/23/evidence",
+      "protectedFlagPointer": "/rows/23/strictDischarged"
+    },
+    {
+      "id": "S6.qualification",
+      "jsonPointer": "/rows/24",
+      "obligation": "Exact current-source native/N1/C1/C2/C3 qualification",
+      "correspondenceRows": [],
+      "paperEvidence": [
+        {
+          "packet": "CROSS",
+          "section": "§7",
+          "exports": "paper review versus exact execution"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§4",
+          "exports": "attempt scope"
+        }
+      ],
+      "currentDispositionText": "Requires a successful exact final source run with native/N1/C1/C2/C3 and every configured gate, raw-source/product/recipe hashes and final binder. Latest00e run38004581681 failed before N1; no execution qualification can be inferred from completed papers or earlier partial passes.",
+      "requiredReceiptGroups": [
+        "host-boundary",
+        "toolchain",
+        "resource",
+        "generations",
+        "strict-binder"
+      ],
+      "statusUpdateTarget": "/rows/24/status",
+      "evidenceUpdateTarget": "/rows/24/evidence",
+      "implementationUpdateTarget": "/rows/24/implementationUpdate",
+      "protectedFlagPointer": "/rows/24/strictDischarged"
+    },
+    {
+      "id": "S6.provider",
+      "jsonPointer": "/rows/25",
+      "obligation": "Independent frozen-provider exact-stream acceptance",
+      "correspondenceRows": [],
+      "paperEvidence": [
+        {
+          "packet": "CROSS",
+          "section": "§7",
+          "exports": "independent provider scope"
+        }
+      ],
+      "currentDispositionText": "Requires the actual frozen provider963030dc decision receipt for exact C2/C3 full-closure, Lean/PS capability and generic-fixture streams after compiler qualification. No other per-compilation object is retroactively provider-checked.",
+      "requiredReceiptGroups": [
+        "provider"
+      ],
+      "statusUpdateTarget": "/rows/25/status",
+      "evidenceUpdateTarget": "/rows/25/evidence",
+      "implementationUpdateTarget": "/rows/25/implementationUpdate",
+      "protectedFlagPointer": "/rows/25/strictDischarged"
+    },
+    {
+      "id": "S6.activation",
+      "jsonPointer": "/rows/26",
+      "obligation": "All mandatory obligations defensibly closed",
+      "correspondenceRows": [],
+      "paperEvidence": [
+        {
+          "packet": "CROSS",
+          "section": "§§1–7",
+          "exports": "33-row composition"
+        },
+        {
+          "packet": "SOURCE_RUNTIME",
+          "section": "§§1–3",
+          "exports": "11 extra stage prerequisites"
+        }
+      ],
+      "currentDispositionText": "Root alone may record a complete explicit33+27disposition after exact execution/provider evidence and reviewed source transport. Preserve immutable per-compilation false flags, R selection, new-only grammar and hashed contract/recipe inputs; do not turn finite passes into formal theorem claims.",
+      "requiredReceiptGroups": [
+        "generations",
+        "strict-binder",
+        "provider"
+      ],
+      "statusUpdateTarget": "/rows/26/status",
+      "evidenceUpdateTarget": "/rows/26/evidence",
+      "protectedFlagPointer": "/rows/26/strictDischarged"
+    }
+  ],
+  "receiptCatalog": [
+    {
+      "id": "generations",
+      "files": [
+        "development/N1/receipt.json",
+        "C1/receipt.json",
+        "C2/receipt.json",
+        "C3/receipt.json",
+        "development/N1/index.ts",
+        "C1/index.ts",
+        "C2/index.ts",
+        "C3/index.ts",
+        "development/N1/index.js",
+        "C1/index.js",
+        "C2/index.js",
+        "C3/index.js",
+        "C1/source-closure.json",
+        "C2/source-closure.json",
+        "C3/source-closure.json",
+        "C2/original-ir-inventory.json",
+        "C3/original-ir-inventory.json",
+        "C2/canonical-source.json",
+        "C3/canonical-source.json",
+        "qualification.json"
+      ],
+      "required": "One final reviewed commit and raw source-closure hash; source/recipe/toolchain/profile and executing/output compiler hashes; actual R-derived C1 identity; complete current original-IR acceptance for C2/C3; N1=C2 emitted TS/JS and C2=C3 full compared artifact tuple. Compare only declared current canonical PS outputs, preserving C1's historical R canonical artifact boundary.",
+      "selectors": [
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/sourceRef",
+            "/sourceClosureSha256",
+            "/authoringSeed",
+            "/artifacts",
+            "/c1CompilerSha256",
+            "/c2CompilerSha256",
+            "/c3CompilerSha256",
+            "/nativeCanonicalSourceCorrespondence",
+            "/originalIrCheckedBuilds"
+          ]
+        }
+      ],
+      "limit": "Fixed-point equality, native parity and typed IR are qualification evidence, not a substitute for the reviewed general arguments."
+    },
+    {
+      "id": "strict-binder",
+      "files": [
+        "strict-enforcement-evidence.json",
+        "qualification.json"
+      ],
+      "sourceBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+      "required": "Authenticate every exact subreceipt/artifact digest, same raw input/closure and compiler identity, native/C2/C3 origin and TS/JS parity, complete reports and all listed fixed assertions. Use qualification.json/strictEnforcementEvidence/report and /sha256 to bind exact binder bytes.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/atomicBuilds",
+            "/generations",
+            "/artifacts",
+            "/nativeEmptyIr",
+            "/sourceOrigins",
+            "/sourceEvaluationReference"
+          ]
+        }
+      ],
+      "limit": "Do not change embedded strictSh1Qualified/semanticContractQualified/providerChecked=false: the binder intentionally requires those per-compilation nonclaims."
+    },
+    {
+      "id": "atomic",
+      "files": [
+        "development/N1/strict-source-native.json",
+        "C2/strict-source.json",
+        "C3/strict-source.json",
+        "C2/original-ir-inventory.json",
+        "C3/original-ir-inventory.json",
+        "strict-enforcement-evidence.json"
+      ],
+      "required": "Complete source and target traversal, accepted full original-IR check of the exact emitted object, fullSourcePreparations=1 and portableIrChecks=1, exact source module/input list, raw/TS/admissions hashes and native/current identity.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/atomicBuilds/0",
+            "/atomicBuilds/1",
+            "/atomicBuilds/2",
+            "/sourceInputsSha256"
+          ]
+        }
+      ],
+      "limit": "C1 is built through the authenticated selected-R exception; do not retrospectively call that build a current atomic API operation."
+    },
+    {
+      "id": "origins",
+      "files": [
+        "development/N1/strict-source-native.json",
+        "C2/strict-source.json",
+        "C3/strict-source.json",
+        "development/N1/capabilities/receipt.json",
+        "C1/capabilities/receipt.json",
+        "C2/capabilities/receipt.json",
+        "C3/capabilities/receipt.json",
+        "strict-enforcement-evidence.json"
+      ],
+      "required": "Bind actual source module ordinals, Core batch names/roles and normalization plans. Atomic native/C2/C3 common origins must match; each Lean/PS capability source reports35 source declarations,55 Core declarations and16normalizations.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/sourceOrigins",
+            "/atomicBuilds/0/originsSha256",
+            "/atomicBuilds/1/originsSha256",
+            "/atomicBuilds/2/originsSha256"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/capabilityOrigins",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/capabilityOrigins",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/capabilityOrigins",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/capabilityOrigins",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "Origins identify the association used by the source proof; they are not a separate expression-preservation certificate."
+    },
+    {
+      "id": "source",
+      "files": [
+        "development/N1/strict-source/receipt.json",
+        "C1/strict-source/receipt.json",
+        "C2/strict-source/receipt.json",
+        "C3/strict-source/receipt.json"
+      ],
+      "required": "For each executing compiler:2 accepted raw-source bundles,38 source refusals,2 carrier refusals; exact complete source/target/IR reports and ingress snapshots; retained source/TS artifacts where prescribed.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/source",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/source",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/source",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/source",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "Finite admission/refusal evidence over the implemented domain; does not replace the exhaustive source worklist argument."
+    },
+    {
+      "id": "source-empty",
+      "files": [
+        "development/N1/strict-source/receipt.json",
+        "C1/strict-source/receipt.json",
+        "C2/strict-source/receipt.json",
+        "C3/strict-source/receipt.json"
+      ],
+      "required": "Both raw Lean/PS empty source files and emitted TS files, their exact recorded paths/bytes/hashes and atomic receipts; each accepted bundle3modules/11 source/16 Core/1 import/0normalizations; empty subset5 source/6 Core/1 layout/4 typed eliminations, separate zero-field subset2 source/4 Core/1 zero-field constructor/actual record value.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/emptySource",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/emptySource",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/emptySource",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/emptySource",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/zeroFieldSource",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/zeroFieldSource",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/zeroFieldSource",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/zeroFieldSource",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "Empty elimination and zero-field inhabitation remain separate observations. Preserve exact recorded artifact filenames from the subreceipts."
+    },
+    {
+      "id": "source-recursion",
+      "files": [
+        "development/N1/strict-source/receipt.json",
+        "C1/strict-source/receipt.json",
+        "C2/strict-source/receipt.json",
+        "C3/strict-source/receipt.json",
+        "development/N1/strict-source/source-cases.json",
+        "C1/strict-source/source-cases.json",
+        "C2/strict-source/source-cases.json",
+        "C3/strict-source/source-cases.json",
+        "development/N1/capabilities/receipt.json",
+        "C1/capabilities/receipt.json",
+        "C2/capabilities/receipt.json",
+        "C3/capabilities/receipt.json"
+      ],
+      "required": "Exact five structural-refusal fixtures and stage/detail/owner/span/input hashes within the retained38 source refusals, plus allowed direct-root/nested-outer cases in the generic fixture; complete original-telescope refusal boundary.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/structuralRecursionRefusals",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/structuralRecursionRefusals",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/structuralRecursionRefusals",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/structuralRecursionRefusals",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "No blanket nested-match refusal, descendant-alias coverage waiver or arbitrary raw-Core root theorem is inferred."
+    },
+    {
+      "id": "target",
+      "files": [
+        "development/N1/strict-target/receipt.json",
+        "C1/strict-target/receipt.json",
+        "C2/strict-target/receipt.json",
+        "C3/strict-target/receipt.json"
+      ],
+      "required": "29observations comprising9 accepted/20 refused, exact target policy and compiler hashes, complete name/order/depth judgment, false arbitraryTypedIrIsStrictSource and semanticPreservationProven observation flags retained.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/target",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/target",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/target",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/target",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "The target judgment does not by itself reconstruct source binding or implicit-owner provenance."
+    },
+    {
+      "id": "ir",
+      "files": [
+        "development/N1/ir-checker/receipt.json",
+        "C1/ir-checker/receipt.json",
+        "C2/ir-checker/receipt.json",
+        "C3/ir-checker/receipt.json",
+        "development/N1/ir-checker/accepted/index.ts",
+        "C1/ir-checker/accepted/index.ts",
+        "C2/ir-checker/accepted/index.ts",
+        "C3/ir-checker/accepted/index.ts",
+        "development/N1/ir-checker/accepted/index.js",
+        "C1/ir-checker/accepted/index.js",
+        "C2/ir-checker/accepted/index.js",
+        "C3/ir-checker/accepted/index.js",
+        "development/N1/ir-checker/accepted/index.d.ts",
+        "C1/ir-checker/accepted/index.d.ts",
+        "C2/ir-checker/accepted/index.d.ts",
+        "C3/ir-checker/accepted/index.d.ts"
+      ],
+      "required": "The actual accepted original-IR object and complete portable inventory, checked/raw emitted parity and one successful configured TS compile;38 negative fixtures,61baseline behavior observations, resource/type-operation/carrier refusal paths unchanged. The added3 tail declarations/1TailList layout are part of that same accepted object.",
+      "selectors": [
+        {
+          "file": "development/N1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        },
+        {
+          "file": "C1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        },
+        {
+          "file": "C2/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        },
+        {
+          "file": "C3/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/acceptedFixture",
+            "/artifacts",
+            "/behavior",
+            "/rejected",
+            "/exhausted",
+            "/directTypeOperations",
+            "/carrierRejections",
+            "/checkedPreparedEntry"
+          ]
+        }
+      ],
+      "limit": "Do not present the finite accepted IR fixture or61 behavior observations as the eleven-constructor proof."
+    },
+    {
+      "id": "ir-empty",
+      "files": [
+        "development/N1/ir-checker/receipt.json",
+        "C1/ir-checker/receipt.json",
+        "C2/ir-checker/receipt.json",
+        "C3/ir-checker/receipt.json"
+      ],
+      "required": "Actual empty layouts/typed eliminations, five exact empty .d.ts signatures and the zero-field value/ABI, bound to the same accepted TS/JS/d.ts products and full inventory.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/emptyIr",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/emptyIr",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/emptyIr",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/emptyIr",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "General empty-major demand is the Core/IR/JS relation; native empty equivalence has its separately proved closed domain."
+    },
+    {
+      "id": "native-ir",
+      "files": [
+        "development/N1/ir-checker-native/receipt.json",
+        "development/N1/ir-checker-native/native.stdout.log",
+        "development/N1/ir-checker-native/native.stderr.log",
+        "development/N1/ir-checker-native/execution-inputs.json",
+        "development/N1/strict-source-native.json"
+      ],
+      "required": "Pinned current native executable/hash, full closure input/source-report binding, full original-IR check and15 native empty-data cases in the same process; exact stdout and artifact hashes.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/nativeEmptyIr"
+          ]
+        },
+        {
+          "file": "development/N1/receipt.json",
+          "jsonPointers": [
+            "/runtimeIrTyping/nativeCurrentSource"
+          ]
+        }
+      ],
+      "limit": "The native executable's own assertions/receipt are execution evidence, not a general demand theorem."
+    },
+    {
+      "id": "generic",
+      "files": [
+        "development/N1/generic-erasure/receipt.json",
+        "C1/generic-erasure/receipt.json",
+        "C2/generic-erasure/receipt.json",
+        "C3/generic-erasure/receipt.json",
+        "development/N1/generic-erasure/admissions.json",
+        "C1/generic-erasure/admissions.json",
+        "C2/generic-erasure/admissions.json",
+        "C3/generic-erasure/admissions.json",
+        "development/N1/generic-erasure/generated/index.ts",
+        "C1/generic-erasure/generated/index.ts",
+        "C2/generic-erasure/generated/index.ts",
+        "C3/generic-erasure/generated/index.ts",
+        "development/N1/generic-erasure/generated/index.js",
+        "C1/generic-erasure/generated/index.js",
+        "C2/generic-erasure/generated/index.js",
+        "C3/generic-erasure/generated/index.js",
+        "development/N1/generic-erasure/native/index.ts",
+        "development/N1/generic-erasure/native/index.js"
+      ],
+      "required": "Exact fixture source hash; complete current original IR with canonical unary value/field types, 18 actual source-entry arity records and2 type-only Unit entry records; direct/partial/returned generic/annotation witnesses and19 function-value observations(14 pure values,5 host diagnostics). N1 includes native-produced TS/JS parity and behavior; all four generated compilers run the same fixture.",
+      "selectors": [
+        {
+          "file": "development/N1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "C1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "C2/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "C3/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/sourceSha256",
+            "/originalIr",
+            "/functionValues",
+            "/artifacts"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/genericFunctionValues",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/genericFunctionValues",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/genericFunctionValues",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/genericFunctionValues",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "Host demand diagnostics do not enable arbitrary source effects. Exact source-domain and entry proof is GROUP/ER."
+    },
+    {
+      "id": "generic-recursion",
+      "files": [
+        "development/N1/generic-erasure/receipt.json",
+        "C1/generic-erasure/receipt.json",
+        "C2/generic-erasure/receipt.json",
+        "C3/generic-erasure/receipt.json",
+        "development/N1/generic-erasure/recursion-core.json",
+        "C1/generic-erasure/recursion-core.json",
+        "C2/generic-erasure/recursion-core.json",
+        "C3/generic-erasure/recursion-core.json"
+      ],
+      "required": "Actual prepared Core for the two corrected Nat recursion declarations, four independent finite2/3→3/6 observations and generated/native comparisons; exact Core artifact/source hashes and reused preparation/IR.",
+      "selectors": [
+        {
+          "file": "development/N1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "C1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "C2/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "C3/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursion/reference",
+            "/recursion/behavior"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/genericFunctionValues/recursion"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/genericFunctionValues/recursion"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/genericFunctionValues/recursion"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/genericFunctionValues/recursion"
+        }
+      ],
+      "limit": "The bounded reference checks those closed total Nat equations; it is not the selective-recursion/callback/divergence adequacy proof."
+    },
+    {
+      "id": "generic-structures",
+      "files": [
+        "development/N1/generic-erasure/receipt.json",
+        "C1/generic-erasure/receipt.json",
+        "C2/generic-erasure/receipt.json",
+        "C3/generic-erasure/receipt.json"
+      ],
+      "required": "Compile-only exact recursive structures:2layouts,4declarations,6 projection lets,2 used IHs,2 unused IHs; one-major and fresh-name/order/body-shape checks; exact reused original IR/TS/native artifacts;0 runtime invocations and0 constructed recursive records.",
+      "selectors": [
+        {
+          "file": "development/N1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "C1/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "C2/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "C3/generic-erasure/receipt.json",
+          "jsonPointers": [
+            "/recursiveStructures"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/genericFunctionValues/recursiveStructures"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/genericFunctionValues/recursiveStructures"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/genericFunctionValues/recursiveStructures"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/genericFunctionValues/recursiveStructures"
+        }
+      ],
+      "limit": "Lack of finite inhabitants does not waive compilation. Zero runtime invocations is deliberate evidence scope, not a preservation proof by vacuity."
+    },
+    {
+      "id": "runtime",
+      "files": [
+        "development/N1/strict-runtime-reference/reference.json",
+        "development/N1/strict-runtime/receipt.json",
+        "C1/strict-runtime/receipt.json",
+        "C2/strict-runtime/receipt.json",
+        "C3/strict-runtime/receipt.json"
+      ],
+      "required": "Native Lean 4.34.0/293d5d0 reference with45operations/186observations, exact source/contract/stdout/observation hashes; each compiler's exact same observations,45 nonempty coverage rows,8 bounds/9 operand/5 carrier/2 text-position observations and complete reused IR check.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/reference",
+            "/contractSha256",
+            "/referenceSourceSha256",
+            "/leanGitHash"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/runtime",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/runtime",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/runtime",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/runtime",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "The45laws and callback schemas come from the reviewed arguments. Keep formalPreservationProven and sourceProofProvenanceReconstructed=false in the receipts."
+    },
+    {
+      "id": "runtime-evaluation",
+      "files": [
+        "development/N1/strict-runtime-reference/native-source-evaluation/receipt.json",
+        "development/N1/strict-runtime/receipt.json",
+        "C1/strict-runtime/receipt.json",
+        "C2/strict-runtime/receipt.json",
+        "C3/strict-runtime/receipt.json",
+        "development/N1/strict-runtime/source-evaluation/lean-source-receipt.json",
+        "C1/strict-runtime/source-evaluation/lean-source-receipt.json",
+        "C2/strict-runtime/source-evaluation/lean-source-receipt.json",
+        "C3/strict-runtime/source-evaluation/lean-source-receipt.json",
+        "development/N1/strict-runtime/source-evaluation/ps-source-receipt.json",
+        "C1/strict-runtime/source-evaluation/ps-source-receipt.json",
+        "C2/strict-runtime/source-evaluation/ps-source-receipt.json",
+        "C3/strict-runtime/source-evaluation/ps-source-receipt.json",
+        "development/N1/strict-runtime/source-equality/lean-source-receipt.json",
+        "C1/strict-runtime/source-equality/lean-source-receipt.json",
+        "C2/strict-runtime/source-equality/lean-source-receipt.json",
+        "C3/strict-runtime/source-equality/lean-source-receipt.json",
+        "development/N1/strict-runtime/source-equality/ps-source-receipt.json",
+        "C1/strict-runtime/source-equality/ps-source-receipt.json",
+        "C2/strict-runtime/source-equality/ps-source-receipt.json",
+        "C3/strict-runtime/source-equality/ps-source-receipt.json"
+      ],
+      "required": "Bind the frozen12-declaration source-evaluation fixture,24 native values/21 host probes, raw Lean/PS and emitted TS/admission artifacts; separate6-declaration source-equality regression. Follow exact source/artifact paths in each subreceipt; do not replace frozen raw PS pins or add new cycles.",
+      "selectors": [
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointers": [
+            "/sourceEvaluationReference"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/sourceEvaluation",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/sourceEvaluation",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/sourceEvaluation",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/sourceEvaluation",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/sourceEquality",
+          "generation": "development/N1",
+          "receipt": "development/N1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/sourceEquality",
+          "generation": "C1",
+          "receipt": "C1/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/sourceEquality",
+          "generation": "C2",
+          "receipt": "C2/receipt.json"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/sourceEquality",
+          "generation": "C3",
+          "receipt": "C3/receipt.json"
+        }
+      ],
+      "limit": "Throwing/callback probes are explicitly diagnostic; they do not become inhabitants of the closed source-origin native domain."
+    },
+    {
+      "id": "capabilities",
+      "files": [
+        "development/N1/capabilities/receipt.json",
+        "C1/capabilities/receipt.json",
+        "C2/capabilities/receipt.json",
+        "C3/capabilities/receipt.json"
+      ],
+      "required": "Both actual raw Lean/PS sources, ordered35/55/16 origin observations, complete checked IR, signatures, grammar/projection cases and retained positive/negative behavior including fuel20000 where specified.",
+      "selectors": [
+        {
+          "file": "development/N1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C2/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C3/capabilities/receipt.json",
+          "jsonPointers": [
+            "/sourceKinds",
+            "/negativeCases",
+            "/projectionResolution",
+            "/grammar",
+            "/workerMigration"
+          ]
+        }
+      ],
+      "limit": "Source-specific finite capability execution supplements N/ER/EV/TS rule arguments."
+    },
+    {
+      "id": "migration",
+      "files": [
+        "worker-harness-reference.json",
+        "worker-migration-reference.json",
+        "worker-migration-correspondence.json",
+        "development/N1/capabilities/receipt.json",
+        "C1/capabilities/receipt.json",
+        "C2/capabilities/receipt.json",
+        "C3/capabilities/receipt.json",
+        "C1/receipt.json",
+        "C2/receipt.json",
+        "C3/receipt.json"
+      ],
+      "required": "Authenticated unchanged R hash/source/seed identity;87 reference/currentworker cases;12 full signatures and12 typed generic partial wrappers in isolated reference probe; full current source original-IR/public ABI from C1/C2/C3; matched reference/current observation hashes.",
+      "selectors": [
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/workerMigration"
+          ]
+        },
+        {
+          "file": "C1/receipt.json",
+          "jsonPointers": [
+            "/migrationWorkerAbi"
+          ]
+        },
+        {
+          "file": "C2/receipt.json",
+          "jsonPointers": [
+            "/migrationWorkerAbi"
+          ]
+        },
+        {
+          "file": "C3/receipt.json",
+          "jsonPointers": [
+            "/migrationWorkerAbi"
+          ]
+        }
+      ],
+      "limit": "Reference/current explicit producer groups remain separate. The finite12 worker corpus does not replace normalization preservation."
+    },
+    {
+      "id": "optimized-tail",
+      "files": [
+        "development/N1/ir-checker/receipt.json",
+        "C1/ir-checker/receipt.json",
+        "C2/ir-checker/receipt.json",
+        "C3/ir-checker/receipt.json"
+      ],
+      "sourceManifest": "4fd43041addbf6d8f79083c372d4b3c006e7b6d0",
+      "required": "optimizedTail block with3 flat entries,actual JS arities3/2/2,exact while-loop export hashes/transitions/signatures,no general __ps$impl fallback,alias elision,1TailList layout and12observations(11 value+1invalid-tag); same existing accepted TS/JS/d.ts hashes. No additional preparation/check/emit/TS/native call.",
+      "selectors": [
+        {
+          "file": "development/N1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "C1/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "C2/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "C3/ir-checker/receipt.json",
+          "jsonPointers": [
+            "/optimizedTail"
+          ]
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/0/emptyIr/optimizedTail"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/1/emptyIr/optimizedTail"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/2/emptyIr/optimizedTail"
+        },
+        {
+          "file": "strict-enforcement-evidence.json",
+          "jsonPointer": "/generations/3/emptyIr/optimizedTail"
+        }
+      ],
+      "limit": "The new block preserves positive optimizer evidence while canonical returned-function replay entries legitimately take the general route. It does not alter TS-TAIL's direct1/alias2 logical-call proof."
+    },
+    {
+      "id": "grammar",
+      "files": [
+        "development/N1/grammar-closure.json",
+        "development/N1/capabilities/receipt.json",
+        "C1/capabilities/receipt.json",
+        "C2/capabilities/receipt.json",
+        "C3/capabilities/receipt.json",
+        "C2/canonical-source.json",
+        "C3/canonical-source.json"
+      ],
+      "required": "Complete current raw closure round-trip and native/C2/C3 canonical source hash association; existing grammar pairs/refusals including5 empty pairs/6refusals and1 zero-record pair/2refusals, with exact full-term nomatch nesting and unchanged new-only profile.",
+      "selectors": [
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/nativeCanonicalSourceCorrespondence",
+            "/sourceGrammar"
+          ]
+        },
+        {
+          "file": "development/N1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        },
+        {
+          "file": "C1/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        },
+        {
+          "file": "C2/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        },
+        {
+          "file": "C3/capabilities/receipt.json",
+          "jsonPointers": [
+            "/grammar"
+          ]
+        }
+      ],
+      "limit": "Native-compatible identifier restrictions and owned-parser overacceptance are not upgraded to general syntax equivalence; latest fold pattern source-shape failure must be corrected and this gate rerun."
+    },
+    {
+      "id": "host-boundary",
+      "files": [
+        "development/foundation/receipt.json",
+        "foundation/receipt.json",
+        "development/helpers/receipt.json",
+        "helpers/receipt.json",
+        "development/N1/helper-runtime.json",
+        "C1/helper-runtime.json",
+        "C2/helper-runtime.json",
+        "C3/helper-runtime.json",
+        "development/session-conformance.json",
+        "session-conformance.json",
+        "development/iteration/receipt.json",
+        "worker-harness-reference.json"
+      ],
+      "required": "Exact current unary/flat-source-prefix host invocations and original expected values/arity checks, selected-R foundation/helper option only at two authenticated reference call sites, replay/native CLI success and index slice success in the full Actions job log. Retain actual receipt paths where the gate writes no separate file.",
+      "sourceManifests": [
+        "d806212a2f6125a863bd0abe658e416e0b090cba",
+        "320a3e3b02b444158db0688e4a7f590877bcb98a",
+        "2d0a961d675206b07f14ac71fe88a21e00655bea"
+      ],
+      "limit": "The replay test and checked-name-index test are workflow-log gates; do not fabricate dedicated receipt files. Selected-R convention support is specific to the authenticated producer, not an old-language compatibility API."
+    },
+    {
+      "id": "name-index",
+      "files": [],
+      "required": "Full Actions step22 success for scripts/checked-erasure-name-index.test.mjs with exact candidate50e91efbdf4d368a713b307aadae5ce2bd9a752a; retained index assertions and source-slice boundary through PsErasureError. Also actual target/name conformance receipts.",
+      "sourceManifest": "d806212a2f6125a863bd0abe658e416e0b090cba",
+      "limit": "This test writes no required standalone receipt. Its finite cases supplement INDEX/FRESH/EXEC-SCOPE, not prove them."
+    },
+    {
+      "id": "resource",
+      "files": [
+        "resource-policy-preflight.json",
+        "resource-policy-candidate.json",
+        "resource-policy-fixed-point.json",
+        "C1/receipt.json",
+        "C2/receipt.json",
+        "C3/receipt.json"
+      ],
+      "required": "Successful resource-policy-preflight.json plus exact candidate/fixed-point policy receipts. Native-candidate deliberately does not call enforceQualificationResourcePolicy and writes no resource-policy-native-candidate.json. Generation receipt /resourceObservation and /resourcePolicy bind actual phase/event traces and hashes; inspect final-source completion without inferring memory/time preservation from FINITE-PLACEMENT.",
+      "selectors": [
+        {
+          "file": "C1/receipt.json",
+          "jsonPointers": [
+            "/resourceObservation",
+            "/resourcePolicy"
+          ]
+        },
+        {
+          "file": "C2/receipt.json",
+          "jsonPointers": [
+            "/resourceObservation",
+            "/resourcePolicy"
+          ]
+        },
+        {
+          "file": "C3/receipt.json",
+          "jsonPointers": [
+            "/resourceObservation",
+            "/resourcePolicy"
+          ]
+        }
+      ],
+      "limit": "Resource evidence measures this run; it does not enlarge the semantic error alphabet or promise universal resource use."
+    },
+    {
+      "id": "toolchain",
+      "files": [
+        "development/N1/receipt.json",
+        "C1/receipt.json",
+        "C2/receipt.json",
+        "C3/receipt.json",
+        "qualification.json"
+      ],
+      "artifactRootOutsideDistSh1": "psc0/dist/typescript-profile",
+      "required": "Exact native Lean version/githash,Node 22.23.3,TypeScript 7.0.2,locked installation/profile hashes and configured compilation; current recipe lists all changed host helpers. The workflow artifact contains the actual TypeScript profile reports/lockfiles; use their recorded paths rather than inventing new filenames.",
+      "selectors": [
+        {
+          "file": "development/N1/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "C1/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "C2/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "C3/receipt.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile",
+            "/recipe"
+          ]
+        },
+        {
+          "file": "qualification.json",
+          "jsonPointers": [
+            "/toolchain",
+            "/typescriptProfile"
+          ]
+        }
+      ],
+      "limit": "Trusted TS/native/JS semantics remain explicit. Do not claim a theorem about the implementation of TypeScript itself."
+    },
+    {
+      "id": "provider",
+      "files": [
+        "kernel-admissions.json",
+        "qualification.json",
+        "C2/admissions.json",
+        "C3/admissions.json",
+        "C2/capabilities/lean/admissions.json",
+        "C2/capabilities/ps/admissions.json",
+        "C3/capabilities/lean/admissions.json",
+        "C3/capabilities/ps/admissions.json",
+        "C2/generic-erasure/admissions.json",
+        "C3/generic-erasure/admissions.json"
+      ],
+      "required": "Exact frozen provider963030dc2d154008fccc82e7c8ed29331f138799 source/tree/binary/metadata/Lean pin, final compiler/sourceclosure identity, accepted=true and each deduplicated exact stream decision accepted. Input digests must match the corresponding current generation/capability/generic receipts;8 labeled streams may deduplicate to fewer calls.",
+      "selectors": [
+        {
+          "file": "kernel-admissions.json",
+          "jsonPointers": [
+            "/sourceRef",
+            "/sourceClosureSha256",
+            "/compilerSha256",
+            "/provider",
+            "/streams",
+            "/accepted",
+            "/emissionWasGatedByThisCheck"
+          ]
+        }
+      ],
+      "limit": "Independent exact-stream acceptance is a separate post-compiler claim. It does not assert every source/runtime/IR example was checked by the provider or that emission was gated by it."
+    }
+  ],
+  "receiptPathConvention": "Receipt/artifact paths are relative to psc0/dist/sh1 from the full qualification artifact unless explicitly marked otherwise. N1 is development/N1; generation indices in the binder are0=N1,1=C1,2=C2,3=C3. The actual output key is generations, not the local variable generationEvidence.",
+  "metadataMaintenance": [
+    {
+      "document": "correspondence",
+      "jsonPointer": "/coverage/mandatoryCoverageNotWaived",
+      "action": "Refresh current missing-general-preservation language to cite completed ER/GROUP/CROSS arguments while retaining all mandatory empty/zero-field/recursive-structure coverage and exact execution prerequisites."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/sharedSemanticFoundation/interactionBudget",
+      "action": "Clarify that COMMON itself introduced a definition and no all-index adequacy claim; CROSS+GROUP+ER now supply the reviewed all-index cofinal composition. Keep its historical sourceRef2b5 and frozen COMMON bytes."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reusableArtifacts/2/blob",
+      "old": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18",
+      "current": "1a547f20911ac23a1f0a9368839593383f9c31e0",
+      "action": "Attach finite Nat-placement transport to the actual current Reduce source; no defeq/kernel semantics change or general evaluator claim."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/normativeAuthority/1/blob",
+      "old": "3f2bcf9aec687a3395a49042aab7732e34a110e0",
+      "current": "0a2a2b26635343472c23b51b1b60394d6f3075e5",
+      "action": "This is a historical proposal snapshot, not an active source proof. If root refreshes the authority pointer, retain the original snapshot in history and bind the exact current proposal independently; do not infer semantic changes merely from its SHA."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/normativeAuthority/2/blob",
+      "old": "5b96f722c573d9e28b376617101d4d7527b44078",
+      "current": "01d3a410da8f3ea8d11a322c7f519433c6e9043f",
+      "action": "Associate the actual current RUNTIME_IR_PLAN document separately from the old authority snapshot; preserve historical review provenance."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/sourceIdentityAdmission/sourceConformanceRefusals",
+      "currentValue": 33,
+      "currentFullGateCount": 38,
+      "action": "The33count belongs to the earlier identity-admission checkpoint. Preserve it as that historical count or explicitly relabel; the final full source conformance count is38, including the five structural-producer refusals."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/sourceIdentityAdmission/status",
+      "action": "The source identity argument is supplied by SOURCE_RUNTIME and ER. Refresh only the active disposition; keep original candidate review and flags as history."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/implementationManifest",
+      "action": "Add active exact source43batch397916, Nat1530, root895081, record62a, native-alpha bc086 and seven-host2d0 transports plus the pending flat-match correction. Keep the older implementation-checkpoint.json as historical rather than treating it as the only current implementation identity."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/currentQualificationRequest",
+      "action": "Replace the awaiting-run-discovery status for the host batch with actual run38004581681/head00e failure, then append the next reviewed correction/run identity only when known. Do not reuse a failed or partial attempt as final qualification."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/latestExecution",
+      "action": "Preserve the prior45d replay failure and record the newer00e step24 owned-parser failure; native/replay/migration preflight success is partial evidence, N1 did not finish and C1/C2/C3/provider did not run."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/finalDisposition",
+      "action": "Attach this proposed33+27map and final source/receipt identities. completeGeneralSourceReview/sourceRuntimeStageReviewComplete are already documented; leave correspondenceRowsClosed and stageObligationsClosed at0 until root's actual final disposition."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reviewedGeneralArguments",
+      "action": "All current paper blobs are already correct. Retain historical sourceRef/review fields and add the explicit active source transport; do not substitute old producer pins as current source identities."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reviewedCrossFamilyComposition",
+      "action": "Keep frozen7702 review and its exact scope. Add the final alpha/flat-match producer transport without reopening or rewriting the proof packet."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reviewedSourceRuntimeInterface",
+      "action": "Keep06b5/814936 and its45d source anchor; current00e adds only host scripts. Attach pending final source-shape transport when reviewed, leaving execution disposition separate."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reviewedParserCorrection/sourceBlob",
+      "old": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "current": "6c9056bb03424fb73667e9c74d59432e05cf0a71",
+      "action": "Retain the original reviewed parser candidate pin; add Nat-placement/current-source association, rather than falsifying its original review source."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reviewedCanonicalRecursionCorrection/recursiveStructures/sourceFiles/0/blob",
+      "old": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "current": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "action": "Retain62a's original Expr pin as reviewed history; actual current source is transported through the closed-local keyword alpha repair and pending flat-match source-shape correction."
+    },
+    {
+      "document": "correspondence",
+      "jsonPointer": "/reviewedRecursiveStructureCorrection/sourceFiles/0/blob",
+      "old": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "current": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "action": "Same original review pin; do not overwrite historical source bytes. Associate final Expr explicitly."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/currentQualificationRequest",
+      "action": "Replace the awaiting-run-discovery status for the host batch with actual run38004581681/head00e failure, then append the next reviewed correction/run identity only when known. Do not reuse a failed or partial attempt as final qualification."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/latestExecution",
+      "action": "Preserve the prior45d replay failure and record the newer00e step24 owned-parser failure; native/replay/migration preflight success is partial evidence, N1 did not finish and C1/C2/C3/provider did not run."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/finalDisposition",
+      "action": "Attach this proposed33+27map and final source/receipt identities. completeGeneralSourceReview/sourceRuntimeStageReviewComplete are already documented; leave correspondenceRowsClosed and stageObligationsClosed at0 until root's actual final disposition."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/reviewedGeneralArguments",
+      "action": "All current paper blobs are already correct. Retain historical sourceRef/review fields and add the explicit active source transport; do not substitute old producer pins as current source identities."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/reviewedCrossFamilyComposition",
+      "action": "Keep frozen7702 review and its exact scope. Add the final alpha/flat-match producer transport without reopening or rewriting the proof packet."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/reviewedSourceRuntimeInterface",
+      "action": "Keep06b5/814936 and its45d source anchor; current00e adds only host scripts. Attach pending final source-shape transport when reviewed, leaving execution disposition separate."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/reviewedParserCorrection/sourceBlob",
+      "old": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "current": "6c9056bb03424fb73667e9c74d59432e05cf0a71",
+      "action": "Retain the original reviewed parser candidate pin; add Nat-placement/current-source association, rather than falsifying its original review source."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/reviewedCanonicalRecursionCorrection/recursiveStructures/sourceFiles/0/blob",
+      "old": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "current": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "action": "Retain62a's original Expr pin as reviewed history; actual current source is transported through the closed-local keyword alpha repair and pending flat-match source-shape correction."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/reviewedRecursiveStructureCorrection/sourceFiles/0/blob",
+      "old": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "current": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "action": "Same original review pin; do not overwrite historical source bytes. Associate final Expr explicitly."
+    },
+    {
+      "document": "stage",
+      "jsonPointer": "/cloudExecution",
+      "action": "Current field still describes ninth45d attempt. Append/refresh to actual00e failed attempt and then final run if successful; retain qualificationAttempts history and no fabricated N1/C1/provider pass."
+    }
+  ],
+  "historicalPinsToPreserve": [
+    "correspondence:/baseRevision and stage:/baselineSourceRef are historical baselines, not active source anchors.",
+    "COMMON's sourceRef2b5, N/EV/TS sourceRef3c0 and original reviewed source candidate pins identify what each frozen paper/review read; attach source transport instead of rewriting that history.",
+    "Targeta0e703 is already the annotation-completed weighted-depth implementation. Its older1c5normalization comparison is retained evidence, not a missing implementation.",
+    "All prior failed/partial attempt evidence, independent provider receipts and immutable seed/cold provenance retain their original source identity and status."
+  ],
+  "immutableContract": {
+    "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+    "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b",
+    "sha256": "21a9272d9d9a68ca67041a705cc049f02d4ccdf8fc258666dc59cce8c428db89",
+    "action": "Do not rewrite this hashed contract's candidate/nonclaim bytes or psconfig/recipe solely to announce qualification. An external final ledger/release record may qualify the reviewed implementation against this exact digest."
+  },
+  "protectedDisposition": {
+    "correspondenceRowsClosed": 0,
+    "stageObligationsClosed": 0,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "formalPreservationProven": false,
+    "sourceFilesChanged": 0,
+    "ledgerFilesChanged": 0,
+    "executions": 0,
+    "allExistingBooleanFlagsPreserved": true,
+    "exactExistingFlagPaths": [
+      {
+        "document": "correspondence",
+        "flags": [
+          {
+            "jsonPointer": "/assurance/strictSh1Qualified",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/semanticContractQualified",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/kernelChanged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/providerChanged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/defeqChanged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/theoryChanged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/finiteTestsAreGeneralProof",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/typingIsSemanticPreservation",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/fixedPointIsSemanticPreservation",
+            "value": false
+          },
+          {
+            "jsonPointer": "/assurance/providerAdmissionIsRuntimePreservation",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/0/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/0/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/1/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/1/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/2/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/2/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/3/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/3/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/4/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/4/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/5/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/5/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/6/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/6/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/7/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/7/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/8/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/8/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/9/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/9/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/10/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/10/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/11/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/11/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/12/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/12/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/13/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/13/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/14/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/14/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/15/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/15/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/16/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/16/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/17/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/17/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/18/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/18/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/19/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/19/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/20/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/20/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/21/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/21/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/22/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/22/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/23/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/23/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/24/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/24/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/25/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/25/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/26/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/26/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/27/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/27/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/28/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/28/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/29/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/29/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/30/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/30/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/31/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/31/strictSh1Discharged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/32/generalPreservationProven",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/32/strictSh1Discharged",
+            "value": false
+          }
+        ]
+      },
+      {
+        "document": "stage",
+        "flags": [
+          {
+            "jsonPointer": "/strictSh1Qualified",
+            "value": false
+          },
+          {
+            "jsonPointer": "/sourceCheckpointQualified",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/0/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/1/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/2/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/3/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/4/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/5/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/6/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/7/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/8/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/9/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/10/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/11/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/12/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/13/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/14/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/15/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/16/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/17/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/18/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/19/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/20/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/21/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/22/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/23/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/24/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/25/strictDischarged",
+            "value": false
+          },
+          {
+            "jsonPointer": "/rows/26/strictDischarged",
+            "value": false
+          }
+        ]
+      }
+    ],
+    "perCompilationReceipts": "Preserve false strictSh1Qualified/semanticContractQualified/providerChecked/formalPreservationProven/sourceProofProvenanceReconstructed flags in source/runtime/IR/reference/binder outputs; the current binder explicitly validates those limits. Root's independent final disposition must not retroactively mutate them."
+  },
+  "verification": {
+    "method": "Pure in-memory text/JSON/path/name/hash inspection of immutable GitHub source and already reviewed papers only.",
+    "rowCounts": {
+      "correspondence": 33,
+      "stage": 27
+    },
+    "rowArraysIdenticalToPriorCheckpoint": true,
+    "staleActiveRowSourceBlobSelectors": 49,
+    "sourceDefinitionReplacementLists": 3,
+    "sourceAdditionEntries": 6,
+    "receiptGroups": 25,
+    "removedDefinitionName": "psEraseFinishApplicationWithFuelWorker",
+    "inactiveDefinitionStillPresent": "psErasureEtaFunction",
+    "inactiveDefinitionCallsites": 0,
+    "rootOnlyFinalDisposition": true
+  },
+  "sourceBlobUpdates": [
+    {
+      "id": "ER-01",
+      "jsonPointer": "/rows/0/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "expected": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+      "observedAt45dAnd00e": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "proposedFinal": "4c9d3878c01751239022e755e2860c6d49ddf301"
+    },
+    {
+      "id": "ER-02",
+      "jsonPointer": "/rows/1/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "expected": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+      "observedAt45dAnd00e": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+      "proposedFinal": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+    },
+    {
+      "id": "ER-03",
+      "jsonPointer": "/rows/2/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "expected": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+      "observedAt45dAnd00e": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+      "proposedFinal": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+    },
+    {
+      "id": "ER-03",
+      "jsonPointer": "/rows/2/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "expected": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+      "observedAt45dAnd00e": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "proposedFinal": "4c9d3878c01751239022e755e2860c6d49ddf301"
+    },
+    {
+      "id": "ER-03",
+      "jsonPointer": "/rows/2/sources/2/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "ER-04",
+      "jsonPointer": "/rows/3/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "ER-04",
+      "jsonPointer": "/rows/3/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "expected": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+      "observedAt45dAnd00e": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "proposedFinal": "4c9d3878c01751239022e755e2860c6d49ddf301"
+    },
+    {
+      "id": "ER-05",
+      "jsonPointer": "/rows/4/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "ER-06",
+      "jsonPointer": "/rows/5/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "expected": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed",
+      "observedAt45dAnd00e": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+      "proposedFinal": "afd981e10d609d38db9ce4698fb4a6152bb50c7f"
+    },
+    {
+      "id": "ER-06",
+      "jsonPointer": "/rows/5/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "ER-07",
+      "jsonPointer": "/rows/6/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "ER-08",
+      "jsonPointer": "/rows/7/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "expected": "66b20621288b76153fa78db6c923f0c7b0c5d9ab",
+      "observedAt45dAnd00e": "57e76a17858b3f4333a44ed880326ac33695351e",
+      "proposedFinal": "57e76a17858b3f4333a44ed880326ac33695351e"
+    },
+    {
+      "id": "ER-09",
+      "jsonPointer": "/rows/8/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "expected": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0",
+      "observedAt45dAnd00e": "0132390f1ddb3133c9c14737b558e9b55bee33c9",
+      "proposedFinal": "0132390f1ddb3133c9c14737b558e9b55bee33c9"
+    },
+    {
+      "id": "ER-09",
+      "jsonPointer": "/rows/8/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "ER-09",
+      "jsonPointer": "/rows/8/sources/2/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "expected": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+      "observedAt45dAnd00e": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "proposedFinal": "4c9d3878c01751239022e755e2860c6d49ddf301"
+    },
+    {
+      "id": "N-01",
+      "jsonPointer": "/rows/9/sources/0/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expected": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "observedAt45dAnd00e": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "proposedFinal": "8b1c409244b9669224fc3caff796aea69eac1401"
+    },
+    {
+      "id": "N-01",
+      "jsonPointer": "/rows/9/sources/1/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "expected": "ff632f3a40b069bfead799b408af009ec9931261",
+      "observedAt45dAnd00e": "d191857ece760f307359d576dca2cef906dea8ec",
+      "proposedFinal": "d191857ece760f307359d576dca2cef906dea8ec"
+    },
+    {
+      "id": "N-02",
+      "jsonPointer": "/rows/10/sources/0/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expected": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "observedAt45dAnd00e": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "proposedFinal": "8b1c409244b9669224fc3caff796aea69eac1401"
+    },
+    {
+      "id": "N-02",
+      "jsonPointer": "/rows/10/sources/1/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "expected": "ff632f3a40b069bfead799b408af009ec9931261",
+      "observedAt45dAnd00e": "d191857ece760f307359d576dca2cef906dea8ec",
+      "proposedFinal": "d191857ece760f307359d576dca2cef906dea8ec"
+    },
+    {
+      "id": "N-03",
+      "jsonPointer": "/rows/11/sources/0/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expected": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "observedAt45dAnd00e": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "proposedFinal": "8b1c409244b9669224fc3caff796aea69eac1401"
+    },
+    {
+      "id": "N-04",
+      "jsonPointer": "/rows/12/sources/0/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "expected": "ff632f3a40b069bfead799b408af009ec9931261",
+      "observedAt45dAnd00e": "d191857ece760f307359d576dca2cef906dea8ec",
+      "proposedFinal": "d191857ece760f307359d576dca2cef906dea8ec"
+    },
+    {
+      "id": "N-04",
+      "jsonPointer": "/rows/12/sources/1/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "expected": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "observedAt45dAnd00e": "8b1c409244b9669224fc3caff796aea69eac1401",
+      "proposedFinal": "8b1c409244b9669224fc3caff796aea69eac1401"
+    },
+    {
+      "id": "EV-01",
+      "jsonPointer": "/rows/13/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "expected": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+      "observedAt45dAnd00e": "074bf2b838994d2af375a20ef1600941d21e956c",
+      "proposedFinal": "074bf2b838994d2af375a20ef1600941d21e956c"
+    },
+    {
+      "id": "EV-02",
+      "jsonPointer": "/rows/14/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-03",
+      "jsonPointer": "/rows/15/sources/0/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expected": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "observedAt45dAnd00e": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "proposedFinal": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+    },
+    {
+      "id": "EV-03",
+      "jsonPointer": "/rows/15/sources/1/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-04",
+      "jsonPointer": "/rows/16/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-05",
+      "jsonPointer": "/rows/17/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-06",
+      "jsonPointer": "/rows/18/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-07",
+      "jsonPointer": "/rows/19/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-08",
+      "jsonPointer": "/rows/20/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-09",
+      "jsonPointer": "/rows/21/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-10",
+      "jsonPointer": "/rows/22/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "EV-11",
+      "jsonPointer": "/rows/23/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "TS-01",
+      "jsonPointer": "/rows/24/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-01",
+      "jsonPointer": "/rows/24/sources/1/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "TS-02",
+      "jsonPointer": "/rows/25/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-02",
+      "jsonPointer": "/rows/25/sources/1/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "TS-03",
+      "jsonPointer": "/rows/26/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "TS-04",
+      "jsonPointer": "/rows/27/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-04",
+      "jsonPointer": "/rows/27/sources/1/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "expected": "a0ab0d6a224bdfd35846990ab6d6e39df422908e",
+      "observedAt45dAnd00e": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3",
+      "proposedFinal": "e85eaa03ef8781fe0fa18a92e120a13e47907ef3"
+    },
+    {
+      "id": "TS-05",
+      "jsonPointer": "/rows/28/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-06",
+      "jsonPointer": "/rows/29/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-07",
+      "jsonPointer": "/rows/30/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-08",
+      "jsonPointer": "/rows/31/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    },
+    {
+      "id": "TS-08",
+      "jsonPointer": "/rows/31/sources/1/blob",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "expected": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8",
+      "observedAt45dAnd00e": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "proposedFinal": "4c9d3878c01751239022e755e2860c6d49ddf301"
+    },
+    {
+      "id": "TS-08",
+      "jsonPointer": "/rows/31/sources/2/blob",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "expected": "ff632f3a40b069bfead799b408af009ec9931261",
+      "observedAt45dAnd00e": "d191857ece760f307359d576dca2cef906dea8ec",
+      "proposedFinal": "d191857ece760f307359d576dca2cef906dea8ec"
+    },
+    {
+      "id": "TS-09",
+      "jsonPointer": "/rows/32/sources/0/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "expected": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79",
+      "observedAt45dAnd00e": "074bf2b838994d2af375a20ef1600941d21e956c",
+      "proposedFinal": "074bf2b838994d2af375a20ef1600941d21e956c"
+    },
+    {
+      "id": "TS-09",
+      "jsonPointer": "/rows/32/sources/1/blob",
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "expected": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+      "observedAt45dAnd00e": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5",
+      "proposedFinal": "662835ce19ecbb0dd76a83ef9fc7beffdd7aa0d5"
+    }
+  ],
+  "globalRowMaintenanceRule": "The old ruleArgument/notEstablished/status fields often describe missing arguments now supplied by the cited frozen packets. Root may refresh these prose fields with the mapped actual-source argument, preserving valid receipt/host/domain limitations; no flag or status is changed by this artifact."
+}

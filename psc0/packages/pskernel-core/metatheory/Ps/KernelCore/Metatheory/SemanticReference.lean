@@ -135,12 +135,17 @@ theorem inferCore_const_success_valid_arity
                       (psKernelConstantInfoLevelParams selected))
                     (psKernelLevelListLength levels) with
                 | true =>
-                    exact Nat.beq_eq_true.mp hc
+                    simpa using hc
                 | false =>
+                    have hne : psKernelNameListLength
+                        (psKernelConstantInfoLevelParams selected) ≠
+                        psKernelLevelListLength levels := by
+                      intro eq
+                      rw [eq] at hc
+                      simp at hc
                     simp [psKernelInferCoreWithFuel,
                       psKernelReferenceCacheGet_miss,
-                      psKernelSemanticCacheGet, psKernelReferenceCachePolicy,
-                      he, hi, hc] at run
+                      psKernelSemanticCacheGet, he, hi, hne] at run
               intro info found
               have actual :
                   psKernelEnvironmentFind c.environment name = some selected := by

@@ -4,6 +4,11 @@ on:
     branches: [psc0/pskernel-core-lean435-arena-v1]
     paths: [".github/workflows/psc0-pskernel-core-correctness.yml"]
   workflow_dispatch:
+    inputs:
+      runtime_checks:
+        description: Run native regressions and both small Arena modes
+        type: boolean
+        default: true
 permissions:
   contents: read
 concurrency:
@@ -23,7 +28,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate reference policy and full proof suite
+      - name: Validate complete reference metatheory and all companion files
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail
@@ -31,6 +36,7 @@ jobs:
           npm run test:proofs
 
   binary:
+    if: github.event_name == 'workflow_dispatch' && inputs.runtime_checks
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -40,6 +46,9 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Run native checker regressions
+        working-directory: psc0/packages/pskernel-core
+        run: npm test
       - name: Build reference-capable Arena binary
         working-directory: psc0/packages/pskernel-core
         run: |

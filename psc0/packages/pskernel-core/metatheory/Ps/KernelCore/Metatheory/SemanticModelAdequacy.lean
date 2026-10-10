@@ -47,4 +47,32 @@ theorem erasure_is_not_semantic_coherence (M : Reading V) (ρ : Nat → V) :
   rw [lamR_zero]
   exact lamR_ne_pt (by decide)
 
+/-- Even membership and a universe-valued type do not establish annotation
+coherence. Both readings below satisfy those semantic facts, but only a
+separate checked-annotation invariant can choose the intended binder regime.
+This is a counterexample to a proposed proof interface, not to the executable. -/
+theorem membership_is_not_annotation_coherence (M : Reading V) (ρ : Nat → V) :
+    ∃ a b A B : AnnotatedExpr,
+      a.erase = b.erase ∧ A.erase = B.erase ∧
+      ModelsType M [] a A ∧ ModelsType M [] b B ∧
+      ModelsType M [] A (.sort (.succ .zero)) ∧
+      ModelsType M [] B (.sort .zero) ∧
+      interp M ρ a ≠ interp M ρ b := by
+  let b : AnnotatedExpr :=
+    .lam .anonymous (.sort .zero) (.bvar 0) .default .zero
+  let B : AnnotatedExpr :=
+    .forallE .anonymous (.sort .zero) (.sort .zero) .default .zero
+  refine ⟨propIdentity, b, propIdentityType, B, rfl, rfl,
+    propIdentity_type M, ?_, propIdentityType_sort M, ?_, ?_⟩
+  · intro σ _
+    exact lamR_mem (fun _ hx => hx)
+  · intro σ _
+    change piR 0 (univ 0 : V) (fun _ => univ 0) ∈ˢ univ 0
+    rw [univ_zero]
+    exact piR_zero_mem_univZero
+  · change lamR 1 (univ 0 : V) (fun x => x) ≠
+      lamR 0 (univ 0 : V) (fun x => x)
+    rw [lamR_zero]
+    exact lamR_ne_pt (by decide)
+
 end PsKernelSemantics.SetModel

@@ -119,6 +119,8 @@ theorem allocator_fresh (state : PsKernelCheckerState) (base : PsKernelName)
 theorem opened_has_no_loose (e : AnnotatedExpr) (name : PsKernelName)
     (h : e.Scoped 1) :
     psKernelExprHasLooseAt (psKernelExprInstantiate1 e.erase (.fvar name)) 0 = false := by
+  change psKernelExprHasLooseAt
+    (psKernelExprInstantiate1 e.erase (AnnotatedExpr.fvar name).erase) 0 = false
   rw [← erase_instantiate1 e (.fvar name)]
   exact (scoped_iff_noLoose _ 0).mp
     (scoped_inst e (.fvar name) 0 0 h True.intro (Nat.zero_le _))

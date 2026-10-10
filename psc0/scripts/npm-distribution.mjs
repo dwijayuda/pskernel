@@ -232,6 +232,7 @@ async function bundleVariant(variant,compiler) {
   const umbrella=join(target,'staging','root');
   await mkdir(join(umbrella,'bin'),{recursive:true});
   await cp(join(root,'npm-cli','psc.js'),join(umbrella,'bin','psc.js'));
+  await cp(join(root,'npm-cli','libraries.mjs'),join(umbrella,'bin','libraries.mjs'));
   const meta=await safeRead(join(root,'packages','proofscript','package.json'));
   meta.proofscript={...meta.proofscript,sourceVariant:variant,
     checkerProvider:'@proofscript/pskernel-core/check',

@@ -167,8 +167,6 @@ theorem Coherent.instManyAt {e f : AnnotatedExpr} (bodies : Coherent e f)
             simp only [hx, hy] at hg
           · simpa [AnnotatedExpr.instManyAt, hlt, hx, hy, hlen] using
               (Coherent.bvar (i - ys.length))
-          · contradiction
-          · contradiction
           · simpa [AnnotatedExpr.instManyAt, hlt, hx, hy] using hg.liftN offset 0
   | fvar n => exact .fvar n
   | mvar n => exact .mvar n
@@ -217,7 +215,7 @@ theorem Coherent.consumeLambdas {f g : AnnotatedExpr} (fn : Coherent f g)
   | zero => exact ⟨fn, rfl⟩
   | succ fuel ih =>
       cases fn <;> try simp only [AnnotatedExpr.consumeLambdas]
-      all_goals try exact ⟨by constructor <;> assumption, rfl⟩
+      all_goals try exact ⟨by constructor <;> assumption, by trivial⟩
       case lam hv hA hb =>
         split
         · exact ih hb (count + 1)

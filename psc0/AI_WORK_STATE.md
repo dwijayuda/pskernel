@@ -1,6 +1,6 @@
 # PSC0 T1 checked TypeScript library adoption — self-host qualification active
 
-Updated: 2026-10-10 00:52 UTC. Focused generated conformance passed. Authenticated recovery was restored; the next full run exposed stale source-shape assertions. This checkpoint aligns those guards with the implemented checked project path and retries full qualification.
+Updated: 2026-10-10 01:07 UTC. Focused generated conformance passed. Full run38010922748 reproduced the authenticated preserved R products (receipt cold:false), built the current native compiler and seed, then stopped at an obsolete source-isolation compiler double. This checkpoint moves that harness to the production checked snapshot API, integrates the separately reviewed Core-JS probe/plan, and retries full qualification.
 
 ## User-authorized scope
 
@@ -37,18 +37,27 @@ Retry run38010642642 at61f45ef2f1a182910e3e421543968a2d81e56720 passed the selec
 
 Align those three guard forms with the actual closed checked paths and require both freeze/serialization markers to exist before comparing order. The former index-only comparison could accept a missing freeze marker as -1. The existing63 host tests already exercise frozen graph ownership, mode/handle forgery, refusal and publication; no session behavior, compiler, kernel, seed policy or acceptance expectation changes here. The full retry remains mandatory.
 
+
+## Authenticated recovery and source-isolation harness
+
+Run38010922748 at dbcf9d9a6f4ed3a8e9a4f75550bf99d99cb3bbf4 passed selected-R authentication, source/host guards, successor/cache contracts and exact native-TS7 reproduction of all four pinned R products. Its receipt is explicitly cold:false; this is not a new isolated cold-recovery qualification. Identity47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225 and JS70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061 match the preserved selection. Both seed policy files remain unchanged.
+
+The current native compiler build (146 jobs), native parser/translation/erasure regressions and native seed build (141 jobs) passed. The run stopped before candidate/C2/C3 because the old filesystem-isolation double lacked psCompilerPrepareSource, which the protected compile-with-generated path now requires. Do not reopen raw emission to satisfy a filesystem fixture.
+
+Integrate qualification commit2a3f51cd8360ae8d359787ac93ebeaf4f216cc17: retain all14 original isolation scenarios and expected diagnostics, but exercise readProofScriptImports and readCheckedSourceSnapshot directly with the existing bounded parser double. Success verifies raw source bytes, parser inputs, closure order/digest, entry/root and frozen records; refusal must return no snapshot. This harness claims filesystem/snapshot isolation only. Actual native/generated compiler, target TypeScript, admission and self-host checks remain separate mandatory gates. The downstream actual-native replay/name-index harnesses were reviewed and need no speculative fixture rewrite.
+
 ## Next required work
 
-1. Let this coherent full [sh1-qualify] checkpoint finish. It must authenticate R/recovery, build/compare current-source C2/C3 products, pass existing compiler regressions, exercise T1 on exact C3 and pass separate pinned native admission replay. The only workflow optimization here is a fallback to the focused native cache; mandatory native rebuilding remains.
+1. Let this coherent full [sh1-qualify] checkpoint finish. It must authenticate R/recovery, build/compare current-source C2/C3 products, pass existing compiler regressions, exercise T1 on exact C3 and pass separate pinned native admission replay. The SH1 replay covers its compiler/capability/generic streams, not the T1 conformance stream; real native admission of the checked-library example is additionally required in platform source and clean installed qualification. The only workflow optimization here is a fallback to the focused native cache; mandatory native rebuilding remains.
 2. Pin release/release.json to the actual qualified successor source/closure/JS hash; do not reuse old F evidence for changed source. Assemble proofscript0.1.0-preview.3 with matching psdev/pshello and the checked-library example. Qualify source and clean installed jobs on Windows/Linux Node22/26, including the actual PowerShell/npm command shim.
-3. Commit exact qualification/evidence, updated consumer/architecture docs and the Core-JS plan/probe; open a reviewable draft T1 PR against platform-v1. Do not merge main, publish npm or promote the authoring seed.
+3. Commit exact qualification/evidence and updated consumer docs, then update draft PR91 against platform-v1 (stacked on PR90). The reviewed Core-JS plan/probe, architecture and Wasm-order updates are integrated at this checkpoint. Do not merge main, publish npm or promote the authoring seed.
 4. Preserve exact bootstrap/release inputs durably as parallel public-release work; metadata is not executable archive retention.
 
 The release manifest intentionally still selects preview2/oldF until step2. Example/demo package versions are already preview3. Full watch, broad npm/workspace library resolution, LSP and complete source/package naming remain subsequent milestones.
 
 ## Core-JS finding and execution order
 
-Separate branch psc0/kernel-js-probe-v1 ends at6a51a209410bf81d5ab6d8cdf6688be211889e7d. Its exact diagnostic b94a6c552d8cc208ce2202527f7f30e28e8836ee / run38007233891 authenticates oldF/current native Core, passes seven native public-admission cases and prepares20 unchanged Core modules before refusing psKernelCheckerStateExitLocalScope in Checker/State.lean. Nat.max is absent from F's standard environment. No current JS kernel artifact exists. Align admitted standard definitions, elaboration/runtime and the pinned provider prelude before another unchanged-Core probe; do not remove the scope-exit algorithm or introduce a compiler-only trusted primitive. Historical run37333010780 demonstrates older same-source TS7→JS feasibility only.
+The four-file Core-JS plan/probe from branch psc0/kernel-js-probe-v1 commit6a51a209410bf81d5ab6d8cdf6688be211889e7d is integrated here with its history preserved. Its workflow remains scoped to its diagnostic branch; integrating the plan does not rerun the probe or change the selected kernel provider. Its exact diagnostic b94a6c552d8cc208ce2202527f7f30e28e8836ee / run38007233891 authenticates oldF/current native Core, passes seven native public-admission cases and prepares20 unchanged Core modules before refusing psKernelCheckerStateExitLocalScope in Checker/State.lean. Nat.max is absent from F's standard environment. No current JS kernel artifact exists. Align admitted standard definitions, elaboration/runtime and the pinned provider prelude before another unchanged-Core probe; do not remove the scope-exit algorithm or introduce a compiler-only trusted primitive. Historical run37333010780 demonstrates older same-source TS7→JS feasibility only.
 
 The intended order is qualified native today, separately qualified same-source pskernel-core-js before Wasm, then the Wasm provider when its gates are met. JS is a trusted provider artifact with canonical codec/parity/budget/artifact/installation obligations; a Node subprocess is not an arbitrary npm-code sandbox. Core-JS code/proof refinement remains separate from this T1 implementation.
 

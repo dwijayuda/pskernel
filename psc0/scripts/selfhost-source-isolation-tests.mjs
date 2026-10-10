@@ -1,14 +1,12 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { spawnSync } from "node:child_process";
 import { computeBootstrapWorkspaceClosureSha256 } from "./bootstrap-manifest.mjs";
-import { sh1GrammarProfile } from "./sh1-grammar-conformance.mjs";
+import { sh1GrammarProfile } from "./source-grammar-profile.mjs";
+import { readProofScriptImports as importsFromParser } from "./proofscript-source.mjs";
+import { readCheckedSourceSnapshot } from "./checked-source-snapshot.mjs";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const entry = "packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps";
 const dependency = "packages/foundation/src/Ps/Foundation/Probe.ps";
 const extra = "packages/foundation/src/Ps/Foundation/Unused.ps";
@@ -16,12 +14,39 @@ let passed = 0;
 let skipped = 0;
 const failures = [];
 
+// Fixed AST responses isolate filesystem selection and module ordering. This
+// double is not a PS parser, elaborator, kernel, or emitter. Actual compiler,
+// admission, and TypeScript behavior belong to the separate integration gates.
+const fixtureImports = new Map([
+  ["import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n", ["Ps.Foundation.Probe"]],
+  ["def GENERATED_DEP : Nat := 42\n", []],
+  ["def GENERATED_DEP : Nat := 43\n", []],
+  ["import Ps.Bootstrap.SelfHost\ndef GENERATED_DEP : Nat := 42\n", ["Ps.Bootstrap.SelfHost"]],
+]);
+const tag = Symbol("psc2-isolation-parser");
+const ok = value => ({ [tag]: "ok", value });
+const List = {
+  nil: () => ({ [tag]: "nil" }),
+  cons: (head, tail) => ({ [tag]: "cons", head, tail }),
+};
+const parser = Object.freeze({
+  psProofScriptGrammarEdition: sh1GrammarProfile.edition,
+  psProofScriptGrammarMode: sh1GrammarProfile.mode,
+  psProofScriptGrammarReferenceSha256: sh1GrammarProfile.referenceSha256,
+  psParseProofScriptSource(source) {
+    assert(fixtureImports.has(source), "unexpected parser-double source: " + JSON.stringify(source));
+    const imports = fixtureImports.get(source).reduceRight(
+      (tail, text) => List.cons({ moduleName: { text } }, tail), List.nil());
+    return ok({ imports });
+  },
+  psPrintSyntaxName(name) { return ok(name.text); },
+});
+
 async function scenario(label, configure = async () => {}, expectedError) {
   const directory = await mkdtemp(path.join(tmpdir(), "psc2-isolation-test-"));
   try {
     const parent = path.join(directory, "parent");
     const workspace = path.join(parent, "dist", "generated");
-    const report = path.join(directory, "consumed.json");
     async function put(file, content) {
       await mkdir(path.dirname(file), { recursive: true });
       await writeFile(file, content, "utf8");
@@ -42,70 +67,46 @@ async function scenario(label, configure = async () => {}, expectedError) {
     await saveManifest();
     const fixture = { directory, parent, workspace, manifest, put, saveManifest };
     await configure(fixture);
-    const compiler = path.join(directory, "compiler.mjs");
-    // A compiler double isolates source selection and module ordering. The
-    // production host still invokes the real, pinned TypeScript compiler.
-    await put(compiler, `import { writeFileSync } from "node:fs";
-export const PsCompilerSourceKind = { lean: "lean", proofScript: "ps" };
-export const psProofScriptGrammarEdition = ${JSON.stringify(sh1GrammarProfile.edition)};
-export const psProofScriptGrammarMode = ${JSON.stringify(sh1GrammarProfile.mode)};
-export const psProofScriptGrammarReferenceSha256 = ${JSON.stringify(sh1GrammarProfile.referenceSha256)};
-let translations = 0;
-const ok = value => ({ [Symbol.for("psc2-test-tag")]: "ok", value });
-export function psCompilerTranslateSource(_from, _to, source) { translations++; return ok(source); }
-export const List = {
-  nil: () => ({ [Symbol.for("psc2-test-tag")]: "nil" }),
-  cons: (head, tail) => ({ [Symbol.for("psc2-test-tag")]: "cons", head, tail }),
-};
-// Fixed AST responses isolate file selection; this double is not a PS parser.
-const fixtureImports = new Map(${JSON.stringify([
-  ["import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n", ["Ps.Foundation.Probe"]],
-  ["def GENERATED_DEP : Nat := 42\n", []],
-  ["def GENERATED_DEP : Nat := 43\n", []],
-  ["import Ps.Bootstrap.SelfHost\ndef GENERATED_DEP : Nat := 42\n", ["Ps.Bootstrap.SelfHost"]],
-])});
-export function psParseProofScriptSource(source) {
-  if (!fixtureImports.has(source)) throw new Error("unexpected parser-double source");
-  const imports = fixtureImports.get(source).reduceRight(
-    (tail, text) => List.cons({ moduleName: { text } }, tail), List.nil());
-  return ok({ imports });
-}
-export function psPrintSyntaxName(name) { return ok(name.text); }
-export function psCompilerPrepareSources(kind, sources) {
-  const chunks = [];
-  for (let value = sources; 'head' in value; value = value.tail) chunks.push(value.head);
-  writeFileSync(process.env.PSC2_TEST_SOURCE_REPORT, JSON.stringify({ kind, source: chunks.join('\\n\\n'), chunks, translations }));
-  return ok({});
-}
-export function psCompilerTypeScriptFromPrepared(_prepared) {
-  return ok("export const answer = 42;\\n");
-}
-`);
-    const result = spawnSync(process.execPath, [path.join(root, "scripts/compile-with-generated.mjs"),
-      compiler, path.join(workspace, entry), path.join(directory, "output.ts")], {
-      cwd: root, encoding: "utf8", timeout: 15000,
-      env: { ...process.env, PSC2_TEST_SOURCE_REPORT: report },
-    });
-    if (result.error) throw result.error;
-    const output = `${result.stdout}\n${result.stderr}`;
+    let snapshot;
+    const parserInputs = [];
+    async function readSnapshot() {
+      snapshot = await readCheckedSourceSnapshot(path.join(workspace, entry), {
+        readProofScriptImports(source, file) {
+          parserInputs.push({ source, file });
+          return importsFromParser(parser, source, file);
+        },
+      });
+      return snapshot;
+    }
     if (expectedError) {
-      assert.notEqual(result.status, 0, "must reject invalid generated source closure");
-      assert.match(output, expectedError);
-      assert.equal(existsSync(report), false, "must reject before invoking semantic compilation");
+      await assert.rejects(readSnapshot, expectedError,
+        "invalid generated source closures must be refused by the production snapshot boundary");
+      assert.equal(snapshot, undefined, "a rejected closure must not produce a source snapshot");
     } else {
-      assert.equal(result.status, 0, output);
-      assert(existsSync(path.join(directory, 'output.js')), 'real TypeScript compilation must complete');
-      const consumed = JSON.parse(await readFile(report, "utf8"));
-      assert.equal(consumed.kind, "ps");
-      assert.equal(consumed.translations, 0, "generated compilation must not translate a handwritten fallback");
-      assert.equal(consumed.chunks.length, 2, "module boundaries must survive compilation");
-      assert.deepEqual(consumed.chunks, ["def GENERATED_DEP : Nat := 42\n",
-        "import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n"],
-        "exact raw PS modules, including imports, must reach preparation");
-      assert.match(consumed.source, /GENERATED_DEP/u);
-      assert.doesNotMatch(consumed.source, /WRONG_PARENT|STALE_LEAN/u);
-      assert.ok(consumed.source.indexOf("GENERATED_DEP") < consumed.source.indexOf("entryMarker"));
-      assert.match(output, /PSC2_SELFHOST_SOURCE_CLOSURE_SHA256: [0-9a-f]{64}/u);
+      await readSnapshot();
+      const expectedSources = ["def GENERATED_DEP : Nat := 42\n",
+        "import Ps.Foundation.Probe\ndef entryMarker : Nat := 1\n"];
+      assert.equal(snapshot.root, workspace);
+      assert.equal(snapshot.entry, path.join(workspace, entry));
+      assert.equal(snapshot.kind, "ps");
+      assert.equal(snapshot.sources.length, 2, "module boundaries must survive source selection");
+      assert.deepEqual(snapshot.sources, expectedSources,
+        "the snapshot must preserve exact raw PS modules, including imports");
+      assert.deepEqual(snapshot.ordered.map(item => item.path),
+        [path.join(workspace, dependency), path.join(workspace, entry)]);
+      assert.deepEqual(snapshot.ordered.map(item => item.source), expectedSources);
+      assert.deepEqual(parserInputs, [
+        { source: expectedSources[1], file: path.join(workspace, entry) },
+        { source: expectedSources[0], file: path.join(workspace, dependency) },
+      ], "the parser adapter must receive exact raw source bytes before dependency resolution");
+      assert.equal(snapshot.source, expectedSources.join("\n\n") + "\n");
+      assert.doesNotMatch(snapshot.source, /WRONG_PARENT|STALE_LEAN/u);
+      assert.ok(snapshot.source.indexOf("GENERATED_DEP") < snapshot.source.indexOf("entryMarker"));
+      assert.match(snapshot.closureSha256, /^[0-9a-f]{64}$/u);
+      assert.equal(snapshot.closureSha256, manifest.closureSha256);
+      assert(Object.isFrozen(snapshot) && Object.isFrozen(snapshot.sources) &&
+        Object.isFrozen(snapshot.ordered) && snapshot.ordered.every(Object.isFrozen),
+        "the accepted source snapshot and its source records must be immutable");
     }
     passed++;
     console.log(`PSC2_SELFHOST_SOURCE_ISOLATION_CASE: PASS ${label}`);
@@ -184,4 +185,4 @@ await scenario("selfhost generation manifest accepted", async ({ workspace, put,
 });
 
 if (failures.length) throw new Error(`PSC2_SELFHOST_SOURCE_ISOLATION: ${passed} passed, ${failures.length} failed\n${failures.join("\n")}`);
-console.log(`PSC2_SELFHOST_SOURCE_ISOLATION: PASS (${passed} passed; ${skipped} platform skips; compiler double and pinned TypeScript)`);
+console.log(`PSC2_SELFHOST_SOURCE_ISOLATION: PASS (${passed} passed; ${skipped} platform skips; bounded parser double; production source snapshot)`);

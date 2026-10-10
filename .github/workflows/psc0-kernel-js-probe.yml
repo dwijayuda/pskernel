@@ -1,0 +1,84 @@
+name: PSC0 Core JavaScript feasibility
+
+on:
+  push:
+    branches: ['psc0/kernel-js-probe-v1']
+    paths:
+      - '.github/workflows/psc0-kernel-js-probe.yml'
+      - 'psc0/scripts/kernel-js-probe.mjs'
+      - 'psc0/test/fixtures/KernelJsProbe.lean'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc0-kernel-js-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  selected-core-js:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Check the probe harness
+        run: node --check psc0/scripts/kernel-js-probe.mjs
+      - name: Obtain the exact already-qualified F compiler
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37947341800
+          name: psc0-sh1-ts7.0.2-fcd875c8f38db4b0524090bd10c7c2fd5024053d
+          path: qualified-f
+      - name: Read the exact selected Core revision
+        uses: actions/checkout@v4
+        with:
+          ref: 963030dc2d154008fccc82e7c8ed29331f138799
+          path: provider-source
+          sparse-checkout: psc0
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: provider-source/psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Restore existing exact native-provider build inputs
+        uses: actions/cache/restore@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: psc0-sh1-provider-v1-${{ runner.os }}-${{ runner.arch }}-963030dc2d154008fccc82e7c8ed29331f138799
+      - name: Build the unchanged selected native admission provider
+        working-directory: provider-source/psc0
+        run: lake build psc_kernel_core_provider
+      - name: Install exact TypeScript 7 without lifecycle scripts
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-core-js-ts" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFile, readFile } from 'node:fs/promises';
+          import path from 'node:path';
+          const packageRoot=path.join(process.env.RUNNER_TEMP,'psc0-core-js-ts/node_modules/typescript');
+          const metadata=JSON.parse(await readFile(path.join(packageRoot,'package.json'),'utf8'));
+          assert.equal(metadata.version,'7.0.2');
+          await appendFile(process.env.GITHUB_ENV,'PSC0_CORE_JS_TSC='+path.resolve(packageRoot,metadata.bin.tsc)+'\n');
+          NODE
+      - name: Generate selected Core through F and exercise its public API
+        timeout-minutes: 20
+        run: node psc0/scripts/kernel-js-probe.mjs produce provider-source/psc0 qualified-f "$PSC0_CORE_JS_TSC" "$GITHUB_WORKSPACE/psc0/dist/kernel-js-probe"
+      - name: Retain source, generated artifacts and exact blocked or passing stage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-core-js-feasibility-${{ github.sha }}
+          path: |
+            psc0/dist/kernel-js-probe
+            ${{ runner.temp }}/psc0-core-js-ts/package-lock.json
+          if-no-files-found: warn
+          retention-days: 30

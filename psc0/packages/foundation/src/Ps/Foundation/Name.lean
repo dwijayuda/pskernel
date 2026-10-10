@@ -13,8 +13,8 @@ def psStringEqFromWithFuel (fuel : Nat) : String -> String -> Nat -> Nat -> Bool
   match fuel with
   | Nat.zero => fun (_left : String) (_right : String) (_leftPos : Nat) (_rightPos : Nat) => false
   | Nat.succ remaining =>
-      let smaller : String -> String -> Nat -> Nat -> Bool := psStringEqFromWithFuel remaining;
       fun (left : String) (right : String) (leftPos : Nat) (rightPos : Nat) =>
+        let smaller : String -> String -> Nat -> Nat -> Bool := psStringEqFromWithFuel remaining;
         if String.Internal.atEnd left (String.Pos.Raw.mk leftPos) then
           String.Internal.atEnd right (String.Pos.Raw.mk rightPos)
         else if String.Internal.atEnd right (String.Pos.Raw.mk rightPos) then

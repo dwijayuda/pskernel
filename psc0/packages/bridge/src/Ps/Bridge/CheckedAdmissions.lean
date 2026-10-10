@@ -423,8 +423,8 @@ def psBridgeHeightBucket (fuel : Nat) : PsBridgeHeightIndex -> Nat -> List (PsNa
       | PsBridgeHeightIndex.bucket entries => entries
       | _ => List.nil
   | Nat.succ remaining =>
-      let smaller : PsBridgeHeightIndex -> Nat -> List (PsName × Nat) := psBridgeHeightBucket remaining;
       fun (index : PsBridgeHeightIndex) (hash : Nat) =>
+        let smaller : PsBridgeHeightIndex -> Nat -> List (PsName × Nat) := psBridgeHeightBucket remaining;
         match index with
         | PsBridgeHeightIndex.branch left right =>
             if Nat.beq (Nat.mod hash 2) 0 then smaller left (Nat.div hash 2)
@@ -439,8 +439,8 @@ def psBridgeHeightInsertWorker (fuel : Nat) : PsBridgeHeightIndex -> Nat -> PsNa
         | _ => List.nil;
       PsBridgeHeightIndex.bucket (List.cons (Prod.mk name height) entries)
   | Nat.succ remaining =>
-      let smaller : PsBridgeHeightIndex -> Nat -> PsName -> Nat -> PsBridgeHeightIndex := psBridgeHeightInsertWorker remaining;
       fun (index : PsBridgeHeightIndex) (hash : Nat) (name : PsName) (height : Nat) =>
+        let smaller : PsBridgeHeightIndex -> Nat -> PsName -> Nat -> PsBridgeHeightIndex := psBridgeHeightInsertWorker remaining;
         let left : PsBridgeHeightIndex := match index with
           | PsBridgeHeightIndex.branch value _ => value
           | _ => PsBridgeHeightIndex.empty;
@@ -462,9 +462,9 @@ def psBridgeNatMax (left : Nat) : Nat -> Nat :=
   | Nat.zero =>
       fun (right : Nat) => right
   | Nat.succ leftPred =>
-      let smaller : Nat -> Nat :=
-        psBridgeNatMax leftPred;
       fun (right : Nat) =>
+        let smaller : Nat -> Nat :=
+          psBridgeNatMax leftPred;
         match right with
         | Nat.zero =>
             left
@@ -701,8 +701,8 @@ def psCheckedNestedOpenWorker (fuel : Nat) : Nat -> PsExpr -> List PsCheckedNest
   match fuel with
   | Nat.zero => fun (_id : Nat) (_type : PsExpr) => List.nil
   | Nat.succ remaining =>
-      let smaller : Nat -> PsExpr -> List PsCheckedNestedBinder := psCheckedNestedOpenWorker remaining;
       fun (id : Nat) (type : PsExpr) =>
+        let smaller : Nat -> PsExpr -> List PsCheckedNestedBinder := psCheckedNestedOpenWorker remaining;
         match type with
         | PsExpr.forallE name domain body _ =>
             List.cons (PsCheckedNestedBinder.mk id name domain)
@@ -793,8 +793,8 @@ def psCheckedNestedExpand (name : PsName) (fuel : Nat) : List PsExpr -> List PsE
   | Nat.zero => fun (pending : List PsExpr) (done : List PsExpr) =>
       if psListIsEmpty pending then Except.ok done else Except.error PsCheckedAdmissionCodecError.unsupportedDeclaration
   | Nat.succ remaining =>
-      let smaller : List PsExpr -> List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) := psCheckedNestedExpand name remaining;
       fun (pending : List PsExpr) (done : List PsExpr) =>
+        let smaller : List PsExpr -> List PsExpr -> Except PsCheckedAdmissionCodecError (List PsExpr) := psCheckedNestedExpand name remaining;
         match pending with
         | List.nil => Except.ok done
         | List.cons type rest =>

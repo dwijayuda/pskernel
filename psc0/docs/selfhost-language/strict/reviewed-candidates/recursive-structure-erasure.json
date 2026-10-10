@@ -1,0 +1,213 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-recursive-structure-erasure-correction",
+  "status": "unattached-source-candidates-independently-reviewed",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2",
+  "expectedParentRootTree": "a197ede26027af2c54010bb142b5a9e4ba74b026",
+  "committedCompilerSource": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "overlayBaseline": {
+    "kind": "unpublished-reviewed-43-code-file-batch",
+    "tree": "faabf657afa1c69fd3a5f595dfebd6b00ca93286",
+    "sourceManifest": "b19d22e352cbe8f236677599f8309f3f4aec09a0",
+    "evidenceManifest": "b1694c3ea44ad2a90116af6afde0b17f6d9ef629",
+    "checkpointInventory": "70f357cb1b61376d370faf3925e76557464f95ff",
+    "note": "The two base blobs below are reviewed unpublished overlays, not the source blobs at expectedParent. Root alone integrates this delta with that existing batch."
+  },
+  "problem": {
+    "class": "A source-authored single-constructor recursive structure is part of the advertised immutable closed-layout structure domain.",
+    "existingBehavior": "The Core structure-recursion prepass substitutes all numFields field lambdas but leaves the following generated recursive-hypothesis lambdas. A result such as Nat consequently becomes a function during erasure and is refused by the unchanged exact IR result-type check.",
+    "witnesses": [
+      "structure Loop where\n  next : Loop\n\ndef observe (x : Loop) : Nat := match x with | Loop.mk next => 0",
+      "def loopSelf (x : Loop) : Nat := match x with | Loop.mk next => loopSelf next"
+    ],
+    "scope": "This repairs accepted-source coverage, including a used root IH. It does not assert an old accepted incorrect JavaScript result. Absence of finite canonical Loop inhabitants is not used to waive source coverage."
+  },
+  "files": [
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "baseBlob": "897a2514e18e0ba51fb93cde6ab933a72a2c6f7f",
+      "candidateBlob": "57e76a17858b3f4333a44ed880326ac33695351e",
+      "baseSha256": "c102169cc4cbb03c5cc9016666cc53acc116404430e4d724aee5f8f9863a2172",
+      "candidateSha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+      "baseBytes": 10012,
+      "candidateBytes": 10378,
+      "editCount": 1,
+      "edits": [
+        {
+          "id": "retain-recursive-structure-minor",
+          "old": "                                  else\n                                    let expectedArity :=\n                                      Nat.add info.numParams 3;",
+          "new": "                                  else if psErasureNatNotEqual (psListLength constructorInfo.recursiveFields) 0 then\n                                    -- Expr erasure opens both fields and recursive hypotheses.\n                                    -- Removing fields here would leave the IH lambdas behind.\n                                    Except.ok Option.none\n                                  else\n                                    let expectedArity :=\n                                      Nat.add info.numParams 3;"
+        }
+      ],
+      "exactForwardReconstruction": true,
+      "exactReverseReconstruction": true,
+      "immutableReadbackExact": true
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "baseBlob": "f1ecc9458fe0c606b0a34c321517069cd27280e4",
+      "candidateBlob": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+      "baseSha256": "0119067649f78605eac5c1339a92ab9171b7c06180932d5db1d606ff074b530b",
+      "candidateSha256": "7da07e96681a91651b3d651c55cfb8af9ee431d27b0930987fd44642bd3ffeb6",
+      "baseBytes": 127724,
+      "candidateBytes": 137310,
+      "editCount": 4,
+      "edits": [
+        {
+          "id": "prepared-structure-recursor-lookup",
+          "old": "def psEraseRuntimeStructureFields\n",
+          "new": "def psErasureLookupStructureRecursor\n    (scope : PsErasureScope) (name : PsName) : Option PsRuntimeStructureInfo :=\n  match name with\n  | PsName.str owner suffix =>\n      if psStringEq suffix \"rec\" then\n        psErasureLookupStructure scope.runtimeStructures owner\n      else Option.none\n  | _ => Option.none\n\ndef psEraseRuntimeStructureFields\n"
+        },
+        {
+          "id": "finite-record-recursor-lowering",
+          "old": "def psEraseMatchAlternativesWorker\n",
+          "new": "-- Accepted structure fields are exactly the runtime field telescope. Recover\n-- direct-recursive flags from the actual constructor, without changing record\n-- names, source slots or generic field types.\ndef psErasureStructureRecursorFields\n    (numParams : Nat) (recursiveFields : List Nat)\n    (fields : List PsRuntimeStructureField) (index : Nat) :\n    Except PsErasureError (List PsRuntimeConstructorField) :=\n  match fields with\n  | List.nil => Except.ok List.nil\n  | List.cons field rest =>\n      if psErasureNatNotEqual field.projectionIndex index then\n        Except.error PsErasureError.binderMismatch\n      else if psErasureNatNotEqual field.sourceIndex (Nat.add numParams index) then\n        Except.error PsErasureError.binderMismatch\n      else\n        match psErasureStructureRecursorFields numParams recursiveFields rest (Nat.succ index) with\n        | Except.error error => Except.error error\n        | Except.ok tail =>\n            Except.ok (List.cons\n              (PsRuntimeConstructorField.mk field.sourceIndex field.name field.type\n                (psErasureNatInList recursiveFields index))\n              tail)\n\ndef psErasureStructureProjectionBindings\n    (owner : String) (typeArguments : List PsVerifiedIrType)\n    (bindings : List PsVerifiedIrMatchBinding)\n    (major : PsVerifiedIrExpr) (body : PsVerifiedIrExpr) : PsVerifiedIrExpr :=\n  match bindings with\n  | List.nil => body\n  | List.cons binding rest =>\n      PsVerifiedIrExpr.letE binding.name binding.type\n        (PsVerifiedIrExpr.projection owner typeArguments major binding.field)\n        (psErasureStructureProjectionBindings owner typeArguments rest major body)\n\ndef psEraseStructureRecursorMinor\n    (environment : PsEnvironment) (scope : PsErasureScope)\n    (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)\n    (structureInfo : PsRuntimeStructureInfo) (constructorInfo : PsConstructorInfo)\n    (view : PsErasureAppView) :\n    Except PsErasureError (Option PsVerifiedIrExpr) :=\n  let expectedArity := Nat.add structureInfo.numParams 3;\n  if psErasureNatNotEqual (psListLength view.args) expectedArity then\n    Except.error PsErasureError.unsupportedApplication\n  else\n    match psListMapExcept (psEraseRuntimeType environment scope)\n        (psListTake structureInfo.numParams view.args) with\n    | Except.error error => Except.error error\n    | Except.ok typeArguments =>\n        if psErasureNatNotEqual (psListLength typeArguments)\n            (psListLength structureInfo.typeParameters) then\n          Except.error PsErasureError.unsupportedApplication\n        else\n          match psErasureStructureRecursorFields structureInfo.numParams\n              constructorInfo.recursiveFields structureInfo.fields 0 with\n          | Except.error error => Except.error error\n          | Except.ok fields =>\n              match psErasureExprListAt view.args (Nat.add structureInfo.numParams 1) with\n              | Option.none => Except.error PsErasureError.unsupportedApplication\n              | Option.some minor =>\n                  match psErasureExprListAt view.args (Nat.add structureInfo.numParams 2) with\n                  | Option.none => Except.error PsErasureError.unsupportedApplication\n                  | Option.some major =>\n                      match eraseAt scope major with\n                      | Except.error error => Except.error error\n                      | Except.ok scrutinee =>\n                          let recursiveParameterIndex : Option Nat :=\n                            match scope.currentDefinition with\n                            | Option.none => Option.none\n                            | Option.some current =>\n                                match scrutinee with\n                                | PsVerifiedIrExpr.var name =>\n                                    psErasureFindStringIndex name current.runtimeParameters 0\n                                | _ => Option.none;\n                          let majorName :=\n                            psErasureLocalName scope \"_psStructureMajor\" \"_psStructureMajor\"\n                              scope.localContext.nextId;\n                          if psErasureLocalNameUsed scope majorName then\n                            Except.error PsErasureError.fuelExhausted\n                          else\n                            let minorScope := psErasureReserveOutputName scope majorName;\n                            let convert : (PsVerifiedIrTypeParameter × PsVerifiedIrType) -> (String × PsVerifiedIrType) :=\n                              fun (entry : PsVerifiedIrTypeParameter × PsVerifiedIrType) =>\n                                match entry with\n                                | Prod.mk parameter value => Prod.mk parameter.name value;\n                            let substitutions :=\n                              psListMap convert (psListZip structureInfo.typeParameters typeArguments);\n                            let runtimeConstructor :=\n                              PsRuntimeConstructorInfo.mk structureInfo.name\n                                (psErasureSafeIdentifier\n                                  (psNameLastComponent constructorInfo.name) \"constructor\")\n                                constructorInfo.name constructorInfo.numParams fields;\n                            match psEraseMatchMinor environment eraseAt minorScope substitutions\n                                recursiveParameterIndex runtimeConstructor minor with\n                            | Except.error error => Except.error error\n                            | Except.ok lowered =>\n                                Except.ok (Option.some\n                                  (PsVerifiedIrExpr.letE majorName\n                                    (PsVerifiedIrType.named structureInfo.name typeArguments)\n                                    scrutinee\n                                    (psErasureStructureProjectionBindings\n                                      structureInfo.name typeArguments lowered.bindings\n                                      (PsVerifiedIrExpr.var majorName) lowered.body)))\n\n-- Recursive structure minors have field binders followed by generated IH\n-- binders. Open them once; never expand a recursive Core recursor in its IH.\ndef psEraseRuntimeStructureRecursorApplication\n    (environment : PsEnvironment) (scope : PsErasureScope)\n    (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)\n    (view : PsErasureAppView) :\n    Except PsErasureError (Option PsVerifiedIrExpr) :=\n  match view.head with\n  | PsExpr.constE name _ =>\n      match psErasureLookupStructureRecursor scope name with\n      | Option.none => Except.ok Option.none\n      | Option.some structureInfo =>\n          match psEnvironmentFindRecursor environment name with\n          | Option.none => Except.error (PsErasureError.unknownConstant name)\n          | Option.some recursorInfo =>\n              if\n                  if psErasureNatNotEqual recursorInfo.numParams structureInfo.numParams then true\n                  else if psErasureNatNotEqual recursorInfo.numIndices 0 then true\n                  else if psErasureNatNotEqual recursorInfo.numMotives 1 then true\n                  else psErasureNatNotEqual recursorInfo.numMinors 1 then\n                Except.error PsErasureError.unsupportedRuntimeTerm\n              else\n                match psEnvironmentFindConstructor environment structureInfo.constructorName with\n                | Option.none =>\n                    Except.error (PsErasureError.unknownConstant structureInfo.constructorName)\n                | Option.some constructorInfo =>\n                    if psErasureBoolNot (psNameEq constructorInfo.inductiveName structureInfo.coreName) then\n                      Except.error PsErasureError.unsupportedRuntimeTerm\n                    else if psErasureNatNotEqual constructorInfo.numParams structureInfo.numParams then\n                      Except.error PsErasureError.unsupportedRuntimeTerm\n                    else if psErasureNatNotEqual constructorInfo.numFields (psListLength structureInfo.fields) then\n                      Except.error PsErasureError.unsupportedRuntimeTerm\n                    else\n                      psEraseStructureRecursorMinor environment scope eraseAt\n                        structureInfo constructorInfo view\n  | _ => Except.ok Option.none\n\ndef psEraseMatchAlternativesWorker\n"
+        },
+        {
+          "id": "recursor-record-dispatch",
+          "old": "                                                      | Option.none =>\n                                                          psEraseGeneralApplication erase environment scope view",
+          "new": "                                                      | Option.none =>\n                                                          match psEraseRuntimeStructureRecursorApplication\n                                                              environment scope eraseAt view with\n                                                          | Except.error error => Except.error error\n                                                          | Except.ok structureRecursor =>\n                                                              match structureRecursor with\n                                                              | Option.some lowered => Except.ok lowered\n                                                              | Option.none =>\n                                                                  psEraseGeneralApplication erase environment scope view"
+        },
+        {
+          "id": "structure-recursor-saturation-boundary",
+          "old": "            | Option.none => Option.none\n\nstructure PsErasureSpecialCompletion where",
+          "new": "            | Option.none =>\n                match psErasureLookupStructureRecursor scope name with\n                | Option.some info =>\n                    Option.some\n                      (PsErasureSpecialEntry.mk (Nat.add info.numParams 3) false)\n                | Option.none => Option.none\n\nstructure PsErasureSpecialCompletion where"
+        }
+      ],
+      "exactForwardReconstruction": true,
+      "exactReverseReconstruction": true,
+      "immutableReadbackExact": true
+    }
+  ],
+  "sourceInterfaces": [
+    {
+      "blob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "facts": [
+        "psPrepareRuntimeStructure delegates full parameter/field preparation to the existing inductive helpers.",
+        "Each structure field copies the prepared runtime field name/type and stores sourceIndex = numParams + fieldIndex and projectionIndex = fieldIndex."
+      ]
+    },
+    {
+      "blob": "afd981e10d609d38db9ce4698fb4a6152bb50c7f",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "facts": [
+        "psPrepareInductiveParameters accepts only type binders; proof and runtime parameters remain refused.",
+        "psPrepareConstructorFields accepts only runtime fields, preserves every accepted field slot and refuses proof/type fields.",
+        "Existing algebraic constructor preparation marks a runtime field recursive by membership of its source field index in the actual constructor.recursiveFields. The new record helper uses the same membership equation."
+      ]
+    },
+    {
+      "blob": "f611218a3623bb413f94c9550b7d98ab7b406e9a",
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "facts": [
+        "The reviewed producer opens all constructor fields, then IHs in actual constructor.recursiveFields order, and closes IHs before fields. Authored direct-recursive indices are ascending source field indices.",
+        "The final producer permits only the whole-definition root to register new direct-child IH mappings; nested bodies retain old mappings but cannot create another current-definition recurrence.",
+        "The reviewed final-meta constructor refinement substitutes the reconstructed major throughout the remaining IH/body lambdas after field opening."
+      ]
+    },
+    {
+      "blob": "d191857ece760f307359d576dca2cef906dea8ec",
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "facts": [
+        "Source structural-recursion seeding is limited to a root match on the original explicit major.",
+        "The complete original parameter-ID vector supports the fixed/result telescope independence guard used by admitted self calls."
+      ]
+    },
+    {
+      "blob": "895081aaa285af545c635e7211c51508c81acb93",
+      "kind": "reviewed-root-producer-manifest"
+    },
+    {
+      "blob": "fb2b9ddb916f768f0afa5205dce34075e2d60d40",
+      "kind": "reviewed-root-erasure-eligibility-manifest"
+    }
+  ],
+  "argument": [
+    {
+      "id": "retain-full-minor",
+      "text": "Only the Core prepass branch with a nonempty actual constructor.recursiveFields list returns Option.none before field substitution. Its existing nonrecursive branch and the surrounding bounded traversal are otherwise unchanged. The recursive structure recursor therefore reaches expression erasure with the full field-plus-IH minor. No synthetic Core major let consumes the whole-entry root eligibility first."
+    },
+    {
+      "id": "prepared-record-owner",
+      "text": "The Expr lookup recognizes the rec suffix only when its owner has a prepared runtime structure entry. The saturated lowering separately checks the actual environment recursor counts (same parameters, zero indices, one motive and one minor), the actual constructor owner and parameter count, and full numFields equality. Prepared source metadata establishes the unique structure constructor and recursor identity; this argument does not quantify over arbitrary forged caller-supplied scope records."
+    },
+    {
+      "id": "field-order-and-ghost-boundary",
+      "text": "The field conversion checks projectionIndex = the ascending traversal index and sourceIndex = numParams + that index, retaining names and unsubstituted field types. It derives recursive flags from the actual constructor field index, and then uses the unchanged psOpenMatchMinorFields/psOpenMatchMinorHypotheses order via psEraseMatchMinor. The successful preparation domain has no removed field slots: proof/type fields, proof parameters and runtime parameters remain refused. Declaration proof/type parameter scopes are unchanged."
+    },
+    {
+      "id": "generic-substitution",
+      "text": "The first numParams Core operands are erased using the existing runtime type eraser. Their count must match the prepared type-parameter vector. The existing parameter-name/type zip and psSubstituteVerifiedType instantiate field binding types, including nested named layouts and canonical unary function values. The major let has exactly the same owner and argument vector used by the record projections. Full original IR checking still validates every projection and body result."
+    },
+    {
+      "id": "major-once-and-freshness",
+      "text": "The actual Core major is erased once. Its original lowered variable is used only to locate an eligible declaration runtime-parameter index. A fresh major name is checked and reserved in byOutput/count before any minor binder is opened; byCore, Core IDs and currentDefinition are unchanged. The result is one typed major let whose initializer is the erased major and whose body uses only its variable. This prevents duplicate evaluation of computed majors. All later field/body local-name allocation sees the reservation."
+    },
+    {
+      "id": "used-and-unused-ih",
+      "text": "psEraseMatchMinor first opens all fields with fresh Core IDs and typed IR binding names, then opens actual recursive field IH binders. At an eligible whole-entry root, the unchanged hypothesis helper maps each IH to the current actual flat declaration call with the major slot replaced by that field variable and all other runtime/type arguments preserved. This is the already-reviewed ROOT-PRODUCER/MAJOR-REFINEMENT/IH-RECURRENCE interface, now applied to the record's sole constructor. The new path does not expand or recursively re-erase a Core recursor inside its IH. An unused IH emits no call or eager computation."
+    },
+    {
+      "id": "nested-eligibility",
+      "text": "The new helper preserves currentDefinition only while the original whole expression establishes its field/IH replacements. Existing eraseAt delegates to the cleared child scope for major and body computations, retaining runtimeExpressions but setting currentDefinition to None. Nested structure matches may consume existing outer mappings; they cannot create new current-definition mappings. A demanded unmapped new IH remains an erased-local refusal. Special-boundary splitting also uses the existing child callback and cannot grant root eligibility below overapplication."
+    },
+    {
+      "id": "projection-demand",
+      "text": "The result wraps the minor body in field projection lets in source field order. They refer only to the one captured major and carry the exact prepared owner/type arguments/field names. For the existing closed immutable record representation each projection is a total silent read of an already constructed field value. It adds no callback/body invocation and cannot precede an abort in the major initializer. No field computation is re-evaluated and no recursive hypothesis is forced by projection binding. Existing source computations retain their minor-body order."
+    },
+    {
+      "id": "result-saturation",
+      "text": "The special-entry catalogue records the original structure recursor boundary at numParams + 3 (parameters, motive, minor, major), with missing-prefix completion disabled as for other recursors. Existing special-boundary code splits overapplication at that boundary, lowers the complete recursor once, derives its actual Core result type and applies every remaining operand using canonical unary returned-value calls. This prevents flattened result-function operands from being mistaken for extra recursor slots."
+    },
+    {
+      "id": "finite-source-construction",
+      "text": "The two new recursive helpers recurse only on the existing field/binding list tail, with all parameters bound before their matches. Every branch builds one descriptor or projection let and calls the direct smaller list at most once. There is no recursive Core expansion, speculative fuel factory or unbounded adapter construction. Existing expression, type, field and source recursion budgets/refusals remain in force."
+    },
+    {
+      "id": "own-source-admissibility",
+      "text": "The helpers use existing typed binder syntax, typed function callbacks, constructor applications, list matches, Nat arithmetic and Except cases. The only changed recursive state is the ascending field index after the structural list major; it uses the existing direct-child normalization class. No new parser syntax or missing expected-type lambda initializer is introduced. This is static source reasoning, not a claim of a completed native or bootstrap execution."
+    }
+  ],
+  "preserved": [
+    "IR model, record/constructor/projection schemas, native/kernel/provider/defeq/cache algorithms",
+    "The existing runtime-only structure field and type-only structure parameter restrictions",
+    "Nonrecursive structure prelowering bytes after the new guard",
+    "Existing whole-entry root provenance and actual current-definition call reconstruction",
+    "Canonical unary function-value types and exact declaration entry/special saturation rules",
+    "All existing host gates, negative cases, original assertions, evidence binding and qualification invocations"
+  ],
+  "verification": {
+    "method": "GitHub MCP immutable reads/unattached blob writes; pure in-memory text guards, byte encoding and SHA256 only",
+    "compilerExecution": false,
+    "testsExecuted": false,
+    "workflowRequested": false,
+    "refsChanged": false,
+    "commitsCreated": false,
+    "sourceEdits": 5,
+    "files": 2,
+    "peerReview": {
+      "root": {
+        "verdict": "CLEAR",
+        "scope": "Both full candidate sources; all five unique old/new guards; complete forward/reverse reconstruction, SHA256, UTF-8 byte counts and immutable readback."
+      },
+      "empty": {
+        "verdict": "CLEAR",
+        "scope": "Exact manifest6452c4d8691f2662c91fe7195ffc998126da6869 and both source readbacks; field/IH order, generic substitution, used root and retained outer IH semantics, name reservation, saturation and own-source syntax."
+      },
+      "runtime": {
+        "verdict": "CLEAR",
+        "scope": "Bounded source-level native/provider metadata leaf: family/constructor/recursor production, ordinary direct-self admission and generated field-then-IH order; actual IR binding/projection/let APIs. Separate compile-only fixture/gate evidence remains a distinct packet and has not been executed."
+      }
+    }
+  },
+  "qualification": {
+    "action": "Root integrates the exact delta with the unpublished coherent source batch and existing evidence before requesting its single full run.",
+    "fixtures": "Any additive compile-only recursive-structure evidence belongs to the existing generic fixture/gate invocation and is a separate guarded packet owned by runtime/root.",
+    "strictClosed": false,
+    "semanticRowsClosed": false,
+    "globalCorrespondence": false,
+    "providerPromoted": false
+  }
+}

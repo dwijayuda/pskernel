@@ -12,8 +12,8 @@ def psLexStringToListFromWithFuel (fuel : Nat) : String -> Nat -> List Char :=
   match fuel with
   | Nat.zero => fun (_source : String) (_position : Nat) => List.nil
   | Nat.succ remaining =>
-      let smaller : String -> Nat -> List Char := psLexStringToListFromWithFuel remaining;
       fun (source : String) (position : Nat) =>
+        let smaller : String -> Nat -> List Char := psLexStringToListFromWithFuel remaining;
         if
             String.Internal.atEnd
               source

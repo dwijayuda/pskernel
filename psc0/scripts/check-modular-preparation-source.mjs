@@ -12,19 +12,30 @@ const cases = [
   ['packages/compiler/src/Ps/Compiler/Api.lean', [
     'sourceKind psSelfHostProdPreludeEnvironment List.nil',
     'psCompilerPreparationStepParsed state sourceModule',
-    'state.sourceKind elaborated.environment',
+    'state.sourceKind elaborated.result.environment',
     'PsElabModuleResult.mk state.environment (psListReverse state.declarationsRev)',
-    'psCompilerPrepareElaborated (psCompilerPreparationElaborated state)',
+    'psCompilerPrepareElaboratedWithOutput (psCompilerPreparationElaborated state)',
+    'match psCompilerPreparationFinishWithOutput state with',
+    '| Except.error error => Except.error error\n  | Except.ok output => Except.ok output.prepared',
     '(PsCompilerPreparationState.mk sourceKind environment declarationsRev) with',
     'psCompilerPreparationSourcesWorker rest next',
     '(sources : List String)\n    (state : PsCompilerPreparationState) :\n    Except PsCompilerError PsCompilerPreparationState :=',
     'match psCompilerParseSource state.sourceKind source with',
-    'match psElabModule state.environment sourceModule with',
+    'match psElabModuleWithOrigins state.environment sourceModule with',
+    'match psCompilerPreparationStepParsedWithOrigins state sourceModule with',
+    '| Except.error error => Except.error (PsCompilerError.elaboration error.error)',
+    '| Except.ok result => Except.ok result.state',
+    'PsCompilerPreparationStepWithOriginsResult.mk nextState elaborated.origins',
     '| Except.ok next => psCompilerPreparationSourcesWorker rest next',
-    '(psListAppend (psListReverse elaborated.declarations) state.declarationsRev)',
+    '(psListAppend\n            (psListReverse elaborated.result.declarations) state.declarationsRev)',
     '(psCompilerPreparationStart sourceKind) with',
     '| Except.ok state => psCompilerPreparationFinish state',
-    'Except.ok (PsCompilerAdmissionReadyModule.mk elaborated.declarations)',
+    'psEncodeCheckedAdmissionsCanonical\n        elaborated.declarations with',
+    'let prepared : PsCompilerAdmissionReadyModule :=',
+    'PsCompilerAdmissionReadyModule.mk elaborated.declarations;',
+    'let admissions : String := String.Internal.append canonicalAdmissions "\\n";',
+    'PsCompilerPreparationOutput.mk prepared elaborated.environment admissions',
+    'match psCompilerPrepareElaboratedWithOutput elaborated with',
     'match psEncodeCheckedAdmissionsCanonical prepared.declarations with',
     'Except.ok (String.Internal.append canonicalAdmissions "\\n")',
   ]],
@@ -70,9 +81,13 @@ function structureFields(name) {
 assert.deepEqual(structureFields('PsCompilerAdmissionReadyModule'), ['declarations']);
 assert.deepEqual(structureFields('PsCompilerPreparationState'),
   ['sourceKind', 'environment', 'declarationsRev']);
+assert.deepEqual(structureFields('PsCompilerPreparationOutput'),
+  ['prepared', 'environment', 'admissions']);
+assert.deepEqual(structureFields('PsCompilerPreparationStepWithOriginsResult'),
+  ['state', 'origins']);
 assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from the declarations, never a cached serialization');
 const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
 assert(session.indexOf('freezeGraph(prepared);') < session.indexOf('const admissions = admissionsFrom(compiler, prepared);'));
 assert(session.includes('admissionsFrom(compiler, item.prepared) !== item.admissions'));
 assert(session.includes('compiler.psCompilerTypeScriptFromPrepared(item.prepared)'));
-console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, combined admission and unchanged kernel gate)');
+console.log('PSC2_MODULAR_PREPARATION_SOURCE: PASS (ordered shared environment, origin companions, retained admission output and unchanged raw prepared/kernel gates)');

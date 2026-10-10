@@ -1,0 +1,532 @@
+{
+  "schemaVersion": 1,
+  "evidence": "exact-current-source-qualification-failure",
+  "repository": "dwijayuda/pskernel",
+  "source": {
+    "commit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "rootTree": "21592550b9016a8e5e7627d59dcdf261df72d2ad",
+    "psc0Tree": "d99e085157331fcf5db74e7ab207f848ee724a13",
+    "erasureExprBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+    "sourceConformanceBlob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+    "evidenceBinderBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+    "repairManifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c",
+    "nestedSourcePinsProvenance": "Published metadata supplied by the integrating root; run source SHA and root tree independently matched against GitHub run metadata."
+  },
+  "workflow": {
+    "id": 38008721677,
+    "workflowId": 378853677,
+    "name": "PSC0 SH1 language qualification",
+    "path": ".github/workflows/psc0-sh1.yml",
+    "runAttempt": 1,
+    "event": "push",
+    "branch": "psc0/strict-sh1-v1",
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-10-10T00:21:51Z",
+    "startedAt": "2026-10-10T00:21:51Z",
+    "updatedAt": "2026-10-10T00:28:26Z",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38008721677"
+  },
+  "compiler": {
+    "jobId": 114083480442,
+    "status": "completed",
+    "conclusion": "failure",
+    "failingStep": {
+      "number": 24,
+      "name": "Run the bounded native development gate before qualification"
+    },
+    "failure": {
+      "stage": "PSC0_SH1_GENERIC_ERASURE_PREPARE",
+      "diagnostic": {
+        "tag": "elaboration",
+        "error": {
+          "tag": "infer",
+          "error": {
+            "tag": "applicationTypeMismatch"
+          }
+        }
+      },
+      "owner": "runGenericErasureConformance",
+      "script": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+      "line": 667,
+      "column": 20,
+      "nodeVersion": "22.23.3",
+      "exitCode": 1,
+      "excerpt": "2026-10-10T00:28:20.2914606Z Error: PSC0_SH1_GENERIC_ERASURE_PREPARE: {\"tag\":\"elaboration\",\"error\":{\"tag\":\"infer\",\"error\":{\"tag\":\"applicationTypeMismatch\"}}}\n2026-10-10T00:28:20.2916564Z     at unwrap (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-capabilities.mjs:44:11)\n2026-10-10T00:28:20.2918522Z     at runGenericErasureConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-generic-erasure-conformance.mjs:667:20)\n2026-10-10T00:28:20.2919846Z     at async nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:950:3)\n2026-10-10T00:28:20.2921016Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1058:3\n2026-10-10T00:28:20.2921433Z \n2026-10-10T00:28:20.2921539Z Node.js v22.23.3\n2026-10-10T00:28:20.4167071Z ##[error]Process completed with exit code 1.\n"
+    },
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Authenticate the selected R seed and TS7-only recovery policy",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Check the actual full-qualification runner memory before expensive work",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Run leanprover/lean-action@v1",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Install the pinned current TypeScript 7 profile",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Verify the installed TypeScript 7 profile before compiler generation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Verify host syntax and bootstrap source restrictions",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Verify successor seed descriptor and cache contracts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10
+      },
+      {
+        "name": "Restore the selected qualified compiler bytes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 11
+      },
+      {
+        "name": "Verify the restored selected compiler bytes",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 12
+      },
+      {
+        "name": "Check out pinned R source for a missing selected seed cache",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 13
+      },
+      {
+        "name": "Recover all four selected R products with native Lean and TypeScript 7",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 14
+      },
+      {
+        "name": "Verify selected authoring cache and execution runtime before current generation",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 15
+      },
+      {
+        "name": "Retain the verified qualified authoring seed",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 16
+      },
+      {
+        "name": "Restore incremental current compiler build",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 17
+      },
+      {
+        "name": "Build current native compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 18
+      },
+      {
+        "name": "Run native parser, translation, and erasure regression targets",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 19
+      },
+      {
+        "name": "Build the actual native checked seed for source and import tests",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 20
+      },
+      {
+        "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 21
+      },
+      {
+        "name": "Verify native and generated TypeScript CLI boundaries",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 22
+      },
+      {
+        "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 23
+      },
+      {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24
+      },
+      {
+        "name": "Build the selected-seed candidate before full qualification",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 25
+      },
+      {
+        "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 26
+      },
+      {
+        "name": "Retain the newly qualified seed without activating a source migration",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 27
+      },
+      {
+        "name": "Retain incremental native outputs",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 28
+      },
+      {
+        "name": "Retain compiler evidence and exact generated artifacts",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 29
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "skipped",
+        "number": 57
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 58
+      },
+      {
+        "name": "Complete job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 59
+      }
+    ],
+    "stageSummaryBeforeFailure": {
+      "n1CompilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+      "n1CompilerHashMarkers": [
+        "PSC0_SH1_STRICT_SOURCE",
+        "PSC0_SH1_STRICT_TARGET",
+        "PSC0_SH1_STRICT_RUNTIME",
+        "PSC0_SH1_GRAMMAR_CLOSURE",
+        "PSC0_SH1_IR_CHECKER",
+        "PSC0_SH1_HELPER_RUNTIME"
+      ],
+      "n1CompilerHashMeaning": "The same N1 compiler hash is recorded by six completed stage markers; the complete N1 development gate did not pass.",
+      "nativeFullSource": {
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1705,
+        "normalizationCount": 50,
+        "originalIr": {
+          "schemaVersion": 1,
+          "kind": "psc0-native-original-ir-check",
+          "accepted": true,
+          "traversalComplete": true,
+          "visitedSteps": 828190,
+          "expressionCount": 64829,
+          "findingCount": 0,
+          "retainedFindingCount": 0,
+          "omittedFindingDetails": 0,
+          "sameOriginalIrCheckedBeforeEmission": true,
+          "strictSh1Qualified": false
+        }
+      },
+      "sourceConformance": {
+        "marker": "PSC0_SH1_STRICT_SOURCE",
+        "acceptedRoutes": 2,
+        "refusedCases": 38,
+        "fullPayloadRetained": true
+      },
+      "targetConformance": {
+        "marker": "PSC0_SH1_STRICT_TARGET",
+        "fullPayloadRetained": true
+      },
+      "runtimeConformance": {
+        "marker": "PSC0_SH1_STRICT_RUNTIME",
+        "status": "pass",
+        "observations": 186
+      },
+      "grammarClosure": {
+        "marker": "PSC0_SH1_GRAMMAR_CLOSURE",
+        "fullPayloadRetained": true
+      },
+      "irChecker": {
+        "marker": "PSC0_SH1_IR_CHECKER",
+        "behavior": {
+          "status": "pass",
+          "observations": 61,
+          "exhaustiveForAllInputs": false,
+          "zeroFieldRecord": {
+            "ownStringFields": 0,
+            "ownBrandSymbols": 1,
+            "inhabited": true
+          },
+          "emptyScrutinee": {
+            "callbackCalls": 1,
+            "propagatedOriginalFailure": true,
+            "noEmptyInhabitantConstructed": true
+          },
+          "letScopeCases": [
+            {
+              "name": "shadowOldScope",
+              "observations": 8
+            },
+            {
+              "name": "shadowWrappedCall",
+              "observations": 8
+            },
+            {
+              "name": "shadowClosure",
+              "observations": 8
+            },
+            {
+              "name": "shadowNestedTail",
+              "observations": 5
+            }
+          ]
+        },
+        "optimizedTail": {
+          "status": "pass",
+          "observations": 12,
+          "valueObservations": 11,
+          "faultObservations": 1,
+          "entries": [
+            {
+              "name": "optimizedTailSwap",
+              "runtimeArity": 3,
+              "route": "tail-loop",
+              "implementationAbsent": true
+            },
+            {
+              "name": "optimizedTailFuel",
+              "runtimeArity": 2,
+              "route": "tail-loop",
+              "implementationAbsent": true
+            },
+            {
+              "name": "optimizedTailReverse",
+              "runtimeArity": 2,
+              "route": "tail-loop",
+              "implementationAbsent": true
+            }
+          ]
+        }
+      },
+      "helperRuntime": {
+        "marker": "PSC0_SH1_HELPER_RUNTIME",
+        "fullPayloadRetained": true
+      }
+    }
+  },
+  "provider": {
+    "jobId": 114084996315,
+    "status": "completed",
+    "conclusion": "skipped",
+    "logFetched": false
+  },
+  "coldRecovery": {
+    "runId": 38008721636,
+    "status": "completed",
+    "conclusion": "skipped"
+  },
+  "artifactMetadata": {
+    "artifacts": [
+      {
+        "id": 11652692106,
+        "name": "psc0-sh1-ts7.0.2-b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+        "size_in_bytes": 1841093,
+        "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11652692106",
+        "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11652692106/zip",
+        "expired": false,
+        "created_at": "2026-10-10T00:28:23Z",
+        "expires_at": "2026-11-09T00:28:21Z",
+        "updated_at": "2026-10-10T00:28:23Z",
+        "digest": "sha256:a90181c130536359774816775acc74ebcae1a2c773e735fd3d55bd7ada273b8f",
+        "workflow_run": {
+          "id": 38008721677,
+          "repository_id": 1381609925,
+          "head_repository_id": 1381609925,
+          "head_branch": "psc0/strict-sh1-v1",
+          "head_sha": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c"
+        }
+      }
+    ],
+    "archiveDownloaded": false,
+    "contentsInspected": false,
+    "digestMeaning": "GitHub API metadata, not an independently downloaded/hash-verified archive."
+  },
+  "retainedLog": {
+    "blob": "763be222e38ed9d5510345dbecd4e722388a17b7",
+    "sha256": "3cf01e99dd7de4ce6305e379333e889577006a399314a3f2ecff411443b5cb44",
+    "utf8Bytes": 1046842,
+    "fetchedCompletedJobLogOnce": true,
+    "unchangedDecodedContents": true,
+    "exactReadbackVerified": true
+  },
+  "retainedMarkers": {
+    "blob": "1e8c4b673586f1ff2422de7b0ab14b1dfec286b6",
+    "sha256": "ce2050c6988b3c40b7951472a585852fec336b3b6cbc4642d6220d58f5a052c7",
+    "utf8Bytes": 2937671,
+    "completeStructuredPayloads": 12,
+    "exactReadbackVerified": true,
+    "markerTransportHashes": [
+      {
+        "marker": "PSC0_SH1_RESOURCE_POLICY",
+        "logLine": 273,
+        "prettyRenderedSha256": "40b0f9c5d4f885cc7cf1104f32b408b0682523f91b35700c74cfa6ef6faff706",
+        "prettyRenderedUtf8Bytes": 2572
+      },
+      {
+        "marker": "PSC0_SH1_WORKER_HARNESS_REFERENCE",
+        "logLine": 2175,
+        "prettyRenderedSha256": "e2b8b1ef0aa32e54f6adf21be0826d10aad8c9a99b401abc2c50d9d876c6cce6",
+        "prettyRenderedUtf8Bytes": 353068
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE",
+        "logLine": 2183,
+        "prettyRenderedSha256": "e3b20cc6c71f5de4531dde2d342db054e6beaa932f0c465dce14b297788be8a5",
+        "prettyRenderedUtf8Bytes": 1752621
+      },
+      {
+        "marker": "PSC0_SH1_IR_NATIVE",
+        "logLine": 2199,
+        "prettyRenderedSha256": "b64fd22226d4be960de686a367217e783dd9c9c3b2857021c50aa5449cce9a89",
+        "prettyRenderedUtf8Bytes": 582
+      },
+      {
+        "marker": "PSC0_SH1_IR_NATIVE_EVIDENCE",
+        "logLine": 2200,
+        "prettyRenderedSha256": "0eff5875516d1424f6584e2ca9bb78a40475f1652c42f49e653067013029e522",
+        "prettyRenderedUtf8Bytes": 2760
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_NATIVE",
+        "logLine": 2201,
+        "prettyRenderedSha256": "64d98671914617b7b90c71e428f20128aaa666a1d6cfa86b2f0171ceaa9811c2",
+        "prettyRenderedUtf8Bytes": 37553
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_SOURCE",
+        "logLine": 2202,
+        "prettyRenderedSha256": "c77ef7a8a9ee5829387b9abfa0ba7203610639cf7cd3a26355baf082a115dd94",
+        "prettyRenderedUtf8Bytes": 71655
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_TARGET",
+        "logLine": 2203,
+        "prettyRenderedSha256": "413637e0129eb006bd8537a040ce0cf5ec5cbdf5d929bd638bd9df76ec05a1cc",
+        "prettyRenderedUtf8Bytes": 42110
+      },
+      {
+        "marker": "PSC0_SH1_STRICT_RUNTIME",
+        "logLine": 2204,
+        "prettyRenderedSha256": "fad1dc223571beaf53222d66bd4c959644930c8011447aed871a262f03d44831",
+        "prettyRenderedUtf8Bytes": 113977
+      },
+      {
+        "marker": "PSC0_SH1_GRAMMAR_CLOSURE",
+        "logLine": 2205,
+        "prettyRenderedSha256": "4f7c056aa1386da5b65ad88dff28e5edc641d489d4202b94f72a493ad1054877",
+        "prettyRenderedUtf8Bytes": 339
+      },
+      {
+        "marker": "PSC0_SH1_IR_CHECKER",
+        "logLine": 2206,
+        "prettyRenderedSha256": "71c998e26fd6222a2910bb1a36a3267566d281fa853bfaf2044747928538d20d",
+        "prettyRenderedUtf8Bytes": 23004
+      },
+      {
+        "marker": "PSC0_SH1_HELPER_RUNTIME",
+        "logLine": 2207,
+        "prettyRenderedSha256": "74c7bea281bd81d0811ae9a3d015bd9dd0ddc65ffdd100a4be7e2f396b685768",
+        "prettyRenderedUtf8Bytes": 656
+      }
+    ],
+    "prettyHashMeaning": "Derived transport rendering of each complete payload; these hashes do not assert that every original stage file used pretty JSON.",
+    "nativeSourceReceiptLinkage": {
+      "claimingMarker": "PSC0_SH1_IR_NATIVE_EVIDENCE",
+      "field": "nativeSourceReceiptSha256",
+      "sha256": "6775d101e0beb3cdd8405aa8e827c1353f4f80dd8c7cfe86ebe44bdc0ee1cdf2",
+      "encoding": "Exact logged compact payload plus one newline",
+      "matches": true
+    },
+    "absentCompletionMarkers": [
+      "PSC0_SH1_NATIVE_CANDIDATE",
+      "PSC0_SH1_GENERATION",
+      "PSC0_SH1_FIXED_POINT"
+    ],
+    "binderHashAuthenticated": false,
+    "binderAbsenceReason": "No PSC0_SH1_FIXED_POINT payload was emitted."
+  },
+  "disposition": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "nativeDevelopmentGateComplete": false,
+    "c1QualificationComplete": false,
+    "c2QualificationComplete": false,
+    "c3QualificationComplete": false,
+    "allCorrespondenceRowsRemainOpen": true,
+    "allStageRowsRemainOpen": true,
+    "explanation": "Native full-compiler source/target/original-IR checks and the listed bounded stage markers succeeded. Generic-erasure fixture preparation then returned the recorded elaboration/infer/applicationTypeMismatch. The log does not identify the responsible fixture declaration, and this record makes no repair or semantic diagnosis. No complete N1, generation, fixed-point, binder, or provider success is inferred."
+  },
+  "retention": {
+    "kind": "unattached-git-blobs",
+    "proposedDirectory": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "proposedFiles": [
+      "development-gate-failure.json",
+      "compiler-job.log",
+      "stage-markers.json"
+    ],
+    "commitsOrRefChangesPerformed": false,
+    "rerunsOrDispatchesPerformed": false,
+    "compilerOrTestInvocationsPerformed": false
+  }
+}

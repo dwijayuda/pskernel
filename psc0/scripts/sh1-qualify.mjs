@@ -6,6 +6,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
+import { enforceQualificationResourcePolicy, createQualificationResourceTrace } from './sh1-resource-policy.mjs';
 import {
   bootstrapEntryRelative as entryRelative,
   readBootstrapClosure as sourceClosure,
@@ -25,6 +26,11 @@ import { runSh1GrammarClosureRoundTrip, sh1GrammarProfile } from './sh1-grammar-
 import { resolveTypeScriptCli, expectedTypeScriptVersion, typeScriptProfileArgs } from './typescript-cli.mjs';
 import { createGeneratedPreparationSession } from './generated-preparation-session.mjs';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
+import { compileStrictSources, strictSourceInputsFromClosure } from './sh1-strict-source.mjs';
+import { runStrictSourceConformance } from './sh1-strict-source-conformance.mjs';
+import { runStrictTargetConformance } from './sh1-strict-target-conformance.mjs';
+import { bindStrictQualificationEvidence } from './sh1-strict-evidence.mjs';
+import { runNativeStrictRuntimeReference, runStrictRuntimeConformance } from './sh1-strict-runtime-conformance.mjs';
 import { runIrCheckerConformance, runNativeIrCheckerConformance } from './sh1-ir-checker-conformance.mjs';
 import { runFoundationConformance } from './sh1-foundation-conformance.mjs';
 import { runHelperConformance, runHelperRuntimeConformance } from './sh1-helper-conformance.mjs';
@@ -105,18 +111,25 @@ async function toolchainIdentity() {
 
 async function recipeIdentity() {
   const files = [
-    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs',
-    'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-projection-conformance.mjs',
+    'scripts/sh1-qualify.mjs', 'scripts/sh1-capabilities.mjs', 'scripts/sh1-resource-policy.mjs',
+    'scripts/sh1-grammar-conformance.mjs', 'scripts/sh1-grammar-profile.mjs', 'scripts/sh1-projection-conformance.mjs',
     'scripts/sh1-successor-seed.mjs', 'psconfig.json',
+    'scripts/sh1-function-entry.mjs',
     'scripts/sh1-fresh-name-conformance.mjs', 'scripts/sh1-migration-worker-conformance.mjs',
     'scripts/sh1-migration-worker-abi.mjs',
     'test/fixtures/selfhost-sh1-accumulators.lean', 'test/fixtures/selfhost-sh1-accumulators.ps',
+    'test/fixtures/selfhost-sh1-empty.lean', 'test/fixtures/selfhost-sh1-empty.ps',
     'scripts/proofscript-source.mjs', 'scripts/checked-source-snapshot.mjs',
     'scripts/selfhost-source-workspace.mjs', 'scripts/LeanCheckedSeed.lean',
     'scripts/typescript-cli.mjs', 'scripts/check-typescript-profile.mjs', 'scripts/workspace-layout.mjs',
     'scripts/generated-preparation-session.mjs', 'scripts/original-ir-inventory.mjs',
     'scripts/original-ir-carrier.mjs', 'scripts/sh1-ir-checker-conformance.mjs',
     'test/IrCheckerTests.lean',
+    'scripts/sh1-strict-source.mjs', 'scripts/sh1-strict-source-conformance.mjs',
+    'scripts/sh1-strict-target-conformance.mjs', 'scripts/sh1-strict-evidence.mjs',
+    'scripts/sh1-strict-runtime-conformance.mjs', 'scripts/StrictSourceCompile.lean',
+    'test/StrictRuntimeReference.lean',
+    'docs/selfhost-language/strict/enabled-runtime-contract.json',
     'scripts/sh1-source-snapshot.mjs', 'scripts/sh1-seed-manifest.mjs',
     'scripts/sh1-iterate.mjs', 'scripts/sh1-iteration-conformance.mjs',
     'scripts/sh1-foundation-conformance.mjs',
@@ -326,32 +339,58 @@ async function buildGeneration(compilerPath, closure, outDir, {
   workspace = root, expectedSha256, authoringSeed, legacyIrBoundary,
 } = {}) {
   const start = performance.now();
+  const resources = createQualificationResourceTrace(outDir, {
+    command, generation: path.basename(outDir), sourceClosureSha256: closure.sha256,
+    executingCompilerSha256: expectedSha256 ?? null,
+  });
+  resources.checkpoint('generation-start');
+  resources.checkpoint('compiler-load-start');
   const loaded = await loadCompiler(compilerPath, { expectedSha256 });
   const { compiler, compilerSha256 } = loaded;
+  resources.checkpoint('compiler-load-complete', { executingCompilerSha256: compilerSha256 });
   const inputs = closure.ordered.map(({ path: sourcePath, source }) => ({
     path: sourcePath, source: stripImports(source),
   }));
   const kind = compiler.PsCompilerSourceKind.lean;
   let prepared;
   let preparation;
-  if ('psCompilerPreparationStart' in compiler) {
+  let strict = null;
+  if (typeof compiler.psCompilerSh1TypeScriptSources === 'function') {
+    resources.checkpoint('atomic-source-wrapper-start', {
+      scope: 'ingress-portable-atomic-compilation-and-post-emission-host-readback',
+    });
+    strict = compileStrictSources(compiler, strictSourceInputsFromClosure(closure), { compilerSha256 });
+    resources.checkpoint('atomic-source-wrapper-complete');
+    prepared = strict.prepared;
+    preparation = { mode: 'portable-atomic-source-and-target',
+      fullSourcePreparations: 1, portableIrChecks: 1,
+      sourcePolicy: strict.evidence.sourcePolicy, targetPolicy: strict.evidence.targetPolicy,
+      cache: { status: 'not-used-by-this-atomic-generation' } };
+  } else {
+    assert.equal(legacyIrBoundary?.kind, 'selected-authoring-seed',
+      'PSC0_SH1_STRICT_CURRENT_COMPILER_API_REQUIRED');
+    assert.equal(legacyIrBoundary.executingCompilerSha256, compilerSha256);
+    assert.equal(authoringSeed?.sourceRef, 'fe2560aba0f347b1caf8d000d371464642d44f23',
+      'PSC0_SH1_STRICT_BOOTSTRAP_REQUIRES_SELECTED_R');
+    resources.checkpoint('selected-R-preparation-start');
     const session = createGeneratedPreparationSession(compiler, { compilerSha256 });
     const result = session.prepare('lean', inputs);
     prepared = result.prepared;
-    preparation = result.receipt;
     const warm = session.prepare('lean', inputs);
     assert.equal(warm.prepared, prepared, 'PSC0_SH1_WARM_PREPARED_IDENTITY');
     assert.equal(warm.receipt.cache.preparedModules, 0);
     assert.equal(warm.receipt.cache.finishHit, true);
-    preparation = { ...result.receipt, warmNoChange: warm.receipt };
-  } else {
-    prepared = unwrap(compiler.psCompilerPrepareSources(kind,
-      list(compiler, inputs.map((item) => item.source))), 'PREPARE');
-    preparation = { mode: 'historical-aggregate-api' };
+    preparation = { ...result.receipt, warmNoChange: warm.receipt,
+      strictSourceBoundary: 'unavailable-on-immutable-selected-R-authoring-compiler',
+      strictSh1Qualified: false };
+    resources.checkpoint('selected-R-preparation-complete');
   }
   const prepareDone = performance.now();
-  const admissions = admissionText(compiler, prepared);
+  resources.checkpoint('admissions-start', { mode: strict ? 'reuse-atomic-output' : 'encode-selected-R-prepared' });
+  const admissions = strict ? strict.admissions : admissionText(compiler, prepared);
+  resources.checkpoint('admissions-complete');
   const admissionDone = performance.now();
+  resources.checkpoint('canonical-surface-start');
   const canonical = [];
   for (const item of closure.ordered) {
     canonical.push({
@@ -362,28 +401,42 @@ async function buildGeneration(compilerPath, closure, outDir, {
   }
   const canonicalText = JSON.stringify(canonical, null, 2) + '\n';
   const canonicalDone = performance.now();
-  const ir = unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');
-  // Observe the existing current-source objects before their original-IR check.
+  resources.checkpoint('canonical-surface-complete');
+  resources.checkpoint('original-ir-start', { mode: strict ? 'reuse-atomic-output' : 'erase-selected-R-prepared' });
+  const ir = strict ? strict.originalIr : unwrap(compiler.psCompilerVerifiedIrFromPrepared(prepared), 'ERASE');
+  resources.checkpoint('original-ir-complete');
+  // Reuse the exact source-owned objects. In the atomic path this is readback
+  // after emission; the selected-R bootstrap path retains its prior ordering.
+  resources.checkpoint('migration-abi-start');
   const migrationWorkerAbi = runMigrationWorkerAbi(compiler, prepared, ir, valueTag);
-  const irInventory = inventoryOriginalIr(compiler, ir, {
+  resources.checkpoint('migration-abi-complete');
+  const irInventory = strict ? strict.irInventory : inventoryOriginalIr(compiler, ir, {
     compilerSha256, legacyBoundary: legacyIrBoundary,
   });
+  resources.checkpoint('original-ir-inventory-complete');
   const legacyBoundary = irInventory.portableChecker.status === 'unavailable-at-explicit-seed-boundary';
   if (!legacyBoundary && (!irInventory.runtimeIrTypingAccepted || !irInventory.traversalComplete)) {
     await writeJson(path.join(outDir, 'original-ir-inventory.json'), irInventory);
     process.stdout.write('PSC0_SH1_IR_REJECTED: ' + JSON.stringify(irInventory) + '\n');
     throw new Error('PSC0_SH1_ORIGINAL_IR_TYPES_REJECTED');
   }
-  // No mutation or asynchronous operation separates a successful portable check
-  // from emission of this exact original IR object.
-  const typeScript = unwrap(compiler.psTsEmitModule(ir), 'EMIT');
+  // Current compilers already emitted this same IR inside the atomic API.
+  // The immutable R bootstrap route checks/emits its own exact IR here.
+  resources.checkpoint('emission-start', { mode: strict ? 'reuse-atomic-output' : 'emit-selected-R-ir' });
+  const typeScript = strict ? strict.typeScript : unwrap(compiler.psTsEmitModule(ir), 'EMIT');
+  resources.checkpoint('emission-complete');
   const emitDone = performance.now();
+  resources.checkpoint('typescript-child-start', { scope: 'write-typescript-and-run-separate-ts7-child' });
   const outputJs = await compileTypeScript(typeScript, outDir, tsc, root, typescriptVersion);
+  resources.checkpoint('typescript-child-complete');
+  resources.checkpoint('artifact-write-start');
   const javascript = await readFile(outputJs);
   await writeJson(path.join(outDir, 'original-ir-inventory.json'), irInventory);
+  if (strict) await writeJson(path.join(outDir, 'strict-source.json'), strict.evidence);
   await writeFile(path.join(outDir, 'admissions.json'), admissions);
   await writeFile(path.join(outDir, 'canonical-source.json'), canonicalText);
   await writeJson(path.join(outDir, 'source-closure.json'), closure.manifest);
+  resources.checkpoint('artifact-write-complete');
   const receipt = {
     schemaVersion: 1,
     executingCompilerSha256: compilerSha256,
@@ -411,6 +464,14 @@ async function buildGeneration(compilerPath, closure, outDir, {
       javascriptSha256: sha256(javascript),
     },
     preparation,
+    strictSourceEnforcement: strict ? {
+      status: 'accepted-complete-source-and-target', report: 'strict-source.json',
+      compilerSha256, sameOriginalIrCheckedBeforeEmission: true,
+      fullSourcePreparations: 1, portableIrChecks: 1, strictSh1Qualified: false,
+    } : {
+      status: 'unavailable-at-explicit-selected-R-boundary',
+      executingSourceRef: authoringSeed.sourceRef, compilerSha256, strictSh1Qualified: false,
+    },
     ...(migrationWorkerAbi ? { migrationWorkerAbi } : {}),
     originalIrInventory: {
       report: 'original-ir-inventory.json',
@@ -423,6 +484,7 @@ async function buildGeneration(compilerPath, closure, outDir, {
       sameOriginalIrCheckedBeforeEmission: !legacyBoundary,
       strictSh1Qualified: false,
     },
+    timingMode: strict ? 'atomic preparation-through-emission is included in loadAndPrepare; later phases reuse its outputs' : 'selected-R staged preparation and emission',
     timingsMs: {
       loadAndPrepare: prepareDone - start,
       admissions: admissionDone - prepareDone,
@@ -435,6 +497,11 @@ async function buildGeneration(compilerPath, closure, outDir, {
     evidence: 'candidate-build',
     provider: { status: 'not-attempted', kernelChecked: false },
   };
+  resources.checkpoint('generation-end-before-receipt-write');
+  receipt.resourceObservation = resources.reference();
+  receipt.resourcePolicy = resourcePolicyReceipt ? { ...resourcePolicyReceipt,
+    report: path.relative(outDir, resourcePolicyFile).split(path.sep).join('/'),
+  } : null;
   await writeJson(path.join(outDir, 'receipt.json'), receipt);
   process.stdout.write('PSC0_SH1_GENERATION: ' + JSON.stringify(receipt) + '\n');
   return { ...loaded, outputJs, receipt };
@@ -834,19 +901,42 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
   const directory = path.join(outDir, 'N1');
   await mkdir(directory, { recursive: true });
   const nativeCompilerSha256 = sha256(await readFile(nativeCompiler));
-  const nativeCommand = ['build', entryRelative, '--out', path.join(directory, 'index.js')];
-  runCommand(nativeCompiler, nativeCommand, { cwd: root });
+  const strictNativeCompiler = path.join(root, '.lake/build/bin/psc1_sh1_compile');
+  const strictNativeCompilerSha256 = sha256(await readFile(strictNativeCompiler));
+  const nativeSourceReceipt = path.join(directory, 'strict-source-native.json');
+  const nativeCommand = ['--kind', 'lean', '--out', path.join(directory, 'index.ts'),
+    '--admissions', path.join(directory, 'admissions.json'), '--report', nativeSourceReceipt,
+    '--sources', ...closure.ordered.map((item) => item.path)];
+  const nativeExecution = spawnSync(strictNativeCompiler, nativeCommand, {
+    cwd: root, encoding: 'utf8', timeout: 300000, maxBuffer: 16 * 1024 * 1024,
+  });
+  await writeFile(path.join(directory, 'strict-native.stdout.log'), nativeExecution.stdout ?? '');
+  await writeFile(path.join(directory, 'strict-native.stderr.log'), nativeExecution.stderr ?? '');
+  process.stdout.write(nativeExecution.stdout ?? '');
+  process.stderr.write(nativeExecution.stderr ?? '');
+  if (nativeExecution.error) throw nativeExecution.error;
+  assert.equal(nativeExecution.status, 0, 'PSC0_SH1_STRICT_NATIVE_EXECUTION');
+  assert.equal(sha256(await readFile(strictNativeCompiler)), strictNativeCompilerSha256,
+    'PSC0_SH1_STRICT_NATIVE_BINARY_CHANGED');
   assert.equal(sha256(await readFile(nativeCompiler)), nativeCompilerSha256,
     'PSC0_SH1_NATIVE_BINARY_CHANGED');
-  const outputJs = path.join(directory, 'index.js');
+  const nativeTypeScript = await readFile(path.join(directory, 'index.ts'), 'utf8');
+  const outputJs = await compileTypeScript(nativeTypeScript, directory, tsc, root, typescriptVersion);
   const compilerSha256 = sha256(await readFile(outputJs));
   const sourceRef = capture('git', ['rev-parse', 'HEAD']);
   const nativeIr = await runNativeIrCheckerConformance({
     nativeChecker: path.join(root, '.lake/build/bin/psc1_ir_check_tests'),
-    closure, nativeTypeScript: path.join(directory, 'index.ts'),
+    closure, nativeTypeScript: path.join(directory, 'index.ts'), nativeSourceReceipt,
     root, outDir: path.join(directory, 'ir-checker-native'),
   });
   const loaded = await loadCompiler(outputJs, { expectedSha256: compilerSha256 });
+  const strictRuntimeReference = await runNativeStrictRuntimeReference({
+    root, outDir: path.join(directory, 'strict-runtime-reference'),
+  });
+  await runStrictSourceConformance({ ...loaded, outDir: path.join(directory, 'strict-source') });
+  await runStrictTargetConformance({ ...loaded, outDir: path.join(directory, 'strict-target') });
+  await runStrictRuntimeConformance({ ...loaded, root, outDir: path.join(directory, 'strict-runtime'),
+    tsc, reference: strictRuntimeReference });
   const grammarClosure = runSh1GrammarClosureRoundTrip({ ...loaded, closure });
   await writeJson(path.join(directory, 'grammar-closure.json'), grammarClosure);
   process.stdout.write('PSC0_SH1_GRAMMAR_CLOSURE: ' + JSON.stringify({
@@ -890,10 +980,11 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
     sourceRef, sourceClosureSha256: closure.sha256,
     sourceKind: 'raw-authoritative-lean', moduleCount: closure.moduleCount,
     nativeCompiler: {
-      binarySha256: nativeCompilerSha256,
-      path: path.relative(root, nativeCompiler),
+      binarySha256: strictNativeCompilerSha256,
+      path: path.relative(root, strictNativeCompiler),
       command: nativeCommand,
-      buildContext: 'CI builds the current native target with lake build psc1; binary and workspace identities are recorded separately.',
+      generalCompilerBinarySha256: nativeCompilerSha256,
+      buildContext: 'CI builds psc1_sh1_compile and psc1; the atomic source executable builds N1, while the general CLI is a separate capability reference.',
     },
     artifacts: {
       javascriptSha256: compilerSha256,
@@ -902,6 +993,11 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
     recipe: await recipeIdentity(), toolchain: await toolchainIdentity(), typescriptProfile,
     candidateClaim: 'Native PSC frontend consumes raw current compiler source; generated current compiler executes the raw language and iteration corpus.',
     selectedSeedBootstrapProven: false, currentSourceFixedPointProven: false,
+    strictSourceEnforcement: { nativeReport: 'strict-source-native.json',
+      sourceConformance: 'strict-source/receipt.json', targetConformance: 'strict-target/receipt.json',
+      runtimeConformance: 'strict-runtime/receipt.json',
+      nativeRuntimeReference: 'strict-runtime-reference/reference.json',
+      fullSourcePreparations: 1, portableIrChecks: 1, strictSh1Qualified: false },
     sourceGrammar: sh1GrammarProfile,
     canonicalSourceCorrespondence: {
       report: 'grammar-closure.json',
@@ -922,6 +1018,30 @@ async function nativeCandidate(nativeCompiler, closure, outDir) {
   process.stdout.write('PSC0_SH1_NATIVE_CANDIDATE: ' + JSON.stringify(receipt) + '\n');
 }
 
+async function readStrictRuntimeReference(outDir) {
+  const candidates = [
+    path.join(outDir, 'development/N1/strict-runtime-reference/reference.json'),
+    path.join(outDir, 'N1/strict-runtime-reference/reference.json'),
+  ];
+  const referencePath = candidates.find((file) => existsSync(file));
+  assert(referencePath, 'PSC0_SH1_STRICT_NATIVE_REFERENCE_REQUIRED');
+  return JSON.parse(await readFile(referencePath, 'utf8'));
+}
+
+async function runCurrentStrictConformance(loaded, outDir, referenceRoot) {
+  const source = await runStrictSourceConformance({
+    ...loaded, outDir: path.join(outDir, 'strict-source'),
+  });
+  const target = await runStrictTargetConformance({
+    ...loaded, outDir: path.join(outDir, 'strict-target'),
+  });
+  const runtime = await runStrictRuntimeConformance({
+    ...loaded, root, outDir: path.join(outDir, 'strict-runtime'), tsc,
+    reference: await readStrictRuntimeReference(referenceRoot),
+  });
+  return { source, target, runtime };
+}
+
 function option(args, name, fallback) {
   const index = args.indexOf(name);
   if (index === -1) return fallback;
@@ -930,6 +1050,9 @@ function option(args, name, fallback) {
 }
 
 const outDir = path.resolve(root, option(args, '--out', 'dist/sh1'));
+const resourcePolicyFile = path.join(outDir, 'resource-policy-' + command + '.json');
+const resourcePolicyReceipt = ['candidate', 'fixed-point'].includes(command)
+  ? enforceQualificationResourcePolicy({ command, receiptPath: resourcePolicyFile }) : null;
 if (command === 'native-candidate') {
   const nativeCompiler = path.resolve(root, option(args, '--native', '.lake/build/bin/psc1'));
   await nativeCandidate(nativeCompiler, await sourceClosure(root), outDir);
@@ -939,7 +1062,9 @@ if (command === 'native-candidate') {
   const libraryCompiler = await loadCompiler(authoring.compilerPath, {
     expectedSha256: authoring.expectedSha256,
   });
-  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag);
+  const referenceWorkerReport = runMigrationWorkerConformance(libraryCompiler.compiler, valueTag, {
+    declarationNamesSchema: 'selected-r-names-only/1',
+  });
   const referenceWorkerReceipt = {
     schemaVersion: 1,
     evidence: 'selected-successor-migration-worker-reference',
@@ -951,11 +1076,13 @@ if (command === 'native-candidate') {
   await writeJson(path.join(outDir, 'worker-migration-reference.json'), referenceWorkerReceipt);
   await runFoundationConformance({
     ...libraryCompiler,
+    fixtureProducer: 'selected-R',
     executingCompiler: 'Same verified selected authoring seed consumes both raw library sources.',
     root, outDir: path.join(outDir, 'foundation'), tsc,
   });
   await runHelperConformance({
     ...libraryCompiler,
+    fixtureProducer: 'selected-R',
     executingCompiler: 'Same verified selected authoring seed consumes both raw helper source slices.',
     root, outDir: path.join(outDir, 'helpers'), tsc,
   });
@@ -964,7 +1091,7 @@ if (command === 'native-candidate') {
     legacyIrBoundary: {
       kind: 'selected-authoring-seed', executingSourceRef: authoring.provenance.sourceRef,
       executingCompilerSha256: authoring.expectedSha256,
-      reason: 'The explicitly pinned pre-checker Q may produce C1; current C1/C2/C3 checker consumers remain mandatory.',
+      reason: 'The explicitly pinned R predates strict source/target admission and may produce C1; current N1/C1/C2/C3 strict consumers remain mandatory.',
     },
   });
   await sessionConformance(authoring.compilerPath, generation.outputJs, outDir, {
@@ -973,6 +1100,7 @@ if (command === 'native-candidate') {
   const loaded = await loadCompiler(generation.outputJs, {
     expectedSha256: generation.receipt.artifacts.javascriptSha256,
   });
+  await runCurrentStrictConformance(loaded, path.join(outDir, 'C1'), outDir);
   await runIrCheckerConformance({
     ...loaded, compilerPath: generation.outputJs, root, outDir: path.join(outDir, 'C1/ir-checker'), tsc,
   });
@@ -1074,6 +1202,7 @@ if (command === 'native-candidate') {
   const secondCompiler = await loadCompiler(second.outputJs, {
     expectedSha256: second.receipt.artifacts.javascriptSha256,
   });
+  await runCurrentStrictConformance(secondCompiler, path.join(outDir, 'C2'), outDir);
   assert.equal(second.receipt.artifacts.canonicalSurfaceSourceSha256,
     nativeGrammar.canonicalSurfaceSourceSha256, 'PSC0_SH1_C2_SURFACE_MATCHES_ROUND_TRIPPED_SOURCE');
   assert.equal(second.receipt.originalIrInventory.runtimeIrTypingAccepted, true,
@@ -1103,6 +1232,7 @@ if (command === 'native-candidate') {
   const thirdCompiler = await loadCompiler(third.outputJs, {
     expectedSha256: third.receipt.artifacts.javascriptSha256,
   });
+  await runCurrentStrictConformance(thirdCompiler, path.join(outDir, 'C3'), outDir);
   assert.equal(third.receipt.originalIrInventory.runtimeIrTypingAccepted, true,
     'PSC0_SH1_C3_PORTABLE_IR_CHECK_REQUIRED');
   assert.equal(third.receipt.originalIrInventory.sameOriginalIrCheckedBeforeEmission, true);
@@ -1121,6 +1251,10 @@ if (command === 'native-candidate') {
     ...thirdCompiler, root, outDir: path.join(outDir, 'C3/generic-erasure'), tsc,
   });
   assert.equal((await sourceClosure(root)).sha256, closure.sha256, 'PSC0_SH1_SOURCE_CHANGED_DURING_RUN');
+  const strictEvidence = await bindStrictQualificationEvidence({
+    outDir, closure, nativeReceipt, firstReceipt, secondReceipt: second.receipt, thirdReceipt: third.receipt,
+  });
+  await writeJson(path.join(outDir, 'strict-enforcement-evidence.json'), strictEvidence);
   const receipt = {
     schemaVersion: 1,
     sourceRef: capture('git', ['rev-parse', 'HEAD']),
@@ -1164,6 +1298,19 @@ if (command === 'native-candidate') {
       correspondenceSha256: sha256(await readFile(migrationCorrespondencePath)),
       fullBaselineClosurePreparedAgain: false,
     },
+    strictSourceAndRuntimeConformanceGenerations: ['N1', 'C1', 'C2', 'C3'],
+    atomicRawSourceBuilds: ['native N1', 'C1 produces C2', 'C2 produces C3'],
+    strictEnforcementEvidence: { report: 'strict-enforcement-evidence.json',
+      sha256: sha256(await readFile(path.join(outDir, 'strict-enforcement-evidence.json'))),
+      ...strictEvidence },
+    strictSourceEnforced: true,
+    strictTargetAdmissionEnforced: true,
+    strictSh1Qualified: false,
+    semanticContractQualified: false,
+    enabledRuntimeConformance: { operations: 45, reference: 'development/N1/strict-runtime-reference/reference.json',
+      reports: ['development/N1/strict-runtime/receipt.json', 'C1/strict-runtime/receipt.json',
+        'C2/strict-runtime/receipt.json', 'C3/strict-runtime/receipt.json'],
+      scope: 'Finite pinned-native/generated observations; general semantic preservation is not inferred.' },
     portableIrCheckerGenerations: ['C1', 'C2', 'C3'],
     originalIrCheckedBuilds: ['C2', 'C3'],
     originalIrChecking: 'C1 checks the exact current-source IR emitted as C2; C2 checks the exact IR emitted as C3.',

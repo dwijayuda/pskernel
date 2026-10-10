@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-failed-qualification-attempt",
+  "status": "failed-before-native-compiler-generation",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "sourceCommit": "656ed78db6a2c26feced9374cd7b251c062a42df",
+  "run": {
+    "id": 38001282875,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "failure",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38001282875",
+    "createdAt": "2026-10-09T22:49:39Z",
+    "updatedAt": "2026-10-09T22:50:47Z"
+  },
+  "jobs": [
+    {
+      "id": 114059689529,
+      "name": "compiler",
+      "status": "completed",
+      "conclusion": "failure",
+      "failedStep": {
+        "number": 18,
+        "name": "Build current native compiler"
+      },
+      "completedPreflightStepNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        15,
+        17
+      ],
+      "skippedGenerationStepNumbers": [
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "retainedEvidenceSteps": [
+        {
+          "number": 28,
+          "conclusion": "success"
+        },
+        {
+          "number": 29,
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 114060007620,
+      "name": "kernel-admissions",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "failure": {
+    "compilerJobId": 114059689529,
+    "stepNumber": 18,
+    "stepName": "Build current native compiler",
+    "module": "Ps.Erasure.Basic",
+    "classification": "native-Lean-reserved-keyword-local-binder",
+    "primaryPath": "packages/erasure/src/Ps/Erasure/Basic.lean",
+    "primaryLine": 326,
+    "primaryColumn": 19,
+    "keyword": "variable",
+    "diagnostics": [
+      {
+        "timestamp": "2026-10-09T22:50:37.6658137Z",
+        "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+        "line": 326,
+        "column": 19,
+        "message": "unexpected token 'variable'; expected '(', ':=', 'rec', '|' or term"
+      },
+      {
+        "timestamp": "2026-10-09T22:50:37.6659537Z",
+        "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+        "line": 326,
+        "column": 28,
+        "message": "unexpected token ':='; expected '(', '[', '{' or '⦃'"
+      },
+      {
+        "timestamp": "2026-10-09T22:50:37.6660462Z",
+        "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+        "line": 331,
+        "column": 57,
+        "message": "unexpected token ')'; expected '(', '[', '{' or '⦃'"
+      }
+    ],
+    "buildExitCode": 1,
+    "explanation": "Native Lean rejected the new entry-catalogue local binder named variable; following parser diagnostics arise on its binding and use. The current native compiler was not produced."
+  },
+  "generationStatus": {
+    "N1": "not-started",
+    "C1": "not-started",
+    "C2": "not-started",
+    "C3": "not-started",
+    "provider": "skipped",
+    "providerJobId": 114060007620,
+    "generationReceiptCount": 0,
+    "newGeneratedProductsQualified": false
+  },
+  "log": {
+    "blob": "c9ad38a7d8d333f547ca4202fe4e261aa38faf05",
+    "sha256": "6c87ac80d11390d49d41c6cbf52232ac832df158efa754168e6f561cf9a2e69f",
+    "utf8Bytes": 82321,
+    "decodedLineCount": 970,
+    "exactBlobReadback": true,
+    "source": "GitHub Actions completed compiler job decoded log; exact leading BOM and text retained"
+  },
+  "preflight": {
+    "resourcePolicy": {
+      "evidence": "generated-qualification-resource-preflight",
+      "command": "workflow-preflight",
+      "policy": "psc0-sh1-generated-qualification-resources/1",
+      "passed": true,
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "oldSpaceMiB": 8192,
+      "minimumAvailableBytes": 12884901888,
+      "observedHeapLimitBytes": 8640266240,
+      "inheritedHeapOverride": false,
+      "physicalTotalBytes": 16766414848,
+      "effectiveAvailableBytes": 15279034368,
+      "semanticContractQualified": false
+    },
+    "typescriptProfile": {
+      "mode": "installed-profile-contract",
+      "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+      "timings": [
+        {
+          "phase": "positional-source-with-unrelated-config",
+          "version": "7.0.2",
+          "elapsedMs": 50.80332099999998
+        }
+      ]
+    },
+    "nativeLean": {
+      "version": "4.34.0",
+      "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    }
+  },
+  "retainedArtifacts": [
+    {
+      "id": 11649037453,
+      "name": "psc0-sh1-ts7.0.2-656ed78db6a2c26feced9374cd7b251c062a42df",
+      "sizeBytes": 447714,
+      "digest": "sha256:ded80948cd3fe16db7408eb900a39bef44fb2153cbe88ab700a5bab1ed2cf3e9",
+      "expired": false,
+      "sourceCommit": "656ed78db6a2c26feced9374cd7b251c062a42df",
+      "runId": 38001282875
+    }
+  ],
+  "interpretation": {
+    "resourcePolicyPassed": true,
+    "typescript7ProfilePassed": true,
+    "selectedSeedAuthenticationPassed": true,
+    "memoryFailureObserved": false,
+    "compilerSemanticGatesReached": false,
+    "finiteEvidenceIsGeneralProof": false,
+    "noAutomaticRerun": true
+  },
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "correspondenceRowsClosed": 0
+  },
+  "agentActions": {
+    "sourceEdits": 0,
+    "refMutations": 0,
+    "workflowDispatches": 0,
+    "reruns": 0,
+    "preservedUnattachedLog": true,
+    "preservedUnattachedEvidence": true
+  }
+}

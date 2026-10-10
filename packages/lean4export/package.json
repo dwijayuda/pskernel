@@ -17,7 +17,7 @@
     }
   },
   "bin": {
-    "proofscript-lean4export": "./dist/bin/proofscript-lean4export.js"
+    "proofscript-lean4export": "dist/bin/proofscript-lean4export.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

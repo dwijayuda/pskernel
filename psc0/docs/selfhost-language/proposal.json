@@ -2,10 +2,10 @@
   "formatVersion": 1,
   "kind": "language-contract-and-migration-ledger",
   "id": "PSC0-SH/1",
-  "status": "bounded-recursion-source-families-recursive-generic-erasure-and-ts5-ts7-runtime-ir-typing-compiler-qualified; strict-runtime-enforcement-pending; R2-new-only-ps-0.9-r3-and-parameter-projection-compiler-qualified-provider-accepted-cold-recovered-explicitly-selected; F-practical-v1-compiler-qualified-provider-accepted",
+  "status": "strict-PSC0-SH/1-qualified-for-explicit-entry-and-current-lane; TypeScript-7.0.2-current-development; new-only-ps-0.9-r3-bounded-subset; all33-correspondence-and27-stage-dispositions-complete; R-remains-selected",
   "activation": {
     "selectedByPsconfig": false,
-    "enforcementInstalled": false,
+    "enforcementInstalled": true,
     "compilerImplementationChanged": true,
     "firstQualifyingSeed": {
       "sourceRef": "e91b9558d665879871b8bf0893915ae64b27c7fe",
@@ -13,9 +13,18 @@
       "runId": 37831951758
     },
     "qualifiedSeedManifest": "selfhost-seed.json",
-    "enforcementMeaning": "Complete strict profile enforcement remains pending. M6 installs a bounded original-IR typing API and checked emission entry; compiler qualification, runtime typing, provider acceptance and profile activation retain separate evidence. Current ps-0.9-r3 syntax selection does not activate strict SH/1 or full Standard/PSCV conformance.",
+    "enforcementMeaning": "Qualified strict PSC0-SH/1 enforcement is installed at psCompilerSh1TypeScriptSources and the recorded strict development/qualification lane. Generic APIs and unchanged psconfig do not select strict SH/1.",
     "runtimeIrTypingApiPresent": true,
-    "selectedByPsconfigMeaning": "This flag describes strict PSC0-SH/1 activation. The current sourceGrammar edition is selected independently."
+    "selectedByPsconfigMeaning": "This flag describes strict PSC0-SH/1 activation. The current sourceGrammar edition is selected independently.",
+    "qualifiedSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "releaseRecordReference": {
+      "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+      "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+      "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+      "bytes": 1858477
+    },
+    "selectedSeed": "R",
+    "selectedSeedChanged": false
   },
   "repository": "dwijayuda/pskernel",
   "baselineRef": "37f63c39d4a07189938046c64152bba25d789450",
@@ -102,7 +111,7 @@
     {
       "id": "source.ps-0.9-r3",
       "tier": "required-current-source-grammar",
-      "current": "implemented-qualification-pending",
+      "current": "compiler-qualified-provider-accepted; cold-recovered-and-selected",
       "baseline": "historical-semicolon-and-empty-call-to-Unit-parser",
       "proposal": "One new-only current .ps lexer/parser/printer and atomic active-source/tooling migration to the bounded supplied-reference subset; no current legacy grammar mode.",
       "sourceGrammar": {
@@ -147,24 +156,28 @@
         "elaboration": "emptyCallUnsupported until a separate completion/default capability has real metadata and semantics."
       },
       "qualification": {
-        "status": "pending",
+        "status": "compiler-qualified-provider-accepted; cold-recovered-and-selected",
         "fullClosureRoundTrip": "N1 only; supplied raw closure manifest; canonical Lean correspondence and new PS idempotence",
         "canonicalArtifactBinding": "Hash N1's already translated canonical source artifact and require exact C2/C3 surface product equality.",
         "checkedOriginalIrRequired": true,
         "currentC2C3Required": true,
         "separateExactStreamProviderRequired": true,
-        "compilerQualified": false,
+        "compilerQualified": true,
         "fullStandardConformance": false,
         "fullPscvConformance": false,
         "strictSh1Qualified": false,
-        "successorSelected": false,
+        "successorSelected": true,
         "requiredSmallApiGenerations": [
           "N1",
           "C1",
           "C2",
           "C3"
         ],
-        "rawSourceExecutionRequired": true
+        "rawSourceExecutionRequired": true,
+        "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+        "runId": 37925722635,
+        "evidenceDocument": "PS_GRAMMAR_ADOPTION.md",
+        "checkpoint": "sourceGrammarCheckpoint"
       },
       "evidenceDocument": "PS_GRAMMAR_ADOPTION.md"
     },
@@ -619,7 +632,13 @@
         "M4",
         "M5"
       ],
-      "status": "recursive-generic-argument-repair-compiler-qualified-and-provider-accepted; bounded-portable-runtime-typing-ts5-and-ts7-qualified-and-provider-accepted; complete-strict-contract-pending"
+      "status": "recursive-generic-argument-repair-compiler-qualified-and-provider-accepted; bounded-portable-runtime-typing-ts5-and-ts7-qualified-and-provider-accepted; declared-strict-PSC0-SH/1-qualified-for-explicit-entry-and-current-lane",
+      "currentStrictReleaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      }
     },
     {
       "id": "M7",
@@ -689,7 +708,7 @@
   },
   "nonClaims": [
     "Unrestricted PSC1 or Lean support",
-    "Strict SH/1 runtime enforcement",
+    "Implicit strict SH/1 enforcement by generic compiler APIs or psconfig selection",
     "Copied backend integration",
     "Conformance on every platform or target",
     "A measured speedup of the generated compiler itself",
@@ -729,13 +748,32 @@
       "requires": [
         "compiler-qualified",
         "all-required-language-capabilities",
-        "runtime-representation-inventory-and-enforcement"
+        "runtime-representation-inventory-and-enforcement",
+        "enabled-primitive-and-canonical-value-laws",
+        "bounds-and-text-position-domain-policy",
+        "source-normalization-and-erasure-layout-correspondence",
+        "evaluation-order-capture-initialization-and-backend-semantic-correspondence",
+        "explicit-evidence-disposition-for-every-enabled-mandatory-obligation"
       ],
       "stages": [
         "M3",
         "M6"
       ],
-      "impliesKernelChecked": false
+      "impliesKernelChecked": false,
+      "activeImplementation": {
+        "branch": "psc0/strict-sh1-v1",
+        "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+        "plan": "strict/PLAN.md",
+        "obligationLedger": "strict/obligations.json",
+        "strictSh1Qualified": true,
+        "qualifiedSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "releaseRecordReference": {
+          "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+          "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+          "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+          "bytes": 1858477
+        }
+      }
     },
     "kernelChecked": {
       "requires": [
@@ -1761,5 +1799,3227 @@
       "fullStandardConformance": false,
       "fullPscvConformance": false
     }
-  }
+  },
+  "strictEnforcementCheckpoint": {
+    "status": "qualified-by-reviewed-source-arguments-and-authenticated-current-compiler-provider-evidence",
+    "baselineRef": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+    "branch": "psc0/strict-sh1-v1",
+    "implementationManifest": "strict/implementation-checkpoint.json",
+    "plan": "strict/PLAN.md",
+    "obligations": "strict/obligations.json",
+    "correspondenceLedger": "strict/correspondence-obligations.json",
+    "sourceEntry": "psCompilerSh1TypeScriptSources",
+    "rawSourceOwned": true,
+    "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "targetPolicy": "psc0-sh1-ts-target/1",
+    "runtimeContract": "PSC0-TSJS-runtime/1",
+    "operationCount": 45,
+    "plannedNativeObservationCount": 186,
+    "plannedSourceConformance": {
+      "accepted": 2,
+      "portableOrCompilerRefusals": 38,
+      "hostCarrierRefusals": 2,
+      "reservedNameCases": {
+        "leanPolicy": 6,
+        "psGrammar": 6
+      },
+      "structuralRecursionRefusals": 5
+    },
+    "plannedTargetConformance": {
+      "accepted": 9,
+      "refused": 20
+    },
+    "generalCorrespondenceRules": 33,
+    "generalCorrespondenceRulesDischarged": 33,
+    "qualified": true,
+    "strictSh1Qualified": true,
+    "semanticContractQualified": true,
+    "providerChecked": true,
+    "selectedSeedUnchanged": "R",
+    "sourceAuthority": ".lean",
+    "cloudExecution": {
+      "attempt": 17,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runId": 38027413274,
+      "workflowId": 380282667,
+      "runAttempt": 1,
+      "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+      "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "priorExecution": {
+        "expectedRunId": 38015134511,
+        "expectedWorkflowId": 378853677,
+        "expectedHeadSha": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "runAttempt": 1,
+        "compilerJobId": 114103608774,
+        "compilerConclusion": "cancelled",
+        "providerJobId": 114120597914,
+        "providerConclusion": "skipped",
+        "completedAtUtc": "2026-10-10T03:27:29Z",
+        "workflowSourceBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+        "attemptReference": {
+          "path": "psc0/docs/selfhost-language/strict/qualification-attempts.json",
+          "blob": "4753c805cf84b7e627f51344e7091ed465e32685",
+          "sha256": "b4cda6451cdd2a25fef72db7895392211190134139b1e2c887d594a7b6c6b386",
+          "bytes": 113727,
+          "jsonPointer": "/attempts/14",
+          "valueSha256": "08695fb98eb3ed17e206e6b91b16ab638ce8c0cabf96dfa61eaf1ae4897ea606",
+          "all15AttemptsSha256": "561074de6df43b4550bc848f8f1c45d714692205f820179a3cb718f8cbee81af"
+        },
+        "runMetadata": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/run-metadata.json",
+          "sha256": "5c7bb0997ad6219eb767c97e952e1463aee27596c77642986046d77de78e906a",
+          "bytes": 28490,
+          "retainedBlob": "e94bbd61407e7f30211c3350726a6014a2e619b8",
+          "receiptOrEnvelopeRef": null
+        },
+        "compilerJobLog": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+          "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+          "bytes": 1917726,
+          "retainedBlob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+          "receiptOrEnvelopeRef": null
+        },
+        "cancellationEvidence": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/qualification-cancellation.json",
+          "sha256": "6e8f4bc35d7729d8d3645e99c2554b44857fe28534c880fa13184b4dc2223720",
+          "bytes": 27767,
+          "retainedBlob": "7b47d247c5e7712c3823511924eced7c126fe452",
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredSuccessfulCompilerSteps": [
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          30
+        ],
+        "configuredWorkflowGateOutcomes": [
+          {
+            "name": "Build current native compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-10T01:58:00Z",
+            "completed_at": "2026-10-10T01:58:02Z"
+          },
+          {
+            "name": "Run native parser, translation, and erasure regression targets",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-10T01:58:02Z",
+            "completed_at": "2026-10-10T01:58:03Z"
+          },
+          {
+            "name": "Build the actual native checked seed for source and import tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T01:58:03Z",
+            "completed_at": "2026-10-10T01:58:11Z"
+          },
+          {
+            "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T01:58:11Z",
+            "completed_at": "2026-10-10T01:58:14Z"
+          },
+          {
+            "name": "Verify native and generated TypeScript CLI boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-10-10T01:58:14Z",
+            "completed_at": "2026-10-10T01:58:17Z"
+          },
+          {
+            "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-10-10T01:58:17Z",
+            "completed_at": "2026-10-10T01:58:19Z"
+          },
+          {
+            "name": "Run the bounded native development gate before qualification",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-10-10T01:58:19Z",
+            "completed_at": "2026-10-10T02:03:42Z"
+          },
+          {
+            "name": "Compare native worker observations before candidate generation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-10-10T02:03:42Z",
+            "completed_at": "2026-10-10T02:03:42Z"
+          },
+          {
+            "name": "Build the selected-seed candidate before full qualification",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-10-10T02:03:42Z",
+            "completed_at": "2026-10-10T02:23:55Z"
+          },
+          {
+            "name": "Retain compiler evidence and exact generated artifacts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30,
+            "started_at": "2026-10-10T03:27:23Z",
+            "completed_at": "2026-10-10T03:27:26Z"
+          }
+        ],
+        "reusedGenerationReceipts": [
+          {
+            "generation": "N1",
+            "sourceArtifactPath": "development/N1/receipt.json",
+            "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/native-candidate-receipt.json",
+            "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827,
+            "serialization": "JSON.stringify(value,null,2)+'\\n'"
+          },
+          {
+            "generation": "C1",
+            "sourceArtifactPath": "C1/receipt.json",
+            "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c1-receipt.json",
+            "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531,
+            "serialization": "JSON.stringify(value,null,2)+'\\n'"
+          }
+        ],
+        "completedC2ReceiptHistoricalOnly": {
+          "generation": "C2",
+          "sourceArtifactPath": "C2/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c2-receipt.json",
+          "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+          "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+          "bytes": 166700,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        },
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false,
+        "scope": "Cancelled predecessor remains cancelled. Only completed N1/C1, their retained conformance artifacts and the named successful prerequisites are carried. Its completed C2 is historical evidence; continuation regenerates C2/C3. It produced no fixed-point qualification, strict binder or provider acceptance."
+      },
+      "continuationInputs": {
+        "kind": "psc0-authenticated-exact-source-fixed-point-continuation",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+        "requiredOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "predecessorRunId": 38015134511,
+        "predecessorCompilerJobId": 114103608774,
+        "predecessorRunAttempt": 1,
+        "predecessorArchive": {
+          "artifactId": 11658430459,
+          "artifactName": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+          "bytes": 5147944,
+          "fileCount": 344,
+          "retainedArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+        },
+        "requiredRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "requiredSourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "requiredNativeReceipt": {
+          "path": "dist/sh1/development/N1/receipt.json",
+          "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+          "bytes": 15827
+        },
+        "requiredCandidateReceipt": {
+          "path": "dist/sh1/C1/receipt.json",
+          "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+          "bytes": 169531
+        },
+        "historicalCompletedC2Receipt": {
+          "path": "dist/sh1/C2/receipt.json",
+          "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+          "bytes": 166700,
+          "usedAsCurrentC2Evidence": false
+        },
+        "command": [
+          "node",
+          "--max-old-space-size=8192",
+          "scripts/sh1-qualify.mjs",
+          "fixed-point",
+          "--out",
+          "dist/sh1"
+        ],
+        "qualifierSourceBlob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+        "qualifierSha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "binderSourceBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "binderSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+        "reusedGenerations": [
+          "N1",
+          "C1"
+        ],
+        "regeneratedGenerations": [
+          "C2",
+          "C3"
+        ],
+        "omittedPathPrefixes": [
+          "dist/sh1/C2/",
+          "dist/sh1/C3/"
+        ],
+        "omittedExactPaths": [
+          "dist/sh1/resource-policy-fixed-point.json"
+        ],
+        "requiredSuccessfulCurrentCompilerSteps": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "artifactPathBase": "continuation compiler artifact root",
+        "inputsFile": {
+          "path": "dist/sh1-continuation-inputs/inputs.json",
+          "sha256": null,
+          "bytes": null,
+          "retainedBlob": null,
+          "receiptOrEnvelopeRef": null
+        },
+        "evidenceInventoryFile": {
+          "path": "dist/sh1-continuation-inputs/evidence-inventory.json",
+          "sha256": null,
+          "bytes": null,
+          "retainedBlob": null,
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredInventoryFileCount": 135,
+        "requiredReturnedJsonFileCount": 24,
+        "compilerJobTimeoutMinutes": 300,
+        "providerJobTimeoutMinutes": 45,
+        "timeoutIsNotCompletionEstimate": true
+      },
+      "continuationInputsRole": "Historical contract for generationExecution run 38021634599. Preserve this former pending contract byte-exact; its actual imported report is generationExecution.importInputs. Current evidence-only completion uses evidenceCompletionInputs.",
+      "generationExecution": {
+        "expectedRunId": 38021634599,
+        "expectedWorkflowId": 380237977,
+        "expectedHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "runAttempt": 1,
+        "compilerJobId": 114123691566,
+        "compilerConclusion": "failure",
+        "providerJobId": 114136283916,
+        "providerConclusion": "skipped",
+        "completedAtUtc": "2026-10-10T04:56:41Z",
+        "workflowSourceBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+        "orchestration": {
+          "sourceRef": "43fa000c4adbc9d4754e20c213595c1449f00961",
+          "rootTree": "044be19b0f128eda642233213d677528b1524ecc",
+          "psc0Tree": "ff0530d231bbec23dfea93abbce435bdddcc62c8",
+          "workflowPath": ".github/workflows/psc0-sh1-continue.yml",
+          "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+          "workflowSha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+          "workflowBytes": 34742,
+          "workflowIsCompilerRecipeInput": false,
+          "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        "runMetadata": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/43fa000c4adbc9d4754e20c213595c1449f00961/run-metadata.json",
+          "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+          "bytes": 94892,
+          "retainedBlob": "227e846d233c501a14600f0ebbe63f0118331273",
+          "receiptOrEnvelopeRef": null
+        },
+        "compilerJobLog": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/43fa000c4adbc9d4754e20c213595c1449f00961/job.log",
+          "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+          "bytes": 875228,
+          "retainedBlob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+          "receiptOrEnvelopeRef": null
+        },
+        "failurePacket": {
+          "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+          "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+          "bytes": 43125
+        },
+        "failurePointer": "/failure",
+        "configuredWorkflowGateOutcomes": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-10T03:44:46Z",
+            "completed_at": "2026-10-10T03:44:47Z"
+          },
+          {
+            "name": "Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-10T03:44:47Z",
+            "completed_at": "2026-10-10T03:45:07Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-10T03:45:07Z",
+            "completed_at": "2026-10-10T03:45:08Z"
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-10T03:45:08Z",
+            "completed_at": "2026-10-10T03:45:27Z"
+          },
+          {
+            "name": "Authenticate the cancelled run and restore its completed N1 and C1 evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-10T03:45:27Z",
+            "completed_at": "2026-10-10T03:45:30Z"
+          },
+          {
+            "name": "Install the pinned current TypeScript 7 profile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-10T03:45:30Z",
+            "completed_at": "2026-10-10T03:45:32Z"
+          },
+          {
+            "name": "Verify the actual TypeScript 7 continuation runtime",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-10T03:45:32Z",
+            "completed_at": "2026-10-10T03:45:32Z"
+          },
+          {
+            "name": "Run the existing exact-source fixed-point command",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 8,
+            "started_at": "2026-10-10T03:45:32Z",
+            "completed_at": "2026-10-10T04:56:36Z"
+          },
+          {
+            "name": "Retain complete file envelopes and exact returned JSON for final disposition",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 9,
+            "started_at": "2026-10-10T04:56:36Z",
+            "completed_at": "2026-10-10T04:56:36Z"
+          },
+          {
+            "name": "Retain continuation evidence and original authenticated inputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-10T04:56:36Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 19,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Post Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          }
+        ],
+        "requiredSuccessfulPrerequisiteSteps": [
+          5,
+          6,
+          7,
+          10
+        ],
+        "failedStep": 8,
+        "collectorStep": 9,
+        "collectorConclusion": "skipped",
+        "importInputs": {
+          "path": "dist/sh1-continuation-inputs/inputs.json",
+          "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+          "bytes": 161276,
+          "retainedBlob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+          "receiptOrEnvelopeRef": null
+        },
+        "generationReceipts": [
+          {
+            "generation": "C2",
+            "receiptPath": "C2/receipt.json",
+            "path": "dist/sh1/C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707,
+            "retainedBlob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+            "receiptOrEnvelopeRef": null,
+            "actualReportsReference": {
+              "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+              "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+              "bytes": 43125,
+              "jsonPointer": "/generations/0/conformanceReportsReturned"
+            }
+          },
+          {
+            "generation": "C3",
+            "receiptPath": "C3/receipt.json",
+            "path": "dist/sh1/C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709,
+            "retainedBlob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+            "receiptOrEnvelopeRef": null,
+            "actualReportsReference": {
+              "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+              "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+              "bytes": 43125,
+              "jsonPointer": "/generations/1/conformanceReportsReturned"
+            }
+          }
+        ],
+        "completedProductEquality": {
+          "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+          "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+          "bytes": 43125,
+          "jsonPointer": "/sourceAndProductComparisons",
+          "generationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+            "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+            "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+            "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+          }
+        },
+        "artifact": {
+          "id": 11659939542,
+          "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+          "size_in_bytes": 11739089,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542/zip",
+          "expired": false,
+          "created_at": "2026-10-10T04:56:39Z",
+          "expires_at": "2026-11-09T04:56:36Z",
+          "updated_at": "2026-10-10T04:56:39Z",
+          "digest": "sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+          "workflow_run": {
+            "id": 38021634599,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961"
+          }
+        },
+        "qualificationReturned": false,
+        "strictBinderReturned": false,
+        "evidenceInventoryReturned": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false,
+        "scope": "This run completed C2/C3 and their existing conformance gates, then failed in the original binder's native pass-marker parser. It remains failed and its provider remains skipped. Its authenticated generation receipts and products can be consumed by the separate corrected evidence producer."
+      },
+      "evidenceProducer": {
+        "sourceRef": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "finisher": {
+          "sourcePath": "psc0/scripts/sh1-finish-evidence.mjs",
+          "path": "scripts/sh1-finish-evidence.mjs",
+          "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+          "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+          "bytes": 38509
+        },
+        "binder": {
+          "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+          "path": "scripts/sh1-strict-evidence-finish.mjs",
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "workflow": {
+          "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+          "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+          "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+          "bytes": 55773
+        },
+        "currentExecution": {
+          "runId": 38027413274,
+          "workflowId": 380282667,
+          "runAttempt": 1,
+          "compilerJobId": 114141103218,
+          "headSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      },
+      "evidenceProducerRepair": {
+        "repair": {
+          "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/native-ir-marker-binding-repair.json",
+          "blob": "7c7ae4343cb94989df72b284dc9bd67c76794872",
+          "sha256": "65de6d37b9c4b75a1dc40999cf7ada6f2be59dfc0c1d23d63edef23b33a62b39",
+          "bytes": 33943
+        },
+        "finisherReview": {
+          "blob": "1d5a535c27171d6b9a6bc5c54e33560d31c83d2f",
+          "sha256": "e496babd155a981e5d23f26ed3b796f7df274acab79c13a8386033a4e82d8c89",
+          "bytes": 33715
+        },
+        "originalQualifier": {
+          "path": "scripts/sh1-qualify.mjs",
+          "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "originalBinder": {
+          "path": "scripts/sh1-strict-evidence.mjs",
+          "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+          "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+          "bytes": 91970
+        },
+        "correctedBinderPointer": "/execution/evidenceProducer/binder",
+        "sourceCorrection": {
+          "original": ".map((line) => line.slice(pass))",
+          "repaired": ".map((line) => line.slice(pass.length))",
+          "utf8ByteDelta": 7,
+          "allOtherBinderBytesUnchanged": true,
+          "sameOrdered15NativeFixtureNamesRequired": true
+        },
+        "executedGenerationRecipe": {
+          "sha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+          "fileCount": 48,
+          "binderEntry": {
+            "path": "scripts/sh1-strict-evidence.mjs",
+            "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          },
+          "retainedC1Receipt": {
+            "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531,
+            "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+          },
+          "mustRemainExactInExistingReceipts": true
+        },
+        "predictedFutureNormalRecipe": {
+          "sha256": "18bfaff7d1d107a95f54733abcd624e5f43cb60dd25be827c764e488b82725fc",
+          "fileCount": 48,
+          "changedEntryCount": 1,
+          "unchangedEntryCount": 47,
+          "changedPath": "scripts/sh1-strict-evidence.mjs",
+          "newBinderSha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "predictionOnly": true,
+          "notAnExecutedGenerationRecipe": true,
+          "historicalScope": "Prediction recorded before the evidence-completion workflow was published. The retained qualification generations N1/C1/C2/C3 use the original a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba recipe. The notAnExecutedGenerationRecipe field concerns those retained qualification generations; this historical prediction makes no claim about separate later normal native runs."
+        },
+        "evidenceProducerIsGenerationRecipeInput": false,
+        "generationReceiptBytesMustRemainExact": true,
+        "scope": "Only the reviewed pass-marker prefix-length correction and authenticated evidence-only extraction of the original post-bind qualification construction. This record does not claim the defective binder and corrected binder have identical acceptance, does not change any source-rule argument, and does not make the failed CLI successful."
+      },
+      "evidenceCompletionInputs": {
+        "kind": "psc0-authenticated-retained-fixed-point-evidence-only-completion",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+        "requiredOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "requiredGenerationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "requiredSourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "generationExecutionPointer": "/execution/generationExecution",
+        "priorExecutionPointer": "/execution/priorExecution",
+        "requiredArchives": [
+          {
+            "runId": 38015134511,
+            "artifactId": 11658430459,
+            "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+            "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+            "bytes": 5147944,
+            "fileCount": 344,
+            "rawArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+          },
+          {
+            "runId": 38021634599,
+            "artifactId": 11659939542,
+            "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+            "sha256": "599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+            "bytes": 11739089,
+            "fileCount": 444,
+            "rawArchivePath": "dist/sh1-evidence-finish-inputs/predecessor-verified.zip"
+          }
+        ],
+        "requiredGenerationOwnership": {
+          "N1": {
+            "runId": 38015134511,
+            "compilerJobId": 114103608774
+          },
+          "C1": {
+            "runId": 38015134511,
+            "compilerJobId": 114103608774
+          },
+          "C2": {
+            "runId": 38021634599,
+            "compilerJobId": 114123691566
+          },
+          "C3": {
+            "runId": 38021634599,
+            "compilerJobId": 114123691566
+          }
+        },
+        "requiredGenerationLog": {
+          "path": "dist/sh1-evidence-finish-inputs/source-generation-job.log",
+          "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+          "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+          "bytes": 875228
+        },
+        "requiredGenerationReceipts": [
+          {
+            "generation": "N1",
+            "path": "dist/sh1/development/N1/receipt.json",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827
+          },
+          {
+            "generation": "C1",
+            "path": "dist/sh1/C1/receipt.json",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531
+          },
+          {
+            "generation": "C2",
+            "path": "dist/sh1/C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707
+          },
+          {
+            "generation": "C3",
+            "path": "dist/sh1/C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709
+          }
+        ],
+        "command": [
+          "node",
+          "scripts/sh1-finish-evidence.mjs",
+          "--inputs",
+          "dist/sh1-evidence-finish-inputs/inputs.json",
+          "--inputs-sha256",
+          "<actual-raw-input-manifest-sha256>",
+          "--out",
+          "dist/sh1"
+        ],
+        "reusedGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "generatedThisCommand": [],
+        "requiredSuccessfulCurrentCompilerSteps": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "artifactPathBase": "evidence-only compiler job artifact root",
+        "inputsFile": {
+          "path": "dist/sh1-evidence-finish-inputs/inputs.json",
+          "sha256": "6244a785d54b0acdcb31ae93784f1985bbff5e49912042b7a93e97746f91ae22",
+          "bytes": 330480,
+          "retainedBlob": "f922f1865b8d83f97c6e8ff5bf0720d2e2776ce0",
+          "receiptOrEnvelopeRef": null
+        },
+        "evidenceInventoryFile": {
+          "path": "dist/sh1-evidence-finish-inputs/evidence-inventory.json",
+          "sha256": "addfaa6074bbc5afa8ffd91c5065fee565cfc33aac42ddfed8911e2560de3559",
+          "bytes": 74318,
+          "retainedBlob": "b45fb963d72b72426be5135b9b4612eb150e2c16",
+          "receiptOrEnvelopeRef": null
+        },
+        "completionFile": {
+          "path": "dist/sh1/evidence-completion.json",
+          "sha256": "b846dfbd8447334ec80e897b39c2271adb87e77599897392c60e4a9109004227",
+          "bytes": 17685,
+          "retainedBlob": "62baf773b1da5516c148a21db9682633ecc71c63",
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredInputKind": "psc0-authenticated-retained-fixed-point-finish-inputs",
+        "requiredInventoryKind": "psc0-exact-source-evidence-completion-inventory",
+        "requiredCompletionKind": "psc0-authenticated-retained-fixed-point-evidence-completion",
+        "requiredInventoryFileCount": 135,
+        "requiredReturnedJsonFileCount": 24,
+        "completionOutputs": [
+          "dist/sh1/strict-enforcement-evidence.json",
+          "dist/sh1/qualification.json",
+          "dist/sh1/seed-selection.json",
+          "dist/sh1/evidence-completion.json"
+        ],
+        "currentProducerPointer": "/execution/evidenceProducer",
+        "importedEvidenceMustRemainByteExact": true,
+        "compilerJobTimeoutMinutes": 45,
+        "providerJobTimeoutMinutes": 45,
+        "timeoutIsNotCompletionEstimate": true,
+        "requiredInputExpectedConstantsSha256": "6da2382a06b079e8b6469c43d721ce3753b2e2a83f74333c08bc62593f302c96"
+      },
+      "currentOutputOwnership": {
+        "qualificationFile": "/execution",
+        "strictBinderFile": "/execution",
+        "providerFile": "/execution",
+        "completionFile": "/execution",
+        "evidenceInventoryFile": "/execution",
+        "evidenceFinishInputsFile": "/execution"
+      },
+      "generationOwnership": [
+        {
+          "generation": "N1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "development/N1/receipt.json"
+        },
+        {
+          "generation": "C1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "C1/receipt.json"
+        },
+        {
+          "generation": "C2",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C2/receipt.json"
+        },
+        {
+          "generation": "C3",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C3/receipt.json"
+        }
+      ],
+      "status": "success",
+      "compilerJobId": 114141103218,
+      "providerJobId": 114141265302,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "generations": [
+        {
+          "name": "N1",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "executingCompilerSha256": "be28aed5164ffa0661369e424dd8d315278de396fec4c22ce3d73ff567e81012",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "receipt": {
+            "path": "development/N1/receipt.json",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827,
+            "retainedBlob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "Native checker checks the full original compiler IR. N1 generatedFullCompilerIrChecked remains false."
+        },
+        {
+          "name": "C1",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+          "receipt": {
+            "path": "C1/receipt.json",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531,
+            "retainedBlob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "C1 construction is the explicit selected-R boundary; C1 subsequently checks the current IR emitted as C2."
+        },
+        {
+          "name": "C2",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "receipt": {
+            "path": "C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707,
+            "retainedBlob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "C1 checks and emits this C2 original-IR object; C2 subsequently checks and emits C3."
+        },
+        {
+          "name": "C3",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "receipt": {
+            "path": "C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709,
+            "retainedBlob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "C2 checks and emits this C3 original-IR object."
+        }
+      ],
+      "fixedPoint": "C2/C3-complete-compared-artifact-tuple-equal",
+      "nativeParity": "N1/C2/C3-TypeScript-and-JavaScript-equal",
+      "compilerQualification": {
+        "path": "qualification.json",
+        "sha256": "093b7c3a3016399b1000c05fb01a3cddb2e45ea415fdbc0bdef2009f9c5c25d3",
+        "bytes": 164959,
+        "retainedBlob": "96be5e6ed93773353a4e084ad7f525af78cd21ad",
+        "receiptOrEnvelopeRef": null
+      },
+      "strictEvidenceBinder": {
+        "path": "strict-enforcement-evidence.json",
+        "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+        "bytes": 149717,
+        "retainedBlob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+        "receiptOrEnvelopeRef": null
+      },
+      "providerReceipt": {
+        "path": "kernel-admissions.json",
+        "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+        "bytes": 3526,
+        "retainedBlob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+        "receiptOrEnvelopeRef": null
+      },
+      "providerScope": {
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "compilerSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "labeledInputs": 8,
+        "uniqueStreams": 4,
+        "exactC2C3StreamsOnly": true,
+        "N1ProviderChecked": false,
+        "allExamplesProviderChecked": false,
+        "receipt": {
+          "path": "kernel-admissions.json",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526,
+          "retainedBlob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "receiptOrEnvelopeRef": null
+        },
+        "emissionWasGatedByThisCheck": false
+      },
+      "strictSh1Qualified": true,
+      "semanticContractQualified": true,
+      "providerChecked": true,
+      "strictQualificationScope": {
+        "qualifiedEntry": "psCompilerSh1TypeScriptSources",
+        "qualifiedLane": "The current explicit strict development and qualification lane for the qualified source and recipe.",
+        "selectedByPsconfig": false,
+        "selectedSeed": "R",
+        "sourceAuthority": ".lean",
+        "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+        "typescript": "7.0.2",
+        "generalPreservationProven": false,
+        "formalPreservationProven": false,
+        "producedReceiptsUnchanged": true,
+        "releaseRecordReference": {
+          "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+          "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+          "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+          "bytes": 1858477
+        }
+      },
+      "releaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      },
+      "completedAtUtc": "2026-10-10T05:27:17Z"
+    },
+    "initialImplementationRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+    "sourceBoundaryCorrection": "strict/source-boundary-correction.json",
+    "qualificationAttempts": "strict/qualification-attempts.json",
+    "sourceExpectedTypeCorrection": "strict/source-expected-type-correction.json",
+    "nativeObservation": {
+      "sourceRef": "05f37fc04e52bfaed70389291a0fcdeda819f71f",
+      "runId": 37971952859,
+      "compilerJobId": 113960540944,
+      "scope": "Native N1 development and selected-R C1 conformance; no C2/C3 qualification",
+      "moduleCount": 64,
+      "sourceBytes": 1178903,
+      "importCount": 149,
+      "sourceDeclarations": 1623,
+      "originalIrExpressions": 60937,
+      "originalIrVisitedSteps": 777667,
+      "originalIrFindings": 0,
+      "traversalComplete": true,
+      "sourceCases": {
+        "accepted": 2,
+        "refused": 33,
+        "carrierRefused": 2
+      },
+      "targetCases": {
+        "accepted": 9,
+        "refused": 20
+      },
+      "enabledRuntimeOperations": 45,
+      "nativeRuntimeReferenceObservations": 186,
+      "rawSourceNatEqualityObservations": 6,
+      "currentGenerationQualified": false,
+      "providerStatus": "skipped"
+    },
+    "runtimeComparisonCorrection": "strict/runtime-comparison-correction.json",
+    "plannedSourceEqualityRegression": {
+      "sourceKinds": [
+        "lean",
+        "ps"
+      ],
+      "declarations": 6,
+      "rawSourceCompilations": 2,
+      "additionalSmallTypeScriptCompilations": 1,
+      "originalRuntimeObservationsUnchanged": 186
+    },
+    "reviewedIntegration": {
+      "manifest": "strict/reviewed-candidates/strict-implementation-batch.json",
+      "expectedParent": "5becf0cf22a8deec760e0da68b706e95ca72f902",
+      "status": "committed-source-compiler-execution-not-started-setup-refused",
+      "originAndPreparationReuse": true,
+      "orderedPartialAndNatEvaluation": true,
+      "hostSnapshotBeforeCompilation": true,
+      "emptyAndZeroFieldRegularData": true,
+      "resourcePolicy": "psc0-sh1-generated-qualification-resources/1",
+      "oldSpaceMiB": 8192,
+      "minimumAvailableBytes": 12884901888,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766"
+    },
+    "plannedSourceEvaluationRegression": {
+      "declarations": 12,
+      "nativeObservations": 24,
+      "hostProbes": 21,
+      "sourceKinds": [
+        "lean",
+        "ps"
+      ],
+      "rawSourceCompilations": 2,
+      "sharedSmallTypeScriptCompilations": 1,
+      "extraNativeExecutionsAfterReference": 0,
+      "profile": "ps-0.9-r3/new-only"
+    },
+    "plannedRegularDataCoverage": {
+      "sourcePositivePerKind": {
+        "modules": 3,
+        "sourceDeclarations": 11,
+        "coreDeclarations": 16,
+        "imports": 1,
+        "normalizations": 0
+      },
+      "emptySourceDeclarations": 5,
+      "emptyCoreDeclarations": 6,
+      "emptySourceEliminations": 4,
+      "zeroFieldSourceDeclarations": 2,
+      "zeroFieldCoreDeclarations": 4,
+      "grammar": {
+        "emptyPairs": 5,
+        "emptyRefusals": 6,
+        "zeroFieldPairs": 1,
+        "zeroFieldRefusals": 2
+      },
+      "ir": {
+        "refusals": 38,
+        "behaviorObservations": 61,
+        "emptyLayouts": 2,
+        "emptyEliminations": 5,
+        "emptyDeclarationSignatures": 5
+      },
+      "nativeCheckerCases": 15,
+      "executedOnThisIntegration": false
+    },
+    "recoveryProfileIsolation": {
+      "manifest": "strict/recovery-profile-isolation.json",
+      "blob": "a930b0bcc8e17cf474014d359e0fe7897bb16ae3",
+      "expectedParent": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+      "status": "qualified-by-new-isolated-cold-receipt",
+      "files": 7,
+      "policySha256": "70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30",
+      "recipeSha256": "d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d",
+      "grammarProfileByteIdentical": true,
+      "selectedRIdentityAndProductsUnchanged": true,
+      "previousColdReceiptQualifiesNewRecipe": false,
+      "newColdRecipeQualified": true,
+      "currentCompilerQualified": false,
+      "coldEvidence": "strict/recovery-profile-cold-evidence.json",
+      "coldEvidenceBlob": "cb178079ea2a32f1cea671de503a02c4145021a3",
+      "coldRunId": 37983663908
+    },
+    "sourceAnnotationCompletion": {
+      "manifest": "strict/match-initializer-annotation-completion.json",
+      "blob": "c3b524d00153400005985f12ce579006df1720c0",
+      "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "sourcePath": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "sourceBlob": "178ecf89498be6502be5f747f0c0d62eb1133420",
+      "status": "integrated-own-source-admission-passed-full-qualification-incomplete",
+      "changedLeanFilesAudited": 15,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "integratedSourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "observedRunId": 37986002380
+    },
+    "sharedSemanticFoundation": {
+      "document": "strict/SEMANTIC_RELATIONS.md",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167",
+      "manifest": "strict/reviewed-candidates/semantic-relations.json",
+      "manifestBlob": "09c621ccba856c8906f24dcba5c9104fdfd08014",
+      "sourceRef": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+      "status": "definitions-and-source-facts-composed-by-independent-ten-interface-review",
+      "rowsClosed": 0,
+      "interactionBudget": "One residual is threaded through sequential computations, callbacks and runner reentry; each logical invocation consumes once; values use the remaining index and index0 cuts off before an unlicensed invocation. No callback budget reset or all-index adequacy claim.",
+      "compositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360"
+    },
+    "reviewedSourceCompletion": {
+      "manifest": "strict/post-review-source-completion.json",
+      "blob": "639e78ffeba7d64f29ef02eadff9b37951073832",
+      "expectedParent": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+      "status": "integrated-own-source-admission-and-partial-conformance-passed-grammar-gate-incomplete",
+      "sourceFiles": 3,
+      "fixturesAndInvocationCountsUnchanged": true,
+      "newColdRunRequired": false,
+      "sharedGeneralRowsClosed": 0,
+      "integratedSourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "observedRunId": 37986002380
+    },
+    "reviewedParserCorrection": {
+      "manifest": "strict/reviewed-candidates/nomatch-application-entry.json",
+      "manifestBlob": "aa62fec9ef76acc69f289d168b2b23b21dc07d93",
+      "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "baseBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+      "sourceBlob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574",
+      "sourceSha256": "7aae911340249d0e00d33da659b3ce1f69d27e064f3364c3658a7010f464cfc8",
+      "status": "reviewed-six-edit-source-correction-integrated-by-enclosing-commit-awaiting-one-full-qualification",
+      "review": "Root exact forward/reverse reconstruction; all 75 existing definition headers unchanged; independent bounded source-class review CLEAR.",
+      "acceptanceScope": "The shared nomatch primary preserves full-term scrutinees through grouped/list application paths. It intentionally closes existing grouped/list primary forms under nesting, including non-nomatch counterparts; other full-control family restrictions and public fuel defaults remain.",
+      "fixturesAndInvocationCountsUnchanged": true,
+      "coldRecipeChanged": false,
+      "newColdRunRequired": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    "reviewedGeneralArguments": [
+      {
+        "family": "N",
+        "rows": [
+          "N-01",
+          "N-02",
+          "N-03",
+          "N-04"
+        ],
+        "document": "strict/NORMALIZATION_ARGUMENTS.md",
+        "blob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+        "sha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+        "manifest": "strict/reviewed-candidates/normalization-arguments.json",
+        "manifestBlob": "0b0e21e4c8b710aeee623c8a92b567e46d2d9bbc",
+        "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+        "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+        "rowsClosed": 0,
+        "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
+      },
+      {
+        "family": "TS",
+        "rows": [
+          "TS-01",
+          "TS-02",
+          "TS-03",
+          "TS-04",
+          "TS-05",
+          "TS-06",
+          "TS-07",
+          "TS-08",
+          "TS-09"
+        ],
+        "document": "strict/TS_RULE_ARGUMENTS.md",
+        "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+        "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+        "manifest": "strict/reviewed-candidates/ts-rule-arguments.json",
+        "manifestBlob": "833ec6592774e2c002701959614abe47213b3021",
+        "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+        "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+        "rowsClosed": 0,
+        "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
+      },
+      {
+        "family": "EV",
+        "rows": [
+          "EV-01",
+          "EV-02",
+          "EV-03",
+          "EV-04",
+          "EV-05",
+          "EV-06",
+          "EV-07",
+          "EV-08",
+          "EV-09",
+          "EV-10",
+          "EV-11"
+        ],
+        "document": "strict/EV_RULE_ARGUMENTS.md",
+        "blob": "7e90465301005a395a871a0563b19c164dcda750",
+        "sha256": "d67a770fc1ac2ba93b6bcc21d1cf87c6564eac020421e7b2824e9815315e6d38",
+        "manifest": "strict/reviewed-candidates/ev-rule-arguments.json",
+        "manifestBlob": "9f7d2bfe1161d23b8a3ee232f7e3845a47291fca",
+        "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+        "status": "reviewed-local-general-arguments-with-explicit-composition-premises",
+        "rowsClosed": 0,
+        "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition"
+      },
+      {
+        "family": "GROUP",
+        "rows": [],
+        "document": "strict/CANONICAL_FUNCTION_ARGUMENTS.md",
+        "blob": "51ed0bfa988a690c425ce59e0c35e4c1bb074e98",
+        "sha256": "36f821511c6e53083802e0b5ec28b30ce190297cfb952d2cb08b65ab61b433b6",
+        "manifest": "strict/reviewed-candidates/canonical-function-arguments.json",
+        "manifestBlob": "30b8328b7e4158cd7279239dc34a4813240916d7",
+        "status": "independently-reviewed-local-general-entry-and-finite-placement-arguments",
+        "rowsClosed": 0,
+        "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition",
+        "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+        "currentSourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
+      },
+      {
+        "family": "ER",
+        "rows": [
+          "ER-01",
+          "ER-02",
+          "ER-03",
+          "ER-04",
+          "ER-05",
+          "ER-06",
+          "ER-07",
+          "ER-08",
+          "ER-09"
+        ],
+        "document": "strict/ERASURE_ARGUMENTS.md",
+        "blob": "71f5f50f4586fcf11b74f02b7904b775f56cd4de",
+        "sha256": "b0d3b1e3815fe127ecd8f02abce5462d76c2dba341e513888a63eea1b7ce04e3",
+        "manifest": "strict/reviewed-candidates/erasure-arguments.json",
+        "manifestBlob": "22cc9d4721321eeac34979394a09fb5447524891",
+        "status": "complete-local-source-derived-arguments-with-reviewed-producer-classifier-demand-and-structure-scopes",
+        "rowsClosed": 0,
+        "finalCrossFamilyCompositionPending": false,
+        "currentCompositionReview": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+        "currentSourceReviewStatus": "complete-in-stated-domain-pending-final-evidence-disposition",
+        "currentSourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+        "currentSourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
+      }
+    ],
+    "pendingErasureClassCorrection": {
+      "status": "reviewed-canonical-and-root-recursion-class-correction-integrated-by-enclosing-commit",
+      "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "leanSource": "def groupId {alpha : Type} (value : alpha) : alpha := value\ndef groupUse (f : Nat -> Nat) : Nat := groupId f 0\n",
+      "inference": "Supported typed binder and implicit generic application produce closed Core (((groupId (Nat -> Nat)) f) 0), with no unresolved metas.",
+      "erasure": "The whole-spine runtime operands [f,0] target the generic identity's one-runtime-parameter IR scheme. Existing exact call-arity checking refuses. A typed-let intermediate is also incorrectly eta-expanded by Finish after it sees the instantiated arrow result.",
+      "classScope": [
+        "Runtime saturation boundaries before and after generic result substitution",
+        "Adjacent concrete arrow flattening versus nested substituted function groups",
+        "Function-valued generic parameter/layout/result representation and necessary adapters",
+        "Ordinary partial capture, result eta and backend eta"
+      ],
+      "next": "Qualify the exact integrated source and complete explicit current-source administrative disposition; local general arguments and all cross-family interfaces are independently reviewed.",
+      "contractAndCheckerMustNotBeWeakened": true,
+      "newColdRunRequired": false,
+      "reviewedIntegration": {
+        "status": "reviewed-canonical-and-root-recursion-class-correction-integrated-by-enclosing-commit",
+        "integrationManifest": "reviewed-candidates/canonical-recursion-batch.json",
+        "integrationBlob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+        "producerManifest": "reviewed-candidates/structural-root-core-repair.json",
+        "producerManifestBlob": "895081aaa285af545c635e7211c51508c81acb93",
+        "actualCoreEvidenceManifest": "reviewed-candidates/prepared-core-recursion-evidence.json",
+        "actualCoreEvidenceManifestBlob": "17225938686b8eed9654daab3c75c926f86d0def",
+        "bindingManifest": "reviewed-candidates/canonical-recursion-evidence.json",
+        "bindingManifestBlob": "b1694c3ea44ad2a90116af6afde0b17f6d9ef629",
+        "rootChildBoundary": "Whole root match creates direct child IDs. Nested control retains existing outer child calls; new descendant/second-match aliases refuse precisely.",
+        "capabilityCorrection": "The previous implementation text claiming matching nested result telescopes suffice for fresh descendant hypotheses was unsound and is corrected before strict activation.",
+        "completeOriginalTelescope": true,
+        "actualRootMinorConstructorRefinement": true,
+        "finiteCoreEquations": 4,
+        "newPreciseSourceRefusals": 5,
+        "newSourceRefusalTotal": 38,
+        "executionEvidenceForThisSource": false,
+        "newColdRunRequired": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false
+      },
+      "historicalCounterexampleSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc"
+    },
+    "plannedGenericFunctionConformance": {
+      "oldGenericObservations": 19,
+      "canonicalObservations": 19,
+      "pureCanonicalValues": 14,
+      "hostDemandDiagnostics": 5,
+      "sourceEntries": 18,
+      "typeOnlyUnitEntries": 2,
+      "actualCoreDeclarations": 2,
+      "actualCoreEquations": 4,
+      "emittedRecursionObservations": 4,
+      "nativePscEmittedRecursionObservations": 4,
+      "additionalCompilerBuilds": 0,
+      "generalRecursorDemandAdequacy": false,
+      "recursiveStructures": {
+        "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
+        "sourceManifest": "reviewed-candidates/recursive-structure-erasure.json",
+        "sourceManifestBlob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+        "evidenceManifest": "reviewed-candidates/recursive-structure-evidence.json",
+        "evidenceManifestBlob": "7aede7e241162b32dc608a7f5d246da211cac095",
+        "sourceFiles": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "7498d68c2f2c57d94ab008b36d08766c957ad815"
+          },
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+            "blob": "57e76a17858b3f4333a44ed880326ac33695351e"
+          }
+        ],
+        "samePreparedAndOriginalIr": true,
+        "layouts": 2,
+        "declarations": 4,
+        "projections": 6,
+        "usedHypotheses": 2,
+        "unusedHypotheses": 2,
+        "runtimeInvocations": 0,
+        "additionalCompilerInvocations": 0,
+        "executionEvidenceForThisSource": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "sourceDeclarations": 34,
+        "definitions": 30
+      }
+    },
+    "currentQualificationRequest": {
+      "status": "completed-and-qualified-for-declared-strict-entry-and-lane",
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runId": 38027413274,
+      "runAttempt": 1,
+      "compilerJobId": 114141103218,
+      "providerJobId": 114141265302,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "recipeFileCount": 48,
+      "workflowBlob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+      "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+      "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "executionMode": "authenticated-retained-generations-with-separate-corrected-evidence-producer",
+      "generationOwnership": [
+        {
+          "generation": "N1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "development/N1/receipt.json"
+        },
+        {
+          "generation": "C1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "C1/receipt.json"
+        },
+        {
+          "generation": "C2",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C2/receipt.json"
+        },
+        {
+          "generation": "C3",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C3/receipt.json"
+        }
+      ],
+      "evidenceProducer": {
+        "sourceRef": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "finisher": {
+          "sourcePath": "psc0/scripts/sh1-finish-evidence.mjs",
+          "path": "scripts/sh1-finish-evidence.mjs",
+          "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+          "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+          "bytes": 38509
+        },
+        "binder": {
+          "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+          "path": "scripts/sh1-strict-evidence-finish.mjs",
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "workflow": {
+          "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+          "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+          "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+          "bytes": 55773
+        },
+        "currentExecution": {
+          "runId": 38027413274,
+          "workflowId": 380282667,
+          "runAttempt": 1,
+          "compilerJobId": 114141103218,
+          "headSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      },
+      "evidenceCompletionInputs": {
+        "kind": "psc0-authenticated-retained-fixed-point-evidence-only-completion",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+        "requiredOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "requiredGenerationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "requiredSourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "generationExecutionPointer": "/execution/generationExecution",
+        "priorExecutionPointer": "/execution/priorExecution",
+        "requiredArchives": [
+          {
+            "runId": 38015134511,
+            "artifactId": 11658430459,
+            "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+            "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+            "bytes": 5147944,
+            "fileCount": 344,
+            "rawArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+          },
+          {
+            "runId": 38021634599,
+            "artifactId": 11659939542,
+            "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+            "sha256": "599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+            "bytes": 11739089,
+            "fileCount": 444,
+            "rawArchivePath": "dist/sh1-evidence-finish-inputs/predecessor-verified.zip"
+          }
+        ],
+        "requiredGenerationOwnership": {
+          "N1": {
+            "runId": 38015134511,
+            "compilerJobId": 114103608774
+          },
+          "C1": {
+            "runId": 38015134511,
+            "compilerJobId": 114103608774
+          },
+          "C2": {
+            "runId": 38021634599,
+            "compilerJobId": 114123691566
+          },
+          "C3": {
+            "runId": 38021634599,
+            "compilerJobId": 114123691566
+          }
+        },
+        "requiredGenerationLog": {
+          "path": "dist/sh1-evidence-finish-inputs/source-generation-job.log",
+          "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+          "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+          "bytes": 875228
+        },
+        "requiredGenerationReceipts": [
+          {
+            "generation": "N1",
+            "path": "dist/sh1/development/N1/receipt.json",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827
+          },
+          {
+            "generation": "C1",
+            "path": "dist/sh1/C1/receipt.json",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531
+          },
+          {
+            "generation": "C2",
+            "path": "dist/sh1/C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707
+          },
+          {
+            "generation": "C3",
+            "path": "dist/sh1/C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709
+          }
+        ],
+        "command": [
+          "node",
+          "scripts/sh1-finish-evidence.mjs",
+          "--inputs",
+          "dist/sh1-evidence-finish-inputs/inputs.json",
+          "--inputs-sha256",
+          "<actual-raw-input-manifest-sha256>",
+          "--out",
+          "dist/sh1"
+        ],
+        "reusedGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "generatedThisCommand": [],
+        "requiredSuccessfulCurrentCompilerSteps": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "artifactPathBase": "evidence-only compiler job artifact root",
+        "inputsFile": {
+          "path": "dist/sh1-evidence-finish-inputs/inputs.json",
+          "sha256": "6244a785d54b0acdcb31ae93784f1985bbff5e49912042b7a93e97746f91ae22",
+          "bytes": 330480,
+          "retainedBlob": "f922f1865b8d83f97c6e8ff5bf0720d2e2776ce0",
+          "receiptOrEnvelopeRef": null
+        },
+        "evidenceInventoryFile": {
+          "path": "dist/sh1-evidence-finish-inputs/evidence-inventory.json",
+          "sha256": "addfaa6074bbc5afa8ffd91c5065fee565cfc33aac42ddfed8911e2560de3559",
+          "bytes": 74318,
+          "retainedBlob": "b45fb963d72b72426be5135b9b4612eb150e2c16",
+          "receiptOrEnvelopeRef": null
+        },
+        "completionFile": {
+          "path": "dist/sh1/evidence-completion.json",
+          "sha256": "b846dfbd8447334ec80e897b39c2271adb87e77599897392c60e4a9109004227",
+          "bytes": 17685,
+          "retainedBlob": "62baf773b1da5516c148a21db9682633ecc71c63",
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredInputKind": "psc0-authenticated-retained-fixed-point-finish-inputs",
+        "requiredInventoryKind": "psc0-exact-source-evidence-completion-inventory",
+        "requiredCompletionKind": "psc0-authenticated-retained-fixed-point-evidence-completion",
+        "requiredInventoryFileCount": 135,
+        "requiredReturnedJsonFileCount": 24,
+        "completionOutputs": [
+          "dist/sh1/strict-enforcement-evidence.json",
+          "dist/sh1/qualification.json",
+          "dist/sh1/seed-selection.json",
+          "dist/sh1/evidence-completion.json"
+        ],
+        "currentProducerPointer": "/execution/evidenceProducer",
+        "importedEvidenceMustRemainByteExact": true,
+        "compilerJobTimeoutMinutes": 45,
+        "providerJobTimeoutMinutes": 45,
+        "timeoutIsNotCompletionEstimate": true,
+        "requiredInputExpectedConstantsSha256": "6da2382a06b079e8b6469c43d721ce3753b2e2a83f74333c08bc62593f302c96"
+      },
+      "rebuiltGenerationsByEvidenceCompletion": [],
+      "allRequiredPhasesCompleted": true,
+      "releaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      },
+      "strictSh1Qualified": true,
+      "semanticContractQualified": true,
+      "providerChecked": true,
+      "providerScope": {
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "compilerSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "labeledInputs": 8,
+        "uniqueStreams": 4,
+        "exactC2C3StreamsOnly": true,
+        "N1ProviderChecked": false,
+        "allExamplesProviderChecked": false,
+        "receipt": {
+          "path": "kernel-admissions.json",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526,
+          "retainedBlob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "receiptOrEnvelopeRef": null
+        },
+        "emissionWasGatedByThisCheck": false
+      }
+    },
+    "reviewedCanonicalRecursionCorrection": {
+      "status": "reviewed-canonical-and-root-recursion-class-correction-integrated-by-enclosing-commit",
+      "integrationManifest": "reviewed-candidates/canonical-recursion-batch.json",
+      "integrationBlob": "397916addb1eec8b8b46aac742e1b4aee67387e0",
+      "producerManifest": "reviewed-candidates/structural-root-core-repair.json",
+      "producerManifestBlob": "895081aaa285af545c635e7211c51508c81acb93",
+      "actualCoreEvidenceManifest": "reviewed-candidates/prepared-core-recursion-evidence.json",
+      "actualCoreEvidenceManifestBlob": "17225938686b8eed9654daab3c75c926f86d0def",
+      "bindingManifest": "reviewed-candidates/canonical-recursion-evidence.json",
+      "bindingManifestBlob": "b1694c3ea44ad2a90116af6afde0b17f6d9ef629",
+      "rootChildBoundary": "Whole root match creates direct child IDs. Nested control retains existing outer child calls; new descendant/second-match aliases refuse precisely.",
+      "capabilityCorrection": "The previous implementation text claiming matching nested result telescopes suffice for fresh descendant hypotheses was unsound and is corrected before strict activation.",
+      "completeOriginalTelescope": true,
+      "actualRootMinorConstructorRefinement": true,
+      "finiteCoreEquations": 4,
+      "newPreciseSourceRefusals": 5,
+      "newSourceRefusalTotal": 38,
+      "executionEvidenceForThisSource": false,
+      "newColdRunRequired": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "recursiveStructures": {
+        "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
+        "sourceManifest": "reviewed-candidates/recursive-structure-erasure.json",
+        "sourceManifestBlob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+        "evidenceManifest": "reviewed-candidates/recursive-structure-evidence.json",
+        "evidenceManifestBlob": "7aede7e241162b32dc608a7f5d246da211cac095",
+        "sourceFiles": [
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+            "blob": "7498d68c2f2c57d94ab008b36d08766c957ad815"
+          },
+          {
+            "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+            "blob": "57e76a17858b3f4333a44ed880326ac33695351e"
+          }
+        ],
+        "samePreparedAndOriginalIr": true,
+        "layouts": 2,
+        "declarations": 4,
+        "projections": 6,
+        "usedHypotheses": 2,
+        "unusedHypotheses": 2,
+        "runtimeInvocations": 0,
+        "additionalCompilerInvocations": 0,
+        "executionEvidenceForThisSource": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false
+      }
+    },
+    "reviewedRecursiveStructureCorrection": {
+      "status": "reviewed-source-and-compile-only-evidence-integrated-by-enclosing-commit",
+      "sourceManifest": "strict/reviewed-candidates/recursive-structure-erasure.json",
+      "sourceManifestBlob": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+      "evidenceManifest": "strict/reviewed-candidates/recursive-structure-evidence.json",
+      "evidenceManifestBlob": "7aede7e241162b32dc608a7f5d246da211cac095",
+      "sourceFiles": [
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+          "blob": "7498d68c2f2c57d94ab008b36d08766c957ad815"
+        },
+        {
+          "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+          "blob": "57e76a17858b3f4333a44ed880326ac33695351e"
+        }
+      ],
+      "samePreparedAndOriginalIr": true,
+      "layouts": 2,
+      "declarations": 4,
+      "projections": 6,
+      "usedHypotheses": 2,
+      "unusedHypotheses": 2,
+      "runtimeInvocations": 0,
+      "additionalCompilerInvocations": 0,
+      "executionEvidenceForThisSource": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false
+    },
+    "reviewedNativeKeywordRepair": {
+      "status": "reviewed-closed-local-alpha-renaming-integrated-by-enclosing-commit",
+      "manifest": "reviewed-candidates/native-keyword-local-repair.json",
+      "manifestBlob": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+      "files": 2,
+      "binders": 6,
+      "identifierOccurrences": 17,
+      "sourceBehaviorChanged": false,
+      "grammarChanged": false,
+      "originalAssertionsUnchanged": true,
+      "previousFailureEvidence": "attempts/656ed78db6a2c26feced9374cd7b251c062a42df/native-build-failure.json",
+      "previousFailureEvidenceBlob": "1d49d362273bed341efe25e205f0d37fb86436cc"
+    },
+    "reviewedCrossFamilyComposition": {
+      "document": "strict/CROSS_FAMILY_INTERFACE_REVIEW.md",
+      "blob": "7702ce74e497ff76dfc75dc1a8dabc08aa675360",
+      "sha256": "77b477c5b31d4afc76878a3085d3458de9bcf9934a3993ee017cf8cf34055912",
+      "manifest": "strict/reviewed-candidates/cross-family-interface-review.json",
+      "manifestBlob": "74d3b5f93f631efb3135728842afdfd6b3ccb3c4",
+      "status": "bounded-independent-ten-interface-review-and-root-composition-CLEAR",
+      "sourceAnchor": "656ed78db6a2c26feced9374cd7b251c062a42df",
+      "alphaTransportManifest": "bc086d4c699aefe4806475fb007b09e2f336b8fb",
+      "interfaces": 10,
+      "rowsClosed": 0,
+      "qualificationPending": true,
+      "formalPreservationProven": false,
+      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
+    },
+    "updatedAtUtc": "2026-10-10T05:45:24Z",
+    "latestExecution": {
+      "attempt": 17,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "runId": 38027413274,
+      "workflowId": 380282667,
+      "runAttempt": 1,
+      "orchestrationHeadSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+      "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "priorExecution": {
+        "expectedRunId": 38015134511,
+        "expectedWorkflowId": 378853677,
+        "expectedHeadSha": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "runAttempt": 1,
+        "compilerJobId": 114103608774,
+        "compilerConclusion": "cancelled",
+        "providerJobId": 114120597914,
+        "providerConclusion": "skipped",
+        "completedAtUtc": "2026-10-10T03:27:29Z",
+        "workflowSourceBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+        "attemptReference": {
+          "path": "psc0/docs/selfhost-language/strict/qualification-attempts.json",
+          "blob": "4753c805cf84b7e627f51344e7091ed465e32685",
+          "sha256": "b4cda6451cdd2a25fef72db7895392211190134139b1e2c887d594a7b6c6b386",
+          "bytes": 113727,
+          "jsonPointer": "/attempts/14",
+          "valueSha256": "08695fb98eb3ed17e206e6b91b16ab638ce8c0cabf96dfa61eaf1ae4897ea606",
+          "all15AttemptsSha256": "561074de6df43b4550bc848f8f1c45d714692205f820179a3cb718f8cbee81af"
+        },
+        "runMetadata": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/run-metadata.json",
+          "sha256": "5c7bb0997ad6219eb767c97e952e1463aee27596c77642986046d77de78e906a",
+          "bytes": 28490,
+          "retainedBlob": "e94bbd61407e7f30211c3350726a6014a2e619b8",
+          "receiptOrEnvelopeRef": null
+        },
+        "compilerJobLog": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/job.log",
+          "sha256": "be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d",
+          "bytes": 1917726,
+          "retainedBlob": "67147f3e76511cf3a918923dcfed8743636cc86b",
+          "receiptOrEnvelopeRef": null
+        },
+        "cancellationEvidence": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/qualification-cancellation.json",
+          "sha256": "6e8f4bc35d7729d8d3645e99c2554b44857fe28534c880fa13184b4dc2223720",
+          "bytes": 27767,
+          "retainedBlob": "7b47d247c5e7712c3823511924eced7c126fe452",
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredSuccessfulCompilerSteps": [
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          30
+        ],
+        "configuredWorkflowGateOutcomes": [
+          {
+            "name": "Build current native compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18,
+            "started_at": "2026-10-10T01:58:00Z",
+            "completed_at": "2026-10-10T01:58:02Z"
+          },
+          {
+            "name": "Run native parser, translation, and erasure regression targets",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19,
+            "started_at": "2026-10-10T01:58:02Z",
+            "completed_at": "2026-10-10T01:58:03Z"
+          },
+          {
+            "name": "Build the actual native checked seed for source and import tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T01:58:03Z",
+            "completed_at": "2026-10-10T01:58:11Z"
+          },
+          {
+            "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T01:58:11Z",
+            "completed_at": "2026-10-10T01:58:14Z"
+          },
+          {
+            "name": "Verify native and generated TypeScript CLI boundaries",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 22,
+            "started_at": "2026-10-10T01:58:14Z",
+            "completed_at": "2026-10-10T01:58:17Z"
+          },
+          {
+            "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 23,
+            "started_at": "2026-10-10T01:58:17Z",
+            "completed_at": "2026-10-10T01:58:19Z"
+          },
+          {
+            "name": "Run the bounded native development gate before qualification",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 24,
+            "started_at": "2026-10-10T01:58:19Z",
+            "completed_at": "2026-10-10T02:03:42Z"
+          },
+          {
+            "name": "Compare native worker observations before candidate generation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 25,
+            "started_at": "2026-10-10T02:03:42Z",
+            "completed_at": "2026-10-10T02:03:42Z"
+          },
+          {
+            "name": "Build the selected-seed candidate before full qualification",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26,
+            "started_at": "2026-10-10T02:03:42Z",
+            "completed_at": "2026-10-10T02:23:55Z"
+          },
+          {
+            "name": "Retain compiler evidence and exact generated artifacts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30,
+            "started_at": "2026-10-10T03:27:23Z",
+            "completed_at": "2026-10-10T03:27:26Z"
+          }
+        ],
+        "reusedGenerationReceipts": [
+          {
+            "generation": "N1",
+            "sourceArtifactPath": "development/N1/receipt.json",
+            "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/native-candidate-receipt.json",
+            "blob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827,
+            "serialization": "JSON.stringify(value,null,2)+'\\n'"
+          },
+          {
+            "generation": "C1",
+            "sourceArtifactPath": "C1/receipt.json",
+            "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c1-receipt.json",
+            "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531,
+            "serialization": "JSON.stringify(value,null,2)+'\\n'"
+          }
+        ],
+        "completedC2ReceiptHistoricalOnly": {
+          "generation": "C2",
+          "sourceArtifactPath": "C2/receipt.json",
+          "path": "attempts/1fa5559a72b293defc56ef7e7020cf82d4b44b79/c2-receipt.json",
+          "blob": "6b661745d9c033809e3dbd83551ebf65bea027f6",
+          "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+          "bytes": 166700,
+          "serialization": "JSON.stringify(value,null,2)+'\\n'"
+        },
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false,
+        "scope": "Cancelled predecessor remains cancelled. Only completed N1/C1, their retained conformance artifacts and the named successful prerequisites are carried. Its completed C2 is historical evidence; continuation regenerates C2/C3. It produced no fixed-point qualification, strict binder or provider acceptance."
+      },
+      "continuationInputs": {
+        "kind": "psc0-authenticated-exact-source-fixed-point-continuation",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+        "requiredOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "predecessorRunId": 38015134511,
+        "predecessorCompilerJobId": 114103608774,
+        "predecessorRunAttempt": 1,
+        "predecessorArchive": {
+          "artifactId": 11658430459,
+          "artifactName": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+          "bytes": 5147944,
+          "fileCount": 344,
+          "retainedArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+        },
+        "requiredRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "requiredSourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "requiredNativeReceipt": {
+          "path": "dist/sh1/development/N1/receipt.json",
+          "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+          "bytes": 15827
+        },
+        "requiredCandidateReceipt": {
+          "path": "dist/sh1/C1/receipt.json",
+          "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+          "bytes": 169531
+        },
+        "historicalCompletedC2Receipt": {
+          "path": "dist/sh1/C2/receipt.json",
+          "sha256": "a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894",
+          "bytes": 166700,
+          "usedAsCurrentC2Evidence": false
+        },
+        "command": [
+          "node",
+          "--max-old-space-size=8192",
+          "scripts/sh1-qualify.mjs",
+          "fixed-point",
+          "--out",
+          "dist/sh1"
+        ],
+        "qualifierSourceBlob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+        "qualifierSha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "binderSourceBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "binderSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+        "reusedGenerations": [
+          "N1",
+          "C1"
+        ],
+        "regeneratedGenerations": [
+          "C2",
+          "C3"
+        ],
+        "omittedPathPrefixes": [
+          "dist/sh1/C2/",
+          "dist/sh1/C3/"
+        ],
+        "omittedExactPaths": [
+          "dist/sh1/resource-policy-fixed-point.json"
+        ],
+        "requiredSuccessfulCurrentCompilerSteps": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "artifactPathBase": "continuation compiler artifact root",
+        "inputsFile": {
+          "path": "dist/sh1-continuation-inputs/inputs.json",
+          "sha256": null,
+          "bytes": null,
+          "retainedBlob": null,
+          "receiptOrEnvelopeRef": null
+        },
+        "evidenceInventoryFile": {
+          "path": "dist/sh1-continuation-inputs/evidence-inventory.json",
+          "sha256": null,
+          "bytes": null,
+          "retainedBlob": null,
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredInventoryFileCount": 135,
+        "requiredReturnedJsonFileCount": 24,
+        "compilerJobTimeoutMinutes": 300,
+        "providerJobTimeoutMinutes": 45,
+        "timeoutIsNotCompletionEstimate": true
+      },
+      "continuationInputsRole": "Historical contract for generationExecution run 38021634599. Preserve this former pending contract byte-exact; its actual imported report is generationExecution.importInputs. Current evidence-only completion uses evidenceCompletionInputs.",
+      "generationExecution": {
+        "expectedRunId": 38021634599,
+        "expectedWorkflowId": 380237977,
+        "expectedHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "runAttempt": 1,
+        "compilerJobId": 114123691566,
+        "compilerConclusion": "failure",
+        "providerJobId": 114136283916,
+        "providerConclusion": "skipped",
+        "completedAtUtc": "2026-10-10T04:56:41Z",
+        "workflowSourceBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+        "orchestration": {
+          "sourceRef": "43fa000c4adbc9d4754e20c213595c1449f00961",
+          "rootTree": "044be19b0f128eda642233213d677528b1524ecc",
+          "psc0Tree": "ff0530d231bbec23dfea93abbce435bdddcc62c8",
+          "workflowPath": ".github/workflows/psc0-sh1-continue.yml",
+          "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+          "workflowSha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+          "workflowBytes": 34742,
+          "workflowIsCompilerRecipeInput": false,
+          "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+        },
+        "runMetadata": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/43fa000c4adbc9d4754e20c213595c1449f00961/run-metadata.json",
+          "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+          "bytes": 94892,
+          "retainedBlob": "227e846d233c501a14600f0ebbe63f0118331273",
+          "receiptOrEnvelopeRef": null
+        },
+        "compilerJobLog": {
+          "path": "psc0/docs/selfhost-language/strict/attempts/43fa000c4adbc9d4754e20c213595c1449f00961/job.log",
+          "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+          "bytes": 875228,
+          "retainedBlob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+          "receiptOrEnvelopeRef": null
+        },
+        "failurePacket": {
+          "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+          "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+          "bytes": 43125
+        },
+        "failurePointer": "/failure",
+        "configuredWorkflowGateOutcomes": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-10-10T03:44:46Z",
+            "completed_at": "2026-10-10T03:44:47Z"
+          },
+          {
+            "name": "Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-10-10T03:44:47Z",
+            "completed_at": "2026-10-10T03:45:07Z"
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-10-10T03:45:07Z",
+            "completed_at": "2026-10-10T03:45:08Z"
+          },
+          {
+            "name": "Run leanprover/lean-action@v1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4,
+            "started_at": "2026-10-10T03:45:08Z",
+            "completed_at": "2026-10-10T03:45:27Z"
+          },
+          {
+            "name": "Authenticate the cancelled run and restore its completed N1 and C1 evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5,
+            "started_at": "2026-10-10T03:45:27Z",
+            "completed_at": "2026-10-10T03:45:30Z"
+          },
+          {
+            "name": "Install the pinned current TypeScript 7 profile",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-10-10T03:45:30Z",
+            "completed_at": "2026-10-10T03:45:32Z"
+          },
+          {
+            "name": "Verify the actual TypeScript 7 continuation runtime",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-10-10T03:45:32Z",
+            "completed_at": "2026-10-10T03:45:32Z"
+          },
+          {
+            "name": "Run the existing exact-source fixed-point command",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 8,
+            "started_at": "2026-10-10T03:45:32Z",
+            "completed_at": "2026-10-10T04:56:36Z"
+          },
+          {
+            "name": "Retain complete file envelopes and exact returned JSON for final disposition",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 9,
+            "started_at": "2026-10-10T04:56:36Z",
+            "completed_at": "2026-10-10T04:56:36Z"
+          },
+          {
+            "name": "Retain continuation evidence and original authenticated inputs",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10,
+            "started_at": "2026-10-10T04:56:36Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 19,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Post Check out the exact previously compiled source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21,
+            "started_at": "2026-10-10T04:56:39Z",
+            "completed_at": "2026-10-10T04:56:39Z"
+          }
+        ],
+        "requiredSuccessfulPrerequisiteSteps": [
+          5,
+          6,
+          7,
+          10
+        ],
+        "failedStep": 8,
+        "collectorStep": 9,
+        "collectorConclusion": "skipped",
+        "importInputs": {
+          "path": "dist/sh1-continuation-inputs/inputs.json",
+          "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+          "bytes": 161276,
+          "retainedBlob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+          "receiptOrEnvelopeRef": null
+        },
+        "generationReceipts": [
+          {
+            "generation": "C2",
+            "receiptPath": "C2/receipt.json",
+            "path": "dist/sh1/C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707,
+            "retainedBlob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+            "receiptOrEnvelopeRef": null,
+            "actualReportsReference": {
+              "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+              "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+              "bytes": 43125,
+              "jsonPointer": "/generations/0/conformanceReportsReturned"
+            }
+          },
+          {
+            "generation": "C3",
+            "receiptPath": "C3/receipt.json",
+            "path": "dist/sh1/C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709,
+            "retainedBlob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+            "receiptOrEnvelopeRef": null,
+            "actualReportsReference": {
+              "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+              "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+              "bytes": 43125,
+              "jsonPointer": "/generations/1/conformanceReportsReturned"
+            }
+          }
+        ],
+        "completedProductEquality": {
+          "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+          "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+          "bytes": 43125,
+          "jsonPointer": "/sourceAndProductComparisons",
+          "generationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+          "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+          "artifacts": {
+            "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+            "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+            "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+            "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+          }
+        },
+        "artifact": {
+          "id": 11659939542,
+          "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+          "size_in_bytes": 11739089,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542/zip",
+          "expired": false,
+          "created_at": "2026-10-10T04:56:39Z",
+          "expires_at": "2026-11-09T04:56:36Z",
+          "updated_at": "2026-10-10T04:56:39Z",
+          "digest": "sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+          "workflow_run": {
+            "id": 38021634599,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961"
+          }
+        },
+        "qualificationReturned": false,
+        "strictBinderReturned": false,
+        "evidenceInventoryReturned": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false,
+        "scope": "This run completed C2/C3 and their existing conformance gates, then failed in the original binder's native pass-marker parser. It remains failed and its provider remains skipped. Its authenticated generation receipts and products can be consumed by the separate corrected evidence producer."
+      },
+      "evidenceProducer": {
+        "sourceRef": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a",
+        "finisher": {
+          "sourcePath": "psc0/scripts/sh1-finish-evidence.mjs",
+          "path": "scripts/sh1-finish-evidence.mjs",
+          "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+          "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+          "bytes": 38509
+        },
+        "binder": {
+          "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+          "path": "scripts/sh1-strict-evidence-finish.mjs",
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "workflow": {
+          "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+          "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+          "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+          "bytes": 55773
+        },
+        "currentExecution": {
+          "runId": 38027413274,
+          "workflowId": 380282667,
+          "runAttempt": 1,
+          "compilerJobId": 114141103218,
+          "headSha": "719f5ec4225baf51d1969cc3b5e4cbc6959fad4a"
+        }
+      },
+      "evidenceProducerRepair": {
+        "repair": {
+          "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/native-ir-marker-binding-repair.json",
+          "blob": "7c7ae4343cb94989df72b284dc9bd67c76794872",
+          "sha256": "65de6d37b9c4b75a1dc40999cf7ada6f2be59dfc0c1d23d63edef23b33a62b39",
+          "bytes": 33943
+        },
+        "finisherReview": {
+          "blob": "1d5a535c27171d6b9a6bc5c54e33560d31c83d2f",
+          "sha256": "e496babd155a981e5d23f26ed3b796f7df274acab79c13a8386033a4e82d8c89",
+          "bytes": 33715
+        },
+        "originalQualifier": {
+          "path": "scripts/sh1-qualify.mjs",
+          "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+          "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        "originalBinder": {
+          "path": "scripts/sh1-strict-evidence.mjs",
+          "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+          "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+          "bytes": 91970
+        },
+        "correctedBinderPointer": "/execution/evidenceProducer/binder",
+        "sourceCorrection": {
+          "original": ".map((line) => line.slice(pass))",
+          "repaired": ".map((line) => line.slice(pass.length))",
+          "utf8ByteDelta": 7,
+          "allOtherBinderBytesUnchanged": true,
+          "sameOrdered15NativeFixtureNamesRequired": true
+        },
+        "executedGenerationRecipe": {
+          "sha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+          "fileCount": 48,
+          "binderEntry": {
+            "path": "scripts/sh1-strict-evidence.mjs",
+            "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          },
+          "retainedC1Receipt": {
+            "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531,
+            "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+          },
+          "mustRemainExactInExistingReceipts": true
+        },
+        "predictedFutureNormalRecipe": {
+          "sha256": "18bfaff7d1d107a95f54733abcd624e5f43cb60dd25be827c764e488b82725fc",
+          "fileCount": 48,
+          "changedEntryCount": 1,
+          "unchangedEntryCount": 47,
+          "changedPath": "scripts/sh1-strict-evidence.mjs",
+          "newBinderSha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "predictionOnly": true,
+          "notAnExecutedGenerationRecipe": true,
+          "historicalScope": "Prediction recorded before the evidence-completion workflow was published. The retained qualification generations N1/C1/C2/C3 use the original a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba recipe. The notAnExecutedGenerationRecipe field concerns those retained qualification generations; this historical prediction makes no claim about separate later normal native runs."
+        },
+        "evidenceProducerIsGenerationRecipeInput": false,
+        "generationReceiptBytesMustRemainExact": true,
+        "scope": "Only the reviewed pass-marker prefix-length correction and authenticated evidence-only extraction of the original post-bind qualification construction. This record does not claim the defective binder and corrected binder have identical acceptance, does not change any source-rule argument, and does not make the failed CLI successful."
+      },
+      "evidenceCompletionInputs": {
+        "kind": "psc0-authenticated-retained-fixed-point-evidence-only-completion",
+        "requiredSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
+        "requiredOutputDirectory": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1",
+        "requiredGenerationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "requiredSourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "generationExecutionPointer": "/execution/generationExecution",
+        "priorExecutionPointer": "/execution/priorExecution",
+        "requiredArchives": [
+          {
+            "runId": 38015134511,
+            "artifactId": 11658430459,
+            "name": "psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+            "sha256": "6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812",
+            "bytes": 5147944,
+            "fileCount": 344,
+            "rawArchivePath": "dist/sh1-continuation-inputs/predecessor-verified.zip"
+          },
+          {
+            "runId": 38021634599,
+            "artifactId": 11659939542,
+            "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+            "sha256": "599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+            "bytes": 11739089,
+            "fileCount": 444,
+            "rawArchivePath": "dist/sh1-evidence-finish-inputs/predecessor-verified.zip"
+          }
+        ],
+        "requiredGenerationOwnership": {
+          "N1": {
+            "runId": 38015134511,
+            "compilerJobId": 114103608774
+          },
+          "C1": {
+            "runId": 38015134511,
+            "compilerJobId": 114103608774
+          },
+          "C2": {
+            "runId": 38021634599,
+            "compilerJobId": 114123691566
+          },
+          "C3": {
+            "runId": 38021634599,
+            "compilerJobId": 114123691566
+          }
+        },
+        "requiredGenerationLog": {
+          "path": "dist/sh1-evidence-finish-inputs/source-generation-job.log",
+          "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+          "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+          "bytes": 875228
+        },
+        "requiredGenerationReceipts": [
+          {
+            "generation": "N1",
+            "path": "dist/sh1/development/N1/receipt.json",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827
+          },
+          {
+            "generation": "C1",
+            "path": "dist/sh1/C1/receipt.json",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531
+          },
+          {
+            "generation": "C2",
+            "path": "dist/sh1/C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707
+          },
+          {
+            "generation": "C3",
+            "path": "dist/sh1/C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709
+          }
+        ],
+        "command": [
+          "node",
+          "scripts/sh1-finish-evidence.mjs",
+          "--inputs",
+          "dist/sh1-evidence-finish-inputs/inputs.json",
+          "--inputs-sha256",
+          "<actual-raw-input-manifest-sha256>",
+          "--out",
+          "dist/sh1"
+        ],
+        "reusedGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "generatedThisCommand": [],
+        "requiredSuccessfulCurrentCompilerSteps": [
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "artifactPathBase": "evidence-only compiler job artifact root",
+        "inputsFile": {
+          "path": "dist/sh1-evidence-finish-inputs/inputs.json",
+          "sha256": "6244a785d54b0acdcb31ae93784f1985bbff5e49912042b7a93e97746f91ae22",
+          "bytes": 330480,
+          "retainedBlob": "f922f1865b8d83f97c6e8ff5bf0720d2e2776ce0",
+          "receiptOrEnvelopeRef": null
+        },
+        "evidenceInventoryFile": {
+          "path": "dist/sh1-evidence-finish-inputs/evidence-inventory.json",
+          "sha256": "addfaa6074bbc5afa8ffd91c5065fee565cfc33aac42ddfed8911e2560de3559",
+          "bytes": 74318,
+          "retainedBlob": "b45fb963d72b72426be5135b9b4612eb150e2c16",
+          "receiptOrEnvelopeRef": null
+        },
+        "completionFile": {
+          "path": "dist/sh1/evidence-completion.json",
+          "sha256": "b846dfbd8447334ec80e897b39c2271adb87e77599897392c60e4a9109004227",
+          "bytes": 17685,
+          "retainedBlob": "62baf773b1da5516c148a21db9682633ecc71c63",
+          "receiptOrEnvelopeRef": null
+        },
+        "requiredInputKind": "psc0-authenticated-retained-fixed-point-finish-inputs",
+        "requiredInventoryKind": "psc0-exact-source-evidence-completion-inventory",
+        "requiredCompletionKind": "psc0-authenticated-retained-fixed-point-evidence-completion",
+        "requiredInventoryFileCount": 135,
+        "requiredReturnedJsonFileCount": 24,
+        "completionOutputs": [
+          "dist/sh1/strict-enforcement-evidence.json",
+          "dist/sh1/qualification.json",
+          "dist/sh1/seed-selection.json",
+          "dist/sh1/evidence-completion.json"
+        ],
+        "currentProducerPointer": "/execution/evidenceProducer",
+        "importedEvidenceMustRemainByteExact": true,
+        "compilerJobTimeoutMinutes": 45,
+        "providerJobTimeoutMinutes": 45,
+        "timeoutIsNotCompletionEstimate": true,
+        "requiredInputExpectedConstantsSha256": "6da2382a06b079e8b6469c43d721ce3753b2e2a83f74333c08bc62593f302c96"
+      },
+      "currentOutputOwnership": {
+        "qualificationFile": "/execution",
+        "strictBinderFile": "/execution",
+        "providerFile": "/execution",
+        "completionFile": "/execution",
+        "evidenceInventoryFile": "/execution",
+        "evidenceFinishInputsFile": "/execution"
+      },
+      "generationOwnership": [
+        {
+          "generation": "N1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "development/N1/receipt.json"
+        },
+        {
+          "generation": "C1",
+          "executionPointer": "/execution/priorExecution",
+          "runId": 38015134511,
+          "compilerJobId": 114103608774,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-predecessor-import",
+          "receiptPath": "C1/receipt.json"
+        },
+        {
+          "generation": "C2",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C2/receipt.json"
+        },
+        {
+          "generation": "C3",
+          "executionPointer": "/execution/generationExecution",
+          "runId": 38021634599,
+          "compilerJobId": 114123691566,
+          "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+          "mode": "authenticated-completed-generation-import",
+          "receiptPath": "C3/receipt.json"
+        }
+      ],
+      "status": "success",
+      "compilerJobId": 114141103218,
+      "providerJobId": 114141265302,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "sourceInputsSha256": "9c32af39a2f82c124c422c7a97162f00457132da12ebb76a11fc03b8138e7dd5",
+      "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "generations": [
+        {
+          "name": "N1",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "executingCompilerSha256": "be28aed5164ffa0661369e424dd8d315278de396fec4c22ce3d73ff567e81012",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "receipt": {
+            "path": "development/N1/receipt.json",
+            "sha256": "6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404",
+            "bytes": 15827,
+            "retainedBlob": "f2d9d6d55c04d7f30238f0de9142c382b8151e8e",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "Native checker checks the full original compiler IR. N1 generatedFullCompilerIrChecked remains false."
+        },
+        {
+          "name": "C1",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "executingCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+          "typescriptSha256": "1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba",
+          "receipt": {
+            "path": "C1/receipt.json",
+            "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+            "bytes": 169531,
+            "retainedBlob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "C1 construction is the explicit selected-R boundary; C1 subsequently checks the current IR emitted as C2."
+        },
+        {
+          "name": "C2",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "receipt": {
+            "path": "C2/receipt.json",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707,
+            "retainedBlob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "C1 checks and emits this C2 original-IR object; C2 subsequently checks and emits C3."
+        },
+        {
+          "name": "C3",
+          "status": "authenticated-current-source-generation",
+          "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "receipt": {
+            "path": "C3/receipt.json",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709,
+            "retainedBlob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+            "receiptOrEnvelopeRef": null
+          },
+          "fullCompilerIrBoundary": "C2 checks and emits this C3 original-IR object."
+        }
+      ],
+      "fixedPoint": "C2/C3-complete-compared-artifact-tuple-equal",
+      "nativeParity": "N1/C2/C3-TypeScript-and-JavaScript-equal",
+      "compilerQualification": {
+        "path": "qualification.json",
+        "sha256": "093b7c3a3016399b1000c05fb01a3cddb2e45ea415fdbc0bdef2009f9c5c25d3",
+        "bytes": 164959,
+        "retainedBlob": "96be5e6ed93773353a4e084ad7f525af78cd21ad",
+        "receiptOrEnvelopeRef": null
+      },
+      "strictEvidenceBinder": {
+        "path": "strict-enforcement-evidence.json",
+        "sha256": "44ec24605d9f1b8d98eb7b64df04a63e693ac1054f74cac4f4cda7a1ae52bcba",
+        "bytes": 149717,
+        "retainedBlob": "d120d6820fd1cc7d4ee2682b103991d8c7e62fb0",
+        "receiptOrEnvelopeRef": null
+      },
+      "providerReceipt": {
+        "path": "kernel-admissions.json",
+        "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+        "bytes": 3526,
+        "retainedBlob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+        "receiptOrEnvelopeRef": null
+      },
+      "providerScope": {
+        "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+        "compilerSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "labeledInputs": 8,
+        "uniqueStreams": 4,
+        "exactC2C3StreamsOnly": true,
+        "N1ProviderChecked": false,
+        "allExamplesProviderChecked": false,
+        "receipt": {
+          "path": "kernel-admissions.json",
+          "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+          "bytes": 3526,
+          "retainedBlob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+          "receiptOrEnvelopeRef": null
+        },
+        "emissionWasGatedByThisCheck": false
+      },
+      "strictSh1Qualified": true,
+      "semanticContractQualified": true,
+      "providerChecked": true,
+      "strictQualificationScope": {
+        "qualifiedEntry": "psCompilerSh1TypeScriptSources",
+        "qualifiedLane": "The current explicit strict development and qualification lane for the qualified source and recipe.",
+        "selectedByPsconfig": false,
+        "selectedSeed": "R",
+        "sourceAuthority": ".lean",
+        "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+        "typescript": "7.0.2",
+        "generalPreservationProven": false,
+        "formalPreservationProven": false,
+        "producedReceiptsUnchanged": true,
+        "releaseRecordReference": {
+          "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+          "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+          "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+          "bytes": 1858477
+        }
+      },
+      "releaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      },
+      "completedAtUtc": "2026-10-10T05:27:17Z"
+    },
+    "reviewedHostFunctionEntryCompletion": {
+      "status": "integrated-replay-cli-passed-full-native-and-generation-qualification-pending",
+      "manifest": "strict/reviewed-candidates/host-function-entry-completion.json",
+      "manifestBlob": "2d0a961d675206b07f14ac71fe88a21e00655bea",
+      "expectedParent": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+      "files": 7,
+      "guards": 31,
+      "productionLeanChanges": 0,
+      "replayFixturesChanged": 0,
+      "replayCallGroupCorrections": 10,
+      "obsoleteRouteAssertionsReconciled": 3,
+      "positiveFlatTailEntries": 3,
+      "positiveFlatTailObservations": 12,
+      "positiveFlatTailManifest": "4fd43041addbf6d8f79083c372d4b3c006e7b6d0",
+      "oldIrBehaviorObservations": 61,
+      "oldIrRefusals": 38,
+      "additionalCompilerInvocations": 0,
+      "reviewers": [
+        "root",
+        "runtime_comparison_finish",
+        "artifact_inspection_review",
+        "empty_evidence_finish"
+      ],
+      "sourceReview": "CLEAR",
+      "executionQualification": false,
+      "passedReplayRun": 38006688264,
+      "passedReplaySource": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "positiveFlatTailExecution": "N1-passed-all-12-observations",
+      "passedPositiveFlatTailRun": 38008721677
+    },
+    "reviewedSourceRuntimeInterface": {
+      "document": "strict/SOURCE_RUNTIME_INTERFACE_REVIEW.md",
+      "blob": "06b5a893e03940ccc24db0b2036dc5bc7e4b60fe",
+      "sha256": "b543637385dc044f837ef36411d8c44b4c5612bacb691ef7bc20cbe882ec6407",
+      "manifest": "strict/reviewed-candidates/source-runtime-interface-review.json",
+      "manifestBlob": "81493683072c6e47a16b2ab292e496cb67162790",
+      "status": "bounded-independent-eleven-stage-source-review-and-root-CLEAR",
+      "sourceAnchor": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+      "stageRows": 11,
+      "rowsClosed": 0,
+      "qualificationPending": true,
+      "formalPreservationProven": false,
+      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d"
+    },
+    "finalDisposition": {
+      "status": "qualified-for-explicit-strict-entry-and-current-lane; all33 correspondence and27 stage dispositions bound to release-qualification.json",
+      "correspondenceRows": 33,
+      "stageObligations": 27,
+      "completeGeneralSourceReview": true,
+      "sourceRuntimeStageReviewComplete": true,
+      "correspondenceRowsClosed": 33,
+      "stageObligationsClosed": 27,
+      "formalPreservationProven": false,
+      "generalPreservationProven": false,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "releaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      },
+      "scope": {
+        "qualifiedEntry": "psCompilerSh1TypeScriptSources",
+        "qualifiedLane": "The current explicit strict development and qualification lane for the qualified source and recipe.",
+        "selectedByPsconfig": false,
+        "selectedSeed": "R",
+        "sourceAuthority": ".lean",
+        "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+        "typescript": "7.0.2",
+        "generalPreservationProven": false,
+        "formalPreservationProven": false,
+        "producedReceiptsUnchanged": true,
+        "releaseRecordReference": {
+          "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+          "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+          "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+          "bytes": 1858477
+        }
+      }
+    },
+    "plannedOptimizedTailConformance": {
+      "entries": 3,
+      "observations": 12,
+      "valueObservations": 11,
+      "faultObservations": 1,
+      "oldBehaviorObservations": 61,
+      "oldRefusals": 38,
+      "sameAcceptedArtifacts": true,
+      "additionalCompilerInvocations": 0,
+      "manifest": "strict/reviewed-candidates/optimized-tail-coverage.json",
+      "manifestBlob": "4fd43041addbf6d8f79083c372d4b3c006e7b6d0",
+      "executedOnThisIntegration": false
+    },
+    "reviewedPortablePatternCompletion": {
+      "status": "integrated-parser-refusal-cleared-next-observed-failure-is-worker-elaboration",
+      "manifest": "strict/reviewed-candidates/foldl-flat-pattern-repair.json",
+      "manifestBlob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "manifestSha256": "a133929cb5d6de03dfb17a9750edeb12180113b0c91da279f22b2c71ff289d88",
+      "manifestBytes": 48534,
+      "expectedParent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "definition": "psEraseArrayFoldl",
+      "baseBlob": "e3ed96f9cf9329882b204da83b3f2925a70e5c73",
+      "baseSha256": "10306c15e992fd75d4762a6ff4c017cda56dde72e0382a18d5c646f40be9f419",
+      "baseBytes": 137412,
+      "candidateBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+      "candidateSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+      "candidateBytes": 138060,
+      "files": 1,
+      "guards": 1,
+      "helperDefinitions": 1,
+      "unchangedSuccessBody": {
+        "sha256": "d5b48e271188de232c3014a49fdace9a1bddc612e063e35ca41b56da4a797ea8",
+        "bytes": 2801,
+        "addedIndentSpaces": 8
+      },
+      "argument": "Exhaustive List lengths 0, 1, 2 and greater than 2 preserve the same result/error and sole length-two runtime-erasure body. The original whole typeArguments and every capture/bridge operation remain. Both fresh tail binders are globally fresh in the base. No timing, allocation or generated-byte identity claim.",
+      "audit": {
+        "files": 31,
+        "productionLeanFiles": 30,
+        "genericLeanFixtures": 1,
+        "patternHeadsBefore": 4664,
+        "patternHeadsAfter": 4668,
+        "independentScrutinees": 2124,
+        "unsupportedNestedPatternsBefore": 1,
+        "unsupportedNestedPatternsAfter": 0,
+        "scope": "Complete canonical/recursion Lean inventory, not all 64 compiler closure files."
+      },
+      "sourceReview": "root-and-independent-CLEAR",
+      "exactManifestReadback": "root-and-runtime_final-CLEAR",
+      "hostScriptsChanged": 0,
+      "replayFixturesChanged": 0,
+      "newSyntaxCapability": false,
+      "parserChanged": false,
+      "newWorkflowSteps": 0,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "subsequentObservedRun": 38006688264
+    },
+    "reviewedWorkerSelfCallCompletion": {
+      "status": "integrated-full-native-source-and-original-IR-accepted-current-N1-conformance-pending",
+      "manifest": "strict/reviewed-candidates/worker-self-call-prefix-repair.json",
+      "manifestBlob": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+      "expectedParent": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "definition": "psEraseRuntimeExprWithFuelWorker",
+      "baseBlob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+      "baseSha256": "e2d86d14b112a16f6fc5ff77fc60968e8dac2adbf466c1f761b2087e7f3a1662",
+      "baseBytes": 138060,
+      "candidateBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+      "candidateSha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+      "candidateBytes": 138189,
+      "files": 1,
+      "guards": 1,
+      "helperDefinitions": 1,
+      "headerExplicitArguments": 2,
+      "oldFlattenedSelfArguments": 4,
+      "currentSelfArguments": 2,
+      "freshBinder": "eraseAtRemainingFuel",
+      "placement": "Inside the original smaller callback. The original two-argument recursive result is bound before the unchanged nested-scope/value application. No work crosses a lambda and no result is shared across separate callback invocations.",
+      "argument": "The exact declaration-prefix call selects the same root-child IH. Context extensions preserve original parameter IDs and the structural child. Callback construction, fuel dispatch, nested-scope clearing, returned-function application, body/error demand and canonical entry boundary remain. Parentheses alone do not create this syntax boundary because the parser flattens application spines.",
+      "audit": {
+        "productionLeanFiles": 30,
+        "declarations": 980,
+        "selfRecursiveDeclarations": 382,
+        "directSelfReferences": 539,
+        "parenthesizedSelfCalls": 109,
+        "arityMismatchesBefore": 1,
+        "arityMismatchesAfter": 0,
+        "bareOrUndersaturatedSelfReferences": 0,
+        "scope": "Complete current production Lean inventory of the canonical/recursion batch; not every file in the whole compiler closure."
+      },
+      "sourceReview": "root-and-two-independent-reviewers-CLEAR",
+      "syntaxCapabilityAdded": false,
+      "structuralValidatorChanged": false,
+      "publicSignatureChanged": false,
+      "newWorkflowSteps": 0,
+      "newCompilerCallSites": 0,
+      "hostScriptsChanged": 0,
+      "fixturesChanged": 0,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "manifestSha256": "d964cfc99eda53cd9fefaa833a0ffbded9f3d5f907c06f21ffe63bf33b467fab",
+      "manifestBytes": 48828,
+      "subsequentObservedRun": 38007714076
+    },
+    "reviewedFinalDispositionMap": {
+      "status": "complete-independent-mapping-review-current-execution-disposition-pending",
+      "map": "strict/reviewed-candidates/final-disposition-map.json",
+      "mapBlob": "697c94b2722a6191537b714f71f629713637b30a",
+      "mapSha256": "474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07",
+      "manifest": "strict/reviewed-candidates/final-disposition-map-review.json",
+      "manifestBlob": "419564764abc492816833a643af40b027b0fd897",
+      "correspondenceReview": "strict/reviewed-candidates/correspondence-disposition-map-review.json",
+      "correspondenceReviewBlob": "20f0116df23d4304e3b7e8f9da5ff39599eaf037",
+      "stageReview": "strict/reviewed-candidates/stage-activation-review.json",
+      "stageReviewBlob": "f6cc608044094aebe90609cb140d9cd00825ebf4",
+      "correspondenceRows": 33,
+      "stageObligations": 27,
+      "receiptGroups": 25,
+      "sourcePatternTransportManifest": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83",
+      "sourceWorkerPrefixTransportManifest": "4c5d8ecca42e10c6da6f19f6118a829c173c9d4d",
+      "rowsClosed": 0,
+      "requiredMetadataCorrection": "ER-06 /rows/5/domain/1 must describe admitted zero-constructor layouts separately from inhabited zero-field structures.",
+      "evidenceBoundary": "Frozen advisory maps keep their historical pending/source pins. Active final disposition must bind the full current transport chain and actual successful exact-source compiler/provider evidence. No row closes by attaching these review packets.",
+      "currentHostReturnBoundaryTransportManifest": "a89fb7324afb820b2df077a26608d71cc11d644c"
+    },
+    "reviewedEmptyResultBoundary": {
+      "status": "integrated-source-return-observations-passed-N1-binder-not-reached",
+      "manifest": "strict/reviewed-candidates/empty-source-return-boundary.json",
+      "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c",
+      "expectedParent": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+      "files": [
+        {
+          "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+          "baseBlob": "c28507666a3c46892c6fc155c66e1842a8954150",
+          "candidateBlob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+          "candidateSha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+          "candidateBytes": 31555
+        },
+        {
+          "path": "psc0/scripts/sh1-strict-evidence.mjs",
+          "baseBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+          "candidateBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+          "candidateSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+          "candidateBytes": 91970
+        }
+      ],
+      "productionLeanChanges": 0,
+      "fixtureChanges": 0,
+      "guards": 2,
+      "sourceDeclarationsPerKind": 5,
+      "typedEmptyEliminationsPerKind": 4,
+      "sourceKinds": 2,
+      "retiredAssertion": "sh1EmptyFunction expected an outer call and callee-position typed let although the raw fixture returns nomatch directly.",
+      "currentAssertion": "All four declarations return their unique typed empty let directly, retain the exact authored runtime parameter prefix and carry the exact declaration and local result type. The binder checks these recorded facts and hashes the entire observation.",
+      "explicitTypedEmptyCalleePreserved": true,
+      "irGateBlob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+      "audit": {
+        "hostScripts": 34,
+        "sh1Scripts": 27,
+        "activeDependencies": 7,
+        "obsoleteComputedResultEtaAssertions": 1
+      },
+      "sourceReview": "root-and-independent-exact-source-review-CLEAR",
+      "newCompilerInvocations": 0,
+      "newWorkflowSteps": 0,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "passedSourceRun": 38008721677
+    },
+    "pendingFinalDrafts": {
+      "correspondence": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-transport.json",
+        "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+        "sha256": "593af3fbe36132afa5e3e6b733c811946d3aed3f4b4a4b8e575e516026b41619",
+        "bytes": 151758
+      },
+      "releaseBase": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/release-qualification-draft.json",
+        "blob": "e8023de73e4956c0217de5044950404705fedcea",
+        "sha256": "92dc055ffcdb2b3709164532d9a991437b401803d484c55f932ddd241ab285d3",
+        "bytes": 286885
+      },
+      "releaseCurrentSourceOverlay": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/release-qualification-current-source-overlay.json",
+        "blob": "f38f814fdba7af53c147e0f1d68cafcd8e0b74b3",
+        "sha256": "6389403a228f204dbfdcc0107318e2bff47906a9c03b57ca55461eb80afc1196",
+        "bytes": 48947
+      },
+      "correspondenceAssemblyProcedure": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-final-assembly-procedure.json",
+        "blob": "1e590688c1d6c87970caa4e22388310a2664b234",
+        "sha256": "fb0439106ef5b6e6afc39e9e63bb29e888260fd2ecd3ca6ff83c387126f0a9c1",
+        "bytes": 148777
+      },
+      "stageAssemblyPlan": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/final-stage-obligation-assembly-plan.json",
+        "blob": "b8c498a5035b9d8f4d7db77c74643f1d2b5a7e4a",
+        "sha256": "25a1697cd5563fc8db413ab1ce6ca18f7422891be6f78d319e28ffd48ad0f4d4",
+        "bytes": 252093
+      },
+      "status": "historical-preparation-packets-applied-through-current-host-overlays-and-actual-evidence",
+      "historicalSourceRef": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "historicalRunId": 38011068208,
+      "historicalRunConclusion": "failure",
+      "note": "These planning packets close no rows. Retain frozen source mappings and general arguments, but refresh exact source/host/workflow/48-file recipe/run metadata and bind actual complete qualification and provider receipts before applying final dispositions. Do not apply the stage plan's 138fe conditional SPEC success insertion.",
+      "completedReleaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      },
+      "currentCorrespondenceHostOverlay": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/correspondence-current-host-run-overlay.json",
+        "blob": "91ff1c5495c46de2a00ab71899024110cad992a6",
+        "sha256": "a8aa1f0bf54627d9930a2ff95c45333b741ba1feea2cf881111f194538d402bc",
+        "utf8Bytes": 34478,
+        "transportPatchPointer": "/projections/transport/operations",
+        "procedurePatchPointer": "/projections/procedure/operations",
+        "projectedTransportSha256": "224c11b5e10e1e91f3aca45efe73190c0f5ff8317217e51dfc6e6af669f33c0f",
+        "projectedTransportBytes": 154003,
+        "projectedProcedureSha256": "c24f4b12f463211d30db0bb1d934735677acd52b182402a152b9ba8640372dac",
+        "projectedProcedureBytes": 151075
+      }
+    },
+    "completedGenericPreparationDiagnostic": {
+      "status": "completed-localization-only",
+      "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "diagnosticSourceRef": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+      "runId": 38010024282,
+      "jobId": 114087631048,
+      "workflowId": 380146660,
+      "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+      "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+      "evidence": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+        "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+        "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+        "bytes": 8051
+      },
+      "report": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin.json",
+        "blob": "6d5a7dca8d9b602fab6492ce1d8dc31f0a2a8666",
+        "sha256": "46a60edd579402eca2ebf1a42aace7635d245b16a6472c4d3e00523c2054ef0b",
+        "bytes": 2756
+      },
+      "log": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-job.log",
+        "blob": "a5df35ba3795f9823fcb5b0c787a57f1baa19db8",
+        "sha256": "fe14d35b49b421b7cf11b337f78d23a80238f309037870e3068711081e04afcf",
+        "bytes": 36865
+      },
+      "sourceIndex": 6,
+      "sourceName": "sh1GroupLet",
+      "phase": "stableDeclaration",
+      "span": {
+        "start": {
+          "byteOffset": "1611",
+          "line": "37",
+          "column": "1"
+        },
+        "stop": {
+          "byteOffset": "1708",
+          "line": "39",
+          "column": "9"
+        }
+      },
+      "error": {
+        "tag": "elaboration",
+        "error": {
+          "tag": "infer",
+          "error": {
+            "tag": "applicationTypeMismatch"
+          }
+        }
+      },
+      "compilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+      "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "parseCalls": 1,
+      "originPreservingPreparationCalls": 1,
+      "nativeBuilds": 0,
+      "typeScriptCompilations": 0,
+      "erasureCalls": 0,
+      "compilerEmissions": 0,
+      "observedExpectedAndActualUniverseExpressions": false,
+      "qualificationMeaning": "The execution locates the existing error; the universe mismatch explanation comes from the separately reviewed source trace.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    "reviewedClosedUniverseInference": {
+      "status": "reviewed-source-correction-full-qualification-requested",
+      "expectedParent": "216b63b5ff5a2740058f0a97c67c71dfc8a1be8d",
+      "manifest": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-repair.json",
+        "blob": "f71b09c33a574e6868b193afac946355008b4d61",
+        "sha256": "6131cefd6461284b35560dd1fa21e267cadb10f77785e2f3b90fb61b1a9936bf",
+        "bytes": 63632
+      },
+      "independentReview": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/closed-universe-inference-independent-review.json",
+        "blob": "8ac34c7b4cd0f87c6d764f230c70993fb6fcb502",
+        "sha256": "4f2e24e8add150073d2070d1e7a9ab0526c6d4ce5d882dcc0adf1015309281c1",
+        "bytes": 13986,
+        "verdict": "CLEAR"
+      },
+      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+      "baseBlob": "cad2c470d5c7682ffdc4caa111dafb5f076b27b3",
+      "baseSha256": "1180f6d8392837fbcc2694478e2747026dfbd56cca5a3d765aeecb086c0ed9df",
+      "candidateBlob": "160a4ae9fb8e5ae00729752463d5c42d4e9f8889",
+      "candidateSha256": "500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6",
+      "candidateBytes": 21458,
+      "sourceFilesChanged": 1,
+      "exactEditGuards": 3,
+      "helpers": [
+        "psInferClosedLevelValue",
+        "psInferLevelFromNat",
+        "psInferNormalizeClosedLevel"
+      ],
+      "producerSites": [
+        "psInferTypeWithFuelWorker.sortE: canonicalize the newly constructed successor level",
+        "psInferTypeWithFuelWorker.forallE: canonicalize the newly constructed imax level"
+      ],
+      "constructionAudit": {
+        "files": 106,
+        "beforeSha256": "164e2296bddb1c7cfcad88be53bd2f2e14a3864b0b29527457f11ff8d8e37272",
+        "afterSha256": "760fd509644fcb342c535879f9ea967043190d2395021ed5617e2e5b3a4e2a76",
+        "beforeBytes": 2179554,
+        "afterBytes": 2181532,
+        "rootCompleteTreeCoverage": true
+      },
+      "sourceArgument": "Every finite closed level evaluates under zero/succ/max/imax arithmetic and reifies to its unique Peano numeral; any param/mvar makes the normalizer return the original whole level. The newly returned sort remains convertible by the unchanged kernel's universe identities. Proof/runtime zero classification is preserved.",
+      "resourceBoundary": "Expression-inference fuel arguments, recursive calls and exhaustion are unchanged. Helpers add finite structural work and allocation on proper acyclic level trees; no equal timing, allocation, machine-stack or all-input resource claim.",
+      "rootAndIndependentSourceReview": "CLEAR",
+      "diagnosticEvidence": {
+        "path": "psc0/docs/selfhost-language/strict/attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/generic-preparation-origin-evidence.json",
+        "blob": "5adcaabbff7c607490ffdb51cfa02f2bee3b0281",
+        "sha256": "ec252008d9cdffc61895f137e9021a07af3dea62a48ff0c2aed7f81f012870fc",
+        "bytes": 8051
+      },
+      "noFixtureOrHostChanges": true,
+      "kernelChanged": false,
+      "providerChanged": false,
+      "defeqChanged": false,
+      "unifierChanged": false,
+      "cacheChanged": false,
+      "theoryChanged": false,
+      "grammarChanged": false,
+      "selectedSeedChanged": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    "reviewedWorkerObservationSchema": {
+      "status": "reviewed-host-observation-correction-full-qualification-requested",
+      "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+      "manifest": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json",
+        "blob": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+        "sha256": "7604f87bf95b202663619d47efedb9114bbf91873534e8725bcca5409c601244",
+        "bytes": 90952
+      },
+      "independentReview": {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json",
+        "blob": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+        "sha256": "98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33",
+        "bytes": 27661,
+        "verdict": "CLEAR"
+      },
+      "executableFiles": [
+        {
+          "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+          "baseBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+          "candidateBlob": "d08d8c622f68314db32ef38d03539a8130abf3f6",
+          "candidateSha256": "7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472",
+          "bytes": 41494
+        },
+        {
+          "path": "psc0/scripts/sh1-qualify.mjs",
+          "baseBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+          "candidateBlob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+          "candidateSha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+          "bytes": 73618
+        },
+        {
+          "path": ".github/workflows/psc0-sh1.yml",
+          "baseBlob": "cb1fbe258526ada2947c3c931a9e8fb96f4ad5e8",
+          "candidateBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+          "candidateSha256": "2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5",
+          "bytes": 25735
+        }
+      ],
+      "sourceOwner": "PsErasureDeclarationNames.entries is semantic declaration-entry ABI metadata. Finite names-only scope construction gives an empty index; both nil-input metadata workers return their input scope.",
+      "observationPolicy": {
+        "currentDefault": "entry-metadata/1: exactly four fields and canonical empty entries required",
+        "historicalReference": "selected-r-names-only/1: exactly three historical fields, with a proven-empty fourth field added only to the fresh observation",
+        "legacyOptInCallers": 2,
+        "automaticLegacyDetection": false,
+        "currentMetadataDropped": false,
+        "nonemptyMetadataRefused": true,
+        "liveCompilerInputsChanged": false,
+        "exactSameGenerationAssertionsRetained": true,
+        "casesPerCompiler": 87,
+        "additionalCases": 0
+      },
+      "preflight": {
+        "placement": "after completed N1 and before selected-R C1 generation, full qualification only",
+        "inputs": [
+          "dist/sh1/worker-harness-reference.json",
+          "dist/sh1/development/N1/receipt.json",
+          "dist/sh1/development/N1/capabilities/receipt.json"
+        ],
+        "binds": [
+          "current GITHUB_SHA",
+          "selected-R source/compiler/identity",
+          "N1 source/compiler identity"
+        ],
+        "comparison": "complete 87-case workerMigration report equality",
+        "originalPostC1ComparisonRetained": true,
+        "additionalCompilerExecutions": 0
+      },
+      "review": {
+        "exactTextGuards": 12,
+        "hostScripts": 51,
+        "workflows": 17,
+        "auditedFiles": 68,
+        "auditedBytes": 971542,
+        "rootAndIndependentVerdict": "CLEAR"
+      },
+      "retainedReportReplay": {
+        "status": "pure-data-only",
+        "reports": [
+          "R",
+          "N1",
+          "C1"
+        ],
+        "all87ProjectedReportsIdentical": true,
+        "projectedReportSha256": "2850f574fee1141fe3e96eee88be8010179e46108a23677d568e1fff701071c8",
+        "projectedReportBytes": 51437,
+        "repositoryCodeExecuted": false,
+        "fullQualificationEstablished": false
+      },
+      "productionSourceChanged": false,
+      "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+      "expectedRecipe": {
+        "fileCount": 48,
+        "sha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "changedRecipeFiles": 2,
+        "predictedNotExecuted": true
+      },
+      "fixtureChanged": false,
+      "kernelChanged": false,
+      "providerChanged": false,
+      "defeqChanged": false,
+      "cacheChanged": false,
+      "theoryChanged": false,
+      "grammarChanged": false,
+      "selectedSeedChanged": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
+    },
+    "previousCheckpointReference": {
+      "path": "psc0/docs/selfhost-language/proposal.json",
+      "blob": "1c1f5402ce6e126f07200687f05e751aec8ba44e",
+      "sha256": "8e1a06c3319a61d7d79d540bb267d03fefb1274eb287c49b2bec21951c2ff0aa",
+      "bytes": 137646,
+      "jsonPointer": "/strictEnforcementCheckpoint"
+    },
+    "qualifiedSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "releaseRecordReference": {
+      "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+      "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+      "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+      "bytes": 1858477
+    },
+    "providerScope": {
+      "sourceRef": "963030dc2d154008fccc82e7c8ed29331f138799",
+      "compilerSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "labeledInputs": 8,
+      "uniqueStreams": 4,
+      "exactC2C3StreamsOnly": true,
+      "N1ProviderChecked": false,
+      "allExamplesProviderChecked": false,
+      "receipt": {
+        "path": "kernel-admissions.json",
+        "sha256": "a3169030f4331500d563c9b34b764279550c63c86e5f0bf743e8a3983d75eb71",
+        "bytes": 3526,
+        "retainedBlob": "78486e8c522e0dffb7ffcf326635b4c1db1c7883",
+        "receiptOrEnvelopeRef": null
+      },
+      "emissionWasGatedByThisCheck": false
+    },
+    "strictQualificationScope": {
+      "qualifiedEntry": "psCompilerSh1TypeScriptSources",
+      "qualifiedLane": "The current explicit strict development and qualification lane for the qualified source and recipe.",
+      "selectedByPsconfig": false,
+      "selectedSeed": "R",
+      "sourceAuthority": ".lean",
+      "sourceGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+      "typescript": "7.0.2",
+      "generalPreservationProven": false,
+      "formalPreservationProven": false,
+      "producedReceiptsUnchanged": true,
+      "releaseRecordReference": {
+        "path": "psc0/docs/selfhost-language/strict/release-qualification.json",
+        "blob": "5d635e8cfb4ed1309ad62afa6cf87183d9ffbe7c",
+        "sha256": "6b39e0dc1b8b828dfef1f07c56a462a5e5364fc1f5e9c1d864ec94976b01db51",
+        "bytes": 1858477
+      }
+    },
+    "historicalCheckpointInterpretation": "Earlier source review, partial execution and pending-draft objects retain their original source identities and conservative claim flags. This final disposition and its immutable release record define the current result; no historical attempt is relabeled as successful."
+  },
+  "previousStatusReference": {
+    "path": "psc0/docs/selfhost-language/proposal.json",
+    "blob": "1c1f5402ce6e126f07200687f05e751aec8ba44e",
+    "sha256": "8e1a06c3319a61d7d79d540bb267d03fefb1274eb287c49b2bec21951c2ff0aa",
+    "bytes": 137646,
+    "jsonPointer": "/status"
+  },
+  "updatedAtUtc": "2026-10-10T05:45:24Z"
 }

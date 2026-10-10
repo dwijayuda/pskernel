@@ -1,0 +1,394 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-exact-source-failed-attempt",
+  "status": "failed-evidence-retained",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "sourceCommit": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+  "sourceIdentity": {
+    "parent": "00e963bb8c84fc9b29f7cc8228f1520de5ca2081",
+    "rootTree": "b1879fa558ae176b8fece41cae24612b76c6b717",
+    "psc0Tree": "de0d9020d11a035cba73740466a4d37a8a557c0f",
+    "verifiedFromCommitAndTreeApi": true,
+    "pins": [
+      {
+        "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "blob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39"
+      },
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "blob": "562f8c0e60a599fadde581f4a6deca502e9202b5"
+      },
+      {
+        "path": "psc0/scripts/selfhost-replay-runtime.test.mjs",
+        "blob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53"
+      },
+      {
+        "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/foldl-flat-pattern-repair.json",
+        "blob": "e91fcacaa7c5a73c1d1fba8c30d213faee3fda83"
+      }
+    ]
+  },
+  "run": {
+    "id": 38006688264,
+    "attempt": 1,
+    "workflowId": 378853677,
+    "status": "completed",
+    "conclusion": "failure",
+    "createdAt": "2026-10-09T23:54:41Z",
+    "completedByUpdatedAt": "2026-10-09T23:56:03Z",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38006688264"
+  },
+  "jobs": {
+    "compiler": {
+      "id": 114076987396,
+      "status": "completed",
+      "conclusion": "failure",
+      "startedAt": "2026-10-09T23:54:44Z",
+      "completedAt": "2026-10-09T23:56:02Z",
+      "failedStep": {
+        "name": "Run the bounded native development gate before qualification",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 24,
+        "started_at": "2026-10-09T23:55:56Z",
+        "completed_at": "2026-10-09T23:55:58Z"
+      }
+    },
+    "provider": {
+      "id": 114077308038,
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-10-09T23:56:03Z",
+      "completedAt": "2026-10-09T23:56:03Z"
+    }
+  },
+  "failure": {
+    "timestamp": "2026-10-09T23:55:58.5812764Z",
+    "logLine": 2196,
+    "marker": "PSC0_SH1_STRICT_SOURCE_NATIVE_REJECTED",
+    "rawPayload": "{\"schemaVersion\":1,\"evidence\":\"native-atomic-source-refusal\",\"strictSh1Qualified\":false,\"semanticContractQualified\":false,\"providerChecked\":false,\"stage\":\"source\",\"code\":\"source-elaboration\",\"moduleName\":\"Ps.Erasure.Expr\",\"compilerStage\":\"elaboration\",\"detail\":\"structuralRecursionArity\",\"owner\":\"psEraseRuntimeExprWithFuelWorker\",\"sourceIndex\":76,\"phase\":\"stableDeclaration\",\"span\":{\"start\":{\"byteOffset\":116469,\"line\":2311,\"column\":1},\"stop\":{\"byteOffset\":137615,\"line\":2710,\"column\":41}}}",
+    "receipt": {
+      "schemaVersion": 1,
+      "evidence": "native-atomic-source-refusal",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false,
+      "stage": "source",
+      "code": "source-elaboration",
+      "moduleName": "Ps.Erasure.Expr",
+      "compilerStage": "elaboration",
+      "detail": "structuralRecursionArity",
+      "owner": "psEraseRuntimeExprWithFuelWorker",
+      "sourceIndex": 76,
+      "phase": "stableDeclaration",
+      "span": {
+        "start": {
+          "byteOffset": 116469,
+          "line": 2311,
+          "column": 1
+        },
+        "stop": {
+          "byteOffset": 137615,
+          "line": 2710,
+          "column": 41
+        }
+      }
+    },
+    "followingException": "uncaught exception: PSC0_SH1_STRICT_SOURCE_NATIVE_REJECTED",
+    "assertion": {
+      "code": "ERR_ASSERTION",
+      "message": "PSC0_SH1_STRICT_NATIVE_EXECUTION",
+      "actual": 1,
+      "expected": 0,
+      "operator": "strictEqual",
+      "site": "psc0/scripts/sh1-qualify.mjs:918:10"
+    },
+    "processExitCode": 1
+  },
+  "sourceInspection": {
+    "module": "Ps.Erasure.Expr",
+    "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+    "blob": "a4d296abf4543fe23f55b71e79a9d0d97a221f39",
+    "owner": "psEraseRuntimeExprWithFuelWorker",
+    "sourceIndex": 76,
+    "phase": "stableDeclaration",
+    "span": {
+      "start": {
+        "byteOffset": 116469,
+        "line": 2311,
+        "column": 1
+      },
+      "stop": {
+        "byteOffset": 137615,
+        "line": 2710,
+        "column": 41
+      }
+    },
+    "classification": "The current native compiler build passed, but the native atomic operation refused source elaboration for this declaration with structuralRecursionArity. The declaration's diagnostic span and current blob identity are retained exactly. This evidence does not claim a repaired declaration or successful compiler closure preparation.",
+    "sourceCodeChangesByThisEvidence": 0
+  },
+  "stageStatus": {
+    "nativeCompilerBuild": "passed-step18",
+    "nativeParserTranslationErasureRegression": "passed-step19",
+    "nativeCheckedSeed": "passed-step20",
+    "newGrammarImportsAndWorkspaceBoundaries": "passed-step21",
+    "nativeAndGeneratedTypeScriptCliReplay": "passed-step22",
+    "authenticatedRMigrationAndIsolatedAbiProbe": "passed-step23",
+    "N1": "failed-step24-during-owned-source-elaboration",
+    "N1SuccessReceiptObserved": false,
+    "C1": "skipped-step25",
+    "C2_C3": "skipped-step26",
+    "qualifiedSeedRetention": "skipped-step27",
+    "provider": "skipped",
+    "optimizedTailNewIrEvidence": "not-reached-in-native-development",
+    "artifactRetention": "passed-steps28-and29"
+  },
+  "observedSteps": [
+    {
+      "name": "Authenticate the selected R seed and TS7-only recovery policy",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 3,
+      "started_at": "2026-10-09T23:55:07Z",
+      "completed_at": "2026-10-09T23:55:07Z"
+    },
+    {
+      "name": "Check the actual full-qualification runner memory before expensive work",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 5,
+      "started_at": "2026-10-09T23:55:07Z",
+      "completed_at": "2026-10-09T23:55:07Z"
+    },
+    {
+      "name": "Install the pinned current TypeScript 7 profile",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 7,
+      "started_at": "2026-10-09T23:55:26Z",
+      "completed_at": "2026-10-09T23:55:28Z"
+    },
+    {
+      "name": "Verify the installed TypeScript 7 profile before compiler generation",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8,
+      "started_at": "2026-10-09T23:55:28Z",
+      "completed_at": "2026-10-09T23:55:29Z"
+    },
+    {
+      "name": "Verify host syntax and bootstrap source restrictions",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 9,
+      "started_at": "2026-10-09T23:55:29Z",
+      "completed_at": "2026-10-09T23:55:30Z"
+    },
+    {
+      "name": "Verify selected authoring cache and execution runtime before current generation",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 15,
+      "started_at": "2026-10-09T23:55:32Z",
+      "completed_at": "2026-10-09T23:55:32Z"
+    },
+    {
+      "name": "Build current native compiler",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 18,
+      "started_at": "2026-10-09T23:55:33Z",
+      "completed_at": "2026-10-09T23:55:40Z"
+    },
+    {
+      "name": "Run native parser, translation, and erasure regression targets",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 19,
+      "started_at": "2026-10-09T23:55:40Z",
+      "completed_at": "2026-10-09T23:55:41Z"
+    },
+    {
+      "name": "Build the actual native checked seed for source and import tests",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 20,
+      "started_at": "2026-10-09T23:55:41Z",
+      "completed_at": "2026-10-09T23:55:48Z"
+    },
+    {
+      "name": "Verify new grammar source loading, imports, and native workspace boundaries",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 21,
+      "started_at": "2026-10-09T23:55:48Z",
+      "completed_at": "2026-10-09T23:55:51Z"
+    },
+    {
+      "name": "Verify native and generated TypeScript CLI boundaries",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 22,
+      "started_at": "2026-10-09T23:55:51Z",
+      "completed_at": "2026-10-09T23:55:54Z"
+    },
+    {
+      "name": "Verify migration behavior and isolated ABI probe on the authenticated R compiler",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 23,
+      "started_at": "2026-10-09T23:55:54Z",
+      "completed_at": "2026-10-09T23:55:56Z"
+    },
+    {
+      "name": "Run the bounded native development gate before qualification",
+      "status": "completed",
+      "conclusion": "failure",
+      "number": 24,
+      "started_at": "2026-10-09T23:55:56Z",
+      "completed_at": "2026-10-09T23:55:58Z"
+    },
+    {
+      "name": "Build the selected-seed candidate before full qualification",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 25,
+      "started_at": "2026-10-09T23:55:58Z",
+      "completed_at": "2026-10-09T23:55:58Z"
+    },
+    {
+      "name": "Qualify exact current-source C2/C3 at a promotion checkpoint",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 26,
+      "started_at": "2026-10-09T23:55:58Z",
+      "completed_at": "2026-10-09T23:55:58Z"
+    },
+    {
+      "name": "Retain the newly qualified seed without activating a source migration",
+      "status": "completed",
+      "conclusion": "skipped",
+      "number": 27,
+      "started_at": "2026-10-09T23:55:58Z",
+      "completed_at": "2026-10-09T23:55:58Z"
+    },
+    {
+      "name": "Retain incremental native outputs",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 28,
+      "started_at": "2026-10-09T23:55:58Z",
+      "completed_at": "2026-10-09T23:56:00Z"
+    },
+    {
+      "name": "Retain compiler evidence and exact generated artifacts",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 29,
+      "started_at": "2026-10-09T23:56:00Z",
+      "completed_at": "2026-10-09T23:56:01Z"
+    }
+  ],
+  "passedEvidence": {
+    "replay": {
+      "timestamp": "2026-10-09T23:55:53.7209889Z",
+      "logLine": 2129,
+      "marker": "PSC2_SELFHOST_REPLAY_RUNTIME",
+      "text": "PASS (strict TypeScript; 20000-step recursion, function results, name collisions, generic lists and exact UTF-8 positions)",
+      "scriptBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+      "scope": "Existing six-fixture replay runtime gate passed at this source, including the recorded 20000-step behavior; this is separate from N1 and full current-source qualification."
+    },
+    "authenticatedReference": {
+      "timestamp": "2026-10-09T23:55:56.1837484Z",
+      "logLine": 2188,
+      "recipeSourceRef": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "referenceSourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+      "referenceCompilerSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061",
+      "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+      "cases": 87,
+      "signatureTypeAnnotations": 12,
+      "typedGenericPartialWrappers": 12,
+      "passed": true,
+      "currentSourceQualifiedByThisCheck": false,
+      "fullPayloadLocation": "Exact JSON is preserved at the PSC0_SH1_WORKER_HARNESS_REFERENCE line in the complete log."
+    }
+  },
+  "log": {
+    "blob": "b3001bbf41d8d846f4e77a3bd764494b994c9557",
+    "sha256": "8da67cd469d51d3666580f485ea60c2c0c9c5797eeda5505b269453c56b9fe0c",
+    "utf8Bytes": 257687,
+    "characters": 257481,
+    "lines": 2286,
+    "decodedUtf8TextPreserved": true,
+    "immutableReadbackVerified": true,
+    "leadingBomPreserved": true,
+    "retrieval": "Root fetched the completed compiler job log once and retained this blob. This reviewer read the retained blob and independently recomputed its hash/size; no duplicate job-log download."
+  },
+  "preflight": {
+    "resource": {
+      "timestamp": "2026-10-09T23:55:07.8959315Z",
+      "logLine": 273,
+      "passed": true,
+      "policyId": "psc0-sh1-generated-qualification-resources/1",
+      "node": "v22.23.3",
+      "oldSpaceMiB": 8192,
+      "observedHeapLimitBytes": 8640266240,
+      "effectiveAvailableBytes": 15351889920,
+      "minimumAvailableBytes": 12884901888
+    },
+    "typescriptVersion": "7.0.2",
+    "typescriptProfile": "passed-step8",
+    "selectedRPolicy": "passed-step3",
+    "hostSyntaxAndBootstrapSourceRestrictions": "passed-step9"
+  },
+  "retainedArtifacts": [
+    {
+      "id": 11651676864,
+      "name": "psc0-sh1-ts7.0.2-9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "bytes": 464191,
+      "digest": "sha256:3c138eb9b66f63d9b8825abbb8e5c6c9bdfb38fe6fa5a28e523fcebe05c53969",
+      "createdAt": "2026-10-09T23:56:01Z",
+      "expiresAt": "2026-11-08T23:56:00Z",
+      "sourceCommit": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+      "runId": 38006688264,
+      "uploadFileCountFromLog": 44,
+      "archiveInspected": false
+    }
+  ],
+  "coldRecovery": {
+    "runId": 38006688280,
+    "workflowId": 379723916,
+    "sourceCommit": "9640e4ba5c89ebfb3dd0adf6783530212ae27409",
+    "status": "completed",
+    "conclusion": "skipped",
+    "createdAt": "2026-10-09T23:54:41Z",
+    "updatedAt": "2026-10-09T23:54:42Z",
+    "newColdRecoveryExecuted": false
+  },
+  "interpretation": [
+    "Native build, its parser/translation/erasure regression targets, checked seed, grammar/import/workspace and CLI/replay boundaries all passed in this exact run.",
+    "The current compiler closure reached source elaboration of psEraseRuntimeExprWithFuelWorker and refused with structuralRecursionArity. The earlier fold adapter nested-pattern parser refusal is not the failure reported by this run.",
+    "No successful N1 candidate or conformance receipt, C1, C2, C3, fixed-point or provider result is established. The positive flat-tail IR block was not reached.",
+    "Resource and TypeScript 7 preflight passed. The observed refusal is a source elaboration diagnostic, not a heap failure. No automatic retry, profile weakening or source correction is performed by this evidence.",
+    "The skipped cold-recovery workflow is recorded as skipped; prior protected cold qualification is neither repeated nor replaced."
+  ],
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "currentSourceClosureQualified": false,
+    "finiteLogEvidenceOnly": true
+  },
+  "agentActions": {
+    "observedRun": 38006688264,
+    "completedLogReadFromExistingBlob": true,
+    "duplicateWorkflowLogFetches": 0,
+    "unattachedEvidenceBlobsOnly": true,
+    "sourceEdits": 0,
+    "refMutations": 0,
+    "workflowDispatches": 0,
+    "compilerExecutionsOutsideExistingRun": 0,
+    "reruns": 0
+  }
+}

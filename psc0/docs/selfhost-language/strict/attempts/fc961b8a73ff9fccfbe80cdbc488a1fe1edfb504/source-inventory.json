@@ -1,0 +1,264 @@
+{
+  "kind": "actual-compiler-source-closure-inventory",
+  "sourceRef": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "sourceClosureSha256": "44331be90edf828bcb0ccc8e2ae3b45f7e7d70714b5b3722b8a6a4a4f43f456b",
+  "sourceReceiptBlob": "4fb3222220b56345871a170230aed525def5f18a",
+  "files": [
+    {
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Source.lean",
+      "blob": "1451dabae049d324b7aeb2d1b89b7bf56dea32fd"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "blob": "6543f69216532449bddb341495cada280d7f8943"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Token.lean",
+      "blob": "5bc9895dbe7a9ba9157b00f6e184da6d16af738f"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+      "blob": "335a78cad3eda53c9dd8687064002c9313901964"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+      "blob": "4a9daaf4179ca7fa74e9183e542891ec110fd5d7"
+    },
+    {
+      "path": "psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+      "blob": "9c896076032762543b57d88c0010f90ad0a066d5"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParserState.lean",
+      "blob": "e784c5836a37e522a21f67db0d52653d5ab12a57"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+      "blob": "45d4cb9ee3d20345ad51ff2e15a7cb4f78fe579b"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "blob": "8c39064e8a9c4bcda1ec9f2432ccbe0a70769574"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "blob": "e8d6ebda842dfbfcf3132f832e7630703080fa8a"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+      "blob": "03f7f576375a72e2ff6c3beaa04363f5839b7bd6"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+      "blob": "519e2ca622ea5ea7e31dba193237b2db871e6bb7"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+      "blob": "4ab23fcc1ae2ef70bd90a997319e421f5744a723"
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/Translate.lean",
+      "blob": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b"
+    },
+    {
+      "path": "psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+      "blob": "4ddfec62f2edd54be87091812dcb6add6304e3ed"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Level.lean",
+      "blob": "2607a00d69cb0299de20aecb6b94a00adc7852a2"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Expr.lean",
+      "blob": "eac8f1a8f883f87af78cc68317644c843ba40fd2"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Declaration.lean",
+      "blob": "c34c280b1c42f23138cfec79f4e448db17071952"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Abstract.lean",
+      "blob": "8ac0f21d92538502ee14fc6932eb0f48fda48a85"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Subst.lean",
+      "blob": "c8439e444e38b642043f2d18561a77a2bdd420a2"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Equality.lean",
+      "blob": "0762bd4fee3540083eb7dab3aeb70dff8d02b6c4"
+    },
+    {
+      "path": "psc0/packages/foundation/src/Ps/Foundation/List.lean",
+      "blob": "29e4e59c271c1a26604cc738a8794f9bb70a2e83"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/Basic.lean",
+      "blob": "533dd2008b773f820e7fdf87ee01d66d759576c5"
+    },
+    {
+      "path": "psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+      "blob": "35bc6d634f203eceb41666ddea9cfe8bcf204196"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/Builtin.lean",
+      "blob": "c64025ddc515c47a4d661076d779e0bccada5046"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+      "blob": "d862ba8c806595fbf11237724089bd2282af9866"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+      "blob": "b9127717d5685ae0de6e10251ba1d8d02b6e647d"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+      "blob": "38485851a30f024d973392c6c8e1d86916e31466"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+      "blob": "fcd057e60367c2fa3f9ffcdf7cf5c40a7c5d49a6"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/Resolve.lean",
+      "blob": "4dcad8f12689b21d640fe192ff81191fe506fe10"
+    },
+    {
+      "path": "psc0/packages/core/src/Ps/Core/LevelSubst.lean",
+      "blob": "48f0d7b821fe0c09e14de126cbf4df40cba7559a"
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+      "blob": "4efa1fe2e98b7482d6c85ebb9bcfe596328c3956"
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Context.lean",
+      "blob": "94f1920fc7e62bbe53f7e70d8d4466d78a0d5755"
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+      "blob": "1b81ba072e26eff9c3afbe58a945e8bf383c6f18"
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Infer.lean",
+      "blob": "25e0c00dfafb0268d6a204089a3eceb10d9bcb0f"
+    },
+    {
+      "path": "psc0/packages/environment/src/Ps/Environment/Instances.lean",
+      "blob": "75b0d66c402b2807149cd2c832207a2d311c2db3"
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/Unify.lean",
+      "blob": "9d2e7e01debd1299fc2e685ff4ecc4c593337ed5"
+    },
+    {
+      "path": "psc0/packages/meta/src/Ps/Meta/SynthInstance.lean",
+      "blob": "3d42e50aa274a988535f8f7969133df373474ae0"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Context.lean",
+      "blob": "d9501b06f0e56df2101ca950cfd518d31dd5e26e"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Literal.lean",
+      "blob": "a4f0ed94c712495b3d379374b5572a047c0c1919"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Term.lean",
+      "blob": "ff7896a864a291ffbf1eb3aa70d6004ac86d1112"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "blob": "ea8518afd0982e64d6fcfcd2320501d89e0385ec"
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "blob": "ff632f3a40b069bfead799b408af009ec9931261"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+      "blob": "a58fa183103817b9b65db45cc9e9798e6abcf4d3"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "blob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+      "blob": "857b9926a14be9e30ad2ed2ccdcd26643624d9ed"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+      "blob": "7b16c9910aba8a0ce3213fd02a34a43fa64b4d75"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+      "blob": "66b20621288b76153fa78db6c923f0c7b0c5d9ab"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+      "blob": "f31d88f0172122d4cf62d62f35f372fe89581c18"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "blob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+      "blob": "71a4231fe23c7049c0930976c383fbc60cc5c24f"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+      "blob": "49f267282ea27f978eaa522e6038d8787676994e"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "blob": "178ecf89498be6502be5f747f0c0d62eb1133420"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+      "blob": "154cc013b692a449a6a47e6e4270957856d5bc0b"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+      "blob": "b9b073b7ec341be105895817a6ddda441020e351"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "blob": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "blob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "blob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+      "blob": "9b6f62bc9b55f1d1ad2ea06a129df11d7e554e44"
+    },
+    {
+      "path": "psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+      "blob": "c88f449644e3caf966c19f01e9534345bbb8c831"
+    }
+  ]
+}

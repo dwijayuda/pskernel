@@ -16,9 +16,9 @@ def psErasureApplyStructureMinorFields
   match count with
   | Nat.zero => fun (_index : Nat) (minor : PsExpr) => Except.ok minor
   | Nat.succ remaining =>
-    let smaller : Nat -> PsExpr -> Except PsErasureError PsExpr :=
-      psErasureApplyStructureMinorFields structureName major remaining;
     fun (index : Nat) (minor : PsExpr) =>
+      let smaller : Nat -> PsExpr -> Except PsErasureError PsExpr :=
+        psErasureApplyStructureMinorFields structureName major remaining;
       match minor with
       | PsExpr.lam _ _ body _ =>
           let projection :=
@@ -69,6 +69,10 @@ def psTryLowerStructureRecursorApplication
                               | Option.some constructorInfo =>
                                   if psErasureNatNotEqual constructorInfo.numParams info.numParams then
                                     Except.error PsErasureError.unsupportedRuntimeTerm
+                                  else if psErasureNatNotEqual (psListLength constructorInfo.recursiveFields) 0 then
+                                    -- Expr erasure opens both fields and recursive hypotheses.
+                                    -- Removing fields here would leave the IH lambdas behind.
+                                    Except.ok Option.none
                                   else
                                     let expectedArity :=
                                       Nat.add info.numParams 3;
@@ -119,8 +123,8 @@ def psLowerStructureRecursorsWithFuel
   match fuel with
   | Nat.zero => fun (_expr : PsExpr) => Except.error PsErasureError.fuelExhausted
   | Nat.succ remaining =>
-    let smaller : PsExpr -> Except PsErasureError PsExpr := psLowerStructureRecursorsWithFuel environment remaining;
     fun (expr : PsExpr) =>
+      let smaller : PsExpr -> Except PsErasureError PsExpr := psLowerStructureRecursorsWithFuel environment remaining;
       match expr with
       | PsExpr.app fn arg =>
           match

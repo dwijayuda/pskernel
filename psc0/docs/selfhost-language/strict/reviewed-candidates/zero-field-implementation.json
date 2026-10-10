@@ -1,0 +1,75 @@
+{
+  "schema": "psc0-unattached-guarded-delta/1",
+  "feature": "inhabited-zero-field-structures",
+  "priorEmptyImplementationManifest": "5360abde1e14fe714a7d1105b28c5131f79d355d",
+  "files": [
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+      "expectedBaseBlob": "969eb9ec1b18e9ab42a1bfdf4d385e39a7fc56a3",
+      "deltaBaseBlob": "760b0ee96b33e31e37eee2f8e7049b4d72cd8fff",
+      "candidateBlob": "e4ffc2f29643145ff5e5eea21e8ee59f000414bd",
+      "edits": [
+        {
+          "before": "                      match psParseListReverse fields.value with\n                      | [] =>\n                          match psTokenCursorPeek fields.cursor with\n                          | Option.none =>\n                              Except.error\n                                (PsParseError.unexpectedEnd\n                                  \"structure field\")\n                          | Option.some token =>\n                              Except.error\n                                (PsParseError.expectedText\n                                  \"structure field\"\n                                  token.text\n                                  token.span)\n                      | List.cons lastField _ =>\n                          match lastField with\n                          | Prod.mk lastHead _ =>\n                              Except.ok {\n                                value :=\n                                  PsSyntaxDeclaration.structureDecl\n                                    name.value\n                                    params.value\n                                    fields.value\n                                    {\n                                      start := keyword.token.span.start\n                                      stop := lastHead.span.stop\n                                    }\n                                cursor := fields.cursor\n                              }\n",
+          "after": "                      let stop : PsSourcePos :=\n                        match psParseListReverse fields.value with\n                        | List.nil => afterWhere.token.span.stop\n                        | List.cons lastField _ =>\n                            match lastField with\n                            | Prod.mk lastHead _ => lastHead.span.stop;\n                      Except.ok {\n                        value :=\n                          PsSyntaxDeclaration.structureDecl\n                            name.value\n                            params.value\n                            fields.value\n                            {\n                              start := keyword.token.span.start\n                              stop := stop\n                            }\n                        cursor := fields.cursor\n                      }\n"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+      "expectedBaseBlob": "e91415c66fec9115a281c93c9459189bb919f121",
+      "deltaBaseBlob": "48a734bb12c3bf9a8314a20dfb0dff87541bc9ff",
+      "candidateBlob": "e8d6ebda842dfbfcf3132f832e7630703080fa8a",
+      "edits": [
+        {
+          "before": "                          match fields.value with\n                          | [] =>\n                              match psTokenCursorPeek fields.cursor with\n                              | Option.none =>\n                                  Except.error\n                                    (PsParseError.unexpectedEnd\n                                      \"structure field\")\n                              | Option.some token =>\n                                  Except.error\n                                    (PsParseError.expectedText\n                                      \"structure field\"\n                                      token.text\n                                      token.span)\n                          | _ =>\n                              match psTokenCursorExpectText\n                                  fields.cursor\n                                  \"}\" with\n                              | Except.error error => Except.error error\n                              | Except.ok close =>\n                                  let finalCursor := close.cursor;\n                                  Except.ok {\n                                    value :=\n                                      PsSyntaxDeclaration.structureDecl\n                                        name.value\n                                        params.value\n                                        fields.value\n                                        {\n                                          start := keyword.token.span.start\n                                          stop := close.token.span.stop\n                                        }\n                                    cursor := finalCursor\n                                  }\n",
+          "after": "                          match psTokenCursorExpectText\n                              fields.cursor\n                              \"}\" with\n                          | Except.error error => Except.error error\n                          | Except.ok close =>\n                              let finalCursor := close.cursor;\n                              Except.ok {\n                                value :=\n                                  PsSyntaxDeclaration.structureDecl\n                                    name.value\n                                    params.value\n                                    fields.value\n                                    {\n                                      start := keyword.token.span.start\n                                      stop := close.token.span.stop\n                                    }\n                                cursor := finalCursor\n                              }\n"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+      "expectedBaseBlob": "8a8005a2ae0aa6564e075e3b224b432295c6bf05",
+      "deltaBaseBlob": "a388d013dbf6c9270ffa91997512f672da6aabff",
+      "candidateBlob": "ff632f3a40b069bfead799b408af009ec9931261",
+      "edits": [
+        {
+          "before": "  match fields with\n  | List.nil =>\n      Except.error PsElabError.unsupportedTerm\n  | List.cons _ _ =>\n      let constructorName : PsSyntaxName :=\n        PsSyntaxName.mk\n          (List.cons \"mk\" List.nil)\n          span;\n      let constructor : PsSyntaxInductiveConstructor :=\n        PsSyntaxInductiveConstructor.mk\n          constructorName\n          fields\n          span;\n      psElabInductiveDeclaration\n        environment\n        name\n        params\n        Option.none\n        (List.cons constructor List.nil)\n        true\n",
+          "after": "  let constructorName : PsSyntaxName :=\n    PsSyntaxName.mk\n      (List.cons \"mk\" List.nil)\n      span;\n  let constructor : PsSyntaxInductiveConstructor :=\n    PsSyntaxInductiveConstructor.mk\n      constructorName\n      fields\n      span;\n  psElabInductiveDeclaration\n    environment\n    name\n    params\n    Option.none\n    (List.cons constructor List.nil)\n    true\n"
+        }
+      ],
+      "reversible": true
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "expectedBaseBlob": "28e14f991df68c4a7d49f09120a42c85c919d6a8",
+      "deltaBaseBlob": "ecc7284e34b476e18c8936fade65dc9e6eaccb4a",
+      "candidateBlob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3",
+      "edits": [
+        {
+          "before": "          | Option.none =>\n              match psErasureLookupName scope.declarationNames name with\n              | Option.some known => Except.ok (PsVerifiedIrExpr.var known)\n              | Option.none =>\n                  if psNameEq name psBoolTrueName then\n                    Except.ok\n                      (PsVerifiedIrExpr.literal\n                        (PsVerifiedIrLiteral.bool true))\n                  else if psNameEq name psBoolFalseName then\n                    Except.ok\n                      (PsVerifiedIrExpr.literal\n                        (PsVerifiedIrLiteral.bool false))\n                  else if psNameEq name psUnitUnitName then\n                    Except.ok\n                      (PsVerifiedIrExpr.literal\n                        PsVerifiedIrLiteral.unit)\n                  else if psNameEq name psNatZeroName then\n                    Except.ok (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))\n                  else\n                    Except.error (PsErasureError.unknownConstant name)\n",
+          "after": "          | Option.none =>\n              -- A zero-field, non-generic structure value is a bare constructor.\n              -- Reuse the same arity/field lowering as applied structure constructors.\n              match psEraseRuntimeStructureApplication environment scope (smaller scope)\n                  (PsErasureAppView.mk expr List.nil) with\n              | Except.error error => Except.error error\n              | Except.ok structureValue =>\n                  match structureValue with\n                  | Option.some value => Except.ok value\n                  | Option.none =>\n                      match psErasureLookupName scope.declarationNames name with\n                      | Option.some known => Except.ok (PsVerifiedIrExpr.var known)\n                      | Option.none =>\n                          if psNameEq name psBoolTrueName then\n                            Except.ok\n                              (PsVerifiedIrExpr.literal\n                                (PsVerifiedIrLiteral.bool true))\n                          else if psNameEq name psBoolFalseName then\n                            Except.ok\n                              (PsVerifiedIrExpr.literal\n                                (PsVerifiedIrLiteral.bool false))\n                          else if psNameEq name psUnitUnitName then\n                            Except.ok\n                              (PsVerifiedIrExpr.literal\n                                PsVerifiedIrLiteral.unit)\n                          else if psNameEq name psNatZeroName then\n                            Except.ok (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))\n                          else\n                            Except.error (PsErasureError.unknownConstant name)\n"
+        }
+      ],
+      "reversible": true
+    }
+  ],
+  "contract": {
+    "oneNullaryConstructor": true,
+    "recordValue": "{} under explicit expected structure type",
+    "kernelProviderChanges": false,
+    "termElaborationChanges": false,
+    "astIrModelChanges": false,
+    "uninhabitedFixturesUnchanged": true,
+    "runtimeFixture12_24_21Unchanged": true,
+    "erasureCompletion": "Bare nullary structure constructor reuses existing structure application lowering with empty argument view; previous fallback produced unknownConstant."
+  },
+  "validation": {
+    "exactForwardReverseText": true,
+    "executed": false,
+    "qualified": false,
+    "refsChanged": false
+  }
+}

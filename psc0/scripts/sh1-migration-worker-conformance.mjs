@@ -166,7 +166,7 @@ function ownedApi(compiler, valueTag) {
   };
 }
 
-function runF2Cases(compiler, valueTag) {
+function runF2Cases(compiler, valueTag, declarationNamesSchema) {
   const api = ownedApi(compiler, valueTag);
   const {
     fail, list, array, plain, ok, some, error, name, nameText, declName,
@@ -503,6 +503,25 @@ function runF2Cases(compiler, valueTag) {
       name: 'keptDefinition', typeArgumentsRev: nil, runtimeParameters: list(['keptRuntime']),
     }),
   };
+  // These nil-input metadata workers preserve the unprepared seeded scope.
+  // Current name indexes carry an empty declaration-entry ABI index; selected R
+  // predates that field. Complete only the explicit historical observation.
+  // Same-compiler scope equality remains exact, and populated entries refuse.
+  const unpreparedScopeObservation = (value) => {
+    const observation = plain(value);
+    const names = observation.declarationNames;
+    const current = declarationNamesSchema === 'entry-metadata/1';
+    assert.deepEqual(Object.keys(names),
+      current ? ['byCore', 'byOutput', 'count', 'entries'] : ['byCore', 'byOutput', 'count'],
+      fail('UNPREPARED_SCOPE_DECLARATION_NAMES_SCHEMA'));
+    if (current) {
+      assert.deepEqual(names.entries, { tag: 'empty' },
+        fail('UNPREPARED_SCOPE_DECLARATION_ENTRIES_EMPTY'));
+    } else {
+      names.entries = { tag: 'empty' };
+    }
+    return observation;
+  };
   const namedIr = (text) => compiler.PsVerifiedIrType.named(text, nil);
   const irRecordA = compiler.psIrCheckMakeStructure('record_A', nil,
     list([compiler.psIrCheckMakeStructureField('value', natIr)]));
@@ -572,7 +591,7 @@ function runF2Cases(compiler, valueTag) {
       list([keptRecordB, keptRecordA])), 'STRUCTURES_EMPTY');
     same(result.scope, seededScope, 'STRUCTURES_EMPTY_SCOPE');
     same(result.ir, list([keptRecordA, keptRecordB]), 'STRUCTURES_EMPTY_REVERSE');
-    return { ir: plain(result.ir), scope: plain(result.scope) };
+    return { ir: plain(result.ir), scope: unpreparedScopeObservation(result.scope) };
   });
   observe('structures-mixed-stream', () => {
     const result = ok(compiler.psPrepareRuntimeStructures(
@@ -647,7 +666,7 @@ function runF2Cases(compiler, valueTag) {
       list([keptChoiceB, keptChoiceA])), 'INDUCTIVES_EMPTY');
     same(result.scope, seededScope, 'INDUCTIVES_EMPTY_SCOPE');
     same(result.ir, list([keptChoiceA, keptChoiceB]), 'INDUCTIVES_EMPTY_REVERSE');
-    return { ir: plain(result.ir), scope: plain(result.scope) };
+    return { ir: plain(result.ir), scope: unpreparedScopeObservation(result.scope) };
   });
   observe('inductives-mixed-stream', () => {
     const result = ok(compiler.psPrepareRuntimeInductives(
@@ -749,11 +768,15 @@ function runF2Cases(compiler, valueTag) {
 
 // The single-runtime entry point is suitable for an existing qualification pass.
 // The separate ABI gate receives its already prepared declarations and exact IR.
-export function runMigrationWorkerConformance(compiler, valueTag) {
+export function runMigrationWorkerConformance(compiler, valueTag, {
+  declarationNamesSchema = 'entry-metadata/1',
+} = {}) {
+  assert(['entry-metadata/1', 'selected-r-names-only/1'].includes(declarationNamesSchema),
+    'PSC0_SH1_MIGRATION_DECLARATION_NAMES_SCHEMA');
   assert.equal(typeof valueTag, 'function', 'PSC0_SH1_MIGRATION_TAG_READER');
   assertMigrationRequiredExports(compiler, migrationRequiredExports, 'F1_F2');
   const f1 = runSh1FreshNameCases(compiler);
-  const f2 = runF2Cases(compiler, valueTag);
+  const f2 = runF2Cases(compiler, valueTag, declarationNamesSchema);
   assert.equal(f1.workerCases, 44, 'PSC0_SH1_MIGRATION_F1_WORKER_COUNT');
   assert.equal(f1.wrapperCases, 7, 'PSC0_SH1_MIGRATION_F1_WRAPPER_COUNT');
   assert.equal(f1.observations.length + f2.observations.length, 87,
@@ -769,6 +792,7 @@ export function runMigrationWorkerConformance(compiler, valueTag) {
       eachCompilerOwnsAllTaggedInputs: true,
       irRecordsUseExistingCompilerFactories: true,
       copiedRecordsRetainOwningCompilerBrands: true,
+      declarationNamesObservation: 'unprepared-empty-entry-index/1; explicit selected-R completion only',
       hostStructuralFixtureRecords: [
         'PsErasureNameState', 'PsTsSymbolMapState', 'PsErasureCurrentDefinition',
       ],
@@ -788,15 +812,20 @@ export function runMigrationWorkerConformance(compiler, valueTag) {
 }
 
 // R and F must already be authenticated and loaded by the caller. The reports
-// compared here contain no values owned by either generated compiler.
+// compared here contain no values owned by either generated compiler. The caller
+// may select the names-only schema only for its authenticated historical R;
+// both sides otherwise require the current schema, and after always does.
 export function compareMigrationWorkerConformance({
   before, after, beforeCompilerSha256, afterCompilerSha256, valueTag,
+  beforeDeclarationNamesSchema = 'entry-metadata/1',
 }) {
   assert.notEqual(before, after, 'PSC0_SH1_MIGRATION_DISTINCT_COMPILERS');
   for (const [label, hash] of Object.entries({ beforeCompilerSha256, afterCompilerSha256 })) {
     assert.match(hash, /^[a-f0-9]{64}$/u, 'PSC0_SH1_MIGRATION_' + label);
   }
-  const beforeReport = runMigrationWorkerConformance(before, valueTag);
+  const beforeReport = runMigrationWorkerConformance(before, valueTag, {
+    declarationNamesSchema: beforeDeclarationNamesSchema,
+  });
   const afterReport = runMigrationWorkerConformance(after, valueTag);
   assert.deepEqual(afterReport, beforeReport, 'PSC0_SH1_MIGRATION_BEHAVIOR_CORRESPONDENCE');
   return {

@@ -1,12 +1,26 @@
 # PSC0 self-host language: findings and decisions
 
+## Current strict SH/1 disposition
+
+The declared bounded PSC0-SH/1 source, runtime and TypeScript target are qualified at [compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`](https://github.com/dwijayuda/pskernel/commit/1fa5559a72b293defc56ef7e7020cf82d4b44b79). The [release qualification record](strict/release-qualification.json) binds the exact compiler evidence, eight independently reviewed source and composition argument packets, all **33 correspondence dispositions** and **27 stage dispositions**, and separate provider acceptance.
+
+[Original run 38015134511](https://github.com/dwijayuda/pskernel/actions/runs/38015134511) remains cancelled; it owns the retained completed native/N1/C1 evidence and named successful prerequisite gates. [Continuation 38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), orchestrated at `43fa000c4adbc9d4754e20c213595c1449f00961`, completed C2/C3 and their conformance gates using the same compiled source and unchanged 48-file recipe, then failed on native IR pass-marker extraction in the evidence binder. Its failure and skipped provider remain recorded.
+
+[Evidence-completion run 38027413274](https://github.com/dwijayuda/pskernel/actions/runs/38027413274), orchestrated at `719f5ec4225baf51d1969cc3b5e4cbc6959fad4a`, authenticated both archives and all 446 imported files, applied the reviewed `slice(pass.length)` binder correction as a separate evidence producer, and completed the original qualification construction without rebuilding any generation or repeating conformance. The compiled checkout and its original 48 recipe inputs remained unchanged. Compiler job `114141103218` completed evidence binding and the complete 135-file catalog with 24 exact returned JSON values. Independent provider job `114141265302` accepted all four deduplicated admission streams covering eight C2/C3 roles. The complete four-product C2/C3 tuple matches, and N1/C2/C3 TypeScript and JavaScript agree. Final 33/27 dispositions are explicitly bound to these exact receipts and their declared source arguments in the release record.
+
+Qualification applies to the explicit `psCompilerSh1TypeScriptSources` entry and the recorded strict development/qualification lane. Generic compiler APIs do not implicitly select strict SH/1, and `selectedByPsconfig` remains false. Reviewed source arguments retain their declared canonical-input, primitive, platform and successful-allocation premises. Finite conformance, original-IR typing, fixed-point equality and provider admission retain their separate meanings; `generalPreservationProven` and the original narrow producer flags remain false.
+
+R remains selected. Handwritten `.lean` remains authoritative through the owned frontend, current `.ps` uses only the `ps-0.9-r3` bounded subset, and current development/recovery uses TypeScript 7.0.2. Node 22.23.3, Lean 4.34.0 and the independently pinned provider are unchanged. Earlier attempt requests and pending statuses below describe their recorded historical checkpoints; they do not restart completed work. The linked release record defines the current strict disposition.
+
+## Earlier research and practical checkpoints
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 Start with [CURRENT.md](CURRENT.md) for the current source forms, daily commands,
 qualification boundary and remaining limits. This file retains the research
 baseline and its evidence.
 
-Status, updated 2026-10-09: R2's new-only grammar and parameter-projection repair
+Historical practical status, recorded 2026-10-09: R2's new-only grammar and parameter-projection repair
 are **compiler-qualified and independently provider-accepted**. Cold source
 recovery is verified, and the exact R successor is explicitly selected by
 [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6).

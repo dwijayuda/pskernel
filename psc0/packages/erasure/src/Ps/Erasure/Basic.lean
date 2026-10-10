@@ -23,8 +23,8 @@ def psErasureIndexBucket (Value : Type) (fuel : Nat) :
       | PsErasureNameIndex.bucket entries => entries
       | _ => List.nil
   | Nat.succ remaining =>
-      let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) := psErasureIndexBucket Value remaining;
       fun (index : PsErasureNameIndex Value) (hash : Nat) =>
+        let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) := psErasureIndexBucket Value remaining;
         match index with
         | PsErasureNameIndex.branch left right =>
             if Nat.beq (Nat.mod hash 2) 0 then smaller left (Nat.div hash 2)
@@ -37,8 +37,8 @@ def psErasureIndexSet (Value : Type) (fuel : Nat) :
   | Nat.zero => fun (_index : PsErasureNameIndex Value) (_hash : Nat) (entries : List (Prod PsName Value)) =>
       PsErasureNameIndex.bucket entries
   | Nat.succ remaining =>
-      let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) -> PsErasureNameIndex Value := psErasureIndexSet Value remaining;
       fun (index : PsErasureNameIndex Value) (hash : Nat) (entries : List (Prod PsName Value)) =>
+        let smaller : PsErasureNameIndex Value -> Nat -> List (Prod PsName Value) -> PsErasureNameIndex Value := psErasureIndexSet Value remaining;
         let left : PsErasureNameIndex Value := match index with
           | PsErasureNameIndex.branch value _ => value
           | _ => PsErasureNameIndex.empty;
@@ -73,14 +73,27 @@ def psErasureIndexPrepend (Value : Type) (entries : List (Prod PsName Value)) : 
         match entry with
         | Prod.mk name value => psErasureIndexInsert Value (smaller tail) name value
 
+inductive PsErasedBinderKind where
+  | type
+  | proof
+  | runtime
+
+-- Flat declaration entries are distinct from canonical unary function values.
+-- These slots describe the checked declaration before call-site substitution.
+structure PsErasureEntryInfo where
+  binders : List PsErasedBinderKind
+  runtimeArity : Nat
+  typeArity : Nat
+
 structure PsErasureDeclarationNames where
   byCore : PsErasureNameIndex String
   byOutput : PsErasureNameIndex Bool
   count : Nat
+  entries : PsErasureNameIndex PsErasureEntryInfo
 
 def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsErasureDeclarationNames :=
   match entries with
-  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0
+  | List.nil => PsErasureDeclarationNames.mk PsErasureNameIndex.empty PsErasureNameIndex.empty 0 PsErasureNameIndex.empty
   | List.cons entry rest =>
       let tail := psErasureDeclarationNameIndex rest;
       match entry with
@@ -88,12 +101,7 @@ def psErasureDeclarationNameIndex (entries : List (Prod PsName String)) : PsEras
           (psErasureIndexInsert String tail.byCore name value)
           (psErasureIndexInsert Bool tail.byOutput (PsName.str PsName.anonymous value) true)
           (Nat.succ tail.count)
-
-
-inductive PsErasedBinderKind where
-  | type
-  | proof
-  | runtime
+          tail.entries
 
 inductive PsErasureError where
   | fuelExhausted
@@ -215,6 +223,9 @@ def psErasureLookupNat
 def psErasureLookupName (entries : PsErasureDeclarationNames) (name : PsName) : Option String :=
   psErasureIndexFind String entries.byCore name
 
+def psErasureLookupEntry (entries : PsErasureDeclarationNames) (name : PsName) : Option PsErasureEntryInfo :=
+  psErasureIndexFind PsErasureEntryInfo entries.entries name
+
 def psErasureLookupStructure (entries : PsErasureNameIndex PsRuntimeStructureInfo) (name : PsName) : Option PsRuntimeStructureInfo :=
   psErasureIndexFind PsRuntimeStructureInfo entries name
 
@@ -291,6 +302,93 @@ def psErasureClassifyBinder
       else
         PsErasedBinderKind.runtime
 
+-- Mirror psEraseOpenDefinition's aligned raw forall/lambda prefix. In particular,
+-- do not weak-head normalize the value or turn an instantiated result arrow into
+-- another declaration parameter. Structure-recursor lowering preserves this prefix.
+def psErasureEntryInfoWithFuel
+    (environment : PsEnvironment) (fuel : Nat) :
+    PsLocalContext -> PsExpr -> PsExpr -> Except PsErasureError PsErasureEntryInfo :=
+  match fuel with
+  | Nat.zero =>
+      fun (_context : PsLocalContext) (_type : PsExpr) (_value : PsExpr) =>
+        Except.error PsErasureError.fuelExhausted
+  | Nat.succ remaining =>
+      fun (context : PsLocalContext) (type : PsExpr) (value : PsExpr) =>
+        match type with
+        | PsExpr.forallE name domain typeBody binder =>
+            match value with
+            | PsExpr.lam _ _ valueBody _ =>
+                -- Construct the smaller worker only when this prefix step is used.
+                let smaller : PsLocalContext -> PsExpr -> PsExpr -> Except PsErasureError PsErasureEntryInfo :=
+                  psErasureEntryInfoWithFuel environment remaining;
+                let kind := psErasureClassifyBinder environment context domain;
+                let pushed := psLocalPushBinding context name domain binder;
+                let openedParameter := PsExpr.fvar pushed.id;
+                -- Only the value's lambda spine is inspected. Replacing bound
+                -- variables by fresh free variables cannot create or remove a lambda,
+                -- so do not traverse the entire value body again for metadata.
+                match smaller pushed.context
+                    (psExprInstantiate1 typeBody openedParameter)
+                    valueBody with
+                | Except.error error => Except.error error
+                | Except.ok tail =>
+                    let runtimeArity : Nat :=
+                      match kind with
+                      | PsErasedBinderKind.runtime => Nat.succ tail.runtimeArity
+                      | _ => tail.runtimeArity;
+                    let typeArity : Nat :=
+                      match kind with
+                      | PsErasedBinderKind.type => Nat.succ tail.typeArity
+                      | _ => tail.typeArity;
+                    Except.ok
+                      (PsErasureEntryInfo.mk
+                        (List.cons kind tail.binders) runtimeArity typeArity)
+            | _ => Except.ok (PsErasureEntryInfo.mk List.nil 0 0)
+        | _ => Except.ok (PsErasureEntryInfo.mk List.nil 0 0)
+
+def psErasureAddDeclarationEntry
+    (environment : PsEnvironment) (name : PsName) (type value : PsExpr)
+    (entries : PsErasureNameIndex PsErasureEntryInfo) :
+    Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
+  -- The emitted declaration loop drops these definitions before opening binders.
+  if psErasureIsProp environment psLocalEmpty type then Except.ok entries
+  else
+    match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
+    | Except.error error => Except.error error
+    | Except.ok info =>
+        Except.ok (psErasureIndexInsert PsErasureEntryInfo entries name info)
+
+def psErasureDeclarationEntryIndex
+    (environment : PsEnvironment) (declarations : List PsDeclaration) :
+    Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
+  match declarations with
+  | List.nil => Except.ok PsErasureNameIndex.empty
+  | List.cons declaration rest =>
+      match psErasureDeclarationEntryIndex environment rest with
+      | Except.error error => Except.error error
+      | Except.ok tail =>
+          match declaration with
+          | PsDeclaration.definitionDecl name _ type value =>
+              psErasureAddDeclarationEntry environment name type value tail
+          | PsDeclaration.partialDecl name _ type value =>
+              psErasureAddDeclarationEntry environment name type value tail
+          | _ => Except.ok tail
+
+def psErasurePrepareDeclarationEntries
+    (environment : PsEnvironment) (declarations : List PsDeclaration)
+    (scope : PsErasureScope) : Except PsErasureError PsErasureScope :=
+  match psErasureDeclarationEntryIndex environment declarations with
+  | Except.error error => Except.error error
+  | Except.ok entries =>
+      let names := PsErasureDeclarationNames.mk
+        scope.declarationNames.byCore scope.declarationNames.byOutput
+        scope.declarationNames.count entries;
+      Except.ok
+        (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
+          scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
+          scope.runtimeStructures scope.runtimeStructureConstructors
+          scope.runtimeExpressions scope.currentDefinition)
+
 def psErasureNatBetween (lower : Nat) (value : Nat) (upper : Nat) : Bool :=
   if Nat.ble lower value then Nat.ble value upper else false
 
@@ -318,8 +416,8 @@ def psErasureSafeStringFromWithFuel (fuel : Nat) : String -> Nat -> String -> St
   match fuel with
   | Nat.zero => fun (_raw : String) (_position : Nat) (mapped : String) => mapped
   | Nat.succ remaining =>
-      let smaller : String -> Nat -> String -> String := psErasureSafeStringFromWithFuel remaining;
       fun (raw : String) (position : Nat) (mapped : String) =>
+        let smaller : String -> Nat -> String -> String := psErasureSafeStringFromWithFuel remaining;
         if String.Internal.atEnd raw (String.Pos.Raw.mk position) then mapped
         else
           let char := String.Internal.get raw (String.Pos.Raw.mk position);
@@ -401,10 +499,10 @@ def psErasureExprListAtWorker
         | [] => Option.none
         | value :: _ => Option.some value
   | nextIndex + 1 =>
-      let smaller :
-          List PsExpr -> Option PsExpr :=
-        psErasureExprListAtWorker nextIndex;
       fun (values : List PsExpr) =>
+        let smaller :
+            List PsExpr -> Option PsExpr :=
+          psErasureExprListAtWorker nextIndex;
         match values with
         | [] => Option.none
         | _ :: rest => smaller rest
@@ -519,9 +617,9 @@ def psEraseRuntimeTypeWithFuelWorker
   | Nat.zero =>
       fun (_scope : PsErasureScope) (_type : PsExpr) => Except.error PsErasureError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrType :=
-        psEraseRuntimeTypeWithFuelWorker environment remaining;
       fun (scope : PsErasureScope) (type : PsExpr) =>
+        let smaller : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrType :=
+          psEraseRuntimeTypeWithFuelWorker environment remaining;
         let value :=
           psWhnf
             environment
@@ -614,17 +712,12 @@ def psEraseRuntimeTypeWithFuelWorker
                             (PsExpr.fvar pushed.id)) with
                     | Except.error error => Except.error error
                     | Except.ok result =>
-                        match result with
-                        | .function parameters finalResult =>
-                            Except.ok
-                              (PsVerifiedIrType.function
-                                (List.cons parameter parameters)
-                                finalResult)
-                        | _ =>
-                            Except.ok
-                              (PsVerifiedIrType.function
-                                [parameter]
-                                result)
+                        -- Function values use unary groups, including beneath named
+                        -- type arguments. This shape commutes with type substitution.
+                        Except.ok
+                          (PsVerifiedIrType.function
+                            [parameter]
+                            result)
             | _ =>
                 Except.ok PsVerifiedIrType.unknown
         | _ =>

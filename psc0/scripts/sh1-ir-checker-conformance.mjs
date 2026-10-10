@@ -4,7 +4,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { inventoryOriginalIr } from './original-ir-inventory.mjs';
-import { loadGeneratedCompiler, stripBootstrapImports } from './sh1-source-snapshot.mjs';
+import { loadGeneratedCompiler } from './sh1-source-snapshot.mjs';
 import { compileTypeScript, sha256, unwrap, valueTag } from './sh1-capabilities.mjs';
 
 function fixtureModel(c) {
@@ -79,6 +79,48 @@ function fixtureModel(c) {
   const array = intrinsic('arrayPush', [
     intrinsic('arrayEmptyWithCapacity', [natural(1)], [nat]), natural(7),
   ], [nat]);
+  const emptyLayouts = [inductive('Empty', []), inductive('EmptyBox', [], ['T0'])];
+  const emptyMatch = (scrutinee, owner = 'Empty', types = []) =>
+    E.matchE(owner, list(types), scrutinee, list([]));
+  const emptyDeclarations = [
+    declaration('eliminateEmptyNat', nat, emptyMatch(variable('empty')), [['empty', named('Empty')]]),
+    declaration('eliminateEmptyFunction', fnNat, emptyMatch(variable('empty')), [['empty', named('Empty')]]),
+    declaration('eliminateEmptyGeneric', T0, emptyMatch(variable('empty'), 'EmptyBox', [T0]),
+      [['empty', named('EmptyBox', [T0])]], ['T0']),
+    declaration('eliminateEmptyTypedCall', nat,
+      call(E.letE('emptyResult', fnNat, emptyMatch(variable('empty')), variable('emptyResult')), [natural(7)]),
+      [['empty', named('Empty')]]),
+    declaration('eliminateEmptyComputed', nat, emptyMatch(call('makeEmpty', [])),
+      [['makeEmpty', functionType([], named('Empty'))]]),
+  ];
+  // Deliberately flat original-IR entries exercise the positive tail recognizer.
+  // They share the existing accepted module, checker and TypeScript compilation.
+  const tailList = named('TailList');
+  const tailLayout = inductive('TailList', [
+    ['nil', []], ['cons', [['head', nat], ['tail', tailList]]],
+  ]);
+  const optimizedTailDeclarations = [
+    declaration('optimizedTailSwap', nat,
+      E.ifE(intrinsic('natEq', [variable('fuel'), natural(0)]), variable('left'),
+        E.letE('nextFuel', nat, intrinsic('natSub', [variable('fuel'), natural(1)]),
+          call('optimizedTailSwap', [variable('nextFuel'), variable('right'), variable('left')]))),
+      [['fuel', nat], ['left', nat], ['right', nat]]),
+    declaration('optimizedTailFuel', nat,
+      E.ifE(intrinsic('natEq', [variable('fuel'), natural(0)]), variable('accumulator'),
+        E.letE('nextFuel', nat, intrinsic('natSub', [variable('fuel'), natural(1)]),
+          E.letE('again', fnNat,
+            lambda([['nextAccumulator', nat]], nat,
+              call('optimizedTailFuel', [variable('nextFuel'), variable('nextAccumulator')])),
+            call('again', [intrinsic('natAdd', [variable('accumulator'), natural(1)])])))),
+      [['fuel', nat], ['accumulator', nat]]),
+    declaration('optimizedTailReverse', tailList,
+      E.matchE('TailList', list([]), variable('items'), list([
+        alternative('nil', [], variable('accumulator')),
+        alternative('cons', [binding('head', 'headValue', nat), binding('tail', 'tailValue', tailList)],
+          call('optimizedTailReverse', [variable('tailValue'),
+            constructor('TailList', 'cons', [['head', variable('headValue')], ['tail', variable('accumulator')]])])),
+      ])), [['items', tailList], ['accumulator', tailList]]),
+  ];
   const positive = module([...base,
     declaration('fromLet', nat, call(E.letE('callee', fnNat, plusOne, variable('callee')), [natural(5)])),
     declaration('fromIf', nat, call(E.ifE(truth(true), variable('functionValue'), plusOne), [natural(5)])),
@@ -122,7 +164,10 @@ function fixtureModel(c) {
     declaration('fromCharacter', string, intrinsic('stringPush', [
       text('x'), intrinsic('charOfNat', [natural(65)]),
     ])),
-  ]);
+    ...emptyDeclarations,
+    declaration('zeroFieldRecordValue', named('RecordUnit'), record('RecordUnit', [])),
+    ...optimizedTailDeclarations,
+  ], [...layouts, structure('RecordUnit', [])], [...choices, ...emptyLayouts, tailLayout]);
   const single = (body, result = nat, params = [], types = []) =>
     module([...base, declaration('rejectedResult', result, body, params, types)]);
   const negative = [
@@ -169,10 +214,15 @@ function fixtureModel(c) {
       [['value', primitive('uint32')]]), 'scalar-capability-unqualified'],
     ['external-import-ABI', module([declaration('importedUse', nat, variable('external'))], [], [],
       [c.psIrCheckMakeExternalImport('external', 'unqualified-module', 'external', nat)]), 'external-import-abi-unqualified'],
-    ['empty-layout', module([], [], [inductive('Empty', [])]), 'empty-layout-unsupported'],
-    ['empty-match', module([declaration('eliminate', nat,
-      E.matchE('Empty', list([]), variable('empty'), list([])), [['empty', named('Empty')]])],
-      [], [inductive('Empty', [])]), 'empty-match-unsupported'],
+    ['empty-match-missing-result-hint', module([declaration('eliminate', nat,
+      call(emptyMatch(variable('empty')), [natural(1)]), [['empty', named('Empty')]])],
+      [], emptyLayouts), 'empty-match-result-type-required'],
+    ['empty-match-wrong-scrutinee', module([declaration('eliminate', nat,
+      emptyMatch(natural(1)))], [], emptyLayouts), 'type-mismatch'],
+    ['empty-match-type-argument-arity', module([declaration('eliminate', nat,
+      emptyMatch(variable('empty'), 'EmptyBox'), [['empty', named('EmptyBox', [nat])]])],
+      [], emptyLayouts), 'layout-type-arity'],
+    ['empty-match-inhabited-layout', single(match([])), 'match-coverage'],
     ['runtime-layout-name-collision', module([], [structure('Array', [])], []), 'duplicate-layout-name'],
   ];
   return { positive, negative, single, natural, E, L, nat, list, module, declaration };
@@ -201,8 +251,23 @@ function assertBehavior(runtime) {
     assert.equal(runtime.shadowNestedTail(fuel, 7n), 7n + 2n * fuel, 'PSC0_SH1_IR_SHADOW_NESTED_TAIL');
     observations++;
   }
+  assert.deepEqual(Object.getOwnPropertyNames(runtime.zeroFieldRecordValue), []);
+  const recordBrands = Object.getOwnPropertySymbols(runtime.zeroFieldRecordValue);
+  assert.equal(recordBrands.length, 1);
+  assert.equal(runtime.zeroFieldRecordValue[recordBrands[0]], true);
+  observations++;
+  let scrutineeCalls = 0;
+  const scrutineeFailure = new Error('empty scrutinee probe');
+  assert.throws(() => runtime.eliminateEmptyComputed(() => {
+    scrutineeCalls++; throw scrutineeFailure;
+  }), (error) => error === scrutineeFailure, 'PSC0_SH1_IR_EMPTY_SCRUTINEE_PRECEDENCE');
+  assert.equal(scrutineeCalls, 1, 'PSC0_SH1_IR_EMPTY_SCRUTINEE_ONCE');
+  observations++;
   return {
     status: 'pass', observations, exhaustiveForAllInputs: false,
+    zeroFieldRecord: { ownStringFields: 0, ownBrandSymbols: 1, inhabited: true },
+    emptyScrutinee: { callbackCalls: scrutineeCalls, propagatedOriginalFailure: true,
+      noEmptyInhabitantConstructed: true },
     letScopeCases: [
       { name: 'shadowOldScope', observations: 8 },
       { name: 'shadowWrappedCall', observations: 8 },
@@ -210,6 +275,145 @@ function assertBehavior(runtime) {
       { name: 'shadowNestedTail', observations: tailFuels.length },
     ],
   };
+}
+
+// Positive optimizer observations on the exact accepted module and its one JS product.
+// These do not contribute to the preserved behavior.observations counter.
+function observeOptimizedTail(originalIr, runtime, typeScript, declarationText, javascriptSha256) {
+  const items = (value) => {
+    const values = [], seen = new Set();
+    while (valueTag(value) === 'cons') {
+      assert(!seen.has(value) && values.length < 1024, 'PSC0_SH1_TAIL_OWNED_LIST');
+      seen.add(value); values.push(value.head); value = value.tail;
+    }
+    assert.equal(valueTag(value), 'nil', 'PSC0_SH1_TAIL_OWNED_LIST_END');
+    return values;
+  };
+  const typeName = (type) => {
+    if (valueTag(type) === 'primitive') {
+      assert.equal(valueTag(type.name), 'nat'); return 'nat';
+    }
+    assert.equal(valueTag(type), 'named');
+    assert.equal(type.name, 'TailList');
+    assert.equal(items(type.arguments).length, 0);
+    return type.name;
+  };
+  const layouts = items(originalIr.inductives).filter((item) => item.name === 'TailList');
+  assert.equal(layouts.length, 1);
+  const layout = { name: layouts[0].name, typeParameters: items(layouts[0].typeParameters).length,
+    constructors: items(layouts[0].constructors).map((ctor) => ({ name: ctor.name,
+      fields: items(ctor.fields).map((field) => ({ name: field.name, type: typeName(field.type) })) })) };
+  assert.deepEqual(layout, { name: 'TailList', typeParameters: 0, constructors: [
+    { name: 'nil', fields: [] },
+    { name: 'cons', fields: [{ name: 'head', type: 'nat' }, { name: 'tail', type: 'TailList' }] },
+  ] });
+  const specifications = [
+    { name: 'optimizedTailSwap', parameters: [['fuel', 'nat'], ['left', 'nat'], ['right', 'nat']], result: 'nat',
+      signature: 'export declare function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint;',
+      exportPrefix: 'export function optimizedTailSwap(fuel: bigint, left: bigint, right: bigint): bigint { while (true) { ',
+      transitions: ['[fuel, left, right] = [nextFuel, right, left]; continue;'], capturedAlias: false },
+    { name: 'optimizedTailFuel', parameters: [['fuel', 'nat'], ['accumulator', 'nat']], result: 'nat',
+      signature: 'export declare function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint;',
+      exportPrefix: 'export function optimizedTailFuel(fuel: bigint, accumulator: bigint): bigint { while (true) { ',
+      transitions: ['[fuel, accumulator] = [nextFuel, (accumulator + 1n)]; continue;'], capturedAlias: true },
+    { name: 'optimizedTailReverse', parameters: [['items', 'TailList'], ['accumulator', 'TailList']], result: 'TailList',
+      signature: 'export declare function optimizedTailReverse(items: TailList, accumulator: TailList): TailList;',
+      exportPrefix: 'export function optimizedTailReverse(items: TailList, accumulator: TailList): TailList { while (true) { ',
+      transitions: ['[items, accumulator] = [tailValue, TailList["cons"](headValue, accumulator)]; continue;'],
+      capturedAlias: false },
+  ];
+  const originalDeclarations = items(originalIr.declarations);
+  const entries = specifications.map((expected) => {
+    const found = originalDeclarations.filter((item) => item.name === expected.name);
+    assert.equal(found.length, 1, expected.name);
+    const declaration = found[0];
+    assert.equal(items(declaration.typeParameters).length, 0);
+    const parameters = items(declaration.parameters).map((item) => [item.name, typeName(item.type)]);
+    assert.deepEqual(parameters, expected.parameters);
+    assert.equal(typeName(declaration.resultType), expected.result);
+    const exports = typeScript.split(/\r?\n/u).filter((line) => line.startsWith('export function ' + expected.name + '('));
+    assert.equal(exports.length, 1);
+    assert(exports[0].startsWith(expected.exportPrefix), 'PSC0_SH1_TAIL_ROUTE: ' + expected.name);
+    for (const transition of expected.transitions) assert(exports[0].includes(transition),
+      'PSC0_SH1_TAIL_TRANSITION: ' + expected.name);
+    assert(!typeScript.includes('__ps$impl$' + expected.name), 'PSC0_SH1_TAIL_NO_FALLBACK: ' + expected.name);
+    if (expected.capturedAlias) assert(!/\bagain\b/u.test(exports[0]), 'PSC0_SH1_TAIL_ALIAS_ELIDED');
+    const signatures = declarationText.split(/\r?\n/u)
+      .filter((line) => line.startsWith('export declare function ' + expected.name + '('));
+    assert.deepEqual(signatures, [expected.signature]);
+    assert.equal(typeof runtime[expected.name], 'function');
+    assert.equal(runtime[expected.name].length, parameters.length, 'PSC0_SH1_TAIL_RUNTIME_ARITY');
+    return { ...expected, runtimeArity: parameters.length, route: 'tail-loop',
+      implementationAbsent: true, exportSha256: sha256(exports[0]) };
+  });
+  const observations = [];
+  for (const fuel of [0n, 1n, 2n, 31n, 20000n]) {
+    const swapped = runtime.optimizedTailSwap(fuel, 7n, 11n);
+    assert.equal(swapped, fuel % 2n === 0n ? 7n : 11n, 'PSC0_SH1_TAIL_SWAP');
+    observations.push({ id: 'swap-' + fuel, fuel: fuel.toString(), value: swapped.toString() });
+    const advanced = runtime.optimizedTailFuel(fuel, 11n);
+    assert.equal(advanced, fuel + 11n, 'PSC0_SH1_TAIL_CAPTURED_ALIAS');
+    observations.push({ id: 'fuel-' + fuel, fuel: fuel.toString(), value: advanced.toString() });
+  }
+  const nil = runtime.TailList.nil;
+  const symbols = Object.getOwnPropertySymbols(nil);
+  assert.equal(symbols.length, 1);
+  const tag = symbols[0];
+  assert.equal(nil[tag], 'nil');
+  let input = nil;
+  for (let index = 0; index < 20000; index++) input = runtime.TailList.cons(BigInt(index), input);
+  let reversed = runtime.optimizedTailReverse(input, nil);
+  const elements = [];
+  while (reversed[tag] === 'cons') {
+    assert(elements.length < 20000, 'PSC0_SH1_TAIL_REVERSE_LENGTH');
+    assert.equal(reversed.head, BigInt(elements.length), 'PSC0_SH1_TAIL_REVERSE_ELEMENT');
+    elements.push(reversed.head.toString()); reversed = reversed.tail;
+  }
+  assert.equal(reversed[tag], 'nil');
+  assert.equal(elements.length, 20000);
+  observations.push({ id: 'reverse-20000', length: elements.length, first: elements[0],
+    last: elements[elements.length - 1], sequenceSha256: sha256(elements.join(',')), checkedElements: elements.length });
+  let invalid;
+  try { runtime.optimizedTailReverse({ [tag]: 'invalid' }, nil); } catch (error) { invalid = error; }
+  assert(invalid instanceof Error, 'PSC0_SH1_TAIL_INVALID_TAG_ERROR');
+  assert.equal(invalid.message, 'invalid ProofScript constructor tag');
+  observations.push({ id: 'reverse-invalid-tag', error: invalid.name, message: invalid.message });
+  assert.equal(observations.length, 12);
+  return { schemaVersion: 1, feature: 'flat-original-ir-optimized-tail-loops', status: 'pass',
+    originalIrBoundary: 'same-existing-accepted-fixture', layout, entries, observations,
+    observationCount: observations.length, valueObservations: 11, faultObservations: 1,
+    swapInputs: ['7', '11'], fuelInitialAccumulator: '11', reverseInput: 'descending-19999-through-0',
+    artifacts: { typescript: 'accepted/index.ts', javascript: 'accepted/index.js', declarations: 'accepted/index.d.ts',
+      typescriptSha256: sha256(typeScript), javascriptSha256, declarationsSha256: sha256(declarationText) },
+    additionalPreparations: 0, additionalPortableIrChecks: 0, additionalEmissions: 0,
+    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0,
+    exhaustiveForAllInputs: false, strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };
+}
+
+function observeEmptyAbi(typeScript, declarations) {
+  assert.match(typeScript, /export type Empty = never;/u);
+  assert.match(typeScript, /export type EmptyBox<T0> = never;/u);
+  assert.equal(typeScript.split('__ps$Computation<never>').length - 1, 5);
+  const names = ['eliminateEmptyNat', 'eliminateEmptyFunction', 'eliminateEmptyGeneric',
+    'eliminateEmptyTypedCall', 'eliminateEmptyComputed'];
+  const signatures = names.map((name) => {
+    const lines = declarations.split(/\r?\n/u)
+      .filter((line) => line.startsWith('export declare function ' + name + '(') ||
+        line.startsWith('export declare function ' + name + '<'));
+    assert.equal(lines.length, 1, 'PSC0_SH1_IR_EMPTY_ABI: ' + name);
+    return { name, signature: lines[0] };
+  });
+  assert.match(declarations, /export type Empty = never;/u);
+  assert.match(declarations, /export type EmptyBox<T0> = never;/u);
+  assert.match(signatures[0].signature, /\(empty: Empty\): bigint;/u);
+  assert.match(signatures[1].signature, /\(empty: Empty\): \([^)]*: bigint\) => bigint;/u);
+  assert.match(signatures[2].signature, /<T0>\(empty: EmptyBox<T0>\): T0;/u);
+  assert.match(signatures[3].signature, /\(empty: Empty\): bigint;/u);
+  assert.match(signatures[4].signature, /\(makeEmpty: \(\) => Empty\): bigint;/u);
+  return { emptyLayoutCount: 2, emptyEliminationCount: 5, signatures,
+    declarationArtifact: 'accepted/index.d.ts', declarationSha256: sha256(declarations),
+    additionalTypeScriptCompilations: 0, nativeValueOracle: false,
+    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };
 }
 
 function assertRejected(report, label, code) {
@@ -236,7 +440,18 @@ export async function runIrCheckerConformance({
     'IR_CHECKED_EMIT');
   assert.equal(typeScript, unwrap(compiler.psTsEmitModule(fixture.positive), 'IR_RAW_EMIT_PARITY'));
   const generated = await compileTypeScript(typeScript, path.join(outDir, 'accepted'), tsc, root);
-  const behavior = assertBehavior(await import(pathToFileURL(generated).href));
+  const runtime = await import(pathToFileURL(generated).href);
+  const behavior = assertBehavior(runtime);
+  const declarations = await readFile(path.join(outDir, 'accepted', 'index.d.ts'), 'utf8');
+  const javascriptSha256 = sha256(await readFile(generated));
+  const optimizedTail = observeOptimizedTail(fixture.positive, runtime, typeScript, declarations, javascriptSha256);
+  const emptyElimination = observeEmptyAbi(typeScript, declarations);
+  assert.match(declarations, /export interface RecordUnit/u);
+  assert.match(declarations, /export declare const zeroFieldRecordValue: RecordUnit;/u);
+  const zeroFieldRecords = { structureCount: 1, fieldCount: 0, valueCount: 1,
+    declarationArtifact: 'accepted/index.d.ts', declarationSha256: sha256(declarations),
+    inhabited: true, additionalTypeScriptCompilations: 0,
+    strictSh1Qualified: false, semanticContractQualified: false, providerChecked: false };
   const rejected = [];
   for (const [name, ir, code] of fixture.negative) {
     const report = inventoryOriginalIr(compiler, ir, { compilerSha256 });
@@ -313,8 +528,8 @@ export async function runIrCheckerConformance({
   const receipt = {
     schemaVersion: 1, evidence: 'portable-original-ir-checker-conformance',
     compilerSha256, acceptedFixture: positive,
-    artifacts: { typescriptSha256: sha256(typeScript), javascriptSha256: sha256(await readFile(generated)) },
-    behavior, rejected, exhausted, directTypeOperations, carrierRejections,
+    artifacts: { typescriptSha256: sha256(typeScript), javascriptSha256 },
+    behavior, rejected, exhausted, directTypeOperations, carrierRejections, emptyElimination, zeroFieldRecords, optimizedTail,
     diagnosticsCap: { limit: 0, findingCount: capped.findingCount, omittedFindingDetails: capped.omittedFindingDetails },
     checkedPreparedEntry: { sourceSha256: sha256(source), typescriptSha256: sha256(preparedOutput), status: 'pass' },
     instanceOwnership: 'All IR constructors and neutral record factories belong to the checked compiler namespace.',
@@ -327,27 +542,40 @@ export async function runIrCheckerConformance({
 }
 
 export async function runNativeIrCheckerConformance({
-  nativeChecker, closure, nativeTypeScript, root, outDir,
+  nativeChecker, closure, nativeTypeScript, nativeSourceReceipt, root, outDir,
 }) {
+  // The native atomic source compiler already prepared, checked and emitted
+  // this closure. Run the small checker cases independently, then retain the
+  // original report. Do not prepare the whole compiler for a second time.
+  assert(nativeSourceReceipt, 'PSC0_SH1_NATIVE_ATOMIC_SOURCE_RECEIPT_REQUIRED');
   await mkdir(outDir, { recursive: true });
-  const source = closure.ordered.map(({ source }) => stripBootstrapImports(source)).join('\n\n') + '\n';
-  const sourcePath = path.join(outDir, 'current-source.lean');
-  const checkedOutput = path.join(outDir, 'checked-current-source.ts');
-  await writeFile(sourcePath, source);
+  const sourceReportText = await readFile(nativeSourceReceipt, 'utf8');
+  const sourceReport = JSON.parse(sourceReportText);
+  assert.equal(sourceReport.evidence, 'native-atomic-source-and-target-enforcement');
+  assert.equal(sourceReport.sourcePolicy.moduleCount, closure.moduleCount);
+  assert.equal(sourceReport.sourcePolicy.sourceBytes, closure.bytes);
+  assert.equal(sourceReport.sourcePolicy.accepted, true);
+  assert.equal(sourceReport.sourcePolicy.traversalComplete, true);
+  assert.equal(sourceReport.targetPolicy.accepted, true);
+  assert.equal(sourceReport.targetPolicy.traversalComplete, true);
+  assert.equal(sourceReport.preparationCount, 1);
+  assert.equal(sourceReport.portableIrCheckCount, 1);
+  const full = sourceReport.originalIr;
+  assert.equal(full.accepted, true);
+  assert.equal(full.traversalComplete, true);
+  assert.equal(full.findingCount, 0);
+  assert.equal(full.sameOriginalIrCheckedBeforeEmission, true);
   const binarySha256 = sha256(await readFile(nativeChecker));
-  const command = [nativeChecker, sourcePath, checkedOutput];
+  const command = [nativeChecker];
   await writeFile(path.join(outDir, 'execution-inputs.json'), JSON.stringify({
-    nativeCheckerSha256: binarySha256, sourceClosureSha256: closure.sha256,
-    sourceAggregateSha256: sha256(source), command,
+    nativeCheckerSha256: binarySha256, sourceClosureSha256: closure.sha256, command,
+    nativeSourceReceipt, nativeSourceReceiptSha256: sha256(sourceReportText),
   }, null, 2) + '\n');
-  const execution = spawnSync(nativeChecker, command.slice(1), {
+  const execution = spawnSync(nativeChecker, [], {
     cwd: root, encoding: 'utf8', stdio: 'pipe', timeout: 180000,
     maxBuffer: 16 * 1024 * 1024,
   });
-  // Retain the complete bounded diagnostics before checking the exit status.
-  // The shared command helper truncates failures, which would lose root causes.
-  const stdout = execution.stdout ?? '';
-  const stderr = execution.stderr ?? '';
+  const stdout = execution.stdout ?? '', stderr = execution.stderr ?? '';
   await writeFile(path.join(outDir, 'native.stdout.log'), stdout);
   await writeFile(path.join(outDir, 'native.stderr.log'), stderr);
   process.stdout.write(stdout);
@@ -355,27 +583,22 @@ export async function runNativeIrCheckerConformance({
   assert.equal(sha256(await readFile(nativeChecker)), binarySha256, 'PSC0_SH1_IR_NATIVE_BINARY_CHANGED');
   if (execution.error) throw new Error('PSC0_SH1_IR_NATIVE_EXECUTION: ' + execution.error.message);
   assert.equal(execution.status, 0, 'PSC0_SH1_IR_NATIVE_EXECUTION_FAILED: ' + (execution.signal ?? 'exit'));
-  const readReceipt = (marker) => {
-    const lines = execution.stdout.split(/\r?\n/u).filter((line) => line.startsWith(marker + ': '));
-    assert.equal(lines.length, 1, 'PSC0_SH1_IR_NATIVE_RECEIPT: ' + marker);
-    return JSON.parse(lines[0].slice(marker.length + 2));
-  };
-  const fixtures = readReceipt('PSC0_SH1_IR_NATIVE');
-  const full = readReceipt('PSC0_SH1_IR_NATIVE_FULL');
+  const marker = 'PSC0_SH1_IR_NATIVE: ';
+  const lines = stdout.split(/\r?\n/u).filter((line) => line.startsWith(marker));
+  assert.equal(lines.length, 1, 'PSC0_SH1_IR_NATIVE_RECEIPT');
+  const fixtures = JSON.parse(lines[0].slice(marker.length));
   assert.equal(fixtures.status, 'pass');
-  assert.equal(full.accepted, true);
-  assert.equal(full.traversalComplete, true);
-  assert.equal(full.findingCount, 0);
-  const checkedTs = await readFile(checkedOutput, 'utf8');
-  assert.equal(checkedTs, await readFile(nativeTypeScript, 'utf8'), 'PSC0_SH1_IR_NATIVE_FULL_TYPESCRIPT_PARITY');
+  const checkedTs = await readFile(nativeTypeScript, 'utf8');
   const receipt = {
     schemaVersion: 1, evidence: 'native-portable-checker-current-source',
     nativeCheckerSha256: binarySha256, sourceClosureSha256: closure.sha256,
-    sourceAggregateSha256: sha256(source), moduleCount: closure.moduleCount,
-    recipe: 'Ordered raw closure with imports stripped, aggregate native preparation, original IR check, same-IR emission.',
-    fixtures, fullCompilerIr: full,
+    moduleCount: closure.moduleCount, nativeSourceReceipt,
+    nativeSourceReceiptSha256: sha256(sourceReportText),
+    recipe: 'Raw named module bundle enters the native atomic source/target API once; reuse its exact original-IR report and emitted TS; checker fixture executable runs separately.',
+    fixtures, fullCompilerIr: full, sourcePolicy: sourceReport.sourcePolicy,
+    targetPolicy: sourceReport.targetPolicy, fullSourcePreparedAgain: false,
     typescriptSha256: sha256(checkedTs),
-    parity: 'Checked native emission equals the native-generated N1 compiler TypeScript byte for byte.',
+    parity: 'N1 is compiled directly from this native atomic checked emission.',
     strictSh1Qualified: false, provider: { status: 'not-attempted', kernelChecked: false },
   };
   await writeFile(path.join(outDir, 'receipt.json'), JSON.stringify(receipt, null, 2) + '\n');

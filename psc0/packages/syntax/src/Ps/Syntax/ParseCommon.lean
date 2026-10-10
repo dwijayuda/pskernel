@@ -110,18 +110,18 @@ def psParseSyntaxNameTailWithFuel
           (_tokens : List PsToken) =>
         Except.error PsParseError.fuelExhausted
   | remainingFuel + 1 =>
-      let smaller :
-          List String ->
-          PsSourcePos ->
-          PsSourcePos ->
-          List PsToken ->
-          Except PsParseError (PsParseResult PsSyntaxName) :=
-        psParseSyntaxNameTailWithFuel remainingFuel;
       fun
           (segmentsRev : List String)
           (start : PsSourcePos)
           (stop : PsSourcePos)
           (tokens : List PsToken) =>
+        let smaller :
+            List String ->
+            PsSourcePos ->
+            PsSourcePos ->
+            List PsToken ->
+            Except PsParseError (PsParseResult PsSyntaxName) :=
+          psParseSyntaxNameTailWithFuel remainingFuel;
         match tokens with
         | List.nil =>
             Except.ok {
@@ -230,17 +230,17 @@ def psParseRecordFieldsWithFuel
             List (Prod PsSyntaxName PsSyntaxTerm)) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List (Prod PsSyntaxName PsSyntaxTerm) ->
-          Except PsParseError
-            (PsParseResult
-              (List (Prod PsSyntaxName PsSyntaxTerm))) :=
-        psParseRecordFieldsWithFuel parseTerm remaining;
       fun
           (cursor : PsTokenCursor)
           (fieldsRev :
             List (Prod PsSyntaxName PsSyntaxTerm)) =>
+        let smaller :
+            PsTokenCursor ->
+            List (Prod PsSyntaxName PsSyntaxTerm) ->
+            Except PsParseError
+              (PsParseResult
+                (List (Prod PsSyntaxName PsSyntaxTerm))) :=
+          psParseRecordFieldsWithFuel parseTerm remaining;
         if psTokenCursorAtText cursor "}" then
           Except.ok {
             value := psParseListReverse fieldsRev
@@ -532,15 +532,15 @@ def psParsePatternBindersWithFuel
           cursor := cursor
         }
   | remaining + 1 =>
-      let smaller :
-          PsTokenCursor ->
-          List PsSyntaxName ->
-          Except PsParseError
-            (PsParseResult (List PsSyntaxName)) :=
-        psParsePatternBindersWithFuel remaining;
       fun
           (cursor : PsTokenCursor)
           (bindersRev : List PsSyntaxName) =>
+        let smaller :
+            PsTokenCursor ->
+            List PsSyntaxName ->
+            Except PsParseError
+              (PsParseResult (List PsSyntaxName)) :=
+          psParsePatternBindersWithFuel remaining;
         match psTokenCursorPeek cursor with
         | none =>
             Except.ok {

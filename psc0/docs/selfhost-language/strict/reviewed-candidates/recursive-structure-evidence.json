@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-recursive-structure-compile-only-evidence",
+  "status": "unattached-readback-verified-reviewed-ready-for-integration",
+  "repository": "dwijayuda/pskernel",
+  "expectedParent": "5a44bbb054d41a7534a0714bdd3f3d3b0ec467a2",
+  "committedCompilerSource": "fc961b8a73ff9fccfbe80cdbc488a1fe1edfb504",
+  "sourceCorrectionManifest": "62a0075aa7eafef61ebc6f9d4af68f743bff8492",
+  "sourceCorrection": {
+    "structureRecursor": "57e76a17858b3f4333a44ed880326ac33695351e",
+    "expr": "7498d68c2f2c57d94ab008b36d08766c957ad815",
+    "declaration": "d191857ece760f307359d576dca2cef906dea8ec",
+    "model": "a58fa183103817b9b65db45cc9e9798e6abcf4d3"
+  },
+  "files": [
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-generic-erasure.lean",
+      "baseBlob": "aee5fd7bf96dbfec9ee1c3b4c2698178c55a10e3",
+      "baseSha256": "6b43a4c92695d355dba24764901cc8b35e50bf43a428ffbc57046be9283c3b7c",
+      "baseBytes": 5369,
+      "candidateBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+      "candidateSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+      "candidateBytes": 6340,
+      "edits": [
+        {
+          "purpose": "Append only the approved two recursive records and four compile-only functions.",
+          "before": "def sh1CoreNestedOuter (n : Nat) : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ outer =>\n      match outer with\n      | Nat.zero => Nat.add n (sh1CoreNestedOuter outer)\n      | Nat.succ inner => Nat.add n (sh1CoreNestedOuter outer)\n",
+          "after": "def sh1CoreNestedOuter (n : Nat) : Nat :=\n  match n with\n  | Nat.zero => 0\n  | Nat.succ outer =>\n      match outer with\n      | Nat.zero => Nat.add n (sh1CoreNestedOuter outer)\n      | Nat.succ inner => Nat.add n (sh1CoreNestedOuter outer)\n\n-- Recursive records remain records. These declarations are compile-only:\n-- no finite canonical value of either recursive record is constructed or run.\nstructure Sh1RecursiveRecord where\n  next : Sh1RecursiveRecord\n\ndef sh1RecursiveRecordObserve (value : Sh1RecursiveRecord) : Nat :=\n  match value with\n  | Sh1RecursiveRecord.mk next => 0\n\ndef sh1RecursiveRecordStep (value : Sh1RecursiveRecord) : Nat :=\n  match value with\n  | Sh1RecursiveRecord.mk next => sh1RecursiveRecordStep next\n\nstructure Sh1RecursiveGenericRecord (alpha : Type) where\n  item : alpha\n  next : Sh1RecursiveGenericRecord alpha\n\ndef sh1RecursiveGenericObserve {alpha : Type}\n    (value : Sh1RecursiveGenericRecord alpha) : alpha :=\n  match value with\n  | Sh1RecursiveGenericRecord.mk item next => item\n\ndef sh1RecursiveGenericStep {alpha : Type}\n    (value : Sh1RecursiveGenericRecord alpha) : alpha :=\n  match value with\n  | Sh1RecursiveGenericRecord.mk item next => sh1RecursiveGenericStep next\n"
+        }
+      ],
+      "readbackVerified": true,
+      "exactReverseVerified": true
+    },
+    {
+      "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+      "baseBlob": "59aa5df7a650f4e3134a41c34377eac9aa75dc1d",
+      "baseSha256": "dbc556d46a0f2e67e902021cf98cb14fc842bd889d68ae83dc586ac6732a2c6f",
+      "baseBytes": 29200,
+      "candidateBlob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+      "candidateSha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332",
+      "candidateBytes": 37975,
+      "edits": [
+        {
+          "before": "export async function runGenericErasureConformance({",
+          "after": "\n// These accepted declarations have no finite canonical record inhabitant.\n// Inspect their actual original IR; never fabricate a record or call them.\nfunction checkRecursiveStructureIr(ir, originalIr) {\n  assert.equal(originalIr.accepted, true);\n  assert.equal(originalIr.traversalComplete, true);\n  assert.equal(originalIr.findingCount, '0');\n  assert.equal(originalIr.checkedObjectIsEmittedObject, true);\n  const typeView = (type, depth = 0) => {\n    assert(depth < 16, 'PSC0_SH1_RECURSIVE_STRUCTURE_TYPE_BOUND');\n    const kind = valueTag(type);\n    if (kind === 'primitive') return { kind, name: valueTag(type.name) };\n    if (kind === 'typeParameter') return { kind, name: type.name };\n    assert.equal(kind, 'named', 'PSC0_SH1_RECURSIVE_STRUCTURE_TYPE_FORM');\n    return { kind, name: type.name,\n      arguments: list(type.arguments, type.name).map((item) => typeView(item, depth + 1)) };\n  };\n  const parameterType = { kind: 'typeParameter', name: 'T0' };\n  const naturalType = { kind: 'primitive', name: 'nat' };\n  const namedType = (name, parameters) => ({\n    kind: 'named', name,\n    arguments: parameters.map((parameter) => ({ kind: 'typeParameter', name: parameter })),\n  });\n  const expectedLayouts = [\n    { name: 'Sh1RecursiveRecord', typeParameters: [], recursiveFieldIndex: 0,\n      fields: [{ name: 'next', type: namedType('Sh1RecursiveRecord', []) }] },\n    { name: 'Sh1RecursiveGenericRecord', typeParameters: ['T0'], recursiveFieldIndex: 1,\n      fields: [{ name: 'item', type: parameterType },\n        { name: 'next', type: namedType('Sh1RecursiveGenericRecord', ['T0']) }] },\n  ];\n  const structures = list(ir.structures, 'recursive structures');\n  const inductives = list(ir.inductives, 'recursive structure inductives');\n  const declarations = list(ir.declarations, 'recursive structure declarations');\n  const globals = new Set([...structures, ...inductives, ...declarations].map((item) => item.name));\n  const layouts = expectedLayouts.map((expected) => {\n    const matches = structures.filter((item) => item.name === expected.name);\n    assert.equal(matches.length, 1, 'PSC0_SH1_RECURSIVE_STRUCTURE_LAYOUT: ' + expected.name);\n    assert.equal(inductives.filter((item) => item.name === expected.name).length, 0,\n      'PSC0_SH1_RECURSIVE_STRUCTURE_REPRESENTATION: ' + expected.name);\n    const layout = matches[0];\n    const observed = {\n      name: layout.name,\n      typeParameters: list(layout.typeParameters, layout.name).map((item) => item.name),\n      recursiveFieldIndex: expected.recursiveFieldIndex,\n      fields: list(layout.fields, layout.name).map((field) => ({\n        name: field.name, type: typeView(field.type),\n      })),\n    };\n    assert.deepEqual(observed, expected, 'PSC0_SH1_RECURSIVE_STRUCTURE_LAYOUT_FIELDS');\n    return observed;\n  });\n  const specs = [\n    { name: 'sh1RecursiveRecordObserve', layout: 0, result: naturalType, outcome: 'zero' },\n    { name: 'sh1RecursiveRecordStep', layout: 0, result: naturalType, outcome: 'recursive-call' },\n    { name: 'sh1RecursiveGenericObserve', layout: 1, result: parameterType, outcome: 'item' },\n    { name: 'sh1RecursiveGenericStep', layout: 1, result: parameterType, outcome: 'recursive-call' },\n  ];\n  const observedDeclarations = specs.map((expected) => {\n    const layout = layouts[expected.layout];\n    const matches = declarations.filter((item) => item.name === expected.name);\n    assert.equal(matches.length, 1, 'PSC0_SH1_RECURSIVE_STRUCTURE_DECLARATION: ' + expected.name);\n    const declaration = matches[0];\n    const typeParameters = list(declaration.typeParameters, expected.name).map((item) => item.name);\n    assert.deepEqual(typeParameters, layout.typeParameters,\n      'PSC0_SH1_RECURSIVE_STRUCTURE_DECLARATION_TYPES: ' + expected.name);\n    const parameters = list(declaration.parameters, expected.name);\n    assert.equal(parameters.length, 1, 'PSC0_SH1_RECURSIVE_STRUCTURE_ENTRY_ARITY');\n    const parameter = parameters[0];\n    const inputType = namedType(layout.name, typeParameters);\n    assert.deepEqual(typeView(parameter.type), inputType);\n    assert.deepEqual(typeView(declaration.resultType), expected.result);\n    const major = declaration.body;\n    assert.equal(valueTag(major), 'letE', 'PSC0_SH1_RECURSIVE_STRUCTURE_MAJOR_LET');\n    assert.deepEqual(typeView(major.type), inputType);\n    assert.equal(valueTag(major.value), 'var', 'PSC0_SH1_RECURSIVE_STRUCTURE_MAJOR_VALUE');\n    assert.equal(major.value.name, parameter.name);\n    const localNames = new Set([parameter.name]);\n    const fresh = (name) => {\n      assert.equal(typeof name, 'string');\n      assert(name.length > 0 && !localNames.has(name) && !globals.has(name),\n        'PSC0_SH1_RECURSIVE_STRUCTURE_FRESH_BINDER: ' + expected.name);\n      localNames.add(name);\n    };\n    fresh(major.name);\n    let cursor = major.body;\n    const projections = layout.fields.map((field, index) => {\n      assert.equal(valueTag(cursor), 'letE', 'PSC0_SH1_RECURSIVE_STRUCTURE_FIELD_LET');\n      assert.deepEqual(typeView(cursor.type), field.type);\n      fresh(cursor.name);\n      const projection = cursor.value;\n      assert.equal(valueTag(projection), 'projection', 'PSC0_SH1_RECURSIVE_STRUCTURE_FIELD_PROJECTION');\n      assert.equal(projection.structureName, layout.name);\n      assert.deepEqual(list(projection.typeArguments, expected.name).map((type) => typeView(type)),\n        inputType.arguments);\n      assert.equal(projection.field, field.name, 'PSC0_SH1_RECURSIVE_STRUCTURE_FIELD_ORDER');\n      assert.equal(valueTag(projection.target), 'var');\n      assert.equal(projection.target.name, major.name, 'PSC0_SH1_RECURSIVE_STRUCTURE_SHARED_MAJOR');\n      const observed = { index, field: projection.field, binding: cursor.name,\n        type: typeView(cursor.type), target: projection.target.name };\n      cursor = cursor.body;\n      return observed;\n    });\n    let body;\n    if (expected.outcome === 'recursive-call') {\n      assert.equal(valueTag(cursor), 'call', 'PSC0_SH1_RECURSIVE_STRUCTURE_USED_IH');\n      assert.equal(valueTag(cursor.fn), 'var');\n      assert.equal(cursor.fn.name, declaration.name);\n      const typeArguments = list(cursor.typeArguments, expected.name).map((type) => typeView(type));\n      assert.deepEqual(typeArguments, inputType.arguments);\n      const arguments_ = list(cursor.arguments, expected.name);\n      assert.equal(arguments_.length, 1);\n      assert.equal(valueTag(arguments_[0]), 'var');\n      assert.equal(arguments_[0].name, projections[layout.recursiveFieldIndex].binding,\n        'PSC0_SH1_RECURSIVE_STRUCTURE_RECURSIVE_FIELD_ARGUMENT');\n      body = { kind: 'recursive-call', declaration: cursor.fn.name,\n        typeArguments, arguments: [arguments_[0].name], runtimeArity: arguments_.length };\n    } else if (expected.outcome === 'zero') {\n      assert.equal(valueTag(cursor), 'literal', 'PSC0_SH1_RECURSIVE_STRUCTURE_UNUSED_IH');\n      assert.equal(valueTag(cursor.value), 'natural');\n      assert.equal(cursor.value.value, 0n);\n      body = { kind: 'natural', value: cursor.value.value.toString() };\n    } else {\n      assert.equal(valueTag(cursor), 'var', 'PSC0_SH1_RECURSIVE_STRUCTURE_GENERIC_FIELD_RESULT');\n      assert.equal(cursor.name, projections[0].binding);\n      body = { kind: 'field', field: 'item', binding: cursor.name };\n    }\n    return {\n      name: declaration.name, structure: layout.name, typeParameters,\n      parameters: [{ name: parameter.name, type: typeView(parameter.type) }],\n      resultType: typeView(declaration.resultType),\n      major: { name: major.name, sourceParameter: major.value.name, type: typeView(major.type),\n        evaluations: 1, fresh: true },\n      projections, recursiveFieldIndex: layout.recursiveFieldIndex, body,\n      freshNamesDistinct: true, remainingHypothesisLambdas: 0,\n    };\n  });\n  return {\n    policy: 'recursive-structure-fields-and-root-hypotheses/1',\n    compileOnly: true, layouts, declarations: observedDeclarations,\n    structureCount: layouts.length, declarationCount: observedDeclarations.length,\n    projectionCount: observedDeclarations.reduce((count, item) => count + item.projections.length, 0),\n    usedHypothesisCount: observedDeclarations.filter((item) => item.body.kind === 'recursive-call').length,\n    unusedHypothesisCount: observedDeclarations.filter((item) => item.body.kind !== 'recursive-call').length,\n    originalIr: { ...originalIr, reusedExistingCheck: true },\n    runtimeInvocations: 0, constructedRuntimeRecords: 0,\n    additionalPreparations: 0, additionalIrChecks: 0,\n    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0,\n    generalRecursorDemandAdequacyProven: false, semanticPreservationProven: false,\n  };\n}\n\nexport async function runGenericErasureConformance({"
+        },
+        {
+          "before": "  const functionValueIr = checkFunctionValueIr(compiler, ir);\n",
+          "after": "  const functionValueIr = checkFunctionValueIr(compiler, ir);\n  const recursiveStructures = checkRecursiveStructureIr(ir, functionValueIr.originalIr);\n"
+        },
+        {
+          "before": "    recursion: { reference: recursionReference.receipt, behavior: recursionBehavior },\n",
+          "after": "    recursion: { reference: recursionReference.receipt, behavior: recursionBehavior },\n    recursiveStructures,\n"
+        }
+      ],
+      "readbackVerified": true,
+      "exactReverseVerified": true
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseBlob": "b18475cd8f1e019c7372a1df64cd3464a62c210a",
+      "baseSha256": "1def5e42cc86de1aacf4eed80d47462b9bede92f55b81f0449cf897ee88a11d9",
+      "baseBytes": 80994,
+      "candidateBlob": "4242eb6e4944ef0be2bfe8a9ae02b0c1123fde54",
+      "candidateSha256": "e6417102ab7101b04f475a888e9eb6d9c7e1e544f079c6ba8a58874995753d4b",
+      "candidateBytes": 85963,
+      "edits": [
+        {
+          "before": "async function bindGenericFunctionValues(outDir, directory, compilerSha256, source, requireNative) {",
+          "after": "\nfunction bindRecursiveStructures(value, originalIr) {\n  assert.equal(value.policy, 'recursive-structure-fields-and-root-hypotheses/1');\n  assert.equal(value.compileOnly, true);\n  assert.equal(value.structureCount, 2);\n  assert.equal(value.declarationCount, 4);\n  assert.equal(value.projectionCount, 6);\n  assert.equal(value.usedHypothesisCount, 2);\n  assert.equal(value.unusedHypothesisCount, 2);\n  assert.deepEqual(value.originalIr, { ...originalIr, reusedExistingCheck: true });\n  for (const key of ['runtimeInvocations', 'constructedRuntimeRecords',\n    'additionalPreparations', 'additionalIrChecks', 'additionalTypeScriptCompilations',\n    'additionalNativeExecutions']) assert.equal(value[key], 0);\n  assert.equal(value.generalRecursorDemandAdequacyProven, false);\n  assert.equal(value.semanticPreservationProven, false);\n  const parameterType = { kind: 'typeParameter', name: 'T0' };\n  const naturalType = { kind: 'primitive', name: 'nat' };\n  const namedType = (name, parameters) => ({\n    kind: 'named', name,\n    arguments: parameters.map((parameter) => ({ kind: 'typeParameter', name: parameter })),\n  });\n  const layouts = [\n    { name: 'Sh1RecursiveRecord', typeParameters: [], recursiveFieldIndex: 0,\n      fields: [{ name: 'next', type: namedType('Sh1RecursiveRecord', []) }] },\n    { name: 'Sh1RecursiveGenericRecord', typeParameters: ['T0'], recursiveFieldIndex: 1,\n      fields: [{ name: 'item', type: parameterType },\n        { name: 'next', type: namedType('Sh1RecursiveGenericRecord', ['T0']) }] },\n  ];\n  assert.deepEqual(value.layouts, layouts);\n  const specs = [\n    { name: 'sh1RecursiveRecordObserve', layout: 0, result: naturalType, outcome: 'zero' },\n    { name: 'sh1RecursiveRecordStep', layout: 0, result: naturalType, outcome: 'recursive-call' },\n    { name: 'sh1RecursiveGenericObserve', layout: 1, result: parameterType, outcome: 'item' },\n    { name: 'sh1RecursiveGenericStep', layout: 1, result: parameterType, outcome: 'recursive-call' },\n  ];\n  assert.equal(value.declarations.length, specs.length);\n  value.declarations.forEach((observed, index) => {\n    const expected = specs[index], layout = layouts[expected.layout];\n    const inputType = namedType(layout.name, layout.typeParameters);\n    assert.equal(observed.parameters.length, 1);\n    assert.equal(observed.projections.length, layout.fields.length);\n    const parameter = observed.parameters[0].name;\n    const major = observed.major.name;\n    const bindings = observed.projections.map((projection) => projection.binding);\n    const names = [parameter, major, ...bindings];\n    assert(names.every((name) => typeof name === 'string' && name.length > 0));\n    assert.equal(new Set(names).size, names.length, 'PSC0_SH1_RECURSIVE_STRUCTURE_BINDER_DISTINCT');\n    assert(names.every((name) => !specs.some((item) => item.name === name) &&\n      !layouts.some((item) => item.name === name)));\n    let body;\n    if (expected.outcome === 'recursive-call') {\n      body = { kind: 'recursive-call', declaration: expected.name,\n        typeArguments: inputType.arguments, arguments: [bindings[layout.recursiveFieldIndex]],\n        runtimeArity: 1 };\n    } else if (expected.outcome === 'zero') {\n      body = { kind: 'natural', value: '0' };\n    } else {\n      body = { kind: 'field', field: 'item', binding: bindings[0] };\n    }\n    assert.deepEqual(observed, {\n      name: expected.name, structure: layout.name, typeParameters: layout.typeParameters,\n      parameters: [{ name: parameter, type: inputType }],\n      resultType: expected.result,\n      major: { name: major, sourceParameter: parameter, type: inputType, evaluations: 1, fresh: true },\n      projections: layout.fields.map((field, fieldIndex) => ({\n        index: fieldIndex, field: field.name, binding: bindings[fieldIndex],\n        type: field.type, target: major,\n      })),\n      recursiveFieldIndex: layout.recursiveFieldIndex, body,\n      freshNamesDistinct: true, remainingHypothesisLambdas: 0,\n    });\n  });\n  assert.equal(value.declarations.reduce((count, item) => count + item.projections.length, 0), 6);\n  assert.equal(value.declarations.filter((item) => item.body.kind === 'recursive-call').length, 2);\n  return {\n    policy: value.policy, compileOnly: true, structureCount: 2, declarationCount: 4,\n    projectionCount: 6, usedHypothesisCount: 2, unusedHypothesisCount: 2,\n    layouts: value.layouts, declarations: value.declarations,\n    layoutsSha256: hash(JSON.stringify(value.layouts)),\n    declarationsSha256: hash(JSON.stringify(value.declarations)),\n    originalIr: value.originalIr,\n    runtimeInvocations: 0, constructedRuntimeRecords: 0,\n    additionalPreparations: 0, additionalIrChecks: 0,\n    additionalTypeScriptCompilations: 0, additionalNativeExecutions: 0,\n    finiteEvidenceOnly: true, generalRecursorDemandAdequacyProven: false,\n    semanticPreservationProven: false,\n  };\n}\n\nasync function bindGenericFunctionValues(outDir, directory, compilerSha256, source, requireNative) {"
+        },
+        {
+          "before": "  const recursion = await bindPreparedCoreRecursion(outDir, folder, source, value);\n",
+          "after": "  const recursion = await bindPreparedCoreRecursion(outDir, folder, source, value);\n  const recursiveStructures = bindRecursiveStructures(value.recursiveStructures, original);\n"
+        },
+        {
+          "before": "  return { receipt: receipt.file, source, artifacts: products, native, recursion,\n",
+          "after": "  return { receipt: receipt.file, source, artifacts: products, native, recursion, recursiveStructures,\n"
+        }
+      ],
+      "readbackVerified": true,
+      "exactReverseVerified": true
+    }
+  ],
+  "fixtureScope": {
+    "sourceDeclarations": 34,
+    "definitions": 30,
+    "appendedSourceDeclarations": 6,
+    "appendedStructures": 2,
+    "appendedDefinitions": 4,
+    "names": [
+      "Sh1RecursiveRecord",
+      "sh1RecursiveRecordObserve",
+      "sh1RecursiveRecordStep",
+      "Sh1RecursiveGenericRecord",
+      "sh1RecursiveGenericObserve",
+      "sh1RecursiveGenericStep"
+    ],
+    "fieldPositions": [
+      0,
+      1
+    ],
+    "genericTypeArities": [
+      0,
+      1
+    ],
+    "runtimeEntryArities": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "unusedGeneratedHypotheses": 2,
+    "usedRootGeneratedHypotheses": 2,
+    "noLegacySh1GenericPrefixAdded": true,
+    "noSlashStyleLeanComments": true,
+    "noConstructedRuntimeRecord": true,
+    "noNewFunctionRuntimeInvocation": true
+  },
+  "evidence": {
+    "receiptField": "recursiveStructures",
+    "policy": "recursive-structure-fields-and-root-hypotheses/1",
+    "samePreparedObject": true,
+    "sameOriginalIrObject": true,
+    "sameExistingIrChecker": "checkFunctionValueIr(compiler, ir)",
+    "originalIrReceiptReuse": "functionValues.ir.originalIr",
+    "exactStructureCount": 2,
+    "exactDeclarationCount": 4,
+    "exactProjectionCount": 6,
+    "exactUsedHypothesisCount": 2,
+    "exactUnusedHypothesisCount": 2,
+    "layouts": "Actual original-IR structure names, type parameters and ordered field type views; the same names must not appear among inductive layouts.",
+    "declarations": "Actual type parameter order, one runtime parameter, exact input/result type, one fresh typed major let, ordered typed projections from that same major, and exact terminal observer or current-declaration call with the recursive field argument.",
+    "residualHypothesisLambdaCount": 0,
+    "binding": "The companion binder authenticates these observations under the existing generic receipt compiler/source/artifact identity, compares the reused original-IR checker receipt, and hashes the exact observed layout/declaration arrays. It evaluates no code.",
+    "additionalPreparations": 0,
+    "additionalIrChecks": 0,
+    "additionalTypeScriptCompilations": 0,
+    "additionalNativeExecutions": 0,
+    "runtimeInvocations": 0,
+    "constructedRuntimeRecords": 0
+  },
+  "preserved": {
+    "originalFourGenericIrCases": true,
+    "originalRecursiveBehaviorCount": 19,
+    "canonicalSourceEntryCount": 20,
+    "canonicalBehaviorCount": 19,
+    "preparedCoreRecursionObservationCount": 4,
+    "generatedRecursionObservationCount": 4,
+    "nativeRecursionObservationCountWhenPresent": 4,
+    "sourceRefusalCount": 38,
+    "nativeReferenceRequiredForN1": true,
+    "fullNativeTypescriptByteParity": true,
+    "previousFixtureBytesAreExactPrefix": true,
+    "previousGateAndBinderAssertionsBytePreserved": true,
+    "kernelProviderDefeqCacheAlgorithmsUnchanged": true
+  },
+  "sourceArgument": [
+    "Both record families are regular, index-free, uniformly parameterized positive one-constructor declarations. The recursive field is first for the monomorphic family and second for the generic family; the other generic field has type T0.",
+    "Each observer discards its generated IH. Each step uses exactly the root-established child IH. Its new original-IR body must retain the current declaration call on the projected next field, so a lowering that indiscriminately discards all IHs cannot pass.",
+    "The original-IR expectation comes from the raw fixture telescope and actual Model fields, independently of erasure's metadata cache. Expected projection order follows the authored record fields.",
+    "Every major is captured once, and each projection reads that fresh immutable major. Field and major binder names are read from actual IR and checked distinct; the raw observer result or single recursive call is checked after the exact field prefix, excluding a leftover IH lambda.",
+    "Source Declaration d191 emits only family/constructor/recursor members. CheckedAdmissions35bc encodes their family/constructor types as an ordinary inductive admission and skips separate constructor/recursor records. No projection declaration or new Core.proj term is introduced by these match-only witnesses or the new Expr lowering.",
+    "The frozen ordinary inductive checker accepts positive direct self fields with the same parameters and constructs minors with field binders followed by recursive hypotheses. Native Lean 4.34 infer_proj independently has no isRec restriction, but no executed provider or native record-value evidence is claimed.",
+    "These families have no finite canonical inhabitant. That limits runtime observations, not required translation of their accepted ordinary functions. No fabricated cyclic record, Empty inhabitant, extra grammar feature, evaluator case or compiler invocation is added."
+  ],
+  "sourcePins": {
+    "checkedAdmissions": "35bc6d634f203eceb41666ddea9cfe8bcf204196",
+    "kernelOrdinaryInductive": "dfc0fdfdcce8108995fa356843c627c2ad15d2c1",
+    "checkedCoreCodecAdmissions": "405f230b5ee260876f6d6a6536e2318162fe9888",
+    "checkedCoreReplay": "25ffbc9277b42a72b4cf9dd1c74bc6f22880a775",
+    "nativeLeanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "nativeStructure": "a1c91bd6fe151224d413a2c083e3d0385d2386eb",
+    "nativeMetaStructure": "131b774c312459c025a2c4021f69ec6cb0b02045",
+    "nativeTypeChecker": "0fae62c2c1a52390cabaa047a3671c77f713bd50"
+  },
+  "verification": {
+    "exactForwardAndReverseGuards": true,
+    "allCandidateReadbacksAndUtf8Hashes": true,
+    "sourceExecuted": false,
+    "compilerExecuted": false,
+    "projectTestsExecuted": false,
+    "refsMutated": false,
+    "independentReview": {
+      "status": "clear",
+      "root": {
+        "semanticReview": "clear",
+        "exactSevenGuardForwardReverse": "clear",
+        "fullCandidateReadbacksAndUtf8Hashes": "clear"
+      },
+      "artifactInspectionReview": {
+        "semanticReview": "clear",
+        "scope": "Approved fixture grammar and record fields; actual Model API; same original IR/checker; exact transported gate/binder shapes; no extra preparation/IR/TS/native or runtime record invocation."
+      }
+    },
+    "supersedesReviewStatusOnly": "4dd6a683235f992aa0f750d85465c0839a561db4"
+  },
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "semanticPreservationProven": false,
+    "generalRecursorDemandAdequacyProven": false,
+    "correspondenceRowsClosed": 0,
+    "providerChecked": false,
+    "statement": "Compile-only original-IR and existing-pipeline evidence; qualification awaits the separately authorized exact-source cloud run."
+  }
+}

@@ -222,9 +222,9 @@ def psMetaInstantiateRounds
   | Nat.zero =>
       fun (expr : PsExpr) => expr
   | Nat.succ remaining =>
-      let smaller : PsExpr -> PsExpr :=
-        psMetaInstantiateRounds context remaining;
       fun (expr : PsExpr) =>
+        let smaller : PsExpr -> PsExpr :=
+          psMetaInstantiateRounds context remaining;
         if psMetaExprHasAssignedVar context expr then
           smaller (psMetaInstantiateStep context expr)
         else expr

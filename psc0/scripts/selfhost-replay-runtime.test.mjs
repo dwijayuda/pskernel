@@ -33,21 +33,27 @@ try {
     });
     const compiled = require(path.join(staging, `${fixture}.js`));
     if (fixture === 'selfhost-tail-loop') {
-      for (const name of ['replayTailSwap', 'replayTailReverse', 'replayTailFuel'])
-        assert(!source.includes(`__ps$impl$${name}`), `${name} must use a bounded tail loop`);
+      // These sources match their sole entry argument before returning state closures.
+      // Preserve that canonical result boundary with arity 1 and the general emitter.
+      // Eligible flat tail loops are checked separately by the IR conformance fixture.
+      for (const name of ['replayTailSwap', 'replayTailReverse', 'replayTailFuel']) {
+        assert(source.includes(`export function ${name}`), `${name} must retain its exported source entry`);
+        assert(source.includes(`__ps$impl$${name}`), `${name} must use the general returned-function route`);
+        assert.equal(compiled[name].length, 1, `${name} must expose only its actual source entry parameter`);
+      }
       assert(source.includes('__ps$impl$replayNonTail'), 'non-tail recursion must keep the general path');
       for (const n of [0n, 1n, 2n, 31n, 20000n]) {
-        assert.equal(compiled.replayTailSwap(n, 11n, 23n), n % 2n === 0n ? 11n : 23n);
-        assert.equal(compiled.replayTailFuel(n, 7n), n + 7n);
-        assert.equal(compiled.replayEscapedTail(n, 7n), n + 7n);
+        assert.equal(compiled.replayTailSwap(n)(11n)(23n), n % 2n === 0n ? 11n : 23n);
+        assert.equal(compiled.replayTailFuel(n)(7n), n + 7n);
+        assert.equal(compiled.replayEscapedTail(n)(7n), n + 7n);
         assert.equal(compiled.replayNonTail(n), 2n * n + 7n);
       }
       let list = compiled.List.nil();
       for (let n = 0n; n < 20000n; n++) list = compiled.List.cons(n, list);
-      let reversed = compiled.replayTailReverse(list, compiled.List.nil());
+      let reversed = compiled.replayTailReverse(list)(compiled.List.nil());
       for (let n = 0n; n < 20000n; n++) { assert.equal(reversed.head, n); reversed = reversed.tail; }
       assert.equal(Object.keys(reversed).length, 0);
-      assert.throws(() => compiled.replayTailReverse({}, compiled.List.nil()), /invalid ProofScript constructor tag/);
+      assert.throws(() => compiled.replayTailReverse({})(compiled.List.nil()), /invalid ProofScript constructor tag/);
     } else if (fixture === 'selfhost-count-fold') {
       for (const name of ['countRenamed', 'countSuccessor']) {
         assert(source.includes(`export function ${name}`));
@@ -100,13 +106,13 @@ try {
       }
     } else {
       for (const n of [0n, 1n, 2n, 8n, 100n]) {
-        assert.equal(compiled.replayReturnedFunction(n, 11n), n === 0n ? 18n : n + 10n);
-        assert.equal(compiled.replayNestedFunction(31n, n, 11n), n === 0n ? 42n : n + 41n);
+        assert.equal(compiled.replayReturnedFunction(n)(11n), n === 0n ? 18n : n + 10n);
+        assert.equal(compiled.replayNestedFunction(31n, n)(11n), n === 0n ? 42n : n + 41n);
         assert.equal(compiled.replayPartialFunction(n), n + 2n);
-        assert.equal(compiled.replayFuelFunction(n, 11n), n + 11n);
+        assert.equal(compiled.replayFuelFunction(n)(11n), n + 11n);
         assert.equal(compiled.replayPairProjection(n, 11n), n + 11n);
         assert.equal(compiled.replayRecordFunction(n, 11n).value, n + 11n);
-        assert.equal(compiled.replayPartialOuter(n, 11n), n === 0n ? 18n : n + 10n);
+        assert.equal(compiled.replayPartialOuter(n)(11n), n === 0n ? 18n : n + 10n);
         assert.equal(compiled.replayIgnoredParameters(4n, 5n, n), n);
         assert.equal(compiled.replayStrictBindings(n, 11n), n + 11n);
         assert.equal(compiled.replayShadowedBinding(n), n + 3n);
@@ -123,7 +129,7 @@ try {
         reversed = reversed.tail;
       }
       assert.equal(Object.keys(reversed).length, 0);
-      assert.equal(compiled.replayFuelFunction(20000n, 11n), 20011n);
+      assert.equal(compiled.replayFuelFunction(20000n)(11n), 20011n);
       assert.throws(() => compiled.replayReverse({}), /invalid ProofScript constructor tag/);
     }
   }

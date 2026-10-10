@@ -56,6 +56,56 @@ def psElabBoolOr (left right : Bool) : Bool :=
 def psElabBoolAnd (left right : Bool) : Bool :=
   if left then right else false
 
+def psElabStructuralParameterAt
+    (ids : List Nat) : Nat -> Option Nat :=
+  match ids with
+  | List.nil => fun (_index : Nat) => Option.none
+  | List.cons id rest =>
+      let smaller : Nat -> Option Nat := psElabStructuralParameterAt rest;
+      fun (index : Nat) =>
+        match index with
+        | Nat.zero => Option.some id
+        | Nat.succ next => smaller next
+
+-- Abstraction changes exactly the selected free ID. Equality with the original
+-- instantiated type therefore checks its absence without a printed-name test.
+def psElabCheckStructuralType
+    (context : PsElabContext) (majorId : Nat) (type : PsExpr) :
+    Except PsElabError Unit :=
+  let instantiated := psMetaInstantiate context.metaContext type;
+  if psExprHasUnresolvedMeta instantiated then
+    Except.error PsElabError.unresolvedMetavariable
+  else if psExprAlphaEq instantiated (psExprAbstractFVar majorId instantiated) then
+    Except.ok Unit.unit
+  else Except.error PsElabError.structuralRecursionDependentParameter
+
+def psElabCheckStructuralParameters
+    (context : PsElabContext) (majorId : Nat) (parameterIds : List Nat) :
+    Except PsElabError Unit :=
+  match parameterIds with
+  | List.nil => Except.ok Unit.unit
+  | List.cons id rest =>
+      match psLocalFindById context.localContext id with
+      | Option.none => Except.error PsElabError.structuralRecursionInternal
+      | Option.some declaration =>
+          match psElabCheckStructuralType context majorId (psLocalDeclType declaration) with
+          | Except.error error => Except.error error
+          | Except.ok _ => psElabCheckStructuralParameters context majorId rest
+
+def psElabCheckStructuralTelescope
+    (context : PsElabContext) (recursion : PsElabStructuralRecursion) :
+    Except PsElabError Nat :=
+  match psElabStructuralParameterAt
+      recursion.explicitParameterIds recursion.recursiveParameterIndex with
+  | Option.none => Except.error PsElabError.structuralRecursionInternal
+  | Option.some majorId =>
+      match psElabCheckStructuralType context majorId recursion.resultType with
+      | Except.error error => Except.error error
+      | Except.ok _ =>
+          match psElabCheckStructuralParameters context majorId recursion.parameterIds with
+          | Except.error error => Except.error error
+          | Except.ok _ => Except.ok majorId
+
 def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true
 
@@ -182,15 +232,15 @@ def psElabFindStructureField
         fun (_cursor : PsExpr) =>
           Except.error PsElabError.unsupportedTerm
   | nextRemaining + 1 =>
-      let smaller : Nat -> PsExpr -> Except PsElabError Nat :=
-        psElabFindStructureField
-          context
-          typeName
-          target
-          fieldName
-          nextRemaining;
       fun (index : Nat) =>
         fun (cursor : PsExpr) =>
+          let smaller : Nat -> PsExpr -> Except PsElabError Nat :=
+            psElabFindStructureField
+              context
+              typeName
+              target
+              fieldName
+              nextRemaining;
           match
               psInferEnsureForall
                 context.environment
@@ -1495,10 +1545,10 @@ def psElabMatchFieldAtWorker
         | field :: _rest =>
             Option.some field
   | nextIndex + 1 =>
-      let smaller :
-          List PsElabMatchField -> Option PsElabMatchField :=
-        psElabMatchFieldAtWorker nextIndex;
       fun (fields : List PsElabMatchField) =>
+        let smaller :
+            List PsElabMatchField -> Option PsElabMatchField :=
+          psElabMatchFieldAtWorker nextIndex;
         match fields with
         | [] =>
             Option.none
@@ -1564,6 +1614,7 @@ def psElabPushRecursiveHypothesesWorker
                 | some recursion =>
                     let nextRecursion : PsElabStructuralRecursion := {
                       functionName := recursion.functionName
+                      parameterIds := recursion.parameterIds
                       explicitParameterIds := recursion.explicitParameterIds
                       recursiveParameterIndex := recursion.recursiveParameterIndex
                       calls :=
@@ -1642,11 +1693,11 @@ def psElabWildcardBinderNamesWorker
       fun (_index : Nat) =>
         []
   | nextRemaining + 1 =>
-      let smaller : Nat -> List PsSyntaxName :=
-        psElabWildcardBinderNamesWorker
-          span
-          nextRemaining;
       fun (index : Nat) =>
+        let smaller : Nat -> List PsSyntaxName :=
+          psElabWildcardBinderNamesWorker
+            span
+            nextRemaining;
         let segment :=
           String.Internal.append "_wild" (psNatToString index);
         let syntaxName : PsSyntaxName := {
@@ -1761,7 +1812,7 @@ def psElabMatchConstructorMinor
                 | Except.error error => Except.error error
                 | Except.ok hypotheses =>
                     match elaborate
-                        hypotheses.context
+                        (psElabContextAfterStructuralFields hypotheses.context)
                         body
                         (Option.some expectedType) with
                     | Except.error error => Except.error error
@@ -1893,6 +1944,76 @@ def psElabMatchMinorsWorker
                       minors := List.cons minor.term tail.minors
                     }
 
+-- Refine only the whole structural match, after every minor has contributed
+-- its meta solutions. Reopen exactly the constructor fields, replace the major
+-- through the remaining term (including IH lambdas), and close the same IDs.
+def psElabRefineStructuralMinor
+    (majorId fieldCount : Nat) (context : PsLocalContext)
+    (constructorValue minor : PsExpr) : Except PsElabError PsExpr :=
+  match fieldCount with
+  | Nat.zero =>
+      Except.ok (psExprInstantiate1 (psExprAbstractFVar majorId minor) constructorValue)
+  | Nat.succ remaining =>
+      match minor with
+      | PsExpr.lam name domain body binder =>
+          let pushed := psLocalPushBinding context name domain binder;
+          match psElabRefineStructuralMinor majorId remaining pushed.context
+              (PsExpr.app constructorValue (PsExpr.fvar pushed.id))
+              (psExprInstantiate1 body (PsExpr.fvar pushed.id)) with
+          | Except.error error => Except.error error
+          | Except.ok refined =>
+              Except.ok (PsExpr.lam name domain
+                (psExprAbstractFVar pushed.id refined) binder)
+      | _ => Except.error PsElabError.structuralRecursionInternal
+
+def psElabRefineStructuralMinors
+    (context : PsElabContext) (majorId : Nat)
+    (inductiveLevels : List PsLevel) (parameterArgs : List PsExpr)
+    (constructorNames : List PsName) (minors : List PsExpr) :
+    Except PsElabError (List PsExpr) :=
+  match constructorNames with
+  | List.nil =>
+      match minors with
+      | List.nil => Except.ok List.nil
+      | _ => Except.error PsElabError.structuralRecursionInternal
+  | List.cons constructorName rest =>
+      match minors with
+      | List.nil => Except.error PsElabError.structuralRecursionInternal
+      | List.cons minor tail =>
+          match psEnvironmentFindConstructor context.environment constructorName with
+          | Option.none => Except.error PsElabError.structuralRecursionInternal
+          | Option.some constructorInfo =>
+              let constructorValue := psMetaInstantiate context.metaContext
+                (psExprApplyMany (PsExpr.constE constructorName inductiveLevels) parameterArgs);
+              match psElabRefineStructuralMinor majorId constructorInfo.numFields
+                  context.localContext constructorValue (psMetaInstantiate context.metaContext minor) with
+              | Except.error error => Except.error error
+              | Except.ok refined =>
+                  match psElabRefineStructuralMinors context majorId
+                      inductiveLevels parameterArgs rest tail with
+                  | Except.error error => Except.error error
+                  | Except.ok refinedTail => Except.ok (List.cons refined refinedTail)
+
+def psElabRefineStructuralMatch
+    (inductiveLevels : List PsLevel) (parameterArgs : List PsExpr)
+    (constructorNames : List PsName) (result : PsElabMatchMinorsResult) :
+    Except PsElabError PsElabMatchMinorsResult :=
+  match result.context.structuralRecursion with
+  | Option.none => Except.ok result
+  | Option.some recursion =>
+      if recursion.collectCalls then
+        match psElabCheckStructuralTelescope result.context recursion with
+        -- An actual recursive call refuses these errors before returning its IH.
+        -- Nonrecursive dependent/Prop matches retain their constant motive.
+        | Except.error _ => Except.ok result
+        | Except.ok majorId =>
+            match psElabRefineStructuralMinors result.context majorId
+                inductiveLevels parameterArgs constructorNames result.minors with
+            | Except.error error => Except.error error
+            | Except.ok minors =>
+                Except.ok (PsElabMatchMinorsResult.mk result.context minors)
+      else Except.ok result
+
 def psElabMatchMinors
     (elaborate :
       PsElabContext ->
@@ -1907,15 +2028,18 @@ def psElabMatchMinors
     (context : PsElabContext)
     (constructorNames : List PsName) :
     Except PsElabError PsElabMatchMinorsResult :=
-  psElabMatchMinorsWorker
-    elaborate
-    inductiveInfo
-    inductiveLevels
-    parameterArgs
-    expectedType
-    alternatives
-    constructorNames
-    context
+  match psElabMatchMinorsWorker
+      elaborate
+      inductiveInfo
+      inductiveLevels
+      parameterArgs
+      expectedType
+      alternatives
+      constructorNames
+      context with
+  | Except.error error => Except.error error
+  | Except.ok result =>
+      psElabRefineStructuralMatch inductiveLevels parameterArgs constructorNames result
 
 def psElabExprListAppendWorker
     (values : List PsExpr) :
@@ -1936,21 +2060,9 @@ def psElabExprListAppend
     List PsExpr :=
   psElabExprListAppendWorker left right
 
--- Only matches on the structural major or a tracked child may register new
--- decreasing arguments. An unrelated nested match retains outer hypotheses but
--- cannot manufacture decrease evidence for its own fields. A narrower nested
--- result telescope also cannot supply the whole worker's induction hypothesis.
-def psElabStructuralParameterAt
-    (ids : List Nat) : Nat -> Option Nat :=
-  match ids with
-  | List.nil => fun (_index : Nat) => Option.none
-  | List.cons id rest =>
-      let smaller : Nat -> Option Nat := psElabStructuralParameterAt rest;
-      fun (index : Nat) =>
-        match index with
-        | Nat.zero => Option.some id
-        | Nat.succ next => smaller next
-
+-- The declaration's root match has one permission to establish its IH map.
+-- Nested matches retain existing root-child identities but cannot create aliases
+-- from a different recurrence, even when the result types happen to agree.
 def psElabStructuralMatchContext
     (context : PsElabContext) (scrutinee expectedType : PsExpr) : PsElabContext :=
   match context.structuralRecursion with
@@ -1960,23 +2072,20 @@ def psElabStructuralMatchContext
         (psMetaInstantiate context.metaContext expectedType)
         (psMetaInstantiate context.metaContext recursion.resultType);
       let permitted : Bool :=
-        if sameResult then
-          match scrutinee with
-          | PsExpr.fvar id =>
-              match psElabStructuralParameterAt
-                  recursion.explicitParameterIds recursion.recursiveParameterIndex with
-              | Option.none => false
-              | Option.some majorId =>
-                  if Nat.beq id majorId then true
-                  else
-                    match psElabStructuralRecursionFindCall recursion.calls id with
-                    | Option.none => false
-                    | Option.some _ => true
-          | _ => false
+        if recursion.collectCalls then
+          if sameResult then
+            match scrutinee with
+            | PsExpr.fvar id =>
+                match psElabStructuralParameterAt
+                    recursion.explicitParameterIds recursion.recursiveParameterIndex with
+                | Option.none => false
+                | Option.some majorId => Nat.beq id majorId
+            | _ => false
+          else false
         else false;
       psElabContextWithStructuralRecursion context
         (Option.some (PsElabStructuralRecursion.mk
-          recursion.functionName recursion.explicitParameterIds
+          recursion.functionName recursion.parameterIds recursion.explicitParameterIds
           recursion.recursiveParameterIndex recursion.calls recursion.resultType permitted))
 
 def psElabMatch
@@ -2168,15 +2277,15 @@ def psElabApplyArgsWithFuelWorker
           fun (_pendingInstancesRev : List Nat) =>
             Except.error PsElabError.fuelExhausted
   | fuel + 1 =>
-      let smaller :
-          PsElabTermResult ->
-          List PsSyntaxTerm ->
-          List Nat ->
-          Except PsElabError PsElabApplicationResult :=
-        psElabApplyArgsWithFuelWorker elaborate fuel;
       fun (current : PsElabTermResult) =>
         fun (arguments : List PsSyntaxTerm) =>
           fun (pendingInstancesRev : List Nat) =>
+            let smaller :
+                PsElabTermResult ->
+                List PsSyntaxTerm ->
+                List Nat ->
+                Except PsElabError PsElabApplicationResult :=
+              psElabApplyArgsWithFuelWorker elaborate fuel;
             let currentType :=
               psWhnf
                 current.context.environment
@@ -2395,9 +2504,9 @@ def psElabDropForallBindersWorker
       fun (type : PsExpr) =>
         Option.some type
   | nextRemaining + 1 =>
-      let smaller : PsExpr -> Option PsExpr :=
-        psElabDropForallBindersWorker nextRemaining;
       fun (type : PsExpr) =>
+        let smaller : PsExpr -> Option PsExpr :=
+          psElabDropForallBindersWorker nextRemaining;
         match type with
         | .forallE _ _ body _ =>
             smaller body
@@ -2418,9 +2527,9 @@ def psElabTakeForallNamesWorker
       fun (_type : PsExpr) =>
         Option.some []
   | nextRemaining + 1 =>
-      let smaller : PsExpr -> Option (List String) :=
-        psElabTakeForallNamesWorker nextRemaining;
       fun (type : PsExpr) =>
+        let smaller : PsExpr -> Option (List String) :=
+          psElabTakeForallNamesWorker nextRemaining;
         match type with
         | .forallE name _ body _ =>
             match smaller body with
@@ -2753,10 +2862,10 @@ def psElabNatListAtWorker
         | value :: _ =>
             Option.some value
   | nextIndex + 1 =>
-      let smaller :
-          List Nat -> Option Nat :=
-        psElabNatListAtWorker nextIndex;
       fun (values : List Nat) =>
+        let smaller :
+            List Nat -> Option Nat :=
+          psElabNatListAtWorker nextIndex;
         match values with
         | [] =>
             Option.none
@@ -2888,13 +2997,16 @@ def psTryElabStructuralSelfCall
                       Option.none with
                 | Except.error error => Except.error error
                 | Except.ok hypothesisId =>
-                    match
-                        psElabResolvedTerm
-                          context
-                          (PsExpr.fvar hypothesisId)
-                          expected with
+                    match psElabCheckStructuralTelescope context recursion with
                     | Except.error error => Except.error error
-                    | Except.ok result => Except.ok (Option.some result)
+                    | Except.ok _ =>
+                        match
+                            psElabResolvedTerm
+                              context
+                              (PsExpr.fvar hypothesisId)
+                              expected with
+                        | Except.error error => Except.error error
+                        | Except.ok result => Except.ok (Option.some result)
           | Option.none => Except.ok Option.none
       | _ =>
           Except.ok Option.none
@@ -2926,15 +3038,15 @@ def psElabTermWithFuel
           fun (_expected : Option PsExpr) =>
             Except.error PsElabError.fuelExhausted
   | remaining + 1 =>
-      let smaller :
-          PsElabContext ->
-          PsSyntaxTerm ->
-          Option PsExpr ->
-          Except PsElabError PsElabTermResult :=
-        psElabTermWithFuel remaining;
       fun (context : PsElabContext) =>
         fun (term : PsSyntaxTerm) =>
           fun (expected : Option PsExpr) =>
+            let smaller :
+                PsElabContext ->
+                PsSyntaxTerm ->
+                Option PsExpr ->
+                Except PsElabError PsElabTermResult :=
+              psElabTermWithFuel remaining;
             match term with
             | .reference name =>
                 if psElabStructuralReferenceEscapes context name then

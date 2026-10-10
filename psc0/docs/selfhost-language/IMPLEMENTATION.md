@@ -1,10 +1,24 @@
 # PSC0 SH/1 implementation and qualification
 
+## Current strict SH/1 disposition
+
+The declared bounded PSC0-SH/1 source, runtime and TypeScript target are qualified at [compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`](https://github.com/dwijayuda/pskernel/commit/1fa5559a72b293defc56ef7e7020cf82d4b44b79). The [release qualification record](strict/release-qualification.json) binds the exact compiler evidence, eight independently reviewed source and composition argument packets, all **33 correspondence dispositions** and **27 stage dispositions**, and separate provider acceptance.
+
+[Original run 38015134511](https://github.com/dwijayuda/pskernel/actions/runs/38015134511) remains cancelled; it owns the retained completed native/N1/C1 evidence and named successful prerequisite gates. [Continuation 38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), orchestrated at `43fa000c4adbc9d4754e20c213595c1449f00961`, completed C2/C3 and their conformance gates using the same compiled source and unchanged 48-file recipe, then failed on native IR pass-marker extraction in the evidence binder. Its failure and skipped provider remain recorded.
+
+[Evidence-completion run 38027413274](https://github.com/dwijayuda/pskernel/actions/runs/38027413274), orchestrated at `719f5ec4225baf51d1969cc3b5e4cbc6959fad4a`, authenticated both archives and all 446 imported files, applied the reviewed `slice(pass.length)` binder correction as a separate evidence producer, and completed the original qualification construction without rebuilding any generation or repeating conformance. The compiled checkout and its original 48 recipe inputs remained unchanged. Compiler job `114141103218` completed evidence binding and the complete 135-file catalog with 24 exact returned JSON values. Independent provider job `114141265302` accepted all four deduplicated admission streams covering eight C2/C3 roles. The complete four-product C2/C3 tuple matches, and N1/C2/C3 TypeScript and JavaScript agree. Final 33/27 dispositions are explicitly bound to these exact receipts and their declared source arguments in the release record.
+
+Qualification applies to the explicit `psCompilerSh1TypeScriptSources` entry and the recorded strict development/qualification lane. Generic compiler APIs do not implicitly select strict SH/1, and `selectedByPsconfig` remains false. Reviewed source arguments retain their declared canonical-input, primitive, platform and successful-allocation premises. Finite conformance, original-IR typing, fixed-point equality and provider admission retain their separate meanings; `generalPreservationProven` and the original narrow producer flags remain false.
+
+R remains selected. Handwritten `.lean` remains authoritative through the owned frontend, current `.ps` uses only the `ps-0.9-r3` bounded subset, and current development/recovery uses TypeScript 7.0.2. Node 22.23.3, Lean 4.34.0 and the independently pinned provider are unchanged. Earlier attempt requests and pending statuses below describe their recorded historical checkpoints; they do not restart completed work. The linked release record defines the current strict disposition.
+
+## Prior implementation and qualification checkpoints
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 That initial attempt stopped at a new test-helper construction error (`PsErasureScope.mk` was not a generated runtime export). C1/C2/C3 and provider qualification were not reached; its passing native checks do not establish completed F qualification.
 
-Status: bounded runtime IR typing M6 is compiler-qualified with independent
+Historical M6 status: bounded runtime IR typing M6 is compiler-qualified with independent
 selected-provider acceptance in both its TypeScript 5 baseline and the current
 TypeScript 7.0.2 integration. The exact qualifying source checkpoints are:
 
@@ -29,14 +43,118 @@ F is **compiler-qualified and independently provider-accepted** at `fcd875c8f38d
 Its own results are recorded below; R remains the selected authoring seed.
 
 The installed checker verifies its bounded runtime type contract before emitting
-the same IR. Strict SH/1 remains false because the remaining primitive/value,
-bounds/text-position and lowering correspondence contracts are separate.
+the same IR. Strict SH/1 remains false pending exact integrated-source qualification and
+explicit final disposition. The general primitive/value, bounds/text-position
+and lowering arguments and their interface reviews are now complete in their
+stated domain.
 No named PSC1 profile or new seed is selected by these qualifications.
 
 This document supplements [SPEC.md](SPEC.md). Exact receipts and historical
 A/B/H/E records are indexed in [qualification-evidence.json](qualification-evidence.json).
 [TYPESCRIPT7.md](TYPESCRIPT7.md) records the exact compiler profiles, recovery
 proof and measured TypeScript phase.
+
+## Historical host observation correction and qualification request
+
+[Attempt14](https://github.com/dwijayuda/pskernel/actions/runs/38011068208) at **138fe57a6adeddfe875f1fbf4cc3a7de6e406a91** completed N1 development and **built C1**. C1 passed source, target, runtime, IR-checker fixtures, helper runtime, generic-erasure, session and capabilities checks before the post-generation migration-report comparison failed. C1 iteration, C2/C3, fixed point, strict binder and provider were not run. The complete native source check covered64 modules,1708 declarations,50 normalizations and64911 original-IR expressions with zero findings.
+
+The complete87-case N1 and C1 reports agree. R differs only because its older declaration-name record lacks the empty function-entry metadata field in two nil-input scope observations; the F2 and aggregate hashes consequently differ. That field is semantic ABI metadata. The source-reviewed invariant proves that these names-only scopes have an empty index; nonempty metadata is never discarded.
+
+The [reviewed correction](strict/reviewed-candidates/worker-migration-observation-schema-repair.json) and [independent review](strict/reviewed-candidates/migration-worker-metadata-independent-review.json) change two host scripts and the strict workflow. Current observations strictly require the four-field schema and canonical empty entries. Exactly two authenticated selected-R callers explicitly use the historical three-field schema and add the proven-empty field to a fresh observation. All87 cases, live compiler objects, exact same-generation checks and the original post-C1 comparison remain. This is an observation boundary, not a legacy grammar mode.
+
+A full-only data comparison now reuses the completed N1 report and authenticated R report **before C1 generation**. It adds no compiler invocation or fixture. The complete68-file host/workflow audit, twelve exact edit guards, and retained-report projection are independently reviewed. Actual new-recipe compiler qualification remains required.
+
+The enclosing commit requests one full **[sh1-qualify]** run. Production source and source closure **46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5** are unchanged. The expected48-file recipe is **a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba**, changing exactly two host hashes; the workflow is bound separately. Do not relabel the failed attempt14 receipts as new qualification. All33 correspondence and27 stage obligations remain pending until actual complete compiler/provider PASS and explicit final disposition. R selection, new-only ps-0.9-r3, TypeScript7.0.2, kernel/provider and .lean authority are unchanged.
+
+Retained attempt14 [failure and stage evidence](strict/attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/migration-worker-correspondence-failure.json) includes complete N1/C1 receipts and the compact68-event marker archive. The first13 attempts are preserved unchanged. Passed TypeScript7 cold recovery remains valid because its seven inputs are unchanged. The final33/27 assembly drafts are retained as conditional planning; their failed138fe/run14 expectations must be refreshed before use.
+
+## Historical closed-universe inference correction request
+
+The [retained-N1 diagnostic](https://github.com/dwijayuda/pskernel/actions/runs/38010024282) successfully reproduced and located the failed generic preparation at **sourceIndex 6, sh1GroupLet, stableDeclaration**. It used the unchanged b3fac compiler/fixture with one parse and one origin-preserving preparation. The diagnostic reports the owner and error; the universe-expression explanation is separately reviewed source analysis.
+
+The [closed-universe correction](strict/reviewed-candidates/closed-universe-inference-repair.json), blob **f71b09c33a574e6868b193afac946355008b4d61**, changes only Meta/Infer.lean from cad2c470d5c7682ffdc4caa111dafb5f076b27b3 to **160a4ae9fb8e5ae00729752463d5c42d4e9f8889**. Three local pure helpers normalize the closed levels freshly constructed by the sort-successor and Pi-imax rules. Every symbolic level is returned unchanged. This resolves the source-derived imax(1,1)-versus-1 construction mismatch without changing equality, unification, kernel/provider, grammar, fixtures or conformance hosts. Complete 106-file construction audit and exact three-guard root/independent review are retained. Finite proper levels and required allocation are explicit premises; no resource-equivalence claim is made.
+
+The enclosing source commit requests one full **[sh1-qualify]** execution. N1/C1/C2/C3, fixed point/native parity, the exact evidence binder and independent provider must pass before the current 33 correspondence rows and 27 stage obligations are discharged. The previous attempt13 failed after six passing N1 conformance stages; it has no completed N1 receipt. Passed cold recovery remains reusable because its seven inputs are unchanged. See [AI_WORK_STATE.md](../../AI_WORK_STATE.md) for the active continuation and exact evidence identities.
+
+## Historical strict SH/1 source integration
+
+The practical migration is already merged at **ed5d00aca0743bde583b45fe7756dd494ac3960f**. Continue the authorized strict SH/1 qualification and merge; do not repeat the practical merge or promote a seed.
+
+Latest published source before this enclosing host correction is **fb8f8076df3ed8708f927f88aa2d32febbfa89dc**, root **b93eaa340ff8955596ddc0376835386dd7f7c0d0**, PSC0 tree **30758899192080d3f6ffc5182f53a2c65a6d1c8a**. Production Expr remains **b4af2687c1b94e85014e323e5325385f139d4015**, SHA256 **88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15**, 138189 bytes. This correction changes only the source-conformance host and its evidence binder.
+
+[Run 38007714076](https://github.com/dwijayuda/pskernel/actions/runs/38007714076), compiler job **114080256053**, passed steps 18–23 and then the full native strict source, target and original-IR checks: **64 modules, 1705 source declarations, 50 normalizations, 64829 IR expressions, zero findings**, plus all 15 native IR cases. The previous worker self-call arity refusal is cleared. **N1 was generated, TypeScript 7 compiled and loaded.** Step 24 subsequently failed in observeEmptySource at the obsolete assertion `letE !== call`. N1 conformance and its final receipt were not completed; C1/C2/C3 did not start. Provider **114080662313** and cold **38007714034** skipped. Attempt 12 retains exact failure blob **ff69f080d6fa1421e36e7db99a60ea4276d3e701** and full log **0239d0ea507f23f560afd3ca84ec8dda3108c935**; the first eleven attempts remain unchanged.
+
+The frozen sh1EmptyFunction source returns `nomatch value` with result `Nat -> Nat`; it contains no authored application. The current compiler opens only the actual lambda prefix, so the declaration has one runtime parameter `value` and directly returns the typed empty `letE`. Its result arrow must not be converted into a new parameter and call. The [empty source return review](strict/reviewed-candidates/empty-source-return-boundary.json) binds the two exact host changes: gate **fec9c43e4bd792aef81983d1dbf100a5b6b2beaa**, binder **b0b080eea2c353640f12d744e599737d71f9c4f6**. All four empty-source declarations now require direct body identity, exact declaration/local result types and exact runtime parameter lists; Fresh alone retains the second `emptyResult` parameter. The binder authenticates the added declarationResultType/bodyIsTypedEmptyResult observations. There is no wrapper peeling or new compilation. The complete 34-host-script assertion-class audit found this one obsolete computed-result eta assertion. Separate directly authored typed-empty-callee IR, untyped-callee refusal, five empty ABI signatures and computed-scrutinee once/original-fault coverage remain unchanged.
+
+The production correction chain remains frozen: the flat List-pattern packet **e91fcacaa7c5a73c1d1fba8c30d213faee3fda83** maps Expr e3ed to a4d; the callback-local self-prefix packet **4c5d8ecca42e10c6da6f19f6118a829c173c9d4d** maps a4d to b4af. The latter binds the two-parameter recursive result inside the original callback, before the unchanged nested-scope/value application. No computation crosses a lambda and no eager remaining-fuel factory is introduced. Its complete 30-file self-call audit remains valid. The cumulative canonical/recursion inventory stays **46 code files: 30 production Lean and 16 hosts/fixtures**, with the two new host overlays. It is not the entire strict branch diff from main.
+
+The general N/GROUP/ER/EV/TS arguments, ten-interface cross-family review and eleven-stage source/runtime review are complete in their stated domain. The final mapping **697c94b2722a6191537b714f71f629713637b30a**, manifest **419564764abc492816833a643af40b027b0fd897**, correspondence review **20f0116df23d4304e3b7e8f9da5ff39599eaf037** and stage/activation review **f6cc608044094aebe90609cb140d9cd00825ebf4** are attached. All **33 correspondence rows and 27 stage obligations remain open** pending exact successful execution and the supported final disposition. ER-06's stale empty-layout domain sentence must be corrected at disposition. Frozen advisory maps keep their historical pins; the active final record must compose all current source and host transports.
+
+The enclosing commit requests one full **[sh1-qualify]** run. Discover the actual commit and matching Actions head_sha, then continue N1/C1/C2/C3, four fixed-point products/native parity, independent provider, retained evidence, explicit 33/27 dispositions and authorized merge. The three-entry/twelve-observation positive flat-tail block still awaits execution alongside the original 61 IR behaviors and 38 refusals. No extra native-only or cold run is needed; passed cold run 37983663908 and its seven inputs are unchanged.
+
+Compose justified final claims in a separate release-qualification record. Preserve produced narrow false flags, runtime-contract and psconfig recipe bytes, historical proof anchors, selected R and the frozen provider. Keep authoritative handwritten **.lean through the owned frontend**, **ps-0.9-r3/new-only**, **Lean 4.34.0 / Node 22.23.3 / TypeScript 7.0.2**. TypeScript 5 is retired. Bulk refactoring, new syntax/deeper recursion, .ps source-authority migration and seed promotion stay deferred. No machine-checked compiler-wide theorem or measured speed/heap improvement is claimed.
+
+
+Function values use nested unary runtime arrows throughout generic arguments,
+returned values, record/data fields and arrays. Actual named declaration entries
+retain the complete aligned lambda prefix from checked Core; a computed returned
+function does not enlarge that entry. Supplied partial operands are captured
+once in order. Generic definitions with no logical runtime arguments use a
+fresh ignored Unit activation argument internally. The existing exact IR checker
+and refusal of arbitrary generic initialized values remain.
+
+The full original structural telescope now includes implicit and proof
+parameters. An actual recursive call refuses unresolved or major-dependent
+parameter/result types. After all minors have been elaborated, the root match
+refines each original-major reference to that minor's actual constructor and
+fields, under the final metavariable context. Root recursion permission is
+consumed before branch-body elaboration and erasure; nested control retains
+already established outer child hypotheses.
+
+The old text saying that an equal nested result telescope alone could introduce
+new descendant hypotheses was incorrect. A fold hypothesis supplies the value
+at its established child; it does not supply an arbitrary recursive function
+at a newly exposed grandchild or an alias from a second match. Current strict
+SH/1 admits direct structural descent and references to established root-child
+identities inside nested control. New nested child aliases are explicitly
+refused. This corrects an unsound capability claim before strict activation;
+it is not a general descendant-recursion implementation.
+
+The source-level counterexamples and exact repair are preserved in
+[the producer review](strict/reviewed-candidates/structural-root-core-repair.json).
+The finite regression reads the same prepared Core declarations later erased,
+records their typed AST snapshots, and checks four fixed Nat equations through
+actual minor closures. It separately checks emitted and native-PSC-emitted
+programs. Five source refusals require the precise structural elaboration
+stage, owner and error. These observations reuse existing compiler/TS/native
+builds; they do not establish general recursor demand adequacy.
+
+Recursive structures now follow their actual minor telescope. The Core prepass
+retains recursive-record field and IH lambdas; expression erasure captures the
+major once, binds ordered typed record projections and reuses the existing
+field/IH opening. Used root IHs call the actual declaration on the projected
+child. Record layouts, generic field types and the original numParams+3
+recursor saturation boundary remain intact. Ordinary recursive-record
+declarations and their functions are supported even when their types have no
+finite canonical inhabitants.
+
+The existing generic fixture adds two recursive record layouts and four
+compile-only functions. Its same-object original-IR inspection checks six
+ordered projections and two used/two unused hypotheses. It adds no compiler
+invocation or runtime record value. The exact source and evidence reviews are
+[recursive-structure-erasure.json](strict/reviewed-candidates/recursive-structure-erasure.json)
+and [recursive-structure-evidence.json](strict/reviewed-candidates/recursive-structure-evidence.json).
+
+The [canonical function argument](strict/CANONICAL_FUNCTION_ARGUMENTS.md)
+records the general entry, capture, activation, bridge and finite-placement
+arguments. The completed [erasure argument](strict/ERASURE_ARGUMENTS.md)
+supplies all nine source-derived ER rule interfaces, including actual root
+recursion and both structure-recursor routes. Cross-family and source/runtime composition reviews are complete. All 33
+administrative correspondence dispositions and 27 stage dispositions remain
+pending the exact integrated-source qualification and explicit evidence mapping. All strict/global/provider qualification
+flags remain false until exact execution and required arguments are complete.
+Selected R, new-only ps-0.9-r3, Lean 4.34.0, Node 22.23.3 and TypeScript 7.0.2
+are unchanged. The passed isolated TS7 cold recipe does not need another run.
 
 ## Current new-only source grammar checkpoint
 
@@ -47,8 +165,7 @@ records the exact supplied reference SHA-256, finite enabled grammar and
 unsupported forms. R2 has its own completed compiler/provider, cold-recovery and
 explicit selection records below. F used that authenticated selected R compiler
 and earned its own separate source/runtime qualification.
-Full Standard/PSCV conformance and strict SH/1 remain unearned, and Lean remains
-4.34.0.
+Full Standard/PSCV conformance remains unearned, and Lean remains 4.34.0. The current explicit strict SH/1 disposition is recorded at the start of this document.
 
 The implementation paths are:
 
@@ -269,10 +386,16 @@ accepted subset, so the historical compiler can build the first candidate.
 - Name decisions use lexical identities. All internal worker parameters are
   alpha-renamed to names unavailable in source syntax. The global worker uses
   a numeric internal name component, and environment insertion checks collision.
-- Unrelated nested matches retain available outer induction hypotheses but
-  cannot introduce decreasing children. Descendant hypotheses are available
-  only when their expected result telescope agrees with the whole worker
-  result; narrower nested motives are outside this checkpoint.
+- Explicit nested matches retain already established outer induction
+  hypotheses. Only the whole root structural match registers direct child
+  identities for self calls. A second match or a match on a child cannot
+  manufacture a new recursive hypothesis, even when its expected result
+  telescope matches the worker result. New descendant/alias provenance needs
+  a separately implemented and qualified capability.
+- The complete original parameter telescope, including implicit and proof
+  parameters, and the result must be resolved and major-independent for an
+  actual recursive call. Root minor bodies refine references to the original
+  major to the actual constructor and fields after final elaboration.
 
 The kernel/provider implementation and metatheory are unchanged on this branch.
 
@@ -312,7 +435,7 @@ iteration corpus through that compiler. From `psc0`:
 npm run dev:sh1
 ```
 
-This runs `lake build psc1 psc1_ir_check_tests` followed by
+This runs `lake build psc1 psc1_sh1_compile psc1_ir_check_tests` followed by
 `node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1`.
 Current PSC0 compilation requires exact TypeScript 7.0.2. Install the `psc0` development dependency or provide the installed
 launcher through `PSC0_TSC`; `PSC0_TYPESCRIPT_VERSION` defaults to `7.0.2`.

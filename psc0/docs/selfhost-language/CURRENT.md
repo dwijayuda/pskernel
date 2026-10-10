@@ -1,5 +1,17 @@
 # PSC0 current authoring guide
 
+## Current strict SH/1 disposition
+
+The declared bounded PSC0-SH/1 source, runtime and TypeScript target are qualified at [compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`](https://github.com/dwijayuda/pskernel/commit/1fa5559a72b293defc56ef7e7020cf82d4b44b79). The [release qualification record](strict/release-qualification.json) binds the exact compiler evidence, eight independently reviewed source and composition argument packets, all **33 correspondence dispositions** and **27 stage dispositions**, and separate provider acceptance.
+
+[Original run 38015134511](https://github.com/dwijayuda/pskernel/actions/runs/38015134511) remains cancelled; it owns the retained completed native/N1/C1 evidence and named successful prerequisite gates. [Continuation 38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), orchestrated at `43fa000c4adbc9d4754e20c213595c1449f00961`, completed C2/C3 and their conformance gates using the same compiled source and unchanged 48-file recipe, then failed on native IR pass-marker extraction in the evidence binder. Its failure and skipped provider remain recorded.
+
+[Evidence-completion run 38027413274](https://github.com/dwijayuda/pskernel/actions/runs/38027413274), orchestrated at `719f5ec4225baf51d1969cc3b5e4cbc6959fad4a`, authenticated both archives and all 446 imported files, applied the reviewed `slice(pass.length)` binder correction as a separate evidence producer, and completed the original qualification construction without rebuilding any generation or repeating conformance. The compiled checkout and its original 48 recipe inputs remained unchanged. Compiler job `114141103218` completed evidence binding and the complete 135-file catalog with 24 exact returned JSON values. Independent provider job `114141265302` accepted all four deduplicated admission streams covering eight C2/C3 roles. The complete four-product C2/C3 tuple matches, and N1/C2/C3 TypeScript and JavaScript agree. Final 33/27 dispositions are explicitly bound to these exact receipts and their declared source arguments in the release record.
+
+Qualification applies to the explicit `psCompilerSh1TypeScriptSources` entry and the recorded strict development/qualification lane. Generic compiler APIs do not implicitly select strict SH/1, and `selectedByPsconfig` remains false. Reviewed source arguments retain their declared canonical-input, primitive, platform and successful-allocation premises. Finite conformance, original-IR typing, fixed-point equality and provider admission retain their separate meanings; `generalPreservationProven` and the original narrow producer flags remain false.
+
+R remains selected. Handwritten `.lean` remains authoritative through the owned frontend, current `.ps` uses only the `ps-0.9-r3` bounded subset, and current development/recovery uses TypeScript 7.0.2. Node 22.23.3, Lean 4.34.0 and the independently pinned provider are unchanged. Earlier attempt requests and pending statuses below describe their recorded historical checkpoints; they do not restart completed work. The linked release record defines the current strict disposition.
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 This is the developer entry point for the current bounded self-host language.
@@ -44,8 +56,7 @@ Current tools require Lean **4.34.0**, Node **22.23.3** and TypeScript **7.0.2**
 Selected-R cache-miss recovery uses the proven native Lean plus TypeScript 7
 route. Historical S0/A TypeScript **5.8.3** metadata and recipes remain archival
 facts, with no current TypeScript 5 execution path. See
-[TYPESCRIPT7.md](TYPESCRIPT7.md). Full Standard/PSCV conformance, Lean 4.35 and
-strict SH/1 activation are separate work.
+[TYPESCRIPT7.md](TYPESCRIPT7.md). Full Standard/PSCV conformance and Lean 4.35 remain separate work. The explicit strict SH/1 lane has the scoped qualification recorded above.
 
 ## Source forms to use
 
@@ -159,8 +170,7 @@ bytes against the supplied compiler digest.
 
 ## Qualification and remaining limits
 
-Use the native gate to check the coherent change before the expensive
-selected-seed sequence. Integrate a source change once its exact source passes
+Use the native gate for ordinary coherent source edits and the authenticated resident loop for repeated preparation. Reserve the expensive selected-seed sequence for coherent language, runtime, source-family or toolchain promotion. Qualify a new checkpoint once its exact source passes
 C1/C2/C3, required current product equality, original-IR checking, bounded
 runtime/grammar gates and separate exact-stream provider decisions. Selecting a
 new authoring seed also requires its separate recovery proof and explicit
@@ -173,6 +183,7 @@ default/named arguments, automatic empty-call completion, tuple terms/patterns,
 arbitrary result projection such as `f(x).field`, nested patterns, general
 equation normalization, class/instance synthesis and broader verified effects.
 Legacy semicolon sequences and repeated explicit PS declaration groups are
-rejected. Full PSC1/Standard/PSCV, strict SH/1 and authoritative PS implementation
-source are not established by this checkpoint. [SPEC.md](SPEC.md) separates the
-implemented subset from the complete contract.
+rejected. Strict SH/1 is qualified for its declared bounded scope; unrestricted
+PSC1, full Standard/PSCV and authoritative PS implementation source are not
+established. [SPEC.md](SPEC.md) separates the implemented subset from the
+complete language, and the release record defines the strict qualification.

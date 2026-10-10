@@ -138,10 +138,10 @@ def psPrintProofScriptTermWithFuel
       fun (_term : PsSyntaxTerm) =>
         Except.error PsSourcePrintError.fuelExhausted
   | remaining + 1 =>
+      fun (term : PsSyntaxTerm) =>
       let smaller :
           PsSyntaxTerm -> Except PsSourcePrintError String :=
         psPrintProofScriptTermWithFuel remaining;
-      fun (term : PsSyntaxTerm) =>
       match term with
       | .reference name =>
           psPrintSyntaxName name

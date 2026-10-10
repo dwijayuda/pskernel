@@ -140,21 +140,21 @@ def psEraseOpenDefinitionWithFuel
           (_parametersRev : List PsVerifiedIrParameter) =>
         Except.error PsErasureError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          PsErasureScope ->
-          PsExpr ->
-          PsExpr ->
-          Nat ->
-          List PsVerifiedIrTypeParameter ->
-          List PsVerifiedIrParameter ->
-          Except PsErasureError PsOpenedErasedDefinition :=
-        psEraseOpenDefinitionWithFuel environment remaining;
       fun (scope : PsErasureScope)
           (currentType : PsExpr)
           (currentValue : PsExpr)
           (typeIndex : Nat)
           (typeParametersRev : List PsVerifiedIrTypeParameter)
           (parametersRev : List PsVerifiedIrParameter) =>
+        let smaller :
+            PsErasureScope ->
+            PsExpr ->
+            PsExpr ->
+            Nat ->
+            List PsVerifiedIrTypeParameter ->
+            List PsVerifiedIrParameter ->
+            Except PsErasureError PsOpenedErasedDefinition :=
+          psEraseOpenDefinitionWithFuel environment remaining;
         match currentType with
         | PsExpr.forallE typeName domain typeBody binder =>
             match currentValue with
@@ -332,6 +332,28 @@ def psEraseOpenDefinition
     []
     []
 
+-- A direct single-definition caller can supply a value before that definition
+-- replaces its self axiom in the environment. Seed only this missing entry from
+-- the supplied raw type/value; module erasure has already prepared the catalogue.
+def psErasureEnsureDefinitionEntry
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (name : PsName) (type value : PsExpr) : Except PsErasureError PsErasureScope :=
+  match psErasureLookupEntry scope.declarationNames name with
+  | Option.some _ => Except.ok scope
+  | Option.none =>
+      match psErasureAddDeclarationEntry environment name type value
+          scope.declarationNames.entries with
+      | Except.error error => Except.error error
+      | Except.ok entries =>
+          let names := PsErasureDeclarationNames.mk
+            scope.declarationNames.byCore scope.declarationNames.byOutput
+            scope.declarationNames.count entries;
+          Except.ok
+            (PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
+              scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
+              scope.runtimeStructures scope.runtimeStructureConstructors
+              scope.runtimeExpressions scope.currentDefinition)
+
 def psEraseDefinition
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -350,40 +372,58 @@ def psEraseDefinition
           psErasureSafeIdentifier
             (psNameToString name)
             "decl";
-    let definitionScope : PsErasureScope :=
-      PsErasureScope.mk
-        scope.localContext
-        scope.runtimeLocals
-        scope.typeLocals
-        scope.erasedLocals
-        scope.declarationNames
-        scope.runtimeConstructors
-        scope.runtimeRecursors
-        scope.runtimeStructures
-        scope.runtimeStructureConstructors
-        scope.runtimeExpressions
-        (Option.some
-          (PsErasureCurrentDefinition.mk outputName List.nil List.nil));
-    match psLowerStructureRecursors environment value with
+    match psErasureEnsureDefinitionEntry environment scope name type value with
     | Except.error error => Except.error error
-    | Except.ok normalizedValue =>
-        match
-            psEraseOpenDefinition
-              environment
-              definitionScope
-              type
-              normalizedValue with
+    | Except.ok entryScope =>
+        let definitionScope : PsErasureScope :=
+          PsErasureScope.mk
+            entryScope.localContext
+            entryScope.runtimeLocals
+            entryScope.typeLocals
+            entryScope.erasedLocals
+            entryScope.declarationNames
+            entryScope.runtimeConstructors
+            entryScope.runtimeRecursors
+            entryScope.runtimeStructures
+            entryScope.runtimeStructureConstructors
+            entryScope.runtimeExpressions
+            (Option.some
+              (PsErasureCurrentDefinition.mk outputName List.nil List.nil));
+        match psLowerStructureRecursors environment value with
         | Except.error error => Except.error error
-        | Except.ok opened =>
-            match psErasureEtaFunction opened.parameters opened.resultType opened.body with
+        | Except.ok normalizedValue =>
+            match
+                psEraseOpenDefinition
+                  environment
+                  definitionScope
+                  type
+                  normalizedValue with
             | Except.error error => Except.error error
-            | Except.ok expanded =>
-                match expanded with
-                | PsVerifiedIrExpr.lambda parameters resultType body =>
+            | Except.ok opened =>
+                -- Keep the actual aligned Core entry prefix. A computed function
+                -- result is evaluated here and returned as a canonical unary value.
+                if psListIsEmpty opened.parameters then
+                  if psListIsEmpty opened.typeParameters then
                     Except.ok
                       (Option.some
-                        (PsVerifiedIrDeclaration.mk outputName opened.typeParameters parameters resultType body))
-                | _ => Except.error PsErasureError.unsupportedRuntimeTerm
+                        (PsVerifiedIrDeclaration.mk outputName opened.typeParameters
+                          opened.parameters opened.resultType opened.body))
+                  else
+                    match psErasureIgnoredUnitNameWithFuel
+                        definitionScope opened.body 4096 0 with
+                    | Except.error error => Except.error error
+                    | Except.ok unitName =>
+                        Except.ok
+                          (Option.some
+                            (PsVerifiedIrDeclaration.mk outputName opened.typeParameters
+                              [PsVerifiedIrParameter.mk unitName
+                                (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.unit)]
+                              opened.resultType opened.body))
+                else
+                  Except.ok
+                    (Option.some
+                      (PsVerifiedIrDeclaration.mk outputName opened.typeParameters
+                        opened.parameters opened.resultType opened.body))
 
 def psErasureReverseIrDeclarationsAcc
     (declarations : List PsVerifiedIrDeclaration) :
@@ -455,38 +495,41 @@ def psEraseCoreModuleWithRuntimePrelude
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
   let baseScope := psErasureScopeEmpty names;
-  match
-      psPrepareRuntimeStructures
-        environment
-        runtimeDeclarations
-        runtimeDeclarations
-        baseScope
-        [] with
+  match psErasurePrepareDeclarationEntries environment runtimeDeclarations baseScope with
   | Except.error error => Except.error error
-  | Except.ok preparedStructures =>
+  | Except.ok entryScope =>
       match
-          psPrepareRuntimeInductives
+          psPrepareRuntimeStructures
             environment
             runtimeDeclarations
             runtimeDeclarations
-            preparedStructures.scope
+            entryScope
             [] with
       | Except.error error => Except.error error
-      | Except.ok preparedInductives =>
+      | Except.ok preparedStructures =>
           match
-              psEraseDefinitionsLoop
+              psPrepareRuntimeInductives
                 environment
-                preparedInductives.scope
-                declarations
+                runtimeDeclarations
+                runtimeDeclarations
+                preparedStructures.scope
                 [] with
           | Except.error error => Except.error error
-          | Except.ok lowered =>
-              Except.ok {
-                imports := []
-                structures := preparedStructures.ir
-                inductives := preparedInductives.ir
-                declarations := lowered
-              }
+          | Except.ok preparedInductives =>
+              match
+                  psEraseDefinitionsLoop
+                    environment
+                    preparedInductives.scope
+                    declarations
+                    [] with
+              | Except.error error => Except.error error
+              | Except.ok lowered =>
+                  Except.ok {
+                    imports := []
+                    structures := preparedStructures.ir
+                    inductives := preparedInductives.ir
+                    declarations := lowered
+                  }
 
 def psEraseCoreModule
     (environment : PsEnvironment)

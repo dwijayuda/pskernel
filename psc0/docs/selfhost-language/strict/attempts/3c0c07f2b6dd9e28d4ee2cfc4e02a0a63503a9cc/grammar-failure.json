@@ -1,0 +1,746 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-partial-native-conformance-and-grammar-failure",
+  "sourceHead": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+  "branch": "psc0/strict-sh1-v1",
+  "runId": 37986002380,
+  "compilerJobId": 114008036763,
+  "providerJobId": 114009942633,
+  "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/37986002380",
+  "compilerConclusion": "failure",
+  "providerConclusion": "skipped",
+  "failedStep": {
+    "number": 24,
+    "name": "Run the bounded native development gate before qualification",
+    "timestamp": "2026-10-09T20:22:37.6258849Z",
+    "exitCode": 1,
+    "error": "AssertionError [ERR_ASSERTION]: grouped-empty-argument: common AST",
+    "script": "psc0/scripts/sh1-grammar-conformance.mjs",
+    "line": 543,
+    "comparison": "Lean parenthesized nomatch value parsed as app(reference nomatch,[reference value]); expected the shared empty matchE(value,[]) AST",
+    "sourceCodeCorrection": "Parser expression-entry class under independent review; no assertion or fixture weakened."
+  },
+  "completedBeforeFailure": {
+    "nativeCompilerBuild": true,
+    "nativeParserTranslationErasureRegressions": true,
+    "newGrammarImportsAndCli": true,
+    "nativeAtomicSource": {
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "accepted": true,
+        "traversalComplete": true,
+        "moduleCount": 64,
+        "sourceBytes": 1209116,
+        "inputBytes": 1210195,
+        "importCount": 149,
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "stats": {
+          "visitedSteps": 142830,
+          "typeSteps": 17482,
+          "termSteps": 55698,
+          "declarationCount": 1664,
+          "theoremCount": 0
+        }
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 1610037
+      },
+      "originalIr": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 792484,
+        "expressionCount": 62169,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      "sourceOriginsSummary": {
+        "policy": "psc0-declaration-origins/1",
+        "actualParsedModulesRetained": 64,
+        "moduleCount": 64,
+        "sourceDeclarationCount": 1664,
+        "coreDeclarationCount": 2510,
+        "normalizationCount": 39,
+        "semanticCorrespondenceDischarged": false
+      },
+      "preparationCount": 1,
+      "canonicalAdmissionEncodingCount": 1,
+      "environmentReconstructionCount": 0,
+      "portableIrCheckCount": 1,
+      "receipt": {
+        "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/strict-source-native.json",
+        "blob": "bca25c3e02c234ece65d257b29e94bd893697d25",
+        "sha256": "dbe4957462d35bf7beb1895f5ef39135afe064aed26a5d0c7cd9f14eec3e5381",
+        "characters": 589363,
+        "reconstruction": "Exact complete compact JSON marker plus newline equals independently printed nativeSourceReceiptSha256",
+        "fileHashIndependentlyMatched": true
+      }
+    },
+    "nativeOriginalIrEvidence": {
+      "schemaVersion": 1,
+      "evidence": "native-portable-checker-current-source",
+      "nativeCheckerSha256": "f6b644e33dce93b9f144d36275a12d21a340e92df898c74d9b37b7c9def3ee4f",
+      "sourceClosureSha256": "baa67e4ed50d0a25d9d97999a10a20d3b436c8bd54304c220dc79cfab386a699",
+      "moduleCount": 64,
+      "nativeSourceReceipt": "/home/runner/work/pskernel/pskernel/psc0/dist/sh1/development/N1/strict-source-native.json",
+      "nativeSourceReceiptSha256": "dbe4957462d35bf7beb1895f5ef39135afe064aed26a5d0c7cd9f14eec3e5381",
+      "recipe": "Raw named module bundle enters the native atomic source/target API once; reuse its exact original-IR report and emitted TS; checker fixture executable runs separately.",
+      "fixtures": {
+        "schemaVersion": 1,
+        "status": "pass",
+        "cases": 15,
+        "checkedEmitterRejectsInvalidIr": true,
+        "strictSh1Qualified": false,
+        "emptyElimination": {
+          "nativeSourceFixturePath": "test/fixtures/selfhost-sh1-empty.lean",
+          "nativeSourceFixtureSha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+          "nativeSourceDeclarations": 5,
+          "emptyLayouts": 2,
+          "emptyEliminations": 4,
+          "nativeValueOracle": false
+        },
+        "zeroFieldRecords": {
+          "structureCount": 1,
+          "fieldCount": 0,
+          "inhabited": true,
+          "nullaryValueMatched": true
+        }
+      },
+      "fullCompilerIr": {
+        "schemaVersion": 1,
+        "kind": "psc0-native-original-ir-check",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 792484,
+        "expressionCount": 62169,
+        "findingCount": 0,
+        "retainedFindingCount": 0,
+        "omittedFindingDetails": 0,
+        "sameOriginalIrCheckedBeforeEmission": true,
+        "strictSh1Qualified": false
+      },
+      "sourcePolicy": {
+        "profile": "PSC0-SH/1",
+        "enforcementVersion": 1,
+        "sourceKind": "lean",
+        "accepted": true,
+        "traversalComplete": true,
+        "moduleCount": 64,
+        "sourceBytes": 1209116,
+        "inputBytes": 1210195,
+        "importCount": 149,
+        "options": {
+          "maxModules": 1024,
+          "maxInputBytes": 16777216,
+          "maxSyntaxSteps": 5000000,
+          "maxTypeSteps": 1000000,
+          "maxTermSteps": 5000000
+        },
+        "stats": {
+          "visitedSteps": 142830,
+          "typeSteps": 17482,
+          "termSteps": 55698,
+          "declarationCount": 1664,
+          "theoremCount": 0
+        }
+      },
+      "targetPolicy": {
+        "policy": "psc0-sh1-ts-target/1",
+        "accepted": true,
+        "traversalComplete": true,
+        "visitedSteps": 1610037
+      },
+      "fullSourcePreparedAgain": false,
+      "typescriptSha256": "74e90228b8b5149a66425f687548cebd09d13a561ac00b34009eee52ccb66db8",
+      "parity": "N1 is compiled directly from this native atomic checked emission.",
+      "strictSh1Qualified": false,
+      "provider": {
+        "status": "not-attempted",
+        "kernelChecked": false
+      }
+    },
+    "portableSource": {
+      "accepted": 2,
+      "refused": 33,
+      "carrierRefusals": 2,
+      "positiveBundles": [
+        {
+          "id": "lean-raw-imports-and-ordinary-do-spellings",
+          "sourceKind": "lean",
+          "modules": 3,
+          "sourceDeclarations": 11,
+          "coreDeclarations": 16,
+          "normalizations": 0,
+          "typescriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45"
+        },
+        {
+          "id": "ps-raw-imports-and-ordinary-do-spellings",
+          "sourceKind": "ps",
+          "modules": 3,
+          "sourceDeclarations": 11,
+          "coreDeclarations": 16,
+          "normalizations": 0,
+          "typescriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45"
+        }
+      ],
+      "invalidOptionProbes": 14,
+      "empty": {
+        "feature": "regular-empty-data-and-single-scrutinee-elimination",
+        "sourceEdition": "ps-0.9-r3",
+        "sourceMode": "new-only",
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "path": "test/fixtures/selfhost-sh1-empty.lean",
+            "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+            "bytes": 345,
+            "sourceArtifact": "empty.lean",
+            "typeScriptArtifact": "accepted-lean.ts",
+            "typeScriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45",
+            "atomicAcceptedId": "lean-raw-imports-and-ordinary-do-spellings",
+            "atomicSourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictEmpty"
+            ],
+            "sourceDeclarationCount": 5,
+            "coreDeclarationCount": 6,
+            "originMemberCounts": [
+              2,
+              1,
+              1,
+              1,
+              1
+            ],
+            "emptyLayoutCount": 1,
+            "emptyEliminationCount": 4,
+            "typedResultCount": 4,
+            "eliminations": [
+              {
+                "name": "sh1EmptyNat",
+                "resultType": {
+                  "kind": "primitive",
+                  "name": "nat"
+                },
+                "resultName": "emptyResult",
+                "runtimeParameters": [
+                  "value"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              },
+              {
+                "name": "sh1EmptyFunction",
+                "resultType": {
+                  "kind": "function",
+                  "parameters": [
+                    {
+                      "kind": "primitive",
+                      "name": "nat"
+                    }
+                  ],
+                  "result": {
+                    "kind": "primitive",
+                    "name": "nat"
+                  }
+                },
+                "resultName": "emptyResult",
+                "runtimeParameters": [
+                  "value",
+                  "__ps_eta_0"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              },
+              {
+                "name": "sh1EmptyGeneric",
+                "resultType": {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                },
+                "resultName": "emptyResult",
+                "runtimeParameters": [
+                  "value"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              },
+              {
+                "name": "sh1EmptyFresh",
+                "resultType": {
+                  "kind": "primitive",
+                  "name": "nat"
+                },
+                "resultName": "emptyResult$2",
+                "runtimeParameters": [
+                  "value",
+                  "emptyResult"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              }
+            ],
+            "capturedFixtureSha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5"
+          },
+          {
+            "sourceKind": "ps",
+            "path": "test/fixtures/selfhost-sh1-empty.ps",
+            "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+            "bytes": 369,
+            "sourceArtifact": "empty.ps",
+            "typeScriptArtifact": "accepted-ps.ts",
+            "typeScriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45",
+            "atomicAcceptedId": "ps-raw-imports-and-ordinary-do-spellings",
+            "atomicSourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictEmpty"
+            ],
+            "sourceDeclarationCount": 5,
+            "coreDeclarationCount": 6,
+            "originMemberCounts": [
+              2,
+              1,
+              1,
+              1,
+              1
+            ],
+            "emptyLayoutCount": 1,
+            "emptyEliminationCount": 4,
+            "typedResultCount": 4,
+            "eliminations": [
+              {
+                "name": "sh1EmptyNat",
+                "resultType": {
+                  "kind": "primitive",
+                  "name": "nat"
+                },
+                "resultName": "emptyResult",
+                "runtimeParameters": [
+                  "value"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              },
+              {
+                "name": "sh1EmptyFunction",
+                "resultType": {
+                  "kind": "function",
+                  "parameters": [
+                    {
+                      "kind": "primitive",
+                      "name": "nat"
+                    }
+                  ],
+                  "result": {
+                    "kind": "primitive",
+                    "name": "nat"
+                  }
+                },
+                "resultName": "emptyResult",
+                "runtimeParameters": [
+                  "value",
+                  "__ps_eta_0"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              },
+              {
+                "name": "sh1EmptyGeneric",
+                "resultType": {
+                  "kind": "typeParameter",
+                  "name": "T0"
+                },
+                "resultName": "emptyResult",
+                "runtimeParameters": [
+                  "value"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              },
+              {
+                "name": "sh1EmptyFresh",
+                "resultType": {
+                  "kind": "primitive",
+                  "name": "nat"
+                },
+                "resultName": "emptyResult$2",
+                "runtimeParameters": [
+                  "value",
+                  "emptyResult"
+                ],
+                "alternatives": 0,
+                "typeArgumentCount": 1,
+                "freshResultName": true
+              }
+            ],
+            "capturedFixtureSha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390"
+          }
+        ],
+        "emittedTypeScriptEqual": true,
+        "typeScriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45",
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "nativeValueOracle": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      },
+      "zeroField": {
+        "feature": "inhabited-zero-field-structures",
+        "observations": [
+          {
+            "sourceKind": "lean",
+            "structureName": "Sh1EmptyRecord",
+            "valueName": "sh1EmptyRecordValue",
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictLibrary"
+            ],
+            "sourceDeclarationCount": 2,
+            "coreDeclarationCount": 4,
+            "constructorCount": 1,
+            "fieldCount": 0,
+            "recordFieldCount": 0,
+            "actualRecordValueRetained": true,
+            "inhabited": true,
+            "atomicAcceptedId": "lean-raw-imports-and-ordinary-do-spellings",
+            "atomicSourceInputsSha256": "51cb5dd7e41929ca51fb513844ef5e51db5ed54f6cfea42ee616637143ae1b7e",
+            "typeScriptArtifact": "accepted-lean.ts",
+            "typeScriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45"
+          },
+          {
+            "sourceKind": "ps",
+            "structureName": "Sh1EmptyRecord",
+            "valueName": "sh1EmptyRecordValue",
+            "moduleName": [
+              "Ps",
+              "Compiler",
+              "StrictLibrary"
+            ],
+            "sourceDeclarationCount": 2,
+            "coreDeclarationCount": 4,
+            "constructorCount": 1,
+            "fieldCount": 0,
+            "recordFieldCount": 0,
+            "actualRecordValueRetained": true,
+            "inhabited": true,
+            "atomicAcceptedId": "ps-raw-imports-and-ordinary-do-spellings",
+            "atomicSourceInputsSha256": "3fbff601540cd3b5a10f2293deb5428b8be0469ecbd453958801e05564fcd14c",
+            "typeScriptArtifact": "accepted-ps.ts",
+            "typeScriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45"
+          }
+        ],
+        "emittedTypeScriptEqual": true,
+        "typeScriptSha256": "8355447a976250b102cfd6a1616bade56f2e501f0f1b8ce6f306c644eb1e9b45",
+        "observationBoundary": "actual-original-ir-after-atomic-emission",
+        "additionalPreparations": 0,
+        "additionalPortableIrChecks": 0,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      }
+    },
+    "target": {
+      "observations": 29,
+      "accepted": 9,
+      "refused": 20
+    },
+    "runtime": {
+      "status": "pass",
+      "compilerSha256": "914211c326068981686413f53021bb16773d59293332f8d1dc017ec6ab0b750b",
+      "operationCount": 45,
+      "observationCount": 186,
+      "observationsSha256": "0ae6941aefcf107c31a9876372ee51805c5e048da4e3e27c9444c937f1a34cf7",
+      "nativeReference": {
+        "sourceSha256": "3a4ada94e66ce4bc8a18bf0417c2a9660c06e326b4de312c8ee83ba831bda008",
+        "leanVersion": "4.34.0",
+        "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+        "observationsSha256": "0ae6941aefcf107c31a9876372ee51805c5e048da4e3e27c9444c937f1a34cf7",
+        "stdoutSha256": "7cea75c9df2ef55f61c0161594fb686d6b40dd85012db817e30fb834b4d1c53a"
+      },
+      "sourceEvaluation": {
+        "status": "pass",
+        "declarations": 12,
+        "observations": 24,
+        "hostProbes": 21,
+        "rawSourceCompilationCount": 2,
+        "portableIrCheckCount": 2,
+        "typescriptCompilationCount": 1,
+        "nativeReferenceReused": true,
+        "additionalNativeExecutions": 0,
+        "observationsSha256": "9aa5567a82c7789778037e145d35d20f310329632da36c7758c8be45431ecb6f",
+        "hostProbesSha256": "76dba00fb02adff5cc8bd76d52f178b95cd6b9886542e8b5cf5e0efc314aae91"
+      }
+    },
+    "originalIrConformance": {
+      "behavior": {
+        "status": "pass",
+        "observations": 61,
+        "exhaustiveForAllInputs": false,
+        "zeroFieldRecord": {
+          "ownStringFields": 0,
+          "ownBrandSymbols": 1,
+          "inhabited": true
+        },
+        "emptyScrutinee": {
+          "callbackCalls": 1,
+          "propagatedOriginalFailure": true,
+          "noEmptyInhabitantConstructed": true
+        },
+        "letScopeCases": [
+          {
+            "name": "shadowOldScope",
+            "observations": 8
+          },
+          {
+            "name": "shadowWrappedCall",
+            "observations": 8
+          },
+          {
+            "name": "shadowClosure",
+            "observations": 8
+          },
+          {
+            "name": "shadowNestedTail",
+            "observations": 5
+          }
+        ]
+      },
+      "refusals": 38,
+      "emptyElimination": {
+        "emptyLayoutCount": 2,
+        "emptyEliminationCount": 5,
+        "signatures": [
+          {
+            "name": "eliminateEmptyNat",
+            "signature": "export declare function eliminateEmptyNat(empty: Empty): bigint;"
+          },
+          {
+            "name": "eliminateEmptyFunction",
+            "signature": "export declare function eliminateEmptyFunction(empty: Empty): (_arg0: bigint) => bigint;"
+          },
+          {
+            "name": "eliminateEmptyGeneric",
+            "signature": "export declare function eliminateEmptyGeneric<T0>(empty: EmptyBox<T0>): T0;"
+          },
+          {
+            "name": "eliminateEmptyTypedCall",
+            "signature": "export declare function eliminateEmptyTypedCall(empty: Empty): bigint;"
+          },
+          {
+            "name": "eliminateEmptyComputed",
+            "signature": "export declare function eliminateEmptyComputed(makeEmpty: () => Empty): bigint;"
+          }
+        ],
+        "declarationArtifact": "accepted/index.d.ts",
+        "declarationSha256": "84e3b7595d1431d8555ca782d070158e893064feb3ca7cea4472a1231bc64a47",
+        "additionalTypeScriptCompilations": 0,
+        "nativeValueOracle": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      },
+      "zeroFieldRecords": {
+        "structureCount": 1,
+        "fieldCount": 0,
+        "valueCount": 1,
+        "declarationArtifact": "accepted/index.d.ts",
+        "declarationSha256": "84e3b7595d1431d8555ca782d070158e893064feb3ca7cea4472a1231bc64a47",
+        "inhabited": true,
+        "additionalTypeScriptCompilations": 0,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      }
+    },
+    "grammarClosure": {
+      "compilerSha256": "914211c326068981686413f53021bb16773d59293332f8d1dc017ec6ab0b750b",
+      "closureSha256": "baa67e4ed50d0a25d9d97999a10a20d3b436c8bd54304c220dc79cfab386a699",
+      "moduleCount": 64,
+      "proofScriptBytes": 988207,
+      "comparison": "Lean canonical text equals Lean -> new ProofScript -> Lean; new ProofScript is idempotent"
+    },
+    "helperRuntime": {
+      "nonApplicationHeads": 11,
+      "argumentLists": 7,
+      "prefixes": 2,
+      "suffixes": 2,
+      "nameBases": 3,
+      "usedNameListsPerBase": 7,
+      "attempts": [
+        0,
+        7
+      ],
+      "typedPartialApplications": false,
+      "expressionObservations": 1232,
+      "stringObservations": 336,
+      "observations": 1568
+    },
+    "recursiveGenericErasure": {
+      "status": "pass",
+      "observations": 19,
+      "native": {
+        "typescriptSha256": "de7365a32ac04d74ccf3f064aa89bd37aaf9f6266555560b333154988fd3996e",
+        "behavior": {
+          "observations": 19,
+          "status": "pass",
+          "exhaustiveForAllInputs": false
+        }
+      }
+    },
+    "sessionConformance": {
+      "status": "pass",
+      "source": "Explicit PSC0_SH1_SESSION_CONFORMANCE PASS line in the complete job log"
+    }
+  },
+  "notReached": [
+    "Complete N1 grammar/capability gate",
+    "selected-R current candidate C1",
+    "current-source C2/C3 fixed point",
+    "new compiler retention",
+    "separate provider job"
+  ],
+  "resourcePreflight": {
+    "observation": "Complete JSON marker from job log; no separate resource artifact file hash claimed",
+    "receipt": {
+      "schemaVersion": 1,
+      "evidence": "generated-qualification-resource-preflight",
+      "command": "workflow-preflight",
+      "policy": {
+        "id": "psc0-sh1-generated-qualification-resources/1",
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "oldSpaceMiB": 8192,
+        "minimumAvailableBytes": 12884901888,
+        "minimumHeapLimitBytes": 8589934592,
+        "maximumHeapLimitBytes": 8858370048,
+        "checkBoundary": "process-entry-before-generated-compiler-loading",
+        "automaticFallback": false,
+        "semanticContractQualified": false
+      },
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "pid": 2361,
+      "passed": true,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "heap": {
+        "explicitOldSpaceMiB": 8192,
+        "observedHeapLimitBytes": 8640266240,
+        "inheritedHeapOverride": false
+      },
+      "physical": {
+        "totalBytes": 16766414848,
+        "availableBytes": 15394009088
+      },
+      "nodeMemory": {
+        "availableBytes": 15394009088,
+        "constrainedBytes": "18446744073709552000",
+        "bindingConstraintBytes": null
+      },
+      "cgroup": {
+        "version": 2,
+        "membership": "/system.slice/hosted-compute-agent.service",
+        "mountRoot": "/",
+        "mountPoint": "/sys/fs/cgroup",
+        "visibility": "current-and-visible-ancestor-cgroups",
+        "observations": [
+          {
+            "directory": "/sys/fs/cgroup/system.slice/hosted-compute-agent.service",
+            "limitFile": "memory.max",
+            "limitBytes": "max",
+            "currentBytes": "3356479488",
+            "capacityBytes": 16766414848,
+            "availableBytes": 16766414848
+          },
+          {
+            "directory": "/sys/fs/cgroup/system.slice/hosted-compute-agent.service",
+            "limitFile": "memory.high",
+            "limitBytes": "max",
+            "currentBytes": "3356479488",
+            "capacityBytes": 16766414848,
+            "availableBytes": 16766414848
+          },
+          {
+            "directory": "/sys/fs/cgroup/system.slice",
+            "limitFile": "memory.max",
+            "limitBytes": "max",
+            "currentBytes": "5918830592",
+            "capacityBytes": 16766414848,
+            "availableBytes": 16766414848
+          },
+          {
+            "directory": "/sys/fs/cgroup/system.slice",
+            "limitFile": "memory.high",
+            "limitBytes": "max",
+            "currentBytes": "5918830592",
+            "capacityBytes": 16766414848,
+            "availableBytes": 16766414848
+          },
+          {
+            "directory": "/sys/fs/cgroup",
+            "globalRootWithoutMemoryController": true
+          }
+        ]
+      },
+      "effectiveCapacityBytes": 16766414848,
+      "effectiveAvailableBytes": 15394009088
+    },
+    "scope": "Successful process-entry availability/heap-policy check; C2 was not reached, so this is not proof of repaired peak memory."
+  },
+  "logs": {
+    "path": "attempts/3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc/job.log",
+    "blob": "00fbc9633180a6aa86d54e312f6166bf0a3e2cbc",
+    "sha256": "158daa528895baff99f9c136fb6a75e4c96ed0d81176a135b34c10891f823b28",
+    "characters": 1031393
+  },
+  "artifact": {
+    "id": 11642987189,
+    "sizeInBytes": 1803936,
+    "digest": "sha256:6e9f4f2b85e7ed3c1a5dd919f826a5466fa8eab6116aa3695f64a888ff15018d",
+    "expiresAt": "2026-11-08T20:22:39Z",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/37986002380/artifacts/11642987189"
+  },
+  "coldRecovery": {
+    "runId": 37986002167,
+    "status": "skipped-by-tag-as-intended",
+    "qualifiedUnchangedRecoveryRun": 37983663908,
+    "recipeChanged": false,
+    "repeatRequired": false
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false,
+  "sourceCheckpointQualified": false,
+  "selectedSeedChanged": false,
+  "mainChanged": false
+}

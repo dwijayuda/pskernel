@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "kind": "authorized-qualified-checkpoint-integration",
+  "repository": "dwijayuda/pskernel",
+  "userAuthorization": "ok do it, after recommendation to merge the qualified checkpoint and implement strict SH/1 next",
+  "method": "non-force-fast-forward",
+  "mainBefore": "37f63c39d4a07189938046c64152bba25d789450",
+  "mainAfter": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "expectedHead": "37f63c39d4a07189938046c64152bba25d789450",
+  "verifiedAtUtc": "2026-10-09 16:30:26 UTC",
+  "comparison": {
+    "aheadBy": 40,
+    "behindBy": 0,
+    "mergeBase": "37f63c39d4a07189938046c64152bba25d789450"
+  },
+  "sourceTree": "ef2eca27b3b73788e0d80ed353094628c3b60b7a",
+  "psc0Tree": "8f65344a97c043e8b0f6ed206552c7958653468c",
+  "strictWorkBranch": "psc0/strict-sh1-v1",
+  "strictBranchInitialHead": "ed5d00aca0743bde583b45fe7756dd494ac3960f",
+  "strictBranchVerifiedAtUtc": "2026-10-09 16:32:13 UTC",
+  "sourceChangedByMerge": false,
+  "force": false,
+  "selectedSeedChanged": false,
+  "strictSh1Qualified": false
+}

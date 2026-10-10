@@ -66,9 +66,9 @@ def psLevelInstantiateWithFuel
   | Nat.zero =>
       fun (level : PsLevel) => level
   | Nat.succ remaining =>
-      let smaller : PsLevel -> PsLevel :=
-        psLevelInstantiateWithFuel context remaining;
       fun (level : PsLevel) =>
+        let smaller : PsLevel -> PsLevel :=
+          psLevelInstantiateWithFuel context remaining;
         match level with
         | .mvar id =>
             match psLevelFindAssignment context id with
@@ -140,9 +140,9 @@ def psLevelUnifyWithFuelWorker
       fun (context : PsLevelMetaContext) (_left : PsLevel) (_right : PsLevel) =>
         { context := context, success := false }
   | Nat.succ remaining =>
-      let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=
-        psLevelUnifyWithFuelWorker remaining;
       fun (context : PsLevelMetaContext) (left : PsLevel) (right : PsLevel) =>
+        let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=
+          psLevelUnifyWithFuelWorker remaining;
         let leftValue := psLevelInstantiate context left;
         let rightValue := psLevelInstantiate context right;
         if psLevelStructuralEq leftValue rightValue then

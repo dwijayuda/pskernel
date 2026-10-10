@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-source-boundary-correction",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "baseSourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+  "baseTree": "7e8bcc67411e6b6cd52a99901af2757dc90ef938",
+  "status": "source-reviewed-candidate-awaiting-cloud-qualification",
+  "files": [
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "baseBlob": "1c5f03cd8d21288f2e1dcb9dbd72191af5f091e5",
+      "blob": "1c26ef5d6cd4e374ea64cd0b4345600302d40ad3"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "baseBlob": "df1258ab879f2e68f378b1e4877482ea37de585b",
+      "blob": "9aaa3a72bbfe03ed3fc4918527e2ca200537d61f"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "baseBlob": "4410601b543b97a848e2b664710f50d4ba3b63c6",
+      "blob": "7e70f4ec75a156c87dc5f1023c451f77b132bc39"
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseBlob": "fb37468df167b0a056b11cf7986bcd66bbf0e60a",
+      "blob": "de83f067f202ef4679dfcc08132616c9d00d501a"
+    }
+  ],
+  "observedFailure": {
+    "sourceRef": "cf35b6b2a3328a065721ef48cf633a44e6122362",
+    "runId": 37964798240,
+    "compilerJobId": 113936354535,
+    "failedStep": 23,
+    "code": "source-compiler",
+    "moduleName": "Ps.BackendTs.Sh1Target",
+    "detail": "283:14: expected 'term', got '.'",
+    "nativeBuildAndPriorRegressionGates": "passed",
+    "candidateGeneration": "not-completed",
+    "provider": "skipped",
+    "record": "qualification-attempts.json",
+    "decodedLogSha256": "22db4770599e603db8c6321ddde00644f0571678aea7460c289296ee7aac4edf"
+  },
+  "targetCorrection": {
+    "reviewedManifest": "5a39309431b4a57d2cc4605d4ad2d5d4d2c69e99",
+    "qualifiedConstructorTerms": 116,
+    "taskTerms": 98,
+    "nameRoleTerms": 18,
+    "unchangedShorthandPatterns": 58,
+    "allOtherBytesUnchanged": true,
+    "parserChanged": false,
+    "targetPolicyChanged": false
+  },
+  "sourceIdentity": {
+    "operationAdapterNames": [
+      "Prod.fst",
+      "Prod.snd",
+      "Int.ofNat",
+      "Int.repr",
+      "Int.negSucc",
+      "Int.neg",
+      "Int.add",
+      "Int.sub",
+      "Int.mul",
+      "Nat.succ",
+      "Nat.add",
+      "Nat.sub",
+      "Nat.mul",
+      "Nat.div",
+      "Nat.mod",
+      "Nat.beq",
+      "Nat.ble",
+      "Nat.blt",
+      "Bool.and",
+      "Bool.or",
+      "Bool.not",
+      "Char.ofNat",
+      "Char.toNat",
+      "String.Pos.Raw.mk",
+      "String.Pos.Raw.byteIdx",
+      "String.push",
+      "String.singleton",
+      "String.Internal.length",
+      "String.Internal.append",
+      "String.utf8ByteSize",
+      "String.Internal.next",
+      "String.Internal.get",
+      "String.Internal.atEnd",
+      "String.Internal.extract",
+      "Array.emptyWithCapacity",
+      "Array.size",
+      "Array.push",
+      "Array.getInternal",
+      "Array.getD",
+      "Array.set",
+      "Array.setIfInBounds",
+      "Array.map",
+      "Array.foldl"
+    ],
+    "operationAdapterCount": 43,
+    "alreadyPreludeDuplicateProtectedCount": 38,
+    "previouslyAbsentOperationAdapterNames": [
+      "Bool.and",
+      "Bool.or",
+      "Bool.not",
+      "Array.getInternal",
+      "Array.set"
+    ],
+    "additionalFixedTypeName": "String.Pos.Raw",
+    "typeNameMeaning": "Absent source type maps by exact name to runtime Nat; refuse authored redefinition before preparation.",
+    "newErrors": [
+      "source-intrinsic-name-reserved",
+      "source-builtin-type-name-reserved"
+    ],
+    "policyScope": "Actual top-level names in each raw source module, all five declaration forms; names refer to erasure's exact lowering identity, not a prefix blacklist.",
+    "doesNotInstallMissingPrimitives": true,
+    "doesNotEnableOptionalScalars": true,
+    "auditDocument": "PRIMITIVE_IDENTITY.md"
+  },
+  "sourceConformance": {
+    "accepted": 2,
+    "refused": 33,
+    "hostCarrierRefusals": 2,
+    "originalRefusals": 21,
+    "leanNamePolicyRefusals": 6,
+    "psDottedDeclaredNameGrammarRefusals": 6,
+    "leanPolicyNameSpans": "exact original name span and owner",
+    "psNameFailure": "source-compiler before source name policy",
+    "positivePsStructure": "required where-brace syntax",
+    "frontendExpanded": false
+  },
+  "review": {
+    "target": "root and target owner independently reconstructed all116 replacements and reversed every byte",
+    "sourcePolicyAndHost": "portable source owner verified final API/budget/span/factory/parser schemas",
+    "identityClass": "runtime owner audited primitive/type/constant/constructor/recursor name dispatch and initial prelude",
+    "execution": "No correction code executed before the new exact-source run"
+  },
+  "qualification": {
+    "workflow": ".github/workflows/psc0-sh1.yml",
+    "commitMarker": "[sh1-qualify]",
+    "status": "not-started-at-correction-commit",
+    "exactSourceRequired": true,
+    "selectedRUnchanged": true
+  },
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "providerChecked": false
+}

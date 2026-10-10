@@ -13,8 +13,8 @@ def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :
   match fuel with
   | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_name : String) => true
   | Nat.succ remaining =>
-      let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
       fun (expr : PsVerifiedIrExpr) (name : String) =>
+        let smaller : PsVerifiedIrExpr -> String -> Bool := psTsExprUsesNameWithFuel remaining;
         let uses : PsVerifiedIrExpr -> Bool := fun (value : PsVerifiedIrExpr) => smaller value name;
         let parameterUses : PsVerifiedIrParameter -> Bool :=
           fun (parameter : PsVerifiedIrParameter) => psStringEq parameter.name name;
@@ -276,12 +276,12 @@ def psTsEmitIntrinsicFromPrinted
   | .natEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as bigint) === ((", right, ") as bigint))"]);
       psTsPrinted2 emit arguments
   | .natNe =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " !== ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as bigint) !== ((", right, ") as bigint))"]);
       psTsPrinted2 emit arguments
   | .natLe =>
       let emit : String -> String -> Except PsTsEmitError String :=
@@ -331,7 +331,7 @@ def psTsEmitIntrinsicFromPrinted
   | .intEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as bigint) === ((", right, ") as bigint))"]);
       psTsPrinted2 emit arguments
   | .intLe =>
       let emit : String -> String -> Except PsTsEmitError String :=
@@ -361,12 +361,12 @@ def psTsEmitIntrinsicFromPrinted
   | .boolEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as boolean) === ((", right, ") as boolean))"]);
       psTsPrinted2 emit arguments
   | .boolNe =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " !== ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as boolean) !== ((", right, ") as boolean))"]);
       psTsPrinted2 emit arguments
   | .charOfNat =>
       let emit : String -> Except PsTsEmitError String :=
@@ -422,9 +422,8 @@ def psTsEmitIntrinsicFromPrinted
   | .stringAtEnd =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (value : String) (position : String) =>
-          let size :=
-            psTsJoin "" ["__ps$utf8(", value, ").size"];
-          Except.ok (psTsJoin "" ["(", position, " >= ", size, ")"]);
+          Except.ok
+            (psTsJoin "" ["((__ps_s: string, __ps_p: bigint) => ", "(__ps_p >= __ps$utf8(__ps_s).size))(", value, ", ", position, ")"]);
       psTsPrinted2 emit arguments
   | .stringExtract =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=
@@ -435,13 +434,13 @@ def psTsEmitIntrinsicFromPrinted
   | .stringEq =>
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (left : String) (right : String) =>
-          Except.ok (psTsJoin "" ["(", left, " === ", right, ")"]);
+          Except.ok (psTsJoin "" ["(((", left, ") as string) === ((", right, ") as string))"]);
       psTsPrinted2 emit arguments
   | .arrayEmptyWithCapacity =>
       let emit : String -> Except PsTsEmitError String :=
         fun (capacity : String) =>
           Except.ok
-            (psTsJoin "" ["(() => { void (", capacity, "); return []; })()"]);
+            (psTsJoin "" ["((__ps_capacity: bigint) => { void __ps_capacity; return []; })(", capacity, ")"]);
       psTsPrinted1 emit arguments
   | .arraySize =>
       let emit : String -> Except PsTsEmitError String :=
@@ -457,7 +456,7 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> String -> Except PsTsEmitError String :=
         fun (array : String) (index : String) =>
           Except.ok
-            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint): T => ", "__ps_a[Number(__ps_i)]!)(", array, ", ", index, ")"]);
+            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint): T => { ", "if (__ps_i < 0n || __ps_i >= BigInt(__ps_a.length)) ", "throw { code: \"PSC0_ARRAY_GET_BOUNDS\" }; ", "return __ps_a[Number(__ps_i)]!; })(", array, ", ", index, ")"]);
       psTsPrinted2 emit arguments
   | .arrayGetD =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=
@@ -469,7 +468,7 @@ def psTsEmitIntrinsicFromPrinted
       let emit : String -> String -> String -> Except PsTsEmitError String :=
         fun (array : String) (index : String) (value : String) =>
           Except.ok
-            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => {", " const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ", "return __ps_out; })(", array, ", ", index, ", ", value, ")"]);
+            (psTsJoin "" ["(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => { ", "if (__ps_i < 0n || __ps_i >= BigInt(__ps_a.length)) ", "throw { code: \"PSC0_ARRAY_SET_BOUNDS\" }; ", "const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ", "return __ps_out; })(", array, ", ", index, ", ", value, ")"]);
       psTsPrinted3 emit arguments
   | .arraySetIfInBounds =>
       let emit : String -> String -> String -> Except PsTsEmitError String :=
@@ -520,8 +519,8 @@ def psTsEmitExprWithFuel
   match fuel with
   | Nat.zero => fun (_expr : PsVerifiedIrExpr) => Except.error PsTsEmitError.fuelExhausted
   | Nat.succ remaining =>
-    let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
     fun (expr : PsVerifiedIrExpr) =>
+      let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
       match expr with
       | .literal literal =>
           psTsEmitLiteral literal
@@ -645,45 +644,54 @@ def psTsEmitExprWithFuel
           | Option.none =>
               Except.error (PsTsEmitError.unknownInductive inductiveName)
           | Option.some tag =>
-              let temp := psTsFreshMatchTemp expr;
-              let printAlternative : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Except PsTsEmitError String :=
-                fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
-                  match alternative with
-                  | Prod.mk constructorName detail =>
-                    match detail with
-                    | Prod.mk bindings body =>
-                      match
-                          smaller
-                            body with
-                      | Except.error error => Except.error error
-                      | Except.ok printedBody =>
-                          if psListIsEmpty bindings then
-                            Except.ok
-                              (psTsJoin "" ["case ", psJsonQuote constructorName, ": return ", printedBody, ";"])
-                          else
-                            let printBinding : PsVerifiedIrMatchBinding -> Except PsTsEmitError String :=
-                              fun (binding : PsVerifiedIrMatchBinding) =>
-                                match psTsEmitType binding.type with
-                                | Except.error error => Except.error error
-                                | Except.ok type =>
-                                    Except.ok
-                                      (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temp, ".", binding.field, ";"]);
-                            match psListMapExcept printBinding bindings with
-                            | Except.error error => Except.error error
-                            | Except.ok printedBindings =>
-                                Except.ok
-                                  (psTsJoin "" ["case ", psJsonQuote constructorName, ": { ", psTsJoin " " printedBindings, " return ", printedBody, "; }"]);
-              match psListMapExcept printAlternative alternatives with
-              | Except.error error => Except.error error
-              | Except.ok cases =>
-                  match
-                      smaller
-                        scrutinee with
-                  | Except.error error => Except.error error
-                  | Except.ok printedScrutinee =>
-                      Except.ok
-                        (psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
-                            "invalid ProofScript constructor tag", "); })())"])
+              if psListIsEmpty alternatives then
+                match smaller scrutinee with
+                | Except.error error => Except.error error
+                | Except.ok printedScrutinee =>
+                    Except.ok
+                      (psTsJoin "" ["(yield* (function*(): __ps$Computation<never> { void (",
+                        printedScrutinee, "); throw new Error(",
+                        psJsonQuote "unreachable empty ProofScript match", "); })())"])
+              else
+                let temp := psTsFreshMatchTemp expr;
+                let printAlternative : (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) -> Except PsTsEmitError String :=
+                  fun (alternative : String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) =>
+                    match alternative with
+                    | Prod.mk constructorName detail =>
+                      match detail with
+                      | Prod.mk bindings body =>
+                        match
+                            smaller
+                              body with
+                        | Except.error error => Except.error error
+                        | Except.ok printedBody =>
+                            if psListIsEmpty bindings then
+                              Except.ok
+                                (psTsJoin "" ["case ", psJsonQuote constructorName, ": return ", printedBody, ";"])
+                            else
+                              let printBinding : PsVerifiedIrMatchBinding -> Except PsTsEmitError String :=
+                                fun (binding : PsVerifiedIrMatchBinding) =>
+                                  match psTsEmitType binding.type with
+                                  | Except.error error => Except.error error
+                                  | Except.ok type =>
+                                      Except.ok
+                                        (psTsJoin "" ["const ", binding.name, ": ", type, " = ", temp, ".", binding.field, ";"]);
+                              match psListMapExcept printBinding bindings with
+                              | Except.error error => Except.error error
+                              | Except.ok printedBindings =>
+                                  Except.ok
+                                    (psTsJoin "" ["case ", psJsonQuote constructorName, ": { ", psTsJoin " " printedBindings, " return ", printedBody, "; }"]);
+                match psListMapExcept printAlternative alternatives with
+                | Except.error error => Except.error error
+                | Except.ok cases =>
+                    match
+                        smaller
+                          scrutinee with
+                    | Except.error error => Except.error error
+                    | Except.ok printedScrutinee =>
+                        Except.ok
+                          (psTsJoin "" ["(yield* (function*() { const ", temp, " = ", printedScrutinee, "; switch (", temp, "[", tag, "]) { ", psTsJoin " " cases, " } throw new Error(", psJsonQuote
+                              "invalid ProofScript constructor tag", "); })())"])
 
 
 def psTsEmitExpr

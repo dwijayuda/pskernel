@@ -49,9 +49,9 @@ def psJsonStringCharsAccWithFuel
       fun (_value : String) (_position : Nat) (charsRev : List Char) =>
         psJsonReverseChars charsRev
   | Nat.succ remaining =>
-      let smaller : String -> Nat -> List Char -> List Char :=
-        psJsonStringCharsAccWithFuel remaining;
       fun (value : String) (position : Nat) (charsRev : List Char) =>
+        let smaller : String -> Nat -> List Char -> List Char :=
+          psJsonStringCharsAccWithFuel remaining;
         if psJsonStringAtEnd value position then
           psJsonReverseChars charsRev
         else
@@ -320,12 +320,12 @@ def psJsonParseStringChars
       fun (_chars : List Char) (_charsRev : List Char) =>
         Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          List Char ->
-          List Char ->
-          Except PsJsonParseError (String × List Char) :=
-        psJsonParseStringChars remaining;
       fun (chars : List Char) (charsRev : List Char) =>
+        let smaller :
+            List Char ->
+            List Char ->
+            Except PsJsonParseError (String × List Char) :=
+          psJsonParseStringChars remaining;
         match chars with
         | List.nil =>
             Except.error PsJsonParseError.unexpectedEnd
@@ -488,12 +488,12 @@ def psJsonParseArrayWith
       fun (_input : List Char) (_valuesRev : List PsJsonValue) =>
         Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          List Char ->
-          List PsJsonValue ->
-          Except PsJsonParseError PsJsonParseResult :=
-        psJsonParseArrayWith parseValue remaining;
       fun (input : List Char) (valuesRev : List PsJsonValue) =>
+        let smaller :
+            List Char ->
+            List PsJsonValue ->
+            Except PsJsonParseError PsJsonParseResult :=
+          psJsonParseArrayWith parseValue remaining;
         let chars := psJsonSkipWhitespace input;
         match chars with
         | List.nil =>
@@ -587,14 +587,14 @@ def psJsonParseObjectWith
           (_fieldsRev : List (String × PsJsonValue)) =>
         Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller :
-          List Char ->
-          List (String × PsJsonValue) ->
-          Except PsJsonParseError PsJsonParseResult :=
-        psJsonParseObjectWith parseValue remaining;
       fun
           (input : List Char)
           (fieldsRev : List (String × PsJsonValue)) =>
+        let smaller :
+            List Char ->
+            List (String × PsJsonValue) ->
+            Except PsJsonParseError PsJsonParseResult :=
+          psJsonParseObjectWith parseValue remaining;
         let chars := psJsonSkipWhitespace input;
         match chars with
         | List.nil =>
@@ -658,9 +658,9 @@ def psJsonParseValueWithFuelWorker
       fun (_requested : Nat) (_input : List Char) =>
         Except.error PsJsonParseError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : Nat -> List Char -> Except PsJsonParseError PsJsonParseResult :=
-        psJsonParseValueWithFuelWorker fallback remaining;
       fun (requested : Nat) (input : List Char) =>
+        let smaller : Nat -> List Char -> Except PsJsonParseError PsJsonParseResult :=
+          psJsonParseValueWithFuelWorker fallback remaining;
         if Nat.blt requested (Nat.succ remaining) then smaller requested input
         else
           let chars := psJsonSkipWhitespace input;
@@ -950,8 +950,8 @@ def psJsonEncodeCanonicalWithFuel (fuel : Nat) : PsJsonValue -> Except PsJsonEnc
   match fuel with
   | Nat.zero => fun (_value : PsJsonValue) => Except.error PsJsonEncodeError.fuelExhausted
   | Nat.succ remaining =>
-      let smaller : PsJsonValue -> Except PsJsonEncodeError String := psJsonEncodeCanonicalWithFuel remaining;
       fun (value : PsJsonValue) =>
+        let smaller : PsJsonValue -> Except PsJsonEncodeError String := psJsonEncodeCanonicalWithFuel remaining;
         match value with
         | PsJsonValue.nullE => Except.ok "null"
         | PsJsonValue.bool boolValue =>

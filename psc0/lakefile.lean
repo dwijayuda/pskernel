@@ -89,7 +89,8 @@ lean_lib PsCompiler where
   srcDir := "packages/compiler/src"
   roots := #[
     `Ps.Compiler,
-    `Ps.Compiler.Api
+    `Ps.Compiler.Api,
+    `Ps.Compiler.Sh1
   ]
 
 lean_lib PsBackendTs where
@@ -99,6 +100,8 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
     `Ps.BackendTs.Checked,
+    `Ps.BackendTs.Sh1Target,
+    `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler
   ]
 
@@ -190,3 +193,8 @@ lean_exe psc2_joint_closure_inventory where
 lean_exe psc2_selfhost_replay_audit where
   srcDir := "scripts"
   root := `SelfhostReplayAudit
+
+-- Native IO adapter for the portable source-owned SH/1 enforcement boundary.
+lean_exe psc1_sh1_compile where
+  srcDir := "scripts"
+  root := `StrictSourceCompile

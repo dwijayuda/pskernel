@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-ts-rule-arguments-review",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "sourceRef": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+  "status": "reviewed-documentation-candidate-no-ledger-discharge",
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/TS_RULE_ARGUMENTS.md",
+      "operation": "create",
+      "expectedOldBlob": null,
+      "expectedAbsentAt": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+      "absenceReadback": "GitHub contents API NOT_FOUND at the exact source ref",
+      "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+      "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+      "characters": 88025,
+      "words": 12378,
+      "utf8Bytes": 88251
+    }
+  ],
+  "sourcePins": [
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+      "blob": "a0e7031d8a5e969fad44ab82b80aecbcc88f1139"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+      "blob": "2580754407e70be69cc10101c4ebe03c7304a8f0"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+      "blob": "a0ab0d6a224bdfd35846990ab6d6e39df422908e"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+      "blob": "8c9dcf6b0168dcb1edc49d87130fbee09a47cd79"
+    },
+    {
+      "path": "psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+      "blob": "178ecf89498be6502be5f747f0c0d62eb1133420"
+    },
+    {
+      "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+      "blob": "1026e3a9d1f89432d9a94d9cd098900f6e4d8b53"
+    },
+    {
+      "path": "psc0/packages/compiler/src/Ps/Compiler/Sh1.lean",
+      "blob": "a947a4058e3d91a02d4f8120a3d86556100c8555"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+      "blob": "e0c932e0280b9c0e2b7f7ad1974b548881f452d0"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "blob": "709fc44f59bddb3c3d7354ba31ea01f296c9cde8"
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "blob": "6da268d23db1d2a709134f54dc8ae8a7f81367d3"
+    },
+    {
+      "path": "psc0/scripts/typescript-cli.mjs",
+      "blob": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+    },
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "blob": "8d87080352509dc936614d560aa68ded14fc36e8"
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "blob": "eedce11a6d99dee010c3de4352a716e5385eb156"
+    },
+    {
+      "path": "psc0/scripts/sh1-resource-policy.mjs",
+      "blob": "7e3066c513a91a6e0717aac9465a879097c0dd82"
+    },
+    {
+      "path": "psc0/test/IrCheckerTests.lean",
+      "blob": "2f507fdaef96411dfa5833016c94655549b99938"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "9ae363efcb6faab4ffd6c10af0e498ece6004649"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/enabled-runtime-contract.json",
+      "blob": "8c893f0ecbc37855d02a006bb2774de4b0ebde2b"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/RUNTIME_LAW_REVIEW.md",
+      "blob": "682250126807cf520fb4c354ad0b52577a04d8b0"
+    }
+  ],
+  "historicalCoordinateSource": {
+    "path": "psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+    "blob": "98bac2823502c641c9b386f0ee1328cd7a688e87",
+    "currentGuardBlob": "2580754407e70be69cc10101c4ebe03c7304a8f0",
+    "guardedManifest": "a3db2591e9e0d7f7dcbef45ad4cc241980d92095"
+  },
+  "coveredRows": [
+    "TS-01",
+    "TS-02",
+    "TS-03",
+    "TS-04",
+    "TS-05",
+    "TS-06",
+    "TS-07",
+    "TS-08",
+    "TS-09"
+  ],
+  "exportedLocalLemmas": [
+    "TS-NAMES",
+    "TS-LAYOUT",
+    "TS-TEMPLATES",
+    "TS-RUNNER",
+    "TS-ETA",
+    "TS-COUNT",
+    "TS-TAIL",
+    "TS-INIT",
+    "TS-HOST"
+  ],
+  "scope": "General source-rule derivations for the exact successful original-IR backend path under the shared budgeted value/environment/call relation and explicit host/primitive domains. Legitimate induction hypotheses are distinguished from actual production invariants; actual-source eta/self provenance and target/name/layout/optimizer/registry invariants are derived. No ledger row is closed by this packet.",
+  "review": [
+    {
+      "reviewer": "/root/artifact_inspection_review",
+      "sections": [
+        "5",
+        "7",
+        "8",
+        "11.1"
+      ],
+      "status": "clear",
+      "readbackBlob": "3d224f0ea016a6c1ebdaef7ad469e8bc254e4f7b",
+      "method": "GitHub immutable source and document readback; exact reverse-equality check of one-sentence wording correction",
+      "result": "Runner transitions/reentry/progress, count/field descent, tail purity/capture/simultaneous tuple semantics, alias+self+eta application budgets, empty fallback and mutual composition match current source."
+    },
+    {
+      "reviewer": "/root",
+      "sections": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "status": "clear",
+      "method": "Read complete document sections and independently correlated critical current Expr/Module/Type/Target/IR checker, runtime-law and emitted command paths; reviewed exact silent-read/count wording refinements.",
+      "result": "Bounded CLEAR within the stated current-source conditional scope. Root covers names/layout/eta/module-init review. No row closes before actual ER/Core grouping dependencies are supplied.",
+      "acceptedFinalTextEdits": [
+        {
+          "oldText": "This is an administrative reordering of total scalar arithmetic on already-known nonnegative values; it crosses no callback or other source computation in the recognized fragment.",
+          "newText": "This moves total silent scalar arithmetic before the recognized child count recursion. The crossed work consists only of that finite count recursion and its total field-read/addition steps, with no authored callback or arbitrary state-argument computation. Under successful allocation, the reordering preserves the result and observed logical-call prefix; the private accumulator is not a source observation at a cutoff.",
+          "expectedOccurrences": 1
+        }
+      ]
+    }
+  ],
+  "supersedesDraft": {
+    "blob": "a090ac54bfcaa2ba600dfb15fa395a5339c293ec",
+    "sha256": "ebba1da9af65ec119f2ea7f0d35de20ccda93387a0d181a4c856bfc7580a5818",
+    "exactTextEdits": [
+      {
+        "oldText": "Moving these already-defined immutable variable reads earlier crosses no callback, aborting expression or semantic invocation.",
+        "newText": "These prefix reads are total and silent lookups of already-defined immutable values. Moving them before a potentially aborting actual operand introduces no invocation or abort, preserves that same first abort and suppression of later operands, and does not reorder any demanded argument computation.",
+        "expectedOccurrences": 1
+      },
+      {
+        "oldText": "This is an administrative reordering of total scalar arithmetic on already-known nonnegative values; it crosses no callback or other source computation in the recognized fragment.",
+        "newText": "This moves total silent scalar arithmetic before the recognized child count recursion. The crossed work consists only of that finite count recursion and its total field-read/addition steps, with no authored callback or arbitrary state-argument computation. Under successful allocation, the reordering preserves the result and observed logical-call prefix; the private accumulator is not a source observation at a cutoff.",
+        "expectedOccurrences": 1
+      },
+      {
+        "oldText": "§12 separates that source correction from its pending execution evidence.",
+        "newText": "§12 separates that source correction from its independently scoped execution evidence.",
+        "expectedOccurrences": 1
+      }
+    ]
+  },
+  "remainingSharedDependencies": [
+    "Actual source/Core operational adequacy and retained application/group/ghost interpretation",
+    "ER's actual Core-ID/environment/substitution/layout associations with this same relation",
+    "Enabled primitive/native value laws, proof-domain bounds and canonical representable host carriers",
+    "All-n source/Core adequacy combined with the local administrative-progress arguments",
+    "Exact source/toolchain execution and independent profile activation reconciliation"
+  ],
+  "countermodels": {
+    "executed": false,
+    "scope": "Arbitrary typed target IR, not accepted source-owned PSC1 inputs",
+    "cases": [
+      "A let binder capturing an implicit constructor namespace in its own emitted initializer",
+      "A local function field shadowing printed self in a count-shaped IR body"
+    ],
+    "purpose": "Refute stronger target-only name/self claims; actual source provenance excludes these misleading occurrences."
+  },
+  "assurance": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "generalPreservationProven": false,
+    "formalPreservationProven": false,
+    "correspondenceRowsClosed": [],
+    "ledgerRowCount": 33,
+    "compilerExecuted": false,
+    "testsExecuted": false,
+    "workflowLaunched": false,
+    "providerChecked": false,
+    "finiteTestsAreGeneralProof": false
+  },
+  "unchanged": {
+    "productionSource": true,
+    "fixtures": true,
+    "ledger": true,
+    "sourceGrammar": true,
+    "toolchainPins": true,
+    "seedIdentity": true,
+    "kernel": true,
+    "provider": true,
+    "defeq": true,
+    "metatheory": true,
+    "runtimeHelpers": true,
+    "utf8CacheAlgorithm": true,
+    "refs": true
+  },
+  "integration": "Root owns repository integration. Check destination absence and source pins before creating the documentation tree entry. Do not replace source/ref qualification with this document. Preserve all strict/global assurance statuses until complete owner reconciliation.",
+  "finalReadback": {
+    "blob": "bc72390c69e0c92cd7dce56092a65731748c96ec",
+    "exactContentEqual": true,
+    "sha256": "c8554a87389d0b58e8449ae7458a1b334576ebdab9b5fcd5a6cadeb9c45dc580",
+    "allThreeGuardedEditsReconstructExactly": true
+  }
+}

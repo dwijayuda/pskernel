@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-strict-normalization-source-arguments",
+  "expectedParent": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+  "manifestPath": "psc0/docs/selfhost-language/strict/reviewed-candidates/normalization-arguments.json",
+  "manifestExpectedBaseBlob": null,
+  "status": "bounded-independently-reviewed-source-arguments-with-explicit-open-premises",
+  "files": [
+    {
+      "path": "psc0/docs/selfhost-language/strict/NORMALIZATION_ARGUMENTS.md",
+      "expectedBaseBlob": null,
+      "candidateBlob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+      "candidateSha256": "fd6d4922d057974a41142c8df2642a9f745daf87cd53d1d64cbf9aa57ff03065",
+      "utf8Bytes": 61414
+    }
+  ],
+  "requiredPins": [
+    {
+      "path": "psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+      "blob": "ea8518afd0982e64d6fcfcd2320501d89e0385ec"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/correspondence-obligations.json",
+      "blob": "9ae363efcb6faab4ffd6c10af0e498ece6004649"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/SEMANTIC_RELATIONS.md",
+      "blob": "40e540b325186ee514ff3af9e39a22126d29a167"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/post-review-source-completion.json",
+      "blob": "639e78ffeba7d64f29ef02eadff9b37951073832"
+    },
+    {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/normalizer-domain-hygiene.json",
+      "blob": "fabe10858976ba2fc0d892ef8c0ab20ef227beb6"
+    }
+  ],
+  "sourceBoundary": {
+    "publishedSource": "3c0c07f2b6dd9e28d4ee2cfc4e02a0a63503a9cc",
+    "immutableLineCitationBaseline": "2b5a4c903ed8a069cde8f08265b28042bcaf5766",
+    "baselineRecursionBlob": "c403bd879e439b7b6e88303df430890352a14115",
+    "integratedRecursionBlob": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+    "inspectedLedgerBlob": "ac3b08adfd5ded6f0678fa1717988375578685c6",
+    "currentLedgerBlob": "9ae363efcb6faab4ffd6c10af0e498ece6004649",
+    "nRowsDifference": "Exactly four Recursion source-blob pins; all other N-row fields are byte-equivalent under JSON structural comparison.",
+    "normalizationRows": [
+      "N-01",
+      "N-02",
+      "N-03",
+      "N-04"
+    ]
+  },
+  "substantiveResults": [
+    "Exhaustive actual normalization success/refusal and diagnostic-origin partition.",
+    "Exact ordinary reference/alpha cases, full-frame shadow invariants, fresh worker identity and actual origin construction.",
+    "Integrated two-expression parameter-domain high-water repair proved for the actual caller without exposing future declarations.",
+    "Changed-ID membership and F/S order, free-ID exclusion over every Core constructor, independent telescope permutation and actual child/fixed-ID validation.",
+    "Function-valued fold readiness by finite structural descent, recursive state demand in the original environment and order, simultaneous values, abort/divergence and higher-order cases.",
+    "Full original public telescope/name/kind/order and partial-prefix calling behavior, with one shared residual budget and each original logical caller group charged once."
+  ],
+  "preciseResiduals": [
+    "Instantiate the ordinary typed opening/closing, valid final type/meta and legal source-name interpretation premises on the actual accepted path.",
+    "Establish the supported runtime-sort and constructor/recursor metadata interpretation used by the successful domain/child checks.",
+    "Justify the independent source/Core demand and fixed original-call alignment K/Pi; finite readiness alone does not classify introduced work as administratively silent.",
+    "Compose with actual erasure scope/layout, partial capture and eta/application-group arguments; preserve the same value/computation relations.",
+    "Retain exact-source compiler/runtime/provider qualification separately from general rule-level semantic arguments."
+  ],
+  "review": {
+    "author": "/root/artifact_inspection_review",
+    "sections3Through5": {
+      "reviewer": "/root/empty_evidence_finish",
+      "reviewedBlob": "1a345be75c1404bbfc400e6405736b6275330dce",
+      "verdict": "CLEAR within the stated source-case and explicit-premise scope",
+      "exactScopeUnchangedInFinalBlob": true,
+      "corrections": [
+        "Fixed explicit argument positions exclude the separately checked major.",
+        "The ordinary alpha lemma does not assume the direct-self normalization case."
+      ]
+    },
+    "sections6Through7": {
+      "reviewer": "/root/runtime_comparison_finish",
+      "reviewedBlob": "d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a",
+      "verdict": "CLEAR within the stated source-shape, shared-budget and conditional-composition scope",
+      "corrections": [
+        "Results use actual returned residuals.",
+        "Readiness termination does not alone establish administrative classification.",
+        "Every original partial/full caller group consumes its matched event; private delegation neither resets nor double-charges.",
+        "Total silent fixed/child value reads may cross computed state operands without changing demanded state order or first abort/divergence."
+      ],
+      "finalDeltaReview": "Exact one-sentence replacement over e9f695b639684a5d051c39b66a51baf4da499741 independently read back CLEAR."
+    },
+    "hygiene": {
+      "reviewedArtifact": "ea8518afd0982e64d6fcfcd2320501d89e0385ec",
+      "guardManifest": "fabe10858976ba2fc0d892ef8c0ab20ef227beb6",
+      "actualCallerOnly": true,
+      "acceptedIncorrectEmissionCounterexampleEstablished": false,
+      "mandatoryGeneralTypeSyntaxCoverageFailureEstablished": false
+    },
+    "exactDocumentReadback": true,
+    "latestWordingEditsExactForwardAndReverse": true,
+    "newDocumentAndManifestPathsConfirmedAbsentAtExpectedParent": true,
+    "wholeNRowDischargeClaimed": false
+  },
+  "method": {
+    "githubMcpOnly": true,
+    "pureInMemoryTextJsonHash": true,
+    "unattachedBlobsOnly": true,
+    "localFiles": false,
+    "shell": false,
+    "browser": false,
+    "codeOrTestsExecuted": false,
+    "compilerExecuted": false,
+    "workflowExecuted": false,
+    "commitsOrRefsChanged": false
+  },
+  "preserved": {
+    "sourceAuthority": ".lean",
+    "generatedGrammar": "ps-0.9-r3",
+    "generatedMode": "new-only",
+    "selectedSeed": "R",
+    "typescript": "7.0.2",
+    "node": "22.23.3",
+    "kernelProviderDefeqCacheAndExistingTheory": true,
+    "sourceAndWorkflowFiles": true,
+    "ledgerRequirementsAndAll33OpenRows": true,
+    "newSerializedWitnessRequirement": false,
+    "machineTheoremRequiredAsOnlyAssuranceMethod": false
+  },
+  "semanticRowsClosed": 0,
+  "strictSh1Qualified": false,
+  "semanticContractQualified": false,
+  "generalPreservationProven": false,
+  "formalPreservationProven": false,
+  "supersedesManifest": "088f82b5c126038c892c4b8bda802e758505d72a"
+}

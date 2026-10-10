@@ -1,3 +1,13 @@
+# Runtime IR work — current continuation and archived M6 plan
+
+The practical F/new-only grammar/TypeScript 7 checkpoint remains merged at `ed5d00aca0743bde583b45fe7756dd494ac3960f`. The declared strict PSC0-SH/1 checkpoint at compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79` now has complete 33/27 disposition and exact compiler/provider evidence in [strict/release-qualification.json](strict/release-qualification.json). It combines authenticated completed native/N1/C1 from cancelled run 38015134511, completed C2/C3 and their conformance gates from failed continuation 38021634599, and corrected binder/qualification evidence plus separate provider acceptance from successful evidence-completion run38027413274. The new producer at719f5ec4225baf51d1969cc3b5e4cbc6959fad4a retained all446 imported files and the original1fa source/48-file recipe; it rebuilt no generation and repeated no conformance. All four deduplicated admission streams covering eight C2/C3 roles were accepted by the pinned provider. R remains selected, `.lean` remains authoritative, and qualification applies to the explicit strict entry/lane. [strict/PLAN.md](strict/PLAN.md) preserves the contract and [AI_WORK_STATE.md](../../AI_WORK_STATE.md) records current integration status.
+
+**Everything below is the historical M6 plan and its historical evidence.** Its references to selected A, TypeScript 5 recovery, current TS7 checkpoints and future projection work describe those old revisions. Selected R now remains active; current recovery and development use TypeScript 7.0.2 only; the qualified F projection/worker migrations are complete. Do not revive archived TODOs or execute retired TS5 recovery from this document.
+
+The historical M6 checker and receipts remain valid for their exact sources. They do not establish the new strict milestone or a general preservation theorem.
+
+---
+
 # M6: bounded runtime typing for original PSC0 IR
 
 ## Active implementation and qualification boundary

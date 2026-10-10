@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-failed-qualification-attempt",
+  "status": "failed-at-existing-runtime-cli-gate-before-N1",
+  "repository": "dwijayuda/pskernel",
+  "branch": "psc0/strict-sh1-v1",
+  "sourceCommit": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+  "run": {
+    "id": 38002284953,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "failure",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38002284953",
+    "createdAt": "2026-10-09T23:01:08Z",
+    "updatedAt": "2026-10-09T23:02:30Z"
+  },
+  "jobs": [
+    {
+      "id": 114062934819,
+      "name": "compiler",
+      "status": "completed",
+      "conclusion": "failure",
+      "failedStep": {
+        "number": 22,
+        "name": "Verify native and generated TypeScript CLI boundaries"
+      },
+      "completedEarlierStepNumbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        15,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "skippedGenerationStepNumbers": [
+        23,
+        24,
+        25,
+        26,
+        27
+      ],
+      "retainedEvidenceSteps": [
+        {
+          "number": 28,
+          "conclusion": "success"
+        },
+        {
+          "number": 29,
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 114063308633,
+      "name": "kernel-admissions",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "failure": {
+    "compilerJobId": 114062934819,
+    "stepNumber": 22,
+    "path": "scripts/selfhost-replay-runtime.test.mjs",
+    "line": 103,
+    "column": 16,
+    "timestamp": "2026-10-09T23:02:23.8784042Z",
+    "assertion": "assert.equal(compiled.replayReturnedFunction(n, 11n), n === 0n ? 18n : n + 10n)",
+    "error": "AssertionError [ERR_ASSERTION]",
+    "actual": "[Function: fn]",
+    "expected": "18n",
+    "operator": "strictEqual",
+    "exitCode": 1,
+    "classification": "existing-host-call-result-arity-assertion"
+  },
+  "sourceInspection": {
+    "testBlob": "516aaf641917f233757fb4badb1a6bb39774645f",
+    "fixturePath": "test/fixtures/selfhost-function-results.lean",
+    "fixtureBlob": "76477fe12f39ccb8cb033cd5fdb2a855495ed056",
+    "failingDeclaration": "replayReturnedFunction",
+    "actualAlignedRuntimeEntryArity": 1,
+    "returnedRuntimeFunctionArity": 1,
+    "rationale": "The raw definition has one leading lambda and then a match returning a function. The existing host test supplies both arguments to the first exported call. The reviewed canonical representation requires the returned function to receive the second argument.",
+    "expectedSourceResultChanged": false,
+    "repairAppliedByMonitoringAgent": false
+  },
+  "stageStatus": {
+    "nativeCompilerBuild": "success",
+    "nativeRegressionTargets": "success",
+    "nativeCheckedSeedBuild": "success",
+    "sourceGrammarImportsAndWorkspace": "success",
+    "runtimeCliGate": "failure",
+    "N1": "not-started",
+    "C1": "not-started",
+    "C2": "not-started",
+    "C3": "not-started",
+    "provider": "skipped",
+    "providerJobId": 114063308633,
+    "generationReceiptCount": 0,
+    "newGeneratedProductsQualified": false
+  },
+  "log": {
+    "blob": "adb2fb82490eb126064cfa83fadf3dfb2c39cb9c",
+    "sha256": "8eebcf46d04d4a8c5d72dfa895609b70220b47ea515ebafc78f790481383ed42",
+    "utf8Bytes": 183576,
+    "decodedLineCount": 2228,
+    "exactBlobReadback": true,
+    "source": "GitHub Actions completed compiler job decoded log; exact leading BOM and text retained"
+  },
+  "preflight": {
+    "resourcePolicy": {
+      "policy": "psc0-sh1-generated-qualification-resources/1",
+      "passed": true,
+      "node": "v22.23.3",
+      "oldSpaceMiB": 8192,
+      "minimumAvailableBytes": 12884901888,
+      "observedHeapLimitBytes": 8640266240,
+      "effectiveAvailableBytes": 15228989440,
+      "inheritedHeapOverride": false
+    },
+    "typescriptProfile": {
+      "mode": "installed-profile-contract",
+      "report": "/home/runner/work/pskernel/pskernel/psc0/dist/typescript-profile/contract/report.json",
+      "timings": [
+        {
+          "phase": "positional-source-with-unrelated-config",
+          "version": "7.0.2",
+          "elapsedMs": 94.56032399999998
+        }
+      ]
+    },
+    "nativeLean": {
+      "version": "4.34.0",
+      "commit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b"
+    }
+  },
+  "retainedArtifacts": [
+    {
+      "id": 11649673654,
+      "name": "psc0-sh1-ts7.0.2-45d314b970d9d76fce9387f6bc8108fb9fab611c",
+      "sizeBytes": 447724,
+      "digest": "sha256:18b26297bd37c23e4f762a093b2a09c595bc5676f314f7419060028cb6f75e2f",
+      "expired": false,
+      "sourceCommit": "45d314b970d9d76fce9387f6bc8108fb9fab611c",
+      "runId": 38002284953
+    }
+  ],
+  "interpretation": {
+    "previousReservedIdentifierFailureResolved": true,
+    "memoryFailureObserved": false,
+    "N1SemanticGatesReached": false,
+    "finiteEvidenceIsGeneralProof": false,
+    "noAutomaticRerun": true
+  },
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "correspondenceRowsClosed": 0
+  },
+  "agentActions": {
+    "sourceEdits": 0,
+    "refMutations": 0,
+    "workflowDispatches": 0,
+    "reruns": 0,
+    "preservedUnattachedLog": true,
+    "preservedUnattachedEvidence": true
+  }
+}

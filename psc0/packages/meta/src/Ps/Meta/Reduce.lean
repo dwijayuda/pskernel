@@ -25,9 +25,9 @@ def psWhnfCoreWithFuel
   | Nat.zero =>
       fun (expr : PsExpr) => psMetaInstantiate metaContext expr
   | Nat.succ remaining =>
-      let smaller : PsExpr -> PsExpr :=
-        psWhnfCoreWithFuel metaContext localContext remaining;
       fun (expr : PsExpr) =>
+        let smaller : PsExpr -> PsExpr :=
+          psWhnfCoreWithFuel metaContext localContext remaining;
         let instantiated := psMetaInstantiate metaContext expr;
         match instantiated with
         | .fvar id =>
@@ -72,9 +72,9 @@ def psWhnfWithFuel
   | Nat.zero =>
       fun (expr : PsExpr) => psWhnfCore metaContext localContext expr
   | Nat.succ remaining =>
-      let smaller : PsExpr -> PsExpr :=
-        psWhnfWithFuel environment metaContext localContext remaining;
       fun (expr : PsExpr) =>
+        let smaller : PsExpr -> PsExpr :=
+          psWhnfWithFuel environment metaContext localContext remaining;
         let core := psWhnfCoreWithFuel metaContext localContext remaining expr;
         match core with
         | .constE name levels =>
@@ -119,9 +119,9 @@ def psDefEqReadOnlyWithEnvFuel
           (psWhnf environment metaContext localContext left)
           (psWhnf environment metaContext localContext right)
   | Nat.succ remaining =>
-      let smaller : PsExpr -> PsExpr -> Bool :=
-        psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;
       fun (left : PsExpr) (right : PsExpr) =>
+        let smaller : PsExpr -> PsExpr -> Bool :=
+          psDefEqReadOnlyWithEnvFuel environment metaContext localContext remaining;
         let leftValue :=
           psWhnf environment metaContext localContext left;
         let rightValue :=

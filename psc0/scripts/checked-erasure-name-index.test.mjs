@@ -18,7 +18,7 @@ test('generated erasure indexes preserve collisions, structured names, precedenc
     const environment=read('packages/environment/src/Ps/Environment/Basic.lean');
     const source=read('packages/foundation/src/Ps/Foundation/Name.lean')+'\n'+
       environment.slice(environment.indexOf('def psEnvironmentHashStringWorker'),environment.indexOf('def psEnvironmentIndexFindWorker'))+'\n'+
-      basic.slice(basic.indexOf('-- Persistent collision buckets'),basic.indexOf('inductive PsErasedBinderKind'))+
+      basic.slice(basic.indexOf('-- Persistent collision buckets'),basic.indexOf('inductive PsErasureError'))+
       '\ndef erasureIndexEntriesNil : List (Prod PsName String) := List.nil\n'+
       'def erasureIndexEntriesCons (name : PsName) (value : String) (tail : List (Prod PsName String)) : List (Prod PsName String) := List.cons (Prod.mk name value) tail\n'+
       'def A.value : Nat := 9\ndef erasureScopeCollision (A_value : Nat) : Nat := Nat.add A_value A.value\n';

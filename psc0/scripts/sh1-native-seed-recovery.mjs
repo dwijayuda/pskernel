@@ -11,7 +11,7 @@ const recipePaths = [
   'scripts/sh1-native-seed-recovery.mjs',
   'scripts/sh1-successor-seed.mjs',
   'scripts/sh1-seed-manifest.mjs',
-  'scripts/sh1-grammar-conformance.mjs',
+  'scripts/sh1-grammar-profile.mjs',
   'scripts/sh1-source-snapshot.mjs',
   'scripts/workspace-layout.mjs',
   'scripts/typescript-cli.mjs',

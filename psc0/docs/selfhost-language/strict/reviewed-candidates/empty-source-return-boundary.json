@@ -1,0 +1,492 @@
+{
+  "schemaVersion": 1,
+  "kind": "strict-sh1-empty-source-entry-assertion-review",
+  "status": "CLEAR",
+  "repository": "dwijayuda/pskernel",
+  "base": {
+    "commit": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
+    "rootTree": "b93eaa340ff8955596ddc0376835386dd7f7c0d0",
+    "psc0Tree": "30758899192080d3f6ffc5182f53a2c65a6d1c8a",
+    "psc0BlobCount": 1394,
+    "treeTruncated": false
+  },
+  "trigger": {
+    "runId": 38007714076,
+    "stage": "SH/1 strict source conformance",
+    "assertion": "observeEmptySource sh1EmptyFunction declaration.body expected call, actual letE",
+    "interpretation": "The no-application fixture exposes an obsolete arbitrary computed-result eta expectation, not an unrecognized application-capture wrapper."
+  },
+  "scope": {
+    "method": "GitHub MCP read-only source and data review with pure in-memory text traversal and SHA256; no compiler, runtime, shell, filesystem or browser execution.",
+    "selection": "All 27 current scripts/sh1-*.mjs files plus 7 active original-IR/replay/preparation dependencies.",
+    "fileCount": 34,
+    "totalUtf8Bytes": 752228,
+    "sameClass": "Source-produced IR assertions that conflate result function arrows with actual entry parameters or demand an obsolete call/capture wrapper; direct original-IR constructors and grammar/Core AST assertions remain distinct.",
+    "boundedAuditExclusions": "Historical source-text migration guards and unrelated native/provider/package tooling are outside this active SH/1 consumer audit."
+  },
+  "auditVector": [
+    {
+      "path": "psc0/scripts/sh1-capabilities.mjs",
+      "gitBlob": "14c581f57a28b5f9edcd372e10fea1a1e575c217",
+      "sha256": "171316bbe186ff91ac055a1171e27e86f5e605d2082d5d7ffcf90de6a68749eb",
+      "bytes": 25989
+    },
+    {
+      "path": "psc0/scripts/sh1-check-admissions.mjs",
+      "gitBlob": "750fe59f317056bfe76b2c77ffd7d09a82aac342",
+      "sha256": "608dd25cc513d9160df05424218c99d02f0c0d681a6b3f137b645e6893fabde6",
+      "bytes": 6891
+    },
+    {
+      "path": "psc0/scripts/sh1-foundation-conformance.mjs",
+      "gitBlob": "9e3e167c38fa56d09ba02d07535bb65008929653",
+      "sha256": "d0c139a4a907ef5e35908379b04d8983ee889218791c8ac7f2361fc080d46f9a",
+      "bytes": 8348
+    },
+    {
+      "path": "psc0/scripts/sh1-fresh-name-conformance.mjs",
+      "gitBlob": "9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7",
+      "sha256": "330e3c53401d3912f092ecf9f6457c67db6852f73b4cf715eb3a92364459d7d5",
+      "bytes": 16581
+    },
+    {
+      "path": "psc0/scripts/sh1-function-entry.mjs",
+      "gitBlob": "ceb4a39851e421e1d95f009cbf31d500e6ff1bb1",
+      "sha256": "b38c4ef844068aae4cb0373785dc5401f72d59e0016dd3e0f3e343ac96348bc4",
+      "bytes": 1701
+    },
+    {
+      "path": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+      "gitBlob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+      "sha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332",
+      "bytes": 37975
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-conformance.mjs",
+      "gitBlob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+      "sha256": "4daafb21cc121532bb0bb549305babc8987b9ca8554e5864a8bdc59b5ceadc58",
+      "bytes": 37358
+    },
+    {
+      "path": "psc0/scripts/sh1-grammar-profile.mjs",
+      "gitBlob": "26836a8e487d77c94a73485e2d11e3575b932edf",
+      "sha256": "8107c4b1f3f5dc8a74b2c999443659a43242c5e0879e8d6921571805f89e71ae",
+      "bytes": 438
+    },
+    {
+      "path": "psc0/scripts/sh1-helper-conformance.mjs",
+      "gitBlob": "686a1a1ab4c74d838639e2044b5403cc0e9ed0e8",
+      "sha256": "412b79ebffc1b65f6d06d5a15b277207cc21df1e1a28e1a8a857c06ee4b1682b",
+      "bytes": 13050
+    },
+    {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "gitBlob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+      "sha256": "c7bc6fff33decea880595023367a5e6d73249226d5002b9810e56bae876ad1f9",
+      "bytes": 40509
+    },
+    {
+      "path": "psc0/scripts/sh1-iterate.mjs",
+      "gitBlob": "185d0fa4b65529e56bb560e6a22a7af9519dd887",
+      "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8",
+      "bytes": 6972
+    },
+    {
+      "path": "psc0/scripts/sh1-iteration-conformance.mjs",
+      "gitBlob": "ef7ceca2ee8fdaf6cbc16dddce7c988d7090a4fa",
+      "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4",
+      "bytes": 5118
+    },
+    {
+      "path": "psc0/scripts/sh1-migration-worker-abi.mjs",
+      "gitBlob": "4a24f22050cdbe9660501b58bc1eeed9c8005319",
+      "sha256": "f520b3d033462e41a87d1aac3db6ed2f75290c05b4f106451919886234352cc7",
+      "bytes": 18393
+    },
+    {
+      "path": "psc0/scripts/sh1-migration-worker-conformance.mjs",
+      "gitBlob": "796263a6a5724f3971530b435f13eb7ce1438eb8",
+      "sha256": "3e43c4ee676c3aea2f5f68b24799a991a72fa608ef65b6371833fafcfe7dc808",
+      "bytes": 39884
+    },
+    {
+      "path": "psc0/scripts/sh1-native-seed-recovery.mjs",
+      "gitBlob": "c1b5673079b2faae56e9c778b62e70087e639fbe",
+      "sha256": "45b5223fa549358da586e5f211261084cfdb153b1334d5feaff6a8349c464715",
+      "bytes": 23134
+    },
+    {
+      "path": "psc0/scripts/sh1-projection-conformance.mjs",
+      "gitBlob": "1c69c032f260eac8d868173b7f8b5b06e90a4a29",
+      "sha256": "64f60f538a01fe288153d3df7a12725854a7dbf9e10a308fe1e3dab2d342fa64",
+      "bytes": 11727
+    },
+    {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "gitBlob": "562f8c0e60a599fadde581f4a6deca502e9202b5",
+      "sha256": "fc7eb46a8f0d1b8fa4db6ef39a09d14cd3d771b9741fae74cd44b197fd1cf193",
+      "bytes": 73556
+    },
+    {
+      "path": "psc0/scripts/sh1-resource-policy.mjs",
+      "gitBlob": "7e3066c513a91a6e0717aac9465a879097c0dd82",
+      "sha256": "76647884ed3f451ebd429c89c480113e88f88c60a673f8d5456b9418fd4fb998",
+      "bytes": 12011
+    },
+    {
+      "path": "psc0/scripts/sh1-seed-manifest.mjs",
+      "gitBlob": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7",
+      "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f",
+      "bytes": 10641
+    },
+    {
+      "path": "psc0/scripts/sh1-source-snapshot.mjs",
+      "gitBlob": "1083a3765a55540f83b2376c40a97bc1f1362ce0",
+      "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8",
+      "bytes": 3705
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "gitBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+      "sha256": "c522c41263e7931b83777242d77c2e7f355ce82832e72f152879645f96f31326",
+      "bytes": 91968
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-runtime-conformance.mjs",
+      "gitBlob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+      "sha256": "a6ff98ba27c458d26761b65dc2ea6ae9ea8042d390981a63a8ec22522ec4647c",
+      "bytes": 81705
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "gitBlob": "c28507666a3c46892c6fc155c66e1842a8954150",
+      "sha256": "b4219497ec2eb9549535241580a22f74c1f03f6d6a5db8e7fad598cf839e9cd0",
+      "bytes": 31384
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-source.mjs",
+      "gitBlob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+      "sha256": "b993d66ef955fb4359f6f472667a0ddc572afcb51501283a4ddcd8ba38d97519",
+      "bytes": 25351
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-target-conformance.mjs",
+      "gitBlob": "0bee0e6f67e080dda87fd10c75d2437bb14c3cd1",
+      "sha256": "a87af12e769804db86f53b38ec5d105f140e74999a84e7d55eecf385418377fc",
+      "bytes": 8864
+    },
+    {
+      "path": "psc0/scripts/sh1-successor-seed.mjs",
+      "gitBlob": "3514a7797e739e7a47af33c91ab58e912584d0c7",
+      "sha256": "00b5dbfae38715df2888d3b3577897010fe98e65fc4268302d7253397e0067e2",
+      "bytes": 22728
+    },
+    {
+      "path": "psc0/scripts/sh1-successor-seed.test.mjs",
+      "gitBlob": "5c93b338a20d090039b00d77e8eee8f7054eea5d",
+      "sha256": "506a66ae046b1557c2ac52de46c249e129b04a147a615ce120e440bf6d81e56a",
+      "bytes": 14023
+    },
+    {
+      "path": "psc0/scripts/selfhost-replay-runtime.test.mjs",
+      "gitBlob": "10df1f5c075bad31e6ddf076250bedd5f26b7c53",
+      "sha256": "254b04288c8880d3b16c9a51e372a8c99604d674d4a12174604eac1ac23bffab",
+      "bytes": 8236
+    },
+    {
+      "path": "psc0/scripts/checked-erasure-name-index.test.mjs",
+      "gitBlob": "50e91efbdf4d368a713b307aadae5ce2bd9a752a",
+      "sha256": "fd3dad8abcf510b03e3efd84ecebc5d4e8bad828c482e1de138c1a456330118f",
+      "bytes": 4592
+    },
+    {
+      "path": "psc0/scripts/original-ir-inventory.mjs",
+      "gitBlob": "d4cf667033cfcd903b4179f8af01fa77f56102bf",
+      "sha256": "190a1d216b89c775b7195433ff7caed1407a382b25175f74e7525ee3a7e345a0",
+      "bytes": 34170
+    },
+    {
+      "path": "psc0/scripts/original-ir-carrier.mjs",
+      "gitBlob": "a2c20c50ada6d5dc13746bc3b9e748088464e70c",
+      "sha256": "5e153c67c5a08ac475962da0a14ea04fe5f996449f81bf071787e11af33515c2",
+      "bytes": 11388
+    },
+    {
+      "path": "psc0/scripts/checked-prepared-session.test.mjs",
+      "gitBlob": "70f50956bced5f987a0304d414bc6a115018dfac",
+      "sha256": "38dfcaae61e3a088c1c12aca02dca73e7a4d6514d9dd1d9d563e7b17571ddd13",
+      "bytes": 6762
+    },
+    {
+      "path": "psc0/scripts/checked-source-snapshot.test.mjs",
+      "gitBlob": "19d86f6b56685a03cfce7e952046a14537c967c9",
+      "sha256": "fac3174f21549b401950507a319848f76022bdbf39dc0a381af202f82a9b357b",
+      "bytes": 5635
+    },
+    {
+      "path": "psc0/scripts/generated-preparation-session.mjs",
+      "gitBlob": "3d1edcd9e03ed53c926fbc38e3b1fb81f2e50fc7",
+      "sha256": "44ab11ab36862d229c3b74bdd84b58d8cd1eb20b30ac245ade3eb21c09c0a926",
+      "bytes": 11441
+    }
+  ],
+  "auditVectorSha256": "20c1c9853016e2409344e6773fce5c63819950f820d5c447fb24ffbef66d899d",
+  "sourceFixtures": [
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-empty.lean",
+      "gitBlob": "295b7dc991bf37e9de8e3d49b7db3692f0c4cf53",
+      "sha256": "243b2660309aba388df6009af8af033a51e9f3ca080dde502e096c4f29b6a7a5",
+      "bytes": 345
+    },
+    {
+      "path": "psc0/test/fixtures/selfhost-sh1-empty.ps",
+      "gitBlob": "cada46d9d1f10d95bcd6053fff6078262b600b6c",
+      "sha256": "71f4e7e756816c301603ce1e6382c60cb6f0877ca8b88c4f166a358dab2e3390",
+      "bytes": 369
+    }
+  ],
+  "producers": [
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+      "gitBlob": "4c9d3878c01751239022e755e2860c6d49ddf301",
+      "sha256": "a55cb381a686ab9081587380793b1b3d8fe485c86b88770fbce4a3e2250516a7",
+      "bytes": 22534
+    },
+    {
+      "path": "psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+      "gitBlob": "b4af2687c1b94e85014e323e5325385f139d4015",
+      "sha256": "88afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15",
+      "bytes": 138189
+    }
+  ],
+  "sourceProof": {
+    "entryProducer": "psEraseOpenDefinitionWithFuel opens a currentType forallE only when the currentValue is an actual PsExpr.lam. On a non-lambda value it erases the entire currentType as the result type and preserves the erased body.",
+    "emptyProducer": "The regular empty recursor branch emits exactly a typed let of its zero-alternative match, followed by var(resultName). The motive at the actual major determines the result type; the binding is fresh in the existing scope.",
+    "canonicalApplication": "psEraseCanonicalArguments builds ordinary nested unary calls only for actual source application operands. These empty fixtures contain no such application.",
+    "arbitraryEta": "psErasureEtaFunction has no current call sites; the repaired source observation must not invent an application or extra runtime parameter from a result arrow.",
+    "requiredRows": [
+      {
+        "name": "sh1EmptyNat",
+        "runtimeParameters": [
+          "value"
+        ],
+        "resultType": {
+          "kind": "primitive",
+          "name": "nat"
+        }
+      },
+      {
+        "name": "sh1EmptyFunction",
+        "runtimeParameters": [
+          "value"
+        ],
+        "resultType": {
+          "kind": "function",
+          "parameters": [
+            {
+              "kind": "primitive",
+              "name": "nat"
+            }
+          ],
+          "result": {
+            "kind": "primitive",
+            "name": "nat"
+          }
+        }
+      },
+      {
+        "name": "sh1EmptyGeneric",
+        "runtimeParameters": [
+          "value"
+        ],
+        "resultType": {
+          "kind": "typeParameter",
+          "name": "T0"
+        }
+      },
+      {
+        "name": "sh1EmptyFresh",
+        "runtimeParameters": [
+          "value",
+          "emptyResult"
+        ],
+        "resultType": {
+          "kind": "primitive",
+          "name": "nat"
+        }
+      }
+    ]
+  },
+  "finding": {
+    "count": 1,
+    "file": "psc0/scripts/sh1-strict-source-conformance.mjs",
+    "owner": "observeEmptySource",
+    "baseLines": [
+      93,
+      96
+    ],
+    "obsoleteAssertion": "declaration.body is call and declaration.body.fn is the typed empty local",
+    "boundedCorrection": "For every one of the four exact fixtures, require declaration.body to be the same object as the unique retained typed empty let, its resultType to match the expected source result, and its runtime parameter names to match the declared source prefix. Bind that same prefix exactly in the existing evidence consumer.",
+    "prohibitedSubstitutes": [
+      "No arbitrary-let peeling",
+      "No generic call/capture unwrapping",
+      "No result-arrow eta reintroduction",
+      "No additional compilation or cloned IR object",
+      "No weakening or alteration of the explicit direct-IR callee fixture"
+    ]
+  },
+  "unchangedConsumers": [
+    {
+      "category": "generic original IR and canonical function values",
+      "paths": [
+        "psc0/scripts/sh1-generic-erasure-conformance.mjs"
+      ],
+      "disposition": "CLEAR; four direct recursive fixture calls are searched in the owned graph with exact declared runtime/type arities. Eighteen current source entry prefixes and two type-only Unit activation entries are already explicit; function value type nodes are canonical unary. Scalar recursive-structure fixtures retain their exact major/projection lets and genuine direct IH call."
+    },
+    {
+      "category": "direct original IR checker and empty ABI",
+      "paths": [
+        "psc0/scripts/sh1-ir-checker-conformance.mjs",
+        "psc0/scripts/sh1-strict-evidence.mjs"
+      ],
+      "disposition": "CLEAR; eliminateEmptyTypedCall explicitly calls the typed-empty let with natural(7). All five empty declaration signatures, the missing-result-hint refusal, zero-field record distinction, and computed-scrutinee single activation/original-fault observations remain unchanged."
+    },
+    {
+      "category": "runtime demand and faults",
+      "paths": [
+        "psc0/scripts/sh1-strict-runtime-conformance.mjs"
+      ],
+      "disposition": "CLEAR; no source IR body-shape peeling. The fixed 24 raw-source values and 21 host diagnostic traces/faults already use canonical unary holder.apply callbacks. Preserve all source/reference/expected-observation hashes, same-object checking/emission, per-use capture demand and fault identity."
+    },
+    {
+      "category": "helper and foundation entry ABI",
+      "paths": [
+        "psc0/scripts/sh1-function-entry.mjs",
+        "psc0/scripts/sh1-helper-conformance.mjs",
+        "psc0/scripts/sh1-foundation-conformance.mjs",
+        "psc0/scripts/sh1-migration-worker-abi.mjs",
+        "psc0/scripts/sh1-migration-worker-conformance.mjs",
+        "psc0/scripts/sh1-fresh-name-conformance.mjs"
+      ],
+      "disposition": "CLEAR; current/selected-R producer and exact declaration prefixes determine invocation groups, without catch/retry or result-based fallbacks. These do not infer arity from arbitrary computed result arrows."
+    },
+    {
+      "category": "syntax, carrier, inventory, replay and orchestration",
+      "paths": [
+        "psc0/scripts/sh1-capabilities.mjs",
+        "psc0/scripts/sh1-check-admissions.mjs",
+        "psc0/scripts/sh1-grammar-conformance.mjs",
+        "psc0/scripts/sh1-grammar-profile.mjs",
+        "psc0/scripts/sh1-iterate.mjs",
+        "psc0/scripts/sh1-iteration-conformance.mjs",
+        "psc0/scripts/sh1-native-seed-recovery.mjs",
+        "psc0/scripts/sh1-projection-conformance.mjs",
+        "psc0/scripts/sh1-qualify.mjs",
+        "psc0/scripts/sh1-resource-policy.mjs",
+        "psc0/scripts/sh1-seed-manifest.mjs",
+        "psc0/scripts/sh1-source-snapshot.mjs",
+        "psc0/scripts/sh1-strict-source.mjs",
+        "psc0/scripts/sh1-strict-target-conformance.mjs",
+        "psc0/scripts/sh1-successor-seed.mjs",
+        "psc0/scripts/sh1-successor-seed.test.mjs",
+        "psc0/scripts/selfhost-replay-runtime.test.mjs",
+        "psc0/scripts/checked-erasure-name-index.test.mjs",
+        "psc0/scripts/original-ir-inventory.mjs",
+        "psc0/scripts/original-ir-carrier.mjs",
+        "psc0/scripts/checked-prepared-session.test.mjs",
+        "psc0/scripts/checked-source-snapshot.test.mjs",
+        "psc0/scripts/generated-preparation-session.mjs"
+      ],
+      "disposition": "No further same-class source-produced IR assertion. Raw grammar/Core syntax shape checks and explicitly authored original IR stay exact; checked-carrier and evidence provenance checks are retained."
+    }
+  ],
+  "retainedChecks": [
+    "One zero-constructor Sh1Empty layout with type parameter T0",
+    "Exactly one typed empty let per fixture in the same compiler-owned checked and emitted object",
+    "Expected typed result, zero alternatives, one type argument and var(value) scrutinee",
+    "Result body is var of the same fresh let name; freshness against runtime parameters",
+    "All raw Lean/PS source pins, source origins, unnormalized source batches, TypeScript never markers and equality",
+    "No additional preparation, portable IR checking, native value oracle, semantic qualification or provider claim"
+  ],
+  "qualification": {
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "correspondenceRowsRemainOpen": 33,
+    "stageRowsRemainOpen": 27,
+    "selectedSeed": "R",
+    "pending": "Actual full qualification on the final source/gate pins, reviewed final evidence disposition and required provider PASS; no early closure."
+  },
+  "verdict": "The two exact host gate/evidence candidates repair one obsolete source-entry observation using the current producer rule. No further same-class active SH/1 assertion correction was found in the pinned 34-file audit. This verdict is source review only, not executed qualification or provider approval.",
+  "candidates": [
+    {
+      "path": "psc0/scripts/sh1-strict-source-conformance.mjs",
+      "baseGitBlob": "c28507666a3c46892c6fc155c66e1842a8954150",
+      "baseSha256": "b4219497ec2eb9549535241580a22f74c1f03f6d6a5db8e7fad598cf839e9cd0",
+      "baseBytes": 31384,
+      "candidateGitBlob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+      "candidateSha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+      "candidateBytes": 31555,
+      "guard": {
+        "startLine": 91,
+        "before": "    assert(!runtimeParameters.includes(local.name), name + ': fresh result binding');\n    if (name === 'sh1EmptyFresh') assert(runtimeParameters.includes('emptyResult'));\n    if (name === 'sh1EmptyFunction') {\n      assert.equal(emptyTag(declaration.body), 'call');\n      assert.equal(declaration.body.fn, local, 'typed empty result is retained in a callee position');\n    }\n    return { name, resultType: type, resultName: local.name,\n      runtimeParameters, alternatives: 0, typeArgumentCount: 1, freshResultName: true };\n",
+        "after": "    const declarationResultType = emptyResultType(declaration.resultType);\n    assert.deepEqual(declarationResultType, type, name + ': declaration result type');\n    assert.deepEqual(runtimeParameters, name === 'sh1EmptyFresh' ? ['value', 'emptyResult'] : ['value'],\n      name + ': authored runtime parameter prefix');\n    assert.equal(declaration.body, local, name + ': direct typed empty result');\n    assert(!runtimeParameters.includes(local.name), name + ': fresh result binding');\n    return { name, resultType: type, declarationResultType, resultName: local.name,\n      runtimeParameters, bodyIsTypedEmptyResult: true,\n      alternatives: 0, typeArgumentCount: 1, freshResultName: true };\n",
+        "beforeSha256": "88f2b10943cc899646c2acda9c78e65d37eb07af33be09b91212aae9740ec5d9",
+        "afterSha256": "c28a5bf900f97ff8958f2bfb03bcdcf9e1651930f371d9d13fb9face0ada7166",
+        "beforeBytes": 525,
+        "afterBytes": 696,
+        "beforeOccurrences": 1,
+        "afterOccurrences": 1,
+        "completeForwardReconstruction": true,
+        "completeReverseReconstruction": true
+      }
+    },
+    {
+      "path": "psc0/scripts/sh1-strict-evidence.mjs",
+      "baseGitBlob": "55b3d5c1f95388500447d6f74119d7ffae3dd8a5",
+      "baseSha256": "c522c41263e7931b83777242d77c2e7f355ce82832e72f152879645f96f31326",
+      "baseBytes": 91968,
+      "candidateGitBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+      "candidateSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+      "candidateBytes": 91970,
+      "guard": {
+        "startLine": 1172,
+        "before": "      assert(Array.isArray(entry.runtimeParameters));\n      assert(entry.runtimeParameters.every((name) => typeof name === 'string' && name.length > 0));\n      assert(!entry.runtimeParameters.includes(entry.resultName));\n      if (entry.name === 'sh1EmptyFresh') assert(entry.runtimeParameters.includes('emptyResult'));\n",
+        "after": "      assert.deepEqual(entry.declarationResultType, entry.resultType);\n      assert.equal(entry.bodyIsTypedEmptyResult, true);\n      assert.deepEqual(entry.runtimeParameters,\n        entry.name === 'sh1EmptyFresh' ? ['value', 'emptyResult'] : ['value']);\n      assert(!entry.runtimeParameters.includes(entry.resultName));\n",
+        "beforeSha256": "39def5e2f389b7d3dcad1ea23f1c2751189e36db84ae3391f6e0522c5dbbc7f5",
+        "afterSha256": "785477075818207f5ea0e4211b0bdb4afa5ed7867cd54d7df2e7c7a74b543d30",
+        "beforeBytes": 320,
+        "afterBytes": 322,
+        "beforeOccurrences": 1,
+        "afterOccurrences": 1,
+        "completeForwardReconstruction": true,
+        "completeReverseReconstruction": true
+      }
+    }
+  ],
+  "postCandidateVectorSha256": "4172159f70315565319ede9ff310eb6c1dc3b50d601c271980e87fd5a6fdcac9",
+  "postCandidateTotalUtf8Bytes": 752401,
+  "candidateReview": {
+    "verifiedCandidateHashes": true,
+    "fullBaseAndCandidateContentsFetched": true,
+    "uniqueLineAlignedGuards": 2,
+    "forwardAndReverseReconstruction": true,
+    "sourceGateChange": "All four fixture rows now record the observed declarationResultType and bodyIsTypedEmptyResult only after exact checks against the original compiler-owned graph. Their runtimeParameters are the exact current authored runtime prefix. The incorrect sh1EmptyFunction body.call/body.fn requirement is removed.",
+    "evidenceConsumerChange": "The existing fixed [name,resultType] vector authenticates expected rows and order. Added fields must match those results and true direct-body observation. Exact parameter-array equality subsumes the old generic array/string tests and Fresh includes check; result-name string and freshness checks stay intact.",
+    "schemaImpact": "Two explicit fields are added to each existing empty-elimination observation and are consumed by the matching binder candidate. The current audit found no additional empty-elimination reader with a conflicting fixed object-key schema. Existing observation hashes are calculated from complete records and therefore bind both new fields.",
+    "unchangedOutsideGuards": true,
+    "sourceFixturesUnchanged": true,
+    "productionCompilerUnchanged": true,
+    "directOriginalIrFixtureUnchanged": true,
+    "runtimeValuesAndProbeHashesUnchanged": true,
+    "noArbitraryLetPeeling": true,
+    "noExtraCompilation": true
+  },
+  "integrationConditions": [
+    "Publish the gate and binder together from the pinned base or recheck the complete exact guards if the base moves.",
+    "Retain both raw fixture pins, producer pins and historical failure record; do not rewrite earlier proof/qualification history.",
+    "The old source call-position claim is retired only for these four no-application source fixtures; explicit eliminateEmptyTypedCall coverage remains in the independently authored original-IR gate.",
+    "Run the authorized full qualification on the final source/gate commit; retain honest source-pinned results and complete the required provider/evidence disposition before closing any of the 33 correspondence or 27 stage rows."
+  ],
+  "postCandidateVectorDerivation": "Replace exactly the two candidate paths in auditVector, preserving order; all other path/blob/hash/byte tuples are unchanged."
+}

@@ -2,7 +2,7 @@ name: PSC0 SH1 language qualification
 
 on:
   push:
-    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1']
+    branches: ['psc0/sh1-implementation-v1', 'psc0/sh1-generic-erasure-v1', 'psc0/sh1-ir-checker-v1', 'psc0/typescript-7-v1', 'psc0/sh1-projection-grammar-v1', 'psc0/strict-sh1-v1']
     paths:
       - 'psc0/packages/bootstrap/**'
       - 'psc0/packages/foundation/**'
@@ -48,7 +48,7 @@ concurrency:
 jobs:
   compiler:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     outputs:
       qualified: ${{ steps.qualify.outcome == 'success' }}
       successor-candidate: ${{ steps.qualify.outputs.successor-candidate }}
@@ -95,6 +95,9 @@ jobs:
         id: node
         with:
           node-version: ${{ steps.seed-selection.outputs.node-version }}
+      - name: Check the actual full-qualification runner memory before expensive work
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        run: node --max-old-space-size=8192 scripts/sh1-resource-policy.mjs --preflight dist/sh1/resource-policy-preflight.json
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: psc0
@@ -142,6 +145,7 @@ jobs:
           node --check scripts/check-typescript-profile.mjs
           node --check scripts/native-typescript-cli.test.mjs
           node scripts/check-native-replay-host-source.mjs
+          node --check scripts/sh1-resource-policy.mjs
           node --check scripts/sh1-qualify.mjs
           node --check scripts/sh1-capabilities.mjs
           node --check scripts/sh1-check-admissions.mjs
@@ -149,6 +153,11 @@ jobs:
           node --check scripts/original-ir-inventory.mjs
           node --check scripts/original-ir-carrier.mjs
           node --check scripts/sh1-ir-checker-conformance.mjs
+          node --check scripts/sh1-strict-source.mjs
+          node --check scripts/sh1-strict-source-conformance.mjs
+          node --check scripts/sh1-strict-target-conformance.mjs
+          node --check scripts/sh1-strict-evidence.mjs
+          node --check scripts/sh1-strict-runtime-conformance.mjs
           node --check scripts/sh1-source-snapshot.mjs
           node --check scripts/sh1-seed-manifest.mjs
           node --check scripts/sh1-grammar-conformance.mjs
@@ -265,7 +274,7 @@ jobs:
             psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
       - name: Build current native compiler
         id: native
-        run: lake build psc1 psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
+        run: lake build psc1 psc1_sh1_compile psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests
       - name: Run native parser, translation, and erasure regression targets
         run: |
           regression_status=0
@@ -309,7 +318,9 @@ jobs:
           await mkdir('dist/sh1', { recursive: true });
           await writeFile('dist/sh1/worker-abi-probe.lean', migrationWorkerAbiProbeSource, 'utf8');
           const started = performance.now();
-          const report = runMigrationWorkerConformance(loaded.compiler, valueTag);
+          const report = runMigrationWorkerConformance(loaded.compiler, valueTag, {
+            declarationNamesSchema: 'selected-r-names-only/1',
+          });
           assert.equal(report.cases, 87);
           const abiProbe = runMigrationWorkerAbiProbe(loaded.compiler, valueTag);
           assert.equal(abiProbe.signatureTypeAnnotations, 12);
@@ -330,13 +341,43 @@ jobs:
       - name: Run the bounded native development gate before qualification
         id: native-gate
         run: node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out ${{ steps.seed-selection.outputs.full-qualification == 'true' && 'dist/sh1/development' || 'dist/sh1' }}
+      - name: Compare native worker observations before candidate generation
+        if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          import { readSelectedAuthoringSeed } from './scripts/sh1-successor-seed.mjs';
+          const readJson = async (file) => JSON.parse(await readFile(file, 'utf8'));
+          const selected = await readSelectedAuthoringSeed();
+          assert.equal(selected.mode, 'qualified');
+          assert.equal(selected.manifest.kind, 'psc0-qualified-successor-seed');
+          const reference = await readJson('dist/sh1/worker-harness-reference.json');
+          const native = await readJson('dist/sh1/development/N1/receipt.json');
+          const capabilities = await readJson('dist/sh1/development/N1/capabilities/receipt.json');
+          assert.equal(reference.evidence, 'migration-fixture-authenticated-reference-preflight');
+          assert.equal(reference.passed, true);
+          assert.equal(reference.recipeSourceRef, process.env.GITHUB_SHA);
+          assert.equal(reference.referenceSourceRef, selected.sourceRef);
+          assert.equal(reference.referenceCompilerSha256, selected.manifest.expectedArtifacts.javascriptSha256);
+          assert.equal(reference.selectedSeedIdentitySha256, selected.identitySha256);
+          assert.equal(native.evidence, 'native-seeded-generated-compiler-candidate');
+          assert.equal(native.sourceRef, process.env.GITHUB_SHA);
+          assert.equal(capabilities.evidence, 'raw-source-generated-execution');
+          assert.equal(capabilities.compilerSha256, native.artifacts.javascriptSha256);
+          assert.equal(reference.report.cases, 87);
+          assert.equal(capabilities.workerMigration.cases, 87);
+          assert.deepEqual(capabilities.workerMigration, reference.report,
+            'PSC0_SH1_NATIVE_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE');
+          console.log('PSC0_SH1_NATIVE_WORKER_REFERENCE: PASS (authenticated R and completed N1; 87 cases; no compiler execution)');
+          NODE
       - name: Build the selected-seed candidate before full qualification
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
-        run: node scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1
+        run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs candidate --seed ${{ steps.seed-selection.outputs.compiler-path }} --out dist/sh1 --native .lake/build/bin/psc1
       - name: Qualify exact current-source C2/C3 at a promotion checkpoint
         id: qualify
         if: ${{ steps.seed-selection.outputs.full-qualification == 'true' }}
-        run: node scripts/sh1-qualify.mjs fixed-point --out dist/sh1
+        run: node --max-old-space-size=8192 scripts/sh1-qualify.mjs fixed-point --out dist/sh1
       - name: Retain the newly qualified seed without activating a source migration
         if: ${{ steps.qualify.outputs.promoted-seed-cache-key != '' }}
         uses: actions/cache/save@v4

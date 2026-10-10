@@ -1,0 +1,1528 @@
+{
+  "schemaVersion": 1,
+  "evidence": "native-source-ts7-seed-recovery",
+  "passed": true,
+  "cold": true,
+  "sourceRef": "fe2560aba0f347b1caf8d000d371464642d44f23",
+  "sourceClosureSha256": "f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226",
+  "sourceKind": "raw-authoritative-lean",
+  "moduleCount": 61,
+  "selectedManifestSha256": "7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694",
+  "selectedSeedIdentitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+  "policySha256": "70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30",
+  "recipe": {
+    "id": "native-lean-original-ir-four-products-ts7/1",
+    "files": [
+      {
+        "path": "scripts/sh1-native-seed-recovery.mjs",
+        "gitBlobSha1": "c1b5673079b2faae56e9c778b62e70087e639fbe"
+      },
+      {
+        "path": "scripts/sh1-successor-seed.mjs",
+        "gitBlobSha1": "3514a7797e739e7a47af33c91ab58e912584d0c7"
+      },
+      {
+        "path": "scripts/sh1-seed-manifest.mjs",
+        "gitBlobSha1": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7"
+      },
+      {
+        "path": "scripts/sh1-grammar-profile.mjs",
+        "gitBlobSha1": "26836a8e487d77c94a73485e2d11e3575b932edf"
+      },
+      {
+        "path": "scripts/sh1-source-snapshot.mjs",
+        "gitBlobSha1": "1083a3765a55540f83b2376c40a97bc1f1362ce0"
+      },
+      {
+        "path": "scripts/workspace-layout.mjs",
+        "gitBlobSha1": "eb7c2c07f147a812f9998904a60123b3719e5539"
+      },
+      {
+        "path": "scripts/typescript-cli.mjs",
+        "gitBlobSha1": "9d6607a6f4284b0afba8023566f6e1d75c30a64a"
+      }
+    ]
+  },
+  "recipeSha256": "d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d",
+  "expectedArtifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "generatedCompilerExecuted": false,
+  "historicalParentCompilerExecuted": false,
+  "historicalTypeScriptExecuted": false,
+  "originalSelectedManifestChanged": false,
+  "strictSh1Qualified": false,
+  "fullStandardConformance": false,
+  "fullPscvConformance": false,
+  "providerCheckedByThisRecovery": false,
+  "scope": "Reproduce the selected compiler from pinned native Lean source with TS7 and compare all four final products; preserve the existing selected seed identity.",
+  "commands": [
+    {
+      "label": "runner-ref",
+      "executable": "git",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 4.399328000000004,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/001-runner-ref.stdout",
+      "stderr": "logs/001-runner-ref.stderr",
+      "stdoutSha256": "fb671ea7e1a0ff31bbe23719314424bc981e1b9c9f6cfdb07d6adf733132d955",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "source-before-root",
+      "executable": "git",
+      "args": [
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 2.566524000000001,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/002-source-before-root.stdout",
+      "stderr": "logs/002-source-before-root.stderr",
+      "stdoutSha256": "f91c739ed00bc073161c7c8febb7bd01a4c06a2819ff17433b18e78b6462b428",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "source-before-ref",
+      "executable": "git",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 2.5554830000000024,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/003-source-before-ref.stdout",
+      "stderr": "logs/003-source-before-ref.stderr",
+      "stdoutSha256": "9d1ccbeb53d76503190656c1f1860d70fc7825ceedde7ad853a102d151723b5b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "source-before-status",
+      "executable": "git",
+      "args": [
+        "status",
+        "--porcelain",
+        "--untracked-files=no"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 1570.5446949999998,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/004-source-before-status.stdout",
+      "stderr": "logs/004-source-before-status.stderr",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "lean-version",
+      "executable": "lake",
+      "args": [
+        "env",
+        "lean",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 1530.8704289999998,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/005-lean-version.stdout",
+      "stderr": "logs/005-lean-version.stderr",
+      "stdoutSha256": "cf6e65bfc214882b1c13717aae89d383a03f6bcf5c96dfbae13368cd3e07ff9d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "lean-githash",
+      "executable": "lake",
+      "args": [
+        "env",
+        "lean",
+        "--githash"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 456.88680399999976,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/006-lean-githash.stdout",
+      "stderr": "logs/006-lean-githash.stderr",
+      "stdoutSha256": "3812a3d2dd2910469d2aae31a4bde882f97e697d6a0ec187a96392134e17d4cf",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "typescript-version",
+      "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+      "args": [
+        "/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc",
+        "--version"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 40.50386900000012,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/007-typescript-version.stdout",
+      "stderr": "logs/007-typescript-version.stderr",
+      "stdoutSha256": "41024334022fa58f9c7337359517de307cbcfc6055c19f2b734245eacc2fe97a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-build",
+      "executable": "lake",
+      "args": [
+        "build",
+        "psc1",
+        "psc1_ir_check_tests"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 900000,
+      "elapsedMs": 31379.008953,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/008-native-build.stdout",
+      "stderr": "logs/008-native-build.stderr",
+      "stdoutSha256": "3655c2e05ca38855248a5da9e6efe75a7488c8704b2670bbe6e4b98c1986b852",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-original-ir",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1_ir_check_tests",
+      "args": [
+        "/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/raw-source.lean",
+        "/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/products/index.ts"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 95649.41932,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/009-native-original-ir.stdout",
+      "stderr": "logs/009-native-original-ir.stderr",
+      "stdoutSha256": "98135b33800ec20ba074929591886e6417dc59c46351c72e36c4dbe6d6c9b0cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "typescript-compile",
+      "executable": "/opt/hostedtoolcache/node/22.23.3/x64/bin/node",
+      "args": [
+        "/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc",
+        "--ignoreConfig",
+        "/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/products/index.ts",
+        "--target",
+        "ES2022",
+        "--module",
+        "ES2022",
+        "--moduleResolution",
+        "bundler",
+        "--strict",
+        "--declaration",
+        "--sourceMap",
+        "--noEmitOnError",
+        "--skipLibCheck",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 2986.2724449999805,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/010-typescript-compile.stdout",
+      "stderr": "logs/010-typescript-compile.stderr",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-admissions",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "admissions",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6929.125937000004,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/011-native-admissions.stdout",
+      "stderr": "logs/011-native-admissions.stderr",
+      "stdoutSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-01",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/foundation/src/Ps/Foundation/Source.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.917752999986988,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/012-native-ps-01.stdout",
+      "stderr": "logs/012-native-ps-01.stderr",
+      "stdoutSha256": "190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-02",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Cursor.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.3206930000160355,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/013-native-ps-02.stdout",
+      "stderr": "logs/013-native-ps-02.stderr",
+      "stdoutSha256": "09a374e1792e2f41aef44142db17e1b04c969dc70f07575262047c2b2c0060c2",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-03",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Token.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.096811999974307,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/014-native-ps-03.stdout",
+      "stderr": "logs/014-native-ps-03.stderr",
+      "stdoutSha256": "ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-04",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Lexer.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 56.04084599998896,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/015-native-ps-04.stdout",
+      "stderr": "logs/015-native-ps-04.stderr",
+      "stdoutSha256": "0256f73a093ab0e3ec00c96b399cab7aced6d648223e3fe6fcf2d58a3a0554cc",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-05",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Ast.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.445146000012755,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/016-native-ps-05.stdout",
+      "stderr": "logs/016-native-ps-05.stderr",
+      "stdoutSha256": "89de3dcb90a0b809c4da70e586f1fb55a56dfc1d38458ac2bed5f723aec7ff26",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-06",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/foundation/src/Ps/Foundation/Name.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.347956999990856,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/017-native-ps-06.stdout",
+      "stderr": "logs/017-native-ps-06.stderr",
+      "stdoutSha256": "f92f198ac2be8092497a4981e4d031d283baf6a96ba9de6e3954804401187b33",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-07",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParserState.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.6799210000026505,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/018-native-ps-07.stdout",
+      "stderr": "logs/018-native-ps-07.stderr",
+      "stdoutSha256": "5303cc56fa752d51d24c741d35d961c509e806ccf8be0d80faf3e1ef9625b9f7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-08",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 26.397948999976506,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/019-native-ps-08.stdout",
+      "stderr": "logs/019-native-ps-08.stderr",
+      "stdoutSha256": "d824adc8674d86c2c6c0d6505a02d489f4809b4c962900528a82425b860619d4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-09",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 402.54189699998824,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/020-native-ps-09.stdout",
+      "stderr": "logs/020-native-ps-09.stderr",
+      "stdoutSha256": "742f2141644b286e6a1e2e7e81fba6c829369ac0559c28247d6582a20d118d87",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-10",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 285.9896319999825,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/021-native-ps-10.stdout",
+      "stderr": "logs/021-native-ps-10.stderr",
+      "stdoutSha256": "0245af0456f11bdddaa119f81cbc01a32b3fbf3ff95d90dd50c2bc5b3bc9f7d1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-11",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.049796000006609,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/022-native-ps-11.stdout",
+      "stderr": "logs/022-native-ps-11.stderr",
+      "stdoutSha256": "b3887750bfdb8321ff9e0a6c0229899118493a49b881837bc8b6dbf6c1cc2399",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-12",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 27.96444400001201,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/023-native-ps-12.stdout",
+      "stderr": "logs/023-native-ps-12.stderr",
+      "stdoutSha256": "45b0c4812868e05570b3e7a96e897d80ee4432d57acf4b041641aab613f07161",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-13",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 32.11082600001828,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/024-native-ps-13.stdout",
+      "stderr": "logs/024-native-ps-13.stderr",
+      "stdoutSha256": "b7d405deafdfc58c2270e07ada341da47ee414af223bab5a8f61a48a82a67c9b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-14",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Translate.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 4.824890999996569,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/025-native-ps-14.stdout",
+      "stderr": "logs/025-native-ps-14.stderr",
+      "stdoutSha256": "0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-15",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bridge/src/Ps/Bridge/Json.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 71.77984999999171,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/026-native-ps-15.stdout",
+      "stderr": "logs/026-native-ps-15.stderr",
+      "stdoutSha256": "38727675a90af661f252f0bb75fdf6306514c303bbb19c18699c879ef09cd15a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-16",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Level.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.0660639999841806,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/027-native-ps-16.stdout",
+      "stderr": "logs/027-native-ps-16.stderr",
+      "stdoutSha256": "da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-17",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Expr.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.062501999986125,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/028-native-ps-17.stdout",
+      "stderr": "logs/028-native-ps-17.stderr",
+      "stdoutSha256": "636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-18",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Declaration.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.185998000000836,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/029-native-ps-18.stdout",
+      "stderr": "logs/029-native-ps-18.stderr",
+      "stdoutSha256": "336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-19",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Abstract.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.649601000011899,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/030-native-ps-19.stdout",
+      "stderr": "logs/030-native-ps-19.stderr",
+      "stdoutSha256": "3f79337b3bde47fd80ed2cd5afb796e414efc4843bab5af7f218a5abf070e479",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-20",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Subst.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.75971899999422,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/031-native-ps-20.stdout",
+      "stderr": "logs/031-native-ps-20.stderr",
+      "stdoutSha256": "5f70d640f0e1e3b3c6fac200ede9c693d2414ae0b257f7239f212360f86a233a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-21",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Equality.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 7.168086999998195,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/032-native-ps-21.stdout",
+      "stderr": "logs/032-native-ps-21.stderr",
+      "stdoutSha256": "236f21decc804baad9e94cdd52fd8ee6970e2eb4055706070ae0efd7ce478de9",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-22",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/foundation/src/Ps/Foundation/List.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.5906250000116415,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/033-native-ps-22.stdout",
+      "stderr": "logs/033-native-ps-22.stderr",
+      "stdoutSha256": "4a3f579b2f5337a41857214813c62bbfdf74c9d990e6b34a2532bde064b88c38",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-23",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Basic.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 8.830022000009194,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/034-native-ps-23.stdout",
+      "stderr": "logs/034-native-ps-23.stderr",
+      "stdoutSha256": "4f66e2917ad7d21293f4588f6f8d91cd3062ca70ff99f4903b9a37a34de1cd5d",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-24",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 131.68957699998282,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/035-native-ps-24.stdout",
+      "stderr": "logs/035-native-ps-24.stderr",
+      "stdoutSha256": "846ee89b0f2e619beb6cec64df7fbabd7e1030d324cf266d7e9d742417c39a19",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-25",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Builtin.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 8.757142999995267,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/036-native-ps-25.stdout",
+      "stderr": "logs/036-native-ps-25.stderr",
+      "stdoutSha256": "561ede24f6f56cabe9f8f389da810e986f59d52050a774d8f45325682f55d17f",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-26",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Prelude.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 24.942674000019906,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/037-native-ps-26.stdout",
+      "stderr": "logs/037-native-ps-26.stderr",
+      "stdoutSha256": "0ef9ec60fc1a13903146734271307fea075c4b52426a00fd3e7127155cacab21",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-27",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 15.030731000006199,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/038-native-ps-27.stdout",
+      "stderr": "logs/038-native-ps-27.stderr",
+      "stdoutSha256": "f9d00bcef28e893b4943078477829bd0c2fc3fdfd973de0e4b9ecab4ee219f49",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-28",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 7.190433000010671,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/039-native-ps-28.stdout",
+      "stderr": "logs/039-native-ps-28.stderr",
+      "stdoutSha256": "725306f3001867098f328bc1b669ea50d810233688ebd92191fa183a508c4757",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-29",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/LocalContext.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.074569000018528,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/040-native-ps-29.stdout",
+      "stderr": "logs/040-native-ps-29.stderr",
+      "stdoutSha256": "0b11fb657905f54f5b56e3465728061574744cd2f973a08d1cb760ca977ed5e1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-30",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Resolve.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 4.803272999997716,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/041-native-ps-30.stdout",
+      "stderr": "logs/041-native-ps-30.stderr",
+      "stdoutSha256": "d19b66ca970fa7d207c8e3af9ccca68373c3e94f2079f65c482d1ff82bc11163",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-31",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/LevelSubst.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.893914999993285,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/042-native-ps-31.stdout",
+      "stderr": "logs/042-native-ps-31.stderr",
+      "stdoutSha256": "637b2d834fc583668b2425da3b6414a6d19329cb4c84bce6631a65f2a92f60d1",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-32",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/LevelContext.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 7.974542999989353,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/043-native-ps-32.stdout",
+      "stderr": "logs/043-native-ps-32.stderr",
+      "stdoutSha256": "2b72226f26aeaceefed2bde4b189f902e90549f240de445222e3e6a00b3f3b3a",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-33",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Context.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 7.996591000002809,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/044-native-ps-33.stdout",
+      "stderr": "logs/044-native-ps-33.stderr",
+      "stdoutSha256": "59751d786051a7be194c670803a46a539fbf08b99ca3f6efd68aa10d2d218c89",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-34",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Reduce.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.558424999995623,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/045-native-ps-34.stdout",
+      "stderr": "logs/045-native-ps-34.stderr",
+      "stdoutSha256": "b74aef33e5bdaf5ad81e423f5db7af318e2f58ebdc9f39fbe2c4a192a3716ddd",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-35",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Infer.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 13.834261000010883,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/046-native-ps-35.stdout",
+      "stderr": "logs/046-native-ps-35.stderr",
+      "stdoutSha256": "df95b9a7c1194c0c294d61aacdc8efa07399e0e78dadda172fe5f71e9be810b6",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-36",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Instances.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.119051999994554,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/047-native-ps-36.stdout",
+      "stderr": "logs/047-native-ps-36.stderr",
+      "stdoutSha256": "3d1a5106b2cb7e2e8247e7d3890265693e6fea27cd55b3af8b63c09e9b4ab21b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-37",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Unify.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 10.204632999986643,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/048-native-ps-37.stdout",
+      "stderr": "logs/048-native-ps-37.stderr",
+      "stdoutSha256": "1c9dacaf21bf362a5f9edbaaa6508342cf0fb5af17b6b43c7c2155c4eed0eaa7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-38",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/SynthInstance.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 9.640938999975333,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/049-native-ps-38.stdout",
+      "stderr": "logs/049-native-ps-38.stderr",
+      "stdoutSha256": "a55ff66a4e23071051a44dc528a275c1c373ccf1817607a54df51b35fc9e1fca",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-39",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Context.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.379118999990169,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/050-native-ps-39.stdout",
+      "stderr": "logs/050-native-ps-39.stderr",
+      "stdoutSha256": "c10fe9eabf1560f8a49f3d58e7e09376f58e1aef120a3b6b4560187785fff4ad",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-40",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Literal.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 9.200837000011234,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/051-native-ps-40.stdout",
+      "stderr": "logs/051-native-ps-40.stderr",
+      "stdoutSha256": "afa0089532a33ad43a30eb090ce2c6ec38c7bf75d64500555890a86556b63331",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-41",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Term.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 461.96515100001125,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/052-native-ps-41.stdout",
+      "stderr": "logs/052-native-ps-41.stderr",
+      "stdoutSha256": "8e6e0d11d6c1ff36b4d15fac3764fa14c2e2a862cd7cbe1030593ad55832d58b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-42",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Recursion.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 45.09910699998727,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/053-native-ps-42.stdout",
+      "stderr": "logs/053-native-ps-42.stderr",
+      "stdoutSha256": "19ec12fd8abd4a207835ec3d3eca9c3b04b3327182a38f1dc8a81379e45a9523",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-43",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Declaration.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 94.63580399999046,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/054-native-ps-43.stdout",
+      "stderr": "logs/054-native-ps-43.stderr",
+      "stdoutSha256": "9f85eebadbd783f4d6509ead4483b0a1b95b613cca3f5f90e533d3fcdaf53c98",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-44",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 8.100674999994226,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/055-native-ps-44.stdout",
+      "stderr": "logs/055-native-ps-44.stderr",
+      "stdoutSha256": "30bead0e91e0bf47eab0f0614a05e1bd34153fb1442b3714ce74f9d5f118c4b0",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-45",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Basic.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 32.8192229999986,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/056-native-ps-45.stdout",
+      "stderr": "logs/056-native-ps-45.stderr",
+      "stdoutSha256": "2d972e0b44693d846ccce81f8eba8401c3a9f274b6fffaca9e5370823bb4bfd4",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-46",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Expr.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 303.39448300001095,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/057-native-ps-46.stdout",
+      "stderr": "logs/057-native-ps-46.stderr",
+      "stdoutSha256": "3b15996b9bbdb8b6f3fdc842fc1105d3af48d10a10905214c3875ec802a0af71",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-47",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 13.462549999996554,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/058-native-ps-47.stdout",
+      "stderr": "logs/058-native-ps-47.stderr",
+      "stdoutSha256": "17d0dc3438905d1afa7a15be5dfb4fc2bc847a9d8a8d14ba8016c6003fc29722",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-48",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Structure.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.409776000014972,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/059-native-ps-48.stdout",
+      "stderr": "logs/059-native-ps-48.stderr",
+      "stdoutSha256": "9d8583e101e9fe3ea3dc99b7f0903d7b771c387eea7bdf2c9795c4ca675c2250",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-49",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 8.250715000001946,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/060-native-ps-49.stdout",
+      "stderr": "logs/060-native-ps-49.stderr",
+      "stdoutSha256": "e87d6b7fd3321bf04dbdea1b8db3c196014eef794b659047025339bec0f9f6bb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-50",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Definition.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 16.081299000012223,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/061-native-ps-50.stdout",
+      "stderr": "logs/061-native-ps-50.stderr",
+      "stdoutSha256": "614e46ae87ef5d509a19c8966a5e1f9a1a8204f6a3f8e66ab766d837b65f1c27",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-51",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler/src/Ps/Compiler/Api.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 11.730952999991132,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/062-native-ps-51.stdout",
+      "stderr": "logs/062-native-ps-51.stderr",
+      "stdoutSha256": "8de52db9015957e75ff8d5bb869da65f38d1100803ad42e92b3bafc535861999",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-52",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 7.900148000015179,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/063-native-ps-52.stdout",
+      "stderr": "logs/063-native-ps-52.stderr",
+      "stdoutSha256": "171cad254be1db7608fc1448ecbf64d18221e01e707646dfa4fac237541ef50e",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-53",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 106.3565510000044,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/064-native-ps-53.stdout",
+      "stderr": "logs/064-native-ps-53.stderr",
+      "stdoutSha256": "db776c24053add0a0d9404648214f04edc974c238465fc6d38e1cb9e264dccdb",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-54",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 90.33182299998589,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/065-native-ps-54.stdout",
+      "stderr": "logs/065-native-ps-54.stderr",
+      "stdoutSha256": "23bf12a6423319fc7085ce1ea63dc1ba6121bdeb746e2229262b2f17c7662014",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-55",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 29.468049999995856,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/066-native-ps-55.stdout",
+      "stderr": "logs/066-native-ps-55.stderr",
+      "stdoutSha256": "04922aaa3a8bdff2a4a701aa7aa343f2c62f902ffd1ad69e09ff1345fd3b2b06",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-56",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 16.62654699999257,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/067-native-ps-56.stdout",
+      "stderr": "logs/067-native-ps-56.stderr",
+      "stdoutSha256": "f756d396c77a7dd82f64a58e99cb67a448e4d600e2eca9525f0188a67368abb5",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-57",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 141.29809500000556,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/068-native-ps-57.stdout",
+      "stderr": "logs/068-native-ps-57.stderr",
+      "stdoutSha256": "8b53a51cc2cc9d773e6122ec7de8feadc8121b2f849cd014f3697a1650d05dce",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-58",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 6.831275000004098,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/069-native-ps-58.stdout",
+      "stderr": "logs/069-native-ps-58.stderr",
+      "stdoutSha256": "3e27ed9004fa996852867db079c9d014c313fbd6fc8ca827ad0dcd401e066a28",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-59",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.272387000004528,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/070-native-ps-59.stdout",
+      "stderr": "logs/070-native-ps-59.stderr",
+      "stdoutSha256": "abea9f83d1a54c4546e985e0295298fbfcef4a8f007d144d17241edfab5a19f7",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-60",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 5.473790999996709,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/071-native-ps-60.stdout",
+      "stderr": "logs/071-native-ps-60.stderr",
+      "stdoutSha256": "780c58bac5812d2c805289c902e4c7bcac2c01000a4639e379434d0a5637340c",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "native-ps-61",
+      "executable": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1",
+      "args": [
+        "translate",
+        "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+        "--to",
+        "ps"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 4.8808070000086445,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/072-native-ps-61.stdout",
+      "stderr": "logs/072-native-ps-61.stderr",
+      "stdoutSha256": "c108b7716fbbf275c2202b11ac58d903bb162604d75e3790ee92a22bdea97202",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "source-after-root",
+      "executable": "git",
+      "args": [
+        "rev-parse",
+        "--show-toplevel"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 3.397854000009829,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/073-source-after-root.stdout",
+      "stderr": "logs/073-source-after-root.stderr",
+      "stdoutSha256": "f91c739ed00bc073161c7c8febb7bd01a4c06a2819ff17433b18e78b6462b428",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "source-after-ref",
+      "executable": "git",
+      "args": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 2.7486299999873154,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/074-source-after-ref.stdout",
+      "stderr": "logs/074-source-after-ref.stderr",
+      "stdoutSha256": "9d1ccbeb53d76503190656c1f1860d70fc7825ceedde7ad853a102d151723b5b",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "source-after-status",
+      "executable": "git",
+      "args": [
+        "status",
+        "--porcelain",
+        "--untracked-files=no"
+      ],
+      "cwd": "/home/runner/work/pskernel/pskernel/native-authoring-source/psc0",
+      "timeoutMs": 180000,
+      "elapsedMs": 24.260282000002917,
+      "status": 0,
+      "signal": null,
+      "stdout": "logs/075-source-after-status.stdout",
+      "stderr": "logs/075-source-after-status.stderr",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "runnerSourceRef": "047a29f17392fea41ac5d59e7f8cbfc172b20313",
+  "toolchain": {
+    "node": "v22.23.3",
+    "platform": "linux",
+    "architecture": "x64",
+    "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+    "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+    "typescript": "Version 7.0.2"
+  },
+  "typescriptInstallation": {
+    "launcher": "/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc",
+    "launcherSha256": "2219f428a7e55aaf1f7ad85b9b0f0cf5078aeb76ccc9a7c6036c92d48f492ffd",
+    "package": {
+      "path": "/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/package.json",
+      "sha256": "3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e",
+      "version": "7.0.2"
+    }
+  },
+  "aggregateSourceSha256": "06035426bb3c5772ff7d1362485a13baee0c4447bf486fbbba448961eef52357",
+  "rawSourceBytes": 1113918,
+  "nativeBinaries": {
+    "compilerSha256": "9f6516dad78d17435cac214d88d79d3c8a254bb3cd3bca279220bff000dfa484",
+    "originalIrCheckerSha256": "0f40ccfae56e0b20e65e54b30e6468c5ff40e2b9ac61c6b1485e605e849d8afd"
+  },
+  "originalIr": {
+    "report": "products/index.ts.ir-report.json",
+    "reportSha256": "e16eefe370f1d0b3c6de87965724e96a6c36941c64afa2c4cb2dc7a3687e79b1",
+    "accepted": true,
+    "traversalComplete": true,
+    "expressionCount": 56391,
+    "visitedSteps": 725484,
+    "findingCount": 0,
+    "sameOriginalIrCheckedBeforeEmission": true
+  },
+  "artifacts": {
+    "canonicalSurfaceSourceSha256": "985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07",
+    "normalizedCanonicalAdmissionsSha256": "200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0",
+    "typescriptSha256": "38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935",
+    "javascriptSha256": "70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"
+  },
+  "trackedSourceCleanBeforeAndAfter": true,
+  "sourceClosureUnchanged": true,
+  "cache": {
+    "directory": "/home/runner/work/_temp/psc0-native-cold-seed/47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "identitySha256": "47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225",
+    "verified": true
+  },
+  "elapsedMs": 143478.74540699998
+}

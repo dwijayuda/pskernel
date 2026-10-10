@@ -1,0 +1,625 @@
+﻿2026-10-09T19:56:52.7159740Z Current runner version: '2.337.0'
+2026-10-09T19:56:52.7196074Z ##[group]Runner Image Provisioner
+2026-10-09T19:56:52.7197400Z Hosted Compute Agent
+2026-10-09T19:56:52.7198417Z Version: 20261002.596
+2026-10-09T19:56:52.7199513Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+2026-10-09T19:56:52.7200686Z Build Date: 2026-10-02T22:28:27Z
+2026-10-09T19:56:52.7202290Z Worker ID: {7de739ef-62cc-4cc3-83c2-9f9dcfadc5f6}
+2026-10-09T19:56:52.7203588Z Region: eastus
+2026-10-09T19:56:52.7204541Z Cloud: Azure
+2026-10-09T19:56:52.7205407Z ##[endgroup]
+2026-10-09T19:56:52.7207651Z ##[group]Operating System
+2026-10-09T19:56:52.7208927Z Ubuntu
+2026-10-09T19:56:52.7209859Z 24.04.5
+2026-10-09T19:56:52.7210757Z LTS
+2026-10-09T19:56:52.7211570Z ##[endgroup]
+2026-10-09T19:56:52.7212870Z ##[group]Runner Image
+2026-10-09T19:56:52.7213997Z Image: ubuntu-24.04
+2026-10-09T19:56:52.7214889Z Version: 20261004.327.1
+2026-10-09T19:56:52.7217052Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-09T19:56:52.7219858Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+2026-10-09T19:56:52.7221728Z ##[endgroup]
+2026-10-09T19:56:52.7224064Z ##[group]GITHUB_TOKEN Permissions
+2026-10-09T19:56:52.7226720Z Contents: read
+2026-10-09T19:56:52.7227652Z Metadata: read
+2026-10-09T19:56:52.7228717Z ##[endgroup]
+2026-10-09T19:56:52.7232226Z Secret source: Actions
+2026-10-09T19:56:52.7233915Z Cache mode: write
+2026-10-09T19:56:52.7235052Z Prepare workflow directory
+2026-10-09T19:56:52.7818370Z Prepare all required actions
+2026-10-09T19:56:52.7890352Z Getting action download info
+2026-10-09T19:56:52.9904765Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-09T19:56:53.1128890Z Download action repository 'actions/github-script@v7' (SHA:f28e40c7f34bde8b3046d885e986cb6290c5673b)
+2026-10-09T19:56:53.2548781Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-10-09T19:56:53.3473742Z Download action repository 'leanprover/lean-action@v1' (SHA:f061402b660e0c34644504b324e830f2991d4865)
+2026-10-09T19:56:53.4664584Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-09T19:56:53.7438716Z Getting action download info
+2026-10-09T19:56:53.8118002Z Download action repository 'actions/cache@caa296126883cff596d87d8935842f9db880ef25' (SHA:caa296126883cff596d87d8935842f9db880ef25)
+2026-10-09T19:56:53.9839740Z Complete job name: native-cold-recovery
+2026-10-09T19:56:54.0680640Z ##[group]Run actions/checkout@v4
+2026-10-09T19:56:54.0681428Z with:
+2026-10-09T19:56:54.0681801Z   repository: dwijayuda/pskernel
+2026-10-09T19:56:54.0684705Z   token: ***
+2026-10-09T19:56:54.0685063Z   ssh-strict: true
+2026-10-09T19:56:54.0685409Z   ssh-user: git
+2026-10-09T19:56:54.0685763Z   persist-credentials: true
+2026-10-09T19:56:54.0686142Z   clean: true
+2026-10-09T19:56:54.0686502Z   sparse-checkout-cone-mode: true
+2026-10-09T19:56:54.0686935Z   fetch-depth: 1
+2026-10-09T19:56:54.0687288Z   fetch-tags: false
+2026-10-09T19:56:54.0687633Z   show-progress: true
+2026-10-09T19:56:54.0687983Z   lfs: false
+2026-10-09T19:56:54.0688312Z   submodules: false
+2026-10-09T19:56:54.0688664Z   set-safe-directory: true
+2026-10-09T19:56:54.0689065Z   allow-unsafe-pr-checkout: false
+2026-10-09T19:56:54.0689735Z ##[endgroup]
+2026-10-09T19:56:54.1743972Z Syncing repository: dwijayuda/pskernel
+2026-10-09T19:56:54.1746665Z ##[group]Getting Git version info
+2026-10-09T19:56:54.1747693Z Working directory is '/home/runner/work/pskernel/pskernel'
+2026-10-09T19:56:54.1748586Z [command]/usr/bin/git version
+2026-10-09T19:56:54.1841452Z git version 2.55.0
+2026-10-09T19:56:54.1865458Z ##[endgroup]
+2026-10-09T19:56:54.1882717Z Temporarily overriding HOME='/home/runner/work/_temp/d3b26dfc-faec-43f1-9781-3748b6da4a34' before making global git config changes
+2026-10-09T19:56:54.1884620Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T19:56:54.1888523Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T19:56:54.1941670Z Deleting the contents of '/home/runner/work/pskernel/pskernel'
+2026-10-09T19:56:54.1946475Z ##[group]Initializing the repository
+2026-10-09T19:56:54.1950196Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel
+2026-10-09T19:56:54.2071262Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T19:56:54.2072826Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T19:56:54.2073988Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T19:56:54.2075335Z hint: call:
+2026-10-09T19:56:54.2075895Z hint:
+2026-10-09T19:56:54.2076606Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T19:56:54.2077326Z hint:
+2026-10-09T19:56:54.2078049Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T19:56:54.2079157Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T19:56:54.2080010Z hint:
+2026-10-09T19:56:54.2080557Z hint: 	git branch -m <name>
+2026-10-09T19:56:54.2081162Z hint:
+2026-10-09T19:56:54.2082194Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T19:56:54.2083381Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/.git/
+2026-10-09T19:56:54.2085520Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-09T19:56:54.2135814Z ##[endgroup]
+2026-10-09T19:56:54.2141889Z ##[group]Disabling automatic garbage collection
+2026-10-09T19:56:54.2142818Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T19:56:54.2176340Z ##[endgroup]
+2026-10-09T19:56:54.2177479Z ##[group]Setting up auth
+2026-10-09T19:56:54.2184655Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T19:56:54.2220052Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T19:56:54.2635253Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T19:56:54.2674103Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T19:56:54.2906324Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T19:56:54.2944288Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T19:56:54.3171384Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T19:56:54.3213539Z ##[endgroup]
+2026-10-09T19:56:54.3214344Z ##[group]Fetching the repository
+2026-10-09T19:56:54.3224175Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +047a29f17392fea41ac5d59e7f8cbfc172b20313:refs/remotes/origin/psc0/strict-sh1-v1
+2026-10-09T19:57:05.8564948Z From https://github.com/dwijayuda/pskernel
+2026-10-09T19:57:05.8566193Z  * [new ref]           047a29f17392fea41ac5d59e7f8cbfc172b20313 -> origin/psc0/strict-sh1-v1
+2026-10-09T19:57:05.8570134Z ##[endgroup]
+2026-10-09T19:57:05.8571198Z ##[group]Determining the checkout info
+2026-10-09T19:57:05.8581513Z ##[endgroup]
+2026-10-09T19:57:05.8582393Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T19:57:05.8647801Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T19:57:05.8688757Z ##[group]Checking out the ref
+2026-10-09T19:57:05.8694604Z [command]/usr/bin/git checkout --progress --force -B psc0/strict-sh1-v1 refs/remotes/origin/psc0/strict-sh1-v1
+2026-10-09T19:57:07.6294096Z Updating files:   6% (1441/20736)
+2026-10-09T19:57:07.6403045Z Updating files:   7% (1452/20736)
+2026-10-09T19:57:07.6563514Z Updating files:   8% (1659/20736)
+2026-10-09T19:57:07.6799630Z Updating files:   9% (1867/20736)
+2026-10-09T19:57:07.7028229Z Updating files:  10% (2074/20736)
+2026-10-09T19:57:07.7247692Z Updating files:  11% (2281/20736)
+2026-10-09T19:57:07.7378161Z Updating files:  12% (2489/20736)
+2026-10-09T19:57:08.0446854Z Updating files:  13% (2696/20736)
+2026-10-09T19:57:08.9795283Z Updating files:  13% (2786/20736)
+2026-10-09T19:57:09.2829021Z Updating files:  13% (2789/20736)
+2026-10-09T19:57:09.2944296Z Updating files:  14% (2904/20736)
+2026-10-09T19:57:09.3041274Z Updating files:  15% (3111/20736)
+2026-10-09T19:57:09.3168622Z Updating files:  16% (3318/20736)
+2026-10-09T19:57:09.3326254Z Updating files:  17% (3526/20736)
+2026-10-09T19:57:09.3466949Z Updating files:  18% (3733/20736)
+2026-10-09T19:57:09.3718837Z Updating files:  19% (3940/20736)
+2026-10-09T19:57:09.3919569Z Updating files:  20% (4148/20736)
+2026-10-09T19:57:09.4156794Z Updating files:  21% (4355/20736)
+2026-10-09T19:57:09.4289514Z Updating files:  22% (4562/20736)
+2026-10-09T19:57:10.0414228Z Updating files:  23% (4770/20736)
+2026-10-09T19:57:10.9667846Z Updating files:  23% (4857/20736)
+2026-10-09T19:57:10.9731514Z Updating files:  23% (4860/20736)
+2026-10-09T19:57:10.9842068Z Updating files:  24% (4977/20736)
+2026-10-09T19:57:10.9943070Z Updating files:  25% (5184/20736)
+2026-10-09T19:57:11.0062685Z Updating files:  26% (5392/20736)
+2026-10-09T19:57:11.0166883Z Updating files:  27% (5599/20736)
+2026-10-09T19:57:11.0466666Z Updating files:  28% (5807/20736)
+2026-10-09T19:57:11.1168807Z Updating files:  29% (6014/20736)
+2026-10-09T19:57:11.1300650Z Updating files:  30% (6221/20736)
+2026-10-09T19:57:11.1463999Z Updating files:  31% (6429/20736)
+2026-10-09T19:57:11.1621502Z Updating files:  32% (6636/20736)
+2026-10-09T19:57:11.1794409Z Updating files:  33% (6843/20736)
+2026-10-09T19:57:11.1959279Z Updating files:  34% (7051/20736)
+2026-10-09T19:57:11.2121881Z Updating files:  35% (7258/20736)
+2026-10-09T19:57:11.2280954Z Updating files:  36% (7465/20736)
+2026-10-09T19:57:11.2438609Z Updating files:  37% (7673/20736)
+2026-10-09T19:57:11.2575847Z Updating files:  38% (7880/20736)
+2026-10-09T19:57:11.2744677Z Updating files:  39% (8088/20736)
+2026-10-09T19:57:11.2966285Z Updating files:  40% (8295/20736)
+2026-10-09T19:57:11.3107247Z Updating files:  41% (8502/20736)
+2026-10-09T19:57:11.3237533Z Updating files:  42% (8710/20736)
+2026-10-09T19:57:11.3365619Z Updating files:  43% (8917/20736)
+2026-10-09T19:57:11.3487517Z Updating files:  44% (9124/20736)
+2026-10-09T19:57:11.4489601Z Updating files:  45% (9332/20736)
+2026-10-09T19:57:11.5091185Z Updating files:  46% (9539/20736)
+2026-10-09T19:57:11.5900920Z Updating files:  47% (9746/20736)
+2026-10-09T19:57:11.6824418Z Updating files:  48% (9954/20736)
+2026-10-09T19:57:11.8694559Z Updating files:  49% (10161/20736)
+2026-10-09T19:57:11.8943707Z Updating files:  50% (10368/20736)
+2026-10-09T19:57:12.1510664Z Updating files:  50% (10389/20736)
+2026-10-09T19:57:12.4131536Z Updating files:  51% (10576/20736)
+2026-10-09T19:57:12.6317779Z Updating files:  52% (10783/20736)
+2026-10-09T19:57:12.8741038Z Updating files:  53% (10991/20736)
+2026-10-09T19:57:12.8920143Z Updating files:  54% (11198/20736)
+2026-10-09T19:57:13.1457987Z Updating files:  54% (11214/20736)
+2026-10-09T19:57:13.3237848Z Updating files:  55% (11405/20736)
+2026-10-09T19:57:13.3994278Z Updating files:  56% (11613/20736)
+2026-10-09T19:57:13.4683145Z Updating files:  57% (11820/20736)
+2026-10-09T19:57:13.4764632Z Updating files:  58% (12027/20736)
+2026-10-09T19:57:13.4839438Z Updating files:  59% (12235/20736)
+2026-10-09T19:57:13.4920379Z Updating files:  60% (12442/20736)
+2026-10-09T19:57:13.4998538Z Updating files:  61% (12649/20736)
+2026-10-09T19:57:13.5085103Z Updating files:  62% (12857/20736)
+2026-10-09T19:57:13.5179913Z Updating files:  63% (13064/20736)
+2026-10-09T19:57:13.5273325Z Updating files:  64% (13272/20736)
+2026-10-09T19:57:13.5371022Z Updating files:  65% (13479/20736)
+2026-10-09T19:57:13.5477878Z Updating files:  66% (13686/20736)
+2026-10-09T19:57:13.5574561Z Updating files:  67% (13894/20736)
+2026-10-09T19:57:13.5669793Z Updating files:  68% (14101/20736)
+2026-10-09T19:57:13.5765038Z Updating files:  69% (14308/20736)
+2026-10-09T19:57:13.5860259Z Updating files:  70% (14516/20736)
+2026-10-09T19:57:13.5959911Z Updating files:  71% (14723/20736)
+2026-10-09T19:57:13.6056642Z Updating files:  72% (14930/20736)
+2026-10-09T19:57:13.6147351Z Updating files:  73% (15138/20736)
+2026-10-09T19:57:13.6268335Z Updating files:  74% (15345/20736)
+2026-10-09T19:57:13.6363651Z Updating files:  75% (15552/20736)
+2026-10-09T19:57:13.6455228Z Updating files:  76% (15760/20736)
+2026-10-09T19:57:13.6546645Z Updating files:  77% (15967/20736)
+2026-10-09T19:57:13.6643962Z Updating files:  78% (16175/20736)
+2026-10-09T19:57:13.6742025Z Updating files:  79% (16382/20736)
+2026-10-09T19:57:13.6869128Z Updating files:  80% (16589/20736)
+2026-10-09T19:57:13.6946290Z Updating files:  81% (16797/20736)
+2026-10-09T19:57:13.7031613Z Updating files:  82% (17004/20736)
+2026-10-09T19:57:13.7113815Z Updating files:  83% (17211/20736)
+2026-10-09T19:57:13.7201065Z Updating files:  84% (17419/20736)
+2026-10-09T19:57:13.7286233Z Updating files:  85% (17626/20736)
+2026-10-09T19:57:13.7371802Z Updating files:  86% (17833/20736)
+2026-10-09T19:57:13.7431452Z Updating files:  87% (18041/20736)
+2026-10-09T19:57:13.7497828Z Updating files:  88% (18248/20736)
+2026-10-09T19:57:13.7564258Z Updating files:  89% (18456/20736)
+2026-10-09T19:57:13.7897480Z Updating files:  90% (18663/20736)
+2026-10-09T19:57:13.8009493Z Updating files:  91% (18870/20736)
+2026-10-09T19:57:13.8098402Z Updating files:  92% (19078/20736)
+2026-10-09T19:57:13.8185392Z Updating files:  93% (19285/20736)
+2026-10-09T19:57:13.8927842Z Updating files:  94% (19492/20736)
+2026-10-09T19:57:13.9576467Z Updating files:  94% (19640/20736)
+2026-10-09T19:57:14.0469898Z Updating files:  95% (19700/20736)
+2026-10-09T19:57:14.1040148Z Updating files:  96% (19907/20736)
+2026-10-09T19:57:14.1309749Z Updating files:  97% (20114/20736)
+2026-10-09T19:57:14.1949360Z Updating files:  98% (20322/20736)
+2026-10-09T19:57:14.2445446Z Updating files:  99% (20529/20736)
+2026-10-09T19:57:14.2446198Z Updating files: 100% (20736/20736)
+2026-10-09T19:57:14.2446583Z Updating files: 100% (20736/20736), done.
+2026-10-09T19:57:14.9428643Z Switched to a new branch 'psc0/strict-sh1-v1'
+2026-10-09T19:57:14.9434236Z branch 'psc0/strict-sh1-v1' set up to track 'origin/psc0/strict-sh1-v1'.
+2026-10-09T19:57:14.9543691Z ##[endgroup]
+2026-10-09T19:57:14.9598197Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T19:57:14.9630732Z 047a29f17392fea41ac5d59e7f8cbfc172b20313
+2026-10-09T19:57:14.9899145Z ##[group]Run actions/github-script@v7
+2026-10-09T19:57:14.9899457Z with:
+2026-10-09T19:57:14.9901744Z   script: const root = process.env.GITHUB_WORKSPACE + '/psc0';
+const recovery = await import(root + '/scripts/sh1-native-seed-recovery.mjs');
+const { selected, policySha256, recipeSha256 } = await recovery.readNativeSeedRecoveryPolicy({ root });
+core.setOutput('source-ref', selected.sourceRef);
+core.setOutput('node-version', selected.nodeVersion);
+core.setOutput('identity', selected.identitySha256);
+core.info('PSC0_SH1_NATIVE_COLD_POLICY: ' + JSON.stringify({
+  selectedSeedIdentitySha256: selected.identitySha256,
+  sourceRef: selected.sourceRef, policySha256, recipeSha256,
+  noCompilerArtifactDownload: true, noBuildOrSeedCacheRestore: true,
+}));
+
+2026-10-09T19:57:14.9906544Z   github-token: ***
+2026-10-09T19:57:14.9906774Z   debug: false
+2026-10-09T19:57:14.9906998Z   user-agent: actions/github-script
+2026-10-09T19:57:14.9907279Z   result-encoding: json
+2026-10-09T19:57:14.9907544Z   retries: 0
+2026-10-09T19:57:14.9907782Z   retry-exempt-status-codes: 400,401,403,404,422
+2026-10-09T19:57:14.9908078Z ##[endgroup]
+2026-10-09T19:57:15.0900930Z PSC0_SH1_NATIVE_COLD_POLICY: {"selectedSeedIdentitySha256":"47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225","sourceRef":"fe2560aba0f347b1caf8d000d371464642d44f23","policySha256":"70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30","recipeSha256":"d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d","noCompilerArtifactDownload":true,"noBuildOrSeedCacheRestore":true}
+2026-10-09T19:57:15.1184169Z ##[group]Run actions/checkout@v4
+2026-10-09T19:57:15.1184668Z with:
+2026-10-09T19:57:15.1185074Z   ref: fe2560aba0f347b1caf8d000d371464642d44f23
+2026-10-09T19:57:15.1185588Z   path: native-authoring-source
+2026-10-09T19:57:15.1185968Z   repository: dwijayuda/pskernel
+2026-10-09T19:57:15.1188332Z   token: ***
+2026-10-09T19:57:15.1188543Z   ssh-strict: true
+2026-10-09T19:57:15.1188759Z   ssh-user: git
+2026-10-09T19:57:15.1188969Z   persist-credentials: true
+2026-10-09T19:57:15.1189202Z   clean: true
+2026-10-09T19:57:15.1189415Z   sparse-checkout-cone-mode: true
+2026-10-09T19:57:15.1189673Z   fetch-depth: 1
+2026-10-09T19:57:15.1189873Z   fetch-tags: false
+2026-10-09T19:57:15.1190080Z   show-progress: true
+2026-10-09T19:57:15.1190286Z   lfs: false
+2026-10-09T19:57:15.1190492Z   submodules: false
+2026-10-09T19:57:15.1190699Z   set-safe-directory: true
+2026-10-09T19:57:15.1190940Z   allow-unsafe-pr-checkout: false
+2026-10-09T19:57:15.1191197Z ##[endgroup]
+2026-10-09T19:57:15.2040915Z Syncing repository: dwijayuda/pskernel
+2026-10-09T19:57:15.2047753Z ##[group]Getting Git version info
+2026-10-09T19:57:15.2048653Z Working directory is '/home/runner/work/pskernel/pskernel/native-authoring-source'
+2026-10-09T19:57:15.2091389Z [command]/usr/bin/git version
+2026-10-09T19:57:15.2135812Z git version 2.55.0
+2026-10-09T19:57:15.2159699Z ##[endgroup]
+2026-10-09T19:57:15.2174889Z Temporarily overriding HOME='/home/runner/work/_temp/4a6255e0-2bcd-40e9-a6f0-5fee9d658903' before making global git config changes
+2026-10-09T19:57:15.2175976Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T19:57:15.2180704Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel/native-authoring-source
+2026-10-09T19:57:15.2215599Z ##[group]Initializing the repository
+2026-10-09T19:57:15.2220789Z [command]/usr/bin/git init /home/runner/work/pskernel/pskernel/native-authoring-source
+2026-10-09T19:57:15.2262837Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-09T19:57:15.2263927Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-09T19:57:15.2265018Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-09T19:57:15.2265942Z hint: call:
+2026-10-09T19:57:15.2266388Z hint:
+2026-10-09T19:57:15.2266945Z hint: 	git config --global init.defaultBranch <name>
+2026-10-09T19:57:15.2267663Z hint:
+2026-10-09T19:57:15.2268296Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-09T19:57:15.2269280Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-09T19:57:15.2270072Z hint:
+2026-10-09T19:57:15.2270538Z hint: 	git branch -m <name>
+2026-10-09T19:57:15.2271065Z hint:
+2026-10-09T19:57:15.2271796Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-09T19:57:15.2273385Z Initialized empty Git repository in /home/runner/work/pskernel/pskernel/native-authoring-source/.git/
+2026-10-09T19:57:15.2275895Z [command]/usr/bin/git remote add origin https://github.com/dwijayuda/pskernel
+2026-10-09T19:57:15.2316897Z ##[endgroup]
+2026-10-09T19:57:15.2317556Z ##[group]Disabling automatic garbage collection
+2026-10-09T19:57:15.2324107Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-09T19:57:15.2357394Z ##[endgroup]
+2026-10-09T19:57:15.2357965Z ##[group]Setting up auth
+2026-10-09T19:57:15.2366047Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T19:57:15.2399978Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T19:57:15.2661694Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T19:57:15.2704461Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T19:57:15.2975368Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T19:57:15.3022950Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T19:57:15.3276692Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-09T19:57:15.3320178Z ##[endgroup]
+2026-10-09T19:57:15.3320619Z ##[group]Fetching the repository
+2026-10-09T19:57:15.3331331Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin fe2560aba0f347b1caf8d000d371464642d44f23
+2026-10-09T19:57:25.5089892Z From https://github.com/dwijayuda/pskernel
+2026-10-09T19:57:25.5090633Z  * branch              fe2560aba0f347b1caf8d000d371464642d44f23 -> FETCH_HEAD
+2026-10-09T19:57:25.5095348Z ##[endgroup]
+2026-10-09T19:57:25.5096011Z ##[group]Determining the checkout info
+2026-10-09T19:57:25.5098105Z ##[endgroup]
+2026-10-09T19:57:25.5105781Z [command]/usr/bin/git sparse-checkout disable
+2026-10-09T19:57:25.5153814Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-09T19:57:25.5186463Z ##[group]Checking out the ref
+2026-10-09T19:57:25.5191011Z [command]/usr/bin/git checkout --progress --force fe2560aba0f347b1caf8d000d371464642d44f23
+2026-10-09T19:57:27.2607687Z Updating files:   6% (1253/20531)
+2026-10-09T19:57:27.2728017Z Updating files:   7% (1438/20531)
+2026-10-09T19:57:27.2986740Z Updating files:   8% (1643/20531)
+2026-10-09T19:57:27.3210322Z Updating files:   9% (1848/20531)
+2026-10-09T19:57:27.3446688Z Updating files:  10% (2054/20531)
+2026-10-09T19:57:27.3575237Z Updating files:  11% (2259/20531)
+2026-10-09T19:57:27.6658775Z Updating files:  12% (2464/20531)
+2026-10-09T19:57:28.6025590Z Updating files:  12% (2582/20531)
+2026-10-09T19:57:28.9079003Z Updating files:  12% (2585/20531)
+2026-10-09T19:57:28.9201340Z Updating files:  13% (2670/20531)
+2026-10-09T19:57:28.9290486Z Updating files:  14% (2875/20531)
+2026-10-09T19:57:28.9413931Z Updating files:  15% (3080/20531)
+2026-10-09T19:57:28.9581829Z Updating files:  16% (3285/20531)
+2026-10-09T19:57:28.9709747Z Updating files:  17% (3491/20531)
+2026-10-09T19:57:28.9910199Z Updating files:  18% (3696/20531)
+2026-10-09T19:57:29.0178682Z Updating files:  19% (3901/20531)
+2026-10-09T19:57:29.0417644Z Updating files:  20% (4107/20531)
+2026-10-09T19:57:29.0542729Z Updating files:  21% (4312/20531)
+2026-10-09T19:57:29.6703256Z Updating files:  22% (4517/20531)
+2026-10-09T19:57:30.6086453Z Updating files:  22% (4653/20531)
+2026-10-09T19:57:30.6121932Z Updating files:  22% (4656/20531)
+2026-10-09T19:57:30.6238660Z Updating files:  23% (4723/20531)
+2026-10-09T19:57:30.6324828Z Updating files:  24% (4928/20531)
+2026-10-09T19:57:30.6437828Z Updating files:  25% (5133/20531)
+2026-10-09T19:57:30.6548996Z Updating files:  26% (5339/20531)
+2026-10-09T19:57:30.6671699Z Updating files:  27% (5544/20531)
+2026-10-09T19:57:30.7469177Z Updating files:  28% (5749/20531)
+2026-10-09T19:57:30.7706270Z Updating files:  29% (5954/20531)
+2026-10-09T19:57:30.7909101Z Updating files:  30% (6160/20531)
+2026-10-09T19:57:30.8083586Z Updating files:  31% (6365/20531)
+2026-10-09T19:57:30.8257801Z Updating files:  32% (6570/20531)
+2026-10-09T19:57:30.8416243Z Updating files:  33% (6776/20531)
+2026-10-09T19:57:30.8560322Z Updating files:  34% (6981/20531)
+2026-10-09T19:57:30.8721274Z Updating files:  35% (7186/20531)
+2026-10-09T19:57:30.8882379Z Updating files:  36% (7392/20531)
+2026-10-09T19:57:30.9012792Z Updating files:  37% (7597/20531)
+2026-10-09T19:57:30.9165047Z Updating files:  38% (7802/20531)
+2026-10-09T19:57:30.9368909Z Updating files:  39% (8008/20531)
+2026-10-09T19:57:30.9537261Z Updating files:  40% (8213/20531)
+2026-10-09T19:57:30.9669947Z Updating files:  41% (8418/20531)
+2026-10-09T19:57:30.9799686Z Updating files:  42% (8624/20531)
+2026-10-09T19:57:30.9904551Z Updating files:  43% (8829/20531)
+2026-10-09T19:57:31.0029926Z Updating files:  44% (9034/20531)
+2026-10-09T19:57:31.1318140Z Updating files:  45% (9239/20531)
+2026-10-09T19:57:31.1784580Z Updating files:  46% (9445/20531)
+2026-10-09T19:57:31.2620551Z Updating files:  47% (9650/20531)
+2026-10-09T19:57:31.4056219Z Updating files:  48% (9855/20531)
+2026-10-09T19:57:31.5409802Z Updating files:  49% (10061/20531)
+2026-10-09T19:57:31.6056172Z Updating files:  49% (10188/20531)
+2026-10-09T19:57:31.9406980Z Updating files:  50% (10266/20531)
+2026-10-09T19:57:32.1564601Z Updating files:  51% (10471/20531)
+2026-10-09T19:57:32.4013117Z Updating files:  52% (10677/20531)
+2026-10-09T19:57:32.5409802Z Updating files:  53% (10882/20531)
+2026-10-09T19:57:32.6366719Z Updating files:  53% (11008/20531)
+2026-10-09T19:57:32.9000686Z Updating files:  54% (11087/20531)
+2026-10-09T19:57:32.9856917Z Updating files:  55% (11293/20531)
+2026-10-09T19:57:33.0682676Z Updating files:  56% (11498/20531)
+2026-10-09T19:57:33.1036271Z Updating files:  57% (11703/20531)
+2026-10-09T19:57:33.1109249Z Updating files:  58% (11908/20531)
+2026-10-09T19:57:33.1183688Z Updating files:  59% (12114/20531)
+2026-10-09T19:57:33.1259951Z Updating files:  60% (12319/20531)
+2026-10-09T19:57:33.1338307Z Updating files:  61% (12524/20531)
+2026-10-09T19:57:33.1427580Z Updating files:  62% (12730/20531)
+2026-10-09T19:57:33.1519367Z Updating files:  63% (12935/20531)
+2026-10-09T19:57:33.1613803Z Updating files:  64% (13140/20531)
+2026-10-09T19:57:33.1717649Z Updating files:  65% (13346/20531)
+2026-10-09T19:57:33.1814478Z Updating files:  66% (13551/20531)
+2026-10-09T19:57:33.1915185Z Updating files:  67% (13756/20531)
+2026-10-09T19:57:33.2006885Z Updating files:  68% (13962/20531)
+2026-10-09T19:57:33.2099049Z Updating files:  69% (14167/20531)
+2026-10-09T19:57:33.2194271Z Updating files:  70% (14372/20531)
+2026-10-09T19:57:33.2289624Z Updating files:  71% (14578/20531)
+2026-10-09T19:57:33.2383832Z Updating files:  72% (14783/20531)
+2026-10-09T19:57:33.2474509Z Updating files:  73% (14988/20531)
+2026-10-09T19:57:33.2592873Z Updating files:  74% (15193/20531)
+2026-10-09T19:57:33.2688210Z Updating files:  75% (15399/20531)
+2026-10-09T19:57:33.2777882Z Updating files:  76% (15604/20531)
+2026-10-09T19:57:33.2869993Z Updating files:  77% (15809/20531)
+2026-10-09T19:57:33.2969088Z Updating files:  78% (16015/20531)
+2026-10-09T19:57:33.3062908Z Updating files:  79% (16220/20531)
+2026-10-09T19:57:33.3189311Z Updating files:  80% (16425/20531)
+2026-10-09T19:57:33.3264537Z Updating files:  81% (16631/20531)
+2026-10-09T19:57:33.3346625Z Updating files:  82% (16836/20531)
+2026-10-09T19:57:33.3432265Z Updating files:  83% (17041/20531)
+2026-10-09T19:57:33.3521030Z Updating files:  84% (17247/20531)
+2026-10-09T19:57:33.3605089Z Updating files:  85% (17452/20531)
+2026-10-09T19:57:33.3686485Z Updating files:  86% (17657/20531)
+2026-10-09T19:57:33.3745124Z Updating files:  87% (17862/20531)
+2026-10-09T19:57:33.3806106Z Updating files:  88% (18068/20531)
+2026-10-09T19:57:33.3883551Z Updating files:  89% (18273/20531)
+2026-10-09T19:57:33.4228355Z Updating files:  90% (18478/20531)
+2026-10-09T19:57:33.4333829Z Updating files:  91% (18684/20531)
+2026-10-09T19:57:33.4421279Z Updating files:  92% (18889/20531)
+2026-10-09T19:57:33.4508450Z Updating files:  93% (19094/20531)
+2026-10-09T19:57:33.5667676Z Updating files:  94% (19300/20531)
+2026-10-09T19:57:33.5947016Z Updating files:  94% (19461/20531)
+2026-10-09T19:57:33.6782944Z Updating files:  95% (19505/20531)
+2026-10-09T19:57:33.7344857Z Updating files:  96% (19710/20531)
+2026-10-09T19:57:33.7648125Z Updating files:  97% (19916/20531)
+2026-10-09T19:57:33.8242359Z Updating files:  98% (20121/20531)
+2026-10-09T19:57:33.8673037Z Updating files:  99% (20326/20531)
+2026-10-09T19:57:33.8673586Z Updating files: 100% (20531/20531)
+2026-10-09T19:57:33.8674366Z Updating files: 100% (20531/20531), done.
+2026-10-09T19:57:34.1015944Z Note: switching to 'fe2560aba0f347b1caf8d000d371464642d44f23'.
+2026-10-09T19:57:34.1016638Z 
+2026-10-09T19:57:34.1017497Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-09T19:57:34.1018678Z changes and commit them, and you can discard any commits you make in this
+2026-10-09T19:57:34.1019745Z state without impacting any branches by switching back to a branch.
+2026-10-09T19:57:34.1020324Z 
+2026-10-09T19:57:34.1020695Z If you want to create a new branch to retain commits you create, you may
+2026-10-09T19:57:34.1021572Z do so (now or later) by using -c with the switch command. Example:
+2026-10-09T19:57:34.1022342Z 
+2026-10-09T19:57:34.1022564Z   git switch -c <new-branch-name>
+2026-10-09T19:57:34.1022921Z 
+2026-10-09T19:57:34.1023123Z Or undo this operation with:
+2026-10-09T19:57:34.1023443Z 
+2026-10-09T19:57:34.1023618Z   git switch -
+2026-10-09T19:57:34.1023861Z 
+2026-10-09T19:57:34.1024291Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-09T19:57:34.1024963Z 
+2026-10-09T19:57:34.1025691Z HEAD is now at fe2560ab fix(psc0): correct native grammar build blockers and collect regression outcomes [sh1-qualify]
+2026-10-09T19:57:34.1135444Z ##[endgroup]
+2026-10-09T19:57:34.1180852Z [command]/usr/bin/git log -1 --format=%H
+2026-10-09T19:57:34.1208688Z fe2560aba0f347b1caf8d000d371464642d44f23
+2026-10-09T19:57:34.2423038Z ##[group]Run actions/setup-node@v4
+2026-10-09T19:57:34.2423336Z with:
+2026-10-09T19:57:34.2423536Z   node-version: 22.23.3
+2026-10-09T19:57:34.2423764Z   always-auth: false
+2026-10-09T19:57:34.2423980Z   check-latest: false
+2026-10-09T19:57:34.2426158Z   token: ***
+2026-10-09T19:57:34.2426362Z ##[endgroup]
+2026-10-09T19:57:34.4475417Z (node:2448) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T19:57:34.4476284Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T19:57:34.4483137Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+2026-10-09T19:57:34.4483970Z ##[group]Environment details
+2026-10-09T19:57:34.9682342Z node: v22.23.3
+2026-10-09T19:57:34.9682756Z npm: 10.9.9
+2026-10-09T19:57:34.9683079Z yarn: 1.22.22
+2026-10-09T19:57:34.9683831Z ##[endgroup]
+2026-10-09T19:57:35.0004849Z ##[group]Run leanprover/lean-action@v1
+2026-10-09T19:57:35.0005161Z with:
+2026-10-09T19:57:35.0005424Z   lake-package-directory: native-authoring-source/psc0
+2026-10-09T19:57:35.0005762Z   auto-config: false
+2026-10-09T19:57:35.0005975Z   build: false
+2026-10-09T19:57:35.0006164Z   test: false
+2026-10-09T19:57:35.0006366Z   use-github-cache: false
+2026-10-09T19:57:35.0006604Z   use-mathlib-cache: false
+2026-10-09T19:57:35.0006825Z   lint: default
+2026-10-09T19:57:35.0007017Z   mk_all-check: false
+2026-10-09T19:57:35.0007248Z   check-reservoir-eligibility: false
+2026-10-09T19:57:35.0007511Z   leanchecker: false
+2026-10-09T19:57:35.0007717Z   lean4checker: false
+2026-10-09T19:57:35.0007936Z   nanoda: false
+2026-10-09T19:57:35.0008137Z   nanoda-allow-sorry: true
+2026-10-09T19:57:35.0008374Z   axiom-audit: false
+2026-10-09T19:57:35.0008655Z   axiom-audit-allow: propext,Classical.choice,Quot.sound
+2026-10-09T19:57:35.0009058Z   reinstall-transient-toolchain: false
+2026-10-09T19:57:35.0009353Z ##[endgroup]
+2026-10-09T19:57:35.0090312Z ##[start-action display=install elan;id=__leanprover_lean-action.__run]
+2026-10-09T19:57:35.0126292Z ##[group]Run : Install Elan
+2026-10-09T19:57:35.0126619Z [36;1m: Install Elan[0m
+2026-10-09T19:57:35.0126933Z [36;1m${GITHUB_ACTION_PATH}/scripts/install_elan.sh[0m
+2026-10-09T19:57:35.0405234Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T19:57:35.0405698Z ##[endgroup]
+2026-10-09T19:57:35.0544929Z ##[group]Elan Installation Output
+2026-10-09T19:57:35.1028292Z info: downloading installer
+2026-10-09T19:57:35.6288220Z info: downloading https://releases.lean-lang.org/lean4/v4.34.0/lean-4.34.0-linux.tar.zst
+2026-10-09T19:57:39.9970089Z info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.34.0
+2026-10-09T19:57:47.0252205Z Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)
+2026-10-09T19:57:47.0717203Z Lake version 5.0.0-src+293d5d0 (Lean version 4.34.0)
+2026-10-09T19:57:47.0720284Z ##[endgroup]
+2026-10-09T19:57:47.0720516Z 
+2026-10-09T19:57:47.0749992Z ##[end-action id=__leanprover_lean-action.__run;outcome=success;conclusion=success;duration_ms=12065]
+2026-10-09T19:57:47.0762422Z ##[start-action display=configure `lean-action`;id=__leanprover_lean-action.config]
+2026-10-09T19:57:47.1016940Z ##[group]Run : Configure Lean Action
+2026-10-09T19:57:47.1017269Z [36;1m: Configure Lean Action[0m
+2026-10-09T19:57:47.1017554Z [36;1m${GITHUB_ACTION_PATH}/scripts/config.sh[0m
+2026-10-09T19:57:47.1080283Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T19:57:47.1080626Z env:
+2026-10-09T19:57:47.1080824Z   AUTO_CONFIG: false
+2026-10-09T19:57:47.1081037Z   BUILD: false
+2026-10-09T19:57:47.1081241Z   TEST: false
+2026-10-09T19:57:47.1081424Z   LINT: default
+2026-10-09T19:57:47.1081619Z ##[endgroup]
+2026-10-09T19:57:47.1963852Z ##[group]Configure lean-action
+2026-10-09T19:57:47.1991876Z ##[end-action id=__leanprover_lean-action.config;outcome=success;conclusion=success;duration_ms=122]
+2026-10-09T19:57:47.1994551Z ##[start-action display=reinstall transient toolchain;id=__leanprover_lean-action.__run_2]
+2026-10-09T19:57:47.2000573Z ##[end-action id=__leanprover_lean-action.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2003822Z ##[start-action display=ensure all files are imported;id=__leanprover_lean-action.mk_all]
+2026-10-09T19:57:47.2007387Z ##[end-action id=__leanprover_lean-action.mk_all;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2009542Z ##[start-action display=Run actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache]
+2026-10-09T19:57:47.2013663Z ##[end-action id=__leanprover_lean-action.__actions_cache;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2015533Z ##[start-action display=detect mathlib;id=__leanprover_lean-action.detect-mathlib]
+2026-10-09T19:57:47.2019085Z ##[end-action id=__leanprover_lean-action.detect-mathlib;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2020872Z ##[start-action display=get mathlib cache;id=__leanprover_lean-action.__run_3]
+2026-10-09T19:57:47.2032730Z ##[end-action id=__leanprover_lean-action.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2059609Z ##[start-action display=build dwijayuda/pskernel;id=__leanprover_lean-action.build]
+2026-10-09T19:57:47.2064361Z ##[end-action id=__leanprover_lean-action.build;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2066476Z ##[start-action display=Run actions/cache/save@caa296126883cff596d87d8935842f9db880ef25;id=__leanprover_lean-action.__actions_cache_2]
+2026-10-09T19:57:47.2069994Z ##[end-action id=__leanprover_lean-action.__actions_cache_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2073984Z ##[start-action display=test dwijayuda/pskernel;id=__leanprover_lean-action.test]
+2026-10-09T19:57:47.2078095Z ##[end-action id=__leanprover_lean-action.test;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2080870Z ##[start-action display=lint dwijayuda/pskernel;id=__leanprover_lean-action.lint]
+2026-10-09T19:57:47.2085343Z ##[end-action id=__leanprover_lean-action.lint;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2087164Z ##[start-action display=check reservoir eligibility;id=__leanprover_lean-action.__run_4]
+2026-10-09T19:57:47.2090405Z ##[end-action id=__leanprover_lean-action.__run_4;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2093478Z ##[start-action display=check environment with leanchecker;id=__leanprover_lean-action.__run_5]
+2026-10-09T19:57:47.2098151Z ##[end-action id=__leanprover_lean-action.__run_5;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2100552Z ##[start-action display=check environment with nanoda;id=__leanprover_lean-action.nanoda]
+2026-10-09T19:57:47.2104245Z ##[end-action id=__leanprover_lean-action.nanoda;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2106675Z ##[start-action display=audit axioms with axiom-audit;id=__leanprover_lean-action.axiom-audit]
+2026-10-09T19:57:47.2109955Z ##[end-action id=__leanprover_lean-action.axiom-audit;outcome=skipped;conclusion=skipped;duration_ms=0]
+2026-10-09T19:57:47.2433779Z ##[group]Run npm install --prefix "$RUNNER_TEMP/psc0-native-cold-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+2026-10-09T19:57:47.2435255Z [36;1mnpm install --prefix "$RUNNER_TEMP/psc0-native-cold-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2[0m
+2026-10-09T19:57:47.2436181Z [36;1mnode --input-type=module <<'NODE'[0m
+2026-10-09T19:57:47.2436610Z [36;1mimport assert from 'node:assert/strict';[0m
+2026-10-09T19:57:47.2437208Z [36;1mimport { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';[0m
+2026-10-09T19:57:47.2437734Z [36;1mimport path from 'node:path';[0m
+2026-10-09T19:57:47.2438054Z [36;1mimport { createRequire } from 'node:module';[0m
+2026-10-09T19:57:47.2438423Z [36;1mconst require = createRequire(import.meta.url);[0m
+2026-10-09T19:57:47.2438933Z [36;1mconst prefix = path.join(process.env.RUNNER_TEMP, 'psc0-native-cold-typescript-7.0.2');[0m
+2026-10-09T19:57:47.2439616Z [36;1mconst metadataPath = require.resolve('typescript/package.json', { paths: [prefix] });[0m
+2026-10-09T19:57:47.2440191Z [36;1mconst metadata = JSON.parse(readFileSync(metadataPath, 'utf8'));[0m
+2026-10-09T19:57:47.2440613Z [36;1massert.equal(metadata.name, 'typescript');[0m
+2026-10-09T19:57:47.2440953Z [36;1massert.equal(metadata.version, '7.0.2');[0m
+2026-10-09T19:57:47.2441313Z [36;1massert.equal(typeof metadata.bin?.tsc, 'string');[0m
+2026-10-09T19:57:47.2441859Z [36;1mconst launcher = realpathSync(path.resolve(path.dirname(metadataPath), metadata.bin.tsc));[0m
+2026-10-09T19:57:47.2442879Z [36;1mconst packageDirectory = realpathSync(path.dirname(metadataPath));[0m
+2026-10-09T19:57:47.2443387Z [36;1mconst relative = path.relative(packageDirectory, launcher);[0m
+2026-10-09T19:57:47.2443957Z [36;1massert(relative !== '..' && !relative.startsWith('..' + path.sep) && !path.isAbsolute(relative));[0m
+2026-10-09T19:57:47.2444475Z [36;1mappendFileSync(process.env.GITHUB_ENV,[0m
+2026-10-09T19:57:47.2444869Z [36;1m  'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=7.0.2\n');[0m
+2026-10-09T19:57:47.2445385Z [36;1mconst evidence = path.resolve('dist/typescript-profile/native-cold-install');[0m
+2026-10-09T19:57:47.2445854Z [36;1mmkdirSync(evidence, { recursive: true });[0m
+2026-10-09T19:57:47.2446268Z [36;1mcopyFileSync(metadataPath, path.join(evidence, 'package.json'));[0m
+2026-10-09T19:57:47.2446953Z [36;1mcopyFileSync(path.join(prefix, 'package-lock.json'), path.join(evidence, 'package-lock.json'));[0m
+2026-10-09T19:57:47.2447464Z [36;1mNODE[0m
+2026-10-09T19:57:47.2510370Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-09T19:57:47.2510718Z ##[endgroup]
+2026-10-09T19:57:50.2053650Z 
+2026-10-09T19:57:50.2054228Z added 2 packages in 3s
+2026-10-09T19:57:50.2886139Z ##[group]Run node scripts/sh1-native-seed-recovery.mjs \
+2026-10-09T19:57:50.2886612Z [36;1mnode scripts/sh1-native-seed-recovery.mjs \[0m
+2026-10-09T19:57:50.2887089Z [36;1m  --source-workspace "$GITHUB_WORKSPACE/native-authoring-source/psc0" \[0m
+2026-10-09T19:57:50.2887595Z [36;1m  --out "$GITHUB_WORKSPACE/psc0/dist/sh1-native-seed-cold" \[0m
+2026-10-09T19:57:50.2888013Z [36;1m  --cache-directory "$PSC0_NATIVE_COLD_CACHE" \[0m
+2026-10-09T19:57:50.2888325Z [36;1m  --cold[0m
+2026-10-09T19:57:50.2953301Z shell: /usr/bin/bash -e {0}
+2026-10-09T19:57:50.2953558Z env:
+2026-10-09T19:57:50.2953992Z   PSC0_TSC: /home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T19:57:50.2954690Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T19:57:50.2955293Z   PSC0_NATIVE_COLD_CACHE: /home/runner/work/_temp/psc0-native-cold-seed/47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225
+2026-10-09T19:57:50.2955890Z ##[endgroup]
+2026-10-09T20:00:13.8598817Z PSC0_SH1_NATIVE_SEED_RECEIPT: {"schemaVersion":1,"evidence":"native-source-ts7-seed-recovery","passed":true,"cold":true,"sourceRef":"fe2560aba0f347b1caf8d000d371464642d44f23","sourceClosureSha256":"f96c811f575cae2be58ccca3ffe587ead83bffa6f8bd862d40936bef28ef3226","sourceKind":"raw-authoritative-lean","moduleCount":61,"selectedManifestSha256":"7a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694","selectedSeedIdentitySha256":"47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225","policySha256":"70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30","recipe":{"id":"native-lean-original-ir-four-products-ts7/1","files":[{"path":"scripts/sh1-native-seed-recovery.mjs","gitBlobSha1":"c1b5673079b2faae56e9c778b62e70087e639fbe"},{"path":"scripts/sh1-successor-seed.mjs","gitBlobSha1":"3514a7797e739e7a47af33c91ab58e912584d0c7"},{"path":"scripts/sh1-seed-manifest.mjs","gitBlobSha1":"b169d5198cea0c549fe72a3365e4fb5740fc0bc7"},{"path":"scripts/sh1-grammar-profile.mjs","gitBlobSha1":"26836a8e487d77c94a73485e2d11e3575b932edf"},{"path":"scripts/sh1-source-snapshot.mjs","gitBlobSha1":"1083a3765a55540f83b2376c40a97bc1f1362ce0"},{"path":"scripts/workspace-layout.mjs","gitBlobSha1":"eb7c2c07f147a812f9998904a60123b3719e5539"},{"path":"scripts/typescript-cli.mjs","gitBlobSha1":"9d6607a6f4284b0afba8023566f6e1d75c30a64a"}]},"recipeSha256":"d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d","expectedArtifacts":{"canonicalSurfaceSourceSha256":"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07","normalizedCanonicalAdmissionsSha256":"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0","typescriptSha256":"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935","javascriptSha256":"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"},"generatedCompilerExecuted":false,"historicalParentCompilerExecuted":false,"historicalTypeScriptExecuted":false,"originalSelectedManifestChanged":false,"strictSh1Qualified":false,"fullStandardConformance":false,"fullPscvConformance":false,"providerCheckedByThisRecovery":false,"scope":"Reproduce the selected compiler from pinned native Lean source with TS7 and compare all four final products; preserve the existing selected seed identity.","commands":[{"label":"runner-ref","executable":"git","args":["rev-parse","HEAD"],"cwd":"/home/runner/work/pskernel/pskernel/psc0","timeoutMs":180000,"elapsedMs":4.399328000000004,"status":0,"signal":null,"stdout":"logs/001-runner-ref.stdout","stderr":"logs/001-runner-ref.stderr","stdoutSha256":"fb671ea7e1a0ff31bbe23719314424bc981e1b9c9f6cfdb07d6adf733132d955","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"source-before-root","executable":"git","args":["rev-parse","--show-toplevel"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":2.566524000000001,"status":0,"signal":null,"stdout":"logs/002-source-before-root.stdout","stderr":"logs/002-source-before-root.stderr","stdoutSha256":"f91c739ed00bc073161c7c8febb7bd01a4c06a2819ff17433b18e78b6462b428","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"source-before-ref","executable":"git","args":["rev-parse","HEAD"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":2.5554830000000024,"status":0,"signal":null,"stdout":"logs/003-source-before-ref.stdout","stderr":"logs/003-source-before-ref.stderr","stdoutSha256":"9d1ccbeb53d76503190656c1f1860d70fc7825ceedde7ad853a102d151723b5b","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"source-before-status","executable":"git","args":["status","--porcelain","--untracked-files=no"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":1570.5446949999998,"status":0,"signal":null,"stdout":"logs/004-source-before-status.stdout","stderr":"logs/004-source-before-status.stderr","stdoutSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"lean-version","executable":"lake","args":["env","lean","--version"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":1530.8704289999998,"status":0,"signal":null,"stdout":"logs/005-lean-version.stdout","stderr":"logs/005-lean-version.stderr","stdoutSha256":"cf6e65bfc214882b1c13717aae89d383a03f6bcf5c96dfbae13368cd3e07ff9d","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"lean-githash","executable":"lake","args":["env","lean","--githash"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":456.88680399999976,"status":0,"signal":null,"stdout":"logs/006-lean-githash.stdout","stderr":"logs/006-lean-githash.stderr","stdoutSha256":"3812a3d2dd2910469d2aae31a4bde882f97e697d6a0ec187a96392134e17d4cf","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"typescript-version","executable":"/opt/hostedtoolcache/node/22.23.3/x64/bin/node","args":["/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc","--version"],"cwd":"/home/runner/work/pskernel/pskernel/psc0","timeoutMs":180000,"elapsedMs":40.50386900000012,"status":0,"signal":null,"stdout":"logs/007-typescript-version.stdout","stderr":"logs/007-typescript-version.stderr","stdoutSha256":"41024334022fa58f9c7337359517de307cbcfc6055c19f2b734245eacc2fe97a","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-build","executable":"lake","args":["build","psc1","psc1_ir_check_tests"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":900000,"elapsedMs":31379.008953,"status":0,"signal":null,"stdout":"logs/008-native-build.stdout","stderr":"logs/008-native-build.stderr","stdoutSha256":"3655c2e05ca38855248a5da9e6efe75a7488c8704b2670bbe6e4b98c1986b852","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-original-ir","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1_ir_check_tests","args":["/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/raw-source.lean","/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/products/index.ts"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":95649.41932,"status":0,"signal":null,"stdout":"logs/009-native-original-ir.stdout","stderr":"logs/009-native-original-ir.stderr","stdoutSha256":"98135b33800ec20ba074929591886e6417dc59c46351c72e36c4dbe6d6c9b0cc","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"typescript-compile","executable":"/opt/hostedtoolcache/node/22.23.3/x64/bin/node","args":["/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc","--ignoreConfig","/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/products/index.ts","--target","ES2022","--module","ES2022","--moduleResolution","bundler","--strict","--declaration","--sourceMap","--noEmitOnError","--skipLibCheck","--pretty","false"],"cwd":"/home/runner/work/pskernel/pskernel/psc0","timeoutMs":180000,"elapsedMs":2986.2724449999805,"status":0,"signal":null,"stdout":"logs/010-typescript-compile.stdout","stderr":"logs/010-typescript-compile.stderr","stdoutSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-admissions","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["admissions","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6929.125937000004,"status":0,"signal":null,"stdout":"logs/011-native-admissions.stdout","stderr":"logs/011-native-admissions.stderr","stdoutSha256":"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-01","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/foundation/src/Ps/Foundation/Source.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.917752999986988,"status":0,"signal":null,"stdout":"logs/012-native-ps-01.stdout","stderr":"logs/012-native-ps-01.stderr","stdoutSha256":"190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-02","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Cursor.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.3206930000160355,"status":0,"signal":null,"stdout":"logs/013-native-ps-02.stdout","stderr":"logs/013-native-ps-02.stderr","stdoutSha256":"09a374e1792e2f41aef44142db17e1b04c969dc70f07575262047c2b2c0060c2","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-03","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Token.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.096811999974307,"status":0,"signal":null,"stdout":"logs/014-native-ps-03.stdout","stderr":"logs/014-native-ps-03.stderr","stdoutSha256":"ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-04","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Lexer.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":56.04084599998896,"status":0,"signal":null,"stdout":"logs/015-native-ps-04.stdout","stderr":"logs/015-native-ps-04.stderr","stdoutSha256":"0256f73a093ab0e3ec00c96b399cab7aced6d648223e3fe6fcf2d58a3a0554cc","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-05","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Ast.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.445146000012755,"status":0,"signal":null,"stdout":"logs/016-native-ps-05.stdout","stderr":"logs/016-native-ps-05.stderr","stdoutSha256":"89de3dcb90a0b809c4da70e586f1fb55a56dfc1d38458ac2bed5f723aec7ff26","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-06","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/foundation/src/Ps/Foundation/Name.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.347956999990856,"status":0,"signal":null,"stdout":"logs/017-native-ps-06.stdout","stderr":"logs/017-native-ps-06.stderr","stdoutSha256":"f92f198ac2be8092497a4981e4d031d283baf6a96ba9de6e3954804401187b33","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-07","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParserState.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.6799210000026505,"status":0,"signal":null,"stdout":"logs/018-native-ps-07.stdout","stderr":"logs/018-native-ps-07.stderr","stdoutSha256":"5303cc56fa752d51d24c741d35d961c509e806ccf8be0d80faf3e1ef9625b9f7","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-08","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParseCommon.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":26.397948999976506,"status":0,"signal":null,"stdout":"logs/019-native-ps-08.stdout","stderr":"logs/019-native-ps-08.stderr","stdoutSha256":"d824adc8674d86c2c6c0d6505a02d489f4809b4c962900528a82425b860619d4","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-09","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParseLean.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":402.54189699998824,"status":0,"signal":null,"stdout":"logs/020-native-ps-09.stdout","stderr":"logs/020-native-ps-09.stderr","stdoutSha256":"742f2141644b286e6a1e2e7e81fba6c829369ac0559c28247d6582a20d118d87","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-10","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":285.9896319999825,"status":0,"signal":null,"stdout":"logs/021-native-ps-10.stdout","stderr":"logs/021-native-ps-10.stderr","stdoutSha256":"0245af0456f11bdddaa119f81cbc01a32b3fbf3ff95d90dd50c2bc5b3bc9f7d1","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-11","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/PrintCommon.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.049796000006609,"status":0,"signal":null,"stdout":"logs/022-native-ps-11.stdout","stderr":"logs/022-native-ps-11.stderr","stdoutSha256":"b3887750bfdb8321ff9e0a6c0229899118493a49b881837bc8b6dbf6c1cc2399","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-12","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/PrintLean.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":27.96444400001201,"status":0,"signal":null,"stdout":"logs/023-native-ps-12.stdout","stderr":"logs/023-native-ps-12.stderr","stdoutSha256":"45b0c4812868e05570b3e7a96e897d80ee4432d57acf4b041641aab613f07161","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-13","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":32.11082600001828,"status":0,"signal":null,"stdout":"logs/024-native-ps-13.stdout","stderr":"logs/024-native-ps-13.stderr","stdoutSha256":"b7d405deafdfc58c2270e07ada341da47ee414af223bab5a8f61a48a82a67c9b","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-14","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/syntax/src/Ps/Syntax/Translate.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":4.824890999996569,"status":0,"signal":null,"stdout":"logs/025-native-ps-14.stdout","stderr":"logs/025-native-ps-14.stderr","stdoutSha256":"0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-15","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bridge/src/Ps/Bridge/Json.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":71.77984999999171,"status":0,"signal":null,"stdout":"logs/026-native-ps-15.stdout","stderr":"logs/026-native-ps-15.stderr","stdoutSha256":"38727675a90af661f252f0bb75fdf6306514c303bbb19c18699c879ef09cd15a","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-16","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Level.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.0660639999841806,"status":0,"signal":null,"stdout":"logs/027-native-ps-16.stdout","stderr":"logs/027-native-ps-16.stderr","stdoutSha256":"da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-17","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Expr.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.062501999986125,"status":0,"signal":null,"stdout":"logs/028-native-ps-17.stdout","stderr":"logs/028-native-ps-17.stderr","stdoutSha256":"636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-18","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Declaration.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.185998000000836,"status":0,"signal":null,"stdout":"logs/029-native-ps-18.stdout","stderr":"logs/029-native-ps-18.stderr","stdoutSha256":"336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-19","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Abstract.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.649601000011899,"status":0,"signal":null,"stdout":"logs/030-native-ps-19.stdout","stderr":"logs/030-native-ps-19.stderr","stdoutSha256":"3f79337b3bde47fd80ed2cd5afb796e414efc4843bab5af7f218a5abf070e479","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-20","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Subst.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.75971899999422,"status":0,"signal":null,"stdout":"logs/031-native-ps-20.stdout","stderr":"logs/031-native-ps-20.stderr","stdoutSha256":"5f70d640f0e1e3b3c6fac200ede9c693d2414ae0b257f7239f212360f86a233a","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-21","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Equality.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":7.168086999998195,"status":0,"signal":null,"stdout":"logs/032-native-ps-21.stdout","stderr":"logs/032-native-ps-21.stderr","stdoutSha256":"236f21decc804baad9e94cdd52fd8ee6970e2eb4055706070ae0efd7ce478de9","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-22","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/foundation/src/Ps/Foundation/List.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.5906250000116415,"status":0,"signal":null,"stdout":"logs/033-native-ps-22.stdout","stderr":"logs/033-native-ps-22.stderr","stdoutSha256":"4a3f579b2f5337a41857214813c62bbfdf74c9d990e6b34a2532bde064b88c38","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-23","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Basic.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":8.830022000009194,"status":0,"signal":null,"stdout":"logs/034-native-ps-23.stdout","stderr":"logs/034-native-ps-23.stderr","stdoutSha256":"4f66e2917ad7d21293f4588f6f8d91cd3062ca70ff99f4903b9a37a34de1cd5d","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-24","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":131.68957699998282,"status":0,"signal":null,"stdout":"logs/035-native-ps-24.stdout","stderr":"logs/035-native-ps-24.stderr","stdoutSha256":"846ee89b0f2e619beb6cec64df7fbabd7e1030d324cf266d7e9d742417c39a19","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-25","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/Builtin.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":8.757142999995267,"status":0,"signal":null,"stdout":"logs/036-native-ps-25.stdout","stderr":"logs/036-native-ps-25.stderr","stdoutSha256":"561ede24f6f56cabe9f8f389da810e986f59d52050a774d8f45325682f55d17f","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-26","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Prelude.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":24.942674000019906,"status":0,"signal":null,"stdout":"logs/037-native-ps-26.stdout","stderr":"logs/037-native-ps-26.stderr","stdoutSha256":"0ef9ec60fc1a13903146734271307fea075c4b52426a00fd3e7127155cacab21","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-27","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/SelfHostPrelude.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":15.030731000006199,"status":0,"signal":null,"stdout":"logs/038-native-ps-27.stdout","stderr":"logs/038-native-ps-27.stderr","stdoutSha256":"f9d00bcef28e893b4943078477829bd0c2fc3fdfd973de0e4b9ecab4ee219f49","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-28","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/SelfHostProd.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":7.190433000010671,"status":0,"signal":null,"stdout":"logs/039-native-ps-28.stdout","stderr":"logs/039-native-ps-28.stderr","stdoutSha256":"725306f3001867098f328bc1b669ea50d810233688ebd92191fa183a508c4757","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-29","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/LocalContext.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.074569000018528,"status":0,"signal":null,"stdout":"logs/040-native-ps-29.stdout","stderr":"logs/040-native-ps-29.stderr","stdoutSha256":"0b11fb657905f54f5b56e3465728061574744cd2f973a08d1cb760ca977ed5e1","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-30","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Resolve.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":4.803272999997716,"status":0,"signal":null,"stdout":"logs/041-native-ps-30.stdout","stderr":"logs/041-native-ps-30.stderr","stdoutSha256":"d19b66ca970fa7d207c8e3af9ccca68373c3e94f2079f65c482d1ff82bc11163","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-31","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/core/src/Ps/Core/LevelSubst.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.893914999993285,"status":0,"signal":null,"stdout":"logs/042-native-ps-31.stdout","stderr":"logs/042-native-ps-31.stderr","stdoutSha256":"637b2d834fc583668b2425da3b6414a6d19329cb4c84bce6631a65f2a92f60d1","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-32","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/LevelContext.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":7.974542999989353,"status":0,"signal":null,"stdout":"logs/043-native-ps-32.stdout","stderr":"logs/043-native-ps-32.stderr","stdoutSha256":"2b72226f26aeaceefed2bde4b189f902e90549f240de445222e3e6a00b3f3b3a","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-33","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Context.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":7.996591000002809,"status":0,"signal":null,"stdout":"logs/044-native-ps-33.stdout","stderr":"logs/044-native-ps-33.stderr","stdoutSha256":"59751d786051a7be194c670803a46a539fbf08b99ca3f6efd68aa10d2d218c89","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-34","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Reduce.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.558424999995623,"status":0,"signal":null,"stdout":"logs/045-native-ps-34.stdout","stderr":"logs/045-native-ps-34.stderr","stdoutSha256":"b74aef33e5bdaf5ad81e423f5db7af318e2f58ebdc9f39fbe2c4a192a3716ddd","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-35","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Infer.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":13.834261000010883,"status":0,"signal":null,"stdout":"logs/046-native-ps-35.stdout","stderr":"logs/046-native-ps-35.stderr","stdoutSha256":"df95b9a7c1194c0c294d61aacdc8efa07399e0e78dadda172fe5f71e9be810b6","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-36","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/environment/src/Ps/Environment/Instances.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.119051999994554,"status":0,"signal":null,"stdout":"logs/047-native-ps-36.stdout","stderr":"logs/047-native-ps-36.stderr","stdoutSha256":"3d1a5106b2cb7e2e8247e7d3890265693e6fea27cd55b3af8b63c09e9b4ab21b","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-37","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/Unify.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":10.204632999986643,"status":0,"signal":null,"stdout":"logs/048-native-ps-37.stdout","stderr":"logs/048-native-ps-37.stderr","stdoutSha256":"1c9dacaf21bf362a5f9edbaaa6508342cf0fb5af17b6b43c7c2155c4eed0eaa7","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-38","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/meta/src/Ps/Meta/SynthInstance.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":9.640938999975333,"status":0,"signal":null,"stdout":"logs/049-native-ps-38.stdout","stderr":"logs/049-native-ps-38.stderr","stdoutSha256":"a55ff66a4e23071051a44dc528a275c1c373ccf1817607a54df51b35fc9e1fca","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-39","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Context.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.379118999990169,"status":0,"signal":null,"stdout":"logs/050-native-ps-39.stdout","stderr":"logs/050-native-ps-39.stderr","stdoutSha256":"c10fe9eabf1560f8a49f3d58e7e09376f58e1aef120a3b6b4560187785fff4ad","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-40","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Literal.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":9.200837000011234,"status":0,"signal":null,"stdout":"logs/051-native-ps-40.stdout","stderr":"logs/051-native-ps-40.stderr","stdoutSha256":"afa0089532a33ad43a30eb090ce2c6ec38c7bf75d64500555890a86556b63331","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-41","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Term.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":461.96515100001125,"status":0,"signal":null,"stdout":"logs/052-native-ps-41.stdout","stderr":"logs/052-native-ps-41.stderr","stdoutSha256":"8e6e0d11d6c1ff36b4d15fac3764fa14c2e2a862cd7cbe1030593ad55832d58b","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-42","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Recursion.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":45.09910699998727,"status":0,"signal":null,"stdout":"logs/053-native-ps-42.stdout","stderr":"logs/053-native-ps-42.stderr","stdoutSha256":"19ec12fd8abd4a207835ec3d3eca9c3b04b3327182a38f1dc8a81379e45a9523","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-43","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/elab/src/Ps/Elab/Declaration.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":94.63580399999046,"status":0,"signal":null,"stdout":"logs/054-native-ps-43.stdout","stderr":"logs/054-native-ps-43.stderr","stdoutSha256":"9f85eebadbd783f4d6509ead4483b0a1b95b613cca3f5f90e533d3fcdaf53c98","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-44","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/Model.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":8.100674999994226,"status":0,"signal":null,"stdout":"logs/055-native-ps-44.stdout","stderr":"logs/055-native-ps-44.stderr","stdoutSha256":"30bead0e91e0bf47eab0f0614a05e1bd34153fb1442b3714ce74f9d5f118c4b0","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-45","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Basic.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":32.8192229999986,"status":0,"signal":null,"stdout":"logs/056-native-ps-45.stdout","stderr":"logs/056-native-ps-45.stderr","stdoutSha256":"2d972e0b44693d846ccce81f8eba8401c3a9f274b6fffaca9e5370823bb4bfd4","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-46","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Expr.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":303.39448300001095,"status":0,"signal":null,"stdout":"logs/057-native-ps-46.stdout","stderr":"logs/057-native-ps-46.stderr","stdoutSha256":"3b15996b9bbdb8b6f3fdc842fc1105d3af48d10a10905214c3875ec802a0af71","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-47","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Inductive.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":13.462549999996554,"status":0,"signal":null,"stdout":"logs/058-native-ps-47.stdout","stderr":"logs/058-native-ps-47.stderr","stdoutSha256":"17d0dc3438905d1afa7a15be5dfb4fc2bc847a9d8a8d14ba8016c6003fc29722","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-48","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Structure.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.409776000014972,"status":0,"signal":null,"stdout":"logs/059-native-ps-48.stdout","stderr":"logs/059-native-ps-48.stderr","stdoutSha256":"9d8583e101e9fe3ea3dc99b7f0903d7b771c387eea7bdf2c9795c4ca675c2250","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-49","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/StructureRecursor.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":8.250715000001946,"status":0,"signal":null,"stdout":"logs/060-native-ps-49.stdout","stderr":"logs/060-native-ps-49.stderr","stdoutSha256":"e87d6b7fd3321bf04dbdea1b8db3c196014eef794b659047025339bec0f9f6bb","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-50","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/erasure/src/Ps/Erasure/Definition.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":16.081299000012223,"status":0,"signal":null,"stdout":"logs/061-native-ps-50.stdout","stderr":"logs/061-native-ps-50.stderr","stdoutSha256":"614e46ae87ef5d509a19c8966a5e1f9a1a8204f6a3f8e66ab766d837b65f1c27","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-51","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler/src/Ps/Compiler/Api.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":11.730952999991132,"status":0,"signal":null,"stdout":"logs/062-native-ps-51.stdout","stderr":"logs/062-native-ps-51.stderr","stdoutSha256":"8de52db9015957e75ff8d5bb869da65f38d1100803ad42e92b3bafc535861999","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-52","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Type.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":7.900148000015179,"status":0,"signal":null,"stdout":"logs/063-native-ps-52.stdout","stderr":"logs/063-native-ps-52.stderr","stdoutSha256":"171cad254be1db7608fc1448ecbf64d18221e01e707646dfa4fac237541ef50e","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-53","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Expr.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":106.3565510000044,"status":0,"signal":null,"stdout":"logs/064-native-ps-53.stdout","stderr":"logs/064-native-ps-53.stderr","stdoutSha256":"db776c24053add0a0d9404648214f04edc974c238465fc6d38e1cb9e264dccdb","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-54","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Module.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":90.33182299998589,"status":0,"signal":null,"stdout":"logs/065-native-ps-54.stdout","stderr":"logs/065-native-ps-54.stderr","stdoutSha256":"23bf12a6423319fc7085ce1ea63dc1ba6121bdeb746e2229262b2f17c7662014","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-55","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":29.468049999995856,"status":0,"signal":null,"stdout":"logs/066-native-ps-55.stdout","stderr":"logs/066-native-ps-55.stderr","stdoutSha256":"04922aaa3a8bdff2a4a701aa7aa343f2c62f902ffd1ad69e09ff1345fd3b2b06","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-56","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":16.62654699999257,"status":0,"signal":null,"stdout":"logs/067-native-ps-56.stdout","stderr":"logs/067-native-ps-56.stderr","stdoutSha256":"f756d396c77a7dd82f64a58e99cb67a448e4d600e2eca9525f0188a67368abb5","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-57","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/Check.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":141.29809500000556,"status":0,"signal":null,"stdout":"logs/068-native-ps-57.stdout","stderr":"logs/068-native-ps-57.stderr","stdoutSha256":"8b53a51cc2cc9d773e6122ec7de8feadc8121b2f849cd014f3697a1650d05dce","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-58","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/compiler-ir/src/Ps/CompilerIr/Construct.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":6.831275000004098,"status":0,"signal":null,"stdout":"logs/069-native-ps-58.stdout","stderr":"logs/069-native-ps-58.stderr","stdoutSha256":"3e27ed9004fa996852867db079c9d014c313fbd6fc8ca827ad0dcd401e066a28","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-59","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Checked.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.272387000004528,"status":0,"signal":null,"stdout":"logs/070-native-ps-59.stdout","stderr":"logs/070-native-ps-59.stderr","stdoutSha256":"abea9f83d1a54c4546e985e0295298fbfcef4a8f007d144d17241edfab5a19f7","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-60","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/backend-ts/src/Ps/BackendTs/Compiler.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":5.473790999996709,"status":0,"signal":null,"stdout":"logs/071-native-ps-60.stdout","stderr":"logs/071-native-ps-60.stderr","stdoutSha256":"780c58bac5812d2c805289c902e4c7bcac2c01000a4639e379434d0a5637340c","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"native-ps-61","executable":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/.lake/build/bin/psc1","args":["translate","/home/runner/work/pskernel/pskernel/native-authoring-source/psc0/packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean","--to","ps"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":4.8808070000086445,"status":0,"signal":null,"stdout":"logs/072-native-ps-61.stdout","stderr":"logs/072-native-ps-61.stderr","stdoutSha256":"c108b7716fbbf275c2202b11ac58d903bb162604d75e3790ee92a22bdea97202","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"source-after-root","executable":"git","args":["rev-parse","--show-toplevel"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":3.397854000009829,"status":0,"signal":null,"stdout":"logs/073-source-after-root.stdout","stderr":"logs/073-source-after-root.stderr","stdoutSha256":"f91c739ed00bc073161c7c8febb7bd01a4c06a2819ff17433b18e78b6462b428","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"source-after-ref","executable":"git","args":["rev-parse","HEAD"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":2.7486299999873154,"status":0,"signal":null,"stdout":"logs/074-source-after-ref.stdout","stderr":"logs/074-source-after-ref.stderr","stdoutSha256":"9d1ccbeb53d76503190656c1f1860d70fc7825ceedde7ad853a102d151723b5b","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},{"label":"source-after-status","executable":"git","args":["status","--porcelain","--untracked-files=no"],"cwd":"/home/runner/work/pskernel/pskernel/native-authoring-source/psc0","timeoutMs":180000,"elapsedMs":24.260282000002917,"status":0,"signal":null,"stdout":"logs/075-source-after-status.stdout","stderr":"logs/075-source-after-status.stderr","stdoutSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"}],"runnerSourceRef":"047a29f17392fea41ac5d59e7f8cbfc172b20313","toolchain":{"node":"v22.23.3","platform":"linux","architecture":"x64","lean":"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)","leanGitHash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","typescript":"Version 7.0.2"},"typescriptInstallation":{"launcher":"/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc","launcherSha256":"2219f428a7e55aaf1f7ad85b9b0f0cf5078aeb76ccc9a7c6036c92d48f492ffd","package":{"path":"/home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/package.json","sha256":"3722b30210616a13a3213ded11575ba6b2dbab10c32a5ef67afca8513e27017e","version":"7.0.2"}},"aggregateSourceSha256":"06035426bb3c5772ff7d1362485a13baee0c4447bf486fbbba448961eef52357","rawSourceBytes":1113918,"nativeBinaries":{"compilerSha256":"9f6516dad78d17435cac214d88d79d3c8a254bb3cd3bca279220bff000dfa484","originalIrCheckerSha256":"0f40ccfae56e0b20e65e54b30e6468c5ff40e2b9ac61c6b1485e605e849d8afd"},"originalIr":{"report":"products/index.ts.ir-report.json","reportSha256":"e16eefe370f1d0b3c6de87965724e96a6c36941c64afa2c4cb2dc7a3687e79b1","accepted":true,"traversalComplete":true,"expressionCount":56391,"visitedSteps":725484,"findingCount":0,"sameOriginalIrCheckedBeforeEmission":true},"artifacts":{"canonicalSurfaceSourceSha256":"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07","normalizedCanonicalAdmissionsSha256":"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0","typescriptSha256":"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935","javascriptSha256":"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"},"trackedSourceCleanBeforeAndAfter":true,"sourceClosureUnchanged":true,"cache":{"directory":"/home/runner/work/_temp/psc0-native-cold-seed/47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225","identitySha256":"47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225","verified":true},"elapsedMs":143478.74540699998}
+2026-10-09T20:00:13.8780280Z PSC0_SH1_NATIVE_SEED_RECOVERY: {"passed":true,"cold":true,"sourceRef":"fe2560aba0f347b1caf8d000d371464642d44f23","selectedSeedIdentitySha256":"47d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225","recipeSha256":"d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d","policySha256":"70806fe918db62d497ed89116ca4fb94c30a614e784a5408be52d4e2c1e25d30","artifacts":{"canonicalSurfaceSourceSha256":"985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07","normalizedCanonicalAdmissionsSha256":"200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0","typescriptSha256":"38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935","javascriptSha256":"70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061"},"receiptPath":"/home/runner/work/pskernel/pskernel/psc0/dist/sh1-native-seed-cold/receipt.json","receiptFileSha256":"d2068b325f37d688914899d417b208eb2365be6a9c5d065237c8ec5857dace2a","elapsedMs":143478.74540699998}
+2026-10-09T20:00:13.8832730Z ##[group]Run actions/upload-artifact@v4
+2026-10-09T20:00:13.8833067Z with:
+2026-10-09T20:00:13.8833424Z   name: psc0-sh1-native-ts7-cold-047a29f17392fea41ac5d59e7f8cbfc172b20313
+2026-10-09T20:00:13.8834190Z   path: psc0/dist/sh1-native-seed-cold
+psc0/dist/typescript-profile/native-cold-install
+/home/runner/work/_temp/psc0-native-cold-seed
+
+2026-10-09T20:00:13.8834839Z   include-hidden-files: true
+2026-10-09T20:00:13.8835120Z   if-no-files-found: ignore
+2026-10-09T20:00:13.8835370Z   retention-days: 30
+2026-10-09T20:00:13.8835607Z   compression-level: 6
+2026-10-09T20:00:13.8835840Z   overwrite: false
+2026-10-09T20:00:13.8836050Z env:
+2026-10-09T20:00:13.8836468Z   PSC0_TSC: /home/runner/work/_temp/psc0-native-cold-typescript-7.0.2/node_modules/typescript/bin/tsc
+2026-10-09T20:00:13.8836972Z   PSC0_TYPESCRIPT_VERSION: 7.0.2
+2026-10-09T20:00:13.8837232Z ##[endgroup]
+2026-10-09T20:00:14.0579361Z (node:3707) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T20:00:14.0580349Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T20:00:14.0988552Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-09T20:00:14.0991393Z The least common ancestor is /home/runner/work. This will be the root directory of the artifact
+2026-10-09T20:00:14.0992571Z With the provided path, there will be 165 files uploaded
+2026-10-09T20:00:14.0998042Z Artifact name is valid!
+2026-10-09T20:00:14.0998583Z Root directory input is valid!
+2026-10-09T20:00:14.3093995Z Beginning upload of artifact content to blob storage
+2026-10-09T20:00:14.9314633Z (node:3707) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-09T20:00:15.0500353Z Uploaded bytes 2219318
+2026-10-09T20:00:15.0655848Z Finished uploading artifact content to blob storage!
+2026-10-09T20:00:15.0657146Z SHA256 digest of uploaded artifact zip is 34cc557bd260af627509cb1103f710d10c66ec04b88f8d03b3cf4c245acb4f6e
+2026-10-09T20:00:15.0659429Z Finalizing artifact upload
+2026-10-09T20:00:15.2582916Z Artifact psc0-sh1-native-ts7-cold-047a29f17392fea41ac5d59e7f8cbfc172b20313.zip successfully finalized. Artifact ID 11642138063
+2026-10-09T20:00:15.2584601Z Artifact psc0-sh1-native-ts7-cold-047a29f17392fea41ac5d59e7f8cbfc172b20313 has been successfully uploaded! Final size is 2219318 bytes. Artifact ID is 11642138063
+2026-10-09T20:00:15.2589221Z Artifact download URL: https://github.com/dwijayuda/pskernel/actions/runs/37983663908/artifacts/11642138063
+2026-10-09T20:00:15.2789144Z Post job cleanup.
+2026-10-09T20:00:15.4045811Z (node:3721) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-09T20:00:15.4046873Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-09T20:00:15.4278620Z Post job cleanup.
+2026-10-09T20:00:15.5196142Z [command]/usr/bin/git version
+2026-10-09T20:00:15.5242559Z git version 2.55.0
+2026-10-09T20:00:15.5285064Z Temporarily overriding HOME='/home/runner/work/_temp/a49aa715-799b-447b-adfa-43ec4be08bcb' before making global git config changes
+2026-10-09T20:00:15.5286566Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T20:00:15.5290769Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel/native-authoring-source
+2026-10-09T20:00:15.5339805Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T20:00:15.5385754Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T20:00:15.5681691Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T20:00:15.5720060Z http.https://github.com/.extraheader
+2026-10-09T20:00:15.5740465Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T20:00:15.5808932Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T20:00:15.6194502Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T20:00:15.6256169Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T20:00:15.6748519Z Post job cleanup.
+2026-10-09T20:00:15.7635485Z [command]/usr/bin/git version
+2026-10-09T20:00:15.7681568Z git version 2.55.0
+2026-10-09T20:00:15.7724418Z Temporarily overriding HOME='/home/runner/work/_temp/76e4031f-6339-4b37-ac9a-03386c137e1b' before making global git config changes
+2026-10-09T20:00:15.7726130Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-09T20:00:15.7730957Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pskernel/pskernel
+2026-10-09T20:00:15.7778156Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-09T20:00:15.7833401Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-09T20:00:15.8109708Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-09T20:00:15.8140885Z http.https://github.com/.extraheader
+2026-10-09T20:00:15.8156209Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-09T20:00:15.8204136Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-09T20:00:15.8501837Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-09T20:00:15.8544446Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-09T20:00:15.8967237Z Cleaning up orphan processes
+2026-10-09T20:00:15.9285373Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/github-script@v7, actions/setup-node@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

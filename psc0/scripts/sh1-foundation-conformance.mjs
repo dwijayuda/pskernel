@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { invokeCompilerValueEntry } from './sh1-function-entry.mjs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -31,7 +32,7 @@ function publicType(compiler, prepared, name) {
   const target = compiler.psRootName(name);
   while (valueTag(declarations) === 'cons') {
     const declaration = declarations.head;
-    if (compiler.psNameEq(compiler.psDeclarationName(declaration), target)) {
+    if (invokeCompilerValueEntry(compiler, 'psNameEq', [compiler.psDeclarationName(declaration), target])) {
       return compiler.psDeclarationType(declaration);
     }
     declarations = declarations.tail;
@@ -49,7 +50,25 @@ function boundedLists() {
   return lists;
 }
 
-function checkLibrary(runtime) {
+function checkLibrary(runtime, sourceLabel, fixtureProducer) {
+  assert(['reference', 'current'].includes(sourceLabel), 'PSC0_SH1_LIBRARY_SOURCE_LABEL');
+  assert(['current', 'selected-R'].includes(fixtureProducer), 'PSC0_SH1_LIBRARY_FIXTURE_PRODUCER');
+  // Current producers retain the reference source's returned unary closure.
+  // Authenticated selected R emits that same reference with its flat result ABI.
+  // The migrated source has both values in its header under either producer.
+  const returnedClosure = sourceLabel === 'reference' && fixtureProducer === 'current';
+  for (const name of ['psListReverseAcc', 'psListAppend', 'psListTake', 'psListZip']) {
+    assert.equal(runtime[name].length, returnedClosure ? 1 : 2,
+      'PSC0_SH1_LIBRARY_SOURCE_ENTRY_ARITY: ' + name);
+  }
+  const reverseAcc = returnedClosure ? (values, acc) => runtime.psListReverseAcc(values)(acc) :
+    runtime.psListReverseAcc;
+  const append = returnedClosure ? (left, right) => runtime.psListAppend(left)(right) :
+    runtime.psListAppend;
+  const take = returnedClosure ? (count, values) => runtime.psListTake(count)(values) :
+    runtime.psListTake;
+  const zip = returnedClosure ? (left, right) => runtime.psListZip(left)(right) :
+    runtime.psListZip;
   const lists = boundedLists();
   let observations = 0;
   for (const left of lists) {
@@ -60,18 +79,18 @@ function checkLibrary(runtime) {
     observations += 3;
     for (let count = 0; count <= 8; count++) {
       const expected = left.slice(0, count);
-      assert.deepEqual(arrayFromList(runtime.psListTake(BigInt(count), a)), expected);
+      assert.deepEqual(arrayFromList(take(BigInt(count), a)), expected);
       assert.deepEqual(arrayFromList(runtime.sh1TakeCurried(BigInt(count), a)), expected);
       observations += 2;
     }
     for (const right of lists) {
       const b = listFromArray(runtime, right);
-      assert.deepEqual(arrayFromList(runtime.psListReverseAcc(a, b)), [...left].reverse().concat(right));
+      assert.deepEqual(arrayFromList(reverseAcc(a, b)), [...left].reverse().concat(right));
       assert.deepEqual(arrayFromList(runtime.sh1ReverseCurried(a, b)), [...left].reverse().concat(right));
-      assert.deepEqual(arrayFromList(runtime.psListAppend(a, b)), left.concat(right));
+      assert.deepEqual(arrayFromList(append(a, b)), left.concat(right));
       assert.deepEqual(arrayFromList(runtime.sh1AppendCurried(a, b)), left.concat(right));
       const expectedPairs = left.slice(0, right.length).map((item, index) => [item, right[index]]);
-      for (const pairs of [runtime.psListZip(a, b), runtime.sh1ZipCurried(a, b)]) {
+      for (const pairs of [zip(a, b), runtime.sh1ZipCurried(a, b)]) {
         assert.deepEqual(arrayFromList(pairs).map((pair) => [pair.fst, pair.snd]), expectedPairs);
       }
       observations += 6;
@@ -85,6 +104,7 @@ function checkLibrary(runtime) {
 
 export async function runFoundationConformance({
   compiler, compilerSha256, executingCompiler, root, outDir, tsc,
+  fixtureProducer = 'current',
 }) {
   const reference = await readFile(path.join(root, 'test/fixtures/selfhost-sh1-foundation-reference.lean'), 'utf8');
   const referenceBytes = Buffer.from(reference);
@@ -111,15 +131,15 @@ export async function runFoundationConformance({
     if (label === 'reference') referencePrepared = prepared;
     else {
       for (const name of publicNames) {
-        assert.equal(compiler.psExprAlphaEq(
+        assert.equal(invokeCompilerValueEntry(compiler, 'psExprAlphaEq', [
           publicType(compiler, referencePrepared, name),
-          publicType(compiler, prepared, name)), true, 'PSC0_SH1_PUBLIC_TYPE_CHANGED: ' + name);
+          publicType(compiler, prepared, name)]), true, 'PSC0_SH1_PUBLIC_TYPE_CHANGED: ' + name);
       }
     }
     const admissions = unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared), 'FOUNDATION_ADMISSIONS');
     const typeScript = unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared), 'FOUNDATION_EMIT');
     const outputJs = await compileTypeScript(typeScript, path.join(outDir, label), tsc, root);
-    const coverage = checkLibrary(await import(pathToFileURL(outputJs).href));
+    const coverage = checkLibrary(await import(pathToFileURL(outputJs).href), label, fixtureProducer);
     outputs.push({
       source: label, sourceSha256: sha256(source),
       admissionsSha256: sha256(admissions),
@@ -133,7 +153,7 @@ export async function runFoundationConformance({
     schemaVersion: 1,
     evidence: 'bounded-foundation-source-correspondence',
     compilerSha256,
-    executingCompiler,
+    executingCompiler, fixtureProducer,
     referenceSourceRef: '37f63c39d4a07189938046c64152bba25d789450',
     referenceGitBlob: referenceBlob,
     authoredProbeSha256: sha256(probe),

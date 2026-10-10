@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { invokeCompilerValueEntry } from './sh1-function-entry.mjs';
 import { createHash } from 'node:crypto';
 
 // F1 only: bounded fresh-name behavior in two already loaded generated modules.
@@ -222,9 +223,9 @@ function inspectRuntime(runtime, label) {
   observe('wrapper-internal-argument-order',
     freshResult(runtime.psTsFreshInternalWithFuel(list(runtime, ['p7', 'p8']), 'p', 7n, 3n)),
     ['p9', '10']);
-  const etaParameters = runtime.psErasureEtaParameters(body(['literal']),
+  const etaParameters = invokeCompilerValueEntry(runtime, 'psErasureEtaParameters', [body(['literal']),
     list(runtime, [natType(runtime), natType(runtime)]),
-    list(runtime, [parameter(runtime, '__ps_eta_0')]), 0n);
+    list(runtime, [parameter(runtime, '__ps_eta_0')]), 0n]);
   assert.equal(tag(etaParameters), 'ok', 'PSC0_SH1_F1_ETA_PARAMETER_WRAPPER_' + label);
   observe('wrapper-eta-parameter-order',
     array(etaParameters.value).map((value) => value.name), ['__ps_eta_1', '__ps_eta_2']);

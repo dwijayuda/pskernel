@@ -1,5 +1,7 @@
 # PSKernel-Fast V2 — Major Architecture Redesign for Performance and Correctness
 
+> **SUPERSEDED FOR NEW DEVELOPMENT (2026-10-11):** V2 is a historical design study, not binding project architecture. Its requirements to preserve the old checker, proof continuity, previous source interfaces, or current self-host constraints have been explicitly retired by the user. The authoritative performance-and-correctness-first V3 is [`pskernel-fast/ARCHITECTURE_V3.md`](../pskernel-fast/ARCHITECTURE_V3.md); the independent implementation is [`pskernel-fast/`](../pskernel-fast). Reuse older proofs or source only when that independently improves correctness, performance or auditability. The active proof branch and PR #89 are not edited by this supersession.
+ 
 > **Decision status:** architectural proposal / research, not a production checker implementation or completed soundness proof.
 >
 > **Repository:** https://github.com/dwijayuda/pskernel

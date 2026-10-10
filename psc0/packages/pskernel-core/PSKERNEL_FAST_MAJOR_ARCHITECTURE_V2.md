@@ -232,3 +232,183 @@ commit ALL or NONE
 Inductives and recursors must be generated/validated by the kernel, not accepted as unchecked exporter metadata. Proof/definition and axiom policies are different. An ordinary Lean-compatible checker may allow arbitrary axioms, including an axiom of `False`. A verified-model mode must constrain or explicitly assume their interpretations; no general unconditional consistency theorem is possible.
 
 **Model extension blocker:** fresh constant admission requires constructing an extended model with the new name interpreted, preserving all prior name interpretations and the reserved `False` interpretation. The V2 admission interface must make this a first-class proof goal rather than postulating an already-correct `StoredConstantModeled` fact for arbitrary models.
+
+## 5. High-performance evaluation and definitional equality
+
+### 5.1 Lazy closure-based weak-head evaluator
+
+The engine should evaluate **only what a checking rule demands**. Design value shapes:
+
+~~~text
+EvalValue :=
+  Sort(universeLevel)
+  Pi(domain, closureForCodomain)
+  Lam(domain, closureForBody)
+  Neutral(head, argumentSpine)
+  Constructor(checkedName, levels, argumentSpine)
+  Literal(checkedNatOrString)
+  Thunk(term, exactEnvironment, forceState)
+
+Closure := (CoreExprId, EnvId, LevelSubstId, ScopeId)
+~~~
+
+For **beta**, extend an environment rather than eagerly rebuilding the lambda body. For **let**, retain a lazily forced binder value. For **neutral terms**, compare rigid head and selective spine arguments instead of constructing full normal forms. For **delta**, respect declaration reducibility hints, bound unfolding, and stay folded until needed. For **recursors and projections**, reduce only when canonical conditions and major premises justify it.
+
+A closure evaluator **is not another trusted kernel**: it runs under the one checker and must be proved to implement the relevant weak-head semantic judgments. If an optimization cannot decide the comparison, return an internal `Unknown` and continue the canonical rule path; do not manufacture Equal or a false rejection.
+
+### 5.2 Correctness-first DefEq stage ordering
+
+Conceptual strategy (NOT complete implementation):
+
+~~~text
+convert(Γ, typeWitness, lhs, rhs):
+  check target, resources, scoped environment and validity
+  if exact validated syntax identity: Equal
+  if guarded proven positive conversion cache: Equal
+  if both values are proven proofs of the same proposition: Equal
+  compare same rigid heads and necessary neutral-spine arguments
+  run cheap beta / zeta / iota / projection exposure
+  use lazy constant unfolding with official reducibility hints
+  apply only verified projection, recursor, K, quotient and eta rules
+  handle type-directed Nat/String primitive reductions
+  retry legal remaining cases; otherwise report NotEqual/Unknown
+~~~
+
+The actual pinned Lean 4.35 conversion algorithm uses a particular combination and order of these rules. The sketch above is an **optimization research direction**, not a substitute for the exact rule map or a correctness argument for arbitrary reordering. No shortcut should equate terms before required type and binder universe-regime checks.
+
+The [Lean Kernel Arena conversion tests](https://arena.lean-lang.org/) explicitly exercise pathological order choices: expensive unfolding before comparing cheap rigid arguments, evaluation of an irrelevant proof before noticing proof irrelevance, eager projection, exponential repeated subproblems and conversion failures. Optimize **algorithm families**, never patches tailored to single benchmark names.
+
+**Important:** do **not** introduce unconstrained union-find/e-graph transitive closure of algorithmic DefEq results. Lean's implemented algorithmic conversion has known incompleteness/transitivity subtleties in corner cases; a graph closure of results without a theorem can create false proofs. Interning identical raw syntax is fundamentally different from asserting arbitrary definitional equality.
+
+### 5.3 Optional explicit work machine
+
+The existing `Checker/Knot` uses fuel-indexed recursive callbacks. A potential major improvement is a typed continuation/worklist machine:
+
+~~~text
+WorkItem :=
+    Infer(expression, grade, localContext)
+  | Reduce(valueClosure, reductionMode)
+  | Compare(leftValue, rightValue, typeEvidence)
+  | CheckRecursor(recInfo, major, localContext)
+
+MachineState :=
+  immutableEnvironment
+  scopedContext
+  typedWorkStack
+  boundedScratchAndCache
+  exactSemanticBudget
+~~~
+
+**Potential benefits:** fewer higher-order closure allocations, iterative bounded stack use, explicit resource accounting, and a small set of transition invariants. **Potential drawbacks:** more continuation variants, worklist memory overhead and complex proofs about the order of reductions. Replace recursive knot only if profiling supports the decision AND a reference-machine simulation theorem exists.
+
+The POPL 2026 [Courant–Leroy lazy/concurrent convertibility paper](https://doi.org/10.1145/3776695) suggests later fair interleaving or parallel exploration of expensive conversion alternatives, but its mechanized partial-correctness results are not ready-made Lean 4.35 kernel proofs. V2 starts with a deterministic single-threaded scheduler, not nondeterministic proof acceptance.
+
+### 5.4 Memory and cache lifetimes
+
+~~~text
+PermanentEnvironment:
+  checked declarations + trusted generated recursors
+  interned names/levels/closed expressions
+
+SessionCache:
+  bounded, scope/epoch/level/transparency-aware entries
+  separate inferOnly and checked
+  whnf/constant unfolding, guarded positive DefEq
+
+ScratchArena:
+  forced closures and thunks
+  neutral spines, temporary expansions
+  provisional declarations
+  released after a checked transaction
+~~~
+
+**Exact cache facts:**
+
+| Cache | Minimal semantic identity | Non-negotiable invariant |
+| --- | --- | --- |
+| Checked inference | term, scoped context, env snapshot, universes, full-check grade | Never substitute infer-only success |
+| Infer-only | term, context, env, universes, infer-only grade | Never conclude fully checked status |
+| WHNF | term or closure + environment + scope + reduction policy + versions | Result refines canonical WHNF |
+| DefEq positive | both terms, justified type/relevance, context, env, transparency and universe mode | Equal fact is proved under exact premises |
+| DefEq negative | initially OFF | An early mismatch cannot bypass a later legal reduction |
+| Closed constant unfold | declaration identity, instantiated universe levels and epoch | No stale definition change |
+| Interned syntax | full structural key and exact collision check | Hash/key equality, not coincidentally equal hash |
+
+Cache table addresses are not logical identities. A scratch handle from a previous generation can never authorize reuse of a positive proof result. Eviction and cache miss may change time, but cannot change accepted results.
+
+### 5.5 Trust boundary and extension security
+
+V2 must retain **sealed checked sessions** even when distributed through npm packages. A JavaScript, Rust, Wasm or Lean module providing a fast cache may suggest *candidate computations* but cannot append trusted declarations, install axioms or alter semantic rules. The kernel process / sandbox must validate the candidate under a trusted operation or use an already proved refinement.
+
+Source-level visibility/private constructors are not a security boundary against malicious native code in the same process. For genuinely untrusted extensions use an isolated process or Wasm sandbox, an immutable checked input protocol and separate resource limits. Signed reports or type aliases do not certify a proof without a correctly enforced kernel boundary.
+
+Avoid compiler/runtime “trusted reduction” escape hatches by default. A fast foreign evaluator is a TCB component unless its result is independently checked by trusted semantics or it is covered by a proved refinement and correctly implemented backend.
+
+## 6. Formal architecture: specify once, prove execution
+
+### 6.1 Separate the logical specification from production code
+
+**Do not maintain two production semantic checkers.** Maintain:
+
+1. A concise **mathematical specification** of expression typing, conversion, universes, inductive admission, quotient rules and axiom semantics.
+2. One **executable checker** with concrete values/IDs/cache/resource strategy.
+3. **Proofs/refinement relations** linking actual successful checking, result annotations, environment transitions and the mathematical model.
+4. Independent *external implementations* (official Lean and selected checkers) used for differential evidence, not as an axiom of runtime correctness.
+
+An optional pure executable reference for tests is not production authority, and its execution result is not a substitute for proving the optimized checker/model relation.
+
+### 6.2 Required theorem chain
+
+~~~text
+Raw input / protocol
+    |
+  well-formed canonical decoding
+    |
+  CoreExpr representation invariant
+    |
+  optimized WHNF / DefEq / inference:
+    accepted result refines the checked judgment
+    |
+  selected checked binder annotations preserved
+    |
+  actual declaration admission preserves model
+    |
+  constructive environment extension for new constants
+    |
+  explicit set-theory and allowed/modeled-axiom assumptions
+    |
+  relative no-derived-proof-of-False theorem
+~~~
+
+A final model theorem cannot follow from an incorrectly formulated typing/DefEq relation. The active branch already diagnosed an old equality specification in which too much equality was permitted; do not “verify” a faster checker against that defective relation.
+
+### 6.3 Concrete proof obligations for migrating
+
+| Structural change | Erasure/refinement proof before promotion |
+| --- | --- |
+| Raw syntax -> shared IDs | decoding/interning injectivity, exact scope, no lost binder/level metadata |
+| Checked-result grade redesign | actual inference run produces same selected type and binder-sort reading; checked != infer-only |
+| Binder local identity change | freshness, shadowing, scoped environment lookup and closing/opening correspond exactly |
+| Lazy closure beta/let | forcing/quoting yields canonical WHNF semantics in same context/level substitution |
+| New DefEq scheduler | every affirmative result sound, legal fallback preserved, proof irrelevance type-correct |
+| Compact scratch stores | no untyped/stale/bounds-violating ID reaches checked persistent environment |
+| Primitive arithmetic | identical 4.35 primitive computation and numeral/resource limits |
+| Declaration and recursors | entire fresh batch checked, positivity/elimination validated, no partial commit |
+| Axiom model | explicit modeled-axiom list, arbitrary-axiom mode distinguished |
+| Generated backends | native/JS/Wasm artifacts preserve verdicts and numeric/stack semantics under stated host assumptions |
+
+**Formal soundness vs official compatibility are not identical.** A proof that the new checker never derives False under a modeled axiom policy does not prove every Lean-valid source export is accepted. Full 4.35 algorithmic equivalence is also difficult because conversion is a partial/heuristic computation with explicit resource limits. Record source-rule compatibility plus differential tested positive/negative coverage, and state any supported/unsupported profile separately.
+
+### 6.4 Preserve work without freezing flawed architecture
+
+The active branch has extensive formal evidence but incomplete global theorems. Use **proof-guided dual development**, not a destructive merge:
+
+- Freeze the old implementation at a pinned commit as a regression/differential oracle in Git history and tests.
+- Construct the V2 modules in a separate branch; for a period both old and new can exist on that research branch **as test-only alternatives**. Only the designated current kernel authorizes production acceptance.
+- Introduce a raw-term erasure/decoding bridge and a semantic model before replacing the core type checker.
+- Close vertical proof slices for one expression family at a time (sort, variable, Pi/lambda, app, let, then reduction/defeq/recursors).
+- Prove new result carrier obligations without inventing checked annotations from raw syntax.
+- Bring in the existing model/consistency proof source by **matching theorem interfaces and source-rule facts**, not copying stale conclusions blindly.
+- Promote the new V2 kernel only when its accepted proof domain has adequate verified/differential evidence and explicitly documented remaining gaps. Archive/retire the old production semantics at promotion; do not indefinitely maintain two competing authorities.
+
+The existing PR #89 and live proof branch must remain intact. A performance experiment should not rewrite the current proof files or claim that a major schema migration has already closed full consistency.

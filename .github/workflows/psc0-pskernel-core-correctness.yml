@@ -23,7 +23,7 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate exact universe and binder-frame transport
+      - name: Validate normalized universe branches and expression instantiation
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail

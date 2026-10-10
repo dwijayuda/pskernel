@@ -320,4 +320,71 @@ theorem referenceSessionCheck_lambda_trace
       name domain body bi result coreRun,
     nextEq⟩
 
+open ConLeche.SetModel
+
+/-- The successful real product visit and the precise chosen domain/range
+readings yield a FULL hereditary checked reading for the resulting product.
+The range's universe tag is the one actually returned by its sort visit,
+even when the binder domain is empty. No arbitrary inferred type is assumed
+to be a sort and no alternate checker is introduced.
+
+The checked domain/range readings are local recursive obligations of the
+future mutual checker theorem, not soundness facts inferred from mere success.
+-/
+theorem forall_trace_checked_reading (M : Reading V)
+    (Γ : List AnnotatedExpr)
+    (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOperation)
+    (c : PsKernelCheckerContext) (s next : PsKernelCheckerState)
+    (name : PsKernelName) (A B : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (result : PsKernelExpr) (io : Bool)
+    (trace : ForallTrace remaining whnf defeq
+      c s name A.erase B.erase bi io result next)
+    (domain : CheckedReading M Γ A (.sort trace.domainLevel))
+    (body : CheckedReading M (A :: Γ) B (.sort trace.rangeLevel)) :
+    let term : AnnotatedExpr := .forallE name A B bi trace.rangeLevel
+    let resultType : AnnotatedExpr :=
+      .sort (psKernelLevelMkIMax trace.domainLevel trace.rangeLevel)
+    term.erase = .forallE name A.erase B.erase bi ∧
+    resultType.erase = result ∧
+    CheckedReading M Γ term resultType := by
+  refine ⟨rfl, trace.resultEq.symm, ?_⟩
+  refine {
+    typed := ?_
+    termAnnotation := ?_
+    typeAnnotation := ?_
+    termFunction := ?_
+    typeFunction := ?_
+  }
+  · intro ρ hρ
+    change piR (M.level trace.rangeLevel) (interp M ρ A)
+      (fun x => interp M (extend x ρ) B) ∈ˢ
+      univ (M.level (psKernelLevelMkIMax
+        trace.domainLevel trace.rangeLevel))
+    have hLevel : M.level (psKernelLevelMkIMax
+        trace.domainLevel trace.rangeLevel) =
+        SetModel.imax (M.level trace.domainLevel)
+          (M.level trace.rangeLevel) :=
+      mkIMax_eval M.levelParams M.levelMetavariables
+        trace.domainLevel trace.rangeLevel
+    rw [hLevel]
+    exact pi_mem_sort (domain.typed ρ hρ)
+      (fun x hx => body.typed (extend x ρ)
+        (satisfies_extend M Γ A ρ x hρ hx))
+  · intro ρ hρ
+    exact annotationValid_forall_of_sort M ρ name A B bi
+      trace.rangeLevel (domain.termAnnotation ρ hρ)
+      (fun x hx => body.termAnnotation (extend x ρ)
+        (satisfies_extend M Γ A ρ x hρ hx))
+      (fun x hx => body.typed (extend x ρ)
+        (satisfies_extend M Γ A ρ x hρ hx))
+  · intro ρ hρ
+    trivial
+  · intro ρ hρ
+    exact ⟨domain.termFunction ρ hρ,
+      fun x hx => body.termFunction (extend x ρ)
+        (satisfies_extend M Γ A ρ x hρ hx)⟩
+  · intro ρ hρ
+    trivial
+
+
 end PsKernelSemantics.Reference

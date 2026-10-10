@@ -240,4 +240,80 @@ theorem successfulAdd_no_stored_literalFalse (M : Reading V)
     (M.extendConstant (psKernelConstantInfoName info) value)
     next modelNext info inserted noParams declaredFalse
 
+/-- Existing modeled declarations continue to have their exact fixed
+interpretation after extending the constant table, even when the new name is
+the reserved False name, PROVIDED its zero-universe interpretation is empty.
+
+The alternative is mathematically necessary for eventually modeling the
+actual empty False inductive. A new declaration's checking and the absence
+of illegal constructors remain separate proof obligations. -/
+theorem environmentModel_extendConstant_preservingFalse
+    (M : Reading V) (env : PsKernelEnvironment)
+    (fresh : PsKernelName) (value : List Nat → V)
+    (old : EnvironmentModel M env)
+    (oldReadings : ∀ info, info ∈ env.constants →
+      StoredConstantAvoids M info fresh)
+    (oldNames : ∀ info, info ∈ env.constants →
+      psKernelConstantInfoName info ≠ fresh)
+    (preservesFalse : fresh ≠ falseConstantName ∨
+      value [] = (empty : V)) :
+    EnvironmentModel (M.extendConstant fresh value) env := by
+  refine {
+    lookupCanonical := old.lookupCanonical
+    lookupInHistory := old.lookupInHistory
+    lookupName := old.lookupName
+    stored := ?_
+    falsePinned := ?_
+  }
+  · intro info present
+    exact storedConstant_extendConstant M info fresh value
+      (oldNames info present) (oldReadings info present)
+  · by_cases matches : falseConstantName = fresh
+    · rcases preservesFalse with different | assignedEmpty
+      · exact False.elim (different matches.symm)
+      · simpa [Reading.extendConstant, matches] using assignedEmpty
+    · simpa [Reading.extendConstant, matches] using old.falsePinned
+
+/-- Model a successful ACTUAL declaration insertion with the generalized
+False-as-empty pin. For an ordinary fresh name this reduces to the previous
+fresh-reading theorem; for the literal False name it requires the selected
+new value at zero universe instances to be the empty set. -/
+theorem successfulAdd_model_preservingFalse (M : Reading V)
+    (env next : PsKernelEnvironment) (info : PsKernelConstantInfo)
+    (value : List Nat → V) (A : AnnotatedExpr)
+    (model : EnvironmentModel M env)
+    (priorTypes : ∀ old, old ∈ env.constants →
+      RawAvoidsConstant (psKernelConstantInfoName info)
+        (psKernelConstantInfoType old))
+    (preservesFalse : psKernelConstantInfoName info ≠ falseConstantName ∨
+      value [] = (empty : V))
+    (erased : A.erase = psKernelConstantInfoType info)
+    (selfFree : RawAvoidsConstant (psKernelConstantInfoName info)
+      (psKernelConstantInfoType info))
+    (assignment : ∀ levels, CorrectUniverseArity info levels →
+      ∀ ρ, value (levels.map M.level) ∈ˢ
+        interp (M.substLevels (psKernelConstantInfoLevelParams info)
+          levels) ρ A)
+    (run : psKernelEnvironmentAdd env info = .ok next) :
+    EnvironmentModel (M.extendConstant (psKernelConstantInfoName info) value)
+      next := by
+  have names := successfulAdd_oldNamesFresh M env next info model run
+  have readings : ∀ old, old ∈ env.constants →
+      StoredConstantAvoids M old (psKernelConstantInfoName info) := by
+    intro old present
+    exact storedConstantAvoids_of_raw M old (psKernelConstantInfoName info)
+      (model.stored old present) (priorTypes old present)
+  have prefixModel : EnvironmentModel
+      (M.extendConstant (psKernelConstantInfoName info) value) env :=
+    environmentModel_extendConstant_preservingFalse M env
+      (psKernelConstantInfoName info) value model
+      readings names preservesFalse
+  have newStored :=
+    newConstant_from_assignment M info value A erased selfFree assignment
+  rw [add_success_is_unchecked env next info run]
+  exact addUnchecked_model
+    (M.extendConstant (psKernelConstantInfoName info) value)
+    env info prefixModel newStored
+
+
 end PsKernelSemantics.SetModel

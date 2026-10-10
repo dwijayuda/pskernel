@@ -1,4 +1,5 @@
 import Ps.KernelCore.Metatheory.SemanticLocalContextExtension
+import Ps.KernelCore.Metatheory.SemanticPublicEntry
 import Ps.KernelCore.Metatheory.SemanticReferenceBinderContext
 import Ps.KernelCore.Metatheory.SemanticSortVisitProvenance
 import Ps.KernelCore.Metatheory.AnnotatedLocalContextErasure
@@ -41,6 +42,28 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.nameBelow_mono,
+    ``PsKernelSemantics.SetModel.nameBelow_fresh,
+    ``PsKernelSemantics.SetModel.boundFrame_empty,
+    ``PsKernelSemantics.SetModel.boundFrame_mono,
+    ``PsKernelSemantics.SetModel.boundFrame_fresh,
+    ``PsKernelSemantics.SetModel.localFrame_empty,
+    ``PsKernelSemantics.SetModel.localFrame_mono,
+    ``PsKernelSemantics.SetModel.localFrame_fresh,
+    ``PsKernelSemantics.SetModel.localFrame_addLocal,
+    ``PsKernelSemantics.SetModel.localFrame_addLet,
+    ``PsKernelSemantics.SetModel.localFrame_exitLocalScope,
+    ``PsKernelSemantics.Reference.binderChild_localContext_frame,
+    ``PsKernelSemantics.Reference.letScope_localContext_frame,
+    ``PsKernelSemantics.Reference.binderChild_fvar_frame_result,
+    ``PsKernelSemantics.Reference.binderChild_opened_frame,
+    ``PsKernelSemantics.noFVar_namesBelow,
+    ``PsKernelSemantics.admittedInput_namesBelow_zero,
+    ``PsKernelSemantics.publicSession_initial_frame,
+    ``PsKernelSemantics.admittedInput_initial_frame,
+    ``PsKernelSemantics.admittedLambda_firstBinderFrame,
+    ``PsKernelSemantics.admittedForall_firstBinderFrame,
+    ``PsKernelSemantics.admittedLet_firstLocalFrame,
     ``PsKernelSemantics.SetModel.freshLocalContext_empty,
     ``PsKernelSemantics.SetModel.satisfies_withFree_fresh,
     ``PsKernelSemantics.SetModel.checkedReading_withFree_fresh,

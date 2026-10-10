@@ -30,6 +30,12 @@ Exact fixed-point, generated-conformance and native-admission receipts are retai
 
 Release checkpoint49ab05830e34c35e8df0f51389d430e88a046b8d / run38019059404 stopped before artifact download or native assembly: the synthetic installed CLI fixture omitted checked-project.mjs from its copy list. All15 CLI cases failed at module loading, while115 other source tests passed. The actual release assembler already includes the module, whose only dependencies are node:path and node:crypto. Add that one fixture copy entry; retain all15 CLI expectations, including the already correct four-example catalog. Compiler qualification, release pins and production behavior are unchanged. Retry all platform gates.
 
+## Windows source-shape correction
+
+Run38019185667 at10fb98c3a3aab466073d210dd7f160da756c33eb passed Linux source130/130 host tests and18/18 real native integration, package assembly, and all four clean installed jobs (48 Linux observations each,46 Windows observations each). Both Windows jobs use PowerShell7.6.6 through npm psc.cmd with Node22.23.3/npm10.9.9 and Node26.7.0/npm12.0.2. All record real native T1 library admission,42→43 consumer rebuild, whole-generation refusal/preservation and both isolated command demos. Candidate11656994979 contains proofscript tarball SHA2560273e5f18a3cea66b0f4deaa44fbfe1214510fd59d146956355985e555c4db7e,3,656,980bytes.
+
+The remaining Windows source job114116349238 passed135 discovered unit tests (134pass,0fail,1existing Unix-permission skip), then failed check-modular-preparation-source.mjs:82. The closed-emitter marker contains a literal LF; the only cross-platform correction is CRLF→LF in that script's read-only session-source inspection view. Keep every exact marker, the two checked emitter names, punctuation/indentation, ordering/readback and no-raw-fallback checks unchanged. Runtime source bytes, canonical admissions, receipts, compiler/backend code and release/kernel pins are not normalized or modified. The retry must reach and pass Windows native source integration and record one coherent completed platform run. Do not call the previous5/6 run wholly qualified.
+
 ## Current next actions
 
 1. Run the prepared [platform-qualify] workflow at this release checkpoint: Linux Node22 source, Windows Node26 source, and four clean installed Windows/Linux × Node22.23.3/26.7.0 jobs. Read actual new counts and every installed receipt; never reuse preview2 counts.

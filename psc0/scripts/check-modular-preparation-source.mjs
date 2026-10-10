@@ -71,7 +71,10 @@ assert.deepEqual(structureFields('PsCompilerAdmissionReadyModule'), ['declaratio
 assert.deepEqual(structureFields('PsCompilerPreparationState'),
   ['sourceKind', 'environment', 'declarationsRev']);
 assert(!api.includes('prepared.canonicalAdmissions'), 'admissions must come from the declarations, never a cached serialization');
-const session = await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8');
+// Normalize checkout line endings only for this source-shape inspection.
+// Runtime inputs, emitted artifacts and receipt hashes retain their exact bytes.
+const session = (await readFile(new URL('./checked-prepared-session.mjs', import.meta.url), 'utf8'))
+  .replaceAll('\r\n', '\n');
 const freezeIndex = session.indexOf('freezeGraph(prepared);');
 const admissionsIndex = session.indexOf(
   'const admissions = admissionsFrom(compiler, prepared, projectUnits !== undefined);');

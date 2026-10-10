@@ -134,6 +134,25 @@ theorem models_weaken (M : Reading V) (Γ : List AnnotatedExpr)
   rw [hs]
   exact h _ hρ.1
 
+theorem models_variable_zero (M : Reading V) (Γ : List AnnotatedExpr)
+    (A : AnnotatedExpr) :
+    ModelsType M (A :: Γ) (.bvar 0) (liftN 1 A 0) := by
+  intro ρ hρ
+  rw [interp_liftN]
+  have hs : shift 1 0 ρ = fun i => ρ (i + 1) := by funext i; simp [shift]
+  rw [hs]
+  exact hρ.2
+
+/-- Substitution preserves semantic typing when its actual argument inhabits
+the binder domain. This covers dependent result types as well as terms. -/
+theorem models_substitution (M : Reading V) (Γ : List AnnotatedExpr)
+    (A a e B : AnnotatedExpr)
+    (ha : ModelsType M Γ a A) (he : ModelsType M (A :: Γ) e B) :
+    ModelsType M Γ (inst a e 0) (inst a B 0) := by
+  intro ρ hρ
+  rw [interp_inst_zero, interp_inst_zero]
+  exact he _ (satisfies_extend M Γ A ρ (interp M ρ a) hρ (ha ρ hρ))
+
 /-- Real empty-context valuation, rather than consistency by an empty context
 interpretation. This construction relies only on the explicit set foundation. -/
 theorem empty_context_satisfiable (M : Reading V) :

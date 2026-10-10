@@ -3,6 +3,7 @@ import Ps.KernelCore.Metatheory.SemanticSortInference
 import Ps.KernelCore.Metatheory.SemanticContext
 import Ps.KernelCore.Metatheory.SemanticErasure
 import Ps.KernelCore.Metatheory.SemanticModelAdequacy
+import Ps.KernelCore.Metatheory.SemanticDeclarative
 
 /-!
 Machine-checked dependency audit for the new semantic foundation.
@@ -86,7 +87,13 @@ run_cmd do
     ``PsKernelSemantics.SetModel.propIdentity_scoped,
     ``PsKernelSemantics.SetModel.propIdentity_type,
     ``PsKernelSemantics.SetModel.propIdentityType_sort,
-    ``PsKernelSemantics.SetModel.erasure_is_not_semantic_coherence
+    ``PsKernelSemantics.SetModel.erasure_is_not_semantic_coherence,
+    ``PsKernelSemantics.SetModel.models_variable_zero,
+    ``PsKernelSemantics.SetModel.models_substitution,
+    ``PsKernelSemantics.Declarative.sound,
+    ``PsKernelSemantics.Declarative.identity_derives,
+    ``PsKernelSemantics.Declarative.no_allProps,
+    ``PsKernelSemantics.Declarative.no_empty
   ]
   let allowed : Array Name := #[``propext, ``Classical.choice, ``Quot.sound]
   for target in targets do

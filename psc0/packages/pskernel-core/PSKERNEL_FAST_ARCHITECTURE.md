@@ -504,3 +504,130 @@ The following are proposed thresholds to decide whether new complexity is worthw
 - Exact parity in the supported positive/negative suites and no new accepted invalid proof.
 - For a P2 closure-view pilot, seek **2x on beta/let-dominated cases** and meaningful allocation savings; otherwise prefer the simpler P1 checker.
 - Do not promise 15x or 24x faster performance against Lean based on unlike export versions or parser-inclusive whole-checker benchmarks.
+
+## 11. Implementation roadmap and acceptance gates
+
+### P0 — source and performance baseline without behavior changes
+
+1. Re-fetch the current active branch and pinned 4.35 toolchain; inspect completed CI and the exact export corpus.
+2. Trace current `Checker/State`, `Runtime/Acceleration/Cache`, `EnvironmentIndex`, `Checker/Reduction/WhnfCore`, `Checker/DefEq/Quick`, `DeltaStep` and `Checker/Knot`.
+3. Use host-side or disabled-by-default counters where possible, recording actual time, allocations, cache hits, type inference, WHNF, delta unfolding and DefEq steps.
+4. Analyze *bounded, reproducible* 4.35 Int64, Prelude, Std/Init-prefix and beta/let cases before costly full-corpus runs.
+5. Produce a **hotspot ledger** linking measured costs to one semantic code owner, candidate optimization, expected extra trusted code and required formal invariant.
+
+**Exit:** reproducible reference/cached baseline plus top-five costs. No semantic edit required; no speedup claimed yet.
+
+### P1 — surgical existing-core improvements
+
+- Pick **one highest-payoff measured family**: raw expression lookup, lazy app spine inspection, validated positive caching, or avoiding pointless term reconstruction.
+- Preserve the existing shared `Checker/Knot` and reference/cached result classification; do not add a cloned FastDefEq implementation.
+- Specify the applicable source-to-official-rule mapping and proof obligation before changing checked code.
+- Keep the reference cache-disabled mode as an independent path through the *same* implementation.
+- Run focused negative, tutorial, typed, version-pinned and supported portability gates, followed by a matched benchmark.
+- Coordinate with the active metatheory authors before modifying recursion that current proofs target.
+
+**Exit:** P1 proposed speed and resource goals, exact verdict parity, no extra trust capability and an audited proof/TCB delta. Revert ineffective optimizations, not individual tests.
+
+### P2 — a small closure-view pilot
+
+- Add an immutable term+environment view to reduce unnecessary beta/let reconstruction *inside the current WHNF rules*.
+- Initially support only exact-scoped cases, reifying to the canonical raw expression at any unchecked boundary.
+- Do not allow an unproved closure comparison to return an authoritative success; prove refinement or validate the result through the existing rule.
+- Benchmark time, allocations, peak RSS, recursion behavior and portability with a bounded beta-heavy suite.
+
+**Exit:** real beta/let win, exact scope/erasure evidence, no wider TCB without commensurate benefit; otherwise revert.
+
+### P3 — representation compaction, only if profiles justify it
+
+- Consider small tagged IDs, per-constructor storage, permanent/scratch arenas and exact free-variable read-set pruning.
+- Prove generation/tag/bounds validity, collision-checked interning and no scratch reference escaping into an admitted declaration.
+- Keep experiments non-authoritative until the current PSC0 compiler can accept/qualify their source semantics.
+
+**Exit:** material memory improvement and reviewed source-size, proof and portability cost. Do not replace the canonical public Expr form merely for aesthetic uniformity.
+
+### P4 — soundness refinement and portable release
+
+- Let the ongoing active 4.35 program complete the **actual reference checker** recursive and modeled-admission obligations.
+- Prove cached/fast positive-result refinement with explicit axiom/model assumptions, or mark the result unverified.
+- Qualify exact native and generated JS/Wasm artifacts from the same semantic source with version-locked acceptance evidence; the generated outputs may have different performance but **must not have different semantics**.
+- Use independent external checkers for optional release assurance, never as an authority that turns internal declines into acceptances.
+
+**Exit:** precise proof status, full supported pinned compatibility and artifact identity; no fake “fully verified” badge based on unproved links.
+
+### P5 — computation-specialized evaluation (deferred)
+
+Study a lazylean-style call-by-need evaluator only if P0–P3 still show real, unacceptable reflective-computation costs. Preserve one admission checker and prove any alternate evaluator's effect on successful WHNF/DefEq. Do not include a second unreviewed computational oracle in MVP.
+
+## 12. The smallness budget and opportunity cost
+
+There is no valid measured estimate yet of exact added PSKernel LOC. The bands below are **planning scenarios**, not empirical implementation estimates; measure **net versus gross additional semantic LOC**, trusted dependencies, proof obligations and generated backend burden separately.
+
+| Scope | Illustrative additional semantic Lean LOC | Relative complexity |
+| --- | ---: | --- |
+| P0 profiling (prefer host-only) | 0–300 | Very low |
+| P1 cache/spine/hot-path changes | 300–1,500 | Low to medium |
+| P2 closure view and correspondence | 800–2,500 | Medium/high |
+| P3 compact arenas/context pruning | 1,000–3,000 | High |
+| P5 full lazy machine | 2,000–6,000+ | Very high |
+
+For every milestone report the transitive code that can change acceptance, including runtime/foreign primitives; don't reduce the reported TCB by moving semantics into an NPM package. Track total maintained kernel implementations (must be **one**), proof-module count separately, source lines, generated artifact size, peak RSS, cold-start cost, and speedup per added complexity. Net deletion of repeated substitution or duplicated cache code is better than a large extra graph-reduction framework.
+
+### Hard stop/revert criteria
+
+Stop when an optimization causes any of the following:
+
+- known-invalid input accepted, stale positive DefEq entry, invalid inductive auxiliary committed or unmodeled native primitive trusted;
+- a new `sorry`, custom soundness axiom or opaque assumed result used to disguise incomplete proof;
+- cache or fast-path result acceptance without an exact semantic invariant, or swallowed resource/unsupported/internal failures;
+- a parallel maintained checker or backend-specific handwritten kernel semantics;
+- reducing a conformance gate, ignoring timeout, or reporting skipped full corpus as passed;
+- breaking checked annotation/model obligations, or claiming self-hostability without a current generated backend qualification;
+- performance benefit too small to justify source size/proof/maintenance.
+
+## 13. Concrete next engineering work item
+
+**Deliverable:** one bounded performance baseline and a top-five hotspot ledger for the active 4.35 checker. It should contain:
+
+- exact branch HEAD, exporter SHA, runner, resource profile and small corpus hashes;
+- separate parser/import versus kernel-only timing and memory measurements;
+- reference and cached mode verdict parity, with typed resource/declaration errors;
+- hot function names and their current source owners, including `WhnfCore`, `DeltaStep` and `State`;
+- one lowest-risk P1 algorithm-family optimization and its exact theorem/conformance impact;
+- a verdict: implement P1, profile more, or preserve current implementation.
+
+Do **not** start with a full Mathlib run, rewrite all source modules, merge active PR #89, or attempt expensive full compiler/kernel selfhost qualification. Keep GitHub and cloud CI canonical.
+
+## 14. Primary source and verification map
+
+**Official source and benchmark methodology**
+
+- [Lean 4.35.0-rc4 release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/) — explicit removal of compiler-backed Lean.reduceBool and Lean.reduceNat, not general Nat arithmetic.
+- [Official C++ type checker](https://github.com/leanprover/lean4/blob/v4.35.0-rc4/src/kernel/type_checker.cpp), [type checker state](https://github.com/leanprover/lean4/blob/v4.35.0-rc4/src/kernel/type_checker.h).
+- [Official inductive checking](https://github.com/leanprover/lean4/blob/v4.35.0-rc4/src/kernel/inductive.cpp), [universe levels](https://github.com/leanprover/lean4/blob/v4.35.0-rc4/src/kernel/level.cpp), [declarations](https://github.com/leanprover/lean4/blob/v4.35.0-rc4/src/kernel/declaration.cpp).
+- [Live Lean Kernel Arena](https://arena.lean-lang.org/), [Arena checker interface](https://github.com/leanprover/lean-kernel-arena), [Lean4export interchange](https://github.com/leanprover/lean4export).
+
+**Independent implementation algorithms**
+
+- [sokonanoda](https://github.com/intgrah/sokonanoda).
+- [MathGraph evaluation](https://github.com/metalogiclabs/mathgraph-lean-kernel/blob/main/src/eval.rs), [MathGraph conversion](https://github.com/metalogiclabs/mathgraph-lean-kernel/blob/main/src/conv.rs), [MathGraph values](https://github.com/metalogiclabs/mathgraph-lean-kernel/blob/main/src/value.rs).
+- [nanoclo closure/env nodes](https://github.com/sgraf812/nanoclo/blob/main/src/closure.rs).
+- [nanobruijn OSNF](https://github.com/nomeata/nanobruijn/blob/main/README.md) and [representation theory](https://github.com/nomeata/nanobruijn/blob/main/Theory.lean).
+- [lazylean README](https://github.com/corun1024/lazylean/blob/main/README.md), [NbE code](https://github.com/corun1024/lazylean/blob/main/src/nbe.cpp), [Krivine-style evaluator](https://github.com/corun1024/lazylean/blob/main/src/kam.cpp): do not confuse its 0.5.1 claims with Arena 0.3.0.
+- [con-ron README](https://github.com/leanprover/con-ron/blob/master/README.md), [refinement methodology](https://github.com/leanprover/con-ron/blob/master/OVERVIEW.md).
+- [con-leche](https://github.com/leanprover/con-leche) and [lean4lean](https://github.com/digama0/lean4lean).
+
+**Existing canonical PSKernel evidence**
+
+- [Active 4.35 kernel code](https://github.com/dwijayuda/pskernel/tree/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core).
+- [Architecture](https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/PSKERNEL_CORE_ARCHITECTURE.md).
+- [Proof work state](https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/AI_WORK_STATE.md).
+- [Reference checker correctness roadmap](https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/REFERENCE_CORRECTNESS_PLAN.md).
+- [Proof-guided relative soundness plan](https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md).
+
+## 15. Final architecture ruling
+
+**Adopt PSKernel-Fast as an optional optimized execution profile of the current PSKernel Core**, not a second checker. Preserve one canonical semantics and Lean 4.35.0-rc4 as an exact authority, protect the live proof-guided development, optimize the costs actually measured, and prove/refine every soundness-affecting positive fast path.
+
+The engineering goal is **official Lean-compatible behavior + small inspectable semantic TCB + one portable self-hosted source + explicit relative proof assumptions + competitive measured speed and memory**.
+
+**Research status only:** this document does not claim a completed fast kernel, current full Mathlib acceptance, an executed new benchmark, finished relative consistency, backend equivalence, or production provider promotion.

@@ -4,7 +4,7 @@ import Lean
 Independent V3 substrate experiment. This file is NOT a kernel proof checker.
 It implements only a tiny RawExpr language and a collision-checked interning
 store; Lean 4.35 semantic term checking, universes and admission are FUTURE.
--/-
+-/
 
 namespace PSKernelFast
 

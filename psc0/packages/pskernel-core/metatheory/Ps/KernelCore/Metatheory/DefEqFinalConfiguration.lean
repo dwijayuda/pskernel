@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.DefEq.FinalRules
+import Ps.KernelCore.Metatheory.DefEqClassifierTrace
 import Ps.KernelCore.Metatheory.CheckerContracts
 
 /-
@@ -123,58 +124,15 @@ theorem psKernelDefEqIsPropWith_true_refines
           inferredType
           (PsKernelExpr.sort level) ∧
         psKernelLevelNormalizesToZero level = true := by
-  cases hInferRun :
-      inferType context state expr with
-  | error error =>
-      simp [
-        psKernelDefEqIsPropWith,
-        hInferRun
-      ] at hSuccess
-  | ok inferRun =>
-      rcases inferRun with ⟨inferredType, inferredState⟩
-      have hInferredConfig :=
-        hInfer
-          context
-          state
-          inferredState
-          expr
-          inferredType
-          hConfig
-          hInferRun
-      cases hWhnfRun :
-          whnf context inferredState inferredType with
-      | error error =>
-          simp [
-            psKernelDefEqIsPropWith,
-            hInferRun,
-            hWhnfRun
-          ] at hSuccess
-      | ok whnfRun =>
-          rcases whnfRun with ⟨reducedType, reducedState⟩
-          have hReduced :=
-            hWhnf
-              context
-              inferredState
-              reducedState
-              inferredType
-              reducedType
-              hInferredConfig
-              hWhnfRun
-          cases reducedType with
-          | sort level =>
-              simp [
-                psKernelDefEqIsPropWith,
-                hInferRun,
-                hWhnfRun
-              ] at hSuccess
-              rcases hSuccess with ⟨hProp, rfl⟩
-              exact ⟨inferredType, level, hReduced.1, hProp⟩
-          | _ =>
-              simp [
-                psKernelDefEqIsPropWith,
-                hInferRun,
-                hWhnfRun
-              ] at hSuccess
+  obtain ⟨inferredType, inferredState, level, hInferRun, hWhnfRun, hZero⟩ :=
+    (psKernelDefEqIsPropWith_true_iff_trace
+      inferType whnf context state nextState expr).mp hSuccess
+  have hInferredConfig :=
+    hInfer context state inferredState expr inferredType hConfig hInferRun
+  have hReduced :=
+    hWhnf context inferredState nextState inferredType (PsKernelExpr.sort level)
+      hInferredConfig hWhnfRun
+  exact ⟨inferredType, level, hReduced.1, hZero⟩
 
 theorem psKernelDefEqEtaStructFieldsWithFuel_configuration_preserves
     (fuel : Nat)

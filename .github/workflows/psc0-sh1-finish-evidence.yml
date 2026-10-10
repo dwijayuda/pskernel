@@ -1,0 +1,592 @@
+name: PSC0 retained-generation SH1 evidence finish
+
+# Finish evidence for immutable source1fa from its already completed generations.
+# The original N1/C1 run remains cancelled and C2/C3 run remains failed at binding.
+# Authenticate both archives, every retained receipt, exact generation gate logs,
+# and the separate corrected evidence producers before finalization and provider checks.
+on:
+  push:
+    branches: ['psc0/strict-sh1-v1']
+    paths: ['.github/workflows/psc0-sh1-finish-evidence.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc0-sh1-evidence-finish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compiler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      qualified: ${{ steps.finish.outcome == 'success' && steps.evidence.outputs.complete == 'true' }}
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - name: Check out the exact previously compiled source
+        uses: actions/checkout@v4
+        with:
+          ref: 1fa5559a72b293defc56ef7e7020cf82d4b44b79
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Authenticate completed generations and install the reviewed evidence producers
+        id: inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
+          import { existsSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          import path from 'node:path';
+          const expected = {"sourceRef":"1fa5559a72b293defc56ef7e7020cf82d4b44b79","sourceRoot":"/home/runner/work/pskernel/pskernel/psc0","sourceClosureSha256":"46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5","recipeSha256":"a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba","toolchain":{"node":"v22.23.3","platform":"linux","architecture":"x64","lean":"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)","leanGitHash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","typescript":"Version 7.0.2"},"typescriptProfile":{"version":"7.0.2","purpose":"current-emission","arguments":["--ignoreConfig"]},"qualifierSha256":"707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb","generationBinderSha256":"bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049","prior":{"sourceRef":"1fa5559a72b293defc56ef7e7020cf82d4b44b79","sourceRoot":"/home/runner/work/pskernel/pskernel/psc0","runId":38015134511,"runAttempt":1,"workflowId":378853677,"compilerJobId":114103608774,"providerJobId":114120597914,"artifactId":11658430459,"artifactName":"psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79","archiveSha256":"6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812","archiveBytes":5147944,"archiveFileCount":344,"recipeSha256":"a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba","sourceClosureSha256":"46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5","N1":{"receiptSha256":"6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404","receiptBytes":15827,"artifacts":{"javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"}},"C1":{"receiptSha256":"33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f","receiptBytes":169531,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52","typescriptSha256":"1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba","javascriptSha256":"91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"}},"completedC2":{"receiptSha256":"a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894","receiptBytes":166700,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c","javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"}},"toolchain":{"node":"v22.23.3","platform":"linux","architecture":"x64","lean":"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)","leanGitHash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","typescript":"Version 7.0.2"},"typescriptProfile":{"version":"7.0.2","purpose":"current-emission","arguments":["--ignoreConfig"]},"qualifierSha256":"707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb","binderSha256":"bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049","predecessorLog":{"blob":"67147f3e76511cf3a918923dcfed8743636cc86b","sha256":"be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d","bytes":1917726}},"generationRun":{"runId":38021634599,"runAttempt":1,"workflowId":380237977,"headSha":"43fa000c4adbc9d4754e20c213595c1449f00961","compilerJobId":114123691566,"providerJobId":114136283916,"conclusion":"failure","artifactId":11659939542,"artifactName":"psc0-sh1-continuation-ts7.0.2-38021634599","archiveSha256":"599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80","archiveBytes":11739089,"archiveFileCount":444},"importedPriorInputs":{"path":"dist/sh1-continuation-inputs/inputs.json","blob":"8731e55592d0bcb57b977c4cc98fcfe91a64b7a9","sha256":"de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638","bytes":161276},"generationLog":{"path":"dist/sh1-evidence-finish-inputs/source-generation-job.log","blob":"6747dc056c2642f069cc1c45c37f9dea492e0b50","sha256":"1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548","bytes":875228},"N1":{"receiptSha256":"6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404","receiptBytes":15827,"artifacts":{"javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"}},"C1":{"receiptSha256":"33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f","receiptBytes":169531,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52","typescriptSha256":"1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba","javascriptSha256":"91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"}},"C2":{"receiptSha256":"5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02","receiptBytes":166707,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c","javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"}},"C3":{"receiptSha256":"eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1","receiptBytes":166709,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c","javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"}},"evidenceProducer":{"workflow":{"path":".github/workflows/psc0-sh1-finish-evidence.yml"},"binder":{"sourcePath":"psc0/scripts/sh1-strict-evidence.mjs","path":"scripts/sh1-strict-evidence-finish.mjs","blob":"7700fef35acd06789b94f72078869fdef489214f","sha256":"829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606","bytes":91977},"finisher":{"sourcePath":"psc0/scripts/sh1-finish-evidence.mjs","path":"scripts/sh1-finish-evidence.mjs","blob":"793adba3bc690bbef566e922c9efb3457d372d87","sha256":"804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d","bytes":38509}}};
+          const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+          const root = process.cwd();
+          const destinationDirectory = 'dist/sh1-evidence-finish-inputs';
+          assert.equal(root, expected.sourceRoot);
+          assert.equal(process.version, 'v22.23.3');
+          assert.equal(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),expected.sourceRef);
+          assert.equal(hash(await readFile('scripts/sh1-qualify.mjs')),expected.qualifierSha256);
+          assert.equal(hash(await readFile('scripts/sh1-strict-evidence.mjs')),expected.generationBinderSha256);
+          assert.match(process.env.GITHUB_SHA,/^[a-f0-9]{40}$/u);
+          const headers = {Authorization:'Bearer '+process.env.GH_TOKEN,
+            Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
+          const base = 'https://api.github.com/repos/dwijayuda/pskernel';
+          async function api(suffix) {
+            const response = await fetch(base+suffix,{headers});
+            assert.equal(response.status,200,'GitHub metadata '+suffix);
+            return response.json();
+          }
+          const currentRunId = Number(process.env.GITHUB_RUN_ID);
+          const currentRunAttempt = Number(process.env.GITHUB_RUN_ATTEMPT);
+          assert(Number.isSafeInteger(currentRunId) && currentRunId > 0);
+          assert.equal(currentRunAttempt,1);
+          const g = expected.generationRun, p = expected.prior;
+          const [run,job,providerJob,artifact,priorRun,priorJob,priorProviderJob,currentRun,currentJobs] =
+            await Promise.all([
+              api('/actions/runs/'+g.runId),api('/actions/jobs/'+g.compilerJobId),
+              api('/actions/jobs/'+g.providerJobId),api('/actions/artifacts/'+g.artifactId),
+              api('/actions/runs/'+p.runId),api('/actions/jobs/'+p.compilerJobId),
+              api('/actions/jobs/'+p.providerJobId),api('/actions/runs/'+currentRunId),
+              api('/actions/runs/'+currentRunId+'/jobs?per_page=100'),
+            ]);
+          function checkRun(value,id,workflow,head,conclusion) {
+            assert.equal(value.id,id); assert.equal(value.workflow_id,workflow);
+            assert.equal(value.head_sha,head); assert.equal(value.run_attempt,1);
+            assert.equal(value.status,'completed'); assert.equal(value.conclusion,conclusion);
+          }
+          function checkJob(value,id,runId,head,conclusion) {
+            assert.equal(value.id,id); assert.equal(value.run_id,runId);
+            assert.equal(value.head_sha,head); assert.equal(value.run_attempt,1);
+            assert.equal(value.status,'completed'); assert.equal(value.conclusion,conclusion);
+          }
+          function step(value,number,conclusion) {
+            const entry=value.steps.find(item=>item.number===number);
+            assert(entry,'recorded step '+number); assert.equal(entry.status,'completed');
+            assert.equal(entry.conclusion,conclusion,entry.name); return entry;
+          }
+          checkRun(run,g.runId,g.workflowId,g.headSha,'failure');
+          checkJob(job,g.compilerJobId,g.runId,g.headSha,'failure');
+          checkJob(providerJob,g.providerJobId,g.runId,g.headSha,'skipped');
+          for(const number of [5,6,7,10]) step(job,number,'success');
+          assert.equal(step(job,8,'failure').name,'Run the existing exact-source fixed-point command');
+          step(job,9,'skipped');
+          checkRun(priorRun,p.runId,p.workflowId,p.sourceRef,'cancelled');
+          checkJob(priorJob,p.compilerJobId,p.runId,p.sourceRef,'cancelled');
+          checkJob(priorProviderJob,p.providerJobId,p.runId,p.sourceRef,'skipped');
+          for(const number of [18,19,20,21,22,23,24,25,26,30]) step(priorJob,number,'success');
+          step(priorJob,27,'cancelled');
+          assert.equal(currentRun.id,currentRunId);
+          assert.equal(currentRun.head_sha,process.env.GITHUB_SHA);
+          assert.equal(currentRun.run_attempt,currentRunAttempt);
+          assert.equal(currentRun.path,expected.evidenceProducer.workflow.path);
+          assert.equal(currentRun.status,'in_progress');
+          assert.equal(currentJobs.total_count,currentJobs.jobs.length);
+          const ownJobs=currentJobs.jobs.filter(value=>value.name==='compiler');
+          assert.equal(ownJobs.length,1);
+          const ownJob=ownJobs[0];
+          assert.equal(ownJob.run_id,currentRunId);
+          assert.equal(ownJob.head_sha,process.env.GITHUB_SHA);
+          assert.equal(ownJob.run_attempt,currentRunAttempt);
+          assert.equal(ownJob.status,'in_progress');
+          assert.equal(artifact.id,g.artifactId);
+          assert.equal(artifact.name,g.artifactName);
+          assert.equal(artifact.expired,false);
+          assert.equal(artifact.size_in_bytes,g.archiveBytes);
+          assert.equal(artifact.digest,'sha256:'+g.archiveSha256);
+          assert.equal(artifact.workflow_run.id,g.runId);
+          assert.equal(artifact.workflow_run.head_sha,g.headSha);
+          const response=await fetch(base+'/actions/artifacts/'+g.artifactId+'/zip',{headers});
+          assert.equal(response.status,200,'authenticated retained-generation archive');
+          const archive=Buffer.from(await response.arrayBuffer());
+          assert.equal(archive.length,g.archiveBytes);
+          assert.equal(hash(archive),g.archiveSha256);
+          await mkdir(destinationDirectory,{recursive:true});
+          const zipPath=path.join(destinationDirectory,'predecessor-verified.zip');
+          await writeFile(zipPath,archive);
+          function safeNames(archivePath,count) {
+            const listing=execFileSync('unzip',['-Z','-1',archivePath],{encoding:'utf8',maxBuffer:4*1024*1024});
+            const entries=listing.split(/\r?\n/u).filter(Boolean);
+            assert.equal(new Set(entries).size,entries.length,'unique archive names');
+            assert(entries.every(name=>!name.startsWith('/')&&!name.includes('\\')&&
+              name.split('/').every(part=>part!=='..'&&part!=='.')&&path.posix.normalize(name)===name),
+              'safe exact archive names');
+            const names=entries.filter(name=>!name.endsWith('/'));
+            assert.equal(names.length,count,'authenticated upload file-count declaration matches actual ZIP');
+            return {entries,names};
+          }
+          const {entries,names}=safeNames(zipPath,g.archiveFileCount);
+          const roots=['dist/sh1/','.selfhost-seeds/','dist/sh1-native-seed-recovery/',
+            'dist/sh1-seed-selection/','dist/typescript-profile/','dist/sh1-continuation-inputs/'];
+          assert(names.every(name=>roots.some(prefix=>name.startsWith(prefix))),'artifact output directories only');
+          for(const name of ['dist/sh1/qualification.json','dist/sh1/strict-enforcement-evidence.json',
+            'dist/sh1/seed-selection.json','dist/sh1/evidence-completion.json',
+            'dist/sh1-continuation-inputs/evidence-inventory.json'])
+            assert(!names.includes(name),'failed run has no completed output '+name);
+          const rawFiles=new Map(),archiveFiles=[];
+          for(const name of names) {
+            const bytes=execFileSync('unzip',['-p',zipPath,name],{maxBuffer:128*1024*1024});
+            rawFiles.set(name,bytes);
+            archiveFiles.push({path:name,sha256:hash(bytes),bytes:bytes.length});
+          }
+          function exactBytes(name,pin) {
+            const bytes=rawFiles.get(name); assert(bytes,'retained '+name);
+            assert.equal(hash(bytes),pin.sha256??pin.receiptSha256,name+' exact raw digest');
+            assert.equal(bytes.length,pin.bytes??pin.receiptBytes,name+' exact raw bytes');
+            return bytes;
+          }
+          const priorInputsBytes=exactBytes(expected.importedPriorInputs.path,expected.importedPriorInputs);
+          const priorInputs=JSON.parse(priorInputsBytes.toString('utf8'));
+          assert.equal(priorInputs.kind,'psc0-authenticated-fixed-point-continuation-inputs');
+          assert.equal(priorInputs.sourceRef,expected.sourceRef);
+          assert.equal(priorInputs.orchestrationHeadSha,g.headSha);
+          assert.equal(priorInputs.orchestrationRunId,g.runId);
+          assert.equal(priorInputs.orchestrationRunAttempt,1);
+          assert.deepEqual(priorInputs.expected,p);
+          assert.equal(priorInputs.archiveDigestVerified,true);
+          assert.equal(priorInputs.currentSourceAndAll48RecipeInputsUnchanged,true);
+          assert.deepEqual(priorInputs.reusedGenerations,['N1','C1']);
+          assert.deepEqual(priorInputs.regeneratedGenerations,['C2','C3']);
+          assert.equal(priorInputs.archiveFileCount,p.archiveFileCount);
+          assert.equal(priorInputs.importedFiles.length,277);
+          assert.equal(priorInputs.omittedFiles.length,67);
+          for(const file of priorInputs.importedFiles) exactBytes(file.path,file);
+          const receipts={};
+          for(const [name,directory] of [['N1','development/N1'],['C1','C1'],['C2','C2'],['C3','C3']]) {
+            const raw=exactBytes('dist/sh1/'+directory+'/receipt.json',expected[name]);
+            const value=JSON.parse(raw.toString('utf8'));
+            assert.equal(JSON.stringify(value,null,2)+'\n',raw.toString('utf8'));
+            assert.equal(value.sourceRef,expected.sourceRef);
+            assert.equal(value.sourceClosureSha256,expected.sourceClosureSha256);
+            assert.equal(value.recipe.sha256,expected.recipeSha256);
+            assert.equal(hash(JSON.stringify(value.recipe.files)),expected.recipeSha256);
+            assert.deepEqual(value.toolchain,expected.toolchain);
+            assert.deepEqual(value.typescriptProfile,expected.typescriptProfile);
+            assert.deepEqual(value.artifacts,expected[name].artifacts);
+            for(const [file,key] of [['index.ts','typescriptSha256'],['index.js','javascriptSha256'],
+              ...('canonicalSurfaceSourceSha256' in value.artifacts?
+                [['canonical-source.json','canonicalSurfaceSourceSha256'],
+                 ['admissions.json','normalizedCanonicalAdmissionsSha256']]:[])]) {
+              assert.equal(hash(rawFiles.get('dist/sh1/'+directory+'/'+file)),value.artifacts[key],name+'/'+file);
+            }
+            receipts[name]=value;
+          }
+          assert.equal(receipts.N1.evidence,'native-seeded-generated-compiler-candidate');
+          for(const name of ['C1','C2','C3']) assert.equal(receipts[name].evidence,'candidate-build');
+          assert.equal(receipts.C2.executingCompilerSha256,receipts.C1.artifacts.javascriptSha256);
+          assert.equal(receipts.C3.executingCompilerSha256,receipts.C2.artifacts.javascriptSha256);
+          assert.deepEqual(receipts.C2.artifacts,receipts.C3.artifacts);
+          assert.equal(receipts.N1.artifacts.typescriptSha256,receipts.C2.artifacts.typescriptSha256);
+          assert.equal(receipts.N1.artifacts.javascriptSha256,receipts.C2.artifacts.javascriptSha256);
+          const recipeFiles=receipts.C1.recipe.files;
+          assert.equal(recipeFiles.length,48);
+          for(const file of recipeFiles) assert.equal(hash(await readFile(file.path)),file.sha256,'generation recipe '+file.path);
+          const importedFiles=[];
+          for(const file of archiveFiles) {
+            await mkdir(path.dirname(file.path),{recursive:true});
+            if(existsSync(file.path))
+              assert.equal(hash(await readFile(file.path)),file.sha256,'pre-existing output is identical '+file.path);
+            else await writeFile(file.path,rawFiles.get(file.path));
+            assert.equal(hash(await readFile(file.path)),file.sha256,'restored '+file.path);
+            importedFiles.push(file);
+          }
+          importedFiles.push({path:zipPath,sha256:g.archiveSha256,bytes:g.archiveBytes});
+          const priorZipPath='dist/sh1-continuation-inputs/predecessor-verified.zip';
+          const priorZip=await readFile(priorZipPath);
+          assert.equal(priorZip.length,p.archiveBytes);
+          assert.equal(hash(priorZip),p.archiveSha256,'retained original raw archive');
+          const oldNames=safeNames(priorZipPath,p.archiveFileCount);
+          const oldFiles=[];
+          for(const name of oldNames.names) {
+            const bytes=execFileSync('unzip',['-p',priorZipPath,name],{maxBuffer:128*1024*1024});
+            oldFiles.push({path:name,sha256:hash(bytes),bytes:bytes.length});
+          }
+          assert.deepEqual(oldFiles,priorInputs.archiveFiles,'full original archive inventory');
+          async function retainedBlob(pin) {
+            const result=await api('/git/blobs/'+pin.blob);
+            assert.equal(result.sha,pin.blob); assert.equal(result.encoding,'base64');
+            const bytes=Buffer.from(result.content,'base64');
+            assert.equal(bytes.length,pin.bytes); assert.equal(hash(bytes),pin.sha256);
+            return bytes;
+          }
+          const logBytes=await retainedBlob(expected.generationLog);
+          await writeFile(expected.generationLog.path,logBytes);
+          importedFiles.push({path:expected.generationLog.path,sha256:expected.generationLog.sha256,bytes:expected.generationLog.bytes});
+          async function sourceAtCurrentHead(sourcePath,pin) {
+            const result=await api('/contents/'+sourcePath+'?ref='+process.env.GITHUB_SHA);
+            assert.equal(result.type,'file'); assert.equal(result.path,sourcePath);
+            assert.equal(result.encoding,'base64');
+            const bytes=Buffer.from(result.content,'base64');
+            assert.equal(result.size,bytes.length);
+            if(pin) {
+              assert.equal(result.sha,pin.blob);
+              assert.equal(bytes.length,pin.bytes); assert.equal(hash(bytes),pin.sha256);
+            }
+            return {blob:result.sha,sha256:hash(bytes),bytes:bytes.length,raw:bytes};
+          }
+          const producer={sourceRef:process.env.GITHUB_SHA};
+          for(const key of ['finisher','binder']) {
+            const pin=expected.evidenceProducer[key];
+            const file=await sourceAtCurrentHead(pin.sourcePath,pin);
+            assert(!recipeFiles.some(item=>item.path===pin.path),'sidecar not a generation recipe input');
+            assert(!existsSync(pin.path),'new sidecar path only '+pin.path);
+            await writeFile(pin.path,file.raw);
+            producer[key]={...pin};
+          }
+          const workflow=await sourceAtCurrentHead(expected.evidenceProducer.workflow.path);
+          producer.workflow={path:expected.evidenceProducer.workflow.path,
+            blob:workflow.blob,sha256:workflow.sha256,bytes:workflow.bytes};
+          producer.currentExecution={runId:currentRunId,workflowId:currentRun.workflow_id,
+            runAttempt:currentRunAttempt,compilerJobId:ownJob.id,headSha:process.env.GITHUB_SHA};
+          const generationOwnership={
+            N1:{runId:38015134511,compilerJobId:114103608774},
+            C1:{runId:38015134511,compilerJobId:114103608774},
+            C2:{runId:38021634599,compilerJobId:114123691566},
+            C3:{runId:38021634599,compilerJobId:114123691566},
+          };
+          const authenticatedArchives=[
+            {runId:p.runId,artifactId:p.artifactId,name:p.artifactName,sha256:p.archiveSha256,
+              bytes:p.archiveBytes,fileCount:oldNames.names.length,rawArchivePath:priorZipPath},
+            {runId:g.runId,artifactId:g.artifactId,name:g.artifactName,sha256:g.archiveSha256,
+              bytes:g.archiveBytes,fileCount:names.length,rawArchivePath:zipPath},
+          ];
+          const report={
+            schemaVersion:1,kind:'psc0-authenticated-retained-fixed-point-finish-inputs',
+            compiledSourceRef:expected.sourceRef,sourceRoot:root,outputRoot:path.join(root,'dist/sh1'),
+            sourceClosureSha256:expected.sourceClosureSha256,recipeSha256:expected.recipeSha256,recipeFiles,
+            evidenceProducer:producer,generationOwnership,authenticatedArchives,importedFiles,
+            orchestrationWorkflowRef:process.env.GITHUB_WORKFLOW_REF,orchestrationWorkflowSha:process.env.GITHUB_WORKFLOW_SHA,
+            generationLog:expected.generationLog,expected,
+            generationExecutions:{
+              nativeAndCandidate:{run:priorRun,compilerJob:priorJob,providerJob:priorProviderJob},
+              secondAndThird:{run,compilerJob:job,providerJob,artifact},
+            },
+            originalContinuationInputs:{...expected.importedPriorInputs,value:priorInputs},
+            archiveEntryCount:entries.length,archiveFileCount:names.length,
+            reusedGenerations:['N1','C1','C2','C3'],generatedThisCommand:[],
+            currentSourceAndAll48RecipeInputsUnchanged:true,allImportedEvidenceUnchanged:true,
+            compilerExecutedByThisImport:false,strictSh1Qualified:false,semanticContractQualified:false,
+            providerChecked:false,
+          };
+          for(const file of recipeFiles) assert.equal(hash(await readFile(file.path)),file.sha256,'recipe after import '+file.path);
+          assert.equal(new Set(importedFiles.map(file=>file.path)).size,importedFiles.length);
+          const reportText=JSON.stringify(report,null,2)+'\n';
+          const reportPath=path.join(destinationDirectory,'inputs.json');
+          await writeFile(reportPath,reportText);
+          await appendFile(process.env.GITHUB_OUTPUT,'inputs_sha256='+hash(reportText)+'\n');
+          console.log('PSC0_SH1_EVIDENCE_FINISH_INPUTS: '+JSON.stringify({
+            path:reportPath,sha256:hash(reportText),bytes:Buffer.byteLength(reportText),value:report}));
+          NODE
+      - name: Install the pinned current TypeScript 7 profile
+        id: typescript
+        shell: bash
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-typescript-7.0.2" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFileSync, copyFileSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
+          import path from 'node:path';
+          import { createRequire } from 'node:module';
+          import { spawnSync } from 'node:child_process';
+          const require = createRequire(import.meta.url);
+          const directory = path.resolve('dist/typescript-profile/evidence-finish-install');
+          mkdirSync(directory, { recursive: true });
+          const version = '7.0.2';
+          const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-typescript-' + version);
+          const manifestPath = require.resolve('typescript/package.json', { paths: [prefix] });
+          const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+          assert.equal(manifest.name, 'typescript');
+          assert.equal(manifest.version, version);
+          const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.tsc;
+          assert.equal(typeof bin, 'string', 'PSC0_TYPESCRIPT_BIN_METADATA');
+          const launcher = realpathSync(path.resolve(path.dirname(manifestPath), bin));
+          const result = spawnSync(process.execPath, [launcher, '--version'], { encoding: 'utf8' });
+          assert.equal(result.status, 0, result.stderr);
+          assert.equal(result.stdout.trim(), 'Version ' + version);
+          appendFileSync(process.env.GITHUB_OUTPUT, 'current-cli=' + launcher + '\n');
+          copyFileSync(path.join(prefix, 'package-lock.json'), path.join(directory, 'current-package-lock.json'));
+          copyFileSync(manifestPath, path.join(directory, 'current-package.json'));
+          appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=' + version + '\n');
+          NODE
+      - name: Verify the actual TypeScript 7 evidence-finishing runtime
+        run: node scripts/check-typescript-profile.mjs --out dist/typescript-profile/evidence-finish-contract
+      - name: Complete binding from the authenticated retained generations
+        id: finish
+        run: node scripts/sh1-finish-evidence.mjs --inputs dist/sh1-evidence-finish-inputs/inputs.json --inputs-sha256 '${{ steps.inputs.outputs.inputs_sha256 }}' --out dist/sh1
+      - name: Retain exact evidence and any remaining failure context
+        id: evidence
+        if: ${{ always() && steps.inputs.outcome == 'success' }}
+        env:
+          FINISH_OUTCOME: ${{ steps.finish.outcome }}
+          INPUTS_SHA256: ${{ steps.inputs.outputs.inputs_sha256 }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { createHash } from 'node:crypto';
+          import { readFile, writeFile, readdir, appendFile } from 'node:fs/promises';
+          import { execFileSync } from 'node:child_process';
+          import path from 'node:path';
+          const expected = {"sourceRef":"1fa5559a72b293defc56ef7e7020cf82d4b44b79","sourceRoot":"/home/runner/work/pskernel/pskernel/psc0","sourceClosureSha256":"46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5","recipeSha256":"a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba","toolchain":{"node":"v22.23.3","platform":"linux","architecture":"x64","lean":"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)","leanGitHash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","typescript":"Version 7.0.2"},"typescriptProfile":{"version":"7.0.2","purpose":"current-emission","arguments":["--ignoreConfig"]},"qualifierSha256":"707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb","generationBinderSha256":"bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049","prior":{"sourceRef":"1fa5559a72b293defc56ef7e7020cf82d4b44b79","sourceRoot":"/home/runner/work/pskernel/pskernel/psc0","runId":38015134511,"runAttempt":1,"workflowId":378853677,"compilerJobId":114103608774,"providerJobId":114120597914,"artifactId":11658430459,"artifactName":"psc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79","archiveSha256":"6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812","archiveBytes":5147944,"archiveFileCount":344,"recipeSha256":"a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba","sourceClosureSha256":"46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5","N1":{"receiptSha256":"6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404","receiptBytes":15827,"artifacts":{"javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"}},"C1":{"receiptSha256":"33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f","receiptBytes":169531,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52","typescriptSha256":"1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba","javascriptSha256":"91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"}},"completedC2":{"receiptSha256":"a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894","receiptBytes":166700,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c","javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"}},"toolchain":{"node":"v22.23.3","platform":"linux","architecture":"x64","lean":"Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)","leanGitHash":"293d5d0c0c3f3dded4688b3ccd6a33939ac5102b","typescript":"Version 7.0.2"},"typescriptProfile":{"version":"7.0.2","purpose":"current-emission","arguments":["--ignoreConfig"]},"qualifierSha256":"707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb","binderSha256":"bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049","predecessorLog":{"blob":"67147f3e76511cf3a918923dcfed8743636cc86b","sha256":"be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d","bytes":1917726}},"generationRun":{"runId":38021634599,"runAttempt":1,"workflowId":380237977,"headSha":"43fa000c4adbc9d4754e20c213595c1449f00961","compilerJobId":114123691566,"providerJobId":114136283916,"conclusion":"failure","artifactId":11659939542,"artifactName":"psc0-sh1-continuation-ts7.0.2-38021634599","archiveSha256":"599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80","archiveBytes":11739089,"archiveFileCount":444},"importedPriorInputs":{"path":"dist/sh1-continuation-inputs/inputs.json","blob":"8731e55592d0bcb57b977c4cc98fcfe91a64b7a9","sha256":"de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638","bytes":161276},"generationLog":{"path":"dist/sh1-evidence-finish-inputs/source-generation-job.log","blob":"6747dc056c2642f069cc1c45c37f9dea492e0b50","sha256":"1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548","bytes":875228},"N1":{"receiptSha256":"6768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404","receiptBytes":15827,"artifacts":{"javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c"}},"C1":{"receiptSha256":"33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f","receiptBytes":169531,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52","typescriptSha256":"1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba","javascriptSha256":"91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5"}},"C2":{"receiptSha256":"5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02","receiptBytes":166707,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c","javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"}},"C3":{"receiptSha256":"eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1","receiptBytes":166709,"artifacts":{"canonicalSurfaceSourceSha256":"240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e","normalizedCanonicalAdmissionsSha256":"e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020","typescriptSha256":"595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c","javascriptSha256":"6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"}},"evidenceProducer":{"workflow":{"path":".github/workflows/psc0-sh1-finish-evidence.yml"},"binder":{"sourcePath":"psc0/scripts/sh1-strict-evidence.mjs","path":"scripts/sh1-strict-evidence-finish.mjs","blob":"7700fef35acd06789b94f72078869fdef489214f","sha256":"829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606","bytes":91977},"finisher":{"sourcePath":"psc0/scripts/sh1-finish-evidence.mjs","path":"scripts/sh1-finish-evidence.mjs","blob":"793adba3bc690bbef566e922c9efb3457d372d87","sha256":"804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d","bytes":38509}}};
+          const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+          const root = process.cwd();
+          const inputPath='dist/sh1-evidence-finish-inputs/inputs.json';
+          const inputRaw=await readFile(inputPath);
+          const inputs=JSON.parse(inputRaw.toString('utf8'));
+          const finishSucceeded=process.env.FINISH_OUTCOME==='success';
+          const failures=[],missingFiles=[],files=[],jsonValues=[],supplementalFiles=[];
+          function check(label,run) { try { run(); } catch(error) { failures.push({label,message:String(error.message)}); } }
+          check('source checkout',()=>assert.equal(execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),expected.sourceRef));
+          check('source root',()=>assert.equal(root,expected.sourceRoot));
+          check('actual input envelope',()=>assert.equal(hash(inputRaw),process.env.INPUTS_SHA256));
+          check('compiled source identity',()=>assert.equal(inputs.compiledSourceRef,expected.sourceRef));
+          check('current evidence execution',()=>{
+            assert.equal(inputs.evidenceProducer.currentExecution.runId,Number(process.env.GITHUB_RUN_ID));
+            assert.equal(inputs.evidenceProducer.sourceRef,process.env.GITHUB_SHA);
+          });
+          for(const file of inputs.importedFiles) {
+            try {
+              const bytes=await readFile(file.path);
+              assert.equal(bytes.length,file.bytes);
+              assert.equal(hash(bytes),file.sha256);
+            } catch(error) { failures.push({label:'imported evidence unchanged: '+file.path,message:String(error.message)}); }
+          }
+          const required = ["development/N1/receipt.json","C1/receipt.json","C2/receipt.json","C3/receipt.json","development/N1/index.ts","C1/index.ts","C2/index.ts","C3/index.ts","development/N1/index.js","C1/index.js","C2/index.js","C3/index.js","C1/source-closure.json","C2/source-closure.json","C3/source-closure.json","C2/original-ir-inventory.json","C3/original-ir-inventory.json","C2/canonical-source.json","C3/canonical-source.json","qualification.json","strict-enforcement-evidence.json","development/N1/strict-source-native.json","C2/strict-source.json","C3/strict-source.json","development/N1/capabilities/receipt.json","C1/capabilities/receipt.json","C2/capabilities/receipt.json","C3/capabilities/receipt.json","development/N1/strict-source/receipt.json","C1/strict-source/receipt.json","C2/strict-source/receipt.json","C3/strict-source/receipt.json","development/N1/strict-source/source-cases.json","C1/strict-source/source-cases.json","C2/strict-source/source-cases.json","C3/strict-source/source-cases.json","development/N1/strict-target/receipt.json","C1/strict-target/receipt.json","C2/strict-target/receipt.json","C3/strict-target/receipt.json","development/N1/ir-checker/receipt.json","C1/ir-checker/receipt.json","C2/ir-checker/receipt.json","C3/ir-checker/receipt.json","development/N1/ir-checker/accepted/index.ts","C1/ir-checker/accepted/index.ts","C2/ir-checker/accepted/index.ts","C3/ir-checker/accepted/index.ts","development/N1/ir-checker/accepted/index.js","C1/ir-checker/accepted/index.js","C2/ir-checker/accepted/index.js","C3/ir-checker/accepted/index.js","development/N1/ir-checker/accepted/index.d.ts","C1/ir-checker/accepted/index.d.ts","C2/ir-checker/accepted/index.d.ts","C3/ir-checker/accepted/index.d.ts","development/N1/ir-checker-native/receipt.json","development/N1/ir-checker-native/native.stdout.log","development/N1/ir-checker-native/native.stderr.log","development/N1/ir-checker-native/execution-inputs.json","development/N1/generic-erasure/receipt.json","C1/generic-erasure/receipt.json","C2/generic-erasure/receipt.json","C3/generic-erasure/receipt.json","development/N1/generic-erasure/admissions.json","C1/generic-erasure/admissions.json","C2/generic-erasure/admissions.json","C3/generic-erasure/admissions.json","development/N1/generic-erasure/generated/index.ts","C1/generic-erasure/generated/index.ts","C2/generic-erasure/generated/index.ts","C3/generic-erasure/generated/index.ts","development/N1/generic-erasure/generated/index.js","C1/generic-erasure/generated/index.js","C2/generic-erasure/generated/index.js","C3/generic-erasure/generated/index.js","development/N1/generic-erasure/native/index.ts","development/N1/generic-erasure/native/index.js","development/N1/generic-erasure/recursion-core.json","C1/generic-erasure/recursion-core.json","C2/generic-erasure/recursion-core.json","C3/generic-erasure/recursion-core.json","development/N1/strict-runtime-reference/reference.json","development/N1/strict-runtime/receipt.json","C1/strict-runtime/receipt.json","C2/strict-runtime/receipt.json","C3/strict-runtime/receipt.json","development/N1/strict-runtime-reference/native-source-evaluation/receipt.json","development/N1/strict-runtime/source-evaluation/lean-source-receipt.json","C1/strict-runtime/source-evaluation/lean-source-receipt.json","C2/strict-runtime/source-evaluation/lean-source-receipt.json","C3/strict-runtime/source-evaluation/lean-source-receipt.json","development/N1/strict-runtime/source-evaluation/ps-source-receipt.json","C1/strict-runtime/source-evaluation/ps-source-receipt.json","C2/strict-runtime/source-evaluation/ps-source-receipt.json","C3/strict-runtime/source-evaluation/ps-source-receipt.json","development/N1/strict-runtime/source-equality/lean-source-receipt.json","C1/strict-runtime/source-equality/lean-source-receipt.json","C2/strict-runtime/source-equality/lean-source-receipt.json","C3/strict-runtime/source-equality/lean-source-receipt.json","development/N1/strict-runtime/source-equality/ps-source-receipt.json","C1/strict-runtime/source-equality/ps-source-receipt.json","C2/strict-runtime/source-equality/ps-source-receipt.json","C3/strict-runtime/source-equality/ps-source-receipt.json","worker-harness-reference.json","worker-migration-reference.json","worker-migration-correspondence.json","development/N1/grammar-closure.json","development/foundation/receipt.json","foundation/receipt.json","development/helpers/receipt.json","helpers/receipt.json","development/N1/helper-runtime.json","C1/helper-runtime.json","C2/helper-runtime.json","C3/helper-runtime.json","development/session-conformance.json","session-conformance.json","development/iteration/receipt.json","resource-policy-preflight.json","resource-policy-candidate.json","resource-policy-fixed-point.json","C2/admissions.json","C3/admissions.json","C2/capabilities/lean/admissions.json","C2/capabilities/ps/admissions.json","C3/capabilities/lean/admissions.json","C3/capabilities/ps/admissions.json","development/N1/source-closure.json","development/N1/admissions.json","development/N1/strict-native.stdout.log","development/N1/strict-native.stderr.log","C1/canonical-source.json","C1/admissions.json","seed-selection.json"];
+          const jsonPaths = ["qualification.json","strict-enforcement-evidence.json","development/N1/strict-source/receipt.json","C1/strict-source/receipt.json","C2/strict-source/receipt.json","C3/strict-source/receipt.json","development/N1/ir-checker/receipt.json","C1/ir-checker/receipt.json","C2/ir-checker/receipt.json","C3/ir-checker/receipt.json","development/N1/receipt.json","development/N1/generic-erasure/receipt.json","C1/generic-erasure/receipt.json","C2/generic-erasure/receipt.json","C3/generic-erasure/receipt.json","development/N1/capabilities/receipt.json","C1/capabilities/receipt.json","C2/capabilities/receipt.json","C3/capabilities/receipt.json","C1/receipt.json","C2/receipt.json","C3/receipt.json","C1/source-closure.json","development/N1/grammar-closure.json"];
+          assert.equal(required.length,135);
+          assert.equal(new Set(required).size,135);
+          assert.equal(jsonPaths.length,24);
+          for(const name of required) {
+            try {
+              const bytes=await readFile(path.join('dist/sh1',name));
+              files.push({path:name,sha256:hash(bytes),bytes:bytes.length});
+            } catch(error) { missingFiles.push({path:name,code:error.code??null,message:String(error.message)}); }
+          }
+          for(const name of jsonPaths) {
+            try {
+              const raw=await readFile(path.join('dist/sh1',name),'utf8');
+              const value=JSON.parse(raw);
+              assert.equal(JSON.stringify(value,null,2)+'\n',raw,'producer JSON serialization: '+name);
+              jsonValues.push({path:name,sha256:hash(raw),bytes:Buffer.byteLength(raw),
+                serialization:'JSON.stringify(value, null, 2) + LF',value});
+            } catch(error) { failures.push({label:'returned JSON '+name,message:String(error.message)}); }
+          }
+          const lookup=name=>jsonValues.find(entry=>entry.path===name)?.value;
+          const qualification=lookup('qualification.json');
+          const binder=lookup('strict-enforcement-evidence.json');
+          const closureManifest=lookup('C1/source-closure.json');
+          const recipe=lookup('C1/receipt.json')?.recipe;
+          if(finishSucceeded) {
+            check('complete catalog',()=>{assert.equal(files.length,135);assert.equal(jsonValues.length,24);assert.equal(missingFiles.length,0);});
+            check('actual qualification and embedded binder',()=>{
+              assert.equal(qualification.sourceRef,expected.sourceRef);
+              assert.equal(qualification.sourceClosureSha256,expected.sourceClosureSha256);
+              assert.equal(qualification.c2CompilerSha256,qualification.c3CompilerSha256);
+              assert.deepEqual(qualification.artifacts,expected.C2.artifacts);
+              assert.equal(qualification.strictSh1Qualified,false);
+              assert.equal(qualification.semanticContractQualified,false);
+              assert.deepEqual(qualification.provider,{status:'not-attempted',kernelChecked:false});
+              const {report,sha256,...embedded}=qualification.strictEnforcementEvidence;
+              assert.equal(report,'strict-enforcement-evidence.json');
+              assert.equal(sha256,files.find(entry=>entry.path===report).sha256);
+              assert.deepEqual(embedded,binder);
+            });
+          }
+          check('source closure',()=>assert.equal(hash(JSON.stringify(closureManifest)),expected.sourceClosureSha256));
+          check('original generation recipe',()=>{
+            assert.equal(recipe.files.length,48);
+            assert.equal(hash(JSON.stringify(recipe.files)),expected.recipeSha256);
+            assert.deepEqual(recipe.files,inputs.recipeFiles);
+          });
+          if(recipe?.files) for(const file of recipe.files) {
+            try { assert.equal(hash(await readFile(file.path)),file.sha256); }
+            catch(error) { failures.push({label:'generation recipe '+file.path,message:String(error.message)}); }
+          }
+          async function supplement(sourcePath) {
+            const bytes=await readFile(sourcePath);
+            const envelope={path:path.relative('dist/sh1',sourcePath).split(path.sep).join('/'),
+              sourcePath,sha256:hash(bytes),bytes:bytes.length};
+            supplementalFiles.push(envelope);
+            return envelope;
+          }
+          async function walk(directory) {
+            const entries=await readdir(directory,{withFileTypes:true});
+            for(const entry of entries.sort((a,b)=>a.name.localeCompare(b.name))) {
+              const name=path.join(directory,entry.name);
+              if(entry.isDirectory()) await walk(name);
+              else { assert(entry.isFile(),'regular profile file'); await supplement(name); }
+            }
+          }
+          try { await walk('dist/typescript-profile'); }
+          catch(error) { failures.push({label:'TypeScript profile evidence',message:String(error.message)}); }
+          await supplement(inputPath);
+          let completionFile=null,completionValue=null;
+          try {
+            completionFile=await supplement('dist/sh1/evidence-completion.json');
+            completionValue=JSON.parse(await readFile('dist/sh1/evidence-completion.json','utf8'));
+            check('completion provenance',()=>{
+              assert.equal(completionValue.kind,'psc0-authenticated-retained-fixed-point-evidence-completion');
+              assert.equal(completionValue.status,'evidence-completed');
+              assert.equal(completionValue.compiledSourceRef,expected.sourceRef);
+              assert.deepEqual(completionValue.evidenceProducer,inputs.evidenceProducer);
+              assert.deepEqual(completionValue.generationOwnership,inputs.generationOwnership);
+              assert.equal(completionValue.inputManifest.sha256,hash(inputRaw));
+              assert.equal(completionValue.preservedInputs.catalogSha256,hash(JSON.stringify(inputs.importedFiles)));
+              assert.equal(completionValue.preservedInputs.beforeAndAfterExact,true);
+              assert.deepEqual(completionValue.compilerGenerationsRebuilt,[]);
+              assert.deepEqual(completionValue.conformanceExecutionsRepeated,[]);
+              for(const name of ['qualification.json','strict-enforcement-evidence.json','seed-selection.json']) {
+                const actual=files.find(file=>file.path===name);
+                const recorded=completionValue.outputs[name];
+                assert.equal(recorded.path,'dist/sh1/'+name);
+                assert.equal(recorded.sha256,actual.sha256);assert.equal(recorded.bytes,actual.bytes);
+              }
+            });
+          } catch(error) {
+            failures.push({label:'completion file',message:String(error.message)});
+          }
+          const complete=finishSucceeded&&failures.length===0&&missingFiles.length===0;
+          const evidence={
+            schemaVersion:1,kind:'psc0-exact-source-evidence-completion-inventory',
+            status:complete?'complete':'partial',complete,finishOutcome:process.env.FINISH_OUTCOME,
+            sourceRef:expected.sourceRef,orchestrationHeadSha:process.env.GITHUB_SHA,
+            runId:Number(process.env.GITHUB_RUN_ID),runAttempt:Number(process.env.GITHUB_RUN_ATTEMPT),
+            predecessorRunId:expected.generationRun.runId,predecessorArtifactId:expected.generationRun.artifactId,
+            predecessorArchiveSha256:expected.generationRun.archiveSha256,
+            evidenceProducer:inputs.evidenceProducer,generationOwnership:inputs.generationOwnership,
+            inputManifest:{path:inputPath,sha256:hash(inputRaw),bytes:inputRaw.length},
+            completionFile,reusedGenerations:['N1','C1','C2','C3'],generatedThisCommand:[],
+            importedEvidenceUnchanged:!failures.some(item=>item.label.startsWith('imported evidence')),
+            files,supplementalFiles,sourceClosureManifest:closureManifest??null,recipe:recipe??null,
+            missingFiles,validationErrors:failures,
+            strictSh1Qualified:false,semanticContractQualified:false,providerChecked:false,
+            compilerExecutedByThisInventory:false,
+          };
+          const evidenceText=JSON.stringify(evidence,null,2)+'\n';
+          const evidencePath='dist/sh1-evidence-finish-inputs/evidence-inventory.json';
+          await writeFile(evidencePath,evidenceText);
+          console.log('PSC0_SH1_EVIDENCE_FINISH_INVENTORY: '+JSON.stringify({
+            path:evidencePath,sha256:hash(evidenceText),bytes:Buffer.byteLength(evidenceText),value:evidence}));
+          for(const entry of jsonValues) console.log('PSC0_SH1_RETURNED_JSON: '+JSON.stringify(entry));
+          if(!complete) for(const name of ['development/N1/strict-source-native.json','C2/strict-source.json','C3/strict-source.json']) {
+            try {
+              const raw=await readFile(path.join('dist/sh1',name),'utf8');
+              const value=JSON.parse(raw);
+              const serialization=raw===JSON.stringify(value,null,2)+'\n' ? 'JSON.stringify(value, null, 2) + LF'
+                : raw===JSON.stringify(value)+'\n' ? 'JSON.stringify(value) + LF' : null;
+              console.log('PSC0_SH1_DIAGNOSTIC_JSON: '+JSON.stringify({path:name,sha256:hash(raw),
+                bytes:Buffer.byteLength(raw),serialization,...(serialization===null?{content:raw}:{}),value}));
+            } catch(error) { console.log('PSC0_SH1_DIAGNOSTIC_UNAVAILABLE: '+JSON.stringify({path:name,message:String(error.message)})); }
+          }
+          await appendFile(process.env.GITHUB_OUTPUT,'complete='+String(complete)+'\n');
+          if(finishSucceeded) assert(complete,'PSC0_SH1_EVIDENCE_FINISH_INVENTORY_INCOMPLETE: '+JSON.stringify(failures));
+          NODE
+      - name: Retain completed evidence and all authenticated original inputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-sh1-evidence-finish-ts7.0.2-${{ github.run_id }}
+          path: |
+            psc0/dist/sh1
+            psc0/.selfhost-seeds
+            psc0/dist/sh1-native-seed-recovery
+            psc0/dist/sh1-seed-selection
+            psc0/dist/typescript-profile
+            psc0/dist/sh1-continuation-inputs
+            psc0/dist/sh1-evidence-finish-inputs
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
+
+  kernel-admissions:
+    needs: compiler
+    if: ${{ needs.compiler.outputs.qualified == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1fa5559a72b293defc56ef7e7020cf82d4b44b79
+      - name: Read the independently qualified native provider at its exact source revision
+        uses: actions/checkout@v4
+        with:
+          ref: 963030dc2d154008fccc82e7c8ed29331f138799
+          path: provider-source
+          sparse-checkout: psc0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: provider-source/psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Restore pinned native provider build
+        id: provider-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: psc0-sh1-provider-v1-${{ runner.os }}-${{ runner.arch }}-963030dc2d154008fccc82e7c8ed29331f138799
+      - name: Build the existing provider target without editing its implementation
+        working-directory: provider-source/psc0
+        run: lake build psc_kernel_core_provider
+      - name: Retain the pinned provider build
+        if: ${{ steps.provider-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: provider-source/psc0/.lake/build
+          key: ${{ steps.provider-cache.outputs.cache-primary-key }}
+      - name: Read exact compiler qualification artifacts from this run
+        uses: actions/download-artifact@v4
+        with:
+          name: psc0-sh1-evidence-finish-ts7.0.2-${{ github.run_id }}
+          path: qualification-artifacts
+      - name: Obtain actual provider decisions for the qualified admission streams
+        working-directory: psc0
+        run: node scripts/sh1-check-admissions.mjs --provider-root ../provider-source/psc0 --artifacts ../qualification-artifacts/dist/sh1
+      - name: Retain provider acceptance or the exact rejection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-sh1-evidence-finish-kernel-ts7.0.2-${{ github.run_id }}
+          path: qualification-artifacts/dist/sh1/kernel-admissions.json
+          if-no-files-found: ignore
+          retention-days: 30

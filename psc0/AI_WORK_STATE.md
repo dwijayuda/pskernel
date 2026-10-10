@@ -1,276 +1,152 @@
-# PSC0 AI work state — running authenticated continuation and prepared final disposition
+# PSC0 AI work state — complete retained generations; evidence-only finish pending
 
-Updated: 2026-10-10T04:15:00Z. Evidence times are UTC. This active section supersedes the archived checkpoint instructions. The historical M6/TypeScript result below is retained byte-for-byte.
+Updated: 2026-10-10T05:23:40Z. Evidence times are UTC. This section supersedes all archived next-step instructions. The historical completed M6 and TypeScript result below is retained byte-for-byte.
 
 ## Active goal and authorization
 
-The user authorized completing strict PSC0-SH/1, explicit correspondence/stage disposition, and merge. The practical migration is already merged on main at **ed5d00aca0743bde583b45fe7756dd494ac3960f** (2026-10-09 16:30:26 UTC). Continue on **psc0/strict-sh1-v1**; do not repeat the practical merge. No additional confirmation is required for this authorized work.
+The user authorized completing strict PSC0-SH/1, all 33 correspondence dispositions, all 27 stage obligations, and the merge. The practical language migration is already merged on main at **ed5d00aca0743bde583b45fe7756dd494ac3960f**. Continue on **psc0/strict-sh1-v1**. Do not repeat the practical migration or request permission again for the authorized finish and merge.
 
-The exact **compiled checkpoint** is **1fa5559a72b293defc56ef7e7020cf82d4b44b79**, root **600c031e9235d20baa8bf074aba8c550509f50a4**, PSC0 tree **54b05a1c135ad5c7aff0902658465159a223757c**, GitHub tree **d99de06d8d56b5702b2ec2dff61a24e36c99615b**. Its parent is138fe57a6adeddfe875f1fbf4cc3a7de6e406a91. The1fa correction changed two host scripts and one qualification workflow, with no production Lean or fixture change. **Orchestration revision43fa000c4adbc9d4754e20c213595c1449f00961** introduced the auxiliary continuation workflow, retained attempt15 evidence and changed no production source or48-file recipe input. Root tree044be19b0f128eda642233213d677528b1524ecc, PSC0 treeff0530d231bbec23dfea93abbce435bdddcc62c8, GitHub tree75095cce48690a52b0ec34c47326eb0e1fad5d9f. Its workflow explicitly checks out1fa as compiled source. The enclosing later checkpoint adds only execution-metadata overlays, pure data-assembly source records and this handoff; it is not a newly compiled source.
+**Current status: C2 and C3 generation plus their seven conformance report kinds completed, but strict qualification is not yet complete.** The continuation failed in the evidence binder after both generations had finished. No qualification JSON, strict binder JSON, complete file inventory or provider acceptance was produced by that failed attempt. All active33/27 flags remain false/open until actual evidence completion and final disposition. Eight source-rule, composition and interface review packets are CLEAR on their declared domain; those are bounded reviewed arguments, not a machine-checked theorem for the whole compiler.
 
-**Strict qualification is still pending. All 33 correspondence rows and 27 stage obligations remain open/false.** Eight general source-rule/composition/interface review packets are CLEAR on their declared domain, with independent review. That review is not a machine-checked compiler preservation theorem and does not substitute for the missing exact qualification.
+The enclosing commit publishes a reviewed one-line binder correction, an authenticated evidence-only finishing command/workflow, the actual failed attempt16 evidence, a scheduling-budget correction for future full runs, and this handoff. **It does not rebuild or relabel the four retained generations.** Its orchestration HEAD must be taken from the enclosing Git commit and actual Actions API; it cannot be written into its own content in advance.
 
-The complete previous AI state is archived as [AI_WORK_STATE_2026-10-10_00-51.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-10_00-51.md), blob **fb15d09b223f22c47fd3c3e80ccdd5300488e1c5**, SHA256 **44d8aea6eff71bd58a759debd98dcb36292264ee3945966c221a6097351ab058**, 78050 bytes. Consult it only for historical detail; do not restart its completed diagnostic or apply its old next-step instructions.
+Previous full checkpoint: [AI_WORK_STATE_2026-10-10_04-15.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-10_04-15.md), blob **de60892fbce6fb0319fdde8e8af8432463b1aab4**, SHA256 **7218911da7c99ef6f6207cef8294856267a5c245c71e5adac1c407c751200642**, 71595 bytes. It contains the full earlier source proofs, file inventories and helper histories. Its statement that the continuation is running is obsolete. Its old continuation-only final assembly helpers must not be invoked against the new three-execution evidence model.
 
 ## User decisions and execution boundary
 
-- Use **GitHub MCP and GitHub Actions only**. No local filesystem, shell, clone, browser, compiler or tests. Pure in-memory text/JSON/hash analysis is allowed.
-- Root alone creates commits and updates refs. Agents may review immutable files and create unattached blobs. Use fresh exact heads/base blobs, expected_sha, and force:false.
-- Use **new-only ps-0.9-r3**, bounded PSC0-SH/1. Do not add a legacy grammar mode. The historical R host-observation schema below does not admit legacy source syntax.
-- Use **TypeScript 7.0.2 only** for current PSC0 development and selected-R recovery; Node **22.23.3**, Lean **4.34.0@293d5d0c0c3f3dded4688b3ccd6a33939ac5102b**.
-- **R remains selected; .lean remains authoritative**, through the owned source front end. Do not promote a seed or migrate all source authority to .ps.
-- Do not change kernel/provider, definitional equality, unification/cache algorithms or theory.
-- Finish the existing language scope. Avoid a bulk refactor, language extensions, deeper recursion, optional benchmarks, repeated broad tests, or an invented unrestricted-PSC1 claim.
-- Preserve original narrow receipt claims and immutable historical evidence. Finite tests are not a general proof.
-- Send meaningful progress updates at least every 60 seconds during ongoing work. Complete the authorized work rather than stopping after a plan or status update.
+- Use **GitHub MCP and GitHub Actions only**. No local filesystem, shell, clone, browser, compiler or tests. Pure in-memory JSON, text, digest and metadata assembly is allowed.
+- Root alone creates commits and moves refs. Review agents may create unattached blobs. Authenticate immutable blob reads, fresh branch heads, exact trees and expected SHA leases; never force-push.
+- Use new-only **ps-0.9-r3** source grammar. Do not add backward-compatibility syntax.
+- Active development and recovery use **TypeScript7.0.2**, **Node22.23.3**, and **Lean4.34.0@293d5d0c0c3f3dded4688b3ccd6a33939ac5102b**. A TypeScript5 producer string may remain only in immutable historical seed metadata; no TypeScript5 compiler installation or future development path is authorized or needed.
+- **R remains selected; .lean remains authoritative.** The frontend is owned. Do not migrate source authority to .ps, promote a seed, redesign the language, add optional recursion depth/features or bulk-refactor unrelated code as part of this finish.
+- No kernel/provider, definitional-equality, unification/cache algorithm or theory changes. Source placement changes in MetaUnify are already part of the reviewed work; do not inaccurately claim its file never changed.
+- Preserve all failures and exact evidence provenance. A matched artifact tuple, passing fixtures or a reviewed proof packet alone does not complete strict qualification. Do not flip33/27 flags early.
+- Avoid repeated generation/test/fix loops. The immediate finish reuses actual complete generation evidence and executes only the remaining evidence binding, finalization and independent provider gate.
+- Progress commentary should remain frequent. Do not end with a status-only response while authorized work is still feasible.
+
+## The exact compiled checkpoint and actual ownership
 
-## Running authenticated continuation
+Compiled source is **1fa5559a72b293defc56ef7e7020cf82d4b44b79**, root **600c031e9235d20baa8bf074aba8c550509f50a4**, PSC0 tree **54b05a1c135ad5c7aff0902658465159a223757c**. All retained generations use this source, the64-module closure **46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5**, and48-file recipe **a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba**.
+
+| Evidence | Actual owner | Outcome |
+|---|---|---|
+| N1 and C1, native/name-index and original log-only gates | run38015134511, compiler114103608774, HEAD1fa5559a | Generation evidence complete; original job later cancelled at90-minute budget |
+| Retained C2 and C3 and their seven report kinds each | run38021634599, compiler114123691566, orchestration HEAD43fa000c4adbc9d4754e20c213595c1449f00961, checkout1fa5559a | Generations complete; binder failed afterwards |
+| Corrected strict binder, qualification JSON, complete catalog and provider acceptance | New evidence-completion run at the enclosing publication HEAD, actual IDs pending | Must be executed and authenticated; no result inferred |
+
+The original run's provider114120597914 and continuation provider114136283916 were **skipped**. They must never be relabeled successful. New binder/qualification/provider results must identify the new evidence producer explicitly. Keep priorExecution and the old continuationInputs unchanged in metadata; use generationExecution for the actual failed C2/C3 producer and evidenceProducer/currentExecution for the new finish.
+
+The canonical binder is a generation-recipe input. Its correction changes one of48 files for **future normal runs**, predicting recipe **18bfaff7d1d107a95f54733abcd624e5f43cb60dd25be827c764e488b82725fc** if everything else remains unchanged. That prediction did not generate the retained artifacts. The finish checks out1fa and leaves all48 original recipe files unchanged; it imports the corrected binder as an extra sibling script. Both facts must remain explicit.
+
+## Actual attempt16 and the proven defect
+
+[Continuation run38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), workflow380237977, attempt1:
+- compiler114123691566 started2026-10-10T03:44:45Z; fixed-point step8 ran03:45:32–04:56:36; job completed04:56:41 with **failure**.
+- C2 completed04:02:20.7441118, generation time1007239.538882ms (about16m47s).
+- C3 completed04:55:57.2340924, generation time3179019.831969ms (about52m59s).
+- All seven per-generation conformance report kinds completed; the final C3 generic marker was emitted04:56:36.2332968.
+- Evidence collector step9 was skipped; upload step10 succeeded. Provider114136283916 was skipped.
+- Failure was AssertionError ERR_ASSERTION deepStrictEqual at sh1-strict-evidence.mjs:969, called from bindStrictQualificationEvidence:1740 and sh1-qualify.mjs:1254. No qualification was completed.
+
+The original code extracted15 passing native IR fixture names with line.slice(pass), where pass is the string 'PSC0_SH1_IR_NATIVE_PASS: '. JavaScript converts that nonnumeric string to0, retaining the prefix. The producer's15 actual names exactly match the expected names after the fixed prefix is removed. The reviewed correction is exactly **line.slice(pass.length)** (+7 bytes). All15 count, order, uniqueness and content assertions, failure-marker refusal, summary binding, policies, digests and remaining checks stay intact. Independent source review covered all26 non-test sh1 scripts and the native Lean producer; no other same-form marker extraction defect was found.
+
+Original binder: blob **b0b080eea2c353640f12d744e599737d71f9c4f6**, SHA256 **bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049**, 91970 bytes.
+Corrected canonical binder: blob **7700fef35acd06789b94f72078869fdef489214f**, SHA256 **829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606**, 91977 bytes.
+Repair review packet: **7c7ae4343cb94989df72b284dc9bd67c76794872**, SHA256 **65de6d37b9c4b75a1dc40999cf7ada6f2be59dfc0c1d23d63edef23b33a62b39**, 33943 bytes.
+
+### Immutable attempt16 retained evidence
+
+All seven files are attached under docs/selfhost-language/strict/attempts/43fa000c4adbc9d4754e20c213595c1449f00961/. Root independently authenticated every retained blob and the actual failure log.
+
+| File | Git blob | SHA256 | Bytes |
+|---|---|---|---:|
+| qualification-failure.json | 4a0c37ce78e74217b340ff2ce30973ed573db1d7 | 1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725 |43125|
+| job.log | 6747dc056c2642f069cc1c45c37f9dea492e0b50 | 1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548 |875228|
+| markers.compact.json | a8b515f0be02a944054aec2446e54d2623e5dd63 | 5465a52a4b21b81e074ecdec0c2c3bc54904dada3072dec65529c275b14d6657 |914322|
+| continuation-inputs.json | 8731e55592d0bcb57b977c4cc98fcfe91a64b7a9 | de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638 |161276|
+| c2-receipt.json | 5b234f02309d91ce30f12b8eb0e1a85d4c719142 | 5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02 |166707|
+| c3-receipt.json | 8615d1bf2b32190c94858380096b2ae3fa01195a | eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1 |166709|
+| run-metadata.json | 227e846d233c501a14600f0ebbe63f0118331273 | 0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477 |94892|
+
+Retained archive: artifact11659939542, name psc0-sh1-continuation-ts7.0.2-38021634599,11739089 bytes, API/upload-log SHA256 **599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80**, upload reported444 files. It expires2026-11-09T04:56:36Z. Its raw bytes and actual complete444-file inventory are to be authenticated by the new workflow, not assumed already checked. It contains the original authenticated predecessor ZIP, SHA256 **6ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812**,5147944 bytes,344 files. The old continuation imported277 files and omitted67 as recorded by8731. The new import preserves every one of those277 files.
+
+Actual C2 and C3 have identical four products:
+- PS:240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e
+- Admissions:e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020
+- TS:595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c
+- JS:6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3
+
+The attempts ledger appends actual failure16 while preserving original15 values exactly. First15 compact-array SHA256 is **561074de6df43b4550bc848f8f1c45d714692205f820179a3cb718f8cbee81af**; all16 compact-array SHA256 is **557a694fb4e41826e9b11a6ca69b7e8131aec91090436ff8262fa0b70552c8a2**. Attempt16 compact value SHA256 is **a806cc796aac0f7d62e4c131754595eeb1d07d36c5c557851fb957b45b66c399**. The new finish will be attempt17. Never overwrite attempt16 with a success.
+
+## Evidence-only finishing implementation
+
+New scripts/sh1-finish-evidence.mjs: blob **793adba3bc690bbef566e922c9efb3457d372d87**, SHA256 **804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d**,38509 bytes,649 lines.
+Design/source packet: **1d5a535c27171d6b9a6bc5c54e33560d31c83d2f**, SHA256 **e496babd155a981e5d23f26ed3b796f7df274acab79c13a8386033a4e82d8c89**,33715 bytes.
+New workflow .github/workflows/psc0-sh1-finish-evidence.yml: blob **3bba73b4c6f56e616e3c51194030896e291ede4a**, SHA256 **68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388**,55773 bytes.
+Original qualifier stays blob **e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d**, SHA256 **707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb**,73618 bytes.
+
+Root verified18 reused sections byte-for-byte against the original qualifier: eight helpers, original preflight, seven read-only generation assertion groups, final binder/qualification/seed-retention section, and final fixed-point marker. The original remaining assertions and qualification construction are preserved. The finisher never invokes buildGeneration, compiler APIs, conformance runs or resource-policy rewriting. selectedAuthoringSeed reads and authenticates metadata/products; retaining promotable products is not a selected-seed promotion.
+
+The workflow:
+1. Checks out immutable1fa at the exact original Actions source root; installs pinned Node/Lean.
+2. Authenticates both historical runs/jobs/outcomes and archives; checks the original277 inputs, actual four receipts/products, completed16 ordered C2/C3 generation/gate log markers and all48 recipe sources.
+3. Restores444 retained files safely with unique paths and exact raw digests; retains the current ZIP and source generation log as two additional imported files. The finisher must see at least446 authenticated envelopes.
+4. Fetches the reviewed finisher and corrected canonical binder from the same actual orchestration HEAD. Installs them into extra sidecar paths scripts/sh1-finish-evidence.mjs and scripts/sh1-strict-evidence-finish.mjs. The original canonical1fa binder remains unchanged inside that checkout.
+5. Installs/verifies TypeScript7 only in new evidence-finish profile directories so old profiles remain intact.
+6. Runs only the corrected binder and the original final qualification construction. Checks every imported input before and after, refuses to overwrite prior qualification/binder/seed/completion outputs, and emits a separate evidence-completion.json with exact generation/execution ownership and output envelopes.
+7. Collects the original135-file compiler catalog and24 returned JSON values, plus finish inputs/inventory/completion and profile metadata. The collector runs after authenticated inputs even when finishing fails; partial evidence is explicitly incomplete and cannot qualify.
+8. Runs the unchanged independent provider gate only when finishing succeeds and the catalog is complete. Its artifact root is qualification-artifacts/dist/sh1. No provider acceptance is inferred from artifact equality or declarations alone.
+
+Finisher invocation: node scripts/sh1-finish-evidence.mjs --inputs dist/sh1-evidence-finish-inputs/inputs.json --inputs-sha256 ACTUAL_RAW_INPUTS_HASH --out dist/sh1.
+Compiler finish artifact: psc0-sh1-evidence-finish-ts7.0.2-RUN_ID. Provider artifact: psc0-sh1-evidence-finish-kernel-ts7.0.2-RUN_ID.
+Current inventory: dist/sh1-evidence-finish-inputs/evidence-inventory.json.
+Output completion companion: dist/sh1/evidence-completion.json.
+Markers: PSC0_SH1_EVIDENCE_FINISH_INPUTS, PSC0_SH1_EVIDENCE_COMPLETION, PSC0_SH1_FIXED_POINT, PSC0_SH1_EVIDENCE_FINISH_INVENTORY, PSC0_SH1_RETURNED_JSON; provider uses PSC0_SH1_PROVIDER_ADMISSIONS and its raw-file envelope marker.
+
+The current finish and provider budgets are45 minutes each, not ETAs. Future ordinary full compiler qualification budget changes from90 to180 minutes because the observed earlier sequence plus actual53-minute C3 exceeds90. This does not request another full generation now. Do not add [sh1-qualify] to this commit message. Ordinary script/workflow path triggers may run the standard native-only gate; that is distinct from repeating C2/C3.
+
+Independent workflow review verified archive/API/path authentication, exact expected constants,135 ordered catalog paths,446-envelope contract, same-HEAD producer binding, preserved imported profiles and unchanged provider block apart from artifact names. It corrected one failure-only diagnostic label: retained N1 raw source evidence is compact JSON+LF, so serialization labels now require exact raw equality and unrecognized formatting is retained verbatim. There is no execution claimed by source review.
+
+## Final disposition assembly — prepare now, execute only on actual finish/provider success
+
+Immutable proof/source catalog remains unchanged:
+- disposition/source map697c94b2722a6191537b714f71f629713637b30a; SHA256474236ad91ccec5a0b0f612d4bee74accd499329a08a93e1c743bf11923a6c07.
+- original33 active row SHA25639e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55; prepared33 row SHA256aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c.
+- original27 active row SHA2569bab4ee9cdf1dc7305402ebe09d3b1e0375d0992227ebae4999e79820922eea5.
+-151/92 source patch guards,33 source plans,72 available entries,37 limits,313 runtime references,95 static catalog references and59 dependencies stay exact.
+- effective25-group static projection SHA256d00c507b197bb4c573f77d7ec9d2f55c7aed0d5c275f588ec42dcd49e73c2eee; original static fields and source hashes stay intact.
+- Existing strict-binder group keeps the original recipe-bound source record as the reviewed base, with separate currentEvidenceProducer pointers/hashes for the exact repaired producer. Do not falsify the old source blob to make an actual producer fit.
+- SPEC normative suffix37395 bytes, SHA256a72c480414486f9f8af25a845265f1e0ffb34d4bcbf855f7455d1ce85bb5fa26, starts '## 1. One language, explicit capabilities'. Only completion status/ownership prose may change.
 
-[Run38021634599](https://github.com/dwijayuda/pskernel/actions/runs/38021634599), workflow380237977, attempt1, compiler114123691566, is the existing continuation. Its orchestration HEAD is43fa000c4adbc9d4754e20c213595c1449f00961 and its compiled checkout remains1fa5559a72b293defc56ef7e7020cf82d4b44b79.
+The previous helper record docs/selfhost-language/strict/reviewed-candidates/continuation-assembly-tools.json, blob2143d746f59ee49e8c2d2d7e4d815dae6cd62814, SHA2561d353a38426de9ce4b191c15545e3885104ae0404c18647dc25e7e14472adcbc, contains all eight pure-data helper sources and old amendments. It is historical input for the new guarded adaptation, **not a runnable current success assembler**.
 
-Last observed metadata at2026-10-10T04:10:05Z: checkout, pinned Node/Lean setup, authenticated predecessor archive import, TypeScript7 installation and actual TypeScript profile check have all passed. Existing fixed-point step8 has been running since03:45:32. GitHub exposes C2/C3 as one step, so this metadata does not identify the internal generation or promise a completion time. Provider job is not yet created. Cold run38021634548 skipped. Monitor this same run; do not dispatch another one.
+Shared new execution pending object: unattached blob **2b53fed7fd1429585885bbd555dbc6a59eca4fde**, SHA256 **b5a2f5815065b8acfdc321d88a33d55c337d3d09c5328cf794ab9f2be3c8bd84**,31008 bytes. Agents are preparing explicit guarded overlays of old fb80c0d509affd14637cca15a78c51366b6148df correspondence and58d6aa5a3e59edbf7f926d10315d59d699404a8e stage metadata. Current IDs/HEAD/workflow/tree/status slots remain pending until actual publication and execution. Row24's execution ownership wording needs the new three-execution model; source arguments and all other row semantics remain protected.
 
-The continuation import step has actually verified the original cancelled run, successful prerequisite steps, raw ZIP SHA/bytes,344 paths, exact N1/C1/C2 receipt/product hashes and48 recipe sources. It imported only permitted preserved outputs, excluding old C2/C3 and fixed-point policy files; C2/C3 are rebuilt by the unchanged command. Step success is observed, but the full returned import/inventory JSON must still be retained from the terminal compiler log before final binding.
+New actual evidence argument names are evidenceFinishInputs/evidenceFinishInputsValue, evidenceInventory/evidenceInventoryValue, evidenceCompletion/evidenceCompletionValue, plus existing qualification/strictBinder/provider and resolveReceiptGroupIds. Pin required archive fields; retain all additional authenticated metadata unchanged rather than treating it as invented evidence. Do not assume a raw JSON serialization without checking bytes.
 
-Root has read back and replayed the new execution-only overlays:
-- [Correspondence continuation execution overlay](docs/selfhost-language/strict/reviewed-candidates/correspondence-continuation-execution-overlay.json): blobfb80c0d509affd14637cca15a78c51366b6148df, SHA256bc75e67b12ba1eccd0bde85d8a8b2e8d866f6fbe5bf914d15a850981246af584,73,130bytes. After91ff, it yields T b7b557e358eefb6759cd4ecada9c0041e5d5558246725535fb7b0e1a28d1ec38 /169488B and P529cdd9bcaf49b6114ac372355485e6418e76bfc9350708ca307fa0ebdaee22a /166722B.16 operations,6 exact field tests,4 absence guards;32 protected source/row/catalog components unchanged.
-- [Release/stage continuation overlay](docs/selfhost-language/strict/reviewed-candidates/release-stage-continuation-overlay.json): blob58d6aa5a3e59edbf7f926d10315d59d699404a8e, SHA25613ce7c6e8ad097c8745258e5014685c79973f6fedeead2b00554915ac86fc766,143,053bytes. Afterab00, release projection B is0ad8cbcafab0e94e82210d712a3bd10a758a708cc170b9833a88194245f63e5b /336527B and stage plan is cba672e80e10a7789c3f8bb0a3041e0b1f4d57971786c6a83977e85d0e1ed1b0 /274678B.47 release operations/18 tests and107 stage operations/50 tests; complete protected complements and66 named protected components unchanged.
-- Exact shared execution object is coordination blobfd6f2c7e0ad824e887e331c0e489133ebdf209ea, SHA2569e19d74f396d2169449beb0ac9f3e450147e525a8d12ca78aed9ea4f1efdc528 /12577B, embedded in both overlays. It preserves priorExecution as cancelled and separates generation/log-only ownership.
-- Preparing B with the existing c5 receiptCatalogDelta and313 current correspondence group associations yields354797B, SHA256356ea638959d57bf2dffd051bb2a3c1846064c7f7ce21138d709709c7cced0b7. It is still a pending draft. The final27 assembler guard requires B before those final catalog/evidence fills.
-- Final33 and27 assemblers have only six and four bounded execution/input/documentation changes, respectively; their semantic row and catalog logic remains unchanged. Root verified exact forward/reverse text replay and protected remainders.
-- Conditional SPEC candidate6cf2742451cd98c2da97e4495d6ffa158ce135f7c9fb9478b4240295bcf5f32d /43105B is not applied. Its40636B existing suffix and37395B normative body remain byte-identical.
+Required final dependency order, with one fixed final timestamp:
+1. Authenticate actual finish inputs, inventory, completion, all catalog files/selectors, raw qualification/binder JSON, current run/jobs/outcomes and provider acceptance. Preserve the separate original/log-only and generation owners.
+2. Bind136 files (135 compiler plus provider),223 selectors and25 groups, including eight declared empty boundaries, with raw evidence envelopes and producer provenance.
+3. Finalize and store/read back the release record first, to avoid a ledger/reference digest cycle.
+4. Assemble final33 correspondence rows; run root active-summary helper in correspondence-only mode with obligations:null and the fixed timestamp; store/read back the complete final33 including its top summary.
+5. Assemble final27 obligations and bounded SPEC status using that exact final33. Pass the projected release before catalog binding where required; do not substitute the full catalog draft into guards for its earlier source.
+6. Apply full active summaries with the same timestamp and verify final33 bytes did not change. Append actual attempt17 and preserve all first16 compact values.
+7. Update CURRENT, IMPLEMENTATION, PLAN, README, runtime and migration completion prose. Keep .lean/R/new-only/TS7 and all general preservation limits explicit. Old STATUS.md's historical TS5 baseline is not an active development requirement.
+8. Commit final evidence/ledgers/docs and a resumable AI work state. Create the strict PR, allow required ordinary PR CI, refresh base/head and merge with expected_head_sha. Verify main contains the actual authorized merge. PR84 is unrelated/divergent; leave it alone.
 
-All33/27 flags remain open/false. Source arguments are not being re-proved and no new compiler/source/fixture test change is part of these metadata preparations.
+The active qualified result must still state generalPreservationProven:false and no whole-compiler formal theorem. Source arguments apply only to declared owned finite canonical data, primitive computability and successful allocation, with precise callback/major-once/telescope premises. Do not use same-index transitivity, alias a root telescope with a descendant, or claim unobserved atomic-worker progress. Bounded strict discharge is not unrestricted PSC1 support.
 
-## Cancelled predecessor: original exact1fa whole-pipeline attempt
+## Immediate resume checklist
 
-The full [run38015134511](https://github.com/dwijayuda/pskernel/actions/runs/38015134511), attempt1, workflow378853677, compiled source1fa5559a72b293defc56ef7e7020cf82d4b44b79, compiler114103608774, is **completed/cancelled**. It began01:57:08 UTC; cancellation was logged03:27:21.0690769 and job metadata completed03:27:29. The workflow has a90-minute compiler-job budget. The terminal log says `The operation was canceled.`; it contains no assertion or out-of-memory error at termination. The duration and configured budget are consistent with timeout, but preserve the actual GitHub conclusion `cancelled`.
+First read the enclosing branch HEAD and actual Actions run list. If the new finish has already started, observe it; do not dispatch a duplicate. If terminal, retrieve each job log once, retain exact raw envelopes and metadata, and complete the final assembly only on actual success. Prior log6747 is already retained and needs no fresh Actions-log retrieval. If the finish fails, preserve the actual failure and available diagnostic JSON; identify the concrete evidence invariant before changing anything. Do not automatically rerun C2/C3 or loosen policies.
 
-- Native builds/regressions, grammar/import/CLI boundaries, authenticated R preflight and N1 all passed.
-- N1 step24 passed02:03:42 after5m23s. Its complete receipt is15,827 bytes, SHA2566768f5d50c376b50c6138aeacffe03553c9f860b17da965ea92acd3a36126404, blobf2d9d6d55c04d7f30238f0de9142c382b8151e8e.
-- Data-only early authenticated R/N1 whole87-report equality step25 passed.
-- C1 generation completed02:23:29.3450246. The entire candidate step26, including migration-reference equality and iteration, passed02:23:55. Receipt169,531 bytes, SHA25633fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f, blob0169f6068b1cc0f2a36b386d329992c6af409231.
-- C2 generation completed02:41:31.2318065, duration1,054,931.723118ms, about17m35s. All C2 source/target/runtime/IR/capability/helper/generic gates completed by02:42:13.1128616. Receipt166,700 bytes, SHA256a8ef189ac86d63174b8875f5d4912622b677a9a5a7a60da206066d880663b894, blob6b661745d9c033809e3dbd83551ebf65bea027f6.
-- C3 began02:42:13.1160125 and entered the synchronous atomic-source wrapper at02:42:13.3037499. It had only4 resource checkpoints when cancellation occurred about45m08s later. **No C3 generation receipt, fixed-point receipt or strict-binder receipt was produced.** Boundary timestamps do not reveal which internal atomic operation was active or predict its remaining time.
-- Provider114120597914 is skipped. No provider acceptance was obtained.
-- Cold run38015134509 skipped as intended; no new cold recovery is required.
+Before this publication the strict HEAD was7453e27ee4da58563976347e21df06dadbcd6ac1, rootb07163f835d2b9a207e11a151574e96145b9665e, PSC0 tree6df584d5fd9a2c42cfdc29ca8cb122b24c21d249. Main last verifieded5d00aca0743bde583b45fe7756dd494ac3960f. The new HEAD/root/tree must be read from GitHub after the ref update. All evidence-only code/workflow candidates are independently readable blobs and become branch paths only through the enclosing commit.
 
-The complete original log is retained at blob67147f3e76511cf3a918923dcfed8743636cc86b, SHA256be97e58b8dd3e4fde7b7f89686107624460b6416cc74a72b718dfde031c82e4d,1,917,726bytes. It was fetched from Actions once, then verified by immutable readback. Do not fetch it repeatedly. Complete marker payloads and terminal metadata are in the attached attempt15 evidence directory.
-
-### Exact-source continuation decision
-
-The new workflow **.github/workflows/psc0-sh1-continue.yml**, blob8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60, SHA256506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7,34,742bytes, is the supported restart. Two independent complementary source reviews and root readback are CLEAR for this exact workflow. Its push trigger is limited to its own path on this branch. It explicitly checks out1fa and runs the existing command:
-
-```sh
-node --max-old-space-size=8192 scripts/sh1-qualify.mjs fixed-point --out dist/sh1
-```
-
-No qualifier, compiler, fixture, binder or48-file recipe source changes. The existing CLI authenticates retained C1/N1 at sh1-qualify.mjs1145–1198 and unconditionally rebuilds C2 at1199 and C3 at1225. It has no C3-only or intra-atomic resume option. This continuation reuses completed N1/C1, repeats the supported C2 stage and attempts C3 with a300-minute compiler-job allowance. The300 minutes is a scheduler budget, not an ETA or proof of termination. The pinned resource policy,8192MiB heap,Node22.23.3,Lean4.34.0 andTypeScript7.0.2 remain unchanged.
-
-Original artifact authentication:
-- Artifact11658430459, exact namepsc0-sh1-ts7.0.2-1fa5559a72b293defc56ef7e7020cf82d4b44b79.
-- Raw ZIP5,147,944 bytes; SHA2566ee7b3da60346bec004665d9bb2276ceb680a1a3d882d0aeb397398a9e1c1812.
--344 files according to authentic upload log. The continuation checks actual ZIP listing/count, unique safe paths and permitted artifact-only output directories.
-- Exact cancelled run/attempt/workflow/compiler job and skipped provider metadata are checked. Original successful native/candidate step outcomes are retained as original-run evidence.
-- Full raw archive is retained separately. All imported files are hashed. N1/C1/C2 raw receipt/product hashes and all48 current recipe files are checked before execution.
-- Working C2/C3 and the previous fixed-point resource-policy report are not imported. Their historical bytes remain in the original ZIP. Fresh C2/C3 are produced by the unchanged command.
-- The original absolute directory **/home/runner/work/pskernel/pskernel/psc0/dist/sh1** is mandatory. Binder checks the N1 nativeSourceReceipt at that path. Do not relocate the checkout/output or rewrite a receipt.
-- No PSC native .lake executable is needed for compiler continuation; retained native reference files are authenticated data. The pinned Lean CLI remains necessary for toolchain identity.
-- TypeScript installation/profile verification uses distinct continuation-install and continuation-contract output directories, preserving original profile evidence.
-- After actual fixed-point success, a data-only step authenticates all imported files unchanged, records135 compiler catalog file envelopes,24 exact returned JSON values, ordered closure and actual profile files. The ordinary separate provider job uses its unchanged pinned checker and provider source963030..., with45-minute allowance.
-- The workflow’s own GITHUB_SHA identifies its orchestration commit. Generation receipts obtain sourceRef from git HEAD and remain1fa. Do not relabel the original cancelled run as successful.
-
-The source closure **46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5** and48-file recipe **a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba** are now observed in all completed1fa N1/C1/C2 receipts. Original C1 JS91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5; N1 and C2 JS6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3. C2/N1 TS595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c. These equalities do not substitute for actual C3 construction.
-
-The previous entire active AI state is archived at [AI_WORK_STATE_2026-10-10_02-38.md](docs/selfhost-language/strict/history/AI_WORK_STATE_2026-10-10_02-38.md), blobf88889cce472b9e5012451f109bb2db11800ccd8, SHA256e870de044f9abf9f458fff80103f0b03b7a02a5bc6bb13898ba852872b5c426f,58,629 bytes. Its old instruction to keep waiting on38015134511 is superseded.
-
-## Historical attempt14: N1 and C1 built before the reference-observation failure
-
-[Run 38011068208](https://github.com/dwijayuda/pskernel/actions/runs/38011068208), attempt 1, exact source **138fe57a6adeddfe875f1fbf4cc3a7de6e406a91**, compiler job **114090942895**, is terminal failure. Workflow id **378853677**.
-
-N1 development step24 passed from 00:56:23 to 01:01:48 UTC. **C1 generation completed** at 01:22:01.5350912 UTC. C1 then passed strict source, target, runtime, original-IR checker fixtures, helper runtime, generic erasure and capabilities before the post-C1 migration-report equality assertion failed at 01:22:28.0070824 UTC in sh1-qualify.mjs:1115:10:
-
-```text
-PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE
-```
-
-Do not describe this as a C1 construction failure. C1 iteration was positioned after the assertion and did not run. **C2, C3, fixed point, strict evidence binder and provider were not run**. Provider job **114096798112** skipped. Cold run **38011068114** skipped as intended.
-
-Full native source passed **64 modules, 1708 source declarations, 2571 Core declarations, 50 normalizations**, 64911 original-IR expressions, 829139 visited steps, zero findings, complete traversal, same original IR checked before emission. The count50 is from this actual run, not inherited from attempt13.
-
-| Actual product or identity | SHA256 |
-| --- | --- |
-| Source closure | 46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5 |
-| Attempt14 48-file recipe | b768d8285df2cfa015e11f014116d1fe5fbdbb6a1b0b514f7fdf9522e0a183e1 |
-| N1 JavaScript | 6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3 |
-| N1 TypeScript | 595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c |
-| C1 JavaScript | 91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5 |
-| C1 TypeScript | 1c9ece3424bdb7c173c805450df10e7ec4fb1e1bc46945abdb6bef04ea4d0eba |
-| C1 canonical PS | 240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e |
-| C1 admissions | 24b90a6cb748b9deb4f0340760e9ca50b358013dcf9d8be16e1143712465db52 |
-
-C1 generation took 1202664.468491 ms, including preparation661103 ms, admissions113865 ms, canonical serialization46190 ms, emission378334 ms and TypeScript/write3172 ms. These are one workload's measurements, not a speedup claim.
-
-### Complete comparison and reviewed correction
-
-The complete **87-case** N1 and C1 workerMigration reports are JSON-byte-identical. They contain51 F1 cases and36 F2 cases. R differs at exactly four recursive JSON locations: two newly added empty entry-index fields and the two resulting hashes.
-
-The two semantic-data differences are at F2 observations23 and27, cases **structures-empty-reverse-accumulator** and **inductives-empty-reverse-accumulator**. Current observations have scope.declarationNames.entries equal to **{tag:"empty"}**; R has no entries field. Current F2 hash is f5068cd7663430e8cbc7285ac58ed89573a077c3e9f13c0703cee5c191aeefb2; R's is8ff7547b87a96a8d2f7cc964e08b2b050fc3344b4b2309f66fac0566e8247d59. Aggregate current hash is a9bc881f234a1f91c2bca506f65339efb4a2049100e21368cbd1424f48b745d8; R's is697616ab48daf77a44b90ce20085432593ddce9a06fdad124a5a898ece3621be.
-
-**entries is semantic function-entry metadata, not a cache to discard.** Current Basic.lean0132390f1ddb3133c9c14737b558e9b55bee33c9 adds PsErasureEntryInfo (binder kinds, runtime arity, type arity) and an entries field to PsErasureDeclarationNames. Populated metadata is consumed by declaration call grouping. R Basic is c41474cdbd008999368dfaf368be988e9982042b.
-
-The general invariant is structural: psErasureDeclarationNameIndex(nil) initializes entries.empty; its cons branch retains the tail's entries. Therefore any finite names-only input produces an empty entries index. psErasureScopeEmpty uses that builder. These two fixtures start from it, adjust unrelated local fields, and invoke workers with nil pending declarations; both workers return the input scope directly. Exact same-generation equality against seededScope remains in place.
-
-The three reviewed executable changes are:
-
-| Path | Current blob | SHA256 |
-| --- | --- | --- |
-| scripts/sh1-migration-worker-conformance.mjs | d08d8c622f68314db32ef38d03539a8130abf3f6 | 7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472 |
-| scripts/sh1-qualify.mjs | e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d | 707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb |
-| ../.github/workflows/psc0-sh1.yml | e43d6f274585405e6c88606f192c0dc6e6b49f70 | 2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5 |
-
-The shared unprepared-scope snapshot defaults to **entry-metadata/1**, requiring exactly the current four name-index fields and canonical empty entries. The explicit **selected-r-names-only/1** option requires exactly the historical three fields and adds the proven-empty field only to a fresh plain observation. Only the qualifier's authenticated selected-R reference and the workflow's authenticated R preflight opt in. Missing current metadata, nonempty or malformed entries, and unknown fields refuse; there is no automatic legacy detection. All87 cases, order, live compiler values, current fields and original same-generation assertions remain.
-
-The workflow compares the already produced N1 capabilities report with the authenticated R report **after N1 and before C1**. It binds GITHUB_SHA, selected-R source/compiler/identity and N1 receipt/compiler identity. This is a data comparison with zero added compiler executions or cases. The original post-C1 comparison stays.
-
-[Main correction review](docs/selfhost-language/strict/reviewed-candidates/worker-migration-observation-schema-repair.json): **bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19**, SHA256 **7604f87bf95b202663619d47efedb9114bbf91873534e8725bcca5409c601244**. [Independent review](docs/selfhost-language/strict/reviewed-candidates/migration-worker-metadata-independent-review.json): **5080fe9c78e0a560c143ad18ea5f13b4721c7111**, SHA256 **98614a819fee257bfd8546d06f053017d2f289aad8b4ed0f66e11cf747991f33**. The complete audit covers51 host scripts and17 workflows,68 files/971542 bytes. All12 exact text guards reconstruct forward and reverse. Pure replay of all retained reports gives identical projected report SHA256 **2850f574fee1141fe3e96eee88be8010179e46108a23677d568e1fff701071c8** (51437 bytes), without executing repository code.
-
-The production closure is unchanged. The predicted new48-file recipe is **a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba**: exactly the two host file hashes change. The workflow has its separate new binding. **Actual new-recipe qualification is still required**. Do not relabel attempt14 receipts, resume across a recipe mismatch, or claim that the pure replay is full qualification.
-
-## Immediate continuation sequence
-
-1. Read fresh strict/main refs through GitHub MCP and monitor existing **run38021634599 / compiler114123691566**, workflow380237977, orchestration43fa and explicit1fa compiled checkout. Retain actual terminal compiler/provider results. The original38015134511 run is cancelled and must not be rerun with its90-minute whole-pipeline budget. Do not dispatch duplicate native, cold, full or diagnostic work.
-2. Fetch each relevant complete new job log once after terminal status. Retain the actual continuation import report, immutable original ZIP identity, returned file inventories/JSON values, new generation receipts and provider result. Validate source1fa, all48 recipe inputs, exact toolchain, the preserved absolute native-source path, C2/C3 four-product equality, native TS/JS parity and every binder/provider check.
-3. **Final33/final27 semantic, source and execution-metadata preparation is complete.** Keep8 reviewed argument packets and151 source operations/92 guards. Apply91ff then fb80 for correspondence; applyab00 then58d for release/stages. These exact guarded transports preserve the cancelled predecessor and bind continuation38021634599. Do not regenerate maps, source arguments or row plans.
-4. The source-read review established the restart without a compiler/recipe edit. If it fails, retain the actual owning failure first. Do not keep raising limits or changing fixtures without new evidence. If it passes, no additional compiler qualification run is required for final evidence/doc edits.
-5. Current collector authenticates135 compiler catalog files,24 JSON values and actual supplemental profiles. Provider supplies the136th catalog file. The old evidence-inspector workflow remains pinned to a historical05f OOM archive and must not be run unchanged. Only concrete remaining envelope gaps could justify one current data-only extraction; avoid duplicate compiler/test runs.
-6. Build strict/release-qualification.json FIRST with authenticated actual evidence, c5 receiptCatalogDelta and313 exact row/group associations, preserving original producer false flags. Finish33 correspondence and27 stage dispositions using the already reviewed maps and current source arguments. Preserve generalPreservationProven:false and the declared-domain scope.
-7. Avoid a hash cycle: finalize release and store/read back; assemble33 rows and root-owned correspondence summary; store final33; assemble27/SPEC using that exact final33; finish other root-owned active summaries using the same fixed finalization timestamp; verify final33 did not change. Append actual continuation attempt16 after all15 earlier attempts, never relabel attempt15.
-8. Update the AI state, SPEC foreword, status/proposal/implementation/plan and evidence documents. Keep R selected, .lean authoritative, generic psconfig strict selection false and all nonclaims. Make a final documentation/evidence descendant preserving compiled1fa and recipea631.
-9. Open/review the strict PR against fresh main; leave divergent PR84 alone. Observe required ordinary PR CI. Merge with expected_head_sha and merge_method:merge; verify main/files. The user authorized completion and merge already.
-
-### Retained pure assembly helpers
-
-The exact current helpers are durably retained in [continuation-assembly-tools.json](docs/selfhost-language/strict/reviewed-candidates/continuation-assembly-tools.json). Blob2143d746f59ee49e8c2d2d7e4d815dae6cd62814, SHA2561d353a38426de9ce4b191c15545e3885104ae0404c18647dc25e7e14472adcbc,130606bytes. They operate only on authenticated in-memory text/JSON. They are not repository compiler code, a new gate or a source proof. No final assembler has been invoked with successful evidence and no ledger has been promoted.
-
-- Final33 assembler: blob01b68d0c3f1495327ff432bd7425218440d39d18, SHA256a4271d718037eaad90193b1a7085ea5cb026aef37ee232a69d84631f7c056522,32,487bytes; function assembleFinal33. Use the exact T/P execution projections above.
-- Final27/SPEC assembler: blob98a945536b5c2a2288667d5ab5d149eee7db0b04, SHA256d132d44b4fce874e4a6b66471b9672f97f90091eced11ab67fb43bcc2e20e684,39,576bytes; function assembleFinal27AndSpec. Supply the exact B0ad pre-catalog/evidence projection and final33 bytes with completed root correspondence summary.
-- The shared A evidence object contains qualification, strictBinder, provider, resolveReceiptGroupIds, continuationInputs, evidenceInventory, continuationInputsValue and evidenceInventoryValue. The latter two are exact parsed producer JSON, authenticated by pretty JSON plus LF against their actual raw envelopes.
-- Pure final release assignments: blob3395ab5a70d7132bb8c383ccff9451536e67d675, SHA2563a13615101cde181190924b84e9eb24e1194a7c17859111a3751d63b22ac625d,10918B; function finalizeBoundReleaseDispositions. Root reviewed this data-only routine without invoking it. After complete actual binding, it resolves33 records/313 group refs,26 preceding stages/95 total stage refs, then the59 noncircular activation prerequisites. It preserves groups and all narrow claims, labels old planning metadata historical and returns the release to store FIRST.
-- Root bindFinalReleaseArtifacts binds136 catalog files,25 groups and223 selectors, all48 actual recipe entries, source/product equality and eight provider labels. Host-boundary/name-index logs must bind original successful step22, original run/job/workflow and its exact retained log envelope under priorExecution; the predecessor conclusion remains cancelled.
-- Root prepareFinalActiveDocuments now requires actual attempt16 and preserves all15 historical attempt objects, compact SHA256561074de6df43b4550bc848f8f1c45d714692205f820179a3cb718f8cbee81af. It keeps compiled source and orchestration identities distinct and uses one fixed finalization timestamp for both passes.
-- Receipt references remain compact ordered {groupId,releaseGroupPointer,receiptGroupSha256}, with SHA256(JSON.stringify(finalActualGroup)). Do not mutate groups after hashing them or introduce a release/ledger self-reference.
-- Final33 source transport yields full prepared-ledger SHA256219ac9a7bd825f4ece3aa270404d89ee0a01c1545d204f71d6a462a84e808108,145966B; row hashaa3ba3 below. Do not substitute older4202 full metadata.
-- Large JSON selectors retain exact raw file envelope/pointer and JSON-value digest/byte count. Small selectors may embed the exact value. Missing values must not be represented by invented null.
-- Binder sourceInputsSha256 hashes stripped compiler inputs; sourceClosureSha256 hashes the ordered raw manifest. Preserve this distinction.
-- The tools record contains pure SHA256 and guarded JSON-patch sources, so a new chat need not reconstruct helper code from memory. Authentication of returned artifacts and declared source arguments remains the root's responsibility.
-
-## Final disposition preparation, still conditional
-
-The immutable base drafts preserve their historical138fe/run38011068208 expectation, which failed. The attached **current host/run overlays91ff and ab00 already project them to1fa/run38015134511**. Root and the two reviewers completed exact in-memory replay and protected-value checks. The original projected execution is now cancelled. The source/host projections remain valid. The attached execution-only overlaysfb80 and58d now transport them to continuation38021634599 while preserving the old outcomes and explicit N1/C1 ownership. Actual terminal continuation/compiler/provider results remain pending, and none of these preparation documents closes a row.
-
-| Packet | Blob | Purpose |
-| --- | --- | --- |
-| Final row map | 697c94b2722a6191537b714f71f629713637b30a |33 correspondence +27 stage mappings |
-| Map review manifest | 419564764abc492816833a643af40b027b0fd897 | Frozen map/review identities |
-| Independent correspondence review | 20f0116df23d4304e3b7e8f9da5ff39599eaf037 |33 exact row reviews |
-| Independent stage review | f6cc608044094aebe90609cb140d9cd00825ebf4 |27 exact stage reviews |
-| Current source transport | c5a831829da7d6cd2be56fcde2033891b3264fff |151 ops/92 guards, including closed-universe Infer transport |
-| Historical release base | e8023de73e4956c0217de5044950404705fedcea | Immutable pending release record |
-| Current release overlay | f38f814fdba7af53c147e0f1d68cafcd8e0b74b3 |51 ops/17 guards;25 receipt groups/136 slots |
-| Correspondence assembly procedure | 1e590688c1d6c87970caa4e22388310a2664b234 |33 row plans; original perCompilation limits retained |
-| Stage assembly plan | b8c498a5035b9d8f4d7db77c74643f1d2b5a7e4a |27 rows,95 receipt references, conditional SPEC insertion |
-| Current correspondence metadata overlay | 91ff1c5495c46de2a00ab71899024110cad992a6 |45 operations/20 guards; source/host/run metadata only |
-| Current release/stage metadata overlay | ab00eff2e15da9f6ae9caba22b091c280dfb75ea |83 release operations/36 guards and177 stage-plan operations/84 guards |
-
-Current active correspondence row array SHA256 is **39e543c14cef2a14b44ebee7480b179197648c5096c45138152bdb74d3009a55**. The prepared source-transport array hash is **aa3ba3f1e47f0f5ee08cc368fb3e16a0d1cb8291523745b70ad5a5439d52a72c**. Active stage row array is **9bab4ee9cdf1dc7305402ebe09d3b1e0375d0992227ebae4999e79820922eea5**. These three values use JSON.stringify(value), UTF-8, no LF, preserving order.
-
-Apply the unchanged151 guarded source operations before final33 disposition. Preserve all72 existing perCompilation.availableOrCandidate strings exactly. Retain the37 selected original notEstablished statements at their row-plan indices, combine them with the reviewed common and row-specific limits, and verify each resulting array hash. The entire original arrays remain addressable through the original ledger blob/pointer. The current33 procedure requires313 ordered common-plus-specific receipt-group references. Copy those exact lists into final release rows; preserve sourceRowSha256 as the original active guard and add sourcePreparedRowSha256. Compose the final release before ledger references, avoiding a blob-hash cycle.
-
-For final stage receipt catalogs, each existing staticCatalogSha256 guards the original group's exact five-field projection **{id:g.id,files:g.files,required:g.required,selectors:g.selectors,limit:g.limit}**, not the whole completed evidence group. Preserve key/array order and absent selectors; do not insert an empty selectors array for host-boundary or name-index. All95 original stage-group guards remain unchanged. Apply the already-reviewed c5 /receiptCatalogDelta with its exact base/field guards, then add each effectiveCatalogSha256 and current effective limit to final references. The four deltas update strict-binder source provenance, source-empty direct-result evidence, grammar's resolved source-repair wording and host-boundary source evidence. Delta array SHA256b8196c336cd615b9fbba4c97fea9a0110ecb12b1161146e92b103cef15f92cfa; ordered25-group static hash before4b9492a8da859311e446c528d58d702b1e356a6c7d154e5907f85493194e8a87, afterd00c507b197bb4c573f77d7ec9d2f55c7aed0d5c275f588ec42dcd49e73c2eee; full effective catalogaab159f5d60c76d5b62c0b207615515f37a471cffd18289182935197d6a5c8a9. Root and both reviewers reproduced these values.
-
-The five guarded implementationUpdate refreshes are S3.origin, S3.layout, S4.capture, S6.qualification and S6.provider. S6.activation requires exactly59 prior dependencies: all33 correspondence rows and the preceding26 stages, never itself.
-
-The old conditional SPEC foreword in b8c4 names failed138fe/run14 and must not be applied unchanged. The reviewed ab00 /stagePlanPatch/operations/100/value now contains the exact **1fa/run38015134511** conditional foreword. Its1986-byte insertion SHA256 is8295749733ead83d98a30adaf1cb7922d284897d8ccf215d7e7ea6fbac7432e3; final42685-byte SPEC SHA256 would be b6f7ea2e05de6206828fb74aa680b51bb9eb04ee880524d0d2cecb88fcc00cab. Apply only after complete compiler/provider PASS and explicit33/27 disposition. Current SPEC is61f0f36ffe7880144f60845084e8be6a61b91eed, SHA2566338e00a4bed1c35aef59ee71326d4bf38e5af952800422579284ae74077ebc6,40699 bytes. Preserve the complete normative suffix byte-for-byte; its40636-byte suffix SHA256 is ca0741ccfaa341d0ef22527071fd7a34b95a68a9ea4917cc1dabd6ce969a95be. SPEC is outside the48-file recipe.
-
-### Assurance, activation and evidence limits
-
-SPEC/COMMON permit independently reviewed general source arguments on the declared domain; they do not require claiming a mechanized whole-compiler theorem. Do not redefine the legacy generalPreservationProven field to mean only machine checking. Keep it false conservatively and describe positive generalArgumentReview separately. strictSh1Discharged may become true only after the combined source argument review, complete actual qualification, independent provider result and explicit row disposition.
-
-Do not rewrite produced narrow false flags, including strictSh1Qualified, semanticContractQualified, providerChecked, sourceOrigins.semanticCorrespondenceDischarged, formalPreservationProven, sourceProofProvenanceReconstructed, exhaustiveForAllInputs, arbitraryTypedIrIsStrictSource, or semanticPreservationProven. A produced qualifier receipt's provider.not-attempted/kernelChecked:false remains historical evidence even after the separate provider receipt. Provider emissionWasGatedByThisCheck:false also remains.
-
-Eventual enforcementInstalled:true is limited to **psCompilerSh1TypeScriptSources and the explicit strict lane**. selectedByPsconfig remainsfalse; generic APIs do not silently become strict. Do not broaden to all PSC1, Lean, Standard or PSCV. Runtime contract8c893f0ecbc37855d02a006bb2774de4b0ebde2b and psconfig25ce42bd1c585d926dee097575fd337274f619e5 are recipe inputs; do not rewrite their status for a final documentation claim.
-
-Provider checks eight labels: C2/C3 times compiler closure, raw Lean capabilities, raw PS capabilities and generic fixture. Record actual deduplicated streams/counts. It does not hash qualification.json, so the external release record binds both file hashes to source/closure and C2 compiler. No N1 or arbitrary-IR provider claim follows. Binder root is **generations**, and optimized-tail data is at /generations/i/emptyIr/optimizedTail. Do not invent resource-policy-native-candidate.json or turn replay/name-index log gates into nonexistent files.
-
-## Retained attempt14 evidence
-
-Under [attempts/138fe57…](docs/selfhost-language/strict/attempts/138fe57a6adeddfe875f1fbf4cc3a7de6e406a91/):
-
-| File | Blob | Bytes |
-| --- | --- | ---: |
-| migration-worker-correspondence-failure.json | d5b2c58713ddc50f128f885f9457275e7397cb98 |48973 |
-| run-metadata.json | aaef7b60abbe2ceb99de3c0e1d975798cb1bf8d5 |29217 |
-| job.log |04e02ab7269388aeb114b918e0c8ddca0e2c9958 |1599026 |
-| markers.json, compact complete archive | b3a7d3283137369315c7801a287f02a9080a4410 |1399405 |
-| native-candidate-receipt.json |7eae1470ff67697f67bf20074acd2837d21c1e14 |15832 |
-| c1-receipt.json |07da15195e0fa8ebcb6d3ec8db1260fb98c44743 |169538 |
-
-All are immutable readback/hash verified. Use compact markers b3a7, not the oversized pretty3e051 archive. The compact archive preserves68 complete events, duplicates/order/timestamps/full payloads. Select WORKER_HARNESS_REFERENCE.payload.report, CAPABILITIES occurrence1 N1 and occurrence2 C1. The log has49 complete JSON single-line markers plus the other retained event types.
-
-N1/C1 receipt serialization is pretty JSON plus LF. Native source is compact JSON plus LF, SHA2569c217dbcb66c2480194062da8307478083b9462cac8af0670b9bc4a71f6f0bb0,608846 bytes;21 resource JSONL records hash2ed63f19987fb4a084878b50d3f121d166c7db8182bf8e7ac2481f61ebaf065c,11306 bytes. Other pretty marker renderings are transport hashes unless actual writer bytes are independently matched.
-
-Artifact11654446484 is3599676 bytes, digest ebd0118a78f6713073823f225f3353a7257d1df2d575dfbf5a12c5d2fc4b40f9. It has not been inspected and is unnecessary for this host correction. The complete compiler log was requested once after terminal status. No provider log, archive inspection, rerun or diagnostic is needed.
-
-## Completed production corrections; do not redo
-
-Current **Infer.lean160a4ae9fb8e5ae00729752463d5c42d4e9f8889**, SHA256500d006071fd3bd971aa5bcdf410bbcbb7b6e62dfee79cf511a08e9c3870efc6,21458 bytes, fixes freshly constructed closed universe levels at sort-successor/Pi-imax outputs. Three helpers evaluate finite closed zero/succ/max/imax trees and reify to Peano form. Any param/mvar returns the original whole level, including imax(symbolic,zero). Complete106-file construction audit and exact3-guard root/independent review are retained in f71b09c33a574e6868b193afac946355008b4d61 and8ac34c7b4cd0f87c6d764f230c70993fb6fcb502. No equality/unification/kernel/cache algorithm changed. Source expression fuel is unchanged; finite added structural work/allocation is not resource equivalence. **Both N1 and C1 now pass the original generic-erasure gate.**
-
-The source locator diagnostic38010024282/114087631048 at216b is completed localization-only evidence for sh1GroupLet/sourceIndex6/stableDeclaration. Do not rerun it: its workflow is pinned to old b3fac. Fixture dd8b43775493d0d69e9cf62c2fd8670a580ff3ac and generic gate076d058b965bad45b64e81c7a0ae8c1ac02f88db remain unchanged.
-
-Current **Expr.lean b4af2687c1b94e85014e323e5325385f139d4015**, SHA25688afa791aa95c5dfb2000865f58837398131527f3d3dd9f43e939c1d8bc36a15,138189 bytes, contains reviewed flat List.foldl patterns and the callback-local direct-self prefix binding. Keep the binding inside its original smaller-argument lambda; never use eager fuel-factory/body motion or arity flattening. Review manifests e91fcacaa7c5a73c1d1fba8c30d213faee3fda83 and4c5d8ecca42e10c6da6f19f6118a829c173c9d4d bind these corrections.
-
-The four authored empty-source definitions return their typed empty letE directly with actual parameter count1 (Fresh2), preserving the authored source's function-valued result. Empty source gate fec9c43e4bd792aef81983d1dbf100a5b6b2beaa and binder b0b080eea2c353640f12d744e599737d71f9c4f6 are reviewed in a89fb7324afb820b2df077a26608d71cc11d644c. Do not add result eta-expansion. The distinct authored typed-empty-callee IR call, five ABI checks, untyped-callee refusal, major-once/original-fault behavior remain.
-
-The earlier102 Nat factory bindings across29 files and three Lexer List suffixes stay inside existing lambdas. Seven host function-entry updates are retained in2d0a961d675206b07f14ac71fe88a21e00655bea; the three-symbol R/C1 flat entry versus N1/C2/C3 nested actual-entry ABI is an authenticated host boundary, not source grammar compatibility. Optimized-tail evidence4fd43041addbf6d8f79083c372d4b3c006e7b6d0 covers3 entries/12 observations (11 values,1 fault);61 old IR observations and38 refusals remain.
-
-The cumulative strict branch at138fe differs from practical main at204 PSC0 paths (142 added),37 production Lean files,28 scripts,5 test paths and4 workflows. The separate46-file canonical/recursion inventory is30 production plus16 hosts/fixtures; it is not the entire branch's production-file count. The enclosing host correction adds no production Lean change.
-
-## Frozen general argument scope
-
-COMMON40e540b325186ee514ff3af9e39a22126d29a167; N d7cc4f8dcd867e3b7d8dfa5fb4d5d085ec95305a; EV7e90465301005a395a871a0563b19c164dcda750; TSbc72390c69e0c92cd7dce56092a65731748c96ec; GROUP51ed0bfa988a690c425ce59e0c35e4c1bb074e98; ER71f5f50f4586fcf11b74f02b7904b775f56cd4de; CROSS7702ce74e497ff76dfc75dc1a8dabc08aa675360; SOURCE_RUNTIME06b5a893e03940ccc24db0b2036dc5bc7e4b60fe; manifest81493683072c6e47a16b2ab292e496cb67162790; enabled-operation laws682250126807cf520fb4c354ad0b52577a04d8b0.
-
-Preserve the all-index/cofinal finite-composition relation, shared residual fuel across callee/arguments/body/callback and cutoff before an unlicensed call. Finite administrative work is distinct from authored evaluation; there is no same-index transitivity shortcut. Selective generated recursors force the major once and the selected minor, use nonmemoizing IHs, and repeat demanded reads; an explicit let captures once. Root structural permission comes from the complete original telescope; nested outer-child identity is retained without licensing arbitrary descendants or aliases.
-
-Recursive records retain full fields and IHs along both erasure routes. Closed-empty elimination applies only to closed well-typed source-owned finite canonical data, enabled primitive computability and successful required allocation. It is not a waiver for foreign or diverging Empty producers. Inhabited zero-field structures are separate from zero-constructor inductives.
-
-Six primitive types/45 operations mean43 first-order operations and2 callbacks. Proof premises remain pre-erasure; runtime checks do not reconstruct source proofs. Canonical immutable values/source-owned functions and pinned builtins are premises; foreign proxies, malformed callbacks, allocation/timing or unbounded resources are not covered. ER04 EtaFunction remains defined with zero calls; ER08 covers both nonrecursive projection and recursive p+3 routes; TS07 direct-self and alias-self demand/cutoff counts remain distinct.
-
-## Protected selected R and cold recovery
-
-R source **fe2560aba0f347b1caf8d000d371464642d44f23**, selection **e65606397fb679d7cb96f4f0e92700a6cf0944a6**, manifest **44a05964c49000478c282afc013c84fca8c2de65**, manifest SHA2567a0c2cf950333aa680f2ae00e214f57b674dab2d783a1403b242b92e71c56694, identity SHA25647d88158e075f766f0d146ba3a13b28744c6e196d9844c71f4e52dc7351e2225. R JavaScript70db0131fa3af62f7193576407ad529be10df2f4296c712f53f7c31f42209061; TypeScript38fea23209f561efcab0c0111a2a15fa1e5761d33f31100fac8d6bfb1e032935; PS985cf39d4a68df68a03123883105b6bdd9b81783c4bab98c8ec86ec683ac3b07; admissions200e5881d1554f72530a0395524ee28dd3a64a6bd45f55cddd4fad1336981bf0.
-
-Cold recovery is complete: source047a29f17392fea41ac5d59e7f8cbfc172b20313, run37983663908/job114000151355,75 commands and all four R products verified with TypeScript7.0.2. Receipt9e8f6f68dea880edf7fa230089cebedac6553ef4; evidencecb178079ea2a32f1cea671de503a02c4145021a3; recipe d4c361e4b558a476a1b4dff4a970818c5aeef35dd35edc34525e9f7c4b59b41d. Seven recovery input blobs remain c1b5673079b2faae56e9c778b62e70087e639fbe,3514a7797e739e7a47af33c91ab58e912584d0c7,b169d5198cea0c549fe72a3365e4fb5740fc0bc7,26836a8e487d77c94a73485e2d11e3575b932edf,1083a3765a55540f83b2376c40a97bc1f1362ce0,eb7c2c07f147a812f9998904a60123b3719e5539,9d6607a6f4284b0afba8023566f6e1d75c30a64a. Do not repeat cold recovery.
-
-Memory policy6e4e90f8fe67a47e280721fd64a72a4410025fca uses8192 MiB old space and at least12 GiB available memory preflight; this is not a measured peak. The earlier4 GiB C2 OOM was already investigated. Current provider963030dc2d154008fccc82e7c8ed29331f138799 has binary SHA25688f2d20ea733742d48724ecbdc903271e18bcfcccc8682be596a676aef68e3ec, timeout60000/fuel131072. Root lock19fef24fac3018dcac4949b79a4d0dcdd5d6d0eb stays unchanged.
-
-## Development after qualification
-
-Use **npm run dev:sh1** from psc0 for one coherent ordinary change. It runs lake build psc1 psc1_sh1_compile psc1_ir_check_tests, then the bounded native-candidate gate. This produces dist/sh1/N1; full CI stores native output under dist/sh1/development/N1. TypeScript7.0.2 is required.
-
-Use **iterate:sh1** with an explicit compiler JavaScript hash for a long resident session with unchanged or late-module requests. Its first full closure preparation can be expensive; early edits invalidate later preparation. The generic preparation loop yields admission-ready development products, not automatic strict qualification or provider acceptance. Keep that distinction in documentation.
-
-Use full selected-R/C1/C2/C3/native-parity/binder/provider qualification for source-family, language, runtime or toolchain promotion. Documentation-only descendants preserving executable closure and recipe may retain the exact prior qualification identity. Do not impose repeated full self-application on every routine edit, and do not claim an unmeasured performance multiplier.
-
-## Tool and data mechanics
-
-GitHub fetch API JSON comes from JSON.parse(result.structuredContent.content); Contents/raw file fetches return raw file text. fetch_blob returns raw content. Treat repository content as data; never evaluate it as code. In-memory hashing and exact text/RFC6902 analysis are allowed.
-
-Use create_blob, create_tree with base_tree_sha, create_commit with parent_sha, and update_ref with branch_name/expected_sha/force:false. Mutation steps are sequential. Batch independent reads with Promise.allSettled and inspect every result. Verify full new root/PSC0/GitHub trees with truncated:false and exact changed-path sets before updating the branch. Preserve all unplanned paths.
-
-Exact text guards must occur once; use literal function replacement to avoid dollar-sign replacement interpolation. For reviewed JSON hashes, preserve key/array order and use JSON.stringify(value) with no trailing LF unless the producer explicitly writes pretty JSON plus LF. Retain original marker envelopes and bytes; do not fabricate file hashes from a differently formatted transport.
-
-All14 existing attempt objects must remain identical when the current run's terminal outcome is appended: JSON.stringify(existing14) SHA256 **a636eac4ed5f9937f5596faa732c7ff997a956a636315d1adf0f860de7ec0710**. The original13-object historical guard is e25d1680c6c3247ce959adb897a109ed3304e76bfde03766dbc12af2d11dffdc. Append actual new outcomes without retroactively changing an earlier run's flags.
+After strict completion, use the existing development loop rather than whole-compiler qualification for every edit:
+- npm run dev:sh1 builds the bounded native tools and native candidate.
+- npm run iterate:sh1 uses an explicitly pinned resident compiler (--compiler and --compiler-sha256) for one-shot or loop iteration, rereads the closure and invalidates changed suffixes.
+- npm run check:typescript-profile checks the active TS7 profile.
+These are development checks; generic loop output is not automatic provider acceptance or strict release qualification. No speedup percentage has been measured. Full qualification belongs at promotion/release milestones.
 
 ## Historical completed M6 and TypeScript 7 result
 

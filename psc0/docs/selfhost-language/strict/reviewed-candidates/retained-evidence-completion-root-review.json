@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-retained-evidence-completion-root-review",
+  "updatedAtUtc": "2026-10-10T05:23:40Z",
+  "disposition": "CLEAR-bounded-source-and-provenance-review-execution-pending",
+  "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+  "originalGenerationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+  "originalGenerationRecipeFileCount": 48,
+  "actualFailedExecution": {
+    "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+    "runId": 38021634599,
+    "workflowId": 380237977,
+    "compilerJobId": 114123691566,
+    "compilerConclusion": "failure",
+    "providerJobId": 114136283916,
+    "providerConclusion": "skipped",
+    "C2Completed": true,
+    "C3Completed": true,
+    "sevenReportKindsPerGenerationCompleted": true,
+    "binderFailedAtLine": 969,
+    "qualificationProduced": false
+  },
+  "binderCorrection": {
+    "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+    "oldBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+    "oldSha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+    "oldBytes": 91970,
+    "newBlob": "7700fef35acd06789b94f72078869fdef489214f",
+    "newSha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+    "newBytes": 91977,
+    "exactBefore": ".map((line) => line.slice(pass))",
+    "exactAfter": ".map((line) => line.slice(pass.length))",
+    "allOtherBytesUnchanged": true,
+    "reviewPacket": {
+      "blob": "7c7ae4343cb94989df72b284dc9bd67c76794872",
+      "sha256": "65de6d37b9c4b75a1dc40999cf7ada6f2be59dfc0c1d23d63edef23b33a62b39",
+      "bytes": 33943
+    },
+    "fixedPrefixLength": 25,
+    "actualNativeFixtureNames": 15,
+    "allOriginalChecksRetained": true
+  },
+  "finisherSourceReview": {
+    "status": "CLEAR-source-review-execution-pending",
+    "module": {
+      "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+      "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+      "bytes": 38509
+    },
+    "checkedOriginalSections": [
+      {
+        "name": "capture",
+        "sha256": "314fa8ab1f01e77a1f4b451e67003770f4441b3fdcdde5e2f522ce2e7c473a4a",
+        "bytes": 162,
+        "exact": true
+      },
+      {
+        "name": "writeJson",
+        "sha256": "30a7385e95d5d660cbee12634004e53eef0b82f32c6f66fa97c8d04f34242e4f",
+        "bytes": 161,
+        "exact": true
+      },
+      {
+        "name": "toolchainIdentity",
+        "sha256": "6408b5e628b9bfd5937571db5e26cc2db7845984366fc96b380a50166d3c9b7d",
+        "bytes": 299,
+        "exact": true
+      },
+      {
+        "name": "recipeIdentity",
+        "sha256": "f790fda77e7364ec30fd1c998053c947d51f82f1f375d20f6bd2b730828fc8c7",
+        "bytes": 2280,
+        "exact": true
+      },
+      {
+        "name": "executionRuntime",
+        "sha256": "1cf58dfe53fbe67e3d937e11bfe60fc3b598ee9fde79846985f01f23b49a9c08",
+        "bytes": 106,
+        "exact": true
+      },
+      {
+        "name": "verifySeedExecutionRuntime",
+        "sha256": "a97c2f3be86036bc195d65dd861de7a6d0b677b995a027b1a302c2eb5087c6aa",
+        "bytes": 453,
+        "exact": true
+      },
+      {
+        "name": "selectedAuthoringSeed",
+        "sha256": "9f16b252b73ecae9847e7a5d790dffacffabde2fe8d9a0511f5da8f24cb7baa9",
+        "bytes": 1402,
+        "exact": true
+      },
+      {
+        "name": "retainPromotableSeed",
+        "sha256": "1cdea075361e80c5288aec1f2d6cefbc491d3262d8e364d8f7ce6bfde16dd9ba",
+        "bytes": 851,
+        "exact": true
+      },
+      {
+        "name": "original-fixed-point-preflight",
+        "sha256": "df106f2295a627811fcf758fb1393307bd3dc2351a9d10089cabde36e69585cf",
+        "bytes": 4651,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-1",
+        "sha256": "0828b742329a7e0f43ab13d46397ece23635889218a51c01bb34b1080863dea4",
+        "bytes": 392,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-2",
+        "sha256": "9f6f55309421dbe683333d5301bcb3821e52e11438d7024cb015a8bd0517d79e",
+        "bytes": 144,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-3",
+        "sha256": "c00c491c0b64897c339da705c0c7d28a026d7eaa43701e322e38f0175e1fc6cb",
+        "bytes": 133,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-4",
+        "sha256": "9fecb8c0d38c2ac691cf2eb1ac542bd96c1d980521df7b9ccf8c1053c42190ea",
+        "bytes": 280,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-5",
+        "sha256": "017c5b41f7d6a084a74097131456ed292f69ecf56431f24c360e9ff2b84a7505",
+        "bytes": 219,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-6",
+        "sha256": "95b8612d797b4abdc93ba88155a5209bc92f4d2116476a49d0a6c16df5d5c236",
+        "bytes": 143,
+        "exact": true
+      },
+      {
+        "name": "original-read-only-generation-guard-7",
+        "sha256": "38192e9a99de370a173846db9377d2142184f23944120b576c56e8ed0da80492",
+        "bytes": 132,
+        "exact": true
+      },
+      {
+        "name": "original-binding-qualification-and-seed-retention",
+        "sha256": "ce80fe8f3dca3c823d920d0a426e5dab7648b8718fedf297e8f615dc54281592",
+        "bytes": 4284,
+        "exact": true
+      },
+      {
+        "name": "original-fixed-point-marker",
+        "sha256": "2b7018799f5b686c2bf1dbf872745922fb7825ddfcadede78f97c2e5cb40d6fe",
+        "bytes": 82,
+        "exact": true
+      }
+    ],
+    "forbiddenCallsAbsent": [
+      "buildGeneration",
+      "loadCompiler",
+      "runCurrentStrictConformance",
+      "runIrCheckerConformance",
+      "runSh1Capabilities",
+      "runHelperRuntimeConformance",
+      "runGenericErasureConformance",
+      "enforceQualificationResourcePolicy"
+    ],
+    "originalRecipeRemains": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+    "sidecarBinderCorrectedOnly": true,
+    "actualCompilerGatesAuthFromRetainedLogRequired": true,
+    "originalSourceAndInputsBeforeAfterRequired": true,
+    "remainingBinderAndProviderExecutionPending": true
+  },
+  "workflow": {
+    "path": ".github/workflows/psc0-sh1-finish-evidence.yml",
+    "blob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+    "sha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+    "bytes": 55773,
+    "importSha256": "daf0aad0bc20cb2718512ff30ae8cf3e18b81b2bc457f3da4bfc571a046f8c09",
+    "collectorSha256": "1ed5cb2bc03af0ea0e3f5b0425f6356237e87fde95a947fe93dcaed47c3578f1"
+  },
+  "independentWorkflowReview": {
+    "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/evidence-finish-workflow-independent-review.json",
+    "blob": "a023c96af0f74a10973fbd1442b440982b3704fd",
+    "sha256": "97fb1b0eb2f4922751fab81f5d909cc8637e26bfb5b52e3806d2162a5dbd9651",
+    "bytes": 7693,
+    "disposition": "CLEAR-bounded-static-scope"
+  },
+  "futureNormalWorkflow": {
+    "path": ".github/workflows/psc0-sh1.yml",
+    "baseBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+    "baseSha256": "2bed091157fce89dea162719a4fe0d7d23deb4be90910aae344f7cb29d405cd5",
+    "sha256": "9af5716673485ef6505551bc46322bf986223d08d7351e0db7ad6a837672dcb8",
+    "bytes": 25736,
+    "onlyChange": "compiler timeout-minutes90→180",
+    "reason": "Original run reached C3 before cancellation at90min. Actual next C3 generation took3179019.832ms (~53m), while original preceding setup/N1/C1/C2 sequence took~45m;90min did not cover the observed combined work.180min is a scheduling budget, not an ETA.",
+    "requestsAnotherFullQualification": false
+  },
+  "receiptOwnership": {
+    "N1": {
+      "runId": 38015134511,
+      "compilerJobId": 114103608774
+    },
+    "C1": {
+      "runId": 38015134511,
+      "compilerJobId": 114103608774
+    },
+    "C2": {
+      "runId": 38021634599,
+      "compilerJobId": 114123691566
+    },
+    "C3": {
+      "runId": 38021634599,
+      "compilerJobId": 114123691566
+    },
+    "correctedBinderQualificationAndProvider": "New evidence-completion run at the enclosing commit; actual IDs and results must be authenticated after publication."
+  },
+  "boundaries": {
+    "runsCompiler": false,
+    "rerunsConformance": false,
+    "changesProductionLean": false,
+    "changesFixture": false,
+    "changesSelectedSeed": false,
+    "changesSourceAuthority": false,
+    "changesKernelProviderOrTheory": false,
+    "canonicalFutureRecipeBinderChanges": true,
+    "originalCompiledCheckout48RecipeInputsRemainExact": true,
+    "priorFailureAndCancellationPreserved": true,
+    "sourceReviewIsNotExecution": true,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "providerChecked": false,
+    "generalPreservationProven": false,
+    "active33And27RemainOpen": true
+  },
+  "publicationPlan": {
+    "retainAttempt16Evidence": true,
+    "appendAttempt16WithoutChangingFirst15": true,
+    "newFinishIsAttempt17": true,
+    "runOnlyRemainingBindingFinalizationAndProvider": true,
+    "finalDispositionsAndMergePendingActualSuccess": true
+  }
+}

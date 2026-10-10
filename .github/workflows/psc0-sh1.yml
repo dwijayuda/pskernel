@@ -48,7 +48,7 @@ concurrency:
 jobs:
   compiler:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 180
     outputs:
       qualified: ${{ steps.qualify.outcome == 'success' }}
       successor-candidate: ${{ steps.qualify.outputs.successor-candidate }}

@@ -966,7 +966,7 @@ async function bindNativeEmptyIr({ outDir, closure, nativeReceipt, nativeSource 
   const summaries = lines.filter((line) => line.startsWith(marker));
   assert.equal(summaries.length, 1);
   assert.deepEqual(JSON.parse(summaries[0].slice(marker.length)), value.fixtures);
-  assert.deepEqual(lines.filter((line) => line.startsWith(pass)).map((line) => line.slice(pass)),
+  assert.deepEqual(lines.filter((line) => line.startsWith(pass)).map((line) => line.slice(pass.length)),
     nativeIrFixtureNames);
   assert(!lines.some((line) => line.startsWith('PSC0_SH1_IR_NATIVE_FAIL: ')));
   const fixtures = value.fixtures;

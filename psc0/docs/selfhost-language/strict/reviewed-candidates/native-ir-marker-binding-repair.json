@@ -1,0 +1,707 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-sh1-native-ir-marker-prefix-binding-repair",
+  "status": "source-class-review-clear-candidate-not-executed",
+  "repository": "dwijayuda/pskernel",
+  "reviewedBranchCheckpoint": "7453e27ee4da58563976347e21df06dadbcd6ac1",
+  "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+  "actualFailure": {
+    "runId": 38021634599,
+    "runAttempt": 1,
+    "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+    "compilerJobId": 114123691566,
+    "compilerConclusion": "failure",
+    "failedStep": 8,
+    "failedStepStartedAtUtc": "2026-10-10T03:45:32Z",
+    "failedStepCompletedAtUtc": "2026-10-10T04:56:36Z",
+    "assertionAtUtc": "2026-10-10T04:56:36.3507522Z",
+    "exitCode": 1,
+    "artifactCollectionStep": 9,
+    "artifactCollectionConclusion": "skipped",
+    "artifactUploadStep": 10,
+    "artifactUploadConclusion": "success",
+    "providerJobId": 114136283916,
+    "providerConclusion": "skipped",
+    "log": {
+      "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+      "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+      "bytes": 875228
+    },
+    "runJobsStepArtifactsMetadata": {
+      "blob": "227e846d233c501a14600f0ebbe63f0118331273",
+      "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+      "bytes": 94892
+    },
+    "error": "ERR_ASSERTION deepStrictEqual: actual has 15 PSC0_SH1_IR_NATIVE_PASS-prefixed strings; expected has the same 15 bare names in the same order.",
+    "stack": [
+      {
+        "path": "psc0/scripts/sh1-strict-evidence.mjs",
+        "function": "bindNativeEmptyIr",
+        "line": 969
+      },
+      {
+        "path": "psc0/scripts/sh1-strict-evidence.mjs",
+        "function": "bindStrictQualificationEvidence",
+        "line": 1740
+      },
+      {
+        "path": "psc0/scripts/sh1-qualify.mjs",
+        "line": 1254
+      }
+    ],
+    "terminalLogEvidence": {
+      "assertionLines": [
+        594,
+        670
+      ],
+      "actualStrings": [
+        "PSC0_SH1_IR_NATIVE_PASS: function-valued let has compositional type",
+        "PSC0_SH1_IR_NATIVE_PASS: checked emitter accepts the same valid IR",
+        "PSC0_SH1_IR_NATIVE_PASS: false let annotation is rejected",
+        "PSC0_SH1_IR_NATIVE_PASS: checked emitter refuses invalid IR",
+        "PSC0_SH1_IR_NATIVE_PASS: function parameter grouping is preserved",
+        "PSC0_SH1_IR_NATIVE_PASS: expression fuel exhaustion is explicit",
+        "PSC0_SH1_IR_NATIVE_PASS: type fuel exhaustion is explicit",
+        "PSC0_SH1_IR_NATIVE_PASS: diagnostic cap preserves finding count",
+        "PSC0_SH1_IR_NATIVE_PASS: empty layouts and typed empty results are accepted",
+        "PSC0_SH1_IR_NATIVE_PASS: empty layouts emit never and typed empty generators",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match without an expected result is rejected",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match still checks its scrutinee",
+        "PSC0_SH1_IR_NATIVE_PASS: empty match still checks layout type arity",
+        "PSC0_SH1_IR_NATIVE_PASS: empty alternatives still refuse an inhabited datatype",
+        "PSC0_SH1_IR_NATIVE_PASS: zero-field source record has its nullary inhabitant"
+      ],
+      "expectedStrings": [
+        "function-valued let has compositional type",
+        "checked emitter accepts the same valid IR",
+        "false let annotation is rejected",
+        "checked emitter refuses invalid IR",
+        "function parameter grouping is preserved",
+        "expression fuel exhaustion is explicit",
+        "type fuel exhaustion is explicit",
+        "diagnostic cap preserves finding count",
+        "empty layouts and typed empty results are accepted",
+        "empty layouts emit never and typed empty generators",
+        "empty match without an expected result is rejected",
+        "empty match still checks its scrutinee",
+        "empty match still checks layout type arity",
+        "empty alternatives still refuse an inhabited datatype",
+        "zero-field source record has its nullary inhabitant"
+      ]
+    },
+    "sourceMatchesRetainedTerminalEvidence": true,
+    "limitations": "The failed run is not successful qualification. This repair packet does not execute the corrected binder, collect missing qualification JSON, run the provider, or discharge final ledgers."
+  },
+  "change": {
+    "path": "psc0/scripts/sh1-strict-evidence.mjs",
+    "base": {
+      "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+      "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+      "bytes": 91970
+    },
+    "candidate": {
+      "blob": "7700fef35acd06789b94f72078869fdef489214f",
+      "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+      "bytes": 91977,
+      "readbackExact": true
+    },
+    "line": 969,
+    "occurrences": 1,
+    "from": "  assert.deepEqual(lines.filter((line) => line.startsWith(pass)).map((line) => line.slice(pass)),",
+    "to": "  assert.deepEqual(lines.filter((line) => line.startsWith(pass)).map((line) => line.slice(pass.length)),",
+    "additionalBytes": 7,
+    "reversePatchRestoresExactBase": true,
+    "untouchedPrefix": {
+      "sha256": "44cdf879318fe49cfb5ea0f56bd9f386bcd2f5ca94c7d6e7d82b240f79569daa",
+      "bytes": 43920
+    },
+    "untouchedSuffix": {
+      "sha256": "cfe2e6215a9692a77c7a81f892c3b801477b0923bb1727b05ad3a4e401baad87",
+      "bytes": 47953
+    },
+    "classification": "Use the marker string's numeric length when extracting the already prefix-checked fixture name. No fixtures, expected names, compiler source, source grammar, IR, erasure, semantic argument, provider or kernel algorithm changes."
+  },
+  "rootCause": {
+    "expressionBefore": "line.slice(pass)",
+    "passValue": "PSC0_SH1_IR_NATIVE_PASS: ",
+    "passUtf16CodeUnits": 25,
+    "explanation": "String.prototype.slice expects a numeric start index. The nonnumeric marker string coerces to NaN and then the slice start is 0, retaining the entire line. startsWith(pass) has already established the prefix. pass.length is exactly 25 for this ASCII marker and removes exactly the established prefix.",
+    "intendedRelation": "The sequence of suffixes on lines beginning with the exact pass prefix must equal the fixed ordered sequence of 15 fixture names.",
+    "defectIsEvidenceConsumer": true,
+    "compilerSemanticChangeRequired": false,
+    "producerChangeRequired": false,
+    "blanketRelaxationRequired": false
+  },
+  "producerContract": {
+    "leanProducer": {
+      "path": "psc0/test/IrCheckerTests.lean",
+      "blob": "2f507fdaef96411dfa5833016c94655549b99938",
+      "sha256": "79092d4ad9c97a83e884df0dac3dc0667b070d91e7df14b597272d30c6550b85",
+      "bytes": 19560,
+      "caseList": "psIrNativeCases",
+      "printLine": 375,
+      "printExpression": "IO.println (\"PSC0_SH1_IR_NATIVE_PASS: \" ++ item.fst)",
+      "failureLine": 377,
+      "summaryLines": [
+        378,
+        383
+      ],
+      "orderedFixtureNames": [
+        "function-valued let has compositional type",
+        "checked emitter accepts the same valid IR",
+        "false let annotation is rejected",
+        "checked emitter refuses invalid IR",
+        "function parameter grouping is preserved",
+        "expression fuel exhaustion is explicit",
+        "type fuel exhaustion is explicit",
+        "diagnostic cap preserves finding count",
+        "empty layouts and typed empty results are accepted",
+        "empty layouts emit never and typed empty generators",
+        "empty match without an expected result is rejected",
+        "empty match still checks its scrutinee",
+        "empty match still checks layout type arity",
+        "empty alternatives still refuse an inhabited datatype",
+        "zero-field source record has its nullary inhabitant"
+      ]
+    },
+    "nativeWrapper": {
+      "path": "psc0/scripts/sh1-ir-checker-conformance.mjs",
+      "blob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+      "sha256": "c7bc6fff33decea880595023367a5e6d73249226d5002b9810e56bae876ad1f9",
+      "bytes": 40509,
+      "function": "runNativeIrCheckerConformance",
+      "lines": [
+        544,
+        606
+      ],
+      "stdoutRetained": "development/N1/ir-checker-native/native.stdout.log",
+      "stderrRetained": "development/N1/ir-checker-native/native.stderr.log",
+      "receipt": "development/N1/ir-checker-native/receipt.json",
+      "nativeExecutionStatusMustBeZero": true,
+      "binaryIdentityCheckedBeforeAndAfter": true,
+      "summaryExtraction": "JSON.parse(lines[0].slice(marker.length))"
+    },
+    "expectedNamesEqualProducerNames": true,
+    "retainedActualStringsEqualPrefixPlusExpectedNames": true
+  },
+  "preservedGuards": [
+    "startsWith(pass) retains the exact marker prefix requirement; arbitrary or malformed non-marker lines cannot enter the pass-name sequence.",
+    "deepEqual against the unchanged array of 15 distinct names preserves exact count, order, uniqueness and complete content. Missing, duplicate, reordered or additional pass markers still fail.",
+    "No trim, substring search, Set-based order erasure, count-only replacement or filtering by expected names is introduced.",
+    "Exactly one native summary marker remains required and its parsed JSON remains deeply equal to receipt.fixtures.",
+    "Any stdout line starting PSC0_SH1_IR_NATIVE_FAIL: remains rejected.",
+    "fixtures.schemaVersion=1, status=pass, cases=15 and checkedEmitterRejectsInvalidIr=true remain enforced.",
+    "Full native source, source-closure, original-IR, source-policy, target-policy, TS digest, native source receipt, input execution binary and absolute receipt-path bindings remain byte-for-byte unchanged.",
+    "Empty-elimination and zero-field-record evidence fields and all noStrictClaim/provider-not-attempted constraints remain byte-for-byte unchanged.",
+    "The complete remainder of bindStrictQualificationEvidence and every other function are unchanged; all actual artifacts must still satisfy them."
+  ],
+  "boundedReview": {
+    "reviewedSourceDomain": "All 26 non-test scripts/sh1-*.mjs files at compiled1fa plus test/IrCheckerTests.lean. The scan inspected every marker-prefixed slice consumer in this bounded family and all three slice sites in the strict binder.",
+    "sourceFileCount": 26,
+    "sourceFiles": [
+      {
+        "path": "scripts/sh1-capabilities.mjs",
+        "blob": "14c581f57a28b5f9edcd372e10fea1a1e575c217",
+        "sha256": "171316bbe186ff91ac055a1171e27e86f5e605d2082d5d7ffcf90de6a68749eb",
+        "bytes": 25989,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-check-admissions.mjs",
+        "blob": "750fe59f317056bfe76b2c77ffd7d09a82aac342",
+        "sha256": "608dd25cc513d9160df05424218c99d02f0c0d681a6b3f137b645e6893fabde6",
+        "bytes": 6891,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-foundation-conformance.mjs",
+        "blob": "9e3e167c38fa56d09ba02d07535bb65008929653",
+        "sha256": "d0c139a4a907ef5e35908379b04d8983ee889218791c8ac7f2361fc080d46f9a",
+        "bytes": 8348,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-fresh-name-conformance.mjs",
+        "blob": "9eaa7b1cbdb50dec79aca57150d825cbdd51f8d7",
+        "sha256": "330e3c53401d3912f092ecf9f6457c67db6852f73b4cf715eb3a92364459d7d5",
+        "bytes": 16581,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-function-entry.mjs",
+        "blob": "ceb4a39851e421e1d95f009cbf31d500e6ff1bb1",
+        "sha256": "b38c4ef844068aae4cb0373785dc5401f72d59e0016dd3e0f3e343ac96348bc4",
+        "bytes": 1701,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-generic-erasure-conformance.mjs",
+        "blob": "076d058b965bad45b64e81c7a0ae8c1ac02f88db",
+        "sha256": "a1e48e2386effb23425ea16f4c1d966a59bf7bc6e3d09f8c50e412651bae1332",
+        "bytes": 37975,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "blob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+        "sha256": "4daafb21cc121532bb0bb549305babc8987b9ca8554e5864a8bdc59b5ceadc58",
+        "bytes": 37358,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-grammar-profile.mjs",
+        "blob": "26836a8e487d77c94a73485e2d11e3575b932edf",
+        "sha256": "8107c4b1f3f5dc8a74b2c999443659a43242c5e0879e8d6921571805f89e71ae",
+        "bytes": 438,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-helper-conformance.mjs",
+        "blob": "686a1a1ab4c74d838639e2044b5403cc0e9ed0e8",
+        "sha256": "412b79ebffc1b65f6d06d5a15b277207cc21df1e1a28e1a8a857c06ee4b1682b",
+        "bytes": 13050,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-ir-checker-conformance.mjs",
+        "blob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+        "sha256": "c7bc6fff33decea880595023367a5e6d73249226d5002b9810e56bae876ad1f9",
+        "bytes": 40509,
+        "markerSliceSites": [
+          {
+            "line": 589,
+            "source": "  const fixtures = JSON.parse(lines[0].slice(marker.length));"
+          }
+        ]
+      },
+      {
+        "path": "scripts/sh1-iterate.mjs",
+        "blob": "185d0fa4b65529e56bb560e6a22a7af9519dd887",
+        "sha256": "9ce539924c9c486a776ae078d491ddfe7e76ad6db7076559211137bec5c0a5b8",
+        "bytes": 6972,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-iteration-conformance.mjs",
+        "blob": "ef7ceca2ee8fdaf6cbc16dddce7c988d7090a4fa",
+        "sha256": "bca0d33389be0bc716eb3c56d2696c547a9f02e0974e40c2205919bffb02dce4",
+        "bytes": 5118,
+        "markerSliceSites": [
+          {
+            "line": 35,
+            "source": "    .map((line) => JSON.parse(line.slice(prefix.length)));"
+          }
+        ]
+      },
+      {
+        "path": "scripts/sh1-migration-worker-abi.mjs",
+        "blob": "4a24f22050cdbe9660501b58bc1eeed9c8005319",
+        "sha256": "f520b3d033462e41a87d1aac3db6ed2f75290c05b4f106451919886234352cc7",
+        "bytes": 18393,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-migration-worker-conformance.mjs",
+        "blob": "d08d8c622f68314db32ef38d03539a8130abf3f6",
+        "sha256": "7c34c498b505158f45dbe5f11f367038e9dd03cb297d2b83dea7c79b13e05472",
+        "bytes": 41494,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-native-seed-recovery.mjs",
+        "blob": "c1b5673079b2faae56e9c778b62e70087e639fbe",
+        "sha256": "45b5223fa549358da586e5f211261084cfdb153b1334d5feaff6a8349c464715",
+        "bytes": 23134,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-projection-conformance.mjs",
+        "blob": "1c69c032f260eac8d868173b7f8b5b06e90a4a29",
+        "sha256": "64f60f538a01fe288153d3df7a12725854a7dbf9e10a308fe1e3dab2d342fa64",
+        "bytes": 11727,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-qualify.mjs",
+        "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+        "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+        "bytes": 73618,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-resource-policy.mjs",
+        "blob": "7e3066c513a91a6e0717aac9465a879097c0dd82",
+        "sha256": "76647884ed3f451ebd429c89c480113e88f88c60a673f8d5456b9418fd4fb998",
+        "bytes": 12011,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-seed-manifest.mjs",
+        "blob": "b169d5198cea0c549fe72a3365e4fb5740fc0bc7",
+        "sha256": "53d7dc1a894a02643f55bf611c955b55497f45f1bcf0d7af9e052e394469794f",
+        "bytes": 10641,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-source-snapshot.mjs",
+        "blob": "1083a3765a55540f83b2376c40a97bc1f1362ce0",
+        "sha256": "b70d16e97265283fe7e0f7f581925797a7918d08fb3dffe4de27122d8510aae8",
+        "bytes": 3705,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-strict-evidence.mjs",
+        "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049",
+        "bytes": 91970,
+        "markerSliceSites": [
+          {
+            "line": 138,
+            "source": "  assert.deepEqual(JSON.parse(lines[0].slice(prefix.length)), envelope.reference);"
+          },
+          {
+            "line": 968,
+            "source": "  assert.deepEqual(JSON.parse(summaries[0].slice(marker.length)), value.fixtures);"
+          },
+          {
+            "line": 969,
+            "source": "  assert.deepEqual(lines.filter((line) => line.startsWith(pass)).map((line) => line.slice(pass)),"
+          }
+        ]
+      },
+      {
+        "path": "scripts/sh1-strict-runtime-conformance.mjs",
+        "blob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+        "sha256": "a6ff98ba27c458d26761b65dc2ea6ae9ea8042d390981a63a8ec22522ec4647c",
+        "bytes": 81705,
+        "markerSliceSites": [
+          {
+            "line": 1310,
+            "source": "  const reference = JSON.parse(lines[0].slice(prefix.length));"
+          }
+        ]
+      },
+      {
+        "path": "scripts/sh1-strict-source-conformance.mjs",
+        "blob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+        "sha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+        "bytes": 31555,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-strict-source.mjs",
+        "blob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+        "sha256": "b993d66ef955fb4359f6f472667a0ddc572afcb51501283a4ddcd8ba38d97519",
+        "bytes": 25351,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-strict-target-conformance.mjs",
+        "blob": "0bee0e6f67e080dda87fd10c75d2437bb14c3cd1",
+        "sha256": "a87af12e769804db86f53b38ec5d105f140e74999a84e7d55eecf385418377fc",
+        "bytes": 8864,
+        "markerSliceSites": []
+      },
+      {
+        "path": "scripts/sh1-successor-seed.mjs",
+        "blob": "3514a7797e739e7a47af33c91ab58e912584d0c7",
+        "sha256": "00b5dbfae38715df2888d3b3577897010fe98e65fc4268302d7253397e0067e2",
+        "bytes": 22728,
+        "markerSliceSites": []
+      }
+    ],
+    "sameConcreteMismatchCount": 1,
+    "sameConcreteMismatchLocations": [
+      {
+        "path": "psc0/scripts/sh1-strict-evidence.mjs",
+        "line": 969
+      }
+    ],
+    "correctlyNumericMarkerExtractionSites": [
+      {
+        "path": "scripts/sh1-ir-checker-conformance.mjs",
+        "blob": "521d1d2fdd6d22edeb1d9e521386d3a90ab954d7",
+        "line": 589,
+        "source": "  const fixtures = JSON.parse(lines[0].slice(marker.length));"
+      },
+      {
+        "path": "scripts/sh1-iteration-conformance.mjs",
+        "blob": "ef7ceca2ee8fdaf6cbc16dddce7c988d7090a4fa",
+        "line": 35,
+        "source": "    .map((line) => JSON.parse(line.slice(prefix.length)));"
+      },
+      {
+        "path": "scripts/sh1-strict-evidence.mjs",
+        "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "line": 138,
+        "source": "  assert.deepEqual(JSON.parse(lines[0].slice(prefix.length)), envelope.reference);"
+      },
+      {
+        "path": "scripts/sh1-strict-evidence.mjs",
+        "blob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "line": 968,
+        "source": "  assert.deepEqual(JSON.parse(summaries[0].slice(marker.length)), value.fixtures);"
+      },
+      {
+        "path": "scripts/sh1-strict-runtime-conformance.mjs",
+        "blob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+        "line": 1310,
+        "source": "  const reference = JSON.parse(lines[0].slice(prefix.length));"
+      }
+    ],
+    "unrelatedSingleVariableSlice": "sh1-migration-worker-abi.mjs uses worker.parameters.slice(start) for an array position; this is not a marker-string consumer.",
+    "noRepositoryApplicationCodeExecuted": true,
+    "noTestsRun": true,
+    "noActionsRerun": true,
+    "noDispatch": true,
+    "noRefChanges": true,
+    "candidateRawBytesReadBack": true,
+    "reasoning": "This is a correction to the consumer's implementation of the producer's existing exact protocol. It changes erroneous rejection behavior. It is not claimed to be behaviorally identical to the defective parser, nor does this source review stand in for actual final evidence production."
+  },
+  "executionAndRecipeSeparation": {
+    "qualifier": {
+      "path": "psc0/scripts/sh1-qualify.mjs",
+      "blob": "e2c55f900b0ba4fe29cdc7e2981160a49ef4d61d",
+      "sha256": "707fedd63f01999293cf68b39f85ea6526c31216e84c2090d6ff1b8edf6fecdb",
+      "bytes": 73618,
+      "recipeFunctionLines": [
+        112,
+        146
+      ],
+      "binderRecipeIndex": 31,
+      "binderImportLine": 32,
+      "existingBindCallLine": 1254,
+      "priorGenerationAndGateRange": [
+        1199,
+        1253
+      ],
+      "qualificationConstructionRange": [
+        1257,
+        1324
+      ]
+    },
+    "originalGenerationRecipe": {
+      "sha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+      "fileCount": 48,
+      "binderEntry": {
+        "path": "scripts/sh1-strict-evidence.mjs",
+        "sha256": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+      },
+      "retainedC1Receipt": {
+        "blob": "0169f6068b1cc0f2a36b386d329992c6af409231",
+        "sha256": "33fa94c5f4f825133be4c07f47e8f68d447546eb8a2858193d16b305afbd9d8f",
+        "bytes": 169531,
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79"
+      },
+      "mustRemainExactInExistingReceipts": true
+    },
+    "predictedFutureNormalRecipe": {
+      "sha256": "18bfaff7d1d107a95f54733abcd624e5f43cb60dd25be827c764e488b82725fc",
+      "fileCount": 48,
+      "changedEntryCount": 1,
+      "unchangedEntryCount": 47,
+      "changedPath": "scripts/sh1-strict-evidence.mjs",
+      "newBinderSha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+      "predictionOnly": true,
+      "notAnExecutedGenerationRecipe": true
+    },
+    "binderEffectDomain": "The exported binder reads and authenticates artifact bytes and returns evidence. It has no source preparation, compiler execution, IR recheck, TypeScript compilation or artifact writes. Its imports and import.meta.url-relative fixture must resolve to the authenticated original supporting source.",
+    "supportingModulePins": [
+      {
+        "path": "scripts/sh1-grammar-conformance.mjs",
+        "blob": "2dcc4cb3b82fcf63c61efb383d9bb8c3e2fb0141",
+        "sha256": "4daafb21cc121532bb0bb549305babc8987b9ca8554e5864a8bdc59b5ceadc58",
+        "bytes": 37358
+      },
+      {
+        "path": "scripts/sh1-strict-runtime-conformance.mjs",
+        "blob": "c38e6b50806481c270db9dfbd9d75e3a4a8f3b29",
+        "sha256": "a6ff98ba27c458d26761b65dc2ea6ae9ea8042d390981a63a8ec22522ec4647c",
+        "bytes": 81705
+      },
+      {
+        "path": "scripts/sh1-strict-source-conformance.mjs",
+        "blob": "fec9c43e4bd792aef81983d1dbf100a5b6b2beaa",
+        "sha256": "03a252f699f4bd72a2b40ddf3558eee1aa9c9e4ee69ef9cc570fb8231754b089",
+        "bytes": 31555
+      },
+      {
+        "path": "scripts/sh1-strict-source.mjs",
+        "blob": "77a85340d94313b7bfebb604ec9f61c53c28c544",
+        "sha256": "b993d66ef955fb4359f6f472667a0ddc572afcb51501283a4ddcd8ba38d97519",
+        "bytes": 25351
+      }
+    ],
+    "reuseConclusion": "New compiler generations are not logically required solely for this marker parser correction. Existing completed N1/C1/C2/C3 artifacts and gate outputs can be consumed in one explicitly authenticated evidence-only completion, provided the original archived bytes, original48-file recipe and original generation origins are kept exact, and the corrected binder/qualification-construction producer is identified separately.",
+    "mandatoryConditions": [
+      "Retain the actual failed continuation outcome and provider skipped outcome; do not turn them into success.",
+      "Authenticate the archived completed compiler/gate products, C2/C3 equality, retained generation receipts, original source closure and all 48 old recipe inputs before using them.",
+      "Keep original N1/C1 ownership on run38015134511 and original C2/C3 ownership on run38021634599; do not relabel them as generated by the new evidence-only run.",
+      "Do not overwrite historical generation recipes or pretend the newly corrected binder participated in old generation.",
+      "Pin and authenticate candidate binder7700/829c as the actual new evidence producer; preserve authenticated original relative imports and the generic fixture path.",
+      "Invoke the corrected binder on actual retained files. Preserve every remaining assertion, output field and producer false flag. A successful source review alone cannot manufacture strict-enforcement-evidence.json.",
+      "Any qualification construction recovered from the original post-bind source must authenticate the exact original source and inputs and be recorded as new evidence production; it must not claim the whole original CLI succeeded.",
+      "Run independent provider acceptance against the actual retained admissions after evidence construction and bind its actual receipt before final33/27 disposition.",
+      "All active strict/source-checkpoint flags remain false until actual corrected evidence production, provider acceptance and the explicit reviewed final dispositions complete."
+    ],
+    "noSeedPromotion": true,
+    "noNewSourceAuthority": true,
+    "noBackwardsGrammarMode": true
+  },
+  "metadataConsumers": {
+    "observedPinOccurrences": [
+      {
+        "key": "releaseBase",
+        "source": {
+          "blob": "e8023de73e4956c0217de5044950404705fedcea",
+          "sha256": "92dc055ffcdb2b3709164532d9a991437b401803d484c55f932ddd241ab285d3",
+          "bytes": 286885
+        },
+        "occurrences": [
+          {
+            "pointer": "/source/currentReviewedSourcePins/2/path",
+            "value": "psc0/scripts/sh1-strict-evidence.mjs"
+          },
+          {
+            "pointer": "/source/currentReviewedSourcePins/2/blob",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/source/currentReviewedSourcePins/2/sha256",
+            "value": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          },
+          {
+            "pointer": "/recipe/sourceFiles/31/path",
+            "value": "scripts/sh1-strict-evidence.mjs"
+          },
+          {
+            "pointer": "/recipe/sourceFiles/31/gitBlobSha1",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          }
+        ]
+      },
+      {
+        "key": "catalogDelta",
+        "source": {
+          "blob": "c5a831829da7d6cd2be56fcde2033891b3264fff",
+          "sha256": "593af3fbe36132afa5e3e6b733c811946d3aed3f4b4a4b8e575e516026b41619",
+          "bytes": 151758
+        },
+        "occurrences": [
+          {
+            "pointer": "/transports/host/1/path",
+            "value": "psc0/scripts/sh1-strict-evidence.mjs"
+          },
+          {
+            "pointer": "/transports/host/1/currentBlob",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/transports/host/1/currentSha256",
+            "value": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          },
+          {
+            "pointer": "/receiptCatalogDelta/0/changes/sourceBlob/proposed",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/receiptCatalogDelta/3/changes/required/proposed",
+            "value": "Exact current unary/flat-source-prefix host invocations and original expected values/arity checks, selected-R foundation/helper option only at two authenticated reference call sites, replay/native CLI success and index slice success in the full Actions job log. Retain actual receipt paths where the gate writes no separate file. The current empty-source return-boundary observation uses source gate fec9c43e4bd792aef81983d1dbf100a5b6b2beaa and binder b0b080eea2c353640f12d744e599737d71f9c4f6; its exact direct body, actual entry prefix and declaration result fields are bound in each empty-source observation."
+          }
+        ]
+      },
+      {
+        "key": "coContinuation",
+        "source": {
+          "blob": "fb80c0d509affd14637cca15a78c51366b6148df",
+          "sha256": "bc75e67b12ba1eccd0bde85d8a8b2e8d866f6fbe5bf914d15a850981246af584",
+          "bytes": 73130
+        },
+        "occurrences": [
+          {
+            "pointer": "/projections/transport/operations/7/value/continuationInputs/binderSourceBlob",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/projections/transport/operations/7/value/continuationInputs/binderSha256",
+            "value": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          },
+          {
+            "pointer": "/projections/procedure/operations/7/value/continuationInputs/binderSourceBlob",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/projections/procedure/operations/7/value/continuationInputs/binderSha256",
+            "value": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          }
+        ]
+      },
+      {
+        "key": "stageContinuation",
+        "source": {
+          "blob": "58d6aa5a3e59edbf7f926d10315d59d699404a8e",
+          "sha256": "13ce7c6e8ad097c8745258e5014685c79973f6fedeead2b00554915ac86fc766",
+          "bytes": 143053
+        },
+        "occurrences": [
+          {
+            "pointer": "/releasePatch/operations/19/value/binderSourceBlob",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/releasePatch/operations/19/value/binderSha256",
+            "value": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          },
+          {
+            "pointer": "/stagePlanPatch/operations/7/value/continuationInputs/binderSourceBlob",
+            "value": "b0b080eea2c353640f12d744e599737d71f9c4f6"
+          },
+          {
+            "pointer": "/stagePlanPatch/operations/7/value/continuationInputs/binderSha256",
+            "value": "bd18cbb77c80fb57038b7d270e468c5b029164095dad958a84c52d113d67b049"
+          }
+        ]
+      }
+    ],
+    "continuationWorkflow": {
+      "path": ".github/workflows/psc0-sh1-continue.yml",
+      "blob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+      "sha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+      "bytes": 34742,
+      "originalBinderDigestOccurrences": 2,
+      "originalRecipeDigestOccurrences": 2,
+      "disposition": "Retain as the actual failed run's immutable workflow. A separate evidence-only workflow must distinguish original inputs from corrected evidence production; do not edit its past identity or claim its collector ran."
+    },
+    "assemblyTools": {
+      "path": "psc0/docs/selfhost-language/strict/reviewed-candidates/continuation-assembly-tools.json",
+      "blob": "2143d746f59ee49e8c2d2d7e4d815dae6cd62814",
+      "sha256": "1d353a38426de9ce4b191c15545e3885104ae0404c18647dc25e7e14472adcbc",
+      "bytes": 130606,
+      "directOriginalBinderPinOccurrences": 0,
+      "originalRecipeDigestOccurrences": 3,
+      "disposition": "Execution guards currently target continuation38021634599 as the final successful compiler/evidence run. Add a bounded authenticated completion provenance extension; preserve source/correspondence/stage semantic guards and original generation recipe."
+    },
+    "directions": [
+      "Original generation recipe.sourceFiles[31] and source.currentReviewedSourcePins[2] describe compiled-source provenance: retain their old blob/hash when describing original1fa. Add a separate actual corrected evidence-producer record.",
+      "Current strict-binder receipt-group sourceBlob must identify or explicitly transport to the actual corrected producer. The reviewed c5 delta's old b0b association can remain historical, with a narrowly reviewed metadata extension binding7700 plus this exact repair.",
+      "Correspondence and release/stage continuation execution overlays currently bind b0b/bd18 and run380216 as the pending final evidence producer. Preserve those immutable failed-attempt overlays and add actual evidence-completion provenance rather than blindly replacing old provenance strings.",
+      "Any resulting final receipt-group hash, static catalog digest, argument/group binding guard or plan hash that covers the actual producer extension must be recomputed and authenticated. Do not bypass guarded hashes.",
+      "Record the actual attempt16 failure and the separately executed completion attempt in qualification-attempts.json and AI_WORK_STATE.md; do not alter any old attempt object.",
+      "No source proof packet, source-language grammar, runtime contract, emitter semantics, kernel/provider implementation, or existing finite fixture expectation requires a change for this repair."
+    ],
+    "completenessLimit": "The occurrence inventory covers the attached current continuation/release/catalog/assembly records inspected here and the bounded sh1 source family. Earlier immutable historical packets may also mention b0b and remain historical; this packet does not authorize a repository-wide textual replacement."
+  },
+  "nonClaims": {
+    "actualCorrectedBinderExecuted": false,
+    "actualQualificationProduced": false,
+    "providerAccepted": false,
+    "strictSh1Qualified": false,
+    "semanticContractQualified": false,
+    "generalPreservationProven": false,
+    "final33Discharged": false,
+    "final27Discharged": false,
+    "sourceGrammarExpanded": false,
+    "compilerGenerationsRebuilt": false,
+    "everyLaterBinderAssertionProvenToPass": false
+  }
+}

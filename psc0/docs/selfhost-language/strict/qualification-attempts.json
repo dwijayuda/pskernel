@@ -2507,6 +2507,534 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 16,
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+      "runId": 38021634599,
+      "runAttempt": 1,
+      "workflowId": 380237977,
+      "compilerJobId": 114123691566,
+      "providerJobId": 114136283916,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38021634599",
+      "status": "failure",
+      "execution": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "orchestrationHeadSha": "43fa000c4adbc9d4754e20c213595c1449f00961",
+        "workflowId": 380237977,
+        "workflowPath": ".github/workflows/psc0-sh1-continue.yml",
+        "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+        "workflowSha256": "506d13b419f00bb1d5361e945f1f70ce02bb4ff6c79d384317432f534c2b2df7",
+        "runId": 38021634599,
+        "runAttempt": 1,
+        "runConclusion": "failure",
+        "compilerJobId": 114123691566,
+        "compilerJobStartedAt": "2026-10-10T03:44:45Z",
+        "compilerJobCompletedAt": "2026-10-10T04:56:41Z",
+        "compilerJobConclusion": "failure",
+        "providerJobId": 114136283916,
+        "providerJobConclusion": "skipped"
+      },
+      "failedStep": {
+        "name": "Run the existing exact-source fixed-point command",
+        "status": "completed",
+        "conclusion": "failure",
+        "number": 8,
+        "started_at": "2026-10-10T03:45:32Z",
+        "completed_at": "2026-10-10T04:56:36Z"
+      },
+      "failure": {
+        "scope": "Evidence binding after both generation builds and their conformance reports",
+        "firstException": {
+          "line": 594,
+          "timestamp": "2026-10-10T04:56:36.3507522Z",
+          "name": "AssertionError",
+          "code": "ERR_ASSERTION",
+          "operator": "deepStrictEqual",
+          "message": "Expected values to be strictly deep-equal"
+        },
+        "stack": [
+          "bindNativeEmptyIr (scripts/sh1-strict-evidence.mjs:969:10)",
+          "bindStrictQualificationEvidence (scripts/sh1-strict-evidence.mjs:1740:25)",
+          "scripts/sh1-qualify.mjs:1254:26"
+        ],
+        "processExit": {
+          "code": 1,
+          "line": 674,
+          "timestamp": "2026-10-10T04:56:36.4827985Z",
+          "text": "##[error]Process completed with exit code 1."
+        },
+        "cause": "The native IR pass-marker prefix string was used as String.slice's numeric start index, retaining the prefix in all15actual names. The exact expected fixture names and all other guards remain unchanged.",
+        "sourcePath": "psc0/scripts/sh1-strict-evidence.mjs",
+        "sourceBlob": "b0b080eea2c353640f12d744e599737d71f9c4f6",
+        "line": 969,
+        "originalExpression": ".map((line) => line.slice(pass))",
+        "reviewedCorrection": ".map((line) => line.slice(pass.length))",
+        "laterBinderAssertionsReached": false
+      },
+      "nativeAndCandidatePredecessor": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774,
+        "conclusion": "cancelled",
+        "reusedGenerations": [
+          "N1",
+          "C1"
+        ],
+        "import": {
+          "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/continuation-inputs.json",
+          "blob": "8731e55592d0bcb57b977c4cc98fcfe91a64b7a9",
+          "sha256": "de17c0d640e014a006783c8b34b948f5d0ca8ddd53d9bbe956feab5ee8c07638",
+          "bytes": 161276
+        },
+        "originalArchiveRawSha256VerifiedByImport": true
+      },
+      "completed": {
+        "C2": "generation-and-all-seven-conformance-report-kinds-complete",
+        "C3": "generation-and-all-seven-conformance-report-kinds-complete",
+        "fourArtifactHashesExactlyEqual": true,
+        "complete48FileRecipeObjectsExactlyEqual": true
+      },
+      "generationEvidence": [
+        {
+          "generation": "C2",
+          "receiptFile": {
+            "id": "c2_receipt",
+            "filename": "c2-receipt.json",
+            "originalPath": "C2/receipt.json",
+            "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+            "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+            "bytes": 166707,
+            "readbackExact": true
+          },
+          "marker": {
+            "name": "PSC0_SH1_GENERATION",
+            "line": 553,
+            "timestamp": "2026-10-10T04:02:20.7441118Z"
+          },
+          "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+          "timingsMs": {
+            "loadAndPrepare": 961865.6151259999,
+            "admissions": 0.11947800009511411,
+            "canonicalSurface": 41696.7286129999,
+            "emit": 853.7180330000119,
+            "tscAndWrite": 2823.3567960000364,
+            "total": 1007239.5388819999
+          },
+          "conformanceReportsReturned": [
+            {
+              "marker": "PSC0_SH1_STRICT_SOURCE",
+              "line": 554,
+              "timestamp": "2026-10-10T04:02:22.8110318Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "c4e6f455802f74ff8f0b989f5f88fd4c30ded5fe834d9c80d9d640c2fd6f4c32",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_TARGET",
+              "line": 555,
+              "timestamp": "2026-10-10T04:02:28.1519329Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "b61a076b035a0110cc5c4bfa5808262d01134b670468642b6da281bc866b8d69",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_RUNTIME",
+              "line": 556,
+              "timestamp": "2026-10-10T04:02:33.7368696Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e17fdb087642b00644b15766330e066ebfb26884a7a2bf7c850406fa3fc56a17",
+              "status": "pass"
+            },
+            {
+              "marker": "PSC0_SH1_IR_CHECKER",
+              "line": 557,
+              "timestamp": "2026-10-10T04:02:36.0146242Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "71c19d58a1d595aedf8dc24265aa463492d8002f2dba89d904ffaae52a88635b",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_CAPABILITIES",
+              "line": 558,
+              "timestamp": "2026-10-10T04:02:53.0837634Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "761cb4ec805fbc9947716ac2d2755ba5f6223d702a912e3cf79c4060eba23838",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_HELPER_RUNTIME",
+              "line": 559,
+              "timestamp": "2026-10-10T04:02:53.1180643Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "78b6773111518b543eb190068262648a06ed5a18f5ebc109f39456fb7826ab63",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_GENERIC_ERASURE",
+              "line": 560,
+              "timestamp": "2026-10-10T04:02:58.2067729Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e746a6bc853f3ce337c917094fc0d901d9ef163fd0d7579540d92e3df8fd01f2",
+              "status": null
+            }
+          ],
+          "reportScope": "The seven producer reports were emitted after their assertions returned and before the binder exception; this is not a completed strict qualification.",
+          "resourceTrace": {
+            "generation": "C2",
+            "count": 21,
+            "sha256": "4e647a23218a92c020309547fba1dad5a2db0e20fcdfe34d9eb32a5d11ccbfcb",
+            "bytes": 11414,
+            "expected": {
+              "report": "resource-usage.jsonl",
+              "sha256": "4e647a23218a92c020309547fba1dad5a2db0e20fcdfe34d9eb32a5d11ccbfcb",
+              "checkpoints": 21,
+              "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+              "atomicInternalsObserved": false,
+              "semanticContractQualified": false
+            },
+            "first": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C2",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+              "sequence": 1,
+              "phase": "generation-start",
+              "pid": 2663,
+              "elapsedMs": 0.15118699999999308,
+              "rss": 69971968,
+              "heapTotal": 18046976,
+              "heapUsed": 11262624,
+              "external": 4278879,
+              "arrayBuffers": 1994963,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 71086080
+            },
+            "last": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C2",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "91f69e62d33bb5f670c5e9a56479280f97ebf15a60d2d9e6155ecb8ec33d49d5",
+              "sequence": 21,
+              "phase": "generation-end-before-receipt-write",
+              "pid": 2663,
+              "elapsedMs": 1007239.379644,
+              "rss": 9308319744,
+              "heapTotal": 1735704576,
+              "heapUsed": 1261794080,
+              "external": 26100236,
+              "arrayBuffers": 23820914,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 9454018560
+            }
+          }
+        },
+        {
+          "generation": "C3",
+          "receiptFile": {
+            "id": "c3_receipt",
+            "filename": "c3-receipt.json",
+            "originalPath": "C3/receipt.json",
+            "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+            "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+            "bytes": 166709,
+            "readbackExact": true
+          },
+          "marker": {
+            "name": "PSC0_SH1_GENERATION",
+            "line": 582,
+            "timestamp": "2026-10-10T04:55:57.2340924Z"
+          },
+          "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+          "timingsMs": {
+            "loadAndPrepare": 3104078.9196840003,
+            "admissions": 0.0831709997728467,
+            "canonicalSurface": 69473.70608499972,
+            "emit": 2744.4626630004495,
+            "tscAndWrite": 2722.6593709997833,
+            "total": 3179019.8319689995
+          },
+          "conformanceReportsReturned": [
+            {
+              "marker": "PSC0_SH1_STRICT_SOURCE",
+              "line": 583,
+              "timestamp": "2026-10-10T04:55:59.2223679Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "c4e6f455802f74ff8f0b989f5f88fd4c30ded5fe834d9c80d9d640c2fd6f4c32",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_TARGET",
+              "line": 584,
+              "timestamp": "2026-10-10T04:56:04.9246532Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "b61a076b035a0110cc5c4bfa5808262d01134b670468642b6da281bc866b8d69",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_STRICT_RUNTIME",
+              "line": 585,
+              "timestamp": "2026-10-10T04:56:10.7294746Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e17fdb087642b00644b15766330e066ebfb26884a7a2bf7c850406fa3fc56a17",
+              "status": "pass"
+            },
+            {
+              "marker": "PSC0_SH1_IR_CHECKER",
+              "line": 586,
+              "timestamp": "2026-10-10T04:56:12.9024913Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "71c19d58a1d595aedf8dc24265aa463492d8002f2dba89d904ffaae52a88635b",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_CAPABILITIES",
+              "line": 587,
+              "timestamp": "2026-10-10T04:56:30.7047965Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "761cb4ec805fbc9947716ac2d2755ba5f6223d702a912e3cf79c4060eba23838",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_HELPER_RUNTIME",
+              "line": 588,
+              "timestamp": "2026-10-10T04:56:30.7345585Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "78b6773111518b543eb190068262648a06ed5a18f5ebc109f39456fb7826ab63",
+              "status": null
+            },
+            {
+              "marker": "PSC0_SH1_GENERIC_ERASURE",
+              "line": 589,
+              "timestamp": "2026-10-10T04:56:36.2332968Z",
+              "compilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "payloadJsonSha256": "e746a6bc853f3ce337c917094fc0d901d9ef163fd0d7579540d92e3df8fd01f2",
+              "status": null
+            }
+          ],
+          "reportScope": "The seven producer reports were emitted after their assertions returned and before the binder exception; this is not a completed strict qualification.",
+          "resourceTrace": {
+            "generation": "C3",
+            "count": 21,
+            "sha256": "efae3e52146d5fc678576b0c6abceb176212a0dc97eb2151874bedea63cb7af0",
+            "bytes": 11442,
+            "expected": {
+              "report": "resource-usage.jsonl",
+              "sha256": "efae3e52146d5fc678576b0c6abceb176212a0dc97eb2151874bedea63cb7af0",
+              "checkpoints": 21,
+              "measurement": "host-process-boundaries-with-process-rss-high-water-mark",
+              "atomicInternalsObserved": false,
+              "semanticContractQualified": false
+            },
+            "first": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C3",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "sequence": 1,
+              "phase": "generation-start",
+              "pid": 2663,
+              "elapsedMs": 0.0718929999275133,
+              "rss": 9337356288,
+              "heapTotal": 1146040320,
+              "heapUsed": 1002376112,
+              "external": 2458552,
+              "arrayBuffers": 179230,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 9454018560
+            },
+            "last": {
+              "schemaVersion": 1,
+              "evidence": "host-resource-boundary-observation",
+              "command": "fixed-point",
+              "generation": "C3",
+              "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+              "executingCompilerSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+              "sequence": 21,
+              "phase": "generation-end-before-receipt-write",
+              "pid": 2663,
+              "elapsedMs": 3179019.580572,
+              "rss": 3703828480,
+              "heapTotal": 2575568896,
+              "heapUsed": 1170422232,
+              "external": 25848236,
+              "arrayBuffers": 23568914,
+              "heapLimitBytes": 8640266240,
+              "maxRssBytes": 9644593152
+            }
+          }
+        }
+      ],
+      "generatedProducts": {
+        "C2": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+        },
+        "C3": {
+          "canonicalSurfaceSourceSha256": "240a3e7072441f14a9ad7070e5c3b8306b42d97ef5932be59f2c458d1816a98e",
+          "normalizedCanonicalAdmissionsSha256": "e77c40ccd38fc3ea6a2d3342732f23b54665d066aeeda38533d04ff54aeeb020",
+          "typescriptSha256": "595cd338505f7012b8f0a813a78a1ecbafe863e6ea715b9861db35333d5a254c",
+          "javascriptSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3"
+        }
+      },
+      "sourceAndRecipe": {
+        "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "sourceKind": "raw-authoritative-lean",
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "recipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "recipeFileCount": 48,
+        "moduleCount": 64,
+        "toolchain": {
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "lean": "Lean (version 4.34.0, x86_64-unknown-linux-gnu, commit 293d5d0c0c3f3dded4688b3ccd6a33939ac5102b, Release)",
+          "leanGitHash": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+          "typescript": "Version 7.0.2"
+        }
+      },
+      "timings": {
+        "C2": {
+          "loadAndPrepare": 961865.6151259999,
+          "admissions": 0.11947800009511411,
+          "canonicalSurface": 41696.7286129999,
+          "emit": 853.7180330000119,
+          "tscAndWrite": 2823.3567960000364,
+          "total": 1007239.5388819999
+        },
+        "C3": {
+          "loadAndPrepare": 3104078.9196840003,
+          "admissions": 0.0831709997728467,
+          "canonicalSurface": 69473.70608499972,
+          "emit": 2744.4626630004495,
+          "tscAndWrite": 2722.6593709997833,
+          "total": 3179019.8319689995
+        }
+      },
+      "fixedPoint": "four-product-equality-observed-but-final-qualification-not-produced",
+      "strictEvidenceBinder": "failed-before-binder-result-and-qualification-writes",
+      "collectorStatus": "skipped",
+      "providerStatus": "skipped",
+      "evidence": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/qualification-failure.json",
+        "blob": "4a0c37ce78e74217b340ff2ce30973ed573db1d7",
+        "sha256": "1ab6c8bbf6f55cbd0ab8213bcf315493b220564d911741c663c46ce5692d1725",
+        "bytes": 43125
+      },
+      "log": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/job.log",
+        "blob": "6747dc056c2642f069cc1c45c37f9dea492e0b50",
+        "sha256": "1ee74d4316074988052bb6e1e86f14d6ede117c03af8e46a3f469c46e6aa3548",
+        "bytes": 875228
+      },
+      "runMetadata": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/run-metadata.json",
+        "blob": "227e846d233c501a14600f0ebbe63f0118331273",
+        "sha256": "0039ae74b0f23a29dd216f6b9f77328cad718e8c50ea837e7a806f73c743d477",
+        "bytes": 94892
+      },
+      "markers": {
+        "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/markers.compact.json",
+        "blob": "a8b515f0be02a944054aec2446e54d2623e5dd63",
+        "sha256": "5465a52a4b21b81e074ecdec0c2c3bc54904dada3072dec65529c275b14d6657",
+        "bytes": 914322
+      },
+      "completeReceipts": [
+        {
+          "generation": "C2",
+          "sourceArtifactPath": "C2/receipt.json",
+          "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/c2-receipt.json",
+          "blob": "5b234f02309d91ce30f12b8eb0e1a85d4c719142",
+          "sha256": "5da7545d89d7b28a4f296cbd1bd3b154aef5bac38af143caa836deb5c61f5a02",
+          "bytes": 166707
+        },
+        {
+          "generation": "C3",
+          "sourceArtifactPath": "C3/receipt.json",
+          "path": "attempts/43fa000c4adbc9d4754e20c213595c1449f00961/c3-receipt.json",
+          "blob": "8615d1bf2b32190c94858380096b2ae3fa01195a",
+          "sha256": "eaf6c772de3d9f27b4b1a42412746165b22be0c5cf431944827c95af7d8050d1",
+          "bytes": 166709
+        }
+      ],
+      "artifacts": [
+        {
+          "id": 11659939542,
+          "name": "psc0-sh1-continuation-ts7.0.2-38021634599",
+          "size_in_bytes": 11739089,
+          "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542",
+          "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/11659939542/zip",
+          "expired": false,
+          "created_at": "2026-10-10T04:56:39Z",
+          "expires_at": "2026-11-09T04:56:36Z",
+          "updated_at": "2026-10-10T04:56:39Z",
+          "digest": "sha256:599fd5160f132d0795246bc102f8b306ae3bd8d42238201cef2d3e69dbef6f80",
+          "workflow_run": {
+            "id": 38021634599,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "psc0/strict-sh1-v1",
+            "head_sha": "43fa000c4adbc9d4754e20c213595c1449f00961"
+          },
+          "digestProvenance": [
+            "GitHub Actions artifacts API digest field",
+            "Matching actions/upload-artifact log digest"
+          ],
+          "archiveInspectedByThisRecord": false,
+          "uploadFileCountDeclaration": {
+            "timestamp": "2026-10-10T04:56:36.7380553Z",
+            "text": "With the provided path, there will be 444 files uploaded",
+            "count": 444,
+            "scope": "Upload-log declaration, not an inspected current archive inventory."
+          }
+        }
+      ],
+      "reviewedRepair": {
+        "path": "reviewed-candidates/native-ir-marker-binding-repair.json",
+        "blob": "7c7ae4343cb94989df72b284dc9bd67c76794872",
+        "sha256": "65de6d37b9c4b75a1dc40999cf7ada6f2be59dfc0c1d23d63edef23b33a62b39",
+        "bytes": 33943,
+        "correctedBinder": {
+          "blob": "7700fef35acd06789b94f72078869fdef489214f",
+          "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+          "bytes": 91977
+        },
+        "compilerSourceChanged": false,
+        "fixtureChanged": false,
+        "executionPending": true
+      },
+      "supportedCompletion": {
+        "mode": "authenticated-retained-fixed-point-evidence-only",
+        "compiledSourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+        "originalGenerationRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "reusedGenerations": [
+          "N1",
+          "C1",
+          "C2",
+          "C3"
+        ],
+        "generationsToRebuild": [],
+        "conformanceExecutionsToRepeat": [],
+        "remaining": [
+          "authenticate complete archive and all actual generation/gate receipts",
+          "execute corrected binder and original qualification finalization",
+          "retain135-file catalog and24returnedJSONvalues",
+          "obtain independent provider acceptance"
+        ],
+        "correctedEvidenceProducerIsSeparateFromGenerationRecipe": true,
+        "oldExecutionConclusionsRemainExact": true
+      },
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -2514,34 +3042,65 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "supported-exact-source-fixed-point-continuation-requested-after-c3-cancellation",
+    "status": "authenticated-evidence-only-completion-requested-after-reviewed-marker-binding-correction",
     "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
     "sourceRefToRecordFromEnclosingCommit": false,
     "orchestrationSourceRefToRecordFromEnclosingCommit": true,
-    "previousCancelledRunId": 38015134511,
-    "previousCompilerJobId": 114103608774,
-    "workflow": ".github/workflows/psc0-sh1-continue.yml",
-    "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+    "previousFailedRunId": 38021634599,
+    "previousCompilerJobId": 114123691566,
+    "previousProviderJobId": 114136283916,
+    "workflow": ".github/workflows/psc0-sh1-finish-evidence.yml",
+    "workflowBlob": "3bba73b4c6f56e616e3c51194030896e291ede4a",
+    "workflowSha256": "68cb5484b0a817209dc80d26c16248d9771ac8f23ded28e558d376dc62273388",
+    "workflowBytes": 55773,
     "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
     "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
     "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
     "expectedRecipeFileCount": 48,
-    "recipeObservedInOriginalN1C1C2": true,
-    "expectedRecipeIsPredictionUntilExecuted": false,
+    "recipeObservedInOriginalGenerations": true,
+    "evidenceProducer": {
+      "finisher": {
+        "blob": "793adba3bc690bbef566e922c9efb3457d372d87",
+        "sha256": "804f4e67d9c9e4165cdbeec01dd3a2c7a5635f08e3d95ab9f88f75054a79316d",
+        "bytes": 38509
+      },
+      "binder": {
+        "blob": "7700fef35acd06789b94f72078869fdef489214f",
+        "sha256": "829c7c8c70ce3388e6a8e8044ee07b5c65649546d1556a62d599a552fdcdb606",
+        "bytes": 91977
+      }
+    },
+    "generationOwnership": {
+      "N1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C1": {
+        "runId": 38015134511,
+        "compilerJobId": 114103608774
+      },
+      "C2": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      },
+      "C3": {
+        "runId": 38021634599,
+        "compilerJobId": 114123691566
+      }
+    },
     "reusedGenerations": [
       "N1",
-      "C1"
+      "C1",
+      "C2",
+      "C3"
     ],
     "requiredPhases": [
-      "authenticate original cancelled run/jobs and complete archive",
-      "verify all imported files and48recipe sources",
-      "existing fixed-point command rebuildsC2 thenC3",
-      "all original C2/C3 conformance and four-product equality",
-      "exact strict evidence binder",
-      "preserved-input and complete-file inventory",
-      "independent selected-provider acceptance"
+      "authenticate complete archive and all actual generation/gate receipts",
+      "execute corrected binder and original qualification finalization",
+      "retain135-file catalog and24returnedJSONvalues",
+      "obtain independent provider acceptance"
     ],
-    "jobTimeoutMinutes": 300,
+    "jobTimeoutMinutes": 45,
     "providerTimeoutMinutes": 45,
     "actualRunId": null,
     "actualCompilerJobId": null,
@@ -2549,42 +3108,90 @@
     "repeatColdRecovery": false,
     "repeatNativeCandidate": false,
     "repeatSelectedSeedCandidate": false,
+    "repeatC2C3": false,
     "productionSourceChanged": false,
     "fixtureChanged": false,
-    "hostRecipeChanged": false,
+    "generationRecipeChanged": false,
+    "canonicalEvidenceBinderChanged": true,
+    "predictedFutureNormalRecipeSha256": "18bfaff7d1d107a95f54733abcd624e5f43cb60dd25be827c764e488b82725fc",
+    "predictedFutureNormalRecipeHasNotGeneratedTheseArtifacts": true,
     "qualificationChecksBypassed": false,
     "previousRequest": {
-      "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
-      "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
-      "sourceRefToRecordFromEnclosingCommit": true,
+      "status": "supported-exact-source-fixed-point-continuation-requested-after-c3-cancellation",
+      "sourceRef": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+      "sourceRefToRecordFromEnclosingCommit": false,
+      "orchestrationSourceRefToRecordFromEnclosingCommit": true,
+      "previousCancelledRunId": 38015134511,
+      "previousCompilerJobId": 114103608774,
+      "workflow": ".github/workflows/psc0-sh1-continue.yml",
+      "workflowBlob": "8f335c42afbf372bbf1e549dcbb11c1cb5ff4c60",
+      "requiredSourceRoot": "/home/runner/work/pskernel/pskernel/psc0",
       "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
       "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
       "expectedRecipeFileCount": 48,
-      "expectedRecipeIsPredictionUntilExecuted": true,
-      "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
-      "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
-      "workflow": ".github/workflows/psc0-sh1.yml",
-      "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
-      "workflowId": 378853677,
-      "fullQualificationRequested": true,
-      "commitMarker": "[sh1-qualify]",
+      "recipeObservedInOriginalN1C1C2": true,
+      "expectedRecipeIsPredictionUntilExecuted": false,
+      "reusedGenerations": [
+        "N1",
+        "C1"
+      ],
       "requiredPhases": [
-        "N1 native candidate and conformance",
-        "data-only authenticated R/N1 worker comparison",
-        "selected-R to C1 and all existing candidate gates",
-        "C1 to C2",
-        "C2 to C3",
-        "four-product fixed point and native parity",
+        "authenticate original cancelled run/jobs and complete archive",
+        "verify all imported files and48recipe sources",
+        "existing fixed-point command rebuildsC2 thenC3",
+        "all original C2/C3 conformance and four-product equality",
         "exact strict evidence binder",
+        "preserved-input and complete-file inventory",
         "independent selected-provider acceptance"
       ],
+      "jobTimeoutMinutes": 300,
+      "providerTimeoutMinutes": 45,
+      "actualRunId": null,
+      "actualCompilerJobId": null,
+      "actualProviderJobId": null,
       "repeatColdRecovery": false,
-      "repeatRetainedN1Diagnostic": false,
+      "repeatNativeCandidate": false,
+      "repeatSelectedSeedCandidate": false,
       "productionSourceChanged": false,
       "fixtureChanged": false,
-      "hostConformanceChanged": true,
-      "addedCompilerExecutions": 0,
-      "priorReceiptsReusedAsNewQualification": false,
+      "hostRecipeChanged": false,
+      "qualificationChecksBypassed": false,
+      "previousRequest": {
+        "status": "one-full-exact-source-qualification-requested-after-reviewed-worker-observation-schema-correction",
+        "expectedParent": "138fe57a6adeddfe875f1fbf4cc3a7de6e406a91",
+        "sourceRefToRecordFromEnclosingCommit": true,
+        "sourceClosureSha256": "46737f1e58a56cfa4cc0b575d30f531efe1dbe06ccf34002cc01e553febb1fb5",
+        "expectedRecipeSha256": "a631bcaf914c0913f696eaf8a138a44449c46957f5a2d7736ec9cff8bcb63eba",
+        "expectedRecipeFileCount": 48,
+        "expectedRecipeIsPredictionUntilExecuted": true,
+        "reviewManifest": "bec69f2d37ae68e7b8ff93fb4fd7fd2f7187dc19",
+        "independentReview": "5080fe9c78e0a560c143ad18ea5f13b4721c7111",
+        "workflow": ".github/workflows/psc0-sh1.yml",
+        "workflowBlob": "e43d6f274585405e6c88606f192c0dc6e6b49f70",
+        "workflowId": 378853677,
+        "fullQualificationRequested": true,
+        "commitMarker": "[sh1-qualify]",
+        "requiredPhases": [
+          "N1 native candidate and conformance",
+          "data-only authenticated R/N1 worker comparison",
+          "selected-R to C1 and all existing candidate gates",
+          "C1 to C2",
+          "C2 to C3",
+          "four-product fixed point and native parity",
+          "exact strict evidence binder",
+          "independent selected-provider acceptance"
+        ],
+        "repeatColdRecovery": false,
+        "repeatRetainedN1Diagnostic": false,
+        "productionSourceChanged": false,
+        "fixtureChanged": false,
+        "hostConformanceChanged": true,
+        "addedCompilerExecutions": 0,
+        "priorReceiptsReusedAsNewQualification": false,
+        "strictSh1Qualified": false,
+        "semanticContractQualified": false,
+        "providerChecked": false
+      },
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
@@ -2630,7 +3237,7 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T03:40:11Z",
+  "updatedAtUtc": "2026-10-10T05:14:00Z",
   "completedDiagnostics": [
     {
       "status": "completed-localization-only",

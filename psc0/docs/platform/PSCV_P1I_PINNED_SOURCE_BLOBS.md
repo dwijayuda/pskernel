@@ -1,5 +1,7 @@
 # PSCV P1-I — immutable Lean module source blobs and lexical candidates
 
+**Qualified:** [GitHub Actions run 38058712867](https://github.com/dwijayuda/pskernel/actions/runs/38058712867) passed all four Linux/Windows and real Lean/pinned-Git checks, at source `f408f374ab6b4484dd79923806b01094b9364b8a`. Module Git blobs: `Init.Prelude` = `f87ee970...`, `Init.Data.String.Defs` = `f2502b70...`, `Init.Data.Int.Basic` = `13eb3c86...`. **Six** unique explicit named-instance lexical line candidates were found, while five selected terms remain module-only. [Exact machine evidence](pscv-p1i-qualification-2026-10-10.json) and [retained artifact](https://github.com/dwijayuda/pskernel/actions/runs/38058712867/artifacts/11671518917), report digest `b640f6295926272724fb922f55d4d433bdfe23f5f7971713c219a99ba7da748a`. These are review candidates only; **191** normative IDs remain unresolved.
+
 The qualified P1-H Lean environment probe identifies three imported
 module names for eleven selected constants:
 `Init.Prelude` (9), `Init.Data.String.Defs` (1),

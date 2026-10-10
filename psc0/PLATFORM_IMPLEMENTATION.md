@@ -1,5 +1,41 @@
 # PSC0 platform implementation
 
+## PSC0 PSCV P1-B — actual Lean registry observation and normative mapping inputs qualified
+
+**Qualification:** [GitHub Actions run 38050837575](https://github.com/dwijayuda/pskernel/actions/runs/38050837575), attempt1, all six jobs successful at source commit `1cb7d874c37bd30d69f2482981a31e940ed581ed`. Branch `psc0/platform-pscv-p1b-v1` and [draft PR97](https://github.com/dwijayuda/pskernel/pull/97) stacked on P1-A PR96. **Status:** P1-B extraction and source-coverage worksheet qualified; the *complete closed PSCV Standard registry and P2 certification are not implemented*. No branch merge or npm publication.
+
+## What was actually implemented
+
+- `PSCVL/RegistryProbe.lean` runs in the exact pinned Lean4.35.0-rc3 environment, imports `PSCVL.Policy` and reads native Lean environment-extension data for instance priorities, default-instance groups, simp theorem origins/unfold declarations, built-in/local simprocs, and selected grind extension/cases names. This is **ambient Lean registration data**, NOT PSCV Standard activation. It is source-incompatible with an implicit claim of complete ordered registry meaning.
+- `packages/pscv/src/ambient-registry-inventory.mjs` validates the bounded observed data and rejects forged completion/certification flags, bad metadata, malformed priorities and arrays. `packages/pscv/scripts/validate-ambient-registry.mjs` saves canonical review output with every conformance/proof/verified executable claim false.
+- `packages/pscv/src/required-standard-surface.mjs` reads the exact SHA-pinned normative PSCV-RC-v2 §24.3 and extracts all **230** required type/operator/literal rows and **194** unique named referenced snapshot IDs. All source-to-declaration mappings remain explicitly unresolved. `packages/pscv/scripts/generate-required-standard-surface.mjs` writes a source-owned coverage worksheet without approving any registry entries.
+- No source-level/compiler folders renamed, no new public npm backend, no change to the 62-module compiler self-host closure, selected seed, native Core implementation or checked build/publication. Existing private `@proofscript/pscv` remains data-only, no scripts, no active PSCV compiler; `PSCV-CERT-v1` gate remains unavailable.
+
+## Actual measured source inputs
+
+The imported Lean environment had **9,742 instances; 28 default-instance classes; 20,786 simp origins; 46 explicit unfold declarations; 390 built-in simprocs; 0 local simprocs; 17 grind-ext names; 13 grind-cases entries.** Canonical observation SHA256 `07d84ebf5aafe1c581a32b9ca0022ffe1b3985f7a3e002fece939a3460997a61`. §24.3 source coverage digest SHA256 `cf9b7ff27263332eb00903a26e6c48019f22c0793f77de215120684a3c904f56`. **These are not the PSCV closed registry selection.** Hash-map sorting does not reproduce equal-priority search, scoped activation or import order.
+
+Normative source reference remains SHA256 `4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71`, Lean4.35.0-rc3 commit `470d5ce1400764999581fd26d5d72b00d990b0f4`. The independently advancing Core rc4 branch and platform Core4.34 baseline are unchanged and not treated as semantic substitutes.
+
+## Qualified executed tests and artifacts
+
+Six green jobs: Linux Node22 **23/23** tests; Linux Node26 **23/23**; Windows Node26 **23/23**; pinned Lean RC3 pure-contract preflight; pinned 40/40 source-root provenance audit; and the new real registry-observation extraction plus 230-row source worksheet. Total **69 Node unit passes**, no test failures. No PSCV executable or certificate produced.
+
+[Download ambient registry observation and source worksheet](https://github.com/dwijayuda/pskernel/actions/runs/38050837575/artifacts/11669157884), ZIP SHA256 `c2f07942b7012cfb89e4ad8910bd1b704b663f2a96fc361436433cb25a4eb5a7`, expires 9 November 2026. [Download corresponding 40-source provenance audit](https://github.com/dwijayuda/pskernel/actions/runs/38050837575/artifacts/11669657062), ZIP SHA256 `915dfe9c774a184bb4b41e3e85369013f0be3d0baa4d8b2f7a2421224eddb2f1`. Both archives expire; committed digests are not durable binaries or approved Standard manifests.
+
+[P1-B implementation details](docs/platform/PSCV_P1B_REGISTRY_INVENTORY.md) · [P1-B machine-readable qualification](docs/platform/pscv-p1b-qualification-2026-10-10.json).
+
+## Still blocking full P1-B and P2
+
+Complete, closed and **ordered** Standard `instances/default_instances/coercions/simp/simprocs/ext/grind` entries, exact source line/blob/symbol locators and non-default class-parameter-mode provenance, effect/WP verification registry, required snapshot ID resolution for all 194 IDs, deterministic conformance tests and final normalized manifest digest in an *approved future normative revision* have not been established. The existing environment-derived 9,742 instances and 20,786 simp origins are far broader than the permitted PSCV Standard closure. Never silently include all of them.
+
+Only after those gates may P2 attempt one genuinely **certified** pure contract with independently complete required VCs, kernel-replayed proof terms, approved spec and trust/erasure/ABI closure, and a protected `VerifiedExecutableModule` transition. Do not change `allowedToEmitVerifiedExecutable`, bypass `PSC_PSCV_CERT_GATE_UNQUALIFIED`, or use preview `check-preview` as a certified source profile.
+
+**Workflow:** always re-fetch GitHub HEAD before writes, use expected-head non-force updates; GitHub/cloud CI exclusively. Preserve concurrent kernel metatheory/refinement work, self-host seed and previous branches. Do not use Desktop Commander or local checkouts/builds/tests.
+
+---
+
+
 ## PSC0 PSCV P1-A semantic source pin and read-only profile identity — qualified
 
 **Source commit:** `829a1945a78965ed87ae3835a48642b6dcff013b`, 10 October 2026. [Run 38049559622](https://github.com/dwijayuda/pskernel/actions/runs/38049559622) passed **all five** jobs on attempt 1. Branch `psc0/platform-pscv-p1-v1`, stacked on P0 at [draft PR96](https://github.com/dwijayuda/pskernel/pull/96). Runtime/core/compiler/seed and selected release paths are unchanged. This is P1-A, not a complete P1 Standard environment or a PSCV-certified build.

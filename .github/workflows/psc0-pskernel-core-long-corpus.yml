@@ -178,7 +178,13 @@ jobs:
           output = tail(stdout)
           errors = tail(stderr)
           times = timing.read_text() if timing.exists() else ""
-          accepted = re.search(r"accepted lean=(\S+) records=(\d+) declarations=(\d+) constants=(\d+)", output)
+          # The adapter emits its final acceptance on stderr. Accept exactly one complete
+          # protocol line from either stream; exit status and record coverage remain mandatory.
+          acceptances = re.findall(
+              r"^accepted lean=(\S+) records=(\d+) declarations=(\d+) constants=(\d+)\r?$",
+              output + "\n" + errors, re.MULTILINE
+          )
+          accepted = (None,) + acceptances[0] if len(acceptances) == 1 else None
           if code == 0 and accepted and int(accepted[2]) == records:
               status = "accepted-complete-under-extended-limit"
           elif code == 0:

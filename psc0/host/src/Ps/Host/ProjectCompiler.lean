@@ -92,6 +92,7 @@ def psHostPackageDirectory : List String -> Option String
   | "Ps" :: "Syntax" :: _ => some "syntax"
   | "Ps" :: "Core" :: _ => some "core"
   | "Ps" :: "Kernel" :: _ => some "pskernel-core"
+  | "Ps" :: "KernelCore" :: _ => some "pskernel-core"
   | "Ps" :: "Environment" :: _ => some "environment"
   | "Ps" :: "Project" :: _ => some "project"
   | "Ps" :: "Meta" :: _ => some "meta"

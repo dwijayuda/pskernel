@@ -32,12 +32,14 @@ Read applicable AGENTS files, GITHUB_FIRST_WORKFLOW.md,
 psc0/docs/selfhost-language/CURRENT.md, REFERENCE_CORRECTNESS_PLAN.md and the
 current evidence before edits. Generated PSC0 kernel qualification is open.
 
-Last fully validated source/audit trigger: 37ab7783212018c5ed1c0b8d43328006c32931ba
-(run 38066007090, bounded frame). The newer binder-opening theorem source
-bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a has an audit at
-https://github.com/dwijayuda/pskernel/actions/runs/38066810266.
-Read its completed result and full logs before calling it validated. An earlier
-attempt failed from reserved Lean identifier `scoped`, fixed at bd32e4fc.
+Latest fully validated source/audit trigger: 566d1c88dc3ac997a2f4d1f76810036529db8d2a
+(code at bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a).
+https://github.com/dwijayuda/pskernel/actions/runs/38066810266/job/114256009792
+passed 266 build jobs, 84 companion files, 298 semantic axiom targets,
+152 model dependency modules, 1,840 reference-policy definitions with zero
+cached fallbacks, and seven native regression executables. Binary, Arena and
+fresh 4.35 exports were skipped. The prior reserved-identifier failure at
+run 38066469877 is preserved in MIGRATION_EVIDENCE.json.
 Later documentation commits may follow it. Verify completed logs and inspect
 any intervening source changes before assuming the current branch is green.
 Recovery checkpoint before this architecture slice:

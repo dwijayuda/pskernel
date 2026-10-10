@@ -31,15 +31,23 @@ the 152-module model import audit (12 pinned pure-math modules) and seven
 native test executables. This validation covers the initial bounded-frame
 slice through `7f2ff1c8`, **not** the subsequent opening theorem.
 
-**Most recent code candidate**: `bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a`,
-workflow audit trigger
-`566d1c88dc3ac997a2f4d1f76810036529db8d2a`,
-[run 38066810266](https://github.com/dwijayuda/pskernel/actions/runs/38066810266):
-pending at this documentary checkpoint. The preceding
-[run 38066469877](https://github.com/dwijayuda/pskernel/actions/runs/38066469877)
-failed because `scoped` was used as a Lean proof-variable identifier in
-`binderChild_opened_frame`; this was renamed to `openedScoped` in the
-candidate. Do not claim the candidate is green before completed logs confirm it.
+**Final validated proof candidate**: `bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a`
+(code), `566d1c88dc3ac997a2f4d1f76810036529db8d2a`
+(workflow-only audit trigger),
+[run 38066810266 / job 114256009792](https://github.com/dwijayuda/pskernel/actions/runs/38066810266/job/114256009792):
+**passed**. The completed cloud log recorded 266 build jobs (221 focused),
+all 84 companion files, 298 semantic axiom declarations,
+152 model dependency modules including 12 pinned pure-math modules,
+0 production-assurance/legacy-judgment imports, 1,840 reference definitions
+with 0 cached fallbacks and all seven native regression executables.
+The separate binary, Arena and fresh-export jobs were skipped by the
+focused workflow. This evidence covers the corrected binder-opening theorem.
+
+The intermediate [run 38066469877](https://github.com/dwijayuda/pskernel/actions/runs/38066469877)
+failed from using Lean-reserved variable name `scoped` in
+`binderChild_opened_frame`; the isolated rename to `openedScoped`
+at `bd32e4fc` repaired compilation. That failed run is retained as a
+distinct source revision, not hidden as success.
 
 **Important remaining obligations:** This is a conditional *binder-entry*
 invariant, not a proof that arbitrary successful public checker executions

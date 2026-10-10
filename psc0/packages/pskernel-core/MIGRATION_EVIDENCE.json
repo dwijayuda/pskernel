@@ -1,15 +1,15 @@
 {
   "schemaVersion": 9,
-  "stage": "Correctness priority: owned local contexts and actual sort-visit provenance",
-  "status": "validated-owned-context-and-sort-visit-support-full-kernel-unfinished",
-  "candidateCommit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-  "assuranceRevision": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
+  "stage": "Correctness priority: bounded local-frame and actual binder opening",
+  "status": "validated-bounded-binder-frame-full-kernel-consistency-unfinished",
+  "candidateCommit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+  "assuranceRevision": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
   "target": {
     "version": "4.35.0-rc4",
     "gitCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
   },
-  "workflowRun": 38062528401,
-  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+  "workflowRun": 38066810266,
+  "workflowUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38066810266/job/114256009792",
   "nativeBinarySha256": null,
   "checks": {
     "build": {
@@ -18,9 +18,9 @@
       "qualification": "The focused semantic workflow compiles runtime/metatheory and native regression executables, but does not build or hash the current Arena binary."
     },
     "metatheory": {
-      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-      "run": 38062528401,
-      "job": 114243521453,
+      "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+      "run": 38066810266,
+      "job": 114256009792,
       "buildJobs": 266,
       "focusedBuildJobs": 221,
       "companionFiles": 84,
@@ -32,21 +32,21 @@
       "referenceDefinitions": 1840,
       "cachedFallbacks": 0,
       "status": "passed",
-      "checkedAt": "2026-10-10 15:17:00 UTC",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38062528401/job/114243521453",
+      "checkedAt": "2026-10-10 16:18:17 UTC",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38066810266/job/114256009792",
       "runConclusion": "success"
     },
     "companionProofs": {
       "status": "passed",
       "files": 84,
-      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-      "run": 38062528401,
-      "job": 114243521453
+      "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+      "run": 38066810266,
+      "job": 114256009792
     },
     "nativeRegression": {
-      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-      "run": 38062528401,
-      "job": 114243521453,
+      "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+      "run": 38066810266,
+      "job": 114256009792,
       "status": "passed",
       "executables": 7,
       "suiteMarkers": [
@@ -94,17 +94,17 @@
         "dagDepth": 32
       },
       "annotatedSyntax": {
-        "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-        "run": 38062528401,
-        "job": 114243521453,
+        "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+        "run": 38066810266,
+        "job": 114256009792,
         "status": "passed",
         "cases": 31,
         "modelImports": 0
       },
       "sortVisitCarriers": {
-        "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-        "run": 38062528401,
-        "job": 114243521453,
+        "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+        "run": 38066810266,
+        "job": 114256009792,
         "status": "passed",
         "cases": 8,
         "unchecked": 1,
@@ -317,18 +317,18 @@
       "qualification": "Storage generalization and actual sort-helper extraction change runtime source after the historical matching binary."
     },
     "annotatedSyntax": {
-      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-      "run": 38062528401,
-      "job": 114243521453,
+      "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+      "run": 38066810266,
+      "job": 114256009792,
       "status": "passed",
       "cases": 31,
       "modelImports": 0
     },
     "runtimeValidationScope": "The current focused gate runs the entire production/metatheory build, all companion files, semantic-axiom/import/reference-policy audits and all seven native test executables. Current standalone Arena binary, small Arena and fresh-export jobs are not run. Historical and intermediate-source corpus/binary receipts retain their original revision and do not qualify the current runtime.",
     "sortVisitCarriers": {
-      "commit": "35cef8c29358ecac8a3e89df540e0fdce72fcbca",
-      "run": 38062528401,
-      "job": 114243521453,
+      "commit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+      "run": 38066810266,
+      "job": 114256009792,
       "status": "passed",
       "cases": 8,
       "unchecked": 1,
@@ -378,7 +378,11 @@
     "crossVisitRawEqualityImpliesCoherence": false,
     "publicRecursiveResultUsesAnnotatedReadings": false,
     "fullAllocatorAndScopeInvariantProved": false,
-    "latestRuntimeArenaBinaryHashMeasured": false
+    "latestRuntimeArenaBinaryHashMeasured": false,
+    "boundedLocalFrameSyntacticPreservationProved": true,
+    "binderFreshnessDerivedFromBoundedFrame": true,
+    "productionOpenedBodyFrameProvedUnderScopeAndBounds": true,
+    "publicRecursiveFramePreservationProved": false
   },
   "correctnessAudit": {
     "sourceCommit": "c78590556fca75f9ee080e32cbb0d0cd82f16b92",
@@ -1849,7 +1853,7 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 15:17:00 UTC",
+  "recordedAt": "2026-10-10 16:18:17 UTC",
   "semanticFoundation": {
     "sourceCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
     "validationCommit": "9cf6d802ea9bc33fabd220abfb38b3fe432495ba",
@@ -3847,5 +3851,44 @@
     "status": "passed",
     "url": "https://github.com/dwijayuda/pskernel/actions/runs/38059022897/job/114233292177",
     "qualification": "Live source at the start of this milestone; preceding docs still described the earlier 9cf6d802 stage."
+  },
+  "boundedLocalFrameStage": {
+    "candidateSource": "bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a",
+    "sourceCommits": [
+      "7f2ff1c87a3d5f7369243eb5448b1bcf03e12194",
+      "9314591744c822b68507d438f192a35002839a41",
+      "bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a"
+    ],
+    "validationCommit": "566d1c88dc3ac997a2f4d1f76810036529db8d2a",
+    "run": 38066810266,
+    "job": 114256009792,
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38066810266/job/114256009792",
+    "previousValidatedRun": 38066007090,
+    "intermediateParserFailure": {
+      "run": 38066469877,
+      "status": "failed",
+      "cause": "Lean-reserved scoped proof-variable name",
+      "fixedIn": "bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a"
+    },
+    "proofScope": [
+      "BoundFrame numeric identity bounds without unjustified closed-context requirement",
+      "LocalFrame selected query/type/let-value bounds with Scoped 0 for local declarations",
+      "empty and weakening, shared local/let insertion and scope exit preserve frame",
+      "allocator freshness derived for semantic binder context and actual local context",
+      "actual reference binder and fvar semantic-model corollaries under checked-reading and model premises",
+      "actual binder opening and local insertion share the same fresh name and advanced counter"
+    ],
+    "retainedOpenObligations": [
+      "public initial-session invariant connection",
+      "joint graded recursive frame preservation through infer/WHNF/defeq callbacks",
+      "cross-visit annotation coherence and accepting-guard soundness",
+      "complete semantic environment/admission model",
+      "allowed-axiom policy and public successful-acceptance to False consistency corollary"
+    ],
+    "conLecheFoundation": "explicit [ConLeche.SetTheory V], pure mathematical dependency only",
+    "newCustomAxioms": false,
+    "fullKernelConsistencyProved": false,
+    "scopeNotes": "Focused semantic proof workflow only; latest Arena binary, full corpora, cached whole-checker refinement and generated PSC0 qualification were not run or proved."
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-psc0.0",
+  "version": "0.1.0-psc0.1",
   "description": "ProofScript PSC0 pskernel-core source and JavaScript runtime package",
   "type": "module",
   "private": false,
@@ -34,6 +34,6 @@
       "lean"
     ],
     "publishingRequiresBuild": true,
-    "runtimeTrust": "candidate; no checker promotion"
+    "runtimeTrust": "qualified bounded JavaScript admission candidate; formal soundness not proven"
   }
 }

@@ -1,5 +1,5 @@
 import Ps.KernelCore.Metatheory.SemanticReferenceBinders
-import Ps.KernelCore.Metatheory.SemanticFunctionValidity
+import Ps.KernelCore.Metatheory.SemanticValidityScope
 
 /-!
 The actual checked lambda branch closes the allocator's fresh name in the
@@ -150,5 +150,48 @@ theorem lambda_trace_model_from_visits
       change interp M (extend x ρ) (close name U 0) ∈ˢ (univ 0 : V)
       rw [abstractFVar_closed_input M U name scopedU ρ x]
       exact truthValues hz ρ hρ x hx
+
+/-- The actual returned function type inherits both hereditary invariants
+from the recursive body type. This is the inferred-type part of the future
+joint checker invariant; the recursive facts and the selected regime remain
+explicit. No separate reduced type is supplied. -/
+theorem lambda_trace_type_validity
+    (M : Reading V) (Γ : List AnnotatedExpr)
+    (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOperation)
+    (c : PsKernelCheckerContext) (s next : PsKernelCheckerState)
+    (n : PsKernelName) (A b U : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (result : PsKernelExpr) (v : PsKernelLevel)
+    (trace : LambdaTrace remaining whnf defeq c s n A.erase b.erase bi result next)
+    (hU : U.erase = trace.bodyType) (scopedU : U.Scoped 0)
+    (domainValid : ∀ ρ, Satisfies M Γ ρ →
+      AnnotationValid M ρ A ∧ FunctionValid M ρ A)
+    (typeValid : ∀ ρ, Satisfies M Γ ρ → ∀ x, x ∈ˢ interp M ρ A →
+      AnnotationValid (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ U ∧
+      FunctionValid (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ U)
+    (truthValues : M.level v = 0 → ∀ ρ, Satisfies M Γ ρ →
+      ∀ x, x ∈ˢ interp M ρ A →
+        interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ U ∈ˢ
+          (univ 0 : V)) :
+    ∃ type : AnnotatedExpr, type.erase = result ∧
+      ∀ ρ, Satisfies M Γ ρ →
+        AnnotationValid M ρ type ∧ FunctionValid M ρ type := by
+  let name := (psKernelCheckerStateFreshName trace.domainSortState n).1
+  refine ⟨.forallE n A (close name U 0) bi v, ?_, ?_⟩
+  · change PsKernelExpr.forallE n A.erase (close name U 0).erase bi = result
+    rw [erase_abstractFVar, hU]
+    exact trace.resultEq.symm
+  · intro ρ hρ
+    constructor
+    · refine ⟨(domainValid ρ hρ).1, ?_, ?_⟩
+      · intro x hx
+        exact (annotationValid_abstractFVar M U name scopedU ρ x).mpr
+          (typeValid ρ hρ x hx).1
+      · intro hz x hx
+        rw [abstractFVar_closed_input M U name scopedU ρ x]
+        exact truthValues hz ρ hρ x hx
+    · refine ⟨(domainValid ρ hρ).2, ?_⟩
+      intro x hx
+      exact (functionValid_abstractFVar M U name scopedU ρ x).mpr
+        (typeValid ρ hρ x hx).2
 
 end PsKernelSemantics.Reference

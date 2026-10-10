@@ -1,6 +1,7 @@
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotationVisits
 import Ps.KernelCore.Metatheory.SemanticCheckedAnnotations
 import Ps.KernelCore.Metatheory.SemanticUniverseRegime
+import Ps.KernelCore.Metatheory.SemanticValidityScope
 import Ps.KernelCore.Metatheory.SemanticReferenceLambda
 import Ps.KernelCore.Metatheory.SemanticFunctionValidity
 import Ps.KernelCore.Metatheory.SemanticReference
@@ -74,6 +75,13 @@ run_cmd do
     ``PsKernelSemantics.SetModel.functionValid_open_fresh,
     ``PsKernelSemantics.Reference.inferCore_lam_trace,
     ``PsKernelSemantics.Reference.lambda_trace_model_from_visits,
+    ``PsKernelSemantics.SetModel.annotationValid_scoped,
+    ``PsKernelSemantics.SetModel.functionValid_scoped,
+    ``PsKernelSemantics.SetModel.annotationValid_closed,
+    ``PsKernelSemantics.SetModel.functionValid_closed,
+    ``PsKernelSemantics.SetModel.annotationValid_abstractFVar,
+    ``PsKernelSemantics.SetModel.functionValid_abstractFVar,
+    ``PsKernelSemantics.Reference.lambda_trace_type_validity,
     ``PsKernelSemantics.SetModel.functionValid_liftN,
     ``PsKernelSemantics.SetModel.functionValid_inst,
     ``PsKernelSemantics.SetModel.functionValid_inst_zero,

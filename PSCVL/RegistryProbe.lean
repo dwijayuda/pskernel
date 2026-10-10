@@ -17,10 +17,31 @@ namespace PSCVL
 private def recordName (name : Name) : Json :=
   Json.str name.toString
 
-private def recordInstance (p : Name × Meta.InstanceEntry) : Json :=
+/-- Peel dependent Pi binders to observe the registered class head.
+    This is a *syntactic* inspection, not definitional equality or an
+    independent proof of instance elaboration semantics. -/
+private partial def codomainHead (e : Expr) : Option Name :=
+  match e with
+  | .forallE _ _ body _ => codomainHead body
+  | e =>
+    match e.getAppFn with
+    | .const name _ => some name
+    | _ => none
+
+private def recordInstance (env : Environment) (p : Name × Meta.InstanceEntry) : Json :=
+  let head : Json :=
+    match env.find? p.1 with
+    | some info =>
+      match codomainHead info.type with
+      | some name => recordName name
+      | none => Json.null
+    | none => Json.null
   Json.mkObj [
     ("name", recordName p.1),
-    ("priority", toJson p.2.priority)
+    ("priority", toJson p.2.priority),
+    ("resultClassHead", head),
+    ("synthOrder", toJson p.2.synthOrder),
+    ("imported", toJson ((env.getModuleIdxFor? p.1).isSome))
   ]
 
 private def recordDefault (p : Name × List (Name × Nat)) : Json :=
@@ -85,7 +106,7 @@ def observedRegistryData (env : Environment) : Json := Id.run do
     ("kind", toJson ("psc-lean-ambient-registrations/0" : String)),
     ("environment", toJson ("PSCVL.Policy imported into Lean 4.35.0-rc3" : String)),
     ("selectedLeanVersion", toJson ("4.35.0-rc3" : String)),
-    ("instances", toJson (instances.map recordInstance)),
+    ("instances", toJson (instances.map (recordInstance env))),
     ("defaultInstances", toJson (defaultClasses.map recordDefault)),
     ("simpOrigins", toJson (simp.lemmaNames.set.toList.map recordSimpOrigin)),
     ("simpToUnfold", toJson (simp.toUnfold.set.toList.map fun (name, _) => recordName name)),

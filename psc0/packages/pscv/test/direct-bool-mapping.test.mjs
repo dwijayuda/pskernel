@@ -32,7 +32,7 @@ const rawAmbient=()=>({
   schemaVersion:0,kind:'psc-lean-ambient-registrations/0',
   environment:'PSCVL.Policy imported into Lean 4.35.0-rc3',
   selectedLeanVersion:'4.35.0-rc3',
-  instances:[{name:'instNat',priority:1000}],
+  instances:[{name:'instNat',priority:1000,resultClassHead:'HAdd',synthOrder:[0],imported:true}],
   defaultInstances:[],simpOrigins:[{name:'Nat.add_zero'}],
   simpToUnfold:[],simprocBuiltins:[],simprocLocal:[],
   grindExtNames:[],grindCases:[],

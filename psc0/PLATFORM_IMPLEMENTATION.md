@@ -1,5 +1,29 @@
 # PSC0 platform implementation
 
+## PSC0 PSCV P1-D — imported instance result-class review index qualified
+
+**Qualified source:** `80570393844e08876c3356c553845b6f89846b88`. [GitHub Actions run 38053043569](https://github.com/dwijayuda/pskernel/actions/runs/38053043569), attempt 1, all six jobs passed: Linux Node22, Linux Node26, Windows Node26 each **29/29** tests (87 unit tests), actual Lean4.35.0-rc3 imported environment/class-head probe, 40-root source provenance and positive/negative Lean contract preflight. Branch `psc0/platform-pscv-p1d-classes-v1`, [draft PR99](https://github.com/dwijayuda/pskernel/pull/99) stacked on qualified P1-C PR98. No npm publication/merges/core/seed/compiler changes.
+
+## Implemented
+
+- `PSCVL/RegistryProbe.lean` now reads each actual Lean imported `InstanceEntry` from `PSCVL.Policy`: declared type's **syntactic result-class head** after Pi elimination, registered priority, `synthOrder` array and imported/module status. This is type/declaration observation, not definitional equality, solver success, scoped instance search or complete provenance.
+- Strict `packages/pscv/src/ambient-registry-inventory.mjs` validator refuses fake class-head, import and synthesis-order metadata while preserving previous Boolean source audit, source pin, required-surface and non-certifying status.
+- `packages/pscv/src/instance-class-index.mjs` and cloud generator group all actual imported instance declarations by class-head, preserving a candidate-only review index. Entries are sorted for display by priority/name and **not** labeled Lean's real scoped/imported equal-priority synthesis order. No source snapshot ID is automatically assigned to a class or proof authority.
+- Real pinned environment: **9,742 registered instance declarations, 411 distinct syntactic class heads, zero null heads, 9,742 marked imported**. Index SHA256 `e9512a596111f2fb095698d0704d3122e0ac1aa1074922acb18ffae5c9dc63db`; revised ambient data SHA256 `c4710a375287b8b45884b0030f1fd8055020b1e849543fae3c837ec0fca0e17c`. The normative §24.3 worksheet has 230 required rows, 194 IDs; P1-C located only 3 Bool direct IDs. **191 still unresolved**.
+
+## Exact evidence and limitations
+
+Qualified output [class-head index and ambient archive artifact 11670241857](https://github.com/dwijayuda/pskernel/actions/runs/38053043569/artifacts/11670241857), ZIP SHA256 `d015f8b3ec6b67b652b50a06ff44c2004af19f728e859fe7b030411b91425481`; 40-root [pinned source provenance artifact 11670701127](https://github.com/dwijayuda/pskernel/actions/runs/38053043569/artifacts/11670701127), ZIP SHA256 `f91dbd38b7069412cd6e264c7b5539fe21f5ca44071405348e0d503a01ae6698`. Both expire 9 November 2026. [P1-D technical procedure](docs/platform/PSCV_P1D_IMPORTED_CLASS_INDEX.md) and [machine-readable qualification](docs/platform/pscv-p1d-qualification-2026-10-10.json).
+
+**Not complete P1-B/P1-D Standard freeze:** result class heads are preliminary candidate indexes only. Resolve 191 `std.*` IDs via exact basis type, class, chosen instance/constant, priority, imported scope and tie order, deterministic Lean elaboration and immutable source-line provenance; then include approved ordered default instances, coercions, simp, simproc, ext/grind and WP/verification effects in a complete frozen manifest with approved normative digest and conformance. A parsed/observed Lean import environment is far broader than PSCV's permitted Standard.
+
+**P2 not started:** the private PSCV package has no certified language activation; `PSCV-CERT-v1` gate remains fail-closed, `VerifiedExecutableModule` cannot be constructed from these review indexes or proof hashes, and no PSCV verified executable can be emitted. The historical selected native Core and 62-module compiler self-host TS7 fixed point remain unchanged; independent Lean4.35rc4 kernel refinement is not silently selected for the normative rc3 profile.
+
+Cloud GitHub Actions and GitHub connector-only source changes; no Desktop Commander/local checkout/build/test; preserve concurrent branches/history, check HEAD and use non-force expected-HEAD ref updates.
+
+---
+
+
 ## PSC0 PSCV P1-C — pinned direct Boolean source and theorem mapping qualified
 
 **Source commit:** `3153fe5732794f2e96cde994085b9a2ec28acfa9`. [GitHub Actions run 38052355776](https://github.com/dwijayuda/pskernel/actions/runs/38052355776), attempt 1, passed all six cloud jobs: Linux22, Linux26, Windows26 each **26/26 tests** (78 total), actual Lean 4.35.0-rc3 imported-env probe, pinned 40-root source audit and Lean contract preflight. New stacked branch `psc0/platform-pscv-p1c-mapping-v1` in [draft PR98](https://github.com/dwijayuda/pskernel/pull/98) on PR97. No npm publication or merges. **This is partial source/declaration mapping, NOT a frozen PSCV Standard environment or PSCV-CERT-v1.**

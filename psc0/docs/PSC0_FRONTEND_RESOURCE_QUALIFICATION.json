@@ -1,0 +1,87 @@
+{
+  "schema": "psc0-owned-frontend-qualification/1",
+  "milestone": "bounded-owned-parser-elaborator-process",
+  "implementationSource": "29c2d611a39d7c3187b1b8d333e5d023090bba9f",
+  "startingSource": "81abfd94102a3628842d07de019f60e92e7b9ea4",
+  "validationRun": 38083824580,
+  "firstImplementationRunPassed": true,
+  "jobs": [
+    {
+      "platform": "linux-x64",
+      "node": "22.23.3",
+      "jobId": 114306040560,
+      "conclusion": "success",
+      "hostTestsPassed": 50,
+      "workspaceCount": 23,
+      "sourceEditions": ["ps", "lean"],
+      "evidenceArtifactId": 11680739771,
+      "evidenceArtifactSha256": "30f19c41700f8f127050bd451fffe7d8cffeb19332bf3ed9e2928573d99a26fa"
+    },
+    {
+      "platform": "windows-x64",
+      "node": "26.7.0",
+      "jobId": 114306040393,
+      "conclusion": "success",
+      "hostTestsPassed": 50,
+      "workspaceCount": 23,
+      "sourceEditions": ["ps", "lean"],
+      "evidenceArtifactId": 11681273714,
+      "evidenceArtifactSha256": "654c0ae7d0bece80805f61bef5af762961cb9f3497cdd4ec88a96be4fc8947b9"
+    }
+  ],
+  "preservedCompiler": {
+    "qualifiedSource": "1fa5559a72b293defc56ef7e7020cf82d4b44b79",
+    "sourceFiles": 69,
+    "closureModules": 64,
+    "sourceInventorySha256": "fc08090151979be64458352a030a2aaa11bc0df5aab6a3e8cc71b3c4213ad0de",
+    "grammar": "ps-0.9-r3/new-only",
+    "typescript": "7.0.2",
+    "sourceUnchanged": true,
+    "seedGrammarToolchainUnchanged": true,
+    "kernelSourceAndAdapterUnchanged": true
+  },
+  "retainedRuntime": {
+    "source": "2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a",
+    "runId": 38075437516,
+    "artifactId": 11678641329,
+    "archiveSha256": "3b89239132db2003a3ee0cc01c2c4c9795be4d4ae0097d86a62616fc48fa122a",
+    "compilerJsSha256": "6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3",
+    "kernelJsSha256": "c3912cdbc078d8a56736ef2790221567f2fab8b129a0a26e80b437b79f95ba27"
+  },
+  "checkedBoundary": {
+    "protocol": "psc0-owned-frontend/1",
+    "defaultAccumulatedRequestMs": 300000,
+    "defaultV8OldSpaceMiB": 4096,
+    "maximumEncodedFrameBytes": 67108864,
+    "maximumDiagnosticBytes": 65536,
+    "maximumRequests": 4096,
+    "actualOwnedChild": true,
+    "directAdmissionsEqualOnFixture": true,
+    "directTypeScriptEqualOnFixture": true,
+    "actualSelectedKernelUsed": true,
+    "copiedAndClosedHandlesRefused": true,
+    "installedTimeoutPreservesOutput": true,
+    "explicitHostResourceSettingsChecked": true,
+    "workerClosedBeforePublication": true,
+    "automaticFallback": false,
+    "arbitraryPluginLoading": false
+  },
+  "sizeDelta": {
+    "netProductionPhysicalLines": 275,
+    "newTestPhysicalLines": 198,
+    "portableCompilerLinesChanged": 0,
+    "kernelLinesChanged": 0,
+    "newNpmDependencies": 0
+  },
+  "compilerRegenerated": false,
+  "kernelRegenerated": false,
+  "fullC2C3Executed": false,
+  "newInstalledFixedPointClaimed": false,
+  "universalSemanticEquivalenceProved": false,
+  "totalProcessRssBounded": false,
+  "hostileGuestSandboxClaimed": false,
+  "formalKernelSoundnessClaimed": false,
+  "manualReleaseExecuted": false,
+  "npmPublished": false,
+  "receiptIsProofAuthority": false
+}

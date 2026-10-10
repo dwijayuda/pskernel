@@ -6,6 +6,9 @@ on:
     paths:
       - .github/workflows/psc0-npm-distribution.yml
       - psc0/npm-cli/**
+      - psc0/scripts/npm-library-canary.mjs
+      - psc0/packages/stdlib/**
+      - psc0/stdlib/**
       - psc0/npm-runtime/**
       - psc0/scripts/npm-distribution.mjs
       - psc0/scripts/npm-core-qualification.mjs
@@ -99,3 +102,56 @@ jobs:
             psc0/dist/npm-distribution/*/manifest.json
           if-no-files-found: ignore
           retention-days: 7
+
+  windows-consumer:
+    name: Offline npm install and psc build on Windows x64 / Node 26
+    needs: release
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26.7.0'
+      - uses: actions/download-artifact@v4
+        with:
+          name: proofscript-psc0-npm-ps-and-lean
+          path: ${{ runner.temp }}/proofscript-ci
+      - name: Verify isolated cross-platform npm installation and build
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($edition in @('ps','lean')) {
+            $archive = Join-Path $env:RUNNER_TEMP ("proofscript-ci/npm-distribution/proofscript-psc0-" + $edition + "-npm-packages.zip")
+            if (!(Test-Path $archive)) { throw "Release ZIP missing: $archive" }
+            $directory = Join-Path $env:RUNNER_TEMP ("proofscript-extract-" + $edition)
+            Expand-Archive -LiteralPath $archive -DestinationPath $directory -Force
+            $prefix = Join-Path $env:RUNNER_TEMP ("psc0-installed-" + $edition)
+            $cache = Join-Path $env:RUNNER_TEMP ("psc0-npm-cache-" + $edition)
+            $tgz = Join-Path $directory 'proofscript-0.1.0-psc0.1.tgz'
+            $ts = Join-Path $directory 'typescript-7.0.2.tgz'
+            $native = Join-Path $directory 'typescript-typescript-win32-x64-7.0.2.tgz'
+            npm install --global --prefix $prefix --cache $cache --offline --ignore-scripts --no-audit --no-fund --no-package-lock $tgz $ts $native
+            if ($LASTEXITCODE -ne 0) { throw "Offline npm install failed ($edition)" }
+            $psc = Join-Path $prefix 'node_modules/proofscript/bin/psc.js'
+            if (!(Test-Path $psc)) { throw "PSC executable absent ($edition)" }
+            node $psc version --json
+            if ($LASTEXITCODE -ne 0) { throw "PSC version failed ($edition)" }
+            $optional = Join-Path $prefix 'node_modules/proofscript/node_modules/@proofscript/backend-rust'
+            if (Test-Path $optional) { throw 'Optional Rust backend was unexpectedly installed' }
+            $project = Join-Path $env:RUNNER_TEMP ("psc0-windows-canary-" + $edition)
+            New-Item -ItemType Directory -Force -Path $project | Out-Null
+            Set-Content -LiteralPath (Join-Path $project 'package.json') -Value '{"type":"module","private":true}'
+            Set-Content -LiteralPath (Join-Path $project ("Main." + $edition)) -Value 'def answer : Nat := 42'
+            Push-Location $project
+            try {
+              node $psc check ("Main." + $edition)
+              if ($LASTEXITCODE -ne 0) { throw "PSC check failed ($edition)" }
+              node $psc build ("Main." + $edition) --out Main.js
+              if ($LASTEXITCODE -ne 0) { throw "PSC build failed ($edition)" }
+              node --input-type=module -e "import('./Main.js').then(m=>{let a=typeof m.answer==='function'?m.answer():m.answer;if(a!==42n)process.exit(1)})"
+              if ($LASTEXITCODE -ne 0) { throw "PSC output mismatch ($edition)" }
+            } finally {
+              Pop-Location
+            }
+            Write-Host "PSC_NPM_WINDOWS_X64: PASS $edition with TypeScript 7.0.2"
+          }

@@ -1,5 +1,22 @@
 # PSKernel Core proof work state
 
+## Proof-guided Lean 4.35 model strategy and public checker entry — October 10, 2026
+
+Canonical proof strategy: [PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md](PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md). Pinned official Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`) determines actual compatibility. The pinned Con Leche source (`65e74db49e89ad2bbd1e90aa4f784954db41fa3a`) supplies **only pure set mathematics**, not its verified checker or main soundness proof. Con Ron's two-step Rust refinement is a later-stage template for optimized backends, not a present PSKernel correctness theorem.
+
+**Design ruling:** proof-guided co-design. Freeze an end-to-end *successful reference acceptance ⇒ modeled environment ⇒ no derived theorem of False* statement, with an explicit `[SetTheory V]` foundation and an axiom interpretation policy. Preserve Lean-compatible admission of *assumed* axioms in normal mode; verified consistency cannot claim unconditional nonacceptance of `axiom impossible : False`. Modify the one executable checker only where the selected annotated result, binder universe regime or state evidence must be carried through actual recursion. Prove exact behavioral erasure and source compatibility at each such migration. Never infer annotation coherence solely from an empty semantic domain.
+
+**New checked entry proofs:** [`SemanticPublicEntry.lean`](metatheory/Ps/KernelCore/Metatheory/SemanticPublicEntry.lean) proves that the real `psKernelCheckNoMVarNoFVar` declaration guard implies numeric name bounds; real `psKernelMkCheckerSession` starts with empty local frame and counter zero; and guarded lambda/forall/let initial binder constructions preserve exact native opening and frame bounds under explicit `Scoped` hypotheses. Later `publicKernelSession_checker_initial_frame` connects the public `psKernelKernelSessionChecker` API to that same frame, **without modeling arbitrary user-constructed environments**. The latest unvalidated addition `emptyKernelSession_environment` and `emptyKernelSession_checker_initial_frame` uses the real successful `psKernelKernelSessionEmpty` constructor; it does *not* itself prove an initial set model.
+
+Source commits: [`89292f66`](https://github.com/dwijayuda/pskernel/commit/89292f667c42d208884e1705a4383a72e67367d1), [`ab895200`](https://github.com/dwijayuda/pskernel/commit/ab8952001cc95a7804e2462e41b40e3c5cf17b8c), [`29e3ad5e`](https://github.com/dwijayuda/pskernel/commit/29e3ad5e276a15fe9d2ad046c2286245dfd77688), [`3fe5058e`](https://github.com/dwijayuda/pskernel/commit/3fe5058e847d8b99242da1c087cb658079596393) and candidate [`63cdc22d`](https://github.com/dwijayuda/pskernel/commit/63cdc22d339f821be6bdcfa25b5f15e936aafdbf).
+
+**Verified focused source:** [run 38071399079](https://github.com/dwijayuda/pskernel/actions/runs/38071399079) at `3fe5058e847d8b99242da1c087cb658079596393`, 267 build jobs, 84 companion files, **321 explicit semantic-axiom declarations**, 153 model dependency modules (12 pinned math modules, zero production-assurance and legacy-judgment imports), 1,840 reference-policy definitions with zero cached fallbacks, seven native executables, all passed. Previous [run 38071032073](https://github.com/dwijayuda/pskernel/actions/runs/38071032073) at `29e3ad5e` was green with 320 explicit declarations. The **newest two-lemma source** `63cdc22d` triggered [run 38071595259](https://github.com/dwijayuda/pskernel/actions/runs/38071595259); inspect its completed logs before calling it green.
+
+**Broader Lean-compatibility evidence remains separate:** full [run 38070188607](https://github.com/dwijayuda/pskernel/actions/runs/38070188607) passed build, proofs, tutorial, bugs, focused Std and Lean 4.35 jobs, but full **Init** and **Std** timed out (status `timeout`, not acceptance); Mathlib skipped. Init reached about 2.3M records and 18,453 declarations; Std about 2M records and 14,314 declarations before timeouts. Green profiling *job* is not completion of its underlying Init checker (600-second timeout). Do not claim complete Lean compatibility or a newly qualified reference runtime from these runs.
+
+**Still open:** prove a meaningful initial set model, explicit axiom/False pins, actual successful public-session/model entry, one joint graded inference/WHNF/defeq soundness invariant with cross-call annotation provenance, complete inductive/quotient/primitive admission soundness, the end-to-end relative-consistency corollary, cached and shipping-backend refinement, and full pinned Lean conformance. The source changes above are **proof/CI only**, not executable rule changes.
+
+
 Snapshot: 2026-10-10 UTC. Read the live branch before continuing; this document
 is a handoff, not a claim that the full proof is finished.
 
@@ -107,6 +124,7 @@ binary was built by these focused workflows.
 ## Exact resume point
 
 Latest fully validated source/audit trigger:
+`3fe5058e847d8b99242da1c087cb658079596393` (public-entry initial frame; run 38071399079). Earlier gate:
 `566d1c88dc3ac997a2f4d1f76810036529db8d2a` (bounded-frame and
 actual binder opening, source `bd32e4fcb64cc6c2b6c6555b39ad308ad9c4309a`).
 Earlier fully validated checkpoints:

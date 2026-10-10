@@ -16,6 +16,27 @@ fragment or conditional theorems full-kernel completion.
 First read the live work state:
 https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/AI_WORK_STATE.md
 
+Latest verified public-frame proof source: `3fe5058e847d8b99242da1c087cb658079596393`,
+focused run 38071399079 (321 semantic axiom targets, 153 model modules,
+267 jobs, 84 companion proofs, seven native regression executables).
+Newest pending candidate: `63cdc22d339f821be6bdcfa25b5f15e936aafdbf`
+(run 38071595259) additionally relates accepted public empty kernel-session
+construction to its empty environment and real checker frame. Check the
+completed run and do not promote unverified output.
+
+Architecture decision and full theorem gates:
+`psc0/packages/pskernel-core/PROOF_GUIDED_FULL_SOUNDNESS_AND_LEAN435_COMPATIBILITY.md`.
+Pin Lean 4.35.0-rc4 and preserve real Lean admission behavior; formal
+relative consistency requires a modeled axiom/basis policy, not a false
+unconditional claim about arbitrary Lean user axioms. The execution/model
+gap requires carrying actual annotated provenance across one shared
+reference checker; never substitute a disconnected paper checker.
+
+Run 38070188607 failed overall on **full Init and Std checker timeouts**,
+despite green proof/build/smaller conformance jobs; Mathlib skipped.
+Do not claim full corpus acceptance or resolve resource issues by patching
+soundness assumptions.
+
 Repository: dwijayuda/pskernel.
 Branch: psc0/pskernel-core-lean435-arena-v1.
 Package: psc0/packages/pskernel-core.

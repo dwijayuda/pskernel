@@ -9,14 +9,15 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root,'dist/npm-distribution');
 const build = join(root,'dist/npm-build');
-const V='0.1.0-psc0.0';
-const names=[
-  'backend-js','backend-rust','backend-ts','backend-wasm','bootstrap','bridge',
-  'cli','compiler-ir','compiler','core','elab','environment','erasure',
-  'foundation','meta','pskernel-core','pskernel-lean-wasm','pskernel-lean','syntax'
-];
+const V='0.1.0-psc0.1';
+const coreNames=['foundation','syntax','core','environment','meta','elab',
+  'bridge','compiler-ir','erasure','compiler','backend-ts','bootstrap','pskernel-core'];
+const optionalNames=['backend-js','backend-rust','backend-wasm','cli',
+  'pskernel-lean-wasm','pskernel-lean','stdlib'];
+const names=[...coreNames,...optionalNames];
 const providerNames=new Set(['pskernel-lean-wasm','pskernel-lean']);
 const directNames=new Set(['compiler','pskernel-core']);
+const sourceOnlyNames=new Set(['stdlib']);
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const portable=d=>!providerNames.has(d);
 const outname=d=>'@proofscript/'+d;
@@ -81,9 +82,9 @@ async function writeCoreRuntime(stage,providerSrc) {
   providerSrc.files=['dist/','src/','README.md'];
 }
 async function producePackage(variant,name,compiler) {
-  const source=join(root,'packages',name);
+  const source=name==='stdlib'?join(root,'stdlib'):join(root,'packages',name);
   const stage=join(dist,variant,'staging','scoped',name);
-  const metadata=await safeRead(join(source,'package.json'));
+  const metadata=await safeRead(join(root,'packages',name,'package.json'));
   await mkdir(stage,{recursive:true});
   const external=providerNames.has(name);
   if(external) {
@@ -102,11 +103,14 @@ async function producePackage(variant,name,compiler) {
   } else {
     const conversion={schemaVersion:1,package:outname(name),requestedVariant:variant,
       translated:0,preservedLean:0,preservedNonLean:0,exceptions:[]};
-    const from=join(source,'src'),to=join(stage,'src');
+    const from=name==='stdlib'?source:join(source,'src'),to=join(stage,'src');
     if(!existsSync(from))throw Error('PSC_NPM_PACKAGE_SOURCE_MISSING '+name);
-    if(variant==='lean')await cp(from,to,{recursive:true});
+    if(variant==='lean'){
+      if(name==='stdlib')await cp(join(from,'ProofScript'),join(to,'ProofScript'),{recursive:true});
+      else await cp(from,to,{recursive:true});
+    }
     else {
-      const files=await walk(from);
+      const files=name==='stdlib'?await walk(join(from,'ProofScript')):await walk(from);
       for(const file of files) {
         const rel=relative(from,file);
         if(!file.endsWith('.lean')) {
@@ -153,6 +157,11 @@ async function producePackage(variant,name,compiler) {
       if(name==='pskernel-core')await writeCoreRuntime(stage,metadata);
       else for(const ext of ['js','ts','d.ts','js.map'])
         await cp(join(build,'compiler','index.'+ext),join(lib,'index.'+ext));
+    } else if(sourceOnlyNames.has(name)) {
+      await writeFile(join(lib,'index.mjs'),
+        "export const proofscriptLibrary = "+JSON.stringify({
+          name:outname(name),version:V,modulePrefix:'ProofScript',sourceVariant:variant,
+          sourceOnly:true})+";\n");
     } else {
       await writeFile(join(lib,'index.mjs'),
         "export * from '@proofscript/compiler';\n"+
@@ -164,7 +173,7 @@ async function producePackage(variant,name,compiler) {
   metadata.private=false;
   if(!external)metadata.files=['dist/','src/','README.md','SOURCE_CONVERSION.json'];
   metadata.proofscript={...metadata.proofscript,sourceVariant:external?'native-provider':variant,
-    runtimeModel:directNames.has(name)?'compiled-psc0-js':'shared-psc0-js-facade',
+    runtimeModel:directNames.has(name)?'compiled-psc0-js':sourceOnlyNames.has(name)?'source-only-library':'shared-psc0-js-facade',
     verifiedIndependentPackageCompilation:false};
   if(metadata.dependencies)for(const d of Object.keys(metadata.dependencies))
     metadata.dependencies[d]=providerNames.has(d.replace('@proofscript/',''))?'4.34.0':V;
@@ -172,7 +181,9 @@ async function producePackage(variant,name,compiler) {
   await writeFile(join(stage,'README.md'),[
     '# '+metadata.name,'',
     'PSC0 npm module from pinned main source. Source variant: '+variant+'.',
-    'Runtime: '+(directNames.has(name)?'compiled ProofScript JavaScript':'shared PSC0 JS module facade')+'.',
+    coreNames.includes(name)?'Installation: required PSC0 compiler closure.':
+      'Installation: optional package; not installed by default with proofscript.',
+    'Runtime: '+(directNames.has(name)?'compiled ProofScript JavaScript':sourceOnlyNames.has(name)?'source-only npm library':'shared PSC0 JS module facade')+'.',
     external?'This external Lean provider retains its original Lean/C/JS assets; it has not been translated to ProofScript.':
       'src/ contains the complete source tree in '+(variant==='ps'?'.ps':'.lean')+' form.',
     'The JS Core checker is gated by release qualification and never falls back to Lean-WASM.',
@@ -214,17 +225,22 @@ async function bundleVariant(variant,compiler) {
     checkerProvider:'@proofscript/pskernel-core/check',
     defaultCheckerExecution:'generated-js-core',
     leanWasmRole:'optional-comparison'};
-  for(const d of names)meta.dependencies[outname(d)]=providerNames.has(d)?'4.34.0':V;
+  meta.dependencies=Object.fromEntries([...coreNames.map(d=>[outname(d),V]),['typescript','7.0.2']]);
+  meta.bundledDependencies=coreNames.map(outname);
   await writeFile(join(umbrella,'package.json'),JSON.stringify(meta,null,2)+'\n');
   await writeFile(join(umbrella,'README.md'),
     '# proofscript\n\nInstallable PSC0 compiler/npm bundle. Source variant: '+variant+
     '\nDefault proof checker: JS PSKernel Core, *without fallback*. See scoped package manifests.'+
     '\nSource and semantic profile are PSC0 bounded, not full PSCV.\n');
-  // Install all 19 local workspace packages without npm publication, then restore registry manifests.
-  run('npm',['install',...createCanary(meta,umbrella),...packages,'typescript@7.0.2'],root,{timeout:900000});
+  // Bundle only the qualified self-host compiler closure plus the required JS checker.
+  // TypeScript stays unbundled so npm installs its *target platform* native optional binary.
+  const coreTarballs=packages.filter((_,i)=>coreNames.includes(names[i]));
+  run('npm',['install',...createCanary(meta,umbrella),...coreTarballs,'typescript@7.0.2'],root,{timeout:900000});
   await writeFile(join(umbrella,'package.json'),JSON.stringify(meta,null,2)+'\n');
   const manifest={schemaVersion:1,version:V,sourceVariant:variant,
-    coreAuthority:'js-core-qualified-scope-only',scope:packages.length,
+    coreAuthority:'js-core-qualified-scope-only',scope:coreNames.length,
+    corePackages:coreNames.map(outname),optionalPackages:optionalNames.map(outname),
+    explicitlyNotBundled:['typescript',...optionalNames.map(outname)],
     sourceCommit:process.env.GITHUB_SHA||'unknown',
     packageNames:names.map(outname),
     sourceConversion:{translated:conversions.reduce((s,x)=>s+x.translated,0),

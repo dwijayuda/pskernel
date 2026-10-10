@@ -264,6 +264,7 @@ jobs:
           key: psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-ts7.0.2-${{ github.sha }}
           restore-keys: |
             psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+            psc0-t1-native-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-ts7.0.2-
       - name: Build current native compiler
         id: native
         run: lake build psc1 psc1_ir_check_tests psc1_tests psc1_translation_tests psc1_erasure_tests

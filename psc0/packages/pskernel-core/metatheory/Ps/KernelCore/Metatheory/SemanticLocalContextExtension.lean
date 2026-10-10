@@ -143,7 +143,7 @@ theorem modelsLocalContext_addLocal (M : Reading V) (Γ : List AnnotatedExpr)
     }
   · have oldFound : psKernelLocalContextFind locals query = some decl := by
       simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, Bool.false_eq_true, ite_false] using found
     exact model query decl oldFound
 
 theorem modelsLocalContext_addLet (M : Reading V) (Γ : List AnnotatedExpr)
@@ -179,7 +179,7 @@ theorem modelsLocalContext_addLet (M : Reading V) (Γ : List AnnotatedExpr)
       exact ⟨checked, valueEq⟩
   · have oldFound : psKernelLocalContextFind locals query = some decl := by
       simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
-        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
+        psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, Bool.false_eq_true, ite_false] using found
     exact model query decl oldFound
 
 private theorem withFree_self (M : Reading V) (name : PsKernelName) (x : V) :
@@ -257,7 +257,7 @@ theorem freshLocalContext_addLocal (future : PsKernelName)
     exact ⟨freshName, freshA, by intro value stored; cases stored⟩
   · apply freshLocals query decl
     simpa only [psKernelLocalContextAddLocal, psKernelLocalContextFind,
-      psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
+      psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, Bool.false_eq_true, ite_false] using found
 
 theorem freshLocalContext_addLet (future : PsKernelName)
     (locals : AnnotatedLocalContext) (name userName : PsKernelName)
@@ -283,6 +283,6 @@ theorem freshLocalContext_addLet (future : PsKernelName)
     exact freshValue
   · apply freshLocals query decl
     simpa only [psKernelLocalContextAddLet, psKernelLocalContextFind,
-      psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, ite_false] using found
+      psKernelLocalContextFindIn, psKernelLocalDeclName, hMatches, Bool.false_eq_true, ite_false] using found
 
 end PsKernelSemantics.SetModel

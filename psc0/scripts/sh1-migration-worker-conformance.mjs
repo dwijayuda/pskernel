@@ -787,6 +787,79 @@ export function runMigrationWorkerConformance(compiler, valueTag) {
   };
 }
 
+// Compare the legacy erasure-scope observations across the T1 record extension.
+// Raw reports stay unchanged. Only these two named fixture paths may lose the
+// newly added empty namespace in the comparison view; every other field remains.
+export function compareMigrationWorkerReportObservations(reference, current,
+  label = 'PSC0_SH1_MIGRATION_BEHAVIOR_CORRESPONDENCE') {
+  const scopeCases = [
+    'structures-empty-reverse-accumulator',
+    'inductives-empty-reverse-accumulator',
+  ];
+  const view = (report, requireRuntimePrefix) => {
+    assert.equal(report.schemaVersion, 1, label + '_REPORT_SCHEMA');
+    assert.equal(report.evidence, 'finite-migration-worker-generated-export-conformance',
+      label + '_REPORT_KIND');
+    assert.equal(report.cases, 87, label + '_CASE_COUNT');
+    assert.deepEqual(report.families.map((family) => family.family), ['F1', 'F2'],
+      label + '_FAMILIES');
+    const [f1, f2] = report.families;
+    assert.equal(f1.workerCases, 44, label + '_F1_WORKERS');
+    assert.equal(f1.wrapperCases, 7, label + '_F1_WRAPPERS');
+    assert.equal(f1.observations.length, 51, label + '_F1_CASES');
+    assert.equal(f2.cases, 36, label + '_F2_CASES');
+    assert.deepEqual(f2.observations.map((item) => item.name), f2CaseNames,
+      label + '_F2_COVERAGE');
+    for (const family of report.families) {
+      assert.equal(family.observationSha256, sha256(JSON.stringify(family.observations)),
+        label + '_RAW_FAMILY_HASH');
+    }
+    assert.equal(report.observationSha256,
+      sha256(JSON.stringify({ F1: f1.observations, F2: f2.observations })),
+      label + '_RAW_REPORT_HASH');
+    const prefixPresence = [];
+    const observations = f2.observations.map((item) => {
+      if (!scopeCases.includes(item.name)) return item;
+      const scope = item.result.scope;
+      const names = scope.declarationNames;
+      const hasPrefix = Object.hasOwn(names, 'runtimePrefix');
+      prefixPresence.push(hasPrefix);
+      if (requireRuntimePrefix) assert(hasPrefix, label + '_CURRENT_RUNTIME_PREFIX_MISSING');
+      if (hasPrefix) assert.equal(names.runtimePrefix, '', label + '_NONEMPTY_RUNTIME_PREFIX');
+      assert.deepEqual(Object.keys(names).sort(),
+        hasPrefix ? ['byCore', 'byOutput', 'count', 'runtimePrefix'] : ['byCore', 'byOutput', 'count'],
+        label + '_DECLARATION_NAMES_FIELDS');
+      const declarationNames = { ...names };
+      delete declarationNames.runtimePrefix;
+      return { ...item, result: { ...item.result, scope: { ...scope, declarationNames } } };
+    });
+    assert.equal(prefixPresence.length, scopeCases.length, label + '_SCOPE_CASES');
+    assert.equal(prefixPresence[0], prefixPresence[1], label + '_REFERENCE_RECORD_SHAPE');
+    const families = [
+      f1, { ...f2, observations, observationSha256: sha256(JSON.stringify(observations)) },
+    ];
+    return {
+      report: { ...report, families,
+        observationSha256: sha256(JSON.stringify({ F1: f1.observations, F2: observations })) },
+      runtimePrefixPresent: prefixPresence[0],
+    };
+  };
+  const before = view(reference, false);
+  const after = view(current, true);
+  assert.deepEqual(after.report, before.report, label);
+  return {
+    profile: 'empty-legacy-erasure-namespace/1',
+    cases: 87,
+    projectedPaths: scopeCases.map((name) =>
+      'F2/' + name + '/result/scope/declarationNames/runtimePrefix'),
+    runtimePrefix: '',
+    referenceRuntimePrefixPresent: before.runtimePrefixPresent,
+    referenceObservationSha256: reference.observationSha256,
+    currentObservationSha256: current.observationSha256,
+    comparisonObservationSha256: after.report.observationSha256,
+  };
+}
+
 // R and F must already be authenticated and loaded by the caller. The reports
 // compared here contain no values owned by either generated compiler.
 export function compareMigrationWorkerConformance({

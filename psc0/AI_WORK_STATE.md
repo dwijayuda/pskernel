@@ -1,6 +1,6 @@
 # PSC0 T1 checked TypeScript library adoption — self-host qualification active
 
-Updated: 2026-10-10 01:07 UTC. Focused generated conformance passed. Full run38010922748 reproduced the authenticated preserved R products (receipt cold:false), built the current native compiler and seed, then stopped at an obsolete source-isolation compiler double. This checkpoint moves that harness to the production checked snapshot API, integrates the separately reviewed Core-JS probe/plan, and retries full qualification.
+Updated: 2026-10-10 01:38 UTC. C1 generated from authenticated R and matched native-generated TS/JS. The exact two-field migration-report compatibility fix is reviewed and integrated with seven cheap negative regression groups before generation. This checkpoint retries full successor qualification; preview3 is still pending its actual qualified artifact.
 
 ## User-authorized scope
 
@@ -45,6 +45,17 @@ Run38010922748 at dbcf9d9a6f4ed3a8e9a4f75550bf99d99cb3bbf4 passed selected-R aut
 The current native compiler build (146 jobs), native parser/translation/erasure regressions and native seed build (141 jobs) passed. The run stopped before candidate/C2/C3 because the old filesystem-isolation double lacked psCompilerPrepareSource, which the protected compile-with-generated path now requires. Do not reopen raw emission to satisfy a filesystem fixture.
 
 Integrate qualification commit2a3f51cd8360ae8d359787ac93ebeaf4f216cc17: retain all14 original isolation scenarios and expected diagnostics, but exercise readProofScriptImports and readCheckedSourceSnapshot directly with the existing bounded parser double. Success verifies raw source bytes, parser inputs, closure order/digest, entry/root and frozen records; refusal must return no snapshot. This harness claims filesystem/snapshot isolation only. Actual native/generated compiler, target TypeScript, admission and self-host checks remain separate mandatory gates. The downstream actual-native replay/name-index harnesses were reviewed and need no speculative fixture rewrite.
+
+
+## C1 generation and migration report compatibility
+
+Full run38011957573 at e81ec3baeec0e9a46d2e50ea255afe96259a6fac passed all preceding host/native/grammar/CLI gates, used the authenticated R cache and generated C1. C1's62-module closure remains3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea. TS8923672fbc4b78a8bc1e25ab172162356ae4ffae6179eddc930c7955c73c1b3d and JS6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617 equal the actual native-generated candidate. C1 canonical surface e91f3bfaaedf755b0fb027a3c6ffe752784c2f19cd41641ba8b015a90e37fe3e and normalized admissions403d7b83ab62150a6f059cd5ed9dcfe18fd68e18f1c54cd8527abf173e20e1d5 are recorded, but C2/C3 have not run. All12 complete worker Core/IR ABI checks passed, observation hashb23c28c75aa3f7955ecbe54fa4580b4278f62c2ed77f1e7ff2a2dbbea6999b49.
+
+The failure is PSC0_SH1_MIGRATION_WORKER_REFERENCE_CORRESPONDENCE at sh1-qualify.mjs:989 after generation and capability execution. Root and compiler agent recursively compared the actual JSON reports. Only F2 cases structures-empty-reverse-accumulator and inductives-empty-reverse-accumulator gain result.scope.declarationNames.runtimePrefix with exact value empty string; the F2 and aggregate hashes consequently differ. All other87-case report values match. Keep raw reports/hashes; assert these exact new fields before a narrow cross-revision comparison view. Do not generically discard fields, bypass ABI or change compiler/Core algorithms. Candidate and later C1/C2/C3 behavioral comparisons must use the same explicit compatibility rule. The isolated ABI runner stays unchanged.
+
+Failed-run artifact11655101607 contains3036362bytes, ZIP SHA2569ba4c9c738a87f95770adb10d32e8a0481c548dd959c8908edebc6f36d857ca6. It is diagnostic evidence, not a qualified successor/release artifact. C1 generation took869718.580168ms; prior successful F candidate13.10min/C2-C3 comparison26.12min explains the long checkpoint. Do not substitute this failed-checkpoint C1 into a new receipt or skip required regeneration.
+
+The reviewed harness follow-up ab10f55660efb97b1cc4017aa26a321f6781594b adds an explicit empty-legacy-erasure-namespace/1 comparison view. It validates raw family/whole-report hashes and case coverage, requires the two exact current fields to exist and equal empty string, preserves every other field, and records both raw hashes plus the comparison hash. C1/C2/C3 recompute and compare this receipt. The ABI harness is unchanged. Seven data-only test groups use the already retained immutable R report, reproduce the exact logged current hash, and reject missing/nonempty fields, unrelated same-named fields, changed observations, dropped cases and invalid raw hashes. The existing early SH1 host step runs them before any long generation. The three harness files and workflow are outside the immutable seven-file native recovery recipe. The remaining iteration gate was reviewed and uses same-compiler comparisons, with no old scope-layout assumption. The next full run still regenerates C1 and must establish C2/C3 and native replay.
 
 ## Next required work
 

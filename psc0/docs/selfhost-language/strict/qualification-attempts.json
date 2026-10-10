@@ -1732,6 +1732,198 @@
       "strictSh1Qualified": false,
       "semanticContractQualified": false,
       "providerChecked": false
+    },
+    {
+      "attempt": 13,
+      "sourceRef": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+      "runId": 38008721677,
+      "workflowId": 378853677,
+      "compilerJobId": 114083480442,
+      "providerJobId": 114084996315,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/38008721677",
+      "status": "failure",
+      "failedStep": {
+        "number": 24,
+        "name": "Run the bounded native development gate before qualification",
+        "stage": "PSC0_SH1_GENERIC_ERASURE_PREPARE",
+        "diagnostic": {
+          "tag": "elaboration",
+          "error": {
+            "tag": "infer",
+            "error": {
+              "tag": "applicationTypeMismatch"
+            }
+          }
+        },
+        "owner": "runGenericErasureConformance",
+        "script": "psc0/scripts/sh1-generic-erasure-conformance.mjs",
+        "line": 667,
+        "column": 20,
+        "nodeVersion": "22.23.3",
+        "exitCode": 1,
+        "excerpt": "2026-10-10T00:28:20.2914606Z Error: PSC0_SH1_GENERIC_ERASURE_PREPARE: {\"tag\":\"elaboration\",\"error\":{\"tag\":\"infer\",\"error\":{\"tag\":\"applicationTypeMismatch\"}}}\n2026-10-10T00:28:20.2916564Z     at unwrap (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-capabilities.mjs:44:11)\n2026-10-10T00:28:20.2918522Z     at runGenericErasureConformance (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-generic-erasure-conformance.mjs:667:20)\n2026-10-10T00:28:20.2919846Z     at async nativeCandidate (file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:950:3)\n2026-10-10T00:28:20.2921016Z     at async file:///home/runner/work/pskernel/pskernel/psc0/scripts/sh1-qualify.mjs:1058:3\n2026-10-10T00:28:20.2921433Z \n2026-10-10T00:28:20.2921539Z Node.js v22.23.3\n2026-10-10T00:28:20.4167071Z ##[error]Process completed with exit code 1.\n"
+      },
+      "stageSummaryBeforeFailure": {
+        "n1CompilerSha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+        "n1CompilerHashMarkers": [
+          "PSC0_SH1_STRICT_SOURCE",
+          "PSC0_SH1_STRICT_TARGET",
+          "PSC0_SH1_STRICT_RUNTIME",
+          "PSC0_SH1_GRAMMAR_CLOSURE",
+          "PSC0_SH1_IR_CHECKER",
+          "PSC0_SH1_HELPER_RUNTIME"
+        ],
+        "n1CompilerHashMeaning": "The same N1 compiler hash is recorded by six completed stage markers; the complete N1 development gate did not pass.",
+        "nativeFullSource": {
+          "moduleCount": 64,
+          "sourceDeclarationCount": 1705,
+          "normalizationCount": 50,
+          "originalIr": {
+            "schemaVersion": 1,
+            "kind": "psc0-native-original-ir-check",
+            "accepted": true,
+            "traversalComplete": true,
+            "visitedSteps": 828190,
+            "expressionCount": 64829,
+            "findingCount": 0,
+            "retainedFindingCount": 0,
+            "omittedFindingDetails": 0,
+            "sameOriginalIrCheckedBeforeEmission": true,
+            "strictSh1Qualified": false
+          }
+        },
+        "sourceConformance": {
+          "marker": "PSC0_SH1_STRICT_SOURCE",
+          "acceptedRoutes": 2,
+          "refusedCases": 38,
+          "fullPayloadRetained": true
+        },
+        "targetConformance": {
+          "marker": "PSC0_SH1_STRICT_TARGET",
+          "fullPayloadRetained": true
+        },
+        "runtimeConformance": {
+          "marker": "PSC0_SH1_STRICT_RUNTIME",
+          "status": "pass",
+          "observations": 186
+        },
+        "grammarClosure": {
+          "marker": "PSC0_SH1_GRAMMAR_CLOSURE",
+          "fullPayloadRetained": true
+        },
+        "irChecker": {
+          "marker": "PSC0_SH1_IR_CHECKER",
+          "behavior": {
+            "status": "pass",
+            "observations": 61,
+            "exhaustiveForAllInputs": false,
+            "zeroFieldRecord": {
+              "ownStringFields": 0,
+              "ownBrandSymbols": 1,
+              "inhabited": true
+            },
+            "emptyScrutinee": {
+              "callbackCalls": 1,
+              "propagatedOriginalFailure": true,
+              "noEmptyInhabitantConstructed": true
+            },
+            "letScopeCases": [
+              {
+                "name": "shadowOldScope",
+                "observations": 8
+              },
+              {
+                "name": "shadowWrappedCall",
+                "observations": 8
+              },
+              {
+                "name": "shadowClosure",
+                "observations": 8
+              },
+              {
+                "name": "shadowNestedTail",
+                "observations": 5
+              }
+            ]
+          },
+          "optimizedTail": {
+            "status": "pass",
+            "observations": 12,
+            "valueObservations": 11,
+            "faultObservations": 1,
+            "entries": [
+              {
+                "name": "optimizedTailSwap",
+                "runtimeArity": 3,
+                "route": "tail-loop",
+                "implementationAbsent": true
+              },
+              {
+                "name": "optimizedTailFuel",
+                "runtimeArity": 2,
+                "route": "tail-loop",
+                "implementationAbsent": true
+              },
+              {
+                "name": "optimizedTailReverse",
+                "runtimeArity": 2,
+                "route": "tail-loop",
+                "implementationAbsent": true
+              }
+            ]
+          }
+        },
+        "helperRuntime": {
+          "marker": "PSC0_SH1_HELPER_RUNTIME",
+          "fullPayloadRetained": true
+        }
+      },
+      "N1": "generated-TS7-compiled-loaded-conformance-incomplete-no-final-receipt",
+      "currentGenerationCandidate": "native-generated-N1-generic-fixture-preparation-refused",
+      "fixedPoint": "not-started",
+      "providerStatus": "skipped",
+      "failureEvidence": {
+        "path": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/development-gate-failure.json",
+        "blob": "8cc02b87983f44339fb4e8156ee791f6d33ee4e9",
+        "sha256": "cf7bb02e138d2a797d0790cef0855db6ca8207765d84f9ea4188bf90586fd2d0",
+        "bytes": 18498
+      },
+      "log": {
+        "path": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/compiler-job.log",
+        "blob": "763be222e38ed9d5510345dbecd4e722388a17b7",
+        "sha256": "3cf01e99dd7de4ce6305e379333e889577006a399314a3f2ecff411443b5cb44",
+        "bytes": 1046842
+      },
+      "stageMarkers": {
+        "path": "attempts/b3fac0872f1a5e2a0fe79aede843179d4ce43a2c/stage-markers.json",
+        "blob": "1e8c4b673586f1ff2422de7b0ab14b1dfec286b6",
+        "sha256": "ce2050c6988b3c40b7951472a585852fec336b3b6cbc4642d6220d58f5a052c7",
+        "bytes": 2937671,
+        "completePayloads": 12,
+        "encoding": "Complete emitted marker payloads. Native source file uses compact JSON plus newline; other pretty hashes in this archive are explicitly transport hashes, not blanket file-byte claims."
+      },
+      "artifacts": [
+        {
+          "id": 11652692106,
+          "name": "psc0-sh1-ts7.0.2-b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+          "bytes": 1841093,
+          "digest": "sha256:a90181c130536359774816775acc74ebcae1a2c773e735fd3d55bd7ada273b8f",
+          "runId": 38008721677,
+          "sourceCommit": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+          "archiveInspected": false
+        }
+      ],
+      "coldRecovery": {
+        "runId": 38008721636,
+        "status": "skipped-by-tag-as-intended",
+        "qualifiedUnchangedRecoveryRun": 37983663908,
+        "recipeChanged": false,
+        "repeatRequired": false
+      },
+      "scopeOfFailure": "Existing source-result correction passed; all six recorded N1 stage markers share one compiler hash. Generic fixture preparation returned infer/applicationTypeMismatch without the owner retained by the underlying origin API. No final N1/C1/C2/C3/binder/provider success.",
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "providerChecked": false
     }
   ],
   "selectedSeedChanged": false,
@@ -1739,19 +1931,25 @@
   "strictSh1Qualified": false,
   "semanticContractQualified": false,
   "nextQualification": {
-    "status": "enclosing-empty-source-return-assertion-correction-requests-full-qualification-awaiting-run-discovery",
-    "expectedParent": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
-    "priorCompilerSource": "fb8f8076df3ed8708f927f88aa2d32febbfa89dc",
-    "priorAttemptRunId": 38007714076,
-    "manifest": "reviewed-candidates/empty-source-return-boundary.json",
-    "manifestBlob": "a89fb7324afb820b2df077a26608d71cc11d644c",
-    "sourceFiles": 2,
-    "productionLeanChanges": 0,
-    "cumulativeReviewedSourceFiles": 46,
-    "hostChanges": 2,
-    "trigger": "[sh1-qualify]",
+    "status": "one-bounded-retained-N1-origin-diagnostic-requested-no-new-full-qualification",
+    "expectedParent": "b3fac0872f1a5e2a0fe79aede843179d4ce43a2c",
+    "priorAttemptRunId": 38008721677,
+    "workflow": ".github/workflows/psc0-generic-prepare-diagnostic.yml",
+    "workflowBlob": "acdd2f7a8cc1c7ab20b7753b9e4b71c012c0c7a8",
+    "workflowSha256": "d3bf915fc479c5d6b1b57410e62643a6e7a5b8826f303b830e27e62d3997200c",
+    "retainedArtifactId": 11652692106,
+    "retainedN1Sha256": "111fbc3c5cb565cc9d723a5fbf72de3fa4d285825c2d6274a099ce29aaf2b9f1",
+    "fixtureBlob": "dd8b43775493d0d69e9cf62c2fd8670a580ff3ac",
+    "fixtureSha256": "fbd5ad124960260862e8fe5bf5b83b9b4e509486ca126c7853fab911852945a5",
+    "parserCalls": 1,
+    "originPreservingPreparationCalls": 1,
+    "productionCodeChanges": 0,
+    "hostConformanceChanges": 0,
+    "nativeBuilds": 0,
+    "typeScriptCompilations": 0,
+    "erasureCalls": 0,
+    "compilerEmissions": 0,
     "repeatColdRecovery": false,
-    "repeatNativeOnlyCheckpoint": false,
     "strictSh1Qualified": false,
     "semanticContractQualified": false,
     "providerChecked": false
@@ -1793,5 +1991,5 @@
       "semanticContractQualified": false
     }
   ],
-  "updatedAtUtc": "2026-10-10T00:20:34Z"
+  "updatedAtUtc": "2026-10-10T00:37:41Z"
 }

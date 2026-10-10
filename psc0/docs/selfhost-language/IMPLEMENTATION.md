@@ -40,6 +40,12 @@ A/B/H/E records are indexed in [qualification-evidence.json](qualification-evide
 [TYPESCRIPT7.md](TYPESCRIPT7.md) records the exact compiler profiles, recovery
 proof and measured TypeScript phase.
 
+## Latest generic preparation diagnostic checkpoint
+
+[Run38008721677](https://github.com/dwijayuda/pskernel/actions/runs/38008721677) at b3fac087 passed the corrected source-return gate, target/runtime/grammar/IR/helper checks, including all12 optimized-tail observations. Generic fixture preparation then returned elaboration/infer/applicationTypeMismatch at gate076d line667. The first source owner is not retained by the raw error API. N1 has no final receipt and C1/C2/C3/provider did not run.
+
+The enclosing commit adds one independently pinned retained-N1 diagnostic: one parse and one origin-preserving preparation of the unchanged fixture, without compiler build/TS compilation/erasure/emission or a full qualification repeat. See [AI_WORK_STATE.md](../../AI_WORK_STATE.md) for exact source/artifact/compiler/fixture pins and the tentative universe-level construction trace. No source correction or semantic qualification is claimed by requesting the diagnostic. All33/27 dispositions remain pending.
+
 ## Current strict SH/1 source integration
 
 The practical migration is already merged at **ed5d00aca0743bde583b45fe7756dd494ac3960f**. Continue the authorized strict SH/1 qualification and merge; do not repeat the practical merge or promote a seed.

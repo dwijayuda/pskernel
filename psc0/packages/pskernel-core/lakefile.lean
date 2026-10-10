@@ -121,6 +121,7 @@ lean_lib PsKernelCoreMetatheory where
   srcDir := "metatheory"
   roots := #[
     `Ps.KernelCore.Metatheory.Judgments,
+    `Ps.KernelCore.Metatheory.JudgmentAdequacy,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,
     `Ps.KernelCore.Metatheory.BootstrapStringObligations,

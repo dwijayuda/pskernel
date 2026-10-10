@@ -4,7 +4,15 @@ import Ps.KernelCore.Checker.Recursor.Analysis
 import Ps.KernelCore.Metatheory.Context
 
 /-
-Shared Assurance Plane judgments for PSKernel Core.
+Legacy operational Assurance Plane judgments for PSKernel Core.
+
+SEMANTIC STATUS: these relations are not yet an adequate type theory.
+JudgmentAdequacy.lean proves that proofIrrelevanceAlgorithmic makes DefEq
+universal and, through convert, gives the legacy typing relation every type.
+The executable checker does not follow from the converse of its refinement
+lemmas. Existing refinement proofs remain operational evidence only; they
+cannot establish semantic soundness or consistency. A semantic bridge must
+retain well-typed-input evidence and the actual inferred-type connections.
 
 This library is outside packages/pskernel-core/src and therefore outside the
 portable production semantic closure.  It specifies properties that the

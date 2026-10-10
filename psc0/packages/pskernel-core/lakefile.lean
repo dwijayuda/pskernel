@@ -196,6 +196,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticReferenceSessionMData,
     `Ps.KernelCore.Metatheory.SemanticReferenceSessionAtomic,
     `Ps.KernelCore.Metatheory.SemanticReadingExtension,
+    `Ps.KernelCore.Metatheory.SemanticFreshAdmission,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,
     `Ps.KernelCore.Metatheory.Comparator,

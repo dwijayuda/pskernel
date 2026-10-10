@@ -46,3 +46,21 @@ def psKernelReferenceCachePolicy : PsKernelSemanticCachePolicy := ⟨false⟩
 @[simp] theorem psKernelReferenceCacheInsertPair_noop
     (cache : PsKernelExprPairSet) (e v : PsKernelExpr) :
     @psKernelSemanticCacheInsertPair psKernelReferenceCachePolicy cache e v = cache := rfl
+
+@[simp] theorem psKernelCachedCacheGet_eq (cache : PsKernelExprMap) (e : PsKernelExpr) :
+    @psKernelSemanticCacheGet psKernelCachedCachePolicy cache e =
+      psKernelExprMapGet cache e := rfl
+
+@[simp] theorem psKernelCachedCacheInsert_eq (cache : PsKernelExprMap) (e v : PsKernelExpr) :
+    @psKernelSemanticCacheInsert psKernelCachedCachePolicy cache e v =
+      psKernelExprMapInsert cache e v := rfl
+
+@[simp] theorem psKernelCachedCacheContains_eq
+    (cache : PsKernelExprPairSet) (e v : PsKernelExpr) :
+    @psKernelSemanticCacheContains psKernelCachedCachePolicy cache e v =
+      psKernelExprPairSetContains cache e v := rfl
+
+@[simp] theorem psKernelCachedCacheInsertPair_eq
+    (cache : PsKernelExprPairSet) (e v : PsKernelExpr) :
+    @psKernelSemanticCacheInsertPair psKernelCachedCachePolicy cache e v =
+      psKernelExprPairSetInsert cache e v := rfl

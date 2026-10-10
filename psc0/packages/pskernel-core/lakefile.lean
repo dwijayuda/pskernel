@@ -133,6 +133,8 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticClassifier,
     `Ps.KernelCore.Metatheory.SemanticSortInference,
     `Ps.KernelCore.Metatheory.SemanticAudit,
+    `Ps.KernelCore.Metatheory.SemanticReference,
+    `Ps.KernelCore.Metatheory.ReferencePolicyAudit,
     `Ps.KernelCore.Metatheory.SemanticSetDomain,
     `Ps.KernelCore.Metatheory.SemanticAnnotatedExpr,
     `Ps.KernelCore.Metatheory.SemanticInterpretation,
@@ -307,3 +309,7 @@ lean_exe pskernel_cache_mode_tests where
 lean_exe pskernel_shared_syntax_tests where
   srcDir := "test"
   root := `SharedSyntaxTests
+
+lean_exe pskernel_reference_cache_tests where
+  srcDir := "test"
+  root := `ReferenceCacheTests

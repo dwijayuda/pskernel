@@ -31,11 +31,11 @@ theorem inferCore_sort_result
       | none =>
           cases he : psKernelCheckerContextEnterRecDepth context with
           | error error =>
-              simp [psKernelInferCoreWithFuel, psKernelInferCacheEligible,
+              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, hc, he] at run
           | ok entered =>
-              simp only [psKernelInferCoreWithFuel, psKernelInferCacheEligible,
+              simp only [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run
@@ -43,11 +43,11 @@ theorem inferCore_sort_result
       | some cached =>
           cases he : psKernelCheckerContextEnterRecDepth context with
           | error error =>
-              simp [psKernelInferCoreWithFuel, psKernelInferCacheEligible,
+              simp [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, hc, he] at run
           | ok entered =>
-              simp only [psKernelInferCoreWithFuel, psKernelInferCacheEligible,
+              simp only [psKernelInferCoreWithFuel, psKernelSemanticCacheGet, psKernelCachedCachePolicy, psKernelInferCacheEligible,
                 psKernelSemanticCacheEligible, psKernelSemanticCacheRemaining,
                 psKernelSemanticCacheNodeBudget, ite_true, hc, he,
                 Except.ok.injEq, Prod.mk.injEq] at run

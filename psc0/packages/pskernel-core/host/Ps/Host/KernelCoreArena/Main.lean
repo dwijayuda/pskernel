@@ -67,9 +67,11 @@ def statsLine (stats : Stats) : String :=
 
 def runChecker
     (allowHistoricalMetadata : Bool := false)
-    (profile : Bool := false) : IO UInt32 := do
+    (profile : Bool := false)
+    (referenceMode : Bool := false) : IO UInt32 := do
   let stderr ← IO.getStderr
-  match State.empty allowHistoricalMetadata with
+  if referenceMode then IO.eprintln "pskernel-core checking-mode=reference semantic-caches=disabled"
+  match State.empty allowHistoricalMetadata referenceMode with
   | .error failure =>
       stderr.putStrLn ("pskernel-core arena initialization failed: " ++ failure.message)
       pure failure.exitCode
@@ -96,9 +98,13 @@ def main (args : List String) : IO UInt32 := do
       PsKernelCoreArena.runChecker true true
   | ["--profile"] =>
       PsKernelCoreArena.runChecker false true
+  | ["--reference"] =>
+      PsKernelCoreArena.runChecker false false true
+  | ["--reference-historical"] =>
+      PsKernelCoreArena.runChecker true false true
   | ["--version"] =>
       IO.println "pskernel-core-arena/1 lean-profile=4.35.0-rc4 export=3.1.0"
       pure 0
   | _ =>
-      IO.eprintln "usage: psc_kernel_core_arena [--check|--check-historical|--profile-historical|--profile|--version] < export.ndjson"
+      IO.eprintln "usage: psc_kernel_core_arena [--check|--check-historical|--profile-historical|--profile|--reference|--reference-historical|--version] < export.ndjson"
       pure 3

@@ -1,5 +1,5 @@
 import PSC1Kernel.ReplayJson
-import Ps.KernelCore.API.Kernel
+import Ps.KernelCore.API.Reference
 import Ps.Host.KernelCoreArena.CoreIntern
 
 namespace PsKernelCoreArena
@@ -209,6 +209,7 @@ def arenaResources : PsKernelResourcePolicy :=
     maxDeclarations := 0 }
 
 structure State where
+  referenceMode : Bool := false
   coreTransport : PsKernelCoreArena.CoreIntern.State
   session : PsKernelKernelSession
   allowHistoricalMetadata : Bool
@@ -219,9 +220,11 @@ structure State where
   pendingMutual : List PendingMutual
 
 def State.empty
-    (allowHistoricalMetadata : Bool := false) : Except Failure State := do
+    (allowHistoricalMetadata : Bool := false)
+    (referenceMode : Bool := false) : Except Failure State := do
   let session ← liftKernel (psKernelKernelSessionEmpty arenaResources psKernelProviderDefault)
   pure {
+    referenceMode := referenceMode
     coreTransport := PsKernelCoreArena.CoreIntern.State.empty
     session := session
     allowHistoricalMetadata := allowHistoricalMetadata
@@ -257,7 +260,9 @@ def State.admitRequest
     remain in canonical pskernel-core declaration dispatch.
     -/
     let _ ← liftKernel (psKernelKernelSessionPreflight state.session)
-    let environment ← liftKernel (psKernelV1DispatchDeclaration state.session request)
+    let environment ← liftKernel (if state.referenceMode then
+      @psKernelV1DispatchDeclaration psKernelReferenceCachePolicy state.session request
+      else psKernelV1DispatchDeclaration state.session request)
     let environment := psKernelEnvironmentWithNativeEvaluator environment Option.none
     pure {
       state with
@@ -268,7 +273,9 @@ def State.admitRequest
           state.session.provider
     }
   else
-    let result ← liftKernel (psKernelV1AdmitDeclaration state.session request)
+    let result ← liftKernel (if state.referenceMode then
+      psKernelReferenceAdmitDeclaration state.session request
+      else psKernelV1AdmitDeclaration state.session request)
     pure { state with session := result.session }
 
 def State.addDefinitionRecord

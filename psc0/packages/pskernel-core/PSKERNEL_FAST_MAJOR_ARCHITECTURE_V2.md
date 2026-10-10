@@ -100,3 +100,135 @@ The following are relative engineering judgments, NOT benchmark results or quant
 
 A **big architecture change is evidence-backed**, but it must be proven and measured on the actual PSKernel source, not justified by assuming that an unrelated Rust implementation's speedup transfers to generated Lean/JavaScript.
 
+
+## 4. Proposed production architecture: one trusted checker
+
+~~~text
+untrusted Lean/ProofScript declarations
+          |
+   Host/ProtocolDecoder (not proof authority)
+          |
+    RawExpr / RawDecl
+          |
+   Decode + ValidateScope
+          |
+    CoreExprId (immutable, shared, validated DAG)
+          |
+    Kernel/Check      [one accepting checker]
+       /      \
+   WHNF        DefEq/Convert
+  closures     guarded proof irrelevance
+  neutrals     lazy delta and eta
+  recursors    exact type/universe checks
+       \      /
+      CheckedResult | typed KernelFailure
+                |
+      Admission/Transaction
+                |
+      immutable admitted Env snapshot
+
+Formal artifacts: model + erasure/refinement +
+                  actual public acceptance soundness
+                  (outside production runtime)
+~~~
+
+### 4.1 Canonical ownership
+
+| Component | Owns | Does NOT own | Interface |
+| --- | --- | --- | --- |
+| Protocol/Host | Decoding, exporter identity, formats, resource isolation | Proof verdict or kernel axioms | Validated input and exact replay |
+| Core/Representation | Names, universe levels, shared expression DAG, scope metadata | Definitional equality or declaration acceptance | Decode/encode and scope proofs |
+| Engine/CheckedJudgments | Infer/check, WHNF, DefEq, resource/checked-mode rules | Unchecked env mutation | Grade-aware executable judgments |
+| Admission/Environment | Checked declarations, positivity, recursors, quotients, atomic transactions | Foreign proof acceptance | Checked environment invariant |
+| Assurance (proof-only) | Operational refinement, modeled type theory, relative consistency | Trusted runtime checking implementation | Public acceptance theorem |
+
+A separate mathematical specification or frozen test oracle is compatible with **one production checker**. A second independent runtime capable of accepting declarations is not.
+
+### 4.2 Compact expression DAG without changing external Lean syntax
+
+The public input remains raw expressions with Lean-compatible constructors. Internally:
+
+~~~text
+RawExpr -> scope/level validation -> CoreExprId -> NodeStore
+
+CoreExprId := opaque, bounds-checked handle
+NodeView   := BVar | Sort | Const | App | Lam | Pi
+           | Let | Lit | MData | Proj | internal FVar
+NodeStore  := immutable, collision-checked interning
+~~~
+
+Representation invariants:
+
+1. Any live ID references a node with the correct store identity, generation, constructor tag and bounds.
+2. Two identical IDs denote **exactly the same syntax**, never merely the same hash. Hash collisions trigger complete key equality.
+3. Universe levels and binder annotations participate in the canonical node identity.
+4. Permanent admitted declarations must not point to invalidated scratch handles.
+5. A raw free variable cannot masquerade as a scoped internal local identifier.
+6. Tagged 32-bit or 64-bit handles are OPTIONAL backend encodings. Logical IDs are abstract and checked for overflow; no wraparound can change expression meaning.
+7. Public callers cannot forge an internal validated handle to bypass checking. In a hostile-plugin environment, process/Wasm isolation is still required; language-level private fields alone are not a security sandbox.
+
+**Schematic theorem obligations** (not yet proved):
+
+~~~text
+decodeEncode: WellFormed e -> decode(encode(e)) = e
+internSound: valid(id) -> decode(id) = originalExpr(id)
+scopePreserved: validScoped(id, Γ) -> scoped(decode(id), Γ)
+scratchNoEscape: successfulCommit(txn) -> all published IDs permanent
+collisionSafe: intern(x) = intern(y) -> x = y
+~~~
+
+Existing proof-backed shared syntax traversal in `Core/Expr/Shared.lean` should be reused as an erasure/reference bridge; do not discard it merely because a packed DAG is attractive.
+
+### 4.3 Actual checked results and annotation provenance
+
+Currently raw expressions can circulate among inference, WHNF and DefEq before the full selected annotation/provenance theorem is established. V2 should provide a single explicit return carrier:
+
+~~~text
+CheckGrade := InferOnly | FullyChecked
+
+CheckResult := {
+  expression: CoreExprId,
+  inferredType: CoreExprId,
+  grade: CheckGrade,
+  environmentEpoch: EnvEpoch,
+  scopedLocalContext: ContextId,
+  checkedUniverseParameters: LevelParamsId,
+  witnessedBinderSorts: ValidatedObservationMap
+}
+~~~
+
+This is a design sketch, not compiled source syntax or user-creatable proof evidence. The `FullyChecked` grade must be earned by the actual checker. An infer-only result cannot be treated as fully checked. Binder range sorts must be carried from the **actual successful sort-exposure visits** and agree with universe-zero/positive interpretation.
+
+The theorem to target is not existentially choosing an annotation after raw checker success; it is connecting **the exact selected reading returned by the executed checker** to the semantic model. Unchecked raw structural equality and bare proof-irrelevance guesses cannot authorize success.
+
+### 4.4 Typed failures and explicit resource discipline
+
+Replace internal `Except String` with an error sum, preserving external contract classification exactly:
+
+~~~text
+KernelFailure :=
+  RejectedInvalid(rule, position)
+  DeclinedUnsupported(feature, target)
+  ResourceExhausted(kind, budget)
+  InternalInvariantError(identifier)
+~~~
+
+Resource policy includes fuel/work units, recursion depth, heap and host process memory/stack limits. A pure kernel function cannot promise to catch host OOM; the host must translate termination into nonacceptance. No unsupported/resource/internal outcome can be promoted into success by another provider.
+
+### 4.5 Atomic environment transactions and consistency modes
+
+~~~text
+already checked immutable Env
+    |
+begin transaction -> check fresh names / universe params / type and body
+    |
+validate positivity / constructors / recursor rules / quotients
+    |
+check all newly generated declarations as one batch
+    |
+commit ALL or NONE
+~~~
+
+Inductives and recursors must be generated/validated by the kernel, not accepted as unchecked exporter metadata. Proof/definition and axiom policies are different. An ordinary Lean-compatible checker may allow arbitrary axioms, including an axiom of `False`. A verified-model mode must constrain or explicitly assume their interpretations; no general unconditional consistency theorem is possible.
+
+**Model extension blocker:** fresh constant admission requires constructing an extended model with the new name interpreted, preserving all prior name interpretations and the reserved `False` interpretation. The V2 admission interface must make this a first-class proof goal rather than postulating an already-correct `StoredConstantModeled` fact for arbitrary models.

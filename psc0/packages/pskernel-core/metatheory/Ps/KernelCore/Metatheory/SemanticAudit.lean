@@ -1,3 +1,4 @@
+import Ps.KernelCore.Metatheory.SemanticFunctionValidity
 import Ps.KernelCore.Metatheory.SemanticReference
 import Ps.KernelCore.Metatheory.SemanticReferenceApplication
 import Lean
@@ -25,6 +26,14 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.functionValid_liftN,
+    ``PsKernelSemantics.SetModel.functionValid_inst,
+    ``PsKernelSemantics.SetModel.functionValid_inst_zero,
+    ``PsKernelSemantics.SetModel.functionValid_instLevels,
+    ``PsKernelSemantics.SetModel.functionValid_app_of_type,
+    ``PsKernelSemantics.SetModel.functionValid_lam_of_type,
+    ``PsKernelSemantics.SetModel.functionValid_beta_positive,
+    ``PsKernelSemantics.SetModel.functionValid_beta_on_domain,
     ``PsKernelSemantics.SetModel.annotationValid_inst_iff,
     ``PsKernelSemantics.SetModel.annotationValid_open_fresh,
     ``PsKernelSemantics.Reference.ensureSort_mem,

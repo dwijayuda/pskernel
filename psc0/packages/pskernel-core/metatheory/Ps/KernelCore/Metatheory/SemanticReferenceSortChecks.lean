@@ -27,7 +27,7 @@ theorem ensureSort_result_sources (whnf : InferOperation)
         split at run
         · simp only [Except.ok.injEq, Prod.mk.injEq] at run
           obtain ⟨rfl, rfl⟩ := run
-          exact Or.inr hw
+          exact Or.inr rfl
         · cases run
 
 open ConLeche ConLeche.SetTheory ConLeche.SetModel SetModel AnnotatedExpr

@@ -209,7 +209,7 @@ export async function runT1CompilerConformance({ compilerPath, outputDirectory, 
     observations.push('unknown and wrong-owner exports cannot enter the public API');
 
     for (const source of [
-      'def forbidden (n : Nat) (h : n = n) : Nat := n\n',
+      'def forbidden (n : Nat) (h : Eq n n) : Nat := n\n',
       'def forbidden (a : Type) (x : a) : a := x\n',
       'def forbidden (x : Nat) : Nat -> Nat := fun (y : Nat) => Nat.add x y\n',
     ]) {

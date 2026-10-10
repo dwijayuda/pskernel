@@ -1,22 +1,43 @@
 {
-  "name": "@proofscript/meta-next",
-  "version": "0.0.0-dev",
-  "private": true,
+  "name": "@proofscript/meta",
+  "version": "0.1.0-psc0.0",
+  "description": "ProofScript PSC0 meta source and JavaScript runtime package",
   "type": "module",
-  "proofscript": {
-    "bootstrap": true,
-    "sourceRoots": [
-      "src"
-    ],
-    "role": "meta",
-    "universeMeta": "separate-context",
-    "testRoots": [
-      "test"
-    ],
-    "outDir": "dist"
+  "private": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.23.3"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc0/packages/meta"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
   "dependencies": {
-    "@proofscript/core": "0.0.0-dev",
-    "@proofscript/environment-next": "0.0.0-dev"
+    "@proofscript/core": "0.1.0-psc0.0",
+    "@proofscript/environment": "0.1.0-psc0.0",
+    "@proofscript/compiler": "0.1.0-psc0.0"
+  },
+  "proofscript": {
+    "npmArchitecture": "psc0-monolithic-runtime-with-scoped-source-packages/1",
+    "sourceVariants": [
+      "ps",
+      "lean"
+    ],
+    "publishingRequiresBuild": true
   }
 }

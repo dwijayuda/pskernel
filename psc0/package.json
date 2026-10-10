@@ -129,7 +129,9 @@
     "check:ir-neutrality": "node scripts/check-ir-neutrality.mjs",
     "dev:sh1": "lake build psc1 psc1_sh1_compile psc1_ir_check_tests && node scripts/sh1-qualify.mjs native-candidate --native .lake/build/bin/psc1 --out dist/sh1",
     "iterate:sh1": "node scripts/sh1-iterate.mjs",
-    "check:typescript-profile": "node scripts/check-typescript-profile.mjs --out dist/typescript-profile"
+    "check:typescript-profile": "node scripts/check-typescript-profile.mjs --out dist/typescript-profile",
+    "npm:release": "node scripts/npm-distribution.mjs",
+    "npm:inspect": "node scripts/npm-distribution.mjs --inspect"
   },
   "devDependencies": {
     "typescript": "7.0.2"

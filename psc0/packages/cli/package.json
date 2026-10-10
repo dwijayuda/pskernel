@@ -1,25 +1,42 @@
 {
-  "name": "@proofscript/cli-next",
-  "version": "0.0.0-dev",
-  "private": true,
+  "name": "@proofscript/cli",
+  "version": "0.1.0-psc0.0",
+  "description": "ProofScript PSC0 cli source and JavaScript runtime package",
   "type": "module",
-  "proofscript": {
-    "bootstrap": true,
-    "portable": false,
-    "sourceRoots": [
-      "src"
-    ],
-    "testRoots": [
-      "test"
-    ],
-    "outDir": "dist",
-    "role": "bootstrap-cli"
+  "private": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.23.3"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc0/packages/cli"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "README.md"
+  ],
   "dependencies": {
-    "@proofscript/compiler-next": "0.0.0-dev",
-    "@proofscript/bootstrap-host-lean": "0.0.0-dev"
+    "@proofscript/compiler": "0.1.0-psc0.0",
+    "@proofscript/pskernel-lean-wasm": "0.1.0-psc0.0"
   },
-  "bin": {
-    "psc": "./bin/psc.mjs"
+  "proofscript": {
+    "npmArchitecture": "psc0-monolithic-runtime-with-scoped-source-packages/1",
+    "sourceVariants": [
+      "ps",
+      "lean"
+    ],
+    "publishingRequiresBuild": true
   }
 }

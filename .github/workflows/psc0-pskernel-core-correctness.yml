@@ -45,6 +45,7 @@ jobs:
       # Normalize already-resolved case equations and explicit level-map transport in fresh-model proof.
       # Avoid reserved Lean keyword for public modeled-axiom trace local binders.
       # Model the reserved False basis as empty and carry actual Forall hereditary soundness.
+      # Reserved Lean keyword in False-name split replaced by a fresh proof-variable identifier.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

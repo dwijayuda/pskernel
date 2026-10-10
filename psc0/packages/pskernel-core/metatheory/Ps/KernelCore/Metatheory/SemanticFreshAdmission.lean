@@ -268,11 +268,11 @@ theorem environmentModel_extendConstant_preservingFalse
   · intro info present
     exact storedConstant_extendConstant M info fresh value
       (oldNames info present) (oldReadings info present)
-  · by_cases matches : falseConstantName = fresh
+  · by_cases sameName : falseConstantName = fresh
     · rcases preservesFalse with different | assignedEmpty
-      · exact False.elim (different matches.symm)
-      · simpa [Reading.extendConstant, matches] using assignedEmpty
-    · simpa [Reading.extendConstant, matches] using old.falsePinned
+      · exact False.elim (different sameName.symm)
+      · simpa [Reading.extendConstant, sameName] using assignedEmpty
+    · simpa [Reading.extendConstant, sameName] using old.falsePinned
 
 /-- Model a successful ACTUAL declaration insertion with the generalized
 False-as-empty pin. For an ordinary fresh name this reduces to the previous

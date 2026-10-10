@@ -1,0 +1,106 @@
+name: PSC0 PSCV P1J arithmetic family typed matrix
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1j-arithmetic-matrix-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1i-pinned-source-blobs-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Generated batch structure and negative refusals
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/arithmetic-surface-batch.mjs
+          node --check packages/pscv/scripts/arithmetic-surface-batch.mjs
+          node --test packages/pscv/test/arithmetic-surface-batch.test.mjs
+      - name: Preserve kernel, compiler, seed, release and certification gate
+        shell: bash
+        run: |
+          git diff --exit-code e7d83ac9eea9c204c1398fdefe1e3a0fbf58c256 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+
+  actual-lean-family:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Run 84 actual typeclass queries generated from normative RC2
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1j-arithmetic
+          node ../psc0/packages/pscv/scripts/arithmetic-surface-batch.mjs generate \
+            ../psc0/dist/pscv-p1j-arithmetic/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1j-arithmetic/plan.json
+          lake env lean ../psc0/dist/pscv-p1j-arithmetic/ArithmeticBatch.lean \
+            > ../psc0/dist/pscv-p1j-arithmetic/lean-transcript.txt 2>&1
+          node ../psc0/packages/pscv/scripts/arithmetic-surface-batch.mjs review \
+            ../psc0/dist/pscv-p1j-arithmetic/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1j-arithmetic/lean-transcript.txt \
+            ../psc0/dist/pscv-p1j-arithmetic/review.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const x=JSON.parse(await readFile('../psc0/dist/pscv-p1j-arithmetic/review.json','utf8'));
+          assert.equal(x.observedArithmeticRows,42);
+          assert.equal(x.observedGoals,84);
+          assert.equal(x.typesExamined,14);
+          assert.equal(x.unresolvedNormativeIDs,191);
+          assert(x.observations.every(y=>!y.semanticMappingApproved));
+          assert.equal(x.approvedStandardRegistryFrozen,false);
+          assert.equal(x.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1J_IMPORTED_ARITHMETIC_SAMPLES_NOT_CLOSED_STANDARD: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1j-arithmetic-probe-${{ github.sha }}
+          path: psc0/dist/pscv-p1j-arithmetic
+          if-no-files-found: error
+          retention-days: 30

@@ -99,3 +99,112 @@ Other essential sources:
 
 Official Lean avoids full normalization whenever a cheaper DefEq path can prove equality. **Do less work before unfolding more**. Preserve its actual logical checks and precise version-specific semantics while changing storage, lookup, and evaluation scheduling.
 
+
+## 4. Fast checker algorithms and what PSKernel should borrow
+
+### 4.1 sokonanoda — closure-based high throughput
+
+Repo: https://github.com/intgrah/sokonanoda
+
+Rust implementation derived from nanoda, influenced by semantic-value/closure-based conversion. On the current Arena Mathlib export: 1.4 virtual minutes and 7.3 GB peak, with two declined negative cases rather than observed incorrect acceptance.
+
+**Transfer:** avoid allocating a fully instantiated syntax tree at every beta or let step. Keep a closure consisting of a term and scoped environment, expose only the needed WHNF head, and compare rigid spines before expensive delta expansion. **Caution:** the closure engine must preserve proof irrelevance, eta, recursor and universe behavior; speed is not itself a proof.
+
+### 4.2 MathGraph — fastest complete scored coverage
+
+Repo: https://github.com/metalogiclabs/mathgraph-lean-kernel
+
+A Rust improvement of sokonanoda, **not an independent clean-room checker**. All 71 invalid and 134 valid scored tests are handled in the current Arena, at 2.2 virtual minutes and 6.7 GB. Inspected files:
+
+| Source | Observed implementation | Transfer question |
+| --- | --- | --- |
+| [eval.rs](https://github.com/metalogiclabs/mathgraph-lean-kernel/blob/main/src/eval.rs): `eval` ~445, `eval_no_cache` ~470 | Evaluate syntax into shared values with closed/open caches | Which PSKernel subterms are repeatedly evaluated under equivalent environments? |
+| `eval.rs`: `force_thunk` ~704 and `whnf_head` ~929 | Deferred evaluation and head forcing | Can substitution be avoided until a head is required? |
+| [conv.rs](https://github.com/metalogiclabs/mathgraph-lean-kernel/blob/main/src/conv.rs): `def_eq_core` ~25, `def_eq_at` ~52 | Value-oriented conversion | Which existing DefEq branches cause duplicate WHNF? |
+| `conv.rs`: `try_proof_irrel_at` ~594 | Type-sensitive proof irrelevance | Can already validated annotations safely avoid re-inference? |
+| [value.rs](https://github.com/metalogiclabs/mathgraph-lean-kernel/blob/main/src/value.rs) | Closures, neutral/rigid heads, environments, thunks/spines | Could a small internal view offer most of the gain? |
+
+It maintains many caches, such as constant-head values/types, environment internings and canonicalized values. These are **not** automatically safe. Cache reuse requires exact target version, checked context, universe instantiation, environment generation and opacity settings. Adopt one measured cache at a time; do not transplant the entire caching apparatus.
+
+### 4.3 nanoclo — delayed substitution, interned environments
+
+Repo: https://github.com/sgraf812/nanoclo
+
+Inspected `src/closure.rs`: interned environment nodes (`EnvNode`), closure representations (`Clo`), cheap environment extension, indexed lookup, and read-set projections that permit equivalent evaluations across contexts containing irrelevant variables. Arena: 8.2 virtual minutes, 7.4 GB, all scored tests handled.
+
+**Transfer:** begin with exact closed-term memoization; later try caching by **precisely proven free-variable projections**. If a read mask is too narrow, too deep, overflows, or cannot be proved correct, conservatively use the entire environment. An internal 64-bit mask is not a bound on Lean binder depth.
+
+### 4.4 nanobruijn — O(1) binder-depth shifts
+
+Repo: https://github.com/nomeata/nanobruijn
+
+Its representation uses `ExprPtr = (CorePtr, u16 shift)` with uniform shifts carried in pointer-offset pairs, plus shift-homomorphic caching and parse-time outermost-shift normal form (OSNF). Equal subgraphs modulo a uniform binder shift can be shared. Arena: 13.2 virtual minutes and 6.7 GB, complete scored coverage.
+
+**Transfer:** possible P3 experiment if profiles prove repeated lifting dominates memory. **Risk:** wholesale representation change; needs proofs of binder capture avoidance, substitution composition, scope, shift overflow, reification and cache equivalence. The repository's `Theory.lean` formalizes representation properties; it is not a complete checker-soundness theorem.
+
+### 4.5 lazylean — computation-heavy normalization
+
+Repo: https://github.com/corun1024/lazylean
+
+The 0.5.1 README describes a C++ checker using semantic closures/neutral spines, a call-by-need Krivine-style computation engine, hash-consing, pruned environments, and bounded long-lived plus scratch evaluation sessions. It reports large gains on computation-heavy verification (including reflective decision procedures). **Those author-reported 0.5.1 numbers were not replicated here. Arena still measures 0.3.0.**
+
+**Transfer:** isolate long-lived immutable imports from reclamable temporary reductions. Treat ordinary Mathlib checking and giant `decide` computations as different performance profiles but not different proof-checker authorities. A second abstract machine would be a substantial source-size and formal-proof cost; **do not include it in the MVP**.
+
+### 4.6 con-ron — compact handles and refinement proof
+
+Repo: https://github.com/leanprover/con-ron, particularly [README](https://github.com/leanprover/con-ron/blob/master/README.md) and [OVERVIEW](https://github.com/leanprover/con-ron/blob/master/OVERVIEW.md).
+
+con-ron connects an optimized Rust checker to a Lean “twin” through Aeneas, and the twin to the pure con-leche algorithm by a simulation/refinement proof under stated assumptions. The driver/export parser and external infrastructure are **not all covered**. Current Arena: 10.8 virtual minutes, 7.1 GB, nine declines in its restricted verified profile.
+
+- Hash-cons names, levels, expressions.
+- Use compact, tagged `u32`-style expression handles.
+- Separate permanent admitted-environment storage and per-declaration scratch nodes.
+- Store variant payloads in **per-constructor arrays**, instead of a large tagged-union object at every node.
+- Maintain two explicit refinement steps: optimized representation -> executable checking algorithm -> mathematical/model semantics.
+
+**Transfer:** data-layout and proof architecture, not Rust as a second production semantic source. Any compact PSKernel handle must have checked bounds/generation/tag, collision-checked interned identity, and a proven erasure into the existing raw expression.
+
+### 4.7 con-leche — soundness under explicit model assumptions
+
+Repo: https://github.com/leanprover/con-leche
+
+The Lean checker provides a conditional relative consistency/model theorem with an explicitly restricted verified axiom regime. It declines some otherwise Lean-valid declarations that rely on unmodeled/nonstandard axioms. **Its proof is not a proof of PSKernel's checker.** Copying only pure set-theoretic mathematics (as the active PSKernel proof work does) still requires proving correctness of the actual PSKernel checker.
+
+### 4.8 lean4lean and eink0rn — validation diversity
+
+[lean4lean](https://github.com/digama0/lean4lean) is a Lean port close to the official C++ implementation, useful for semantic source comparison and proof ideas. eink0rn is independently developed in Haskell and offers valuable implementation diversity. Independent checker agreement increases confidence but does not imply soundness or authoritatively resolve a disagreement. On releases, record accepted/rejected/declined separately; never “accept if any checker accepts”.
+
+## 5. Active PSKernel source and soundness constraints
+
+**Active branch:** `psc0/pskernel-core-lean435-arena-v1`, NOT the historical `main` 4.34 implementation.
+
+~~~text
+psc0/packages/pskernel-core/
+  src/Ps/KernelCore/
+    Core/                   expressions, universes, substitutions, annotations
+    Environment/            checked environment and derived lookups
+    Checker/
+      Knot.lean             ONE recursive checker owner
+      Inference/            full checking versus infer-only
+      Reduction/            beta, let, delta, WHNF, primitive operations
+      DefEq/                quick equality, applications, lazy delta, eta
+      Recursor/             recursor reduction/validation
+      State.lean            inferOnly, checkedInfer, whnfCore, whnf,
+                            unfold, success, failure caches
+    Admission/              definitions, axioms, ordinary/mutual/nested
+                            inductives, quotient
+    Runtime/Acceleration/   Cache, CachePolicy, EnvironmentIndex
+    Runtime/Capability/     explicitly trusted capabilities
+    API/                    checked sessions and reference-mode entry
+    SelfHost.lean           one semantic source root
+  metatheory/               formal model and correctness work, not runtime
+  host/                     exports, Arena integration, diagnostics
+~~~
+
+Its reference mode disables semantic caching using **the same checking rules**, while ordinary cached mode still uses the one checker. A dedicated fast profile should do the same: choose a strategy within the current implementation, not clone `Checker/Knot`.
+
+According to active [AI_WORK_STATE](https://github.com/dwijayuda/pskernel/blob/psc0/pskernel-core-lean435-arena-v1/psc0/packages/pskernel-core/AI_WORK_STATE.md), the validated Oct. 11 proof source `f7d00c2c61c78f7148c5f6c9080e72cc3cbf2b01` passed focused metatheory/test CI (283 jobs, 84 companion files, seven native executables). Full Init/Std/Mathlib were deliberately skipped; earlier broad Init and Std replay timed out. **Neither full 4.35 conformance nor full kernel consistency has been proven**.
+
+The old `Judgments.lean` equality/typing model was shown inadequate in `JudgmentAdequacy.lean`: that is a defect in proof specification, **not evidence of executable false acceptance**. New annotated-expression/universe-regime semantic work remains unfinished. In particular, successful admission of a fresh constant needs a **constructive semantic-model extension** preserving previously interpreted constants and the pinned False interpretation. Assuming `StoredConstantModeled` for an arbitrary fixed model would silently bypass this real proof obligation.
+
+**Do not invalidate the proof work.** Keep PR #89, active `AI_WORK_STATE.md` and proof branch unchanged; prototype on an isolated branch. P0 profiling needs no semantic rewrite. P1 implementation in `Checker/Knot` or shared inference should only merge with proof-owner coordination. Lean-native proof/source work is not automatically qualified for the latest PSC0 self-host compiler or generated JS/Wasm; those are separate explicit gates.

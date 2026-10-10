@@ -20,7 +20,7 @@ admission, with the same source and returned sessions at every step. -/
 structure ReferenceTheoremAdmissionTrace
     (fuel : Nat) (env : PsKernelEnvironment)
     (value : PsKernelTheoremInfo) (maxDepth maxNatSize : Nat)
-    (next : PsKernelEnvironment) : Prop where
+    (next : PsKernelEnvironment) : Type where
   headerSession : PsKernelCheckerSession
   propositionSession : PsKernelCheckerSession
   guardWitness : Unit
@@ -51,7 +51,7 @@ theorem referenceAddTheorem_success_trace
     (value : PsKernelTheoremInfo) (maxDepth maxNatSize : Nat)
     (run : @psKernelAddTheorem psKernelReferenceCachePolicy
       fuel env value maxDepth maxNatSize = .ok next) :
-    ReferenceTheoremAdmissionTrace fuel env value maxDepth maxNatSize next := by
+    Nonempty (ReferenceTheoremAdmissionTrace fuel env value maxDepth maxNatSize next) := by
   have inserted := referenceAddTheorem_returns_insert
     fuel env next value maxDepth maxNatSize run
   cases hHeader : @psKernelCheckConstantBaseWithSession
@@ -101,7 +101,7 @@ theorem referenceAddTheorem_success_trace
                                   simp [psKernelAddTheorem, hHeader, hProp,
                                     hGuard, hLevels, hProof, hEq] at run
                               | true =>
-                                  exact {
+                                  exact ⟨{
                                     headerSession := header
                                     propositionSession := propSession
                                     guardWitness := guard
@@ -116,6 +116,6 @@ theorem referenceAddTheorem_success_trace
                                     proofRun := hProof
                                     equalityRun := hEq
                                     insertionRun := inserted
-                                  }
+                                  }⟩
 
 end PsKernelSemantics.SetModel

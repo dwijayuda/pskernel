@@ -33,6 +33,7 @@ jobs:
       # Audit repaired public axiom dispatch inversion and semantic-reading extension.
       # Explicit Except error type in public checked-axiom proof inversion.
       # Validate complete guarded theorem admission (header, Prop, scope, levels, check, DefEq).
+      # The safe theorem's execution evidence is Type-valued with a Nonempty theorem witness.
       - name: Validate full semantic and companion proof compatibility
         working-directory: psc0/packages/pskernel-core
         run: |

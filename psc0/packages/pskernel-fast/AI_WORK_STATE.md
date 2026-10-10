@@ -60,3 +60,14 @@ New `PSKernelFast/Level.lean` represents raw `zero`, `succ`, `max`, `imax`, `par
 ## G2 candidate — toy lazy closure evaluator
 
 `PSKernelFast/EvalPrototype.lean` introduces a standalone closure view and fuel-bounded head evaluation of beta/let, preserving stuck neutrals and refusing zero-fuel execution. It intentionally has no public proof acceptance. The accompanying tests exercise identity beta, let-binding, stuck neutral application and resource failure. This is an architecture experiment, not a real Lean WHNF or type checker. CI must confirm its exact commit before marking G2 qualified.
+
+## Verified G2 evidence — 2026-10-11
+
+Source commit `313af5514e3d5a94bcb35247d83366cc40191a3c`.
+[Successful workflow 38094155908](https://github.com/dwijayuda/pskernel/actions/runs/38094155908), job `114336476304`. Log shows exact Lean `4.35.0-rc4` commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; **10/10** build jobs succeeded and the executable reported beta/let closures, symbolic levels and raw DAG/scoping checks passed. This **only** certifies the named G2 tests; no formal soundness, proof admission or performance improvement is established.
+
+### Immediate next architectural implementation milestone
+
+Build a complete and precisely versioned expression/universe/name input layer, an independent reference evaluator and a closure evaluator over the same **well-scoped, well-typed** subset, then compare actual kernel-only cost and negative conformance before selecting the engine. Rewriting old proofs is not a goal and should never veto the implementation choice.
+
+Cloud policy: document-only edits should not trigger costly Lean builds; the workflow now filters on code/toolchain/CI changes only. Keep CI claims bound to exact source and workflow SHAs.

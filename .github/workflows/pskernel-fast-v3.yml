@@ -4,7 +4,8 @@ on:
   push:
     branches: [research/pskernel-fast-v3-greenfield-20261011]
     paths:
-      - "psc0/packages/pskernel-fast/**"
+      - "psc0/packages/pskernel-fast/**/*.lean"
+      - "psc0/packages/pskernel-fast/lean-toolchain"
       - ".github/workflows/pskernel-fast-v3.yml"
   workflow_dispatch:
 
@@ -23,7 +24,7 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.35.0-rc4
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-      - name: Verify pinned compiler and run G0 representation checks
+      - name: Verify pinned compiler and run focused G0-G2 research checks
         shell: bash
         working-directory: psc0/packages/pskernel-fast
         run: |

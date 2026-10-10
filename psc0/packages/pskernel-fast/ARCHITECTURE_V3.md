@@ -6,7 +6,7 @@
 >
 > **Compatibility authority:** pinned Lean **4.35.0-rc4**, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 >
-> **Status:** architecture plus an intentionally incomplete *representation* prototype. No complete checker, qualified speed improvement, consistency theorem, or self-host milestone claimed.
+> **Status:** architecture with a cloud-validated G0–G2 *representation and toy closure* prototype; not a complete kernel. No complete checker, qualified speed improvement, consistency theorem, or self-host milestone claimed.
 >
 > **GitHub source of truth:** `dwijayuda/pskernel`, `research/pskernel-fast-v3-greenfield-20261011`.
 
@@ -214,3 +214,11 @@ Do not do “test-fix-patch” without tracing the shared semantic cause. Work a
 ## 11. Prototype checkpoint clarification
 
 G0/G1 builds test the new representation and symbolic universe syntax. G2 introduces a **non-authoritative** lazy closure beta/let head evaluator, to make the design's main hypothesis executable. It is deliberately not a Lean type checker, verified WHNF, DefEq engine or proof-accepting kernel. Only CI-validated commits can earn the narrow claim that this prototype compiles and passes those specific tests.
+
+### Cloud-validated bounded checkpoints
+
+- G0: [run 38093806811](https://github.com/dwijayuda/pskernel/actions/runs/38093806811) at `48ce7e1`: canonical DAG/scope tests built and passed.
+- G1: [run 38094023391](https://github.com/dwijayuda/pskernel/actions/runs/38094023391) at `5e47d1d`: symbolic `imax` syntax and round-trip tests built and passed. The first attempt [38093952606](https://github.com/dwijayuda/pskernel/actions/runs/38093952606) failed from an incomplete Lake root list; evidence preserved.
+- G2: [run 38094155908](https://github.com/dwijayuda/pskernel/actions/runs/38094155908) at `313af551`: beta/let closure *prototype*, neutral-head and resource tests built and passed (10 Lake jobs).
+
+This is **not** a benchmark or a successful Lean proof checker. Never infer full universe equivalence, actual DefEq, inductive admission, mathematical soundness or future self-host compatibility from these tests.

@@ -42,29 +42,47 @@
     },
     "freshPreludeUtf8XorInt64": "passed",
     "originalBudgetCorpora": {
-      "status": "running",
+      "status": "completed-with-timeouts",
       "runId": 38007755710,
-      "checkedAt": "2026-10-10 00:19:59 UTC",
-      "jobs": [
-        {
-          "jobId": 114080872733,
-          "name": "profile-init",
-          "status": "in_progress",
-          "conclusion": null
-        },
-        {
-          "jobId": 114080872766,
-          "name": "corpus (init)",
-          "status": "in_progress",
-          "conclusion": null
-        },
-        {
-          "jobId": 114080872785,
-          "name": "corpus (std)",
-          "status": "in_progress",
-          "conclusion": null
+      "checkedAt": "2026-10-10 00:23:05 UTC",
+      "init": {
+        "status": "timeout",
+        "jobId": 114080872766,
+        "exitCode": -9,
+        "elapsedSeconds": 500.0116081237793,
+        "originalLimitSeconds": 500,
+        "lastProgress": {
+          "records": 1699999,
+          "declarations": 14005
         }
-      ]
+      },
+      "std": {
+        "status": "timeout",
+        "jobId": 114080872785,
+        "exitCode": -9,
+        "elapsedSeconds": 590.0852546691895,
+        "originalLimitSeconds": 590,
+        "lastProgress": {
+          "records": 1999999,
+          "declarations": 14314
+        }
+      },
+      "mathlib": {
+        "status": "skipped",
+        "jobId": 114083516556,
+        "reason": "Original-budget Init/Std prerequisite gates timed out"
+      },
+      "profileInit": {
+        "status": "timeout",
+        "jobId": 114080872733,
+        "workflowJobConclusion": "success",
+        "explanation": "Diagnostic workflow preserves timeout as data; green job is not corpus acceptance",
+        "exitCode": 124,
+        "elapsedSeconds": 600,
+        "maxRssKiB": 174868,
+        "lastEnteredRecord": 2414950,
+        "lastEnteredDeclaration": "_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList"
+      }
     }
   },
   "claims": {
@@ -149,29 +167,47 @@
       },
       "freshPreludeUtf8XorInt64": "passed",
       "originalBudgetCorpora": {
-        "status": "running",
+        "status": "completed-with-timeouts",
         "runId": 38007755710,
-        "checkedAt": "2026-10-10 00:19:59 UTC",
-        "jobs": [
-          {
-            "jobId": 114080872733,
-            "name": "profile-init",
-            "status": "in_progress",
-            "conclusion": null
-          },
-          {
-            "jobId": 114080872766,
-            "name": "corpus (init)",
-            "status": "in_progress",
-            "conclusion": null
-          },
-          {
-            "jobId": 114080872785,
-            "name": "corpus (std)",
-            "status": "in_progress",
-            "conclusion": null
+        "checkedAt": "2026-10-10 00:23:05 UTC",
+        "init": {
+          "status": "timeout",
+          "jobId": 114080872766,
+          "exitCode": -9,
+          "elapsedSeconds": 500.0116081237793,
+          "originalLimitSeconds": 500,
+          "lastProgress": {
+            "records": 1699999,
+            "declarations": 14005
           }
-        ]
+        },
+        "std": {
+          "status": "timeout",
+          "jobId": 114080872785,
+          "exitCode": -9,
+          "elapsedSeconds": 590.0852546691895,
+          "originalLimitSeconds": 590,
+          "lastProgress": {
+            "records": 1999999,
+            "declarations": 14314
+          }
+        },
+        "mathlib": {
+          "status": "skipped",
+          "jobId": 114083516556,
+          "reason": "Original-budget Init/Std prerequisite gates timed out"
+        },
+        "profileInit": {
+          "status": "timeout",
+          "jobId": 114080872733,
+          "workflowJobConclusion": "success",
+          "explanation": "Diagnostic workflow preserves timeout as data; green job is not corpus acceptance",
+          "exitCode": 124,
+          "elapsedSeconds": 600,
+          "maxRssKiB": 174868,
+          "lastEnteredRecord": 2414950,
+          "lastEnteredDeclaration": "_private.Init.Data.String.Lemmas.Pattern.String.ForwardSearcher.0.String.Slice.Pattern.Model.ForwardSliceSearcher.Invariants.isValidSearchFrom_toList"
+        }
       }
     },
     "nativeBinarySha256": "a7c43dc302ee6f51435c33e7cb6d1350c8290aecc561edca855c8475fcdd3827",
@@ -1439,5 +1475,5 @@
       "defaultProviderChanged": false
     }
   },
-  "recordedAt": "2026-10-10 00:19:59 UTC"
+  "recordedAt": "2026-10-10 00:23:05 UTC"
 }

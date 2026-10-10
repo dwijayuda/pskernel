@@ -87,6 +87,14 @@ at `aea996799b986091a4c8fbf6e1ce28f578609348`: 201 build jobs and all 84
 companion files. This later change affects assurance code and Lake registration,
 not the production implementation tested at `c7859055`.
 
+The current executable still times out on historical Init at 500.012 seconds
+and Std at 590.085 seconds under the unchanged Arena budgets. The dependent
+Mathlib gate is skipped. The separate 600-second Init profile also times out
+(exit 124; peak RSS 174,868 KiB; last entered record 2,414,950). Its diagnostic
+job succeeds at preserving that evidence, not at checking the whole corpus.
+The string-equality change is therefore not presented as a performance fix
+or complete-corpus qualification.
+
 ### Retained classifier evidence
 
 `DefEqClassifierTrace.lean` now states the exact positive proposition-classifier

@@ -127,6 +127,6 @@ theorem exprEq_preserves_interp (M : Reading V) (a other : AnnotatedExpr)
       have hi' := Nat.eq_of_beq_eq_true hi
       cases hn'
       cases hi'
-      exact congrArg _ (ih e' he hRegimes ρ)
+      exact congrArg (M.projections n i) (ih e' he hRegimes ρ)
 
 end PsKernelSemantics.SetModel

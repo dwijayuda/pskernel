@@ -1,3 +1,27 @@
+# PSC0 PSCV P1-C — pinned direct Boolean source and theorem mapping qualified
+
+**Source commit:** `3153fe5732794f2e96cde994085b9a2ec28acfa9`. [GitHub Actions run 38052355776](https://github.com/dwijayuda/pskernel/actions/runs/38052355776), attempt 1, passed all six cloud jobs: Linux22, Linux26, Windows26 each **26/26 tests** (78 total), actual Lean 4.35.0-rc3 imported-env probe, pinned 40-root source audit and Lean contract preflight. New stacked branch `psc0/platform-pscv-p1c-mapping-v1` in [draft PR98](https://github.com/dwijayuda/pskernel/pull/98) on PR97. No npm publication or merges. **This is partial source/declaration mapping, NOT a frozen PSCV Standard environment or PSCV-CERT-v1.**
+
+## Concrete implementation and evidence
+
+- `PSCVL/RegistryProbe.lean` now observes the exact imported `Bool.not`, `Bool.and`, `Bool.or` logical declarations, their `Bool.Internal.*` runtime-oriented definitions and the three named equality (`@[csimp]`) theorems. The Lean source marks the public Bool functions `noncomputable`. Observing those equality theorems does not independently prove PSKernel replay or TypeScript/Wasm preservation.
+- `packages/pscv/src/ambient-registry-inventory.mjs` and tests validate all three exact logical/internal/theorem names, imported presence, logical noncomputability and lack of runtime/certified permission. Forged Boolean flags, missing evidence, altered source, changed pin and false conformance claims are rejected.
+- `packages/pscv/src/direct-bool-mapping.mjs` plus cloud-only `scripts/audit-direct-bool-mapping.mjs` bind the immutable `src/Init/Prelude.lean` Git tree/blob, exact source lines, required PSCV-RC-v2 §24.3 snapshot IDs and real imported Lean observations. The private report locates **3 of 194** required snapshot IDs; the remaining **191** are explicitly unresolved. It has no `allowedInClosedStandard` or `verifiedExecutableAuthorized` branch.
+- Pinned Prelude source blob SHA-1 `f87ee970af5149d74434f09a89aedff1a8fdb2d2`, source byte SHA256 `cc9f337a5d8bd00768121701bceb0661ac63e01831a9aa34b282f37c689a6c39`. Mapping report SHA256 `c9e5dce7f97646779dc8a00d5c441226550a353190c9ebbe7c9b1aac70c70b9d`. Source verified via Git `cat-file`; avoid worktree newline transformations.
+- Source locators: `Bool.or` logical line 1053, internal 1056, equality theorem `Bool.or_eq_internalOr` line 1098; `Bool.and` lines 1071,1074, theorem `Bool.and_eq_internalAnd` 1094; `Bool.not` lines 1086,1089, theorem `Bool.not_eq_internalNot` 1102. Source types and noncomputability distinction require qualified compiler/backend lowering before runtime evidence can be claimed.
+
+**Retained GitHub Actions artifacts:** [actual ambient registry plus direct Boolean mapping](https://github.com/dwijayuda/pskernel/actions/runs/38052355776/artifacts/11670325503) ZIP SHA256 `cf62cc227fd79ca1fe6f64bf8eb0d7b787e8f13a76d271ff340ef5d8ddd51ee6`; [independent 40-source provenance](https://github.com/dwijayuda/pskernel/actions/runs/38052355776/artifacts/11670400315) ZIP SHA256 `d33e06c8314c35ffdab734162e4abfe99ff5fd4d7c784632db42d63020e90f5d`. Both expire 9 November 2026 UTC. [P1-C mapping procedure](docs/platform/PSCV_P1C_DIRECT_BOOL_MAPPING.md) and [machine-readable CI record](docs/platform/pscv-p1c-qualification-2026-10-10.json).
+
+## P1-B still unfinished; next implementation P1-D
+
+The 191 other snapshot IDs, including `std.generic.*`, `std.nat.*`, numeric `std.int*/uint*` and other operations, must be resolved using actual Lean instance class/type and priority/order, not spelling guesses. Full PSCV Standard instance/default instance/coercion/simp/simproc/ext/grind registries require complete source-line provenance, deterministic selected ordering, class-parameter modes and WP/effect law evidence. Audit/replay and an approved later normative digest remain mandatory. The independent rc4 PSKernel refinement is not silently substituted for the reference's Lean rc3 semantics.
+
+**P2 certified pure contract is not authorized**: current private `@proofscript/pscv` remains data-only, selected native PSC0 kernel and 62-module self-host compiler remain unchanged, production `checked` build refuses PSCV, and supervisor `PSCV-CERT-v1` authorization remains fail-closed. No verified executable or artifacts issued.
+
+**Execution constraints:** GitHub and cloud Actions only; no local checkout, Desktop Commander, kernel edits or force updates. Recheck remote HEAD before all writes and preserve PR90–98 history. Continue updating `AI_WORK_STATE.md` with exact source, CI and known gaps.
+
+---
+
 # PSC0 PSCV P1-B — actual Lean registry observation and normative mapping inputs qualified
 
 **Qualification:** [GitHub Actions run 38050837575](https://github.com/dwijayuda/pskernel/actions/runs/38050837575), attempt1, all six jobs successful at source commit `1cb7d874c37bd30d69f2482981a31e940ed581ed`. Branch `psc0/platform-pscv-p1b-v1` and [draft PR97](https://github.com/dwijayuda/pskernel/pull/97) stacked on P1-A PR96. **Status:** P1-B extraction and source-coverage worksheet qualified; the *complete closed PSCV Standard registry and P2 certification are not implemented*. No branch merge or npm publication.

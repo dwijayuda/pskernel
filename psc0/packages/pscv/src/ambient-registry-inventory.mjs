@@ -22,6 +22,7 @@ const schemaKeys = [
   'schemaVersion','kind','environment','selectedLeanVersion',
   'instances','defaultInstances','simpOrigins','simpToUnfold',
   'simprocBuiltins','simprocLocal','grindExtNames','grindCases',
+  'directBool',
   'rawStateOrderPreserved','sourceLineProvenanceResolved',
   'standardRegistryComplete','coercionsEnumerated','extTheoremsEnumerated',
   'grindEmatchComplete','verificationEffectRegistryComplete','pscvVerified',
@@ -30,6 +31,7 @@ const schemaKeys = [
 const groupKeys = [
   'instances','defaultInstances','simpOrigins','simpToUnfold',
   'simprocBuiltins','simprocLocal','grindExtNames','grindCases',
+  'directBool',
 ];
 const disabled = [
   'rawStateOrderPreserved','sourceLineProvenanceResolved',
@@ -74,6 +76,37 @@ export function validateAmbientRegistryInventory(input) {
     objectEntries(key,['name','patternCount'],x=>num(x.patternCount));
   }
   objectEntries('grindCases',['name','eager'],x=>typeof x.eager==='boolean');
+
+  const expectedBool = new Map([
+    ['Bool.not',['Bool.Internal.not','Bool.not_eq_internalNot']],
+    ['Bool.and',['Bool.Internal.and','Bool.and_eq_internalAnd']],
+    ['Bool.or',['Bool.Internal.or','Bool.or_eq_internalOr']],
+  ]);
+  const boolSchema=[
+    'snapshotId','logicalDeclaration','internalDeclaration','equalityTheorem',
+    'logicalPresent','internalPresent','equalityTheoremPresent',
+    'logicalNoncomputable','internalNoncomputable',
+    'sourceLineProvenanceChecked','runtimeEquivalenceQualified','pscvVerified',
+  ];
+  if (input.directBool.length !== 3) fail('BOOL_DIRECT_COVERAGE');
+  const boolSeen=new Set();
+  for (const entry of input.directBool) {
+    if (!exact(entry,boolSchema) ||
+        boolSeen.has(entry.snapshotId) || !expectedBool.has(entry.snapshotId) ||
+        entry.logicalDeclaration !== entry.snapshotId ||
+        entry.internalDeclaration !== expectedBool.get(entry.snapshotId)[0] ||
+        entry.equalityTheorem !== expectedBool.get(entry.snapshotId)[1] ||
+        entry.logicalPresent !== true ||
+        entry.internalPresent !== true ||
+        entry.equalityTheoremPresent !== true ||
+        entry.logicalNoncomputable !== true ||
+        typeof entry.internalNoncomputable !== 'boolean' ||
+        entry.sourceLineProvenanceChecked !== false ||
+        entry.runtimeEquivalenceQualified !== false ||
+        entry.pscvVerified !== false) fail('BOOL_DIRECT_DECLARATION');
+    boolSeen.add(entry.snapshotId);
+  }
+
 
   const canonical = Object.fromEntries(groupKeys.map(key => [
     key, [...input[key]].sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b),'en')),

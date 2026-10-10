@@ -15,14 +15,14 @@ private theorem native_lift_unchanged (e : PsKernelExpr) (cut amount : Nat) :
     (psKernelExprLiftLooseBVarsChanged e cut amount).2 = false →
       (psKernelExprLiftLooseBVarsChanged e cut amount).1 = e := by
   cases e <;> simp only [psKernelExprLiftLooseBVarsChanged] <;>
-    repeat' first | split | (progress simp_all)
+    repeat' split <;> simp_all
 
 private theorem native_inst_unchanged (e : PsKernelExpr) (cut : Nat)
     (a : PsKernelExpr) :
     (psKernelExprInstantiateAtChanged e 0 [a] cut).2 = false →
       (psKernelExprInstantiateAtChanged e 0 [a] cut).1 = e := by
   cases e <;> simp only [psKernelExprInstantiateAtChanged] <;>
-    repeat' first | split | (progress simp_all)
+    repeat' split <;> simp_all
 
 theorem AnnotatedExpr.liftN_zero (e : AnnotatedExpr) (cut : Nat) :
     liftN 0 e cut = e := by
@@ -88,7 +88,21 @@ theorem AnnotatedExpr.erase_liftN (e : AnnotatedExpr) (amount cut : Nat) :
 theorem AnnotatedExpr.scoped_iff_noLoose (e : AnnotatedExpr) (cut : Nat) :
     e.Scoped cut ↔ psKernelExprHasLooseAt e.erase cut = false := by
   induction e generalizing cut <;>
-    simp_all [Scoped, erase, psKernelExprHasLooseAt] <;> omega
+    try { simp_all [Scoped, erase, psKernelExprHasLooseAt]; done }
+  case bvar i =>
+    change i < cut ↔ Nat.ble cut i = false
+    constructor
+    · intro hi
+      cases hb : Nat.ble cut i with
+      | false => rfl
+      | true => have hle := Nat.le_of_ble_eq_true hb; omega
+    · intro hb
+      have hn : ¬ cut ≤ i := by
+        intro hle
+        have ht := Nat.ble_eq_true_of_le hle
+        rw [hb] at ht
+        contradiction
+      omega
 
 theorem AnnotatedExpr.inst_scoped (e a : AnnotatedExpr) (cut : Nat)
     (h : e.Scoped cut) : inst a e cut = e := by
@@ -107,11 +121,14 @@ theorem AnnotatedExpr.erase_inst (e a : AnnotatedExpr) (cut : Nat) :
         · subst i
           simp [inst, erase, psKernelExprInstantiateAtChanged, psKernelNatLt,
             psKernelExprListGet, erase_liftN]
-        · have hgt : cut < i := by omega
-          have hdiff : i - cut = (i - cut - 1) + 1 := by omega
-          simp [inst, erase, psKernelExprInstantiateAtChanged, psKernelNatLt,
-            psKernelExprListGet, psKernelExprListIsEmpty, psKernelExprListLength,
-            hi, he, show ¬ i ≤ cut by omega, hdiff]
+        · have hdiff : i - cut = (i - cut - 1) + 1 := by omega
+          have hn : psKernelNatLt i cut = false := by
+            simp [psKernelNatLt, he, show ¬ i ≤ cut by omega]
+          simp only [inst, ite_eq_right hi, ite_eq_right he, erase,
+            psKernelExprInstantiateAtChanged, Nat.zero_add, hn,
+            Bool.false_eq_true, ite_false]
+          rw [hdiff]
+          rfl
   | fvar _ | mvar _ | sort _ | const _ _ | lit _ => rfl
   | app f b ihf ihb =>
       have h0 := ihf cut
@@ -160,7 +177,7 @@ theorem AnnotatedExpr.erase_instantiate1 (e a : AnnotatedExpr) :
       exact erase_inst e a 0
   | false =>
       have hs : e.Scoped 0 := (scoped_iff_noLoose e 0).mpr h
-      simp only [h, Bool.false_eq_true, ite_eq_right, inst_scoped e a 0 hs]
+      simp [inst_scoped e a 0 hs]
 
 namespace SetModel
 open ConLeche

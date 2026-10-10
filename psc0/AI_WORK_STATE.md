@@ -1,3 +1,63 @@
+# PSC0 T2 checked watch — completed
+
+**Updated:** 10 October 2026, 05:14:26 UTC. T2 source commit **130e9501ccb39b11fe20bfe762718c9df896ebdd** passed all six jobs in [run 38026670864](https://github.com/dwijayuda/pskernel/actions/runs/38026670864), attempt 1: Linux source, Windows source, and four clean installed-package runs (Linux/Windows, Node 22.23.3 and 26.7.0). Integration branch **psc0/platform-t2-watch-v1**, stacked on qualified T1 in [draft PR92](https://github.com/dwijayuda/pskernel/pull/92). Main, selected seed R, 62-module compiler closure, native PSKernel algorithms and the TS7.0.2 pin are unchanged; no npm registry publication or merge.
+
+### Packages and exact evidence
+
+The [qualified preview4 candidate](https://github.com/dwijayuda/pskernel/actions/runs/38026670864/artifacts/11659064861) (ZIP 3,896,027 bytes, SHA256 0c066d5ceb6b3b0e81124a41d782b63f52f4bd78a54626e45d1fb96f575dbff6) contains:
+
+| Archive | Bytes | SHA256 |
+| --- | ---: | --- |
+| proofscript-0.1.0-preview.4.tgz | 3,661,914 | 652aa526f71f1111ee4292b73c3c888840c8ece921a6aeff5e20718c71800ab2 |
+| psdev-0.1.0-preview.4.tgz | 1,996 | d569a61af0f9161aa04bcc79650e903f38191c9fc69fe8d12d17f259cbf64d27 |
+| psc-demo-pshello-0.1.0-preview.4.tgz | 1,934 | 66b773f77d2a2deaa968ff08617a90d7fe991fceb856d3f3c08190bef5d57b50 |
+
+Artifact expires **9 November 2026 05:12:54 UTC**. JSON evidence is not durable executable storage. Source tests: Linux 136 host +18 native/integration passed; Windows 140 host +15 native/integration passed, with four inherited POSIX/permission-only skips. Installed jobs: Linux22 48 regular +5 watch observations, Linux26 48+5, Windows22 46+5, Windows26 46+5. Exact jobs and checks: [t2-watch-qualification-2026-10-10.json](docs/platform/t2-watch-qualification-2026-10-10.json).
+
+### User workflow and implemented boundaries
+
+With a private installed psdev package explicitly enabled for command:dev in project package.json, users run:
+
+~~~sh
+node ./node_modules/proofscript/bin/psc.mjs dev --watch --tsc --json
+~~~
+
+This uses the **same checked dev --once host** for each generation via bounded abortable Node child processes, and starts pinned TypeScript 7 project checking **only after** PSC admission and checked bundle/facade publication. Watch emits pending, checking, checked, ready, rejected and stopped generation states. It neither grants extension guests filesystem/proof/publication authority nor executes extension JavaScript entrypoints.
+
+The qualified checked-library smoke created an initial generation (TS consumer 42), detected an imported-module edit (43), rejected malformed source while preserving all last accepted bundle/facade/receipt bytes, recovered after correction, and rejected a modified command.wasm while preserving prior output.
+
+Linux uses recursive fs.watch plus periodic accepted-input freshness checks. Windows uses bounded 110 ms **content polling** for source/configuration/selected-extension inputs, because pinned Windows Node 22/26 libuv fs_event can fatally abort on alias paths. Poll caps: at most 16 nesting levels, 512 directories, 2,048 files, 2 MiB per file and 64 MiB total per snapshot. Exceeding those caps halts watch; it never weakens kernel admission. This is an initial small-project scheduling profile, not an instantaneous filesystem freshness guarantee. Source bytes and receipt eligibility are rechecked by the unchanged checked publisher.
+
+An invalid revision leaves prior owned generated output intact; no **ready** state is emitted for that revision. A failing downstream --tsc run reports rejected, even though the preceding PSC generation was already successfully published. The supervisor coordinates its own downstream TS build; independent watchers are not promised atomically visible multi-file writes. If the entry or active extension identity changes, restart watch. Bare psc init projects do not include tsconfig.json; use --tsc in a TypeScript project or the checked-library example.
+
+### Try on Windows PowerShell
+
+Download/extract the candidate and from its extracted root:
+
+~~~powershell
+$candidate = (Resolve-Path .\platform).Path
+npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.4.tgz"
+psc.cmd examples --json
+~~~
+
+Copy the installed checked-library example to a writable project directory. Inside that copied project:
+
+~~~powershell
+npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.4.tgz" "$candidate\psdev-0.1.0-preview.4.tgz"
+npm pkg set 'proofscript.extensions[0].package=psdev' 'proofscript.extensions[0].enable[0]=command:dev'
+node .\node_modules\proofscript\bin\psc.mjs dev --watch --tsc --json
+~~~
+
+Save Quantity.ps or Main.ps to trigger new checked generations; stop using Ctrl-C. The optional extension remains inactive until explicitly enabled.
+
+### Assurance and remaining work
+
+Compiler portable closure is still 62 modules SHA256 **3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea**, generated compiler JS SHA256 **6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617**, selected native Core source **963030dc2d154008fccc82e7c8ed29331f138799**. The existing T1 fixed-point qualification remains valid; host-only watch did not require recompilation or seed promotion. New proofs were not established: full semantic preservation, PSCV and strict SH1 remain explicitly unproved.
+
+Still outstanding: durable executable archive retention and public npm licensing/release; larger npm library/workspace resolution and package consolidation; generic plugin extensions; LSP/VS Code; independently qualified PSKernel Core JS then Wasm runtime candidates; later formal proof companions outside the self-host cycle. Do not silently switch the selected native provider, weaken admission, merge main, or publish npm.
+
+---
+
 # PSC0 T1 checked TypeScript library adoption — completed
 
 Updated: 2026-10-10 03:14:33 UTC. T1 implementation, exact current-source compiler qualification and all six preview3 platform jobs are complete. This handoff records the qualified release source and exact artifacts; subsequent documentation commits do not replace those identities. No npm publication, main merge, seed promotion, kernel algorithm change or default-provider switch was performed.

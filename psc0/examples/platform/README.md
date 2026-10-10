@@ -23,7 +23,7 @@ Init creates package.json, src/Main.ps, and PROOFSCRIPT.md. It installs nothing.
 For a published version, the generated exact dependency can be installed with `npm install --ignore-scripts`. For this unpublished preview, install the downloaded candidate tarball from its actual path:
 
 ```sh
-npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.3.tgz"
+npm install --save-dev --save-exact --ignore-scripts "/absolute/path/proofscript-0.1.0-preview.4.tgz"
 npm run check
 npm run build
 ```
@@ -55,13 +55,13 @@ To adopt the same approach in an existing project, preserve its package metadata
 
 ## checked-library
 
-Copy checked-library into a working directory and install the preview.3 candidate tarball as above. The project also pins TypeScript 7.0.2. Run `npm run ps:check` for kernel admission only, or `npm run build` followed by `npm start` for the complete example.
+Copy checked-library into a working directory and install the preview.4 candidate tarball as above. The project also pins TypeScript 7.0.2. Run `npm run ps:check` for kernel admission only, or `npm run build` followed by `npm start` for the complete example.
 
 Its root `proofscript.exports` map selects `Quantity` and `makeQuantity` from src/Quantity.ps, and `readQuantity` and `sameQuantity` from src/Main.ps. The entry imports the first module. The compiler checks the complete source closure, then publishes src/generated/library.ts as one shared implementation plus the thin src/Quantity.ts and src/Main.ts facades. The completed receipt is src/generated/library.checked.json. The handwritten consumer imports the two neighboring modules and prints `ProofScript library answer: 42`.
 
 The public interface uses bigint for Nat and frozen opaque handles for Quantity. A handle created through one facade retains its identity through the other; forged objects and malformed scalar values are refused. This bounded first-order interface excludes dependent, generic, callback, array and erased-proof parameters. The [checked-library guide](checked-library/README.md) explains the build order and current boundaries.
 
-Keep the project bundle at a distinct output path and keep generated facades separate from handwritten .ts files. The checked transaction refuses unowned or manually modified destinations. A rejected source build preserves the last completed generation. Run the downstream TypeScript build only after the checked project command succeeds; coordination with an independent TypeScript watcher remains later work.
+Keep the project bundle at a distinct output path and keep generated facades separate from handwritten .ts files. The checked transaction refuses unowned or manually modified destinations. A rejected source build preserves the last completed generation. Run the downstream TypeScript build only after the checked project command succeeds; host-coordinated downstream checking is available through explicitly activated `psc dev --watch --tsc`. Independent build watchers are not given an atomic project snapshot.
 
 ## Rejected build
 
@@ -69,4 +69,4 @@ The rejected-source directory contains `def answer : Nat := Type`. Its check/bui
 
 ## Optional extension demo
 
-The separately built psdev candidate is outside the compiler self-host closure. The generated PROOFSCRIPT.md explains how to install its exact tarball, explicitly enable `command:dev` in package.json, and run `psc dev --once`. This demo uses the same protected checked-build route. It is a bounded one-shot command. The same command can use the checked-library project's configured entry, bundle and export selection; enabling it does not grant direct access to those files. Live watch, LSP and broader ABI support remain later work.
+The separately built psdev candidate is outside the compiler self-host closure. The generated PROOFSCRIPT.md explains how to install its exact tarball, explicitly enable `command:dev` in package.json, and run `psc dev --once`. This demo uses the same protected checked-build route. It is a bounded one-shot command. The same command can use the checked-library project's configured entry, bundle and export selection; enabling it does not grant direct access to those files. Try `psc dev --watch --tsc` with installed/activated psdev in a copied checked-library project. LSP and broader ABI support remain later work.

@@ -4,6 +4,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { buildChecked } from '../scripts/checked-build.mjs';
+import { watchCheckedProject, runCheckedChild } from '../scripts/project-watch.mjs';
+import { resolveTypeScriptCli } from '../scripts/typescript-cli.mjs';
 import { initProject } from '../scripts/project-init.mjs';
 import { validateProjectExports } from '../scripts/checked-project.mjs';
 import {
@@ -18,6 +20,7 @@ const help = `Usage: psc init [directory] [--json]
        psc check [entry.ps|entry.lean] [--json]
        psc build [entry.ps|entry.lean] [--out file.ts|file.js] [--json]
        psc dev [entry.ps|entry.lean] --once [--out file.ts] [--json]
+       psc dev [entry.ps] --watch [--out file.ts] [--tsc] [--json]
        psc examples [--json]
        psc extensions [--json]
        psc version [--json]
@@ -28,8 +31,9 @@ thin .ts modules beside selected .ps sources. Library builds require out.
 Without exports or an output setting, build writes one neighboring .ts bundle.
 init never installs packages; existing package.json and tsconfig.json are preserved.
 dev requires an explicitly enabled, locally installed psc-command/1 Wasm extension.
-This preview supports one-shot dev requests. Watch, LSP, PSCV, general language
-extensions remain later milestones.
+Watch runs the same checked one-shot dev command on saved source changes.
+Optional --tsc runs pinned TypeScript after successful PSC publication.
+LSP, PSCV, and general language extensions remain later milestones.
 `;
 
 function fail(message) { throw new Error(message); }
@@ -137,21 +141,26 @@ function parseCommand(args) {
   let output;
   let json = false;
   let once = false;
+  let watch = false;
+  let downstream = false;
   while (rest.length) {
     const flag = rest.shift();
     if (flag === '--json' && !json) json = true;
     else if (flag === '--once' && command === 'dev' && !once) once = true;
-    else if (flag === '--watch' && command === 'dev') {
-      fail('PSC_DEV_WATCH_UNSUPPORTED: watch follows the module/export and ABI milestone; use --once');
-    } else if (flag === '--out' && command !== 'check' && output === undefined) {
+    else if (flag === '--watch' && command === 'dev' && !watch) watch = true;
+    else if (flag === '--tsc' && command === 'dev' && !downstream) downstream = true;
+    else if (flag === '--out' && command !== 'check' && output === undefined) {
       output = rest.shift();
       if (!output || output.startsWith('-') || !/\.(?:ts|js)$/u.test(output)) {
         fail('PSC_CLI_OUTPUT: --out requires a .ts or .js path');
       }
     } else fail('PSC_CLI_ARGUMENT_UNSUPPORTED: ' + flag);
   }
-  if (command === 'dev' && !once) fail('PSC_DEV_ONCE_REQUIRED: use dev --once');
-  return { command, entry, output, json };
+  if (command === 'dev' && once === watch) {
+    fail('PSC_DEV_MODE_REQUIRED: choose exactly one of --once or --watch');
+  }
+  if (downstream && !watch) fail('PSC_DEV_TSC_MODE: --tsc requires dev --watch');
+  return { command, entry, output, json, watch, downstream };
 }
 
 async function main() {
@@ -222,7 +231,7 @@ async function main() {
     }
   }
   if (options.command === 'dev' && !outputPath.endsWith('.ts')) {
-    fail('PSC_DEV_OUTPUT_KIND: the one-shot command demo publishes a .ts project bundle');
+    fail('PSC_DEV_OUTPUT_KIND: dev publishes a .ts project bundle');
   }
   assertReleasePlatform(release);
   for (const variable of ['PSC0_TSC', 'PSC0_TYPESCRIPT_VERSION', 'PSC_KERNEL_CORE_PROVIDER_BIN',
@@ -252,6 +261,52 @@ async function main() {
   process.once('SIGINT', onInterrupt);
   process.once('SIGTERM', onTerminate);
   try {
+    if (options.command === 'dev' && options.watch) {
+      if (!project) fail('PSC_DEV_WATCH_PROJECT_REQUIRED');
+      if (!entryPath.endsWith('.ps')) fail('PSC_DEV_WATCH_SOURCE_PROFILE');
+      const configured = await discoverCommandExtensions({
+        projectRoot: project.root, projectMetadata: project.metadata,
+      });
+      if (configured.length !== 1) fail('PSC_DEV_EXTENSION_REQUIRED');
+      const cli = fileURLToPath(import.meta.url);
+      const args = ['dev', ...(options.entry ? [options.entry] : []), '--once',
+        ...(options.output ? ['--out', options.output] : []), '--json'];
+      const childLog = message => process.stderr.write(message);
+      const runBuild = async buildSignal => {
+        const output = await runCheckedChild({
+          executable: process.execPath, args: [cli, ...args], cwd,
+          signal: buildSignal, onStderr: childLog,
+        });
+        let result;
+        try { result = JSON.parse(output); }
+        catch { fail('PSC_DEV_WATCH_CHILD_RESPONSE'); }
+        if (result?.command !== 'dev' || result.receipt?.kind !== 'psc0-checked-build') {
+          fail('PSC_DEV_WATCH_CHILD_RESPONSE');
+        }
+        return result.receipt;
+      };
+      const runDownstream = options.downstream ? async downstreamSignal => {
+        const tsc = resolveTypeScriptCli();
+        await runCheckedChild({
+          executable: process.execPath,
+          args: [tsc, '--project', path.join(project.root, 'tsconfig.json'), '--pretty', 'false'],
+          cwd: project.root, signal: downstreamSignal, onStderr: childLog,
+        });
+        return true;
+      } : undefined;
+      await watchCheckedProject({
+        projectRoot: project.root, entryPath,
+        extensionRoot: configured[0].report.packageRoot,
+        configuredEntry: options.entry ? undefined : config?.entry,
+        configuredExtension: configured[0].report.package,
+        signal: controller.signal,
+        runBuild, runDownstream, onStatus: update => process.stdout.write(options.json
+          ? JSON.stringify(update) + '\n'
+          : 'psc dev: ' + update.state + ' generation ' + update.generation +
+            (update.error ? ' (' + update.error + ')' : '') + '\n'),
+      });
+      return;
+    }
     let extensionExecution;
     if (options.command === 'dev') {
       const configured = project ? await discoverCommandExtensions({

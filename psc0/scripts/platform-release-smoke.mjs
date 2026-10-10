@@ -664,13 +664,13 @@ export async function qualifyInstalledPackage(tarballArgument, outputArgument, p
       assert.equal(configured.configuredExtensions[0].instantiated, false);
       await missing(poisonSentinel);
       if (extensionIndex === 0) {
-        const watch = invoke(['dev', 'src/Main.ps', '--watch', '--json']);
+        const watch = invoke(['dev', 'src/Main.ps', '--watch', '--once', '--json']);
         assert.notEqual(watch.status, 0);
         assert.equal(watch.stdout, '');
-        assert.match(watch.stderr, /PSC_DEV_WATCH_UNSUPPORTED/u);
+        assert.match(watch.stderr, /PSC_DEV_MODE_REQUIRED/u);
         assert.deepEqual(await readFile(path.join(project, 'src/Main.ts')), generated);
         assert.deepEqual(await readFile(path.join(project, 'src/Main.checked.json')), savedReceipt);
-        observations.push('watch is explicitly refused without changing the previous output');
+        observations.push('conflicting watch/once request is refused without changing previous output');
       }
       const dev = success(invoke(['dev', 'src/Main.ps', '--once', '--out', 'src/Main.ts', '--json']),
         'isolated ' + packageName + ' requests the ordinary checked build');

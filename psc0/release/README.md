@@ -2,7 +2,7 @@
 
 This package installs **psc**: the ProofScript command-line compiler with pinned PSKernel Core admission, checked RuntimeIR emission, and TypeScript 7.0.2 validation.
 
-Version **0.1.0-preview.3** adds the **psc-ts-library/1** checked project profile: selected exports from pure acyclic `.ps` modules, one shared TypeScript bundle, neighboring TypeScript facades, and a bounded runtime interface. Four examples ship with the existing initializer and **psc-command/1** extension protocol. The separately packed **psdev** demo requests one ordinary checked build; full watch scheduling remains later work.
+Version **0.1.0-preview.4** adds the **psc-ts-library/1** checked project profile: selected exports from pure acyclic `.ps` modules, one shared TypeScript bundle, neighboring TypeScript facades, and a bounded runtime interface. Four examples ship with the existing initializer and **psc-command/1** extension protocol. The optional **psdev** package enables one-shot builds and host-owned **dev --watch** scheduling.
 
 This candidate supports Linux x64 and Windows x64. Consumer Node ranges are >=22.23.3 <23 or >=26.7.0 <27; the installation qualification exercises Node22.23.3 and Node26.7.0. Bootstrap remains Node22.23.3/Lean4.34.0/TS7.0.2. Installing the prebuilt package requires no Lean toolchain or repository checkout.
 
@@ -14,11 +14,11 @@ From an extracted candidate on Windows PowerShell:
 
 ```powershell
 $candidate = (Resolve-Path .\platform).Path
-npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.3.tgz"
+npm install --global --ignore-scripts "$candidate\proofscript-0.1.0-preview.4.tgz"
 psc.cmd version
 psc.cmd init my-app
 Set-Location my-app
-npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.3.tgz"
+npm install --save-dev --save-exact --ignore-scripts "$candidate\proofscript-0.1.0-preview.4.tgz"
 npm run check
 npm run build
 ```
@@ -49,7 +49,8 @@ This avoids selecting a different package's psc executable from node_modules/.bi
 | psc init [directory] | Create a starter in a new or empty directory, or add source/guide to an existing npm project. Default directory is the current directory. |
 | psc check [entry.ps or entry.lean] | Check canonical declarations with the pinned native Core provider. |
 | psc build [entry] [--out file.ts or file.js] | Check admission and the original RuntimeIR, validate with TS7, then publish owned output. |
-| psc dev [entry] --once [--out file.ts] | Execute one explicitly enabled command guest and honor a permitted build request through the same checked host. |
+| psc dev [entry] --once [--out file.ts] | Run one checked build through an enabled command guest. |
+| psc dev [entry] --watch [--tsc] [--json] | Watch saved project source, coalesce edits and check each generation; optional pinned downstream TypeScript compilation. |
 | psc examples | Show the installed locations of the four examples. |
 | psc extensions | Inspect configured command packages without executing a guest. |
 | psc version | Report this compiler's version and installed runtime identities. |
@@ -186,12 +187,12 @@ Copy an example to a project you own before building. Do not generate output int
 
 ## Install and activate the psdev command demo
 
-The candidate also includes psdev-0.1.0-preview.3.tgz. It is an optional, separately installable npm package. The compiler does not depend on it, and installation alone does not activate it.
+The candidate also includes psdev-0.1.0-preview.4.tgz. It is an optional, separately installable npm package. The compiler does not depend on it, and installation alone does not activate it.
 
 In the initialized project, using the PowerShell candidate variable from above:
 
 ```powershell
-npm install --save-dev --save-exact --ignore-scripts "$candidate\psdev-0.1.0-preview.3.tgz"
+npm install --save-dev --save-exact --ignore-scripts "$candidate\psdev-0.1.0-preview.4.tgz"
 ```
 
 Set the existing root proofscript.extensions array to:
@@ -215,7 +216,7 @@ Only direct, physically installed root node_modules dependencies with a matching
 
 ## Third-party demo
 
-The independently named package @psc-demo/pshello uses the same protocol and authority boundary. Its candidate filename is psc-demo-pshello-0.1.0-preview.3.tgz. It is an illustrative private package, not a claim that this npm scope is owned or published.
+The independently named package @psc-demo/pshello uses the same protocol and authority boundary. Its candidate filename is psc-demo-pshello-0.1.0-preview.4.tgz. It is an illustrative private package, not a claim that this npm scope is owned or published.
 
 Install that candidate locally with --save-dev --save-exact --ignore-scripts, and replace the single command:dev entry with:
 
@@ -243,7 +244,11 @@ A successful build checks native kernel admission, the current RuntimeIR invaria
 
 The output publisher refuses unowned or manually edited destinations. Failed checks preserve the previous completed generation. It uses a staged ownership and recovery protocol with receipt commitment last, not atomic visibility of multiple files to arbitrary watchers. Follow its recovery-required diagnostics if cleanup or rollback cannot finish safely.
 
-Full watch scheduling, automatically coordinated downstream builds, broader ABI/FFI, general macros/tactics/backends, npm/workspace library resolution and LSP remain later milestones. This package implements a command extension demo, not the complete extension framework.
+The T2 watcher uses the same checked host through cancellable supervised subprocesses:
+```sh
+node ./node_modules/proofscript/bin/psc.mjs dev --watch --tsc
+```
+It requires one explicitly enabled command:dev package. Optional --tsc runs pinned TypeScript 7 with tsconfig.json only after PSC accepts the generation. The status stream distinguishes pending, checking, checked, ready, rejected and stopped; --json emits one JSON object per line. Invalid source preserves the last accepted files but never marks them current. The monitor watches the source directory recursively, project metadata and the selected extension package, and periodically rechecks known accepted inputs. Filesystem events can be delayed or missed; this is not instantaneous global freshness or atomic multi-file visibility for independent watchers. Restart after changing the entry or enabled extension identity. Downstream TS failure never marks the application ready. Broader ABI/FFI, general macros/tactics/backends, npm/workspace resolution and LSP remain later work. This package implements a command extension demo, not the complete extension framework.
 
 ## Self-host and later proofs
 

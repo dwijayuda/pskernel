@@ -12,6 +12,9 @@ const help = [
   '       psc check <entry.ps|entry.lean> [--json]',
   '       psc build <entry.ps|entry.lean> [--out output.js|output.ts] [--json]',
   '       psc packages [--json]',
+  'Check/build resources: --frontend-timeout-ms N --frontend-heap-mb N',
+  'Defaults: 300000 ms accumulated frontend request time; 4096 MiB V8 old space.',
+  'Resource overrides do not bypass kernel acceptance or change language rules.',
   'Bounded new-only ps-0.9-r3; JS PSKernel Core; TypeScript 7.0.2.',
   'Outputs use immutable .psc-artifacts generations and one public entry point.',
   'Lean-WASM is not an automatic fallback. Receipts are audit data, not authority.',
@@ -56,8 +59,14 @@ async function main(args) {
   if (!['check', 'build'].includes(command)) throw new Error('PSC_COMMAND_UNSUPPORTED: ' + command);
   const entry = rest.shift();
   if (!entry || entry.startsWith('--')) throw new Error('PSC_ENTRY_REQUIRED');
-  const flags = options(rest, command === 'build' ? ['--out'] : []);
-  const result = await runCheckedBuild({ entry, output: flags['--out'], checkOnly: command === 'check', version: meta.version });
+  const flags = options(rest, ['--frontend-timeout-ms', '--frontend-heap-mb', ...(command === 'build' ? ['--out'] : [])]);
+  const frontendLimits = {};
+  for (const [flag, field] of [['--frontend-timeout-ms', 'timeoutMs'], ['--frontend-heap-mb', 'heapMb']]) {
+    if (flags[flag] === undefined) continue;
+    if (!/^[1-9][0-9]*$/u.test(flags[flag])) throw new Error('PSC_FRONTEND_INVALID_LIMIT: ' + flag);
+    frontendLimits[field] = Number(flags[flag]);
+  }
+  const result = await runCheckedBuild({ entry, output: flags['--out'], checkOnly: command === 'check', version: meta.version, frontendLimits });
   console.log(flags['--json'] ? JSON.stringify(result, null, 2) : 'PSC_' + command.toUpperCase() + '_PASS: ' + entry);
 }
 try { await main(process.argv.slice(2)); }

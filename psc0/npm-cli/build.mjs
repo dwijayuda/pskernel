@@ -1,5 +1,6 @@
-// The sole checked build path used by the installed CLI. Host IO only;
-// compiler source, grammar, kernel rules and default provider are unchanged.
+// The sole checked build path used by the installed CLI. Host IO only.
+// The parent does not load/execute the compiler: the owned child keeps its
+// prepared graph. Kernel selection, snapshots and publication stay here.
 import { createRequire } from 'node:module';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -7,9 +8,8 @@ import { readFile, readdir, mkdir, mkdtemp, writeFile, rm } from 'node:fs/promis
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import * as compiler from '@proofscript/compiler';
 import { checkCanonicalAdmissions } from '@proofscript/pskernel-core/check';
-import { createCheckedPreparedSession } from './checked-session.mjs';
+import { createCompilerProcess } from './frontend-session.mjs';
 import { captureSourceGraph } from './source-graph.mjs';
 import { publishGeneration } from './publication.mjs';
 const require = createRequire(import.meta.url);
@@ -33,7 +33,7 @@ function typeScript() {
   return { manifestPath, launcher };
 }
 
-export async function runCheckedBuild({ entry, output, checkOnly = false, version = 'development' }) {
+export async function runCheckedBuild({ entry, output, checkOnly = false, version = 'development', frontendLimits, signal }) {
   const target = path.resolve(output || entry.replace(/\.(ps|lean)$/u, '.js'));
   if (!checkOnly && !/\.(js|ts)$/u.test(target)) throw new Error('PSC_OUTPUT_EXTENSION');
   const tsc = checkOnly ? null : typeScript();
@@ -41,18 +41,22 @@ export async function runCheckedBuild({ entry, output, checkOnly = false, versio
   for (const name of ['index.js', 'kernel-manifest.json', 'prelude.json', 'core-checker.mjs', 'core-cli.mjs', 'generated-core-provider.mjs']) trustedFiles.push(['kernel/' + name, path.join(coreRoot, 'dist', name)]);
   for (const name of (await readdir(host)).filter(n => n.endsWith('.mjs') || n === 'psc.js').sort()) trustedFiles.push(['host/' + name, path.join(host, name)]);
   if (tsc) trustedFiles.push(['typescript-package', tsc.manifestPath], ['typescript-launcher', tsc.launcher]);
-  const graph = await captureSourceGraph(compiler, entry, { trustedFiles });
-  if (hash(await readFile(compilerPath)) !== compilerIdentity) throw new Error('PSC_COMPILER_IDENTITY_CHANGED');
-  const sourceKind = graph.kind === 'ps' ? compiler.PsCompilerSourceKind.proofScript : compiler.PsCompilerSourceKind.lean;
-  const session = createCheckedPreparedSession(compiler, text => checkCanonicalAdmissions(text, { timeoutMs: 120000 }), expectedKernel);
-  const handle = await session.checkSources(sourceKind, graph.sources, { sourceClosureSha256: graph.snapshot.sourceClosureSha256, compilerSha256: compilerIdentity, grammar: 'ps-0.9-r3/new-only', kernel: expectedKernel, profile: 'bounded-compiler' });
+  const frontend = await createCompilerProcess({ compilerSha256: compilerIdentity, kernelIdentity: expectedKernel, checkAdmissions: text => checkCanonicalAdmissions(text, { timeoutMs: 120000 }), limits: frontendLimits, signal });
   let stage;
   try {
+    const graph = await captureSourceGraph(frontend, entry, { trustedFiles });
+    if (hash(await readFile(compilerPath)) !== compilerIdentity) throw new Error('PSC_COMPILER_IDENTITY_CHANGED');
+    const handle = await frontend.checkSources(graph.kind, graph.sources, { sourceClosureSha256: graph.snapshot.sourceClosureSha256, compilerSha256: compilerIdentity, grammar: 'ps-0.9-r3/new-only', kernel: expectedKernel, profile: 'bounded-compiler', frontendLimits: frontend.stats().limits });
     await graph.snapshot.revalidate();
     const audit = { schemaVersion: 2, kind: checkOnly ? 'psc0-npm-checked' : 'psc0-npm-checked-build', version, entry: path.resolve(entry), sourceCount: graph.sourceCount, sourceClosureSha256: graph.snapshot.sourceClosureSha256, canonicalAdmissionsSha256: handle.canonicalAdmissionsSha256, compilerSha256: compilerIdentity, kernel: expectedKernel, inputs: graph.snapshot.binding, claims: { kernelAdmitted: true, fullPscvVerified: false, compilerSemanticsProven: false, newSelfhostFixedPoint: false }, receiptIsAuthority: false };
-    if (checkOnly) return Object.freeze(audit);
-    const typeScriptSource = session.emit(handle);
-    if (Buffer.byteLength(typeScriptSource) > 32 * 1024 * 1024) throw new Error('PSC_OUTPUT_SIZE_LIMIT');
+    if (checkOnly) {
+      await frontend.assertCurrent(handle);
+      const evidence = frontend.stats();
+      await frontend.close();
+      signal?.throwIfAborted();
+      return Object.freeze({ ...audit, frontend: evidence });
+    }
+    const typeScriptSource = await frontend.emit(handle);
     await mkdir(path.dirname(target), { recursive: true });
     stage = await mkdtemp(path.join(path.dirname(target), '.psc-stage-'));
     const stem = path.basename(target).replace(/\.(js|ts)$/u, '');
@@ -63,13 +67,16 @@ export async function runCheckedBuild({ entry, output, checkOnly = false, versio
     if (result.error || result.status !== 0) throw new Error('PSC_TSC_FAILED: ' + String(result.stderr || result.stdout || result.error).slice(0,4000));
     const products = {};
     for (const extension of ['.ts', '.js', '.d.ts', '.js.map']) products[extension] = await readFile(path.join(stage, stem + extension), 'utf8');
-    session.assertCurrent(handle);
+    await frontend.assertCurrent(handle);
+    const evidence = frontend.stats();
+    // Reap the worker before the single public commit. A late worker result
+    // cannot publish or invalidate a generation after the public switch.
+    await frontend.close();
     await graph.snapshot.revalidate();
-    return await publishGeneration({ output: target, products, snapshot: graph.snapshot, receipt: { ...audit, typescript: '7.0.2', outputSha256: hash(products['.js']) } });
+    signal?.throwIfAborted();
+    return await publishGeneration({ output: target, products, snapshot: graph.snapshot, receipt: { ...audit, frontend: evidence, typescript: '7.0.2', outputSha256: hash(products['.js']) } });
   } finally {
-    session.revoke(handle);
-    // The executable switch is the commit boundary. Cleanup failure must not
-    // report that a committed build failed or mask the original refusal.
+    await frontend.close();
     if (stage) await rm(stage, { recursive: true, force: true }).catch(error => console.warn('PSC_STAGING_CLEANUP: ' + error.message));
   }
 }

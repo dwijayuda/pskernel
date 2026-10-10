@@ -52,7 +52,12 @@ export async function captureSourceGraph(compiler, entry, { limits, trustedFiles
     if (visited.has(actual)) return;
     const source = await io.readText(descriptor.path, { root: descriptor.root, id: 'source/' + logical });
     active.add(actual);
-    for (const name of readImports(compiler, source, kind)) {
+    // Production delegates synchronous parser work to the owned child. Direct
+    // compiler callers remain supported for source-only inventory qualification.
+    const imports = typeof compiler.readSourceImports === 'function'
+      ? await compiler.readSourceImports(source, kind) : readImports(compiler, source, kind);
+    if (!Array.isArray(imports) || imports.length > 2048 || imports.some(n => typeof n !== 'string' || !modulePattern.test(n))) throw new Error('PSC_IMPORT_LIST');
+    for (const name of imports) {
       const child = await locate(name); edges.push([logical, name]);
       await visit(child, name, depth + 1);
     }

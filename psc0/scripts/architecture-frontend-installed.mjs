@@ -1,0 +1,57 @@
+// Bounded correspondence smoke on the exact retained compiler. No full
+// compiler rebuild, C2/C3 generation, parser rewrite or kernel change.
+import assert from 'node:assert/strict';
+import { readFile, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+const [prefix, variant, project] = process.argv.slice(2);
+assert(prefix && project && ['ps', 'lean'].includes(variant));
+const packageRoot = path.join(prefix, ...(process.platform === 'win32' ? ['node_modules'] : ['lib', 'node_modules']), 'proofscript');
+const compilerPath = path.join(packageRoot, 'node_modules/@proofscript/compiler/dist/index.js');
+const corePath = path.join(packageRoot, 'node_modules/@proofscript/pskernel-core/dist');
+const compiler = await import(pathToFileURL(compilerPath).href);
+const { createCompilerProcess } = await import(pathToFileURL(path.join(packageRoot, 'bin/frontend-session.mjs')).href);
+const { checkCanonicalAdmissions } = await import(pathToFileURL(path.join(corePath, 'core-checker.mjs')).href);
+const manifest = JSON.parse(await readFile(path.join(corePath, 'kernel-manifest.json'), 'utf8'));
+const identity = { protocol: 'pskernel-core-js/1', provider: 'psc0-generated-js-core', leanVersion: '4.34.0', profile: 'lean4.34-core', kernelSha256: manifest.kernelSha256, kernelSourceRevision: manifest.baseMainCommit };
+const hash = bytes => createHash('sha256').update(bytes).digest('hex');
+const unwrap = value => { assert(Object.getOwnPropertySymbols(value).some(k => value[k] === 'ok')); return value.value; };
+const sources = ['def workerAnswer : Nat := 42\n'];
+const kind = variant === 'ps' ? compiler.PsCompilerSourceKind.proofScript : compiler.PsCompilerSourceKind.lean;
+const prepared = unwrap(compiler.psCompilerPrepareSources(kind, compiler.List.cons(sources[0], compiler.List.nil())));
+const directAdmissions = unwrap(compiler.psCompilerAdmissionsFromPrepared(prepared));
+const directTs = unwrap(compiler.psCompilerTypeScriptFromPrepared(prepared));
+let calls = 0, seen;
+const service = await createCompilerProcess({ compilerSha256: hash(await readFile(compilerPath)), kernelIdentity: identity, checkAdmissions: stream => { calls++; seen = stream; return checkCanonicalAdmissions(stream); } });
+let facts;
+try {
+  assert.notEqual(service.stats().childPid, process.pid);
+  assert.deepEqual(await service.readSourceImports('import Demo.Math\n\ndef a : Nat := 1\n', variant), ['Demo.Math']);
+  const checked = await service.checkSources(variant, sources, { sourceClosureSha256: hash(sources[0]) });
+  await assert.rejects(service.emit({ ...checked }), /UNCHECKED_MODULE/);
+  assert.equal(await service.emit(checked), directTs, 'worker target output diverged from identical direct compiler');
+  assert.equal(seen, directAdmissions, 'worker admissions diverged from identical direct compiler');
+  assert.equal(calls, 1);
+  await service.assertCurrent(checked);
+  facts = service.stats();
+  await service.close();
+  await assert.rejects(service.emit(checked), /CLOSED|EXIT/);
+} finally { await service.close(); }
+const primary = path.join(project, 'Timeout.js');
+await writeFile(primary, 'previous published generation');
+const cli = path.join(packageRoot, 'bin/psc.js');
+const timed = spawnSync(process.execPath, [cli, 'build', 'src/Main.' + variant, '--out', 'Timeout.js', '--frontend-timeout-ms', '1'], { cwd: project, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
+assert(!timed.error && timed.status !== 0 && timed.stderr.includes('PSC_FRONTEND_TIME_LIMIT'), 'installed CLI must report a bounded frontend refusal: ' + timed.stderr);
+assert.equal(await readFile(primary, 'utf8'), 'previous published generation');
+const checked = spawnSync(process.execPath, [cli, 'check', 'src/Main.' + variant, '--frontend-timeout-ms', '120000', '--frontend-heap-mb', '256', '--json'], { cwd: project, encoding: 'utf8', timeout: 180000, maxBuffer: 4 * 1024 * 1024 });
+assert(!checked.error && checked.status === 0, checked.stderr);
+const audit = JSON.parse(checked.stdout);
+assert.equal(audit.frontend.limits.heapMb, 256);
+assert.equal(audit.frontend.protocol, 'psc0-owned-frontend/1');
+assert.equal(audit.kernel.provider, 'psc0-generated-js-core');
+const evidence = { schema: 'psc0-frontend-resource-qualification/1', source: process.env.GITHUB_SHA, platform: process.platform, node: process.version, variant, realOwnedChild: true, directAdmissionsEqual: true, directTypeScriptEqual: true, selectedKernelCalls: calls, copiedHandleRefused: true, closedHandleRefused: true, installedTimeoutRefused: true, timeoutPreservesExistingOutput: true, explicitResourceLimitChecked: true, frontend: facts, compilerRegenerated: false, kernelRegenerated: false, fullFixedPointExecuted: false };
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+await writeFile(path.join(root, 'dist/architecture-evidence/frontend-' + variant + '.json'), JSON.stringify(evidence, null, 2) + '\n');
+console.log('PSC_FRONTEND_INSTALLED: PASS ' + JSON.stringify(evidence));

@@ -12,6 +12,9 @@ assert policy["design"]["legacyProofPreservationRequired"] is False
 assert policy["design"]["oneProductionSemanticAuthority"] is True
 assert policy["target"]["commit"] == "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
 
+placeholder_pattern = re.compile(r"(?m)^\s*(?:sorry|axiom)\b")
+if not placeholder_pattern.search("  axiom impossible : False\n"):
+    raise SystemExit("Architecture placeholder scanner self-test failed")
 prefixes = tuple(policy["source"]["forbiddenRuntimeImportPrefixes"])
 lean_files = list((root / "src" / "PSKernelFast").rglob("*.lean"))
 if not lean_files:
@@ -23,6 +26,6 @@ for path in lean_files:
             for module in line.removeprefix("import ").split():
                 if module.startswith(prefixes):
                     raise SystemExit(f"Legacy implementation imported in {path}: {module}")
-    if re.search(r"(?m)^\\s*(?:sorry|axiom)\\b", source):
+    if placeholder_pattern.search(source):
         raise SystemExit(f"Unsafe top-level proof placeholder in V3 kernel source: {path}")
 print(f"V3 architecture fence PASS: {len(lean_files)} independent Lean source files")

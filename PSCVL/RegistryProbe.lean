@@ -35,7 +35,7 @@ private def recordSimpOrigin (p : Meta.Origin × Unit) : Json :=
     ("name", recordName p.1.key)
   ]
 
-private def recordSimproc (p : Name × Array Meta.Simp.SimpTheoremKey) : Json :=
+private def recordSimproc (p : Name × Array Meta.SimpTheoremKey) : Json :=
   Json.mkObj [
     ("name", recordName p.1),
     ("patternCount", toJson p.2.size)

@@ -1,0 +1,119 @@
+name: PSC0 PSCV P1I pinned Git source locators
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1i-pinned-source-blobs-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1h-declaration-types-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Pinned source byte and lexical locator unit tests
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/pinned-lean-source-review.mjs
+          node --check packages/pscv/scripts/generate-pinned-source-review.mjs
+          node --test packages/pscv/test/pinned-lean-source-review.test.mjs
+      - name: Compiler, kernel, seed and production certificate gate unchanged
+        shell: bash
+        run: |
+          git diff --exit-code 3c9d0e217752876ed24d4ef7958aeb301ad766d7 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+  upstream-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Inspect exact immutable upstream Lean source tree
+        uses: actions/checkout@v4
+        with:
+          repository: leanprover/lean4
+          ref: 470d5ce1400764999581fd26d5d72b00d990b0f4
+          path: lean435-upstream
+          fetch-depth: 1
+          sparse-checkout: |
+            src/Init/Prelude.lean
+            src/Init/Data/String/Defs.lean
+            src/Init/Data/Int/Basic.lean
+      - name: Bind imported-module origin to pinned Git file/blob and lexical candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1i-source-locators
+          lake env lean TypedInstanceWitness.lean > ../psc0/dist/pscv-p1i-source-locators/typed.txt 2>&1
+          lake env lean ConcreteDictionaryWitness.lean > ../psc0/dist/pscv-p1i-source-locators/concrete.txt 2>&1
+          lake env lean --run SelectedInstanceDeclarations.lean ../psc0/dist/pscv-p1i-source-locators/raw-types.json
+          node ../psc0/packages/pscv/scripts/generate-selected-declaration-review.mjs \
+            ../psc0/dist/pscv-p1i-source-locators/typed.txt \
+            ../psc0/dist/pscv-p1i-source-locators/concrete.txt \
+            ../psc0/dist/pscv-p1i-source-locators/raw-types.json \
+            ../psc0/dist/pscv-p1i-source-locators/typed-review.json
+          node ../psc0/packages/pscv/scripts/generate-pinned-source-review.mjs \
+            ../psc0/dist/pscv-p1i-source-locators/typed-review.json \
+            ../lean435-upstream \
+            ../psc0/dist/pscv-p1i-source-locators/source-review.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const x=JSON.parse(await readFile('../psc0/dist/pscv-p1i-source-locators/source-review.json','utf8'));
+          assert.equal(x.importedConstantCount,11);
+          assert.equal(x.selectedSourceBlobCount,3);
+          assert.equal(x.explicitlyNamedCandidateCount,6);
+          assert.equal(x.unresolvedNormativeIds,191);
+          assert.equal(x.exactElaboratorLineProven,false);
+          assert.equal(x.acceptedForPSCVStandard,false);
+          assert.equal(x.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1I_IMMUTABLE_BLOBS_NAMED_CANDIDATES_ONLY: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1i-pinned-source-evidence-${{ github.sha }}
+          path: psc0/dist/pscv-p1i-source-locators
+          if-no-files-found: error
+          retention-days: 30

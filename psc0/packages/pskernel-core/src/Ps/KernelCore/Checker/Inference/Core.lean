@@ -483,9 +483,11 @@ def psKernelInferCoreWithFuel
                         | Except.error error =>
                             Except.error error
                         | Except.ok bodyResult =>
+                            -- Return the recursively inferred type unchanged. Closing
+                            -- fresh names is semantic transport; opportunistic beta
+                            -- reduction here would need an additional soundness proof.
                             let bodyType :=
-                              psKernelExprCheapBetaReduce
-                                (Prod.fst bodyResult);
+                              Prod.fst bodyResult;
                             let closedBody :=
                               psKernelExprAbstractFVars
                                 bodyType

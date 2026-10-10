@@ -2370,7 +2370,7 @@ inductive PsKernelTypingJudgment
           name
           domain
           (psKernelExprAbstractFVars
-            (psKernelExprCheapBetaReduce bodyType)
+            bodyType
             (List.cons fresh List.nil))
           binderInfo)
   | forallE

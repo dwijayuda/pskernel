@@ -1040,8 +1040,7 @@ theorem psKernelCheckedInferenceCoreConfigurationSound_contract
                                 hChildConfig
                                 hBody
                             let bodyType :=
-                              psKernelExprCheapBetaReduce
-                                rawBodyType
+                              rawBodyType
                             let closedBody :=
                               psKernelExprAbstractFVars
                                 bodyType

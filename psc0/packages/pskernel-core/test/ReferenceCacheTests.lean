@@ -13,6 +13,49 @@ private def cachesEmpty (s : PsKernelCheckerState) : Bool :=
   mapEmpty s.inferOnly && mapEmpty s.checkedInfer && mapEmpty s.whnfCore &&
   mapEmpty s.whnf && mapEmpty s.unfold && pairEmpty s.success && pairEmpty s.failure
 
+/-- Inference may retain beta redexes in a lambda's result type. Public
+declaration checking must compare that type with the user's stated type by
+ordinary conversion, under either semantic-cache policy. -/
+private def checkLambdaTypeTransport (policy : PsKernelSemanticCachePolicy)
+    (level : PsKernelLevel) (tag : String) : IO Unit := do
+  let c := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let p := PsKernelExpr.sort level
+  let P := PsKernelName.str .anonymous "P"
+  let Q := PsKernelName.str .anonymous "Q"
+  let h := PsKernelName.str .anonymous "h"
+  let idType := PsKernelExpr.lam Q p (.bvar 0) .default
+  let domain := PsKernelExpr.app idType (.bvar 0)
+  let term := PsKernelExpr.lam P p (.lam h domain (.bvar 0) .default) .default
+  let unreduced := PsKernelExpr.forallE P p
+    (.forallE h domain (.app idType (.bvar 1)) .default) .default
+  let reduced := PsKernelExpr.forallE P p
+    (.forallE h (.bvar 0) (.bvar 1) .default) .default
+  match @psKernelCheckerCheck policy 4096 c psKernelCheckerStateEmpty term with
+  | .error e => throw (IO.userError (tag ++ ": checked inference failed: " ++ e))
+  | .ok (actual, _) =>
+      require (psKernelExprEq actual unreduced)
+        (tag ++ ": lambda inference changed its recursively inferred body type")
+      match @psKernelIsDefEq policy 4096 c psKernelCheckerStateEmpty actual reduced with
+      | .ok (true, _) => pure ()
+      | _ => throw (IO.userError (tag ++ ": retained type did not convert to declared type"))
+  match @psKernelCheckerInfer policy 4096 c psKernelCheckerStateEmpty term with
+  | .ok (actual, _) =>
+      require (psKernelExprEq actual unreduced) (tag ++ ": infer-only result drift")
+  | .error e => throw (IO.userError (tag ++ ": infer-only failed: " ++ e))
+  let session := PsKernelKernelSession.mk psKernelEnvironmentEmpty
+    { psKernelResourcePolicyDefault with fuel := 4096 } psKernelProviderDefault
+  let definition : PsKernelDefinitionInfo :=
+    { base := { name := .str .anonymous tag, levelParams := [], type := reduced },
+      value := term, hints := .regular 0, safety := .safe }
+  match @psKernelV1AdmitDeclaration policy session (.definitionDecl definition) with
+  | .ok _ => pure ()
+  | .error _ => throw (IO.userError (tag ++ ": valid converted declaration rejected"))
+  let impossible := PsKernelExpr.forallE P p (.bvar 0) .default
+  match @psKernelV1AdmitDeclaration policy session
+      (.definitionDecl { definition with base := { definition.base with type := impossible } }) with
+  | .error (.rejectedInvalid _) => pure ()
+  | _ => throw (IO.userError (tag ++ ": invalid all-types inhabitant was not rejected"))
+
 def main : IO Unit := do
   let c := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
   let p := PsKernelExpr.sort .zero
@@ -80,4 +123,9 @@ def main : IO Unit := do
   match psKernelReferenceCheckExpression stopped [] .safe identity with
   | .error (.resourceExhausted .fuel _) => pure ()
   | _ => throw (IO.userError "reference lost the resource-exhaustion boundary")
+  checkLambdaTypeTransport psKernelCachedCachePolicy .zero "lambdaPropCached"
+  checkLambdaTypeTransport psKernelReferenceCachePolicy .zero "lambdaPropReference"
+  checkLambdaTypeTransport psKernelCachedCachePolicy (.succ .zero) "lambdaTypeCached"
+  checkLambdaTypeTransport psKernelReferenceCachePolicy (.succ .zero) "lambdaTypeReference"
+  IO.println "PSKERNEL_LAMBDA_TYPE_TRANSPORT: PASS modes=2 regimes=2 checked=4 inferOnly=4 conversion=4 validAdmission=4 invalidAdmission=4"
   IO.println "PSKERNEL_REFERENCE_TESTS: PASS poison=3 dependent-binders=1 admission=3 resource=1"

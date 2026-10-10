@@ -2,11 +2,11 @@ import Ps.KernelCore.Metatheory.SemanticReferenceBinders
 import Ps.KernelCore.Metatheory.SemanticFunctionValidity
 
 /-!
-The actual checked lambda branch. In particular, this records cheap beta
-reduction of the inferred body type and closing the allocator's fresh name.
-Unlike forall inference, lambda inference does not visit a body-sort check.
-Consequently the model bridge keeps body-type reduction preservation and the
-proof-valued fibre obligation explicit; neither is invented from a sort visit.
+The actual checked lambda branch closes the allocator's fresh name in the
+recursively inferred body type without applying an extra beta-reduction pass.
+The model bridge therefore needs no body-type reduction-preservation premise.
+Unlike forall inference, lambda inference does not visit a body-sort check;
+the proof-valued fibre obligation remains explicit.
 -/
 namespace PsKernelSemantics.Reference
 
@@ -32,7 +32,7 @@ structure LambdaTrace (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOp
     (psKernelExprInstantiate1 b (.fvar (psKernelCheckerStateFreshName domainSortState n).1))
     false = .ok (bodyType, bodyState)
   resultEq : result = .forallE n A
-    (psKernelExprAbstractFVars (psKernelExprCheapBetaReduce bodyType)
+    (psKernelExprAbstractFVars bodyType
       [(psKernelCheckerStateFreshName domainSortState n).1]) bi
   stateEq : next = psKernelCheckerStateExitLocalScope
     (psKernelCheckerStateFreshName domainSortState n).2 bodyState
@@ -89,31 +89,27 @@ open ConLeche ConLeche.SetTheory ConLeche.SetModel SetModel AnnotatedExpr
 universe w
 variable {V : Type w} [SetTheory V]
 
-/-- The actual returned type has a reading if the observed opened body is
-typed, its cheap-beta type reduction preserves meaning, and the selected
-lambda regime has truth-valued fibres when zero. Recursive checker validity,
-reduction preservation and regime selection remain explicit obligations. -/
+/-- Closing the actual inferred body type has a model directly. No separate
+normalization result or preservation assumption is needed. Recursive body
+typing, hereditary validity and the selected annotation's proof-valued fibres
+remain explicit obligations of joint checker soundness. -/
 theorem lambda_trace_model_from_visits
     (M : Reading V) (Γ : List AnnotatedExpr)
     (remaining : Nat) (whnf : InferOperation) (defeq : DefEqOperation)
     (c : PsKernelCheckerContext) (s next : PsKernelCheckerState)
-    (n : PsKernelName) (A b U C : AnnotatedExpr) (bi : PsKernelBinderInfo)
+    (n : PsKernelName) (A b U : AnnotatedExpr) (bi : PsKernelBinderInfo)
     (result : PsKernelExpr) (v : PsKernelLevel)
     (trace : LambdaTrace remaining whnf defeq c s n A.erase b.erase bi result next)
     (hU : U.erase = trace.bodyType)
-    (hC : C.erase = psKernelExprCheapBetaReduce U.erase)
-    (scopedC : C.Scoped 0)
+    (scopedU : U.Scoped 0)
     (fresh : Fresh (psKernelCheckerStateFreshName trace.domainSortState n).1 b)
     (bodyTyped : ∀ ρ, Satisfies M Γ ρ → ∀ x, x ∈ˢ interp M ρ A →
       interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x)
           ρ (inst (.fvar (psKernelCheckerStateFreshName trace.domainSortState n).1) b 0) ∈ˢ
         interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ U)
-    (typeReduction : ∀ ρ, Satisfies M Γ ρ → ∀ x, x ∈ˢ interp M ρ A →
-      interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ U =
-        interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ C)
     (truthValues : M.level v = 0 → ∀ ρ, Satisfies M Γ ρ →
       ∀ x, x ∈ˢ interp M ρ A →
-        interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ C ∈ˢ
+        interp (M.withFree (psKernelCheckerStateFreshName trace.domainSortState n).1 x) ρ U ∈ˢ
           (univ 0 : V))
     (domainValid : ∀ ρ, Satisfies M Γ ρ → FunctionValid M ρ A)
     (bodyValid : ∀ ρ, Satisfies M Γ ρ → ∀ x, x ∈ˢ interp M ρ A →
@@ -136,24 +132,23 @@ theorem lambda_trace_model_from_visits
     exact interp_withFree_fresh M b name fresh x (extend x ρ)
   have typed (ρ : Nat → V) (hρ : Satisfies M Γ ρ)
       (x : V) (hx : x ∈ˢ interp M ρ A) :
-      interp M (extend x ρ) b ∈ˢ interp M (extend x ρ) (close name C 0) := by
-    rw [abstractFVar_closed_input M C name scopedC ρ x]
-    rw [← typeReduction ρ hρ x hx, ← opened ρ x]
+      interp M (extend x ρ) b ∈ˢ interp M (extend x ρ) (close name U 0) := by
+    rw [abstractFVar_closed_input M U name scopedU ρ x, ← opened ρ x]
     exact bodyTyped ρ hρ x hx
-  refine ⟨.lam n A b bi v, .forallE n A (close name C 0) bi v, rfl, ?_, ?_, ?_⟩
-  · change PsKernelExpr.forallE n A.erase (close name C 0).erase bi = result
-    rw [erase_abstractFVar, hC, hU]
+  refine ⟨.lam n A b bi v, .forallE n A (close name U 0) bi v, rfl, ?_, ?_, ?_⟩
+  · change PsKernelExpr.forallE n A.erase (close name U 0).erase bi = result
+    rw [erase_abstractFVar, hU]
     exact trace.resultEq.symm
   · intro ρ hρ
     exact lamR_mem (typed ρ hρ)
   · intro ρ hρ
     refine ⟨domainValid ρ hρ, ?_,
-      (fun x => interp M (extend x ρ) (close name C 0)), typed ρ hρ, ?_⟩
+      (fun x => interp M (extend x ρ) (close name U 0)), typed ρ hρ, ?_⟩
     · intro x hx
       exact (functionValid_open_fresh M b name fresh x ρ).mp (bodyValid ρ hρ x hx)
     · intro hz x hx
-      change interp M (extend x ρ) (close name C 0) ∈ˢ (univ 0 : V)
-      rw [abstractFVar_closed_input M C name scopedC ρ x]
+      change interp M (extend x ρ) (close name U 0) ∈ˢ (univ 0 : V)
+      rw [abstractFVar_closed_input M U name scopedU ρ x]
       exact truthValues hz ρ hρ x hx
 
 end PsKernelSemantics.Reference

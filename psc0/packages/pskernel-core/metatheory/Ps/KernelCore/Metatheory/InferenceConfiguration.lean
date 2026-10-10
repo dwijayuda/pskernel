@@ -471,7 +471,7 @@ theorem psKernelInferOnlyCoreConfigurationPreserves_contract
                 | ok bodyRun =>
                     rcases bodyRun with ⟨rawBodyType, bodyState⟩
                     let bodyType :=
-                      psKernelExprCheapBetaReduce rawBodyType
+                      rawBodyType
                     let closedBody :=
                       psKernelExprAbstractFVars
                         bodyType

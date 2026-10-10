@@ -1,4 +1,5 @@
 import Ps.KernelCore.Metatheory.SemanticReference
+import Ps.KernelCore.Metatheory.SemanticReferenceBinders
 import Lean
 import Ps.KernelCore.Metatheory.SemanticSortInference
 import Ps.KernelCore.Metatheory.SemanticContext
@@ -24,6 +25,14 @@ in theorem statements and documented in RESEARCH_AND_MIGRATION.md.
 open Lean Elab Command in
 run_cmd do
   let targets : Array Name := #[
+    ``PsKernelSemantics.SetModel.annotationValid_forall_of_sort,
+    ``PsKernelSemantics.SetModel.annotationValid_liftN,
+    ``PsKernelSemantics.SetModel.annotationValid_inst,
+    ``PsKernelSemantics.SetModel.annotationValid_inst_zero,
+    ``PsKernelSemantics.SetModel.annotationValid_instLevels,
+    ``PsKernelSemantics.SetModel.forged_product_annotation_invalid,
+    ``PsKernelSemantics.Reference.inferCore_forall_trace,
+    ``PsKernelSemantics.Reference.forall_trace_has_model,
     ``psKernelReferenceCacheGet_miss,
     ``psKernelReferenceCacheInsert_noop,
     ``psKernelReferenceCacheContains_miss,

@@ -1,5 +1,7 @@
 # PSCV P1-H — Imported declaration types and origin modules
 
+**Qualified observation:** [run 38058186775](https://github.com/dwijayuda/pskernel/actions/runs/38058186775), all four jobs successful at `f5a5322db8f9493df6be27a425239cd5e5f6d43c`. Eleven imported declaration types and module names checked; fingerprint `8246970bdb3a79da9879bca1b191c5ddcd552589a54e4ef11a33cca6447925c5`. [Evidence](pscv-p1h-qualification-2026-10-10.json). Exact module names occur in `Init.Prelude` (9 entries), `Init.Data.String.Defs` (1), and `Init.Data.Int.Basic` (1), **not yet source-blob/line matches**.
+
 P1-G established a complete normative **194-ID** review ledger and attached
 seven paired Lean typeclass observations. P1-H inspects the actual Lean
 4.35.0-rc3 imported constant declarations selected in those observations.

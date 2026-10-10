@@ -28,12 +28,12 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate coherent readings and complete application invariants
+      - name: Validate annotation transport through simultaneous substitution and spines
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
-          lake build Ps.KernelCore.Metatheory.SemanticCoherentValidity Ps.KernelCore.Metatheory.SemanticReferenceApplication
+          lake build Ps.KernelCore.Metatheory.SemanticAnnotatedSpines
           npm run test:proofs
       - name: Run model-independent annotated syntax checks
         if: ${{ !cancelled() }}

@@ -27,7 +27,11 @@ if(!match)throw Error('PSC_PSCV_BOOL_AUDIT_GIT_TREE');
 const blob=execFileSync('git',['-C',sourceDirectory,'cat-file','blob',match[1]],{
   timeout:15000,maxBuffer:8*1024*1024,
 }).toString('utf8');
-const norm=git(root,'show','HEAD:pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md');
+// Git blob bytes MUST retain their final newline. The helper above trims
+// command output only for git rev-parse/ls-tree identity lines.
+const norm=execFileSync('git',[
+  '-C',root,'show','HEAD:pscv0/PROOFSCRIPT_PSCV_LANGUAGE_REFERENCE.md',
+],{encoding:'utf8',timeout:15000,maxBuffer:2*1024*1024});
 const ambient=JSON.parse(await readFile(rawAmbientPath,'utf8'));
 const worksheet=JSON.parse(await readFile(requiredSurfacePath,'utf8'));
 const report=auditDirectBooleanMapping({

@@ -161,3 +161,7 @@ Proceed with a genuinely Lean-semantic G8: full universe-level equivalence (incl
 ## G9 theorem-backed *positive* root-level universe equivalence candidate
 
 `Level.simplifyTop` rewrites four universally valid root identities: `imax u 0` -> 0, `imax 0 u` -> u, `max 0 u` -> u and `max u 0` -> u. `Level.quickEquivalent` returns true only if simplified syntactic levels match. New `Level.simplifyTop_evalAt` and `Level.quickEquivalent_sound` theorems are intended to prove such **positive** matches have equal meanings under all valuations. Only Sort-vs-Sort equality in the tiny **partial** checker uses this shortcut; all other types use the previous conservative structural rule. G9 must pass the new fully rooted proof/module and runtime gate before being called validated. This is not a complete Lean universe constraint/equivalence algorithm.
+
+### G9 first CI failure — unproved obligations, not accepted
+
+[Run 38096140397](https://github.com/dwijayuda/pskernel/actions/runs/38096140397), source `27934ad2a7488f8dbba01da3f53a62c00f2306e9`: runtime modules compiled, but the proof module failed at uncovered `imax` constructor arithmetic goals and use of an unavailable `by_contra` tactic. No runtime quick-equality acceptance is qualified. The new proof uses explicit unfolding of `Level.evalAt` for the root constructor cases and ordinary `by_cases`/contradiction reasoning for equality of normal forms. No new axiom, admitted theorem, or change to the proposed equality rule. Revalidate the exact replacement source.

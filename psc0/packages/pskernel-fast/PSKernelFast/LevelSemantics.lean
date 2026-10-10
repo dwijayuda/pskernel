@@ -68,9 +68,9 @@ theorem Level.simplifyTop_evalAt
   | param _ => rfl
   | mvar _ => rfl
   | max a b =>
-      cases a <;> cases b <;> simp [Level.simplifyTop]
+      cases a <;> cases b <;> simp [Level.simplifyTop, Level.evalAt]
   | imax a b =>
-      cases a <;> cases b <;> simp [Level.simplifyTop]
+      cases a <;> cases b <;> simp [Level.simplifyTop, Level.evalAt]
 
 /--
 An affirmative quick comparison implies equal numeric valuations universally.
@@ -81,8 +81,12 @@ theorem Level.quickEquivalent_sound
     (h : a.quickEquivalent b = true) :
     a.evalAt ρ = b.evalAt ρ := by
   have hEq : a.simplifyTop = b.simplifyTop := by
-    by_contra hNe
-    simp [Level.quickEquivalent, hNe] at h
+    by_cases hSame : a.simplifyTop = b.simplifyTop
+    · exact hSame
+    · have hFalse : a.quickEquivalent b = false := by
+        simp [Level.quickEquivalent, hSame]
+      rw [hFalse] at h
+      cases h
   calc
     a.evalAt ρ = a.simplifyTop.evalAt ρ := (Level.simplifyTop_evalAt ρ a).symm
     _ = b.simplifyTop.evalAt ρ := by rw [hEq]

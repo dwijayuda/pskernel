@@ -1,3 +1,13 @@
+# PSCV source/instance assurance progress — qualified imported arithmetic witnesses
+
+## PSCV P1 arithmetic instance-resolution progress (P1-J–P1-M)
+
+The P1-J–P1-M draft stack implements a source-derived typeclass evidence route from exact PSCV-RC-v2 Standard requirements without modifying the portable compiler: **42** normative arithmetic rows, **84** actual pinned Lean4.35rc3 typed class queries, **45** distinct selected declaration types, **7** immutable upstream source module blobs, and **42** explicit concrete-dictionary-to-generic-instance applications typechecked in Lean. P1-J, P1-K, P1-L and P1-M each passed all four respective Linux/Windows/actual-Lean cloud jobs. The current source-qualified [P1-M PR108](https://github.com/dwijayuda/pskernel/pull/108) records exact artifacts and identity digests in [P1-M qualification JSON](docs/platform/pscv-p1m-qualification-2026-10-10.json).
+
+**These are imported-Lean observations, not closed PSCV Standard approval.** The three prior direct Boolean source-location IDs remain the only specifically located required IDs; **191 normative IDs are unresolved**. Source-to-Core elaboration, closed scope/priority/tie instance selection, effect/WP and prover registries, runtime/backends and verification-condition completeness remain separate evidence gates. No `PSCV-CERT-v1`, `VerifiedExecutableModule` or verified executable can be emitted. The selected native kernel provider, 62-module self-host compiler, TypeScript7 toolchain, source seed, npm release and production certificate refusal remain unchanged.
+
+---
+
 # PSCV P1-F concrete typeclass witness checkpoint
 
 **Qualified P1-F source:** `d8a8e2a9b5d4ab2294316af74671a02af1815ce0`. [Run 38056463990](https://github.com/dwijayuda/pskernel/actions/runs/38056463990), attempt 1, all four jobs passed: Linux Node22/Node26, Windows Node26 unit and negative review, plus real pinned Lean 4.35.0-rc3 synthesis/typechecking. Seven selected terms: `instAddNat`, `instMulNat`, `instSubNat`, `Int.instAdd`, `instDecidableEqNat`, `instDecidableEqBool`, `instAppendString`. Non-authoritative evidence SHA256 `215f6e60a0319320690035dbbfa34deb812c53466f53f6dd8892daa99757cc29`; [artifact 11670981656](https://github.com/dwijayuda/pskernel/actions/runs/38056463990/artifacts/11670981656), ZIP SHA256 `fb38e67c7eb9cdf9dd26ba17eb0b7f910f35c42c4641aed25e4d3e47e777237a`.

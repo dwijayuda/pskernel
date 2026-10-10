@@ -1,0 +1,117 @@
+name: PSC0 PSCV P1M exact generic concrete dictionary applications
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1m-dictionary-applications-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1l-batch-source-provenance-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Exact batch dictionary source/refusal tests
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/explicit-dictionary-edges.mjs
+          node --check packages/pscv/scripts/explicit-dictionary-edges.mjs
+          node --test packages/pscv/test/explicit-dictionary-edges.test.mjs
+      - name: Compiler/Core/seed/release/certificate gate unchanged
+        shell: bash
+        run: |
+          git diff --exit-code e4696b54a460204b35e8686a7e1041b48bb7d652 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+
+  real-Lean-explicit-applications:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Rebuild source-derived typeclass observations and typecheck explicit dictionary edges
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1m-dictionaries
+          node ../psc0/packages/pscv/scripts/arithmetic-surface-batch.mjs generate \
+            ../psc0/dist/pscv-p1m-dictionaries/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1m-dictionaries/plan.json
+          lake env lean ../psc0/dist/pscv-p1m-dictionaries/ArithmeticBatch.lean \
+            > ../psc0/dist/pscv-p1m-dictionaries/transcript.txt 2>&1
+          node ../psc0/packages/pscv/scripts/explicit-dictionary-edges.mjs generate \
+            ../psc0/dist/pscv-p1m-dictionaries/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1m-dictionaries/transcript.txt \
+            ../psc0/dist/pscv-p1m-dictionaries/ExplicitDictionaryEdges.lean \
+            ../psc0/dist/pscv-p1m-dictionaries/candidates.json
+          if ! lake env lean ../psc0/dist/pscv-p1m-dictionaries/ExplicitDictionaryEdges.lean \
+              > ../psc0/dist/pscv-p1m-dictionaries/typecheck-output.txt 2>&1; then
+            sed -n '1,100p' ../psc0/dist/pscv-p1m-dictionaries/typecheck-output.txt
+            exit 1
+          fi
+          node ../psc0/packages/pscv/scripts/explicit-dictionary-edges.mjs review \
+            ../psc0/dist/pscv-p1m-dictionaries/ArithmeticBatch.lean \
+            ../psc0/dist/pscv-p1m-dictionaries/transcript.txt \
+            ../psc0/dist/pscv-p1m-dictionaries/ExplicitDictionaryEdges.lean \
+            ../psc0/dist/pscv-p1m-dictionaries/typecheck-output.txt \
+            ../psc0/dist/pscv-p1m-dictionaries/checked-edges.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {readFile} from 'node:fs/promises';
+          const x=JSON.parse(await readFile('../psc0/dist/pscv-p1m-dictionaries/checked-edges.json','utf8'));
+          assert.equal(x.testedArithmeticSurfaceRows,42);
+          assert(x.attemptedExplicitApplications>0);
+          assert.equal(x.attemptedExplicitApplications+x.excludedSpecializedGenericInstances,42);
+          assert.equal(x.closedStandardQualified,false);
+          assert.equal(x.certificateAuthorized,false);
+          console.log('PSC_P1M_IMPORTED_DICTIONARY_APPLICATIONS_CHECKED_NOT_STANDARD: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1m-explicit-dictionary-edges-${{ github.sha }}
+          path: psc0/dist/pscv-p1m-dictionaries
+          if-no-files-found: error
+          retention-days: 30

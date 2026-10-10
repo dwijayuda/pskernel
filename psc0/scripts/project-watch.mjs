@@ -1,4 +1,3 @@
-import { watch } from 'node:fs';
 import { readFile, realpath, lstat, readdir } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -39,10 +38,11 @@ async function identity(projectRoot, downstream) {
 }
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-// On the qualified Windows Node22/26 toolchains, libuv fs_event can terminate
-// the process on 8.3/long-path alias notifications (not a catchable JS error).
-// Avoid fs.watch entirely on Windows. This bounded, content-hash polling is an
-// event hint only: the separately authenticated build owns actual freshness,
+// Recursive fs.watch can traverse transient publisher-owned output directories
+// while they are being removed (observed on Linux Node22); Windows Node22/26
+// additionally hit a fatal libuv fs_event assertion on aliased paths.
+// A bounded, content-hash polling scheduler avoids both watcher races.
+// Its signature is only an edit hint: the separately authenticated build owns actual freshness,
 // kernel admission and publication. Its limits are development ergonomics,
 // never grounds for accepting a generation.
 async function pollWatchInputSignature({ root, sourceDirectory, extensionRoot, downstream }) {
@@ -68,8 +68,15 @@ async function pollWatchInputSignature({ root, sourceDirectory, extensionRoot, d
   };
   async function scan(directory, depth) {
     if (depth > 16 || ++directories > 512) fail('PSC_DEV_WATCH_POLL_LIMIT');
-    for (const item of await readdir(directory, { withFileTypes: true })) {
-      if (['.git', 'node_modules'].includes(item.name)) continue;
+    let items;
+    try { items = await readdir(directory, { withFileTypes: true }); }
+    catch (error) {
+      if (depth > 0 && error?.code === 'ENOENT') return; // raced an editor's rename
+      throw error;
+    }
+    for (const item of items) {
+      if (['.git', 'node_modules', '.psc-output-lock'].includes(item.name) ||
+          /^\.psc-(?:target|stage)-/u.test(item.name)) continue;
       const location = path.join(directory, item.name);
       const relative = path.relative(sourceDirectory, location).split(path.sep).join('/');
       if (item.isSymbolicLink()) {
@@ -77,7 +84,11 @@ async function pollWatchInputSignature({ root, sourceDirectory, extensionRoot, d
       } else if (item.isDirectory()) {
         await scan(location, depth + 1);
       } else if (/\.(?:ps|lean)$/u.test(item.name)) {
-        await add('source:' + relative, location);
+        try { await add('source:' + relative, location); }
+        catch (error) {
+          if (error?.code === 'ENOENT') inputs.push(['source:' + relative, null]);
+          else throw error;
+        }
       }
     }
   }
@@ -184,7 +195,6 @@ export async function watchCheckedProject({
   }
   if (signal?.aborted) fail('PSC_DEV_WATCH_CANCELLED');
   const downstream = typeof runDownstream === 'function';
-  const watchers = [];
   let generation = 0, timer, periodic, pollTimer, current, running = false, stopped = false;
   let lastAccepted, lastIdentity, stopError;
   let finish, rejectFinish;
@@ -198,7 +208,6 @@ export async function watchCheckedProject({
     stopped = true; stopError = error;
     clearTimeout(timer); clearInterval(periodic); clearInterval(pollTimer);
     signal?.removeEventListener('abort', onAbort);
-    for (const watcher of watchers) watcher.close();
     current?.abort(new Error('PSC_DEV_WATCH_STOPPED'));
     if (!running) conclude();
   }
@@ -282,13 +291,6 @@ export async function watchCheckedProject({
         !inside(await realpath(root), await realpath(sourceDirectory))) {
       fail('PSC_DEV_WATCH_DIRECTORY_LINK');
     }
-    function attach(directory, kind, recursive) {
-      const watcher = watch(directory, { recursive }, (event, filename) => {
-        if (relevantWatchEvent(kind, filename, downstream)) request('filesystem-' + kind);
-      });
-      watcher.on('error', error => stop(new Error('PSC_DEV_WATCH_FILESYSTEM: ' + error.message)));
-      watchers.push(watcher);
-    }
     if (extensionRoot) {
       const extensionInfo = await lstat(extensionRoot);
       if (!extensionInfo.isDirectory() || extensionInfo.isSymbolicLink() ||
@@ -296,7 +298,7 @@ export async function watchCheckedProject({
         fail('PSC_DEV_WATCH_EXTENSION_ROOT');
       }
     }
-    if (process.platform === 'win32') {
+    {
       const inputs = { root, sourceDirectory, extensionRoot, downstream };
       let observed = await pollWatchInputSignature(inputs);
       let polling = false;
@@ -310,14 +312,9 @@ export async function watchCheckedProject({
         }).catch(error => stop(new Error('PSC_DEV_WATCH_POLL: ' + error.message)))
           .finally(() => { polling = false; });
       }, 110);
-    } else {
-      attach(sourceDirectory, 'source', true);
-      attach(root, 'project', false);
-      if (extensionRoot) attach(extensionRoot, 'extension', false);
     }
-    // A periodic freshness check reduces reliance on a platform's watcher
-    // delivery for already accepted inputs. Unseen new imports still require
-    // an event; this is not a guarantee of instantaneous filesystem knowledge.
+    // Recheck previously admitted source snapshots independently of polling.
+    // New imports appear in the polling signature, but detection is not instantaneous.
     periodic = setInterval(() => {
       if (running || stopped || !lastIdentity || generation !== lastAccepted) return;
       void watchReceiptCurrent({

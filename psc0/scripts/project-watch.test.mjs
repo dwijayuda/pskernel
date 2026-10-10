@@ -186,3 +186,30 @@ test('child launcher uses no shell, keeps bounded output, and reports failure', 
   controller.abort();
   await assert.rejects(request, /PSC_DEV_WATCH_CANCELLED/u);
 });
+
+test('publisher-owned temporary directories are ignored by the bounded content scanner', async t => {
+  const p = await fixture(t);
+  const controller = new AbortController();
+  t.after(() => controller.abort());
+  const states = [];
+  const monitoring = watchCheckedProject({
+    projectRoot: p.root, entryPath: p.entry, signal: controller.signal, debounceMs: 30,
+    runBuild: async signal => {
+      signal.throwIfAborted();
+      return receipt([p.quantity, p.entry]);
+    },
+    onStatus: value => states.push(value),
+  });
+  await until(() => states.some(x => x.state === 'ready'), 'initial polling accepted');
+  const outputLock = path.join(p.sourceDir, '.psc-output-lock');
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await mkdir(outputLock, { recursive: true });
+    await writeFile(path.join(outputLock, 'fake.ps'), 'not part of source closure');
+    await delay(45);
+    await rm(outputLock, { recursive: true, force: true });
+  }
+  await delay(450);
+  assert.equal(states.filter(x => x.state === 'ready').length, 1);
+  assert.equal(states.filter(x => x.state === 'rejected').length, 0);
+  controller.abort(); await monitoring;
+});

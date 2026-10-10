@@ -27,11 +27,11 @@ def main (cliArgs : List String) : IO Unit := do
 
   if mode != "reference" && mode != "closure" then
     throw (IO.userError "mode must be reference or closure")
-  if depth == 0 || depth > 96 || repetitions == 0 || repetitions > 10000 then
+  if depth == 0 || depth > 96 || repetitions == 0 || repetitions > 50000 then
     throw (IO.userError "out-of-range diagnostic parameters")
 
   let leaves : Array RawExpr :=
-    (List.range 16).toArray.map (fun i =>
+    (List.range 128).toArray.map (fun i =>
       .const (.num (Name.simple "leaf") i) [])
   let inputs := leaves.map (makeWorkload depth)
   let fuel := 16 * depth + 128

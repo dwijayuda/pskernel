@@ -36,7 +36,7 @@ jobs:
             for sample in 1 2 3; do
               echo "MEASUREMENT mode=$mode sample=$sample"
               /usr/bin/time -f "COST mode=$mode sample=$sample elapsed_s=%e peak_rss_kb=%M" \
-                .lake/build/bin/pskernel_fast_bench "$mode" 24 1200 \
+                .lake/build/bin/pskernel_fast_bench "$mode" 64 25000 \
                 >> metrics.txt 2>&1
             done
           done
@@ -48,7 +48,7 @@ jobs:
           results = {}
           checksums = {}
           for line in lines:
-              m = re.search(r"mode=(reference|closure) depth=24 iterations=1200 checksum=(\d+)", line)
+              m = re.search(r"mode=(reference|closure) depth=64 iterations=25000 checksum=(\d+)", line)
               if m:
                   checksums.setdefault(m[1], []).append(int(m[2]))
               m = re.search(r"COST mode=(reference|closure) sample=(\d+) elapsed_s=([\d.]+) peak_rss_kb=(\d+)", line)

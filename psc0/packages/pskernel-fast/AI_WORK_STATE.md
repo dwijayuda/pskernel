@@ -123,3 +123,9 @@ Benchmarking and large-corpus conformance remain separate from G5 correctness an
 ### G6 first cloud attempt — failed benchmark CLI API, not semantic regression
 
 [Run 38095463586](https://github.com/dwijayuda/pskernel/actions/runs/38095463586), source `de38c283e8e1ed22f9ba724f7c92506100c988f6`, failed compiling `Bench.lean`: `IO.getArgs` is not a constant in pinned Lean 4.35.0-rc4. All evaluator/quote/source modules built. Changed only CLI input to Lean's supported `main (cliArgs : List String)` signature. Do not claim benchmark data before re-running the corrected source and recording its measurements.
+
+### G6 first measurement — completed, insufficient precision
+
+[Run 38095544825](https://github.com/dwijayuda/pskernel/actions/runs/38095544825), source `f99c2aaf2ddb4784ffdf9168a1327b05f37ce12b` passed the benchmark and checksum tests. Three substitution and three closure-reification samples all reported elapsed time **0.00 s** at GNU time's 0.01-second resolution, with identical checksum 10,200. Median peak RSS (whole process) was 9,608 KB substitution and 9,664 KB closure, differences too small to interpret at this scale. This is **NOT sufficient timing evidence to rank algorithms or report a speedup**.
+
+The matched workload has been expanded from depth 24 / 1,200 evaluations / 16 unique leaves to depth 64 / 25,000 evaluations / 128 unique leaves, keeping the same exact normalization output checks and measured process type. Record the subsequent cloud run separately, even if the result is slower or times out. Input construction still occurs outside the timed loop; prototype evaluator costs include closure quoting.

@@ -31,7 +31,7 @@ const exact=(x,keys)=>x!==null&&typeof x==='object'&&
 export function literalInstanceLineCandidates(text,name) {
  if(typeof text!=='string'||typeof name!=='string'||name.length>100)
   fail('LOCATOR_ARGUMENTS');
- const escaped=name.replace(/[.*+?^${}()|[\]\\]/gu,'\\export function reviewPinnedLeanSource(');
+ const escaped=name.replace(/[.*+?^${}()|[\]\\]/gu,'\\$&');
  const expression=new RegExp('^\\s*instance\\s+'+escaped+'(?=\\s|\\[|:|\\()','u');
  return text.split('\n').flatMap((line,i)=>expression.test(line)?[i+1]:[]);
 }

@@ -256,6 +256,7 @@ async function bundleVariant(variant,compiler) {
     explicitlyNotBundled:['typescript',...optionalNames.map(outname)],
     sourceCommit:process.env.GITHUB_SHA||'unknown',
     packageNames:names.map(outname),
+    testedThirdPartyNpmLibrary:true,
     sourceConversion:{translated:conversions.reduce((s,x)=>s+x.translated,0),
       preservedLean:conversions.reduce((s,x)=>s+x.preservedLean,0),
       exceptions:conversions.flatMap(x=>x.exceptions.map(e=>({package:x.package,...e})))},
@@ -277,6 +278,17 @@ async function bundleVariant(variant,compiler) {
   const cli=join(prefix,'lib','node_modules','proofscript','bin','psc.js');
   if(!existsSync(cli))throw Error('PSC_NPM_GLOBAL_BIN_MISSING');
   run(process.execPath,[cli,'version','--json'],root,{timeout:120000});
+  const installedCore=join(prefix,'lib','node_modules','proofscript','node_modules','@proofscript');
+  for(const name of coreNames){
+    if(!existsSync(join(installedCore,name)))throw Error('PSC_NPM_CORE_MODULE_MISSING: '+name);
+  }
+  for(const name of optionalNames){
+    if(existsSync(join(installedCore,name))||
+      existsSync(join(prefix,'lib','node_modules','@proofscript',name))){
+      throw Error('PSC_NPM_OPTIONAL_MODULE_BUNDLED: '+name);
+    }
+  }
+  console.log('PSC_NPM_MINIMAL_GLOBAL_INSTALL: PASS '+coreNames.length+' required, '+optionalNames.length+' absent');
   const example=join(target,'canary-project');
   await mkdir(example,{recursive:true});
   const ext=variant==='ps'?'.ps':'.lean';
@@ -290,11 +302,14 @@ async function bundleVariant(variant,compiler) {
   const negative=spawnSync(process.execPath,[cli,'build','IllTyped'+ext,'--out','Bad.js'],{
     cwd:example,encoding:'utf8',timeout:120000});
   if(negative.status===0||existsSync(join(example,'Bad.js'))) throw Error('PSC_NPM_FAILED_OPEN_ON_BAD_SOURCE');
+  run(process.execPath,['scripts/npm-library-canary.mjs',variant,join(target,'thirdparty-canary'),cli],
+    root,{timeout:480000});
   const files=await Promise.all([rootTgz,...packages,...toolchains].map(async f=>({
     name:basename(f),sha256:hash(await readFile(f)),bytes:(await stat(f)).size,
   })));
   const index={...manifest,packages:files,installedCanary:{checked:true,built:true,
-      output42n:true,negativeRefusal:true},sourceType:variant};
+      output42n:true,negativeRefusal:true,thirdPartyLibrary:true,
+      optionalPackagesAbsent:true,typescriptPlatformPresent:true},sourceType:variant};
   await writeFile(join(target,'manifest.json'),JSON.stringify(index,null,2)+'\n');
   const zipName='proofscript-psc0-'+variant+'-npm-packages.zip';
   const installGuide=join(target,'INSTALL.md');

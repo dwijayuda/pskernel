@@ -1399,3 +1399,8 @@ Repository sources are pinned to the inspected commits. Workflow links identify 
 [E30]: https://www.w3.org/TR/wasm-js-api-1/
 [E31]: https://nodejs.org/download/release/v22.23.3/docs/api/worker_threads.html
 [E32]: https://webassembly.org/docs/security/
+
+
+## PSCV P1–P5 progress and promotion limits (10 October 2026)
+
+The accepted P0 [feature ownership map](docs/platform/PSCV_PROFILE_AND_PACKAGE_BOUNDARIES.md) remains in force. The qualified P1-E typed-witness observation is documented in [PSCV_P1E_TYPED_RESOLUTION.md](docs/platform/PSCV_P1E_TYPED_RESOLUTION.md); it does not freeze the Standard environment. The explicit [P1–P5 sound gates](docs/platform/PSCV_P1_TO_P5_SOUND_GATES.md) separate pure-source certification (P2) from executable backend preservation (P4). No production core/backend/bootstrap change or verified executable certification is authorized by these planning documents.

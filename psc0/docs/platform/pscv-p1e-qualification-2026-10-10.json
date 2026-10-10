@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 0,
+  "milestone": "PSC0-PSCV-P1E-OBSERVATION",
+  "branch": "psc0/platform-pscv-p1e-typed-resolution-v1",
+  "parentBranch": "psc0/platform-pscv-p1d-classes-v1",
+  "parentHead": "53f600950f2c99981530c3ebb55b20f069af2654",
+  "qualifiedSourceCommit": "07daca7e83950a5ad242369dd2f131aa7c249d86",
+  "ci": {
+    "run": 38055826619,
+    "attempt": 1,
+    "allJobsPassed": true,
+    "jobCount": 4,
+    "hostReviewPlatforms": [
+      "ubuntu-24.04-node22.23.3",
+      "ubuntu-24.04-node26.7.0",
+      "windows-2022-node26.7.0"
+    ],
+    "actualLean43RC3Synthesized": true,
+    "selectedTerms": [
+      "instHAdd",
+      "instHMul",
+      "instHSub",
+      "instHAdd",
+      "instAppendString",
+      "instBEqOfDecidableEq",
+      "instBEqOfDecidableEq"
+    ],
+    "artifactId": 11671591053,
+    "artifactZipSha256": "12d4d529be5c4783c119f0f62d485ad39e730872606c97cbb82cd90090b0a10a"
+  },
+  "reviewFingerprintSha256": "0a5cdad32ace1492158fab973a9da60d9b430ff529c71a9804e415e80efea712",
+  "normativeSnapshotIds": 194,
+  "sourceLocatedDirectBoolIds": 3,
+  "unresolvedStandardIds": 191,
+  "claims": {
+    "closedStandardEnvironment": false,
+    "exactInstanceSearchQualified": false,
+    "approvedRuntimeMapping": false,
+    "pscvCertificateIssuerAvailable": false,
+    "verifiedExecutableAuthorized": false,
+    "pscvVerified": false
+  },
+  "kernelCompilerSeedAndReleaseUnchanged": true,
+  "status": "qualified-non-authoritative-observation"
+}

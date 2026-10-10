@@ -1,0 +1,102 @@
+name: PSC0 PSCV P1E typed instance witnesses
+on:
+  push:
+    branches:
+      - psc0/platform-pscv-p1e-typed-resolution-v1
+  pull_request:
+    branches:
+      - psc0/platform-pscv-p1d-classes-v1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  review:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            node: '22.23.3'
+          - os: ubuntu-24.04
+            node: '26.7.0'
+          - os: windows-2022
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Preserve LF source bytes
+        shell: bash
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Node review checks and negative cases
+        shell: bash
+        working-directory: psc0
+        run: |
+          node --check packages/pscv/src/typed-resolution-review.mjs
+          node --check packages/pscv/scripts/generate-typed-resolution-review.mjs
+          node --test packages/pscv/test/typed-resolution-review.test.mjs
+      - name: Self-host, provider, seed, and certificate gate unchanged
+        shell: bash
+        run: |
+          git diff --exit-code 53f600950f2c99981530c3ebb55b20f069af2654 -- \
+            psc0/packages/foundation psc0/packages/syntax psc0/packages/core \
+            psc0/packages/environment psc0/packages/meta psc0/packages/elab \
+            psc0/packages/compiler psc0/packages/compiler-ir psc0/packages/bridge \
+            psc0/packages/erasure psc0/packages/backend-ts psc0/packages/bootstrap \
+            psc0/packages/pskernel-core psc0/selfhost-seed.json psc0/release \
+            psc0/scripts/checked-build.mjs psc0/scripts/pscv-certification-gate.mjs
+  lean-witness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: PSCVL
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: PSCVL
+          build: true
+          test: false
+          lint: false
+      - name: Real Lean synthesis under normative RC3 pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat lean-toolchain)" = 'leanprover/lean4:v4.35.0-rc3'
+          mkdir -p ../psc0/dist/pscv-p1e-witness
+          lake env lean TypedInstanceWitness.lean > ../psc0/dist/pscv-p1e-witness/transcript.txt 2>&1
+          echo '--- Exact Lean #synth witness output (diagnostic only) ---'
+          sed -n '1,100p' ../psc0/dist/pscv-p1e-witness/transcript.txt
+          node ../psc0/packages/pscv/scripts/generate-typed-resolution-review.mjs \
+            ../psc0/dist/pscv-p1e-witness/transcript.txt \
+            ../psc0/dist/pscv-p1e-witness/review.json
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFile } from 'node:fs/promises';
+          const data=JSON.parse(await readFile('../psc0/dist/pscv-p1e-witness/review.json','utf8'));
+          assert.equal(data.goalsObserved,7);
+          assert.equal(data.distinctStandardIds,194);
+          assert.equal(data.unresolvedStandardSnapshotIds,191);
+          assert.equal(data.mappedToClosedStandard,false);
+          assert.equal(data.standardEnvironmentFrozen,false);
+          assert.equal(data.verifiedExecutableAuthorized,false);
+          console.log('PSC_P1E_LEAN_TYPED_WITNESSES_NOT_STANDARD: PASS');
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pscv-p1e-typed-observations-${{ github.sha }}
+          path: psc0/dist/pscv-p1e-witness
+          if-no-files-found: error
+          retention-days: 30

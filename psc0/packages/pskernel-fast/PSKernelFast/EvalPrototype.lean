@@ -33,14 +33,14 @@ def whnfFuel (fuel : Nat) (view : Closure) : Except Failure Closure :=
           match env[i]? with
           | some replacement => whnfFuel remaining replacement
           | none => .error .unscopedInput
-      | .term (.letE _ value body) env =>
+      | .term (.letE _ _ value body _) env =>
           whnfFuel remaining (.term body (.term value env :: env))
       | .term (.app fn arg) env =>
           whnfFuel remaining (.app (.term fn env) (.term arg env))
       | .app fn arg =>
           match whnfFuel remaining fn with
           | .error err => .error err
-          | .ok (.term (.lam _ body) env) =>
+          | .ok (.term (.lam _ _ body _) env) =>
               whnfFuel remaining (.term body (arg :: env))
           | .ok reducedFn => .ok (.app reducedFn arg)
       | value => .ok value

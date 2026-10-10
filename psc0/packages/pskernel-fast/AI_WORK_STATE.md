@@ -71,3 +71,13 @@ Source commit `313af5514e3d5a94bcb35247d83366cc40191a3c`.
 Build a complete and precisely versioned expression/universe/name input layer, an independent reference evaluator and a closure evaluator over the same **well-scoped, well-typed** subset, then compare actual kernel-only cost and negative conformance before selecting the engine. Rewriting old proofs is not a goal and should never veto the implementation choice.
 
 Cloud policy: document-only edits should not trigger costly Lean builds; the workflow now filters on code/toolchain/CI changes only. Keep CI claims bound to exact source and workflow SHAs.
+
+## G3 expanded raw syntax (candidate, not CI-qualified)
+
+New `PSKernelFast/Name.lean`, expanded `Level.lean` and `Core.lean` represent most Lean 4.35 expression constructor *shapes*: anonymous/str/num names; free/bound/metavariables; symbolic universe levels; constants with universe parameters; application; lambda/Pi with binder information; let/nondep; Nat/String literals; metadata and projections. Metadata is still a string placeholder, **not** Lean's full MData interchange.
+
+An explicit closed-export preflight now rejects out-of-scope de Bruijn indices, expr metavariables, raw free variables and universe metavariables. Those checks do NOT establish typing, constant environment lookup, universe equivalence, positivity, or logical proof admission.
+
+G3 code remains experimental until a completed exact-source GitHub workflow run confirms build/test. The G2 toy closure evaluator is adapted to the wider constructors without granting it proof acceptance.
+
+**New acceptance requirement:** compare official Lean Expr round-trip and metadata decoding only after implementing full exact protocol; do not advertise full 4.35 expression import yet.

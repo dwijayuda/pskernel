@@ -18,8 +18,11 @@ private theorem entered_environment (context entered : PsKernelCheckerContext)
     exact (congrArg PsKernelCheckerContext.environment h).symm
   · by_cases hl : psKernelNatGt (Nat.succ context.recDepth)
         (Nat.mul context.maxRecDepth psKernelRecDepthFactor) = true
-    · simp [psKernelCheckerContextEnterRecDepth, hz, hl] at h
-    · simp only [psKernelCheckerContextEnterRecDepth, hz, hl, ite_false, Except.ok.injEq] at h
+    · simp only [psKernelCheckerContextEnterRecDepth, hz, hl,
+        Bool.false_eq_true, ite_false, ite_true] at h
+      cases h
+    · simp only [psKernelCheckerContextEnterRecDepth, hz, hl,
+        Bool.false_eq_true, ite_false, Except.ok.injEq] at h
       exact (congrArg PsKernelCheckerContext.environment h).symm
 
 theorem inferCore_const_result

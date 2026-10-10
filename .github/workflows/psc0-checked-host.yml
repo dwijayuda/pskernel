@@ -1,0 +1,101 @@
+name: PSC0 checked host and compiler preservation (fast)
+on:
+  push:
+    branches: [psc0/npm-modular-packages-v1]
+    paths:
+      - 'psc0/npm-cli/**'
+      - 'psc0/scripts/architecture-*'
+      - 'psc0/scripts/npm-host-packaging.mjs'
+      - 'psc0/scripts/checked-prepared-session*'
+      - 'psc0/scripts/check-workspace.mjs'
+      - 'psc0/packages/**'
+      - 'psc0/psconfig.json'
+      - 'psc0/selfhost-seed*.json'
+      - '.github/workflows/psc0-checked-host.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc0-checked-host-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  host:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '22.23.3'
+          - os: windows-latest
+            node: '26.7.0'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc0
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/
+            !/psc0/docs/
+            !/psc0/packages/pskernel-lean/prebuilt/
+            !/psc0/legacy/
+            /psc0/legacy/packages/pskernel-core/manifests/BUILD.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Preserve qualified compiler, language and kernel source by exact Git identity
+        run: node scripts/architecture-source-identity.mjs
+      - name: Validate complete workspace and checked-host invariants
+        run: |
+          node scripts/check-workspace.mjs
+          node --test scripts/checked-prepared-session.test.mjs scripts/architecture-host.test.mjs
+      - name: Retrieve immutable, already-qualified runtime (no rebuild)
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38075437516
+          name: proofscript-psc0-npm-ps-and-lean
+          path: ${{ runner.temp }}/psc0-runtime
+      - name: Expand source editions from the pinned artifact
+        run: |
+          python - <<'PY'
+          import os, pathlib, zipfile
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'psc0-runtime'
+          for variant in ('ps','lean'):
+              matches=list(root.rglob('proofscript-psc0-'+variant+'-npm-packages.zip'))
+              assert len(matches)==1, matches
+              target=pathlib.Path(os.environ['RUNNER_TEMP'])/('psc0-input-'+variant)
+              with zipfile.ZipFile(matches[0]) as z:
+                  assert all(pathlib.PurePosixPath(n).name==n for n in z.namelist())
+                  z.extractall(target)
+          PY
+      - name: Repack and install current host with exact retained compiler bytes
+        run: |
+          if [ '${{ runner.os }}' = 'Windows' ]; then NATIVE=win32; else NATIVE=linux; fi
+          for EDITION in ps lean; do
+            INPUT="$RUNNER_TEMP/psc0-input-$EDITION"
+            STAGE="$RUNNER_TEMP/psc0-stage-$EDITION"
+            PREFIX="$RUNNER_TEMP/psc0-installed-$EDITION"
+            PACK="$RUNNER_TEMP/psc0-pack-$EDITION"
+            mkdir -p "$PACK"
+            node scripts/architecture-repack.mjs "$INPUT" "$STAGE" "$EDITION"
+            npm pack "$STAGE/package" --pack-destination "$PACK" --ignore-scripts
+            npm install -g --prefix "$PREFIX" --cache "$RUNNER_TEMP/psc0-cache-$EDITION" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$PACK/proofscript-0.1.0-psc0.1.tgz" "$INPUT/typescript-7.0.2.tgz" "$INPUT/typescript-typescript-$NATIVE-x64-7.0.2.tgz"
+            node scripts/architecture-installed-smoke.mjs "$PREFIX" "$EDITION" "$RUNNER_TEMP/psc0-project-$EDITION"
+          done
+      - name: Retain exact preservation and installed-host evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-checked-host-${{ runner.os }}-${{ github.sha }}
+          path: psc0/dist/architecture-evidence/
+          if-no-files-found: error
+          retention-days: 30

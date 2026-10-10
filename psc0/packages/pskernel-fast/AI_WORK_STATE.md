@@ -81,3 +81,15 @@ An explicit closed-export preflight now rejects out-of-scope de Bruijn indices, 
 G3 code remains experimental until a completed exact-source GitHub workflow run confirms build/test. The G2 toy closure evaluator is adapted to the wider constructors without granting it proof acceptance.
 
 **New acceptance requirement:** compare official Lean Expr round-trip and metadata decoding only after implementing full exact protocol; do not advertise full 4.35 expression import yet.
+
+## G3 completed CI
+
+Source `a6c178259f7a974fb9ec90f67f3cdb9ae81382b1` passed [run 38094975440](https://github.com/dwijayuda/pskernel/actions/runs/38094975440), job `114338913786`. Twelve Lake build jobs completed and focused syntax, metadata/projection, scope, forbidden-mvar and existing closure tests passed. The language is still not a real Lean export parser or a proof checker.
+
+## G4 reference/closure agreement candidate (unqualified)
+
+Added pure `PSKernelFast/Substitution.lean` (de Bruijn lifting, capture-avoiding single-binder instantiation, substitution WHNF) and `PSKernelFast/Quote.lean` (bounded environment reification and explicit closed-term comparison against the G2 lazy closure evaluator). Strengthened G2 to transparently strip inert metadata while exposing the WHNF head. Added nested binder, discarded argument, neutral, eta-shaped and metadata test cases.
+
+This is **untyped beta/let fragment testing only**. Do NOT call successful agreement a Lean proof of correctness or DefEq soundness. Runtime resource outcomes depend on budget placement; this slice compares successful closed cases, not identical fuel consumption.
+
+G4 cloud CI must pass for the exact new source before promotion.

@@ -33,6 +33,8 @@ def whnfFuel (fuel : Nat) (view : Closure) : Except Failure Closure :=
           match env[i]? with
           | some replacement => whnfFuel remaining replacement
           | none => .error .unscopedInput
+      | .term (.mdata _ e) env =>
+          whnfFuel remaining (.term e env)
       | .term (.letE _ _ value body _) env =>
           whnfFuel remaining (.term body (.term value env :: env))
       | .term (.app fn arg) env =>

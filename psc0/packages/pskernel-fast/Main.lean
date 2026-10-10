@@ -1,4 +1,4 @@
-import PSKernelFast.EvalPrototype
+import PSKernelFast.Quote
 
 open PSKernelFast
 
@@ -131,4 +131,39 @@ def main : IO Unit := do
   | .error .unscopedInput => pure ()
   | _ => throw (IO.userError "invalid binder index was not declined")
 
-  IO.println "PSKernel-Fast G3: expanded Lean raw syntax, scope, meta guards and closures passed (NOT proof checking)"
+  let a : RawExpr := .const (Name.simple "a") []
+  let b : RawExpr := .const (Name.simple "b") []
+  let x : Name := Name.simple "x"
+  let y : Name := Name.simple "y"
+  let ty : RawExpr := .sort .zero
+
+  let cases : List RawExpr := [
+    betaTerm,
+    letTerm,
+    neutralTerm,
+    .app (.lam x ty (.app (.const (Name.simple "f") []) (.bvar 0)) .default) a,
+    .app (.app (.lam x ty (.lam y ty (.bvar 1) .default) .default) a) b,
+    .app (.app (.lam x ty (.lam y ty (.bvar 0) .default) .default) a) b,
+    .app (.lam x ty (.app (.bvar 0) b) .default) (.lam y ty (.bvar 0) .default),
+    .letE x ty (.lam y ty (.bvar 0) .default)
+      (.app (.bvar 0) a) false,
+    .mdata "informational" betaTerm,
+    .lam x ty (.letE y ty a (.bvar 0) false)
+  ]
+  for e in cases do
+    match referenceAgreesWithClosure e with
+    | .ok true => pure ()
+    | .ok false =>
+        throw (IO.userError s!"G4 reference/closure mismatch on {repr e}")
+    | .error err =>
+        throw (IO.userError s!"G4 evaluator unexpectedly declined {repr e}: {repr err}")
+
+  match referenceAgreesWithClosure (.bvar 0) with
+  | .error .unscopedInput => pure ()
+  | _ => throw (IO.userError "G4 comparison failed to reject loose variable")
+
+  match referenceWhnfFuel 0 betaTerm with
+  | .error .reductionBudget => pure ()
+  | _ => throw (IO.userError "reference WHNF ignored zero fuel")
+
+  IO.println "PSKernel-Fast G4: two beta/let evaluators agreed on bounded closed raw corpus (NOT Lean DefEq)"

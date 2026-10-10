@@ -187,6 +187,7 @@ lean_lib PsKernelCoreMetatheory where
     `Ps.KernelCore.Metatheory.SemanticModeledAxiomTrace,
     `Ps.KernelCore.Metatheory.SemanticReferenceTheoremAdmission,
     `Ps.KernelCore.Metatheory.SemanticPublicAdmissionBoundary,
+    `Ps.KernelCore.Metatheory.SemanticPublicAdmissionSequence,
     `Ps.KernelCore.Metatheory.SemanticReadingExtension,
     `Ps.KernelCore.Metatheory.DefEqClassifierTrace,
     `Ps.KernelCore.Metatheory.ExprEq,

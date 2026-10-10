@@ -39,6 +39,7 @@ import Ps.KernelCore.Metatheory.SemanticPublicAxiomAdmission
 import Ps.KernelCore.Metatheory.SemanticModeledAxiomTrace
 import Ps.KernelCore.Metatheory.SemanticReferenceTheoremAdmission
 import Ps.KernelCore.Metatheory.SemanticPublicAdmissionBoundary
+import Ps.KernelCore.Metatheory.SemanticPublicAdmissionSequence
 import Ps.KernelCore.Metatheory.SemanticReadingExtension
 
 /-!
@@ -74,6 +75,8 @@ run_cmd do
     ``PsKernelSemantics.SetModel.referenceChecked_dispatch_result,
     ``PsKernelSemantics.SetModel.referenceAdmit_dispatch_result,
     ``PsKernelSemantics.SetModel.referenceAdmit_of_dispatch_model,
+    ``PsKernelSemantics.SetModel.ModeledPublicReferenceTrace.preserves,
+    ``PsKernelSemantics.SetModel.modeledPublicReferenceTrace_no_literalFalse,
     ``PsKernelSemantics.SetModel.referenceDispatchAxiom_preserves_model,
     ``PsKernelSemantics.SetModel.add_success_preserves_model,
     ``PsKernelSemantics.SetModel.no_stored_constant_of_literalFalse,

@@ -1,6 +1,6 @@
 # PSC0 target-toolchain identity boundary
 
-Status: coherent implementation prepared; qualification is not yet claimed. This is a host-only slice of PSC0-ARCH/1's target and release binding obligations, not a new backend, compiler language, kernel or complete P4/P6.
+Status: implementation committed; complete qualification pending. This is a host-only slice of PSC0-ARCH/1's target and release binding obligations, not a new backend, compiler language, kernel or complete P4/P6. See [validation ledger](PSC0_TARGET_TOOLCHAIN_VALIDATION.md) for the initial failed comparison assumption and its evidence-based correction.
 
 ## Contract
 
@@ -10,17 +10,18 @@ Capture uses bounded streaming (not UTF-8 decoding for binaries): at most 4,096 
 
 The official TypeScript launcher delegates directly to its platform executable. This host executes that same selected native binary without a shell, second package lookup or JS wrapper process. The parent can terminate/reap it on cancellation, wall-time limit or diagnostic overflow. It does not import target compiler JS into the proof-authority process. The sanitized environment permits only required system/temp paths and fixed locale, not arbitrary preload/Go runtime variables or PATH overrides.
 
-For the currently generated monolithic TypeScript program, the target plan retains ES2022/module/strict/declaration/source-map flags, ignores project configuration, disables adding imported target files with `noResolve`, and supplies a newly created empty `typeRoots` directory so ambient npm typings do not enter the program. Foreign TypeScript linking is not implemented by this profile. Source libraries still compile through the existing ProofScript source graph.
+For the currently generated monolithic TypeScript program, the target plan retains ES2022/module/strict/declaration/source-map flags, ignores project configuration, disables adding imported target files with `noResolve`, and supplies a newly created empty `typeRoots` directory. TypeScript6+ already defaults `types` to `[]`; this design makes the selected target profile explicit and keeps surrounding project policy out, rather than claiming to repair automatic ambient-type inclusion in TypeScript7. Foreign TypeScript linking is not implemented by this profile. Source libraries still compile through the existing ProofScript source graph.
 
 A parent-owned plan hash binds target identity, flags, environment and limits to the checked frontend handle and audit receipt. The actual generated TypeScript input and all four outputs are byte-hashed; output files are bounded regular UTF-8 files. Identity is revalidated before/after the native process and again at the existing single publication boundary. Target failure/drift/cancellation cannot replace the prior executable. `psc check` does not require or execute TypeScript.
 
 ## Evidence required
 
-Keep the old 50 tests and both installed source-edition suites. Add negative toolchain-tree, metadata, native subprocess, cancellation and output-budget tests. On Linux/Node22 and Windows/Node26, compare `.ts`, `.js`, `.d.ts` and `.js.map` bytes against the retained original TypeScript launcher on the same bounded generated input, verify isolation from inherited ambient typings, and refuse toolchain-byte drift without publishing. Do not change compiler/kernel sources, source-identity baselines, seed or language. Reuse retained artifacts; no C2/C3, full generation or npm publication.
+Keep the old 50 tests and both installed source-edition suites, plus the 16 target identity/resource negative tests. On Linux/Node22 and Windows/Node26, compare `.ts`, `.js`, `.d.ts` and `.js.map` bytes against the retained original TypeScript launcher on the same bounded generated input. Verify that the pinned default does not select unrelated ambient types, that an explicit foreign-type request is a real negative control, and that the fixed owned plan ignores surrounding tsconfig/types. Refuse toolchain-byte drift without publishing. Do not change compiler/kernel sources, source-identity baselines, seed or language. Reuse retained artifacts; no C2/C3, full generation or npm publication.
 
 ## Research basis
 
 - Microsoft TypeScript `packages/typescript/lib/getExePath.js` and `lib/tsc.js`, source `aa8149273b23401f0a79a5f0384c42de51888693`: installed platform resolution and transparent native delegation. https://github.com/microsoft/TypeScript/blob/aa8149273b23401f0a79a5f0384c42de51888693/packages/typescript/lib/tsc.js
+- TypeScript6 `types` default change: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html
 - TypeScript `noResolve`: https://www.typescriptlang.org/tsconfig/noResolve.html
 - TypeScript `typeRoots`: https://www.typescriptlang.org/tsconfig/typeRoots.html
 - Node22 child-process argument, environment, cancellation and close semantics: https://nodejs.org/download/release/v22.23.3/docs/api/child_process.html

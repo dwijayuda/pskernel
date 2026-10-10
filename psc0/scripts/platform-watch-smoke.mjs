@@ -8,7 +8,7 @@ import path from 'node:path';
 
 // Installed-tarball smoke. No repository checkout, native build, compiler
 // bootstrap, npm scripts, or external extension JavaScript entrypoints.
-const [productTarball, psdevTarball, evidenceDirectory] = process.argv.slice(2).map(path.resolve);
+const [productTarball, psdevTarball, evidenceDirectory] = process.argv.slice(2).map(item => path.resolve(item));
 assert(productTarball?.endsWith('.tgz') && psdevTarball?.endsWith('.tgz') &&
   evidenceDirectory, 'PSC_WATCH_SMOKE_ARGUMENTS');
 assert(process.env.PSC0_SMOKE_NPM_CLI, 'PSC_WATCH_SMOKE_PINNED_NPM');

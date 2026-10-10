@@ -1,5 +1,5 @@
 import { watch } from 'node:fs';
-import { readFile, realpath } from 'node:fs/promises';
+import { readFile, realpath, lstat } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
@@ -220,7 +220,11 @@ export async function watchCheckedProject({
     }
   }
   try {
-    if (await realpath(root) !== root || await realpath(sourceDirectory) !== sourceDirectory) {
+    const rootInfo = await lstat(root);
+    const sourceInfo = await lstat(sourceDirectory);
+    if (!rootInfo.isDirectory() || rootInfo.isSymbolicLink() ||
+        !sourceInfo.isDirectory() || sourceInfo.isSymbolicLink() ||
+        !inside(await realpath(root), await realpath(sourceDirectory))) {
       fail('PSC_DEV_WATCH_DIRECTORY_LINK');
     }
     function attach(directory, kind, recursive) {
@@ -233,8 +237,11 @@ export async function watchCheckedProject({
     attach(sourceDirectory, 'source', true);
     attach(root, 'project', false);
     if (extensionRoot) {
-      if (await realpath(extensionRoot) !== path.resolve(extensionRoot) ||
-          !inside(root, extensionRoot)) fail('PSC_DEV_WATCH_EXTENSION_ROOT');
+      const extensionInfo = await lstat(extensionRoot);
+      if (!extensionInfo.isDirectory() || extensionInfo.isSymbolicLink() ||
+          !inside(await realpath(root), await realpath(extensionRoot))) {
+        fail('PSC_DEV_WATCH_EXTENSION_ROOT');
+      }
       attach(extensionRoot, 'extension', false);
     }
     // A periodic freshness check reduces reliance on a platform's watcher

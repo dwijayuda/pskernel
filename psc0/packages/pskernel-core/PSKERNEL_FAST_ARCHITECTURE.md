@@ -421,3 +421,86 @@ Each row should have: pinned official 4.35 source locator, at least one valid an
 | Resource failure | Separate declinedUnsupported, rejectedInvalid, resourceExhausted, internalError | Retrying as success, ignoring budget |
 
 **Full compatibility is different from modeled-axiom safe mode.** The latter may intentionally decline a valid Lean proof relying on arbitrary foreign axioms. Advertise separately; neither a full-score Arena suite nor con-leche's limited axiom profile establishes “all Lean proofs supported”.
+
+## 9. Formal assurance: required actual theorem chain
+
+The goal is a theorem about the ACTUAL executable public checker, not a diagram that purports to show proof completion:
+
+~~~text
+Untrusted export -> validated term and declaration input
+        |
+optional optimized representation and safe cache
+        |  (erasure + positive-result refinement)
+        v
+ONE reference Checker/Knot checking semantics
+        |  (joint infer/WHNF/DefEq soundness)
+        v
+modeled expression / type judgment
+        |  (complete declaration admission)
+        v
+constructively extended model for fresh declarations
+        |  (explicit assumptions about axioms and set theory)
+        v
+conditional no derived proof of False
+~~~
+
+**None of the full end-to-end arrows is currently claimed as complete** on the active PSKernel branch. A theorem about one metadata, sort, constant, binder or application case does not certify every recursive branch. Adding closures or caching adds proof obligations rather than replacing the existing soundness work.
+
+| Fast component | Required result | Unsoundness or compatibility defect to exclude |
+| --- | --- | --- |
+| Positive infer/WHNF/DefEq cache | Every hit has same expression, exact context, target, environment, mode and admissible interpretation | Stale context/universe cache false success |
+| Spine view | Application flatten/reconstruct is exact, preserving arity and binder metadata | Dropped argument or wrong level instantiation |
+| Closure view | Forcing/erasure matches canonical WHNF under correct scoped substitutions | Captured or shifted variable interpreted incorrectly |
+| Context pruning | Projection includes every variable the term actually reads | Free-variable mask overflow or omission |
+| Positive equality shortcut | Fast Equal implies reference/model Equal under identical typing and annotation premises | Unproved proof-irrelevance acceptance |
+| Interned compact handle | Live handle decoding is injective and generation-safe; no scratch escape | Old allocation reused as another term |
+| Optimized literals | Numerals and strings match the pinned 4.35 behavior and size limits | Foreign arithmetic shortcut changes truth |
+| Generated self-host backend | Compiled output preserves source checked semantics and failure classification | JS/Wasm omits a guard |
+
+**Safety versus completeness:** affirmative fast equality must imply correct kernel equality; conversely, if the fast path cannot decide, the same canonical checker should continue and not falsely reject a valid case. An unsupported operation, exhausted resource or failed checker cannot be transformed into successful admission by a fallback authority.
+
+In the current formal work, respect two crucial facts. First, checked annotations and universe zero/positive regime coherence are required for any positive structural comparison. Second, the model interpretation of a newly admitted fresh constant must be constructed, rather than assumed for an arbitrary fixed model. Never use an upstream con-leche theorem as a substitute for proving PSKernel's executed path correct.
+
+## 10. Benchmarks: distinguish kernel throughput and parse speed
+
+For each workload record:
+
+~~~text
+source commit, Lean SHA, exporter and protocol SHA
+axiom/profile modes, checker flags, memory and resource limits
+corpus hash, full input size and declaration count
+CPU/memory/OS/compiler flags, number of samples
+parse/import time, kernel-only time, total wall time
+retired instruction count / normalized virtual CPU
+peak RSS, allocations, retained memory, scratch high water
+cache hits/misses, WHNF/beta/let/delta/recursor counts
+accepted, rejected, declined, exhausted, internal-error totals
+~~~
+
+Measure at least three matched samples and report medians/ranges. Compare identical semantic versions and hardware; cache warmness must be specified. Never convert parser speedups into claimed semantic kernel speedups.
+
+| Workload | Performance reason | Mandatory correctness case |
+| --- | --- | --- |
+| Arena tutorial and scored negative corpus | Cheap broad conformance | No known-invalid accepted |
+| Fresh pinned Lean 4.35 Prelude / focused Std | Typical program proofs | Same version/export and correct result |
+| Int64 and large Nat computation | Historically expensive/timed-out case | Numeral limits, failure semantics |
+| Beta and let ladders | Eager substitution allocator cost | Capture avoidance |
+| Deep dependent binders and shift cascades | Scope/shift workload | Exact context identity |
+| Same-head applications and opaque definitions | Delta/DefEq scheduling | No premature unequal result |
+| Expensive expressions in proofs erased by proof irrelevance | Avoid unnecessary evaluation | Type is checked as Prop first |
+| Mutual/nested inductives and recursors | Admission and iota | Recheck generated recursors |
+| Repeated shared expression DAGs | Hashcons/cache reuse | No hash collision or scratch alias |
+| Reflective computation and decide tactics | Lazy evaluation potential | Exact reduction, bounded memory |
+| Full fresh Init/Std/Mathlib | Large-scale qualification | Later RELEASE milestone only |
+
+A full suite timeout is **not** a pass; a green focused workflow with the full Mathlib job deliberately skipped is **not** a Mathlib conformance certificate.
+
+### Suggested P1 targets, explicitly not measured facts
+
+The following are proposed thresholds to decide whether new complexity is worthwhile. They can be revised based on P0 profiling.
+
+- At least **1.25x median kernel-only speedup** on a pinned named hot workload.
+- No more than **10% matched peak-RSS regression** and no more than **5% overall focused-mix slowdown**, unless a documented tradeoff is accepted.
+- Exact parity in the supported positive/negative suites and no new accepted invalid proof.
+- For a P2 closure-view pilot, seek **2x on beta/let-dominated cases** and meaningful allocation savings; otherwise prefer the simpler P1 checker.
+- Do not promise 15x or 24x faster performance against Lean based on unlike export versions or parser-inclusive whole-checker benchmarks.

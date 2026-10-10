@@ -41,10 +41,24 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
-      - name: Install the exact TypeScript 7.0.2 toolchain
+      - name: Install the exact TypeScript 7.0.2 toolchain, independent of unpublished workspaces
+        shell: bash
         run: |
-          npm install --ignore-scripts --no-package-lock --no-audit --no-fund
-          node -e "import('typescript/package.json',{with:{type:'json'}}).then(m=>{if(m.default.version!=='7.0.2') process.exit(1);console.log('TypeScript '+m.default.version)})"
+          npm install --prefix "$RUNNER_TEMP/psc0-ts7" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync, realpathSync } from 'node:fs';
+          import path from 'node:path';
+          import { spawnSync } from 'node:child_process';
+          const directory = path.join(process.env.RUNNER_TEMP, 'psc0-ts7/node_modules/typescript');
+          const manifest = JSON.parse(readFileSync(path.join(directory, 'package.json'), 'utf8'));
+          if (manifest.name !== 'typescript' || manifest.version !== '7.0.2') throw Error('Not pinned TypeScript 7.0.2');
+          const bin = typeof manifest.bin === 'string' ? manifest.bin : manifest.bin.tsc;
+          const cli = realpathSync(path.join(directory, bin));
+          const result = spawnSync(process.execPath, [cli, '--version'], { encoding: 'utf8' });
+          if (result.status !== 0 || result.stdout.trim() !== 'Version 7.0.2') throw Error('TypeScript 7.0.2 CLI mismatch');
+          appendFileSync(process.env.GITHUB_ENV, 'PSC0_TSC=' + cli + '\n');
+          console.log('Pinned TypeScript 7.0.2 CLI: ' + cli);
+          NODE
       - name: Build the existing Lean-native PSC0 compiler frontend
         run: lake build psc1
       - name: Check both exact source roots through the PSC0 frontend

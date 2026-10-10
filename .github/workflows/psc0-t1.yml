@@ -1,0 +1,106 @@
+name: PSC0 focused T1 compiler validation
+
+on:
+  push:
+    branches: ['psc0/platform-t1-v1']
+    paths:
+      - 'psc0/packages/**'
+      - 'psc0/scripts/**'
+      - 'psc0/test/**'
+      - 'psc0/examples/platform/checked-library/**'
+      - 'psc0/lakefile.lean'
+      - 'psc0/lean-toolchain'
+      - 'psc0/psconfig.json'
+      - '.github/workflows/psc0-t1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc0-t1-native-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[t1-native]') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: psc0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Install and verify the exact TypeScript 7 profile
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc0-t1-typescript" --ignore-scripts --save-exact --no-audit --no-fund typescript@7.0.2
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { appendFile, copyFile, mkdir, readFile } from 'node:fs/promises';
+          import { createRequire } from 'node:module';
+          import path from 'node:path';
+          assert.equal(process.version, 'v22.23.3');
+          const require = createRequire(import.meta.url);
+          const prefix = path.join(process.env.RUNNER_TEMP, 'psc0-t1-typescript');
+          const metadataPath = require.resolve('typescript/package.json', { paths: [prefix] });
+          const metadata = JSON.parse(await readFile(metadataPath, 'utf8'));
+          assert.equal(metadata.name, 'typescript');
+          assert.equal(metadata.version, '7.0.2');
+          const launcher = path.resolve(path.dirname(metadataPath), metadata.bin.tsc);
+          await mkdir('dist/t1', { recursive: true });
+          await copyFile(path.join(prefix, 'package-lock.json'), 'dist/t1/typescript-package-lock.json');
+          await appendFile(process.env.GITHUB_ENV,
+            'PSC0_TSC=' + launcher + '\nPSC0_TYPESCRIPT_VERSION=7.0.2\n');
+          NODE
+      - name: Check protected host sessions, interface descriptors and multi-directory publication
+        run: node --test scripts/checked-prepared-session.test.mjs scripts/checked-artifact-publication.test.mjs scripts/checked-project.test.mjs
+      - name: Check the portable source profile before native compilation
+        run: |
+          node --check scripts/t1-compiler-conformance.mjs
+          node check-psc1-source.mjs
+          node scripts/bootstrap-root-minimality-tests.mjs
+          node scripts/check-typescript-profile.mjs --out dist/t1/typescript-profile
+      - name: Restore incremental native compiler outputs
+        id: native-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: psc0/.lake/build
+          key: psc0-t1-native-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-ts7.0.2-${{ github.sha }}
+          restore-keys: |
+            psc0-t1-native-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-ts7.0.2-
+            psc0-sh1-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/lean-toolchain', 'psc0/lakefile.lean') }}-
+      - name: Compile the current compiler and focused backend regression target
+        id: native-build
+        run: lake build psc1 psc1_backend_ts_tests
+      - name: Run the focused native backend regression target
+        run: lake exe psc1_backend_ts_tests
+      - name: Generate the current compiler through the native frontend
+        run: .lake/build/bin/psc1 build packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean --out dist/t1/compiler/index.js
+      - name: Exercise the actual generated project API and checked TS boundary
+        run: node scripts/t1-compiler-conformance.mjs --compiler dist/t1/compiler/index.js --out dist/t1/conformance --phase native-generated
+      - name: Retain incremental native outputs
+        if: ${{ always() && steps.native-build.outcome == 'success' && steps.native-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: psc0/.lake/build
+          key: ${{ steps.native-cache.outputs.cache-primary-key }}
+      - name: Retain focused evidence without claiming a self-host fixed point
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc0-t1-native-${{ github.sha }}
+          path: psc0/dist/t1
+          if-no-files-found: warn
+          retention-days: 30

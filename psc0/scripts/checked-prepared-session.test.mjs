@@ -282,3 +282,52 @@ test('the default prepared session cannot accept the legacy owned provider', asy
   }));
   await assert.rejects(session.check('lean', '42'), /PROVIDER_IDENTITY: provider/);
 });
+
+
+function projectFixture(provider) {
+  return fixture(provider, compiler => {
+    compiler.psCompilerMakeProjectSource = (sourceId, source, exports) => ({ sourceId, source, exports });
+    compiler.psCompilerPrepareProject = (kind, inputs) => {
+      const units = [];
+      for (let cursor = inputs; cursor !== null; cursor = cursor.tail) {
+        const unit = cursor.head, names = [];
+        for (let list = unit.exports; list !== null; list = list.tail) names.push(list.head);
+        units.push({ sourceId: unit.sourceId, source: unit.source, exports: names });
+      }
+      let sources = null;
+      for (const unit of [...units].reverse()) sources = compiler.List.cons(unit.source, sources);
+      const prepared = compiler.psCompilerPrepareSources(kind, sources).value;
+      return ok({ prepared, units });
+    };
+    compiler.psCompilerProjectAdmissionsFromPrepared = project =>
+      compiler.psCompilerAdmissionsFromPrepared(project.prepared);
+    compiler.psCompilerCheckedTypeScriptProjectFromPrepared = (options, project) => {
+      const bundle = compiler.psCompilerCheckedTypeScriptFromPrepared(options, project.prepared).value;
+      return ok(JSON.stringify({ profile: 'psc-ts-library/1', bundle,
+        modules: project.units.filter(unit => unit.exports.length).map(unit => ({
+          sourceId: unit.sourceId,
+          exports: unit.exports.map(name => ({ name, kind: 'value', binding: 'answer' })),
+        })) }));
+    };
+  });
+}
+test('project sessions capture ownership selection and retain the same mandatory admission boundary', async () => {
+  const { session, calls } = projectFixture();
+  const units = [{ sourceId: 'Main.ps', source: '42', exports: ['answer'] }];
+  const pending = session.checkProject('ps', units);
+  units[0].exports[0] = 'changed';
+  const handle = await pending;
+  assert.throws(() => session.emitChecked(handle), /LIBRARY_EMISSION_MODE/);
+  assert.throws(() => session.emitProjectChecked({ ...handle }), /UNCHECKED_MODULE/);
+  const result = session.emitProjectChecked(handle);
+  assert.deepEqual(result.library.modules[0].exports, [{ name: 'answer', kind: 'value', binding: 'answer' }]);
+  assert.equal(result.validation.publicInterfaceSha256, result.library.publicInterfaceSha256);
+  assert.equal(result.validation.emitter, 'psCompilerCheckedTypeScriptProjectFromPrepared');
+  assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel', 'encode', 'checked-emit']);
+});
+test('project preparation cannot turn kernel refusal into a public library', async () => {
+  const { session, calls } = projectFixture(() => ({ ...identity, accepted: false }));
+  await assert.rejects(session.checkProject('ps', [{ sourceId: 'Main.ps', source: '42', exports: ['answer'] }]),
+    /KERNEL_REJECTED/);
+  assert.deepEqual(calls, ['prepare-modules', 'encode', 'kernel']);
+});

@@ -446,11 +446,15 @@ def psErasureAppendDeclarations (declarations : List PsDeclaration) : List PsDec
       let smaller : List PsDeclaration -> List PsDeclaration := psErasureAppendDeclarations rest;
       fun (tail : List PsDeclaration) => List.cons declaration (smaller tail)
 
-def psEraseCoreModuleWithRuntimePrelude
+structure PsErasedNamedModule where
+  ir : PsVerifiedIrModule
+  names : List (Prod PsName String)
+
+def psEraseCoreModuleWithRuntimePreludeAndNames
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
-    Except PsErasureError PsVerifiedIrModule :=
+    Except PsErasureError PsErasedNamedModule :=
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
   let names := psErasureDeclarationNames runtimeDeclarations;
@@ -481,12 +485,18 @@ def psEraseCoreModuleWithRuntimePrelude
                 [] with
           | Except.error error => Except.error error
           | Except.ok lowered =>
-              Except.ok {
-                imports := []
-                structures := preparedStructures.ir
-                inductives := preparedInductives.ir
-                declarations := lowered
-              }
+              Except.ok
+                (PsErasedNamedModule.mk
+                  (PsVerifiedIrModule.mk List.nil preparedStructures.ir preparedInductives.ir lowered)
+                  names)
+
+def psEraseCoreModuleWithRuntimePrelude
+    (environment : PsEnvironment)
+    (runtimePreludeDeclarations : List PsDeclaration)
+    (declarations : List PsDeclaration) : Except PsErasureError PsVerifiedIrModule :=
+  match psEraseCoreModuleWithRuntimePreludeAndNames environment runtimePreludeDeclarations declarations with
+  | Except.error error => Except.error error
+  | Except.ok result => Except.ok result.ir
 
 def psEraseCoreModule
     (environment : PsEnvironment)

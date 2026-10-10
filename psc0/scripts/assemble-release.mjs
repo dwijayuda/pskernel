@@ -18,6 +18,7 @@ export const releaseHostFiles = Object.freeze([
   'scripts/command-extension-worker.mjs',
   'scripts/command-wasm-profile.mjs',
   'scripts/checked-build.mjs',
+  'scripts/checked-project.mjs',
   'scripts/checked-artifact-publication.mjs',
   'scripts/checked-prepared-session.mjs',
   'scripts/checked-source-snapshot.mjs',
@@ -46,7 +47,13 @@ export const releaseExampleFiles = Object.freeze([
   "examples/platform/rejected-source/Main.ps",
   "examples/platform/rejected-source/README.md",
   "examples/platform/checked-nat/README.md",
-  "examples/platform/existing-typescript/README.md"
+  "examples/platform/existing-typescript/README.md",
+  "examples/platform/checked-library/README.md",
+  "examples/platform/checked-library/package.json",
+  "examples/platform/checked-library/tsconfig.json",
+  "examples/platform/checked-library/src/Quantity.ps",
+  "examples/platform/checked-library/src/Main.ps",
+  "examples/platform/checked-library/src/consumer.ts"
 ]);
 
 async function absent(file) {

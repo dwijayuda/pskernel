@@ -278,3 +278,168 @@ def psCompilerVerifiedIrSource
       Except.error error
   | Except.ok prepared =>
       psCompilerVerifiedIrFromPrepared prepared
+
+
+-- Project preparation retains source ownership beside the ordinary declaration
+-- stream. These are preparation facts, never kernel admission capabilities.
+structure PsCompilerProjectSource where
+  sourceId : String
+  source : String
+  exports : List String
+
+structure PsCompilerProjectOwner where
+  sourceId : String
+  declarations : List PsName
+  exports : List PsName
+  arities : List (Prod PsName Nat)
+
+structure PsCompilerAdmissionReadyProject where
+  prepared : PsCompilerAdmissionReadyModule
+  owners : List PsCompilerProjectOwner
+
+inductive PsCompilerProjectError where
+  | compiler (error : PsCompilerError)
+  | invalidExport (detail : String)
+
+def psCompilerMakeProjectSource
+    (sourceId source : String) (exports : List String) : PsCompilerProjectSource :=
+  PsCompilerProjectSource.mk sourceId source exports
+
+def psCompilerProjectAuthoredName (declaration : PsSyntaxDeclaration) : Option PsName :=
+  let syntaxName : PsSyntaxName :=
+    match declaration with
+    | PsSyntaxDeclaration.definition name _ _ _ _ => name
+    | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => name
+    | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => name
+    | PsSyntaxDeclaration.inductiveDecl name _ _ _ _ => name
+    | PsSyntaxDeclaration.structureDecl name _ _ _ => name;
+  psSyntaxNameToName syntaxName
+
+def psCompilerProjectAuthoredNames
+    (declarations : List PsSyntaxDeclaration) : List PsName :=
+  match declarations with
+  | List.nil => List.nil
+  | List.cons declaration rest =>
+      match psCompilerProjectAuthoredName declaration with
+      | Option.none => psCompilerProjectAuthoredNames rest
+      | Option.some name => List.cons name (psCompilerProjectAuthoredNames rest)
+
+def psCompilerProjectAuthoredArities
+    (declarations : List PsSyntaxDeclaration) : List (Prod PsName Nat) :=
+  match declarations with
+  | List.nil => List.nil
+  | List.cons declaration rest =>
+      let tail := psCompilerProjectAuthoredArities rest;
+      match declaration with
+      | PsSyntaxDeclaration.definition syntaxName binders _ _ _ =>
+          match psSyntaxNameToName syntaxName with
+          | Option.none => tail
+          | Option.some name => List.cons (Prod.mk name (psListLength binders)) tail
+      | _ => tail
+
+def psCompilerProjectFindName (names : List PsName) : String -> Option PsName :=
+  match names with
+  | List.nil => fun (_target : String) => Option.none
+  | List.cons name rest =>
+      let smaller : String -> Option PsName := psCompilerProjectFindName rest;
+      fun (target : String) =>
+        if psStringEq (psNameToString name) target then Option.some name
+        else smaller target
+
+def psCompilerProjectIdentifierTail (chars : List Char) : Bool :=
+  match chars with
+  | List.nil => true
+  | List.cons char rest =>
+      if psErasureAsciiAlpha char then psCompilerProjectIdentifierTail rest
+      else if psErasureNatBetween 48 (Char.toNat char) 57 then psCompilerProjectIdentifierTail rest
+      else if Nat.beq (Char.toNat char) 95 then psCompilerProjectIdentifierTail rest
+      else if Nat.beq (Char.toNat char) 36 then psCompilerProjectIdentifierTail rest
+      else false
+
+def psCompilerProjectIdentifier (name : String) : Bool :=
+  let reserved : List String :=
+    ["await", "break", "case", "catch", "class", "const", "continue",
+     "debugger", "default", "delete", "do", "else", "enum", "export",
+     "extends", "false", "finally", "for", "function", "if", "import",
+     "in", "instanceof", "let", "new", "null", "return", "super",
+     "switch", "this", "throw", "true", "try", "typeof", "var",
+     "void", "while", "with", "yield", "implements", "interface",
+     "package", "private", "protected", "public", "static"];
+  let same : String -> Bool := fun (value : String) => psStringEq name value;
+  if psListAny same reserved then false
+  else
+    match psJsonStringToChars name with
+    | List.nil => false
+    | List.cons first rest =>
+        if psErasureAsciiAlpha first then psCompilerProjectIdentifierTail rest
+        else if Nat.beq (Char.toNat first) 95 then psCompilerProjectIdentifierTail rest
+        else if Nat.beq (Char.toNat first) 36 then psCompilerProjectIdentifierTail rest
+        else false
+
+def psCompilerProjectSelectExports
+    (authored declared : List PsName)
+    (requested : List String) : Except PsCompilerProjectError (List PsName) :=
+  match requested with
+  | List.nil => Except.ok List.nil
+  | List.cons name rest =>
+      let duplicate : String -> Bool := fun (other : String) => psStringEq name other;
+      if psListAny duplicate rest then Except.error (PsCompilerProjectError.invalidExport name)
+      else if psCompilerProjectIdentifier name then
+        match psCompilerProjectFindName authored name with
+        | Option.none => Except.error (PsCompilerProjectError.invalidExport name)
+        | Option.some coreName =>
+            match psCompilerProjectFindName declared name with
+            | Option.none => Except.error (PsCompilerProjectError.invalidExport name)
+            | Option.some _ =>
+                match psCompilerProjectSelectExports authored declared rest with
+                | Except.error error => Except.error error
+                | Except.ok selected => Except.ok (List.cons coreName selected)
+      else Except.error (PsCompilerProjectError.invalidExport name)
+
+def psCompilerPrepareProjectWorker
+    (sources : List PsCompilerProjectSource)
+    (state : PsCompilerPreparationState)
+    (ownersRev : List PsCompilerProjectOwner) :
+    Except PsCompilerProjectError PsCompilerAdmissionReadyProject :=
+  match sources with
+  | List.nil =>
+      match psCompilerPreparationFinish state with
+      | Except.error error => Except.error (PsCompilerProjectError.compiler error)
+      | Except.ok prepared =>
+          Except.ok (PsCompilerAdmissionReadyProject.mk prepared (psListReverse ownersRev))
+  | List.cons source rest =>
+      let duplicate : PsCompilerProjectOwner -> Bool :=
+        fun (owner : PsCompilerProjectOwner) => psStringEq owner.sourceId source.sourceId;
+      if psStringEq source.sourceId "" then
+        Except.error (PsCompilerProjectError.invalidExport source.sourceId)
+      else if psListAny duplicate ownersRev then
+        Except.error (PsCompilerProjectError.invalidExport source.sourceId)
+      else
+        match psCompilerParseSource state.sourceKind source.source with
+        | Except.error error => Except.error (PsCompilerProjectError.compiler error)
+        | Except.ok parsed =>
+            match psElabModule state.environment parsed with
+            | Except.error error =>
+                Except.error (PsCompilerProjectError.compiler (PsCompilerError.elaboration error))
+            | Except.ok elaborated =>
+                let declarations := psListMap psDeclarationName elaborated.declarations;
+                let authored := psCompilerProjectAuthoredNames parsed.declarations;
+                match psCompilerProjectSelectExports authored declarations source.exports with
+                | Except.error error => Except.error error
+                | Except.ok selected =>
+                    let next := PsCompilerPreparationState.mk
+                      state.sourceKind elaborated.environment
+                      (psListAppend (psListReverse elaborated.declarations) state.declarationsRev);
+                    let owner := PsCompilerProjectOwner.mk source.sourceId declarations selected
+                      (psCompilerProjectAuthoredArities parsed.declarations);
+                    psCompilerPrepareProjectWorker rest next (List.cons owner ownersRev)
+
+def psCompilerPrepareProject
+    (sourceKind : PsCompilerSourceKind)
+    (sources : List PsCompilerProjectSource) :
+    Except PsCompilerProjectError PsCompilerAdmissionReadyProject :=
+  psCompilerPrepareProjectWorker sources (psCompilerPreparationStart sourceKind) List.nil
+
+def psCompilerProjectAdmissionsFromPrepared
+    (project : PsCompilerAdmissionReadyProject) : Except PsCompilerError String :=
+  psCompilerAdmissionsFromPrepared project.prepared

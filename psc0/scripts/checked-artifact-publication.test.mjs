@@ -313,3 +313,81 @@ if (process.platform === 'win32') {
     assert.equal(await readFile(path.join(outputDirectory, 'answer.ts'), 'utf8'), 'first');
   }));
 }
+
+
+function libraryFixture(fn) {
+  return fixture(async ({ directory }) => {
+    await mkdir(path.join(directory, 'src'));
+    await writeFile(path.join(directory, 'src/Main.ps'), 'main source');
+    await writeFile(path.join(directory, 'src/Quantity.ps'), 'quantity source');
+    const names = ['src/generated/library.ts', 'src/Quantity.ts', 'src/Main.ts'];
+    const publish = (label, options = {}) => publishCheckedArtifacts({
+      projectRoot: directory, entryPath: path.join(directory, 'src/Main.ps'),
+      outputPath: path.join(directory, names[0]), facadeSources: ['src/Quantity.ps', 'src/Main.ps'],
+      artifacts: new Map(names.map(name => [name, label + ':' + name])),
+      receipt: { fixture: true }, ...options,
+    });
+    await fn({ directory, names, publish, receiptPath: path.join(directory, 'src/generated/library.checked.json') });
+  });
+}
+test('library bundle and facades share one completed generation across directories', () => libraryFixture(async ({ directory, names, publish, receiptPath }) => {
+  const first = await publish('first');
+  assert.equal(first.outputOwner, 'src/Main.ps');
+  assert.equal(first.publication.layout, 'psc-ts-library/1');
+  assert.deepEqual(first.artifacts.map(item => item.name), names);
+  for (const name of names) assert.equal(await readFile(path.join(directory, name), 'utf8'), 'first:' + name);
+  const second = await publish('second');
+  assert.notEqual(first.transactionId, second.transactionId);
+  assert.deepEqual(JSON.parse(await readFile(receiptPath, 'utf8')), second);
+}));
+test('one handwritten facade prevents publication of the entire library', () => libraryFixture(async ({ directory, publish, receiptPath }) => {
+  const handwritten = path.join(directory, 'src/Quantity.ts');
+  await writeFile(handwritten, 'user source');
+  await assert.rejects(publish('first'), /OUTPUT_UNOWNED/);
+  assert.equal(await readFile(handwritten, 'utf8'), 'user source');
+  assert.equal(existsSync(path.join(directory, 'src/Main.ts')), false);
+  assert.equal(existsSync(receiptPath), false);
+}));
+test('partial library publication restores the old bundle and every facade', () => libraryFixture(async ({ directory, names, publish, receiptPath }) => {
+  await publish('first');
+  const previous = await readFile(receiptPath);
+  await assert.rejects(publish('second', { beforeCommit: async () => {
+    const [stage] = (await readdir(directory)).filter(name => name.startsWith('.psc-stage-'));
+    await rm(path.join(directory, stage, 'src/Main.ts'));
+  } }), /ENOENT/);
+  for (const name of names) assert.equal(await readFile(path.join(directory, name), 'utf8'), 'first:' + name);
+  assert.deepEqual(await readFile(receiptPath), previous);
+}));
+test('retired facades are removed only after their prior owned bytes are verified', () => libraryFixture(async ({ directory, names, publish }) => {
+  await publish('first');
+  const kept = names.filter(name => name !== 'src/Quantity.ts');
+  const receipt = await publish('second', {
+    facadeSources: ['src/Main.ps'],
+    artifacts: new Map(kept.map(name => [name, 'second:' + name])),
+  });
+  assert.deepEqual(receipt.artifacts.map(item => item.name), kept);
+  assert.equal(existsSync(path.join(directory, 'src/Quantity.ts')), false);
+}));
+test('library leases exclude ordinary builds in each facade directory', () => libraryFixture(async ({ directory, publish }) => {
+  let enter, release;
+  const ready = new Promise(resolve => { enter = resolve; });
+  const held = new Promise(resolve => { release = resolve; });
+  const running = publish('first', { beforeCommit: async () => { enter(); await held; } });
+  await ready;
+  try {
+    await assert.rejects(publishCheckedArtifacts({
+      entryPath: path.join(directory, 'src/Quantity.ps'),
+      outputPath: path.join(directory, 'src/Quantity.ts'),
+      artifacts: new Map([['Quantity.ts', 'other build']]), receipt: {},
+    }), /OUTPUT_BUSY/);
+  } finally { release(); }
+  await running;
+}));
+test('library publication refuses parent directory links before writing target files', () => libraryFixture(async ({ directory, publish, receiptPath }) => {
+  const outside = path.join(directory, 'outside');
+  await mkdir(outside);
+  await symlink(outside, path.join(directory, 'src/generated'), process.platform === 'win32' ? 'junction' : 'dir');
+  await assert.rejects(publish('first'), /OUTPUT_DIRECTORY_LINK/);
+  assert.deepEqual(await readdir(outside), []);
+  assert.equal(existsSync(receiptPath), false);
+}));

@@ -6,11 +6,12 @@ import { createHash } from 'node:crypto';
 import { readCheckedSourceSnapshot } from './checked-source-snapshot.mjs';
 import { readProofScriptImports, readProofScriptImportsWithSeed } from './proofscript-source.mjs';
 import { createCheckedPreparedSession } from './checked-prepared-session.mjs';
+import { captureProjectUnits, libraryArtifacts } from './checked-project.mjs';
 import { checkedKernelIdentity } from './checked-kernel-identity.mjs';
 import { checkAdmissionsWithKernel, checkedKernelDescriptor, defaultCheckedKernel } from './checked-kernel-provider.mjs';
 import { loadGeneratedCompiler } from './sh1-source-snapshot.mjs';
 import { expectedTypeScriptVersion, resolveTypeScriptCli, typeScriptProfileArgs } from './typescript-cli.mjs';
-import { checkedOutputPath, publishCheckedArtifacts } from './checked-artifact-publication.mjs';
+import { checkedOutputPath, prepareCheckedOutputDirectory, publishCheckedArtifacts } from './checked-artifact-publication.mjs';
 import { completedCommandRecords, assertCommandExtensionCurrent } from './command-extensions.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,7 +42,7 @@ async function assertSnapshotCurrent(snapshot, signal) {
  */
 export async function buildChecked({
   entryPath, outputPath, compilerPath, compilerSha256, seedPath, checkOnly = false,
-  kernel = defaultCheckedKernel, nativeBinaryPath, profile = 'checked', signal, extensionExecution,
+  kernel = defaultCheckedKernel, nativeBinaryPath, profile = 'checked', signal, extensionExecution, libraryConfig,
 }) {
   if (profile !== 'checked') throw new Error('PSC0_PROFILE_UNAVAILABLE: ' + profile);
   if (typeof entryPath !== 'string' || entryPath.length === 0) throw new Error('PSC0_SOURCE_REQUIRED');
@@ -49,6 +50,18 @@ export async function buildChecked({
   if (!checkOnly && !outputPath) throw new Error('PSC2_CHECKED_OUTPUT_REQUIRED');
   if (!checkOnly && !/\.(?:ts|js)$/u.test(outputPath)) throw new Error('PSC2_CHECKED_OUTPUT_KIND');
   const output = checkOnly ? undefined : checkedOutputPath(outputPath);
+  const library = libraryConfig !== undefined;
+  if (library && (seedPath || typeof libraryConfig?.projectRoot !== 'string' ||
+      !checkOnly && !output.endsWith('.ts'))) throw new Error('PSC0_LIBRARY_BUILD_PROFILE');
+  const projectRoot = library ? path.resolve(libraryConfig.projectRoot) : undefined;
+  const projectConfigSource = libraryConfig?.configSource;
+  const projectConfigPath = libraryConfig?.configPath;
+  if (projectConfigSource !== undefined || projectConfigPath !== undefined) {
+    if (typeof projectConfigSource !== 'string' || typeof projectConfigPath !== 'string' ||
+        path.resolve(projectConfigPath) !== path.join(projectRoot, 'package.json')) {
+      throw new Error('PSC0_LIBRARY_CONFIG_IDENTITY');
+    }
+  }
   // The historical native seed protocol attests admissions only. Its raw emit
   // response cannot satisfy the protected same-original-IR emission contract.
   if (seedPath && !checkOnly) throw new Error('PSC0_NATIVE_SEED_EMISSION_UNQUALIFIED');
@@ -76,7 +89,9 @@ export async function buildChecked({
     parseImports = (source, file) => readProofScriptImports(compiler, source, file);
   }
   const snapshot = await readCheckedSourceSnapshot(entryPath, { readProofScriptImports: parseImports });
-  let admissions, typeScript, irValidation;
+  const projectUnits = library ? captureProjectUnits(snapshot, projectRoot, libraryConfig.exports) : undefined;
+  const exportSelection = projectUnits?.map(unit => ({ sourceId: unit.sourceId, exports: unit.exports }));
+  let admissions, typeScript, irValidation, libraryEmission;
   let actualKernel = kernelDescriptor;
   const checkAdmissions = async text => {
     signal?.throwIfAborted();
@@ -105,9 +120,11 @@ export async function buildChecked({
       admissions = text;
       return checkAdmissions(text);
     }, checkedKernelIdentity(kernel));
-    const handle = await session.checkSources(kind, snapshot.sources);
+    const handle = library ? await session.checkProject(kind, projectUnits)
+      : await session.checkSources(kind, snapshot.sources);
     if (!checkOnly) {
-      const emitted = session.emitChecked(handle);
+      const emitted = library ? session.emitProjectChecked(handle) : session.emitChecked(handle);
+      libraryEmission = emitted.library;
       typeScript = emitted.typeScript;
       irValidation = emitted.validation;
       if (irValidation.canonicalAdmissionsSha256 !== digest(admissions) ||
@@ -125,11 +142,23 @@ export async function buildChecked({
     })),
     canonicalAdmissionsSha256: digest(admissions),
     kernelAdmissionAccepted: true, extensions,
+    ...(library ? { library: {
+      profile: 'psc-ts-library/1', exportSelectionSha256: digest(JSON.stringify(exportSelection)),
+      configSha256: projectConfigSource === undefined ? null : digest(projectConfigSource),
+      publicInterfaceSha256: libraryEmission?.publicInterfaceSha256 ?? null,
+      abiStatus: checkOnly ? 'not-requested' : 'checked-bounded',
+    } } : {}),
     runtimeIr: irValidation ?? { status: 'not-requested' },
     semanticPreservationProved: false, pscvVerified: false, strictSh1Qualified: false,
   };
   const assertCurrent = async () => {
     await assertSnapshotCurrent(snapshot, signal);
+    if (projectConfigSource !== undefined) {
+      const current = await readFile(projectConfigPath);
+      if (!current.equals(Buffer.from(projectConfigSource, 'utf8'))) {
+        throw new Error('PSC0_LIBRARY_CONFIG_CHANGED_DURING_BUILD');
+      }
+    }
     if (extensionExecution !== undefined) await assertCommandExtensionCurrent(extensionExecution);
     signal?.throwIfAborted();
   };
@@ -139,6 +168,10 @@ export async function buildChecked({
   }
   if (typeof typeScript !== 'string') throw new Error('PSC2_CHECKED_TS_RESULT');
   const stem = path.basename(output).replace(/\.(?:ts|js)$/u, '');
+  const projectLayout = library ? libraryArtifacts({ projectRoot, outputPath: output, emission: libraryEmission }) : undefined;
+  if (projectLayout) {
+    for (const name of projectLayout.artifacts.keys()) checkedOutputPath(path.join(projectRoot, name));
+  }
   const expectedVersion = expectedTypeScriptVersion();
   const tsc = resolveTypeScriptCli();
   const version = spawnSync(process.execPath, [tsc, '--version'], {
@@ -147,14 +180,19 @@ export async function buildChecked({
   if (version.error || version.status !== 0 || version.stdout.trim() !== 'Version ' + expectedVersion) {
     throw new Error('PSC2_CHECKED_TYPESCRIPT_PIN: require TypeScript ' + expectedVersion);
   }
-  await mkdir(path.dirname(output), { recursive: true });
+  await prepareCheckedOutputDirectory(output);
   const staging = await mkdtemp(path.join(path.dirname(output), '.psc-target-'));
   try {
-    const tsFile = path.join(staging, stem + '.ts');
-    await writeFile(tsFile, typeScript);
+    const tsInputs = projectLayout?.artifacts ?? new Map([[stem + '.ts', typeScript]]);
+    for (const [name, text] of tsInputs) {
+      const file = path.join(staging, name);
+      await mkdir(path.dirname(file), { recursive: true });
+      await writeFile(file, text);
+    }
+    const tsFiles = [...tsInputs.keys()].map(name => path.join(staging, name));
     signal?.throwIfAborted();
     const args = typeScriptProfileArgs([
-      tsFile, '--target', 'ES2022', '--module', 'ES2022', '--moduleResolution', 'bundler',
+      ...tsFiles, '--target', 'ES2022', '--module', 'ES2022', '--moduleResolution', 'bundler',
       '--strict', '--declaration', '--sourceMap', '--noEmitOnError', '--skipLibCheck', '--pretty', 'false',
     ], expectedVersion);
     const run = spawnSync(process.execPath, [tsc, ...args], {
@@ -163,7 +201,8 @@ export async function buildChecked({
     });
     if (run.error) throw run.error;
     if (run.status !== 0) throw new Error('PSC2_CHECKED_TSC_FAILED: ' + run.stdout + '\n' + run.stderr);
-    const js = await readFile(path.join(staging, stem + '.js'));
+    const js = await readFile(path.join(staging,
+      projectLayout ? projectLayout.bundle.replace(/\.ts$/u, '.js') : stem + '.js'));
     receipt.typeScriptSha256 = digest(typeScript);
     receipt.targetValidation = {
       tool: 'typescript', version: expectedVersion, launcherSha256: digest(await readFile(tsc)),
@@ -171,7 +210,7 @@ export async function buildChecked({
       strict: true, noEmitOnError: true, generatedJavaScriptSha256: digest(js),
       semanticPreservationProved: false,
     };
-    const artifacts = new Map([[stem + '.ts', typeScript]]);
+    const artifacts = projectLayout?.artifacts ?? new Map([[stem + '.ts', typeScript]]);
     if (output.endsWith('.js')) {
       artifacts.set(stem + '.js', js);
       for (const suffix of ['.d.ts', '.js.map']) {
@@ -182,6 +221,7 @@ export async function buildChecked({
     }
     return await publishCheckedArtifacts({
       outputPath: output, entryPath: snapshot.entry, artifacts, receipt,
+      ...(projectLayout ? { projectRoot, facadeSources: projectLayout.facadeSources } : {}),
       beforeCommit: assertCurrent,
     });
   } finally {

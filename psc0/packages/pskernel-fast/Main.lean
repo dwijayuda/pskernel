@@ -10,7 +10,7 @@ def check (condition : Bool) (description : String) : IO Unit := do
 
 def main : IO Unit := do
   let term : RawExpr :=
-    .lam (.sort 0) (.app (.bvar 0) (.const "x"))
+    .lam (.sort .zero) (.app (.bvar 0) (.const "x" []))
 
   let (root, store) ←
     match encodeClosed term with
@@ -52,4 +52,21 @@ def main : IO Unit := do
   | .error .decodeBudget => pure ()
   | _ => throw (IO.userError "exhausted decode budget was not rejected")
 
-  IO.println "PSKernel-Fast G0: representation/scoping checks passed (NOT proof-checker certification)"
+  let u : Level := .param "u"
+  let symbolic : RawExpr := .sort (.imax .zero u)
+  let successor : RawExpr := .sort (.succ (.imax .zero u))
+  let universeTerm : RawExpr := .pi symbolic successor
+  let (universeRoot, universeStore) ←
+    match encodeClosed universeTerm with
+    | .ok result => pure result
+    | .error err =>
+        throw (IO.userError s!"symbolic universe syntax was rejected: {repr err}")
+  check (universeStore.nodes.size == 3)
+    "different imax and successor expressions were incorrectly interned as one"
+  match decodeClosed universeStore universeRoot with
+  | .ok restored =>
+      check (restored == universeTerm) "symbolic universe round-trip changed syntax"
+  | .error err =>
+      throw (IO.userError s!"failed to decode symbolic universe: {repr err}")
+
+  IO.println "PSKernel-Fast G1: representation, imax syntax and scope checks passed (NOT proof checking)"

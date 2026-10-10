@@ -1,4 +1,5 @@
 import Std
+import PSKernelFast.Level
 
 /-!
 # PSKernel-Fast G0: representation only
@@ -12,8 +13,8 @@ namespace PSKernelFast
 
 inductive RawExpr where
   | bvar (index : Nat)
-  | sort (level : Nat)
-  | const (name : String)
+  | sort (level : Level)
+  | const (name : String) (levels : List Level)
   | app (fn arg : RawExpr)
   | lam (type body : RawExpr)
   | pi (type body : RawExpr)
@@ -23,7 +24,7 @@ deriving Repr, BEq, Inhabited
 def RawExpr.scoped (expr : RawExpr) (depth : Nat) : Bool :=
   match expr with
   | .bvar i => decide (i < depth)
-  | .sort _ | .const _ => true
+  | .sort _ | .const _ _ => true
   | .app fn arg => fn.scoped depth && arg.scoped depth
   | .lam ty body | .pi ty body => ty.scoped depth && body.scoped (depth + 1)
   | .letE ty value body =>
@@ -31,8 +32,8 @@ def RawExpr.scoped (expr : RawExpr) (depth : Nat) : Bool :=
 
 inductive Node where
   | bvar (index : Nat)
-  | sort (level : Nat)
-  | const (name : String)
+  | sort (level : Level)
+  | const (name : String) (levels : List Level)
   | app (fn arg : Nat)
   | lam (type body : Nat)
   | pi (type body : Nat)
@@ -89,7 +90,7 @@ def Store.intern (store : Store) (node : Node) :
 def encode : RawExpr → Store → Except Failure (Nat × Store)
   | .bvar i, store => store.intern (.bvar i)
   | .sort l, store => store.intern (.sort l)
-  | .const n, store => store.intern (.const n)
+  | .const n levels, store => store.intern (.const n levels)
   | .app fn arg, store => do
       let (fi, store) ← encode fn store
       let (ai, store) ← encode arg store
@@ -124,7 +125,7 @@ def decodeFuel : Nat → Store → Nat → Except Failure RawExpr
           match node with
           | .bvar i => .ok (.bvar i)
           | .sort l => .ok (.sort l)
-          | .const n => .ok (.const n)
+          | .const n levels => .ok (.const n levels)
           | .app fi ai => do
               let fn ← decodeFuel remaining store fi
               let arg ← decodeFuel remaining store ai

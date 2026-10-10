@@ -37,3 +37,13 @@ Intended focused tests:
 7. Independently qualify generated native/JS/Wasm and future self-host source only after algorithm architecture and runtime are stable.
 
 **No claimed speedup or success beyond G0 tests**; keep benchmarks parser-separated and compare official Lean at matching version and corpus.
+
+## Verified G0 evidence — exact 4.35 toolchain
+
+Source SHA: `48ce7e1ddaddee60bf1b6a108ea420b1469ff40f`.
+[Successful workflow 38093806811](https://github.com/dwijayuda/pskernel/actions/runs/38093806811), job `114335443522`.
+Log: Lean `4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; six successful Lake build jobs; executable printed G0 representation/scoping checks passed. This is not a proof checker or a benchmark result.
+
+## G1 in progress (unqualified until separately completed CI)
+
+New `PSKernelFast/Level.lean` represents raw `zero`, `succ`, `max`, `imax`, `param`, `mvar` syntactically, without implementing semantic level equivalence, cumulativity or checking. `RawExpr.sort` and constant universe args carry this representation. Add a negative-regression-style structural distinction between `imax 0 u` and `succ (imax 0 u)`, a known dangerous comparison class. Do NOT claim this syntactic test establishes universe soundness. Cloud validation requires a new exact SHA run.

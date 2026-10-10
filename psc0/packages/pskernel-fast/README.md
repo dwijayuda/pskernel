@@ -6,7 +6,7 @@ This is an independent greenfield project. Its design **is not constrained by pr
 
 Read [ARCHITECTURE_V3.md](ARCHITECTURE_V3.md) for the canonical performance-and-correctness-first decisions and [AI_WORK_STATE.md](AI_WORK_STATE.md) for actual qualifications.
 
-The G0 package defines a simplified raw expression language and a hash-consed array of nodes with exact collision-checked node lookup, bounded decoding, and raw-scope validation. Those operations will support a future fast kernel; they do not establish typing or soundness.
+The G0/G1 seed defines a simplified raw expression language including **symbolic universe syntax** (zero/succ/max/imax/param/mvar), and a hash-consed array of nodes with exact collision-checked lookup, bounded decoding, and raw-scope validation. Universe *equivalence and typing* are not implemented. Those operations will support a future fast kernel; they do not establish typing or soundness.
 
 Native Lean 4.35-rc4 development commands:
 

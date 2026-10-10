@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-pscv-p1c-direct-boolean-source-mapping-qualification",
+  "milestone": "P1-C selected direct surface source mapping; NOT a complete Standard registry",
+  "sourceCommit": "3153fe5732794f2e96cde994085b9a2ec28acfa9",
+  "sourceBranch": "psc0/platform-pscv-p1c-mapping-v1",
+  "baseBranch": "psc0/platform-pscv-p1b-v1",
+  "draftPR": "https://github.com/dwijayuda/pskernel/pull/98",
+  "qualification": {
+    "runId": 38052355776,
+    "attempt": 1,
+    "result": "success",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38052355776",
+    "jobs": [
+      {
+        "name": "proposal-and-gate (ubuntu-24.04, 22.23.3)",
+        "id": 114213856104,
+        "conclusion": "success",
+        "nodeTests": 26
+      },
+      {
+        "name": "proposal-and-gate (ubuntu-24.04, 26.7.0)",
+        "id": 114213856198,
+        "conclusion": "success",
+        "nodeTests": 26
+      },
+      {
+        "name": "proposal-and-gate (windows-2022, 26.7.0)",
+        "id": 114213856266,
+        "conclusion": "success",
+        "nodeTests": 26
+      },
+      {
+        "name": "lean-rc3-source-provenance-audit",
+        "id": 114213856219,
+        "conclusion": "success"
+      },
+      {
+        "name": "lean-pure-contract-preflight",
+        "id": 114213856241,
+        "conclusion": "success",
+        "pscvCertified": false
+      },
+      {
+        "name": "lean-observed-registry-inventory",
+        "id": 114213856300,
+        "conclusion": "success",
+        "directBoolMapped": 3
+      }
+    ]
+  },
+  "normative": {
+    "reference": "PSCV-RC-v2",
+    "referenceSha256": "4c02626fd0b991e8526c64b65f4ffb66b9ce7b688298e82fb0309802a263db71",
+    "exactLeanSemanticCommit": "470d5ce1400764999581fd26d5d72b00d990b0f4",
+    "leanVersion": "4.35.0-rc3",
+    "requiredOperatorRows": 230,
+    "requiredReferencedSnapshotIds": 194,
+    "locatedDirectBooleanIds": 3,
+    "unresolvedSnapshotIds": 191,
+    "closedStandardActivated": false
+  },
+  "provenance": {
+    "sourcePath": "src/Init/Prelude.lean",
+    "sourceGitBlobSha1": "f87ee970af5149d74434f09a89aedff1a8fdb2d2",
+    "sourceContentSha256": "cc9f337a5d8bd00768121701bceb0661ac63e01831a9aa34b282f37c689a6c39",
+    "mappingEvidenceSha256": "c9e5dce7f97646779dc8a00d5c441226550a353190c9ebbe7c9b1aac70c70b9d",
+    "mappings": [
+      {
+        "id": "Bool.or",
+        "logicalLine": 1053,
+        "internal": "Bool.Internal.or",
+        "internalLine": 1056,
+        "equalityTheorem": "Bool.or_eq_internalOr",
+        "theoremLine": 1098,
+        "publicNoncomputable": true
+      },
+      {
+        "id": "Bool.and",
+        "logicalLine": 1071,
+        "internal": "Bool.Internal.and",
+        "internalLine": 1074,
+        "equalityTheorem": "Bool.and_eq_internalAnd",
+        "theoremLine": 1094,
+        "publicNoncomputable": true
+      },
+      {
+        "id": "Bool.not",
+        "logicalLine": 1086,
+        "internal": "Bool.Internal.not",
+        "internalLine": 1089,
+        "equalityTheorem": "Bool.not_eq_internalNot",
+        "theoremLine": 1102,
+        "publicNoncomputable": true
+      }
+    ],
+    "independentPSKernelReplay": false,
+    "backendExecutionPreservationProved": false
+  },
+  "artifacts": [
+    {
+      "id": 11670325503,
+      "name": "pscv-ambient-registry-observation",
+      "zipSha256": "cf62cc227fd79ca1fe6f64bf8eb0d7b787e8f13a76d271ff340ef5d8ddd51ee6",
+      "size": 456129,
+      "expiresAt": "2026-11-09T12:33:44Z"
+    },
+    {
+      "id": 11670400315,
+      "name": "pscv-lean435rc3-source-provenance",
+      "zipSha256": "d33e06c8314c35ffdab734162e4abfe99ff5fd4d7c784632db42d63020e90f5d",
+      "size": 2598,
+      "expiresAt": "2026-11-09T12:33:25Z"
+    }
+  ],
+  "guarantees": {
+    "typeNamePinsSourceChecked": true,
+    "logicalBooleanDeclarationsImported": true,
+    "equalityTheoremNamesImported": true,
+    "runtimeBridgeQualified": false,
+    "sourceToTypeScriptSemanticsQualified": false,
+    "closedRegistryOrderingQualified": false,
+    "coercionAndEffectRegistriesQualified": false,
+    "certifiedExecutableAuthorized": false,
+    "pscvVerified": false,
+    "nativeCoreOrCompilerImplementationChanged": false,
+    "compilerFixedPointChanged": false,
+    "npmPublished": false,
+    "mainMerged": false
+  },
+  "next": "P1-D resolve the remaining 191 normative snapshot IDs by typed class-head/instance search, source provenance, exact ordering and approved environment manifest; verify erasure/backend and certificate only later."
+}

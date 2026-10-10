@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "kind": "psc0-t3-editor-query-and-pslsp-qualification",
+  "version": "0.1.0-preview.5",
+  "qualifiedRuntimeSource": "fe62c189aac09cdfe1c156864a329b4db5a0a9e5",
+  "compilerSourceUnchanged": true,
+  "kernelSemanticSourceUnchanged": true,
+  "run": {
+    "id": 38031535192,
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38031535192",
+    "completedAt": "2026-10-10T06:39:22Z"
+  },
+  "baseBranch": "psc0/platform-t2-watch-v1",
+  "branch": "psc0/platform-t3-lsp-v1",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/94",
+  "candidateArtifact": {
+    "id": 11661484886,
+    "bytes": 3908781,
+    "sha256": "b5849bf805567f012768d9b0967e00019bcf21fa891beeaa1e0aac108b054e1d",
+    "expiresAt": "2026-11-09T06:37:44Z"
+  },
+  "packages": [
+    {
+      "name": "proofscript",
+      "file": "proofscript-0.1.0-preview.5.tgz",
+      "bytes": 3665055,
+      "sha256": "3c59c56eaa3f23bda83708b796af520db5c7042692c27bd555d9d7c427fbb440"
+    },
+    {
+      "name": "psdev",
+      "file": "psdev-0.1.0-preview.5.tgz",
+      "bytes": 1996,
+      "sha256": "4d0e619661de46dc8c6e53d534a8757b4185bf482f16d961d773c7a1f96262cc"
+    },
+    {
+      "name": "@psc-demo/pshello",
+      "file": "psc-demo-pshello-0.1.0-preview.5.tgz",
+      "bytes": 1934,
+      "sha256": "815ad4e1624373a90fe506581cb2c51ffeafeaaf161bd01c8104635cff0736a3"
+    },
+    {
+      "name": "pslsp",
+      "file": "pslsp-0.1.0-preview.5.tgz",
+      "sha256": null,
+      "note": "Exact pslsp package SHA recorded in installed-lsp-smoke.json in each successful installed job artifact, not extracted into this committed summary."
+    }
+  ],
+  "jobs": [
+    {
+      "id": 114153320768,
+      "platform": "linux",
+      "node": "22.23.3",
+      "name": "qualify",
+      "conclusion": "success",
+      "hostTests": {
+        "pass": 143,
+        "fail": 0,
+        "skip": 0
+      },
+      "nativeTests": {
+        "pass": 18,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    {
+      "id": 114153510080,
+      "platform": "windows",
+      "node": "26.7.0",
+      "name": "windows-source",
+      "conclusion": "success",
+      "hostTests": {
+        "pass": 147,
+        "fail": 0,
+        "skip": 1
+      },
+      "nativeTests": {
+        "pass": 15,
+        "fail": 0,
+        "skip": 3
+      }
+    },
+    {
+      "id": 114153510072,
+      "platform": "windows",
+      "node": "22.23.3",
+      "npm": "10.9.9",
+      "name": "installed",
+      "conclusion": "success",
+      "ordinaryObservations": 46,
+      "watchObservations": 5,
+      "lspObservations": 5,
+      "evidenceArtifactId": 11661554904
+    },
+    {
+      "id": 114153510113,
+      "platform": "windows",
+      "node": "26.7.0",
+      "npm": "12.0.2",
+      "name": "installed",
+      "conclusion": "success",
+      "ordinaryObservations": 46,
+      "watchObservations": 5,
+      "lspObservations": 5,
+      "evidenceArtifactId": 11662084530
+    },
+    {
+      "id": 114153510078,
+      "platform": "linux",
+      "node": "22.23.3",
+      "npm": "10.9.9",
+      "name": "installed",
+      "conclusion": "success",
+      "ordinaryObservations": 48,
+      "watchObservations": 5,
+      "lspObservations": 5,
+      "evidenceArtifactId": 11662114353
+    },
+    {
+      "id": 114153510124,
+      "platform": "linux",
+      "node": "26.7.0",
+      "npm": "12.0.2",
+      "name": "installed",
+      "conclusion": "success",
+      "ordinaryObservations": 48,
+      "watchObservations": 5,
+      "lspObservations": 5,
+      "evidenceArtifactId": 11662630537
+    }
+  ],
+  "editorQuery": {
+    "protocol": "psc-source-query/1",
+    "scope": "in-memory entry document plus saved imported .ps closure",
+    "kernelAdmission": true,
+    "emitsArtifacts": false,
+    "profile": "checked",
+    "acceptsUnpublishedOverlay": true,
+    "formatter": "syntax spans in UTF-16 when reported by the compiler, otherwise source-unlocated",
+    "acceptedArtifactClaims": false,
+    "compilerSemanticPreservationProof": false,
+    "pscvVerified": false
+  },
+  "lsp": {
+    "protocol": "LSP-3.17",
+    "transport": "stdio JSON-RPC",
+    "supported": [
+      "initialize",
+      "initialized",
+      "shutdown",
+      "exit",
+      "textDocument/didOpen",
+      "textDocument/didChange(full)",
+      "textDocument/didSave",
+      "textDocument/didClose",
+      "textDocument/publishDiagnostics"
+    ],
+    "unsupported": [
+      "hover",
+      "definition",
+      "completion",
+      "semanticTokens",
+      "workspace semantic queries"
+    ],
+    "safeVersionedResultCancellation": true,
+    "noImplicitEditorLaunch": true,
+    "noExtensionGuestExecution": true,
+    "maxDocuments": 32,
+    "maxTotalEditorTextBytes": 8388608,
+    "maxDocBytes": 1048576
+  },
+  "watchSchedulingFix": {
+    "appliesTo": [
+      "linux",
+      "windows"
+    ],
+    "approach": "bounded content polling, excluding publisher-owned temporary paths",
+    "motivation": "Linux recursive fs.watch could race temporary output-lock directory retirement; Windows libuv alias path crash was previously observed",
+    "regressionTestPassed": true
+  },
+  "previousQualifiedCompiler": {
+    "modules": 62,
+    "sourceClosureSha256": "3932952ddb743692ceab3fe2d48e5c3d5f61aa04d2da47e562f5fa4e3aa689ea",
+    "generatedJsSha256": "6ab7d603cb612aaaa710a9dd0367ff8fdc4edadb893b3f6f217873444c167617",
+    "nativeKernelSource": "963030dc2d154008fccc82e7c8ed29331f138799",
+    "selectedSeedChanged": false,
+    "bootstrapRequalifiedByT3": false
+  },
+  "npmPublished": false,
+  "mergedToMain": false,
+  "scopeExclusions": [
+    "full compiler semantic-preservation proof",
+    "general PSCV contract verification",
+    "LSP semantic hover/definition",
+    "VS Code extension publishing",
+    "qualified Core JS/Wasm provider",
+    "general npm extension framework"
+  ],
+  "artifactRetentionNotice": "Expiring CI ZIP is not durable binary retention; committed digests do not preserve executable bytes."
+}

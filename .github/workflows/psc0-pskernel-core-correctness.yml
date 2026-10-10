@@ -28,17 +28,17 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      - name: Validate complete spine coherence, erasure and axiom boundaries
+      - name: Validate annotated local lookup and carried inference proofs
         working-directory: psc0/packages/pskernel-core
         run: |
           set -euo pipefail
           test "$(lean --githash)" = c29b6dda4f7c20e3eeaa717c4e565663c5cfa364
-          lake build Ps.KernelCore.Metatheory.SemanticAnnotatedSpines
+          lake build Ps.KernelCore.Metatheory.SemanticReferenceLocalContext Ps.KernelCore.Metatheory.SemanticInferenceBoundary
           npm run test:proofs
-      - name: Run model-independent annotated syntax checks
+      - name: Run native checker and annotated-context regressions
         if: ${{ !cancelled() }}
         working-directory: psc0/packages/pskernel-core
-        run: lake exe pskernel_annotated_syntax_tests
+        run: npm test
 
   binary:
     if: github.event_name == 'workflow_dispatch' && inputs.runtime_checks

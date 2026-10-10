@@ -23,7 +23,28 @@ theorem environmentModel_withNativeEvaluator (M : Reading V)
     (env : PsKernelEnvironment) (native : Option PsKernelNativeEvaluator)
     (model : EnvironmentModel M env) :
     EnvironmentModel M (psKernelEnvironmentWithNativeEvaluator env native) := by
-  exact model
+  refine {
+    lookupCanonical := ?_
+    lookupInHistory := ?_
+    lookupName := ?_
+    stored := ?_
+    falsePinned := model.falsePinned
+  }
+  · intro name
+    simpa [psKernelEnvironmentWithNativeEvaluator, psKernelEnvironmentFind]
+      using model.lookupCanonical name
+  · intro name info found
+    have prior : psKernelEnvironmentFind env name = some info := by
+      simpa [psKernelEnvironmentWithNativeEvaluator, psKernelEnvironmentFind]
+        using found
+    exact model.lookupInHistory name info prior
+  · intro name info found
+    have prior : psKernelEnvironmentFind env name = some info := by
+      simpa [psKernelEnvironmentWithNativeEvaluator, psKernelEnvironmentFind]
+        using found
+    exact model.lookupName name info prior
+  · intro info present
+    exact model.stored info present
 
 /-- The real reference axiom checking entry can only return the result of
 the guarded environment insertion, following successful header checking. -/
@@ -34,15 +55,9 @@ theorem referenceAddAxiom_returns_insert
       fuel env value maxDepth maxNatSize = .ok next) :
     psKernelEnvironmentAdd env (.axiomInfo value) = .ok next := by
   unfold psKernelAddAxiom at run
-  cases hHeader : psKernelCheckConstantBaseWithSession fuel
-      (psKernelMkCheckerSession env value.base.levelParams
-        (if value.isUnsafe then PsKernelDefinitionSafety.unsafeDef
-          else PsKernelDefinitionSafety.safe) maxDepth maxNatSize)
-      value.base with
-  | error error =>
-      simp [hHeader] at run
-  | ok valid =>
-      simpa [hHeader] using run
+  split at run
+  · cases run
+  · exact run
 
 /-- An actual successful reference axiom check preserves the modeled history
 *provided* the caller independently models the axiom. Mere success of the
@@ -80,7 +95,7 @@ theorem referenceDispatchAxiom_returns_add
       have equal : candidate = next := by
         simpa [psKernelV1DispatchDeclaration, psKernelV1EnvironmentOutcome, h] using run
       cases equal
-      exact h
+      rfl
 
 /-- The actual reference public AXIOM dispatch preserves the stronger model
 when that axiom belongs to the *explicit* modeled policy. It is not yet a

@@ -233,7 +233,13 @@ def generalPiFormationSmoke : IO Unit := do
   -- not the domain universe. Other imax ranks remain predicative.
   let piProp : KExpr :=
     .forallE a (.sort .zero) (.bvar 0) .default
-  expectType (inferClosedGeneralPi [] piProp) (.sort .zero)
+  -- The prototype preserves the symbolic imax syntax; semantic
+  -- evaluation proves it denotes zero, without claiming normalization.
+  expectType (inferClosedGeneralPi [] piProp)
+    (.sort (.imax (.succ .zero) .zero))
+  require ((ULevel.imax (.succ .zero) .zero).denote
+      (fun _ => 0) == 0)
+    "P1d syntactic imax failed numeric Prop regime"
   let piType : KExpr :=
     .forallE a (.sort two) (.sort one) .default
   expectType (inferClosedGeneralPi [] piType)

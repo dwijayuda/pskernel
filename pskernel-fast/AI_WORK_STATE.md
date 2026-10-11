@@ -8,7 +8,20 @@ Working branch: `research/pskernel-fast-clean-v3-20261011`. Source ancestor: V2 
 
 ## Current status (read before the chronological checkpoints)
 
-## New-chat continuation handoff — P1g (October 11, 2026)
+## Latest P1g tagged-source denotation checkpoint — GREEN (October 11, 2026)
+
+**Most recent VERIFIED source/CI:** [commit `8cc2d41aee99ec82fc2fbcd265c11875d4581590`](https://github.com/dwijayuda/pskernel/commit/8cc2d41aee99ec82fc2fbcd265c11875d4581590), [run 38133327235](https://github.com/dwijayuda/pskernel/actions/runs/38133327235), job `114451991620`, **SUCCESS**, pinned Lean 4.35.0-rc4 upstream `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`: **96 Lake build jobs, 44 independent Lean sources audited, 129 exact theorem-assumption receipts** (restricted to `propext`, `Classical.choice`, `Quot.sound`; no `sorryAx`) and the existing G1–G4.3b smoke suite passed. See [P1g human evidence](P1G_TAGGED_INTERPRETATION_EVIDENCE.md) and [JSON evidence](P1G_TAGGED_INTERPRETATION_EVIDENCE.json).
+
+**Coherent proof-only NEW tagged semantics:** `Spec/TaggedPropSemantics.lean` reuses the independently proved P1f `taggedPoint/taggedTrue/taggedProp/taggedSortSet`, defines `taggedPropPi`, `interpTaggedProp` over the **existing** semantic AST, and explicitly checks semantic Pi fibre validity. Proves Pi membership/truth/false counterexample, false `∀P:Prop,P`, true `∀P:Prop,P→P`, no false inhabitant and that this true proposition has only the distinguished tagged point as model member. `Proof/TaggedPropModelBridge.lean` independently proves the matching ACTUAL `inferClosedGeneralPi` success, typed annotation, source/type erasure, exact symbolic imax Prop regime and those new tagged denotations for BOTH checked sources. The NEW theorem conclusions no longer refer to the old provisional `interpProp`.
+
+**Scope boundary:** this is two precisely requalified checked source cases plus a reusable conditional annotated Prop-Pi rule — **not general Lean term soundness**, closed model existence, proof-term irrelevance, Type-valued dependent graph Pi, typed quotient freshness, model-preserving declarations or relative no-False. P1d/P1e `sortSet/propPi/interpProp` remain compiled as historical provisional proofs; their retirement is still open, so the pre-existing full-migration policy flag remains false. The production G4.3b checker and proof-admission boundary were NOT modified; admitted declarations remain zero. Real kernel-only performance not yet benchmarked.
+
+**CI diagnostics:** initial P1g [run 38133021503](https://github.com/dwijayuda/pskernel/actions/runs/38133021503) failed in a theorem-audit stage with redirected diagnostics; CI now explicitly builds both new modules and logs failed proofs. [Run 38133151703](https://github.com/dwijayuda/pskernel/actions/runs/38133151703) found four definitional `Mem`-versus-`member` simplifier mismatches, resolved via consistent P1f raw membership notation. [Run 38133250018](https://github.com/dwijayuda/pskernel/actions/runs/38133250018) found the same notation boundary in the proof bridge. Final [run 38133327235](https://github.com/dwijayuda/pskernel/actions/runs/38133327235) passed ALL jobs without extra set-model assumptions or weaker assertions.
+
+**Next P1h:** hereditary and source-environment-indexed `WellDenoted` with checked binder regimes and real semantic fibre evidence for Sort/bvar/Pi; after that proof-term beta/let, Type-valued dependent graph Pi and app/eta, guarded typed quotient slots, general checked-source semantic soundness, and model-preserving fully checked declarations. Preserve P1f's negative unrestricted-image countermodel and refuse universal quotient freshness. Do not freeze performance architecture to fit provisional proofs.
+
+
+## Historical handoff (written before P1g; superseded by the verified checkpoint above)
 
 **Self-contained prompt committed:** [AI_HANDOFF_NEXT_CHAT.md](AI_HANDOFF_NEXT_CHAT.md), created in commit `9a3bef3d4c420b90b6a53ad07ee6540c933f073b`. Paste the entire document into a new chat or supply its exact GitHub URL. **GitHub LIVE HEAD is the source of truth; this handoff itself is a documentation-only change.** No executing checker source or old branches changed to prepare the handoff.
 

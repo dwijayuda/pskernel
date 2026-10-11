@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1f-tagged-point-and-derived-Tarski-finite-pair-closure-verified-no-global-model-or-admission",
+    "stage": "P1g-tagged-prop-interpretation-qualified-for-two-actual-checked-sources-conditional-no-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,7 +86,7 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 110,
+    "p1ReviewedTheoremAssumptionCount": 129,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
@@ -159,7 +159,25 @@
     "p1fFullTypedQuotientWritabilityModelProved": false,
     "p1fFullProofIrrelevanceGraphQuotientFreshnessProved": false,
     "p1fGeneralCheckedSourceSoundnessProved": false,
-    "p1fCompleteModelExistsProved": false
+    "p1fCompleteModelExistsProved": false,
+    "p1gTaggedPropInterpreterImplemented": true,
+    "p1gTaggedPiMembershipAndTruthRulesProved": true,
+    "p1gActualCheckedFalseAndTrueSourceDenotationsProved": true,
+    "p1gCheckedAnnotationsAndSymbolicImaxRequalifiedUnderTaggedCarrier": true,
+    "p1gTaggedSemanticFibreValidityForTwoConcreteSourcesProved": true,
+    "p1gTrueValueOnlyTaggedPointAndFalseValueUninhabitedProved": true,
+    "p1gModelTermsDependentOnProvisionalTruthCarrier": false,
+    "p1gOldProvisionalInterpreterFullyRetired": false,
+    "p1gSourceIndependentHereditaryWellDenotedProved": false,
+    "p1gGeneralCheckedSourceSemanticSoundnessProved": false,
+    "p1gTypedProofIrrelevanceProved": false,
+    "p1gTypeValuedDependentGraphPiProved": false,
+    "p1gGeneralBetaLetSetDenotationPreservationProved": false,
+    "p1gTypedQuotientSlotFreshnessProved": false,
+    "p1gConstructedSetTheoryBasisInstance": false,
+    "p1gRelativeConsistencyTheoremProved": false,
+    "p1gProductionAdmissionEnabled": false,
+    "p1gRuntimeSemanticCheckerModified": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -171,10 +189,11 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "367ddf25d3d97e7fb0b88c86dbeed7410d51dc10",
+    "validatedSourceCommit": "8cc2d41aee99ec82fc2fbcd265c11875d4581590",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38129546961",
-    "jobId": 114440827120,
-    "scope": "94 Lake build jobs, 42 independent V3 Lean source files audited, 110 exact theorem assumptions, all G1-G4.3b smokes. Proof-only SetEncoding + TaggedProofPoint prove precise pair/graph/finite-natural/Prop non-collision, two distinct truth values, and unrestricted-image counterexample; FiniteUniverseClosure derives pair closure from Tarski size law with three-versus-two pigeonhole; TaggedPointUniverse proves tag/point/True/Prop∈Type1 and tagged Sort successor membership. No global quotient freshness, typed quotient model, old source interpreter migration, proof irrelevance, checked constant environment, kernel soundness, relative consistency, admission, or real kernel speed."
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38133327235",
+    "jobId": 114451991620,
+    "scope": "P1g GREEN: 96 Lake build jobs, 44 audited independent Lean modules, 129 theorem-assumption receipts, executing G4.3b regressions. New tagged Prop/Pi/interp and two actual source/erasure true-false denotations conditional on explicit SetTheoryBasis V and checked annotations. Old provisional interpreter retained as historical only; no full general model, well-denoted, proof irrelevance, Type-valued Pi, typed quotients, full Lean 4.35 conformance, admission, consistency, or real kernel benchmark.",
+    "p1fValidatedSourceCommit": "367ddf25d3d97e7fb0b88c86dbeed7410d51dc10"
   }
 }

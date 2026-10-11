@@ -1,0 +1,50 @@
+{
+  "schema": "pskernel-fast-tagged-interpretation-evidence/p1g",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualifiedSourceCommit": "8cc2d41aee99ec82fc2fbcd265c11875d4581590",
+  "ci": {
+    "runId": 38133327235,
+    "jobId": 114451991620,
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38133327235",
+    "toolchain": "Lean 4.35.0-rc4",
+    "upstreamCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "lakeBuildJobs": 96,
+    "independentLeanSourceModules": 44,
+    "assumptionReceipts": 129,
+    "allowlistedAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "sorryAxAllowed": false
+  },
+  "proved": {
+    "taggedProofOnlyPropositionInterpreter": true,
+    "taggedPropPiMembershipAndTruthCondition": true,
+    "exactTwoTruthValuesForTaggedPi": true,
+    "twoActualCheckedSourcesWithValidatedFibreProofs": true,
+    "sourceJudgmentBackedAnnotationAndSymbolicImaxRegime": true,
+    "actualSourceAndTypeErasure": true,
+    "taggedFalseForallPropDenotation": true,
+    "taggedTrueForallPropIdentityDenotation": true,
+    "exactTrueCarrierPointAndFalseCarrierUninhabited": true
+  },
+  "open": {
+    "constructedSetTheoryBasisInstance": false,
+    "fullOldInterpreterRetirement": false,
+    "generalHereditaryWellDenoted": false,
+    "fullSourceSemanticSoundness": false,
+    "checkedProofTermProofIrrelevance": false,
+    "typeValuedGraphPiAndApp": false,
+    "typedQuotientWritability": false,
+    "fullLean435DefEq": false,
+    "checkedDeclarationModel": false,
+    "relativeModelConsistency": false,
+    "proofAdmissionAPI": false,
+    "realKernelBenchmark": false
+  },
+  "runtimeKernelRulesChanged": false,
+  "retainedProvisionalP1dP1eProofsAreNotCanonicalTaggedDenotations": true
+}

@@ -367,14 +367,7 @@ def psElabMatchWith (elaborate : PsElaborator)
   let cursor ← psElabMatchApplyParameters context (parameters ++ [plan.motive]) recursorType
   let minors ← psElabMatchMinors info levels parameters plan alternatives info.constructors
     minorContext cursor
-  -- Branches can solve an initially unknown result type. Reconcile its
-  -- universe with the recursor before checking the completed application.
-  let resolvedLevel ← psElabMatchMotiveLevel minors.context plan.motive
-  let levels := psLevelUnify minors.context.metaContext.levels level resolvedLevel
-  if !levels.success then throw .typeMismatch
-  let completed := psElabContextWithMeta minors.context
-    (psMetaSetLevels minors.context.metaContext levels.context)
   let term := psExprApplyMany (.constE recursorName recursorLevels)
     (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term] ++ plan.arguments)
-  psElabResolvedTerm (psElabLeaveScope context completed) term (some expectedType)
+  psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
 

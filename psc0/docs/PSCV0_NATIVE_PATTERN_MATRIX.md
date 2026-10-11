@@ -64,8 +64,8 @@ variable let retains its original let node and optional annotation.
 
 When no result type is supplied, the matrix allocates one scoped type constraint
 before discriminants and branch fields are opened. All rows solve that shared
-constraint; branch-local fields cannot escape into it. Once branches have
-inferred the result, the elimination layer reconciles the motive's universe with
-the recursor before checking its final application. Explicit expected types use
-the same path. Inference of dependent motives beyond this scoped result variable
-is not claimed.
+constraint; branch-local fields cannot escape into it. The shared unifier
+checks each metavariable assignment's type and solves its universe constraints,
+including those of inferred match results. Motive level inference inspects the
+instantiated type. Explicit expected types use the same path. Inference of
+dependent motives beyond this scoped result variable is not claimed.

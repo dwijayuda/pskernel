@@ -56,3 +56,13 @@ and kernel checking. This change does not admit Type/existential fields, arbitra
 proof-valued uniform parameters, or Prop-family runtime data. Function-typed
 runtime fields can still accept proofs: their ignored Unit call slots follow the
 evaluation-boundary rule above, unlike proof payload fields which store nothing.
+
+Proof-carrying fields also exercise polymorphic proposition applications.
+The shared unifier now checks a candidate assignment against its metavariable's
+declared type before assignment, using the same bounded worker and transactional
+context. This constrains universes when an implicit type parameter is inferred
+(for example A : Sort u instantiated as Nat), instead of relying on explicit
+type arguments. Occurs and local-scope checks remain in the assignment store.
+The pinned [RC4 assignment checker](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Meta/ExprDefEq.lean)
+likewise checks candidate types. Match-specific universe reconciliation is no
+longer necessary and has been removed.

@@ -4,6 +4,7 @@ import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
 import Ps.Meta.Reduce
+import Ps.Meta.Infer
 
 structure PsUnifyResult where
   context : PsMetaContext
@@ -41,16 +42,25 @@ def psMetaVarIsNatural (context : PsMetaContext) (id : Nat) : Bool :=
       | _ => false
   | none => false
 
+-- Assignment solves the candidate's type constraints as well as its value.
+-- In particular ?A : Sort ?u := Nat must constrain ?u to 1; scope/occurs
+-- checks alone would leave polymorphic constants with unresolved universes.
 def psUnifyAssign
-    (context : PsMetaContext)
-    (id : Nat)
-    (value : PsExpr) : PsUnifyResult :=
-  if psMetaVarAssignable context id then
-    match psMetaAssign context id value with
+    (unifyTypes : PsMetaContext -> PsExpr -> PsExpr -> PsUnifyResult)
+    (environment : PsEnvironment) (localContext : PsLocalContext)
+    (context : PsMetaContext) (id : Nat) (value : PsExpr) : PsUnifyResult :=
+  if !psMetaVarAssignable context id then psUnifyFailure context else
+    match psMetaFindDecl context id with
     | none => psUnifyFailure context
-    | some next => psUnifySuccess next
-  else
-    psUnifyFailure context
+    | some declaration =>
+      match psInferType environment context localContext (psMetaInstantiate context value) with
+      | .error _ => psUnifyFailure context
+      | .ok type =>
+        let checked := unifyTypes context declaration.type type
+        if !checked.success then psUnifyFailure context else
+          match psMetaAssign checked.context id value with
+          | none => psUnifyFailure context
+          | some next => psUnifySuccess next
 
 def psUnifyLevelLists
     (leftLevels : List PsLevel) :
@@ -107,6 +117,8 @@ def psUnifyWithFuelWorker
             PsExpr ->
             PsUnifyResult :=
           psUnifyWithFuelWorker remaining;
+        let assign : Nat -> PsExpr -> PsUnifyResult :=
+          psUnifyAssign (smaller environment localContext) environment localContext context;
         let leftValue := psWhnf environment context localContext left;
         let rightValue := psWhnf environment context localContext right;
         if psExprAlphaEq leftValue rightValue then
@@ -121,21 +133,21 @@ def psUnifyWithFuelWorker
                   else if psMetaVarIsNatural context rightId then
                     if psMetaVarIsNatural context leftId then
                       if psMetaVarAssignable context leftId then
-                        psUnifyAssign context leftId rightValue
+                        assign leftId rightValue
                       else
-                        psUnifyAssign context rightId leftValue
+                        assign rightId leftValue
                     else
-                      psUnifyAssign context rightId leftValue
+                      assign rightId leftValue
                   else if psMetaVarAssignable context leftId then
-                    psUnifyAssign context leftId rightValue
+                    assign leftId rightValue
                   else
-                    psUnifyAssign context rightId leftValue
+                    assign rightId leftValue
               | _ =>
-                  psUnifyAssign context leftId rightValue
+                  assign leftId rightValue
           | .sortE leftLevel =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .sortE rightLevel =>
                   let unified := psLevelUnify context.levels leftLevel rightLevel;
                   if unified.success then
@@ -146,7 +158,7 @@ def psUnifyWithFuelWorker
           | .constE leftName leftLevels =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .constE rightName rightLevels =>
                   if psNameEq leftName rightName then
                     psUnifyLevelLists leftLevels context rightLevels
@@ -156,7 +168,7 @@ def psUnifyWithFuelWorker
           | .app leftFn leftArg =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .app rightFn rightArg =>
                   let fnResult :=
                     smaller
@@ -178,7 +190,7 @@ def psUnifyWithFuelWorker
           | .lam leftName leftType leftBody _ =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .lam rightName rightType rightBody _ =>
                   let typeResult :=
                     smaller
@@ -207,7 +219,7 @@ def psUnifyWithFuelWorker
           | .forallE leftName leftType leftBody _ =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .forallE rightName rightType rightBody _ =>
                   let typeResult :=
                     smaller
@@ -236,12 +248,12 @@ def psUnifyWithFuelWorker
           | .letE _ _ _ _ =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | _ => psUnifyFailure context
           | .lit leftLiteral =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .lit rightLiteral =>
                   if psLiteralEq leftLiteral rightLiteral then
                     psUnifySuccess context
@@ -251,7 +263,7 @@ def psUnifyWithFuelWorker
           | .fvar leftId =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .fvar rightId =>
                   if Nat.beq leftId rightId then
                     psUnifySuccess context
@@ -261,7 +273,7 @@ def psUnifyWithFuelWorker
           | .bvar leftIndex =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .bvar rightIndex =>
                   if Nat.beq leftIndex rightIndex then
                     psUnifySuccess context
@@ -271,7 +283,7 @@ def psUnifyWithFuelWorker
           | .proj leftType leftIndex leftProjValue =>
               match rightValue with
               | .mvar id =>
-                  psUnifyAssign context id leftValue
+                  assign id leftValue
               | .proj rightType rightIndex rightProjValue =>
                   if psNameEq leftType rightType then
                     if Nat.beq leftIndex rightIndex then

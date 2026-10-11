@@ -340,8 +340,7 @@ theorem sourceRankedTagged_rule_sort_rank
       | pi _ _ _ _ _ uOther vOther hDomOther hBodyOther =>
           obtain ⟨vRank, hBodyType, hZero⟩ := ihBody hBodyOther
           have hEq : vOther = vRank := by
-            injection hBodyType with hv
-            exact hv
+            injection hBodyType
           have hBodyZero : vOther.denote ρ = 0 := by
             simpa only [hEq] using hZero
           refine ⟨.imax uOther vOther, rfl, ?_⟩

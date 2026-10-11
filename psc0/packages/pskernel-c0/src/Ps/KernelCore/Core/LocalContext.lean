@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Expr
+import Ps.KernelCore.Runtime.Acceleration.Cache
 
 inductive PsKernelLocalDecl where
   | localDecl
@@ -59,6 +60,9 @@ def psKernelLocalDeclBinderInfo
 structure PsKernelLocalContext where
   decls : List PsKernelLocalDecl
   nextIndex : Nat
+  -- Optional persistent index. Small contexts remain list-only.
+  -- The list remains the authoritative declaration order (shadowing).
+  index : Option (PsKernelC0HashTrie PsKernelLocalDecl) := Option.none
 
 def psKernelLocalContextEmpty : PsKernelLocalContext :=
   {
@@ -84,13 +88,58 @@ def psKernelLocalContextFindIn
           name
           rest
 
+
+/-
+C0 local environment indexing.
+
+Small local contexts stay as simple lists. At the ninth binder, construct a
+radix-16 trie keyed by full name hashes, with collision buckets checked by
+exact PsKernelName equality. Future extensions update only four trie levels.
+Previously captured contexts remain immutable and retain their prior index.
+-/
+def psKernelC0LocalIndexInsert
+    (index : PsKernelC0HashTrie PsKernelLocalDecl)
+    (decl : PsKernelLocalDecl) :
+    PsKernelC0HashTrie PsKernelLocalDecl :=
+  let hash := psKernelCacheNameHash (psKernelLocalDeclName decl)
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth index hash
+  psKernelC0TrieSet psKernelC0IndexDepth index hash (List.cons decl bucket)
+
+def psKernelC0LocalIndexBuild
+    (decls : List PsKernelLocalDecl) :
+    PsKernelC0HashTrie PsKernelLocalDecl :=
+  match decls with
+  | List.nil => PsKernelC0HashTrie.empty
+  | List.cons decl rest =>
+      psKernelC0LocalIndexInsert (psKernelC0LocalIndexBuild rest) decl
+
+def psKernelC0LocalContextNextIndex
+    (context : PsKernelLocalContext)
+    (decl : PsKernelLocalDecl) :
+    Option (PsKernelC0HashTrie PsKernelLocalDecl) :=
+  match context.index with
+  | Option.some index =>
+      Option.some (psKernelC0LocalIndexInsert index decl)
+  | Option.none =>
+      -- The linear check is bounded to the eight-entry small-context path.
+      if Nat.ble 8 context.decls.length then
+        Option.some
+          (psKernelC0LocalIndexBuild (List.cons decl context.decls))
+      else
+        Option.none
+
 def psKernelLocalContextFind
     (context : PsKernelLocalContext)
     (name : PsKernelName) :
     Option PsKernelLocalDecl :=
-  psKernelLocalContextFindIn
-    name
-    context.decls
+  match context.index with
+  | Option.none =>
+      psKernelLocalContextFindIn name context.decls
+  | Option.some index =>
+      psKernelLocalContextFindIn
+        name
+        (psKernelC0TrieBucket psKernelC0IndexDepth index
+          (psKernelCacheNameHash name))
 
 def psKernelLocalContextAddLocal
     (context : PsKernelLocalContext)
@@ -99,18 +148,12 @@ def psKernelLocalContextAddLocal
     (type : PsKernelExpr)
     (binderInfo : PsKernelBinderInfo) :
     PsKernelLocalContext :=
+  let decl := PsKernelLocalDecl.localDecl
+    context.nextIndex name userName type binderInfo
   {
-    decls :=
-      List.cons
-        (PsKernelLocalDecl.localDecl
-          context.nextIndex
-          name
-          userName
-          type
-          binderInfo)
-        context.decls
-    nextIndex :=
-      Nat.succ context.nextIndex
+    decls := List.cons decl context.decls
+    nextIndex := Nat.succ context.nextIndex
+    index := psKernelC0LocalContextNextIndex context decl
   }
 
 def psKernelLocalContextAddLet
@@ -120,16 +163,10 @@ def psKernelLocalContextAddLet
     (type : PsKernelExpr)
     (value : PsKernelExpr) :
     PsKernelLocalContext :=
+  let decl := PsKernelLocalDecl.letDecl
+    context.nextIndex name userName type value
   {
-    decls :=
-      List.cons
-        (PsKernelLocalDecl.letDecl
-          context.nextIndex
-          name
-          userName
-          type
-          value)
-        context.decls
-    nextIndex :=
-      Nat.succ context.nextIndex
+    decls := List.cons decl context.decls
+    nextIndex := Nat.succ context.nextIndex
+    index := psKernelC0LocalContextNextIndex context decl
   }

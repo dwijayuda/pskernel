@@ -45,7 +45,7 @@ jobs:
           lean --version
           lake --version
           lake update
-          lake build PSKernelFast.Spec.TaggedPropSemantics PSKernelFast.Proof.TaggedPropModelBridge PSKernelFast.Proof.TaggedWellDenoted PSKernelFast.Proof.SourceTaggedContextBridge pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke
+          lake build PSKernelFast.Spec.TaggedPropSemantics PSKernelFast.Proof.TaggedPropModelBridge PSKernelFast.Proof.TaggedWellDenoted PSKernelFast.Proof.SourceTaggedContextBridge PSKernelFast.TypedConversion pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke
       - name: Audit exact theorem assumptions
         working-directory: pskernel-fast
         shell: bash

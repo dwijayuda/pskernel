@@ -74,12 +74,12 @@ def psRecursorLiftHelper (state : PsRecursorLiftState) (locals : PsLocalContext)
   let context := psRecursorLiftContext state locals
   let headType ← psRecursorLiftInfer state locals view.head
   let some cursor := psReduceApplyType
-    (psWhnf state.environment psMetaEmpty locals) headType view.prefix
-    | throw "recursor prefix does not match its telescope"
+    (psWhnf state.environment psMetaEmpty locals) headType view.fixedArgs
+    | throw "recursor fixedArgs does not match its telescope"
   let opened ← (psElabOpenCoreTelescope 4096 context cursor
     (some (view.info.numIndices + 1))).mapError (fun _ => "cannot open recursor index/major telescope")
   let fresh := psElabBinderArguments opened.bindersRev
-  let body := psReduceApply view.head (view.prefix ++ fresh)
+  let body := psReduceApply view.head (view.fixedArgs ++ fresh)
   let value := psCloseElabLambdaBinders psMetaEmpty opened.bindersRev body
   let type := psCloseElabForallBinders psMetaEmpty opened.bindersRev opened.body
   let captures := psRecursorLiftCaptures locals type value
@@ -88,7 +88,7 @@ def psRecursorLiftHelper (state : PsRecursorLiftState) (locals : PsLocalContext)
   let arguments := captures.map (fun binder => PsExpr.fvar binder.id) ++ view.indices ++ [view.major]
   let some restored := psRecursorLiftBetaApply value arguments
     | throw "recursor helper substitution failed"
-  let original := psReduceApply view.head (view.prefix ++ view.indices ++ [view.major])
+  let original := psReduceApply view.head (view.fixedArgs ++ view.indices ++ [view.major])
   if !psExprAlphaEq restored original then throw "recursor helper changed its original computation"
   let (name, state) ← psRecursorLiftFreshName 4096 state
   let declaration := PsDeclaration.definitionDecl name state.levels type value
@@ -137,7 +137,7 @@ def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
       let term := psReduceApply head.term arguments.snd.reverse
       let some view := psRecursorApplication state.environment term | return { state, term }
       if !psRecursorUsesHypotheses state.environment view then return { state, term }
-      let minors := view.prefix.drop (view.info.numParams + 1)
+      let minors := view.fixedArgs.drop (view.info.numParams + 1)
       let direct := root && view.suffix.isEmpty &&
         ((psRecursorVaryingLocals view.major view.indices minors).map
           (fun ids => ids.all entryIds.contains)).getD false
@@ -152,7 +152,8 @@ def psRecursorLiftDeclarations (environment : PsEnvironment)
       match declaration with
       | .definitionDecl name levels type value =>
         let state : PsRecursorLiftState := { environment := acc.fst, owner := name, levels }
-        let lifted ← psRecursorLiftVisit 4096 true [] state psLocalEmpty value
+        let lifted ← (psRecursorLiftVisit 4096 true [] state psLocalEmpty value).mapError
+          (fun message => message ++ " (in " ++ psNameToString name ++ ")")
         let rewritten := PsDeclaration.definitionDecl name levels type lifted.term
         let environment := { lifted.state.environment with
           declarations := rewritten :: psEnvironmentRemoveName name lifted.state.environment.declarations

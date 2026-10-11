@@ -8,7 +8,7 @@ structure PsRecursorApplication where
   info : PsRecursorInfo
   family : PsInductiveInfo
   head : PsExpr
-  prefix : List PsExpr
+  fixedArgs : List PsExpr
   indices : List PsExpr
   major : PsExpr
   suffix : List PsExpr
@@ -26,7 +26,7 @@ def psRecursorApplication (environment : PsEnvironment) (expr : PsExpr) :
     let prefixSize := info.numParams + 1 + info.numMinors
     let major ← view.args[prefixSize + info.numIndices]?
     return {
-      info, family, head := view.head, prefix := view.args.take prefixSize
+      info, family, head := view.head, fixedArgs := view.args.take prefixSize
       indices := (view.args.drop prefixSize).take info.numIndices
       major, suffix := view.args.drop (prefixSize + info.numIndices + 1) }
 
@@ -67,7 +67,7 @@ def psRecursorUsesHypotheses (environment : PsEnvironment)
     (view : PsRecursorApplication) : Bool :=
   view.family.constructors.zipIdx |>.any fun entry =>
     match psEnvironmentFindConstructor environment entry.fst,
-        view.prefix[view.info.numParams + 1 + entry.snd]? with
+        view.fixedArgs[view.info.numParams + 1 + entry.snd]? with
     | some ctor, some minor =>
       if ctor.recursiveFields.isEmpty then false else
         match psRecursorStripLambdas (ctor.numFields + ctor.recursiveFields.length) minor with

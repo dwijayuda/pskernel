@@ -271,7 +271,15 @@ Ordinary edits use incremental Lake builds with toolchain/configuration-specific
 cache keys. The old M1 generation and closure workflows are manual-only here.
 Measured evidence and exact source commits are recorded in ../AI_WORK_STATE.md.
 
-## Next semantic milestones
+## Next requested milestone
+
+Implement a Rust backend over validated typed IR before completing v7. Keep the
+existing parser, elaborator, official kernel checks and proof erasure shared;
+put Rust representation and runtime support in the target backend. Establish a
+small compile-and-run acceptance boundary first. Compiler-source migration and
+self-hosting remain later milestones.
+
+## Remaining semantic milestones
 
 1. Rich source representation and shared parser category ownership.
 2. Shared scopes, ordered applications, expected types and small proof goals.
@@ -287,5 +295,12 @@ Never imply that native Lean elaborator availability proves portable coverage.
 
 Profile 15 adds source class/instance registration and qualified structure/class
 projections through the shared portable environment. See
-`../docs/PSCV0_NATIVE_CLASSES.md`; native qualification is pending. The next
-requested milestone is a Rust backend over the existing typed IR, before full v7.
+[class environment design](../docs/PSCV0_NATIVE_CLASSES.md).
+[Native run 38171564012](https://github.com/dwijayuda/pskernel/actions/runs/38171564012)
+passed at a74153c8c1571ee01913b8db6af10d803767d005: 264 checked declarations,
+four accepted semantic inputs, 50 phase-specific refusals, and strict TypeScript
+compilation plus JavaScript runtime execution. Instance lookup prioritizes
+lexical locals, then descending global priorities; failed candidates restore their
+constraint snapshots. Ground cycles backtrack. Expected record parameters reach
+field lambdas through the shared named application engine. Full non-ground
+typeclass resolution and source attributes remain pending.

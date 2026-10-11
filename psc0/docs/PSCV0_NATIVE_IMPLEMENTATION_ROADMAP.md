@@ -24,7 +24,7 @@ this development loop.
 | Capability family | Existing implementation/evidence | Remaining mechanisms |
 |---|---|---|
 | Source categories and scopes | Rich terms, calls/defaults, expected binders, namespaces/open/sections, grouped annotation scope | Full selected literals/operators, aliases/modifiers, syntax-preserving diagnostics |
-| Type inference and environment | Scoped typed metavariable assignment with universe constraints, local instances, universe instantiation, RC4 checking | Source universes, complete global class/instance registration and frozen Standard registry |
+| Type inference and environment | Scoped typed metavariable assignment with universe constraints, prioritized global/local instances and checked class methods, universe instantiation, RC4 checking | Source universes, tabled non-ground search/output parameters, attributes/default instances and frozen Standard registry |
 | Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, nested/multiple typed pattern matrices and nomatch, proof-field storage erasure | Named discriminants, heterogeneous constraints, Type/existential fields, selected nested/mutual data |
 | Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
 | Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
@@ -55,7 +55,7 @@ terms, then the affected runtime path, while reusing compact integration inputs.
 
 ## Next requested backend milestone
 
-After the current small class/instance milestone, implement a Rust backend before
+The small class/instance milestone is qualified in native profile 15. Implement a Rust backend before
 full v7 completion. Reuse checked prepared Core and validated typed IR. Keep target
 representation and runtime support inside backend/runtime modules; do not fork
 source elaboration or proof checking. Define the initial Rust capability boundary

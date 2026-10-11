@@ -1,4 +1,50 @@
-# PSCV0 v7 native continuation — pattern matrices and proof-carrying runtime data
+# PSCV0 v7 native continuation — class and instance milestone
+
+The small milestone requested before adding Rust is complete. Development remains
+portable native .lean with official Lean RC4 checking and Linux cloud CI on draft
+PR #109. Full v7 completion is not claimed. The next requested implementation
+milestone is the Rust backend over the existing validated typed IR.
+
+## Latest qualified implementation
+
+Source **a74153c8c1571ee01913b8db6af10d803767d005**,
+[run 38171564012](https://github.com/dwijayuda/pskernel/actions/runs/38171564012),
+profile **pscv0-v7-native-bounded/15**, all PASS:
+- Native Lean 4.35.0-rc4 build and official kernel admission of the 264-declaration
+  composite application.
+- Existing 28 parser cases and one isolated semantic batch: four accepted inputs,
+  50 phase-specific refusals. Six new refusals protect instance grammar,
+  registered-class results, dictionary field typing and cyclic-only search.
+- Actual CLI emission, typed IR validation, TypeScript 7.0.2 strict compilation
+  and emitted JavaScript execution.
+- Runtime evidence covers named/anonymous global instances, numeric/named
+  priorities, recursive generic dictionaries, local precedence, cyclic-candidate
+  fallback, class proof fields and qualified structure/class projections.
+- Import guard: 85 portable modules / 91 native closure modules.
+- Observed application phases: parse 17 ms, elaborate 20 ms, prepare 57 ms,
+  official kernel 30 ms, erase 53 ms, emit 9 ms. Single-run observations only.
+
+Class registration is environment metadata over existing structure elaboration.
+Global instances are checked definitions, registered only after elaboration and
+class-result validation. Persistent environment insertion preserves both registries.
+Locals precede prioritized globals; equal priorities prefer the most recent entry.
+Failed candidates restore their constraints; active ground goals prune cycles.
+Class dictionary projections and ordinary structure projections are closed Core
+definitions submitted to the same official checking boundary.
+
+Record construction now propagates expected uniform parameters before checking
+fields and uses the shared named-argument engine. Obsolete positional record
+ordering helpers were removed. Generated instance field lambdas enclose their
+dependent result ascriptions. No alternate checker or host frontend is introduced.
+
+See docs/PSCV0_NATIVE_CLASSES.md for the invariants and remaining boundaries.
+Ground search is not full RC4 typeclass resolution: tabled non-ground search,
+output parameters, superclasses, attributes/default instances, imported class
+registries and source universes remain pending. Full v7 language work resumes
+after the requested Rust backend milestone. pskernel-core, compiler-source .ps
+generation and self-hosting remain outside this development loop.
+
+## Prior qualified dependent-pattern and proof-data milestone
 
 Development remains native .lean with official Lean RC4 checking and Linux cloud
 CI, on draft PR #109. The canonical v7 specification remains the target; this

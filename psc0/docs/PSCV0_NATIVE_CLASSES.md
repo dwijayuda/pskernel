@@ -33,8 +33,11 @@ priority arithmetic and value-form instance declarations remain grammar refusals
 The compact existing composite application exercises prioritized global selection,
 recursive generic dictionaries, local precedence, proof fields, qualified
 projections and cyclic-candidate backtracking. Focused refusals exercise the
-grammar and registration boundaries. Validation is pending until a linked native
-CI receipt is recorded in AI_WORK_STATE.md.
+grammar and registration boundaries. [Native run 38171564012](https://github.com/dwijayuda/pskernel/actions/runs/38171564012)
+passed at source a74153c8c1571ee01913b8db6af10d803767d005: official Lean
+accepted the 264-declaration composite, all 50 phase-specific refusals passed,
+and TypeScript strict compilation plus JavaScript runtime checks passed.
+The exact receipt is recorded in AI_WORK_STATE.md.
 
 This is ground instance synthesis, not a claim of complete native typeclass
 resolution: output parameters, tabled non-ground search, superclass derivation,

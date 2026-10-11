@@ -58,6 +58,7 @@ jobs:
           lake env lean src/PSKernelFast/Proof/Erasure.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/ErasureTotality.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Spec/UniverseSemantics.lean >> /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/PropPi.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/PiModelRegime.lean >> /tmp/pskernel-fast-axioms.log
           cat /tmp/pskernel-fast-axioms.log
           python3 scripts/audit_axioms.py /tmp/pskernel-fast-axioms.log

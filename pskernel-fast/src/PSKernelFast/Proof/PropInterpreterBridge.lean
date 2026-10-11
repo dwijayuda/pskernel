@@ -51,7 +51,7 @@ term underlying the proposition-specific model AST.
 theorem forallPropProp_actual_erasure
     (ρ : KName → Nat) (name : KName) :
     eraseExpr ρ (forallPropPropSource name) =
-      some PropInterpTerm.forallPropPropTerm.forget := by
+      some forallPropPropTerm.forget := by
   rfl
 
 /--
@@ -99,7 +99,7 @@ theorem forallPropProp_checked_set_denotation
     inferClosedGeneralPi [] (forallPropPropSource name) =
       .ok forallPropPropSourceType ∧
     eraseExpr ρ (forallPropPropSource name) =
-      some PropInterpTerm.forallPropPropTerm.forget ∧
+      some forallPropPropTerm.forget ∧
     eraseExpr ρ forallPropPropSourceType = some (.sort 0) ∧
     SetTheoryBasis.Mem
       (interpProp V env forallPropPropTerm)

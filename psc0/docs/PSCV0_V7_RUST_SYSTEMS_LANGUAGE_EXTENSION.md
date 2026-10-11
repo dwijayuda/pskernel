@@ -172,10 +172,10 @@ psNativeType ::=
 psNativeResourceBase ::= psNativeNominalType
                        | '(' psNativeType ')'
 
-psNativeNominalType ::= selectedRustBoundType
+psNativeNominalType ::= selectedRustBoundType | selectedNativeScalarType
 ```
 
-`selectedRustBoundType` denotes a named native-library type such as `Rust.Vec UInt8`. The qualifiers are recognized only in selected native type positions. They are **not** ordinary curried term application, and `let mut` remains a separate `do` construct.
+`selectedRustBoundType` denotes a named native-library type such as `Rust.Vec UInt8`; `selectedNativeScalarType` covers ABI-compatible scalars such as `UInt32` (not arbitrary Lean objects). The qualifiers are recognized only in selected native type positions. They are **not** ordinary curried term application, and `let mut` remains a separate `do` construct.
 
 | Rust | Proposed `.ps` parameter | Static meaning |
 |---|---|---|
@@ -221,7 +221,7 @@ The Rust borrow checker can reject invalid generated Rust. But the source-to-Rus
 function submit(
   q: borrow mut Rust.Queue,
   req: owned Rust.Request
-): Rust.Result Unit (Rust.Error, Rust.Request) := do {
+): Rust.Result(Unit, Rust.Error × Rust.Request) := do {
   return q.tryPush(req)
 }
 ```
@@ -433,8 +433,11 @@ These are type and library properties; **no `effect`, `irq`, `transaction`, `pac
 ```text
 psNativeExternalFunction ::=
   '@[' 'native.externC' '(' stringLiteral ')' ']'
-  'function' declId V7.psFunctionBinders ':' psNativeType
+  'function' declId psNativeExternBinders ':' psNativeType
 
+psNativeExternBinders ::= V7.psBinderSeq | '(' ')'
+-- Only in a foreign ABI signature, `()` denotes zero ABI parameters,
+-- not V7 function f()'s hidden required Unit binder.
 -- No ':=' body.
 -- ABI parameter/return types must be admitted native representations.
 ```
@@ -454,7 +457,7 @@ unsafe extern "C" {
 function cAbs(input: Int32): Int32
 ```
 
-This example is a **declared foreign symbol**, not a proof of symbol existence, ABI validity or call safety. Calls remain privileged unless an approved wrapper establishes the necessary conditions. Other ABI families and variadics are not selected in the initial grammar.
+This example is a **declared foreign symbol**, not a proof of symbol existence, ABI validity or call safety. The special foreign signature `function clockTicks(): Rust.USize` (for a suitably declared foreign symbol) has **zero C ABI arguments**; it is not the same grammar category as an ordinary V7 `function clockTicks()` with a hidden logical `Unit` binder. Calls remain privileged unless an approved wrapper establishes the necessary conditions. Other ABI families and variadics are not selected in the initial grammar.
 
 ### Explicit native unsafe wrappers
 
@@ -753,7 +756,9 @@ psNativeUnsafeFunction ::=
 
 psNativeExternalFunction ::=
   '@[' 'native.externC' '(' stringLiteral ')' ']'
-  'function' declId V7.psFunctionBinders ':' psNativeType
+  'function' declId psNativeExternBinders ':' psNativeType
+
+psNativeExternBinders ::= V7.psBinderSeq | '(' ')'
 
 psNativeRepresentedStructure ::=
   ('@[' 'native.reprC' ']' |
@@ -779,7 +784,7 @@ psNativeResourceBase ::=
     psNativeNominalType
   | '(' psNativeType ')'
 
-psNativeNominalType ::= selectedRustBoundType
+psNativeNominalType ::= selectedRustBoundType | selectedNativeScalarType
 
 psNativeContract ::=
   psNativeGiven? psNativeRequires? psNativeEnsures?

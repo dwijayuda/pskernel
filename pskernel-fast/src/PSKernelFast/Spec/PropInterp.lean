@@ -146,9 +146,80 @@ theorem forallPropProp_is_false (V : Type u)
     (propPi_false_of_counterexample V
       (sortSet V 0) (fun x => x) (propFalse V) hMember hNotTrue)
 
+
+/--
+Another closed proposition fragment: forall (P : Prop), P -> P.
+The first binder is a proposition, the second binder is a proof of P
+at the source level; at this PROP-SET interpretation tier the body
+denotes the model value P. This statement DOES NOT interpret a proof term.
+-/
+def forallPropIdentityTerm : PropInterpTerm :=
+  .propPi (.sort 0) (.propPi (.bvar 0) (.bvar 1))
+
+/--
+In the two-valued carrier, the truth-value implication P -> P is true
+for either P. A false proposition has no elements, while a true one
+gives the same true fibre at every domain member.
+-/
+theorem prop_imp_self_true (V : Type u) [SetTheoryBasis V]
+    (P : V) (hP : SetTheoryBasis.Mem P (sortSet V 0)) :
+    propPi V P (fun _ => P) = propTrue V := by
+  apply (propPi_true_iff V P (fun _ => P)).2
+  intro x hx
+  have hInCarrier : SetTheoryBasis.Mem P (propTruthUniverse V) := by
+    simpa only [sortSet] using hP
+  rcases (propUniverse_exactly_two V P).mp hInCarrier with hFalse | hTrue
+  · have hMemberEmpty : SetTheoryBasis.Mem x
+        (SetTheoryBasis.emptySet V) := by
+      simpa only [hFalse] using hx
+    exact False.elim (SetTheoryBasis.not_member_empty V x hMemberEmpty)
+  · exact hTrue
+
+/--
+For every model proposition P, the nested implication product has a
+well-formed Prop-valued semantic fibre. This is derived from the actual
+two-valued candidate set-model definition, not assumed on the source.
+-/
+theorem forallPropIdentity_fibres_valid (V : Type u)
+    [SetTheoryBasis V] (env : Nat → V) :
+    PropPiFibresValid V env (.sort 0)
+      (.propPi (.bvar 0) (.bvar 1)) := by
+  intro P hP
+  apply interpProp_pi_member V
+    (extendSetEnv P env) (.bvar 0) (.bvar 1)
+  intro x hx
+  simpa [interpProp, extendSetEnv] using hP
+
+/-- The nested dependent identity-implication proposition is modelled Prop. -/
+theorem forallPropIdentity_member_prop (V : Type u)
+    [SetTheoryBasis V] (env : Nat → V) :
+    SetTheoryBasis.Mem (interpProp V env forallPropIdentityTerm)
+      (sortSet V 0) :=
+  interpProp_pi_member V env (.sort 0)
+    (.propPi (.bvar 0) (.bvar 1))
+    (forallPropIdentity_fibres_valid V env)
+
+/--
+The second fully interpreted proposition is TRUE, as the semantic
+implication P -> P is true for both false and true model propositions.
+-/
+theorem forallPropIdentity_is_true (V : Type u)
+    [SetTheoryBasis V] (env : Nat → V) :
+    interpProp V env forallPropIdentityTerm = propTrue V := by
+  change propPi V (sortSet V 0)
+      (fun P => propPi V P (fun _ => P)) = propTrue V
+  apply (propPi_true_iff V (sortSet V 0)
+    (fun P => propPi V P (fun _ => P))).2
+  intro P hP
+  exact prop_imp_self_true V P hP
+
 #print axioms interpProp_pi_member
 #print axioms forallPropProp_fibres_valid
 #print axioms forallPropProp_member_prop
 #print axioms forallPropProp_is_false
+#print axioms prop_imp_self_true
+#print axioms forallPropIdentity_fibres_valid
+#print axioms forallPropIdentity_member_prop
+#print axioms forallPropIdentity_is_true
 
 end PSKernelFast.Spec

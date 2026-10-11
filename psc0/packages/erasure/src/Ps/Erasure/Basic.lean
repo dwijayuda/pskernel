@@ -148,6 +148,7 @@ structure PsRuntimeInductiveInfo where
   numParams : Nat
   typeParameters : List PsVerifiedIrTypeParameter
   constructors : List PsRuntimeConstructorInfo
+  numIndices : Nat := 0
 
 structure PsErasureCurrentDefinition where
   name : String
@@ -661,7 +662,12 @@ def psEraseRuntimeTypeWithFuelWorker
                       psErasureSafeIdentifier
                         (psNameToString name)
                         "Type";
-                match psErasureMapRuntimeTypes (smaller scope) view.args with
+                -- Indexed families retain only uniform type parameters in the
+                -- runtime representation; constructor fields carry runtime data.
+                let arguments := match psEnvironmentFindInductive environment name with
+                  | some info => view.args.take info.numParams
+                  | none => view.args
+                match psErasureMapRuntimeTypes (smaller scope) arguments with
                 | Except.error error => Except.error error
                 | Except.ok arguments =>
                     Except.ok

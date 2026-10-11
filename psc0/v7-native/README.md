@@ -98,10 +98,33 @@ all field and constructor annotations use the rich term reader. The existing
 scope, telescope, record/projection and recursor machinery performs elaboration,
 without a second data-specific elaborator.
 
-Lambda result annotations, pattern binders and automatic insertion of omitted
-implicit lambda binders remain pending. Data support remains limited to simple
-nonindexed types in `Type`; constructor result annotations, deriving, structure
-field methods/defaults and inheritance remain pending.
+## Indexed data milestone
+
+Constructor result annotations are retained through syntax, scope resolution and
+printing. An inductive result telescope such as `Nat -> Type` declares indices;
+constructor results and direct recursive fields must apply the same uniform
+parameters and supply all indices. Missing indexed results, wrong families and
+changed parameters fail during elaboration.
+
+`Ps.Elab.Data` owns family/constructor admission and recursor construction.
+A shared Core telescope operation opens indices and fields, keeping their terminal
+types. Motives receive indices followed by the major; constructor conclusions and
+recursive hypotheses instantiate that same motive. The native official kernel
+checks the emitted declarations and actual recursor uses. The previous large
+data block is removed from the general declaration module.
+
+Ordinary exhaustive constructor matches now work on indexed families with a
+constant result motive. Runtime type applications omit family indices while
+constructor fields retain their runtime values; recursor lowering skips index
+arguments using metadata. Index-dependent pattern refinement, impossible-case
+elimination, dependent motive inference and indexed structural recursion remain
+pending. Indexed recursive hypotheses may be used in kernel-checked proofs;
+runtime use is refused until changing-index recursion has its own lowering.
+This prevents the nonindexed recursion optimization from reusing stale indices.
+
+Data families still end in `Type`; universe/Prop families, deriving, structure
+field methods/defaults and inheritance remain pending. Lambda result annotations,
+pattern binders and insertion of omitted implicit lambda binders are also pending.
 
 ## Boundaries
 
@@ -147,7 +170,10 @@ variables. The same composite also covers grouped structure fields with an outer
 annotation scope, quantified field types, interleaved inductive/constructor
 parameters, constructor defaults, record projections and constructor matching.
 Three data refusals protect adjacent explicit groups, nullary constructors and
-field separators. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
+field separators. Indexed vectors and a two-index family extend that same
+application with construction, exhaustive matches and a checked induction proof.
+Four refusals protect uniform parameters, required constructor results, result
+family identity and index typing. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
 application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.

@@ -55,7 +55,7 @@ def psPscv0BinderShadowsExcept (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) :
 def psPscv0BinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0ConstructorTerms (constructor : PsSyntaxInductiveConstructor) : List PsSyntaxTerm :=
-  psListMap psPscv0BinderType constructor.fields
+  psListMap psPscv0BinderType constructor.fields ++ constructor.resultType.toList
 
 def psPscv0JoinTermLists (values : List (List PsSyntaxTerm)) : List PsSyntaxTerm :=
   match values with

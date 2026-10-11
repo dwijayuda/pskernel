@@ -156,7 +156,29 @@ private def application : String :=
   "}\n" ++
   "end Data\n" ++
   "const dataRecordAnswer: Nat := Data.dataRecord\n" ++
-  "const dataMatchAnswer: Nat := Data.pick(Data.event)\n"
+  "const dataMatchAnswer: Nat := Data.pick(Data.event)\n" ++
+  "namespace Indexed\n" ++
+  "inductive Vector(A: Type): Nat -> Type where {\n" ++
+  "  | nil: Vector(A, 0)\n" ++
+  "  | cons(n: Nat, head: A, tail: Vector(A, n)): Vector(A, Nat.succ(n))\n" ++
+  "}\n" ++
+  "const one: Vector(Nat, Nat.succ(0)) := Vector.cons(0, 71, Vector.nil)\n" ++
+  "function peek{A: Type}(n: Nat, values: Vector(A, n), fallback: A): A := match values with {\n" ++
+  "  | Vector.nil => fallback\n" ++
+  "  | Vector.cons n head tail => head\n" ++
+  "}\n" ++
+  "inductive Cell(A: Type): Nat -> Bool -> Type where {\n" ++
+  "  | cell(n: Nat, flag: Bool, value: A): Cell(A, n, flag)\n" ++
+  "}\n" ++
+  "function readCell{A: Type}(n: Nat, flag: Bool, cell: Cell(A, n, flag)): A := match cell with {\n" ++
+  "  | Cell.cell n flag value => value\n" ++
+  "}\n" ++
+  "theorem vectorInduction{A: Type}(P: Prop, base: P, n: Nat, values: Vector(A, n)): P :=\n" ++
+  "  Vector.rec(fun n values => P, base, fun n head tail ih => ih, values)\n" ++
+  "end Indexed\n" ++
+  "const indexedAnswer: Nat := Indexed.peek(Nat.succ(0), Indexed.one, 0)\n" ++
+  "const indexedEmpty: Nat := Indexed.peek(0, Indexed.Vector.nil, 72)\n" ++
+  "const indexedCell: Nat := Indexed.readCell(3, true, Indexed.Cell.cell(3, true, 73))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -203,7 +225,11 @@ private def semanticCases : IO Unit := do
     { source := "section\nvariable (x x: Nat)\nend\n" },
     { source := "structure Bad(A: Type)(B: Type) where { value: A }\n" },
     { source := "inductive Bad where { | empty() }\n" },
-    { source := "structure Bad where { x: Nat, y: Nat }\n" }]
+    { source := "structure Bad where { x: Nat, y: Nat }\n" },
+    { source := "inductive Bad(A: Type): Nat -> Type where { | bad: Bad(Nat, 0) }\n" },
+    { source := "inductive Bad: Nat -> Type where { | bad }\n" },
+    { source := "inductive Bad: Nat -> Type where { | bad: List Nat }\n" },
+    { source := "inductive Bad: Nat -> Type where { | bad: Bad(0) }\nconst wrong: Bad(Nat.succ(0)) := Bad.bad\n" }]
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate",
@@ -211,14 +237,18 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate", some "elaborate",
       some "parse", some "parse", some "parse", some "elaborate",
       some "parse", some "elaborate", some "elaborate",
-      some "parse", some "parse", some "parse"]
+      some "parse", some "parse", some "parse",
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
     "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-PARSE", "PSCV0-SCOPE: unknown name", "PSCV0-SCOPE: duplicate active section variable",
     "PSCV0-PARSE: PSCV0-BIND-02", "PSCV0-PARSE: nonempty binder group",
-    "PSCV0-PARSE: newline-separated structure field"]
+    "PSCV0-PARSE: newline-separated structure field",
+    "PSCV0-DATA: constructor parameters must remain uniform",
+    "PSCV0-DATA: indexed constructor requires a result type",
+    "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -245,7 +275,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 28 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 32 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

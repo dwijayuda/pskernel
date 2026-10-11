@@ -48,7 +48,9 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let result ← result.mapM (visit params.bound)
     let constructors ← constructors.mapM fun constructor => do
       let fields ← psScopeBinders visit params.bound constructor.fields
-      return ({ constructor with fields := fields.binders }, fields.used)
+      let result ← constructor.resultType.mapM (visit fields.bound)
+      return ({ constructor with fields := fields.binders, resultType := result.map (·.term) },
+        psScopeUnion fields.used (result.map (·.used) |>.getD []))
     let used := constructors.foldl (fun acc c => psScopeUnion acc c.snd)
       (psScopeUnion params.used (result.map (·.used) |>.getD []))
     let captured := psScopeSelect resolver.scope used

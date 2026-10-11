@@ -22,6 +22,7 @@ inductive PsElabError where
   | emptyCallUnsupported
   | invalidArgument (message : String)
   | scope (message : String)
+  | data (message : String)
   | atDeclaration (name : PsName) (error : PsElabError)
   | unsupportedTerm
   | matchExpectedType

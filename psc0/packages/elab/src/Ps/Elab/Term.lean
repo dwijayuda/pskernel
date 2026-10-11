@@ -1095,149 +1095,59 @@ def psElabStructuralMatchContext
           recursion.functionName recursion.parameterIds recursion.explicitParameterIds
           recursion.recursiveParameterIndex recursion.calls recursion.resultType permitted))
 
-def psElabMatch
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
+-- Generalize the index telescope of the major while keeping the selected
+-- result type constant. Dependent motive inference/generalization is separate.
+def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
+    (levels : List PsLevel) (parameters : List PsExpr) (expected : PsExpr) :
+    Except PsElabError PsExpr := do
+  let type := psExprInstantiateLevelParams info.levelParams levels info.type
+  let cursor ← psElabMatchApplyParameters context parameters type
+  let indices ← psElabOpenCoreTelescope 4096 context cursor (some info.numIndices)
+  let majorType := psExprApplyMany (.constE info.name levels)
+    (parameters ++ psElabBinderArguments indices.bindersRev)
+  return psCloseElabLambdaBinders context.metaContext indices.bindersRev
+    (.lam (psRootName "_match") majorType expected .explicit)
+
+def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
     (scrutineeSyntax : PsSyntaxTerm)
-    (alternativesSyntax :
-      List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match expected with
-  | none => Except.error PsElabError.matchExpectedType
-  | some expectedType =>
-      match elaborate context scrutineeSyntax Option.none with
-      | Except.error error => Except.error error
-      | Except.ok scrutineeResult =>
-          let scrutineeType :=
-            psWhnf
-              scrutineeResult.context.environment
-              scrutineeResult.context.metaContext
-              scrutineeResult.context.localContext
-              scrutineeResult.type;
-          let typeView := psExprAppView scrutineeType;
-          match typeView.head with
-          | .constE inductiveName inductiveLevels =>
-              match psEnvironmentFindInductive
-                  scrutineeResult.context.environment
-                  inductiveName with
-              | none =>
-                  Except.error PsElabError.matchScrutineeUnsupported
-              | some inductiveInfo =>
-                  if psElabNatNe inductiveInfo.numIndices 0 then
-                    Except.error PsElabError.matchInductiveUnsupported
-                  else if psElabNatNe (psElabListLength typeView.args) inductiveInfo.numParams then
-                    Except.error PsElabError.matchParameterArity
-                  else
-                    match psElabPrepareMatchAlternatives
-                        inductiveInfo
-                        alternativesSyntax
-                        [] with
-                    | Except.error error => Except.error error
-                    | Except.ok alternatives =>
-                        let recursorName :=
-                          psNameAppendStr inductiveInfo.name "rec";
-                        match psEnvironmentFindRecursor
-                            scrutineeResult.context.environment
-                            recursorName with
-                        | none =>
-                            Except.error PsElabError.matchRecursorUnsupported
-                        | some recInfo =>
-                            if
-                                psElabBoolOr
-                                  (psElabNatNe
-                                    recInfo.numParams
-                                    inductiveInfo.numParams)
-                                  (psElabBoolOr
-                                    (psElabNatNe recInfo.numIndices 0)
-                                    (psElabBoolOr
-                                      (psElabNatNe recInfo.numMotives 1)
-                                      (psElabNatNe
-                                        recInfo.numMinors
-                                        (psElabListLength inductiveInfo.constructors)))) then
-                              Except.error
-                                PsElabError.matchRecursorUnsupported
-                            else
-                              let instantiatedExpected :=
-                                psMetaInstantiate
-                                  scrutineeResult.context.metaContext
-                                  expectedType;
-                              match psInferType
-                                  scrutineeResult.context.environment
-                                  scrutineeResult.context.metaContext
-                                  scrutineeResult.context.localContext
-                                  instantiatedExpected with
-                              | Except.error error =>
-                                  Except.error (PsElabError.infer error)
-                              | Except.ok expectedTypeType =>
-                                  match psInferEnsureSort
-                                      scrutineeResult.context.environment
-                                      scrutineeResult.context.metaContext
-                                      scrutineeResult.context.localContext
-                                      expectedTypeType with
-                                  | Except.error error =>
-                                      Except.error (PsElabError.infer error)
-                                  | Except.ok resultLevel =>
-                                      let recursorLevels :=
-                                        if Nat.beq (psElabListLength recInfo.levelParams) 0 then
-                                          []
-                                        else if Nat.beq (psElabListLength recInfo.levelParams) 1 then
-                                          [resultLevel]
-                                        else
-                                          [];
-                                      if Nat.blt 1 (psElabListLength recInfo.levelParams) then
-                                        Except.error
-                                          PsElabError.matchRecursorLevels
-                                      else
-                                        match psElabMatchMinors
-                                            elaborate
-                                            inductiveInfo
-                                            inductiveLevels
-                                            typeView.args
-                                            instantiatedExpected
-                                            alternatives
-                                            (psElabStructuralMatchContext
-                                              scrutineeResult.context
-                                              scrutineeResult.term
-                                              instantiatedExpected)
-                                            inductiveInfo.constructors with
-                                        | Except.error error =>
-                                            Except.error error
-                                        | Except.ok minors =>
-                                            let motive :=
-                                              PsExpr.lam
-                                                (psRootName "_match")
-                                                scrutineeType
-                                                instantiatedExpected
-                                                PsBinderInfo.explicit;
-                                            let recursorTail :=
-                                              psElabExprListAppend
-                                                minors.minors
-                                                (List.cons
-                                                  scrutineeResult.term
-                                                  List.nil);
-                                            let recursorArgs :=
-                                              psElabExprListAppend
-                                                typeView.args
-                                                (List.cons
-                                                  motive
-                                                  recursorTail);
-                                            let recursorTerm :=
-                                              psExprApplyMany
-                                                (PsExpr.constE
-                                                  recursorName
-                                                  recursorLevels)
-                                                recursorArgs;
-                                            psElabResolvedTerm
-                                              minors.context
-                                              recursorTerm
-                                              (Option.some instantiatedExpected)
-          | _ =>
-              Except.error PsElabError.matchScrutineeUnsupported
+    (alternativesSyntax : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+  let some expectedType := expected | throw .matchExpectedType
+  let scrutinee ← elaborate context scrutineeSyntax none
+  let context := scrutinee.context
+  let typeView := psExprAppView
+    (psWhnf context.environment context.metaContext context.localContext scrutinee.type)
+  let .constE name levels := typeView.head | throw .matchScrutineeUnsupported
+  let some info := psEnvironmentFindInductive context.environment name
+    | throw .matchScrutineeUnsupported
+  if typeView.args.length != info.numParams + info.numIndices then throw .matchParameterArity
+  let parameters := typeView.args.take info.numParams
+  let indices := typeView.args.drop info.numParams
+  let alternatives ← psElabPrepareMatchAlternatives info alternativesSyntax []
+  let recursorName := psNameAppendStr name "rec"
+  let some recursor := psEnvironmentFindRecursor context.environment recursorName
+    | throw .matchRecursorUnsupported
+  if recursor.numParams != info.numParams || recursor.numIndices != info.numIndices ||
+      recursor.numMotives != 1 || recursor.numMinors != info.constructors.length then
+    throw .matchRecursorUnsupported
+  let expectedType := psMetaInstantiate context.metaContext expectedType
+  let expectedSort ← (psInferType context.environment context.metaContext
+    context.localContext expectedType).mapError PsElabError.infer
+  let level ← (psInferEnsureSort context.environment context.metaContext
+    context.localContext expectedSort).mapError PsElabError.infer
+  if recursor.levelParams.length > 1 then throw .matchRecursorLevels
+  let recursorLevels := if recursor.levelParams.isEmpty then [] else [level]
+  let motive ← psElabMatchMotive context info levels parameters expectedType
+  let minorContext := psElabStructuralMatchContext context scrutinee.term expectedType
+  -- The nonindexed recursion planner assumes invariant preceding arguments.
+  -- Do not give it an indexed IH until it can track changing indices as well.
+  let minorContext := if info.numIndices == 0 then minorContext
+    else psElabContextWithStructuralRecursion minorContext none
+  let minors ← psElabMatchMinors elaborate info levels parameters expectedType
+    alternatives minorContext info.constructors
+  let term := psExprApplyMany (.constE recursorName recursorLevels)
+    (parameters ++ [motive] ++ minors.minors ++ indices ++ [scrutinee.term])
+  psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
 
 structure PsElabRecordCandidate where
   constructorName : PsName

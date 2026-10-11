@@ -483,7 +483,12 @@ def psPrintLeanConstructor
             | List.nil => ""
             | List.cons _ _ =>
                 psPrintLeanConcat2 " " (psPrintJoin " " fields);
-          Except.ok (psPrintLeanConcat3 "  | " name suffix)
+          match constructor.resultType with
+          | none => Except.ok (psPrintLeanConcat3 "  | " name suffix)
+          | some type =>
+            match psPrintLeanTerm type with
+            | .error error => .error error
+            | .ok type => .ok ("  | " ++ name ++ suffix ++ " : " ++ type)
 
 def psPrintLeanDeclaration
     (declaration : PsSyntaxDeclaration) :

@@ -20,6 +20,7 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .atDeclaration name error =>
       psCompilerPscv0ElabError error ++ " (in " ++ psNameToString name ++ ")"
   | .scope message => "PSCV0-SCOPE: " ++ message
+  | .data message => "PSCV0-DATA: " ++ message
   | .invalidArgument message => "PSCV0-ARGUMENT: " ++ message
   | .emptyCallUnsupported => "PSCV0-APP-03"
   | .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"

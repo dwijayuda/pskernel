@@ -91,6 +91,7 @@ structure PsSyntaxInductiveConstructor where
   name : PsSyntaxName
   fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm)
   span : PsSourceSpan
+  resultType : Option PsSyntaxTerm := none
 
 structure PsSyntaxImport where
   moduleName : PsSyntaxName

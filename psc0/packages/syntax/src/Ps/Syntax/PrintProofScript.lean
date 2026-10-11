@@ -535,7 +535,12 @@ def psPrintProofScriptConstructor
       match psPrintProofScriptDeclarationBinders constructor.fields with
       | Except.error error => Except.error error
       | Except.ok suffix =>
-          Except.ok (psPrintProofScriptConcat3 "  | " name suffix)
+          match constructor.resultType with
+          | none => Except.ok (psPrintProofScriptConcat3 "  | " name suffix)
+          | some type =>
+            match psPrintProofScriptTerm type with
+            | .error error => .error error
+            | .ok type => .ok ("  | " ++ name ++ suffix ++ " : " ++ type)
 
 def psPrintProofScriptDeclaration
     (declaration : PsSyntaxDeclaration) :

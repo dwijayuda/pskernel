@@ -93,3 +93,7 @@ def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
       nextId := max outer.localContext.nextId inner.localContext.nextId
       declarations := outer.localContext.declarations }
     metaContext := inner.metaContext }
+
+def psElabContextWithEnvironment (context : PsElabContext)
+    (environment : PsEnvironment) : PsElabContext :=
+  { context with environment }

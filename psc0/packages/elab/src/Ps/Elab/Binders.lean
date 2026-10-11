@@ -277,3 +277,41 @@ def psElabLet (elaborate : PsElaborator) (context : PsElabContext)
       let annotation ← psElabType elaborate context sourceType
       elaborate annotation.context value (some annotation.type)
   psElabLetAfterValue elaborate context name valueResult.type valueResult body expected
+
+-- Open a Core telescope once, retaining its terminal body. A bounded count is
+-- used for constructor fields; none opens all indices of an inductive family.
+structure PsElabOpenTelescope where
+  context : PsElabContext
+  bindersRev : List PsElabTypedBinder
+  body : PsExpr
+
+def psElabOpenCoreTelescope (fuel : Nat) (context : PsElabContext)
+    (type : PsExpr) (count : Option Nat) (bindersRev : List PsElabTypedBinder := []) :
+    Except PsElabError PsElabOpenTelescope := do
+  if count == some 0 then return { context, bindersRev, body := type }
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match psWhnf context.environment context.metaContext context.localContext type with
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding context.localContext name domain binder
+      psElabOpenCoreTelescope fuel (psElabContextWithLocal context pushed.context)
+        (psExprInstantiate1 body (.fvar pushed.id)) (count.map Nat.pred)
+        (PsElabTypedBinder.mk pushed.id name domain binder :: bindersRev)
+    | body =>
+      if count.isSome then throw (.infer .expectedFunction)
+      return { context, bindersRev, body }
+
+def psElabBinderArguments (bindersRev : List PsElabTypedBinder) : List PsExpr :=
+  bindersRev.reverse.map (fun binder => .fvar binder.id)
+
+def psCloseElabImplicitBinders (metaContext : PsMetaContext)
+    (bindersRev : List PsElabTypedBinder) (body : PsExpr) : PsExpr :=
+  psCloseElabForallBinders metaContext
+    (bindersRev.map (fun binder => { binder with binder := .implicit })) body
+
+def psCloseElabLambdaBinders (metaContext : PsMetaContext)
+    (bindersRev : List PsElabTypedBinder) (body : PsExpr) : PsExpr :=
+  bindersRev.foldl (fun body binder =>
+    .lam binder.name (psMetaInstantiate metaContext binder.type)
+      (psExprAbstractFVar binder.id body) binder.binder) body

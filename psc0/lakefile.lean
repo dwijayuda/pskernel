@@ -155,6 +155,7 @@ lean_lib PsElab where
     `Ps.Elab.Application,
     `Ps.Elab.Term,
     `Ps.Elab.Recursion,
+    `Ps.Elab.Data,
     `Ps.Elab.Declaration,
     `Ps.Elab.Scope,
     `Ps.Elab.Command

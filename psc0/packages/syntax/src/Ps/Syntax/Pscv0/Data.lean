@@ -52,16 +52,23 @@ def psPscv0Constructors (fuel : Nat) (cursor : PsTokenCursor)
     let bar ← psTokenCursorExpectText cursor "|"
     let name ← psParseProofScriptDeclaredName bar.cursor
     let fields ← psPscv0DataParameters (fuel + 1) name.cursor
-    if psTokenCursorAtText fields.cursor ":" then
-      throw (psProofScriptExpectedError "constructor result types not yet supported" fields.cursor)
-    if !psTokenCursorAtText fields.cursor "|" && !psTokenCursorAtText fields.cursor "}" then
-      throw (psProofScriptExpectedError "next constructor bar or closing brace" fields.cursor)
+    let result ←
+      if psTokenCursorAtText fields.cursor ":" then do
+        let colon ← psTokenCursorExpectText fields.cursor ":"
+        let type ← psPscv0ParseTerm true colon.cursor
+        pure (PsParseResult.mk (some type.value) type.cursor)
+      else pure (PsParseResult.mk none fields.cursor)
+    if !psTokenCursorAtText result.cursor "|" && !psTokenCursorAtText result.cursor "}" then
+      throw (psProofScriptExpectedError "next constructor bar or closing brace" result.cursor)
     let constructor : PsSyntaxInductiveConstructor := {
       name := name.value
       fields := fields.value
+      resultType := result.value
       span := { start := bar.token.span.start
-                stop := psProofScriptLastBinderStop name.value.span.stop fields.value } }
-    psPscv0Constructors fuel fields.cursor (constructor :: accRev)
+                stop := match result.value with
+                  | some type => (psSyntaxTermSpan type).stop
+                  | none => psProofScriptLastBinderStop name.value.span.stop fields.value } }
+    psPscv0Constructors fuel result.cursor (constructor :: accRev)
 
 def psPscv0ReadDataDeclaration (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) := do

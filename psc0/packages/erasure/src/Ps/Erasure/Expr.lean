@@ -1735,7 +1735,7 @@ def psEraseRuntimeRecursorApplication
             Nat.add
               (Nat.add (Nat.add inductiveInfo.numParams 1)
                 (psListLength inductiveInfo.constructors))
-              1;
+              (Nat.add inductiveInfo.numIndices 1);
           if psErasureBoolNot (Nat.beq (psListLength view.args) expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
@@ -1767,6 +1767,7 @@ def psEraseRuntimeRecursorApplication
                       | Except.error error => Except.error error
                       | Except.ok scrutinee =>
                           let recursiveParameterIndex : Option Nat :=
+                            if inductiveInfo.numIndices != 0 then Option.none else
                             match scope.currentDefinition with
                             | Option.none => Option.none
                             | Option.some current =>
@@ -1866,7 +1867,8 @@ def psEraseRuntimeRecursorApplication
                                         -- A typed IR let carries that result into inference-only
                                         -- positions without changing the original IR model.
                                         match psEraseRuntimeType environment scope
-                                            (PsExpr.app motive major) with
+                                            (((view.args.drop (minorStart + inductiveInfo.constructors.length)).take
+                                              inductiveInfo.numIndices ++ [major]).foldl PsExpr.app motive) with
                                         | Except.error error => Except.error error
                                         | Except.ok resultType =>
                                             let resultName :=

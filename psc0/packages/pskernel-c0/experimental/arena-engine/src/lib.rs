@@ -56,6 +56,8 @@ pub struct Arena {
     levels: Vec<Level>, level_index: HashMap<Level, LevelId>,
     terms: Vec<Expr>, term_index: HashMap<Expr, ExprId>,
     term_depth: Vec<u32>,
+    // Context-free fragment only: cached result and its exact node-visit cost.
+    whnf_cache: HashMap<ExprId, (ExprId, usize)>,
 }
 impl Arena {
     pub fn new() -> Self { Self::default() }
@@ -112,6 +114,8 @@ impl Arena {
     pub fn get(&self, id: ExprId) -> &Expr { &self.terms[id.0 as usize] }
     pub fn count(&self) -> usize { self.terms.len() }
     pub fn expr_depth(&self, id: ExprId) -> u32 { self.term_depth[id.0 as usize] }
+    pub fn whnf_cache_count(&self) -> usize { self.whnf_cache.len() }
+    pub fn clear_whnf_cache(&mut self) { self.whnf_cache.clear(); }
     /// Depth metadata is computed exactly once when a term is first interned.
     fn calculate_depth(&self, term: &Expr) -> u32 {
         let child = |id: ExprId| self.expr_depth(id);
@@ -412,6 +416,11 @@ impl Arena {
     /// This is NOT Lean WHNF: delta, iota, projections, recursors, native
     /// reductions, proof irrelevance and quotient rules remain unsupported.
     pub fn whnf_fragment(&mut self, mut root: ExprId, fuel: usize) -> Result<ExprId, &'static str> {
+        let initial = root;
+        if let Some(&(result, required)) = self.whnf_cache.get(&root) {
+            return if fuel >= required { Ok(result) }
+                   else { Err("reduction fuel exhausted") };
+        }
         let mut pending = Vec::<ExprId>::new();
         let mut remaining = fuel;
         loop {
@@ -441,6 +450,7 @@ impl Arena {
                     while let Some(arg) = pending.pop() {
                         root = self.intern(Expr::App(root, arg));
                     }
+                    self.whnf_cache.insert(initial, (root, fuel - remaining));
                     return Ok(root);
                 }
             }
@@ -700,6 +710,37 @@ mod tests {
         assert_eq!(a.expr_depth(deep), 4121);
         let result = a.instantiate1(deep, x).unwrap();
         assert_eq!(a.expr_depth(result), 4121);
+    }
+
+    #[test]
+    fn whnf_cache_preserves_resource_budget_and_results() {
+        let mut a = Arena::new();
+        let f = a.intern(Expr::BVar(0));
+        let x = a.intern(Expr::BVar(1));
+        let app = a.intern(Expr::App(f, x));
+        assert_eq!(a.whnf_fragment(app, 1), Err("reduction fuel exhausted"));
+        assert_eq!(a.whnf_cache_count(), 0);
+        assert_eq!(a.whnf_fragment(app, 2), Ok(app));
+        assert_eq!(a.whnf_cache_count(), 1);
+        assert_eq!(a.whnf_fragment(app, 1), Err("reduction fuel exhausted"));
+        assert_eq!(a.whnf_fragment(app, 2), Ok(app));
+        a.clear_whnf_cache();
+        assert_eq!(a.whnf_cache_count(), 0);
+        assert_eq!(a.whnf_fragment(app, 2), Ok(app));
+    }
+
+    #[test]
+    fn beta_cache_cannot_succeed_with_too_little_fuel() {
+        let mut a = Arena::new();
+        let name = a.name("x");
+        let ty = a.intern(Expr::BVar(4));
+        let body = a.intern(Expr::BVar(0));
+        let arg = a.intern(Expr::Nat(vec![9].into_boxed_slice()));
+        let lam = a.intern(Expr::Lam { name, domain:ty, body, info:BinderInfo::Default });
+        let app = a.intern(Expr::App(lam, arg));
+        assert_eq!(a.whnf_fragment(app, 3), Ok(arg));
+        assert_eq!(a.whnf_fragment(app, 2), Err("reduction fuel exhausted"));
+        assert_eq!(a.whnf_fragment(app, 3), Ok(arg));
     }
 
 }

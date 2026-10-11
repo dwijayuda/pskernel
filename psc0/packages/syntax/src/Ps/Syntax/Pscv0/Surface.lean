@@ -112,7 +112,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .app fn args _ => List.cons fn args
   | .lambda binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
   | .forallE binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
-  | .letE _ type value body _ =>
+  | .letE _ type value body _ | .haveE _ type value body _ =>
       match type with
       | none => [value, body]
       | some annotation => [annotation, value, body]

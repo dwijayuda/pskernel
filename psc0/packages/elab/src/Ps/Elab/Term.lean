@@ -575,6 +575,8 @@ def psElabTermWithFuel
                   binders
                   body
                   expected
+            | .haveE name declaredType value body _ =>
+                psElabLet smaller context name declaredType value body expected true
             | .letE name declaredType value body _ =>
                 psElabLet
                   smaller

@@ -158,9 +158,14 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
     | tactic :: rest =>
       let (used, next) ← match tactic with
         | .intro names _ => pure ([], names.map psScopeKey ++ bound)
-        | .exactE value _ _ | .applyE value _ => do
+        | .exactE value _ _ | .applyE value _ | .change value _ _ => do
           let result ← visit bound value
           pure (result.used, bound)
+        | .localE name type value _ _ => do
+          let annotation ← type.mapM (visit bound)
+          let value ← visit bound value
+          pure (psScopeUnion (annotation.map (·.used) |>.getD []) value.used,
+            psScopeKey name :: bound)
         | .focus body _ _ | .each body _ _ => do
           let used ← psScopeTacticDependencies fuel visit bound body
           pure (used, bound)
@@ -228,12 +233,15 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
         | .lambda _ _ _ => PsSyntaxTerm.lambda binders.binders body.term span
         | _ => PsSyntaxTerm.forallE binders.binders body.term span
       return { term, used := psScopeUnion binders.used body.used }
-    | .letE name type value body span =>
+    | .letE name type value body span | .haveE name type value body span =>
       let type ← type.mapM (visit bound)
       let value ← visit bound value
       let body ← visit (psScopeKey name :: bound) body
+      let term := match source with
+        | .haveE .. => PsSyntaxTerm.haveE name (type.map (·.term)) value.term body.term span
+        | _ => PsSyntaxTerm.letE name (type.map (·.term)) value.term body.term span
       return {
-        term := .letE name (type.map (·.term)) value.term body.term span
+        term
         used := psScopeUnion (type.map (·.used) |>.getD []) (psScopeUnion value.used body.used) }
     | .ifE condition yes no span =>
       let condition ← visit bound condition

@@ -101,6 +101,8 @@ inductive PsSyntaxTerm where
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (body : PsSyntaxTerm)
       (span : PsSourceSpan)
+  | haveE (name : PsSyntaxName) (type : Option PsSyntaxTerm)
+      (value body : PsSyntaxTerm) (span : PsSourceSpan)
   | letE
       (name : PsSyntaxName)
       (type : Option PsSyntaxTerm)
@@ -120,6 +122,9 @@ inductive PsSyntaxTerm where
 inductive PsSyntaxTactic where
   | exactE (value : PsSyntaxTerm) (refine : Bool) (span : PsSourceSpan)
   | applyE (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | localE (name : PsSyntaxName) (type : Option PsSyntaxTerm) (value : PsSyntaxTerm)
+      (reducible : Bool) (span : PsSourceSpan)
+  | change (type : PsSyntaxTerm) (select : Bool) (span : PsSourceSpan)
   | intro (names : List PsSyntaxName) (span : PsSourceSpan)
   | assumption (span : PsSourceSpan)
   | reflexivity (span : PsSourceSpan)
@@ -132,7 +137,8 @@ def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTe
   match fuel with
   | 0 => []
   | fuel + 1 => match tactic with
-    | .exactE value _ _ | .applyE value _ => [value]
+    | .exactE value _ _ | .applyE value _ | .change value _ _ => [value]
+    | .localE _ type value _ _ => type.toList ++ [value]
     | .focus body _ _ | .each body _ _ => body.flatMap (psSyntaxTacticTerms fuel)
     | _ => []
 
@@ -162,7 +168,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .app _ _ span => span
   | .lambda _ _ span => span
   | .forallE _ _ span => span
-  | .letE _ _ _ _ span => span
+  | .letE _ _ _ _ span | .haveE _ _ _ _ span => span
   | .ifE _ _ _ span => span
   | .matchMany _ _ span => span
 

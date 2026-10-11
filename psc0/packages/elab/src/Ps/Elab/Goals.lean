@@ -10,6 +10,7 @@ structure PsProofClosure where
   parent : Nat
   child : Nat
   binder : PsElabTypedBinder
+  value : Option PsExpr := none
 
 structure PsProofState where
   context : PsElabContext
@@ -52,9 +53,12 @@ def psProofNormalize (state : PsProofState) : Except PsElabError PsProofState :=
     if psExprHasTermMeta value then remaining := closure :: remaining
     else
       let binder := closure.binder
-      let value := PsExpr.lam binder.name
-        (psMetaInstantiate current.context.metaContext binder.type)
-        (psExprAbstractFVar binder.id value) binder.binder
+      let type := psMetaInstantiate current.context.metaContext binder.type
+      let body := psExprAbstractFVar binder.id value
+      let value := match closure.value with
+        | none => PsExpr.lam binder.name type body binder.binder
+        | some bound => PsExpr.letE binder.name type
+            (psMetaInstantiate current.context.metaContext bound) body
       current ← psProofAssign current closure.parent value
   return { current with
     closures := remaining.reverse
@@ -92,3 +96,27 @@ def psProofIntro (state : PsProofState) (source : Option PsSyntaxName) :
     closures := {
       parent := goal.id, child
       binder := PsElabTypedBinder.mk pushed.id name pi.domain pi.binder } :: state.closures }
+
+-- A completed local fact enters only this goal's context. Closing its scope
+-- uses the same deferred abstraction as intro, including nested proof goals.
+def psProofLocal (state : PsProofState) (name : PsName) (value : PsElabTermResult)
+    (reducible : Bool) : Except PsElabError PsProofState := do
+  let goal :: rest := state.goals | throw (.proof "no goal for local declaration")
+  let some declaration := psMetaFindDecl value.context.metaContext goal.id
+    | throw (.proof "unknown goal")
+  let type := psMetaInstantiate value.context.metaContext value.type
+  let term := psMetaInstantiate value.context.metaContext value.term
+  if psExprHasTermMeta type || psExprHasTermMeta term then
+    throw (.proof "local declaration has unresolved holes")
+  let pushed := if reducible then
+      psLocalPushLet value.context.localContext name type term
+    else psLocalPushBinding value.context.localContext name type .explicit
+  let context := psElabContextWithLocal value.context pushed.context
+  let fresh := psMetaFresh context.metaContext context.localContext declaration.type .syntheticOpaque
+  let .mvar child := fresh.expr | throw (.proof "invalid fresh goal")
+  let context := psElabContextWithMeta context fresh.context
+  return { (psProofUpdate state context) with
+    goals := { id := child, tag := goal.tag } :: rest
+    closures := {
+      parent := goal.id, child, value := some term
+      binder := PsElabTypedBinder.mk pushed.id name type .explicit } :: state.closures }

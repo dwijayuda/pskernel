@@ -58,3 +58,28 @@ witnesses, and independently introduced sibling goals; a negative case protects
 Or's large-elimination restriction. The full native cloud workflow passed at a8fbc17f1ad2d24efbde14a7cbe993a4400d4c01,
 run 38179168385: 329 fixture declarations, 61 phase-specific refusals and 111
 shared TypeScript/Rust observations.
+
+## Local facts, target selection and existential notation
+
+Term/tactic have share local-value elaboration with let. During body elaboration,
+have introduces an ordinary opaque local binding while let introduces a reducible
+local definition. Both eventually close to ordinary checked Core let terms.
+Tactic locals extend only the focused goal; deferred scope closure substitutes
+solved children before abstracting locals. Completed facts cannot retain holes.
+Named and anonymous-this facts and nested by blocks use ordinary term checking.
+Patterns, local function headers and let configuration flags remain pending.
+
+Term show lowers to a type ascription. Tactic change checks definitional equality;
+tactic show tries goals in order with independent source/unification snapshots and
+moves the first match to the front. Hypothesis locations remain pending.
+
+Existential Unicode/text notation follows the pinned explicitBinders macro:
+typed parenthesized groups or a single unbracketed optional-type group expand
+into nested Exists/lambda applications. Its per-name annotation copying follows
+Init/NotationExtra.lean and is distinct from native forall group elaboration.
+This adds no kernel expression or proof authority.
+
+References at the pinned RC4 commit: Lean/Elab/Binders.lean (nondependent lets),
+Lean/Parser/Term.lean (have/show), Init/Tactics.lean (show/locals) and
+Init/NotationExtra.lean (existential grammar and expansion). Qualification pending
+the next exact cloud run; no full-v7 completion claim.

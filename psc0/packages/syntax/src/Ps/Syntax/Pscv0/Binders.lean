@@ -3,6 +3,10 @@ import Ps.Syntax.ParseProofScript
 abbrev PsPscv0TermReader :=
   PsTokenCursor → Except PsParseError (PsParseResult PsSyntaxTerm)
 
+def psPscv0ReservedArgument (text : String) : Bool :=
+  psProofScriptReservedArgument text ||
+    ["by", "have", "show", "suffices", "exists", "∃", "from"].contains text
+
 -- All binder contexts use the caller's v7 annotation reader. Grammar policy
 -- stays here: declarations own comma groups/defaults; terms own native binders.
 def psPscv0BinderNames (fuel : Nat) (cursor : PsTokenCursor)
@@ -13,7 +17,7 @@ def psPscv0BinderNames (fuel : Nat) (cursor : PsTokenCursor)
   | fuel + 1 =>
     match psTokenCursorPeek cursor with
     | some token =>
-      if psTokenKindEq token.kind .identifier && !psProofScriptReservedArgument token.text then
+      if psTokenKindEq token.kind .identifier && !psPscv0ReservedArgument token.text then
         let name ← psTokenCursorExpectKind cursor .identifier
         psPscv0BinderNames fuel name.cursor
           (PsSyntaxName.mk [name.token.text] name.token.span :: accRev)

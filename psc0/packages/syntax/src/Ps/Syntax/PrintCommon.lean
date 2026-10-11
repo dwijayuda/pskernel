@@ -141,6 +141,15 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
       match tactic with
       | .exactE value refine _ => return (if refine then "refine " else "exact ") ++ (← printTerm value)
       | .applyE value _ => return "apply " ++ (← printTerm value)
+      | .localE name type value reducible _ =>
+        let annotation ← match type with
+          | none => pure ""
+          | some type => do
+            let rendered ← printTerm type
+            pure (" : " ++ rendered)
+        return (if reducible then "let " else "have ") ++ (← psPrintSyntaxName name) ++
+          annotation ++ " := " ++ (← printTerm value)
+      | .change type select _ => return (if select then "show " else "change ") ++ (← printTerm type)
       | .intro names _ =>
         let rendered ← psPrintSyntaxNames names
         return "intro" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)

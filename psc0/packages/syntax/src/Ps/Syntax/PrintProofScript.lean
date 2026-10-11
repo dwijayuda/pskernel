@@ -269,7 +269,7 @@ def psPrintProofScriptTermWithFuel
               | Except.ok printedBody =>
                   Except.ok
                     (psPrintProofScriptConcat4 "forall " (psPrintJoin " " printedBinders) ", " printedBody)
-      | .letE name type value body _ =>
+      | .letE name type value body _ | .haveE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
           | Except.ok printedName =>
@@ -296,7 +296,7 @@ def psPrintProofScriptTermWithFuel
                       | Except.ok printedBody =>
                           Except.ok
                             (psPrintProofScriptConcat6
-                              "let "
+                              (match term with | .haveE .. => "have " | _ => "let ")
                               printedName
                               printedType
                               " := "

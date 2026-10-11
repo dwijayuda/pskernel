@@ -422,7 +422,18 @@ private def application : String :=
   "theorem andAssociativity(P: Prop, Q: Prop, R: Prop, h: P ∧ Q ∧ R): P ∧ (Q ∧ R) := h\n" ++
   "theorem implicationPrecedence(P: Prop, Q: Prop): P -> Q ↔ (P -> Q) := by {\n  constructor\n  all_goals intro h\n  all_goals assumption\n}\n" ++
   "theorem logicalAliases(P: Prop, Q: Prop, h: P /\\ Q): P \\/ Q := Or.inl(h.left)\n" ++
-  "theorem iffAlias(P: Prop): P <-> P := iffProof(P)\n"
+  "theorem iffAlias(P: Prop): P <-> P := iffProof(P)\n" ++
+  "theorem termFact(P: Prop, h: P): P := {\n  have local: P := h\n  show P from local\n}\n" ++
+  "theorem nestedFact(n: Nat): n = n := by {\n  have equality: n = n := by { rfl }\n  change Eq(n, n)\n  exact equality\n}\n" ++
+  "theorem selectGoal(P: Prop, Q: Prop, hp: P, hq: Q): P ∧ Q := by {\n  constructor\n  show Q\n  exact hq\n  show P\n  exact hp\n}\n" ++
+  "theorem localDefinition: 3 = 3 := by {\n  let x: Nat := 3\n  change x = 3\n  rfl\n}\n" ++
+  "function savedFact(value: Nat): Nat -> Nat := by {\n  have saved: Nat := value\n  intro delta\n  exact Nat.add(saved, delta)\n}\n" ++
+  "theorem savedFactValue: savedFact(217)(1) = 218 := by { rfl }\n" ++
+  "theorem namedWitness(n: Nat): ∃ x: Nat, x = n := by {\n  refine Exists.intro(n, _)\n  rfl\n}\n" ++
+  "theorem inferredWitness(n: Nat): exists x, x = n := namedWitness(n)\n" ++
+  "theorem doubleWitness: ∃ (x y: Nat), x = y := by {\n  refine Exists.intro(0, Exists.intro(0, _))\n  rfl\n}\n" ++
+  "theorem anonymousFact(P: Prop, h: P): P := by {\n  have : P := h\n  exact this\n}\n" ++
+  "theorem termShow(n: Nat): n = n := show n = n by { rfl }\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -505,7 +516,12 @@ private def semanticCases : IO Unit := do
     { source := "theorem bad: Eq(0, 1) := by { any_goals rfl }\n" },
     { source := "function bad(h: Or True True): Nat := match h with { | .inl proof => 0 | .inr proof => 1 }\n" },
     { source := "theorem bad(n: Nat): n = n = n := by { rfl }\n" },
-    { source := "function id(n: Nat): Nat := n\ntheorem bad(n: Nat): id (n) = n := by { rfl }\n" }]
+    { source := "function id(n: Nat): Nat := n\ntheorem bad(n: Nat): id (n) = n := by { rfl }\n" },
+    { source := "theorem bad: True := by {\n  have x: Nat := 0\n  have h: x = 0 := by { rfl }\n  constructor\n}\n" },
+    { source := "theorem bad: True := {\n  have x: Nat := 0\n  have h: x = 0 := by { rfl }\n  True.intro\n}\n" },
+    { source := "theorem bad: True := by {\n  show False\n  constructor\n}\n" },
+    { source := "theorem bad(n: Nat): exists {x: Nat}, x = n := by { constructor }\n" },
+    { source := "theorem bad: True := by {\n  have h: True := _\n  exact h\n}\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -522,7 +538,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -541,7 +557,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -570,7 +586,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 63 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 68 phase-specific refusals, shared-prelude isolation"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [

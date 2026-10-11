@@ -114,6 +114,43 @@ def psProofConstructor (state : PsProofState) : Except PsElabError PsProofState 
     | .error _ => pure ()
   throw (.proof "no constructor applies to the target")
 
+def psProofLocalValue (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
+    (state : PsProofState) (nameSyntax : PsSyntaxName) (annotation : Option PsSyntaxTerm)
+    (source : PsSyntaxTerm) (reducible : Bool) : Except PsElabError PsProofState := do
+  let (_, context, _) ← psProofMain state
+  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let annotation ← annotation.mapM (psProofSource scope context)
+  let source ← psProofSource scope context source
+  let value ← psElabLocalValue elaborate context annotation source
+  psProofLocal state name value reducible
+
+def psProofChange (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
+    (state : PsProofState) (source : PsSyntaxTerm) : Except PsElabError PsProofState := do
+  let (goal, context, target) ← psProofMain state
+  let source ← psProofSource scope context source
+  let annotation ← psElabType elaborate context source
+  let unified := psUnify annotation.context.environment annotation.context.localContext
+    annotation.context.metaContext target annotation.type
+  if !unified.success then throw (.proof "change requires a definitionally equal target")
+  let context := psElabContextWithMeta annotation.context unified.context
+  let fresh := psMetaFresh context.metaContext context.localContext
+    (psMetaInstantiate context.metaContext annotation.type) .syntheticOpaque
+  let .mvar child := fresh.expr | throw (.proof "invalid fresh goal")
+  let state := psProofUpdate state (psElabContextWithMeta context fresh.context)
+  let state ← psProofAssign state goal.id fresh.expr
+  psProofNormalize { state with goals := { id := child, tag := goal.tag } :: state.goals.drop 1 }
+
+-- Each candidate owns its source resolution and unification snapshot. A failed
+-- show attempt cannot constrain a later goal. The selected goal moves first.
+def psProofShow (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
+    (state : PsProofState) (source : PsSyntaxTerm) : Except PsElabError PsProofState := do
+  for goal in state.goals do
+    let selected := { state with goals := goal :: state.goals.filter (fun other => other.id != goal.id) }
+    match psProofChange elaborate scope selected source with
+    | .ok next => return next
+    | .error _ => pure ()
+  throw (.proof "show did not match any goal")
+
 def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : Nat)
     (state : PsProofState) (tactics : List PsSyntaxTactic) : Except PsElabError PsProofState := do
   match fuel with
@@ -126,6 +163,11 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
       let next ← match tactic with
         | .exactE source refine _ => psProofExact elaborate scope state source refine
         | .applyE source _ => psProofApply elaborate scope state source
+        | .localE name type source reducible _ =>
+          psProofLocalValue elaborate scope state name type source reducible
+        | .change source select _ =>
+          if select then psProofShow elaborate scope state source
+          else psProofChange elaborate scope state source
         | .intro names _ =>
           if names.isEmpty then psProofIntro state none
           else names.foldlM (fun current name => psProofIntro current (some name)) state

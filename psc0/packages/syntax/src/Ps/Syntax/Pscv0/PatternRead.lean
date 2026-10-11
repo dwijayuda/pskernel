@@ -4,7 +4,7 @@ def psPscv0PatternStart (cursor : PsTokenCursor) : Bool :=
   match psTokenCursorPeek cursor with
   | none => false
   | some token =>
-      !psProofScriptReservedArgument token.text && token.text != "matches" &&
+      !psPscv0ReservedArgument token.text && token.text != "matches" &&
         (psTokenKindEq token.kind .identifier || psTokenKindEq token.kind .natural ||
           token.text == "." || token.text == "(")
 

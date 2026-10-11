@@ -1312,3 +1312,13 @@ Profile pscv0-v7-native-bounded/21 at a8fbc17f1ad2d24efbde14a7cbe993a4400d4c01 p
 refusals and 111 shared runtime observations. The source guard reports 109 portable
 and 115 native modules. Checked And/Iff/Or/Exists/Not declarations preserve their
 elimination restrictions; no proof axiom or host elaborator fallback is added.
+
+## Logical notation qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/22 at cc38e63898da8eb9600114d6d94949b0df3aaaf0 passed
+[run 38179816372](https://github.com/dwijayuda/pskernel/actions/runs/38179816372), job 114589798702:
+334 fixture declarations, 28 parser cases, four accepted programs, 63 phase-specific
+refusals and 111 shared runtime observations. One source precedence reader replaces
+the previous arrow/matches-only tail. The source guard reports 110 portable and
+116 native modules. A prior compile failure used a reserved Lean identifier;
+that failed run supplies no semantic qualification.

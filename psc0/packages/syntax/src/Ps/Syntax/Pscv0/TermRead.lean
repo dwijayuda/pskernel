@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.Operators
+import Ps.Syntax.Pscv0.QuantifierRead
 import Ps.Syntax.Pscv0.ProofRead
 
 -- V7 term dispatch owns assignment boundaries. In an annotation, the caller
@@ -17,7 +17,7 @@ def psPscv0CanStartNativeArgument
   match psTokenCursorPeek cursor with
   | Option.none => false
   | Option.some token =>
-      if psProofScriptReservedArgument token.text || (psPscv0InfixToken cursor).isSome then
+      if psPscv0ReservedArgument token.text || (psPscv0InfixToken cursor).isSome then
         false
       else if (if annotation then false else psTokenCursorStartsNamedAssignment cursor) then
         false
@@ -161,7 +161,7 @@ def psPscv0ParseTermAtPrecedence
                 (psSyntaxSpanJoin negation.token.span (psSyntaxTermSpan argument.value))
               cursor := argument.cursor }
           else if psTokenCursorAtText cursor "by" then
-            psPscv0ReadProof smaller (remaining + 1) cursor
+            psPscv0ReadProof smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "do" then
               Except.error
                 (psProofScriptExpectedError
@@ -226,6 +226,12 @@ def psPscv0ParseTermAtPrecedence
                                                               }
                                                           cursor := close.cursor
                                                         }
+          else if psTokenCursorAtText cursor "have" then
+            psPscv0ReadHave smaller readAnnotation continuation cursor
+          else if psTokenCursorAtText cursor "show" then
+            psPscv0ReadShow smaller readAnnotation cursor
+          else if psTokenCursorAtText cursor "exists" || psTokenCursorAtText cursor "∃" then
+            psPscv0ReadExists readAnnotation continuation remaining cursor
           else if psTokenCursorAtText cursor "let" then
             psPscv0ReadLet smaller readAnnotation continuation remaining cursor
           else if psTokenCursorAtText cursor "fun" || psTokenCursorAtText cursor "λ" then

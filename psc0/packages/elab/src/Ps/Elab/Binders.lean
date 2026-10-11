@@ -218,65 +218,39 @@ def psElabForall
                 closed
                 expected
 
-def psElabLetAfterValue
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (outerContext : PsElabContext)
-    (name : PsName)
-    (bindingType : PsExpr)
-    (valueResult : PsElabTermResult)
-    (body : PsSyntaxTerm)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  let pushed :=
-    psLocalPushLet
-      valueResult.context.localContext
-      name
-      bindingType
-      valueResult.term;
-  let bodyContext :=
-    psElabContextWithLocal
-      valueResult.context
-      pushed.context;
-  match elaborate bodyContext body expected with
-  | Except.error error => Except.error error
-  | Except.ok bodyResult =>
-      let metaContext := bodyResult.context.metaContext;
-      let closedBindingType :=
-        psMetaInstantiate metaContext bindingType;
-      let closedValue :=
-        psMetaInstantiate metaContext valueResult.term;
-      let openBody :=
-        psMetaInstantiate metaContext bodyResult.term;
-      let closedBody :=
-        psExprAbstractFVar pushed.id openBody;
-      let term :=
-        PsExpr.letE
-          name
-          closedBindingType
-          closedValue
-          closedBody;
-      let restoredContext :=
-        psElabLeaveScope outerContext bodyResult.context;
-      psElabResolvedTerm
-        restoredContext
-        term
-        expected
+-- Both term bindings and tactic facts use this expected-type path.
+def psElabLocalValue (elaborate : PsElaborator) (context : PsElabContext)
+    (declaredType : Option PsSyntaxTerm) (value : PsSyntaxTerm) :
+    Except PsElabError PsElabTermResult := do
+  match declaredType with
+  | none => elaborate context value none
+  | some sourceType =>
+    let annotation ← psElabType elaborate context sourceType
+    elaborate annotation.context value (some annotation.type)
+
+def psElabLetAfterValue (elaborate : PsElaborator) (outerContext : PsElabContext)
+    (name : PsName) (bindingType : PsExpr) (valueResult : PsElabTermResult)
+    (body : PsSyntaxTerm) (expected : Option PsExpr) (nondependent : Bool := false) :
+    Except PsElabError PsElabTermResult := do
+  let pushed := if nondependent then
+      psLocalPushBinding valueResult.context.localContext name bindingType .explicit
+    else psLocalPushLet valueResult.context.localContext name bindingType valueResult.term
+  let bodyContext := psElabContextWithLocal valueResult.context pushed.context
+  let bodyResult ← elaborate bodyContext body expected
+  let constraints := bodyResult.context.metaContext
+  let type := psMetaInstantiate constraints bindingType
+  let value := psMetaInstantiate constraints valueResult.term
+  let body := psExprAbstractFVar pushed.id (psMetaInstantiate constraints bodyResult.term)
+  let term := PsExpr.letE name type value body
+  psElabResolvedTerm (psElabLeaveScope outerContext bodyResult.context) term expected
 
 def psElabLet (elaborate : PsElaborator) (context : PsElabContext)
     (nameSyntax : PsSyntaxName) (declaredType : Option PsSyntaxTerm)
-    (value body : PsSyntaxTerm) (expected : Option PsExpr) :
+    (value body : PsSyntaxTerm) (expected : Option PsExpr) (nondependent : Bool := false) :
     Except PsElabError PsElabTermResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
-  let valueResult ← match declaredType with
-    | none => elaborate context value none
-    | some sourceType =>
-      let annotation ← psElabType elaborate context sourceType
-      elaborate annotation.context value (some annotation.type)
-  psElabLetAfterValue elaborate context name valueResult.type valueResult body expected
+  let valueResult ← psElabLocalValue elaborate context declaredType value
+  psElabLetAfterValue elaborate context name valueResult.type valueResult body expected nondependent
 
 -- Open a Core telescope once, retaining its terminal body. A bounded count is
 -- used for constructor fields; none opens all indices of an inductive family.

@@ -158,6 +158,8 @@ def psProofScriptTermWithSpan
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span
   | .letE name type value body _ =>
       PsSyntaxTerm.letE name type value body span
+  | .haveE name type value body _ =>
+      PsSyntaxTerm.haveE name type value body span
   | .ifE condition yes no _ => PsSyntaxTerm.ifE condition yes no span
   | .matchMany scrutinees alternatives _ =>
       PsSyntaxTerm.matchMany scrutinees alternatives span

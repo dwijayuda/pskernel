@@ -224,16 +224,27 @@ impl Arena {
         loop {
             if remaining == 0 { return Err("reduction fuel exhausted"); }
             remaining -= 1;
-            match self.get(root).clone() {
-                Expr::App(fun, arg) => { pending.push(arg); root = fun; }
-                Expr::MData(_, inner) => root = inner,
-                Expr::Let { body, value, .. } => root = self.instantiate1(body, value)?,
-                Expr::Lam { body, .. } if !pending.is_empty() => {
-                    // The nearest argument is at the end of the spine.
-                    let arg = pending.pop().expect("checked nonempty");
-                    root = self.instantiate1(body, arg)?;
-                }
-                _ => {
+            // Only copy compact child handles. Never clone the entire node:
+            // string literals, numerals and constant-level vectors may be large.
+            enum HeadStep {
+                Apply(ExprId, ExprId),
+                Unwrap(ExprId),
+                Substitute(ExprId, ExprId),
+                Stuck,
+            }
+            let step = match self.get(root) {
+                Expr::App(fun, arg) => HeadStep::Apply(*fun, *arg),
+                Expr::MData(_, inner) => HeadStep::Unwrap(*inner),
+                Expr::Let { body, value, .. } => HeadStep::Substitute(*body, *value),
+                Expr::Lam { body, .. } if !pending.is_empty() =>
+                    HeadStep::Substitute(*body, pending.pop().expect("checked nonempty")),
+                _ => HeadStep::Stuck,
+            };
+            match step {
+                HeadStep::Apply(fun, arg) => { pending.push(arg); root = fun; }
+                HeadStep::Unwrap(inner) => root = inner,
+                HeadStep::Substitute(body, value) => root = self.instantiate1(body, value)?,
+                HeadStep::Stuck => {
                     while let Some(arg) = pending.pop() {
                         root = self.intern(Expr::App(root, arg));
                     }

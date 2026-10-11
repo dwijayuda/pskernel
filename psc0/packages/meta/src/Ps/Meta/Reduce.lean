@@ -1,4 +1,5 @@
 import Ps.Meta.Iota
+import Ps.Meta.NatReduce
 import Ps.Core.Equality
 import Ps.Core.Subst
 import Ps.Core.LevelSubst
@@ -95,15 +96,8 @@ def psWhnfWithFuel
                     else
                       core
         | .app fn arg =>
-            let natural := match fn with
-              | .constE name [] =>
-                if psNameEq name psNatSuccName then
-                  match smaller arg with
-                  | .lit (.natural n) => some (PsExpr.lit (.natural (n + 1)))
-                  | _ => none
-                else none
-              | _ => none;
-            match natural.orElse (fun _ => psReduceIota smaller environment core) with
+            match (psReduceNatPrimitive smaller core).orElse
+                (fun _ => psReduceIota smaller environment core) with
             | some value => smaller value
             | none =>
               let reducedFn := smaller fn;

@@ -83,3 +83,11 @@ References at the pinned RC4 commit: Lean/Elab/Binders.lean (nondependent lets),
 Lean/Parser/Term.lean (have/show), Init/Tactics.lean (show/locals) and
 Init/NotationExtra.lean (existential grammar and expansion). Qualification pending
 the next exact cloud run; no full-v7 completion claim.
+
+Closed natural arithmetic is a shared conversion capability, not a special
+rfl evaluator. Meta/NatReduce.lean implements selected RC4 kernel reductions
+for succ/add/sub/mul/div/mod/beq/ble, leaving nonliteral operands and unknown
+heads stuck. It uses native Lean Nat arithmetic without Peano expansion.
+The reference is src/kernel/type_checker.cpp, reduce_nat, at the pinned commit.
+The fact fixture retains its original computed-value requirement; focused
+checks include subtraction, zero division/modulo and Boolean comparisons.

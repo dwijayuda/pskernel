@@ -433,7 +433,10 @@ private def application : String :=
   "theorem inferredWitness(n: Nat): exists x, x = n := namedWitness(n)\n" ++
   "theorem doubleWitness: ∃ (x y: Nat), x = y := by {\n  refine Exists.intro(0, Exists.intro(0, _))\n  rfl\n}\n" ++
   "theorem anonymousFact(P: Prop, h: P): P := by {\n  have : P := h\n  exact this\n}\n" ++
-  "theorem termShow(n: Nat): n = n := show n = n by { rfl }\n"
+  "theorem termShow(n: Nat): n = n := show n = n by { rfl }\n" ++
+  "theorem naturalComputation: Nat.mul(Nat.add(2, 3), Nat.sub(9, 7)) = 10 := by { rfl }\n" ++
+  "theorem naturalDivision: Nat.div(7, 0) = 0 ∧ Nat.mod(7, 0) = 7 := by {\n  constructor\n  all_goals rfl\n}\n" ++
+  "theorem naturalComparison: Nat.beq(3, 3) = true ∧ Nat.ble(4, 3) = false := by {\n  constructor\n  all_goals rfl\n}\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

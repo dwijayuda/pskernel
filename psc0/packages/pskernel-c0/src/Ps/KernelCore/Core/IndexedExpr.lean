@@ -62,10 +62,12 @@ structure PsKernelC0StoredNode where
   hash : Nat
   depth : Nat
 
-inductive PsKernelC0Trie where
-  | empty
-  | bucket (ids : List Nat)
-  | branch (left : PsKernelC0Trie) (right : PsKernelC0Trie)
+/--
+  Share the persistent radix-16 index with the checker caches.
+  A term store keeps its full nodes in an immutable array; the index only
+  stores candidate handles. Hash collisions always compare complete nodes.
+-/
+abbrev PsKernelC0Trie := PsKernelC0HashTrie Nat
 
 structure PsKernelC0TermStore where
   nodes : Array PsKernelC0StoredNode
@@ -74,7 +76,7 @@ structure PsKernelC0TermStore where
 def psKernelC0StoreEmpty : PsKernelC0TermStore :=
   {
     nodes := Array.empty
-    index := PsKernelC0Trie.empty
+    index := PsKernelC0HashTrie.empty
   }
 
 def psKernelC0StoreGet
@@ -179,51 +181,20 @@ def psKernelC0NodeDepth
   | .proj _ _ body => Nat.succ (child body)
   | _ => 1
 
+/-- Radix-16 lookup over the four nibbles of the 16-bit node fingerprint. -/
 def psKernelC0TermTrieBucket
-    (fuel : Nat) :
-    PsKernelC0Trie -> Nat -> List Nat :=
-  match fuel with
-  | Nat.zero =>
-      fun index _ =>
-        match index with
-        | .bucket ids => ids
-        | _ => List.nil
-  | Nat.succ more =>
-      let next := psKernelC0TermTrieBucket more;
-      fun index hash =>
-        match index with
-        | .branch left right =>
-            if Nat.beq (Nat.mod hash 2) 0 then
-              next left (Nat.div hash 2)
-            else
-              next right (Nat.div hash 2)
-        | _ => List.nil
+    (fuel : Nat)
+    (index : PsKernelC0Trie)
+    (hash : Nat) : List Nat :=
+  psKernelC0TrieBucket fuel index hash
 
+/-- Persistent path update, sharing every untouched radix subtree. -/
 def psKernelC0TermTrieReplace
-    (fuel : Nat) :
-    PsKernelC0Trie -> Nat -> List Nat -> PsKernelC0Trie :=
-  match fuel with
-  | Nat.zero =>
-      fun _ _ ids => PsKernelC0Trie.bucket ids
-  | Nat.succ more =>
-      let next := psKernelC0TermTrieReplace more;
-      fun index hash ids =>
-        let left :=
-          match index with
-          | .branch value _ => value
-          | _ => PsKernelC0Trie.empty
-        let right :=
-          match index with
-          | .branch _ value => value
-          | _ => PsKernelC0Trie.empty
-        if Nat.beq (Nat.mod hash 2) 0 then
-          PsKernelC0Trie.branch
-            (next left (Nat.div hash 2) ids)
-            right
-        else
-          PsKernelC0Trie.branch
-            left
-            (next right (Nat.div hash 2) ids)
+    (fuel : Nat)
+    (index : PsKernelC0Trie)
+    (hash : Nat)
+    (ids : List Nat) : PsKernelC0Trie :=
+  psKernelC0TrieSet fuel index hash ids
 
 def psKernelC0FindNode
     (store : PsKernelC0TermStore)
@@ -246,7 +217,7 @@ def psKernelC0Intern
     Option (Prod PsKernelC0TermStore Nat) :=
   if psKernelC0NodeValid store node then
     let hash := psKernelC0NodeHash store node
-    let bucket := psKernelC0TermTrieBucket 16 store.index hash
+    let bucket := psKernelC0TermTrieBucket psKernelC0IndexDepth store.index hash
     match psKernelC0FindNode store node bucket with
     | Option.some id =>
         Option.some (Prod.mk store id)
@@ -256,7 +227,7 @@ def psKernelC0Intern
           { node := node, hash := hash, depth := psKernelC0NodeDepth store node }
         let index :=
           psKernelC0TermTrieReplace
-            16 store.index hash (List.cons id bucket)
+            psKernelC0IndexDepth store.index hash (List.cons id bucket)
         let next : PsKernelC0TermStore :=
           { nodes := store.nodes.push entry, index := index }
         Option.some (Prod.mk next id)

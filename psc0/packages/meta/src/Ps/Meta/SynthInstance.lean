@@ -322,7 +322,7 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
       psDefEqReadOnlyWithEnv environment context localContext target prior)
     if cyclic then psSynthFailure context
     else
-      let head := (psExprAppView (psWhnf environment context localContext target)).head
+      let head := (psInferAppView (psWhnf environment context localContext target)).head
       let entries := (psAllInstanceEntries localContext index).filter fun entry =>
         match entry.className, head with
         | some className, .constE name _ => psNameEq className name

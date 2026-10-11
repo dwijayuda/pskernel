@@ -354,11 +354,15 @@ private def application : String :=
   "const local: Nat := localFirst(chosen := lowNat, value := 143)\n" ++
   "theorem lawful: True := Measure.law(A := Nat)\n" ++
   "const staticProjection: Nat := CertifiedPair.second(checkedPair)\n" ++
+  "class Flag where { enabled: Bool }\n" ++
+  "instance (priority := 777): Flag where { enabled := true }\n" ++
+  "const anonymous: Bool := Flag.enabled\n" ++
   "end Classes\n" ++
   "const classSelected: Nat := Classes.selected\n" ++
   "const classNested: Nat := Classes.nested\n" ++
   "const classLocal: Nat := Classes.local\n" ++
-  "const classStaticProjection: Nat := Classes.staticProjection\n"
+  "const classStaticProjection: Nat := Classes.staticProjection\n" ++
+  "const classAnonymous: Bool := Classes.anonymous\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

@@ -107,6 +107,7 @@ assert.equal(output.proofRecursiveAnswer, 2n);
 assert.equal(output.proofPartialAnswer, 1n);
 assert.deepEqual(Object.keys(output.checkedPair), ['first', 'second']);
 assert.deepEqual(Object.keys(output.checkedList), ['head', 'tail']);
+assert.equal(output.classAnonymous, true);
 assert.equal(output.classSelected, 141n);
 assert.equal(output.classNested, 142n);
 assert.equal(output.classLocal, 140n);

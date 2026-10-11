@@ -444,7 +444,8 @@ def psElabMatchAlias (state : PsElabMatchAliases) (entry : Nat × PsExpr) :
   let type ← (psInferType state.context.environment state.context.metaContext
     state.context.localContext entry.snd).mapError PsElabError.infer
   let pushed := psLocalPushLet state.context.localContext name type entry.snd
-  return { context := psElabContextWithLocal state.context pushed.context,
+  return {
+    context := psElabContextWithLocal state.context pushed.context
     valuesRev := (pushed.id, entry.snd) :: state.valuesRev }
 
 def psElabMatchFields (names : List PsSyntaxName) (context : PsElabContext)

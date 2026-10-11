@@ -1,0 +1,21 @@
+{
+  "schema": "psc0-compiler-source-candidates/1",
+  "status": "candidate-only-not-selected-into-full-generated-bridge",
+  "language": "pscv0",
+  "referenceSha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
+  "comparison": "same retained PSC0 compiler, independent source readers, identical canonical admissions and TypeScript output, no kernel test",
+  "modules": [
+    {
+      "module": "Ps.Foundation.Source",
+      "source": "packages/foundation/src-ps/Ps/Foundation/Source.ps",
+      "baseline": "packages/foundation/src/Ps/Foundation/Source.lean",
+      "expectedDeclarations": 2
+    },
+    {
+      "module": "Ps.Foundation.List",
+      "source": "packages/foundation/src-ps/Ps/Foundation/List.ps",
+      "baseline": "packages/foundation/src/Ps/Foundation/List.lean",
+      "expectedDeclarations": 10
+    }
+  ]
+}

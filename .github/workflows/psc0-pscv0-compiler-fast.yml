@@ -8,6 +8,7 @@ on:
       - 'psc0/packages/syntax/src-ps/**'
       - 'psc0/packages/foundation/src-ps/**'
       - 'psc0/pscv0-authoring.json'
+      - 'psc0/pscv0-fast-candidates.json'
       - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
       - 'psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean'
       - 'psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean'
@@ -46,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check tools/abi/compiler-fast.mjs
-          node --check tools/abi/foundation-list-probe.mjs
+          node --check tools/abi/compiler-source-differential.mjs
           node --check tools/abi/transport.mjs
           node --check scripts/pscv0-authoring.mjs
           node --check scripts/pscv0-build-bridge.mjs
@@ -83,11 +84,11 @@ jobs:
           set -euo pipefail
           node tools/abi/compiler-fast.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee fast-compiler.log
           grep -F 'PSCV0_COMPILER_FAST: PASS' fast-compiler.log
-      - name: Qualify second compiler-source module against original Lean compiler output
+      - name: Differential all candidate compiler source modules without kernel tests
         run: |
           set -euo pipefail
-          node tools/abi/foundation-list-probe.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee second-module.log
-          grep -F 'PSCV0_SECOND_MODULE_COMPILER: PASS' second-module.log
+          node tools/abi/compiler-source-differential.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee multi-source-differential.log
+          grep -F 'PSCV0_COMPILER_MULTI_SOURCE: PASS' multi-source-differential.log
       - name: Retain measured compiler-only evidence without mislabeling checked release
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -95,8 +96,8 @@ jobs:
           name: pscv0-compiler-only-fast-${{ github.sha }}
           path: |
             psc0/fast-compiler.log
-            psc0/second-module.log
-            psc0/dist/pscv0-compiler-fast/foundation-list-differential.json
+            psc0/multi-source-differential.log
+            psc0/dist/pscv0-compiler-fast/source-module-differential.json
             psc0/dist/pscv0-compiler-fast/compiler-only-report.json
           if-no-files-found: warn
           retention-days: 14

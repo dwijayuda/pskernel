@@ -1,3 +1,19 @@
+# PSC0 AI WORK STATE — manifest-driven v7 compiler-only multi-source migration
+
+## Current checkpoint (11 October 2026)
+
+**Workstream:** self-host compiler packages only. No PSKernel implementation, kernel differential tests, kernel metatheory or independent checker in routine development. Language specification: exact sole PSCV0 v7, no prior ProofScript grammar compatibility.
+
+**Verified second v7-authored compiler module:** [38130835390](https://github.com/dwijayuda/pskernel/actions/runs/38130835390) **SUCCESS** at source d01f9bd470a2fd58ae5bcc09d5cb7993aa4c984d. The conservative Ps.Foundation.List.ps candidate has ten generic recursion/list operations, **4,882** AST nodes and original/candidate compiler products are **byte-identical**: canonical admission SHA-256 88975c455e2d8a69d7123f0a320306c65897e0022fa90b3913eab2f946b0a7b6 and TS7 SHA-256 efa2692bf423d9cbfb7115780d1e299db19a8ee431e4c63d7489ff05e6f37b9d. Baseline Lean 66 physical lines, v7 source 90: **do not claim code-length improvement** from this first conservative conversion. Compiler differential 670ms parse + 5,793ms preparation, excl. runner provisioning. **Zero kernel tests** and no new full fixed point. The initial error from v7's strict APP-02 rule was resolved by using the *actual v7 explicit adjacent type-call syntax*, not by weakening the parser.
+
+**Next architectural milestone, now authored:** a single [closed candidate manifest](pscv0-fast-candidates.json) and [manifest-driven differential tool](tools/abi/compiler-source-differential.mjs) replace individual test harnesses. It handles existing List and new third candidate [Ps.Foundation.Source.ps](packages/foundation/src-ps/Ps/Foundation/Source.ps), two structure declarations. For each module, it validates source identities and correct declaration counts; parses current v7 source with the cached exact source compiler; uses receiver-owned AST transfer; elaborates both the original Lean and v7 source through the same retained PSC0 compiler; compares canonical admission and emitted TS7 byte-for-byte, and reports elapsed time and first differences. This is **compiler-only product equivalence**, not a production verified build. The third candidate is **pending actual cloud CI** and not promoted to authoritative full compiler source.
+
+**Next:** observe fresh rapid compiler-only workflow result for both candidate modules, diagnose any actual AST or source-grammar mismatch at its invariant rather than patching expected outputs. After green, consider the next meaningful source feature family (e.g. typed compiler APIs with source comments and do-based error propagation), but keep parser/trivia/source span obligations explicit. Only later deliberately construct a new 21/22-module generated self-host candidate and fixed-point work with independent release gates, without requiring kernel test runs during the current loop.
+
+**Stable fast-loop baseline:** [38130403756](https://github.com/dwijayuda/pskernel/actions/runs/38130403756) passed **1,723 ms compiler-process** time for 20 source file cache identity, 2,440 existing Translate.ps AST nodes and three compiled TS7/Javascript programs; native source typecheck [38130403714](https://github.com/dwijayuda/pskernel/actions/runs/38130403714) green, both without PSKernel tests. Full generated bridge [38128357665](https://github.com/dwijayuda/pskernel/actions/runs/38128357665) fully green at ABI source commit a640a2d2; this stronger historical result cannot automatically qualify new candidate source identities.
+
+---
+
 # PSC0 AI WORK STATE — fast compiler-only loop qualified; second .ps module candidate
 
 ## Active checkpoint (11 October 2026)

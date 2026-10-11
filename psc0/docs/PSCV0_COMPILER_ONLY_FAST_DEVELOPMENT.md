@@ -32,6 +32,14 @@ Current authored compiler source, packages/syntax/src-ps/Ps/Syntax/Translate.ps,
 
 The generated JS frontend is still an independent component with private ADT symbols. The closed AST ABI translates source trees to receiver-owned constructors; it creates no proof authority. Any verification claim must later use the separate exact-source release build and independent checker.
 
+## Actual early measurements and reusable multi-module expansion
+
+The first fast compiler-only cloud job [38130403756](https://github.com/dwijayuda/pskernel/actions/runs/38130403756) **passed** with **1,723 milliseconds measured compiler-test execution**: all 20 cached-source SHA-256 identities, 2,440 actual Translate.ps source AST nodes, source typing/elaboration/TS7 runtime and three results 3, 8 and 4. The separate cheap native compiler-source typecheck [38130403714](https://github.com/dwijayuda/pskernel/actions/runs/38130403714) also passed. Neither ran an independent PSKernel checker.
+
+The exact second-module v7 compiler-only differential [38130835390](https://github.com/dwijayuda/pskernel/actions/runs/38130835390) **passed** on the real ten-function Ps.Foundation.List module. It validated 4,882 AST nodes and yielded **byte-identical compiler canonical admissions and TypeScript7 source** compared with the original Lean version. This stage took 670ms source parsing and 5,793ms compiler preparation (not including CI provisioning). It did not run a kernel checker or promote source into the 20-module build.
+
+To scale cheaply, the source candidates are now selected by one closed [v7 candidate manifest](../pscv0-fast-candidates.json), and the reusable [compiler source differential](../tools/abi/compiler-source-differential.mjs) performs the same source/AST/elaboration/admission/TS7 comparisons for every selected module. The next candidate is Ps.Foundation.Source, covering structure declarations rather than generic recursion. Its result remains **pending** until its own cloud job passes. No per-module test-output relaxation or old language compatibility is introduced.
+
 ## Efficiency and development discipline
 
 Prefer invariant-level fixes for parsing, grouping, comments/trivia, scoped environments, source positions and AST shape. Do not change tests to fit a deficient parser. A small typechecked v7 source and actual compiler TS7 output offer cheap feedback, then run the full 20-module bridge only at intentional milestones. Native Lean typechecking uses the existing host compiler toolchain; selecting another independent kernel for this no-kernel development tier would be unnecessary, with no measured benefit. If kernel testing resumes, choose and qualify a fast checker separately rather than silently replacing trusted policy.

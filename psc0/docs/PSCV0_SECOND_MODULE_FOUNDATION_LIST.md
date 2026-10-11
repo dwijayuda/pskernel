@@ -1,12 +1,14 @@
 # PSCV0 v7 — Second self-host compiler-source candidate
 
-**Work branch:** psc0/pscv0-compiler-fast-loop-v1. **Status:** experimental source migration with strict compiler-only differential gate, **not promoted** into the shipping compiler source manifest. **Normative language:** solely [PSCV0 v7](../PSCV0_LANGUAGE_REFERENCE.md), no old .ps syntax fallback.
+**Work branch:** psc0/pscv0-compiler-fast-loop-v1. **Status:** compiler-only strict product-equivalence candidate **QUALIFIED** at [cloud run 38130835390](https://github.com/dwijayuda/pskernel/actions/runs/38130835390), but **not promoted** into the shipping compiler source manifest. **Normative language:** solely [PSCV0 v7](../PSCV0_LANGUAGE_REFERENCE.md), no old .ps syntax fallback.
 
 ## Source selection
 
 The next source-owner candidate is **Ps.Foundation.List**, original **packages/foundation/src/Ps/Foundation/List.lean** (66 physical lines; 10 definitions). Source candidate **packages/foundation/src-ps/Ps/Foundation/List.ps** expresses the ten identical intended functions using v7 explicit typed parameter groups, nonexplicit binders, comma calls, braced matches and conditional syntax. The first version is a mechanical, conservative transliteration, *not* a claim of fewer lines or improved algorithms. The source is independent of kernel implementation and has no comments that would trigger the existing unfinished trivia-anchoring feature.
 
 The functions are psListLength, psListIsEmpty, psListAny, psListReverseAcc, psListReverse, psListAppend, psListMap, psListMapExcept, psListTake and psListZip. Their implementation contains structural recursion and exact first-error behavior. Replacing the entire family with an unchecked short JavaScript implementation, retaining an older ProofScript parser mode, or rewriting the checker is not permitted.
+
+**Measured result:** The original Lean source (66 physical lines, SHA-256 0a73eb4dded33cd9fecf000996653746800ea5fb05956e46670a7d3579426680) and canonical v7 candidate (90 physical lines, SHA-256 b26a6b2e5672d2da25e00d809b5818ef34f7c49aaad0fb0844b592a5118b6c71) elaborated to **identical canonical admission bytes** (SHA-256 88975c455e2d8a69d7123f0a320306c65897e0022fa90b3913eab2f946b0a7b6) and **identical TypeScript output bytes** (SHA-256 efa2692bf423d9cbfb7115780d1e299db19a8ee431e4c63d7489ff05e6f37b9d). Generated v7 source AST validation consumed **4,882 nodes**; the measured compiler differential took about **6.5 seconds** (670ms parsing plus 5,793ms preparation), excluding CI provisioning. **No independent kernel or kernel-proof tests were run.** This qualifies a bounded compiler product-equivalence milestone, not a source-to-source formal theorem or a new full compiler self-host fixed point.
 
 ## Cheap acceptance
 
@@ -16,4 +18,4 @@ Compare exact canonical compiler-admission text, exact TypeScript 7 output and r
 
 A green structural/semantic differential establishes only that the selected module preserves those concrete compiler-generated products under that retained toolchain, **not full v7 correctness or a proof of arbitrary source code**. Additional performance/readability refactoring (especially error-return do lowering), multi-module import/provenance and source spans should follow only after initial feature-family acceptance. The historical original Lean source must remain immutable until deliberate source-authority promotion, with fresh full generated bridge and fixed-point evidence.
 
-**Current status when this note was written:** new candidate and probe have been authored; the actual cloud result is not yet observed and must be reported separately in AI_WORK_STATE.
+**Current status:** Green strict compiler-only differential on the exact original and v7 candidate sources. Full source-closure integration and separately checked promotion remain future milestones.

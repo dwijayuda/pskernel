@@ -143,11 +143,12 @@ test('generated bridge output compiles, selected kernel admits fixtures, and run
   assert.equal(F.asciiBind(good).value,10n);assert.equal(F.strings(good).value,'do; -- λ');
   const summary={source:process.env.GITHUB_SHA,platform:process.platform,node:process.version,bridgeJsSha256:report.bridgeJsSha256,fixtureAdmissionSha256:sha(stream),kernelProvider:decision.provider,fixtureKernelAdmitted:true,fixtureCount:fixtures.length,firstErrorAndValueBehavior:true,fullSelfhostCycleExecuted:false};
   await writeFile(path.join(dist,'runtime-report-'+process.platform+'.json'),JSON.stringify(summary,null,2)+'\n');
-  // Reference test uses the actual generated pretty and lowered source, not
-  // a separate handwritten implementation of the bridge.
+  // Preserve the actual generated functions and equality statement. The native
+  // lane established that explicit constructor cases close this proof; symbolic
+  // rfl alone is not a requirement of semantic correspondence.
   const reference=fixtures[1].ps.replace('function two(','function referenceProgram(');
   const lowered=fixtures[1].ps.replace('function two(','function loweredProgram(');
-  const proof=lean(reference)+'\n'+lower(lowered)+'\ntheorem pscv0_do_correspondence (a b : Except String Nat) :\n    referenceProgram a b = loweredProgram a b := by\n  rfl\n\n#print axioms pscv0_do_correspondence\n';
+  const proof=lean(reference)+'\n'+lower(lowered)+'\ntheorem pscv0_do_correspondence (a b : Except String Nat) :\n    referenceProgram a b = loweredProgram a b := by\n  cases a <;> cases b <;> rfl\n\n#print axioms pscv0_do_correspondence\n';
   await writeFile(path.join(dist,'reference.lean'),proof);
   console.log('PSCV0_BRIDGE_RUNTIME: PASS '+JSON.stringify(summary));
 });

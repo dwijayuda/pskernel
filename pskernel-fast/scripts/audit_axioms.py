@@ -31,6 +31,8 @@ THEOREMS = {
     "PSKernelFast.Proof.dependent_outer_variable_let_preserves_type",
     "PSKernelFast.Proof.eraseExpr_lift",
     "PSKernelFast.Proof.eraseExpr_instantiate",
+    "PSKernelFast.Proof.eraseExpr_beta_redex",
+    "PSKernelFast.Proof.eraseExpr_let_redex",
     "PSKernelFast.Proof.generalPiRule_erasable",
     "PSKernelFast.Proof.generalPiContextWF_erasable",
     "PSKernelFast.Proof.inferClosedGeneralPi_erasable",

@@ -1,0 +1,20 @@
+name: PSKernel-C0 experimental arena
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - 'psc0/packages/pskernel-c0/experimental/arena-engine/**'
+      - '.github/workflows/pskernel-c0-arena.yml'
+  workflow_dispatch:
+jobs:
+  arena-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Rust toolchain
+        run: rustc --version && cargo --version
+      - name: Test independent indexed term engine
+        run: cargo test --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --locked
+      - name: Static lint
+        run: cargo clippy --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --all-targets -- -D warnings

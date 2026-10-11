@@ -429,11 +429,11 @@ def psElabResolvedReference (context : PsElabContext) (resolved : PsResolvedName
   | .local id => return (context, .fvar id)
   | .global name =>
     let some declaration := psEnvironmentFind context.environment name | throw (.unknownName name)
-    let (meta, levelsRev) := (psDeclarationLevelParams declaration).foldl
+    let (constraints, levelsRev) := (psDeclarationLevelParams declaration).foldl
       (fun (state : PsMetaContext × List PsLevel) _ =>
         let fresh := psMetaFreshLevel state.fst
         (fresh.context, fresh.level :: state.snd)) (context.metaContext, [])
-    return (psElabContextWithMeta context meta, .constE name levelsRev.reverse)
+    return (psElabContextWithMeta context constraints, .constE name levelsRev.reverse)
 
 def psElabProjectionReference
     (context : PsElabContext)

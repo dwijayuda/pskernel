@@ -17,10 +17,32 @@ bootstrap/provider identities remain intact. Old M1 regeneration workflows are
 manual-only on this branch; a dedicated incremental native Linux job replaces
 them in ordinary work.
 
-**Status: implemented candidate, Linux CI pending.** The initial target deliberately
-rejects module imports until v7 module semantics land. This is a bounded compiler
-development foundation, not full v7 conformance or a portable compiler fixed point.
-No performance improvement is claimed before measurement.
+**Status: native development foundation qualified on Linux.**
+[Run 38150035834](https://github.com/dwijayuda/pskernel/actions/runs/38150035834)
+passed at executable/source commit `7672b5f9f0c905fc19cdf251ac080f1a2e7ac072`:
+native compiler/check executable build; 28 existing M1 parser cases; three accepted
+programs and four phase-specific refusals with batch isolation; CLI emission;
+pinned TypeScript 7.0.2 compilation and JavaScript runtime. Source inventory found
+61 portable and 67 native closure modules, with no `pskernel-core`. Actual runtime
+identity is checked against Lean 4.35.0-rc4 commit
+`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+
+The cached incremental build took 1,943 ms and the immediate unchanged build
+424 ms. The small CLI fixture initialized its prelude in 1 ms and recorded 1 ms
+for kernel checking; 0 ms phase values mean millisecond timer resolution, not zero
+work. These are small-workload observations, not a cold-build measurement, a
+large-program benchmark, or a speedup ratio against earlier compiler regeneration.
+
+The initial target deliberately rejects module imports until v7 module semantics
+land. This is a bounded compiler development foundation, not full v7 conformance
+or a portable compiler fixed point. Rich source representation, scopes/applications
+and expected types, dependent patterns/recursion, general typed control, proof
+automation/contracts and the Standard/P1 environment remain semantic milestones.
+Elaborator/backend errors currently retain phase-level codes, not rich source
+diagnostics. Do not infer these capabilities from host Lean's available features.
+
+[Draft PR #109](https://github.com/dwijayuda/pskernel/pull/109) contains this change.
+The work-state update after the passing run changes documentation only.
 
 **Corrected predecessor evidence:** M1 run
 [38144002557](https://github.com/dwijayuda/pskernel/actions/runs/38144002557)

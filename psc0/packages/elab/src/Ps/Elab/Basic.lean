@@ -420,6 +420,21 @@ def psElabResolveReferenceBase (localContext : PsLocalContext)
   let segments := psSyntaxNameRootSegments sourceName.segments
   psElabReferencePrefix (segments.length + 1) localContext environment rooted segments []
 
+-- Global constants instantiate declared universe parameters at every use.
+-- Keep the fresh constraints in the ordinary elaboration context so arguments
+-- and expected types solve them through the same unifier as expression holes.
+def psElabResolvedReference (context : PsElabContext) (resolved : PsResolvedName) :
+    Except PsElabError (PsElabContext × PsExpr) := do
+  match resolved with
+  | .local id => return (context, .fvar id)
+  | .global name =>
+    let some declaration := psEnvironmentFind context.environment name | throw (.unknownName name)
+    let (meta, levelsRev) := (psDeclarationLevelParams declaration).foldl
+      (fun (state : PsMetaContext × List PsLevel) _ =>
+        let fresh := psMetaFreshLevel state.fst
+        (fresh.context, fresh.level :: state.snd)) (context.metaContext, [])
+    return (psElabContextWithMeta context meta, .constE name levelsRev.reverse)
+
 def psElabProjectionReference
     (context : PsElabContext)
     (sourceName : PsSyntaxName)
@@ -433,20 +448,13 @@ def psElabProjectionReference
       | List.cons first _ =>
           Except.error
             (PsElabError.unknownName (psNameAppendStr PsName.anonymous first))
-  | Option.some selected =>
-      let baseTerm : PsExpr :=
-        match Prod.fst selected with
-        | PsResolvedName.local id => PsExpr.fvar id
-        | PsResolvedName.global name => PsExpr.constE name List.nil;
-      match Prod.snd selected with
-      | List.nil => psElabResolvedTerm context baseTerm expected
-      | List.cons _ _ =>
-          match psElabResolvedTerm context baseTerm Option.none with
-          | Except.error error => Except.error error
-          | Except.ok baseResult =>
-              match psElabProjectionChain context baseResult (Prod.snd selected) with
-              | Except.error error => Except.error error
-              | Except.ok projected => psElabFinalizeExpected projected expected
+  | Option.some selected => do
+      let (context, baseTerm) ← psElabResolvedReference context selected.fst
+      if selected.snd.isEmpty then psElabResolvedTerm context baseTerm expected
+      else
+        let base ← psElabResolvedTerm context baseTerm none
+        let projected ← psElabProjectionChain context base selected.snd
+        psElabFinalizeExpected projected expected
 
 def psElabNamedReference
     (context : PsElabContext)

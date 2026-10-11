@@ -110,7 +110,10 @@ changed parameters fail during elaboration.
 A shared Core telescope operation opens indices and fields, keeping their terminal
 types. Motives receive indices followed by the major; constructor conclusions and
 recursive hypotheses instantiate that same motive. The native official kernel
-checks the emitted declarations and actual recursor uses. The previous large
+checks the emitted declarations and actual recursor uses. Global references now
+instantiate their universe parameters with fresh constraints solved by arguments
+and expected types; source universe commands remain pending. Inference failures
+report their actual category. The previous large
 data block is removed from the general declaration module.
 
 Ordinary exhaustive constructor matches now work on indexed families with a

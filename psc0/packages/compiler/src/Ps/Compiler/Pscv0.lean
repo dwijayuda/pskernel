@@ -16,9 +16,23 @@ def psCompilerElaboratePscv0 (program : PsSyntaxProgram) :
     Except PsCompilerError PsElabModuleResult :=
   (psElabProgram psSelfHostProdPreludeEnvironment program).mapError PsCompilerError.elaboration
 
+def psCompilerPscv0InferError : PsInferError → String
+  | .fuelExhausted => "inference budget"
+  | .looseBoundVariable index => "loose bound variable " ++ psNatToString index
+  | .unknownFreeVariable id => "unknown local " ++ psNatToString id
+  | .unknownMetavariable id => "unknown inference variable " ++ psNatToString id
+  | .unknownConstant name => "unknown constant " ++ psNameToString name
+  | .incorrectUniverseArity name => "universe arity of " ++ psNameToString name
+  | .expectedSort => "expected a type"
+  | .expectedFunction => "expected a function"
+  | .applicationTypeMismatch => "application argument type mismatch"
+  | .letTypeMismatch => "let binding type mismatch"
+  | .projectionUnsupported => "unsupported projection"
+
 def psCompilerPscv0ElabError : PsElabError → String
   | .atDeclaration name error =>
       psCompilerPscv0ElabError error ++ " (in " ++ psNameToString name ++ ")"
+  | .infer error => "PSCV0-ELABORATION: " ++ psCompilerPscv0InferError error
   | .scope message => "PSCV0-SCOPE: " ++ message
   | .data message => "PSCV0-DATA: " ++ message
   | .invalidArgument message => "PSCV0-ARGUMENT: " ++ message

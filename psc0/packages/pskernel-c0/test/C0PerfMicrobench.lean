@@ -16,9 +16,9 @@ def c0BenchApps (count : Nat)
 
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
-  let first := c0BenchApps 256 (PsKernelExpr.bvar 0) arg
-  let second := c0BenchApps 256 (PsKernelExpr.bvar 1) arg
-  let iterations := 700
+  let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
+  let second := c0BenchApps 512 (PsKernelExpr.bvar 1) arg
+  let iterations := 10000
   let startedOld ← IO.monoMsNow
   for _ in [:iterations] do
     if psKernelExprEqLegacy first second then

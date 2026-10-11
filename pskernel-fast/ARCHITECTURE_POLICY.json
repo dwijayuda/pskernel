@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G4.3-structural-binder-scope-certified-no-admission",
+    "stage": "G4.3-structural-scope-certified-binder-lookup-and-substitution-no-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -52,7 +52,11 @@
     "admittedDeclarations": 0,
     "scopedBinderFrameCertified": true,
     "generalDependentInferenceImplemented": false,
-    "formalContextualTypeLookupProved": false
+    "formalContextualTypeLookupProved": false,
+    "scopedBinderLiftingProved": true,
+    "scopedCurrentDomainLookupCertified": true,
+    "substitutionScopePreservationProved": true,
+    "failClosedScopedSubstitutionPreflight": true
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -64,8 +68,9 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "df800d5f390e36a0c807bd88397221adce488394",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38110413629",
-    "scope": "45 native build targets, 18 independent V3 Lean source files, G1-G4.3 focused regression and proof-carrying structural binder scope, no admission"
+    "validatedSourceCommit": "1a86eb4eefe24e37b0747ae0881e66467f39f0ec",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38115032789",
+    "jobId": 114398149274,
+    "scope": "47 native build jobs, 19 independent source files audited, G1–G4.3 focused smoke plus source-specific scope/lifting/substitution proofs and fail-closed structural negative tests; no type checker or admission"
   }
 }

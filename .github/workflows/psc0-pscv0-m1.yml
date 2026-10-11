@@ -8,9 +8,9 @@ on:
       - 'psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean'
       - 'psc0/packages/foundation/src/**'
       - 'psc0/scripts/Pscv0M1Harness.lean'
-      - 'psc0/scripts/pscv0-m1-*'
+      - 'psc0/scripts/pscv0-m1-cases.json'
+      - 'psc0/scripts/pscv0-m1-check.mjs'
       - 'psc0/packages/syntax/src-ps/Ps/Syntax/Cursor.ps'
-      - '.github/workflows/psc0-pscv0-m1.yml'
   workflow_dispatch:
 permissions:
   contents: read
@@ -96,13 +96,13 @@ jobs:
           PY
           node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
           npm install -g --prefix "$RUNNER_TEMP/pscv0-tools" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
-      - name: Regenerate current M1 frontend and qualify five v7 source modules
+      - name: Regenerate current M1 bootstrap frontend and run generated corpus
         run: |
           set -euo pipefail
           node --check scripts/pscv0-m1-build.mjs
           node scripts/pscv0-reference-identity.mjs
           timeout 2400 node scripts/pscv0-m1-build.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee m1-linux.log
-          grep -F 'PSCV0_M1_PORTABLE: PASS' m1-linux.log
+          grep -F 'PSCV0_M1_BOOTSTRAP: PASS' m1-linux.log
       - name: Retain M1 source provenance, products and progress
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -1,6 +1,6 @@
-// Regenerate the current 21-module frontend once, then reuse live immutable
-// preparation prefixes to qualify five real v7 source modules. Linux compiler
-// development only: no kernel check, native parser fallback or cached grammar.
+// Regenerate the current 21-module bootstrap frontend and check its corpus.
+// The separate baseline/candidate closure workflow qualifies v7 source modules.
+// Linux compiler development only; no kernel check or cached grammar fallback.
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -8,7 +8,7 @@ import {createRequire} from 'node:module';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import path from 'node:path';
-import {transferPscv0Ast,V7_REFERENCE_SHA} from '../tools/abi/transport.mjs';
+import {V7_REFERENCE_SHA} from '../tools/abi/transport.mjs';
 
 assert.equal(process.platform,'linux');
 assert(process.argv[2]&&process.argv[3],'pass old provenance artifact and retained compiler');
@@ -70,7 +70,7 @@ const report={schema:'psc0-v7-m1-compiler-qualification/1',source:process.env.GI
  windowsTestsExecuted:false,kernelTestsExecuted:false,independentlyKernelAdmitted:false,
  fullV7Conformance:false,fullCompilerSelfhostFixedPoint:false};
 const checkpoint=()=>writeFile(path.join(dir,'report.json'),JSON.stringify(report,null,2)+'\n');
-const parsed=new Map(),prefixes=new Map();
+const parsed=new Map();
 try{
  await checkpoint();
  for(const row of order){
@@ -79,11 +79,10 @@ try{
  let state=C.psCompilerPreparationStart(C.PsCompilerSourceKind.lean);
  const prepStart=performance.now();
  for(const row of order){
-  const before=state,t0=performance.now();
+  const t0=performance.now();
   report.phase='prepare '+row.module;await checkpoint();
   console.log('PSCV0_M1_PREPARING: '+row.module);
   state=ok(C.psCompilerPreparationStepParsedWithOrigins(state,parsed.get(row.module)),'prepare '+row.module).state;
-  if(selected.has(row.module))prefixes.set(row.module,{before,after:state});
   const item={module:row.module,elapsedMs:Math.round(performance.now()-t0)};
   report.prepared.push(item);console.log('PSCV0_M1_PREPARED: '+JSON.stringify(item));
   await checkpoint();
@@ -114,35 +113,8 @@ try{
  process.stdout.write(checked.stdout||'');
  assert(!checked.error&&checked.status===0,String(checked.error||checked.stderr||checked.stdout));
  report.generatedCorpusPassed=true;
- const B=await import(pathToFileURL(path.join(dir,'index.js')).href);
- assert.equal(B.psPscv0ReferenceSha256,V7_REFERENCE_SHA);
- for(const [module,m] of selected){
-  report.phase='real v7 source '+module;await checkpoint();
-  const t0=performance.now(),source=await readFile(m.source,'utf8');
-  const row=order.find(x=>x.module===module);
-  assert.equal(m.baseline||m.baselineSource,row.path);
-  assert.deepEqual(imports(source),imports(await readFile(row.path,'utf8')));
-  const surface=ok(B.psPscv0ParseSource(true,source),'v7 parse '+module);
-  assert.equal(B.psPscv0ReplayOriginal(surface),source);
-  const syntax=ok(B.psPscv0LowerModule(surface),'lower '+module);
-  const transferred=transferPscv0Ast(B,C,syntax,source);
-  const prefix=prefixes.get(module);assert(prefix);
-  const next=ok(C.psCompilerPreparationStepParsedWithOrigins(prefix.before,transferred.module),'v7 preparation '+module).state;
-  const baseline=ok(C.psCompilerPreparationFinish(prefix.after),'baseline finish '+module);
-  const candidate=ok(C.psCompilerPreparationFinish(next),'v7 finish '+module);
-  const oldAdmissions=ok(C.psCompilerAdmissionsFromPrepared(baseline),'baseline admissions');
-  const newAdmissions=ok(C.psCompilerAdmissionsFromPrepared(candidate),'v7 admissions');
-  const oldTS=ok(C.psCompilerTypeScriptFromPrepared(baseline),'baseline TS');
-  const newTS=ok(C.psCompilerTypeScriptFromPrepared(candidate),'v7 TS');
-  assert.equal(newAdmissions,oldAdmissions,module+' canonical admissions changed');
-  assert.equal(newTS,oldTS,module+' TypeScript changed');
-  const item={module,path:m.source,sourceSha256:hash(source),astNodes:transferred.receipt.normalizedNodes,
-   admissionsSha256:hash(newAdmissions),typeScriptSha256:hash(newTS),
-   admissionsIdentical:true,typeScriptIdentical:true,elapsedMs:Math.round(performance.now()-t0)};
-  report.sourceChecks.push(item);console.log('PSCV0_M1_V7_SOURCE: PASS '+JSON.stringify(item));await checkpoint();
- }
  report.phase='complete';report.elapsedMs=Math.round(performance.now()-start);await checkpoint();
- console.log('PSCV0_M1_PORTABLE: PASS '+JSON.stringify(report));
+ console.log('PSCV0_M1_BOOTSTRAP: PASS '+JSON.stringify(report));
 }catch(error){
  report.failure=error.message;report.elapsedMs=Math.round(performance.now()-start);
  await checkpoint();throw error;

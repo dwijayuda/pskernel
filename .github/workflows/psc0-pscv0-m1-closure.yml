@@ -1,0 +1,127 @@
+name: PSC0 v7 M1 combined source closure (Linux only)
+on:
+  push:
+    branches: [psc0/pscv0-v7-m1-parser-ownership-v1]
+    paths:
+      - 'psc0/tools/abi/m1-source-closure.mjs'
+      - 'psc0/tools/abi/m1-compare-products.mjs'
+      - '.github/workflows/psc0-pscv0-m1-closure.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc0-v7-m1-combined-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compiler-closure:
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [baseline, candidate]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: psc0
+        shell: bash
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/packages/syntax
+            psc0/packages/foundation
+            psc0/tools/abi
+            psc0/scripts
+            psc0/pscv0-authoring.json
+            psc0/pscv0-fast-candidates.json
+            psc0/pscv0-linux-source-closure.json
+            psc0/PSCV0_LANGUAGE_REFERENCE.md
+            psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Cheap Linux compiler-script syntax, v7 source identity and no fallback
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          node --check tools/abi/m1-source-closure.mjs
+          node --check scripts/pscv0-m1-build.mjs
+          node scripts/pscv0-reference-identity.mjs
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38141737890
+          name: pscv0-v7-m1-92899697f2d019cd9430e8cbcf5ae08c6b0159de
+          path: psc0/m1-cache
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38075437516
+          name: proofscript-psc0-npm-ps-and-lean
+          path: ${{ runner.temp }}/pscv0-retained
+      - name: Install exact retained self-host compiler and TS7 (not a kernel test)
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,zipfile,os
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          matches=list((root/'pscv0-retained').rglob('proofscript-psc0-lean-npm-packages.zip'))
+          assert len(matches)==1
+          with zipfile.ZipFile(matches[0]) as z:
+            assert all(pathlib.PurePosixPath(n).name==n for n in z.namelist())
+            z.extractall(root/'pscv0-input')
+          PY
+          node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
+          npm install -g --prefix "$RUNNER_TEMP/pscv0-tools" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
+      - name: Compile current frontend closure (${{ matrix.mode }})
+        run: |
+          set -euo pipefail
+          mkdir -p "dist/pscv0-m1-source-closure/${{ matrix.mode }}"
+          timeout 1950 node tools/abi/m1-source-closure.mjs "$PWD/m1-cache/dist/pscv0-m1" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" 92899697f2d019cd9430e8cbcf5ae08c6b0159de "${{ matrix.mode }}" | tee "dist/pscv0-m1-source-closure/${{ matrix.mode }}/ci.log"
+          grep -F 'PSCV0_M1_CLOSURE_STAGE: PASS' "dist/pscv0-m1-source-closure/${{ matrix.mode }}/ci.log"
+      - name: Retain exact five-v7-source compiler outputs and progress, no kernel/Windows claim
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-v7-m1-${{ matrix.mode }}-${{ github.sha }}
+          path: psc0/dist/pscv0-m1-source-closure/${{ matrix.mode }}/
+          if-no-files-found: warn
+          retention-days: 30
+  compare-products:
+    needs: compiler-closure
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/tools/abi
+            psc0/scripts
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: pscv0-v7-m1-baseline-${{ github.sha }}
+          path: psc0/comparison/baseline
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: pscv0-v7-m1-candidate-${{ github.sha }}
+          path: psc0/comparison/candidate
+      - name: Require full admissions, TypeScript and JavaScript byte equality
+        working-directory: psc0
+        run: node tools/abi/m1-compare-products.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-v7-m1-comparison-${{ github.sha }}
+          path: psc0/comparison/report.json
+          if-no-files-found: warn
+          retention-days: 30

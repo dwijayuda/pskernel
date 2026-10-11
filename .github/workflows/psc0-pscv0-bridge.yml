@@ -1,7 +1,7 @@
 name: PSC0 portable PSCV0 source bridge
 on:
   push:
-    branches: [psc0/pscv0-readable-selfhost-v1, psc0/pscv0-v7-app-model-v1]
+    branches: [psc0/pscv0-readable-selfhost-v1, psc0/pscv0-v7-app-model-v1, psc0/pscv0-v7-abi-v1]
     paths:
       - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
       - 'psc0/packages/syntax/src-ps/**'
@@ -38,6 +38,7 @@ jobs:
             psc0/packages/syntax
             psc0/packages/foundation
             psc0/scripts
+            psc0/tools/abi
             psc0/test/pscv0
             psc0/PSCV0_LANGUAGE_REFERENCE.md
             psc0/docs/PSCV0_REFERENCE_ADOPTION.json
@@ -121,7 +122,9 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-          sparse-checkout: psc0/scripts
+          sparse-checkout: |
+            psc0/scripts
+            psc0/tools/abi
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '26.7.0'

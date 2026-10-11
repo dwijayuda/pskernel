@@ -1,3 +1,26 @@
+# PSC0 AI WORK STATE — v7 closed AST ABI and generated compiler integration
+
+## Latest milestone, October 11, 2026
+
+**User intent is unchanged:** `psc0/PSCV0_LANGUAGE_REFERENCE.md` revision **v7** is the sole forward-looking `.ps` language specification, SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`; **no backward compatibility** for earlier PSC1, ps-0.9-r3, or older PSCV0 language references is needed. Historical compiler seeds/source and receipts are immutable bootstrap/provenance, not supported new grammar options. No kernel modifications or public/npm compiler switch in this workstream.
+
+**Root-cause run:** [38125532982](https://github.com/dwijayuda/pskernel/actions/runs/38125532982), exact source `6e811feabba89bf8ea3ebbf50916453169d100ed`, completed **failure** after successful generated 20-module bootstrap and eight actual first-module correspondence proofs. The source bridge's newly direct PSCV0 AST failed in retained compiler elaboration with `invalid ProofScript constructor tag` because generated frontend and retained compiler inhabit **separate JavaScript private-Symbol ADT domains**. A direct `PsSyntaxModule` object cannot simply cross between their two module instances. No source/kernal consistency claim follows from this failure.
+
+**Architecture fix:** a closed, pinned, versioned source AST interop codec lives at [`tools/abi/transport.mjs`](tools/abi/transport.mjs), contract `psc0-pscv0-source-ast-transport/1`. It reconstructs recipient-owned `List`/`Option`/syntax-term/declaration union constructors with recipient factories after full source-field, source brand, constructor symbol-identity, depth/list/byte/span/fuel and exact reference validation. It deliberately does not share or forge private Symbols. Its output is still **untrusted syntax**, not a proof token: caller MUST invoke unchanged source elaboration, canonical admissions and independent kernel check. [Architecture/limitations](docs/PSCV0_V7_CROSS_RUNTIME_AST_ABI.md).
+
+**Verified cheap real cloud evidence:**
+- [38127436381](https://github.com/dwijayuda/pskernel/actions/runs/38127436381) passed inspecting actual generated 20-module artifact and retained compiler exports; mismatched Symbol identities confirmed. This is empirical runtime/ABI source analysis, not a proof that all constructs work.
+- [38127922986](https://github.com/dwijayuda/pskernel/actions/runs/38127922986) **passed** validating/rebuilding **257** typed source nodes of v7 `(add(1))(2)`; existing retained compiler elaborated it, independent kernel accepted canonical admissions, TypeScript emitter produced output **without an old Lean text parse**; wrong-module tags and extra fields were rejected.
+- [38128089427](https://github.com/dwijayuda/pskernel/actions/runs/38128089427) **passed** source schema coverage on the exact authoritative `Ps.Syntax.Translate.ps` module: **2,440** AST nodes, source SHA-256 `938288af9c8476d592fc69c4e6f2c01ecb8e1f371fdd5bac1f789a3097710428`. It did **not** run that module's full prepared prefix/elaboration in isolation.
+
+**Now integrating the real bounded compiler source** on `psc0/pscv0-v7-abi-v1` (forked from `psc0/pscv0-v7-app-model-v1` commit `6e811fe...`). The generated candidate builder now decodes the actual `Translate.ps` source AST with versioned source/runtime identity; passes **recipient-owned** `PsSyntaxModule` to pure `psCompilerPreparationStepParsedWithOrigins`; leaves readable Lean as independently checked projection; adds precise ABI receipt to build-report, source-content/no-fallback enforcement and generated JS/Windows APP-04 runtime/checker test. All prior 43 bridge and 12 authoring tests, Lean RC4 proofs, full builder toolchain, semantic checks and immutable 69-file historic source gate stay in place. **DO NOT CLAIM changed 20-module bridge success until its new CI completes on exact new source commit.**
+
+**Already green predecessor evidence, not transferable:** primary `psc0/pscv0-readable-selfhost-v1` [38122341583](https://github.com/dwijayuda/pskernel/actions/runs/38122341583), source `2394fc7e`, Linux/Windows 43+12 tests each and RC4 proofs; native source APP-04 positive and eight axiom-free formal model lemmas [38124980640](https://github.com/dwijayuda/pskernel/actions/runs/38124980640) at `0e664233`. These do not certify newly changed artifacts.
+
+**Next checkpoint:** get actual new [PSC0 portable bridge](https://github.com/dwijayuda/pskernel/actions/workflows/psc0-pscv0-bridge.yml) Linux generation, source provenance, kernel/runtime and Windows/RC4 results; resolve any *real* ABI/elaboration semantic mismatch systematically rather than patching negative tests or relying on old Lean parsing. Then compare to current primary HEAD (includes concurrent separate Rust-target documentation commit) and preserve both histories; integrate with non-force expected-HEAD only after evidence. Update work state with actual outcome. Unqualified v7 full Standard/verified contracts, 64-module source migration, self-host C0/C3 and kernel consistency remain separate work.
+
+---
+
 # PSC0 AI WORK STATE — direct generated v7 AST handoff and APP-04 verification
 
 ## Current milestone: 2026-10-11 — source model passed; generated direct-AST pipeline pending

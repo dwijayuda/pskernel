@@ -49,7 +49,12 @@ test('candidate compiler module really comes from its authoritative PS source',a
   assert.equal(report.authoring.selectedPsModules,1);
   assert.equal(report.authoring.noFallback,true);
   assert.equal(report.authoring.directGeneratedSourceAstHandoff,true);
-  assert.equal(report.authoring.compilerInput,'generated-v7-pscv0-syntax-module');
+  assert.equal(report.authoring.compilerInput,'versioned-validated-v7-pscv0-syntax-module');
+  assert.equal(report.authoring.sourceAstTransportVersion,'psc0-pscv0-source-ast-transport/1');
+  assert.equal(report.authoring.sourceAstTransport.schema,'psc0-pscv0-source-ast-transport/1');
+  assert.equal(report.authoring.sourceAstTransport.sourceSha256,receipt.sourceSha256);
+  assert.equal(report.authoring.sourceAstTransport.elaborationRequired,true);
+  assert.equal(report.authoring.sourceAstTransport.trustedByKernel,false);
   assert.equal(report.authoring.readableLeanProjectionOnly,true);
   assert.equal(receipt.candidateSourceAuthority,'ps');
   for(const [file,digest] of Object.entries(receipt.products))assert.equal(hash(await readFile(path.join(authoring,file))),digest);

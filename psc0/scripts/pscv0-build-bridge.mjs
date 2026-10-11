@@ -10,6 +10,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readAuthoringInputs, materializeAuthoring } from './pscv0-authoring.mjs';
+import { transferPscv0Ast, AST_ABI_VERSION } from '../tools/abi/transport.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const prefix=path.resolve(process.argv[2]);
 const output=path.resolve(process.argv[3]||path.join(root,'dist/pscv0-bridge'));
@@ -109,7 +110,8 @@ async function emitStage(state,modules,stage,directory,authoring){
     closure:modules.map(({source,...record})=>record),
     ...(authoring?{authoring:{manifestSha256:authoring.receipt.manifestSha256,modules:[authoring.receipt],selectedPsModules:1,noFallback:true,
       sharedPrefixModules:forkIndex,sharedPrefixPreparedOnce:true,
-      directGeneratedSourceAstHandoff:true,compilerInput:'generated-v7-pscv0-syntax-module',
+      directGeneratedSourceAstHandoff:true,compilerInput:'versioned-validated-v7-pscv0-syntax-module',
+      sourceAstTransport:authoring.astTransport,sourceAstTransportVersion:AST_ABI_VERSION,
       readableLeanProjectionOnly:true,
       surfaceBootstrapJsSha256:authoring.receipt.surfaceSeed.jsSha256}}:{}),
     bridgeTypeScriptSha256:sha(ts),bridgeJsSha256:sha(await readFile(path.join(directory,'index.js'))),admissionsSha256:sha(admissions),
@@ -143,10 +145,21 @@ try{
   // directly to the existing elaboration step avoids a second lossy Lean-text
   // parse and does not bypass admission or any kernel/host obligation.
   // The Lean text above remains an independently checked projection.
-  assert(authoring.parsedModule&&typeof authoring.parsedModule==='object',
-    'generated PSCV0 parsed module must exist; no old Lean parser fallback');
-  parsed.set(chosen.module+':'+chosen.consumedSha256,authoring.parsedModule);
-  console.log('PSCV0_SOURCE_AST_HANDOFF: generated PSCV0 source AST, direct checked elaboration');
+  assert(authoring.parsedModule&&authoring.sourceRuntime,
+    'generated PSCV0 source AST and provenance must exist; no old Lean parser fallback');
+  // AST source and retained compiler are independent generated JS modules.
+  // Their private constructor Symbols are NOT cross-bundle ABI compatible:
+  // validate a closed source syntax schema, rebuild recipient-owned union
+  // constructors, then pass the still-untrusted AST to existing elaboration.
+  const transferred=transferPscv0Ast(
+    authoring.sourceRuntime,compiler,authoring.parsedModule,inputs.source);
+  assert.equal(transferred.receipt.schema,AST_ABI_VERSION);
+  assert.equal(transferred.receipt.sourceSha256,authoring.receipt.sourceSha256,
+    'typed AST transport source provenance mismatch');
+  authoring.astTransport=transferred.receipt;
+  parsed.set(chosen.module+':'+chosen.consumedSha256,transferred.module);
+  console.log('PSCV0_SOURCE_AST_HANDOFF: validated '+AST_ABI_VERSION+
+    ', '+transferred.receipt.normalizedNodes+' nodes, recipient-owned ADTs; checked elaboration pending');
   state=shared;
   for(const module of candidate.slice(forkIndex))state=await prepareOne(state,module,'ps-authoring-candidate');
   await emitStage(state,candidate,'ps-authoring-candidate',output,authoring);

@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { transferPscv0Ast, AST_ABI_VERSION } from '../tools/abi/transport.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const dist=path.join(root,'dist/pscv0-bridge');
 const prefix=process.env.PSCV0_PREFIX;
@@ -131,9 +132,12 @@ test('v7 APP-04 generated AST enters checked compiler directly and runs correctl
     'const grouped: Nat := (add(1))(2)\n';
   const selected=ok(B.psPscv0ParseSource(true,source),'parse v7 source');
   const sourceModule=ok(B.psPscv0LowerModule(selected),'lower selected source AST');
+  const transported=transferPscv0Ast(B,C,sourceModule,source);
+  assert.equal(transported.receipt.schema,AST_ABI_VERSION);
+  assert.equal(transported.receipt.sourceSha256,sha(source));
   const initial=C.psCompilerPreparationStart(C.PsCompilerSourceKind.lean);
-  const stepped=ok(C.psCompilerPreparationStepParsedWithOrigins(initial,sourceModule),
-    'elaborate generated v7 AST');
+  const stepped=ok(C.psCompilerPreparationStepParsedWithOrigins(initial,transported.module),
+    'elaborate validated v7 AST');
   const prepared=ok(C.psCompilerPreparationFinish(stepped.state),
     'finish direct AST compiler preparation');
   const admissions=ok(C.psCompilerAdmissionsFromPrepared(prepared),
@@ -159,7 +163,8 @@ test('v7 APP-04 generated AST enters checked compiler directly and runs correctl
   assert.equal(executable.grouped,3n,'v7 grouped-curried runtime must equal pinned Lean source');
   const evidence={sourceRevision:process.env.GITHUB_SHA,platform:process.platform,
     sourceSha256:sha(source),generatedBridgeSha256:report.bridgeJsSha256,
-    parsedWith:'generated PSCV0 v7 JavaScript',compilerInput:'owned PsSyntaxModule, no old Lean parse',
+    parsedWith:'generated PSCV0 v7 JavaScript',compilerInput:'validated '+AST_ABI_VERSION+
+      ', no old Lean parse',
     checkedProvider:decision.provider,canonicalAdmissionsSha256:sha(admissions),
     typescript:'7.0.2',result:'3',noTextReparse:true,kernelAdmitted:true,
     fullV7Conformance:false,newCompilerFixedPoint:false};

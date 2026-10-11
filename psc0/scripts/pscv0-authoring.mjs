@@ -145,7 +145,10 @@ export async function materializeAuthoring(seedDirectory,outputDirectory){
   const recorded=await record(inputs,{readable,lowered,roundtrip},outputDirectory,
     {stage:'current-generated-surface-bootstrap',source:report.source,jsSha256:report.bridgeJsSha256,
       tsSha256:report.bridgeTypeScriptSha256,builderJsSha256:report.builderJsSha256,nativeFallback:false});
-  return {...recorded,parsedModule};
+  // Runtime constructor symbols are bundle-local. The host-side schema
+  // transport requires the exact generator module to check source identities.
+  // This value stays in memory and is never serialized as checking authority.
+  return {...recorded,parsedModule,sourceRuntime:B};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   if(process.argv[2]==='--native-preflight'){

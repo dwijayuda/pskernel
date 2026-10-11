@@ -119,4 +119,33 @@ theorem KExpr.instantiateBVar_top_scoped
     (KExpr.instantiateBVar_structurallyValid params outerDepth
       replacement hReplacement body 0 (by simpa using hBody))
 
+/-- Structural preflight failures for this binder operation, not kernel errors. -/
+inductive SubstitutionScopeError where
+  | malformedBody
+  | malformedReplacement
+  deriving Inhabited, Repr, BEq
+
+/--
+Fail-closed runtime entry point for substitution in a known context:
+validate BOTH inputs, run the real reference substitution, and return
+a scope certificate for the EXACT executable result.
+
+This does not validate a term's TYPE and does not enable theorem admission.
+-/
+def KExpr.instantiateTopScoped (params : List KName) (outerDepth : Nat)
+    (body replacement : KExpr) :
+    Except SubstitutionScopeError
+      { result : KExpr // KExpr.StructurallyValid params outerDepth result } :=
+  if hBody : body.validAt params (outerDepth + 1) = true then
+    if hReplacement : replacement.validAt params outerDepth = true then
+      .ok ⟨body.instantiateBVar replacement 0,
+        KExpr.instantiateBVar_top_scoped params outerDepth replacement body
+          (KExpr.validAt_sound params outerDepth replacement hReplacement)
+          (KExpr.validAt_sound params (outerDepth + 1) body hBody)⟩
+    else
+      .error .malformedReplacement
+  else
+    .error .malformedBody
+
+
 end PSKernelFast.Core

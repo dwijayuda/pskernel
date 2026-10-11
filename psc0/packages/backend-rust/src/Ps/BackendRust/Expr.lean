@@ -110,25 +110,27 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
         let parameters ← ps.mapM psRustParameter
         let type ← psRustResult (psRustEmitType (.function (ps.map (·.type)) result))
         let result ← psRustResult (psRustEmitType result)
-        let clones := captures.map fun name => PsDoc.text ("let " ++ name ++ " = " ++ psRustClonePrinted name ++ ";")
+        let clones := captures.map fun name => PsDoc.text ("let " ++ name ++ " = " ++
+          (if preserve.contains name then psRustClonePrinted name else name) ++ ";")
         let closure : PsDoc := .append (.text ("let __ps_closure: " ++ type ++ " = std::rc::Rc::new("))
           (.append (psDocBlock ("move |" ++ String.intercalate ", " parameters ++ "| -> " ++ result) [body]) (.text ");"))
         return psDocBlock "" (clones ++ [closure, .text "__ps_closure"])
     | .letE name type value body =>
         let value ← emit (preserve ++ psRustFree ctx body) value
         let type ← psRustResult (psRustEmitType type)
-        let (aliases, captures) := match ctx.tail? with
+        let (aliases, captures) : List PsRustTailAlias × List (String × String) := match ctx.tail? with
           | none => (ctx.aliases, [])
           | some d =>
               let original := match expr with | .letE _ _ v _ => v | _ => .literal .unit
-              let alias := psRustTailAliasFor d ctx.locals fuel name original
-              (psRustTailEnterAlias d ctx.locals ctx.aliases fuel name original,
-                alias.map (·.captures) |>.getD [])
+              let snapshots := match psRustTailAliasFor d ctx.locals fuel name original with
+                | none => []
+                | some entry => entry.captures
+              (psRustTailEnterAlias d ctx.locals ctx.aliases fuel name original, snapshots)
         let body ← psRustExpr fuel { ctx with locals := name :: ctx.locals, aliases } preserve body
         let captureDocs := captures.map fun (source, captureName) =>
           PsDoc.text ("let " ++ captureName ++ " = " ++ psRustClonePrinted source ++ ";")
         return psDocBlock "" (captureDocs ++ [
-          .append (.text ("let " ++ name ++ ": " ++ type ++ " = ")) (.append value (.text ";")), body])
+          PsDoc.append (.text ("let " ++ name ++ ": " ++ type ++ " = ")) (.append value (.text ";")), body])
     | .ifE condition yes no =>
         let condition ← emit (preserve ++ psRustFreeMany ctx [yes, no]) condition
         let yes ← psRustExpr fuel ctx preserve yes
@@ -168,5 +170,5 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
           let pattern := psRustNodeName ctx.shared name ++ "::" ++ ctor ++ " { " ++
             String.intercalate ", " (fields ++ [".."]) ++ " } =>"
           arms := .append (psDocBlock pattern (clones ++ [branch])) (.text ",") :: arms
-        let target := if shared then psRustDocWrap "(" target ").as_ref()" else target
+        let target := if shared then psRustDocWrap "(" target ").as_ref()" else psRustDocWrap "(" target ")"
         return .append (.text "match ") (.append target (psDocBlock "" arms.reverse))

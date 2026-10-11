@@ -87,4 +87,80 @@ theorem AnyScopedFrame.extend_depth {params : List KName}
     rfl
   · simp [good] at h
 
+
+/-
+G4.3 continuation: capture-avoiding *reference* lifting on the exact G3
+KExpr constructors. This is structural infrastructure only, not a typing
+judgment, an optimized WHNF algorithm or a proof-admission operation.
+-/
+
+/-- Raise free indices at or above cutoff, descending under actual binders. -/
+def KExpr.liftBVars (amount cutoff : Nat) : KExpr → KExpr
+  | .bvar index =>
+      if index < cutoff then .bvar index else .bvar (index + amount)
+  | .app fn arg =>
+      .app (fn.liftBVars amount cutoff) (arg.liftBVars amount cutoff)
+  | .lam name domain body style =>
+      .lam name (domain.liftBVars amount cutoff)
+        (body.liftBVars amount (cutoff + 1)) style
+  | .forallE name domain body style =>
+      .forallE name (domain.liftBVars amount cutoff)
+        (body.liftBVars amount (cutoff + 1)) style
+  | .letE name ty value body nondep =>
+      .letE name (ty.liftBVars amount cutoff)
+        (value.liftBVars amount cutoff)
+        (body.liftBVars amount (cutoff + 1)) nondep
+  | .mdata tag inner => .mdata tag (inner.liftBVars amount cutoff)
+  | .proj name index inner =>
+      .proj name index (inner.liftBVars amount cutoff)
+  | atom => atom
+
+/--
+Every structurally scoped expression remains structurally scoped when
+its *free* indices are raised. The required cutoff ≤ depth hypothesis
+prevents treating indices free to an inner binder as locally bound.
+This is not proof that an expression has a type.
+-/
+theorem KExpr.liftBVars_structurallyValid
+    (params : List KName) (amount cutoff depth : Nat) (expr : KExpr)
+    (hCutoff : cutoff ≤ depth)
+    (h : KExpr.StructurallyValid params depth expr) :
+    KExpr.StructurallyValid params (depth + amount)
+      (expr.liftBVars amount cutoff) := by
+  induction expr generalizing depth cutoff with
+  | bvar index =>
+      change index < depth at h
+      by_cases hIndex : index < cutoff
+      · have hRaised : index < depth + amount := by omega
+        simpa [KExpr.liftBVars, hIndex, KExpr.StructurallyValid]
+          using hRaised
+      · have hRaised : index + amount < depth + amount := by omega
+        simpa [KExpr.liftBVars, hIndex, KExpr.StructurallyValid]
+          using hRaised
+  | fvar _ => exact False.elim h
+  | mvar _ => exact False.elim h
+  | sort _ =>
+      simpa [KExpr.liftBVars, KExpr.StructurallyValid] using h
+  | const _ _ =>
+      simpa [KExpr.liftBVars, KExpr.StructurallyValid] using h
+  | app fn arg ihFn ihArg =>
+      exact ⟨ihFn depth cutoff hCutoff h.1,
+        ihArg depth cutoff hCutoff h.2⟩
+  | lam name domain body style ihDomain ihBody =>
+      exact ⟨ihDomain depth cutoff hCutoff h.1,
+        ihBody (depth + 1) (cutoff + 1) (by omega) h.2⟩
+  | forallE name domain body style ihDomain ihBody =>
+      exact ⟨ihDomain depth cutoff hCutoff h.1,
+        ihBody (depth + 1) (cutoff + 1) (by omega) h.2⟩
+  | letE name ty value body nondep ihTy ihValue ihBody =>
+      exact ⟨⟨ihTy depth cutoff hCutoff h.1.1,
+        ihValue depth cutoff hCutoff h.1.2⟩,
+        ihBody (depth + 1) (cutoff + 1) (by omega) h.2⟩
+  | lit _ => trivial
+  | mdata tag inner ih =>
+      exact ih depth cutoff hCutoff h
+  | proj name index inner ih =>
+      exact ih depth cutoff hCutoff h
+
+
 end PSKernelFast.Core

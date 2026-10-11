@@ -548,13 +548,16 @@ def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
       recursor.numMotives != 1 || recursor.numMinors != info.constructors.length then
     throw .matchRecursorUnsupported
   let expectedType := psMetaInstantiate context.metaContext expectedType
-  let expectedSort ← (psInferType context.environment context.metaContext
-    context.localContext expectedType).mapError PsElabError.infer
+  let plan ← psElabMatchMotive context info levels parameters indices scrutinee.term expectedType
+  -- Reverted dependent parameters can raise the motive's universe above that
+  -- of the original expected result. Infer the completed motive, not a proxy.
+  let motiveType ← (psInferType context.environment context.metaContext
+    context.localContext plan.motive).mapError PsElabError.infer
+  let motiveTelescope ← psElabOpenCoreTelescope 4096 context motiveType none
   let level ← (psInferEnsureSort context.environment context.metaContext
-    context.localContext expectedSort).mapError PsElabError.infer
+    motiveTelescope.context.localContext motiveTelescope.body).mapError PsElabError.infer
   if recursor.levelParams.length > 1 then throw .matchRecursorLevels
   let recursorLevels := if recursor.levelParams.isEmpty then [] else [level]
-  let plan ← psElabMatchMotive context info levels parameters indices scrutinee.term expectedType
   let minorContext := psElabStructuralMatchContext context scrutinee.term expectedType plan info.numIndices
   let recursorType := psExprInstantiateLevelParams recursor.levelParams recursorLevels recursor.type
   let cursor ← psElabMatchApplyParameters context (parameters ++ [plan.motive]) recursorType

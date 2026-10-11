@@ -58,6 +58,7 @@ def psCompilerPscv0ErasureError : PsErasureError → String
   | .unknownLocal id => "unknown local " ++ psNatToString id
   | .erasedLocalUsed id => "runtime use of erased local " ++ psNatToString id
   | .unsupportedRuntimeTerm => "unsupported runtime term"
+  | .inDeclaration name cause => psCompilerPscv0ErasureError cause ++ " (in " ++ psNameToString name ++ ")"
   | .unsupportedApplication => "unsupported application"
   | .unknownConstant name => "unknown constant " ++ psNameToString name
 

@@ -166,7 +166,7 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
     match entry.value with
     | some _ =>
       let .letE _ type value body := psElabExposeTelescope 256 state.context state.body
-        | throw (.refinement "dependent entry definition lost its telescope")
+        | throw (.refinement "dependent local definition lost its telescope")
       let pushed := psLocalPushLet state.context.localContext name type value
       psElabOpenDependents rest { state with
         context := psElabContextWithLocal state.context pushed.context

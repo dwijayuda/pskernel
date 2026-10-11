@@ -450,7 +450,7 @@ def psEraseDefinitionsLoopWorker
       match declaration with
       | PsDeclaration.definitionDecl name _ type value =>
           match psEraseDefinition environment scope name type value with
-          | Except.error error => Except.error error
+          | Except.error error => Except.error (.inDeclaration name error)
           | Except.ok result =>
               match result with
               | Option.none =>
@@ -460,7 +460,7 @@ def psEraseDefinitionsLoopWorker
                     (List.cons lowered declarationsRev)
       | PsDeclaration.partialDecl name _ type value =>
           match psEraseDefinition environment scope name type value with
-          | Except.error error => Except.error error
+          | Except.error error => Except.error (.inDeclaration name error)
           | Except.ok result =>
               match result with
               | Option.none =>

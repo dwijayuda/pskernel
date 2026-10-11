@@ -118,34 +118,47 @@ data block is removed from the general declaration module.
 
 ## Dependent matches and indexed recursion
 
-Exhaustive constructor matches infer motives by generalizing distinct local
-indices and the matched local value in the expected result type. Every branch
-opens its field and induction-hypothesis telescope from the recursor's type.
-This shares the admitted recursor contract instead of independently rebuilding
-branch types. Fresh local let aliases refine unshadowed index/major names; pattern
-binders retain precedence, and outer dependent hypotheses keep their original
-types.
+Constructor matches infer motives by abstracting distinct local indices and the
+matched value, then reverting the transitive closure of dependent locals.
+Bindings become motive parameters; local definitions keep their values.
+Branches open their fields, induction hypotheses and reverted context from the
+actual recursor telescope. Fresh aliases refine visible names, preserving pattern
+shadowing and the original outer local declarations. The completed motive
+determines the recursor universe.
+
+Fixed, compound and repeated parent indices use explicit homogeneous equality
+constraints. `Ps.Elab.Equality` produces substitutions, constructor injectivity
+and disjointness proofs through recursors; impossible branches eliminate a proof
+of `False`. Missing cases are accepted only when that construction proves a
+contradiction. Unsolved and cyclic constraints are not evidence of impossibility.
+`Ps.Elab.Refinement` owns shared dependency closure, context reversion and
+opening/closing of telescopes; `Match` coordinates this machinery.
+
+The compiler prelude now supplies genuine `Eq`, `False`, `True` and `Bool`
+inductives and the defined `False.elim`. Official Lean checks their admission and
+the generated proof terms. Portable reduction handles direct single-family
+recursor iota steps and canonical Nat literals without expanding large literals
+into successor chains.
 
 Whole-definition structural calls may change the major to a direct recursive
-field and change its index arguments to that field's indices, including computed
-expressions. Other arguments must remain definitionally equal to their original
-values. Existing changing-state normalization composes with this path when state
-types satisfy its independence restrictions.
+field and its index arguments to that field's indices, including computed
+expressions. Changing state uses the existing worker normalization, including
+state whose type depends on retained indices. The worker returns a function over
+that state. Invalid stale dependent arguments still fail.
 
 Runtime type applications omit family indices while constructor fields retain
-their runtime values. `Ps.Erasure.Recursion` derives a recursion plan from the
-actual major and index arguments, then substitutes the child value and child
-indices in runtime calls. It refuses reuse of the current definition when a minor
-captures a varying major/index; such a recursor needs a separately lifted fold.
-This also protects explicit recursor applications from changing captured values.
-No runtime helper is generated speculatively.
+their runtime values. Equality transports erase only when source and target have
+the same checked runtime representation. Impossible branches become typed
+unreachable IR nodes, and Boolean recursors lower to conditionals.
+`Ps.Erasure.Recursion` derives recursive calls from actual majors and indices.
+It still refuses reuse of the current definition when a minor captures a varying
+major/index; such recursors need separately lifted folds.
 
-Automatic refinement requires distinct local indices independent of uniform
-parameters. Compound or repeated parent indices retain constant motives; indexed
-structural recursion requires explicit local index parameters. Impossible-case
-elimination, general dependent-local generalization, nested/multiple patterns and
-arbitrary runtime recursor lifting remain pending. Type/Prop constructor fields
-and runtime Type/Prop indices remain outside the current data erasure profile.
+Fixed-index matching with a major-dependent result/context, heterogeneous
+dependent index-constructor projections, nested/multiple patterns and arbitrary
+runtime recursor lifting remain pending. Indexed structural recursion still
+requires distinct explicit local index parameters. Type/Prop constructor fields
+and runtime Type/Prop indices remain outside the data erasure profile.
 
 Data families still end in `Type`; universe/Prop families, deriving, structure
 field methods/defaults and inheritance remain pending. Lambda result annotations,
@@ -201,7 +214,12 @@ Four refusals protect uniform parameters, required constructor results, result
 family identity and index typing. Dependent vector mapping/reconstruction, two-index
 cell reconstruction, indexed accumulator recursion and computed child indices extend
 the same application. Four additional refusals cover stale indices, dependent
-invariant arguments, captured runtime folds and wrong dependent branch results. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
+invariant arguments, captured runtime folds and wrong dependent branch results.
+Dependent context values/definitions, fixed and symbolic vector tails, repeated-index
+contradictions, omitted Boolean cases, a dependent proof and dependent recursive
+state extend the same application. Three added refusals check missing feasible
+branches, satisfiable repeated indices and incorrectly refined branch results.
+Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
 application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.

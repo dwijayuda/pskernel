@@ -111,6 +111,7 @@ inductive PsErasureError where
   | unknownLocal (id : Nat)
   | erasedLocalUsed (id : Nat)
   | unsupportedRuntimeTerm
+  | inDeclaration (name : PsName) (cause : PsErasureError)
   | unsupportedApplication
   | unknownConstant (name : PsName)
 

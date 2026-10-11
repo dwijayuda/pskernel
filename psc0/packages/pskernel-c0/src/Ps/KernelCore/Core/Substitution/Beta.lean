@@ -122,3 +122,92 @@ def psKernelExprCheapBetaReduce
           (psKernelExprListDrop consumed args)
   | _ =>
       expr
+
+
+/-
+C0 portable beta-spine plan.
+
+The old WHNF beta path performed an entire lambda-body node count, lambda
+spine counting, selected-argument take, selected-argument reversal, and
+remaining-argument drop. This executable plan consumes the argument list
+once, inspecting at most one lambda per selected argument. The returned
+selected arguments are already in de Bruijn instantiation order (reversed).
+
+Only the C0 implementation imports this optimization. The source profile
+uses inductives, List, Prod, Option and structural recursion so that the
+same .lean implementation can be translated by the future self-host target.
+-/
+
+def psKernelC0BetaSpineWorker
+    (args : List PsKernelExpr) :
+    PsKernelExpr ->
+    List PsKernelExpr ->
+    Option
+      (Prod
+        PsKernelExpr
+        (Prod
+          (List PsKernelExpr)
+          (List PsKernelExpr))) :=
+  match args with
+  | List.nil =>
+      fun
+        (_fn : PsKernelExpr)
+        (_reversed : List PsKernelExpr) =>
+        Option.none
+  | List.cons arg rest =>
+      let smaller :
+          PsKernelExpr ->
+          List PsKernelExpr ->
+          Option
+            (Prod
+              PsKernelExpr
+              (Prod
+                (List PsKernelExpr)
+                (List PsKernelExpr))) :=
+        psKernelC0BetaSpineWorker rest;
+      fun
+        (fn : PsKernelExpr)
+        (reversed : List PsKernelExpr) =>
+        match fn with
+        | PsKernelExpr.lam _ _ body _ =>
+            let selected := List.cons arg reversed;
+            match rest with
+            | List.nil =>
+                Option.some
+                  (Prod.mk body
+                    (Prod.mk selected List.nil))
+            | List.cons _ _ =>
+                match body with
+                | PsKernelExpr.lam _ _ _ _ =>
+                    smaller body selected
+                | _ =>
+                    Option.some
+                      (Prod.mk body
+                        (Prod.mk selected rest))
+        | _ =>
+            Option.none
+
+def psKernelC0BetaSpinePlan
+    (fn : PsKernelExpr)
+    (args : List PsKernelExpr) :
+    Option
+      (Prod
+        PsKernelExpr
+        (Prod
+          (List PsKernelExpr)
+          (List PsKernelExpr))) :=
+  psKernelC0BetaSpineWorker args fn List.nil
+
+def psKernelC0BetaSpineApply
+    (plan :
+      Prod PsKernelExpr
+        (Prod
+          (List PsKernelExpr)
+          (List PsKernelExpr))) :
+    PsKernelExpr :=
+  let body := Prod.fst plan;
+  let selectedRev := Prod.fst (Prod.snd plan);
+  let remaining := Prod.snd (Prod.snd plan);
+  psKernelExprApplyArgsCheap
+    (psKernelExprInstantiate body selectedRev)
+    remaining

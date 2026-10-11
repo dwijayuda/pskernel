@@ -1,4 +1,4 @@
-import PSKernelFast.ScopedContext
+import PSKernelFast.Substitution
 
 namespace PSKernelFast.Core
 
@@ -103,6 +103,50 @@ def scopedContextSmoke : IO Unit := do
   expectScopedDomain (c3.scopedDomainAt 2) (.sort (.param u))
   require ((c3.scopedDomainAt 3).isNone)
     "out-of-range certified binder lookup unexpectedly succeeded"
+
+  -- New independent reference instantiation: variable capture is forbidden.
+  let sortZero : KExpr := .sort .zero
+  let simpleBody : KExpr := .app (.bvar 0) (.bvar 2)
+  let simpleResult : KExpr := .app sortZero (.bvar 1)
+  require (simpleBody.validAt [u] 3)
+    "ordinary substitution fixture was not structurally valid"
+  require (simpleBody.instantiateBVar sortZero 0 == simpleResult &&
+    simpleResult.validAt [u] 2)
+    "substitution did not replace target and decrement outer index"
+
+  let outerReplacement : KExpr := .bvar 1
+  let nestedBody : KExpr :=
+    .lam u sortZero (.app (.bvar 0) (.bvar 1)) .default
+  let expectedNested : KExpr :=
+    .lam u sortZero (.app (.bvar 0) (.bvar 2)) .default
+  require (nestedBody.validAt [u] 3 &&
+    outerReplacement.validAt [u] 2)
+    "nested substitution fixture invalid"
+  require (nestedBody.instantiateBVar outerReplacement 0 == expectedNested &&
+    expectedNested.validAt [u] 2)
+    "substitution captured a local lambda variable"
+
+  let piLetBody : KExpr :=
+    .forallE u sortZero
+      (.letE u sortZero (.bvar 1)
+        (.app (.bvar 0) (.bvar 2)) false) .default
+  let expectedPiLet : KExpr :=
+    .forallE u sortZero
+      (.letE u sortZero (.bvar 2)
+        (.app (.bvar 0) (.bvar 3)) false) .default
+  require (piLetBody.validAt [u] 3 &&
+    piLetBody.instantiateBVar outerReplacement 0 == expectedPiLet &&
+    expectedPiLet.validAt [u] 2)
+    "Pi/let binder substitution failed lifting, scope or decrement"
+
+  let wrapped : KExpr := .mdata 27 (.proj u 0 (.bvar 0))
+  let expectedWrapped : KExpr := .mdata 27 (.proj u 0 sortZero)
+  require (wrapped.instantiateBVar sortZero 0 == expectedWrapped)
+    "reference substitution skipped metadata/projection wrapper"
+  require (!(KExpr.validAt [u] 1 (.bvar 2)))
+    "malformed substitution body was not classified unscoped"
+  IO.println "PSKernel-Fast G4.3 substitution: capture-avoiding cases PASS"
+
   IO.println "PSKernel-Fast G4.3: scope-certified current-context lookup PASS"
 
   IO.println "PSKernel-Fast G4.3 lifting: scoped capture-avoidance tests PASS"

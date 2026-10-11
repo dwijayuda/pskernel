@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1c-source-to-erasure-and-totality-proved-no-set-model-or-admission",
+    "stage": "P1d-conditional-Sort-and-Prop-Pi-set-model-components-proved-no-global-soundness",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,7 +86,7 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 24,
+    "p1ReviewedTheoremAssumptionCount": 48,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
@@ -109,7 +109,20 @@
     "p1cClosedInferenceErasureTotalityProved": true,
     "p1cValidatedBinderPropRegimeAnnotationsImplemented": false,
     "p1cSetTheoreticDenotationDefined": false,
-    "p1cDenotationalTypingSoundnessProved": false
+    "p1cDenotationalTypingSoundnessProved": false,
+    "p1dExplicitSetTheoryBasisSpecified": true,
+    "p1dDerivedEmptyAndUniversePowersetClosureProved": true,
+    "p1dTwoDistinctPropValuesExhaustiveProved": true,
+    "p1dConditionalSortSetMembershipProved": true,
+    "p1dCheckedPiCodomainPropRegimeProved": true,
+    "p1dSemanticPropPiMembershipProved": true,
+    "p1dSemanticPropPiTruthConditionProved": true,
+    "p1dSetTheoryBasisInstanceConstructed": false,
+    "p1dProofPointDisjointnessProved": false,
+    "p1dProofIrrelevanceInterpretationProved": false,
+    "p1dFullTypeValuedPiModelConstructed": false,
+    "p1dSourceToSetTermDenotationProved": false,
+    "p1dDependentPiSourceSemanticSoundnessProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -121,10 +134,10 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "5b137281e8a0cc8306b335c0a40464248b4131d7",
+    "validatedSourceCommit": "3b70a90bdcf23dd0b6e8843132abb2916f05058a",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38121976529",
-    "jobId": 114418422585,
-    "scope": "68 Lean Lake build jobs, 29 independent source files audited, 24 exact theorem-assumption receipts and functional smokes; older-context beta/let typed cases, independent erased ground-universe syntax, actual lifting/substitution commute with erasure, beta/let redex bridge, source/type erasure total for every successful six-rule inference; NO denotational set model, general substitution, full checker, relative consistency or proof admission."
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38124170798",
+    "jobId": 114424937667,
+    "scope": "76 successful Lake builds, 33 independent V3 Lean sources audited, 48 exact reviewed axiom receipts. Proof-only conditional SetTheoryBasis, derived empty/universe powerset closure, an exhaustive two-valued candidate Prop carrier, conditional Sort membership in successor model universe, actual checked Pi codomain Prop classification, and semantic proposition-valued Pi member/forall/false-fibre laws over already interpreted sets. NO SetTheoryBasis instance, no arbitrary term denotation/WellDenoted, proof irrelevance, Type-valued Pi graphs, global checker/model soundness, relative consistency, G4.4, theorem admission or real checker speed."
   }
 }

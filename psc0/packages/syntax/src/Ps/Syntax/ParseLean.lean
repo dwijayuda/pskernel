@@ -1577,6 +1577,7 @@ def psParseLeanTermWithFuel
                                 Except.ok {
                                   value :=
                                     PsSyntaxTerm.ifE
+                                      none
                                       condition.value
                                       thenBranch.value
                                       elseBranch.value

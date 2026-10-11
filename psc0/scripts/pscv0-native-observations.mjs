@@ -129,5 +129,13 @@ export const observations = [
   { name: "casesPredAnswer", args: null, expected: 271n },
   { name: "casesTailAnswer", args: null, expected: 71n },
   { name: "casesContextAnswer", args: null, expected: 71n },
+  { name: "decisionTrueAnswer", args: null, expected: 281n },
+  { name: "decisionFalseAnswer", args: null, expected: 282n },
+  { name: "decisionEqualAnswer", args: null, expected: 283n },
+  { name: "decisionDifferentAnswer", args: null, expected: 284n },
+  { name: "decisionStringAnswer", args: null, expected: 285n },
+  { name: "proofTrueAnswer", args: null, expected: 286n },
+  { name: "proofFalseAnswer", args: null, expected: 287n },
+  { name: "refineConditionalAnswer", args: null, expected: 288n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

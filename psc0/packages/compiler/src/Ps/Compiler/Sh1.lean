@@ -383,7 +383,7 @@ def psSh1SyntaxTermStep
       | Option.some annotation =>
           Except.ok (psSh1SyntaxSchedule state
             (List.cons (PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type annotation) bodies))
-  | PsSyntaxTerm.ifE condition thenBranch elseBranch _ =>
+  | PsSyntaxTerm.ifE _ condition thenBranch elseBranch _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.term owner region condition,
          PsSh1SyntaxTask.term owner region thenBranch,

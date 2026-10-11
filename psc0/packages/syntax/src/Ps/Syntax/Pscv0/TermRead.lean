@@ -133,6 +133,33 @@ def psPscv0ParseApplicationWithFuel
           psPscv0ParseApplicationAfterPrimary annotation
             parseArgument (Nat.succ remaining) primary
 
+-- A binder followed by a colon owns the conditional proof scope.
+def psPscv0ReadConditional (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let keyword ← psTokenCursorExpectText cursor "if"
+  let opening ← psTokenCursorExpectText keyword.cursor "("
+  let (name, cursor) ←
+    match psTokenCursorAdvance opening.cursor with
+    | some next =>
+      if psTokenKindEq next.token.kind .identifier && psTokenCursorAtText next.cursor ":" then do
+        let colon ← psTokenCursorExpectText next.cursor ":"
+        pure (some (PsSyntaxName.mk [next.token.text] next.token.span), colon.cursor)
+      else pure (none, opening.cursor)
+    | none => pure (none, opening.cursor)
+  let condition ← read cursor
+  let closed ← psTokenCursorExpectText condition.cursor ")"
+  let yesOpen ← psTokenCursorExpectText closed.cursor "{"
+  let yes ← read yesOpen.cursor
+  let yesClose ← psTokenCursorExpectText yes.cursor "}"
+  let alternative ← psTokenCursorExpectText yesClose.cursor "else"
+  let noOpen ← psTokenCursorExpectText alternative.cursor "{"
+  let no ← read noOpen.cursor
+  let noClose ← psTokenCursorExpectText no.cursor "}"
+  return {
+    value := .ifE name condition.value yes.value no.value
+      { start := keyword.token.span.start, stop := noClose.token.span.stop }
+    cursor := noClose.cursor }
+
 def psPscv0ParseTermAtPrecedence
     (annotation : Bool) (minimum : Nat)
     (fuel : Nat) :
@@ -173,59 +200,7 @@ def psPscv0ParseTermAtPrecedence
           else if psTokenCursorAtText cursor "if" && psPscv0IfLetStart cursor then
             psPscv0ReadIfLet smaller remaining cursor
           else if psTokenCursorAtText cursor "if" then
-            match psTokenCursorAdvance cursor with
-            | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-            | Option.some keyword =>
-                match psTokenCursorExpectText keyword.cursor "(" with
-                | Except.error error => Except.error error
-                | Except.ok afterOpen =>
-                    match smaller afterOpen.cursor with
-                    | Except.error error => Except.error error
-                    | Except.ok condition =>
-                        match psTokenCursorExpectText condition.cursor ")" with
-                        | Except.error error => Except.error error
-                        | Except.ok afterCondition =>
-                            match psTokenCursorExpectText afterCondition.cursor "{" with
-                            | Except.error error => Except.error error
-                            | Except.ok afterThenOpen =>
-                                match smaller afterThenOpen.cursor with
-                                | Except.error error => Except.error error
-                                | Except.ok thenBranch =>
-                                    match psTokenCursorExpectText thenBranch.cursor "}" with
-                                    | Except.error error => Except.error error
-                                    | Except.ok afterThenClose =>
-                                        match psTokenCursorExpectText
-                                            afterThenClose.cursor
-                                            "else" with
-                                        | Except.error error => Except.error error
-                                        | Except.ok afterElse =>
-                                            match psTokenCursorExpectText
-                                                afterElse.cursor
-                                                "{" with
-                                            | Except.error error => Except.error error
-                                            | Except.ok afterElseOpen =>
-                                                match smaller afterElseOpen.cursor with
-                                                | Except.error error => Except.error error
-                                                | Except.ok elseBranch =>
-                                                    match psTokenCursorExpectText
-                                                        elseBranch.cursor
-                                                        "}" with
-                                                    | Except.error error => Except.error error
-                                                    | Except.ok close =>
-                                                        Except.ok {
-                                                          value :=
-                                                            PsSyntaxTerm.ifE
-                                                              condition.value
-                                                              thenBranch.value
-                                                              elseBranch.value
-                                                              {
-                                                                start :=
-                                                                  keyword.token.span.start
-                                                                stop :=
-                                                                  close.token.span.stop
-                                                              }
-                                                          cursor := close.cursor
-                                                        }
+            psPscv0ReadConditional smaller cursor
           else if psTokenCursorAtText cursor "have" then
             psPscv0ReadHave smaller readAnnotation continuation cursor
           else if psTokenCursorAtText cursor "show" then

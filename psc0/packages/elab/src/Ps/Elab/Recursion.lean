@@ -388,18 +388,19 @@ def psElabRecursionWalkWithFuel
                             valueResult.term bodyResult.term span)
                           (psListAppend (Prod.snd typeResult)
                             (psListAppend valueResult.changedIds bodyResult.changedIds)))
-        | PsSyntaxTerm.ifE condition thenBranch elseBranch span =>
+        | PsSyntaxTerm.ifE name condition thenBranch elseBranch span =>
             match smaller context condition with
             | Except.error error => Except.error error
             | Except.ok conditionResult =>
-                match smaller context thenBranch with
+                let branchContext := psElabRecursionPushNames name.toList context;
+                match smaller branchContext thenBranch with
                 | Except.error error => Except.error error
                 | Except.ok thenResult =>
-                    match smaller context elseBranch with
+                    match smaller branchContext elseBranch with
                     | Except.error error => Except.error error
                     | Except.ok elseResult =>
                         Except.ok (PsElabRecursionWalkResult.mk
-                          (PsSyntaxTerm.ifE conditionResult.term
+                          (PsSyntaxTerm.ifE name conditionResult.term
                             thenResult.term elseResult.term span)
                           (psListAppend conditionResult.changedIds
                             (psListAppend thenResult.changedIds elseResult.changedIds)))

@@ -309,7 +309,7 @@ def psPrintProofScriptTermWithFuel
                               " := "
                               (psPrintProofScriptGroupedTerm value printedValue)
                               (psPrintProofScriptConcat2 "\n" printedBody))
-      | .ifE condition thenBranch elseBranch _ =>
+      | .ifE proofName condition thenBranch elseBranch _ =>
           match
               smaller condition with
           | Except.error error => Except.error error
@@ -325,7 +325,9 @@ def psPrintProofScriptTermWithFuel
                       Except.ok
                         (psPrintProofScriptConcat6
                           "if ("
-                          printedCondition
+                          ((match proofName with
+                            | none => ""
+                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
                           ") { "
                           printedThen
                           " } else { "

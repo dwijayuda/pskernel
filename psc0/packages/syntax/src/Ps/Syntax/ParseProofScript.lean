@@ -161,7 +161,7 @@ def psProofScriptTermWithSpan
       PsSyntaxTerm.letE name type value body span
   | .haveE name type value body _ =>
       PsSyntaxTerm.haveE name type value body span
-  | .ifE condition yes no _ => PsSyntaxTerm.ifE condition yes no span
+  | .ifE name condition yes no _ => PsSyntaxTerm.ifE name condition yes no span
   | .matchMany scrutinees alternatives _ =>
       PsSyntaxTerm.matchMany scrutinees alternatives span
 
@@ -1071,6 +1071,7 @@ def psParseProofScriptTermWithFuel
                                                     Except.ok {
                                                       value :=
                                                         PsSyntaxTerm.ifE
+                                                          none
                                                           condition.value
                                                           thenBranch.value
                                                           elseBranch.value

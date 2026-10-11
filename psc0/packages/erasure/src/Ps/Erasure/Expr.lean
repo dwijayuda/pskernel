@@ -926,94 +926,6 @@ def psErasePrimitiveApplication
         Except.ok Option.none
   | _ => Except.ok Option.none
 
-def psEraseCondition
-    (erase :
-      PsExpr -> Except PsErasureError PsVerifiedIrExpr)
-    (proposition : PsExpr) :
-    Except PsErasureError PsVerifiedIrExpr :=
-  let view := psErasureAppView proposition;
-  match view.head with
-  | .constE name _ =>
-      if psNameEq name psEqName then
-        match view.args with
-        | List.cons type afterType =>
-            match afterType with
-            | List.cons left afterLeft =>
-                match afterLeft with
-                | List.cons right remaining =>
-                    match remaining with
-                    | List.nil =>
-                        match type with
-                        | .constE typeName _ =>
-                            if psNameEq typeName psBoolName then
-                              match right with
-                              | .constE trueName _ =>
-                                  if psNameEq trueName psBoolTrueName then
-                                    erase left
-                                  else
-                                    Except.error PsErasureError.unsupportedApplication
-                              | _ =>
-                                  Except.error PsErasureError.unsupportedApplication
-                            else if psNameEq typeName psStringName then
-                              match erase left with
-                              | Except.error error => Except.error error
-                              | Except.ok erasedLeft =>
-                                  match erase right with
-                                  | Except.error error => Except.error error
-                                  | Except.ok erasedRight =>
-                                      Except.ok
-                                        (PsVerifiedIrExpr.intrinsic
-                                          PsVerifiedIrIntrinsic.stringEq
-                                          []
-                                          [erasedLeft, erasedRight])
-                            else
-                              Except.error PsErasureError.unsupportedApplication
-                        | _ => Except.error PsErasureError.unsupportedApplication
-                    | List.cons _ _ => Except.error PsErasureError.unsupportedApplication
-                | List.nil => Except.error PsErasureError.unsupportedApplication
-            | List.nil => Except.error PsErasureError.unsupportedApplication
-        | List.nil => Except.error PsErasureError.unsupportedApplication
-      else
-        Except.error PsErasureError.unsupportedApplication
-  | _ => Except.error PsErasureError.unsupportedApplication
-
-
-def psEraseIteApplication
-    (erase :
-      PsExpr -> Except PsErasureError PsVerifiedIrExpr)
-    (view : PsErasureAppView) :
-    Except PsErasureError (Option PsVerifiedIrExpr) :=
-  match view.head with
-  | .constE name _ =>
-      if psErasureBoolAnd (psNameEq name psIteName) (Nat.beq (psListLength view.args) 5) then
-        match psErasureExprListAt view.args 1 with
-        | Option.none => Except.error PsErasureError.unsupportedApplication
-        | Option.some proposition =>
-            match psErasureExprListAt view.args 3 with
-            | Option.none => Except.error PsErasureError.unsupportedApplication
-            | Option.some thenBranch =>
-                match psErasureExprListAt view.args 4 with
-                | Option.none => Except.error PsErasureError.unsupportedApplication
-                | Option.some elseBranch =>
-                    match psEraseCondition erase proposition with
-                    | Except.error error => Except.error error
-                    | Except.ok condition =>
-                        match erase thenBranch with
-                        | Except.error error => Except.error error
-                        | Except.ok erasedThen =>
-                            match erase elseBranch with
-                            | Except.error error => Except.error error
-                            | Except.ok erasedElse =>
-                                Except.ok
-                                  (Option.some
-                                    (PsVerifiedIrExpr.ifE
-                                      condition
-                                      erasedThen
-                                      erasedElse))
-      else
-        Except.ok Option.none
-  | _ => Except.ok Option.none
-
 def psErasureLookupTypeSubstitution
     (entries : List (String × PsVerifiedIrType)) :
     String -> Option PsVerifiedIrType :=
@@ -1898,7 +1810,10 @@ def psErasureSpecialEntry
     Option.some (PsErasureSpecialEntry.mk 5 true)
   else if named "Array.foldl" then
     Option.some (PsErasureSpecialEntry.mk 7 true)
-  else if psNameEq name psIteName then
+  else if psListAny named ["Decidable.isTrue", "Decidable.isFalse", "Decidable.decide",
+      "Bool.decEq", "Nat.decEq", "String.decEq"] then
+    Option.some (PsErasureSpecialEntry.mk 2 true)
+  else if psNameEq name psIteName || named "dite" then
     Option.some (PsErasureSpecialEntry.mk 5 false)
   else
     match psErasureLookupStructure scope.runtimeStructureConstructors name with
@@ -2095,6 +2010,36 @@ def psEraseProofMinorFields
       | _ => PsExpr.app minor value
     let scope := { scope with localContext := pushed.context, erasedLocals := pushed.id :: scope.erasedLocals }
     psEraseProofMinorFields eraseAt environment count scope application applied
+
+-- Decidable has a single Boolean payload in RC4. The reflection proof never
+-- becomes runtime data. Conditions use the actual dictionary, not its Prop syntax.
+def psEraseDecisionApplication
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (view : PsErasureAppView) : Except PsErasureError (Option PsVerifiedIrExpr) := do
+  let .constE name _ := view.head | return none
+  let text := psNameToString name
+  let erase := eraseAt scope
+  match text, view.args with
+  | "Decidable.isTrue", [_, _] => return some (.literal (.bool true))
+  | "Decidable.isFalse", [_, _] => return some (.literal (.bool false))
+  | "Decidable.decide", [_, decision] => return some (← erase decision)
+  | "Nat.decEq", [left, right] =>
+    return some (.intrinsic .natEq [] [← erase left, ← erase right])
+  | "String.decEq", [left, right] =>
+    return some (.intrinsic .stringEq [] [← erase left, ← erase right])
+  | "Bool.decEq", [left, right] =>
+    let left ← erase left
+    let right ← erase right
+    return some (.ifE left right (.intrinsic .boolNot [] [right]))
+  | "ite", [_, _, decision, yes, no] =>
+    return some (.ifE (← erase decision) (← erase yes) (← erase no))
+  | "dite", [_, _, decision, yes, no] =>
+    let application := psExprApplyMany view.head view.args
+    let yes ← psEraseProofMinorFields eraseAt environment 1 scope application yes
+    let no ← psEraseProofMinorFields eraseAt environment 1 scope application no
+    return some (.ifE (← erase decision) yes no)
+  | _, _ => return none
 
 -- Proof transports preserve the erased representation. Empty eliminators
 -- become typed unreachable nodes. General recursive proof elimination needs
@@ -2375,7 +2320,7 @@ def psEraseRuntimeExprWithFuelWorker
               match special with
               | Option.some result => Except.ok result
               | Option.none =>
-                  match psEraseIteApplication erase view with
+                  match psEraseDecisionApplication eraseAt environment scope view with
                   | Except.error error => Except.error error
                   | Except.ok candidate =>
                       match candidate with

@@ -66,6 +66,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.Resolve,
     `Ps.Environment.Logic,
     `Ps.Environment.Connectives,
+    `Ps.Environment.Decision,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.SelfHostProd
@@ -192,6 +193,7 @@ lean_lib PsElab where
     `Ps.Elab.Equality,
     `Ps.Elab.Match,
     `Ps.Elab.PatternMatrix,
+    `Ps.Elab.Conditional,
     `Ps.Elab.Term,
     `Ps.Elab.Recursion,
     `Ps.Elab.Data,

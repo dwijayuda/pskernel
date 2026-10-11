@@ -1,3 +1,17 @@
+# Native core language continuation
+
+Profile 29 at e1b03d35384387f055b424d87f16092d47162e7f passed
+[run 38184092534](https://github.com/dwijayuda/pskernel/actions/runs/38184092534):
+438 checked declarations, 85 phase-specific refusals, and 130 shared TS/Rust
+runtime observations. Cases, induction and named case/next focus reuse typed
+Match refinement and shared metavariable scope closure. See
+docs/PSCV0_NATIVE_ELIMINATION.md. No pskernel-core or self-hosting.
+
+Profile 30 adds ordinary and named proof conditionals using actual decision
+evidence. Native .lean remains authoritative. The complete cloud native build,
+official kernel and both runtime targets must qualify this source before any
+completion claim. See docs/PSCV0_NATIVE_CONDITIONALS.md. Full v7 remains open.
+
 # Native codegen milestones A and B qualified
 
 Implementation source **ff83ff5e927bdc4bf5d31f57bef688f4b146537b** passed

@@ -11,7 +11,7 @@ def psPscv0ArrowDomain
   | .forallE _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .lambda _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .letE _ _ _ _ _ | .haveE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
-  | .ifE _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
+  | .ifE _ _ _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | .matchMany _ _ _ => psPrintLeanConcat3 "(" printed ")"
   | _ => printed
 

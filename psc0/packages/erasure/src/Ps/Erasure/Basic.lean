@@ -651,27 +651,30 @@ def psEraseRuntimeTypeWithFuelWorker
             let view := psErasureAppView value;
             match view.head with
             | .constE name _ =>
-                let outputName : String :=
-                  match psErasureLookupName
-                      scope.declarationNames
-                      name with
-                  | Option.some known => known
-                  | Option.none =>
-                      psErasureSafeIdentifier
-                        (psNameToString name)
-                        "Type";
-                -- Indexed families retain only uniform type parameters in the
-                -- runtime representation; constructor fields carry runtime data.
-                let arguments := match psEnvironmentFindInductive environment name with
-                  | some info => view.args.take info.numParams
-                  | none => view.args
-                match psErasureMapRuntimeTypes (smaller scope) arguments with
-                | Except.error error => Except.error error
-                | Except.ok arguments =>
-                    Except.ok
-                      (PsVerifiedIrType.named
-                        outputName
-                        arguments)
+                if psNameEq name psDecidableName && view.args.length == 1 then
+                  Except.ok (.primitive .bool)
+                else
+                  let outputName : String :=
+                    match psErasureLookupName
+                        scope.declarationNames
+                        name with
+                    | Option.some known => known
+                    | Option.none =>
+                        psErasureSafeIdentifier
+                          (psNameToString name)
+                          "Type";
+                  -- Indexed families retain only uniform type parameters in the
+                  -- runtime representation; constructor fields carry runtime data.
+                  let arguments := match psEnvironmentFindInductive environment name with
+                    | some info => view.args.take info.numParams
+                    | none => view.args
+                  match psErasureMapRuntimeTypes (smaller scope) arguments with
+                  | Except.error error => Except.error error
+                  | Except.ok arguments =>
+                      Except.ok
+                        (PsVerifiedIrType.named
+                          outputName
+                          arguments)
             | _ => Except.ok PsVerifiedIrType.unknown
         | .forallE name domain body binder =>
             match

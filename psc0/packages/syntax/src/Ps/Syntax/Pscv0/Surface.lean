@@ -117,7 +117,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
       match type with
       | none => [value, body]
       | some annotation => [annotation, value, body]
-  | .ifE condition yes no _ => [condition, yes, no]
+  | .ifE _ condition yes no _ => [condition, yes, no]
   | .matchMany scrutinees alternatives _ => scrutinees ++ alternatives.map psPscv0AlternativeTerm
 
 -- The seed supports structurally recursive function-valued results. Keeping

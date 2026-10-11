@@ -112,6 +112,7 @@ inductive PsSyntaxTerm where
       (body : PsSyntaxTerm)
       (span : PsSourceSpan)
   | ifE
+      (proofName : Option PsSyntaxName)
       (condition : PsSyntaxTerm)
       (thenBranch : PsSyntaxTerm)
       (elseBranch : PsSyntaxTerm)
@@ -174,7 +175,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .lambda _ _ span => span
   | .forallE _ _ span => span
   | .letE _ _ _ _ span | .haveE _ _ _ _ span => span
-  | .ifE _ _ _ span => span
+  | .ifE _ _ _ _ span => span
   | .matchMany _ _ span => span
 
 def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan

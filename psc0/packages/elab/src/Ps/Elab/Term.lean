@@ -3,84 +3,7 @@ import Ps.Elab.Universe
 import Ps.Elab.Proof
 import Ps.Elab.PatternMatrix
 
-def psElabIf
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
-    (condition : PsSyntaxTerm)
-    (thenBranch : PsSyntaxTerm)
-    (elseBranch : PsSyntaxTerm)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  let boolType := PsExpr.constE psBoolName [];
-  match elaborate context condition (Option.some boolType) with
-  | Except.error error => Except.error error
-  | Except.ok conditionResult =>
-      let trueTerm := PsExpr.constE psBoolTrueName [];
-      let conditionProp :=
-        psExprApplyMany
-          (PsExpr.constE
-            psEqName
-            [PsLevel.succ PsLevel.zero])
-          [boolType, conditionResult.term, trueTerm];
-      let decider :=
-        psExprApplyMany
-          (PsExpr.constE psBoolDecEqName [])
-          [conditionResult.term, trueTerm];
-      match elaborate
-          conditionResult.context
-          thenBranch
-          expected with
-      | Except.error error => Except.error error
-      | Except.ok thenResult =>
-          let resultType : PsExpr :=
-            match expected with
-            | some type => type
-            | none => thenResult.type;
-          match elaborate
-              thenResult.context
-              elseBranch
-              (Option.some resultType) with
-          | Except.error error => Except.error error
-          | Except.ok elseResult =>
-              let metaContext := elseResult.context.metaContext;
-              let instantiatedType :=
-                psMetaInstantiate metaContext resultType;
-              match psInferType
-                  elseResult.context.environment
-                  metaContext
-                  elseResult.context.localContext
-                  instantiatedType with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok typeType =>
-                  match psInferEnsureSort
-                      elseResult.context.environment
-                      metaContext
-                      elseResult.context.localContext
-                      typeType with
-                  | Except.error error =>
-                      Except.error (PsElabError.infer error)
-                  | Except.ok universeLevel =>
-                      let term :=
-                        psExprApplyMany
-                          (PsExpr.constE psIteName [universeLevel])
-                          [
-                            instantiatedType,
-                            psMetaInstantiate metaContext conditionProp,
-                            psMetaInstantiate metaContext decider,
-                            psMetaInstantiate metaContext thenResult.term,
-                            psMetaInstantiate metaContext elseResult.term
-                          ];
-                      let restoredContext :=
-                        psElabLeaveScope context elseResult.context;
-                      psElabResolvedTerm
-                        restoredContext
-                        term
-                        expected
+import Ps.Elab.Conditional
 
 def psElabSyntaxLocalId
     (context : PsElabContext) :
@@ -312,10 +235,11 @@ def psElabTermWithFuel
                   value
                   body
                   expected
-            | .ifE condition thenBranch elseBranch _ =>
+            | .ifE name condition thenBranch elseBranch _ =>
                 psElabIf
                   smaller
                   context
+                  name
                   condition
                   thenBranch
                   elseBranch

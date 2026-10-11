@@ -383,7 +383,7 @@ def psPrintLeanTermWithFuel
                               " := "
                               printedValue
                               (psPrintLeanConcat2 "; " printedBody))
-      | .ifE condition thenBranch elseBranch _ =>
+      | .ifE proofName condition thenBranch elseBranch _ =>
           match smaller condition with
           | Except.error error => Except.error error
           | Except.ok printedCondition =>
@@ -396,7 +396,9 @@ def psPrintLeanTermWithFuel
                       Except.ok
                         (psPrintLeanConcat6
                           "if "
-                          printedCondition
+                          ((match proofName with
+                            | none => ""
+                            | some name => String.intercalate "." name.segments ++ " : ") ++ printedCondition)
                           " then "
                           printedThen
                           " else "

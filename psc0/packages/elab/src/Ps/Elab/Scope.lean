@@ -254,12 +254,13 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return {
         term
         used := psScopeUnion (type.map (·.used) |>.getD []) (psScopeUnion value.used body.used) }
-    | .ifE condition yes no span =>
+    | .ifE name condition yes no span =>
       let condition ← visit bound condition
-      let yes ← visit bound yes
-      let no ← visit bound no
+      let branchBound := name.toList.map psScopeKey ++ bound
+      let yes ← visit branchBound yes
+      let no ← visit branchBound no
       return {
-        term := .ifE condition.term yes.term no.term span
+        term := .ifE name condition.term yes.term no.term span
         used := psScopeUnion condition.used (psScopeUnion yes.used no.used) }
     | .matchMany scrutinees alternatives span =>
       let scrutinees ← scrutinees.mapM (visit bound)

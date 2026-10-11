@@ -362,6 +362,9 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.unit _ => Except.ok state
   | PsSyntaxTerm.record fields _ =>
       Except.ok (psSh1SyntaxSchedule state [PsSh1SyntaxTask.fields owner region fields])
+  | PsSyntaxTerm.recordUpdate source fields _ =>
+      Except.ok (psSh1SyntaxSchedule state
+        [PsSh1SyntaxTask.term owner region source, PsSh1SyntaxTask.fields owner region fields])
   | PsSyntaxTerm.app fn args _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.term owner region fn, PsSh1SyntaxTask.terms owner region args])

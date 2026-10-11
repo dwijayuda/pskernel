@@ -203,6 +203,13 @@ def psPrintProofScriptTermWithFuel
           | Except.ok printedFields =>
               Except.ok
                 (psPrintProofScriptConcat3 "{ " (psPrintJoin ", " printedFields) " }")
+      | .recordUpdate source fields _ => do
+          let source ← smaller source
+          let fields ← fields.mapM fun (name, value) => do
+            let name ← psPrintSyntaxName name
+            let value ← smaller value
+            pure (name ++ " := " ++ value)
+          return "{ " ++ source ++ " with " ++ psPrintJoin ", " fields ++ " }"
       | .app fn args _ =>
           -- An empty argument list stays empty; Unit remains an explicit () argument.
           match smaller fn with

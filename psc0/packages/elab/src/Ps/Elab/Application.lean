@@ -29,8 +29,8 @@ def psSyntaxTermListIsEmpty
 
 abbrev PsElabNamedArguments := List (Prod PsName PsSyntaxTerm)
 
-def psElabTakeNamed (name : PsName) (args : PsElabNamedArguments) :
-    Prod (Option PsSyntaxTerm) PsElabNamedArguments :=
+def psElabTakeNamed {α : Type} (name : PsName) (args : List (PsName × α)) :
+    Prod (Option α) (List (PsName × α)) :=
   match args with
   | [] => (none, [])
   | (key, value) :: rest =>
@@ -101,8 +101,8 @@ def psElabApplicationResultType (context : PsElabContext) (fuel : Nat)
       else psElabApplicationResultType context fuel body positions names
     | _ => none
 
-def psElabPropagateExpected (current : PsElabTermResult)
-    (positions : List PsSyntaxTerm) (names : PsElabNamedArguments)
+def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
+    (positions : List α) (names : List (PsName × α))
     (expected : Option PsExpr) : PsElabTermResult :=
   match expected with
   | none => current
@@ -126,9 +126,10 @@ def psElabPropagateExpected (current : PsElabTermResult)
 -- One ordered engine owns positional/named arguments, defaults and implicits.
 -- A matching expected function type preserves partial application. Explicit
 -- empty invocation passes no expected type here and requests full completion.
-def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
-    (current : PsElabTermResult) (positions : List PsSyntaxTerm)
-    (names : PsElabNamedArguments) (pending : List Nat)
+def psElabApplyOrderedWith {α : Type}
+    (elaborate : PsElabContext → α → Option PsExpr → Except PsElabError PsElabTermResult) (fuel : Nat)
+    (current : PsElabTermResult) (positions : List α)
+    (names : List (PsName × α)) (pending : List Nat)
     (complete : Bool := true) (expected : Option PsExpr := none) :
     Except PsElabError PsElabApplicationResult := do
   match fuel with
@@ -170,14 +171,14 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
         let current := psElabPropagateExpected current positions names expected
         let argument ← elaborate current.context source
           (some (psMetaInstantiate current.context.metaContext domain))
-        psElabApplyOrdered elaborate fuel (psElabApplyValue current argument body)
+        psElabApplyOrderedWith elaborate fuel (psElabApplyValue current argument body)
           selected.2.1 selected.2.2 pending complete expected
       | none =>
         if explicit && (complete || !names.isEmpty) then
           match psElabDefaultValue current.context domain with
           | some value =>
             let argument ← psElabResolvedTerm current.context value (some domain)
-            return ← psElabApplyOrdered elaborate fuel
+            return ← psElabApplyOrderedWith elaborate fuel
               (psElabApplyValue current argument body) positions names pending complete expected
           | none => pure ()
         if (explicit || (psBinderIsStrictImplicit binder && !complete)) &&
@@ -193,11 +194,20 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
         let pending := if psBinderIsInstanceImplicit binder then
           match fresh.expr with | .mvar id => id :: pending | _ => pending
           else pending
-        psElabApplyOrdered elaborate fuel next positions names pending complete expected
+        psElabApplyOrderedWith elaborate fuel next positions names pending complete expected
     | _ =>
       if !names.isEmpty then throw (.invalidArgument "unknown named argument")
       if !positions.isEmpty then throw (.infer .expectedFunction)
       return { result := current, pendingInstancesRev := pending }
+
+-- Ordinary calls and records share the same telescope walk. A record update
+-- supplies either source syntax or an already typed Core projection.
+def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
+    (current : PsElabTermResult) (positions : List PsSyntaxTerm)
+    (names : PsElabNamedArguments) (pending : List Nat)
+    (complete : Bool := true) (expected : Option PsExpr := none) :
+    Except PsElabError PsElabApplicationResult :=
+  psElabApplyOrderedWith elaborate fuel current positions names pending complete expected
 
 def psElabApplyArgsWithFuelWorker (elaborate : PsElaborator) (fuel : Nat)
     (current : PsElabTermResult) (arguments : List PsSyntaxTerm) (pending : List Nat) :

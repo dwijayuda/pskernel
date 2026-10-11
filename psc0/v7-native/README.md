@@ -324,3 +324,7 @@ and generated UTF-8 declaration ranges. Original source-span mapping is pending.
 Rust integration uses the current pure single-module profile; it does not mean
 full v7, compiler-source translation, self-hosting, cross-platform qualification,
 or formal backend preservation. See ../docs/PSCV0_NATIVE_RUST.md.
+
+Record literals require an expected nominal structure type. Single-source updates
+share ordered constructor application and retain dependent field checks; see
+[record architecture](../docs/PSCV0_NATIVE_RECORDS.md).

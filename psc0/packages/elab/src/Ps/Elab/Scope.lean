@@ -226,6 +226,14 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return {
         term := .record (fields.map fun (name, value) => (name, value.term)) span
         used := fields.foldl (fun acc field => psScopeUnion acc field.snd.used) [] }
+    | .recordUpdate source fields span =>
+      let source ← visit bound source
+      let fields ← fields.mapM fun (name, value) => do
+        let value ← visit bound value
+        return (name, value)
+      return {
+        term := .recordUpdate source.term (fields.map fun (name, value) => (name, value.term)) span
+        used := fields.foldl (fun acc field => psScopeUnion acc field.snd.used) source.used }
     | .lambda binders body span | .forallE binders body span =>
       let binders ← psScopeBinders visit bound binders
       let body ← visit binders.bound body

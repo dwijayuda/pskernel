@@ -153,6 +153,7 @@ def psProofScriptTermWithSpan
   | .bool value _ => PsSyntaxTerm.bool value span
   | .unit _ => PsSyntaxTerm.unit span
   | .record fields _ => PsSyntaxTerm.record fields span
+  | .recordUpdate source fields _ => .recordUpdate source fields span
   | .app fn args _ => PsSyntaxTerm.app fn args span
   | .lambda binders body _ => PsSyntaxTerm.lambda binders body span
   | .forallE binders body _ => PsSyntaxTerm.forallE binders body span

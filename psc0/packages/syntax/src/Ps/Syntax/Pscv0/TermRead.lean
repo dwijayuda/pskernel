@@ -239,9 +239,7 @@ def psPscv0ParseTermAtPrecedence
           else if psTokenCursorAtText cursor "forall" || psTokenCursorAtText cursor "∀" then
             psPscv0BoundTerm readAnnotation continuation true (remaining + 1) cursor
           else if psTokenCursorAtText cursor "{" then
-            psParseProofScriptRecordLiteral
-              (smaller)
-              cursor
+            psPscv0ReadRecord smaller cursor
           else if psTokenCursorAtText cursor "(" then
             match psPscv0DependentBinder readAnnotation (remaining + 1) cursor with
             | Except.ok binder =>
@@ -297,6 +295,9 @@ def psPscv0ParseDefinitionBody
           match psPscv0ParseTerm false opening.cursor with
           | Except.error error => Except.error error
           | Except.ok inner =>
+            if psTokenCursorAtText inner.cursor "with" then
+              psPscv0RecordUpdateAfterSource (psPscv0ParseTerm false) opening.token.span inner
+            else
               match psTokenCursorExpectText inner.cursor "}" with
               | Except.error error => Except.error error
               | Except.ok close =>

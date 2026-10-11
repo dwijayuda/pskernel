@@ -627,3 +627,12 @@ def psElabAscription (elaborate : PsElaborator) (context : PsElabContext)
   let annotation ← psElabType elaborate context type
   let result ← elaborate annotation.context value (some annotation.type)
   psElabFinalizeExpected result expected
+
+def psExprHasTermMeta : PsExpr → Bool
+  | .mvar _ => true
+  | .app a b | .lam _ a b _ | .forallE _ a b _ =>
+    psExprHasTermMeta a || psExprHasTermMeta b
+  | .letE _ a b c => psExprHasTermMeta a || psExprHasTermMeta b || psExprHasTermMeta c
+  | .proj _ _ value => psExprHasTermMeta value
+  | _ => false
+

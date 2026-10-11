@@ -1,6 +1,26 @@
 import Ps.Syntax.Pscv0.Binders
 import Ps.Syntax.Pscv0.Universe
 
+-- Records keep their source and replacement fields distinct until elaboration.
+def psPscv0RecordUpdateAfterSource (read : PsPscv0TermReader)
+    (opening : PsSourceSpan) (source : PsParseResult PsSyntaxTerm) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let keyword ← psTokenCursorExpectText source.cursor "with"
+  let fields ← psParseProofScriptRecordFieldsWithFuel read
+    (keyword.cursor.remaining.length + 1) keyword.cursor []
+  let close ← psTokenCursorExpectText fields.cursor "}"
+  return {
+    value := .recordUpdate source.value fields.value (psSyntaxSpanJoin opening close.token.span)
+    cursor := close.cursor }
+
+def psPscv0ReadRecord (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let opening ← psTokenCursorExpectText cursor "{"
+  if psTokenCursorAtText opening.cursor "}" || psTokenCursorStartsNamedAssignment opening.cursor then
+    return ← psParseProofScriptRecordLiteral read cursor
+  let source ← read opening.cursor
+  psPscv0RecordUpdateAfterSource read opening.token.span source
+
 -- These readers preserve source intent. Semantic argument insertion belongs to
 -- the application elaborator, never to parsing or token rewriting.
 def psPscv0ReadAscription (read : PsPscv0TermReader)
@@ -16,6 +36,7 @@ def psPscv0ReadAscription (read : PsPscv0TermReader)
 
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if psTokenCursorAtText cursor "{" then return ← psPscv0ReadRecord read cursor
   if ["Type", "Sort", "Prop"].any (psTokenCursorAtText cursor) then
     return ← psPscv0ReadSort cursor
   if psTokenCursorAtText cursor "_" then

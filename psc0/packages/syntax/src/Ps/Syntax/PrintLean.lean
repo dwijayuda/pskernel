@@ -274,6 +274,13 @@ def psPrintLeanTermWithFuel
           | Except.ok printedFields =>
               Except.ok
                 (psPrintLeanConcat3 "{ " (psPrintJoin ", " printedFields) " }")
+      | .recordUpdate source fields _ => do
+          let source ← smaller source
+          let fields ← fields.mapM fun (name, value) => do
+            let name ← psPrintSyntaxName name
+            let value ← smaller value
+            pure (name ++ " := " ++ value)
+          return "{ " ++ source ++ " with " ++ psPrintJoin ", " fields ++ " }"
       | .app fn args _ =>
           if psPrintLeanBoolNot (psSyntaxTermSimpleForApplication fn) then
             Except.error PsSourcePrintError.unsupportedApplication

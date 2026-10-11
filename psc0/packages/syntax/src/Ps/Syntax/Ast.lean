@@ -92,6 +92,8 @@ inductive PsSyntaxTerm where
   | record
       (fields : List (Prod PsSyntaxName PsSyntaxTerm))
       (span : PsSourceSpan)
+  | recordUpdate (source : PsSyntaxTerm)
+      (fields : List (PsSyntaxName × PsSyntaxTerm)) (span : PsSourceSpan)
   | app (fn : PsSyntaxTerm) (args : List PsSyntaxTerm) (span : PsSourceSpan)
   | lambda
       (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
@@ -164,7 +166,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .character _ span => span
   | .bool _ span => span
   | .unit span => span
-  | .record _ span => span
+  | .record _ span | .recordUpdate _ _ span => span
   | .app _ _ span => span
   | .lambda _ _ span => span
   | .forallE _ _ span => span

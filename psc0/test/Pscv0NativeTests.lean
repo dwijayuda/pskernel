@@ -461,7 +461,26 @@ private def application : String :=
   "instance trueClass: PropositionClass True where { hold := True.intro }\n" ++
   "theorem propositionInstance: True := PropositionClass.hold(P := True)\n" ++
   "structure ExplicitHigh(A: Type): Type 1 where { value: A }\n" ++
-  "const explicitHighAnswer: Nat := ExplicitHigh.value(ExplicitHigh.mk(241))\n"
+  "const explicitHighAnswer: Nat := ExplicitHigh.value(ExplicitHigh.mk(241))\n" ++
+  "namespace Updates\n" ++
+  "structure Pair where {\n  first: Nat\n  second: Nat\n}\n" ++
+  "function change(source: Pair, value: Nat): Pair := { source with second := value, }\n" ++
+  "function keep(source: Pair): Pair := {\n  { source with }\n}\n" ++
+  "const original: Pair := { first := 251, second := 252 }\n" ++
+  "const changed: Pair := change(original, 253)\n" ++
+  "const inferred: Nat := {\n  let pair := { changed with second := 254 }\n  pair.second\n}\n" ++
+  "const copied: Pair := keep(changed)\n" ++
+  "function adjust(source: CertifiedPair): CertifiedPair := { source with certified := by { rfl }, first := 255 }\n" ++
+  "const dependent: CertifiedPair := adjust(checkedPair)\n" ++
+  "function replace{A: Type}(source: Universes.Holder(A), value: A): Universes.Holder(A) := { source with value := value }\n" ++
+  "const generic: Universes.Holder Nat := replace(Universes.Holder.mk(256), 257)\n" ++
+  "theorem proofUpdate(P: Prop, source: PropositionBox P, h: P): PropositionBox P := { source with proof := h }\n" ++
+  "end Updates\n" ++
+  "const updateFirst: Nat := Updates.changed.first\n" ++
+  "const updateSecond: Nat := Updates.copied.second\n" ++
+  "const updateInferred: Nat := Updates.inferred\n" ++
+  "const updateDependent: Nat := Updates.dependent.first\n" ++
+  "const updateGeneric: Nat := Updates.generic.value\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -555,7 +574,13 @@ private def semanticCases : IO Unit := do
     { source := "inductive Encoded: Nat -> Prop where { | mk(n: Nat): Encoded(Nat.succ(n)) }\nfunction bad(n: Nat, h: Encoded(n)): Nat := match h with { | .mk value => value }\n" },
     { source := "structure Hidden: Prop where { value: Nat }\n" },
     { source := "structure Indexed: Nat -> Type where { value: Nat }\n" },
-    { source := "structure Bad: Nat where { }\n" }]
+    { source := "structure Bad: Nat where { }\n" },
+    { source := "structure Pair where {\n  first: Nat\n  second: Nat\n}\nfunction bad(p: Pair): Pair := { p with first := 1, first := 2 }\n" },
+    { source := "structure Pair where { first: Nat }\nfunction bad(p: Pair): Pair := { p with wrong := 1 }\n" },
+    { source := "structure Pair where {\n  first: Nat\n  second: Nat\n}\nconst bad: Pair := { first := 1 }\n" },
+    { source := "structure Pair where { first: Nat }\nconst bad: Nat := {\n  let p := { first := 1 }\n  0\n}\n" },
+    { source := "structure Checked where {\n  n: Nat\n  proof: n = 0\n}\nfunction bad(p: Checked): Checked := { p with n := 1 }\n" },
+    { source := "structure Pair where { first: Nat }\nfunction id(n: Nat): Nat := n\nfunction bad(p: Pair): Pair := { p with first := id (0) }\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -572,7 +597,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -591,7 +616,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -620,7 +645,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 74 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 80 phase-specific refusals, shared-prelude isolation"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [

@@ -17,14 +17,6 @@ structure PsProofState where
   goals : List PsProofGoal
   closures : List PsProofClosure := []
 
-def psExprHasTermMeta : PsExpr → Bool
-  | .mvar _ => true
-  | .app a b | .lam _ a b _ | .forallE _ a b _ =>
-    psExprHasTermMeta a || psExprHasTermMeta b
-  | .letE _ a b c => psExprHasTermMeta a || psExprHasTermMeta b || psExprHasTermMeta c
-  | .proj _ _ value => psExprHasTermMeta value
-  | _ => false
-
 def psProofContext (state : PsProofState) (id : Nat) : Except PsElabError PsElabContext := do
   let some goal := psMetaFindDecl state.context.metaContext id
     | throw (.proof "unknown goal")

@@ -109,6 +109,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .bool _ _ => []
   | .unit _ => []
   | .record fields _ => psListMap psPscv0RecordTerm fields
+  | .recordUpdate source fields _ => source :: psListMap psPscv0RecordTerm fields
   | .app fn args _ => List.cons fn args
   | .lambda binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)
   | .forallE binders body _ => List.cons body (psListMap psPscv0TermBinderType binders)

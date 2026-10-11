@@ -347,6 +347,12 @@ def psElabRecursionWalkWithFuel
             | Except.ok result =>
                 Except.ok (PsElabRecursionWalkResult.mk
                   (PsSyntaxTerm.record (Prod.fst result) span) (Prod.snd result))
+        | PsSyntaxTerm.recordUpdate source fields span => do
+            let source ← smaller context source
+            let fields ← psElabRecursionWalkFields smaller fields context
+            return PsElabRecursionWalkResult.mk
+              (.recordUpdate source.term fields.fst span)
+              (psListAppend source.changedIds fields.snd)
         | PsSyntaxTerm.lambda binders body span =>
             match psElabRecursionWalkBinders smaller binders context with
             | Except.error error => Except.error error

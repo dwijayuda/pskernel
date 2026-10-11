@@ -113,5 +113,10 @@ export const observations = [
   { name: "proofFamilyAnswer", args: null, expected: 231n },
   { name: "savedFactAnswer", args: null, expected: 218n },
   { name: "explicitHighAnswer", args: null, expected: 241n },
+  { name: "updateFirst", args: null, expected: 251n },
+  { name: "updateSecond", args: null, expected: 253n },
+  { name: "updateInferred", args: null, expected: 254n },
+  { name: "updateDependent", args: null, expected: 255n },
+  { name: "updateGeneric", args: null, expected: 257n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

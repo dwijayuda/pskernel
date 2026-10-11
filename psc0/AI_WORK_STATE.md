@@ -1344,3 +1344,14 @@ and 120 native modules. Proof families share kernel-aligned elimination metadata
 and do not become runtime tags. Singleton minors open proof fields before erasure,
 preserving the independent proof-guarded call convention. Explicit limits are in
 docs/PSCV0_NATIVE_DATA.md. Earlier failed runs are not qualification evidence.
+
+## Explicit structure sorts qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/25 at d19339609d6ba579927f7cae9292674f284ccf44 passed
+[run 38181410257](https://github.com/dwijayuda/pskernel/actions/runs/38181410257),
+job 114594573059: 390 fixture declarations, 28 parser cases, four accepted
+programs, 74 phase-specific refusals and 114 shared runtime observations.
+114 portable and 120 native modules. Explicit Prop/Type structure and class
+sorts pass through shared data metadata and checked projection generation.
+
+Record reconstruction is the next native milestone; see docs/PSCV0_NATIVE_RECORDS.md.

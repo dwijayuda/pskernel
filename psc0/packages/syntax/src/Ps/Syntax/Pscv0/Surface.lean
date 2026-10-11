@@ -161,9 +161,50 @@ def psPscv0ReadCompleteTerm (proofScript : Bool) (cursor : PsTokenCursor) : Exce
       if psTokenCursorDone parsed.cursor then Except.ok parsed.value
       else Except.error "PSCV0-TERM-TRAILING-INPUT"
 
+-- PSCV0-APP-04: preserve the application's actual head, including the
+-- intentionally distinct tree for (f x)(y). The historical Lean writer
+-- declines compound heads. Extend only that supported application family;
+-- never flatten the head into arguments or change the trusted old printer.
+-- Everything already printable by the existing writer stays byte-identical.
+def psPscv0PrintLeanAppWithFuel (fuel : Nat) :
+    PsSyntaxTerm -> Except PsSourcePrintError String :=
+  match fuel with
+  | 0 => fun (_term : PsSyntaxTerm) => Except.error PsSourcePrintError.fuelExhausted
+  | remaining + 1 =>
+      let smaller : PsSyntaxTerm -> Except PsSourcePrintError String :=
+        psPscv0PrintLeanAppWithFuel remaining;
+      fun (term : PsSyntaxTerm) =>
+        match psPrintLeanTerm term with
+        | Except.ok printed => Except.ok printed
+        | Except.error originalError =>
+            match term with
+            | .app fn args _ =>
+                match fn with
+                | .app _ _ _ =>
+                    match args with
+                    | [] => Except.error originalError
+                    | _ :: _ =>
+                        match smaller fn with
+                        | Except.error error => Except.error error
+                        | Except.ok printedHead =>
+                            let printArgument : PsSyntaxTerm -> Except PsSourcePrintError String :=
+                              fun (argument : PsSyntaxTerm) =>
+                                match smaller argument with
+                                | Except.error error => Except.error error
+                                | Except.ok printed =>
+                                    if psSyntaxTermSimpleForApplication argument then Except.ok printed
+                                    else Except.ok (psPscv0Cat ["(", printed, ")"]);
+                            match psListMapExcept printArgument args with
+                            | Except.error error => Except.error error
+                            | Except.ok printedArgs =>
+                                Except.ok (psPscv0Cat ["(", printedHead, ") ", psPrintJoin " " printedArgs])
+                | _ => Except.error originalError
+            | _ => Except.error originalError
+
 def psPscv0PrintTerm (proofScript : Bool) (term : PsSyntaxTerm) : Except String String :=
   let result : Except PsSourcePrintError String :=
-    if proofScript then psPrintProofScriptTerm term else psPrintLeanTerm term;
+    if proofScript then psPrintProofScriptTerm term
+    else psPscv0PrintLeanAppWithFuel 4096 term;
   match result with
   | Except.error _ => Except.error "PSCV0-SOURCE-TERM-PRINT-UNSUPPORTED"
   | Except.ok text => Except.ok text

@@ -176,6 +176,28 @@ def generalPiFormationSmoke : IO Unit := do
           | some inferred =>
               require (inferred.val == .sort one)
                 "outer binder type incorrectly shifted"
+          -- P1c regression: a fresh binder does not capture an older
+          -- dependent variable. Check both source and contracted types
+          -- in an actually checked nonempty context.
+          let outerBeta : KExpr :=
+            .app (.lam x (.sort one) (.bvar 2) .default) (.sort .zero)
+          let outerLet : KExpr :=
+            .letE x (.sort one) (.sort .zero) (.bvar 2) false
+          let contracted : KExpr :=
+            (.bvar 2 : KExpr).instantiateBVar (.sort .zero) 0
+          require (contracted == .bvar 1)
+            "outer dependent variable was captured during substitution"
+          match context2.infer outerBeta, context2.infer outerLet,
+              context2.infer contracted with
+          | some betaTy, some letTy, some reductTy =>
+              require (betaTy.val == .sort one &&
+                letTy.val == .sort one &&
+                reductTy.val == .sort one)
+                "outer beta/let typing changed after dropping fresh binder"
+          | _, _, _ =>
+              throw (IO.userError
+                "checked-context outer variable beta/let was declined")
+          IO.println "PSKernel-Fast P1c checked outer beta/let regression PASS"
           require ((context1.infer (.bvar 1)).isNone)
             "immutable parent context changed after extension"
 

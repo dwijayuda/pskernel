@@ -1,0 +1,42 @@
+{
+  "schema": "pskernel-fast-p1d-conditional-set-model-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualified_commit": "3b70a90bdcf23dd0b6e8843132abb2916f05058a",
+  "run_id": 38124170798,
+  "job_id": 114424937667,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38124170798",
+  "conclusion": "success",
+  "lake_jobs": 76,
+  "independent_lean_files": 33,
+  "assumption_receipts": 48,
+  "assumption_allowlist": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "explicit_mathematical_model_parameter": "SetTheoryBasis V",
+  "model_instance_constructed": false,
+  "partial_mathematical_facts_proved": [
+    "SetTheoryBasis.exists_empty",
+    "SetTheoryBasis.universe_powerset_closed",
+    "propUniverse_exactly_two",
+    "sort_member_succ",
+    "numericIMax_zero_iff_codomain_zero",
+    "checked_pi_prop_regime",
+    "inferred_closed_pi_prop_regime",
+    "propPi_member_prop",
+    "propPi_true_iff",
+    "propPi_false_of_counterexample",
+    "propPi_exact_truth_range"
+  ],
+  "runtime_semantic_authority_unchanged": true,
+  "piProp_uses_already_interpreted_semantic_values": true,
+  "arbitrary_source_to_model_denotation_proved": false,
+  "type_valued_pi_set_implemented": false,
+  "proof_irrelevance_interpretation_proved": false,
+  "full_checker_soundness": false,
+  "relative_consistency": false,
+  "general_defeq": false,
+  "theorem_admission": false
+}

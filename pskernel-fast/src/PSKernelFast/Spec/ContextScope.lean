@@ -60,4 +60,6 @@ theorem ContextScoped.lookup_scoped (params : List KName)
                   prior.length - (older + 1) := by omega
             simpa only [List.length_cons, hDepth] using hDomain
 
+#print axioms ContextScoped.lookup_scoped
+
 end PSKernelFast.Spec

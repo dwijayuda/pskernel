@@ -1,6 +1,6 @@
 // Compile only the portable syntax bridge using the retained self-hosted PSC0.
-// Preflight all new raw source before expensive prefix preparation. Module-level
-// observations report failures precisely, without an alternative parser/builder.
+// New raw source is parsed before costly prefix preparation. Origin-bearing
+// preparation uses the same compiler API and preserves exact error locations.
 import assert from 'node:assert/strict';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -47,7 +47,7 @@ async function visit(module){
   const parts=module.split('.'),owner={Syntax:'syntax',Foundation:'foundation'}[parts[1]];
   assert(parts[0]==='Ps'&&owner,'bridge imports non-syntax compiler or kernel: '+module);
   const file=path.join(root,'packages',owner,'src',...parts)+'.lean';
-  const source=await readFile(file,'utf8'); active.add(module);
+  const source=await readFile(file,'utf8');active.add(module);
   for(const line of source.split(/\r?\n/u)){
     const m=line.match(/^\s*import\s+([A-Za-z_][A-Za-z_0-9.]*)\s*$/u);
     if(m)await visit(m[1]);
@@ -60,24 +60,26 @@ await visit('Ps.Syntax.Pscv0.Module');
 await mkdir(output,{recursive:true});
 const progress={source:git(['rev-parse','HEAD']).trim(),preflight:[],prepared:[],phase:'preflight',closure:order.map(({source,...r})=>r)};
 async function checkpoint(){await writeFile(path.join(output,'progress.json'),JSON.stringify(progress,null,2)+'\n');}
+const parsedNew=new Map();
 const start=Date.now();
-try {
+try{
   await checkpoint();
   for(const module of order.filter(x=>x.module.startsWith('Ps.Syntax.Pscv0.'))){
     const begin=Date.now();
-    unwrap(compiler.psCompilerParseSource(compiler.PsCompilerSourceKind.lean,module.source),'PREFLIGHT '+module.module);
+    parsedNew.set(module.module,unwrap(compiler.psCompilerParseSource(compiler.PsCompilerSourceKind.lean,module.source),'PREFLIGHT '+module.module));
     progress.preflight.push({module:module.module,elapsedMs:Date.now()-begin});
     console.log('PSCV0_BRIDGE_PREFLIGHT: PASS '+module.module);await checkpoint();
   }
   let state=compiler.psCompilerPreparationStart(compiler.PsCompilerSourceKind.lean);
   for(const module of order){
     progress.phase='prepare '+module.module;await checkpoint();
-    console.log('PSCV0_BRIDGE_PREPARING: '+module.module);
-    const begin=Date.now();
-    state=unwrap(compiler.psCompilerPreparationStep(state,module.source),'PREPARE '+module.module);
+    console.log('PSCV0_BRIDGE_PREPARING: '+module.module);const begin=Date.now();
+    if(parsedNew.has(module.module)){
+      const result=unwrap(compiler.psCompilerPreparationStepParsedWithOrigins(state,parsedNew.get(module.module)),'PREPARE_WITH_ORIGINS '+module.module);
+      state=result.state;
+    }else state=unwrap(compiler.psCompilerPreparationStep(state,module.source),'PREPARE '+module.module);
     progress.prepared.push({module:module.module,elapsedMs:Date.now()-begin});
-    console.log('PSCV0_BRIDGE_PREPARED: '+module.module+' '+(Date.now()-begin)+'ms');
-    await checkpoint();
+    console.log('PSCV0_BRIDGE_PREPARED: '+module.module+' '+(Date.now()-begin)+'ms');await checkpoint();
   }
   progress.phase='finish';await checkpoint();
   const prepared=unwrap(compiler.psCompilerPreparationFinish(state),'FINISH');
@@ -97,7 +99,6 @@ try {
   await writeFile(path.join(output,'build-report.json'),JSON.stringify(report,null,2)+'\n');
   progress.phase='complete';await checkpoint();
   console.log('PSCV0_PORTABLE_BRIDGE_BUILD: PASS '+JSON.stringify({...report,closureModules:order.length,closure:undefined}));
-} catch(error) {
-  await writeFile(path.join(output,'failure.json'),JSON.stringify({source:progress.source,phase:progress.phase,message:error.message,elapsedMs:Date.now()-start},null,2)+'\n');
-  throw error;
+}catch(error){
+  await writeFile(path.join(output,'failure.json'),JSON.stringify({source:progress.source,phase:progress.phase,message:error.message,elapsedMs:Date.now()-start},null,2)+'\n');throw error;
 }

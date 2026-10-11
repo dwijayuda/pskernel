@@ -112,29 +112,34 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .ifE condition yes no _ => [condition, yes, no]
   | .matchE scrutinee alternatives _ => List.cons scrutinee (psListMap psPscv0AlternativeTerm alternatives)
 
-def psPscv0ValidateTermWithFuel (tokens : List PsToken) (fuel : Nat)
-    (term : PsSyntaxTerm) : Except String Unit :=
+-- The seed supports structurally recursive function-valued results. Keeping
+-- term as that returned function's argument preserves the complete Pi type
+-- while avoiding a partially supplied recursive call in the old normalizer.
+def psPscv0ValidateTermWithFuel (tokens : List PsToken) (fuel : Nat) :
+    PsSyntaxTerm -> Except String Unit :=
   match fuel with
-  | 0 => Except.error "PSCV0-TERM-BUDGET"
+  | 0 => fun (_term : PsSyntaxTerm) => Except.error "PSCV0-TERM-BUDGET"
   | remaining + 1 =>
-      let localCheck : Except String Unit :=
-        match term with
-        | .app fn args _ =>
-            match args with
-            | [] => Except.error "PSCV0-APP-03-COMPLETION-NOT-YET-SUPPORTED"
-            | _ :: _ =>
-                let fnSpan := psSyntaxTermSpan fn;
-                if psStringEq (psPscv0TokenTextAt tokens fnSpan.stop.byteOffset) "(" then Except.ok ()
-                else if psListAny (psPscv0GroupedArgument tokens) args then Except.error "PSCV0-APP-02"
-                else Except.ok ()
-        | _ => Except.ok ();
-      match localCheck with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          let check : PsSyntaxTerm -> Except String Unit := psPscv0ValidateTermWithFuel tokens remaining;
-          match psListMapExcept check (psPscv0TermChildren term) with
-          | Except.error error => Except.error error
-          | Except.ok _ => Except.ok ()
+      let check : PsSyntaxTerm -> Except String Unit :=
+        psPscv0ValidateTermWithFuel tokens remaining;
+      fun (term : PsSyntaxTerm) =>
+        let localCheck : Except String Unit :=
+          match term with
+          | .app fn args _ =>
+              match args with
+              | [] => Except.error "PSCV0-APP-03-COMPLETION-NOT-YET-SUPPORTED"
+              | _ :: _ =>
+                  let fnSpan := psSyntaxTermSpan fn;
+                  if psStringEq (psPscv0TokenTextAt tokens fnSpan.stop.byteOffset) "(" then Except.ok ()
+                  else if psListAny (psPscv0GroupedArgument tokens) args then Except.error "PSCV0-APP-02"
+                  else Except.ok ()
+          | _ => Except.ok ();
+        match localCheck with
+        | Except.error error => Except.error error
+        | Except.ok _ =>
+            match psListMapExcept check (psPscv0TermChildren term) with
+            | Except.error error => Except.error error
+            | Except.ok _ => Except.ok ()
 
 def psPscv0ReadTerm (proofScript : Bool) (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxTerm) :=

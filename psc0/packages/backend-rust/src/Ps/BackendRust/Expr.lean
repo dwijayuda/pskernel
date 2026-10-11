@@ -97,7 +97,7 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
                   | throw ("PSCV0-RUST: unknown callee " ++ name)
                 let generic ← psRustResult (psRustEmitTypeArguments types)
                 pure (.text (name ++ generic ++ if d.parameters.isEmpty then "()" else ""))
-          | _ => return psRustDocWrap "(" (← emit fnLive fn) ")"
+          | _ => pure (psRustDocWrap "(" (← emit fnLive fn) ")")
         -- A closure's call receiver remains live until all arguments finish.
         let callCtx := preserve ++ psRustFree ctx fn
         let docs ← arguments callCtx args

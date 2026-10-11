@@ -1,0 +1,25 @@
+{
+  "schema": "pskernel-fast-g4-scoped-evidence/v1",
+  "sourceSha": "df800d5f390e36a0c807bd88397221adce488394",
+  "ci": {
+    "run": 38110413629,
+    "job": 114384612773,
+    "conclusion": "success"
+  },
+  "lean": {
+    "version": "4.35.0-rc4",
+    "commit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "buildTargets": 45,
+  "independentSourceModules": 18,
+  "proved": [
+    "ScopedFrame.rawDomainAt_top",
+    "AnyScopedFrame.extend_depth",
+    "KExpr.validAt_sound (reused from V3 only)"
+  ],
+  "validated": "structural binder stack",
+  "generalDependentInference": false,
+  "semanticDefEq": false,
+  "checkedEnvironment": false,
+  "admittedProofs": 0
+}

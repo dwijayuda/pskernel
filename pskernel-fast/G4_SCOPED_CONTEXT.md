@@ -27,3 +27,7 @@ G4.2's Sort/Pi fragment is not the general inference engine.
 
 CI state: pending implementation-source validation. No full Lean compatibility,
 metatheory consistency or self-host status claimed.
+
+## Validated G4.3 structural-binder checkpoint
+
+Source `df800d5f390e36a0c807bd88397221adce488394` passed [CI 38110413629](https://github.com/dwijayuda/pskernel/actions/runs/38110413629): 45 native build jobs and the structural binder-scope test including three nested domains. This validates only structural scope; `rawDomainAt` is **not a type judgment**. See [G4_SCOPED_EVIDENCE.md](G4_SCOPED_EVIDENCE.md).

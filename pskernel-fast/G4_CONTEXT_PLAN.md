@@ -2,6 +2,10 @@
 
 **Status:** new-generation design direction, **no implementation claim**. Lean 4.35 pinned `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; no obligation to preserve old PSKernel proof/code interfaces.
 
+## Validated bounded precursor
+
+The independent `ScopedFrame params depth` prototype passed [G4.3 scoped-frame evidence](G4_SCOPED_EVIDENCE.md). It validates the exact domain's *structural* scope when pushing a binder and proves top lookup/depth progression. A raw domain read back from its original insertion context is NOT an inferred type; the next operation must explicitly shift under newer binders. No dependent typing or proof acceptance was added.
+
 ## Required design
 
 The G4.2 source can only infer types for syntactically Sort-shaped closed terms. It does not handle a genuinely dependent term, so future additions need:

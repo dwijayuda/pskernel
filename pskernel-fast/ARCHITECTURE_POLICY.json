@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G4.2-certified-sort-pi-fragment-no-proof-admission",
+    "stage": "G4.3-structural-binder-scope-certified-no-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -49,7 +49,10 @@
       "Pi x:(Sort u), (Sort v) : Sort (imax (succ u) (succ v))"
     ],
     "generalCheckedInferenceImplemented": false,
-    "admittedDeclarations": 0
+    "admittedDeclarations": 0,
+    "scopedBinderFrameCertified": true,
+    "generalDependentInferenceImplemented": false,
+    "formalContextualTypeLookupProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -61,8 +64,8 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "dc43ce850291dc5527c933a8f5d86c408c40eb27",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38110171823",
-    "scope": "40 native Lean build targets, 16 independent modules, G1-G4.2 focused tests, theorem-backed small formation fragment; no general checker"
+    "validatedSourceCommit": "df800d5f390e36a0c807bd88397221adce488394",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38110413629",
+    "scope": "45 native build targets, 18 independent V3 Lean source files, G1-G4.3 focused regression and proof-carrying structural binder scope, no admission"
   }
 }

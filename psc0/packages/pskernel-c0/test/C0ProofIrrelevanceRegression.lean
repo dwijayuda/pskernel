@@ -1,3 +1,4 @@
+import Ps.KernelCore.Core.IndexedExpr
 import Ps.KernelCore.Checker.Session
 
 /- Native checker regression only. No bootstrap or self-host tests.
@@ -46,3 +47,48 @@ def main : IO Unit := do
             Nat.beq (Prod.snd old) (Prod.snd next)) then
         throw (IO.userError "beta-spine linear optimization changed behavior")
   IO.println "C0_PERF_REGRESSION beta_spine_semantics=pass"
+  -- Native-only differential checks for the specialized beta/zeta
+  -- substitution. The generic multi-substitution algorithm is independent.
+  let nested := PsKernelExpr.lam PsKernelName.anonymous sort0
+    (PsKernelExpr.app (PsKernelExpr.bvar 1)
+      (PsKernelExpr.bvar 0)) info
+  let many := PsKernelExpr.letE PsKernelName.anonymous sort0
+    sort1 (PsKernelExpr.forallE PsKernelName.anonymous sort0
+      (PsKernelExpr.proj PsKernelName.anonymous 0
+        (PsKernelExpr.mdata 10 (PsKernelExpr.bvar 2))) info) false
+  for term in [base, sort0, sort1, nested, many,
+      PsKernelExpr.app nested many] do
+    for replacement in [base, sort0, sort1, nested, many] do
+      let expected :=
+        psKernelExprInstantiateAt term 0 [replacement] 0
+      let actual :=
+        psKernelExprInstantiate1 term replacement
+      if !(psKernelExprEqual expected actual) then
+        throw (IO.userError "C0 optimized single substitution mismatch")
+  IO.println "C0_PERF_REGRESSION single_substitution_semantics=pass"
+
+  -- Test the indexed store's shared radix-16 interner, including duplicates.
+  let first := psKernelC0Intern psKernelC0StoreEmpty (.bvar 0)
+  match first with
+  | Option.none =>
+      throw (IO.userError "C0 indexed store rejected valid leaf")
+  | Option.some (store1, id1) =>
+      let second := psKernelC0Intern store1 (.bvar 0)
+      match second with
+      | Option.none =>
+          throw (IO.userError "C0 indexed store rejected duplicate")
+      | Option.some (store2, id2) =>
+          if !(Nat.beq id1 id2 && Nat.beq store1.nodes.size store2.nodes.size) then
+            throw (IO.userError "C0 indexed interning broke identity")
+          match psKernelC0Intern store2 (.app id1 id2) with
+          | Option.none =>
+              throw (IO.userError "C0 indexed store rejected valid application")
+          | Option.some (store3, id3) =>
+              match psKernelC0Intern store3 (.app id1 id2) with
+              | Option.none =>
+                  throw (IO.userError "C0 indexed store rejected shared application")
+              | Option.some (_, id4) =>
+                  if !(Nat.beq id3 id4) then
+                    throw (IO.userError "C0 radix-16 interning lost duplicate")
+  IO.println "C0_PERF_REGRESSION radix_indexed_interning=pass"
+

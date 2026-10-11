@@ -17,6 +17,8 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [G4.3 scope-certified lifting and substitution evidence](G4_BINDER_EVIDENCE.md)
 - [First dependent Sort/Pi formation fragment and CI](G4_DEPENDENT_SORT_EVIDENCE.md)
 - [G4.3b general-domain Pi/lambda/application/restricted-let evidence](G4_GENERAL_PI_EVIDENCE.md)
+- [P0 mathematical/model soundness contract](PSKERNEL_FAST_SOUNDNESS_CONTRACT_V1.md)
+- [P1 independently proved scope metatheory and axiom audit](P1_SOUNDNESS_EVIDENCE.md)
 
 ## Current executable state
 
@@ -30,8 +32,8 @@ lake build pskernel_fast_smoke
 lake exe pskernel_fast_smoke
 ```
 
-Research branch: `research/pskernel-fast-clean-v3-20261011`; native source toolchain pinned to Lean 4.35.0-rc4. **Latest independently inspected source green:** `253afb42b477aacab22def288a2dd42d7ca9633b`, [GitHub Actions #38116916150](https://github.com/dwijayuda/pskernel/actions/runs/38116916150), **54 successful build jobs**, 22 independent V3 Lean sources audited, all earlier focused regressions and dedicated G4.3b rules/scoped-output tests passed. See [G4.3b evidence](G4_GENERAL_PI_EVIDENCE.md). Other proof branches and draft PR #89 were not modified.
+Research branch: `research/pskernel-fast-clean-v3-20261011`. Pinned Lean `v4.35.0-rc4`. The last qualified restricted G4.3b implementation remains `253afb42b477aacab22def288a2dd42d7ca9633b`. **P0/P1 formal-safety checkpoint**: the independent `ContextScoped` spec, G3 executable scope equivalence, proofs that all six G4.3b rule outcomes preserve source and type scope, and proofs that the second runtime output scope check cannot fail after successful inference. [Cloud CI 38118786036](https://github.com/dwijayuda/pskernel/actions/runs/38118786036) passed 60 Lake jobs, audited 25 independent V3 Lean source files, and pinned 7 theorem-assumption receipts to `propext`, `Classical.choice`, `Quot.sound` with fail-closed synthetic tests. Read the exact [P1 evidence](P1_SOUNDNESS_EVIDENCE.md). **No type-preserving substitution, set-theoretic denotational soundness, consistency theorem, general DefEq, real kernel benchmarks or theorem admission has been established.**
 
 ## Next
 
-G4.3b's general-domain Pi/lambda/application/restricted-let experiments are green **only in their explicitly bounded syntactic fragment**. The next gated work is source-sound **typed WHNF/DefEq (G4.4)** with complete symbolic universe rules and strict positive/unknown decisions, followed by an actually protected checked environment and proof-admission refinement/model proofs. The current application/let type-preserving substitution theorem, official-Lean typed differential tests, and resource/heap budgets remain open. No previous proof preservation constraint may compromise performance or correctness.
+The new P0/P1 proof contracts are green in their **structural** scope, separate from the executing checker. Next formalize and prove the **type-preserving** dependent substitution theorem, then derive a genuinely denotational (set-theoretic) soundness theorem against the executing rules, and develop G4.4 typed WHNF/DefEq. Keep the second runtime output check for defense in depth despite the new proof it is unreachable when first inference succeeds. Preserve old GitHub branches and do not advertise a finished Lean kernel or consistency proof.

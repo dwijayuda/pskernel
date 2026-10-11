@@ -25,8 +25,8 @@ this development loop.
 |---|---|---|
 | Source categories and scopes | Rich terms, calls/defaults, expected binders, namespaces/open/sections, grouped annotation scope | Full selected literals/operators, aliases/modifiers, syntax-preserving diagnostics |
 | Type inference and environment | Core metas, unification, local instances, universe instantiation, RC4 checking | Source universes, complete global class/instance registration and frozen Standard registry |
-| Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases | Pattern matrices, named discriminants, heterogeneous constraints, erased/existential fields, selected nested/mutual data |
-| Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting under qualification | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
+| Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, single-discriminant nomatch | Pattern matrices, named discriminants, heterogeneous constraints, erased/existential fields, selected nested/mutual data |
+| Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
 | Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
 | Proofs and contracts | Term proofs checked by official Lean; selected logical primitives | Shared goal state, proof-producing tactic registry, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Selected Except do | General typed do, if-let/pattern bindings, mutable/early-return/loop lowering, registered effect families |

@@ -21,6 +21,19 @@ def psLogicEq (level : PsLevel) (type left right : PsExpr) : PsExpr :=
 def psLogicRefl (level : PsLevel) (type value : PsExpr) : PsExpr :=
   psLogicApply (.constE (psNameAppendStr psEqName "refl") [level]) [type, value]
 
+-- RC4 Init.Prelude declares Empty : Type with no constructors. It is a
+-- runtime type (unlike False : Prop), so its declarations also belong to the
+-- runtime prelude catalogue.
+def psEmptyDeclarations : List PsDeclaration :=
+  let name := psRootName "Empty"
+  let u := psRootName "u"
+  let type := PsExpr.constE name []
+  let motiveType := psLogicPi 1 "value" type (.sortE (.param u))
+  let recursorType := psLogicPi 0 "motive" motiveType
+    (psLogicPi 1 "value" type (.app (.fvar 0) (.fvar 1))) .implicit
+  [ .inductiveDecl (.mk name [] (.sortE (.succ .zero)) 0 0 [] false),
+    .recursorDecl (.mk (psNameAppendStr name "rec") [u] recursorType [name] 0 0 1 0) ]
+
 def psLogicDeclarations : List PsDeclaration :=
   let u := psRootName "u"
   let v := psRootName "v"
@@ -67,7 +80,7 @@ def psLogicDeclarations : List PsDeclaration :=
   let trueRecType := psLogicPi 2 "motive" (psLogicPi 5 "h" trueType sort)
     (psLogicPi 3 "intro" (.app motive (.constE introName []))
       (psLogicPi 5 "h" trueType (.app motive h))) .implicit
-  [
+  psEmptyDeclarations ++ [
     .inductiveDecl (.mk psEqName [u] eqType 2 1 [psNameAppendStr psEqName "refl"] false),
     .constructorDecl (.mk (psNameAppendStr psEqName "refl") [u] reflType psEqName 0 2 0 []),
     .recursorDecl (.mk (psNameAppendStr psEqName "rec") [v, u] recType [psEqName] 2 1 1 1),

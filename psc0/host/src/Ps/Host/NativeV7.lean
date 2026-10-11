@@ -7,6 +7,9 @@ open Lean (toJson)
 
 namespace PsV7Native
 
+-- Shared by diagnostics and the executable version response.
+def profile : String := "pscv0-v7-native-bounded/11"
+
 def leanVersion : String := "4.35.0-rc4"
 def leanCommit : String := "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
 
@@ -121,7 +124,7 @@ def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.
   let identity := [
     ("source", toJson sourceName), ("leanVersion", toJson Lean.versionString),
     ("leanCommit", toJson Lean.githash), ("provider", toJson ("lean4-cpp" : String)),
-    ("profile", toJson ("pscv0-v7-native-bounded/10" : String))]
+    ("profile", toJson profile)]
   match result with
   | .error error => Lean.Json.mkObj (identity ++ [
       ("accepted", toJson false), ("phase", toJson error.phase),

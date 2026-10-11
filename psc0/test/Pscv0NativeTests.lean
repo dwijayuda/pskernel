@@ -26,6 +26,12 @@ private def parserCases : IO Unit := do
       (← get "error" (c.getObjValAs? String "error"))
 
 private def application : String :=
+  "function emptyElim{A: Type}(value: Empty): A := nomatch value\n" ++
+  "function falseElim{A: Type}(proof: False): A := nomatch proof\n" ++
+  "inductive Void(A: Type) where { }\n" ++
+  "function voidElim{A: Type}(value: Void(A)): A := nomatch value\n" ++
+  "inductive Diagonal: Nat -> Nat -> Type where { | same(n: Nat): Diagonal(n, n) }\n" ++
+  "function impossibleIndex(value: Diagonal(0, 1)): Nat := nomatch value\n" ++
   "function keep(value: Nat): Nat := {\n" ++
   "  let selected: _ := value\n" ++
   "  selected\n" ++
@@ -286,7 +292,7 @@ private def semanticCases : IO Unit := do
     { source := application },
     { source := instanceProgram },
     { source := "function keep(value: Nat): Nat := value\nconst bad: Nat := keep (3)\n" },
-    { source := "const bad: Nat := true\n" },
+    { source := "function bad(n: Nat): Nat := nomatch n\n" },
     { source := "import Missing\nconst answer: Nat := 42\n" },
     { source := "const leaked: Nat := answer\n" },
     { source := "const answer: Nat := 43\n" },
@@ -364,6 +370,8 @@ private def semanticCases : IO Unit := do
         if i >= 7 then
           unless error.message.startsWith diagnosticPrefixes[i - 7]! do
             throw (IO.userError s!"case {i}: wrong diagnostic: {error.message}")
+        if i == 3 && !error.message.startsWith "PSCV0-MATCH: missing feasible" then
+          throw (IO.userError "nomatch accepted or misclassified a feasible Nat branch")
         if i == 2 && !error.message.startsWith "PSCV0-APP-02" then
           throw (IO.userError "gap application did not reach APP-02")
         if i == 4 && error.message != "PSCV0-NATIVE-MODULE-IMPORTS-PENDING" then

@@ -151,7 +151,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  match
+  psEmptyDeclarations ++ match
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with

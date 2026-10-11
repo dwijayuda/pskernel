@@ -178,6 +178,19 @@ def psPscv0ParseTermWithFuel
           Except.error
             (psProofScriptExpectedError
               "supported pure term; do is not enabled in this source subset" cursor)
+      else if psTokenCursorAtText cursor "nomatch" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (.unexpectedEnd "nomatch scrutinee")
+        | some keyword =>
+          match smaller keyword.cursor with
+          | .error error => .error error
+          | .ok scrutinee =>
+            -- Empty alternatives use the same typed coverage/refinement
+            -- mechanism as an ordinary match. No assumed contradiction.
+            .ok { value := .matchE scrutinee.value []
+                    { start := keyword.token.span.start
+                      stop := (psSyntaxTermSpan scrutinee.value).stop }
+                  cursor := scrutinee.cursor }
       else if psTokenCursorAtText cursor "match" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")

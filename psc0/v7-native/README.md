@@ -151,12 +151,21 @@ their runtime values. Equality transports erase only when source and target have
 the same checked runtime representation. Impossible branches become typed
 unreachable IR nodes, and Boolean recursors lower to conditionals.
 `Ps.Erasure.Recursion` derives recursive calls from actual majors and indices.
-It still refuses reuse of the current definition when a minor captures a varying
-major/index; such recursors need separately lifted folds.
+A typed Core preparation pass lifts captured and nested folds to fresh helpers.
+Helpers capture the dependency closure of their types and values, while fresh
+index/major parameters vary on recursive calls. Proofs and type computations
+are skipped. Every generated helper is part of the same checked prepared graph.
+See [the recursor design](../docs/PSCV0_NATIVE_RECURSOR_PREPARATION.md).
+
+Single-discriminant `nomatch` reuses empty match alternatives and the same
+coverage/equality solver. The prelude includes the RC4 empty inductive `Empty`.
+User-defined empty families and impossible indexed families follow the ordinary
+recursor path; eliminating `False` uses proof erasure and typed unreachable IR.
 
 Fixed-index matching with a major-dependent result/context, heterogeneous
-dependent index-constructor projections, nested/multiple patterns and arbitrary
-runtime recursor lifting remain pending. Indexed structural recursion still
+dependent index-constructor projections, nested/multiple patterns and multiple
+nomatch discriminants remain pending. Partial/non-lambda recursor minors are
+not yet a fully qualified runtime profile. Indexed structural recursion still
 requires distinct explicit local index parameters. Type/Prop constructor fields
 and runtime Type/Prop indices remain outside the data erasure profile.
 
@@ -214,7 +223,11 @@ Four refusals protect uniform parameters, required constructor results, result
 family identity and index typing. Dependent vector mapping/reconstruction, two-index
 cell reconstruction, indexed accumulator recursion and computed child indices extend
 the same application. Four additional refusals cover stale indices, dependent
-invariant arguments, captured runtime folds and wrong dependent branch results.
+invariant arguments and wrong dependent branch results. The captured-fold case
+now emits successfully; captured/computed/local/nested folds and dependent
+fold results extend the same composite. Empty elimination extends that application,
+and the existing basic type refusal is replaced by the specified feasible-Nat
+nomatch refusal; several independent type-mismatch refusals remain.
 Dependent context values/definitions, fixed and symbolic vector tails, repeated-index
 contradictions, omitted Boolean cases, a dependent proof and dependent recursive
 state extend the same application. Three added refusals check missing feasible

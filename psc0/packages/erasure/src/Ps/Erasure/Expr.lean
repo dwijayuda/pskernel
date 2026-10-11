@@ -1925,7 +1925,7 @@ def psErasureSpecialEntry
   let text := psNameToString name;
   let named : String -> Bool := fun (candidate : String) => psStringEq text candidate;
   if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
-  else if named "False.elim" then some (PsErasureSpecialEntry.mk 2 false)
+  else if named "False.elim" || named "False.rec" then some (PsErasureSpecialEntry.mk 2 false)
   else if psListAny named
       ["Int.ofNat", "Int.repr", "Int.negSucc", "Int.neg", "Nat.succ",
         "Bool.not", "Char.ofNat", "Char.toNat", "String.Pos.Raw.mk",
@@ -2119,6 +2119,10 @@ def psEraseLogicalApplication
     let some target := view.args[0]? | throw .unsupportedApplication
     let type ← psEraseRuntimeType environment scope target
     return some (.unreachable type)
+  if psNameEq name (psNameAppendStr (psRootName "False") "rec") then
+    let type ← psErasureCheckedTypeView environment scope.localContext
+      (psExprApplyMany view.head view.args)
+    return some (.unreachable (← psEraseRuntimeType environment scope type))
   if !psNameEq name (psNameAppendStr psEqName "rec") then return none
   let some minor := view.args[3]? | throw .unsupportedApplication
   let headType ← (psInferType environment psMetaEmpty scope.localContext view.head).mapError (fun _ => PsErasureError.unsupportedApplication)

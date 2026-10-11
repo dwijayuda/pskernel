@@ -10,7 +10,8 @@ def psPscv0IntroNames (fuel line : Nat) (cursor : PsTokenCursor) :
       return { value := [], cursor }
     let name ← psTokenCursorExpectKind cursor .identifier
     let rest ← psPscv0IntroNames fuel line name.cursor
-    return { value := PsSyntaxName.mk [name.token.text] name.token.span :: rest.value
+    return {
+      value := PsSyntaxName.mk [name.token.text] name.token.span :: rest.value
       cursor := rest.cursor }
 
 def psPscv0ReadTactics (read : PsPscv0TermReader) (fuel : Nat)
@@ -54,5 +55,6 @@ def psPscv0ReadProof (read : PsPscv0TermReader) (fuel : Nat)
   let opening ← psTokenCursorExpectText keyword.cursor "{"
   let tactics ← psPscv0ReadTactics read fuel none opening.cursor
   let close ← psTokenCursorExpectText tactics.cursor "}"
-  return { value := .byE tactics.value {} (psSyntaxSpanJoin keyword.token.span close.token.span)
+  return {
+    value := .byE tactics.value {} (psSyntaxSpanJoin keyword.token.span close.token.span)
     cursor := close.cursor }

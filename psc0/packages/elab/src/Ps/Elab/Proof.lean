@@ -54,6 +54,11 @@ def psProofApplyTerm (fuel : Nat) (current : PsElabTermResult) (target : PsExpr)
 
 def psProofApplied (state : PsProofState) (goal : PsProofGoal) (before : Nat)
     (value : PsElabTermResult) : Except PsElabError PsProofState := do
+  let pending := value.context.metaContext.declarations.filterMap fun entry =>
+    match entry.kind with
+    | .synthetic => if entry.id >= before then some entry.id else none
+    | _ => none
+  let value ← psElabSolvePendingInstances value pending
   let goals := psProofFreshGoals before value.context
   let dependent := fun goal => goals.any fun other =>
     match psMetaFindDecl value.context.metaContext other.id with
@@ -67,7 +72,9 @@ def psProofApply (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (state : PsProofState) (source : PsSyntaxTerm) : Except PsElabError PsProofState := do
   let (goal, context, target) ← psProofMain state
   let source ← psProofSource scope context source
-  let value ← elaborate context source none
+  let value ← match source with
+    | .reference name => psElabReference context name none
+    | _ => elaborate context source none
   let value ← psProofApplyTerm 4096 value target
   psProofApplied state goal context.metaContext.nextId value
 

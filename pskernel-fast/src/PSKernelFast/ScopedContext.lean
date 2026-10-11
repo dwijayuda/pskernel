@@ -148,14 +148,17 @@ theorem KExpr.liftBVars_structurallyValid
         ihArg cutoff depth hCutoff h.2⟩
   | lam name domain body style ihDomain ihBody =>
       exact ⟨ihDomain cutoff depth hCutoff h.1,
-        ihBody (cutoff + 1) (depth + 1) (by omega) h.2⟩
+        (by simpa only [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
+          (ihBody (cutoff + 1) (depth + 1) (by omega) h.2))⟩
   | forallE name domain body style ihDomain ihBody =>
       exact ⟨ihDomain cutoff depth hCutoff h.1,
-        ihBody (cutoff + 1) (depth + 1) (by omega) h.2⟩
+        (by simpa only [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
+          (ihBody (cutoff + 1) (depth + 1) (by omega) h.2))⟩
   | letE name ty value body nondep ihTy ihValue ihBody =>
       exact ⟨⟨ihTy cutoff depth hCutoff h.1.1,
         ihValue cutoff depth hCutoff h.1.2⟩,
-        ihBody (cutoff + 1) (depth + 1) (by omega) h.2⟩
+        (by simpa only [Nat.add_assoc, Nat.add_comm, Nat.add_left_comm] using
+          (ihBody (cutoff + 1) (depth + 1) (by omega) h.2))⟩
   | lit _ => trivial
   | mdata tag inner ih =>
       exact ih cutoff depth hCutoff h

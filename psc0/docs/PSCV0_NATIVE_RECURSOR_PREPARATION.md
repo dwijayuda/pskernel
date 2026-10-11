@@ -24,7 +24,10 @@ recursive IR node, backend-specific recursion or host elaborator service is need
   Let values are passed as existing values, not recomputed inside recursive calls.
 - Fresh index/major locals cannot alias captured originals.
 - Keep safe whole-definition recursion direct. Do not lift unused recursive
-  hypotheses or proof/type computations.
+  hypotheses or proof/type computations. Traverse application operands using
+  the callee telescope, skipping erased domains before visiting their values.
+  Ps.Meta.TypeView is shared with erasure; it recovers existing annotations and
+  never acts as a substitute for official admission.
 - Nested helpers precede users, names are inaccessible and collision checked,
   and traversal/resource exhaustion refuses preparation.
 - Direct single-family recursors are the supported contract. Mutual and nested

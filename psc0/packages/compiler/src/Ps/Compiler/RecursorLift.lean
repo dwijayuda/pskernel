@@ -1,4 +1,5 @@
 import Ps.Meta.Recursor
+import Ps.Meta.TypeView
 import Ps.Elab.Refinement
 import Ps.Elab.Declaration
 
@@ -21,20 +22,8 @@ def psRecursorLiftContext (state : PsRecursorLiftState)
 
 def psRecursorLiftInfer (state : PsRecursorLiftState) (locals : PsLocalContext)
     (expr : PsExpr) : Except String PsExpr :=
-  (psInferType state.environment psMetaEmpty locals expr).mapError
+  (psExprTypeView state.environment locals expr).mapError
     (fun _ => "cannot infer recursor preparation type")
-
-def psRecursorLiftIsComputational (state : PsRecursorLiftState)
-    (locals : PsLocalContext) (expr : PsExpr) : Except String Bool := do
-  let type ← psRecursorLiftInfer state locals expr
-  let reduce := psWhnf state.environment psMetaEmpty locals
-  match reduce type with
-  | .sortE _ => return false
-  | _ =>
-    let sort ← psRecursorLiftInfer state locals type
-    match reduce sort with
-    | .sortE level => return psInferClosedLevelValue level != some 0
-    | _ => throw "recursor result is not a type"
 
 -- Walk newest-to-oldest so adding a capture's type discovers only earlier
 -- dependencies. Let locals become parameters, preserving their evaluated values.
@@ -101,40 +90,46 @@ def psRecursorLiftHelper (state : PsRecursorLiftState) (locals : PsLocalContext)
 -- Only a declaration's leading lambda telescope may reuse its recursion
 -- equation. Every nested computation has its own major and lexical captures.
 def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
-    (state : PsRecursorLiftState) (locals : PsLocalContext) (expr : PsExpr) :
+    (state : PsRecursorLiftState) (locals : PsLocalContext) (expr type : PsExpr) :
     Except String PsRecursorLiftResult := do
   match fuel with
   | 0 => throw "recursor preparation traversal budget"
   | fuel + 1 =>
+    if (← (psTypeViewIsErased state.environment locals type).mapError
+        (fun _ => "cannot classify recursor preparation type")) then
+      return { state, term := expr }
     match expr with
     | .lam name domain body binder =>
+      let .forallE _ _ typeBody _ := psWhnf state.environment psMetaEmpty locals type
+        | throw "lambda preparation requires a function type"
       let pushed := psLocalPushBinding locals name domain binder
       let result ← psRecursorLiftVisit fuel root (if root then pushed.id :: entryIds else entryIds)
         state pushed.context (psExprInstantiate1 body (.fvar pushed.id))
+        (psExprInstantiate1 typeBody (.fvar pushed.id))
       return { result with term := .lam name domain (psExprAbstractFVar pushed.id result.term) binder }
-    | .letE name type value body =>
-      let value ← psRecursorLiftVisit fuel false entryIds state locals value
-      let pushed := psLocalPushLet locals name type value.term
+    | .letE name domain value body =>
+      let value ← psRecursorLiftVisit fuel false entryIds state locals value domain
+      let pushed := psLocalPushLet locals name domain value.term
       let body ← psRecursorLiftVisit fuel false entryIds value.state pushed.context
-        (psExprInstantiate1 body (.fvar pushed.id))
-      return { body with term := .letE name type value.term (psExprAbstractFVar pushed.id body.term) }
+        (psExprInstantiate1 body (.fvar pushed.id)) type
+      return { body with term := .letE name domain value.term (psExprAbstractFVar pushed.id body.term) }
     | .proj name index value =>
-      let value ← psRecursorLiftVisit fuel false entryIds state locals value
+      let valueType ← psRecursorLiftInfer state locals value
+      let value ← psRecursorLiftVisit fuel false entryIds state locals value valueType
       return { value with term := .proj name index value.term }
     | .app .. =>
-      -- Do not transform a proof or type recursor merely because its proof
-      -- term contains computational intermediate expressions.
-      match psRecursorApplication state.environment expr with
-      | some _ =>
-        if !(← psRecursorLiftIsComputational state locals expr) then return { state, term := expr }
-      | none => pure ()
       let spine := psReduceAppView expr
-      let head ← psRecursorLiftVisit fuel false entryIds state locals spine.head
-      let arguments ← spine.args.foldlM (fun (acc : PsRecursorLiftState × List PsExpr) value => do
-        let result ← psRecursorLiftVisit fuel false entryIds acc.fst locals value
-        return (result.state, result.term :: acc.snd)) (head.state, [])
+      let headType ← psRecursorLiftInfer state locals spine.head
+      let head ← psRecursorLiftVisit fuel false entryIds state locals spine.head headType
+      let arguments ← spine.args.foldlM
+        (fun (acc : PsRecursorLiftState × PsExpr × List PsExpr) value => do
+          let .forallE _ domain body _ := psWhnf acc.fst.environment psMetaEmpty locals acc.snd.fst
+            | throw "application preparation requires a function type"
+          let result ← psRecursorLiftVisit fuel false entryIds acc.fst locals value domain
+          return (result.state, psExprInstantiate1 body result.term, result.term :: acc.snd.snd))
+        (head.state, headType, [])
       let state := arguments.fst
-      let term := psReduceApply head.term arguments.snd.reverse
+      let term := psReduceApply head.term arguments.snd.snd.reverse
       let some view := psRecursorApplication state.environment term | return { state, term }
       if !psRecursorUsesHypotheses state.environment view then return { state, term }
       let minors := view.fixedArgs.drop (view.info.numParams + 1)
@@ -152,7 +147,7 @@ def psRecursorLiftDeclarations (environment : PsEnvironment)
       match declaration with
       | .definitionDecl name levels type value =>
         let state : PsRecursorLiftState := { environment := acc.fst, owner := name, levels }
-        let lifted ← (psRecursorLiftVisit 4096 true [] state psLocalEmpty value).mapError
+        let lifted ← (psRecursorLiftVisit 4096 true [] state psLocalEmpty value type).mapError
           (fun message => message ++ " (in " ++ psNameToString name ++ ")")
         let rewritten := PsDeclaration.definitionDecl name levels type lifted.term
         let environment := { lifted.state.environment with

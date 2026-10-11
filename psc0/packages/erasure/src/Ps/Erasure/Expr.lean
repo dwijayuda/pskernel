@@ -1,5 +1,6 @@
 import Ps.Erasure.Recursion
 import Ps.CompilerIr.CheckTypes
+import Ps.Meta.TypeView
 
 structure PsErasureAppliedArguments where
   typeArgumentsRev : List PsVerifiedIrType
@@ -308,47 +309,8 @@ def psErasureCheckedTypeViewWithFuel
     (environment : PsEnvironment) (fuel : Nat)
     (localContext : PsLocalContext) (expr : PsExpr) :
     Except PsErasureError PsExpr :=
-  match fuel with
-  | Nat.zero => Except.error PsErasureError.fuelExhausted
-  | Nat.succ remaining =>
-      match expr with
-      | PsExpr.app fn argument =>
-          match psErasureCheckedTypeViewWithFuel environment remaining localContext fn with
-          | Except.error error => Except.error error
-          | Except.ok functionType =>
-              match psWhnf environment psMetaEmpty localContext functionType with
-              | PsExpr.forallE _ _ body _ =>
-                  Except.ok (psExprInstantiate1 body argument)
-              | _ => Except.error PsErasureError.unsupportedApplication
-      | PsExpr.lam name domain body binder =>
-          let pushed := psLocalPushBinding localContext name domain binder;
-          match psErasureCheckedTypeViewWithFuel environment remaining pushed.context
-              (psExprInstantiate1 body (PsExpr.fvar pushed.id)) with
-          | Except.error error => Except.error error
-          | Except.ok bodyType =>
-              Except.ok
-                (PsExpr.forallE name domain (psExprAbstractFVar pushed.id bodyType) binder)
-      | PsExpr.letE name type value body =>
-          let pushed := psLocalPushLet localContext name type value;
-          match psErasureCheckedTypeViewWithFuel environment remaining pushed.context
-              (psExprInstantiate1 body (PsExpr.fvar pushed.id)) with
-          | Except.error error => Except.error error
-          | Except.ok bodyType =>
-              Except.ok
-                (psExprInstantiate1 (psExprAbstractFVar pushed.id bodyType) value)
-      | PsExpr.proj typeName index target =>
-          match psErasureCheckedTypeViewWithFuel environment remaining localContext target with
-          | Except.error error => Except.error error
-          | Except.ok targetType =>
-              match psInferProjectionType environment psMetaEmpty localContext
-                  targetType typeName index target with
-              | Except.error _ => Except.error PsErasureError.unsupportedRuntimeTerm
-              | Except.ok type => Except.ok type
-      | _ =>
-          match psInferTypeWithFuel environment psMetaEmpty localContext
-              (Nat.succ remaining) expr with
-          | Except.error _ => Except.error PsErasureError.unsupportedRuntimeTerm
-          | Except.ok type => Except.ok type
+  (psExprTypeViewWithFuel environment fuel localContext expr).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
 
 def psErasureCheckedTypeView
     (environment : PsEnvironment) (localContext : PsLocalContext) (expr : PsExpr) :

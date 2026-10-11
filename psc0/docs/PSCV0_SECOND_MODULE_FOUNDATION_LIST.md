@@ -12,7 +12,7 @@ The functions are psListLength, psListIsEmpty, psListAny, psListReverseAcc, psLi
 
 ## Cheap acceptance
 
-The [fast compiler-only differential probe](../tools/abi/foundation-list-probe.mjs) exercises the **same generated PSCV0 JavaScript frontend** and the **same retained original PSC0 compiler** as the previously qualified first-module build. It parses both source kinds intentionally (new v7 ProofScript and old immutable Lean baseline as separate historical source type). It validates the v7 AST against the closed versioned source schema, then passes the reconstructed recipient-owned syntax directly to the retained compiler's unchanged elaboration/preparation path.
+The [reusable fast multi-module compiler differential](../tools/abi/compiler-source-differential.mjs) exercises the **same generated PSCV0 JavaScript frontend** and the **same retained original PSC0 compiler** as the previously qualified first-module build. It parses both source kinds intentionally (new v7 ProofScript and old immutable Lean baseline as separate historical source type). It validates the v7 AST against the closed versioned source schema, then passes the reconstructed recipient-owned syntax directly to the retained compiler's unchanged elaboration/preparation path.
 
 Compare exact canonical compiler-admission text, exact TypeScript 7 output and relevant source/target SHA-256 on both sides. Any disagreement is a **real conformance investigation**, not an invitation to weaken expected tests or silently choose the baseline Lean parser for v7 input. Run no independent PSKernel checker in this inexpensive inner loop. The explicit full compiler/checked-assurance gate remains later and has a different source identity.
 

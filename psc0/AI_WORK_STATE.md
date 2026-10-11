@@ -1,3 +1,21 @@
+# PSC0 AI WORK STATE — three v7-authored compiler modules, fast development only
+
+## Latest verified checkpoint — October 11, 2026
+
+**Current branch:** psc0/pscv0-compiler-fast-loop-v1. **Sole language reference:** exact PSCV0 v7 SHA-256 843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5. No backward-compatibility parser or historical language reference is required for new code.
+
+**New observed compiler-only CI:** [run 38131142962](https://github.com/dwijayuda/pskernel/actions/runs/38131142962), source commit 4c79d8854d453b27111e8675cd4240fc2de58112, **SUCCESS**. The one reusable [multi-module source manifest](pscv0-fast-candidates.json) qualified **both** alternate PSCV0 v7-authored source files against their unchanged historical Lean predecessor using exactly the same retained PSC0 compiler, generated v7 frontend and versioned recipient-owned AST schema. Source module: Ps.Foundation.Source, **two structure declarations**, 236 AST nodes, admission stream SHA 976e966131f71d2ab80aac725cd236be1790ca6538d11390202e1532b4269119, TS7 SHA 851d74e325381ee236632853296815c0d1f2e1f4630722bcf1bf68cfd2b47e77, both byte-identical to Lean baseline; 634ms compiler differential. List module: Ps.Foundation.List, **ten generic recursive definitions**, 4,882 AST nodes, admission SHA 88975c455e2d8a69d7123f0a320306c65897e0022fa90b3913eab2f946b0a7b6 and TS7 SHA efa2692bf423d9cbfb7115780d1e299db19a8ee431e4c63d7489ff05e6f37b9d, both byte-identical to Lean baseline; 7,680ms. Total multi-source compiler differential **8,318ms**, excluding CI provisioning/tool installation. **No independent kernel, kernel proof suite, checker conformance or new fixed-point cycle ran.**
+
+**Total bounded source migration evidence so far:** Ps.Syntax.Translate.ps remains the FIRST qualified real 20-module generated bridge candidate ([full Linux/Windows/RC4 run 38128357665](https://github.com/dwijayuda/pskernel/actions/runs/38128357665)); Source.ps and List.ps are SECOND and THIRD *separately checked source-product-equivalence candidates*, NOT selected into that full bridge. Do not aggregate their separate cheap results into a claim of three modules already self-hosting the current full compiler. The original Lean baselines are immutable and still selected outside the bounded first-module candidate.
+
+**Efficiency achieved:** fast compiler-only generated AST -> elaboration -> TS7 -> JS runtime step measured **1,411ms** compiler-process execution on [38131142962](https://github.com/dwijayuda/pskernel/actions/runs/38131142962), full two-module source differential **8,318ms**. Cached 20-module parser remains valid only if all source raw SHA-256 identities match the qualified artifact; any changed frontend source must fail with FAST_CACHE_STALE and require native compiler-source typecheck plus deliberate future regenerated self-host milestone. These are compiler development results; all release-time independent checking/verification obligations remain unchanged but are not executed by this loop.
+
+**Architectural improvement:** migration source candidates are chosen in [pscv0-fast-candidates.json](pscv0-fast-candidates.json) and validated by the ONE generalized [compiler-source-differential.mjs](tools/abi/compiler-source-differential.mjs). It is intended to replace obsolete module-specific test scripts to avoid duplicate logic and chase individual test quirks. Strict exact admissions and TS output compare unchanged. See [fast development design](docs/PSCV0_COMPILER_ONLY_FAST_DEVELOPMENT.md) and [Source candidate evidence](docs/PSCV0_THIRD_MODULE_FOUNDATION_SOURCE.md).
+
+**Next recommended compiler-only actions:** retire obsolete standalone List differential runner if safely replaced; extend candidate manifest to another useful source family only after verifying its dependency imports and typed environmental closure; build a source-graph-aware, cached preparation prefix for dependent compiler modules; improve v7 source readability/trivia/diagnostic origins without reintroducing older parser compatibility. Deliberately schedule full candidate compiler source authority/fixed-point requalification separately, and avoid independent kernel tests until explicitly requested.
+
+---
+
 # PSC0 AI WORK STATE — manifest-driven v7 compiler-only multi-source migration
 
 ## Current checkpoint (11 October 2026)

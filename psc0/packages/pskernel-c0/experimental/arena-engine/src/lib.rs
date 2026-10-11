@@ -28,6 +28,11 @@ pub enum Expr {
     Nat(Box<[u8]>), Str(Box<str>), MData(u64, ExprId),
     Proj { name: NameId, field: u32, target: ExprId },
 }
+/// A positive-only conversion hint, never a kernel rejection verdict.
+/// Unknown requires the full Lean-compatible conversion checker.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ConversionHint { Equal, Unknown }
+
 /// IDs must never escape their owner arena. A new arena invalidates every ID.
 #[derive(Default)]
 pub struct Arena {
@@ -187,6 +192,23 @@ impl Arena {
         memo.insert((id,depth),result);
         Ok(result)
     }
+    /// A conservative conversion precheck for an experimental engine.
+    /// It never decides non-equality: unequal normal forms may still be
+    /// definitionally equal through unsupported Lean reductions.
+    /// On an exhausted budget, return Unknown (never Equal).
+    pub fn conversion_hint(&mut self, left: ExprId, right: ExprId, fuel: usize) -> ConversionHint {
+        if left == right { return ConversionHint::Equal; }
+        let left_nf = match self.whnf_fragment(left, fuel) {
+            Ok(value) => value,
+            Err(_) => return ConversionHint::Unknown,
+        };
+        let right_nf = match self.whnf_fragment(right, fuel) {
+            Ok(value) => value,
+            Err(_) => return ConversionHint::Unknown,
+        };
+        if left_nf == right_nf { ConversionHint::Equal } else { ConversionHint::Unknown }
+    }
+
     /// Explicit-stack beta/zeta/metadata evaluator for the supported fragment.
     ///
     /// Each examined term node spends one unit from the caller's global budget.
@@ -345,6 +367,20 @@ mod tests {
             Expr::Lam { body, .. } => assert_eq!(a.get(*body), &Expr::BVar(4)),
             _ => panic!("expected lambda"),
         }
+    }
+
+    #[test] fn conversion_hint_never_claims_inequality() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let zero = a.level(Level::Zero);
+        let ty = a.intern(Expr::Sort(zero));
+        let body = a.intern(Expr::BVar(0));
+        let value = a.intern(Expr::Nat(vec![7].into_boxed_slice()));
+        let lam = a.intern(Expr::Lam { name:n, domain:ty, body, info:BinderInfo::Default });
+        let app = a.intern(Expr::App(lam,value));
+        assert_eq!(a.conversion_hint(app,value,10),ConversionHint::Equal);
+        assert_eq!(a.conversion_hint(app,ty,10),ConversionHint::Unknown);
+        assert_eq!(a.conversion_hint(app,value,1),ConversionHint::Unknown);
     }
 
 }

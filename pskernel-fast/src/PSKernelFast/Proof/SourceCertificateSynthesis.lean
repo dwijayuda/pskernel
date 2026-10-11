@@ -79,6 +79,7 @@ private theorem appCertificateAtRank
     SourceModelTyping params ρ ctx ac (.app fn arg)
       (body.instantiateBVar arg 0) (.app af aa) (ab.instantiate aa 0) := by
   have representable : ∃ level : ULevel, level.denote ρ = rank := by
+    clear hf
     induction rank with
     | zero => exact ⟨.zero, rfl⟩
     | succ n ih =>

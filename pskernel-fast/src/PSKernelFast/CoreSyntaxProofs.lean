@@ -36,6 +36,7 @@ theorem ULevel.validParams_sound (params : List KName) (level : ULevel)
         simpa [ULevel.validParams, Bool.and_eq_true] using h
       exact ⟨ihLeft both.1, ihRight both.2⟩
   | param name =>
+      change name ∈ params
       exact of_decide_eq_true (by simpa [ULevel.validParams] using h)
   | mvar name =>
       simp [ULevel.validParams] at h
@@ -70,6 +71,7 @@ theorem KExpr.validAt_sound (params : List KName) (depth : Nat)
     KExpr.StructurallyValid params depth expr := by
   induction expr generalizing depth with
   | bvar index =>
+      change index < depth
       exact of_decide_eq_true (by simpa [KExpr.validAt] using h)
   | fvar name =>
       simp [KExpr.validAt] at h

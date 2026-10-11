@@ -15,6 +15,6 @@ jobs:
       - name: Verify Rust toolchain
         run: rustc --version && cargo --version
       - name: Test independent indexed term engine
-        run: cargo test --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --locked
+        run: cargo test --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml
       - name: Static lint
         run: cargo clippy --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --all-targets -- -D warnings

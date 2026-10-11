@@ -1,3 +1,17 @@
+# PSC0 AI WORK STATE — model-first v7 source APP-04 printer implementation
+
+## 2026-10-11 source compiler milestone in progress
+
+**Validated model:** [run 38124512189](https://github.com/dwijayuda/pskernel/actions/runs/38124512189) **SUCCESS**, pinned Lean 4.35.0-rc4 commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; all **eight** abstract application-grouping theorems reported **no axioms**. This is a model, *not* the production compiler semantic preservation theorem.
+
+**Systematic architectural adjustment:** The goal is canonical `.ps` source (sole v7 grammar) → semantically faithful Lean projection → pinned Lean elaboration/checking. PSC0 need not implement a universal reverse `.lean`→`.ps` parser to self-host or prove its source transformations. The failed experimental reverse conversion for a grouped Lean head is retained as an **optional migration-tool gap**, not silently patched or used to require preservation of old source-language parsing behavior. The previously qualified first-module *bounded* source roundtrip remains valid on its original recorded source. This is an acceptance-contract clarification, not a waiver of source soundness or proof closure.
+
+**New portable production work (model branch, pending CI):** selected APP-04 application rendering in `Ps.Syntax.Pscv0.Surface.lean` is now a compositional, bounded traversal of nested `PsSyntaxTerm.app` source trees, parenthesizing non-atomic callee/argument subtrees; no special error-fallback on compound heads, flattened AST head, copied historical Lean parser, or kernel changes. `scripts/Pscv0App04CoreSmoke.lean` checks v7 PS canonicalization, compares source APP grouping, prints `(add 1) 2` from actual v7 `(add(1))(2)`, then hands the generated Lean theorem `grouped = 3` to the immutable RC4 toolchain. This is a typed positive correspondence gate as well as a syntax-ownership gate. Its exact compiled and generated test results have not yet been observed. The separate full generated JavaScript/Windows bridge still requires a new run after source changes.
+
+**Source authority and trust:** The model branch `psc0/pscv0-v7-app-model-v1` inherits primary `8213f02e`. The public compiler and kernel remain unchanged; no old `.ps` compatibility mode, executable plugin authority, release, 64-module migration, or C2/C3 requalification has occurred. Keep the source-only printer changes separate until RC4 native, actual generated JS and Windows validations are complete.
+
+---
+
 # PSC0 AI WORK STATE — APP-04 ownership model (new isolated research branch)
 
 ## 2026-10-11 abstract-model checkpoint

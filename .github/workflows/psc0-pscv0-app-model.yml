@@ -5,6 +5,8 @@ on:
       - psc0/pscv0-v7-app-model-v1
     paths:
       - 'psc0/test/pscv0/reference/ApplicationOwnershipModel.lean'
+      - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/Surface.lean'
+      - 'psc0/scripts/Pscv0App04CoreSmoke.lean'
       - '.github/workflows/psc0-pscv0-app-model.yml'
   workflow_dispatch:
 permissions:
@@ -26,6 +28,9 @@ jobs:
           persist-credentials: false
           sparse-checkout: |
             psc0/test/pscv0/reference
+            psc0/packages/syntax
+            psc0/packages/foundation
+            psc0/scripts
             psc0/docs/PSCV0_V7_APPLICATION_OWNERSHIP_MODEL.md
             psc0/PSCV0_LANGUAGE_REFERENCE.md
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
@@ -47,6 +52,30 @@ jobs:
             echo 'Unexpected model axiom dependency'; exit 1
           fi
           test "$(grep -c 'does not depend on any axioms' model-proof-output.txt)" -eq 8
+      - name: PSCV0-owned grouping parser and Lean RC4 correspondence
+        working-directory: psc0
+        env:
+          ELAN_TOOLCHAIN: leanprover/lean4:v4.35.0-rc4
+        run: |
+          set -euo pipefail
+          lake build PsSyntax PsFoundation
+          mkdir -p .lake/build/lib/lean/Ps/Syntax/Pscv0
+          for MODULE in Surface Read Commands TypePrint Module; do
+            lake env lean -o ".lake/build/lib/lean/Ps/Syntax/Pscv0/$MODULE.olean" "packages/syntax/src/Ps/Syntax/Pscv0/$MODULE.lean"
+          done
+          lake env lean --run scripts/Pscv0App04CoreSmoke.lean | tee dist-pscv0-app04-native.txt
+          lake env lean dist/pscv0-app04/grouped-proof.lean | tee dist/pscv0-app04/grouped-proof-result.txt
+          grep -F "'pscv0_app04_grouped_value' does not depend on any axioms" dist/pscv0-app04/grouped-proof-result.txt
+      - name: Retain generated v7 source and checked Lean projection
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-app04-native-${{ github.sha }}
+          path: |
+            psc0/dist-pscv0-app04-native.txt
+            psc0/dist/pscv0-app04/
+          if-no-files-found: warn
+          retention-days: 30
       - name: Retain reference model evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

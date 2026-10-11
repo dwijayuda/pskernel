@@ -48,7 +48,7 @@ private theorem imax_one_left (v : Nat) : numericImax 1 v = v := by
   cases v with
   | zero => rfl
   | succ n =>
-      simp [numericImax, Nat.max_succ_succ]
+      simp [numericImax, Nat.succ_max_succ]
 
 theorem smartIMax_denote (ρ : KName → Nat) (a b : ULevel) :
     (smartIMax a b).denote ρ =

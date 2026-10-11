@@ -220,3 +220,11 @@ The **next engineering boundary** is checked typing judgments and protected type
 - Next: isolate `InferOnly` and `FullyChecked` from the first real general typing rule, use actual checker-generated binder-sort witnesses and checked immutable environment identities, and run pinned independent official Lean positive/negative differential tests before any admission. Preserve architectural freedom (performance/correctness above legacy proof reuse).
 
 See [G4_DEPENDENT_SORT_EVIDENCE.md](G4_DEPENDENT_SORT_EVIDENCE.md) and the prior [G4_BINDER_EVIDENCE.md](G4_BINDER_EVIDENCE.md).
+
+## Policy-fenced follow-up qualification for dependent fragment — GREEN
+
+**Policy commit:** `24849e5fbacfaeeec60feafbdf4062668bb634dc`. The branch architecture policy now explicitly records that the new dependent Sort/bvar/Pi fragment is **restricted and certified** while general checked inference, checked environment, full DefEq, full Lean semantics and proof admission remain **false/unimplemented**.
+
+[GitHub Actions run 38115681187](https://github.com/dwijayuda/pskernel/actions/runs/38115681187), job `114399991374`, **completed success**: pinned Lean 4.35.0-rc4; import/syntactic-placeholder fence passed on 20 independently authored V3 Lean files; 49 Lake build jobs; all existing regression executables plus the restricted dependent Sort/Pi and checked-scope substitution cases passed. The policy commit did not change semantic source relative to its previously qualified `35ce306` implementation. A **document-only** update does not constitute a new semantic qualification, and the final branch HEAD may therefore be later than the last CI-covered code/policy commit.
+
+**Keep current next target:** independently specified and source-connected general typed local context, actual domain-sort validation, general `infer/check` with `InferOnly`/`FullyChecked` separation and typed DefEq. Do not promote restricted certificates to admission readiness or interpret the toy beta benchmark as a kernel performance result.

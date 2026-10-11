@@ -7,12 +7,18 @@ private def require (condition : Bool) (message : String) : IO Unit :=
 
 private def name (s : String) : KName := .str .anonymous s
 
-private def candidate (n : KName) (params : List KName) (type : KExpr)
+private def candidate (n : KName) (params : List KName) (ty : KExpr)
     (mode : SafetyMode := .safe) (kind : CandidateKind := .assumedAxiom)
     (body : Option KExpr := none) : CandidateRecord :=
-  { header := { name := n, levelParams := params, type := type,
-      safety := mode, kind := kind },
-    value? := body }
+  { header := {
+      name := n
+      levelParams := params
+      type := ty
+      safety := mode
+      kind := kind
+    }
+    value? := body
+  }
 
 private def expectError (expected : CatalogError)
     (result : Except CatalogError CandidateCatalog) : IO Unit := do

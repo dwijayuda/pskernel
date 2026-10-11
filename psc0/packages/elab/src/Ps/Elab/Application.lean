@@ -80,15 +80,25 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    let currentType := psWhnf current.context.environment current.context.metaContext
+      current.context.localContext current.type
     if positions.isEmpty && names.isEmpty then
       match expected with
       | some target =>
-        match psElabFinalizeExpected current (some target) with
-        | .ok result => return { result, pendingInstancesRev := pending }
-        | .error _ => pure ()
+        -- An unconstrained expected metavariable is not evidence that an
+        -- implicit Pi should be preserved as a polymorphic function value.
+        -- Insert its implicit arguments before constraining that expected type.
+        let targetType := psWhnf current.context.environment current.context.metaContext
+          current.context.localContext target
+        let preserve := match currentType, targetType with
+          | .forallE _ _ _ binder, .mvar _ => psBinderAcceptsExplicitArgument binder
+          | _, _ => true
+        if preserve then
+          match psElabFinalizeExpected current (some target) with
+          | .ok result => return { result, pendingInstancesRev := pending }
+          | .error _ => pure ()
       | none => pure ()
-    match psWhnf current.context.environment current.context.metaContext
-        current.context.localContext current.type with
+    match currentType with
     | .forallE name domain body binder =>
       let named := psElabTakeNamed name names
       let explicit := psBinderAcceptsExplicitArgument binder

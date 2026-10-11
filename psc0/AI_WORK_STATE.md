@@ -1,3 +1,9 @@
+# ABI abstract model checkpoint — 2026-10-11
+
+Nine transport-model theorems passed with zero axioms under Lean 4.35.0-rc4: [CI 38129094461](https://github.com/dwijayuda/pskernel/actions/runs/38129094461), proof commit `9bdc082e9051987141f37c0ffa24f281b47b5e03`. This proves abstract source-tree encode/decode preservation, owner/revision/invalid-constructor refusals, replay rejection and APP-04 grouping distinction. It does not prove the implementation of `tools/abi/transport.mjs` or complete compiler semantics. Production direct-AST bridge qualification remains separately tracked on `psc0/pscv0-v7-abi-v1` (run 38128357665); preserve exact branch/CI identities. Sole language reference: PSCV0 v7, no backward-compatibility mode.
+
+---
+
 # PSC0 AI WORK STATE — v7 closed AST ABI and generated compiler integration
 
 ## Latest milestone, October 11, 2026

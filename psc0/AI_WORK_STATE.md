@@ -25,10 +25,12 @@ the obsolete ValueRefs module were removed. The same composite gains eleven
 observations for closures, array persistence, numeric/Unicode behavior and
 borrowed operands followed by consuming argument expressions.
 
-Final cleanup changes the generated lazy-cell static to Rust's uppercase naming
-convention and omits redundant parentheses for atomic match scrutinees. It leaves
-the qualification inputs and thresholds unchanged; the final branch head must
-pass the same cloud workflow.
+Final implementation source **6a96dfccfdb66a868efb8b2ed9282f4953ff71b1**
+also passed [run 38176347485](https://github.com/dwijayuda/pskernel/actions/runs/38176347485),
+job 114579440804, with the same acceptance inputs and thresholds. Cleanup uses
+conventional uppercase lazy-cell statics and omits redundant atomic-match
+parentheses. The following evidence-only documentation commit does not change
+compiler sources, workflow, inputs or runtime behavior.
 
 See docs/PSCV0_NATIVE_RUST.md and docs/PSCV0_NATIVE_CODEGEN.md. Rust is qualified
 for the current pure, single-module runtime profile on Linux; this is not full

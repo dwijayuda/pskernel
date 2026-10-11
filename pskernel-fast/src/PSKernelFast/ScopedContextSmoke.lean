@@ -1,4 +1,6 @@
 import PSKernelFast.Substitution
+import PSKernelFast.DependentSortFragment
+import PSKernelFast.SortFragment
 
 namespace PSKernelFast.Core
 
@@ -164,6 +166,52 @@ def scopedContextSmoke : IO Unit := do
   match KExpr.instantiateTopScoped [u] 0 (.sort (.param v)) sortZero with
   | .error .malformedBody => pure ()
   | _ => throw <| IO.userError "undeclared level parameter bypassed preflight"
+
+  -- New proof-carrying DEPENDENT Sort/Pi formation (NOT a kernel admission).
+  let propDependent : KExpr :=
+    .forallE u (.sort .zero) (.bvar 0) .default
+  let propResult : ULevel := .imax (.succ .zero) .zero
+  require (propDependent.closedInput [] &&
+    inferClosedDependentSort [] propDependent == .ok propResult)
+    "dependent (forall P : Prop, P) failed sort inference"
+
+  let nestedDependent : KExpr :=
+    .forallE u (.sort .zero)
+      (.forallE v (.sort .zero) (.bvar 1) .default) .default
+  let nestedResult : ULevel :=
+    .imax (.succ .zero) (.imax (.succ .zero) .zero)
+  require (nestedDependent.closedInput [] &&
+    inferClosedDependentSort [] nestedDependent == .ok nestedResult)
+    "nested dependent Pi did not use the correct outer binder"
+
+  let polymorphicDependent : KExpr :=
+    .forallE u (.sort (.param u)) (.bvar 0) .default
+  let polymorphicLevel : ULevel :=
+    .imax (.succ (.param u)) (.param u)
+  require (inferClosedDependentSort [u] polymorphicDependent ==
+    .ok polymorphicLevel)
+    "symbolic universe parameter in dependent Pi was mishandled"
+
+  let oldFragment : KExpr :=
+    .forallE u (.sort .zero) (.sort (.succ .zero)) .default
+  require (inferClosedDependentSort [] oldFragment ==
+    inferClosedSortFragment [] oldFragment)
+    "new dependent Pi rule disagreed with prior certified Sort/Pi fragment"
+
+  let outOfScope : KExpr :=
+    .forallE u (.sort .zero) (.bvar 1) .default
+  require (inferClosedDependentSort [] outOfScope == .error .malformed)
+    "escaped de Bruijn index accepted by dependent fragment"
+  let missingLevel : KExpr :=
+    .forallE u (.sort (.param v)) (.bvar 0) .default
+  require (inferClosedDependentSort [u] missingLevel == .error .malformed)
+    "undeclared universe parameter accepted by dependent fragment"
+  let unsupportedLambda : KExpr :=
+    .lam u (.sort .zero) (.bvar 0) .default
+  require (inferClosedDependentSort [] unsupportedLambda == .error .unsupported)
+    "unsupported lambda was falsely reported as checked"
+  IO.println "PSKernel-Fast G4.3: certified dependent Sort/Pi fragment PASS"
+
   IO.println "PSKernel-Fast G4.3: checked-scope substitution rejection PASS"
 
   IO.println "PSKernel-Fast G4.3 substitution: capture-avoiding cases PASS"

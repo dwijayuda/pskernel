@@ -114,6 +114,8 @@ THEOREMS = {
     "PSKernelFast.Spec.taggedTrue_mem_typeOne",
     "PSKernelFast.Spec.taggedProp_mem_typeOne",
     "PSKernelFast.Spec.taggedSort_member_succ",
+    "PSKernelFast.Spec.modelOrderedPair_member_univ",
+    "PSKernelFast.Spec.modelGraph_member_successor_univ",
     "PSKernelFast.Spec.taggedPropPi_member_prop",
     "PSKernelFast.Spec.taggedPropPi_true_iff",
     "PSKernelFast.Spec.taggedPropPi_false_of_counterexample",

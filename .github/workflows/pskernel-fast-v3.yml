@@ -55,6 +55,7 @@ jobs:
           lake env lean src/PSKernelFast/Spec/ScopeReflection.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/GeneralPiScope.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/TypedSubstitution.lean >> /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/Erasure.lean >> /tmp/pskernel-fast-axioms.log
           cat /tmp/pskernel-fast-axioms.log
           python3 scripts/audit_axioms.py /tmp/pskernel-fast-axioms.log
       - name: Run fail-closed representation tests

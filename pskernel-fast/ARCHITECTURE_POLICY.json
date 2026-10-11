@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G4.3b-restricted-Pi-lambda-exact-app-let-output-scope-certified-no-admission",
+    "stage": "P1-independent-context-and-output-scope-metatheory-proved-no-denotational-consistency",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -78,7 +78,20 @@
     "fragmentUsesExactSyntacticConversionOnly": true,
     "typedSubstitutionPreservationProved": false,
     "typedWHNFImplemented": false,
-    "typedDefEqImplemented": false
+    "typedDefEqImplemented": false,
+    "p0SoundnessModelContractPublished": true,
+    "p1IndependentContextScopeProved": true,
+    "p1ExecutingTypingRulesPreserveSourceAndOutputScopeProved": true,
+    "p1ContextFormationImpliesIndependentScopeProved": true,
+    "p1ExecutableScopePreflightReflectionProved": true,
+    "p1MalformedResultProvablyUnreachable": true,
+    "p1SuccessCertifiedReturnSameTypeProved": true,
+    "p1ReviewedTheoremAssumptionCount": 7,
+    "p1AssumptionAuditCloudValidated": true,
+    "p1TypedSubstitutionPreservationProved": false,
+    "p1DenotationalSetModelEstablished": false,
+    "p1CheckedInferenceSemanticSoundnessProved": false,
+    "p1RelativeConsistencyProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -90,9 +103,11 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38116916150",
-    "jobId": 114403520665,
-    "scope": "54 native Lake build jobs, 22 independent Lean sources audited, G1–G4.3b focused suites including general-domain Pi/lambda/exact-app/restricted-let, fragment-rule theorem and output-scope certificates. No G4.4 WHNF/DefEq, full checked kernel or admission."
+    "validatedSourceCommit": "b0a1c6503f12d1dbd5a8c6905be193d91f20f6d6",
+    "checkedProofSourceCommit": "6611504268816d87c2ac5546ef0c52a73247002b",
+    "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38118786036",
+    "jobId": 114409045221,
+    "scope": "60 native Lake build jobs, 25 independent Lean files audited; independent context scope and G3 scope reflection, six G4.3b rule structural closure, actual successful-result scope, unreachable malformedResult, certified success parity; 7 theorem-axiom receipts pinned to propext/Classical.choice/Quot.sound. No typed substitution, model interpretation, consistency, G4.4 WHNF/DefEq or theorem admission."
   }
 }

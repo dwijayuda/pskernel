@@ -185,7 +185,51 @@ theorem eraseExpr_instantiate (ρ : KName → Nat)
   | mdata _ _ _ => rfl
   | proj _ _ _ _ => rfl
 
+
+/--
+The actual beta redex and its actual contracted body translate to the
+SAME independent erased redex and erased contraction, respectively.
+This is the source-to-semantic-syntax bridge for a future beta-model lemma,
+NOT itself a proof of equal set-theoretic denotations.
+-/
+theorem eraseExpr_beta_redex (ρ : KName → Nat)
+    (name : KName) (domain body arg : KExpr) (style : BinderStyle)
+    (d b a : ErasedExpr)
+    (hD : eraseExpr ρ domain = some d)
+    (hB : eraseExpr ρ body = some b)
+    (hA : eraseExpr ρ arg = some a) :
+    eraseExpr ρ (.app (.lam name domain body style) arg) =
+      some (.app (.lam d b) a) ∧
+    eraseExpr ρ (body.instantiateBVar arg 0) =
+      some (b.instantiate a 0) := by
+  constructor
+  · simp [eraseExpr, hD, hB, hA]
+  · simpa [hB] using
+      (eraseExpr_instantiate ρ arg a hA body 0)
+
+/--
+The analogous bridge for precisely the supported nondep=false let path.
+The independent erased syntax has no name, style or nondep optimization
+metadata; the actual guard is checked at source typing and erasure.
+-/
+theorem eraseExpr_let_redex (ρ : KName → Nat)
+    (name : KName) (ty val body : KExpr)
+    (d v b : ErasedExpr)
+    (hD : eraseExpr ρ ty = some d)
+    (hV : eraseExpr ρ val = some v)
+    (hB : eraseExpr ρ body = some b) :
+    eraseExpr ρ (.letE name ty val body false) =
+      some (.letE d v b) ∧
+    eraseExpr ρ (body.instantiateBVar val 0) =
+      some (b.instantiate v 0) := by
+  constructor
+  · simp [eraseExpr, hD, hV, hB]
+  · simpa [hB] using
+      (eraseExpr_instantiate ρ val v hV body 0)
+
 #print axioms eraseExpr_lift
 #print axioms eraseExpr_instantiate
+#print axioms eraseExpr_beta_redex
+#print axioms eraseExpr_let_redex
 
 end PSKernelFast.Proof

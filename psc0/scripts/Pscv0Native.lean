@@ -7,7 +7,7 @@ private def run (paths : List String) (output? : Option String) : IO UInt32 := d
   let requests ← paths.toArray.mapM fun (path : String) => do
     if !path.endsWith ".ps" then
       throw (IO.userError "PSCV0-NATIVE-INPUT: expected .ps application input")
-    return { source := ← IO.FS.readFile (System.FilePath.mk path), emit := output?.isSome : Request }
+    return { source := ← IO.FS.readFile (System.FilePath.mk path), targets := if output?.isSome then [.typescript] else [] : Request }
   match ← runBatch requests with
   | .error error =>
       IO.eprintln (error.phase ++ ": " ++ error.message)
@@ -23,11 +23,23 @@ private def run (paths : List String) (output? : Option String) : IO UInt32 := d
         | .error _ => failed := true
         | .ok value =>
             if let some output := output? then
-              let some typescript := value.typescript
+              let some artifact := value.artifacts.head?
                 | throw (IO.userError "PSCV0-NATIVE-OUTPUT-MISSING")
               if let some parent := (System.FilePath.mk output).parent then
                 IO.FS.createDirAll parent
-              IO.FS.writeFile output typescript
+              IO.FS.writeFile output artifact.source.text
+              let symbols := artifact.symbols.map fun s => Lean.Json.mkObj [
+                ("semantic", toJson s.semanticName), ("output", toJson s.outputName)]
+              let ranges := artifact.source.ranges.map fun r => Lean.Json.mkObj [
+                ("output", toJson r.symbol), ("startByte", toJson r.startByte),
+                ("endByte", toJson r.endByte)]
+              IO.FS.writeFile (output ++ ".origins.json") (Lean.Json.mkObj [
+                ("schema", toJson ("pscv0-origins/1" : String)),
+                ("target", toJson (psEmissionTargetName artifact.target)),
+                ("kernel", toJson ("official-lean4-cpp" : String)),
+                ("leanCommit", toJson Lean.githash), ("profile", toJson profile),
+                ("coordinates", toJson ("utf8-bytes" : String)),
+                ("symbols", toJson symbols), ("ranges", toJson ranges)]).pretty
       return if failed then 1 else 0
 
 def main (args : List String) : IO UInt32 := do

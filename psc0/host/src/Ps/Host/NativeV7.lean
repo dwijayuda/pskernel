@@ -1,5 +1,6 @@
 import Ps.Compiler.Pscv0
-import Ps.BackendTs.Module
+import Ps.BackendTs.Readable
+import Ps.CompilerIr.Checked
 import PsKernelLean.Protocol
 import PsKernelLean.Prelude
 
@@ -8,7 +9,7 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/15"
+def profile : String := "pscv0-v7-native-bounded/16"
 
 def leanVersion : String := "4.35.0-rc4"
 def leanCommit : String := "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
@@ -20,7 +21,7 @@ structure Diagnostic where
 
 structure Request where
   source : String
-  emit : Bool := false
+  targets : List PsEmissionTarget := []
 
 structure Timings where
   parseMs : Nat := 0
@@ -32,7 +33,7 @@ structure Timings where
 
 structure Result where
   declarationCount : Nat
-  typescript : Option String
+  artifacts : List PsEmissionArtifact
   timings : Timings
 
 structure Batch where
@@ -75,22 +76,25 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   let timings : Timings := {
     parseMs := t1 - t0, elaborateMs := t2 - t1,
     prepareMs := t3 - t2, kernelMs := t4 - t3 }
-  if !request.emit then
+  if request.targets.isEmpty then
     return {
       declarationCount := output.prepared.declarations.length
-      typescript := none
+      artifacts := []
       timings := timings }
   -- Keep the same immutable prepared graph alive through checking and emission.
   -- Existing erasure validation is retained until profiling justifies changing it.
   let ir ← fromResult "erase"
     ((psCompilerVerifiedIrFromPrepared output.prepared).mapError psCompilerPscv0Error)
   let t5 ← IO.monoMsNow
-  let typescript ← fromResult "emit" ((psTsEmitModule ir).mapError
-    (fun _ => "PSCV0-TYPESCRIPT-EMISSION-FAILED"))
+  let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked =>
+    request.targets.mapM fun target =>
+      match target with
+      | .typescript => psTsEmitReadable checked
+      | .rust => .error "PSCV0-RUST: target not integrated")
   let t6 ← IO.monoMsNow
   return {
     declarationCount := output.prepared.declarations.length
-    typescript := some typescript
+    artifacts := artifacts
     timings := { timings with eraseMs := t5 - t4, emitMs := t6 - t5 } }
 
 -- A batch shares only the immutable checked prelude. Inputs remain independent:

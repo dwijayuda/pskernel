@@ -416,7 +416,7 @@ private def semanticCases : IO Unit := do
     { source := "inductive Bad: Nat -> Type where { | bad: Bad(0) }\nconst wrong: Bad(Nat.succ(0)) := Bad.bad\n" },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): Nat := match v with { | V.nil => 0 | V.cons k tail => bad(Nat.succ(k), tail) }\n" },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n), other: V(n)): Nat := match v with { | V.nil => 0 | V.cons k tail => bad(k, tail, other) }\n" },
-    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction captured(n: Nat, v: V(n)): Nat := V.rec(fun k value => Nat, n, fun k tail ih => ih, v)\n", emit := true },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction captured(n: Nat, v: V(n)): Nat := V.rec(fun k value => Nat, n, fun k tail ih => ih, v)\n", targets := [.typescript] },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): V(n) := match v with { | V.nil => V.nil | V.cons k tail => tail }\n" },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): Nat := match v with { | V.cons k tail => 0 }\n" },
     { source := "inductive Same: Nat -> Nat -> Type where { | same(n: Nat): Same(n, n) }\nfunction bad(n: Nat, value: Same(n, n)): Nat := match value with { }\n" },
@@ -493,7 +493,33 @@ private def semanticCases : IO Unit := do
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
   IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 50 phase-specific refusals, shared-prelude isolation"
 
+private def emissionBoundary : IO Unit := do
+  let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [
+    { name := "bad", typeParameters := [], parameters := [],
+      resultType := .primitive .nat, body := .literal (.bool true) }] }
+  match psWithCheckedIr psIrCheckDefaultOptions invalid (fun _ => .ok ()) with
+  | .ok _ => throw (IO.userError "invalid IR reached emission")
+  | .error message => unless message.startsWith "PSCV0-IR-CHECK:" do
+      throw (IO.userError message)
+  let state : PsCodegenNames := {}
+  let names := ["A.b", "A_b", "α", "normal"]
+  let (_, state) ← match (names.mapM psCodegenName).run state with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  unless (state.symbols.map (·.outputName)).eraseDups.length == names.length do
+    throw (IO.userError "target name collision")
+  unless state.symbols.any (fun s => s.semanticName == "α" && s.outputName == "α") do
+    throw (IO.userError "Unicode name lost before target naming")
+  let rendered ← match psRenderDoc (.origin "normal" (psDocBlock "function normal()" [.text "return 1;"])) with
+    | .ok value => pure value
+    | .error error => throw (IO.userError error)
+  unless rendered.text.contains '\n' && rendered.ranges.length == 1 &&
+      rendered.ranges.all (fun r => r.startByte <= r.endByte && r.endByte <= rendered.text.utf8ByteSize) do
+    throw (IO.userError "structured layout/origin range invalid")
+  IO.println "PSCV0_NATIVE_EMISSION_BOUNDARY: PASS invalid IR refusal, names and layout origins"
+
 def main : IO Unit := do
+  emissionBoundary
   parserCases
   semanticCases
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

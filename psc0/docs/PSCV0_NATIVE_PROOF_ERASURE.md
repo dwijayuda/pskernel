@@ -66,3 +66,7 @@ type arguments. Occurs and local-scope checks remain in the assignment store.
 The pinned [RC4 assignment checker](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Meta/ExprDefEq.lean)
 likewise checks candidate types. Match-specific universe reconciliation is no
 longer necessary and has been removed.
+
+Qualification correction: historical native runs used typed erasure but did not
+invoke the explicit shared IR checker in NativeV7. The codegen milestone wires
+that gate into production emission and qualifies it independently.

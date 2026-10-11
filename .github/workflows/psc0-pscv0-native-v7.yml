@@ -49,6 +49,7 @@ jobs:
             /psc0/packages/compiler-ir/src/
             /psc0/packages/erasure/src/
             /psc0/packages/compiler/src/
+            /psc0/packages/codegen/src/
             /psc0/packages/backend-ts/src/
             /psc0/packages/pskernel-lean/provider/
             /psc0/host/src/

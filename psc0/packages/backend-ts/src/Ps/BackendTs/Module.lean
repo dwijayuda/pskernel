@@ -1,4 +1,13 @@
 import Ps.BackendTs.Expr
+import Ps.Codegen.Names
+
+def psTsReservedNames : List String :=
+  ["break", "case", "catch", "class", "const", "continue", "debugger", "default",
+   "delete", "do", "else", "enum", "export", "extends", "false", "finally", "for",
+   "function", "if", "import", "in", "instanceof", "new", "null", "return", "super",
+   "switch", "this", "throw", "true", "try", "typeof", "var", "void", "while", "with",
+   "yield", "let", "static", "implements", "interface", "package", "private",
+   "protected", "public", "await", "arguments", "eval"]
 
 structure PsTsFreshNameResult where
   name : String
@@ -684,7 +693,7 @@ def psTsFlattenLines (groups : List (List String)) : List String :=
   | List.nil => List.nil
   | List.cons lines rest => psTsAppendLines lines (psTsFlattenLines rest)
 
-def psTsEmitModule
+def psTsEmitNamedModule
     (module : PsVerifiedIrModule) :
     Except PsTsEmitError String :=
   let brands := psTsBuildBrandMap module;
@@ -698,6 +707,12 @@ def psTsEmitModule
           match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
           | Except.error error => Except.error error
           | Except.ok declarations =>
-              let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];
+              let header : List String := ["// generated from ProofScript runtime IR; kernel provenance belongs to the caller", psTsRuntimeSupport];
               let lines := psTsFlattenLines [header, psListMap psTsEmitImport module.imports, psTsFlattenLines structures, psTsFlattenLines inductives, declarations];
               Except.ok (psTsJoin "" [psTsJoin "\n" lines, "\n"])
+
+-- Raw lowering API: naming is still required for all callers. Provider
+-- acceptance belongs to the host; the checked entry owns IR validation.
+def psTsEmitModule (ir : PsVerifiedIrModule) : Except PsTsEmitError String := do
+  let (view, _) ← (psCodegenNamesFor ir psTsReservedNames).mapError (fun _ => .fuelExhausted)
+  psTsEmitNamedModule view

@@ -1,3 +1,20 @@
+# Native codegen milestone A — implementation awaiting qualification
+
+The explicit IR gate is now wired into native emission. Earlier entries saying
+"typed IR validation" described typed erasure and TS integration but the previous
+NativeV7 host called the raw TS emitter without Ps.CompilerIr.Check. Those runs
+remain valid evidence for their actual kernel/TS/runtime checks, not that missing
+gate. The current change must earn new cloud qualification.
+
+Milestone A retains semantic names through erasure, creates a collision-free
+target naming view, adds a portable document printer and artifact/origin records,
+and renders TS declarations/structures with structured blocks. Full expression
+formatting, source-span/comment retention and source Lean/PS output remain later.
+See docs/PSCV0_NATIVE_CODEGEN.md. Rust integration follows this foundation.
+No pskernel-core, local checkout/build/tests or self-hosting are introduced.
+
+---
+
 # PSCV0 v7 native continuation — class and instance milestone
 
 The small milestone requested before adding Rust is complete. Development remains

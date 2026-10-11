@@ -84,6 +84,7 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.CheckTypes,
     `Ps.CompilerIr.CheckSize,
     `Ps.CompilerIr.Check,
+    `Ps.CompilerIr.Checked,
     `Ps.CompilerIr.Specialize
   ]
 
@@ -109,12 +110,17 @@ lean_lib PsCompiler where
     `Ps.Compiler.Pscv0
   ]
 
+lean_lib PsCodegen where
+  srcDir := "packages/codegen/src"
+  roots := #[`Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact]
+
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
+    `Ps.BackendTs.Readable,
     `Ps.BackendTs.Checked,
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,

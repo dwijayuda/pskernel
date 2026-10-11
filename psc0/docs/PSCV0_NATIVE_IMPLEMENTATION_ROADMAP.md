@@ -30,7 +30,7 @@ this development loop.
 | Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
 | Proofs and contracts | Term proofs checked by official Lean; selected logical primitives | Shared goal state, proof-producing tactic registry, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Term if-let, pattern-let, matches and inferred matrix results; selected Except do | General typed do and do-pattern sequencing, mutable/early-return/loop lowering, registered effect families |
-| Executable assurance | Checked prepared graph, typed IR validation, TS/JS integration | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
+| Executable assurance | Checked prepared graph, TS/JS integration; explicit shared IR gate wired in the codegen milestone | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
 | Portable source end state | Native portable authoring/import guard | Translate sufficient implemented closure to readable .ps, then explicit source/semantic/fixed-point qualification |
 
 ## Dependency-driven sequence

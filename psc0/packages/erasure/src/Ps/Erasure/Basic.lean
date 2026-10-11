@@ -404,57 +404,10 @@ def psErasurePrepareDeclarationEntries
           scope.runtimeStructures scope.runtimeStructureConstructors
           scope.runtimeExpressions scope.currentDefinition)
 
-def psErasureNatBetween (lower : Nat) (value : Nat) (upper : Nat) : Bool :=
-  if Nat.ble lower value then Nat.ble value upper else false
-
-
-def psErasureAsciiAlpha (char : Char) : Bool :=
-  let value := Char.toNat char;
-  if psErasureNatBetween 65 value 90 then true
-  else psErasureNatBetween 97 value 122
-
-
-def psErasureSafeChar (char : Char) : Char :=
-  if psErasureAsciiAlpha char then char
-  else if psErasureNatBetween 48 (Char.toNat char) 57 then char
-  else if Nat.beq (Char.toNat char) (Char.toNat '_') then char
-  else if Nat.beq (Char.toNat char) (Char.toNat '$') then char
-  else '_'
-
-def psErasureSafeChars (chars : List Char) : List Char :=
-  match chars with
-  | List.nil => List.nil
-  | List.cons char rest =>
-      List.cons (psErasureSafeChar char) (psErasureSafeChars rest)
-
-def psErasureSafeStringFromWithFuel (fuel : Nat) : String -> Nat -> String -> String :=
-  match fuel with
-  | Nat.zero => fun (_raw : String) (_position : Nat) (mapped : String) => mapped
-  | Nat.succ remaining =>
-      fun (raw : String) (position : Nat) (mapped : String) =>
-        let smaller : String -> Nat -> String -> String := psErasureSafeStringFromWithFuel remaining;
-        if String.Internal.atEnd raw (String.Pos.Raw.mk position) then mapped
-        else
-          let char := String.Internal.get raw (String.Pos.Raw.mk position);
-          let next := String.Pos.Raw.byteIdx (String.Internal.next raw (String.Pos.Raw.mk position));
-          smaller raw next (String.push mapped (psErasureSafeChar char))
-
-def psErasureSafeStringFrom (raw : String) (position : Nat) (mapped : String) : String :=
-  psErasureSafeStringFromWithFuel (Nat.succ (String.utf8ByteSize raw)) raw position mapped
-
-
-def psErasureSafeIdentifier
-    (raw : String)
-    (fallback : String) : String :=
-  let mapped := psErasureSafeStringFrom raw 0 "";
-  let base := if Nat.beq (String.Internal.length mapped) 0 then fallback else mapped;
-  if String.Internal.atEnd base (String.Pos.Raw.mk 0) then fallback
-  else
-    let first := String.Internal.get base (String.Pos.Raw.mk 0);
-    if psErasureAsciiAlpha first then base
-    else if Nat.beq (Char.toNat first) (Char.toNat '_') then base
-    else if Nat.beq (Char.toNat first) (Char.toNat '$') then base
-    else String.Internal.append "_" base
+-- Semantic identifiers retain their original spelling. Code generation owns
+-- target keywords, Unicode policy and collision-safe output names.
+def psErasureSafeIdentifier (raw fallback : String) : String :=
+  if raw.isEmpty then fallback else raw
 
 def psErasureLocalNameUsed (scope : PsErasureScope) (candidate : String) : Bool :=
   let localUses : (Nat × String) -> Bool :=
@@ -480,10 +433,7 @@ def psErasureLocalNameWithFuel
 
 def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Nat) : String :=
   let sanitized := psErasureSafeIdentifier raw fallback;
-  let base :=
-    if psStringEq sanitized "arguments" then "_arguments"
-    else if psStringEq sanitized "eval" then "_eval"
-    else sanitized;
+  let base := sanitized;
   let fuel := Nat.succ (Nat.add (psListLength scope.runtimeLocals) scope.declarationNames.count);
   if psStringEq base "_" then psErasureLocalNameWithFuel scope fallback fuel id
   else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""G4.4b exact receipts, using the existing fail-closed parser/allowlist.
+"""G4.4b/P1k exact receipts using the existing fail-closed parser/allowlist.
 
 The original 157-receipt gate runs separately and is unchanged. This stage
-adds six precisely enumerated receipts; it does not replace or weaken it.
+adds six operational and five model receipts; it does not replace it.
 """
 import pathlib
 import sys
@@ -15,6 +15,11 @@ NAMES = {
     "PSKernelFast.Core.compareTypedWH_positive",
     "PSKernelFast.Core.compareTypedWH_zero",
     "PSKernelFast.Core.JoinedCertificate.total_steps_bound",
+    "PSKernelFast.Spec.member_modelSeparation",
+    "PSKernelFast.Spec.universe_separation_closed",
+    "PSKernelFast.Spec.universe_no_surjection_from_member",
+    "PSKernelFast.Spec.universe_image_closed",
+    "PSKernelFast.Spec.modelGraph_member_same_univ",
 }
 
 if __name__ == "__main__":
@@ -25,5 +30,5 @@ if __name__ == "__main__":
         gate.test_fail_closed()
         gate.audit(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
     except ValueError as error:
-        raise SystemExit(f"G4.4b assumption audit FAILED: {error}")
-    print(f"G4.4b theorem-assumptions PASS: {len(NAMES)} exact additional receipts")
+        raise SystemExit(f"G4.4b/P1k assumption audit FAILED: {error}")
+    print(f"G4.4b/P1k theorem-assumptions PASS: {len(NAMES)} exact additional receipts")

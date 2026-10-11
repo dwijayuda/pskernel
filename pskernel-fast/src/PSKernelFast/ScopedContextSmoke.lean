@@ -11,6 +11,16 @@ private def expectFailure (result : Except ScopedError α)
   | .error actual => require (actual == error) "scope failure category changed"
   | .ok _ => throw <| IO.userError "malformed binder was unexpectedly stored"
 
+private def expectScopedDomain {params : List KName} {depth : Nat}
+    (result : Option {domain : KExpr //
+      KExpr.StructurallyValid params depth domain})
+    (expected : KExpr) : IO Unit :=
+  match result with
+  | none => throw <| IO.userError "certified binder domain was absent"
+  | some domain =>
+      require (domain.val == expected) "certified binder domain shifted incorrectly"
+
+/-- Runtime structural-only behavior; the type signature carries the proof. -/
 private def expectOk (result : Except ScopedError (AnyScopedFrame params)) :
     IO (AnyScopedFrame params) :=
   match result with
@@ -81,6 +91,19 @@ def scopedContextSmoke : IO Unit := do
   require (rawDomain == some (.bvar 0)) "scope fixture unexpectedly changed"
   require (((.bvar 0 : KExpr).liftBVars 1 0) == .bvar 1)
     "stored-domain reference lifting failed"
+
+
+  -- Every observed domain is shifted from its ORIGINAL parent context.
+  -- The returned subtype carries the actual current-depth scoping proof.
+  expectScopedDomain (c1.scopedDomainAt 0) (.sort (.param u))
+  expectScopedDomain (c2.scopedDomainAt 0) (.bvar 1)
+  expectScopedDomain (c2.scopedDomainAt 1) (.sort (.param u))
+  expectScopedDomain (c3.scopedDomainAt 0) (.bvar 2)
+  expectScopedDomain (c3.scopedDomainAt 1) (.bvar 2)
+  expectScopedDomain (c3.scopedDomainAt 2) (.sort (.param u))
+  require ((c3.scopedDomainAt 3).isNone)
+    "out-of-range certified binder lookup unexpectedly succeeded"
+  IO.println "PSKernel-Fast G4.3: scope-certified current-context lookup PASS"
 
   IO.println "PSKernel-Fast G4.3 lifting: scoped capture-avoidance tests PASS"
 

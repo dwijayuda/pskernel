@@ -56,6 +56,36 @@ theorem liftBVars_one_instantiate_cancel
   | proj name index inner ih =>
       simp [KExpr.liftBVars, KExpr.instantiateBVar, ih depth]
 
+/--
+Lifting any term by ZERO positions changes nothing, for every binder cutoff.
+This is an equality of the *actual* implementation, not a heuristic.
+-/
+theorem liftBVars_zero (expr : KExpr) (cutoff : Nat) :
+    expr.liftBVars 0 cutoff = expr := by
+  induction expr generalizing cutoff with
+  | bvar index =>
+      by_cases h : index < cutoff
+      · simp [KExpr.liftBVars, h]
+      · simp [KExpr.liftBVars, h]
+  | fvar _ => rfl
+  | mvar _ => rfl
+  | sort _ => rfl
+  | const _ _ => rfl
+  | app fn arg ihFn ihArg =>
+      simp [KExpr.liftBVars, ihFn cutoff, ihArg cutoff]
+  | lam name domain body style ihDomain ihBody =>
+      simp [KExpr.liftBVars, ihDomain cutoff, ihBody (cutoff + 1)]
+  | forallE name domain body style ihDomain ihBody =>
+      simp [KExpr.liftBVars, ihDomain cutoff, ihBody (cutoff + 1)]
+  | letE name ty val body flag ihTy ihVal ihBody =>
+      simp [KExpr.liftBVars, ihTy cutoff, ihVal cutoff,
+        ihBody (cutoff + 1)]
+  | lit _ => rfl
+  | mdata tag inner ih =>
+      simp [KExpr.liftBVars, ih cutoff]
+  | proj name index inner ih =>
+      simp [KExpr.liftBVars, ih cutoff]
+
 /-- The substitution result of a bound variable at depth zero is exact. -/
 theorem bound_zero_substitution_preserves_type
     (params : List KName) (ctx : List KExpr)
@@ -102,6 +132,7 @@ theorem dependent_identity_beta_preserves_type
   · simpa [KExpr.instantiateBVar] using valueTyped
 
 #print axioms liftBVars_one_instantiate_cancel
+#print axioms liftBVars_zero
 #print axioms bound_zero_substitution_preserves_type
 #print axioms dependent_identity_beta_preserves_type
 

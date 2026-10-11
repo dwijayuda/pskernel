@@ -54,15 +54,15 @@ inductive Domain where
 structure Packet where
   domain : Domain
   revision : Nat
-  syntax : Wire
+  wireTree : Wire
   deriving Repr, DecidableEq
 
 /-- A receiver changes the ownership label only after edition and source
 domain checks, and only after decoding a structurally accepted wire tree. -/
 def transfer (packet : Packet) : Option Packet :=
   if packet.domain == Domain.generated && packet.revision == 7 then
-    (decode packet.syntax).map fun syntax =>
-      { domain := .compiler, revision := 7, syntax := encode syntax }
+    (decode packet.wireTree).map fun value =>
+      { domain := .compiler, revision := 7, wireTree := encode value }
   else none
 
 theorem valid_source_preserved (source : Source) :

@@ -302,4 +302,49 @@ mod tests {
         }
     }
 
+    #[test] fn two_argument_beta_preserves_argument_order() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let zero = a.level(Level::Zero);
+        let t = a.intern(Expr::Sort(zero));
+        let inner_body = a.intern(Expr::BVar(1));
+        let inner = a.intern(Expr::Lam {
+            name: n, domain: t, body: inner_body, info: BinderInfo::Default
+        });
+        let outer = a.intern(Expr::Lam {
+            name: n, domain: t, body: inner, info: BinderInfo::Default
+        });
+        let x = a.intern(Expr::Nat(vec![10].into_boxed_slice()));
+        let y = a.intern(Expr::Nat(vec![20].into_boxed_slice()));
+        let first = a.intern(Expr::App(outer, x));
+        let both = a.intern(Expr::App(first, y));
+        assert_eq!(a.whnf_fragment(both, 12), Ok(x));
+    }
+
+    #[test] fn inert_head_does_not_allocate_another_application() {
+        let mut a = Arena::new();
+        let f = a.intern(Expr::BVar(0));
+        let x = a.intern(Expr::BVar(1));
+        let app = a.intern(Expr::App(f, x));
+        let before = a.count();
+        assert_eq!(a.whnf_fragment(app, 3), Ok(app));
+        assert_eq!(a.count(), before);
+    }
+
+    #[test] fn under_binder_substitution_shifts_outer_variables() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let ty = a.intern(Expr::BVar(0));
+        let target = a.intern(Expr::BVar(1));
+        let body = a.intern(Expr::Lam {
+            name: n, domain: ty, body: target, info: BinderInfo::Default
+        });
+        let replacement = a.intern(Expr::BVar(3));
+        let reduced = a.instantiate1(body, replacement).unwrap();
+        match a.get(reduced) {
+            Expr::Lam { body, .. } => assert_eq!(a.get(*body), &Expr::BVar(4)),
+            _ => panic!("expected lambda"),
+        }
+    }
+
 }

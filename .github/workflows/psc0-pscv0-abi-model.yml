@@ -1,0 +1,53 @@
+name: PSC0 PSCV0 v7 source AST transport abstract proof
+on:
+  push:
+    branches: [psc0/pscv0-v7-abi-model-v1]
+    paths:
+      - 'psc0/test/pscv0/reference/ASTTransportModel.lean'
+      - '.github/workflows/psc0-pscv0-abi-model.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: psc0/test/pscv0/reference
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: psc0/test/pscv0/reference
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/test/pscv0/reference
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Check all source AST interchange model proofs under exact Lean RC4
+        run: |
+          set -euo pipefail
+          lean --version | tee abi-lean-version.txt
+          grep -F '4.35.0-rc4' abi-lean-version.txt
+          grep -F 'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364' abi-lean-version.txt
+          lean ASTTransportModel.lean | tee abi-model-output.txt
+          test "$(grep -c 'does not depend on any axioms' abi-model-output.txt)" -eq 9
+          if grep -q 'depends on axioms:' abi-model-output.txt; then
+            echo 'An abstract AST transport theorem depends on an axiom'
+            exit 1
+          fi
+      - name: Retain separate model evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-abi-model-${{ github.sha }}
+          path: |
+            psc0/test/pscv0/reference/abi-lean-version.txt
+            psc0/test/pscv0/reference/abi-model-output.txt
+          if-no-files-found: warn
+          retention-days: 30

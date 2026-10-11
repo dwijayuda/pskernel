@@ -182,6 +182,7 @@ def GeneralPiContext.infer {params : List KName}
 
 inductive GeneralPiError where
   | malformed
+  | malformedResult
   | unsupported
   deriving Inhabited, Repr, BEq
 
@@ -218,5 +219,33 @@ theorem inferClosedGeneralPi_sound (params : List KName)
         exact ⟨KExpr.closedInput_sound params expr hv,
           hSame ▸ witness.property⟩
   · simp [inferClosedGeneralPi, hv] at h
+
+/--
+Stronger, FAIL-CLOSED closed-input/output gate for the executing fragment:
+successful inference must satisfy the actual input scope checker, the actual
+OUTPUT type scope checker, AND the independent fragment typing rules.
+
+This is not a verified general typing, DefEq or proof-admission API; it may
+return unsupported for Lean-valid expressions and has no checked environment.
+-/
+def inferClosedGeneralPiCertified (params : List KName) (expr : KExpr) :
+    Except GeneralPiError
+      { result : KExpr //
+          KExpr.StructurallyValid params 0 expr ∧
+          KExpr.StructurallyValid params 0 result ∧
+          GeneralPiRule params [] expr result } :=
+  if hInput : expr.closedInput params = true then
+    match inferGeneralPi (params := params) ([] : List KExpr)
+        (GeneralPiContextWF.empty (params := params)) expr with
+    | none => .error .unsupported
+    | some candidate =>
+        if hResult : candidate.val.closedInput params = true then
+          .ok ⟨candidate.val,
+            ⟨KExpr.closedInput_sound params expr hInput,
+             KExpr.closedInput_sound params candidate.val hResult,
+             candidate.property⟩⟩
+        else .error .malformedResult
+  else .error .malformed
+
 
 end PSKernelFast.Core

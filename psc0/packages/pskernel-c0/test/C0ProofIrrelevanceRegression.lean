@@ -99,6 +99,10 @@ def main : IO Unit := do
             (psKernelExprEqLegacy left right)
             (psKernelExprEq left right)) then
         throw (IO.userError "C0 paired expression equality mismatch")
+      if !(psKernelBoolEq
+            (psKernelExprEqualLegacy left right)
+            (psKernelExprEqual left right)) then
+        throw (IO.userError "C0 exact expression equality mismatch")
   IO.println "C0_PERF_REGRESSION paired_equality_semantics=pass"
 
 

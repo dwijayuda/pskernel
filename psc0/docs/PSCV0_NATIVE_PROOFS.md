@@ -43,4 +43,16 @@ prints proof syntax only; no compiler-source .ps conversion or self-host runs.
 Compact qualification extends the existing composite with proof-producing
 clients, nested scopes and four executable values. Six refusals protect holes,
 unsolved goals, bullet completion, reflexivity and the uniform application rule.
-Qualification remains pending until the native cloud workflow completes.
+The full native cloud workflow passed at 5d63d8962084a8df15f318610646f6d30ed42308,
+run 38178805422. Exact evidence is recorded in AI_WORK_STATE.md.
+
+
+## Logical prelude
+
+Connectives.lean adds checked definitions/inductives for And, Iff, Or, Exists
+and Not. And/Iff carry singleton eliminators and ordinary proof projections;
+Or/Exists retain Prop-only elimination. No axiom is added. Existing Core universe
+and recursor metadata represent these families without a separate proof calculus.
+The same native composite now checks construction, projections, existential
+witnesses, and independently introduced sibling goals; a negative case protects
+Or's large-elimination restriction. This extension awaits its exact cloud run.

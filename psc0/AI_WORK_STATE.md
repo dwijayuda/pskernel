@@ -1293,3 +1293,13 @@ rfl/constructor and focus/bullets. Proof terms are scoped against actual goal
 contexts, with the same source term parser and declaration/kernel pipeline.
 No host elaborator fallback or proof authority was added. The next integration
 extends this same state to all_goals/any_goals with failure rollback.
+
+
+## Shared proof control qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/20 at 5d63d8962084a8df15f318610646f6d30ed42308 passed
+[run 38178805422](https://github.com/dwijayuda/pskernel/actions/runs/38178805422), job 114586770796:
+28 parser cases, four accepted semantic programs, 60 phase-specific refusals,
+and 111 shared runtime observations in both targets. all_goals and any_goals
+reuse the same focused goal engine; failed any_goals branches roll back their
+constraint state. No source/compiler self-host qualification was performed.

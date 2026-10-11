@@ -64,6 +64,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.Instances,
     `Ps.Environment.Resolve,
     `Ps.Environment.Logic,
+    `Ps.Environment.Connectives,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.SelfHostProd

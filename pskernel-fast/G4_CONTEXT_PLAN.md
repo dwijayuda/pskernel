@@ -1,6 +1,6 @@
 # G4.3 planning gate — scoped contexts and real typed checking
 
-**Status:** independent G4.3 binder operations are structurally proved ([run 38115032789](https://github.com/dwijayuda/pskernel/actions/runs/38115032789)); a new **restricted dependent Sort/Pi fragment** with verified Sort-only contexts and an exact independent formation judgment passed [run 38115500178](https://github.com/dwijayuda/pskernel/actions/runs/38115500178). **General** dependent typing, type preservation, a protected checked environment, typed DefEq and proof admission remain unimplemented. Lean 4.35 pinned `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; old proof/API interfaces are not requirements.
+**Status:** G4.3 structural scope + substitution, restricted Sort-only dependent Pi, and the new **G4.3b general-domain Pi/lambda/exact-app/restricted-let fragment** have source-matched green CI in their bounded scopes. Latest [G4.3b evidence](G4_GENERAL_PI_EVIDENCE.md): [run 38116916150](https://github.com/dwijayuda/pskernel/actions/runs/38116916150), 54 build jobs. This is NOT a production checked kernel or a proof of type-preserving substitution. Exact Lean 4.35.0-rc4 source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; old PSKernel proof/API preservation remains non-binding.
 
 ## Validated bounded precursor
 
@@ -18,10 +18,10 @@ The G4.2 source can only infer types for syntactically Sort-shaped closed terms.
 
 ## Vertical implementation order
 
-1. **G4.3 structural foundation GREEN:** exact original-scope and lifted current-scope lookup, total capture-avoiding reference substitution, machine-checked structural preservation and strict malformed-input handling. [Evidence](G4_BINDER_EVIDENCE.md). Do not upgrade it to a typing result.
-2. **Partially GREEN:** `DependentSortFragment.lean` certifies `Sort`, bound variables and truly dependent `Pi` when every binder domain is syntactically `Sort u`. This is NOT general checked inference; see [exact CI](G4_DEPENDENT_SORT_EVIDENCE.md). **Next:** build an immutable, protected typed context for arbitrary checked domain expressions with actual sort observations and a full `Γ ⊢ e : A` judgment, keeping `InferOnly` and `FullyChecked` separate. Add lambda/application/let only with correct result-type substitution.
-3. Implement actual WHNF and **typed** DefEq with positive-soundness evidence and exact symbolic universes; use G2 evaluators as non-authoritative research references only.
-4. Create a protected immutable checked environment distinct from the untrusted candidate catalog. Only introduce atomic declaration admission after the full Lean kernel rule families, resource policies and required proofs/tests are qualified.
-5. Run pinned Lean 4.35 independent positive/negative differential tests from the first typed-rule slices, then realistic checker performance/memory benchmarks; defer full Init/Std/Mathlib until correct coverage justifies them.
+1. **GREEN:** structural binder context, exact source-context lifting, certified scope and capture-avoiding substitution ([binder evidence](G4_BINDER_EVIDENCE.md)).
+2. **GREEN in bounded research fragment:** Sort and dependent Pi over Sort-only contexts ([earlier evidence](G4_DEPENDENT_SORT_EVIDENCE.md)); G4.3b extends to well-formed general-domain Pi, lambda, application when arg type is **exactly** the Pi domain, and `nondep=false` let with exact declared-type agreement ([latest source/evidence](G4_GENERAL_PI_EVIDENCE.md)). The `GeneralPiContextWF` premise and `inferClosedGeneralPiCertified` output scope certificates cannot mint a production `FullyChecked` result or admit a theorem.
+3. **NEXT G4.4:** architect and prove sound positive typed WHNF/DefEq, exact Lean symbolic universe equality/`isGEq`, proof irrelevance and eta. Keep `unresolved` distinct from negative equality. Prove source-aligned application/let **typing substitution** and integration with actual checked context/environment identity before promotion.
+4. Build a protected immutable *checked* constant environment separate from the untrusted G4.1 catalog. Source-matched checked-vs-infer-only modes, opacity, axiom/model policy, recursive recursors/quotients and exact versioned primitive reductions precede any atomic declaration admission.
+5. Run actual Lean 4.35 official-positive AND negative differential conformance at each new typed rule; resource-graded behavior, realistic kernel-only time/RSS/allocations and later broader Init/Std/Mathlib. Do not label G4.4 completed based on the current syntactic-conversion fragment.
 
-Until these are met, the most advanced executable success is a **restricted Sort/bound-variable/dependent-Pi fragment over Sort-only contexts**, not a general-purpose Lean kernel.
+Until these are met, the most advanced qualified executable success is the **restricted G4.3b general-domain Pi/lambda/exact-application/let fragment**, not a general-purpose Lean kernel.

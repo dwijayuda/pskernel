@@ -12,6 +12,12 @@
       "expectedDeclarations": 2
     },
     {
+      "module": "Ps.Syntax.Token",
+      "source": "packages/syntax/src-ps/Ps/Syntax/Token.ps",
+      "baseline": "packages/syntax/src/Ps/Syntax/Token.lean",
+      "expectedDeclarations": 3
+    },
+    {
       "module": "Ps.Foundation.List",
       "source": "packages/foundation/src-ps/Ps/Foundation/List.ps",
       "baseline": "packages/foundation/src/Ps/Foundation/List.lean",

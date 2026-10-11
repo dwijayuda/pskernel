@@ -1,0 +1,11 @@
+# PSCV0 v7 — Token compiler-source migration candidate
+
+**Branch:** `psc0/pscv0-compiler-fast-loop-v1`. **State at first proposal:** authored v7 source, source-graph differential pending. **Sole language edition:** PSCV0 v7. No older .ps backward-compatibility mode.
+
+The retained `Ps.Syntax.Token` module imports `Ps.Foundation.Source` and contains the six-way `PsTokenKind` inductive declaration, `psTokenKindEq` with nested constructor-pattern matches, and the `PsToken` structure whose span field refers to `PsSourceSpan` from the imported Source module. The candidate [Token.ps](../packages/syntax/src-ps/Ps/Syntax/Token.ps) uses the selected v7 bracketed inductive/structure syntax, typed `function` declaration and v7 `match ... with { ... }` form. It is a conservative direct source translation, not a readability/performance claim.
+
+Unlike previously qualified `Source.ps` (structures only) and `List.ps` (generic recursion), Token tests a **genuine dependent compiler module** with an inductive, nested pattern matches and a field referencing a separately selected source. It remains unpromoted to the full generated frontend.
+
+The [Linux-only incremental graph](../tools/abi/compiler-graph.mjs) must parse both the retained Lean module and this actual current v7 .ps source with their intentionally distinct source-kind readers. All source imports and module positions are pinned to the same graph; the returned v7 syntax AST crosses the recipient-owned versioned ABI, then the retained compiler elaborates the complete ordered source graph. Seven scenarios now test the baseline and selected combinations of v7 Source, Token and List; all should yield **byte-identical canonical compiler admissions and TypeScript7 output**. One Linux TS7/Node runtime verifies list, token kinds and dependent cursors after product equality. No Windows runner or kernel/consistency test is run.
+
+An initial syntax or elaboration refusal must be investigated as a **general source grammar / source AST correctness issue**, not patched by weakening tests or selecting the original Lean source when Token.ps was chosen. This document deliberately claims **no passing result until that exact cloud CI is observed**.

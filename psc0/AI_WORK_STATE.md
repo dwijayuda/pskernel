@@ -1,3 +1,17 @@
+# PSC0 AI WORK STATE — Linux incremental graph passed; Token.ps source candidate
+
+## Active compiler-only development checkpoint — 11 October 2026
+
+**Development policy (user directive):** run **Linux only**. Do not start Windows CI or PSKernel/kernel proof/consistency tests. Windows support is a **static portability-pattern review only** and remains unverified by this branch. Retain separate checked-release gates but do not execute them in the fast compiler loop. PSCV0 v7 remains the sole prospective .ps grammar; no old language reference or compatibility mode.
+
+**Verified incremental source graph:** [Linux run 38133290733](https://github.com/dwijayuda/pskernel/actions/runs/38133290733), source 4e800e57478882616d4da28b3a88734cabdbad1e, **SUCCESS**. Four scenarios covering Ps.Foundation.Source, Ps.Syntax.Cursor, Ps.Syntax.Token and Ps.Foundation.List all produced the **same exact canonical compiler admission and TypeScript7 outputs**, with independent Linux TypeScript/JS runtime smoke. In-memory compiler preparation reused **6 out of 16 dependency preparation steps**, building **10 distinct states**, with **6 parsed source modules**; measured graph script elapsed time **31,209 ms**, excluding CI startup and cached artifact download. All 20 source closure hashes were rechecked before use. No independent kernel or Windows execution. This is a bounded compiler source dependency result, not a full compiler fixed point.
+
+**New candidate being tried:** fourth v7 .ps module [Ps.Syntax.Token.ps](packages/syntax/src-ps/Ps/Syntax/Token.ps), currently **unqualified**; it uses v7 inductive, nested constructor matches and structure grammar. It imports Source and therefore exercises the typed dependency semantics of the Linux compiler graph. [Source candidate plan](docs/PSCV0_TOKEN_V7_SOURCE_CANDIDATE.md). Updated [candidate registry](pscv0-fast-candidates.json) includes Token (3 declarations) alongside Source (2) and List (10). Updated [graph manifest](pscv0-fast-graph.json) adds Token-only, Source+Token and all-three-v7 combinations. The exact new Linux CI must show **seven scenarios with identical full compiler admission and TypeScript output**; do not claim qualification from a previous run.
+
+**Next:** check the generated frontend's actual v7 Token.ps parser and typed constructor-pattern handling under the fast Linux workflow. Any failure is an implementation/grammar boundary to diagnose against v7, not a reason to weaken tests or enable an older .ps source mode. If green, record source SHA/equality and explore v7 Cursor.ps (first lexical runtime source module with dependent Source). Keep the full 20-module generated bridge stable; no kernel build or Windows job.
+
+---
+
 # PSC0 AI WORK STATE — Linux-only incremental compiler preparation graph
 
 ## 11 October 2026 — active fast development milestone

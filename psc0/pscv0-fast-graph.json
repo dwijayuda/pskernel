@@ -35,6 +35,27 @@
         "Ps.Foundation.Source",
         "Ps.Foundation.List"
       ]
+    },
+    {
+      "name": "token-v7-only",
+      "v7Modules": [
+        "Ps.Syntax.Token"
+      ]
+    },
+    {
+      "name": "source-and-token-v7",
+      "v7Modules": [
+        "Ps.Foundation.Source",
+        "Ps.Syntax.Token"
+      ]
+    },
+    {
+      "name": "all-three-v7",
+      "v7Modules": [
+        "Ps.Foundation.Source",
+        "Ps.Syntax.Token",
+        "Ps.Foundation.List"
+      ]
     }
   ],
   "cachePolicy": "in-memory only; key includes fully ordered source prefix, source sha256, edition, pinned frontend and retained compiler; no serialized unchecked state",

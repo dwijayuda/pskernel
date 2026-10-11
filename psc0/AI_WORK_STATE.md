@@ -1322,3 +1322,14 @@ refusals and 111 shared runtime observations. One source precedence reader repla
 the previous arrow/matches-only tail. The source guard reports 110 portable and
 116 native modules. A prior compile failure used a reserved Lean identifier;
 that failed run supplies no semantic qualification.
+
+## Intermediate proof facts qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/23 at 960dcdaa1599797f359ba5560bf8e06f2c4e4d89 passed
+[run 38180641379](https://github.com/dwijayuda/pskernel/actions/runs/38180641379):
+348 fixture declarations, 28 parser cases, four accepted programs, 68 phase-specific
+refusals and 111 shared runtime observations; 113 portable and 119 native modules.
+Have/let preserve distinct elaboration reduction behavior, show selects goals with
+rollback, change checks conversion, and existential notation uses checked Exists.
+The same checks exposed and now cover shared natural computation and independent
+application-result propagation. No acceptance outcome was weakened.

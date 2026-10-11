@@ -1,4 +1,5 @@
 import Ps.Elab.Term
+import Ps.Meta.Inductive
 
 structure PsElabDeclarationBatchResult where
   declarations : List PsDeclaration
@@ -184,14 +185,19 @@ def psElabDataMinor (context : PsElabContext) (info : PsInductiveInfo)
 def psBuildInductiveRecursor (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
     (constructors : List PsDeclaration) : Except PsElabError PsDeclaration := do
-  let motiveUniverse := psNameAppendNum (psRootName "_motiveUniverse") 0
+  let large ← (psInductiveLargeElimination context.environment info).mapError PsElabError.infer
+  let some motiveUniverse := (List.range (info.levelParams.length + 1)).map
+      (psNameAppendNum (psRootName "_motiveUniverse")) |>.find?
+        (fun name => !(info.levelParams.any (psNameEq name)))
+    | throw (.data "cannot allocate motive universe")
+  let motiveLevel := if large then PsLevel.param motiveUniverse else .zero
   let parameters := psElabBinderArguments parameterBindersRev
   let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters
   let indexType ← psElabMatchApplyParameters context parameters info.type
   let indices ← psElabOpenCoreTelescope 4096 context indexType (some info.numIndices)
   let indexedFamily := psExprApplyMany family (psElabBinderArguments indices.bindersRev)
   let motiveType := psCloseElabForallBinders context.metaContext indices.bindersRev
-    (.forallE (psRootName "_major") indexedFamily (.sortE (.param motiveUniverse)) .explicit)
+    (.forallE (psRootName "_major") indexedFamily (.sortE motiveLevel) .explicit)
   -- Index locals are scoped inside the motive; keep their IDs fresh for minors.
   let outer := psElabLeaveScope context indices.context
   let motive := psLocalPushBinding outer.localContext (psRootName "_motive") motiveType .explicit
@@ -220,7 +226,9 @@ def psBuildInductiveRecursor (context : PsElabContext)
             [PsElabTypedBinder.mk major.id majorName majorType .explicit] body))))
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   return .recursorDecl {
-    name := psNameAppendStr info.name "rec", levelParams := motiveUniverse :: info.levelParams, type
+    name := psNameAppendStr info.name "rec"
+    levelParams := if large then motiveUniverse :: info.levelParams else info.levelParams
+    type
     inductiveNames := [info.name], numParams := info.numParams, numIndices := info.numIndices
     numMotives := 1, numMinors := constructors.length }
 
@@ -246,9 +254,7 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
     | some source => psElabType psElabTerm parameters.context source
   let indices ← psElabOpenCoreTelescope 4096 result.context result.type none
   match indices.body with
-  | .sortE level =>
-    if !psLevelAlwaysPositive (psLevelNormalize level) then
-      throw (.data "data family must end in a positive universe; Prop families are pending")
+  | .sortE _ => pure ()
   | _ => throw (.data "data family must end in a sort")
   let type := psCloseElabForallBinders result.context.metaContext parameters.bindersRev result.type
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable

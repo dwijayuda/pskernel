@@ -110,5 +110,7 @@ export const observations = [
   { name: "tacticShadowAnswer", args: null, expected: 212n },
   { name: "tacticMixedNat", args: null, expected: 213n },
   { name: "tacticMixedBool", args: null, expected: false },
+  { name: "proofFamilyAnswer", args: null, expected: 231n },
+  { name: "savedFactAnswer", args: null, expected: 218n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

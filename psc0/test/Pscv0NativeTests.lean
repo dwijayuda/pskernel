@@ -436,7 +436,24 @@ private def application : String :=
   "theorem termShow(n: Nat): n = n := show n = n by { rfl }\n" ++
   "theorem naturalComputation: Nat.mul(Nat.add(2, 3), Nat.sub(9, 7)) = 10 := by { rfl }\n" ++
   "theorem naturalDivision: Nat.div(7, 0) = 0 ∧ Nat.mod(7, 0) = 7 := by {\n  constructor\n  all_goals rfl\n}\n" ++
-  "theorem naturalComparison: Nat.beq(3, 3) = true ∧ Nat.ble(4, 3) = false := by {\n  constructor\n  all_goals rfl\n}\n"
+  "theorem naturalComparison: Nat.beq(3, 3) = true ∧ Nat.ble(4, 3) = false := by {\n  constructor\n  all_goals rfl\n}\n" ++
+  "namespace Predicates\n" ++
+  "inductive Evidence(P: Prop): Prop where { | intro(proof: P) }\n" ++
+  "theorem evidence(P: Prop, h: P): Evidence P := by {\n  constructor\n  assumption\n}\n" ++
+  "theorem recover(P: Prop, h: Evidence P): P := match h with { | .intro proof => proof }\n" ++
+  "function fixed(h: Evidence True): Nat := match h with { | .intro proof => 231 }\n" ++
+  "inductive Secret: Prop where { | hide(value: Nat) }\n" ++
+  "theorem secret(n: Nat): Secret := Secret.hide(n)\n" ++
+  "theorem secretTrue(h: Secret): True := match h with { | .hide value => True.intro }\n" ++
+  "inductive Choice(P: Prop, Q: Prop): Prop where { | left(proof: P) | right(proof: Q) }\n" ++
+  "theorem choose(P: Prop, Q: Prop, h: Choice(P, Q)): P ∨ Q := match h with { | .left hp => Or.inl(hp) | .right hq => Or.inr(hq) }\n" ++
+  "inductive Impossible: Prop where { }\n" ++
+  "function absurd(h: Impossible): Nat := nomatch h\n" ++
+  "inductive Indexed: Nat -> Prop where { | intro(n: Nat): Indexed(n) }\n" ++
+  "theorem indexed(n: Nat, h: Indexed(n)): True := match h with { | .intro m => True.intro }\n" ++
+  "end Predicates\n" ++
+  "const proofFamilyAnswer: Nat := Predicates.fixed(Predicates.Evidence.intro(True.intro))\n" ++
+  "const savedFactAnswer: Nat := savedFact(217)(1)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -524,7 +541,10 @@ private def semanticCases : IO Unit := do
     { source := "theorem bad: True := {\n  have x: Nat := 0\n  have h: x = 0 := by { rfl }\n  True.intro\n}\n" },
     { source := "theorem bad: True := by {\n  show False\n  constructor\n}\n" },
     { source := "theorem bad(n: Nat): exists {x: Nat}, x = n := by { constructor }\n" },
-    { source := "theorem bad: True := by {\n  have h: True := _\n  exact h\n}\n" }]
+    { source := "theorem bad: True := by {\n  have h: True := _\n  exact h\n}\n" },
+    { source := "inductive Hidden: Prop where { | mk(value: Nat) }\nfunction bad(h: Hidden): Nat := match h with { | .mk value => value }\n" },
+    { source := "inductive Choice: Prop where { | yes | no }\nfunction bad(h: Choice): Nat := match h with { | .yes => 0 | .no => 1 }\n" },
+    { source := "inductive Encoded: Nat -> Prop where { | mk(n: Nat): Encoded(Nat.succ(n)) }\nfunction bad(n: Nat, h: Encoded(n)): Nat := match h with { | .mk value => value }\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -541,7 +561,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -560,7 +580,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -589,7 +609,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 68 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 71 phase-specific refusals, shared-prelude isolation"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [

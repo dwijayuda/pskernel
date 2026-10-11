@@ -2051,8 +2051,32 @@ def psEraseCompleteSpecialWithFuel
                                 state.bindingsRev)
           | _ => Except.error PsErasureError.unsupportedApplication
 
--- Proof transports preserve the erased representation. Contradictory branches
--- become a typed unreachable node, retaining exhaustive runtime match shape.
+-- Metadata supplies the proof-recursion boundary for user families as well
+-- as the prelude. No constructor tag or proof value is retained at runtime.
+def psErasureProofRecursorEntry (environment : PsEnvironment) (name : PsName) :
+    Option PsErasureSpecialEntry := do
+  let info ← psEnvironmentFindRecursor environment name
+  let [familyName] := info.inductiveNames | none
+  let family ← psEnvironmentFindInductive environment familyName
+  let true ← (psInductiveIsProp environment family).toOption | none
+  if info.numMotives != 1 || info.numMinors != family.constructors.length then none else
+    return .mk (info.numParams + 1 + info.numMinors + info.numIndices + 1) false
+
+def psEraseRepresentationPreservingMinor
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (environment : PsEnvironment) (scope : PsErasureScope) (application minor : PsExpr) :
+    Except PsErasureError PsVerifiedIrExpr := do
+  let target ← psErasureCheckedTypeView environment scope.localContext application
+  let source ← psErasureCheckedTypeView environment scope.localContext minor
+  let sourceType ← psEraseRuntimeType environment scope source
+  let targetType ← psEraseRuntimeType environment scope target
+  if (psIrCheckTypeEqual 4096 sourceType targetType).toOption != some true then
+    throw .unsupportedRuntimeTerm
+  eraseAt scope minor
+
+-- Proof transports preserve the erased representation. Empty eliminators
+-- become typed unreachable nodes. General recursive proof elimination needs
+-- its own recursion lowering; it is never guessed from constructor count.
 def psEraseLogicalApplication
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (environment : PsEnvironment) (scope : PsErasureScope) (view : PsErasureAppView) :
@@ -2062,21 +2086,25 @@ def psEraseLogicalApplication
     let some target := view.args[0]? | throw .unsupportedApplication
     let type ← psEraseRuntimeType environment scope target
     return some (.unreachable type)
-  if psNameEq name (psNameAppendStr (psRootName "False") "rec") then
-    let type ← psErasureCheckedTypeView environment scope.localContext
-      (view.args.foldl PsExpr.app view.head)
+  let application := view.args.foldl PsExpr.app view.head
+  if psNameEq name (psNameAppendStr psEqName "rec") then
+    let some minor := view.args[3]? | throw .unsupportedApplication
+    return some (← psEraseRepresentationPreservingMinor eraseAt environment scope application minor)
+  let some recursor := psRecursorApplication environment application | return none
+  let proofFamily ← (psInductiveIsProp environment recursor.family).mapError
+    (fun _ => PsErasureError.unsupportedRuntimeTerm)
+  if !proofFamily then return none
+  match recursor.family.constructors with
+  | [] =>
+    let type ← psErasureCheckedTypeView environment scope.localContext application
     return some (.unreachable (← psEraseRuntimeType environment scope type))
-  if !psNameEq name (psNameAppendStr psEqName "rec") then return none
-  let some minor := view.args[3]? | throw .unsupportedApplication
-  let headType ← (psInferType environment psMetaEmpty scope.localContext view.head).mapError (fun _ => PsErasureError.unsupportedApplication)
-  let target ← psErasureApplyCoreType environment scope headType view.args
-  let source ← psErasureCheckedTypeView environment scope.localContext minor
-  let sourceType ← psEraseRuntimeType environment scope source
-  let targetType ← psEraseRuntimeType environment scope target
-  if (psIrCheckTypeEqual 4096 sourceType targetType).toOption != some true then
-    throw .unsupportedRuntimeTerm
-  let value ← eraseAt scope minor
-  return some value
+  | [constructorName] =>
+    let some constructor := psEnvironmentFindConstructor environment constructorName
+      | throw .unsupportedRuntimeTerm
+    if !constructor.recursiveFields.isEmpty then throw .unsupportedRuntimeTerm
+    let some minor := view.args[recursor.info.numParams + 1]? | throw .unsupportedApplication
+    return some (← psEraseRepresentationPreservingMinor eraseAt environment scope application minor)
+  | _ => throw .unsupportedRuntimeTerm
 
 def psEraseSpecialBoundary
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
@@ -2084,7 +2112,8 @@ def psEraseSpecialBoundary
     (view : PsErasureAppView) : Except PsErasureError (Option PsVerifiedIrExpr) :=
   match view.head with
   | PsExpr.constE name _ =>
-      match psErasureSpecialEntry scope name with
+      match (psErasureSpecialEntry scope name).orElse
+          (fun _ => psErasureProofRecursorEntry environment name) with
       | Option.none => Except.ok Option.none
       | Option.some entry =>
           let supplied := psListLength view.args;

@@ -170,7 +170,7 @@ lean_lib PsMeta where
     `Ps.Meta.Unify,
     `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer,
-    `Ps.Meta.TypeView
+    `Ps.Meta.Inductive, `Ps.Meta.TypeView
   ]
 
 lean_lib PsElab where

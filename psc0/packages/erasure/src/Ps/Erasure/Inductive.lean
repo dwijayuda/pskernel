@@ -382,8 +382,9 @@ def psPrepareRuntimeInductives
       Except.ok (PsPreparedInductivesResult.mk scope (psListReverse irRev))
   | List.cons declaration rest =>
       match declaration with
-      | .inductiveDecl info =>
-          if info.isStructure then
+      | .inductiveDecl info => do
+          let proofFamily ← (psInductiveIsProp environment info).mapError (fun _ => PsErasureError.unsupportedRuntimeTerm)
+          if info.isStructure || proofFamily then
             psPrepareRuntimeInductives
               environment
               declarations

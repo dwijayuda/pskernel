@@ -116,8 +116,9 @@ def psPrepareRuntimeStructures
       Except.ok (PsPreparedStructuresResult.mk scope (psListReverse structuresRev))
   | List.cons declaration rest =>
       match declaration with
-      | .inductiveDecl info =>
-          if info.isStructure then
+      | .inductiveDecl info => do
+          let proofFamily ← (psInductiveIsProp environment info).mapError (fun _ => PsErasureError.unsupportedRuntimeTerm)
+          if info.isStructure && !proofFamily then
             match
                 psPrepareRuntimeStructure
                   environment

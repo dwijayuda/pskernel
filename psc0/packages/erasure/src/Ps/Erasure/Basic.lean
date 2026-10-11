@@ -6,6 +6,7 @@ import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
 import Ps.Meta.Infer
+import Ps.Meta.Inductive
 import Ps.Meta.Reduce
 
 -- Persistent collision buckets accelerate lookup without changing name equality

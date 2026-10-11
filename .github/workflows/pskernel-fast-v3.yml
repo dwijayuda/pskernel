@@ -46,7 +46,7 @@ jobs:
           lake --version
           lake update
           # Fail fast on changed proof/runtime closures, reusing outputs below.
-          lake build PSKernelFast.Spec.AnnotatedSubstitution PSKernelFast.Proof.SourcePiModelBridge pskernel_fast_typed_normalization_smoke
+          lake build PSKernelFast.Proof.SourceSubstitutionModel pskernel_fast_typed_normalization_smoke
           lake build PSKernelFast.Spec.GraphUniverseClosure PSKernelFast.Spec.TaggedPropSemantics PSKernelFast.Proof.TaggedPropModelBridge PSKernelFast.Proof.TaggedWellDenoted PSKernelFast.Proof.SourceTaggedContextBridge PSKernelFast.TypedConversion pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke pskernel_fast_typed_conversion_smoke pskernel_fast_typed_conversion_bench
       - name: Audit exact theorem assumptions
         working-directory: pskernel-fast
@@ -103,6 +103,7 @@ jobs:
         run: |
           set -euo pipefail
           lake env lean src/PSKernelFast/Spec/AnnotatedSubstitution.lean | tee /tmp/pskernel-fast-p1n-axioms.log
+          lake env lean src/PSKernelFast/Proof/SourceSubstitutionModel.lean | tee -a /tmp/pskernel-fast-p1n-axioms.log
           python3 scripts/audit_annotated_substitution.py /tmp/pskernel-fast-p1n-axioms.log
       - name: Run fail-closed representation tests
         working-directory: pskernel-fast

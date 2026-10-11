@@ -63,6 +63,7 @@ def psCompilerPscv0ErasureError : PsErasureError → String
   | .unknownConstant name => "unknown constant " ++ psNameToString name
 
 def psCompilerPscv0Error : PsCompilerError → String
+  | .normalization message => "PSCV0-PREPARATION: " ++ message
   | .translation _ => "PSCV0-TRANSLATION-FAILED"
   | .leanFrontend _ => "PSCV0-LEAN-FRONTEND-FAILED"
   | .proofScriptFrontend _ => "PSCV0-FRONTEND-FAILED"

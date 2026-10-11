@@ -238,6 +238,13 @@ private def application : String :=
   "  | Vector.nil => other\n" ++
   "  | Vector.cons k head tail => Vector.cons(k, head, replace(k, tail, tail))\n" ++
   "}\n" ++
+  "function captured(n: Nat, values: Vector(Nat, n)): Nat := Vector.rec(fun k value => Nat, n, fun k head tail ih => ih, values)\n" ++
+  "function computedFold(seed: Nat, n: Nat): Nat := Nat.rec(fun k => Nat, seed, fun k ih => Nat.succ(ih), Nat.succ(n))\n" ++
+  "function localFold(seed: Nat, n: Nat): Nat :=\n" ++
+  "  let run: Nat -> Nat := fun m => Nat.rec(fun k => Nat, seed, fun k ih => Nat.succ(ih), m)\n" ++
+  "  run(n)\n" ++
+  "function nestedFold(n: Nat): Nat := Nat.rec(fun k => Nat, 0, fun k ih => Nat.rec(fun j => Nat, ih, fun j inner => Nat.succ(inner), k), n)\n" ++
+  "function capturedMap{A: Type}(n: Nat, values: Vector(A, n)): Vector(A, n) := Vector.rec(fun k value => Vector(A, k), Vector.nil, fun k head tail ih => Vector.cons(k, head, ih), values)\n" ++
   "end Indexed\n" ++
   "const indexedAnswer: Nat := Indexed.peek(Nat.succ(0), Indexed.one, 0)\n" ++
   "const indexedEmpty: Nat := Indexed.peek(0, Indexed.Vector.nil, 72)\n" ++
@@ -254,7 +261,12 @@ private def application : String :=
   "const zeroCaseAnswer: Nat := Indexed.zeroOnly(Indexed.Vector.nil)\n" ++
   "const trueCaseAnswer: Nat := Indexed.trueOnly(Indexed.Flag.yes)\n" ++
   "const boolCaseAnswer: Nat := Indexed.boolBranch(false)\n" ++
-  "const dependentRecursionAnswer: Nat := Indexed.head(1, Indexed.replace(2, Indexed.two, Indexed.two))\n"
+  "const dependentRecursionAnswer: Nat := Indexed.head(1, Indexed.replace(2, Indexed.two, Indexed.two))\n" ++
+  "const capturedFoldAnswer: Nat := Indexed.captured(2, Indexed.two)\n" ++
+  "const computedFoldAnswer: Nat := Indexed.computedFold(100, 3)\n" ++
+  "const localFoldAnswer: Nat := Indexed.localFold(100, 4)\n" ++
+  "const nestedFoldAnswer: Nat := Indexed.nestedFold(4)\n" ++
+  "const capturedMapAnswer: Nat := Indexed.head(1, Indexed.capturedMap(2, Indexed.two))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -323,7 +335,7 @@ private def semanticCases : IO Unit := do
       some "parse", some "elaborate", some "elaborate",
       some "parse", some "parse", some "parse",
       some "elaborate", some "elaborate", some "elaborate", some "elaborate",
-      some "elaborate", some "elaborate", some "erase", some "elaborate",
+      some "elaborate", some "elaborate", none, some "elaborate",
       some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
@@ -335,7 +347,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-DATA: constructor parameters must remain uniform",
     "PSCV0-DATA: indexed constructor requires a result type",
     "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH",
-    "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "PSCV0-ERASURE", "PSCV0-TYPE-MISMATCH",
+    "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "", "PSCV0-TYPE-MISMATCH",
     "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
@@ -363,7 +375,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 39 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 38 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

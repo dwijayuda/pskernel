@@ -1,4 +1,5 @@
 import Ps.Erasure.Basic
+import Ps.Meta.Recursor
 
 -- A root recursor can reuse the current function only when its varying locals
 -- are absent from all minors. Otherwise a recursive call would silently change
@@ -26,20 +27,17 @@ def psErasureRecursionParameter (scope : PsErasureScope) (expr : PsExpr) : Optio
 def psErasurePlanRecursion (scope : PsErasureScope) (family : PsName)
     (numParams : Nat) (major : PsExpr) (indices minors : List PsExpr) :
     Option PsErasureRecursionPlan := do
-  let (majorId, majorParameter) ← psErasureRecursionParameter scope major
+  let _ ← psRecursorVaryingLocals major indices minors
+  let (_, majorParameter) ← psErasureRecursionParameter scope major
   let positions ← (indices.zipIdx).mapM fun entry => do
     let (id, parameter) ← psErasureRecursionParameter scope entry.fst
     return (id, parameter, entry.snd)
-  let varying := majorId :: positions.map (fun entry => entry.fst)
-  if varying.eraseDups.length != varying.length then none else do
-    if minors.any (fun minor => varying.any (fun id =>
-        !(psExprAlphaEq minor (psExprAbstractFVar id minor)))) then none else
-      return {
-        family := family
-        numParams := numParams
-        numIndices := indices.length
-        majorParameter := majorParameter
-        indexParameters := positions.map (fun entry => entry.snd) }
+  return {
+    family := family
+    numParams := numParams
+    numIndices := indices.length
+    majorParameter := majorParameter
+    indexParameters := positions.map (fun entry => entry.snd) }
 
 def psErasureRecursiveCall (environment : PsEnvironment)
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)

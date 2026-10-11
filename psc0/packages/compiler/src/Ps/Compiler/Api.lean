@@ -3,12 +3,14 @@ import Ps.Bridge.CheckedAdmissions
 import Ps.Environment.SelfHostProd
 import Ps.Elab.Declaration
 import Ps.Erasure.Definition
+import Ps.Compiler.RecursorLift
 
 inductive PsCompilerSourceKind where
   | lean
   | proofScript
 
 inductive PsCompilerError where
+  | normalization (message : String)
   | translation (error : PsTranslationError)
   | leanFrontend (error : PsLeanFrontendError)
   | proofScriptFrontend (error : PsProofScriptFrontendError)
@@ -100,7 +102,9 @@ def psCompilerElaborateSource
 
 def psCompilerPrepareElaboratedWithOutput
     (elaborated : PsElabModuleResult) :
-    Except PsCompilerError PsCompilerPreparationOutput :=
+    Except PsCompilerError PsCompilerPreparationOutput := do
+  let elaborated ← (psRecursorLiftDeclarations elaborated.environment
+    elaborated.declarations).mapError PsCompilerError.normalization
   match
       psEncodeCheckedAdmissionsCanonical
         elaborated.declarations with

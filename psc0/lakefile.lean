@@ -102,6 +102,7 @@ lean_lib PsCompiler where
   roots := #[
     `Ps.Compiler,
     `Ps.Compiler.Api,
+    `Ps.Compiler.RecursorLift,
     `Ps.Compiler.Sh1,
     `Ps.Compiler.Pscv0
   ]
@@ -142,6 +143,7 @@ lean_lib PsMeta where
     `Ps.Meta.LevelContext,
     `Ps.Meta.Context,
     `Ps.Meta.Iota,
+    `Ps.Meta.Recursor,
     `Ps.Meta.Reduce,
     `Ps.Meta.Unify,
     `Ps.Meta.SynthInstance,

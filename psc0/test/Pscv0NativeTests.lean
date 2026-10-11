@@ -378,7 +378,7 @@ private def application : String :=
   "const largeNatural: Nat := 18446744073709551617\n" ++
   "const saturatedNatural: Nat := Nat.sub(1, 9)\n" ++
   "const zeroDivision: Nat := Nat.div(7, 0)\n" ++
-  "const unicodeLength: Nat := String.length(\"α🙂\")\n" ++
+  "const unicodeLength: Nat := String.Internal.length(\"α🙂\")\n" ++
   "const unicodeBytes: Nat := String.utf8ByteSize(\"α🙂\")\n"
 
 private def instanceProgram : String :=

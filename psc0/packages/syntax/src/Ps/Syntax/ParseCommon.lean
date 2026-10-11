@@ -77,7 +77,7 @@ def psSyntaxCompilerBind
     span
 
 def psParseSyntaxNameTailWithFuel
-    (fuel : Nat) :
+    (fuel : Nat) (adjacent : Bool) :
     List String ->
     PsSourcePos ->
     PsSourcePos ->
@@ -103,7 +103,7 @@ def psParseSyntaxNameTailWithFuel
             PsSourcePos ->
             List PsToken ->
             Except PsParseError (PsParseResult PsSyntaxName) :=
-          psParseSyntaxNameTailWithFuel remainingFuel;
+          psParseSyntaxNameTailWithFuel remainingFuel adjacent;
         match tokens with
         | List.nil =>
             Except.ok {
@@ -114,7 +114,7 @@ def psParseSyntaxNameTailWithFuel
               cursor := { remaining := List.nil }
             }
         | List.cons dot rest =>
-            if psStringEq dot.text "." then
+            if psStringEq dot.text "." && (!adjacent || dot.span.start.byteOffset == stop.byteOffset) then
               match rest with
               | List.nil =>
                   Except.error
@@ -124,7 +124,9 @@ def psParseSyntaxNameTailWithFuel
                       psTokenKindEq
                         next.kind
                         PsTokenKind.identifier then
-                    smaller
+                    if adjacent && next.span.start.byteOffset != dot.span.stop.byteOffset then
+                      Except.error (PsParseError.unexpectedEnd "adjacent qualified-name component")
+                    else smaller
                       (List.cons next.text segmentsRev)
                       start
                       next.span.stop
@@ -153,30 +155,25 @@ def psParseSyntaxNameTail
     (tokens : List PsToken) :
     Except PsParseError (PsParseResult PsSyntaxName) :=
   psParseSyntaxNameTailWithFuel
-    (Nat.add (psParseListLength tokens) 1)
+    (Nat.add (psParseListLength tokens) 1) false
     segmentsRev
     start
     stop
     tokens
 
-def psParseSyntaxName
-    (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult PsSyntaxName) :=
+def psParseSyntaxNameWith (adjacent : Bool)
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxName) :=
   match cursor.remaining with
   | [] => Except.error (PsParseError.unexpectedEnd "identifier")
   | token :: rest =>
-      if psTokenKindEq token.kind PsTokenKind.identifier then
-        psParseSyntaxNameTail
-          (List.cons token.text List.nil)
-          token.span.start
-          token.span.stop
-          rest
-      else
-        Except.error
-          (PsParseError.expectedKind
-            PsTokenKind.identifier
-            token.kind
-            token.span)
+    if psTokenKindEq token.kind PsTokenKind.identifier then
+      psParseSyntaxNameTailWithFuel (rest.length + 1) adjacent
+        [token.text] token.span.start token.span.stop rest
+    else .error (.expectedKind .identifier token.kind token.span)
+
+def psParseSyntaxName (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxName) :=
+  psParseSyntaxNameWith false cursor
 
 def psTokenCursorStartsNamedAssignment
     (cursor : PsTokenCursor) : Bool :=

@@ -182,6 +182,8 @@ def psElabMatchMatrix (elaborate : PsElaborator) (context : PsElabContext)
       | _ => false
   let inputs ← psElabPatternInputs elaborate context sources capture
   let result ← psElabPatternMatrix 4096 elaborate inputs.context inputs.columns rows expected
+  let instantiate := psMetaInstantiate result.context.metaContext
   let term := inputs.locals.foldr (fun (binder, value) body =>
-    .letE binder.name binder.type value (psExprAbstractFVar binder.id body)) result.term
-  return { context := psElabLeaveScope context result.context, term, type := expected }
+    .letE binder.name (instantiate binder.type) (instantiate value)
+      (psExprAbstractFVar binder.id body)) (instantiate result.term)
+  return { context := psElabLeaveScope context result.context, term, type := instantiate expected }

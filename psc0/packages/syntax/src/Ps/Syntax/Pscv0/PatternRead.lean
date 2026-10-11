@@ -43,10 +43,10 @@ def psPscv0PatternAtom (fuel : Nat) (cursor : PsTokenCursor) :
       return { value := .natural value token.span, cursor := read.cursor }
     if token.text == "." then
       let dot ← psTokenCursorExpectText cursor "."
-      let name ← psParseSyntaxName dot.cursor
+      let name ← psParseSyntaxNameWith true dot.cursor
       return { value := .ctor name.value [] (psSyntaxSpanJoin token.span name.value.span)
                cursor := name.cursor }
-    let name ← psParseSyntaxName cursor
+    let name ← psParseSyntaxNameWith true cursor
     return { value := if name.value.segments.length == 1 then .variable name.value
                       else .ctor name.value [] name.value.span
              cursor := name.cursor }

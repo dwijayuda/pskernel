@@ -226,104 +226,82 @@ def psKernelExprHash
           index)
         (psKernelExprHash body)
 
-inductive PsKernelExprMapIndex where
+/-
+PSKernel-C0 radix-16 cache index.
+
+One generic persistent trie replaces the two duplicated binary tries.  Four
+radix-16 levels index the existing bounded 16-bit expression hash.  Collisions
+remain in leaf buckets and are always resolved by structural expression
+equality; the hash is never an acceptance predicate.
+
+The small-entry fast path is preserved.  Each insertion path allocates at most
+four trie branches rather than sixteen.  Fixed-width child arrays reduce lookup
+branching overhead without requiring Std or external hash-table instances.
+-/
+
+inductive PsKernelC0HashTrie (α : Type) where
   | empty
-  | bucket
-      (entries :
-        List (Prod PsKernelExpr PsKernelExpr))
-  | branch
-      (left : PsKernelExprMapIndex)
-      (right : PsKernelExprMapIndex)
+  | bucket (entries : List α)
+  | branch (children : Array (PsKernelC0HashTrie α))
+
+def psKernelC0Radix : Nat := 16
+def psKernelC0IndexDepth : Nat := 4
+
+def psKernelC0TrieBucket {α : Type}
+    (fuel : Nat)
+    (index : PsKernelC0HashTrie α)
+    (hash : Nat) : List α :=
+  match fuel with
+  | Nat.zero =>
+      match index with
+      | PsKernelC0HashTrie.bucket entries => entries
+      | _ => []
+  | Nat.succ remaining =>
+      match index with
+      | PsKernelC0HashTrie.branch children =>
+          match children[hash % psKernelC0Radix]? with
+          | Option.some child =>
+              psKernelC0TrieBucket remaining child (hash / psKernelC0Radix)
+          | Option.none => []
+      | _ => []
+
+def psKernelC0TrieSet {α : Type}
+    (fuel : Nat)
+    (index : PsKernelC0HashTrie α)
+    (hash : Nat)
+    (entries : List α) : PsKernelC0HashTrie α :=
+  match fuel with
+  | Nat.zero => PsKernelC0HashTrie.bucket entries
+  | Nat.succ remaining =>
+      let children :=
+        match index with
+        | PsKernelC0HashTrie.branch values => values
+        | _ => Array.replicate psKernelC0Radix PsKernelC0HashTrie.empty
+      let slot := hash % psKernelC0Radix
+      let previous :=
+        match children[slot]? with
+        | Option.some value => value
+        | Option.none => PsKernelC0HashTrie.empty
+      let next :=
+        psKernelC0TrieSet remaining previous (hash / psKernelC0Radix) entries
+      PsKernelC0HashTrie.branch (children.set! slot next)
+
+abbrev PsKernelExprMapIndex :=
+  PsKernelC0HashTrie (Prod PsKernelExpr PsKernelExpr)
 
 def psKernelExprMapIndexBucket
-    (fuel : Nat) :
-    PsKernelExprMapIndex ->
-    Nat ->
-    List (Prod PsKernelExpr PsKernelExpr) :=
-  match fuel with
-  | Nat.zero =>
-      fun
-        (index : PsKernelExprMapIndex)
-        (_hash : Nat) =>
-        match index with
-        | PsKernelExprMapIndex.bucket entries =>
-            entries
-        | _ =>
-            List.nil
-  | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprMapIndex ->
-          Nat ->
-          List (Prod PsKernelExpr PsKernelExpr) :=
-        psKernelExprMapIndexBucket remaining;
-      fun
-        (index : PsKernelExprMapIndex)
-        (hash : Nat) =>
-        match index with
-        | PsKernelExprMapIndex.branch left right =>
-            if Nat.beq (Nat.mod hash 2) 0 then
-              smaller
-                left
-                (Nat.div hash 2)
-            else
-              smaller
-                right
-                (Nat.div hash 2)
-        | _ =>
-            List.nil
+    (fuel : Nat)
+    (index : PsKernelExprMapIndex)
+    (hash : Nat) : List (Prod PsKernelExpr PsKernelExpr) :=
+  psKernelC0TrieBucket fuel index hash
 
 def psKernelExprMapIndexSet
-    (fuel : Nat) :
-    PsKernelExprMapIndex ->
-    Nat ->
-    List (Prod PsKernelExpr PsKernelExpr) ->
+    (fuel : Nat)
+    (index : PsKernelExprMapIndex)
+    (hash : Nat)
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
     PsKernelExprMapIndex :=
-  match fuel with
-  | Nat.zero =>
-      fun
-        (_index : PsKernelExprMapIndex)
-        (_hash : Nat)
-        (entries :
-          List (Prod PsKernelExpr PsKernelExpr)) =>
-        PsKernelExprMapIndex.bucket entries
-  | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprMapIndex ->
-          Nat ->
-          List (Prod PsKernelExpr PsKernelExpr) ->
-          PsKernelExprMapIndex :=
-        psKernelExprMapIndexSet remaining;
-      fun
-        (index : PsKernelExprMapIndex)
-        (hash : Nat)
-        (entries :
-          List (Prod PsKernelExpr PsKernelExpr)) =>
-        let left : PsKernelExprMapIndex :=
-          match index with
-          | PsKernelExprMapIndex.branch value _ =>
-              value
-          | _ =>
-              PsKernelExprMapIndex.empty;
-        let right : PsKernelExprMapIndex :=
-          match index with
-          | PsKernelExprMapIndex.branch _ value =>
-              value
-          | _ =>
-              PsKernelExprMapIndex.empty;
-        if Nat.beq (Nat.mod hash 2) 0 then
-          PsKernelExprMapIndex.branch
-            (smaller
-              left
-              (Nat.div hash 2)
-              entries)
-            right
-        else
-          PsKernelExprMapIndex.branch
-            left
-            (smaller
-              right
-              (Nat.div hash 2)
-              entries)
+  psKernelC0TrieSet fuel index hash entries
 
 def psKernelCacheSmallLimit : Nat :=
   8
@@ -383,7 +361,7 @@ def psKernelExprMapGet
       psKernelExprMapGetIn
         expr
         (psKernelExprMapIndexBucket
-          16
+          psKernelC0IndexDepth
           index
           (psKernelExprHash expr))
 
@@ -420,7 +398,7 @@ def psKernelExprMapBuildIndex
     PsKernelExprMapIndex :=
   match entries with
   | List.nil =>
-      PsKernelExprMapIndex.empty
+      PsKernelC0HashTrie.empty
   | List.cons entry rest =>
       let index :=
         psKernelExprMapBuildIndex rest;
@@ -430,11 +408,11 @@ def psKernelExprMapBuildIndex
         psKernelExprHash key;
       let bucket :=
         psKernelExprMapIndexBucket
-          16
+          psKernelC0IndexDepth
           index
           hash;
       psKernelExprMapIndexSet
-        16
+        psKernelC0IndexDepth
         index
         hash
         (psKernelExprMapInsertIn
@@ -474,7 +452,7 @@ def psKernelExprMapInsert
         psKernelExprHash expr;
       let bucket :=
         psKernelExprMapIndexBucket
-          16
+          psKernelC0IndexDepth
           index
           hash;
       {
@@ -482,7 +460,7 @@ def psKernelExprMapInsert
         index :=
           Option.some
             (psKernelExprMapIndexSet
-              16
+              psKernelC0IndexDepth
               index
               hash
               (psKernelExprMapInsertIn
@@ -516,104 +494,22 @@ def psKernelExprPairHash
       (psKernelExprHash right))
     psKernelCacheHashModulus
 
-inductive PsKernelExprPairSetIndex where
-  | empty
-  | bucket
-      (entries :
-        List (Prod PsKernelExpr PsKernelExpr))
-  | branch
-      (left : PsKernelExprPairSetIndex)
-      (right : PsKernelExprPairSetIndex)
+abbrev PsKernelExprPairSetIndex :=
+  PsKernelC0HashTrie (Prod PsKernelExpr PsKernelExpr)
 
 def psKernelExprPairSetIndexBucket
-    (fuel : Nat) :
-    PsKernelExprPairSetIndex ->
-    Nat ->
-    List (Prod PsKernelExpr PsKernelExpr) :=
-  match fuel with
-  | Nat.zero =>
-      fun
-        (index : PsKernelExprPairSetIndex)
-        (_hash : Nat) =>
-        match index with
-        | PsKernelExprPairSetIndex.bucket entries =>
-            entries
-        | _ =>
-            List.nil
-  | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprPairSetIndex ->
-          Nat ->
-          List (Prod PsKernelExpr PsKernelExpr) :=
-        psKernelExprPairSetIndexBucket remaining;
-      fun
-        (index : PsKernelExprPairSetIndex)
-        (hash : Nat) =>
-        match index with
-        | PsKernelExprPairSetIndex.branch left right =>
-            if Nat.beq (Nat.mod hash 2) 0 then
-              smaller
-                left
-                (Nat.div hash 2)
-            else
-              smaller
-                right
-                (Nat.div hash 2)
-        | _ =>
-            List.nil
+    (fuel : Nat)
+    (index : PsKernelExprPairSetIndex)
+    (hash : Nat) : List (Prod PsKernelExpr PsKernelExpr) :=
+  psKernelC0TrieBucket fuel index hash
 
 def psKernelExprPairSetIndexSet
-    (fuel : Nat) :
-    PsKernelExprPairSetIndex ->
-    Nat ->
-    List (Prod PsKernelExpr PsKernelExpr) ->
+    (fuel : Nat)
+    (index : PsKernelExprPairSetIndex)
+    (hash : Nat)
+    (entries : List (Prod PsKernelExpr PsKernelExpr)) :
     PsKernelExprPairSetIndex :=
-  match fuel with
-  | Nat.zero =>
-      fun
-        (_index : PsKernelExprPairSetIndex)
-        (_hash : Nat)
-        (entries :
-          List (Prod PsKernelExpr PsKernelExpr)) =>
-        PsKernelExprPairSetIndex.bucket entries
-  | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprPairSetIndex ->
-          Nat ->
-          List (Prod PsKernelExpr PsKernelExpr) ->
-          PsKernelExprPairSetIndex :=
-        psKernelExprPairSetIndexSet remaining;
-      fun
-        (index : PsKernelExprPairSetIndex)
-        (hash : Nat)
-        (entries :
-          List (Prod PsKernelExpr PsKernelExpr)) =>
-        let left : PsKernelExprPairSetIndex :=
-          match index with
-          | PsKernelExprPairSetIndex.branch value _ =>
-              value
-          | _ =>
-              PsKernelExprPairSetIndex.empty;
-        let right : PsKernelExprPairSetIndex :=
-          match index with
-          | PsKernelExprPairSetIndex.branch _ value =>
-              value
-          | _ =>
-              PsKernelExprPairSetIndex.empty;
-        if Nat.beq (Nat.mod hash 2) 0 then
-          PsKernelExprPairSetIndex.branch
-            (smaller
-              left
-              (Nat.div hash 2)
-              entries)
-            right
-        else
-          PsKernelExprPairSetIndex.branch
-            left
-            (smaller
-              right
-              (Nat.div hash 2)
-              entries)
+  psKernelC0TrieSet fuel index hash entries
 
 structure PsKernelExprPairSet where
   small :
@@ -665,7 +561,7 @@ def psKernelExprPairSetContains
         left
         right
         (psKernelExprPairSetIndexBucket
-          16
+          psKernelC0IndexDepth
           index
           (psKernelExprPairHash left right))
 
@@ -675,7 +571,7 @@ def psKernelExprPairSetBuildIndex
     PsKernelExprPairSetIndex :=
   match entries with
   | List.nil =>
-      PsKernelExprPairSetIndex.empty
+      PsKernelC0HashTrie.empty
   | List.cons entry rest =>
       let index :=
         psKernelExprPairSetBuildIndex rest;
@@ -687,7 +583,7 @@ def psKernelExprPairSetBuildIndex
         psKernelExprPairHash left right;
       let bucket :=
         psKernelExprPairSetIndexBucket
-          16
+          psKernelC0IndexDepth
           index
           hash;
       if
@@ -698,7 +594,7 @@ def psKernelExprPairSetBuildIndex
         index
       else
         psKernelExprPairSetIndexSet
-          16
+          psKernelC0IndexDepth
           index
           hash
           (List.cons entry bucket)
@@ -741,7 +637,7 @@ def psKernelExprPairSetInsert
         psKernelExprPairHash left right;
       let bucket :=
         psKernelExprPairSetIndexBucket
-          16
+          psKernelC0IndexDepth
           index
           hash;
       if
@@ -756,7 +652,7 @@ def psKernelExprPairSetInsert
           index :=
             Option.some
               (psKernelExprPairSetIndexSet
-                16
+                psKernelC0IndexDepth
                 index
                 hash
                 (List.cons

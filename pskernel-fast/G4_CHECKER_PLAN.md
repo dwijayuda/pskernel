@@ -59,3 +59,9 @@ The next theorem must cover **typing-preserving application/let substitution**, 
 4. Introduce sealed `InferOnly` versus `FullyChecked` and immutable checked declaration environments under exact axiom/opacity/primitive policies. Run independent official Lean positive and negative typed differential fixtures and real kernel-only benchmarks before implementing admission.
 
 G3 [validated evidence](G3_EVIDENCE.md) and G2 [performance evidence](G2_EVALUATION_EVIDENCE.md) remain the exact documented baselines.
+
+## P1 bounded typed-substitution update — verified but not complete
+
+[Source/assumption-matched evidence](P1_TYPED_SUBSTITUTION_EVIDENCE.md) pins [green run 38120030487](https://github.com/dwijayuda/pskernel/actions/runs/38120030487), with 62 build jobs, 26 independent Lean modules, 15 theorem-assumption receipts. Real typing preservation is now proved for **dependent identity beta** and **variable-body let/zeta**, and checked variable weakening under one newly inserted binder is proved; all use actual `KExpr.instantiateBVar`/`liftBVars`. This does NOT provide general dependent type-preserving substitution or an executable full-kernel safety theorem.
+
+The next G4.4 proof gate must distinguish `equal` from `unresolved` and preserve denotation for actual typed positive WHNF/DefEq under the approved universe/env/axiom regime. Consider a model-directed semantic proof when cheaper than a complete intensional syntactic substitution development, as in [P0 contract](PSKERNEL_FAST_SOUNDNESS_CONTRACT_V1.md). Full mathematical denotation/consistency remains explicitly open.

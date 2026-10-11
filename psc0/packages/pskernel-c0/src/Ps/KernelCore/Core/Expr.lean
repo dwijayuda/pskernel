@@ -628,10 +628,18 @@ def psKernelExprListLength
   | List.cons _ rest =>
       Nat.succ (psKernelExprListLength rest)
 
+/-- Count application-spine arguments directly without allocating a list.
+    Tail-recursive accumulator keeps deep application spines cheap. -/
+def psKernelExprAppArityLoop
+    (expr : PsKernelExpr) (count : Nat) : Nat :=
+  match expr with
+  | PsKernelExpr.app fn _ =>
+      psKernelExprAppArityLoop fn (count + 1)
+  | _ => count
+
 def psKernelExprGetAppNumArgs
     (expr : PsKernelExpr) : Nat :=
-  psKernelExprListLength
-    (psKernelExprGetAppArgs expr)
+  psKernelExprAppArityLoop expr 0
 
 def psKernelTypeAnnotationOutParamName : PsKernelName :=
   PsKernelName.str PsKernelName.anonymous "outParam"

@@ -1,0 +1,23 @@
+{
+  "schema": "psc0-linux-v7-compiler-source-closure/1",
+  "status": "candidate-unqualified-until-cloud-linux-run-success",
+  "referenceSha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
+  "verifiedCachedFrontendSource": "a640a2d22adeabd4ca7919839a8991667bcc3eae",
+  "verifiedCachedFrontendRun": 38128357665,
+  "compilerOnly": true,
+  "linuxOnly": true,
+  "windows": "static-portability-pattern-only-not-executed",
+  "independentlyCheckedKernelTests": false,
+  "sourceAuthority": "sole-v7",
+  "selectedModules": [
+    "Ps.Foundation.Source",
+    "Ps.Syntax.Cursor",
+    "Ps.Syntax.Token",
+    "Ps.Syntax.Translate",
+    "Ps.Foundation.List"
+  ],
+  "sourceRegistry": "pscv0-fast-candidates.json",
+  "firstModuleAuthoring": "pscv0-authoring.json",
+  "expectedGeneratedCompilerClosureModules": 20,
+  "acceptance": "same full compiler canonical admissions, emitted TypeScript7, emitted JavaScript and Linux runtime as qualified first-module artifact; exact input/ABI/reference identities; no kernel checker"
+}

@@ -1,3 +1,98 @@
+# PSC0 AI WORK STATE — native indexed-data milestone
+
+## 12 October 2026 — indexed families through the checked native pipeline
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user requested continued implementation until a substantial milestone,
+keeping native `.lean`, clean extensible architecture and minimal tests, without
+pskernel-core or self-hosting. Work used GitHub source operations and Linux cloud
+CI only; no local checkout, builds, tests, kernel implementation edits or merges.
+
+### Implemented boundary
+
+Constructor result types are retained in the AST, visited after constructor
+fields during scope resolution, validated as annotations and preserved by both
+source printers. Family result telescopes introduce indices. Constructors must
+return their own family with all indices and unchanged uniform parameters;
+indexed constructors must state their result. Direct recursive fields carry
+their own indices, checked by the same family-application rule.
+
+A dedicated 259-line `Ps.Elab.Data` module replaces the approximately 980-line
+data block in general declaration elaboration. The binder module provides a
+bounded Core telescope opener retaining its terminal body, plus common binder
+closure operations. Data admission, constructor checking and recursor generation
+reuse these operations. A motive receives every index and then the major.
+Constructor conclusions and induction hypotheses instantiate that same motive.
+Existing nonindexed and selected nested-data behavior uses this path too.
+
+Ordinary exhaustive constructor matches now admit indexed families with constant
+result motives. Erasure removes indices from nominal runtime type arguments
+while preserving constructor runtime fields. Both special application completion
+and recursor lowering use one metadata-based arity calculation.
+Indexed runtime IH replacement is disabled: the old nonindexed optimization
+cannot accidentally reuse stale index arguments.
+
+Global references now instantiate declared universe parameters with fresh
+constraints resolved by arguments and expected types. This supports explicit
+polymorphic recursor use, including induction proofs. Source universe commands
+remain pending. Compiler diagnostics retain specific inference and erasure
+failure categories instead of discarding them.
+
+The implementation/source-documentation delta before this evidence entry is
+605 additions and 1,258 deletions across 22 files, or 653 net lines removed.
+The general declaration module is now about 615 lines. No host elaborator fallback,
+alternate kernel or generated compiler source was introduced.
+
+### Qualification
+
+**[Linux run 38159768970](https://github.com/dwijayuda/pskernel/actions/runs/38159768970) passed**
+at source `93ba44679ecce746ea1e64754baa597dbe3d76e8`, using native Lean 4.35.0-rc4
+(`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`), profile
+`pscv0-v7-native-bounded/7`.
+
+The unchanged 28 parser cases and existing three accepted semantic programs run
+in one process with a shared checked prelude. The composite now admits 99
+declarations, adding an indexed vector, a two-index cell, construction, exhaustive
+matches and a polymorphic indexed induction theorem that actually uses its
+recursive hypothesis. Four new rejection inputs cover nonuniform parameters,
+a missing indexed constructor result, a wrong result family and an index type
+mismatch. The compact batch has 32 phase-specific refusals.
+
+Native build, all official-kernel submissions, CLI emission, TypeScript 7.0.2
+compilation and JavaScript execution passed. The added runtime results are
+71, 72 and 73. The closure inventory has 71 portable and 77 native modules,
+with no pskernel-core dependency.
+
+Measured final cached source rebuild: 7,722 ms; unchanged build: 476 ms.
+CLI parsing took 4 ms, elaboration 2 ms, bridge preparation 5 ms, official
+kernel checking 6 ms, erasure 6 ms and emission 1 ms; prelude initialization
+took 1 ms. These are observations on the compact application, not a broad
+performance benchmark. Existing unrelated unused-name warnings remain.
+
+Four preceding bounded runs identified compilation corrections, missing global
+universe instantiation, and inconsistent recursor arity ownership. Those issues
+were resolved in the shared implementation paths; the final run above passed.
+The test set was not broadened during those corrections.
+
+### Remaining language work
+
+Dependent motive inference, contextual index refinement, impossible-case
+elimination and indexed structural/runtime recursion remain pending. Indexed
+recursive hypotheses work in checked proofs, as exercised here; they are not
+yet runtime recursion support. Families still end in `Type`; source universes
+and Prop families, mutual/indexed nested data, deriving, structure defaults and
+inheritance remain future work. The runtime backend retains its existing
+restrictions on erased/existential constructor fields and parameter kinds.
+Full imports/visibility, classes/instances, wider proof automation, contracts and
+other v7 milestones remain pending. No full-v7 or source-roundtrip claim.
+
+Main remains `748ee630e43ee1a89643cbc8cec3e31087788b08`; the M1 base remains
+`b4bd7e7d6c48443e56eaf96099515a29a83982bf`. PR #109 remains draft.
+The next commit records this evidence only. Older records below apply to their
+own exact commits.
+
+---
+
 # PSC0 AI WORK STATE — native v7 data declarations
 
 ## 11 October 2026 — shared v7 syntax for structures and inductives

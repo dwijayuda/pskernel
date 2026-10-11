@@ -32,6 +32,9 @@ type ascriptions and inference placeholders. Lambda binders can obtain their
 types from the expected Pi telescope. Positional and named calls share one
 ordered application engine with implicit insertion and pending instance solving.
 Scopes restore lexical visibility while preserving constraints and fresh IDs.
+Metavariable assignment checks the candidate's type and solves its universe
+constraints before recording a value. Inferred implicit type parameters and
+match results therefore use the same typed unifier.
 
 Ordered programs retain `namespace`, `section`, `end`, `open`, typed `variable`,
 `include` and `omit` commands. Namespace ancestors and opened namespaces are
@@ -54,7 +57,8 @@ needed, exactly one required `Unit` argument. A final `function f()` group lower
 to that required Unit binder.
 
 Basic owns inference/checking and global/projection lookup; Binders owns ordered
-telescopes and lexical scopes; Application owns argument consumption; Match owns motives, branches and recursor
+telescopes and lexical scopes; Application owns argument consumption; PatternMatrix
+owns ordered pattern specialization; Match owns motives, branches and recursor
 telescopes; Term owns term dispatch. Scope owns capture-aware syntax traversal
 and section dependencies; Command owns ordered scope transitions and declaration
 admission. All are portable source modules, without host elaborator imports.
@@ -146,8 +150,16 @@ expressions. Changing state uses the existing worker normalization, including
 state whose type depends on retained indices. The worker returns a function over
 that state. Invalid stale dependent arguments still fail.
 
-Runtime type applications omit family indices while constructor fields retain
-their runtime values. Equality transports erase only when source and target have
+Runtime type applications omit family indices. Stored constructor fields keep
+their original source/projection indices across erased proof fields. Checked
+constructor arity remains separate from runtime storage, including partial
+constructors and the recursor's field/IH boundary. Dependent structure proof
+fields are checked normally and store no payload.
+
+Computational functions accepting proofs retain ignored Unit call slots. This
+preserves the evaluation boundary of proof-guarded results and induction
+hypotheses while erasing proof payloads. Types, lambdas, declaration entries and
+calls share this convention. Equality transports erase only when source and target have
 the same checked runtime representation. Impossible branches become typed
 unreachable IR nodes, and Boolean recursors lower to conditionals.
 `Ps.Erasure.Recursion` derives recursive calls from actual majors and indices.
@@ -157,17 +169,35 @@ index/major parameters vary on recursive calls. Proofs and type computations
 are skipped. Every generated helper is part of the same checked prepared graph.
 See [the recursor design](../docs/PSCV0_NATIVE_RECURSOR_PREPARATION.md).
 
-Single-discriminant `nomatch` reuses empty match alternatives and the same
+The recursive pattern tree and multi-discriminant matrix share ordered row
+specialization and the same typed elimination engine. Nested constructors,
+tuples, natural literals, successor patterns, wildcard fallback and pattern
+bindings retain first-match behavior. Inaccessible aliases prevent cross-column
+capture and evaluate computed discriminants once. Later discriminants elaborate
+inside the earlier split's dependent refinement.
+
+Term-level `if let`, pattern `let` and `matches` lower to that matrix.
+If-let requires else and limits pattern names to the success branch. Pattern-let
+uses the same coverage check as a one-row match. Inferred result types use a
+shared scoped constraint; branch-local types cannot escape. Single- and
+multiple-discriminant `nomatch` reuse empty alternatives and the same
 coverage/equality solver. The prelude includes the RC4 empty inductive `Empty`.
 User-defined empty families and impossible indexed families follow the ordinary
 recursor path; eliminating `False` uses proof erasure and typed unreachable IR.
 
-Fixed-index matching with a major-dependent result/context, heterogeneous
-dependent index-constructor projections, nested/multiple patterns and multiple
-nomatch discriminants remain pending. Partial/non-lambda recursor minors are
-not yet a fully qualified runtime profile. Indexed structural recursion still
-requires distinct explicit local index parameters. Type/Prop constructor fields
-and runtime Type/Prop indices remain outside the data erasure profile.
+Fixed-index matching with a major-dependent result/context and heterogeneous
+dependent index-constructor projections remain pending. Joint contradictions
+that require splitting several otherwise feasible nomatch inputs, named
+discriminant equations, generalizing controls, inaccessible/as patterns and
+implicit constructor-pattern insertion remain outside the selected matrix
+profile. Root source recursion with multiple discriminants is pending.
+Partial/non-lambda recursor minors are not yet a fully qualified runtime profile.
+Indexed structural recursion still requires distinct explicit local index
+parameters. Type/existential constructor fields, non-type uniform parameters and
+runtime Type/Prop indices remain outside the data erasure profile.
+
+See [pattern matrices](../docs/PSCV0_NATIVE_PATTERN_MATRIX.md) and
+[proof erasure](../docs/PSCV0_NATIVE_PROOF_ERASURE.md) for the shared invariants.
 
 Data families still end in `Type`; universe/Prop families, deriving, structure
 field methods/defaults and inheritance remain pending. Lambda result annotations,

@@ -1,42 +1,93 @@
-# PSCV0 v7 native continuation — qualified pattern matrix and proof boundaries
+# PSCV0 v7 native continuation — pattern matrices and proof-carrying runtime data
 
-Current work remains on draft PR #109, native .lean authoring and Linux cloud CI.
-Canonical v7 remains the language target; this is bounded implementation progress.
+Development remains native .lean with official Lean RC4 checking and Linux cloud
+CI, on draft PR #109. The canonical v7 specification remains the target; this
+entry qualifies a bounded milestone, not complete language/project conformance.
 
-**Qualified source:** 9495643e8914fb76e7b3f6c627d92d00aacccabb,
-[run 38169325178](https://github.com/dwijayuda/pskernel/actions/runs/38169325178),
-profile 12. Native build and official Lean RC4 checking, 28 parser cases, four
-accepted semantic inputs / 42 phase-specific refusals, and strict TypeScript
-7.0.2 -> JavaScript all PASS. The composite contains 195 admitted declarations.
-Native build 8,318 ms; warm build 477 ms on that runner (not a benchmark guarantee).
+## Latest qualified implementation
 
-This continuation implemented captured/local/computed/nested recursor lifting
-through checked helper declarations, Empty and nomatch, recursive patterns,
-ordered nested/multiple-discriminant matrices, tuple/successor patterns,
-cross-column binding hygiene, nested indexed refinement and dependent later
-discriminants. Shared application inference inserts implicit parameters before
-solving an unknown expected type with a polymorphic head.
+Source **2b992051732b8f484995b91c934c7ccd37bcf663**,
+[run 38170141115](https://github.com/dwijayuda/pskernel/actions/runs/38170141115),
+profile **pscv0-v7-native-bounded/14**, all PASS:
+- Native Lean 4.35.0-rc4 build, commit c29b6dda4f7c20e3eeaa717c4e565663c5cfa364.
+- Official Lean admission of the 230-declaration application and compact isolated
+  semantic batch: four accepted inputs and 44 phase-specific refusals.
+- Existing 28 parser cases, actual CLI emission, typed IR validation, strict
+  TypeScript 7.0.2 compilation and emitted JavaScript execution.
+- Runtime checks include nested dependent tails, first-match priority, binding
+  hygiene, proof-guarded functions, pattern-derived terms and proof-field layouts.
+- Import guard: 83 portable modules / 89 native closure modules; pskernel-core
+  excluded. No compiler .ps generation, self-hosting or separate kernel suites.
 
-**Corrected erasure invariant:** prior notes below saying proof binders disappear
-from computational function representations are superseded. Proof payloads
-disappear, but an ignored Unit call slot preserves each proof-function boundary.
-Dropping it caused an unused, proof-guarded IH to be evaluated prematurely in
-nested indexed matching. Generated call-site evidence established the cause;
-uniform type/lambda/entry/call/completion handling fixed it. Two compact unused
-False -> Nat values and the nested indexed tail now run through TS/JS.
+Observed cached source rebuild: 9,355 ms; unchanged warm build: 433 ms.
+The emitted application took parse 14 ms, elaborate 14 ms, prepare 41 ms, official
+kernel 23 ms, erase 36 ms and emit 6 ms in that run. These are single-run
+observations, not general performance guarantees.
 
-Design records:
-- docs/PSCV0_NATIVE_RECURSOR_PREPARATION.md
-- docs/PSCV0_NATIVE_PATTERN_MATRIX.md
-- docs/PSCV0_NATIVE_PROOF_ERASURE.md
-- docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md
+Earlier qualified boundaries in this continuation:
+- Captured recursor preparation: source 97964cfc3c1dbc5b7c90a8ec8180cb98e00d2824,
+  [run 38166467810](https://github.com/dwijayuda/pskernel/actions/runs/38166467810), profile 10.
+- Empty/nomatch: source 7676965c1b78cce38df4acdb7410895949bf0331,
+  [run 38166881411](https://github.com/dwijayuda/pskernel/actions/runs/38166881411), profile 11.
+- Typed matrix and proof-function boundaries: source 9495643e8914fb76e7b3f6c627d92d00aacccabb,
+  [run 38169325178](https://github.com/dwijayuda/pskernel/actions/runs/38169325178), profile 12.
+- Pattern-derived terms/inferred results: source cc5b01740337d5e6a61c8b8e4c490790c1828fb3,
+  [run 38169695528](https://github.com/dwijayuda/pskernel/actions/runs/38169695528), profile 13.
 
-**Next source qualification pending:** shared if-let / pattern-let / matches
-lowering and inferred matrix results, profile 13. Do not inherit the profile 12
-receipt for these changes. Heterogeneous fixed-index major dependence, full
-pattern selection, multi-root source recursion, modules/classes/Standard,
-tactics/contracts and complete v7 remain outstanding. No pskernel-core,
-self-hosting, compiler .ps source generation, or kernel implementation changes.
+## Shared mechanisms and corrected invariants
+
+Captured/local/computed/nested runtime recursors are lifted to checked helper
+declarations. Dependency closure preserves captured values; fresh major/index
+parameters vary. Typed traversal skips proofs/types and the host checks the same
+prepared graph it emits.
+
+One recursive pattern tree and typed ordered matrix serves nested/multiple
+discriminants, tuple/Nat successor patterns, nomatch, if-let, pattern-let and
+matches. Branch continuation reuses Match/Refinement/Equality for motives,
+dependent-context transport, impossibility and coverage. Inaccessible aliases
+preserve cross-column binding hygiene and once-only computed discriminants.
+Constrained motives retain outer index scope until actual equality elimination;
+they do not rebind indices around dependent captured values.
+
+Proof data disappears, but proof parameters of computational functions retain
+ignored Unit call slots. **Earlier notes below claiming that proof binders
+disappear from function representations are superseded.** Removing that boundary
+prematurely forced a proof-guarded IH in nested matching. Uniform
+type/lambda/entry/call/completion handling preserves evaluation order.
+
+Checked constructor arity is separate from runtime field storage. Leading,
+interleaved and trailing proof fields keep their original source/projection
+indices, are checked normally, and occupy no runtime fields. The shared minor
+opener consumes the checked field telescope before IHs. This supports dependent
+structure proofs, record projection/matching, recursive inductives and partial
+constructors without compacted-index guesses.
+
+Metavariable assignment now checks the candidate's type with the same bounded
+unifier before recording its value. This solves implicit type-parameter universe
+constraints uniformly. The previous extra match-universe reconciliation step
+is removed; scope/occurs checks and transactional failure are preserved.
+Unknown expected types no longer prematurely retain an implicit Pi instead of
+inserting its implicit arguments.
+
+Design records: docs/PSCV0_NATIVE_RECURSOR_PREPARATION.md,
+docs/PSCV0_NATIVE_PATTERN_MATRIX.md, docs/PSCV0_NATIVE_PROOF_ERASURE.md and
+docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md. The README describes the selected
+surface and limits.
+
+## Remaining boundaries
+
+Heterogeneous fixed-index major dependence and index-constructor projections,
+general joint nomatch contradictions, named/generalizing/as/inaccessible
+patterns, implicit constructor-pattern insertion, multi-root source recursion,
+Type/existential fields, non-type uniform parameters, source universes/Prop
+families, modules/global classes/Standard, tactics/contracts/effects and complete
+v7 assurance remain outstanding. Native compiler growth still precedes final
+readable .ps migration and fixed-point qualification.
+
+Main remains 748ee630e43ee1a89643cbc8cec3e31087788b08 and the M1 base remains
+b4bd7e7d6c48443e56eaf96099515a29a83982bf. No local checkout/build/test, Windows
+test, kernel implementation edit, merge, publication or branch rewrite was used.
+
 
 ---
 

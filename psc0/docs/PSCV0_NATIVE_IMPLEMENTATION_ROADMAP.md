@@ -24,22 +24,23 @@ this development loop.
 | Capability family | Existing implementation/evidence | Remaining mechanisms |
 |---|---|---|
 | Source categories and scopes | Rich terms, calls/defaults, expected binders, namespaces/open/sections, grouped annotation scope | Full selected literals/operators, aliases/modifiers, syntax-preserving diagnostics |
-| Type inference and environment | Core metas, unification, local instances, universe instantiation, RC4 checking | Source universes, complete global class/instance registration and frozen Standard registry |
-| Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, single-discriminant nomatch | Pattern matrices, named discriminants, heterogeneous constraints, erased/existential fields, selected nested/mutual data |
+| Type inference and environment | Scoped typed metavariable assignment with universe constraints, local instances, universe instantiation, RC4 checking | Source universes, complete global class/instance registration and frozen Standard registry |
+| Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, nested/multiple typed pattern matrices and nomatch, proof-field storage erasure | Named discriminants, heterogeneous constraints, Type/existential fields, selected nested/mutual data |
 | Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
 | Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
 | Proofs and contracts | Term proofs checked by official Lean; selected logical primitives | Shared goal state, proof-producing tactic registry, selected automation, VC/effect/spec generation and assumption closure |
-| Control and effects | Selected Except do | General typed do, if-let/pattern bindings, mutable/early-return/loop lowering, registered effect families |
+| Control and effects | Term if-let, pattern-let, matches and inferred matrix results; selected Except do | General typed do and do-pattern sequencing, mutable/early-return/loop lowering, registered effect families |
 | Executable assurance | Checked prepared graph, typed IR validation, TS/JS integration | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
 | Portable source end state | Native portable authoring/import guard | Translate sufficient implemented closure to readable .ps, then explicit source/semantic/fixed-point qualification |
 
 ## Dependency-driven sequence
 
-1. Remove captured/nested recursion restrictions once at Core preparation, using
-   checked helper declarations and the existing backend contract.
-2. Build one typed pattern-matrix mechanism for nested/multiple discriminants,
-   first-match behavior and pattern-derived term forms, on the shared dependent
-   telescope/equality machinery.
+1. Captured/nested runtime recursion now uses checked Core helpers and the
+   existing backend contract; broader well-founded/mutual recursion is separate.
+2. The typed pattern matrix now serves nested/multiple discriminants,
+   first-match behavior and pattern-derived terms through shared dependent
+   telescopes/equality. Complete its remaining documented grammar/refinement
+   boundaries as their type/recursion dependencies become available.
 3. Extend data/instance and module environment ownership before broader library
    sugar, tactics and effects rely on it.
 4. Build shared proof-goal and typed control mechanisms; implement selected

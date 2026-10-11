@@ -17,7 +17,7 @@ are evaluated once. Original local majors retain their identities, so the shared
 dependent motive can refine later discriminants and their dependent context.
 Structural-call lookup follows let aliases to an actual registered recursive child.
 
-Every split calls Ps.Elab.MatchWith. That module alone owns motives, recursor
+Every split calls psElabMatchWith in Ps.Elab.Match. That module alone owns motives, recursor
 telescopes, branch context reversion, homogeneous index constraints, contradiction
 proofs and coverage rejection. Branch continuations let the matrix elaborate
 remaining columns inside the refined context; no syntax marker, unchecked cast,

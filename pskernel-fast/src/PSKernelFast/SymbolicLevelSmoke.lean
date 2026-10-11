@@ -58,10 +58,26 @@ def symbolicLevelSmoke : IO Unit := do
   -- Positive direction must agree with official on a broader structured
   -- sample, regardless of hash table ordering. False means "unresolved".
   let samples : Array ULevel := #[
-    .zero, lu, lv, .succ lu, .succ lv,
-    .max lu lv, .max lv lu, .max .zero lu,
-    .imax .zero lu, .imax lu lv, .imax lu (.succ lv),
-    .max lu (.succ lv), .max (.succ lv) lu
+    .zero, .succ .zero, .succ (.succ .zero), lu, lv,
+    .succ lu, .succ lv, .succ (.succ lu),
+    .max lu lv, .max lv lu, .max .zero lu, .max lu lu,
+    .max lu (.succ lv), .max (.succ lv) lu,
+    .max (.max lu lv) (.succ lu),
+    .max lu (.max lv (.succ lu)),
+    .max (.max lu lv) (.max lv lu),
+    .max (.succ lu) (.succ lv),
+    .succ (.max lu lv), .succ (.max lv lu),
+    .max (.succ .zero) lu, .max (.succ (.succ .zero)) (.succ lu),
+    .imax .zero lu, .imax lu .zero, .imax lu lu,
+    .imax lu lv, .imax lv lu,
+    .imax lu (.succ lv), .max lu (.succ lv),
+    .imax (.succ .zero) lu,
+    .imax lu (.max (.succ .zero) lv),
+    .max lu (.max (.succ .zero) lv),
+    .imax (.max lu lv) (.succ lu),
+    .max (.max lu lv) (.succ lu),
+    .succ (.imax lu lv),
+    .imax (.succ lu) lv
   ]
   let mut positives : Nat := 0
   let mut unresolvedOfficialPositives : Nat := 0
@@ -78,7 +94,7 @@ def symbolicLevelSmoke : IO Unit := do
       | .malformed =>
           throw <| IO.userError "well-formed sample was rejected"
   assertIO (positives >= 13) "unexpectedly few positive normalization cases"
-  IO.println s!"G4.0 symbolic universes: positive={positives}, official-positive-but-unresolved={unresolvedOfficialPositives}; no false equality on sampled oracle pairs"
+  IO.println s!"G4.0 symbolic universe matrix: expressions={samples.size}, pairs={samples.size * samples.size}, positive={positives}, official-positive-but-unresolved={unresolvedOfficialPositives}; no false equality on sampled oracle pairs"
   IO.println "G4.0 limit: positive-only subset; no complete Lean symbolic level equivalence or theorem checker"
 
 end PSKernelFast.Core

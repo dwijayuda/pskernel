@@ -1,3 +1,17 @@
+# PSC0 AI WORK STATE — fast compiler-only loop qualified; second .ps module candidate
+
+## Active checkpoint (11 October 2026)
+
+**Fast compiler-only inner loop is operational.** At exact commit 2f1d9169b12bd689fa109071a19d3b5cd58708fd, GitHub [run 38130403756](https://github.com/dwijayuda/pskernel/actions/runs/38130403756) **PASSED**. The measured **compiler process** took 1,723 milliseconds, excluding CI provisioning/artifact download and retained compiler installation. It validated all 20 cached frontend source hashes, all 2,440 selected Translate.ps source nodes, exact sole v7 document, source AST transfer, actual compiler elaboration, TypeScript 7.0.2 emission and three JS results 3, 8 and 4. Four v7-only source refusals passed. **Zero** new frontend generation, independent kernel checks, checked-admission provider calls or kernel-proof suites. Reports explicitly state kernel-admission false, not a verified release. The separate [native syntax/foundation CI 38130403714](https://github.com/dwijayuda/pskernel/actions/runs/38130403714) also **PASSED** with five portable source modules, no PSKernel package tests. Both are qualified *development lanes only*.
+
+**Second migration candidate now authored, not promoted:** [Ps.Foundation.List.ps](packages/foundation/src-ps/Ps/Foundation/List.ps) maps the ten existing generic list helper functions from the immutable 66-line Lean file. The v7 source candidate uses typed comma groups, implicit binders, match and application syntax. Its purpose is proving reusable compiler-source migration breadth, **not claiming that mechanical transliteration is shorter**. A new [compiler-only differential](tools/abi/foundation-list-probe.mjs) must parse the candidate with generated PSCV0 JS, reconstruct the receiver-owned syntax ABI, elaborate both the candidate and original Lean source with the same retained compiler and demand exact canonical admissions and TypeScript7 output. The new result is **PENDING CI**. Investigate substantive model/AST discrepancies systematically; do not change tests to accept unequal semantics.
+
+**Efficiency rule:** routine compiler-source/ABI fixes invoke the cached frontend compiler-only tier (currently 1.7 seconds measured compiler process, not total CI wall-clock); changes to the 20-file parser/frontend closure fail closed on stale source hash and require native compiler-source typechecks plus intentional regenerated milestone bridge. The independent kernel/checked release gates remain unchanged and are not part of this development loop.
+
+**No full compiler self-host claim:** only the first Translate.ps module was qualified by the 20-module generated bridge [38128357665](https://github.com/dwijayuda/pskernel/actions/runs/38128357665), and full source-fixed-point C0-C3, general v7 semantics and complete compiler proof work remain later. Preserve user decision of v7 as sole language reference and zero backward-compatibility requirement for older ProofScript source.
+
+---
+
 # PSC0 AI WORK STATE — Compiler-only rapid development loop
 
 ## Current checkpoint: 2026-10-11

@@ -52,6 +52,38 @@ def scopedContextSmoke : IO Unit := do
   require (c2.depth == 2 && (c2.rawDomainAt 2).isNone)
     "failed or successful extension mutated prior scope"
 
+
+  -- Lifting is structural: outer free variables shift, local binder indices do not.
+  let original : KExpr :=
+    .lam u (.sort (.param u)) (.app (.bvar 1) (.bvar 0)) .default
+  let shifted : KExpr := original.liftBVars 2 0
+  let expected : KExpr :=
+    .lam u (.sort (.param u)) (.app (.bvar 3) (.bvar 0)) .default
+  require (original.validAt [u] 1) "lift fixture was not valid in its original scope"
+  require (shifted == expected && shifted.validAt [u] 3)
+    "lambda lifting captured or failed to shift an outer variable"
+
+  let layered : KExpr :=
+    .forallE u (.sort (.param u))
+      (.letE u (.sort (.param u)) (.bvar 1) (.bvar 2) false) .default
+  let liftedLayered := layered.liftBVars 2 0
+  let expectedLayered : KExpr :=
+    .forallE u (.sort (.param u))
+      (.letE u (.sort (.param u)) (.bvar 3) (.bvar 4) false) .default
+  require (layered.validAt [u] 1) "Pi/let lifting fixture is unscoped"
+  require (liftedLayered == expectedLayered &&
+    liftedLayered.validAt [u] 3)
+    "Pi/let lifting shifted a local binder or lost an outer variable"
+
+  -- A stored binder domain is from its parent context: index 0 must be
+  -- raised by one before inspecting it in the extended context.
+  let rawDomain := c2.rawDomainAt 0
+  require (rawDomain == some (.bvar 0)) "scope fixture unexpectedly changed"
+  require (((.bvar 0 : KExpr).liftBVars 1 0) == .bvar 1)
+    "stored-domain reference lifting failed"
+
+  IO.println "PSKernel-Fast G4.3 lifting: scoped capture-avoidance tests PASS"
+
   IO.println "PSKernel-Fast G4.3: proof-carrying structural binder frame PASS"
   IO.println "G4.3 limit: stored domains are raw observations, not inferred types"
 end PSKernelFast.Core

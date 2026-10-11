@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1b-bounded-typed-beta-zeta-variable-weakening-proved-general-substitution-open",
+    "stage": "P1c-source-to-erasure-and-totality-proved-no-set-model-or-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,7 +86,7 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 15,
+    "p1ReviewedTheoremAssumptionCount": 24,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
@@ -97,7 +97,19 @@
     "p1VariableLetZetaTypePreservationProved": true,
     "p1CheckedHeadBinderVariableWeakeningProved": true,
     "p1LiftCompositionAndCommutationProved": true,
-    "p1GeneralTypedSubstitutionProved": false
+    "p1GeneralTypedSubstitutionProved": false,
+    "p1cOuterVariableBetaTypingProved": true,
+    "p1cOuterVariableLetTypingProved": true,
+    "p1cIndependentErasedSyntaxImplemented": true,
+    "p1cSourceLiftErasureRefinementProved": true,
+    "p1cSourceSubstitutionErasureRefinementProved": true,
+    "p1cBetaLetErasedRedexCorrespondenceProved": true,
+    "p1cGeneralPiRuleErasureTotalityProved": true,
+    "p1cGeneralPiContextErasureTotalityProved": true,
+    "p1cClosedInferenceErasureTotalityProved": true,
+    "p1cValidatedBinderPropRegimeAnnotationsImplemented": false,
+    "p1cSetTheoreticDenotationDefined": false,
+    "p1cDenotationalTypingSoundnessProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -109,10 +121,10 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "b08feccc8bb06d7f5823636ec6d9f1badbafd6fe",
+    "validatedSourceCommit": "5b137281e8a0cc8306b335c0a40464248b4131d7",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38120030487",
-    "jobId": 114412662054,
-    "scope": "62 Lake build jobs, 26 independent V3 Lean source files audited and 15 reviewed theorem-assumption receipts; P1 independent scope metatheory plus bounded typing preservation of dependent identity beta and variable-body let/zeta, checked single-binder variable weakening, lift algebra; no generalized typed substitution, denotational model, relative consistency, full DefEq or proof admission."
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38121976529",
+    "jobId": 114418422585,
+    "scope": "68 Lean Lake build jobs, 29 independent source files audited, 24 exact theorem-assumption receipts and functional smokes; older-context beta/let typed cases, independent erased ground-universe syntax, actual lifting/substitution commute with erasure, beta/let redex bridge, source/type erasure total for every successful six-rule inference; NO denotational set model, general substitution, full checker, relative consistency or proof admission."
   }
 }

@@ -55,3 +55,7 @@ lean_exe pskernel_fast_typed_conversion_bench where
 lean_exe pskernel_fast_typed_normalization_smoke where
   root := `PSKernelFast.TypedNormalizationSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_source_certificate_smoke where
+  root := `PSKernelFast.Proof.SourceCertificateSynthesisSmoke
+  srcDir := "src"

@@ -1,22 +1,31 @@
 #!/usr/bin/env python3
-"""Build/audit the current certificate closure before the older full suite.
+"""Build/audit/test current certificate construction before the older suite.
 
-Runs in pinned GitHub Actions, not on a developer workstation. The existing
-232-receipt gates run separately and remain unchanged. This gate reuses
-the same strict assumption parser and negative-input self-tests.
+The existing 232-receipt gates remain unchanged. Every new receipt is
+explicitly named and audited with the same parser/allowlist and self-tests.
 """
 import subprocess
 import sys
 import audit_axioms as gate
 
-MODULES = ["Proof/SourceCertificateCoherence.lean"]
-NAMES = {"PSKernelFast.Proof.sourceModelTyping_annotations_unique"}
+MODULES = [
+    "Proof/SourceCertificateCoherence.lean",
+    "Proof/SourceCertificateSynthesis.lean",
+]
+NAMES = {
+    "PSKernelFast.Proof.sourceModelTyping_annotations_unique",
+    "PSKernelFast.Proof.synthesizedModel_unique",
+    "PSKernelFast.Proof.certifyClosedModel_sound",
+    "PSKernelFast.Proof.certifyClosedModel_no_false",
+    "PSKernelFast.Proof.certifyClosedModel_zero",
+}
+SMOKE = "pskernel_fast_source_certificate_smoke"
 
 
 def main() -> None:
     targets = ["PSKernelFast." + p.removesuffix(".lean").replace("/", ".")
                for p in MODULES]
-    subprocess.run(["lake", "build", *targets], check=True)
+    subprocess.run(["lake", "build", *targets, SMOKE], check=True)
     texts = []
     for path in MODULES:
         result = subprocess.run(
@@ -29,6 +38,7 @@ def main() -> None:
     gate.test_fail_closed()
     gate.audit("\n".join(texts))
     print(f"Source-certificate gate PASS: {len(NAMES)} exact additional receipts", flush=True)
+    subprocess.run(["lake", "exe", SMOKE], check=True)
 
 
 if __name__ == "__main__":

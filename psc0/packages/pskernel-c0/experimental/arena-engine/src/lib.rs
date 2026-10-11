@@ -178,34 +178,36 @@ impl Arena {
         memo.insert((id,depth),result);
         Ok(result)
     }
-    /// Fragment WHNF with a *single shared* reduction budget.
+    /// Explicit-stack beta/zeta/metadata evaluator for the supported fragment.
     ///
-    /// Previously recursive head reduction received a fresh copy of the fuel;
-    /// deeply nested applications could therefore evade the caller's bound.
-    /// Every visited head node now consumes from the same budget. A zero budget
-    /// cannot produce a successful result (even for an already-normal term).
-    pub fn whnf_fragment(&mut self, root: ExprId, fuel: usize) -> Result<ExprId, &'static str> {
+    /// Each examined term node spends one unit from the caller's global budget.
+    /// Outermost applications are pushed onto a spine and only rebuilt once
+    /// when a non-lambda head is reached. This avoids recursive head-WHNF calls
+    /// and temporary application reconstruction between beta steps.
+    ///
+    /// This is NOT Lean WHNF: delta, iota, projections, recursors, native
+    /// reductions, proof irrelevance and quotient rules remain unsupported.
+    pub fn whnf_fragment(&mut self, mut root: ExprId, fuel: usize) -> Result<ExprId, &'static str> {
+        let mut pending = Vec::<ExprId>::new();
         let mut remaining = fuel;
-        self.whnf_fragment_budget(root, &mut remaining)
-    }
-
-    fn whnf_fragment_budget(
-        &mut self, mut root: ExprId, remaining: &mut usize
-    ) -> Result<ExprId, &'static str> {
         loop {
-            if *remaining == 0 { return Err("reduction fuel exhausted"); }
-            *remaining -= 1;
+            if remaining == 0 { return Err("reduction fuel exhausted"); }
+            remaining -= 1;
             match self.get(root).clone() {
-                Expr::MData(_, x) => root = x,
-                Expr::Let { value, body, .. } => root = self.instantiate1(body, value)?,
-                Expr::App(fun, arg) => {
-                    let head = self.whnf_fragment_budget(fun, remaining)?;
-                    match self.get(head).clone() {
-                        Expr::Lam { body, .. } => root = self.instantiate1(body, arg)?,
-                        _ => return Ok(if head == fun { root } else { self.intern(Expr::App(head, arg)) }),
-                    }
+                Expr::App(fun, arg) => { pending.push(arg); root = fun; }
+                Expr::MData(_, inner) => root = inner,
+                Expr::Let { body, value, .. } => root = self.instantiate1(body, value)?,
+                Expr::Lam { body, .. } if !pending.is_empty() => {
+                    // The nearest argument is at the end of the spine.
+                    let arg = pending.pop().expect("checked nonempty");
+                    root = self.instantiate1(body, arg)?;
                 }
-                _ => return Ok(root),
+                _ => {
+                    while let Some(arg) = pending.pop() {
+                        root = self.intern(Expr::App(root, arg));
+                    }
+                    return Ok(root);
+                }
             }
         }
     }

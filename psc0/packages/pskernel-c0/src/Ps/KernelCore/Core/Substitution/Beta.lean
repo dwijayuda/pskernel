@@ -68,15 +68,35 @@ def psKernelExprConsumeLambdaSpineWithFuel
         | _ =>
             Prod.mk fn count
 
+/-
+C0 linear lambda-spine consumption.
+
+The historical wrapper first traversed the full function tree to count nodes
+and then recomputed the argument-list length for each consumed lambda. The
+argument list itself is the exact bound, so consume it structurally once.
+The count parameter remains compatible with callers that already consumed a
+prefix: drop those previously consumed arguments before proceeding.
+-/
+def psKernelC0ConsumeLambdaSpineLinear
+    (fn : PsKernelExpr)
+    (args : List PsKernelExpr)
+    (count : Nat) : Prod PsKernelExpr Nat :=
+  match args with
+  | List.nil => Prod.mk fn count
+  | List.cons _ rest =>
+      match fn with
+      | PsKernelExpr.lam _ _ body _ =>
+          psKernelC0ConsumeLambdaSpineLinear body rest (Nat.succ count)
+      | _ => Prod.mk fn count
+
 def psKernelExprConsumeLambdaSpine
     (fn : PsKernelExpr)
     (args : List PsKernelExpr)
     (count : Nat) :
     Prod PsKernelExpr Nat :=
-  psKernelExprConsumeLambdaSpineWithFuel
-    (Nat.succ (psKernelExprNodeCount fn))
+  psKernelC0ConsumeLambdaSpineLinear
     fn
-    args
+    (List.drop count args)
     count
 
 def psKernelExprCheapBetaReduce

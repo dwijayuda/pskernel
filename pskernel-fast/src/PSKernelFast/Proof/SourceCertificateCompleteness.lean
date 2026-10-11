@@ -18,6 +18,17 @@ No model, semantic membership or consistency assumption appears here.
 namespace PSKernelFast.Proof
 open PSKernelFast.Core PSKernelFast.Spec
 
+@[simp] private theorem except_bind_ok {ε α β : Type}
+    (x : α) (f : α → Except ε β) :
+    ((Except.ok x : Except ε α) >>= f) = f x := rfl
+
+@[simp] private theorem except_map_ok {ε α β : Type}
+    (f : α → β) (x : α) :
+    f <$> (Except.ok x : Except ε α) = Except.ok (f x) := rfl
+
+@[simp] private theorem except_pure_eq {ε α : Type} (a : α) :
+    (pure a : Except ε α) = .ok a := rfl
+
 private theorem validParams_complete (params : List KName)
     (level : ULevel) (h : ULevel.WellFormed params level) :
     level.validParams params = true := by
@@ -55,7 +66,22 @@ theorem synthesizeSourceCertificate_complete
       cases fuel with
       | zero => omega
       | succ fuel =>
-          simp [synthesizeSourceCertificate, found, foundAnn, erases]
+          simp only [synthesizeSourceCertificate]
+          split
+          · rename_i hNone
+            simp [found] at hNone
+          · rename_i nextDomain hFound
+            have sameDomain : nextDomain = domain :=
+              Option.some.inj (hFound.symm.trans found)
+            subst nextDomain
+            split
+            · rename_i hNone
+              simp [foundAnn] at hNone
+            · rename_i nextAnn hFoundAnn
+              have sameAnn : nextAnn = ad :=
+                Option.some.inj (hFoundAnn.symm.trans foundAnn)
+              subst nextAnn
+              simp [erases]
   | pi ctx ac name domain body style u v ad ab hd hb ihd ihb =>
       obtain ⟨kd, runD⟩ := ihd
       obtain ⟨kb, runB⟩ := ihb

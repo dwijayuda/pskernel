@@ -3,6 +3,7 @@ import PSKernelFast.Proof.TypedSubstitution
 import PSKernelFast.Proof.Erasure
 import PSKernelFast.Proof.ErasureTotality
 import PSKernelFast.Proof.PiModelRegime
+import PSKernelFast.Spec.PropPi
 import PSKernelFast.GeneralPiFormation
 import PSKernelFast.DependentSortFragment
 

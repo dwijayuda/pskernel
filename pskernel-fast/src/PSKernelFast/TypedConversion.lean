@@ -17,7 +17,7 @@ No declaration acceptance authority is implemented here.
 
 namespace PSKernelFast.Core
 
-inductive HeadConversion : KExpr → KExpr → Prop where
+inductive HeadConversion : KExpr → KExpr → Type where
   | refl (e : KExpr) : HeadConversion e e
   | beta (name : KName) (domain body : KExpr)
       (style : BinderStyle) (arg : KExpr) :
@@ -29,25 +29,22 @@ inductive HeadConversion : KExpr → KExpr → Prop where
 
 /-- Construct actual operational evidence, never hash-only equivalence. -/
 def checkHeadConversion (lhs rhs : KExpr) :
-    Option (HeadConversion lhs rhs) := by
+    Option (HeadConversion lhs rhs) :=
   if h : lhs = rhs then
-    exact some (h ▸ HeadConversion.refl lhs)
-  match lhs with
-  | .app (.lam name domain body style) arg =>
-      if h : body.instantiateBVar arg 0 = rhs then
-        exact some (h ▸ HeadConversion.beta name domain body style arg)
-      else
-        exact none
-  | .letE name ty val body nondep =>
-      if flag : nondep = false then
-        if h : body.instantiateBVar val 0 = rhs then
-          subst nondep
-          exact some (h ▸ HeadConversion.zeta name ty val body)
+    some (h ▸ HeadConversion.refl lhs)
+  else
+    match lhs with
+    | .app (.lam name domain body style) arg =>
+        if h : body.instantiateBVar arg 0 = rhs then
+          some (h ▸ HeadConversion.beta name domain body style arg)
         else
-          exact none
-      else
-        exact none
-  | _ => exact none
+          none
+    | .letE name ty val body false =>
+        if h : body.instantiateBVar val 0 = rhs then
+          some (h ▸ HeadConversion.zeta name ty val body)
+        else
+          none
+    | _ => none
 
 /-- Source checker judgments for BOTH sides under the very same type. -/
 structure TypedHeadCertificate (params : List KName) (ctx : List KExpr)
@@ -80,31 +77,29 @@ Unsupported conversions must not become negative DefEq assertions.
 def compareTypedHead {params : List KName}
     (ctx : GeneralPiContext params)
     (lhs rhs : KExpr) (budget : Nat) :
-    TypedHeadDecision params ctx.entries lhs rhs := by
+    TypedHeadDecision params ctx.entries lhs rhs :=
   if !lhs.validAt params ctx.entries.length ||
       !rhs.validAt params ctx.entries.length then
-    exact .malformed
-  match budget with
-  | 0 => exact .resourceExhausted
-  | _ + 1 =>
-      match ctx.infer lhs, ctx.infer rhs with
-      | some lhsJudgment, some rhsJudgment =>
-          if hSame : lhsJudgment.val = rhsJudgment.val then
-            match checkHeadConversion lhs rhs with
-            | some hStep =>
-                have hRight :
-                    GeneralPiRule params ctx.entries rhs
-                      lhsJudgment.val := by
-                  simpa only [hSame] using rhsJudgment.property
-                exact .equal {
-                  ty := lhsJudgment.val
-                  lhsTyped := lhsJudgment.property
-                  rhsTyped := hRight
-                  headStep := hStep
-                }
-            | none => exact .unresolved
-          else
-            exact .unresolved
-      | _, _ => exact .unresolved
+    .malformed
+  else
+    match budget with
+    | 0 => .resourceExhausted
+    | _ + 1 =>
+        match ctx.infer lhs, ctx.infer rhs with
+        | some lhsJudgment, some rhsJudgment =>
+            if hSame : lhsJudgment.val = rhsJudgment.val then
+              match checkHeadConversion lhs rhs with
+              | some hStep =>
+                  .equal {
+                    ty := lhsJudgment.val
+                    lhsTyped := lhsJudgment.property
+                    rhsTyped := by
+                      simpa only [hSame] using rhsJudgment.property
+                    headStep := hStep
+                  }
+              | none => .unresolved
+            else
+              .unresolved
+        | _, _ => .unresolved
 
 end PSKernelFast.Core

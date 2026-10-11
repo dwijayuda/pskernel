@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1-independent-context-and-output-scope-metatheory-proved-no-denotational-consistency",
+    "stage": "P1b-bounded-typed-beta-zeta-variable-weakening-proved-general-substitution-open",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,12 +86,18 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 7,
+    "p1ReviewedTheoremAssumptionCount": 15,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
     "p1CheckedInferenceSemanticSoundnessProved": false,
-    "p1RelativeConsistencyProved": false
+    "p1RelativeConsistencyProved": false,
+    "p1BoundVarSubstitutionTypingProved": true,
+    "p1DependentIdentityBetaTypePreservationProved": true,
+    "p1VariableLetZetaTypePreservationProved": true,
+    "p1CheckedHeadBinderVariableWeakeningProved": true,
+    "p1LiftCompositionAndCommutationProved": true,
+    "p1GeneralTypedSubstitutionProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -103,11 +109,10 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "b0a1c6503f12d1dbd5a8c6905be193d91f20f6d6",
-    "checkedProofSourceCommit": "6611504268816d87c2ac5546ef0c52a73247002b",
+    "validatedSourceCommit": "b08feccc8bb06d7f5823636ec6d9f1badbafd6fe",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38118786036",
-    "jobId": 114409045221,
-    "scope": "60 native Lake build jobs, 25 independent Lean files audited; independent context scope and G3 scope reflection, six G4.3b rule structural closure, actual successful-result scope, unreachable malformedResult, certified success parity; 7 theorem-axiom receipts pinned to propext/Classical.choice/Quot.sound. No typed substitution, model interpretation, consistency, G4.4 WHNF/DefEq or theorem admission."
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38120030487",
+    "jobId": 114412662054,
+    "scope": "62 Lake build jobs, 26 independent V3 Lean source files audited and 15 reviewed theorem-assumption receipts; P1 independent scope metatheory plus bounded typing preservation of dependent identity beta and variable-body let/zeta, checked single-binder variable weakening, lift algebra; no generalized typed substitution, denotational model, relative consistency, full DefEq or proof admission."
   }
 }

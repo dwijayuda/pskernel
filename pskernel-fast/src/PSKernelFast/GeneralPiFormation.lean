@@ -1,7 +1,7 @@
 import PSKernelFast.Substitution
 
 /-!
-G4.4 prototype: a *restricted*, proof-carrying general-domain Pi fragment.
+G4.3b prototype: a *restricted*, proof-carrying general-domain Pi fragment.
 This extends the earlier Sort-only context: domains may themselves be Pi
 expressions or context-dependent types, provided their ACTUAL inferred type
 is syntactically Sort-shaped. Bound variables read their validated domain

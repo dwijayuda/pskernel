@@ -2,7 +2,7 @@
 """G4.4b/P1k exact receipts using the existing fail-closed parser/allowlist.
 
 The original 157-receipt gate runs separately and is unchanged. This stage
-adds six operational and five model receipts; it does not replace it.
+adds six operational and eleven model receipts; it does not replace it.
 """
 import pathlib
 import sys
@@ -20,6 +20,12 @@ NAMES = {
     "PSKernelFast.Spec.universe_no_surjection_from_member",
     "PSKernelFast.Spec.universe_image_closed",
     "PSKernelFast.Spec.modelGraph_member_same_univ",
+    "PSKernelFast.Spec.model_no_membership_cycle",
+    "PSKernelFast.Spec.universe_union_closed",
+    "PSKernelFast.Spec.member_modelDependentSum",
+    "PSKernelFast.Spec.modelDependentSum_member_univ",
+    "PSKernelFast.Spec.member_modelGraphPi",
+    "PSKernelFast.Spec.modelGraphPi_member_univ",
 }
 
 if __name__ == "__main__":

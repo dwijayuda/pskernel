@@ -40,3 +40,10 @@ failure, differing field binder names, cross-column shadowing, tuples, nested
 indexed refinement and dependent later discriminants. Four refusal inputs protect
 row arity, duplicate variables, nested coverage and expression-call punctuation.
 Qualification must be recorded by exact source/run in AI_WORK_STATE.md.
+
+Reference design: the pinned RC4 [match compiler](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Meta/Match/Match.lean)
+separates variable substitution, ordered alternative processing and constructor
+splits. Its [source elaborator](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Elab/Match.lean)
+uses fresh names to avoid source capture. This implementation follows those
+invariants through the existing portable dependent-elimination layer, without
+importing the host elaborator into the portable closure.

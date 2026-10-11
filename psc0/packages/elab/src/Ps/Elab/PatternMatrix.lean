@@ -112,7 +112,7 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
               psNatToString index] span
           let fieldColumns := fields.map fun name =>
             PsElabPatternColumn.mk (.reference name) (.reference name)
-          let selected := rows.filterMap fun (head, row) =>
+          let selected := rows.filterMap fun (head, row) => do
             let pattern :: patterns := row.patterns | none
             if head.isNone then
               let row := psElabPatternBind column pattern row

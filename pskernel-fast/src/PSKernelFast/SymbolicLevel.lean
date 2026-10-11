@@ -22,9 +22,7 @@ def ULevel.denote (ρ : KName → Nat) : ULevel → Nat
   | .param n => ρ n
   | .mvar n => ρ n
 
-/-- Symbolic structure uses exact lawful equality, never just a hash. -/
-deriving instance DecidableEq for ULevel
-deriving instance Hashable for ULevel
+/-- Structural decidable equality and hashing are derived in CoreSyntax. -/
 
 /--
 Canonical orientation of a binary max. Hashes are **ordering hints only**.

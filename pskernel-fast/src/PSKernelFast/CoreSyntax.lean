@@ -29,7 +29,7 @@ inductive ULevel where
   | imax (left right : ULevel)
   | param (name : KName)
   | mvar (name : KName)
-  deriving Repr, Inhabited, BEq
+  deriving Repr, Inhabited, BEq, DecidableEq, Hashable
 
 inductive BinderStyle where
   | default

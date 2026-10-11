@@ -1,7 +1,7 @@
 name: PSC0 PSCV0 portable bridge native source check
 on:
   push:
-    branches: [psc0/pscv0-readable-selfhost-v1]
+    branches: [psc0/pscv0-readable-selfhost-v1, psc0/pscv0-v7-sole-source-policy-v1]
     paths:
       - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
       - 'psc0/scripts/Pscv0BridgeSourceSmoke.lean'

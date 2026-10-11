@@ -84,17 +84,30 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
                                   body.cursor)
               else Except.error "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED"
 
+-- PSCV0 v7 is the only prospective .ps grammar. The historical parser is
+-- reused solely for the explicitly selected theorem/inductive/structure
+-- bootstrap families; it is not a compatibility fallback for old language
+-- declaration commands. The full v7 language remains unimplemented.
+def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxDeclaration) :=
+  match psParseProofScriptDeclaration cursor with
+  | Except.error error => Except.error (psPscv0ParseError error)
+  | Except.ok value => Except.ok value
+
 def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
-  let selected :=
-    if psTokenCursorAtText cursor "def" then true
-    else if psTokenCursorAtText cursor "const" then true
-    else psTokenCursorAtText cursor "function";
-  if selected then psPscv0ReadValueDeclaration cursor
-  else
-    match psParseProofScriptDeclaration cursor with
-    | Except.error error => Except.error (psPscv0ParseError error)
-    | Except.ok value => Except.ok value
+  if psTokenCursorAtText cursor "partial" then Except.error "PSCV0-PARTIAL-EXCLUDED"
+  else if psTokenCursorAtText cursor "unsafe" then Except.error "PSCV0-UNSAFE-EXCLUDED"
+  else if psTokenCursorAtText cursor "axiom" then Except.error "PSCV0-SOURCE-AXIOM-EXCLUDED"
+  else if psTokenCursorAtText cursor "verify" then Except.error "PSCV0-VERIFY-REMOVED"
+  else if psTokenCursorAtText cursor "ghost" then Except.error "PSCV0-GHOST-REMOVED"
+  else if psTokenCursorAtText cursor "def" then psPscv0ReadValueDeclaration cursor
+  else if psTokenCursorAtText cursor "const" then psPscv0ReadValueDeclaration cursor
+  else if psTokenCursorAtText cursor "function" then psPscv0ReadValueDeclaration cursor
+  else if psTokenCursorAtText cursor "structure" then psPscv0ReadSelectedDeclaration cursor
+  else if psTokenCursorAtText cursor "inductive" then psPscv0ReadSelectedDeclaration cursor
+  else if psTokenCursorAtText cursor "theorem" then psPscv0ReadSelectedDeclaration cursor
+  else Except.error "PSCV0-V7-COMMAND-NOT-YET-SUPPORTED"
 
 def psPscv0ReadDeclarations (fuel : Nat) (cursor : PsTokenCursor)
     (declarationsRev : List PsSyntaxDeclaration) : Except String (List PsSyntaxDeclaration) :=

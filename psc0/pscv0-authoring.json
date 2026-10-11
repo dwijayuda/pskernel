@@ -37,5 +37,8 @@
   "referenceDocumentPath": "PSCV0_LANGUAGE_REFERENCE.md",
   "referenceBytes": 308462,
   "referenceGitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
-  "referenceLeanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  "referenceLeanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "sourcePolicy": "pscv0-v7-only-no-legacy-fallback",
+  "backwardCompatibilityRequired": false,
+  "supersededLanguageReferenceAllowed": false
 }

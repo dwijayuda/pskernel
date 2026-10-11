@@ -38,6 +38,20 @@ def main : IO Unit := do
   expectError "dangling bind" "PSCV0-DO-MISSING-FINAL-ACTION" (fixture "  let x ← a")
   expectError "nonterminal return" "PSCV0-DO-NONTERMINAL-RETURN-UNSUPPORTED" (fixture "  return 1\n  return 2")
   expectError "gap application" "PSCV0-APP-02" (fixture "  let x ← a\n  return Nat.succ (x)")
+  -- V7 is the only prospective ProofScript source language. These commands
+  -- are not accepted through an older .ps grammar or native Lean fallback.
+  expectError "retired partial" "PSCV0-PARTIAL-EXCLUDED"
+    "partial def legacy(n: Nat): Nat := n\n"
+  expectError "unsafe declaration" "PSCV0-UNSAFE-EXCLUDED"
+    "unsafe def unsafeCode(n: Nat): Nat := n\n"
+  expectError "source axiom" "PSCV0-SOURCE-AXIOM-EXCLUDED"
+    "axiom unproved : False\n"
+  expectError "removed verify" "PSCV0-VERIFY-REMOVED"
+    "verify f := by { omega }\n"
+  expectError "removed ghost" "PSCV0-GHOST-REMOVED"
+    "ghost mut x := 0\n"
+  expectError "unselected syntax extension" "PSCV0-V7-COMMAND-NOT-YET-SUPPORTED"
+    "syntax \"foo\" : term\n"
   let commented := "-- preserve me\n" ++ examples.head!
   let surface ← expectOk "commented source" (psPscv0ParseSource true commented)
   if psPscv0ReplayOriginal surface != commented then throw (IO.userError "comment was lost")
@@ -52,4 +66,4 @@ def main : IO Unit := do
   IO.FS.createDirAll "dist/pscv0-source-check"
   IO.FS.writeFile "dist/pscv0-source-check/correspondence.lean" theoremSource
   IO.println theoremSource
-  IO.println "PSCV0_NATIVE_SURFACE_SMOKE: PASS 5 round trips, 4 refusals, exact comment replay; emitted correspondence fixture still requires checking"
+  IO.println "PSCV0_NATIVE_SURFACE_SMOKE: PASS 5 round trips, 10 refusals, exact comment replay; emitted correspondence fixture still requires checking"

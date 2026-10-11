@@ -63,6 +63,9 @@ export async function readAuthoringInputs(){
   assert.equal(manifest.referenceDocumentPath,'PSCV0_LANGUAGE_REFERENCE.md');
   assert.equal(manifest.referenceLeanCommit,'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364');
   assert.equal(manifest.sourceSelection,'explicit-module-map-no-fallback');
+  assert.equal(manifest.sourcePolicy,'pscv0-v7-only-no-legacy-fallback');
+  assert.equal(manifest.backwardCompatibilityRequired,false);
+  assert.equal(manifest.supersededLanguageReferenceAllowed,false);
   assert.equal(manifest.publicCompilerSelected,false);
   assert.equal(manifest.surfacePreparation,'current-portable-bootstrap-before-source-selection');
   assert.equal(manifest.modules.length,1,'review scope before extending candidate modules');

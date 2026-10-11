@@ -90,9 +90,18 @@ Native term printers keep groups intact; the declaration-only PSC printer refuse
 a multi-name explicit group requiring scope-preserving lowering rather than
 silently expanding it. Declaration explicit parameters still require comma entries.
 
+Structures and ordinary inductives now use the v7 data reader. Headers and
+constructors share the declaration telescope reader, including interleaved
+explicit/nonexplicit groups, grouped native parameters and explicit defaults.
+Structure fields retain newline separation and native named binder groups;
+all field and constructor annotations use the rich term reader. The existing
+scope, telescope, record/projection and recursor machinery performs elaboration,
+without a second data-specific elaborator.
+
 Lambda result annotations, pattern binders and automatic insertion of omitted
-implicit lambda binders remain pending. Inductive/structure source headers still
-use the selected legacy data grammar; their parser expansion is a later milestone.
+implicit lambda binders remain pending. Data support remains limited to simple
+nonindexed types in `Type`; constructor result annotations, deriving, structure
+field methods/defaults and inheritance remain pending.
 
 ## Boundaries
 
@@ -134,7 +143,11 @@ instances extend those same programs. Grouped binders additionally exercise loca
 and global shadowing, dependent arrows, heterogeneous inference, selective section
 capture, implicit kinds and changing-state structural recursion. Focused refusals
 protect binder category ownership, unknown annotation names and duplicate section
-variables. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
+variables. The same composite also covers grouped structure fields with an outer
+annotation scope, quantified field types, interleaved inductive/constructor
+parameters, constructor defaults, record projections and constructor matching.
+Three data refusals protect adjacent explicit groups, nullary constructors and
+field separators. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
 application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.

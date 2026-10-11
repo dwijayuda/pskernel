@@ -37,4 +37,6 @@ assert.equal(output.groupGlobalAnswer, 54n);
 assert.equal(output.groupKindsAnswer, 55n);
 assert.equal(output.groupSectionAnswer, 56n);
 assert.equal(output.groupFoldAnswer, 57n);
+assert.equal(output.dataRecordAnswer, 61n);
+assert.equal(output.dataMatchAnswer, 62n);
 console.log('PSCV0_NATIVE_RUNTIME: PASS checked current-source v7 application -> TypeScript -> JavaScript');

@@ -133,7 +133,30 @@ private def application : String :=
   "}\n" ++
   "end Grouped\n" ++
   "const groupSectionAnswer: Nat := groupSection(Nat, Bool, 56, true)\n" ++
-  "const groupFoldAnswer: Nat := groupFold(Nat, Bool, 57, List.cons(true, List.nil), 0)\n"
+  "const groupFoldAnswer: Nat := groupFold(Nat, Bool, 57, List.cons(true, List.nil), 0)\n" ++
+  "namespace Data\n" ++
+  "structure Duo{A B: Type} where {\n" ++
+  "  (A spare: A)\n" ++
+  "  convert: forall (x y: Nat), B\n" ++
+  "}\n" ++
+  "const duo: Duo(A := Nat, B := Nat) := {\n" ++
+  "  A := 1,\n" ++
+  "  spare := 61,\n" ++
+  "  convert := fun (x y) => y\n" ++
+  "}\n" ++
+  "const dataRecord: Nat := duo.convert(duo.A, duo.spare)\n" ++
+  "inductive Event(A: Type){B C: Type}(D: Type): Type where {\n" ++
+  "  | idle\n" ++
+  "  | item(seed: A){n m: Nat}(choose: forall (x y: A), A := fun (x y) => y)\n" ++
+  "}\n" ++
+  "const event: Event(Nat, Nat, B := Nat, C := Bool) := Event.item(1, n := 0, m := 0)\n" ++
+  "function pick(value: Event(Nat, Nat, B := Nat, C := Bool)): Nat := match value with {\n" ++
+  "  | Event.idle => 0\n" ++
+  "  | Event.item seed n m choose => choose(seed, 62)\n" ++
+  "}\n" ++
+  "end Data\n" ++
+  "const dataRecordAnswer: Nat := Data.dataRecord\n" ++
+  "const dataMatchAnswer: Nat := Data.pick(Data.event)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -177,19 +200,25 @@ private def semanticCases : IO Unit := do
     { source := "function need{P: Prop}[Decidable P](value: Nat): Nat := value\nfunction bad{P: Prop}(value: Nat): Nat := need(P := P, value := value)\n" },
     { source := "function bad(x y: Nat): Nat := x\n" },
     { source := "const bad: forall (A x: A), A := fun (A x: A) => x\n" },
-    { source := "section\nvariable (x x: Nat)\nend\n" }]
+    { source := "section\nvariable (x x: Nat)\nend\n" },
+    { source := "structure Bad(A: Type)(B: Type) where { value: A }\n" },
+    { source := "inductive Bad where { | empty() }\n" },
+    { source := "structure Bad where { x: Nat, y: Nat }\n" }]
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate",
       some "parse", some "parse", some "parse", some "elaborate",
-      some "parse", some "elaborate", some "elaborate"]
+      some "parse", some "elaborate", some "elaborate",
+      some "parse", some "parse", some "parse"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
     "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-ELABORATION",
-    "PSCV0-PARSE", "PSCV0-SCOPE: unknown name", "PSCV0-SCOPE: duplicate active section variable"]
+    "PSCV0-PARSE", "PSCV0-SCOPE: unknown name", "PSCV0-SCOPE: duplicate active section variable",
+    "PSCV0-PARSE: PSCV0-BIND-02", "PSCV0-PARSE: nonempty binder group",
+    "PSCV0-PARSE: newline-separated structure field"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -216,7 +245,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 25 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 28 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

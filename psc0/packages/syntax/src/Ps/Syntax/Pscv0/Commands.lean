@@ -1,5 +1,5 @@
 import Ps.Syntax.Pscv0.Read
-import Ps.Syntax.Pscv0.Binders
+import Ps.Syntax.Pscv0.Data
 
 -- The annotation parser owns nested terms; the declaration consumes only its
 -- own assignment token. No scan to the first top-level := is involved.
@@ -49,15 +49,9 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
                                 Except.ok (PsParseResult.mk declaration body.cursor)
               else Except.error "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED"
 
--- PSCV0 v7 is the only prospective .ps grammar. The historical parser is
--- reused solely for the explicitly selected inductive/structure
--- bootstrap families; it is not a compatibility fallback for old language
--- declaration commands. The full v7 language remains unimplemented.
 def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
-  match psParseProofScriptDeclaration cursor with
-  | Except.error error => Except.error (psPscv0ParseError error)
-  | Except.ok value => Except.ok value
+  (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
 
 def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=

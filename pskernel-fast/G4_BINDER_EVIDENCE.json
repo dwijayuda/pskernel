@@ -1,0 +1,32 @@
+{
+  "schema": "pskernel-fast-g4-binder-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "source_sha": "1a86eb4eefe24e37b0747ae0881e66467f39f0ec",
+  "toolchain": "leanprover/lean4:v4.35.0-rc4",
+  "lean_source_sha": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "run_id": 38115032789,
+  "job_id": 114398149274,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38115032789",
+  "conclusion": "success",
+  "build_jobs": 47,
+  "audited_source_files": 19,
+  "proved": [
+    "KExpr.liftBVars_structurallyValid",
+    "ScopedFrame.rawDomainAt_scoped",
+    "KExpr.instantiateBVar_structurallyValid",
+    "KExpr.instantiateBVar_top_scoped"
+  ],
+  "certified_executable": [
+    "ScopedFrame.scopedDomainAt",
+    "AnyScopedFrame.scopedDomainAt",
+    "KExpr.instantiateTopScoped"
+  ],
+  "structural_scope_only": true,
+  "type_preservation_proved": false,
+  "dependent_inference_implemented": false,
+  "checked_environment_implemented": false,
+  "defeq_implemented": false,
+  "admission_api_implemented": false,
+  "actual_kernel_benchmark": false
+}

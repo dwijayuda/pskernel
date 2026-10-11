@@ -61,10 +61,10 @@ def m1Good (name source result : String) (locals : List String) : IO Unit := do
     throw (IO.userError (name ++ ": source span bounds"))
   IO.println ("PSCV0_M1_NATIVE_CASE: PASS " ++ name)
 
-def m1Bad (name source prefix : String) : IO Unit := do
+def m1Bad (name source errorPrefix : String) : IO Unit := do
   match psPscv0ParseSource true source with
   | .ok _ => throw (IO.userError (name ++ ": invalid source accepted"))
   | .error error =>
-    unless prefix.isPrefixOf error do
+    unless errorPrefix.isPrefixOf error do
       throw (IO.userError (name ++ ": " ++ error))
     IO.println ("PSCV0_M1_NATIVE_REFUSAL: PASS " ++ name)

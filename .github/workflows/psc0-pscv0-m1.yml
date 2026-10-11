@@ -9,21 +9,25 @@ on:
       - 'psc0/packages/foundation/src/**'
       - 'psc0/scripts/Pscv0M1Harness.lean'
       - 'psc0/scripts/pscv0-m1-*'
+      - 'psc0/packages/syntax/src-ps/Ps/Syntax/Cursor.ps'
       - '.github/workflows/psc0-pscv0-m1.yml'
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: psc0-v7-m1-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   source-typecheck:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 45
     defaults:
       run:
         working-directory: psc0
         shell: bash
+    env:
+      NODE_OPTIONS: --max-old-space-size=6144
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -32,6 +36,8 @@ jobs:
             psc0/packages/syntax
             psc0/packages/foundation
             psc0/scripts
+            psc0/tools/abi
+            psc0/docs/PSCV0_REFERENCE_ADOPTION.json
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0
@@ -62,3 +68,48 @@ jobs:
           node --check scripts/pscv0-m1-check.mjs
           node scripts/pscv0-m1-check.mjs --native
           lake env lean --run dist/Pscv0M1Generated.lean
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38128357665
+          name: pscv0-bridge-a640a2d22adeabd4ca7919839a8991667bcc3eae
+          path: psc0/fast-cache
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38075437516
+          name: proofscript-psc0-npm-ps-and-lean
+          path: ${{ runner.temp }}/pscv0-retained
+      - name: Install exact retained self-host compiler and TS7 (not a kernel test)
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib,zipfile,os
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          matches=list((root/'pscv0-retained').rglob('proofscript-psc0-lean-npm-packages.zip'))
+          assert len(matches)==1
+          with zipfile.ZipFile(matches[0]) as z:
+            assert all(pathlib.PurePosixPath(n).name==n for n in z.namelist())
+            z.extractall(root/'pscv0-input')
+          PY
+          node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
+          npm install -g --prefix "$RUNNER_TEMP/pscv0-tools" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
+      - name: Regenerate current M1 frontend and qualify five v7 source modules
+        run: |
+          set -euo pipefail
+          node --check scripts/pscv0-m1-build.mjs
+          node scripts/pscv0-reference-identity.mjs
+          timeout 2400 node scripts/pscv0-m1-build.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee m1-linux.log
+          grep -F 'PSCV0_M1_PORTABLE: PASS' m1-linux.log
+      - name: Retain M1 source provenance, products and progress
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-v7-m1-${{ github.sha }}
+          path: |
+            psc0/m1-linux.log
+            psc0/dist/pscv0-m1/
+          if-no-files-found: warn
+          retention-days: 30

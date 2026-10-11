@@ -16,7 +16,7 @@ function psLexStringToListFromWithFuel(fuel: Nat): String -> Nat -> List Char :=
         fun (_source: String) (_position: Nat) => List.nil
     | Nat.succ remaining =>
         fun (source: String) (position: Nat) =>
-          let smaller: String -> Nat -> List(Char) := psLexStringToListFromWithFuel(remaining)
+          let smaller: String -> Nat -> List Char := psLexStringToListFromWithFuel(remaining)
           if (String.Internal.atEnd(source, String.Pos.Raw.mk(position))) {
             List.nil
           } else {

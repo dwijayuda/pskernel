@@ -1,0 +1,59 @@
+name: PSC0 cross-bundle source AST ABI probe
+on:
+  push:
+    branches: [psc0/pscv0-v7-abi-v1]
+    paths:
+      - 'psc0/tools/abi/**'
+      - '.github/workflows/psc0-pscv0-abi-probe.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc0
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/tools/abi
+            psc0/scripts
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38125532982
+          name: pscv0-bridge-6e811feabba89bf8ea3ebbf50916453169d100ed
+          path: psc0/abi/generated
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38075437516
+          name: proofscript-psc0-npm-ps-and-lean
+          path: ${{ runner.temp }}/pscv0-retained
+      - name: Recover exact retained compiler without source regeneration
+        run: |
+          python - <<'PY'
+          import pathlib,zipfile,os
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])
+          matches=list((root/'pscv0-retained').rglob('proofscript-psc0-lean-npm-packages.zip'))
+          assert len(matches)==1
+          with zipfile.ZipFile(matches[0]) as z:
+            assert all(pathlib.PurePosixPath(n).name==n for n in z.namelist())
+            z.extractall(root/'pscv0-input')
+          PY
+          node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
+          npm install -g --prefix "$RUNNER_TEMP/pscv0-tools" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
+      - name: Inspect actual AST constructor shapes in both separately generated modules
+        run: |
+          node tools/abi/inspect.mjs "$PWD/abi/generated" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript"

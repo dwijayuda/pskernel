@@ -1,3 +1,73 @@
+# PSC0 AI WORK STATE — native v7 command scopes and defaults
+
+## 11 October 2026 — ordered scopes and optional parameters
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user authorized namespace/open/section scopes and default arguments in native
+`.lean`, with minimal checks and no `pskernel-core` or self-hosting. Work continues
+through GitHub source operations and Linux cloud CI only.
+
+The ordered program AST retains namespace/section/end/open/variable/include/omit
+commands independently of the legacy flat translation API. The shared source
+preparation owns lexing budgets, selected do parsing and hygiene. A capture-aware
+Scope traversal qualifies names and collects section dependencies; Command applies
+scope transitions and admits ordinary declarations through the existing elaborator.
+Local binders shadow globals, namespace ancestors are searched before unique open
+candidates, and `_root_` bypasses source scope. Generated Unit/Except helpers use
+rooted names. End restores variables, opens and inclusion state; declarations remain.
+
+Definitions generalize section variables used in their headers or bodies;
+theorems generalize header dependencies, explicitly included variables and eligible
+instances. Dependency selection uses ordered reverse/forward passes. Variables are
+typechecked at declaration time; omitted/unrelated parameters are not carried into
+ordinary signatures. Selected structural self-calls receive fixed captured explicit
+parameters before existing recursion elaboration. Shadowed captured parameters
+are refused rather than rebound.
+
+Defaults are checked at declaration scope and represented by canonical
+`optParam` type applications. The portable prelude contains the same reducible
+definition as RC4 Init.Prelude, checked by the official native kernel. Application
+instantiation substitutes preceding arguments into dependent defaults; no source
+reparsing, call-site name lookup, side metadata table or kernel change is involved.
+Named/positional/default/implicit arguments share one ordered engine. Expected
+function types retain partial applications; explicit empty invocation completes
+defaults and at most one required Unit argument. Final `function f()` declaration
+groups lower to a required Unit parameter. Diagnostics retain the declaration name.
+
+**Qualified in [Linux run 38154247902](https://github.com/dwijayuda/pskernel/actions/runs/38154247902)**
+at source commit `8a0806345b2d7cdfc2942953934193e1fffc70ff`, with native Lean 4.35.0-rc4
+(`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`), profile
+`pscv0-v7-native-bounded/3`.
+
+The unchanged 28 parser cases passed. The existing semantic batch now contains
+three accepted programs and 18 phase-specific refusals; it still shares one
+checked immutable prelude. One 43-declaration application covers namespace
+ancestors/opens, defaults closed over earlier parameters and declaration scope,
+expected-result completion, preserved function values, section dependency/order,
+local shadowing, theorem include/omit, fixed recursive parameters and nullary/Unit
+completion. The existing Except do case now runs inside a namespace. The CLI
+checked and emitted that same composite application; TypeScript 7.0.2 compilation
+and JavaScript assertions passed. The source inventory found 69 portable modules
+and 75 native closure modules, without pskernel-core.
+
+Measured cached incremental build: 6,010 ms; immediate unchanged build: 504 ms.
+For the CLI fixture, prelude setup took 2 ms, elaboration 1 ms, official kernel
+checking 2 ms and erasure 2 ms. These small-workload observations are not a
+large-program benchmark; zero-millisecond phases are timer resolution.
+The following evidence-recording commit changes only this work-state document.
+
+Selected remaining limits: module imports/visibility, universe commands, full native
+binder grammar, rebinding active section variables, open modifiers/expected-type
+overloads, autoParam, general CoeFun, named recursive self-calls and recursion under
+shadowed captured section parameters. Source translation of scoped programs is
+explicitly refused until that printer has its own ownership. This increment does
+not claim complete v7 or compiler self-hosting. The import/source profile guard
+is not a full portable authoring-profile verifier.
+
+The following records are historical and apply to their exact source commits.
+
+---
+
 # PSC0 AI WORK STATE — rich native v7 terms
 
 ## 11 October 2026 — shared lexical scopes, applications and expected types

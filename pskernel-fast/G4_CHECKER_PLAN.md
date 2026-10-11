@@ -45,6 +45,12 @@ An independent persistent, **untrusted candidate catalog** passed [G4.1 CI](G4_C
 
 Positive-only symbolic normalizer and universal-assignment proof are implemented and validated at source `4c37b7f`: [G4 evidence](G4_LEVEL_EVIDENCE.md). It recognizes 98 positive pairs of 1296 versus the pinned official oracle with **8 more official-positive cases unresolved**. The conservative `unresolved` result must never be treated as negative conversion. Full official normal-form equivalence and `isGEq` remain unimplemented; G4.0 is **partially implemented, not complete**, and does not enable theorem admission.
 
+## P0/P1 invariant foundation — validated but NOT model consistency
+
+The new [soundness contract](PSKERNEL_FAST_SOUNDNESS_CONTRACT_V1.md) and [source-matched P1 proof checkpoint](P1_SOUNDNESS_EVIDENCE.md) establish **independent structural** context/source/type validity of all six G4.3b rule constructors and exact reflection of the real G3 scope checker. Proofs show the extra inferred-result structural validation cannot reject a successfully inferred type. [Cloud run 38118786036](https://github.com/dwijayuda/pskernel/actions/runs/38118786036) passed 60 build jobs and a fail-closed 7-theorem axiom whitelist gate. These are prerequisites, NOT independently justified denotational typing, model consistency or a complete acceptance theorem.
+
+The next theorem must cover **typing-preserving application/let substitution**, not another restatement of `GeneralPiRule`. The following set-theoretic interpretation and `checkDecls` model-extension theorem remain major open tasks; do not report con-leche's theorem as a theorem of this independent checker.
+
 ## Immediate next implementation
 
 1. **G4.3b bounded source GREEN, NOT a general checker:** [exact evidence](G4_GENERAL_PI_EVIDENCE.md). `GeneralPiRule` has six guarded constructors, `GeneralPiContextWF` admits only previously checked Sort-domain binders, and `inferClosedGeneralPiCertified` performs source+output scope checks. Untrusted catalog headers never mint witnesses.

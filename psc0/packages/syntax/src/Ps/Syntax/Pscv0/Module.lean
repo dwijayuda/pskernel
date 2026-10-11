@@ -14,7 +14,7 @@ def psPscv0CommentTriviaWorker (chars : List Char) (position : PsSourcePos)
   | [] => false
   | char :: rest =>
       let current := psPscv0SkipEndedTokens tokens position.byteOffset;
-      let gap :=
+      let gap : Bool :=
         match current with
         | [] => true
         | token :: _ => Nat.ble (Nat.succ position.byteOffset) token.span.start.byteOffset;

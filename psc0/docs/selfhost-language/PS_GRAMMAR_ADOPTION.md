@@ -1,5 +1,8 @@
 # New-only ProofScript grammar transition
 
+> **Historical implementation evidence — NOT the current PSCV0 language specification.** PSC0's only normative future `.ps` source-language reference is [PSCV0 v7](../../PSCV0_LANGUAGE_REFERENCE.md), SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`. No backward compatibility with the older language references or bootstrap `.ps` grammar is required. The historical strict SH/1, R/F and selected-seed descriptions below remain reproducibility records for the still-deployed *old compiler*, not a language mode or compatibility promise for the developing v7 frontend. See [v7-only source policy](../PSCV0_V7_ONLY_SOURCE_POLICY.md) and [current AI state](../../AI_WORK_STATE.md).
+
+
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.
 
 Status: the bounded new-only grammar and projection implementation passed full R2 compiler qualification, independent provider acceptance and verified cold recovery. [selection commit e65606397fb679d7cb96f4f0e92700a6cf0944a6](https://github.com/dwijayuda/pskernel/commit/e65606397fb679d7cb96f4f0e92700a6cf0944a6) explicitly selects the exact R successor. F at `fcd875c8f38db4b0524090bd10c7c2fd5024053d` subsequently earned its own source/runtime and provider qualification in [F run 37947341800](https://github.com/dwijayuda/pskernel/actions/runs/37947341800). The bounded source grammar remains the R2 edition.

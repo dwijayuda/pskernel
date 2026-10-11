@@ -1,5 +1,8 @@
 # PSC0 self-host language: findings and decisions
 
+> **Historical implementation evidence — NOT the current PSCV0 language specification.** PSC0's only normative future `.ps` source-language reference is [PSCV0 v7](../../PSCV0_LANGUAGE_REFERENCE.md), SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`. No backward compatibility with the older language references or bootstrap `.ps` grammar is required. The historical strict SH/1, R/F and selected-seed descriptions below remain reproducibility records for the still-deployed *old compiler*, not a language mode or compatibility promise for the developing v7 frontend. See [v7-only source policy](../PSCV0_V7_ONLY_SOURCE_POLICY.md) and [current AI state](../../AI_WORK_STATE.md).
+
+
 ## Current strict SH/1 disposition
 
 The declared bounded PSC0-SH/1 source, runtime and TypeScript target are qualified at [compiled source `1fa5559a72b293defc56ef7e7020cf82d4b44b79`](https://github.com/dwijayuda/pskernel/commit/1fa5559a72b293defc56ef7e7020cf82d4b44b79). The [release qualification record](strict/release-qualification.json) binds the exact compiler evidence, eight independently reviewed source and composition argument packets, all **33 correspondence dispositions** and **27 stage dispositions**, and separate provider acceptance.

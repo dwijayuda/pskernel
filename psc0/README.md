@@ -19,7 +19,7 @@ closure contained 55 modules in 12 package groups; later qualified checkpoints
 record their own exact closure manifests rather than changing that historical
 receipt.
 
-## Current compiler authoring and `.ps` grammar
+## Deployed historical bootstrap profile (not the v7 design)
 
 The current compiler uses the bounded PSC authoring capabilities described in
 [the current authoring guide](docs/selfhost-language/CURRENT.md). Handwritten

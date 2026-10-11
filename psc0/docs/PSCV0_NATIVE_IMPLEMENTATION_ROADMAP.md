@@ -30,7 +30,7 @@ this development loop.
 | Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
 | Proofs and contracts | Term proofs checked by official Lean; selected logical primitives | Shared goal state, proof-producing tactic registry, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Term if-let, pattern-let, matches and inferred matrix results; selected Except do | General typed do and do-pattern sequencing, mutable/early-return/loop lowering, registered effect families |
-| Executable assurance | Checked prepared graph, TS/JS integration; explicit shared IR gate wired in the codegen milestone | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
+| Executable assurance | Checked prepared graph, complete shared IR gate, TS/JS and Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
 | Portable source end state | Native portable authoring/import guard | Translate sufficient implemented closure to readable .ps, then explicit source/semantic/fixed-point qualification |
 
 ## Dependency-driven sequence
@@ -53,11 +53,18 @@ A green compact fixture is evidence for its exact boundary, never completion of
 an entire row. Validation first checks semantic invariants and actual admitted
 terms, then the affected runtime path, while reusing compact integration inputs.
 
-## Next requested backend milestone
+## Qualified backend milestones and remaining output work
 
-The small class/instance milestone is qualified in native profile 15. Implement a Rust backend before
-full v7 completion. Reuse checked prepared Core and validated typed IR. Keep target
-representation and runtime support inside backend/runtime modules; do not fork
-source elaboration or proof checking. Define the initial Rust capability boundary
-and compile/run the same compact application subset with the native Rust toolchain.
-Full v7 and source/self-host migration remain subsequent milestones.
+Native profile 17 qualifies milestones A and B: one checked prepared graph,
+actual shared IR validation, semantic/output name mapping, portable layout and
+origin artifacts, plus Rust alongside TS. The same 285-declaration composite and
+102 runtime observations pass in strict TypeScript/JavaScript and Rust. Target
+representation and runtime policy remain in backend modules, never elaboration.
+See PSCV0_NATIVE_CODEGEN.md and PSCV0_NATIVE_RUST.md for exact boundaries.
+
+Milestone C remains readable pre-erasure Lean/ProofScript source output, full TS
+expression layout, original-source spans/comments and stronger incremental name
+stability. Milestone D remains broader allocation/scaling qualification and
+stack-safe recursive destruction. Neither is implied by this bounded Rust
+milestone. Language coverage, compiler-source migration and self-hosting remain
+separate acceptance boundaries.

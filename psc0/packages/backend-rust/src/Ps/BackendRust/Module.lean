@@ -57,11 +57,11 @@ def psRustDeclarationDoc (ctx : PsRustContext) (d : PsVerifiedIrDeclaration) :
     -- Closed pure values are initialized once per thread. They may contain Rc
     -- closures/data; requiring Sync statics would change the source language.
     let initialization : PsDoc := .append
-      (.text ("static __ps_value: std::cell::LazyCell<" ++ resultType ++ "> = std::cell::LazyCell::new(|| "))
+      (.text ("static __PS_VALUE: std::cell::LazyCell<" ++ resultType ++ "> = std::cell::LazyCell::new(|| "))
       (.append (psDocBlock "" [body]) (.text ");"))
     return .origin d.name (psDocBlock header [
       psDocBlock "std::thread_local!" [initialization],
-      .text "__ps_value.with(|value| (**value).clone())"])
+      .text "__PS_VALUE.with(|value| (**value).clone())"])
   return .origin d.name (psDocBlock header [body])
 
 def psRustEmitReadable (ir : PsVerifiedIrModule) : Except String PsEmissionArtifact := do

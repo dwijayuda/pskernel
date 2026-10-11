@@ -1,21 +1,42 @@
-# Native codegen milestone A qualified; Rust milestone B awaiting qualification
+# Native codegen milestones A and B qualified
 
-Milestone A source 6115702332bb51c11fbe2df1e5835f0d0c45bf6b passed
-[run 38174273630](https://github.com/dwijayuda/pskernel/actions/runs/38174273630),
-job 114573192333, native profile 16. The 264-declaration CLI application passed
-official Lean checking, the actual shared IR gate, structured TS emission,
-strict TS 7.0.2 and JS runtime checks. The compact boundary check refused invalid
-IR and checked target name collisions/Unicode retention and generated ranges.
-All previous 28 parser cases, four accepted semantic inputs and 50 refusals pass.
-The guard reports 92 portable / 98 native modules. Cached rebuild 6509 ms, warm
-469 ms; single-run observations, not general performance claims.
+Implementation source **ff83ff5e927bdc4bf5d31f57bef688f4b146537b** passed
+[run 38176124905](https://github.com/dwijayuda/pskernel/actions/runs/38176124905),
+job 114578776391, native profile **pscv0-v7-native-bounded/17**:
+- Native Lean 4.35.0-rc4 build and official kernel admission of 285 declarations.
+- Existing 28 parser cases, four accepted semantic inputs, 50 phase-specific
+  refusals and the compact invalid-IR/name/origin boundary check.
+- One CLI preparation/check/erasure and complete shared IR validation for TS and
+  Rust. Strict TypeScript 7.0.2 and Rust 1.98.1 Cargo --locked --release both pass
+  the same 102 runtime observations. No prior acceptance requirement was removed.
+- Source guard: 102 portable / 108 native modules; no pskernel-core.
+- Cached rebuild 5146 ms; warm build 520 ms. CLI parse/elaborate/prepare/kernel/
+  erase/combined-IR-and-emit: 19/21/79/38/57/14 ms. Single-run observations only.
 
-Rust milestone B now integrates the existing backend with the shared boundary,
-uniform closures, recursive-layout analysis, liveness-based moves/clones,
-copy-on-write arrays, structured output and a separate versioned runtime.
-It reuses the existing application plus eleven focused runtime observations;
-the same 102 observations drive TS and Rust. Qualification is pending.
-See docs/PSCV0_NATIVE_RUST.md and docs/PSCV0_NATIVE_CODEGEN.md.
+Milestone A added the real IR gate, semantic/output symbol mapping, a portable
+document printer, artifact/origin records and structured TS declarations.
+It first qualified at 6115702332bb51c11fbe2df1e5835f0d0c45bf6b in
+[run 38174273630](https://github.com/dwijayuda/pskernel/actions/runs/38174273630).
+
+Milestone B integrates Rust with uniform Rc<dyn Fn> values, recursive nominal
+layout analysis, liveness-based moves/clones, copy-on-write arrays, compositional
+Rust output and a separate runtime. Legacy function-storage restrictions and
+the obsolete ValueRefs module were removed. The same composite gains eleven
+observations for closures, array persistence, numeric/Unicode behavior and
+borrowed operands followed by consuming argument expressions.
+
+Final cleanup changes the generated lazy-cell static to Rust's uppercase naming
+convention and omits redundant parentheses for atomic match scrutinees. It leaves
+the qualification inputs and thresholds unchanged; the final branch head must
+pass the same cloud workflow.
+
+See docs/PSCV0_NATIVE_RUST.md and docs/PSCV0_NATIVE_CODEGEN.md. Rust is qualified
+for the current pure, single-module runtime profile on Linux; this is not full
+v7, a backend preservation proof, or a scaling/cross-platform qualification.
+Complete TS expression layout, source-coordinate/comment retention and readable
+source Lean/ProofScript emission remain milestone C. Final-owner iterative
+release and broader scaling/performance work remain milestone D. Continue v7
+language growth natively; no compiler-source .ps generation or self-hosting yet.
 
 ---
 

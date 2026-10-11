@@ -2,7 +2,7 @@
 
 Develop the portable compiler in `.lean` and run the current sources through the
 official Lean native compiler. The native host checks compiler-produced declarations
-with the official RC4 kernel before emitting TypeScript. It does not use Lean's
+with the official RC4 kernel and validates erased IR before emitting TypeScript or Rust. It does not use Lean's
 frontend as a fallback for unsupported PSCV0 syntax or semantics.
 
 ## Fast loop
@@ -12,7 +12,7 @@ From this directory on the Linux development runner:
 ```sh
 lake build pscv0_native
 .lake/build/bin/pscv0_native --check path/to/Application.ps
-.lake/build/bin/pscv0_native --emit path/to/Application.ps path/to/Application.ts
+.lake/build/bin/pscv0_native --emit-both path/to/Application.ps path/to/Application
 ```
 
 `--check` accepts several independent input files in one process. It initializes
@@ -22,7 +22,8 @@ with `PSCV0-NATIVE-MODULE-IMPORTS-PENDING`. This is the existing bounded v7 fron
 connected to the existing portable semantics, not complete v7 language coverage.
 
 The emitted TypeScript uses the existing backend and pinned TypeScript 7.0.2
-profile. The CLI emits TypeScript; use the pinned target compiler for JavaScript.
+profile. Use the pinned target compiler for JavaScript. The Rust target uses Rust 1.98.1
+and the runtime dependencies recorded in its origins manifest.
 An input is an application fixture, never generated compiler source.
 
 ## Rich terms and shared elaboration
@@ -271,13 +272,18 @@ Ordinary edits use incremental Lake builds with toolchain/configuration-specific
 cache keys. The old M1 generation and closure workflows are manual-only here.
 Measured evidence and exact source commits are recorded in ../AI_WORK_STATE.md.
 
-## Next requested milestone
+## Qualified backend milestones
 
-Implement a Rust backend over validated typed IR before completing v7. Keep the
-existing parser, elaborator, official kernel checks and proof erasure shared;
-put Rust representation and runtime support in the target backend. Establish a
-small compile-and-run acceptance boundary first. Compiler-source migration and
-self-hosting remain later milestones.
+Milestones A and B add the actual shared IR gate, portable layout/naming/artifact
+modules, structured TS declarations and the native Rust target. Source
+ff83ff5e927bdc4bf5d31f57bef688f4b146537b passed
+[run 38176124905](https://github.com/dwijayuda/pskernel/actions/runs/38176124905):
+285 officially checked declarations and the same 102 runtime observations in
+both targets. The existing semantic/refusal suite is retained.
+
+Source Lean/ProofScript output and full TS expression layout remain a separate
+milestone. See [runtime emission](../docs/PSCV0_NATIVE_CODEGEN.md) and
+[Rust design and limits](../docs/PSCV0_NATIVE_RUST.md).
 
 ## Remaining semantic milestones
 

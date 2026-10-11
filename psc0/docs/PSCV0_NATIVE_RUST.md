@@ -47,11 +47,14 @@ dependencies. The current generated API is a source interface, not a stable ABI.
 
 ## Qualification and bounds
 
-Use the same 102 scalar/call observations for TS and Rust. The existing composite
+Source ff83ff5e927bdc4bf5d31f57bef688f4b146537b passed
+[Linux run 38176124905](https://github.com/dwijayuda/pskernel/actions/runs/38176124905):
+285 officially checked declarations and the same 102 scalar/call observations
+for TS and Rust, with the existing parser/semantic/refusal batch retained. The existing composite
 also retains dependent data, impossible cases, proof fields, recursive functions
 and instance dictionaries. Eleven observations cover stored/repeated captured
-callbacks, returned branch closures, persistent array aliasing/building, borrowed operands across later moves, large
-Nat, saturating subtraction, zero division and Unicode length/byte distinction.
+callbacks, returned branch closures, persistent array aliasing/building,
+borrowed operands across later moves, large Nat, saturating subtraction, zero division and Unicode length/byte distinction.
 
 External imports/effects, concurrency, unqualified machine scalars/floats and
 higher-rank runtime polymorphism remain explicit capability boundaries. Type

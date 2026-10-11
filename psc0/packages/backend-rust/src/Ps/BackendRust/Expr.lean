@@ -158,6 +158,7 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
             .append (.text "let __ps_empty = ") (.append target (.text ";")),
             .text "panic!(\"uninhabited checked PSCV0 value\")"]
         let branchFree := alternatives.flatMap fun (_, _, body) => psRustFree ctx body
+        let atomic := match target with | .var _ | .literal _ => true | _ => false
         let target ← emit (preserve ++ branchFree) target
         let shared := ctx.shared.contains name
         let mut arms := []
@@ -170,5 +171,5 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
           let pattern := psRustNodeName ctx.shared name ++ "::" ++ ctor ++ " { " ++
             String.intercalate ", " (fields ++ [".."]) ++ " } =>"
           arms := .append (psDocBlock pattern (clones ++ [branch])) (.text ",") :: arms
-        let target := if shared then psRustDocWrap "(" target ").as_ref()" else psRustDocWrap "(" target ")"
+        let target := if shared then psRustDocWrap "(" target ").as_ref()" else if atomic then target else psRustDocWrap "(" target ")"
         return .append (.text "match ") (.append target (psDocBlock "" arms.reverse))

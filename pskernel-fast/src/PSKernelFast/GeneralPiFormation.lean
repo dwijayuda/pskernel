@@ -121,7 +121,8 @@ ONLY the three GeneralPiRule constructors. No acceptance/admission API exists.
 def inferClosedGeneralPi (params : List KName) (expr : KExpr) :
     Except GeneralPiError KExpr :=
   if h : expr.closedInput params = true then
-    match inferGeneralPi ([] : List KExpr) (GeneralPiContextWF.empty) expr with
+    match inferGeneralPi (params := params) ([] : List KExpr)
+      (GeneralPiContextWF.empty (params := params)) expr with
     | some witness => .ok witness.val
     | none => .error .unsupported
   else .error .malformed
@@ -137,14 +138,14 @@ theorem inferClosedGeneralPi_sound (params : List KName)
     KExpr.StructurallyValid params 0 expr ∧
       GeneralPiRule params [] expr result := by
   by_cases hv : expr.closedInput params = true
-  · cases hi : inferGeneralPi ([] : List KExpr)
-      GeneralPiContextWF.empty expr with
+  · cases hi : inferGeneralPi (params := params) ([] : List KExpr)
+      (GeneralPiContextWF.empty (params := params)) expr with
     | none => simp [inferClosedGeneralPi, hv, hi] at h
     | some witness =>
         have hSame : witness.val = result := by
           simpa [inferClosedGeneralPi, hv, hi] using h
-        subst result
-        exact ⟨KExpr.closedInput_sound params expr hv, witness.property⟩
+        exact ⟨KExpr.closedInput_sound params expr hv,
+          hSame ▸ witness.property⟩
   · simp [inferClosedGeneralPi, hv] at h
 
 end PSKernelFast.Core

@@ -29,6 +29,8 @@ THEOREMS = {
     "PSKernelFast.Proof.dependent_let_variable_zeta_preserves_type",
     "PSKernelFast.Proof.dependent_outer_variable_beta_preserves_type",
     "PSKernelFast.Proof.dependent_outer_variable_let_preserves_type",
+    "PSKernelFast.Proof.eraseExpr_lift",
+    "PSKernelFast.Proof.eraseExpr_instantiate",
     "PSKernelFast.Proof.liftBVars_add",
     "PSKernelFast.Proof.liftBVars_comm",
     "PSKernelFast.Proof.checked_bound_variable_weakens",

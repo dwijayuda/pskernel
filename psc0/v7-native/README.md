@@ -33,15 +33,40 @@ types from the expected Pi telescope. Positional and named calls share one
 ordered application engine with implicit insertion and pending instance solving.
 Scopes restore lexical visibility while preserving constraints and fresh IDs.
 
-This increment covers lexical binders, lets and nested closures. Namespace/open/
-section commands, default arguments, general CoeFun, named recursive self-calls
-and the full native lambda binder grammar remain pending. Empty calls complete
-the selected callable/exactly-one-Unit case; they do not invent defaults. Source
-printing to Lean refuses empty invocation until typed completion is available.
+Ordered programs retain `namespace`, `section`, `end`, `open`, typed `variable`,
+`include` and `omit` commands. Namespace ancestors and opened namespaces are
+resolved before term elaboration; local binders shadow globals, `_root_` bypasses
+that lookup, and ambiguous opened names fail explicitly. Scope exit restores
+opens/variables/inclusions while retaining checked declarations.
 
-The shared elaborator is split into Basic (inference/checking), Binders (ordered
-telescopes and lexical scopes), Application (argument consumption), and Term
-(dispatch, existing records/control/patterns). All are portable source modules.
+Section parameters are selected from header/body dependencies for definitions,
+and from the header plus explicit inclusions for theorems. Dependencies precede
+their users in the original variable order; eligible instance variables are
+retained. A theorem proof cannot silently enlarge its public signature.
+Annotations and defaults are resolved at their declaration site.
+
+Explicit defaults use the checked `optParam` definition from Lean RC4's
+`Init.Prelude`. The default is part of the Core parameter type, closed over prior
+binders; ordinary instantiation substitutes actual preceding arguments. Named,
+positional and empty calls use the same telescope engine. Expected function types
+preserve partial applications. Empty calls complete declared defaults and, when
+needed, exactly one required `Unit` argument. A final `function f()` group lowers
+to that required Unit binder.
+
+Basic owns inference/checking and global/projection lookup; Binders owns ordered
+telescopes and lexical scopes; Application owns argument consumption; Term owns
+dispatch and existing control/patterns. Scope owns capture-aware syntax traversal
+and section dependencies; Command owns ordered scope transitions and declaration
+admission. All are portable source modules, without host elaborator imports.
+
+Selected limitations remain explicit: one named typed parameter per native
+variable/nonexplicit group, no rebinding an active section variable, no universe
+commands, scoped notation/open modifiers, expected-type overload disambiguation,
+general CoeFun, autoParam or full lambda grammar. Named recursive self-calls and
+recursive calls under a shadowed captured section parameter remain unsupported.
+The declaration-only source translation API refuses scope commands and empty
+calls rather than dropping scope or inventing typed completion. Full project
+imports/visibility and full v7 conformance remain later milestones.
 
 ## Boundaries
 
@@ -75,9 +100,12 @@ profile verifier or a final runtime-library manifest.
 The executable retains 28 parser cases (the named-call case now accepts its
 newly implemented syntax) and a compact semantic batch. One composite application
 covers expected lambdas, captures/shadowing, named dependent calls, inferred
-arguments, ascriptions and Unit completion; focused refusals protect the same
-boundaries. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and
-runs one small emitted application. Phase times and source hashes are artifacts.
+arguments, ascriptions, namespace resolution, section generalization, theorem
+inclusions, dependent defaults, partial application and Unit completion. Focused
+refusals protect scope restoration, ambiguity, theorem signatures, default type
+checking and required arguments. Selected Except do and request isolation remain
+covered. The Linux workflow additionally checks CLI output and runs the emitted
+application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.
 

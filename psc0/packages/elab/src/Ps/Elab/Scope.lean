@@ -145,6 +145,7 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
         used := args.foldl (fun acc arg => psScopeUnion acc arg.snd.used) fn.used }
     | .app fn args span =>
       let fn ← visit bound fn
+      let fixed ← psScopeSelfArguments resolver bound fn.term
       let args ← args.mapM (visit bound)
       return {
         term := .app fn.term (fixed ++ args.map (·.term)) span

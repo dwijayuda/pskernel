@@ -8,16 +8,13 @@ inductive PsPscv0DoItem where
       (value : PsSyntaxTerm) (span : PsSourceSpan)
   | action (value : PsSyntaxTerm) (span : PsSourceSpan)
   | returnValue (value : PsSyntaxTerm) (span : PsSourceSpan)
-
 structure PsPscv0DoBlock where
   items : List PsPscv0DoItem
   span : PsSourceSpan
-
 structure PsPscv0SurfaceDeclaration where
   keyword : String
   declaration : PsSyntaxDeclaration
   doBody : Option PsPscv0DoBlock
-
 structure PsPscv0SurfaceModule where
   originalSource : String
   proofScript : Bool
@@ -48,9 +45,9 @@ def psPscv0ParseError (error : PsParseError) : String :=
 
 def psPscv0TokenAt (tokens : List PsToken) (offset : Nat) : Option PsToken :=
   match tokens with
-  | [] => none
+  | [] => Option.none
   | token :: rest =>
-      if Nat.beq token.span.start.byteOffset offset then some token
+      if Nat.beq token.span.start.byteOffset offset then Option.some token
       else psPscv0TokenAt rest offset
 
 def psPscv0TokenTextAt (tokens : List PsToken) (offset : Nat) : String :=
@@ -84,7 +81,6 @@ def psPscv0FreshName (tokens : List PsToken) (base : String)
   | Except.error error => Except.error error
   | Except.ok name => Except.ok (PsSyntaxName.mk [name] span)
 
--- Check actual application nodes, not a blanket whitespace regex.
 def psPscv0GroupedArgument (tokens : List PsToken) (term : PsSyntaxTerm) : Bool :=
   let span := psSyntaxTermSpan term;
   psStringEq (psPscv0TokenTextAt tokens span.start.byteOffset) "("
@@ -128,10 +124,8 @@ def psPscv0ValidateTermWithFuel (tokens : List PsToken) (fuel : Nat)
             | [] => Except.error "PSCV0-APP-03-COMPLETION-NOT-YET-SUPPORTED"
             | _ :: _ =>
                 let fnSpan := psSyntaxTermSpan fn;
-                if psStringEq (psPscv0TokenTextAt tokens fnSpan.stop.byteOffset) "(" then
-                  Except.ok ()
-                else if psListAny (psPscv0GroupedArgument tokens) args then
-                  Except.error "PSCV0-APP-02"
+                if psStringEq (psPscv0TokenTextAt tokens fnSpan.stop.byteOffset) "(" then Except.ok ()
+                else if psListAny (psPscv0GroupedArgument tokens) args then Except.error "PSCV0-APP-02"
                 else Except.ok ()
         | _ => Except.ok ();
       match localCheck with
@@ -155,8 +149,7 @@ def psPscv0ReadTerm (proofScript : Bool) (cursor : PsTokenCursor) :
         | Except.ok _ => Except.ok result
       else Except.ok result
 
-def psPscv0ReadCompleteTerm (proofScript : Bool) (cursor : PsTokenCursor) :
-    Except String PsSyntaxTerm :=
+def psPscv0ReadCompleteTerm (proofScript : Bool) (cursor : PsTokenCursor) : Except String PsSyntaxTerm :=
   match psPscv0ReadTerm proofScript cursor with
   | Except.error error => Except.error error
   | Except.ok parsed =>

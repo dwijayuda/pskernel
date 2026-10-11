@@ -4,11 +4,9 @@ structure PsPscv0Collected where
   tokens : List PsToken
   cursor : PsTokenCursor
   stop : PsSourcePos
-
 structure PsPscv0DoRead where
   block : PsPscv0DoBlock
   cursor : PsTokenCursor
-
 structure PsPscv0Rewritten where
   tokens : List PsToken
   blocks : List PsPscv0DoBlock
@@ -19,17 +17,16 @@ def psPscv0Expect (cursor : PsTokenCursor) (text : String) : Except String PsTok
   | Except.ok value => Except.ok value
 
 def psPscv0ClosingFor (text : String) : Option String :=
-  if psStringEq text "(" then some ")"
-  else if psStringEq text "{" then some "}"
-  else if psStringEq text "[" then some "]"
-  else none
+  if psStringEq text "(" then Option.some ")"
+  else if psStringEq text "{" then Option.some "}"
+  else if psStringEq text "[" then Option.some "]"
+  else Option.none
 
 def psPscv0IsClosing (text : String) : Bool :=
   if psStringEq text ")" then true
   else if psStringEq text "}" then true
   else psStringEq text "]"
 
--- Partition by token positions and balanced delimiters, not source regex.
 def psPscv0CollectItem (braced : Bool) (indent : Nat) (fuel : Nat)
     (cursor : PsTokenCursor) (closing : List String) (tokensRev : List PsToken)
     (stop : PsSourcePos) : Except String PsPscv0Collected :=
@@ -110,7 +107,7 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
                   | Except.ok assign =>
                       match psPscv0ReadCompleteTerm proofScript assign.cursor with
                       | Except.error error => Except.error error
-                      | Except.ok value => Except.ok (PsPscv0DoItem.letValue name (some annotation.value) value span)
+                      | Except.ok value => Except.ok (PsPscv0DoItem.letValue name (Option.some annotation.value) value span)
         else
           match psTokenCursorAdvance nameToken.cursor with
           | none => Except.error "PSCV0-DO-BINDING-OPERATOR"
@@ -118,7 +115,7 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
               match psPscv0ReadCompleteTerm proofScript operator.cursor with
               | Except.error error => Except.error error
               | Except.ok value =>
-                  if psStringEq operator.token.text ":=" then Except.ok (PsPscv0DoItem.letValue name none value span)
+                  if psStringEq operator.token.text ":=" then Except.ok (PsPscv0DoItem.letValue name Option.none value span)
                   else if psStringEq operator.token.text "←" then Except.ok (PsPscv0DoItem.bind name value span)
                   else if psStringEq operator.token.text "<-" then Except.ok (PsPscv0DoItem.bind name value span)
                   else Except.error "PSCV0-DO-BINDING-OPERATOR"
@@ -202,7 +199,6 @@ def psPscv0ReadDo (proofScript : Bool) (declarationColumn : Nat)
             keyword.token.span.start 513 keyword.cursor [] keyword.token.span.stop
         else Except.error "PSCV0-DO-NATIVE-LAYOUT-REQUIRED"
 
--- Unlexable temporary parser slot: validation requires a whole definition body.
 def psPscv0DoSlot : String := "$pscv0Do"
 
 def psPscv0RewriteTokens (proofScript : Bool) (fuel : Nat)

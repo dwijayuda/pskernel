@@ -45,7 +45,7 @@ jobs:
       - name: Native type-check all new portable source modules
         run: |
           mkdir -p .lake/build/lib/lean/Ps/Syntax/Pscv0
-          for MODULE in Surface Read Module; do
+          for MODULE in Surface Read Commands Module; do
             lake env lean -o ".lake/build/lib/lean/Ps/Syntax/Pscv0/$MODULE.olean" "packages/syntax/src/Ps/Syntax/Pscv0/$MODULE.lean" | tee "dist/pscv0-source-check/$MODULE.txt"
           done
           git rev-parse HEAD > dist/pscv0-source-check/commit.txt

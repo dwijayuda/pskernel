@@ -30,6 +30,7 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
           filter: blob:none
+          show-progress: false
           sparse-checkout: |
             psc0/packages/syntax
             psc0/packages/foundation
@@ -38,6 +39,22 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22.23.3'
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Cheap native source and round-trip gate before expensive preparation
+        run: |
+          lake build PsSyntax PsFoundation
+          mkdir -p .lake/build/lib/lean/Ps/Syntax/Pscv0
+          for MODULE in Surface Read Commands Module; do
+            lake env lean -o ".lake/build/lib/lean/Ps/Syntax/Pscv0/$MODULE.olean" "packages/syntax/src/Ps/Syntax/Pscv0/$MODULE.lean"
+          done
+          lake env lean --run scripts/Pscv0BridgeSourceSmoke.lean
       - name: Set runner-local installation prefix
         run: echo "PSCV0_PREFIX=$RUNNER_TEMP/pscv0-tools" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093

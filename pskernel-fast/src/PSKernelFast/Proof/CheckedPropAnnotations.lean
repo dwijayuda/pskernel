@@ -140,7 +140,7 @@ theorem checkedPropAnnotation_pi_model_member
       refine ⟨u, v, .pi ctx name domain body style u v
         hDomain hBody, hResultProp, ?_⟩
       simpa only [hResultProp] using
-        (interpProp_pi_member V env annDom annBody hValid)
+        (interpProp_pi_member V env annotatedDomain annotatedBody hValid)
 
 #print axioms checkedPropAnnotation_erases
 #print axioms checkedPropAnnotation_typed

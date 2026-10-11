@@ -288,7 +288,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "where" then true
   else if psStringEq text "with" then true
   else if psStringEq text "else" then true
-  else if psStringEq text "fun" then true
+  else if ["fun", "λ", "forall", "∀", "↦"].contains text then true
   else if psStringEq text "let" then true
   else if psStringEq text "if" then true
   else if psStringEq text "match" then true

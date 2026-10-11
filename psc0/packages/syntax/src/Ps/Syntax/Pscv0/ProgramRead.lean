@@ -33,7 +33,7 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
     return { value := command, cursor := names.cursor }
   if token.text == "variable" then
     let head ← psPscv0Expect cursor "variable"
-    let binders ← (psPscv0ParameterGroups 4096 false false false head.cursor []).mapError psPscv0ParseError
+    let binders ← (psPscv0ParameterGroups (psPscv0ParseTerm true) (psPscv0ParseTerm false) 4096 false false false head.cursor []).mapError psPscv0ParseError
     if binders.value.isEmpty then throw "PSCV0-VARIABLE-BINDERS-REQUIRED"
     let stop := psProofScriptLastBinderStop token.span.stop binders.value
     let next ← (psParseProofScriptCommandSeparator stop binders.cursor).mapError psPscv0ParseError

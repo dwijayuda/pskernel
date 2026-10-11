@@ -1,10 +1,7 @@
-import Ps.Syntax.ParseProofScript
+import Ps.Syntax.Pscv0.Binders
 
 -- These readers preserve source intent. Semantic argument insertion belongs to
 -- the application elaborator, never to parsing or token rewriting.
-abbrev PsPscv0TermReader :=
-  PsTokenCursor → Except PsParseError (PsParseResult PsSyntaxTerm)
-
 def psPscv0ReadAscription (read : PsPscv0TermReader)
     (value : PsParseResult PsSyntaxTerm) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
@@ -76,31 +73,3 @@ def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
       (.call current args.value (psSyntaxSpanJoin (psSyntaxTermSpan current) close.token.span))
       close.cursor
 
--- Lambda binders use native binder ownership, not declaration comma groups.
--- A missing annotation is represented by a hole for expected-type elaboration.
-def psPscv0LambdaBinders (read : PsPscv0TermReader) (fuel : Nat)
-    (cursor : PsTokenCursor) (acc : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
-    Except PsParseError (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) := do
-  match fuel with
-  | 0 => throw .fuelExhausted
-  | fuel + 1 =>
-    if psTokenCursorAtText cursor "=>" then
-      if acc.isEmpty then throw (psProofScriptExpectedError "lambda binder" cursor)
-      return { value := acc.reverse, cursor }
-    if psTokenCursorAtBinderStart cursor then
-      let opening ← psParseBinderOpening cursor
-      let name ← psTokenCursorExpectKind opening.cursor .identifier
-      let type ←
-        if psTokenCursorAtText name.cursor ":" then do
-          let colon ← psTokenCursorExpectText name.cursor ":"
-          read colon.cursor
-        else pure (PsParseResult.mk (.hole name.token.span) name.cursor)
-      let close ← psParseBinderClosing opening type.cursor
-      let head := PsSyntaxBinderHead.mk
-        (PsSyntaxName.mk [name.token.text] name.token.span) opening.kind close.value
-      psPscv0LambdaBinders read fuel close.cursor ((head, type.value) :: acc)
-    else
-      let name ← psTokenCursorExpectKind cursor .identifier
-      let head := PsSyntaxBinderHead.mk
-        (PsSyntaxName.mk [name.token.text] name.token.span) .explicit name.token.span
-      psPscv0LambdaBinders read fuel name.cursor ((head, .hole name.token.span) :: acc)

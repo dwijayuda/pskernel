@@ -306,24 +306,9 @@ def psPrintLeanTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintLeanConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintLeanMapBinders printBinder binders;
@@ -343,24 +328,9 @@ def psPrintLeanTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintLeanConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintLeanMapBinders printBinder binders;
@@ -371,7 +341,7 @@ def psPrintLeanTermWithFuel
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
-                    (psPrintArrowChain printedBinders printedBody)
+                    (psPrintLeanConcat4 "forall " (psPrintJoin " " printedBinders) ", " printedBody)
       | .letE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
@@ -471,23 +441,9 @@ def psPrintLeanTerm
 
 def psPrintLeanBinder
     (binder : PsSyntaxBinderHead × PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  match binder with
-  | Prod.mk head type =>
-      match psPrintSyntaxName head.name with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          match psPrintLeanTerm type with
-          | Except.error error => Except.error error
-          | Except.ok printedType =>
-              let delimiters := psPrintBinderDelimiters head.kind;
-              Except.ok
-                (psPrintLeanConcat5
-                  delimiters.fst
-                  name
-                  " : "
-                  printedType
-                  delimiters.snd)
+    Except PsSourcePrintError String := do
+  let type ← psPrintLeanTerm binder.snd
+  psPrintTypedBinder binder.fst type
 
 def psPrintLeanStructureField
     (field : PsSyntaxBinderHead × PsSyntaxTerm) :

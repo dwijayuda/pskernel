@@ -121,7 +121,7 @@ def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.
   let identity := [
     ("source", toJson sourceName), ("leanVersion", toJson Lean.versionString),
     ("leanCommit", toJson Lean.githash), ("provider", toJson ("lean4-cpp" : String)),
-    ("profile", toJson ("pscv0-v7-native-bounded/3" : String))]
+    ("profile", toJson ("pscv0-v7-native-bounded/4" : String))]
   match result with
   | .error error => Lean.Json.mkObj (identity ++ [
       ("accepted", toJson false), ("phase", toJson error.phase),

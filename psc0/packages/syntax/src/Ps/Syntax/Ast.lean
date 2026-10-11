@@ -15,6 +15,11 @@ structure PsSyntaxBinderHead where
   kind : PsSyntaxBinderKind
   span : PsSourceSpan
 
+def psSyntaxAnonymousInstanceBinder (head : PsSyntaxBinderHead) : Bool :=
+  match head.kind, head.name.segments with
+  | .instanceImplicit, [name] => name.startsWith "$psc0Inst"
+  | _, _ => false
+
 inductive PsSyntaxPattern where
   | bool (value : Bool) (span : PsSourceSpan)
   | wildcard (span : PsSourceSpan)

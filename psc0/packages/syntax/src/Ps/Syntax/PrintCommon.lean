@@ -65,6 +65,14 @@ def psPrintBinderDelimiters
   | .strictImplicit => Prod.mk "{{" "}}"
   | .instanceImplicit => Prod.mk "[" "]"
 
+-- The generated local name of an anonymous instance is never source syntax.
+def psPrintTypedBinder (head : PsSyntaxBinderHead) (type : String) :
+    Except PsSourcePrintError String := do
+  if psSyntaxAnonymousInstanceBinder head then return "[" ++ type ++ "]"
+  let name ← psPrintSyntaxName head.name
+  let delimiters := psPrintBinderDelimiters head.kind
+  return delimiters.fst ++ name ++ " : " ++ type ++ delimiters.snd
+
 def psPrintPattern
     (pattern : PsSyntaxPattern) :
     Except PsSourcePrintError String :=

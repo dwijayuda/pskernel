@@ -227,25 +227,9 @@ def psPrintProofScriptTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match
-                          smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintProofScriptConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintProofScriptMapBinders printBinder binders;
@@ -266,25 +250,9 @@ def psPrintProofScriptTermWithFuel
           let printBinder :
               Prod PsSyntaxBinderHead PsSyntaxTerm ->
                 Except PsSourcePrintError String :=
-            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) =>
-              match binder with
-              | Prod.mk head type =>
-                  match psPrintSyntaxName head.name with
-                  | Except.error error => Except.error error
-                  | Except.ok name =>
-                      match
-                          smaller type with
-                      | Except.error error => Except.error error
-                      | Except.ok printedType =>
-                          let delimiters :=
-                            psPrintBinderDelimiters head.kind;
-                          Except.ok
-                            (psPrintProofScriptConcat5
-                              delimiters.fst
-                              name
-                              " : "
-                              printedType
-                              delimiters.snd);
+            fun (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) => do
+              let type ← smaller binder.snd
+              psPrintTypedBinder binder.fst type;
           let printedBindersResult :
               Except PsSourcePrintError (List String) :=
             psPrintProofScriptMapBinders printBinder binders;
@@ -296,7 +264,7 @@ def psPrintProofScriptTermWithFuel
               | Except.error error => Except.error error
               | Except.ok printedBody =>
                   Except.ok
-                    (psPrintArrowChain printedBinders printedBody)
+                    (psPrintProofScriptConcat4 "forall " (psPrintJoin " " printedBinders) ", " printedBody)
       | .letE name type value body _ =>
           match psPrintSyntaxName name with
           | Except.error error => Except.error error
@@ -400,23 +368,9 @@ def psPrintProofScriptTerm
 
 def psPrintProofScriptBinder
     (binder : PsSyntaxBinderHead × PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  match binder with
-  | Prod.mk head type =>
-      match psPrintSyntaxName head.name with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          match psPrintProofScriptTerm type with
-          | Except.error error => Except.error error
-          | Except.ok printedType =>
-              let delimiters := psPrintBinderDelimiters head.kind;
-              Except.ok
-                (psPrintProofScriptConcat5
-                  delimiters.fst
-                  name
-                  " : "
-                  printedType
-                  delimiters.snd)
+    Except PsSourcePrintError String := do
+  let type ← psPrintProofScriptTerm binder.snd
+  psPrintTypedBinder binder.fst type
 
 -- Declaration and constructor headers share one explicit comma group.
 -- Non-explicit binders remain in their original prefix; never reorder a

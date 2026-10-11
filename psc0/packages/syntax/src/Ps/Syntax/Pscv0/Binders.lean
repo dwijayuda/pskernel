@@ -1,50 +1,93 @@
-import Ps.Syntax.Pscv0.TermRead
+import Ps.Syntax.ParseProofScript
 
--- Declaration comma groups and native variable groups share entries but keep
--- distinct group rules. Defaults stay attached to their own binder annotation.
-def psPscv0ParameterEntries (fuel : Nat) (opening : PsSyntaxBinderOpening)
-    (commaGroup : Bool) (cursor : PsTokenCursor)
+abbrev PsPscv0TermReader :=
+  PsTokenCursor → Except PsParseError (PsParseResult PsSyntaxTerm)
+
+-- All binder contexts use the caller's v7 annotation reader. Grammar policy
+-- stays here: declarations own comma groups/defaults; terms own native binders.
+def psPscv0BinderEntry (readType readValue : PsPscv0TermReader)
+    (kind : PsSyntaxBinderKind) (requireType defaults : Bool)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (Prod PsSyntaxBinderHead PsSyntaxTerm)) := do
+  let name ← psTokenCursorExpectKind cursor .identifier
+  let type ←
+    if psTokenCursorAtText name.cursor ":" then do
+      let colon ← psTokenCursorExpectText name.cursor ":"
+      readType colon.cursor
+    else if requireType then throw (psProofScriptExpectedError "typed binder" name.cursor)
+    else pure (PsParseResult.mk (.hole name.token.span) name.cursor)
+  let annotation ←
+    if psTokenCursorAtText type.cursor ":=" then do
+      if !defaults then throw (psProofScriptExpectedError "binder without default" type.cursor)
+      match kind with
+      | .explicit => pure ()
+      | _ => throw (psProofScriptExpectedError "default on explicit parameter" type.cursor)
+      let assign ← psTokenCursorExpectText type.cursor ":="
+      let value ← readValue assign.cursor
+      pure (PsParseResult.mk
+        (.optionalType type.value value.value
+          (psSyntaxSpanJoin (psSyntaxTermSpan type.value) (psSyntaxTermSpan value.value)))
+        value.cursor)
+    else pure type
+  let head := PsSyntaxBinderHead.mk
+    (PsSyntaxName.mk [name.token.text] name.token.span) kind
+    (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value))
+  return { value := (head, annotation.value), cursor := annotation.cursor }
+
+def psPscv0BinderEntries (readType readValue : PsPscv0TermReader)
+    (fuel : Nat) (opening : PsSyntaxBinderOpening)
+    (commaGroup requireType defaults : Bool) (cursor : PsTokenCursor)
     (acc : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
     Except PsParseError (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    let name ← psTokenCursorExpectKind cursor .identifier
-    let colon ← psTokenCursorExpectText name.cursor ":"
-    let type ← psPscv0ParseTerm true colon.cursor
-    let annotation ←
-      if psTokenCursorAtText type.cursor ":=" then do
-        match opening.kind with
-        | .explicit => pure ()
-        | _ => throw (psProofScriptExpectedError "default on explicit parameter" type.cursor)
-        let assign ← psTokenCursorExpectText type.cursor ":="
-        let value ← psPscv0ParseTerm false assign.cursor
-        pure (PsParseResult.mk
-          (.optionalType type.value value.value
-            (psSyntaxSpanJoin (psSyntaxTermSpan type.value) (psSyntaxTermSpan value.value)))
-          value.cursor)
-      else pure type
-    let head := PsSyntaxBinderHead.mk
-      (PsSyntaxName.mk [name.token.text] name.token.span) opening.kind
-      (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value))
-    let acc := (head, annotation.value) :: acc
-    if commaGroup && psTokenCursorAtText annotation.cursor "," then
-      let comma ← psTokenCursorExpectText annotation.cursor ","
+    let entry ← psPscv0BinderEntry readType readValue opening.kind requireType defaults cursor
+    let acc := entry.value :: acc
+    if commaGroup && psTokenCursorAtText entry.cursor "," then
+      let comma ← psTokenCursorExpectText entry.cursor ","
       if psTokenCursorAtText comma.cursor ")" then
         let close ← psParseBinderClosing opening comma.cursor
         return { value := acc.reverse, cursor := close.cursor }
-      psPscv0ParameterEntries fuel opening commaGroup comma.cursor acc
+      psPscv0BinderEntries readType readValue fuel opening commaGroup requireType defaults comma.cursor acc
     else
-      let close ← psParseBinderClosing opening annotation.cursor
-      return { value := acc.reverse, cursor := close.cursor }
+      let close ← psParseBinderClosing opening entry.cursor
+      let entries := acc.reverse
+      let entries := match entries with
+        | [(head, type)] => [({ head with span := close.value }, type)]
+        | _ => entries
+      return { value := entries, cursor := close.cursor }
 
-def psPscv0ParameterGroups (fuel : Nat) (declaration nullary previousExplicit : Bool)
-    (cursor : PsTokenCursor) (acc : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+def psPscv0BinderGroup (readType readValue : PsPscv0TermReader)
+    (fuel : Nat) (opening : PsSyntaxBinderOpening)
+    (commaGroup requireType defaults : Bool) :
+    Except PsParseError (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) := do
+  match opening.kind with
+  | .instanceImplicit =>
+    let named := match psTokenCursorAdvance opening.cursor with
+      | some first => psTokenKindEq first.token.kind .identifier &&
+          psTokenCursorAtText first.cursor ":"
+      | none => false
+    if !named then
+      let type ← readType opening.cursor
+      let close ← psParseBinderClosing opening type.cursor
+      -- '$' is not a source identifier character. Every anonymous binder gets
+      -- a distinct local identity and is found only through instance search.
+      let name := PsSyntaxName.mk
+        ["$psc0Inst" ++ psNatToString opening.start.byteOffset] close.value
+      return { value := [(PsSyntaxBinderHead.mk name .instanceImplicit close.value, type.value)]
+               cursor := close.cursor }
+  | _ => pure ()
+  psPscv0BinderEntries readType readValue fuel opening commaGroup requireType defaults opening.cursor []
+
+def psPscv0ParameterGroups (readType readValue : PsPscv0TermReader)
+    (fuel : Nat) (declaration nullary previousExplicit : Bool)
+    (cursor : PsTokenCursor) (accRev : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
     Except PsParseError (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    if !psTokenCursorAtBinderStart cursor then return { value := acc, cursor }
+    if !psTokenCursorAtBinderStart cursor then return { value := accRev.reverse, cursor }
     let opening ← psParseBinderOpening cursor
     let explicit := match opening.kind with | .explicit => true | _ => false
     if declaration && previousExplicit && explicit then
@@ -57,7 +100,68 @@ def psPscv0ParameterGroups (fuel : Nat) (declaration nullary previousExplicit : 
       let name := PsSyntaxName.mk ["_"] close.value
       let head := PsSyntaxBinderHead.mk name .explicit close.value
       let type := PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "Unit"] close.value)
-      return { value := acc ++ [(head, type)], cursor := close.cursor }
-    let group ← psPscv0ParameterEntries (fuel + 1) opening
-      (declaration && explicit) opening.cursor []
-    psPscv0ParameterGroups fuel declaration nullary explicit group.cursor (acc ++ group.value)
+      return { value := accRev.reverse ++ [(head, type)], cursor := close.cursor }
+    let group ← psPscv0BinderGroup readType readValue (fuel + 1) opening
+      (declaration && explicit) true true
+    psPscv0ParameterGroups readType readValue fuel declaration nullary explicit
+      group.cursor (group.value.reverse ++ accRev)
+
+def psPscv0AtLambdaArrow (cursor : PsTokenCursor) : Bool :=
+  psTokenCursorAtText cursor "=>" || psTokenCursorAtText cursor "↦"
+
+-- Native term binders never acquire declaration commas or a hidden Unit.
+-- Multi-name typed groups need a grouped AST to preserve annotation scope;
+-- they are deliberately refused by the one-entry native group reader.
+def psPscv0TermBinders (read : PsPscv0TermReader) (quantified : Bool)
+    (fuel : Nat) (cursor : PsTokenCursor)
+    (acc : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
+    Except PsParseError (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let done := if quantified then psTokenCursorAtText cursor "," else psPscv0AtLambdaArrow cursor
+    if done then
+      if acc.isEmpty then throw (psProofScriptExpectedError "nonempty term binders" cursor)
+      return { value := acc.reverse, cursor }
+    if psTokenCursorAtBinderStart cursor then
+      let opening ← psParseBinderOpening cursor
+      let group ← psPscv0BinderGroup read read (fuel + 1) opening false false false
+      psPscv0TermBinders read quantified fuel group.cursor (group.value.reverse ++ acc)
+    else
+      let entry ←
+        if quantified then psPscv0BinderEntry read read .explicit false false cursor
+        else do
+          let name ← psTokenCursorExpectKind cursor .identifier
+          let head := PsSyntaxBinderHead.mk
+            (PsSyntaxName.mk [name.token.text] name.token.span) .explicit name.token.span
+          pure (PsParseResult.mk (head, PsSyntaxTerm.hole name.token.span) name.cursor)
+      if quantified && !psTokenCursorAtText entry.cursor "," then
+        throw (psProofScriptExpectedError "comma after bare quantified binder" entry.cursor)
+      psPscv0TermBinders read quantified fuel entry.cursor (entry.value :: acc)
+
+def psPscv0BoundTerm (readType readBody : PsPscv0TermReader)
+    (quantified : Bool) (fuel : Nat) (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let some keyword := psTokenCursorAdvance cursor | throw (.unexpectedEnd "binder keyword")
+  let binders ← psPscv0TermBinders readType quantified fuel keyword.cursor []
+  let delimiter ←
+    if quantified then psTokenCursorExpectText binders.cursor ","
+    else if psPscv0AtLambdaArrow binders.cursor then
+      match psTokenCursorAdvance binders.cursor with
+      | some arrow => pure arrow
+      | none => throw (.unexpectedEnd "lambda arrow")
+    else throw (psProofScriptExpectedError "lambda arrow" binders.cursor)
+  let body ← readBody delimiter.cursor
+  let span := psSyntaxSpanJoin keyword.token.span (psSyntaxTermSpan body.value)
+  return { value := if quantified then .forallE binders.value body.value span
+                   else .lambda binders.value body.value span
+           cursor := body.cursor }
+
+def psPscv0DependentBinder (read : PsPscv0TermReader) (fuel : Nat)
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult (Prod PsSyntaxBinderHead PsSyntaxTerm)) := do
+  let opening ← psParseBinderOpening cursor
+  let group ← psPscv0BinderGroup read read fuel opening false true false
+  match group.value with
+  | [binder] => return { value := binder, cursor := group.cursor }
+  | _ => throw (psProofScriptExpectedError "one dependent binder" cursor)

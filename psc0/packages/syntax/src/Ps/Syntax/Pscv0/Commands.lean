@@ -15,7 +15,7 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
               (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
             if psStringEq keyword.token.text "const" then
               Except.ok (PsParseResult.mk [] name.cursor)
-            else psPscv0ParameterGroups
+            else psPscv0ParameterGroups (psPscv0ParseTerm true) (psPscv0ParseTerm false)
               (Nat.succ (psParseListLength name.cursor.remaining)) true
               (psStringEq keyword.token.text "function") false name.cursor [];
           match bindersResult with

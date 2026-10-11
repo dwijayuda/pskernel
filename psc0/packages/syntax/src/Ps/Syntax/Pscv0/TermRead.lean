@@ -348,52 +348,16 @@ def psPscv0ParseTermWithFuel
                                         }
                                     cursor := body.cursor
                                   }
-      else if psTokenCursorAtText cursor "fun" then
-        match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
-        | Option.some keyword =>
-            match psPscv0LambdaBinders readAnnotation
-                (psParseListLength keyword.cursor.remaining)
-                keyword.cursor
-                [] with
-            | Except.error error => Except.error error
-            | Except.ok binders =>
-                match binders.value with
-                | [] =>
-                    match psTokenCursorPeek binders.cursor with
-                    | Option.none =>
-                        Except.error
-                          (PsParseError.unexpectedEnd "lambda binder")
-                    | Option.some token =>
-                        Except.error
-                          (PsParseError.expectedText
-                            "typed lambda binder"
-                            token.text
-                            token.span)
-                | _ =>
-                    match psTokenCursorExpectText binders.cursor "=>" with
-                    | Except.error error => Except.error error
-                    | Except.ok afterArrow =>
-                        match continuation afterArrow.cursor with
-                        | Except.error error => Except.error error
-                        | Except.ok body =>
-                            Except.ok {
-                              value :=
-                                PsSyntaxTerm.lambda
-                                  binders.value
-                                  body.value
-                                  {
-                                    start := keyword.token.span.start
-                                    stop := psProofScriptTermStop body.value
-                                  }
-                              cursor := body.cursor
-                            }
+      else if psTokenCursorAtText cursor "fun" || psTokenCursorAtText cursor "λ" then
+        psPscv0BoundTerm readAnnotation continuation false (remaining + 1) cursor
+      else if psTokenCursorAtText cursor "forall" || psTokenCursorAtText cursor "∀" then
+        psPscv0BoundTerm readAnnotation continuation true (remaining + 1) cursor
       else if psTokenCursorAtText cursor "{" then
         psParseProofScriptRecordLiteral
           (smaller)
           cursor
       else if psTokenCursorAtText cursor "(" then
-        match psParseProofScriptBinder cursor with
+        match psPscv0DependentBinder readAnnotation (remaining + 1) cursor with
         | Except.ok binder =>
             if psTokenCursorAtArrow binder.cursor then
               psParseProofScriptDependentArrowTail continuation binder

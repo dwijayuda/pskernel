@@ -431,6 +431,17 @@ def psParseBinderOpening
                 closeCount := 1
                 cursor := first.cursor
               }
+      else if psStringEq token.text "⦃" then
+        match psTokenCursorAdvance cursor with
+        | none => Except.error (PsParseError.unexpectedEnd "binder")
+        | some opening =>
+            Except.ok {
+              kind := PsSyntaxBinderKind.strictImplicit
+              start := opening.token.span.start
+              closeText := "⦄"
+              closeCount := 1
+              cursor := opening.cursor
+            }
       else if psStringEq token.text "[" then
         match psTokenCursorAdvance cursor with
         | none => Except.error (PsParseError.unexpectedEnd "binder")
@@ -479,7 +490,7 @@ def psTokenCursorAtBinderStart (cursor : PsTokenCursor) : Bool :=
   else if psTokenCursorAtText cursor "{" then
     true
   else
-    psTokenCursorAtText cursor "["
+    psTokenCursorAtText cursor "[" || psTokenCursorAtText cursor "⦃"
 
 def psTokenCursorAtArrow (cursor : PsTokenCursor) : Bool :=
   if psTokenCursorAtText cursor "->" then

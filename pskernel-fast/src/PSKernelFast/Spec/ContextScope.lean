@@ -32,11 +32,11 @@ A successful lookup at index `i` retrieves a domain valid in the ORIGINAL
 context at depth `ctx.length - (i + 1)`. Index bounds are not assumed.
 -/
 theorem ContextScoped.lookup_scoped (params : List KName)
-    {ctx : List KExpr} (scoped : ContextScoped params ctx)
+    {ctx : List KExpr} (contextScope : ContextScoped params ctx)
     (index : Nat) (domain : KExpr) (lookup : ctx[index]? = some domain) :
     index < ctx.length ∧
       KExpr.StructurallyValid params (ctx.length - (index + 1)) domain := by
-  induction scoped generalizing index domain with
+  induction contextScope generalizing index domain with
   | empty =>
       simp at lookup
   | @extend prior stored priorScoped valid ih =>

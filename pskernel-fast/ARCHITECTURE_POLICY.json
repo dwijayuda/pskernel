@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1h-hereditary-tagged-model-judgment-plus-generic-model-prop-point-uniqueness-conditional-no-admission",
+    "stage": "P1i-source-context-validated-tagged-model-and-exact-inferred-sort-rank-green-no-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,7 +86,7 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 139,
+    "p1ReviewedTheoremAssumptionCount": 152,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
@@ -191,7 +191,27 @@
     "p1hCompleteModelExistenceProved": false,
     "p1hGeneralCheckedSourceSoundnessProved": false,
     "p1hProductionProofAdmissionEnabled": false,
-    "p1hRuntimeCheckerChanged": false
+    "p1hRuntimeCheckerChanged": false,
+    "p1iSourceSortBinderModelEnvironmentValidDefined": true,
+    "p1iSourceCheckedBinderEnvironmentExtensionProved": true,
+    "p1iGuardedSortBvarPropPiSourceFragmentSpecified": true,
+    "p1iGuardedSourceReconstructsCheckedAnnotationProved": true,
+    "p1iSourceInductionProducesHereditaryTaggedWellDenotedProved": true,
+    "p1iSourceInductionDerivesAllPropPiFibresProved": true,
+    "p1iActualClosedCheckerSuccessInGuardedFragmentModelMemberProved": true,
+    "p1iAnyActualInferredSortInGuardedFragmentMatchesModelRankProved": true,
+    "p1iActualInferredSourceTypeErasureMatchesModelRankProved": true,
+    "p1iBothActualCheckedSourceExamplesGeneralBridgeProved": true,
+    "p1iAllG43bSourceSemanticSoundnessProved": false,
+    "p1iGeneralProofTermSemanticSoundnessProved": false,
+    "p1iTypeValuedGraphPiProved": false,
+    "p1iFullTypedDefEqProved": false,
+    "p1iTypedQuotientWritableGuardProved": false,
+    "p1iSetTheoryBasisInstanceConstructed": false,
+    "p1iRelativeConsistencyProved": false,
+    "p1iActualKernelOnlyPerformanceMeasured": false,
+    "p1iRuntimeCheckerChanged": false,
+    "p1iProofAdmissionEnabled": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -203,12 +223,13 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "2b4e79bddce283c3bd7fb04fd0387a8e81d3ca3f",
+    "validatedSourceCommit": "57e15477f82317d29431722aca0ca6130ae29e52",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38134093069",
-    "jobId": 114454289188,
-    "scope": "P1h GREEN: 97 Lake jobs, 45 audited independent Lean modules, 139 exact assumption receipts; hereditary model-only TaggedWellDenoted, Pi fibre extraction, actual two G4.3b checked sources with hereditary witnesses, all tagged Prop model inhabitants equal distinguished pt. Caller-supplied SetTheoryBasis V; NOT general G4.3b typing semantic soundness, checked proof term irrelevance, Type graph Pi, quotient safety, full Lean compatibility, model existence, no-False, admission, or actual kernel benchmarks.",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38135777941",
+    "jobId": 114459225119,
+    "scope": "P1i GREEN: Lean4.35rc4; 98 Lake builds, 46 audited independent modules, 152 strict theorem receipts, prior G1–G4.3b regressions PASS. In source-checked Sort-binder/Prop Pi fragment, semantic model env respects SOURCE context, recursive checked source induction gives hereditary tagged denotation/fibres, actual executable source success has inferred Sort whose numeric level and erasure EXACTLY match tagged model rank. All set-model claims conditional on caller-supplied SetTheoryBasis V; no general six-rule soundness, Type Pi, WHNF/DefEq, quotient, model existence, admission, consistency or real kernel-only performance.",
     "p1fValidatedSourceCommit": "367ddf25d3d97e7fb0b88c86dbeed7410d51dc10",
-    "p1gValidatedSourceCommit": "8cc2d41aee99ec82fc2fbcd265c11875d4581590"
+    "p1gValidatedSourceCommit": "8cc2d41aee99ec82fc2fbcd265c11875d4581590",
+    "p1hValidatedSourceCommit": "2b4e79bddce283c3bd7fb04fd0387a8e81d3ca3f"
   }
 }

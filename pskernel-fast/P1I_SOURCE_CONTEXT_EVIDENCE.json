@@ -1,0 +1,52 @@
+{
+  "schema": "pskernel-fast-source-context-tagged-model-evidence/p1i",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualifiedSourceCommit": "57e15477f82317d29431722aca0ca6130ae29e52",
+  "ci": {
+    "runId": 38135777941,
+    "jobId": 114459225119,
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38135777941",
+    "lean": "4.35.0-rc4",
+    "upstreamCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "lakeBuildJobs": 98,
+    "sourceModulesAudited": 46,
+    "assumptionReceipts": 152,
+    "allowlistedGlobalAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "sorryAxAllowed": false
+  },
+  "proved": {
+    "sourceSortBinderContextModelValidityDefined": true,
+    "sourceCheckedBinderExtendPreservesContextModelValidity": true,
+    "guardedSourceSortBvarAndPropPiFragmentSpecified": true,
+    "guardedSourceFragmentReconstructsActualAnnotations": true,
+    "guardedSourceFragmentInductivelyYieldsHereditaryWellDenoted": true,
+    "allGuardedPropPiSemanticFibresDerivedFromSourceContext": true,
+    "guardedClosedRuntimeSuccessImpliesTaggedSemanticModelMembership": true,
+    "anySupportedActualInferredSortLevelEqualsModelRank": true,
+    "guardedExecutableOutputErasureMatchesModelRank": true,
+    "bothActualCheckedPropositionExamplesGeneralBridgeCovered": true
+  },
+  "stillOpen": {
+    "globalSetTheoryBasisInstanceConstructed": false,
+    "fullExecutingSixRuleSourceTypingSoundness": false,
+    "sourceProofTermIrrelevance": false,
+    "typeValuedDependentGraphPi": false,
+    "generalBetaLetDenotationPreservation": false,
+    "completeTypedDefEqWhnf": false,
+    "checkedEnvironment": false,
+    "typedQuotientModel": false,
+    "relativeConsistency": false,
+    "admissionAPI": false,
+    "fullLean435Compatibility": false,
+    "realKernelOnlyBenchmark": false,
+    "optimizedRuntimeModelRefinement": false
+  },
+  "runningG43bSemanticsModified": false,
+  "admittedDeclarations": 0
+}

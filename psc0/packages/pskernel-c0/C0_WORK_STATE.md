@@ -51,3 +51,28 @@ The metatheory and consistency-proof program is deferred. False acceptance is no
 - Audited the proof branch and later model work in `C0_PROOF_FINDINGS_AUDIT.md`. Confirmed the legacy formal judgment permits arbitrary equality, but the runtime proof-irrelevance branch retains actual type inference for both terms and type comparison. This is a specification defect, **not** a demonstrated C0 executable false acceptance.
 - [Native CI 38183611788](https://github.com/dwijayuda/pskernel/actions/runs/38183611788) at `aeae35159c694b8e196c9149b4f72845785e2797` passed 82 jobs and targeted negative equality/unbound variable/beta differential tests. **No self-host tests were run.**
 - Remaining unverified proof-guided risks: annotation coherence, binder-local semantic cache scope, and additional checked lambda codomain evidence. Do not claim they are fixed or proven harmless. The new radix-index and beta changes still lack same-run comparison benchmarks against original PSKernel-Core.
+
+## Native Lean architecture redesign — 2026-10-12
+
+Primary optimization work has moved into the **real C0 `.lean` checker**. No self-hosting tests are requested or run here.
+
+- `Core/IndexedExpr.lean`: share the four-level radix-16 persistent fingerprint index already used by the kernel caches; retain exact collision comparisons and cached child fingerprints.
+- `Runtime/Acceleration/EnvironmentIndex.lean`: use the same persistent radix trie for new global declaration indexes, preserving historical binary lookup for old values; use native Unicode codepoint folding for name hashing.
+- `Core/LocalContext.lean`: add a list-first/indexed-after-eight local-context representation. Preserve shadowing and old persistent snapshots. Explicit continuation constructors in inductive admission now preserve the matching index.
+- `Core/Substitution/Instantiate.lean`: dedicated single-variable beta/zeta traversal without repeated list get/length on BVars; preserve generic simultaneous substitution.
+- `Core/Substitution/Lift.lean`: direct structural lift without a whole-term node-count prepass, retaining the fuel-based reference for native differential checks.
+- `Core/Expr.lean`: head-first expression comparison with the proven reference comparator on matching recursive children; keep both legacy oracles for differential testing.
+- `Runtime/Acceleration/Cache.lean`: native Unicode `String.foldl` hashing instead of the full UTF-8 length+fuel prepass, retaining the previous worker as oracle.
+
+The `test/C0ProofIrrelevanceRegression.lean` native suite now checks index interning, declaration collisions/replacements, local-variable shadowing, single substitution, lift, exact and kernel-semantic equality, Unicode fingerprints, and selected negative kernel decisions. The Lean workflow also measures these paths using `test/C0PerfMicrobench.lean`. These are **native Lean checks**, not self-hosting checks.
+
+### Verified prior checkpoint
+
+- [Native CI 38185426527](https://github.com/dwijayuda/pskernel/actions/runs/38185426527): success, with 30,000 varied-input iterations on a 512-application test term.
+- Direct lifting measured 7,717 ms vs 10,558 ms for the old fuel-based path (single hosted runner); specialized instantiate1 measured 11,244 ms vs 19,841 ms generic. Both are workload-specific.
+- The first paired equality measured 2,646 ms versus 2,458 ms for the old comparator and was replaced by a **hybrid paired-head/legacy-recursive design**, whose final benchmark is a separate pending observation.
+- These measurements are not full Init/Std/Mathlib proof-checking benchmarks and are not a complete kernel performance certification.
+
+### Open architectural work
+
+The checker still uses recursive `PsKernelExpr` values at the public acceptance boundary; the indexed term store is an auxiliary representation, not a universal replacement. Full integration requires a lossless representation bridge, end-to-end benchmarks, environment/context provenance and resource-limit review, and compatibility qualification. Metatheory is deferred; soundness-sensitive negative tests remain in place.

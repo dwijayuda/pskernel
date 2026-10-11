@@ -481,8 +481,8 @@ private def application : String :=
   "const updateInferred: Nat := Updates.inferred\n" ++
   "const updateDependent: Nat := Updates.dependent.first\n" ++
   "const updateGeneric: Nat := Updates.generic.value\n" ++
-  "function delayedLambda: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n  exact n\n}\n" ++
-  "function delayedLet: Nat := by {\n  refine (let n: Nat := 261\n    _)\n  exact n\n}\n" ++
+  "const delayedLambda: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n  exact n\n}\n" ++
+  "const delayedLet: Nat := by {\n  refine (let n: Nat := 261\n    _)\n  exact n\n}\n" ++
   "theorem delayedHave(P: Prop, h: P): P := by {\n  refine (have saved: P := h\n    _)\n  exact saved\n}\n" ++
   "theorem delayedNested: forall (P: Prop), P -> P := by {\n  refine (fun (P: Prop) => fun (h: P) => _)\n  exact h\n}\n" ++
   "function delayedUpdate(source: CertifiedPair): CertifiedPair := by {\n  refine { source with first := 263, certified := _ }\n  rfl\n}\n" ++
@@ -588,7 +588,7 @@ private def semanticCases : IO Unit := do
     { source := "structure Pair where { first: Nat }\nconst bad: Nat := {\n  let p := { first := 1 }\n  0\n}\n" },
     { source := "structure Checked where {\n  n: Nat\n  proof: n = 0\n}\nfunction bad(p: Checked): Checked := { p with n := 1 }\n" },
     { source := "structure Pair where { first: Nat }\nfunction id(n: Nat): Nat := n\nfunction bad(p: Pair): Pair := { p with first := id (0) }\n" },
-    { source := "function bad: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n}\n" }]
+    { source := "const bad: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n}\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,

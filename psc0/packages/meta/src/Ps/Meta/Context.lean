@@ -356,12 +356,13 @@ def psMetaRestrictScope (fuel : Nat) (context : PsMetaContext)
       | .syntheticOpaque => none
       | _ =>
         if (psMetaFindDelayed current id).isSome then none else
-        let narrowed := {
-          declaration.localContext with declarations := declaration.localContext.declarations.filter
-            (fun localDecl => psLocalContainsId localContext (psLocalDeclId localDecl)) }
+        let locals := declaration.localContext.declarations.filter fun localDecl =>
+          psLocalContainsId localContext (psLocalDeclId localDecl)
+        let narrowed := { declaration.localContext with declarations := locals }
         let current ← psMetaRestrictScope fuel current narrowed declaration.type
-        return { current with declarations := current.declarations.map fun entry =>
-          if entry.id == id then { entry with localContext := narrowed } else entry }) context
+        let declarations := current.declarations.map fun entry =>
+          if entry.id == id then { entry with localContext := narrowed } else entry
+        return { current with declarations }) context
 
 -- An assignment can finish several nested scopes. Each productive pass removes
 -- a pending entry; the pending count bounds the work without a magic depth cap.
@@ -376,8 +377,8 @@ def psMetaNormalizeDelayed (fuel : Nat) (context : PsMetaContext) : Option PsMet
       | none => pending := entry :: pending
       | some value =>
         let some declaration := psMetaFindDecl current entry.id | none
-        let scoped ← psMetaRestrictScope (current.nextId + 1) current declaration.localContext value
-        current := { scoped with assignments := { id := entry.id, value } :: scoped.assignments }
+        let restricted ← psMetaRestrictScope (current.nextId + 1) current declaration.localContext value
+        current := { restricted with assignments := { id := entry.id, value } :: restricted.assignments }
     current := { current with delayed := pending.reverse }
     if current.delayed.length == context.delayed.length then return current
     psMetaNormalizeDelayed fuel current

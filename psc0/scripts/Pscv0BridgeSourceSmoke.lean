@@ -38,6 +38,22 @@ def main : IO Unit := do
   expectError "dangling bind" "PSCV0-DO-MISSING-FINAL-ACTION" (fixture "  let x ← a")
   expectError "nonterminal return" "PSCV0-DO-NONTERMINAL-RETURN-UNSUPPORTED" (fixture "  return 1\n  return 2")
   expectError "gap application" "PSCV0-APP-02" (fixture "  let x ← a\n  return Nat.succ (x)")
+  -- V7 APP-04: a postfix call binds to its immediately preceding head
+  -- before the surrounding Lean whitespace application. This checks the
+  -- source/projection trees, not the intentionally ill-typed grouped branch.
+  let operators :=
+    "function twice(n: Nat): Nat := Nat.add(n, n)\n" ++
+    "function inc(n: Nat): Nat := Nat.succ(n)\n"
+  let mixed ← expectOk "v7 mixed APP-04"
+    (psPscv0LowerToLean true (operators ++ "const value: Nat := twice inc(3)\n"))
+  let explicit ← expectOk "v7 adjacent nested APP-04"
+    (psPscv0LowerToLean true (operators ++ "const value: Nat := twice(inc(3))\n"))
+  if mixed != explicit then throw (IO.userError "PSCV0-APP-04-MIXED-TREE-MISMATCH")
+  let grouped ← expectOk "v7 grouped APP-04"
+    (psPscv0LowerToLean true (operators ++ "const value: Nat := (twice inc)(3)\n"))
+  if mixed == grouped then throw (IO.userError "PSCV0-APP-04-GROUPING-LOST")
+  expectError "gap outside do" "PSCV0-APP-02"
+    (operators ++ "const value: Nat := twice (inc 3)\n")
   -- V7 is the only prospective ProofScript source language. These commands
   -- are not accepted through an older .ps grammar or native Lean fallback.
   expectError "retired partial" "PSCV0-PARTIAL-EXCLUDED"
@@ -66,4 +82,4 @@ def main : IO Unit := do
   IO.FS.createDirAll "dist/pscv0-source-check"
   IO.FS.writeFile "dist/pscv0-source-check/correspondence.lean" theoremSource
   IO.println theoremSource
-  IO.println "PSCV0_NATIVE_SURFACE_SMOKE: PASS 5 round trips, 10 refusals, exact comment replay; emitted correspondence fixture still requires checking"
+  IO.println "PSCV0_NATIVE_SURFACE_SMOKE: PASS 5 do round trips, APP-04 source-tree comparison, 11 refusals, exact comment replay; emitted correspondence fixture still requires checking"

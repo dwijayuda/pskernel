@@ -62,6 +62,14 @@ for(const fixture of fixtures)test('source intent and semantic round trip: '+fix
   if(fixture.native)assert.equal(admissions(lower(fixture.ps)),admissions(ok(B.psPscv0LowerToLean(false,fixture.native))));
   if(fixture.expanded)assert.equal(admissions(lower(fixture.ps)),admissions(fixture.expanded));
 });
+test('v7 APP-04 mixed native/postfix application preserves source grouping',()=>{
+  const definitions='function twice(n: Nat): Nat := Nat.add(n, n)\n'+'function inc(n: Nat): Nat := Nat.succ(n)\n';
+  const mixed=lower(definitions+'const value: Nat := twice inc(3)\n');
+  const explicit=lower(definitions+'const value: Nat := twice(inc(3))\n');
+  const grouped=lower(definitions+'const value: Nat := (twice inc)(3)\n');
+  assert.equal(mixed,explicit,'native mixed and nested postfix application trees differ');
+  assert.notEqual(mixed,grouped,'parentheses must distinguish a different argument tree');
+});
 const negatives=[
   ['missing braces','function f(a: Except String Nat): Except String Nat := do\n  return 1\n','BRACES-REQUIRED'],
   ['empty do',psBody('f',''),'DO-EMPTY'],
@@ -78,6 +86,7 @@ const negatives=[
   ['effect shadow',psBody('f','  let Except := 1\n  return 1'),'EFFECT-SHADOW'],
   ['binder effect shadow',psBody('f','  return 1','Except: Type','Except String Nat'),'EFFECT-SHADOW'],
   ['gap call',psBody('f','  let x ← a\n  return Nat.succ (x)'),'PSCV0-APP-02'],
+  ['v7 gap outside do','function inc(n: Nat): Nat := Nat.succ(n)\nconst value: Nat := inc (3)\n','PSCV0-APP-02'],
   ['comment gap',psBody('f','  let x ← a\n  return Nat.succ /- gap -/ (x)'),'PSCV0-APP-02'],
   ['empty call not implemented',psBody('f','  return Nat.zero()'),'APP-03'],
   ['partial excluded','partial def bad(a: Nat): Nat := a\n','PARTIAL-EXCLUDED'],

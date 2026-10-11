@@ -35,7 +35,7 @@ def main (args : List String) : IO UInt32 := do
     match args with
     | ["--version"] =>
         IO.println (Lean.Json.mkObj [
-          ("leanVersion", toJson Lean.versionString), ("leanCommit", toJson leanCommit),
+          ("leanVersion", toJson Lean.versionString), ("leanCommit", toJson Lean.githash),
           ("profile", toJson ("pscv0-v7-native-bounded/1" : String))]).compress
         return 0
     | "--check" :: first :: rest => run (first :: rest) none

@@ -73,8 +73,10 @@ private def compile (prelude : Lean.Environment) (request : Request) :
     parseMs := t1 - t0, elaborateMs := t2 - t1,
     prepareMs := t3 - t2, kernelMs := t4 - t3 }
   if !request.emit then
-    return { declarationCount := output.prepared.declarations.length,
-      typescript := none, timings }
+    return {
+      declarationCount := output.prepared.declarations.length
+      typescript := none
+      timings := timings }
   -- Keep the same immutable prepared graph alive through checking and emission.
   -- Existing erasure validation is retained until profiling justifies changing it.
   let ir ← fromResult "erase"
@@ -83,17 +85,20 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   let typescript ← fromResult "emit" ((psTsEmitModule ir).mapError
     (fun _ => "PSCV0-TYPESCRIPT-EMISSION-FAILED"))
   let t6 ← IO.monoMsNow
-  return { declarationCount := output.prepared.declarations.length,
-    typescript := some typescript,
+  return {
+    declarationCount := output.prepared.declarations.length
+    typescript := some typescript
     timings := { timings with eraseMs := t5 - t4, emitMs := t6 - t5 } }
 
 -- A batch shares only the immutable checked prelude. Inputs remain independent:
 -- successful or failed requests cannot leak declarations into the next source.
 -- Callers supply source, never an environment or a claimed checked token.
 def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
-  if Lean.versionString != leanVersion then
-    return .error { phase := "toolchain",
-      message := "expected Lean " ++ leanVersion ++ ", got " ++ Lean.versionString }
+  if Lean.versionString != leanVersion || Lean.githash != leanCommit then
+    return .error {
+      phase := "toolchain"
+      message := "expected Lean " ++ leanVersion ++ " at " ++ leanCommit ++
+        ", got " ++ Lean.versionString ++ " at " ++ Lean.githash }
   let t0 ← IO.monoMsNow
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let t1 ← IO.monoMsNow
@@ -115,7 +120,7 @@ def timingsJson (t : Timings) : Lean.Json :=
 def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.Json :=
   let identity := [
     ("source", toJson sourceName), ("leanVersion", toJson Lean.versionString),
-    ("leanCommit", toJson leanCommit), ("provider", toJson ("lean4-cpp" : String)),
+    ("leanCommit", toJson Lean.githash), ("provider", toJson ("lean4-cpp" : String)),
     ("profile", toJson ("pscv0-v7-native-bounded/1" : String))]
   match result with
   | .error error => Lean.Json.mkObj (identity ++ [

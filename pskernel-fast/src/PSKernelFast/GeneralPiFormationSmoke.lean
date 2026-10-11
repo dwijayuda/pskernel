@@ -1,5 +1,6 @@
 import PSKernelFast.Proof.GeneralPiScope
 import PSKernelFast.Proof.TypedSubstitution
+import PSKernelFast.Proof.Erasure
 import PSKernelFast.GeneralPiFormation
 import PSKernelFast.DependentSortFragment
 

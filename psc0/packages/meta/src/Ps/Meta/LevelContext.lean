@@ -60,28 +60,22 @@ def psLevelAssignmentCount (assignments : List PsLevelAssignment) : Nat :=
   | assignment :: rest =>
       Nat.succ (psLevelAssignmentCount rest)
 
-def psLevelInstantiateWithFuel
-    (context : PsLevelMetaContext)
-    (fuel : Nat) : PsLevel -> PsLevel :=
+-- Fuel bounds assignment chains, not the depth of an otherwise finite level.
+def psLevelInstantiateWithFuel (context : PsLevelMetaContext) (fuel : Nat) :
+    PsLevel → PsLevel :=
   match fuel with
-  | Nat.zero =>
-      fun (level : PsLevel) => level
-  | Nat.succ remaining =>
-      fun (level : PsLevel) =>
-        let smaller : PsLevel -> PsLevel :=
-          psLevelInstantiateWithFuel context remaining;
-        match level with
-        | .mvar id =>
-            match psLevelFindAssignment context id with
-            | Option.none => level
-            | Option.some value => smaller value
-        | .succ value =>
-            PsLevel.succ (smaller value)
-        | .max left right =>
-            PsLevel.max (smaller left) (smaller right)
-        | .imax left right =>
-            PsLevel.imax (smaller left) (smaller right)
-        | _ => level
+  | 0 => fun level => level
+  | fuel + 1 =>
+    let follow := psLevelInstantiateWithFuel context fuel
+    let rec visit : PsLevel → PsLevel
+      | .mvar id => match psLevelFindAssignment context id with
+        | none => .mvar id
+        | some value => follow value
+      | .succ value => .succ (visit value)
+      | .max a b => .max (visit a) (visit b)
+      | .imax a b => .imax (visit a) (visit b)
+      | level => level
+    visit
 
 def psLevelInstantiate (context : PsLevelMetaContext) (level : PsLevel) : PsLevel :=
   psLevelInstantiateWithFuel

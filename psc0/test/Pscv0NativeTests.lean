@@ -387,6 +387,7 @@ private def application : String :=
   "function keepSort(A: Sort (imax u v), value: A): A := value\n" ++
   "function keepOffset(A: Type (u + 1), value: A): A := value\n" ++
   "function keepHole(A: Type _, value: A): A := value\n" ++
+  "function commuted(A: Type (max u v), value: A): A := keepMax(A, value)\n" ++
   "inductive Bag(A: Type u): Type u where { | nil | cons(head: A, tail: Bag A) }\n" ++
   "function size(A: Type u, value: Bag A): Nat := match value with { | .nil => 0 | .cons head tail => Nat.succ(size(A, tail)) }\n" ++
   "structure Holder(A: Type u) where { value: A }\n" ++

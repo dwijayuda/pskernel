@@ -66,6 +66,80 @@ theorem propFalse_ne_true (V : Type u) [SetTheoryBasis V] :
     simpa [← h] using hEmptyInPower
   exact SetTheoryBasis.not_member_empty V _ hSelf
 
+
+/--
+There is exactly ONE subset of the derived empty set: the empty set
+itself. This is proved by extensionality, the model's powerset
+membership law, and the constructed empty-set theorem.
+-/
+theorem powerset_empty_exact (V : Type u) [SetTheoryBasis V] (x : V) :
+    SetTheoryBasis.Mem x
+        (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V)) ↔
+      x = SetTheoryBasis.emptySet V := by
+  constructor
+  · intro hx
+    apply SetTheoryBasis.ext
+    intro z
+    constructor
+    · intro hz
+      have hSub := (SetTheoryBasis.member_powerset).1 hx
+      exact False.elim (SetTheoryBasis.not_member_empty V z (hSub z hz))
+    · intro hz
+      exact False.elim (SetTheoryBasis.not_member_empty V z hz)
+  · intro h
+    subst x
+    apply (SetTheoryBasis.member_powerset).2
+    intro z hz
+    exact False.elim (SetTheoryBasis.not_member_empty V z hz)
+
+/--
+Complete characterization of candidate Prop: there are ONLY two possible
+truth values, the empty set and powerset empty, both of which were already
+shown to be members and shown distinct. This does not by itself interpret
+all propositions, their proof terms, or the dependent Pi elimination laws.
+-/
+theorem propUniverse_exactly_two (V : Type u) [SetTheoryBasis V] (x : V) :
+    SetTheoryBasis.Mem x (propTruthUniverse V) ↔
+      (x = SetTheoryBasis.emptySet V ∨
+       x = SetTheoryBasis.powerset (SetTheoryBasis.emptySet V)) := by
+  constructor
+  · intro hx
+    by_cases hOccupied : ∃ z : V, SetTheoryBasis.Mem z x
+    · obtain ⟨z, hz⟩ := hOccupied
+      have hzMember : SetTheoryBasis.Mem z
+          (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V)) :=
+        (SetTheoryBasis.member_powerset).1 hx z hz
+      have hzEq : z = SetTheoryBasis.emptySet V :=
+        (powerset_empty_exact V z).1 hzMember
+      have hEmptyInX : SetTheoryBasis.Mem (SetTheoryBasis.emptySet V) x := by
+        simpa [hzEq] using hz
+      right
+      apply SetTheoryBasis.ext
+      intro y
+      constructor
+      · intro hy
+        exact (SetTheoryBasis.member_powerset).1 hx y hy
+      · intro hy
+        have hyEq : y = SetTheoryBasis.emptySet V :=
+          (powerset_empty_exact V y).1 hy
+        simpa [hyEq] using hEmptyInX
+    · left
+      apply SetTheoryBasis.ext
+      intro z
+      constructor
+      · intro hz
+        exact False.elim (hOccupied ⟨z, hz⟩)
+      · intro hz
+        exact False.elim (SetTheoryBasis.not_member_empty V z hz)
+  · intro h
+    cases h with
+    | inl he =>
+        subst x
+        exact propFalse_mem V
+    | inr ht =>
+        subst x
+        exact propTrue_mem V
+
 /--
 Derived membership of the candidate Prop universe in the FIRST positive
 Sort. This uses the tower and two successive Grothendieck powerset
@@ -175,6 +249,8 @@ theorem piLevel_positive_bounds
 #print axioms propFalse_mem
 #print axioms propTrue_mem
 #print axioms propFalse_ne_true
+#print axioms powerset_empty_exact
+#print axioms propUniverse_exactly_two
 #print axioms SetTheoryBasis.universe_two_steps
 #print axioms sort_member_succ
 #print axioms numericIMax_zero_iff_codomain_zero

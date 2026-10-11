@@ -328,7 +328,7 @@ def psElabStructuralMatchContext (context : PsElabContext)
 def psElabMatchMotiveLevel (context : PsElabContext) (motive : PsExpr) :
     Except PsElabError PsLevel := do
   let type ← (psInferType context.environment context.metaContext
-    context.localContext motive).mapError PsElabError.infer
+    context.localContext (psMetaInstantiate context.metaContext motive)).mapError PsElabError.infer
   let telescope ← psElabOpenCoreTelescope 4096 context type none
   (psInferEnsureSort context.environment context.metaContext
     telescope.context.localContext telescope.body).mapError PsElabError.infer

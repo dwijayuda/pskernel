@@ -1,3 +1,65 @@
+# PSC0 AI WORK STATE — native v7 quantified types and shared binders
+
+## 11 October 2026 — native binder syntax through shared semantics
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user authorized continued native `.lean` implementation with clean portable
+architecture, minimal checks, no pskernel-core and no self-hosting. Source changes
+and qualification use GitHub operations and Linux cloud CI.
+
+The v7 binder module now accepts annotation/value readers as callbacks. Declaration
+parameters, variable commands, native lambda/quantifier groups and explicit
+dependent arrows use the same entry/group grammar. Declaration comma groups and
+defaults retain their own policy; native term binders cannot introduce a hidden
+Unit or accept declaration commas. Parameter accumulation now uses a reversed
+accumulator instead of repeatedly appending the growing prefix.
+
+Implemented `forall`/`∀`, `fun`/`λ`, `=>`/`↦`, Unicode strict implicit
+`⦃...⦄`, and anonymous `[ClassTerm]` binders. Quantifiers feed the existing
+forall AST and ordered binder elaborator. Anonymous instances have inaccessible,
+source-local names and use existing lexical instance synthesis and section
+generalization. A common printer renders these binders anonymously and preserves
+binder kinds in quantified source. No new Core expression, proof algorithm,
+host elaborator fallback or kernel implementation change is involved.
+
+**Qualified in [Linux run 38155402871](https://github.com/dwijayuda/pskernel/actions/runs/38155402871)**
+at source commit `7c80638275e979689473d5bf43ba9f2d054edd59`, with native Lean 4.35.0-rc4
+(`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`), profile
+`pscv0-v7-native-bounded/4`. The first run passed.
+
+The existing 28 parser cases passed unchanged. The compact semantic batch still
+uses three accepted programs and one checked immutable prelude, now with 22
+phase-specific refusals. The first application has 54 declarations and checks
+quantified explicit/implicit polymorphism, dependent arrows and Unicode aliases.
+The existing Except do program also checks anonymous instances in declarations,
+lambdas, quantifiers and section variables (five declarations). Four new negative
+inputs reject lambda declaration commas, nullary lambdas, a missing quantifier
+comma and an unavailable instance.
+
+The official kernel accepted both programs and the request-isolation case. The
+CLI checked and emitted the 54-declaration application; pinned TypeScript 7.0.2
+compilation and JavaScript runtime assertions passed. The import inventory stays
+at 69 portable modules and 75 native closure modules, without pskernel-core.
+
+Measured cached source rebuild: 14,612 ms; immediate unchanged build: 480 ms.
+For the CLI fixture: prelude setup 1 ms, parsing 1 ms, elaboration 1 ms, bridge
+preparation 2 ms, official kernel checking 2 ms, erasure 2 ms, emission 1 ms.
+These are compact-workload measurements, not a large-program performance claim.
+The affected compiler source has 194 added and 223 removed lines. The following
+evidence-recording commit changes only this work-state document.
+
+Remaining binder limits: one name per native group, one final bare quantified
+binder, lambda result annotations/pattern binders and automatic insertion of
+omitted implicit lambda binders. Multi-name typed groups require shared annotation
+scope in the AST; copying their annotation into unary entries could capture an
+earlier name. These forms remain explicitly unsupported. Global class/instance
+declarations, universes, imports and the wider v7 milestones remain pending.
+There is no full-v7, self-hosting or printer-roundtrip qualification claim.
+
+The following records are historical and apply to their exact source commits.
+
+---
+
 # PSC0 AI WORK STATE — native v7 command scopes and defaults
 
 ## 11 October 2026 — ordered scopes and optional parameters

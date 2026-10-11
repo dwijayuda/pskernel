@@ -20,7 +20,8 @@ def Erasable (ρ : KName → Nat) (expr : KExpr) : Prop :=
   ∃ sem : ErasedExpr, eraseExpr ρ expr = some sem
 
 def ContextErasable (ρ : KName → Nat) (ctx : List KExpr) : Prop :=
-  ∀ index domain, ctx[index]? = some domain → Erasable ρ domain
+  ∀ (index : Nat) (domain : KExpr),
+    ctx[index]? = some domain → Erasable ρ domain
 
 private theorem contextErasable_empty (ρ : KName → Nat) :
     ContextErasable ρ [] := by
@@ -111,7 +112,7 @@ theorem generalPiRule_erasable (params : List KName) (ρ : KName → Nat) :
   | sort ctx u good =>
       intro _
       exact ⟨⟨.sort (u.denote ρ), rfl⟩,
-        ⟨.sort ((.succ u).denote ρ), rfl⟩⟩
+        ⟨.sort ((ULevel.succ u).denote ρ), rfl⟩⟩
   | bound ctx index domain found =>
       intro hCtx
       exact ⟨⟨.bvar index, rfl⟩,
@@ -122,7 +123,7 @@ theorem generalPiRule_erasable (params : List KName) (ρ : KName → Nat) :
       have hExtended := contextErasable_extend ρ ctx domain hCtx domErased
       have bodyErased := (ihBody hExtended).1
       exact ⟨erasable_pi ρ name domain body style domErased bodyErased,
-        ⟨.sort ((.imax u v).denote ρ), rfl⟩⟩
+        ⟨.sort ((ULevel.imax u v).denote ρ), rfl⟩⟩
   | lam ctx name domain body style u bodyType domainTyped bodyTyped
       ihDomain ihBody =>
       intro hCtx

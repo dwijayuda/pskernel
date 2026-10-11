@@ -2058,8 +2058,8 @@ def psErasureProofRecursorEntry (environment : PsEnvironment) (name : PsName) :
   let info ← psEnvironmentFindRecursor environment name
   let [familyName] := info.inductiveNames | none
   let family ← psEnvironmentFindInductive environment familyName
-  let true ← (psInductiveIsProp environment family).toOption | none
-  if info.numMotives != 1 || info.numMinors != family.constructors.length then none else
+  let proofFamily ← (psInductiveIsProp environment family).toOption
+  if !proofFamily || info.numMotives != 1 || info.numMinors != family.constructors.length then none else
     return .mk (info.numParams + 1 + info.numMinors + info.numIndices + 1) false
 
 def psEraseRepresentationPreservingMinor

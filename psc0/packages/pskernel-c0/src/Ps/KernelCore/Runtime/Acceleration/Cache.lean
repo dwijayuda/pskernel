@@ -53,15 +53,23 @@ def psKernelCacheStringHashWorker
               hash
               (Char.toNat char))
 
+/-
+C0 UTF-8 hash fast path: fold directly over Unicode scalar values.
+The portable historical worker is retained above as a differential oracle.
+String.foldl avoids a complete UTF-8 byte-length prepass and the fuelled
+interpreter loop. Each step uses the same 31*x+c mod 65521 mixing rule.
+-/
+def psKernelC0HashStringFrom
+    (value : String)
+    (seed : Nat) : Nat :=
+  value.foldl
+    (fun hash ch => psKernelCacheMix hash (Char.toNat ch))
+    seed
+
 def psKernelCacheStringHash
     (value : String) :
     Nat :=
-  psKernelCacheStringHashWorker
-    (Nat.succ
-      (String.utf8ByteSize value))
-    value
-    0
-    0
+  psKernelC0HashStringFrom value 0
 
 def psKernelCacheNameHash
     (name : PsKernelName) :

@@ -9,7 +9,9 @@ require proofscriptSelfhost from ".."
 
 lean_lib PsV7Syntax where
   srcDir := "../packages/syntax/src"
-  roots := #[`Ps.Syntax.Pscv0.Module]
+  roots := #[`Ps.Syntax.Pscv0.TermRead, `Ps.Syntax.Pscv0.Surface,
+    `Ps.Syntax.Pscv0.Read, `Ps.Syntax.Pscv0.Commands,
+    `Ps.Syntax.Pscv0.TypePrint, `Ps.Syntax.Pscv0.Module]
 
 lean_lib PsV7Compiler where
   srcDir := "../packages/compiler/src"

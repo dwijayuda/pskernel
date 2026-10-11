@@ -1,3 +1,35 @@
+# PSC0 AI WORK STATE — PSCV0 v7 authority and ongoing first-module qualification
+
+## Active checkpoint — 2026-10-11
+
+**Branch:** `psc0/pscv0-readable-selfhost-v1`. **Pre-adoption HEAD:** `29c12e9eb8cf00966c03b4636ff9d6d243b010a3`. The source-language **design** authority for all new PSC0 work is now the full, byte-identical [PSCV0 v7 reference](PSCV0_LANGUAGE_REFERENCE.md): 308,462 bytes, SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`, Git blob `d9e9d7c21337881175b19ccc4c508a792a430195`, Lean 4.35.0-rc4 pin `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. The previous document SHA `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0` and PSC1/old PSCV0 references are historical, not alternate grammar or supported compatibility fallbacks. Preserve old exact bootstrap seeds and source-specific test receipts.
+
+**Actual compiler status:** v7 is a design reference, **not implemented full conformance**. Public installed PSC0 still uses the earlier bounded grammar and TypeScript 7.0.2 reference backend. First selected `.ps` compiler source `packages/syntax/src-ps/Ps/Syntax/Translate.ps` has 40 lines versus 63 in frozen handwritten Lean; compiler source authority remains unchanged outside the bounded candidate. Do not change the separate kernel/proof workstream or claim a verified executable.
+
+**Verified latest prior run:** [38112642444](https://github.com/dwijayuda/pskernel/actions/runs/38112642444) completed **failure** at the 900-second explicit generator timeout (exit 124) while preparing `Ps.Syntax.Pscv0.Module` in the candidate suffix. Contrary to older work-state wording, native preflight, actual generated surface bootstrap, authoritative `.ps` source materialization, owned Lean reader round-trip, all eight concrete source-equation proofs and two axiom-free algebra lemmas **passed first**. The concrete original parser/printer/API and changed equations retain exactly inherited `[propext]`; the generic helper/algebra require zero axioms. The 20-module candidate generation, Windows tests and RC4 candidate proof job did **not** finish. Earlier 19-module `Except do` bridge had bounded 38/38 Linux/Windows tests plus RC4 fixture replay [38108354566](https://github.com/dwijayuda/pskernel/actions/runs/38108354566); that historical success is not evidence of the changed candidate or complete v7.
+
+**This change:** commit original v7 file unchanged; pin authoring/adoption manifests and the portable bridge constant/tests to the new digest; install a cheap full-file bytes/SHA256/Git-blob/RC4 identity check before costly CI; raise only the explicit generation ceiling `timeout 900 → 1600` and bridge job budget `25 → 40 minutes`. Preserve all semantic, proof, source, identity, kernel/no-fallback and negative test gates. This budget change does not certify speed or guarantee the next run will pass. See [v7 adoption matrix](docs/PSCV0_V7_ADOPTION_AND_MIGRATION_MATRIX.md). The previous AI state is preserved verbatim in [history](docs/history/AI_WORK_STATE_BEFORE_V7_ADOPTION.md).
+
+### Ordered milestone acceptance (no assumed success)
+
+**V7-M0:** exact 308,462-byte reference committed; automated identity guard passes in actual CI; historical earlier reference preserved and separately labeled.
+
+**V7-M1:** finish the **20-module** candidate using the *generated retained PSC0 JavaScript compiler*, with one in-memory shared prefix; no native fallback or fabricated checked state. Require both readable/lowered projections and their eight equations, unchanged 38 bridge tests, eight selected authoring tests, four arrow regressions, 36 old/new API comparisons, identical source/admission/TS/JS identity, Windows check and independent Lean RC4 generated-proof replay. No completed runs means no candidate promotion.
+
+**V7-M2:** review/migrate selected additional `.ps` compiler modules; introduce useful portable features only with v7 syntax/typing/negative conformance evidence; preserve comments/docstrings/source spans and evaluation order. Avoid JS-only language semantics and duplicate tiny packages. Don't repeatedly run a full compiler fixed point for every routine edit.
+
+**V7-M3:** convert complete actual 64-module compiler-source closure to authoritative `.ps` and reproducibly generated readable `.lean`. Promote explicit new grammar and source/seed manifest identities, not historical SH/1 receipts.
+
+**V7-M4:** deliberate compiler-only C0→C1→C2→C3 with source/admission/TS/JS parity, checked host, typed environment and negative gates. Kernel model-consistency and backend behavior preservation are separate formal obligations.
+
+**V7-specific risks:** `function f()` alone gets one required Unit; `def f()` is invalid; `f ()` gap is banned in term application but binder and grouped-initial terms remain legal; mixed `f x(y)` and `(f x)(y)` differ; proof terms share call syntax; patterns are not comma-call expressions. `psDoItem` is the explicit selected base / verified P0 / environment-gated P1 union. RC4 modules/public imports, Std.WP contract-spec `where finally`, Standard registry digest, accurate `.ps` spans and full P0 APIs remain unqualified. Source `axiom`/`unsafe`/`partial` and emitted `sorryAx` are prohibited by v7, but code paths must earn actual release enforcement evidence. Ordinary checked is not verified executable.
+
+**Process:** GitHub/cloud CI only; no local checkouts/tests, Desktop Commander, kernel edits, force updates or automatic publication. Read current HEAD and CI before each write; preserve history and use expected-HEAD lease. Update this state after *observed* CI outcomes without retroactively relabeling historical artifacts.
+
+---
+
+## Historical work-state snapshot (content below predates this checkpoint)
+
 # PSC0 AI work state — first PSCV0 module, source integration and assumption audit
 
 ## Current status (2026-10-11)

@@ -1,18 +1,20 @@
 {
-  "schema": "psc0-language-reference-adoption/1",
-  "status": "user-selected-design-target-not-implemented-conformance",
+  "schema": "psc0-language-reference-adoption/2",
+  "status": "v7-selected-normative-design-target-not-implemented-conformance",
   "selectedOn": "2026-10-11",
   "languageEdition": "pscv0",
   "reference": {
     "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
-    "uploadedFilename": "Lean4_ProofScript_PSCV0_Lean435rc4_Expanded_Lean_First_Unified_Language_Reference(2).md",
-    "source": "user-uploaded original in the task conversation",
-    "bytes": 230234,
-    "physicalLines": 2888,
-    "sha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
-    "gitBlobSha1": "8cd3f5b9d2a47d10927ac40e32fe702d4642afb4",
-    "verbatimCopyCommittedInThisReview": false,
-    "sourceAvailabilityRequirement": "Retrieve the exact user upload and verify the digest before implementation; this manifest and review are not substitutes for its full text."
+    "revision": "v7",
+    "repoPath": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
+    "uploadedFilename": "ProofScript_PSCV0_Lean435rc4_Language_Reference_Consistency_Revision_v7_2026-10-11(2).md",
+    "source": "byte-identical user upload in psc0",
+    "bytes": 308462,
+    "physicalLines": 3201,
+    "sha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
+    "gitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
+    "verbatimCopyCommittedInThisReview": true,
+    "sourceAvailabilityRequirement": "Verify complete repo source SHA-256 and byte identity; old parser or reference is not a v7 fallback."
   },
   "referenceLeanPin": {
     "tag": "v4.35.0-rc4",
@@ -23,7 +25,8 @@
     "oldProfileIsFeatureCeiling": false,
     "oldParserFallbackAllowedInNewEdition": false,
     "nativeLeanSourceKindRetained": true,
-    "bootstrapArtifactsAndHistoricalReceiptsPreserved": true
+    "bootstrapArtifactsAndHistoricalReceiptsPreserved": true,
+    "v7RequiredForNewDevelopment": true
   },
   "observedImplementation": {
     "sourceCommit": "f7b92aa3479cd2c39ce959cab82d69dfb8d969a4",
@@ -44,17 +47,45 @@
     "newGrammarFixtureAndReceiptIdentityRequired": true,
     "changedSourceMayInheritExactOldSelfhostReceipt": false,
     "routineFullFixedPointRequired": false,
-    "deliberateCompilerOnlyPromotionQualificationRequired": true
+    "deliberateCompilerOnlyPromotionQualificationRequired": true,
+    "referenceAuthority": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
+    "v7IdentityGuardRequired": true,
+    "firstPsCompilerModuleStillCandidate": true,
+    "historicalBridgeEvidenceRetainsOldReferenceIdentity": true
   },
   "sourceErrataForReview": [
-    "The dedicated deriving adoption sections admit a pinned trailing clause; the older attributes paragraph still lists deriving as excluded.",
-    "Some illustrative dependent applications, including Vec alpha (n + 1), contradict the no-gap-parenthesized-application rule in ordinary .ps terms.",
-    "C-style comment spellings in some negative application examples do not isolate adjacency under the document's Lean comment lexer; use valid Lean comments for adjacency tests.",
-    "The detailed exactly-one-required-Unit completion rule permits useUnit(); earlier wording suggesting only useUnit(()) needs alignment."
+    "V7 settles earlier E1-E4, F01-F22, C01-C05 and v4-v7 document-only category/grammar corrections; examples and fixtures are not executed compiler conformance.",
+    "Full RC4 Standard environment manifest, exact module visibility and Std.WP contract/tactic/effect registration remain pending implementation evidence.",
+    "Prior 19-module bridge qualification is exact-source historical evidence under the older reference digest; never retag it as complete v7."
   ],
   "implementationPlan": "PSC0_PSCV0_SELFHOST_MIGRATION_REVIEW.md",
   "compilerCodeChangedByThisReview": false,
   "kernelCodeChangedByThisReview": false,
   "newLanguageConformanceTestsExecuted": false,
-  "newSelfhostFixedPointExecuted": false
+  "newSelfhostFixedPointExecuted": false,
+  "supersededReference": {
+    "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
+    "uploadedFilename": "Lean4_ProofScript_PSCV0_Lean435rc4_Expanded_Lean_First_Unified_Language_Reference(2).md",
+    "source": "user-uploaded original in the task conversation",
+    "bytes": 230234,
+    "physicalLines": 2888,
+    "sha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
+    "gitBlobSha1": "8cd3f5b9d2a47d10927ac40e32fe702d4642afb4",
+    "verbatimCopyCommittedInThisReview": false,
+    "sourceAvailabilityRequirement": "Retrieve the exact user upload and verify the digest before implementation; this manifest and review are not substitutes for its full text.",
+    "status": "historical previous language design and exact qualification identity"
+  },
+  "currentCandidate": {
+    "branch": "psc0/pscv0-readable-selfhost-v1",
+    "parentHead": "29c12e9eb8cf00966c03b4636ff9d6d243b010a3",
+    "module": "Ps.Syntax.Translate",
+    "source": "psc0/packages/syntax/src-ps/Ps/Syntax/Translate.ps",
+    "latestRun": 38112642444,
+    "nativeAndGeneratedMaterializationPassed": true,
+    "eightConcreteEquationsPassed": true,
+    "twoAxiomFreeAlgebraLemmasPassed": true,
+    "incompleteReason": "900-second timeout during candidate suffix module preparation, exit 124",
+    "fullV7Conformance": false,
+    "newSelfhostFixedPoint": false
+  }
 }

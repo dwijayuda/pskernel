@@ -5,6 +5,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { verifyPscv0Reference } from './pscv0-reference-identity.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const blob=b=>createHash('sha1').update('blob '+b.length+'\0').update(b).digest('hex');
@@ -50,10 +51,17 @@ function correspondence(projected,baseline){
   return projected+'\n'+original+'\n'+proofs;
 }
 export async function readAuthoringInputs(){
+  const identity=await verifyPscv0Reference();
   const manifestBytes=await readFile(path.join(root,'pscv0-authoring.json'));
   const manifest=JSON.parse(text(manifestBytes));
   assert.equal(manifest.schema,'psc0-pscv0-authoring-candidate/1');
   assert.equal(manifest.language,'pscv0');
+  assert.equal(manifest.referenceSha256,identity.sha256);
+  assert.equal(manifest.referenceBytes,identity.bytes);
+  assert.equal(manifest.referenceGitBlobSha1,identity.gitBlobSha1);
+  assert.equal(manifest.referenceRevision,'v7');
+  assert.equal(manifest.referenceDocumentPath,'PSCV0_LANGUAGE_REFERENCE.md');
+  assert.equal(manifest.referenceLeanCommit,'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364');
   assert.equal(manifest.sourceSelection,'explicit-module-map-no-fallback');
   assert.equal(manifest.publicCompilerSelected,false);
   assert.equal(manifest.surfacePreparation,'current-portable-bootstrap-before-source-selection');

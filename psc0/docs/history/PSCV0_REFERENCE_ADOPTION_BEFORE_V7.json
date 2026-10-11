@@ -1,0 +1,60 @@
+{
+  "schema": "psc0-language-reference-adoption/1",
+  "status": "user-selected-design-target-not-implemented-conformance",
+  "selectedOn": "2026-10-11",
+  "languageEdition": "pscv0",
+  "reference": {
+    "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
+    "uploadedFilename": "Lean4_ProofScript_PSCV0_Lean435rc4_Expanded_Lean_First_Unified_Language_Reference(2).md",
+    "source": "user-uploaded original in the task conversation",
+    "bytes": 230234,
+    "physicalLines": 2888,
+    "sha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
+    "gitBlobSha1": "8cd3f5b9d2a47d10927ac40e32fe702d4642afb4",
+    "verbatimCopyCommittedInThisReview": false,
+    "sourceAvailabilityRequirement": "Retrieve the exact user upload and verify the digest before implementation; this manifest and review are not substitutes for its full text."
+  },
+  "referenceLeanPin": {
+    "tag": "v4.35.0-rc4",
+    "commit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "futureSourceCompatibility": {
+    "oldProofScriptGrammarRequired": false,
+    "oldProfileIsFeatureCeiling": false,
+    "oldParserFallbackAllowedInNewEdition": false,
+    "nativeLeanSourceKindRetained": true,
+    "bootstrapArtifactsAndHistoricalReceiptsPreserved": true
+  },
+  "observedImplementation": {
+    "sourceCommit": "f7b92aa3479cd2c39ce959cab82d69dfb8d969a4",
+    "sourceAuthority": "handwritten-lean",
+    "psGrammar": "ps-0.9-r3/new-only/bounded-selfhost-subset",
+    "strictEntry": "psCompilerSh1TypeScriptSources",
+    "leanToolchain": "4.34.0",
+    "typescript": "7.0.2",
+    "compilerSourceFiles": 69,
+    "compilerBootstrapModules": 64,
+    "pscv0ConformanceEstablished": false
+  },
+  "migrationPolicy": {
+    "compilerOnlyFirst": true,
+    "kernelSourceChangesAuthorizedByThisReview": false,
+    "languageRuntimeRelabelingAllowed": false,
+    "portableFeaturesImplementedInPortableCompiler": true,
+    "newGrammarFixtureAndReceiptIdentityRequired": true,
+    "changedSourceMayInheritExactOldSelfhostReceipt": false,
+    "routineFullFixedPointRequired": false,
+    "deliberateCompilerOnlyPromotionQualificationRequired": true
+  },
+  "sourceErrataForReview": [
+    "The dedicated deriving adoption sections admit a pinned trailing clause; the older attributes paragraph still lists deriving as excluded.",
+    "Some illustrative dependent applications, including Vec alpha (n + 1), contradict the no-gap-parenthesized-application rule in ordinary .ps terms.",
+    "C-style comment spellings in some negative application examples do not isolate adjacency under the document's Lean comment lexer; use valid Lean comments for adjacency tests.",
+    "The detailed exactly-one-required-Unit completion rule permits useUnit(); earlier wording suggesting only useUnit(()) needs alignment."
+  ],
+  "implementationPlan": "PSC0_PSCV0_SELFHOST_MIGRATION_REVIEW.md",
+  "compilerCodeChangedByThisReview": false,
+  "kernelCodeChangedByThisReview": false,
+  "newLanguageConformanceTestsExecuted": false,
+  "newSelfhostFixedPointExecuted": false
+}

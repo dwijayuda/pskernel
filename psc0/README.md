@@ -1,5 +1,8 @@
 # PSC0 compiler and self-host implementation
 
+> **New PSCV0 design authority (2026-10-11):** [exact uploaded v7 reference](PSCV0_LANGUAGE_REFERENCE.md), SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`. See [adoption and migration matrix](docs/PSCV0_V7_ADOPTION_AND_MIGRATION_MATRIX.md), [reference identity](docs/PSCV0_REFERENCE_ADOPTION.json), and [AI work state](AI_WORK_STATE.md). This supersedes older **design** references for new PSC0 language work, not the already selected public compiler source/grammar. The `.ps`-authored module remains an unpromoted candidate; qualified historical compiler/kernel and npm receipts are not relabeled as v7.
+
+
 **New normative target (design only):** [PSC0 soundness and secure extensibility target architecture](docs/PSC0_SOUNDNESS_SECURE_EXTENSIBLE_ARCHITECTURE.md). The design specifies a single checked-build authority, independent JS-kernel proof obligations, secure npm extension boundaries, and exact P0–P6 migration gates. Its target design is not evidence that those gates are implemented. Existing historical receipts retain their original meaning.
 
 Initial F application: [`9ee0b1fd38dd1456a187d4675f9027440a989f2d`](https://github.com/dwijayuda/pskernel/commit/9ee0b1fd38dd1456a187d4675f9027440a989f2d). This is the initial attempt identity; any qualifying revision and its evidence are recorded separately below.

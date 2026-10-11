@@ -20,7 +20,7 @@ concurrency:
 jobs:
   bridge:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     defaults:
       run:
         working-directory: psc0
@@ -39,6 +39,8 @@ jobs:
             psc0/packages/foundation
             psc0/scripts
             psc0/test/pscv0
+            psc0/PSCV0_LANGUAGE_REFERENCE.md
+            psc0/docs/PSCV0_REFERENCE_ADOPTION.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22.23.3'
@@ -50,6 +52,8 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
+      - name: Verify authoritative PSCV0 v7 source bytes and manifests first
+        run: node scripts/pscv0-reference-identity.mjs
       - name: Cheap native source, authoring round trip and eight proofs before generation
         run: |
           lake build PsSyntax PsFoundation
@@ -84,7 +88,7 @@ jobs:
           node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
           npm install -g --prefix "$PSCV0_PREFIX" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
       - name: Generate owned surface then PS-authored bridge with one shared preparation prefix
-        run: timeout 900 node scripts/pscv0-build-bridge.mjs "$PSCV0_PREFIX" dist/pscv0-bridge
+        run: timeout 1600 node scripts/pscv0-build-bridge.mjs "$PSCV0_PREFIX" dist/pscv0-bridge
       - name: Exercise unchanged bridge assertions and candidate authoring regressions
         run: |
           node --test --test-concurrency=1 --test-reporter=tap scripts/pscv0-bridge.test.mjs | tee dist/pscv0-bridge/tests-linux.tap

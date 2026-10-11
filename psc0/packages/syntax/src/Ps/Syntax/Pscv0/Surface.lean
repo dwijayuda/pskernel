@@ -26,7 +26,7 @@ structure PsPscv0SurfaceModule where
 
 def psPscv0LanguageEdition : String := "pscv0"
 def psPscv0ReferenceSha256 : String :=
-  "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0"
+  "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5"
 def psPscv0SurfaceCapability : String := "declaration-except-do/1"
 def psPscv0FullConformance : Bool := false
 

@@ -44,7 +44,8 @@ test('bridge is generated portable PSCV0 candidate, not a relabeled legacy runti
   assert.equal(constant(B.psPscv0LanguageEdition),'pscv0');
   assert.equal(constant(B.psPscv0SurfaceCapability),'declaration-except-do/1');
   assert.equal(constant(B.psPscv0FullConformance),false);
-  assert.equal(constant(B.psPscv0ReferenceSha256),'a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0');
+  assert.equal(constant(B.psPscv0ReferenceSha256),'843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5');
+  assert.equal(report.referenceSha256,'843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5');
   assert.equal(report.builder,'retained self-hosted JavaScript PSC0 compiler');
   assert.equal(report.existingCompilerSourceFilesUnchanged,69);
   assert.equal(report.newInstalledFixedPoint,false);

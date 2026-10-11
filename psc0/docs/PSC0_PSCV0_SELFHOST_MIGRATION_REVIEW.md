@@ -1,5 +1,8 @@
 # PSC0: PSCV0 adoption and readable self-host migration review
 
+> **Historical planning input:** this review studied an earlier 230,234-byte RC4 design document. The [full v7 reference](../PSCV0_LANGUAGE_REFERENCE.md) now supersedes that *language-design authority* for new work (SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`). The [v7 implementation matrix](PSCV0_V7_ADOPTION_AND_MIGRATION_MATRIX.md) preserves the distinction between design requirements and completed compiler qualification. The older review below remains historical evidence and does not authorize an older language fallback.
+
+
 **Date:** 2026-10-11. **Status:** static source review, user-selected target and proposed implementation sequence; not executed language conformance or completed migration.
 **Inspected source:** `psc0/npm-modular-packages-v1` at `f7b92aa3479cd2c39ce959cab82d69dfb8d969a4`.
 **Selected reference:** the user's `Lean4_ProofScript_PSCV0_Lean435rc4_Expanded_Lean_First_Unified_Language_Reference(2).md`, SHA-256 `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0`, 230234 bytes. See [adoption record](PSCV0_REFERENCE_ADOPTION.json).

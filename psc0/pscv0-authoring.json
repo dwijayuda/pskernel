@@ -3,7 +3,7 @@
   "status": "candidate-not-promoted",
   "language": "pscv0",
   "capability": "declaration-except-do/1",
-  "referenceSha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
+  "referenceSha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
   "sourceSelection": "explicit-module-map-no-fallback",
   "surfacePreparation": "current-portable-bootstrap-before-source-selection",
   "surfaceSeed": {
@@ -32,5 +32,10 @@
   "baselineLeanRole": "frozen-predecessor-source-not-second-candidate-master",
   "defaultNpmSourceRootChanged": false,
   "publicCompilerSelected": false,
-  "newFullSelfhostFixedPoint": false
+  "newFullSelfhostFixedPoint": false,
+  "referenceRevision": "v7",
+  "referenceDocumentPath": "PSCV0_LANGUAGE_REFERENCE.md",
+  "referenceBytes": 308462,
+  "referenceGitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
+  "referenceLeanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
 }

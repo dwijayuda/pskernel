@@ -153,21 +153,155 @@ def psKernelExprLiftLooseBVarsChangedWithFuel
           | _ =>
               Prod.mk expr false
 
+/-
+C0 direct structural de Bruijn lift. The source-oriented fuel-bounded
+function above remains as the independent regression oracle.
+
+The old production route counted *every* node in the replacement term before
+performing the lift. A directly recursive transform visits each affected
+subtree only once and structurally shares unchanged descendants. This matters
+when one beta substitution lifts the same nontrivial replacement under binders.
+-/
+def psKernelC0LiftChanged
+    (expr : PsKernelExpr)
+    (start : Nat)
+    (amount : Nat) :
+    Prod PsKernelExpr Bool :=
+        if Nat.beq amount 0 then
+          Prod.mk expr false
+        else
+          match expr with
+          | PsKernelExpr.bvar index =>
+              if psKernelNatGe index start then
+                Prod.mk
+                  (PsKernelExpr.bvar
+                    (Nat.add index amount))
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.app fn arg =>
+              let fnResult := psKernelC0LiftChanged fn start amount;
+              let argResult := psKernelC0LiftChanged arg start amount;
+              if (Prod.snd fnResult) then
+                Prod.mk
+                  (PsKernelExpr.app
+                    (Prod.fst fnResult)
+                    (Prod.fst argResult))
+                  true
+              else if (Prod.snd argResult) then
+                Prod.mk
+                  (PsKernelExpr.app
+                    (Prod.fst fnResult)
+                    (Prod.fst argResult))
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.lam name type body binderInfo =>
+              let typeResult := psKernelC0LiftChanged type start amount;
+              let bodyResult := psKernelC0LiftChanged body (Nat.succ start) amount;
+              if (Prod.snd typeResult) then
+                Prod.mk
+                  (PsKernelExpr.lam
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.lam
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.forallE name type body binderInfo =>
+              let typeResult := psKernelC0LiftChanged type start amount;
+              let bodyResult := psKernelC0LiftChanged body (Nat.succ start) amount;
+              if (Prod.snd typeResult) then
+                Prod.mk
+                  (PsKernelExpr.forallE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.forallE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst bodyResult)
+                    binderInfo)
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.letE name type value body nondep =>
+              let typeResult := psKernelC0LiftChanged type start amount;
+              let valueResult := psKernelC0LiftChanged value start amount;
+              let bodyResult := psKernelC0LiftChanged body (Nat.succ start) amount;
+              if (Prod.snd typeResult) then
+                Prod.mk
+                  (PsKernelExpr.letE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst valueResult)
+                    (Prod.fst bodyResult)
+                    nondep)
+                  true
+              else if (Prod.snd valueResult) then
+                Prod.mk
+                  (PsKernelExpr.letE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst valueResult)
+                    (Prod.fst bodyResult)
+                    nondep)
+                  true
+              else if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.letE
+                    name
+                    (Prod.fst typeResult)
+                    (Prod.fst valueResult)
+                    (Prod.fst bodyResult)
+                    nondep)
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.mdata metadata body =>
+              let bodyResult := psKernelC0LiftChanged body start amount;
+              if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.mdata
+                    metadata
+                    (Prod.fst bodyResult))
+                  true
+              else
+                Prod.mk expr false
+          | PsKernelExpr.proj typeName index body =>
+              let bodyResult := psKernelC0LiftChanged body start amount;
+              if (Prod.snd bodyResult) then
+                Prod.mk
+                  (PsKernelExpr.proj
+                    typeName
+                    index
+                    (Prod.fst bodyResult))
+                  true
+              else
+                Prod.mk expr false
+          | _ =>
+              Prod.mk expr false
+
+
 def psKernelExprLiftLooseBVarsChanged
     (expr : PsKernelExpr)
     (start : Nat)
     (amount : Nat) :
     Prod PsKernelExpr Bool :=
-  -- The worker already returns this result for zero. Avoid counting the tree
-  -- and constructing its fuel worker before reaching that same branch.
-  if Nat.beq amount 0 then
-    Prod.mk expr false
-  else
-    psKernelExprLiftLooseBVarsChangedWithFuel
-      (Nat.succ (psKernelExprNodeCount expr))
-      expr
-      start
-      amount
+  psKernelC0LiftChanged expr start amount
 
 def psKernelExprLiftLooseBVars
     (expr : PsKernelExpr)

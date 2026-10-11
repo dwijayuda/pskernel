@@ -37,7 +37,7 @@ def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
   {
     environment := environment
     localContext := psLocalEmpty
-    instances := psInstanceIndexEmpty
+    instances := environment.instances
     metaContext := psMetaEmpty
     structuralRecursion := Option.none
   }

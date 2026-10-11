@@ -183,7 +183,14 @@ structure PsSyntaxModule where
 
 -- Commands are ordered independently of declarations. The legacy module record
 -- remains a declaration-only API; v7 programs retain all scope boundaries.
+-- Registration is command metadata; the underlying value/data declaration
+-- retains the shared binder, scope and elaboration representation.
+inductive PsSyntaxRegistration where
+  | classDecl
+  | instanceDecl (priority : Nat)
+
 inductive PsSyntaxCommand where
+  | registeredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
   | declaration (value : PsSyntaxDeclaration)
   | namespaceCmd (name : PsSyntaxName) (span : PsSourceSpan)
   | sectionCmd (name : Option PsSyntaxName) (span : PsSourceSpan)

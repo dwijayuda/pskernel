@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.Commands
+import Ps.Syntax.Pscv0.Instances
 
 def psPscv0CommandNames (line fuel : Nat) (cursor : PsTokenCursor)
     (acc : List PsSyntaxName) : Except String (PsParseResult (List PsSyntaxName)) := do
@@ -15,6 +15,17 @@ def psPscv0CommandNames (line fuel : Nat) (cursor : PsTokenCursor)
 def psPscv0ReadCommand (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxCommand) := do
   let some token := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
+  if token.text == "instance" then
+    let parsed ← (psPscv0ReadInstance cursor).mapError psPscv0ParseError
+    let .registeredDeclaration declaration _ := parsed.value | throw "PSCV0-INSTANCE-DECLARATION"
+    let next ← (psParseProofScriptCommandSeparator
+      (psProofScriptDeclarationStop declaration) parsed.cursor).mapError psPscv0ParseError
+    return { parsed with cursor := next }
+  if token.text == "class" then
+    let parsed ← (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
+    let next ← (psParseProofScriptCommandSeparator
+      (psProofScriptDeclarationStop parsed.value) parsed.cursor).mapError psPscv0ParseError
+    return { value := .registeredDeclaration parsed.value .classDecl, cursor := next }
   if ["namespace", "section", "end", "open", "include", "omit"].contains token.text then
     let head ← psPscv0Expect cursor token.text
     let names ← psPscv0CommandNames token.span.start.line 4096 head.cursor []

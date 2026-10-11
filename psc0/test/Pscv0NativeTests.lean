@@ -326,7 +326,39 @@ private def application : String :=
   "const checkedList: CertifiedList := CertifiedList.cons(131, True.intro, CertifiedList.cons(132, True.intro, CertifiedList.nil, True.intro), True.intro)\n" ++
   "const proofRecursiveAnswer: Nat := certifiedCount(checkedList)\n" ++
   "const proofConstructor: True -> CertifiedList := CertifiedList.cons(133, True.intro, CertifiedList.nil)\n" ++
-  "const proofPartialAnswer: Nat := certifiedCount(proofConstructor(True.intro))\n"
+  "const proofPartialAnswer: Nat := certifiedCount(proofConstructor(True.intro))\n" ++
+  "namespace Classes\n" ++
+  "class Measure(A: Type) where {\n" ++
+  "  measure: A -> Nat\n" ++
+  "  law: True\n" ++
+  "}\n" ++
+  "instance (priority := low) lowNat: Measure Nat where {\n" ++
+  "  measure(value: Nat): Nat := 140\n" ++
+  "  law := True.intro\n" ++
+  "}\n" ++
+  "instance chosenNat: Measure Nat where {\n" ++
+  "  measure(value: Nat): Nat := value\n" ++
+  "  law := True.intro\n" ++
+  "}\n" ++
+  "instance (priority := high) cycle{A: Type}[Measure A]: Measure A where {\n" ++
+  "  measure(value: A): Nat := Measure.measure(value)\n" ++
+  "  law := True.intro\n" ++
+  "}\n" ++
+  "instance optionMeasure{A: Type}[Measure A]: Measure(Option A) where {\n" ++
+  "  measure(value: Option A): Nat := match value with { | .none => 0 | .some n => Measure.measure(n) }\n" ++
+  "  law := True.intro\n" ++
+  "}\n" ++
+  "function localFirst[chosen: Measure Nat](value: Nat): Nat := Measure.measure(value)\n" ++
+  "const selected: Nat := Measure.measure(141)\n" ++
+  "const nested: Nat := Measure.measure(Option.some(Option.some(142)))\n" ++
+  "const local: Nat := localFirst(chosen := lowNat, value := 143)\n" ++
+  "theorem lawful: True := Measure.law(A := Nat)\n" ++
+  "const staticProjection: Nat := CertifiedPair.second(checkedPair)\n" ++
+  "end Classes\n" ++
+  "const classSelected: Nat := Classes.selected\n" ++
+  "const classNested: Nat := Classes.nested\n" ++
+  "const classLocal: Nat := Classes.local\n" ++
+  "const classStaticProjection: Nat := Classes.staticProjection\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -390,7 +422,13 @@ private def semanticCases : IO Unit := do
     { source := "function bad(value: Option(Option Nat)): Nat := match value with { | .some (.some n) => n | .none => 0 }\n" },
     { source := "function bad(value: Option(Prod Nat Nat)): Nat := match value with { | .some(x, y) => x | .none => 0 }\n" },
     { source := "function bad(value: Option Nat): Nat := if let .some n := value { n } else { n }\n" },
-    { source := "function bad(value: Option Nat): Nat := {\n  let .some n := value\n  n\n}\n" }]
+    { source := "function bad(value: Option Nat): Nat := {\n  let .some n := value\n  n\n}\n" },
+    { source := "class C where { value: Nat }\ninstance (priority := high + 1): C where { value := 0 }\n" },
+    { source := "structure C where { value: Nat }\ninstance : C where { value := 0 }\n" },
+    { source := "class C where { value: Nat }\ninstance : C := C.mk(0)\n" },
+    { source := "class C where { value: Nat }\ninstance () : C where { value := 0 }\n" },
+    { source := "class C where { value: Nat }\ninstance : C where { value := true }\n" },
+    { source := "class C where { value: Nat }\ninstance loop[C]: C where { value := C.value }\nconst bad: Nat := C.value\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -404,7 +442,8 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate", none, some "elaborate",
       some "elaborate", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate"]
+      some "elaborate", some "elaborate",
+      some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -418,7 +457,8 @@ private def semanticCases : IO Unit := do
     "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "", "PSCV0-TYPE-MISMATCH",
     "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH",
     "PSCV0-MATCH: pattern row", "PSCV0-SCOPE: duplicate pattern", "PSCV0-MATCH: missing feasible", "PSCV0-PARSE",
-    "PSCV0-SCOPE: unknown name", "PSCV0-MATCH: missing feasible"]
+    "PSCV0-SCOPE: unknown name", "PSCV0-MATCH: missing feasible",
+    "PSCV0-PARSE", "PSCV0-DATA: instance result", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-TYPE-MISMATCH", "PSCV0-ELABORATION"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -447,7 +487,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 44 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 50 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

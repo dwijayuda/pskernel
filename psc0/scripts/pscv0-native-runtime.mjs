@@ -107,4 +107,8 @@ assert.equal(output.proofRecursiveAnswer, 2n);
 assert.equal(output.proofPartialAnswer, 1n);
 assert.deepEqual(Object.keys(output.checkedPair), ['first', 'second']);
 assert.deepEqual(Object.keys(output.checkedList), ['head', 'tail']);
+assert.equal(output.classSelected, 141n);
+assert.equal(output.classNested, 142n);
+assert.equal(output.classLocal, 140n);
+assert.equal(output.classStaticProjection, 132n);
 console.log('PSCV0_NATIVE_RUNTIME: PASS checked current-source v7 application -> TypeScript -> JavaScript');

@@ -4,6 +4,8 @@ import Ps.Environment.LocalContext
 structure PsInstanceEntry where
   value : PsExpr
   type : PsExpr
+  priority : Nat := 1000
+  className : Option PsName := none
 
 structure PsInstanceIndex where
   entries : List PsInstanceEntry
@@ -19,10 +21,20 @@ def psInstanceListAppend
   | entry :: rest =>
       List.cons entry (psInstanceListAppend rest right)
 
+-- Higher priority precedes lower priority; equal priorities prefer the most
+-- recently registered declaration, matching the native instance stack.
+def psInstanceInsert (entry : PsInstanceEntry) (entries : List PsInstanceEntry) :
+    List PsInstanceEntry :=
+  match entries with
+  | [] => [entry]
+  | first :: rest =>
+    if entry.priority >= first.priority then entry :: entries
+    else first :: psInstanceInsert entry rest
+
 def psInstanceIndexAdd
     (index : PsInstanceIndex)
     (entry : PsInstanceEntry) : PsInstanceIndex :=
-  { entries := psInstanceListAppend index.entries (List.cons entry []) }
+  { entries := psInstanceInsert entry index.entries }
 
 def psLocalInstanceEntriesFromList
     (declarations : List PsLocalDecl) : List PsInstanceEntry :=

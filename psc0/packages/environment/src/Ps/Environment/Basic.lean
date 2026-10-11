@@ -1,5 +1,6 @@
 import Ps.Foundation.Name
 import Ps.Core.Declaration
+import Ps.Environment.Instances
 
 def psDeclarationName : PsDeclaration -> PsName
   | .axiomDecl name _ _ => name
@@ -110,6 +111,8 @@ def psEnvironmentIndexSetWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> List
 structure PsEnvironment where
   declarations : List PsDeclaration
   index : PsEnvironmentIndex
+  classes : List PsName := []
+  instances : PsInstanceIndex := psInstanceIndexEmpty
 
 def psEnvironmentEmpty : PsEnvironment :=
   PsEnvironment.mk List.nil PsEnvironmentIndex.empty
@@ -191,33 +194,22 @@ def psEnvironmentIndexInsert (index : PsEnvironmentIndex) (declaration : PsDecla
   let bucket := psEnvironmentIndexFindWorker 16 index hash;
   psEnvironmentIndexSetWorker 16 index hash (List.cons declaration (psEnvironmentRemoveName name bucket))
 
+-- Persistent updates retain semantic registries alongside the declaration index.
+def psEnvironmentInsert (environment : PsEnvironment) (declaration : PsDeclaration) :
+    PsEnvironment :=
+  { environment with
+    declarations := declaration :: psEnvironmentRemoveName (psDeclarationName declaration) environment.declarations
+    index := psEnvironmentIndexInsert environment.index declaration }
+
 def psEnvironmentAddReplacingAxiom
-    (environment : PsEnvironment)
-    (declaration : PsDeclaration) : Option PsEnvironment :=
-  let name := psDeclarationName declaration;
-  match psEnvironmentFind environment name with
-  | none =>
-      Option.some
-        (PsEnvironment.mk
-          (List.cons declaration environment.declarations)
-          (psEnvironmentIndexInsert environment.index declaration))
-  | some existing =>
-      match existing with
-      | .axiomDecl _ _ _ =>
-          Option.some
-            (PsEnvironment.mk
-              (List.cons
-                declaration
-                (psEnvironmentRemoveName
-                  name
-                  environment.declarations))
-              (psEnvironmentIndexInsert environment.index declaration))
-      | _ =>
-          Option.none
+    (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=
+  match psEnvironmentFind environment (psDeclarationName declaration) with
+  | none => some (psEnvironmentInsert environment declaration)
+  | some (.axiomDecl _ _ _) => some (psEnvironmentInsert environment declaration)
+  | _ => none
 
 def psEnvironmentAdd (environment : PsEnvironment) (declaration : PsDeclaration) : Option PsEnvironment :=
-  if psEnvironmentContains environment (psDeclarationName declaration) then
-    Option.none
-  else
-    Option.some (PsEnvironment.mk (List.cons declaration environment.declarations)
-      (psEnvironmentIndexInsert environment.index declaration))
+  if psEnvironmentContains environment (psDeclarationName declaration) then none
+  else some { environment with
+    declarations := declaration :: environment.declarations
+    index := psEnvironmentIndexInsert environment.index declaration }

@@ -52,3 +52,12 @@ This ordering may change when source inspection reveals a stronger dependency.
 A green compact fixture is evidence for its exact boundary, never completion of
 an entire row. Validation first checks semantic invariants and actual admitted
 terms, then the affected runtime path, while reusing compact integration inputs.
+
+## Next requested backend milestone
+
+After the current small class/instance milestone, implement a Rust backend before
+full v7 completion. Reuse checked prepared Core and validated typed IR. Keep target
+representation and runtime support inside backend/runtime modules; do not fork
+source elaboration or proof checking. Define the initial Rust capability boundary
+and compile/run the same compact application subset with the native Rust toolchain.
+Full v7 and source/self-host migration remain subsequent milestones.

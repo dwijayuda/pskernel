@@ -354,69 +354,41 @@ def psElabUniqueRecordCandidate
       | [] => Option.some candidate
       | _ :: _ => Option.none
 
-def psElabRecord
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
-    (fields :
-      List (Prod PsSyntaxName PsSyntaxTerm))
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  let candidate : Option PsElabRecordCandidate :=
-    match expected with
-    | some expectedType =>
-        match
-            psElabRecordCandidateFromExpected
-              context
-              expectedType with
-        | some found =>
-            if
-                psSyntaxRecordFieldsMatch
-                  fields
-                  found.fieldNames then
-              Option.some found
-            else
-              Option.none
-        | none =>
-            psElabUniqueRecordCandidate
-              context.environment
-              fields
-    | none =>
-        psElabUniqueRecordCandidate
-          context.environment
-          fields;
-  match candidate with
-  | none => Except.error PsElabError.unsupportedTerm
-  | some found =>
-      match
-          psSyntaxRecordOrderFields
-            fields
-            found.fieldNames with
-      | none => Except.error PsElabError.unsupportedTerm
-      | some arguments =>
-          match
-              psElabResolvedTerm
-                context
-                (PsExpr.constE
-                  found.constructorName
-                  [])
-                Option.none with
-          | Except.error error => Except.error error
-          | Except.ok constructor =>
-              match
-                  psElabApplyArgs
-                    elaborate
-                    constructor
-                    arguments
-                    [] with
-              | Except.error error => Except.error error
-              | Except.ok application =>
-                  psElabFinishApplication
-                    application
-                    expected
+-- Seed known uniform parameters before elaborating fields. Field lambdas and
+-- dependent proof fields then receive the actual expected dictionary/record type.
+def psElabRecordConstructor (context : PsElabContext) (found : PsElabRecordCandidate)
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+  let constructor ← psElabResolvedTerm context (.constE found.constructorName []) none
+  let some target := expected | return constructor
+  let some info := psEnvironmentFindConstructor context.environment found.constructorName
+    | throw .unsupportedTerm
+  let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext target)
+  let .constE name _ := view.head | return constructor
+  if !psNameEq name info.inductiveName then return constructor
+  if view.args.length != info.numParams then throw .unsupportedTerm
+  view.args.foldlM (fun current value => do
+    let pi ← (psInferEnsureForall current.context.environment current.context.metaContext
+      current.context.localContext current.type).mapError PsElabError.infer
+    let argument ← psElabResolvedTerm current.context value (some pi.domain)
+    return psElabApplyValue current argument pi.body) constructor
+
+def psElabRecord (elaborate : PsElaborator) (context : PsElabContext)
+    (fields : List (PsSyntaxName × PsSyntaxTerm)) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let candidate := match expected with
+    | some type => match psElabRecordCandidateFromExpected context type with
+      | some found => some found
+      | none => psElabUniqueRecordCandidate context.environment fields
+    | none => psElabUniqueRecordCandidate context.environment fields
+  let some found := candidate | throw .unsupportedTerm
+  if !psSyntaxRecordFieldsMatch fields found.fieldNames then
+    throw (.invalidArgument "record fields do not match the selected structure")
+  let constructor ← psElabRecordConstructor context found expected
+  let names ← fields.mapM fun (name, value) => do
+    let some field := psSyntaxRecordFieldName (name, value) | throw .emptyName
+    return (psRootName field, value)
+  let application ← psElabApplyOrdered elaborate 4096 constructor [] names [] true expected
+  psElabFinishApplication application expected
 
 def psElabSyntaxLocalId
     (context : PsElabContext) :

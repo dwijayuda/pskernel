@@ -180,11 +180,14 @@ def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
   let parsed ← psPscv0ParseProgramTokens input.rewritten.tokens
   let attached ← parsed.commands.mapM fun command => do
     match command with
-    | .declaration declaration =>
+    | .declaration declaration | .registeredDeclaration declaration _ =>
       let surface ← psPscv0AttachDeclaration true input.tokens input.rewritten.blocks
         input.errorName input.discardName declaration
       let lowered ← psPscv0LowerDeclaration input.errorName input.discardName surface
-      return (PsSyntaxCommand.declaration lowered, if surface.doBody.isSome then 1 else 0)
+      let command := match command with
+        | .registeredDeclaration _ registration => .registeredDeclaration lowered registration
+        | _ => PsSyntaxCommand.declaration lowered
+      return (command, if surface.doBody.isSome then 1 else 0)
     | .variableCmd binders _ =>
       let _ ← binders.mapM (fun binder => psPscv0ValidateTermWithFuel input.tokens 4096 binder.snd)
       return (command, 0)

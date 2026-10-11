@@ -307,52 +307,36 @@ def psTryInstanceCandidates
     target
     synthesize
 
-def psSynthInstanceWithFuelWorker
-    (remainingFuel : Nat) :
-    PsEnvironment ->
-    PsLocalContext ->
-    PsInstanceIndex ->
-    PsMetaContext ->
-    PsExpr ->
+-- Candidate branches own their metavariable snapshots. Active ground goals
+-- detect recursive dictionary cycles without committing a failed branch.
+-- This is a bounded ground search; output-parameter/table machinery is separate.
+def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
+    (localContext : PsLocalContext) (index : PsInstanceIndex)
+    (active : List PsExpr) (context : PsMetaContext) (target : PsExpr) :
     PsSynthInstanceResult :=
-  match remainingFuel with
-  | Nat.zero =>
-      fun (_environment : PsEnvironment) =>
-        fun (_localContext : PsLocalContext) =>
-          fun (_index : PsInstanceIndex) =>
-            fun (context : PsMetaContext) =>
-              fun (_target : PsExpr) =>
-                psSynthFailure context
-  | Nat.succ fuel =>
-      fun (environment : PsEnvironment) =>
-        fun (localContext : PsLocalContext) =>
-          fun (index : PsInstanceIndex) =>
-            fun (context : PsMetaContext) =>
-              fun (target : PsExpr) =>
-                let smaller :
-                    PsEnvironment ->
-                    PsLocalContext ->
-                    PsInstanceIndex ->
-                    PsMetaContext ->
-                    PsExpr ->
-                    PsSynthInstanceResult :=
-                  psSynthInstanceWithFuelWorker fuel;
-                let synthesize :=
-                  fun (nextContext : PsMetaContext) =>
-                    fun (nextTarget : PsExpr) =>
-                      smaller
-                        environment
-                        localContext
-                        index
-                        nextContext
-                        nextTarget;
-                psTryInstanceCandidates
-                  environment
-                  localContext
-                  context
-                  target
-                  synthesize
-                  (psAllInstanceEntries localContext index)
+  match fuel with
+  | 0 => psSynthFailure context
+  | fuel + 1 =>
+    let target := psMetaInstantiate context target
+    let cyclic := !psExprHasUnresolvedMeta target && active.any (fun prior =>
+      psDefEqReadOnlyWithEnv environment context localContext target prior)
+    if cyclic then psSynthFailure context
+    else
+      let head := (psExprAppView (psWhnf environment context localContext target)).head
+      let entries := (psAllInstanceEntries localContext index).filter fun entry =>
+        match entry.className, head with
+        | some className, .constE name _ => psNameEq className name
+        | none, _ => true
+        | _, _ => false
+      let synthesize := fun nextContext nextTarget =>
+        psSynthInstanceSearch fuel environment localContext index
+          (target :: active) nextContext nextTarget
+      psTryInstanceCandidates environment localContext context target synthesize entries
+
+def psSynthInstanceWithFuelWorker (fuel : Nat) (environment : PsEnvironment)
+    (localContext : PsLocalContext) (index : PsInstanceIndex)
+    (context : PsMetaContext) (target : PsExpr) : PsSynthInstanceResult :=
+  psSynthInstanceSearch fuel environment localContext index [] context target
 
 def psSynthInstanceWithFuel
     (environment : PsEnvironment)

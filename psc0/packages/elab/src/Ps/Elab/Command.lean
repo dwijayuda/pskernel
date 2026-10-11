@@ -1,5 +1,5 @@
 import Ps.Elab.Scope
-import Ps.Elab.Declaration
+import Ps.Elab.Class
 
 structure PsCommandState where
   environment : PsEnvironment
@@ -113,6 +113,30 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
     state.scope.included
   return { state with scope := { state.scope with included } }
 
+def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
+    (registration : Option PsSyntaxRegistration) : Except PsElabError PsCommandState := do
+  let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
+  let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
+  let batch ← (psElabDeclarationBatch state.environment source).mapError (.atDeclaration name)
+  let isClass := match registration with | some .classDecl => true | _ => false
+  let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
+    (.atDeclaration name)
+  let environment ← (psAddDeclarationList state.environment batch.declarations).mapError
+    (.atDeclaration name)
+  let environment ← (match registration with
+    | none => pure environment
+    | some .classDecl => psElabRegisterClass environment name
+    | some (.instanceDecl priority) => psElabRegisterInstance environment name priority).mapError
+      (.atDeclaration name)
+  let namespaces := batch.declarations.foldl (fun acc decl =>
+    -- A declaration registers its parent namespaces. Constructors and
+    -- projections also register their inductive/structure namespace.
+    ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) state.namespaces
+  return { state with
+    environment := environment
+    namespaces := namespaces
+    declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev }
+
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
   match command with
@@ -137,20 +161,9 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
   | .variableCmd binders _ => psScopeVariables state binders
   | .includeCmd names _ => psScopeInclusion state names true
   | .omitCmd names _ => psScopeInclusion state names false
-  | .declaration source =>
-    let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
-    let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
-    let batch ← (psElabDeclarationBatch state.environment source).mapError (.atDeclaration name)
-    let environment ← (psAddDeclarationList state.environment batch.declarations).mapError
-      (.atDeclaration name)
-    let namespaces := batch.declarations.foldl (fun acc decl =>
-      -- A declaration registers its parent namespaces. Constructors and
-      -- projections also register their inductive/structure namespace.
-      ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) state.namespaces
-    return { state with
-      environment := environment
-      namespaces := namespaces
-      declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev }
+  | .declaration source => psElabCommandDeclaration state source none
+  | .registeredDeclaration source registration =>
+    psElabCommandDeclaration state source (some registration)
 
 def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
     Except PsElabError PsElabModuleResult := do

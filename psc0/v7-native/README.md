@@ -284,3 +284,8 @@ Measured evidence and exact source commits are recorded in ../AI_WORK_STATE.md.
 
 Keep native-only kernel/host services outside that final portable closure.
 Never imply that native Lean elaborator availability proves portable coverage.
+
+Profile 15 adds source class/instance registration and qualified structure/class
+projections through the shared portable environment. See
+`../docs/PSCV0_NATIVE_CLASSES.md`; native qualification is pending. The next
+requested milestone is a Rust backend over the existing typed IR, before full v7.

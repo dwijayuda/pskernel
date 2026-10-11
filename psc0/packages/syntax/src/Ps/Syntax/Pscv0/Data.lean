@@ -73,7 +73,7 @@ def psPscv0Constructors (fuel : Nat) (cursor : PsTokenCursor)
 def psPscv0ReadDataDeclaration (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxDeclaration) := do
   let some keyword := psTokenCursorAdvance cursor | throw (.unexpectedEnd "data declaration")
-  let isStructure := psStringEq keyword.token.text "structure"
+  let isStructure := ["structure", "class"].contains keyword.token.text
   let name ← psParseProofScriptDeclaredName keyword.cursor
   let fuel := Nat.succ (psParseListLength name.cursor.remaining)
   let params ← psPscv0DataParameters fuel name.cursor

@@ -29,6 +29,49 @@ private def checkWHNF (name : String) (original expected : RawExpr) : IO Unit :=
           require (lazy == expected) s!"{name}: lazy result disagreed with reference expectation"
           require (lazy == eager) s!"{name}: eager/lazy diverged"
 
+/--
+  Bounded, deterministic generated closed beta terms. This is a finite
+  differential corpus, not a proof of full evaluator completeness.
+-/
+private def boundedRawTerms : Nat → Nat → List RawExpr
+  | 0, depth =>
+      if depth == 0 then
+        [.sort 0, .sort 1]
+      else
+        [.sort 0, .sort 1, .bvar 0, .bvar (depth - 1)]
+  | n + 1, depth =>
+      let atoms := boundedRawTerms 0 depth
+      let previous := (boundedRawTerms n depth).take 9
+      let bodies := (boundedRawTerms n (depth + 1)).take 9
+      atoms ++
+        bodies.map (fun body => .lam (.sort 0) body) ++
+        previous.flatMap (fun fn =>
+          previous.map (fun arg => .app fn arg))
+
+private def generatedDifferential : IO Unit := do
+  let corpus := boundedRawTerms 4 0
+  let mut checked : Nat := 0
+  let mut bothExhausted : Nat := 0
+  for term in corpus do
+    let (root, store) ←
+      match encodeClosed 1000 term with
+      | .ok value => pure value
+      | .error err => throw <| IO.userError s!"generated encode: {repr err}"
+    let decoded ←
+      match decodeForEvaluation store root (store.nodes.size + 10) with
+      | .ok value => pure value
+      | .error err => throw <| IO.userError s!"generated decode: {repr err}"
+    require (decoded == term) "generated raw/DAG roundtrip mismatch"
+    match eagerWHNF 100 decoded, lazyWHNF 5000 5000 decoded with
+    | .ok eager, .ok lazy =>
+        require (eager == lazy) "generated eager/lazy WHNF mismatch"
+        checked := checked + 1
+    | .error .betaBudgetExhausted, .error .machineBudgetExhausted =>
+        bothExhausted := bothExhausted + 1
+    | _, _ => throw <| IO.userError "generated evaluator disagreement or resource failure"
+  require (checked > 40) "generated differential coverage unexpectedly too small"
+  IO.println s!"G2 bounded generated corpus: equal={checked}, both_exhausted={bothExhausted}"
+  
 /-- Root-level test executable. No checker/admission code is exposed. -/
 def reductionSmoke : IO Unit := do
   let id := rawId
@@ -71,6 +114,7 @@ def reductionSmoke : IO Unit := do
   | .error (.invalidStore (.invalidHandle 777)) => pure ()
   | _ => throw <| IO.userError "forged DAG handle reached evaluation"
 
+  generatedDifferential
   IO.println "PSKernel-Fast V3 G2: eager/lazy beta WHNF differential corpus PASS"
 end PSKernelFast
 

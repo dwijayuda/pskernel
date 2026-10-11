@@ -70,3 +70,9 @@ Both share the same `RawExpr` obtained by encoding + decoding the G1 interned DA
 Test families include capture avoidance, shadowing, multi-beta, inert neutral application (does not evaluate argument), duplication, long identity chains, omega fuel exhaustion and invalid store handles. Every agreed result is also checked against a specific expected raw WHNF, so mutual agreement alone cannot disguise an incorrect reference result.
 
 Next: inspect the exact cloud run for this candidate; if green, profile multiple runs/hot cases, add work counters, refine representations and begin a formal reduction specification. **No quantitative speedup claim before cloud evidence.**
+
+## G2 stronger evidence — candidate, pending CI
+
+Previous **green** G2 source commit `557f30c6be7675c92ddd3c6045193e2565168193` passed [GitHub Actions run 38107251428](https://github.com/dwijayuda/pskernel/actions/runs/38107251428), job `114375255032`: **14 native build targets**, existing G1 smoke and named G2 differential corpus passed. Initial exploratory, non-repeat timing for **700** closed beta WHNF samples: eager **18 ms**, lazy + readback **1 ms**. **Not a Lean kernel benchmark or validated speedup** (tiny untyped source subset, different resource budgets, one runner).
+
+This candidate makes the **actual eager reduction step proof-carrying**: `HeadBeta` is a new small-step specification and `eagerHeadStepCertified` returns the exact one-step witness; `eagerHeadStep_sound` states successful actual step implies `HeadBeta` (proof must compile in CI). No old proofs imported. It also runs a deterministic bounded generated corpus plus fixed expected regressions and measures **5 interleaved runs** with matched decoded DAG inputs, warmup and digest parity. The lazy evaluator remains differentially checked, not formally refined. Full Lean 4.35 kernel semantics remain future.

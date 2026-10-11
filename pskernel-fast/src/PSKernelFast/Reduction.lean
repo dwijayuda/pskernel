@@ -52,16 +52,44 @@ def instantiateAt (argument : RawExpr) (cutoff : Nat) : RawExpr → RawExpr
       .lam (instantiateAt argument cutoff domain)
         (instantiateAt argument (cutoff + 1) body)
 
+/-- Inductive reference relation for a single legal weak-head beta step. -/
+inductive HeadBeta : RawExpr → RawExpr → Prop where
+  | beta (domain body arg : RawExpr) :
+      HeadBeta (.app (.lam domain body) arg) (instantiateAt arg 0 body)
+  | head {fn fn' arg : RawExpr} :
+      HeadBeta fn fn' → HeadBeta (.app fn arg) (.app fn' arg)
+
 /--
-  One leftmost weak-head beta contraction. This does not descend into lambda
-  bodies or application arguments unless a beta rule forces the body.
+  Implement the deterministic eager step WITH a proof of its precise
+  weak-head contraction relation. Runtime erases the proof; the result is
+  not a theorem-proving kernel acceptance certificate.
 -/
-def eagerHeadStep : RawExpr → Option RawExpr
+def eagerHeadStepCertified :
+    (expr : RawExpr) → Option { next : RawExpr // HeadBeta expr next }
+  | .app (.lam domain body) arg =>
+      some ⟨instantiateAt arg 0 body, .beta domain body arg⟩
   | .app fn arg =>
-      match fn with
-      | .lam _ body => some (instantiateAt arg 0 body)
-      | _ => (eagerHeadStep fn).map (fun fn' => .app fn' arg)
+      match eagerHeadStepCertified fn with
+      | some ⟨next, valid⟩ =>
+          some ⟨.app next arg, .head valid⟩
+      | none => none
   | _ => none
+
+/-- Erased, executing portion of the certified eager step. -/
+def eagerHeadStep (expr : RawExpr) : Option RawExpr :=
+  (eagerHeadStepCertified expr).map Subtype.val
+
+/-- Every actual affirmative eager step is a valid weak-head beta step. -/
+theorem eagerHeadStep_sound (expr next : RawExpr)
+    (h : eagerHeadStep expr = some next) : HeadBeta expr next := by
+  unfold eagerHeadStep at h
+  cases hc : eagerHeadStepCertified expr with
+  | none =>
+      simp [hc] at h
+  | some result =>
+      simp [hc] at h
+      cases h
+      exact result.property
 
 /-- Eager weak-head beta normalization with a genuine beta-contraction budget. -/
 def eagerWHNF : Nat → RawExpr → Except EvalError RawExpr

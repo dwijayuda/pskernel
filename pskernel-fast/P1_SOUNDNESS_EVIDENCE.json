@@ -1,0 +1,46 @@
+{
+  "schema": "pskernel-fast-p1-scope-soundness-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "baseline_fragment_sha": "253afb42b477aacab22def288a2dd42d7ca9633b",
+  "proof_source_sha": "6611504268816d87c2ac5546ef0c52a73247002b",
+  "checked_workflow_sha": "b0a1c6503f12d1dbd5a8c6905be193d91f20f6d6",
+  "run_id": 38118786036,
+  "job_id": 114409045221,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38118786036",
+  "result": "success",
+  "build_jobs": 60,
+  "independent_lean_files_audited": 25,
+  "lean_toolchain": "v4.35.0-rc4",
+  "lean_upstream_sha": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "independent_spec": "PSKernelFast.Spec.ContextScoped",
+  "theorems": [
+    "PSKernelFast.Spec.ContextScoped.lookup_scoped",
+    "PSKernelFast.Spec.closedInput_iff",
+    "PSKernelFast.Proof.generalPiRule_scope",
+    "PSKernelFast.Proof.generalPiContextWF_scoped",
+    "PSKernelFast.Proof.certified_ne_malformedResult",
+    "PSKernelFast.Proof.inferred_success_certifiable",
+    "PSKernelFast.Proof.inferClosedGeneralPi_source_and_result_scoped"
+  ],
+  "assumption_audit": {
+    "exact_theorems": 7,
+    "allowlist": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "scanner_checked": true,
+    "scanner_self_tested": true,
+    "observed_sorryAx": false
+  },
+  "scope_only": true,
+  "formal_typing_soundness": false,
+  "typed_substitution_preservation_proved": false,
+  "set_theoretic_model_proved": false,
+  "relative_consistency_proved": false,
+  "whnf_defeq_proved": false,
+  "full_kernel_checker": false,
+  "declaration_admission": false,
+  "real_kernel_benchmark": false
+}

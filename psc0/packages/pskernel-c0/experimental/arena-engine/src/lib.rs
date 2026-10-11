@@ -43,6 +43,12 @@ pub enum Expr {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ConversionHint { Equal, Unknown }
 
+#[derive(Clone, Copy)]
+enum Transform {
+    Lift(u32),
+    Substitute(ExprId),
+}
+
 /// IDs must never escape their owner arena. A new arena invalidates every ID.
 #[derive(Default)]
 pub struct Arena {
@@ -141,6 +147,14 @@ impl Arena {
     pub fn instantiate1(&mut self, body: ExprId, replacement: ExprId)
         -> Result<ExprId, &'static str>
     {
+        self.transform_dag(body, Transform::Substitute(replacement))
+    }
+    /// Previous recursive implementation retained as a differential oracle.
+    /// Do not use for deeply nested untrusted expressions.
+    #[doc(hidden)]
+    pub fn instantiate1_reference(&mut self, body: ExprId, replacement: ExprId)
+        -> Result<ExprId, &'static str>
+    {
         let mut memo = HashMap::new();
         let mut lift_memo = HashMap::new();
         self.subst_at(body, replacement, 0, &mut memo, &mut lift_memo)
@@ -230,6 +244,117 @@ impl Arena {
         memo.insert((id,depth),result);
         Ok(result)
     }
+    /// Iterative postorder transform of the shared expression DAG.
+    ///
+    /// No recursion through the input term, preserving shared subexpressions
+    /// through (node, binder depth) memoization. Unchanged branches reuse their
+    /// existing ID without a fresh structural hash or allocation. A nested
+    /// Lift invocation only occurs from a Substitution, never from another Lift.
+    fn transform_dag(&mut self, root: ExprId, operation: Transform)
+        -> Result<ExprId, &'static str>
+    {
+        let mut done: HashMap<(ExprId, u32), ExprId> = HashMap::new();
+        let mut lifted: HashMap<u32, ExprId> = HashMap::new();
+        // Boolean marks the postorder rebuild frame.
+        let mut todo = vec![(root, 0u32, false)];
+        while let Some((id, depth, rebuild)) = todo.pop() {
+            if done.contains_key(&(id, depth)) { continue; }
+            if !rebuild {
+                todo.push((id, depth, true));
+                match self.get(id) {
+                    Expr::App(fun, arg) => {
+                        todo.push((*arg, depth, false));
+                        todo.push((*fun, depth, false));
+                    }
+                    Expr::Lam { domain, body, .. } | Expr::Forall { domain, body, .. } => {
+                        let inside = depth.checked_add(1).ok_or("depth overflow")?;
+                        todo.push((*body, inside, false));
+                        todo.push((*domain, depth, false));
+                    }
+                    Expr::Let { domain, value, body, .. } => {
+                        let inside = depth.checked_add(1).ok_or("depth overflow")?;
+                        todo.push((*body, inside, false));
+                        todo.push((*value, depth, false));
+                        todo.push((*domain, depth, false));
+                    }
+                    Expr::MData(_, inner) => todo.push((*inner, depth, false)),
+                    Expr::Proj { target, .. } => todo.push((*target, depth, false)),
+                    _ => {},
+                }
+                continue;
+            }
+
+            // The expensive literal/constant payloads do not contain term
+            // references. They are returned unchanged, without cloning.
+            if matches!(self.get(id),
+                Expr::Nat(_) | Expr::Str(_) | Expr::Const(_, _) |
+                Expr::Sort(_) | Expr::FVar(_) | Expr::MVar(_))
+            {
+                done.insert((id, depth), id);
+                continue;
+            }
+            let next = match self.get(id).clone() {
+                Expr::BVar(index) => match operation {
+                    Transform::Lift(by) if index >= depth => {
+                        self.intern(Expr::BVar(index.checked_add(by).ok_or("de Bruijn overflow")?))
+                    }
+                    Transform::Substitute(replacement) if index == depth => {
+                        if depth == 0 { replacement }
+                        else if let Some(&existing) = lifted.get(&depth) { existing }
+                        else {
+                            let value = self.transform_dag(replacement, Transform::Lift(depth))?;
+                            lifted.insert(depth, value);
+                            value
+                        }
+                    }
+                    Transform::Substitute(_) if index > depth =>
+                        self.intern(Expr::BVar(index - 1)),
+                    _ => id,
+                },
+                Expr::App(fun, arg) => {
+                    let new_fun = done[&(fun, depth)];
+                    let new_arg = done[&(arg, depth)];
+                    if fun == new_fun && arg == new_arg { id }
+                    else { self.intern(Expr::App(new_fun, new_arg)) }
+                }
+                Expr::Lam { name, domain, body, info } => {
+                    let new_domain = done[&(domain, depth)];
+                    let new_body = done[&(body, depth + 1)];
+                    if domain == new_domain && body == new_body { id }
+                    else { self.intern(Expr::Lam { name, domain:new_domain, body:new_body, info }) }
+                }
+                Expr::Forall { name, domain, body, info } => {
+                    let new_domain = done[&(domain, depth)];
+                    let new_body = done[&(body, depth + 1)];
+                    if domain == new_domain && body == new_body { id }
+                    else { self.intern(Expr::Forall { name, domain:new_domain, body:new_body, info }) }
+                }
+                Expr::Let { name, domain, value, body, nondep } => {
+                    let new_domain = done[&(domain, depth)];
+                    let new_value = done[&(value, depth)];
+                    let new_body = done[&(body, depth + 1)];
+                    if domain == new_domain && value == new_value && body == new_body { id }
+                    else { self.intern(Expr::Let {
+                        name, domain:new_domain, value:new_value, body:new_body, nondep
+                    }) }
+                }
+                Expr::MData(metadata, inner) => {
+                    let new_inner = done[&(inner, depth)];
+                    if inner == new_inner { id }
+                    else { self.intern(Expr::MData(metadata, new_inner)) }
+                }
+                Expr::Proj { name, field, target } => {
+                    let new_target = done[&(target, depth)];
+                    if target == new_target { id }
+                    else { self.intern(Expr::Proj { name, field, target:new_target }) }
+                }
+                _ => id,
+            };
+            done.insert((id, depth), next);
+        }
+        Ok(done[&(root, 0)])
+    }
+
     /// A conservative conversion precheck for an experimental engine.
     /// It never decides non-equality: unequal normal forms may still be
     /// definitionally equal through unsupported Lean reductions.
@@ -459,6 +584,71 @@ mod tests {
         let mut a = Arena::new();
         let root = a.anonymous_name();
         a.name_num_le(root, &[1, 0]);
+    }
+
+    #[test]
+    fn iterative_substitution_matches_recursive_oracle() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let vars: Vec<_> = (0..6).map(|i| a.intern(Expr::BVar(i))).collect();
+        let mut terms = vars.clone();
+        let copy = terms.clone();
+        for &x in &copy {
+            for &y in &vars {
+                terms.push(a.intern(Expr::App(x, y)));
+            }
+            terms.push(a.intern(Expr::Lam {
+                name: n, domain: vars[1], body: x, info: BinderInfo::Default
+            }));
+            terms.push(a.intern(Expr::Forall {
+                name: n, domain: vars[2], body: x, info: BinderInfo::Implicit
+            }));
+            terms.push(a.intern(Expr::Let {
+                name: n, domain: vars[1], value: vars[0], body: x, nondep: false
+            }));
+            terms.push(a.intern(Expr::MData(0, x)));
+            terms.push(a.intern(Expr::Proj { name: n, field: 0, target: x }));
+        }
+        for term in terms {
+            for &replacement in &vars {
+                let reference = a.instantiate1_reference(term, replacement).unwrap();
+                let iterative = a.instantiate1(term, replacement).unwrap();
+                assert_eq!(iterative, reference);
+            }
+        }
+    }
+
+    #[test]
+    fn deeply_nested_substitution_is_stack_safe() {
+        let mut a = Arena::new();
+        let mut term = a.intern(Expr::BVar(0));
+        let value = a.intern(Expr::BVar(9));
+        for _ in 0..12000 {
+            term = a.intern(Expr::MData(0, term));
+        }
+        let result = a.instantiate1(term, value).unwrap();
+        assert_ne!(result, term);
+        let mut current = result;
+        for _ in 0..12000 {
+            match a.get(current) {
+                Expr::MData(_, inner) => current = *inner,
+                _ => panic!("lost metadata wrapper"),
+            }
+        }
+        assert_eq!(current, value);
+    }
+
+    #[test]
+    fn unchanged_dag_is_reused_without_allocations() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let zero = a.intern(Expr::BVar(0));
+        let nested = a.intern(Expr::Lam {
+            name: n, domain: zero, body: zero, info: BinderInfo::Default
+        });
+        let count = a.count();
+        assert_eq!(a.instantiate1(nested, zero).unwrap(), nested);
+        assert_eq!(a.count(), count);
     }
 
 }

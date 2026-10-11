@@ -21,10 +21,10 @@ theorem typedHead_positive_certificate
     ∃ ty : KExpr,
       GeneralPiRule params ctx lhs ty ∧
       GeneralPiRule params ctx rhs ty ∧
-      HeadConversion lhs rhs := by
+      Nonempty (HeadConversion lhs rhs) := by
   cases decision with
   | equal cert =>
-      exact ⟨cert.ty, cert.lhsTyped, cert.rhsTyped, cert.headStep⟩
+      exact ⟨cert.ty, cert.lhsTyped, cert.rhsTyped, ⟨cert.headStep⟩⟩
   | unresolved => cases h
   | malformed => cases h
   | resourceExhausted => cases h
@@ -37,7 +37,7 @@ theorem compareTypedHead_positive_sound
     ∃ ty : KExpr,
       GeneralPiRule params ctx.entries lhs ty ∧
       GeneralPiRule params ctx.entries rhs ty ∧
-      HeadConversion lhs rhs :=
+      Nonempty (HeadConversion lhs rhs) :=
   typedHead_positive_certificate
     (compareTypedHead ctx lhs rhs budget) h
 

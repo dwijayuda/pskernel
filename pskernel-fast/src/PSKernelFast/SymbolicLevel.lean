@@ -22,8 +22,6 @@ def ULevel.denote (ρ : KName → Nat) : ULevel → Nat
   | .param n => ρ n
   | .mvar n => ρ n
 
-/-- Structural decidable equality and hashing are derived in CoreSyntax. -/
-
 /--
 Canonical orientation of a binary max. Hashes are **ordering hints only**.
 When they tie, deterministic representation order is used, but semantic

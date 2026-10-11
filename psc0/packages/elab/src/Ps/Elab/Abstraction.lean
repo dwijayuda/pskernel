@@ -5,6 +5,10 @@ import Ps.Elab.Basic
 -- converted into a bound index before its assignment is available.
 def psElabAbstract (outer inner : PsElabContext) (abstractions : List PsMetaAbstraction)
     (body type : PsExpr) : Except PsElabError PsElabTermResult := do
+  -- Aliases and binders can interleave. Fresh local identities preserve their
+  -- lexical order, so close newest first, including dependencies in binder types.
+  let abstractions := abstractions.mergeSort (fun left right =>
+    psMetaAbstractionId left >= psMetaAbstractionId right)
   let context := psElabLeaveScope outer inner
   let entry : PsMetaDelayedAssignment := { id := 0, abstractions, body }
   match psMetaTryClose context.metaContext entry with
@@ -28,7 +32,7 @@ def psElabAbstractType (outer inner : PsElabContext)
     | .forallE _ _ domain _ =>
       let domainLevel ← psElabExpressionSort inner domain
       pure (PsLevel.imax domainLevel level)
-    | .letE _ _ _ _ => pure level
+    | .letE _ _ _ _ | .substitute _ _ => pure level
     | .lambdaE _ _ _ _ => throw (.invalidArgument "lambda in type abstraction")) level
   psElabAbstract outer inner abstractions body (.sortE level)
 

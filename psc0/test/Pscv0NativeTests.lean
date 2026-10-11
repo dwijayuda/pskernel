@@ -487,7 +487,15 @@ private def application : String :=
   "theorem delayedNested: forall (P: Prop), P -> P := by {\n  refine (fun (P: Prop) => fun (h: P) => _)\n  exact h\n}\n" ++
   "function delayedUpdate(source: CertifiedPair): CertifiedPair := by {\n  refine { source with first := 263, certified := _ }\n  rfl\n}\n" ++
   "const delayedLambdaAnswer: Nat := delayedLambda(262)\n" ++
-  "const delayedUpdateAnswer: Nat := CertifiedPair.first(delayedUpdate(checkedPair))\n"
+  "const delayedUpdateAnswer: Nat := CertifiedPair.first(delayedUpdate(checkedPair))\n" ++
+  "function delayedMatch(value: Option Nat): Nat := by {\n  refine (match value with { | .none => 264 | .some n => _ })\n  exact n\n}\n" ++
+  "function delayedTail(n: Nat, value: Indexed.Vector(Nat, Nat.succ(n))): Indexed.Vector(Nat, n) := by {\n  refine (match value with { | .cons k head tail => _ })\n  exact tail\n}\n" ++
+  "function delayedContext(n: Nat, value: Indexed.Vector(Nat, n), other: Indexed.Vector(Nat, n)): Indexed.Vector(Nat, n) := by {\n  refine (match value with { | .nil => _ | .cons k head tail => _ })\n  · exact other\n  · exact other\n}\n" ++
+  "function delayedComputed(value: Nat): Nat := by {\n  refine (match Option.some(value) with { | .none => 0 | .some n => _ })\n  exact n\n}\n" ++
+  "const delayedMatchAnswer: Nat := delayedMatch(Option.some(265))\n" ++
+  "const delayedTailAnswer: Nat := Indexed.head(0, delayedTail(1, Indexed.two))\n" ++
+  "const delayedContextAnswer: Nat := Indexed.head(0, delayedContext(1, Indexed.one, Indexed.one))\n" ++
+  "const delayedComputedAnswer: Nat := delayedComputed(266)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

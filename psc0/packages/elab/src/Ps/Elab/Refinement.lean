@@ -183,10 +183,14 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
         bindersRev := PsElabTypedBinder.mk pushed.id name pi.domain original.binder :: state.bindersRev
         replacements := state.replacements ++ [(original.id, .fvar pushed.id)] }
 
-def psElabCloseDependents (opened : PsElabOpenedDependents)
-    (constraints : PsMetaContext) (value : PsExpr) : PsExpr :=
-  psCloseElabLambdaBinders constraints opened.bindersRev
-    (psElabSubstituteLocals opened.aliasesRev (psMetaInstantiate constraints value))
+def psElabAliasAbstractions (aliasesRev : List (Nat × PsExpr)) : List PsMetaAbstraction :=
+  aliasesRev.map fun (id, value) => .substitute id value
+
+def psElabCloseDependents (outer : PsElabContext) (opened : PsElabOpenedDependents)
+    (result : PsElabTermResult) (expected : PsExpr) : Except PsElabError PsElabTermResult :=
+  psElabAbstract outer result.context
+    (psElabAliasAbstractions opened.aliasesRev ++ psElabLambdaAbstractions opened.bindersRev)
+    result.term expected
 
 -- Kernel recursors either add a motive universe or eliminate in the family's
 -- fixed sort. All users share this arity contract.

@@ -1,4 +1,5 @@
 import Ps.Core.Abstract
+import Ps.Core.Subst
 import Ps.Environment.LocalContext
 import Ps.Meta.LevelContext
 
@@ -23,6 +24,7 @@ inductive PsMetaAbstraction where
   | lambdaE (id : Nat) (name : PsName) (type : PsExpr) (binder : PsBinderInfo)
   | forallE (id : Nat) (name : PsName) (type : PsExpr) (binder : PsBinderInfo)
   | letE (id : Nat) (name : PsName) (type value : PsExpr)
+  | substitute (id : Nat) (value : PsExpr)
 
 structure PsMetaDelayedAssignment where
   id : Nat
@@ -285,6 +287,7 @@ def psMetaFindDelayed (context : PsMetaContext) (id : Nat) :
 def psMetaAbstractionTerms : PsMetaAbstraction → List PsExpr
   | .lambdaE _ _ type _ | .forallE _ _ type _ => [type]
   | .letE _ _ type value => [type, value]
+  | .substitute _ value => [value]
 
 def psMetaDelayedTerms (entry : PsMetaDelayedAssignment) : List PsExpr :=
   entry.body :: entry.abstractions.flatMap psMetaAbstractionTerms
@@ -321,10 +324,13 @@ def psMetaCloseAbstractions (context : PsMetaContext)
       .forallE name (psMetaInstantiate context type) (psExprAbstractFVar id body) binder
     | .letE id name type value =>
       .letE name (psMetaInstantiate context type) (psMetaInstantiate context value)
-        (psExprAbstractFVar id body)) (psMetaInstantiate context body)
+        (psExprAbstractFVar id body)
+    | .substitute id value =>
+      psExprInstantiate1 (psExprAbstractFVar id body) (psMetaInstantiate context value))
+    (psMetaInstantiate context body)
 
 def psMetaAbstractionId : PsMetaAbstraction → Nat
-  | .lambdaE id _ _ _ | .forallE id _ _ _ | .letE id _ _ _ => id
+  | .lambdaE id _ _ _ | .forallE id _ _ _ | .letE id _ _ _ | .substitute id _ => id
 
 -- An unsolved metavariable already confined to the outer scope is safe to
 -- retain. Only holes that could mention a removed local delay abstraction.

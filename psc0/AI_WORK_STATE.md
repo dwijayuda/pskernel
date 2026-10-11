@@ -1368,3 +1368,16 @@ and import-boundary failures are not qualification evidence.
 
 Shared delayed term-scope closure is the next integration; see
 docs/PSCV0_NATIVE_SCOPES.md.
+
+## Shared delayed scopes qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/27 at c1d77c64bfda6107da9291d72971c5989a123330 passed
+[run 38183102348](https://github.com/dwijayuda/pskernel/actions/runs/38183102348):
+418 fixture declarations, 28 parser cases, four accepted programs, 81 phase-specific
+refusals and 122 shared runtime observations; 116 portable and 122 native modules.
+The compact metadata boundary rejects delayed cycles and narrower-scope goal
+aliases. Lambda/forall/let/update and tactic scopes share delayed assignments.
+The prior source-syntax compile failure is not qualification evidence.
+
+Dependent match branches now route through the same abstraction mechanism;
+substitution recipes close interleaved aliases in lexical order.

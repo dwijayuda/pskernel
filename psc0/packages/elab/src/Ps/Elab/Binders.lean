@@ -142,6 +142,9 @@ def psCloseElabTypedBinders
               binder.binder;
           smaller closedValue closedType
 
+def psElabLambdaAbstractions (bindersRev : List PsElabTypedBinder) : List PsMetaAbstraction :=
+  bindersRev.map fun binder => .lambdaE binder.id binder.name binder.type binder.binder
+
 def psElabLambda (elaborate : PsElaborator) (context : PsElabContext)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (body : PsSyntaxTerm) (expected : Option PsExpr) :
@@ -152,8 +155,7 @@ def psElabLambda (elaborate : PsElaborator) (context : PsElabContext)
   let typeAbstractions := prepared.bindersRev.map fun binder =>
     PsMetaAbstraction.forallE binder.id binder.name binder.type binder.binder
   let closedType ← psElabAbstractType context result.context typeAbstractions result.type
-  let valueAbstractions := prepared.bindersRev.map fun binder =>
-    PsMetaAbstraction.lambdaE binder.id binder.name binder.type binder.binder
+  let valueAbstractions := psElabLambdaAbstractions prepared.bindersRev
   let inner := psElabContextWithMeta result.context closedType.context.metaContext
   let closed ← psElabAbstract context inner valueAbstractions result.term closedType.term
   psElabFinalizeExpected closed expected

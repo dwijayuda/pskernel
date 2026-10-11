@@ -116,11 +116,11 @@ def psElabSubstituteEquation
     context := aliases.context, body := specialized, bindersRev := []
     aliasesRev := aliases.valuesRev, replacements := substitutions }
   let body ← finish opened.context opened.body
-  let base := psElabCloseDependents opened body.context.metaContext body.term
-  let transported ← psElabEquationRec context equation
-    (fun value => psElabSubstituteLocals [(id, value)] telescope) base
+  let base ← psElabCloseDependents context opened body specialized
+  let transported ← psElabEquationRec base.context equation
+    (fun value => psElabSubstituteLocals [(id, value)] telescope) base.term
   return {
-    context := psElabLeaveScope context body.context
+    context := base.context
     type := target
     term := psExprApplyMany transported (psElabDependentArguments dependents) }
 
@@ -141,10 +141,8 @@ def psElabSolveIndexConstraints (fuel count : Nat) (flexible ignored : List Nat)
       let body ← psElabSolveIndexEquation fuel flexible (pushed.id :: ignored)
         (psElabSolveIndexConstraints fuel count flexible (pushed.id :: ignored) finish)
         inner (psExprInstantiate1 pi.body (.fvar pushed.id)) equation
-      return {
-        context := psElabLeaveScope context body.context
-        type := target
-        term := .lam pi.name pi.domain (psExprAbstractFVar pushed.id body.term) pi.binder }
+      psElabAbstract context body.context
+        [.lambdaE pushed.id pi.name pi.domain pi.binder] body.term target
 
 def psElabSolveIndexEquation (fuel : Nat) (flexible ignored : List Nat)
     (finish : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult)

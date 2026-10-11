@@ -23,10 +23,14 @@ captured contexts. This prevents an apparently closed alias from later injecting
 an escaping free local. Constraint snapshots include delayed assignments.
 
 Lambdas, forall expressions, term lets/haves, record-update lets, tactic intro and
-tactic locals use the mechanism. The old proof-specific closure list and the
-record-update term-hole refusal are removed. Match-branch closure clients and
-general delayed conversion constraints remain subsequent integration work.
-Consequently this is not a claim of complete higher-order elaboration.
+tactic locals use the mechanism. Match fields, dependent-context reintroduction,
+equality transport and captured discriminants use the same closure path.
+Substitution recipes defer alias removal too. The recipe order follows descending
+fresh local identity, so interleaved aliases are removed after any dependent
+binder types have entered the closed expression. The old proof-specific closure
+list, immediate branch substitutions and record-update term-hole refusal are removed.
+General delayed conversion constraints remain pending; this is not a claim of
+complete higher-order elaboration.
 
 The design follows the locally nameless/delayed-abstraction invariant documented
 in Lean MetavarContext.lean and Meta/ExprDefEq.lean at

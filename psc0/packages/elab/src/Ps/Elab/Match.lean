@@ -275,16 +275,15 @@ def psElabMatchMinor (context : PsElabContext)
       replacements := substitutions }
     let body ← alternative.elaborate (psElabContextAfterStructuralFields generalized.context)
       generalized.body
-    return PsElabTermResult.mk (psElabLeaveScope context body.context)
-      (psElabCloseDependents generalized body.context.metaContext body.term) target
+    psElabCloseDependents context generalized body target
   let flexible := fields.bindersRev.map (fun binder => binder.id) ++ plan.constraintVariables
   let body ← psElabSolveIndexConstraints 256 plan.constraints.length flexible (hypotheses.bindersRev.map (fun binder => binder.id))
     finish hypotheses.context hypotheses.body
-  let value := psElabSubstituteLocals aliases.valuesRev
-    (psMetaInstantiate body.context.metaContext body.term)
-  let closed := psCloseElabLambdaBinders body.context.metaContext fields.bindersRev
-    (psCloseElabLambdaBinders body.context.metaContext hypotheses.bindersRev value)
-  return { context := psElabLeaveScope context body.context, term := closed }
+  let closed ← psElabAbstract context body.context
+    (psElabAliasAbstractions aliases.valuesRev ++
+      psElabLambdaAbstractions hypotheses.bindersRev ++ psElabLambdaAbstractions fields.bindersRev)
+    body.term minorType
+  return { context := closed.context, term := closed.term }
 
 structure PsElabMatchMinorsResult where
   context : PsElabContext

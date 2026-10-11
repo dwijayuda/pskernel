@@ -121,5 +121,9 @@ export const observations = [
   { name: "delayedLambdaAnswer", args: null, expected: 262n },
   { name: "delayedLet", args: null, expected: 261n },
   { name: "delayedUpdateAnswer", args: null, expected: 263n },
+  { name: "delayedMatchAnswer", args: null, expected: 265n },
+  { name: "delayedTailAnswer", args: null, expected: 71n },
+  { name: "delayedContextAnswer", args: null, expected: 71n },
+  { name: "delayedComputedAnswer", args: null, expected: 266n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

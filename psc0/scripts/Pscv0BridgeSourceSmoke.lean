@@ -1,7 +1,7 @@
 import Ps.Syntax.Pscv0.Module
 
--- Fast native execution of the SAME portable implementation. This does not
--- replace the generated-JavaScript gate or confer compiler self-host status.
+-- Native execution of the same portable implementation. This does not replace
+-- generated-JavaScript qualification or confer a compiler self-host fixed point.
 def expectOk {α : Type} (name : String) (result : Except String α) : IO α :=
   match result with
   | .ok value => pure value
@@ -48,7 +48,8 @@ def main : IO Unit := do
   let body := "(a: Except String Nat, b: Except String Nat): Except String Nat := do {\n  let x ← a\n  let y ← b\n  return Nat.add(x, y)\n}\n"
   let readable ← expectOk "reference readable" (psPscv0TranslateReadable true false ("function referenceProgram" ++ body))
   let lowered ← expectOk "reference lowered" (psPscv0LowerToLean true ("function loweredProgram" ++ body))
-  let theoremSource := readable ++ "\n" ++ lowered ++ "\ntheorem pscv0_native_do_correspondence (a b : Except String Nat) :\n    referenceProgram a b = loweredProgram a b := by\n  rfl\n\n#print axioms pscv0_native_do_correspondence\n"
+  let theoremSource := readable ++ "\n" ++ lowered ++ "\ntheorem pscv0_native_do_correspondence (a b : Except String Nat) :\n    referenceProgram a b = loweredProgram a b := by\n  cases a <;> cases b <;> rfl\n\n#print axioms pscv0_native_do_correspondence\n"
   IO.FS.createDirAll "dist/pscv0-source-check"
   IO.FS.writeFile "dist/pscv0-source-check/correspondence.lean" theoremSource
+  IO.println theoremSource
   IO.println "PSCV0_NATIVE_SURFACE_SMOKE: PASS 5 round trips, 4 refusals, exact comment replay; emitted correspondence fixture still requires checking"

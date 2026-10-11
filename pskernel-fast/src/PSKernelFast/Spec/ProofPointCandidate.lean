@@ -162,7 +162,9 @@ theorem propUniverseV2_exactly_two (V : Type u)
           rcases (SetTheoryBasis.member_pair).1 hy with ha | hb
           · exact ha
           · exact hb
-        simpa only [hyPoint] using hPointInX
+        have hRaw : SetTheoryBasis.member
+            (proofPointV2 V) x := hPointInX
+        simpa only [hyPoint] using hRaw
     · left
       apply SetTheoryBasis.ext
       intro z

@@ -296,8 +296,14 @@ theorem dependent_outer_variable_beta_preserves_type
     .app ctx (.lam name domain (.bvar (index + 1)) style) value
       name domain (storedDomain.liftBVars ((index + 1) + 1) 0) style
       lamTyped valueTyped
+  have hLiftedResult :
+      ((storedDomain.liftBVars ((index + 1) + 1) 0).instantiateBVar value 0) =
+        storedDomain.liftBVars (index + 1) 0 := by
+    rw [← liftBVars_add storedDomain (index + 1) 1 0]
+    exact liftBVars_one_instantiate_cancel
+      (storedDomain.liftBVars (index + 1) 0) value 0
   constructor
-  · simpa [liftBVars_one_instantiate_cancel] using appTyped
+  · simpa only [hLiftedResult] using appTyped
   · have droppedIndex : index + 1 - 1 = index := by omega
     simpa [KExpr.instantiateBVar, droppedIndex] using oldTyped
 

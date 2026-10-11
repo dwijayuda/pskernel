@@ -1,6 +1,6 @@
 # G4.3 planning gate — scoped contexts and real typed checking
 
-**Status:** new-generation design direction, **no implementation claim**. Lean 4.35 pinned `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; no obligation to preserve old PSKernel proof/code interfaces.
+**Status:** G4.3 structural binder context implemented and independently CI-validated in its narrow scope; capture-avoiding shifting has a newly committed source/proof/test **candidate pending CI qualification**. True dependent typed inference and checked environment are still unimplemented. Lean 4.35 pinned `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; no obligation to preserve old PSKernel proof/code interfaces.
 
 ## Validated bounded precursor
 

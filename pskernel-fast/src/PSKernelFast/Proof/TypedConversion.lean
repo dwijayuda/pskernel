@@ -41,7 +41,15 @@ theorem compareTypedHead_positive_sound
   typedHead_positive_certificate
     (compareTypedHead ctx lhs rhs budget) h
 
+/-- Zero step budget cannot authorize conversion, including on a reflexive input. -/
+theorem compareTypedHead_zero_budget_no_equal
+    {params : List KName} (ctx : GeneralPiContext params)
+    (lhs rhs : KExpr) :
+    (compareTypedHead ctx lhs rhs 0).isEqual = false := by
+  simp [compareTypedHead, TypedHeadDecision.isEqual]
+
 #print axioms typedHead_positive_certificate
+#print axioms compareTypedHead_zero_budget_no_equal
 #print axioms compareTypedHead_positive_sound
 
 end PSKernelFast.Proof

@@ -158,6 +158,7 @@ THEOREMS = {
     "PSKernelFast.Proof.sourceRankedTagged_executed_exact_inferred_model",
     "PSKernelFast.Proof.typedHead_positive_certificate",
     "PSKernelFast.Proof.compareTypedHead_positive_sound",
+    "PSKernelFast.Proof.compareTypedHead_zero_budget_no_equal",
     "PSKernelFast.Spec.sort_member_succ",
     "PSKernelFast.Spec.numericIMax_zero_iff_codomain_zero",
     "PSKernelFast.Spec.piLevel_isProp_iff_codomain_isProp",

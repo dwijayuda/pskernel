@@ -47,3 +47,7 @@ lean_exe pskernel_fast_general_pi_smoke where
 lean_exe pskernel_fast_typed_conversion_smoke where
   root := `PSKernelFast.TypedConversionSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_typed_conversion_bench where
+  root := `PSKernelFast.TypedConversionBench
+  srcDir := "src"

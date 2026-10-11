@@ -1,565 +1,866 @@
-# ProofScript PSCV0 v7 — Rust-Native Verified Programming Extension
+# Lean 4 ↔ ProofScript `ps-rust-native/0` ↔ Rust — Language Features, Syntax, Grammar, and Examples
 
-**Status:** REVISED DESIGN PROPOSAL — **not adopted, not implemented, not compiler-conformant**  
-**Proposal edition:** `PS-RUST-NATIVE/0` (revision 2, 2026-10-11)  
-**First backend:** Rust source generation through a selected `rustc` toolchain  
-**Reference authority:** [PSCV0 v7 language reference](../PSCV0_LANGUAGE_REFERENCE.md), exact repository-adopted SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`  
-**Lean logic pin:** Lean 4.35.0-rc4, commit [`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`](https://github.com/leanprover/lean4/tree/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364)  
-**Architecture boundary:** [PSC0-ARCH/1](PSC0_SOUNDNESS_SECURE_EXTENSIBLE_ARCHITECTURE.md); [PSCV0 v7 source-only policy](PSCV0_V7_ONLY_SOURCE_POLICY.md)  
-**File location:** `psc0/docs/PSCV0_V7_RUST_SYSTEMS_LANGUAGE_EXTENSION.md` (retain the old filename to preserve links).
+**Status:** Proposed language-extension reference. Not implemented and not evidence of compiler conformance.  
+**Edition:** `ps-rust-native/0`, an optional Rust-only source profile extending `pscv0` v7 · **Date:** 2026-10-11.  
+**Inherited source authority:** [PSCV0 v7 language reference](../PSCV0_LANGUAGE_REFERENCE.md), targeting Lean 4.35.0-rc4 at commit [`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`](https://github.com/leanprover/lean4/tree/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364).  
+**Scope:** Language features, source syntax, selected grammar, static and operational meaning, Lean/Rust correspondence, and accepted/rejected source examples. No implementation architecture, CLI, package design, build procedures, milestones or release gates.
 
-> **Status invariant:** Nothing in this document changes today's PSCV0 v7 source language, trusted kernel, installed runtime or supported backends. All proposed spellings and examples below are *design illustrations*, **not accepted `.ps` code or executed proofs**. No Rust build, Lean compilation, or conformance test is claimed by this revision.
+> **Important:** Every example using `@[native]`, native resource qualifiers, native representation attributes or foreign bindings is a **proposed** `.ps` spelling, not valid in PSCV0 v7 today. No source snippet or proof in this document is claimed to have been executed. Qualified `Rust.*` names in examples illustrate future pinned native-library types and adapters, not existing PSC0 Standard APIs.
 
-## 0. Decision — cross-domain correctness, Rust first
+> **Semantic identity:** The ordinary V7 subset keeps exactly its Lean-grounded meaning, whether Rust or another backend is used. Explicitly selected native declarations have Rust operational/resource semantics and are **not** transparent Lean total definitions. The Lean proof kernel still checks logical proof terms; Rust's borrow checking alone does not prove functional correctness or correspondence to Lean models.
 
-**Proposed direction:** make ProofScript a practical **Rust-native verified programming language** for native libraries, parsers, codecs, storage engines, protocols, networking services, embedded/real-time components, compiler/runtime infrastructure, and eventually Linux drivers and OS kernels. **Do not optimize the whole language around Linux alone.** Linux and freestanding targets should be *optional platform profiles* using the same small foundational language extension.
+## Executive syntax map
 
-The distinguishing value is **combining Rust's existing memory-safety/resource discipline with Lean-checkable functional specifications**, not pretending Rust is unsafe, recreating all of Rust's syntax, or guaranteeing proof of arbitrary native code.
+| Concern | Existing Lean / PSCV0 v7 | Rust | Proposed `ps-rust-native/0` |
+|---|---|---|---|
+| Pure definition | `function f(x: A): B := term` | `fn f(x: A) -> B` | **Keep V7 syntax and Lean meaning** |
+| Runtime definition | V7 excludes source `partial`/`unsafe` | Native effectful or looping `fn` | `@[native] function f(...) ...` |
+| Required zero-argument `Unit` | `function f()`, `f()`, `f(())` | `fn f()` | Keep V7 Unit semantics for source `function` |
+| Function call | `f(x, y)` or `f x y` | `f(x, y)` | Retain V7 adjacency and currying; **reject** `f (x)` as application |
+| Owned resource | No general affine type in V7 | Native owned `T` | `owned T` |
+| Shared reference | Lean `@&` is an RC optimization annotation | `&T` | `borrow T` |
+| Exclusive reference | `let mut` is local mutable state | `&mut T` | `borrow mut T` |
+| Complex escaping lifetime | No Rust lifetime binders in V7 | `'a`, HRTB | Initially **not admitted** in `.ps`; named native Rust wrapper |
+| Integers | `UInt32`, `Int32`, `Nat`, `Int` | `u32`, `i32`, `usize` | Exact type mapping; never silently narrow `Nat` |
+| Collections | Lean `List`, `Array`, `ByteArray` | `Vec<T>`, `&[T]`, `[T; N]` | Distinct native library types; no silent semantic substitution |
+| Errors | `Except`, `Option`, selected `do` | `Result`, `Option` | Qualified types and typed adapters |
+| Recursion/loops | Total `def`; selected braced `for`/`while` | General `loop`, `while`, `for` | Add native-only `loop { ... }`; no implicit termination proof |
+| Data layout | Nominal `structure` | `repr(C)`, `repr(transparent)` | `@[native.reprC]`, `@[native.reprTransparent]` |
+| External symbols | V7 excludes arbitrary `extern` | Edition-2024 `unsafe extern "C"` | Restricted `@[native.externC("symbol")]` declaration |
+| Privileged body | V7 source `unsafe` excluded | Rust `unsafe` operations | `@[native.unsafe]` boundary declaration |
+| Logical contracts | Selected RC4 `given`, `requires`, `ensures` | Native function + separate verifier | Reuse words, but specify native operational WP meaning |
+| Theorems | `theorem`, `by`, `omega`, `simp`, `grind` | No built-in full theorem system | **Keep Lean's proof language** |
+| General Rust syntax | V7 closed grammar | `fn`, `impl`, macros, traits | **No implicit Rust parser fallback** |
 
-**Four intentionally small additional source/semantic families:**
+**Four new source/semantic families:** native execution, ownership/borrowing, native representation/ABI, and privileged/foreign declarations. Domain-specific operations (binary codecs, networking, storage, cryptography, embedded, Linux) should be **library types and functions**, not new source keywords.
 
-1. **Native runtime declaration classification.** Distinguish a Rust-executed function from a transparent total Lean definition. Reuse Lean's existing total recursion, `termination_by`, selected `partial_fixpoint` and intrinsic contract mechanisms when their actual applicability suffices. A target-only native marker supplies otherwise missing operational semantics.
-2. **Ownership and borrowing.** Only the minimal source-visible resource roles: ownership/consumption, shared borrowing and exclusive mutable borrowing; allow conservative inference of call-site borrows and moves. Reuse `rustc`'s real borrow checker.
-3. **Native layout and ABI declarations.** A small, frozen attribute/binding inventory, not a second record/type system and not a full Rust attribute grammar.
-4. **Explicit privileged foreign/low-level boundary.** Raw pointers, FFI, platform intrinsics and unsafe operations only in explicitly identified wrappers/capabilities, with separate assumptions and proof obligations.
+## Comparison guide and grammar authority
 
-**Everything else should first be a library or target option**: `Vec`, slices, `Result`, error propagation, allocation, atomics, MMIO, async cancellation, transaction models, serialization, tensor shapes, cryptographic primitives, target toolchains and linker configuration.
+| Status label | Meaning |
+|---|---|
+| **Inherited V7** | Same accepted `.ps` syntax and same Lean meaning as [the reference](../PSCV0_LANGUAGE_REFERENCE.md) |
+| **Selected Lean** | Existing Lean grammar/semantics, only if expressly admitted by V7 |
+| **Native addition** | Proposed Rust-only `.ps` surface or resource/effect rule |
+| **Library** | Named type/function with a separately selected Rust binding, not a grammar change |
+| **Privileged** | Foreign/unsafe operation requiring explicit permissions and unproved or separately proved obligations |
+| **Illustrative** | A code shape describing a design rather than evidence that it compiles or proves |
 
-**Non-goals for the first edition:** full Rust syntax/traits/macros/async ownership; automatically verified unsafe or concurrent Rust; arbitrary C++ ABI interop; replacing Lean's kernel with Rust checking; LLVM or Rust MIR emission from PSC0; Linux kernel upstream acceptance; a verified Rust compiler; a second logical type theory.
+The following grammar fragments are **schematic Lean/V7-category selections**, not standalone executable EBNF. `command`, `term`, `binder`, `doSeqItem`, `tactic`, `structField` and `attribute` refer to inherited V7/Lean categories. A new nonterminal begins `psNative`. Ellipses are not permission to accept unrestricted Rust or Lean syntax.
 
-### 0.1 Three separate meanings of "correct"
+## 0. Source files, lexical rules and naming
 
-- **Rust-checked:** emitted Rust is well typed and accepted by its selected borrow checker; valid safe-Rust use inherits Rust's memory-safety guarantees under its unsafe dependencies and assumptions.
-- **Logic-model-verified:** an explicit theorem or invariant about an abstract/program model has kernel-checked Lean evidence, relative to named axioms and imports.
-- **Implementation-correspondence-verified:** additional checked evidence relates the *specific emitted Rust behavior* to the model/property. Neither a Rust compile nor a logical theorem alone establishes this stronger claim.
+### Source identity and explicit extension selection
 
-These distinctions MUST appear in every later build/assurance policy and output receipt. Upstream Rust's own type system is not a general-purpose proof of functional behavior, crash durability, noninterference or hardware correctness.
+The same `.ps` module syntax is used under an explicitly named language edition. Selecting a Rust **output target** alone does not activate native syntax or override PSCV0 restrictions.
 
-## 1. Source authority, profiles and adoption boundaries
+```text
+psNativeSourceFile ::=
+  V7.importHeader (V7.selectedCommand | psNativeCommand)* EOF
 
-### 1.1 Do not silently weaken existing PSCV0 v7
+psNativeCommand ::=
+    psNativeFunction
+  | psNativeUnsafeFunction
+  | psNativeExternalFunction
+  | psNativeRepresentedStructure
+```
 
-[PSCV0 v7](../PSCV0_LANGUAGE_REFERENCE.md) remains the **sole currently adopted forward-looking `.ps` language reference**, with selected Lean 4.35.0-rc4 semantics. Its source `partial`, `unsafe`, `axiom`, unregistered syntax and proof-hole restrictions remain unchanged for `pscv0`. Existing `.lean` source/archival bootstrap material and prior CI receipts are separate historical/implementation lanes, not a syntax fallback.
+The language edition is a source/profile identity, **not a new token** such as `profile rust` or a magic filename suffix. V7 `import`, `public import`, `namespace`, `section`, `variable`, `include`, `omit`, visibility and module rules retain their meaning. An imported native library can add named declarations, not arbitrary parser forms or Lean axioms.
 
-A *future* Rust native source profile may accept functions that are nonterminating, effectful or resource-owning, and may admit explicitly privileged boundaries. This is an **explicit new semantic profile**, not a claim that such programs are transparent Lean definitions or that their Rust behavior is established by the Lean kernel.
+### Lean comments, whitespace, binders and calls
 
-Selection must be explicit in the source-graph/profile/target identity; **choosing a Rust backend must never, by itself, turn forbidden PSCV0 source into accepted source**.
-
-### 1.2 Proposed identity dimensions
-
-| Dimension | Candidate identity | Semantic consequence |
+| Fragment | Status | Grammar ownership |
 |---|---|---|
-| Source language | `pscv0` | Existing Lean-grounded, v7-closed grammar and ordinary/verified assurance rules |
-| Source language extension | `ps-rust-native/0` | Explicitly adopted selected native declarations, resource qualifiers and target bindings |
-| Target | `rust-hosted/0` | Rust `std`/selected native-library runtime, pinned toolchain |
-| Target | `rust-core/0` | `no_std`/`core` subset; allocation requires separately selected `alloc` and allocator |
-| Target | `rust-linux/0` | Pinned Linux kernel tree, kernel API wrappers, Kbuild and context policies |
-| Target | `rust-freestanding/0` | Entry/startup/linker/ABI rules for selected embedded or kernel platform |
-| Capability | `native-privileged/0` | Independently declared unsafe/FFI/raw boundary; **not** proof authority |
-| Assurance | `rust-checked` / `logic-model-verified` / `implementation-correspondence-verified` | Separate evidence, never automatically upgraded |
+| `f(x, y)` | Accepted when well-typed | Adjacent comma call, two explicit source arguments |
+| `f x y` | Accepted where V7 admits it | Curried Lean application |
+| `f((x, y))` | Accepted | One tuple argument |
+| `f(())` | Accepted when `Unit` parameter required | Explicit Unit argument |
+| `f()` | Only V7 completion rules | No JavaScript/Rust zero-arity reinterpretation |
+| `f (x)` | **Reject** when a spaced parenthesized application | `PSCV0-APP-02` |
+| `f /- gap -/ (x)` | **Reject** as an application | Lean comment breaks adjacency |
+| `variable (n: Nat)` | Accepted | Fresh command binder, not application |
+| `#check (f x)` | Accepted | Grouped fresh term |
+| `borrow mut (Rust.Vec UInt8)` | Native-only | Type qualifier, not function call |
 
-Names are candidates, not shipped command-line flags. Portable v7 functions can be targeted to Rust **without enabling the extension** if the selected backend preserves their semantics. Future non-Rust backends must define their own execution mappings; they do not automatically inherit Rust resource guarantees.
+V7's Lean `--` and nested block comments, line-break, brace and application rules remain unchanged. In particular, **no C-style block comments**, Rust macro token trees, Rust path `::` syntax, JS truthiness or automatic semicolon insertion are added.
 
-### 1.3 Scope of earlier proposal
+## 1. Functions, native declarations, recursion and bodies
 
-The former `PS-SYSTEMS/0` emphasis on Linux drivers and a new OS has been **demoted to optional advanced use cases**, not deleted. The current proposal moves the common native/resource/verification substrate ahead of kernel-specific concerns. Preserve prior branch history, CI receipts and the exact v7 reference digest.
+### Ordinary logical `function`, `def` and `const`
 
-## 2. What PSCV0 v7 and Lean already provide
+**Feature/profile:** Inherited V7.
 
-Reuse actual Lean mechanisms before introducing duplicate ProofScript grammar.
+| Rust implementation equivalent | V7 ProofScript |
+|---|---|
+| `fn add(a: u32, b: u32) -> u32 { a.wrapping_add(b) }` | `function add(a: UInt32, b: UInt32): UInt32 := a + b` |
 
-| Capability | Existing source or Lean foundation | Rust-extension implication |
+The target mapping must preserve Lean's `UInt32` arithmetic; this is an intended correspondence, not a proved one. The `function`, `def`, `const`, implicit binders, named/default parameters and call forms are **not modified** by this extension.
+
+### Native execution modifier
+
+**Feature/profile:** New allowlisted attribute, recognized only in a native declaration position. It denotes a Rust-executed function and does not make its body transparently reducible in Lean logic.
+
+**Grammar (schematic):**
+
+```text
+psNativeFunction ::=
+  '@[' 'native' ']' 'function' declId
+  V7.psFunctionBinders (':' psNativeType)?
+  psNativeContract? ':=' psNativeBody
+
+psNativeBody ::= V7.selectedTerm
+               | 'do' '{' psNativeDoSeq '}'
+```
+
+It is intentionally **one marker**, not both `runtime function` and `systems function`. A native runtime declaration may be partial/effectful when its native profile permits it. The unmarked `function` remains the V7 total Lean-grounded form.
+
+| Rust | Proposed ProofScript |
+|---|---|
+| `fn bump(n: &mut u32) { *n = n.wrapping_add(1); }` | `@[native] function bump(n: borrow mut UInt32): Unit := do { n.set(n.get() + 1) }` |
+
+The `.get()`/`.set()` methods are **schematic native-reference operations**, not V7 built-ins.
+
+### Recursion and nontermination: source distinctions
+
+| Source kind | Acceptance | Logical meaning |
 |---|---|---|
-| `Prop`, `Type`, Pi, equality, `Subtype`, `Fin`, indexed data | PSCV0 v7 / Lean core and libraries | Keep for specifications, bounds and abstract models |
-| `structure`, `inductive`, matches, dependent matches, `if let` | Selected v7 source | Reuse for models, enums and pure Rust-admissible values |
-| `Nat`, `Int`, `UInt*`, `Int*`, `Float*`, `BitVec`, `Array`, `ByteArray` | v7 catalog with pinned import/instance requirements | Define exact target representation, not name-based equivalence |
-| `do`, immutable and mutable local bindings, loops and errors | Selected v7, staged P1 where marked | Do not relabel pending P1 source as already conformant |
-| `termination_by`, `decreasing_by` | v7 selected well-founded recursion | Preferred for provably terminating algorithms |
-| Lean `partial_fixpoint` | Upstream Lean recursion technique; **not automatically v7 admitted** | Evaluate selective adoption for supported partial-equation reasoning before inventing recursion constructs |
-| Lean `partial def`, `unsafe def` | Upstream Lean runtime/logic distinction; **v7 excludes source forms** | Optional runtime profile may admit a deliberately selected opaque/unsafe boundary with exact rules |
-| Lean `@&` borrowed argument annotation | Lean 4.30+ compiled borrow/RC optimization | Helpful for Lean-runtime optimization, **not** Rust's general affine lifetime model |
-| `given`, `requires`, `ensures`, `assert`, `erased`, invariant/decreasing annotations | Selected experimental RC4 intrinsic verification + `Std.WP` prerequisite | Reuse vocabulary; a Rust implementation requires a separate operational model and correspondence |
-| `theorem`, `by`, `simp`, `omega`, `grind` and selected tactics | v7 proof selection | **No new proof language** for Rust |
+| `function f(...) := ... termination_by ...` | V7 rules | Transparent total Lean definition with accepted termination evidence |
+| Lean upstream `partial_fixpoint` | **Not automatically admitted** in V7 or this extension | Only selected Lean-supported partial-equation/partial-correctness rules |
+| V7 source `partial function ...` | Rejected | V7 excludes source `partial` |
+| `@[native] function service(...): Unit := do { loop { ... } }` | Proposed native | Operational loop; no automatic totality proof |
+| V7 source `unsafe def ...` | Rejected | No new general Lean unsafe source permission |
 
-**Upstream constraints:** Lean `partial` definitions are opaque in logic; `unsafe` functions are excluded from normal logical reasoning; `partial_fixpoint` admits only certain recursion patterns and does not promise arbitrary total correctness. Lean user `@&` annotations help reference-counted C emission, not Rust lifetime checking. RC4 intrinsic verification is experimental; proof-object checking and proof-to-runtime correspondence remain separate.
+**Native loop grammar:**
 
-**Lean's C emitter is not a freestanding-C semantics guarantee.** Its usual representation expects Lean runtime services for allocation, reference counting and data layout. A `no_std` Rust target must use deliberately chosen representations and library dependencies instead of assuming Lean-generated C is already a low-level zero-runtime backend.
+```text
+psNativeDoSeq  ::= psNativeDoItem
+                   (V7.doItemSeparator psNativeDoItem)*
 
-## 3. Cross-domain use cases drive the feature choices
+psNativeDoItem ::= V7.selectedDoSeqItem
+                 | 'loop' '{' psNativeDoSeq '}'
+```
 
-| Real application family | High-value correctness goal | Shared ProofScript features; domain-specific library |
-|---|---|---|
-| Binary formats, codecs and parsers | Bounds, exact decoding, canonical round-trip, malformed-input rejection | `Fin`/`Subtype`, bitvectors, read-only slices, proved codec combinators |
-| Databases, filesystems, storage | B-tree/log invariants, transactional state, rollback, crash recovery | State transitions, functional models, durable-I/O specifications |
-| Networking/proxies/protocols | Legal state transitions, length/flow control, cancellation correctness | Protocol automata, buffer borrowing, typed error/cancellation contracts |
-| Cryptography | Arithmetic equivalence and selected secret-dependence properties | Bitvector proofs, native fixed width, specialized security models |
-| Cloud runtimes/compilers | Semantic preservation and resource lifecycle | ADTs, transformation lemmas, owned native collections |
-| Embedded/robotics | No hidden heap, admissible context/effects, range/actuator invariants | `no_std`, resource policy, bounded numeric models |
-| Numerical/HPC | Bounds and shape correctness, explicit overflow/float assumptions | Indexed arrays, native representation, optional SIMD wrappers |
-| Linux drivers/OS kernels | Driver lifecycle, device protocol, lock/IRQ/resource rules | Optional Linux/freestanding platform libraries, tiny low-level boundary |
-
-**Initial showcase:** a **verified binary codec compiled to safe Rust**, followed by a zero-copy borrowed buffer and a small protocol state machine. These exercise cross-domain value with less trusted platform surface than a Linux driver. A whole database, full cryptographic constant-time assurance and a microkernel are **not** first-release requirements.
-
-Do not introduce a global `transaction`, `packet`, `irq` or `kernel` keyword for these domains. Admit code through **reusable mathematical abstractions and typed libraries**.
-
-## 4. Minimal source-language additions (proposal)
-
-### 4.1 Native execution declaration — one role, preferably no new keyword
-
-**Preferred candidate:** one allowlisted `@[native]` declaration modifier accepted **only** in `ps-rust-native/0`. It signals that the source declaration is an operational Rust function; its body may use selected native effect/resource syntax and **is not automatically a transparent Lean total definition**.
+Native `while`, `for`, `if`, `if let`, `match`, `let mut`, assignment, `return`, `break` and `continue` reuse their *selected V7 braced syntax* when applicable. `loop` is the only additional native control-flow head selected here. Runtime loops need not have a termination proof, although a claim of invariant preservation or termination needs the corresponding proof.
 
 ```proofscript
--- PROPOSED syntax: not currently valid PSCV0 v7.
+-- Proposed operational function; no predefined socket API implied.
 @[native]
-function runService(
-  server: owned Rust.Server
-): Rust.Result Unit Rust.IoError := do {
+function run(server: owned Rust.Server): Unit := do {
   loop {
-    let request ← server.accept()
-    server.respond(request)
+    let request ← server.receive()
+    server.reply(request)
   }
 }
 ```
 
-- `Rust.Server`, `Rust.IoError` and the `loop` body are **illustrative bindings**, not established PSCV0 APIs.
-- `@[native]` is a newly selected attribute **candidate**, not a current v7 user attribute.
-- A `partial`/general-recursive native function must not be silently represented as transparent Lean.
-- Ordinary mathematical `function` remains the v7 rule when not in the native declaration category.
-- Prefer already selected `termination_by` or upstream `partial_fixpoint` where an accurate Lean logical model is desired; adding `@[native]` does **not** establish such a model.
-- If a new declaration category proves necessary, revisit syntax only after a concrete parser/semantic counterexample. Do not introduce a redundant `systems function` alongside `@[native]` in the initial proposal.
+### Nullary functions, binders and Unit
 
-### 4.2 Minimal resource qualifiers and conservative inference
+`function f()` **continues to mean** a required logical `Unit` binder under V7, even when marked `@[native]`. The source `f()` requests V7 empty-call completion, and `f(())` explicitly supplies `Unit`. Do **not** silently equate the source declaration with every foreign ABI's zero-parameter convention. A bodyless FFI declaration (see §6) has an independent ABI signature.
 
-The *semantic* addition is an affine/resource typing discipline. Proposed source roles:
+## 2. Ownership, move and borrowed resource types
 
-| Role | Candidate spelling | Intended mapping |
+### Native type grammar
+
+**Feature/profile:** Affine/resource-qualified *native types*, not new Lean kernel constructors.
+
+```text
+psNativeType ::=
+    V7.selectedType
+  | 'owned' psNativeResourceBase
+  | 'borrow' psNativeResourceBase
+  | 'borrow' 'mut' psNativeResourceBase
+
+psNativeResourceBase ::= psNativeNominalType
+                       | '(' psNativeType ')'
+
+psNativeNominalType ::= selectedRustBoundType
+```
+
+`selectedRustBoundType` denotes a named native-library type such as `Rust.Vec UInt8`. The qualifiers are recognized only in selected native type positions. They are **not** ordinary curried term application, and `let mut` remains a separate `do` construct.
+
+| Rust | Proposed `.ps` parameter | Static meaning |
 |---|---|---|
-| Owned resource | `owned T` | Rust value owned by current binding, moved when consumed |
-| Shared borrow | `borrow T` | Rust `&T` for a statically valid scoped borrow |
-| Exclusive borrow | `borrow mut T` | Rust `&mut T` with exclusivity/lifetime constraints |
-| Temporary call-site borrowing | Unwritten where unambiguous | Infer Rust borrow/reborrow, **not** arbitrary cloning |
-| Complex escaping borrow | Explicit lifetime/binding or Rust wrapper (later) | No forged/extended reference lifetime |
+| `value: Resource` | `value: owned Resource` | Owned, transferable native resource |
+| `value: &Resource` | `value: borrow Resource` | Shared borrow for validated lifetime |
+| `value: &mut Resource` | `value: borrow mut Resource` | Exclusive mutable borrow |
+| `xs: &[u8]` | `xs: borrow (Rust.Slice UInt8)` | Non-owning read-only view |
+| `xs: &mut [u8]` | `xs: borrow mut (Rust.Slice UInt8)` | Exclusive mutable view |
+| `n: u32` | `n: UInt32` | Ordinary copyable scalar, no resource qualifier required |
 
-Do **not** claim that adding a Lean structure named `Owned` creates linearity. The systems frontend must enforce or correctly project moves, valid borrows, drop effects and ownership of failure results. Use `rustc` as the final authoritative borrow checker for the emitted safe Rust, not as a substitute for a source-to-Rust resource correspondence argument.
+`owned` does **not** make an ordinary duplicable Lean value affine throughout the logic. Its enforceable meaning is restricted to native resource typing and Rust-corresponding operations.
 
-A formal reference judgment may use `Gamma ; Delta ⊢ e : T ! E ; Delta'`, where `Gamma` contains logical/value assumptions, `Delta` owned resources/borrow permissions, `E` effects and `Delta'` the resulting resource state. This is **proposed operational/static semantics**, not a new Lean kernel rule.
+### Move and borrow rules
 
-### 4.3 Representation/ABI selection
+- A noncopyable owned value cannot be used after being moved/consumed.
+- Shared borrows disallow invalid mutation, and exclusive borrows disallow overlapping incompatible aliases.
+- An inferred call-site borrow is allowed only when the already-resolved function signature and current resource state give one valid interpretation.
+- Inference **may not** silently add `clone`, `Rc`, `Arc`, `Mutex`, `RefCell`, allocation or locking to resolve an ownership conflict.
+- An escaping borrow requires a proven lifetime relation. Complex returned borrows, higher-ranked lifetimes and self-referential types are **not initially selected** in `.ps`; a typed native Rust wrapper is permitted instead.
+- `Drop` and cleanup are operational, potentially effectful actions. Logical proof erasure may not suppress or invent them.
 
-Proposed allowlisted syntax:
+**Example:**
 
 ```proofscript
--- PROPOSED systems-only attribute; NOT current PSCV0 syntax.
+-- Assumed signatures:
+-- inspect(x: borrow Rust.Packet): Unit
+-- consume(x: owned Rust.Packet): Unit
+@[native]
+function inspectThenSend(packet: owned Rust.Packet): Unit := do {
+  inspect(packet)   -- inferred shared borrow
+  consume(packet)   -- ownership transferred
+  -- inspect(packet) would be INVALID: use after move
+}
+```
+
+The Rust borrow checker can reject invalid generated Rust. But the source-to-Rust translation must also preserve the source's ownership choices; the compiler must not claim the Rust check proves arbitrary business logic correct.
+
+### Explicit failure ownership
+
+```proofscript
+-- Illustrative queue API, not an existing PSC0 signature.
+@[native]
+function submit(
+  q: borrow mut Rust.Queue,
+  req: owned Rust.Request
+): Rust.Result Unit (Rust.Error, Rust.Request) := do {
+  return q.tryPush(req)
+}
+```
+
+Success may consume `req`; the failure result returns ownership according to the **selected queue contract**. The return type alone does not prove that queue contents were unchanged, nor that a destructor or callback has no side effects.
+
+## 3. Scalars, native collections, pointers and representations
+
+### Existing numeric types
+
+| V7/Lean source | Rust representation candidate | Required semantic condition |
+|---|---|---|
+| `UInt8`/`UInt16`/`UInt32`/`UInt64` | `u8`/`u16`/`u32`/`u64` | Explicit wrapping and shift/division behavior |
+| `Int8`/`Int16`/`Int32`/`Int64` | `i8`/`i16`/`i32`/`i64` | Signed overflow and other operations preserved |
+| `USize`/`ISize` | `usize`/`isize` | Target machine-width assumptions selected |
+| `Nat`/`Int` | Big integers or explicitly bounded values | Never silently narrow to machine width |
+| `Bool`, `Unit` | `bool`, `()` | Correct valid-value and control-flow meaning |
+| `Float`/`Float32` | `f64`/`f32` where justified | IEEE/NaN/rounding and target optimizations specified |
+| `Fin n`, `Subtype` | Native representation plus approved erasure | Evidence/value correspondence maintained |
+
+**Side-by-side:**
+
+```rust
+fn add32(a: u32, b: u32) -> u32 { a.wrapping_add(b) }
+```
+
+```proofscript
+function add32(a: UInt32, b: UInt32): UInt32 := a + b
+```
+
+This requires **no new ProofScript syntax**. It requires a faithful mapping: debug/release Rust overflow differences must not change the source meaning.
+
+### Native collections are not silently Lean arrays
+
+| Selected native-library type | Rust equivalent | Distinction |
+|---|---|---|
+| `Rust.Vec T` | `Vec<T>` | Owned, mutable, potentially allocating collection |
+| `Rust.Slice T` with borrow qualifier | `&[T]` / `&mut [T]` | Non-owning contiguous view |
+| `Rust.FixedArray T n` | `[T; N]` | Inline fixed-size array when `n` maps to a target constant |
+| `Rust.Result T E` | `Result<T,E>` | Native error sum, not automatically Lean `Except` |
+| `Rust.Option T` | `Option<T>` | Native optional sum |
+| `Rust.RawPtr T` | `*const T` / `*mut T` via a selected binding | Privileged raw pointer; not safe to dereference |
+| `Rust.Box T` / `Rust.Arc T` | Native owning/shared allocations | Allocation/sharing/destructor semantics remain explicit |
+
+These are **illustrative names**, not claims that PSC0 defines them. Do not substitute native `Rust.Vec T` for Lean persistent `Array T` merely because their element types match. Use an explicit adapter and an appropriate copying/aliasing/semantic contract.
+
+### Borrowed slice example
+
+**Rust:**
+
+```rust
+fn first(xs: &[u8]) -> Option<u8> {
+    xs.first().copied()
+}
+```
+
+**Proposed ProofScript:**
+
+```proofscript
+@[native]
+function first(
+  xs: borrow (Rust.Slice UInt8)
+): Rust.Option UInt8 := xs.firstCopied()
+```
+
+`firstCopied` is a *selected-library placeholder*. It illustrates non-escaping borrowing, without inventing an unsafe pointer operation or a returned lifetime.
+
+## 4. Structures, layout and ABI
+
+### Structure representation annotations
+
+**Feature/profile:** Native source attributes that attach Rust representation requirements to a V7 structure declaration.
+
+```text
+psNativeRepresentedStructure ::=
+  psNativeReprAttribute V7.structureDecl
+
+psNativeReprAttribute ::=
+    '@[' 'native.reprC' ']'
+  | '@[' 'native.reprTransparent' ']'
+```
+
+**Rust:**
+
+```rust
+#[repr(C)]
+struct Header {
+    flags: u32,
+    length: u32,
+}
+```
+
+**Proposed ProofScript:**
+
+```proofscript
 @[native.reprC]
-structure PacketHeader where {
+structure Header where {
   flags: UInt32
   length: UInt32
 }
 ```
 
-This must require every field to have an admissible native representation under the pinned ABI; it does not make arbitrary Lean inductives, proof fields or dependent structures C-compatible. Representations should include explicit size, alignment, offsets, endianness where relevant, calling convention and layout guarantees.
+V7 structure declaration fields remain **newline-separated**, not C/Rust-style comma- or semicolon-terminated fields. `native.reprC` requires a representable field telescope, target alignment and ABI correspondence. `native.reprTransparent` follows the stricter single-nonzero-sized-field representation requirements. Neither attribute automatically proves logical field invariants or external ABI compatibility.
 
-Start with Rust-owned scalar structs/arrays and selected `repr(C)` mappings. Defer packed unions, C bitfields and arbitrary Rust layout attributes to named wrapper modules unless a practical case justifies them.
+### Native variables and storage
 
-### 4.4 Privileged boundary without proof privilege
+Top-level V7 `const` remains a *parameterless Lean definition*, not Rust `const` or mutable `static`. Exported symbols, thread locals, linker sections, static mutable state, packed unions and C bitfields are not admitted by this initial native grammar. They may be expressed using selected typed native Rust wrappers, without importing unrestricted Rust source syntax into `.ps`.
 
-Raw pointers, FFI, inline assembly, volatile/atomic operations and unsafe Rust belong in *explicitly opted-in, versioned boundary modules*. The first `ps-rust-native/0` needs typed references to approved external APIs; it need not expose inline assembly or unrestricted raw pointer syntax.
+## 5. Native control flow, errors and effects
+
+### Braced `do`, runtime loops and sequencing
+
+**Grammar:**
 
 ```text
-native user code
-  -> safe typed Rust API / resource contract
-  -> explicit boundary manifest
-  -> pinned Rust/C/architecture implementation
-  -> external behavior: modeled / audited / separately proved
+psNativeBody ::= V7.selectedTerm
+               | 'do' '{' psNativeDoSeq '}'
+
+psNativeDoSeq ::= psNativeDoItem
+                  (V7.doItemSeparator psNativeDoItem)*
+
+psNativeDoItem ::= V7.selectedDoSeqItem
+                 | 'loop' '{' psNativeDoSeq '}'
 ```
 
-No ordinary npm package, crate, procedural macro, backend or tactic may silently register such a capability, introduce axioms into verified claims, or declare its own executable output verified.
+The ordinary V7 `if`, `match`, `if let`, `for`, `while`, `let`, `let mut`, assignment, `return`, `break`, `continue`, and selected errors keep their existing surface categories. Staged V7 P1 forms do **not** become accepted merely because they resemble Rust features. The only new native control-flow head specified here is `loop`.
 
-### 4.5 No additional mandatory syntax families initially
+**Rust:**
 
-Do NOT add mandatory Rust-like `fn`, `impl`, `trait`, macro, `&'a`, lifetime elision, `async`, `await`, `unsafe {}`, `Box<T>` punctuation, C-style pointer arithmetic or a universal effect keyword. These can be introduced **selectively and later** if source API usability demands them. Rust's full capabilities remain reachable through **native `.rs` modules and checked typed interfaces** where the `.ps` subset is insufficient, but that is project-level interoperability, not full Rust source compatibility.
-
-## 5. Rust representation and arithmetic correspondence
-
-**Rule:** the Rust backend MUST preserve the meaning of a portable v7 expression. Changing target must not silently change the mathematical meaning, lifetime semantics or public effects of the portable source.
-
-| Portable / abstract | Rust-native candidate | Required conditions |
-|---|---|---|
-| `UInt8`, `UInt16`, `UInt32`, `UInt64` | `u8`, `u16`, `u32`, `u64` | Explicit wrapping/checked operations matching Lean values, not accidental debug/release overflow modes |
-| `Int8`, `Int16`, `Int32`, `Int64` | `i8`, `i16`, `i32`, `i64` | Preserve specified signed/shift/division/overflow behavior |
-| `Nat`, `Int` | Arbitrary-precision representation, or selected bounded conversion | **Never** silently use `usize`/`isize`; bounds/proof and error behavior explicit |
-| `USize`, `ISize` | `usize`, `isize` where target model agrees | Freeze word width, numeric conversions and overflow semantics |
-| `Bool`, `Unit`, products, ADTs | Rust primitive/tuple/enum where admissible | Define constructor, field, equality and proof-erasure correspondence |
-| `Fin n`, `Subtype` | Native bounded scalar or owned value | Preserve invariant/erasure; checked conversion or approved proof |
-| Lean `Array`, `ByteArray`, `String` | Lean-compatible managed view or explicitly native type | **Not** automatically Rust `Vec`, `Vec<u8>` or `String`; sharing, UTF-8, mutation and allocation modeled |
-| Native `Rust.Vec T`, `Rust.Slice T` | Rust `Vec<T>` / `&[T]` | Separate library identity, ownership and borrowing rules |
-| Native `Result`/`Option` | Rust standard versions | Explicit error/value mapping to Lean `Except`/`Option` where required |
-| Native `Pin`, `Arc`, lock/FFI handles | Pinned Rust wrapper types | Exact destructor, aliasing, synchronization, safety contract |
-| Native FFI structure | `repr(C)` or other selected representation | Target-specific ABI/layout constraints, no fabricated C++ ABI compatibility |
-
-Default Rust arithmetic is not a license to substitute `a + b` for a specified modular or checked Lean operation without proving/codifying the same overflow behavior. Floating point needs equally explicit rounding/NaN/optimization assumptions. `no_std` means `core` availability, not automatically an allocator, stack setup, OS or Lean runtime.
-
-## 6. Ownership, borrows, cleanup and performance policy
-
-1. **Move/consume:** an owning binding becomes unusable after transfer when the type is noncopyable. A consumed resource cannot be reconstructed through a duplicated ProofScript logical value.
-2. **Borrow:** shared borrows permit access without unsanctioned mutation; exclusive borrows exclude incompatible aliases. Escaping references have checked lifetime constraints.
-3. **Call-site inference:** infer borrow or move only where callee signatures, resource types and a deterministic rule yield one valid meaning. An ambiguous call is a diagnostic, not a random codegen heuristic.
-4. **Drop:** destructors and cleanup can be effectful; exact normal, error, early-return, panic/unwind and cancellation behavior must be represented for each supported target policy. Rust `Drop` is not automatically pure Lean computation.
-5. **No invisible cost change:** do not silently add arbitrary `clone`, `Arc`, `Mutex`, `RefCell`, allocation, blocking or synchronization to repair a borrow failure; suggest an explicit user decision.
-6. **Interior mutability:** only via selected types/contracts; Rust's safety is conditional on the correctness of unsafe internals in those abstractions.
-7. **Zero-copy:** borrowed slices can be used as views over owned buffers, but lifetime, alignment and output ownership must hold. A zero-copy optimization must not change decoded logical results.
-8. **Performance claims:** preserve explicit profiles such as "no implicit heap", "no blocking" and "fallible allocation", and report when a native library needs a more permissive policy. Formal worst-case execution time is a separate obligation.
-
-### 6.1 Low-annotation example
-
-```proofscript
--- PROPOSED ps-rust-native/0 spelling.
-@[native]
-function pushByte(
-  bytes: borrow mut Rust.Vec UInt8,
-  b: UInt8
-): Rust.Result Unit Rust.AllocError := do {
-  bytes.tryPush(b)
+```rust
+fn count_nonzero(xs: &[u8]) -> u32 {
+    let mut total = 0u32;
+    for &x in xs {
+        if x != 0 { total = total.wrapping_add(1); }
+    }
+    total
 }
 ```
 
-Call-site borrowing may be inferred; `tryPush` is an **illustrative wrapper**, not the currently established Rust `Vec` API. The wrapper must describe failure, capacity growth, ownership and cleanup. Rust's ordinary `Vec::push` is not a fallible-allocator API by itself, so this wrapper must not be assumed to exist without implementation and validation.
+**Proposed ProofScript:**
 
-Rust equivalent *shape*:
+```proofscript
+@[native]
+function countNonzero(
+  xs: borrow (Rust.Slice UInt8)
+): UInt32 := do {
+  let mut total: UInt32 := 0
+  for x in xs {
+    if (x != 0) {
+      total := total + 1
+    }
+  }
+  return total
+}
+```
+
+This is a **proposed source equivalence**, subject to the selected iterator binding and integer semantics; not an executed comparison.
+
+### Native typed errors
+
+`Rust.Result T E` is a named native type with the semantics of a typed success/error result. Rust `?` is **not** added to V7 grammar in the initial extension. Use selected `do`/typed-result combinators until a specific new sugar is justified.
+
+**Rust:**
 
 ```rust
-fn push_byte(bytes: &mut Vec<u8>, b: u8) -> Result<(), TryReserveError> {
-    bytes.try_reserve(1)?;
-    bytes.push(b);
+use std::collections::TryReserveError;
+
+fn add_byte(v: &mut Vec<u8>, x: u8) -> Result<(), TryReserveError> {
+    v.try_reserve(1)?;
+    v.push(x);
     Ok(())
 }
 ```
 
-The example does not prove a postcondition. It only illustrates conservative borrow mapping and a fallible allocation strategy.
-
-## 7. Contracts, proofs, erasure and totality — reuse Lean vocabulary
-
-### 7.1 Native behavior versus logical specification
-
-An `@[native]` function may loop, allocate, panic, mutate native resources, borrow them, use I/O or call an external API. It is **not** automatically interpreted as a transparent total Lean function.
-
-Its usable logical view must be one of:
-
-- A separately defined *total* pure function or inductive state transition with ordinary checked theorems.
-- A selected Lean partial-fixpoint definition with the supported equational/partial-correctness interpretation; this must be explicitly admitted and checked, not assumed from a similar runtime loop.
-- A typed weakest-precondition/Hoare/specification relation over an explicit state and effect model.
-- A named foreign assumption/axiom *in the model's assumption ledger* when implementation behavior is not proved; this is NOT permission for arbitrary user `axiom` declarations in `pscv0`.
-
-A specification or `ensures` clause is **not** executable correctness evidence by itself. Runtime operations cannot acquire theorem-like logical unfoldability through an attribute or a Rust compiler success flag.
-
-### 7.2 Reuse, do not fork, the proof language
-
-Use the selected PSCV0 `theorem`, `by`, `simp`, `omega`, `grind`, `Subtype`, `Fin`, inductive invariants, and eligible RC4 `given` / `requires` / `ensures` / `assert` / `erased` forms.
-
-**Important:** RC4's intrinsic `Std.WP` contracts are experimental and are defined for selected Lean effect/verification environments. Applying the same words to arbitrary native Rust operations would require a **new declared WP/resource model and explicit translation**. It is incorrect to state that Rust functions are thereby automatically supported by RC4's verifier. Keep generated `f.spec` proof attachment and exact contract clause ordering under their pinned Lean rules when that mechanism is reused.
-
-When a proof is erased from Rust output, proof erasure must preserve all operational behavior required by the approved model. Erased logical evidence cannot determine runtime branches or observable foreign effects.
-
-### 7.3 Partial correctness, total correctness and liveness
-
-| Claim | Example | Necessary evidence |
-|---|---|---|
-| Pure total correctness | `decode(encode(x)) = ok x` | Lean proof plus implementation correspondence |
-| Bounds validity | `index < length` | Checked type/arithmetical proof or safe bounds check |
-| Resource safety | owned buffer cannot be reused after transfer | Static discipline and Rust checking; unsafe wrappers modeled separately |
-| Partial correctness | invariant preserved by every service-loop step | Step theorem and operational mapping; no termination claim |
-| Termination | parser/event handler terminates | Well-founded proof or bounded control argument |
-| Cancellation safety | dropping async work leaves protocol valid | Cancellation/recovery model and applicable implementation proof |
-| Crash recovery | disk state recovers committed transaction | Explicit I/O order, durability and failure assumptions |
-| Security noninterference | secret does not affect observable output/timing | Selected leakage/target model, not just no secret-dependent branch |
-| Concurrency correctness | lock/state invariant preserved | Interleaving/memory-order model and corresponding proof |
-| Liveness | request eventually completes | Fairness, scheduler and environment assumptions |
-
-## 8. Two principal verified-execution routes, plus explicit boundaries
-
-### Route A — specification-derived Rust for a provable subset
-
-```text
-total PSCV0 definition -> Lean kernel-checked properties
-           |
-           v
- selected representation + code-generation correspondence
-           |
-           v
-       safe Rust output + rustc
-```
-
-This should be the **first** route. One source definition can supply both the mathematical meaning and executable code when its representation, erasure and target operations admit a faithful translation. Verus's `exec_spec_verified!` research supplies a related *bounded* precedent, not a universal ProofScript lowering proof.
-
-A plain successful Rust code generation does NOT establish the correspondence arrow.
-
-### Route B — Rust implementation-derived functional model
-
-```text
-resource-owning `.ps` -> generated safe Rust -> rustc/MIR
-                                  |
-                                  v
-                 selected Rust-to-functional translation
-                                  |
-                                  v
-                        Lean model + theorem proof
-```
-
-Aeneas offers relevant functionalization of **supported safe Rust** for Lean and other provers; the supported subset and limitations change over time. Concurrency, unsafe code and some complex borrow/generic patterns remain independent research issues; never label unsupported code verified via Aeneas.
-
-### Route C — low-level wrapper with explicit assumptions or stronger proof
-
-For unmodeled FFI, hardware, unsafe memory, C++ libraries, assembly, or unsupported Rust constructs, rely on a small native wrapper. A wrapper's *signature* does not verify its implementation. The artifact must identify whether the wrapper is **modeled/assumed, reviewed/audited, or independently proved/refined** for the claimed property.
-
-**Failure-closed assurance:** if a project requests implementation-level verification but has only model-level proofs, it must **reject the stronger artifact label**, not silently downgrade the claimed evidence or auto-admit assumptions.
-
-## 9. Native effects and reusable high-value libraries
-
-**Do not introduce a global systems-effect keyword until the typed-library route demonstrates a concrete gap.** Start with capabilities and contracts describing, where applicable:
-
-| Effects or operations | Example libraries/domains | Important distinction |
-|---|---|---|
-| Allocation, failure, deallocation | collections, embedded, codecs | `no_std` can be allocator-free; `alloc` requires explicit allocator |
-| Blocking/sleeping | networking, real-time, kernel | No-blocking type/effect policy not implied by Rust borrow checking |
-| Cancellation and drop | async services, storage | A function can be memory-safe but not cancellation-safe |
-| I/O, durable writes and crash | database/filesystem | Logical state proof != physical durability guarantee |
-| Locks and atomics | concurrent servers, runtimes | Rust data-race safety != deadlock freedom or protocol correctness |
-| Foreign/untrusted calls | C/C++/Rust crates | Imported signatures != verified external behavior |
-| Volatile/MMIO/DMA | embedded and kernels | Volatile != coherent DMA or sufficient memory ordering |
-| Secret-dependent operation | crypto | Constant-time guarantee needs a leakage/target model |
-
-**Domain libraries before syntax:** binary codecs/parsers, byte slices and endian conversions; protocol state machines; transactional invariants; checked collections; native resource wrappers; fixed-point/control-range models; bitvector arithmetic; later numerical shape/SIMD, synchronization and crypto assurance.
-
-### 9.1 Cross-domain exemplar: verified codec first
+**Proposed ProofScript:**
 
 ```proofscript
--- PSCV0-style LOGICAL sketch; not a completed proof or compiled fixture.
-function highByte(x: UInt16): UInt8 := UInt8.ofNat(x.toNat / 256)
-function lowByte(x: UInt16): UInt8 := UInt8.ofNat(x.toNat % 256)
-
-function decodeWord(hi: UInt8, lo: UInt8): UInt16 :=
-  UInt16.ofNat(hi.toNat * 256 + lo.toNat)
-
--- The proof obligation for a concrete exported implementation:
-theorem wordRoundTrip(x: UInt16):
-  decodeWord(highByte(x), lowByte(x)) = x := by {
-  -- actual pinned bitvector/integer proof required
+@[native]
+function addByte(
+  v: borrow mut (Rust.Vec UInt8),
+  x: UInt8
+): Rust.Result Unit Rust.AllocError := do {
+  return v.tryPush(x)
 }
 ```
 
-The theorem is **unproved in this document**. A future implementation must prove it under the selected environment and show that its emitted Rust native-byte operations correspond to this meaning. Noncanonical formats and malformed-input rules require separately stated predicates. This benchmark is reusable for networking, storage, images, compilers and embedded protocols.
+`tryPush` is a **hypothetical approved wrapper** combining fallible reserve and insertion; it is not a standard `Vec::tryPush` Rust API. Its normal and failed resource states require an exact contract.
 
-### 9.2 Resource exemplar: bounded native append
+### Operational effects, no new universal syntax
+
+| Effect or context | Selected source meaning |
+|---|---|
+| Allocation/failure | Native API may allocate or return a typed error; no hidden allocator in no-heap context |
+| Blocking/sleeping | Context capability may forbid selected calls |
+| Native memory mutation | Requires valid resource ownership/borrow |
+| FFI | Requires selected foreign binding and its safety conditions |
+| Atomic/volatile/MMIO | Named library operations with memory-order/device semantics |
+| Async cancellation | Only with an explicitly admitted native effect/cleanup model |
+| Cleanup/panic | Drop/unwind/abort behavior follows the selected operational type/target constraints |
+
+These are type and library properties; **no `effect`, `irq`, `transaction`, `packet` or `kernel` language keyword is introduced**.
+
+## 6. Foreign functions and privileged memory
+
+### Bodyless C ABI declarations
+
+**Feature/profile:** Restricted external command syntax. The symbol is an explicit string literal. A foreign declaration is *not* a Lean `axiom` or a checked theorem.
+
+```text
+psNativeExternalFunction ::=
+  '@[' 'native.externC' '(' stringLiteral ')' ']'
+  'function' declId V7.psFunctionBinders ':' psNativeType
+
+-- No ':=' body.
+-- ABI parameter/return types must be admitted native representations.
+```
+
+**Rust (2024 edition):**
+
+```rust
+unsafe extern "C" {
+    fn abs(input: i32) -> i32;
+}
+```
+
+**Proposed ProofScript:**
 
 ```proofscript
--- PROPOSED native syntax. Types/predicates are placeholders.
+@[native.externC("abs")]
+function cAbs(input: Int32): Int32
+```
+
+This example is a **declared foreign symbol**, not a proof of symbol existence, ABI validity or call safety. Calls remain privileged unless an approved wrapper establishes the necessary conditions. Other ABI families and variadics are not selected in the initial grammar.
+
+### Explicit native unsafe wrappers
+
+**Grammar:**
+
+```text
+psNativeUnsafeFunction ::=
+  '@[' 'native.unsafe' ']' '@[' 'native' ']'
+  'function' declId V7.psFunctionBinders
+  (':' psNativeType)? psNativeContract? ':=' psNativeBody
+```
+
+The order of the two attributes is selected rather than introducing both alternative spellings. `native.unsafe` grants a **source privilege and an effect boundary**, not theorems or permission to omit assumptions.
+
+```proofscript
+-- Illustrative raw-memory binding, not an existing PSC0 primitive.
+@[native.unsafe]
+@[native]
+function read32(p: Rust.RawPtr UInt32): UInt32 := do {
+  return Rust.Raw.load32(p)
+}
+```
+
+Correctness of such a load requires the relevant pointer provenance, alignment, initialized-value, lifetime and memory-access conditions. Ordinary `@[native]` code cannot invoke arbitrary raw dereference operations as if they were safe.
+
+**Preferred safe wrapper:**
+
+```proofscript
+@[native]
+function readReg(r: borrow Rust.Register32): UInt32 := do {
+  return r.read()
+}
+```
+
+`Rust.Register32` and `read` are schematic interfaces. Hardware register correctness or memory ordering must not be inferred merely from their types.
+
+### Privileged forms excluded from normal source
+
+| Source form | Status |
+|---|---|
+| `@[native] function` using selected safe operations | Proposed accepted native source |
+| `@[native.unsafe]` followed by `@[native]` | Proposed accepted privileged wrapper |
+| Raw dereference inside ordinary safe native function | **Reject** |
+| Arbitrary Rust `unsafe { ... }` pasted into `.ps` | **Reject** |
+| Bare Lean `unsafe def` / `partial def` in V7 | **Reject** under V7 |
+| User `axiom proof : False` | **Reject** under V7 |
+| Native `.rs` module with typed wrapper | Interoperability boundary, **not** native `.ps` syntax |
+
+## 7. Formal specifications, proof terms and executable meaning
+
+### Pure Lean-grounded theorems
+
+Keep V7's `Prop`, `Subtype`, `Fin`, dependent types, ordinary `theorem`, `by { ... }`, `simp`, `omega`, `grind`, and other selected proof terms. Nothing about a Rust target changes the kernel's inference or definitional-equality rules.
+
+**Pure specification example:**
+
+```proofscript
+inductive State where {
+  | ready
+  | removed
+}
+
+inductive Event where {
+  | retry
+  | remove
+}
+
+function step(s: State, e: Event): State := {
+  match s, e with {
+    | .removed, _ => .removed
+    | _, .remove => .removed
+    | other, _ => other
+  }
+}
+
+theorem removedStaysRemoved(e: Event):
+  step(.removed, e) = .removed := by {
+  cases e <;> rfl
+}
+```
+
+The theorem proof is **illustrative, not execution-tested**. If checked, it proves a property of `step`, not automatically that a separately written Rust driver follows `step`.
+
+### Reuse `given`, `requires`, `ensures` for native specifications
+
+**Grammar selection:**
+
+```text
+psNativeContract ::=
+  psNativeGiven? psNativeRequires? psNativeEnsures?
+
+psNativeGiven    ::= 'given' V7.selectedGivenBinders
+psNativeRequires ::= 'requires' V7.selectedContractPredicate
+psNativeEnsures  ::= 'ensures' V7.selectedResultBinder '=>' term
+```
+
+At most one clause of each kind, always in **`given`, `requires`, `ensures` order**. A `given` binder denotes a logical specification variable, never a runtime argument. Native contract terms are Lean propositions over a selected abstract state/resource model.
+
+**Crucial distinction:** Lean 4.35 RC4's experimental intrinsic `Std.WP` verification does **not** automatically establish the effects of arbitrary native Rust functions. Reusing the *surface keywords* requires a corresponding Rust-native WP/resource interpretation; a well-formed contract is not evidence that the native body satisfies it.
+
+```proofscript
+-- Schematic native API and relational specification.
 @[native]
 function appendBounded(
-  out: borrow mut Rust.Vec UInt8,
+  out: borrow mut (Rust.Vec UInt8),
   byte: UInt8,
   limit: Rust.USize
 ): Rust.Result Bool Rust.AllocError
   given (before: BufferModel)
   requires models(out, before)
-  ensures r => appendPost(before, out, byte, limit, r)
+  ensures result =>
+    appendPost(before, out, byte, limit, result)
 := do {
-  NativeBuffer.appendBounded(out, byte, limit)
+  return NativeBuffer.appendBounded(out, byte, limit)
 }
 ```
 
-The intended postcondition distinguishes success, capacity-limit refusal and allocation failure, and states preservation of the preexisting bytes, final element and resource ownership. Neither `models` nor `appendPost` is currently a PSCV0 library declaration. The example is a *contract target*, **not** a claim that RC4 automatically proves a Rust-mutating function. The outcome also depends on the wrapper's exact failure and unwind behavior.
+`BufferModel`, `models`, `appendPost` and `NativeBuffer.appendBounded` are *not* declared by V7. They describe the expected native resource model and a future typed wrapper.
 
-### 9.3 Protocol exemplar: abstract transitions first
+### Partial correctness, erasure and nontermination
 
-Use an ordinary PSCV0 `inductive` state/event model; prove that invalid transitions cannot occur under a selected transition function. Then relate the Rust operation/driver state to that model. This is beneficial for network handshakes, parser modes, database transactions, device lifecycles and OS capability protocols.
+A native event loop may preserve a stated invariant without terminating. Termination, liveness, cancellation, crash recovery, lock freedom and constant-time behavior require **separate specifications**, not a generic Rust safety claim.
 
-## 10. Optional low-level/native-platform facilities
+`erased` proof data and abstract specifications must not determine runtime branch conditions, destructor execution, atomic operations or observable foreign calls. A ProofScript function marked `@[native]` is **opaque to ordinary Lean proof unfolding** unless an explicitly justified logical correspondence supplies the relevant meaning.
 
-These capabilities are **necessary for some use cases**, but not required to validate the core language's value. Keep their low-level implementation in versioned libraries or small Rust/FFI modules.
+### Three independent meanings of "checked"
 
-| Facility | First route | Later verification task |
+| Result | Meaning | Does not imply |
 |---|---|---|
-| Typed C ABI, symbol imports/exports | `extern` metadata and Rust `extern "C"` wrappers | ABI/layout, ownership, lifetime and callback assumptions |
-| C++ interop | Stable C ABI bridge or explicit C++ wrapper | Native C++ ABI/template compatibility NOT inferred |
-| Raw pointer/unsafe memory | Explicit approved Rust wrapper | Pointer provenance, initialization, alignment, aliasing, allocation proofs |
-| Static storage/linker sections | Target attributes and linker configuration | Startup, initialization and placement assumptions |
-| `no_std` freestanding | Rust `core`, optional `alloc`, board/OS runtime setup | Allocation and panic policy, ABI/platform assumptions |
-| Atomics/locks | Selected Rust synchronization APIs | Ordering, fairness and protocol invariants |
-| MMIO/DMA | Typed device/region capability libraries | Device ordering, memory coherence and ownership transfer |
-| Pin/self-referential objects | Approved Rust `Pin` wrappers | Initialization and immovability invariants |
-| Inline assembly/CPU intrinsics | Native Rust/assembly module | Machine-level semantics for claimed properties |
-| GPU/SIMD | Target-specific native wrappers | Numerical, layout and target semantics as separate profile |
+| Rust type/borrow accepted | Native program satisfies selected Rust static rules | Functional correctness |
+| Lean theorem checked | Logical property of a given model, relative to assumptions | The emitted Rust implements that model |
+| Implementation corresponds to specification | Property of a **specific** native implementation, when evidence is supplied | Arbitrary external hardware/OS correctness |
 
-Linux and standalone kernels use these primitives; **they are not the initial definition of the language**.
+This is a semantic distinction, not a new theorem-proving grammar or proof-kernel rule.
 
-### 10.1 Linux remains an advanced target
+## 8. Further side-by-side examples
 
-Use a pinned Linux kernel Rust API and Kbuild integration, not a generic Cargo-only assumption. A misc-device state machine remains a useful **later** benchmark: prove transitions and resource invariants, validate generated Rust ownership/lifecycle, then establish the implementation-to-model relation. IRQ constraints, fallible allocation, MMIO and DMA require separately approved kernel and hardware assumptions.
+### A. Fixed-width arithmetic without new syntax
 
-### 10.2 Small OS kernels remain advanced targets
+**Rust:**
 
-For a new kernel, begin with a single-core capability-oriented microkernel or an isolated service on seL4 Microkit before a monolithic OS. Defer boot/interrupt vectors, page tables, custom allocators, scheduling, assembly, IPC and multi-core weak-memory verification to platform-specific stages. A bootable kernel is an engineering result, not automatically a whole-kernel correctness theorem.
-
-## 11. Compiler placement and trust architecture
-
-```text
-versioned `.ps` source graph + selected profile and target identity
-          |
-          v
-existing v7-selected parser/Lean-grounded elaboration (portable subset)
-          |                       \
-          |                        +-> total specifications/proof terms
-          |                                    |
-          |                                    v
-          |                          selected independent kernel checker
-          v
-native resource/effect and ABI elaboration for `ps-rust-native/0`
-          |
-          v
-typed target IR with exact source spans, ownership/effect provenance
-          |
-          v
-readable `.rs` generation and selected approved wrapper imports
-          |
-          v
-pinned rustc / target toolchain (type/move/borrow/native checks)
-          |
-          v
-selected implementation correspondence and assumption/effect audit
-          |
-          v
-host-owned staging, receipt and artifact publication
+```rust
+fn sum32(a: u32, b: u32) -> u32 {
+    a.wrapping_add(b)
+}
 ```
 
-**Trusted boundary constraints:**
+**V7:**
 
-- A backend is an untrusted *output candidate producer*; it cannot mint a kernel-checked handle, alter proof rules, ignore rejected obligations, or publish a verified artifact by itself.
-- Native operational resource typing is not a second Lean kernel. If proofs formalize its soundness, those proofs are Lean terms checked by the selected kernel.
-- Generated source and Rust JSON diagnostics need dependable mapping back to `.ps` positions and exact dependency/environment provenance.
-- Rust crates, build scripts and procedural macros are executable external dependencies; they require separate trust and toolchain policy. `rustc` success is not authentication or universal semantic preservation.
-- Keep Rust source generation and wrappers **outside** the existing mandatory PSC0 bootstrap/self-host closure until explicitly adopted and qualified. Do not change the selected TypeScript 7 historical bootstrap or previous receipts.
-- No source profile silently inherits new language syntax from imports or the target backend.
+```proofscript
+function sum32(a: UInt32, b: UInt32): UInt32 := a + b
+```
 
-## 12. Prioritized feature roadmap: small language, broad utility
+Portable arithmetic meaning takes precedence over incidental Rust debug/release overflow behavior.
 
-| Phase | Deliverable | Required evidence; nonclaim |
+### B. Read-only slice and inferred borrow
+
+**Rust:**
+
+```rust
+fn checksum(bytes: &[u8]) -> u32 {
+    bytes.iter().fold(0u32, |x, &b| x.wrapping_add(b as u32))
+}
+```
+
+**Proposed native `.ps`:**
+
+```proofscript
+@[native]
+function checksum(xs: borrow (Rust.Slice UInt8)): UInt32 := do {
+  let mut total: UInt32 := 0
+  for x in xs {
+    total := total + UInt32.ofNat(x.toNat)
+  }
+  return total
+}
+```
+
+The loop and conversion depend on the selected Rust-native slice library. A borrow of the source slice ends without returning a reference to it.
+
+### C. Native memory-safe error handling
+
+**Rust:**
+
+```rust
+fn reserve_one(v: &mut Vec<u8>) -> Result<(), std::collections::TryReserveError> {
+    v.try_reserve(1)
+}
+```
+
+**Proposed `.ps`:**
+
+```proofscript
+@[native]
+function reserveOne(v: borrow mut (Rust.Vec UInt8)):
+  Rust.Result Unit Rust.AllocError := do {
+  return v.tryReserve(1)
+}
+```
+
+The Rust-facing error representation and wrapper (`tryReserve`) must be specified; they are not already supplied by PSC0.
+
+### D. Protocol invariants
+
+**Rust:**
+
+```rust
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Phase { Active, Removed }
+
+fn remove(_: Phase) -> Phase { Phase::Removed }
+```
+
+**Portable ProofScript logical model:**
+
+```proofscript
+inductive Phase where {
+  | active
+  | removed
+}
+
+function remove(_: Phase): Phase := .removed
+
+theorem removeIsRemoved(p: Phase):
+  remove(p) = .removed := by {
+  rfl
+}
+```
+
+A checked theorem would constrain the source logical function; a Rust implementation must separately be related to it before the theorem is claimed for executable code.
+
+### E. C-compatible native structure
+
+**Rust:**
+
+```rust
+#[repr(C)]
+struct Header {
+    length: u32,
+    kind: u32,
+}
+```
+
+**Proposed `.ps`:**
+
+```proofscript
+@[native.reprC]
+structure Header where {
+  length: UInt32
+  kind: UInt32
+}
+```
+
+An ordinary Lean structure without the native attribute has **no implicit C representation**.
+
+### F. Restricted FFI function
+
+**Rust:**
+
+```rust
+unsafe extern "C" {
+    fn abs(x: i32) -> i32;
+}
+```
+
+**Proposed `.ps`:**
+
+```proofscript
+@[native.externC("abs")]
+function cAbs(x: Int32): Int32
+```
+
+A bodyless foreign declaration is not a user axiom. Its externally implemented behavior is not established by the source signature.
+
+## 9. Grammar concordance (deltas only)
+
+```text
+psNativeSourceFile ::=
+  V7.importHeader (V7.selectedCommand | psNativeCommand)* EOF
+
+psNativeCommand ::=
+    psNativeFunction
+  | psNativeUnsafeFunction
+  | psNativeExternalFunction
+  | psNativeRepresentedStructure
+
+psNativeFunction ::=
+  '@[' 'native' ']' 'function' declId
+  V7.psFunctionBinders (':' psNativeType)?
+  psNativeContract? ':=' psNativeBody
+
+psNativeUnsafeFunction ::=
+  '@[' 'native.unsafe' ']' '@[' 'native' ']' 'function'
+  declId V7.psFunctionBinders (':' psNativeType)?
+  psNativeContract? ':=' psNativeBody
+
+psNativeExternalFunction ::=
+  '@[' 'native.externC' '(' stringLiteral ')' ']'
+  'function' declId V7.psFunctionBinders ':' psNativeType
+
+psNativeRepresentedStructure ::=
+  ('@[' 'native.reprC' ']' |
+   '@[' 'native.reprTransparent' ']')
+  V7.structureDecl
+
+psNativeBody ::= V7.selectedTerm
+               | 'do' '{' psNativeDoSeq '}'
+
+psNativeDoSeq ::= psNativeDoItem
+                  (V7.doItemSeparator psNativeDoItem)*
+
+psNativeDoItem ::= V7.selectedDoSeqItem
+                 | 'loop' '{' psNativeDoSeq '}'
+
+psNativeType ::=
+    V7.selectedType
+  | 'owned' psNativeResourceBase
+  | 'borrow' psNativeResourceBase
+  | 'borrow' 'mut' psNativeResourceBase
+
+psNativeResourceBase ::=
+    psNativeNominalType
+  | '(' psNativeType ')'
+
+psNativeNominalType ::= selectedRustBoundType
+
+psNativeContract ::=
+  psNativeGiven? psNativeRequires? psNativeEnsures?
+
+psNativeGiven    ::= 'given' V7.selectedGivenBinders
+psNativeRequires ::= 'requires' V7.selectedContractPredicate
+psNativeEnsures  ::= 'ensures' V7.selectedResultBinder '=>' term
+```
+
+These are schematic category selections, **not a complete Rust parser**, and are interpreted with all V7 restrictions on source applications, binders, comments, newlines and proof expressions. The Rust-only lexical items are recognized only in their designated source grammar categories.
+
+## 10. Accepted and rejected language fixtures (proposed)
+
+| ID | Fragment or source situation | Expected result |
 |---|---|---|
-| **R0** | Freeze `ps-rust-native/0` grammar and semantic boundaries, type/resource/assurance matrix | Document-only decision; not proof of compiler conformance |
-| **R1** | Generate safe Rust for bounded pure fixed-width functions, products/ADTs and a verified codec prototype | Rust compilation, semantic differential cases and *separately checked* codec theorem |
-| **R2** | Exact implementation correspondence for a small pure/total subset | Property-scoped checked translation/refinement evidence; no universal backend theorem |
-| **R3** | Typed Rust crate wrappers, native `Vec`/slice/`Result`, native-runtime declaration and basic effects | API, ownership, allocation and failure-path cases |
-| **R4** | Conservative borrowed/owned inference and zero-copy codec | `rustc` accepted source, resource semantics checks; no hidden clone/allocation |
-| **R5** | Resource contract/WP model and selected Rust-derived Lean verification | Audited assumptions, independently checked generated proof terms |
-| **R6** | Protocol and transaction-state models, cancellation-safe effects | Invariant, failure and cancellation properties on a clearly scoped implementation |
-| **R7** | ABI/FFI, `no_std`, fallible allocation, controlled low-level facilities | Pinned toolchain/ABI/target and explicit boundaries |
-| **R8** | Advanced concurrency, embedded/real-time, cryptography, Linux and OS profiles | Domain-specific models and separately validated claims |
+| RN-P01 | V7 pure `function inc(n: Nat): Nat := n+1` for Rust target | Same V7 syntax/meaning |
+| RN-P02 | `@[native] function ... := do { loop { ... } }` in native profile | Accept operational loop if its types/effects are valid |
+| RN-N01 | `@[native]` in ordinary V7 profile | Reject profile/attribute |
+| RN-P03 | `x: owned Rust.Packet` | Selected owned type |
+| RN-P04 | `xs: borrow (Rust.Slice UInt8)` | Selected shared borrow |
+| RN-P05 | `xs: borrow mut (Rust.Vec UInt8)` | Selected exclusive borrow |
+| RN-N02 | Owned resource reused after consuming move | Reject resource use |
+| RN-N03 | Overlapping conflicting exclusive borrows | Reject resource use |
+| RN-N04 | Returning reference to destroyed local | Reject |
+| RN-N05 | Escaping borrow whose lifetime relation is not selected | Reject or require native wrapper |
+| RN-N06 | Compiler silently clones or adds `Arc` to fix a borrow error | Reject hidden behavior |
+| RN-P06 | Fixed-width `UInt32` semantics mapped to explicit wrapping Rust | Admit semantics-preserving mapping |
+| RN-N07 | `Nat` silently narrowed to `usize` | Reject representation |
+| RN-N08 | Lean persistent `Array` silently treated as mutable `Rust.Vec` | Reject without correspondence |
+| RN-P07 | `@[native.reprC]` with native ABI-representable fields | Accept |
+| RN-N09 | `native.reprC` over unsupported proof/dependent field | Reject |
+| RN-P08 | Bodyless `native.externC` foreign declaration | Admit as external signature, not proof |
+| RN-N10 | Unmarked bodyless ordinary `function` | Reject |
+| RN-P09 | Explicit `@[native.unsafe]` wrapper with selected raw operation | Admit privileged category, not automatically proved |
+| RN-N11 | Raw dereference in unprivileged native body | Reject |
+| RN-N12 | Arbitrary user `axiom` supplied from native source | Reject |
+| RN-P10 | Logical theorem over pure state transition | Kernel-checkable proof if actually supplied |
+| RN-N13 | Logical theorem alone claimed proof of native executable | Reject stronger claim |
+| RN-N14 | Arbitrary Rust `impl`/macro or Rust unsafe block inside `.ps` | Reject no fallback |
+| RN-P11 | V7 `variable (n: Nat)`, `#check (f x)`, `f((x,y))` | Retain V7 grammar |
+| RN-N15 | V7-invalid `f (x)` application | Reject adjacency |
+| RN-P12 | Ordered `given`, `requires`, `ensures` on native declaration | Well-formed specification if model exists |
+| RN-N16 | Well-formed specification called verified without implementation evidence | Reject executable-verification claim |
 
-Stages describe **goals, not elapsed-time estimates or current completion**. Kernel, concurrency and verified-unsafe work do not block the cross-domain first benchmark.
+These describe intended **language semantics and source acceptance**, not executed tests or implementation readiness.
 
-### 12.1 First two acceptance exemplars
+## 11. Exclusions and exact language scope
 
-**Exemplar A — verified binary codec:** a v7 total codec, Lean-checked round-trip theorem, safe emitted Rust, exact native fixed-width meaning, negative malformed inputs and performance comparisons against handwritten Rust. Without a real implementation-correspondence proof, report `rust-checked` + `logic-model-verified`, **not** `implementation-correspondence-verified`.
-
-**Exemplar B — borrowed native buffer:** a Rust-owned vector with a borrowed mutable view, fallible growth, no unintended implicit allocations, preserved contents on error, correct output resources and (where supported) a Lean proof of the specified postcondition related to the emitted implementation.
-
-**These two exemplars matter more initially than an entire verified Linux driver.**
-
-## 13. Conformance requirements (design fixtures; not executed)
-
-| ID | Scenario | Required result and rejection owner |
-|---|---|---|
-| RN-P01 | Standard v7 pure function emitted to Rust without native profile | Preserve v7 acceptance and semantics; target may only change representation under correspondence |
-| RN-N01 | A `@[native]` modifier in ordinary `pscv0` | Reject at source/profile selection |
-| RN-P02 | Native runtime function with an intentionally nonterminating loop | Accept only under selected native operational rules; no Lean transparency claim |
-| RN-N02 | Treat native nontermination/unsafe as a transparent total Lean proof | Reject logical/assurance use |
-| RN-P03 | Native `Rust.Vec` with short exclusive borrow inferred | Accept if exact Rust borrow relation holds |
-| RN-N03 | Use an owned noncopyable resource after move | Reject at resource analysis or `rustc`; no silent clone |
-| RN-N04 | Two overlapping conflicting mutable borrows | Reject at resource analysis or `rustc` |
-| RN-N05 | Escaping reference whose owner does not live long enough | Reject |
-| RN-N06 | Compiler silently inserts `Arc`, `RefCell`, `Mutex`, clone or heap allocation as borrow repair | Reject compiler policy |
-| RN-P04 | Fixed-width wrap operation maps to Rust `wrapping_*` correctly | Accept after semantic evidence |
-| RN-N07 | `Nat` silently becomes target `usize` without range/model | Reject representation mapping |
-| RN-N08 | Lean persistent `Array` silently becomes observable mutable `Vec` | Reject without approved correspondence |
-| RN-P05 | Explicit native ABI struct with admissible fields | Accept with target ABI/layout checks |
-| RN-N09 | `repr(C)` claimed for nonrepresentable proof/dependent fields | Reject |
-| RN-N10 | Foreign function signature claimed proved solely by typecheck | Reject stronger assurance |
-| RN-P06 | Kernel-checked theorem about an abstract codec/protocol state model | Accept `logic-model-verified` only |
-| RN-N11 | Abstract proof claims correctness of emitted Rust without translation proof | Reject executable-verification label |
-| RN-P07 | Bounded Rust-to-functional model for a supported borrowed safe-Rust subset | Admit proofs only with tool subset, target identity and evidence checked |
-| RN-N12 | Unsupported Aeneas/foreign translation silently accepted as verified | Reject |
-| RN-P08 | `no_std` value program without hidden allocator dependency | Accept on compatible selected target |
-| RN-N13 | Hidden heap/RC dependency in declared no-heap target | Reject |
-| RN-P09 | Selected audited unsafe wrapper used in ordinary native program | Permit with explicit assumed/audited boundary; no closed-verified label inferred |
-| RN-N14 | Imported crate/macro changes proof authority or language grammar silently | Reject |
-| RN-P10 | Native build and Lean theorem both succeed but correspondence is unknown | Report both facts separately, no executable correctness claim |
-| RN-N15 | Native P1 async/protocol syntax unsupported by current selected profile | Reject source; do not fall back to Rust/old ProofScript parsing |
-
-A negative test must fail **for the intended phase**: source/profile, resource/effect, Rust compilation, Lean proof construction, kernel rejection, target correspondence, or assurance/publication. A Rust borrow-check failure must not be counted as a passing Lean theorem-rejection test.
-
-## 14. Prior research, optional advanced targets and unresolved questions
-
-**Research-informed decisions** above are based on Lean/Rust reference material, Rust verification work, and the earlier Linux-specific proposal. External links are informational and may move; a conformant edition must freeze exact Rust toolchain, library and binding revisions.
-
-### 14.1 Open decisions before adoption
-
-1. Choose exact `@[native]` grammar and whether the native profile selects upstream `partial`, `partial_fixpoint`, or a dedicated opaque runtime-lowering category for each use. Do not mix their logical meanings.
-2. Define the smallest Rust-owned/borrowed type representation, source-visible qualifier grammar and lifetime inference/rejection policy.
-3. State which ordinary v7 terms may occur inside native runtime bodies and how Lean proof/specification terms are isolated from operational resource terms.
-4. Define native type representation for every P0 exported type; establish wrapping/overflow, string, collection, proof erasure and ABI rules.
-5. Select initial API bindings: `Vec`, slices, `Result`, allocation failure, library linkage; pin actual signatures rather than invent them.
-6. Specify the exact subset of RC4 WP/contracts adaptable to native Rust effects and how contract proofs are attached without treating foreign models as theorem facts.
-7. Choose the first property-scoped semantics-preservation strategy: shared-source verified lowering, translation validation, or Rust-functional model extraction.
-8. Define toolchain and crate/macro/build-script trust, compilation diagnostics, source-map provenance and artifact receipts.
-9. Decide performance constraints before permitting compiler-automated borrowing; document deterministic legal coercions and prohibited hidden allocations.
-10. Select the exact first codec and native-buffer benchmark and their independent proof/resource/correspondence acceptance cases.
-
-### 14.2 Lean and Rust references
-
-- [PSCV0 v7 authoritative source](../PSCV0_LANGUAGE_REFERENCE.md)
-- [PSC0 v7 source-policy](PSCV0_V7_ONLY_SOURCE_POLICY.md) and [adoption matrix](PSCV0_V7_ADOPTION_AND_MIGRATION_MATRIX.md)
-- [PSC0 secure, extensible architecture](PSC0_SOUNDNESS_SECURE_EXTENSIBLE_ARCHITECTURE.md)
-- [Lean 4.35 RC4 source pin](https://github.com/leanprover/lean4/tree/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364)
-- [Lean recursive definitions, `partial_fixpoint`, `partial`, `unsafe`](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/)
-- [Lean 4.30 borrow annotations and LCNF compiler](https://lean-lang.org/doc/reference/latest/releases/v4.30.0/)
-- [Lean 4.35 intrinsic-verification release notes](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/)
-- [Rust reference — pointer and reference types](https://doc.rust-lang.org/reference/types/pointer.html)
-- [Rust reference — representations and layout](https://doc.rust-lang.org/reference/type-layout.html)
-- [Rust reference — destructors](https://doc.rust-lang.org/reference/destructors.html)
-- [Rust reference — unsafe keyword](https://doc.rust-lang.org/reference/unsafe-keyword.html)
-- [Rust embedded `no_std`](https://doc.rust-lang.org/embedded-book/intro/no-std.html)
-
-### 14.3 Verification projects and cross-domain precedents
-
-- [Aeneas: supported Rust functionalization and documented limitations](https://aeneasverif.github.io/aeneas/)
-- [Aeneas paper: Rust verification by functional translation](https://doi.org/10.1145/3547647)
-- [Verus project](https://github.com/verus-lang/verus) and [supported `exec_spec_verified!` precedent](https://docs.rs/verus_builtin_macros/latest/verus_builtin_macros/macro.exec_spec_verified.html)
-- [RefinedRust: refinement types and separation logic](https://plv.mpi-sws.org/refinedrust/)
-- [Flux: ownership-aided Rust refinement verification](https://flux-rs.github.io/flux/)
-- [Swift noncopyable types and ownership](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/ownership/)
-- [EverParse verified parsers/serializers](https://github.com/project-everest/everparse)
-- [CompCert: verified C compilation](https://compcert.org/)
-
-### 14.4 Optional platform references
-
-- [Linux kernel Rust: general information](https://www.kernel.org/doc/html/latest/rust/general-information.html)
-- [Linux kernel Rust: quick start](https://www.kernel.org/doc/html/latest/rust/quick-start.html)
-- [Linux kernel Rust: coding guidelines](https://www.kernel.org/doc/html/latest/rust/coding-guidelines.html)
-- [Rust misc-device example](https://github.com/torvalds/linux/blob/master/samples/rust/rust_misc_device.rs)
-- [seL4 Microkit user manual](https://docs.sel4.systems/projects/microkit/manual/latest/)
-
-## 15. Revision disposition (previous `PS-SYSTEMS/0` → this proposal)
-
-| Earlier proposal | Revision |
+| Requested capability | `ps-rust-native/0` selection |
 |---|---|
-| Linux kernel/OS as primary benchmark | Binary codec + owned zero-copy buffer first; Linux and microkernel optional advanced profiles |
-| `systems function` as mandatory new keyword | Prefer one profile-gated `@[native]` marker and existing Lean constructs where sufficient; keyword pending evidence |
-| Rust semantics implied by target | Explicit versioned source/profile separation, no automatic relaxation of PSCV0 v7 |
-| New verification vocabulary | Reuse Lean `theorem`, dependent types and RC4 contract syntax where *actually supported*; native WP model required |
-| Specialized Linux effect model | Common allocation, failure, cleanup, cancellation, sync and foreign effect libraries; Linux-specific context libraries optional |
-| Native Rust resource representation only | Separate Lean logical values, Rust-native owned resources and explicit shared values |
-| Proof of abstract state model as feature headline | Three distinct assurance outcomes plus implementation correspondence requirement |
-| Broad Rust support promised through `.ps` | Small safe `.ps` subset; full Rust project-level reach via native `.rs` wrappers, not full `.ps` compatibility |
-| Linux-first acceptance test | First pure codec semantics/proof/Rust lowering; second mutable owned-buffer contract |
-| Existing core/kernel or bootstrap implicitly changed | Explicit non-adoption and no modification until separate reviewed migration |
+| V7 logical programming, proof tactics and mathematical syntax | Inherited |
+| Runtime nontermination and native effects | Only explicit native declaration |
+| Rust-owned/mutable/native library types | Selected named bindings |
+| `owned`, `borrow`, `borrow mut` | Initial resource surface |
+| Full Rust lifetime syntax/HRTB/GATs | Not selected; typed native Rust adapters may handle them |
+| Native C ABI structures | Restricted `native.reprC` / transparent representation |
+| FFI function import | Restricted `native.externC` bodyless signature |
+| Raw pointers in safe code | Not admitted |
+| Privileged raw/unsafe boundary | Explicit native unsafe declaration |
+| C++ templates and arbitrary object ABI | No automatic syntax or ABI equivalence |
+| Rust trait/impl/procedural-macro language syntax | Not selected as `.ps` syntax |
+| Inline assembly and platform-specific intrinsics | Native wrapper boundary |
+| `async`/`await` global syntax | Not added in initial profile |
+| Linux-driver, database, packet or transaction keywords | No special source grammar |
+| New proof kernel axioms or arbitrary user `axiom` | Not admitted |
+| ProofScript v7 source `partial` and `unsafe` | Remain excluded in plain V7 |
+| Arbitrary existing Rust code interpreted as `.ps` | Never accepted by a parser fallback |
 
-**Final proposal:** a small Rust-native resource and execution extension over the stable Lean-grounded ProofScript foundation, with cross-domain verified libraries and explicit proof-to-Rust correspondence. **Four compact source/semantic additions can unlock substantial useful capability; they do not remove the considerable work of correct native code generation, typed resource models, FFI/ABI, contracts and independent assurance.**
+**Native software domains use these common facilities through libraries and bindings.** A language need not add separate syntactic families for embedded, storage, networking, cryptography, numerical computing or OS kernels.
+
+## 12. Source concordance (grammar and semantics only)
+
+- [ProofScript PSCV0 v7](../PSCV0_LANGUAGE_REFERENCE.md) — authoritative grammar for the inherited language.
+- [Pinned Lean 4.35.0-rc4 source](https://github.com/leanprover/lean4/tree/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364).
+- [Lean recursive definitions, including partial fixpoints](https://lean-lang.org/doc/reference/latest/Definitions/Recursive-Definitions/).
+- [Lean 4.35.0 verification notation](https://lean-lang.org/doc/reference/latest/releases/v4.35.0/).
+- [Lean 4.30 borrowed-argument annotation](https://lean-lang.org/doc/reference/latest/releases/v4.30.0/) — RC optimization, **not** Rust lifetime semantics.
+- [Rust reference: pointer/reference types](https://doc.rust-lang.org/reference/types/pointer.html).
+- [Rust reference: structure and C layout](https://doc.rust-lang.org/reference/type-layout.html).
+- [Rust 2024 unsafe-extern syntax](https://doc.rust-lang.org/edition-guide/rust-2024/unsafe-extern.html).
+- [Rust reference: destructor behavior](https://doc.rust-lang.org/reference/destructors.html).
+- [Rust reference: unsafe behavior](https://doc.rust-lang.org/reference/unsafe-keyword.html).
+
+**Final language distinction:** `ps-rust-native/0` adds **native execution, affine resource-qualified types, selected native representation and explicitly privileged foreign code** while retaining V7's Lean proof grammar and precise portable semantics. That is a deliberately small **language-design proposal**; it is neither an implemented Rust backend nor a claim that Rust memory safety alone establishes the Lean specifications.

@@ -1,6 +1,6 @@
 # G4.3 planning gate — scoped contexts and real typed checking
 
-**Status:** independent G4.3 binder-frame, scope-preserving lifting, exact insertion-depth-aware lookup, and capture-avoiding substitution are **cloud-validated structural precursors** at [run 38115032789](https://github.com/dwijayuda/pskernel/actions/runs/38115032789). Actual dependent **typing**, type-preserving substitution, checked environment, DefEq and proof admission remain unimplemented. Lean 4.35 pinned `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; old proof/API interfaces are not requirements.
+**Status:** independent G4.3 binder operations are structurally proved ([run 38115032789](https://github.com/dwijayuda/pskernel/actions/runs/38115032789)); a new **restricted dependent Sort/Pi fragment** with verified Sort-only contexts and an exact independent formation judgment passed [run 38115500178](https://github.com/dwijayuda/pskernel/actions/runs/38115500178). **General** dependent typing, type preservation, a protected checked environment, typed DefEq and proof admission remain unimplemented. Lean 4.35 pinned `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; old proof/API interfaces are not requirements.
 
 ## Validated bounded precursor
 
@@ -19,9 +19,9 @@ The G4.2 source can only infer types for syntactically Sort-shaped closed terms.
 ## Vertical implementation order
 
 1. **G4.3 structural foundation GREEN:** exact original-scope and lifted current-scope lookup, total capture-avoiding reference substitution, machine-checked structural preservation and strict malformed-input handling. [Evidence](G4_BINDER_EVIDENCE.md). Do not upgrade it to a typing result.
-2. **Next actual checker slice:** define immutable **typed** binder entries whose domain sort was checked by the actual infer/check procedure; define independent `Γ ⊢ e : A` judgments and fully-checked versus infer-only capabilities. Start with `Sort`, verified context-variable types and dependent `Pi` under approved context, then lambda/application/let with correctly substituted result types.
+2. **Partially GREEN:** `DependentSortFragment.lean` certifies `Sort`, bound variables and truly dependent `Pi` when every binder domain is syntactically `Sort u`. This is NOT general checked inference; see [exact CI](G4_DEPENDENT_SORT_EVIDENCE.md). **Next:** build an immutable, protected typed context for arbitrary checked domain expressions with actual sort observations and a full `Γ ⊢ e : A` judgment, keeping `InferOnly` and `FullyChecked` separate. Add lambda/application/let only with correct result-type substitution.
 3. Implement actual WHNF and **typed** DefEq with positive-soundness evidence and exact symbolic universes; use G2 evaluators as non-authoritative research references only.
 4. Create a protected immutable checked environment distinct from the untrusted candidate catalog. Only introduce atomic declaration admission after the full Lean kernel rule families, resource policies and required proofs/tests are qualified.
 5. Run pinned Lean 4.35 independent positive/negative differential tests from the first typed-rule slices, then realistic checker performance/memory benchmarks; defer full Init/Std/Mathlib until correct coverage justifies them.
 
-Until these are met, the most advanced executable success in V3 is a **two-rule formation fragment**, not a general-purpose Lean kernel.
+Until these are met, the most advanced executable success is a **restricted Sort/bound-variable/dependent-Pi fragment over Sort-only contexts**, not a general-purpose Lean kernel.

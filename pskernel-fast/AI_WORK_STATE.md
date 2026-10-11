@@ -1,62 +1,66 @@
 # PSKernel-Fast V3 — current work state
 
-Updated 11 October 2026. **Current qualified scope: G4.4b typed multistep weak-head joins + P1k same-universe dependent graph spaces.**
+Updated 11 October 2026. **Latest qualified scope: P1l uniform Prop/Type Pi algebra with graph beta/eta + P1m guarded source Pi-to-model bridge.** G4.4b runtime is retained unchanged.
 
 ## Authority and operating rules
 
-Repository `dwijayuda/pskernel`; only development branch `research/pskernel-fast-clean-v3-20261011`. Target official Lean **4.35.0-rc4**, upstream commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. This is the user's public open-source compiler/kernel correctness, semantic compatibility and formal-methods project.
+Repository `dwijayuda/pskernel`; ONLY development branch `research/pskernel-fast-clean-v3-20261011`. Target official Lean **4.35.0-rc4**, upstream `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. This is the user's public open-source compiler/kernel correctness, Lean compatibility and formal-methods project.
 
-Use GitHub and cloud Actions only: no Desktop Commander, local repository checkout, local builds or tests. Before every write refresh branch HEAD and affected blob SHAs; use serial non-force updates with an expected-HEAD lease. Preserve concurrent changes, other branches and PR #89. Performance, correctness and a small trusted authority take precedence over preserving old implementation/proof shapes. Do not use proof-name whitelists, new global model axioms, `sorryAx`, unreviewed `native_decide` or blanket quotient-freshness assumptions.
+GitHub connector and cloud Actions ONLY: no Desktop Commander, local repository checkout/files/builds/tests. Refresh live HEAD and affected blob SHAs before writes; use serial non-force expected-HEAD updates. Preserve other branches, concurrent work and PR #89. Small runtime authority, performance and correctness outrank preserving old implementation/proof shapes. No new global model axioms, `sorryAx`, unreviewed native proofs, proof-name admission whitelists or unrestricted quotient-freshness assumptions.
 
-One production semantic authority remains the goal. No public proof admission is implemented: **admitted declarations = 0**. Old checkers and official Lean are independent test oracles, not authority supplied by a plugin or majority vote.
+One production semantic authority is the goal. Official Lean and other checkers are test oracles, not an accepting vote or plugin-supplied proof authority. **No public proof admission; admitted declarations = 0.**
 
-## Exact verified checkpoint
+## Exact verified code checkpoint
 
-**Code/proof source:** `4e6a06e1180e504d359b9637d6273d4bb9f8a853`.
-**Completed SUCCESS:** [Actions 38140633920](https://github.com/dwijayuda/pskernel/actions/runs/38140633920), job `114473607797`.
+Source **`e95c0b5e381e4ee5a0d47001fad6c69494261683`**; [Actions 38143764809](https://github.com/dwijayuda/pskernel/actions/runs/38143764809), job `114482754713`, completed SUCCESS. The full job log confirms pinned Lean, **58** independent Lean source files, **157 + 17 + 28 = 202** distinct enumerated theorem receipts, and all regressions. The 28 new receipts are 9 concrete graph laws, 10 uniform Pi laws and 9 source bridge laws.
 
-The full job log was inspected: exact pinned Lean, **55 independent Lean source files** in the architecture fence, original **157** exact axiom receipts plus **17** disjoint additional receipts = **174** reviewed theorems. The allowed globals remain `propext`, `Classical.choice`, `Quot.sound`; no `sorryAx`. The focused new closure built in a 24-job Lake invocation and the existing closure in a 109-job invocation. **These counts overlap and must NOT be added into a claimed distinct build count.** All old regressions and both new validation stages passed.
+Allowed globals remain `propext`, `Classical.choice`, `Quot.sound`; `SetTheoryBasis V` remains an explicitly supplied mathematical premise, not an established model instance. The 42-job focused build and 109-job existing build share outputs and must NOT be added. Native differential remains 15 supported equalities, 2 rejection controls and 1 documented completeness gap; all passed.
 
-Native official-kernel differential: **15 supported equality fixtures, 2 rejection controls, 1 intended completeness gap**, all passed. Documentation/policy commits may follow this code checkpoint; always inspect live HEAD and its matching CI before further writes or status claims.
+Documentation/policy commits may follow this qualified CODE checkpoint. Re-fetch live HEAD and matching CI before reporting current status or writing. [Evidence](P1L_P1M_PI_MODEL_EVIDENCE.md) / [JSON](P1L_P1M_PI_MODEL_EVIDENCE.json).
 
-[Detailed evidence](G44B_P1K_EVIDENCE.md) / [machine-readable evidence](G44B_P1K_EVIDENCE.json).
+## New P1l model algebra
 
-## G4.4b — executing typed reduction with erased paths
+`Spec/GraphApplication.lean` proves actual Kuratowski pair injectivity, exact pair membership in function graphs, graph functionality and on-domain extensionality. `modelGraphApp graph x` is presentation-independent, proof-only noncomputable lookup. Its default empty-set branch is NOT a typed application or acceptance path. Beta, carrier introduction/elimination, eta and extensionality are proved for the EXISTING P1k dependent graph space.
 
-`src/PSKernelFast/TypedNormalization.lean` contains the actual new reducer. `WeakHeadStep` and `TypedSteps` are in **Prop**, so historical proof paths are not retained as Type-valued runtime traces. A tail-recursive accumulator keeps the current term/count; its path and bound evidence are propositions.
+`Spec/TaggedDependentPi.lean` unifies Prop-valued and Type-valued Pis. `modelPi` chooses the tagged truth carrier at codomain rank zero and the graph carrier at positive rank; `modelLam` chooses point or graph. A single `modelApp V f x` distinguishes the point from graphs using the existing noncollision theorem, without caller-supplied sort/domain/type witnesses.
 
-`stepWeakHead` performs immediate beta, let-zeta with `nondep=false`, and reduction along the function side of an application. `normalizeTyped` rechecks EVERY intermediate term through the unchanged G4.3b `ctx.infer`, requiring the same EXACT source type. `compareTypedWH` normalizes BOTH sides and returns equal only with two typed paths to a common syntactic result. It now handles reverse and two-sided joins, not just the directional one-step G4.4a cases.
+Exact numeric `imax` formation is proved without a new Pi universe successor. The adopted `taggedSortSet` already uses `U_(n+1)` for positive sort rank n; retain that convention. Mathematical universe inclusion and model extensionality are not new source cumulativity or kernel DefEq rules. Both regimes have intro/elim/beta/eta and on-domain Pi/lambda congruence. Beta's fibre/body membership premises are explicit, not hidden source-soundness axioms.
 
-The six new operational receipts prove typed path endpoints, composition of a GIVEN single-step denotation law, existence of bounded common-reduct paths for positive executions, zero-fuel nonacceptance, and a total contraction-count bound. **The composition lemma assumes `stepSound`; it is NOT a proof of beta/zeta preservation in the set model.**
+## New P1m guarded source bridge
 
-Fuel is PER SIDE and counts head inspections INCLUDING the final terminal inspection: n contractions require at least n+1 fuel. It bounds recognized contractions, not source size, application-spine recursion depth, substitution allocation, rechecking cost, CPU or RSS. Different stable heads are `unresolved`, not a proof of inequality. No reduction under binders/neutral arguments, delta/iota, full universe equivalence, eta, proof irrelevance, constants or declaration transactions have been added.
+`Proof/SourcePiModelBridge.lean` defines `PiModelTerm`, its source erasure, `interpPiModel`, and source-only `SourcePiAnnotation`. Unlike P1i, codomains may have ANY source universe rank. No semantic fibre premises appear in the annotation relation: source induction and a sort-binder environment-extension proof derive all fibre memberships.
 
-`TypedNormalizationSmoke.lean` includes a TEST-ONLY KExpr-to-Lean mapping. It calls the native `Lean.Kernel.check` on an application requiring an `Eq.refl` witness to inhabit `Eq ty lhs rhs`. The production reducer never invokes the oracle. Generated mixed beta/let chains, two-sided joins, beta and let application-spines, fuel boundaries, scope precedence, capture avoidance in a checked dependent context, and neutral-head non-evaluation are checked. The deliberate under-lambda equality gap is equal in official Lean but unresolved here.
+Proved: annotations reconstruct actual `GeneralPiRule`; preserve source erasure; imply model membership in every environment satisfying the source sort-binder invariant; and identify the exact syntactic inferred Sort. `sourcePiAnnotation_executed_model` connects a real `inferClosedGeneralPi` success to those erasures and the modeled inferred type.
 
-## P1k — a stronger model foundation without new assumptions
+The shared symbolic source family is `forall (A : Sort u), A -> A`. Actual Prop and Type Pi-formation executions are proved by `rfl`, not `native_decide`. `sourcePiIdentityType_exec_model` applies the general bridge to the Type case and obtains denotation membership in `taggedSortSet V 2`. These check the type/proposition itself; they are NOT admission of a proof or identity-function implementation.
 
-`Spec/UniverseImageClosure.lean` constructs separation from image, singleton, empty and union. A diagonal subset rules out a surjection from A in U onto U. The supplied Tarski size alternative then forces every U-bounded image of A to belong to U. Consequently the actual Kuratowski graph belongs to **the SAME universe**, closing P1j's successor-stage limitation.
+Guard: a used variable must have an actual syntactic Sort as its source binder domain. A proof variable `x:P` is NOT treated as a proposition `P:Prop`. Full dependent contexts and source lambda/app/let semantics are still outside this bridge. The annotations are proof-side syntax, not a second accepting kernel or a requirement on optimized runtime representation.
 
-`Spec/DependentGraphSpace.lean` derives union closure from image closure, the size alternative and regularity: a supposed surjection from union(A) onto U produces a forbidden membership two-cycle. It defines the dependent pair set `modelDependentSum A B` and the function-space carrier `modelGraphPi A B`, exactly the graphs of functions whose values inhabit the corresponding fibres. Both carriers stay in the same U when A and every B(x) are members of U. Eleven new model receipts cover the construction and precise membership/closure laws.
+## Retained G4.4b / P1k foundation
 
-**This is a universe-closed mathematical carrier, NOT a complete Lean Pi interpretation.** Graph application/uniqueness and beta/eta, proof-valued versus Type-valued representation, source level/`imax` alignment and typing-to-model induction remain to be done. The substantial `[SetTheoryBasis V]` premise is unchanged, and no instance/model-existence or consistency capstone is constructed.
+`TypedNormalization.lean` remains unchanged: multiple beta/restricted-zeta/function-spine steps, each reduct rechecked at the SAME exact syntactic type through G4.3b. Equal requires two paths to a common syntactic head. Paths and bounds are in Prop and erased; the accumulator is tail recursive. Fuel is per-side head inspections including terminal inspection, NOT CPU/RSS/allocation/spine-depth bounds. Unsupported equality is unresolved, never a proved negative result.
 
-## Verification history for this continuation
+P1k derived separation, same-universe image/graph/union closure, dependent sums and dependent graph-space closure from the unchanged set basis. P1l now uses those constructions rather than assuming replacement graph laws. The older `TypedSteps.denotation_preserved` composition theorem still assumes `stepSound`: model beta is not yet the source substitution/denotation theorem needed to discharge it.
 
-- `fc90e0b365dff0cc6b6d610eb7d617a055582f78`: G4.4b source + tests, [run 38139817827](https://github.com/dwijayuda/pskernel/actions/runs/38139817827), job `114471180304`, SUCCESS on first attempt; base157 + new6.
-- `719b62894761f196915caab3c0cc215870c87e76`: separation/diagonal/image/same-stage graph closure, [run 38140320151](https://github.com/dwijayuda/pskernel/actions/runs/38140320151), job `114472687102`, SUCCESS on first attempt; base157 + new11.
-- `4e6a06e1180e504d359b9637d6273d4bb9f8a853`: union and dependent graph-space closure, [run 38140633920](https://github.com/dwijayuda/pskernel/actions/runs/38140633920), job `114473607797`, SUCCESS on first attempt; base157 + new17.
+## This continuation's provenance
 
-No test-fix iterations or weakened statements were needed for these three source commits. Existing source warnings remain; do not relabel the whole tree warning-free. G4.4a microbenchmarks still execute but measure the OLD one-head comparator, NOT the new multistep implementation. No new speedup, matched official-kernel timing, peak RSS or allocation claim is made. `kernelBenchmarkRun` stays false.
+- `fa0bfc38499b314bd2ec1c6e10526138be7bcd0a`: graph laws; run `38142533048`, SUCCESS.
+- `ddc32de7b784e6a02591549e43cdd6397048e702`: unified algebra; run `38142864676`, correctly FAILED on one Prop-Pi congruence simplification.
+- `8421bc44580808f795788be4be2d6eba4bc5eef9`: replaced that simplification with direct composition of established truth equations; run `38143138914`, SUCCESS. No theorem or assumption weakened.
+- `e95c0b5e381e4ee5a0d47001fad6c69494261683`: guarded source bridge; run `38143764809`, SUCCESS first run.
 
-## Next exact work — join the two proof paths
+Only three proof-side Lean modules, a new audit manifest/script and its CI hook were added to source. `SetTheoryBasis`, the runtime checker, G4.4b reducer and native differential fixtures are unchanged. Base157 and prior17 audits are unchanged. New source modules total 680 lines including comments/proofs, not additional runtime checker lines. Source warnings remain; do not claim the tree warning-free or all commits first-run green.
 
-First prove injectivity/functional uniqueness for the ACTUAL Kuratowski pair and graph encoding, define model application on well-typed graph values, and prove graph beta/eta. Use the derived same-stage `universe_image_closed`, `universe_union_closed`, `modelDependentSum_member_univ` and `modelGraphPi_member_univ`; do not rebuild these or add their conclusions as assumptions.
+## Next exact dependency
 
-Then connect the graph-valued Type-Pi semantics and tagged proof-valued Prop semantics to source-certified binders and the actual beta/let substitution implementation. Supply a real semantic single-step theorem before applying `TypedSteps.denotation_preserved` to the kernel model. Generalize that composition lemma's carrier universe if needed; it currently uses `A : Type`.
+Extend or replace the proof-only annotation syntax to represent source lambda/app/let and general typed variable lookup under dependent contexts. Establish semantic weakening and substitution against the ACTUAL capture-avoiding source `KExpr.instantiateBVar`, using the existing source-to-erased substitution correspondence rather than another unrelated toy substitution. Track annotation/rank preservation and context validity without assuming the intended typing theorem.
 
-Keep exact G4.3b type agreement as a conservative fallback until a sound broader conversion judgment is ready. Later conversion must include binder/argument congruence, exact symbolic levels, typed proof irrelevance, eta, transparency and protected immutable environment identity, followed by quotient/inductive/primitive rules and model-preserving declaration folds. Full source soundness, conditional no-derived-False, broad Init/Std/Mathlib compatibility and representative kernel benchmarks remain OPEN.
+Then use `modelPi_beta` plus the source substitution law to prove actual source beta/zeta denotation preservation. Generalize `TypedSteps.denotation_preserved` from `A : Type` to a universe-polymorphic carrier when connecting it to V. Only this real one-step theorem may discharge `stepSound`. Do not relabel mathematical graph beta, guarded Pi formation or a hypothesis-parameterized chain lemma as all-source soundness.
+
+Subsequent obligations remain broader typed conversion (binder/argument congruence, exact symbolic levels, typed proof irrelevance/eta, environment/transparency identity), quotients/inductives/primitives, immutable FullyChecked declaration-model extension, conditional no-derived-False, representative compatibility and performance. P1f proved arbitrary images CAN equal the proof point, so no blanket quotient freshness assumption is valid.
+
+No new runtime speedup, binary-size, allocation, peak-RSS or official-kernel benchmark result was produced here. Old G4.4a timings are NOT G4.4b or full-kernel timings. Keep `kernelBenchmarkRun=false`, full source soundness=false and consistency=false until the corresponding evidence exists.
 
 ## Preserved history
 
-The previous long work state was archived **byte-for-byte using its existing Git blob**, without deleting history: [history/AI_WORK_STATE_THROUGH_G44A.md](history/AI_WORK_STATE_THROUGH_G44A.md), blob `99085dfab9d7788f414c69700cec2b07f0086247`. The previous handoff is also preserved at [history/AI_HANDOFF_THROUGH_G44A.md](history/AI_HANDOFF_THROUGH_G44A.md), blob `475100f3de7c9ab03693c06be86d72ce2af2332f`. Historical stage flags/documents describe their original checkpoint; this current state and live evidence govern continuation.
+Previous active work state/handoff are archived byte-for-byte by existing blobs in `history/AI_WORK_STATE_THROUGH_P1K.md` (`89e18c43a490ec5aee6f004b9bb3a617745fd348`) and `history/AI_HANDOFF_THROUGH_P1K.md` (`8ff093cecaa6c5a12e56a0cb61788c3aaff37216`). Earlier G4.4a history and G44B_P1K evidence remain intact. Stage-prefixed historical policy flags describe those stages; current P1l/P1m groups and live evidence govern continuation.

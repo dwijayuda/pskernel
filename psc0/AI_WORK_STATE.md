@@ -1,3 +1,23 @@
+# PSC0 AI WORK STATE — Compiler-only rapid development loop
+
+## Current checkpoint: 2026-10-11
+
+**User instruction:** for now work on the self-host compiler packages only, prioritize the most efficient iteration path, and **do not run independent PSKernel tests or kernel metatheory tasks in the fast loop**. This is not a release-policy change. PSCV0 v7 remains the sole forward-looking ProofScript language reference; no older .ps grammar compatibility is required.
+
+**Production-like baseline established before optimization:** [full generated 20-module bridge run 38128357665](https://github.com/dwijayuda/pskernel/actions/runs/38128357665), source a640a2d22adeabd4ca7919839a8991667bcc3eae, **overall SUCCESS** including Linux 44 bridge + 12 authoring tests, Windows and Lean RC4 reference proof gate. That exact source imported the generated v7 PSCV0 parser, crossed the validated closed source-AST ABI into the retained compiler without old Lean text reparse, elaborated the first actual Translate.ps module, emitted the checked candidate JS and independently tested the grouped call; no complete compiler 64-module .ps fixed point was claimed.
+
+**Current branch:** psc0/pscv0-compiler-fast-loop-v1, separate from psc0/pscv0-v7-abi-v1. Its new [fast compiler-only design](docs/PSCV0_COMPILER_ONLY_FAST_DEVELOPMENT.md) and [GitHub CI workflow](../.github/workflows/psc0-pscv0-compiler-fast.yml) reuse only that exact full-run surface-bootstrap artifact. A cheap script checks all 20 original source SHA-256 identities and exact retained toolchain, parses the current .ps compiler module, validates and reconstitutes its AST, executes the real PSC0 elaborator/TypeScript7/JS runtime on representative typed programs and writes a timed report.
+
+**No kernel in fast lane:** the script intentionally does not import pskernel-core or call checkCanonicalAdmissions. It may serialize compiler admission data for comparison but does **not** claim an independently checked module. Reports must explicitly carry independentlyKernelAdmitted=false, kernelOrKernelProofTestsExecuted=false, fullV7Conformance=false, fullSelfhostFixedPoint=false. Native source typecheck workflow [compiler-only native](../.github/workflows/psc0-pscv0-compiler-native.yml) builds only PsSyntax/PsFoundation and the five portable language modules when their Lean source changes; it does not run PSKernel tests. Full generated bridge/Windows/RC4 qualifications are reserved for milestones and verified release actions, not routine edits.
+
+**Cache invariant:** any change to one of the 20 cached generated-source Lean modules causes FAST_CACHE_STALE. Never use the previous v7 generated JavaScript bundle as proof of a newly changed parser or old-language fallback. Rerun the full generator intentionally and pin a new immutable artifact after a source-closure change. Changes to the current authored .ps module itself are read directly from GitHub and can receive fast source/AST/typecheck/TS7 runtime feedback while grammar remains unchanged.
+
+**Current acceptance status:** these new fast workflows are created and require their **own** observed CI success before claims of working optimized feedback. The earlier full run and cheap ABI model already passed; the latter had 2,440 selected Translate source nodes and 257 standalone AST nodes. Do not conflate it with a full compiler-source or kernel proof. Preserve all branches/history, current Rust-target proposal on primary and user instructions.
+
+**Next actions:** check the initial fast CI for actual elapsed time and correctness; research any refusal at the parser/typed boundary, not by altering fixture expectations. Keep kernel work separately dormant. Once the fast tier is green, use it to iterate through next cheap v7 grammar/portable source improvements and .ps compiler modules. At promotion explicitly do full source-identity qualification and record actual results before merging.
+
+---
+
 # PSC0 AI WORK STATE — v7 closed AST ABI and generated compiler integration
 
 ## Latest milestone, October 11, 2026

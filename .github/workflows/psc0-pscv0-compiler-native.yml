@@ -1,0 +1,51 @@
+name: PSC0 cheap native compiler frontend checks
+on:
+  push:
+    branches: [psc0/pscv0-compiler-fast-loop-v1]
+    paths:
+      - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
+      - 'psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean'
+      - 'psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean'
+      - 'psc0/packages/foundation/src/**'
+      - '.github/workflows/psc0-pscv0-compiler-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc0-compiler-native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source-typecheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: psc0
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/packages/syntax
+            psc0/packages/foundation
+            psc0/scripts
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Typecheck only portable source syntax/foundation compiler modules
+        run: |
+          set -euo pipefail
+          lean --version | tee compiler-native-version.txt
+          grep -F '4.34.0' compiler-native-version.txt
+          lake build PsSyntax PsFoundation
+          mkdir -p .lake/build/lib/lean/Ps/Syntax/Pscv0
+          for MODULE in Surface Read Commands TypePrint Module; do
+            lake env lean -o ".lake/build/lib/lean/Ps/Syntax/Pscv0/$MODULE.olean" "packages/syntax/src/Ps/Syntax/Pscv0/$MODULE.lean"
+          done
+          echo 'PSCV0_COMPILER_NATIVE: PASS syntax/foundation plus five portable v7 modules; no pskernel package tests'

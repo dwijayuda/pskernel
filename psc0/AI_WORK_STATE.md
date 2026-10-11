@@ -1,3 +1,110 @@
+# PSC0 AI WORK STATE — dependent context refinement and impossible cases
+
+## 12 October 2026 — proof-producing refinement through native runtime emission
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The requested milestone is implemented within the explicit bounds below.
+Compiler authoring remains native `.lean`; work used GitHub source operations
+and Linux cloud CI. No local checkout/build/tests, pskernel-core, compiler-source
+generation, self-hosting or kernel implementation changes were used.
+
+### Implemented boundary
+
+`Ps.Elab.Refinement` owns ordered dependency closure and telescope reversion.
+Match motives now generalize dependent local bindings and preserve dependent
+local definitions. Branches reopen that context from the recursor's actual
+telescope. Fresh local aliases preserve pattern shadowing and original outer
+declarations. The completed motive determines the recursor universe.
+
+Fixed, compound and repeated indices generate homogeneous equality constraints.
+`Ps.Elab.Equality` constructs equality transport, constructor field injectivity
+and constructor disjointness through checked recursors. An omitted constructor
+branch is accepted only when the solver produces a contradiction and eliminates
+`False`. Equal indices and unresolved/occurs-check constraints do not justify
+omitting a branch.
+
+`Ps.Environment.Logic` supplies genuine Eq/False/True/Bool inductives plus
+defined False.elim; no new proof axiom or host elaboration service is used.
+Official Lean admits the prelude and checks actual generated proof terms.
+`Ps.Meta.Iota` reduces direct single-family recursors, with compact Nat literal
+constructor views rather than eager successor expansion.
+
+Changing dependent state now reaches the existing recursion worker normalization:
+the worker returns a function over state whose type can depend on retained
+indices. Invalid stale dependent recursive arguments remain rejected.
+There is no second recursion algorithm.
+
+Runtime erasure removes proof binders from function representations as it already
+does for calls and lambdas. Equality transport requires equal checked erased
+representations; impossible branches use a typed unreachable IR node with a
+defensive runtime throw. Boolean recursors emit conditionals. Erasure failures
+retain their declaration name. Unsupported runtime folds retain the existing
+refusal rather than changing captured values.
+
+The implementation, compact fixtures and README increment changes 24 files:
+837 additions and 177 deletions (660 net lines). New focused modules contain
+194 lines for context refinement, 195 for equations, 88 for logical primitives
+and 67 for iota reduction. Match shrinks by 37 net lines. No broad suite was added.
+
+### Qualification
+
+**[Linux run 38165240831](https://github.com/dwijayuda/pskernel/actions/runs/38165240831) passed**
+at exact source `6b6eb2b5c08ee6422103b9e1b6bd5cd79b5b5142`, job `114546331097`.
+Toolchain: native Lean 4.35.0-rc4,
+`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`;
+profile `pscv0-v7-native-bounded/9`.
+
+Native compilation, unchanged 28 parser cases and the compact semantic batch
+passed: three checked programs and 39 phase-specific refusals.
+Official Lean accepted the expanded 146-declaration composite, the existing
+five-declaration instance/Except program and the isolation input.
+
+The same composite now covers dependent context values and let definitions,
+symbolic/fixed vector tails, zero-length case elimination, repeated-index
+contradictions, omitted Boolean-indexed constructors, direct Boolean matching,
+a dependent-context proof and recursive dependent state. Only three refusal
+inputs were added: missing feasible branches, satisfiable repeated indices and
+an incorrectly refined result. Existing stale-recursion and captured-fold
+refusals still pass.
+
+CLI emission, TypeScript 7.0.2 strict compilation and JavaScript execution passed.
+The eight added runtime results are 74, 74, 71, 71, 85, 91, 94 and 74.
+The import guard reports 78 portable / 84 native closure modules, excluding
+pskernel-core. Cached source rebuild: 8,120 ms; unchanged build: 482 ms.
+CLI observations: parse 9 ms, elaborate 9 ms, prepare 18 ms, official kernel
+15 ms, erase 20 ms, emit 3 ms; checked prelude initialization 2 ms.
+These are compact-program observations, not a general performance benchmark.
+
+Four preceding runs remain failed. The first identified reserved native Lean
+identifiers and the new IR visitor case. The next exposed the old recursion
+fallback boundary. Two subsequent runs passed official checking but stopped
+during runtime erasure; declaration diagnostics located the proof-binder
+representation mismatch. The shared implementation paths were corrected.
+Acceptance assertions were not weakened and fixtures were not expanded during
+these corrections. Existing unrelated unused-binding warnings remain.
+
+### Explicit limits and next work
+
+Fixed-index matching with a major-dependent result/context still requires
+heterogeneous transport and is refused. Injectivity projections currently cover
+homogeneous fields of nonindexed index constructors. Nested/multiple patterns,
+arbitrary runtime recursor lifting and broader well-founded recursion remain
+pending. Indexed structural recursion still requires distinct explicit local
+index parameters; not every dependent recursive context is supported.
+
+Source universes/Prop families, mutual/indexed nested data, erased/existential
+constructor fields and runtime Type/Prop indices remain outside this profile.
+Full imports/visibility, global classes/instances, wider proof automation and
+contracts remain pending. This is a bounded native semantic/runtime milestone,
+not full v7 conformance or self-host qualification.
+
+Main was verified at `748ee630e43ee1a89643cbc8cec3e31087788b08`;
+M1 base at `b4bd7e7d6c48443e56eaf96099515a29a83982bf`.
+PR #109 remains draft. This commit records evidence only; the qualified source
+is the exact commit above. Older records retain their historical boundaries.
+
+---
+
 # PSC0 AI WORK STATE — native dependent matching and indexed recursion
 
 ## 12 October 2026 — recursor-driven dependent branch elaboration

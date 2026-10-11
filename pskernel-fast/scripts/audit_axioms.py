@@ -27,6 +27,9 @@ THEOREMS = {
     "PSKernelFast.Proof.bound_zero_substitution_preserves_type",
     "PSKernelFast.Proof.dependent_identity_beta_preserves_type",
     "PSKernelFast.Proof.dependent_let_variable_zeta_preserves_type",
+    "PSKernelFast.Proof.liftBVars_add",
+    "PSKernelFast.Proof.liftBVars_comm",
+    "PSKernelFast.Proof.checked_bound_variable_weakens",
 }
 
 

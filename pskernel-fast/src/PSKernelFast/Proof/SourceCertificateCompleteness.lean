@@ -28,7 +28,8 @@ private theorem validParams_complete (params : List KName)
       simp only [ULevel.validParams, iha h.1, ihb h.2, Bool.and_self]
   | imax a b iha ihb =>
       simp only [ULevel.validParams, iha h.1, ihb h.2, Bool.and_self]
-  | param name => simpa only [ULevel.validParams, decide_eq_true_eq] using h
+  | param name =>
+      simpa only [ULevel.validParams, ULevel.WellFormed, decide_eq_true_eq] using h
   | mvar name => exact False.elim h
 
 /-- Every certified source has an eventual, fuel-stable successful synthesis. -/
@@ -39,8 +40,7 @@ theorem synthesizeSourceCertificate_complete
     (h : SourceModelTyping params ρ ctx ac source ty ann aTy) :
     ∃ required : Nat, ∀ fuel : Nat, required ≤ fuel →
       synthesizeSourceCertificate params ρ fuel ctx ac source =
-        .ok { sourceType := ty, termAnnotation := ann,
-          typeAnnotation := aTy, certificate := h } := by
+        .ok ⟨ty, ann, aTy, h⟩ := by
   induction h with
   | sort ctx ac level good =>
       refine ⟨1, ?_⟩

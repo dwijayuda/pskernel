@@ -377,30 +377,16 @@ def psKernelWhnfCoreWithFuel
                               Prod.snd fnResult;
                             match fn with
                             | PsKernelExpr.lam _ _ _ _ =>
-                                let consumedResult :=
-                                  psKernelWhnfCountLambdas
-                                    fn
-                                    (psKernelExprListLength args);
-                                let lastLam :=
-                                  Prod.fst consumedResult;
-                                let consumed :=
-                                  Prod.snd consumedResult;
-                                match lastLam with
-                                | PsKernelExpr.lam _ _ body _ =>
-                                    let selected :=
-                                      psKernelExprListTake
-                                        consumed
-                                        args;
-                                    let reducedBody :=
-                                      psKernelExprInstantiateRev
-                                        body
-                                        selected;
+                                match
+                                    psKernelC0BetaSpinePlan
+                                      fn
+                                      args with
+                                | Option.none =>
+                                    Except.ok
+                                      (Prod.mk expr state1)
+                                | Option.some plan =>
                                     let rebuilt :=
-                                      psKernelExprApplyArgsCheap
-                                        reducedBody
-                                        (psKernelExprListDrop
-                                          consumed
-                                          args);
+                                      psKernelC0BetaSpineApply plan;
                                     match
                                         smaller
                                           publicWhnf
@@ -418,9 +404,6 @@ def psKernelWhnfCoreWithFuel
                                           cheapProj
                                           (Prod.fst result)
                                           (Prod.snd result)
-                                | _ =>
-                                    Except.ok
-                                      (Prod.mk expr state1)
                             | _ =>
                                 if psKernelExprEq fn fn0 then
                                   match

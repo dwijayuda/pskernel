@@ -47,10 +47,10 @@ dependencies. The current generated API is a source interface, not a stable ABI.
 
 ## Qualification and bounds
 
-Use the same 101 scalar/call observations for TS and Rust. The existing composite
+Use the same 102 scalar/call observations for TS and Rust. The existing composite
 also retains dependent data, impossible cases, proof fields, recursive functions
-and instance dictionaries. Ten observations cover stored/repeated captured
-callbacks, returned branch closures, persistent array aliasing/building, large
+and instance dictionaries. Eleven observations cover stored/repeated captured
+callbacks, returned branch closures, persistent array aliasing/building, borrowed operands across later moves, large
 Nat, saturating subtraction, zero division and Unicode length/byte distinction.
 
 External imports/effects, concurrency, unqualified machine scalars/floats and

@@ -13,8 +13,8 @@ The guard reports 92 portable / 98 native modules. Cached rebuild 6509 ms, warm
 Rust milestone B now integrates the existing backend with the shared boundary,
 uniform closures, recursive-layout analysis, liveness-based moves/clones,
 copy-on-write arrays, structured output and a separate versioned runtime.
-It reuses the existing application plus ten focused runtime observations;
-the same 101 observations drive TS and Rust. Qualification is pending.
+It reuses the existing application plus eleven focused runtime observations;
+the same 102 observations drive TS and Rust. Qualification is pending.
 See docs/PSCV0_NATIVE_RUST.md and docs/PSCV0_NATIVE_CODEGEN.md.
 
 ---
@@ -762,7 +762,7 @@ constraints and fresh local identities. Shared elaboration is split into Basic,
 Binders, Application and the remaining Term dispatcher/control implementation.
 
 **Qualified in [Linux run 38151599948](https://github.com/dwijayuda/pskernel/actions/runs/38151599948)**
-at source commit `0c7aa371e6101b25c34ed689191c186107fd03b0`.
+at source commit `0c7aa371e6102b25c34ed689191c186107fd03b0`.
 Native Lean 4.35.0-rc4 compilation, the 28-case parser corpus (19 positive,
 9 negative), three accepted semantic programs and 11 phase-specific refusals,
 CLI emission, TypeScript 7.0.2 compilation and JavaScript execution all passed.
@@ -1183,7 +1183,7 @@ Work branch `psc0/pscv0-readable-selfhost-v1`. The actual compiler module `Ps.Sy
 
 ## Important correction: original native dependencies are not axiom-free
 
-Run `38112266804`, job `114390104605`, at `d510124ad9cbbaefab1dcabb51e2049352a5b6d4` checked the unchanged original declarations. The two parsers, two printers and four original translation APIs report exactly **[propext]**; PsTranslationError reports no axioms. The readable correspondence equations close with the same dependency. Prior attempts to remove it solely by changing proof tactics were misdirected.
+Run `38112266804`, job `114390104605`, at `d510224ad9cbbaefab1dcabb51e2049352a5b6d4` checked the unchanged original declarations. The two parsers, two printers and four original translation APIs report exactly **[propext]**; PsTranslationError reports no axioms. The readable correspondence equations close with the same dependency. Prior attempts to remove it solely by changing proof tactics were misdirected.
 
 The original empty-closure gate assumed the concrete compiler APIs had the same empty dependency closure as the isolated Except/Nat fixture. That assumption was wrong. It is explicitly replaced with **exact baseline closure + zero-axiom refactoring algebra**. See [PSCV0_MODULE_ASSUMPTION_AUDIT.md](docs/PSCV0_MODULE_ASSUMPTION_AUDIT.md).
 
@@ -1227,7 +1227,7 @@ Retained C0: source `2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a`, run38075437516, 
 Previous19-module bridge: implementation1ed94be7b1d3, run38098425773 Linux/Windows38 passed, overall failed dueRC4 setup; successful separate reference replay38108354566. Full ledger in docs/PSCV0_BRIDGE_CAPABILITIES.json applies to that exact old source only.
 
 First module run38110082840 at1d578cd6: printer produced anonymous binder inside higher-order type, owned reader refused. General portable arrow correction at364740af restored round trip.
-Runs38111345101 and38111578077: incomplete native proof scripts, not changed source behavior. Run38111837339 at8ccd191b: readable proofs closed, zero-axiom audit refused propext. Run38112058253 at58525ea3: delta proof still same dependency. Run38112266804 atd510124a: original dependency audit established the true baseline. All remain failed; no generated candidate claims. Last diagnostic artifact11691727987 SHA256 `6903cc573c49bd79419d775b3b8ad59cc546dc5d5554190f296a7c7e43516781`.
+Runs38111345102 and38111578077: incomplete native proof scripts, not changed source behavior. Run38111837339 at8ccd191b: readable proofs closed, zero-axiom audit refused propext. Run38112058253 at58525ea3: delta proof still same dependency. Run38112266804 atd510224a: original dependency audit established the true baseline. All remain failed; no generated candidate claims. Last diagnostic artifact11691727987 SHA256 `6903cc573c49bd79419d775b3b8ad59cc546dc5d5554190f296a7c7e43516781`.
 
 ## Continuation and limits
 

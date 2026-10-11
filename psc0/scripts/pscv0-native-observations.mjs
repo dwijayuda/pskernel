@@ -100,5 +100,6 @@ export const observations = [
   { name: "saturatedNatural", args: null, expected: 0n },
   { name: "zeroDivision", args: null, expected: 0n },
   { name: "unicodeLength", args: null, expected: 2n },
-  { name: "unicodeBytes", args: null, expected: 6n }
+  { name: "unicodeBytes", args: null, expected: 6n },
+  { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

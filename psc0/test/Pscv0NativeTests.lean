@@ -363,6 +363,7 @@ private def application : String :=
   "const classLocal: Nat := Classes.local\n" ++
   "const classStaticProjection: Nat := Classes.staticProjection\n" ++
   "const classAnonymous: Bool := Classes.anonymous\n" ++
+  "function borrowedBeforeMove(value: Nat): Nat := Nat.add(value, keep(value))\n" ++
   "structure Callback where { run: Nat -> Nat }\n" ++
   "function makeCallback(base: Nat): Callback := { run := fun value => Nat.add(base, value) }\n" ++
   "function selectCallback(flag: Bool, base: Nat): Nat -> Nat := match flag with { | true => fun value => Nat.add(base, value) | false => fun value => value }\n" ++

@@ -65,13 +65,15 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
         -- needless BigInt/array clone; owned updates can retain uniqueness.
         let mut statements := []
         let mut printed := []
+        let mut held := []
         for i in [:args.length] do
           let some arg := args[i]? | throw "PSCV0-RUST: intrinsic argument index"
-          let live := preserve ++ psRustFreeMany ctx (args.drop (i + 1))
+          let live := preserve ++ held ++ psRustFreeMany ctx (args.drop (i + 1))
           match arg with
           | .var name =>
               if ctx.locals.contains name && !psRustIntrinsicConsumes op i then
                 printed := name :: printed
+                held := name :: held
               else
                 let value ← emit live arg
                 let temporary := "__ps_arg_" ++ toString fuel ++ "_" ++ toString i
@@ -123,8 +125,8 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
               (psRustTailEnterAlias d ctx.locals ctx.aliases fuel name original,
                 alias.map (·.captures) |>.getD [])
         let body ← psRustExpr fuel { ctx with locals := name :: ctx.locals, aliases } preserve body
-        let captureDocs := captures.map fun (source, local) =>
-          PsDoc.text ("let " ++ local ++ " = " ++ psRustClonePrinted source ++ ";")
+        let captureDocs := captures.map fun (source, captureName) =>
+          PsDoc.text ("let " ++ captureName ++ " = " ++ psRustClonePrinted source ++ ";")
         return psDocBlock "" (captureDocs ++ [
           .append (.text ("let " ++ name ++ ": " ++ type ++ " = ")) (.append value (.text ";")), body])
     | .ifE condition yes no =>

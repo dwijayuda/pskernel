@@ -111,10 +111,78 @@ theorem forallPropProp_checked_set_denotation
   · simpa [interpProp] using (forallPropProp_member_prop V env)
   · exact forallPropProp_is_false V env
 
+
+/-- Second actual G4.3b source: forall (P : Prop), P -> P. -/
+def forallPropIdentitySource (propName proofName : KName) : KExpr :=
+  .forallE propName (.sort .zero)
+    (.forallE proofName (.bvar 0) (.bvar 1) .default) .default
+
+/-- Keep both nested imax nodes unnormalized in the source checker. -/
+def forallPropIdentitySourceType : KExpr :=
+  .sort (.imax (.succ .zero) (.imax .zero .zero))
+
+/-- The ACTUAL executing G4.3b inference accepts the nested Pi formula. -/
+theorem forallPropIdentity_actual_inference
+    (propName proofName : KName) :
+    inferClosedGeneralPi []
+      (forallPropIdentitySource propName proofName) =
+      .ok forallPropIdentitySourceType := by
+  rfl
+
+/--
+Actual source erases into exactly the same nested proposition-valued Pi
+syntax that the independent set interpretation evaluates. Erasure drops
+both binder names but preserves all de Bruijn dependencies.
+-/
+theorem forallPropIdentity_actual_erasure (ρ : KName → Nat)
+    (propName proofName : KName) :
+    eraseExpr ρ (forallPropIdentitySource propName proofName) =
+      some forallPropIdentityTerm.forget := by
+  rfl
+
+/--
+Nested symbolic imax(1, imax(0,0)) has valuation zero, but the
+executing checker makes no unproved full DefEq/normalization claim.
+-/
+theorem forallPropIdentity_type_erases_to_Prop (ρ : KName → Nat) :
+    eraseExpr ρ forallPropIdentitySourceType = some (.sort 0) := by
+  rfl
+
+/--
+A second genuine executable-checker-to-set-model theorem. The actual
+checker types the nested dependent Pi proposition and its output type
+erases to Prop. Its interpretation is true (whereas the previous
+forall(P:Prop),P source has a false interpretation). There is still
+NO typed proof-term interpretation or general kernel model theorem.
+-/
+theorem forallPropIdentity_checked_set_denotation
+    (V : Type u) [SetTheoryBasis V]
+    (propName proofName : KName)
+    (ρ : KName → Nat) (env : Nat → V) :
+    inferClosedGeneralPi []
+      (forallPropIdentitySource propName proofName) =
+      .ok forallPropIdentitySourceType ∧
+    eraseExpr ρ (forallPropIdentitySource propName proofName) =
+      some forallPropIdentityTerm.forget ∧
+    eraseExpr ρ forallPropIdentitySourceType = some (.sort 0) ∧
+    SetTheoryBasis.Mem
+      (interpProp V env forallPropIdentityTerm)
+      (interpProp V env (.sort 0)) ∧
+    interpProp V env forallPropIdentityTerm = propTrue V := by
+  refine ⟨forallPropIdentity_actual_inference propName proofName,
+    forallPropIdentity_actual_erasure ρ propName proofName,
+    forallPropIdentity_type_erases_to_Prop ρ, ?_, ?_⟩
+  · simpa [interpProp] using (forallPropIdentity_member_prop V env)
+  · exact forallPropIdentity_is_true V env
+
 #print axioms forallPropProp_actual_inference
 #print axioms forallPropProp_actual_erasure
 #print axioms forallPropProp_type_erases_to_Prop
 #print axioms forallPropProp_checked_body_prop
 #print axioms forallPropProp_checked_set_denotation
+#print axioms forallPropIdentity_actual_inference
+#print axioms forallPropIdentity_actual_erasure
+#print axioms forallPropIdentity_type_erases_to_Prop
+#print axioms forallPropIdentity_checked_set_denotation
 
 end PSKernelFast.Proof

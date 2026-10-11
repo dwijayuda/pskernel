@@ -8,11 +8,13 @@ Working branch: `research/pskernel-fast-clean-v3-20261011`. Source ancestor: V2 
 
 ## Current status (read before the chronological checkpoints)
 
-**Last independently inspected GREEN source:** `df800d5f390e36a0c807bd88397221adce488394`, G4.3 structural binder frame, [run 38110413629](https://github.com/dwijayuda/pskernel/actions/runs/38110413629), completed success, 45 native build jobs. This is NOT a general-purpose Lean checker.
+**Latest independently inspected GREEN *code* source:** `1a86eb4eefe24e37b0747ae0881e66467f39f0ec`, [GitHub Actions run 38115032789](https://github.com/dwijayuda/pskernel/actions/runs/38115032789), job `114398149274`: completed **success**, pinned Lean 4.35.0-rc4 commit `c29b6dd`, **47 Lake build jobs**, **19** independent V3 Lean files audited. All G1–G4.3 focused tests, including binder lifting, scope-certified current-context lookup, capture-avoiding substitution and malformed-input rejection, passed. [Exact G4.3 evidence](G4_BINDER_EVIDENCE.md) and [machine-readable record](G4_BINDER_EVIDENCE.json).
 
-**New follow-up candidate (CI UNCONFIRMED):** `c22863ba81911fb7c2996eeaf2021f5293b2a797` adds `KExpr.liftBVars` for the actual G3 expression constructors and the proposed `KExpr.liftBVars_structurallyValid` theorem. `9ddd8ed1f765cba00904f29470b53f1848224561` adds lambda/Pi/let/binder-domain regression tests. GitHub accepted both source commits, but the available commit status endpoint exposes no completed cloud CI result for them. **Do not label the new theorem compiling or tests passing until the exact completed Actions job has been inspected.** Source can require fixes.
+**Scope of correctness:** `KExpr.liftBVars_structurallyValid`, `ScopedFrame.rawDomainAt_scoped`, `KExpr.instantiateBVar_structurallyValid`, and `KExpr.instantiateBVar_top_scoped` compile. `scopedDomainAt` and `instantiateTopScoped` return dependent **structural-scope** certificates for the actual executable output. This does **not** prove type correctness, type-preserving substitution, full universes, WHNF/DefEq, kernel soundness, model consistency, declaration admission or JS/Wasm. There is still **no accepting proof API**.
 
-The new lifting operation is a **reference** structural operation, not a typed context lookup, certified substitution, generalized inference, DefEq or admission. Next: verify/fix cloud CI; add a context-depth-aware lifted lookup with independent scope proof; then substitution and checked inference with environment identity. Do not integrate G9 greenfield's unproved `TinyTyping` result as a trusted checker.
+**Previous unverified/failing candidates are superseded:** the `c22863ba` / `9ddd8ed1` lifting commits failed induction elaboration, corrected in green `29207f7`; substitution's first integrated test source `d719e1e` failed two proof-case reductions, corrected in green `58b8fa4`. Later source `1a86eb4` is verified. The job-level GitHub Actions collection, not commit combined-status or PR-only workflow runs, was inspected.
+
+**Next:** implement separately validated *typed* local context and a source-matched `Γ ⊢ e : A` checker. No structural certificate, untrusted catalog entry or inference-only cache entry may become a fully checked result. Resource-bounded substitution, full symbolic universe equality/`isGEq`, typed WHNF/DefEq, official Lean 4.35 differential conformance and an explicit soundness model remain open. Do not import the unrelated greenfield `TinyTyping` prototype as kernel authority.
 
 ## Completed document decisions
 
@@ -29,14 +31,13 @@ The first G1 term-store experiment consists of:
 
 **Evidence status at authoring:** source committed once the associated commit is created; CI outcome **not yet known**. No kernel checker/admission implementation, executable proof soundness theorem or measured speedup. Do not upgrade to passed/verified unless the completed cloud CI job and exact commit are inspected.
 
-## Next steps
+## Next steps (after independently green G4.3)
 
-1. Inspect workflow outcomes and fix any real Lean compiler errors in the coherent term-store slice; no proof shortcut.
-2. Prove exact interning/encoding/scope invariants on the current implementation (not an unrelated reference model).
-3. Add exact Name/Level/Expr representations and scope/level checks toward full Lean 4.35 syntax.
-4. Build two comparable WHNF engines (eager DAG vs lazy closure) behind the same input/output contract and profile on controlled corpus.
-5. Only after correct reduction/typing gates, add a checked inference/DefEq engine and declaration admission; keep fail-closed error types.
-6. Track actual source LOC, trusted runtime dependencies, CI, mem/RSS and the current open formal-obligation ledger on every milestone.
+1. Define exact checked binder-domain formation and protect a new typed local context. Build actual dependent `Sort`/bound-variable/`Pi` inference with explicit fully-checked and infer-only separation; no upgrading scoped raw terms into checked types.
+2. Add official Lean 4.35 positive/negative differential tests at each newly supported typed rule; state exact unsupported/invalid/resource-error outcomes.
+3. Complete symbolic `Level.isEquiv`/`isGEq` and safe typed WHNF/DefEq, including binder shifts, proof irrelevance and independent positive-result soundness obligations.
+4. Add protected immutable checked constant environment, safety/opacity/axiom policy; only later atomic declaration admission after versioned inductive/quotient/primitive rules are qualified.
+5. Strengthen code/proof audits, bounded-resource behavior, benchmarks on REAL kernel inference and DefEq; preserve existing branches and continue cloud-only CI.
 
 ## Operating rules
 
@@ -198,3 +199,14 @@ Introduced independent `ScopedContext.lean`, proof-carrying indexed `ScopedFrame
 **Validated source:** `df800d5f390e36a0c807bd88397221adce488394`; [CI run 38110413629](https://github.com/dwijayuda/pskernel/actions/runs/38110413629), job `114384612773`: **PASS**. Pinned Lean 4.35.0-rc4 commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; **45 native build targets**, independent import-fence audit of **18 V3 Lean source modules**, all G1 through G4.3 focused suites passed. New `ScopedFrame` index includes structural proof at each binder push; compiling theorems `rawDomainAt_top` and `extend_depth` validate exact stored lookup and depth increment. Source and tests are independent of the old PSKernel/proof branch. See [G4_SCOPED_EVIDENCE.md](G4_SCOPED_EVIDENCE.md).
 
 **Boundary:** only structural scopes; no dependent type inference from a raw bound domain (which requires lifting and controlled context), no checked environment, DefEq, model/consistency theorem, theorem admission, Mathlib replay or real kernel benchmarking. This is the **latest verified architectural slice**. Next actual work is in the updated [G4_CONTEXT_PLAN.md](G4_CONTEXT_PLAN.md): first exact capture-avoiding index shifting/instantiation under the new KExpr constructors, then certified lookup/type inference and environment/model proofs. Do not revive constraints from old metatheory. Source evidence on `df800d5f` stays pinned even if later docs/policy commits trigger another CI run.
+
+## Current follow-up G4.3 certified binder operations — independently green (October 11, 2026)
+
+- Old last-green source `df800d5`, [run 38110413629](https://github.com/dwijayuda/pskernel/actions/runs/38110413629): only the structural binder frame and raw insertion-depth observations (45 build jobs).
+- `29207f7fab5277822817423f77ce600257f64039`, [run 38114530408](https://github.com/dwijayuda/pskernel/actions/runs/38114530408): after diagnosing the generalized induction-argument order and Nat association issues, the implementation-specific `KExpr.liftBVars_structurallyValid` theorem compiled and capture-avoidance regressions ran (45 build jobs). No theorem weakening or legacy import.
+- `2648b992073b88b5dca9f8b6d867a988d66433c0`, [run 38114692336](https://github.com/dwijayuda/pskernel/actions/runs/38114692336): scope-certified lookup at original/current binder depths compiled and positive/negative nested-binder cases passed (45 build jobs).
+- `58b8fa490fb724c43da66e651e0fb691320b0268`, [run 38114942215](https://github.com/dwijayuda/pskernel/actions/runs/38114942215): reference capture-avoiding `KExpr.instantiateBVar` and universal structural-scope theorem compiled; lambda/Pi/let/metadata/projection tests passed (47 build jobs). Prior `d719e1e` failed only the proof's Sort/Const depth-independent simplification; runtime substitution unchanged.
+- **Latest qualified `1a86eb4eefe24e37b0747ae0881e66467f39f0ec`, [run 38115032789](https://github.com/dwijayuda/pskernel/actions/runs/38115032789), job `114398149274`: PASS, 47 build jobs, 19 source files audited.** Strict `KExpr.instantiateTopScoped` checks both inputs and emits the exact scope-certified output or `malformedBody`/`malformedReplacement`; negative tests include escaped bvars and undeclared universe parameters. No proof-admission endpoint exists.
+- The docs and governance commits after this source checkpoint do not change this already validated source. If a later *source/policy* change occurs, record its separately completed cloud CI outcome before promoting it.
+
+The **next engineering boundary** is checked typing judgments and protected typed contexts, **not** additional untyped beta benchmark ratio chasing. Source/CI evidence is in [G4_BINDER_EVIDENCE.md](G4_BINDER_EVIDENCE.md), with machine-readable [G4_BINDER_EVIDENCE.json](G4_BINDER_EVIDENCE.json).

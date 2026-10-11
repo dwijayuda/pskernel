@@ -182,6 +182,11 @@ def psErasureNatRecursor : PsRuntimeInductiveInfo :=
           (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil))
         List.nil)) 0
 
+def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
+  PsRuntimeInductiveInfo.mk "Bool" psBoolName (psNameAppendStr psBoolName "rec") 0 []
+    [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [],
+     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 []] 0
+
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
     PsErasureScope :=
@@ -192,7 +197,9 @@ def psErasureScopeEmpty
     erasedLocals := []
     declarationNames := psErasureDeclarationNameIndex declarationNames
     runtimeConstructors := PsErasureNameIndex.empty
-    runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor
+    runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo
+      (psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor)
+      (psNameAppendStr psBoolName "rec") psErasureBoolRecursor
     runtimeStructures := PsErasureNameIndex.empty
     runtimeStructureConstructors := PsErasureNameIndex.empty
     runtimeExpressions := []

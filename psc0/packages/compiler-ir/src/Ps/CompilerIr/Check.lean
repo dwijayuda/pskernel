@@ -545,6 +545,8 @@ def psIrCheckExpression (options : PsIrCheckOptions) (module : PsVerifiedIrModul
     (Nat.succ state.expressionCount) state.findingCount state.findingsRev state.traversalComplete;
   let next := psIrCheckSchedule counted [PsIrCheckTask.expect scope expected allowScheme];
   match expr with
+  | PsVerifiedIrExpr.unreachable type =>
+      psIrCheckPush (psIrCheckAnnotation options module next scope type) (PsIrCheckValue.mono type)
   | PsVerifiedIrExpr.literal literal =>
       match psIrCheckLiteralType literal with
       | Except.error issue => psIrCheckPush (psIrCheckRecordIssue options next scope issue) PsIrCheckValue.invalid

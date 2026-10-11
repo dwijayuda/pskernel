@@ -59,6 +59,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.LocalContext,
     `Ps.Environment.Instances,
     `Ps.Environment.Resolve,
+    `Ps.Environment.Logic,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.SelfHostProd
@@ -140,6 +141,7 @@ lean_lib PsMeta where
   roots := #[
     `Ps.Meta.LevelContext,
     `Ps.Meta.Context,
+    `Ps.Meta.Iota,
     `Ps.Meta.Reduce,
     `Ps.Meta.Unify,
     `Ps.Meta.SynthInstance,
@@ -154,6 +156,8 @@ lean_lib PsElab where
     `Ps.Elab.Basic,
     `Ps.Elab.Binders,
     `Ps.Elab.Application,
+    `Ps.Elab.Refinement,
+    `Ps.Elab.Equality,
     `Ps.Elab.Match,
     `Ps.Elab.Term,
     `Ps.Elab.Recursion,

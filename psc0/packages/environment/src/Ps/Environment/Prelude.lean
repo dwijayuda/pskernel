@@ -1,5 +1,5 @@
 import Ps.Core.Builtin
-import Ps.Environment.Basic
+import Ps.Environment.Logic
 
 def psPreludeAdd
     (environment : PsEnvironment)
@@ -900,7 +900,7 @@ def psOptParamDeclaration : PsDeclaration :=
     (.lam alpha sort (.lam value (.bvar 0) (.bvar 1) .explicit) .explicit)
 
 def psBootstrapPreludeEnvironment : PsEnvironment :=
-  psPreludeAdd
+  psLogicPrelude <| psPreludeAdd
     (psPreludeAdd psPreludeEnv19
       (PsDeclaration.axiomDecl psIteName [psPreludeUName] psPreludeIteType))
     psOptParamDeclaration

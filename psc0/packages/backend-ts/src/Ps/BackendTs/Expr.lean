@@ -32,6 +32,7 @@ def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :
                 | Prod.mk bindings body =>
                     if psListAny bindingUses bindings then true else smaller body name;
         match expr with
+        | .unreachable _ => false
         | .literal _ => false
         | .var value => psStringEq value name
         | .intrinsic _ _ arguments => psListAny uses arguments
@@ -522,6 +523,7 @@ def psTsEmitExprWithFuel
     fun (expr : PsVerifiedIrExpr) =>
       let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
       match expr with
+      | .unreachable _ => Except.ok "((): never => { throw new Error(\"unreachable match branch\"); })()"
       | .literal literal =>
           psTsEmitLiteral literal
       | .var name =>

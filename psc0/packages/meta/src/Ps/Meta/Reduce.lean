@@ -1,3 +1,4 @@
+import Ps.Meta.Iota
 import Ps.Core.Equality
 import Ps.Core.Subst
 import Ps.Core.LevelSubst
@@ -78,6 +79,7 @@ def psWhnfWithFuel
         let core := psWhnfCoreWithFuel metaContext localContext remaining expr;
         match core with
         | .constE name levels =>
+            if psNameEq name psNatZeroName then .lit (.natural 0) else
             match psEnvironmentFind environment name with
             | none => core
             | some declaration =>
@@ -93,11 +95,20 @@ def psWhnfWithFuel
                     else
                       core
         | .app fn arg =>
-            let reducedFn := smaller fn;
-            if psExprAlphaEq reducedFn fn then
-              core
-            else
-              smaller (PsExpr.app reducedFn arg)
+            let natural := match fn with
+              | .constE name [] =>
+                if psNameEq name psNatSuccName then
+                  match smaller arg with
+                  | .lit (.natural n) => some (PsExpr.lit (.natural (n + 1)))
+                  | _ => none
+                else none
+              | _ => none;
+            match natural.orElse (fun _ => psReduceIota smaller environment core) with
+            | some value => smaller value
+            | none =>
+              let reducedFn := smaller fn;
+              if psExprAlphaEq reducedFn fn then core
+              else smaller (PsExpr.app reducedFn arg)
         | _ => core
 
 def psWhnf

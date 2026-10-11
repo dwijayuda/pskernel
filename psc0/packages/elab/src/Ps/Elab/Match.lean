@@ -1,69 +1,5 @@
-import Ps.Elab.Binders
+import Ps.Elab.Equality
 import Ps.Elab.Application
-
-def psExprApplyManyWorker
-    (arguments : List PsExpr)
-    (fn : PsExpr) : PsExpr :=
-  match arguments with
-  | [] => fn
-  | argument :: rest =>
-      psExprApplyManyWorker rest (PsExpr.app fn argument)
-
-def psExprApplyMany
-    (fn : PsExpr)
-    (arguments : List PsExpr) :
-    PsExpr :=
-  psExprApplyManyWorker arguments fn
-
-structure PsExprAppView where
-  head : PsExpr
-  args : List PsExpr
-
-def psExprAppViewAccWorker
-    (expr : PsExpr)
-    (args : List PsExpr) : PsExprAppView :=
-  match expr with
-  | .app fn argument =>
-      psExprAppViewAccWorker fn (List.cons argument args)
-  | _ =>
-      {
-        head := expr
-        args := args
-      }
-
-def psExprAppViewAcc
-    (expr : PsExpr)
-    (args : List PsExpr) : PsExprAppView :=
-  psExprAppViewAccWorker expr args
-
-def psExprAppView (expr : PsExpr) : PsExprAppView :=
-  psExprAppViewAcc expr []
-
-def psExprHasConst
-    (target : PsName)
-    (expr : PsExpr) : Bool :=
-  match expr with
-  | .constE name _ => psNameEq name target
-  | .app fn argument =>
-      psElabBoolOr
-        (psExprHasConst target fn)
-        (psExprHasConst target argument)
-  | .lam _ type body _ =>
-      psElabBoolOr
-        (psExprHasConst target type)
-        (psExprHasConst target body)
-  | .forallE _ type body _ =>
-      psElabBoolOr
-        (psExprHasConst target type)
-        (psExprHasConst target body)
-  | .letE _ type value body =>
-      psElabBoolOr
-        (psExprHasConst target type)
-        (psElabBoolOr
-          (psExprHasConst target value)
-          (psExprHasConst target body))
-  | .proj _ _ value => psExprHasConst target value
-  | _ => false
 
 def psMatchNameEqTarget
     (target : PsName)
@@ -210,16 +146,7 @@ def psElabPrepareMatchAlternativesWorker
   match entries with
   | [] =>
       fun (alternativesRev : List PsElabMatchAlternative) =>
-        let alternatives :=
-          psElabMatchAlternativeListReverse alternativesRev;
-        let exhaustive :=
-          psElabMatchAlternativesCoverConstructors
-            alternatives
-            inductiveInfo.constructors;
-        if exhaustive then
-          Except.ok alternatives
-        else
-          Except.error PsElabError.matchNonExhaustive
+        Except.ok (psElabMatchAlternativeListReverse alternativesRev)
   | entry :: rest =>
       let smaller :
           List PsElabMatchAlternative ->
@@ -379,20 +306,16 @@ def psSyntaxNameListHasDuplicate
         else
           psSyntaxNameListHasDuplicate rest
 
--- A motive and its refinement map are shared by every branch. Only distinct
--- local indices can be generalized automatically; compound/repeated indices
--- keep a constant motive and cannot establish a structural recursion plan.
+-- One motive plan owns direct index abstraction, dependent context reversion,
+-- and equality constraints for fixed, compound or repeated parent indices.
 structure PsElabMatchPlan where
   motive : PsExpr
   indices : List (Nat × Nat)
   majorId : Option Nat
-
-def psElabSubstituteLocals (values : List (Nat × PsExpr)) (term : PsExpr) : PsExpr :=
-  values.foldl (fun body entry => psExprInstantiate1
-    (psExprAbstractFVar entry.fst body) entry.snd) term
-
-def psElabExprContainsLocal (id : Nat) (term : PsExpr) : Bool :=
-  !(psExprAlphaEq term (psExprAbstractFVar id term))
+  auxiliary : List PsElabDependentLocal
+  generalized : List PsElabDependentLocal
+  constraints : List PsExpr
+  arguments : List PsExpr
 
 def psElabMatchIndexMap (parameters indices : List PsExpr) : List (Nat × Nat) :=
   (indices.zipIdx).filterMap fun entry =>
@@ -411,6 +334,8 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
   let opened ← psElabOpenCoreTelescope 4096 context cursor (some info.numIndices)
   let freshIndices := psElabBinderArguments opened.bindersRev
   let indexMap := psElabMatchIndexMap parameters indices
+  let constrained := indexMap.length != indices.length
+  let indexMap := if constrained then [] else indexMap
   let substitutions := indexMap.filterMap fun entry =>
     (freshIndices[entry.snd]?).map (fun value => (entry.fst, value))
   let majorType := psExprApplyMany (.constE info.name levels) (parameters ++ freshIndices)
@@ -419,34 +344,40 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
     | .fvar id => if parameters.any (psElabExprContainsLocal id) ||
         indices.any (psElabExprContainsLocal id) then none else some id
     | _ => none
-  let substitutions := match majorId with
-    | none => substitutions
-    | some id => substitutions ++ [(id, .fvar pushed.id)]
-  let body := psElabSubstituteLocals substitutions expected
+  let auxiliary := if !constrained then [] else
+    context.localContext.declarations.reverse.filterMap fun declaration =>
+      let id := psLocalDeclId declaration
+      if indices.any (psElabExprContainsLocal id) && !(parameters.any (psElabExprContainsLocal id)) then
+        some (PsElabDependentLocal.mk
+          (PsElabTypedBinder.mk id (psLocalDeclUserName declaration) (psLocalDeclType declaration) .explicit) none)
+      else none
+  let roots := (if constrained then auxiliary.map (fun local => local.binder.id) else indexMap.map Prod.fst) ++ majorId.toList
+  let generalized := psElabDependentLocals context roots []
+  if constrained then
+    match majorId with
+    | some id =>
+      if psElabExprContainsLocal id expected ||
+          generalized.any (fun local => psElabExprContainsLocal id local.binder.type) then
+        throw (.refinement "fixed-index matching with major-dependent result/context requires heterogeneous transport")
+    | none => pure ()
+  let body := psElabCloseDependentType generalized expected
+  let body := if constrained then body else
+    psElabSubstituteLocals (substitutions ++ majorId.toList.map (fun id => (id, .fvar pushed.id))) body
+  let equations ← if !constrained then pure [] else
+    (indices.zip freshIndices).mapM fun entry => do
+      let type ← (psInferType context.environment context.metaContext context.localContext entry.fst).mapError PsElabError.infer
+      let level ← psElabExpressionSort context type
+      return (psLogicEq level type entry.snd entry.fst, psLogicRefl level type entry.fst)
+  let body := (equations.zipIdx).foldr (fun entry body =>
+    psLogicPi (pushed.id + 1 + entry.snd) "_indexEq" entry.fst.fst body) body
+  let body := psElabCloseDependentType auxiliary body
   let motive := psCloseElabLambdaBinders context.metaContext opened.bindersRev
     (.lam (psRootName "_match") majorType (psExprAbstractFVar pushed.id body) .explicit)
-  return { motive, indices := indexMap, majorId }
-
--- Preserve outer local declarations. Refinement creates fresh let aliases only
--- for names not shadowed by a pattern; closing inlines those aliases. Dependent
--- outer hypotheses are never silently assigned a different type.
-structure PsElabMatchAliases where
-  context : PsElabContext
-  valuesRev : List (Nat × PsExpr)
-
-def psElabMatchAlias (state : PsElabMatchAliases) (entry : Nat × PsExpr) :
-    Except PsElabError PsElabMatchAliases := do
-  let some original := psLocalFindById state.context.localContext entry.fst
-    | throw .structuralRecursionInternal
-  let name := psLocalDeclUserName original
-  let some visible := psLocalFindUser state.context.localContext name | return state
-  if psLocalDeclId visible != entry.fst then return state
-  let type ← (psInferType state.context.environment state.context.metaContext
-    state.context.localContext entry.snd).mapError PsElabError.infer
-  let pushed := psLocalPushLet state.context.localContext name type entry.snd
   return {
-    context := psElabContextWithLocal state.context pushed.context
-    valuesRev := (pushed.id, entry.snd) :: state.valuesRev }
+    motive, indices := indexMap, majorId, auxiliary, generalized
+    constraints := equations.map Prod.fst
+    arguments := psElabDependentArguments auxiliary ++ equations.map Prod.snd ++
+      psElabDependentArguments generalized }
 
 def psElabMatchFields (names : List PsSyntaxName) (context : PsElabContext)
     (cursor : PsExpr) (bindersRev : List PsElabTypedBinder := []) :
@@ -485,24 +416,40 @@ def psElabMatchHypotheses (fields : List PsElabTypedBinder) (recursiveFields : L
       (psExprInstantiate1 pi.body (.fvar pushed.id))
       (PsElabTypedBinder.mk pushed.id name pi.domain pi.binder :: bindersRev)
 
+def psElabMatchAnonymousFields (context : PsElabContext) (type : PsExpr) (count : Nat) :
+    Except PsElabError PsElabOpenTelescope := do
+  let opened ← psElabOpenCoreTelescope 4096 context type (some count)
+  let ids := opened.bindersRev.map (fun binder => binder.id)
+  let name := fun id => psNameAppendNum (psRootName "_matchField") id
+  let declarations := opened.context.localContext.declarations.map fun declaration =>
+    match declaration with
+    | .binding id original type binder =>
+      .binding id (if ids.contains id then name id else original) type binder
+    | _ => declaration
+  return { opened with
+    context := psElabContextWithLocal opened.context { opened.context.localContext with declarations }
+    bindersRev := opened.bindersRev.map (fun binder => { binder with name := name binder.id }) }
+
 structure PsElabMatchMinorResult where
   context : PsElabContext
   term : PsExpr
 
 def psElabMatchMinor (elaborate : PsElaborator) (context : PsElabContext)
     (info : PsInductiveInfo) (levels : List PsLevel) (parameters : List PsExpr)
-    (plan : PsElabMatchPlan) (alternative : PsElabMatchAlternative)
+    (plan : PsElabMatchPlan) (ctorName : PsName) (alternative : Option PsElabMatchAlternative)
     (minorType : PsExpr) : Except PsElabError PsElabMatchMinorResult := do
-  let some ctor := psEnvironmentFindConstructor context.environment alternative.constructorName
-    | throw (.matchConstructorUnknown alternative.constructorName)
-  let (names, span) := match alternative.pattern with
-    | .constructor _ names span => (some names, span)
-    | .wildcard span | .bool _ span => (none, span)
-  let names := names.getD ((List.range ctor.numFields).map fun index =>
-    PsSyntaxName.mk ["_matchField" ++ toString index] span)
-  if names.length != ctor.numFields || psSyntaxNameListHasDuplicate names then
-    throw (.matchConstructorArity ctor.name)
-  let fields ← psElabMatchFields names context minorType
+  let some ctor := psEnvironmentFindConstructor context.environment ctorName
+    | throw (.matchConstructorUnknown ctorName)
+  let names := alternative.bind fun alternative =>
+    match alternative.pattern with
+    | .constructor _ names _ => some names
+    | _ => none
+  let fields ← match names with
+    | none => psElabMatchAnonymousFields context minorType ctor.numFields
+    | some names =>
+      if names.length != ctor.numFields || psSyntaxNameListHasDuplicate names then
+        throw (.matchConstructorArity ctor.name)
+      psElabMatchFields names context minorType
   let values := psElabBinderArguments fields.bindersRev
   let constructor := psExprApplyMany (.constE ctor.name levels) (parameters ++ values)
   let constructorType ← (psInferType fields.context.environment fields.context.metaContext
@@ -518,10 +465,23 @@ def psElabMatchMinor (elaborate : PsElaborator) (context : PsElabContext)
   let aliases ← substitutions.foldlM psElabMatchAlias { context := fields.context, valuesRev := [] }
   let hypotheses ← psElabMatchHypotheses fields.bindersRev.reverse ctor.recursiveFields
     aliases.context fields.body
-  let body ← elaborate (psElabContextAfterStructuralFields hypotheses.context)
-    alternative.body (some hypotheses.body)
+  let auxiliary ← psElabOpenDependents plan.auxiliary {
+    context := hypotheses.context, body := hypotheses.body, bindersRev := []
+    aliasesRev := [], replacements := substitutions }
+  let finish := fun context target => do
+    let some alternative := alternative | throw PsElabError.matchNonExhaustive
+    let generalized ← psElabOpenDependents plan.generalized {
+      context, body := target, bindersRev := [], aliasesRev := []
+      replacements := auxiliary.replacements }
+    let body ← elaborate (psElabContextAfterStructuralFields generalized.context)
+      alternative.body (some generalized.body)
+    return PsElabTermResult.mk (psElabLeaveScope context body.context)
+      (psElabCloseDependents generalized body.context.metaContext body.term) target
+  let flexible := auxiliary.bindersRev.map (fun binder => binder.id) ++ fields.bindersRev.map (fun binder => binder.id)
+  let body ← psElabSolveIndexConstraints 256 plan.constraints.length flexible (hypotheses.bindersRev.map (fun binder => binder.id))
+    finish auxiliary.context auxiliary.body
   let value := psElabSubstituteLocals aliases.valuesRev
-    (psMetaInstantiate body.context.metaContext body.term)
+    (psElabCloseDependents auxiliary body.context.metaContext body.term)
   let closed := psCloseElabLambdaBinders body.context.metaContext fields.bindersRev
     (psCloseElabLambdaBinders body.context.metaContext hypotheses.bindersRev value)
   return { context := psElabLeaveScope context body.context, term := closed }
@@ -538,10 +498,10 @@ def psElabMatchMinors (elaborate : PsElaborator) (info : PsInductiveInfo)
   match constructors with
   | [] => return { context, minors := [] }
   | name :: rest =>
-    let some alternative := psElabMatchAlternativeFind name alternatives | throw .matchNonExhaustive
+    let alternative := psElabMatchAlternativeFind name alternatives
     let pi ← (psInferEnsureForall context.environment context.metaContext
       context.localContext cursor).mapError PsElabError.infer
-    let minor ← psElabMatchMinor elaborate context info levels parameters plan alternative pi.domain
+    let minor ← psElabMatchMinor elaborate context info levels parameters plan name alternative pi.domain
     let tail ← psElabMatchMinors elaborate info levels parameters plan alternatives rest
       minor.context (psExprInstantiate1 pi.body minor.term)
     return { context := tail.context, minors := minor.term :: tail.minors }
@@ -601,5 +561,5 @@ def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
   let minors ← psElabMatchMinors elaborate info levels parameters plan alternatives info.constructors
     minorContext cursor
   let term := psExprApplyMany (.constE recursorName recursorLevels)
-    (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term])
+    (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term] ++ plan.arguments)
   psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)

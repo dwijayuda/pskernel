@@ -515,6 +515,9 @@ def psSh1TargetStep
                 [PsSh1TargetTask.name (psSh1TargetAt scope "constructor") PsSh1TargetNameRole.quotedProperty name,
                  PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,
                  PsSh1TargetTask.expressionFields scope remaining fields 0])
+          | .unreachable type =>
+              Except.ok (psSh1TargetSchedule state
+                [PsSh1TargetTask.runtimeType scope 4096 type])
           | .matchE _ typeArguments scrutinee alternatives =>
               Except.ok (psSh1TargetSchedule state
                 [PsSh1TargetTask.runtimeTypes scope 4096 typeArguments 0,

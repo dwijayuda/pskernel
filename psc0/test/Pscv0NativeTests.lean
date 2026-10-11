@@ -208,6 +208,36 @@ private def application : String :=
   "  | EvenChain.step k next => Nat.succ(chainSize(Nat.succ(k), next))\n" ++
   "  | EvenChain.single => n\n" ++
   "}\n" ++
+  "function contextCopy{A: Type}(n: Nat, values: Vector(A, n), other: Vector(A, n)): Vector(A, n) := match values with {\n" ++
+  "  | Vector.nil => other\n" ++
+  "  | Vector.cons k head tail => other\n" ++
+  "}\n" ++
+  "function localCopy(n: Nat, values: Vector(Nat, n)): Vector(Nat, n) :=\n" ++
+  "  let other: Vector(Nat, n) := values\n" ++
+  "  match values with { | Vector.nil => other | Vector.cons k head tail => other }\n" ++
+  "function head{A: Type}(n: Nat, values: Vector(A, Nat.succ(n))): A := match values with {\n" ++
+  "  | Vector.cons k head tail => head\n" ++
+  "}\n" ++
+  "function tail{A: Type}(n: Nat, values: Vector(A, Nat.succ(n))): Vector(A, n) := match values with {\n" ++
+  "  | Vector.cons k head tail => tail\n" ++
+  "}\n" ++
+  "function fixedTail(values: Vector(Nat, 2)): Vector(Nat, 1) := match values with {\n" ++
+  "  | Vector.cons k head tail => tail\n" ++
+  "}\n" ++
+  "function zeroOnly(values: Vector(Nat, 0)): Nat := match values with { | Vector.nil => 85 }\n" ++
+  "inductive Same: Nat -> Nat -> Type where { | same(n: Nat): Same(n, n) }\n" ++
+  "function impossible(value: Same(0, 1)): Nat := match value with { }\n" ++
+  "inductive Flag: Bool -> Type where { | yes: Flag(true) | no: Flag(false) }\n" ++
+  "function trueOnly(value: Flag(true)): Nat := match value with { | Flag.yes => 91 }\n" ++
+  "function boolBranch(value: Bool): Nat := match value with { | true => 93 | false => 94 }\n" ++
+  "theorem contextProof(P: Nat -> Prop, n: Nat, proof: P(n)): P(n) := match n with {\n" ++
+  "  | Nat.zero => proof\n" ++
+  "  | Nat.succ k => proof\n" ++
+  "}\n" ++
+  "function replace{A: Type}(n: Nat, values: Vector(A, n), other: Vector(A, n)): Vector(A, n) := match values with {\n" ++
+  "  | Vector.nil => other\n" ++
+  "  | Vector.cons k head tail => Vector.cons(k, head, replace(k, tail, tail))\n" ++
+  "}\n" ++
   "end Indexed\n" ++
   "const indexedAnswer: Nat := Indexed.peek(Nat.succ(0), Indexed.one, 0)\n" ++
   "const indexedEmpty: Nat := Indexed.peek(0, Indexed.Vector.nil, 72)\n" ++
@@ -216,7 +246,15 @@ private def application : String :=
   "const indexedRebuilt: Nat := Indexed.peek(Nat.succ(Nat.succ(0)), Indexed.rebuild(Nat.succ(Nat.succ(0)), Indexed.two), 0)\n" ++
   "const indexedCount: Nat := Indexed.count(Nat.succ(Nat.succ(0)), Indexed.two, 80)\n" ++
   "const indexedCopiedCell: Nat := Indexed.readCell(3, true, Indexed.copyCell(3, true, Indexed.Cell.cell(3, true, 76)))\n" ++
-  "const indexedChainSize: Nat := Indexed.chainSize(Nat.succ(Nat.succ(0)), Indexed.chained)\n"
+  "const indexedChainSize: Nat := Indexed.chainSize(Nat.succ(Nat.succ(0)), Indexed.chained)\n" ++
+  "const contextAnswer: Nat := Indexed.head(1, Indexed.contextCopy(2, Indexed.two, Indexed.two))\n" ++
+  "const contextLetAnswer: Nat := Indexed.head(1, Indexed.localCopy(2, Indexed.two))\n" ++
+  "const refinedTailAnswer: Nat := Indexed.head(0, Indexed.tail(1, Indexed.two))\n" ++
+  "const fixedTailAnswer: Nat := Indexed.head(0, Indexed.fixedTail(Indexed.two))\n" ++
+  "const zeroCaseAnswer: Nat := Indexed.zeroOnly(Indexed.Vector.nil)\n" ++
+  "const trueCaseAnswer: Nat := Indexed.trueOnly(Indexed.Flag.yes)\n" ++
+  "const boolCaseAnswer: Nat := Indexed.boolBranch(false)\n" ++
+  "const dependentRecursionAnswer: Nat := Indexed.head(1, Indexed.replace(2, Indexed.two, Indexed.two))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -271,7 +309,11 @@ private def semanticCases : IO Unit := do
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): Nat := match v with { | V.nil => 0 | V.cons k tail => bad(Nat.succ(k), tail) }\n" },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n), other: V(n)): Nat := match v with { | V.nil => 0 | V.cons k tail => bad(k, tail, other) }\n" },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction captured(n: Nat, v: V(n)): Nat := V.rec(fun k value => Nat, n, fun k tail ih => ih, v)\n", emit := true },
-    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): V(n) := match v with { | V.nil => V.nil | V.cons k tail => tail }\n" }]
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): V(n) := match v with { | V.nil => V.nil | V.cons k tail => tail }\n" },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): Nat := match v with { | V.cons k tail => 0 }\n" },
+    { source := "inductive Same: Nat -> Nat -> Type where { | same(n: Nat): Same(n, n) }\nfunction bad(n: Nat, value: Same(n, n)): Nat := match value with { }\n" },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(v: V(1)): V(1) := match v with { | V.cons k tail => tail }\n" }]
+
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate",
@@ -281,7 +323,8 @@ private def semanticCases : IO Unit := do
       some "parse", some "elaborate", some "elaborate",
       some "parse", some "parse", some "parse",
       some "elaborate", some "elaborate", some "elaborate", some "elaborate",
-      some "elaborate", some "elaborate", some "erase", some "elaborate"]
+      some "elaborate", some "elaborate", some "erase", some "elaborate",
+      some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -292,7 +335,8 @@ private def semanticCases : IO Unit := do
     "PSCV0-DATA: constructor parameters must remain uniform",
     "PSCV0-DATA: indexed constructor requires a result type",
     "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH",
-    "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "PSCV0-ERASURE", "PSCV0-TYPE-MISMATCH"]
+    "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "PSCV0-ERASURE", "PSCV0-TYPE-MISMATCH",
+    "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -319,7 +363,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 36 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 39 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

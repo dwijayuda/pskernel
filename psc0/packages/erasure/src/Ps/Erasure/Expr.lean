@@ -1,4 +1,5 @@
 import Ps.Erasure.Recursion
+import Ps.CompilerIr.CheckTypes
 
 structure PsErasureAppliedArguments where
   typeArgumentsRev : List PsVerifiedIrType
@@ -1785,7 +1786,12 @@ def psEraseRuntimeRecursorApplication
                                   [] with
                             | Except.error error => Except.error error
                             | Except.ok alternatives =>
-                                if psNameEq inductiveInfo.coreName psNatName then
+                                if psNameEq inductiveInfo.coreName psBoolName then
+                                  match alternatives with
+                                  | [(_, [], onFalse), (_, [], onTrue)] =>
+                                    Except.ok (some (.ifE scrutinee onTrue onFalse))
+                                  | _ => Except.error PsErasureError.binderMismatch
+                                else if psNameEq inductiveInfo.coreName psNatName then
                                   let majorReference : PsVerifiedIrExpr :=
                                     match natMajorName with
                                     | Option.none => scrutinee
@@ -1955,7 +1961,9 @@ def psErasureSpecialEntry
     (scope : PsErasureScope) (name : PsName) : Option PsErasureSpecialEntry :=
   let text := psNameToString name;
   let named : String -> Bool := fun (candidate : String) => psStringEq text candidate;
-  if psListAny named
+  if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
+  else if named "False.elim" then some (PsErasureSpecialEntry.mk 2 false)
+  else if psListAny named
       ["Int.ofNat", "Int.repr", "Int.negSucc", "Int.neg", "Nat.succ",
         "Bool.not", "Char.ofNat", "Char.toNat", "String.Pos.Raw.mk",
         "String.Pos.Raw.byteIdx", "String.singleton", "String.Internal.length",
@@ -2137,6 +2145,29 @@ def psEraseCompleteSpecialWithFuel
                                 state.bindingsRev)
           | _ => Except.error PsErasureError.unsupportedApplication
 
+-- Proof transports preserve the erased representation. Contradictory branches
+-- become a typed unreachable node, retaining exhaustive runtime match shape.
+def psEraseLogicalApplication
+    (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
+    (environment : PsEnvironment) (scope : PsErasureScope) (view : PsErasureAppView) :
+    Except PsErasureError (Option PsVerifiedIrExpr) := do
+  let .constE name _ := view.head | return none
+  if psNameEq name (psNameAppendStr (psRootName "False") "elim") then
+    let some target := view.args[0]? | throw .unsupportedApplication
+    let type ← psEraseRuntimeType environment scope target
+    return some (.unreachable type)
+  if !psNameEq name (psNameAppendStr psEqName "rec") then return none
+  let some minor := view.args[3]? | throw .unsupportedApplication
+  let headType ← (psInferType environment psMetaEmpty scope.localContext view.head).mapError (fun _ => PsErasureError.unsupportedApplication)
+  let target ← psErasureApplyCoreType environment scope headType view.args
+  let source ← (psInferType environment psMetaEmpty scope.localContext minor).mapError (fun _ => PsErasureError.unsupportedApplication)
+  let sourceType ← psEraseRuntimeType environment scope source
+  let targetType ← psEraseRuntimeType environment scope target
+  if (psIrCheckTypeEqual 4096 sourceType targetType).toOption != some true then
+    throw .unsupportedRuntimeTerm
+  let value ← eraseAt scope minor
+  return some value
+
 def psEraseSpecialBoundary
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (environment : PsEnvironment) (scope : PsErasureScope)
@@ -2147,7 +2178,7 @@ def psEraseSpecialBoundary
       | Option.none => Except.ok Option.none
       | Option.some entry =>
           let supplied := psListLength view.args;
-          if Nat.beq supplied entry.arity then Except.ok Option.none
+          if Nat.beq supplied entry.arity then psEraseLogicalApplication eraseAt environment scope view
           else
             match psInferType environment psMetaEmpty scope.localContext view.head with
             | Except.error _ => Except.error PsErasureError.unsupportedApplication

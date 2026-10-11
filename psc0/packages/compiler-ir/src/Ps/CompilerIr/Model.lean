@@ -154,6 +154,7 @@ structure PsVerifiedIrMatchBinding where
   type : PsVerifiedIrType
 
 inductive PsVerifiedIrExpr where
+  | unreachable (resultType : PsVerifiedIrType)
   | literal (value : PsVerifiedIrLiteral)
   | var (name : String)
   | intrinsic

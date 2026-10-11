@@ -35,6 +35,8 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .infer error => "PSCV0-ELABORATION: " ++ psCompilerPscv0InferError error
   | .scope message => "PSCV0-SCOPE: " ++ message
   | .data message => "PSCV0-DATA: " ++ message
+  | .refinement message => "PSCV0-MATCH: " ++ message
+  | .matchNonExhaustive => "PSCV0-MATCH: missing feasible constructor branch"
   | .invalidArgument message => "PSCV0-ARGUMENT: " ++ message
   | .emptyCallUnsupported => "PSCV0-APP-03"
   | .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"

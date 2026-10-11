@@ -197,6 +197,56 @@ theorem tagged_forallPropIdentity_is_true (V : Type u)
   intro P hP
   exact tagged_imp_self_true V P hP
 
+/--
+GENERIC semantic proof-point uniqueness for EVERY value of the canonical
+tagged Prop carrier. No property of an arbitrary quotient or proof term
+is assumed: the result follows from P1f's proved exhaustive two-valued
+representation and the actual singleton membership law.
+-/
+theorem taggedProp_member_only_point (V : Type u) [SetTheoryBasis V]
+    (P x : V)
+    (hP : SetTheoryBasis.member P (taggedProp V))
+    (hx : SetTheoryBasis.member x P) :
+    x = taggedPoint V := by
+  rcases (taggedProp_exactly_two V P).mp hP with hFalse | hTrue
+  · have hEmpty : SetTheoryBasis.member x
+        (SetTheoryBasis.emptySet V) := by
+      simpa only [hFalse] using hx
+    exact False.elim (SetTheoryBasis.not_member_empty V x hEmpty)
+  · have hPoint : SetTheoryBasis.member x (taggedTrue V) := by
+      simpa only [hTrue] using hx
+    exact (member_modelSingleton x (taggedPoint V)).mp hPoint
+
+/--
+Purely SET-MODEL proof-irrelevance: inhabitants of the SAME interpreted
+proposition coincide. This is NOT a theorem about all checked source proof
+terms, source-level beta/eta or a complete Lean kernel.
+-/
+theorem taggedProp_model_proof_value_unique (V : Type u)
+    [SetTheoryBasis V] (P x y : V)
+    (hP : SetTheoryBasis.member P (taggedProp V))
+    (hx : SetTheoryBasis.member x P)
+    (hy : SetTheoryBasis.member y P) : x = y :=
+  (taggedProp_member_only_point V P x hP hx).trans
+    (taggedProp_member_only_point V P y hP hy).symm
+
+/-- Every inhabited tagged proposition is exactly the modeled True. -/
+theorem taggedProp_inhabited_iff_true (V : Type u)
+    [SetTheoryBasis V] (P : V)
+    (hP : SetTheoryBasis.member P (taggedProp V)) :
+    (∃ x : V, SetTheoryBasis.member x P) ↔ P = taggedTrue V := by
+  constructor
+  · rintro ⟨x, hx⟩
+    rcases (taggedProp_exactly_two V P).mp hP with hFalse | hTrue
+    · have hEmpty : SetTheoryBasis.member x
+          (SetTheoryBasis.emptySet V) := by
+        simpa only [hFalse] using hx
+      exact False.elim (SetTheoryBasis.not_member_empty V x hEmpty)
+    · exact hTrue
+  · intro hTrue
+    refine ⟨taggedPoint V, ?_⟩
+    simpa only [hTrue] using (taggedPoint_member_true V)
+
 /-- False source proposition has no denoting proof value. -/
 theorem tagged_forallPropProp_uninhabited (V : Type u)
     [SetTheoryBasis V] (env : Nat → V) (x : V) :
@@ -229,5 +279,8 @@ theorem tagged_forallPropIdentity_only_point (V : Type u)
 #print axioms tagged_forallPropIdentity_is_true
 #print axioms tagged_forallPropProp_uninhabited
 #print axioms tagged_forallPropIdentity_only_point
+#print axioms taggedProp_member_only_point
+#print axioms taggedProp_model_proof_value_unique
+#print axioms taggedProp_inhabited_iff_true
 
 end PSKernelFast.Spec

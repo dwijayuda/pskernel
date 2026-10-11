@@ -68,6 +68,8 @@ jobs:
           lake env lean src/PSKernelFast/Spec/TaggedProofPoint.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Spec/FiniteUniverseClosure.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Spec/TaggedPointUniverse.lean >> /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/TaggedPropSemantics.lean >> /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/TaggedPropModelBridge.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/PiModelRegime.lean >> /tmp/pskernel-fast-axioms.log
           cat /tmp/pskernel-fast-axioms.log
           python3 scripts/audit_axioms.py /tmp/pskernel-fast-axioms.log

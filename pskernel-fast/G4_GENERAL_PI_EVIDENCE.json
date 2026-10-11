@@ -1,0 +1,44 @@
+{
+  "schema": "pskernel-fast-g4-general-pi-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualified_source_sha": "253afb42b477aacab22def288a2dd42d7ca9633b",
+  "lean_version": "4.35.0-rc4",
+  "lean_source_sha": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "run_id": 38116916150,
+  "job_id": 114403520665,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38116916150",
+  "conclusion": "success",
+  "lake_build_jobs": 54,
+  "independent_source_files": 22,
+  "stage": "G4.3b-fragment-experiment",
+  "rules": [
+    "sort",
+    "bound",
+    "pi",
+    "lam",
+    "exactTypeApp",
+    "restrictedLetNondepFalse"
+  ],
+  "proved": [
+    "inferClosedGeneralPi_sound"
+  ],
+  "executable_certified_entry": "inferClosedGeneralPiCertified",
+  "checks": [
+    "closedInputScope",
+    "inferredTypeScope",
+    "fragmentTypingRule"
+  ],
+  "context_witness": "GeneralPiContextWF",
+  "unsupported_classification_is_not_inequality": true,
+  "type_preservation_theorem": false,
+  "full_lean_compatibility": false,
+  "typed_whnf": false,
+  "typed_defeq": false,
+  "checked_production_environment": false,
+  "proof_admission": false,
+  "consistency_model": false,
+  "official_typed_oracle_replay": false,
+  "real_kernel_performance_measured": false,
+  "generated_js_wasm_qualified": false
+}

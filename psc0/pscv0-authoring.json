@@ -5,7 +5,9 @@
   "capability": "declaration-except-do/1",
   "referenceSha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
   "sourceSelection": "explicit-module-map-no-fallback",
+  "surfacePreparation": "current-portable-bootstrap-before-source-selection",
   "surfaceSeed": {
+    "role": "historical qualified predecessor; not the changed candidate printer",
     "source": "1ed94be7b1d3c49f11e302464478be76fa299172",
     "run": 38098425773,
     "artifact": 11686899111,

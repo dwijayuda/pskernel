@@ -1,4 +1,5 @@
 import Ps.Syntax.Pscv0.Commands
+import Ps.Syntax.Pscv0.TypePrint
 
 -- Full original input is retained. Printing unanchored comments declines.
 def psPscv0SkipEndedTokens (tokens : List PsToken) (offset : Nat) : List PsToken :=
@@ -179,9 +180,16 @@ def psPscv0PrintBinders (proofScript : Bool)
     | Except.error _ => Except.error "PSCV0-BINDER-PRINT-UNSUPPORTED"
     | Except.ok text => Except.ok text
   else
-    match psListMapExcept psPrintLeanBinder binders with
+    match psListMapExcept psPscv0PrintLeanBinder binders with
     | Except.error _ => Except.error "PSCV0-BINDER-PRINT-UNSUPPORTED"
     | Except.ok texts => Except.ok (psPrintLeanSpaceJoinedSuffix texts)
+
+def psPscv0PrintResultType (proofScript : Bool) (type : PsSyntaxTerm) : Except String String :=
+  if proofScript then psPscv0PrintTerm true type
+  else
+    match psPscv0PrintLeanType type with
+    | Except.error _ => Except.error "PSCV0-RESULT-TYPE-PRINT-UNSUPPORTED"
+    | Except.ok text => Except.ok text
 
 def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
     (surface : PsPscv0SurfaceDeclaration) : Except String String :=
@@ -190,7 +198,7 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
       match psPscv0PrintBinders proofScript binders with
       | Except.error error => Except.error error
       | Except.ok parameters =>
-          match psPscv0PrintTerm proofScript type with
+          match psPscv0PrintResultType proofScript type with
           | Except.error error => Except.error error
           | Except.ok resultType =>
               let body : Except String String :=
@@ -225,6 +233,9 @@ def psPscv0PrintSurfaceModule (proofScript : Bool) (surface : PsPscv0SurfaceModu
         let importPrefix := if psListIsEmpty imports then "" else psPscv0Cat [psPrintJoin "\n" imports, "\n\n"];
         Except.ok (psPscv0Cat [importPrefix, psPrintJoin "\n\n" declarations, "\n"])
 
+def psPscv0LoweredSurface (declaration : PsSyntaxDeclaration) : PsPscv0SurfaceDeclaration :=
+  PsPscv0SurfaceDeclaration.mk "def" declaration Option.none
+
 def psPscv0LowerToLean (proofScript : Bool) (source : String) : Except String String :=
   match psPscv0ParseSource proofScript source with
   | Except.error error => Except.error error
@@ -232,9 +243,9 @@ def psPscv0LowerToLean (proofScript : Bool) (source : String) : Except String St
       match psPscv0LowerModule surface with
       | Except.error error => Except.error error
       | Except.ok sourceModule =>
-          match psPrintLeanModule sourceModule with
-          | Except.error _ => Except.error "PSCV0-LOWERED-PRINT-UNSUPPORTED"
-          | Except.ok text => Except.ok text
+          let lowered := PsPscv0SurfaceModule.mk "" false false sourceModule.imports
+            (psListMap psPscv0LoweredSurface sourceModule.declarations) surface.errorName surface.discardName;
+          psPscv0PrintSurfaceModule false lowered
 
 def psPscv0TranslateReadable (sourceIsPs targetIsPs : Bool) (source : String) : Except String String :=
   match psPscv0ParseSource sourceIsPs source with

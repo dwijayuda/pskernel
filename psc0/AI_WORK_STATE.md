@@ -1,50 +1,53 @@
 # PSC0 AI work state — first PSCV0-authored compiler module candidate
 
-## Current work (2026-10-11)
+## Current implementation checkpoint (2026-10-11)
 
-Branch `psc0/pscv0-readable-selfhost-v1`; starting checkpoint `82ad3c6ef1cc634a5c3d94a1bad7ad2babd2e263`.
-The user authorized continuing the readable self-host migration. This slice uses the already qualified portable PSCV0 bridge to author the real `Ps.Syntax.Translate` compiler module in `.ps` and consume that source in the candidate bridge build. It does not broaden the language or replace the public compiler yet.
+Branch `psc0/pscv0-readable-selfhost-v1`; this migration started at `82ad3c6ef1cc634a5c3d94a1bad7ad2babd2e263`. The selected real compiler module is `Ps.Syntax.Translate`, now authored as `packages/syntax/src-ps/Ps/Syntax/Translate.ps` in an explicit candidate source map. The original public compiler remains unchanged.
 
-Implementation and validation are being committed; no new successful CI or completed source migration is claimed at this checkpoint. Read live branch HEAD and CI before continuing.
+The first source candidate `1d578cd6d96b3bd6a3a57ff90c8340a2b47c1870`, run `38110082840`, job `114383654200`, failed in the cheap round-trip gate: the predecessor printer expanded a higher-order parameter's `epsilon -> PsTranslationError` into `(_ : epsilon) -> PsTranslationError`, which the owned native binder reader could not reread. No expensive retained-compiler preparation ran. See `docs/PSCV0_FIRST_MODULE_VALIDATION.md`.
 
-## Canonical candidate source and bootstrap boundaries
+The general correction adds portable `Pscv0/TypePrint.lean`, rendering anonymous explicit Pi as ordinary arrows while preserving named/non-explicit binders. `Pscv0/Module.lean` uses it for both readable and lowered declaration headers. No original69 compiler source file, kernel code, host or source expectation is changed. This changes the new bridge itself, so its previous artifact cannot simply be relabeled qualified for the new behavior.
 
-- Candidate authoring source: `packages/syntax/src-ps/Ps/Syntax/Translate.ps`, inside the existing `@proofscript/syntax` package.
-- `pscv0-authoring.json` selects this module explicitly. Missing, invalid or unsupported selected PS fails; there is no fallback to the old Lean file.
-- The original `packages/syntax/src/Ps/Syntax/Translate.lean`, Git blob `eafd7159b14a251fe11ffdbfb1e2482bcc773c9b`, remains immutable predecessor code. It is not a second editable candidate master. `src-ps` avoids an accidental same-path source collision in the old release packer. Promotion/moving the final source root is a later explicit operation.
-- The candidate retains the four translation API signatures and behavior while replacing repeated error propagation with `do` and one generic pure error-mapping helper. Keeping predecessor leaf-translation APIs during bootstrap is not a user-facing old-PS compatibility mode; the candidate source path applies PSCV0 restrictions and never falls back.
-- Existing 69 baseline compiler files, all four qualified bridge implementation modules, public npm host, selected seed/toolchain and kernel source/JS adapter remain unchanged. The generated candidate bridge is new code and must earn its own evidence; unchanged-source inheritance alone cannot qualify it.
+**Status:** corrected implementation is being committed for native/generated qualification. Read live HEAD and exact CI results before claiming success. Whole compiler migration and new full self-hosting are not complete.
 
-The selected specification remains the user's PSCV0 reference, SHA-256 `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0`, Lean RC4 commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Base do forms follow its §3, lines796–823 in the attached reference. This implementation is still the bounded `declaration-except-do/1` subset, not full PSCV0.
+## Candidate authoring authority
 
-## Integration owners
+`pscv0-authoring.json` selects exactly `Ps.Syntax.Translate` from `.ps`. Missing, malformed or unsupported selected source fails with no fallback to the old `.lean` file. The four API signatures, error wrappers, values and failure order must be preserved; the source uses simple Except do and a generic error adapter rather than duplicated match chains.
 
-`scripts/pscv0-authoring.mjs`: IO, explicit module selection, predecessor/seed hash validation and output capture. It invokes the actual retained portable bridge for all parsing/printing/lowering; no JS implementation of language semantics.
+The original `.lean` source is frozen predecessor code, blob `eafd7159b14a251fe11ffdbfb1e2482bcc773c9b`, not a second editable candidate master. `src-ps` keeps the candidate out of the old npm packer's source collision path. This is a staged source-authority selection, not a permanent dual-source architecture. Public npm source roots and CLI have not switched.
 
-`scripts/pscv0-build-bridge.mjs`: actually chooses the `.ps` module from the manifest, lowers it using the qualified surface seed, and feeds that result to the retained self-hosted PSC0 compiler. Only the syntax/foundation bridge closure is regenerated. It records raw PS, readable Lean, lowered Lean and consumed-source identities.
+The selected reference is the user's PSCV0 Lean4.35.0-rc4 document, SHA-256 `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0`, RC4 commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Its base do, arrows, binder visibility and source-formatter meaning apply. No backward-compatible old `.ps` option is required. Predecessor leaf translation APIs remain internal bootstrap functionality, not a future public old-grammar mode.
 
-`scripts/pscv0-authoring-proof.mjs`: runs native proofs that BOTH actual generated projections equal each of the four frozen predecessor APIs for every String input. There are eight theorems per Lean version; require no theorem axioms. Run this cheap gate before expensive generation. A proof script failure must not trigger a new full build before being resolved.
+## Systematic two-stage bootstrap with shared prefix
 
-`scripts/pscv0-authoring.test.mjs`: compare the genuinely generated candidate APIs against retained compiler APIs on positive/negative sources; require the new bridge to read/lower its own selected PS source and reproduce both projections. Keep all original38 generated-bridge tests unchanged.
+1. Native cloud preflight checks all five portable PSCV0 modules, source round trips and the real Translate.ps projection. Eight Lean4.34 theorems compare its two projections against all four frozen predecessor APIs for every String input. These are native preflight files, NOT compiler inputs.
+2. The hash-pinned retained PSC0 JS compiler prepares the unchanged syntax/foundation prefix once. Its documented pure preparation state is retained IN MEMORY immediately before Translate. Nothing is serialized into a trust token.
+3. The compiler generates the current20-module surface bootstrap using the frozen predecessor Translate. This actual generated portable bridge—not native Lean or JavaScript string rewriting—then reads, prints and lowers the selected Translate.ps. Its views must exactly match native preflight, and the eight proofs run again on the generated products.
+4. Resume the same pure prefix with PS-derived Translate and prepare the remaining suffix to emit the final candidate bridge. Report the reused prefix, both generated stages and all exact source/product identities. This avoids preparing the expensive unchanged prefix twice.
+5. Linux/Windows run the original38 bridge tests unchanged, eight authoring tests (including36 original/candidate positive/negative comparisons) and four anonymous-arrow regressions. The generated candidate must read its own selected PS source and reproduce both projections. RC4 separately checks the actual generated module equalities and existing do fixture theorem.
 
-## Evidence and generation plan
+Only syntax/foundation source is regenerated, not the whole64-module compiler or kernel. No full C2/C3 or selected-seed promotion is performed. A native pass alone does not qualify generated JS.
 
-Surface seed: generated bridge source `1ed94be7b1d3c49f11e302464478be76fa299172`, run `38098425773`, artifact `11686899111`; JS SHA-256 `1ef9268e2b84aab67e5c122bf860f85957c6b66352d71be5f76bb4354cdfa281`, TS SHA-256 `5a27fda9ca051a9bd769da6d678f75b3ae3a54804ea22807c53d24006b7aca7f`. Its 38-test Linux/Windows and RC4 qualification are recorded in `docs/PSCV0_BRIDGE_CAPABILITIES.json` and the archived work state.
+## Owners and preserved boundaries
 
-Retained compiler: npm run `38075437516`, source `2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a`, artifact `11678641329`; TypeScript7.0.2. Do not regenerate compiler or kernel.
+- `Syntax/Pscv0/TypePrint.lean`: small portable anonymous-arrow/declaration-type printer; no change to kernel Pi meaning. Other expression/dependent-parser capabilities retain their limits.
+- `Syntax/Pscv0/Module.lean`: common source declaration/header and lowered projection owner.
+- `scripts/pscv0-authoring.mjs`: source-map IO and identity checks, invoking generated portable code for language meaning; proof-source assembly compares unmodified generated functions with frozen original definitions.
+- `scripts/pscv0-build-bridge.mjs`: retained compiler and shared pure prefix, explicit ordered two-stage candidate generation.
+- `scripts/Pscv0AuthoringSmoke.lean`: cheap native preflight only, no generated-runtime substitution.
+- `scripts/pscv0-authoring-proof.mjs`: source/product-bound correspondence proof checks and zero-axiom report.
+- `scripts/pscv0-authoring.test.mjs`, `pscv0-arrow.test.mjs`: genuinely generated source/API correspondence and regression cases.
 
-The workflow first type-checks the old bridge and generates/proves candidate source projections using native Lean4.34. Only after these cheap gates pass does it build the19-module syntax/foundation candidate using the retained compiler. Linux and Windows run the unchanged38 tests plus new authoring tests. The independent RC4 lane builds only the native syntax/foundation prerequisites and checks the actual generated module projections and existing do correspondence theorem.
+All original69 compiler source files, public host, kernel source/JS adapter, selected seed and toolchain remain pinned. Previous qualified bridge evidence applies to its exact old four-module source, not to the corrected five-module candidate.
 
-## Honest limitations
+Retained compiler: source `2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a`, run38075437516, artifact11678641329; JS SHA-256 `6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3`, TypeScript7.0.2, bootstrap Lean4.34.0. No new npm dependencies.
 
-This first selected module has no existing source comments; the gate verifies both old/new trivia inventories and exact source replay. No comments are lost, but general comment anchoring/formatting is NOT implemented. Do not strip comments to admit another source file. The materializer explicitly refuses commented canonical output until that feature exists.
+Previous surface qualification: implementation `1ed94be7b1d3c49f11e302464478be76fa299172`, run38098425773 Linux/Windows38 passed but original overall run failed; separate successful RC4 replay38108354566. Full predecessor evidence is preserved in `docs/history/AI_WORK_STATE_BEFORE_FIRST_PS_MODULE.md` and `docs/PSCV0_BRIDGE_CAPABILITIES.json`.
 
-Compiler diagnostics after lowering still use generated-Lean coordinates. Full PS source-to-diagnostic remapping is pending and must be addressed before switching the public authoring path. Neither source hashes nor this native proof constitute a general compiler/backend correctness theorem.
+## Limits and continuation
 
-The public compiler source root remains unchanged. Only the candidate bridge build selects the first PS module. No full C2/C3, complete compiler migration, public npm release, kernel admission of the whole bridge, kernel regeneration or main merge is claimed.
+First selected module has no comments; both original and candidate trivia inventories are checked and exact source replay is required. General comment anchoring/formatting is still pending. Do not strip comments to migrate another file. Diagnostics after lowering still use generated-Lean positions; full PS diagnostic remapping remains pending before public source-path promotion.
 
-## Continuation discipline
+This is not full PSCV0, complete source migration, independent13-package self-hosting, kernel proof/admission of the entire bridge, or a new C2/C3 fixed point. No public CLI change, npm publication, replacement release ZIP or main merge.
 
-GitHub repository reads/writes and cloud CI only. No local checkout/build/test, Desktop Commander, force push, automatic npm publication or kernel edits. Preserve concurrent history with expected-HEAD non-force updates. Use native/focused checks before expensive generation; do not loosen old tests, source identity guards or the reference to obtain a pass.
-
-Previous complete work state: `docs/history/AI_WORK_STATE_BEFORE_FIRST_PS_MODULE.md`, original blob `25c589a1970f6f3b91bb5f6855aaecdbd0eb39c1`. Keep historical failed runs failed and separate qualified old bridge from the newly generated authoring candidate.
+GitHub for all repo reads/writes; cloud CI for execution. No local checkout/build/test, Desktop Commander, force push or kernel edits. Read live HEAD and use expected-HEAD non-force updates. Preserve historical failures and old qualification records; never loosen tests or source baselines merely to obtain a pass. Native checks first; regenerate only when source semantics changed. Update this file with observed run outcomes.

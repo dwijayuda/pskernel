@@ -114,7 +114,7 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
             return ← psElabApplyOrdered elaborate fuel
               (psElabApplyValue current argument body) positions names pending complete expected
           | none => pure ()
-        if (explicit || psBinderIsStrictImplicit binder) &&
+        if (explicit || (psBinderIsStrictImplicit binder && !complete)) &&
             positions.isEmpty && names.isEmpty then
           return { result := current, pendingInstancesRev := pending }
         let kind := if psBinderIsInstanceImplicit binder then

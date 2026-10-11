@@ -393,23 +393,23 @@ def psElabLocalProjectionBaseWorker
 -- Only an absent first segment permits a longer LOCAL base; a selected base
 -- never falls back to another name after a field or type error.
 def psElabReferencePrefix (fuel : Nat) (localContext : PsLocalContext)
-    (environment : PsEnvironment) (rooted : Bool) (prefix suffix : List String) :
+    (environment : PsEnvironment) (rooted : Bool) (namePrefix suffix : List String) :
     Option (Prod PsResolvedName (List String)) :=
-  match fuel, prefix with
+  match fuel, namePrefix with
   | 0, _ => none
   | _, [] => none
   | fuel + 1, _ =>
-    let name := psSyntaxNameAppendSegments prefix .anonymous
+    let name := psSyntaxNameAppendSegments namePrefix .anonymous
     let resolved := if rooted then
       (psEnvironmentFind environment name).map (fun _ => PsResolvedName.global name)
       else psResolveName localContext environment name
     match resolved with
     | some value => some (value, suffix)
     | none =>
-      match prefix.getLast? with
+      match namePrefix.getLast? with
       | none => none
       | some last => psElabReferencePrefix fuel localContext environment rooted
-          prefix.dropLast (last :: suffix)
+          namePrefix.dropLast (last :: suffix)
 
 def psElabResolveReferenceBase (localContext : PsLocalContext)
     (environment : PsEnvironment) (sourceName : PsSyntaxName) :

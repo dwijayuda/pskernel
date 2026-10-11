@@ -17,17 +17,17 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
   match source with
   | .definition _ binders type value span
   | .theoremDecl _ binders type value span =>
-    let theorem := match source with | .theoremDecl _ _ _ _ _ => true | _ => false
+    let isTheorem := match source with | .theoremDecl _ _ _ _ _ => true | _ => false
     let binders ← psScopeBinders visit [] binders
     let type ← visit binders.bound type
     let value ← visit binders.bound value
     let header := psScopeUnion binders.used type.used
-    let used := if theorem then psScopeUnion header resolver.scope.included
+    let used := if isTheorem then psScopeUnion header resolver.scope.included
       else psScopeUnion header value.used
     let captured := psScopeSelect resolver.scope used
-    if theorem && !value.used.all (fun key => captured.any (fun b => psScopeKey b.fst.name == key)) then
+    if isTheorem && !value.used.all (fun key => captured.any (fun b => psScopeKey b.fst.name == key)) then
       throw (.scope "theorem proof uses a section variable absent from its header; use include")
-    if theorem then
+    if isTheorem then
       return .theoremDecl name (captured ++ binders.binders) type.term value.term span
     -- Recursive section parameters are fixed in the source scope. Add them at
     -- the syntax boundary before the existing structural-recursion algorithm.
@@ -64,16 +64,16 @@ def psScopeNamePrefixes (name : PsName) : List (List String) :=
     (match prefixes with | [] => [part] | first :: _ => first ++ [part]) :: prefixes
   | .num parent _ => psScopeNamePrefixes parent
 
-def psScopeRemember (namespaces : List (List String)) (prefix : List String) :
+def psScopeRemember (namespaces : List (List String)) (namePrefix : List String) :
     List (List String) :=
-  (psScopePrefixes prefix).foldl (fun acc item =>
+  (psScopePrefixes namePrefix).foldl (fun acc item =>
     if item.isEmpty || acc.contains item then acc else item :: acc) namespaces
 
 def psScopeOpen (state : PsCommandState) (name : PsSyntaxName) :
     Except PsElabError (List String) := do
   let segments := psSyntaxNameRootSegments name.segments
   let candidates := if name.segments.head? == some "_root_" then [segments]
-    else (psScopePrefixes state.scope.prefix).map (· ++ segments)
+    else (psScopePrefixes state.scope.namePrefix).map (· ++ segments)
   let some found := candidates.find? state.namespaces.contains
     | throw (.scope ("unknown namespace " ++ psScopeKey name))
   return found
@@ -117,7 +117,7 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     if qualified.segments.isEmpty then throw .emptyName
     return { state with
       frames := { label := some name.segments, saved := state.scope } :: state.frames
-      scope := { state.scope with prefix := qualified.segments }
+      scope := { state.scope with namePrefix := qualified.segments }
       namespaces := psScopeRemember state.namespaces qualified.segments }
   | .sectionCmd name _ =>
     return { state with
@@ -141,7 +141,9 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
       -- A declaration registers its parent namespaces. Constructors and
       -- projections also register their inductive/structure namespace.
       ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) state.namespaces
-    return { state with environment, namespaces,
+    return { state with
+      environment := environment
+      namespaces := namespaces
       declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev }
 
 def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :

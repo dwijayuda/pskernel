@@ -135,7 +135,11 @@ def psPscv0PrepareSource (proofScript : Bool) (source : String) :
   let errorName ← psPscv0FreshName tokens "pscv0InternalError" span
   let discardName ← psPscv0FreshName tokens "pscv0InternalDiscard" span
   let cursor := psLexCursorFromString source
-  return { tokens, rewritten, errorName, discardName,
+  return {
+    tokens := tokens
+    rewritten := rewritten
+    errorName := errorName
+    discardName := discardName
     commentTrivia := psPscv0CommentTriviaWorker cursor.remaining cursor.position tokens }
 
 def psPscv0ParseSource (proofScript : Bool) (source : String) :
@@ -150,8 +154,13 @@ def psPscv0ParseSource (proofScript : Bool) (source : String) :
       input.errorName input.discardName)
   if psPscv0CountDoBodies declarations != input.rewritten.blocks.length then
     throw "PSCV0-DO-DECLARATION-BODY-ONLY"
-  return { originalSource := source, proofScript, commentTrivia := input.commentTrivia,
-    imports := parsed.imports, declarations, errorName := input.errorName,
+  return {
+    originalSource := source
+    proofScript := proofScript
+    commentTrivia := input.commentTrivia
+    imports := parsed.imports
+    declarations := declarations
+    errorName := input.errorName
     discardName := input.discardName }
 
 def psPscv0LowerDeclaration (errorName discardName : PsSyntaxName)

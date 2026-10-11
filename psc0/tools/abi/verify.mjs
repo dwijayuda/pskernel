@@ -1,8 +1,9 @@
 // Cloud-only proof-of-interop: use the exact failed run's generated PSCV0
 // bootstrap and immutable retained compiler. No full compiler generation here.
 import assert from 'node:assert/strict';
-import { readdir } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { transferPscv0Ast, AST_ABI_VERSION } from './transport.mjs';
 const root=process.argv[2],installed=process.argv[3];
@@ -49,6 +50,24 @@ assert.throws(()=>transferPscv0Ast(B,C,malformed,source),/PSCV0_AST_ABI_INVALID/
 // Negative: constructor identity is not inferred from Symbol descriptions.
 const fake={...ast,declarations:{[Symbol('ProofScript.List.tag')]:'nil'}};
 assert.throws(()=>transferPscv0Ast(B,C,fake,source),/PSCV0_AST_ABI_INVALID/);
+// Qualify the *real* selected 40-line v7 compiler module using the same
+// generated bootstrap AST, without assuming its imports exist in the tiny
+// standalone checker environment used above.
+const selectedText=await readFile(path.join('packages','syntax','src-ps','Ps','Syntax','Translate.ps'),'utf8');
+const selectedSha=createHash('sha256').update(selectedText).digest('hex');
+assert.equal(selectedSha,'938288af9c8476d592fc69c4e6f2c01ecb8e1f371fdd5bac1f789a3097710428',
+  'selected compiler module changed without updating the source identity');
+const selectedParsed=get(B.psPscv0ParseSource(true,selectedText),'selected v7 compiler module');
+const selectedLowered=get(B.psPscv0LowerModule(selectedParsed),'selected v7 module source AST');
+const selectedTransport=transferPscv0Ast(B,C,selectedLowered,selectedText);
+assert(selectedTransport.receipt.normalizedNodes>result.receipt.normalizedNodes,
+  'selected module must have a larger real source AST than the two-declaration fixture');
+assert.equal(selectedTransport.receipt.sourceSha256,selectedSha);
+console.log('PSCV0_AST_ABI_SELECTED_COMPILER_SOURCE: PASS '+JSON.stringify({
+  module:'Ps.Syntax.Translate',sourceSha256:selectedSha,
+  schema:AST_ABI_VERSION,validatedNodes:selectedTransport.receipt.normalizedNodes,
+  noLeanTextParse:true,noKernelBypass:true
+}));
 const evidence={schema:AST_ABI_VERSION,
   source:result.receipt.sourceSha256,nodes:result.receipt.normalizedNodes,
   compiler:'retained PSC0',sourceRuntime:'generated PSCV0 bootstrap',

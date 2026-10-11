@@ -82,6 +82,25 @@ def main : IO Unit := do
               psKernelBoolEq (Prod.snd old) (Prod.snd next)) then
           throw (IO.userError "C0 direct lifting changed semantics")
   IO.println "C0_PERF_REGRESSION structural_lift_semantics=pass"
+  -- Paired comparison must agree with the historical curried comparator,
+  -- including ignored binder names/annotations in kernel semantic equality.
+  let renamed := PsKernelExpr.lam
+    (PsKernelName.str PsKernelName.anonymous "renamed")
+    sort0 (PsKernelExpr.bvar 0) PsKernelBinderInfo.implicit
+  let original := PsKernelExpr.lam PsKernelName.anonymous
+    sort0 (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let candidates := [base, sort0, sort1, renamed, original,
+    nested, many, PsKernelExpr.app nested many,
+    PsKernelExpr.mdata 10 nested,
+    PsKernelExpr.proj PsKernelName.anonymous 0 nested]
+  for left in candidates do
+    for right in candidates do
+      if !(psKernelBoolEq
+            (psKernelExprEqLegacy left right)
+            (psKernelExprEq left right)) then
+        throw (IO.userError "C0 paired expression equality mismatch")
+  IO.println "C0_PERF_REGRESSION paired_equality_semantics=pass"
+
 
 
   -- Test the indexed store's shared radix-16 interner, including duplicates.
@@ -115,10 +134,10 @@ def main : IO Unit := do
     let name := PsKernelName.num PsKernelName.anonymous k
     let base : PsKernelConstantBase :=
       { name := name, levelParams := [], type := sort0 }
-    let axiom : PsKernelAxiomInfo :=
+    let axiomValue : PsKernelAxiomInfo :=
       { base := base, isUnsafe := false }
     decls := psKernelEnvironmentIndexInsert decls
-      (PsKernelConstantInfo.axiomInfo axiom)
+      (PsKernelConstantInfo.axiomInfo axiomValue)
   for k in [:40] do
     let name := PsKernelName.num PsKernelName.anonymous k
     let bucket := psKernelEnvironmentIndexFind decls name

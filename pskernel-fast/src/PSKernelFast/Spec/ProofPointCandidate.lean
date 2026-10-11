@@ -232,6 +232,54 @@ theorem propUniverseV2_mem_typeOne
   exact SetTheoryBasis.universe_powerset_closed (V := V)
     2 (propTrueV2 V) hTrue
 
+
+/--
+Standard Kuratowski ordered-pair construction from the SAME primitive
+unordered-pair constructor supplied by the set-theory model:
+  (a,b) = {{a}, {a,b}}.
+This is a legitimate writable data encoding in ordinary set models.
+-/
+noncomputable def modelKuratowskiPair (V : Type u)
+    [SetTheoryBasis V] (a b : V) : V :=
+  SetTheoryBasis.pair (SetTheoryBasis.pair a a)
+    (SetTheoryBasis.pair a b)
+
+/-- The powerset of empty is EXACTLY the singleton of empty. -/
+theorem powerEmpty_is_singletonEmpty (V : Type u)
+    [SetTheoryBasis V] :
+    SetTheoryBasis.powerset (SetTheoryBasis.emptySet V) =
+      SetTheoryBasis.pair (SetTheoryBasis.emptySet V)
+        (SetTheoryBasis.emptySet V) := by
+  apply SetTheoryBasis.ext
+  intro z
+  constructor
+  · intro hz
+    have hzEq : z = SetTheoryBasis.emptySet V :=
+      (powerset_empty_exact V z).1 hz
+    exact (SetTheoryBasis.member_pair).2 (Or.inl hzEq)
+  · intro hz
+    have hzEq : z = SetTheoryBasis.emptySet V := by
+      rcases (SetTheoryBasis.member_pair).1 hz with h | h
+      · exact h
+      · exact h
+    exact (powerset_empty_exact V z).2 hzEq
+
+/--
+SECOND CRITICAL MODEL DESIGN DEFECT: the simple V2 proof point is
+LITERALLY the standard writable Kuratowski pair of (empty,empty).
+So the V2 candidate, despite being outside Prop, is NOT a suitable
+final proof point for a model that represents pair data as Kuratowski
+sets. This is not speculation or a benchmark: it is an equality
+proved from our current explicit set-theory definitions.
+-/
+theorem proofPointV2_is_kuratowski_empty_pair
+    (V : Type u) [SetTheoryBasis V] :
+    proofPointV2 V =
+      modelKuratowskiPair V (SetTheoryBasis.emptySet V)
+        (SetTheoryBasis.emptySet V) := by
+  unfold proofPointV2 proofPointTagV2 modelKuratowskiPair
+  rw [powerEmpty_is_singletonEmpty V]
+
 #print axioms old_true_forces_truth_value
 #print axioms set_not_member_self
 #print axioms proofPointV2_mem_true
@@ -242,5 +290,7 @@ theorem propUniverseV2_mem_typeOne
 #print axioms propUniverseV2_exactly_two
 #print axioms universe_singleton_closed
 #print axioms propUniverseV2_mem_typeOne
+#print axioms powerEmpty_is_singletonEmpty
+#print axioms proofPointV2_is_kuratowski_empty_pair
 
 end PSKernelFast.Spec

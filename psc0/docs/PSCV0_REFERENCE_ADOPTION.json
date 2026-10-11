@@ -84,8 +84,75 @@
     "nativeAndGeneratedMaterializationPassed": true,
     "eightConcreteEquationsPassed": true,
     "twoAxiomFreeAlgebraLemmasPassed": true,
-    "incompleteReason": "900-second timeout during candidate suffix module preparation, exit 124",
+    "incompleteReason": "Earlier 900-second failure superseded at original source 8603f7; newer v7-only policy source still requires generated qualification.",
     "fullV7Conformance": false,
-    "newSelfhostFixedPoint": false
+    "newSelfhostFixedPoint": false,
+    "latestQualifiedSource": "8603f7dcf6af6295335c4e11912a10aac86c85a4",
+    "latestQualifiedRun": 38120695522,
+    "newerV7OnlySourcePolicyCandidateGeneratedQualification": false
+  },
+  "firstAuthoredCompilerModuleQualification": {
+    "status": "bounded-first-ps-module-qualified-at-original-source",
+    "originalSourceCommit": "8603f7dcf6af6295335c4e11912a10aac86c85a4",
+    "run": 38120695522,
+    "overallConclusion": "success",
+    "languageDesign": "pscv0-v7",
+    "leanPin": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "module": "Ps.Syntax.Translate",
+    "modulePsSha256": "938288af9c8476d592fc69c4e6f2c01ecb8e1f371fdd5bac1f789a3097710428",
+    "generatedBridgeModules": 20,
+    "sharedPrefixPreparedOnce": 13,
+    "generatedBridgeJsSha256": "fa5728347204ea683c6a22f900f2a2474d8f178ae0b093a01d141c2557605e27",
+    "fixtureCanonicalAdmissionsSha256": "6f14a42e22bf0e0fb41fbe4af07ada5bcbc82b21776d629ddb2",
+    "linux": {
+      "job": 114414631646,
+      "conclusion": "success",
+      "bridgeTests": 38,
+      "authoringAndArrowTests": 12,
+      "apiComparisons": 36
+    },
+    "windows": {
+      "job": 114418588840,
+      "conclusion": "success",
+      "bridgeTests": 38,
+      "authoringAndArrowTests": 12,
+      "apiComparisons": 36
+    },
+    "leanReference": {
+      "job": 114418588824,
+      "conclusion": "success",
+      "generatedDoFixtureAxioms": [],
+      "concreteApiEquationCount": 8,
+      "concreteApiAxioms": [
+        "propext"
+      ],
+      "zeroAxiomAlgebraTheorems": 2
+    },
+    "artifacts": [
+      {
+        "role": "linux-generated",
+        "id": 11695282564,
+        "zipSha256": "e9aa3ac1089bed9465fd01e83bdf5a6facea673fe9de1d289840738003d49e57"
+      },
+      {
+        "role": "native-source",
+        "id": 11695122822,
+        "zipSha256": "6d223b0ac47382e99fe2e0d811ad8a41564bd64a6df1e87e25d6239a73ace564"
+      },
+      {
+        "role": "windows-generated",
+        "id": 11695114280,
+        "zipSha256": "6085c35c27418bdbf72425d16f5c915ebf6f1b34019815461cab6e0cd54813bb"
+      },
+      {
+        "role": "lean-rc4",
+        "id": 11695019450,
+        "zipSha256": "861a9f197df2f4f2ce5fae8a4eaa325e877c718a7516364e533339ecf940d46c"
+      }
+    ],
+    "fullCompilerAuthoritativePs": false,
+    "newC2C3CompilerFixedPoint": false,
+    "kernelRegenerated": false,
+    "fullV7Conformance": false
   }
 }

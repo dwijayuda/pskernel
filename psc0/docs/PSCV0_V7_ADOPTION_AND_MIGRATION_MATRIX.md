@@ -1,5 +1,8 @@
 # PSC0 — PSCV0 v7 adoption and source/self-host migration matrix
 
+> **Measured v7 M1 checkpoint:** Full generated first `.ps` module bridge run [38120695522](https://github.com/dwijayuda/pskernel/actions/runs/38120695522) at source `8603f7dcf6af6295335c4e11912a10aac86c85a4` passed Linux/Windows 38 bridge + 12 authoring/arrow tests per platform, independent RC4 correspondence proof and ten checked/runtime fixture functions. This replaces the earlier 900-second-timeout status *for that exact source only*. The later v7-only parser-policy changes require their own generated CI before they inherit any qualification; full PSCV0 v7 and full compiler fixed point remain unproved.
+
+
 **Review date:** 2026-10-11. **Status:** source-grounded *implementation plan* and reference adoption, NOT complete PSCV0 compiler conformance or verified executable certification.
 
 The new authoritative language *design* is the complete [v7 document](../PSCV0_LANGUAGE_REFERENCE.md), byte-identical to the user's upload (308,462 UTF-8 bytes; SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`). Semantic upstream target: Lean `v4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. The prior `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0` reference is historical. Earlier bridge tests remain evidence for the exact earlier selected syntax and code, not proof of unimplemented v7 features. ProofScript v7 is a **semantic subset of Lean**, with one source language and two *assurance outcomes*, not a new type theory or a JS compatibility mode.

@@ -1,5 +1,8 @@
 # First PSCV0-authored compiler module — validation
 
+> **Qualification update — 2026-10-11:** [complete v7 first-module bridge run 38120695522](https://github.com/dwijayuda/pskernel/actions/runs/38120695522) **SUCCESS** at source `8603f7dcf6af6295335c4e11912a10aac86c85a4`, with generated `Ps.Syntax.Translate.ps` (SHA-256 `938288af9c8476d592fc69c4e6f2c01ecb8e1f371fdd5bac1f789a3097710428`) in the 20-module candidate (JS SHA-256 `fa5728347204ea683c6a22f900f2a2474d8f178ae0b093a01d141c2557605e27`). Linux **38/38 + 12/12**, Windows **38/38 + 12/12**, **36** old/new API comparisons per platform, generated source/Lean round trips and `noFallback=true`, and independent Lean RC4 proof lane succeeded. The generated ten-fixture admission digest matched both platforms, `6f14a42e22bf0e0fb41fbe4af07ada5bcbc82b21776e7f6b40149176d629ddb2`. RC4 do-fixture theorem had **zero axioms**; eight API equations retain only the original `[propext]` assumptions, with two zero-axiom generic refactoring lemmas. **This qualifies only the first real candidate `.ps` compiler module**, not v7 as a whole, not the public compiler, and not a new C2/C3 or joint compiler/kernel self-host. The subsequently developed v7-only command-source policy changes source identity and must be generated and qualified separately before promotion.
+
+
 ## Candidate scope
 
 The actual compiler module `Ps.Syntax.Translate` is selected from `packages/syntax/src-ps/Ps/Syntax/Translate.ps` by `pscv0-authoring.json` for the candidate bridge build. The existing public compiler and its 69 baseline Lean files are not changed. There is no old-PS fallback when the selected source is invalid.

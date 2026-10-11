@@ -246,8 +246,8 @@ def psKernelExprEq
   | .fvar a, .fvar b => psKernelNameEq a b
   | .mvar a, .mvar b => psKernelNameEq a b
   | .sort a, .sort b => psKernelLevelEq a b
-  | .const a as, .const b bs =>
-      psKernelNameEq a b && psKernelLevelListEq as bs
+  | .const a als, .const b bls =>
+      psKernelNameEq a b && psKernelLevelListEq als bls
   | .app af aa, .app bf ba =>
       psKernelExprEq af bf && psKernelExprEq aa ba
   | .lam _ at ab _, .lam _ bt bb _ =>

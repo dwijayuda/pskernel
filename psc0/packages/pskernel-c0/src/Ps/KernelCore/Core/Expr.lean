@@ -407,22 +407,22 @@ def psKernelExprEqual
   | .const a als, .const b bls =>
       psKernelNameEq a b && psKernelLevelListEq als bls
   | .app af aa, .app bf ba =>
-      psKernelExprEqual af bf && psKernelExprEqual aa ba
+      psKernelExprEqualLegacy af bf && psKernelExprEqualLegacy aa ba
   | .lam an aty ab ai, .lam bn bty bb bi =>
-      psKernelNameEq an bn && psKernelExprEqual aty bty &&
-      psKernelExprEqual ab bb && psKernelBinderInfoEq ai bi
+      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
+      psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
   | .forallE an aty ab ai, .forallE bn bty bb bi =>
-      psKernelNameEq an bn && psKernelExprEqual aty bty &&
-      psKernelExprEqual ab bb && psKernelBinderInfoEq ai bi
+      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
+      psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
   | .letE an aty av ab adn, .letE bn bty bv bb bdn =>
-      psKernelNameEq an bn && psKernelExprEqual aty bty &&
-      psKernelExprEqual av bv && psKernelExprEqual ab bb &&
+      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
+      psKernelExprEqualLegacy av bv && psKernelExprEqualLegacy ab bb &&
       psKernelBoolEq adn bdn
   | .lit a, .lit b => psKernelLiteralEq a b
   | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelExprEqual ab bb
+      Nat.beq am bm && psKernelExprEqualLegacy ab bb
   | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqual ab bb
+      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqualLegacy ab bb
   | _, _ => false
 
 def psKernelExprHasLooseAt

@@ -150,6 +150,10 @@ structure PsRuntimeInductiveInfo where
   constructors : List PsRuntimeConstructorInfo
   numIndices : Nat := 0
 
+-- Used by both partial-application completion and recursor lowering.
+def psRuntimeRecursorArity (info : PsRuntimeInductiveInfo) : Nat :=
+  info.numParams + 1 + info.constructors.length + info.numIndices + 1
+
 structure PsErasureCurrentDefinition where
   name : String
   -- Only declaration binders contribute; restore their order at recursive calls.

@@ -1731,11 +1731,7 @@ def psEraseRuntimeRecursorApplication
       match psErasureLookupRecursor scope.runtimeRecursors name with
       | Option.none => Except.ok Option.none
       | Option.some inductiveInfo =>
-          let expectedArity :=
-            Nat.add
-              (Nat.add (Nat.add inductiveInfo.numParams 1)
-                (psListLength inductiveInfo.constructors))
-              (Nat.add inductiveInfo.numIndices 1);
+          let expectedArity := psRuntimeRecursorArity inductiveInfo;
           if psErasureBoolNot (Nat.beq (psListLength view.args) expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
@@ -2050,7 +2046,7 @@ def psErasureSpecialEntry
             | Option.some info =>
                 Option.some
                   (PsErasureSpecialEntry.mk
-                    (Nat.add (Nat.add info.numParams (psListLength info.constructors)) 2)
+                    (psRuntimeRecursorArity info)
                     false)
             | Option.none =>
                 match psErasureLookupStructureRecursor scope name with

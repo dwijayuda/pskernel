@@ -42,10 +42,21 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .unknownName name => "PSCV0-UNKNOWN-NAME: " ++ psNameToString name
   | _ => "PSCV0-ELABORATION-FAILED"
 
+def psCompilerPscv0ErasureError : PsErasureError → String
+  | .fuelExhausted => "budget"
+  | .binderMismatch => "binder mismatch"
+  | .looseBoundVariable => "loose bound variable"
+  | .unresolvedMetavariable => "unsolved inference"
+  | .unknownLocal id => "unknown local " ++ psNatToString id
+  | .erasedLocalUsed id => "runtime use of erased local " ++ psNatToString id
+  | .unsupportedRuntimeTerm => "unsupported runtime term"
+  | .unsupportedApplication => "unsupported application"
+  | .unknownConstant name => "unknown constant " ++ psNameToString name
+
 def psCompilerPscv0Error : PsCompilerError → String
   | .translation _ => "PSCV0-TRANSLATION-FAILED"
   | .leanFrontend _ => "PSCV0-LEAN-FRONTEND-FAILED"
   | .proofScriptFrontend _ => "PSCV0-FRONTEND-FAILED"
   | .elaboration error => psCompilerPscv0ElabError error
   | .admission _ => "PSCV0-ADMISSION-CODEC-FAILED"
-  | .erasure _ => "PSCV0-ERASURE-FAILED"
+  | .erasure error => "PSCV0-ERASURE: " ++ psCompilerPscv0ErasureError error

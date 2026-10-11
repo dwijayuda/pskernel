@@ -1,0 +1,58 @@
+{
+  "schema": "pskernel-fast-g2-evidence/v1",
+  "target": "Lean-4.35.0-rc4",
+  "sourceSha": "3ed28be5834078d5cd33a762cb183cf9693a2520",
+  "workflowRunId": 38107735958,
+  "jobId": 114376707944,
+  "result": "success",
+  "qualification": "beta-only-untyped-whnf-experimental",
+  "nativeBuildJobs": 16,
+  "generatedClosedCases": 92,
+  "comparedEngines": [
+    "eager-tree-beta",
+    "lazy-tree-closures",
+    "lazy-dag-closures"
+  ],
+  "samplesPerRepetitionPerEngine": 5040,
+  "repetitions": 5,
+  "wallMs": {
+    "eager": [
+      121,
+      128,
+      120,
+      120,
+      121
+    ],
+    "lazyTree": [
+      7,
+      6,
+      7,
+      7,
+      6
+    ],
+    "lazyDag": [
+      7,
+      7,
+      7,
+      7,
+      7
+    ]
+  },
+  "medianWallMs": {
+    "eager": 121,
+    "lazyTree": 7,
+    "lazyDag": 7
+  },
+  "benchmarkExcludes": [
+    "input encoding",
+    "input decoding",
+    "full Lean type checking",
+    "DefEq",
+    "inductive admission",
+    "memory benchmarking"
+  ],
+  "leanCompatibilityEstablished": false,
+  "fullKernelSoundnessProved": false,
+  "lazySoundnessProved": false,
+  "interpretation": "lazy closures promising on narrow beta workload; DAG gives no extra measured time win there; no whole-kernel performance claim"
+}

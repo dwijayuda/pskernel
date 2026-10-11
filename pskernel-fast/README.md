@@ -6,6 +6,7 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [MVP scope / correctness contract](MVP_SCOPE.md)
 - [Live work state and evidence](AI_WORK_STATE.md)
 - [Machine-readable no-legacy constraint and CI guard](ARCHITECTURE_POLICY.json)
+- [G2 three-evaluator evidence and architecture decision](G2_EVALUATION_EVIDENCE.md)
 
 ## Current executable state
 

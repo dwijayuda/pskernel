@@ -7,6 +7,10 @@
 **Previous V2 research:** `research/pskernel-fast-major-v2-20261011`.  
 **Existing proof branch:** `psc0/pskernel-core-lean435-arena-v1` — reference/history only; NOT a constraint, requirement, source dependency or release gate for V3.
 
+## G2 research decision — 11 October 2026
+
+The first [three-engine experimental evidence](G2_EVALUATION_EVIDENCE.md) found that eager tree substitution, lazy tree closures and lazy DAG-handle closures agreed on the bounded beta-only test domain, while repeated median times were 121 ms, 7 ms and 7 ms respectively on a small identity-chain corpus. **This is not a Lean kernel benchmark.** It establishes no measured speed benefit for *direct DAG traversal* over ordinary closure/tree evaluation on that workload. Therefore **a compact DAG is an optional storage candidate, not a mandatory end-state**; correctness, memory and real Lean-checking throughput choose the representation. Lazy closures remain a favored hypothesis but require a separate semantic refinement proof before they can authorize any positive kernel result.
+
 ## 0. Binding decisions — clean architectural freedom
 
 1. **Performance, semantic correctness, Lean compatibility, fail-closed behavior, and clear trust boundaries come before preservation of any V1/V2 internal API, implementation, proof, file hierarchy, or existing self-host subset.**

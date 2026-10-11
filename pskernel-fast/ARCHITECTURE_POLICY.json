@@ -18,12 +18,21 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G1-experimental",
+    "stage": "G2-experimental-beta-WHNF",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
     "kernelBenchmarkRun": false,
-    "fullLeanCompatibilityDemonstrated": false
+    "fullLeanCompatibilityDemonstrated": false,
+    "betaEvaluationEngines": [
+      "eager-substitution",
+      "lazy-tree-closures",
+      "lazy-interned-DAG-closures"
+    ],
+    "betaPrototypeBenchmarkRun": true,
+    "betaSingleStepSoundnessProved": true,
+    "rawScopedValidationSoundnessProved": true,
+    "lazySoundnessProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -35,8 +44,8 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "6fd4d9f5d7a3ec2277e2f194dab77db8a106763c",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38094070233",
-    "scope": "six native builds and focused representation smoke only"
+    "validatedSourceCommit": "3ed28be5834078d5cd33a762cb183cf9693a2520",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38107735958",
+    "scope": "16 native build jobs, 92 generated and named beta-only differential tests, 5 repeated 3-engine toy timing samples; not Lean type checking"
   }
 }

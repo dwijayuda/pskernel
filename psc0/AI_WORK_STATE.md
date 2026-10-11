@@ -1,3 +1,45 @@
+# PSC0 AI WORK STATE — native Lean v7 implementation
+
+## 11 October 2026 — native development foundation
+
+The user selected the existing portable semantic compiler, authored/run natively
+in Lean and checked by official Lean. Implementation stays in `.lean`; compiler
+`.ps` generation and full self-host qualification are deferred to the final
+migration milestone. No `pskernel-core` development/tests or slow fallback.
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`, based on
+`b4bd7e7d6c48443e56eaf96099515a29a83982bf`.
+The new `v7-native/` workspace uses exact Lean 4.35.0-rc4, imports shared compiler
+sources, and connects the active v7 parser to the existing semantic compiler,
+canonical admission bridge, official native kernel and TS backend. Native batches
+reuse one checked prelude with independent request environments. Historical 4.34
+bootstrap/provider identities remain intact. Old M1 regeneration workflows are
+manual-only on this branch; a dedicated incremental native Linux job replaces
+them in ordinary work.
+
+**Status: implemented candidate, Linux CI pending.** The initial target deliberately
+rejects module imports until v7 module semantics land. This is a bounded compiler
+development foundation, not full v7 conformance or a portable compiler fixed point.
+No performance improvement is claimed before measurement.
+
+**Corrected predecessor evidence:** M1 run
+[38144002557](https://github.com/dwijayuda/pskernel/actions/runs/38144002557)
+passed the bounded 21-module, one-v7 versus five-v7 source comparison at the base
+commit. Candidate preparation 587,868 ms; emission 370,963 ms; total 960,809 ms.
+The 18 positive/10 negative parser cases are retained, with no inferred broader
+language conformance.
+
+Current work uses GitHub source operations and Linux cloud CI only. No local
+compiler builds/tests, Windows tests, independent kernel suites or kernel-source
+changes. Source-profile and timings artifacts distinguish parser checks, native
+kernel acceptance, runtime behavior and eventual self-hosting evidence.
+
+See [native development commands and boundaries](v7-native/README.md).
+The entries below are preserved historical records; their pending statuses and
+source-authority policies may be superseded by this entry.
+
+---
+
 # PSC0 AI WORK STATE — v7 M1 parser ownership candidate
 
 ## 11 October 2026 — M1 implementation in progress

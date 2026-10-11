@@ -1,0 +1,122 @@
+name: PSC0 v7 native Lean development (Linux)
+on:
+  push:
+    branches: [psc0/pscv0-v7-native-lean-v1]
+    paths:
+      - 'psc0/packages/*/src/**'
+      - 'psc0/packages/pskernel-lean/provider/**'
+      - 'psc0/host/src/Ps/Host/NativeV7.lean'
+      - 'psc0/v7-native/**'
+      - 'psc0/lakefile.lean'
+      - 'psc0/scripts/Pscv0Native.lean'
+      - 'psc0/scripts/Pscv0M1Harness.lean'
+      - 'psc0/scripts/pscv0-native-*.mjs'
+      - 'psc0/scripts/pscv0-m1-cases.json'
+      - 'psc0/test/Pscv0NativeTests.lean'
+      - '.github/workflows/psc0-pscv0-native-v7.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc0-v7-native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc0/v7-native
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /psc0/lakefile.lean
+            /psc0/lake-manifest.json
+            /psc0/lean-toolchain
+            /psc0/package.json
+            /psc0/v7-native/
+            /psc0/packages/foundation/src/
+            /psc0/packages/syntax/src/
+            /psc0/packages/core/src/
+            /psc0/packages/environment/src/
+            /psc0/packages/meta/src/
+            /psc0/packages/elab/src/
+            /psc0/packages/bridge/src/
+            /psc0/packages/compiler-ir/src/
+            /psc0/packages/erasure/src/
+            /psc0/packages/compiler/src/
+            /psc0/packages/backend-ts/src/
+            /psc0/packages/pskernel-lean/provider/
+            /psc0/host/src/
+            /psc0/scripts/
+            /psc0/test/Pscv0NativeTests.lean
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Guard source closure and native-only development policy
+        run: |
+          set -euo pipefail
+          test "$RUNNER_OS" = Linux
+          test ! -d ../packages/pskernel-core
+          node ../scripts/pscv0-native-profile.mjs
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/v7-native
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          restore-keys: |
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/lakefile.lean') }}-
+      - name: Compile current Lean sources into native compiler and compact checks
+        id: build
+        run: |
+          set -euo pipefail
+          lean --version | tee ../dist/pscv0-native/toolchain.txt
+          grep -F '4.35.0-rc4' ../dist/pscv0-native/toolchain.txt
+          grep -F 'c29b6dd' ../dist/pscv0-native/toolchain.txt
+          START=$(date +%s%3N)
+          lake build pscv0_native pscv0_native_checks 2>&1 | tee ../dist/pscv0-native/build.log
+          BUILT=$(date +%s%3N)
+          lake build pscv0_native pscv0_native_checks > ../dist/pscv0-native/warm-build.log 2>&1
+          WARM=$(date +%s%3N)
+          printf '{"initialBuildMs":%s,"warmBuildMs":%s}\n' "$((BUILT-START))" "$((WARM-BUILT))" > ../dist/pscv0-native/build-timings.json
+      - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
+        with:
+          path: |
+            psc0/.lake
+            psc0/v7-native/.lake
+          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/lakefile.lean') }}-${{ github.sha }}
+      - name: Run existing parser corpus and native checked compiler cases in one process
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native_checks | tee ../dist/pscv0-native/checks.log
+          .lake/build/bin/pscv0_native --version | tee ../dist/pscv0-native/native-version.json
+          .lake/build/bin/pscv0_native --emit ../dist/pscv0-native/application.ps ../dist/pscv0-native/application.ts | tee ../dist/pscv0-native/emit.log
+      - name: Compile and run the small emitted application with pinned TypeScript
+        run: |
+          set -euo pipefail
+          npm install --prefix "$RUNNER_TEMP/pscv0-native-tools" --ignore-scripts --no-audit --no-fund --no-package-lock typescript@7.0.2
+          TSC="$RUNNER_TEMP/pscv0-native-tools/node_modules/.bin/tsc"
+          "$TSC" --version | tee ../dist/pscv0-native/typescript-version.txt
+          grep -Fx 'Version 7.0.2' ../dist/pscv0-native/typescript-version.txt
+          "$TSC" --ignoreConfig ../dist/pscv0-native/application.ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/application.js | tee ../dist/pscv0-native/runtime.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: pscv0-v7-native-${{ github.sha }}
+          path: psc0/dist/pscv0-native/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,16 +1,6 @@
 name: PSC0 v7 M1 parser ownership (Linux compiler only)
 on:
-  push:
-    branches: [psc0/pscv0-v7-m1-parser-ownership-v1]
-    paths:
-      - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
-      - 'psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean'
-      - 'psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean'
-      - 'psc0/packages/foundation/src/**'
-      - 'psc0/scripts/Pscv0M1Harness.lean'
-      - 'psc0/scripts/pscv0-m1-cases.json'
-      - 'psc0/scripts/pscv0-m1-check.mjs'
-      - 'psc0/packages/syntax/src-ps/Ps/Syntax/Cursor.ps'
+  # Historical compiler regeneration is an explicit migration/qualification action.
   workflow_dispatch:
 permissions:
   contents: read

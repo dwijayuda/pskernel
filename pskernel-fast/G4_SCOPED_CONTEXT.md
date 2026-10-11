@@ -19,13 +19,9 @@ substitution, checked sort observations, level parameter validity, and a real
 typing judgment. No public checker may treat the result of `rawDomainAt` as a
 verified type. No declaration or proof acceptance is implemented.
 
-The next stage is an exact lifting/opening/closing model and a scoped
-environment-backed `infer/check` engine with proper type validation, resource
-classification and immutable admission. G4.0's positive-only symbolic level
-normalizer remains conservative; G4.1's candidate catalog remains untrusted;
-G4.2's Sort/Pi fragment is not the general inference engine.
+G4.3 has now also implemented exact binder-aware lifting, scope-certified current-context lookup and substitution with a checked-scope **structural** entry point. See [the source-matched G4.3 continuation evidence](G4_BINDER_EVIDENCE.md), validated at [run 38115032789](https://github.com/dwijayuda/pskernel/actions/runs/38115032789). G4.0's symbolic-level normalizer remains incomplete, G4.1's candidate catalog remains untrusted, and G4.2's Sort/Pi fragment is not a dependent inference engine.
 
-CI state: structural binder-frame source `df800d5f` is independently validated by run 38110413629. New capture-avoiding lifting source/test candidate `9ddd8ed1` awaits an inspected completed CI result; no claim of compilation or proof validation yet. No full Lean compatibility, metatheory consistency or self-host status is claimed.
+**Remaining hard boundary:** prove typed local-context formation, checked type lookup, WHNF and DefEq for actual Lean 4.35 expression rules, with a sealed checked environment; structural certificates must NEVER authorize theorem acceptance. No complete compatibility, model consistency or self-host status is claimed.
 
 ## Validated G4.3 structural-binder checkpoint
 

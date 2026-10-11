@@ -478,7 +478,8 @@ def psElabDeclarationBatchWithOrigins
           (psElabBatchOriginAt sourceIndex source members Option.none))
   | Except.error error =>
       match error with
-      | PsElabError.structuralRecursionInvariantArgument =>
+      | PsElabError.structuralRecursionInvariantArgument
+      | PsElabError.structuralRecursionDependentParameter =>
           match source with
           | PsSyntaxDeclaration.definition name binders type value span =>
               match psElabPlanStructuralNormalizationWithOrigin

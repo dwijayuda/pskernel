@@ -131,9 +131,42 @@ theorem dependent_identity_beta_preserves_type
   · simpa [liftBVars_one_instantiate_cancel] using hApp
   · simpa [KExpr.instantiateBVar, liftBVars_zero] using valueTyped
 
+
+/--
+Checked zeta reduction of the newest, potentially dependent binder.
+The exact executing `letE` rule, rather than a second invented let rule,
+inferred the original term's type from the body `bvar 0`. Replacing that
+binder with its well-typed value preserves the same type.
+
+This is a second bounded subject-reduction case, NOT arbitrary typed
+substitution for all possible binder bodies.
+-/
+theorem dependent_let_variable_zeta_preserves_type
+    (params : List KName) (ctx : List KExpr)
+    (contextWF : GeneralPiContextWF params ctx)
+    (name : KName) (domain value : KExpr) (level : ULevel)
+    (domainTyped : GeneralPiRule params ctx domain (.sort level))
+    (valueTyped : GeneralPiRule params ctx value domain) :
+    GeneralPiRule params ctx
+      (.letE name domain value (.bvar 0) false) domain ∧
+    GeneralPiRule params ctx
+      ((KExpr.bvar 0).instantiateBVar value 0) domain := by
+  have hBound : GeneralPiRule params (domain :: ctx)
+      (.bvar 0) (domain.liftBVars 1 0) :=
+    .bound (domain :: ctx) 0 domain rfl
+  have hLet : GeneralPiRule params ctx
+      (.letE name domain value (.bvar 0) false)
+      ((domain.liftBVars 1 0).instantiateBVar value 0) :=
+    .letE ctx name domain value (.bvar 0) false rfl level
+      (domain.liftBVars 1 0) domainTyped valueTyped hBound
+  constructor
+  · simpa [liftBVars_one_instantiate_cancel] using hLet
+  · simpa [KExpr.instantiateBVar, liftBVars_zero] using valueTyped
+
 #print axioms liftBVars_one_instantiate_cancel
 #print axioms liftBVars_zero
 #print axioms bound_zero_substitution_preserves_type
 #print axioms dependent_identity_beta_preserves_type
+#print axioms dependent_let_variable_zeta_preserves_type
 
 end PSKernelFast.Proof

@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.IndexedExpr
+import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
 import Ps.KernelCore.Checker.Session
 
 /- Native checker regression only. No bootstrap or self-host tests.
@@ -91,4 +92,35 @@ def main : IO Unit := do
                   if !(Nat.beq id3 id4) then
                     throw (IO.userError "C0 radix-16 interning lost duplicate")
   IO.println "C0_PERF_REGRESSION radix_indexed_interning=pass"
+  -- Exercise the >8-entry threshold, exact-name collisions and updates in
+  -- the C0 radix-16 declaration index. No self-hosting involved.
+  let mut decls := PsKernelEnvironmentIndex.empty
+  for k in [:40] do
+    let name := PsKernelName.num PsKernelName.anonymous k
+    let base : PsKernelConstantBase :=
+      { name := name, levelParams := [], type := sort0 }
+    let axiom : PsKernelAxiomInfo :=
+      { base := base, isUnsafe := false }
+    decls := psKernelEnvironmentIndexInsert decls
+      (PsKernelConstantInfo.axiomInfo axiom)
+  for k in [:40] do
+    let name := PsKernelName.num PsKernelName.anonymous k
+    let bucket := psKernelEnvironmentIndexFind decls name
+    let found := bucket.any (fun info =>
+      psKernelNameEq (psKernelConstantInfoName info) name)
+    if !found then
+      throw (IO.userError "C0 radix declaration index lost a name")
+  let replaceName := PsKernelName.num PsKernelName.anonymous 5
+  let replacement : PsKernelConstantInfo :=
+    PsKernelConstantInfo.axiomInfo
+      { base := { name := replaceName, levelParams := [], type := sort1 },
+        isUnsafe := false }
+  let updated := psKernelEnvironmentIndexInsert decls replacement
+  let foundUpdated := (psKernelEnvironmentIndexFind updated replaceName).any
+    (fun info => psKernelNameEq (psKernelConstantInfoName info) replaceName &&
+      psKernelExprEqual (psKernelConstantInfoType info) sort1)
+  if !foundUpdated then
+    throw (IO.userError "C0 radix declaration index lost replacement")
+  IO.println "C0_PERF_REGRESSION radix_declaration_index=pass"
+
 

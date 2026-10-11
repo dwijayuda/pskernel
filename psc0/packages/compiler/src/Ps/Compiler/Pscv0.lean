@@ -16,15 +16,21 @@ def psCompilerElaboratePscv0 (program : PsSyntaxProgram) :
     Except PsCompilerError PsElabModuleResult :=
   (psElabProgram psSelfHostProdPreludeEnvironment program).mapError PsCompilerError.elaboration
 
+def psCompilerPscv0ElabError : PsElabError → String
+  | .atDeclaration name error =>
+      psCompilerPscv0ElabError error ++ " (in " ++ psNameToString name ++ ")"
+  | .scope message => "PSCV0-SCOPE: " ++ message
+  | .invalidArgument message => "PSCV0-ARGUMENT: " ++ message
+  | .emptyCallUnsupported => "PSCV0-APP-03"
+  | .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"
+  | .typeMismatch => "PSCV0-TYPE-MISMATCH"
+  | .unknownName name => "PSCV0-UNKNOWN-NAME: " ++ psNameToString name
+  | _ => "PSCV0-ELABORATION-FAILED"
+
 def psCompilerPscv0Error : PsCompilerError → String
   | .translation _ => "PSCV0-TRANSLATION-FAILED"
   | .leanFrontend _ => "PSCV0-LEAN-FRONTEND-FAILED"
   | .proofScriptFrontend _ => "PSCV0-FRONTEND-FAILED"
-  | .elaboration (.scope message) => "PSCV0-SCOPE: " ++ message
-  | .elaboration (.invalidArgument message) => "PSCV0-ARGUMENT: " ++ message
-  | .elaboration .emptyCallUnsupported => "PSCV0-APP-03"
-  | .elaboration .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"
-  | .elaboration .typeMismatch => "PSCV0-TYPE-MISMATCH"
-  | .elaboration _ => "PSCV0-ELABORATION-FAILED"
+  | .elaboration error => psCompilerPscv0ElabError error
   | .admission _ => "PSCV0-ADMISSION-CODEC-FAILED"
   | .erasure _ => "PSCV0-ERASURE-FAILED"

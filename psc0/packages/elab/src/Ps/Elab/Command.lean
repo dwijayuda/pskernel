@@ -135,8 +135,10 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
   | .omitCmd names _ => psScopeInclusion state names false
   | .declaration source =>
     let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
-    let batch ← psElabDeclarationBatch state.environment source
-    let environment ← psAddDeclarationList state.environment batch.declarations
+    let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
+    let batch ← (psElabDeclarationBatch state.environment source).mapError (.atDeclaration name)
+    let environment ← (psAddDeclarationList state.environment batch.declarations).mapError
+      (.atDeclaration name)
     let namespaces := batch.declarations.foldl (fun acc decl =>
       -- A declaration registers its parent namespaces. Constructors and
       -- projections also register their inductive/structure namespace.

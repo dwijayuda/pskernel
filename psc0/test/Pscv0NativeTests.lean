@@ -92,9 +92,10 @@ private def application : String :=
   "end Proofs\n" ++
   "section Recursive\n" ++
   "variable (seed: Nat)\n" ++
-  "function sectionFold(xs: List Nat): Nat := match xs with\n" ++
+  "function sectionFold(xs: List Nat): Nat := match xs with {\n" ++
   "  | List.nil => seed\n" ++
   "  | List.cons head tail => sectionFold(tail)\n" ++
+  "}\n" ++
   "end Recursive\n" ++
   "const recursiveSection: Nat := sectionFold(37, List.cons(1, List.nil))\n" ++
   "function strictDefault{{A: Type}}(value: Nat := 3): Nat := value\n" ++

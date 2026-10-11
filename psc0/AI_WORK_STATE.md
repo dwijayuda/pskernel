@@ -1,3 +1,15 @@
+# PSC0 AI WORK STATE — v7-only source policy integrated on primary branch
+
+## Integration checkpoint — 2026-10-11
+
+Primary development branch `psc0/pscv0-readable-selfhost-v1` was **non-force fast-forwarded** from successful bounded first-module checkpoint `8603f7dcf6af6295335c4e11912a10aac86c85a4` to `2394fc7e8ea327869b6cbe57ef41417de82e5408`. This incorporates the separate v7-only parser and historical-source-document work *without altering the already-qualified old evidence* or touching the independent kernel proof branch. User instruction is explicit: **PSCV0 v7 is the only new `.ps` language reference; no older PSC1/PSC0/previous PSCV0 source-language backwards compatibility is needed.** Frozen historical bootstrap seeds are reconstruction evidence only, not a compatibility/fallback feature.
+
+**Exact new-HEAD CI launched:** native source/10-policy-refusal test [38122341557](https://github.com/dwijayuda/pskernel/actions/runs/38122341557) and generated 20-module/Windows/RC4 candidate test [38122341583](https://github.com/dwijayuda/pskernel/actions/runs/38122341583), both source `2394fc7d`, were **in progress** at this checkpoint. Run [38120695522](https://github.com/dwijayuda/pskernel/actions/runs/38120695522) already **fully succeeded** at original source `8603f7dc`, but its result must NOT be carried forward automatically to the changed v7-only parser source. Check the new CI's actual final conclusions before marking it qualified. An updated document-only checkpoint must not be mistaken for new compiler generation.
+
+**Next:** inspect source and bridge logs; if the new integrated candidate passes, record the exact 43 generated bridge test results (prior 38 plus five new v7-only source refusals), twelve authoring/arrow tests, Windows identities and RC4 proof dependencies. Then begin the next small portable source feature/trivia-mapping milestone, not a premature whole-compiler `.ps` switch or public npm release. Preserve no-fallback admission and artifact gates.
+
+---
+
 # PSC0 AI WORK STATE — first PSCV0 v7-authored module: complete bounded CI; v7-only extension pending integration
 
 ## Latest proven checkpoint — 2026-10-11

@@ -125,6 +125,16 @@ export async function materializeAuthoring(seedDirectory,outputDirectory){
   const surface=unwrap(B.psPscv0ParseSource(true,inputs.source),'authoritative candidate PS source');
   assert.equal(previous.commentTrivia,false);assert.equal(surface.commentTrivia,false);
   assert.equal(B.psPscv0ReplayOriginal(surface),inputs.source,'source capture lost bytes');
+  // Imported modules are externally selected by the host-owned closure. The
+  // PSCV0 AST input must not silently add or reorder compiler dependencies.
+  const sourceImports=text=>text.split(/\r?\n/u).filter(line=>/^import [A-Za-z_][A-Za-z_0-9.]*$/u.test(line));
+  assert.deepEqual(sourceImports(inputs.source),sourceImports(inputs.baseline),
+    'PSCV0 source import closure drift from the selected predecessor');
+  // The generated PSCV0 parser/lowerer owns the authoritative syntax module.
+  // This typed syntax value is passed directly to PSC0 elaboration; the Lean
+  // text below is a checked readable projection, not a second compiler input.
+  assert.equal(typeof B.psPscv0LowerModule,'function','portable PSCV0 AST lowering missing');
+  const parsedModule=unwrap(B.psPscv0LowerModule(surface),'generated PSCV0 source AST');
   const readable=unwrap(B.psPscv0PrintSurfaceModule(false,surface),'readable Lean projection');
   const lowered=unwrap(B.psPscv0LowerToLean(true,inputs.source),'compiler input projection');
   const roundtrip=unwrap(B.psPscv0TranslateReadable(false,true,readable),'owned Lean reader round trip');
@@ -132,9 +142,10 @@ export async function materializeAuthoring(seedDirectory,outputDirectory){
   for(const [file,value] of [['readable.lean',readable],['lowered.lean',lowered],['roundtrip.ps',roundtrip]]){
     assert.equal(value,await readFile(path.join(root,'dist/pscv0-native-authoring',file),'utf8'),'native/generated disagreement: '+file);
   }
-  return record(inputs,{readable,lowered,roundtrip},outputDirectory,
+  const recorded=await record(inputs,{readable,lowered,roundtrip},outputDirectory,
     {stage:'current-generated-surface-bootstrap',source:report.source,jsSha256:report.bridgeJsSha256,
       tsSha256:report.bridgeTypeScriptSha256,builderJsSha256:report.builderJsSha256,nativeFallback:false});
+  return {...recorded,parsedModule};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   if(process.argv[2]==='--native-preflight'){

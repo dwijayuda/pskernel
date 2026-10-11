@@ -1,3 +1,21 @@
+# PSC0 AI WORK STATE — direct generated v7 AST handoff and APP-04 verification
+
+## Current milestone: 2026-10-11 — source model passed; generated direct-AST pipeline pending
+
+**Sole language authority remains PSCV0 v7**, SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`, Lean pin `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. No old PSC1/older PSCV0 `.ps` compatibility profiles or parser fallback. Historical fixed-point sources are immutable qualified bootstrap artifacts, not new source-language requirements.
+
+**Proved model / native positive:** abstract APP-04 eight-lemma model checked axiom-free [38124512189](https://github.com/dwijayuda/pskernel/actions/runs/38124512189). Source-owned recursive application printer in `Ps.Syntax.Pscv0.Surface.lean` passed [38124980640](https://github.com/dwijayuda/pskernel/actions/runs/38124980640), source `0e664233f90895e6baa90d377b2821e5fd4d01ce`. Exact RC4 accepted the actually produced `(add 1) 2` and checked the generated `grouped = 3` proof with no axioms. The `.ps` printer/parser preserved nested grouping; mixed native/postfix calls were tested. This is a real native source/Lean correspondence, **not** a generated JS backend proof.
+
+**Architecture/root fix:** avoid the historical Lean reader as a second semantic compiler input. `Ps.Syntax.Pscv0.Module.psPscv0LowerModule` already supplies `PsSyntaxModule` from the **generated PSCV0 JS** source parser. The qualified old compiler exposes a pure `psCompilerPreparationStepParsedWithOrigins(state, sourceModule)` and elaborates with `psElabModuleWithOrigins`; it does not require a text parse. The new bridge now passes this owned, untrusted syntax module **directly** to existing elaboration/preparation, with a mandatory no-fallback check on the `pscv0` source kind. Readable Lean remains a separate independently checked view. Source imports must exactly match the frozen selected module's imported source closure during first-module migration; full source/module manifest identity remains a later gate. No kernel or trust-policy change.
+
+**New executable acceptance under development:** generated JS `B.psPscv0ParseSource` + `B.psPscv0LowerModule` crosses into retained compiler `C.psCompilerPreparationStepParsedWithOrigins`, followed by complete typechecking, canonical admissions, independent `pskernel-core` check, TypeScript 7.0.2 emission/compilation, and actual JavaScript runtime `grouped = 3`. The exact same test runs on Linux and Windows and records checked source/admission/runtime digests. This is an *architectural end-to-end* validation of the semantic AST boundary, not a test-output change. Full generated 20-module bridge and RC4 correspondence are required before declaring the changed source qualified; no results claimed yet.
+
+**Stable prior M1:** integrated v7-only branch [38122341583](https://github.com/dwijayuda/pskernel/actions/runs/38122341583) completed Linux/Windows/RC4 successfully at source `2394fc7d`. New model/direct-AST source needs independent qualification. No complete 64-module v7 `.ps` compiler migration, new public CLI, full Standard digest or C2/C3 compiler-only fixed point yet.
+
+**Next:** examine actual newly triggered cloud CI rather than assuming constructor ABI compatibility across the generated PSCV0 and retained compiler runtimes. If in-memory cross-runtime data representation fails, establish a canonical typed-data ABI and source-derived proof/admission identity rather than falling back to the legacy Lean text parser. Preserve both old validated branch and its proof history.
+
+---
+
 # PSC0 AI WORK STATE — model-first v7 source APP-04 printer implementation
 
 ## 2026-10-11 source compiler milestone in progress

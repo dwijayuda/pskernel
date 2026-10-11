@@ -48,6 +48,9 @@ test('candidate compiler module really comes from its authoritative PS source',a
   assert.equal(input.rawSha256,receipt.sourceSha256);
   assert.equal(report.authoring.selectedPsModules,1);
   assert.equal(report.authoring.noFallback,true);
+  assert.equal(report.authoring.directGeneratedSourceAstHandoff,true);
+  assert.equal(report.authoring.compilerInput,'generated-v7-pscv0-syntax-module');
+  assert.equal(report.authoring.readableLeanProjectionOnly,true);
   assert.equal(receipt.candidateSourceAuthority,'ps');
   for(const [file,digest] of Object.entries(receipt.products))assert.equal(hash(await readFile(path.join(authoring,file))),digest);
   assert.equal(typeof B.psTranslationMapError,'function','candidate helper not generated');

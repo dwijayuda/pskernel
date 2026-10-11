@@ -123,6 +123,49 @@ test('wrong returned value and incompatible action error types are rejected by t
 test('input budget is a refusal, not success with truncated source',()=>{
   const result=parse(' '.repeat(1048577));assert.equal(tag(result),'error');assert.equal(result.error,'PSCV0-SOURCE-BYTE-BUDGET');
 });
+// An actual PSCV0 source module crosses the generated-reader -> existing
+// elaborator boundary as AST, without asking the old Lean source parser to
+// reconstruct parentheses or permissions from a pretty-printed text view.
+test('v7 APP-04 generated AST enters checked compiler directly and runs correctly',async()=>{
+  const source='function add(x: Nat, y: Nat): Nat := Nat.add(x, y)\n'+
+    'const grouped: Nat := (add(1))(2)\n';
+  const selected=ok(B.psPscv0ParseSource(true,source),'parse v7 source');
+  const sourceModule=ok(B.psPscv0LowerModule(selected),'lower selected source AST');
+  const initial=C.psCompilerPreparationStart(C.PsCompilerSourceKind.lean);
+  const stepped=ok(C.psCompilerPreparationStepParsedWithOrigins(initial,sourceModule),
+    'elaborate generated v7 AST');
+  const prepared=ok(C.psCompilerPreparationFinish(stepped.state),
+    'finish direct AST compiler preparation');
+  const admissions=ok(C.psCompilerAdmissionsFromPrepared(prepared),
+    'canonical admissions from direct AST');
+  const decision=K.checkCanonicalAdmissions(admissions,{timeoutMs:120000});
+  assert.equal(decision.accepted,true,json(decision));
+  const ts=ok(C.psCompilerTypeScriptFromPrepared(prepared),'emit from checked direct AST');
+  const dir=path.join(dist,'app04-ast-runtime-'+process.platform);
+  await mkdir(dir,{recursive:true});
+  await writeFile(path.join(dir,'index.ts'),ts);
+  await writeFile(path.join(dir,'package.json'),'{"type":"module"}\n');
+  const req=createRequire(path.join(installed,'package.json'));
+  const metaFile=req.resolve('typescript/package.json');
+  const meta=JSON.parse(await readFile(metaFile,'utf8'));
+  assert.equal(meta.version,'7.0.2');
+  const cli=path.join(path.dirname(metaFile),typeof meta.bin==='string'?meta.bin:meta.bin.tsc);
+  const result=spawnSync(process.execPath,[cli,'--ignoreConfig',path.join(dir,'index.ts'),
+    '--target','ES2022','--module','ES2022','--moduleResolution','bundler',
+    '--strict','--skipLibCheck','--noEmitOnError','--pretty','false'],
+    {encoding:'utf8',timeout:120000,maxBuffer:4*1024*1024});
+  assert(!result.error&&result.status===0,String(result.error||result.stderr||result.stdout));
+  const executable=await import(pathToFileURL(path.join(dir,'index.js')).href);
+  assert.equal(executable.grouped,3n,'v7 grouped-curried runtime must equal pinned Lean source');
+  const evidence={sourceRevision:process.env.GITHUB_SHA,platform:process.platform,
+    sourceSha256:sha(source),generatedBridgeSha256:report.bridgeJsSha256,
+    parsedWith:'generated PSCV0 v7 JavaScript',compilerInput:'owned PsSyntaxModule, no old Lean parse',
+    checkedProvider:decision.provider,canonicalAdmissionsSha256:sha(admissions),
+    typescript:'7.0.2',result:'3',noTextReparse:true,kernelAdmitted:true,
+    fullV7Conformance:false,newCompilerFixedPoint:false};
+  await writeFile(path.join(dist,'app04-ast-'+process.platform+'.json'),JSON.stringify(evidence,null,2)+'\n');
+  console.log('PSCV0_APP04_AST_CHECKED_RUNTIME: PASS '+JSON.stringify(evidence));
+});
 test('generated bridge output compiles, selected kernel admits fixtures, and runtime sequencing is correct',async()=>{
   const joined=fixtures.map(f=>lower(f.ps)).join('\n');
   const prepared=prepare(joined);

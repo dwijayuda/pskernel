@@ -78,8 +78,17 @@ async function prepareOne(state,module,stage){
   console.log('PSCV0_BRIDGE_PREPARING: '+stage+' '+module.module+' ['+module.sourceKind+']');const begin=Date.now();
   const key=module.module+':'+module.consumedSha256;
   let next;
-  if(parsed.has(key))next=unwrap(compiler.psCompilerPreparationStepParsedWithOrigins(state,parsed.get(key)),'PREPARE '+module.module).state;
-  else next=unwrap(compiler.psCompilerPreparationStep(state,module.source),'PREPARE '+module.module);
+  if(module.sourceKind==='pscv0'){
+    assert(parsed.has(key),'authoritative PSCV0 source AST missing; old Lean parser fallback forbidden');
+    next=unwrap(compiler.psCompilerPreparationStepParsedWithOrigins(state,parsed.get(key)),
+      'PREPARE_V7_AST '+module.module).state;
+  }else if(parsed.has(key)){
+    next=unwrap(compiler.psCompilerPreparationStepParsedWithOrigins(state,parsed.get(key)),
+      'PREPARE_RETAINED_LEAN_AST '+module.module).state;
+  }else{
+    assert.equal(module.sourceKind,'lean','unregistered module source kind');
+    next=unwrap(compiler.psCompilerPreparationStep(state,module.source),'PREPARE '+module.module);
+  }
   progress.prepared.push({stage,module:module.module,elapsedMs:Date.now()-begin});
   console.log('PSCV0_BRIDGE_PREPARED: '+module.module+' '+(Date.now()-begin)+'ms');await checkpoint();return next;
 }
@@ -99,7 +108,10 @@ async function emitStage(state,modules,stage,directory,authoring){
     existingCompilerSourceFilesUnchanged:old.length,newPortableSourceFiles:added,
     closure:modules.map(({source,...record})=>record),
     ...(authoring?{authoring:{manifestSha256:authoring.receipt.manifestSha256,modules:[authoring.receipt],selectedPsModules:1,noFallback:true,
-      sharedPrefixModules:forkIndex,sharedPrefixPreparedOnce:true,surfaceBootstrapJsSha256:authoring.receipt.surfaceSeed.jsSha256}}:{}),
+      sharedPrefixModules:forkIndex,sharedPrefixPreparedOnce:true,
+      directGeneratedSourceAstHandoff:true,compilerInput:'generated-v7-pscv0-syntax-module',
+      readableLeanProjectionOnly:true,
+      surfaceBootstrapJsSha256:authoring.receipt.surfaceSeed.jsSha256}}:{}),
     bridgeTypeScriptSha256:sha(ts),bridgeJsSha256:sha(await readFile(path.join(directory,'index.js'))),admissionsSha256:sha(admissions),
     typescript:'7.0.2',elapsedMs:Date.now()-start,kernelRegenerated:false,existingCompilerRebuilt:false,newInstalledFixedPoint:false,bridgeKernelAdmitted:false};
   await writeFile(path.join(directory,'build-report.json'),JSON.stringify(report,null,2)+'\n');
@@ -127,7 +139,14 @@ try{
     surfaceSeedJsSha256:authoring.receipt.surfaceSeed.jsSha256,loweredLeanSha256:sha(authoring.lowered),
     source:consumed(authoring.lowered),consumedSha256:sha(consumed(authoring.lowered))});
   const chosen=candidate[forkIndex];
-  parsed.set(chosen.module+':'+chosen.consumedSha256,unwrap(compiler.psCompilerParseSource(compiler.PsCompilerSourceKind.lean,chosen.source),'SELECTED_PS_PREFLIGHT'));
+  // Semantic source authority is the generated PSCV0 syntax tree. Passing it
+  // directly to the existing elaboration step avoids a second lossy Lean-text
+  // parse and does not bypass admission or any kernel/host obligation.
+  // The Lean text above remains an independently checked projection.
+  assert(authoring.parsedModule&&typeof authoring.parsedModule==='object',
+    'generated PSCV0 parsed module must exist; no old Lean parser fallback');
+  parsed.set(chosen.module+':'+chosen.consumedSha256,authoring.parsedModule);
+  console.log('PSCV0_SOURCE_AST_HANDOFF: generated PSCV0 source AST, direct checked elaboration');
   state=shared;
   for(const module of candidate.slice(forkIndex))state=await prepareOne(state,module,'ps-authoring-candidate');
   await emitStage(state,candidate,'ps-authoring-candidate',output,authoring);

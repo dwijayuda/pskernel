@@ -31,4 +31,4 @@ Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel
 
 ## Next
 
-Develop a precise scoped term-store specification and prove encode/decode and interning invariants. Benchmark representative node-sharing and beta-heavy workloads on identical input/runners. Only then introduce independent checked-inference/WHNF/DefEq prototypes and complete versioned Lean 4.35 semantics. Keep any proof-acceptance entry point **absent** until a legitimate fully checked admission layer exists.
+Verify the new G4.3 lifting candidate in cloud CI, then construct a scope-correct local-domain lookup, exact substitution and genuinely dependent inference; keep the stored domains distinct from checked types. Complete symbolic level equivalence/inequality, guarded DefEq/WHNF and a sealed checked declaration environment before any admission capability. Only evaluate performance on representative *real checker* operations. Keep proof admission **absent** until fully checked admission and associated soundness gates exist.

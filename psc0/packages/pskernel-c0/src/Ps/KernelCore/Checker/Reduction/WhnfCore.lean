@@ -62,7 +62,9 @@ def psKernelWhnfCountLambdas
     (argCount : Nat) :
     Prod PsKernelExpr Nat :=
   psKernelWhnfCountLambdasWithFuel
-    (Nat.succ (psKernelExprNodeCount current))
+    -- At most argCount consecutive leading lambdas can be consumed.
+    -- Avoid counting every node in the potentially enormous lambda body.
+    (Nat.succ argCount)
     current
     argCount
     0

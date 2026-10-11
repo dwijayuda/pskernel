@@ -376,12 +376,13 @@ def psKernelExprInstantiate
 def psKernelExprInstantiate1
     (expr : PsKernelExpr)
     (replacement : PsKernelExpr) : PsKernelExpr :=
-  if psKernelExprHasLooseBVar expr then
-    psKernelExprInstantiate
-      expr
-      (List.cons replacement List.nil)
-  else
+  -- The changed-result traversal itself preserves unchanged subtrees.
+  -- Avoid the extra complete loose-variable prepass on the beta/zeta hot path.
+  psKernelExprInstantiateAt
     expr
+    0
+    (List.cons replacement List.nil)
+    0
 
 def psKernelExprInstantiateRev
     (expr : PsKernelExpr)

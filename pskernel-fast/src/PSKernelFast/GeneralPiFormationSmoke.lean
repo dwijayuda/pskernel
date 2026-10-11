@@ -66,6 +66,26 @@ def generalPiFormationSmoke : IO Unit := do
   | .error _ =>
       throw <| IO.userError "previous certified dependent fragment declined"
 
+  -- Lambda introduction: the type is synthesized from ACTUAL checked body
+  -- inference, not a caller-supplied Pi or inferred-only advertisement.
+  let identity : KExpr :=
+    .lam a (.sort one)
+      (.lam x (.bvar 0) (.bvar 0) .default) .default
+  expectType (inferClosedGeneralPi [] identity) dependent
+
+  let simpleLambda : KExpr :=
+    .lam a (.sort one) (.bvar 0) .default
+  expectType (inferClosedGeneralPi [] simpleLambda)
+    (.forallE a (.sort one) (.sort one) .default)
+
+  let unknownLambda : KExpr :=
+    .lam a (.sort (.param unknown)) (.bvar 0) .default
+  expectError (inferClosedGeneralPi [] unknownLambda) .malformed
+  let unsupportedLambdaBody : KExpr :=
+    .lam a (.sort .zero)
+      (.app (.bvar 0) (.sort .zero)) .default
+  expectError (inferClosedGeneralPi [] unsupportedLambdaBody) .unsupported
+
   -- Context formation has to run actual inference: it cannot be extended
   -- by a dangling variable or a lambda with no applicable type rule.
   let empty := GeneralPiContext.empty []
@@ -105,8 +125,8 @@ def generalPiFormationSmoke : IO Unit := do
     (.forallE a (.sort .zero)
       (.lam x (.sort .zero) (.bvar 0) .default) .default)) .unsupported
 
-  IO.println "PSKernel-Fast G4.4 restricted general-domain Pi formation PASS"
-  IO.println "G4.4 limits: syntactic Sort only, no DefEq, lambda/app, full checking or admission"
+  IO.println "PSKernel-Fast G4.4 certified Pi and lambda-introduction fragment PASS"
+  IO.println "G4.4 limits: syntactic Sort only, no application/DefEq or proof admission"
 
 end PSKernelFast.Core
 

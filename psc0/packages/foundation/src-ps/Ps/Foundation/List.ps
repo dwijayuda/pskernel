@@ -49,7 +49,7 @@ function psListMap {alpha: Type} {beta: Type}(
 
 function psListMapExcept {alpha: Type} {beta: Type} {error: Type}(
   convert: alpha -> Except error beta, values: List alpha
-): Except error (List beta) := {
+): Except(error, List(beta)) := {
   match values with {
     | List.nil => Except.ok(List.nil)
     | List.cons value rest =>
@@ -77,7 +77,7 @@ function psListTake {alpha: Type}(count: Nat, values: List alpha): List alpha :=
 
 function psListZip {alpha: Type} {beta: Type}(
   left: List alpha, right: List beta
-): List (Prod alpha beta) := {
+): List(Prod(alpha, beta)) := {
   match left with {
     | List.nil => List.nil
     | List.cons value rest =>

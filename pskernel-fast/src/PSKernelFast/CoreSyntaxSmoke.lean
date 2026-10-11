@@ -1,4 +1,4 @@
-import PSKernelFast.CoreSyntax
+import PSKernelFast.CoreSyntaxProofs
 
 namespace PSKernelFast.Core
 

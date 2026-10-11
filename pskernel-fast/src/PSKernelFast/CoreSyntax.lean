@@ -20,7 +20,7 @@ inductive KName where
   | anonymous
   | str (parent : KName) (value : String)
   | num (parent : KName) (value : Nat)
-  deriving Repr, Inhabited, BEq, Hashable
+  deriving Repr, Inhabited, BEq, DecidableEq, Hashable
 
 inductive ULevel where
   | zero
@@ -95,7 +95,7 @@ def ULevel.validParams (params : List KName) : ULevel → Bool
       ULevel.validParams params left && ULevel.validParams params right
   | .imax left right =>
       ULevel.validParams params left && ULevel.validParams params right
-  | .param name => params.contains name
+  | .param name => decide (name ∈ params)
   | .mvar _ => false
 
 /--

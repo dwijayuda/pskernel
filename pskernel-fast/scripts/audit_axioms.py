@@ -11,7 +11,8 @@ import re
 import sys
 
 REPORTED = re.compile(
-    r"'(?P<theorem>[^']+)' depends on axioms:\s*\[(?P<axioms>[^\]]*)\]"
+    r"'(?P<theorem>[^']+)' (?:depends on axioms:\s*\[(?P<axioms>[^\]]*)\]"
+    r"|(?P<none>does not depend on any axioms))"
 )
 ALLOWED = {"propext", "Classical.choice", "Quot.sound"}
 THEOREMS = {
@@ -59,7 +60,7 @@ def audit(content: str) -> None:
     for result in REPORTED.finditer(content):
         name = result.group("theorem")
         ax = {
-            item.strip() for item in result.group("axioms").split(",")
+            item.strip() for item in (result.group("axioms") or "").split(",")
             if item.strip()
         }
         if name in records:
@@ -84,6 +85,11 @@ def test_fail_closed() -> None:
         for name in sorted(THEOREMS)
     )
     audit(valid)
+    # Lean prints a DIFFERENT format for axiom-free theorems.
+    axiom_free = valid.replace(
+        "depends on axioms: [propext, Quot.sound]",
+        "does not depend on any axioms", 1)
+    audit(axiom_free)
     for bad in (
         valid.replace("Quot.sound", "sorryAx", 1),
         valid.replace("Quot.sound", "Axiom.ofUnchecked", 1),

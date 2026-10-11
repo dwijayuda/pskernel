@@ -292,7 +292,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-DATA: constructor parameters must remain uniform",
     "PSCV0-DATA: indexed constructor requires a result type",
     "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH",
-    "PSCV0-TYPE-MISMATCH", "PSCV0-ELABORATION", "PSCV0-ERASURE", "PSCV0-TYPE-MISMATCH"]
+    "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "PSCV0-ERASURE", "PSCV0-TYPE-MISMATCH"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))

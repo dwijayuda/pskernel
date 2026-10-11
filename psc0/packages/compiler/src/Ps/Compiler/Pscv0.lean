@@ -39,6 +39,12 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .emptyCallUnsupported => "PSCV0-APP-03"
   | .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"
   | .typeMismatch => "PSCV0-TYPE-MISMATCH"
+  | .structuralRecursionInvariantArgument =>
+      "PSCV0-RECURSION: argument must equal its child index or invariant value"
+  | .structuralRecursionDependentParameter =>
+      "PSCV0-RECURSION: invariant parameter depends on a varying index or major"
+  | .structuralRecursionNotDecreasing =>
+      "PSCV0-RECURSION: recursive major must be a direct recursive field"
   | .unknownName name => "PSCV0-UNKNOWN-NAME: " ++ psNameToString name
   | _ => "PSCV0-ELABORATION-FAILED"
 

@@ -34,7 +34,7 @@ def psErasurePlanRecursion (scope : PsErasureScope) (family : PsName)
   if varying.eraseDups.length != varying.length then none else do
     if minors.any (fun minor => varying.any (fun id =>
         !(psExprAlphaEq minor (psExprAbstractFVar id minor)))) then none else
-      return { family, numParams, numIndices := indices.length, majorParameter
+      return { family, numParams, numIndices := indices.length, majorParameter,
         indexParameters := positions.map (fun entry => entry.snd) }
 
 def psErasureRecursiveCall (environment : PsEnvironment)

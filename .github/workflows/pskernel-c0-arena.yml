@@ -18,3 +18,7 @@ jobs:
         run: cargo test --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml
       - name: Static lint
         run: cargo clippy --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --all-targets -- -D warnings
+      - name: Build release microbenchmark
+        run: cargo build --release --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --examples
+      - name: Run indexed-spine microbenchmark smoke
+        run: cargo run --release --quiet --manifest-path psc0/packages/pskernel-c0/experimental/arena-engine/Cargo.toml --example microbench

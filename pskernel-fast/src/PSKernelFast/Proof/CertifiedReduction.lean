@@ -76,7 +76,7 @@ theorem sourceModelTyping_step (V : Type u) [SetTheoryBasis V]
               have hDomainAnn : ad = ad' := (AnnotatedModelTerm.pi.inj hFnAnn).2.1
               cases hDomainAnn
               have result := sourceModelTyping_beta V params ρ ctx ac env
-                name style domain body bodyType arg a b ad' ab' aType aa
+                name style domain body _ arg a b _ ab' aType aa
                 hd ht hb ha hCtx
               exact ⟨ab'.instantiate aa 0, rfl, result.2.2.1, result.2.2.2⟩
   | zeta name declared value body =>

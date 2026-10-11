@@ -220,7 +220,8 @@ theorem modelPi_congr (V : Type u) [SetTheoryBasis V]
       by_cases hb : ∀ x : V, SetTheoryBasis.member x A → B x = taggedTrue V
       · have hc : ∀ x : V, SetTheoryBasis.member x A → C x = taggedTrue V :=
           fun x hx => (h x hx).symm.trans (hb x hx)
-        simp only [modelPi, taggedPropPi, hb, hc, ite_true]
+        exact ((taggedPropPi_true_iff V A B).mpr hb).trans
+          ((taggedPropPi_true_iff V A C).mpr hc).symm
       · have hc : ¬ ∀ x : V, SetTheoryBasis.member x A → C x = taggedTrue V :=
           fun hall => hb (fun x hx => (h x hx).trans (hall x hx))
         simp only [modelPi, taggedPropPi, hb, hc, ite_false]

@@ -46,7 +46,8 @@ theorem compareTypedHead_zero_budget_no_equal
     {params : List KName} (ctx : GeneralPiContext params)
     (lhs rhs : KExpr) :
     (compareTypedHead ctx lhs rhs 0).isEqual = false := by
-  simp [compareTypedHead, TypedHeadDecision.isEqual]
+  unfold compareTypedHead
+  split <;> rfl
 
 #print axioms typedHead_positive_certificate
 #print axioms compareTypedHead_zero_budget_no_equal

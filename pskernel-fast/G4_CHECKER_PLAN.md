@@ -1,6 +1,6 @@
 # PSKernel-Fast G4 — Symbolic universes and checked-inference plan
 
-**Status:** prospective design gate; implementation NOT started. Lean semantics pinned to 4.35.0-rc4 at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. No old checker/proof interfaces constrain this work.
+**Status:** partially implemented research stages. G4.0 positive symbolic equality, G4.1 unchecked catalog, G4.2 certified Sort/Pi fragment, and G4.3 structural binder frames have validated bounded checkpoints; **general dependent checking, full symbolic equivalence/inequality, checked environment, DefEq, and admission remain unimplemented**. A capture-avoiding lifting proof/test candidate at `9ddd8ed1` awaits independently inspected cloud CI. Lean semantics pinned to 4.35.0-rc4 at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. No old checker/proof interfaces constrain this work.
 
 ## Critical architectural choices
 
@@ -47,6 +47,9 @@ Positive-only symbolic normalizer and universal-assignment proof are implemented
 
 ## Immediate next implementation
 
-Create `Core/LevelNorm` and an executable symbolic universe equivalence **research-only** interface, paired with an oracle matrix and a proof that affirmative equality respects all parameter assignments. Do not mark it as a trusted kernel equality operation before that proof. Then build a strict immutable constant environment with an explicit checked/untrusted distinction.
+1. Verify the CI outcome for the new G4.3 lifting candidate and keep it as nonauthoritative structural groundwork until proven in the exact compiling code.
+2. Implement scope-correct, insertion-depth-aware local-domain lookup, full instantiation and checked inference under actual local context (not a raw-domain lookup).
+3. Complete symbolic universe equivalence/`isGEq` and define a protected checked environment distinct from G4.1's unchecked catalog. Do not turn an `unresolved` level comparison into a negative fact.
+4. Implement a semantic WHNF/DefEq witness/refinement path for real dependent expressions, then official Lean 4.35 source rule and negative differential suites before any declaration admission.
 
 G3 [validated evidence](G3_EVIDENCE.md) and G2 [performance evidence](G2_EVALUATION_EVIDENCE.md) remain the exact documented baselines.

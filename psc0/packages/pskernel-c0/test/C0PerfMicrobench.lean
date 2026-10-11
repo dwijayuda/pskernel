@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Substitution.Instantiate
+import Ps.KernelCore.Core.LocalContext
 
 /-
 Native Lean C0 performance microbenchmarks. No self-hosting or proof work.
@@ -76,3 +77,31 @@ def main : IO Unit := do
   if !(Nat.beq genericApps specializedApps) then
     throw (IO.userError "substitution counts diverged")
   IO.println s!"C0_BENCH instantiate1 generic_ms={subsEnd - subsStart} specialized_ms={c0End - c0Start} apps={specializedApps} iterations={iterations}"
+
+  let sort0 := PsKernelExpr.sort PsKernelLevel.zero
+  let mut locals := psKernelLocalContextEmpty
+  for k in [:512] do
+    let name := PsKernelName.num PsKernelName.anonymous k
+    locals := psKernelLocalContextAddLocal locals name name
+      sort0 PsKernelBinderInfo.default
+  let queries := 20000
+  let mut legacyLookupHits : Nat := 0
+  let lookupStart ← IO.monoMsNow
+  for k in [:queries] do
+    let name := PsKernelName.num PsKernelName.anonymous (k % 16)
+    match psKernelLocalContextFindIn name locals.decls with
+    | Option.some _ => legacyLookupHits := legacyLookupHits + 1
+    | Option.none => throw (IO.userError "linear local lookup missing")
+  let lookupEnd ← IO.monoMsNow
+  let mut indexedLookupHits : Nat := 0
+  let indexedStart ← IO.monoMsNow
+  for k in [:queries] do
+    let name := PsKernelName.num PsKernelName.anonymous (k % 16)
+    match psKernelLocalContextFind locals name with
+    | Option.some _ => indexedLookupHits := indexedLookupHits + 1
+    | Option.none => throw (IO.userError "indexed local lookup missing")
+  let indexedEnd ← IO.monoMsNow
+  if !(Nat.beq legacyLookupHits indexedLookupHits) then
+    throw (IO.userError "local lookup counts diverged")
+  IO.println s!"C0_BENCH locals linear_ms={lookupEnd - lookupStart} indexed_ms={indexedEnd - indexedStart} entries=512 queries={queries}"
+

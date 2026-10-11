@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build/audit/test the executable source-certificate and model-normalization path.
+"""Build/audit/test certified execution and relative search completeness.
 
 All older 232-receipt gates remain unchanged. This gate reuses the same
 strict parser/allowlist and negative-input self-tests.
@@ -13,6 +13,7 @@ MODULES = [
     "Proof/SourceCertificateSynthesis.lean",
     "Proof/CertifiedReduction.lean",
     "Proof/CertifiedNormalization.lean",
+    "Proof/SourceCertificateCompleteness.lean",
 ]
 NAMES = {
     "PSKernelFast.Proof.sourceModelTyping_annotations_unique",
@@ -26,6 +27,7 @@ NAMES = {
     "PSKernelFast.Proof.compareCertifiedWH_sound",
     "PSKernelFast.Proof.compareCertifiedWH_operational",
     "PSKernelFast.Proof.compareCertifiedWH_zero",
+    "PSKernelFast.Proof.synthesizeSourceCertificate_complete",
 }
 SMOKES = ["pskernel_fast_source_certificate_smoke", "pskernel_fast_certified_normalization_smoke"]
 

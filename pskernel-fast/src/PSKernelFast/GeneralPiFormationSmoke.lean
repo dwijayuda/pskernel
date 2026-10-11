@@ -2,6 +2,7 @@ import PSKernelFast.Proof.GeneralPiScope
 import PSKernelFast.Proof.TypedSubstitution
 import PSKernelFast.Proof.Erasure
 import PSKernelFast.Proof.ErasureTotality
+import PSKernelFast.Proof.PiModelRegime
 import PSKernelFast.GeneralPiFormation
 import PSKernelFast.DependentSortFragment
 
@@ -226,6 +227,22 @@ def generalPiFormationSmoke : IO Unit := do
   expectCertifiedError [] badLetValue .malformed
   expectCertifiedError [] nondepLet .unsupported
   IO.println "PSKernel-Fast G4.3b source/output scoped certificates PASS"
+
+
+  -- P1d source rule tests: Prop depends on the checked CODOMAIN sort,
+  -- not the domain universe. Other imax ranks remain predicative.
+  let piProp : KExpr :=
+    .forallE a (.sort .zero) (.bvar 0) .default
+  expectType (inferClosedGeneralPi [] piProp) (.sort .zero)
+  let piType : KExpr :=
+    .forallE a (.sort two) (.sort one) .default
+  expectType (inferClosedGeneralPi [] piType)
+    (.sort (.imax (.succ two) two))
+  require (numericImax 33 0 == 0 &&
+    numericImax 33 2 == 33 &&
+    numericImax 0 2 == 2)
+    "P1d numeric Pi Prop/predicative ranking regression"
+  IO.println "PSKernel-Fast P1d actual Pi Prop-regime examples PASS"
 
   IO.println "PSKernel-Fast G4.3b certified Pi/lambda/app/restricted-let fragment PASS"
   IO.println "G4.3b limits: syntactic type equality only; no DefEq/constants/nondep-let/admission"

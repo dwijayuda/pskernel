@@ -1,0 +1,15 @@
+{
+  "name": "@proofscript/pskernel-c0",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "module",
+  "proofscript": {
+    "bootstrap": false,
+    "portable": true,
+    "sourceRoots": ["src"],
+    "testRoots": ["test"],
+    "outDir": "dist",
+    "role": "experimental-performance-kernel",
+    "authoritative": false
+  }
+}

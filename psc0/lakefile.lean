@@ -26,7 +26,13 @@ lean_lib PsSyntax where
     `Ps.Syntax.PrintCommon,
     `Ps.Syntax.PrintLean,
     `Ps.Syntax.PrintProofScript,
-    `Ps.Syntax.Translate
+    `Ps.Syntax.Translate,
+    `Ps.Syntax.Pscv0.TermRead,
+    `Ps.Syntax.Pscv0.Surface,
+    `Ps.Syntax.Pscv0.Read,
+    `Ps.Syntax.Pscv0.Commands,
+    `Ps.Syntax.Pscv0.TypePrint,
+    `Ps.Syntax.Pscv0.Module
   ]
 
 lean_lib PsCore where
@@ -90,7 +96,8 @@ lean_lib PsCompiler where
   roots := #[
     `Ps.Compiler,
     `Ps.Compiler.Api,
-    `Ps.Compiler.Sh1
+    `Ps.Compiler.Sh1,
+    `Ps.Compiler.Pscv0
   ]
 
 lean_lib PsBackendTs where

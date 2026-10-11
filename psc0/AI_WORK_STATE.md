@@ -1,3 +1,21 @@
+# PSC0 AI WORK STATE — APP-04 ownership model (new isolated research branch)
+
+## 2026-10-11 abstract-model checkpoint
+
+**Branch:** `psc0/pscv0-v7-app-model-v1`, cut from primary at `8213f02ea3874f329c96855f46638717219b26e8`. This branch is deliberately separate from the failing `psc0/pscv0-v7-call-ownership-v1` prototype and the green main compiler-bridge qualification. Future `.ps` grammar remains **only PSCV0 v7**; no older ProofScript syntax/backwards-compatible parser mode is part of the target.
+
+**New diagnostic conclusion:** The `psPscv0TranslateReadable(false,true,grouped)` call fails while **reading the generated Lean code**, before it can print ProofScript. In the older `Ps.Syntax.ParseLean` code, grouped initial terms do not consistently own a following application suffix, and `psLeanApplicationWithArgument` eagerly flattens an application spine. This explains why more tweaks to PS printing alone are an inadequate general fix; the exact class of all contexts must still be established with executable checks. Historical compiler source is protected by the 69-file immutable source-closure gate, so do not casually modify the old reader to pass an isolated fixture.
+
+**New deliverables:** [PSCV0 APP-04 source-ownership architectural model](docs/PSCV0_V7_APPLICATION_OWNERSHIP_MODEL.md) plus [pinned Lean 4.35.0-rc4 abstract application-tree model](test/pscv0/reference/ApplicationOwnershipModel.lean), with eight abstract source/core grouping facts. This proves only construction-level properties, **not the correctness of the actual parser or generated backend**. A new targeted GitHub CI job checks Lean version, exact pin, theorem dependencies and lack of axioms; **no CI claim is made until its actual result is observed**.
+
+**Production design:** maintain the source-only `group`, native-whitespace app and adjacent-postfix app boundaries through a structured, precedence-owned PSCV0 syntax reader. Only lower them to existing normal `PsSyntaxTerm.app` after ownership is known. Give the Lean readable projection its own selected parser context; never use old `.ps` grammar fallback, hidden span heuristics, flattened-head reconstruction, untyped text rewrites or new kernel primitives. Printer correspondence must be tested at the AST partition level and typed Lean admission separately; preserve comments/origins, fail-closed limits and pinned environment.
+
+**Known passing bounds:** first PS compiler module on 20-module generated bridge [run 38120695522](https://github.com/dwijayuda/pskernel/actions/runs/38120695522) passed all Linux/Windows/RC4 lanes at source `8603f7dc`. Integrated v7-only policy [run 38122341583](https://github.com/dwijayuda/pskernel/actions/runs/38122341583) likewise **overall passed** at source `2394fc7d`. Still not complete v7 or full 64-module compiler source fixed point. The experimental APP-04 [run 38122847916](https://github.com/dwijayuda/pskernel/actions/runs/38122847916) passed only a narrower source case, while deeper [38122996299](https://github.com/dwijayuda/pskernel/actions/runs/38122996299) and [38124012051](https://github.com/dwijayuda/pskernel/actions/runs/38124012051) revealed the grouped Lean-reader obstruction.
+
+**Next gate:** first prove the abstract APP-04 model under RC4 via CI. Then implement an owned portable source parser/printer with explicit group ownership (not a test-specific fallback) and compile it with existing retained generated source pipeline; compare actual source AST partition, Linux/Windows generated semantics and RC4 kernel-accepted terms before integration into main. No source/CLI/seed switches, old receipts rewrites or kernel edits occur in this model branch.
+
+---
+
 # PSC0 AI WORK STATE — v7-only source policy integrated on primary branch
 
 ## Integration checkpoint — 2026-10-11

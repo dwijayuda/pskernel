@@ -1,0 +1,59 @@
+name: PSC0 PSCV0 APP-04 abstract application model
+on:
+  push:
+    branches:
+      - psc0/pscv0-v7-app-model-v1
+    paths:
+      - 'psc0/test/pscv0/reference/ApplicationOwnershipModel.lean'
+      - '.github/workflows/psc0-pscv0-app-model.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc0-app-model-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: psc0/test/pscv0/reference
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            psc0/test/pscv0/reference
+            psc0/docs/PSCV0_V7_APPLICATION_OWNERSHIP_MODEL.md
+            psc0/PSCV0_LANGUAGE_REFERENCE.md
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/test/pscv0/reference
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Check pinned Lean 4.35.0-rc4 and no-axiom application tree model
+        run: |
+          set -euo pipefail
+          lean --version | tee model-lean-version.txt
+          grep -F '4.35.0-rc4' model-lean-version.txt
+          grep -F 'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364' model-lean-version.txt
+          lean ApplicationOwnershipModel.lean | tee model-proof-output.txt
+          if grep -q 'depends on axioms:' model-proof-output.txt; then
+            echo 'Unexpected model axiom dependency'; exit 1
+          fi
+          test "$(grep -c 'does not depend on any axioms' model-proof-output.txt)" -eq 8
+      - name: Retain reference model evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-app-model-${{ github.sha }}
+          path: |
+            psc0/test/pscv0/reference/model-lean-version.txt
+            psc0/test/pscv0/reference/model-proof-output.txt
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,6 +1,6 @@
 import Ps.KernelCore.Checker.Reduction.WhnfCore
 
-def c0LegacyBeta
+def c0LegacyBetaApplied
     (fn : PsKernelExpr)
     (args : List PsKernelExpr) : PsKernelExpr :=
   let counted :=
@@ -16,6 +16,13 @@ def c0LegacyBeta
         (psKernelExprListDrop consumed args)
   | _ =>
       psKernelExprApplyArgsCheap fn args
+
+def c0LegacyBeta
+    (fn : PsKernelExpr)
+    (args : List PsKernelExpr) : PsKernelExpr :=
+  match args with
+  | List.nil => fn
+  | List.cons _ _ => c0LegacyBetaApplied fn args
 
 def c0FastBeta
     (fn : PsKernelExpr)

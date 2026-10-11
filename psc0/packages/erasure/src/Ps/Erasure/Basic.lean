@@ -736,7 +736,17 @@ def psEraseRuntimeTypeWithFuelWorker
                           (PsVerifiedIrType.function
                             [parameter]
                             result)
-            | _ =>
+            | .proof =>
+                -- Proof arguments disappear from function values just as they
+                -- disappear from applications and lambda bodies. Keep the Core
+                -- binding available when reducing the remaining dependent type.
+                let pushed := psLocalPushBinding scope.localContext name domain binder
+                let nextScope := { scope with
+                  localContext := pushed.context
+                  erasedLocals := pushed.id :: scope.erasedLocals
+                  currentDefinition := none }
+                smaller nextScope (psExprInstantiate1 body (.fvar pushed.id))
+            | .type =>
                 Except.ok PsVerifiedIrType.unknown
         | _ =>
             Except.ok PsVerifiedIrType.unknown

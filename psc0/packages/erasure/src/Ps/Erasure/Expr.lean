@@ -2161,7 +2161,7 @@ def psEraseLogicalApplication
   let some minor := view.args[3]? | throw .unsupportedApplication
   let headType ← (psInferType environment psMetaEmpty scope.localContext view.head).mapError (fun _ => PsErasureError.unsupportedApplication)
   let target ← psErasureApplyCoreType environment scope headType view.args
-  let source ← (psInferType environment psMetaEmpty scope.localContext minor).mapError (fun _ => PsErasureError.unsupportedApplication)
+  let source ← psErasureCheckedTypeView environment scope.localContext minor
   let sourceType ← psEraseRuntimeType environment scope source
   let targetType ← psEraseRuntimeType environment scope target
   if (psIrCheckTypeEqual 4096 sourceType targetType).toOption != some true then

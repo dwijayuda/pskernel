@@ -360,8 +360,7 @@ def psElabMatchWith (elaborate : PsElaborator)
   -- Reverted dependent parameters can raise the motive's universe above that
   -- of the original expected result. Infer the completed motive, not a proxy.
   let level ← psElabMatchMotiveLevel context plan.motive
-  if recursor.levelParams.length > 1 then throw .matchRecursorLevels
-  let recursorLevels := if recursor.levelParams.isEmpty then [] else [level]
+  let recursorLevels ← psElabRecursorLevels info recursor levels level
   let minorContext := psElabStructuralMatchContext context scrutinee.term expectedType plan info.numIndices
   let recursorType := psExprInstantiateLevelParams recursor.levelParams recursorLevels recursor.type
   let cursor ← psElabMatchApplyParameters context (parameters ++ [plan.motive]) recursorType

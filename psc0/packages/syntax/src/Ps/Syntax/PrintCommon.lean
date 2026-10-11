@@ -115,3 +115,19 @@ def psPrintArrowChain
         binder
         " -> "
         (psPrintArrowChain rest body)
+
+-- Parenthesize composite levels independently of the surrounding term printer.
+def psPrintSyntaxLevel : PsSyntaxLevel → String
+  | .number n => toString n
+  | .name name => name
+  | .hole => "_"
+  | .offset base n => "(" ++ psPrintSyntaxLevel base ++ " + " ++ toString n ++ ")"
+  | .max left right => "(max " ++ psPrintSyntaxLevel left ++ " " ++ psPrintSyntaxLevel right ++ ")"
+  | .imax left right => "(imax " ++ psPrintSyntaxLevel left ++ " " ++ psPrintSyntaxLevel right ++ ")"
+
+def psPrintSyntaxSort (isType : Bool) (level : PsSyntaxLevel) : String :=
+  match isType, level with
+  | true, .number 0 => "Type"
+  | false, .number 0 => "Prop"
+  | true, _ => "(Type " ++ psPrintSyntaxLevel level ++ ")"
+  | false, _ => "(Sort " ++ psPrintSyntaxLevel level ++ ")"

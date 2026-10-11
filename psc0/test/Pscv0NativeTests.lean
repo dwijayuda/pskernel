@@ -379,7 +379,26 @@ private def application : String :=
   "const saturatedNatural: Nat := Nat.sub(1, 9)\n" ++
   "const zeroDivision: Nat := Nat.div(7, 0)\n" ++
   "const unicodeLength: Nat := String.Internal.length(\"α🙂\")\n" ++
-  "const unicodeBytes: Nat := String.utf8ByteSize(\"α🙂\")\n"
+  "const unicodeBytes: Nat := String.utf8ByteSize(\"α🙂\")\n" ++
+  "namespace Universes\n" ++
+  "universe u v\n" ++
+  "function keep(A: Type u, value: A): A := value\n" ++
+  "function keepMax(A: Type (max u v), value: A): A := value\n" ++
+  "function keepSort(A: Sort (imax u v), value: A): A := value\n" ++
+  "function keepOffset(A: Type (u + 1), value: A): A := value\n" ++
+  "function keepHole(A: Type _, value: A): A := value\n" ++
+  "inductive Bag(A: Type u): Type u where { | nil | cons(head: A, tail: Bag A) }\n" ++
+  "function size(A: Type u, value: Bag A): Nat := match value with { | .nil => 0 | .cons head tail => Nat.succ(size(A, tail)) }\n" ++
+  "structure Holder(A: Type u) where { value: A }\n" ++
+  "class Echo(A: Type u) where { run: A -> A }\n" ++
+  "instance every{A: Type u}: Echo A where { run(value: A): A := value }\n" ++
+  "function reflected{A: Type u}(value: A): A := Echo.run(value)\n" ++
+  "end Universes\n" ++
+  "const universeIdentity: Nat := Universes.keep(Nat, 201)\n" ++
+  "const universeHole: Nat := Universes.keepHole(Nat, 202)\n" ++
+  "const universeSize: Nat := Universes.size(Nat, Universes.Bag.cons(203, Universes.Bag.nil))\n" ++
+  "const universeProjection: Nat := Universes.Holder.value(Universes.Holder.mk(204))\n" ++
+  "const universeInstance: Nat := Universes.reflected(205)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -449,7 +468,11 @@ private def semanticCases : IO Unit := do
     { source := "class C where { value: Nat }\ninstance : C := C.mk(0)\n" },
     { source := "class C where { value: Nat }\ninstance () : C where { value := 0 }\n" },
     { source := "class C where { value: Nat }\ninstance : C where { value := true }\n" },
-    { source := "class C where { value: Nat }\ninstance loop[C]: C where { value := C.value }\nconst bad: Nat := C.value\n" }]
+    { source := "class C where { value: Nat }\ninstance loop[C]: C where { value := C.value }\nconst bad: Nat := C.value\n" },
+    { source := "function bad(A: Type missing, value: A): A := value\n" },
+    { source := "section\nuniverse u\nfunction good(A: Type u, value: A): A := value\nend\nfunction bad(A: Type u, value: A): A := value\n" },
+    { source := "universe u u\n" },
+    { source := "universe u\nfunction bad(A: Type (u + 33), value: A): A := value\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -464,7 +487,8 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
       some "elaborate", some "elaborate",
-      some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate"]
+      some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
+      some "elaborate", some "elaborate", some "elaborate", some "parse"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -479,7 +503,9 @@ private def semanticCases : IO Unit := do
     "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH",
     "PSCV0-MATCH: pattern row", "PSCV0-SCOPE: duplicate pattern", "PSCV0-MATCH: missing feasible", "PSCV0-PARSE",
     "PSCV0-SCOPE: unknown name", "PSCV0-MATCH: missing feasible",
-    "PSCV0-PARSE", "PSCV0-DATA: instance result", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-TYPE-MISMATCH", "PSCV0-ELABORATION"]
+    "PSCV0-PARSE", "PSCV0-DATA: instance result", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-TYPE-MISMATCH", "PSCV0-ELABORATION",
+    "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
+    "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -508,7 +534,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 50 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 54 phase-specific refusals, shared-prelude isolation"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [

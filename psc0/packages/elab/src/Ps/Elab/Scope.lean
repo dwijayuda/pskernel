@@ -7,6 +7,7 @@ structure PsScopeVariable where
   dependencies : List String
 
 structure PsCommandScope where
+  levelNames : List String := []
   namePrefix : List String := []
   opened : List (List String) := []
   variables : List PsScopeVariable := []

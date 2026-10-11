@@ -101,6 +101,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   | .ascription value type _ => [value, type]
   | .call fn args _ => fn :: args.map Prod.snd
   | .reference _ => []
+  | .sortE _ _ _ => []
   | .natural _ _ => []
   | .string _ _ => []
   | .character _ _ => []

@@ -32,14 +32,16 @@ structure PsElabContext where
   instances : PsInstanceIndex
   metaContext : PsMetaContext
   structuralRecursion : Option PsElabStructuralRecursion
+  levelNames : List PsName := []
 
-def psElabContextEmpty (environment : PsEnvironment) : PsElabContext :=
+def psElabContextEmpty (environment : PsEnvironment) (levelNames : List PsName := []) : PsElabContext :=
   {
     environment := environment
     localContext := psLocalEmpty
     instances := environment.instances
     metaContext := psMetaEmpty
     structuralRecursion := Option.none
+    levelNames := levelNames
   }
 
 def psElabContextWithLocal
@@ -51,6 +53,7 @@ def psElabContextWithLocal
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := context.structuralRecursion
+    levelNames := context.levelNames
   }
 
 def psElabContextWithMeta
@@ -62,6 +65,7 @@ def psElabContextWithMeta
     instances := context.instances
     metaContext := metaContext
     structuralRecursion := context.structuralRecursion
+    levelNames := context.levelNames
   }
 
 def psElabContextWithStructuralRecursion
@@ -74,6 +78,7 @@ def psElabContextWithStructuralRecursion
     instances := context.instances
     metaContext := context.metaContext
     structuralRecursion := structuralRecursion
+    levelNames := context.levelNames
   }
 
 -- Root fields keep their established call map in every nested body. Only the

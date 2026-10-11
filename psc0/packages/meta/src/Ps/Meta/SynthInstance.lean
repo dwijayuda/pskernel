@@ -1,4 +1,5 @@
 import Ps.Core.Subst
+import Ps.Core.LevelSubst
 import Ps.Environment.Basic
 import Ps.Environment.Instances
 import Ps.Environment.LocalContext
@@ -150,12 +151,17 @@ def psPrepareInstance
     (localContext : PsLocalContext)
     (context : PsMetaContext)
     (entry : PsInstanceEntry) : PsPreparedInstance :=
+  let (context, levelsRev) := entry.levelParams.foldl
+    (fun (state : PsMetaContext × List PsLevel) _ =>
+      let fresh := psMetaFreshLevel state.fst
+      (fresh.context, fresh.level :: state.snd)) (context, [])
+  let levels := levelsRev.reverse
   psPrepareInstanceWithFuel
     environment
     localContext
     context
-    entry.value
-    entry.type
+    (psExprInstantiateLevelParams entry.levelParams levels entry.value)
+    (psExprInstantiateLevelParams entry.levelParams levels entry.type)
     []
     128
 

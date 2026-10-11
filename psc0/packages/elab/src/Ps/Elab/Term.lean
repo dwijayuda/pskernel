@@ -1,3 +1,4 @@
+import Ps.Elab.Universe
 import Ps.Elab.PatternMatrix
 
 def psElabIf
@@ -540,6 +541,7 @@ def psElabTermWithFuel
                       | Except.error error => Except.error error
                       | Except.ok application =>
                           psElabFinishApplication application expected
+            | .sortE isType level _ => psElabSort context isType level expected
             | .natural text _ =>
                 psElabNatural context text expected
             | .string text _ =>

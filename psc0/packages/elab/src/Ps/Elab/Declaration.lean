@@ -207,11 +207,12 @@ def psElabDeclarationTermCallback
 def psElabDeclarationParts
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax valueSyntax : PsSyntaxTerm) (isTheorem : Bool) :
+    (typeSyntax valueSyntax : PsSyntaxTerm) (isTheorem : Bool)
+    (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
   let binderResult ← psElabTypedBinders psElabDeclarationTermCallback
-    (psElabContextEmpty environment) binders
+    (psElabContextEmpty environment levelNames) binders
   let annotation ← psElabType psElabDeclarationTermCallback binderResult.context typeSyntax
   let valueContext := if isTheorem then annotation.context else
     psElabContextWithStructuralRecursion annotation.context
@@ -221,11 +222,13 @@ def psElabDeclarationParts
   let constraints := value.context.metaContext
   let closed := psCloseElabTypedBinders constraints binderResult.bindersRev
     (psMetaInstantiate constraints value.term) (psMetaInstantiate constraints annotation.type)
+  let closed := (psElabGeneralizeExpr closed.fst, psElabGeneralizeExpr closed.snd)
+  let levels := psElabDeclarationLevels levelNames [closed.snd, closed.fst]
   if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
     throw .unresolvedMetavariable
   let declaration := if isTheorem then
-    PsDeclaration.theoremDecl name [] closed.snd closed.fst
-    else PsDeclaration.definitionDecl name [] closed.snd closed.fst
+    PsDeclaration.theoremDecl name levels closed.snd closed.fst
+    else PsDeclaration.definitionDecl name levels closed.snd closed.fst
   return { declaration, metaContext := constraints }
 
 def psElabPartialDeclaration
@@ -331,7 +334,7 @@ def psElabPartialDeclaration
 
 def psElabDeclaration
     (environment : PsEnvironment)
-    (source : PsSyntaxDeclaration) :
+    (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationResult :=
   match source with
   | .definition name binders type value _ =>
@@ -341,7 +344,7 @@ def psElabDeclaration
         binders
         type
         value
-        false
+        false levelNames
   | .partialDefinition name binders type value _ =>
       psElabPartialDeclaration
         environment
@@ -356,7 +359,7 @@ def psElabDeclaration
         binders
         type
         value
-        true
+        true levelNames
   | .inductiveDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
   | .structureDecl _ _ _ _ =>
@@ -368,10 +371,10 @@ def psElabDeclaration
 -- The richer result keeps the two actual declarations and the known error phase.
 def psElabNormalizedDefinitionWithPhase
     (environment : PsEnvironment) (sourceName : PsSyntaxName)
-    (normalized : PsElabStructuralNormalization) :
+    (normalized : PsElabStructuralNormalization) (levelNames : List PsName := []) :
     Except PsElabOriginPhaseError PsElabNormalizedDefinitionResult :=
   match psElabDeclarationParts environment sourceName
-      normalized.workerBinders normalized.workerType normalized.workerValue false with
+      normalized.workerBinders normalized.workerType normalized.workerValue false levelNames with
   | Except.error error =>
       Except.error
         (PsElabOriginPhaseError.mk error PsElabOriginPhase.normalizedWorker)
@@ -389,8 +392,16 @@ def psElabNormalizedDefinitionWithPhase
           | Option.some workerEnvironment =>
               let context : PsElabContext := psElabContextWithEnvironment
                 normalized.publicContext workerEnvironment;
+              let fresh := (psDeclarationLevelParams worker).foldl
+                (fun (state : PsMetaContext × List PsLevel) name =>
+                  if levelNames.any (psNameEq name) then
+                    (state.fst, PsLevel.param name :: state.snd)
+                  else
+                    let next := psMetaFreshLevel state.fst
+                    (next.context, next.level :: state.snd)) (context.metaContext, []);
+              let context := psElabContextWithMeta context fresh.fst;
               let application : PsExpr := psExprApplyMany
-                (PsExpr.constE normalized.workerName List.nil)
+                (PsExpr.constE normalized.workerName fresh.snd.reverse)
                 normalized.workerArguments;
               match psElabResolvedTerm context application
                   (Option.some normalized.publicType) with
@@ -403,6 +414,8 @@ def psElabNormalizedDefinitionWithPhase
                     normalized.publicBindersRev
                     (psMetaInstantiate metaContext checked.term)
                     (psMetaInstantiate metaContext normalized.publicType);
+                  let closed := (psElabGeneralizeExpr closed.fst, psElabGeneralizeExpr closed.snd);
+                  let levelParams := psElabDeclarationLevels levelNames [closed.snd, closed.fst];
                   if psExprHasUnresolvedMeta (Prod.fst closed) then
                     Except.error
                       (PsElabOriginPhaseError.mk PsElabError.unresolvedMetavariable
@@ -413,7 +426,7 @@ def psElabNormalizedDefinitionWithPhase
                         PsElabOriginPhase.publicWrapper)
                   else
                     let publicDeclaration : PsDeclaration := PsDeclaration.definitionDecl
-                      normalized.publicName List.nil (Prod.snd closed) (Prod.fst closed);
+                      normalized.publicName levelParams (Prod.snd closed) (Prod.fst closed);
                     Except.ok
                       (PsElabNormalizedDefinitionResult.mk worker publicDeclaration)
       | _ =>
@@ -436,7 +449,7 @@ def psElabNormalizedDefinition
 
 def psElabDeclarationBatchStable
     (environment : PsEnvironment)
-    (source : PsSyntaxDeclaration) :
+    (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationBatchResult :=
   match source with
   | .inductiveDecl name params resultType constructors _ =>
@@ -446,16 +459,16 @@ def psElabDeclarationBatchStable
         params
         resultType
         constructors
-        false
+        false levelNames
   | .structureDecl name params fields span =>
       psElabStructureDeclaration
         environment
         name
         params
         fields
-        span
+        span levelNames
   | _ =>
-      match psElabDeclaration environment source with
+      match psElabDeclaration environment source levelNames with
       | Except.error error => Except.error error
       | Except.ok result =>
           Except.ok
@@ -467,9 +480,9 @@ def psElabDeclarationBatchStable
 -- capability refusal. Origins are recorded from that execution, not a replay.
 def psElabDeclarationBatchWithOrigins
     (environment : PsEnvironment) (sourceIndex : Nat)
-    (source : PsSyntaxDeclaration) :
+    (source : PsSyntaxDeclaration) (levelNames : List PsName := []) :
     Except PsElabOriginError PsElabDeclarationBatchWithOriginsResult :=
-  match psElabDeclarationBatchStable environment source with
+  match psElabDeclarationBatchStable environment source levelNames with
   | Except.ok result =>
       let members : List PsElabMemberOrigin :=
         psElabStableMemberOrigins result.declarations 0;
@@ -483,7 +496,7 @@ def psElabDeclarationBatchWithOrigins
           match source with
           | PsSyntaxDeclaration.definition name binders type value span =>
               match psElabPlanStructuralNormalizationWithOrigin
-                  environment name binders type value span with
+                  environment name binders type value span levelNames with
               | Except.error failure =>
                   Except.error
                     (psElabOriginErrorAt sourceIndex source
@@ -496,7 +509,7 @@ def psElabDeclarationBatchWithOrigins
                           PsElabOriginPhase.stableDeclaration error)
                   | Option.some normalized =>
                       match psElabNormalizedDefinitionWithPhase
-                          environment name normalized.normalization with
+                          environment name normalized.normalization levelNames with
                       | Except.error failure =>
                           Except.error
                             (psElabOriginErrorAt sourceIndex source
@@ -526,9 +539,10 @@ def psElabDeclarationBatchWithOrigins
               PsElabOriginPhase.stableDeclaration error)
 
 def psElabDeclarationBatch
-    (environment : PsEnvironment) (source : PsSyntaxDeclaration) :
+    (environment : PsEnvironment) (source : PsSyntaxDeclaration)
+    (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationBatchResult :=
-  match psElabDeclarationBatchWithOrigins environment 0 source with
+  match psElabDeclarationBatchWithOrigins environment 0 source levelNames with
   | Except.error failure => Except.error failure.error
   | Except.ok result => Except.ok result.result
 

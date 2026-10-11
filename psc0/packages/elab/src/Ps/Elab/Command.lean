@@ -96,7 +96,7 @@ def psScopeVariables (state : PsCommandState) (entries : List PsScopeBinder) :
     let resolved ← psScopeTerm 4096 { environment := state.environment, scope } [] entry.snd
     let entry := PsScopeVariable.mk (entry.fst, resolved.term) resolved.used
     return { scope with variables := scope.variables ++ [entry] }) state.scope
-  let checked ← psElabTypedBinders psElabTerm (psElabContextEmpty state.environment)
+  let checked ← psElabTypedBinders psElabTerm (psElabContextEmpty state.environment (scope.levelNames.map psRootName))
     (scope.variables.map (·.binder))
   if checked.bindersRev.any (fun b =>
       psExprHasUnresolvedMeta (psMetaInstantiate checked.context.metaContext b.type)) then
@@ -117,7 +117,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     (registration : Option PsSyntaxRegistration) : Except PsElabError PsCommandState := do
   let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
   let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
-  let batch ← (psElabDeclarationBatch state.environment source).mapError (.atDeclaration name)
+  let batch ← (psElabDeclarationBatch state.environment source (state.scope.levelNames.map psRootName)).mapError (.atDeclaration name)
   let isClass := match registration with | some .classDecl => true | _ => false
   let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
     (.atDeclaration name)
@@ -140,6 +140,13 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
   match command with
+  | .universeCmd names _ =>
+    let levelNames ← names.foldlM (fun levels name => do
+      let [key] := name.segments | throw (.scope "universe requires an unqualified name")
+      if key == "_" || levels.contains key then
+        throw (.scope ("duplicate or invalid universe " ++ key))
+      return levels ++ [key]) state.scope.levelNames
+    return { state with scope := { state.scope with levelNames } }
   | .namespaceCmd name _ =>
     let qualified := psScopeQualified state.scope name
     if qualified.segments.isEmpty then throw .emptyName

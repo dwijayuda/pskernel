@@ -101,5 +101,10 @@ export const observations = [
   { name: "zeroDivision", args: null, expected: 0n },
   { name: "unicodeLength", args: null, expected: 2n },
   { name: "unicodeBytes", args: null, expected: 6n },
+  { name: "universeIdentity", args: null, expected: 201n },
+  { name: "universeHole", args: null, expected: 202n },
+  { name: "universeSize", args: null, expected: 1n },
+  { name: "universeProjection", args: null, expected: 204n },
+  { name: "universeInstance", args: null, expected: 205n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

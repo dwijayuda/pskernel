@@ -163,6 +163,7 @@ def psPrintProofScriptTermWithFuel
               pure (name ++ " := " ++ value)
           let head := if psSyntaxTermSimpleForApplication fn then head else "(" ++ head ++ ")"
           return head ++ "(" ++ psPrintJoin ", " arguments ++ ")"
+      | .sortE isType level _ => .ok (psPrintSyntaxSort isType level)
       | .reference name =>
           psPrintSyntaxName name
       | .natural text _ =>

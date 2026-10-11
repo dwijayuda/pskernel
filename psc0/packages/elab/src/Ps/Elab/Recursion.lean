@@ -681,7 +681,8 @@ def psElabRecursionTermCallback
 def psElabPlanStructuralNormalizationWithOrigin
     (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
-    (typeSyntax valueSyntax : PsSyntaxTerm) (span : PsSourceSpan) :
+    (typeSyntax valueSyntax : PsSyntaxTerm) (span : PsSourceSpan)
+    (levelNames : List PsName := []) :
     Except PsElabError (Option PsElabStructuralNormalizationWithOrigin) :=
   match valueSyntax with
   | PsSyntaxTerm.matchMany [scrutinee] _ _ =>
@@ -689,7 +690,7 @@ def psElabPlanStructuralNormalizationWithOrigin
       | Option.none => Except.error PsElabError.emptyName
       | Option.some name =>
           match psElabTypedBinders psElabRecursionTermCallback
-              (psElabContextEmpty environment) binders with
+              (psElabContextEmpty environment levelNames) binders with
           | Except.error error => Except.error error
           | Except.ok binderResult =>
               match psElabRecursionLocalId binderResult.context.localContext scrutinee with

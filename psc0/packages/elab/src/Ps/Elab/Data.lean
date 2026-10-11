@@ -100,7 +100,9 @@ def psElabDataIndices (context : PsElabContext) (info : PsInductiveInfo)
   let view := psExprAppView
     (psWhnf context.environment context.metaContext context.localContext type)
   let .constE name levels := view.head | throw (.data "constructor result must be its declared family")
-  if !psNameEq name info.name || !levels.isEmpty then
+  if !psNameEq name info.name || levels.length != info.levelParams.length ||
+      !(levels.zip info.levelParams).all (fun pair =>
+        psLevelEquivalent (psLevelInstantiate context.metaContext.levels pair.fst) (.param pair.snd)) then
     throw (.data "constructor result must be its declared family")
   if view.args.length != info.numParams + info.numIndices then
     throw (.data "family parameter/index arity mismatch")
@@ -140,14 +142,20 @@ def psElabDataConstructor (context : PsElabContext)
     | some type => psElabType psElabTerm fields.context type
     | none =>
       if info.numIndices != 0 then throw (.data "indexed constructor requires a result type")
-      pure (PsElabTypeResult.mk fields.context (psExprApplyMany (.constE info.name []) parameters))
+      pure (PsElabTypeResult.mk fields.context (psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters))
+  let familyHead := (psExprAppView (psWhnf result.context.environment
+    result.context.metaContext result.context.localContext result.type)).head
+  let unified := psUnify result.context.environment result.context.localContext
+    result.context.metaContext familyHead (.constE info.name (info.levelParams.map PsLevel.param))
+  if !unified.success then throw (.data "constructor result must be its declared family")
+  let result := { result with context := psElabContextWithMeta result.context unified.context }
   let _ ← psElabDataIndices result.context info parameters result.type
   let recursiveFields ← psElabDataRecursiveFields result.context info parameters fields.bindersRev.reverse
   let type := psCloseElabImplicitBinders result.context.metaContext parameterBindersRev
     (psCloseElabForallBinders result.context.metaContext fields.bindersRev result.type)
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   return .constructorDecl {
-    name, levelParams := [], type, inductiveName := info.name, constructorIndex := index
+    name, levelParams := info.levelParams, type, inductiveName := info.name, constructorIndex := index
     numParams := info.numParams, numFields := fields.bindersRev.length, recursiveFields }
 
 -- Motives always receive all indices followed by the major. The same operation
@@ -163,7 +171,7 @@ def psElabDataMinor (context : PsElabContext) (info : PsInductiveInfo)
   let cursor ← psElabMatchApplyParameters context parameters constructor.type
   let fields ← psElabOpenCoreTelescope 4096 context cursor (some constructor.numFields)
   let args := psElabBinderArguments fields.bindersRev
-  let intro := psExprApplyMany (.constE constructor.name []) (parameters ++ args)
+  let intro := psExprApplyMany (.constE constructor.name (info.levelParams.map PsLevel.param)) (parameters ++ args)
   let conclusion ← psElabDataMotiveAt fields.context info parameters motive intro fields.body
   let fieldsInOrder := fields.bindersRev.reverse
   let hypotheses ← constructor.recursiveFields.mapM fun index => do
@@ -176,9 +184,9 @@ def psElabDataMinor (context : PsElabContext) (info : PsInductiveInfo)
 def psBuildInductiveRecursor (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
     (constructors : List PsDeclaration) : Except PsElabError PsDeclaration := do
-  let motiveUniverse := psRootName "u"
+  let motiveUniverse := psNameAppendNum (psRootName "_motiveUniverse") 0
   let parameters := psElabBinderArguments parameterBindersRev
-  let family := psExprApplyMany (.constE info.name []) parameters
+  let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) parameters
   let indexType ← psElabMatchApplyParameters context parameters info.type
   let indices ← psElabOpenCoreTelescope 4096 context indexType (some info.numIndices)
   let indexedFamily := psExprApplyMany family (psElabBinderArguments indices.bindersRev)
@@ -212,23 +220,36 @@ def psBuildInductiveRecursor (context : PsElabContext)
             [PsElabTypedBinder.mk major.id majorName majorType .explicit] body))))
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   return .recursorDecl {
-    name := psNameAppendStr info.name "rec", levelParams := [motiveUniverse], type
+    name := psNameAppendStr info.name "rec", levelParams := motiveUniverse :: info.levelParams, type
     inductiveNames := [info.name], numParams := info.numParams, numIndices := info.numIndices
     numMotives := 1, numMinors := constructors.length }
 
 def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)
-    (constructors : List PsSyntaxInductiveConstructor) (isStructure : Bool) :
+    (constructors : List PsSyntaxInductiveConstructor) (isStructure : Bool)
+    (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationBatchResult := do
   let some name := psSyntaxNameToName nameSyntax | throw .emptyName
-  let parameters ← psElabTypedBinders psElabTerm (psElabContextEmpty environment) params
+  let parameters ← psElabTypedBinders psElabTerm (psElabContextEmpty environment levelNames) params
   let result ← match resultType with
-    | none => pure (PsElabTypeResult.mk parameters.context (.sortE (.succ .zero)))
+    | none => do
+      let mut context := parameters.context
+      let mut level := PsLevel.succ .zero
+      if isStructure then
+        for constructor in constructors do
+          let fields ← psElabTypedBinders psElabTerm context constructor.fields
+          for field in fields.bindersRev do
+            let fieldLevel ← psElabExpressionSort fields.context field.type
+            level := psLevelMax level fieldLevel
+          context := psElabLeaveScope context fields.context
+      pure (PsElabTypeResult.mk context (.sortE (psLevelNormalize level)))
     | some source => psElabType psElabTerm parameters.context source
   let indices ← psElabOpenCoreTelescope 4096 result.context result.type none
   match indices.body with
-  | .sortE (.succ .zero) => pure ()
-  | _ => throw (.data "data family must end in Type; universe/Prop families are pending")
+  | .sortE level =>
+    if !psLevelAlwaysPositive (psLevelNormalize level) then
+      throw (.data "data family must end in a positive universe; Prop families are pending")
+  | _ => throw (.data "data family must end in a sort")
   let type := psCloseElabForallBinders result.context.metaContext parameters.bindersRev result.type
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   let names ← constructors.mapM fun source =>
@@ -237,7 +258,7 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
     | none => throw .emptyName
   if names.any (fun name => (names.filter (psNameEq name)).length > 1) then throw (.data "duplicate constructor")
   let info : PsInductiveInfo := {
-    name, levelParams := [], type, numParams := parameters.bindersRev.length
+    name, levelParams := psElabDeclarationLevels levelNames [type], type, numParams := parameters.bindersRev.length
     numIndices := indices.bindersRev.length, constructors := names, isStructure }
   let declaration := PsDeclaration.inductiveDecl info
   let withInductive ← psAddDeclarationList environment [declaration]
@@ -253,7 +274,8 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
   return { declarations := declaration :: (declarations ++ [recursor]) }
 
 def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxName)
-    (params fields : List (PsSyntaxBinderHead × PsSyntaxTerm)) (span : PsSourceSpan) :
+    (params fields : List (PsSyntaxBinderHead × PsSyntaxTerm)) (span : PsSourceSpan)
+    (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationBatchResult :=
   psElabInductiveDeclaration environment name params none
-    [{ name := PsSyntaxName.mk ["mk"] span, fields, span }] true
+    [{ name := PsSyntaxName.mk ["mk"] span, fields, span }] true levelNames

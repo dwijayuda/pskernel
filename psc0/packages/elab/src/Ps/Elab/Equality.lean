@@ -59,8 +59,7 @@ def psElabIndexFunction (context : PsElabContext) (value : PsExpr)
   let recName := psNameAppendStr family "rec"
   let some recursor := psEnvironmentFindRecursor context.environment recName | throw .matchRecursorUnsupported
   let level ← psElabExpressionSort context resultType
-  let recLevels := if recursor.levelParams.isEmpty then [] else [level]
-  if recursor.levelParams.length > 1 then throw .matchRecursorLevels
+  let recLevels ← psElabRecursorLevels info recursor levels level
   let id := context.localContext.nextId
   let motive := psLogicLam id "_index" type resultType
   let recType := psExprInstantiateLevelParams recursor.levelParams recLevels recursor.type

@@ -1,4 +1,5 @@
 import Ps.Syntax.Pscv0.Binders
+import Ps.Syntax.Pscv0.Universe
 
 -- These readers preserve source intent. Semantic argument insertion belongs to
 -- the application elaborator, never to parsing or token rewriting.
@@ -15,6 +16,8 @@ def psPscv0ReadAscription (read : PsPscv0TermReader)
 
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if ["Type", "Sort", "Prop"].any (psTokenCursorAtText cursor) then
+    return ← psPscv0ReadSort cursor
   if psTokenCursorAtText cursor "_" then
     let token ← psTokenCursorExpectText cursor "_"
     return { value := .hole token.token.span, cursor := token.cursor }

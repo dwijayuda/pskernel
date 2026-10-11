@@ -27,6 +27,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.PrintLean,
     `Ps.Syntax.PrintProofScript,
     `Ps.Syntax.Translate,
+    `Ps.Syntax.Pscv0.Universe,
     `Ps.Syntax.Pscv0.TermParts,
     `Ps.Syntax.Pscv0.TermRead,
     `Ps.Syntax.Pscv0.PatternRead,
@@ -157,6 +158,7 @@ lean_lib PsProject where
 lean_lib PsMeta where
   srcDir := "packages/meta/src"
   roots := #[
+    `Ps.Meta.LevelNormalize,
     `Ps.Meta.LevelContext,
     `Ps.Meta.Context,
     `Ps.Meta.Iota,
@@ -174,6 +176,7 @@ lean_lib PsElab where
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
+    `Ps.Elab.Universe,
     `Ps.Elab.Binders,
     `Ps.Elab.Application,
     `Ps.Elab.Refinement,

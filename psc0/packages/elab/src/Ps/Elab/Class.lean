@@ -32,7 +32,7 @@ def psElabAddStructureProjections (environment : PsEnvironment) (isClass : Bool)
   let parameters ← psElabOpenCoreTelescope 4096 (psElabContextEmpty environment)
     info.type (some info.numParams)
   let arguments := psElabBinderArguments parameters.bindersRev
-  let family := psExprApplyMany (.constE info.name []) arguments
+  let family := psExprApplyMany (.constE info.name (info.levelParams.map PsLevel.param)) arguments
   let binder := if isClass then PsBinderInfo.instanceImplicit else .explicit
   let majorName := psRootName "self"
   let major := psLocalPushBinding parameters.context.localContext majorName family binder
@@ -63,7 +63,8 @@ def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priori
   if !environment.classes.any (psNameEq className) then
     throw (.data "instance result must be a registered class")
   let entry : PsInstanceEntry := {
-    value := .constE name []
+    value := .constE name ((psDeclarationLevelParams declaration).map PsLevel.param)
+    levelParams := psDeclarationLevelParams declaration
     type := psDeclarationType declaration
     priority
     className := some className }

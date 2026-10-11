@@ -59,7 +59,17 @@ def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSynta
     | .ctor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
     | _ => []
 
+-- Universe syntax has its own category; its names are never term variables.
+inductive PsSyntaxLevel where
+  | number (value : Nat)
+  | name (value : String)
+  | hole
+  | offset (base : PsSyntaxLevel) (amount : Nat)
+  | max (left right : PsSyntaxLevel)
+  | imax (left right : PsSyntaxLevel)
+
 inductive PsSyntaxTerm where
+  | sortE (isType : Bool) (level : PsSyntaxLevel) (span : PsSourceSpan)
   | reference (name : PsSyntaxName)
   | hole (span : PsSourceSpan)
   -- Binder-only source annotation; checked as Lean's reducible optParam type.
@@ -111,6 +121,7 @@ def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan
   { start := start.start, stop := stop.stop }
 
 def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
+  | .sortE _ _ span => span
   | .hole span => span
   | .optionalType _ _ span => span
   | .ascription _ _ span => span
@@ -190,6 +201,7 @@ inductive PsSyntaxRegistration where
   | instanceDecl (priority : Nat)
 
 inductive PsSyntaxCommand where
+  | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
   | registeredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
   | declaration (value : PsSyntaxDeclaration)
   | namespaceCmd (name : PsSyntaxName) (span : PsSourceSpan)

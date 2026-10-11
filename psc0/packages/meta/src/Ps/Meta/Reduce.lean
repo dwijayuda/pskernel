@@ -141,6 +141,15 @@ def psDefEqReadOnlyWithEnvFuel
           true
         else
           match leftValue with
+          | .sortE a =>
+              match rightValue with
+              | .sortE b => psLevelEquivalent a b
+              | _ => false
+          | .constE a levels =>
+              match rightValue with
+              | .constE b other => psNameEq a b && levels.length == other.length &&
+                  (levels.zip other).all (fun pair => psLevelEquivalent pair.fst pair.snd)
+              | _ => false
           | .app leftFn leftArg =>
               match rightValue with
               | .app rightFn rightArg =>

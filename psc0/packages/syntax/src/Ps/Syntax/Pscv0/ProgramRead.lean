@@ -26,12 +26,13 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
     let next ← (psParseProofScriptCommandSeparator
       (psProofScriptDeclarationStop parsed.value) parsed.cursor).mapError psPscv0ParseError
     return { value := .registeredDeclaration parsed.value .classDecl, cursor := next }
-  if ["namespace", "section", "end", "open", "include", "omit"].contains token.text then
+  if ["namespace", "section", "end", "open", "include", "omit", "universe", "universes"].contains token.text then
     let head ← psPscv0Expect cursor token.text
     let names ← psPscv0CommandNames token.span.start.line 4096 head.cursor []
     let stop := match names.value.getLast? with | none => token.span | some name => name.span
     let span := psSyntaxSpanJoin token.span stop
     let command ← match token.text, names.value with
+      | "universe", _ :: _ | "universes", _ :: _ => pure (.universeCmd names.value span)
       | "namespace", [name] => pure (.namespaceCmd name span)
       | "section", [] => pure (.sectionCmd none span)
       | "section", [name] => pure (.sectionCmd (some name) span)

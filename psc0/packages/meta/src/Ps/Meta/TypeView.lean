@@ -73,5 +73,5 @@ def psTypeViewIsErased (environment : PsEnvironment)
   if (← psTypeViewReturnsSort 4096 environment locals type) then return true
   let sort ← psExprTypeView environment locals type
   match psWhnf environment psMetaEmpty locals sort with
-  | .sortE level => return psInferClosedLevelValue level == some 0
+  | .sortE level => return psLevelEquivalent level .zero
   | _ => throw .expectedSort

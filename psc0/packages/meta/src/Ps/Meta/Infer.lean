@@ -55,59 +55,6 @@ def psInferLevelListLength
   | _ :: rest =>
       Nat.succ (psInferLevelListLength rest)
 
--- Canonicalize only closed universe arithmetic produced by inference.
--- Any parameter or metavariable preserves the original whole level.
-def psInferClosedLevelValue
-    (level : PsLevel) : Option Nat :=
-  match level with
-  | PsLevel.zero =>
-      Option.some 0
-  | PsLevel.succ inner =>
-      match psInferClosedLevelValue inner with
-      | Option.none => Option.none
-      | Option.some value => Option.some (Nat.succ value)
-  | PsLevel.max left right =>
-      match psInferClosedLevelValue left with
-      | Option.none => Option.none
-      | Option.some leftValue =>
-          match psInferClosedLevelValue right with
-          | Option.none => Option.none
-          | Option.some rightValue =>
-              if Nat.ble leftValue rightValue then
-                Option.some rightValue
-              else
-                Option.some leftValue
-  | PsLevel.imax left right =>
-      match psInferClosedLevelValue left with
-      | Option.none => Option.none
-      | Option.some leftValue =>
-          match psInferClosedLevelValue right with
-          | Option.none => Option.none
-          | Option.some rightValue =>
-              if Nat.beq rightValue 0 then
-                Option.some 0
-              else if Nat.ble leftValue rightValue then
-                Option.some rightValue
-              else
-                Option.some leftValue
-  | PsLevel.param _ =>
-      Option.none
-  | PsLevel.mvar _ =>
-      Option.none
-
-def psInferLevelFromNat
-    (value : Nat) : PsLevel :=
-  match value with
-  | Nat.zero => PsLevel.zero
-  | Nat.succ remaining =>
-      PsLevel.succ (psInferLevelFromNat remaining)
-
-def psInferNormalizeClosedLevel
-    (level : PsLevel) : PsLevel :=
-  match psInferClosedLevelValue level with
-  | Option.none => level
-  | Option.some value => psInferLevelFromNat value
-
 def psInferEnsureSort
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -410,7 +357,7 @@ def psInferTypeWithFuelWorker
               | .sortE level =>
                   Except.ok
                     (PsExpr.sortE
-                      (psInferNormalizeClosedLevel (PsLevel.succ level)))
+                      (psLevelNormalize (PsLevel.succ level)))
               | .constE name levels =>
                   match psEnvironmentFind environment name with
                   | none => Except.error (PsInferError.unknownConstant name)
@@ -499,7 +446,7 @@ def psInferTypeWithFuelWorker
                               | Except.ok bodyLevel =>
                                   Except.ok
                                     (PsExpr.sortE
-                                      (psInferNormalizeClosedLevel
+                                      (psLevelNormalize
                                         (PsLevel.imax domainLevel bodyLevel)))
               | .letE _ type value body =>
                   match smaller environment metaContext localContext type with

@@ -6,6 +6,7 @@ structure PsInstanceEntry where
   type : PsExpr
   priority : Nat := 1000
   className : Option PsName := none
+  levelParams : List PsName := []
 
 structure PsInstanceIndex where
   entries : List PsInstanceEntry

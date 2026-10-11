@@ -146,6 +146,7 @@ def psProofScriptTermWithSpan
   | .reference name =>
       PsSyntaxTerm.reference { segments := name.segments, span := span }
   | .natural value _ => PsSyntaxTerm.natural value span
+  | .sortE isType level _ => PsSyntaxTerm.sortE isType level span
   | .string value _ => PsSyntaxTerm.string value span
   | .character value _ => PsSyntaxTerm.character value span
   | .bool value _ => PsSyntaxTerm.bool value span
@@ -300,7 +301,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "decreasing_by" then true
   else if psStringEq text "namespace" then true
   else if psStringEq text "section" then true
-  else if ["open", "variable", "include", "omit", "universe"].contains text then true
+  else if ["open", "variable", "include", "omit", "universe", "universes"].contains text then true
   else if psStringEq text "end" then true
   else if psStringEq text "class" then true
   else if psStringEq text "instance" then true

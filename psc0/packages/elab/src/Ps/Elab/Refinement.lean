@@ -192,3 +192,12 @@ def psElabExpressionSort (context : PsElabContext) (type : PsExpr) :
     Except PsElabError PsLevel := do
   let sort ← (psInferType context.environment context.metaContext context.localContext type).mapError PsElabError.infer
   (psInferEnsureSort context.environment context.metaContext context.localContext sort).mapError PsElabError.infer
+
+-- Kernel recursors either add a motive universe or eliminate in the family's
+-- fixed sort. All users share this arity contract.
+def psElabRecursorLevels (info : PsInductiveInfo) (recursor : PsRecursorInfo)
+    (levels : List PsLevel) (motive : PsLevel) : Except PsElabError (List PsLevel) := do
+  if levels.length != info.levelParams.length then throw .matchRecursorLevels
+  if recursor.levelParams.length == levels.length + 1 then return motive :: levels
+  if recursor.levelParams.length == levels.length then return levels
+  throw .matchRecursorLevels

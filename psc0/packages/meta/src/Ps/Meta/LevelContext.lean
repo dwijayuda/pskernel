@@ -1,4 +1,5 @@
 import Ps.Core.Equality
+import Ps.Meta.LevelNormalize
 import Ps.Core.Expr
 import Ps.Core.Level
 
@@ -143,9 +144,9 @@ def psLevelUnifyWithFuelWorker
       fun (context : PsLevelMetaContext) (left : PsLevel) (right : PsLevel) =>
         let smaller : PsLevelMetaContext -> PsLevel -> PsLevel -> PsLevelUnifyResult :=
           psLevelUnifyWithFuelWorker remaining;
-        let leftValue := psLevelInstantiate context left;
-        let rightValue := psLevelInstantiate context right;
-        if psLevelStructuralEq leftValue rightValue then
+        let leftValue := psLevelNormalize (psLevelInstantiate context left);
+        let rightValue := psLevelNormalize (psLevelInstantiate context right);
+        if psLevelEquivalent leftValue rightValue then
           { context := context, success := true }
         else
           match leftValue with

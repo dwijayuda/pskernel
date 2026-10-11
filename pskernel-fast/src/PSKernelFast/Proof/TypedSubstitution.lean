@@ -86,6 +86,51 @@ theorem liftBVars_zero (expr : KExpr) (cutoff : Nat) :
   | proj name index inner ih =>
       simp [KExpr.liftBVars, ih cutoff]
 
+/--
+Two shifts at the same binder cutoff compose by adding their amounts.
+This is a pure equation about actual CoreSyntax operations and works
+under arbitrarily nested Pi, lambda and let binders.
+-/
+theorem liftBVars_add (expr : KExpr) (first second cutoff : Nat) :
+    (expr.liftBVars first cutoff).liftBVars second cutoff =
+      expr.liftBVars (first + second) cutoff := by
+  induction expr generalizing cutoff with
+  | bvar index =>
+      by_cases hLocal : index < cutoff
+      · simp [KExpr.liftBVars, hLocal]
+      · have hOuter : ¬ index + first < cutoff := by omega
+        simp [KExpr.liftBVars, hLocal, hOuter, Nat.add_assoc]
+  | fvar _ => rfl
+  | mvar _ => rfl
+  | sort _ => rfl
+  | const _ _ => rfl
+  | app fn arg ihFn ihArg =>
+      simp [KExpr.liftBVars, ihFn cutoff, ihArg cutoff]
+  | lam name domain body style ihDomain ihBody =>
+      simp [KExpr.liftBVars, ihDomain cutoff, ihBody (cutoff + 1)]
+  | forallE name domain body style ihDomain ihBody =>
+      simp [KExpr.liftBVars, ihDomain cutoff, ihBody (cutoff + 1)]
+  | letE name ty val body flag ihTy ihVal ihBody =>
+      simp [KExpr.liftBVars, ihTy cutoff, ihVal cutoff,
+        ihBody (cutoff + 1)]
+  | lit _ => rfl
+  | mdata tag inner ih =>
+      simp [KExpr.liftBVars, ih cutoff]
+  | proj name index inner ih =>
+      simp [KExpr.liftBVars, ih cutoff]
+
+/-- Two positive binder shifts at the same cutoff commute. -/
+theorem liftBVars_comm (expr : KExpr) (first second cutoff : Nat) :
+    (expr.liftBVars first cutoff).liftBVars second cutoff =
+      (expr.liftBVars second cutoff).liftBVars first cutoff := by
+  calc
+    (expr.liftBVars first cutoff).liftBVars second cutoff =
+        expr.liftBVars (first + second) cutoff :=
+          liftBVars_add expr first second cutoff
+    _ = expr.liftBVars (second + first) cutoff := by rw [Nat.add_comm]
+    _ = (expr.liftBVars second cutoff).liftBVars first cutoff :=
+      (liftBVars_add expr second first cutoff).symm
+
 /-- The substitution result of a bound variable at depth zero is exact. -/
 theorem bound_zero_substitution_preserves_type
     (params : List KName) (ctx : List KExpr)
@@ -164,6 +209,8 @@ theorem dependent_let_variable_zeta_preserves_type
   · simpa [KExpr.instantiateBVar, liftBVars_zero] using valueTyped
 
 #print axioms liftBVars_one_instantiate_cancel
+#print axioms liftBVars_add
+#print axioms liftBVars_comm
 #print axioms liftBVars_zero
 #print axioms bound_zero_substitution_preserves_type
 #print axioms dependent_identity_beta_preserves_type

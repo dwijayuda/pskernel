@@ -46,7 +46,8 @@ theorem smartIMax_denote (ρ : KName → Nat) (a b : ULevel) :
     simp [smartIMax, ULevel.denote, numericImax]
   · by_cases ha : a = .zero
     · subst a
-      simpa [smartIMax, hb] using (imax_zero_left (b.denote ρ)).symm
+      simpa [smartIMax, hb, ULevel.denote] using
+        (imax_zero_left (b.denote ρ)).symm
     · by_cases heq : a = b
       · subst b
         simpa [smartIMax, ha] using (imax_self (a.denote ρ)).symm

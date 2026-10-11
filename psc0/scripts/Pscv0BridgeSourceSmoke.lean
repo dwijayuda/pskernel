@@ -54,6 +54,7 @@ def main : IO Unit := do
   if mixed == grouped then throw (IO.userError "PSCV0-APP-04-GROUPING-LOST")
   let groupedPS ← expectOk "v7 grouped APP-04 PS rendering"
     (psPscv0TranslateReadable false true grouped)
+  IO.println ("PSCV0_APP04_RENDERED_BEGIN\n" ++ groupedPS ++ "\nPSCV0_APP04_RENDERED_END")
   let groupedAgain ← expectOk "v7 grouped APP-04 PS round trip"
     (psPscv0LowerToLean true groupedPS)
   if groupedAgain != grouped then throw (IO.userError "PSCV0-APP-04-ROUNDTRIP-TREE-CHANGED")

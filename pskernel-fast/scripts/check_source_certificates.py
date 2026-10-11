@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build/audit/test current certificate construction before the older suite.
+"""Build/audit/test the source-certificate and semantic-step closure.
 
-The existing 232-receipt gates remain unchanged. Every new receipt is
-explicitly named and audited with the same parser/allowlist and self-tests.
+The older 232-receipt gates remain unchanged. The new gate uses the same
+fail-closed parser, explicit theorem names, and negative-input self-tests.
 """
 import subprocess
 import sys
@@ -11,6 +11,7 @@ import audit_axioms as gate
 MODULES = [
     "Proof/SourceCertificateCoherence.lean",
     "Proof/SourceCertificateSynthesis.lean",
+    "Proof/CertifiedReduction.lean",
 ]
 NAMES = {
     "PSKernelFast.Proof.sourceModelTyping_annotations_unique",
@@ -18,6 +19,8 @@ NAMES = {
     "PSKernelFast.Proof.certifyClosedModel_sound",
     "PSKernelFast.Proof.certifyClosedModel_no_false",
     "PSKernelFast.Proof.certifyClosedModel_zero",
+    "PSKernelFast.Proof.sourceModelTyping_step",
+    "PSKernelFast.Proof.ModelSteps.sound",
 }
 SMOKE = "pskernel_fast_source_certificate_smoke"
 

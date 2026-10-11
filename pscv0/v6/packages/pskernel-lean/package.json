@@ -1,0 +1,64 @@
+{
+  "name": "@proofscript/pskernel-lean",
+  "version": "4.34.0",
+  "description": "Official Lean kernel provider for ProofScript PSC2, pinned to Lean 4.34.0 semantics",
+  "type": "module",
+  "private": false,
+  "exports": {
+    ".": "./index.mjs",
+    "./node": "./host/node-provider.mjs",
+    "./metadata": "./LEAN_SOURCE_PIN.json",
+    "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
+    "./package.json": "./package.json",
+    "./metadata/proofscript-source": "./PROOFSCRIPT_SOURCE_MANIFEST.json"
+  },
+  "files": [
+    "index.mjs",
+    "host/node-provider.mjs",
+    "host/prebuilt.mjs",
+    "host/source-distribution.test.mjs",
+    "provider/",
+    "kernel/",
+    "LEAN_LICENSE",
+    "KERNEL_SOURCE_MANIFEST.json",
+    "LEAN_SOURCE_PIN.json",
+    "PREBUILT_MANIFEST.json",
+    "prebuilt/",
+    "README.md",
+    "BUILDING.md",
+    "INTEGRATION.md",
+    "NPM_PACKAGE.md",
+    "host/verify-prebuilt.mjs",
+    "source/",
+    "scripts/build-native.mjs",
+    "PROOFSCRIPT_SOURCE_MANIFEST.json",
+    "lakefile.lean",
+    "lean-toolchain",
+    "scripts/build-native-slim.mjs",
+    "scripts/native-slim-differential.test.mjs"
+  ],
+  "scripts": {
+    "build:kernel": "node scripts/build-native.mjs",
+    "build:native": "node scripts/build-native.mjs",
+    "verify:source": "node host/source-distribution.test.mjs",
+    "verify:prebuilt": "node host/verify-prebuilt.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "proofscript": {
+    "bootstrap": false,
+    "portable": false,
+    "sourceRoots": [
+      "provider"
+    ],
+    "testRoots": [
+      "provider-test"
+    ],
+    "outDir": "dist",
+    "role": "external-lean-kernel-provider"
+  }
+}

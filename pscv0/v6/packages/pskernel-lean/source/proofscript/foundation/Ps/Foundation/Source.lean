@@ -1,0 +1,8 @@
+structure PsSourcePos where
+  byteOffset : Nat
+  line : Nat
+  column : Nat
+
+structure PsSourceSpan where
+  start : PsSourcePos
+  stop : PsSourcePos

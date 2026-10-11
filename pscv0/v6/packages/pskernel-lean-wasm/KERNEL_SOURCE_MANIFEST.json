@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "upstream": "https://github.com/leanprover/lean4",
+  "leanVersion": "4.34.0",
+  "leanCommit": "293d5d0c0c3f3dded4688b3ccd6a33939ac5102b",
+  "upstreamSourcePath": "src/kernel",
+  "packageSourcePath": "kernel",
+  "sourceTreeSha": "636837af92156cf17226e56106f08eb553bfb961",
+  "license": "Apache-2.0",
+  "licenseFile": "LEAN_LICENSE",
+  "modified": false,
+  "scope": "The Apache-2.0 license in LEAN_LICENSE applies to the vendored Lean kernel source snapshot under kernel/. It does not relabel other ProofScript package sources."
+}

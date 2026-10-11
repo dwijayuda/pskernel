@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "packageName": "@proofscript/pskernel-lean-wasm",
+  "snapshotRoot": "source/proofscript",
+  "sourceRevision": "1b21b2483df7e8de7542873c24eaff2501539b1b",
+  "sourceTreeSha": "22f39d23220cc53b499640b5777e944a9aad5a97",
+  "components": {
+    "foundation": "5cb363c31d7cec6dece85cb6178c0518f409f172",
+    "core": "f7fd0326588d4028a952f832c4de03364905668c",
+    "environment": "f80bc27eddcc35a712feee0b173abf5e7cdf3e5f",
+    "bridge": "bff9e1f815ed9cacc8f0e1d005936d6a8dec41f3",
+    "provider": "694e217dc9f69f8cc0c417266298078b181f842d",
+    "wasm-provider": "3767e0af2a336ee632526fb30e85fa2c207ef9c6"
+  }
+}

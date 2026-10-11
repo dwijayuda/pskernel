@@ -75,8 +75,8 @@ theorem KExpr.instantiateBVar_structurallyValid
             KExpr.StructurallyValid] using hBound
   | fvar _ => exact False.elim hExpr
   | mvar _ => exact False.elim hExpr
-  | sort _ => simpa [KExpr.instantiateBVar] using hExpr
-  | const _ _ => simpa [KExpr.instantiateBVar] using hExpr
+  | sort _ => exact hExpr
+  | const _ _ => exact hExpr
   | app fn arg ihFn ihArg =>
       exact ⟨ihFn depth hExpr.1, ihArg depth hExpr.2⟩
   | lam name domain body style ihDomain ihBody =>

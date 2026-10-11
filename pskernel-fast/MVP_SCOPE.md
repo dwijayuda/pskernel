@@ -38,3 +38,7 @@ Keep all status words precise: intended vs implemented vs CI-passed vs formally 
 ## G2 validated experiment (not part of G1 proof acceptance)
 
 Three **beta-only** evaluators have now been built and compared: eager substitution on decoded syntax; lazy closures over decoded syntax; and direct compact-DAG handle closures. See [G2 evidence](G2_EVALUATION_EVIDENCE.md) for the exact source commit, 92 generated differential cases, source-level weak-head one-step and scopedness proofs, and five paired timing samples. The experiments have **no proof-checking authority**, **do not implement dependent type inference**, and **do not prove complete Lean compatibility**. The V3 architecture is free to choose a different representation once real correctness and performance data exist.
+
+## G3 validated structural layer
+
+Independent 4.35-shaped `KName`, `ULevel`, `KExpr`, binder styles, Nat/String literals and structural input preflight exist in `CoreSyntax.lean`. `CoreSyntaxProofs.lean` compiles three theorems about **structural validation** (scope, known universe parameters, and rejection of metavariables). `CoreSyntaxSmoke.lean` compares ground `imax` against Lean on 400 numeric pairs and tests binder/let/Pi/constant-level preflight. Exact evidence: [G3_EVIDENCE.md](G3_EVIDENCE.md). **No type checker, symbolic universe equivalence, or declaration admission exists.**

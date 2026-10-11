@@ -28,3 +28,7 @@ The existing G1/G2 `RawExpr` with `Nat` sorts and its three beta-only evaluators
 5. Measure native checking throughput and memory on the *actual* semantic implementation, not just the old beta-only microbenchmark. Add model/refinement evidence for all authoritative positive shortcuts.
 
 **No proof-checking or full Lean-compatibility claim follows from compiling this source.**
+
+## Fully validated G3 structural theorem checkpoint
+
+Source `f767415fc1d1824ae50ab83b73f67e8cd8b21e21` passed [CI 38108276674](https://github.com/dwijayuda/pskernel/actions/runs/38108276674), with 23 build jobs, named structural negative cases, source fence and G1/G2 regressions. `CoreSyntaxProofs.lean` defines the separate propositions `ULevel.WellFormed`, `KExpr.StructurallyValid`, and proves `validParams_sound`, `validAt_sound`, `closedInput_sound` for the executable checks. KName explicitly derives `ReflBEq` and `LawfulBEq` so `decide (name ∈ params)` is sound against logical name membership. The proof is not about typing, reduction or the eventual kernel admission semantics.

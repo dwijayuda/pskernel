@@ -7,10 +7,12 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [Live work state and evidence](AI_WORK_STATE.md)
 - [Machine-readable no-legacy constraint and CI guard](ARCHITECTURE_POLICY.json)
 - [G2 three-evaluator evidence and architecture decision](G2_EVALUATION_EVIDENCE.md)
+- [G3 structural Lean syntax and proved preflight](G3_EVIDENCE.md)
+- [G4 next checker implementation contract](G4_CHECKER_PLAN.md)
 
 ## Current executable state
 
-Only the **non-authoritative scoped term-store prototype** exists: `src/PSKernelFast/TermStore.lean` encodes a tiny closed expression subset into collision-checked interned nodes and decodes them with bounded fuel. It is **not a Lean kernel, does not type-check declarations and cannot accept a proof**. This deliberate restriction prevents a partially built checker from being mistaken for an authoritative soundness mechanism.
+The independent prototype now includes G1 scoped storage, G2 comparative beta-WHNF evaluators, and G3 Lean 4.35-shaped syntax with **proved structural preflight**. The original G1 **non-authoritative scoped term-store prototype** `src/PSKernelFast/TermStore.lean` encodes a tiny closed expression subset into collision-checked interned nodes and decodes them with bounded fuel. None is **a Lean proof-checking kernel**; the package still does not type-check declarations or accept proofs. This deliberate restriction prevents a partially built checker from being mistaken for an authoritative soundness mechanism.
 
 Native experiment uses Lean `v4.35.0-rc4`:
 

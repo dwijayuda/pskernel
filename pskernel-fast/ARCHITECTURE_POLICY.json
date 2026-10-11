@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G2-experimental-beta-WHNF",
+    "stage": "G3-structural-preflight-proved-no-checker",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -32,7 +32,10 @@
     "betaPrototypeBenchmarkRun": true,
     "betaSingleStepSoundnessProved": true,
     "rawScopedValidationSoundnessProved": true,
-    "lazySoundnessProved": false
+    "lazySoundnessProved": false,
+    "g3CoreSyntaxPresent": true,
+    "g3PreflightSoundnessProved": true,
+    "leanGroundImaxGridTested": true
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -44,8 +47,8 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "3ed28be5834078d5cd33a762cb183cf9693a2520",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38107735958",
-    "scope": "16 native build jobs, 92 generated and named beta-only differential tests, 5 repeated 3-engine toy timing samples; not Lean type checking"
+    "validatedSourceCommit": "f767415fc1d1824ae50ab83b73f67e8cd8b21e21",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38108276674",
+    "scope": "23 Lean native build jobs, independent import fence, G1/G2 regression, G3 structural validation and 3 small preflight soundness theorems, ground imax tests; no proof checking"
   }
 }

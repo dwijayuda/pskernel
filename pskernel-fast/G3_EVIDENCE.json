@@ -1,0 +1,25 @@
+{
+  "schema": "pskernel-fast-g3-evidence/v1",
+  "sourceSha": "f767415fc1d1824ae50ab83b73f67e8cd8b21e21",
+  "workflowRunId": 38108276674,
+  "jobId": 114378309523,
+  "result": "success",
+  "leanTarget": {
+    "version": "4.35.0-rc4",
+    "sha": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "nativeBuildJobs": 23,
+  "standaloneLeanModulesAudited": 9,
+  "groundImaxComparisons": 400,
+  "structuralTheorems": [
+    "ULevel.validParams_sound",
+    "KExpr.validAt_sound",
+    "KExpr.closedInput_sound"
+  ],
+  "checkerImplemented": false,
+  "admissionImplemented": false,
+  "symbolicUniverseEqualityImplemented": false,
+  "fullLeanCompatibility": false,
+  "fullKernelSoundness": false,
+  "description": "official-shape syntax preflight and its independent structural soundness predicates; not proof checking"
+}

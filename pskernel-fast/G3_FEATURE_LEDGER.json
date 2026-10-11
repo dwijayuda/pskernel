@@ -1,0 +1,60 @@
+{
+  "schema": "pskernel-fast-g3-feature-ledger/v1",
+  "leanVersion": "4.35.0-rc4",
+  "semanticsAuthority": "official lean source",
+  "structuralCategories": {
+    "names": [
+      "anonymous",
+      "str",
+      "num"
+    ],
+    "universes": [
+      "zero",
+      "succ",
+      "max",
+      "imax",
+      "param",
+      "mvar"
+    ],
+    "expressions": [
+      "bvar",
+      "fvar",
+      "mvar",
+      "sort",
+      "const",
+      "app",
+      "lam",
+      "forallE",
+      "letE",
+      "lit",
+      "mdata",
+      "proj"
+    ],
+    "binders": [
+      "default",
+      "implicit",
+      "strictImplicit",
+      "instImplicit",
+      "recursive"
+    ]
+  },
+  "verifiedStage": {
+    "universeParameterMembershipPreflight": true,
+    "closedBinderScopingPreflight": true,
+    "fvarMvarExclusionPreflight": true,
+    "numericalGroundImaxGrid": true,
+    "shapeOnlyNoTypeChecking": true
+  },
+  "openSemanticObligations": {
+    "symbolicLevelEquivalence": true,
+    "typedInference": true,
+    "typedDefEq": true,
+    "primitiveReduction": true,
+    "inductiveAndQuotientAdmission": true,
+    "constantLookupAndUniverseArity": true,
+    "metadataProtocolFidelity": true,
+    "environmentModelAndConsistency": true,
+    "fullLeanCompatibility": true,
+    "portableSelfHost": true
+  }
+}

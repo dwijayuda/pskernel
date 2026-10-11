@@ -86,7 +86,7 @@ theorem taggedSort_member_succ (V : Type u)
         (taggedProp_mem_typeOne V)
   | succ n =>
       simpa [taggedSortSet, ULevel.denote, hLevel, Nat.add_assoc] using
-        (SetTheoryBasis.universe_step (V := V) (n + 2))
+        (SetTheoryBasis.univ_step (V := V) (n + 2))
 
 #print axioms taggedPointTag_mem_typeOne
 #print axioms taggedPoint_mem_typeOne

@@ -250,10 +250,62 @@ theorem checked_bound_variable_weakens
   · rw [oldVarRaised, oldTypeRaised]
     exact newVarTyped
 
+
+/--
+P1c: beta reduction preserves the inferred type even when the lambda
+body reads an ARBITRARY PRE-EXISTING dependent context variable.
+The new head binder is correctly skipped in both source and result types.
+Unlike the identity-only beta lemma, this exercises weakening across the
+binder and the composed lift used by the actual bound-variable inference.
+It does NOT yet cover an arbitrary typed lambda body.
+-/
+theorem dependent_outer_variable_beta_preserves_type
+    (params : List KName) (ctx : List KExpr)
+    (contextWF : GeneralPiContextWF params ctx)
+    (name : KName) (style : BinderStyle)
+    (domain value : KExpr) (level : ULevel)
+    (domainTyped : GeneralPiRule params ctx domain (.sort level))
+    (valueTyped : GeneralPiRule params ctx value domain)
+    (index : Nat) (storedDomain : KExpr)
+    (found : ctx[index]? = some storedDomain) :
+    GeneralPiRule params ctx
+      (.app (.lam name domain (.bvar (index + 1)) style) value)
+      (storedDomain.liftBVars (index + 1) 0) ∧
+    GeneralPiRule params ctx
+      ((KExpr.bvar (index + 1)).instantiateBVar value 0)
+      (storedDomain.liftBVars (index + 1) 0) := by
+  have oldTyped : GeneralPiRule params ctx
+      (.bvar index) (storedDomain.liftBVars (index + 1) 0) :=
+    .bound ctx index storedDomain found
+  have weakTyped := (checked_bound_variable_weakens params ctx contextWF
+      domain level domainTyped index storedDomain found).2
+  have bodyTyped : GeneralPiRule params (domain :: ctx)
+      (.bvar (index + 1))
+      (storedDomain.liftBVars ((index + 1) + 1) 0) := by
+    simpa [KExpr.liftBVars, liftBVars_add] using weakTyped
+  have lamTyped : GeneralPiRule params ctx
+      (.lam name domain (.bvar (index + 1)) style)
+      (.forallE name domain
+        (storedDomain.liftBVars ((index + 1) + 1) 0) style) :=
+    .lam ctx name domain (.bvar (index + 1)) style level
+      (storedDomain.liftBVars ((index + 1) + 1) 0)
+      domainTyped bodyTyped
+  have appTyped : GeneralPiRule params ctx
+      (.app (.lam name domain (.bvar (index + 1)) style) value)
+      ((storedDomain.liftBVars ((index + 1) + 1) 0).instantiateBVar value 0) :=
+    .app ctx (.lam name domain (.bvar (index + 1)) style) value
+      name domain (storedDomain.liftBVars ((index + 1) + 1) 0) style
+      lamTyped valueTyped
+  constructor
+  · simpa [liftBVars_one_instantiate_cancel] using appTyped
+  · have droppedIndex : index + 1 - 1 = index := by omega
+    simpa [KExpr.instantiateBVar, droppedIndex] using oldTyped
+
 #print axioms liftBVars_one_instantiate_cancel
 #print axioms liftBVars_add
 #print axioms liftBVars_comm
 #print axioms checked_bound_variable_weakens
+#print axioms dependent_outer_variable_beta_preserves_type
 #print axioms liftBVars_zero
 #print axioms bound_zero_substitution_preserves_type
 #print axioms dependent_identity_beta_preserves_type

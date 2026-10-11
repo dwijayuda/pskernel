@@ -25,37 +25,44 @@ private theorem imax_succ_right (u v : Nat) :
 theorem smartMax_denote (ρ : KName → Nat) (a b : ULevel) :
     (smartMax a b).denote ρ =
       Nat.max (a.denote ρ) (b.denote ρ) := by
-  unfold smartMax
-  split_ifs with hzA hzB heq hOrder
+  by_cases ha : a = .zero
   · subst a
-    simp [ULevel.denote]
-  · subst b
-    simp [ULevel.denote]
-  · subst b
-    simp [ULevel.denote]
-  · rfl
-  · exact Nat.max_comm (b.denote ρ) (a.denote ρ)
+    simp [smartMax, ULevel.denote]
+  · by_cases hb : b = .zero
+    · subst b
+      simp [smartMax, ha, ULevel.denote]
+    · by_cases heq : a = b
+      · subst b
+        simp [smartMax, ha, ULevel.denote]
+      · by_cases horder : levelOrder a b = true
+        · simp [smartMax, ha, hb, heq, horder, ULevel.denote]
+        · simp [smartMax, ha, hb, heq, horder, ULevel.denote, Nat.max_comm]
 
 theorem smartIMax_denote (ρ : KName → Nat) (a b : ULevel) :
     (smartIMax a b).denote ρ =
       numericImax (a.denote ρ) (b.denote ρ) := by
-  unfold smartIMax
-  split_ifs with hzB hzA heq
+  by_cases hb : b = .zero
   · subst b
-    rfl
-  · subst a
-    exact (imax_zero_left (b.denote ρ)).symm
-  · subst b
-    exact (imax_self (a.denote ρ)).symm
-  · cases b with
-    | succ inner =>
-        simpa [ULevel.denote, smartMax_denote] using
-          (imax_succ_right (a.denote ρ) (inner.denote ρ)).symm
-    | zero => simp_all
-    | param n => rfl
-    | mvar n => rfl
-    | max left right => rfl
-    | imax left right => rfl
+    simp [smartIMax, ULevel.denote, numericImax]
+  · by_cases ha : a = .zero
+    · subst a
+      simpa [smartIMax, hb] using (imax_zero_left (b.denote ρ)).symm
+    · by_cases heq : a = b
+      · subst b
+        simpa [smartIMax, ha] using (imax_self (a.denote ρ)).symm
+      · cases b with
+        | zero => contradiction
+        | succ inner =>
+            simp [smartIMax, hb, ha, heq, ULevel.denote,
+              smartMax_denote, numericImax]
+        | param n =>
+            simp [smartIMax, hb, ha, heq, ULevel.denote]
+        | mvar n =>
+            simp [smartIMax, hb, ha, heq, ULevel.denote]
+        | max left right =>
+            simp [smartIMax, hb, ha, heq, ULevel.denote]
+        | imax left right =>
+            simp [smartIMax, hb, ha, heq, ULevel.denote]
 
 theorem normalize_denote (ρ : KName → Nat) (level : ULevel) :
     (normalize level).denote ρ = level.denote ρ := by
@@ -89,10 +96,10 @@ implementation's internal normalization/interning/hash ordering.
 theorem compare_equal_sound (params : List KName) (a b : ULevel)
     (h : compare params a b = .equal) :
     ∀ ρ : KName → Nat, a.denote ρ = b.denote ρ := by
-  unfold compare at h
-  split_ifs at h with hInvalid hEqual
-  · cases h
-  · exact positiveEquivalent_sound a b hEqual
-  · cases h
+  by_cases hBad : (!a.validParams params || !b.validParams params) = true
+  · simp [compare, hBad] at h
+  · by_cases hEq : positiveEquivalent a b = true
+    · exact positiveEquivalent_sound a b hEq
+    · simp [compare, hBad, hEq] at h
 
 end PSKernelFast.Core

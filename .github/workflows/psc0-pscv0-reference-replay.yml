@@ -1,0 +1,79 @@
+name: PSC0 PSCV0 generated bridge RC4 reference replay
+# Reference/metadata-only changes do not need another expensive bridge build.
+on:
+  push:
+    branches: [psc0/pscv0-readable-selfhost-v1]
+    paths:
+      - '.github/workflows/psc0-pscv0-reference-replay.yml'
+      - 'psc0/scripts/bridge-reference-replay.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc0-pscv0-reference-replay-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          show-progress: false
+          sparse-checkout: |
+            psc0/packages/syntax
+            psc0/packages/foundation
+            psc0/scripts
+            psc0/test/pscv0/reference
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38098425773
+          name: pscv0-bridge-1ed94be7b1d3c49f11e302464478be76fa299172
+          path: psc0/dist/pscv0-bridge
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38098425773
+          name: pscv0-bridge-windows-1ed94be7b1d3c49f11e302464478be76fa299172
+          path: psc0/dist/pscv0-windows
+      - name: Read actual originating run and job conclusions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api repos/dwijayuda/pskernel/actions/runs/38098425773 > psc0/dist/pscv0-bridge/origin-run.json
+          gh api 'repos/dwijayuda/pskernel/actions/runs/38098425773/jobs?per_page=100' > psc0/dist/pscv0-bridge/origin-jobs.json
+      - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
+        with:
+          lake-package-directory: psc0/test/pscv0/reference
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Verify retained evidence, prove generated equality, and reject false equation
+        run: node psc0/scripts/bridge-reference-replay.mjs
+      - name: Retain exact RC4 source, proof and reference qualification
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: pscv0-rc4-reference-${{ github.sha }}
+          path: |
+            psc0/dist/pscv0-bridge/reference*.lean
+            psc0/dist/pscv0-bridge/reference*.json
+            psc0/dist/pscv0-bridge/reference*.txt
+            psc0/dist/pscv0-bridge/lean-version.txt
+            psc0/dist/pscv0-bridge/build-report.json
+            psc0/dist/pscv0-bridge/origin-*.json
+            psc0/dist/pscv0-bridge/tests-linux.tap
+            psc0/dist/pscv0-bridge/runtime-report-linux.json
+            psc0/dist/pscv0-windows/
+          if-no-files-found: error
+          retention-days: 30

@@ -176,7 +176,7 @@ def psErasureNatRecursor : PsRuntimeInductiveInfo :=
       (List.cons
         (PsRuntimeConstructorInfo.mk "Nat" "succ" psNatSuccName 0
           (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil))
-        List.nil))
+        List.nil)) 0
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :

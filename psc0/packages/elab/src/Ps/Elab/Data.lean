@@ -176,14 +176,14 @@ def psElabDataMinor (context : PsElabContext) (info : PsInductiveInfo)
 def psBuildInductiveRecursor (context : PsElabContext)
     (parameterBindersRev : List PsElabTypedBinder) (info : PsInductiveInfo)
     (constructors : List PsDeclaration) : Except PsElabError PsDeclaration := do
-  let universe := psRootName "u"
+  let motiveUniverse := psRootName "u"
   let parameters := psElabBinderArguments parameterBindersRev
   let family := psExprApplyMany (.constE info.name []) parameters
   let indexType ← psElabMatchApplyParameters context parameters info.type
   let indices ← psElabOpenCoreTelescope 4096 context indexType (some info.numIndices)
   let indexedFamily := psExprApplyMany family (psElabBinderArguments indices.bindersRev)
   let motiveType := psCloseElabForallBinders context.metaContext indices.bindersRev
-    (.forallE (psRootName "_major") indexedFamily (.sortE (.param universe)) .explicit)
+    (.forallE (psRootName "_major") indexedFamily (.sortE (.param motiveUniverse)) .explicit)
   -- Index locals are scoped inside the motive; keep their IDs fresh for minors.
   let outer := psElabLeaveScope context indices.context
   let motive := psLocalPushBinding outer.localContext (psRootName "_motive") motiveType .explicit
@@ -212,7 +212,7 @@ def psBuildInductiveRecursor (context : PsElabContext)
             [PsElabTypedBinder.mk major.id majorName majorType .explicit] body))))
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   return .recursorDecl {
-    name := psNameAppendStr info.name "rec", levelParams := [universe], type
+    name := psNameAppendStr info.name "rec", levelParams := [motiveUniverse], type
     inductiveNames := [info.name], numParams := info.numParams, numIndices := info.numIndices
     numMotives := 1, numMinors := constructors.length }
 
@@ -256,4 +256,4 @@ def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxNam
     (params fields : List (PsSyntaxBinderHead × PsSyntaxTerm)) (span : PsSourceSpan) :
     Except PsElabError PsElabDeclarationBatchResult :=
   psElabInductiveDeclaration environment name params none
-    [PsSyntaxInductiveConstructor.mk (PsSyntaxName.mk ["mk"] span) fields span] true
+    [{ name := PsSyntaxName.mk ["mk"] span, fields, span }] true

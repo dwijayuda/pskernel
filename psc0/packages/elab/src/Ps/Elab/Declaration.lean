@@ -187,7 +187,7 @@ def psElabStructuralRecursionFromSource
                               recursiveParameterIndex
                               List.nil
                               resultType
-                              true)
+                              true [] false)
                   | _ =>
                       Option.none
               | none =>

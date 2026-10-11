@@ -54,8 +54,8 @@ needed, exactly one required `Unit` argument. A final `function f()` group lower
 to that required Unit binder.
 
 Basic owns inference/checking and global/projection lookup; Binders owns ordered
-telescopes and lexical scopes; Application owns argument consumption; Term owns
-dispatch and existing control/patterns. Scope owns capture-aware syntax traversal
+telescopes and lexical scopes; Application owns argument consumption; Match owns motives, branches and recursor
+telescopes; Term owns term dispatch. Scope owns capture-aware syntax traversal
 and section dependencies; Command owns ordered scope transitions and declaration
 admission. All are portable source modules, without host elaborator imports.
 
@@ -116,14 +116,36 @@ and expected types; source universe commands remain pending. Inference failures
 report their actual category. The previous large
 data block is removed from the general declaration module.
 
-Ordinary exhaustive constructor matches now work on indexed families with a
-constant result motive. Runtime type applications omit family indices while
-constructor fields retain their runtime values; recursor lowering skips index
-arguments using metadata. Index-dependent pattern refinement, impossible-case
-elimination, dependent motive inference and indexed structural recursion remain
-pending. Indexed recursive hypotheses may be used in kernel-checked proofs;
-runtime use is refused until changing-index recursion has its own lowering.
-This prevents the nonindexed recursion optimization from reusing stale indices.
+## Dependent matches and indexed recursion
+
+Exhaustive constructor matches infer motives by generalizing distinct local
+indices and the matched local value in the expected result type. Every branch
+opens its field and induction-hypothesis telescope from the recursor's type.
+This shares the admitted recursor contract instead of independently rebuilding
+branch types. Fresh local let aliases refine unshadowed index/major names; pattern
+binders retain precedence, and outer dependent hypotheses keep their original
+types.
+
+Whole-definition structural calls may change the major to a direct recursive
+field and change its index arguments to that field's indices, including computed
+expressions. Other arguments must remain definitionally equal to their original
+values. Existing changing-state normalization composes with this path when state
+types satisfy its independence restrictions.
+
+Runtime type applications omit family indices while constructor fields retain
+their runtime values. `Ps.Erasure.Recursion` derives a recursion plan from the
+actual major and index arguments, then substitutes the child value and child
+indices in runtime calls. It refuses reuse of the current definition when a minor
+captures a varying major/index; such a recursor needs a separately lifted fold.
+This also protects explicit recursor applications from changing captured values.
+No runtime helper is generated speculatively.
+
+Automatic refinement requires distinct local indices independent of uniform
+parameters. Compound or repeated parent indices retain constant motives; indexed
+structural recursion requires explicit local index parameters. Impossible-case
+elimination, general dependent-local generalization, nested/multiple patterns and
+arbitrary runtime recursor lifting remain pending. Type/Prop constructor fields
+and runtime Type/Prop indices remain outside the current data erasure profile.
 
 Data families still end in `Type`; universe/Prop families, deriving, structure
 field methods/defaults and inheritance remain pending. Lambda result annotations,
@@ -176,7 +198,10 @@ Three data refusals protect adjacent explicit groups, nullary constructors and
 field separators. Indexed vectors and a two-index family extend that same
 application with construction, exhaustive matches and a checked induction proof.
 Four refusals protect uniform parameters, required constructor results, result
-family identity and index typing. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
+family identity and index typing. Dependent vector mapping/reconstruction, two-index
+cell reconstruction, indexed accumulator recursion and computed child indices extend
+the same application. Four additional refusals cover stale indices, dependent
+invariant arguments, captured runtime folds and wrong dependent branch results. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
 application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.

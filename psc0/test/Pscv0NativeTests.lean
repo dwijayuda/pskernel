@@ -175,10 +175,48 @@ private def application : String :=
   "}\n" ++
   "theorem vectorInduction{A: Type}(P: Prop, base: P, n: Nat, values: Vector(A, n)): P :=\n" ++
   "  Vector.rec(fun n values => P, base, fun n head tail ih => ih, values)\n" ++
+  "function map{A B: Type}(f: A -> B, n: Nat, values: Vector(A, n)): Vector(B, n) := match values with {\n" ++
+  "  | Vector.nil => Vector.nil\n" ++
+  "  | Vector.cons k head tail => Vector.cons(k, f(head), map(f, k, tail))\n" ++
+  "}\n" ++
+  "function rebuild{A: Type}(n: Nat, values: Vector(A, n)): Vector(A, n) := match values with {\n" ++
+  "  | Vector.nil => values\n" ++
+  "  | Vector.cons k head tail => values\n" ++
+  "}\n" ++
+  "function count{A: Type}(n: Nat, values: Vector(A, n), total: Nat): Nat := match values with {\n" ++
+  "  | Vector.nil => total\n" ++
+  "  | Vector.cons k head tail => count(k, tail, Nat.succ(total))\n" ++
+  "}\n" ++
+  "function copyCell{A: Type}(n: Nat, flag: Bool, cell: Cell(A, n, flag)): Cell(A, n, flag) := match cell with {\n" ++
+  "  | Cell.cell k tag value => Cell.cell(k, tag, value)\n" ++
+  "}\n" ++
+  "inductive EvenChain: Nat -> Type where {\n" ++
+  "  | stop: EvenChain(0)\n" ++
+  "  | step(k: Nat, next: EvenChain(Nat.succ(k))): EvenChain(Nat.succ(Nat.succ(k)))\n" ++
+  "  | single: EvenChain(Nat.succ(0))\n" ++
+  "}\n" ++
+  "function chainCopy(n: Nat, chain: EvenChain(n)): EvenChain(n) := match chain with {\n" ++
+  "  | EvenChain.stop => EvenChain.stop\n" ++
+  "  | EvenChain.step k next => EvenChain.step(k, chainCopy(Nat.succ(k), next))\n" ++
+  "  | EvenChain.single => EvenChain.single\n" ++
+  "}\n" ++
+  "const two: Vector(Nat, Nat.succ(Nat.succ(0))) := Vector.cons(Nat.succ(0), 74, one)\n" ++
+  "const mapped: Vector(Nat, Nat.succ(Nat.succ(0))) := map(fun x => Nat.succ(x), Nat.succ(Nat.succ(0)), two)\n" ++
+  "const chained: EvenChain(Nat.succ(Nat.succ(0))) := chainCopy(Nat.succ(Nat.succ(0)), EvenChain.step(0, EvenChain.single))\n" ++
+  "function chainSize(n: Nat, chain: EvenChain(n)): Nat := match chain with {\n" ++
+  "  | EvenChain.stop => n\n" ++
+  "  | EvenChain.step k next => Nat.succ(chainSize(Nat.succ(k), next))\n" ++
+  "  | EvenChain.single => n\n" ++
+  "}\n" ++
   "end Indexed\n" ++
   "const indexedAnswer: Nat := Indexed.peek(Nat.succ(0), Indexed.one, 0)\n" ++
   "const indexedEmpty: Nat := Indexed.peek(0, Indexed.Vector.nil, 72)\n" ++
-  "const indexedCell: Nat := Indexed.readCell(3, true, Indexed.Cell.cell(3, true, 73))\n"
+  "const indexedCell: Nat := Indexed.readCell(3, true, Indexed.Cell.cell(3, true, 73))\n" ++
+  "const indexedMapped: Nat := Indexed.peek(Nat.succ(Nat.succ(0)), Indexed.mapped, 0)\n" ++
+  "const indexedRebuilt: Nat := Indexed.peek(Nat.succ(Nat.succ(0)), Indexed.rebuild(Nat.succ(Nat.succ(0)), Indexed.two), 0)\n" ++
+  "const indexedCount: Nat := Indexed.count(Nat.succ(Nat.succ(0)), Indexed.two, 80)\n" ++
+  "const indexedCopiedCell: Nat := Indexed.readCell(3, true, Indexed.copyCell(3, true, Indexed.Cell.cell(3, true, 76)))\n" ++
+  "const indexedChainSize: Nat := Indexed.chainSize(Nat.succ(Nat.succ(0)), Indexed.chained)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -229,7 +267,11 @@ private def semanticCases : IO Unit := do
     { source := "inductive Bad(A: Type): Nat -> Type where { | bad: Bad(Nat, 0) }\n" },
     { source := "inductive Bad: Nat -> Type where { | bad }\n" },
     { source := "inductive Bad: Nat -> Type where { | bad: List Nat }\n" },
-    { source := "inductive Bad: Nat -> Type where { | bad: Bad(0) }\nconst wrong: Bad(Nat.succ(0)) := Bad.bad\n" }]
+    { source := "inductive Bad: Nat -> Type where { | bad: Bad(0) }\nconst wrong: Bad(Nat.succ(0)) := Bad.bad\n" },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): Nat := match v with { | V.nil => 0 | V.cons k tail => bad(Nat.succ(k), tail) }\n" },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n), other: V(n)): Nat := match v with { | V.nil => 0 | V.cons k tail => bad(k, tail, other) }\n" },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction captured(n: Nat, v: V(n)): Nat := V.rec(fun k value => Nat, n, fun k tail ih => ih, v)\n" },
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): V(n) := match v with { | V.nil => V.nil | V.cons k tail => tail }\n" }]
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate",
@@ -238,7 +280,8 @@ private def semanticCases : IO Unit := do
       some "parse", some "parse", some "parse", some "elaborate",
       some "parse", some "elaborate", some "elaborate",
       some "parse", some "parse", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate",
+      some "elaborate", some "elaborate", some "erase", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -248,7 +291,8 @@ private def semanticCases : IO Unit := do
     "PSCV0-PARSE: newline-separated structure field",
     "PSCV0-DATA: constructor parameters must remain uniform",
     "PSCV0-DATA: indexed constructor requires a result type",
-    "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH"]
+    "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH",
+    "PSCV0-TYPE-MISMATCH", "PSCV0-ELABORATION", "PSCV0-ERASURE", "PSCV0-TYPE-MISMATCH"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -275,7 +319,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 32 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 36 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

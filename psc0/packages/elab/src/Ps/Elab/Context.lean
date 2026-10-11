@@ -11,6 +11,8 @@ structure PsElabStructuralRecursion where
   calls : List (Prod Nat Nat)
   resultType : PsExpr
   collectCalls : Bool
+  indices : List (Nat × Nat) := []
+  refined : Bool := false
 
 def psElabStructuralRecursionFindCall
     (calls : List (Prod Nat Nat))
@@ -81,9 +83,7 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
   | Option.none => context
   | Option.some recursion =>
       psElabContextWithStructuralRecursion context
-        (Option.some (PsElabStructuralRecursion.mk
-          recursion.functionName recursion.parameterIds recursion.explicitParameterIds
-          recursion.recursiveParameterIndex recursion.calls recursion.resultType false))
+        (some { recursion with collectCalls := false })
 
 -- Restore lexical visibility, retain solved constraints, and never recycle a
 -- local identity still mentioned by the shared metavariable context.

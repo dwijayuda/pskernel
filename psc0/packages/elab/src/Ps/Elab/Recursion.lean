@@ -9,6 +9,7 @@ structure PsElabRecursionPlan where
   explicitIds : List Nat
   majorId : Nat
   generalizedIds : List Nat
+  indexIds : List Nat := []
 
 structure PsElabRecursionWalkResult where
   term : PsSyntaxTerm
@@ -99,7 +100,7 @@ def psElabRecursionChangedArguments
             match smaller tail with
             | Except.error error => Except.error error
             | Except.ok changed =>
-                if Nat.beq id plan.majorId then Except.ok changed
+                if Nat.beq id plan.majorId || plan.indexIds.contains id then Except.ok changed
                 else
                   match psElabRecursionLocalId context argument with
                   | Option.some actual =>
@@ -715,8 +716,20 @@ def psElabPlanStructuralNormalizationWithOrigin
                             typeResult.type with
                         | Except.error error => Except.error (PsElabError.infer error)
                         | Except.ok _ =>
+                            let indexIds := match psLocalFindById typeResult.context.localContext majorId with
+                              | none => []
+                              | some major =>
+                                let view := psExprAppView (psWhnf environment typeResult.context.metaContext
+                                  typeResult.context.localContext (psLocalDeclType major));
+                                match view.head with
+                                | .constE family _ =>
+                                  match psEnvironmentFindInductive environment family with
+                                  | none => []
+                                  | some info => (psElabMatchIndexMap (view.args.take info.numParams)
+                                      (view.args.drop info.numParams)).map Prod.fst
+                                | _ => [];
                             let plan := PsElabRecursionPlan.mk name
-                              (psElabRecursionParameterIds typed) explicitIds majorId List.nil;
+                              (psElabRecursionParameterIds typed) explicitIds majorId List.nil indexIds;
                             match psElabRecursionWalkWithFuel
                                 4096 plan environment typeResult.context.localContext valueSyntax with
                             | Except.error error => Except.error error
@@ -724,7 +737,7 @@ def psElabPlanStructuralNormalizationWithOrigin
                                 if psListIsEmpty scanned.changedIds then Except.ok Option.none
                                 else
                                   let generalized := PsElabRecursionPlan.mk name
-                                    plan.parameterIds explicitIds majorId scanned.changedIds;
+                                    plan.parameterIds explicitIds majorId scanned.changedIds plan.indexIds;
                                   match psElabRecursionBuildNormalizationWithOrigin generalized
                                       binders typeSyntax valueSyntax span binderResult typeResult with
                                   | Except.error error => Except.error error

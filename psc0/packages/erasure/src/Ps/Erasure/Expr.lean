@@ -1,4 +1,4 @@
-import Ps.Erasure.Basic
+import Ps.Erasure.Recursion
 
 structure PsErasureAppliedArguments where
   typeArgumentsRev : List PsVerifiedIrType
@@ -1330,33 +1330,6 @@ def psOpenMatchMinorFields
               Except.error PsErasureError.unsupportedRuntimeTerm
       | _ => Except.error PsErasureError.binderMismatch
 
-def psErasureFindStringIndex (target : String) (values : List String) : Nat -> Option Nat :=
-  match values with
-  | List.nil => fun (_index : Nat) => Option.none
-  | List.cons value rest =>
-      let smaller : Nat -> Option Nat := psErasureFindStringIndex target rest;
-      fun (index : Nat) =>
-        if psStringEq value target then Option.some index
-        else smaller (Nat.succ index)
-
-def psErasureRuntimeVariables
-    (names : List String) : List PsVerifiedIrExpr :=
-  match names with
-  | List.nil => List.nil
-  | List.cons name rest =>
-      List.cons (PsVerifiedIrExpr.var name) (psErasureRuntimeVariables rest)
-
-
-def psErasureRecursiveCallArguments (names : List String) : Nat -> String -> List PsVerifiedIrExpr :=
-  match names with
-  | List.nil => fun (_index : Nat) (_recursiveName : String) => List.nil
-  | List.cons name rest =>
-      let smaller : Nat -> String -> List PsVerifiedIrExpr := psErasureRecursiveCallArguments rest;
-      fun (index : Nat) (recursiveName : String) =>
-        match index with
-        | Nat.zero => List.cons (PsVerifiedIrExpr.var recursiveName) (psErasureRuntimeVariables rest)
-        | Nat.succ remaining => List.cons (PsVerifiedIrExpr.var name) (smaller remaining recursiveName)
-
 structure PsOpenMatchHypotheses where
   scope : PsErasureScope
   cursor : PsExpr
@@ -1373,14 +1346,15 @@ def psErasureFindMatchBinding
 
 def psOpenMatchMinorHypotheses
     (environment : PsEnvironment)
-    (recursiveParameterIndex : Option Nat) (bindings : List PsVerifiedIrMatchBinding)
+    (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
+    (recursionPlan : Option PsErasureRecursionPlan) (bindings : List PsVerifiedIrMatchBinding)
     (fields : List PsRuntimeConstructorField) :
     PsOpenMatchHypotheses -> Except PsErasureError PsOpenMatchHypotheses :=
   match fields with
   | List.nil => fun (state : PsOpenMatchHypotheses) => Except.ok state
   | List.cons field rest =>
     let smaller : PsOpenMatchHypotheses -> Except PsErasureError PsOpenMatchHypotheses :=
-      psOpenMatchMinorHypotheses environment recursiveParameterIndex bindings rest;
+      psOpenMatchMinorHypotheses environment eraseAt recursionPlan bindings rest;
     fun (state : PsOpenMatchHypotheses) =>
       if psErasureBoolNot field.recursive then
         smaller
@@ -1412,21 +1386,10 @@ def psOpenMatchMinorHypotheses
                   currentDefinition := state.scope.currentDefinition
                 };
                 let replacement : Except PsErasureError (Option PsVerifiedIrExpr) :=
-                  match state.scope.currentDefinition with
-                  | Option.none => Except.ok Option.none
-                  | Option.some current =>
-                      match recursiveParameterIndex with
-                      | Option.none => Except.ok Option.none
-                      | Option.some parameterIndex =>
-                          -- All actual declaration entry parameters are already supplied.
-                          -- A function-valued hypothesis is the returned unary value.
-                          Except.ok
-                            (Option.some
-                              (PsVerifiedIrExpr.call
-                                (PsVerifiedIrExpr.var current.name)
-                                (psListReverse current.typeArgumentsRev)
-                                (psErasureRecursiveCallArguments
-                                  current.runtimeParameters parameterIndex binding.name)));
+                  match recursionPlan with
+                  | none => Except.ok none
+                  | some plan => (psErasureRecursiveCall environment eraseAt
+                      state.scope plan binding.name).map some;
                 match replacement with
                 | Except.error error => Except.error error
                 | Except.ok value =>
@@ -1449,7 +1412,7 @@ def psEraseMatchMinor
       Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope)
     (substitutions : List (String × PsVerifiedIrType))
-    (recursiveParameterIndex : Option Nat)
+    (recursionPlan : Option PsErasureRecursionPlan)
     (ctorInfo : PsRuntimeConstructorInfo)
     (minor : PsExpr) :
     Except PsErasureError PsErasedMatchMinor :=
@@ -1469,7 +1432,8 @@ def psEraseMatchMinor
       match
           psOpenMatchMinorHypotheses
             environment
-            recursiveParameterIndex
+            eraseAt
+            recursionPlan
             bindings
             ctorInfo.fields
             {
@@ -1552,14 +1516,8 @@ def psEraseStructureRecursorMinor
                       match eraseAt scope major with
                       | Except.error error => Except.error error
                       | Except.ok scrutinee =>
-                          let recursiveParameterIndex : Option Nat :=
-                            match scope.currentDefinition with
-                            | Option.none => Option.none
-                            | Option.some current =>
-                                match scrutinee with
-                                | PsVerifiedIrExpr.var name =>
-                                    psErasureFindStringIndex name current.runtimeParameters 0
-                                | _ => Option.none;
+                          let recursionPlan := psErasurePlanRecursion scope structureInfo.coreName
+                            structureInfo.numParams major [] [minor];
                           let majorName :=
                             psErasureLocalName scope "_psStructureMajor" "_psStructureMajor"
                               scope.localContext.nextId;
@@ -1579,7 +1537,7 @@ def psEraseStructureRecursorMinor
                                   (psNameLastComponent constructorInfo.name) "constructor")
                                 constructorInfo.name constructorInfo.numParams fields;
                             match psEraseMatchMinor environment eraseAt minorScope substitutions
-                                recursiveParameterIndex runtimeConstructor minor with
+                                recursionPlan runtimeConstructor minor with
                             | Except.error error => Except.error error
                             | Except.ok lowered =>
                                 Except.ok (Option.some
@@ -1631,7 +1589,7 @@ def psEraseMatchAlternativesWorker
     (environment : PsEnvironment)
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope) (substitutions : List (String × PsVerifiedIrType))
-    (recursiveParameterIndex : Option Nat) (arguments : List PsExpr) (minorStart : Nat)
+    (recursionPlan : Option PsErasureRecursionPlan) (arguments : List PsExpr) (minorStart : Nat)
     (constructors : List PsRuntimeConstructorInfo) :
     Nat -> List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) ->
     Except PsErasureError (List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :=
@@ -1642,7 +1600,7 @@ def psEraseMatchAlternativesWorker
   | List.cons ctorInfo rest =>
     let smaller : Nat -> List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr) ->
         Except PsErasureError (List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :=
-      psEraseMatchAlternativesWorker environment eraseAt scope substitutions recursiveParameterIndex arguments minorStart rest;
+      psEraseMatchAlternativesWorker environment eraseAt scope substitutions recursionPlan arguments minorStart rest;
     fun (index : Nat) (alternativesRev : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) =>
       match psErasureExprListAt arguments (Nat.add minorStart index) with
       | Option.none => Except.error PsErasureError.unsupportedApplication
@@ -1653,7 +1611,7 @@ def psEraseMatchAlternativesWorker
                 eraseAt
                 scope
                 substitutions
-                recursiveParameterIndex
+                recursionPlan
                 ctorInfo
                 minor with
           | Except.error error => Except.error error
@@ -1671,11 +1629,11 @@ def psEraseMatchAlternatives
     (environment : PsEnvironment)
     (eraseAt : PsErasureScope -> PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (scope : PsErasureScope) (substitutions : List (String × PsVerifiedIrType))
-    (recursiveParameterIndex : Option Nat) (arguments : List PsExpr) (minorStart : Nat)
+    (recursionPlan : Option PsErasureRecursionPlan) (arguments : List PsExpr) (minorStart : Nat)
     (index : Nat) (constructors : List PsRuntimeConstructorInfo)
     (alternativesRev : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :
     Except PsErasureError (List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :=
-  psEraseMatchAlternativesWorker environment eraseAt scope substitutions recursiveParameterIndex arguments minorStart
+  psEraseMatchAlternativesWorker environment eraseAt scope substitutions recursionPlan arguments minorStart
     constructors index alternativesRev
 
 def psEraseNatRecursorAlternatives
@@ -1762,18 +1720,11 @@ def psEraseRuntimeRecursorApplication
                       match eraseAt scope major with
                       | Except.error error => Except.error error
                       | Except.ok scrutinee =>
-                          let recursiveParameterIndex : Option Nat :=
-                            if inductiveInfo.numIndices != 0 then Option.none else
-                            match scope.currentDefinition with
-                            | Option.none => Option.none
-                            | Option.some current =>
-                                match scrutinee with
-                                | PsVerifiedIrExpr.var name =>
-                                    psErasureFindStringIndex
-                                      name
-                                      current.runtimeParameters
-                                      0
-                                | _ => Option.none;
+                          let indices := (view.args.drop
+                            (minorStart + inductiveInfo.constructors.length)).take inductiveInfo.numIndices;
+                          let minors := (view.args.drop minorStart).take inductiveInfo.constructors.length;
+                          let recursionPlan := psErasurePlanRecursion scope inductiveInfo.coreName
+                            inductiveInfo.numParams major indices minors;
                           -- Reusing a computed Nat major in both the zero test and
                           -- predecessor expression would evaluate it twice on succ.
                           -- Variables and natural literals already denote values.
@@ -1826,7 +1777,7 @@ def psEraseRuntimeRecursorApplication
                                   eraseAt
                                   minorScope
                                   substitutions
-                                  recursiveParameterIndex
+                                  recursionPlan
                                   view.args
                                   minorStart
                                   0

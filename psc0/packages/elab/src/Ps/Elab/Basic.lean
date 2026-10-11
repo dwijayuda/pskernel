@@ -96,19 +96,20 @@ def psElabCheckStructuralParameters
           | Except.error error => Except.error error
           | Except.ok _ => psElabCheckStructuralParameters context majorId rest
 
-def psElabCheckStructuralTelescope
-    (context : PsElabContext) (recursion : PsElabStructuralRecursion) :
-    Except PsElabError Nat :=
-  match psElabStructuralParameterAt
-      recursion.explicitParameterIds recursion.recursiveParameterIndex with
-  | Option.none => Except.error PsElabError.structuralRecursionInternal
-  | Option.some majorId =>
-      match psElabCheckStructuralType context majorId recursion.resultType with
-      | Except.error error => Except.error error
-      | Except.ok _ =>
-          match psElabCheckStructuralParameters context majorId recursion.parameterIds with
-          | Except.error error => Except.error error
-          | Except.ok _ => Except.ok majorId
+-- Recursion may vary the major and its generalized indices. Every other
+-- parameter must have a type independent of them; otherwise its recursive
+-- replacement would require dependent context generalization.
+def psElabCheckStructuralTelescope (context : PsElabContext)
+    (recursion : PsElabStructuralRecursion) : Except PsElabError Nat := do
+  let some majorId := psElabStructuralParameterAt recursion.explicitParameterIds
+    recursion.recursiveParameterIndex | throw .structuralRecursionInternal
+  let varying := majorId :: recursion.indices.map Prod.fst
+  let fixed := recursion.parameterIds.filter (fun id => !varying.contains id)
+  for id in varying do
+    psElabCheckStructuralParameters context id fixed
+  if !recursion.refined then
+    psElabCheckStructuralType context majorId recursion.resultType
+  return majorId
 
 def psElabNatNe (left right : Nat) : Bool :=
   if Nat.beq left right then false else true

@@ -91,6 +91,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Inductive,
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
+    `Ps.Erasure.Recursion,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]
@@ -153,6 +154,7 @@ lean_lib PsElab where
     `Ps.Elab.Basic,
     `Ps.Elab.Binders,
     `Ps.Elab.Application,
+    `Ps.Elab.Match,
     `Ps.Elab.Term,
     `Ps.Elab.Recursion,
     `Ps.Elab.Data,

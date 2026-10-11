@@ -17,24 +17,100 @@ open PSKernelFast.Core
 
 universe u
 
-/-- The set denoted by Sort u in a supplied infinite-universe set model. -/
-def sortSet (V : Type u) [SetTheoryBasis V] (level : Nat) : V :=
-  SetTheoryBasis.univ level
+/--
+A TWO-TRUTH-VALUE candidate for Lean's impredicative Sort 0 (= Prop):
+the subsets of the singleton powerset of the derived empty set.
+The two distinct truth-value sets are empty and powerset empty.
+This carrier is not yet a proof-irrelevant Pi/lambda interpretation.
+-/
+noncomputable def propTruthUniverse (V : Type u) [SetTheoryBasis V] : V :=
+  SetTheoryBasis.powerset
+    (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V))
 
 /--
-THE FIRST SET-MODEL THEOREM: under the explicitly supplied model
-assumptions, the denotation of Sort u is a member of the denotation
-of its actual inferred type Sort (succ u), for EVERY universe valuation.
-This is a conditional semantic-membership fact, not an empty syntax
-identity and not a constructed SetTheoryBasis instance.
+The sort tower must distinguish impredicative Prop (level zero) from
+predicative Type universes. Positive ranks start two stages above the
+underlying Grothendieck chain, following the existence proof below.
+-/
+noncomputable def sortSet (V : Type u) [SetTheoryBasis V] : Nat → V
+  | 0 => propTruthUniverse V
+  | n + 1 => SetTheoryBasis.univ (n + 2)
+
+/-- Empty (false) is a member of the two-truth-value universe. -/
+theorem propFalse_mem (V : Type u) [SetTheoryBasis V] :
+    SetTheoryBasis.Mem (SetTheoryBasis.emptySet V)
+      (propTruthUniverse V) := by
+  apply (SetTheoryBasis.member_powerset).2
+  intro z hz
+  exact False.elim (SetTheoryBasis.not_member_empty V z hz)
+
+/-- Powerset empty (true) is another member of the truth-value universe. -/
+theorem propTrue_mem (V : Type u) [SetTheoryBasis V] :
+    SetTheoryBasis.Mem (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V))
+      (propTruthUniverse V) := by
+  exact (SetTheoryBasis.member_powerset).2 (fun z hz => hz)
+
+/-- The two truth values are distinct, derived without a new axiom. -/
+theorem propFalse_ne_true (V : Type u) [SetTheoryBasis V] :
+    SetTheoryBasis.emptySet V ≠
+      SetTheoryBasis.powerset (SetTheoryBasis.emptySet V) := by
+  intro h
+  have hEmptyInPower : SetTheoryBasis.Mem
+      (SetTheoryBasis.emptySet V)
+      (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V)) := by
+    apply (SetTheoryBasis.member_powerset).2
+    intro z hz
+    exact False.elim (SetTheoryBasis.not_member_empty V z hz)
+  have hSelf : SetTheoryBasis.Mem
+      (SetTheoryBasis.emptySet V) (SetTheoryBasis.emptySet V) := by
+    simpa [← h] using hEmptyInPower
+  exact SetTheoryBasis.not_member_empty V _ hSelf
+
+/--
+Derived membership of the candidate Prop universe in the FIRST positive
+Sort. This uses the tower and two successive Grothendieck powerset
+closure steps, and is not a new assumed Pi/Prop interpretation law.
+-/
+theorem propUniverse_mem_typeOne (V : Type u) [SetTheoryBasis V] :
+    SetTheoryBasis.Mem (propTruthUniverse V)
+      (SetTheoryBasis.univ 2) := by
+  have hChain : SetTheoryBasis.Mem
+      (SetTheoryBasis.univ 1 : V) (SetTheoryBasis.univ 2) :=
+    SetTheoryBasis.universe_step (V := V) 1
+  have hEmpty : SetTheoryBasis.Mem
+      (SetTheoryBasis.emptySet V) (SetTheoryBasis.univ 2) :=
+    SetTheoryBasis.universe_subset_closed (V := V) 2
+      (SetTheoryBasis.univ 1) (SetTheoryBasis.emptySet V)
+      hChain (by
+        intro z hz
+        exact False.elim (SetTheoryBasis.not_member_empty V z hz))
+  have hPower : SetTheoryBasis.Mem
+      (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V))
+      (SetTheoryBasis.univ 2) :=
+    SetTheoryBasis.universe_powerset_closed (V := V) 2
+      (SetTheoryBasis.emptySet V) hEmpty
+  exact SetTheoryBasis.universe_powerset_closed (V := V) 2
+    (SetTheoryBasis.powerset (SetTheoryBasis.emptySet V)) hPower
+
+/--
+FIRST CONDITIONAL LEAN-SHAPED SET-MODEL MEMBERSHIP THEOREM:
+the interpretation of Sort u belongs to the interpretation of
+its inferred Sort (u+1), for every ground universe valuation.
+Unlike a raw Grothendieck tower, zero now has a distinct two-valued
+Prop carrier. This still does NOT interpret proof irrelevance or Pi.
 -/
 theorem sort_member_succ (V : Type u) [SetTheoryBasis V]
     (ρ : KName → Nat) (level : ULevel) :
     SetTheoryBasis.Mem
       (sortSet V (level.denote ρ))
       (sortSet V ((ULevel.succ level).denote ρ)) := by
-  simpa [sortSet, ULevel.denote] using
-    (SetTheoryBasis.universe_step (V := V) (level.denote ρ))
+  cases hLevel : level.denote ρ with
+  | zero =>
+      simpa [sortSet, ULevel.denote, hLevel] using
+        (propUniverse_mem_typeOne V)
+  | succ n =>
+      simpa [sortSet, ULevel.denote, hLevel, Nat.add_assoc] using
+        (SetTheoryBasis.universe_step (V := V) (n + 2))
 
 /--
 Lean's impredicative Pi sort rule uses imax u v. The resulting sort is
@@ -91,6 +167,14 @@ theorem piLevel_positive_bounds
     (numericIMax_positive_bounds
       (domain.denote ρ) (codomain.denote ρ) h)
 
+#print axioms SetTheoryBasis.exists_empty
+#print axioms SetTheoryBasis.not_member_empty
+#print axioms SetTheoryBasis.universe_subset_closed
+#print axioms SetTheoryBasis.universe_powerset_closed
+#print axioms propUniverse_mem_typeOne
+#print axioms propFalse_mem
+#print axioms propTrue_mem
+#print axioms propFalse_ne_true
 #print axioms SetTheoryBasis.universe_two_steps
 #print axioms sort_member_succ
 #print axioms numericIMax_zero_iff_codomain_zero

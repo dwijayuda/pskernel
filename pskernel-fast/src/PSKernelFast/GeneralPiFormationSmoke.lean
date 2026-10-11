@@ -6,6 +6,25 @@ namespace PSKernelFast.Core
 private def require (ok : Bool) (message : String) : IO Unit :=
   if ok then pure () else throw <| IO.userError message
 
+private def expectCertifiedType (params : List KName)
+    (expr expected : KExpr) : IO Unit :=
+  match inferClosedGeneralPiCertified params expr with
+  | .ok checked => do
+      require (checked.val == expected)
+        "certified inferred type disagrees with earlier judgment"
+      require (checked.val.closedInput params)
+        "certified inferred type escaped declaration scope"
+  | .error _ =>
+      throw (IO.userError "expected scope-certified type was declined")
+
+private def expectCertifiedError (params : List KName)
+    (expr : KExpr) (expected : GeneralPiError) : IO Unit :=
+  match inferClosedGeneralPiCertified params expr with
+  | .error actual =>
+      require (actual == expected) "certified typing failure category changed"
+  | .ok _ =>
+      throw (IO.userError "invalid/unsupported certified typing accepted")
+
 private def expectType (actual : Except GeneralPiError KExpr)
     (expected : KExpr) : IO Unit :=
   match actual with
@@ -170,6 +189,17 @@ def generalPiFormationSmoke : IO Unit := do
   expectError (inferClosedGeneralPi []
     (.forallE a (.sort .zero)
       (.lam x (.sort .zero) (.bvar 0) .default) .default)) .unsupported
+
+  -- The strict entry point checks the exact *output* scope, in addition to
+  -- the source and the independently certified fragment rules.
+  expectCertifiedType [] dependent expectedDependent
+  expectCertifiedType [] identity dependent
+  expectCertifiedType [] twoApplications (.sort one)
+  expectCertifiedType [] dependentLet expectedLetType
+  expectCertifiedError [] mismatchedArg .unsupported
+  expectCertifiedError [] badLetValue .malformed
+  expectCertifiedError [] nondepLet .unsupported
+  IO.println "PSKernel-Fast G4.4 source/output scoped certificates PASS"
 
   IO.println "PSKernel-Fast G4.4 certified Pi/lambda/app/restricted-let fragment PASS"
   IO.println "G4.4 limits: syntactic type equality only; no DefEq/constants/nondep-let/admission"

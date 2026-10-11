@@ -22,6 +22,11 @@ THEOREMS = {
     "PSKernelFast.Proof.certified_ne_malformedResult",
     "PSKernelFast.Proof.inferred_success_certifiable",
     "PSKernelFast.Proof.inferClosedGeneralPi_source_and_result_scoped",
+    "PSKernelFast.Proof.liftBVars_one_instantiate_cancel",
+    "PSKernelFast.Proof.liftBVars_zero",
+    "PSKernelFast.Proof.bound_zero_substitution_preserves_type",
+    "PSKernelFast.Proof.dependent_identity_beta_preserves_type",
+    "PSKernelFast.Proof.dependent_let_variable_zeta_preserves_type",
 }
 
 

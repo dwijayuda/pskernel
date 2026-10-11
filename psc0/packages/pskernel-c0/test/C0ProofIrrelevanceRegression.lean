@@ -67,6 +67,22 @@ def main : IO Unit := do
       if !(psKernelExprEqual expected actual) then
         throw (IO.userError "C0 optimized single substitution mismatch")
   IO.println "C0_PERF_REGRESSION single_substitution_semantics=pass"
+  -- Independent fuel-based lifting oracle versus direct traversal.
+  for term in [base, sort0, nested, many,
+      PsKernelExpr.app nested many] do
+    for start in [0, 1, 2, 4] do
+      for amount in [0, 1, 3] do
+        let old :=
+          psKernelExprLiftLooseBVarsChangedWithFuel
+            (Nat.succ (psKernelExprNodeCount term))
+            term start amount
+        let next :=
+          psKernelExprLiftLooseBVarsChanged term start amount
+        if !(psKernelExprEqual (Prod.fst old) (Prod.fst next) &&
+              psKernelBoolEq (Prod.snd old) (Prod.snd next)) then
+          throw (IO.userError "C0 direct lifting changed semantics")
+  IO.println "C0_PERF_REGRESSION structural_lift_semantics=pass"
+
 
   -- Test the indexed store's shared radix-16 interner, including duplicates.
   let first := psKernelC0Intern psKernelC0StoreEmpty (.bvar 0)

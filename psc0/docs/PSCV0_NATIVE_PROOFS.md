@@ -55,4 +55,6 @@ Or/Exists retain Prop-only elimination. No axiom is added. Existing Core univers
 and recursor metadata represent these families without a separate proof calculus.
 The same native composite now checks construction, projections, existential
 witnesses, and independently introduced sibling goals; a negative case protects
-Or's large-elimination restriction. This extension awaits its exact cloud run.
+Or's large-elimination restriction. The full native cloud workflow passed at a8fbc17f1ad2d24efbde14a7cbe993a4400d4c01,
+run 38179168385: 329 fixture declarations, 61 phase-specific refusals and 111
+shared TypeScript/Rust observations.

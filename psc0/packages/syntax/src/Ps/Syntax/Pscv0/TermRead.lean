@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.PatternRead
+import Ps.Syntax.Pscv0.Operators
 import Ps.Syntax.Pscv0.ProofRead
 
 -- V7 term dispatch owns assignment boundaries. In an annotation, the caller
@@ -17,7 +17,7 @@ def psPscv0CanStartNativeArgument
   match psTokenCursorPeek cursor with
   | Option.none => false
   | Option.some token =>
-      if psProofScriptReservedArgument token.text || token.text == "matches" then
+      if psProofScriptReservedArgument token.text || (psPscv0InfixToken cursor).isSome then
         false
       else if (if annotation then false else psTokenCursorStartsNamedAssignment cursor) then
         false
@@ -133,31 +133,8 @@ def psPscv0ParseApplicationWithFuel
           psPscv0ParseApplicationAfterPrimary annotation
             parseArgument (Nat.succ remaining) primary
 
-def psPscv0ParseGroupedContinuation
-    (annotation : Bool)
-    (parseTerm :
-      PsTokenCursor ->
-      Except PsParseError (PsParseResult PsSyntaxTerm))
-    (parseContinuation : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm))
-    (fuel : Nat)
-    (opening : PsTokenRead)
-    (grouped : PsParseResult PsSyntaxTerm)
-    (close : PsTokenRead) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  let primary : PsParseResult PsSyntaxTerm := {
-    value := psProofScriptTermWithSpan grouped.value {
-      start := opening.token.span.start
-      stop := close.token.span.stop
-    }
-    cursor := close.cursor
-  };
-  match psPscv0ParseApplicationAfterPrimary annotation parseTerm fuel primary with
-  | Except.error error => Except.error error
-  | Except.ok application =>
-      psPscv0TermTail parseContinuation application
-
-def psPscv0ParseTermWithFuel
-    (annotation : Bool)
+def psPscv0ParseTermAtPrecedence
+    (annotation : Bool) (minimum : Nat)
     (fuel : Nat) :
     PsTokenCursor ->
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
@@ -166,121 +143,134 @@ def psPscv0ParseTermWithFuel
       fun (_cursor : PsTokenCursor) =>
         Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      fun (cursor : PsTokenCursor) =>
+      fun (cursor : PsTokenCursor) => do
         let smaller :
             PsTokenCursor ->
             Except PsParseError (PsParseResult PsSyntaxTerm) :=
-          psPscv0ParseTermWithFuel false remaining;
+          psPscv0ParseTermAtPrecedence false 0 remaining;
         let readAnnotation : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
-          psPscv0ParseTermWithFuel true remaining;
+          psPscv0ParseTermAtPrecedence true 0 remaining;
         let continuation : PsTokenCursor -> Except PsParseError (PsParseResult PsSyntaxTerm) :=
-          psPscv0ParseTermWithFuel annotation remaining;
-        if psTokenCursorAtText cursor "by" then
-          psPscv0ReadProof smaller (remaining + 1) cursor
-      else if psTokenCursorAtText cursor "do" then
-          Except.error
-            (psProofScriptExpectedError
-              "supported pure term; do is not enabled in this source subset" cursor)
-      else if psTokenCursorAtText cursor "nomatch" then
-        psPscv0ReadMatch smaller remaining true cursor
-      else if psTokenCursorAtText cursor "match" then
-        psPscv0ReadMatch smaller remaining false cursor
-      else if psTokenCursorAtText cursor "if" && psPscv0IfLetStart cursor then
-        psPscv0ReadIfLet smaller remaining cursor
-      else if psTokenCursorAtText cursor "if" then
-        match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-        | Option.some keyword =>
-            match psTokenCursorExpectText keyword.cursor "(" with
-            | Except.error error => Except.error error
-            | Except.ok afterOpen =>
-                match smaller afterOpen.cursor with
+          psPscv0ParseTermAtPrecedence annotation 0 remaining;
+        let primary ←
+          if psTokenCursorAtText cursor "¬" then do
+            let prefix ← psTokenCursorExpectText cursor "¬"
+            let argument ← psPscv0ParseTermAtPrecedence annotation 40 remaining prefix.cursor
+            pure {
+              value := psPscv0NotationCall "Not" [argument.value]
+                (psSyntaxSpanJoin prefix.token.span (psSyntaxTermSpan argument.value))
+              cursor := argument.cursor }
+          else if psTokenCursorAtText cursor "by" then
+            psPscv0ReadProof smaller (remaining + 1) cursor
+          else if psTokenCursorAtText cursor "do" then
+              Except.error
+                (psProofScriptExpectedError
+                  "supported pure term; do is not enabled in this source subset" cursor)
+          else if psTokenCursorAtText cursor "nomatch" then
+            psPscv0ReadMatch smaller remaining true cursor
+          else if psTokenCursorAtText cursor "match" then
+            psPscv0ReadMatch smaller remaining false cursor
+          else if psTokenCursorAtText cursor "if" && psPscv0IfLetStart cursor then
+            psPscv0ReadIfLet smaller remaining cursor
+          else if psTokenCursorAtText cursor "if" then
+            match psTokenCursorAdvance cursor with
+            | Option.none => Except.error (PsParseError.unexpectedEnd "(")
+            | Option.some keyword =>
+                match psTokenCursorExpectText keyword.cursor "(" with
                 | Except.error error => Except.error error
-                | Except.ok condition =>
-                    match psTokenCursorExpectText condition.cursor ")" with
+                | Except.ok afterOpen =>
+                    match smaller afterOpen.cursor with
                     | Except.error error => Except.error error
-                    | Except.ok afterCondition =>
-                        match psTokenCursorExpectText afterCondition.cursor "{" with
+                    | Except.ok condition =>
+                        match psTokenCursorExpectText condition.cursor ")" with
                         | Except.error error => Except.error error
-                        | Except.ok afterThenOpen =>
-                            match smaller afterThenOpen.cursor with
+                        | Except.ok afterCondition =>
+                            match psTokenCursorExpectText afterCondition.cursor "{" with
                             | Except.error error => Except.error error
-                            | Except.ok thenBranch =>
-                                match psTokenCursorExpectText thenBranch.cursor "}" with
+                            | Except.ok afterThenOpen =>
+                                match smaller afterThenOpen.cursor with
                                 | Except.error error => Except.error error
-                                | Except.ok afterThenClose =>
-                                    match psTokenCursorExpectText
-                                        afterThenClose.cursor
-                                        "else" with
+                                | Except.ok thenBranch =>
+                                    match psTokenCursorExpectText thenBranch.cursor "}" with
                                     | Except.error error => Except.error error
-                                    | Except.ok afterElse =>
+                                    | Except.ok afterThenClose =>
                                         match psTokenCursorExpectText
-                                            afterElse.cursor
-                                            "{" with
+                                            afterThenClose.cursor
+                                            "else" with
                                         | Except.error error => Except.error error
-                                        | Except.ok afterElseOpen =>
-                                            match smaller afterElseOpen.cursor with
+                                        | Except.ok afterElse =>
+                                            match psTokenCursorExpectText
+                                                afterElse.cursor
+                                                "{" with
                                             | Except.error error => Except.error error
-                                            | Except.ok elseBranch =>
-                                                match psTokenCursorExpectText
-                                                    elseBranch.cursor
-                                                    "}" with
+                                            | Except.ok afterElseOpen =>
+                                                match smaller afterElseOpen.cursor with
                                                 | Except.error error => Except.error error
-                                                | Except.ok close =>
-                                                    Except.ok {
-                                                      value :=
-                                                        PsSyntaxTerm.ifE
-                                                          condition.value
-                                                          thenBranch.value
-                                                          elseBranch.value
-                                                          {
-                                                            start :=
-                                                              keyword.token.span.start
-                                                            stop :=
-                                                              close.token.span.stop
-                                                          }
-                                                      cursor := close.cursor
-                                                    }
-      else if psTokenCursorAtText cursor "let" then
-        psPscv0ReadLet smaller readAnnotation continuation remaining cursor
-      else if psTokenCursorAtText cursor "fun" || psTokenCursorAtText cursor "λ" then
-        psPscv0BoundTerm readAnnotation continuation false (remaining + 1) cursor
-      else if psTokenCursorAtText cursor "forall" || psTokenCursorAtText cursor "∀" then
-        psPscv0BoundTerm readAnnotation continuation true (remaining + 1) cursor
-      else if psTokenCursorAtText cursor "{" then
-        psParseProofScriptRecordLiteral
-          (smaller)
-          cursor
-      else if psTokenCursorAtText cursor "(" then
-        match psPscv0DependentBinder readAnnotation (remaining + 1) cursor with
-        | Except.ok binder =>
-            if psTokenCursorAtArrow binder.cursor then
-              psParseProofScriptDependentArrowTail continuation binder
-            else
-              match psPscv0Primary smaller cursor with
-              | .error error => .error error
-              | .ok primary =>
-                  match psPscv0ParseApplicationAfterPrimary annotation smaller (remaining + 1) primary with
-                  | .error error => .error error
-                  | .ok application => psPscv0TermTail continuation application
-        | Except.error _ =>
-            match psPscv0Primary smaller cursor with
-            | .error error => .error error
-            | .ok primary =>
-                match psPscv0ParseApplicationAfterPrimary annotation smaller (remaining + 1) primary with
-                | .error error => .error error
-                | .ok application => psPscv0TermTail continuation application
-      else
-        match
-            psPscv0ParseApplicationWithFuel annotation
+                                                | Except.ok elseBranch =>
+                                                    match psTokenCursorExpectText
+                                                        elseBranch.cursor
+                                                        "}" with
+                                                    | Except.error error => Except.error error
+                                                    | Except.ok close =>
+                                                        Except.ok {
+                                                          value :=
+                                                            PsSyntaxTerm.ifE
+                                                              condition.value
+                                                              thenBranch.value
+                                                              elseBranch.value
+                                                              {
+                                                                start :=
+                                                                  keyword.token.span.start
+                                                                stop :=
+                                                                  close.token.span.stop
+                                                              }
+                                                          cursor := close.cursor
+                                                        }
+          else if psTokenCursorAtText cursor "let" then
+            psPscv0ReadLet smaller readAnnotation continuation remaining cursor
+          else if psTokenCursorAtText cursor "fun" || psTokenCursorAtText cursor "λ" then
+            psPscv0BoundTerm readAnnotation continuation false (remaining + 1) cursor
+          else if psTokenCursorAtText cursor "forall" || psTokenCursorAtText cursor "∀" then
+            psPscv0BoundTerm readAnnotation continuation true (remaining + 1) cursor
+          else if psTokenCursorAtText cursor "{" then
+            psParseProofScriptRecordLiteral
               (smaller)
-              (Nat.add remaining 1)
-              cursor with
-        | Except.error error => Except.error error
-        | Except.ok domain =>
-            psPscv0TermTail
-              continuation
-              domain
+              cursor
+          else if psTokenCursorAtText cursor "(" then
+            match psPscv0DependentBinder readAnnotation (remaining + 1) cursor with
+            | Except.ok binder =>
+                if psTokenCursorAtArrow binder.cursor then
+                  psParseProofScriptDependentArrowTail
+                    (psPscv0ParseTermAtPrecedence annotation 25 remaining) binder
+                else
+                  match psPscv0Primary smaller cursor with
+                  | .error error => .error error
+                  | .ok primary =>
+                      match psPscv0ParseApplicationAfterPrimary annotation smaller (remaining + 1) primary with
+                      | .error error => .error error
+                      | .ok application => pure application
+            | Except.error _ =>
+                match psPscv0Primary smaller cursor with
+                | .error error => .error error
+                | .ok primary =>
+                    match psPscv0ParseApplicationAfterPrimary annotation smaller (remaining + 1) primary with
+                    | .error error => .error error
+                    | .ok application => pure application
+          else
+            match
+                psPscv0ParseApplicationWithFuel annotation
+                  (smaller)
+                  (Nat.add remaining 1)
+                  cursor with
+            | Except.error error => Except.error error
+            | Except.ok domain =>
+                pure domain
+        psPscv0OperatorTail (fun precedence =>
+          psPscv0ParseTermAtPrecedence annotation precedence remaining)
+          minimum (remaining + 1) primary
+
+def psPscv0ParseTermWithFuel (annotation : Bool) (fuel : Nat) : PsPscv0TermReader :=
+  psPscv0ParseTermAtPrecedence annotation 0 fuel
 
 def psPscv0ParseTerm (annotation : Bool) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=

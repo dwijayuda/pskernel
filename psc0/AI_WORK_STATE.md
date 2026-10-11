@@ -1303,3 +1303,12 @@ Profile pscv0-v7-native-bounded/20 at 5d63d8962084a8df15f318610646f6d30ed42308 p
 and 111 shared runtime observations in both targets. all_goals and any_goals
 reuse the same focused goal engine; failed any_goals branches roll back their
 constraint state. No source/compiler self-host qualification was performed.
+
+## Logical prelude qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/21 at a8fbc17f1ad2d24efbde14a7cbe993a4400d4c01 passed
+[run 38179168385](https://github.com/dwijayuda/pskernel/actions/runs/38179168385), job 114587853107:
+329 fixture declarations, 28 parser cases, four accepted programs, 61 phase-specific
+refusals and 111 shared runtime observations. The source guard reports 109 portable
+and 115 native modules. Checked And/Iff/Or/Exists/Not declarations preserve their
+elimination restrictions; no proof axiom or host elaborator fallback is added.

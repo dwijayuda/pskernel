@@ -32,6 +32,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.Pscv0.ProofRead,
     `Ps.Syntax.Pscv0.TermRead,
     `Ps.Syntax.Pscv0.PatternRead,
+    `Ps.Syntax.Pscv0.Operators,
     `Ps.Syntax.Pscv0.Surface,
     `Ps.Syntax.Pscv0.Read,
     `Ps.Syntax.Pscv0.Binders,

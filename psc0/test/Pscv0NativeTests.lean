@@ -403,7 +403,7 @@ private def application : String :=
   "theorem tacticIdentity(P: Prop): P -> P := by {\n  intro h\n  exact h\n}\n" ++
   "theorem tacticApply(P: Prop, Q: Prop, step: P -> Q, h: P): Q := by {\n  apply step\n  assumption\n}\n" ++
   "theorem tacticRefine(P: Prop, h: P): P := by {\n  refine tacticIdentity(P, _)\n  exact h\n}\n" ++
-  "theorem tacticRfl(n: Nat): Eq(n, n) := by { rfl }\n" ++
+  "theorem tacticRfl(n: Nat): n = n := by { rfl }\n" ++
   "theorem tacticTrue: True := by { constructor }\n" ++
   "function tacticPair(value: Nat): Prod Nat Nat := by {\n  constructor\n  · exact value\n  · exact value\n}\n" ++
   "function tacticShadow(value: Nat): Nat -> Nat := by {\n  intro value\n  exact value\n}\n" ++
@@ -412,12 +412,17 @@ private def application : String :=
   "function tacticMixed(value: Nat): Prod Nat Bool := by {\n  constructor\n  any_goals exact value\n  all_goals constructor\n}\n" ++
   "const tacticMixedNat: Nat := Prod.fst(tacticMixed(213))\n" ++
   "const tacticMixedBool: Bool := Prod.snd(tacticMixed(214))\n" ++
-  "theorem andProof(P: Prop, Q: Prop, hp: P, hq: Q): And P Q := by {\n  constructor\n  · exact hp\n  · exact hq\n}\n" ++
-  "theorem andProjection(P: Prop, Q: Prop, h: And P Q): P := h.left\n" ++
-  "theorem orProof(P: Prop, Q: Prop, hp: P): Or P Q := Or.inl(hp)\n" ++
+  "theorem andProof(P: Prop, Q: Prop, hp: P, hq: Q): P ∧ Q := by {\n  constructor\n  · exact hp\n  · exact hq\n}\n" ++
+  "theorem andProjection(P: Prop, Q: Prop, h: P ∧ Q): P := h.left\n" ++
+  "theorem orProof(P: Prop, Q: Prop, hp: P): P ∨ Q := Or.inl(hp)\n" ++
   "theorem existsProof(n: Nat): Exists(fun (x: Nat) => Eq(x, x)) := by {\n  refine Exists.intro(n, _)\n  rfl\n}\n" ++
-  "theorem iffProof(P: Prop): Iff P P := by {\n  constructor\n  all_goals intro h\n  all_goals assumption\n}\n" ++
-  "theorem notFalse: Not False := by {\n  intro h\n  exact h\n}\n"
+  "theorem iffProof(P: Prop): P ↔ P := by {\n  constructor\n  all_goals intro h\n  all_goals assumption\n}\n" ++
+  "theorem notFalse: ¬ False := by {\n  intro h\n  exact h\n}\n" ++
+  "theorem logicalPrecedence(P: Prop, Q: Prop, R: Prop, h: P ∧ Q ∨ R): (P ∧ Q) ∨ R := h\n" ++
+  "theorem andAssociativity(P: Prop, Q: Prop, R: Prop, h: P ∧ Q ∧ R): P ∧ (Q ∧ R) := h\n" ++
+  "theorem implicationPrecedence(P: Prop, Q: Prop): P -> Q ↔ (P -> Q) := by {\n  constructor\n  all_goals intro h\n  all_goals assumption\n}\n" ++
+  "theorem logicalAliases(P: Prop, Q: Prop, h: P /\\ Q): P \\/ Q := Or.inl(h.left)\n" ++
+  "theorem iffAlias(P: Prop): P <-> P := iffProof(P)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -498,7 +503,9 @@ private def semanticCases : IO Unit := do
     { source := "theorem bad: Eq(0, 1) := by { rfl }\n" },
     { source := "theorem bad(P: Prop, step: P -> P, h: P): P := by { exact step (h) }\n" },
     { source := "theorem bad: Eq(0, 1) := by { any_goals rfl }\n" },
-    { source := "function bad(h: Or True True): Nat := match h with { | .inl proof => 0 | .inr proof => 1 }\n" }]
+    { source := "function bad(h: Or True True): Nat := match h with { | .inl proof => 0 | .inr proof => 1 }\n" },
+    { source := "theorem bad(n: Nat): n = n = n := by { rfl }\n" },
+    { source := "function id(n: Nat): Nat := n\ntheorem bad(n: Nat): id (n) = n := by { rfl }\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -515,7 +522,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -534,7 +541,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -563,7 +570,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 61 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 63 phase-specific refusals, shared-prelude isolation"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [

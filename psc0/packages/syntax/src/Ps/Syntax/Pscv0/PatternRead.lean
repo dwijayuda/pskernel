@@ -212,6 +212,3 @@ def psPscv0MatchesTail (value : PsParseResult PsSyntaxTerm) :
     value := .ascription test (.reference (PsSyntaxName.mk ["_root_", "Bool"] span)) span
     cursor := pattern.cursor }
 
-def psPscv0TermTail (continuation : PsPscv0TermReader) (value : PsParseResult PsSyntaxTerm) :
-    Except PsParseError (PsParseResult PsSyntaxTerm) := do
-  psParseProofScriptArrowTail continuation (← psPscv0MatchesTail value)

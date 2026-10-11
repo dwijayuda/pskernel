@@ -88,6 +88,8 @@ THEOREMS = {
     "PSKernelFast.Spec.propUniverseV2_exactly_two",
     "PSKernelFast.Spec.universe_singleton_closed",
     "PSKernelFast.Spec.propUniverseV2_mem_typeOne",
+    "PSKernelFast.Spec.powerEmpty_is_singletonEmpty",
+    "PSKernelFast.Spec.proofPointV2_is_kuratowski_empty_pair",
     "PSKernelFast.Spec.sort_member_succ",
     "PSKernelFast.Spec.numericIMax_zero_iff_codomain_zero",
     "PSKernelFast.Spec.piLevel_isProp_iff_codomain_isProp",

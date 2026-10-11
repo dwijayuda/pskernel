@@ -59,3 +59,7 @@ lean_exe pskernel_fast_typed_normalization_smoke where
 lean_exe pskernel_fast_source_certificate_smoke where
   root := `PSKernelFast.Proof.SourceCertificateSynthesisSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_certified_normalization_smoke where
+  root := `PSKernelFast.Proof.CertifiedNormalizationSmoke
+  srcDir := "src"

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build/audit/test the source-certificate and semantic-step closure.
+"""Build/audit/test the executable source-certificate and model-normalization path.
 
-The older 232-receipt gates remain unchanged. The new gate uses the same
-fail-closed parser, explicit theorem names, and negative-input self-tests.
+All older 232-receipt gates remain unchanged. This gate reuses the same
+strict parser/allowlist and negative-input self-tests.
 """
 import subprocess
 import sys
@@ -12,6 +12,7 @@ MODULES = [
     "Proof/SourceCertificateCoherence.lean",
     "Proof/SourceCertificateSynthesis.lean",
     "Proof/CertifiedReduction.lean",
+    "Proof/CertifiedNormalization.lean",
 ]
 NAMES = {
     "PSKernelFast.Proof.sourceModelTyping_annotations_unique",
@@ -21,14 +22,18 @@ NAMES = {
     "PSKernelFast.Proof.certifyClosedModel_zero",
     "PSKernelFast.Proof.sourceModelTyping_step",
     "PSKernelFast.Proof.ModelSteps.sound",
+    "PSKernelFast.Proof.ModelSteps.operational",
+    "PSKernelFast.Proof.compareCertifiedWH_sound",
+    "PSKernelFast.Proof.compareCertifiedWH_operational",
+    "PSKernelFast.Proof.compareCertifiedWH_zero",
 }
-SMOKE = "pskernel_fast_source_certificate_smoke"
+SMOKES = ["pskernel_fast_source_certificate_smoke", "pskernel_fast_certified_normalization_smoke"]
 
 
 def main() -> None:
     targets = ["PSKernelFast." + p.removesuffix(".lean").replace("/", ".")
                for p in MODULES]
-    subprocess.run(["lake", "build", *targets, SMOKE], check=True)
+    subprocess.run(["lake", "build", *targets, *SMOKES], check=True)
     texts = []
     for path in MODULES:
         result = subprocess.run(
@@ -41,7 +46,8 @@ def main() -> None:
     gate.test_fail_closed()
     gate.audit("\n".join(texts))
     print(f"Source-certificate gate PASS: {len(NAMES)} exact additional receipts", flush=True)
-    subprocess.run(["lake", "exe", SMOKE], check=True)
+    for target in SMOKES:
+        subprocess.run(["lake", "exe", target], check=True)
 
 
 if __name__ == "__main__":

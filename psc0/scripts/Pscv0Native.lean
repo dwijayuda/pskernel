@@ -4,10 +4,10 @@ open Lean (toJson)
 open PsV7Native
 
 private def run (paths : List String) (output? : Option String) : IO UInt32 := do
-  let requests ← paths.toArray.mapM fun path => do
+  let requests ← paths.toArray.mapM fun (path : String) => do
     if !path.endsWith ".ps" then
       throw (IO.userError "PSCV0-NATIVE-INPUT: expected .ps application input")
-    return { source := ← IO.FS.readFile path, emit := output?.isSome : Request }
+    return { source := ← IO.FS.readFile (System.FilePath.mk path), emit := output?.isSome : Request }
   match ← runBatch requests with
   | .error error =>
       IO.eprintln (error.phase ++ ": " ++ error.message)

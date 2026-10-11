@@ -1,0 +1,58 @@
+{
+  "schema": "pskernel-fast-hereditary-tagged-denotation-evidence/p1h",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualifiedSourceCommit": "2b4e79bddce283c3bd7fb04fd0387a8e81d3ca3f",
+  "cloudCI": {
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38134093069",
+    "runId": 38134093069,
+    "jobId": 114454289188,
+    "conclusion": "success",
+    "lean": "v4.35.0-rc4",
+    "upstreamCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "lakeBuildJobs": 97,
+    "independentLeanModules": 45,
+    "assumptionTheoremReceipts": 139,
+    "allowedGlobalAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "sorryAxAllowed": false
+  },
+  "priorHereditaryGreen": {
+    "commit": "af1a547fc4ae779c15eb3e31aa31cc425b82205b",
+    "runId": 38133936309,
+    "jobId": 114453808100,
+    "conclusion": "success",
+    "assumptionTheoremReceipts": 136
+  },
+  "proved": {
+    "hereditaryTaggedSemanticJudgmentDefined": true,
+    "sortAndModelVariableAndPropositionPiMembershipSoundnessProved": true,
+    "hereditaryPiWitnessEntailsValidSemanticFibres": true,
+    "actualCheckedFalsePropositionHasHereditaryWitness": true,
+    "actualCheckedTrueDependentPropositionHasHereditaryWitness": true,
+    "sourceBackedAnnotationsReusableWithHereditaryFibreWitness": true,
+    "anyInhabitantOfTaggedPropIsDistinguishedPoint": true,
+    "anyTwoModelInhabitantsOfSameTaggedPropEqual": true,
+    "taggedPropInhabitedIffTrue": true
+  },
+  "stillOpen": {
+    "setTheoryBasisConstructed": false,
+    "allCheckerSuccessesYieldHereditaryModelWitness": false,
+    "generalTypedContextEnvironmentModel": false,
+    "checkedTermProofIrrelevance": false,
+    "typeValuedPiGraphAndApp": false,
+    "betaLetSemanticPreservation": false,
+    "typedQuotientFreshness": false,
+    "fullLeanConversion": false,
+    "immutableCheckedDeclarationEnvironment": false,
+    "generalSourceModelSoundness": false,
+    "modelRelativeConsistency": false,
+    "realKernelOnlyBenchmark": false,
+    "productionProofAdmission": false
+  },
+  "executingCheckerChanged": false,
+  "admittedDeclarations": 0
+}

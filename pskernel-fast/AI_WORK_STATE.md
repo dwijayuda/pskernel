@@ -6,6 +6,14 @@ New-generation PSKernel-Fast independent architecture. **Performance and semanti
 
 Working branch: `research/pskernel-fast-clean-v3-20261011`. Source ancestor: V2 research commit `80f198c41fe7e3a8bd96a910672f26f5ddd94882`. Active kernel proof branch, its prior evidence and draft PR #89 are **not dependencies and are not modified**.
 
+## Current status (read before the chronological checkpoints)
+
+**Last independently inspected GREEN source:** `df800d5f390e36a0c807bd88397221adce488394`, G4.3 structural binder frame, [run 38110413629](https://github.com/dwijayuda/pskernel/actions/runs/38110413629), completed success, 45 native build jobs. This is NOT a general-purpose Lean checker.
+
+**New follow-up candidate (CI UNCONFIRMED):** `c22863ba81911fb7c2996eeaf2021f5293b2a797` adds `KExpr.liftBVars` for the actual G3 expression constructors and the proposed `KExpr.liftBVars_structurallyValid` theorem. `9ddd8ed1f765cba00904f29470b53f1848224561` adds lambda/Pi/let/binder-domain regression tests. GitHub accepted both source commits, but the available commit status endpoint exposes no completed cloud CI result for them. **Do not label the new theorem compiling or tests passing until the exact completed Actions job has been inspected.** Source can require fixes.
+
+The new lifting operation is a **reference** structural operation, not a typed context lookup, certified substitution, generalized inference, DefEq or admission. Next: verify/fix cloud CI; add a context-depth-aware lifted lookup with independent scope proof; then substitution and checked inference with environment identity. Do not integrate G9 greenfield's unproved `TinyTyping` result as a trusted checker.
+
 ## Completed document decisions
 
 - V3 architecture document created with full freedom for a new kernel implementation, compact DAG / closure/NbE alternatives, formal method target, benchmark gates and clean architecture.

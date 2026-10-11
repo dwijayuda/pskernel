@@ -672,7 +672,8 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                               let continuationLocal :=
                                 PsKernelLocalContext.mk
                                   child0.context.localContext.decls
-                                  analysisLocal.nextIndex;
+                                  analysisLocal.nextIndex
+                                  child0.context.localContext.index;
                               let continuation :=
                                 PsKernelCheckerSession.mk
                                   (psKernelCheckerContextWithLocalContext

@@ -19,3 +19,11 @@ The copied Lean kernel represents expressions as recursive `PsKernelExpr` values
 5. Benchmark large real workloads; adopt only if measured speed and semantic qualification justify it.
 
 Metatheory is deferred; semantic correctness and no false acceptance remain mandatory.
+
+## Lean-native acceleration stage (active)
+
+The earlier Rust crate remains a separate experiment. The primary implementation now modifies `src/Ps/KernelCore/**.lean` directly: shared four-level radix indexes for term/declaration/local-context storage; beta/zeta-specific one-variable substitution; direct structural lifting; Unicode hashing over scalar values; and optimized expression equality dispatch. The trusted public checker continues to operate on its original expression API while these hot paths are replaced incrementally.
+
+**Performance selection rule:** retain an optimization only with executable semantic equivalence and repeated workload measurements; e.g., the first paired-expression-equality implementation was slower on a deep case, so C0 changed to a hybrid instead of claiming improvement.
+
+The next architectural milestone is to make indexed expression storage an internal representation for inference, WHNF and conversion with explicit lossless conversion at the public boundary. That is **not yet implemented**. The original package and PSC0 Rust backend remain unchanged. Self-hosting tests and metatheory are not part of this performance iteration.

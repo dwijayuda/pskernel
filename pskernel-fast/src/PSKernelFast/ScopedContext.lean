@@ -166,4 +166,69 @@ theorem KExpr.liftBVars_structurallyValid
       exact ih cutoff depth hCutoff h
 
 
+/--
+For every raw binder-domain lookup, the stored expression is structurally
+valid in its ORIGINAL parent context. The de Bruijn index bounds that
+parent depth exactly. This theorem does not certify the domain as a type.
+-/
+theorem ScopedFrame.rawDomainAt_scoped {params : List KName} :
+    {depth : Nat} → (context : ScopedFrame params depth) →
+    (index : Nat) → (domain : KExpr) →
+    context.rawDomainAt index = some domain →
+    index < depth ∧
+      KExpr.StructurallyValid params (depth - (index + 1)) domain := by
+  intro depth context
+  induction context with
+  | empty =>
+      intro index domain h
+      simp [ScopedFrame.rawDomainAt] at h
+  | @extend prior parent stored valid ih =>
+      intro index domain h
+      cases index with
+      | zero =>
+          have hStored : stored = domain := by
+            simpa [ScopedFrame.rawDomainAt] using h
+          subst domain
+          constructor
+          · omega
+          · simpa using valid
+      | succ olderIndex =>
+          have hParent : parent.rawDomainAt olderIndex = some domain := by
+            simpa [ScopedFrame.rawDomainAt] using h
+          have hOlder := ih olderIndex domain hParent
+          constructor
+          · omega
+          · have hDepth :
+                (prior + 1) - ((olderIndex + 1) + 1) =
+                  prior - (olderIndex + 1) := by omega
+            simpa only [hDepth] using hOlder.2
+
+/--
+Return the EXACT raw binder domain, lifted by index+1 from its original
+parent context into the current one, plus a structural scoping certificate.
+The lifted result is emphatically NOT a checked/inferred type.
+-/
+def ScopedFrame.scopedDomainAt {params : List KName} {depth : Nat}
+    (context : ScopedFrame params depth) (index : Nat) :
+    Option { domain : KExpr //
+      KExpr.StructurallyValid params depth domain } :=
+  match hRaw : context.rawDomainAt index with
+  | none => none
+  | some raw =>
+      have scope := ScopedFrame.rawDomainAt_scoped context index raw hRaw
+      have raised :=
+        KExpr.liftBVars_structurallyValid params (index + 1) 0
+          (depth - (index + 1)) raw (by omega) scope.2
+      have hExact :
+          (depth - (index + 1)) + (index + 1) = depth := by omega
+      some ⟨raw.liftBVars (index + 1) 0,
+        by simpa only [hExact] using raised⟩
+
+def AnyScopedFrame.scopedDomainAt {params : List KName}
+    (context : AnyScopedFrame params) (index : Nat) :
+    Option { domain : KExpr //
+      KExpr.StructurallyValid params context.depth domain } :=
+  context.frame.scopedDomainAt index
+
+
 end PSKernelFast.Core

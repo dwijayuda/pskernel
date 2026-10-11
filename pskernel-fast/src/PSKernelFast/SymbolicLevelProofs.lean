@@ -1,4 +1,5 @@
 import PSKernelFast.CoreSyntaxProofs
+import Init.Data.Nat.Lemmas
 import PSKernelFast.SymbolicLevel
 
 /-!
@@ -64,7 +65,7 @@ theorem smartIMax_denote (ρ : KName → Nat) (a b : ULevel) :
         simpa [smartIMax, ha] using (imax_self (a.denote ρ)).symm
       · by_cases hone : a = .succ .zero
         · subst a
-          simpa [smartIMax, hb, ULevel.denote] using
+          simpa [smartIMax, hb, heq, ULevel.denote] using
             (imax_one_left (b.denote ρ)).symm
         · cases b with
           | zero => contradiction

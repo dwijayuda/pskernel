@@ -124,7 +124,7 @@ theorem forallPropIdentity_tagged_wellDenoted (V : Type u)
     · intro x hx
       apply TaggedWellDenoted.bvar
         (extendSetEnv x (extendSetEnv P env)) 1 0
-      simpa only [extendSetEnv] using hP
+      simpa only [extendSetEnv, interpTaggedProp] using hP
 
 /-- Source-backed tagged Pi typing via HEREDITARY rather than ad hoc fibres. -/
 theorem forallPropProp_tagged_checked_via_wellDenoted

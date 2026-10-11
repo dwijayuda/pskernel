@@ -1,3 +1,26 @@
+# PSC0 AI WORK STATE — v7-only source-policy checkpoint
+
+## 2026-10-11 — latest implementation and CI evidence
+
+**Sole future .ps source-language authority:** `psc0/PSCV0_LANGUAGE_REFERENCE.md`, PSCV0 v7, SHA-256 `843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5`. **No backwards-compatible PSC1/ps-0.9-r3/old-PSCV0 source edition is required or selected for this candidate.** Historical frozen JavaScript/Lean compiler artifacts remain bootstrap tools and provenance, **not** compatibility promises. The public installed old compiler has NOT been promoted to v7.
+
+**Dedicated source-policy branch:** `psc0/pscv0-v7-sole-source-policy-v1` from the v7 adoption commit `8603f7dcf6af6295335c4e11912a10aac86c85a4`. Code commit [b7c6211b](https://github.com/dwijayuda/pskernel/commit/b7c6211b4698c8895279db49428a1e9cdce4c5f2) makes `psPscv0ReadDeclaration` dispatch only explicitly selected v7 command families, with direct refusals for source `partial`, `unsafe`, `axiom`, old `verify`, `ghost`, and unselected new parser extensions. The three retained `theorem`/`structure`/`inductive` families still reuse existing parser code as a *selected v7 subset*, **not** an old-language fallback. `pscv0-authoring.json` now encodes `sourcePolicy=pscv0-v7-only-no-legacy-fallback`, `backwardCompatibilityRequired=false` and `supersededLanguageReferenceAllowed=false`; the materializer checks these before generated source selection. Unknown v7 constructs explicitly decline until implemented and qualified.
+
+**Native cloud proof/test:** [run 38121307578](https://github.com/dwijayuda/pskernel/actions/runs/38121307578) **SUCCESS** at policy commit b7c6211b. Native `PsSyntax`/`PsFoundation` built, all five portable PSCV0 source modules typechecked, `Pscv0BridgeSourceSmoke` reported **five positive source round trips and ten explicit negative refusals**, then `pscv0_native_do_correspondence` was checked **axiom-free**. This is a bounded native source policy/proof gate, **not** updated generated JavaScript, full v7 conformance, Windows, or the whole compiler self-host fixed point. The generated regression script adds five new policy refusals; it still requires independent generation and execution.
+
+**Legacy-document routing:** [new v7-only source policy](docs/PSCV0_V7_ONLY_SOURCE_POLICY.md). Earlier `docs/selfhost-language/{CURRENT,SPEC,PS_GRAMMAR_ADOPTION,README,MIGRATION}.md` now have historical-evidence notices, and the root README labels the currently deployed old grammar historical, so no active document purports to supersede v7.
+
+**Integration boundary:** The separate mainline candidate run [38120695522](https://github.com/dwijayuda/pskernel/actions/runs/38120695522), commit 8603f7dc, was still generating the 20-module bridge when the policy branch was created. **Do not cancel it prematurely by advancing the main branch.** After its actual conclusion, inspect Linux/Windows/RC4 jobs, distinguish timeout/semantic failures, then integrate this policy branch into `psc0/pscv0-readable-selfhost-v1` without deleting histories and requalify the changed candidate. Do not claim passing generated tests before they complete. All kernel branches and public npm source remain unchanged.
+
+### Next actions and conditions
+
+1. Verify the main 20-module candidate job's final status and exact source/JS/TS/proof artifacts. If it finishes and all Linux/Windows/RC4 lanes pass, record its bounded source identity, **not** full compiler or v7 language conformance.
+2. Integrate the narrow v7-only policy and historical-doc clarification into the primary readable-self-host branch with current-HEAD validation and non-force expected-SHA update.
+3. Run native/generation/cloud CI on integrated source; the added five generated refusals must pass, alongside existing 38 bridge assertions, source/Lean correspondence, 36 API comparisons and cross-platform checks.
+4. Only after one genuine candidate qualification, expand high-value portable v7 grammar/lowering and migrate additional actual compiler modules, preserving trivia/source spans. A final deliberate 64-module source migration and C0–C3 fixed point remains later.
+
+---
+
 # PSC0 AI WORK STATE — PSCV0 v7 authority and ongoing first-module qualification
 
 ## Active checkpoint — 2026-10-11

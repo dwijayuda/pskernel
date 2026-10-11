@@ -325,6 +325,14 @@ def psElabStructuralMatchContext (context : PsElabContext)
       indices := if permitted then plan.indices else recursion.indices
       refined := if permitted then plan.majorId.isSome else recursion.refined })
 
+def psElabMatchMotiveLevel (context : PsElabContext) (motive : PsExpr) :
+    Except PsElabError PsLevel := do
+  let type ← (psInferType context.environment context.metaContext
+    context.localContext motive).mapError PsElabError.infer
+  let telescope ← psElabOpenCoreTelescope 4096 context type none
+  (psInferEnsureSort context.environment context.metaContext
+    telescope.context.localContext telescope.body).mapError PsElabError.infer
+
 def psElabMatchWith (elaborate : PsElaborator)
     (prepare : PsElabContext -> PsInductiveInfo -> Except PsElabError (List PsElabMatchAlternative))
     (context : PsElabContext) (scrutineeSyntax : PsSyntaxTerm)
@@ -351,11 +359,7 @@ def psElabMatchWith (elaborate : PsElaborator)
   let plan ← psElabMatchMotive context info levels parameters indices scrutinee.term expectedType
   -- Reverted dependent parameters can raise the motive's universe above that
   -- of the original expected result. Infer the completed motive, not a proxy.
-  let motiveType ← (psInferType context.environment context.metaContext
-    context.localContext plan.motive).mapError PsElabError.infer
-  let motiveTelescope ← psElabOpenCoreTelescope 4096 context motiveType none
-  let level ← (psInferEnsureSort context.environment context.metaContext
-    motiveTelescope.context.localContext motiveTelescope.body).mapError PsElabError.infer
+  let level ← psElabMatchMotiveLevel context plan.motive
   if recursor.levelParams.length > 1 then throw .matchRecursorLevels
   let recursorLevels := if recursor.levelParams.isEmpty then [] else [level]
   let minorContext := psElabStructuralMatchContext context scrutinee.term expectedType plan info.numIndices
@@ -363,7 +367,14 @@ def psElabMatchWith (elaborate : PsElaborator)
   let cursor ← psElabMatchApplyParameters context (parameters ++ [plan.motive]) recursorType
   let minors ← psElabMatchMinors info levels parameters plan alternatives info.constructors
     minorContext cursor
+  -- Branches can solve an initially unknown result type. Reconcile its
+  -- universe with the recursor before checking the completed application.
+  let resolvedLevel ← psElabMatchMotiveLevel minors.context plan.motive
+  let levels := psLevelUnify minors.context.metaContext.levels level resolvedLevel
+  if !levels.success then throw .typeMismatch
+  let completed := psElabContextWithMeta minors.context
+    (psMetaSetLevels minors.context.metaContext levels.context)
   let term := psExprApplyMany (.constE recursorName recursorLevels)
     (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term] ++ plan.arguments)
-  psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
+  psElabResolvedTerm (psElabLeaveScope context completed) term (some expectedType)
 

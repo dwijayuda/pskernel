@@ -296,7 +296,25 @@ private def application : String :=
   "const matrixCapture: Nat := captureNames(117, 0)\n" ++
   "const tupleAnswer: Nat := tuplePattern(Prod.mk(118, 0))\n" ++
   "const nestedTail: Nat := Indexed.zeroOnly(Indexed.twoTail(0, Indexed.two))\n" ++
-  "const matrixIndexed: Nat := Indexed.multiIndexed(2, Indexed.two)\n"
+  "const matrixIndexed: Nat := Indexed.multiIndexed(2, Indexed.two)\n" ++
+  "function ifPattern(value: Option Nat): Nat := if let .some n := value { n } else { 0 }\n" ++
+  "function letPattern(value: Prod Nat Nat): Nat := {\n  let (first, second) := value\n  first\n}\n" ++
+  "function inferredPattern(value: Option Nat): Nat := {\n  let result := match value with { | .some n => n | .none => 0 }\n  result\n}\n" ++
+  "function ifPatternScope(value: Option Nat, n: Nat): Nat := if let .some n := value { n } else { n }\n" ++
+  "function isNested(value: Option(Option Nat)): Bool := value matches .some (.some _)\n" ++
+  "function inferredIfPattern(value: Option Nat): Nat := {\n  let result := if let .some n := value { n } else { 0 }\n  result\n}\n" ++
+  "function dependentLet(value: Indexed.Vector(Nat, 1)): Nat := {\n  let .cons k head tail := value\n  head\n}\n" ++
+  "function inferredLetPattern(value: Prod Nat Nat): Nat := {\n  let result := let (first, second) := value\n    second\n  result\n}\n" ++
+  "const ifPatternSome: Nat := ifPattern(Option.some(121))\n" ++
+  "const ifPatternNone: Nat := ifPattern(Option.none)\n" ++
+  "const letPatternAnswer: Nat := letPattern(Prod.mk(122, 0))\n" ++
+  "const inferredPatternAnswer: Nat := inferredPattern(Option.some(123))\n" ++
+  "const patternScopeAnswer: Nat := ifPatternScope(Option.none, 124)\n" ++
+  "const matchesYes: Bool := isNested(Option.some(Option.some(1)))\n" ++
+  "const matchesNo: Bool := isNested(Option.some(Option.none))\n" ++
+  "const inferredIfAnswer: Nat := inferredIfPattern(Option.some(125))\n" ++
+  "const dependentLetAnswer: Nat := dependentLet(Indexed.one)\n" ++
+  "const inferredLetAnswer: Nat := inferredLetPattern(Prod.mk(0, 126))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -358,7 +376,9 @@ private def semanticCases : IO Unit := do
     { source := "function bad(a: Bool, b: Bool): Nat := match a, b with { | true => 0 | _ => 1 }\n" },
     { source := "function bad(value: Prod Nat Nat): Nat := match value with { | (x, x) => x }\n" },
     { source := "function bad(value: Option(Option Nat)): Nat := match value with { | .some (.some n) => n | .none => 0 }\n" },
-    { source := "function bad(value: Option(Prod Nat Nat)): Nat := match value with { | .some(x, y) => x | .none => 0 }\n" }]
+    { source := "function bad(value: Option(Prod Nat Nat)): Nat := match value with { | .some(x, y) => x | .none => 0 }\n" },
+    { source := "function bad(value: Option Nat): Nat := if let .some n := value { n } else { n }\n" },
+    { source := "function bad(value: Option Nat): Nat := {\n  let .some n := value\n  n\n}\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -371,7 +391,8 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", none, some "elaborate",
       some "elaborate", some "elaborate", some "elaborate",
-      some "elaborate", some "elaborate", some "elaborate", some "parse"]
+      some "elaborate", some "elaborate", some "elaborate", some "parse",
+      some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -384,7 +405,8 @@ private def semanticCases : IO Unit := do
     "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH",
     "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "", "PSCV0-TYPE-MISMATCH",
     "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH",
-    "PSCV0-MATCH: pattern row", "PSCV0-SCOPE: duplicate pattern", "PSCV0-MATCH: missing feasible", "PSCV0-PARSE"]
+    "PSCV0-MATCH: pattern row", "PSCV0-SCOPE: duplicate pattern", "PSCV0-MATCH: missing feasible", "PSCV0-PARSE",
+    "PSCV0-SCOPE: unknown name", "PSCV0-MATCH: missing feasible"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -413,7 +435,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 42 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 44 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

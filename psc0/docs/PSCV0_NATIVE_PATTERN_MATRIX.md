@@ -53,3 +53,19 @@ They do not rebind outer index variables around captured dependent values.
 The equality solver alone reverts and specializes those variables and values
 when transporting along an actual index equation. Direct distinct-index motives
 continue to generalize their dependent context as before.
+
+Term-level if-let, pattern-let and matches lower to this same matrix during
+native parsing. If-let requires else and binds names only in the success row.
+Pattern-let supplies one row, so the ordinary typed coverage check rejects
+refutable bindings unless index refinement proves the omitted cases impossible.
+Matches returns Bool through the same two-row lowering. Pattern continuation
+respects native indentation and reserved keyword boundaries. The existing simple
+variable let retains its original let node and optional annotation.
+
+When no result type is supplied, the matrix allocates one scoped type constraint
+before discriminants and branch fields are opened. All rows solve that shared
+constraint; branch-local fields cannot escape into it. Once branches have
+inferred the result, the elimination layer reconciles the motive's universe with
+the recursor before checking its final application. Explicit expected types use
+the same path. Inference of dependent motives beyond this scoped result variable
+is not claimed.

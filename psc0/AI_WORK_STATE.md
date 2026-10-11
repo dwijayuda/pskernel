@@ -1,3 +1,45 @@
+# PSCV0 v7 native continuation — qualified pattern matrix and proof boundaries
+
+Current work remains on draft PR #109, native .lean authoring and Linux cloud CI.
+Canonical v7 remains the language target; this is bounded implementation progress.
+
+**Qualified source:** 9495643e8914fb76e7b3f6c627d92d00aacccabb,
+[run 38169325178](https://github.com/dwijayuda/pskernel/actions/runs/38169325178),
+profile 12. Native build and official Lean RC4 checking, 28 parser cases, four
+accepted semantic inputs / 42 phase-specific refusals, and strict TypeScript
+7.0.2 -> JavaScript all PASS. The composite contains 195 admitted declarations.
+Native build 8,318 ms; warm build 477 ms on that runner (not a benchmark guarantee).
+
+This continuation implemented captured/local/computed/nested recursor lifting
+through checked helper declarations, Empty and nomatch, recursive patterns,
+ordered nested/multiple-discriminant matrices, tuple/successor patterns,
+cross-column binding hygiene, nested indexed refinement and dependent later
+discriminants. Shared application inference inserts implicit parameters before
+solving an unknown expected type with a polymorphic head.
+
+**Corrected erasure invariant:** prior notes below saying proof binders disappear
+from computational function representations are superseded. Proof payloads
+disappear, but an ignored Unit call slot preserves each proof-function boundary.
+Dropping it caused an unused, proof-guarded IH to be evaluated prematurely in
+nested indexed matching. Generated call-site evidence established the cause;
+uniform type/lambda/entry/call/completion handling fixed it. Two compact unused
+False -> Nat values and the nested indexed tail now run through TS/JS.
+
+Design records:
+- docs/PSCV0_NATIVE_RECURSOR_PREPARATION.md
+- docs/PSCV0_NATIVE_PATTERN_MATRIX.md
+- docs/PSCV0_NATIVE_PROOF_ERASURE.md
+- docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md
+
+**Next source qualification pending:** shared if-let / pattern-let / matches
+lowering and inferred matrix results, profile 13. Do not inherit the profile 12
+receipt for these changes. Heterogeneous fixed-index major dependence, full
+pattern selection, multi-root source recursion, modules/classes/Standard,
+tactics/contracts and complete v7 remain outstanding. No pskernel-core,
+self-hosting, compiler .ps source generation, or kernel implementation changes.
+
+---
+
 # PSC0 AI WORK STATE — dependent context refinement and impossible cases
 
 ## 12 October 2026 — proof-producing refinement through native runtime emission

@@ -169,7 +169,12 @@ def psElabMatchMatrix (elaborate : PsElaborator) (context : PsElabContext)
     (sources : List PsSyntaxTerm)
     (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
-  let some expected := expected | throw .matchExpectedType
+  -- Allocate the result in the caller's scope, before pattern fields exist.
+  -- Branches share this constraint; no branch-local type may escape it.
+  let target := match expected with
+    | some type => PsElabTypeResult.mk context type
+    | none => psElabFreshType context
+  let expected := target.type
   if sources.isEmpty then throw .matchScrutineeUnsupported
   let rows ← alternatives.mapM fun (patterns, body, span) => do
     if patterns.length != sources.length then throw (.refinement "pattern row/discriminant arity mismatch")
@@ -180,7 +185,7 @@ def psElabMatchMatrix (elaborate : PsElaborator) (context : PsElabContext)
     rows.any fun row => match row.patterns[index]? with
       | some (.variable _) => true
       | _ => false
-  let inputs ← psElabPatternInputs elaborate context sources capture
+  let inputs ← psElabPatternInputs elaborate target.context sources capture
   let result ← psElabPatternMatrix 4096 elaborate inputs.context inputs.columns rows expected
   let instantiate := psMetaInstantiate result.context.metaContext
   let term := inputs.locals.foldr (fun (binder, value) body =>

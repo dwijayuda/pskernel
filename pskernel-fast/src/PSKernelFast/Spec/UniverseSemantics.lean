@@ -122,7 +122,9 @@ theorem propUniverse_exactly_two (V : Type u) [SetTheoryBasis V] (x : V) :
       · intro hy
         have hyEq : y = SetTheoryBasis.emptySet V :=
           (powerset_empty_exact V y).1 hy
-        simpa [hyEq] using hEmptyInX
+        have hRaw : SetTheoryBasis.member
+            (SetTheoryBasis.emptySet V) x := hEmptyInX
+        simpa only [hyEq] using hRaw
     · left
       apply SetTheoryBasis.ext
       intro z

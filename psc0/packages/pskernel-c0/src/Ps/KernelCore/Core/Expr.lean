@@ -111,7 +111,7 @@ def psKernelLevelListEq
             else
               false
 
-def psKernelExprEq
+def psKernelExprEqLegacy
     (left : PsKernelExpr) :
     PsKernelExpr -> Bool :=
   match left with
@@ -150,9 +150,9 @@ def psKernelExprEq
         | _ => false
   | PsKernelExpr.app leftFn leftArg =>
       let fnEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftFn;
+        psKernelExprEqLegacy leftFn;
       let argEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftArg;
+        psKernelExprEqLegacy leftArg;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.app rightFn rightArg =>
@@ -160,9 +160,9 @@ def psKernelExprEq
         | _ => false
   | PsKernelExpr.lam _ leftType leftBody _ =>
       let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftType;
+        psKernelExprEqLegacy leftType;
       let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftBody;
+        psKernelExprEqLegacy leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.lam _ rightType rightBody _ =>
@@ -170,9 +170,9 @@ def psKernelExprEq
         | _ => false
   | PsKernelExpr.forallE _ leftType leftBody _ =>
       let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftType;
+        psKernelExprEqLegacy leftType;
       let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftBody;
+        psKernelExprEqLegacy leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.forallE _ rightType rightBody _ =>
@@ -180,11 +180,11 @@ def psKernelExprEq
         | _ => false
   | PsKernelExpr.letE _ leftType leftValue leftBody leftNondep =>
       let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftType;
+        psKernelExprEqLegacy leftType;
       let valueEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftValue;
+        psKernelExprEqLegacy leftValue;
       let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftBody;
+        psKernelExprEqLegacy leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.letE _ rightType rightValue rightBody rightNondep =>
@@ -204,7 +204,7 @@ def psKernelExprEq
         | _ => false
   | PsKernelExpr.mdata leftMetadata leftExpr =>
       let exprEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftExpr;
+        psKernelExprEqLegacy leftExpr;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.mdata rightMetadata rightExpr =>
@@ -214,7 +214,7 @@ def psKernelExprEq
         | _ => false
   | PsKernelExpr.proj leftName leftIndex leftExpr =>
       let exprEq : PsKernelExpr -> Bool :=
-        psKernelExprEq leftExpr;
+        psKernelExprEqLegacy leftExpr;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.proj rightName rightIndex rightExpr =>
@@ -224,6 +224,45 @@ def psKernelExprEq
               else false
             else false
         | _ => false
+
+/-
+C0 constructor-paired kernel equality.
+
+The historical implementation above recursively constructed curried
+comparators for *all* left children before pattern matching the right term.
+The paired traversal only visits a child after both outer constructors agree.
+It short-circuits on the first mismatch, which is especially important for
+DefEq quick checks and hash-bucket collision comparisons.
+
+This intentionally keeps the old semantics: lambda and forall binder names
+and binderInfo are ignored, and let binder names are ignored. The separate
+psKernelExprEqual function is full exact (metadata-sensitive) syntax equality.
+-/
+def psKernelExprEq
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) : Bool :=
+  match left, right with
+  | .bvar a, .bvar b => Nat.beq a b
+  | .fvar a, .fvar b => psKernelNameEq a b
+  | .mvar a, .mvar b => psKernelNameEq a b
+  | .sort a, .sort b => psKernelLevelEq a b
+  | .const a as, .const b bs =>
+      psKernelNameEq a b && psKernelLevelListEq as bs
+  | .app af aa, .app bf ba =>
+      psKernelExprEq af bf && psKernelExprEq aa ba
+  | .lam _ at ab _, .lam _ bt bb _ =>
+      psKernelExprEq at bt && psKernelExprEq ab bb
+  | .forallE _ at ab _, .forallE _ bt bb _ =>
+      psKernelExprEq at bt && psKernelExprEq ab bb
+  | .letE _ at av ab an, .letE _ bt bv bb bn =>
+      psKernelExprEq at bt && psKernelExprEq av bv &&
+      psKernelExprEq ab bb && psKernelBoolEq an bn
+  | .lit a, .lit b => psKernelLiteralEq a b
+  | .mdata am ab, .mdata bm bb =>
+      Nat.beq am bm && psKernelExprEq ab bb
+  | .proj an ai ab, .proj bn bi bb =>
+      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEq ab bb
+  | _, _ => false
 
 def psKernelExprEqual
     (left : PsKernelExpr) :

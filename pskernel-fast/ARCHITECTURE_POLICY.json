@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G4.3-structural-scope-certified-binder-lookup-and-substitution-no-admission",
+    "stage": "G4.3-restricted-dependent-Sort-Pi-rule-certified-no-general-checker-no-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -56,7 +56,13 @@
     "scopedBinderLiftingProved": true,
     "scopedCurrentDomainLookupCertified": true,
     "substitutionScopePreservationProved": true,
-    "failClosedScopedSubstitutionPreflight": true
+    "failClosedScopedSubstitutionPreflight": true,
+    "restrictedDependentSortFragmentCertified": true,
+    "restrictedDependentSortRules": [
+      "Sort",
+      "boundVariableUnderVerifiedSortDomain",
+      "PiWithSyntacticSortDomainAndDependentBody"
+    ]
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -68,9 +74,9 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "1a86eb4eefe24e37b0747ae0881e66467f39f0ec",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38115032789",
-    "jobId": 114398149274,
-    "scope": "47 native build jobs, 19 independent source files audited, G1–G4.3 focused smoke plus source-specific scope/lifting/substitution proofs and fail-closed structural negative tests; no type checker or admission"
+    "validatedSourceCommit": "35ce306421368e8b8689b143e8e70ce0a4b03d73",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38115500178",
+    "jobId": 114399479495,
+    "scope": "49 native Lake build jobs, 20 independent Lean source files audited, G1–G4.3 old regressions and new certified restricted dependent Sort/bvar/Pi formation; structural binder operations green separately; no general checker/DefEq/admission"
   }
 }

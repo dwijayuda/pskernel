@@ -69,6 +69,12 @@ test('v7 APP-04 mixed native/postfix application preserves source grouping',()=>
   const grouped=lower(definitions+'const value: Nat := (twice inc)(3)\n');
   assert.equal(mixed,explicit,'native mixed and nested postfix application trees differ');
   assert.notEqual(mixed,grouped,'parentheses must distinguish a different argument tree');
+  const source='function twice(n: Nat): Nat := Nat.add(n, n)\n'+'function inc(n: Nat): Nat := Nat.succ(n)\n';
+  assert.equal(admissions(lower(source+'const accepted: Nat := twice inc(3)\n')),
+    admissions(lower(source+'const accepted: Nat := twice(inc(3))\n')),
+    'v7 mixed application must preserve canonical checked declarations');
+  const printable=ok(B.psPscv0TranslateReadable(false,true,grouped));
+  assert.equal(lower(printable),grouped,'the grouped head must survive Lean to PS to Lean');
 });
 const negatives=[
   ['missing braces','function f(a: Except String Nat): Except String Nat := do\n  return 1\n','BRACES-REQUIRED'],

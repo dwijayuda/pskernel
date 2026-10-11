@@ -52,6 +52,11 @@ def main : IO Unit := do
   let grouped ← expectOk "v7 grouped APP-04"
     (psPscv0LowerToLean true (operators ++ "const value: Nat := (twice inc)(3)\n"))
   if mixed == grouped then throw (IO.userError "PSCV0-APP-04-GROUPING-LOST")
+  let groupedPS ← expectOk "v7 grouped APP-04 PS rendering"
+    (psPscv0TranslateReadable false true grouped)
+  let groupedAgain ← expectOk "v7 grouped APP-04 PS round trip"
+    (psPscv0LowerToLean true groupedPS)
+  if groupedAgain != grouped then throw (IO.userError "PSCV0-APP-04-ROUNDTRIP-TREE-CHANGED")
   expectError "gap outside do" "PSCV0-APP-02"
     (operators ++ "const value: Nat := twice (inc 3)\n")
   -- V7 is the only prospective ProofScript source language. These commands

@@ -1,4 +1,4 @@
-import PSKernelFast.Reduction
+import PSKernelFast.DagReduction
 
 namespace PSKernelFast
 
@@ -28,6 +28,11 @@ private def checkWHNF (name : String) (original expected : RawExpr) : IO Unit :=
       | .ok lazy =>
           require (lazy == expected) s!"{name}: lazy result disagreed with reference expectation"
           require (lazy == eager) s!"{name}: eager/lazy diverged"
+          match dagWHNFFromCheckedInput store root (store.nodes.size + 10) 5000 5000 with
+          | .error err => throw <| IO.userError s!"{name}: DAG lazy failed: {repr err}"
+          | .ok dag =>
+              require (dag == expected) s!"{name}: DAG lazy differs from expected"
+              require (dag == eager) s!"{name}: DAG lazy differs from eager"
 
 /--
   Bounded, deterministic generated closed beta terms. This is a finite
@@ -62,13 +67,17 @@ private def generatedDifferential : IO Unit := do
       | .ok value => pure value
       | .error err => throw <| IO.userError s!"generated decode: {repr err}"
     require (decoded == term) "generated raw/DAG roundtrip mismatch"
-    match eagerWHNF 100 decoded, lazyWHNF 5000 5000 decoded with
-    | .ok eager, .ok lazy =>
-        require (eager == lazy) "generated eager/lazy WHNF mismatch"
+    match eagerWHNF 100 decoded, lazyWHNF 5000 5000 decoded,
+        dagWHNFOnValidatedGraph store root 5000 5000 with
+    | .ok eager, .ok lazy, .ok dag =>
+        require (eager == lazy && lazy == dag)
+          "generated eager/tree-lazy/DAG-lazy WHNF mismatch"
         checked := checked + 1
-    | .error .betaBudgetExhausted, .error .machineBudgetExhausted =>
+    | .error .betaBudgetExhausted, .error .machineBudgetExhausted,
+        .error .machineBudgetExhausted =>
         bothExhausted := bothExhausted + 1
-    | _, _ => throw <| IO.userError "generated evaluator disagreement or resource failure"
+    | _, _, _ => throw <| IO.userError
+        "generated 3-engine disagreement or resource failure"
   require (checked > 40) "generated differential coverage unexpectedly too small"
   IO.println s!"G2 bounded generated corpus: equal={checked}, both_exhausted={bothExhausted}"
   
@@ -109,6 +118,9 @@ def reductionSmoke : IO Unit := do
         match lazyWHNF 200 500 decoded with
         | .error .machineBudgetExhausted => pure ()
         | _ => throw <| IO.userError "omega lazy did not exhaust machine budget"
+        match dagWHNFFromCheckedInput store id 100 200 500 with
+        | .error .machineBudgetExhausted => pure ()
+        | _ => throw <| IO.userError "omega DAG lazy did not exhaust machine budget"
 
   match decodeForEvaluation {} 777 10 with
   | .error (.invalidStore (.invalidHandle 777)) => pure ()
@@ -119,6 +131,9 @@ def reductionSmoke : IO Unit := do
   match decodeForEvaluation forgedOpen 0 10 with
   | .error (.invalidStore .invalidScope) => pure ()
   | _ => throw <| IO.userError "out-of-scope forged DAG term was not rejected"
+  match dagWHNFFromCheckedInput forgedOpen 0 10 100 100 with
+  | .error (.invalidStore .invalidScope) => pure ()
+  | _ => throw <| IO.userError "DAG evaluator ignored scope preflight"
   let forgedNested : Store := {
     nodes := #[.sort 0, .bvar 2, .lam 0 1]
   }

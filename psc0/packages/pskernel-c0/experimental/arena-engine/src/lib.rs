@@ -178,26 +178,38 @@ impl Arena {
         memo.insert((id,depth),result);
         Ok(result)
     }
-    /// Only structural beta/zeta and metadata elimination: NOT full Lean WHNF.
-    /// Applications are reduced on the left spine. Resource exhaustion is explicit.
-    pub fn whnf_fragment(&mut self, mut root:ExprId, fuel:usize) -> Result<ExprId,&'static str> {
-        for _ in 0..fuel {
-            let node=self.get(root).clone();
-            match node {
-                Expr::MData(_,x)=>root=x,
-                Expr::Let{value,body,..}=>root=self.instantiate1(body,value)?,
-                Expr::App(fun,arg)=>{
-                    let fun_whnf=self.whnf_fragment(fun, fuel.min(256))?;
-                    match self.get(fun_whnf).clone() {
-                        Expr::Lam{body,..}=>root=self.instantiate1(body,arg)?,
-                        _=>return Ok(self.intern(Expr::App(fun_whnf,arg))),
+    /// Fragment WHNF with a *single shared* reduction budget.
+    ///
+    /// Previously recursive head reduction received a fresh copy of the fuel;
+    /// deeply nested applications could therefore evade the caller's bound.
+    /// Every visited head node now consumes from the same budget. A zero budget
+    /// cannot produce a successful result (even for an already-normal term).
+    pub fn whnf_fragment(&mut self, root: ExprId, fuel: usize) -> Result<ExprId, &'static str> {
+        let mut remaining = fuel;
+        self.whnf_fragment_budget(root, &mut remaining)
+    }
+
+    fn whnf_fragment_budget(
+        &mut self, mut root: ExprId, remaining: &mut usize
+    ) -> Result<ExprId, &'static str> {
+        loop {
+            if *remaining == 0 { return Err("reduction fuel exhausted"); }
+            *remaining -= 1;
+            match self.get(root).clone() {
+                Expr::MData(_, x) => root = x,
+                Expr::Let { value, body, .. } => root = self.instantiate1(body, value)?,
+                Expr::App(fun, arg) => {
+                    let head = self.whnf_fragment_budget(fun, remaining)?;
+                    match self.get(head).clone() {
+                        Expr::Lam { body, .. } => root = self.instantiate1(body, arg)?,
+                        _ => return Ok(if head == fun { root } else { self.intern(Expr::App(head, arg)) }),
                     }
                 }
-                _=>return Ok(root),
+                _ => return Ok(root),
             }
         }
-        Err("reduction fuel exhausted")
     }
+
 }
 
 #[cfg(test)]
@@ -233,4 +245,31 @@ mod tests {
         let mut args=Vec::new();assert_eq!(a.spine(fxy,|x|args.push(x)),f);
         assert_eq!(args,vec![y,x]);
     }
+    #[test] fn nested_application_consumes_shared_fuel() {
+        let mut a = Arena::new();
+        let f = a.intern(Expr::BVar(0));
+        let arg = a.intern(Expr::BVar(1));
+        let a1 = a.intern(Expr::App(f, arg));
+        let a2 = a.intern(Expr::App(a1, arg));
+        assert_eq!(a.whnf_fragment(a2, 2), Err("reduction fuel exhausted"));
+        assert_eq!(a.whnf_fragment(a2, 3), Ok(a2));
+    }
+    #[test] fn normal_forms_obey_budget() {
+        let mut a = Arena::new();
+        let x = a.intern(Expr::BVar(12));
+        assert_eq!(a.whnf_fragment(x, 0), Err("reduction fuel exhausted"));
+        assert_eq!(a.whnf_fragment(x, 1), Ok(x));
+    }
+    #[test] fn zeta_then_beta() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let ty = a.intern(Expr::BVar(0));
+        let body = a.intern(Expr::BVar(0));
+        let value = a.intern(Expr::Nat(vec![42].into_boxed_slice()));
+        let lam = a.intern(Expr::Lam { name: n, domain: ty, body, info: BinderInfo::Default });
+        let app = a.intern(Expr::App(lam, value));
+        let term = a.intern(Expr::Let { name: n, domain: ty, value: app, body, nondep: false });
+        assert_eq!(a.whnf_fragment(term, 20), Ok(value));
+    }
+
 }

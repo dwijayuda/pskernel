@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.Commands
+import Ps.Syntax.Pscv0.ProgramRead
 import Ps.Syntax.Pscv0.TypePrint
 
 -- Full original input is retained. Printing unanchored comments declines.
@@ -114,47 +114,45 @@ def psPscv0CountDoBodies (declarations : List PsPscv0SurfaceDeclaration) : Nat :
       | none => tail
       | some _ => Nat.succ tail
 
-def psPscv0ParseSource (proofScript : Bool) (source : String) : Except String PsPscv0SurfaceModule :=
-  if Nat.ble (String.utf8ByteSize source) 1048576 then
-    let lexed : Except PsLexError (List PsToken) :=
-      if proofScript then psLexProofScript source else psLex source;
-    match lexed with
-    | Except.error _ => Except.error "PSCV0-LEXICAL-SOURCE-ERROR"
-    | Except.ok tokens =>
-        if Nat.ble (psListLength tokens) 65536 then
-          match psPscv0RewriteTokens proofScript 65537 (PsTokenCursor.mk tokens) "" 0 [] [] with
-          | Except.error error => Except.error error
-          | Except.ok rewritten =>
-              let parsed : Except String PsSyntaxModule :=
-                if proofScript then psPscv0ParseTokens rewritten.tokens
-                else
-                  match psParseLeanTokens rewritten.tokens with
-                  | Except.error error => Except.error (psPscv0ParseError error)
-                  | Except.ok sourceModule => Except.ok sourceModule;
-              match parsed with
-              | Except.error error => Except.error error
-              | Except.ok sourceModule =>
-                  let pos := PsSourcePos.mk 0 1 1;
-                  let span := PsSourceSpan.mk pos pos;
-                  match psPscv0FreshName tokens "pscv0InternalError" span with
-                  | Except.error error => Except.error error
-                  | Except.ok errorName =>
-                      match psPscv0FreshName tokens "pscv0InternalDiscard" span with
-                      | Except.error error => Except.error error
-                      | Except.ok discardName =>
-                          let attach : PsSyntaxDeclaration -> Except String PsPscv0SurfaceDeclaration :=
-                            psPscv0AttachDeclaration proofScript tokens rewritten.blocks errorName discardName;
-                          match psListMapExcept attach sourceModule.declarations with
-                          | Except.error error => Except.error error
-                          | Except.ok declarations =>
-                              if Nat.beq (psPscv0CountDoBodies declarations) (psListLength rewritten.blocks) then
-                                let cursor := psLexCursorFromString source;
-                                Except.ok (PsPscv0SurfaceModule.mk source proofScript
-                                  (psPscv0CommentTriviaWorker cursor.remaining cursor.position tokens)
-                                  sourceModule.imports declarations errorName discardName)
-                              else Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
-        else Except.error "PSCV0-SOURCE-TOKEN-BUDGET"
-  else Except.error "PSCV0-SOURCE-BYTE-BUDGET"
+structure PsPscv0SourceInput where
+  tokens : List PsToken
+  rewritten : PsPscv0Rewritten
+  errorName : PsSyntaxName
+  discardName : PsSyntaxName
+  commentTrivia : Bool
+
+-- Both declaration-only translation and ordered-program compilation use the
+-- same lexical budgets, do-block reader, hygiene and source validation.
+def psPscv0PrepareSource (proofScript : Bool) (source : String) :
+    Except String PsPscv0SourceInput := do
+  if source.utf8ByteSize > 1048576 then throw "PSCV0-SOURCE-BYTE-BUDGET"
+  let tokens ← (if proofScript then psLexProofScript source else psLex source).mapError
+    (fun _ => "PSCV0-LEXICAL-SOURCE-ERROR")
+  if tokens.length > 65536 then throw "PSCV0-SOURCE-TOKEN-BUDGET"
+  let rewritten ← psPscv0RewriteTokens proofScript 65537 (PsTokenCursor.mk tokens) "" 0 [] []
+  let pos := PsSourcePos.mk 0 1 1
+  let span := PsSourceSpan.mk pos pos
+  let errorName ← psPscv0FreshName tokens "pscv0InternalError" span
+  let discardName ← psPscv0FreshName tokens "pscv0InternalDiscard" span
+  let cursor := psLexCursorFromString source
+  return { tokens, rewritten, errorName, discardName,
+    commentTrivia := psPscv0CommentTriviaWorker cursor.remaining cursor.position tokens }
+
+def psPscv0ParseSource (proofScript : Bool) (source : String) :
+    Except String PsPscv0SurfaceModule := do
+  let input ← psPscv0PrepareSource proofScript source
+  -- This translation API deliberately remains flat. Scope commands are never
+  -- discarded to manufacture a printable declaration-only module.
+  let parsed ← if proofScript then psPscv0ParseTokens input.rewritten.tokens
+    else (psParseLeanTokens input.rewritten.tokens).mapError psPscv0ParseError
+  let declarations ← parsed.declarations.mapM
+    (psPscv0AttachDeclaration proofScript input.tokens input.rewritten.blocks
+      input.errorName input.discardName)
+  if psPscv0CountDoBodies declarations != input.rewritten.blocks.length then
+    throw "PSCV0-DO-DECLARATION-BODY-ONLY"
+  return { originalSource := source, proofScript, commentTrivia := input.commentTrivia,
+    imports := parsed.imports, declarations, errorName := input.errorName,
+    discardName := input.discardName }
 
 def psPscv0LowerDeclaration (errorName discardName : PsSyntaxName)
     (surface : PsPscv0SurfaceDeclaration) : Except String PsSyntaxDeclaration :=
@@ -167,6 +165,24 @@ def psPscv0LowerDeclaration (errorName discardName : PsSyntaxName)
           | Except.error error => Except.error error
           | Except.ok body => Except.ok (PsSyntaxDeclaration.definition name binders type body span)
       | _ => Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
+
+def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
+  let input ← psPscv0PrepareSource true source
+  let parsed ← psPscv0ParseProgramTokens input.rewritten.tokens
+  let attached ← parsed.commands.mapM fun command => do
+    match command with
+    | .declaration declaration =>
+      let surface ← psPscv0AttachDeclaration true input.tokens input.rewritten.blocks
+        input.errorName input.discardName declaration
+      let lowered ← psPscv0LowerDeclaration input.errorName input.discardName surface
+      return (PsSyntaxCommand.declaration lowered, if surface.doBody.isSome then 1 else 0)
+    | .variableCmd binders _ =>
+      let _ ← binders.mapM (fun binder => psPscv0ValidateTermWithFuel input.tokens 4096 binder.snd)
+      return (command, 0)
+    | _ => return (command, 0)
+  if (attached.map Prod.snd).foldl Nat.add 0 != input.rewritten.blocks.length then
+    throw "PSCV0-DO-DECLARATION-BODY-ONLY"
+  return { imports := parsed.imports, commands := attached.map Prod.fst }
 
 def psPscv0LowerModule (surface : PsPscv0SurfaceModule) : Except String PsSyntaxModule :=
   let lower : PsPscv0SurfaceDeclaration -> Except String PsSyntaxDeclaration :=

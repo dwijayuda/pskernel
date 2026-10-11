@@ -21,6 +21,7 @@ inductive PsElabError where
   | implicitApplicationUnsupported
   | emptyCallUnsupported
   | invalidArgument (message : String)
+  | scope (message : String)
   | unsupportedTerm
   | matchExpectedType
   | matchScrutineeUnsupported
@@ -129,14 +130,15 @@ def psSyntaxNameAppendSegments
       fun (name : PsName) =>
         smaller (psNameAppendStr name segment)
 
+def psSyntaxNameRootSegments (segments : List String) : List String :=
+  match segments with
+  | "_root_" :: rest => rest
+  | _ => segments
+
 def psSyntaxNameToName (name : PsSyntaxName) : Option PsName :=
-  match name.segments with
-  | [] => Option.none
-  | first :: rest =>
-      Option.some
-        (psSyntaxNameAppendSegments
-          rest
-          (psNameAppendStr PsName.anonymous first))
+  match psSyntaxNameRootSegments name.segments with
+  | [] => none
+  | first :: rest => some (psSyntaxNameAppendSegments rest (psRootName first))
 
 def psElabResultWithMeta
     (result : PsElabTermResult)
@@ -390,29 +392,31 @@ def psElabLocalProjectionBaseWorker
 -- Exact complete names precede the established first-segment projection base.
 -- Only an absent first segment permits a longer LOCAL base; a selected base
 -- never falls back to another name after a field or type error.
-def psElabResolveReferenceBase
-    (localContext : PsLocalContext)
-    (environment : PsEnvironment)
-    (sourceName : PsSyntaxName) :
+def psElabReferencePrefix (fuel : Nat) (localContext : PsLocalContext)
+    (environment : PsEnvironment) (rooted : Bool) (prefix suffix : List String) :
     Option (Prod PsResolvedName (List String)) :=
-  match psSyntaxNameToName sourceName with
-  | Option.none => Option.none
-  | Option.some name =>
-      match psResolveName localContext environment name with
-      | Option.some resolved => Option.some (Prod.mk resolved List.nil)
-      | Option.none =>
-          match sourceName.segments with
-          | List.nil => Option.none
-          | List.cons first tail =>
-              match tail with
-              | List.nil => Option.none
-              | List.cons second rest =>
-                  let base := psNameAppendStr PsName.anonymous first;
-                  match psResolveName localContext environment base with
-                  | Option.some resolved => Option.some (Prod.mk resolved tail)
-                  | Option.none =>
-                      psElabLocalProjectionBaseWorker
-                        localContext rest (psNameAppendStr base second)
+  match fuel, prefix with
+  | 0, _ => none
+  | _, [] => none
+  | fuel + 1, _ =>
+    let name := psSyntaxNameAppendSegments prefix .anonymous
+    let resolved := if rooted then
+      (psEnvironmentFind environment name).map (fun _ => PsResolvedName.global name)
+      else psResolveName localContext environment name
+    match resolved with
+    | some value => some (value, suffix)
+    | none =>
+      match prefix.getLast? with
+      | none => none
+      | some last => psElabReferencePrefix fuel localContext environment rooted
+          prefix.dropLast (last :: suffix)
+
+def psElabResolveReferenceBase (localContext : PsLocalContext)
+    (environment : PsEnvironment) (sourceName : PsSyntaxName) :
+    Option (Prod PsResolvedName (List String)) :=
+  let rooted := sourceName.segments.head? == some "_root_"
+  let segments := psSyntaxNameRootSegments sourceName.segments
+  psElabReferencePrefix (segments.length + 1) localContext environment rooted segments []
 
 def psElabProjectionReference
     (context : PsElabContext)
@@ -454,7 +458,7 @@ def psElabReference
     (sourceName : PsSyntaxName)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  match sourceName.segments with
+  match psSyntaxNameRootSegments sourceName.segments with
   | List.nil =>
       psElabNamedReference context sourceName expected
   | List.cons segment rest =>
@@ -583,10 +587,21 @@ def psElabHole (context : PsElabContext) (expected : Option PsExpr) : PsElabTerm
     term := fresh.expr
     type := target.type }
 
+def psElabOptionalType (elaborate : PsElaborator) (context : PsElabContext)
+    (type value : PsSyntaxTerm) : Except PsElabError PsElabTypeResult := do
+  let annotation ← elaborate context type none
+  let level ← (psInferEnsureSort annotation.context.environment annotation.context.metaContext
+    annotation.context.localContext annotation.type).mapError PsElabError.infer
+  let value ← elaborate annotation.context value (some annotation.term)
+  return {
+    context := value.context
+    type := .app (.app (.constE psOptParamName [level]) annotation.term) value.term }
+
 def psElabType (elaborate : PsElaborator) (context : PsElabContext)
     (source : PsSyntaxTerm) : Except PsElabError PsElabTypeResult := do
   match source with
   | .hole _ => return psElabFreshType context
+  | .optionalType type value _ => psElabOptionalType elaborate context type value
   | _ =>
     let result ← elaborate context source none
     let _ ← (psInferEnsureSort result.context.environment result.context.metaContext

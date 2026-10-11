@@ -1,4 +1,5 @@
 import Ps.Syntax.Pscv0.Read
+import Ps.Syntax.Pscv0.Binders
 
 -- The annotation parser owns nested terms; the declaration consumes only its
 -- own assignment token. No scan to the first top-level := is involved.
@@ -14,8 +15,9 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
               (PsParseResult (List (Prod PsSyntaxBinderHead PsSyntaxTerm))) :=
             if psStringEq keyword.token.text "const" then
               Except.ok (PsParseResult.mk [] name.cursor)
-            else psParseProofScriptDeclarationBindersWithFuel
-              (Nat.succ (psParseListLength name.cursor.remaining)) name.cursor [];
+            else psPscv0ParameterGroups
+              (Nat.succ (psParseListLength name.cursor.remaining)) true
+              (psStringEq keyword.token.text "function") false name.cursor [];
           match bindersResult with
           | Except.error error => Except.error (psPscv0ParseError error)
           | Except.ok binders =>

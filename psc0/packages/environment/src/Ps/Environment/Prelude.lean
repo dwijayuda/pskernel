@@ -888,6 +888,19 @@ def psPreludeEnv19 : PsEnvironment :=
   psPreludeAdd psPreludeEnv18
     (PsDeclaration.axiomDecl psBoolDecEqName [] psPreludeBoolDecEqType)
 
+-- Lean RC4 Init.Prelude.optParam: (α : Sort u) → α → Sort u := α.
+-- This is a checked reducible definition, not an axiom or kernel extension.
+def psOptParamDeclaration : PsDeclaration :=
+  let u := psRootName "u"
+  let alpha := psRootName "α"
+  let value := psRootName "default"
+  let sort := PsExpr.sortE (.param u)
+  PsDeclaration.definitionDecl psOptParamName [u]
+    (.forallE alpha sort (.forallE value (.bvar 0) sort .explicit) .explicit)
+    (.lam alpha sort (.lam value (.bvar 0) (.bvar 1) .explicit) .explicit)
+
 def psBootstrapPreludeEnvironment : PsEnvironment :=
-  psPreludeAdd psPreludeEnv19
-      (PsDeclaration.axiomDecl psIteName [psPreludeUName] psPreludeIteType)
+  psPreludeAdd
+    (psPreludeAdd psPreludeEnv19
+      (PsDeclaration.axiomDecl psIteName [psPreludeUName] psPreludeIteType))
+    psOptParamDeclaration

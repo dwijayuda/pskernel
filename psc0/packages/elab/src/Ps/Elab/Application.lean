@@ -60,16 +60,33 @@ def psElabApplyValue (current argument : PsElabTermResult) (body : PsExpr) :
     term := .app current.term argument.term
     type := psExprInstantiate1 body argument.term }
 
--- A single telescope engine owns positional/named consumption and implicit
--- insertion. It preserves binder order and opens each dependent codomain only
--- after the corresponding argument has been checked.
+-- Defaults are closed with the declaration telescope as optParam applications.
+-- Instantiating a preceding codomain therefore substitutes preceding arguments
+-- into its default without looking up source names in the caller's scope.
+def psElabDefaultValue (context : PsElabContext) (domain : PsExpr) : Option PsExpr :=
+  match psMetaInstantiate context.metaContext domain with
+  | .app (.app (.constE name _) _) value =>
+    if psNameEq name psOptParamName then some value else none
+  | _ => none
+
+-- One ordered engine owns positional/named arguments, defaults and implicits.
+-- A matching expected function type preserves partial application. Explicit
+-- empty invocation passes no expected type here and requests full completion.
 def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
     (current : PsElabTermResult) (positions : List PsSyntaxTerm)
-    (names : PsElabNamedArguments) (pending : List Nat) :
+    (names : PsElabNamedArguments) (pending : List Nat)
+    (complete : Bool := true) (expected : Option PsExpr := none) :
     Except PsElabError PsElabApplicationResult := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    if positions.isEmpty && names.isEmpty then
+      match expected with
+      | some target =>
+        match psElabFinalizeExpected current (some target) with
+        | .ok result => return { result, pendingInstancesRev := pending }
+        | .error _ => pure ()
+      | none => pure ()
     match psWhnf current.context.environment current.context.metaContext
         current.context.localContext current.type with
     | .forallE name domain body binder =>
@@ -88,8 +105,15 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
       | some source =>
         let argument ← elaborate current.context source (some domain)
         psElabApplyOrdered elaborate fuel (psElabApplyValue current argument body)
-          selected.2.1 selected.2.2 pending
+          selected.2.1 selected.2.2 pending complete expected
       | none =>
+        if explicit && (complete || !names.isEmpty) then
+          match psElabDefaultValue current.context domain with
+          | some value =>
+            let argument ← psElabResolvedTerm current.context value (some domain)
+            return ← psElabApplyOrdered elaborate fuel
+              (psElabApplyValue current argument body) positions names pending complete expected
+          | none => pure ()
         if (explicit || psBinderIsStrictImplicit binder) &&
             positions.isEmpty && names.isEmpty then
           return { result := current, pendingInstancesRev := pending }
@@ -103,7 +127,7 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
         let pending := if psBinderIsInstanceImplicit binder then
           match fresh.expr with | .mvar id => id :: pending | _ => pending
           else pending
-        psElabApplyOrdered elaborate fuel next positions names pending
+        psElabApplyOrdered elaborate fuel next positions names pending complete expected
     | _ =>
       if !names.isEmpty then throw (.invalidArgument "unknown named argument")
       if !positions.isEmpty then throw (.infer .expectedFunction)
@@ -117,9 +141,11 @@ def psElabApplyArgsWithFuelWorker (elaborate : PsElaborator) (fuel : Nat)
 def psElabApplyArgsWithFuel := psElabApplyArgsWithFuelWorker
 
 def psElabApplyArgs (elaborate : PsElaborator) (current : PsElabTermResult)
-    (arguments : List PsSyntaxTerm) (pending : List Nat) :
+    (arguments : List PsSyntaxTerm) (pending : List Nat)
+    (expected : Option PsExpr := none) :
     Except PsElabError PsElabApplicationResult :=
   psElabApplyOrdered elaborate 4096 current arguments [] pending
+    (!arguments.isEmpty || expected.isSome) expected
 
 def psElabSolvePendingInstancesWorker
     (pendingInstances : List Nat) :
@@ -232,6 +258,7 @@ def psElabCall (elaborate : PsElaborator) (head : PsElabTermResult)
     | .forallE _ _ _ _ => pure ()
     | _ => throw (.infer .expectedFunction)
   let arguments ← psElabCallArguments args [] []
-  let application ← psElabApplyOrdered elaborate 4096 head arguments.fst arguments.snd []
+  let application ← psElabApplyOrdered elaborate 4096 head arguments.fst arguments.snd [] true
+    (if args.isEmpty then none else expected)
   let application ← if args.isEmpty then psElabCompleteEmpty elaborate application else pure application
   psElabFinishApplication application expected

@@ -62,7 +62,7 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   let parsed ← fromResult "parse" (psCompilerParsePscv0 request.source)
   let t1 ← IO.monoMsNow
   let elaborated ← fromResult "elaborate"
-    ((psCompilerElaborateModule parsed).mapError psCompilerPscv0Error)
+    ((psCompilerElaboratePscv0 parsed).mapError psCompilerPscv0Error)
   let t2 ← IO.monoMsNow
   let output ← fromResult "prepare"
     ((psCompilerPrepareElaboratedWithOutput elaborated).mapError psCompilerPscv0Error)
@@ -121,7 +121,7 @@ def resultJson (sourceName : String) (result : Except Diagnostic Result) : Lean.
   let identity := [
     ("source", toJson sourceName), ("leanVersion", toJson Lean.versionString),
     ("leanCommit", toJson Lean.githash), ("provider", toJson ("lean4-cpp" : String)),
-    ("profile", toJson ("pscv0-v7-native-bounded/2" : String))]
+    ("profile", toJson ("pscv0-v7-native-bounded/3" : String))]
   match result with
   | .error error => Lean.Json.mkObj (identity ++ [
       ("accepted", toJson false), ("phase", toJson error.phase),

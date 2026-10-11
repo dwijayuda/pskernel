@@ -26,6 +26,8 @@ inductive PsSyntaxPattern where
 inductive PsSyntaxTerm where
   | reference (name : PsSyntaxName)
   | hole (span : PsSourceSpan)
+  -- Binder-only source annotation; checked as Lean's reducible optParam type.
+  | optionalType (type value : PsSyntaxTerm) (span : PsSourceSpan)
   | ascription (value type : PsSyntaxTerm) (span : PsSourceSpan)
   -- Adjacent calls retain labels and the empty-invocation request until elaboration.
   | call (fn : PsSyntaxTerm)
@@ -106,3 +108,19 @@ inductive PsSyntaxDeclaration where
 structure PsSyntaxModule where
   imports : List PsSyntaxImport
   declarations : List PsSyntaxDeclaration
+
+-- Commands are ordered independently of declarations. The legacy module record
+-- remains a declaration-only API; v7 programs retain all scope boundaries.
+inductive PsSyntaxCommand where
+  | declaration (value : PsSyntaxDeclaration)
+  | namespaceCmd (name : PsSyntaxName) (span : PsSourceSpan)
+  | sectionCmd (name : Option PsSyntaxName) (span : PsSourceSpan)
+  | endCmd (name : Option PsSyntaxName) (span : PsSourceSpan)
+  | openCmd (names : List PsSyntaxName) (span : PsSourceSpan)
+  | variableCmd (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) (span : PsSourceSpan)
+  | includeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
+  | omitCmd (names : List PsSyntaxName) (span : PsSourceSpan)
+
+structure PsSyntaxProgram where
+  imports : List PsSyntaxImport
+  commands : List PsSyntaxCommand

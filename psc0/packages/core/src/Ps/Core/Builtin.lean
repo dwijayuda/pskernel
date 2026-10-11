@@ -227,3 +227,6 @@ def psStringAtEndName : PsName :=
 
 def psStringExtractName : PsName :=
   psNameAppendStr psStringInternalName "extract"
+
+-- Canonical Lean optional-parameter type constructor.
+def psOptParamName : PsName := psRootName "optParam"

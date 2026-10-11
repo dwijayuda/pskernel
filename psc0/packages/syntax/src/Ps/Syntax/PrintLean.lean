@@ -214,6 +214,10 @@ def psPrintLeanTermWithFuel
         psPrintLeanTermWithFuel remaining;
       match term with
       | .hole _ => Except.ok "_"
+      | .optionalType type value _ => do
+          let type ← smaller type
+          let value ← smaller value
+          return type ++ " := " ++ value
       | .ascription value type _ => do
           let value ← smaller value
           let type ← smaller type

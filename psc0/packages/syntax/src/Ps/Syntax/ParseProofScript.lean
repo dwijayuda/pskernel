@@ -140,6 +140,7 @@ def psProofScriptTermWithSpan
     (span : PsSourceSpan) : PsSyntaxTerm :=
   match term with
   | .hole _ => .hole span
+  | .optionalType type value _ => .optionalType type value span
   | .ascription value type _ => .ascription value type span
   | .call fn args _ => .call fn args span
   | .reference name =>
@@ -299,6 +300,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "decreasing_by" then true
   else if psStringEq text "namespace" then true
   else if psStringEq text "section" then true
+  else if ["open", "variable", "include", "omit", "universe"].contains text then true
   else if psStringEq text "end" then true
   else if psStringEq text "class" then true
   else if psStringEq text "instance" then true

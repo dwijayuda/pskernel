@@ -1803,6 +1803,7 @@ def psElabTermWithFuel
               | _ => smaller ctx source target
             match term with
             | .hole _ => Except.ok (psElabHole context expected)
+            | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected
             | .call fn args span =>
                 if args.all (fun arg => arg.fst.isNone) && !args.isEmpty then
@@ -1823,7 +1824,7 @@ def psElabTermWithFuel
                           smaller
                           reference
                           []
-                          [] with
+                          [] expected with
                       | Except.error error => Except.error error
                       | Except.ok application =>
                           psElabFinishApplication application expected
@@ -1882,9 +1883,7 @@ def psElabTermWithFuel
                   alternatives
                   expected
             | .app fn args _ =>
-                -- R3 empty calls request argument completion. This bounded
-                -- profile has no optional/default parameter metadata yet.
-                -- Keep [] distinct from an explicit Unit argument and fail closed.
+                -- An adjacent empty call has its own completion path above.
                 match args with
                 | List.nil => Except.error PsElabError.emptyCallUnsupported
                 | List.cons _ _ =>
@@ -1906,7 +1905,7 @@ def psElabTermWithFuel
                                     smaller
                                     elaboratedFn
                                     args
-                                    [] with
+                                    [] expected with
                                 | Except.error error => Except.error error
                                 | Except.ok application =>
                                     psElabFinishApplication application expected

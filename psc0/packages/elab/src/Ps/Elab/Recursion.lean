@@ -303,6 +303,11 @@ def psElabRecursionWalkWithFuel
                         Except.ok (PsElabRecursionWalkResult.mk
                           (PsSyntaxTerm.reference projected) List.nil)
                       else Except.ok (PsElabRecursionWalkResult.mk source List.nil)
+        | PsSyntaxTerm.optionalType type value span => do
+            let type ← smaller context type
+            let value ← smaller context value
+            return PsElabRecursionWalkResult.mk
+              (.optionalType type.term value.term span) (type.changedIds ++ value.changedIds)
         | PsSyntaxTerm.ascription value type span => do
             let value ← smaller context value
             let type ← smaller context type

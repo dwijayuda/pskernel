@@ -23,3 +23,7 @@ lean_exe pskernel_fast_eval_bench where
 lean_exe pskernel_fast_core_syntax_smoke where
   root := `PSKernelFast.CoreSyntaxSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_symbolic_level_smoke where
+  root := `PSKernelFast.SymbolicLevelSmoke
+  srcDir := "src"

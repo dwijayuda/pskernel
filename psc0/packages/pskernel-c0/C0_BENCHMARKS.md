@@ -39,3 +39,16 @@ The equality implementation was subsequently revised; do not apply the paired-eq
 ### Deep local-variable lookup result
 
 [Native CI 38185618064](https://github.com/dwijayuda/pskernel/actions/runs/38185618064) passed full source compilation, native negative semantics and the new local-context shadowing tests. For 20,000 lookups among names 0–15 in a 512-local-declaration context, **linear lookup measured 2,048 ms** and **the C0 persistent radix index measured 66 ms** (approximately 31× faster for this narrow, repeated deep-context workload). This does not measure index construction, typical short contexts, memory or full kernel workloads. Old semantic and Unicode regressions also passed.
+
+### Latest hybrid C0 Lean benchmark checkpoint
+
+[Native CI 38185687752](https://github.com/dwijayuda/pskernel/actions/runs/38185687752), source commit `699ec13a3e3ec785d5e94b85211a29da06a8b84e`, passed the full Lean library build, native negative checks, structural differential suite and varied-input benchmarks. One run:
+
+| C0 hot path | Legacy | C0 | Observed workload-specific change |
+|---|---:|---:|---|
+| Expression equality (30,000 × 512-level) | 2,078 ms | 2,055 ms | Near parity; not a reliable speedup claim |
+| Lift (30,000 × 512-level) | 8,948 ms | 6,640 ms | ~26% elapsed-time reduction |
+| Single substitution (30,000 × 512-level) | 16,694 ms | 9,358 ms | ~44% elapsed-time reduction |
+| Local name lookup (20,000 lookups, 512 locals) | 1,691 ms | 54 ms | ~31× faster on deep-local lookup |
+
+All times are single-run CI runner values and exclude representative end-to-end Lean module checking workloads and memory costs. They should be treated as microbenchmark evidence, not general speedup factors.

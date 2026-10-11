@@ -62,6 +62,7 @@ jobs:
           lake env lean src/PSKernelFast/Spec/PropInterp.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/PropInterpreterBridge.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/CheckedPropAnnotations.lean >> /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/CertifiedPropExamples.lean >> /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/PiModelRegime.lean >> /tmp/pskernel-fast-axioms.log
           cat /tmp/pskernel-fast-axioms.log
           python3 scripts/audit_axioms.py /tmp/pskernel-fast-axioms.log

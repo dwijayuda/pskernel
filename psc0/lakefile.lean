@@ -169,6 +169,7 @@ lean_lib PsMeta where
     `Ps.Meta.Recursor,
     `Ps.Meta.NatReduce, `Ps.Meta.Reduce,
     `Ps.Meta.Unify,
+    `Ps.Meta.InstanceTarget,
     `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView

@@ -522,7 +522,24 @@ private def application : String :=
   "const proofFalseAnswer: Nat := proofChoose(P := False, decision := decisionNo, yes := fun h => 0, no := fun h => 287)\n" ++
   "function refineConditional{P: Prop}[decision: Decidable P](yes: P -> Nat, no: (¬P) -> Nat): Nat := by {\n  refine (if (h : P) { _ } else { _ })\n  · exact yes(h)\n  · exact no(h)\n}\n" ++
   "const refineConditionalAnswer: Nat := refineConditional(P := True, decision := decisionYes, yes := fun h => 288, no := fun h => 0)\n" ++
-  "theorem conditionalExcluded(P: Prop)[Decidable P]: P ∨ ¬P := if (h : P) { Or.inl(h) } else { Or.inr(h) }\n"
+  "theorem conditionalExcluded(P: Prop)[Decidable P]: P ∨ ¬P := if (h : P) { Or.inl(h) } else { Or.inr(h) }\n" ++
+  "namespace Outputs\n" ++
+  "universe a b\n" ++
+  "class Convert(A: Type a, B: outParam(Type b)): Type (max a b) where { run: A -> B }\n" ++
+  "instance nat: Convert Nat Nat where { run(n: Nat): Nat := Nat.succ(n) }\n" ++
+  "instance flag: Convert Bool Nat where { run(value: Bool): Nat := if (value) { 292 } else { 293 } }\n" ++
+  "class Lift(A: Type a, B: outParam(Type b)): Type (max a b) where { run: A -> B }\n" ++
+  "instance lifted{A: Type a}{B: Type b}[Convert A B]: Lift A B where { run(value: A): B := Convert.run(value) }\n" ++
+  "function local{A: Type a}{B: Type b}[Convert A B](value: A): B := {\n  let converted := Convert.run(value)\n  converted\n}\n" ++
+  "const inferred: Nat := {\n  let converted := Convert.run(290)\n  converted\n}\n" ++
+  "const localAnswer: Nat := local(true)\n" ++
+  "const flagAnswer: Nat := Convert.run(false)\n" ++
+  "const nested: Nat := {\n  let converted := Lift.run(294)\n  converted\n}\n" ++
+  "end Outputs\n" ++
+  "const outputInferredAnswer: Nat := Outputs.inferred\n" ++
+  "const outputLocalAnswer: Nat := Outputs.localAnswer\n" ++
+  "const outputFlagAnswer: Nat := Outputs.flagAnswer\n" ++
+  "const outputNestedAnswer: Nat := Outputs.nested\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -630,7 +647,11 @@ private def semanticCases : IO Unit := do
     { source := "function bad(n: Nat): Nat := by {\n  cases n\n  case zero => exact n\n  case succ k => exact k\n}\n" },
     { source := "function bad(P: Prop): Nat := if (P) { 0 } else { 1 }\n" },
     { source := "function bad(P: Prop)[Decidable P](use: P -> Nat): Nat := if (h : P) { use(h) } else { use(h) }\n" },
-    { source := "function bad(b: Bool): Nat := {\n  let value: Nat := if (h : b) { 1 } else { 2 }\n  h\n}\n" }]
+    { source := "function bad(b: Bool): Nat := {\n  let value: Nat := if (h : b) { 1 } else { 2 }\n  h\n}\n" },
+    { source := "class Bad(A: outParam(Type), n: A) where { value: A }\n" },
+    { source := "class C(A: Type, B: outParam(Type)) where { run: A -> B }\ninstance low: C Nat Bool where { run(n: Nat): Bool := true }\ninstance high: C Nat Nat where { run(n: Nat): Nat := n }\nconst bad: Bool := C.run(0)\n" },
+    { source := "class C(A: Type, B: outParam(Type)) where { run: A -> B }\ninstance nat: C Nat Nat where { run(n: Nat): Nat := n }\nfunction need{A: Type}{B: Type}[C A B](value: Nat): Nat := value\nconst bad: Nat := need(0)\n" },
+    { source := "class C(A: Type, B: outParam(Type)) where { run: A -> B }\ninstance loop{A: Type}{B: Type}[C A B]: C A B where { run(value: A): B := C.run(value) }\nconst bad: Nat := C.run(0)\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -647,7 +668,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -666,7 +687,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02", "PSCV0-PROOF: unsolved goals", "PSCV0-SCOPE: unknown name", "PSCV0-PROOF: unknown case tag", "PSCV0-PROOF: too many case binder", "PSCV0-SCOPE: unknown name", "PSCV0-ARGUMENT: conditional proposition", "PSCV0-TYPE-MISMATCH", "PSCV0-SCOPE: unknown name"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02", "PSCV0-PROOF: unsolved goals", "PSCV0-SCOPE: unknown name", "PSCV0-PROOF: unknown case tag", "PSCV0-PROOF: too many case binder", "PSCV0-SCOPE: unknown name", "PSCV0-ARGUMENT: conditional proposition", "PSCV0-TYPE-MISMATCH", "PSCV0-SCOPE: unknown name", "PSCV0-DATA: class input parameter", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -695,7 +716,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 88 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 92 phase-specific refusals, shared-prelude isolation"
 
 private def metavariableBoundary : IO Unit := do
   let type := PsExpr.constE psNatName []

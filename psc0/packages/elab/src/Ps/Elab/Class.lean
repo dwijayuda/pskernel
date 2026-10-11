@@ -49,12 +49,49 @@ def psElabAddStructureProjections (environment : PsEnvironment) (isClass : Bool)
     (.fvar major.id) 0 cursor
   return { declarations := batch.declarations ++ projections }
 
+structure PsClassParameterState where
+  inputs : PsLocalContext := psLocalEmpty
+  inputLevels : List PsName := []
+  outputs : List Nat := []
+  position : Nat := 0
+
+-- Check the entire class telescope once at registration. An ordinary input
+-- cannot depend on an output; dependent instance binders are outputs as in RC4.
+def psElabClassParameters (environment : PsEnvironment) (info : PsInductiveInfo) :
+    Except PsElabError PsClassParameters := do
+  let telescope ← psElabOpenCoreTelescope 4096 (psElabContextEmpty environment) info.type none
+  let state ← telescope.bindersRev.reverse.foldlM (fun (state : PsClassParameterState) binder => do
+    let marked := match binder.type with
+      | .app (.constE name _) _ => psNameEq name (psRootName "outParam")
+      | _ => false
+    let dependent := !psExprFVarsInContext state.inputs binder.type
+    let output := marked || (dependent && psBinderInfoIsInstance binder.binder)
+    if dependent && !output then
+      throw (.data "class input parameter depends on an output parameter")
+    if output then
+      return { state with outputs := state.outputs ++ [state.position], position := state.position + 1 }
+    else
+      let inputs := { state.inputs with
+        declarations := .binding binder.id binder.name binder.type binder.binder :: state.inputs.declarations
+        nextId := max state.inputs.nextId (binder.id + 1) }
+      return {
+        inputs
+        inputLevels := state.inputLevels ++ (psElabExprLevels binder.type).flatMap psElabLevelParams
+        outputs := state.outputs
+        position := state.position + 1 }) {}
+  let outputLevels := info.levelParams.zipIdx |>.filterMap fun (name, index) =>
+    if state.inputLevels.any (psNameEq name) then none else some index
+  return { outputs := state.outputs, outputLevels }
+
 def psElabRegisterClass (environment : PsEnvironment) (name : PsName) :
     Except PsElabError PsEnvironment := do
   let some info := psEnvironmentFindInductive environment name
     | throw (.data "class requires a structure declaration")
   if !info.isStructure then throw (.data "class requires a structure declaration")
-  return { environment with classes := name :: environment.classes }
+  let parameters ← psElabClassParameters environment info
+  return { environment with
+    classes := name :: environment.classes
+    classParameters := (name, parameters) :: environment.classParameters }
 
 def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priority : Nat) :
     Except PsElabError PsEnvironment := do

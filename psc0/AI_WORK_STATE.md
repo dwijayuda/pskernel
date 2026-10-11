@@ -1,3 +1,17 @@
+# Native decision evidence qualified; class outputs in progress
+
+Profile 30 at 60cb1d2bb42144393c4373c3119b9d3f10d1bcce passed
+[run 38184666068](https://github.com/dwijayuda/pskernel/actions/runs/38184666068),
+job 114604319945: 453 checked declarations, 88 phase-specific refusals and 138
+shared TypeScript/Rust observations. General Prop/Bool and named proof
+conditionals use actual decision dictionaries and shared scope closure.
+See docs/PSCV0_NATIVE_CONDITIONALS.md.
+
+Profile 31 adds registered class output parameters, output-only universe
+positions and a shared dependency worklist for dictionaries. It requires its
+own full cloud qualification. See docs/PSCV0_NATIVE_INSTANCE_OUTPUTS.md.
+This remains native portable .lean with official Lean checking; full v7 is open.
+
 # Native core language continuation
 
 Profile 29 at e1b03d35384387f055b424d87f16092d47162e7f passed

@@ -223,75 +223,15 @@ def psElabApplyArgs (elaborate : PsElaborator) (current : PsElabTermResult)
   psElabApplyOrdered elaborate 4096 current arguments [] pending
     (!arguments.isEmpty || expected.isSome) expected
 
-def psElabSolvePendingInstancesWorker
-    (pendingInstances : List Nat) :
-    PsElabTermResult ->
-    Except PsElabError PsElabTermResult :=
-  match pendingInstances with
-  | [] =>
-      fun (current : PsElabTermResult) =>
-        let metaContext := current.context.metaContext;
-        Except.ok {
-          context := current.context
-          term := psMetaInstantiate metaContext current.term
-          type := psMetaInstantiate metaContext current.type
-        }
-  | id :: rest =>
-      let smaller :
-          PsElabTermResult ->
-          Except PsElabError PsElabTermResult :=
-        psElabSolvePendingInstancesWorker rest;
-      fun (current : PsElabTermResult) =>
-        let metaContext := current.context.metaContext;
-        match psMetaFindAssignment metaContext id with
-        | some _ =>
-            smaller current
-        | none =>
-            match psMetaFindDecl metaContext id with
-            | none =>
-                Except.error PsElabError.implicitApplicationUnsupported
-            | some declaration =>
-                let target :=
-                  psMetaInstantiate metaContext declaration.type;
-                if psExprHasUnresolvedMeta target then
-                  Except.error PsElabError.implicitApplicationUnsupported
-                else
-                  let synthesized :=
-                    psSynthInstance
-                      current.context.environment
-                      current.context.localContext
-                      current.context.instances
-                      metaContext
-                      target;
-                  match synthesized.value with
-                  | none =>
-                      Except.error PsElabError.implicitApplicationUnsupported
-                  | some value =>
-                      match psMetaAssign
-                          synthesized.context
-                          id
-                          value with
-                      | none =>
-                          Except.error
-                            PsElabError.implicitApplicationUnsupported
-                      | some assigned =>
-                          let assignedResult : PsElabTermResult := {
-                            context :=
-                              psElabContextWithMeta
-                                current.context
-                                assigned
-                            term := current.term
-                            type := current.type
-                          };
-                          smaller assignedResult
-
 def psElabSolvePendingInstances
-    (current : PsElabTermResult)
-    (pendingInstances : List Nat) :
-    Except PsElabError PsElabTermResult :=
-  psElabSolvePendingInstancesWorker
-    pendingInstances
-    current
+    (current : PsElabTermResult) (pendingInstances : List Nat) :
+    Except PsElabError PsElabTermResult := do
+  let synthesize := fun constraints target =>
+    psSynthInstance current.context.environment current.context.localContext
+      current.context.instances constraints target
+  let solved := psSolveInstanceMetavars synthesize pendingInstances current.context.metaContext
+  if !solved.success then throw .implicitApplicationUnsupported
+  return psElabResultWithMeta current solved.context current.type
 
 def psElabFinishApplication
     (application : PsElabApplicationResult)

@@ -6,6 +6,7 @@ import Ps.Environment.LocalContext
 import Ps.Meta.Context
 import Ps.Meta.Reduce
 import Ps.Meta.Unify
+import Ps.Meta.InstanceTarget
 
 structure PsPreparedInstanceArgument where
   expr : PsExpr
@@ -165,53 +166,55 @@ def psPrepareInstance
     []
     128
 
-def psSolvePreparedInstanceArgumentsWorker
-    (arguments : List PsPreparedInstanceArgument) :
-    (PsMetaContext -> PsExpr -> PsSynthInstanceResult) ->
-    PsMetaContext ->
-    PsSolveInstanceArgsResult :=
-  match arguments with
-  | [] =>
-      fun (_synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult) =>
-        fun (current : PsMetaContext) =>
-          { context := current, success := true }
-  | argument :: rest =>
-      let smaller :
-          (PsMetaContext -> PsExpr -> PsSynthInstanceResult) ->
-          PsMetaContext ->
-          PsSolveInstanceArgsResult :=
-        psSolvePreparedInstanceArgumentsWorker rest;
-      fun (synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult) =>
-        fun (current : PsMetaContext) =>
-          match argument.expr with
-          | .mvar id =>
-              match psMetaFindAssignment current id with
-              | Option.some _ =>
-                  smaller synthesize current
-              | Option.none =>
-                  if argument.isInstance then
-                    let targetType := psMetaInstantiate current argument.type;
-                    let synthesized := synthesize current targetType;
-                    match synthesized.value with
-                    | Option.none => { context := current, success := false }
-                    | Option.some instanceValue =>
-                        match psMetaAssign synthesized.context id instanceValue with
-                        | Option.none => { context := current, success := false }
-                        | Option.some next =>
-                            smaller synthesize next
-                  else
-                    { context := current, success := false }
-          | _ =>
-              smaller synthesize current
+structure PsInstanceSolvePass where
+  context : PsMetaContext
+  pending : List Nat
+
+-- Pending dictionaries are a dependency worklist. A successful output can
+-- unlock an earlier input; a failed attempt keeps its original snapshot.
+def psSolveInstancePass (synthesize : PsMetaContext → PsExpr → PsSynthInstanceResult)
+    (pending : List Nat) (context : PsMetaContext) : PsInstanceSolvePass :=
+  match pending with
+  | [] => { context, pending := [] }
+  | id :: rest =>
+    let solved := match psMetaFindAssignment context id, psMetaFindDecl context id with
+      | some _, _ => some context
+      | none, some declaration =>
+        let result := synthesize context (psMetaInstantiate context declaration.type)
+        result.value.bind fun value => psMetaAssign result.context id value
+      | _, _ => none
+    let tail := psSolveInstancePass synthesize rest (solved.getD context)
+    { context := tail.context
+      pending := if solved.isSome then tail.pending else id :: tail.pending }
+
+def psSolveInstanceMetavarsWithFuel
+    (synthesize : PsMetaContext → PsExpr → PsSynthInstanceResult)
+    (fuel : Nat) (pending : List Nat) (context : PsMetaContext) : PsSolveInstanceArgsResult :=
+  match fuel with
+  | 0 => { context, success := pending.isEmpty }
+  | fuel + 1 =>
+    let pass := psSolveInstancePass synthesize pending context
+    if pass.pending.isEmpty then { context := pass.context, success := true }
+    else if pass.pending.length >= pending.length then { context, success := false }
+    else psSolveInstanceMetavarsWithFuel synthesize fuel pass.pending pass.context
+
+def psSolveInstanceMetavars
+    (synthesize : PsMetaContext → PsExpr → PsSynthInstanceResult)
+    (pending : List Nat) (context : PsMetaContext) : PsSolveInstanceArgsResult :=
+  psSolveInstanceMetavarsWithFuel synthesize (pending.length + 1) pending context
 
 def psSolvePreparedInstanceArguments
-    (synthesize : PsMetaContext -> PsExpr -> PsSynthInstanceResult)
+    (synthesize : PsMetaContext → PsExpr → PsSynthInstanceResult)
     (arguments : List PsPreparedInstanceArgument)
     (current : PsMetaContext) : PsSolveInstanceArgsResult :=
-  psSolvePreparedInstanceArgumentsWorker
-    arguments
-    synthesize
-    current
+  let pending := arguments.filterMap fun argument =>
+    if argument.isInstance then
+      match argument.expr with | .mvar id => some id | _ => none
+    else none
+  let solved := psSolveInstanceMetavars synthesize pending current
+  if solved.success && arguments.all (fun argument =>
+      !psExprHasUnresolvedMeta (psMetaInstantiate solved.context argument.expr)) then solved
+  else { context := current, success := false }
 
 def psTryInstanceCandidate
     (environment : PsEnvironment)
@@ -313,9 +316,9 @@ def psTryInstanceCandidates
     target
     synthesize
 
--- Candidate branches own their metavariable snapshots. Active ground goals
--- detect recursive dictionary cycles without committing a failed branch.
--- This is a bounded ground search; output-parameter/table machinery is separate.
+-- Each candidate owns its metavariable snapshot. Inputs must be known; output
+-- positions and output-only universe levels are masked before search. Active
+-- keys ignore outputs, making cycles independent of fresh output identities.
 def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
     (localContext : PsLocalContext) (index : PsInstanceIndex)
     (active : List PsExpr) (context : PsMetaContext) (target : PsExpr) :
@@ -323,12 +326,13 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
   match fuel with
   | 0 => psSynthFailure context
   | fuel + 1 =>
-    let target := psMetaInstantiate context target
-    let cyclic := !psExprHasUnresolvedMeta target && active.any (fun prior =>
-      psDefEqReadOnlyWithEnv environment context localContext target prior)
-    if cyclic then psSynthFailure context
-    else
-      let head := (psInferAppView (psWhnf environment context localContext target)).head
+    match psPrepareInstanceTarget environment localContext context target with
+    | none => psSynthFailure context
+    | some prepared =>
+      let cyclic := active.any fun prior =>
+        psDefEqReadOnlyWithEnv environment prepared.context localContext prepared.key prior
+      if cyclic then psSynthFailure context else
+      let head := (psInferAppView prepared.type).head
       let entries := (psAllInstanceEntries localContext index).filter fun entry =>
         match entry.className, head with
         | some className, .constE name _ => psNameEq className name
@@ -336,8 +340,19 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
         | _, _ => false
       let synthesize := fun nextContext nextTarget =>
         psSynthInstanceSearch fuel environment localContext index
-          (target :: active) nextContext nextTarget
-      psTryInstanceCandidates environment localContext context target synthesize entries
+          (prepared.key :: active) nextContext nextTarget
+      let solved := psTryInstanceCandidates environment localContext prepared.context
+        prepared.type synthesize entries
+      match solved.value with
+      | none => psSynthFailure context
+      | some value =>
+        match psInferType environment solved.context localContext value with
+        | .error _ => psSynthFailure context
+        | .ok type =>
+          let checked := psUnify environment localContext solved.context type target
+          if checked.success then
+            psSynthSuccess checked.context (psMetaInstantiate checked.context value)
+          else psSynthFailure context
 
 def psSynthInstanceWithFuelWorker (fuel : Nat) (environment : PsEnvironment)
     (localContext : PsLocalContext) (index : PsInstanceIndex)

@@ -137,5 +137,9 @@ export const observations = [
   { name: "proofTrueAnswer", args: null, expected: 286n },
   { name: "proofFalseAnswer", args: null, expected: 287n },
   { name: "refineConditionalAnswer", args: null, expected: 288n },
+  { name: "outputInferredAnswer", args: null, expected: 291n },
+  { name: "outputLocalAnswer", args: null, expected: 292n },
+  { name: "outputFlagAnswer", args: null, expected: 293n },
+  { name: "outputNestedAnswer", args: null, expected: 295n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

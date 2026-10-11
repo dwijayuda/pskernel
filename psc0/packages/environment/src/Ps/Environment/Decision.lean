@@ -28,7 +28,10 @@ def psDecisionDeclarations : List PsDeclaration :=
     (psLogicPi 0 "c" prop (psLogicPi 1 "h" decision
       (psLogicPi 2 "t" (psLogicPi 5 "_" p alpha)
         (psLogicPi 3 "e" (psLogicPi 5 "_" notP alpha) alpha)) .instanceImplicit)) .implicit
-  [ decisionCtor "Decidable.isTrue" p,
+  [ .definitionDecl (psRootName "outParam") [u]
+      (psLogicPi 0 "α" (.sortE (.param u)) (.sortE (.param u)))
+      (psLogicLam 0 "α" (.sortE (.param u)) (.fvar 0)),
+    decisionCtor "Decidable.isTrue" p,
     decisionCtor "Decidable.isFalse" notP,
     .axiomDecl (psDecisionName "Decidable.decide") []
       (psLogicPi 0 "p" prop (psLogicPi 1 "self" decision boolean .instanceImplicit)),

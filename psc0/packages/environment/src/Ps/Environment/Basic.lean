@@ -108,10 +108,15 @@ def psEnvironmentIndexSetWorker (fuel : Nat) : PsEnvironmentIndex -> Nat -> List
           PsEnvironmentIndex.branch (smaller left (Nat.div hash 2) declarations) right
         else PsEnvironmentIndex.branch left (smaller right (Nat.div hash 2) declarations)
 
+structure PsClassParameters where
+  outputs : List Nat := []
+  outputLevels : List Nat := []
+
 structure PsEnvironment where
   declarations : List PsDeclaration
   index : PsEnvironmentIndex
   classes : List PsName := []
+  classParameters : List (PsName × PsClassParameters) := []
   instances : PsInstanceIndex := psInstanceIndexEmpty
 
 def psEnvironmentEmpty : PsEnvironment :=

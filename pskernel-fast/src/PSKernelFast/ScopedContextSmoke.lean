@@ -145,6 +145,27 @@ def scopedContextSmoke : IO Unit := do
     "reference substitution skipped metadata/projection wrapper"
   require (!(KExpr.validAt [u] 1 (.bvar 2)))
     "malformed substitution body was not classified unscoped"
+
+  match KExpr.instantiateTopScoped [u] 2 simpleBody sortZero with
+  | .ok certified =>
+      require (certified.val == simpleResult)
+        "checked-scope substitution result differs from reference substitution"
+  | .error _ =>
+      throw <| IO.userError "valid checked-scope substitution rejected"
+
+  match KExpr.instantiateTopScoped [u] 0 (.bvar 2) sortZero with
+  | .error .malformedBody => pure ()
+  | _ => throw <| IO.userError "malformed substitution body was accepted"
+
+  match KExpr.instantiateTopScoped [u] 0 (.bvar 0) (.bvar 0) with
+  | .error .malformedReplacement => pure ()
+  | _ => throw <| IO.userError "malformed substitution replacement was accepted"
+
+  match KExpr.instantiateTopScoped [u] 0 (.sort (.param v)) sortZero with
+  | .error .malformedBody => pure ()
+  | _ => throw <| IO.userError "undeclared level parameter bypassed preflight"
+  IO.println "PSKernel-Fast G4.3: checked-scope substitution rejection PASS"
+
   IO.println "PSKernel-Fast G4.3 substitution: capture-avoiding cases PASS"
 
   IO.println "PSKernel-Fast G4.3: scope-certified current-context lookup PASS"

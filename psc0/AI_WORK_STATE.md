@@ -7,17 +7,31 @@ The user authorized continuing v7 in native `.lean`, starting with rich syntax
 and shared elaboration. No `pskernel-core`, compiler-source `.ps` generation,
 self-hosting, local builds/tests or Windows runs.
 
-Candidate: richer term nodes preserve labeled calls, empty invocation, ascription
+Implemented: richer term nodes preserve labeled calls, empty invocation, ascription
 and inference holes. Shared binder/application engines implement expected lambda
 domains, telescope-order argument checking, named arguments, implicit insertion
 and the selected one-required-Unit completion. Lexical scope exit retains meta
 constraints and fresh local identities. Shared elaboration is split into Basic,
 Binders, Application and the remaining Term dispatcher/control implementation.
 
-Validation pending in the compact native Linux job. The 28-case parser corpus
-moves the newly supported named-call syntax from refusal to acceptance. The
-semantic application covers closures/shadowing and the new term families; seven
-new phase-specific refusals are added to the existing small batch.
+**Qualified in [Linux run 38151599948](https://github.com/dwijayuda/pskernel/actions/runs/38151599948)**
+at source commit `0c7aa371e6101b25c34ed689191c186107fd03b0`.
+Native Lean 4.35.0-rc4 compilation, the 28-case parser corpus (19 positive,
+9 negative), three accepted semantic programs and 11 phase-specific refusals,
+CLI emission, TypeScript 7.0.2 compilation and JavaScript execution all passed.
+The named-call parser case moved from refusal to acceptance because it is now
+implemented; unknown/duplicate names and invalid argument order have specific
+refusals. One 14-declaration application covers the new accepted behavior.
+
+The shared type-only result is used for binder, ascription, local-let and ordinary
+declaration annotation inference, including inferred annotations. Declaration
+closure still rejects unresolved term/universe metavariables before preparation.
+The exact source inventory is 65 portable modules and 71 native closure modules.
+The actual native identity remains checked against the pinned RC4 version/commit.
+
+Cached incremental rebuild: 5,991 ms; immediate unchanged rebuild: 383 ms.
+These observations concern this compact workload, not a cold build or full v7
+performance benchmark. The evidence-recording commit changes documentation only.
 
 Scope is lexical term/declaration binders, not namespace/open/section semantics.
 Defaults, general CoeFun, named recursive self-calls, full lambda binder grammar,

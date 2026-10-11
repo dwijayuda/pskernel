@@ -77,8 +77,7 @@ def generalPiFormationSmoke : IO Unit := do
   | none => throw <| IO.userError "valid first context domain rejected"
   | some context1 =>
       match context1.extend (.bvar 0) with
-      | none => throw <| IO.userError
-          "dependent variable domain was not accepted after type checking"
+      | none => throw (IO.userError "dependent variable domain was declined")
       | some context2 =>
           match context2.infer (.bvar 0) with
           | none => throw <| IO.userError "certified context lookup failed"

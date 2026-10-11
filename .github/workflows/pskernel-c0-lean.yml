@@ -9,6 +9,7 @@ on:
       - 'psc0/packages/pskernel-c0/lean-toolchain'
       - '.github/workflows/pskernel-c0-lean.yml'
       - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,3 +32,6 @@ jobs:
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean
+      - name: Native Lean C0 performance microbenchmarks (no self-host)
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0PerfMicrobench.lean

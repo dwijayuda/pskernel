@@ -2,16 +2,16 @@ import Ps.Meta.Infer
 
 -- Family classification opens its telescope without assuming parameters are
 -- runtime types. Proof families and indexed families use the same operation.
-def psInductiveResultLevelWithFuel (environment : PsEnvironment) (meta : PsMetaContext)
+def psInductiveResultLevelWithFuel (environment : PsEnvironment) (constraints : PsMetaContext)
     (fuel : Nat) (locals : PsLocalContext) (type : PsExpr) : Except PsInferError PsLevel := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    match psWhnf environment meta locals type with
+    match psWhnf environment constraints locals type with
     | .sortE level => return psLevelNormalize level
     | .forallE name domain body binder =>
       let pushed := psLocalPushBinding locals name domain binder
-      psInductiveResultLevelWithFuel environment meta fuel pushed.context
+      psInductiveResultLevelWithFuel environment constraints fuel pushed.context
         (psExprInstantiate1 body (.fvar pushed.id))
     | _ => throw .expectedSort
 

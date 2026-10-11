@@ -46,6 +46,8 @@ THEOREMS = {
     "PSKernelFast.Spec.propFalse_mem",
     "PSKernelFast.Spec.propTrue_mem",
     "PSKernelFast.Spec.propFalse_ne_true",
+    "PSKernelFast.Spec.powerset_empty_exact",
+    "PSKernelFast.Spec.propUniverse_exactly_two",
     "PSKernelFast.Spec.sort_member_succ",
     "PSKernelFast.Spec.numericIMax_zero_iff_codomain_zero",
     "PSKernelFast.Spec.piLevel_isProp_iff_codomain_isProp",

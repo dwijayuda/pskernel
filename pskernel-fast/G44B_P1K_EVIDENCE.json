@@ -1,0 +1,70 @@
+{
+  "schema": "pskernel-fast-g44b-p1k-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualifiedSourceCommit": "4e6a06e1180e504d359b9637d6273d4bb9f8a853",
+  "ci": {
+    "runId": 38140633920,
+    "jobId": 114473607797,
+    "conclusion": "success",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/38140633920",
+    "leanVersion": "4.35.0-rc4",
+    "upstreamCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "auditedLeanSources": 55,
+    "baseExactTheoremReceipts": 157,
+    "additionalOperationalReceipts": 6,
+    "additionalModelReceipts": 11,
+    "totalDistinctTheoremReceipts": 174,
+    "allowedGlobalAxioms": ["propext", "Classical.choice", "Quot.sound"],
+    "sorryAxAllowed": false,
+    "buildInvocations": [
+      {"scope": "new dependency closure", "jobs": 24},
+      {"scope": "existing closure with shared outputs", "jobs": 109}
+    ],
+    "buildJobCountsAreAdditive": false
+  },
+  "g44b": {
+    "runtimeModule": "src/PSKernelFast/TypedNormalization.lean",
+    "stepRules": ["beta", "let-nondep-false-zeta", "application-function-spine"],
+    "tailRecursiveAccumulator": true,
+    "typedReductionPathsInProp": true,
+    "everyIntermediateTermRecheckedAtOriginalExactType": true,
+    "twoSidedCommonHeadCertificate": true,
+    "zeroFuelNeverEqualProved": true,
+    "totalContractionsLessThanTwicePerSideFuelProved": true,
+    "fuelIncludesTerminalInspection": true,
+    "hardCpuRssAllocationBound": false,
+    "generalSetDenotationStepSoundnessProved": false,
+    "semanticChainCompositionRequiresStepSoundPremise": true,
+    "fullLeanWHNFOrDefEq": false
+  },
+  "nativeDifferential": {
+    "oracle": "Lean.Kernel.check native C++ kernel; Eq.refl checked against Eq ty lhs rhs",
+    "testOnly": true,
+    "supportedEqualities": 15,
+    "rejectionControls": 2,
+    "documentedCompletenessGaps": 1,
+    "allPassed": true
+  },
+  "p1k": {
+    "separationDerivedFromExistingOperations": true,
+    "noSurjectionFromUniverseMemberOntoUniverseProved": true,
+    "sameUniverseImageClosureProved": true,
+    "sameUniverseFunctionGraphClosureProved": true,
+    "unionClosureDerivedFromImageRegularityTarski": true,
+    "dependentSumCarrierMembershipAndUniverseClosureProved": true,
+    "dependentFunctionGraphCarrierExactMembershipProved": true,
+    "dependentFunctionGraphCarrierSameUniverseClosureProved": true,
+    "newSetTheoryBasisFields": false,
+    "callerSuppliedSetTheoryBasisRequired": true,
+    "modelExistenceConstructed": false,
+    "graphApplicationBetaEtaSourceModelComplete": false,
+    "fullLeanPiInterpretationComplete": false
+  },
+  "originalG43bInferenceRulesChanged": false,
+  "admittedDeclarations": 0,
+  "fullSourceSoundnessProved": false,
+  "relativeConsistencyCapstoneProved": false,
+  "matchedOfficialKernelPerformanceMeasured": false,
+  "oldG44aTimingsDescribeG44b": false
+}

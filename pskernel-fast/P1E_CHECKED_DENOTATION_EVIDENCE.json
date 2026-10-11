@@ -1,0 +1,54 @@
+{
+  "schema": "pskernel-fast-p1e-checked-prop-denotation-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualified_source_sha": "8de790e40c0ecacea1ff80390f7b636bb9cffd63",
+  "run_id": 38126457033,
+  "job_id": 114431719831,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38126457033",
+  "conclusion": "success",
+  "build_jobs": 86,
+  "independent_lean_files": 38,
+  "theorem_receipts": 84,
+  "lean_version": "4.35.0-rc4",
+  "lean_source_sha": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "assumption_allowlist": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "model_class_assumed_not_instantiated": "SetTheoryBasis V",
+  "verified_source_examples": [
+    {
+      "source": "forall(P:Prop),P",
+      "checker_succeeds": true,
+      "model_value": "false",
+      "annotation_witness": true
+    },
+    {
+      "source": "forall(P:Prop),P->P",
+      "checker_succeeds": true,
+      "model_value": "true",
+      "annotation_witness": true
+    }
+  ],
+  "general_checked_prop_annotation_relation_proved": true,
+  "annotation_erasure_preservation": true,
+  "annotation_implies_typing_rule": true,
+  "prop_pi_model_membership_conditional_on_semantic_fibres": true,
+  "all_checked_bodies_semantically_valid": false,
+  "old_proof_point_collision_proved": true,
+  "v2_candidate_point_member_true_not_prop_proved": true,
+  "v2_candidate_exact_two_truth_values_proved": true,
+  "v2_candidate_member_type1_proved": true,
+  "v2_candidate_graph_numeral_quotient_disjointness_proved": false,
+  "v2_candidate_promoted_as_final": false,
+  "full_term_interpretation": false,
+  "model_instance_constructed": false,
+  "proof_irrelevance_proved": false,
+  "type_valued_pi_model": false,
+  "general_checker_soundness": false,
+  "relative_consistency": false,
+  "theorem_admission": false,
+  "real_kernel_benchmark": false
+}

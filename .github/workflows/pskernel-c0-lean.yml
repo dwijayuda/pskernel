@@ -8,6 +8,7 @@ on:
       - 'psc0/packages/pskernel-c0/lakefile.lean'
       - 'psc0/packages/pskernel-c0/lean-toolchain'
       - '.github/workflows/pskernel-c0-lean.yml'
+      - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -27,3 +28,6 @@ jobs:
       - name: Compile C0 Lean semantic closure (no self-host tests)
         working-directory: psc0/packages/pskernel-c0
         run: lake build PsKernelC0
+      - name: Negative kernel conformance (no self-host)
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

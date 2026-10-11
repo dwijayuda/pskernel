@@ -34,9 +34,9 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let selfArguments := (captured.filter fun binder =>
       match binder.fst.kind with | .explicit => true | _ => false).map
         (fun binder => PsSyntaxTerm.reference binder.fst.name)
-    let value ← if selfArguments.isEmpty then pure value
-      else psScopeTerm 4096 { resolver with selfArguments }
-        binders.bound value.term
+    let value ←
+      if selfArguments.isEmpty then pure value
+      else psScopeTerm 4096 { resolver with selfArguments } binders.bound value.term
     return .definition name (captured ++ binders.binders) type.term value.term span
   | .structureDecl _ params fields span =>
     let params ← psScopeBinders visit [] params

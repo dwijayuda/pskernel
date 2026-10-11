@@ -27,3 +27,7 @@ lean_exe pskernel_fast_core_syntax_smoke where
 lean_exe pskernel_fast_symbolic_level_smoke where
   root := `PSKernelFast.SymbolicLevelSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_catalog_smoke where
+  root := `PSKernelFast.CandidateCatalogSmoke
+  srcDir := "src"

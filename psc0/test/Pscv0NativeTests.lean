@@ -104,7 +104,7 @@ private def application : String :=
 private def semanticCases : IO Unit := do
   let requests : Array PsV7Native.Request := #[
     { source := application },
-    { source := "function keep(value: Nat): Except String Nat := do {\n  return value\n}\n" },
+    { source := "namespace Effects\nfunction keep(value: Nat): Except String Nat := do {\n  return value\n}\nend Effects\n" },
     { source := "function keep(value: Nat): Nat := value\nconst bad: Nat := keep (3)\n" },
     { source := "const bad: Nat := true\n" },
     { source := "import Missing\nconst answer: Nat := 42\n" },

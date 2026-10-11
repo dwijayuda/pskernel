@@ -274,14 +274,16 @@ def psPscv0PrintDoBlock (proofScript : Bool) (block : PsPscv0DoBlock) : Except S
       if proofScript then Except.ok (psPscv0Cat ["do {\n", body, "\n}"])
       else Except.ok (psPscv0Cat ["do\n", body])
 
+-- Generated helpers name the selected effect absolutely; surrounding namespaces
+-- and source locals cannot capture these compiler-introduced references.
 def psPscv0ExceptCall (constructor : String) (value : PsSyntaxTerm) (span : PsSourceSpan) : PsSyntaxTerm :=
-  PsSyntaxTerm.app (PsSyntaxTerm.reference (PsSyntaxName.mk ["Except", constructor] span)) [value] span
+  PsSyntaxTerm.app (PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "Except", constructor] span)) [value] span
 
 def psPscv0BindMatch (action : PsSyntaxTerm) (name errorName : PsSyntaxName)
     (continuation : PsSyntaxTerm) (span : PsSourceSpan) : PsSyntaxTerm :=
   let failure := psPscv0ExceptCall "error" (PsSyntaxTerm.reference errorName) span;
-  let errorPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["Except", "error"] span) [errorName] span;
-  let okPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["Except", "ok"] span) [name] span;
+  let errorPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["_root_", "Except", "error"] span) [errorName] span;
+  let okPattern := PsSyntaxPattern.constructor (PsSyntaxName.mk ["_root_", "Except", "ok"] span) [name] span;
   PsSyntaxTerm.matchE action
     [Prod.mk errorPattern (Prod.mk failure span), Prod.mk okPattern (Prod.mk continuation span)] span
 

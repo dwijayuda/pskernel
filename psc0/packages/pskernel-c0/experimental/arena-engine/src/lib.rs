@@ -13,6 +13,16 @@ pub struct NameId(u32);
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum BinderInfo { Default, Implicit, StrictImplicit, Instance }
 
+/// Exact Lean-style hierarchical names; dotted text is not equivalent to
+/// successive string components. Numeric components support arbitrary Nat
+/// values, encoded as canonical little-endian bytes (zero is the empty slice).
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum Name {
+    Anonymous,
+    Str(NameId, Box<str>),
+    Num(NameId, Box<[u8]>),
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum Level {
     Zero, Succ(LevelId), Max(LevelId, LevelId), IMax(LevelId, LevelId),
@@ -36,17 +46,45 @@ pub enum ConversionHint { Equal, Unknown }
 /// IDs must never escape their owner arena. A new arena invalidates every ID.
 #[derive(Default)]
 pub struct Arena {
-    names: Vec<Box<str>>, name_index: HashMap<Box<str>, NameId>,
+    names: Vec<Name>, name_index: HashMap<Name, NameId>,
     levels: Vec<Level>, level_index: HashMap<Level, LevelId>,
     terms: Vec<Expr>, term_index: HashMap<Expr, ExprId>,
 }
 impl Arena {
     pub fn new() -> Self { Self::default() }
-    pub fn name(&mut self, value: &str) -> NameId {
-        if let Some(&id) = self.name_index.get(value) { return id; }
+    /// Intern a complete name node. Validates the parent and canonical
+    /// Nat encoding before a node can become part of the immutable DAG.
+    pub fn intern_name(&mut self, value: Name) -> NameId {
+        match &value {
+            Name::Anonymous => {},
+            Name::Str(parent, _) => self.validate_name(*parent),
+            Name::Num(parent, bytes) => {
+                self.validate_name(*parent);
+                assert!(bytes.last() != Some(&0), "noncanonical little-endian Nat");
+            }
+        }
+        if let Some(&id) = self.name_index.get(&value) { return id; }
         let id = NameId(u32::try_from(self.names.len()).expect("name IDs exhausted"));
-        let value: Box<str> = value.into();
-        self.names.push(value.clone()); self.name_index.insert(value,id); id
+        self.names.push(value.clone());
+        self.name_index.insert(value, id);
+        id
+    }
+    pub fn anonymous_name(&mut self) -> NameId {
+        self.intern_name(Name::Anonymous)
+    }
+    /// Convenience: one component under Anonymous, not a dotted-name parser.
+    pub fn name(&mut self, value: &str) -> NameId {
+        let root = self.anonymous_name();
+        self.intern_name(Name::Str(root, value.into()))
+    }
+    pub fn name_str(&mut self, parent: NameId, value: &str) -> NameId {
+        self.intern_name(Name::Str(parent, value.into()))
+    }
+    pub fn name_num_le(&mut self, parent: NameId, value: &[u8]) -> NameId {
+        self.intern_name(Name::Num(parent, value.into()))
+    }
+    pub fn get_name(&self, id: NameId) -> &Name {
+        &self.names[id.0 as usize]
     }
     pub fn level(&mut self, level: Level) -> LevelId {
         self.validate_level(&level);
@@ -392,6 +430,35 @@ mod tests {
         assert_eq!(a.conversion_hint(app,value,10),ConversionHint::Equal);
         assert_eq!(a.conversion_hint(app,ty,10),ConversionHint::Unknown);
         assert_eq!(a.conversion_hint(app,value,1),ConversionHint::Unknown);
+    }
+
+    #[test]
+    fn hierarchical_names_do_not_confuse_dots_or_numeric_components() {
+        let mut a = Arena::new();
+        let flat = a.name("A.B");
+        let a_name = a.name("A");
+        let nested = a.name_str(a_name, "B");
+        let numeric = a.name_num_le(a_name, &[42]);
+        let text = a.name_str(a_name, "42");
+        assert_ne!(flat, nested);
+        assert_ne!(numeric, text);
+        assert_eq!(nested, a.name_str(a_name, "B"));
+        assert_eq!(a.get_name(nested), &Name::Str(a_name, "B".into()));
+    }
+    #[test]
+    fn numeric_name_components_are_unbounded_and_canonical() {
+        let mut a = Arena::new();
+        let root = a.anonymous_name();
+        let large = a.name_num_le(root, &[0,0,0,0,0,1]);
+        assert_eq!(a.get_name(large), &Name::Num(root, vec![0,0,0,0,0,1].into()));
+        assert_eq!(a.name_num_le(root, &[]), a.name_num_le(root, &[]));
+    }
+    #[test]
+    #[should_panic(expected = "noncanonical little-endian Nat")]
+    fn reject_noncanonical_name_nat() {
+        let mut a = Arena::new();
+        let root = a.anonymous_name();
+        a.name_num_le(root, &[1, 0]);
     }
 
 }

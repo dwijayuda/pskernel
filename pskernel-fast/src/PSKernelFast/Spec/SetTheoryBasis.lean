@@ -101,5 +101,58 @@ theorem universe_two_steps (n : Nat) :
     (SetTheoryBasis.univ (n + 1)) (SetTheoryBasis.univ n)
     second first
 
+
+/--
+There is an empty set, DERIVED from regularity and the transitivity of
+the supplied first universe stage. No extra empty-set axiom is added:
+if the stage has a member, regularity chooses a minimal one and the
+universe's transitivity proves it has no members; otherwise the stage
+itself is empty.
+-/
+theorem exists_empty (V : Type u) [SetTheoryBasis V] :
+    ∃ e : V, ∀ z : V, ¬ Mem z e := by
+  let U : V := SetTheoryBasis.univ 0
+  by_cases hNonempty : ∃ x : V, Mem x U
+  · obtain ⟨x, hx, hMinimal⟩ :=
+      SetTheoryBasis.regularity U hNonempty
+    refine ⟨x, ?_⟩
+    intro z hz
+    exact hMinimal ⟨z, hz,
+      universe_transitive (V := V) 0 x z hx hz⟩
+  · refine ⟨U, ?_⟩
+    intro z hz
+    exact hNonempty ⟨z, hz⟩
+
+/-- A canonical model-level empty set chosen from a proved existence result. -/
+noncomputable def emptySet (V : Type u) [SetTheoryBasis V] : V :=
+  Classical.choose (exists_empty V)
+
+/-- A fact about a constructed set, NOT a new axiom. -/
+theorem not_member_empty (V : Type u) [SetTheoryBasis V] (z : V) :
+    ¬ Mem z (emptySet V) :=
+  Classical.choose_spec (exists_empty V) z
+
+/-- Downward subset closure of every supplied Grothendieck universe. -/
+theorem universe_subset_closed (n : Nat) (x y : V)
+    (hx : Mem x (SetTheoryBasis.univ n))
+    (hSub : ∀ z : V, Mem z y → Mem z x) :
+    Mem y (SetTheoryBasis.univ n) :=
+  (SetTheoryBasis.univ_groth n).2.1 x y hx hSub
+
+/--
+The POWERSET closure needed to place the two truth-value sets inside
+the next universe. Derived from the Tarski covering clause and the
+universe's subset closure, rather than posited as a new law.
+-/
+theorem universe_powerset_closed (n : Nat) (x : V)
+    (hx : Mem x (SetTheoryBasis.univ n)) :
+    Mem (SetTheoryBasis.powerset x) (SetTheoryBasis.univ n) := by
+  obtain ⟨p, hp, hCover⟩ :=
+    (SetTheoryBasis.univ_groth n).2.2.1 x hx
+  exact universe_subset_closed (V := V) n p
+    (SetTheoryBasis.powerset x) hp
+    (fun z hz => hCover z
+      ((SetTheoryBasis.member_powerset).mp hz))
+
 end SetTheoryBasis
 end PSKernelFast.Spec

@@ -27,3 +27,22 @@ def main : IO Unit := do
       IO.println "C0_PROOF_AUDIT unbound_bvar_rejected=pass"
   | Except.ok _ =>
       throw (IO.userError "unsound: unbound de Bruijn variable was checked")
+
+  -- The performance refactor must retain the historical lambda-consumption
+  -- semantics, including nonzero already-consumed argument prefixes.
+  let info := PsKernelBinderInfo.default
+  let base := PsKernelExpr.bvar 0
+  let f1 := PsKernelExpr.lam PsKernelName.anonymous sort0 base info
+  let f2 := PsKernelExpr.lam PsKernelName.anonymous sort0 f1 info
+  let args := [sort0, sort1, sort0]
+  for fn in [base, f1, f2] do
+    for count in [0, 1, 2, 3, 4] do
+      let old :=
+        psKernelExprConsumeLambdaSpineWithFuel
+          (Nat.succ (psKernelExprNodeCount fn))
+          fn args count
+      let next := psKernelExprConsumeLambdaSpine fn args count
+      if !(psKernelExprEq (Prod.fst old) (Prod.fst next) &&
+            Nat.beq (Prod.snd old) (Prod.snd next)) then
+        throw (IO.userError "beta-spine linear optimization changed behavior")
+  IO.println "C0_PERF_REGRESSION beta_spine_semantics=pass"

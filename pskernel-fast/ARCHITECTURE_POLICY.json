@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G3-structural-preflight-proved-no-checker",
+    "stage": "G4.0-positive-only-symbolic-universe-sound",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -35,7 +35,11 @@
     "lazySoundnessProved": false,
     "g3CoreSyntaxPresent": true,
     "g3PreflightSoundnessProved": true,
-    "leanGroundImaxGridTested": true
+    "leanGroundImaxGridTested": true,
+    "symbolicUniversePositiveSoundnessProved": true,
+    "symbolicUniverseEqualityComplete": false,
+    "symbolicUniverseOfficialPositiveGapsOnFixture": 8,
+    "checkedInferenceImplemented": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -47,8 +51,8 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "f767415fc1d1824ae50ab83b73f67e8cd8b21e21",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38108276674",
-    "scope": "23 Lean native build jobs, independent import fence, G1/G2 regression, G3 structural validation and 3 small preflight soundness theorems, ground imax tests; no proof checking"
+    "validatedSourceCommit": "4c37b7f4a0cc287dbba77d004dd33ffd6f10dd8b",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38109715920",
+    "scope": "30 native build targets; 12 independent Lean modules; positive universe normalization proofs; 1296 paired official-Lean oracle tests; no full checker"
   }
 }

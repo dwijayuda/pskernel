@@ -9,6 +9,7 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [G2 three-evaluator evidence and architecture decision](G2_EVALUATION_EVIDENCE.md)
 - [G3 structural Lean syntax and proved preflight](G3_EVIDENCE.md)
 - [G4 next checker implementation contract](G4_CHECKER_PLAN.md)
+- [G4.0 sound symbolic universe evidence](G4_LEVEL_EVIDENCE.md)
 
 ## Current executable state
 

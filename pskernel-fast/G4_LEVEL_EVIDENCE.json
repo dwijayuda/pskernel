@@ -1,0 +1,28 @@
+{
+  "schema": "pskernel-fast-g4-level-evidence/v1",
+  "sourceSha": "4c37b7f4a0cc287dbba77d004dd33ffd6f10dd8b",
+  "leanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "run": 38109715920,
+  "job": 114382566956,
+  "conclusion": "success",
+  "standaloneBuildTargets": 30,
+  "independentLeanModules": 12,
+  "oracleMatrix": {
+    "expressions": 36,
+    "pairs": 1296,
+    "positive": 98,
+    "officialPositiveUnresolved": 8,
+    "officialDisagreePositive": 0
+  },
+  "certifiedTheorems": [
+    "smartMax_denote",
+    "smartIMax_denote",
+    "smartSucc_denote",
+    "normalize_denote",
+    "positiveEquivalent_sound",
+    "compare_equal_sound"
+  ],
+  "completeness": false,
+  "checkedTheorems": false,
+  "fullLeanCompatible": false
+}

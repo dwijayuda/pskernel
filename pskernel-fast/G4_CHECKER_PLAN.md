@@ -33,6 +33,10 @@ At each stage, one actual source rule maps to an official file/function, direct 
 - First small differential corpus and formal slice, then package-level Init/Std, eventually full Mathlib when implementation complete.
 - Native Lean first; then independently qualify generated JS/Wasm from the chosen single maintained semantic source without preserving the old PSC1 syntax subset.
 
+## G4.0 validated partial checker status
+
+Positive-only symbolic normalizer and universal-assignment proof are implemented and validated at source `4c37b7f`: [G4 evidence](G4_LEVEL_EVIDENCE.md). It recognizes 98 positive pairs of 1296 versus the pinned official oracle with **8 more official-positive cases unresolved**. The conservative `unresolved` result must never be treated as negative conversion. Full official normal-form equivalence and `isGEq` remain unimplemented; G4.0 is **partially implemented, not complete**, and does not enable theorem admission.
+
 ## Immediate next implementation
 
 Create `Core/LevelNorm` and an executable symbolic universe equivalence **research-only** interface, paired with an oracle matrix and a proof that affirmative equality respects all parameter assignments. Do not mark it as a trusted kernel equality operation before that proof. Then build a strict immutable constant environment with an explicit checked/untrusted distinction.

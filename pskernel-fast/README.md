@@ -17,7 +17,7 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 
 ## Current executable state
 
-The independent prototype now includes G1 scoped storage, G2 comparative beta-WHNF evaluators, and G3 Lean 4.35-shaped syntax with **proved structural preflight**. The original G1 **non-authoritative scoped term-store prototype** `src/PSKernelFast/TermStore.lean` encodes a tiny closed expression subset into collision-checked interned nodes and decodes them with bounded fuel. None is **a Lean proof-checking kernel**; the package still does not type-check declarations or accept proofs. This deliberate restriction prevents a partially built checker from being mistaken for an authoritative soundness mechanism.
+The independent prototype includes G1 scoped storage, G2 beta-only evaluator comparisons, G3 proved structural preflight, G4.0 sound-but-incomplete symbolic universe positive comparisons, G4.1 an untrusted candidate catalog, G4.2 certified restricted Sort/Pi formation, and G4.3 a structurally verified binder frame. None of these is a full dependent checker or proof-admission mechanism. The original G1 **non-authoritative scoped term-store prototype** `src/PSKernelFast/TermStore.lean` encodes a tiny closed expression subset into collision-checked interned nodes and decodes them with bounded fuel. None is **a Lean proof-checking kernel**; the package still does not type-check declarations or accept proofs. This deliberate restriction prevents a partially built checker from being mistaken for an authoritative soundness mechanism.
 
 Native experiment uses Lean `v4.35.0-rc4`:
 
@@ -27,7 +27,7 @@ lake build pskernel_fast_smoke
 lake exe pskernel_fast_smoke
 ```
 
-Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel proof branch and PR #89 are not changed. GitHub Actions workflow `pskernel-fast-v3.yml` is the cloud validation gate for this prototype. The [latest green policy-fenced checkpoint](https://github.com/dwijayuda/pskernel/actions/runs/38094207080) built six targets, validated the independent import boundary, and passed the focused smoke; the source still cannot accept proofs.
+Research branch: `research/pskernel-fast-clean-v3-20261011`. The active PSKernel proof branch and PR #89 are not changed. GitHub Actions workflow `pskernel-fast-v3.yml` is the cloud validation gate for this prototype. The [latest independently inspected green code checkpoint](https://github.com/dwijayuda/pskernel/actions/runs/38110413629) built 45 Lake targets, audited 18 independent Lean source modules, and passed G1–G4.3 focused suites. Later `c22863ba`/`9ddd8ed1` introduce reference binder lifting and tests, but their cloud CI success is **not yet confirmed**. Do not promote those changes as proved/validated until the completed matching job is inspected.
 
 ## Next
 

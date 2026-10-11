@@ -2074,6 +2074,28 @@ def psEraseRepresentationPreservingMinor
     throw .unsupportedRuntimeTerm
   eraseAt scope minor
 
+-- Open the constructor's erased proof fields before erasing its minor.
+-- Erasing the un-applied minor would retain a proof-guarded Unit call slot.
+-- Public nonproof index fields require explicit index substitution later.
+def psEraseProofMinorFields
+    (eraseAt : PsErasureScope → PsExpr → Except PsErasureError PsVerifiedIrExpr)
+    (environment : PsEnvironment) (count : Nat) (scope : PsErasureScope)
+    (application minor : PsExpr) : Except PsErasureError PsVerifiedIrExpr := do
+  match count with
+  | 0 => psEraseRepresentationPreservingMinor eraseAt environment scope application minor
+  | count + 1 =>
+    let type ← psErasureCheckedTypeView environment scope.localContext minor
+    let .forallE name domain body binder := psWhnf environment psMetaEmpty scope.localContext type
+      | throw .binderMismatch
+    if !psErasureIsProp environment scope.localContext domain then throw .unsupportedRuntimeTerm
+    let pushed := psLocalPushBinding scope.localContext name domain binder
+    let value := PsExpr.fvar pushed.id
+    let applied := match psWhnf environment psMetaEmpty scope.localContext minor with
+      | .lam _ _ body _ => psExprInstantiate1 body value
+      | _ => PsExpr.app minor value
+    let scope := { scope with localContext := pushed.context, erasedLocals := pushed.id :: scope.erasedLocals }
+    psEraseProofMinorFields eraseAt environment count scope application applied
+
 -- Proof transports preserve the erased representation. Empty eliminators
 -- become typed unreachable nodes. General recursive proof elimination needs
 -- its own recursion lowering; it is never guessed from constructor count.
@@ -2103,7 +2125,7 @@ def psEraseLogicalApplication
       | throw .unsupportedRuntimeTerm
     if !constructor.recursiveFields.isEmpty then throw .unsupportedRuntimeTerm
     let some minor := view.args[recursor.info.numParams + 1]? | throw .unsupportedApplication
-    return some (← psEraseRepresentationPreservingMinor eraseAt environment scope application minor)
+    return some (← psEraseProofMinorFields eraseAt environment constructor.numFields scope application minor)
   | _ => throw .unsupportedRuntimeTerm
 
 def psEraseSpecialBoundary

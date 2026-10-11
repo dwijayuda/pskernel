@@ -199,10 +199,10 @@ def generalPiFormationSmoke : IO Unit := do
   expectCertifiedError [] mismatchedArg .unsupported
   expectCertifiedError [] badLetValue .malformed
   expectCertifiedError [] nondepLet .unsupported
-  IO.println "PSKernel-Fast G4.4 source/output scoped certificates PASS"
+  IO.println "PSKernel-Fast G4.3b source/output scoped certificates PASS"
 
-  IO.println "PSKernel-Fast G4.4 certified Pi/lambda/app/restricted-let fragment PASS"
-  IO.println "G4.4 limits: syntactic type equality only; no DefEq/constants/nondep-let/admission"
+  IO.println "PSKernel-Fast G4.3b certified Pi/lambda/app/restricted-let fragment PASS"
+  IO.println "G4.3b limits: syntactic type equality only; no DefEq/constants/nondep-let/admission"
 
 end PSKernelFast.Core
 

@@ -7,7 +7,7 @@ kernel, with no pskernel-core or compiler-source/self-host generation.
 
 ## Syntax and ownership
 
-Selected RC4 grammar: scoped universe/universes commands; Type, Prop and Sort;
+Selected RC4 grammar: scoped universe commands; Type, Prop and Sort;
 named levels, numerals, holes, parenthesized levels, max/imax and numeral offsets.
 Offsets retain RC4's default bound of 32. Universe syntax is distinct from term
 names; namespace qualification never rewrites a level name. Namespace/section

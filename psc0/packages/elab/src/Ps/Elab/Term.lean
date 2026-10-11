@@ -324,7 +324,8 @@ def psElabUniqueRecordCandidate
 -- dependent proof fields then receive the actual expected dictionary/record type.
 def psElabRecordConstructor (context : PsElabContext) (found : PsElabRecordCandidate)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
-  let constructor ← psElabResolvedTerm context (.constE found.constructorName []) none
+  let (context, term) ← psElabResolvedReference context (.global found.constructorName)
+  let constructor ← psElabResolvedTerm context term none
   let some target := expected | return constructor
   let some info := psEnvironmentFindConstructor context.environment found.constructorName
     | throw .unsupportedTerm

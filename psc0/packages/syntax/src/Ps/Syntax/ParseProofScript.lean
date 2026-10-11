@@ -301,7 +301,7 @@ def psProofScriptReservedArgument (text : String) : Bool :=
   else if psStringEq text "decreasing_by" then true
   else if psStringEq text "namespace" then true
   else if psStringEq text "section" then true
-  else if ["open", "variable", "include", "omit", "universe", "universes"].contains text then true
+  else if ["open", "variable", "include", "omit", "universe"].contains text then true
   else if psStringEq text "end" then true
   else if psStringEq text "class" then true
   else if psStringEq text "instance" then true

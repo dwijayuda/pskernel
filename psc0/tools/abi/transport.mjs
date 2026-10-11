@@ -98,7 +98,7 @@ function verifiedBrand(v,type,path){
   record(v,path);
   const syms=Object.getOwnPropertySymbols(v);
   if(syms.length!==1||syms[0].description!=='ProofScript.'+type||
-    v[syms[0]]!==true||!Object.hasOwn(Object.getOwnPropertyDescriptor(v,syms[0]]),'value'))
+    v[syms[0]]!==true||!Object.hasOwn(Object.getOwnPropertyDescriptor(v,syms[0]),'value'))
     refuse(path,'invalid '+type+' source structure brand');
 }
 function closedAbi(B,C){

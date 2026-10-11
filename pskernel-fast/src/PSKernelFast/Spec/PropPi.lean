@@ -55,8 +55,14 @@ theorem propPi_member_prop (V : Type u) [SetTheoryBasis V]
   classical
   by_cases hAll :
       ∀ x : V, SetTheoryBasis.Mem x A → B x = propTrue V
-  · simpa [propPi, hAll, propTrue, sortSet] using (propTrue_mem V)
-  · simpa [propPi, hAll, propFalse, sortSet] using (propFalse_mem V)
+  · have hResult : propPi V A B = propTrue V := by
+      simp only [propPi, if_pos hAll]
+    rw [hResult]
+    simpa [sortSet, propTrue] using (propTrue_mem V)
+  · have hResult : propPi V A B = propFalse V := by
+      simp only [propPi, if_neg hAll]
+    rw [hResult]
+    simpa [sortSet, propFalse] using (propFalse_mem V)
 
 /--
 Truth condition: the semantic Pi proposition is true IFF every
@@ -74,12 +80,12 @@ theorem propPi_true_iff (V : Type u) [SetTheoryBasis V]
         ∀ x : V, SetTheoryBasis.Mem x A → B x = propTrue V
     · exact hAll
     · have hFalse : propPi V A B = propFalse V := by
-        simp [propPi, hAll]
+        simp only [propPi, if_neg hAll]
       have hImpossible : propFalse V = propTrue V :=
         hFalse.symm.trans hProduct
       exact False.elim (propFalse_ne_true V hImpossible)
   · intro hAll
-    simp [propPi, hAll]
+    simp only [propPi, if_pos hAll]
 
 /-- One false fibre at an inhabitant makes the whole Pi proposition false. -/
 theorem propPi_false_of_counterexample (V : Type u) [SetTheoryBasis V]

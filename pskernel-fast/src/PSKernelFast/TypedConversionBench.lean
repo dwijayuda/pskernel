@@ -11,56 +11,71 @@ No declarations are admitted. Report active loop work and timings only.
 namespace PSKernelFast.Core
 
 def typedConversionBench : IO Unit := do
-  let x : KName := .str .anonymous "x"
   let ctx := GeneralPiContext.empty []
   let s0 : KExpr := .sort .zero
   let s1 : KExpr := .sort (.succ .zero)
-  let beta : KExpr := .app (.lam x s1 (.bvar 0) .default) s0
-  let zeta : KExpr := .letE x s1 s0 (.bvar 0) false
-  let count : Nat := 20000
+  let count : Nat := 100000
+  let betaAt : Nat → KExpr := fun i =>
+    .app (.lam (.num .anonymous i) s1 (.bvar 0) .default) s0
+  let letAt : Nat → KExpr := fun i =>
+    .letE (.num .anonymous i) s1 s0 (.bvar 0) false
+  let terms : Array KExpr := (List.range 127).toArray.map betaAt
+  let lets : Array KExpr := (List.range 127).toArray.map letAt
+  if terms.size == 0 || lets.size == 0 then
+    throw (IO.userError "typed microbenchmark fixture array is empty")
 
-  for _ in [0:256] do
-    unless (compareTypedHead ctx beta s0 1).isEqual do
+  for i in [0:256] do
+    let term := terms[i % terms.size]!
+    unless (compareTypedHead ctx term s0 1).isEqual do
       throw (IO.userError "G4.4a warmup failed")
 
-  let t0 ← IO.monoMsNow
+  let t0 ← IO.monoNanosNow
   let mut inferred : Nat := 0
-  for _ in [0:count] do
-    match ctx.infer beta with
+  for i in [0:count] do
+    let term := terms[i % terms.size]!
+    match ctx.infer term with
     | some _ => inferred := inferred + 1
     | none => throw (IO.userError "typed inference baseline failed")
-  let t1 ← IO.monoMsNow
+  let t1 ← IO.monoNanosNow
 
   let mut reflexive : Nat := 0
-  for _ in [0:count] do
-    if (compareTypedHead ctx s0 s0 1).isEqual then
+  for i in [0:count] do
+    let term := terms[i % terms.size]!
+    if (compareTypedHead ctx term term 1).isEqual then
       reflexive := reflexive + 1
     else
       throw (IO.userError "typed reflexivity benchmark declined")
-  let t2 ← IO.monoMsNow
+  let t2 ← IO.monoNanosNow
 
   let mut betaCount : Nat := 0
-  for _ in [0:count] do
-    if (compareTypedHead ctx beta s0 1).isEqual then
+  for i in [0:count] do
+    let term := terms[i % terms.size]!
+    if (compareTypedHead ctx term s0 1).isEqual then
       betaCount := betaCount + 1
     else
       throw (IO.userError "typed beta benchmark declined")
-  let t3 ← IO.monoMsNow
+  let t3 ← IO.monoNanosNow
 
   let mut zetaCount : Nat := 0
-  for _ in [0:count] do
-    if (compareTypedHead ctx zeta s0 1).isEqual then
+  for i in [0:count] do
+    let term := lets[i % lets.size]!
+    if (compareTypedHead ctx term s0 1).isEqual then
       zetaCount := zetaCount + 1
     else
       throw (IO.userError "typed let benchmark declined")
-  let t4 ← IO.monoMsNow
+  let t4 ← IO.monoNanosNow
 
   unless inferred == count && reflexive == count &&
       betaCount == count && zetaCount == count do
     throw (IO.userError "typed work counter unexpectedly short")
 
-  IO.println s!"PSKernel-Fast G4.4a microbench: {count} iterations each; infer={t1-t0}ms, reflexive={t2-t1}ms, beta={t3-t2}ms, let={t4-t3}ms"
-  IO.println "G4.4a benchmark is only a bounded typed-conversion baseline; no official Lean kernel throughput or RSS comparison"
+  let inferNs := t1-t0
+  let reflNs := t2-t1
+  let betaNs := t3-t2
+  let letNs := t4-t3
+  IO.println s!"PSKernel-Fast G4.4a typed microbench: {count} runtime-indexed terms per family; infer={inferNs}ns ({inferNs/count}ns/op), reflexive={reflNs}ns ({reflNs/count}ns/op), beta={betaNs}ns ({betaNs/count}ns/op), let={letNs}ns ({letNs/count}ns/op)"
+  IO.println "Includes input-array lookup but excludes fixture construction and executable startup; no official kernel/RSS comparison"
+
 
 end PSKernelFast.Core
 

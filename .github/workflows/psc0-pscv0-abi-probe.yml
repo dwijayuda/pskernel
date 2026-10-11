@@ -54,6 +54,9 @@ jobs:
           PY
           node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
           npm install -g --prefix "$RUNNER_TEMP/pscv0-tools" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
+      - name: Verify closed AST schema and checked recipient reconstitution
+        run: |
+          node tools/abi/verify.mjs "$PWD/abi/generated" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript"
       - name: Inspect actual AST constructor shapes in both separately generated modules
         run: |
           node tools/abi/inspect.mjs "$PWD/abi/generated" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript"

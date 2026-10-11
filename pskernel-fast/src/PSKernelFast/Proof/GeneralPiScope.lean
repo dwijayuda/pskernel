@@ -1,4 +1,5 @@
 import PSKernelFast.Spec.ContextScope
+import PSKernelFast.Spec.ScopeReflection
 import PSKernelFast.GeneralPiFormation
 
 /-!
@@ -129,8 +130,60 @@ theorem inferClosedGeneralPi_source_and_result_scoped
   exact generalPiRule_scope params hRule
     (ContextScoped.empty (params := params))
 
+
+/--
+The redundant runtime output-scope check cannot return
+`malformedResult` on ANY source input because the accepted type
+already satisfies the independent structural model and G3 preflight
+is COMPLETE for that model. Invalid/unsupported inputs may still fail.
+-/
+theorem certified_ne_malformedResult (params : List KName) (expr : KExpr) :
+    inferClosedGeneralPiCertified params expr ≠ .error .malformedResult := by
+  intro contradiction
+  by_cases hv : expr.closedInput params = true
+  · cases hi : inferGeneralPi (params := params) ([] : List KExpr)
+      (GeneralPiContextWF.empty (params := params)) expr with
+    | none =>
+        simp [inferClosedGeneralPiCertified, hv, hi] at contradiction
+    | some candidate =>
+        have hScope : KExpr.StructurallyValid params 0 candidate.val :=
+          (generalPiRule_scope params candidate.property
+            (ContextScoped.empty (params := params))).2
+        have hChecked := closedInput_complete params candidate.val hScope
+        simp [inferClosedGeneralPiCertified, hv, hi, hChecked] at contradiction
+  · simp [inferClosedGeneralPiCertified, hv] at contradiction
+
+/--
+For every successful value-only inference, the certified entry point also
+succeeds with precisely the SAME inferred type. This is not a statement
+of full semantic type correctness, just an executable behavior guarantee
+following from the separate structural proof.
+-/
+theorem inferred_success_certifiable (params : List KName)
+    (expr ty : KExpr) (h : inferClosedGeneralPi params expr = .ok ty) :
+    ∃ certified, inferClosedGeneralPiCertified params expr = .ok certified ∧
+      certified.val = ty := by
+  by_cases hv : expr.closedInput params = true
+  · cases hi : inferGeneralPi (params := params) ([] : List KExpr)
+      (GeneralPiContextWF.empty (params := params)) expr with
+    | none =>
+        simp [inferClosedGeneralPi, hv, hi] at h
+    | some candidate =>
+        have hSame : candidate.val = ty := by
+          simpa [inferClosedGeneralPi, hv, hi] using h
+        have hScope : KExpr.StructurallyValid params 0 candidate.val :=
+          (generalPiRule_scope params candidate.property
+            (ContextScoped.empty (params := params))).2
+        have hChecked := closedInput_complete params candidate.val hScope
+        refine ⟨⟨candidate.val, ⟨KExpr.closedInput_sound params expr hv,
+          hScope, candidate.property⟩⟩, ?_, hSame⟩
+        simp [inferClosedGeneralPiCertified, hv, hi, hChecked]
+  · simp [inferClosedGeneralPi, hv] at h
+
 #print axioms generalPiRule_scope
 #print axioms generalPiContextWF_scoped
+#print axioms certified_ne_malformedResult
+#print axioms inferred_success_certifiable
 #print axioms inferClosedGeneralPi_source_and_result_scoped
 
 end PSKernelFast.Proof

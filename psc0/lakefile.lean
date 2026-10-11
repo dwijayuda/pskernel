@@ -35,6 +35,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.Pscv0.Binders,
     `Ps.Syntax.Pscv0.Data,
     `Ps.Syntax.Pscv0.Commands,
+    `Ps.Syntax.Pscv0.Instances,
     `Ps.Syntax.Pscv0.ProgramRead,
     `Ps.Syntax.Pscv0.TypePrint,
     `Ps.Syntax.Pscv0.Module
@@ -168,6 +169,7 @@ lean_lib PsElab where
     `Ps.Elab.Recursion,
     `Ps.Elab.Data,
     `Ps.Elab.Declaration,
+    `Ps.Elab.Class,
     `Ps.Elab.Scope,
     `Ps.Elab.Command
   ]

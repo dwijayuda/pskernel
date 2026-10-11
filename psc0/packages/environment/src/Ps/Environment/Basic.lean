@@ -115,7 +115,7 @@ structure PsEnvironment where
   instances : PsInstanceIndex := psInstanceIndexEmpty
 
 def psEnvironmentEmpty : PsEnvironment :=
-  PsEnvironment.mk List.nil PsEnvironmentIndex.empty
+  { declarations := [], index := .empty }
 
 def psEnvironmentFindInListWorker
     (declarations : List PsDeclaration) :

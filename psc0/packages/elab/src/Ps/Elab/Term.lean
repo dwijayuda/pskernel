@@ -201,41 +201,6 @@ def psSyntaxRecordFieldsMatch
     (Nat.beq (psElabListLength fields) (psElabListLength names))
     (psSyntaxRecordFieldsMatchWorker names fields)
 
-def psSyntaxRecordFindField
-    (fields : List (Prod PsSyntaxName PsSyntaxTerm))
-    (name : String) :
-    Option PsSyntaxTerm :=
-  match fields with
-  | [] =>
-      Option.none
-  | field :: rest =>
-      match psSyntaxRecordFieldName field with
-      | Option.some fieldName =>
-          if psStringEq fieldName name then
-            Option.some (Prod.snd field)
-          else
-            psSyntaxRecordFindField rest name
-      | Option.none =>
-          psSyntaxRecordFindField rest name
-
-def psSyntaxRecordOrderFields
-    (fields : List (Prod PsSyntaxName PsSyntaxTerm))
-    (names : List String) :
-    Option (List PsSyntaxTerm) :=
-  match names with
-  | [] =>
-      Option.some []
-  | name :: rest =>
-      match psSyntaxRecordFindField fields name with
-      | Option.none =>
-          Option.none
-      | Option.some value =>
-          match psSyntaxRecordOrderFields fields rest with
-          | Option.none =>
-              Option.none
-          | Option.some values =>
-              Option.some (List.cons value values)
-
 def psElabRecordCandidateForInfo
     (environment : PsEnvironment)
     (info : PsInductiveInfo) :

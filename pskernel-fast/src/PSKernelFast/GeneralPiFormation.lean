@@ -17,8 +17,8 @@ namespace PSKernelFast.Core
 
 /--
 Independent typing rules for Sort, context variables, dependent Pi, lambda introduction and
-application with EXACT syntactic domain-type agreement.
-No DefEq, let/constant or other logical rules are assumed.
+application and restricted let introduction with EXACT syntactic type agreement.
+No DefEq, constants, nondependent-let optimization, or other logical rules are assumed.
 The context must separately be certified well-formed before an executable
 checker is allowed to use these rules.
 -/
@@ -52,6 +52,19 @@ inductive GeneralPiRule (params : List KName) :
       (argTyped : GeneralPiRule params ctx arg domain) :
       GeneralPiRule params ctx (.app fn arg)
         (body.instantiateBVar arg 0)
+
+  | letE (ctx : List KExpr) (name : KName)
+      (declaredType value body : KExpr) (nondep : Bool)
+      (flag : nondep = false) (level : ULevel) (bodyType : KExpr)
+      (typeTyped :
+        GeneralPiRule params ctx declaredType (.sort level))
+      (valueTyped :
+        GeneralPiRule params ctx value declaredType)
+      (bodyTyped :
+        GeneralPiRule params (declaredType :: ctx) body bodyType) :
+      GeneralPiRule params ctx
+        (.letE name declaredType value body nondep)
+        (bodyType.instantiateBVar value 0)
 
 /--
 Only contexts constructed from an empty context by checking a new domain
@@ -117,6 +130,26 @@ def inferGeneralPi {params : List KName} (ctx : List KExpr)
               else none
           | none => none
       | _ => none
+  | .letE name declaredType value body nondep =>
+      if hFlag : nondep = false then
+        match inferGeneralPi ctx wf declaredType with
+        | some ⟨.sort level, typeTyped⟩ =>
+            match inferGeneralPi ctx wf value with
+            | some valueResult =>
+                if hSame : valueResult.val = declaredType then
+                  match inferGeneralPi (declaredType :: ctx)
+                      (.extend wf typeTyped) body with
+                  | some bodyResult =>
+                      some ⟨bodyResult.val.instantiateBVar value 0,
+                        .letE ctx name declaredType value body nondep
+                          hFlag level bodyResult.val typeTyped
+                          (hSame ▸ valueResult.property)
+                          bodyResult.property⟩
+                  | none => none
+                else none
+            | none => none
+        | _ => none
+      else none
   | _ => none
 
 /--

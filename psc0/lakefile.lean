@@ -184,6 +184,7 @@ lean_lib PsElab where
     `Ps.Elab.Goals,
     `Ps.Elab.Proof,
     `Ps.Elab.Application,
+    `Ps.Elab.Record,
     `Ps.Elab.Refinement,
     `Ps.Elab.Equality,
     `Ps.Elab.Match,

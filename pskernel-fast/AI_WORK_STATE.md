@@ -100,3 +100,9 @@ G2 named and generated differential tests now compare **eager raw substitution, 
 Five repeated medians for equal-output beta-only WHNF, 5,040 evaluations per strategy per repetition, prepared validated inputs: eager **121 ms**, lazy tree **7 ms**, lazy DAG **7 ms**. NO Lean kernel speedup, peak memory, universal lazy soundness or self-host inference. **Architecture finding:** keep closure laziness as a candidate; DAG traversal has no advantage for this tiny corpus, and must be justified by larger sharing/memory analysis before promotion.
 
 **Next:** move to G3 real Lean 4.35 expression/universe/constant and graded checker infrastructure with independent semantic spec and explicit resource/error rules. Avoid further ratio-chasing on toy beta-only code. Preserve V3 independence and do not make old proofs a constraint.
+
+## G3 independent Lean 4.35 semantic syntax candidate — CI pending
+
+Source added from official Lean 4.35 kernel `level.h`, `expr.h`, `type_checker.cpp` and `Lean/Level.lean`. V3-owned `KName`, `ULevel`, `KExpr` and binder/literal structures cover core constructor *shapes*; exact closed structural preflight rejects undeclared level parameters, level metavariables, escaped bound variables and free/metavariables, with proper Pi/lambda/let binder depth. Ground numerical `imax` is tested against official `Lean.Nat.imax` over a small grid. **Not symbolic universe equivalence or a type checker.** `mdata` uses a temporary opaque tag, explicitly unqualified for full interchange. See [G3 spec](G3_STRUCTURAL_SPEC.md).
+
+The existing G2 `RawExpr`/DAG/closure code remains experimental, **not the required eventual logical representation**. The V3 architecture is free to replace it. Cloud CI outcome for this candidate must be inspected before any validation claim.

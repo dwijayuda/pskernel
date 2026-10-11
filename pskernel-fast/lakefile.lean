@@ -19,3 +19,7 @@ lean_exe pskernel_fast_eval_smoke where
 lean_exe pskernel_fast_eval_bench where
   root := `PSKernelFast.ReductionBench
   srcDir := "src"
+
+lean_exe pskernel_fast_core_syntax_smoke where
+  root := `PSKernelFast.CoreSyntaxSmoke
+  srcDir := "src"

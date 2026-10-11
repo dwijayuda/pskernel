@@ -95,7 +95,7 @@ theorem bound_zero_substitution_preserves_type
       ((KExpr.bvar 0).instantiateBVar value 0)
       ((domain.liftBVars 1 0).instantiateBVar value 0) := by
   simpa [KExpr.instantiateBVar,
-    liftBVars_one_instantiate_cancel] using valueTyped
+    liftBVars_one_instantiate_cancel, liftBVars_zero] using valueTyped
 
 /--
 A typing derivation for the application of a dependent identity
@@ -129,7 +129,7 @@ theorem dependent_identity_beta_preserves_type
       name domain (domain.liftBVars 1 0) style hLam valueTyped
   constructor
   · simpa [liftBVars_one_instantiate_cancel] using hApp
-  · simpa [KExpr.instantiateBVar] using valueTyped
+  · simpa [KExpr.instantiateBVar, liftBVars_zero] using valueTyped
 
 #print axioms liftBVars_one_instantiate_cancel
 #print axioms liftBVars_zero

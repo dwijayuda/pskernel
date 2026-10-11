@@ -307,11 +307,60 @@ theorem dependent_outer_variable_beta_preserves_type
   · have droppedIndex : index + 1 - 1 = index := by omega
     simpa [KExpr.instantiateBVar, droppedIndex] using oldTyped
 
+
+/--
+P1c: the analogous result for an ACTUAL restricted let binding whose body
+reads any pre-existing context variable. The binder value has its declared
+type checked, but the body's result type is calculated independently of it.
+The result-type cancellation follows from exact lift composition.
+-/
+theorem dependent_outer_variable_let_preserves_type
+    (params : List KName) (ctx : List KExpr)
+    (contextWF : GeneralPiContextWF params ctx)
+    (name : KName)
+    (domain value : KExpr) (level : ULevel)
+    (domainTyped : GeneralPiRule params ctx domain (.sort level))
+    (valueTyped : GeneralPiRule params ctx value domain)
+    (index : Nat) (storedDomain : KExpr)
+    (found : ctx[index]? = some storedDomain) :
+    GeneralPiRule params ctx
+      (.letE name domain value (.bvar (index + 1)) false)
+      (storedDomain.liftBVars (index + 1) 0) ∧
+    GeneralPiRule params ctx
+      ((KExpr.bvar (index + 1)).instantiateBVar value 0)
+      (storedDomain.liftBVars (index + 1) 0) := by
+  have oldTyped : GeneralPiRule params ctx
+      (.bvar index) (storedDomain.liftBVars (index + 1) 0) :=
+    .bound ctx index storedDomain found
+  have weakTyped := (checked_bound_variable_weakens params ctx contextWF
+    domain level domainTyped index storedDomain found).2
+  have bodyTyped : GeneralPiRule params (domain :: ctx)
+      (.bvar (index + 1))
+      (storedDomain.liftBVars ((index + 1) + 1) 0) := by
+    simpa [KExpr.liftBVars, liftBVars_add] using weakTyped
+  have letTyped : GeneralPiRule params ctx
+      (.letE name domain value (.bvar (index + 1)) false)
+      ((storedDomain.liftBVars ((index + 1) + 1) 0).instantiateBVar value 0) :=
+    .letE ctx name domain value (.bvar (index + 1)) false rfl level
+      (storedDomain.liftBVars ((index + 1) + 1) 0)
+      domainTyped valueTyped bodyTyped
+  have hReduced :
+      ((storedDomain.liftBVars ((index + 1) + 1) 0).instantiateBVar value 0) =
+        storedDomain.liftBVars (index + 1) 0 := by
+    rw [← liftBVars_add storedDomain (index + 1) 1 0]
+    exact liftBVars_one_instantiate_cancel
+      (storedDomain.liftBVars (index + 1) 0) value 0
+  constructor
+  · simpa only [hReduced] using letTyped
+  · have droppedIndex : index + 1 - 1 = index := by omega
+    simpa [KExpr.instantiateBVar, droppedIndex] using oldTyped
+
 #print axioms liftBVars_one_instantiate_cancel
 #print axioms liftBVars_add
 #print axioms liftBVars_comm
 #print axioms checked_bound_variable_weakens
 #print axioms dependent_outer_variable_beta_preserves_type
+#print axioms dependent_outer_variable_let_preserves_type
 #print axioms liftBVars_zero
 #print axioms bound_zero_substitution_preserves_type
 #print axioms dependent_identity_beta_preserves_type

@@ -33,6 +33,10 @@ At each stage, one actual source rule maps to an official file/function, direct 
 - First small differential corpus and formal slice, then package-level Init/Std, eventually full Mathlib when implementation complete.
 - Native Lean first; then independently qualify generated JS/Wasm from the chosen single maintained semantic source without preserving the old PSC1 syntax subset.
 
+## G4.1 validated input-indexing status
+
+An independent persistent, **untrusted candidate catalog** passed [G4.1 CI](G4_CATALOG_EVIDENCE.md). It validates duplicate names/level parameters, known constant names/arity, reference safety and transactional snapshot behavior. It does **not** perform type checking or prove a declaration, and is not an admitted checker environment. Any future G4.2+ checked environment must be distinct.
+
 ## G4.0 validated partial checker status
 
 Positive-only symbolic normalizer and universal-assignment proof are implemented and validated at source `4c37b7f`: [G4 evidence](G4_LEVEL_EVIDENCE.md). It recognizes 98 positive pairs of 1296 versus the pinned official oracle with **8 more official-positive cases unresolved**. The conservative `unresolved` result must never be treated as negative conversion. Full official normal-form equivalence and `isGEq` remain unimplemented; G4.0 is **partially implemented, not complete**, and does not enable theorem admission.

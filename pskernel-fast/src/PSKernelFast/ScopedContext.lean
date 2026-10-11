@@ -144,23 +144,23 @@ theorem KExpr.liftBVars_structurallyValid
   | const _ _ =>
       simpa [KExpr.liftBVars, KExpr.StructurallyValid] using h
   | app fn arg ihFn ihArg =>
-      exact ⟨ihFn depth cutoff hCutoff h.1,
-        ihArg depth cutoff hCutoff h.2⟩
+      exact ⟨ihFn cutoff depth hCutoff h.1,
+        ihArg cutoff depth hCutoff h.2⟩
   | lam name domain body style ihDomain ihBody =>
-      exact ⟨ihDomain depth cutoff hCutoff h.1,
-        ihBody (depth + 1) (cutoff + 1) (by omega) h.2⟩
+      exact ⟨ihDomain cutoff depth hCutoff h.1,
+        ihBody (cutoff + 1) (depth + 1) (by omega) h.2⟩
   | forallE name domain body style ihDomain ihBody =>
-      exact ⟨ihDomain depth cutoff hCutoff h.1,
-        ihBody (depth + 1) (cutoff + 1) (by omega) h.2⟩
+      exact ⟨ihDomain cutoff depth hCutoff h.1,
+        ihBody (cutoff + 1) (depth + 1) (by omega) h.2⟩
   | letE name ty value body nondep ihTy ihValue ihBody =>
-      exact ⟨⟨ihTy depth cutoff hCutoff h.1.1,
-        ihValue depth cutoff hCutoff h.1.2⟩,
-        ihBody (depth + 1) (cutoff + 1) (by omega) h.2⟩
+      exact ⟨⟨ihTy cutoff depth hCutoff h.1.1,
+        ihValue cutoff depth hCutoff h.1.2⟩,
+        ihBody (cutoff + 1) (depth + 1) (by omega) h.2⟩
   | lit _ => trivial
   | mdata tag inner ih =>
-      exact ih depth cutoff hCutoff h
+      exact ih cutoff depth hCutoff h
   | proj name index inner ih =>
-      exact ih depth cutoff hCutoff h
+      exact ih cutoff depth hCutoff h
 
 
 end PSKernelFast.Core

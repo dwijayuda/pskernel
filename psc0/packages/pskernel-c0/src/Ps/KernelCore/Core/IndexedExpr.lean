@@ -80,7 +80,7 @@ def psKernelC0StoreEmpty : PsKernelC0TermStore :=
 def psKernelC0StoreGet
     (store : PsKernelC0TermStore)
     (id : Nat) : Option PsKernelC0StoredNode :=
-  store.nodes.get? id
+  store.nodes[id]?
 
 def psKernelC0StoreValid
     (store : PsKernelC0TermStore)
@@ -179,7 +179,7 @@ def psKernelC0NodeDepth
   | .proj _ _ body => Nat.succ (child body)
   | _ => 1
 
-def psKernelC0TrieBucket
+def psKernelC0TermTrieBucket
     (fuel : Nat) :
     PsKernelC0Trie -> Nat -> List Nat :=
   match fuel with
@@ -189,7 +189,7 @@ def psKernelC0TrieBucket
         | .bucket ids => ids
         | _ => List.nil
   | Nat.succ more =>
-      let next := psKernelC0TrieBucket more;
+      let next := psKernelC0TermTrieBucket more;
       fun index hash =>
         match index with
         | .branch left right =>
@@ -199,14 +199,14 @@ def psKernelC0TrieBucket
               next right (Nat.div hash 2)
         | _ => List.nil
 
-def psKernelC0TrieReplace
+def psKernelC0TermTrieReplace
     (fuel : Nat) :
     PsKernelC0Trie -> Nat -> List Nat -> PsKernelC0Trie :=
   match fuel with
   | Nat.zero =>
       fun _ _ ids => PsKernelC0Trie.bucket ids
   | Nat.succ more =>
-      let next := psKernelC0TrieReplace more;
+      let next := psKernelC0TermTrieReplace more;
       fun index hash ids =>
         let left :=
           match index with
@@ -246,7 +246,7 @@ def psKernelC0Intern
     Option (Prod PsKernelC0TermStore Nat) :=
   if psKernelC0NodeValid store node then
     let hash := psKernelC0NodeHash store node
-    let bucket := psKernelC0TrieBucket 16 store.index hash
+    let bucket := psKernelC0TermTrieBucket 16 store.index hash
     match psKernelC0FindNode store node bucket with
     | Option.some id =>
         Option.some (Prod.mk store id)
@@ -255,7 +255,7 @@ def psKernelC0Intern
         let entry : PsKernelC0StoredNode :=
           { node := node, hash := hash, depth := psKernelC0NodeDepth store node }
         let index :=
-          psKernelC0TrieReplace
+          psKernelC0TermTrieReplace
             16 store.index hash (List.cons id bucket)
         let next : PsKernelC0TermStore :=
           { nodes := store.nodes.push entry, index := index }

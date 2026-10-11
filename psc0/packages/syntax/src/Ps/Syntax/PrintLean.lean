@@ -234,6 +234,9 @@ def psPrintLeanTermWithFuel
               let name ← psPrintSyntaxName name
               pure ("(" ++ name ++ " := " ++ value ++ ")")
           return "(" ++ head ++ ") " ++ psPrintJoin " " arguments
+      | .byE tactics _ _ => do
+          let body ← psPrintTactics smaller 4096 tactics
+          return "by\n  " ++ body.replace "\n" "\n  "
       | .sortE isType level _ => .ok (psPrintSyntaxSort isType level)
       | .reference name =>
           psPrintSyntaxName name

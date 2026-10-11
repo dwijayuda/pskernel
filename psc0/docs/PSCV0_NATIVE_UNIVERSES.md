@@ -46,6 +46,5 @@ The existing composite program now includes polymorphic definitions, symbolic
 sort grammar, generalized holes, recursive data, projections and global instance
 search. Five added observations exercise its executable results in both Rust and
 TypeScript. Four negative cases check unknown/scoped/duplicate names and the
-source offset bound. Existing refusal expectations are retained. Qualification
-is pending until the full native cloud workflow passes; record the exact source
-and run in AI_WORK_STATE.md after completion.
+source offset bound. Existing refusal expectations are retained. The full native workflow passed at 8d28ab396bab52b32b2174b0029f83eeefbbcdbd, run 38177929378; exact evidence is
+recorded in AI_WORK_STATE.md.

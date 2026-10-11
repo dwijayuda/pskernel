@@ -68,7 +68,13 @@ inductive PsSyntaxLevel where
   | max (left right : PsSyntaxLevel)
   | imax (left right : PsSyntaxLevel)
 
+structure PsSyntaxProofScope where
+  namePrefix : List String := []
+  opened : List (List String) := []
+
+mutual
 inductive PsSyntaxTerm where
+  | byE (tactics : List PsSyntaxTactic) (scope : PsSyntaxProofScope) (span : PsSourceSpan)
   | sortE (isType : Bool) (level : PsSyntaxLevel) (span : PsSourceSpan)
   | reference (name : PsSyntaxName)
   | hole (span : PsSourceSpan)
@@ -111,6 +117,24 @@ inductive PsSyntaxTerm where
       (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
       (span : PsSourceSpan)
 
+inductive PsSyntaxTactic where
+  | exactE (value : PsSyntaxTerm) (refine : Bool) (span : PsSourceSpan)
+  | applyE (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | intro (names : List PsSyntaxName) (span : PsSourceSpan)
+  | assumption (span : PsSourceSpan)
+  | reflexivity (span : PsSourceSpan)
+  | constructor (span : PsSourceSpan)
+  | focus (body : List PsSyntaxTactic) (mustClose : Bool) (span : PsSourceSpan)
+end
+
+def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTerm :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match tactic with
+    | .exactE value _ _ | .applyE value _ => [value]
+    | .focus body _ _ => body.flatMap (psSyntaxTacticTerms fuel)
+    | _ => []
+
 -- Single-scrutinee clients construct the same matrix representation.
 def PsSyntaxTerm.matchE (scrutinee : PsSyntaxTerm)
     (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
@@ -121,6 +145,7 @@ def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan
   { start := start.start, stop := stop.stop }
 
 def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
+  | .byE _ _ span => span
   | .sortE _ _ span => span
   | .hole span => span
   | .optionalType _ _ span => span

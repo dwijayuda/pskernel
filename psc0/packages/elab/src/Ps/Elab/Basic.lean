@@ -23,6 +23,7 @@ inductive PsElabError where
   | invalidArgument (message : String)
   | scope (message : String)
   | data (message : String)
+  | proof (message : String)
   | refinement (message : String)
   | atDeclaration (name : PsName) (error : PsElabError)
   | unsupportedTerm

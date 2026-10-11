@@ -1,4 +1,5 @@
 import Ps.Elab.Universe
+import Ps.Elab.Proof
 import Ps.Elab.PatternMatrix
 
 def psElabIf
@@ -516,6 +517,7 @@ def psElabTermWithFuel
                   else psElabReference ctx name target
               | _ => smaller ctx source target
             match term with
+            | .byE tactics scope _ => psElabProof smaller context tactics scope expected
             | .hole _ => Except.ok (psElabHole context expected)
             | .optionalType _ _ _ => Except.error PsElabError.unsupportedTerm
             | .ascription value type _ => psElabAscription smaller context value type expected

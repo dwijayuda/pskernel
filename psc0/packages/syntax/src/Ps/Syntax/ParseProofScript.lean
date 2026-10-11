@@ -139,6 +139,7 @@ def psProofScriptTermWithSpan
     (term : PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   match term with
+  | .byE tactics scope _ => .byE tactics scope span
   | .hole _ => .hole span
   | .optionalType type value _ => .optionalType type value span
   | .ascription value type _ => .ascription value type span

@@ -22,6 +22,7 @@ structure PsScopeResolver where
   scope : PsCommandScope
   selfName : Option (List String) := none
   selfArguments : List PsSyntaxTerm := []
+  deferProofNames : Bool := false
 
 def psScopeKey (name : PsSyntaxName) : String := String.intercalate "." name.segments
 
@@ -62,6 +63,7 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     if bound.contains first then return (name, [])
     if psScopeHasVariable resolver.scope first then
       return (name, [first])
+  if resolver.deferProofNames then return (name, [])
   if segments == ["Type"] || segments == ["Prop"] then
     return ({ name with segments := ["_root_"] ++ segments }, [])
   let candidates := if rooted then [segments]
@@ -143,6 +145,28 @@ def psScopePattern (fuel : Nat) (resolver : PsScopeResolver)
       return .ctor resolved (← fields.mapM (psScopePattern fuel resolver)) span
     | _ => return pattern
 
+-- Static section capture follows explicit tactic binders. Actual proof-name
+-- resolution is delayed until the goal's complete local context is available.
+def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
+    (bound : List String) (tactics : List PsSyntaxTactic) :
+    Except PsElabError (List String) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match tactics with
+    | [] => return []
+    | tactic :: rest =>
+      let (used, next) ← match tactic with
+        | .intro names _ => pure ([], names.map psScopeKey ++ bound)
+        | .exactE value _ _ | .applyE value _ => do
+          let result ← visit bound value
+          pure (result.used, bound)
+        | .focus body _ _ => do
+          let used ← psScopeTacticDependencies fuel visit bound body
+          pure (used, bound)
+        | _ => pure ([], bound)
+      return psScopeUnion used (← psScopeTacticDependencies fuel visit next rest)
+
 -- This single capture-aware walk qualifies references and collects section
 -- dependencies. Labels/field names stay labels; binders and patterns delimit
 -- visibility explicitly. It never rewrites printed text.
@@ -153,6 +177,11 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
   | fuel + 1 =>
     let visit := psScopeTerm fuel resolver
     match source with
+    | .byE tactics _ span =>
+      let used ← psScopeTacticDependencies fuel
+        (psScopeTerm fuel { resolver with deferProofNames := true }) bound tactics
+      return { term := .byE tactics {
+        namePrefix := resolver.scope.namePrefix, opened := resolver.scope.opened } span, used }
     | .reference name =>
       let resolved ← psScopeResolve resolver bound name
       return { term := .reference resolved.fst, used := resolved.snd }

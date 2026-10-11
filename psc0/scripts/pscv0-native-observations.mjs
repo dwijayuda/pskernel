@@ -106,5 +106,7 @@ export const observations = [
   { name: "universeSize", args: null, expected: 1n },
   { name: "universeProjection", args: null, expected: 204n },
   { name: "universeInstance", args: null, expected: 205n },
+  { name: "tacticPairAnswer", args: null, expected: 211n },
+  { name: "tacticShadowAnswer", args: null, expected: 212n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

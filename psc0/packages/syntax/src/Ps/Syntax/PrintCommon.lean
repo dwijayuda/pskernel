@@ -131,3 +131,22 @@ def psPrintSyntaxSort (isType : Bool) (level : PsSyntaxLevel) : String :=
   | false, .number 0 => "Prop"
   | true, _ => "(Type " ++ psPrintSyntaxLevel level ++ ")"
   | false, _ => "(Sort " ++ psPrintSyntaxLevel level ++ ")"
+
+def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (tactics : List PsSyntaxTactic) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let lines ← tactics.mapM fun tactic => do
+      match tactic with
+      | .exactE value refine _ => return (if refine then "refine " else "exact ") ++ (← printTerm value)
+      | .applyE value _ => return "apply " ++ (← printTerm value)
+      | .intro names _ => return "intro" ++
+          (if names.isEmpty then "" else " " ++ psPrintJoin " " (← psPrintSyntaxNames names))
+      | .assumption _ => return "assumption"
+      | .reflexivity _ => return "rfl"
+      | .constructor _ => return "constructor"
+      | .focus body close _ =>
+        let body ← psPrintTactics printTerm fuel body
+        return (if close then "·" else "focus") ++ "\n  " ++ body.replace "\n" "\n  "
+    return psPrintJoin "\n" lines

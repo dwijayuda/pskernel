@@ -96,6 +96,7 @@ def psPscv0AlternativeTerm
 
 def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   match term with
+  | .byE tactics _ _ => tactics.flatMap (psSyntaxTacticTerms 4096)
   | .hole _ => []
   | .optionalType type value _ => [type, value]
   | .ascription value type _ => [value, type]

@@ -23,6 +23,21 @@ private def expectScopedDomain {params : List KName} {depth : Nat}
       require (domain.val == expected) "certified binder domain shifted incorrectly"
 
 /-- Runtime structural-only behavior; the type signature carries the proof. -/
+private def expectDependentOk (actual : Except DependentSortError ULevel)
+    (expected : ULevel) : IO Unit :=
+  match actual with
+  | .ok level =>
+      require (level == expected) "dependent Sort/Pi type level changed"
+  | .error _ =>
+      throw <| IO.userError "valid dependent Sort/Pi was declined"
+
+private def expectDependentError (actual : Except DependentSortError ULevel)
+    (expected : DependentSortError) : IO Unit :=
+  match actual with
+  | .ok _ => throw <| IO.userError "invalid/unsupported dependent Pi passed"
+  | .error error =>
+      require (error == expected) "dependent Pi failure category changed"
+
 private def expectOk (result : Except ScopedError (AnyScopedFrame params)) :
     IO (AnyScopedFrame params) :=
   match result with
@@ -167,49 +182,47 @@ def scopedContextSmoke : IO Unit := do
   | .error .malformedBody => pure ()
   | _ => throw <| IO.userError "undeclared level parameter bypassed preflight"
 
-  -- New proof-carrying DEPENDENT Sort/Pi formation (NOT a kernel admission).
+  -- Certified DEPENDENT Sort/Pi formation, no kernel admission.
   let propDependent : KExpr :=
     .forallE u (.sort .zero) (.bvar 0) .default
   let propResult : ULevel := .imax (.succ .zero) .zero
-  require (propDependent.closedInput [] &&
-    inferClosedDependentSort [] propDependent == .ok propResult)
-    "dependent (forall P : Prop, P) failed sort inference"
+  require (propDependent.closedInput []) "dependent Pi fixture is unscoped"
+  expectDependentOk (inferClosedDependentSort [] propDependent) propResult
 
   let nestedDependent : KExpr :=
     .forallE u (.sort .zero)
       (.forallE v (.sort .zero) (.bvar 1) .default) .default
   let nestedResult : ULevel :=
     .imax (.succ .zero) (.imax (.succ .zero) .zero)
-  require (nestedDependent.closedInput [] &&
-    inferClosedDependentSort [] nestedDependent == .ok nestedResult)
-    "nested dependent Pi did not use the correct outer binder"
+  require (nestedDependent.closedInput []) "nested Pi fixture is unscoped"
+  expectDependentOk (inferClosedDependentSort [] nestedDependent) nestedResult
 
   let polymorphicDependent : KExpr :=
     .forallE u (.sort (.param u)) (.bvar 0) .default
   let polymorphicLevel : ULevel :=
     .imax (.succ (.param u)) (.param u)
-  require (inferClosedDependentSort [u] polymorphicDependent ==
-    .ok polymorphicLevel)
-    "symbolic universe parameter in dependent Pi was mishandled"
+  expectDependentOk (inferClosedDependentSort [u] polymorphicDependent)
+    polymorphicLevel
 
   let oldFragment : KExpr :=
     .forallE u (.sort .zero) (.sort (.succ .zero)) .default
-  require (inferClosedDependentSort [] oldFragment ==
-    inferClosedSortFragment [] oldFragment)
-    "new dependent Pi rule disagreed with prior certified Sort/Pi fragment"
+  match inferClosedDependentSort [] oldFragment,
+      inferClosedSortFragment [] oldFragment with
+  | .ok newLevel, .ok oldLevel =>
+      require (newLevel == oldLevel)
+        "dependent Pi disagreed with prior certified syntactic Pi"
+  | _, _ =>
+      throw <| IO.userError "one of two known-good Sort/Pi fragments failed"
 
   let outOfScope : KExpr :=
     .forallE u (.sort .zero) (.bvar 1) .default
-  require (inferClosedDependentSort [] outOfScope == .error .malformed)
-    "escaped de Bruijn index accepted by dependent fragment"
+  expectDependentError (inferClosedDependentSort [] outOfScope) .malformed
   let missingLevel : KExpr :=
     .forallE u (.sort (.param v)) (.bvar 0) .default
-  require (inferClosedDependentSort [u] missingLevel == .error .malformed)
-    "undeclared universe parameter accepted by dependent fragment"
+  expectDependentError (inferClosedDependentSort [u] missingLevel) .malformed
   let unsupportedLambda : KExpr :=
     .lam u (.sort .zero) (.bvar 0) .default
-  require (inferClosedDependentSort [] unsupportedLambda == .error .unsupported)
-    "unsupported lambda was falsely reported as checked"
+  expectDependentError (inferClosedDependentSort [] unsupportedLambda) .unsupported
   IO.println "PSKernel-Fast G4.3: certified dependent Sort/Pi fragment PASS"
 
   IO.println "PSKernel-Fast G4.3: checked-scope substitution rejection PASS"

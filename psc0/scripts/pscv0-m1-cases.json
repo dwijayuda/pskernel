@@ -1,0 +1,193 @@
+{
+  "good": [
+    {
+      "name": "declaration type",
+      "source": "const xs: List Char := seed\n",
+      "result": "app(List;Char)",
+      "locals": []
+    },
+    {
+      "name": "arrow result",
+      "source": "function f(x: Nat): String -> Nat -> List Char := impl\n",
+      "result": "pi(String;pi(Nat;app(List;Char)))",
+      "locals": []
+    },
+    {
+      "name": "local type",
+      "source": "const sample: Nat :=\n  let xs: List Char := seed\n  0\n",
+      "result": "Nat",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "Cursor original annotation",
+      "source": "const sample: Nat :=\n  let smaller: String -> Nat -> List Char := impl\n  0\n",
+      "result": "Nat",
+      "locals": [
+        "pi(String;pi(Nat;app(List;Char)))"
+      ]
+    },
+    {
+      "name": "nested lets",
+      "source": "const sample: Nat :=\n  let x: Nat :=\n    let ys: List Char := seed\n    0\n  let zs: List Char := seed\n  x\n",
+      "result": "Nat",
+      "locals": [
+        "Nat",
+        "app(List;Char)",
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "call argument let",
+      "source": "const sample: Nat := use(let xs: List Char := seed\n  0)\n",
+      "result": "Nat",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "record field let",
+      "source": "const sample: Box := {value := let xs: List Char := seed\n  0, next := 1}\n",
+      "result": "Box",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "lambda body let",
+      "source": "const sample: Nat -> Nat := fun (n: Nat) =>\n  let xs: List Char := seed\n  n\n",
+      "result": "pi(Nat;Nat)",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "match branch let",
+      "source": "const sample: Nat := match flag with {\n| true => let xs: List Char := seed\n  0\n| false => 1\n}\n",
+      "result": "Nat",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "if branch let",
+      "source": "const sample: Nat := if (flag) {\n  let xs: List Char := seed\n  0\n} else {1}\n",
+      "result": "Nat",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "do local type",
+      "source": "function sample(a: Except String Nat): Except String Nat := do {\n  let xs: List Char := seed\n  return 0\n}\n",
+      "result": "app(Except;String, Nat)",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "do arrow type",
+      "source": "function sample(a: Except String Nat): Except String Nat := do {\n  let smaller: String -> Nat -> List Char := impl\n  return 0\n}\n",
+      "result": "app(Except;String, Nat)",
+      "locals": [
+        "pi(String;pi(Nat;app(List;Char)))"
+      ]
+    },
+    {
+      "name": "theorem term proof",
+      "source": "theorem sample: True :=\n  let xs: List Char := seed\n  proof\n",
+      "result": "True",
+      "locals": [
+        "app(List;Char)"
+      ]
+    },
+    {
+      "name": "annotation contains let",
+      "source": "const xs: let T: Type := Char\n  List T := seed\n",
+      "result": "let(Type;Char;app(List;T))",
+      "locals": []
+    },
+    {
+      "name": "local annotation contains let",
+      "source": "const sample: Nat :=\n  let xs: let T: Type := Char\n    List T := seed\n  0\n",
+      "result": "Nat",
+      "locals": [
+        "let(Type;Char;app(List;T))",
+        "Type"
+      ]
+    },
+    {
+      "name": "grouped arrow domain",
+      "source": "const sample: (Nat -> Nat) -> List Char := impl\n",
+      "result": "pi(pi(Nat;Nat);app(List;Char))",
+      "locals": []
+    },
+    {
+      "name": "dependent arrow codomain",
+      "source": "const sample: (n: Nat) -> List Char := impl\n",
+      "result": "pi(Nat;app(List;Char))",
+      "locals": []
+    },
+    {
+      "name": "comment and Unicode replay",
+      "source": "-- λ ownership\nconst sample: Nat :=\n  let chars: List Char := seed -- λ tail\n  0\n",
+      "result": "Nat",
+      "locals": [
+        "app(List;Char)"
+      ]
+    }
+  ],
+  "bad": [
+    {
+      "name": "missing local assignment",
+      "source": "const sample: Nat :=\n  let xs: List Char\n  0\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "missing declaration assignment",
+      "source": "const sample: List Char\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "missing annotation",
+      "source": "const sample: := seed\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "missing let newline",
+      "source": "const sample: Nat := let xs: List Char := seed 0\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "missing record comma",
+      "source": "const sample: Box := {a := seed b := next}\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "gap parenthesis",
+      "source": "const sample: Nat := f (x)\n",
+      "error": "PSCV0-APP-02"
+    },
+    {
+      "name": "gap annotation parenthesis",
+      "source": "const sample: Nat :=\n  let xs: List (Char) := seed\n  0\n",
+      "error": "PSCV0-APP-02"
+    },
+    {
+      "name": "named call not selected",
+      "source": "const sample: Nat := f(x := seed)\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "mismatched annotation group",
+      "source": "const sample: (List Char] := seed\n",
+      "error": "PSCV0-PARSE"
+    },
+    {
+      "name": "retired grammar",
+      "source": "partial def sample: Nat := 0\n",
+      "error": "PSCV0-PARTIAL-EXCLUDED"
+    }
+  ]
+}

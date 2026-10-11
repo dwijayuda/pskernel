@@ -99,7 +99,7 @@ def psPscv0ReadDoBinding (proofScript : Bool) (span : PsSourceSpan)
           match psPscv0Expect nameToken.cursor ":" with
           | Except.error error => Except.error error
           | Except.ok colon =>
-              match psPscv0ReadTerm proofScript colon.cursor with
+              match psPscv0ReadAnnotation proofScript colon.cursor with
               | Except.error error => Except.error error
               | Except.ok annotation =>
                   match psPscv0Expect annotation.cursor ":=" with

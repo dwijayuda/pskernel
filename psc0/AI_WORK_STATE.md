@@ -1,3 +1,19 @@
+# PSC0 AI WORK STATE — v7 M1 parser ownership candidate
+
+## 11 October 2026 — M1 implementation in progress
+
+The user approved continuation of the systematic v7 compiler roadmap after the implementation audit. Active implementation branch: `psc0/pscv0-v7-m1-parser-ownership-v1`, based on `0e8996d2aff414986f04dbc68c2689aaf118fb48`. M1 introduces a v7-owned term dispatcher with explicit annotation assignment ownership, reuses predecessor token/AST/category-neutral readers, and preserves historical compiler implementation files. Declaration types, nested immutable let annotations, theorem term proofs and supported typed do lets use the reader. The declaration scanner is removed so nested let assignments are parsed grammatically.
+
+**Status: candidate, not qualified yet.** Linux syntax/foundation typecheck and an 18-positive/10-negative shared native/generated parser corpus are being introduced. Generated compiler qualification is still pending. No full v7 conformance, full portable compiler self-host fixed point, performance improvement, independent kernel admission or Windows execution is claimed.
+
+**Correction to the historical pending text below:** Linux five-v7-source closure run [38134451122](https://github.com/dwijayuda/pskernel/actions/runs/38134451122) at the base commit succeeded: five actual v7 modules plus fifteen retained Lean modules (20-module frontend/foundation closure), identical admissions/TS/JS and passing Linux runtime. Preparation 497,482ms, total 819,997ms. TS SHA `407fc682eb1798adb48701b9310edff6282bf16d24f564d494272a41840f29b3`; JS SHA `8fc8f9cacedf56e245c11ba094e58c254ae8550eea1f417a52a83816165ce9a5`. This was not the complete compiler.
+
+Policy remains GitHub-only source operations and cloud Linux compiler CI; no local compiler builds/tests, Windows execution, kernel modifications, independent kernel/metatheory/conformance/differential suites or kernel rebuilds. v7 is the sole prospective .ps edition; original release assurance remains separate. New parser source invalidates reuse of the old frontend cache as current-source authority.
+
+The following sections are retained historical work-state entries and may contain superseded pending statuses.
+
+---
+
 # PSC0 AI WORK STATE — five v7 source modules in Linux-only 20-module compiler-closure candidate
 
 ## 11 October 2026 — new active source-closure milestone

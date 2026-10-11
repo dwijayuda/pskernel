@@ -1,48 +1,7 @@
 import Ps.Syntax.Pscv0.Read
 
--- A declaration type owns the tokens before its top-level :=. The ordinary
--- expression parser's record-field/named-argument lookahead cannot own that :=.
--- Parse this bounded token slice with the SAME PSCV0 term parser and spans.
-def psPscv0CollectDeclaredType (fuel : Nat) (cursor : PsTokenCursor)
-    (closing : List String) (tokensRev : List PsToken) (stop : PsSourcePos) :
-    Except String PsPscv0Collected :=
-  match fuel with
-  | 0 => Except.error "PSCV0-DECLARATION-TYPE-BUDGET"
-  | remaining + 1 =>
-      if psTokenCursorDone cursor then Except.error "PSCV0-DECLARATION-ASSIGN-MISSING"
-      else
-        match psTokenCursorAdvance cursor with
-        | none => Except.error "PSCV0-DECLARATION-ASSIGN-MISSING"
-        | some next =>
-            let token := next.token;
-            if psListIsEmpty closing then
-              if psStringEq token.text ":=" then
-                if psListIsEmpty tokensRev then Except.error "PSCV0-DECLARATION-TYPE-MISSING"
-                else Except.ok (PsPscv0Collected.mk (psListReverse tokensRev) next.cursor stop)
-              else
-                match psPscv0ClosingFor token.text with
-                | some close => psPscv0CollectDeclaredType remaining next.cursor
-                    [close] (List.cons token tokensRev) token.span.stop
-                | none =>
-                    if psPscv0IsClosing token.text then Except.error "PSCV0-DECLARATION-TYPE-DELIMITER"
-                    else psPscv0CollectDeclaredType remaining next.cursor []
-                      (List.cons token tokensRev) token.span.stop
-            else
-              match psPscv0ClosingFor token.text with
-              | some close => psPscv0CollectDeclaredType remaining next.cursor
-                  (List.cons close closing) (List.cons token tokensRev) token.span.stop
-              | none =>
-                  if psPscv0IsClosing token.text then
-                    match closing with
-                    | [] => Except.error "PSCV0-DECLARATION-TYPE-DELIMITER"
-                    | expected :: rest =>
-                        if psStringEq expected token.text then
-                          psPscv0CollectDeclaredType remaining next.cursor rest
-                            (List.cons token tokensRev) token.span.stop
-                        else Except.error "PSCV0-DECLARATION-TYPE-DELIMITER"
-                  else psPscv0CollectDeclaredType remaining next.cursor closing
-                    (List.cons token tokensRev) token.span.stop
-
+-- The annotation parser owns nested terms; the declaration consumes only its
+-- own assignment token. No scan to the first top-level := is involved.
 def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxDeclaration) :=
   match psTokenCursorAdvance cursor with
@@ -68,24 +27,28 @@ def psPscv0ReadValueDeclaration (cursor : PsTokenCursor) :
                 match psPscv0Expect binders.cursor ":" with
                 | Except.error error => Except.error error
                 | Except.ok colon =>
-                    match psPscv0CollectDeclaredType 65536 colon.cursor [] [] colon.token.span.stop with
+                    match psPscv0ReadAnnotation true colon.cursor with
                     | Except.error error => Except.error error
-                    | Except.ok typeTokens =>
-                        match psPscv0ReadCompleteTerm true (PsTokenCursor.mk typeTokens.tokens) with
+                    | Except.ok resultType =>
+                        match psPscv0Expect resultType.cursor ":=" with
                         | Except.error error => Except.error error
-                        | Except.ok resultType =>
-                            match psParseProofScriptDefinitionBody typeTokens.cursor with
+                        | Except.ok assign =>
+                            match psPscv0ParseDefinitionBody assign.cursor with
                             | Except.error error => Except.error (psPscv0ParseError error)
                             | Except.ok body =>
                                 let span := PsSourceSpan.mk keyword.token.span.start
                                   (psProofScriptTermStop body.value);
-                                Except.ok (PsParseResult.mk
-                                  (PsSyntaxDeclaration.definition name.value binders.value resultType body.value span)
-                                  body.cursor)
+                                let declaration : PsSyntaxDeclaration :=
+                                  if psStringEq keyword.token.text "theorem" then
+                                    PsSyntaxDeclaration.theoremDecl name.value binders.value
+                                      resultType.value body.value span
+                                  else PsSyntaxDeclaration.definition name.value binders.value
+                                    resultType.value body.value span;
+                                Except.ok (PsParseResult.mk declaration body.cursor)
               else Except.error "PSCV0-NULLARY-DECLARATION-NOT-YET-SUPPORTED"
 
 -- PSCV0 v7 is the only prospective .ps grammar. The historical parser is
--- reused solely for the explicitly selected theorem/inductive/structure
+-- reused solely for the explicitly selected inductive/structure
 -- bootstrap families; it is not a compatibility fallback for old language
 -- declaration commands. The full v7 language remains unimplemented.
 def psPscv0ReadSelectedDeclaration (cursor : PsTokenCursor) :
@@ -106,7 +69,7 @@ def psPscv0ReadDeclaration (cursor : PsTokenCursor) :
   else if psTokenCursorAtText cursor "function" then psPscv0ReadValueDeclaration cursor
   else if psTokenCursorAtText cursor "structure" then psPscv0ReadSelectedDeclaration cursor
   else if psTokenCursorAtText cursor "inductive" then psPscv0ReadSelectedDeclaration cursor
-  else if psTokenCursorAtText cursor "theorem" then psPscv0ReadSelectedDeclaration cursor
+  else if psTokenCursorAtText cursor "theorem" then psPscv0ReadValueDeclaration cursor
   else Except.error "PSCV0-V7-COMMAND-NOT-YET-SUPPORTED"
 
 def psPscv0ReadDeclarations (fuel : Nat) (cursor : PsTokenCursor)

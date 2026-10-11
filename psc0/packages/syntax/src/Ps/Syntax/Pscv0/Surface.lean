@@ -1,4 +1,5 @@
 import Ps.Syntax.Translate
+import Ps.Syntax.Pscv0.TermRead
 import Ps.Foundation.List
 
 -- Portable high-level intent; semantic lowering is a separate operation.
@@ -141,10 +142,10 @@ def psPscv0ValidateTermWithFuel (tokens : List PsToken) (fuel : Nat) :
             | Except.error error => Except.error error
             | Except.ok _ => Except.ok ()
 
-def psPscv0ReadTerm (proofScript : Bool) (cursor : PsTokenCursor) :
+def psPscv0ReadTermCategory (annotation : Bool) (proofScript : Bool) (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxTerm) :=
   let parsed : Except PsParseError (PsParseResult PsSyntaxTerm) :=
-    if proofScript then psParseProofScriptTerm cursor else psParseLeanTerm cursor;
+    if proofScript then psPscv0ParseTerm annotation cursor else psParseLeanTerm cursor;
   match parsed with
   | Except.error error => Except.error (psPscv0ParseError error)
   | Except.ok result =>
@@ -153,6 +154,14 @@ def psPscv0ReadTerm (proofScript : Bool) (cursor : PsTokenCursor) :
         | Except.error error => Except.error error
         | Except.ok _ => Except.ok result
       else Except.ok result
+
+def psPscv0ReadTerm (proofScript : Bool) (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxTerm) :=
+  psPscv0ReadTermCategory false proofScript cursor
+
+def psPscv0ReadAnnotation (proofScript : Bool) (cursor : PsTokenCursor) :
+    Except String (PsParseResult PsSyntaxTerm) :=
+  psPscv0ReadTermCategory true proofScript cursor
 
 def psPscv0ReadCompleteTerm (proofScript : Bool) (cursor : PsTokenCursor) : Except String PsSyntaxTerm :=
   match psPscv0ReadTerm proofScript cursor with

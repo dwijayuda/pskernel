@@ -41,9 +41,15 @@ theorem decode_encode (source : Source) : decode (encode source) = some source :
   induction source with
   | name value => rfl
   | app fn arg ihFn ihArg =>
-      simp [encode, decode, ihFn, ihArg]
+      change (decode (encode fn)).bind
+        (fun lhs => (decode (encode arg)).map (fun rhs => Source.app lhs rhs)) =
+          some (Source.app fn arg)
+      rw [ihFn, ihArg]
+      rfl
   | group inner ih =>
-      simp [encode, decode, ih]
+      change (decode (encode inner)).map Source.group = some (Source.group inner)
+      rw [ih]
+      rfl
 
 inductive Domain where
   | generated
@@ -60,24 +66,32 @@ structure Packet where
 /-- A receiver changes the ownership label only after edition and source
 domain checks, and only after decoding a structurally accepted wire tree. -/
 def transfer (packet : Packet) : Option Packet :=
-  if packet.domain == Domain.generated && packet.revision == 7 then
-    (decode packet.wireTree).map fun value =>
-      { domain := .compiler, revision := 7, wireTree := encode value }
+  if packet.domain = Domain.generated then
+    if packet.revision = 7 then
+      (decode packet.wireTree).map fun value =>
+        { domain := .compiler, revision := 7, wireTree := encode value }
+    else none
   else none
 
 theorem valid_source_preserved (source : Source) :
     transfer ⟨.generated, 7, encode source⟩ =
       some ⟨.compiler, 7, encode source⟩ := by
-  simp [transfer, decode_encode]
+  change (decode (encode source)).map
+      (fun value => Packet.mk .compiler 7 (encode value)) =
+        some (Packet.mk .compiler 7 (encode source))
+  rw [decode_encode]
+  rfl
 
 theorem foreign_source_refused (wire : Wire) (revision : Nat) :
-    transfer ⟨.unrelated, revision, wire⟩ = none := by
-  simp [transfer]
+    transfer ⟨.unrelated, revision, wire⟩ = none := rfl
 
 theorem incorrect_edition_refused (wire : Wire) (revision : Nat)
     (h : revision ≠ 7) :
     transfer ⟨.generated, revision, wire⟩ = none := by
-  simp [transfer, h]
+  change (if revision = 7 then
+      (decode wire).map (fun value => Packet.mk .compiler 7 (encode value))
+      else none) = none
+  rw [if_neg h]
 
 theorem unknown_constructor_refused :
     transfer ⟨.generated, 7, .invalid⟩ = none := rfl
@@ -87,7 +101,8 @@ theorem nested_unknown_constructor_refused (value : String) :
 
 theorem transferred_packet_not_reaccepted_as_source (source : Source) :
     (transfer ⟨.generated, 7, encode source⟩).bind transfer = none := by
-  simp [transfer, decode_encode]
+  rw [valid_source_preserved]
+  rfl
 
 def mixed (f x y : String) : Source :=
   .app (.name f) (.app (.name x) (.name y))

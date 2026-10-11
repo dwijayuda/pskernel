@@ -31,15 +31,15 @@ function correspondence(projected,baseline){
     assert.equal(original.split(name).length,2,'baseline unexpectedly references '+name);
     original=original.replace('def '+name+'\n','def old_'+name+'\n');
   }
-  // Expose the successful parse before splitting the printer result: under
-  // bind/match scopes it is not yet the same free-variable occurrence.
-  // Then reduce both generic and specialized error maps on each constructor.
-  // Neither the generated functions nor the universal statement is rewritten.
+  // Use direct definitional expansion, not `unfold`'s simp/equation rewriting.
+  // Case analysis then exposes the success continuation before the printer
+  // result is split. The source functions and universal statements stay exact.
+  // The separate gate requires no theorem axioms; no audit policy is relaxed.
   const proofs=APIs.map(([name,parse,print])=>
     `theorem migration_${name} (source : String) :\n`+
     `    ${name} source = old_${name} source := by\n`+
-    `  unfold ${name} old_${name}\n`+
-    `  cases parsed : ${parse} source with\n`+
+    `  delta ${name} old_${name}\n`+
+    `  cases ${parse} source with\n`+
     `  | error error => rfl\n`+
     `  | ok sourceModule =>\n`+
     `      change psTranslationMapError PsTranslationError.print (${print} sourceModule) =\n`+

@@ -20,7 +20,7 @@ inductive KName where
   | anonymous
   | str (parent : KName) (value : String)
   | num (parent : KName) (value : Nat)
-  deriving Repr, Inhabited, BEq, DecidableEq, Hashable
+  deriving Repr, Inhabited, BEq, ReflBEq, LawfulBEq, DecidableEq, Hashable
 
 inductive ULevel where
   | zero

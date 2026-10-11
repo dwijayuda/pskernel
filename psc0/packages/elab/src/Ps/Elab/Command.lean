@@ -38,11 +38,13 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
       if selfArguments.isEmpty then pure value
       else psScopeTerm 4096 { resolver with selfArguments } binders.bound value.term
     return .definition name (captured ++ binders.binders) type.term value.term span
-  | .structureDecl _ params fields span =>
+  | .structureDecl _ params result fields span =>
     let params ← psScopeBinders visit [] params
+    let result ← result.mapM (visit params.bound)
     let fields ← psScopeBinders visit params.bound fields
-    let captured := psScopeSelect resolver.scope (psScopeUnion params.used fields.used)
-    return .structureDecl name (captured ++ params.binders) fields.binders span
+    let used := psScopeUnion (result.map (·.used) |>.getD []) (psScopeUnion params.used fields.used)
+    let captured := psScopeSelect resolver.scope used
+    return .structureDecl name (captured ++ params.binders) (result.map (·.term)) fields.binders span
   | .inductiveDecl _ params result constructors span =>
     let params ← psScopeBinders visit [] params
     let result ← result.mapM (visit params.bound)

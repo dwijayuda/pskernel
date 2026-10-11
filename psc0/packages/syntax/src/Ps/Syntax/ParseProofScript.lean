@@ -1460,6 +1460,7 @@ def psParseProofScriptStructureDeclaration
                                   PsSyntaxDeclaration.structureDecl
                                     name.value
                                     params.value
+                                    none
                                     fields.value
                                     {
                                       start := keyword.token.span.start
@@ -1668,7 +1669,7 @@ def psProofScriptDeclarationStop
   | .partialDefinition _ _ _ _ span => span.stop
   | .theoremDecl _ _ _ _ span => span.stop
   | .inductiveDecl _ _ _ _ span => span.stop
-  | .structureDecl _ _ _ span => span.stop
+  | .structureDecl _ _ _ _ span => span.stop
 
 def psParseProofScriptImportsWithFuel
     (fuel : Nat) :

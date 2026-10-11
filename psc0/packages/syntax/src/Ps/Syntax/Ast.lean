@@ -217,6 +217,7 @@ inductive PsSyntaxDeclaration where
   | structureDecl
       (name : PsSyntaxName)
       (params : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+      (resultType : Option PsSyntaxTerm)
       (fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
       (span : PsSourceSpan)
 

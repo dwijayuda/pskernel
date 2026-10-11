@@ -2,7 +2,7 @@ import Ps.Elab.Declaration
 
 -- Qualified projections are ordinary closed definitions over Core projections.
 -- Class methods change only the dictionary binder to instance-implicit.
-def psElabStructureProjections (fuel : Nat) (context : PsElabContext)
+def psElabStructureProjections (fuel : Nat) (context : PsElabContext) (proofFamily : Bool)
     (info : PsInductiveInfo) (bindersRev : List PsElabTypedBinder)
     (major : PsExpr) (index : Nat) (cursor : PsExpr) :
     Except PsElabError (List PsDeclaration) := do
@@ -11,12 +11,16 @@ def psElabStructureProjections (fuel : Nat) (context : PsElabContext)
   | fuel + 1 =>
     let field ← (psInferEnsureForall context.environment context.metaContext
       context.localContext cursor).mapError PsElabError.infer
+    if proofFamily then
+      let fieldLevel ← psElabExpressionSort context field.domain
+      if !psLevelEquivalent fieldLevel .zero then
+        throw (.data "Prop structure fields must be propositions")
     let value := PsExpr.proj info.name index major
     let closed := psCloseElabTypedBinders context.metaContext bindersRev value field.domain
     let declaration := PsDeclaration.definitionDecl
       (psNameAppendStr info.name (psNameLastComponent field.name)) info.levelParams
       closed.snd closed.fst
-    let rest ← psElabStructureProjections fuel context info bindersRev major (index + 1)
+    let rest ← psElabStructureProjections fuel context proofFamily info bindersRev major (index + 1)
       (psExprInstantiate1 field.body value)
     return declaration :: rest
 
@@ -40,7 +44,8 @@ def psElabAddStructureProjections (environment : PsEnvironment) (isClass : Bool)
   let parametersRev := parameters.bindersRev.map fun entry => { entry with binder := .implicit }
   let bindersRev := PsElabTypedBinder.mk major.id majorName family binder :: parametersRev
   let cursor ← psElabProjectionApplyParameters context arguments constructor.type
-  let projections ← psElabStructureProjections constructor.numFields context info bindersRev
+  let proofFamily ← (psInductiveIsProp environment info).mapError PsElabError.infer
+  let projections ← psElabStructureProjections constructor.numFields context proofFamily info bindersRev
     (.fvar major.id) 0 cursor
   return { declarations := batch.declarations ++ projections }
 

@@ -72,7 +72,7 @@ def psElabOriginSource
   | PsSyntaxDeclaration.partialDefinition name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.theoremDecl name _ _ _ span => Prod.mk name span
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ span => Prod.mk name span
-  | PsSyntaxDeclaration.structureDecl name _ _ span => Prod.mk name span
+  | PsSyntaxDeclaration.structureDecl name _ _ _ span => Prod.mk name span
 
 def psElabOriginErrorAt
     (sourceIndex : Nat) (source : PsSyntaxDeclaration)
@@ -362,7 +362,7 @@ def psElabDeclaration
         true levelNames
   | .inductiveDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
-  | .structureDecl _ _ _ _ =>
+  | .structureDecl _ _ _ _ _ =>
       Except.error PsElabError.unsupportedTerm
 
 -- Elaborate the canonical worker with the original source self name, then give
@@ -460,11 +460,12 @@ def psElabDeclarationBatchStable
         resultType
         constructors
         false levelNames
-  | .structureDecl name params fields span =>
+  | .structureDecl name params resultType fields span =>
       psElabStructureDeclaration
         environment
         name
         params
+        resultType
         fields
         span levelNames
   | _ =>

@@ -20,9 +20,19 @@ runtime representations agree. Recursive proof eliminators and extraction of
 public index fields still need dedicated lowering; they fail closed today.
 These limits do not weaken the kernel's large-elimination restriction.
 
-Explicit result annotations on structures/classes, mutual/nested family
-completion, recursor kernel K reduction parity and the rest of the selected
+Mutual/nested family completion, recursor kernel K reduction parity and the rest of the selected
 data/library inventory remain pending. The compact composite checks construction,
 logical elimination, singleton runtime erasure and empty elimination. Three
 refusals protect hidden witnesses, multiple constructors and computed indices.
 Exact cloud qualification follows in AI_WORK_STATE.md.
+
+## Explicit structure and class sorts
+
+An optional source result annotation remains part of the structure AST, scope
+capture, recursive source validation and both source printers. Inference is used
+only when the annotation is absent. Structures cannot add an index telescope;
+their result must be a sort. Proposition structures/classes require proposition
+fields so generated projections cannot reveal hidden runtime data. Class
+registration, instance synthesis and projection generation reuse ordinary checked
+declarations; there is no separate proof-dictionary mechanism. Higher declared
+universes remain explicit rather than being silently minimized to field sorts.

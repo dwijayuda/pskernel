@@ -256,6 +256,8 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
   match indices.body with
   | .sortE _ => pure ()
   | _ => throw (.data "data family must end in a sort")
+  if isStructure && !indices.bindersRev.isEmpty then
+    throw (.data "structure result must be a sort, not an indexed family")
   let type := psCloseElabForallBinders result.context.metaContext parameters.bindersRev result.type
   if psExprHasUnresolvedMeta type then throw .unresolvedMetavariable
   let names ← constructors.mapM fun source =>
@@ -280,8 +282,9 @@ def psElabInductiveDeclaration (environment : PsEnvironment) (nameSyntax : PsSyn
   return { declarations := declaration :: (declarations ++ [recursor]) }
 
 def psElabStructureDeclaration (environment : PsEnvironment) (name : PsSyntaxName)
-    (params fields : List (PsSyntaxBinderHead × PsSyntaxTerm)) (span : PsSourceSpan)
+    (params : List (PsSyntaxBinderHead × PsSyntaxTerm)) (resultType : Option PsSyntaxTerm)
+    (fields : List (PsSyntaxBinderHead × PsSyntaxTerm)) (span : PsSourceSpan)
     (levelNames : List PsName := []) :
     Except PsElabError PsElabDeclarationBatchResult :=
-  psElabInductiveDeclaration environment name params none
+  psElabInductiveDeclaration environment name params resultType
     [{ name := PsSyntaxName.mk ["mk"] span, fields, span }] true levelNames

@@ -2055,6 +2055,7 @@ def psParseLeanStructureDeclaration
                           PsSyntaxDeclaration.structureDecl
                             name.value
                             params.value
+                            none
                             fields.value
                             {
                               start := keyword.token.span.start

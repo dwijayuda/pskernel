@@ -78,7 +78,7 @@ def psPscv0ReadDataDeclaration (cursor : PsTokenCursor) :
   let fuel := Nat.succ (psParseListLength name.cursor.remaining)
   let params ← psPscv0DataParameters fuel name.cursor
   let result ←
-    if !isStructure && psTokenCursorAtText params.cursor ":" then do
+    if psTokenCursorAtText params.cursor ":" then do
       let colon ← psTokenCursorExpectText params.cursor ":"
       let type ← psPscv0ParseTerm true colon.cursor
       pure (PsParseResult.mk (some type.value) type.cursor)
@@ -89,7 +89,7 @@ def psPscv0ReadDataDeclaration (cursor : PsTokenCursor) :
     let fields ← psPscv0StructureFields fuel opening.cursor []
     let close ← psTokenCursorExpectText fields.cursor "}"
     return {
-      value := .structureDecl name.value params.value fields.value
+      value := .structureDecl name.value params.value result.value fields.value
         (psSyntaxSpanJoin keyword.token.span close.token.span)
       cursor := close.cursor }
   else

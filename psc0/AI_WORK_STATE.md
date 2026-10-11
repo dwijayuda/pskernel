@@ -1333,3 +1333,14 @@ Have/let preserve distinct elaboration reduction behavior, show selects goals wi
 rollback, change checks conversion, and existential notation uses checked Exists.
 The same checks exposed and now cover shared natural computation and independent
 application-result propagation. No acceptance outcome was weakened.
+
+## Proposition family qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/24 at 7fb7a4ed8e2aaa71953a6e0726c2eb4f804449d2 passed
+[run 38181283317](https://github.com/dwijayuda/pskernel/actions/runs/38181283317):
+373 fixture declarations, 28 parser cases, four accepted programs, 71 phase-specific
+refusals and 113 shared runtime observations. The source guard reports 114 portable
+and 120 native modules. Proof families share kernel-aligned elimination metadata
+and do not become runtime tags. Singleton minors open proof fields before erasure,
+preserving the independent proof-guarded call convention. Explicit limits are in
+docs/PSCV0_NATIVE_DATA.md. Earlier failed runs are not qualification evidence.

@@ -582,33 +582,17 @@ def psPrintLeanDeclaration
                           printedResult
                           " where\n"
                           (psPrintJoin "\n" printedConstructors))
-  | .structureDecl name params fields _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedParamsResult :
-              Except PsSourcePrintError (List String) :=
-            psPrintLeanMapBinders psPrintLeanBinder params;
-          match printedParamsResult with
-          | Except.error error => Except.error error
-          | Except.ok printedParams =>
-              let printedFieldsResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintLeanMapBinders
-                  psPrintLeanStructureField
-                  fields;
-              match printedFieldsResult with
-              | Except.error error => Except.error error
-              | Except.ok printedFields =>
-                  let paramSuffix :=
-                    psPrintLeanSpaceJoinedSuffix printedParams;
-                  Except.ok
-                    (psPrintLeanConcat5
-                      "structure "
-                      printedName
-                      paramSuffix
-                      " where\n"
-                      (psPrintJoin "\n" printedFields))
+  | .structureDecl name params result fields _ => do
+      let name ← psPrintSyntaxName name
+      let params ← psPrintLeanMapBinders psPrintLeanBinder params
+      let result ← match result with
+        | none => pure ""
+        | some type => do
+          let type ← psPrintLeanTerm type
+          pure (" : " ++ type)
+      let fields ← psPrintLeanMapBinders psPrintLeanStructureField fields
+      return "structure " ++ name ++ psPrintLeanSpaceJoinedSuffix params ++ result ++
+        " where\n" ++ psPrintJoin "\n" fields
 
 def psPrintLeanImport
     (sourceImport : PsSyntaxImport) :

@@ -67,7 +67,8 @@ def psPscv0DeclarationTerms (declaration : PsSyntaxDeclaration) : List PsSyntaxT
   | .definition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .partialDefinition _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
   | .theoremDecl _ binders type value _ => List.cons type (List.cons value (psListMap psPscv0BinderType binders))
-  | .structureDecl _ params fields _ => psListMap psPscv0BinderType (psListAppend params fields)
+  | .structureDecl _ params result fields _ =>
+      result.toList ++ psListMap psPscv0BinderType (psListAppend params fields)
   | .inductiveDecl _ params result constructors _ =>
       let terms := psListAppend (psListMap psPscv0BinderType params)
         (psPscv0JoinTermLists (psListMap psPscv0ConstructorTerms constructors));

@@ -462,7 +462,7 @@ def psSh1SourceDeclarationName (source : PsSyntaxDeclaration) : PsSyntaxName :=
   | PsSyntaxDeclaration.partialDefinition name _ _ _ _ => name
   | PsSyntaxDeclaration.theoremDecl name _ _ _ _ => name
   | PsSyntaxDeclaration.inductiveDecl name _ _ _ _ => name
-  | PsSyntaxDeclaration.structureDecl name _ _ _ => name
+  | PsSyntaxDeclaration.structureDecl name _ _ _ _ => name
 
 
 -- General partial definitions are excluded. Theorems use the existing
@@ -495,10 +495,12 @@ def psSh1SyntaxDeclarationBodyStep
             List.cons (PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type type) tail;
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
         (List.cons (PsSh1SyntaxTask.binders owner params) withResult))
-  | PsSyntaxDeclaration.structureDecl name params fields _ =>
+  | PsSyntaxDeclaration.structureDecl name params result fields _ =>
       let owner : String := psSh1NameText name.segments;
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)
-        [PsSh1SyntaxTask.binders owner params, PsSh1SyntaxTask.binders owner fields])
+        ([PsSh1SyntaxTask.binders owner params] ++
+          result.toList.map (PsSh1SyntaxTask.term owner PsSh1SyntaxRegion.type) ++
+          [PsSh1SyntaxTask.binders owner fields]))
 
 
 def psSh1SyntaxDeclarationStep

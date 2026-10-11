@@ -630,32 +630,17 @@ def psPrintProofScriptDeclaration
                           (psPrintProofScriptConcat2
                             (psPrintJoin "\n" printedConstructors)
                             "\n}"))
-  | .structureDecl name params fields _ =>
-      match psPrintSyntaxName name with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedParamsResult :
-              Except PsSourcePrintError String :=
-            psPrintProofScriptDeclarationBinders params;
-          match printedParamsResult with
-          | Except.error error => Except.error error
-          | Except.ok printedParams =>
-              let printedFieldsResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintProofScriptMapBinders
-                  psPrintProofScriptStructureField
-                  fields;
-              match printedFieldsResult with
-              | Except.error error => Except.error error
-              | Except.ok printedFields =>
-                  Except.ok
-                    (psPrintProofScriptConcat6
-                      "structure "
-                      printedName
-                      printedParams
-                      " where {\n"
-                      (psPrintJoin "\n" printedFields)
-                      "\n}")
+  | .structureDecl name params result fields _ => do
+      let name ← psPrintSyntaxName name
+      let params ← psPrintProofScriptDeclarationBinders params
+      let result ← match result with
+        | none => pure ""
+        | some type => do
+          let type ← psPrintProofScriptTerm type
+          pure (" : " ++ type)
+      let fields ← psPrintProofScriptMapBinders psPrintProofScriptStructureField fields
+      return "structure " ++ name ++ params ++ result ++
+        " where {\n" ++ psPrintJoin "\n" fields ++ "\n}"
 
 def psPrintProofScriptImport
     (sourceImport : PsSyntaxImport) :

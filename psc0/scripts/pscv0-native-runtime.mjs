@@ -22,4 +22,6 @@ assert.equal(output.fromInherited, 17n);
 assert.equal(output.fromPartial, 6n);
 assert.equal(output.fromNullary, 23n);
 assert.equal(output.fromUnitDefault, 19n);
+assert.equal(output.recursiveSection, 37n);
+assert.equal(output.strictCompleted, 3n);
 console.log('PSCV0_NATIVE_RUNTIME: PASS checked current-source v7 application -> TypeScript -> JavaScript');

@@ -89,7 +89,16 @@ private def application : String :=
   "theorem included: P := proof\n" ++
   "omit proof\n" ++
   "theorem explicitProof(proof: P): P := proof\n" ++
-  "end Proofs\n"
+  "end Proofs\n" ++
+  "section Recursive\n" ++
+  "variable (seed: Nat)\n" ++
+  "function sectionFold(xs: List Nat): Nat := match xs with\n" ++
+  "  | List.nil => seed\n" ++
+  "  | List.cons head tail => sectionFold(tail)\n" ++
+  "end Recursive\n" ++
+  "const recursiveSection: Nat := sectionFold(37, List.cons(1, List.nil))\n" ++
+  "function strictDefault{{A: Type}}(value: Nat := 3): Nat := value\n" ++
+  "const strictCompleted: Nat := strictDefault(A := Nat)\n"
 
 private def semanticCases : IO Unit := do
   let requests : Array PsV7Native.Request := #[

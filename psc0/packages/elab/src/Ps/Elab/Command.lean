@@ -36,7 +36,7 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
         (fun binder => PsSyntaxTerm.reference binder.fst.name)
     let value ← if selfArguments.isEmpty then pure value
       else psScopeTerm 4096 { resolver with selfArguments }
-        (captured.map (fun b => psScopeKey b.fst.name) ++ binders.bound) value.term
+        binders.bound value.term
     return .definition name (captured ++ binders.binders) type.term value.term span
   | .structureDecl _ params fields span =>
     let params ← psScopeBinders visit [] params

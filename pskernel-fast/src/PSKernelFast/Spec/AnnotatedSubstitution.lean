@@ -222,8 +222,10 @@ theorem interpAnnotated_instantiate_zero (V : Type u) [SetTheoryBasis V]
     (body arg : AnnotatedModelTerm) (env : Nat → V) :
     interpAnnotated V env (body.instantiate arg 0) =
       interpAnnotated V (extendSetEnv (interpAnnotated V env arg) env) body := by
-  simpa only [dropModelEnv, Nat.add_zero, insertModelEnv_zero] using
-    interpAnnotated_instantiate V body arg 0 env
+  have hDrop : dropModelEnv 0 env = env := rfl
+  have h := interpAnnotated_instantiate V body arg 0 env
+  rw [hDrop, insertModelEnv_zero] at h
+  exact h
 
 #print axioms AnnotatedModelTerm.forget_lift
 #print axioms AnnotatedModelTerm.forget_instantiate

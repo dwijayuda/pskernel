@@ -40,11 +40,13 @@ private theorem stepModelAnnotation_app
   | lam n a b => simp [stepModelAnnotation] at h
   | pi n a b => simp [stepModelAnnotation] at h
   | app f a =>
-      change (stepModelAnnotation (.app f a)).map (fun k => .app k arg) = _
+      change (stepModelAnnotation (.app f a)).map
+        (fun k => AnnotatedModelTerm.app k arg) = some (.app next arg)
       rw [h]
       rfl
   | letE a v b =>
-      change (stepModelAnnotation (.letE a v b)).map (fun k => .app k arg) = _
+      change (stepModelAnnotation (.letE a v b)).map
+        (fun k => AnnotatedModelTerm.app k arg) = some (.app next arg)
       rw [h]
       rfl
 
@@ -68,8 +70,11 @@ theorem sourceModelTyping_step (V : Type u) [SetTheoryBasis V]
   | beta name domain body style arg =>
       cases typing with
       | app _ _ _ _ fnName fnDomain fnBody fnStyle rank af aa ad ab hf ha =>
+          generalize hFnAnn : AnnotatedModelTerm.pi (rank.denote ρ) ad ab = annType at hf
           cases hf with
           | lam _ _ _ _ _ bodyType _ a b ad' ab' aType hd ht hb =>
+              have hDomainAnn : ad = ad' := (AnnotatedModelTerm.pi.inj hFnAnn).2.1
+              cases hDomainAnn
               have result := sourceModelTyping_beta V params ρ ctx ac env
                 name style domain body bodyType arg a b ad' ab' aType aa
                 hd ht hb ha hCtx

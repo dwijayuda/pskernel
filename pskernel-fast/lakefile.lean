@@ -35,3 +35,7 @@ lean_exe pskernel_fast_catalog_smoke where
 lean_exe pskernel_fast_sort_fragment_smoke where
   root := `PSKernelFast.SortFragmentSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_scoped_context_smoke where
+  root := `PSKernelFast.ScopedContextSmoke
+  srcDir := "src"

@@ -1,40 +1,43 @@
-# Continue PSKernel-Fast — P1l/P1m model and source-Pi bridge green
+# Continue PSKernel-Fast — P1n/P1o source-certified six-form model green
 
-Repository `dwijayuda/pskernel`; ONLY branch `research/pskernel-fast-clean-v3-20261011`. Public open-source compiler/kernel correctness and formal-methods work. GitHub connector + cloud Actions only; no Desktop Commander, local repository checkout/files/builds/tests. Preserve every other branch and PR #89. Refresh live HEAD/affected blobs before each write and use non-force expected-HEAD commits.
+Repository `dwijayuda/pskernel`; ONLY branch `research/pskernel-fast-clean-v3-20261011`. Public open-source compiler/kernel correctness and formal-methods work. GitHub connector + cloud Actions ONLY; no Desktop Commander, local repository checkout/files/builds/tests. Preserve other branches, PR #89 and concurrent work. Read live HEAD/affected blobs before each write; use serial non-force expected-HEAD updates.
 
 ## Read first
 
-Read live `pskernel-fast/AI_WORK_STATE.md`, `P1L_P1M_PI_MODEL_EVIDENCE.md`/JSON and `ARCHITECTURE_POLICY.json`, then:
+Read `AI_WORK_STATE.md`, `P1N_P1O_SOURCE_MODEL_EVIDENCE.md`/JSON and `ARCHITECTURE_POLICY.json`, then:
 
-- `src/PSKernelFast/Spec/GraphApplication.lean`
-- `src/PSKernelFast/Spec/TaggedDependentPi.lean`
-- `src/PSKernelFast/Proof/SourcePiModelBridge.lean`
+- `src/PSKernelFast/Spec/AnnotatedSubstitution.lean`
+- `src/PSKernelFast/Proof/SourceSubstitutionModel.lean`
+- `src/PSKernelFast/Proof/SourceModelTyping.lean`
+- `src/PSKernelFast/Proof/SourceModelExecution.lean`
 - `src/PSKernelFast/TypedNormalization.lean`
 
-Target: official Lean **4.35.0-rc4**, upstream `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+Pinned target: Lean **4.35.0-rc4**, upstream `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 
-Last fully qualified CODE checkpoint at authoring: **`e95c0b5e381e4ee5a0d47001fad6c69494261683`**, [Actions 38143764809](https://github.com/dwijayuda/pskernel/actions/runs/38143764809), job `114482754713`, SUCCESS. Full log inspected: 58 independent Lean sources; exact assumption gates157+17+28=**202** distinct enumerated receipts; old native differential15 supported equalities,2 rejection controls,1 equality gap all passed. Focused42 and existing109 Lake invocation jobs overlap, so do NOT add them. Docs/policy may follow; fetch live matching CI.
+Last qualified SOURCE at authoring: **`84c27f8c953e3c3aed8ae7fc047a37437ce06d19`**, [Actions38152604792](https://github.com/dwijayuda/pskernel/actions/runs/38152604792), job114508960699, completed SUCCESS. Full job log inspected:62 audited source files; five disjoint exact gates157+17+28+18+12=**232** receipts; all earlier regressions/native differential15/2/1 pass. Focused46 and old109 Lake invocations overlap; do NOT add them. Docs/policy may follow; verify live matching CI.
 
-## Newly established
+## What is genuinely proved
 
-P1l proves concrete Kuratowski pair injectivity and graph functionality, presentation-independent graph lookup, and graph beta/eta/intro/elim/extensionality for P1k's SAME-universe graph carrier. No new set basis laws or model axioms.
+P1n all-depth annotated semantic lifting/substitution covers all six constructors and commutes with source-matched erasure. `source_annotated_instantiate` uses the actual `KExpr.instantiateBVar` erasure theorem, not a toy source operation. Dependent `AnnotatedContextValid` interprets stored domain at index i in `dropModelEnv(i+1) env`; extension and actual lifted-domain lookup are proved, including non-Sort and proof-variable domains. The P1m embedding preserves model meaning.
 
-The unified `modelPi`/`modelLam`/`modelApp` algebra handles tagged proof-valued and graph-valued functions. Application depends ONLY on f,x; the existing proof-point-vs-graph noncollision theorem validates its branch. Exact numeric imax formation adds no extra Pi universe shift. Intro/elim/beta/eta and on-domain lambda/Pi congruence are proved. These are proof-only mathematical operations; universe inclusion/model extensionality do NOT grant new source conversion.
+P1o `SourceModelTyping` is a SOURCE-ONLY proof relation: actual terms/types, levels/valuation, context lookup, annotations. It contains NO V, model values or semantic-fibre assumptions. It supports Sort/bvar/Pi/lam/app/let. Lambda requires typing the body TYPE at the annotated sort, so the Prop/Type rank is justified. The source typing/erasure theorems and general semantic membership induction cover all six forms; exact raw GeneralPiRule type uniqueness connects actual inferred output.
 
-P1m `SourcePiAnnotation` contains source constraints, not semantic-fibre premises. It covers Sort, variables with actual syntactic Sort binder domains and Pi with arbitrary codomain rank. Source induction derives all fibres and modeled membership; separate proofs recover actual G4.3b typing, source erasure and the EXACT syntactic inferred Sort. `sourcePiAnnotation_executed_model` connects actual closed checker success to this guarded model theorem.
+`sourceModelTyping_beta` DERIVES the semantic fibre/body/arg premises from source certificates, then proves actual beta-step erasures and denotation preservation. `SourceModelExecution` certifies actual beta/let programs, proves real inference and G4.4b join equations by `rfl`, and obtains model membership/equal denotations via the general theorem. Actual Prop/Type polymorphic identity lambda programs similarly instantiate it, including proof variables x:P.
 
-The symbolic example family `forall (A : Sort u), A -> A` has actual Prop/Type Pi-formation equations proved by `rfl` and an executed Type-case model bridge. This checks formation of the type/proposition, NOT an identity-function term or proof admission. A proof variable x:P is excluded by the current Sort-domain variable guard; it must not be mislabeled as P:Prop.
+`sourceModelTyping_no_false` proves a **conditional no-inhabitant result for this SOURCE-CERTIFIED fragment**, empty contexts, literal `forall P:Prop,P`, canonical `.pi0(.sort0)(.bvar0)` annotation, assuming a supplied SetTheoryBasis. Do not call this full kernel consistency or native False/declaration soundness. The relation is nonvacuous (generic identity certificates), but is not proved synthesized for ALL checker successes.
 
-The original runtime checker, G4.4b reducer, basis, old157 audit and prior17 audit are unchanged. New audit `scripts/audit_graph_model.py` enumerates28 names. Allowed global assumptions remain propext/Classical.choice/Quot.sound. `[SetTheoryBasis V]` is STILL an explicit substantial hypothesis; no instance/model existence is constructed.
+## Next work — coverage/coherence, not another semantic substitution theorem
 
-One intermediate run (`38142864676`) failed on a Pi-congruence simplifier step. `8421bc44580808f795788be4be2d6eba4bc5eef9` fixed it by composing existing equations, with no weakened statement/assumption; run38143138914 green. Do not claim this entire continuation first-run green. Latest source bridge was first-run green. Existing warnings remain.
+Prove source-certificate weakening/substitution closure and annotation coherence, then construct certificates from actual checker evidence. The semantic all-depth substitution theorem already exists; do NOT recreate it under another syntax. General raw G4.3b typing regularity/body-type sort evidence must be derived when proving certificate coverage, not smuggled in as a semantic premise.
 
-## Next work: actual source term semantics and substitution
+Connect coherent source interpretation and preserved certificates to arbitrary runtime beta/zeta/function-spine reductions. Only a genuine theorem for those sources discharges the old `TypedSteps.denotation_preserved` stepSound premise. Its `A : Type` is still universe0; generalize as needed. Specific beta/let join examples are not a universal conversion proof.
 
-Extend OR REPLACE the proof-only annotation representation to cover source lambda/app/let and general dependent-context lookup. Do not bend the runtime architecture to preserve transitional proof syntax. Derive semantic context extension/weakening/substitution against real `KExpr.instantiateBVar`, reusing the existing source/erased substitution correspondence. Track codomain-sort annotations from actual typing rather than frontend metadata or assumed semantic validity.
+Then broader conversion, exact levels, proof irrelevance/eta, environment/transparency, quotients/inductives/primitives, protected immutable FullyChecked declaration-model folds, modeled axioms and relative no-False capstone, and representative official-kernel CPU/RSS/allocations. Avoid false universal quotient freshness and preserve runtime architecture freedom.
 
-Use the now-proved `modelPi_beta` only AFTER the source substitution/interpretation bridge is established to prove source beta/zeta preservation. `TypedSteps.denotation_preserved` STILL assumes `stepSound`; no full source theorem yet discharges it. Generalize its `A : Type` to a universe-polymorphic carrier as needed. Graph beta and guarded source-Pi formation do NOT equal full term soundness.
+## Safety/evidence boundaries
 
-After the source bridge: richer typed conversion, exact symbolic universes, typed proof irrelevance/eta, protected immutable environment/transparency identity, quotient/inductive/primitive rules, FullyChecked declaration-model folds, relative no-False and representative kernel benchmarks. No blanket quotient freshness: arbitrary images can equal the point.
+Unchanged SetTheoryBasis V is a substantial caller-supplied hypothesis, not a constructed model. Allowed global axioms remain propext/Classical.choice/Quot.sound; exact audits reject missing/extra/duplicate/sorryAx receipts. Keep every earlier gate enabled. Public admission remains disabled, zero admitted declarations. No new runtime optimization, size or speed result here; G4.4a timings do not describe G4.4b/full kernel.
 
-Smallness/performance/correctness outrank old proofs. One accepting semantic authority, no plugin votes, new global axioms or acceptance whitelists. Public admission remains disabled; admitted declarations=0. No matched official speed/RSS result and no new runtime optimization here; G4.4a timings do NOT describe G4.4b. Prior work-state/handoff were preserved byte-for-byte in `history/*THROUGH_P1K.md`.
+Concurrent P1n work was preserved. This continuation fixed a dependent-match lookup proof, then repaired one new P1o build's reserved identifier/erasure proof issue without weakening a theorem or assumption. The final source/execution commit was first-run green; the whole continuation was NOT all-first-run green. Existing warnings remain.
+
+Prior current work-state/handoff are archived byte-for-byte under `history/*THROUGH_P1M.md`. New canonical state is intentionally current rather than a long repetition of obsolete checkpoints.

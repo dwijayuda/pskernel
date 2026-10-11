@@ -128,6 +128,7 @@ structure PsRuntimeStructureInfo where
   numParams : Nat
   typeParameters : List PsVerifiedIrTypeParameter
   fields : List PsRuntimeStructureField
+  numFields : Nat
 
 structure PsRuntimeConstructorField where
   sourceIndex : Nat
@@ -141,6 +142,7 @@ structure PsRuntimeConstructorInfo where
   coreName : PsName
   numParams : Nat
   fields : List PsRuntimeConstructorField
+  numFields : Nat
 
 structure PsRuntimeInductiveInfo where
   name : String
@@ -177,16 +179,16 @@ structure PsErasureScope where
 def psErasureNatRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Nat" psNatName psNatRecName 0 List.nil
     (List.cons
-      (PsRuntimeConstructorInfo.mk "Nat" "zero" psNatZeroName 0 List.nil)
+      (PsRuntimeConstructorInfo.mk "Nat" "zero" psNatZeroName 0 List.nil 0)
       (List.cons
         (PsRuntimeConstructorInfo.mk "Nat" "succ" psNatSuccName 0
-          (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil))
+          (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil) 1)
         List.nil)) 0
 
 def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Bool" psBoolName (psNameAppendStr psBoolName "rec") 0 []
-    [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [],
-     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 []] 0
+    [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [] 0,
+     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
@@ -487,6 +489,19 @@ def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Na
   else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id
   else base
 
+def psErasureReserveOutputName (scope : PsErasureScope) (name : String) :
+    PsErasureScope :=
+  let names := PsErasureDeclarationNames.mk
+    scope.declarationNames.byCore
+    (psErasureIndexInsert Bool scope.declarationNames.byOutput
+      (PsName.str PsName.anonymous name) true)
+    (Nat.succ scope.declarationNames.count)
+    scope.declarationNames.entries;
+  PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
+    scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
+    scope.runtimeStructures scope.runtimeStructureConstructors
+    scope.runtimeExpressions scope.currentDefinition
+
 -- Proof data is erased, but computational functions retain an ignored Unit
 -- slot at each proof binder. Dropping the slot could force a proof-guarded body
 -- before its caller has supplied the proof (notably constrained recursor IHs).
@@ -502,14 +517,10 @@ def psErasureOpenProofSlot (scope : PsErasureScope)
     PsVerifiedIrParameter × PsErasureScope :=
   let name := psErasureLocalNameWithFuel scope "_psProof"
     (scope.runtimeLocals.length + scope.declarationNames.count + 1) id
-  let names := { scope.declarationNames with
-    byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
-      (PsName.str PsName.anonymous name) true
-    count := scope.declarationNames.count + 1 }
-  (.mk name psErasureProofSlotType, { scope with
+  let reserved := psErasureReserveOutputName scope name
+  (.mk name psErasureProofSlotType, { reserved with
     localContext := context
-    erasedLocals := id :: scope.erasedLocals
-    declarationNames := names })
+    erasedLocals := id :: scope.erasedLocals })
 
 structure PsErasureAppView where
   head : PsExpr

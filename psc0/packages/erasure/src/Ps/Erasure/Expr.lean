@@ -569,19 +569,6 @@ def psErasureBoolNot
     (value : Bool) : Bool :=
   if value then false else true
 
-def psErasureReserveOutputName (scope : PsErasureScope) (name : String) :
-    PsErasureScope :=
-  let names := PsErasureDeclarationNames.mk
-    scope.declarationNames.byCore
-    (psErasureIndexInsert Bool scope.declarationNames.byOutput
-      (PsName.str PsName.anonymous name) true)
-    (Nat.succ scope.declarationNames.count)
-    scope.declarationNames.entries;
-  PsErasureScope.mk scope.localContext scope.runtimeLocals scope.typeLocals
-    scope.erasedLocals names scope.runtimeConstructors scope.runtimeRecursors
-    scope.runtimeStructures scope.runtimeStructureConstructors
-    scope.runtimeExpressions scope.currentDefinition
-
 -- Array.foldl alone has a flat two-parameter callback ABI. Capture its source
 -- callback before the remaining operands, then bridge canonical unary calls.
 def psEraseArrayFoldl
@@ -1117,7 +1104,7 @@ def psEraseRuntimeStructureApplication
       | Option.none => Except.ok Option.none
       | Option.some structureInfo =>
           let expectedArity :=
-            Nat.add structureInfo.numParams (psListLength structureInfo.fields);
+            Nat.add structureInfo.numParams structureInfo.numFields;
           if psErasureBoolNot (Nat.beq (psListLength view.args) expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
@@ -1181,7 +1168,7 @@ def psEraseRuntimeConstructorApplication
       | Option.none => Except.ok Option.none
       | Option.some ctorInfo =>
           let expectedArity :=
-            Nat.add ctorInfo.numParams (psListLength ctorInfo.fields);
+            Nat.add ctorInfo.numParams ctorInfo.numFields;
           if psErasureBoolNot (Nat.beq (psListLength view.args) expectedArity) then
             Except.error PsErasureError.unsupportedApplication
           else
@@ -1218,71 +1205,41 @@ structure PsOpenMatchMinor where
   cursor : PsExpr
   bindingsRev : List PsVerifiedIrMatchBinding
 
+-- Walk the checked field telescope, not just its stored runtime projection.
+-- Source indices remain stable across proof fields, including trailing ones.
 def psOpenMatchMinorFields
     (environment : PsEnvironment) (substitutions : List (String × PsVerifiedIrType))
-    (fields : List PsRuntimeConstructorField) :
-    PsOpenMatchMinor -> Except PsErasureError PsOpenMatchMinor :=
-  match fields with
-  | List.nil => fun (state : PsOpenMatchMinor) => Except.ok state
-  | List.cons field rest =>
-    let smaller : PsOpenMatchMinor -> Except PsErasureError PsOpenMatchMinor :=
-      psOpenMatchMinorFields environment substitutions rest;
-    fun (state : PsOpenMatchMinor) =>
-      match state.cursor with
-      | .lam name domain body binder =>
-          match
-              psErasureClassifyBinder
-                environment
-                state.scope.localContext
-                domain with
-          | .runtime =>
-              let bindingName :=
-                psErasureLocalName state.scope
-                  (psNameToString name)
-                  field.name state.scope.localContext.nextId;
-              let pushed :=
-                psLocalPushBinding
-                  state.scope.localContext
-                  name
-                  domain
-                  binder;
-              let nextScope : PsErasureScope := {
-                localContext := pushed.context
-                runtimeLocals :=
-                  List.cons
-                    (Prod.mk pushed.id bindingName)
-                    state.scope.runtimeLocals
-                typeLocals := state.scope.typeLocals
-                erasedLocals := state.scope.erasedLocals
-                declarationNames := state.scope.declarationNames
-                runtimeConstructors :=
-                  state.scope.runtimeConstructors
-                runtimeRecursors := state.scope.runtimeRecursors
-                runtimeStructures := state.scope.runtimeStructures
-                runtimeStructureConstructors := state.scope.runtimeStructureConstructors
-                runtimeExpressions := state.scope.runtimeExpressions
-                currentDefinition := state.scope.currentDefinition
-              };
-              smaller
-                {
-                  scope := nextScope
-                  cursor :=
-                    psExprInstantiate1
-                      body
-                      (PsExpr.fvar pushed.id)
-                  bindingsRev :=
-                    List.cons
-                      (PsVerifiedIrMatchBinding.mk
-                        field.name
-                        bindingName
-                        (psSubstituteVerifiedType
-                          substitutions
-                          field.type))
-                      state.bindingsRev
-                }
-          | _ =>
-              Except.error PsErasureError.unsupportedRuntimeTerm
-      | _ => Except.error PsErasureError.binderMismatch
+    (count index : Nat) (fields : List PsRuntimeConstructorField)
+    (state : PsOpenMatchMinor) : Except PsErasureError PsOpenMatchMinor := do
+  match count with
+  | 0 =>
+    if !fields.isEmpty then throw .binderMismatch
+    return state
+  | count + 1 =>
+    let .lam name domain body binder := state.cursor | throw .binderMismatch
+    let pushed := psLocalPushBinding state.scope.localContext name domain binder
+    let cursor := psExprInstantiate1 body (.fvar pushed.id)
+    match psErasureClassifyBinder environment state.scope.localContext domain with
+    | .type => throw .unsupportedRuntimeTerm
+    | .proof =>
+      if fields.head?.any (fun field => field.sourceIndex <= index) then throw .binderMismatch
+      let scope := { state.scope with
+        localContext := pushed.context
+        erasedLocals := pushed.id :: state.scope.erasedLocals }
+      psOpenMatchMinorFields environment substitutions count (index + 1) fields
+        { state with scope, cursor }
+    | .runtime =>
+      let field :: fields := fields | throw .binderMismatch
+      if field.sourceIndex != index then throw .binderMismatch
+      let bindingName := psErasureLocalName state.scope
+        (psNameToString name) field.name pushed.id
+      let scope := { state.scope with
+        localContext := pushed.context
+        runtimeLocals := (pushed.id, bindingName) :: state.scope.runtimeLocals }
+      let binding := PsVerifiedIrMatchBinding.mk field.name bindingName
+        (psSubstituteVerifiedType substitutions field.type)
+      psOpenMatchMinorFields environment substitutions count (index + 1) fields
+        { scope, cursor, bindingsRev := binding :: state.bindingsRev }
 
 structure PsOpenMatchHypotheses where
   scope : PsErasureScope
@@ -1374,6 +1331,8 @@ def psEraseMatchMinor
       psOpenMatchMinorFields
         environment
         substitutions
+        ctorInfo.numFields
+        ctorInfo.numParams
         ctorInfo.fields
         {
           scope := scope
@@ -1405,9 +1364,8 @@ def psEraseMatchMinor
                 body := body
               }
 
--- Accepted structure fields are exactly the runtime field telescope. Recover
--- direct-recursive flags from the actual constructor, without changing record
--- names, source slots or generic field types.
+-- Runtime structure fields form an ordered subset of the checked telescope.
+-- Recover recursive flags using original projection indices, across proof gaps.
 def psErasureStructureRecursorFields
     (numParams : Nat) (recursiveFields : List Nat)
     (fields : List PsRuntimeStructureField) (index : Nat) :
@@ -1415,17 +1373,17 @@ def psErasureStructureRecursorFields
   match fields with
   | List.nil => Except.ok List.nil
   | List.cons field rest =>
-      if psErasureNatNotEqual field.projectionIndex index then
+      if field.projectionIndex < index then
         Except.error PsErasureError.binderMismatch
-      else if psErasureNatNotEqual field.sourceIndex (Nat.add numParams index) then
+      else if psErasureNatNotEqual field.sourceIndex (Nat.add numParams field.projectionIndex) then
         Except.error PsErasureError.binderMismatch
       else
-        match psErasureStructureRecursorFields numParams recursiveFields rest (Nat.succ index) with
+        match psErasureStructureRecursorFields numParams recursiveFields rest (Nat.succ field.projectionIndex) with
         | Except.error error => Except.error error
         | Except.ok tail =>
             Except.ok (List.cons
               (PsRuntimeConstructorField.mk field.sourceIndex field.name field.type
-                (psErasureNatInList recursiveFields index))
+                (psErasureNatInList recursiveFields field.projectionIndex))
               tail)
 
 def psErasureStructureProjectionBindings
@@ -1489,7 +1447,7 @@ def psEraseStructureRecursorMinor
                               PsRuntimeConstructorInfo.mk structureInfo.name
                                 (psErasureSafeIdentifier
                                   (psNameLastComponent constructorInfo.name) "constructor")
-                                constructorInfo.name constructorInfo.numParams fields;
+                                constructorInfo.name constructorInfo.numParams fields constructorInfo.numFields;
                             match psEraseMatchMinor environment eraseAt minorScope substitutions
                                 recursionPlan runtimeConstructor minor with
                             | Except.error error => Except.error error
@@ -1532,7 +1490,7 @@ def psEraseRuntimeStructureRecursorApplication
                       Except.error PsErasureError.unsupportedRuntimeTerm
                     else if psErasureNatNotEqual constructorInfo.numParams structureInfo.numParams then
                       Except.error PsErasureError.unsupportedRuntimeTerm
-                    else if psErasureNatNotEqual constructorInfo.numFields (psListLength structureInfo.fields) then
+                    else if psErasureNatNotEqual constructorInfo.numFields structureInfo.numFields then
                       Except.error PsErasureError.unsupportedRuntimeTerm
                     else
                       psEraseStructureRecursorMinor environment scope eraseAt
@@ -1947,13 +1905,13 @@ def psErasureSpecialEntry
     | Option.some info =>
         Option.some
           (PsErasureSpecialEntry.mk
-            (Nat.add info.numParams (psListLength info.fields)) true)
+            (Nat.add info.numParams info.numFields) true)
     | Option.none =>
         match psErasureLookupConstructor scope.runtimeConstructors name with
         | Option.some info =>
             Option.some
               (PsErasureSpecialEntry.mk
-                (Nat.add info.numParams (psListLength info.fields)) true)
+                (Nat.add info.numParams info.numFields) true)
         | Option.none =>
             match psErasureLookupRecursor scope.runtimeRecursors name with
             | Option.some info =>
@@ -2314,7 +2272,7 @@ def psEraseRuntimeExprWithFuelWorker
                               if
                                   psErasureBoolAnd
                                     (Nat.beq ctorInfo.numParams 0)
-                                    (psListIsEmpty ctorInfo.fields) then
+                                    (Nat.beq ctorInfo.numFields 0) then
                                 Except.ok
                                   (PsVerifiedIrExpr.constructor
                                     ctorInfo.inductiveName

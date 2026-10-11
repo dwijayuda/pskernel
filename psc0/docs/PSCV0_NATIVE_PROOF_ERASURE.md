@@ -35,3 +35,24 @@ Validation extends the existing application with two unused False -> Nat values
 tail that exercises proof-guarded induction hypotheses. The same native build,
 official Lean checking, typed IR, strict TypeScript and JavaScript path qualify
 the change. Exact run evidence belongs in AI_WORK_STATE.md.
+
+## Checked field layout
+
+Constructor and structure metadata now records the checked field count separately
+from the runtime field list. Stored fields retain original source argument and
+projection indices. Proof fields are opened in the Core telescope but omitted
+from that list, including leading, interleaved and trailing proof fields.
+Constructor saturation and partial completion use checked arity, while records
+and tagged runtime constructors use only the stored field list.
+
+Recursor minors consume exactly the checked field count before opening IHs.
+They skip proof payloads without shifting the remaining binders. Structure
+recursor flags likewise use original projection indices. This one layout is
+shared by constructor emission, match binders and structure projections; it
+avoids compacted-index guesses or special cases for the final proof field.
+
+Proofs depending on earlier fields still belong to ordinary source elaboration
+and kernel checking. This change does not admit Type/existential fields, arbitrary
+proof-valued uniform parameters, or Prop-family runtime data. Function-typed
+runtime fields can still accept proofs: their ignored Unit call slots follow the
+evaluation-boundary rule above, unlike proof payload fields which store nothing.

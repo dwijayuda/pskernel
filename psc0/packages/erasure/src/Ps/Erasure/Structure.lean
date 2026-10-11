@@ -77,6 +77,7 @@ def psPrepareRuntimeStructure
                                 numParams := info.numParams
                                 typeParameters := parameters.typeParameters
                                 fields := fields
+                                numFields := constructorInfo.numFields
                               };
                               let nextScope : PsErasureScope := {
                                 localContext := scope.localContext

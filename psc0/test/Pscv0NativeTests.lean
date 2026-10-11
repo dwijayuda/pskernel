@@ -314,7 +314,19 @@ private def application : String :=
   "const matchesNo: Bool := isNested(Option.some(Option.none))\n" ++
   "const inferredIfAnswer: Nat := inferredIfPattern(Option.some(125))\n" ++
   "const dependentLetAnswer: Nat := dependentLet(Indexed.one)\n" ++
-  "const inferredLetAnswer: Nat := inferredLetPattern(Prod.mk(0, 126))\n"
+  "const inferredLetAnswer: Nat := inferredLetPattern(Prod.mk(0, 126))\n" ++
+  "structure CertifiedPair where {\n  before: True\n  first: Nat\n  certified: Eq(first, first)\n  second: Nat\n  after: True\n}\n" ++
+  "const checkedPair: CertifiedPair := CertifiedPair.mk(True.intro, 131, Eq.refl(131), 132, True.intro)\n" ++
+  "theorem checkedPairProof: Eq(checkedPair.first, checkedPair.first) := checkedPair.certified\n" ++
+  "function proofRecord(value: CertifiedPair): Nat := match value with { | .mk _ first _ second _ => second }\n" ++
+  "const proofProjectionAnswer: Nat := checkedPair.second\n" ++
+  "const proofRecordAnswer: Nat := proofRecord(checkedPair)\n" ++
+  "inductive CertifiedList where { | nil | cons(head: Nat, proof: True, tail: CertifiedList, after: True) }\n" ++
+  "function certifiedCount(value: CertifiedList): Nat := match value with { | .nil => 0 | .cons _ _ tail _ => Nat.succ(certifiedCount(tail)) }\n" ++
+  "const checkedList: CertifiedList := CertifiedList.cons(131, True.intro, CertifiedList.cons(132, True.intro, CertifiedList.nil, True.intro), True.intro)\n" ++
+  "const proofRecursiveAnswer: Nat := certifiedCount(checkedList)\n" ++
+  "const proofConstructor: True -> CertifiedList := CertifiedList.cons(133, True.intro, CertifiedList.nil)\n" ++
+  "const proofPartialAnswer: Nat := certifiedCount(proofConstructor(True.intro))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

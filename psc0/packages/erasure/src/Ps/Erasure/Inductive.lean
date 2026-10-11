@@ -167,7 +167,14 @@ def psPrepareConstructorFieldsWithFuel
                         remaining
                         (Nat.add index 1)
                         (List.cons (PsRuntimeConstructorField.mk index fieldName fieldType false) fieldsRev)
-              | _ =>
+              | .proof =>
+                  let pushed := psLocalPushBinding scope.localContext name domain binder
+                  smaller { scope with
+                    localContext := pushed.context
+                    erasedLocals := pushed.id :: scope.erasedLocals }
+                    (psExprInstantiate1 body (.fvar pushed.id))
+                    remaining (index + 1) fieldsRev
+              | .type =>
                   Except.error PsErasureError.unsupportedRuntimeTerm
           | _ =>
               Except.error PsErasureError.binderMismatch
@@ -257,6 +264,7 @@ def psPrepareRuntimeConstructors
                     coreName := coreName
                     numParams := ctorInfo.numParams
                     fields := fields
+                    numFields := ctorInfo.numFields
                   };
                   smaller
                     (List.cons runtimeInfo constructorsRev)

@@ -28,6 +28,13 @@ jobs:
             psc0/packages/syntax
             psc0/packages/foundation
             psc0/scripts
+            psc0/PSCV0_LANGUAGE_REFERENCE.md
+            psc0/docs/PSCV0_REFERENCE_ADOPTION.json
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
+      - name: Refuse missing or changed PSCV0 v7 reference before any Lean build
+        run: node scripts/pscv0-reference-identity.mjs
       - uses: leanprover/lean-action@f061402b660e0c34644504b324e830f2991d4865
         with:
           lake-package-directory: psc0

@@ -52,6 +52,8 @@ jobs:
           sha256sum packages/syntax/src/Ps/Syntax/Pscv0/*.lean > dist/pscv0-source-check/source-sha256.txt
       - name: Fast native round trips and negative source cases
         run: lake env lean --run scripts/Pscv0BridgeSourceSmoke.lean | tee dist/pscv0-source-check/surface-smoke.txt
+      - name: Check the actual emitted readable and lowered fixture functions
+        run: lake env lean dist/pscv0-source-check/correspondence.lean | tee dist/pscv0-source-check/correspondence.txt
       - name: Retain source validation, distinct from generated compiler behavior
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

@@ -1,53 +1,63 @@
-# PSC0 AI work state — first PSCV0-authored compiler module candidate
+# PSC0 AI work state — first PSCV0 module, source integration and assumption audit
 
-## Current implementation checkpoint (2026-10-11)
+## Current status (2026-10-11)
 
-Branch `psc0/pscv0-readable-selfhost-v1`; this migration started at `82ad3c6ef1cc634a5c3d94a1bad7ad2babd2e263`. The selected real compiler module is `Ps.Syntax.Translate`, now authored as `packages/syntax/src-ps/Ps/Syntax/Translate.ps` in an explicit candidate source map. The original public compiler remains unchanged.
+Work branch `psc0/pscv0-readable-selfhost-v1`. The actual compiler module `Ps.Syntax.Translate` is authored in `packages/syntax/src-ps/Ps/Syntax/Translate.ps`, selected explicitly by `pscv0-authoring.json`. It has40 physical lines instead of63 in the frozen predecessor. Native PS/readable-Lean/PS round trip works. A portable arrow-type printer repairs the higher-order parameter round trip without changing old69 source files or the kernel.
 
-The first source candidate `1d578cd6d96b3bd6a3a57ff90c8340a2b47c1870`, run `38110082840`, job `114383654200`, failed in the cheap round-trip gate: the predecessor printer expanded a higher-order parameter's `epsilon -> PsTranslationError` into `(_ : epsilon) -> PsTranslationError`, which the owned native binder reader could not reread. No expensive retained-compiler preparation ran. See `docs/PSCV0_FIRST_MODULE_VALIDATION.md`.
+**Still a candidate.** The generated20-module bridge, final Linux/Windows tests and independent RC4 module proofs have not passed yet. Every attempt so far stopped in cheap native preflight before expensive retained-compiler preparation. The stable public `psc` and default npm source root remain unchanged. Do not claim complete compiler migration or a new full self-host fixed point.
 
-The general correction adds portable `Pscv0/TypePrint.lean`, rendering anonymous explicit Pi as ordinary arrows while preserving named/non-explicit binders. `Pscv0/Module.lean` uses it for both readable and lowered declaration headers. No original69 compiler source file, kernel code, host or source expectation is changed. This changes the new bridge itself, so its previous artifact cannot simply be relabeled qualified for the new behavior.
+## Important correction: original native dependencies are not axiom-free
 
-**Status:** corrected implementation is being committed for native/generated qualification. Read live HEAD and exact CI results before claiming success. Whole compiler migration and new full self-hosting are not complete.
+Run `38112266804`, job `114390104605`, at `d510124ad9cbbaefab1dcabb51e2049352a5b6d4` checked the unchanged original declarations. The two parsers, two printers and four original translation APIs report exactly **[propext]**; PsTranslationError reports no axioms. The readable correspondence equations close with the same dependency. Prior attempts to remove it solely by changing proof tactics were misdirected.
 
-## Candidate authoring authority
+The original empty-closure gate assumed the concrete compiler APIs had the same empty dependency closure as the isolated Except/Nat fixture. That assumption was wrong. It is explicitly replaced with **exact baseline closure + zero-axiom refactoring algebra**. See [PSCV0_MODULE_ASSUMPTION_AUDIT.md](docs/PSCV0_MODULE_ASSUMPTION_AUDIT.md).
 
-`pscv0-authoring.json` selects exactly `Ps.Syntax.Translate` from `.ps`. Missing, malformed or unsupported selected source fails with no fallback to the old `.lean` file. The four API signatures, error wrappers, values and failure order must be preserved; the source uses simple Except do and a generic error adapter rather than duplicated match chains.
+The runner now checks original, migrated and theorem dependencies separately. Concrete equations must add no assumptions beyond exactly [propext]; unexpected dependencies fail. Two generic error-map/bind and error-map/match lemmas over abstract parser/printer results, and the actual generated error helper, must have zero axioms. A baseline reflexivity theorem exposes inherited dependencies. All eight concrete API equations and generated source products are unchanged. This updates qualification scope, not production kernel/axiom acceptance.
 
-The original `.lean` source is frozen predecessor code, blob `eafd7159b14a251fe11ffdbfb1e2482bcc773c9b`, not a second editable candidate master. `src-ps` keeps the candidate out of the old npm packer's source collision path. This is a staged source-authority selection, not a permanent dual-source architecture. Public npm source roots and CLI have not switched.
+## Source authority and immutable boundaries
 
-The selected reference is the user's PSCV0 Lean4.35.0-rc4 document, SHA-256 `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0`, RC4 commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Its base do, arrows, binder visibility and source-formatter meaning apply. No backward-compatible old `.ps` option is required. Predecessor leaf translation APIs remain internal bootstrap functionality, not a future public old-grammar mode.
+Reference: user's PSCV0 Lean4.35.0-rc4 document, SHA256 `a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0`; upstream `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Use its base do, arrows, binder visibility and formatting semantics. No old-.ps backward-compatible mode is required.
 
-## Systematic two-stage bootstrap with shared prefix
+Candidate source selection has no .lean fallback. Original Translate.lean blob `eafd7159b14a251fe11ffdbfb1e2482bcc773c9b` is a frozen predecessor, not a second candidate master. src-ps keeps it outside the old release packer's source-collision path. The other compiler source, public npm host, seed/toolchain and kernel source/JS adapter remain unchanged. Kernel work stays on the other branch.
 
-1. Native cloud preflight checks all five portable PSCV0 modules, source round trips and the real Translate.ps projection. Eight Lean4.34 theorems compare its two projections against all four frozen predecessor APIs for every String input. These are native preflight files, NOT compiler inputs.
-2. The hash-pinned retained PSC0 JS compiler prepares the unchanged syntax/foundation prefix once. Its documented pure preparation state is retained IN MEMORY immediately before Translate. Nothing is serialized into a trust token.
-3. The compiler generates the current20-module surface bootstrap using the frozen predecessor Translate. This actual generated portable bridge—not native Lean or JavaScript string rewriting—then reads, prints and lowers the selected Translate.ps. Its views must exactly match native preflight, and the eight proofs run again on the generated products.
-4. Resume the same pure prefix with PS-derived Translate and prepare the remaining suffix to emit the final candidate bridge. Report the reused prefix, both generated stages and all exact source/product identities. This avoids preparing the expensive unchanged prefix twice.
-5. Linux/Windows run the original38 bridge tests unchanged, eight authoring tests (including36 original/candidate positive/negative comparisons) and four anonymous-arrow regressions. The generated candidate must read its own selected PS source and reproduce both projections. RC4 separately checks the actual generated module equalities and existing do fixture theorem.
+Candidate PS SHA256 `938288af9c8476d592fc69c4e6f2c01ecb8e1f371fdd5bac1f789a3097710428`.
+Native readable SHA256 `21ac2a83f37c5aac102a9343ea0f310503449dc8a800f0ca6c3493f77e8b11e5`.
+Native lowered SHA256 `c11d75f3f6a3ecda32bd2014bbab80d387d1f5fae6b822f44481300a490aefeb`.
+These native views are NOT substituted for generated compiler inputs.
 
-Only syntax/foundation source is regenerated, not the whole64-module compiler or kernel. No full C2/C3 or selected-seed promotion is performed. A native pass alone does not qualify generated JS.
+## Ordered bootstrap and validation
 
-## Owners and preserved boundaries
+1. Cloud native preflight: build only syntax/foundation dependencies, type-check Surface/Read/Commands/TypePrint/Module, execute original smoke and real authoring round trip, then prove both generated projections equal the original four APIs and audit dependencies/algebra.
+2. Retained C0 JavaScript prepares the unchanged syntax prefix once. Preserve its pure in-memory preparation state just before Translate; do not serialize it as proof authority.
+3. Generate the current20-module surface bootstrap with predecessor Translate. Use THAT generated JS to parse/print/lower the selected Translate.ps. All three views must equal native preflight, and proofs run on generated products again.
+4. Resume the same pure prefix with PS-derived Translate, compile only the suffix, and emit the final candidate. Record both stages and exact source/JS/TS identities. This avoids repeating expensive prefix preparation.
+5. Linux and Windows run the original38 tests unchanged plus8 authoring tests (36 original/candidate input comparisons) and4 arrow regressions. The new bridge must read/lower its own selected PS module and reproduce readable/lowered views.
+6. RC4 checks the existing actual generated do fixture with zero axioms and all eight concrete module equations under their exact baseline dependencies, plus two zero-axiom refactoring lemmas.
 
-- `Syntax/Pscv0/TypePrint.lean`: small portable anonymous-arrow/declaration-type printer; no change to kernel Pi meaning. Other expression/dependent-parser capabilities retain their limits.
-- `Syntax/Pscv0/Module.lean`: common source declaration/header and lowered projection owner.
-- `scripts/pscv0-authoring.mjs`: source-map IO and identity checks, invoking generated portable code for language meaning; proof-source assembly compares unmodified generated functions with frozen original definitions.
-- `scripts/pscv0-build-bridge.mjs`: retained compiler and shared pure prefix, explicit ordered two-stage candidate generation.
-- `scripts/Pscv0AuthoringSmoke.lean`: cheap native preflight only, no generated-runtime substitution.
-- `scripts/pscv0-authoring-proof.mjs`: source/product-bound correspondence proof checks and zero-axiom report.
-- `scripts/pscv0-authoring.test.mjs`, `pscv0-arrow.test.mjs`: genuinely generated source/API correspondence and regression cases.
+No full64-module compiler rebuild, C2/C3, kernel regeneration, public CLI change, npm publication or main merge. Old qualification is not inherited by changed source; the candidate must earn its own bounded evidence.
 
-All original69 compiler source files, public host, kernel source/JS adapter, selected seed and toolchain remain pinned. Previous qualified bridge evidence applies to its exact old four-module source, not to the corrected five-module candidate.
+## Canonical owners
 
-Retained compiler: source `2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a`, run38075437516, artifact11678641329; JS SHA-256 `6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3`, TypeScript7.0.2, bootstrap Lean4.34.0. No new npm dependencies.
+- syntax/src-ps/Ps/Syntax/Translate.ps: sole candidate module source, four original APIs + generic error adapter.
+- Syntax/Pscv0/TypePrint.lean and Module.lean: portable readable/lowered declaration-type printing; no new kernel/Pi semantics.
+- scripts/pscv0-authoring.mjs: IO, source selection/hashes and portable bridge invocation; proof-source assembly is test tooling.
+- scripts/pscv0-build-bridge.mjs: two-stage generation with one shared pure prefix.
+- scripts/Pscv0AuthoringSmoke.lean: native preflight only.
+- scripts/pscv0-authoring-proof.mjs and test/pscv0/reference/TranslationAlgebra.lean: exact dependency audit and actual projection equations/algebra.
+- scripts/pscv0-authoring.test.mjs, pscv0-arrow.test.mjs: genuinely generated JS tests.
 
-Previous surface qualification: implementation `1ed94be7b1d3c49f11e302464478be76fa299172`, run38098425773 Linux/Windows38 passed but original overall run failed; separate successful RC4 replay38108354566. Full predecessor evidence is preserved in `docs/history/AI_WORK_STATE_BEFORE_FIRST_PS_MODULE.md` and `docs/PSCV0_BRIDGE_CAPABILITIES.json`.
+## Retained evidence and failures
 
-## Limits and continuation
+Retained C0: source `2f42a52814f3785ff2d92bd826f6e7fb3eb9bc8a`, run38075437516, artifact11678641329, JS SHA256 `6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3`; TypeScript7.0.2, Lean4.34.0.
+Previous19-module bridge: implementation1ed94be7b1d3, run38098425773 Linux/Windows38 passed, overall failed dueRC4 setup; successful separate reference replay38108354566. Full ledger in docs/PSCV0_BRIDGE_CAPABILITIES.json applies to that exact old source only.
 
-First selected module has no comments; both original and candidate trivia inventories are checked and exact source replay is required. General comment anchoring/formatting is still pending. Do not strip comments to migrate another file. Diagnostics after lowering still use generated-Lean positions; full PS diagnostic remapping remains pending before public source-path promotion.
+First module run38110082840 at1d578cd6: printer produced anonymous binder inside higher-order type, owned reader refused. General portable arrow correction at364740af restored round trip.
+Runs38111345101 and38111578077: incomplete native proof scripts, not changed source behavior. Run38111837339 at8ccd191b: readable proofs closed, zero-axiom audit refused propext. Run38112058253 at58525ea3: delta proof still same dependency. Run38112266804 atd510124a: original dependency audit established the true baseline. All remain failed; no generated candidate claims. Last diagnostic artifact11691727987 SHA256 `6903cc573c49bd79419d775b3b8ad59cc546dc5d5554190f296a7c7e43516781`.
 
-This is not full PSCV0, complete source migration, independent13-package self-hosting, kernel proof/admission of the entire bridge, or a new C2/C3 fixed point. No public CLI change, npm publication, replacement release ZIP or main merge.
+## Continuation and limits
 
-GitHub for all repo reads/writes; cloud CI for execution. No local checkout/build/test, Desktop Commander, force push or kernel edits. Read live HEAD and use expected-HEAD non-force updates. Preserve historical failures and old qualification records; never loosen tests or source baselines merely to obtain a pass. Native checks first; regenerate only when source semantics changed. Update this file with observed run outcomes.
+First module contains no original/new comments and exact source replay is checked. Do not strip comments from later modules: full comment anchoring remains pending. Compiler diagnostics after lowering still use generated-Lean coordinates; source remapping is pending before public promotion. Full inferred lambdas, record updates and broader language features remain later work.
+
+GitHub repository reads/writes and cloud CI execution only. No local checkout/build/test, Desktop Commander, force push, kernel edits or automatic releases. Fetch live HEAD before writing and use expected-HEAD non-force updates; preserve concurrent commits. Do not call a pending run success or silently relax source/semantic assertions. Update this state after actual results.
+
+Prior full state retained byte-for-byte at docs/history/AI_WORK_STATE_BEFORE_MODULE_AXIOM_AUDIT.md (blob1149451ec45760127d7511bb4a54a793bc018f93); initial module state at docs/history/AI_WORK_STATE_BEFORE_FIRST_PS_MODULE.md.

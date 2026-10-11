@@ -347,7 +347,7 @@ def psErasureEntryInfoWithFuel
                 | Except.ok tail =>
                     let runtimeArity : Nat :=
                       match kind with
-                      | PsErasedBinderKind.runtime => Nat.succ tail.runtimeArity
+                      | PsErasedBinderKind.runtime | PsErasedBinderKind.proof => Nat.succ tail.runtimeArity
                       | _ => tail.runtimeArity;
                     let typeArity : Nat :=
                       match kind with
@@ -486,6 +486,30 @@ def psErasureLocalName (scope : PsErasureScope) (raw fallback : String) (id : Na
   if psStringEq base "_" then psErasureLocalNameWithFuel scope fallback fuel id
   else if psErasureLocalNameUsed scope base then psErasureLocalNameWithFuel scope base fuel id
   else base
+
+-- Proof data is erased, but computational functions retain an ignored Unit
+-- slot at each proof binder. Dropping the slot could force a proof-guarded body
+-- before its caller has supplied the proof (notably constrained recursor IHs).
+def psErasureProofSlotType : PsVerifiedIrType :=
+  .primitive .unit
+
+def psErasureProofSlotValue : PsVerifiedIrExpr :=
+  .literal .unit
+
+-- Reserve the output name without exposing the proof as a computational local.
+def psErasureOpenProofSlot (scope : PsErasureScope)
+    (context : PsLocalContext) (id : Nat) :
+    PsVerifiedIrParameter × PsErasureScope :=
+  let name := psErasureLocalNameWithFuel scope "_psProof"
+    (scope.runtimeLocals.length + scope.declarationNames.count + 1) id
+  let names := { scope.declarationNames with
+    byOutput := psErasureIndexInsert Bool scope.declarationNames.byOutput
+      (PsName.str PsName.anonymous name) true
+    count := scope.declarationNames.count + 1 }
+  (.mk name psErasureProofSlotType, { scope with
+    localContext := context
+    erasedLocals := id :: scope.erasedLocals
+    declarationNames := names })
 
 structure PsErasureAppView where
   head : PsExpr
@@ -737,15 +761,15 @@ def psEraseRuntimeTypeWithFuelWorker
                             [parameter]
                             result)
             | .proof =>
-                -- Proof arguments disappear from function values just as they
-                -- disappear from applications and lambda bodies. Keep the Core
-                -- binding available when reducing the remaining dependent type.
+                -- Retain the call boundary while erasing the proof payload.
                 let pushed := psLocalPushBinding scope.localContext name domain binder
                 let nextScope := { scope with
                   localContext := pushed.context
                   erasedLocals := pushed.id :: scope.erasedLocals
                   currentDefinition := none }
-                smaller nextScope (psExprInstantiate1 body (.fvar pushed.id))
+                match smaller nextScope (psExprInstantiate1 body (.fvar pushed.id)) with
+                | .error error => .error error
+                | .ok result => .ok (.function [psErasureProofSlotType] result)
             | .type =>
                 Except.ok PsVerifiedIrType.unknown
         | _ =>

@@ -19,6 +19,8 @@ try {
     console.error(`${i}: ${lines[i - 1]}`);
   throw error;
 }
+assert.equal(output.proofClosure, 119n);
+assert.equal(output.proofEntry, 119n);
 assert.equal(output.answer, 42n);
 assert.equal(output.keep(7n), 7n);
 assert.equal(output.declared, 12n);

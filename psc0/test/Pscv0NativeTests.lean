@@ -32,6 +32,10 @@ private def application : String :=
   "function voidElim{A: Type}(value: Void(A)): A := nomatch value\n" ++
   "inductive Diagonal: Nat -> Nat -> Type where { | same(n: Nat): Diagonal(n, n) }\n" ++
   "function impossibleIndex(value: Diagonal(0, 1)): Nat := nomatch value\n" ++
+  "function ignoreGuard(guard: False -> Nat): Nat := 119\n" ++
+  "function guarded(value: Nat, proof: False): Nat := nomatch proof\n" ++
+  "const proofClosure: Nat := ignoreGuard(fun (proof: False) => nomatch proof)\n" ++
+  "const proofEntry: Nat := ignoreGuard(guarded(120))\n" ++
   "function keep(value: Nat): Nat := {\n" ++
   "  let selected: _ := value\n" ++
   "  selected\n" ++

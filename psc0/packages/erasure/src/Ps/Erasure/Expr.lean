@@ -64,7 +64,9 @@ def psEraseApplicationArgumentsWorker
                     }
           | .proof =>
               smaller (psExprInstantiate1 body argument)
-                state
+                { state with
+                  runtimeArgumentsRev := psErasureProofSlotValue :: state.runtimeArgumentsRev
+                  runtimeArgumentTypesRev := .constE psUnitName [] :: state.runtimeArgumentTypesRev }
           | .runtime =>
               match erase argument with
               | Except.error error => Except.error error
@@ -91,7 +93,7 @@ def psEraseApplicationArguments
 
 
 -- Captures are target bindings only. The supplied runtime domains are recorded
--- before each telescope substitution advances; proof/type operands are omitted.
+-- before each telescope substitution advances; proof slots use Unit, types are omitted.
 structure PsErasureApplicationCaptureTypes where
   runtimeTypes : List PsExpr
 
@@ -170,9 +172,8 @@ def psErasureCaptureApplicationFunction
     match captureTypes with
     | Option.none => Except.error PsErasureError.unsupportedApplication
     | Option.some types =>
-        -- Reconstruct the runtime arrow, not the original proof-bearing Pi type.
-        -- Ordered runtime domains and completed parameters omit exactly the same
-        -- proof/type binders as the call; no unknown type or guessed cast is used.
+        -- Reconstruct the runtime arrow with the same Unit proof slots and
+        -- omitted type binders as the call; no unknown type or guessed cast.
         let eraseType : PsExpr -> Except PsErasureError PsVerifiedIrType :=
           fun (type : PsExpr) => psEraseRuntimeType environment scope type;
         match psListMapExcept eraseType types.runtimeTypes with
@@ -333,7 +334,8 @@ def psEraseCanonicalArguments
           | PsErasedBinderKind.type =>
               Except.error PsErasureError.unsupportedApplication
           | PsErasedBinderKind.proof =>
-              psEraseCanonicalArguments erase environment scope fn
+              psEraseCanonicalArguments erase environment scope
+                (.call fn [] [psErasureProofSlotValue])
                 (psExprInstantiate1 body argument) rest
           | PsErasedBinderKind.runtime =>
               match erase argument with
@@ -389,24 +391,13 @@ def psEraseFinishEntryWithFuel
               | PsErasedBinderKind.type =>
                   Except.error PsErasureError.unsupportedApplication
               | PsErasedBinderKind.proof =>
-                  let pushed :=
-                    psLocalPushBinding scope.localContext name domain binder;
-                  let nextScope : PsErasureScope := {
-                    localContext := pushed.context
-                    runtimeLocals := scope.runtimeLocals
-                    typeLocals := scope.typeLocals
-                    erasedLocals := List.cons pushed.id scope.erasedLocals
-                    declarationNames := scope.declarationNames
-                    runtimeConstructors := scope.runtimeConstructors
-                    runtimeRecursors := scope.runtimeRecursors
-                    runtimeStructures := scope.runtimeStructures
-                    runtimeStructureConstructors := scope.runtimeStructureConstructors
-                    runtimeExpressions := scope.runtimeExpressions
-                    currentDefinition := scope.currentDefinition
-                  };
+                  let pushed := psLocalPushBinding scope.localContext name domain binder
+                  let (parameter, nextScope) := psErasureOpenProofSlot scope pushed.context pushed.id
                   psEraseFinishEntryWithFuel environment fn typeArguments unitTransport
-                    remaining nextScope (psExprInstantiate1 body (PsExpr.fvar pushed.id))
-                    rest parametersRev runtimeArguments captureTypes
+                    remaining nextScope (psExprInstantiate1 body (.fvar pushed.id))
+                    rest (parameter :: parametersRev)
+                    (psErasureAppendRuntimeArgument runtimeArguments psErasureProofSlotValue)
+                    captureTypes
               | PsErasedBinderKind.runtime =>
                   match psEraseRuntimeType environment scope domain with
                   | Except.error error => Except.error error
@@ -2061,22 +2052,16 @@ def psEraseCompleteSpecialWithFuel
                   | PsErasedBinderKind.type =>
                       Except.error PsErasureError.unsupportedApplication
                   | PsErasedBinderKind.proof =>
-                      let pushed :=
-                        psLocalPushBinding state.scope.localContext name domain binder;
-                      let nextScope := PsErasureScope.mk
-                        pushed.context state.scope.runtimeLocals state.scope.typeLocals
-                        (List.cons pushed.id state.scope.erasedLocals)
-                        state.scope.declarationNames state.scope.runtimeConstructors
-                        state.scope.runtimeRecursors state.scope.runtimeStructures
-                        state.scope.runtimeStructureConstructors state.scope.runtimeExpressions
-                        state.scope.currentDefinition;
-                      let openedArgument := PsExpr.fvar pushed.id;
+                      let pushed := psLocalPushBinding state.scope.localContext name domain binder
+                      let (parameter, nextScope) :=
+                        psErasureOpenProofSlot state.scope pushed.context pushed.id
+                      let openedArgument := PsExpr.fvar pushed.id
                       psEraseCompleteSpecialWithFuel eraseAt environment
                         remaining restCount List.nil
                         (PsErasureSpecialCompletion.mk nextScope
                           (PsExpr.app state.term openedArgument)
                           (psExprInstantiate1 body openedArgument)
-                          state.parametersRev state.bindingsRev)
+                          (parameter :: state.parametersRev) state.bindingsRev)
                   | PsErasedBinderKind.runtime =>
                       match psEraseRuntimeType environment state.scope domain with
                       | Except.error error => Except.error error
@@ -2514,22 +2499,13 @@ def psEraseRuntimeExprWithFuelWorker
               };
               smaller nextScope
                 openedBody
-          | .proof =>
-              let nextScope : PsErasureScope := {
-                localContext := pushed.context
-                runtimeLocals := scope.runtimeLocals
-                typeLocals := scope.typeLocals
-                erasedLocals := List.cons pushed.id scope.erasedLocals
-                declarationNames := scope.declarationNames
-                runtimeConstructors := scope.runtimeConstructors
-                runtimeRecursors := scope.runtimeRecursors
-                runtimeStructures := scope.runtimeStructures
-                runtimeStructureConstructors := scope.runtimeStructureConstructors
-                runtimeExpressions := scope.runtimeExpressions
-                currentDefinition := scope.currentDefinition
-              };
-              smaller nextScope
-                openedBody
+          | .proof => do
+              let (parameter, proofScope) := psErasureOpenProofSlot scope pushed.context pushed.id
+              let nextScope := psErasureNestedRuntimeScope proofScope
+              let loweredBody ← smaller nextScope openedBody
+              let bodyType ← psErasureCheckedTypeView environment nextScope.localContext openedBody
+              let resultType ← psEraseRuntimeType environment nextScope bodyType
+              return .lambda [parameter] resultType loweredBody
       | .letE name type value body =>
           let kind :=
             psErasureClassifyBinder

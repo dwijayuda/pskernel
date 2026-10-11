@@ -211,26 +211,14 @@ def psEraseOpenDefinitionWithFuel
                         typeParametersRev)
                       parametersRev
                 | PsErasedBinderKind.proof =>
-                    let nextScope : PsErasureScope :=
-                      PsErasureScope.mk
-                        pushed.context
-                        scope.runtimeLocals
-                        scope.typeLocals
-                        (List.cons pushed.id scope.erasedLocals)
-                        scope.declarationNames
-                        scope.runtimeConstructors
-                        scope.runtimeRecursors
-                        scope.runtimeStructures
-                        scope.runtimeStructureConstructors
-                        scope.runtimeExpressions
-                        scope.currentDefinition;
-                    smaller
-                      nextScope
-                      nextType
-                      nextValue
-                      typeIndex
-                      typeParametersRev
-                      parametersRev
+                    let (parameter, proofScope) :=
+                      psErasureOpenProofSlot scope pushed.context pushed.id
+                    let current := proofScope.currentDefinition.map fun current =>
+                      { current with runtimeParameters :=
+                        psErasureAppendRuntimeParameter current.runtimeParameters parameter.name }
+                    smaller { proofScope with currentDefinition := current }
+                      nextType nextValue typeIndex typeParametersRev
+                      (parameter :: parametersRev)
                 | PsErasedBinderKind.runtime =>
                     let parameterName :=
                       psErasureLocalName scope

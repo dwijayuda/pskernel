@@ -55,6 +55,7 @@ pub struct Arena {
     names: Vec<Name>, name_index: HashMap<Name, NameId>,
     levels: Vec<Level>, level_index: HashMap<Level, LevelId>,
     terms: Vec<Expr>, term_index: HashMap<Expr, ExprId>,
+    term_depth: Vec<u32>,
 }
 impl Arena {
     pub fn new() -> Self { Self::default() }
@@ -102,10 +103,30 @@ impl Arena {
         self.validate_term(&term);
         if let Some(&id) = self.term_index.get(&term) { return id; }
         let id = ExprId(u32::try_from(self.terms.len()).expect("term IDs exhausted"));
-        self.terms.push(term.clone()); self.term_index.insert(term,id); id
+        let depth = self.calculate_depth(&term);
+        self.terms.push(term.clone());
+        self.term_depth.push(depth);
+        self.term_index.insert(term,id);
+        id
     }
     pub fn get(&self, id: ExprId) -> &Expr { &self.terms[id.0 as usize] }
     pub fn count(&self) -> usize { self.terms.len() }
+    pub fn expr_depth(&self, id: ExprId) -> u32 { self.term_depth[id.0 as usize] }
+    /// Depth metadata is computed exactly once when a term is first interned.
+    fn calculate_depth(&self, term: &Expr) -> u32 {
+        let child = |id: ExprId| self.expr_depth(id);
+        let descendants = match term {
+            Expr::App(fun, arg) => child(*fun).max(child(*arg)),
+            Expr::Lam { domain, body, .. } | Expr::Forall { domain, body, .. } =>
+                child(*domain).max(child(*body)),
+            Expr::Let { domain, value, body, .. } =>
+                child(*domain).max(child(*value)).max(child(*body)),
+            Expr::MData(_, inner) => child(*inner),
+            Expr::Proj { target, .. } => child(*target),
+            _ => 0,
+        };
+        descendants.saturating_add(1)
+    }
     /// Visit arguments in outermost-first order without building a list.
     pub fn spine(&self, mut root: ExprId, mut argument: impl FnMut(ExprId)) -> ExprId {
         while let Expr::App(fun,arg) = self.get(root) {
@@ -147,7 +168,16 @@ impl Arena {
     pub fn instantiate1(&mut self, body: ExprId, replacement: ExprId)
         -> Result<ExprId, &'static str>
     {
-        self.transform_dag(body, Transform::Substitute(replacement))
+        // CI microbenchmarks showed that recursive substitution is faster
+        // on shallow terms. Depth metadata provides constant-time dispatch,
+        // while the iterative DAG engine guarantees deep-term stack safety.
+        const RECURSIVE_DEPTH_LIMIT: u32 = 256;
+        if self.expr_depth(body) <= RECURSIVE_DEPTH_LIMIT &&
+           self.expr_depth(replacement) <= RECURSIVE_DEPTH_LIMIT {
+            self.instantiate1_reference(body, replacement)
+        } else {
+            self.transform_dag(body, Transform::Substitute(replacement))
+        }
     }
     /// Previous recursive implementation retained as a differential oracle.
     /// Do not use for deeply nested untrusted expressions.
@@ -649,6 +679,27 @@ mod tests {
         let count = a.count();
         assert_eq!(a.instantiate1(nested, zero).unwrap(), nested);
         assert_eq!(a.count(), count);
+    }
+
+    #[test]
+    fn depth_metadata_drives_safe_hybrid_dispatch() {
+        let mut a = Arena::new();
+        let x = a.intern(Expr::BVar(0));
+        assert_eq!(a.expr_depth(x), 1);
+        let mut shallow = x;
+        for _ in 0..120 {
+            shallow = a.intern(Expr::MData(0, shallow));
+        }
+        assert_eq!(a.expr_depth(shallow), 121);
+        assert_eq!(a.instantiate1(shallow, x).unwrap(),
+                   a.instantiate1_reference(shallow, x).unwrap());
+        let mut deep = shallow;
+        for _ in 0..4000 {
+            deep = a.intern(Expr::MData(0, deep));
+        }
+        assert_eq!(a.expr_depth(deep), 4121);
+        let result = a.instantiate1(deep, x).unwrap();
+        assert_eq!(a.expr_depth(result), 4121);
     }
 
 }

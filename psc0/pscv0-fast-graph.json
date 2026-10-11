@@ -1,0 +1,42 @@
+{
+  "schema": "psc0-pscv0-fast-source-graph/1",
+  "edition": "pscv0-v7",
+  "languageReferenceSha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
+  "compilerOnly": true,
+  "noIndependentKernelChecks": true,
+  "noWindowsExecutions": true,
+  "sourceCandidateManifest": "pscv0-fast-candidates.json",
+  "roots": [
+    "Ps.Syntax.Cursor",
+    "Ps.Syntax.Token",
+    "Ps.Foundation.List"
+  ],
+  "maxClosureModules": 12,
+  "scenarios": [
+    {
+      "name": "retained-lean-baseline",
+      "v7Modules": []
+    },
+    {
+      "name": "list-v7-only",
+      "v7Modules": [
+        "Ps.Foundation.List"
+      ]
+    },
+    {
+      "name": "source-v7-only",
+      "v7Modules": [
+        "Ps.Foundation.Source"
+      ]
+    },
+    {
+      "name": "source-and-list-v7",
+      "v7Modules": [
+        "Ps.Foundation.Source",
+        "Ps.Foundation.List"
+      ]
+    }
+  ],
+  "cachePolicy": "in-memory only; key includes fully ordered source prefix, source sha256, edition, pinned frontend and retained compiler; no serialized unchecked state",
+  "resultContract": "all scenarios same exact canonical admissions and TypeScript bytes, topological import correctness, Linux-only JS smoke; no kernel testing or verified release"
+}

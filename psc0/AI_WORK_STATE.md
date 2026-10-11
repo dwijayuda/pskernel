@@ -1,3 +1,19 @@
+# PSC0 AI WORK STATE — Linux-only incremental compiler preparation graph
+
+## 11 October 2026 — active fast development milestone
+
+**User decision:** only **Linux** compiler tests now. No Windows CI runs and no independent PSKernel/consistency/arena/kernel-metatheory tests in this development phase. Windows is handled as **static portability patterns**, explicitly *not a Windows pass*. Keep production independent-checking obligations intact for a future deliberate release milestone. The sole prospective ProofScript grammar remains complete PSCV0 v7 (reference SHA-256 843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5); no old source compatibility target.
+
+**Stable baseline (actual evidence):** fast compiler-only run [38131347281](https://github.com/dwijayuda/pskernel/actions/runs/38131347281) SUCCESS, latest code check SHA 0cde1e2e3707e6550431d30e589e785b46fcdc72. The exact cached generated 20-source frontend is from the previously fully qualified 38128357665 bridge at source a640a2d22adeabd4ca7919839a8991667bcc3eae. Separate compiler-only v7 candidates are Ps.Foundation.Source (2 structures) and Ps.Foundation.List (10 recursive definitions); each matched original retained Lean compiler's complete canonical admission/TS7 products byte-for-byte under the same compiler. Ps.Syntax.Translate.ps remains first source module qualified in the actual 20-module generated bridge. Neither other candidate has been promoted into that full source closure.
+
+**New architectural work:** an **in-memory topological source graph** (no disk-state deserialization or checker authority) to prepare dependencies and v7-source variants without repeated elaboration of unchanged prefixes. [Source graph config](pscv0-fast-graph.json): roots Ps.Syntax.Cursor, Ps.Syntax.Token and Ps.Foundation.List. Actual dependency edges are Cursor→Source and Token→Source; List independent. Four variants are historical Lean baseline, List-v7 only, Source-v7 only, and both Source/List-v7. The selected candidate's v7 parser produces a source AST transferred through the validated versioned recipient-owned codec. Each variant must produce identical compiler admissions and TypeScript7 bytes in the **same dependency closure**. Prefix keys include previously selected sources, exact source SHA, module identity, and pinned generator/recipient toolchain; only state values in the single CI JavaScript process are memoized.
+
+**New code, pending validation:** [qualified-cache.mjs](tools/abi/qualified-cache.mjs) checks the same 20 cached source hashes, builder identity and v7 reference, [compiler-graph.mjs](tools/abi/compiler-graph.mjs) calculates a closed import graph and reuses pure compiler state, and [Linux-only graph design](docs/PSCV0_LINUX_INCREMENTAL_COMPILER_GRAPH.md) states source assumptions, Windows portability patterns and no-kernel boundaries. The fast Linux workflow's second pass replaces redundant independent single-module compilations with these four dependent source variants and one TypeScript7/Node JS runtime smoke. **DO NOT claim this new scenario graph passed until live CI confirms it.** Existing three-module candidate evidence is retained separately.
+
+**Immediate next step:** review actual Linux-only fast CI and inspect exact graph admission/TS source discrepancies or runtime errors. Avoid test patches: diagnose wrong source import topology, typed AST correctness, source printer group ownership and correct elaboration environment. If green, record unique/hit prefix counts and measured timings, then migrate Ps.Syntax.Cursor.ps only after confirming dependency-closure semantics and exact v7 grammar. Do not run Windows and do not change kernel.
+
+---
+
 # PSC0 AI WORK STATE — three v7-authored compiler modules, fast development only
 
 ## Latest verified checkpoint — October 11, 2026

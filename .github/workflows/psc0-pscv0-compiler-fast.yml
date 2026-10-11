@@ -9,6 +9,7 @@ on:
       - 'psc0/packages/foundation/src-ps/**'
       - 'psc0/pscv0-authoring.json'
       - 'psc0/pscv0-fast-candidates.json'
+      - 'psc0/pscv0-fast-graph.json'
       - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
       - 'psc0/packages/syntax/src/Ps/Syntax/ParseProofScript.lean'
       - 'psc0/packages/syntax/src/Ps/Syntax/PrintProofScript.lean'
@@ -38,6 +39,8 @@ jobs:
             psc0/tools/abi
             psc0/scripts
             psc0/pscv0-authoring.json
+            psc0/pscv0-fast-candidates.json
+            psc0/pscv0-fast-graph.json
             psc0/PSCV0_LANGUAGE_REFERENCE.md
             psc0/docs/PSCV0_REFERENCE_ADOPTION.json
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
@@ -47,6 +50,8 @@ jobs:
         run: |
           set -euo pipefail
           node --check tools/abi/compiler-fast.mjs
+          node --check tools/abi/qualified-cache.mjs
+          node --check tools/abi/compiler-graph.mjs
           node --check tools/abi/compiler-source-differential.mjs
           node --check tools/abi/transport.mjs
           node --check scripts/pscv0-authoring.mjs
@@ -84,11 +89,11 @@ jobs:
           set -euo pipefail
           node tools/abi/compiler-fast.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee fast-compiler.log
           grep -F 'PSCV0_COMPILER_FAST: PASS' fast-compiler.log
-      - name: Differential all candidate compiler source modules without kernel tests
+      - name: Linux-only incremental dependency graph and 4 compiler source scenarios
         run: |
           set -euo pipefail
-          node tools/abi/compiler-source-differential.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee multi-source-differential.log
-          grep -F 'PSCV0_COMPILER_MULTI_SOURCE: PASS' multi-source-differential.log
+          node tools/abi/compiler-graph.mjs "$PWD/fast-cache" "$RUNNER_TEMP/pscv0-tools/lib/node_modules/proofscript" | tee incremental-compiler-graph.log
+          grep -F 'PSCV0_INCREMENTAL_GRAPH: PASS' incremental-compiler-graph.log
       - name: Retain measured compiler-only evidence without mislabeling checked release
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -96,8 +101,10 @@ jobs:
           name: pscv0-compiler-only-fast-${{ github.sha }}
           path: |
             psc0/fast-compiler.log
-            psc0/multi-source-differential.log
-            psc0/dist/pscv0-compiler-fast/source-module-differential.json
+            psc0/incremental-compiler-graph.log
+            psc0/dist/pscv0-compiler-fast/incremental-source-graph.json
+            psc0/dist/pscv0-compiler-fast/graph-linux/index.ts
+            psc0/dist/pscv0-compiler-fast/graph-linux/index.js
             psc0/dist/pscv0-compiler-fast/compiler-only-report.json
           if-no-files-found: warn
           retention-days: 14

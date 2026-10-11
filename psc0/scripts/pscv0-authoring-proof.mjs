@@ -1,5 +1,5 @@
-// Correspondence for the actual generated projections, plus a separately
-// labelled native preflight. No native output is selected as compiler input.
+// Correspondence for actual generated projections; native preflight remains
+// separate. Audit prerequisite axioms before interpreting theorem dependencies.
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -27,12 +27,20 @@ for(const [file,expected] of Object.entries(receipt.products)){
   assert.equal(sha(await readFile(path.join(dir,file))),expected,'proof input drift: '+file);
 }
 const names=['psTranslateLeanToProofScript','psTranslateProofScriptToLean','psCanonicalizeLeanSource','psCanonicalizeProofScriptSource'];
+// Diagnostics only: preserve the existing empty-axiom gate until the actual
+// original dependency closure has been observed, rather than guess its basis.
+const prerequisiteNames=['PsTranslationError','psParseLeanSource','psParseProofScriptSource','psPrintLeanModule','psPrintProofScriptModule',...names];
+const dependencyFile=path.join(dir,'DependencyAxioms.lean');
+await writeFile(dependencyFile,'import Ps.Syntax.Translate\n\n'+prerequisiteNames.map(n=>'#print axioms '+n).join('\n')+'\n');
+const dependencyOutput=run([dependencyFile]);
+await writeFile(path.join(dir,'dependency-axioms-'+wanted+'.txt'),dependencyOutput);
+console.log('PSCV0_ORIGINAL_DEPENDENCY_AUDIT:\n'+dependencyOutput.trim());
 const proofs=[];
 for(const file of ['ReadableProof.lean','LoweredProof.lean']){
   const output=run([path.join(dir,file)]);
+  await writeFile(path.join(dir,file+'.'+wanted+'.txt'),output);
   for(const name of names)assert(output.includes("'migration_"+name+"' does not depend on any axioms"),output);
   assert(!output.includes('sorryAx'));
-  await writeFile(path.join(dir,file+'.'+wanted+'.txt'),output);
   proofs.push({file,sha256:receipt.products[file],theorems:names.map(n=>'migration_'+n),axioms:[]});
   console.log(output.trim());
 }

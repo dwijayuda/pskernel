@@ -1,0 +1,34 @@
+{
+  "schema": "psc0-pscv0-authoring-candidate/1",
+  "status": "candidate-not-promoted",
+  "language": "pscv0",
+  "capability": "declaration-except-do/1",
+  "referenceSha256": "a419955383fd3e35d873f82c939ecf3a92dc65b162cc9d0d3cadf5b853a0f4b0",
+  "sourceSelection": "explicit-module-map-no-fallback",
+  "surfaceSeed": {
+    "source": "1ed94be7b1d3c49f11e302464478be76fa299172",
+    "run": 38098425773,
+    "artifact": 11686899111,
+    "jsSha256": "1ef9268e2b84aab67e5c122bf860f85957c6b66352d71be5f76bb4354cdfa281",
+    "tsSha256": "5a27fda9ca051a9bd769da6d678f75b3ae3a54804ea22807c53d24006b7aca7f",
+    "referenceQualificationRun": 38108354566
+  },
+  "modules": [
+    {
+      "module": "Ps.Syntax.Translate",
+      "source": "packages/syntax/src-ps/Ps/Syntax/Translate.ps",
+      "baselineSource": "packages/syntax/src/Ps/Syntax/Translate.lean",
+      "baselineGitBlob": "eafd7159b14a251fe11ffdbfb1e2482bcc773c9b",
+      "entryPoints": [
+        "psTranslateLeanToProofScript",
+        "psTranslateProofScriptToLean",
+        "psCanonicalizeLeanSource",
+        "psCanonicalizeProofScriptSource"
+      ]
+    }
+  ],
+  "baselineLeanRole": "frozen-predecessor-source-not-second-candidate-master",
+  "defaultNpmSourceRootChanged": false,
+  "publicCompilerSelected": false,
+  "newFullSelfhostFixedPoint": false
+}

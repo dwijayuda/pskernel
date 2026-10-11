@@ -1,0 +1,40 @@
+import Ps.Syntax.ParseLean
+import Ps.Syntax.ParseProofScript
+import Ps.Syntax.PrintLean
+import Ps.Syntax.PrintProofScript
+
+inductive PsTranslationError where {
+  | leanFrontend(error: PsLeanFrontendError)
+  | proofScriptFrontend(error: PsProofScriptFrontendError)
+  | print(error: PsSourcePrintError)
+}
+
+function psTranslationMapError {epsilon: Type} {alpha: Type}(
+  wrap: epsilon -> PsTranslationError,
+  result: Except epsilon alpha
+): Except PsTranslationError alpha := {
+  match result with {
+    | Except.error failure => Except.error(wrap(failure))
+    | Except.ok value => Except.ok(value)
+  }
+}
+
+function psTranslateLeanToProofScript(source: String): Except PsTranslationError String := do {
+  let sourceModule ← psTranslationMapError(PsTranslationError.leanFrontend, psParseLeanSource(source))
+  psTranslationMapError(PsTranslationError.print, psPrintProofScriptModule(sourceModule))
+}
+
+function psTranslateProofScriptToLean(source: String): Except PsTranslationError String := do {
+  let sourceModule ← psTranslationMapError(PsTranslationError.proofScriptFrontend, psParseProofScriptSource(source))
+  psTranslationMapError(PsTranslationError.print, psPrintLeanModule(sourceModule))
+}
+
+function psCanonicalizeLeanSource(source: String): Except PsTranslationError String := do {
+  let sourceModule ← psTranslationMapError(PsTranslationError.leanFrontend, psParseLeanSource(source))
+  psTranslationMapError(PsTranslationError.print, psPrintLeanModule(sourceModule))
+}
+
+function psCanonicalizeProofScriptSource(source: String): Except PsTranslationError String := do {
+  let sourceModule ← psTranslationMapError(PsTranslationError.proofScriptFrontend, psParseProofScriptSource(source))
+  psTranslationMapError(PsTranslationError.print, psPrintProofScriptModule(sourceModule))
+}

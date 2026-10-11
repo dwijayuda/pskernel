@@ -4,6 +4,8 @@ on:
     branches: [psc0/pscv0-readable-selfhost-v1]
     paths:
       - 'psc0/packages/syntax/src/Ps/Syntax/Pscv0/**'
+      - 'psc0/packages/syntax/src-ps/**'
+      - 'psc0/pscv0-authoring.json'
       - 'psc0/scripts/pscv0-*'
       - 'psc0/test/pscv0/**'
       - '.github/workflows/psc0-pscv0-bridge.yml'
@@ -55,8 +57,22 @@ jobs:
             lake env lean -o ".lake/build/lib/lean/Ps/Syntax/Pscv0/$MODULE.olean" "packages/syntax/src/Ps/Syntax/Pscv0/$MODULE.lean"
           done
           lake env lean --run scripts/Pscv0BridgeSourceSmoke.lean
-      - name: Set runner-local installation prefix
-        run: echo "PSCV0_PREFIX=$RUNNER_TEMP/pscv0-tools" >> "$GITHUB_ENV"
+      - name: Set runner-local retained tool locations
+        run: |
+          echo "PSCV0_PREFIX=$RUNNER_TEMP/pscv0-tools" >> "$GITHUB_ENV"
+          echo "PSCV0_SURFACE_SEED=$RUNNER_TEMP/pscv0-surface-seed" >> "$GITHUB_ENV"
+      - name: Reuse qualified portable PSCV0 source reader and printer
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 38098425773
+          name: pscv0-bridge-1ed94be7b1d3c49f11e302464478be76fa299172
+          path: ${{ runner.temp }}/pscv0-surface-seed
+      - name: Materialize selected PS authoring module and prove both projections before generation
+        run: |
+          node scripts/pscv0-authoring.mjs dist/pscv0-bridge
+          node scripts/pscv0-authoring-proof.mjs 4.34.0
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           github-token: ${{ github.token }}
@@ -77,11 +93,13 @@ jobs:
           PY
           node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
           npm install -g --prefix "$PSCV0_PREFIX" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-linux-x64-7.0.2.tgz"
-      - name: Retained JS compiler builds only the portable syntax-bridge closure
+      - name: Retained JS compiler builds bridge using the selected PS implementation module
         run: timeout 600 node scripts/pscv0-build-bridge.mjs "$PSCV0_PREFIX" dist/pscv0-bridge
-      - name: Exercise generated source bridge and checked application fixtures
-        run: node --test --test-concurrency=1 --test-reporter=tap scripts/pscv0-bridge.test.mjs | tee dist/pscv0-bridge/tests-linux.tap
-      - name: Retain generated bridge and evidence, not a public compiler release
+      - name: Exercise generated bridge, original assertions and candidate self-source use
+        run: |
+          node --test --test-concurrency=1 --test-reporter=tap scripts/pscv0-bridge.test.mjs | tee dist/pscv0-bridge/tests-linux.tap
+          node --test --test-concurrency=1 --test-reporter=tap scripts/pscv0-authoring.test.mjs | tee dist/pscv0-bridge/authoring-tests-linux.tap
+      - name: Retain generated bridge and authoring evidence, not a public compiler release
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -118,7 +136,7 @@ jobs:
           run-id: 38075437516
           name: proofscript-psc0-npm-ps-and-lean
           path: ${{ runner.temp }}/pscv0-retained
-      - name: Install retained Windows toolchain and test the already generated bridge
+      - name: Install retained Windows toolchain and test the same generated bridge
         run: |
           python - <<'PY'
           import os,pathlib,zipfile
@@ -132,6 +150,7 @@ jobs:
           node scripts/pscv0-stage-runtime.mjs "$RUNNER_TEMP/pscv0-input"
           npm install -g --prefix "$PSCV0_PREFIX" --cache "$RUNNER_TEMP/pscv0-cache" --offline --ignore-scripts --no-audit --no-fund --no-package-lock "$RUNNER_TEMP/pscv0-input/proofscript-0.1.0-psc0.1.tgz" "$RUNNER_TEMP/pscv0-input/typescript-7.0.2.tgz" "$RUNNER_TEMP/pscv0-input/typescript-typescript-win32-x64-7.0.2.tgz"
           node --test --test-concurrency=1 --test-reporter=tap scripts/pscv0-bridge.test.mjs | tee dist/pscv0-bridge/tests-windows.tap
+          node --test --test-concurrency=1 --test-reporter=tap scripts/pscv0-authoring.test.mjs | tee dist/pscv0-bridge/authoring-tests-windows.tap
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -139,6 +158,8 @@ jobs:
           path: |
             psc0/dist/pscv0-bridge/tests-windows.tap
             psc0/dist/pscv0-bridge/runtime-report-win32.json
+            psc0/dist/pscv0-bridge/authoring-tests-windows.tap
+            psc0/dist/pscv0-bridge/authoring-tests-win32.json
           if-no-files-found: error
   lean-reference:
     needs: bridge
@@ -148,7 +169,14 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
-          sparse-checkout: psc0/test/pscv0/reference
+          sparse-checkout: |
+            psc0/packages/syntax
+            psc0/packages/foundation
+            psc0/scripts
+            psc0/test/pscv0/reference
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22.23.3'
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           name: pscv0-bridge-${{ github.sha }}
@@ -161,14 +189,20 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
-      - name: RC4 checks equality of the actual generated readable and lowered sources
+      - name: RC4 checks the generated do fixture and all migrated translation APIs
         shell: bash
-        working-directory: psc0/test/pscv0/reference
+        working-directory: psc0
+        env:
+          ELAN_TOOLCHAIN: leanprover/lean4:v4.35.0-rc4
         run: |
-          lean --version | tee ../../../dist/pscv0-bridge/lean-version.txt
-          grep -F '4.35.0-rc4' ../../../dist/pscv0-bridge/lean-version.txt
-          grep -F 'c29b6dd' ../../../dist/pscv0-bridge/lean-version.txt
-          lean ../../../dist/pscv0-bridge/reference.lean | tee ../../../dist/pscv0-bridge/reference-proof.txt
+          set -euo pipefail
+          lean --version | tee dist/pscv0-bridge/lean-version.txt
+          grep -F '4.35.0-rc4' dist/pscv0-bridge/lean-version.txt
+          grep -F 'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364' dist/pscv0-bridge/lean-version.txt
+          lean dist/pscv0-bridge/reference.lean | tee dist/pscv0-bridge/reference-proof.txt
+          grep -F "'pscv0_do_correspondence' does not depend on any axioms" dist/pscv0-bridge/reference-proof.txt
+          lake build PsSyntax PsFoundation
+          node scripts/pscv0-authoring-proof.mjs 4.35.0-rc4
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -177,4 +211,5 @@ jobs:
             psc0/dist/pscv0-bridge/reference.lean
             psc0/dist/pscv0-bridge/reference-proof.txt
             psc0/dist/pscv0-bridge/lean-version.txt
+            psc0/dist/pscv0-bridge/authoring/
           if-no-files-found: error

@@ -1,3 +1,4 @@
+import PSKernelFast.Proof.GeneralPiScope
 import PSKernelFast.GeneralPiFormation
 import PSKernelFast.DependentSortFragment
 

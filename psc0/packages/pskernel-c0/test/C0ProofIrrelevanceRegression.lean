@@ -161,5 +161,18 @@ def main : IO Unit := do
   if !foundUpdated then
     throw (IO.userError "C0 radix declaration index lost replacement")
   IO.println "C0_PERF_REGRESSION radix_declaration_index=pass"
+  -- The UTF-8 optimized fingerprint is identical to the original decoder
+  -- for ASCII, multi-byte scalar values and mixed names at varied seeds.
+  for value in ["", "a", "abc", "A.B", "βeta", "中文", "emoji 😀"] do
+    for seed in [0, 1, 17, 65520] do
+      let old :=
+        psKernelEnvironmentHashStringWorker
+          (Nat.succ (String.utf8ByteSize value))
+          value 0 seed
+      let fast := psKernelC0HashStringFrom value seed
+      if !(Nat.beq old fast) then
+        throw (IO.userError "C0 UTF-8 fingerprint changed semantics")
+  IO.println "C0_PERF_REGRESSION native_utf8_hash=pass"
+
 
 

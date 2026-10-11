@@ -1,55 +1,89 @@
-# PSCV0 source bridge — validation ledger
+# PSCV0 source bridge — completed bounded qualification ledger
 
-Keep native source validity, native fixture correspondence, retained-compiler generation, generated-JavaScript conformance and final compiler migration as separate claims. Failed runs stay failed.
+Keep native source validity, generated bridge behavior, fixture proofs and whole-compiler self-hosting distinct. **The first generated source-bridge capability is qualified; full PSCV0 and compiler-source migration are not.**
 
-## Latest native checkpoint
+## Qualified implementation and evidence
 
-Portable implementation source: `1ed94be7b1d3c49f11e302464478be76fa299172`.
-Native harness/proof source: `be0232c40e77c603da6954c505fc7ace2aa0541f`.
-Run [38098707088](https://github.com/dwijayuda/pskernel/actions/runs/38098707088), job `114349935198`: **success**.
+Portable source: `1ed94be7b1d3c49f11e302464478be76fa299172`.
+Reference-completion source: `4269b087b3bf2bc81baf9920ab3f23aae251cc54`.
 
-All four portable modules type-checked under Lean 4.34.0. The same implementation passed five PS → readable Lean → PS round trips, four malformed-source refusals and exact original-comment replay. The generated readable source uses native `do`, and canonical formatting of unanchored comments explicitly declines.
+| Lane | Source / run | Job | Actual result |
+| --- | --- | --- | --- |
+| Native portable source + source intent | `be0232c40e77c603da6954c505fc7ace2aa0541f` / [38098707088](https://github.com/dwijayuda/pskernel/actions/runs/38098707088) | `114349935198` | success; Lean4.34 checks4 modules,5 round trips,4 source refusals, original-comment replay and fixture equality |
+| Retained self-hosted compiler generation + Linux | `1ed94be7b1d3c49f11e302464478be76fa299172` / [38098425773](https://github.com/dwijayuda/pskernel/actions/runs/38098425773) | `114349106754` | success; emits actual bridge JS,38/38 generated tests |
+| Windows over identical bridge | same source/run | `114351167496` | success;38/38 generated tests |
+| Pinned RC4 correspondence replay | `4269b087b3bf2bc81baf9920ab3f23aae251cc54` / [38108354566](https://github.com/dwijayuda/pskernel/actions/runs/38108354566) | `114378537741` | success; actual generated fixture proof with no axioms, false-proof refusal, positive recheck |
 
-The harness also generated two complete functions from the actual bridge: a readable native-do version and an explicit match/let lowering of the same two-action program. Lean checked:
+**Run38098425773 remains failed overall:** its original RC4 job `114351167444` failed during reference-project setup. The completed independent replay adds the missing evidence without changing the historical conclusion or regenerating a successful bridge.
+
+## What the generated tests cover
+
+Ten valid source fixtures retain high-level do intent, round-trip PS/readable-Lean/PS, and compare canonical admissions after lowering. They include two binds, typed immutable lets, lexical shadowing, wildcard/discard, final action, first-error propagation, identifier hygiene, ASCII bind and string literals. Twenty-one malformed/unsupported cases decline explicitly. Additional checks cover exact commented-source replay, canonical comment-print refusal, BOM/string trivia, parameterless-value semantics, wrong return/error types, input limits and actual generated-runtime behavior.
+
+All38 tests passed on Linux/Node22.23.3 and Windows/Node26.7.0. The ten-fixture stream was accepted by the retained JS kernel, then TypeScript7.0.2 produced executable code whose success/error values were checked. Fixture admissions SHA-256 agreed across platforms: `6f14a42e22bf0e0fb41fbe4af07ada5bcbc82b21776e7f6b40149176d629ddb2`.
+
+The bridge's whole generated admission stream is retained but **not independently kernel-admitted**. Fixture admission does not imply that broader claim.
+
+## Independent RC4 theorem
+
+The replay uses exact generated functions from the successful artifact, not separately handwritten equivalents. The unchanged theorem is:
 
 ```lean
-theorem pscv0_native_do_correspondence (a b : Except String Nat) :
+theorem pscv0_do_correspondence (a b : Except String Nat) :
     referenceProgram a b = loweredProgram a b := by
   cases a <;> cases b <;> rfl
+
+#print axioms pscv0_do_correspondence
 ```
 
-`#print axioms` reported **no axioms**. This proves equality for all arguments of this particular pair of generated functions. It is not a proof of the bridge algorithm for arbitrary programs, of JavaScript preservation, or of RC4 conformance. The native run uses 4.34.0 as the bootstrap implementation environment; the reference's independent RC4 lane is distinct.
+Lean4.35.0-rc4 at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364` returned:
 
-Native evidence artifact `11686798545` contains 11 files, 3062 compressed bytes; ZIP SHA-256 `c7aafa3625cf0c04fbadce46fcfa75b9d9a6d4c3591d184e5f9a04610ff87c8b`.
+```text
+'pscv0_do_correspondence' does not depend on any axioms
+```
 
-## Retained self-hosted compiler generation
+This establishes equality of that pair of generated functions for **all** their inputs. It is not a general theorem about the translator, every supported program, JavaScript lowering or kernel soundness. The failed symbolic-rfl attempt was resolved by constructor cases; the statement and generated functions were not weakened.
 
-The generation run [38098425773](https://github.com/dwijayuda/pskernel/actions/runs/38098425773), implementation `1ed94be7b1d3c49f11e302464478be76fa299172`, was still in progress at this checkpoint. Native preconditions and the exact retained runtime installation passed. Do not infer generated-bridge, Windows or RC4 success from this native record.
+A known-false equation between the successful ground call and an error constructor was rejected by the same reference checker. The original positive proof then passed again. Checked reference-source SHA-256: `26252fe00865f313b64b3b18cb397544c4b390dac65a044c9d05f6049759e8a6`. Unchanged functions+statement SHA-256: `d8f2aa3ab2647569acc6bb2a2127b3d0fb4172dabf02b248c9e964b842af4e95`.
 
-Previous run `38097650380`, source `9265af40cdcee0dbf1cf4b125a9c79d52c5198da`, prepared the three new modules Surface, Read and Commands successfully, then failed in Module's `psPscv0CommentTriviaWorker` with `matchExpectedType`. The local match-valued `gap` needed an explicit `Bool` annotation under the existing bootstrap language. The annotation changes no intended runtime behavior. This is the actual last localized seed issue—not a claim that native type-checking qualifies generated output.
+The replay verifies the origin run/source and actual successful bridge/Windows jobs, both exact38-test summaries, all19 source-module hashes and generated TS/JS/admission identities before checking the proof. It never executes downloaded JS. It completed from03:25:55Z to03:26:27Z on2026-10-11, approximately32 seconds including toolchain setup; no prefix rebuild was needed.
 
-No complete compiler C2/C3 cycle or kernel regeneration occurred. Existing 69 compiler files, the main bootstrap source closure, public CLI, selected seed and kernel source/adapter remain unchanged. New bridge modules are added independently and must earn their own qualification.
+## Immutable artifacts
 
-## Historical failures and corrected boundaries
-
-| Source / run | Actual outcome | Correction or meaning |
+| Artifact | ID | ZIP SHA-256 |
 | --- | --- | --- |
-| `7b0b3803062d` / `38094720290` | Workflow invalid before execution | Set runner-local prefix at step execution |
-| `7092ba81c304` / `38095004877` | C0 rejected expression `::` | Normalize new expression constructor family to List.cons, retain admitted patterns |
-| `a5932fb84e74` / `38095258615` | Native prerequisite Foundation.List missing | Build actual PsFoundation prerequisite |
-| `1f62effe6e86` / `38095425532` | Reserved native local identifiers syntax/prefix | Rename sourceModule/importPrefix |
-| `6eb1cb5f6e42` / `38095954154` | C0 raw parse passed; unqualified Option value rejected | Qualify Option constructor expressions throughout new modules |
-| `7f41b6367f40` / `38096114909` | PS result type before := confused with assignment | Give declaration result-type tokens their own delimiter ownership before shared expression parsing |
-| `960692ed256f` / `38097055403` | C0 structuralRecursionArity in Surface | Use seed-compatible function-valued recursive result for the term-validation helper, preserving its full Pi type |
-| `9265af40cdce` / `38097650380` | First three new modules prepared; Module local match lacked expected type | Explicit Bool annotation; no test or old-source changes |
-| `01faf55c15d1` / `38098565850` | Native symbolic rfl did not close generated equality | Same universally quantified statement proved by exhaustive Except cases; generated functions unchanged |
+| Native4.34 evidence | `11686798545` | `c7aafa3625cf0c04fbadce46fcfa75b9d9a6d4c3591d184e5f9a04610ff87c8b` |
+| Generated bridge and Linux evidence | `11686899111` | `ce2fb8315b733ae64aa8515d31eb32b4a5941a941a2119ce433fac5d41037361` |
+| Windows evidence | `11686158753` | `a43cf36fae1e1499e5fa68c8fc92bc7dcef94318335fe766a23d773101476fe1` |
+| RC4 replay, raw reports, proof and negative-control records | `11691260418` | `bce05b001f8b7e62dda0bc29bb71ea31f3de499157e578ec19744bad9ec4c5b2` |
 
-Earlier native success `38097055425` at `960692ed256f` covered type checking, five round trips, four refusals and comment replay, not the later theorem or generated-JS behavior. Its artifact `11685979857` SHA-256 was `6822d5d919d0a2024901474d209fff52f63adef54bca68ab5cfb8f563b0edd5e`.
+Bridge JavaScript SHA-256: `1ef9268e2b84aab67e5c122bf860f85957c6b66352d71be5f76bb4354cdfa281`.
+Bridge TypeScript SHA-256: `5a27fda9ca051a9bd769da6d678f75b3ae3a54804ea22807c53d24006b7aca7f`.
+Retained C0 builder SHA-256: `6cddc3c34c38f1524ef9a355c46b0eb17949c45c54fd59367ea370c1af861ab3`.
 
-Native run `38097650367` also passed its then-current source checks at `9265af40cdce`; a native result is never substituted for the retained compiler's failed generation.
+## Preserved compiler and kernel boundaries
 
-## Qualification discipline
+The original69 compiler source files and the main64-module bootstrap closure remain unchanged. Four new portable modules are added under the existing syntax package; generation covers only their19-module syntax/foundation closure. The unchanged retained self-hosted JavaScript compiler generated this bridge. No native compiler or handwritten JS was substituted for that generation gate.
 
-The expensive prefix has only the syntax/foundation dependencies, not the complete compiler or kernel. All new raw source is preflighted before preparing that prefix, and origin-bearing preparation identifies the exact failing declaration. Native source/round-trip checks run first so known native failures do not consume another prefix build.
+No full C0/C1/C2/C3 cycle, selected-seed promotion, public CLI switch, kernel rebuild or full source-authority migration occurred. No new npm package/dependency, public ZIP release or main merge was made. The one-language PSCV0 design reference remains the target; unimplemented forms explicitly decline.
 
-The generated bridge test corpus must still run against a genuinely emitted bridge. Existing tests are not changed to use native code. Its RC4 fixture theorem should use the same constructor-case proof of the unchanged equality, rather than require symbolic definitional equality that the native experiment disproved. Fixing that proof script must not be presented as changing the acceptance statement or proving the entire compiler.
+## Historical failures — do not erase or misclassify
+
+| Run / source | Actual failure | Coherent correction |
+| --- | --- | --- |
+| `38094720290` / `7b0b3803062d` | Invalid workflow before code execution | Runner-local prefix set at step execution |
+| `38095004877` / `7092ba81c304` | Old C0 rejects expression `::` | Normalize new-source expressions to List.cons; retain supported patterns |
+| `38095258615` / `a5932fb84e74` | Missing Foundation.List build prerequisite | Include actual PsFoundation prerequisite |
+| `38095425532` / `1f62effe6e86` | Native reserved local names | Rename sourceModule/importPrefix |
+| `38095954154` / `6eb1cb5f6e42` | Unqualified Option constructor values | Qualify new-source constructor family |
+| `38096114909` / `7f41b6367f40` | Result-type token misclassified as assignment | Explicit declaration-owned type delimiter before shared term parsing |
+| `38097055403` / `960692ed256f` | Structural recursive call arity | Preserve full Pi type via supported returned-function form |
+| `38097650380` / `9265af40cdce` | Match-valued local lacks expected type | Explicit Bool annotation in new Module source |
+| `38098565850` / `01faf55c15d1` | Symbolic rfl alone does not close fixture equality | Same statement proved by exhaustive Except cases |
+| `38098425773` reference lane | Reference Lake metadata missing before theorem execution | Complete reference project; independent artifact replay rather than repeating successful generation |
+
+The previous detailed native/prequalification ledger is archived unchanged at [history/PSCV0_BRIDGE_VALIDATION_BEFORE_RC4_REPLAY.md](history/PSCV0_BRIDGE_VALIDATION_BEFORE_RC4_REPLAY.md). Earlier native passes retain their narrower original scope.
+
+## Remaining migration work
+
+The first bridge is complete within its capability contract. Public integration, source-trivia placement, broader inference/projections/updates, complete source conversion and the actual authoritative `.ps` compiler migration remain later steps. A changed bridge requires new generated-source qualification; a reference-only replay verifies hashes and refuses changed code. Never update old self-host baselines merely to make a changed source tree pass.

@@ -304,7 +304,85 @@ theorem forallPropIdentity_executed_source_model
     (forallPropIdentity_actual_inference propName proofName)
     (forallPropIdentity_sourceRanked ρ propName proofName)
 
+/--
+TYPE-RANK COHERENCE: every G4.3b source typing certificate for a supported
+term returns an actual Sort whose interpreted level equals the model rank.
+The source term fixes the relevant rank; no untrusted cast from an
+annotation to an inferred type is permitted.
+-/
+theorem sourceRankedTagged_rule_sort_rank
+    (params : List KName) (ρ : KName → Nat) :
+    ∀ {ctx expr ann rank},
+      SourceRankedTagged params ρ ctx expr ann rank →
+        ∀ {result},
+          GeneralPiRule params ctx expr result →
+            ∃ level : ULevel,
+              result = .sort level ∧ level.denote ρ = rank := by
+  intro ctx expr ann rank h
+  induction h with
+  | sort ctx level good =>
+      intro result hTyped
+      cases hTyped
+      exact ⟨.succ level, rfl, rfl⟩
+  | bvar ctx index level found =>
+      intro result hTyped
+      cases hTyped with
+      | bound _ _ domain hFound =>
+          have hDomain : domain = .sort level :=
+            Option.some.inj (hFound.symm.trans found)
+          subst domain
+          refine ⟨level, ?_, rfl⟩
+          simp [KExpr.liftBVars]
+  | pi ctx name domain body style u v annDom annBody
+      hDomain hBody hProp hDomSupported hBodySupported ihDom ihBody =>
+      intro result hTyped
+      cases hTyped with
+      | pi _ _ _ _ _ uOther vOther hDomOther hBodyOther =>
+          obtain ⟨vRank, hBodyType, hZero⟩ := ihBody hBodyOther
+          have hEq : vOther = vRank := by
+            injection hBodyType with hv
+            exact hv
+          have hBodyZero : vOther.denote ρ = 0 := by
+            simpa only [hEq] using hZero
+          refine ⟨.imax uOther vOther, rfl, ?_⟩
+          exact (piLevel_isProp_iff_codomain_isProp
+            ρ uOther vOther).2 hBodyZero
+
+/--
+Real closed G4.3b successes in the guarded fragment now have an inferred
+Sort whose exact universe level erases to the same numerical rank as the
+set-model membership judgment. This joins ACTUAL inferred output to the
+semantic rank; no auxiliary rank equality premise is supplied by a caller.
+-/
+theorem sourceRankedTagged_executed_exact_inferred_model
+    (V : Type u) [SetTheoryBasis V]
+    (params : List KName) (ρ : KName → Nat)
+    (env : Nat → V) (expr result : KExpr)
+    (ann : PropInterpTerm) (rank : Nat)
+    (hRun : inferClosedGeneralPi params expr = .ok result)
+    (hSupported : SourceRankedTagged params ρ [] expr ann rank) :
+    ∃ level : ULevel,
+      result = .sort level ∧
+      level.denote ρ = rank ∧
+      eraseExpr ρ result = some (.sort rank) ∧
+      SetTheoryBasis.member
+        (interpTaggedProp V env ann)
+        (interpTaggedProp V env (.sort rank)) := by
+  have hRule := (inferClosedGeneralPi_sound params expr result hRun).2
+  obtain ⟨level, hType, hRank⟩ :=
+    sourceRankedTagged_rule_sort_rank params ρ hSupported hRule
+  have hMember : SetTheoryBasis.member
+      (interpTaggedProp V env ann) (taggedSortSet V rank) :=
+    sourceRankedTagged_model_member V params ρ hSupported env
+      (taggedSortContextValid_empty V ρ env)
+  refine ⟨level, hType, hRank, ?_, ?_⟩
+  · subst result
+    simp [eraseExpr, hRank]
+  · simpa only [interpTaggedProp] using hMember
+
 #print axioms taggedSortContextValid_empty
+#print axioms sourceRankedTagged_rule_sort_rank
+#print axioms sourceRankedTagged_executed_exact_inferred_model
 #print axioms checkedPropAnnotation_sort_exact
 #print axioms taggedSortContextValid_extend
 #print axioms sourceRankedTagged_checked

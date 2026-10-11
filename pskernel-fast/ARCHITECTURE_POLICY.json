@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1d-conditional-Sort-and-Prop-Pi-set-model-components-proved-no-global-soundness",
+    "stage": "P1e-two-checked-Prop-set-cases-and-proved-old-proofpoint-obstruction-no-global-soundness",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,7 +86,7 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 48,
+    "p1ReviewedTheoremAssumptionCount": 84,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
@@ -122,7 +122,24 @@
     "p1dProofIrrelevanceInterpretationProved": false,
     "p1dFullTypeValuedPiModelConstructed": false,
     "p1dSourceToSetTermDenotationProved": false,
-    "p1dDependentPiSourceSemanticSoundnessProved": false
+    "p1dDependentPiSourceSemanticSoundnessProved": false,
+    "p1eProofOnlyPropInterpImplemented": true,
+    "p1eCheckedFalseAndTrueSourceCasesDenoted": true,
+    "p1eNestedDependentPropSourceDenoted": true,
+    "p1eCheckedPropAnnotationTypingAndErasureProved": true,
+    "p1eCheckedPropPiModelMembershipConditionalOnFibresProved": true,
+    "p1eAnnotationWitnessesForTwoSourceExamplesProved": true,
+    "p1eGeneralSemanticFibreValidityFromCheckingProved": false,
+    "p1eOldPropCarrierProofPointCollisionProved": true,
+    "p1eOldPropCarrierQualifiedForProofIrrelevance": false,
+    "p1eV2CandidateProofPointInTrueNotInPropProved": true,
+    "p1eV2CandidateExactlyTwoTruthValuesProved": true,
+    "p1eV2CandidatePropMemberTypeOneProved": true,
+    "p1eV2CandidateWritablesGraphNumeralQuotientDisjointnessProved": false,
+    "p1eV2CandidatePromotedToCanonicalModel": false,
+    "p1eCompleteModelWithDistinguishedProofPointProved": false,
+    "p1eFullLeanTermInterpreterImplemented": false,
+    "p1eGeneralCheckedTypingDenotationalSoundnessProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -134,10 +151,10 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "3b70a90bdcf23dd0b6e8843132abb2916f05058a",
+    "validatedSourceCommit": "8de790e40c0ecacea1ff80390f7b636bb9cffd63",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38124170798",
-    "jobId": 114424937667,
-    "scope": "76 successful Lake builds, 33 independent V3 Lean sources audited, 48 exact reviewed axiom receipts. Proof-only conditional SetTheoryBasis, derived empty/universe powerset closure, an exhaustive two-valued candidate Prop carrier, conditional Sort membership in successor model universe, actual checked Pi codomain Prop classification, and semantic proposition-valued Pi member/forall/false-fibre laws over already interpreted sets. NO SetTheoryBasis instance, no arbitrary term denotation/WellDenoted, proof irrelevance, Type-valued Pi graphs, global checker/model soundness, relative consistency, G4.4, theorem admission or real checker speed."
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38126457033",
+    "jobId": 114431719831,
+    "scope": "86 successful Lake builds, 38 independent Lean sources audited, 84 exact theorem-assumption receipts; proof-only partial Prop interpreter with actual executable-checker source-to-set cases for ∀P:Prop,P (false) and ∀P:Prop,P→P (true), reusable checked PropPi annotations and conditional semantic Pi membership, source-backed witnesses; proved old truth-carrier proof-point collision and an independent V2 carrier candidate with proofPoint∈True, proofPoint∉Prop, exactly two truth values and Type1 membership. Still NO candidate proven disjoint from writable graph/number/quotient encodings, no general semantic fibre validity, complete Type-valued Pi/proof irrelevance, full checker/model soundness, consistency, admission or real kernel speed."
   }
 }

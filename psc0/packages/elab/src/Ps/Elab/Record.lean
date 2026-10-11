@@ -21,7 +21,7 @@ def psElabRecordFieldNames (skip count : Nat) (type : PsExpr) : Option (List Str
 
 def psElabRecordShape (context : PsElabContext) (type : PsExpr) :
     Except PsElabError PsElabRecordShape := do
-  let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext type)
+  let view := psInferAppView (psWhnf context.environment context.metaContext context.localContext type)
   let .constE familyName _ := view.head
     | throw (.invalidArgument "record requires an expected nominal structure type")
   let some info := psEnvironmentFindInductive context.environment familyName
@@ -52,7 +52,7 @@ def psElabRecordConstructor (context : PsElabContext) (found : PsElabRecordShape
   let constructor ← psElabResolvedTerm context term none
   let some info := psEnvironmentFindConstructor context.environment found.constructorName
     | throw .unsupportedTerm
-  let view := psExprAppView (psWhnf context.environment context.metaContext context.localContext target)
+  let view := psInferAppView (psWhnf context.environment context.metaContext context.localContext target)
   let .constE name _ := view.head | return constructor
   if !psNameEq name info.inductiveName then return constructor
   if view.args.length != info.numParams then throw .unsupportedTerm

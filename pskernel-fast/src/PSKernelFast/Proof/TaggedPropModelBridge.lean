@@ -39,7 +39,7 @@ theorem checkedTaggedPropAnnotation_pi_model_member
       GeneralPiRule params ctx (.forallE name domain body style)
         (.sort (.imax domainSort codomainSort)) ∧
       ((ULevel.imax domainSort codomainSort).denote ρ = 0) ∧
-      SetTheoryBasis.Mem
+      SetTheoryBasis.member
         (interpTaggedProp V env (.propPi annotatedDomain annotatedBody))
         (taggedSortSet V
           ((ULevel.imax domainSort codomainSort).denote ρ)) := by
@@ -62,7 +62,7 @@ theorem forallPropProp_tagged_checked_annotation_model
       GeneralPiRule [] [] (forallPropPropSource name)
         (.sort (.imax domainSort codomainSort)) ∧
       ((ULevel.imax domainSort codomainSort).denote ρ = 0) ∧
-      SetTheoryBasis.Mem
+      SetTheoryBasis.member
         (interpTaggedProp V env forallPropPropTerm)
         (taggedSortSet V
           ((ULevel.imax domainSort codomainSort).denote ρ)) := by
@@ -82,7 +82,7 @@ theorem forallPropIdentity_tagged_checked_annotation_model
         (forallPropIdentitySource propName proofName)
         (.sort (.imax domainSort codomainSort)) ∧
       ((ULevel.imax domainSort codomainSort).denote ρ = 0) ∧
-      SetTheoryBasis.Mem
+      SetTheoryBasis.member
         (interpTaggedProp V env forallPropIdentityTerm)
         (taggedSortSet V
           ((ULevel.imax domainSort codomainSort).denote ρ)) := by
@@ -108,7 +108,7 @@ theorem forallPropProp_tagged_checked_set_denotation
     eraseExpr ρ (forallPropPropSource name) =
       some forallPropPropTerm.forget ∧
     eraseExpr ρ forallPropPropSourceType = some (.sort 0) ∧
-    SetTheoryBasis.Mem
+    SetTheoryBasis.member
       (interpTaggedProp V env forallPropPropTerm)
       (interpTaggedProp V env (.sort 0)) ∧
     interpTaggedProp V env forallPropPropTerm = taggedPropFalse V := by
@@ -118,7 +118,7 @@ theorem forallPropProp_tagged_checked_set_denotation
     forallPropProp_type_erases_to_Prop ρ, ?_, ?_⟩
   · obtain ⟨u, v, _, hProp, hMem⟩ :=
       forallPropProp_tagged_checked_annotation_model V ρ env name
-    have hMemProp : SetTheoryBasis.Mem
+    have hMemProp : SetTheoryBasis.member
         (interpTaggedProp V env forallPropPropTerm)
         (taggedSortSet V 0) := by
       simpa only [hProp] using hMem
@@ -139,7 +139,7 @@ theorem forallPropIdentity_tagged_checked_set_denotation
       (forallPropIdentitySource propName proofName) =
       some forallPropIdentityTerm.forget ∧
     eraseExpr ρ forallPropIdentitySourceType = some (.sort 0) ∧
-    SetTheoryBasis.Mem
+    SetTheoryBasis.member
       (interpTaggedProp V env forallPropIdentityTerm)
       (interpTaggedProp V env (.sort 0)) ∧
     interpTaggedProp V env forallPropIdentityTerm = taggedTrue V := by
@@ -150,7 +150,7 @@ theorem forallPropIdentity_tagged_checked_set_denotation
   · obtain ⟨u, v, _, hProp, hMem⟩ :=
       forallPropIdentity_tagged_checked_annotation_model
         V ρ env propName proofName
-    have hMemProp : SetTheoryBasis.Mem
+    have hMemProp : SetTheoryBasis.member
         (interpTaggedProp V env forallPropIdentityTerm)
         (taggedSortSet V 0) := by
       simpa only [hProp] using hMem

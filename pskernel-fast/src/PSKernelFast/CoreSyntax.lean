@@ -37,12 +37,12 @@ inductive BinderStyle where
   | strictImplicit
   | instImplicit
   | recursive
-  deriving Repr, Inhabited, BEq
+  deriving Repr, Inhabited, BEq, DecidableEq
 
 inductive KLiteral where
   | nat (value : Nat)
   | str (value : String)
-  deriving Repr, Inhabited, BEq
+  deriving Repr, Inhabited, BEq, DecidableEq
 
 inductive KExpr where
   | bvar (index : Nat)
@@ -57,7 +57,7 @@ inductive KExpr where
   | lit (value : KLiteral)
   | mdata (opaqueTag : Nat) (expr : KExpr)
   | proj (typeName : KName) (index : Nat) (expr : KExpr)
-  deriving Repr, Inhabited, BEq
+  deriving Repr, Inhabited, BEq, DecidableEq
 
 /--
   Under a ground numerical assignment, imax u v = 0 if v = 0,

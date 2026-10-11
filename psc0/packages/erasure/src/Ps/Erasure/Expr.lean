@@ -2121,7 +2121,7 @@ def psEraseLogicalApplication
     return some (.unreachable type)
   if psNameEq name (psNameAppendStr (psRootName "False") "rec") then
     let type ← psErasureCheckedTypeView environment scope.localContext
-      (psExprApplyMany view.head view.args)
+      (view.args.foldl PsExpr.app view.head)
     return some (.unreachable (← psEraseRuntimeType environment scope type))
   if !psNameEq name (psNameAppendStr psEqName "rec") then return none
   let some minor := view.args[3]? | throw .unsupportedApplication

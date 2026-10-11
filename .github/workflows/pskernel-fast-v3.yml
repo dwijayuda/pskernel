@@ -45,32 +45,32 @@ jobs:
           lean --version
           lake --version
           lake update
-          lake build pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke
+          lake build PSKernelFast.Spec.TaggedPropSemantics PSKernelFast.Proof.TaggedPropModelBridge pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke
       - name: Audit exact theorem assumptions
         working-directory: pskernel-fast
         shell: bash
         run: |
           set -euo pipefail
-          lake env lean src/PSKernelFast/Spec/ContextScope.lean > /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/ScopeReflection.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/GeneralPiScope.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/TypedSubstitution.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/Erasure.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/ErasureTotality.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/UniverseSemantics.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/PropPi.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/PropInterp.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/PropInterpreterBridge.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/CheckedPropAnnotations.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/CertifiedPropExamples.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/ProofPointCandidate.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/SetEncoding.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/TaggedProofPoint.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/FiniteUniverseClosure.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/TaggedPointUniverse.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Spec/TaggedPropSemantics.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/TaggedPropModelBridge.lean >> /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/PiModelRegime.lean >> /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/ContextScope.lean | tee /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/ScopeReflection.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/GeneralPiScope.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/TypedSubstitution.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/Erasure.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/ErasureTotality.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/UniverseSemantics.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/PropPi.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/PropInterp.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/PropInterpreterBridge.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/CheckedPropAnnotations.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/CertifiedPropExamples.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/ProofPointCandidate.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/SetEncoding.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/TaggedProofPoint.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/FiniteUniverseClosure.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/TaggedPointUniverse.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Spec/TaggedPropSemantics.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/TaggedPropModelBridge.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/PiModelRegime.lean | tee -a /tmp/pskernel-fast-axioms.log
           cat /tmp/pskernel-fast-axioms.log
           python3 scripts/audit_axioms.py /tmp/pskernel-fast-axioms.log
       - name: Run fail-closed representation tests

@@ -18,6 +18,12 @@
       "expectedDeclarations": 3
     },
     {
+      "module": "Ps.Syntax.Cursor",
+      "source": "packages/syntax/src-ps/Ps/Syntax/Cursor.ps",
+      "baseline": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+      "expectedDeclarations": 11
+    },
+    {
       "module": "Ps.Foundation.List",
       "source": "packages/foundation/src-ps/Ps/Foundation/List.ps",
       "baseline": "packages/foundation/src/Ps/Foundation/List.lean",

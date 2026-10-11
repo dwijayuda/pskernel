@@ -1,3 +1,19 @@
+# PSC0 AI WORK STATE — fifth source candidate Cursor.ps on Linux-only graph
+
+## Current checkpoint, October 11, 2026
+
+**Explicit user constraints:** Linux CI only. Windows is a *static pattern review*, not an executed compatibility pass. No independent PSKernel/core checker tests, metatheory work or full fixed-point kernel runs in this self-host compiler development loop. The sole .ps language specification remains PSCV0 v7, without prior-edition compatibility.
+
+**Fourth module source qualified at compiler-only graph level:** [38133538760](https://github.com/dwijayuda/pskernel/actions/runs/38133538760), exact source 798f1aefdc59fbdaa75bc4423741e27aec1d0e65, **SUCCESS**. Ps.Syntax.Token.ps (an inductive, function with nested pattern matches, and structure) compiled consistently as either Lean or v7 source in the 4-node Source/Cursor/Token/List dependency graph. All **seven** source combinations yielded byte-identical canonical compiler admission SHA-256 a8eb6c2ef657200072ba314cc45bd4df9b668a477d2239fca3a2cee9b33fa042 and TypeScript7 SHA-256 7e5682ea38342adf20b252a3eb668d727849100a22f6b2b0ff71a853b812d447. Compiler graph **43,694ms measured**, **15 unique prepared prefix states** with **13 actual reuse hits out of 28 steps**, 7 parsed source modules. Linux TypeScript/JS runtime smoke passed, no Windows or independent kernel tests. This remains compiler-only product equivalence, NOT the complete generated self-host compiler or an independently admitted proof output.
+
+**Fifth candidate being attempted:** [Ps.Syntax.Cursor.ps](packages/syntax/src-ps/Ps/Syntax/Cursor.ps), 2 structures/9 functions, genuinely dependent on Source and using Unicode/UTF-8 cursor data, higher-order fuel-recursion lambdas, nested matches, option, records and conditional v7 syntax. [Source review](docs/PSCV0_CURSOR_V7_SOURCE_CANDIDATE.md). The new candidate manifest has four alternative v7 modules: Source, Cursor, Token, List; graph manifest now has **nine** source combinations, including Cursor-v7-only and all-four-v7. The complete graph must still produce identical canonical compiler admission and TypeScript bytes, and the test must run on Linux only. **New Cursor source is PENDING CI; do not count it as qualified until its actual source, elaboration and product results pass.**
+
+**Current evidence distinctions:** Translate.ps remains the first actual 20-module generated bridge qualified in [38128357665](https://github.com/dwijayuda/pskernel/actions/runs/38128357665). Source.ps, List.ps and Token.ps are separate compiler-only equivalent source candidates and are not yet selected in that full bridge. Cursor.ps is still unqualified. This distinction must not be collapsed into claims of a full compiler fixed point. Preserve prior source graph green commit, history and all kernel branches.
+
+**Next:** inspect the Linux-only nine-scenario CI source parser/elaboration/TS outputs. If Cursor genuinely requires an unimplemented v7 surface family, pinpoint the general grammar semantics and revise the architecture/source appropriately rather than weakening tests or enabling old-source fallback. After green, start a source-closure selection plan with incremental dependency topological ordering and full compiler-only source evidence while still deferring kernel and Windows tests.
+
+---
+
 # PSC0 AI WORK STATE — Linux incremental graph passed; Token.ps source candidate
 
 ## Active compiler-only development checkpoint — 11 October 2026

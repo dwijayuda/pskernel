@@ -56,6 +56,21 @@
         "Ps.Syntax.Token",
         "Ps.Foundation.List"
       ]
+    },
+    {
+      "name": "cursor-v7-only",
+      "v7Modules": [
+        "Ps.Syntax.Cursor"
+      ]
+    },
+    {
+      "name": "all-four-v7",
+      "v7Modules": [
+        "Ps.Foundation.Source",
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Token",
+        "Ps.Foundation.List"
+      ]
     }
   ],
   "cachePolicy": "in-memory only; key includes fully ordered source prefix, source sha256, edition, pinned frontend and retained compiler; no serialized unchecked state",

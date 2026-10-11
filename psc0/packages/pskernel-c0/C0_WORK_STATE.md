@@ -28,3 +28,10 @@ The Rust engine is **not an accepting kernel**. It lacks the full Lean 4.35 redu
 6. Switch any acceptance path only after semantic agreement and measured gains.
 
 Metatheory/consistency proofs are deferred; preventing false acceptance is not.
+
+## Latest checkpoint (2026-10-12)
+
+- Added `ConversionHint` (`Equal`/`Unknown`) and `conversion_hint` over the experimental indexed WHNF fragment. This is positive-only: it is not a full defeq procedure, cannot issue negative decisions or certify a declaration, and is not integrated with PSKernel's accepting checker.
+- Expanded CI to build and execute the release microbenchmark example, alongside tests and Clippy.
+- Rust compilation, CI results, and absolute performance numbers have **not** been independently confirmed in this chat. No performance gain or Lean compatibility beyond the restricted fragment is claimed.
+- Next: obtain verified green CI, compare results to the original Lean checker, implement a lossless expression/environment bridge and full conversion rules before touching acceptance.

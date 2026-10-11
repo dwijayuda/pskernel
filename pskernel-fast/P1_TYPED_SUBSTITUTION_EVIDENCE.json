@@ -1,0 +1,39 @@
+{
+  "schema": "pskernel-fast-p1-typed-substitution-evidence/v1",
+  "date": "2026-10-11",
+  "repo": "dwijayuda/pskernel",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "validated_sha": "b08feccc8bb06d7f5823636ec6d9f1badbafd6fe",
+  "run_id": 38120030487,
+  "job_id": 114412662054,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38120030487",
+  "result": "success",
+  "lake_jobs": 62,
+  "audited_lean_files": 26,
+  "theorem_receipts": 15,
+  "allowed_axioms": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "source": "pskernel-fast/src/PSKernelFast/Proof/TypedSubstitution.lean",
+  "proved": [
+    "liftBVars_one_instantiate_cancel",
+    "liftBVars_zero",
+    "liftBVars_add",
+    "liftBVars_comm",
+    "bound_zero_substitution_preserves_type",
+    "dependent_identity_beta_preserves_type",
+    "dependent_let_variable_zeta_preserves_type",
+    "checked_bound_variable_weakens"
+  ],
+  "typed_fragment": "GeneralPiRule G4.3b",
+  "general_typed_substitution": false,
+  "weakening_all_terms": false,
+  "subject_reduction_all_terms": false,
+  "denotational_model_soundness": false,
+  "consistency_proved": false,
+  "full_lean_compatible": false,
+  "proof_checker_implemented": false,
+  "proof_admission_enabled": false
+}

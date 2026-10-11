@@ -208,9 +208,52 @@ theorem dependent_let_variable_zeta_preserves_type
   · simpa [liftBVars_one_instantiate_cancel] using hLet
   · simpa [KExpr.instantiateBVar, liftBVars_zero] using valueTyped
 
+
+/--
+ONE-BINDER TYPED WEAKENING, the variable case needed by full substitution:
+when a new binder has genuinely been checked to have a Sort type,
+a previously checked variable is still correctly typed one index later.
+
+Both the source variable and its inferred dependent domain type are raised
+using the ACTUAL binder implementation. The resulting context's
+well-formedness is returned, not assumed. This is not yet arbitrary-term
+weakening, which must still handle binders, apps and let recursively.
+-/
+theorem checked_bound_variable_weakens
+    (params : List KName) (ctx : List KExpr)
+    (contextWF : GeneralPiContextWF params ctx)
+    (addedDomain : KExpr) (level : ULevel)
+    (addedTyped : GeneralPiRule params ctx addedDomain (.sort level))
+    (index : Nat) (storedDomain : KExpr)
+    (found : ctx[index]? = some storedDomain) :
+    GeneralPiContextWF params (addedDomain :: ctx) ∧
+    GeneralPiRule params (addedDomain :: ctx)
+      ((KExpr.bvar index).liftBVars 1 0)
+      ((storedDomain.liftBVars (index + 1) 0).liftBVars 1 0) := by
+  have foundNext :
+      (addedDomain :: ctx)[index + 1]? = some storedDomain := by
+    simpa using found
+  have oldVarRaised :
+      ((KExpr.bvar index).liftBVars 1 0) =
+        .bvar (index + 1) := by
+    simp [KExpr.liftBVars]
+  have oldTypeRaised :
+      (storedDomain.liftBVars (index + 1) 0).liftBVars 1 0 =
+        storedDomain.liftBVars ((index + 1) + 1) 0 :=
+    liftBVars_add storedDomain (index + 1) 1 0
+  have newVarTyped : GeneralPiRule params (addedDomain :: ctx)
+      (.bvar (index + 1))
+      (storedDomain.liftBVars ((index + 1) + 1) 0) :=
+    .bound (addedDomain :: ctx) (index + 1) storedDomain foundNext
+  constructor
+  · exact .extend contextWF addedTyped
+  · rw [oldVarRaised, oldTypeRaised]
+    exact newVarTyped
+
 #print axioms liftBVars_one_instantiate_cancel
 #print axioms liftBVars_add
 #print axioms liftBVars_comm
+#print axioms checked_bound_variable_weakens
 #print axioms liftBVars_zero
 #print axioms bound_zero_substitution_preserves_type
 #print axioms dependent_identity_beta_preserves_type

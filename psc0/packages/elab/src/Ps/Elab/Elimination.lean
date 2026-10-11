@@ -98,8 +98,8 @@ def psProofSelectCase (state : PsProofState) (tag : Option PsSyntaxName)
       | none => throw (.proof "no goal to focus")
     | some name =>
       let key := psScopeKey name
-      let matches := state.goals.filter fun goal => goal.tag == key || goal.tag.endsWith ("." ++ key)
-      match matches with
+      let matchingGoals := state.goals.filter fun goal => goal.tag == key || goal.tag.endsWith ("." ++ key)
+      match matchingGoals with
       | [goal] => pure goal
       | [] => throw (.proof "unknown case tag")
       | _ => throw (.proof "ambiguous case tag")

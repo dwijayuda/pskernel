@@ -7,6 +7,7 @@ import PSKernelFast.Spec.PropPi
 import PSKernelFast.Proof.PropInterpreterBridge
 import PSKernelFast.Proof.CheckedPropAnnotations
 import PSKernelFast.Proof.CertifiedPropExamples
+import PSKernelFast.Spec.ProofPointCandidate
 import PSKernelFast.GeneralPiFormation
 import PSKernelFast.DependentSortFragment
 

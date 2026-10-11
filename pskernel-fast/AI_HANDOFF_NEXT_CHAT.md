@@ -1,5 +1,5 @@
-# PSKernel-Fast continuation handoff — P1i green, next G4.4 and Type Pi
-**Updated October 11, 2026 after independently verified P1i source-to-model and exact inferred-rank qualification.**
+# PSKernel-Fast continuation handoff — G4.4a/P1j green, next G4.4b and Type Pi
+**Updated October 11, 2026 after independently verified bounded typed head conversion, active-loop timing and successor-stage graph closure.**
 This is the user's public open-source compiler/kernel correctness, Lean semantics, formal-model research and safe differential/conformance testing; no offensive-security work.
 
 ## Exact ownership and work boundaries
@@ -9,7 +9,14 @@ This is the user's public open-source compiler/kernel correctness, Lean semantic
 - GitHub connector and GitHub Actions/cloud CI ONLY. No Desktop Commander, local checkout, build or tests. Before EACH write fetch live HEAD and relevant blob SHAs; preserve concurrent changes with non-force expected-HEAD fast-forward commits.
 - Exact compatibility target `leanprover/lean4` `v4.35.0-rc4`, source `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - Follow `pskernel-fast/AI_WORK_STATE.md`, `ARCHITECTURE_POLICY.json`, `PSKERNEL_FAST_SOUNDNESS_CONTRACT_V1.md`, `P1F_TAGGED_MODEL_EVIDENCE.md`, and now **`P1G_TAGGED_INTERPRETATION_EVIDENCE.md` / JSON**.
-- Latest code/CI green at this handoff: **`57e15477f82317d29431722aca0ca6130ae29e52`**, [run 38135777941](https://github.com/dwijayuda/pskernel/actions/runs/38135777941), job `114459225119`: **98 Lake builds, 46 independent Lean sources, 152 exact audited theorem assumptions, all G1–G4.3b focused regressions GREEN**, pinned Lean 4.35.0-rc4. Docs/policy commits may follow; LIVE HEAD/CI always govern.
+- Last EXACT source/CI GREEN before docs/policy: **`7dd6f175f57b3c091826c6e12391ada5139488dd`**, [run 38138084007](https://github.com/dwijayuda/pskernel/actions/runs/38138084007), job `114466008004`: **109 builds, 51 audited Lean modules, 157 strict exact theorem receipts and all G1–G4.4a smokes GREEN**. Pinned Lean 4.35.0-rc4. Documentation/policy commit may follow; check LIVE HEAD/CI.
+
+## NEW verified G4.4a/P1j source foundation (start here)
+
+- [G4.4a evidence](G44A_TYPED_CONVERSION_EVIDENCE.md) / [JSON](G44A_TYPED_CONVERSION_EVIDENCE.json): actual `TypedConversion.lean` positive-only `compareTypedHead`; `HeadConversion` data certificate for reflexivity/ONE beta/ONE zeta; actual typing of BOTH terms in same checked context with EXACT same type. `Proof/TypedConversion.lean` certifies positive source-typing/operational evidence plus zero-fuel fail-closed; `TypedConversionSmoke.lean` validates success/decline/malformed/resource; `TypedConversionBench.lean` creates actual nanosecond active-loop baseline with varied runtime input. This is NOT full kernel DefEq or set-denotation soundness. No admission.
+- [P1j evidence](P1J_GRAPH_UNIVERSE_EVIDENCE.md) / [JSON](P1J_GRAPH_UNIVERSE_EVIDENCE.json): actual P1f Kuratowski pairs are closed in inhabited modeled stages, and bounded `modelGraph F A` is a member of the SUCCESSOR stage; the NEXT project step must NOT treat this as SAME-stage closure or proof of Type-valued dependent function Pi. All proofs are conditional on caller-supplied `SetTheoryBasis V`.
+- Benchmark [CI #38138084007](https://github.com/dwijayuda/pskernel/actions/runs/38138084007) printed internal inference/reflexivity/beta/let **164/553/342/324 ns per active call** over 100k varied source inputs; no official Lean comparison, representative kernel workload, RSS, allocation or confidence interval. Keep `kernelBenchmarkRun=false`.
+- G4.4b next: typed, resource-indexed multi-step positive conversion with proven chain of reductions, independently modeled beta/let, environment/transparency identity and exact Lean 4.35 DefEq rule/primitive coverage. Type-valued Pi, quotient typed slots, model-preserving `FullyChecked` declaration environment, relative consistency and actual official benchmark remain major OPEN tasks. No proof admission until the capstones.
 
 ## Mission and intellectual priorities
 
@@ -42,8 +49,8 @@ P1i guarded source-context induction is now COMPLETED and cloud green. Do not re
 ## Iteration and evidence rules
 
 - Architecture, invariants and proof obligations first; exact cloud CI second. The workflow `.github/workflows/pskernel-fast-v3.yml` now explicitly builds tagged model/proof files and **streams** theorem-audit compiler diagnostics, avoiding a masked-error failure from the first P1g attempt.
-- On code/proof changes, ensure the exact commit completed GitHub Actions; audit `pskernel-fast/scripts/audit_axioms.py` reviews exactly 152 theorems (update its reviewed set if genuinely adding #print axioms). Allowed `propext`, `Classical.choice`, `Quot.sound` only. `SetTheoryBasis V` is a caller-supplied substantial mathematical model assumption and **not** an additional #print-axioms token.
+- On code/proof changes, ensure the exact commit completed GitHub Actions; audit `pskernel-fast/scripts/audit_axioms.py` reviews exactly 157 theorems (update its reviewed set if genuinely adding #print axioms). Allowed `propext`, `Classical.choice`, `Quot.sound` only. `SetTheoryBasis V` is a caller-supplied substantial mathematical model assumption and **not** an additional #print-axioms token.
 - Check LIVE HEAD + blob SHAs before writes and use serial non-force, expected-HEAD updates. Update AI_WORK_STATE and policy only with actually qualified proof-status booleans and exact CI; keep honest records of intermediate failures.
 - Preserve all historical branches/PRs. Work autonomously through meaningful proof slices while the conversation/tools permit. If close to chat limit, refresh these handoff/state docs for the next chat.
 
-**First action for the next chat:** inspect LIVE HEAD/CI, P1i evidence and proof `SourceTaggedContextBridge.lean`. The restricted source-context and exact inferred Sort rank bridge is ALREADY VERIFIED. Advance G4.4 typed positive WHNF/DefEq contract/implementation and Type-valued Pi application semantics, with real kernel-only benchmark/differential fixtures and soundness premises. Do not broaden proof-admission authority or assume model existence.
+**First action for the next chat:** inspect LIVE HEAD/CI and both G4.4a/P1j evidence files, the actual `TypedConversion.lean` / `GraphUniverseClosure.lean` source and model assumptions. G4.4a typed ONE-HEAD positive conversion is ALREADY GREEN; NEXT design multi-step resource-indexed WHNF/DefEq with genuine semantic beta/let refinement and independent official Lean 4.35 fixtures, plus SAME-stage dependent-graph/Type-Pi rank proofs where mathematically valid. Do not claim full model, kernel admission or official performance superiority.

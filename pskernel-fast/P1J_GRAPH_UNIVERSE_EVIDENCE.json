@@ -1,0 +1,32 @@
+{
+  "schema": "pskernel-fast-graph-successor-universe-evidence/p1j",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualifiedSourceCommit": "7dd6f175f57b3c091826c6e12391ada5139488dd",
+  "ci": {
+    "runId": 38138084007,
+    "jobId": 114466008004,
+    "conclusion": "success",
+    "lakeBuildJobs": 109,
+    "auditedSources": 51,
+    "assumptionReceipts": 157,
+    "leanVersion": "4.35.0-rc4",
+    "upstreamCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+  },
+  "proved": {
+    "specificKuratowskiPairSameStageClosure": true,
+    "boundedGraphSuccessorStageClosure": true,
+    "usesExistingTarskiClosureOnly": true,
+    "unrestrictedProofPointFreshnessAssumed": false
+  },
+  "open": {
+    "boundedGraphSameStageClosure": false,
+    "typeValuedDependentPi": false,
+    "sourceApplicationBetaEtaDenotation": false,
+    "typedQuotientFreshness": false,
+    "constructedSetTheoryBasisInstance": false,
+    "generalSourceTypingSoundness": false,
+    "relativeConsistency": false
+  },
+  "runtimeCheckerChanged": false
+}

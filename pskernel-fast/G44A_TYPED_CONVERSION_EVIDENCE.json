@@ -1,0 +1,60 @@
+{
+  "schema": "pskernel-fast-typed-head-conversion-evidence/g44a",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "qualifiedSourceCommit": "7dd6f175f57b3c091826c6e12391ada5139488dd",
+  "ci": {
+    "runId": 38138084007,
+    "jobId": 114466008004,
+    "conclusion": "success",
+    "leanVersion": "4.35.0-rc4",
+    "leanSourceCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "lakeBuildJobs": 109,
+    "auditedLeanSources": 51,
+    "exactAssumptionReceipts": 157,
+    "allowedGlobalAxioms": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "sorryAxAllowed": false
+  },
+  "g44a": {
+    "runtimeCode": "src/PSKernelFast/TypedConversion.lean",
+    "proofCode": "src/PSKernelFast/Proof/TypedConversion.lean",
+    "smokeCode": "src/PSKernelFast/TypedConversionSmoke.lean",
+    "benchmarkCode": "src/PSKernelFast/TypedConversionBench.lean",
+    "recognizedConversions": [
+      "literal-reflexivity",
+      "literal-head-beta",
+      "literal-head-let-nondep-false"
+    ],
+    "bothSidesActuallyTypedAtSameExactType": true,
+    "malformedFailsClosed": true,
+    "budgetExhaustedFailsClosed": true,
+    "unresolvedDistinctFromUnequal": true,
+    "zeroBudgetNeverEqualProved": true,
+    "positiveOperationalSoundnessProved": true,
+    "fullTypedWhnf": false,
+    "fullLeanDefeq": false,
+    "setModelReductionSoundness": false,
+    "admissionAPI": false
+  },
+  "benchmark": {
+    "matchedOfficialLean": false,
+    "numberOfPerformanceRunsWithDynamicInputs": 2,
+    "sourceRunId": 38138084007,
+    "iterationsPerFamily": 100000,
+    "variedSources": 127,
+    "unit": "ns/active call",
+    "inference": 164,
+    "reflexive": 553,
+    "beta": 342,
+    "zeta": 324,
+    "peakRssMeasured": false,
+    "allocationsMeasured": false,
+    "releaseGradePerformance": false
+  },
+  "noNewSetTheoryAxioms": true,
+  "admittedDeclarations": 0
+}

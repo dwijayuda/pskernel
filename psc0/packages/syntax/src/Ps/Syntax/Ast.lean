@@ -107,6 +107,35 @@ def PsSyntaxTerm.matchE (scrutinee : PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   .matchMany [scrutinee] (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) span
 
+def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan :=
+  { start := start.start, stop := stop.stop }
+
+def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
+  | .hole span => span
+  | .optionalType _ _ span => span
+  | .ascription _ _ span => span
+  | .call _ _ span => span
+  | .reference name => name.span
+  | .natural _ span => span
+  | .string _ span => span
+  | .character _ span => span
+  | .bool _ span => span
+  | .unit span => span
+  | .record _ span => span
+  | .app _ _ span => span
+  | .lambda _ _ span => span
+  | .forallE _ _ span => span
+  | .letE _ _ _ _ span => span
+  | .ifE _ _ _ span => span
+  | .matchMany _ _ span => span
+
+def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
+  | .natural _ span => span
+  | .bool _ span => span
+  | .wildcard span => span
+  | .ctor _ _ span => span
+  | .variable name => name.span
+
 structure PsSyntaxInductiveConstructor where
   name : PsSyntaxName
   fields : List (Prod PsSyntaxBinderHead PsSyntaxTerm)

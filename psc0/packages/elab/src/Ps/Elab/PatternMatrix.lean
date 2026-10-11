@@ -1,5 +1,32 @@
 import Ps.Elab.Match
 
+def psElabMatchPatternConstructorName
+    (inductiveInfo : PsName)
+    (pattern : PsSyntaxPattern) :
+    Except PsElabError PsName :=
+  match pattern with
+  | .bool value _ =>
+      if psNameEq inductiveInfo psBoolName then
+        if value then
+          Except.ok psBoolTrueName
+        else
+          Except.ok psBoolFalseName
+      else
+        Except.error PsElabError.matchPatternUnsupported
+  | .wildcard _ | .variable _ | .natural _ _ =>
+      Except.error PsElabError.matchPatternUnsupported
+  | .ctor syntaxName _ _ =>
+      match syntaxName.segments with
+      | [] => Except.error PsElabError.matchPatternUnsupported
+      | segment :: rest =>
+          match rest with
+          | [] =>
+              Except.ok (psNameAppendStr inductiveInfo segment)
+          | _ :: _ =>
+              match psSyntaxNameToName syntaxName with
+              | none => Except.error PsElabError.matchPatternUnsupported
+              | some name => Except.ok name
+
 structure PsElabPatternColumn where
   major : PsSyntaxTerm
   value : PsSyntaxTerm
@@ -47,7 +74,7 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
           match remaining with
           | [] => throw .matchNonExhaustive
           | column :: remaining =>
-            match psElabMatch elaborate context column.major [] (some expected) with
+            match psElabMatchWith elaborate (fun _ _ => pure []) context column.major (some expected) with
             | .ok result => return result
             | .error .matchNonExhaustive => eliminate remaining
             | .error error => throw error
@@ -97,8 +124,7 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
             else none
           return {
             constructorName := name
-            pattern := PsSyntaxPattern.constructor
-              (PsSyntaxName.mk ((psNameToString name).splitOn ".") span) fields span
+            fieldNames := fields
             elaborate := fun branch target =>
               psElabPatternMatrix fuel elaborate branch (fieldColumns ++ rest) selected target
             span }) context column.major (some expected)
@@ -112,11 +138,17 @@ structure PsElabPatternInputs where
 -- enter scope. Keep original local majors so dependent refinement still sees
 -- their original identities; computed discriminants use the alias and run once.
 def psElabPatternInputs (elaborate : PsElaborator) (context : PsElabContext)
-    (sources : List PsSyntaxTerm) : Except PsElabError PsElabPatternInputs := do
+    (sources : List PsSyntaxTerm) (capture : List Bool) : Except PsElabError PsElabPatternInputs := do
   match sources with
   | [] => return { context, columns := [], locals := [] }
   | source :: rest =>
     let value ← elaborate context source none
+    let localReference := match value.term, source with
+      | .fvar _, .reference _ => true
+      | _, _ => false
+    if localReference && !(capture.head?.getD false) then
+      let tail ← psElabPatternInputs elaborate value.context rest (capture.drop 1)
+      return { tail with columns := { major := source, value := source } :: tail.columns }
     let id := value.context.localContext.nextId
     let span := psSyntaxTermSpan source
     let syntaxName := PsSyntaxName.mk ["$psc0Discriminant", psNatToString id] span
@@ -127,7 +159,7 @@ def psElabPatternInputs (elaborate : PsElaborator) (context : PsElabContext)
     let major := match value.term, source with
       | .fvar _, .reference _ => source
       | _, _ => reference
-    let tail ← psElabPatternInputs elaborate inner rest
+    let tail ← psElabPatternInputs elaborate inner rest (capture.drop 1)
     return {
       context := tail.context
       columns := { major, value := reference } :: tail.columns
@@ -144,7 +176,11 @@ def psElabMatchMatrix (elaborate : PsElaborator) (context : PsElabContext)
     let names := patterns.flatMap (psSyntaxPatternNames 4096)
     if psSyntaxNameListHasDuplicate names then throw (.refinement "duplicate pattern variable")
     return PsElabPatternRow.mk patterns body span []
-  let inputs ← psElabPatternInputs elaborate context sources
+  let capture := sources.zipIdx |>.map fun (_, index) =>
+    rows.any fun row => match row.patterns[index]? with
+      | some (.variable _) => true
+      | _ => false
+  let inputs ← psElabPatternInputs elaborate context sources capture
   let result ← psElabPatternMatrix 4096 elaborate inputs.context inputs.columns rows expected
   let term := inputs.locals.foldr (fun (binder, value) body =>
     .letE binder.name binder.type value (psExprAbstractFVar binder.id body)) result.term

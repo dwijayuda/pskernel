@@ -1,26 +1,9 @@
 import Ps.Elab.Equality
 import Ps.Elab.Application
 
-def psMatchNameEqTarget
-    (target : PsName)
-    (name : PsName) : Bool :=
-  psNameEq name target
-
-def psMatchNameListContains
-    (names : List PsName)
-    (target : PsName) : Bool :=
-  match names with
-  | [] =>
-      false
-  | name :: rest =>
-      if psMatchNameEqTarget target name then
-        true
-      else
-        psMatchNameListContains rest target
-
 structure PsElabMatchAlternative where
   constructorName : PsName
-  pattern : PsSyntaxPattern
+  fieldNames : List PsSyntaxName
   elaborate : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult
   span : PsSourceSpan
 
@@ -35,186 +18,6 @@ def psElabMatchAlternativeFind
         Option.some alternative
       else
         psElabMatchAlternativeFind name rest
-
-def psElabMatchAlternativeCovered
-    (alternatives : List PsElabMatchAlternative)
-    (ctorName : PsName) : Bool :=
-  match psElabMatchAlternativeFind ctorName alternatives with
-  | some _ => true
-  | none => false
-
-def psElabFillWildcardAlternatives
-    (elaborate : PsElaborator)
-    (pattern : PsSyntaxPattern)
-    (body : PsSyntaxTerm)
-    (span : PsSourceSpan)
-    (constructors : List PsName) :
-    List PsElabMatchAlternative ->
-    List PsElabMatchAlternative :=
-  match constructors with
-  | [] =>
-      fun (alternativesRev : List PsElabMatchAlternative) =>
-        alternativesRev
-  | ctorName :: rest =>
-      let smaller :
-          List PsElabMatchAlternative ->
-          List PsElabMatchAlternative :=
-        psElabFillWildcardAlternatives
-          elaborate pattern
-          body
-          span
-          rest;
-      fun (alternativesRev : List PsElabMatchAlternative) =>
-        let next : List PsElabMatchAlternative :=
-          match psElabMatchAlternativeFind ctorName alternativesRev with
-          | some _ => alternativesRev
-          | none =>
-              let alternative : PsElabMatchAlternative := {
-                constructorName := ctorName
-                pattern := pattern
-                elaborate := fun context expected => elaborate context body (some expected)
-                span := span
-              };
-              List.cons alternative alternativesRev;
-        smaller next
-
-def psElabMatchAlternativeListReverseAux
-    (values : List PsElabMatchAlternative) :
-    List PsElabMatchAlternative ->
-    List PsElabMatchAlternative :=
-  match values with
-  | [] =>
-      fun (acc : List PsElabMatchAlternative) => acc
-  | value :: rest =>
-      let smaller :
-          List PsElabMatchAlternative ->
-          List PsElabMatchAlternative :=
-        psElabMatchAlternativeListReverseAux rest;
-      fun (acc : List PsElabMatchAlternative) =>
-        smaller (List.cons value acc)
-
-def psElabMatchAlternativeListReverse
-    (values : List PsElabMatchAlternative) :
-    List PsElabMatchAlternative :=
-  psElabMatchAlternativeListReverseAux values []
-
-def psElabMatchAlternativesCoverConstructors
-    (alternatives : List PsElabMatchAlternative)
-    (constructors : List PsName) : Bool :=
-  match constructors with
-  | [] => true
-  | constructorName :: rest =>
-      if
-          psElabMatchAlternativeCovered
-            alternatives
-            constructorName then
-        psElabMatchAlternativesCoverConstructors alternatives rest
-      else
-        false
-
-def psElabMatchPatternConstructorName
-    (inductiveInfo : PsName)
-    (pattern : PsSyntaxPattern) :
-    Except PsElabError PsName :=
-  match pattern with
-  | .bool value _ =>
-      if psNameEq inductiveInfo psBoolName then
-        if value then
-          Except.ok psBoolTrueName
-        else
-          Except.ok psBoolFalseName
-      else
-        Except.error PsElabError.matchPatternUnsupported
-  | .wildcard _ | .variable _ | .natural _ _ =>
-      Except.error PsElabError.matchPatternUnsupported
-  | .ctor syntaxName _ _ =>
-      match syntaxName.segments with
-      | [] => Except.error PsElabError.matchPatternUnsupported
-      | segment :: rest =>
-          match rest with
-          | [] =>
-              Except.ok (psNameAppendStr inductiveInfo segment)
-          | _ :: _ =>
-              match psSyntaxNameToName syntaxName with
-              | none => Except.error PsElabError.matchPatternUnsupported
-              | some name => Except.ok name
-
-def psElabPrepareMatchAlternativesWorker
-    (elaborate : PsElaborator)
-    (inductiveInfo : PsInductiveInfo)
-    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
-    List PsElabMatchAlternative ->
-    Except PsElabError (List PsElabMatchAlternative) :=
-  match entries with
-  | [] =>
-      fun (alternativesRev : List PsElabMatchAlternative) =>
-        Except.ok (psElabMatchAlternativeListReverse alternativesRev)
-  | entry :: rest =>
-      let smaller :
-          List PsElabMatchAlternative ->
-          Except PsElabError (List PsElabMatchAlternative) :=
-        psElabPrepareMatchAlternativesWorker
-          elaborate inductiveInfo
-          rest;
-      fun (alternativesRev : List PsElabMatchAlternative) =>
-        let pattern := Prod.fst entry;
-        let payload := Prod.snd entry;
-        let body := Prod.fst payload;
-        let span := Prod.snd payload;
-        match pattern with
-        | .wildcard _ =>
-            match rest with
-            | [] =>
-                Except.ok
-                  (psElabMatchAlternativeListReverse
-                    (psElabFillWildcardAlternatives
-                      elaborate pattern
-                      body
-                      span
-                      inductiveInfo.constructors
-                      alternativesRev))
-            | _ :: _ =>
-                Except.error PsElabError.matchPatternUnsupported
-        | _ =>
-            match psElabMatchPatternConstructorName
-                inductiveInfo.name
-                pattern with
-            | Except.error error => Except.error error
-            | Except.ok ctorName =>
-                if psElabBoolNot
-                    (psMatchNameListContains
-                      inductiveInfo.constructors
-                      ctorName) then
-                  Except.error
-                    (PsElabError.matchConstructorUnknown ctorName)
-                else
-                  match
-                      psElabMatchAlternativeFind
-                        ctorName
-                        alternativesRev with
-                  | some _ =>
-                      Except.error
-                        (PsElabError.matchDuplicateConstructor ctorName)
-                  | none =>
-                      let alternative : PsElabMatchAlternative := {
-                        constructorName := ctorName
-                        pattern := pattern
-                        elaborate := fun context expected => elaborate context body (some expected)
-                        span := span
-                      };
-                      smaller
-                        (List.cons alternative alternativesRev)
-
-def psElabPrepareMatchAlternatives
-    (elaborate : PsElaborator)
-    (inductiveInfo : PsInductiveInfo)
-    (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
-    (alternativesRev : List PsElabMatchAlternative) :
-    Except PsElabError (List PsElabMatchAlternative) :=
-  psElabPrepareMatchAlternativesWorker
-    elaborate inductiveInfo
-    entries
-    alternativesRev
 
 def psElabMatchApplyParametersWorker
     (context : PsElabContext)
@@ -443,13 +246,7 @@ def psElabMatchMinor (context : PsElabContext)
     (minorType : PsExpr) : Except PsElabError PsElabMatchMinorResult := do
   let some ctor := psEnvironmentFindConstructor context.environment ctorName
     | throw (.matchConstructorUnknown ctorName)
-  let names := alternative.bind fun alternative =>
-    match alternative.pattern with
-    | .ctor _ fields _ => some (fields.map fun field => match field with
-      | .variable name => name
-      | .wildcard span => PsSyntaxName.mk ["_"] span
-      | _ => PsSyntaxName.mk [] (psSyntaxPatternSpan field))
-    | _ => none
+  let names := alternative.map (·.fieldNames)
   let fields ← match names with
     | none => psElabMatchAnonymousFields context minorType ctor.numFields
     | some names =>
@@ -573,13 +370,3 @@ def psElabMatchWith (elaborate : PsElaborator)
     (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term] ++ plan.arguments)
   psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
 
-
--- The flat adapter remains useful to coverage checks and older source readers.
--- Motive construction and branch proof production have exactly one owner.
-def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
-    (scrutinee : PsSyntaxTerm)
-    (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
-    (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
-  psElabMatchWith elaborate
-    (fun _ info => psElabPrepareMatchAlternatives elaborate info alternatives [])
-    context scrutinee expected

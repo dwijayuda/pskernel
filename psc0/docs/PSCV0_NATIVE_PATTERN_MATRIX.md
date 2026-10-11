@@ -11,7 +11,7 @@ duplicate variables, and qualifies constructor identities.
 Ps.Elab.PatternMatrix owns ordered row specialization. A constructor split
 preserves row order and retains wildcard/variable rows in every applicable branch.
 Field patterns precede remaining columns. Completed rows choose the first body.
-Fresh inaccessible discriminant aliases save binding values before any user
+Fresh inaccessible discriminant aliases, created only when needed, save binding values before any user
 pattern name enters scope, avoiding cross-column capture. Computed discriminants
 are evaluated once. Original local majors retain their identities, so the shared
 dependent motive can refine later discriminants and their dependent context.

@@ -86,6 +86,26 @@ def generalPiFormationSmoke : IO Unit := do
       (.app (.bvar 0) (.sort .zero)) .default
   expectError (inferClosedGeneralPi [] unsupportedLambdaBody) .unsupported
 
+  -- Application: an affirmative result requires both inferred function Pi
+  -- shape and EXACT equality of the checked argument type to its domain.
+  let applied : KExpr := .app identity (.sort .zero)
+  let expectedAppliedType : KExpr :=
+    .forallE x (.sort .zero) (.sort .zero) .default
+  expectType (inferClosedGeneralPi [] applied) expectedAppliedType
+
+  let idHigher : KExpr :=
+    .lam a (.sort two) (.lam x (.bvar 0) (.bvar 0) .default) .default
+  let twoApplications : KExpr :=
+    .app (.app idHigher (.sort one)) (.sort .zero)
+  expectType (inferClosedGeneralPi [] twoApplications) (.sort one)
+
+  let mismatchedArg : KExpr := .app identity (.sort one)
+  expectError (inferClosedGeneralPi [] mismatchedArg) .unsupported
+  let invalidHead : KExpr := .app (.sort .zero) (.sort .zero)
+  expectError (inferClosedGeneralPi [] invalidHead) .unsupported
+  let malformedArg : KExpr := .app identity (.bvar 0)
+  expectError (inferClosedGeneralPi [] malformedArg) .malformed
+
   -- Context formation has to run actual inference: it cannot be extended
   -- by a dangling variable or a lambda with no applicable type rule.
   let empty := GeneralPiContext.empty []
@@ -125,8 +145,8 @@ def generalPiFormationSmoke : IO Unit := do
     (.forallE a (.sort .zero)
       (.lam x (.sort .zero) (.bvar 0) .default) .default)) .unsupported
 
-  IO.println "PSKernel-Fast G4.4 certified Pi and lambda-introduction fragment PASS"
-  IO.println "G4.4 limits: syntactic Sort only, no application/DefEq or proof admission"
+  IO.println "PSKernel-Fast G4.4 certified Pi/lambda/exact-application fragment PASS"
+  IO.println "G4.4 limits: exact syntactic domain equality only, no DefEq/let/constants or admission"
 
 end PSKernelFast.Core
 

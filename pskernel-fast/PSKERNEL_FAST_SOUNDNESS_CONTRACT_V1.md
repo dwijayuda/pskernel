@@ -22,7 +22,7 @@ This is *not* proof-first in the sense of implementing all of a second type theo
 | --- | --- | --- |
 | Context well-formedness | Every stored binder domain is scoped at *its introduction depth* and was actually certified as a type; lookup lifts it without capture | G4.3 structural proof only; new P1 independent spec/proof in progress |
 | Executing typed rules | A successful `inferGeneralPi` gives the independent `GeneralPiRule` and a structurally valid source and inferred type for every checked context | Rule certificate proved; general input/output structural scope beyond wrapper preflight is next P1 theorem |
-| **Typed substitution** | Substituting a well-typed argument into a well-typed dependent body preserves the appropriate *typing*, not merely scope | **OPEN** |
+| **Typed substitution** | Actual beta and let result-type substitution preserves typing under exact G4.3b premises | **BOUNDED CASES PROVED**: checked dependent identity beta and variable-body let/zeta; generic nested substitution **OPEN**. [P1 evidence](P1_TYPED_SUBSTITUTION_EVIDENCE.md) |
 | Conversion | Every positive typed WHNF/DefEq result preserves model denotation at the EXACT level context, opacity and checker environment generation | **OPEN** (G4.4) |
 | Inductives/quotient/primitives | Every generated recursor and exceptional rule has an independent, sound model interpretation and exact pinned version policy | **OPEN** |
 | Declaration fold | Each accepted fresh name extends a model of the prior immutable environment; no temporary handle or unchecked candidate can survive as a checked constant | **OPEN** |
@@ -62,3 +62,9 @@ A full set model must eventually account for `Prop` as proof-irrelevant, cumulat
 - [Official Lean 4.35 kernel](https://github.com/leanprover/lean4/tree/v4.35.0-rc4/src/kernel): `type_checker.cpp`, `level.cpp`, `inductive.cpp`, `quot.cpp`, `declaration.cpp`. Official source is a compatibility oracle, not an imported soundness theorem.
 
 **No release/merge as a complete checker until the end-to-end model and accepting path really exist.**
+
+## New typed-substitution checkpoint and economy decision (P1)
+
+[Cloud-verified P1 typed substitution evidence](P1_TYPED_SUBSTITUTION_EVIDENCE.md), [run 38120030487](https://github.com/dwijayuda/pskernel/actions/runs/38120030487), establishes **bounded genuine typing preservation** (dependent identity beta, variable-body let/zeta), exact binder lifting laws, and one checked-binder variable-weakening theorem against the unchanged executable source. The 15-theorem assumption receipt gate passed without a new axiom. These theorems refine local portions of the mathematical proof obligations, not the whole calculus.
+
+**Cost choice:** do not make a proof of a global *syntactic* substitution/regularity theorem an unconditional prerequisite for exploring con-leche's direct model-based `WellDenoted` proof. The consistency capstone ultimately needs every **executing positive** beta/let/WHNF/DefEq and admission rule to preserve its model's meaning. A direct semantic preservation theorem can sometimes be cheaper than fully developing syntactic subject reduction and normalization; neither option is proved for PSKernel-Fast today. Evaluate both on a small, independently denoted calculus, measure proof complexity, and choose the smallest valid assurance path. Do not weaken the actual checker, fabricate model assumptions, or treat type-level structural proofs as set-model consistency.

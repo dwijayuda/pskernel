@@ -31,5 +31,31 @@ fn main() {
     println!("depth={},repeats={},nodes={}",DEPTH,REPEATS,arena.count());
     println!("spine_total_ns={}",spine_time.as_nanos());
     println!("whnf_total_ns={}",whnf_time.as_nanos());
-    println!("note: no source kernel comparison and no claims of speedup");
+    // In-process comparison against the previous recursive C0 algorithm.
+    // Both runs use the same arena and identical input. This is a fragment
+    // microbenchmark, NOT a comparison with production PSKernel-Core.
+    const SUBST_DEPTH: usize = 128;
+    const SUBST_REPEATS: usize = 300;
+    let mut substitution_input = head;
+    for _ in 0..SUBST_DEPTH {
+        substitution_input = arena.intern(Expr::App(substitution_input, head));
+    }
+    let replacement = arena.intern(Expr::BVar(17));
+    let expected = arena.instantiate1_reference(substitution_input, replacement).unwrap();
+    assert_eq!(arena.instantiate1(substitution_input, replacement).unwrap(), expected);
+    let started = Instant::now();
+    for _ in 0..SUBST_REPEATS {
+        black_box(arena.instantiate1_reference(substitution_input, replacement).unwrap());
+    }
+    let reference_time = started.elapsed();
+    let started = Instant::now();
+    for _ in 0..SUBST_REPEATS {
+        black_box(arena.instantiate1(substitution_input, replacement).unwrap());
+    }
+    let iterative_time = started.elapsed();
+    println!("substitution_depth={},substitution_repeats={}",SUBST_DEPTH,SUBST_REPEATS);
+    println!("recursive_substitution_total_ns={}",reference_time.as_nanos());
+    println!("iterative_substitution_total_ns={}",iterative_time.as_nanos());
+    println!("note: comparison only covers the C0 substitution fragment; no full kernel speedup claim");
+
 }

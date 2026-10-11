@@ -1,0 +1,33 @@
+{
+  "schema": "pskernel-fast-g4-dependent-sort-evidence/v1",
+  "date": "2026-10-11",
+  "branch": "research/pskernel-fast-clean-v3-20261011",
+  "source_sha": "35ce306421368e8b8689b143e8e70ce0a4b03d73",
+  "run_id": 38115500178,
+  "job_id": 114399479495,
+  "run_url": "https://github.com/dwijayuda/pskernel/actions/runs/38115500178",
+  "conclusion": "success",
+  "native_build_jobs": 49,
+  "audited_source_files": 20,
+  "lean_version": "4.35.0-rc4",
+  "lean_source_commit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "proved": [
+    "inferClosedDependentSort_sound"
+  ],
+  "specified_judgment": "DependentSortRule",
+  "source_module": "pskernel-fast/src/PSKernelFast/DependentSortFragment.lean",
+  "rules": [
+    "sort",
+    "boundVar",
+    "pi"
+  ],
+  "supported_scope": "closed Sort and Pi whose binder domains are syntactic Sort u, with verified universe parameters and dependent bound-variable codomains",
+  "malformed_input_rejected": true,
+  "unsupported_lambdas_rejected": true,
+  "full_dependent_typing": false,
+  "checked_environment": false,
+  "defeq": false,
+  "theorem_admission": false,
+  "model_soundness": false,
+  "real_kernel_benchmark": false
+}

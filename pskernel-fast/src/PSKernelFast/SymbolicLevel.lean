@@ -43,13 +43,23 @@ def smartMax (a b : ULevel) : ULevel :=
   else .max b a
 
 /--
+  Push successors through a binary max (Lean's normalizer also distributes
+  offsets over maximal terms). Safe independent of any parameter valuation.
+-/
+def smartSucc (level : ULevel) : ULevel :=
+  match level with
+  | .max a b => smartMax (.succ a) (.succ b)
+  | other => .succ other
+
+/--
 imax x 0 = 0; imax 0 y = y; imax x x = x;
-if the right argument is syntactically a successor, it cannot evaluate to 0.
+imax 1 y = y; if RHS is a successor, imax becomes max.
 -/
 def smartIMax (a b : ULevel) : ULevel :=
   if b = .zero then .zero
   else if a = .zero then b
   else if a = b then a
+  else if a = .succ .zero then b
   else
     match b with
     | .succ _ => smartMax a b
@@ -60,7 +70,7 @@ def normalize : ULevel → ULevel
   | .zero => .zero
   | .param n => .param n
   | .mvar n => .mvar n
-  | .succ l => .succ (normalize l)
+  | .succ l => smartSucc (normalize l)
   | .max a b => smartMax (normalize a) (normalize b)
   | .imax a b => smartIMax (normalize a) (normalize b)
 

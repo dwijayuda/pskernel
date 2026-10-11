@@ -48,6 +48,9 @@ def symbolicLevelSmoke : IO Unit := do
   checkPair [u, v] (.imax .zero lu) lu .equal
   checkPair [u, v] (.imax lu lu) lu .equal
   checkPair [u, v] (.imax lu (.succ lv)) (.max lu (.succ lv)) .equal
+  checkPair [u, v] (.imax (.succ .zero) lu) lu .equal
+  checkPair [u, v] (.succ (.max lu lv))
+    (.max (.succ lu) (.succ lv)) .equal
 
   checkPair [u, v] (.imax lu lv) (.max lu lv) .unresolved
   checkPair [u, v] (.max lu lv) lu .unresolved

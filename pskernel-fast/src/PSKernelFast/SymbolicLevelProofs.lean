@@ -38,6 +38,17 @@ theorem smartMax_denote (ρ : KName → Nat) (a b : ULevel) :
         · simp [smartMax, ha, hb, heq, horder, ULevel.denote]
         · simp [smartMax, ha, hb, heq, horder, ULevel.denote, Nat.max_comm]
 
+theorem smartSucc_denote (ρ : KName → Nat) (level : ULevel) :
+    (smartSucc level).denote ρ = level.denote ρ + 1 := by
+  cases level <;>
+    simp [smartSucc, ULevel.denote, smartMax_denote, Nat.succ_max_succ]
+
+private theorem imax_one_left (v : Nat) : numericImax 1 v = v := by
+  cases v with
+  | zero => rfl
+  | succ n =>
+      simp [numericImax, Nat.max_succ_succ]
+
 theorem smartIMax_denote (ρ : KName → Nat) (a b : ULevel) :
     (smartIMax a b).denote ρ =
       numericImax (a.denote ρ) (b.denote ρ) := by
@@ -51,19 +62,23 @@ theorem smartIMax_denote (ρ : KName → Nat) (a b : ULevel) :
     · by_cases heq : a = b
       · subst b
         simpa [smartIMax, ha] using (imax_self (a.denote ρ)).symm
-      · cases b with
-        | zero => contradiction
-        | succ inner =>
-            simp [smartIMax, hb, ha, heq, ULevel.denote,
-              smartMax_denote, numericImax]
-        | param n =>
-            simp [smartIMax, hb, ha, heq, ULevel.denote]
-        | mvar n =>
-            simp [smartIMax, hb, ha, heq, ULevel.denote]
-        | max left right =>
-            simp [smartIMax, hb, ha, heq, ULevel.denote]
-        | imax left right =>
-            simp [smartIMax, hb, ha, heq, ULevel.denote]
+      · by_cases hone : a = .succ .zero
+        · subst a
+          simpa [smartIMax, hb, ULevel.denote] using
+            (imax_one_left (b.denote ρ)).symm
+        · cases b with
+          | zero => contradiction
+          | succ inner =>
+              simp [smartIMax, hb, ha, heq, hone, ULevel.denote,
+                smartMax_denote, numericImax]
+          | param n =>
+              simp [smartIMax, hb, ha, heq, hone, ULevel.denote]
+          | mvar n =>
+              simp [smartIMax, hb, ha, heq, hone, ULevel.denote]
+          | max left right =>
+              simp [smartIMax, hb, ha, heq, hone, ULevel.denote]
+          | imax left right =>
+              simp [smartIMax, hb, ha, heq, hone, ULevel.denote]
 
 theorem normalize_denote (ρ : KName → Nat) (level : ULevel) :
     (normalize level).denote ρ = level.denote ρ := by
@@ -72,7 +87,7 @@ theorem normalize_denote (ρ : KName → Nat) (level : ULevel) :
   | param n => rfl
   | mvar n => rfl
   | succ l ih =>
-      simp only [normalize, ULevel.denote, ih]
+      simp only [normalize, smartSucc_denote, ULevel.denote, ih]
   | max a b ihA ihB =>
       simp only [normalize, smartMax_denote, ULevel.denote, ihA, ihB]
   | imax a b ihA ihB =>

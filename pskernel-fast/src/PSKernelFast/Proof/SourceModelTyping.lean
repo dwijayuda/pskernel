@@ -136,11 +136,11 @@ theorem sourceModelTyping_typed (params : List KName) (ρ : KName → Nat) :
   | bound ctx ac i d ad found foundAnn erases => exact .bound ctx i d found
   | pi ctx ac name d b style u v ad ab hd hb ihd ihb =>
       exact .pi ctx name d b style u v ihd ihb
-  | lam ctx ac name d b type style u v ad ab at hd ht hb ihd iht ihb =>
+  | lam ctx ac name d b type style u v ad ab aTy hd ht hb ihd iht ihb =>
       exact .lam ctx name d b style u type ihd ihb
   | app ctx ac fn arg name d b style v af aa ad ab hf ha ihf iha =>
       exact .app ctx fn arg name d b style ihf iha
-  | letE ctx ac name d value b type level ad av ab at hd hv hb ihd ihv ihb =>
+  | letE ctx ac name d value b type level ad av ab aTy hd hv hb ihd ihv ihb =>
       exact .letE ctx name d value b false rfl level type ihd ihv ihb
 
 private theorem erasePi_parts (ρ : KName → Nat)
@@ -159,7 +159,7 @@ private theorem erasePi_parts (ρ : KName → Nat)
           injection heq with ed eb
           cases ed
           cases eb
-          exact ⟨hd, hb⟩
+          exact ⟨rfl, rfl⟩
 
 /-- Both source TERM and source TYPE erase to their certified annotations. -/
 theorem sourceModelTyping_erases (params : List KName) (ρ : KName → Nat) :
@@ -174,7 +174,7 @@ theorem sourceModelTyping_erases (params : List KName) (ρ : KName → Nat) :
   | pi ctx ac name d b style u v ad ab hd hb ihd ihb =>
       refine ⟨?_, rfl⟩
       simp [eraseExpr, AnnotatedModelTerm.forget, ihd.1, ihb.1]
-  | lam ctx ac name d b type style u v ad ab at hd ht hb ihd iht ihb =>
+  | lam ctx ac name d b type style u v ad ab aTy hd ht hb ihd iht ihb =>
       constructor
       · simp [eraseExpr, AnnotatedModelTerm.forget, ihd.1, ihb.1]
       · simp [eraseExpr, AnnotatedModelTerm.forget, ihd.1, ihb.2]
@@ -183,10 +183,10 @@ theorem sourceModelTyping_erases (params : List KName) (ρ : KName → Nat) :
       · simp [eraseExpr, AnnotatedModelTerm.forget, ihf.1, iha.1]
       · have hParts := erasePi_parts ρ name d b style ad.forget ab.forget ihf.2
         exact source_annotated_instantiate ρ b arg ab aa 0 hParts.2 iha.1
-  | letE ctx ac name d value b type level ad av ab at hd hv hb ihd ihv ihb =>
+  | letE ctx ac name d value b type level ad av ab aTy hd hv hb ihd ihv ihb =>
       constructor
       · simp [eraseExpr, AnnotatedModelTerm.forget, ihd.1, ihv.1, ihb.1]
-      · exact source_annotated_instantiate ρ type value at av 0 ihb.2 ihv.1
+      · exact source_annotated_instantiate ρ type value aTy av 0 ihb.2 ihv.1
 
 /--
 MAIN semantic typing induction. All Pi fibres, lambda body membership,
@@ -222,10 +222,10 @@ theorem sourceModelTyping_sound (V : Type u) [SetTheoryBasis V]
         (ihd env hCtx)
         (fun x hx => ihb (extendSetEnv x env)
           (AnnotatedContextValid.extend V ac env ad x hCtx hx))
-  | lam ctx ac name d b type style u v ad ab at hd ht hb ihd iht ihb =>
+  | lam ctx ac name d b type style u v ad ab aTy hd ht hb ihd iht ihb =>
       intro env hCtx
       exact modelLam_intro V (v.denote ρ) (interpAnnotated V env ad)
-        (fun x => interpAnnotated V (extendSetEnv x env) at)
+        (fun x => interpAnnotated V (extendSetEnv x env) aTy)
         (fun x => interpAnnotated V (extendSetEnv x env) ab)
         (fun x hx => iht (extendSetEnv x env)
           (AnnotatedContextValid.extend V ac env ad x hCtx hx))
@@ -241,11 +241,11 @@ theorem sourceModelTyping_sound (V : Type u) [SetTheoryBasis V]
         (fun x => interpAnnotated V (extendSetEnv x env) ab)
         (interpAnnotated V env af) (interpAnnotated V env aa)
         (ihf env hCtx) (iha env hCtx)
-  | letE ctx ac name d value b type level ad av ab at hd hv hb ihd ihv ihb =>
+  | letE ctx ac name d value b type level ad av ab aTy hd hv hb ihd ihv ihb =>
       intro env hCtx
       change SetTheoryBasis.member
         (interpAnnotated V (extendSetEnv (interpAnnotated V env av) env) ab)
-        (interpAnnotated V env (at.instantiate av 0))
+        (interpAnnotated V env (aTy.instantiate av 0))
       rw [interpAnnotated_instantiate_zero]
       exact ihb (extendSetEnv (interpAnnotated V env av) env)
         (AnnotatedContextValid.extend V ac env ad (interpAnnotated V env av)
@@ -273,11 +273,11 @@ theorem sourceModelTyping_beta (V : Type u) [SetTheoryBasis V]
     (params : List KName) (ρ : KName → Nat) (ctx : List KExpr)
     (ac : List AnnotatedModelTerm) (env : Nat → V)
     (name : KName) (style : BinderStyle) (domain body bodyType arg : KExpr)
-    (u v : ULevel) (ad ab at aa : AnnotatedModelTerm)
+    (u v : ULevel) (ad ab aTy aa : AnnotatedModelTerm)
     (hd : SourceModelTyping params ρ ctx ac domain (.sort u) ad (.sort (u.denote ρ)))
     (ht : SourceModelTyping params ρ (domain :: ctx) (ad :: ac)
-      bodyType (.sort v) at (.sort (v.denote ρ)))
-    (hb : SourceModelTyping params ρ (domain :: ctx) (ad :: ac) body bodyType ab at)
+      bodyType (.sort v) aTy (.sort (v.denote ρ)))
+    (hb : SourceModelTyping params ρ (domain :: ctx) (ad :: ac) body bodyType ab aTy)
     (ha : SourceModelTyping params ρ ctx ac arg domain aa ad)
     (hCtx : AnnotatedContextValid V ac env) :
     WeakHeadStep (.app (.lam name domain body style) arg) (body.instantiateBVar arg 0) ∧
@@ -287,7 +287,7 @@ theorem sourceModelTyping_beta (V : Type u) [SetTheoryBasis V]
     interpAnnotated V env (.app (.lam (v.denote ρ) ad ab) aa) =
       interpAnnotated V env (ab.instantiate aa 0) := by
   exact source_annotated_beta V ρ env name style domain body arg ad ab aa (v.denote ρ)
-    (fun x => interpAnnotated V (extendSetEnv x env) at)
+    (fun x => interpAnnotated V (extendSetEnv x env) aTy)
     (sourceModelTyping_erases params ρ hd).1
     (sourceModelTyping_erases params ρ hb).1
     (sourceModelTyping_erases params ρ ha).1

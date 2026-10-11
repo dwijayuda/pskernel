@@ -19,6 +19,7 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [G4.3b general-domain Pi/lambda/application/restricted-let evidence](G4_GENERAL_PI_EVIDENCE.md)
 - [P0 mathematical/model soundness contract](PSKERNEL_FAST_SOUNDNESS_CONTRACT_V1.md)
 - [P1 independently proved scope metatheory and axiom audit](P1_SOUNDNESS_EVIDENCE.md)
+- [P1 bounded typed beta/let substitution and variable weakening evidence](P1_TYPED_SUBSTITUTION_EVIDENCE.md)
 
 ## Current executable state
 
@@ -32,8 +33,8 @@ lake build pskernel_fast_smoke
 lake exe pskernel_fast_smoke
 ```
 
-Research branch: `research/pskernel-fast-clean-v3-20261011`. Pinned Lean `v4.35.0-rc4`. The last qualified restricted G4.3b implementation remains `253afb42b477aacab22def288a2dd42d7ca9633b`. **P0/P1 formal-safety checkpoint**: the independent `ContextScoped` spec, G3 executable scope equivalence, proofs that all six G4.3b rule outcomes preserve source and type scope, and proofs that the second runtime output scope check cannot fail after successful inference. [Cloud CI 38118786036](https://github.com/dwijayuda/pskernel/actions/runs/38118786036) passed 60 Lake jobs, audited 25 independent V3 Lean source files, and pinned 7 theorem-assumption receipts to `propext`, `Classical.choice`, `Quot.sound` with fail-closed synthetic tests. Read the exact [P1 evidence](P1_SOUNDNESS_EVIDENCE.md). **No type-preserving substitution, set-theoretic denotational soundness, consistency theorem, general DefEq, real kernel benchmarks or theorem admission has been established.**
+Research branch: `research/pskernel-fast-clean-v3-20261011`; Lean pinned to `v4.35.0-rc4`. The unchanged G4.3b **executing** checker is a restricted six-rule typing fragment, not theorem admission. Latest proof/CI milestone: source and assumption gate through `b08feccc8bb06d7f5823636ec6d9f1badbafd6fe`, [Actions #38120030487](https://github.com/dwijayuda/pskernel/actions/runs/38120030487): **62 successful Lake jobs, 26 independent Lean sources audited and 15 exact theorem-assumption receipts**. Alongside independent structural [P1 scope metatheory](P1_SOUNDNESS_EVIDENCE.md), [P1 bounded typed substitution](P1_TYPED_SUBSTITUTION_EVIDENCE.md) now proves typed dependent-identity beta, variable-body let/zeta reduction and checked-head-binder variable weakening using the actual substitution/lifting algorithms. **General typed substitution, an actual set-theoretic denotational model, consistency, full Lean DefEq and proof admission remain UNPROVED/UNIMPLEMENTED.**
 
 ## Next
 
-The new P0/P1 proof contracts are green in their **structural** scope, separate from the executing checker. Next formalize and prove the **type-preserving** dependent substitution theorem, then derive a genuinely denotational (set-theoretic) soundness theorem against the executing rules, and develop G4.4 typed WHNF/DefEq. Keep the second runtime output check for defense in depth despite the new proof it is unreachable when first inference succeeds. Preserve old GitHub branches and do not advertise a finished Lean kernel or consistency proof.
+Continue the **full** dependent substitution/context preservation proof only where its cost supports a future executable soundness result; evaluate con-leche-style direct semantic preservation as the cheaper route around difficult syntactic inversion. Implement a genuine independent set-model interpretation, G4.4 typed positive-sound WHNF/DefEq and a protected checked environment without sacrificing freedom to optimize representation. Keep the second runtime output-scope check as defense in depth. Do not claim a consistency theorem or Lean kernel compatibility based solely on these bounded metatheory proofs.

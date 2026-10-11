@@ -154,11 +154,11 @@ def psPscv0ParseTermAtPrecedence
           psPscv0ParseTermAtPrecedence annotation 0 remaining;
         let primary ←
           if psTokenCursorAtText cursor "¬" then do
-            let prefix ← psTokenCursorExpectText cursor "¬"
-            let argument ← psPscv0ParseTermAtPrecedence annotation 40 remaining prefix.cursor
+            let negation ← psTokenCursorExpectText cursor "¬"
+            let argument ← psPscv0ParseTermAtPrecedence annotation 40 remaining negation.cursor
             pure {
               value := psPscv0NotationCall "Not" [argument.value]
-                (psSyntaxSpanJoin prefix.token.span (psSyntaxTermSpan argument.value))
+                (psSyntaxSpanJoin negation.token.span (psSyntaxTermSpan argument.value))
               cursor := argument.cursor }
           else if psTokenCursorAtText cursor "by" then
             psPscv0ReadProof smaller (remaining + 1) cursor

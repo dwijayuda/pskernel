@@ -43,3 +43,7 @@ lean_exe pskernel_fast_scoped_context_smoke where
 lean_exe pskernel_fast_general_pi_smoke where
   root := `PSKernelFast.GeneralPiFormationSmoke
   srcDir := "src"
+
+lean_exe pskernel_fast_typed_conversion_smoke where
+  root := `PSKernelFast.TypedConversionSmoke
+  srcDir := "src"

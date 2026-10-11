@@ -1,3 +1,73 @@
+# PSC0 AI WORK STATE — native v7 binder groups
+
+## 11 October 2026 — shared annotation scope for multi-name native groups
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user requested multi-name native binder groups with correct annotation scope,
+authored in native `.lean`, with clean architecture, minimal checks, no
+pskernel-core and no self-hosting. Work uses GitHub source operations and Linux
+cloud CI; no local checkout, build or tests.
+
+The binder head now represents a nonempty group: one first name, additional names,
+binder kind and span, paired with one annotation in the existing recursive AST.
+A unary construction helper preserves existing callers. Native group parsing
+retains this boundary in lambdas, quantifiers (including bare `forall A B : Type`),
+explicit dependent arrows, variables and nonexplicit value-declaration parameters.
+Declaration explicit parameters still require individual comma entries.
+
+The scope walker visits the annotation before adding any group name. The shared
+elaborator elaborates a non-placeholder annotation in that outer context once,
+then introduces each name with the resulting Core type. Whole-domain inference
+holes obtain their own expected domains per name. Thus a grouped lambda such as
+`fun (T: Type) (T x: T) => x` retains the outer type identity in both inner
+parameter types. Expected telescopes still advance one actual parameter at a time.
+
+Section dependency selection filters names within groups, preserving shared
+annotations and dependency order without capturing unused siblings. Inclusion,
+instance eligibility and fixed recursive section arguments all use the same name
+enumeration. The recursion walker respects group scope; normalization splits
+groups only after renaming annotations to inaccessible parameter identities.
+Constructor metadata counts elaborated fields rather than source groups.
+
+Shared native binder printers preserve all group names. The declaration-only PSC
+printer explicitly refuses grouped explicit parameters requiring a future
+scope-preserving lowering. There is no compiler-source translation milestone here.
+
+**Qualified in [Linux run 38156237259](https://github.com/dwijayuda/pskernel/actions/runs/38156237259)**
+at source commit `8c0504c4ba8c9f8a6118bcf65e9803824a6dd2af`, using native Lean 4.35.0-rc4
+(`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`), profile
+`pscv0-v7-native-bounded/5`. The first run passed.
+
+The 28 existing parser cases remain unchanged. The same three accepted semantic
+programs now cover grouped local/global shadowing, bare quantifiers, dependent
+arrows, heterogeneous inferred lambda parameters, implicit/strict implicit groups,
+selective section capture and changing-state recursion. The composite application
+admits 72 declarations, including its generated recursive worker. The existing
+five-declaration instance/Except case now uses grouped proposition variables.
+Three new refusal inputs check declaration-vs-native grammar, an unavailable
+outer annotation name and duplicate names within a section-variable group,
+bringing the compact batch to 25 phase-specific refusals.
+
+Native compiler/check binaries, official kernel acceptance, CLI emission,
+TypeScript 7.0.2 compilation and JavaScript runtime assertions all passed.
+The inventory remains 69 portable and 75 native closure modules, no pskernel-core.
+Measured cached source rebuild: 17,613 ms; unchanged rebuild: 490 ms.
+CLI application parsing took 2 ms, elaboration 1 ms, bridge preparation 3 ms,
+official kernel checking 3 ms and erasure 4 ms. These are small-workload
+measurements, not a broad performance benchmark. Existing unrelated unused-name
+warnings remain. The following evidence-recording commit changes this document only.
+
+Remaining binder limitations: pattern binders, lambda result annotations and
+automatic insertion of omitted implicit lambda binders. Inductive/structure source
+headers retain the selected legacy data grammar. The older Lean-source parser,
+full source translation and roundtrip qualification remain outside this native
+development increment. Imports, universes, global classes/instances and the other
+broader v7 milestones remain pending. No complete-v7 or self-hosting claim.
+
+The following records are historical and apply to their exact source commits.
+
+---
+
 # PSC0 AI WORK STATE — native v7 quantified types and shared binders
 
 ## 11 October 2026 — native binder syntax through shared semantics

@@ -4,6 +4,7 @@ import path from 'node:path';
 const output = await import(pathToFileURL(path.resolve(process.argv[2])).href);
 assert.equal(output.answer, 42n);
 assert.equal(output.keep(7n), 7n);
+assert.equal(output.declared, 12n);
 assert.equal(output.typed, 7n);
 assert.equal(output.completed, 9n);
 assert.equal(output.inferred, 8n);

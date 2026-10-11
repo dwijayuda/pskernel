@@ -565,35 +565,37 @@ def psElabBool
 abbrev PsElaborator :=
   PsElabContext → PsSyntaxTerm → Option PsExpr → Except PsElabError PsElabTermResult
 
-def psElabFreshType (context : PsElabContext) : PsElabTermResult :=
+structure PsElabTypeResult where
+  context : PsElabContext
+  type : PsExpr
+
+def psElabFreshType (context : PsElabContext) : PsElabTypeResult :=
   let level := psMetaFreshLevel context.metaContext
   let fresh := psMetaFresh level.context context.localContext (.sortE level.level) .natural
-  { context := psElabContextWithMeta context fresh.context
-    term := fresh.expr
-    type := .sortE level.level }
+  { context := psElabContextWithMeta context fresh.context, type := fresh.expr }
 
 def psElabHole (context : PsElabContext) (expected : Option PsExpr) : PsElabTermResult :=
-  let type := match expected with
-    | some type => PsElabTermResult.mk context type (.sortE .zero)
+  let target := match expected with
+    | some type => PsElabTypeResult.mk context type
     | none => psElabFreshType context
-  let fresh := psMetaFresh type.context.metaContext type.context.localContext type.term .natural
-  { context := psElabContextWithMeta type.context fresh.context
+  let fresh := psMetaFresh target.context.metaContext target.context.localContext target.type .natural
+  { context := psElabContextWithMeta target.context fresh.context
     term := fresh.expr
-    type := type.term }
+    type := target.type }
 
 def psElabType (elaborate : PsElaborator) (context : PsElabContext)
-    (source : PsSyntaxTerm) : Except PsElabError PsElabTermResult := do
-  let result ← match source with
-    | .hole _ => pure (psElabFreshType context)
-    | _ => elaborate context source none
-  let _ ← (psInferEnsureSort result.context.environment result.context.metaContext
-    result.context.localContext result.type).mapError PsElabError.infer
-  return result
+    (source : PsSyntaxTerm) : Except PsElabError PsElabTypeResult := do
+  match source with
+  | .hole _ => return psElabFreshType context
+  | _ =>
+    let result ← elaborate context source none
+    let _ ← (psInferEnsureSort result.context.environment result.context.metaContext
+      result.context.localContext result.type).mapError PsElabError.infer
+    return { context := result.context, type := result.term }
 
 def psElabAscription (elaborate : PsElaborator) (context : PsElabContext)
     (value type : PsSyntaxTerm) (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult := do
   let annotation ← psElabType elaborate context type
-  let result ← elaborate annotation.context value (some annotation.term)
+  let result ← elaborate annotation.context value (some annotation.type)
   psElabFinalizeExpected result expected
-

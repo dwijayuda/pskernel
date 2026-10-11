@@ -211,108 +211,28 @@ def psElabDeclarationTermCallback
   psElabTerm context term expected
 
 def psElabDeclarationParts
-    (environment : PsEnvironment)
-    (nameSyntax : PsSyntaxName)
+    (environment : PsEnvironment) (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax : PsSyntaxTerm)
-    (valueSyntax : PsSyntaxTerm)
-    (isTheorem : Bool) :
-    Except PsElabError PsElabDeclarationResult :=
-  match psSyntaxNameToName nameSyntax with
-  | none =>
-      Except.error PsElabError.emptyName
-  | some name =>
-      let initial : PsElabContext :=
-        psElabContextEmpty environment;
-      match
-          psElabTypedBinders
-            psElabDeclarationTermCallback
-            initial
-            binders with
-      | Except.error error =>
-          Except.error error
-      | Except.ok binderResult =>
-          match
-              psElabTerm
-                binderResult.context
-                typeSyntax
-                Option.none with
-          | Except.error error =>
-              Except.error error
-          | Except.ok typeResult =>
-              match
-                  psInferEnsureSort
-                    typeResult.context.environment
-                    typeResult.context.metaContext
-                    typeResult.context.localContext
-                    typeResult.type with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok _ =>
-                  let valueContext : PsElabContext :=
-                    if isTheorem then
-                      typeResult.context
-                    else
-                      psElabContextWithStructuralRecursion
-                        typeResult.context
-                        (psElabStructuralRecursionFromSource
-                          name
-                          binderResult.bindersRev
-                          valueSyntax
-                          typeResult.context
-                          typeResult.term);
-                  match
-                      psElabTerm
-                        valueContext
-                        valueSyntax
-                        (Option.some typeResult.term) with
-                  | Except.error error =>
-                      Except.error error
-                  | Except.ok valueResult =>
-                      let metaContext : PsMetaContext :=
-                        valueResult.context.metaContext;
-                      let openValue : PsExpr :=
-                        psMetaInstantiate
-                          metaContext
-                          valueResult.term;
-                      let openType : PsExpr :=
-                        psMetaInstantiate
-                          metaContext
-                          typeResult.term;
-                      let closed : PsExpr × PsExpr :=
-                        psCloseElabTypedBinders
-                          metaContext
-                          binderResult.bindersRev
-                          openValue
-                          openType;
-                      if
-                          psExprHasUnresolvedMeta
-                            (Prod.fst closed) then
-                        Except.error
-                          PsElabError.unresolvedMetavariable
-                      else if
-                          psExprHasUnresolvedMeta
-                            (Prod.snd closed) then
-                        Except.error
-                          PsElabError.unresolvedMetavariable
-                      else if isTheorem then
-                        Except.ok
-                          (PsElabDeclarationResult.mk
-                            (PsDeclaration.theoremDecl
-                              name
-                              List.nil
-                              (Prod.snd closed)
-                              (Prod.fst closed))
-                            metaContext)
-                      else
-                        Except.ok
-                          (PsElabDeclarationResult.mk
-                            (PsDeclaration.definitionDecl
-                              name
-                              List.nil
-                              (Prod.snd closed)
-                              (Prod.fst closed))
-                            metaContext)
+    (typeSyntax valueSyntax : PsSyntaxTerm) (isTheorem : Bool) :
+    Except PsElabError PsElabDeclarationResult := do
+  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let binderResult ← psElabTypedBinders psElabDeclarationTermCallback
+    (psElabContextEmpty environment) binders
+  let annotation ← psElabType psElabDeclarationTermCallback binderResult.context typeSyntax
+  let valueContext := if isTheorem then annotation.context else
+    psElabContextWithStructuralRecursion annotation.context
+      (psElabStructuralRecursionFromSource name binderResult.bindersRev
+        valueSyntax annotation.context annotation.type)
+  let value ← psElabTerm valueContext valueSyntax (some annotation.type)
+  let constraints := value.context.metaContext
+  let closed := psCloseElabTypedBinders constraints binderResult.bindersRev
+    (psMetaInstantiate constraints value.term) (psMetaInstantiate constraints annotation.type)
+  if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
+    throw .unresolvedMetavariable
+  let declaration := if isTheorem then
+    PsDeclaration.theoremDecl name [] closed.snd closed.fst
+    else PsDeclaration.definitionDecl name [] closed.snd closed.fst
+  return { declaration, metaContext := constraints }
 
 def psSyntaxConstructorCoreName
     (inductiveName : PsName)

@@ -40,21 +40,21 @@ def psElabBindersWithExpected (elaborate : PsElaborator)
         | .mvar _ => pure none
         | _ => throw (.infer .expectedFunction)
     let type ← match sourceType, expectedPi with
-      | .hole _, some pi => pure (PsElabTermResult.mk state.context pi.domain (.sortE .zero))
+      | .hole _, some pi => pure (PsElabTypeResult.mk state.context pi.domain)
       | _, _ => psElabType elaborate state.context sourceType
     let constraints ← match expectedPi with
       | none => pure type.context.metaContext
       | some pi =>
         let unified := psUnify type.context.environment type.context.localContext
-          type.context.metaContext type.term pi.domain
+          type.context.metaContext type.type pi.domain
         if unified.success then pure unified.context else throw .typeMismatch
     let context := psElabContextWithMeta type.context constraints
     let binder := psElabBinderKindToCore head.kind
-    let pushed := psLocalPushBinding context.localContext name (psMetaInstantiate constraints type.term) binder
+    let pushed := psLocalPushBinding context.localContext name (psMetaInstantiate constraints type.type) binder
     let nextExpected := expectedPi.map (fun pi => psExprInstantiate1 pi.body (.fvar pushed.id))
     psElabBindersWithExpected elaborate rest {
       context := psElabContextWithLocal context pushed.context
-      bindersRev := PsElabTypedBinder.mk pushed.id name type.term binder :: state.bindersRev
+      bindersRev := PsElabTypedBinder.mk pushed.id name type.type binder :: state.bindersRev
       expected := nextExpected }
 
 def psElabTypedBindersAcc (elaborate : PsElaborator)
@@ -252,59 +252,14 @@ def psElabLetAfterValue
         term
         expected
 
-def psElabLet
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
-    (nameSyntax : PsSyntaxName)
-    (declaredType : Option PsSyntaxTerm)
-    (value : PsSyntaxTerm)
-    (body : PsSyntaxTerm)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match psSyntaxNameToName nameSyntax with
-  | none => Except.error PsElabError.emptyName
-  | some name =>
-      match declaredType with
-      | none =>
-          match elaborate context value Option.none with
-          | Except.error error => Except.error error
-          | Except.ok valueResult =>
-              psElabLetAfterValue
-                elaborate
-                context
-                name
-                valueResult.type
-                valueResult
-                body
-                expected
-      | some sourceType =>
-          match elaborate context sourceType Option.none with
-          | Except.error error => Except.error error
-          | Except.ok typeResult =>
-              match psInferEnsureSort
-                  typeResult.context.environment
-                  typeResult.context.metaContext
-                  typeResult.context.localContext
-                  typeResult.type with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok _ =>
-                  match elaborate
-                      typeResult.context
-                      value
-                      (Option.some typeResult.term) with
-                  | Except.error error => Except.error error
-                  | Except.ok valueResult =>
-                      psElabLetAfterValue
-                        elaborate
-                        context
-                        name
-                        typeResult.term
-                        valueResult
-                        body
-                        expected
-
+def psElabLet (elaborate : PsElaborator) (context : PsElabContext)
+    (nameSyntax : PsSyntaxName) (declaredType : Option PsSyntaxTerm)
+    (value body : PsSyntaxTerm) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let valueResult ← match declaredType with
+    | none => elaborate context value none
+    | some sourceType =>
+      let annotation ← psElabType elaborate context sourceType
+      elaborate annotation.context value (some annotation.type)
+  psElabLetAfterValue elaborate context name valueResult.type valueResult body expected

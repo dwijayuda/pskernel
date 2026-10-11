@@ -26,7 +26,27 @@ private def parserCases : IO Unit := do
       (← get "error" (c.getObjValAs? String "error"))
 
 private def application : String :=
-  "function keep(value: Nat): Nat := {\n  let selected: Nat := value\n  selected\n}\nfunction apply(f: Nat -> Nat, value: Nat): Nat := f(value)\nfunction choose{A: Type}(first: A, second: A): A := first\nfunction useUnit(value: Unit): Nat := 9\nconst identity: Nat -> Nat := fun x => x\nconst shadow: Nat -> Nat := fun x =>\n  let x: Nat := x\n  x\nfunction capture(value: Nat): Nat := apply(fun ignored => value, 0)\nconst answer: Nat := apply(fun x => x, choose(A := Nat, second := 0, first := 42))\nconst typed: Nat := (identity(7) : Nat)\nconst completed: Nat := useUnit()\nconst inferred: Nat := choose(A := _, first := 8, second := 0)\nconst inferredLambda: Nat := (fun x => x)(13)\nconst nested: Nat := apply(fun x =>\n  let f: Nat -> Nat := fun x => x\n  f(x), 11)\n"
+  "function keep(value: Nat): Nat := {\n" ++
+  "  let selected: _ := value\n" ++
+  "  selected\n" ++
+  "}\n" ++
+  "function apply(f: Nat -> Nat, value: Nat): Nat := f(value)\n" ++
+  "function choose{A: Type}(first: A, second: A): A := first\n" ++
+  "function useUnit(value: Unit): Nat := 9\n" ++
+  "const identity: Nat -> Nat := fun x => x\n" ++
+  "const shadow: Nat -> Nat := fun x =>\n" ++
+  "  let x: Nat := x\n" ++
+  "  x\n" ++
+  "function capture(value: Nat): Nat := apply(fun ignored => value, 0)\n" ++
+  "const answer: Nat := apply(fun x => x, choose(A := Nat, second := 0, first := 42))\n" ++
+  "const typed: Nat := (identity(7) : Nat)\n" ++
+  "const completed: Nat := useUnit()\n" ++
+  "const inferred: Nat := choose(A := _, first := 8, second := 0)\n" ++
+  "const inferredLambda: Nat := (fun x => x)(13)\n" ++
+  "const nested: Nat := apply(fun x =>\n" ++
+  "  let f: Nat -> Nat := fun x => x\n" ++
+  "  f(x), 11)\n" ++
+  "const declared: _ := 12\n"
 
 private def semanticCases : IO Unit := do
   let requests : Array PsV7Native.Request := #[

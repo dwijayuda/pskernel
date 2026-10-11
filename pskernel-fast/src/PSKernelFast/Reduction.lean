@@ -185,8 +185,12 @@ def lazyWHNF (machineFuel readbackFuel : Nat) (term : RawExpr) :
 def decodeForEvaluation (store : Store) (root decodeFuel : Nat) :
     Except EvalError RawExpr :=
   match decode store decodeFuel root with
-  | .ok term => .ok term
   | .error e => .error (.invalidStore e)
+  | .ok term =>
+      if isScoped 0 term then
+        .ok term
+      else
+        .error (.invalidStore .invalidScope)
 
 /-- Typed-experiment-only identity function. Not a Lean kernel identity proof. -/
 def rawId : RawExpr := .lam (.sort 0) (.bvar 0)

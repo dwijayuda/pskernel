@@ -31,7 +31,51 @@ inductive StoreError where
   | inconsistentIndex (handle : Nat)
   | nodeLimit (maximum : Nat)
   | decodeFuelExhausted
+  | invalidScope
   deriving Repr, BEq, Inhabited
+
+/--
+  Independently specified well-scopedness of the small prototype RawExpr.
+  This is only a binder-scope fact, not a typing judgment.
+-/
+def RawScoped : Nat → RawExpr → Prop
+  | depth, .bvar index => index < depth
+  | _, .sort _ => True
+  | depth, .app fn arg => RawScoped depth fn ∧ RawScoped depth arg
+  | depth, .lam domain body =>
+      RawScoped depth domain ∧ RawScoped (depth + 1) body
+
+/-- Executable strict scope validator used at all G2 decoding boundaries. -/
+def isScoped : Nat → RawExpr → Bool
+  | depth, .bvar index => decide (index < depth)
+  | _, .sort _ => true
+  | depth, .app fn arg => isScoped depth fn && isScoped depth arg
+  | depth, .lam domain body =>
+      isScoped depth domain && isScoped (depth + 1) body
+
+/--
+  A successful executable scope check guarantees the declarative binder
+  predicate. No old kernel metatheory is imported or assumed.
+-/
+theorem isScoped_sound (depth : Nat) (term : RawExpr)
+    (h : isScoped depth term = true) : RawScoped depth term := by
+  induction term generalizing depth with
+  | bvar index =>
+      simpa [isScoped, RawScoped, decide_eq_true_eq] using h
+  | sort _ =>
+      trivial
+  | app fn arg ihFn ihArg =>
+      have both : isScoped depth fn = true ∧ isScoped depth arg = true := by
+        simpa [isScoped, Bool.and_eq_true] using h
+      change RawScoped depth fn ∧ RawScoped depth arg
+      exact ⟨ihFn depth both.1, ihArg depth both.2⟩
+  | lam domain body ihDomain ihBody =>
+      have both :
+          isScoped depth domain = true ∧
+            isScoped (depth + 1) body = true := by
+        simpa [isScoped, Bool.and_eq_true] using h
+      change RawScoped depth domain ∧ RawScoped (depth + 1) body
+      exact ⟨ihDomain depth both.1, ihBody (depth + 1) both.2⟩
 
 /-- Persistent functional table; no proof authority or unchecked declaration API. -/
 structure Store where

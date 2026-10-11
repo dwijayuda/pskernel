@@ -115,6 +115,17 @@ def reductionSmoke : IO Unit := do
   | _ => throw <| IO.userError "forged DAG handle reached evaluation"
 
   generatedDifferential
+  let forgedOpen : Store := { nodes := #[.bvar 0] }
+  match decodeForEvaluation forgedOpen 0 10 with
+  | .error (.invalidStore .invalidScope) => pure ()
+  | _ => throw <| IO.userError "out-of-scope forged DAG term was not rejected"
+  let forgedNested : Store := {
+    nodes := #[.sort 0, .bvar 2, .lam 0 1]
+  }
+  match decodeForEvaluation forgedNested 2 10 with
+  | .error (.invalidStore .invalidScope) => pure ()
+  | _ => throw <| IO.userError "nested escaped de Bruijn index was not rejected"
+
   IO.println "PSKernel-Fast V3 G2: eager/lazy beta WHNF differential corpus PASS"
 end PSKernelFast
 

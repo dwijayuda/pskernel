@@ -31,6 +31,9 @@ function correspondence(projected,baseline){
     assert.equal(original.split(name).length,2,'baseline unexpectedly references '+name);
     original=original.replace('def '+name+'\n','def old_'+name+'\n');
   }
+  // Expose the known successful parse before reasoning about the printer.
+  // Splitting a printer hidden under bind/match binder scopes does not rewrite
+  // those occurrences. `change` checks definitional equality; it is not an axiom.
   const proofs=APIs.map(([name,parse,print])=>
     `theorem migration_${name} (source : String) :\n`+
     `    ${name} source = old_${name} source := by\n`+
@@ -38,8 +41,11 @@ function correspondence(projected,baseline){
     `  cases parsed : ${parse} source with\n`+
     `  | error error => rfl\n`+
     `  | ok sourceModule =>\n`+
-    `      cases printed : ${print} sourceModule <;> rfl\n\n`+
-    `#print axioms migration_${name}\n`).join('\n');
+    `      change psTranslationMapError PsTranslationError.print (${print} sourceModule) =\n`+
+    `        (match ${print} sourceModule with\n`+
+    `         | Except.error error => Except.error (PsTranslationError.print error)\n`+
+    `         | Except.ok output => Except.ok output)\n`+
+    `      rfl\n\n#print axioms migration_${name}\n`).join('\n');
   return projected+'\n'+original+'\n'+proofs;
 }
 export async function readAuthoringInputs(){
@@ -111,7 +117,6 @@ export async function materializeAuthoring(seedDirectory,outputDirectory){
   const lowered=unwrap(B.psPscv0LowerToLean(true,inputs.source),'compiler input projection');
   const roundtrip=unwrap(B.psPscv0TranslateReadable(false,true,readable),'owned Lean reader round trip');
   assert.equal(unwrap(B.psPscv0LowerToLean(true,roundtrip),'round-trip lowering'),lowered);
-  // A disagreement with native preflight is an error, not a native fallback.
   for(const [file,value] of [['readable.lean',readable],['lowered.lean',lowered],['roundtrip.ps',roundtrip]]){
     assert.equal(value,await readFile(path.join(root,'dist/pscv0-native-authoring',file),'utf8'),'native/generated disagreement: '+file);
   }

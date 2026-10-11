@@ -76,8 +76,8 @@ private def generatedDifferential : IO Unit := do
     | .error .betaBudgetExhausted, .error .machineBudgetExhausted,
         .error .machineBudgetExhausted =>
         bothExhausted := bothExhausted + 1
-    | _, _, _ => throw <| IO.userError
-        "generated 3-engine disagreement or resource failure"
+    | _, _, _ =>
+        throw <| IO.userError "generated 3-engine disagreement or resource failure"
   require (checked > 40) "generated differential coverage unexpectedly too small"
   IO.println s!"G2 bounded generated corpus: equal={checked}, both_exhausted={bothExhausted}"
   

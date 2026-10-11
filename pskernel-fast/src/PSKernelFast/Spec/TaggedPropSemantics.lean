@@ -30,17 +30,17 @@ noncomputable def taggedPropFalse (V : Type u) [SetTheoryBasis V] : V :=
 noncomputable def taggedPropPi (V : Type u) [SetTheoryBasis V]
     (A : V) (B : V → V) : V := by
   classical
-  exact if ∀ x : V, SetTheoryBasis.Mem x A → B x = taggedTrue V
+  exact if ∀ x : V, SetTheoryBasis.member x A → B x = taggedTrue V
     then taggedTrue V
     else taggedPropFalse V
 
 /-- No new axiom: the tagged Pi denotes a member of P1f's actual Prop. -/
 theorem taggedPropPi_member_prop (V : Type u) [SetTheoryBasis V]
     (A : V) (B : V → V) :
-    SetTheoryBasis.Mem (taggedPropPi V A B) (taggedSortSet V 0) := by
+    SetTheoryBasis.member (taggedPropPi V A B) (taggedSortSet V 0) := by
   classical
   by_cases hAll :
-      ∀ x : V, SetTheoryBasis.Mem x A → B x = taggedTrue V
+      ∀ x : V, SetTheoryBasis.member x A → B x = taggedTrue V
   · have hResult : taggedPropPi V A B = taggedTrue V := by
       simp only [taggedPropPi, if_pos hAll]
     rw [hResult]
@@ -54,12 +54,12 @@ theorem taggedPropPi_member_prop (V : Type u) [SetTheoryBasis V]
 theorem taggedPropPi_true_iff (V : Type u) [SetTheoryBasis V]
     (A : V) (B : V → V) :
     taggedPropPi V A B = taggedTrue V ↔
-      ∀ x : V, SetTheoryBasis.Mem x A → B x = taggedTrue V := by
+      ∀ x : V, SetTheoryBasis.member x A → B x = taggedTrue V := by
   classical
   constructor
   · intro hProduct
     by_cases hAll :
-        ∀ x : V, SetTheoryBasis.Mem x A → B x = taggedTrue V
+        ∀ x : V, SetTheoryBasis.member x A → B x = taggedTrue V
     · exact hAll
     · have hFalse : taggedPropPi V A B = taggedPropFalse V := by
         simp only [taggedPropPi, if_neg hAll]
@@ -73,11 +73,11 @@ theorem taggedPropPi_true_iff (V : Type u) [SetTheoryBasis V]
 theorem taggedPropPi_false_of_counterexample
     (V : Type u) [SetTheoryBasis V]
     (A : V) (B : V → V) (x : V)
-    (hDomain : SetTheoryBasis.Mem x A)
+    (hDomain : SetTheoryBasis.member x A)
     (hFalse : B x ≠ taggedTrue V) :
     taggedPropPi V A B = taggedPropFalse V := by
   have hNotAll :
-      ¬ ∀ y : V, SetTheoryBasis.Mem y A → B y = taggedTrue V :=
+      ¬ ∀ y : V, SetTheoryBasis.member y A → B y = taggedTrue V :=
     fun hall => hFalse (hall x hDomain)
   simp [taggedPropPi, hNotAll]
 
@@ -106,8 +106,8 @@ noncomputable def interpTaggedProp (V : Type u) [SetTheoryBasis V] :
 /-- A semantic obligation; NEVER inferred from an untrusted annotation. -/
 def TaggedPropPiFibresValid (V : Type u) [SetTheoryBasis V]
     (env : Nat → V) (domain body : PropInterpTerm) : Prop :=
-  ∀ x : V, SetTheoryBasis.Mem x (interpTaggedProp V env domain) →
-    SetTheoryBasis.Mem
+  ∀ x : V, SetTheoryBasis.member x (interpTaggedProp V env domain) →
+    SetTheoryBasis.member
       (interpTaggedProp V (extendSetEnv x env) body)
       (taggedSortSet V 0)
 
@@ -115,7 +115,7 @@ def TaggedPropPiFibresValid (V : Type u) [SetTheoryBasis V]
 theorem interpTaggedProp_pi_member (V : Type u) [SetTheoryBasis V]
     (env : Nat → V) (domain body : PropInterpTerm)
     (_valid : TaggedPropPiFibresValid V env domain body) :
-    SetTheoryBasis.Mem
+    SetTheoryBasis.member
       (interpTaggedProp V env (.propPi domain body))
       (taggedSortSet V 0) := by
   simpa only [interpTaggedProp] using
@@ -132,7 +132,7 @@ theorem tagged_forallPropProp_fibres_valid (V : Type u)
 
 theorem tagged_forallPropProp_member_prop (V : Type u)
     [SetTheoryBasis V] (env : Nat → V) :
-    SetTheoryBasis.Mem
+    SetTheoryBasis.member
       (interpTaggedProp V env forallPropPropTerm) (taggedSortSet V 0) :=
   interpTaggedProp_pi_member V env (.sort 0) (.bvar 0)
     (tagged_forallPropProp_fibres_valid V env)
@@ -143,7 +143,7 @@ theorem tagged_forallPropProp_is_false (V : Type u)
     interpTaggedProp V env forallPropPropTerm = taggedPropFalse V := by
   have hNotTrue : taggedPropFalse V ≠ taggedTrue V :=
     fun h => taggedTrue_ne_empty V (by simpa only [taggedPropFalse] using h.symm)
-  have hMember : SetTheoryBasis.Mem
+  have hMember : SetTheoryBasis.member
       (taggedPropFalse V) (taggedSortSet V 0) := by
     simpa only [taggedPropFalse, taggedSortSet] using
       (taggedFalse_member_prop V)
@@ -154,14 +154,14 @@ theorem tagged_forallPropProp_is_false (V : Type u)
 
 /-- For every P in tagged Prop, implication P → P has true denotation. -/
 theorem tagged_imp_self_true (V : Type u) [SetTheoryBasis V]
-    (P : V) (hP : SetTheoryBasis.Mem P (taggedSortSet V 0)) :
+    (P : V) (hP : SetTheoryBasis.member P (taggedSortSet V 0)) :
     taggedPropPi V P (fun _ => P) = taggedTrue V := by
   apply (taggedPropPi_true_iff V P (fun _ => P)).2
   intro x hx
-  have hCarrier : SetTheoryBasis.Mem P (taggedProp V) := by
+  have hCarrier : SetTheoryBasis.member P (taggedProp V) := by
     simpa only [taggedSortSet] using hP
   rcases (taggedProp_exactly_two V P).mp hCarrier with hFalse | hTrue
-  · have hEmptyMember : SetTheoryBasis.Mem x
+  · have hEmptyMember : SetTheoryBasis.member x
         (SetTheoryBasis.emptySet V) := by
       simpa only [hFalse] using hx
     exact False.elim (SetTheoryBasis.not_member_empty V x hEmptyMember)
@@ -180,7 +180,7 @@ theorem tagged_forallPropIdentity_fibres_valid
 
 theorem tagged_forallPropIdentity_member_prop (V : Type u)
     [SetTheoryBasis V] (env : Nat → V) :
-    SetTheoryBasis.Mem
+    SetTheoryBasis.member
       (interpTaggedProp V env forallPropIdentityTerm) (taggedSortSet V 0) :=
   interpTaggedProp_pi_member V env (.sort 0)
     (.propPi (.bvar 0) (.bvar 1))
@@ -200,7 +200,7 @@ theorem tagged_forallPropIdentity_is_true (V : Type u)
 /-- False source proposition has no denoting proof value. -/
 theorem tagged_forallPropProp_uninhabited (V : Type u)
     [SetTheoryBasis V] (env : Nat → V) (x : V) :
-    ¬ SetTheoryBasis.Mem x
+    ¬ SetTheoryBasis.member x
       (interpTaggedProp V env forallPropPropTerm) := by
   rw [tagged_forallPropProp_is_false V env]
   exact SetTheoryBasis.not_member_empty V x
@@ -209,7 +209,7 @@ theorem tagged_forallPropProp_uninhabited (V : Type u)
 This is a fact about its mathematical carrier, NOT checked proof terms. -/
 theorem tagged_forallPropIdentity_only_point (V : Type u)
     [SetTheoryBasis V] (env : Nat → V) (x : V)
-    (hx : SetTheoryBasis.Mem x
+    (hx : SetTheoryBasis.member x
       (interpTaggedProp V env forallPropIdentityTerm)) :
     x = taggedPoint V := by
   rw [tagged_forallPropIdentity_is_true V env] at hx

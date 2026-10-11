@@ -1,6 +1,6 @@
 # PSKernel-Fast G4 — Symbolic universes and checked-inference plan
 
-**Status:** partially implemented research. G4.0 positive symbolic equality, G4.1 unchecked catalog, G4.2 certified restricted Sort/Pi fragment, and **G4.3 structural binder lifting/lookup/substitution** have bounded green CI evidence. [Latest G4.3 evidence](G4_BINDER_EVIDENCE.md), run 38115032789, covers **scope only**, not dependent typing. **General checked inference, full symbolic equivalence/inequality, protected checked environment, DefEq and admission remain unimplemented**. Lean pinned to 4.35.0-rc4 `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; legacy APIs/proofs do not constrain V3.
+**Status:** partially implemented research. G4.0 positive symbolic equality, G4.1 unchecked catalog, G4.2 certified restricted Sort/Pi fragment, and **G4.3 structural binder lifting/lookup/substitution** have bounded green CI evidence. [Latest G4.3 evidence](G4_BINDER_EVIDENCE.md), run 38115032789, covers **scope only**, not dependent typing. The additional [dependent Sort/Pi fragment](G4_DEPENDENT_SORT_EVIDENCE.md), run 38115500178, proves a restricted `Sort`/bound-variable/Pi source-rule judgment over verified **Sort-only** contexts. **General checked inference for arbitrary domains, full symbolic equivalence/inequality, protected checked environment, DefEq and admission remain unimplemented**. Lean pinned to 4.35.0-rc4 `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`; legacy APIs/proofs do not constrain V3.
 
 ## Critical architectural choices
 
@@ -48,7 +48,7 @@ Positive-only symbolic normalizer and universal-assignment proof are implemented
 ## Immediate next implementation
 
 1. **Completed, GREEN:** capture-avoiding lift, scope-correct original and current-domain lookup, structural substitution and fail-closed preflight. [Exact evidence](G4_BINDER_EVIDENCE.md). Do not represent these as type-preservation results.
-2. **Now:** build a checked local typing judgment and protected binder-context constructors, carefully separating `InferOnly` and `FullyChecked`. Support bound variables and genuinely dependent `Pi` with actual sort formation; add lambda/application/let incrementally only under correct typed conversion.
+2. **Restricted fragment GREEN:** certified `Sort`, bound variables and dependent `Pi` for verified Sort-only context entries ([evidence](G4_DEPENDENT_SORT_EVIDENCE.md)). **Now:** build protected general typed binder entries and independently specified `Γ ⊢ e : A` for arbitrary well-typed domains, with `InferOnly` and `FullyChecked` separated; add lambda/application/let only under correct typed conversion.
 3. Finish symbolic universe equivalence/`isGEq` and a real checked environment distinct from G4.1's untrusted catalog; `unresolved` is never negative equality.
 4. Connect WHNF/DefEq positive results to actual typed context and independent official-Lean 4.35 positive/negative differential conformance; delay all theorem admission until full rule and soundness gates.
 

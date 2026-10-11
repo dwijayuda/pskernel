@@ -76,9 +76,9 @@ jobs:
           path: |
             psc0/.lake
             psc0/v7-native/.lake
-          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/v7-native/lake-manifest.json', 'psc0/lakefile.lean', 'psc0/lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
-            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/lakefile.lean') }}-
+            pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/v7-native/lake-manifest.json', 'psc0/lakefile.lean', 'psc0/lake-manifest.json') }}-
       - name: Compile current Lean sources into native compiler and compact checks
         id: build
         run: |
@@ -97,7 +97,7 @@ jobs:
           path: |
             psc0/.lake
             psc0/v7-native/.lake
-          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/lakefile.lean') }}-${{ github.sha }}
+          key: pscv0-native-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc0/v7-native/lean-toolchain', 'psc0/v7-native/lakefile.lean', 'psc0/v7-native/lake-manifest.json', 'psc0/lakefile.lean', 'psc0/lake-manifest.json') }}-${{ github.sha }}
       - name: Run existing parser corpus and native checked compiler cases in one process
         run: |
           set -euo pipefail

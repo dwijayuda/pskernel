@@ -1,0 +1,34 @@
+name: PSKernel-C0 portable Lean checker
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - 'psc0/packages/pskernel-c0/src/**'
+      - 'psc0/packages/pskernel-c0/test/**'
+      - 'psc0/packages/pskernel-c0/lakefile.lean'
+      - 'psc0/packages/pskernel-c0/lean-toolchain'
+      - '.github/workflows/pskernel-c0-lean.yml'
+  workflow_dispatch:
+jobs:
+  lean-portable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: false
+          use-mathlib-cache: false
+      - name: Enforce PSC0 portable source syntax
+        working-directory: psc0
+        run: node check-psc1-source.mjs --all-portable
+      - name: Compile C0 semantic closure and regression executable
+        working-directory: psc0/packages/pskernel-c0
+        run: lake build PsKernelC0 pskernel_c0_beta_tests
+      - name: Compare fused beta against original beta
+        working-directory: psc0/packages/pskernel-c0
+        run: lake exe pskernel_c0_beta_tests

@@ -69,6 +69,60 @@ def psElabDefaultValue (context : PsElabContext) (domain : PsExpr) : Option PsEx
     if psNameEq name psOptParamName then some value else none
   | _ => none
 
+def psElabHasLooseBound (term : PsExpr) (depth : Nat := 0) : Bool :=
+  match term with
+  | .bvar index => index >= depth
+  | .app fn value => psElabHasLooseBound fn depth || psElabHasLooseBound value depth
+  | .lam _ domain body _ | .forallE _ domain body _ =>
+    psElabHasLooseBound domain depth || psElabHasLooseBound body (depth + 1)
+  | .letE _ type value body => psElabHasLooseBound type depth ||
+      psElabHasLooseBound value depth || psElabHasLooseBound body (depth + 1)
+  | .proj _ _ value => psElabHasLooseBound value depth
+  | _ => false
+
+-- Inspect the result without allocating speculative argument metavariables.
+-- A loose binder means a source argument must be elaborated before expected
+-- type information can safely flow back into the remaining argument domains.
+def psElabApplicationResultType (context : PsElabContext) (fuel : Nat)
+    (type : PsExpr) (positions : Nat) (names : List PsName) : Option PsExpr :=
+  match fuel with
+  | 0 => none
+  | fuel + 1 =>
+    if positions == 0 && names.isEmpty then
+      if psElabHasLooseBound type then none else some type
+    else match psWhnf context.environment context.metaContext context.localContext type with
+    | .forallE name _ body binder =>
+      let named := names.any (psNameEq name)
+      if named then psElabApplicationResultType context fuel body positions
+        (names.filter (fun other => !psNameEq name other))
+      else if psBinderAcceptsExplicitArgument binder then
+        if positions == 0 then none else
+          psElabApplicationResultType context fuel body (positions - 1) names
+      else psElabApplicationResultType context fuel body positions names
+    | _ => none
+
+def psElabPropagateExpected (current : PsElabTermResult)
+    (positions : List PsSyntaxTerm) (names : PsElabNamedArguments)
+    (expected : Option PsExpr) : PsElabTermResult :=
+  match expected with
+  | none => current
+  | some target =>
+    let target := psWhnf current.context.environment current.context.metaContext
+      current.context.localContext target
+    let enabled := match target with
+      | .mvar _ => false
+      | .sortE level => !psLevelEquivalent level .zero
+      | _ => true
+    if !enabled then current else
+    match psElabApplicationResultType current.context 4096 current.type positions.length (names.map (·.fst)) with
+    | none => current
+    | some result =>
+      let unified := psUnify current.context.environment current.context.localContext
+        current.context.metaContext result target
+      if unified.success then
+        { current with context := psElabContextWithMeta current.context unified.context }
+      else current
+
 -- One ordered engine owns positional/named arguments, defaults and implicits.
 -- A matching expected function type preserves partial application. Explicit
 -- empty invocation passes no expected type here and requests full completion.
@@ -113,7 +167,9 @@ def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
         | none, [] => pure (none, [], names)
       match selected.1 with
       | some source =>
-        let argument ← elaborate current.context source (some domain)
+        let current := psElabPropagateExpected current positions names expected
+        let argument ← elaborate current.context source
+          (some (psMetaInstantiate current.context.metaContext domain))
         psElabApplyOrdered elaborate fuel (psElabApplyValue current argument body)
           selected.2.1 selected.2.2 pending complete expected
       | none =>

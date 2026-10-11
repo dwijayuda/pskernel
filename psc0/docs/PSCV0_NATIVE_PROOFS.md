@@ -91,3 +91,12 @@ heads stuck. It uses native Lean Nat arithmetic without Peano expansion.
 The reference is src/kernel/type_checker.cpp, reduce_nat, at the pinned commit.
 The fact fixture retains its original computed-value requirement; focused
 checks include subtraction, zero division/modulo and Boolean comparisons.
+
+Nested existential construction also exercises general expected-result
+propagation. Before checking a supplied argument, the application engine inspects
+the remaining result telescope without creating speculative holes. A result
+independent of unelaborated binders may constrain the existing implicit types
+and predicates. Dependent results defer until the required arguments are known;
+failed speculative unification restores the original state. Prop and bare
+expected metavariables do not trigger this heuristic, following
+Lean/Elab/App.lean. This is shared by all ordinary applications.

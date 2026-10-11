@@ -87,7 +87,9 @@ def psCodegenExpr : Nat → PsVerifiedIrExpr →
       | .matchE name ts target alts =>
           let alts ← alts.mapM fun (ctor, bindings, body) => do
             let bindings ← bindings.mapM fun b => do
-              return { field := ← psCodegenName b.field, name := ← psCodegenName b.name,
+              return {
+                field := ← psCodegenName b.field
+                name := ← psCodegenName b.name
                 type := ← psCodegenType 65536 b.type : PsVerifiedIrMatchBinding }
             return (← psCodegenName ctor, bindings, ← psCodegenExpr n body)
           return .matchE (← psCodegenName name) (← types ts) (← psCodegenExpr n target) alts
@@ -109,18 +111,25 @@ def psCodegenModule (ir : PsVerifiedIrModule) :
   let structures ← ir.structures.mapM fun s => do
     let fields ← s.fields.mapM fun p => do
       return { name := ← psCodegenName p.name, type := ← psCodegenType 65536 p.type : PsVerifiedIrStructureField }
-    return { name := ← psCodegenName s.name, typeParameters := ← parameters s.typeParameters,
-      fields : PsVerifiedIrStructure }
+    return {
+      name := ← psCodegenName s.name
+      typeParameters := ← parameters s.typeParameters
+      fields := fields : PsVerifiedIrStructure }
   let inductives ← ir.inductives.mapM fun s => do
     let constructors ← s.constructors.mapM fun c => do
       let fields ← c.fields.mapM fun p => do
         return { name := ← psCodegenName p.name, type := ← psCodegenType 65536 p.type : PsVerifiedIrConstructorField }
       return { name := ← psCodegenName c.name, fields : PsVerifiedIrConstructor }
-    return { name := ← psCodegenName s.name, typeParameters := ← parameters s.typeParameters,
-      constructors : PsVerifiedIrInductive }
+    return {
+      name := ← psCodegenName s.name
+      typeParameters := ← parameters s.typeParameters
+      constructors := constructors : PsVerifiedIrInductive }
   let declarations ← ir.declarations.mapM fun d => do
-    return { name := ← psCodegenName d.name, typeParameters := ← parameters d.typeParameters,
-      parameters := ← d.parameters.mapM psCodegenParameter, resultType := ← psCodegenType 65536 d.resultType,
+    return {
+      name := ← psCodegenName d.name
+      typeParameters := ← parameters d.typeParameters
+      parameters := ← d.parameters.mapM psCodegenParameter
+      resultType := ← psCodegenType 65536 d.resultType
       body := ← psCodegenExpr 65536 d.body : PsVerifiedIrDeclaration }
   let imports ← ir.imports.mapM fun d => do
     return { d with localName := ← psCodegenName d.localName, type := ← psCodegenType 65536 d.type }

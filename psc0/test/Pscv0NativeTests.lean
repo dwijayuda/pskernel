@@ -495,8 +495,7 @@ private def semanticCases : IO Unit := do
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [
-    { name := "bad", typeParameters := [], parameters := [],
-      resultType := .primitive .nat, body := .literal (.bool true) }] }
+    { name := "bad", typeParameters := [], parameters := [], resultType := .primitive .nat, body := .literal (.bool true) }] }
   match psWithCheckedIr psIrCheckDefaultOptions invalid (fun _ => .ok ()) with
   | .ok _ => throw (IO.userError "invalid IR reached emission")
   | .error message => unless message.startsWith "PSCV0-IR-CHECK:" do

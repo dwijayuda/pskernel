@@ -52,8 +52,9 @@ structure PsDocState where
   column : Nat := 0
 
 def psDocWrite (state : PsDocState) (text : String) : PsDocState :=
-  { state with chunks := text :: state.chunks,
-    byteOffset := state.byteOffset + text.utf8ByteSize,
+  { state with
+    chunks := text :: state.chunks
+    byteOffset := state.byteOffset + text.utf8ByteSize
     column := if text.contains '\n' then (text.splitOn "\n").getLast!.length else state.column + text.length }
 
 def psDocRenderLoop (width : Nat) : Nat → List PsDocTask → PsDocState →

@@ -46,7 +46,7 @@ jobs:
           lake --version
           lake update
           # Fail fast on changed proof/runtime closures, reusing outputs below.
-          lake build PSKernelFast.Spec.TaggedDependentPi pskernel_fast_typed_normalization_smoke
+          lake build PSKernelFast.Proof.SourcePiModelBridge pskernel_fast_typed_normalization_smoke
           lake build PSKernelFast.Spec.GraphUniverseClosure PSKernelFast.Spec.TaggedPropSemantics PSKernelFast.Proof.TaggedPropModelBridge PSKernelFast.Proof.TaggedWellDenoted PSKernelFast.Proof.SourceTaggedContextBridge PSKernelFast.TypedConversion pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke pskernel_fast_typed_conversion_smoke pskernel_fast_typed_conversion_bench
       - name: Audit exact theorem assumptions
         working-directory: pskernel-fast
@@ -88,13 +88,14 @@ jobs:
           lake env lean src/PSKernelFast/Spec/UniverseImageClosure.lean | tee -a /tmp/pskernel-fast-g44b-axioms.log
           lake env lean src/PSKernelFast/Spec/DependentGraphSpace.lean | tee -a /tmp/pskernel-fast-g44b-axioms.log
           python3 scripts/audit_typed_normalization.py /tmp/pskernel-fast-g44b-axioms.log
-      - name: Audit P1l graph and tagged Pi model assumptions
+      - name: Audit P1l and P1m model and source assumptions
         working-directory: pskernel-fast
         shell: bash
         run: |
           set -euo pipefail
           lake env lean src/PSKernelFast/Spec/GraphApplication.lean | tee /tmp/pskernel-fast-p1l-axioms.log
           lake env lean src/PSKernelFast/Spec/TaggedDependentPi.lean | tee -a /tmp/pskernel-fast-p1l-axioms.log
+          lake env lean src/PSKernelFast/Proof/SourcePiModelBridge.lean | tee -a /tmp/pskernel-fast-p1l-axioms.log
           python3 scripts/audit_graph_model.py /tmp/pskernel-fast-p1l-axioms.log
       - name: Run fail-closed representation tests
         working-directory: pskernel-fast

@@ -28,7 +28,9 @@ theorem levelParams_complete (params : List KName) (level : ULevel)
       simp only [ULevel.validParams, Bool.and_eq_true]
       exact ⟨ihLeft h.1, ihRight h.2⟩
   | param name =>
-      simpa [ULevel.validParams] using (decide_eq_true h)
+      change name ∈ params at h
+      change decide (name ∈ params) = true
+      simp [h]
   | mvar name =>
       exact False.elim h
 
@@ -38,7 +40,9 @@ theorem validAt_complete (params : List KName) (depth : Nat)
     expr.validAt params depth = true := by
   induction expr generalizing depth with
   | bvar index =>
-      simpa [KExpr.validAt] using (decide_eq_true h)
+      change index < depth at h
+      change decide (index < depth) = true
+      simp [h]
   | fvar name => exact False.elim h
   | mvar name => exact False.elim h
   | sort level =>

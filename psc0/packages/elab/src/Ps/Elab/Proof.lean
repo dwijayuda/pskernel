@@ -205,7 +205,7 @@ def psElabProof (elaborate : PsElaborator) (context : PsElabContext)
   let .mvar root := fresh.expr | throw (.proof "invalid fresh goal")
   let state ← psProofRun elaborate scope 4096 {
     context := psElabContextWithMeta context fresh.context, goals := [{ id := root }] } tactics
-  if !state.goals.isEmpty || !state.closures.isEmpty then throw (.proof "unsolved goals")
+  if !state.goals.isEmpty then throw (.proof "unsolved goals")
   let value := psMetaInstantiate state.context.metaContext fresh.expr
   if psExprHasTermMeta value then throw (.proof "unresolved proof")
   psElabResolvedTerm (psElabLeaveScope context state.context) value expected

@@ -180,6 +180,7 @@ lean_lib PsElab where
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
     `Ps.Elab.Universe,
+    `Ps.Elab.Abstraction,
     `Ps.Elab.Binders,
     `Ps.Elab.Goals,
     `Ps.Elab.Proof,

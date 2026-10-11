@@ -628,11 +628,9 @@ def psElabAscription (elaborate : PsElaborator) (context : PsElabContext)
   let result ← elaborate annotation.context value (some annotation.type)
   psElabFinalizeExpected result expected
 
-def psExprHasTermMeta : PsExpr → Bool
-  | .mvar _ => true
-  | .app a b | .lam _ a b _ | .forallE _ a b _ =>
-    psExprHasTermMeta a || psExprHasTermMeta b
-  | .letE _ a b c => psExprHasTermMeta a || psExprHasTermMeta b || psExprHasTermMeta c
-  | .proj _ _ value => psExprHasTermMeta value
-  | _ => false
+
+def psElabExpressionSort (context : PsElabContext) (type : PsExpr) :
+    Except PsElabError PsLevel := do
+  let sort ← (psInferType context.environment context.metaContext context.localContext type).mapError PsElabError.infer
+  (psInferEnsureSort context.environment context.metaContext context.localContext sort).mapError PsElabError.infer
 

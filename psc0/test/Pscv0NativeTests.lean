@@ -480,7 +480,14 @@ private def application : String :=
   "const updateSecond: Nat := Updates.copied.second\n" ++
   "const updateInferred: Nat := Updates.inferred\n" ++
   "const updateDependent: Nat := Updates.dependent.first\n" ++
-  "const updateGeneric: Nat := Updates.generic.value\n"
+  "const updateGeneric: Nat := Updates.generic.value\n" ++
+  "function delayedLambda: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n  exact n\n}\n" ++
+  "function delayedLet: Nat := by {\n  refine (let n: Nat := 261\n    _)\n  exact n\n}\n" ++
+  "theorem delayedHave(P: Prop, h: P): P := by {\n  refine (have saved: P := h\n    _)\n  exact saved\n}\n" ++
+  "theorem delayedNested: forall (P: Prop), P -> P := by {\n  refine (fun (P: Prop) => fun (h: P) => _)\n  exact h\n}\n" ++
+  "function delayedUpdate(source: CertifiedPair): CertifiedPair := by {\n  refine { source with first := 263, certified := _ }\n  rfl\n}\n" ++
+  "const delayedLambdaAnswer: Nat := delayedLambda(262)\n" ++
+  "const delayedUpdateAnswer: Nat := CertifiedPair.first(delayedUpdate(checkedPair))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -580,7 +587,8 @@ private def semanticCases : IO Unit := do
     { source := "structure Pair where {\n  first: Nat\n  second: Nat\n}\nconst bad: Pair := { first := 1 }\n" },
     { source := "structure Pair where { first: Nat }\nconst bad: Nat := {\n  let p := { first := 1 }\n  0\n}\n" },
     { source := "structure Checked where {\n  n: Nat\n  proof: n = 0\n}\nfunction bad(p: Checked): Checked := { p with n := 1 }\n" },
-    { source := "structure Pair where { first: Nat }\nfunction id(n: Nat): Nat := n\nfunction bad(p: Pair): Pair := { p with first := id (0) }\n" }]
+    { source := "structure Pair where { first: Nat }\nfunction id(n: Nat): Nat := n\nfunction bad(p: Pair): Pair := { p with first := id (0) }\n" },
+    { source := "function bad: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n}\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -597,7 +605,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -616,7 +624,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02", "PSCV0-PROOF: unsolved goals"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -645,7 +653,26 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 80 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 81 phase-specific refusals, shared-prelude isolation"
+
+private def metavariableBoundary : IO Unit := do
+  let type := PsExpr.constE psNatName []
+  let functionType := PsExpr.forallE (psRootName "argument") type type .explicit
+  let parent := psMetaFresh psMetaEmpty psLocalEmpty functionType .syntheticOpaque
+  let child := psMetaFresh parent.context psLocalEmpty type .natural
+  let .mvar parentId := parent.expr | throw (IO.userError "missing parent")
+  let .mvar childId := child.expr | throw (IO.userError "missing child")
+  let pushed := psLocalPushBinding psLocalEmpty (psRootName "captured") type .explicit
+  let goal := psMetaFresh child.context pushed.context type .syntheticOpaque
+  let .mvar goalId := goal.expr | throw (IO.userError "missing goal")
+  let some context := psMetaAssignDelayed goal.context parentId
+      [.lambdaE pushed.id (psRootName "captured") type .explicit] goal.expr
+    | throw (IO.userError "delayed assignment rejected")
+  if (psMetaAssign context goalId (.app parent.expr (.fvar pushed.id))).isSome then
+    throw (IO.userError "cycle through delayed scope accepted")
+  if (psMetaAssign context childId goal.expr).isSome then
+    throw (IO.userError "goal alias escaped its captured context")
+  IO.println "PSCV0_NATIVE_SCOPE_BOUNDARY: PASS delayed cycle and goal scope refusal"
 
 private def emissionBoundary : IO Unit := do
   let invalid : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with declarations := [
@@ -673,6 +700,7 @@ private def emissionBoundary : IO Unit := do
 
 def main : IO Unit := do
   emissionBoundary
+  metavariableBoundary
   parserCases
   semanticCases
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

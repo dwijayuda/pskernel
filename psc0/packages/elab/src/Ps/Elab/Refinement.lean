@@ -188,11 +188,6 @@ def psElabCloseDependents (opened : PsElabOpenedDependents)
   psCloseElabLambdaBinders constraints opened.bindersRev
     (psElabSubstituteLocals opened.aliasesRev (psMetaInstantiate constraints value))
 
-def psElabExpressionSort (context : PsElabContext) (type : PsExpr) :
-    Except PsElabError PsLevel := do
-  let sort ← (psInferType context.environment context.metaContext context.localContext type).mapError PsElabError.infer
-  (psInferEnsureSort context.environment context.metaContext context.localContext sort).mapError PsElabError.infer
-
 -- Kernel recursors either add a motive universe or eliminate in the family's
 -- fixed sort. All users share this arity contract.
 def psElabRecursorLevels (info : PsInductiveInfo) (recursor : PsRecursorInfo)

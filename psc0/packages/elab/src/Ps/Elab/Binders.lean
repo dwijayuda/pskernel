@@ -1,4 +1,4 @@
-import Ps.Elab.Basic
+import Ps.Elab.Abstraction
 
 structure PsElabTypedBinder where
   id : Nat
@@ -149,11 +149,14 @@ def psElabLambda (elaborate : PsElaborator) (context : PsElabContext)
   let prepared ← psElabBindersWithExpected elaborate binders {
     context, bindersRev := [], expected }
   let result ← elaborate prepared.context body prepared.expected
-  let constraints := result.context.metaContext
-  let closed := psCloseElabTypedBinders constraints prepared.bindersRev
-    (psMetaInstantiate constraints result.term) (psMetaInstantiate constraints result.type)
-  psElabFinalizeExpected
-    (PsElabTermResult.mk (psElabLeaveScope context result.context) closed.fst closed.snd) expected
+  let typeAbstractions := prepared.bindersRev.map fun binder =>
+    PsMetaAbstraction.forallE binder.id binder.name binder.type binder.binder
+  let closedType ← psElabAbstractType context result.context typeAbstractions result.type
+  let valueAbstractions := prepared.bindersRev.map fun binder =>
+    PsMetaAbstraction.lambdaE binder.id binder.name binder.type binder.binder
+  let inner := psElabContextWithMeta result.context closedType.context.metaContext
+  let closed ← psElabAbstract context inner valueAbstractions result.term closedType.term
+  psElabFinalizeExpected closed expected
 
 def psCloseElabForallBinders
     (metaContext : PsMetaContext)
@@ -178,45 +181,15 @@ def psCloseElabForallBinders
             binder.binder;
         smaller closedBody
 
-def psElabForall
-    (elaborate :
-      PsElabContext ->
-      PsSyntaxTerm ->
-      Option PsExpr ->
-      Except PsElabError PsElabTermResult)
-    (context : PsElabContext)
-    (binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
-    (body : PsSyntaxTerm)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match psElabTypedBinders elaborate context binders with
-  | Except.error error => Except.error error
-  | Except.ok binderResult =>
-      match elaborate binderResult.context body Option.none with
-      | Except.error error => Except.error error
-      | Except.ok bodyResult =>
-          match psInferEnsureSort
-              bodyResult.context.environment
-              bodyResult.context.metaContext
-              bodyResult.context.localContext
-              bodyResult.type with
-          | Except.error error =>
-              Except.error (PsElabError.infer error)
-          | Except.ok _ =>
-              let metaContext := bodyResult.context.metaContext;
-              let openBody :=
-                psMetaInstantiate metaContext bodyResult.term;
-              let closed :=
-                psCloseElabForallBinders
-                  metaContext
-                  binderResult.bindersRev
-                  openBody;
-              let outerContext :=
-                psElabLeaveScope context bodyResult.context;
-              psElabResolvedTerm
-                outerContext
-                closed
-                expected
+def psElabForall (elaborate : PsElaborator) (context : PsElabContext)
+    (binders : List (PsSyntaxBinderHead × PsSyntaxTerm)) (body : PsSyntaxTerm)
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
+  let prepared ← psElabTypedBinders elaborate context binders
+  let result ← elaborate prepared.context body none
+  let abstractions := prepared.bindersRev.map fun binder =>
+    PsMetaAbstraction.forallE binder.id binder.name binder.type binder.binder
+  let closed ← psElabAbstractType context result.context abstractions result.term
+  psElabFinalizeExpected closed expected
 
 -- Both term bindings and tactic facts use this expected-type path.
 def psElabLocalValue (elaborate : PsElaborator) (context : PsElabContext)
@@ -237,12 +210,7 @@ def psElabLetAfterValue (elaborate : PsElaborator) (outerContext : PsElabContext
     else psLocalPushLet valueResult.context.localContext name bindingType valueResult.term
   let bodyContext := psElabContextWithLocal valueResult.context pushed.context
   let bodyResult ← elaborate bodyContext body expected
-  let constraints := bodyResult.context.metaContext
-  let type := psMetaInstantiate constraints bindingType
-  let value := psMetaInstantiate constraints valueResult.term
-  let body := psExprAbstractFVar pushed.id (psMetaInstantiate constraints bodyResult.term)
-  let term := PsExpr.letE name type value body
-  psElabResolvedTerm (psElabLeaveScope outerContext bodyResult.context) term expected
+  psElabCloseLetScope outerContext bodyResult pushed.id name bindingType valueResult.term expected
 
 def psElabLet (elaborate : PsElaborator) (context : PsElabContext)
     (nameSyntax : PsSyntaxName) (declaredType : Option PsSyntaxTerm)

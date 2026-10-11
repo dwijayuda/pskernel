@@ -23,6 +23,7 @@ def psMetaSetLevels
     nextId := context.nextId
     declarations := context.declarations
     assignments := context.assignments
+    delayed := context.delayed
     levels := levels
   }
 

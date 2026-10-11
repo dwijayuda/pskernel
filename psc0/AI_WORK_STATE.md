@@ -1355,3 +1355,16 @@ programs, 74 phase-specific refusals and 114 shared runtime observations.
 sorts pass through shared data metadata and checked projection generation.
 
 Record reconstruction is the next native milestone; see docs/PSCV0_NATIVE_RECORDS.md.
+
+## Record reconstruction qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/26 at 36148d3f7b324296b38dbcd41e0d639a93ab7e79 passed
+[run 38182281191](https://github.com/dwijayuda/pskernel/actions/runs/38182281191):
+411 fixture declarations, 28 parser cases, four accepted programs, 80 phase-specific
+refusals and 119 shared runtime observations; 115 portable and 121 native modules.
+Record construction/update uses the shared ordered argument engine. Expected
+nominal types replace the obsolete literal-shape scan. Prior build-registration
+and import-boundary failures are not qualification evidence.
+
+Shared delayed term-scope closure is the next integration; see
+docs/PSCV0_NATIVE_SCOPES.md.

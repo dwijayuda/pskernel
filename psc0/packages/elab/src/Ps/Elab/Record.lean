@@ -111,11 +111,4 @@ def psElabRecordUpdate (elaborate : PsElaborator) (context : PsElabContext)
       | none => .retained (.proj shape.familyName index (.fvar pushed.id))
     (name, argument)
   let result ← psElabBuildRecord elaborate inner shape value.type arguments
-  let constraints := result.context.metaContext
-  let body := psMetaInstantiate constraints result.term
-  -- This scope cannot be closed over a future assignment carrying its local.
-  -- General delayed term-scope closure is a separate elaboration capability.
-  if psExprHasTermMeta body then throw (.invalidArgument "record update has unresolved field holes")
-  let term := PsExpr.letE sourceName (psMetaInstantiate constraints value.type)
-    (psMetaInstantiate constraints value.term) (psExprAbstractFVar pushed.id body)
-  psElabResolvedTerm (psElabLeaveScope context result.context) term expected
+  psElabCloseLetScope context result pushed.id sourceName value.type value.term expected

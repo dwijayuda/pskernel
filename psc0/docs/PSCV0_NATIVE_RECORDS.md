@@ -24,10 +24,9 @@ This follows the selected record rule in PSCV0_LANGUAGE_REFERENCE.md and the
 single-source binding/reconstruction design in Lean's src/Lean/Elab/StructInst.lean
 at c29b6dda4f7c20e3eeaa717c4e565663c5cfa364. The full host elaborator is not imported.
 
-Declared field defaults and record inheritance are pending. Updates currently
-require their field term holes to be resolved before closing the internal let;
-general delayed term-scope abstraction is pending. This fails closed rather than
-letting a later metavariable assignment escape its captured local scope.
+Declared field defaults and record inheritance are pending. Update field holes
+use the shared delayed abstraction in PSCV0_NATIVE_SCOPES.md, preserving their
+captured contexts until the internal let can close safely.
 The compact composite covers generic/proposition/dependent/empty updates and
 both braced forms. Six refusals cover duplicates, unknown/missing fields,
 untyped literal guessing, stale dependent proofs and recursive APP-02 checking.

@@ -100,3 +100,7 @@ and predicates. Dependent results defer until the required arguments are known;
 failed speculative unification restores the original state. Prop and bare
 expected metavariables do not trigger this heuristic, following
 Lean/Elab/App.lean. This is shared by all ordinary applications.
+
+Term and tactic scopes now share Meta delayed assignments. The previous proof-only
+closure list is removed; see PSCV0_NATIVE_SCOPES.md. Child goals retain their
+captured contexts, and a managed closure is never presented as another user goal.

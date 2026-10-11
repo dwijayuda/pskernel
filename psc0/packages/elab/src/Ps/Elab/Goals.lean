@@ -6,16 +6,9 @@ structure PsProofGoal where
   id : Nat
   tag : String := ""
 
-structure PsProofClosure where
-  parent : Nat
-  child : Nat
-  binder : PsElabTypedBinder
-  value : Option PsExpr := none
-
 structure PsProofState where
   context : PsElabContext
   goals : List PsProofGoal
-  closures : List PsProofClosure := []
 
 def psProofContext (state : PsProofState) (id : Nat) : Except PsElabError PsElabContext := do
   let some goal := psMetaFindDecl state.context.metaContext id
@@ -35,31 +28,21 @@ def psProofAssign (state : PsProofState) (id : Nat) (value : PsExpr) :
     | throw (.proof "invalid goal assignment")
   return psProofUpdate state (psElabContextWithMeta checked.context constraints)
 
--- A lambda is abstracted only after its child's metavariables are substituted.
--- Abstracting an unresolved child first would let its future locals escape.
+-- Shared metavariable assignment settles term and tactic scope closures.
 def psProofNormalize (state : PsProofState) : Except PsElabError PsProofState := do
-  let mut current := state
-  let mut remaining := []
-  for closure in state.closures do
-    let value := psMetaInstantiate current.context.metaContext (.mvar closure.child)
-    if psExprHasTermMeta value then remaining := closure :: remaining
-    else
-      let binder := closure.binder
-      let type := psMetaInstantiate current.context.metaContext binder.type
-      let body := psExprAbstractFVar binder.id value
-      let value := match closure.value with
-        | none => PsExpr.lam binder.name type body binder.binder
-        | some bound => PsExpr.letE binder.name type
-            (psMetaInstantiate current.context.metaContext bound) body
-      current ← psProofAssign current closure.parent value
-  return { current with
-    closures := remaining.reverse
-    goals := current.goals.filter fun goal =>
-      (psMetaFindAssignment current.context.metaContext goal.id).isNone }
+  let some constraints := psMetaNormalizeDelayed
+      state.context.metaContext.delayed.length state.context.metaContext
+    | throw (.proof "invalid scope closure")
+  return { state with
+    context := psElabContextWithMeta state.context constraints
+    goals := state.goals.filter fun goal =>
+      (psMetaFindAssignment constraints goal.id).isNone &&
+      (psMetaFindDelayed constraints goal.id).isNone }
 
 def psProofFreshGoals (before : Nat) (context : PsElabContext) : List PsProofGoal :=
   context.metaContext.declarations.reverse.filterMap fun entry =>
-    if entry.id >= before && (psMetaFindAssignment context.metaContext entry.id).isNone then
+    if entry.id >= before && (psMetaFindAssignment context.metaContext entry.id).isNone &&
+        (psMetaFindDelayed context.metaContext entry.id).isNone then
       some { id := entry.id }
     else none
 
@@ -82,12 +65,12 @@ def psProofIntro (state : PsProofState) (source : Option PsSyntaxName) :
   let fresh := psMetaFresh context.metaContext context.localContext
     (psExprInstantiate1 pi.body (.fvar pushed.id)) .syntheticOpaque
   let .mvar child := fresh.expr | throw (.proof "invalid fresh goal")
-  let context := psElabContextWithMeta context fresh.context
+  let some constraints := psMetaAssignDelayed fresh.context goal.id
+      [.lambdaE pushed.id name pi.domain pi.binder] fresh.expr
+    | throw (.proof "invalid intro scope")
+  let context := psElabContextWithMeta context constraints
   return { (psProofUpdate state context) with
-    goals := { id := child, tag := goal.tag } :: rest
-    closures := {
-      parent := goal.id, child
-      binder := PsElabTypedBinder.mk pushed.id name pi.domain pi.binder } :: state.closures }
+    goals := { id := child, tag := goal.tag } :: rest }
 
 -- A completed local fact enters only this goal's context. Closing its scope
 -- uses the same deferred abstraction as intro, including nested proof goals.
@@ -106,9 +89,9 @@ def psProofLocal (state : PsProofState) (name : PsName) (value : PsElabTermResul
   let context := psElabContextWithLocal value.context pushed.context
   let fresh := psMetaFresh context.metaContext context.localContext declaration.type .syntheticOpaque
   let .mvar child := fresh.expr | throw (.proof "invalid fresh goal")
-  let context := psElabContextWithMeta context fresh.context
+  let some constraints := psMetaAssignDelayed fresh.context goal.id
+      [.letE pushed.id name type term] fresh.expr
+    | throw (.proof "invalid local declaration scope")
+  let context := psElabContextWithMeta context constraints
   return { (psProofUpdate state context) with
-    goals := { id := child, tag := goal.tag } :: rest
-    closures := {
-      parent := goal.id, child, value := some term
-      binder := PsElabTypedBinder.mk pushed.id name type .explicit } :: state.closures }
+    goals := { id := child, tag := goal.tag } :: rest }

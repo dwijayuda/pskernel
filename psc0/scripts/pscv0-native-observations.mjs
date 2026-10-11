@@ -118,5 +118,8 @@ export const observations = [
   { name: "updateInferred", args: null, expected: 254n },
   { name: "updateDependent", args: null, expected: 255n },
   { name: "updateGeneric", args: null, expected: 257n },
+  { name: "delayedLambdaAnswer", args: null, expected: 262n },
+  { name: "delayedLet", args: null, expected: 261n },
+  { name: "delayedUpdateAnswer", args: null, expected: 263n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

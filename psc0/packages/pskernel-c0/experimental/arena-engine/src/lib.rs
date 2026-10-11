@@ -99,7 +99,8 @@ impl Arena {
         -> Result<ExprId, &'static str>
     {
         let mut memo = HashMap::new();
-        self.subst_at(body, replacement, 0, &mut memo)
+        let mut lift_memo = HashMap::new();
+        self.subst_at(body, replacement, 0, &mut memo, &mut lift_memo)
     }
     fn lift(&mut self, id: ExprId, by: u32, depth: u32,
         memo: &mut HashMap<(ExprId,u32),ExprId>) -> Result<ExprId,&'static str>
@@ -140,37 +141,45 @@ impl Arena {
         Ok(result)
     }
     fn subst_at(&mut self,id:ExprId,replacement:ExprId,depth:u32,
-        memo:&mut HashMap<(ExprId,u32),ExprId>) -> Result<ExprId,&'static str>
+        memo:&mut HashMap<(ExprId,u32),ExprId>,
+        lift_memo:&mut HashMap<(u32,ExprId,u32),ExprId>) -> Result<ExprId,&'static str>
     {
         if let Some(&x)=memo.get(&(id,depth)){return Ok(x);}
         let node=self.get(id).clone();
         let result=match node {
-            Expr::BVar(i) if i == depth => self.lift(replacement,depth,0,&mut HashMap::new())?,
+            Expr::BVar(i) if i == depth => {
+                if let Some(&cached) = lift_memo.get(&(depth,replacement,0)) { cached }
+                else {
+                    let value = self.lift(replacement,depth,0,&mut HashMap::new())?;
+                    lift_memo.insert((depth,replacement,0),value);
+                    value
+                }
+            },
             Expr::BVar(i) if i > depth => self.intern(Expr::BVar(i-1)),
             Expr::App(f,a) => {
-                let f=self.subst_at(f,replacement,depth,memo)?;
-                let a=self.subst_at(a,replacement,depth,memo)?;
+                let f=self.subst_at(f,replacement,depth,memo,lift_memo)?;
+                let a=self.subst_at(a,replacement,depth,memo,lift_memo)?;
                 self.intern(Expr::App(f,a))
             }
             Expr::Lam{name,domain,body,info} => {
-                let domain=self.subst_at(domain,replacement,depth,memo)?;
-                let body=self.subst_at(body,replacement,depth.checked_add(1).ok_or("depth overflow")?,memo)?;
+                let domain=self.subst_at(domain,replacement,depth,memo,lift_memo)?;
+                let body=self.subst_at(body,replacement,depth.checked_add(1).ok_or("depth overflow")?,memo,lift_memo)?;
                 self.intern(Expr::Lam{name,domain,body,info})
             }
             Expr::Forall{name,domain,body,info} => {
-                let domain=self.subst_at(domain,replacement,depth,memo)?;
-                let body=self.subst_at(body,replacement,depth.checked_add(1).ok_or("depth overflow")?,memo)?;
+                let domain=self.subst_at(domain,replacement,depth,memo,lift_memo)?;
+                let body=self.subst_at(body,replacement,depth.checked_add(1).ok_or("depth overflow")?,memo,lift_memo)?;
                 self.intern(Expr::Forall{name,domain,body,info})
             }
             Expr::Let{name,domain,value,body,nondep} => {
-                let domain=self.subst_at(domain,replacement,depth,memo)?;
-                let value=self.subst_at(value,replacement,depth,memo)?;
-                let body=self.subst_at(body,replacement,depth.checked_add(1).ok_or("depth overflow")?,memo)?;
+                let domain=self.subst_at(domain,replacement,depth,memo,lift_memo)?;
+                let value=self.subst_at(value,replacement,depth,memo,lift_memo)?;
+                let body=self.subst_at(body,replacement,depth.checked_add(1).ok_or("depth overflow")?,memo,lift_memo)?;
                 self.intern(Expr::Let{name,domain,value,body,nondep})
             }
-            Expr::MData(x,e)=>{let e=self.subst_at(e,replacement,depth,memo)?;self.intern(Expr::MData(x,e))}
+            Expr::MData(x,e)=>{let e=self.subst_at(e,replacement,depth,memo,lift_memo)?;self.intern(Expr::MData(x,e))}
             Expr::Proj{name,field,target}=>{
-                let target=self.subst_at(target,replacement,depth,memo)?;
+                let target=self.subst_at(target,replacement,depth,memo,lift_memo)?;
                 self.intern(Expr::Proj{name,field,target})
             }
             _=>id,
@@ -272,6 +281,25 @@ mod tests {
         let app = a.intern(Expr::App(lam, value));
         let term = a.intern(Expr::Let { name: n, domain: ty, value: app, body, nondep: false });
         assert_eq!(a.whnf_fragment(term, 20), Ok(value));
+    }
+
+    #[test] fn repeated_replacement_under_multiple_binders() {
+        let mut a = Arena::new();
+        let n = a.name("x");
+        let bound = a.intern(Expr::BVar(0));
+        let body = a.intern(Expr::App(bound, bound));
+        let wrapped = a.intern(Expr::Lam {
+            name: n, domain: bound, body, info: BinderInfo::Default
+        });
+        let replacement = a.intern(Expr::BVar(3));
+        let out = a.instantiate1(wrapped, replacement).unwrap();
+        match a.get(out) {
+            Expr::Lam { domain, body, .. } => {
+                assert_eq!(a.get(*domain), &Expr::BVar(3));
+                assert_eq!(a.get(*body), &Expr::App(bound, bound));
+            },
+            _ => panic!("expected lambda"),
+        }
     }
 
 }

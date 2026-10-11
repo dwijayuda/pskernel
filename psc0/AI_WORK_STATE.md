@@ -1,3 +1,103 @@
+# PSC0 AI WORK STATE — native dependent matching and indexed recursion
+
+## 12 October 2026 — recursor-driven dependent branch elaboration
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user's requested next substantial milestone is implemented and qualified
+within the boundary below. Compiler source remains native `.lean`. Work used
+GitHub source operations and Linux cloud CI, without local checkout/build/tests,
+pskernel-core, compiler-source generation, self-hosting or kernel implementation
+changes.
+
+### Implemented boundary
+
+`Ps.Elab.Match` now owns motive inference and exhaustive constructor matching.
+It generalizes distinct local indices and the matched local value in the expected
+result type. Each branch opens its constructor fields, recursive hypotheses and
+conclusion from the admitted recursor's actual minor telescope. The previous
+independent reconstruction of constant branch/IH types and post-hoc structural
+minor rewriting are removed.
+
+Fresh local let aliases refine outer index/major names only when a pattern binder
+does not shadow them. Closing a branch inlines these aliases. Original dependent
+locals keep their original types; the compiler does not silently retype evidence.
+
+Structural self-calls are checked as Core arguments against the child's family
+indices and direct recursive field. Computed child indices are accepted.
+Invariant arguments remain definitionally equal, and their types must be
+independent of varying indices/major. Changing-state normalization recognizes
+family indices and composes with this mechanism for independent state.
+
+`Ps.Erasure.Recursion` owns the runtime recursion plan. Reusing the current
+definition replaces both the child major and its runtime index arguments.
+The plan checks that minors do not capture the original varying locals. Explicit
+recursor applications that require a separately lifted fold therefore fail on
+runtime IH use instead of silently changing captured values. The same planner
+also serves nonindexed inductives and structure recursors.
+
+Before this evidence entry the increment changes 14 files: 889 added lines and
+1,308 removed lines, or 419 net lines removed. Term dispatch shrinks from about
+1,831 to 690 lines; Match is 605 lines and runtime Recursion is 67 lines.
+No host elaboration fallback or speculative runtime helper generation is added.
+
+### Qualification
+
+**[Linux run 38161224386](https://github.com/dwijayuda/pskernel/actions/runs/38161224386) passed**
+at exact source `ac735c2110e9ca4074128b4c4ff5a3e05c481180`, job `114534374952`.
+Toolchain: native Lean 4.35.0-rc4,
+`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`;
+profile `pscv0-v7-native-bounded/8`.
+
+The unchanged 28 parser cases and compact shared-prelude semantic batch passed:
+three accepted programs, 36 phase-specific refusals. Official Lean accepted the
+119-declaration composite plus the existing five-declaration instance/Except
+program and one-declaration isolation input.
+
+The composite now includes dependent vector mapping, refinement of the major
+during reconstruction, two-index cell reconstruction, indexed recursion with
+changing accumulator state, and a family whose child index is a computed
+successor expression. CLI emission, TypeScript 7.0.2 compilation and JavaScript
+execution passed; the five added runtime results are 75, 74, 82, 76 and 2.
+Four new refusals exercise stale recursive indices, dependent invariant arguments,
+a captured explicit recursor fold during emission, and an incorrect dependent
+branch result. These extend the existing batch rather than adding a broad suite.
+
+The import guard reports 73 portable and 79 native closure modules, with no
+pskernel-core dependency. The final cached build (a fixture-only source delta)
+took 2,594 ms; unchanged build took 466 ms. CLI phase observations on this compact
+application: parse 8 ms, elaborate 4 ms, prepare 21 ms, official kernel 8 ms,
+erase 9 ms, emit 2 ms; prelude 2 ms. These are bounded measurements, not a general
+compiler performance benchmark.
+
+Three preceding runs remain failed: two stopped at Lean record layout syntax;
+the third built and passed positive official-kernel checks, but the runtime-fold
+refusal fixture mistakenly used check-only mode. Its request now enables
+emission. No semantic acceptance assertion was relaxed. Existing unrelated
+unused-binding warnings remain.
+
+### Explicit limits and next work
+
+Automatic index refinement requires distinct local indices independent of
+uniform parameters. Indexed structural calls currently require explicit local
+index parameters. Compound/repeated parent indices retain constant result motives.
+General dependent-local generalization, impossible-case elimination,
+nested/multiple patterns, arbitrary runtime recursor lifting and broader
+well-founded recursion remain future work.
+
+Families still end in Type; source universes/Prop families, mutual/indexed nested
+data, erased/existential constructor fields and runtime Type/Prop indices remain
+outside the selected profile. Full imports/visibility, global classes/instances,
+wider proof automation and contracts also remain pending. This is not full v7
+conformance, a source-roundtrip qualification or a self-hosting milestone.
+
+Main was verified at `748ee630e43ee1a89643cbc8cec3e31087788b08`;
+M1 base at `b4bd7e7d6c48443e56eaf96099515a29a83982bf`.
+PR #109 remains draft. This commit records evidence only; the qualified
+implementation is the exact source above. Older records below retain their
+historical scopes and outcomes.
+
+---
+
 # PSC0 AI WORK STATE — native indexed-data milestone
 
 ## 12 October 2026 — indexed families through the checked native pipeline

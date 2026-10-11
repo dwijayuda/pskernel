@@ -77,9 +77,9 @@ theorem taggedPointTag_ne_singleton (V : Type u)
   have hw : SetTheoryBasis.member (modelSingleton e) d :=
     modelSingleton_member (modelSingleton e)
   have hEmpty : SetTheoryBasis.member
-      (modelSingleton e) e := by
-    rw [← hde]
-    exact hw
+      (modelSingleton e) e :=
+    Eq.mp (congrArg
+      (fun t : V => SetTheoryBasis.member (modelSingleton e) t) hde) hw
   exact (SetTheoryBasis.not_member_empty V (modelSingleton e)) hEmpty
 
 /-- The tag is NOT a Kuratowski pair: a pair has no empty members. -/

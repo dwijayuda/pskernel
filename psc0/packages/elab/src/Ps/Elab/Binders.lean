@@ -42,15 +42,15 @@ def psElabBindersWithExpected (elaborate : PsElaborator)
     let type ← match sourceType, expectedPi with
       | .hole _, some pi => pure (PsElabTermResult.mk state.context pi.domain (.sortE .zero))
       | _, _ => psElabType elaborate state.context sourceType
-    let meta ← match expectedPi with
+    let constraints ← match expectedPi with
       | none => pure type.context.metaContext
       | some pi =>
         let unified := psUnify type.context.environment type.context.localContext
           type.context.metaContext type.term pi.domain
         if unified.success then pure unified.context else throw .typeMismatch
-    let context := psElabContextWithMeta type.context meta
+    let context := psElabContextWithMeta type.context constraints
     let binder := psElabBinderKindToCore head.kind
-    let pushed := psLocalPushBinding context.localContext name (psMetaInstantiate meta type.term) binder
+    let pushed := psLocalPushBinding context.localContext name (psMetaInstantiate constraints type.term) binder
     let nextExpected := expectedPi.map (fun pi => psExprInstantiate1 pi.body (.fvar pushed.id))
     psElabBindersWithExpected elaborate rest {
       context := psElabContextWithLocal context pushed.context
@@ -135,9 +135,9 @@ def psElabLambda (elaborate : PsElaborator) (context : PsElabContext)
   let prepared ← psElabBindersWithExpected elaborate binders {
     context, bindersRev := [], expected }
   let result ← elaborate prepared.context body prepared.expected
-  let meta := result.context.metaContext
-  let closed := psCloseElabTypedBinders meta prepared.bindersRev
-    (psMetaInstantiate meta result.term) (psMetaInstantiate meta result.type)
+  let constraints := result.context.metaContext
+  let closed := psCloseElabTypedBinders constraints prepared.bindersRev
+    (psMetaInstantiate constraints result.term) (psMetaInstantiate constraints result.type)
   psElabFinalizeExpected
     (PsElabTermResult.mk (psElabLeaveScope context result.context) closed.fst closed.snd) expected
 

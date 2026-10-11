@@ -72,7 +72,11 @@ It rejects host dependencies and partial/unsafe definitions in the selected
 portable roots. This is an initial import/source guard, not a complete authoring
 profile verifier or a final runtime-library manifest.
 
-The executable retains 28 parser cases (the named-call case now accepts its\nnewly implemented syntax) and a compact semantic batch. One composite application\ncovers expected lambdas, captures/shadowing, named dependent calls, inferred\narguments, ascriptions and Unit completion; focused refusals protect the same\nboundaries. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and
+The executable retains 28 parser cases (the named-call case now accepts its
+newly implemented syntax) and a compact semantic batch. One composite application
+covers expected lambdas, captures/shadowing, named dependent calls, inferred
+arguments, ascriptions and Unit completion; focused refusals protect the same
+boundaries. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and
 runs one small emitted application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.

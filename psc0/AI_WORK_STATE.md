@@ -1,3 +1,15 @@
+# PSC0 AI WORK STATE — v7 Cursor local-type grammar boundary
+
+## 11 October 2026 — latest attempted dependent compiler source
+
+**Policy remains:** only Linux compiler tests; Windows is static portability review, not actual tested status. No PSKernel/kernel soundness/metatheory tests or changes in this iteration. V7 alone defines future .ps source language; no old source compatibility.
+
+**Cursor first attempt failed at the source reader, not typed elaboration.** Linux [run 38133808088](https://github.com/dwijayuda/pskernel/actions/runs/38133808088) (source 6687ead5d9d18bd370428745d58cabbb636a738f) completed **failure** in the eighth scenario `cursor-v7-only`, diagnostic `PSCV0-PARSE: := at 19:46; got Char`. The preceding seven scenarios ALL passed with unchanged canonical compiler admissions/TS7 SHA; their earlier [run 38133538760](https://github.com/dwijayuda/pskernel/actions/runs/38133538760) remains fully green. The issue arises when the existing bounded source reader parses `let smaller: String -> Nat -> List Char := ...`: an application lookahead wrongly interprets the terminal `Char :=` as a named-assignment start and stops the type prematurely. This is **a systematic source grammar category ownership problem**, distinct from any actual wrong compiler semantics or kernel issue.
+
+**Current canonical v7 candidate:** use the already admitted explicit adjacent type-call spelling `List(Char)` inside that let binder, to retain the same intended type. Source doc [Cursor v7 grammar issue and plan](docs/PSCV0_CURSOR_V7_SOURCE_CANDIDATE.md) explains that native `List Char` must still be supported in correct v7 expression contexts: a later owned parser must implement proper typed-local and record-assignment delimiters, not permanently narrow the normative v7 grammar. The **new candidate is pending fresh Linux CI** until its full nine-scenario source/typed/admission/TS7 comparisons succeed. Do not weaken tests, edit history, enable old parser fallback, run Windows or kernel tests.
+
+---
+
 # PSC0 AI WORK STATE — fifth source candidate Cursor.ps on Linux-only graph
 
 ## Current checkpoint, October 11, 2026

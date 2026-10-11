@@ -21,3 +21,7 @@ Malformed/ill-scoped terms yield `FormationError.malformed`. Structurally valid 
 Develop an exact scoped local-context representation and universe substitution, with a real environment and proper conversion. Extend inference across sort/Pi/lambda/application/let using the actual checking rules, not by loosening `SortFragmentRule`. Release any checked admission only after the full constraints, quotient/inductive rules and verified policy are implemented.
 
 Evidence will be added to this file only after the corresponding source's Lean 4.35 cloud workflow passes.
+
+## Validated cloud checkpoint (October 11, 2026)
+
+Source `dc43ce850291dc5527c933a8f5d86c408c40eb27`, [CI run 38110171823](https://github.com/dwijayuda/pskernel/actions/runs/38110171823), job `114383914870`, passed all **40 native build targets**, independent source audit and formation regression tests. Exact theorem `inferClosedSortFragment_sound` compiled; this result is a *fragment*, not general Lean kernel correctness. See [evidence](G4_SORT_EVIDENCE.md).

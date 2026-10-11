@@ -1,0 +1,18 @@
+{
+  "schema": "pskernel-fast-g4-sort-evidence/v1",
+  "sourceSha": "dc43ce850291dc5527c933a8f5d86c408c40eb27",
+  "run": 38110171823,
+  "job": 114383914870,
+  "conclusion": "success",
+  "standaloneBuildTargets": 40,
+  "independentModules": 16,
+  "proven": "inferClosedSortFragment_sound",
+  "supportedRules": [
+    "Sort universe formation",
+    "syntactically Sort domain/codomain Pi formation"
+  ],
+  "generalDependentInference": false,
+  "defeq": false,
+  "checkedEnvironment": false,
+  "admittedProofs": 0
+}

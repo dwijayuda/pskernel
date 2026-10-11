@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G4.1-untrusted-catalog-no-admission",
+    "stage": "G4.2-certified-sort-pi-fragment-no-proof-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -42,7 +42,14 @@
     "checkedInferenceImplemented": false,
     "untrustedCandidateCatalogImplemented": true,
     "candidateCatalogTestsPassed": true,
-    "checkedEnvironmentImplemented": false
+    "checkedEnvironmentImplemented": false,
+    "sortFragmentCertified": true,
+    "sortFragmentRules": [
+      "Sort u : Sort (succ u)",
+      "Pi x:(Sort u), (Sort v) : Sort (imax (succ u) (succ v))"
+    ],
+    "generalCheckedInferenceImplemented": false,
+    "admittedDeclarations": 0
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -54,8 +61,8 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "309a4b5d156dd8cab386048cc3aa2c9345713601",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38109975956",
-    "scope": "35 native Lean build targets; 14 independent Lean modules; G1-G4.0 tests and untrusted candidate catalog preflight tests; no proof checker"
+    "validatedSourceCommit": "dc43ce850291dc5527c933a8f5d86c408c40eb27",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38110171823",
+    "scope": "40 native Lean build targets, 16 independent modules, G1-G4.2 focused tests, theorem-backed small formation fragment; no general checker"
   }
 }

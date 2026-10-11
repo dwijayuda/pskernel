@@ -33,6 +33,10 @@ At each stage, one actual source rule maps to an official file/function, direct 
 - First small differential corpus and formal slice, then package-level Init/Std, eventually full Mathlib when implementation complete.
 - Native Lean first; then independently qualify generated JS/Wasm from the chosen single maintained semantic source without preserving the old PSC1 syntax subset.
 
+## G4.2 validated limited formation status
+
+The [G4.2 certified fragment](G4_SORT_EVIDENCE.md) supports only closed `Sort` and syntactic nondependent `Pi` over `Sort` declarations and proves successful execution entails independent structural + fragment formation judgments. All other well-formed terms are **unsupported**, not checked. The G4.3 local-context/DefEq roadmap is documented at [G4_CONTEXT_PLAN.md](G4_CONTEXT_PLAN.md); never claim full checker or admission readiness.
+
 ## G4.1 validated input-indexing status
 
 An independent persistent, **untrusted candidate catalog** passed [G4.1 CI](G4_CATALOG_EVIDENCE.md). It validates duplicate names/level parameters, known constant names/arity, reference safety and transactional snapshot behavior. It does **not** perform type checking or prove a declaration, and is not an admitted checker environment. Any future G4.2+ checked environment must be distinct.

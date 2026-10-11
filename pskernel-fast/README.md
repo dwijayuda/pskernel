@@ -11,6 +11,8 @@ A **new-generation** proof-kernel research program that prioritizes Lean 4.35 co
 - [G4 next checker implementation contract](G4_CHECKER_PLAN.md)
 - [G4.0 sound symbolic universe evidence](G4_LEVEL_EVIDENCE.md)
 - [G4.1 strict untrusted declaration catalog evidence](G4_CATALOG_EVIDENCE.md)
+- [G4.2 certified formation evidence](G4_SORT_EVIDENCE.md)
+- [Next G4.3 context/typed checker plan](G4_CONTEXT_PLAN.md)
 
 ## Current executable state
 

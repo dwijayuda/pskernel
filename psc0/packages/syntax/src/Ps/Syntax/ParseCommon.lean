@@ -39,6 +39,9 @@ def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan
   { start := start.start, stop := stop.stop }
 
 def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
+  | .hole span => span
+  | .ascription _ _ span => span
+  | .call _ _ span => span
   | .reference name => name.span
   | .natural _ span => span
   | .string _ span => span

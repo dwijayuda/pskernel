@@ -25,6 +25,11 @@ inductive PsSyntaxPattern where
 
 inductive PsSyntaxTerm where
   | reference (name : PsSyntaxName)
+  | hole (span : PsSourceSpan)
+  | ascription (value type : PsSyntaxTerm) (span : PsSourceSpan)
+  -- Adjacent calls retain labels and the empty-invocation request until elaboration.
+  | call (fn : PsSyntaxTerm)
+      (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm)) (span : PsSourceSpan)
   | natural (text : String) (span : PsSourceSpan)
   | string (text : String) (span : PsSourceSpan)
   | character (text : String) (span : PsSourceSpan)

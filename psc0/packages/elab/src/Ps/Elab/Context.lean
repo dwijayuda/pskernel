@@ -84,3 +84,12 @@ def psElabContextAfterStructuralFields (context : PsElabContext) : PsElabContext
         (Option.some (PsElabStructuralRecursion.mk
           recursion.functionName recursion.parameterIds recursion.explicitParameterIds
           recursion.recursiveParameterIndex recursion.calls recursion.resultType false))
+
+-- Restore lexical visibility, retain solved constraints, and never recycle a
+-- local identity still mentioned by the shared metavariable context.
+def psElabLeaveScope (outer inner : PsElabContext) : PsElabContext :=
+  { outer with
+    localContext := {
+      nextId := max outer.localContext.nextId inner.localContext.nextId
+      declarations := outer.localContext.declarations }
+    metaContext := inner.metaContext }

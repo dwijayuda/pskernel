@@ -213,6 +213,23 @@ def psPrintLeanTermWithFuel
           PsSyntaxTerm -> Except PsSourcePrintError String :=
         psPrintLeanTermWithFuel remaining;
       match term with
+      | .hole _ => Except.ok "_"
+      | .ascription value type _ => do
+          let value ← smaller value
+          let type ← smaller type
+          return "(" ++ value ++ " : " ++ type ++ ")"
+      | .call fn args _ => do
+          if args.isEmpty then
+            throw (.unsupportedSourceForm "empty invocation requires typed completion")
+          let head ← smaller fn
+          let arguments ← args.mapM fun (label, value) => do
+            let value ← smaller value
+            match label with
+            | none => pure ("(" ++ value ++ ")")
+            | some name =>
+              let name ← psPrintSyntaxName name
+              pure ("(" ++ name ++ " := " ++ value ++ ")")
+          return "(" ++ head ++ ") " ++ psPrintJoin " " arguments
       | .reference name =>
           psPrintSyntaxName name
       | .natural text _ =>

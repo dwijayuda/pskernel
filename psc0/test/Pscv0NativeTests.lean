@@ -26,9 +26,7 @@ private def parserCases : IO Unit := do
       (← get "error" (c.getObjValAs? String "error"))
 
 private def application : String :=
-  "function keep(value: Nat): Nat := {\n" ++
-  "  let selected: Nat := value\n  selected\n}\n" ++
-  "const answer: Nat := keep(42)\n"
+  "function keep(value: Nat): Nat := {\n  let selected: Nat := value\n  selected\n}\nfunction apply(f: Nat -> Nat, value: Nat): Nat := f(value)\nfunction choose{A: Type}(first: A, second: A): A := first\nfunction useUnit(value: Unit): Nat := 9\nconst identity: Nat -> Nat := fun x => x\nconst shadow: Nat -> Nat := fun x =>\n  let x: Nat := x\n  x\nfunction capture(value: Nat): Nat := apply(fun ignored => value, 0)\nconst answer: Nat := apply(fun x => x, choose(A := Nat, second := 0, first := 42))\nconst typed: Nat := (identity(7) : Nat)\nconst completed: Nat := useUnit()\nconst inferred: Nat := choose(A := _, first := 8, second := 0)\nconst inferredLambda: Nat := (fun x => x)(13)\nconst nested: Nat := apply(fun x =>\n  let f: Nat -> Nat := fun x => x\n  f(x), 11)\n"
 
 private def semanticCases : IO Unit := do
   let requests : Array PsV7Native.Request := #[
@@ -38,9 +36,18 @@ private def semanticCases : IO Unit := do
     { source := "const bad: Nat := true\n" },
     { source := "import Missing\nconst answer: Nat := 42\n" },
     { source := "const leaked: Nat := answer\n" },
-    { source := "const answer: Nat := 43\n" }]
+    { source := "const answer: Nat := 43\n" },
+    { source := "function keep(value: Nat): Nat := value\nconst bad: Nat := keep(missing := 1)\n" },
+    { source := "function keep(value: Nat): Nat := value\nconst bad: Nat := keep(value := 1, value := 2)\n" },
+    { source := "function use(a: Unit, b: Unit): Nat := 0\nconst bad: Nat := use()\n" },
+    { source := "const bad: Nat := _\n" },
+    { source := "const bad: Nat -> Nat := fun x => true\n" },
+    { source := "const bad: Nat := keep(value := 1, 2)\n" },
+    { source := "const value: Nat := 1\nconst bad: Nat := value()\n" }]
   let expected : Array (Option String) :=
-    #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none]
+    #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate"]
+  let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -53,6 +60,9 @@ private def semanticCases : IO Unit := do
     | some phase, .error error =>
         unless error.phase == phase do
           throw (IO.userError s!"case {i}: expected {phase}, got {error.phase}")
+        if i >= 7 then
+          unless error.message.startsWith diagnosticPrefixes[i - 7]! do
+            throw (IO.userError s!"case {i}: wrong diagnostic: {error.message}")
         if i == 2 && !error.message.startsWith "PSCV0-APP-02" then
           throw (IO.userError "gap application did not reach APP-02")
         if i == 4 && error.message != "PSCV0-NATIVE-MODULE-IMPORTS-PENDING" then
@@ -64,7 +74,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 4 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 11 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

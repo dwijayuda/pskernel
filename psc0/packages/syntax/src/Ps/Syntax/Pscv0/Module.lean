@@ -41,6 +41,8 @@ def psPscv0BodyBlock (blocks : List PsPscv0DoBlock) (value : PsSyntaxTerm) : Opt
 
 def psPscv0ExceptType (type : PsSyntaxTerm) : Bool :=
   match type with
+  | .call (.reference name) args _ =>
+      psStringEq (psPscv0NameText name) "Except" && args.length == 2 && args.all (fun a => a.fst.isNone)
   | .app fn args _ =>
       match fn with
       | .reference name =>

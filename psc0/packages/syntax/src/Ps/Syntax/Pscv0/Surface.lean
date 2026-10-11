@@ -96,6 +96,9 @@ def psPscv0AlternativeTerm
 
 def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
   match term with
+  | .hole _ => []
+  | .ascription value type _ => [value, type]
+  | .call fn args _ => fn :: args.map Prod.snd
   | .reference _ => []
   | .natural _ _ => []
   | .string _ _ => []

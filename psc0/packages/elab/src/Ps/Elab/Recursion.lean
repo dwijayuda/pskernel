@@ -303,6 +303,22 @@ def psElabRecursionWalkWithFuel
                         Except.ok (PsElabRecursionWalkResult.mk
                           (PsSyntaxTerm.reference projected) List.nil)
                       else Except.ok (PsElabRecursionWalkResult.mk source List.nil)
+        | PsSyntaxTerm.ascription value type span => do
+            let value ← smaller context value
+            let type ← smaller context type
+            return PsElabRecursionWalkResult.mk
+              (.ascription value.term type.term span) (value.changedIds ++ type.changedIds)
+        | PsSyntaxTerm.call fn arguments span => do
+            if arguments.all (fun arg => arg.fst.isNone) && !arguments.isEmpty then
+              smaller context (.app fn (arguments.map Prod.snd) span)
+            else
+              let head ← smaller context fn
+              let args ← arguments.mapM fun (label, value) => do
+                let result ← smaller context value
+                pure ((label, result.term), result.changedIds)
+              return PsElabRecursionWalkResult.mk
+                (.call head.term (args.map Prod.fst) span)
+                (head.changedIds ++ args.flatMap Prod.snd)
         | PsSyntaxTerm.app fn arguments span =>
             match psElabRecursionWalkTerms smaller arguments context with
             | Except.error error => Except.error error

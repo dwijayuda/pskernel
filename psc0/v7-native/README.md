@@ -25,6 +25,24 @@ The emitted TypeScript uses the existing backend and pinned TypeScript 7.0.2
 profile. The CLI emits TypeScript; use the pinned target compiler for JavaScript.
 An input is an application fixture, never generated compiler source.
 
+## Rich terms and shared elaboration
+
+The v7 term tree retains named/positional call arguments, empty invocation,
+type ascriptions and inference placeholders. Lambda binders can obtain their
+types from the expected Pi telescope. Positional and named calls share one
+ordered application engine with implicit insertion and pending instance solving.
+Scopes restore lexical visibility while preserving constraints and fresh IDs.
+
+This increment covers lexical binders, lets and nested closures. Namespace/open/
+section commands, default arguments, general CoeFun, named recursive self-calls
+and the full native lambda binder grammar remain pending. Empty calls complete
+the selected callable/exactly-one-Unit case; they do not invent defaults. Source
+printing to Lean refuses empty invocation until typed completion is available.
+
+The shared elaborator is split into Basic (inference/checking), Binders (ordered
+telescopes and lexical scopes), Application (argument consumption), and Term
+(dispatch, existing records/control/patterns). All are portable source modules.
+
 ## Boundaries
 
 - Implementation authority is shared `.lean` source during language growth.
@@ -54,16 +72,14 @@ It rejects host dependencies and partial/unsafe definitions in the selected
 portable roots. This is an initial import/source guard, not a complete authoring
 profile verifier or a final runtime-library manifest.
 
-The executable reuses the existing 28 M1 parser cases and adds a small semantic
-batch: typed local/application, selected Except do, parse/type/import refusals,
-and request isolation. The Linux workflow additionally checks CLI output and
+The executable retains 28 parser cases (the named-call case now accepts its\nnewly implemented syntax) and a compact semantic batch. One composite application\ncovers expected lambdas, captures/shadowing, named dependent calls, inferred\narguments, ascriptions and Unit completion; focused refusals protect the same\nboundaries. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and
 runs one small emitted application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.
 
 Ordinary edits use incremental Lake builds with toolchain/configuration-specific
 cache keys. The old M1 generation and closure workflows are manual-only here.
-No timing claim is made until the new job actually completes.
+Measured evidence and exact source commits are recorded in ../AI_WORK_STATE.md.
 
 ## Next semantic milestones
 

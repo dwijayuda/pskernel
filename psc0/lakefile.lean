@@ -27,6 +27,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.PrintLean,
     `Ps.Syntax.PrintProofScript,
     `Ps.Syntax.Translate,
+    `Ps.Syntax.Pscv0.TermParts,
     `Ps.Syntax.Pscv0.TermRead,
     `Ps.Syntax.Pscv0.Surface,
     `Ps.Syntax.Pscv0.Read,
@@ -146,6 +147,9 @@ lean_lib PsElab where
   roots := #[
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
+    `Ps.Elab.Basic,
+    `Ps.Elab.Binders,
+    `Ps.Elab.Application,
     `Ps.Elab.Term,
     `Ps.Elab.Recursion,
     `Ps.Elab.Declaration

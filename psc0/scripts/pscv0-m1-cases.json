@@ -136,6 +136,12 @@
       "locals": [
         "app(List;Char)"
       ]
+    },
+    {
+      "name": "named call syntax retained",
+      "source": "const sample: Nat := f(x := seed)\n",
+      "result": "Nat",
+      "locals": []
     }
   ],
   "bad": [
@@ -173,11 +179,6 @@
       "name": "gap annotation parenthesis",
       "source": "const sample: Nat :=\n  let xs: List (Char) := seed\n  0\n",
       "error": "PSCV0-APP-02"
-    },
-    {
-      "name": "named call not selected",
-      "source": "const sample: Nat := f(x := seed)\n",
-      "error": "PSCV0-PARSE"
     },
     {
       "name": "mismatched annotation group",

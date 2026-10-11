@@ -1,3 +1,31 @@
+# PSC0 AI WORK STATE — rich native v7 terms
+
+## 11 October 2026 — shared lexical scopes, applications and expected types
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user authorized continuing v7 in native `.lean`, starting with rich syntax
+and shared elaboration. No `pskernel-core`, compiler-source `.ps` generation,
+self-hosting, local builds/tests or Windows runs.
+
+Candidate: richer term nodes preserve labeled calls, empty invocation, ascription
+and inference holes. Shared binder/application engines implement expected lambda
+domains, telescope-order argument checking, named arguments, implicit insertion
+and the selected one-required-Unit completion. Lexical scope exit retains meta
+constraints and fresh local identities. Shared elaboration is split into Basic,
+Binders, Application and the remaining Term dispatcher/control implementation.
+
+Validation pending in the compact native Linux job. The 28-case parser corpus
+moves the newly supported named-call syntax from refusal to acceptance. The
+semantic application covers closures/shadowing and the new term families; seven
+new phase-specific refusals are added to the existing small batch.
+
+Scope is lexical term/declaration binders, not namespace/open/section semantics.
+Defaults, general CoeFun, named recursive self-calls, full lambda binder grammar,
+richer dependent matching, automation/contracts and full v7 remain pending.
+Historical evidence below applies only to its recorded source commits.
+
+---
+
 # PSC0 AI WORK STATE — native Lean v7 implementation
 
 ## 11 October 2026 — native development foundation

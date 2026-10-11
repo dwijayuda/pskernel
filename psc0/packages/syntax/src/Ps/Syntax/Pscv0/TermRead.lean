@@ -1,4 +1,4 @@
-import Ps.Syntax.ParseProofScript
+import Ps.Syntax.Pscv0.TermParts
 
 -- V7 term dispatch owns assignment boundaries. In an annotation, the caller
 -- owns :=; an identifier immediately before it is still a type argument.
@@ -71,10 +71,10 @@ def psPscv0ParseNativeTailWithFuel
           stop := stop
         };
         if psPscv0CanStartNativeArgument annotation span cursor then
-          match psParseProofScriptPrimary parseArgument cursor with
+          match psPscv0Primary parseArgument cursor with
           | Except.error error => Except.error error
           | Except.ok primary =>
-              match psParseProofScriptPostfixTailWithFuel
+              match psPscv0Postfix
                   parseArgument
                   (Nat.succ remaining)
                   primary.value
@@ -100,7 +100,7 @@ def psPscv0ParseApplicationAfterPrimary
     (fuel : Nat)
     (primary : PsParseResult PsSyntaxTerm) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
-  match psParseProofScriptPostfixTailWithFuel
+  match psPscv0Postfix
       parseArgument
       fuel
       primary.value
@@ -126,7 +126,7 @@ def psPscv0ParseApplicationWithFuel
   match fuel with
   | 0 => Except.error PsParseError.fuelExhausted
   | remaining + 1 =>
-      match psParseProofScriptPrimary parseArgument cursor with
+      match psPscv0Primary parseArgument cursor with
       | Except.error error => Except.error error
       | Except.ok primary =>
           psPscv0ParseApplicationAfterPrimary annotation
@@ -352,7 +352,7 @@ def psPscv0ParseTermWithFuel
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "lambda binder")
         | Option.some keyword =>
-            match psParseProofScriptBindersWithFuel
+            match psPscv0LambdaBinders readAnnotation
                 (psParseListLength keyword.cursor.remaining)
                 keyword.cursor
                 [] with
@@ -393,46 +393,24 @@ def psPscv0ParseTermWithFuel
           (smaller)
           cursor
       else if psTokenCursorAtText cursor "(" then
-        match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "(")
-        | Option.some opening =>
-            if psTokenCursorAtText opening.cursor ")" then
-              match psTokenCursorAdvance opening.cursor with
-              | Option.none => Except.error (PsParseError.unexpectedEnd ")")
-              | Option.some close =>
-                  Except.ok {
-                    value :=
-                      PsSyntaxTerm.unit {
-                        start := opening.token.span.start
-                        stop := close.token.span.stop
-                      }
-                    cursor := close.cursor
-                  }
+        match psParseProofScriptBinder cursor with
+        | Except.ok binder =>
+            if psTokenCursorAtArrow binder.cursor then
+              psParseProofScriptDependentArrowTail continuation binder
             else
-              match psParseProofScriptBinder cursor with
-              | Except.ok binder =>
-                  if psTokenCursorAtArrow binder.cursor then
-                    psParseProofScriptDependentArrowTail
-                      continuation
-                      binder
-                  else
-                    match smaller opening.cursor with
-                    | Except.error error => Except.error error
-                    | Except.ok grouped =>
-                        match psTokenCursorExpectText grouped.cursor ")" with
-                        | Except.error error => Except.error error
-                        | Except.ok close =>
-                            psPscv0ParseGroupedContinuation annotation
-                              smaller continuation (Nat.succ remaining) opening grouped close
-              | Except.error _ =>
-                  match smaller opening.cursor with
-                  | Except.error error => Except.error error
-                  | Except.ok grouped =>
-                      match psTokenCursorExpectText grouped.cursor ")" with
-                      | Except.error error => Except.error error
-                      | Except.ok close =>
-                          psPscv0ParseGroupedContinuation annotation
-                            smaller continuation (Nat.succ remaining) opening grouped close
+              match psPscv0Primary smaller cursor with
+              | .error error => .error error
+              | .ok primary =>
+                  match psPscv0ParseApplicationAfterPrimary annotation smaller (remaining + 1) primary with
+                  | .error error => .error error
+                  | .ok application => psParseProofScriptArrowTail continuation application
+        | Except.error _ =>
+            match psPscv0Primary smaller cursor with
+            | .error error => .error error
+            | .ok primary =>
+                match psPscv0ParseApplicationAfterPrimary annotation smaller (remaining + 1) primary with
+                | .error error => .error error
+                | .ok application => psParseProofScriptArrowTail continuation application
       else
         match
             psPscv0ParseApplicationWithFuel annotation

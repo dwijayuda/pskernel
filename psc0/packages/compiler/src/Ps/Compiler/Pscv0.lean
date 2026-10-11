@@ -16,6 +16,10 @@ def psCompilerPscv0Error : PsCompilerError → String
   | .translation _ => "PSCV0-TRANSLATION-FAILED"
   | .leanFrontend _ => "PSCV0-LEAN-FRONTEND-FAILED"
   | .proofScriptFrontend _ => "PSCV0-FRONTEND-FAILED"
+  | .elaboration (.invalidArgument message) => "PSCV0-ARGUMENT: " ++ message
+  | .elaboration .emptyCallUnsupported => "PSCV0-APP-03"
+  | .elaboration .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"
+  | .elaboration .typeMismatch => "PSCV0-TYPE-MISMATCH"
   | .elaboration _ => "PSCV0-ELABORATION-FAILED"
   | .admission _ => "PSCV0-ADMISSION-CODEC-FAILED"
   | .erasure _ => "PSCV0-ERASURE-FAILED"

@@ -33,3 +33,12 @@ The older dedicated proof branch targets Lean 4.34; later model work targets Lea
 3. Introduce binder-local cache isolation or a context-keyed semantic cache where a targeted test demonstrates need. Do not blindly cache context-dependent defeq results.
 4. Benchmark structural radix-index performance and the beta/WHNF optimizations with the original C0 baseline.
 5. Keep metatheory/consistency proofs deferred while preserving the basic checker rule and no-false-acceptance invariant.
+
+## Executable native regression receipts
+
+- [Native Lean run 38183611788](https://github.com/dwijayuda/pskernel/actions/runs/38183611788) at `aeae35159c694b8e196c9149b4f72845785e2797`: **82 build jobs passed**, no self-host/bootstrap test run.
+- `C0_PROOF_AUDIT sort0_sort1_distinct=pass`: the runnable C0 equality API rejects equality of different universe sorts in an empty environment.
+- `C0_PROOF_AUDIT unbound_bvar_rejected=pass`: the executable checker rejects an unbound de Bruijn variable.
+- `C0_PERF_REGRESSION beta_spine_semantics=pass`: the linear beta-spine implementation matches the old fuel-bounded implementation on short lambda spines, several argument lengths and nonzero consumed-argument prefixes.
+
+These focused regressions **do not establish complete soundness or a consistency proof**. They are an executable check that the notorious *universal* equality theorem from the legacy formal relation is not reproduced by this ordinary C0 runtime scenario. Tests involving context/cache scope and annotated binder regimes remain future work.

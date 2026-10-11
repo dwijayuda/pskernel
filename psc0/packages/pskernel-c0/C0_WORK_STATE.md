@@ -41,3 +41,13 @@ The Rust engine is **NOT** a complete Lean kernel. It does not implement full Le
 5. Compare cold/warm time, allocated bytes, peak memory and throughput on identical hardware before deciding whether to switch PSC0 consumers.
 
 The metatheory and consistency-proof program is deferred. False acceptance is not an acceptable performance optimization.
+
+## Lean-owned performance architecture and proof-risk checkpoint (2026-10-12)
+
+- Lean C0 runtime cache indexes were converted from duplicated 16-level binary tries to a shared 4-level radix-16 trie. Collisions continue to be checked structurally.
+- Removed a redundant loose-variable prepass before instantiation; WHNF lambda counting no longer walks an entire expression tree to calculate a lambda-spine bound.
+- Replaced old full-node-count + repeated argument-list-length lambda consumption with linear, argument-driven consumption in `src/Ps/KernelCore/Core/Substitution/Beta.lean`.
+- Fixed `Core/IndexedExpr.lean` native Lean accessor and trie name collision; the dedicated standalone C0 Lake build now compiles all 80 Lean modules, with 82 native Lake jobs passing.
+- Audited the proof branch and later model work in `C0_PROOF_FINDINGS_AUDIT.md`. Confirmed the legacy formal judgment permits arbitrary equality, but the runtime proof-irrelevance branch retains actual type inference for both terms and type comparison. This is a specification defect, **not** a demonstrated C0 executable false acceptance.
+- [Native CI 38183611788](https://github.com/dwijayuda/pskernel/actions/runs/38183611788) at `aeae35159c694b8e196c9149b4f72845785e2797` passed 82 jobs and targeted negative equality/unbound variable/beta differential tests. **No self-host tests were run.**
+- Remaining unverified proof-guided risks: annotation coherence, binder-local semantic cache scope, and additional checked lambda codomain evidence. Do not claim they are fixed or proven harmless. The new radix-index and beta changes still lack same-run comparison benchmarks against original PSKernel-Core.

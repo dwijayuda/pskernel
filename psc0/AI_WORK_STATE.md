@@ -12,7 +12,9 @@
 
 **Architectural improvement:** migration source candidates are chosen in [pscv0-fast-candidates.json](pscv0-fast-candidates.json) and validated by the ONE generalized [compiler-source-differential.mjs](tools/abi/compiler-source-differential.mjs). It is intended to replace obsolete module-specific test scripts to avoid duplicate logic and chase individual test quirks. Strict exact admissions and TS output compare unchanged. See [fast development design](docs/PSCV0_COMPILER_ONLY_FAST_DEVELOPMENT.md) and [Source candidate evidence](docs/PSCV0_THIRD_MODULE_FOUNDATION_SOURCE.md).
 
-**Next recommended compiler-only actions:** retire obsolete standalone List differential runner if safely replaced; extend candidate manifest to another useful source family only after verifying its dependency imports and typed environmental closure; build a source-graph-aware, cached preparation prefix for dependent compiler modules; improve v7 source readability/trivia/diagnostic origins without reintroducing older parser compatibility. Deliberately schedule full candidate compiler source authority/fixed-point requalification separately, and avoid independent kernel tests until explicitly requested.
+**Completed cleanup:** obsolete single-module List differential runner retired from active tree (history preserved), replaced by the generic source manifest and differential. The consolidated [fast compiler-only CI 38131347281](https://github.com/dwijayuda/pskernel/actions/runs/38131347281) **PASSED** at commit 0cde1e2e3707e6550431d30e589e785b46fcdc72 after cleanup; no independent kernel tests ran.
+
+**Next recommended compiler-only actions:** extend candidate manifest to another useful source family only after verifying its dependency imports and typed environmental closure; build a source-graph-aware, cached preparation prefix for dependent compiler modules; improve v7 source readability/trivia/diagnostic origins without reintroducing older parser compatibility. Deliberately schedule full candidate compiler source authority/fixed-point requalification separately, and avoid independent kernel tests until explicitly requested.
 
 ---
 

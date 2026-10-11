@@ -449,3 +449,31 @@ def psPscv0ParseTerm (annotation : Bool) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) :=
   psPscv0ParseTermWithFuel annotation (Nat.succ (psParseListLength cursor.remaining)) cursor
 
+def psPscv0ParseDefinitionBody
+    (cursor : PsTokenCursor) :
+    Except PsParseError (PsParseResult PsSyntaxTerm) :=
+  if psTokenCursorAtText cursor "{" then
+    match psTokenCursorAdvance cursor with
+    | Option.none => Except.error (PsParseError.unexpectedEnd "definition body")
+    | Option.some opening =>
+        if psProofScriptBoolOr
+            (psTokenCursorAtText opening.cursor "}")
+            (psTokenCursorStartsNamedAssignment opening.cursor) then
+          psPscv0ParseTerm false cursor
+        else
+          match psPscv0ParseTerm false opening.cursor with
+          | Except.error error => Except.error error
+          | Except.ok inner =>
+              match psTokenCursorExpectText inner.cursor "}" with
+              | Except.error error => Except.error error
+              | Except.ok close =>
+                  Except.ok {
+                    value := psProofScriptTermWithSpan inner.value {
+                      start := opening.token.span.start
+                      stop := close.token.span.stop
+                    }
+                    cursor := close.cursor
+                  }
+  else
+    psPscv0ParseTerm false cursor
+

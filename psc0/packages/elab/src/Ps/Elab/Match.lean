@@ -118,7 +118,7 @@ structure PsElabMatchPlan where
   motive : PsExpr
   indices : List (Nat × Nat)
   majorId : Option Nat
-  auxiliary : List PsElabDependentLocal
+  constraintVariables : List Nat
   generalized : List PsElabDependentLocal
   constraints : List PsExpr
   arguments : List PsExpr
@@ -150,20 +150,21 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
     | .fvar id => if parameters.any (psElabExprContainsLocal id) ||
         indices.any (psElabExprContainsLocal id) then none else some id
     | _ => none
-  let auxiliary := if !constrained then [] else
-    context.localContext.declarations.reverse.filterMap fun declaration =>
+  -- A constrained motive keeps outer indices in their original scope. Only
+  -- equality elimination may generalize them and their dependent values.
+  let constraintVariables := if !constrained then [] else
+    context.localContext.declarations.filterMap fun declaration =>
       let id := psLocalDeclId declaration
-      if indices.any (psElabExprContainsLocal id) && !(parameters.any (psElabExprContainsLocal id)) then
-        some (PsElabDependentLocal.mk
-          (PsElabTypedBinder.mk id (psLocalDeclUserName declaration) (psLocalDeclType declaration) .explicit) none)
-      else none
-  let roots := (if constrained then auxiliary.map (fun entry => entry.binder.id) else indexMap.map Prod.fst) ++ majorId.toList
-  let generalized := psElabDependentLocals context roots []
+      if indices.any (psElabExprContainsLocal id) &&
+          !(parameters.any (psElabExprContainsLocal id)) then some id else none
+  let roots := indexMap.map Prod.fst ++ majorId.toList
+  let dependents := psElabDependentLocals context roots []
+  let generalized := if constrained then [] else dependents
   if constrained then
     match majorId with
     | some id =>
       if psElabExprContainsLocal id expected ||
-          generalized.any (fun entry => psElabExprContainsLocal id entry.binder.type) then
+          dependents.any (fun entry => psElabExprContainsLocal id entry.binder.type) then
         throw (.refinement "fixed-index matching with major-dependent result/context requires heterogeneous transport")
     | none => pure ()
   let body := psElabCloseDependentType generalized expected
@@ -176,13 +177,12 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
       return (psLogicEq level type entry.snd entry.fst, psLogicRefl level type entry.fst)
   let body := (equations.zipIdx).foldr (fun entry body =>
     psLogicPi (pushed.id + 1 + entry.snd) "_indexEq" entry.fst.fst body) body
-  let body := psElabCloseDependentType auxiliary body
   let motive := psCloseElabLambdaBinders context.metaContext opened.bindersRev
     (.lam (psRootName "_match") majorType (psExprAbstractFVar pushed.id body) .explicit)
   return {
-    motive, indices := indexMap, majorId, auxiliary, generalized
+    motive, indices := indexMap, majorId, constraintVariables, generalized
     constraints := equations.map Prod.fst
-    arguments := psElabDependentArguments auxiliary ++ equations.map Prod.snd ++
+    arguments := equations.map Prod.snd ++
       psElabDependentArguments generalized }
 
 def psElabMatchFields (names : List PsSyntaxName) (context : PsElabContext)
@@ -268,23 +268,20 @@ def psElabMatchMinor (context : PsElabContext)
   let aliases ← substitutions.foldlM psElabMatchAlias { context := fields.context, valuesRev := [] }
   let hypotheses ← psElabMatchHypotheses fields.bindersRev.reverse ctor.recursiveFields
     aliases.context fields.body
-  let auxiliary ← psElabOpenDependents plan.auxiliary {
-    context := hypotheses.context, body := hypotheses.body, bindersRev := []
-    aliasesRev := [], replacements := substitutions }
   let finish := fun context target => do
     let some alternative := alternative | throw PsElabError.matchNonExhaustive
     let generalized ← psElabOpenDependents plan.generalized {
       context, body := target, bindersRev := [], aliasesRev := []
-      replacements := auxiliary.replacements }
+      replacements := substitutions }
     let body ← alternative.elaborate (psElabContextAfterStructuralFields generalized.context)
       generalized.body
     return PsElabTermResult.mk (psElabLeaveScope context body.context)
       (psElabCloseDependents generalized body.context.metaContext body.term) target
-  let flexible := auxiliary.bindersRev.map (fun binder => binder.id) ++ fields.bindersRev.map (fun binder => binder.id)
+  let flexible := fields.bindersRev.map (fun binder => binder.id) ++ plan.constraintVariables
   let body ← psElabSolveIndexConstraints 256 plan.constraints.length flexible (hypotheses.bindersRev.map (fun binder => binder.id))
-    finish auxiliary.context auxiliary.body
+    finish hypotheses.context hypotheses.body
   let value := psElabSubstituteLocals aliases.valuesRev
-    (psElabCloseDependents auxiliary body.context.metaContext body.term)
+    (psMetaInstantiate body.context.metaContext body.term)
   let closed := psCloseElabLambdaBinders body.context.metaContext fields.bindersRev
     (psCloseElabLambdaBinders body.context.metaContext hypotheses.bindersRev value)
   return { context := psElabLeaveScope context body.context, term := closed }

@@ -47,3 +47,9 @@ splits. Its [source elaborator](https://github.com/leanprover/lean4/blob/c29b6dd
 uses fresh names to avoid source capture. This implementation follows those
 invariants through the existing portable dependent-elimination layer, without
 importing the host elaborator into the portable closure.
+
+Nested constrained matches retain the original index scope in their motive.
+They do not rebind outer index variables around captured dependent values.
+The equality solver alone reverts and specializes those variables and values
+when transporting along an actual index equation. Direct distinct-index motives
+continue to generalize their dependent context as before.

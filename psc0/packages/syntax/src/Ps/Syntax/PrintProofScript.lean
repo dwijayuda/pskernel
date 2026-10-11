@@ -377,8 +377,10 @@ def psPrintProofScriptBinder
 -- telescope to make an unsupported header printable.
 def psPrintProofScriptExplicitEntry
     (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) :
-    Except PsSourcePrintError String :=
-  let head := Prod.fst binder;
+    Except PsSourcePrintError String := do
+  let head := Prod.fst binder
+  if !head.moreNames.isEmpty then
+    throw (.unsupportedSourceForm "native explicit group needs scope-preserving declaration lowering")
   match psPrintSyntaxName head.name with
   | Except.error error => Except.error error
   | Except.ok name =>

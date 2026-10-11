@@ -69,7 +69,8 @@ def psPrintBinderDelimiters
 def psPrintTypedBinder (head : PsSyntaxBinderHead) (type : String) :
     Except PsSourcePrintError String := do
   if psSyntaxAnonymousInstanceBinder head then return "[" ++ type ++ "]"
-  let name ← psPrintSyntaxName head.name
+  let names ← psPrintSyntaxNames (psSyntaxBinderNames head)
+  let name := psPrintJoin " " names
   let delimiters := psPrintBinderDelimiters head.kind
   return delimiters.fst ++ name ++ " : " ++ type ++ delimiters.snd
 

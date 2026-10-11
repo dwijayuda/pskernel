@@ -10,14 +10,31 @@ inductive PsSyntaxBinderKind where
   | strictImplicit
   | instanceImplicit
 
+-- A nonempty native group shares one annotation. The first name preserves
+-- unary construction; moreNames retains the group boundary until elaboration.
 structure PsSyntaxBinderHead where
+  group ::
   name : PsSyntaxName
   kind : PsSyntaxBinderKind
   span : PsSourceSpan
+  moreNames : List PsSyntaxName := []
+
+def PsSyntaxBinderHead.mk (name : PsSyntaxName) (kind : PsSyntaxBinderKind)
+    (span : PsSourceSpan) : PsSyntaxBinderHead :=
+  .group name kind span []
+
+def psSyntaxBinderNames (head : PsSyntaxBinderHead) : List PsSyntaxName :=
+  head.name :: head.moreNames
+
+def psSyntaxBinderSelectNames (head : PsSyntaxBinderHead)
+    (keep : PsSyntaxName → Bool) : Option PsSyntaxBinderHead :=
+  match (psSyntaxBinderNames head).filter keep with
+  | [] => none
+  | name :: moreNames => some { head with name, moreNames }
 
 def psSyntaxAnonymousInstanceBinder (head : PsSyntaxBinderHead) : Bool :=
   match head.kind, head.name.segments with
-  | .instanceImplicit, [name] => name.startsWith "$psc0Inst"
+  | .instanceImplicit, [name] => head.moreNames.isEmpty && name.startsWith "$psc0Inst"
   | _, _ => false
 
 inductive PsSyntaxPattern where

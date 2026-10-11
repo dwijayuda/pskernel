@@ -59,9 +59,8 @@ dispatch and existing control/patterns. Scope owns capture-aware syntax traversa
 and section dependencies; Command owns ordered scope transitions and declaration
 admission. All are portable source modules, without host elaborator imports.
 
-Selected limitations remain explicit: one parameter per native
-variable/nonexplicit group, no rebinding an active section variable, no universe
-commands, scoped notation/open modifiers, expected-type overload disambiguation,
+Selected limitations remain explicit: no rebinding an active section variable,
+no universe commands, scoped notation/open modifiers, expected-type overload disambiguation,
 general CoeFun, autoParam or full native binder grammar. Named recursive self-calls and
 recursive calls under a shadowed captured section parameter remain unsupported.
 The declaration-only source translation API refuses scope commands and empty
@@ -77,11 +76,23 @@ Anonymous `[ClassTerm]` binders receive inaccessible source-local names and
 participate in the existing local instance search and section generalization.
 Printers retain their anonymous form.
 
-Native groups currently contain one name each; sequential groups are supported.
-A bare quantified binder can carry a type (`forall A : Type, ...`).
-Multi-name typed groups, lambda result annotations, pattern binders and automatic
-insertion of omitted implicit lambda binders remain pending. Multi-name groups
-require shared annotation scope in the AST before they can be expanded safely.
+Native explicit, implicit and strict implicit groups retain all names and one
+annotation in the AST, including bare `forall A B : Type, ...`. Name resolution
+visits the annotation before adding any of those names. Elaboration checks a
+concrete annotation in that same outer context, then introduces all group names
+with the resulting Core type. Inferred `_` domains consume expected types per
+name, including heterogeneous inferred lambda parameters.
+
+Section dependency selection retains only used names from a group, with their
+shared annotation and dependencies. Recursion preserves group scope and splits
+parameters only after their annotations have been renamed to internal identities.
+Native term printers keep groups intact; the declaration-only PSC printer refuses
+a multi-name explicit group requiring scope-preserving lowering rather than
+silently expanding it. Declaration explicit parameters still require comma entries.
+
+Lambda result annotations, pattern binders and automatic insertion of omitted
+implicit lambda binders remain pending. Inductive/structure source headers still
+use the selected legacy data grammar; their parser expansion is a later milestone.
 
 ## Boundaries
 
@@ -119,9 +130,11 @@ arguments, ascriptions, namespace resolution, section generalization, theorem
 inclusions, dependent defaults, partial application and Unit completion. Focused
 refusals protect scope restoration, ambiguity, theorem signatures, default type
 checking and required arguments. Quantified polymorphic values, Unicode binder aliases and anonymous local
-instances extend those same programs. Four additional refusals protect term
-binder grammar and missing instances. Selected Except do and request isolation
-remain covered. The Linux workflow additionally checks CLI output and runs the emitted
+instances extend those same programs. Grouped binders additionally exercise local
+and global shadowing, dependent arrows, heterogeneous inference, selective section
+capture, implicit kinds and changing-state structural recursion. Focused refusals
+protect binder category ownership, unknown annotation names and duplicate section
+variables. Selected Except do and request isolation remain covered. The Linux workflow additionally checks CLI output and runs the emitted
 application. Phase times and source hashes are artifacts.
 A successful result claims official-kernel acceptance under the current PSC
 prelude; it does not claim full v7 conformance or verified runtime behavior.

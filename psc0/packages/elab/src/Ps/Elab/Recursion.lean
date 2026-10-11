@@ -196,7 +196,7 @@ def psElabRecursionWalkBinders
         match walk context (Prod.snd binder) with
         | Except.error error => Except.error error
         | Except.ok type =>
-            match smaller (psElabRecursionPushName context head.name) with
+            match smaller ((psSyntaxBinderNames head).foldl psElabRecursionPushName context) with
             | Except.error error => Except.error error
             | Except.ok tail =>
                 Except.ok (PsElabRecursionBinderWalk.mk
@@ -523,44 +523,43 @@ def psElabRecursionSelectedValues
       else if psElabBoolOr selected selectGeneralized then smaller
       else List.cons (PsExpr.fvar binder.id) smaller
 
+structure PsElabRecursionRenamedGroup where
+  binders : List (Prod PsSyntaxBinderHead PsSyntaxTerm)
+  remaining : List PsElabTypedBinder
+  context : PsLocalContext
+
+-- Splitting is safe only after the group's annotation has been renamed in its
+-- outer scope. The resulting parameter names are fresh internal identities.
+def psElabRecursionRenameGroup (kind : PsSyntaxBinderKind) (span : PsSourceSpan)
+    (type : PsSyntaxTerm) (names : List PsSyntaxName)
+    (typed : List PsElabTypedBinder) (context : PsLocalContext) :
+    Except PsElabError PsElabRecursionRenamedGroup := do
+  match names with
+  | [] => return { binders := [], remaining := typed, context }
+  | name :: names =>
+    let binder :: typed := typed | throw .structuralRecursionInternal
+    let next := PsLocalContext.mk context.nextId
+      (PsLocalDecl.binding binder.id binder.name binder.type binder.binder :: context.declarations)
+    let rest ← psElabRecursionRenameGroup kind span type names typed next
+    let head := PsSyntaxBinderHead.mk (psElabRecursionParameterName binder.id name.span) kind span
+    return { rest with binders := (head, type) :: rest.binders }
+
 def psElabRecursionRenameParameters
     (plan : PsElabRecursionPlan) (environment : PsEnvironment)
-    (typed : List PsElabTypedBinder) :
-    List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
-    PsLocalContext ->
-    Except PsElabError (List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :=
-  match typed with
-  | List.nil =>
-      fun (source : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) (_context : PsLocalContext) =>
-        match source with
-        | List.nil => Except.ok List.nil
-        | List.cons _ _ => Except.error PsElabError.structuralRecursionInternal
-  | List.cons binder rest =>
-      let smaller : List (Prod PsSyntaxBinderHead PsSyntaxTerm) ->
-          PsLocalContext ->
-          Except PsElabError (List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :=
-        psElabRecursionRenameParameters plan environment rest;
-      fun (source : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) (context : PsLocalContext) =>
-        match source with
-        | List.nil => Except.error PsElabError.structuralRecursionInternal
-        | List.cons entry tail =>
-            let sourceHead := Prod.fst entry;
-            match psElabRecursionWalkWithFuel 4096 plan environment context (Prod.snd entry) with
-            | Except.error error => Except.error error
-            | Except.ok type =>
-                -- Keep every original parameter ID reserved for this syntax walk.
-                -- Only preceding declarations are visible; dummy locals use fresh IDs.
-                let next := PsLocalContext.mk context.nextId
-                  (List.cons
-                    (PsLocalDecl.binding binder.id binder.name binder.type binder.binder)
-                    context.declarations);
-                match smaller tail next with
-                | Except.error error => Except.error error
-                | Except.ok renamed =>
-                    let head := PsSyntaxBinderHead.mk
-                      (psElabRecursionParameterName binder.id sourceHead.name.span)
-                      sourceHead.kind sourceHead.span;
-                    Except.ok (List.cons (Prod.mk head type.term) renamed)
+    (typed : List PsElabTypedBinder)
+    (source : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
+    (context : PsLocalContext) :
+    Except PsElabError (List (Prod PsSyntaxBinderHead PsSyntaxTerm)) := do
+  match source with
+  | [] =>
+    if typed.isEmpty then return []
+    throw .structuralRecursionInternal
+  | (head, type) :: rest =>
+    let type ← psElabRecursionWalkWithFuel 4096 plan environment context type
+    let group ← psElabRecursionRenameGroup head.kind head.span type.term
+      (psSyntaxBinderNames head) typed context
+    let tail ← psElabRecursionRenameParameters plan environment group.remaining rest group.context
+    return group.binders ++ tail
 
 def psElabRecursionWrapAlternatives
     (state : List (Prod PsSyntaxBinderHead PsSyntaxTerm))

@@ -567,7 +567,7 @@ def psElabInductiveConstructor
                       inductiveName
                       0
                       (psElabListLength parameterArgs)
-                      (psElabListLength source.fields)
+                      (psElabListLength fields.bindersRev)
                       recursiveFields))
 
 

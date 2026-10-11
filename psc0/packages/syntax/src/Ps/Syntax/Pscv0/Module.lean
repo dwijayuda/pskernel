@@ -51,7 +51,7 @@ def psPscv0ExceptType (type : PsSyntaxTerm) : Bool :=
   | _ => false
 
 def psPscv0BinderShadowsExcept (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : Bool :=
-  psStringEq (psPscv0NameText binder.fst.name) "Except"
+  (psSyntaxBinderNames binder.fst).any (fun name => psStringEq (psPscv0NameText name) "Except")
 def psPscv0BinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0ConstructorTerms (constructor : PsSyntaxInductiveConstructor) : List PsSyntaxTerm :=

@@ -110,7 +110,30 @@ private def application : String :=
   "const strictAnswer: Nat := unicodeStrict(44)\n" ++
   "const dependentId: (A: Type) -> A -> A := λ (A: Type) x => x\n" ++
   "const dependentAnswer: Nat := dependentId(Nat, 45)\n" ++
-  "theorem quantifiedProof: ∀ (P: Prop), P -> P := λ (P: Prop) proof => proof\n"
+  "theorem quantifiedProof: ∀ (P: Prop), P -> P := λ (P: Prop) proof => proof\n" ++
+  "const groupLocal: forall (T: Type), T -> T -> T := fun (T: Type) (T x: T) => x\n" ++
+  "const groupOuter: Nat := groupLocal(Nat, 1, 51)\n" ++
+  "const groupPi: (A B: Type) -> A -> B -> B := fun (A B: Type) (x: A) (y: B) => y\n" ++
+  "const groupArrow: Nat := groupPi(Bool, Nat, true, 52)\n" ++
+  "const groupBare: forall A B : Type, A -> B -> A := fun (A B: Type) (x: A) (y: B) => x\n" ++
+  "const groupBareAnswer: Nat := groupBare(Nat, Bool, 53, true)\n" ++
+  "const groupInferred: Nat -> Bool -> Bool := fun (x y) => y\n" ++
+  "const groupInferredAnswer: Bool := groupInferred(0, true)\n" ++
+  "const groupGlobal: Nat -> Nat -> Nat := fun (Nat x: Nat) => x\n" ++
+  "const groupGlobalAnswer: Nat := groupGlobal(0, 54)\n" ++
+  "function groupImplicit{A B: Type}(x: A, y: B): B := y\n" ++
+  "function groupStrict⦃A B: Type⦄(x: A, y: B): B := y\n" ++
+  "const groupKindsAnswer: Nat := groupStrict(groupImplicit(0, true), 55)\n" ++
+  "section Grouped\n" ++
+  "variable (A B: Type) (x y: A)\n" ++
+  "function groupSection(z: B): A := y\n" ++
+  "function groupFold(xs: List B, count: Nat): A := match xs with {\n" ++
+  "  | List.nil => y\n" ++
+  "  | List.cons head tail => groupFold(tail, Nat.succ(count))\n" ++
+  "}\n" ++
+  "end Grouped\n" ++
+  "const groupSectionAnswer: Nat := groupSection(Nat, Bool, 56, true)\n" ++
+  "const groupFoldAnswer: Nat := groupFold(Nat, Bool, 57, List.cons(true, List.nil), 0)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -121,7 +144,7 @@ private def instanceProgram : String :=
   "const lambdaForward: forall (P: Prop) [Decidable P], Nat -> Nat :=\n" ++
   "  λ (P: Prop) [Decidable P] value => need(P := P, value := value)\n" ++
   "section Instances\n" ++
-  "variable (P: Prop) [Decidable P]\n" ++
+  "variable (P Q: Prop) [Decidable P]\n" ++
   "function sectionForward(value: Nat): Nat := need(P := P, value := value)\n" ++
   "end Instances\n"
 
@@ -151,17 +174,22 @@ private def semanticCases : IO Unit := do
     { source := "const bad: Nat -> Nat -> Nat := fun (x: Nat, y: Nat) => x\n" },
     { source := "const bad: Unit -> Nat := fun() => 0\n" },
     { source := "const bad: forall (A: Type) A -> A := fun (A: Type) x => x\n" },
-    { source := "function need{P: Prop}[Decidable P](value: Nat): Nat := value\nfunction bad{P: Prop}(value: Nat): Nat := need(P := P, value := value)\n" }]
+    { source := "function need{P: Prop}[Decidable P](value: Nat): Nat := value\nfunction bad{P: Prop}(value: Nat): Nat := need(P := P, value := value)\n" },
+    { source := "function bad(x y: Nat): Nat := x\n" },
+    { source := "const bad: forall (A x: A), A := fun (A x: A) => x\n" },
+    { source := "section\nvariable (x x: Nat)\nend\n" }]
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
       some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate",
-      some "parse", some "parse", some "parse", some "elaborate"]
+      some "parse", some "parse", some "parse", some "elaborate",
+      some "parse", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
-    "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-ELABORATION"]
+    "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-PARSE", "PSCV0-ELABORATION",
+    "PSCV0-PARSE", "PSCV0-SCOPE: unknown name", "PSCV0-SCOPE: duplicate active section variable"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -188,7 +216,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 22 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 3 checked programs, 25 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

@@ -25,15 +25,15 @@ def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaratio
     let used := if isTheorem then psScopeUnion header resolver.scope.included
       else psScopeUnion header value.used
     let captured := psScopeSelect resolver.scope used
-    if isTheorem && !value.used.all (fun key => captured.any (fun b => psScopeKey b.fst.name == key)) then
+    if isTheorem && !value.used.all (fun key => captured.any (fun b => (psScopeBinderKeys b.fst).contains key)) then
       throw (.scope "theorem proof uses a section variable absent from its header; use include")
     if isTheorem then
       return .theoremDecl name (captured ++ binders.binders) type.term value.term span
     -- Recursive section parameters are fixed in the source scope. Add them at
     -- the syntax boundary before the existing structural-recursion algorithm.
     let selfArguments := (captured.filter fun binder =>
-      match binder.fst.kind with | .explicit => true | _ => false).map
-        (fun binder => PsSyntaxTerm.reference binder.fst.name)
+      match binder.fst.kind with | .explicit => true | _ => false).flatMap
+        (fun binder => (psSyntaxBinderNames binder.fst).map PsSyntaxTerm.reference)
     let value ←
       if selfArguments.isEmpty then pure value
       else psScopeTerm 4096 { resolver with selfArguments } binders.bound value.term
@@ -84,11 +84,13 @@ def psScopeOpen (state : PsCommandState) (name : PsSyntaxName) :
 def psScopeVariables (state : PsCommandState) (entries : List PsScopeBinder) :
     Except PsElabError PsCommandState := do
   let scope ← entries.foldlM (fun scope entry => do
-    let key := psScopeKey entry.fst.name
-    if entry.fst.name.segments.length != 1 || key == "_" then
-      throw (.scope "section variable requires a name")
-    if scope.variables.any (fun old => psScopeKey old.binder.fst.name == key) then
-      throw (.scope ("duplicate active section variable " ++ key))
+    let _ ← (psSyntaxBinderNames entry.fst).foldlM (fun seen name => do
+      let key := psScopeKey name
+      if name.segments.length != 1 || key == "_" then
+        throw (.scope "section variable requires a name")
+      if psScopeHasVariable scope key || seen.contains key then
+        throw (.scope ("duplicate active section variable " ++ key))
+      pure (key :: seen)) ([] : List String)
     let resolved ← psScopeTerm 4096 { environment := state.environment, scope } [] entry.snd
     let entry := PsScopeVariable.mk (entry.fst, resolved.term) resolved.used
     return { scope with variables := scope.variables ++ [entry] }) state.scope
@@ -103,7 +105,7 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
     Except PsElabError PsCommandState := do
   let included ← names.foldlM (fun included name => do
     let key := psScopeKey name
-    if !state.scope.variables.any (fun entry => psScopeKey entry.binder.fst.name == key) then
+    if !psScopeHasVariable state.scope key then
       throw (.scope ("unknown section variable " ++ key))
     return if add then psScopeUnion included [key] else included.filter (· != key))
     state.scope.included

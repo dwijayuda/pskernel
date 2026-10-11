@@ -21,41 +21,55 @@ structure PsElabBinderState where
   bindersRev : List PsElabTypedBinder
   expected : Option PsExpr
 
--- One ordered telescope walk for declarations, lambdas and forall. Expected
--- domains are available before entering each binder; each codomain is opened
--- using that binder's fresh identity before processing the next binder.
+-- One ordered name walk consumes the expected telescope. Concrete group
+-- annotations are elaborated before entering this walk and reused by identity.
+-- Inferred domains remain per-name, so (x y : _) can use different expected
+-- domains without inventing a dependency in the shared source annotation.
+def psElabBinderName (type : Option PsExpr) (kind : PsSyntaxBinderKind)
+    (state : PsElabBinderState) (sourceName : PsSyntaxName) :
+    Except PsElabError PsElabBinderState := do
+  let some name := psSyntaxNameToName sourceName | throw .emptyName
+  let expectedPi ← match state.expected with
+    | none => pure none
+    | some expected =>
+      match psWhnf state.context.environment state.context.metaContext
+          state.context.localContext expected with
+      | .forallE name domain body binder => pure (some (PsForallView.mk name domain body binder))
+      | .mvar _ => pure none
+      | _ => throw (.infer .expectedFunction)
+  let type := match type, expectedPi with
+    | some type, _ => PsElabTypeResult.mk state.context type
+    | none, some pi => PsElabTypeResult.mk state.context pi.domain
+    | none, none => psElabFreshType state.context
+  let constraints ← match expectedPi with
+    | none => pure type.context.metaContext
+    | some pi =>
+      let unified := psUnify type.context.environment type.context.localContext
+        type.context.metaContext type.type pi.domain
+      if unified.success then pure unified.context else throw .typeMismatch
+  let context := psElabContextWithMeta type.context constraints
+  let binder := psElabBinderKindToCore kind
+  let pushed := psLocalPushBinding context.localContext name (psMetaInstantiate constraints type.type) binder
+  return {
+    context := psElabContextWithLocal context pushed.context
+    bindersRev := PsElabTypedBinder.mk pushed.id name type.type binder :: state.bindersRev
+    expected := expectedPi.map (fun pi => psExprInstantiate1 pi.body (.fvar pushed.id)) }
+
+-- Group scope is a semantic boundary, not parser expansion into repeated
+-- annotations. All names enter only after their annotation has been elaborated.
 def psElabBindersWithExpected (elaborate : PsElaborator)
     (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm))
     (state : PsElabBinderState) : Except PsElabError PsElabBinderState := do
   match entries with
   | [] => return state
   | (head, sourceType) :: rest =>
-    let some name := psSyntaxNameToName head.name | throw .emptyName
-    let expectedPi ← match state.expected with
-      | none => pure none
-      | some expected =>
-        match psWhnf state.context.environment state.context.metaContext
-            state.context.localContext expected with
-        | .forallE name domain body binder => pure (some (PsForallView.mk name domain body binder))
-        | .mvar _ => pure none
-        | _ => throw (.infer .expectedFunction)
-    let type ← match sourceType, expectedPi with
-      | .hole _, some pi => pure (PsElabTypeResult.mk state.context pi.domain)
-      | _, _ => psElabType elaborate state.context sourceType
-    let constraints ← match expectedPi with
-      | none => pure type.context.metaContext
-      | some pi =>
-        let unified := psUnify type.context.environment type.context.localContext
-          type.context.metaContext type.type pi.domain
-        if unified.success then pure unified.context else throw .typeMismatch
-    let context := psElabContextWithMeta type.context constraints
-    let binder := psElabBinderKindToCore head.kind
-    let pushed := psLocalPushBinding context.localContext name (psMetaInstantiate constraints type.type) binder
-    let nextExpected := expectedPi.map (fun pi => psExprInstantiate1 pi.body (.fvar pushed.id))
-    psElabBindersWithExpected elaborate rest {
-      context := psElabContextWithLocal context pushed.context
-      bindersRev := PsElabTypedBinder.mk pushed.id name type.type binder :: state.bindersRev
-      expected := nextExpected }
+    let (type, state) ← match sourceType with
+      | .hole _ => pure (none, state)
+      | _ => do
+        let annotation ← psElabType elaborate state.context sourceType
+        pure (some annotation.type, { state with context := annotation.context })
+    let state ← (psSyntaxBinderNames head).foldlM (psElabBinderName type head.kind) state
+    psElabBindersWithExpected elaborate rest state
 
 def psElabTypedBindersAcc (elaborate : PsElaborator)
     (entries : List (Prod PsSyntaxBinderHead PsSyntaxTerm))

@@ -24,6 +24,12 @@ structure PsScopeResolver where
 
 def psScopeKey (name : PsSyntaxName) : String := String.intercalate "." name.segments
 
+def psScopeBinderKeys (head : PsSyntaxBinderHead) : List String :=
+  (psSyntaxBinderNames head).map psScopeKey
+
+def psScopeHasVariable (scope : PsCommandScope) (key : String) : Bool :=
+  scope.variables.any (fun entry => (psScopeBinderKeys entry.binder.fst).contains key)
+
 def psScopeUnion (left right : List String) : List String :=
   right.foldl (fun acc name => if acc.contains name then acc else name :: acc) left
 
@@ -53,7 +59,7 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
   let rooted := name.segments.head? == some "_root_"
   if !rooted then
     if bound.contains first then return (name, [])
-    if resolver.scope.variables.any (fun entry => psScopeKey entry.binder.fst.name == first) then
+    if psScopeHasVariable resolver.scope first then
       return (name, [first])
   if segments == ["Type"] || segments == ["Prop"] then
     return ({ name with segments := ["_root_"] ++ segments }, [])
@@ -82,14 +88,14 @@ structure PsScopeBindersResult where
   bound : List String
   used : List String
 
--- Shared, ordered telescope traversal: annotations see preceding binders only.
+-- An annotation sees preceding groups; all names of its group enter together.
 def psScopeBinders (visit : PsScopeVisitor) (bound : List String)
     (binders : List PsScopeBinder) : Except PsElabError PsScopeBindersResult := do
   match binders with
   | [] => return { binders := [], bound, used := [] }
   | (head, type) :: rest =>
     let annotation ← visit bound type
-    let next ← psScopeBinders visit (psScopeKey head.name :: bound) rest
+    let next ← psScopeBinders visit (psScopeBinderKeys head ++ bound) rest
     return {
       binders := (head, annotation.term) :: next.binders
       bound := next.bound
@@ -204,12 +210,14 @@ def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxNa
 -- No whole-scope fixed-point iteration or generalization by proof body.
 def psScopeSelect (scope : PsCommandScope) (used : List String) : List PsScopeBinder :=
   let selected := scope.variables.reverse.foldl (fun acc entry =>
-    if acc.contains (psScopeKey entry.binder.fst.name) then
+    if (psScopeBinderKeys entry.binder.fst).any acc.contains then
       psScopeUnion acc entry.dependencies else acc) used
   let selected := scope.variables.foldl (fun acc entry =>
     match entry.binder.fst.kind with
     | .instanceImplicit =>
-      if entry.dependencies.all acc.contains then psScopeUnion acc [psScopeKey entry.binder.fst.name]
+      if entry.dependencies.all acc.contains then psScopeUnion acc (psScopeBinderKeys entry.binder.fst)
       else acc
     | _ => acc) selected
-  (scope.variables.filter (fun entry => selected.contains (psScopeKey entry.binder.fst.name))).map (·.binder)
+  scope.variables.filterMap fun entry =>
+    (psSyntaxBinderSelectNames entry.binder.fst (fun name => selected.contains (psScopeKey name))).map
+      (fun head => (head, entry.binder.snd))

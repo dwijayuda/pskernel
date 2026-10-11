@@ -5,17 +5,35 @@ abbrev PsPscv0TermReader :=
 
 -- All binder contexts use the caller's v7 annotation reader. Grammar policy
 -- stays here: declarations own comma groups/defaults; terms own native binders.
-def psPscv0BinderEntry (readType readValue : PsPscv0TermReader)
-    (kind : PsSyntaxBinderKind) (requireType defaults : Bool)
+def psPscv0BinderNames (fuel : Nat) (cursor : PsTokenCursor)
+    (accRev : List PsSyntaxName) :
+    Except PsParseError (PsParseResult (List PsSyntaxName)) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match psTokenCursorPeek cursor with
+    | some token =>
+      if psTokenKindEq token.kind .identifier && !psProofScriptReservedArgument token.text then
+        let name ← psTokenCursorExpectKind cursor .identifier
+        psPscv0BinderNames fuel name.cursor
+          (PsSyntaxName.mk [name.token.text] name.token.span :: accRev)
+      else return { value := accRev.reverse, cursor }
+    | none => return { value := accRev.reverse, cursor }
+
+def psPscv0BinderEntry (readType readValue : PsPscv0TermReader) (fuel : Nat)
+    (kind : PsSyntaxBinderKind) (requireType defaults multiName : Bool)
     (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult (Prod PsSyntaxBinderHead PsSyntaxTerm)) := do
   let name ← psTokenCursorExpectKind cursor .identifier
+  let names ← if multiName then
+      psPscv0BinderNames fuel name.cursor []
+    else pure (PsParseResult.mk [] name.cursor)
   let type ←
-    if psTokenCursorAtText name.cursor ":" then do
-      let colon ← psTokenCursorExpectText name.cursor ":"
+    if psTokenCursorAtText names.cursor ":" then do
+      let colon ← psTokenCursorExpectText names.cursor ":"
       readType colon.cursor
-    else if requireType then throw (psProofScriptExpectedError "typed binder" name.cursor)
-    else pure (PsParseResult.mk (.hole name.token.span) name.cursor)
+    else if requireType then throw (psProofScriptExpectedError "typed binder" names.cursor)
+    else pure (PsParseResult.mk (.hole name.token.span) names.cursor)
   let annotation ←
     if psTokenCursorAtText type.cursor ":=" then do
       if !defaults then throw (psProofScriptExpectedError "binder without default" type.cursor)
@@ -29,9 +47,9 @@ def psPscv0BinderEntry (readType readValue : PsPscv0TermReader)
           (psSyntaxSpanJoin (psSyntaxTermSpan type.value) (psSyntaxTermSpan value.value)))
         value.cursor)
     else pure type
-  let head := PsSyntaxBinderHead.mk
+  let head := PsSyntaxBinderHead.group
     (PsSyntaxName.mk [name.token.text] name.token.span) kind
-    (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value))
+    (psSyntaxSpanJoin name.token.span (psSyntaxTermSpan annotation.value)) names.value
   return { value := (head, annotation.value), cursor := annotation.cursor }
 
 def psPscv0BinderEntries (readType readValue : PsPscv0TermReader)
@@ -42,7 +60,8 @@ def psPscv0BinderEntries (readType readValue : PsPscv0TermReader)
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    let entry ← psPscv0BinderEntry readType readValue opening.kind requireType defaults cursor
+    let entry ← psPscv0BinderEntry readType readValue (fuel + 1) opening.kind requireType defaults
+      (!commaGroup && match opening.kind with | .instanceImplicit => false | _ => true) cursor
     let acc := entry.value :: acc
     if commaGroup && psTokenCursorAtText entry.cursor "," then
       let comma ← psTokenCursorExpectText entry.cursor ","
@@ -110,8 +129,8 @@ def psPscv0AtLambdaArrow (cursor : PsTokenCursor) : Bool :=
   psTokenCursorAtText cursor "=>" || psTokenCursorAtText cursor "↦"
 
 -- Native term binders never acquire declaration commas or a hidden Unit.
--- Multi-name typed groups need a grouped AST to preserve annotation scope;
--- they are deliberately refused by the one-entry native group reader.
+-- A native group retains its names together; annotation scope ends before
+-- all of them. Instance binders retain their separate one-name grammar.
 def psPscv0TermBinders (read : PsPscv0TermReader) (quantified : Bool)
     (fuel : Nat) (cursor : PsTokenCursor)
     (acc : List (Prod PsSyntaxBinderHead PsSyntaxTerm)) :
@@ -129,14 +148,14 @@ def psPscv0TermBinders (read : PsPscv0TermReader) (quantified : Bool)
       psPscv0TermBinders read quantified fuel group.cursor (group.value.reverse ++ acc)
     else
       let entry ←
-        if quantified then psPscv0BinderEntry read read .explicit false false cursor
+        if quantified then psPscv0BinderEntry read read (fuel + 1) .explicit false false true cursor
         else do
           let name ← psTokenCursorExpectKind cursor .identifier
           let head := PsSyntaxBinderHead.mk
             (PsSyntaxName.mk [name.token.text] name.token.span) .explicit name.token.span
           pure (PsParseResult.mk (head, PsSyntaxTerm.hole name.token.span) name.cursor)
       if quantified && !psTokenCursorAtText entry.cursor "," then
-        throw (psProofScriptExpectedError "comma after bare quantified binder" entry.cursor)
+        throw (psProofScriptExpectedError "comma after quantified binder group" entry.cursor)
       psPscv0TermBinders read quantified fuel entry.cursor (entry.value :: acc)
 
 def psPscv0BoundTerm (readType readBody : PsPscv0TermReader)

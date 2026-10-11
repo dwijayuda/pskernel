@@ -101,7 +101,7 @@ structure PsElabDependentLocal where
 
 def psElabDependentLocals (context : PsElabContext) (roots ignored : List Nat) :
     List PsElabDependentLocal :=
-  let state := context.localContext.declarations.reverse.foldl (fun state declaration =>
+  let state := context.localContext.declarations.reverse.foldl (fun (state : List Nat × List PsElabDependentLocal) declaration =>
     let id := psLocalDeclId declaration
     let type := psMetaInstantiate context.metaContext (psLocalDeclType declaration)
     let value := match declaration with
@@ -120,15 +120,15 @@ def psElabDependentLocals (context : PsElabContext) (roots ignored : List Nat) :
   state.snd.reverse
 
 def psElabCloseDependentType (locals : List PsElabDependentLocal) (body : PsExpr) : PsExpr :=
-  locals.foldr (fun local body =>
-    let binder := local.binder
+  locals.foldr (fun entry body =>
+    let binder := entry.binder
     let body := psExprAbstractFVar binder.id body
-    match local.value with
+    match entry.value with
     | none => .forallE binder.name binder.type body binder.binder
     | some value => .letE binder.name binder.type value body) body
 
 def psElabDependentArguments (locals : List PsElabDependentLocal) : List PsExpr :=
-  locals.filterMap fun local => if local.value.isSome then none else some (.fvar local.binder.id)
+  locals.filterMap fun entry => if entry.value.isSome then none else some (.fvar entry.binder.id)
 
 structure PsElabOpenedDependents where
   context : PsElabContext
@@ -157,16 +157,16 @@ def psElabOpenDependents (locals : List PsElabDependentLocal)
     (state : PsElabOpenedDependents) : Except PsElabError PsElabOpenedDependents := do
   match locals with
   | [] => return state
-  | local :: rest =>
-    let original := local.binder
+  | entry :: rest =>
+    let original := entry.binder
     let visible := match psLocalFindUser state.context.localContext original.name with
       | some declaration => psLocalDeclId declaration == original.id
       | none => false
     let name := if visible then original.name else psNameAppendNum (psRootName "_context") original.id
-    match local.value with
+    match entry.value with
     | some _ =>
       let .letE _ type value body := psElabExposeTelescope 256 state.context state.body
-        | throw (.refinement "dependent local definition lost its telescope")
+        | throw (.refinement "dependent entry definition lost its telescope")
       let pushed := psLocalPushLet state.context.localContext name type value
       psElabOpenDependents rest { state with
         context := psElabContextWithLocal state.context pushed.context

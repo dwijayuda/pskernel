@@ -351,13 +351,13 @@ def psElabMatchMotive (context : PsElabContext) (info : PsInductiveInfo)
         some (PsElabDependentLocal.mk
           (PsElabTypedBinder.mk id (psLocalDeclUserName declaration) (psLocalDeclType declaration) .explicit) none)
       else none
-  let roots := (if constrained then auxiliary.map (fun local => local.binder.id) else indexMap.map Prod.fst) ++ majorId.toList
+  let roots := (if constrained then auxiliary.map (fun entry => entry.binder.id) else indexMap.map Prod.fst) ++ majorId.toList
   let generalized := psElabDependentLocals context roots []
   if constrained then
     match majorId with
     | some id =>
       if psElabExprContainsLocal id expected ||
-          generalized.any (fun local => psElabExprContainsLocal id local.binder.type) then
+          generalized.any (fun entry => psElabExprContainsLocal id entry.binder.type) then
         throw (.refinement "fixed-index matching with major-dependent result/context requires heterogeneous transport")
     | none => pure ()
   let body := psElabCloseDependentType generalized expected

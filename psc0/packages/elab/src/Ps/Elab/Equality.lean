@@ -19,12 +19,12 @@ def psElabEquationView (context : PsElabContext) (type proof : PsExpr) :
 def psElabEquationRec (context : PsElabContext) (equation : PsElabEquation)
     (result : PsExpr -> PsExpr) (base : PsExpr) : Except PsElabError PsExpr := do
   let id := context.localContext.nextId
-  let variable := PsExpr.fvar id
+  let freshValue := PsExpr.fvar id
   let target := result equation.right
   let level ← psElabExpressionSort context target
   let motive := psLogicLam id "_eqValue" equation.type
-    (psLogicLam (id + 1) "_eqProof" (psLogicEq equation.level equation.type equation.left variable)
-      (result variable))
+    (psLogicLam (id + 1) "_eqProof" (psLogicEq equation.level equation.type equation.left freshValue)
+      (result freshValue))
   return psExprApplyMany (.constE (psNameAppendStr psEqName "rec") [level, equation.level])
     [equation.type, equation.left, motive, base, equation.right, equation.proof]
 
@@ -67,7 +67,7 @@ def psElabIndexFunction (context : PsElabContext) (value : PsExpr)
   let some cursor := psReduceApplyType
     (psWhnf context.environment context.metaContext context.localContext) recType (view.args ++ [motive])
     | throw .matchRecursorUnsupported
-  let state ← info.constructors.foldlM (fun state ctorName => do
+  let state ← info.constructors.foldlM (fun (state : PsExpr × List PsExpr) ctorName => do
     let pi ← (psInferEnsureForall context.environment context.metaContext context.localContext state.fst).mapError PsElabError.infer
     let some ctor := psEnvironmentFindConstructor context.environment ctorName | throw .matchRecursorUnsupported
     let opened ← psElabOpenCoreTelescope 4096 context pi.domain

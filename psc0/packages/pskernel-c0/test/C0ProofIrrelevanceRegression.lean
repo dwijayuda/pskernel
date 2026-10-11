@@ -161,6 +161,44 @@ def main : IO Unit := do
   if !foundUpdated then
     throw (IO.userError "C0 radix declaration index lost replacement")
   IO.println "C0_PERF_REGRESSION radix_declaration_index=pass"
+  -- Check the local-context transition across the eight-declaration
+  -- threshold, persistent shadowing, and complete lookup equivalence.
+  let mut locals := psKernelLocalContextEmpty
+  for k in [:40] do
+    let name := PsKernelName.num PsKernelName.anonymous k
+    locals := psKernelLocalContextAddLocal locals name name
+      sort0 PsKernelBinderInfo.default
+  for k in [:45] do
+    let name := PsKernelName.num PsKernelName.anonymous k
+    let expected := psKernelLocalContextFindIn name locals.decls
+    let actual := psKernelLocalContextFind locals name
+    match expected, actual with
+    | Option.none, Option.none => pure ()
+    | Option.some x, Option.some y =>
+        if !(psKernelNameEq (psKernelLocalDeclName x)
+              (psKernelLocalDeclName y) &&
+              psKernelExprEqual (psKernelLocalDeclType x)
+                (psKernelLocalDeclType y)) then
+          throw (IO.userError "C0 indexed locals disagreed with linear lookup")
+    | _, _ =>
+        throw (IO.userError "C0 indexed locals changed presence")
+  let shadowName := PsKernelName.num PsKernelName.anonymous 5
+  let shadowed := psKernelLocalContextAddLet locals shadowName
+    shadowName sort1 sort0
+  match psKernelLocalContextFind shadowed shadowName with
+  | Option.some decl =>
+      if !(psKernelExprEqual (psKernelLocalDeclType decl) sort1) then
+        throw (IO.userError "C0 indexed local shadowing failed")
+  | Option.none =>
+      throw (IO.userError "C0 indexed local shadow missing")
+  match psKernelLocalContextFind locals shadowName with
+  | Option.some decl =>
+      if !(psKernelExprEqual (psKernelLocalDeclType decl) sort0) then
+        throw (IO.userError "C0 indexed context mutated persistent predecessor")
+  | Option.none =>
+      throw (IO.userError "C0 original local context lost its entry")
+  IO.println "C0_PERF_REGRESSION indexed_local_shadowing=pass"
+
   -- The UTF-8 optimized fingerprint is identical to the original decoder
   -- for ASCII, multi-byte scalar values and mixed names at varied seeds.
   for value in ["", "a", "abc", "A.B", "βeta", "中文", "emoji 😀"] do

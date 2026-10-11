@@ -16,7 +16,7 @@ UNSUPPORTED, never silently considered equal.
 namespace PSKernelFast.Core
 
 /--
-Independent typing rules for exactly Sort, context variables and dependent Pi.
+Independent typing rules for Sort, context variables, dependent Pi and checked lambda introduction.
 No DefEq, lambda/app/let/constant or other logical rules are assumed.
 The context must separately be certified well-formed before an executable
 checker is allowed to use these rules.
@@ -36,6 +36,13 @@ inductive GeneralPiRule (params : List KName) :
       (bodyTyped : GeneralPiRule params (domain :: ctx) body (.sort v)) :
       GeneralPiRule params ctx (.forallE name domain body style)
         (.sort (.imax u v))
+
+  | lam (ctx : List KExpr) (name : KName) (domain body : KExpr)
+      (style : BinderStyle) (u : ULevel) (bodyType : KExpr)
+      (domainTyped : GeneralPiRule params ctx domain (.sort u))
+      (bodyTyped : GeneralPiRule params (domain :: ctx) body bodyType) :
+      GeneralPiRule params ctx (.lam name domain body style)
+        (.forallE name domain bodyType style)
 
 /--
 Only contexts constructed from an empty context by checking a new domain
@@ -78,6 +85,16 @@ def inferGeneralPi {params : List KName} (ctx : List KExpr)
               some ⟨.sort (.imax u v),
                 .pi ctx name domain body style u v domainTyped bodyTyped⟩
           | _ => none
+      | _ => none
+  | .lam name domain body style =>
+      match inferGeneralPi ctx wf domain with
+      | some ⟨.sort u, domainTyped⟩ =>
+          match inferGeneralPi (domain :: ctx) (.extend wf domainTyped) body with
+          | some bodyResult =>
+              some ⟨.forallE name domain bodyResult.val style,
+                .lam ctx name domain body style u bodyResult.val
+                  domainTyped bodyResult.property⟩
+          | none => none
       | _ => none
   | _ => none
 

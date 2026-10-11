@@ -57,3 +57,16 @@ After this green source, the next changes add a machine-readable policy and inde
 **Qualification scope:** tiny structurally scoped, hashed DAG representation **only**. Not a theorem checker, not an accepting DefEq algorithm, not full Lean compatibility, not formally proved roundtrip, not a performance comparison and not self-hosted JS/Wasm. The project's V3 correctness and performance score remain **unmeasured/unqualified**. The next substantive work is G1 exact proof of representation invariants plus G2 matched eager/closure WHNF experiments. Maintain independent sources and no old proof-preservation constraint.
 
 **Workflow housekeeping in this docs commit:** narrow CI trigger paths to standalone Lean source, package config, audit policy/script and workflow; ordinary documentation/evidence-only commits do not waste native CI time. This housekeeping commit itself should be checked before calling its workflow qualified.
+
+## G2 evaluation prototype — candidate, awaiting cloud evidence
+
+Designed on live V3 head `f372677cd5cf72d4a7798f70522518d61813f5b4`, independent of current PSKernel proof/core code. Introduces **two prototype beta WHNF executors over identical decoded closed terms**:
+
+- **Eager**: leftmost weak-head beta contractions using capture-avoiding de Bruijn instantiation, bounded by beta contraction count.
+- **Lazy**: call-by-name closure/environment machine; inert neutral sorts and a pending argument spine; bounded scan and separate readback with binder-depth-aware quotation.
+
+Both share the same `RawExpr` obtained by encoding + decoding the G1 interned DAG. **This is not yet direct handle-based DAG evaluation, not full NbE, not Lean 4.35 DefEq and not theorem admission.** The eager contraction budget and lazy transition budget measure different operations; equal fuel values have no semantic compatibility claim. One-pass exploratory timing is not fair general performance evidence; benchmark matches terminal values and explicitly discloses scope.
+
+Test families include capture avoidance, shadowing, multi-beta, inert neutral application (does not evaluate argument), duplication, long identity chains, omega fuel exhaustion and invalid store handles. Every agreed result is also checked against a specific expected raw WHNF, so mutual agreement alone cannot disguise an incorrect reference result.
+
+Next: inspect the exact cloud run for this candidate; if green, profile multiple runs/hot cases, add work counters, refine representations and begin a formal reduction specification. **No quantitative speedup claim before cloud evidence.**

@@ -45,7 +45,12 @@ jobs:
           lean --version
           lake --version
           lake update
-          lake build pskernel_fast_smoke
+          lake build pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench
       - name: Run fail-closed representation tests
         working-directory: pskernel-fast
-        run: lake exe pskernel_fast_smoke
+        run: |
+          lake exe pskernel_fast_smoke
+          lake exe pskernel_fast_eval_smoke
+      - name: Exploratory paired beta WHNF benchmark
+        working-directory: pskernel-fast
+        run: lake exe pskernel_fast_eval_bench

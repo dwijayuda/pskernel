@@ -11,3 +11,11 @@ lean_lib PSKernelFast where
 lean_exe pskernel_fast_smoke where
   root := `PSKernelFast.Smoke
   srcDir := "src"
+
+lean_exe pskernel_fast_eval_smoke where
+  root := `PSKernelFast.ReductionSmoke
+  srcDir := "src"
+
+lean_exe pskernel_fast_eval_bench where
+  root := `PSKernelFast.ReductionBench
+  srcDir := "src"

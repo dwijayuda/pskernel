@@ -127,6 +127,15 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Compiler
   ]
 
+lean_lib PsBackendRust where
+  srcDir := "packages/backend-rust/src"
+  roots := #[
+    `Ps.BackendRust.Identifier, `Ps.BackendRust.Type,
+    `Ps.BackendRust.Intrinsic, `Ps.BackendRust.Captures,
+    `Ps.BackendRust.TailAlias, `Ps.BackendRust.Layout,
+    `Ps.BackendRust.Expr, `Ps.BackendRust.Tail,
+    `Ps.BackendRust.Runtime, `Ps.BackendRust.Module]
+
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
   roots := #[`Ps.Bootstrap.SelfHost]

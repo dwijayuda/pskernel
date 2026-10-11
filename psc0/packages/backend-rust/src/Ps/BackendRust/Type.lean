@@ -18,6 +18,7 @@ inductive PsRustEmitError where
   | unknownInductive (name : String)
   | namedTypeArity (name : String)
   | unknownRuntimeType
+  deriving Repr
 
 def psRustConcat2 (a b : String) : String :=
   String.Internal.append a b
@@ -157,10 +158,10 @@ def psRustEmitTypeWithFuel
               | Except.ok printedResult =>
                   Except.ok
                     (psRustConcat4
-                      "fn("
+                      "std::rc::Rc<dyn Fn("
                       (psRustJoin ", " printedParameters)
                       ") -> "
-                      printedResult)
+                      (printedResult ++ ">"))
         | PsVerifiedIrType.named name arguments =>
           match psRustEmitTypeListWith emitNested arguments with
           | Except.error error =>
@@ -175,7 +176,7 @@ def psRustEmitTypeWithFuel
                     match rest with
                     | List.nil =>
                         Except.ok
-                          (psRustConcat3 "Vec<" elementType ">")
+                          (psRustConcat3 "PsArray<" elementType ">")
                     | List.cons _ _ =>
                         Except.error
                           (PsRustEmitError.namedTypeArity name)
@@ -215,102 +216,6 @@ def psRustEmitTypeArguments
               (psRustJoin ", " printed)
               ">"
               "")
-
-def psRustTypeContainsFunctionWithFuel
-    (fuel : Nat) :
-    PsVerifiedIrType -> Bool :=
-  match fuel with
-  | Nat.zero =>
-      fun (_type : PsVerifiedIrType) => true
-  | Nat.succ remaining =>
-      let containsFunction :
-          PsVerifiedIrType -> Bool :=
-        psRustTypeContainsFunctionWithFuel remaining;
-      fun (type : PsVerifiedIrType) =>
-        match type with
-        | PsVerifiedIrType.function _ _ =>
-            true
-        | PsVerifiedIrType.named _ arguments =>
-            psListAny containsFunction arguments
-        | _ =>
-            false
-
-def psRustTypeContainsFunction
-    (type : PsVerifiedIrType) : Bool :=
-  psRustTypeContainsFunctionWithFuel 4096 type
-
-def psRustFunctionTypeIsFirstOrder
-    (type : PsVerifiedIrType) : Bool :=
-  match type with
-  | PsVerifiedIrType.function parameters result =>
-      let nestedParameter : Bool :=
-        psListAny psRustTypeContainsFunction parameters;
-      if nestedParameter then
-        false
-      else
-        if psRustTypeContainsFunction result then
-          false
-        else
-          true
-  | _ =>
-      false
-
-def psRustEmitClosureValueTypeWithFuel
-    (fuel : Nat) :
-    PsVerifiedIrType ->
-    Except PsRustEmitError String :=
-  match fuel with
-  | Nat.zero =>
-      fun (_type : PsVerifiedIrType) =>
-        Except.error PsRustEmitError.fuelExhausted
-  | Nat.succ remaining =>
-      let smaller :
-          PsVerifiedIrType ->
-          Except PsRustEmitError String :=
-        psRustEmitClosureValueTypeWithFuel remaining;
-      fun (type : PsVerifiedIrType) =>
-        match type with
-        | PsVerifiedIrType.function parameters result =>
-            let emitNested :
-                PsVerifiedIrType ->
-                Except PsRustEmitError String :=
-              fun (nested : PsVerifiedIrType) =>
-                match nested with
-                | PsVerifiedIrType.function _ _ =>
-                    smaller nested
-                | _ =>
-                    psRustEmitTypeWithFuel remaining nested;
-            match psRustEmitTypeListWith emitNested parameters with
-            | Except.error error =>
-                Except.error error
-            | Except.ok printedParameters =>
-                match emitNested result with
-                | Except.error error =>
-                    Except.error error
-                | Except.ok printedResult =>
-                    Except.ok
-                      (psRustConcat4
-                        "std::rc::Rc<dyn Fn("
-                        (psRustJoin ", " printedParameters)
-                        ") -> "
-                        (psRustConcat2 printedResult ">"))
-        | _ =>
-            psRustEmitTypeWithFuel remaining type
-
-def psRustEmitClosureValueType
-    (type : PsVerifiedIrType) :
-    Except PsRustEmitError String :=
-  psRustEmitClosureValueTypeWithFuel 4096 type
-
-def psRustEmitFirstOrderClosureType
-    (type : PsVerifiedIrType) :
-    Except PsRustEmitError String :=
-  if psRustFunctionTypeIsFirstOrder type then
-    psRustEmitClosureValueType type
-  else
-    Except.error
-      (PsRustEmitError.lambdaFunctionParameterUnsupported
-        "nested")
 
 def psRustMachineIntegerSuffix
     (type : PsVerifiedIrMachineIntegerType) : String :=

@@ -1,4 +1,14 @@
-import Ps.BackendRust.ValueRefs
+import Ps.BackendRust.Type
+
+def psRustStringListContains (values : List String) (name : String) : Bool :=
+  values.contains name
+
+def psRustAddParameterNames (ps : List PsVerifiedIrParameter) (names : List String) : List String :=
+  ps.map (·.name) ++ names
+
+def psRustAddBindingNames (bs : List PsVerifiedIrMatchBinding) (names : List String) : List String :=
+  bs.map (·.name) ++ names
+
 
 def psRustListFoldl {alpha beta : Type}
     (step : beta -> alpha -> beta) (values : List alpha) : beta -> beta :=
@@ -74,7 +84,7 @@ def psRustCollectCapturesWorker
                 (field : String × PsVerifiedIrExpr) =>
                 collect (Prod.snd field) state;
             match expr with
-            | .literal _ => captures
+            | .literal _ | .unreachable _ => captures
             | .var name =>
                 psRustAppendCaptureForName
                   outerNames
@@ -150,44 +160,3 @@ def psRustCollectCapturesWorker
                   alternatives
                   withScrutinee
 
-def psRustEmitCaptureClones (names : List String) : String :=
-  match names with
-  | List.nil => ""
-  | List.cons name rest =>
-      psRustConcat4 "let " (psRustIdentifier name) " = "
-        (psRustConcat3 (psRustClonePrinted (psRustIdentifier name)) "; "
-          (psRustEmitCaptureClones rest))
-
-def psRustFindFunctionArity
-    (declarations : List PsVerifiedIrDeclaration) (name : String) : Option Nat :=
-  match declarations with
-  | List.nil => Option.none
-  | List.cons declaration rest =>
-      if psStringEq declaration.name name then
-        match declaration.parameters with
-        | List.nil => Option.none
-        | List.cons _ _ => Option.some (psListLength declaration.parameters)
-      else psRustFindFunctionArity rest name
-
-def psRustInferredParameterTypes (arity : Nat) : List String :=
-  match arity with
-  | Nat.zero => List.nil
-  | Nat.succ remaining => List.cons "_" (psRustInferredParameterTypes remaining)
-
-def psRustEmitGlobalFunctionValue (name : String) (arity : Nat) : String :=
-  psRustConcat4 "(std::rc::Rc::new(" (psRustIdentifier name)
-    ") as std::rc::Rc<dyn Fn("
-    (psRustConcat3 (psRustJoin ", " (psRustInferredParameterTypes arity)) ") -> _>" ")")
-
-def psRustEmitStoredExprWith
-    (declarations : List PsVerifiedIrDeclaration) (locals : List String)
-    (emitExpr : PsVerifiedIrExpr -> Except PsRustEmitError String)
-    (expr : PsVerifiedIrExpr) : Except PsRustEmitError String :=
-  match expr with
-  | PsVerifiedIrExpr.var name =>
-      if psRustStringListContains locals name then emitExpr expr
-      else
-        match psRustFindFunctionArity declarations name with
-        | Option.none => emitExpr expr
-        | Option.some _ => Except.ok (psRustIdentifier name)
-  | _ => emitExpr expr

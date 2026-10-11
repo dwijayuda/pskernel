@@ -362,7 +362,23 @@ private def application : String :=
   "const classNested: Nat := Classes.nested\n" ++
   "const classLocal: Nat := Classes.local\n" ++
   "const classStaticProjection: Nat := Classes.staticProjection\n" ++
-  "const classAnonymous: Bool := Classes.anonymous\n"
+  "const classAnonymous: Bool := Classes.anonymous\n" ++
+  "structure Callback where { run: Nat -> Nat }\n" ++
+  "function makeCallback(base: Nat): Callback := { run := fun value => Nat.add(base, value) }\n" ++
+  "function selectCallback(flag: Bool, base: Nat): Nat -> Nat := match flag with { | true => fun value => Nat.add(base, value) | false => fun value => value }\n" ++
+  "const callback: Callback := makeCallback(150)\n" ++
+  "const callbackFirst: Nat := callback.run(1)\n" ++
+  "const callbackAgain: Nat := callback.run(2)\n" ++
+  "const callbackChosen: Nat := selectCallback(true, 160)(3)\n" ++
+  "function arrayAlias(seed: Nat): Nat := {\n  let original: Array Nat := Array.push(Array.emptyWithCapacity(2), seed)\n  let changed: Array Nat := Array.push(original, 1)\n  Nat.add(Array.size(original), Array.size(changed))\n}\n" ++
+  "const arrayAliasAnswer: Nat := arrayAlias(5)\n" ++
+  "function buildArray(n: Nat, values: Array Nat): Array Nat := match n with { | 0 => values | k + 1 => buildArray(k, Array.push(values, k)) }\n" ++
+  "const arrayBuiltSize: Nat := Array.size(buildArray(1000, Array.emptyWithCapacity(0)))\n" ++
+  "const largeNatural: Nat := 18446744073709551617\n" ++
+  "const saturatedNatural: Nat := Nat.sub(1, 9)\n" ++
+  "const zeroDivision: Nat := Nat.div(7, 0)\n" ++
+  "const unicodeLength: Nat := String.length(\"α🙂\")\n" ++
+  "const unicodeBytes: Nat := String.utf8ByteSize(\"α🙂\")\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

@@ -304,3 +304,17 @@ lexical locals, then descending global priorities; failed candidates restore the
 constraint snapshots. Ground cycles backtrack. Expected record parameters reach
 field lambdas through the shared named application engine. Full non-ground
 typeclass resolution and source attributes remain pending.
+
+
+## Readable runtime targets
+
+The native CLI supports --emit application.ps application.ts and
+--emit application.ps application.rs. Use --emit-both application.ps application
+to retain one checked/erased/validated artifact for both targets. Rust writes
+pscv0_runtime.rs beside the selected module; Cargo dependencies are num-bigint
+=0.4.6 and num-traits =0.2.19. Each output has a .origins.json with semantic names
+and generated UTF-8 declaration ranges. Original source-span mapping is pending.
+
+Rust integration uses the current pure single-module profile; it does not mean
+full v7, compiler-source translation, self-hosting, cross-platform qualification,
+or formal backend preservation. See ../docs/PSCV0_NATIVE_RUST.md.

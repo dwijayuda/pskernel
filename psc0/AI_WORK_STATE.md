@@ -1,3 +1,24 @@
+# Native codegen milestone A qualified; Rust milestone B awaiting qualification
+
+Milestone A source 6115702332bb51c11fbe2df1e5835f0d0c45bf6b passed
+[run 38174273630](https://github.com/dwijayuda/pskernel/actions/runs/38174273630),
+job 114573192333, native profile 16. The 264-declaration CLI application passed
+official Lean checking, the actual shared IR gate, structured TS emission,
+strict TS 7.0.2 and JS runtime checks. The compact boundary check refused invalid
+IR and checked target name collisions/Unicode retention and generated ranges.
+All previous 28 parser cases, four accepted semantic inputs and 50 refusals pass.
+The guard reports 92 portable / 98 native modules. Cached rebuild 6509 ms, warm
+469 ms; single-run observations, not general performance claims.
+
+Rust milestone B now integrates the existing backend with the shared boundary,
+uniform closures, recursive-layout analysis, liveness-based moves/clones,
+copy-on-write arrays, structured output and a separate versioned runtime.
+It reuses the existing application plus ten focused runtime observations;
+the same 101 observations drive TS and Rust. Qualification is pending.
+See docs/PSCV0_NATIVE_RUST.md and docs/PSCV0_NATIVE_CODEGEN.md.
+
+---
+
 # Native codegen milestone A — implementation awaiting qualification
 
 The explicit IR gate is now wired into native emission. Earlier entries saying

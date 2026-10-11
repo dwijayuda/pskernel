@@ -7,30 +7,43 @@ import {fileURLToPath} from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const packages = ['foundation','syntax','core','environment','meta','elab',
-  'bridge','compiler-ir','erasure','compiler','codegen','backend-ts'];
+  'bridge','compiler-ir','erasure','compiler','codegen','backend-ts','backend-rust'];
 const sourceRoots = packages.map(name => 'packages/' + name + '/src');
 const hostRoots = [...sourceRoots, 'host/src', 'packages/pskernel-lean/provider'];
 const sha = text => createHash('sha256').update(text).digest('hex');
 
 function withoutComments(source) {
-  let result = '', depth = 0, string = false;
+  let result = '', depth = 0, string = false, rawClose = null;
   for (let i = 0; i < source.length; i++) {
     const pair = source.slice(i, i + 2), ch = source[i];
     if (depth) {
       if (pair === '/-') { depth++; i++; }
       else if (pair === '-/') { depth--; i++; }
       else if (ch === '\n') result += '\n';
+    } else if (rawClose !== null) {
+      if (source.startsWith(rawClose, i)) {
+        i += rawClose.length - 1; rawClose = null; result += ' ';
+      } else if (ch === '\n') result += '\n';
     } else if (string) {
-      result += ch;
-      if (ch === '\\') { result += source[++i] ?? ''; }
-      else if (ch === '"') string = false;
+      if (ch === '\\') i++;
+      else if (ch === '"') { string = false; result += ' '; }
+      else if (ch === '\n') result += '\n';
     } else if (pair === '/-') { depth = 1; result += ' '; i++; }
     else if (pair === '--') {
       while (i < source.length && source[i] !== '\n') i++;
       result += '\n';
-    } else { result += ch; if (ch === '"') string = true; }
+    } else {
+      const char = ch === "'" ? /^'(?:\\(?:u\{[0-9a-fA-F]+\}|u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2}|[^\r\n])|[^'\\\r\n])'/u.exec(source.slice(i)) : null;
+      if (char) { i += char[0].length - 1; result += ' '; continue; }
+      const raw = ch === 'r' ? /^r(#+)"/.exec(source.slice(i)) : null;
+      if (raw) { rawClose = '"' + raw[1]; i += raw[0].length - 1; result += ' '; }
+      else if (ch === '"') { string = true; result += ' '; }
+      else result += ch;
+    }
   }
   assert.equal(depth, 0, 'unclosed source comment');
+  assert.equal(rawClose, null, 'unclosed raw string');
+  assert.equal(string, false, 'unclosed string');
   return result;
 }
 
@@ -63,7 +76,7 @@ async function closure(roots, portable) {
   return [...visited.values()].sort((a,b) => a.module.localeCompare(b.module));
 }
 
-const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.CompilerIr.Checked'], true);
+const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.BackendRust.Module', 'Ps.CompilerIr.Checked'], true);
 const native = await closure(['Ps.Host.NativeV7'], false);
 const toolchain = (await readFile(path.join(root, 'v7-native/lean-toolchain'), 'utf8')).trim();
 assert.equal(toolchain, 'leanprover/lean4:v4.35.0-rc4');

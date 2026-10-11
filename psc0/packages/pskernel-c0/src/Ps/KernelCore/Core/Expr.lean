@@ -249,19 +249,19 @@ def psKernelExprEq
   | .const a als, .const b bls =>
       psKernelNameEq a b && psKernelLevelListEq als bls
   | .app af aa, .app bf ba =>
-      psKernelExprEq af bf && psKernelExprEq aa ba
+      psKernelExprEqLegacy af bf && psKernelExprEqLegacy aa ba
   | .lam _ aty ab _, .lam _ bty bb _ =>
-      psKernelExprEq aty bty && psKernelExprEq ab bb
+      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
   | .forallE _ aty ab _, .forallE _ bty bb _ =>
-      psKernelExprEq aty bty && psKernelExprEq ab bb
+      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
   | .letE _ aty av ab an, .letE _ bty bv bb bn =>
-      psKernelExprEq aty bty && psKernelExprEq av bv &&
-      psKernelExprEq ab bb && psKernelBoolEq an bn
+      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy av bv &&
+      psKernelExprEqLegacy ab bb && psKernelBoolEq an bn
   | .lit a, .lit b => psKernelLiteralEq a b
   | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelExprEq ab bb
+      Nat.beq am bm && psKernelExprEqLegacy ab bb
   | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEq ab bb
+      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqLegacy ab bb
   | _, _ => false
 
 def psKernelExprEqualLegacy

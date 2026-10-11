@@ -1,4 +1,5 @@
 import Ps.KernelCore.Core.Declaration
+import Ps.KernelCore.Runtime.Acceleration.Cache
 
 inductive PsKernelEnvironmentIndex where
   | empty
@@ -7,6 +8,7 @@ inductive PsKernelEnvironmentIndex where
   | branch
       (left : PsKernelEnvironmentIndex)
       (right : PsKernelEnvironmentIndex)
+  | radix (tree : PsKernelC0HashTrie PsKernelConstantInfo)
 
 def psKernelEnvironmentHashStringWorker
     (fuel : Nat) :
@@ -213,6 +215,17 @@ def psKernelEnvironmentIndexRemoveName
     constants
     name
 
+/-
+C0 declaration index migration.
+
+New indexes use the same persistent four-step radix-16 trie as expression
+caches and the indexed syntax store. An indexed lookup does not walk sixteen
+binary branches. Exact declaration names are still compared by callers and
+when replacing a hash bucket, so hash collisions are harmless.
+
+Keep the historical binary constructors/worker for reading old index values.
+New builds and inserts use the radix constructor.
+-/
 def psKernelEnvironmentIndexBuild
     (constants : List PsKernelConstantInfo) :
     PsKernelEnvironmentIndex :=
@@ -220,26 +233,21 @@ def psKernelEnvironmentIndexBuild
   | List.nil =>
       PsKernelEnvironmentIndex.empty
   | List.cons info rest =>
-      let index :=
-        psKernelEnvironmentIndexBuild rest;
-      let name :=
-        psKernelConstantInfoName info;
-      let hash :=
-        psKernelEnvironmentNameHash name;
+      let previous := psKernelEnvironmentIndexBuild rest
+      let tree :=
+        match previous with
+        | PsKernelEnvironmentIndex.radix value => value
+        | _ => PsKernelC0HashTrie.empty
+      let name := psKernelConstantInfoName info
+      let hash := psKernelEnvironmentNameHash name
       let bucket :=
-        psKernelEnvironmentIndexFindWorker
-          16
-          index
-          hash;
-      psKernelEnvironmentIndexSetWorker
-        16
-        index
-        hash
-        (List.cons
-          info
-          (psKernelEnvironmentIndexRemoveName
-            name
-            bucket))
+        psKernelC0TrieBucket psKernelC0IndexDepth tree hash
+      PsKernelEnvironmentIndex.radix
+        (psKernelC0TrieSet
+          psKernelC0IndexDepth
+          tree hash
+          (List.cons info
+            (psKernelEnvironmentIndexRemoveName name bucket)))
 
 def psKernelEnvironmentIndexFind
     (index : PsKernelEnvironmentIndex)
@@ -257,6 +265,9 @@ def psKernelEnvironmentIndexFind
         16
         index
         (psKernelEnvironmentNameHash name)
+  | PsKernelEnvironmentIndex.radix tree =>
+      psKernelC0TrieBucket
+        psKernelC0IndexDepth tree (psKernelEnvironmentNameHash name)
 
 def psKernelEnvironmentIndexInsert
     (index : PsKernelEnvironmentIndex)
@@ -282,6 +293,14 @@ def psKernelEnvironmentIndexInsert
         PsKernelEnvironmentIndex.small next
       else
         psKernelEnvironmentIndexBuild next
+  | PsKernelEnvironmentIndex.radix tree =>
+      let hash := psKernelEnvironmentNameHash name
+      let bucket := psKernelC0TrieBucket psKernelC0IndexDepth tree hash
+      PsKernelEnvironmentIndex.radix
+        (psKernelC0TrieSet
+          psKernelC0IndexDepth tree hash
+          (List.cons info
+            (psKernelEnvironmentIndexRemoveName name bucket)))
   | _ =>
       let hash :=
         psKernelEnvironmentNameHash name;

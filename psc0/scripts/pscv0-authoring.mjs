@@ -31,9 +31,10 @@ function correspondence(projected,baseline){
     assert.equal(original.split(name).length,2,'baseline unexpectedly references '+name);
     original=original.replace('def '+name+'\n','def old_'+name+'\n');
   }
-  // Expose the known successful parse before reasoning about the printer.
-  // Splitting a printer hidden under bind/match binder scopes does not rewrite
-  // those occurrences. `change` checks definitional equality; it is not an axiom.
+  // Expose the successful parse before splitting the printer result: under
+  // bind/match scopes it is not yet the same free-variable occurrence.
+  // Then reduce both generic and specialized error maps on each constructor.
+  // Neither the generated functions nor the universal statement is rewritten.
   const proofs=APIs.map(([name,parse,print])=>
     `theorem migration_${name} (source : String) :\n`+
     `    ${name} source = old_${name} source := by\n`+
@@ -45,7 +46,7 @@ function correspondence(projected,baseline){
     `        (match ${print} sourceModule with\n`+
     `         | Except.error error => Except.error (PsTranslationError.print error)\n`+
     `         | Except.ok output => Except.ok output)\n`+
-    `      rfl\n\n#print axioms migration_${name}\n`).join('\n');
+    `      cases ${print} sourceModule <;> rfl\n\n#print axioms migration_${name}\n`).join('\n');
   return projected+'\n'+original+'\n'+proofs;
 }
 export async function readAuthoringInputs(){

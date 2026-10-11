@@ -264,7 +264,7 @@ def psKernelExprEq
       psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEq ab bb
   | _, _ => false
 
-def psKernelExprEqual
+def psKernelExprEqualLegacy
     (left : PsKernelExpr) :
     PsKernelExpr -> Bool :=
   match left with
@@ -302,9 +302,9 @@ def psKernelExprEqual
         | _ => false
   | PsKernelExpr.app leftFn leftArg =>
       let fnEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftFn;
+        psKernelExprEqualLegacy leftFn;
       let argEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftArg;
+        psKernelExprEqualLegacy leftArg;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.app rightFn rightArg =>
@@ -312,9 +312,9 @@ def psKernelExprEqual
         | _ => false
   | PsKernelExpr.lam leftName leftType leftBody leftInfo =>
       let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftType;
+        psKernelExprEqualLegacy leftType;
       let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftBody;
+        psKernelExprEqualLegacy leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.lam rightName rightType rightBody rightInfo =>
@@ -328,9 +328,9 @@ def psKernelExprEqual
         | _ => false
   | PsKernelExpr.forallE leftName leftType leftBody leftInfo =>
       let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftType;
+        psKernelExprEqualLegacy leftType;
       let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftBody;
+        psKernelExprEqualLegacy leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.forallE rightName rightType rightBody rightInfo =>
@@ -344,11 +344,11 @@ def psKernelExprEqual
         | _ => false
   | PsKernelExpr.letE leftName leftType leftValue leftBody leftNondep =>
       let typeEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftType;
+        psKernelExprEqualLegacy leftType;
       let valueEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftValue;
+        psKernelExprEqualLegacy leftValue;
       let bodyEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftBody;
+        psKernelExprEqualLegacy leftBody;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.letE rightName rightType rightValue rightBody rightNondep =>
@@ -370,7 +370,7 @@ def psKernelExprEqual
         | _ => false
   | PsKernelExpr.mdata leftMetadata leftExpr =>
       let exprEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftExpr;
+        psKernelExprEqualLegacy leftExpr;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.mdata rightMetadata rightExpr =>
@@ -380,7 +380,7 @@ def psKernelExprEqual
         | _ => false
   | PsKernelExpr.proj leftName leftIndex leftExpr =>
       let exprEq : PsKernelExpr -> Bool :=
-        psKernelExprEqual leftExpr;
+        psKernelExprEqualLegacy leftExpr;
       fun (right : PsKernelExpr) =>
         match right with
         | PsKernelExpr.proj rightName rightIndex rightExpr =>
@@ -390,6 +390,40 @@ def psKernelExprEqual
               else false
             else false
         | _ => false
+
+/--
+  C0 exact expression equality without allocating partial comparator closures.
+  Unlike psKernelExprEq, this preserves binder names and binder annotations.
+  Both functions short-circuit on the first mismatching constructor or field.
+-/
+def psKernelExprEqual
+    (left : PsKernelExpr)
+    (right : PsKernelExpr) : Bool :=
+  match left, right with
+  | .bvar a, .bvar b => Nat.beq a b
+  | .fvar a, .fvar b => psKernelNameEq a b
+  | .mvar a, .mvar b => psKernelNameEq a b
+  | .sort a, .sort b => psKernelLevelEq a b
+  | .const a als, .const b bls =>
+      psKernelNameEq a b && psKernelLevelListEq als bls
+  | .app af aa, .app bf ba =>
+      psKernelExprEqual af bf && psKernelExprEqual aa ba
+  | .lam an aty ab ai, .lam bn bty bb bi =>
+      psKernelNameEq an bn && psKernelExprEqual aty bty &&
+      psKernelExprEqual ab bb && psKernelBinderInfoEq ai bi
+  | .forallE an aty ab ai, .forallE bn bty bb bi =>
+      psKernelNameEq an bn && psKernelExprEqual aty bty &&
+      psKernelExprEqual ab bb && psKernelBinderInfoEq ai bi
+  | .letE an aty av ab adn, .letE bn bty bv bb bdn =>
+      psKernelNameEq an bn && psKernelExprEqual aty bty &&
+      psKernelExprEqual av bv && psKernelExprEqual ab bb &&
+      psKernelBoolEq adn bdn
+  | .lit a, .lit b => psKernelLiteralEq a b
+  | .mdata am ab, .mdata bm bb =>
+      Nat.beq am bm && psKernelExprEqual ab bb
+  | .proj an ai ab, .proj bn bi bb =>
+      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqual ab bb
+  | _, _ => false
 
 def psKernelExprHasLooseAt
     (expr : PsKernelExpr) :

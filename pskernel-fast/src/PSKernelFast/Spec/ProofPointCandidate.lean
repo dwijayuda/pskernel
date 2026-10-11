@@ -14,9 +14,10 @@ A second, separate candidate uses a singleton proof point, a singleton
 true proposition containing it, and the powerset of that singleton as
 Prop. We PROVE the candidate point belongs to True but not to Prop,
 and that Prop still has precisely two members and lies in Type1.
-This is a necessary but NOT SUFFICIENT condition for full soundness:
-the selected simple point may still collide with writable numeral,
-pair/graph or quotient encodings. Con-leche uses a more elaborate tag.
+This is a necessary but NOT SUFFICIENT condition for full soundness.
+The selected simple point ACTUALLY COLLIDES with the standard writable
+Kuratowski pair of (empty,empty), as proved at the end of this file.
+Con-leche uses a more elaborate anti-collision tag.
 We do not change runtime kernel code or promote the second candidate
 to the official Sort 0 interpretation at this research checkpoint.
 -/

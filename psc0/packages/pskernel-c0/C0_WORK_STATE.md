@@ -76,3 +76,5 @@ The `test/C0ProofIrrelevanceRegression.lean` native suite now checks index inter
 ### Open architectural work
 
 The checker still uses recursive `PsKernelExpr` values at the public acceptance boundary; the indexed term store is an auxiliary representation, not a universal replacement. Full integration requires a lossless representation bridge, end-to-end benchmarks, environment/context provenance and resource-limit review, and compatibility qualification. Metatheory is deferred; soundness-sensitive negative tests remain in place.
+
+- [Native CI 38185618064](https://github.com/dwijayuda/pskernel/actions/runs/38185618064) additionally passed native compilation and the indexed-local shadowing checks; 20,000 deep-local lookups measured **2,048 ms linear / 66 ms indexed** for 512 declarations. Narrow microbenchmark only, not full-checker throughput.

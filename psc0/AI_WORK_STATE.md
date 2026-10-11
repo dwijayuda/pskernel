@@ -1,3 +1,69 @@
+# PSC0 AI WORK STATE — native v7 data declarations
+
+## 11 October 2026 — shared v7 syntax for structures and inductives
+
+Active branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+The user requested continued native `.lean` implementation, clean extensible
+architecture and minimal checks, without pskernel-core or self-hosting.
+Work uses GitHub source operations and Linux cloud CI; no local checkout,
+build or tests.
+
+The new 94-line `Ps.Syntax.Pscv0.Data` module replaces the remaining legacy
+structure/inductive declaration dispatch. Data headers and constructor parameters
+call the shared declaration telescope reader; annotations call the rich v7 term
+reader. Interleaved explicit/nonexplicit groups, grouped native parameters,
+named applications in types, quantified annotations and explicit constructor
+defaults now reach the existing semantic compiler through the same paths as
+value declarations.
+
+Structure fields retain newline separation and the selected native named-group
+forms. Their one annotation stays outside every name in its group. They use the
+shared binder-entry reader with defaults disabled and separate field delimiter
+ownership. Native field grouping is grounded in the pinned RC4
+[`structExplicitBinder`, `structImplicitBinder`, `structInstBinder` and `structSimpleBinder`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Parser/Command.lean).
+The existing scope walker, binder elaborator, constructor metadata,
+record/projection operations and recursor lowering are reused unchanged.
+No second data elaborator, Core representation or kernel implementation was added.
+
+**Qualified in [Linux run 38156960316](https://github.com/dwijayuda/pskernel/actions/runs/38156960316)**
+at source commit `f6b8f12e80866293bd7210ad0ebb2e453b5b1a49`, native Lean 4.35.0-rc4
+(`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`), profile
+`pscv0-v7-native-bounded/6`. The first run passed.
+
+The 28 existing parser cases remain unchanged. The same three accepted semantic
+programs now include a grouped structure with parameter-shadowing field names,
+quantified field types, expected record lambdas and projections; and an inductive
+with interleaved/grouped parameters, grouped implicit constructor fields,
+a quantified default argument and constructor matching. The composite admits
+85 declarations. Its emitted runtime returns 61 and 62 for the two added results.
+Only three refusal inputs were added: adjacent explicit data groups, a nullary
+constructor group and comma-separated structure fields. The batch now has
+28 phase-specific refusals and still shares one checked prelude.
+
+Native compiler/check builds, official kernel acceptance, CLI emission,
+TypeScript 7.0.2 compilation and JavaScript assertions passed.
+The source inventory has 70 portable and 76 native closure modules, including
+the new reader and excluding pskernel-core.
+The Lake root change gave this run a fresh cache key: clean build 39,367 ms;
+immediate unchanged build 516 ms. CLI application parsing took 2 ms,
+elaboration 2 ms, bridge preparation 4 ms, official kernel checking 4 ms,
+erasure 5 ms and emission 1 ms; prelude initialization took 2 ms.
+These are compact-workload observations, not broad performance claims.
+Existing unrelated unused-name warnings remain.
+
+Data support is still limited to nonindexed types in `Type`. Constructor result
+annotations, deriving, structure field methods/defaults and inheritance remain
+pending. The richer declaration source-printing/roundtrip milestone is not
+claimed. Imports, universes, global classes/instances, dependent matching, proof
+automation and broader v7 semantics also remain future work. No compiler `.ps`
+generation, self-hosting, kernel suites or Windows tests were run.
+Main and the M1 base branch remain unchanged; PR #109 remains draft.
+
+The following evidence commit changes this document only. Older records below
+are historical and apply to their exact source commits.
+
+---
+
 # PSC0 AI WORK STATE — native v7 binder groups
 
 ## 11 October 2026 — shared annotation scope for multi-name native groups

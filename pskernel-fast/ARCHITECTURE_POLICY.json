@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "G4.3-restricted-dependent-Sort-Pi-rule-certified-no-general-checker-no-admission",
+    "stage": "G4.3b-restricted-Pi-lambda-exact-app-let-output-scope-certified-no-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -62,7 +62,23 @@
       "Sort",
       "boundVariableUnderVerifiedSortDomain",
       "PiWithSyntacticSortDomainAndDependentBody"
-    ]
+    ],
+    "restrictedGeneralDomainTypingFragmentCertified": true,
+    "fragmentTypingRules": [
+      "Sort",
+      "BoundVar",
+      "Pi",
+      "Lambda",
+      "ExactTypeApplication",
+      "LetNondepFalse"
+    ],
+    "fragmentContextFormationCertified": true,
+    "fragmentClosedSourceAndInferredTypeScopeCertified": true,
+    "fragmentExecutionImpliesRuleJudgmentProved": true,
+    "fragmentUsesExactSyntacticConversionOnly": true,
+    "typedSubstitutionPreservationProved": false,
+    "typedWHNFImplemented": false,
+    "typedDefEqImplemented": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -74,9 +90,9 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "35ce306421368e8b8689b143e8e70ce0a4b03d73",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38115500178",
-    "jobId": 114399479495,
-    "scope": "49 native Lake build jobs, 20 independent Lean source files audited, G1–G4.3 old regressions and new certified restricted dependent Sort/bvar/Pi formation; structural binder operations green separately; no general checker/DefEq/admission"
+    "validatedSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38116916150",
+    "jobId": 114403520665,
+    "scope": "54 native Lake build jobs, 22 independent Lean sources audited, G1–G4.3b focused suites including general-domain Pi/lambda/exact-app/restricted-let, fragment-rule theorem and output-scope certificates. No G4.4 WHNF/DefEq, full checked kernel or admission."
   }
 }

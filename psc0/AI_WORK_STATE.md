@@ -1277,3 +1277,19 @@ global instance candidates. Symbolic level simplification and depth-independent
 assignment substitution are shared metadata operations. See
 [universe architecture](docs/PSCV0_NATIVE_UNIVERSES.md) for explicit limits.
 Full v7 remains incomplete; next work is the shared proof-goal mechanism.
+
+
+## Portable proof goal foundation (2026-10-12)
+
+Qualified source e2dffaf6db6b86947c315960b33ff159ea0e927a, profile pscv0-v7-native-bounded/19,
+[native run 38178663565](https://github.com/dwijayuda/pskernel/actions/runs/38178663565),
+job 114586356725. Official Lean accepts the proof-producing composite; all 28 parser
+cases, four accepted semantic programs, 59 phase-specific refusals and both
+strict TS/JavaScript and Rust execution pass (109 shared runtime observations).
+
+The shared goal engine uses typed metavariables, globally fresh local IDs and
+deferred binder closure. Initial clients are exact/refine/apply/intro/assumption/
+rfl/constructor and focus/bullets. Proof terms are scoped against actual goal
+contexts, with the same source term parser and declaration/kernel pipeline.
+No host elaborator fallback or proof authority was added. The next integration
+extends this same state to all_goals/any_goals with failure rollback.

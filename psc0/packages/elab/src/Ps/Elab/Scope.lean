@@ -161,7 +161,7 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
         | .exactE value _ _ | .applyE value _ => do
           let result ← visit bound value
           pure (result.used, bound)
-        | .focus body _ _ => do
+        | .focus body _ _ | .each body _ _ => do
           let used ← psScopeTacticDependencies fuel visit bound body
           pure (used, bound)
         | _ => pure ([], bound)

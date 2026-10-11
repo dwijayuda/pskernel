@@ -37,10 +37,13 @@ def psPscv0ReadTactics (read : PsPscv0TermReader) (fuel : Nat)
       else if token.text == "assumption" then pure (.assumption token.span, head.cursor)
       else if token.text == "rfl" then pure (.reflexivity token.span, head.cursor)
       else if token.text == "constructor" then pure (.constructor token.span, head.cursor)
-      else if token.text == "·" || token.text == "focus" then do
+      else if ["·", "focus", "all_goals", "any_goals"].contains token.text then do
         let body ← psPscv0ReadTactics read fuel (some token.span.start) head.cursor
         if body.value.isEmpty then throw (psProofScriptExpectedError "focused tactic" head.cursor)
-        pure (.focus body.value (token.text == "·") token.span, body.cursor)
+        let tactic := if token.text == "all_goals" || token.text == "any_goals" then
+          PsSyntaxTactic.each body.value (token.text == "any_goals") token.span
+          else .focus body.value (token.text == "·") token.span
+        pure (tactic, body.cursor)
       else throw (psProofScriptExpectedError "selected tactic" cursor)
     let consumed := cursor.remaining.take (cursor.remaining.length - next.remaining.length)
     let stop := (consumed.getLast?).map (·.span.stop) |>.getD token.span.stop

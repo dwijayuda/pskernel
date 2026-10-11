@@ -108,5 +108,7 @@ export const observations = [
   { name: "universeInstance", args: null, expected: 205n },
   { name: "tacticPairAnswer", args: null, expected: 211n },
   { name: "tacticShadowAnswer", args: null, expected: 212n },
+  { name: "tacticMixedNat", args: null, expected: 213n },
+  { name: "tacticMixedBool", args: null, expected: false },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

@@ -150,4 +150,7 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
       | .focus body close _ =>
         let body ← psPrintTactics printTerm fuel body
         return (if close then "·" else "focus") ++ "\n  " ++ body.replace "\n" "\n  "
+      | .each body any _ =>
+        let body ← psPrintTactics printTerm fuel body
+        return (if any then "any_goals" else "all_goals") ++ "\n  " ++ body.replace "\n" "\n  "
     return psPrintJoin "\n" lines

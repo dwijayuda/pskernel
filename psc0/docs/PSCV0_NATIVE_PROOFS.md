@@ -20,7 +20,7 @@ is static, while name resolution runs against each goal's actual local context.
 Consequently a newly introduced local can shadow a global or an outer binder.
 
 The initial registry includes exact, refine, apply, intro, assumption, rfl,
-constructor, focus and middle-dot bullets. Application opens typed metavariables
+constructor, focus, all_goals, any_goals and middle-dot bullets. Application opens typed metavariables
 and orders nondependent obligations first. Constructor candidates and assumption
 attempts own snapshots; failed attempts do not leak assignments. Focus isolates
 one goal; bullets additionally require it and all generated subgoals to close.
@@ -33,7 +33,7 @@ Lean 4.35.0-rc4 commit c29b6dda4f7c20e3eeaa717c4e565663c5cfa364:
 - src/Lean/Elab/Tactic/Basic.lean: focus, focusAndDone, getUnsolvedGoals.
 - src/Lean/Parser/Tactic.lean: tactic sequence and bullet categories.
 
-Remaining required clients include case/next/all_goals/any_goals/combinators,
+Remaining required clients include case/next/combinators,
 additional introduction/elimination, rewriting, simplification, omega/grind,
 intermediate facts, structured calc and contract/effect verification. Intro
 patterns and named holes need their explicit selected syntax. Data/Prop and
@@ -41,6 +41,6 @@ library completeness remain independently tracked. Source-printer support here
 prints proof syntax only; no compiler-source .ps conversion or self-host runs.
 
 Compact qualification extends the existing composite with proof-producing
-clients, nested scopes and two executable values. Five refusals protect holes,
+clients, nested scopes and four executable values. Six refusals protect holes,
 unsolved goals, bullet completion, reflexivity and the uniform application rule.
 Qualification remains pending until the native cloud workflow completes.

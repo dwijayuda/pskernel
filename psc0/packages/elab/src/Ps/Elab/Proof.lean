@@ -132,6 +132,22 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
         | .assumption _ => psProofAssumption state
         | .reflexivity _ => psProofReflexivity state
         | .constructor _ => psProofConstructor state
+        | .each body any _ => do
+          let mut current := state
+          let mut goals := []
+          let mut succeeded := false
+          for goal in state.goals do
+            if (psMetaFindAssignment current.context.metaContext goal.id).isSome then continue
+            match psProofRun elaborate scope fuel { current with goals := [goal] } body with
+            | .ok next =>
+              current := next
+              goals := goals ++ next.goals
+              succeeded := true
+            | .error error =>
+              if !any then throw error
+              goals := goals ++ [goal]
+          if any && !succeeded then throw (.proof "tactic failed on all goals")
+          pure { current with goals }
         | .focus body mustClose _ => do
           let goal :: saved := state.goals | throw (.proof "no goal to focus")
           let focused ← psProofRun elaborate scope fuel { state with goals := [goal] } body

@@ -125,6 +125,7 @@ inductive PsSyntaxTactic where
   | reflexivity (span : PsSourceSpan)
   | constructor (span : PsSourceSpan)
   | focus (body : List PsSyntaxTactic) (mustClose : Bool) (span : PsSourceSpan)
+  | each (body : List PsSyntaxTactic) (any : Bool) (span : PsSourceSpan)
 end
 
 def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTerm :=
@@ -132,7 +133,7 @@ def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTe
   | 0 => []
   | fuel + 1 => match tactic with
     | .exactE value _ _ | .applyE value _ => [value]
-    | .focus body _ _ => body.flatMap (psSyntaxTacticTerms fuel)
+    | .focus body _ _ | .each body _ _ => body.flatMap (psSyntaxTacticTerms fuel)
     | _ => []
 
 -- Single-scrutinee clients construct the same matrix representation.

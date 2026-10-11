@@ -23,14 +23,24 @@ fn main() {
     let spine_time = started.elapsed();
     let started = Instant::now();
     for _ in 0..REPEATS {
+        arena.clear_whnf_cache();
         let result = arena.whnf_fragment(app, DEPTH + 1).unwrap();
         black_box(result);
         assert_eq!(result, app);
     }
-    let whnf_time = started.elapsed();
+    let whnf_uncached_time = started.elapsed();
+    let started = Instant::now();
+    for _ in 0..REPEATS {
+        let result = arena.whnf_fragment(app, DEPTH + 1).unwrap();
+        black_box(result);
+        assert_eq!(result, app);
+    }
+    let whnf_cached_time = started.elapsed();
     println!("depth={},repeats={},nodes={}",DEPTH,REPEATS,arena.count());
     println!("spine_total_ns={}",spine_time.as_nanos());
-    println!("whnf_total_ns={}",whnf_time.as_nanos());
+    println!("whnf_uncached_total_ns={}",whnf_uncached_time.as_nanos());
+    println!("whnf_cached_total_ns={}",whnf_cached_time.as_nanos());
+    println!("whnf_cache_entries={}",arena.whnf_cache_count());
     // In-process comparison against the previous recursive C0 algorithm.
     // Both runs use the same arena and identical input. This is a fragment
     // microbenchmark, NOT a comparison with production PSKernel-Core.

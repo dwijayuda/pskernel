@@ -125,8 +125,8 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
           return {
             constructorName := name
             fieldNames := fields
-            elaborate := fun branch target =>
-              psElabPatternMatrix fuel elaborate branch (fieldColumns ++ rest) selected target
+            elaborate := fun branch =>
+              psElabPatternMatrix fuel elaborate branch.context (fieldColumns ++ rest) selected branch.target
             span }) context column.major (some expected)
 
 structure PsElabPatternInputs where

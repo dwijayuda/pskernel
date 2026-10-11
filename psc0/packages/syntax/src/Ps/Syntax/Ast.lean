@@ -127,6 +127,9 @@ inductive PsSyntaxTactic where
   | localE (name : PsSyntaxName) (type : Option PsSyntaxTerm) (value : PsSyntaxTerm)
       (reducible : Bool) (span : PsSourceSpan)
   | change (type : PsSyntaxTerm) (select : Bool) (span : PsSourceSpan)
+  | eliminate (value : PsSyntaxTerm) (induction : Bool) (span : PsSourceSpan)
+  | caseE (tag : Option PsSyntaxName) (names : List PsSyntaxName)
+      (body : List PsSyntaxTactic) (span : PsSourceSpan)
   | intro (names : List PsSyntaxName) (span : PsSourceSpan)
   | assumption (span : PsSourceSpan)
   | reflexivity (span : PsSourceSpan)
@@ -139,9 +142,9 @@ def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTe
   match fuel with
   | 0 => []
   | fuel + 1 => match tactic with
-    | .exactE value _ _ | .applyE value _ | .change value _ _ => [value]
+    | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ => [value]
     | .localE _ type value _ _ => type.toList ++ [value]
-    | .focus body _ _ | .each body _ _ => body.flatMap (psSyntaxTacticTerms fuel)
+    | .focus body _ _ | .each body _ _ | .caseE _ _ body _ => body.flatMap (psSyntaxTacticTerms fuel)
     | _ => []
 
 -- Single-scrutinee clients construct the same matrix representation.

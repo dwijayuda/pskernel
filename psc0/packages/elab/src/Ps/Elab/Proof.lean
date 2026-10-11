@@ -1,24 +1,6 @@
-import Ps.Elab.Goals
+import Ps.Elab.Elimination
 import Ps.Elab.Application
 import Ps.Elab.Equality
-import Ps.Elab.Scope
-
-def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
-    (source : PsSyntaxTerm) : Except PsElabError PsSyntaxTerm := do
-  let bound := context.localContext.declarations.map fun entry =>
-    psNameLastComponent (psLocalDeclUserName entry)
-  let resolved ← psScopeTerm 4096 {
-    environment := context.environment
-    scope := { namePrefix := scope.namePrefix, opened := scope.opened } } bound source
-  return resolved.term
-
-def psProofMain (state : PsProofState) :
-    Except PsElabError (PsProofGoal × PsElabContext × PsExpr) := do
-  let some goal := state.goals.head? | throw (.proof "no goals")
-  let context ← psProofContext state goal.id
-  let some declaration := psMetaFindDecl context.metaContext goal.id
-    | throw (.proof "unknown goal")
-  return (goal, context, psMetaInstantiate context.metaContext declaration.type)
 
 def psProofExact (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     (state : PsProofState) (source : PsSyntaxTerm) (refine : Bool) :
@@ -47,6 +29,7 @@ def psProofApplyTerm (fuel : Nat) (current : PsElabTermResult) (target : PsExpr)
       current.context.localContext current.type).mapError PsElabError.infer
     let fresh := psMetaFresh current.context.metaContext current.context.localContext pi.domain
       (if psBinderIsInstanceImplicit pi.binder then .synthetic else .natural)
+      { tag := psNameLastComponent pi.name }
     let context := psElabContextWithMeta current.context fresh.context
     psProofApplyTerm fuel {
       context, term := .app current.term fresh.expr
@@ -59,7 +42,8 @@ def psProofApplied (state : PsProofState) (goal : PsProofGoal) (before : Nat)
     | .synthetic => if entry.id >= before then some entry.id else none
     | _ => none
   let value ← psElabSolvePendingInstances value pending
-  let goals := psProofFreshGoals before value.context
+  let goals := (psProofFreshGoals before value.context).map fun child =>
+    { child with tag := psProofTag goal.tag child.tag }
   let dependent := fun goal => goals.any fun other =>
     match psMetaFindDecl value.context.metaContext other.id with
     | none => false
@@ -168,6 +152,12 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
         | .change source select _ =>
           if select then psProofShow elaborate scope state source
           else psProofChange elaborate scope state source
+        | .eliminate source induction _ => psProofEliminate elaborate scope state source induction
+        | .caseE tag names body _ => do
+          let (selected, saved) ← psProofSelectCase state tag names
+          let finished ← psProofRun elaborate scope fuel selected body
+          if !finished.goals.isEmpty then throw (.proof "case left unsolved goals")
+          pure { finished with goals := saved }
         | .intro names _ =>
           if names.isEmpty then psProofIntro state none
           else names.foldlM (fun current name => psProofIntro current (some name)) state

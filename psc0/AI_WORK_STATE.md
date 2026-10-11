@@ -1381,3 +1381,16 @@ The prior source-syntax compile failure is not qualification evidence.
 
 Dependent match branches now route through the same abstraction mechanism;
 substitution recipes close interleaved aliases in lexical order.
+
+## Dependent branch goal qualification (2026-10-12)
+
+Profile pscv0-v7-native-bounded/28 at 86a7fabda66115ce886790ebf243abce4e96177a passed
+[run 38183309863](https://github.com/dwijayuda/pskernel/actions/runs/38183309863):
+426 fixture declarations, 28 parser cases, four accepted programs, 81 phase-specific
+refusals and 126 shared runtime observations; 116 portable and 122 native modules.
+Refinement preserves captured goals through constructor fields, aliases, equality
+transport, generalized dependents and computed discriminants. Closure recipes
+follow lexical identity order rather than grouping aliases before binder types.
+
+Proof elimination and named case focus are the next clients of this shared path;
+see docs/PSCV0_NATIVE_ELIMINATION.md.

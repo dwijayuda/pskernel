@@ -8,11 +8,18 @@ inductive PsMetaVarKind where
   | synthetic
   | syntheticOpaque
 
+-- Optional origin information for named goals and source binder order.
+-- It does not participate in typing, conversion or kernel admission.
+structure PsMetaOrigin where
+  tag : String := ""
+  binders : List Nat := []
+
 structure PsMetaVarDecl where
   id : Nat
   type : PsExpr
   localContext : PsLocalContext
   kind : PsMetaVarKind
+  origin : PsMetaOrigin := {}
 
 structure PsMetaAssignment where
   id : Nat
@@ -95,13 +102,14 @@ def psMetaFresh
     (context : PsMetaContext)
     (localContext : PsLocalContext)
     (type : PsExpr)
-    (kind : PsMetaVarKind) : PsMetaFreshResult :=
+    (kind : PsMetaVarKind) (origin : PsMetaOrigin := {}) : PsMetaFreshResult :=
   let id := context.nextId;
   let declaration : PsMetaVarDecl := {
     id := id
     type := type
     localContext := localContext
     kind := kind
+    origin := origin
   };
   {
     context := {

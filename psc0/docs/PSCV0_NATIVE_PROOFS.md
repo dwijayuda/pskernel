@@ -104,3 +104,6 @@ Lean/Elab/App.lean. This is shared by all ordinary applications.
 Term and tactic scopes now share Meta delayed assignments. The previous proof-only
 closure list is removed; see PSCV0_NATIVE_SCOPES.md. Child goals retain their
 captured contexts, and a managed closure is never presented as another user goal.
+
+Selected cases/induction and case/next now consume shared typed match branches.
+See PSCV0_NATIVE_ELIMINATION.md for source forms, goal naming and explicit limits.

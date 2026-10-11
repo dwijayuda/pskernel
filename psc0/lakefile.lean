@@ -183,6 +183,8 @@ lean_lib PsElab where
     `Ps.Elab.Abstraction,
     `Ps.Elab.Binders,
     `Ps.Elab.Goals,
+    `Ps.Elab.GoalSource,
+    `Ps.Elab.Elimination,
     `Ps.Elab.Proof,
     `Ps.Elab.Application,
     `Ps.Elab.Record,

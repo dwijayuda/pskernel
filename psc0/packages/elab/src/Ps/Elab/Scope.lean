@@ -158,7 +158,7 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
     | tactic :: rest =>
       let (used, next) ← match tactic with
         | .intro names _ => pure ([], names.map psScopeKey ++ bound)
-        | .exactE value _ _ | .applyE value _ | .change value _ _ => do
+        | .exactE value _ _ | .applyE value _ | .change value _ _ | .eliminate value _ _ => do
           let result ← visit bound value
           pure (result.used, bound)
         | .localE name type value _ _ => do
@@ -166,6 +166,9 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
           let value ← visit bound value
           pure (psScopeUnion (annotation.map (·.used) |>.getD []) value.used,
             psScopeKey name :: bound)
+        | .caseE _ names body _ => do
+          let used ← psScopeTacticDependencies fuel visit (names.map psScopeKey ++ bound) body
+          pure (used, bound)
         | .focus body _ _ | .each body _ _ => do
           let used ← psScopeTacticDependencies fuel visit bound body
           pure (used, bound)

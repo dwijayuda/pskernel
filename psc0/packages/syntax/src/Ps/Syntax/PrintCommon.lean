@@ -150,6 +150,18 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
         return (if reducible then "let " else "have ") ++ (← psPrintSyntaxName name) ++
           annotation ++ " := " ++ (← printTerm value)
       | .change type select _ => return (if select then "show " else "change ") ++ (← printTerm type)
+      | .eliminate value induction _ =>
+        return (if induction then "induction " else "cases ") ++ (← printTerm value)
+      | .caseE tag names body _ =>
+        let header ← match tag with
+          | none => pure "next"
+          | some name => do
+            let name ← psPrintSyntaxName name
+            pure ("case " ++ name)
+        let names ← psPrintSyntaxNames names
+        let body ← psPrintTactics printTerm fuel body
+        return header ++ (if names.isEmpty then "" else " " ++ psPrintJoin " " names) ++
+          " =>\n  " ++ body.replace "\n" "\n  "
       | .intro names _ =>
         let rendered ← psPrintSyntaxNames names
         return "intro" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)

@@ -43,7 +43,7 @@ def psProofFreshGoals (before : Nat) (context : PsElabContext) : List PsProofGoa
   context.metaContext.declarations.reverse.filterMap fun entry =>
     if entry.id >= before && (psMetaFindAssignment context.metaContext entry.id).isNone &&
         (psMetaFindDelayed context.metaContext entry.id).isNone then
-      some { id := entry.id }
+      some { id := entry.id, tag := entry.origin.tag }
     else none
 
 def psProofIntro (state : PsProofState) (source : Option PsSyntaxName) :

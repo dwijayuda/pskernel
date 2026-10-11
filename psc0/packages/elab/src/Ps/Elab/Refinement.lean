@@ -78,6 +78,7 @@ def psElabExprContainsLocal (id : Nat) (term : PsExpr) : Bool :=
 structure PsElabMatchAliases where
   context : PsElabContext
   valuesRev : List (Nat × PsExpr)
+  sourcesRev : List (Nat × Nat) := []
 
 def psElabMatchAlias (state : PsElabMatchAliases) (entry : Nat × PsExpr) :
     Except PsElabError PsElabMatchAliases := do
@@ -91,7 +92,8 @@ def psElabMatchAlias (state : PsElabMatchAliases) (entry : Nat × PsExpr) :
   let pushed := psLocalPushLet state.context.localContext name type entry.snd
   return {
     context := psElabContextWithLocal state.context pushed.context
-    valuesRev := (pushed.id, entry.snd) :: state.valuesRev }
+    valuesRev := (pushed.id, entry.snd) :: state.valuesRev
+    sourcesRev := (entry.fst, pushed.id) :: state.sourcesRev }
 
 -- Ordered dependency closure is shared by motive generalization and equality
 -- elimination. Let locals are reintroduced with their definitions, not assumed.

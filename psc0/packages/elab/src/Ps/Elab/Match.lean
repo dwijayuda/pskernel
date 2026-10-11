@@ -1,10 +1,19 @@
 import Ps.Elab.Equality
 import Ps.Elab.Application
 
+-- Branch consumers receive typed elimination metadata; patterns and tactics
+-- share refinement without reconstructing fields or induction hypotheses.
+structure PsElabMatchBranch where
+  context : PsElabContext
+  target : PsExpr
+  fields : List PsElabTypedBinder
+  hypotheses : List PsElabTypedBinder
+  clearedIds : List Nat
+
 structure PsElabMatchAlternative where
   constructorName : PsName
   fieldNames : List PsSyntaxName
-  elaborate : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult
+  elaborate : PsElabMatchBranch -> Except PsElabError PsElabTermResult
   span : PsSourceSpan
 
 def psElabMatchAlternativeFind
@@ -273,8 +282,16 @@ def psElabMatchMinor (context : PsElabContext)
     let generalized ← psElabOpenDependents plan.generalized {
       context, body := target, bindersRev := [], aliasesRev := []
       replacements := substitutions }
-    let body ← alternative.elaborate (psElabContextAfterStructuralFields generalized.context)
-      generalized.body
+    let majorIds := plan.majorId.toList
+    let clearedIds := majorIds ++ plan.generalized.map (·.binder.id) ++
+      aliases.sourcesRev.filterMap (fun (original, alias) =>
+        if majorIds.contains original then some alias else none)
+    let body ← alternative.elaborate {
+      context := psElabContextAfterStructuralFields generalized.context
+      target := generalized.body
+      fields := fields.bindersRev.reverse
+      hypotheses := hypotheses.bindersRev.reverse
+      clearedIds }
     psElabCloseDependents context generalized body target
   let flexible := fields.bindersRev.map (fun binder => binder.id) ++ plan.constraintVariables
   let body ← psElabSolveIndexConstraints 256 plan.constraints.length flexible (hypotheses.bindersRev.map (fun binder => binder.id))

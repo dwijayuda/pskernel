@@ -125,5 +125,9 @@ export const observations = [
   { name: "delayedTailAnswer", args: null, expected: 71n },
   { name: "delayedContextAnswer", args: null, expected: 71n },
   { name: "delayedComputedAnswer", args: null, expected: 266n },
+  { name: "eliminationCountAnswer", args: null, expected: 271n },
+  { name: "casesPredAnswer", args: null, expected: 271n },
+  { name: "casesTailAnswer", args: null, expected: 71n },
+  { name: "casesContextAnswer", args: null, expected: 71n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

@@ -495,7 +495,19 @@ private def application : String :=
   "const delayedMatchAnswer: Nat := delayedMatch(Option.some(265))\n" ++
   "const delayedTailAnswer: Nat := Indexed.head(0, delayedTail(1, Indexed.two))\n" ++
   "const delayedContextAnswer: Nat := Indexed.head(0, delayedContext(1, Indexed.one, Indexed.one))\n" ++
-  "const delayedComputedAnswer: Nat := delayedComputed(266)\n"
+  "const delayedComputedAnswer: Nat := delayedComputed(266)\n" ++
+  "function eliminationCount(n: Nat): Nat := by {\n  induction n\n  case zero => exact 0\n  case succ k ih => exact Nat.succ(ih)\n}\n" ++
+  "function casesPred(n: Nat): Nat := by {\n  cases n\n  case zero => exact 0\n  case succ k => exact k\n}\n" ++
+  "theorem inductionTrue(n: Nat): True := by {\n  induction n\n  case zero => constructor\n  case succ k ih => exact ih\n}\n" ++
+  "theorem casesSwap(P: Prop, Q: Prop, h: P \\/ Q): Q \\/ P := by {\n  cases h\n  case inl hp => exact Or.inr(hp)\n  case inr hq => exact Or.inl(hq)\n}\n" ++
+  "theorem nextPair(P: Prop, Q: Prop, hp: P, hq: Q): P /\\ Q := by {\n  constructor\n  next => exact hp\n  next => exact hq\n}\n" ++
+  "function casesTail(n: Nat, value: Indexed.Vector(Nat, Nat.succ(n))): Indexed.Vector(Nat, n) := by {\n  cases value\n  case cons k head tail => exact tail\n}\n" ++
+  "function casesContext(n: Nat, value: Indexed.Vector(Nat, n), other: Indexed.Vector(Nat, n)): Indexed.Vector(Nat, n) := by {\n  cases value\n  case nil => exact other\n  case cons k head tail => exact other\n}\n" ++
+  "function casesEmpty(value: Empty): Nat := by {\n  cases value\n}\n" ++
+  "const eliminationCountAnswer: Nat := eliminationCount(271)\n" ++
+  "const casesPredAnswer: Nat := casesPred(272)\n" ++
+  "const casesTailAnswer: Nat := Indexed.head(0, casesTail(1, Indexed.two))\n" ++
+  "const casesContextAnswer: Nat := Indexed.head(0, casesContext(1, Indexed.one, Indexed.one))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -596,7 +608,11 @@ private def semanticCases : IO Unit := do
     { source := "structure Pair where { first: Nat }\nconst bad: Nat := {\n  let p := { first := 1 }\n  0\n}\n" },
     { source := "structure Checked where {\n  n: Nat\n  proof: n = 0\n}\nfunction bad(p: Checked): Checked := { p with n := 1 }\n" },
     { source := "structure Pair where { first: Nat }\nfunction id(n: Nat): Nat := n\nfunction bad(p: Pair): Pair := { p with first := id (0) }\n" },
-    { source := "const bad: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n}\n" }]
+    { source := "const bad: Nat -> Nat := by {\n  refine (fun (n: Nat) => _)\n}\n" },
+    { source := "function bad(n: Nat): Nat := by {\n  cases n\n  case zero => exact 0\n  case succ k => exact ih\n}\n" },
+    { source := "function bad(n: Nat): Nat := by {\n  cases n\n  case absent => exact 0\n}\n" },
+    { source := "function bad(n: Nat): Nat := by {\n  cases n\n  case zero x => exact 0\n}\n" },
+    { source := "function bad(n: Nat): Nat := by {\n  cases n\n  case zero => exact n\n  case succ k => exact k\n}\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -613,7 +629,7 @@ private def semanticCases : IO Unit := do
       some "elaborate", some "elaborate",
       some "parse", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", some "elaborate", some "parse",
-      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "parse", some "parse", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "parse", some "elaborate", some "elaborate", some "elaborate", some "elaborate", some "elaborate"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -632,7 +648,7 @@ private def semanticCases : IO Unit := do
     "PSCV0-SCOPE: unknown universe", "PSCV0-SCOPE: unknown universe",
     "PSCV0-SCOPE: duplicate or invalid universe", "PSCV0-PARSE",
     "PSCV0-PROOF: exact left", "PSCV0-PROOF: unsolved goals",
-    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02", "PSCV0-PROOF: unsolved goals"]
+    "PSCV0-PROOF: focused branch", "PSCV0-PROOF: rfl", "PSCV0-APP-02", "PSCV0-PROOF: tactic failed on all goals", "PSCV0-ELABORATION", "PSCV0-PARSE", "PSCV0-APP-02", "PSCV0-PROOF: rfl", "PSCV0-PROOF: rfl", "PSCV0-PROOF: show", "PSCV0-PARSE", "PSCV0-PROOF: local declaration", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-ELABORATION", "PSCV0-DATA: Prop structure fields", "PSCV0-DATA: structure result", "PSCV0-DATA: data family must end", "PSCV0-ARGUMENT: duplicate record", "PSCV0-ARGUMENT: unknown record", "PSCV0-ARGUMENT: missing required record", "PSCV0-ARGUMENT: record requires", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-02", "PSCV0-PROOF: unsolved goals", "PSCV0-SCOPE: unknown name", "PSCV0-PROOF: unknown case tag", "PSCV0-PROOF: too many case binder", "PSCV0-SCOPE: unknown name"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -661,7 +677,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 81 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 85 phase-specific refusals, shared-prelude isolation"
 
 private def metavariableBoundary : IO Unit := do
   let type := PsExpr.constE psNatName []

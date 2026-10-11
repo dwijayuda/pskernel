@@ -18,7 +18,7 @@
     "externalCheckersAreProofOracles": false
   },
   "prototype": {
-    "stage": "P1e-two-checked-Prop-set-cases-and-proved-old-proofpoint-obstruction-no-global-soundness",
+    "stage": "P1f-tagged-point-and-derived-Tarski-finite-pair-closure-verified-no-global-model-or-admission",
     "proofCheckerImplemented": false,
     "acceptingAdmissionAPIImplemented": false,
     "formalProofComplete": false,
@@ -86,7 +86,7 @@
     "p1ExecutableScopePreflightReflectionProved": true,
     "p1MalformedResultProvablyUnreachable": true,
     "p1SuccessCertifiedReturnSameTypeProved": true,
-    "p1ReviewedTheoremAssumptionCount": 84,
+    "p1ReviewedTheoremAssumptionCount": 110,
     "p1AssumptionAuditCloudValidated": true,
     "p1TypedSubstitutionPreservationProved": false,
     "p1DenotationalSetModelEstablished": false,
@@ -139,7 +139,27 @@
     "p1eV2CandidatePromotedToCanonicalModel": false,
     "p1eCompleteModelWithDistinguishedProofPointProved": false,
     "p1eFullLeanTermInterpreterImplemented": false,
-    "p1eGeneralCheckedTypingDenotationalSoundnessProved": false
+    "p1eGeneralCheckedTypingDenotationalSoundnessProved": false,
+    "p1eV2CandidatePairCollisionWithKuratowskiProved": true,
+    "p1fIndependentSetEncodingSpecImplemented": true,
+    "p1fKuratowskiPairAndGraphEncodingLawsProved": true,
+    "p1fVonNeumannFiniteOrdinalEncodingLawsProved": true,
+    "p1fTaggedPointTagNotSingletonOrOrderedPairProved": true,
+    "p1fTaggedPointNotKuratowskiPairProved": true,
+    "p1fTaggedPointNotFunctionGraphProved": true,
+    "p1fTaggedPointNotFiniteVonNeumannNaturalProved": true,
+    "p1fTaggedPointNotPropValueProved": true,
+    "p1fTaggedPointInTrueAndPropExactlyTwoValuesProved": true,
+    "p1fArbitraryImageMayEqualProofPointProved": true,
+    "p1fFinitePairUniverseClosureDerivedFromTarskiProved": true,
+    "p1fTaggedPointPropCarrierMemberTypeOneProved": true,
+    "p1fTaggedSortSuccessorSetMembershipProved": true,
+    "p1fNewSetTheoryAxiomIntroduced": false,
+    "p1fTaggedModelMigratedToCheckedSourceInterpretation": false,
+    "p1fFullTypedQuotientWritabilityModelProved": false,
+    "p1fFullProofIrrelevanceGraphQuotientFreshnessProved": false,
+    "p1fGeneralCheckedSourceSoundnessProved": false,
+    "p1fCompleteModelExistsProved": false
   },
   "source": {
     "root": "pskernel-fast/src/PSKernelFast",
@@ -151,10 +171,10 @@
     ]
   },
   "evidence": {
-    "validatedSourceCommit": "8de790e40c0ecacea1ff80390f7b636bb9cffd63",
+    "validatedSourceCommit": "367ddf25d3d97e7fb0b88c86dbeed7410d51dc10",
     "retainedG43bSemanticSourceCommit": "253afb42b477aacab22def288a2dd42d7ca9633b",
-    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38126457033",
-    "jobId": 114431719831,
-    "scope": "86 successful Lake builds, 38 independent Lean sources audited, 84 exact theorem-assumption receipts; proof-only partial Prop interpreter with actual executable-checker source-to-set cases for ∀P:Prop,P (false) and ∀P:Prop,P→P (true), reusable checked PropPi annotations and conditional semantic Pi membership, source-backed witnesses; proved old truth-carrier proof-point collision and an independent V2 carrier candidate with proofPoint∈True, proofPoint∉Prop, exactly two truth values and Type1 membership. Still NO candidate proven disjoint from writable graph/number/quotient encodings, no general semantic fibre validity, complete Type-valued Pi/proof irrelevance, full checker/model soundness, consistency, admission or real kernel speed."
+    "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/38129546961",
+    "jobId": 114440827120,
+    "scope": "94 Lake build jobs, 42 independent V3 Lean source files audited, 110 exact theorem assumptions, all G1-G4.3b smokes. Proof-only SetEncoding + TaggedProofPoint prove precise pair/graph/finite-natural/Prop non-collision, two distinct truth values, and unrestricted-image counterexample; FiniteUniverseClosure derives pair closure from Tarski size law with three-versus-two pigeonhole; TaggedPointUniverse proves tag/point/True/Prop∈Type1 and tagged Sort successor membership. No global quotient freshness, typed quotient model, old source interpreter migration, proof irrelevance, checked constant environment, kernel soundness, relative consistency, admission, or real kernel speed."
   }
 }

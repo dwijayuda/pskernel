@@ -35,3 +35,16 @@ path; no compiler-source translation, self-hosting or pskernel-core.
 Reference implementation: Lean/Class.lean and Lean/Meta/SynthInstance.lean at
 c29b6dda4f7c20e3eeaa717c4e565663c5cfa364. Semi-output parameters, tabled synthesis,
 default-instance scheduling and complete non-ground inference remain separate.
+
+## Qualification
+
+Profile 31 at 9c08a9a019b2afc2dc7eda15a0c6699832f2c688 passed
+[run 38185022674](https://github.com/dwijayuda/pskernel/actions/runs/38185022674),
+job 114605381212: 473 composite declarations checked relative to the reconstructed
+portable prelude, four accepted programs, 92 phase-specific refusals and 142
+shared TypeScript/JavaScript and Rust observations. Existing parser and boundary
+checks pass. Full tabled synthesis and full v7 remain open.
+
+Implementation stops at this user-requested milestone. DirectJS/directWasm and
+readable source output are proposals in PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md,
+not implemented capabilities.

@@ -12,8 +12,13 @@ no new Core expressions. Named proof binders use the same local identity and
 hole-closing rules as lambdas. A branch result type cannot leak its proof local.
 
 Lean RC4 changed Decidable to a structure carrying a Bool and a reflection proof.
-The selected runtime ABI maps Decidable P to Bool. Imported isTrue/isFalse and
-decide signatures, and ite/dite, are checked against the official pinned prelude.
+The selected runtime ABI maps Decidable P to Bool. The selected isTrue/isFalse,
+decide and ite/dite signatures follow the pinned RC4 reference, but are trusted
+portable prelude declarations. The official provider replays the portable
+prelude into an empty Lean environment; it does not automatically compare those
+signatures with imported native standard-library declarations. Kernel admission
+is relative to that reconstructed prelude. Primitive fidelity and runtime
+preservation require separate evidence; see PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md.
 Bool, Nat and String equality decisions are registered through the existing
 instance index, so local decision dictionaries and user instances use the same
 search machinery. The primitive runtime boundary erases the dictionary to its

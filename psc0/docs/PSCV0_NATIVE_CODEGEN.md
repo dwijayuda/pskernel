@@ -28,3 +28,12 @@ pre-erasure information and is a separate later milestone. No compiler-source
 Validation reuses the compact native application, strict TypeScript build and
 runtime assertions. A small direct boundary check refuses an invalid IR and
 checks naming collisions, Unicode retention and declaration range bounds.
+
+## Proposed next architecture
+
+PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md records the requested research/design after
+qualified native profile 31. It extends this pipeline with artifact bundles,
+source provenance/export ABI, shared structured ECMAScript emission for TS and
+directJS, a typed directWasm path, and pre-erasure source reconstruction.
+The existing byte-origin records are not debugger source maps. These additions
+are proposed only; implementation is stopped at the class-output milestone.

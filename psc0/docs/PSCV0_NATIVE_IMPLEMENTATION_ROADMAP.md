@@ -68,3 +68,21 @@ stability. Milestone D remains broader allocation/scaling qualification and
 stack-safe recursive destruction. Neither is implied by this bounded Rust
 milestone. Language coverage, compiler-source migration and self-hosting remain
 separate acceptance boundaries.
+
+## Backend design stopping point (12 October 2026)
+
+Native profile 31 qualifies class output inference and dictionary dependencies:
+473 composite declarations, 92 phase-specific refusals and 142 shared TS/Rust
+observations. Language implementation is stopped at the user's request.
+
+PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md refines the remaining milestone C into
+C0 contracts/provenance/primitive audit, C1 shared ECMAScript, C2 directJS,
+C3 directWasm foundation, C4 current-runtime Wasm parity and C5 readable
+pre-erasure Lean/ProofScript output. Milestone D remains measured performance
+work. This proposal preserves the earlier A/B architecture and does not
+implement new backends or begin compiler migration/self-hosting.
+
+Official checking is relative to the reconstructed portable prelude; primitive
+signature fidelity is not automatically checked against imported native Lean.
+The proposed signature/model audit and assumption ledger address that explicit
+boundary without replacing the kernel.

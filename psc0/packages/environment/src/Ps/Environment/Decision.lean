@@ -1,7 +1,8 @@
 import Ps.Environment.Connectives
 
--- Signatures are checked against the pinned native prelude. Decidable RC4
--- carries one computational Bool and an erased reflection proof.
+-- Trusted primitive signatures follow the pinned RC4 reference; the provider
+-- checks relative to the reconstructed portable prelude. Decidable RC4 carries
+-- one computational Bool and an erased reflection proof.
 def psDecisionName (text : String) : PsName :=
   (text.splitOn ".").foldl psNameAppendStr .anonymous
 

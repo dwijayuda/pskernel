@@ -1,16 +1,57 @@
-# Native decision evidence qualified; class outputs in progress
+# Class output inference qualified; backend design reported, implementation stopped
 
-Profile 30 at 60cb1d2bb42144393c4373c3119b9d3f10d1bcce passed
-[run 38184666068](https://github.com/dwijayuda/pskernel/actions/runs/38184666068),
-job 114604319945: 453 checked declarations, 88 phase-specific refusals and 138
-shared TypeScript/Rust observations. General Prop/Bool and named proof
-conditionals use actual decision dictionaries and shared scope closure.
-See docs/PSCV0_NATIVE_CONDITIONALS.md.
+Profile 31 at **9c08a9a019b2afc2dc7eda15a0c6699832f2c688** passed
+[run 38185022674](https://github.com/dwijayuda/pskernel/actions/runs/38185022674),
+job 114605381212: 473 composite declarations checked relative to the reconstructed
+portable prelude, four accepted programs, 92 phase-specific refusals and 142
+shared TypeScript/JavaScript and Rust runtime observations. The existing 28
+parser cases and compact emission/scope checks pass. Closure guard: 121 portable
+and 127 native modules; pskernel-core excluded.
 
-Profile 31 adds registered class output parameters, output-only universe
-positions and a shared dependency worklist for dictionaries. It requires its
-own full cloud qualification. See docs/PSCV0_NATIVE_INSTANCE_OUTPUTS.md.
-This remains native portable .lean with official Lean checking; full v7 is open.
+The completed milestone registers class output parameters and output-only
+universes, masks outputs for candidate selection/cycle detection, reconciles
+outputs after selection, and shares a dependency worklist between application
+and recursive dictionary synthesis. It removes duplicated fixed-order solvers.
+See docs/PSCV0_NATIVE_INSTANCE_OUTPUTS.md.
+
+Single-run timings: rebuild 59,973 ms; warm build 502 ms; application parse/
+elaborate/prepare/kernel/erase/IR-and-emit 48/64/79/53/71/22 ms. These are not
+benchmarks. Native Lean remains pinned to 4.35.0-rc4,
+c29b6dda4f7c20e3eeaa717c4e565663c5cfa364.
+
+## User-requested stopping boundary
+
+Language implementation stops here. The user requested research and an
+architecture report before adding directJS (.js, .d.ts, .map), directWasm, and
+further readable TS/Rust/Lean/ProofScript output. The proposal is in
+docs/PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md. No new backend is implemented.
+
+Recommended order: C0 contracts/provenance/trust audit, C1 shared structured
+ECMAScript emission, C2 directJS, C3 typed directWasm foundation, C4 current
+runtime parity, C5 pre-erasure readable source reconstruction. Wasm GC is the
+recommended first representation, subject to explicit engine qualification.
+The existing semantic pipeline, Rust ownership work and native portable closure
+remain authoritative. Full v7 remains incomplete.
+
+## Correction to verification wording
+
+The official provider replays portable declarations into an empty Lean
+environment. Portable axiom signatures become assumptions; they are not
+automatically compared with imported native standard-library declarations.
+Earlier conditional documentation and its inline comment overstated that check.
+This documentation correction does not change executable behavior.
+
+Official checking is relative to that reconstructed prelude. It does not prove
+native primitive fidelity or backend preservation. The proposal requires a
+compact native signature/model audit and primitive/assumption ledger before
+qualifying additional targets. Source typing, runtime primitive contracts,
+IR/target validation and observed runtime agreement remain distinct claims.
+
+Native .lean authoring and Linux cloud qualification continue to define this
+development lane. No local checkout/build/tests, pskernel-core, compiler-source
+.ps migration, self-hosting, main merge or release. Earlier records below are
+historical; their pending-work descriptions are superseded by the current
+roadmap and this stopping boundary.
 
 # Native core language continuation
 

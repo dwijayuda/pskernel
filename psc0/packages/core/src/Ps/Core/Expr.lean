@@ -23,3 +23,18 @@ inductive PsExpr where
   | letE (name : PsName) (type : PsExpr) (value : PsExpr) (body : PsExpr)
   | lit (value : PsLiteral)
   | proj (typeName : PsName) (index : Nat) (value : PsExpr)
+
+def psExprApplyManyWorker
+    (arguments : List PsExpr)
+    (fn : PsExpr) : PsExpr :=
+  match arguments with
+  | [] => fn
+  | argument :: rest =>
+      psExprApplyManyWorker rest (PsExpr.app fn argument)
+
+def psExprApplyMany
+    (fn : PsExpr)
+    (arguments : List PsExpr) :
+    PsExpr :=
+  psExprApplyManyWorker arguments fn
+

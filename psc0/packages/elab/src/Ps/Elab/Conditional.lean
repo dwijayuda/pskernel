@@ -17,8 +17,10 @@ def psElabCondition (elaborate : PsElaborator) (context : PsElabContext)
       value.context.instances value.context.metaContext target
     let some term := decision.value
       | throw (.invalidArgument "conditional proposition requires a Decidable instance")
-    return { context := psElabContextWithMeta value.context decision.context
-      proposition := psMetaInstantiate decision.context value.term, decision := term }
+    return {
+      context := psElabContextWithMeta value.context decision.context
+      proposition := psMetaInstantiate decision.context value.term
+      decision := term }
   | _ =>
     let value ← psElabFinalizeExpected value (some (.constE psBoolName []))
     let boolean := PsExpr.constE psBoolName []
@@ -52,8 +54,8 @@ def psElabIf (elaborate : PsElaborator) (context : PsElabContext)
     | none => do
       let yes ← elaborate condition.context thenBranch expected
       pure (yes, expected.getD yes.type)
-    | some name => psElabConditionBranch elaborate condition.context name
-      condition.proposition thenBranch expected
+    | some name =>
+      psElabConditionBranch elaborate condition.context name condition.proposition thenBranch expected
   let no ← match name with
     | none => elaborate yes.context elseBranch (some type)
     | some name => do

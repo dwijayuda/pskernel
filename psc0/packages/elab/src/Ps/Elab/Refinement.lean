@@ -1,20 +1,6 @@
 import Ps.Elab.Binders
 import Ps.Environment.Logic
 
-def psExprApplyManyWorker
-    (arguments : List PsExpr)
-    (fn : PsExpr) : PsExpr :=
-  match arguments with
-  | [] => fn
-  | argument :: rest =>
-      psExprApplyManyWorker rest (PsExpr.app fn argument)
-
-def psExprApplyMany
-    (fn : PsExpr)
-    (arguments : List PsExpr) :
-    PsExpr :=
-  psExprApplyManyWorker arguments fn
-
 structure PsExprAppView where
   head : PsExpr
   args : List PsExpr

@@ -106,6 +106,32 @@ def generalPiFormationSmoke : IO Unit := do
   let malformedArg : KExpr := .app identity (.bvar 0)
   expectError (inferClosedGeneralPi [] malformedArg) .malformed
 
+  -- Let typing: the declared type is checked as a Sort and the value
+  -- must infer EXACTLY that type. Type substitution uses G4.3's
+  -- certified capture-avoiding reference substitution.
+  let simpleLet : KExpr :=
+    .letE a (.sort one) (.sort .zero) (.bvar 0) false
+  expectType (inferClosedGeneralPi [] simpleLet) (.sort one)
+
+  let dependentLet : KExpr :=
+    .letE a (.sort two) (.sort one)
+      (.lam x (.bvar 0) (.bvar 0) .default) false
+  let expectedLetType : KExpr :=
+    .forallE x (.sort one) (.sort one) .default
+  expectType (inferClosedGeneralPi [] dependentLet) expectedLetType
+
+  let mismatchedLet : KExpr :=
+    .letE a (.sort one) (.sort one) (.bvar 0) false
+  expectError (inferClosedGeneralPi [] mismatchedLet) .unsupported
+
+  let badLetValue : KExpr :=
+    .letE a (.sort one) (.bvar 0) (.bvar 0) false
+  expectError (inferClosedGeneralPi [] badLetValue) .malformed
+
+  let nondepLet : KExpr :=
+    .letE a (.sort one) (.sort .zero) (.sort .zero) true
+  expectError (inferClosedGeneralPi [] nondepLet) .unsupported
+
   -- Context formation has to run actual inference: it cannot be extended
   -- by a dangling variable or a lambda with no applicable type rule.
   let empty := GeneralPiContext.empty []
@@ -145,8 +171,8 @@ def generalPiFormationSmoke : IO Unit := do
     (.forallE a (.sort .zero)
       (.lam x (.sort .zero) (.bvar 0) .default) .default)) .unsupported
 
-  IO.println "PSKernel-Fast G4.4 certified Pi/lambda/exact-application fragment PASS"
-  IO.println "G4.4 limits: exact syntactic domain equality only, no DefEq/let/constants or admission"
+  IO.println "PSKernel-Fast G4.4 certified Pi/lambda/app/restricted-let fragment PASS"
+  IO.println "G4.4 limits: syntactic type equality only; no DefEq/constants/nondep-let/admission"
 
 end PSKernelFast.Core
 

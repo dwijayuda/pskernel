@@ -250,12 +250,12 @@ def psKernelExprEq
       psKernelNameEq a b && psKernelLevelListEq als bls
   | .app af aa, .app bf ba =>
       psKernelExprEq af bf && psKernelExprEq aa ba
-  | .lam _ at ab _, .lam _ bt bb _ =>
-      psKernelExprEq at bt && psKernelExprEq ab bb
-  | .forallE _ at ab _, .forallE _ bt bb _ =>
-      psKernelExprEq at bt && psKernelExprEq ab bb
-  | .letE _ at av ab an, .letE _ bt bv bb bn =>
-      psKernelExprEq at bt && psKernelExprEq av bv &&
+  | .lam _ aty ab _, .lam _ bty bb _ =>
+      psKernelExprEq aty bty && psKernelExprEq ab bb
+  | .forallE _ aty ab _, .forallE _ bty bb _ =>
+      psKernelExprEq aty bty && psKernelExprEq ab bb
+  | .letE _ aty av ab an, .letE _ bty bv bb bn =>
+      psKernelExprEq aty bty && psKernelExprEq av bv &&
       psKernelExprEq ab bb && psKernelBoolEq an bn
   | .lit a, .lit b => psKernelLiteralEq a b
   | .mdata am ab, .mdata bm bb =>

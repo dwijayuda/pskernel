@@ -16,8 +16,9 @@ UNSUPPORTED, never silently considered equal.
 namespace PSKernelFast.Core
 
 /--
-Independent typing rules for Sort, context variables, dependent Pi and checked lambda introduction.
-No DefEq, lambda/app/let/constant or other logical rules are assumed.
+Independent typing rules for Sort, context variables, dependent Pi, lambda introduction and
+application with EXACT syntactic domain-type agreement.
+No DefEq, let/constant or other logical rules are assumed.
 The context must separately be certified well-formed before an executable
 checker is allowed to use these rules.
 -/
@@ -43,6 +44,14 @@ inductive GeneralPiRule (params : List KName) :
       (bodyTyped : GeneralPiRule params (domain :: ctx) body bodyType) :
       GeneralPiRule params ctx (.lam name domain body style)
         (.forallE name domain bodyType style)
+
+  | app (ctx : List KExpr) (fn arg : KExpr)
+      (name : KName) (domain body : KExpr) (style : BinderStyle)
+      (fnTyped :
+        GeneralPiRule params ctx fn (.forallE name domain body style))
+      (argTyped : GeneralPiRule params ctx arg domain) :
+      GeneralPiRule params ctx (.app fn arg)
+        (body.instantiateBVar arg 0)
 
 /--
 Only contexts constructed from an empty context by checking a new domain
@@ -94,6 +103,18 @@ def inferGeneralPi {params : List KName} (ctx : List KExpr)
               some ⟨.forallE name domain bodyResult.val style,
                 .lam ctx name domain body style u bodyResult.val
                   domainTyped bodyResult.property⟩
+          | none => none
+      | _ => none
+  | .app fn arg =>
+      match inferGeneralPi ctx wf fn with
+      | some ⟨.forallE name domain body style, fnTyped⟩ =>
+          match inferGeneralPi ctx wf arg with
+          | some argResult =>
+              if hEq : argResult.val = domain then
+                some ⟨body.instantiateBVar arg 0,
+                  .app ctx fn arg name domain body style fnTyped
+                    (hEq ▸ argResult.property)⟩
+              else none
           | none => none
       | _ => none
   | _ => none

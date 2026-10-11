@@ -52,10 +52,10 @@ fn main() {
     for _ in 0..SUBST_REPEATS {
         black_box(arena.instantiate1(substitution_input, replacement).unwrap());
     }
-    let iterative_time = started.elapsed();
+    let hybrid_time = started.elapsed();
     println!("substitution_depth={},substitution_repeats={}",SUBST_DEPTH,SUBST_REPEATS);
     println!("recursive_substitution_total_ns={}",reference_time.as_nanos());
-    println!("iterative_substitution_total_ns={}",iterative_time.as_nanos());
+    println!("hybrid_substitution_total_ns={}",hybrid_time.as_nanos());
     println!("note: comparison only covers the C0 substitution fragment; no full kernel speedup claim");
 
 }

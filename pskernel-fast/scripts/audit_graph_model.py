@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact P1l graph application receipts; original 157+17 gates remain unchanged."""
+"""Exact P1l graph/tagged Pi receipts; original 157+17 gates remain unchanged."""
 import pathlib
 import sys
 import audit_axioms as gate
@@ -14,6 +14,16 @@ NAMES = {
     "PSKernelFast.Spec.modelGraphPi_app_member",
     "PSKernelFast.Spec.modelGraphPi_eta",
     "PSKernelFast.Spec.modelGraphPi_ext",
+    "PSKernelFast.Spec.modelApp_point",
+    "PSKernelFast.Spec.modelApp_graph",
+    "PSKernelFast.Spec.modelPi_member_sort",
+    "PSKernelFast.Spec.modelLam_intro",
+    "PSKernelFast.Spec.modelPi_elim",
+    "PSKernelFast.Spec.modelPi_beta",
+    "PSKernelFast.Spec.modelLam_congr",
+    "PSKernelFast.Spec.modelPi_eta",
+    "PSKernelFast.Spec.modelPi_ext",
+    "PSKernelFast.Spec.modelPi_congr",
 }
 
 if __name__ == "__main__":
@@ -24,5 +34,5 @@ if __name__ == "__main__":
         gate.test_fail_closed()
         gate.audit(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
     except ValueError as error:
-        raise SystemExit(f"P1l graph model assumption audit FAILED: {error}")
-    print(f"P1l graph model PASS: {len(NAMES)} exact additional theorem receipts")
+        raise SystemExit(f"P1l graph/tagged Pi assumption audit FAILED: {error}")
+    print(f"P1l graph/tagged Pi model PASS: {len(NAMES)} exact additional theorem receipts")

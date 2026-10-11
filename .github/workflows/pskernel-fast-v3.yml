@@ -46,7 +46,7 @@ jobs:
           lake --version
           lake update
           # Fail fast on changed proof/runtime closures, reusing outputs below.
-          lake build PSKernelFast.Proof.SourceModelTyping pskernel_fast_typed_normalization_smoke
+          lake build PSKernelFast.Proof.SourceModelExecution pskernel_fast_typed_normalization_smoke
           lake build PSKernelFast.Spec.GraphUniverseClosure PSKernelFast.Spec.TaggedPropSemantics PSKernelFast.Proof.TaggedPropModelBridge PSKernelFast.Proof.TaggedWellDenoted PSKernelFast.Proof.SourceTaggedContextBridge PSKernelFast.TypedConversion pskernel_fast_smoke pskernel_fast_eval_smoke pskernel_fast_eval_bench pskernel_fast_core_syntax_smoke pskernel_fast_symbolic_level_smoke pskernel_fast_catalog_smoke pskernel_fast_sort_fragment_smoke pskernel_fast_scoped_context_smoke pskernel_fast_general_pi_smoke pskernel_fast_typed_conversion_smoke pskernel_fast_typed_conversion_bench
       - name: Audit exact theorem assumptions
         working-directory: pskernel-fast
@@ -58,8 +58,8 @@ jobs:
           lake env lean src/PSKernelFast/Proof/GeneralPiScope.lean | tee -a /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/TypedSubstitution.lean | tee -a /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/Erasure.lean | tee -a /tmp/pskernel-fast-axioms.log
-          lake env lean src/PSKernelFast/Proof/ErasureTotality.lean | tee -a /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Spec/UniverseSemantics.lean | tee -a /tmp/pskernel-fast-axioms.log
+          lake env lean src/PSKernelFast/Proof/ErasureTotality.lean | tee -a /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Spec/PropPi.lean | tee -a /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Spec/PropInterp.lean | tee -a /tmp/pskernel-fast-axioms.log
           lake env lean src/PSKernelFast/Proof/PropInterpreterBridge.lean | tee -a /tmp/pskernel-fast-axioms.log
@@ -111,6 +111,7 @@ jobs:
         run: |
           set -euo pipefail
           lake env lean src/PSKernelFast/Proof/SourceModelTyping.lean | tee /tmp/pskernel-fast-p1o-axioms.log
+          lake env lean src/PSKernelFast/Proof/SourceModelExecution.lean | tee -a /tmp/pskernel-fast-p1o-axioms.log
           python3 scripts/audit_source_model_typing.py /tmp/pskernel-fast-p1o-axioms.log
       - name: Run fail-closed representation tests
         working-directory: pskernel-fast

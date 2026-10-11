@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Exact P1o receipts; all earlier independent assumption gates stay enabled."""
+"""Exact P1o typing/execution receipts; earlier independent gates stay enabled."""
 import pathlib
 import sys
 import audit_axioms as gate
@@ -13,6 +13,10 @@ NAMES = {
     "PSKernelFast.Proof.sourceModelTyping_beta",
     "PSKernelFast.Proof.sourceModelTyping_no_false",
     "PSKernelFast.Proof.polyIdentity_sourceModelTyping",
+    "PSKernelFast.Proof.sourceBetaZeta_certificates",
+    "PSKernelFast.Proof.sourceBetaZeta_executed_model",
+    "PSKernelFast.Proof.sourceBetaZeta_equal_denotations",
+    "PSKernelFast.Proof.polyIdentity_executed_via_sourceModelTyping",
 }
 
 if __name__ == "__main__":

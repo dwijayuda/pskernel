@@ -2285,9 +2285,17 @@ def psLeanPatternHeadEq
       match right with
       | .wildcard _ => true
       | _ => false
-  | .constructor leftName _ _ =>
+  | .natural value _ =>
       match right with
-      | .constructor rightName _ _ =>
+      | .natural other _ => value == other
+      | _ => false
+  | .variable leftName =>
+      match right with
+      | .variable rightName => psLeanStringListEq leftName.segments rightName.segments
+      | _ => false
+  | .ctor leftName _ _ =>
+      match right with
+      | .ctor rightName _ _ =>
           psLeanStringListEq
             leftName.segments
             rightName.segments

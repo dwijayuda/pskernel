@@ -74,37 +74,27 @@ def psPrintTypedBinder (head : PsSyntaxBinderHead) (type : String) :
   let delimiters := psPrintBinderDelimiters head.kind
   return delimiters.fst ++ name ++ " : " ++ type ++ delimiters.snd
 
-def psPrintPattern
-    (pattern : PsSyntaxPattern) :
-    Except PsSourcePrintError String :=
-  match pattern with
-  | .bool value _ =>
-      if value then
-        Except.ok "true"
-      else
-        Except.ok "false"
-  | .wildcard _ =>
-      Except.ok "_"
-  | .constructor name binders _ =>
-      let printedNameResult :=
-        psPrintSyntaxName name;
-      match printedNameResult with
-      | Except.error error => Except.error error
-      | Except.ok printedName =>
-          let printedBindersResult :=
-            psPrintSyntaxNames binders;
-          match printedBindersResult with
-          | Except.error error => Except.error error
-          | Except.ok printedBinders =>
-              match printedBinders with
-              | List.nil =>
-                  Except.ok printedName
-              | List.cons _ _ =>
-                  Except.ok
-                    (psPrintCommonConcat3
-                      printedName
-                      " "
-                      (psPrintJoin " " printedBinders))
+def psPrintPatternWithFuel (fuel : Nat) (pattern : PsSyntaxPattern) :
+    Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match pattern with
+    | .natural value _ => return toString value
+    | .bool value _ => return if value then "true" else "false"
+    | .wildcard _ => return "_"
+    | .variable name => psPrintSyntaxName name
+    | .ctor name fields _ =>
+      let name ← psPrintSyntaxName name
+      let fields ← fields.mapM fun field => do
+        let text ← psPrintPatternWithFuel fuel field
+        return match field with
+          | .ctor _ (_ :: _) _ => "(" ++ text ++ ")"
+          | _ => text
+      return String.intercalate " " (name :: fields)
+
+def psPrintPattern (pattern : PsSyntaxPattern) : Except PsSourcePrintError String :=
+  psPrintPatternWithFuel 4096 pattern
 
 def psSyntaxTermSimpleForApplication : PsSyntaxTerm -> Bool
   | .reference _ => true

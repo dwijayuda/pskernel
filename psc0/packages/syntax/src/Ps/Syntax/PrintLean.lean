@@ -390,49 +390,15 @@ def psPrintLeanTermWithFuel
                           printedThen
                           " else "
                           printedElse)
-      | .matchE scrutinee alternatives _ =>
-          match smaller scrutinee with
-          | Except.error error => Except.error error
-          | Except.ok printedScrutinee =>
-              let printAlternative :
-                  Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
-                    Except PsSourcePrintError String :=
-                fun (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) =>
-                  match alternative with
-                  | Prod.mk pattern bodyAndSpan =>
-                      match bodyAndSpan with
-                      | Prod.mk body _ =>
-                          match psPrintPattern pattern with
-                          | Except.error error => Except.error error
-                          | Except.ok printedPattern =>
-                              match
-                                  smaller body with
-                              | Except.error error => Except.error error
-                              | Except.ok printedBody =>
-                                  Except.ok
-                                    (psPrintLeanConcat4
-                                      "  | "
-                                      printedPattern
-                                      " => "
-                                      printedBody);
-              let printedAlternativesResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintLeanMapAlternatives
-                  printAlternative
-                  alternatives;
-              match printedAlternativesResult with
-              | Except.error error => Except.error error
-              | Except.ok printedAlternatives =>
-                  match printedAlternatives with
-                  | List.nil =>
-                      Except.ok (psPrintLeanConcat2 "nomatch " printedScrutinee)
-                  | List.cons _ _ =>
-                      Except.ok
-                        (psPrintLeanConcat4
-                          "match "
-                          printedScrutinee
-                          " with\n"
-                          (psPrintJoin "\n" printedAlternatives))
+      | .matchMany scrutinees alternatives _ => do
+          let scrutinees ← scrutinees.mapM smaller
+          let discriminants := String.intercalate ", " scrutinees
+          let alternatives ← alternatives.mapM fun (patterns, body, _) => do
+            let patterns ← patterns.mapM psPrintPattern
+            let body ← smaller body
+            return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
+          if alternatives.isEmpty then return "nomatch " ++ discriminants
+          return "match " ++ discriminants ++ " with\n" ++ String.intercalate "\n" alternatives
 
 def psPrintLeanTerm
     (term : PsSyntaxTerm) :

@@ -38,12 +38,26 @@ def psSyntaxAnonymousInstanceBinder (head : PsSyntaxBinderHead) : Bool :=
   | _, _ => false
 
 inductive PsSyntaxPattern where
+  | natural (value : Nat) (span : PsSourceSpan)
   | bool (value : Bool) (span : PsSourceSpan)
   | wildcard (span : PsSourceSpan)
-  | constructor
-      (name : PsSyntaxName)
-      (binders : List PsSyntaxName)
-      (span : PsSourceSpan)
+  | variable (name : PsSyntaxName)
+  | ctor (name : PsSyntaxName) (fields : List PsSyntaxPattern) (span : PsSourceSpan)
+
+-- Construction helper for existing flat parser clients; the stored tree is
+-- uniformly recursive.
+def PsSyntaxPattern.constructor (name : PsSyntaxName) (binders : List PsSyntaxName)
+    (span : PsSourceSpan) : PsSyntaxPattern :=
+  .ctor name (binders.map fun name =>
+    if name.segments == ["_"] then .wildcard name.span else .variable name) span
+
+def psSyntaxPatternNames (fuel : Nat) (pattern : PsSyntaxPattern) : List PsSyntaxName :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match pattern with
+    | .variable name => [name]
+    | .ctor _ fields _ => fields.flatMap (psSyntaxPatternNames fuel)
+    | _ => []
 
 inductive PsSyntaxTerm where
   | reference (name : PsSyntaxName)
@@ -82,10 +96,16 @@ inductive PsSyntaxTerm where
       (thenBranch : PsSyntaxTerm)
       (elseBranch : PsSyntaxTerm)
       (span : PsSourceSpan)
-  | matchE
-      (scrutinee : PsSyntaxTerm)
-      (alternatives : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
+  | matchMany
+      (scrutinees : List PsSyntaxTerm)
+      (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
       (span : PsSourceSpan)
+
+-- Single-scrutinee clients construct the same matrix representation.
+def PsSyntaxTerm.matchE (scrutinee : PsSyntaxTerm)
+    (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  .matchMany [scrutinee] (alternatives.map fun (pattern, body, span) => ([pattern], body, span)) span
 
 structure PsSyntaxInductiveConstructor where
   name : PsSyntaxName

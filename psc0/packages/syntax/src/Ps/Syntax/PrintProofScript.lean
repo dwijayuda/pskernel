@@ -319,47 +319,15 @@ def psPrintProofScriptTermWithFuel
                           printedThen
                           " } else { "
                           (psPrintProofScriptConcat2 printedElse " }"))
-      | .matchE scrutinee alternatives _ =>
-          match
-              smaller scrutinee with
-          | Except.error error => Except.error error
-          | Except.ok printedScrutinee =>
-              let printAlternative :
-                  Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan) ->
-                    Except PsSourcePrintError String :=
-                fun (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) =>
-                  match alternative with
-                  | Prod.mk pattern bodyAndSpan =>
-                      match bodyAndSpan with
-                      | Prod.mk body _ =>
-                          match psPrintPattern pattern with
-                          | Except.error error => Except.error error
-                          | Except.ok printedPattern =>
-                              match
-                                  smaller body with
-                              | Except.error error => Except.error error
-                              | Except.ok printedBody =>
-                                  Except.ok
-                                    (psPrintProofScriptConcat4
-                                      "  | "
-                                      printedPattern
-                                      " => "
-                                      printedBody);
-              let printedAlternativesResult :
-                  Except PsSourcePrintError (List String) :=
-                psPrintProofScriptMapAlternatives
-                  printAlternative
-                  alternatives;
-              match printedAlternativesResult with
-              | Except.error error => Except.error error
-              | Except.ok printedAlternatives =>
-                  Except.ok
-                    (psPrintProofScriptConcat5
-                      "match "
-                      (psPrintProofScriptGroupedTerm scrutinee printedScrutinee)
-                      " with {\n"
-                      (psPrintJoin "\n" printedAlternatives)
-                      "\n}")
+      | .matchMany scrutinees alternatives _ => do
+          let scrutinees ← scrutinees.mapM smaller
+          let discriminants := String.intercalate ", " scrutinees
+          let alternatives ← alternatives.mapM fun (patterns, body, _) => do
+            let patterns ← patterns.mapM psPrintPattern
+            let body ← smaller body
+            return "  | " ++ String.intercalate ", " patterns ++ " => " ++ body
+          if alternatives.isEmpty then return "nomatch " ++ discriminants
+          return "match " ++ discriminants ++ " with {\n" ++ String.intercalate "\n" alternatives ++ "\n}"
 
 def psPrintProofScriptTerm
     (term : PsSyntaxTerm) :

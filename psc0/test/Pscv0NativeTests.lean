@@ -251,6 +251,8 @@ private def application : String :=
   "  run(n)\n" ++
   "function nestedFold(n: Nat): Nat := Nat.rec(fun k => Nat, 0, fun k ih => Nat.rec(fun j => Nat, ih, fun j inner => Nat.succ(inner), k), n)\n" ++
   "function capturedMap{A: Type}(n: Nat, values: Vector(A, n)): Vector(A, n) := Vector.rec(fun k value => Vector(A, k), Vector.nil, fun k head tail ih => Vector.cons(k, head, ih), values)\n" ++
+  "function twoTail{A: Type}(n: Nat, values: Vector(A, Nat.succ(Nat.succ(n)))): Vector(A, n) := match values with { | .cons _ _ (.cons k _ tail) => tail }\n" ++
+  "function multiIndexed(n: Nat, values: Vector(Nat, n)): Nat := match n, values with { | 0, .nil => 0 | k + 1, .cons m head tail => head }\n" ++
   "end Indexed\n" ++
   "const indexedAnswer: Nat := Indexed.peek(Nat.succ(0), Indexed.one, 0)\n" ++
   "const indexedEmpty: Nat := Indexed.peek(0, Indexed.Vector.nil, 72)\n" ++
@@ -272,7 +274,25 @@ private def application : String :=
   "const computedFoldAnswer: Nat := Indexed.computedFold(100, 3)\n" ++
   "const localFoldAnswer: Nat := Indexed.localFold(100, 4)\n" ++
   "const nestedFoldAnswer: Nat := Indexed.nestedFold(4)\n" ++
-  "const capturedMapAnswer: Nat := Indexed.head(1, Indexed.capturedMap(2, Indexed.two))\n"
+  "const capturedMapAnswer: Nat := Indexed.head(1, Indexed.capturedMap(2, Indexed.two))\n" ++
+  "function multi(a: Bool, b: Bool): Nat := match a, b with { | true, _ => 10 | _, true => 20 | _, _ => 30 }\n" ++
+  "function nestedPattern(value: Option(Option Nat)): Nat := match value with { | .some (.some n) => n | .some .none => 4 | .none => 5 }\n" ++
+  "function overlap(value: Option Nat, b: Bool): Nat := match value, b with { | .some n, true => n | .some m, _ => Nat.succ(m) | _, _ => 0 }\n" ++
+  "function captureNames(a: Nat, b: Nat): Nat := match a, b with { | x, a => x }\n" ++
+  "function tuplePattern(value: Prod Nat Nat): Nat := match value with { | (x, y) => x }\n" ++
+  "function impossiblePair(n: Nat, value: Empty): Nat := nomatch n, value\n" ++
+  "const matrixFirst: Nat := multi(true, true)\n" ++
+  "const matrixSecond: Nat := multi(false, true)\n" ++
+  "const matrixLast: Nat := multi(false, false)\n" ++
+  "const nestedSome: Nat := nestedPattern(Option.some(Option.some(113)))\n" ++
+  "const nestedNone: Nat := nestedPattern(Option.some(Option.none))\n" ++
+  "const nestedEmpty: Nat := nestedPattern(Option.none)\n" ++
+  "const overlapFirst: Nat := overlap(Option.some(115), true)\n" ++
+  "const overlapSecond: Nat := overlap(Option.some(115), false)\n" ++
+  "const matrixCapture: Nat := captureNames(117, 0)\n" ++
+  "const tupleAnswer: Nat := tuplePattern(Prod.mk(118, 0))\n" ++
+  "const nestedTail: Nat := Indexed.zeroOnly(Indexed.twoTail(0, Indexed.two))\n" ++
+  "const matrixIndexed: Nat := Indexed.multiIndexed(2, Indexed.two)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -330,7 +350,11 @@ private def semanticCases : IO Unit := do
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): V(n) := match v with { | V.nil => V.nil | V.cons k tail => tail }\n" },
     { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(n: Nat, v: V(n)): Nat := match v with { | V.cons k tail => 0 }\n" },
     { source := "inductive Same: Nat -> Nat -> Type where { | same(n: Nat): Same(n, n) }\nfunction bad(n: Nat, value: Same(n, n)): Nat := match value with { }\n" },
-    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(v: V(1)): V(1) := match v with { | V.cons k tail => tail }\n" }]
+    { source := "inductive V: Nat -> Type where { | nil: V(0) | cons(k: Nat, tail: V(k)): V(Nat.succ(k)) }\nfunction bad(v: V(1)): V(1) := match v with { | V.cons k tail => tail }\n" },
+    { source := "function bad(a: Bool, b: Bool): Nat := match a, b with { | true => 0 | _ => 1 }\n" },
+    { source := "function bad(value: Prod Nat Nat): Nat := match value with { | (x, x) => x }\n" },
+    { source := "function bad(value: Option(Option Nat)): Nat := match value with { | .some (.some n) => n | .none => 0 }\n" },
+    { source := "function bad(value: Option(Prod Nat Nat)): Nat := match value with { | .some(x, y) => x | .none => 0 }\n" }]
 
   let expected : Array (Option String) :=
     #[none, none, some "parse", some "elaborate", some "parse", some "elaborate", none,
@@ -342,7 +366,8 @@ private def semanticCases : IO Unit := do
       some "parse", some "parse", some "parse",
       some "elaborate", some "elaborate", some "elaborate", some "elaborate",
       some "elaborate", some "elaborate", none, some "elaborate",
-      some "elaborate", some "elaborate", some "elaborate"]
+      some "elaborate", some "elaborate", some "elaborate",
+      some "elaborate", some "elaborate", some "elaborate", some "parse"]
   let diagnosticPrefixes : Array String := #["PSCV0-ARGUMENT: unknown", "PSCV0-ARGUMENT: duplicate", "PSCV0-APP-03", "PSCV0-UNSOLVED-INFERENCE", "PSCV0-TYPE-MISMATCH", "PSCV0-PARSE", "PSCV0-ELABORATION",
     "PSCV0-SCOPE: ambiguous", "PSCV0-SCOPE: end name", "PSCV0-SCOPE: unknown name",
     "PSCV0-SCOPE: theorem proof", "PSCV0-TYPE-MISMATCH", "PSCV0-APP-03", "PSCV0-SCOPE: unclosed",
@@ -354,7 +379,8 @@ private def semanticCases : IO Unit := do
     "PSCV0-DATA: indexed constructor requires a result type",
     "PSCV0-DATA: constructor result must be its declared family", "PSCV0-TYPE-MISMATCH",
     "PSCV0-RECURSION: argument", "PSCV0-RECURSION: invariant parameter", "", "PSCV0-TYPE-MISMATCH",
-    "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH"]
+    "PSCV0-MATCH: missing feasible", "PSCV0-MATCH: missing feasible", "PSCV0-TYPE-MISMATCH",
+    "PSCV0-MATCH: pattern row", "PSCV0-SCOPE: duplicate pattern", "PSCV0-MATCH: missing feasible", "PSCV0-PARSE"]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -383,7 +409,7 @@ private def semanticCases : IO Unit := do
     (Lean.Json.mkObj [
       ("preludeMs", toJson batch.preludeMs),
       ("results", Lean.Json.arr (batch.results.map (PsV7Native.resultJson "batch-case")))]).pretty
-  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 38 phase-specific refusals, shared-prelude isolation"
+  IO.println "PSCV0_NATIVE_SEMANTICS: PASS 4 checked programs, 42 phase-specific refusals, shared-prelude isolation"
 
 def main : IO Unit := do
   parserCases

@@ -114,6 +114,34 @@ def psScopeSelfArguments (resolver : PsScopeResolver) (bound : List String)
     return resolver.selfArguments
   | _ => return []
 
+-- Constructor identity is resolved before matrix specialization; variables
+-- remain lexical binders. An unqualified constructor head can be supplied by
+-- the scrutinee's family during elaboration (including leading-dot patterns).
+def psScopePattern (fuel : Nat) (resolver : PsScopeResolver)
+    (pattern : PsSyntaxPattern) : Except PsElabError PsSyntaxPattern := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 => match pattern with
+    | .variable name =>
+      match psScopeResolve resolver [] name with
+      | .ok (resolved, _) =>
+        match psSyntaxNameToName resolved with
+        | some core =>
+          if (psEnvironmentFindConstructor resolver.environment core).isSome then
+            return .ctor resolved [] name.span
+          else return pattern
+        | none => return pattern
+      | .error _ => return pattern
+    | .ctor name fields span =>
+      let resolved ← match psScopeResolve resolver [] name with
+        | .ok (resolved, _) => pure resolved
+        | .error (.scope message) =>
+          if name.segments.length == 1 && message.startsWith "unknown name" then pure name
+          else throw (.scope message)
+        | .error error => throw error
+      return .ctor resolved (← fields.mapM (psScopePattern fuel resolver)) span
+    | _ => return pattern
+
 -- This single capture-aware walk qualifies references and collects section
 -- dependencies. Labels/field names stay labels; binders and patterns delimit
 -- visibility explicitly. It never rewrites printed text.
@@ -184,21 +212,21 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       return {
         term := .ifE condition.term yes.term no.term span
         used := psScopeUnion condition.used (psScopeUnion yes.used no.used) }
-    | .matchE scrutinee alternatives span =>
-      let scrutinee ← visit bound scrutinee
-      let alternatives ← alternatives.mapM fun (pattern, body, bodySpan) => do
-        let (pattern, inner) ← match pattern with
-          | .constructor name binders patternSpan =>
-            let resolved ← psScopeResolve resolver [] name
-            pure (PsSyntaxPattern.constructor resolved.fst binders patternSpan,
-              binders.map psScopeKey ++ bound)
-          | _ => pure (pattern, bound)
-        let body ← visit inner body
-        return (pattern, body, bodySpan)
+    | .matchMany scrutinees alternatives span =>
+      let scrutinees ← scrutinees.mapM (visit bound)
+      let alternatives ← alternatives.mapM fun (patterns, body, bodySpan) => do
+        let patterns ← patterns.mapM (psScopePattern fuel resolver)
+        let names := patterns.flatMap (psSyntaxPatternNames 4096)
+        let keys := names.map psScopeKey
+        if keys.any (fun key => (keys.filter (· == key)).length > 1) then
+          throw (.scope "duplicate pattern variable")
+        let body ← visit (keys ++ bound) body
+        return (patterns, body, bodySpan)
       return {
-        term := .matchE scrutinee.term
-          (alternatives.map fun (pattern, body, bodySpan) => (pattern, body.term, bodySpan)) span
-        used := alternatives.foldl (fun acc alt => psScopeUnion acc alt.snd.fst.used) scrutinee.used }
+        term := .matchMany (scrutinees.map (·.term))
+          (alternatives.map fun (patterns, body, bodySpan) => (patterns, body.term, bodySpan)) span
+        used := alternatives.foldl (fun acc alt => psScopeUnion acc alt.snd.fst.used)
+          (scrutinees.foldl (fun acc item => psScopeUnion acc item.used) []) }
     | _ => return { term := source }
 
 def psScopeQualified (scope : PsCommandScope) (name : PsSyntaxName) : PsSyntaxName :=

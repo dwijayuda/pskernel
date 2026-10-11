@@ -55,7 +55,7 @@ def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
   | .forallE _ _ span => span
   | .letE _ _ _ _ span => span
   | .ifE _ _ _ span => span
-  | .matchE _ _ span => span
+  | .matchMany _ _ span => span
 
 def psSyntaxSyntheticName
     (text : String)
@@ -528,9 +528,11 @@ def psSyntaxAnonymousExplicitBinder
   }
 
 def psSyntaxPatternSpan : PsSyntaxPattern -> PsSourceSpan
+  | .natural _ span => span
   | .bool _ span => span
   | .wildcard span => span
-  | .constructor _ _ span => span
+  | .ctor _ _ span => span
+  | .variable name => name.span
 
 def psParsePatternBindersWithFuel
     (fuel : Nat) :

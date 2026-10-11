@@ -91,7 +91,7 @@ def psPscv0RecordTerm (field : Prod PsSyntaxName PsSyntaxTerm) : PsSyntaxTerm :=
 def psPscv0TermBinderType (binder : Prod PsSyntaxBinderHead PsSyntaxTerm) : PsSyntaxTerm := binder.snd
 
 def psPscv0AlternativeTerm
-    (alternative : Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)) : PsSyntaxTerm :=
+    (alternative : List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) : PsSyntaxTerm :=
   alternative.snd.fst
 
 def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
@@ -115,7 +115,7 @@ def psPscv0TermChildren (term : PsSyntaxTerm) : List PsSyntaxTerm :=
       | none => [value, body]
       | some annotation => [annotation, value, body]
   | .ifE condition yes no _ => [condition, yes, no]
-  | .matchE scrutinee alternatives _ => List.cons scrutinee (psListMap psPscv0AlternativeTerm alternatives)
+  | .matchMany scrutinees alternatives _ => scrutinees ++ alternatives.map psPscv0AlternativeTerm
 
 -- The seed supports structurally recursive function-valued results. Keeping
 -- term as that returned function's argument preserves the complete Pi type

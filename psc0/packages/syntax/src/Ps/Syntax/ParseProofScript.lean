@@ -157,8 +157,8 @@ def psProofScriptTermWithSpan
   | .letE name type value body _ =>
       PsSyntaxTerm.letE name type value body span
   | .ifE condition yes no _ => PsSyntaxTerm.ifE condition yes no span
-  | .matchE scrutinee alternatives _ =>
-      PsSyntaxTerm.matchE scrutinee alternatives span
+  | .matchMany scrutinees alternatives _ =>
+      PsSyntaxTerm.matchMany scrutinees alternatives span
 
 def psProofScriptLaterLine
     (previous : PsSourcePos)

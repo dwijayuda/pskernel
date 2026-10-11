@@ -1,4 +1,4 @@
-import Ps.Elab.Match
+import Ps.Elab.PatternMatrix
 
 def psElabIf
     (elaborate :
@@ -433,7 +433,11 @@ def psElabSyntaxLocalId
           | Option.none => Option.none
           | Option.some resolved =>
               match resolved with
-              | .local id => Option.some id
+              | .local id =>
+                  match psWhnf context.environment context.metaContext
+                      context.localContext (.fvar id) with
+                  | .fvar actual => some actual
+                  | _ => none
               | .global _ => Option.none
   | _ => Option.none
 
@@ -646,8 +650,8 @@ def psElabTermWithFuel
                   thenBranch
                   elseBranch
                   expected
-            | .matchE scrutinee alternatives _ =>
-                psElabMatch
+            | .matchMany scrutinee alternatives _ =>
+                psElabMatchMatrix
                   smaller
                   context
                   scrutinee

@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.TermParts
+import Ps.Syntax.Pscv0.PatternRead
 
 -- V7 term dispatch owns assignment boundaries. In an annotation, the caller
 -- owns :=; an identifier immediately before it is still a type argument.
@@ -179,54 +179,9 @@ def psPscv0ParseTermWithFuel
             (psProofScriptExpectedError
               "supported pure term; do is not enabled in this source subset" cursor)
       else if psTokenCursorAtText cursor "nomatch" then
-        match psTokenCursorAdvance cursor with
-        | none => Except.error (.unexpectedEnd "nomatch scrutinee")
-        | some keyword =>
-          match smaller keyword.cursor with
-          | .error error => .error error
-          | .ok scrutinee =>
-            -- Empty alternatives use the same typed coverage/refinement
-            -- mechanism as an ordinary match. No assumed contradiction.
-            .ok { value := .matchE scrutinee.value []
-                    { start := keyword.token.span.start
-                      stop := (psSyntaxTermSpan scrutinee.value).stop }
-                  cursor := scrutinee.cursor }
+        psPscv0ReadMatch smaller remaining true cursor
       else if psTokenCursorAtText cursor "match" then
-        match psTokenCursorAdvance cursor with
-        | Option.none => Except.error (PsParseError.unexpectedEnd "match scrutinee")
-        | Option.some keyword =>
-            match smaller keyword.cursor with
-            | Except.error error => Except.error error
-            | Except.ok scrutinee =>
-                match psTokenCursorExpectText scrutinee.cursor "with" with
-                | Except.error error => Except.error error
-                | Except.ok afterWith =>
-                    match psTokenCursorExpectText afterWith.cursor "{" with
-                    | Except.error error => Except.error error
-                    | Except.ok afterOpen =>
-                        match psParseProofScriptMatchAlternativesWithFuel
-                            (smaller)
-                            (psParseListLength afterOpen.cursor.remaining)
-                            afterOpen.cursor
-                            [] with
-                        | Except.error error => Except.error error
-                        | Except.ok alternatives =>
-                            match psTokenCursorExpectText
-                                alternatives.cursor
-                                "}" with
-                            | Except.error error => Except.error error
-                            | Except.ok close =>
-                                Except.ok {
-                                  value :=
-                                    PsSyntaxTerm.matchE
-                                      scrutinee.value
-                                      alternatives.value
-                                      {
-                                        start := keyword.token.span.start
-                                        stop := close.token.span.stop
-                                      }
-                                  cursor := close.cursor
-                                }
+        psPscv0ReadMatch smaller remaining false cursor
       else if psTokenCursorAtText cursor "if" then
         match psTokenCursorAdvance cursor with
         | Option.none => Except.error (PsParseError.unexpectedEnd "(")

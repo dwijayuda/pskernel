@@ -21,7 +21,7 @@ def psMatchNameListContains
 structure PsElabMatchAlternative where
   constructorName : PsName
   pattern : PsSyntaxPattern
-  body : PsSyntaxTerm
+  elaborate : PsElabContext -> PsExpr -> Except PsElabError PsElabTermResult
   span : PsSourceSpan
 
 def psElabMatchAlternativeFind
@@ -44,6 +44,7 @@ def psElabMatchAlternativeCovered
   | none => false
 
 def psElabFillWildcardAlternatives
+    (elaborate : PsElaborator)
     (pattern : PsSyntaxPattern)
     (body : PsSyntaxTerm)
     (span : PsSourceSpan)
@@ -59,7 +60,7 @@ def psElabFillWildcardAlternatives
           List PsElabMatchAlternative ->
           List PsElabMatchAlternative :=
         psElabFillWildcardAlternatives
-          pattern
+          elaborate pattern
           body
           span
           rest;
@@ -71,7 +72,7 @@ def psElabFillWildcardAlternatives
               let alternative : PsElabMatchAlternative := {
                 constructorName := ctorName
                 pattern := pattern
-                body := body
+                elaborate := fun context expected => elaborate context body (some expected)
                 span := span
               };
               List.cons alternative alternativesRev;
@@ -124,9 +125,9 @@ def psElabMatchPatternConstructorName
           Except.ok psBoolFalseName
       else
         Except.error PsElabError.matchPatternUnsupported
-  | .wildcard _ =>
+  | .wildcard _ | .variable _ | .natural _ _ =>
       Except.error PsElabError.matchPatternUnsupported
-  | .constructor syntaxName _ _ =>
+  | .ctor syntaxName _ _ =>
       match syntaxName.segments with
       | [] => Except.error PsElabError.matchPatternUnsupported
       | segment :: rest =>
@@ -139,6 +140,7 @@ def psElabMatchPatternConstructorName
               | some name => Except.ok name
 
 def psElabPrepareMatchAlternativesWorker
+    (elaborate : PsElaborator)
     (inductiveInfo : PsInductiveInfo)
     (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan))) :
     List PsElabMatchAlternative ->
@@ -152,7 +154,7 @@ def psElabPrepareMatchAlternativesWorker
           List PsElabMatchAlternative ->
           Except PsElabError (List PsElabMatchAlternative) :=
         psElabPrepareMatchAlternativesWorker
-          inductiveInfo
+          elaborate inductiveInfo
           rest;
       fun (alternativesRev : List PsElabMatchAlternative) =>
         let pattern := Prod.fst entry;
@@ -166,7 +168,7 @@ def psElabPrepareMatchAlternativesWorker
                 Except.ok
                   (psElabMatchAlternativeListReverse
                     (psElabFillWildcardAlternatives
-                      pattern
+                      elaborate pattern
                       body
                       span
                       inductiveInfo.constructors
@@ -197,19 +199,20 @@ def psElabPrepareMatchAlternativesWorker
                       let alternative : PsElabMatchAlternative := {
                         constructorName := ctorName
                         pattern := pattern
-                        body := body
+                        elaborate := fun context expected => elaborate context body (some expected)
                         span := span
                       };
                       smaller
                         (List.cons alternative alternativesRev)
 
 def psElabPrepareMatchAlternatives
+    (elaborate : PsElaborator)
     (inductiveInfo : PsInductiveInfo)
     (entries : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
     (alternativesRev : List PsElabMatchAlternative) :
     Except PsElabError (List PsElabMatchAlternative) :=
   psElabPrepareMatchAlternativesWorker
-    inductiveInfo
+    elaborate inductiveInfo
     entries
     alternativesRev
 
@@ -434,7 +437,7 @@ structure PsElabMatchMinorResult where
   context : PsElabContext
   term : PsExpr
 
-def psElabMatchMinor (elaborate : PsElaborator) (context : PsElabContext)
+def psElabMatchMinor (context : PsElabContext)
     (info : PsInductiveInfo) (levels : List PsLevel) (parameters : List PsExpr)
     (plan : PsElabMatchPlan) (ctorName : PsName) (alternative : Option PsElabMatchAlternative)
     (minorType : PsExpr) : Except PsElabError PsElabMatchMinorResult := do
@@ -442,7 +445,10 @@ def psElabMatchMinor (elaborate : PsElaborator) (context : PsElabContext)
     | throw (.matchConstructorUnknown ctorName)
   let names := alternative.bind fun alternative =>
     match alternative.pattern with
-    | .constructor _ names _ => some names
+    | .ctor _ fields _ => some (fields.map fun field => match field with
+      | .variable name => name
+      | .wildcard span => PsSyntaxName.mk ["_"] span
+      | _ => PsSyntaxName.mk [] (psSyntaxPatternSpan field))
     | _ => none
   let fields ← match names with
     | none => psElabMatchAnonymousFields context minorType ctor.numFields
@@ -473,8 +479,8 @@ def psElabMatchMinor (elaborate : PsElaborator) (context : PsElabContext)
     let generalized ← psElabOpenDependents plan.generalized {
       context, body := target, bindersRev := [], aliasesRev := []
       replacements := auxiliary.replacements }
-    let body ← elaborate (psElabContextAfterStructuralFields generalized.context)
-      alternative.body (some generalized.body)
+    let body ← alternative.elaborate (psElabContextAfterStructuralFields generalized.context)
+      generalized.body
     return PsElabTermResult.mk (psElabLeaveScope context body.context)
       (psElabCloseDependents generalized body.context.metaContext body.term) target
   let flexible := auxiliary.bindersRev.map (fun binder => binder.id) ++ fields.bindersRev.map (fun binder => binder.id)
@@ -490,7 +496,7 @@ structure PsElabMatchMinorsResult where
   context : PsElabContext
   minors : List PsExpr
 
-def psElabMatchMinors (elaborate : PsElaborator) (info : PsInductiveInfo)
+def psElabMatchMinors (info : PsInductiveInfo)
     (levels : List PsLevel) (parameters : List PsExpr) (plan : PsElabMatchPlan)
     (alternatives : List PsElabMatchAlternative) (constructors : List PsName)
     (context : PsElabContext) (cursor : PsExpr) :
@@ -501,8 +507,8 @@ def psElabMatchMinors (elaborate : PsElaborator) (info : PsInductiveInfo)
     let alternative := psElabMatchAlternativeFind name alternatives
     let pi ← (psInferEnsureForall context.environment context.metaContext
       context.localContext cursor).mapError PsElabError.infer
-    let minor ← psElabMatchMinor elaborate context info levels parameters plan name alternative pi.domain
-    let tail ← psElabMatchMinors elaborate info levels parameters plan alternatives rest
+    let minor ← psElabMatchMinor context info levels parameters plan name alternative pi.domain
+    let tail ← psElabMatchMinors info levels parameters plan alternatives rest
       minor.context (psExprInstantiate1 pi.body minor.term)
     return { context := tail.context, minors := minor.term :: tail.minors }
 
@@ -525,9 +531,9 @@ def psElabStructuralMatchContext (context : PsElabContext)
       indices := if permitted then plan.indices else recursion.indices
       refined := if permitted then plan.majorId.isSome else recursion.refined })
 
-def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
-    (scrutineeSyntax : PsSyntaxTerm)
-    (alternativesSyntax : List (Prod PsSyntaxPattern (Prod PsSyntaxTerm PsSourceSpan)))
+def psElabMatchWith (elaborate : PsElaborator)
+    (prepare : PsElabContext -> PsInductiveInfo -> Except PsElabError (List PsElabMatchAlternative))
+    (context : PsElabContext) (scrutineeSyntax : PsSyntaxTerm)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
   let some expectedType := expected | throw .matchExpectedType
   let scrutinee ← elaborate context scrutineeSyntax none
@@ -540,7 +546,7 @@ def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
   if typeView.args.length != info.numParams + info.numIndices then throw .matchParameterArity
   let parameters := typeView.args.take info.numParams
   let indices := typeView.args.drop info.numParams
-  let alternatives ← psElabPrepareMatchAlternatives info alternativesSyntax []
+  let alternatives ← prepare context info
   let recursorName := psNameAppendStr name "rec"
   let some recursor := psEnvironmentFindRecursor context.environment recursorName
     | throw .matchRecursorUnsupported
@@ -561,8 +567,19 @@ def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
   let minorContext := psElabStructuralMatchContext context scrutinee.term expectedType plan info.numIndices
   let recursorType := psExprInstantiateLevelParams recursor.levelParams recursorLevels recursor.type
   let cursor ← psElabMatchApplyParameters context (parameters ++ [plan.motive]) recursorType
-  let minors ← psElabMatchMinors elaborate info levels parameters plan alternatives info.constructors
+  let minors ← psElabMatchMinors info levels parameters plan alternatives info.constructors
     minorContext cursor
   let term := psExprApplyMany (.constE recursorName recursorLevels)
     (parameters ++ [plan.motive] ++ minors.minors ++ indices ++ [scrutinee.term] ++ plan.arguments)
   psElabResolvedTerm (psElabLeaveScope context minors.context) term (some expectedType)
+
+
+-- The flat adapter remains useful to coverage checks and older source readers.
+-- Motive construction and branch proof production have exactly one owner.
+def psElabMatch (elaborate : PsElaborator) (context : PsElabContext)
+    (scrutinee : PsSyntaxTerm)
+    (alternatives : List (PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
+  psElabMatchWith elaborate
+    (fun _ info => psElabPrepareMatchAlternatives elaborate info alternatives [])
+    context scrutinee expected

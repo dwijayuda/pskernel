@@ -59,11 +59,8 @@ def psKernelEnvironmentNameHash
   | PsKernelName.anonymous =>
       0
   | PsKernelName.str parent value =>
-      psKernelEnvironmentHashStringWorker
-        (Nat.succ
-          (String.utf8ByteSize value))
+      psKernelC0HashStringFrom
         value
-        0
         (Nat.mod
           (Nat.add
             (Nat.mul

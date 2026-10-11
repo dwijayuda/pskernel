@@ -196,7 +196,18 @@ theorem source_bound_annotated_model (V : Type u) [SetTheoryBasis V]
     SetTheoryBasis.member (env index)
       (interpAnnotated V env (annDomain.lift (index + 1) 0)) := by
   refine ⟨?_, source_annotated_lift ρ sourceDomain annDomain (index + 1) 0 hErase, ?_⟩
-  · simp [GeneralPiContext.infer, inferGeneralPi, hSource]
+  · unfold GeneralPiContext.infer
+    simp only [inferGeneralPi]
+    split
+    · rename_i domain hFound
+      have hDomain : domain = sourceDomain :=
+        Option.some.inj (hFound.symm.trans hSource)
+      subst domain
+      rfl
+    · rename_i hFound
+      have hImpossible : (none : Option KExpr) = some sourceDomain :=
+        hFound.symm.trans hSource
+      cases hImpossible
   · rw [interpAnnotated_lift]
     have he : pullLiftEnv (index + 1) 0 env = dropModelEnv (index + 1) env := by
       funext i

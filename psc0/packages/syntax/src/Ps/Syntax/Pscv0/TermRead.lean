@@ -188,6 +188,13 @@ def psPscv0ParseTermAtPrecedence
               value := psPscv0NotationCall "Not" [argument.value]
                 (psSyntaxSpanJoin negation.token.span (psSyntaxTermSpan argument.value))
               cursor := argument.cursor }
+          else if psTokenCursorAtText cursor "!" then do
+            let negation ← psTokenCursorExpectText cursor "!"
+            let argument ← psPscv0ParseTermAtPrecedence annotation 40 remaining negation.cursor
+            let span := psSyntaxSpanJoin negation.token.span (psSyntaxTermSpan argument.value)
+            pure {
+              value := .ifE none argument.value (.bool false span) (.bool true span) span
+              cursor := argument.cursor }
           else if psTokenCursorAtText cursor "-" then do
             let sign ← psTokenCursorExpectText cursor "-"
             let argument ← psPscv0ParseTermAtPrecedence annotation 75 remaining sign.cursor

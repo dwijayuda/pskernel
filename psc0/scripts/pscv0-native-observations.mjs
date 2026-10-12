@@ -153,6 +153,12 @@ export const observations = [
   { name: "arithmeticMixed", args: null, expected: 10n },
   { name: "arithmeticAssociative", args: null, expected: 3n },
   { name: "arithmeticModulo", args: null, expected: 7n },
+  { name: "boolLazyPrecedence", args: null, expected: true },
+  { name: "boolLazyNegation", args: null, expected: true },
+  { name: "boolLazyGrouping", args: null, expected: false },
+  { name: "boolLazyBranch", args: [true, false], expected: true },
+  { name: "boolLazyBranch", args: [false, true], expected: true },
+  { name: "boolLazyBranch", args: [false, false], expected: false },
   { name: "signedLiteral", type: "int", args: null, expected: -42n },
   { name: "signedArithmetic", type: "int", argTypes: ["int", "int"], args: [5n, 2n], expected: -5n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }

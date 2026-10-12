@@ -3,6 +3,8 @@ import Ps.Syntax.Pscv0.PatternRead
 inductive PsPscv0InfixKind where
   | constant (name : String)
   | arrow
+  | booleanAnd
+  | booleanOr
   | matches
 
 structure PsPscv0Infix where
@@ -17,6 +19,10 @@ def psPscv0InfixInfo : String → Option PsPscv0Infix
   | "=" => some { kind := .constant "Eq", precedence := 50, rightPrecedence := 51, nonAssociative := true }
   | "∧" | "/\\" => some { kind := .constant "And", precedence := 35, rightPrecedence := 35 }
   | "∨" | "\\/" => some { kind := .constant "Or", precedence := 30, rightPrecedence := 30 }
+  -- Pinned RC4 Init/Notation.lean: infixl:35 "&&", infixl:30 "||".
+  -- Encode selected lazy Bool operations through the existing typed if.
+  | "&&" => some { kind := .booleanAnd, precedence := 35, rightPrecedence := 36 }
+  | "||" => some { kind := .booleanOr, precedence := 30, rightPrecedence := 31 }
   | "↔" | "<->" => some { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }
   -- Pinned Lean RC4 Init/Notation.lean: infixr:35 " × " => Prod.
   | "×" => some { kind := .constant "Prod", precedence := 35, rightPrecedence := 35 }
@@ -74,6 +80,8 @@ def psPscv0OperatorTail (read : Nat → PsPscv0TermReader) (minimum fuel : Nat)
           | .arrow => PsSyntaxTerm.forallE
               [(psSyntaxAnonymousExplicitBinder (psSyntaxTermSpan left.value), left.value)] right.value span
           | .constant name => psPscv0NotationCall name [left.value, right.value] span
+          | .booleanAnd => .ifE none left.value right.value (.bool false span) span
+          | .booleanOr => .ifE none left.value (.bool true span) right.value span
           | .matches => left.value
         pure { value, cursor := right.cursor }
     if info.nonAssociative then

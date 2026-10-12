@@ -952,6 +952,35 @@ def main : IO Unit := do
       if hits != deltaRuns then
         throw (IO.userError "C0 indexed delta benchmark count mismatch")
       IO.println s!"C0_BENCH indexed_head_delta ms={deltaEnd-deltaStart} runs={deltaRuns} depth=24"
+      -- Paired ablation of old projection-then-delta probing against
+      -- the one-pass head dispatcher. Same preinterned argument spine and
+      -- checked context; both paths invoke the same source-derived rules.
+      let mut doubleHits := 0
+      let doubleStart ← IO.monoMsNow
+      for _ in [:deltaRuns] do
+        let candidate :=
+          match psKernelC0IndexedReduceProjectionOnce
+              deltaContext stored root with
+          | some reduction => some reduction
+          | none => psKernelC0IndexedUnfoldHeadOnce deltaContext stored root
+        match candidate with
+        | some (next, resultId) =>
+            if psKernelC0StoreValid next resultId then
+              doubleHits := doubleHits + 1
+        | none => throw (IO.userError "C0 dual head dispatcher missed delta")
+      let doubleEnd ← IO.monoMsNow
+      let mut singleHits := 0
+      let singleStart ← IO.monoMsNow
+      for _ in [:deltaRuns] do
+        match psKernelC0IndexedReduceHeadOnce deltaContext stored root with
+        | some (next, resultId) =>
+            if psKernelC0StoreValid next resultId then
+              singleHits := singleHits + 1
+        | none => throw (IO.userError "C0 unified head dispatcher missed delta")
+      let singleEnd ← IO.monoMsNow
+      if doubleHits != deltaRuns || singleHits != deltaRuns then
+        throw (IO.userError "C0 indexed head dispatcher counts diverged")
+      IO.println s!"C0_BENCH indexed_head_dispatch two_probes_ms={doubleEnd-doubleStart} one_probe_ms={singleEnd-singleStart} depth=24 runs={deltaRuns}"
 
   -- Pair recursive-source and canonical-indexed universe substitution on
   -- preconstructed equivalent shared input; report implementation-family

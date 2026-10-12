@@ -247,7 +247,7 @@ def psKernelC0IndexedReduceHeadOnce
   | .proj typeName index structId =>
       psKernelC0IndexedProjectKnownHead
         context store typeName index structId args
-  | .fvar _ | .const _ =>
+  | .fvar _ | .const _ _ =>
       psKernelC0IndexedUnfoldKnownHead context store head.node args
   | _ => none
 

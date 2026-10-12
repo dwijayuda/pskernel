@@ -108,6 +108,15 @@ def c0CompareDependentForallPair (width : Nat) (annotate : Bool) :
       PsKernelBinderInfo.default)
     PsKernelBinderInfo.default
 
+/-- Complete matched source zeta chain: every let binds Sort 0 : Sort 1. -/
+def c0CompareZetaChain : Nat → PsKernelExpr → PsKernelExpr
+  | 0, leaf => leaf
+  | n + 1, leaf =>
+      .letE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (.sort PsKernelLevel.zero)
+        (c0CompareZetaChain n leaf) false
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -847,6 +856,50 @@ def main : IO Unit := do
       if yes != samples then throw (IO.userError "large-domain DefEq count mismatch")
       IO.println s!"C0_COMPARE round={round} operation=cold_defeq_large_domain milliseconds={finished-started} binder_domain_depth={innerDepth} samples={samples}"
 
+
+    -- Both C0 and original check exactly these prepared zeta terms and
+    -- sequentially admit a checked library with the same expressions.
+    for depth in [24, 96, 192] do
+      let term := c0CompareZetaChain depth sort0
+      let samples := if depth == 192 then 24 else 60
+      let mut passes := 0
+      let zetaStart ← IO.monoMsNow
+      for _ in [:samples] do
+        match psKernelSessionWhnf 4096 session term with
+        | Except.ok (value, _) =>
+            if psKernelExprEqual value sort0 then passes := passes + 1
+            else throw (IO.userError "matched zeta WHNF result changed")
+        | Except.error err =>
+            throw (IO.userError ("matched zeta WHNF failed: " ++ err))
+      let zetaEnd ← IO.monoMsNow
+      if passes != samples then throw (IO.userError "matched zeta count changed")
+      IO.println s!"C0_COMPARE round={round} operation=cold_whnf_zeta_spine milliseconds={zetaEnd-zetaStart} depth={depth} samples={samples}"
+    let zetaValue := c0CompareZetaChain 64 sort0
+    let zetaBase := PsKernelName.str PsKernelName.anonymous
+      "C0CheckedZetaLibrary"
+    let mut zetaEnv := empty
+    let admitZetaStart ← IO.monoMsNow
+    for i in [:40] do
+      let decl : PsKernelDefinitionInfo := {
+        base := {
+          name := PsKernelName.num zetaBase i
+          levelParams := []
+          type := sort1
+        }
+        value := zetaValue
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 zetaEnv decl
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok accepted => zetaEnv := accepted
+      | Except.error err =>
+          throw (IO.userError ("matched checked zeta admission failed: " ++ err))
+    let admitZetaEnd ← IO.monoMsNow
+    for i in [:40] do
+      if !psKernelEnvironmentContains zetaEnv (PsKernelName.num zetaBase i) then
+        throw (IO.userError "matched checked zeta definition missing")
+    IO.println s!"C0_COMPARE round={round} operation=admit_checked_zeta_library milliseconds={admitZetaEnd-admitZetaStart} declarations=40 depth=64"
 
     let mut admitted := 0
     let mut rejected := 0

@@ -41,9 +41,9 @@ def aggregateComponentBinary (plan : AggregateComponent) : Except String ByteArr
     [0] ++ str node.name ++ [3] ++ u index
   let functionExports := plan.abi.exports.zipIdx.map fun (e, index) =>
     [0] ++ str e.foreignName ++ [1] ++ u index
-  let instance := sect 5 (vector [[1] ++ vector (typeExports ++ functionExports)])
+  let instanceSection := sect 5 (vector [[1] ++ vector (typeExports ++ functionExports)])
   let exported := sect 11 (vector [[0] ++ str "api" ++ [5, 0, 0]])
-  return ByteArray.mk (bytes ++ instance ++ exported).toArray
+  return ByteArray.mk (bytes ++ instanceSection ++ exported).toArray
 
 def aggregateComponentWat (plan : AggregateComponent) : Except String PsDoc := do
   let mut declarations : List PsDoc := [

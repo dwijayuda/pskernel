@@ -829,7 +829,7 @@ def psLexReadToken
               if psLexIdentifierStart proofStart || psLexCharEq proofStart '(' then
                 let read : PsLexRead := {
                   cursor := { remaining := rest, position := afterOpen }
-                  charsRev := ['\\''] }
+                  charsRev := [first] }
                 Except.ok (Prod.mk
                   (psLexTokenFromRead PsTokenKind.symbol start read) read.cursor)
               else Except.error error

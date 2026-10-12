@@ -132,30 +132,17 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
+  let prodDeclarations :=
+    match psEnvironmentFind psSelfHostProdPreludeEnvironment psProdName with
+    | none => []
+    | some prod =>
+      match psEnvironmentFind psSelfHostProdPreludeEnvironment psProdMkName with
+      | none => []
+      | some constructor =>
+        match psEnvironmentFind psSelfHostProdPreludeEnvironment
+            psSelfHostProdRecName with
+        | none => []
+        | some recursor => [prod, constructor, recursor]
   psEmptyDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
-    (match
-      psEnvironmentFind
-        psSelfHostProdPreludeEnvironment
-        psProdName with
-  | none => List.nil
-  | some prodDeclaration =>
-      match
-          psEnvironmentFind
-            psSelfHostProdPreludeEnvironment
-            psProdMkName with
-      | none => List.nil
-      | some prodMkDeclaration =>
-          match
-              psEnvironmentFind
-                psSelfHostProdPreludeEnvironment
-                psSelfHostProdRecName with
-          | none => List.nil
-          | some prodRecDeclaration =>
-              List.cons
-                prodDeclaration
-                (List.cons
-                  prodMkDeclaration
-                  (List.cons
-                    prodRecDeclaration
-                    psSelfHostRuntimePreludeDeclarations)) ++
+    prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations

@@ -81,10 +81,12 @@ def main : IO Unit := do
     "function invert(value: Bool): Bool := if (value) { false } else { true }\n"
   IO.FS.writeFile (directory ++ "/scalar.ps") source
   IO.FS.writeFile (directory ++ "/exports.json") "[\"both\", \"invert\"]"
+  IO.FS.writeFile (directory ++ "/aggregate.ps") "function echoNatural(value: Nat): Nat := value\nfunction addNatural(left: Nat, right: Nat): Nat := Nat.add(left, right)\nfunction echoInteger(value: Int): Int := value\nfunction showInteger(value: Int): String := Int.repr(value)\nfunction echoText(value: String): String := value\nfunction echoArray(value: Array Nat): Array Nat := value\nstructure Packet where {\n  count: Nat\n  text: String\n  enabled: Bool\n}\nfunction echoPacket(value: Packet): Packet := value\ninductive Choice where {\n  | vacant: Choice\n  | present(value: Nat): Choice\n}\nfunction echoChoice(value: Choice): Choice := value\nfunction many(p0: Bool, p1: Bool, p2: Bool, p3: Bool, p4: Bool, p5: Bool, p6: Bool, p7: Bool, p8: Bool, p9: Bool, p10: Bool, p11: Bool, p12: Bool, p13: Bool, p14: Bool, p15: Bool, p16: Bool): Bool := p16\n"
+  IO.FS.writeFile (directory ++ "/aggregate.exports.json") "[\"echoNatural\",\"addNatural\",\"echoInteger\",\"showInteger\",\"echoText\",\"echoArray\",\"echoPacket\",\"echoChoice\",\"many\"]"
   let requests : Array PsV7Native.Request := #[
     { source, targets := [.wasmComponent], outputStem := "scalar",
       exports := .selected ["both", "invert"] },
-    { source := "const bigint: Nat := 18446744073709551617\n", targets := [.wasmComponent] },
+    { source := "function generic{A: Type}(value: A): A := value\n", targets := [.wasmComponent] },
     { source, targets := [.wasmComponent], exports := .selected ["missing"] }]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok b => pure b

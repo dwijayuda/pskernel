@@ -1,5 +1,5 @@
 import Ps.BackendWasm.Lower
-import Ps.BackendWasm.Component
+import Ps.BackendWasm.AbiComponent
 import Ps.BackendWasm.ValidateIr
 
 namespace PsWasm
@@ -20,21 +20,35 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
   let api ← psPublicApi ir exposure
   let (view, names) ← psCodegenNamesFor ir []
   let nameOf := fun name => ((names.symbols.find? (fun s => s.semanticName == name)).map (·.outputName)).getD name
-  let (lowered, locals) ← lowerModule view
+  let (lowered, initialLocals) ← lowerModule view
   let mut core : PsWasmModule := { lowered with exports := api.exports.map fun (d : PsVerifiedIrDeclaration) => (d.name, nameOf d.name) }
-  -- Scalar component compatibility: internal Unit is a value; WIT Unit result
-  -- is an explicitly omitted result at the boundary.
+  let mut locals := initialLocals
+  let mut aggregate : Option AbiPlan := none
   if component then
-    for d in api.exports do
-      if let .primitive .unit := d.resultType then
-        let name := "__ps_abi_unit_" ++ nameOf d.name
-        let parameters ← d.parameters.mapM (fun p => representation p.type)
-        let wrapper : PsWasmFunction := {
-          name, typeName := none, parameters, results := [], locals := []
-          body := (parameters.zipIdx.map fun (_, i) => .localGet i) ++ [.call (nameOf d.name), .drop] }
-        core := { core with
-          functions := core.functions ++ [wrapper],
-          exports := core.exports.map fun (exportedName, target) => (exportedName, if exportedName == d.name then name else target) }
+    -- Scalar-only worlds need no marshalling memory. Other worlds are planned
+    -- through the same canonical layout policy, including indirect scalars.
+    let scalar ← match scalarApi api core locals with
+      | .ok plan => pure (some plan)
+      | .error _ => pure none
+    if scalar.isSome then
+      for d in api.exports do
+        if let .primitive .unit := d.resultType then
+          let name := "__ps_abi_unit_" ++ nameOf d.name
+          let parameters ← d.parameters.mapM (fun p => representation p.type)
+          let wrapper : PsWasmFunction := {
+            name, typeName := none, parameters, results := [], locals := []
+            body := (parameters.zipIdx.map fun (_, i) => .localGet i) ++ [.call (nameOf d.name), .drop] }
+          core := { core with
+            functions := core.functions ++ [wrapper],
+            exports := core.exports.map fun (exportedName, target) => (exportedName, if exportedName == d.name then name else target) }
+    else
+      let exports ← api.exports.mapM fun d => do
+        return (d.name, ← requireDeclaration view (nameOf d.name))
+      let plan ← canonicalAbiPlan view exports
+      let (adapted, adaptedNames) ← addCanonicalAdapters core locals plan
+      core := adapted
+      locals := adaptedNames
+      aggregate := some plan
   core ← pruneFunctions core
   let binary ← checkedCore core locals
   let source ← psRenderDoc (watModuleDoc core locals)
@@ -50,17 +64,23 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
     source, symbols := core.exports.map fun (a, b) => { semanticName := a, outputName := b }
     files := coreFiles, exports, origins := context.origins }
   if !component then return ← psValidateArtifact base
-  let plan ← scalarApi api core locals
-  let wasm ← scalarComponentBinary plan
-  let wat ← psRenderDoc (scalarComponentWat plan)
+  let (wasm, wat, wit, symbols) ← match aggregate with
+    | none => do
+      let plan ← scalarApi api core locals
+      return (← scalarComponentBinary plan, ← psRenderDoc (scalarComponentWat plan), scalarWit plan,
+        plan.exports.map fun e => { semanticName := e.sourceName, outputName := e.foreignName : PsCodegenSymbol })
+    | some abi => do
+      let plan : AggregateComponent := { core, locals, abi }
+      return (← aggregateComponentBinary plan, ← psRenderDoc (← aggregateComponentWat plan), ← abiWit abi,
+        abi.exports.map fun e => { semanticName := e.semanticName, outputName := e.foreignName : PsCodegenSymbol })
   psValidateArtifact { base with
     source := wat
-    symbols := plan.exports.map fun e => { semanticName := e.sourceName, outputName := e.foreignName }
+    symbols
     exports := exports.map fun e => { e with witReason := none }
     files := coreFiles ++ [
       { path := stem ++ ".wasm", role := .implementation, payload := .binary wasm },
       { path := stem ++ ".wat", role := .debugText, payload := .text (wat.text ++ "\n") },
-      { path := stem ++ ".wit", role := .interface, payload := .text (scalarWit plan) }] }
+      { path := stem ++ ".wit", role := .interface, payload := .text wit }] }
 
 
 end PsWasm

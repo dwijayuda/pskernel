@@ -15,3 +15,5 @@ const wrappers = observations.map(({name, args, expected}, i) => {
 await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' + wrappers.join('\n') + '\n');
 await writeFile(path.join(directory, 'wasm/observations.exports.json'),
   JSON.stringify(observations.map((_, i) => 'wasmCheck' + i)));
+
+await writeFile(path.join(directory, 'wasm/observation-count.txt'), String(observations.length));

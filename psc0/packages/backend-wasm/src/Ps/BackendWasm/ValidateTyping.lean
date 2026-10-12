@@ -506,6 +506,11 @@ def psWasmTypingInstruction
     (instruction : PsWasmInstruction) (state : PsWasmTypingState) :
     Option PsWasmTypingState :=
   match instruction with
+  | .memory operation =>
+      let descriptor := psWasmMemoryInstruction operation
+      psWasmTypingApply module descriptor.parameters descriptor.results state
+  | .globalGet _ => psWasmTypingApply module [] [.i32] state
+  | .globalSet _ => psWasmTypingApply module [.i32] [] state
   | PsWasmInstruction.localGet index => psWasmTypingLocalGet function locals index state
   | PsWasmInstruction.localSet index => psWasmTypingLocalSet module locals index state
   | PsWasmInstruction.drop =>

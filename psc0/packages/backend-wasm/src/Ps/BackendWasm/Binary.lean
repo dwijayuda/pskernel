@@ -398,6 +398,9 @@ def psWasmEncodeInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
   match instruction with
+  | .memory operation => pure (psWasmMemoryInstruction operation).bytes
+  | .globalGet index => pure ([0x23] ++ psWasmEncodeUleb index)
+  | .globalSet index => pure ([0x24] ++ psWasmEncodeUleb index)
   | .word operation => pure [(psWasmWordInstruction operation).opcode]
   | .localGet index =>
       Except.ok
@@ -983,7 +986,14 @@ def psWasmEncodeModule (module : PsWasmModule) :
   let signatures ← psWasmEncodeFunctionTypes module.structures module.arrays module.functions
   let indices ← psWasmEncodeFunctionTypeIndices module.structures module.arrays
     module.functionTypes module.functions
-  let exports ← psWasmEncodeExports module.functions module.exports
+  let functionExports ← psWasmEncodeExports module.functions module.exports
+  let exports := functionExports ++ (if module.abiMemory then psWasmEncodeName "memory" ++ [2, 0] else [])
+  let memorySection := if module.abiMemory then psWasmEncodeSection 5
+    ([1, 1, 1] ++ psWasmEncodeUleb 32768) else []
+  let globals := module.abiGlobals.flatMap fun (_, value) =>
+    [0x7f, 1, 0x41] ++ psWasmEncodeI32Constant value ++ [0x0b]
+  let globalSection := if module.abiGlobals.isEmpty then [] else
+    psWasmEncodeSection 6 (psWasmEncodeVector globals module.abiGlobals.length)
   let refs ← psWasmEncodeDeclarativeFunctionRefs module.functions module.functionRefs
   let bodies ← psWasmEncodeFunctionBodies module.structures module.arrays
     module.functionTypes module.functions module.functions
@@ -994,5 +1004,6 @@ def psWasmEncodeModule (module : PsWasmModule) :
   return [0, 97, 115, 109, 1, 0, 0, 0] ++
     psWasmEncodeSection 1 types ++
     psWasmEncodeSection 3 (psWasmEncodeVector indices module.functions.length) ++
-    psWasmEncodeSection 7 (psWasmEncodeVector exports module.exports.length) ++ elementSection ++
+    memorySection ++ globalSection ++
+    psWasmEncodeSection 7 (psWasmEncodeVector exports (module.exports.length + if module.abiMemory then 1 else 0)) ++ elementSection ++
     psWasmEncodeSection 10 (psWasmEncodeVector bodies module.functions.length)

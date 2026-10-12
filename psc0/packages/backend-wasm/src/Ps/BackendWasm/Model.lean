@@ -57,7 +57,39 @@ def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
   | .i32WrapI64 => { mnemonic := "i32.wrap_i64", opcode := 167, parameters := [.i64], result := .i32 }
   | .i64ExtendI32U => { mnemonic := "i64.extend_i32_u", opcode := 173, parameters := [.i32], result := .i64 }
 
+-- Memory operations are admitted only in explicitly marked ABI modules.
+inductive PsWasmMemoryOp where
+  | load32
+  | load8
+  | load16
+  | store32
+  | store8
+  | store16
+  | size
+  | grow
+  | copy
+
+structure PsWasmMemoryInstruction where
+  mnemonic : String
+  bytes : List UInt8
+  parameters : List PsWasmValueType
+  results : List PsWasmValueType
+
+def psWasmMemoryInstruction : PsWasmMemoryOp → PsWasmMemoryInstruction
+  | .load32 => { mnemonic := "i32.load", bytes := [40, 2, 0], parameters := [.i32], results := [.i32] }
+  | .load8 => { mnemonic := "i32.load8_u", bytes := [45, 0, 0], parameters := [.i32], results := [.i32] }
+  | .load16 => { mnemonic := "i32.load16_u", bytes := [47, 1, 0], parameters := [.i32], results := [.i32] }
+  | .store32 => { mnemonic := "i32.store", bytes := [54, 2, 0], parameters := [.i32, .i32], results := [] }
+  | .store8 => { mnemonic := "i32.store8", bytes := [58, 0, 0], parameters := [.i32, .i32], results := [] }
+  | .store16 => { mnemonic := "i32.store16", bytes := [59, 1, 0], parameters := [.i32, .i32], results := [] }
+  | .size => { mnemonic := "memory.size", bytes := [63, 0], parameters := [], results := [.i32] }
+  | .grow => { mnemonic := "memory.grow", bytes := [64, 0], parameters := [.i32], results := [.i32] }
+  | .copy => { mnemonic := "memory.copy", bytes := [252, 10, 0, 0], parameters := [.i32, .i32, .i32], results := [] }
+
 inductive PsWasmInstruction where
+  | memory (operation : PsWasmMemoryOp)
+  | globalGet (index : Nat)
+  | globalSet (index : Nat)
   | word (operation : PsWasmWordOp)
   | localGet (index : Nat)
   | localSet (index : Nat)
@@ -177,6 +209,8 @@ structure PsWasmFunction where
   body : List PsWasmInstruction
 
 structure PsWasmModule where
+  abiMemory : Bool := false
+  abiGlobals : List (String × Int) := []
   structures : List PsWasmStructType
   arrays : List PsWasmArrayType
   functionTypes : List PsWasmFunctionType

@@ -57,6 +57,9 @@ def watFloat (bits fractionBits exponentBits : Nat) : String :=
     sign ++ "0x" ++ hexNat 16 significand ++ "p" ++ toString power
 
 def watInstruction (locals : List String) : PsWasmInstruction → String
+  | .memory operation => (psWasmMemoryInstruction operation).mnemonic
+  | .globalGet index => "global.get " ++ toString index
+  | .globalSet index => "global.set " ++ toString index
   | .word operation => (psWasmWordInstruction operation).mnemonic
   | .localGet i => "local.get " ++ watId (locals[i]?.getD ("local" ++ toString i))
   | .localSet i => "local.set " ++ watId (locals[i]?.getD ("local" ++ toString i))
@@ -203,10 +206,14 @@ def watModuleDoc (m : PsWasmModule) (names : LocalNames := []) (header := "(modu
     PsDoc.text ("(elem declare func " ++ String.intercalate " " (m.functionRefs.map watId) ++ ")")]
   let exports := m.exports.map fun (external, internal) =>
     PsDoc.text ("(export " ++ watQuote external ++ " (func " ++ watId internal ++ "))")
+  let memory := if m.abiMemory then [PsDoc.text "(memory $abi_buffers 1 32768)",
+    .text "(export \"memory\" (memory $abi_buffers))"] else []
+  let globals := m.abiGlobals.map fun (name, value) =>
+    PsDoc.text ("(global " ++ watId name ++ " (mut i32) (i32.const " ++ toString value ++ "))")
   let functions := m.functions.zipIdx |>.map fun (f, i) =>
     watFunction names { f with typeName := some (f.typeName.getD (anonymousTypeName m i)) }
   .append (.text header)
-    (.append (.nest 2 (.append .hardline (psDocJoin .hardline (group ++ signatures ++ anonymous ++ refs ++ functions ++ exports))))
+    (.append (.nest 2 (.append .hardline (psDocJoin .hardline (group ++ signatures ++ anonymous ++ memory ++ globals ++ refs ++ functions ++ exports))))
       (.append .hardline (.text ")")))
 
 end PsWasm

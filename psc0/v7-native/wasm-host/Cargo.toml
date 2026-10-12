@@ -1,0 +1,11 @@
+[package]
+name = "pscv0-wasm-host-check"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+wasmtime = { version = "=49.0.2", default-features = false, features = ["cranelift", "component-model", "runtime", "std", "gc", "gc-drc"] }
+
+[profile.dev]
+debug = 0

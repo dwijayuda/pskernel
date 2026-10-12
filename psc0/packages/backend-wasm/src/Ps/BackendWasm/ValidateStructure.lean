@@ -345,6 +345,10 @@ def psWasmIrValidateInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmIrValidationError Unit :=
   match instruction with
+  | .memory _ =>
+      if module.abiMemory && functionName.startsWith "__ps_abi_" then pure () else throw (.invalidFunctionBody functionName)
+  | .globalGet index | .globalSet index =>
+      if functionName.startsWith "__ps_abi_" && index < module.abiGlobals.length then pure () else throw (.invalidLocalIndex functionName index)
   | PsWasmInstruction.localGet index =>
       if Nat.blt index localCount then
         Except.ok Unit.unit
@@ -743,7 +747,10 @@ def psWasmIrValidateModuleStructure
     psWasmIrFunctionNames module.functions;
   let exportNames : List String :=
     psWasmIrExportNames module.exports;
-  if psWasmIrUnique typeNames then
+  if (!module.abiMemory && !module.abiGlobals.isEmpty) ||
+      (module.abiMemory && exportNames.contains "memory") then
+    Except.error (.invalidTypeDeclaration "ABI memory/global policy")
+  else if psWasmIrUnique typeNames then
     if psWasmIrUnique functionNames then
       if psWasmIrUnique exportNames then
         if psWasmIrUnique module.functionRefs then

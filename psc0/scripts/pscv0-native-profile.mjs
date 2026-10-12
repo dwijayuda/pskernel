@@ -77,6 +77,13 @@ async function closure(roots, portable) {
 }
 
 const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.BackendRust.Module', 'Ps.BackendWasm.Module', 'Ps.BackendWasm.Natural', 'Ps.CompilerIr.Checked'], true);
+// New portable imports must be registered as Lake roots before CI compilation.
+// A transitive source file alone is insufficient for Lake's module scheduler.
+const lake = await readFile(path.join(root, 'lakefile.lean'), 'utf8');
+const lakeRoots = new Set([...lake.matchAll(/`(Ps\\.[A-Za-z0-9_.]+)/g)].map(match => match[1]));
+for (const entry of portable) {
+  assert(lakeRoots.has(entry.module), 'missing portable Lake root: ' + entry.module);
+}
 const native = await closure(['Ps.Host.NativeV7', 'Ps.Host.PrimitiveAudit'], false);
 const toolchain = (await readFile(path.join(root, 'v7-native/lean-toolchain'), 'utf8')).trim();
 assert.equal(toolchain, 'leanprover/lean4:v4.35.0-rc4');

@@ -258,6 +258,42 @@ def main : IO Unit := do
       throw (IO.userError "matched nested rejection count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=reject_nested_invalid milliseconds={complexNoEnd-complexNoStart} samples={complexCount} binder_depth=24"
 
+    -- Actual growing checked declaration environment. Every eighth
+    -- definition contains a nested 16-lambda body; all intervening
+    -- definitions refer to the immediately preceding checked declaration.
+    -- Environment index construction, dependency inference, checked type
+    -- comparison and persistent admission are included in the timed span.
+    let chainLength := 160
+    let chainBase := PsKernelName.str PsKernelName.anonymous "C0LibraryChain"
+    let chainType := c0CompareCheckedPi 16
+    let chainBody := c0CompareCheckedLambda 16
+    let mut chainEnv := psKernelEnvironmentEmpty
+    let mut priorName := chainBase
+    let chainStart ← IO.monoMsNow
+    for i in [:chainLength] do
+      let currentName := PsKernelName.num chainBase i
+      let body :=
+        if i % 8 == 0 then chainBody
+        else PsKernelExpr.const priorName []
+      let decl : PsKernelDefinitionInfo := {
+        base := { name := currentName, levelParams := [], type := chainType }
+        value := body
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 chainEnv decl
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("matched library chain rejected declaration: " ++ err))
+      | Except.ok next =>
+          chainEnv := next
+          priorName := currentName
+    let chainEnd ← IO.monoMsNow
+    for i in [:chainLength] do
+      if !psKernelEnvironmentContains chainEnv (PsKernelName.num chainBase i) then
+        throw (IO.userError "matched library chain lost an admitted declaration")
+    IO.println s!"C0_COMPARE round={round} operation=admit_library_chain milliseconds={chainEnd-chainStart} declarations={chainLength} nested_every=8 binder_depth=16"
+
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do
     if line.startsWith "VmHWM:" then IO.println s!"C0_COMPARE process_peak {line}"

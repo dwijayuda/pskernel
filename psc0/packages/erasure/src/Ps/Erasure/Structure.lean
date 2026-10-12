@@ -125,7 +125,7 @@ def psPrepareRuntimeStructures
                   declarations
                   scope
                   info with
-            | Except.error error => Except.error error
+            | Except.error error => Except.error (.inDeclaration info.name error)
             | Except.ok prepared =>
                 psPrepareRuntimeStructures
                   environment

@@ -337,6 +337,11 @@ def psErasureClassifyBinder
   | _ =>
       if psErasureIsProp environment localContext type then
         PsErasedBinderKind.proof
+      else if psErasureIsTypeFamily environment 4096 localContext type then
+        -- Higher-kinded type and predicate families (e.g. coll → idx → Prop)
+        -- are compile-time indices, not runtime functions. Lean erases them.
+        -- Unlike a function returning Nat/Bool, their codomain is a Sort.
+        PsErasedBinderKind.type
       else
         PsErasedBinderKind.runtime
 

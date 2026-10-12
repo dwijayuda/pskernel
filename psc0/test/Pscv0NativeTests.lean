@@ -972,6 +972,23 @@ private def projectBoundaries : IO Unit := do
     " classes=" ++ toString psSelfHostProdPreludeEnvironment.classes.length ++
     " instances=" ++ toString psSelfHostProdPreludeEnvironment.instances.entries.length ++
     " fingerprint=" ++ psStandardSnapshotExpected)
+  -- Type-family parameters to a class are erased even when their source
+  -- shape is a dependent function returning Sort (e.g. coll → idx → Prop).
+  -- An ordinary function returning Nat remains computational, and an actual
+  -- proposition remains a proof. These three classifications must not merge.
+  let nat := PsExpr.constE psNatName []
+  let predicateFamily := psLogicPi 50 "xs" nat (psLogicPi 51 "i" nat (.sortE .zero))
+  let runtimeFunction := psLogicPi 50 "xs" nat nat
+  let psIndexKind := psErasureClassifyBinder
+    psSelfHostProdPreludeEnvironment psLocalEmpty predicateFamily
+  let runtimeKind := psErasureClassifyBinder
+    psSelfHostProdPreludeEnvironment psLocalEmpty runtimeFunction
+  let proofKind := psErasureClassifyBinder
+    psSelfHostProdPreludeEnvironment psLocalEmpty (.constE (psRootName "True") [])
+  unless (match psIndexKind with | .type => true | _ => false) &&
+      (match runtimeKind with | .runtime => true | _ => false) &&
+      (match proofKind with | .proof => true | _ => false) do
+    throw (IO.userError "type-family parameter erasure confused predicates with runtime functions/proofs")
   let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
     (.definitionDecl
       (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []

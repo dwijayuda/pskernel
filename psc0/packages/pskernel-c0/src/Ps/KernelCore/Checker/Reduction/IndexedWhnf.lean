@@ -106,12 +106,6 @@ def psKernelC0IndexedAppHeadWithFuel
           psKernelC0IndexedAppHeadWithFuel remaining store fn (arg :: args)
       | _ => some (id, args)
 
-/--
-  One exact local-let or delta-unfolding *step* in canonical indexed syntax.
-  The source checker still owns acceptance, fuel accounting and reduction
-  priority. This helper returns none for absent/opaque/unfoldable heads or
-  invalid term stores, not a positive typing/DefEq/normalization verdict.
--/
 /-- Unfold an already selected local/constant head and reapply the
     existing canonical arguments. The body is the only source-to-index
     import; universe substitution and applications stay indexed. -/

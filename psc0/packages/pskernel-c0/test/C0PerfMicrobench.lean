@@ -70,6 +70,53 @@ def c0BenchLambdaChain : Nat -> PsKernelExpr
         (c0BenchLambdaChain n)
         PsKernelBinderInfo.default
 
+/-- Historical binder hash used as a benchmark-only reference.
+    It omits binder names and binder info, creating dense collision buckets. -/
+def c0BenchOldBinderHash
+    (store : PsKernelC0TermStore)
+    (node : PsKernelC0Node) : Nat :=
+  match node with
+  | .lam _ ty body _ =>
+      psKernelCacheMix
+        (psKernelCacheMix 27 (psKernelC0ChildHash store ty))
+        (psKernelC0ChildHash store body)
+  | _ => psKernelC0NodeHash store node
+
+def c0BenchOldBinderIntern
+    (store : PsKernelC0TermStore)
+    (node : PsKernelC0Node) :
+    Option (Prod PsKernelC0TermStore Nat) :=
+  if psKernelC0NodeValid store node then
+    let hash := c0BenchOldBinderHash store node
+    let bucket := psKernelC0TermTrieBucket psKernelC0IndexDepth store.index hash
+    match psKernelC0FindNode store node bucket with
+    | some id => some (store, id)
+    | none =>
+        let id := store.nodes.size
+        let entry : PsKernelC0StoredNode :=
+          { node := node, hash := hash, depth := psKernelC0NodeDepth store node }
+        let index := psKernelC0TermTrieReplace
+          psKernelC0IndexDepth store.index hash (id :: bucket)
+        some ({ nodes := store.nodes.push entry, index := index }, id)
+  else
+    none
+
+def c0BenchBinderStore (historical : Bool) (count : Nat) :
+    Option PsKernelC0TermStore := do
+  let (initial, domainId) ←
+    psKernelC0Intern psKernelC0StoreEmpty (.sort PsKernelLevel.zero)
+  let (prepared, bodyId) ← psKernelC0Intern initial (.bvar 0)
+  let mut store := prepared
+  for i in [:count] do
+    let name := PsKernelName.num PsKernelName.anonymous i
+    let node : PsKernelC0Node :=
+      .lam name domainId bodyId PsKernelBinderInfo.default
+    let (next, _) ←
+      if historical then c0BenchOldBinderIntern store node
+      else psKernelC0Intern store node
+    store := next
+  pure store
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -572,3 +619,27 @@ def main : IO Unit := do
   if psKernelC0IndexedSessionRootCount ownedSession != 1 then
     throw (IO.userError "C0 indexed session repeatedly stored the same root")
   IO.println s!"C0_BENCH optin_indexed_whnf plain_ms={plainEnd-plainStart} indexed_ms={ownedEnd-ownedStart} runs={optRuns} roots={psKernelC0IndexedSessionRootCount ownedSession} nodes={psKernelC0IndexedSessionNodeCount ownedSession}"
+
+
+  -- Same-run canonical-DAG binder-storm measurement. Exactly the same nodes
+  -- and structural collision checks; only identity hashing differs.
+  let binderRuns := 8
+  let binderCount := 160
+  let mut legacyNodeTotal := 0
+  let legacyBinderStart ← IO.monoMsNow
+  for _ in [:binderRuns] do
+    match c0BenchBinderStore true binderCount with
+    | none => throw (IO.userError "C0 historical binder benchmark failed")
+    | some store => legacyNodeTotal := legacyNodeTotal + store.nodes.size
+  let legacyBinderEnd ← IO.monoMsNow
+  let mut nextNodeTotal := 0
+  let exactBinderStart ← IO.monoMsNow
+  for _ in [:binderRuns] do
+    match c0BenchBinderStore false binderCount with
+    | none => throw (IO.userError "C0 exact binder benchmark failed")
+    | some store => nextNodeTotal := nextNodeTotal + store.nodes.size
+  let exactBinderEnd ← IO.monoMsNow
+  if legacyNodeTotal != nextNodeTotal ||
+      nextNodeTotal != binderRuns * (binderCount + 2) then
+    throw (IO.userError "C0 canonical binder benchmark node divergence")
+  IO.println s!"C0_BENCH binder_intern_hash legacy_ms={legacyBinderEnd-legacyBinderStart} exact_ms={exactBinderEnd-exactBinderStart} runs={binderRuns} binders={binderCount}"

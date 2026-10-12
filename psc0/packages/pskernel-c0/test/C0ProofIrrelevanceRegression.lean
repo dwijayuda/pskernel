@@ -213,6 +213,53 @@ def main : IO Unit := do
   if (psKernelC0LetBodyRangesWithFuel 1
       (c0ZetaFixture 32 sort0)).isSome then
     throw (IO.userError "C0 zeta metadata exceeded recursion budget")
+  -- Exact structural hash and range equivalence at *every* intermediate
+  -- let source, not only at the root. A cache fingerprint never replaces
+  -- collision-checked source equality.
+  for depth in [1, 12, 16, 24, 48, 96] do
+    for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
+      let source := c0ZetaFixture depth leaf
+      match psKernelC0LetCacheFramesWithFuel 1024 source,
+            psKernelC0LetBodyRangesWithFuel 1024 source with
+      | some (_, fullHash, frames), some (_, oldRanges) =>
+          if fullHash != psKernelExprHash source then
+            throw (IO.userError "C0 cached zeta root hash differs")
+          let mut term := source
+          let mut remainingFrames := frames
+          let mut remainingRanges := oldRanges
+          for _ in [:depth] do
+            match term, remainingFrames, remainingRanges with
+            | .letE _ _ _ body _, (range, hash) :: tail, oldRange :: tailRanges =>
+                if range != oldRange || hash != psKernelExprHash term then
+                  throw (IO.userError "C0 zeta source cache metadata differs")
+                term := body
+                remainingFrames := tail
+                remainingRanges := tailRanges
+            | _, _, _ => throw (IO.userError "C0 zeta hash frames misaligned")
+          if !remainingFrames.isEmpty || !remainingRanges.isEmpty then
+            throw (IO.userError "C0 zeta cache frame size differs")
+      | _, _ => throw (IO.userError "C0 zeta cache metadata unavailable")
+  -- Exact hash-key fast paths must be observationally equivalent across
+  -- both the small-list cache and promoted collision-checked radix index.
+  let mut ordinaryCache := psKernelExprMapEmpty
+  let mut hashedCache := psKernelExprMapEmpty
+  for depth in [1, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128] do
+    let source := c0ZetaFixture depth sort0
+    ordinaryCache := psKernelExprMapInsert ordinaryCache source sort0
+    hashedCache := psKernelExprMapInsertWithKnownHash
+      hashedCache source sort0 (some (psKernelExprHash source))
+  for depth in [1, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96, 128] do
+    let source := c0ZetaFixture depth sort0
+    match psKernelExprMapGet ordinaryCache source,
+          psKernelExprMapGetWithKnownHash hashedCache source
+            (some (psKernelExprHash source)) with
+    | some normal, some hashed =>
+        if !(psKernelExprEqual normal hashed &&
+             psKernelExprEqual hashed sort0) then
+          throw (IO.userError "C0 prehashed cache changed returned expression")
+    | _, _ => throw (IO.userError "C0 prehashed cache missed original entry")
+  IO.println "C0_PERF_REGRESSION zeta_hash_cache_exactness=pass"
+
   IO.println "C0_PERF_REGRESSION exact_zeta_suffix_oracle=pass"
 
   -- One bounded bottom-up syntax analysis must agree with the independent

@@ -220,6 +220,9 @@ structure PsSyntaxInductiveConstructor where
 structure PsSyntaxImport where
   moduleName : PsSyntaxName
   span : PsSourceSpan
+  -- RC4 module-style import: a public import also re-exports this module's
+  -- public interface. Ordinary imports remain visible only in this module.
+  isPublic : Bool := false
 
 inductive PsSyntaxDeclaration where
   | definition

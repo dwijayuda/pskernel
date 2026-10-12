@@ -33,23 +33,21 @@ def psProofScriptBoolOr
 
 def psParseProofScriptImport
     (cursor : PsTokenCursor) :
-    Except PsParseError (PsParseResult PsSyntaxImport) :=
-  match psTokenCursorExpectText cursor "import" with
-  | Except.error error => Except.error error
-  | Except.ok keyword =>
-      match psParseSyntaxName keyword.cursor with
-      | Except.error error => Except.error error
-      | Except.ok name =>
-          Except.ok {
-            value := {
-              moduleName := name.value
-              span := {
-                start := keyword.token.span.start
-                stop := name.value.span.stop
-              }
-            }
-            cursor := name.cursor
-          }
+    Except PsParseError (PsParseResult PsSyntaxImport) := do
+  let publicToken ← if psTokenCursorAtText cursor "public" then
+    (psTokenCursorExpectText cursor "public").map some
+  else pure none
+  let keyword ← psTokenCursorExpectText
+    (publicToken.map (·.cursor) |>.getD cursor) "import"
+  let name ← psParseSyntaxName keyword.cursor
+  return {
+    value := {
+      moduleName := name.value
+      span := {
+        start := (publicToken.map (·.token.span.start)).getD keyword.token.span.start
+        stop := name.value.span.stop }
+      isPublic := publicToken.isSome }
+    cursor := name.cursor }
 
 structure PsProofScriptCallArgs where
   args : List PsSyntaxTerm
@@ -1697,7 +1695,8 @@ def psParseProofScriptImportsWithFuel
             List PsSyntaxImport ->
             Except PsParseError (PsParseResult (List PsSyntaxImport)) :=
           psParseProofScriptImportsWithFuel remaining;
-        if psTokenCursorAtText cursor "import" then
+        if psTokenCursorAtText cursor "import" ||
+            psTokenCursorAtText cursor "public" then
           match psParseProofScriptImport cursor with
           | Except.error error => Except.error error
           | Except.ok parsed =>

@@ -250,7 +250,8 @@ def psPscv0PrintSurfaceDeclaration (proofScript : Bool)
       | Except.ok text => Except.ok text
 
 def psPscv0PrintImport (sourceImport : PsSyntaxImport) : String :=
-  psPscv0Cat ["import ", psPscv0NameText sourceImport.moduleName]
+  psPscv0Cat [(if sourceImport.isPublic then "public import " else "import "),
+    psPscv0NameText sourceImport.moduleName]
 
 def psPscv0PrintSurfaceModule (proofScript : Bool) (surface : PsPscv0SurfaceModule) : Except String String :=
   if surface.commentTrivia then Except.error "PSCV0-TRIVIA-PRINT-PENDING"

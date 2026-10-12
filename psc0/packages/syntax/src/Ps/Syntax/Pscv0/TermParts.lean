@@ -1,4 +1,4 @@
-import Ps.Syntax.Pscv0.Binders
+import Ps.Syntax.Pscv0.Interpolation
 import Ps.Syntax.Pscv0.Universe
 
 -- Records keep their source and replacement fields distinct until elaboration.
@@ -102,6 +102,9 @@ def psPscv0ReadListLiteral (read : PsPscv0TermReader)
 
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if let some token := psTokenCursorPeek cursor then
+    if psTokenKindEq token.kind .string && token.text.startsWith "s!\"" then
+      return ← psPscv0Interpolate read cursor
   if psTokenCursorAtText cursor "#" then return ← psPscv0ReadArrayLiteral read cursor
   if psTokenCursorAtText cursor "[" then return ← psPscv0ReadListLiteral read cursor
   if psTokenCursorAtText cursor "{" then return ← psPscv0ReadRecord read cursor

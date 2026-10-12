@@ -953,6 +953,12 @@ private def projectBoundaries : IO Unit := do
     "const characterText: String := toString('x')\n" ++
     "const booleanText: String := toString(true)\n" ++
     "theorem boolRendering: booleanText = \"true\" := by { rfl }\n"
+  let interpolationSource :=
+    "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
+    "const inner: String := s!\"Embedded {String.append(\"x\", \"y\")}\"\n" ++
+    "const braces: String := s!\"double {{braces}}\"\n" ++
+    "theorem bracesExact: braces = \"double {braces}\" := by { rfl }\n"
+  let invalidInterpolation := "const msg: String := s!\"unfinished {12\"\n"
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },
@@ -974,7 +980,10 @@ private def projectBoundaries : IO Unit := do
     { source := numeralSource, moduleName := "RadixNumerals" },
     { source := invalidNumeral, moduleName := "InvalidNumeral" },
     { source := tostringSource, moduleName := "StandardToString",
-      targets := [.javascript, .typescript, .rust] }]
+      targets := [.javascript, .typescript, .rust] },
+    { source := interpolationSource, moduleName := "Interpolated",
+      targets := [.javascript, .typescript, .rust] },
+    { source := invalidInterpolation, moduleName := "InvalidInterpolation" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1005,6 +1014,15 @@ private def projectBoundaries : IO Unit := do
     | 14, .error error =>
         throw (IO.userError ("ToString exported-alias check failed at " ++
           error.phase ++ ": " ++ error.message))
+    | 15, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "interpolation missing multi-target checked artifacts")
+    | 15, .error error =>
+        throw (IO.userError ("interpolation failed at " ++ error.phase ++
+          ": " ++ error.message))
+    | 16, .error error =>
+        unless error.phase == "module" do
+          throw (IO.userError "invalid interpolation accepted or refused after parsing")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

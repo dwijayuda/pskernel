@@ -28,6 +28,7 @@ lean_lib PsSyntax where
     `Ps.Syntax.PrintProofScript,
     `Ps.Syntax.Translate,
     `Ps.Syntax.Pscv0.Universe,
+    `Ps.Syntax.Pscv0.Interpolation,
     `Ps.Syntax.Pscv0.TermParts,
     `Ps.Syntax.Pscv0.ProofRead,
     `Ps.Syntax.Pscv0.DoRead,

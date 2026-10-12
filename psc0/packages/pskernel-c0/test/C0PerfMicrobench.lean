@@ -17,12 +17,6 @@ def c0BenchApps (count : Nat)
   | Nat.succ rest =>
       c0BenchApps rest (PsKernelExpr.app current arg) arg
 
-def c0BenchSuccLevel (count : Nat) (current : PsKernelLevel) : PsKernelLevel :=
-  match count with
-  | 0 => current
-  | Nat.succ rest =>
-      c0BenchSuccLevel rest (PsKernelLevel.succ current)
-
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -293,15 +287,14 @@ def main : IO Unit := do
   IO.println s!"C0_BENCH native_checker_cold_defeq beta_true_ms={yesEnd - yesStart} sort_false_ms={noEnd - noStart} comparisons={comparisons}"
 
 
-  -- Measure the duplicate work removed from accepting DefEq: the top-level
-  -- recursive checker has *already* ruled out syntactic equality and prior
-  -- successful cache hits before entering the shape-specific quick rules.
-  -- Use long universe levels to make that repeated structural scan visible.
-  let baseName := PsKernelName.str PsKernelName.anonymous "C0DeepUniverse"
-  let leftDeep := PsKernelExpr.sort
-    (c0BenchSuccLevel 256 PsKernelLevel.zero)
-  let rightDeep := PsKernelExpr.sort
-    (c0BenchSuccLevel 256 (PsKernelLevel.param baseName))
+
+  -- Isolate the redundant structural-equality traversal eliminated from the
+  -- accepting DefEq path. The pair-cache is empty, both application spines
+  -- differ at the deeply nested head, and the input varies at runtime.
+  -- The general quick API checks equality again; the guarded API does not.
+  let leftDeep := first
+  let rightDeepA := second
+  let rightDeepB := c0BenchApps 512 (PsKernelExpr.bvar 3) arg
   let quickContext := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
   let quickState := psKernelCheckerStateEmpty
   let quickDefeq :=
@@ -310,24 +303,26 @@ def main : IO Unit := do
         (lhs : PsKernelExpr)
         (rhs : PsKernelExpr) =>
       psKernelIsDefEq 256 context state lhs rhs
-  if psKernelExprEq leftDeep rightDeep then
+  if psKernelExprEq leftDeep rightDeepA || psKernelExprEq leftDeep rightDeepB then
     throw (IO.userError "C0 deep quick benchmark guard unexpectedly succeeded")
-  let deepIterations := 3000
-  let mut generalFalse := 0
+  let deepIterations := 12000
+  let mut generalMisses := 0
   let generalStart ← IO.monoMsNow
-  for _ in [:deepIterations] do
-    match psKernelDefEqQuick quickDefeq quickContext quickState leftDeep rightDeep with
-    | Except.ok (Option.some false, _) => generalFalse := generalFalse + 1
+  for k in [:deepIterations] do
+    let current := if k % 2 == 0 then rightDeepA else rightDeepB
+    match psKernelDefEqQuick quickDefeq quickContext quickState leftDeep current with
+    | Except.ok (Option.none, _) => generalMisses := generalMisses + 1
     | _ => throw (IO.userError "C0 general deep quick comparison changed outcome")
   let generalEnd ← IO.monoMsNow
-  let mut guardedFalse := 0
+  let mut guardedMisses := 0
   let guardedStart ← IO.monoMsNow
-  for _ in [:deepIterations] do
+  for k in [:deepIterations] do
+    let current := if k % 2 == 0 then rightDeepA else rightDeepB
     match psKernelDefEqQuickAfterCommon quickDefeq quickContext quickState
-        leftDeep rightDeep with
-    | Except.ok (Option.some false, _) => guardedFalse := guardedFalse + 1
+        leftDeep current with
+    | Except.ok (Option.none, _) => guardedMisses := guardedMisses + 1
     | _ => throw (IO.userError "C0 guarded deep quick comparison changed outcome")
   let guardedEnd ← IO.monoMsNow
-  if !(Nat.beq generalFalse guardedFalse) then
+  if !(Nat.beq generalMisses guardedMisses) then
     throw (IO.userError "C0 guarded deep quick result count mismatch")
-  IO.println s!"C0_BENCH guarded_defeq_quick general_ms={generalEnd - generalStart} guarded_ms={guardedEnd - guardedStart} depth=256 iterations={deepIterations} failures={guardedFalse}"
+  IO.println s!"C0_BENCH guarded_defeq_quick general_ms={generalEnd - generalStart} guarded_ms={guardedEnd - guardedStart} depth=512 iterations={deepIterations} misses={guardedMisses}"

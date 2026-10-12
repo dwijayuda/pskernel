@@ -28,11 +28,26 @@ def main : IO Unit := do
   let selected := root
   match psKernelC0ScratchIntern scratch (.mdata 49 root) with
   | none => throw (IO.userError "C0 unused temporary metadata append failed")
-  | some (next, _) => scratch := next
+  | some (next, id) =>
+      scratch := next
+      match psKernelC0ScratchPromoteVerified next id with
+      | none => throw (IO.userError "C0 verified metadata promotion failed")
+      | some (checked, target) =>
+          match psKernelC0DecodeExpr checked target with
+          | some (.mdata 49 (.app _ _)) => pure ()
+          | _ => throw (IO.userError "C0 promotion erased root metadata")
   match psKernelC0ScratchEncode scratch
       (.lam name leaf (.bvar 0) .implicit) with
   | none => throw (IO.userError "C0 unused binder construction failed")
-  | some (next, _) => scratch := next
+  | some (next, id) =>
+      scratch := next
+      match psKernelC0ScratchPromoteVerified next id with
+      | none => throw (IO.userError "C0 verified binder promotion failed")
+      | some (checked, target) =>
+          let some actual := psKernelC0DecodeExpr checked target
+            | throw (IO.userError "C0 verified binder readback missing")
+          if !psKernelExprEqual actual (.lam name leaf (.bvar 0) .implicit) then
+            throw (IO.userError "C0 verified promotion lost binder information")
 
   if !psKernelC0ScratchValid scratch ||
       (psKernelC0ScratchAbort scratch).nodes.size != persistent.nodes.size then

@@ -262,3 +262,35 @@ def main : IO Unit := do
   | Option.none => pure ()
   | Option.some _ => throw (IO.userError "C0 decoder accepted invalid handle")
   IO.println "C0_PERF_REGRESSION indexed_expr_roundtrip=pass"
+
+
+  -- Demand-driven application-spine WHNF must preserve the old outcomes.
+  -- This directly exercises the accepting Lean engine, not the Rust sketch.
+  let context := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let stopped := PsKernelExpr.app
+    (PsKernelExpr.app (PsKernelExpr.mvar named) leftSort) rightSort
+  match psKernelWhnfNoRecursor 4096 context psKernelCheckerStateEmpty stopped with
+  | Except.error message =>
+      throw (IO.userError ("C0 stuck-spine WHNF error: " ++ message))
+  | Except.ok (result, _) =>
+      if !(psKernelExprEqual result stopped) then
+        throw (IO.userError "C0 WHNF changed stuck application spine")
+  let identity := PsKernelExpr.lam named leftSort
+    (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let beta := PsKernelExpr.app identity rightSort
+  match psKernelWhnfNoRecursor 4096 context psKernelCheckerStateEmpty beta with
+  | Except.error message =>
+      throw (IO.userError ("C0 beta WHNF error: " ++ message))
+  | Except.ok (result, _) =>
+      if !(psKernelExprEqual result rightSort) then
+        throw (IO.userError "C0 WHNF lost beta reduction")
+  let reducibleHead := PsKernelExpr.letE named leftSort
+    identity (PsKernelExpr.bvar 0) false
+  let zetaBeta := PsKernelExpr.app reducibleHead rightSort
+  match psKernelWhnfNoRecursor 4096 context psKernelCheckerStateEmpty zetaBeta with
+  | Except.error message =>
+      throw (IO.userError ("C0 zeta-beta WHNF error: " ++ message))
+  | Except.ok (result, _) =>
+      if !(psKernelExprEqual result rightSort) then
+        throw (IO.userError "C0 WHNF changed reducible application head")
+  IO.println "C0_PERF_REGRESSION demand_driven_whnf=pass"

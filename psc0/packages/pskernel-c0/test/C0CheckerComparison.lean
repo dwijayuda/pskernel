@@ -569,6 +569,47 @@ def main : IO Unit := do
       | Except.error _ => pure ()
       IO.println s!"C0_COMPARE round={round} operation=admit_medium_checked_library milliseconds={mediumChainEnd-mediumChainStart} declarations={mediumChainLength} arguments={arity} malformed_rejected=true"
 
+    -- A wide application buried under an ordinary metadata node and under
+    -- a lambda body. Both cases use full checked inference through the
+    -- existing core recursion rather than public root-application routing.
+    let nestedMeta := PsKernelExpr.mdata 77 application
+    let nestedLambda :=
+      PsKernelExpr.lam PsKernelName.anonymous sort1 application
+        PsKernelBinderInfo.default
+    let nestedLambdaType :=
+      PsKernelExpr.forallE PsKernelName.anonymous sort1 sort0
+        PsKernelBinderInfo.default
+    for style in [0, 1] do
+      let nestedValue := if style == 0 then nestedMeta else nestedLambda
+      let nestedType := if style == 0 then sort0 else nestedLambdaType
+      let nestedBase := PsKernelName.num
+        (PsKernelName.str PsKernelName.anonymous "C0NestedCheckedLibrary")
+        style
+      let mut nestedEnv := functionEnvironment
+      let nestedStart ← IO.monoMsNow
+      for i in [:64] do
+        let nestedDecl : PsKernelDefinitionInfo := {
+          base := {
+            name := PsKernelName.num nestedBase i
+            levelParams := []
+            type := nestedType
+          }
+          value := nestedValue
+          hints := PsKernelReducibilityHints.abbrevHint
+          safety := PsKernelDefinitionSafety.safe
+        }
+        match psKernelAddDefinition 4096 nestedEnv nestedDecl
+            4096 psKernelLeanNatMaxSizeDefault with
+        | Except.ok next => nestedEnv := next
+        | Except.error err =>
+            throw (IO.userError ("matched nested checked admission failed: " ++ err))
+      let nestedEnd ← IO.monoMsNow
+      for i in [:64] do
+        if !psKernelEnvironmentContains nestedEnv
+            (PsKernelName.num nestedBase i) then
+          throw (IO.userError "matched nested library dropped declaration")
+      IO.println s!"C0_COMPARE round={round} operation=admit_nested_application_library milliseconds={nestedEnd-nestedStart} declarations=64 arguments=48 style={style}"
+
     let mut admitted := 0
     let mut rejected := 0
     let admissionStart ← IO.monoMsNow

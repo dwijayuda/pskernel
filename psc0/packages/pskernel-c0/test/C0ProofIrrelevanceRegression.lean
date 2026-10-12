@@ -224,6 +224,42 @@ def main : IO Unit := do
             throw (IO.userError "C0 public recursion metadata changed type")
       | _, _ =>
           throw (IO.userError "C0 public recursion metadata changed acceptance")
+  -- The public nested checked route must not compare against itself.
+  -- Include common enclosing syntax, exact low-fuel errors and local binder
+  -- freshness. The hook-free recursive worker is the independent oracle.
+  for arity in [15, 16, 17, 24, 48, 64] do
+    let application := (List.range arity).foldl
+      (fun term _ => PsKernelExpr.app term sort0)
+      (c0CheckedSpineFixture arity)
+    let wrapped : List PsKernelExpr := [
+      PsKernelExpr.mdata arity application,
+      PsKernelExpr.lam PsKernelName.anonymous sort1 application
+        PsKernelBinderInfo.default,
+      PsKernelExpr.letE PsKernelName.anonymous sort1 sort0 application false,
+      PsKernelExpr.forallE PsKernelName.anonymous sort1 application
+        PsKernelBinderInfo.default
+    ]
+    for term in wrapped do
+      for fuel in [0, 1, 2, 16, 64, 4096] do
+        let defeq := psKernelIsDefEqWithFuel fuel
+        let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+        match psKernelSessionCheck fuel session term,
+            psKernelInferCoreWithFuel fuel whnf defeq
+              session.context session.state term false with
+        | Except.error fastError, Except.error referenceError =>
+            if fastError != referenceError then
+              throw (IO.userError
+                "C0 nested checked applications changed resource/error")
+        | Except.ok (fastType, fastSession),
+            Except.ok (referenceType, referenceState) =>
+            if !(psKernelExprEqual fastType referenceType &&
+                fastSession.state.nextFresh == referenceState.nextFresh) then
+              throw (IO.userError
+                "C0 nested checked applications changed inferred type/state")
+        | _, _ =>
+            throw (IO.userError "C0 nested checked acceptance diverged")
+  IO.println "C0_PERF_REGRESSION nested_checked_application_core_hook=pass"
+
   IO.println "C0_PERF_REGRESSION public_recursive_checked_spine_boundary=pass"
 
   IO.println "C0_PERF_REGRESSION checked_spine_malformed_heads_args=pass"

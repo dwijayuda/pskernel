@@ -337,5 +337,10 @@ def psKernelCheckWithFuel
         psKernelInferCoreWithFuel
           fuel whnf defeq context state expr false
   | _ =>
-      psKernelInferCoreWithFuel
-        fuel whnf defeq context state expr false
+      -- Non-application roots preserve their existing syntax-directed rules.
+      -- The optional callback reaches checked application subterms inside
+      -- lambda/forall/let/metadata/projection inference without duplicating
+      -- those rules or changing infer-only judgments.
+      psKernelInferCoreWithFuelUsing
+        fuel (some psKernelC0CheckAppRecursive)
+        whnf defeq context state expr false

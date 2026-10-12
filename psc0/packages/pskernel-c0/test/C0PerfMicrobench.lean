@@ -17,11 +17,82 @@ def c0BenchApps (count : Nat)
   | Nat.succ rest =>
       c0BenchApps rest (PsKernelExpr.app current arg) arg
 
+/- Exact previous eager version, kept only for paired benchmark evidence. -/
+def c0BenchEagerUnfoldDefinition
+    (context : PsKernelCheckerContext)
+    (expr : PsKernelExpr) :
+    Option PsKernelExpr :=
+  let fn :=
+    psKernelExprGetAppFn expr;
+  let args :=
+    psKernelExprGetAppArgs expr;
+  match fn with
+  | PsKernelExpr.const name levels =>
+      match
+          psKernelEnvironmentFind
+            context.environment
+            name with
+      | Option.none =>
+          Option.none
+      | Option.some info =>
+          match
+              psKernelConstantInfoDeltaValue info with
+          | Option.none =>
+              Option.none
+          | Option.some value =>
+              let params :=
+                psKernelConstantInfoLevelParams info;
+              if
+                  Nat.beq
+                    (psKernelNameListLength params)
+                    (psKernelLevelListLength levels) then
+                Option.some
+                  (psKernelApplyArgs
+                    (psKernelExprInstantiateLevelParams
+                      value
+                      params
+                      levels)
+                    args)
+              else
+                Option.none
+  | _ =>
+      Option.none
+
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
   let second := c0BenchApps 512 (PsKernelExpr.bvar 1) arg
   let iterations := 30000
+  -- Matched same-run hot-path benchmark, not a full kernel comparison.
+  -- Both paths perform the exact delta lookup; the reference eagerly
+  -- allocates the entire argument spine even when the head is stuck.
+  let stuckName := PsKernelName.str PsKernelName.anonymous "C0MissingDefinition"
+  let missingConst := c0BenchApps 512 (PsKernelExpr.const stuckName [])
+    (PsKernelExpr.bvar 0)
+  let missingMvar := c0BenchApps 512 (PsKernelExpr.mvar stuckName)
+    (PsKernelExpr.bvar 0)
+  let unfoldingCtx := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let mut eagerMisses := 0
+  let eagerStart ← IO.monoMsNow
+  for k in [:12000] do
+    let current := if k % 2 == 0 then missingConst else missingMvar
+    match c0BenchEagerUnfoldDefinition unfoldingCtx current with
+    | Option.none => eagerMisses := eagerMisses + 1
+    | Option.some _ => throw (IO.userError "C0 eager delta fixture unexpectedly unfolded")
+  let eagerEnd ← IO.monoMsNow
+  let mut lazyMisses := 0
+  let lazyStart ← IO.monoMsNow
+  for k in [:12000] do
+    let current := if k % 2 == 0 then missingConst else missingMvar
+    match psKernelUnfoldDefinition unfoldingCtx current with
+    | Option.none => lazyMisses := lazyMisses + 1
+    | Option.some _ => throw (IO.userError "C0 lazy delta fixture unexpectedly unfolded")
+  let lazyEnd ← IO.monoMsNow
+  if !(Nat.beq eagerMisses lazyMisses) then
+    throw (IO.userError "C0 delta comparison outcomes diverged")
+  IO.println s!"C0_BENCH lazy_delta_miss eager_ms={eagerEnd - eagerStart} lazy_ms={lazyEnd - lazyStart} depth=512 queries={lazyMisses}"
+
 
   let mut legacyHits : Nat := 0
   let startedOld ← IO.monoMsNow

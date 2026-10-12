@@ -31,6 +31,25 @@ def c0CompareForalls : Nat → PsKernelExpr
         (c0CompareForalls n)
         PsKernelBinderInfo.default
 
+/-- Nested source definitions: each binder accepts a Sort 1 argument,
+    while the innermost Sort 0 has type Sort 1. Both reference and C0
+    verify the same declaration through their complete admission APIs. -/
+def c0CompareCheckedPi : Nat → PsKernelExpr
+  | 0 => .sort (.succ PsKernelLevel.zero)
+  | n + 1 =>
+      .forallE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0CompareCheckedPi n)
+        PsKernelBinderInfo.default
+
+def c0CompareCheckedLambda : Nat → PsKernelExpr
+  | 0 => .sort PsKernelLevel.zero
+  | n + 1 =>
+      .lam PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0CompareCheckedLambda n)
+        PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -78,6 +97,23 @@ def main : IO Unit := do
     PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
   let application := c0CompareApps 48
     (PsKernelExpr.const functionName []) sort0
+
+  let safeDefinition : PsKernelDefinitionInfo := {
+    base := {
+      name := PsKernelName.str PsKernelName.anonymous "C0ComparedSafeDef"
+      levelParams := []
+      type := c0CompareCheckedPi 24
+    }
+    value := c0CompareCheckedLambda 24
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let invalidDefinition : PsKernelDefinitionInfo := {
+    base := safeDefinition.base
+    value := c0CompareCheckedLambda 23
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
 
   for round in [:3] do
     -- Full WHNF, not the isolated application-head probe.
@@ -190,6 +226,37 @@ def main : IO Unit := do
     if admitted != 600 || rejected != 600 then
       throw (IO.userError "matched admission count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=admission milliseconds={admissionEnd-admissionStart} samples=1200"
+
+    let complexCount := 32
+    let mut complexYes := 0
+    let complexStart ← IO.monoMsNow
+    for _ in [:complexCount] do
+      match psKernelAddDefinition 4096 empty safeDefinition
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("matched nested safe definition rejected: " ++ err))
+      | Except.ok result =>
+          if psKernelEnvironmentContains result safeDefinition.base.name then
+            complexYes := complexYes + 1
+          else
+            throw (IO.userError "matched nested safe definition not admitted")
+    let complexEnd ← IO.monoMsNow
+    if complexYes != complexCount then
+      throw (IO.userError "matched nested admission count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=admit_nested_safe milliseconds={complexEnd-complexStart} samples={complexCount} binder_depth=24"
+
+    let mut complexNo := 0
+    let complexNoStart ← IO.monoMsNow
+    for _ in [:complexCount] do
+      match psKernelAddDefinition 4096 empty invalidDefinition
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error _ => complexNo := complexNo + 1
+      | Except.ok _ =>
+          throw (IO.userError "matched invalid nested definition accepted")
+    let complexNoEnd ← IO.monoMsNow
+    if complexNo != complexCount then
+      throw (IO.userError "matched nested rejection count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=reject_nested_invalid milliseconds={complexNoEnd-complexNoStart} samples={complexCount} binder_depth=24"
 
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do

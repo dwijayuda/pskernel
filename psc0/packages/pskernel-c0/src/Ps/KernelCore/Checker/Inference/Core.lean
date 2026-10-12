@@ -288,23 +288,28 @@ def psKernelInferCoreWithFuel
                               (Prod.fst result)))
                 | PsKernelExpr.app fn arg =>
                     if inferOnly then
-                      let args :=
-                        psKernelExprGetAppArgs expr;
+                      -- Collect the canonical head and ordered arguments in
+                      -- one spine traversal; the length is used by both the
+                      -- budget and the infer-only exposure worker.
+                      let spine :=
+                        psKernelExprGetAppFnArgs expr;
+                      let args := spine.snd;
+                      let argCount := psKernelExprListLength args;
                       match
                           smaller
                             whnf
                             defeq
                             nextContext
                             state
-                            (psKernelExprGetAppFn expr)
+                            spine.fst
                             true with
                       | Except.error error =>
                           Except.error error
                       | Except.ok fnResult =>
                           match
-                              psKernelInferAppOnlyLoopWithFuel
-                                (Nat.succ
-                                  (psKernelExprListLength args))
+                              psKernelInferAppOnlyLoopWithFuelCount
+                                (Nat.succ argCount)
+                                argCount
                                 whnf
                                 nextContext
                                 (Prod.snd fnResult)

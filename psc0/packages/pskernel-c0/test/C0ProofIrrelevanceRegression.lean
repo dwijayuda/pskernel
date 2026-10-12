@@ -1256,6 +1256,75 @@ def main : IO Unit := do
       | _ => throw (IO.userError "C0 unknown projection claimed indexed verdict")
   IO.println "C0_PERF_REGRESSION indexed_applied_projection_head=pass"
 
+  -- Restricted Quot.lift/Quot.ind iota uses a *direct* Quot.mk major.
+  -- Independently compare the full source one-step Quot reducer (which
+  -- invokes public WHNF on the major) and the new canonical-index rule.
+  let quotEnv := psKernelEnvironmentMarkQuotInitialized
+    psKernelEnvironmentEmpty
+  let quotContext := psKernelCheckerContextEmpty quotEnv
+  let uninitializedQuotContext :=
+    psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let applyQuotArgs := fun (name : PsKernelName)
+      (args : List PsKernelExpr) =>
+    args.foldl (fun fn arg => PsKernelExpr.app fn arg)
+      (PsKernelExpr.const name [])
+  let representative := PsKernelExpr.lit (PsKernelLiteral.nat 7)
+  let quotMk := applyQuotArgs psKernelQuotMkName
+    [sort0, sort1, representative]
+  let quotientFn : PsKernelExpr :=
+    .lam localName sort0 (.bvar 0) PsKernelBinderInfo.default
+  let liftArgs : List PsKernelExpr :=
+    [sort0, sort1, sort0, quotientFn, sort0, quotMk]
+  let indArgs : List PsKernelExpr :=
+    [sort0, sort1, sort0, quotientFn, quotMk]
+  let quotLift := applyQuotArgs psKernelQuotLiftName liftArgs
+  let quotInd := applyQuotArgs psKernelQuotIndName indArgs
+  let quotExtra := PsKernelExpr.app quotLift sort1
+  let quotShort := applyQuotArgs psKernelQuotLiftName
+    (liftArgs.take 5)
+  let quotTerms : List PsKernelExpr :=
+    [quotLift, quotInd, quotExtra, quotShort]
+  for context in [quotContext, uninitializedQuotContext] do
+    for term in quotTerms do
+      match psKernelC0EncodeExpr psKernelC0StoreEmpty term with
+      | none => throw (IO.userError "C0 indexed Quot term import failed")
+      | some (store, id) =>
+          let sourceResult := psKernelReduceQuotWith
+            (fun c s major => psKernelWhnfNoRecursor 4096 c s major)
+            context psKernelCheckerStateEmpty term
+          match sourceResult,
+                psKernelC0IndexedReduceQuotOnce context store id,
+                psKernelC0IndexedReduceHeadOnce context store id with
+          | Except.ok (none, _), none, none => pure ()
+          | Except.ok (some reference, _), some (first, a),
+                some (second, b) =>
+              match psKernelC0DecodeExpr first a,
+                    psKernelC0DecodeExpr second b with
+              | some isolated, some dispatched =>
+                  if !(psKernelExprEqual reference isolated &&
+                       psKernelExprEqual reference dispatched) then
+                    throw (IO.userError "C0 indexed Quot changed representative or args")
+              | _, _ => throw (IO.userError "C0 indexed Quot result undecodable")
+          | Except.error err, _, _ =>
+              throw (IO.userError ("C0 source Quot reducer failed: " ++ err))
+          | _, _, _ =>
+              throw (IO.userError "C0 indexed Quot one-step classification differs")
+  -- Metadata-wrapped majors require the source reducer's public WHNF
+  -- callback. The narrower indexed operation must defer this case.
+  let wrappedQuot := applyQuotArgs psKernelQuotLiftName
+    [sort0, sort1, sort0, quotientFn, sort0, .mdata 14 quotMk]
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty wrappedQuot with
+  | none => throw (IO.userError "C0 indexed wrapped Quot import failed")
+  | some (store, id) =>
+      match psKernelReduceQuotWith
+          (fun c s major => psKernelWhnfNoRecursor 4096 c s major)
+          quotContext psKernelCheckerStateEmpty wrappedQuot,
+          psKernelC0IndexedReduceQuotOnce quotContext store id with
+      | Except.ok (some _, _), none => pure ()
+      | _, _ => throw (IO.userError "C0 indexed Quot did not defer major WHNF")
+  IO.println "C0_PERF_REGRESSION indexed_quot_constructor_iota=pass"
+
+
 
   -- A direct application-spine selector must match the historical
   -- fully materialized argument-list representation for every index.

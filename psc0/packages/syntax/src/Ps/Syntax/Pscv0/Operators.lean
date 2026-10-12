@@ -38,14 +38,20 @@ def psPscv0InfixToken (cursor : PsTokenCursor) :
   match cursor.remaining with
   | [] => none
   | first :: rest =>
-    match psPscv0InfixInfo first.text with
-    | some info => some (info, first.span, { remaining := rest })
-    | none => match rest with
+    -- Maximal adjacent operator recognition must precede single-token
+    -- selection. Otherwise enabling '/' steals the first token of '/\\',
+    -- and similarly other longer registered spellings can change meaning.
+    let combined := match rest with
       | second :: tail =>
-        if first.span.stop.byteOffset != second.span.start.byteOffset then none else
-        (psPscv0InfixInfo (first.text ++ second.text)).map fun info =>
-          (info, psSyntaxSpanJoin first.span second.span, { remaining := tail })
+        if first.span.stop.byteOffset == second.span.start.byteOffset then
+          (psPscv0InfixInfo (first.text ++ second.text)).map fun info =>
+            (info, psSyntaxSpanJoin first.span second.span, { remaining := tail })
+        else none
       | [] => none
+    match combined with
+    | some result => some result
+    | none => (psPscv0InfixInfo first.text).map fun info =>
+        (info, first.span, { remaining := rest })
 
 def psPscv0NotationCall (name : String) (arguments : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=

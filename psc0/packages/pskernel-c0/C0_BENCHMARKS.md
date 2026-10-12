@@ -377,3 +377,35 @@ An isolated **whole checked operation, not a helper** in C0 with 60 repeated 192
 | 64 growing depth-48 checked declarations | 64 / 64 / 64 | 64 / 64 / 64 |
 
 Within C0 itself, full 60-call typed 192-argument check: explicit recursive oracle **230 ms** versus framed route **44 ms**. The library fixture includes environment extension and completed declaration admission, not only a subroutine. These one-run three-round observations establish about **4.1× speedup on that specific engineered library**, not arbitrary library/whole kernel speedup. The source does **not** separately ablate compact frame context versus the earlier full-context frames; crediting frame compaction for the entire gain would be incorrect. Entire benchmark-process peak VmHWM **862312 kB C0** vs **857292 kB original**; no attributable memory saving. Preserve slightly slower short checked cases. Full Init/Std/Mathlib checking and p95/memory distribution unqualified. Do not run excluded bootstrap/self-hosting or metatheory gates.
+
+
+## Fuel-indexed checked Pi-suffix recursion in production — native CI 38252783408
+
+Source [5c8a1e83](https://github.com/dwijayuda/pskernel/commit/5c8a1e83e22debd4fd6c365ba9666e834e8c5d66) on existing perf branch; [CI 38252783408](https://github.com/dwijayuda/pskernel/actions/runs/38252783408), successful full C0 Lean 4.34 native build, negative/differential, native full-operation microbench and matched unchanged original-core benchmark. Root checked applications of 16 or more args now use the structurally fuel-indexed metadata-carrying recursive worker, without allocating explicit frames. Original checked inference remains for narrower/non-app roots. Prior frame runner remains executable as a separate diagnostic; it is not the production default.
+
+| Whole accepting checker (three rounds, ms) | C0 | Unchanged original |
+| --- | --- | --- |
+| 200 fully checked 16-arg applications | **18 / 17 / 17** | **20 / 20 / 20** |
+| 200 fully checked 24-arg applications | **24 / 25 / 25** | **32 / 33 / 33** |
+| 160 fully checked 32-arg applications | **25 / 25 / 25** | **36 / 37 / 37** |
+| 160 varied fully checked 48-arg applications | **39 / 41 / 41** | **65 / 67 / 74** |
+| 32 admitted wide 192-arg definitions | **31 / 32 / 32** | **123 / 124 / 124** |
+| 64 safe admitted 16-arg definitions | **10 / 10 / 10** | **11 / 11 / 11** |
+| 64 safe admitted 24-arg definitions | **13 / 12 / 12** | **16 / 15 / 15** |
+| 64 safe admitted 32-arg definitions | **15 / 15 / 14** | **20 / 20 / 19** |
+| 64 safe admitted 48-arg definitions | **20 / 19 / 20** | **31 / 31 / 31** |
+
+Full benchmark-process high-water RSS: C0 **844628 kB**, original **843588 kB** (entire process, unrelated allocations not isolated). Ordinary short checked library and inductive cases remained near parity. These are repeated matched fixture rounds on **one** hosted runner, not independent-run medians, p95, realistic whole-library throughput or proof of memory improvement.
+
+Same-run three-way candidate evaluation [CI 38251853231](https://github.com/dwijayuda/pskernel/actions/runs/38251853231):
+
+| Full checked C0 operation | Old recursive | Frame route | Fuel-indexed metadata recursion |
+| --- | ---: | ---: | ---: |
+| 200 calls, 16 args | 23 ms | 24 ms | 19 ms |
+| 200 calls, 24 args | 36 ms | 36 ms | 26 ms |
+| 200 calls, 32 args | 52 ms | 34 ms | 33 ms |
+| 200 calls, 48 args | 91 ms | 49 ms | 48 ms |
+| 60 calls, 64 args | 42 ms | 20 ms | 18 ms |
+| 60 calls, 192 args | 270 ms | 55 ms | 53 ms |
+
+This justifies replacing frame storage on the measured checked families without changing acceptance semantics. The measured gain is for the **combined source metadata and routing**, not for pointer-based term arena conversion. Negative checks include exact error precedence for malformed heads/args, fuel/context limits, source Pi loose-range oracle and full public-vs-original acceptance around threshold boundaries. The indexed DAG remains non-accepting and the general software/kernel performance redesign is **not complete**.

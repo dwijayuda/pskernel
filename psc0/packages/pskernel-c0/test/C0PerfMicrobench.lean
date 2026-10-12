@@ -239,6 +239,67 @@ def c0BenchOpenForallSpine : Nat → Nat → PsKernelExpr
         (c0BenchOpenForallSpine n loose)
         PsKernelBinderInfo.default
 
+/-
+Diagnostic local-index alternative: a fixed-depth 16-bit binary trie.
+A binary update shares old subtrees and allocates two-way nodes instead of
+copying 16-child arrays. It is NOT used by the accepting checker.
+Its purpose is to compare write costs and read costs before selecting an
+architectural representation for a deeply extended local context.
+-/
+inductive C0BenchLocalBinary where
+  | empty
+  | bucket (entries : List PsKernelLocalDecl)
+  | branch (left : C0BenchLocalBinary) (right : C0BenchLocalBinary)
+
+def c0BenchLocalBinaryBucket
+    (fuel : Nat)
+    (index : C0BenchLocalBinary)
+    (hash : Nat) : List PsKernelLocalDecl :=
+  match fuel with
+  | 0 =>
+      match index with
+      | .bucket entries => entries
+      | _ => []
+  | remaining + 1 =>
+      match index with
+      | .branch left right =>
+          if hash % 2 == 0 then
+            c0BenchLocalBinaryBucket remaining left (hash / 2)
+          else
+            c0BenchLocalBinaryBucket remaining right (hash / 2)
+      | _ => []
+
+def c0BenchLocalBinarySet
+    (fuel : Nat)
+    (index : C0BenchLocalBinary)
+    (hash : Nat)
+    (entries : List PsKernelLocalDecl) : C0BenchLocalBinary :=
+  match fuel with
+  | 0 => .bucket entries
+  | remaining + 1 =>
+      let (left, right) :=
+        match index with
+        | .branch a b => (a, b)
+        | _ => (C0BenchLocalBinary.empty, C0BenchLocalBinary.empty)
+      if hash % 2 == 0 then
+        .branch (c0BenchLocalBinarySet remaining left (hash / 2) entries) right
+      else
+        .branch left (c0BenchLocalBinarySet remaining right (hash / 2) entries)
+
+def c0BenchLocalBinaryInsert
+    (index : C0BenchLocalBinary)
+    (decl : PsKernelLocalDecl) : C0BenchLocalBinary :=
+  let hash := psKernelCacheNameHash (psKernelLocalDeclName decl)
+  let bucket := c0BenchLocalBinaryBucket 16 index hash
+  c0BenchLocalBinarySet 16 index hash (decl :: bucket)
+
+def c0BenchLocalBinaryFind
+    (index : C0BenchLocalBinary)
+    (name : PsKernelName) : Option PsKernelLocalDecl :=
+  let hash := psKernelCacheNameHash name
+  psKernelLocalContextFindIn name
+    (c0BenchLocalBinaryBucket 16 index hash)
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -403,6 +464,68 @@ def main : IO Unit := do
         indexedEntries != entryCount * buildRuns then
       throw (IO.userError "C0 local construction benchmark mismatch")
     IO.println s!"C0_BENCH locals_build list_ms={linearEnd-linearStart} adaptive_ms={buildEnd-buildStart} entries={entryCount} runs={buildRuns}"
+  -- Matched local-index representation experiment (no kernel acceptance).
+  -- Build the same 512 distinct binder identities using direct radix writes
+  -- or binary path-copying, then query the same cold name sequence.
+  let binRuns := 25
+  let binEntries := 512
+  let mut binTotal := 0
+  let binWriteStart ← IO.monoMsNow
+  for _ in [:binRuns] do
+    let mut bin : C0BenchLocalBinary := .empty
+    for k in [:binEntries] do
+      let key := PsKernelName.num PsKernelName.anonymous k
+      let decl := PsKernelLocalDecl.localDecl k key key
+        sort0 PsKernelBinderInfo.default
+      bin := c0BenchLocalBinaryInsert bin decl
+    binTotal := binTotal + 1
+  let binWriteEnd ← IO.monoMsNow
+  let mut radixTotal := 0
+  let radixWriteStart ← IO.monoMsNow
+  for _ in [:binRuns] do
+    let mut trie : PsKernelC0HashTrie PsKernelLocalDecl :=
+      PsKernelC0HashTrie.empty
+    for k in [:binEntries] do
+      let key := PsKernelName.num PsKernelName.anonymous k
+      let decl := PsKernelLocalDecl.localDecl k key key
+        sort0 PsKernelBinderInfo.default
+      trie := psKernelC0LocalIndexInsert trie decl
+    radixTotal := radixTotal + 1
+  let radixWriteEnd ← IO.monoMsNow
+  if binTotal != radixTotal then
+    throw (IO.userError "C0 local index diagnostic construction divergence")
+  let mut bin : C0BenchLocalBinary := .empty
+  let mut trie : PsKernelC0HashTrie PsKernelLocalDecl :=
+    PsKernelC0HashTrie.empty
+  for k in [:binEntries] do
+    let key := PsKernelName.num PsKernelName.anonymous k
+    let decl := PsKernelLocalDecl.localDecl k key key
+      sort0 PsKernelBinderInfo.default
+    bin := c0BenchLocalBinaryInsert bin decl
+    trie := psKernelC0LocalIndexInsert trie decl
+  let binQueries := 20000
+  let mut binHits := 0
+  let binaryReadStart ← IO.monoMsNow
+  for k in [:binQueries] do
+    let key := PsKernelName.num PsKernelName.anonymous (k % 32)
+    match c0BenchLocalBinaryFind bin key with
+    | some _ => binHits := binHits + 1
+    | none => throw (IO.userError "C0 binary local diagnostic lost a binder")
+  let binaryReadEnd ← IO.monoMsNow
+  let mut radixHits := 0
+  let radixReadStart ← IO.monoMsNow
+  for k in [:binQueries] do
+    let key := PsKernelName.num PsKernelName.anonymous (k % 32)
+    match psKernelLocalContextFindIn key
+        (psKernelC0TrieBucket psKernelC0IndexDepth trie
+          (psKernelCacheNameHash key)) with
+    | some _ => radixHits := radixHits + 1
+    | none => throw (IO.userError "C0 radix local diagnostic lost a binder")
+  let radixReadEnd ← IO.monoMsNow
+  if binHits != radixHits || binHits != binQueries then
+    throw (IO.userError "C0 binary and radix lookup totals disagreed")
+  IO.println s!"C0_BENCH local_index_alternatives binary_build_ms={binWriteEnd-binWriteStart} radix_build_ms={radixWriteEnd-radixWriteStart} binary_lookup_ms={binaryReadEnd-binaryReadStart} radix_lookup_ms={radixReadEnd-radixReadStart} entries={binEntries} builds={binRuns} queries={binQueries}"
+
   let mut locals := psKernelLocalContextEmpty
   for k in [:512] do
     let name := PsKernelName.num PsKernelName.anonymous k

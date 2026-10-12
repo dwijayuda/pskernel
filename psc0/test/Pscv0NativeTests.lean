@@ -45,15 +45,15 @@ private def parserCases : IO Unit := do
 private def getElemFoundationCases : IO Unit := do
   let source :=
     "structure IndexBox where { value: Nat }\n" ++
-    "instance indexBoxGet: GetElem IndexBox Nat Nat (fun (_: IndexBox) => fun (_: Nat) => True) where {\n" ++
-    "  getElem(xs: IndexBox, i: Nat, h: True): Nat := xs.value\n" ++
+    "instance indexBoxGet: GetElem(IndexBox, Nat, Nat, fun (_: IndexBox) => fun (i: Nat) => i = 0) where {\n" ++
+    "  getElem(xs: IndexBox, i: Nat, h: i = 0): Nat := xs.value\n" ++
     "}\n" ++
-    "function implicitLookup(xs: IndexBox, i: Nat, h: True): Nat := xs[i]\n" ++
-    "function explicitLookup(xs: IndexBox, i: Nat, h: True): Nat := xs[i]'h\n" ++
-    "const selected: Nat := implicitLookup(IndexBox.mk(17), 0, True.intro)\n" ++
-    "const selectedExplicit: Nat := explicitLookup(IndexBox.mk(19), 3, True.intro)\n"
+    "function implicitLookup(xs: IndexBox, i: Nat, h: i = 0): Nat := xs[i]\n" ++
+    "function explicitLookup(xs: IndexBox, i: Nat, h: i = 0): Nat := xs[i]'h\n" ++
+    "const selected: Nat := implicitLookup(IndexBox.mk(17), 0, by { rfl })\n" ++
+    "const selectedExplicit: Nat := explicitLookup(IndexBox.mk(19), 0, by { rfl })\n"
   let unproved := source ++
-    "const unproved: Nat := (IndexBox.mk(4))[0]\n"
+    "const unproved: Nat := (IndexBox.mk(4))[1]\n"
   let batch ← PsV7Native.runBatch #[
     { source := source, targets := [], sourceName := "GetElemGood.ps" },
     { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]

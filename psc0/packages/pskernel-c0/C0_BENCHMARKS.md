@@ -69,3 +69,20 @@ All times are single-run CI runner values and exclude representative end-to-end 
 The new indexed-execution engine stores canonical subterms and memoizes rewrites by term ID and binder depth. Unlike the **accepting** WHNF demand-driven spine change, indexed WHNF remains experimental and limited to context-free beta/zeta/metadata. It must not issue kernel acceptance judgments.
 
 These are **subsystem measurements**, neither complete kernel throughput nor PSC0 Rust backend compilation or self-hosting results. The Rust prototype measurements earlier in this file are separate. Preserve both cold and warm performance comparisons on identical workloads before adopting more indexed internals.
+
+
+## Native Lean indexed WHNF unchanged-spine checkpoint — 2026-10-12
+
+[CI 38191368025](https://github.com/dwijayuda/pskernel/actions/runs/38191368025) at `d9c78cd2b05bfb7c3f4750f004d27dab9399c058` passed the full native Lean library build, negative regression checks (including stuck indexed handle identity and metadata-head rewriting), and native microbenchmarks. **No self-host tests.**
+
+| Microbenchmark, single hosted CI run | Total elapsed |
+|---|---:|
+| Reassemble only: intern a precomputed 256-argument spine, 600 repetitions | 750 ms |
+| Optimized indexed WHNF: walk that same stuck spine and retain its exact original handle, 600 repetitions | 86 ms |
+| Actual native checker cold WHNF: 400 checks of 128-argument stuck spines, each with a fresh state | 25 ms |
+| Demand-driven raw head probe: 30,000 iterations | 447 ms |
+| Eager raw head and full argument-list collection, 30,000 iterations | 4,014 ms |
+
+The 750-ms reconstruction-only comparison is an isolated cost of the *removed work*: unlike a full original indexed WHNF run it omits the head traversal, and therefore the two first rows are **not** matched full-kernel throughput measurements. All 600 calls retained identical term IDs and node-store sizes. The cold actual-checker sample is a baseline and was not paired with the prior original-kernel implementation. Do not generalize these timings to full declaration admission, WHNF with environment unfolding, DefEq, or memory efficiency.
+
+Other same-run subsystem measurements: native expression equality near parity (2,615 vs 2,624 ms), direct lifting 11,439 to 8,393 ms, specialized single substitution 20,882 to 11,965 ms, and indexed deep-local lookup 2,052 to 68 ms. These are workload-specific single-run measurements.

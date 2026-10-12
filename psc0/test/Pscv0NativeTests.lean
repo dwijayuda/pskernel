@@ -1021,8 +1021,9 @@ private def projectBoundaries : IO Unit := do
         throw (IO.userError ("interpolation failed at " ++ error.phase ++
           ": " ++ error.message))
     | 16, .error error =>
-        unless error.phase == "module" do
-          throw (IO.userError "invalid interpolation accepted or refused after parsing")
+        unless error.phase == "parse" do
+          throw (IO.userError ("invalid interpolation was not rejected by the lexical/parser boundary: " ++
+            error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

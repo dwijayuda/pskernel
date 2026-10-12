@@ -659,7 +659,33 @@ private def application : String :=
   "const outputNestedAnswer: Nat := Outputs.nested\n" ++
   "abbrev IdentityType(A: Type): Type := A\n" ++
   "const aliasAnswer: IdentityType Nat := 318\n" ++
-  "namespace DoCore\nfunction pair(value: Nat): Except(String, Nat × Nat) := do {\n  return (value, Nat.add(value, 1))\n}\nfunction flow(flag: Bool, fail: Bool): Except String Nat := do {\n  let base: Nat := 300\n  if (flag) {\n    return base\n  }\n  let (left, right) ← pair(base)\n  let _: Unit ← if (fail) { Except.error(\"stopped\") } else { Except.ok(()) }\n  return Nat.add(left, right)\n}\nfunction read(value: Except String Nat): Nat :=\n  match value with { | .error _ => 399 | .ok n => n }\nfunction optionFlow(found: Bool): Option Nat := do {\n  let n: Nat ← if (found) { Option.some(302) } else { Option.none }\n  if let .some extra := Option.some(2) {\n    return Nat.add(n, extra)\n  }\n  return 0\n}\nfunction readOption(value: Option Nat): Nat :=\n  match value with { | .none => 398 | .some n => n }\nfunction Identity(A: Type): Type := Id A\nfunction identityFlow(flag: Bool): Identity Nat := do {\n  let x: Nat ← do {\n    return 303\n  }\n  if (h : flag) {\n    let proof: flag = true := h\n    return x\n  }\n  let (a, b): Nat × Nat := (x, 2)\n  return Nat.add(a, b)\n}\nfunction identityOption(flag: Bool): Id(Option Nat) := do {\n  if (flag) {\n    return Option.some(306)\n  }\n  return Option.none\n}\nfunction ignoredUnit(flag: Bool): Except String Nat := do {\n  if (flag) {\n    Except.ok(())\n    Except.ok(())\n  }\n  return 307\n}\nend DoCore\nconst doEarlyAnswer: Nat := DoCore.read(DoCore.flow(true, false))\nconst doBindAnswer: Nat := DoCore.read(DoCore.flow(false, false))\nconst doErrorAnswer: Nat := DoCore.read(DoCore.flow(false, true))\nconst doOptionAnswer: Nat := DoCore.readOption(DoCore.optionFlow(true))\nconst doNoneAnswer: Nat := DoCore.readOption(DoCore.optionFlow(false))\nconst doIdentityEarly: Nat := DoCore.identityFlow(true)\nconst doIdentityTail: Nat := DoCore.identityFlow(false)\nconst doIdentityOption: Nat := DoCore.readOption(DoCore.identityOption(true))\nconst doIgnoredUnit: Nat := DoCore.read(DoCore.ignoredUnit(true))\n"
+  "namespace DoCore\nfunction pair(value: Nat): Except(String, Nat × Nat) := do {\n  return (value, Nat.add(value, 1))\n}\nfunction flow(flag: Bool, fail: Bool): Except String Nat := do {\n  let base: Nat := 300\n  if (flag) {\n    return base\n  }\n  let (left, right) ← pair(base)\n  let _: Unit ← if (fail) { Except.error(\"stopped\") } else { Except.ok(()) }\n  return Nat.add(left, right)\n}\nfunction read(value: Except String Nat): Nat :=\n  match value with { | .error _ => 399 | .ok n => n }\nfunction optionFlow(found: Bool): Option Nat := do {\n  let n: Nat ← if (found) { Option.some(302) } else { Option.none }\n  if let .some extra := Option.some(2) {\n    return Nat.add(n, extra)\n  }\n  return 0\n}\nfunction readOption(value: Option Nat): Nat :=\n  match value with { | .none => 398 | .some n => n }\nfunction Identity(A: Type): Type := Id A\nfunction identityFlow(flag: Bool): Identity Nat := do {\n  let x: Nat ← do {\n    return 303\n  }\n  if (h : flag) {\n    let proof: flag = true := h\n    return x\n  }\n  let (a, b): Nat × Nat := (x, 2)\n  return Nat.add(a, b)\n}\nfunction identityOption(flag: Bool): Id(Option Nat) := do {\n  if (flag) {\n    return Option.some(306)\n  }\n  return Option.none\n}\nfunction ignoredUnit(flag: Bool): Except String Nat := do {\n  if (flag) {\n    Except.ok(())\n    Except.ok(())\n  }\n  return 307\n}\nend DoCore\nconst doEarlyAnswer: Nat := DoCore.read(DoCore.flow(true, false))\nconst doBindAnswer: Nat := DoCore.read(DoCore.flow(false, false))\nconst doErrorAnswer: Nat := DoCore.read(DoCore.flow(false, true))\nconst doOptionAnswer: Nat := DoCore.readOption(DoCore.optionFlow(true))\nconst doNoneAnswer: Nat := DoCore.readOption(DoCore.optionFlow(false))\nconst doIdentityEarly: Nat := DoCore.identityFlow(true)\nconst doIdentityTail: Nat := DoCore.identityFlow(false)\nconst doIdentityOption: Nat := DoCore.readOption(DoCore.identityOption(true))\nconst doIgnoredUnit: Nat := DoCore.read(DoCore.ignoredUnit(true))\n" ++
+  -- Exercise exactly the same checked dependent dictionary across JS, TS,
+  -- Rust, Wasm GC and Component observation pipelines, not just emission.
+  "namespace ProofIndexRuntime\n" ++
+  "structure IndexBox where { value: Nat }\n" ++
+  "instance indexGet: GetElem(IndexBox, Nat, Nat, fun (_: IndexBox) => fun (i: Nat) => i = 0) where {\n" ++
+  "  getElem(xs: IndexBox, i: Nat, h: i = 0): Nat := xs.value\n" ++
+  "}\n" ++
+  "function atZero(xs: IndexBox): Nat := xs[0]\n" ++
+  "function atExplicit(xs: IndexBox, i: Nat, h: i = 0): Nat := xs[i]'h\n" ++
+  "function atAssumed(xs: IndexBox, i: Nat, h: i = 0): Nat := xs[i]\n" ++
+  "structure AlwaysBox where { value: Nat }\n" ++
+  "instance alwaysGet: GetElem(AlwaysBox, Nat, Nat, fun (_: AlwaysBox) => fun (_: Nat) => True) where {\n" ++
+  "  getElem(xs: AlwaysBox, i: Nat, h: True): Nat := xs.value\n" ++
+  "}\n" ++
+  "function alwaysAt(xs: AlwaysBox): Nat := xs[42]\n" ++
+  "structure AndBox where { value: Nat }\n" ++
+  "instance andGet: GetElem(AndBox, Nat, Nat, fun (_: AndBox) => fun (_: Nat) => True ∧ True) where {\n" ++
+  "  getElem(xs: AndBox, i: Nat, h: True ∧ True): Nat := xs.value\n" ++
+  "}\n" ++
+  "function andAt(xs: AndBox): Nat := xs[42]\n" ++
+  "end ProofIndexRuntime\n" ++
+  "const indexZeroRuntime: Nat := ProofIndexRuntime.atZero(ProofIndexRuntime.IndexBox.mk(311))\n" ++
+  "const indexExplicitRuntime: Nat := ProofIndexRuntime.atExplicit(ProofIndexRuntime.IndexBox.mk(313), 0, by { rfl })\n" ++
+  "const indexAssumedRuntime: Nat := ProofIndexRuntime.atAssumed(ProofIndexRuntime.IndexBox.mk(317), 0, by { rfl })\n" ++
+  "const indexTrueRuntime: Nat := ProofIndexRuntime.alwaysAt(ProofIndexRuntime.AlwaysBox.mk(319))\n" ++
+  "const indexAndRuntime: Nat := ProofIndexRuntime.andAt(ProofIndexRuntime.AndBox.mk(323))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

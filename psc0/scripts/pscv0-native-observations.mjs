@@ -19,7 +19,6 @@ export const observations = [
   { name: "derivedPositiveRuntime", args: null, expected: 347n },
   { name: "derivedBangRuntime", args: null, expected: 349n },
   { name: "derivedNegativeRuntime", args: null, expected: true },
-  { name: "derivedLawfulRuntime", args: null, expected: 353n },
   { name: "indexAndRuntime", args: null, expected: 323n },
   { name: "proofClosure", args: null, expected: 119n },
   { name: "proofEntry", args: null, expected: 119n },

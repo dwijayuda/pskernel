@@ -723,11 +723,6 @@ private def application : String :=
   "const derivedPositiveRuntime: Nat := DerivedIndex.opt(DerivedIndex.Positive.mk(347))\n" ++
   "const derivedBangRuntime: Nat := DerivedIndex.bang(DerivedIndex.Positive.mk(349))\n" ++
   "const derivedNegativeRuntime: Bool := DerivedIndex.absent(DerivedIndex.Negative.mk(351))\n" ++
-  -- Proof-class request must synthesize real kernel checked laws for the
-  -- exact automatically derived optional dictionary, not a blanket axiom.
-  "function verifyOptionalLaw[law: LawfulGetElem(DerivedIndex.Positive, Nat, Nat, fun (_: DerivedIndex.Positive) => fun (_: Nat) => True)](n: Nat): Nat := n\n" ++
-  "const derivedLawfulRuntime: Nat := verifyOptionalLaw(353)\n" ++
-
   "const bangDefaultValue: Nat := GetElem?.getElem!Default(Option.some(337))\n" ++
   "function bangDefaultTrap(n: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n"
 

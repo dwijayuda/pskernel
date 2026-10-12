@@ -261,7 +261,9 @@ def main : IO Unit := do
     ("C0OfficialAppAccept.ndjson", true),
     ("C0OfficialAppReject.ndjson", false),
     ("C0OfficialDependencyAccept.ndjson", true),
-    ("C0OfficialDependencyReject.ndjson", false)
+    ("C0OfficialDependencyReject.ndjson", false),
+    ("C0OfficialChainAccept.ndjson", true),
+    ("C0OfficialChainReject.ndjson", false)
   ]
   for item in cases do
     let path := "test/" ++ item.fst

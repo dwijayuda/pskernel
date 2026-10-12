@@ -55,7 +55,8 @@ def gcComponentProbe : ScalarComponent := {
       body := [.localGet 0, .structNew "CapturedValue", .structGet "CapturedValue" 0] }]
     exports := [("readCaptured", "readCaptured")] }
   locals := [("readCaptured", ["value"])]
-  exports := [{ sourceName := "readCaptured", foreignName := "read-captured",
+  exports := [{
+    sourceName := "readCaptured", foreignName := "read-captured",
     parameters := [("value", .u32)], result := some .u32 }] }
 
 end PsWasm

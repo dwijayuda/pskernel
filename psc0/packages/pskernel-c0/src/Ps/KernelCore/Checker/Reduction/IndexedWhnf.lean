@@ -27,12 +27,21 @@ def psKernelC0IndexedApplySpine
       let (next, applied) ← psKernelC0Intern store (.app fn arg)
       psKernelC0IndexedApplySpine next applied rest
 
-/-- Demand-driven WHNF machine; args are earliest/innermost-first. -/
-def psKernelC0IndexedWhnfWithFuel
+/--
+  Indexed WHNF with an explicit unchanged-spine fast path.
+
+  A stuck application head can only preserve its original handle if no
+  metadata erasure, zeta reduction or beta reduction happened during the head
+  traversal. This does not infer definitional equality from handle identity
+  across stores: the original handle is returned only within the same store.
+-/
+def psKernelC0IndexedWhnfMachine
     (fuel : Nat)
     (store : PsKernelC0TermStore)
     (id : Nat)
-    (args : List Nat) :
+    (args : List Nat)
+    (original : Nat)
+    (changed : Bool) :
     Option (Prod PsKernelC0TermStore Nat) :=
   match fuel with
   | 0 => none
@@ -40,20 +49,36 @@ def psKernelC0IndexedWhnfWithFuel
       let stored ← psKernelC0StoreGet store id
       match stored.node with
       | .app fn arg =>
-          psKernelC0IndexedWhnfWithFuel remaining store fn (arg :: args)
+          psKernelC0IndexedWhnfMachine remaining store fn (arg :: args)
+            original changed
       | .mdata _ body =>
-          psKernelC0IndexedWhnfWithFuel remaining store body args
+          psKernelC0IndexedWhnfMachine remaining store body args
+            original true
       | .letE _ _ value body _ => do
           let (next, opened) ← psKernelC0Instantiate1Indexed store body value
-          psKernelC0IndexedWhnfWithFuel remaining next opened args
+          psKernelC0IndexedWhnfMachine remaining next opened args
+            original true
       | .lam _ _ body _ =>
           match args with
           | [] => some (store, id)
           | arg :: rest => do
               let (next, opened) ← psKernelC0Instantiate1Indexed store body arg
-              psKernelC0IndexedWhnfWithFuel remaining next opened rest
+              psKernelC0IndexedWhnfMachine remaining next opened rest
+                original true
       | _ =>
-          psKernelC0IndexedApplySpine store id args
+          if changed then
+            psKernelC0IndexedApplySpine store id args
+          else
+            some (store, original)
+
+/-- Demand-driven WHNF; args are earliest/innermost-first. -/
+def psKernelC0IndexedWhnfWithFuel
+    (fuel : Nat)
+    (store : PsKernelC0TermStore)
+    (id : Nat)
+    (args : List Nat) :
+    Option (Prod PsKernelC0TermStore Nat) :=
+  psKernelC0IndexedWhnfMachine fuel store id args id (!args.isEmpty)
 
 /--
   Exact fuel-bound fragment normalization. No interpretation of kernel

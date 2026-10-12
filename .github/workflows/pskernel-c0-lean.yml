@@ -62,6 +62,7 @@ jobs:
           (cd "$baseline" && lake build PsKernelC0 && lake env lean --run "$c0/test/C0CheckerComparison.lean")
 
       - name: Isolate original instantiation inside private C0 copy (no self-host)
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail

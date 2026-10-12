@@ -1356,11 +1356,11 @@ def main : IO Unit := do
               throw (IO.userError ("C0 indexed post-admission WHNF failed: " ++ err))
           let axiomName := PsKernelName.str PsKernelName.anonymous
             "C0.indexedAxiom"
-          let axiom : PsKernelAxiomInfo := {
+          let axiomInfo : PsKernelAxiomInfo := {
             base := { name := axiomName, levelParams := [], type := sort1 }
             isUnsafe := false
           }
-          match psKernelC0IndexedSessionAdmitAxiom 4096 accepted axiom with
+          match psKernelC0IndexedSessionAdmitAxiom 4096 accepted axiomInfo with
           | Except.error err =>
               throw (IO.userError ("C0 indexed axiom rejected: " ++ err))
           | Except.ok withAxiom =>

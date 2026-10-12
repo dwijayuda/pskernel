@@ -1,4 +1,5 @@
 import Ps.KernelCore.Checker.Reduction.IndexedWhnf
+import Ps.KernelCore.Checker.Session
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.LocalContext
 
@@ -217,3 +218,33 @@ def main : IO Unit := do
           if !(Nat.beq rebuiltHits runs && Nat.beq originalHits runs) then
             throw (IO.userError "C0 indexed stuck-spine outcomes diverged")
           IO.println s!"C0_BENCH indexed_stuck_spine reassemble_only_ms={rebuiltEnd - rebuiltStart} unchanged_head_whnf_ms={nativeEnd - nativeStart} depth=256 runs={runs} hits={originalHits}"
+
+
+  -- Public C0 native checking-path baseline (no self-hosting).
+  -- Every call begins with a fresh state, so this is a cold WHNF sample,
+  -- not artificially amplified cache hits. Both source forms are constructed
+  -- outside the timed loop; only the head varies across runtime iterations.
+  let checkerContext := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let variableName := PsKernelName.str PsKernelName.anonymous "C0BenchmarkStuck"
+  let stuck0 := c0BenchApps 128 (PsKernelExpr.mvar variableName)
+    (PsKernelExpr.bvar 2)
+  let stuck1 := c0BenchApps 128 (PsKernelExpr.mvar variableName)
+    (PsKernelExpr.bvar 3)
+  let coldRuns := 400
+  let mut coldHits := 0
+  let coldStart ← IO.monoMsNow
+  for k in [:coldRuns] do
+    let current := if k % 2 == 0 then stuck0 else stuck1
+    match psKernelWhnfNoRecursor 4096 checkerContext
+        psKernelCheckerStateEmpty current with
+    | Except.error message =>
+        throw (IO.userError ("C0 native cold WHNF failed: " ++ message))
+    | Except.ok (reduced, _) =>
+        if psKernelExprEqual current reduced then
+          coldHits := coldHits + 1
+        else
+          throw (IO.userError "C0 cold native WHNF changed stuck spine")
+  let coldEnd ← IO.monoMsNow
+  if !(Nat.beq coldHits coldRuns) then
+    throw (IO.userError "C0 cold WHNF did not return all expected values")
+  IO.println s!"C0_BENCH native_checker_cold_whnf ms={coldEnd - coldStart} depth=128 runs={coldRuns} hits={coldHits}"

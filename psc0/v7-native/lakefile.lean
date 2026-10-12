@@ -30,3 +30,7 @@ lean_exe pscv0_native where
 lean_exe pscv0_native_checks where
   srcDir := "../test"
   root := `Pscv0NativeTests
+
+lean_exe pscv0_wasm_checks where
+  srcDir := "../test"
+  root := `Pscv0WasmTests

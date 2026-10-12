@@ -18,6 +18,7 @@ inductive PsWasmIrValidationError where
   | invalidValueType
   | invalidTypeDeclaration (name : String)
   | invalidFunctionBody (name : String)
+  deriving Repr
 
 def psWasmIrStringIn
     (target : String)

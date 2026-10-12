@@ -10,6 +10,7 @@ inductive PsWasmEncodeError where
   | unknownFunction (name : String)
   | unknownFunctionType (name : String)
   | unknownStructure (name : String)
+  deriving Repr
 
 def psWasmByte (value : Nat) : UInt8 :=
   UInt8.ofNat value

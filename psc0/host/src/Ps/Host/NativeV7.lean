@@ -1,6 +1,7 @@
 import Ps.Compiler.Pscv0
 import Ps.BackendTs.Readable
 import Ps.BackendRust.Module
+import Ps.BackendWasm.Module
 import Ps.CompilerIr.Checked
 import Ps.Codegen.Api
 import Ps.Codegen.Provenance
@@ -12,7 +13,7 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/32"
+def profile : String := "pscv0-v7-native-bounded/33"
 
 def leanVersion : String := "4.35.0-rc4"
 def leanCommit : String := "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
@@ -27,6 +28,7 @@ structure Request where
   sourceName : String := "application.ps"
   outputStem : String := "module"
   targets : List PsEmissionTarget := []
+  exports : PsApiExposure := .allRuntime
 
 structure Timings where
   parseMs : Nat := 0
@@ -120,7 +122,9 @@ private def compile (prelude : Lean.Environment) (request : Request) :
         | none => .error "PSCV0-ECMA: missing planned program"
         | some program => PsEcma.emitProgram program
             (if target == .typescript then .typescript else .javascript) context
-      | .rust => psRustEmitReadable checked request.outputStem origins)
+      | .rust => psRustEmitReadable checked request.outputStem origins
+      | .wasmCore | .wasmComponent =>
+          PsWasm.emitScalar checked context (target == .wasmComponent) request.exports)
   let t6 ← IO.monoMsNow
   return {
     declarationCount := output.prepared.declarations.length

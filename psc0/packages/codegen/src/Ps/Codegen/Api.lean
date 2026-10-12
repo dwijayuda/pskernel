@@ -84,6 +84,21 @@ def psTargetCapabilities : PsEmissionTarget → PsTargetCapabilities
       externalImports := false
       sourceMaps := false }
 
+  | .wasmCore => {
+      target := .wasmCore
+      dialect := "pscv0-wasm-c3-scalar-gc/1"
+      arbitraryPrecision := false
+      stackSafeCalls := false
+      externalImports := false
+      sourceMaps := false }
+  | .wasmComponent => {
+      target := .wasmComponent
+      dialect := "pscv0-component-c3-scalar/1"
+      arbitraryPrecision := false
+      stackSafeCalls := false
+      externalImports := false
+      sourceMaps := false }
+
 def psApiExports (ir : PsVerifiedIrModule) : Except String (List PsApiExport) := do
   let api ← psPublicApi ir
   return api.exports.map fun d => {

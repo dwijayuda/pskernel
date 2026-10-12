@@ -147,6 +147,14 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Expr, `Ps.BackendRust.Tail,
     `Ps.BackendRust.Runtime, `Ps.BackendRust.Module]
 
+lean_lib PsBackendWasm where
+  srcDir := "packages/backend-wasm/src"
+  roots := #[`Ps.BackendWasm.Model, `Ps.BackendWasm.IntUtil,
+    `Ps.BackendWasm.Binary, `Ps.BackendWasm.ValidateStructure,
+    `Ps.BackendWasm.ValidateTyping, `Ps.BackendWasm.ValidateIr,
+    `Ps.BackendWasm.Wat, `Ps.BackendWasm.Scalar,
+    `Ps.BackendWasm.Component, `Ps.BackendWasm.Module]
+
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"
   roots := #[`Ps.Bootstrap.SelfHost]

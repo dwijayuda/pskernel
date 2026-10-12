@@ -57,7 +57,7 @@ private def writeFiles (files : List (System.FilePath × PsArtifactPayload)) : I
     | .text value => IO.FS.writeFile path value
     | .binary value => IO.FS.writeBinFile path value
 
-private def run (paths : List String) (outputs : List (PsEmissionTarget × String)) : IO UInt32 := do
+private def run (paths : List String) (outputs : List (PsEmissionTarget × String)) (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
   let requests ← paths.toArray.mapM fun (path : String) => do
     if !path.endsWith ".ps" then
       throw (IO.userError "PSCV0-NATIVE-INPUT: expected .ps application input")
@@ -68,7 +68,8 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
       source := ← IO.FS.readFile (System.FilePath.mk path)
       sourceName := (System.FilePath.mk path).fileName.getD path
       outputStem := outputStem
-      targets := outputs.map (·.1) : Request }
+      targets := outputs.map (·.1)
+      exports := exposure : Request }
   match ← runBatch requests with
   | .error error =>
       IO.eprintln (error.phase ++ ": " ++ error.message)
@@ -107,12 +108,23 @@ def main (args : List String) : IO UInt32 := do
           else if output.endsWith ".js" then pure PsEmissionTarget.javascript
           else throw (IO.userError "PSCV0-NATIVE-OUTPUT: expected .ts, .js or .rs output")
         run [input] [(target, output)]
+    | ["--emit-wasm-core", input, stem] =>
+        run [input] [(.wasmCore, stem ++ ".wasm")]
+    | ["--emit-wasm", input, stem, manifest] =>
+        let json ← match Lean.Json.parse (← IO.FS.readFile manifest) with
+          | .ok value => pure value
+          | .error message => throw (IO.userError message)
+        let names ← match Lean.fromJson? json with
+          | .ok (names : List String) => pure names
+          | .error message => throw (IO.userError ("PSCV0-EXPORT-MANIFEST: " ++ message))
+        if names.isEmpty then throw (IO.userError "PSCV0-EXPORT-MANIFEST: empty selection")
+        run [input] [(.wasmComponent, stem ++ ".wasm")] (.selected names)
     | ["--emit-all", input, stem] =>
         run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs"), (.javascript, stem ++ ".js")]
     | ["--emit-both", input, stem] =>
         run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --audit-primitives | --version"
+        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --audit-primitives | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

@@ -3,7 +3,7 @@ import Ps.Codegen.Names
 import Ps.Codegen.Provenance
 
 inductive PsEmissionTarget where
-  | typescript | javascript | rust
+  | typescript | javascript | rust | wasmCore | wasmComponent
   deriving BEq
 
 inductive PsArtifactRole where
@@ -39,6 +39,8 @@ def psEmissionTargetName : PsEmissionTarget → String
   | .typescript => "typescript"
   | .javascript => "javascript"
   | .rust => "rust"
+  | .wasmCore => "wasm-core"
+  | .wasmComponent => "wasm-component"
 
 -- Portable paths only. A host joins these validated names to its output root.
 -- Reject Windows aliases as well as POSIX traversal and case-folded collisions.

@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const packages = ['foundation','syntax','core','environment','meta','elab',
-  'bridge','compiler-ir','erasure','compiler','codegen','backend-ts','backend-rust','backend-ecma'];
+  'bridge','compiler-ir','erasure','compiler','codegen','backend-ts','backend-rust','backend-ecma','backend-wasm'];
 const sourceRoots = packages.map(name => 'packages/' + name + '/src');
 const hostRoots = [...sourceRoots, 'host/src', 'packages/pskernel-lean/provider'];
 const sha = text => createHash('sha256').update(text).digest('hex');
@@ -76,7 +76,7 @@ async function closure(roots, portable) {
   return [...visited.values()].sort((a,b) => a.module.localeCompare(b.module));
 }
 
-const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.BackendRust.Module', 'Ps.CompilerIr.Checked'], true);
+const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.BackendRust.Module', 'Ps.BackendWasm.Module', 'Ps.CompilerIr.Checked'], true);
 const native = await closure(['Ps.Host.NativeV7', 'Ps.Host.PrimitiveAudit'], false);
 const toolchain = (await readFile(path.join(root, 'v7-native/lean-toolchain'), 'utf8')).trim();
 assert.equal(toolchain, 'leanprover/lean4:v4.35.0-rc4');

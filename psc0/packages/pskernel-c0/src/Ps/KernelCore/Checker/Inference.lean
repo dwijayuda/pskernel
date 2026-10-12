@@ -201,14 +201,23 @@ the old substitution worker. Dependent substitutions and exposed/non-Pi heads
 discard the suffix metadata and fall back. Routing requires whole checked-operation performance and independent
 positive/negative/resource equivalence before deployment.
 -/
+/-- A bounded syntactic shape probe before a potentially useful
+    re-analysis. Nothing in this predicate determines typing or conversion. -/
+def psKernelC0HasPiPrefix : Nat -> PsKernelExpr -> Bool
+  | 0, _ => true
+  | n + 1, .forallE _ _ body _ =>
+      psKernelC0HasPiPrefix n body
+  | _ + 1, _ => false
+
 structure PsKernelC0CheckedAppSummary where
   type : PsKernelExpr
   state : PsKernelCheckerState
   bodyRanges : List Nat
 
-def psKernelC0CheckAppRecursiveWithFuel
+def psKernelC0CheckAppRecursiveWithFuelMode
     (fuel : Nat)
-    (rangeFuel : Nat) :
+    (rangeFuel : Nat)
+    (rebuildRanges : Bool) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -227,7 +236,8 @@ def psKernelC0CheckAppRecursiveWithFuel
       fun _ _ _ _ _ => Except.error "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelC0CheckAppRecursiveWithFuel remaining rangeFuel
+        psKernelC0CheckAppRecursiveWithFuelMode
+          remaining rangeFuel rebuildRanges
       fun whnf defeq context state expr =>
         match expr with
         | .app fn arg => do
@@ -267,15 +277,28 @@ def psKernelC0CheckAppRecursiveWithFuel
                     Except.ok approvedState
                 | Except.ok (false, _) =>
                     Except.error "application type mismatch"
-            let (resultType, nextRanges) :=
+            let (resultType, inheritedRanges, changedBySubst) :=
               match inferredFn.type, inferredFn.bodyRanges with
               | .forallE _ _ _ _, range :: suffix =>
                   if range == 0 then
-                    (view.body, suffix)
+                    (view.body, suffix, false)
                   else
-                    (psKernelExprInstantiate1 view.body arg, [])
+                    (psKernelExprInstantiate1 view.body arg, [], true)
               | _, _ =>
-                  (psKernelExprInstantiate1 view.body arg, [])
+                  (psKernelExprInstantiate1 view.body arg, [], false)
+            -- A dependent substitution invalidates the old suffix summary,
+            -- but it can expose a long newly closed Pi tail. Recompute an
+            -- exact bounded syntax summary at most once at this boundary.
+            -- Short tails, unknown shapes or metadata-budget exhaustion
+            -- keep the historical substitution behavior unchanged.
+            let nextRanges :=
+              if rebuildRanges && changedBySubst &&
+                  psKernelC0HasPiPrefix 12 resultType then
+                match psKernelC0PiBodyRangesWithFuel rangeFuel resultType with
+                | some (_, suffix) => suffix
+                | none => inheritedRanges
+              else
+                inheritedRanges
             pure {
               type := resultType
               state := nextState
@@ -294,6 +317,12 @@ def psKernelC0CheckAppRecursiveWithFuel
               state := nextState
               bodyRanges := ranges
             }
+
+/-- Historical metadata-invalidation mode, retained as the exact
+    accepting-path performance comparison. -/
+def psKernelC0CheckAppRecursiveWithFuel
+    (fuel : Nat) (rangeFuel : Nat) :=
+  psKernelC0CheckAppRecursiveWithFuelMode fuel rangeFuel false
 
 /-- Source-native, fuel-indexed checked application execution; production
     for selected root spines, with independent recursive and frame oracles. -/
@@ -314,8 +343,32 @@ def psKernelC0CheckAppRecursive
     (state : PsKernelCheckerState)
     (expr : PsKernelExpr) :
     Except String (Prod PsKernelExpr PsKernelCheckerState) := do
-  let result ← psKernelC0CheckAppRecursiveWithFuel fuel
-    (Nat.min 1024 fuel) whnf defeq context state expr
+  let result ← psKernelC0CheckAppRecursiveWithFuelMode fuel
+    (Nat.min 1024 fuel) false whnf defeq context state expr
+  pure (result.type, result.state)
+
+/-- Opt-in exact suffix-reanalysis candidate. The accepting default and
+    independent historical recursive core remain unchanged until matched
+    complete-checker results qualify the candidate. -/
+def psKernelC0CheckAppRecursiveResummarized
+    (fuel : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) := do
+  let result ← psKernelC0CheckAppRecursiveWithFuelMode fuel
+    (Nat.min 1024 fuel) true whnf defeq context state expr
   pure (result.type, result.state)
 
 def psKernelCheckWithFuel

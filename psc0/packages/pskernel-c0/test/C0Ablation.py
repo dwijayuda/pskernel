@@ -51,8 +51,8 @@ def main() -> None:
         substitute = """def psKernelC0LocalContextNextIndex
     (_context : PsKernelLocalContext)
     (_decl : PsKernelLocalDecl) :
-    Option (PsKernelC0HashTrie PsKernelLocalDecl) :=
-  Option.none
+    PsKernelC0LocalIndexUpdate :=
+  { index := Option.none, pending := [], pendingCount := 0 }
 
 """
         changed = current[:a] + substitute + current[b:]

@@ -992,7 +992,8 @@ private def projectBoundaries : IO Unit := do
   let collectionCompletionSource :=
     "const hasValue: Bool := Option.isSome(Option.some(3))\n" ++
     "theorem hasValueProof: hasValue = true := by { rfl }\n" ++
-    "const missingValue: Bool := Option.isNone(Option.none : Option Nat)\n" ++
+    "const absentValue: Option Nat := Option.none\n" ++
+    "const missingValue: Bool := Option.isNone(absentValue)\n" ++
     "theorem missingValueProof: missingValue = true := by { rfl }\n" ++
     "const keptValue: Option Nat := Option.filter(fun (n: Nat) => true, Option.some(3))\n" ++
     "theorem keptValueProof: keptValue = Option.some(3) := by { rfl }\n" ++

@@ -21,6 +21,16 @@ def c0CompareLambdas : Nat → PsKernelExpr
         (c0CompareLambdas n)
         PsKernelBinderInfo.default
 
+/-- An actual fully typed function, with 48 Sort 1 parameters and a
+    Sort 0 result, shared by original-core and C0 benchmarks. -/
+def c0CompareForalls : Nat → PsKernelExpr
+  | 0 => .sort PsKernelLevel.zero
+  | n + 1 =>
+      .forallE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0CompareForalls n)
+        PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -46,6 +56,28 @@ def main : IO Unit := do
     hints := PsKernelReducibilityHints.abbrevHint
     safety := PsKernelDefinitionSafety.safe
   }
+
+  -- Admit the benchmark function through the accepting admission API.
+  -- Applications use Sort 0, whose inferred type is Sort 1 as required.
+  let functionName := PsKernelName.str PsKernelName.anonymous "C0CompareFunction"
+  let functionDecl : PsKernelAxiomInfo := {
+    base := {
+      name := functionName
+      levelParams := []
+      type := c0CompareForalls 48
+    }
+    isUnsafe := false
+  }
+  let functionEnvironment ←
+    match psKernelAddAxiom 4096 empty functionDecl
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("matched benchmark axiom rejected: " ++ err))
+  let functionSession := psKernelMkCheckerSession functionEnvironment []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let application := c0CompareApps 48
+    (PsKernelExpr.const functionName []) sort0
 
   for round in [:3] do
     -- Full WHNF, not the isolated application-head probe.
@@ -110,6 +142,34 @@ def main : IO Unit := do
     let warmEnd ← IO.monoMsNow
     if warmOk != 800 then throw (IO.userError "matched warm inference count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=warm_infer milliseconds={warmEnd-warmStart} samples=800"
+
+    let mut appInferOk := 0
+    let appInferStart ← IO.monoMsNow
+    for _ in [:200] do
+      match psKernelSessionInfer 4096 functionSession application with
+      | Except.ok (type, _) =>
+          if psKernelExprEqual type sort0 then appInferOk := appInferOk + 1
+          else throw (IO.userError "matched application inference changed type")
+      | Except.error err =>
+          throw (IO.userError ("matched application inference failed: " ++ err))
+    let appInferEnd ← IO.monoMsNow
+    if appInferOk != 200 then
+      throw (IO.userError "matched application inference count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=cold_infer_application milliseconds={appInferEnd-appInferStart} samples=200"
+
+    let mut appCheckedOk := 0
+    let appCheckedStart ← IO.monoMsNow
+    for _ in [:80] do
+      match psKernelSessionCheck 4096 functionSession application with
+      | Except.ok (type, _) =>
+          if psKernelExprEqual type sort0 then appCheckedOk := appCheckedOk + 1
+          else throw (IO.userError "matched checked application changed type")
+      | Except.error err =>
+          throw (IO.userError ("matched checked application failed: " ++ err))
+    let appCheckedEnd ← IO.monoMsNow
+    if appCheckedOk != 80 then
+      throw (IO.userError "matched checked application count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=cold_check_application milliseconds={appCheckedEnd-appCheckedStart} samples=80"
 
     let mut admitted := 0
     let mut rejected := 0

@@ -13,7 +13,9 @@ function run(tool, args) {
 const declared = run('wasm-tools', ['component','wit',stem+'.wit']);
 const extracted = run('wasm-tools', ['component','wit',stem+'.wasm']);
 await writeFile(stem+'.extracted.wit', extracted+'\n');
-const normalize = s => s.replace(/\/\/[^\n]*/g,'').replaceAll('%','').replace(/\s/g,'');
+// Package/world labels are not stored in a component; interface members and
+// their complete type graph remain exact. Normalize only those outer labels.
+const normalize = s => s.replace(/^package [^;]+;/m,'').replace(/world [\w-]+ \{/,'world application {').replace(/\/\/[^\n]*/g,'').replaceAll('%','').replace(/\s/g,'');
 assert.equal(normalize(extracted), normalize(declared), 'complete extracted aggregate world');
 for (const kind of ['', '.core']) {
   run('wasm-tools', ['validate',stem+kind+'.wasm']);
@@ -60,6 +62,7 @@ const refused = [
   ['overflowed list', x => x.echoArray(16,0x40000000)],
   ['natural resource bound', x => x.echoNatural(16,134217728)],
   ['invalid bool before narrowing', x => x.echoInteger(256,0,0)],
+  ['invalid Unicode scalar', x => x.echoChar(0xd800)],
   ['invalid variant tag', x => x.echoChoice(256,0,0)],
   ['post-return without call', x => x.__ps_abi_post_return(0)],
   ['entry before post-return', x => { x.echoText(0,0); x.echoText(0,0); }]

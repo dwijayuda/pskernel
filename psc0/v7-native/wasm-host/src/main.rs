@@ -2,8 +2,13 @@ use wasmtime::{Config, Engine, Result, Store};
 use wasmtime::component::{Component, Instance, Linker, Val};
 use std::path::Path;
 
+fn lookup(store: &mut Store<()>, instance: Instance, name: &str) -> wasmtime::component::Func {
+    let interface = instance.get_export_index(&mut *store, None, "api");
+    let index = instance.get_export_index(&mut *store, interface.as_ref(), name).expect(name);
+    instance.get_func(&mut *store, &index).expect(name)
+}
 fn invoke(store: &mut Store<()>, instance: Instance, name: &str, input: &[Val], expected: Val) -> Result<()> {
-    let function = instance.get_func(&mut *store, name).expect(name);
+    let function = lookup(&mut *store, instance, name);
     let mut output = [Val::Bool(false)];
     function.call(&mut *store, input, &mut output)?;
     assert_eq!(output[0], expected, "{name}");
@@ -50,6 +55,12 @@ fn main() -> Result<()> {
         let present = Val::Variant("present".into(), Some(Box::new(Val::Record(vec![("value".into(), natural(&[17]))]))));
         invoke(&mut store, instance, "echo-choice", &[present.clone()], present)?;
         invoke(&mut store, instance, "many", &vec![Val::Bool(true); 17], Val::Bool(true))?;
+        let boxed = Val::Record(vec![("value".into(), Val::Bool(true))]);
+        invoke(&mut store, instance, "echo-box", &[boxed.clone()], boxed)?;
+        invoke(&mut store, instance, "echo-char", &[Val::Char('🙂')], Val::Char('🙂'))?;
+        let consume = lookup(&mut store, instance, "consume");
+        consume.call(&mut store, &[Val::String("discarded".into())], &mut [])?;
+        consume.post_return(&mut store)?;
         let text = Val::String("é🙂".repeat(16384));
         for _ in 0..64 {
             invoke(&mut store, instance, "echo-text", &[text.clone()], text.clone())?;

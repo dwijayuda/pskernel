@@ -82,12 +82,24 @@ def abiTypeKey : Nat → PsVerifiedIrType → Except String String
         String.intercalate "," (← arguments.mapM (abiTypeKey fuel)) ++ "]"
     | _ => throw "PSCV0-WIT-CAPABILITY: concrete first-order value required"
 
+-- Readable labels are separate from structural identity; collisions are rejected
+-- by addAbiNode rather than resolved by changing a public contract silently.
+def abiTypeLabel : Nat → PsVerifiedIrType → Except String String
+  | 0, _ => throw "PSCV0-ABI-RESOURCE: type label traversal exhausted"
+  | fuel + 1, type => do
+    match type with
+    | .primitive p => pure (psIrCheckPrimitiveName p)
+    | .named name arguments =>
+      let labels ← arguments.mapM (abiTypeLabel fuel)
+      pure (name ++ (if labels.isEmpty then "" else "-" ++ String.intercalate "-" labels))
+    | _ => throw "PSCV0-WIT-CAPABILITY: concrete first-order value required"
+
 def addAbiNode (node : AbiNode) : AbiM Nat := do
   let plan : AbiPlan ← get
   if node.size > 2147483647 || node.flat > 65536 then
     throw ("PSCV0-ABI-RESOURCE: boundary layout exceeds the memory32 profile: " ++ node.name)
   if let some (_, index) := plan.nodes.zipIdx.find? (fun p => p.1.key == node.key) then return index
-  if plan.nodes.any (fun n => n.name == node.name) then
+  if plan.nodes.any (fun n => n.name == node.name) || plan.exports.any (fun e => e.foreignName == node.name) then
     throw ("PSCV0-WIT-NAME: type collision: " ++ node.name)
   set { plan with nodes := plan.nodes ++ [node] }
   return plan.nodes.length
@@ -121,12 +133,7 @@ def planAbiType (ir : PsVerifiedIrModule) :
     if let some (_, index) := plan.nodes.zipIdx.find? (fun p => p.1.key == key) then return index
     if seen.contains key then throw ("PSCV0-WIT-CAPABILITY: recursive value requires an explicit resource/view API: " ++ key)
     let child := planAbiType ir fuel (key :: seen)
-    let readable ← match type with
-      | .primitive p => pure (psIrCheckPrimitiveName p)
-      | .named name arguments => do
-        let arguments ← (arguments.mapM (abiTypeKey 4096) : Except String (List String))
-        pure (name ++ (if arguments.isEmpty then "" else "-" ++ String.intercalate "-" arguments))
-      | _ => pure key
+    let readable ← abiTypeLabel 4096 type
     let name := witName readable
     let make := fun shape size alignment flat =>
       addAbiNode { key, name, type, shape, size, alignment, flat }

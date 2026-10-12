@@ -17,7 +17,7 @@ def abiNamedNodes (plan : AbiPlan) : List (AbiNode × Nat) :=
 
 def abiComponentTypeIndex (plan : AbiPlan) (id : Nat) : Except String Nat :=
   match (abiNamedNodes plan).zipIdx.find? (fun ((_, nodeId), _) => nodeId == id) with
-  | some (_, index) => pure (2 * index + 1)
+  | some (_, index) => pure index
   | none => throw "PSCV0-COMPONENT-PLAN: missing exported type identity"
 
 def abiComponentValueBytes (plan : AbiPlan) (id : Nat) : Except String (List UInt8) := do
@@ -64,10 +64,10 @@ def abiWit (plan : AbiPlan) : Except String String := do
     let result ← match e.result with
       | none => pure ""
       | some id => (abiWitType plan id).map (" -> " ++ ·)
-    return "export %" ++ e.foreignName ++ ": func(" ++ String.intercalate ", " params ++ ")" ++ result ++ ";"
+    return "%" ++ e.foreignName ++ ": func(" ++ String.intercalate ", " params ++ ")" ++ result ++ ";"
   let lines := (String.intercalate "\n\n" (types ++ exports)).splitOn "\n"
-  return "package proofscript:generated;\n\nworld application {\n" ++
-    String.intercalate "\n" (lines.map fun l => "  " ++ l) ++ "\n}\n"
+  return "package proofscript:generated;\n\nworld application {\n  export api: interface {\n" ++
+    String.intercalate "\n" (lines.map fun l => "    " ++ l) ++ "\n  }\n}\n"
 
 def abiDefinitionBytes (plan : AbiPlan) (node : AbiNode) : Except String (List UInt8) := do
   let vector := fun values => psWasmEncodeUleb (List.length values) ++ List.flatten values

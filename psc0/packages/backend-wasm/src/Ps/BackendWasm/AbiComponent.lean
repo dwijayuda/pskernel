@@ -23,10 +23,9 @@ def aggregateComponentBinary (plan : AggregateComponent) : Except String ByteArr
   let vector := fun (xs : List (List UInt8)) => u xs.length ++ xs.flatten
   let sect := psWasmEncodeSection
   let mut bytes := [0, 97, 115, 109, 13, 0, 1, 0] ++ sect 1 core ++ sect 2 [1, 0, 0, 0]
-  for ((node, _), index) in (abiNamedNodes plan.abi).zipIdx do
-    bytes := bytes ++ sect 7 (vector [← abiDefinitionBytes plan.abi node]) ++
-      sect 11 (vector [[0] ++ str node.name ++ [3] ++ u (2 * index) ++ [0]])
-  let typeCount := 2 * (abiNamedNodes plan.abi).length
+  for (node, _) in abiNamedNodes plan.abi do
+    bytes := bytes ++ sect 7 (vector [← abiDefinitionBytes plan.abi node])
+  let typeCount := (abiNamedNodes plan.abi).length
   let types ← plan.abi.exports.mapM (abiFunctionTypeBytes plan.abi)
   bytes := bytes ++ sect 7 (vector types)
   let aliases := [("__ps_abi_realloc", 0), ("__ps_abi_post_return", 0),
@@ -38,19 +37,21 @@ def aggregateComponentBinary (plan : AggregateComponent) : Except String ByteArr
     [0, 0] ++ u (3 + index) ++ [4, 0, 3, 0, 4, 0, 5] ++
       u (if e.result.isSome then 1 else 2) ++ u (typeCount + index)
   bytes := bytes ++ sect 8 (vector lifts)
-  let exports := plan.abi.exports.zipIdx.map fun (e, index) =>
-    [0] ++ str e.foreignName ++ [1] ++ u index ++ [0]
-  return ByteArray.mk (bytes ++ sect 11 (vector exports)).toArray
+  let typeExports := (abiNamedNodes plan.abi).zipIdx.map fun ((node, _), index) =>
+    [0] ++ str node.name ++ [3] ++ u index
+  let functionExports := plan.abi.exports.zipIdx.map fun (e, index) =>
+    [0] ++ str e.foreignName ++ [1] ++ u index
+  let instance := sect 5 (vector [[1] ++ vector (typeExports ++ functionExports)])
+  let exported := sect 11 (vector [[0] ++ str "api" ++ [5, 0, 0]])
+  return ByteArray.mk (bytes ++ instance ++ exported).toArray
 
 def aggregateComponentWat (plan : AggregateComponent) : Except String PsDoc := do
   let mut declarations : List PsDoc := [
     watModuleDoc plan.core plan.locals "(core module $implementation",
     .text "(core instance $instance (instantiate $implementation))"]
   for (node, _) in abiNamedNodes plan.abi do
-    let definition := node.name ++ "_definition"
     declarations := declarations ++ [
-      .text ("(type " ++ watId definition ++ " " ++ (← abiDefinitionText plan.abi node) ++ ")"),
-      .text ("(export " ++ watId node.name ++ " " ++ watQuote node.name ++ " (type " ++ watId definition ++ "))")]
+      .text ("(type " ++ watId node.name ++ " " ++ (← abiDefinitionText plan.abi node) ++ ")")]
   for (e, index) in plan.abi.exports.zipIdx do
     let parameters ← e.parameters.mapM fun (name, id) => do
       return " (param " ++ watQuote name ++ " " ++ (← abiComponentValueText plan.abi id) ++ ")"
@@ -72,8 +73,15 @@ def aggregateComponentWat (plan : AggregateComponent) : Except String PsDoc := d
       ") (canon lift (core func $lift" ++ toString index ++ ") string-encoding=utf8 (memory $abi_memory)" ++
       " (realloc $reallocate) (post-return " ++
       (if e.result.isSome then "$post_return" else "$post_return_void") ++ ")))")]
-  for e in plan.abi.exports do
-    declarations := declarations ++ [.text ("(export " ++ watQuote e.foreignName ++ " (func " ++ watId e.foreignName ++ "))")]
+  let typeExports := (abiNamedNodes plan.abi).map fun (node, _) =>
+    PsDoc.text ("(export " ++ watQuote node.name ++ " (type " ++ watId node.name ++ "))")
+  let functionExports := plan.abi.exports.map fun e =>
+    PsDoc.text ("(export " ++ watQuote e.foreignName ++ " (func " ++ watId e.foreignName ++ "))")
+  declarations := declarations ++ [
+    .append (.text "(instance $api") (.append
+      (.nest 2 (.append .hardline (psDocJoin .hardline (typeExports ++ functionExports))))
+      (.append .hardline (.text ")"))),
+    .text "(export \"api\" (instance $api))"]
   return .append (.text "(component")
     (.append (.nest 2 (.append .hardline (psDocJoin .hardline declarations))) (.append .hardline (.text ")")))
 

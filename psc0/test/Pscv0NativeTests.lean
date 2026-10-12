@@ -56,6 +56,12 @@ private def getElemFoundationCases : IO Unit := do
     "  getElem(xs: AlwaysBox, i: Nat, h: True): Nat := xs.value\n" ++
     "}\n" ++
     "function triviallyValid(xs: AlwaysBox): Nat := xs[42]\n" ++
+    "structure ProductProofBox where { value: Nat }\n" ++
+    "instance productProofGet: GetElem(ProductProofBox, Nat, Nat, fun (_: ProductProofBox) => fun (_: Nat) => True ∧ True) where {\n" ++
+    "  getElem(xs: ProductProofBox, i: Nat, h: True ∧ True): Nat := xs.value\n" ++
+    "}\n" ++
+    "function constructorProof(xs: ProductProofBox): Nat := xs[42]\n" ++
+    "const constructorResult: Nat := constructorProof(ProductProofBox.mk(31))\n" ++
     "const reflexiveResult: Nat := reflectedIndex(IndexBox.mk(23))\n" ++
     "const trivialResult: Nat := triviallyValid(AlwaysBox.mk(29))\n" ++
     "const selected: Nat := implicitLookup(IndexBox.mk(17), 0, by { rfl })\n" ++

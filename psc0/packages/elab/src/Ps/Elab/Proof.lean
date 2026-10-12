@@ -135,25 +135,43 @@ def psProofShow (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     | .error _ => pure ()
   throw (.proof "show did not match any goal")
 
--- Match Lean RC4's safe opening tactics before arithmetic and user extensions.
--- Each candidate starts from the *same* immutable proof state; failure cannot
--- leak metavariable assignments into a later choice. A constructor is accepted
--- only if it actually closes the index side condition (not when it creates
--- further unsolved obligations). A bounded solver must never admit a term
--- merely because a tactic made progress.
+-- A closed, fuel-bounded analogue of Lean RC4's introductory
+-- get_elem_tactic/trivial rules. Attempts run against immutable proof states.
+-- The recursion discharges *every* constructor-produced goal before success:
+-- unification progress is never confused with a completed proof.
+-- Arithmetic/omega and user-extensible tactics are separate pending rules.
+def psProofIndexValiditySolve (fuel : Nat) (state : PsProofState) :
+    Except PsElabError PsProofState := do
+  match fuel with
+  | 0 => throw (.proof "get_elem_tactic proof-search budget exhausted")
+  | remaining + 1 =>
+    let state ← psProofNormalize state
+    if state.goals.isEmpty then return state
+    let mut solved : Option PsProofState := none
+    for candidate in [psProofAssumption, psProofReflexivity] do
+      if solved.isNone then
+        match candidate state with
+        | .ok progressed => solved := some progressed
+        | .error _ => pure ()
+    match solved with
+    | some progressed => psProofIndexValiditySolve remaining progressed
+    | none =>
+      -- Constructor may introduce obligations: those obligations are not
+      -- admitted until this same checked search closes the whole branch.
+      match psProofConstructor state with
+      | .ok progressed => psProofIndexValiditySolve remaining progressed
+      | .error _ =>
+        throw (.proof "get_elem_tactic could not establish index validity; supply xs[i]'h or use xs[i]?")
+
 def psProofIndexValidity (state : PsProofState) : Except PsElabError PsProofState := do
   let state ← psProofNormalize state
-  let some originalGoal := state.goals.head?
-    | return state
-  for candidate in [psProofAssumption, psProofReflexivity, psProofConstructor] do
-    match candidate state with
-    | .error _ => pure ()
-    | .ok progressed =>
-      let normalized ← psProofNormalize progressed
-      if !normalized.goals.any (fun goal => goal.id == originalGoal.id) &&
-          normalized.goals.length < state.goals.length then
-        return normalized
-  throw (.proof "get_elem_tactic could not establish index validity; provide an explicit proof using xs[i]'h or use xs[i]?")
+  let some goal := state.goals.head? | return state
+  -- A generated validity proof may not capture/solve unrelated sibling goals.
+  let saved := state.goals.drop 1
+  let solved ← psProofIndexValiditySolve 64 { state with goals := [goal] }
+  if !solved.goals.isEmpty then
+    throw (.proof "get_elem_tactic left unresolved constructor obligations")
+  psProofNormalize { solved with goals := saved }
 
 def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : Nat)
     (state : PsProofState) (tactics : List PsSyntaxTactic) : Except PsElabError PsProofState := do

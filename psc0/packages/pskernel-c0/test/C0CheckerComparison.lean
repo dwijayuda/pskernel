@@ -159,6 +159,28 @@ def main : IO Unit := do
     PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
   let mediumApp := c0CompareApps 32 (PsKernelExpr.const mediumName []) sort0
 
+  -- Independently admitted typed lower-width functions, built outside
+  -- all measured loops so comparisons charge only checking and admission.
+  let mut smallCases :
+      List (Nat × PsKernelEnvironment × PsKernelExpr) := []
+  for arity in [16, 24] do
+    let name := PsKernelName.num
+      (PsKernelName.str PsKernelName.anonymous "C0SmallFunction")
+      arity
+    let declaration : PsKernelAxiomInfo := {
+      base := { name := name, levelParams := [], type := c0CompareForalls arity }
+      isUnsafe := false
+    }
+    let smallEnvironment ←
+      match psKernelAddAxiom 4096 empty declaration
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok accepted => pure accepted
+      | Except.error err =>
+          throw (IO.userError ("matched small axiom rejected: " ++ err))
+    let smallApp := c0CompareApps arity
+      (PsKernelExpr.const name []) sort0
+    smallCases := (arity, smallEnvironment, smallApp) :: smallCases
+
   let safeDefinition : PsKernelDefinitionInfo := {
     base := {
       name := PsKernelName.str PsKernelName.anonymous "C0ComparedSafeDef"
@@ -386,6 +408,54 @@ def main : IO Unit := do
     let mediumEnd ← IO.monoMsNow
     if mediumOk != 160 then throw (IO.userError "medium checked count changed")
     IO.println s!"C0_COMPARE round={round} operation=cold_check_application_medium milliseconds={mediumEnd-mediumStart} samples=160 arguments=32"
+
+    -- Exact complete public checking and sequential safe declaration
+    -- admission for 16/24 argument spines, compared with the unchanged
+    -- original package in this native workflow.
+    for smallCase in smallCases do
+      let (arity, smallEnvironment, smallApp) := smallCase
+      let smallSession := psKernelMkCheckerSession smallEnvironment []
+        PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+      let mut checked := 0
+      let start ← IO.monoMsNow
+      for _ in [:200] do
+        match psKernelSessionCheck 4096 smallSession smallApp with
+        | Except.ok (result, _) =>
+            if psKernelExprEqual result sort0 then
+              checked := checked + 1
+            else throw (IO.userError "matched small type changed")
+        | Except.error err =>
+            throw (IO.userError ("matched small checking failed: " ++ err))
+      let finish ← IO.monoMsNow
+      if checked != 200 then throw (IO.userError "small checked count mismatch")
+      IO.println s!"C0_COMPARE round={round} operation=cold_check_application_small milliseconds={finish-start} samples=200 arguments={arity}"
+
+      let base := PsKernelName.num
+        (PsKernelName.str PsKernelName.anonymous "C0SmallCheckedLibrary")
+        arity
+      let mut env := smallEnvironment
+      let admitStart ← IO.monoMsNow
+      for i in [:64] do
+        let definition : PsKernelDefinitionInfo := {
+          base := {
+            name := PsKernelName.num base i
+            levelParams := []
+            type := sort0
+          }
+          value := smallApp
+          hints := PsKernelReducibilityHints.abbrevHint
+          safety := PsKernelDefinitionSafety.safe
+        }
+        match psKernelAddDefinition 4096 env definition
+            4096 psKernelLeanNatMaxSizeDefault with
+        | Except.ok next => env := next
+        | Except.error err =>
+            throw (IO.userError ("matched small admission failed: " ++ err))
+      let admitFinish ← IO.monoMsNow
+      for i in [:64] do
+        if !psKernelEnvironmentContains env (PsKernelName.num base i) then
+          throw (IO.userError "matched small admission lost declaration")
+      IO.println s!"C0_COMPARE round={round} operation=admit_small_checked_library milliseconds={admitFinish-admitStart} declarations=64 arguments={arity}"
 
     let mut wideInferOk := 0
     let wideInferStart ← IO.monoMsNow

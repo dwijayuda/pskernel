@@ -174,7 +174,7 @@ def main : IO Unit := do
   -- alternative against the original checked core. Its only possible
   -- acceptance difference must be caught here, including exact resource
   -- exhaustion, failed heads, typed arguments and metadata-bearing syntax.
-  for arity in [1, 12, 24, 31, 32, 33, 48, 64, 192] do
+  for arity in [1, 8, 15, 16, 17, 23, 24, 31, 32, 33, 48, 64, 192, 320] do
     let source := (List.range arity).foldl
       (fun fn i =>
         PsKernelExpr.app fn
@@ -203,6 +203,28 @@ def main : IO Unit := do
             throw (IO.userError
               "C0 recursive Pi metadata changed acceptance")
   IO.println "C0_PERF_REGRESSION recursive_pi_metadata_exact_checker=pass"
+  -- The public production router must match an *independent* recursive
+  -- acceptance oracle across the medium-width routing boundary.
+  for arity in [8, 15, 16, 17, 23, 24, 31, 32, 33, 48, 64, 192] do
+    let term := (List.range arity).foldl
+      (fun fn _ => PsKernelExpr.app fn sort0)
+      (c0CheckedSpineFixture arity)
+    for fuel in [0, 1, 8, 32, 512, 4096] do
+      let defeq := psKernelIsDefEqWithFuel fuel
+      let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+      match psKernelSessionCheck fuel session term,
+          psKernelInferCoreWithFuel fuel whnf defeq
+            session.context session.state term false with
+      | Except.error a, Except.error b =>
+          if a != b then
+            throw (IO.userError "C0 public recursion metadata changed error")
+      | Except.ok (a, next), Except.ok (b, originalState) =>
+          if !(psKernelExprEqual a b &&
+              next.state.nextFresh == originalState.nextFresh) then
+            throw (IO.userError "C0 public recursion metadata changed type")
+      | _, _ =>
+          throw (IO.userError "C0 public recursion metadata changed acceptance")
+  IO.println "C0_PERF_REGRESSION public_recursive_checked_spine_boundary=pass"
 
   IO.println "C0_PERF_REGRESSION checked_spine_malformed_heads_args=pass"
 

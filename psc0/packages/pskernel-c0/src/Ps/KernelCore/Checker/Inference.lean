@@ -198,9 +198,8 @@ same WHNF, checked inference, DefEq, eager-reduction, and substitution rules.
 
 Only a syntactically unchanged Pi body with exact loose range zero may bypass
 the old substitution worker. Dependent substitutions and exposed/non-Pi heads
-discard the suffix metadata and fall back. This is not an accepting router:
-the independently qualified explicit-frame path remains production default
-until full checked-operation evidence and negative conformance justify a switch.
+discard the suffix metadata and fall back. Routing requires whole checked-operation performance and independent
+positive/negative/resource equivalence before deployment.
 -/
 structure PsKernelC0CheckedAppSummary where
   type : PsKernelExpr
@@ -282,7 +281,8 @@ def psKernelC0CheckAppRecursiveWithFuel
               bodyRanges := ranges
             }
 
-/-- Source-only alternative to framed checked execution; not production. -/
+/-- Source-native, fuel-indexed checked application execution; production
+    for selected root spines, with independent recursive and frame oracles. -/
 def psKernelC0CheckAppRecursive
     (fuel : Nat)
     (whnf :
@@ -324,15 +324,14 @@ def psKernelCheckWithFuel
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  -- Use the exact-frame/Pi-range checked route for medium and large
-  -- application spines. Smaller applications retain historical recursive
-  -- checking to avoid frame allocation overhead. The 32-argument boundary
-  -- is checked by independent recursive differential and same-run original
-  -- kernel whole-checker benchmarks; this is a routing heuristic only.
+  -- Selected root application spines use one fuel-indexed checked walk
+  -- carrying bounded, exact Pi-body metadata instead of allocating frames.
+  -- Smaller spines retain original recursive checking. Historical recursive
+  -- and explicit-frame workers remain independent differential references.
   match expr with
   | .app _ _ =>
-      if psKernelExprGetAppNumArgs expr >= 32 then
-        psKernelC0CheckAppSpineWithFuel
+      if psKernelExprGetAppNumArgs expr >= 16 then
+        psKernelC0CheckAppRecursive
           fuel whnf defeq context state expr
       else
         psKernelInferCoreWithFuel

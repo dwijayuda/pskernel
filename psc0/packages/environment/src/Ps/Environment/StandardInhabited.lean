@@ -33,6 +33,14 @@ def psStandardInhabitedValue (type value : PsExpr) : PsExpr :=
   psLogicApply (.constE (psNameAppendStr (psRootName "Inhabited") "mk")
     [.succ .zero]) [type, value]
 
+-- Construct a proof-checkable default application after typeclass search.
+-- The universe is the inferred sort of the requested field type, not a
+-- guessed Type-0 specialization.
+def psStandardInhabitedDefault (level : PsLevel)
+    (type dictionary : PsExpr) : PsExpr :=
+  psLogicApply (.constE (psNameAppendStr (psRootName "Inhabited") "default")
+    [level]) [type, dictionary]
+
 def psStandardInhabitedGround (suffix : String) (type value : PsExpr) :
     PsDeclaration :=
   .definitionDecl (psNameAppendStr (psRootName "PsStandard")

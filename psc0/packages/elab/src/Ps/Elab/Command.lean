@@ -185,6 +185,40 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
 -- The first bounded deriving handler generates an ordinary checked
 -- instance from a non-dependent fieldless constructor. It never admits
 -- arbitrary elaborator extensions or fabricated typeclass inhabitants.
+-- Compute a default for each constructor field from the registered,
+-- checked Inhabited dictionaries. Instantiating the remaining telescope
+-- after every field also supports field types dependent on earlier defaults.
+-- Source params/indices are handled separately, so this worker has neither.
+def psElabDeriveInhabitedConstructor (environment : PsEnvironment)
+    (family : PsExpr) (constructor : PsConstructorInfo) :
+    Except PsElabError PsExpr := do
+  if constructor.numParams != 0 || !constructor.levelParams.isEmpty then
+    throw (.data "deriving constructor has unsupported family parameters")
+  let mut cursor := constructor.type
+  let mut value := PsExpr.constE constructor.name []
+  for _ in [:constructor.numFields] do
+    let .forallE _ domain body _ :=
+      psWhnf environment psMetaEmpty psLocalEmpty cursor
+      | throw (.data "deriving constructor field telescope is incomplete")
+    let inferred ← (psInferType environment psMetaEmpty psLocalEmpty domain).mapError
+      PsElabError.infer
+    let .sortE level := psWhnf environment psMetaEmpty psLocalEmpty inferred
+      | throw (.data "deriving field must be a type")
+    let target := .app (.constE (psRootName "Inhabited") [level]) domain
+    let candidate := psSynthInstance environment psLocalEmpty environment.instances
+      psMetaEmpty target
+    let some dictionary := candidate.value
+      | throw (.data "deriving constructor field has no Inhabited instance")
+    let dictionary := psMetaInstantiate candidate.context dictionary
+    if psExprHasUnresolvedMeta dictionary then
+      throw (.data "deriving constructor field leaves unresolved typeclass parameters")
+    let defaultValue := psStandardInhabitedDefault level domain dictionary
+    cursor := psExprInstantiate1 body defaultValue
+    value := .app value defaultValue
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty psLocalEmpty cursor family then
+    throw (.data "derived constructor does not produce the expected family")
+  return value
+
 def psElabDeriveInhabited (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
   let some member := origin.members.find? (fun member =>
@@ -200,17 +234,17 @@ def psElabDeriveInhabited (environment : PsEnvironment)
     | throw (.data "bounded Inhabited deriving requires a Type 0 family")
   if !psLevelEquivalent level (.succ .zero) then
     throw (.data "bounded Inhabited deriving requires a Type 0 family")
-  let some constructorName := info.constructors.head?
-    | throw (.data "Inhabited deriving requires a constructor")
-  let some constructor := psEnvironmentFindConstructor environment constructorName
-    | throw (.data "deriving constructor is missing")
-  if constructor.numParams != 0 || constructor.numFields != 0 ||
-      !constructor.levelParams.isEmpty then
-    throw (.data "bounded Inhabited deriving requires a fieldless first constructor")
   let family := PsExpr.constE info.name []
   let name := psNameAppendStr info.name "instInhabited"
-  return .definitionDecl name [] (psStandardInhabitedType family)
-    (psStandardInhabitedValue family (.constE constructorName []))
+  for constructorName in info.constructors do
+    let some constructor := psEnvironmentFindConstructor environment constructorName
+      | throw (.data "deriving constructor is missing")
+    match psElabDeriveInhabitedConstructor environment family constructor with
+    | .ok defaultValue =>
+      return .definitionDecl name [] (psStandardInhabitedType family)
+        (psStandardInhabitedValue family defaultValue)
+    | .error _ => pure ()
+  throw (.data "Inhabited deriving requires a constructor with inhabitable fields")
 
 def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration)
     (handlers : List PsSyntaxName) (isPrivate : Bool) :

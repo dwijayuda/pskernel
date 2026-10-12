@@ -1028,7 +1028,15 @@ private def projectBoundaries : IO Unit := do
     "const chosen: Signal := Inhabited.default\n" ++
     "theorem chosenProof: chosen = Signal.green := by { rfl }\n"
   let derivingMissingCtor :=
-    "inductive HasPayload where { | make(value: Nat) } deriving Inhabited\n"
+    "inductive NoConstructor where { } deriving Inhabited\n"
+  let derivingPayload :=
+    "inductive Payload where { | make(value: Nat) } deriving Inhabited\n" ++
+    "const payload: Payload := Inhabited.default\n" ++
+    "theorem payloadProof: payload = Payload.make(0) := by { rfl }\n"
+  let derivingStructure :=
+    "structure Defaults where {\n  count: Nat\n  enabled: Bool\n} deriving Inhabited\n" ++
+    "const recordDefault: Defaults := Inhabited.default\n" ++
+    "theorem countProof: recordDefault.count = 0 := by { rfl }\n"
   let derivingPending :=
     "inductive Shade where { | dark | light } deriving BEq\n"
   let interpolationSource :=
@@ -1078,7 +1086,11 @@ private def projectBoundaries : IO Unit := do
     { source := derivingInhabitedSource, moduleName := "DerivingInhabited",
       targets := [.javascript, .typescript, .rust] },
     { source := derivingMissingCtor, moduleName := "DerivingMissingCtor" },
-    { source := derivingPending, moduleName := "DerivingPending" }]
+    { source := derivingPending, moduleName := "DerivingPending" },
+    { source := derivingPayload, moduleName := "DerivingPayload",
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingStructure, moduleName := "DerivingStructure",
+      targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1166,6 +1178,12 @@ private def projectBoundaries : IO Unit := do
     | 25, .error error | 26, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "unsupported deriving did not fail during elaboration")
+    | 27, .ok value | 28, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "derived payload/structure missing checked artifacts")
+    | 27, .error error | 28, .error error =>
+        throw (IO.userError ("derived payload/structure failed at " ++
+          error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

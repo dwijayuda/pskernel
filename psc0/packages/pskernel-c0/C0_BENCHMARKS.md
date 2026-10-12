@@ -473,3 +473,17 @@ The whole-expression terms differ by transparent terminal metadata, ensuring Def
 | Domain depth512 | **2 / 2 / 2** | **4 / 5 / 4** | 8 |
 
 The already-qualified full DefEq depth256 *multi*-binder fixture stays at C0 forall **6/5/5** ms vs unchanged original **162/162/162**, lambda **5/5/6** ms vs original **162/162/163** over six calls. Ordinary short/deep library and inductive admission remained near parity. Full benchmark VmHWM was C0 **1,092,300 kB** / unchanged original **1,087,788 kB**, not evidence of a memory reduction. All figures are on a single hosted runner with three within-run rounds, not statistical p95 or full-library throughput. Do not extrapolate to arbitrary proof developments.
+
+
+## Native source zeta suffix qualification — CI 38280619138
+
+[Latest native CI 38280619138](https://github.com/dwijayuda/pskernel/actions/runs/38280619138) **passed** after [source 33748911](https://github.com/dwijayuda/pskernel/commit/33748911328f92207b8db5869c6061955b2e9d67), [range test 47f59c31](https://github.com/dwijayuda/pskernel/commit/47f59c317d6b7d97115fe6ea0d66c6b91ff19f30), [matched source 5c0db911](https://github.com/dwijayuda/pskernel/commit/5c0db9118d607ed8874973f86df473182671cc07) and [dependent 2e7df3b4](https://github.com/dwijayuda/pskernel/commit/2e7df3b4d76a62ef617d9f653eef24c01aca091f). Public WHNF and accepted checked declarations exercised the *identical prepared source* in a separately rebuilt unchanged original C0 package and current C0 source, three rounds on one runner.
+
+| Complete native operation | C0, three rounds (ms) | Unchanged original, three rounds (ms) |
+| --- | --- | --- |
+| 60 public WHNF calls on 24-let spine | **54 / 51 / 53** | **62 / 63 / 64** |
+| 60 public WHNF calls on 96-let spine | **632 / 605 / 625** | **709 / 717 / 728** |
+| 24 public WHNF calls on 192-let spine | **970 / 937 / 956** | **1072 / 1076 / 1092** |
+| 40 sequentially admitted checked depth64 let definitions | **254 / 247 / 252** | **255 / 255 / 262** |
+
+These show only **modest** 10–20% C0-over-original WHNF gains on closed zeta workloads and near parity on checked admission. Other preexisting C0 improvements contribute to these differences; no isolated incremental zeta optimization effect is proven. Process-wide high-water memory **1,149,436 kB C0 / 1,149,176 kB original**, not a memory gain. The exact range metadata is read-only and validated against independent de Bruijn predicates; genuine outer-let-dependent examples must and do use original substitution. Full indexed accepting WHNF/DefEq/inference/admission, realistic whole-library throughput, p95, allocation/resource use and independent multi-run variability remain unqualified. No selfhost/bootstrap/fixed-point/metatheory tests.

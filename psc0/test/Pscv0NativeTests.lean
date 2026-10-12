@@ -1014,6 +1014,18 @@ private def projectBoundaries : IO Unit := do
   unless memoAgain.result.value.isSome &&
       memoAgain.table.visits == memoFirst.table.visits do
     throw (IO.userError "closed typeclass goal bypassed the checked answer table")
+  -- The table should also reuse *definitionally equal* closed goals.
+  -- Id Nat and Nat denote the same type; the cached witness must still be
+  -- independently checked against the exact new dependent class target.
+  let idNat := PsExpr.app (.constE (psRootName "Id") [.zero]) (.constE psNatName [])
+  let convertibleGoal := psStandardInhabitedType idNat
+  let convertibleMemo := psSynthInstanceSearch 64
+    psSelfHostProdPreludeEnvironment psLocalEmpty
+    psSelfHostProdPreludeEnvironment.instances [] memoFirst.table psMetaEmpty
+    convertibleGoal
+  unless convertibleMemo.result.value.isSome &&
+      convertibleMemo.table.visits == memoFirst.table.visits do
+    throw (IO.userError "definitionally equal instance target was not safely reused")
   IO.println ("PSCV0_NATIVE_INSTANCE_MEMO: PASS checked ground-answer reuse; expansions=" ++
     toString memoFirst.table.visits)
   let wrongDigest := "sha256:" ++ String.ofList (List.replicate 64 '0')

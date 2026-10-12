@@ -251,6 +251,28 @@ def psInstanceTableSuccess (context : PsMetaContext) (value : PsExpr)
     (table : PsInstanceSearchTable) : PsInstanceTabledResult :=
   { result := psSynthSuccess context value, table }
 
+-- Normalize only closed goals, and only using the checked environment
+-- belonging to this invocation. OutParam-masked keys select candidate groups;
+-- the positive answer table always uses the *full* goal including outputs.
+-- This is crucial for safe replay of definitions such as Id Nat versus Nat.
+def psInstanceTableGroundGoal (environment : PsEnvironment)
+    (localContext : PsLocalContext) (context : PsMetaContext)
+    (target : PsExpr) : Option PsExpr := do
+  let target := psMetaInstantiate context target
+  if psExprHasUnresolvedMeta target then none else
+  let normal := psMetaInstantiate context
+    (psWhnf environment context localContext target)
+  if psExprHasUnresolvedMeta normal then none else some normal
+
+-- Even a conversion-equivalent hit is never trusted as proof evidence:
+-- the caller must independently infer the stored witness and unify it
+-- with the *original* requested class type.
+def psInstanceTableSameGroundGoal (environment : PsEnvironment)
+    (localContext : PsLocalContext) (context : PsMetaContext)
+    (left right : PsExpr) : Bool :=
+  psExprAlphaEq left right ||
+    psDefEqReadOnlyWithEnv environment context localContext left right
+
 -- A cached witness is NEVER trusted by the cache itself. Re-infer its type
 -- and reconcile it with the caller's exact target (including outParams).
 -- Comparing normalized FULL targets avoids mixing GetElem output families.
@@ -258,10 +280,9 @@ def psInstanceTableLookup (environment : PsEnvironment)
     (localContext : PsLocalContext) (context : PsMetaContext)
     (target : PsExpr) (table : PsInstanceSearchTable) :
     Option PsSynthInstanceResult := do
-  let target := psMetaInstantiate context target
-  if psExprHasUnresolvedMeta target then none else
+  let ground ← psInstanceTableGroundGoal environment localContext context target
   let answer ← table.answers.find? (fun answer =>
-    psExprAlphaEq answer.goal target)
+    psInstanceTableSameGroundGoal environment localContext context answer.goal ground)
   if psExprHasUnresolvedMeta answer.value then none else
   match psInferType environment context localContext answer.value with
   | .error _ => none
@@ -272,11 +293,16 @@ def psInstanceTableLookup (environment : PsEnvironment)
         (psMetaInstantiate checked.context answer.value))
     else none
 
-def psInstanceTableInsert (table : PsInstanceSearchTable)
-    (goal value : PsExpr) : PsInstanceSearchTable :=
-  if psExprHasUnresolvedMeta goal || psExprHasUnresolvedMeta value ||
-      table.answers.any (fun answer => psExprAlphaEq answer.goal goal) then table
-  else { table with answers := { goal, value } :: table.answers }
+def psInstanceTableInsert (environment : PsEnvironment)
+    (localContext : PsLocalContext) (context : PsMetaContext)
+    (table : PsInstanceSearchTable) (goal value : PsExpr) : PsInstanceSearchTable :=
+  if psExprHasUnresolvedMeta value then table else
+  match psInstanceTableGroundGoal environment localContext context goal with
+  | none => table
+  | some goal =>
+    if table.answers.any (fun answer =>
+        psInstanceTableSameGroundGoal environment localContext context answer.goal goal) then table
+    else { table with answers := { goal, value } :: table.answers }
 
 -- A dependency pass consumes all currently solvable dictionary arguments.
 -- Unresolved inputs are postponed until another dictionary constrains them.
@@ -420,7 +446,8 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
             else
               let finalValue := psMetaInstantiate checked.context value
               let finalGoal := psMetaInstantiate checked.context target
-              let updated := psInstanceTableInsert attempted.table finalGoal finalValue
+              let updated := psInstanceTableInsert environment localContext checked.context
+                 attempted.table finalGoal finalValue
               psInstanceTableSuccess checked.context finalValue updated
 
 -- No persistent memo: the caller's context, local dictionaries and registry

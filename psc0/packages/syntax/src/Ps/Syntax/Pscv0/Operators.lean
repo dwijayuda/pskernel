@@ -20,6 +20,8 @@ def psPscv0InfixInfo : String → Option PsPscv0Infix
   | "↔" | "<->" => some { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }
   -- Pinned Lean RC4 Init/Notation.lean: infixr:35 " × " => Prod.
   | "×" => some { kind := .constant "Prod", precedence := 35, rightPrecedence := 35 }
+  -- Pinned Lean RC4 Init/Notation.lean: infixl:65 "+" => HAdd.hAdd.
+  | "+" => some { kind := .constant "HAdd.hAdd", precedence := 65, rightPrecedence := 66 }
   | "→" | "->" => some { kind := .arrow, precedence := 25, rightPrecedence := 25 }
   | "matches" => some { kind := .matches, precedence := 50, rightPrecedence := 51, nonAssociative := true }
   | _ => none
@@ -42,7 +44,7 @@ def psPscv0InfixToken (cursor : PsTokenCursor) :
 
 def psPscv0NotationCall (name : String) (arguments : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
-  .call (.reference (PsSyntaxName.mk ["_root_", name] span))
+  .call (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
     (arguments.map fun argument => (none, argument)) span
 
 def psPscv0OperatorTail (read : Nat → PsPscv0TermReader) (minimum fuel : Nat)

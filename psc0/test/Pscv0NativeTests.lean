@@ -36,6 +36,14 @@ private def application : String :=
   "function guarded(value: Nat, proof: False): Nat := nomatch proof\n" ++
   "const proofClosure: Nat := ignoreGuard(fun (proof: False) => nomatch proof)\n" ++
   "const proofEntry: Nat := ignoreGuard(guarded(120))\n" ++
+  -- Class notation resolves through the existing output-param and instance
+  -- elaborator; it never hard-codes Nat addition in the parser.
+  "class HAdd(A: Type, B: Type, C: outParam(Type)) where {\n" ++
+  "  hAdd: A -> B -> C\n" ++
+  "}\n" ++
+  "instance nativeNatAdd: HAdd Nat Nat Nat where {\n" ++
+  "  hAdd(a: Nat, b: Nat): Nat := Nat.add(a, b)\n" ++
+  "}\n" ++
   "opaque keep(value: Nat): Nat := {\n" ++
   "  let selected: _ := value\n" ++
   "  selected\n" ++
@@ -363,7 +371,7 @@ private def application : String :=
   "const classLocal: Nat := Classes.local\n" ++
   "const classStaticProjection: Nat := Classes.staticProjection\n" ++
   "const classAnonymous: Bool := Classes.anonymous\n" ++
-  "function borrowedBeforeMove(value: Nat): Nat := Nat.add(value, keep(value))\n" ++
+  "function borrowedBeforeMove(value: Nat): Nat := value + keep(value)\n" ++
   "structure Callback where { run: Nat -> Nat }\n" ++
   "function makeCallback(base: Nat): Callback := { run := fun value => Nat.add(base, value) }\n" ++
   "function selectCallback(flag: Bool, base: Nat): Nat -> Nat := match flag with { | true => fun value => Nat.add(base, value) | false => fun value => value }\n" ++

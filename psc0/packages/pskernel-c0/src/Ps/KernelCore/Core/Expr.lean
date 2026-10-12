@@ -700,6 +700,40 @@ def psKernelC0PiBodyRangesWithFuel
             let range ← psKernelC0SourceLooseRangeWithFuel remaining expr
             pure (range, [])
 
+/-- Exact syntactic loose-variable ranges for both lambda and Pi binder
+    tails, computed bottom-up once. Each entry is the loose range of its
+    corresponding body at the surrounding binder's scope. The analysis is
+    optional: budget exhaustion must fall back to the original scan. -/
+def psKernelC0BinderBodyRangesWithFuel
+    (fuel : Nat) :
+    PsKernelExpr -> Option (Prod Nat (List Nat)) :=
+  match fuel with
+  | 0 => fun _ => none
+  | Nat.succ remaining =>
+      let smaller := psKernelC0BinderBodyRangesWithFuel remaining
+      fun expr =>
+        match expr with
+        | .lam _ domain body _
+        | .forallE _ domain body _ => do
+            let domainRange ←
+              psKernelC0SourceLooseRangeWithFuel remaining domain
+            let (bodyRange, ranges) ← smaller body
+            pure (Nat.max domainRange (Nat.pred bodyRange),
+              bodyRange :: ranges)
+        | _ => do
+            let range ← psKernelC0SourceLooseRangeWithFuel remaining expr
+            pure (range, [])
+
+/-- A constant-bounded shape precheck avoids whole-term metadata work for
+    shallow or mismatched binders. This predicate is not a typing judgment. -/
+def psKernelC0HasBinderPrefix : Nat -> Bool -> PsKernelExpr -> Bool
+  | 0, _, _ => true
+  | n + 1, true, .lam _ _ body _ =>
+      psKernelC0HasBinderPrefix n true body
+  | n + 1, false, .forallE _ _ body _ =>
+      psKernelC0HasBinderPrefix n false body
+  | _, _, _ => false
+
 def psKernelExprGetAppFnArgsWorker
     (expr : PsKernelExpr) :
     List PsKernelExpr ->

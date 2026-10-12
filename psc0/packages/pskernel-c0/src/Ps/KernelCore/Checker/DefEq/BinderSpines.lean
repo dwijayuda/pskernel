@@ -79,6 +79,8 @@ def psKernelDefEqLambdaSpineWithFuel
     PsKernelExpr ->
     PsKernelExpr ->
     List PsKernelExpr ->
+    List Nat ->
+    List Nat ->
     Except String
       (Prod Bool PsKernelCheckerState) :=
   match fuel with
@@ -95,7 +97,9 @@ def psKernelDefEqLambdaSpineWithFuel
         (_state : PsKernelCheckerState)
         (_left : PsKernelExpr)
         (_right : PsKernelExpr)
-        (_subst : List PsKernelExpr) =>
+        (_subst : List PsKernelExpr)
+        (_leftRanges : List Nat)
+        (_rightRanges : List Nat) =>
         Except.error
           "kernel defeq lambda-spine budget exhausted"
   | Nat.succ remaining =>
@@ -113,17 +117,19 @@ def psKernelDefEqLambdaSpineWithFuel
         (state : PsKernelCheckerState)
         (left : PsKernelExpr)
         (right : PsKernelExpr)
-        (subst : List PsKernelExpr) =>
+        (subst : List PsKernelExpr)
+        (leftRanges : List Nat)
+        (rightRanges : List Nat) =>
         match left with
         | PsKernelExpr.lam _ leftDomain leftBody _ =>
             match right with
             | PsKernelExpr.lam rightName rightDomain rightBody rightBinderInfo =>
                 let leftOpened :=
-                  psKernelExprInstantiateRev
+                  psKernelExprInstantiate
                     leftDomain
                     subst;
                 let rightOpened :=
-                  psKernelExprInstantiateRev
+                  psKernelExprInstantiate
                     rightDomain
                     subst;
                 let domainResult :
@@ -143,11 +149,15 @@ def psKernelDefEqLambdaSpineWithFuel
                     Except.error error
                 | Except.ok domains =>
                     if Prod.fst domains then
-                      if
-                          if psKernelExprHasLooseBVar leftBody then
-                            true
-                          else
-                            psKernelExprHasLooseBVar rightBody then
+                      let (openLocal, nextLeftRanges, nextRightRanges) :=
+                        match leftRanges, rightRanges with
+                        | leftRange :: leftTail, rightRange :: rightTail =>
+                            (leftRange != 0 || rightRange != 0,
+                             leftTail, rightTail)
+                        | _, _ =>
+                            (psKernelExprHasLooseBVar leftBody ||
+                             psKernelExprHasLooseBVar rightBody, [], [])
+                      if openLocal then
                         let openedLocal :=
                           psKernelDefEqWithLocal
                             context
@@ -167,11 +177,9 @@ def psKernelDefEqLambdaSpineWithFuel
                           nextState
                           leftBody
                           rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.fvar fresh)
-                              List.nil))
+                          (List.cons (PsKernelExpr.fvar fresh) subst)
+                          nextLeftRanges
+                          nextRightRanges
                       else
                         smaller
                           defeq
@@ -179,12 +187,9 @@ def psKernelDefEqLambdaSpineWithFuel
                           (Prod.snd domains)
                           leftBody
                           rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.sort
-                                PsKernelLevel.zero)
-                              List.nil))
+                          (List.cons (PsKernelExpr.sort PsKernelLevel.zero) subst)
+                          nextLeftRanges
+                          nextRightRanges
                     else
                       Except.ok
                         (Prod.mk
@@ -194,14 +199,14 @@ def psKernelDefEqLambdaSpineWithFuel
                 defeq
                   context
                   state
-                  (psKernelExprInstantiateRev left subst)
-                  (psKernelExprInstantiateRev right subst)
+                  (psKernelExprInstantiate left subst)
+                  (psKernelExprInstantiate right subst)
         | _ =>
             defeq
               context
               state
-              (psKernelExprInstantiateRev left subst)
-              (psKernelExprInstantiateRev right subst)
+              (psKernelExprInstantiate left subst)
+              (psKernelExprInstantiate right subst)
 
 def psKernelDefEqLambdaSpine
     (defeq :
@@ -217,6 +222,16 @@ def psKernelDefEqLambdaSpine
     (right : PsKernelExpr) :
     Except String
       (Prod Bool PsKernelCheckerState) :=
+  let summaryDepth := 12
+  let (leftRanges, rightRanges) :=
+    if psKernelC0HasBinderPrefix summaryDepth true left &&
+        psKernelC0HasBinderPrefix summaryDepth true right then
+      match psKernelC0BinderBodyRangesWithFuel 1024 left,
+            psKernelC0BinderBodyRangesWithFuel 1024 right with
+      | some (_, a), some (_, b) => (a, b)
+      | _, _ => ([], [])
+    else
+      ([], [])
   psKernelDefEqLambdaSpineWithFuel
     (Nat.succ
       (Nat.add
@@ -228,6 +243,8 @@ def psKernelDefEqLambdaSpine
     left
     right
     List.nil
+    leftRanges
+    rightRanges
 
 def psKernelDefEqForallSpineWithFuel
     (fuel : Nat) :
@@ -242,6 +259,8 @@ def psKernelDefEqForallSpineWithFuel
     PsKernelExpr ->
     PsKernelExpr ->
     List PsKernelExpr ->
+    List Nat ->
+    List Nat ->
     Except String
       (Prod Bool PsKernelCheckerState) :=
   match fuel with
@@ -258,7 +277,9 @@ def psKernelDefEqForallSpineWithFuel
         (_state : PsKernelCheckerState)
         (_left : PsKernelExpr)
         (_right : PsKernelExpr)
-        (_subst : List PsKernelExpr) =>
+        (_subst : List PsKernelExpr)
+        (_leftRanges : List Nat)
+        (_rightRanges : List Nat) =>
         Except.error
           "kernel defeq forall-spine budget exhausted"
   | Nat.succ remaining =>
@@ -276,17 +297,19 @@ def psKernelDefEqForallSpineWithFuel
         (state : PsKernelCheckerState)
         (left : PsKernelExpr)
         (right : PsKernelExpr)
-        (subst : List PsKernelExpr) =>
+        (subst : List PsKernelExpr)
+        (leftRanges : List Nat)
+        (rightRanges : List Nat) =>
         match left with
         | PsKernelExpr.forallE _ leftDomain leftBody _ =>
             match right with
             | PsKernelExpr.forallE rightName rightDomain rightBody rightBinderInfo =>
                 let leftOpened :=
-                  psKernelExprInstantiateRev
+                  psKernelExprInstantiate
                     leftDomain
                     subst;
                 let rightOpened :=
-                  psKernelExprInstantiateRev
+                  psKernelExprInstantiate
                     rightDomain
                     subst;
                 let domainResult :
@@ -306,11 +329,15 @@ def psKernelDefEqForallSpineWithFuel
                     Except.error error
                 | Except.ok domains =>
                     if Prod.fst domains then
-                      if
-                          if psKernelExprHasLooseBVar leftBody then
-                            true
-                          else
-                            psKernelExprHasLooseBVar rightBody then
+                      let (openLocal, nextLeftRanges, nextRightRanges) :=
+                        match leftRanges, rightRanges with
+                        | leftRange :: leftTail, rightRange :: rightTail =>
+                            (leftRange != 0 || rightRange != 0,
+                             leftTail, rightTail)
+                        | _, _ =>
+                            (psKernelExprHasLooseBVar leftBody ||
+                             psKernelExprHasLooseBVar rightBody, [], [])
+                      if openLocal then
                         let openedLocal :=
                           psKernelDefEqWithLocal
                             context
@@ -330,11 +357,9 @@ def psKernelDefEqForallSpineWithFuel
                           nextState
                           leftBody
                           rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.fvar fresh)
-                              List.nil))
+                          (List.cons (PsKernelExpr.fvar fresh) subst)
+                          nextLeftRanges
+                          nextRightRanges
                       else
                         smaller
                           defeq
@@ -342,12 +367,9 @@ def psKernelDefEqForallSpineWithFuel
                           (Prod.snd domains)
                           leftBody
                           rightBody
-                          (psKernelExprListAppend
-                            subst
-                            (List.cons
-                              (PsKernelExpr.sort
-                                PsKernelLevel.zero)
-                              List.nil))
+                          (List.cons (PsKernelExpr.sort PsKernelLevel.zero) subst)
+                          nextLeftRanges
+                          nextRightRanges
                     else
                       Except.ok
                         (Prod.mk
@@ -357,14 +379,14 @@ def psKernelDefEqForallSpineWithFuel
                 defeq
                   context
                   state
-                  (psKernelExprInstantiateRev left subst)
-                  (psKernelExprInstantiateRev right subst)
+                  (psKernelExprInstantiate left subst)
+                  (psKernelExprInstantiate right subst)
         | _ =>
             defeq
               context
               state
-              (psKernelExprInstantiateRev left subst)
-              (psKernelExprInstantiateRev right subst)
+              (psKernelExprInstantiate left subst)
+              (psKernelExprInstantiate right subst)
 
 def psKernelDefEqForallSpine
     (defeq :
@@ -380,6 +402,16 @@ def psKernelDefEqForallSpine
     (right : PsKernelExpr) :
     Except String
       (Prod Bool PsKernelCheckerState) :=
+  let summaryDepth := 12
+  let (leftRanges, rightRanges) :=
+    if psKernelC0HasBinderPrefix summaryDepth false left &&
+        psKernelC0HasBinderPrefix summaryDepth false right then
+      match psKernelC0BinderBodyRangesWithFuel 1024 left,
+            psKernelC0BinderBodyRangesWithFuel 1024 right with
+      | some (_, a), some (_, b) => (a, b)
+      | _, _ => ([], [])
+    else
+      ([], [])
   psKernelDefEqForallSpineWithFuel
     (Nat.succ
       (Nat.add
@@ -391,6 +423,8 @@ def psKernelDefEqForallSpine
     left
     right
     List.nil
+    leftRanges
+    rightRanges
 
 def psKernelDefEqArgsWithFuel
     (fuel : Nat) :

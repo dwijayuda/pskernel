@@ -44,11 +44,11 @@ def scalarApi (api : PsPublicApi) (core : PsWasmModule) (locals : LocalNames) :
     let type := fun (t : PsVerifiedIrType) => match t with
       | .primitive .bool => .ok WitScalar.bool
       | .primitive .char => .ok WitScalar.char
-      | _ => .error ("PSCV0-WIT-C3-CAPABILITY: scalar interface required: " ++ d.name)
+      | _ => .error ("PSCV0-WIT-SCALAR-PLAN: scalar interface required: " ++ d.name)
     let parameters ← d.parameters.mapM fun p => do return (witName p.name, ← type p.type)
     if (parameters.map (·.1)).eraseDups.length != parameters.length then
       throw ("PSCV0-WIT-NAME: parameter collision: " ++ d.name)
-    if parameters.length > 16 then throw "PSCV0-WIT-C3-CAPABILITY: indirect parameters require C4b"
+    if parameters.length > 16 then throw "PSCV0-WIT-SCALAR-PLAN: indirect parameters use the aggregate ABI plan"
     let result ← match d.resultType with
       | .primitive .unit => pure none
       | t => (type t).map some
@@ -66,17 +66,21 @@ def scalarWit (plan : ScalarComponent) : String :=
       ")" ++ (e.result.map (fun t => " -> " ++ t.name)).getD "" ++ ";\n") ++ "}\n"
 
 def scalarComponentWat (plan : ScalarComponent) : PsDoc :=
-  let functions := plan.exports.zipIdx |>.flatMap fun (e, i) =>
-    let label := watId e.foreignName
+  let signatures := plan.exports.zipIdx.map fun (e, i) =>
     let params := String.join (e.parameters.map fun (n, t) => " (param " ++ watQuote n ++ " " ++ t.name ++ ")")
     let result := (e.result.map (fun t => " (result " ++ t.name ++ ")")).getD ""
-    [PsDoc.text ("(alias core export $instance " ++ watQuote e.sourceName ++ " (core func $lift" ++ toString i ++ "))"),
-      .text ("(func " ++ label ++ params ++ result ++ " (canon lift (core func $lift" ++ toString i ++ ")))"),
-      .text ("(export " ++ watQuote e.foreignName ++ " (func " ++ label ++ "))")]
+    PsDoc.text ("(type $__ps_signature" ++ toString i ++ " (func" ++ params ++ result ++ "))")
+  let aliases := plan.exports.zipIdx.map fun (e, i) =>
+    PsDoc.text ("(alias core export $instance " ++ watQuote e.sourceName ++ " (core func $lift" ++ toString i ++ "))")
+  let functions := plan.exports.zipIdx.map fun (e, i) =>
+    PsDoc.text ("(func " ++ watId e.foreignName ++ " (type $__ps_signature" ++ toString i ++
+      ") (canon lift (core func $lift" ++ toString i ++ ")))")
+  let exports := plan.exports.map fun e =>
+    PsDoc.text ("(export " ++ watQuote e.foreignName ++ " (func " ++ watId e.foreignName ++ "))")
   .append (.text "(component")
     (.append (.nest 2 (.append .hardline (psDocJoin .hardline (
       [watModuleDoc plan.core plan.locals "(core module $implementation",
-       .text "(core instance $instance (instantiate $implementation))"] ++ functions))))
+       .text "(core instance $instance (instantiate $implementation))"] ++ signatures ++ aliases ++ functions ++ exports))))
       (.append .hardline (.text ")")))
 
 def scalarComponentBinary (plan : ScalarComponent) : Except String ByteArray := do

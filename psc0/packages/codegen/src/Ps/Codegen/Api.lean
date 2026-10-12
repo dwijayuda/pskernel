@@ -86,15 +86,15 @@ def psTargetCapabilities : PsEmissionTarget → PsTargetCapabilities
 
   | .wasmCore => {
       target := .wasmCore
-      dialect := "pscv0-wasm-c3-scalar-gc/1"
-      arbitraryPrecision := false
+      dialect := "pscv0-wasm-c4-gc/1"
+      arbitraryPrecision := true
       stackSafeCalls := false
       externalImports := false
       sourceMaps := false }
   | .wasmComponent => {
       target := .wasmComponent
-      dialect := "pscv0-component-c3-scalar/1"
-      arbitraryPrecision := false
+      dialect := "pscv0-component-c4b-memory32/1"
+      arbitraryPrecision := true
       stackSafeCalls := false
       externalImports := false
       sourceMaps := false }

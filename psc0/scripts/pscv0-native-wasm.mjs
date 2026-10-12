@@ -33,12 +33,13 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
     run('wasm-tools', ['validate', binary]);
     run('wasm-tools', ['parse', stem + kind + '.wat', '-o', stem + kind + '.roundtrip.wasm']);
     run('wasm-tools', ['validate', stem + kind + '.roundtrip.wasm']);
-    if (kind === '.core') {
-      run('wasm-tools', ['strip', '--delete', '^name$', binary, '-o', stem + '.stripped.wasm']);
-      run('wasm-tools', ['strip', '--delete', '^name$', stem + kind + '.roundtrip.wasm', '-o', stem + '.roundtrip.stripped.wasm']);
+    {
+      run('wasm-tools', ['strip', '--delete', '^(name|component-name)$', binary, '-o', stem + '.stripped.wasm']);
+      run('wasm-tools', ['strip', '--delete', '^(name|component-name)$', stem + kind + '.roundtrip.wasm', '-o', stem + '.roundtrip.stripped.wasm']);
       assert.deepEqual(await readFile(stem + '.stripped.wasm'), await readFile(stem + '.roundtrip.stripped.wasm'),
-        'direct binary and reassembled readable core WAT');
-    } else {
+        'direct binary and reassembled readable WAT');
+    }
+    if (!kind) {
       assert.deepEqual(exportsOf(run('wasm-tools', ['component', 'wit', stem + '.roundtrip.wasm'])),
         exportsOf(declared), 'reassembled component world');
     }
@@ -71,6 +72,6 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
   }
   console.log(await readFile(stem + '.wit', 'utf8'));
 }
-console.log(JSON.stringify({profile:'pscv0-wasm-c4-candidate/1', node:process.version, v8:process.versions.v8,
+console.log(JSON.stringify({profile:'pscv0-wasm-c4-gc/1', node:process.version, v8:process.versions.v8,
   wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
   gcInsideComponent:true, scalarWorlds:4, sharedObservations:observations.length, naturalLimbChecks:10, coreBinaryWatEqual:true}));

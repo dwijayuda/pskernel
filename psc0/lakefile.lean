@@ -152,7 +152,7 @@ lean_lib PsBackendWasm where
   roots := #[`Ps.BackendWasm.Model, `Ps.BackendWasm.IntUtil,
     `Ps.BackendWasm.Binary, `Ps.BackendWasm.ValidateStructure,
     `Ps.BackendWasm.ValidateTyping, `Ps.BackendWasm.ValidateIr,
-    `Ps.BackendWasm.Wat, `Ps.BackendWasm.Names, `Ps.BackendWasm.Scalar,
+    `Ps.BackendWasm.Wat, `Ps.BackendWasm.Names,
     `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,

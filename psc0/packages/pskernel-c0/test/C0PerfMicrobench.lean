@@ -257,6 +257,16 @@ def c0BenchCheckedForalls : Nat → PsKernelExpr
         (PsKernelExpr.sort (.succ PsKernelLevel.zero))
         (c0BenchCheckedForalls n) PsKernelBinderInfo.default
 
+/-- Shared dependent Pi fixture for source-owned native checker timings. -/
+def c0BenchDependentPiTail (tail : Nat) : PsKernelExpr :=
+  PsKernelExpr.forallE PsKernelName.anonymous
+    (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+    (PsKernelExpr.forallE PsKernelName.anonymous
+      (PsKernelExpr.bvar 0)
+      (c0BenchCheckedForalls tail)
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -543,6 +553,83 @@ def main : IO Unit := do
     if legacyCount != runs || framedCount != runs || recursiveCount != runs then
       throw (IO.userError "C0 checked spine candidates disagree")
     IO.println s!"C0_BENCH checked_spine_three_way arguments={width} iterations={runs} old_ms={legacyEnd-legacyStart} frames_ms={framedEnd-framedStart} recursive_ms={recursiveEnd-recursiveStart}"
+
+  -- Two complete accepting checked operations share the exact same
+  -- admitted dependent source syntax. Only the handling of invalidated Pi
+  -- range metadata differs; all typing/DefEq/substitution rules stay equal.
+  let proofName := PsKernelName.str PsKernelName.anonymous "C0BenchDependentProp"
+  let proofAxiom : PsKernelAxiomInfo := {
+    base := {
+      name := proofName
+      levelParams := []
+      type := PsKernelExpr.sort PsKernelLevel.zero
+    }
+    isUnsafe := false
+  }
+  let proofEnv ←
+    match psKernelAddAxiom 4096 psKernelEnvironmentEmpty proofAxiom
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("C0 dependent proof fixture rejected: " ++ err))
+  for width in [24, 64, 192] do
+    let fnName := PsKernelName.num
+      (PsKernelName.str PsKernelName.anonymous "C0DependentBenchmarkFn")
+      width
+    let dependentAxiom : PsKernelAxiomInfo := {
+      base := {
+        name := fnName
+        levelParams := []
+        type := c0BenchDependentPiTail width
+      }
+      isUnsafe := false
+    }
+    let dependentEnv ←
+      match psKernelAddAxiom 4096 proofEnv dependentAxiom
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok accepted => pure accepted
+      | Except.error err =>
+          throw (IO.userError ("C0 dependent function fixture rejected: " ++ err))
+    let term := c0BenchApps width
+      (PsKernelExpr.app
+        (PsKernelExpr.app
+          (PsKernelExpr.const fnName [])
+          (PsKernelExpr.sort PsKernelLevel.zero))
+        (PsKernelExpr.const proofName []))
+      (PsKernelExpr.sort PsKernelLevel.zero)
+    let ctx := psKernelCheckerContextEmpty dependentEnv
+    let samples := if width == 192 then 30 else 80
+    let mut oldOk := 0
+    let oldStart ← IO.monoMsNow
+    for _ in [:samples] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelC0CheckAppRecursive 4096 whnf defeq
+          ctx psKernelCheckerStateEmpty term with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty (PsKernelExpr.sort PsKernelLevel.zero) then
+            oldOk := oldOk + 1
+          else throw (IO.userError "C0 old dependent type differed")
+      | Except.error err =>
+          throw (IO.userError ("C0 old dependent check failed: " ++ err))
+    let oldEnd ← IO.monoMsNow
+    let mut optimizedOk := 0
+    let optimizedStart ← IO.monoMsNow
+    for _ in [:samples] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelC0CheckAppRecursiveResummarized 4096 whnf defeq
+          ctx psKernelCheckerStateEmpty term with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty (PsKernelExpr.sort PsKernelLevel.zero) then
+            optimizedOk := optimizedOk + 1
+          else throw (IO.userError "C0 resummarized dependent type differed")
+      | Except.error err =>
+          throw (IO.userError ("C0 resummarized dependent check failed: " ++ err))
+    let optimizedEnd ← IO.monoMsNow
+    if oldOk != samples || optimizedOk != samples then
+      throw (IO.userError "C0 dependent suffix results diverged")
+    IO.println s!"C0_BENCH dependent_checked_suffix width={width} calls={samples} old_ms={oldEnd-oldStart} rebuilt_ms={optimizedEnd-optimizedStart}"
 
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   -- Build cost includes all radix allocations. Compare against an

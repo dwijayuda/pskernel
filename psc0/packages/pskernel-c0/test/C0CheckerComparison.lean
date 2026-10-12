@@ -64,6 +64,17 @@ def c0CompareLocalRefLambdas : Nat → Nat → PsKernelExpr
         (c0CompareLocalRefLambdas n index)
         PsKernelBinderInfo.default
 
+/-- One genuinely dependent Pi followed by a long non-dependent tail.
+    The first argument chooses the type of the second argument. -/
+def c0DependentPiTail (tail : Nat) : PsKernelExpr :=
+  PsKernelExpr.forallE PsKernelName.anonymous
+    (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+    (PsKernelExpr.forallE PsKernelName.anonymous
+      (PsKernelExpr.bvar 0)
+      (c0CompareForalls tail)
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -180,6 +191,50 @@ def main : IO Unit := do
     let smallApp := c0CompareApps arity
       (PsKernelExpr.const name []) sort0
     smallCases := (arity, smallEnvironment, smallApp) :: smallCases
+
+  -- A genuinely dependent first Pi binder with a long independent tail.
+  -- The second argument's type is chosen by the first. It is a complete
+  -- matching fixture for the original and C0 accepting kernels, not
+  -- specific to C0's implementation.
+  let depPropName :=
+    PsKernelName.str PsKernelName.anonymous "C0MatchedDependentProp"
+  let depFnName :=
+    PsKernelName.str PsKernelName.anonymous "C0MatchedDependentFunction"
+  let depPropAxiom : PsKernelAxiomInfo := {
+    base := {
+      name := depPropName
+      levelParams := []
+      type := sort0
+    }
+    isUnsafe := false
+  }
+  let depPropEnvironment ←
+    match psKernelAddAxiom 4096 empty depPropAxiom
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("matched dependent proposition rejected: " ++ err))
+  let depFunctionAxiom : PsKernelAxiomInfo := {
+    base := {
+      name := depFnName
+      levelParams := []
+      type := c0DependentPiTail 64
+    }
+    isUnsafe := false
+  }
+  let depEnvironment ←
+    match psKernelAddAxiom 4096 depPropEnvironment depFunctionAxiom
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("matched dependent function rejected: " ++ err))
+  let depSession := psKernelMkCheckerSession depEnvironment []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let depApplication := c0CompareApps 64
+    (PsKernelExpr.app
+      (PsKernelExpr.app (PsKernelExpr.const depFnName []) sort0)
+      (PsKernelExpr.const depPropName []))
+    sort0
 
   let safeDefinition : PsKernelDefinitionInfo := {
     base := {
@@ -645,6 +700,50 @@ def main : IO Unit := do
           (PsKernelName.num nestedArgumentBase i) then
         throw (IO.userError "matched nested argument declaration missing")
     IO.println s!"C0_COMPARE round={round} operation=admit_nested_argument_application milliseconds={nestedArgumentEnd-nestedArgumentStart} declarations=48 outer_arguments=48 inner_arguments=24"
+
+    -- Dependent-first, non-dependent-suffix real checked admission:
+    -- measures complete environment growth and checked typing, as well as
+    -- full session checking, on identical native C0/original inputs.
+    let mut dependentOk := 0
+    let dependentCheckStart ← IO.monoMsNow
+    for _ in [:80] do
+      match psKernelSessionCheck 4096 depSession depApplication with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty sort0 then
+            dependentOk := dependentOk + 1
+          else throw (IO.userError "matched dependent application type differs")
+      | Except.error err =>
+          throw (IO.userError ("matched dependent check rejected: " ++ err))
+    let dependentCheckEnd ← IO.monoMsNow
+    if dependentOk != 80 then throw (IO.userError "dependent checks lost")
+    IO.println s!"C0_COMPARE round={round} operation=cold_check_dependent_pi_tail milliseconds={dependentCheckEnd-dependentCheckStart} calls=80 tail=64"
+
+    let mut dependentLibrary := depEnvironment
+    let depLibraryName :=
+      PsKernelName.str PsKernelName.anonymous "C0MatchedDependentLibrary"
+    let depLibraryStart ← IO.monoMsNow
+    for i in [:48] do
+      let checkedDefinition : PsKernelDefinitionInfo := {
+        base := {
+          name := PsKernelName.num depLibraryName i
+          levelParams := []
+          type := sort0
+        }
+        value := depApplication
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 dependentLibrary checkedDefinition
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok next => dependentLibrary := next
+      | Except.error err =>
+          throw (IO.userError ("matched dependent library admission: " ++ err))
+    let depLibraryEnd ← IO.monoMsNow
+    for i in [:48] do
+      if !psKernelEnvironmentContains dependentLibrary
+          (PsKernelName.num depLibraryName i) then
+        throw (IO.userError "matched dependent library missing definition")
+    IO.println s!"C0_COMPARE round={round} operation=admit_dependent_pi_library milliseconds={depLibraryEnd-depLibraryStart} declarations=48 tail=64"
 
     let mut admitted := 0
     let mut rejected := 0

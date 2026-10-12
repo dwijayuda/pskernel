@@ -1,3 +1,4 @@
+import Ps.KernelCore.Admission.Declaration.Admission
 import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
 import Ps.KernelCore.Checker.Session
@@ -100,6 +101,23 @@ def c0CheckedSpineFixture : Nat → PsKernelExpr
         (PsKernelExpr.sort (.succ PsKernelLevel.zero))
         (c0CheckedSpineFixture n) PsKernelBinderInfo.default
 
+def c0RegressionForalls : Nat → PsKernelExpr
+  | 0 => .sort PsKernelLevel.zero
+  | n + 1 =>
+      .forallE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0RegressionForalls n) PsKernelBinderInfo.default
+
+def c0RegressionDependentPi (n : Nat) : PsKernelExpr :=
+  .forallE PsKernelName.anonymous (.sort (.succ PsKernelLevel.zero))
+    (.forallE PsKernelName.anonymous (.bvar 0)
+      (c0RegressionForalls n) PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
+def c0RegressionApps : Nat → PsKernelExpr → PsKernelExpr → PsKernelExpr
+  | 0, fn, _ => fn
+  | n + 1, fn, arg => c0RegressionApps n (.app fn arg) arg
+
 def main : IO Unit := do
   let session :=
     psKernelMkCheckerSession
@@ -110,6 +128,79 @@ def main : IO Unit := do
       psKernelLeanNatMaxSizeDefault
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   let sort1 := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
+  -- A genuine dependent first binder, followed by a long closed Pi
+  -- suffix, exercises range invalidation followed by exact bounded
+  -- resummarization. Both paths must agree with independent recursive
+  -- acceptance, including malformed arguments and small fuel.
+  let propName :=
+    PsKernelName.str PsKernelName.anonymous "C0DependentProp"
+  let depName :=
+    PsKernelName.str PsKernelName.anonymous "C0DependentFn"
+  let propAxiom : PsKernelAxiomInfo := {
+    base := { name := propName, levelParams := [], type := sort0 }
+    isUnsafe := false
+  }
+  let propEnv ←
+    match psKernelAddAxiom 4096 psKernelEnvironmentEmpty propAxiom
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("C0 dependent proposition rejected: " ++ err))
+  for width in [12, 24, 64] do
+    let fnName := PsKernelName.num depName width
+    let fnAxiom : PsKernelAxiomInfo := {
+      base := {
+        name := fnName
+        levelParams := []
+        type := c0RegressionDependentPi width
+      }
+      isUnsafe := false
+    }
+    let depEnv ←
+      match psKernelAddAxiom 4096 propEnv fnAxiom
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok accepted => pure accepted
+      | Except.error err =>
+          throw (IO.userError ("C0 dependent function rejected: " ++ err))
+    let ctx := psKernelCheckerContextEmpty depEnv
+    let baseTerm := PsKernelExpr.app
+      (PsKernelExpr.app (PsKernelExpr.const fnName []) sort0)
+      (PsKernelExpr.const propName [])
+    let accepted := c0RegressionApps width baseTerm sort0
+    let rejected := c0RegressionApps width
+      (PsKernelExpr.app (PsKernelExpr.app
+        (PsKernelExpr.const fnName []) sort0) sort0) sort0
+    for term in [accepted, rejected] do
+      for fuel in [0, 1, 8, 32, 128, 512, 4096] do
+        let defeq := psKernelIsDefEqWithFuel fuel
+        let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+        let oldCheck :=
+          psKernelC0CheckAppRecursive fuel whnf defeq
+            ctx psKernelCheckerStateEmpty term
+        let improved :=
+          psKernelC0CheckAppRecursiveResummarized fuel whnf defeq
+            ctx psKernelCheckerStateEmpty term
+        let reference :=
+          psKernelInferCoreWithFuel fuel whnf defeq
+            ctx psKernelCheckerStateEmpty term false
+        match oldCheck, improved, reference with
+        | Except.error a, Except.error b, Except.error referenceError =>
+            if a != b || b != referenceError then
+              throw (IO.userError
+                "C0 dependent Pi reanalysis changed exact error")
+        | Except.ok (a, stateA), Except.ok (b, stateB),
+            Except.ok (referenceType, stateRef) =>
+            if !(psKernelExprEqual a b &&
+                psKernelExprEqual b referenceType &&
+                stateA.nextFresh == stateB.nextFresh &&
+                stateB.nextFresh == stateRef.nextFresh) then
+              throw (IO.userError
+                "C0 dependent Pi reanalysis changed checked result")
+        | _, _, _ =>
+            throw (IO.userError
+              "C0 dependent Pi reanalysis changed acceptance")
+  IO.println "C0_PERF_REGRESSION dependent_pi_suffix_resummary=pass"
+
   -- The flattened checked-spine candidate must have identical fully checked
   -- outcomes, exact error strings, resource exhaustion and fresh-name state.
   -- This includes a deeply nested app, a bad argument and tight fuel limits.

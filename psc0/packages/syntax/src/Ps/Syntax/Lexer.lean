@@ -1017,6 +1017,68 @@ def psLexSkipProofScriptTriviaWithFuel
               | [] =>
                   Except.ok { remaining := remaining, position := position }
 
+-- Lean RC4 raw literals begin with r followed by any number of '#'s
+-- and a quote. An unmatched prefix remains an ordinary identifier/symbol.
+def psLexRawOpening (fuel : Nat) (remaining : List Char)
+    (hashes : Nat := 0) : Option (Nat × List Char) :=
+  match fuel, remaining with
+  | 0, _ => none
+  | _ + 1, [] => none
+  | fuel + 1, char :: rest =>
+    if psLexCharEq char '"' then some (hashes, rest)
+    else if psLexCharEq char '#' then psLexRawOpening fuel rest (hashes + 1)
+    else none
+
+def psLexRawTrailingHashes (count : Nat) (remaining : List Char) :
+    Option (List Char) :=
+  match count, remaining with
+  | 0, _ => some remaining
+  | _ + 1, [] => none
+  | count + 1, char :: rest =>
+    if psLexCharEq char '#' then psLexRawTrailingHashes count rest else none
+
+def psLexReadRawBody (fuel : Nat) (hashes : Nat) (remaining : List Char)
+    (position start : PsSourcePos) (charsRev : List Char) :
+    Except PsLexError PsLexRead :=
+  match fuel with
+  | 0 => .error (.unterminatedString (psLexSpan start position))
+  | fuel + 1 =>
+    match remaining with
+    | [] => .error (.unterminatedString (psLexSpan start position))
+    | char :: rest =>
+      if psLexCharEq char '"' then
+        match psLexRawTrailingHashes hashes rest with
+        | some trailing =>
+          let closing := '"' :: List.replicate hashes '#'
+          return {
+            cursor := {
+              remaining := trailing
+              position := closing.foldl psLexAdvanceChar position }
+            charsRev := closing.foldl (fun acc c => c :: acc) charsRev }
+        | none =>
+          psLexReadRawBody fuel hashes rest (psLexAdvanceChar position char)
+            start (char :: charsRev)
+      else
+        psLexReadRawBody fuel hashes rest (psLexAdvanceChar position char)
+          start (char :: charsRev)
+
+def psLexRawToken? (cursor : PsLexCursor) :
+    Option (Except PsLexError (PsToken × PsLexCursor)) :=
+  match cursor.remaining with
+  | [] => none
+  | first :: rest =>
+    if !psLexCharEq first 'r' then none
+    else
+      match psLexRawOpening (rest.length + 1) rest with
+      | none => none
+      | some (hashes, body) =>
+        let opening := 'r' :: List.replicate hashes '#' ++ ['"']
+        let position := opening.foldl psLexAdvanceChar cursor.position
+        let reversed := opening.foldl (fun acc c => c :: acc) ([] : List Char)
+        some ((psLexReadRawBody (body.length + 1) hashes body position
+          cursor.position reversed).map fun read =>
+            (psLexTokenFromRead .string cursor.position read, read.cursor))
+
 def psLexAllProofScriptWorker
     (inputBound : Nat)
     (fuel : Nat) :
@@ -1054,7 +1116,8 @@ def psLexAllProofScriptWorker
               Except.ok
                 (List.cons token List.nil)
             else
-              match psLexReadToken ready with
+              let parsed := (psLexRawToken? ready).getD (psLexReadToken ready)
+              match parsed with
               | Except.error error => Except.error error
               | Except.ok pair =>
                   let token : PsToken := pair.fst;

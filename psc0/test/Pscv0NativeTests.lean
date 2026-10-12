@@ -940,6 +940,9 @@ private def projectBoundaries : IO Unit := do
       isolated.libraryNames.any (fun name =>
         psNameToString name == "$psc0Private.PrivateB.same") do
     throw (IO.userError "two private module identities collided or lost scope")
+  let rawSource := "const rawQuotes: String := r#\"two \"quotes\" and \\n\"#\ntheorem quotesMatch: rawQuotes = \"two \\\"quotes\\\" and \\\\n\" := by { rfl }\nconst rawLines: String := r\"one\ntwo\"\ntheorem linesMatch: rawLines = \"one\\ntwo\" := by { rfl }\n"
+  unless (psPscv0ParseProgram "const raw: String := r#\"unterminated\n").isError do
+    throw (IO.userError "raw literal lexer accepted an unterminated delimiter")
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },
@@ -956,7 +959,8 @@ private def projectBoundaries : IO Unit := do
     { source := abbreviationClient, moduleName := "AbbrevClient", modules := [aliases] },
     { source := abbreviationOpacity, moduleName := "AbbrevOpacity", modules := [aliases] },
     { source := sharedClient.source, moduleName := "SharedClient",
-      modules := [privateA, privateB], targets := [.javascript] }]
+      modules := [privateA, privateB], targets := [.javascript] },
+    { source := rawSource, moduleName := "RawStrings" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -970,7 +974,7 @@ private def projectBoundaries : IO Unit := do
         for artifact in value.artifacts do
           if artifact.exports.any (fun e => e.semanticName == "Library.double") then
             throw (IO.userError "ordinary imported runtime symbol leaked into public API")
-    | 1, .ok _ | 8, .ok _ => pure ()
+    | 1, .ok _ | 8, .ok _ | 11, .ok _ => pure ()
     | 4, .ok value | 6, .ok value | 7, .ok value | 10, .ok value =>
         unless value.artifacts.length == 1 do
           throw (IO.userError "module linked JS artifact missing")
@@ -982,7 +986,7 @@ private def projectBoundaries : IO Unit := do
         unless error.phase == "module" do
           throw (IO.userError ("module visibility/reflexivity checked at wrong boundary: " ++ error.phase))
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
-  IO.println "PSCV0_NATIVE_MODULES: PASS module-private hygiene, abbrev exposure, diamonds, entry closure/exports and graph refusals"
+  IO.println "PSCV0_NATIVE_MODULES: PASS private hygiene, raw literals, abbreviation exposure, diamonds and entry closure/exports"
 
 def main : IO Unit := do
   emissionBoundary

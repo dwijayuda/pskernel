@@ -1,4 +1,5 @@
 import Ps.Syntax.Cursor
+import Ps.Syntax.Lexer
 
 def psCharCodeEq (char : Char) (code : Nat) : Bool :=
   Nat.beq (Char.toNat char) code
@@ -240,6 +241,24 @@ def psCharListLength (chars : List Char) : Nat :=
   | _ :: rest =>
       Nat.succ (psCharListLength rest)
 
+-- Raw strings preserve all ordinary characters, including literal
+-- backslashes and quotes, except for RC4's source newline normalization.
+def psRawNormalizeNewlines : List Char → List Char
+  | '\r' :: '\n' :: rest => '\n' :: psRawNormalizeNewlines rest
+  | char :: rest => char :: psRawNormalizeNewlines rest
+  | [] => []
+
+def psDecodeRawStringLiteral (text : String) : Option String := do
+  let 'r' :: remaining := psLexStringToList text | none
+  let (hashes, body) ← psLexRawOpening (remaining.length + 1) remaining
+  let close := '"' :: List.replicate hashes '#'
+  if body.length < close.length then none
+  else
+    let contentLength := body.length - close.length
+    if body.drop contentLength != close then none
+    else some (psStringFromReversedChars
+      (psRawNormalizeNewlines (body.take contentLength)).reverse)
+
 def psDecodeStringLiteral (text : String) : Option String :=
   match psLexStringToList text with
   | [] =>
@@ -250,6 +269,8 @@ def psDecodeStringLiteral (text : String) : Option String :=
           (Nat.succ (psCharListLength rest))
           rest
           []
+      else if psCharCodeEq first 114 then
+        psDecodeRawStringLiteral text
       else
         Option.none
 

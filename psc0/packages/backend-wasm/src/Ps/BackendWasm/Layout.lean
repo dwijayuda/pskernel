@@ -2,7 +2,7 @@ import Ps.BackendWasm.Value
 
 namespace PsWasm
 
-def constructorTypeName (owner name : String) := "__ps_constructor_" ++ owner ++ "__" ++ name
+def constructorTypeName (owner name : String) := "__ps_constructor_" ++ toString owner.length ++ "_" ++ owner ++ "_" ++ name
 
 def dataLayouts (ir : PsVerifiedIrModule) : Except String (List PsWasmStructType) := do
   let records ← ir.structures.mapM fun s => do

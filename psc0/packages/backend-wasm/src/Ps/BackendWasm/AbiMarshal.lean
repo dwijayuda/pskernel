@@ -234,7 +234,9 @@ def abiExportWrapper (plan : AbiPlan) (e : AbiExport) : Except String RuntimeDef
   let mut locals : List (String × PsWasmValueType) := []
   let mut prepare : List R := [c "__ps_abi_enter" []]
   let mut arguments : List R := []
-  if e.indirectParameters then parameters := [("arguments", .i32)]
+  if e.indirectParameters then
+    parameters := [("arguments", .i32)]
+    prepare := prepare ++ [c "__ps_abi_check_range" [g "arguments", k e.parameterSize, k e.parameterAlignment]]
   for ((name, id), index) in e.parameters.zipIdx do
     let node ← abiNode plan id
     let temporary := name ++ "_abi"

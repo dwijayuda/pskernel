@@ -87,7 +87,9 @@ def main : IO Unit := do
     { source, targets := [.wasmComponent], outputStem := "scalar",
       exports := .selected ["both", "invert"] },
     { source := "function generic{A: Type}(value: A): A := value\n", targets := [.wasmComponent] },
-    { source, targets := [.wasmComponent], exports := .selected ["missing"] }]
+    { source, targets := [.wasmComponent], exports := .selected ["missing"] },
+    { source := "structure Refined where {\n  value: Nat\n  proof: Eq(value, 0)\n}\nfunction echo(value: Refined): Refined := value\n",
+      targets := [.wasmComponent], exports := .selected ["echo"] }]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok b => pure b
     | .error e => throw (IO.userError (reprStr e))
@@ -107,4 +109,6 @@ def main : IO Unit := do
       | .ok _ => throw (IO.userError "expected bounded-profile/export refusal")
       | .error e =>
         if e.phase != "ir/emit" then throw (IO.userError ("unexpected refusal phase: " ++ e.phase))
-  IO.println "Wasm: scalar native pipeline, two refusals, typed GC/component fixture emitted."
+        if i == 3 && (e.message.splitOn "PSCV0-WIT-INVARIANT").length <= 1 then
+          throw (IO.userError ("missing foreign invariant refusal: " ++ e.message))
+  IO.println "Wasm: scalar native pipeline, three refusals, typed GC/component fixture emitted."

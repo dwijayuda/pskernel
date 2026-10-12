@@ -55,6 +55,7 @@ structure AbiExport where
   result : Option Nat
   parameterOffsets : List Nat
   parameterSize : Nat
+  parameterAlignment : Nat
   indirectParameters : Bool
   indirectResult : Bool
 
@@ -83,6 +84,8 @@ def abiTypeKey : Nat → PsVerifiedIrType → Except String String
 
 def addAbiNode (node : AbiNode) : AbiM Nat := do
   let plan : AbiPlan ← get
+  if node.size > 2147483647 || node.flat > 65536 then
+    throw ("PSCV0-ABI-RESOURCE: boundary layout exceeds the memory32 profile: " ++ node.name)
   if let some (_, index) := plan.nodes.zipIdx.find? (fun p => p.1.key == node.key) then return index
   if plan.nodes.any (fun n => n.name == node.name) then
     throw ("PSCV0-WIT-NAME: type collision: " ++ node.name)
@@ -121,7 +124,7 @@ def planAbiType (ir : PsVerifiedIrModule) :
     let readable ← match type with
       | .primitive p => pure (psIrCheckPrimitiveName p)
       | .named name arguments => do
-        let arguments ← arguments.mapM (fun arg => do pure ← abiTypeKey 4096 arg)
+        let arguments ← (arguments.mapM (abiTypeKey 4096) : Except String (List String))
         pure (name ++ (if arguments.isEmpty then "" else "-" ++ String.intercalate "-" arguments))
       | _ => pure key
     let name := witName readable
@@ -193,7 +196,7 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
       let result ← match d.resultType with
         | .primitive .unit => pure none
         | type => (planAbiType ir 4096 [] type).map some
-      let (fields, size, _, flat) ← abiFieldsLayout
+      let (fields, size, alignment, flat) ← abiFieldsLayout
         (parameters.map fun (name, node) => (name, node, PsVerifiedIrType.unknown))
       let plan : AbiPlan ← get
       let resultFlat ← (match result with
@@ -206,6 +209,7 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
       set { plan with exports := plan.exports ++ [{
         semanticName, foreignName, target := d.name, parameters, result,
         parameterOffsets := fields.map (fun (field : AbiField) => field.offset), parameterSize := size,
+        parameterAlignment := alignment,
         indirectParameters := flat > 16, indirectResult := resultFlat > 1 : AbiExport }] }
   let (_, plan) ← action.run {}
   return plan

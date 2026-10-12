@@ -19,6 +19,7 @@ inductive PsElabOriginRole where
   | structureType
   | constructor
   | recursor
+  | derivedInstance
   | normalizedWorker
   | publicWrapper
 

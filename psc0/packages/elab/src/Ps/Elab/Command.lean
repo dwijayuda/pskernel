@@ -1,5 +1,6 @@
 import Ps.Elab.Scope
 import Ps.Elab.Class
+import Ps.Environment.StandardInhabited
 
 structure PsCommandState where
   environment : PsEnvironment
@@ -181,6 +182,59 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     else state.exposedNames
     privateAliases := aliases }
 
+-- The first bounded deriving handler generates an ordinary checked
+-- instance from a non-dependent fieldless constructor. It never admits
+-- arbitrary elaborator extensions or fabricated typeclass inhabitants.
+def psElabDeriveInhabited (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
+  let some member := origin.members.find? (fun member =>
+    match member.role with
+    | .inductiveType | .structureType => true
+    | _ => false)
+    | throw (.data "deriving requires an inductive/structure declaration")
+  let some (.inductiveDecl info) := psEnvironmentFind environment member.name
+    | throw (.data "derived family is not an inductive")
+  if info.numParams != 0 || info.numIndices != 0 || !info.levelParams.isEmpty then
+    throw (.data "bounded Inhabited deriving requires a closed non-indexed family")
+  let .sortE level := info.type
+    | throw (.data "bounded Inhabited deriving requires a Type 0 family")
+  if !psLevelEquivalent level (.succ .zero) then
+    throw (.data "bounded Inhabited deriving requires a Type 0 family")
+  let some constructorName := info.constructors.head?
+    | throw (.data "Inhabited deriving requires a constructor")
+  let some constructor := psEnvironmentFindConstructor environment constructorName
+    | throw (.data "deriving constructor is missing")
+  if constructor.numParams != 0 || constructor.numFields != 0 ||
+      !constructor.levelParams.isEmpty then
+    throw (.data "bounded Inhabited deriving requires a fieldless first constructor")
+  let family := PsExpr.constE info.name []
+  let name := psNameAppendStr info.name "instInhabited"
+  return .definitionDecl name [] (psStandardInhabitedType family)
+    (psStandardInhabitedValue family (.constE constructorName []))
+
+def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration)
+    (handlers : List PsSyntaxName) (isPrivate : Bool) :
+    Except PsElabError PsCommandState := do
+  if handlers.map (·.segments) != [["Inhabited"]] then
+    throw (.data "deriving handler is allowlisted but not yet implemented")
+  let next ← psElabCommandDeclaration state source none isPrivate
+  let origin :: previous := next.originsRev
+    | throw (.data "deriving lost source provenance")
+  let instance ← psElabDeriveInhabited next.environment origin
+  let name := psDeclarationName instance
+  let some added := psEnvironmentAdd next.environment instance
+    | throw (.duplicateDeclaration name)
+  let environment ← psElabRegisterInstance added name 1000
+  let member : PsElabMemberOrigin := {
+    index := origin.members.length
+    name
+    role := .derivedInstance }
+  return { next with
+    environment
+    declarationsRev := instance :: next.declarationsRev
+    originsRev := { origin with members := origin.members ++ [member] } :: previous
+    privateNames := if isPrivate then name :: next.privateNames else next.privateNames }
+
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
   match command with
@@ -218,6 +272,8 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
   | .privateDeclaration source => psElabCommandDeclaration state source none true
   | .privateRegisteredDeclaration source registration =>
     psElabCommandDeclaration state source (some registration) true
+  | .derivingDeclaration source handlers isPrivate =>
+    psElabCommandDeriving state source handlers isPrivate
 
 def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram)
     (moduleIdentity : String := "") :

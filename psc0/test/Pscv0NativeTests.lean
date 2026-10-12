@@ -1023,6 +1023,14 @@ private def projectBoundaries : IO Unit := do
     "theorem defaultListProof: defaultList = [] := by { rfl }\n" ++
     "const defaultArray: Array Nat := Inhabited.default\n"
   let noInhabited := "const impossible: Empty := Inhabited.default\n"
+  let derivingInhabitedSource :=
+    "inductive Signal where { | green | red } deriving Inhabited\n" ++
+    "const chosen: Signal := Inhabited.default\n" ++
+    "theorem chosenProof: chosen = Signal.green := by { rfl }\n"
+  let derivingMissingCtor :=
+    "inductive HasPayload where { | make(value: Nat) } deriving Inhabited\n"
+  let derivingPending :=
+    "inductive Shade where { | dark | light } deriving BEq\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1066,7 +1074,11 @@ private def projectBoundaries : IO Unit := do
       targets := [.javascript, .typescript, .rust] },
     { source := inhabitedSource, moduleName := "StandardInhabited",
       targets := [.javascript, .typescript, .rust] },
-    { source := noInhabited, moduleName := "NoInhabited" }]
+    { source := noInhabited, moduleName := "NoInhabited" },
+    { source := derivingInhabitedSource, moduleName := "DerivingInhabited",
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingMissingCtor, moduleName := "DerivingMissingCtor" },
+    { source := derivingPending, moduleName := "DerivingPending" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1146,6 +1158,14 @@ private def projectBoundaries : IO Unit := do
     | 23, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "uninhabited Empty was not rejected during synthesis")
+    | 24, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "derived Inhabited instance missing checked artifacts")
+    | 24, .error error =>
+        throw (IO.userError ("deriving Inhabited rejected at " ++ error.phase ++ ": " ++ error.message))
+    | 25, .error error | 26, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "unsupported deriving did not fail during elaboration")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

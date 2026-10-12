@@ -185,7 +185,9 @@ def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
   let parsed ← psPscv0ParseProgramTokens input.tokens
   for command in parsed.commands do
     match command with
-    | .declaration declaration | .registeredDeclaration declaration _ =>
+    | .declaration declaration | .registeredDeclaration declaration _
+    | .privateDeclaration declaration | .privateRegisteredDeclaration declaration _
+    | .derivingDeclaration declaration _ _ =>
       match declaration with
       | .partialDefinition .. => throw "PSCV0-PARTIAL-EXCLUDED"
       | _ => pure ()

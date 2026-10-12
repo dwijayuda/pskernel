@@ -280,6 +280,10 @@ inductive PsSyntaxCommand where
   -- Modifier ownership stays in command syntax; data/term ASTs are unchanged.
   | privateDeclaration (value : PsSyntaxDeclaration)
   | privateRegisteredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
+  -- A trailing allowlisted deriving clause belongs to its defining data
+  -- command, not to a second unconstrained source macro or derived type AST.
+  | derivingDeclaration (value : PsSyntaxDeclaration) (handlers : List PsSyntaxName)
+      (isPrivate : Bool)
   | namespaceCmd (name : PsSyntaxName) (span : PsSourceSpan)
   | sectionCmd (name : Option PsSyntaxName) (span : PsSourceSpan)
   | endCmd (name : Option PsSyntaxName) (span : PsSourceSpan)

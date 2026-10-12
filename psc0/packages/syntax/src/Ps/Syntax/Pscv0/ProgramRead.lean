@@ -12,6 +12,27 @@ def psPscv0CommandNames (line fuel : Nat) (cursor : PsTokenCursor)
       let name ← (psParseSyntaxName cursor).mapError psPscv0ParseError
       psPscv0CommandNames line fuel name.cursor (name.value :: acc)
 
+-- A deriving clause is parsed after the data body's closing brace,
+-- before the command separator. The syntax layer selects a fixed handler
+-- vocabulary; the elaborator supplies the checked generated instance.
+def psPscv0DerivingHandlers (fuel : Nat) (cursor : PsTokenCursor)
+    (acc : List PsSyntaxName) : Except String (PsParseResult (List PsSyntaxName)) := do
+  match fuel with
+  | 0 => throw "PSCV0-DERIVE-HANDLER-BUDGET"
+  | fuel + 1 =>
+    let name ← (psParseSyntaxName cursor).mapError psPscv0ParseError
+    let selected := name.value.segments
+    if !([["Inhabited"], ["Repr"], ["BEq"], ["DecidableEq"],
+        ["Hashable"]] : List (List String)).contains selected then
+      throw "PSCV0-DERIVE-HANDLER-UNKNOWN"
+    if (acc.any (fun previous => previous.segments == selected)) then
+      throw "PSCV0-DERIVE-HANDLER-DUPLICATE"
+    let accumulated := name.value :: acc
+    if psTokenCursorAtText name.cursor "," then
+      let comma ← (psTokenCursorExpectText name.cursor ",").mapError psPscv0ParseError
+      psPscv0DerivingHandlers fuel comma.cursor accumulated
+    else return { value := accumulated.reverse, cursor := name.cursor }
+
 def psPscv0ReadCommand (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxCommand) := do
   let some first := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
@@ -53,6 +74,21 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
       PsSyntaxCommand.privateRegisteredDeclaration parsed.value .classDecl
     else PsSyntaxCommand.registeredDeclaration parsed.value .classDecl
     return { value := command, cursor := next }
+  if token.text == "structure" || token.text == "inductive" then
+    let parsed ← (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
+    let stop := psProofScriptDeclarationStop parsed.value
+    if psTokenCursorAtText parsed.cursor "deriving" then
+      let marker ← (psTokenCursorExpectText parsed.cursor "deriving").mapError psPscv0ParseError
+      let handlers ← psPscv0DerivingHandlers 128 marker.cursor []
+      let some finalHandler := handlers.value.getLast?
+        | throw "PSCV0-DERIVE-HANDLER-REQUIRED"
+      let next ← (psParseProofScriptCommandSeparator finalHandler.span.stop
+        handlers.cursor).mapError psPscv0ParseError
+      return { value := .derivingDeclaration parsed.value handlers.value isPrivate,
+        cursor := next }
+    let next ← (psParseProofScriptCommandSeparator stop parsed.cursor).mapError psPscv0ParseError
+    return { value := if isPrivate then .privateDeclaration parsed.value
+      else .declaration parsed.value, cursor := next }
   if ["namespace", "section", "end", "open", "include", "omit", "universe"].contains token.text then
     let head ← psPscv0Expect cursor token.text
     let names ← psPscv0CommandNames token.span.start.line 4096 head.cursor []

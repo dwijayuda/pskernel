@@ -18,7 +18,7 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
   let (view, names) ← psCodegenNamesFor ir []
   let nameOf := fun name => ((names.symbols.find? (fun s => s.semanticName == name)).map (·.outputName)).getD name
   let (lowered, locals) ← lowerModule view
-  let mut core := { lowered with exports := api.exports.map fun d => (d.name, nameOf d.name) }
+  let mut core : PsWasmModule := { lowered with exports := api.exports.map fun (d : PsVerifiedIrDeclaration) => (d.name, nameOf d.name) }
   -- Scalar component compatibility: internal Unit is a value; WIT Unit result
   -- is an explicitly omitted result at the boundary.
   if component then
@@ -32,7 +32,7 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
         core := { core with
           functions := core.functions ++ [wrapper],
           exports := core.exports.map fun (exportedName, target) => (exportedName, if exportedName == d.name then name else target) }
-  let core ← pruneFunctions core
+  core ← pruneFunctions core
   let binary ← checkedCore core locals
   let source ← psRenderDoc (watModuleDoc core locals)
   let stem := context.outputStem

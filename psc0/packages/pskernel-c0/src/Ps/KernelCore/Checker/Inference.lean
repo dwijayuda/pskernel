@@ -347,9 +347,9 @@ def psKernelC0CheckAppRecursive
     (Nat.min 1024 fuel) false whnf defeq context state expr
   pure (result.type, result.state)
 
-/-- Opt-in exact suffix-reanalysis candidate. The accepting default and
-    independent historical recursive core remain unchanged until matched
-    complete-checker results qualify the candidate. -/
+/-- Qualified exact suffix-reanalysis route for accepting checked
+    applications. Independent old C0 metadata invalidation, recursive
+    inference and explicit-frame workers remain separately callable. -/
 def psKernelC0CheckAppRecursiveResummarized
     (fuel : Nat)
     (whnf :
@@ -391,14 +391,14 @@ def psKernelCheckWithFuel
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  -- Selected root application spines use one fuel-indexed checked walk
-  -- carrying bounded, exact Pi-body metadata instead of allocating frames.
-  -- Smaller spines retain original recursive checking. Historical recursive
-  -- and explicit-frame workers remain independent differential references.
+  -- Selected root application spines use one exact fuel-indexed checked walk
+  -- that can rebuild syntactic Pi ranges after dependent substitution.
+  -- Only sufficiently long remaining Pi tails pay for a rescan. Unchanged
+  -- original inference and the old C0 mode stay independent test oracles.
   match expr with
   | .app _ _ =>
       if psKernelExprGetAppNumArgs expr >= 16 then
-        psKernelC0CheckAppRecursive
+        psKernelC0CheckAppRecursiveResummarized
           fuel whnf defeq context state expr
       else
         psKernelInferCoreWithFuel
@@ -409,5 +409,5 @@ def psKernelCheckWithFuel
       -- lambda/forall/let/metadata/projection inference without duplicating
       -- those rules or changing infer-only judgments.
       psKernelInferCoreWithFuelUsing
-        fuel (some psKernelC0CheckAppRecursive)
+        fuel (some psKernelC0CheckAppRecursiveResummarized)
         whnf defeq context state expr false

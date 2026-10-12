@@ -167,11 +167,11 @@ def main : IO Unit := do
       | _, _ =>
           throw (IO.userError "C0 lazy-projection changed decision")
   if !(psKernelExprEqual
-      Option.getD (psKernelUnfoldDefinition fixtureCtx defined) sort0
+      (Option.getD (psKernelUnfoldDefinition fixtureCtx defined) sort0)
       (PsKernelExpr.app sort1 sort0)) then
     throw (IO.userError "C0 delta fixture failed to unfold")
   if !(psKernelExprEqual
-      Option.getD (psKernelReduceProjCore fixtureCtx inductName 0 ctorTerm) sort0
+      (Option.getD (psKernelReduceProjCore fixtureCtx inductName 0 ctorTerm) sort0)
       sort1) then
     throw (IO.userError "C0 projection fixture failed to select field")
   IO.println "C0_PERF_REGRESSION lazy_delta_projection_spines=pass"

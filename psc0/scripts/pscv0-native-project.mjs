@@ -11,7 +11,7 @@ const executable = path.resolve(process.argv[3] ?? stem + ".js");
 const manifest = JSON.parse(await readFile(stem + ".js.origins.json", "utf8"));
 const mapping = JSON.parse(await readFile(stem + ".js.map", "utf8"));
 assert.equal(manifest.target, "javascript");
-assert.deepEqual(manifest.exports.map(e => e.semanticName), ["App.compute"],
+assert.deepEqual(manifest.exports.map(e => e.semantic), ["App.compute"],
   "only entry-module public declarations are executable exports");
 const exported = new Map(manifest.symbols.map(s => [s.semantic, s.output]));
 const functionName = exported.get("App.compute");

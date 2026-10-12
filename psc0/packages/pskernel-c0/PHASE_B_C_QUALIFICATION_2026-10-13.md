@@ -37,7 +37,8 @@ Important: the error-message classification in this **test adapter** is not a pr
 | `lam`, `forallE`, `letE` | Test-only decoding; same-byte acceptance/rejection fixtures |
 | `proj`, `natVal`, `strVal` | Parser code exists; **not** an official corpus qualification |
 | Safe ordinary `def` | Sequential atomic C0 checking in test adapter |
-| `axiom`, `thm`, `opaque`, `quot` and inductive blocks | Unsupported by this adapter; explicit decline |
+| Safe `axiom`, `thm`, `opaque` | New same-byte accepted/rejected native replay fixtures; unsafe axiom/opaque currently declined |
+| `quot` and inductive blocks | Unsupported by this adapter; explicit decline |
 | Free/meta variables and structured `mdata` | Unsupported; no lossy rewriting |
 | Real `Init`, Std, Mathlib export | **NOT YET QUALIFIED** |
 

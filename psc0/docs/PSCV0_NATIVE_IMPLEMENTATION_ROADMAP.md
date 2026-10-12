@@ -64,6 +64,46 @@ digest, with Lean 4.35.0-rc4 semantics. This is an implementation dependency map
 not a conformance claim. Exact qualified sources/runs are in AI_WORK_STATE.md.
 Historical generated-source milestones do not certify the current native source.
 
+## Complete Phase A–E language-first execution plan (authoritative overview)
+
+This is the full dependency plan for **core/essential `pscv0` v7**, not five independently measured percentage scores. Phases may overlap where dependencies demand it. All require checked native `.lean` semantics; no other proof kernel or unchecked runtime escape is permitted. Sub-phases and acceptance detail are also present at the TOP of `psc0/AI_WORK_STATE.md`.
+
+| Phase | Focus | Status and completion evidence |
+|---|---|---|
+| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** 208-declaration/11-class/36-instance deterministic FNV snapshot is qualified; exact RC4 GetElem validity/proof semantics, remaining deriving, Float/scientific/fixed-width/BitVec, complete curated APIs and cryptographic manifest remain |
+| **B** | Dependent and mutual data, elimination, strict positivity and total recursive programming | **Planned.** Complete heterogeneous index reasoning, dependent motives, nested/mutual inductives, recursive pattern matrices and well-founded/structural termination; refuse invalid/partial constructs |
+| **C** | General class-driven typed do, state, effectful control and explicit IO/FFI boundaries | **Planned.** Complete Monad/Except/State/Reader and selected transformers, mutable/erased state, loops/early returns, try/catch/finally, effect/capability evidence and all-target preservation |
+| **D** | Kernel-checked tactics, intrinsic specifications, VC generation and assurance ledger | **Planned.** Complete selected rewrite/simp/automation, RC4 given/requires/ensures/assert/invariant/decreasing, WP/VC proof attachment, and verified-emission block on *any* unresolved mandatory obligation |
+| **E** | Comprehensive conformance, independent evidence and final core/essential v7 integration | **Planned.** Reference-to-`PS-CONF-*` matrix, differential RC4 checking, reproducible cryptographic Standard+assumption closure, multi-module runtime matrix and audited verified acceptance gates |
+
+### Phase A detailed exit gate
+
+- **GetElem:** implement pinned RC4 `GetElem` and `GetElem?` with actual Prop-valued validity and Decidable/proof instances; `xs[i]` and `xs[i]'h` cannot discard proofs; `xs[i]?` returns Option safely; `xs[i]!` is a separately declared panic/default behavior, not a bounds proof. Do not confuse existing checked `List.get?` with the four forms.
+- **Deriving:** accepted selected trailing handlers `Inhabited`/`BEq`/`DecidableEq`/`Repr`/`Hashable` must produce genuine checked and registered definitions with generated-source provenance. Unsupported cases and arbitrary handlers fail closed.
+- **Scalars/libraries:** complete pinned `Float`/`Float32`/scientific, fixed-width/`BitVec` and selected arrays/bytes/string/collection conversions, then prove and execute target parity.
+- **Registry:** supplement existing selected `fnv1a64:3890664716772208725` structural-drift check with a cryptographically pinned, complete RC4 module/notation/deriving/class/instance/tactic/effect/axiom manifest. Recompute/approve intentional semantic changes; never silently overwrite a frozen expected hash.
+
+### Phase B detailed exit gate
+
+Ensure formation/elimination of selected heterogeneous/indexed/dependent/recursive types, nested and mutual inductives, constructor consistency/positivity, independent motive checking, total structural and well-founded recursion. Check invalid indices/termination negative cases and runtime/proof erasure across all supported backends. No user `partial`/`unsafe` workaround.
+
+### Phase C detailed exit gate
+
+Generalize effects through common checked bind/pure/elaboration and appropriate instances, not a succession of one-off translations; add selected `StateT`/`ReaderT`/`ExceptT`, typed `do` and mutable/erased variables, loops, early return, throw/try/catch/finally and explicit world/IO boundaries. Specify effect and failure semantics independently of JS exceptions and validate the cross-target IR.
+
+### Phase D detailed exit gate
+
+Proof-producing tactics and rewriting/selected simp/omega/grind require pinned proof extensions and official kernel validation. Implement RC4-style `given`/`requires`/`ensures`, assertions, invariants/decreasing, `Std.WP`/`vcgen` and optional `where finally | spec` proof tails with a traceable obligation/effect/assumption/erasure ledger. **Verified executable output is forbidden while any mandatory proof, specification coverage, effect, assumption, termination or erasure obligation is unresolved.**
+
+### Phase E detailed exit gate
+
+Close a source-rule → positive/negative case → exact failure phase → Lean RC4 elaborated-term/semantic correspondence → verified IR/backend matrix. Independently validate assumption/primitive/erasure safety, crypto-pinned environment closure, multi-module linking and public APIs, JS/TS/Rust/Wasm GC/Wasmtime parity, and reproducible CI with fully recorded SHA, version/digest and evidence. Only then say core/essential v7 is complete. A green bounded profile is insufficient.
+
+### Separate deferred workstreams: C5, backend D and later migration
+
+**C5** readable pre-erasure source reconstruction, round-trip formatting and finer source maps happens **after** the A–E essential language closure. Existing backend **D** means *measured performance and ownership work*, not language Phase D. Compiler-source `.ps` migration, bootstrap/self-hosting, `pskernel-core` and wider P2 ecosystem are **not in this authorization**. Keep original protected branches/history, draft PR #109, Wasm GC internals and Canonical ABI-only linear memory.
+
+
 ## End state and current development contract
 
 Keep the portable semantic compiler in shared .lean modules, executed natively

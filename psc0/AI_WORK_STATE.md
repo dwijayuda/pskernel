@@ -1,35 +1,78 @@
-# Current AI handoff — PSCV0 v7 native Lean (13 October 2026)
+# PSCV0 v7 — Active AI work state and complete phase handoff
 
-**Authoritative active checkpoint; everything below the historical divider is earlier evidence.**
-
+**Date:** 13 October 2026 · **Status:** implementation in progress, NOT full v7 conformance.
 **Repository:** https://github.com/dwijayuda/pskernel
-**Branch:** `psc0/pscv0-v7-native-lean-v1` · **Draft PR:** https://github.com/dwijayuda/pskernel/pull/109
-**Latest qualified executable SHA:** `c810d6fe15d064968008d09849efd9ac5b2820de`
-**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38292170524
-**Official checker:** Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`
-**Bounded source profile:** `pscv0-v7-native-bounded/48`, **not full v7 conformance**.
+**Working branch:** `psc0/pscv0-v7-native-lean-v1`
+**Existing draft PR:** https://github.com/dwijayuda/pskernel/pull/109
+**Last qualified EXECUTABLE source commit:** `c810d6fe15d064968008d09849efd9ac5b2820de`
+**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38292170524 — all jobs passed.
+**Prior documentation-only commit:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`.
+**Official checker:** Lean `4.35.0-rc4`, upstream SHA `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+**Source qualification profile:** `pscv0-v7-native-bounded/48`. Profile 49's module foundation is not a claim of completed language conformance.
+**Canonical language spec:** `psc0/PSCV0_LANGUAGE_REFERENCE.md`; follow its stated RC4 semantics, restrictions and phase-sensitive refusals.
+**Dependency roadmap:** `psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md` (now includes the complete Phase A–E plan).
+**Standard snapshot details:** `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md`.
+**Ready-to-paste continuation:** `psc0/AI_CONTINUE_PROMPT.md`.
 
-## Newly qualified Phase A — reproducible Standard environment identity
+## Verified current baseline — what actually passed
 
-- `Ps.Environment.StandardSnapshot` is a new **portable native .lean** module. It serializes the installed checked Core declarations, binder/universe types and bodies, metadata for constructors/recursors, class identities and input/output parameters, ordered typeclass instances with priorities, and exported source aliases.
-- Canonical serialization uses tagged, UTF-8-length-delimited fields. Its **FNV-1a 64-bit** fingerprint is deterministic across host word sizes. It is a non-cryptographic **drift detector**, not a proof certificate or replacement for checked Lean admission.
-- The frozen selected fingerprint is **`fnv1a64:3890664716772208725`**, covering **208 declarations, 11 registered classes, 36 instance entries** at Lean 4.35.0-rc4. Audit invokes the existing exact declaration-body/signature/class/instance checks before requiring the pinned fingerprint. A compact negative check ensures a newly injected source alias is rejected despite passing the old structural declaration audit.
-- Implementation checkpoint `c3445fc108856617e20aa86b64ca35a19a513425`, [Linux run 38291606077](https://github.com/dwijayuda/pskernel/actions/runs/38291606077); pinned validation checkpoint `c810d6fe15d064968008d09849efd9ac5b2820de`, [run 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524) — both passed.
-- Full preexisting integration remains green: **168 portable / 176 native Lean modules**, **187 shared runtime observations** each in direct JS, strict TS, Rust, V8 Wasm GC and Wasmtime. Multi-file executable projects, 4 checked semantic programs and 92 phase-specific refusals are still qualified.
-- `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md` documents the serialized inputs, trust boundaries, digest purpose, versioning rules and deliberate omissions.
+- Native, portable `.lean` compiler with **168 portable / 176 native Lean modules**, with no pskernel-core integration or compiler-source self-hosting.
+- **187 shared runtime observations** qualified through direct JavaScript, strict TypeScript, Rust, V8 Wasm GC and Wasmtime component/core execution; existing multi-module checking, linking, entry-only exports and original-file provenance passed.
+- **Four checked semantic programs and 92 phase-specific refusals**, plus the bounded lexical/module/do/Standard and negative-regression cases. These counts are qualification cases, NOT a coverage percentage.
+- One official-Lean-admitted prepared Core graph shared through checking → typed erasure → complete target-neutral IR validation → JS/TS/Rust/direct Wasm and Component emission. Preserve proof, assumption, type and source/provenance boundaries; do not substitute a fallback checker.
+- Selected modules: public/private declarations, re-exports/diamonds, dependency ordering, opaque imported definitions versus exposed abbreviations, module-local private names, executable library closure.
+- Selected source and Standard: `const`/`function`, native theorem/proof and typed programming subset, raw strings, `s!"..."`, grouped/radix numerals, List/Array literal subset, checked `BEq`, `ToString`, `Inhabited`, selected checked deriving `Inhabited`/`BEq`, approved `Option`/`List`/`Except` operations, selected typed `do` and recursion.
+- Reproducible portable `Ps.Environment.StandardSnapshot`: **208 installed declarations; 11 registered classes; 36 ordered instance entries**. Fingerprint **`fnv1a64:3890664716772208725`** reflects checked declaration kinds, Core bodies/types, constructor/recursor metadata, levels, priority/class metadata and aliases. This is **NON-CRYPTOGRAPHIC**, not a final conformance manifest, consistency proof or proof certificate. Revalidate intentionally changed expected values; never auto-accept drift.
+- Linux milestone `c810d6fe` implements the pinned selected Standard snapshot gate and a negative source-alias-drift refusal. Previous snapshot milestone `c3445fc108856617e20aa86b64ca35a19a513425` passed https://github.com/dwijayuda/pskernel/actions/runs/38291606077.
 
-## Phase A remaining — dependency-driven
+## Full execution phases — one integrated dependency-driven plan
 
-1. Implement **exact RC4 `GetElem` / `GetElem?`** classes with index-validity propositions/proof obligations, auto/explicit proof behavior and `xs[i]`, `xs[i]'h`, `xs[i]?`, `xs[i]!` notation. Pinned Lean source `src/Init/GetElem.lean` confirms these are distinct: safe `List.get?` alone is **not** implementation of GetElem. The current prelude still needs the appropriate `Nat.lt` proposition/proof/Decidable foundations; do not invent unchecked indexing or substitute Bool comparisons for proof terms.
-2. Finish supported trailing `deriving` handlers (current checked bounded `Inhabited` and `BEq` support is qualified; `DecidableEq`, `Repr`, `Hashable`, broader recursive/parametric data and exact handler origin are not).
-3. Close Float/Float32/scientific and fixed-width/scalar/coercion semantics, further actual Lean-standard `List`/`Array`/`ByteArray` APIs, complete language notation and imported instance precedence.
-4. Complete the final **cryptographically pinned Standard/notation/deriving/import/effect/axiom manifest**, not just this selected non-cryptographic environment fingerprint, and the final assurance ledger.
+**Phase A — Standard environment, everyday language and P0 library closure (IN PROGRESS).**
+1. First close exact pinned Lean RC4 `GetElem` / `GetElem?` interfaces and notation `xs[i]`, `xs[i]'h`, `xs[i]?`, `xs[i]!`. Provide real index-validity **Prop** and `Decidable` evidence, explicit/automated checked proof arguments, safe optional result and separately modeled panic/default behavior. `List.get?` is already useful but is *not* full GetElem. Examine `src/Init/GetElem.lean` at the pinned upstream SHA. No unchecked indexing or Bool comparison masquerading as a proof.
+2. Finish the *fixed trailing deriving allowlist* `Inhabited`, `BEq`, `DecidableEq`, `Repr`, `Hashable` for selected structures/inductives, including generic/recursive cases where actually supported, checked generated instances, collision rules, origin retention and exact handler registration. Reject unknown/standalone deriving and unsupported handlers rather than fabricating instances.
+3. Close `Float`/`Float32`, scientific/typed numeric literals, fixed-width integers, `BitVec` and conversions with exact RC4 semantics; complete viable List/Array/ByteArray/Option/Except APIs and curated P0 formatting/encoding. Distinguish real user APIs from merely declared type names.
+4. Finish module and instance priority/import-order rules and a **cryptographically pinned** environment/notation/deriving/import/tactic/effect/assumption manifest that includes the selected closed Standard signature and provenance. Current FNV snapshot is only an intermediate drift guard.
+**Phase A exit:** each required P0 form is admitted/refused at the correct phase, generated Core is officially checked, selected APIs execute across the current backend matrix, and the final pinned Standard closure is reproducible.
 
-After Phase A, continue dependent/mutual induction/termination, generalized typed do/effects/state, proof-producing tactics/rewriting, contracts/VCs and verified emission obligations. The whole v7 core and essentials remain incomplete.
+**Phase B — Dependent data, elimination, totality and recursion (PLANNED).**
+1. Finish dependent pattern matrices, heterogeneous/index equality and impossible branches, motive elaboration, named discriminants, dependent/existential/proof fields, nested/mutual inductives, strict positivity and recursor formation.
+2. Finish source mutual recursion and well-founded recursion with precise structural/decreasing obligations. Preserve totality: no silent `partial`, `unsafe`, unproven termination or unsound recursion shortcuts.
+3. Carry dependent data/recursor/runtime layout and proof erasure through the shared checked IR, including JS/TS/Rust/Wasm GC and cross-module linking.
+**Phase B exit:** all selected v7 data/termination forms produce well-typed checked Core and preserve computational behavior; invalid recursion/index proofs are refused.
 
-## Mandatory workflow
+**Phase C — Generic typed `do`, effects, state and control (PLANNED).**
+1. Generalize the class-driven `pure`/`bind`/map/Except/State/Reader and relevant transformer behavior instead of a per-syntax monad special-case path. Implement selected mutable/erased state, loops, early return, matching/binding, `throw`, `try`/`catch`/`finally` and effectful control under the RC4 contract.
+2. Separate pure/replayable checked semantics from external `IO`/FFI/files/network/time/random/task boundaries. Explicit capability and effect identities must be reflected in assurance/target emission.
+3. Lower structured control once into checked Core and shared IR, then qualify identical observable behavior in admitted JS/TS/Rust/Wasm targets.
+**Phase C exit:** correct typed sequencing, recovery and state semantics with no undocumented JS-style exception behavior or lost erasure/effect obligations.
 
-Maintain the shared, clean, portable native `.lean` compiler; use official Lean 4.35.0-rc4 checking. GitHub is canonical for all source reads/writes, Linux GitHub Actions for builds/tests. Preserve existing JS/TS/Rust/Wasm and Wasm GC/Canonical ABI contracts, branch and draft PR #109. No local checkout/build, Desktop Commander, pskernel-core integration/replacement, compiler-source `.ps` migration, bootstrap/self-hosting, C5 reconstruction, main merge, release, force push or branch deletion. Keep handoff and roadmap current after each qualified semantic milestone.
+**Phase D — Proof-producing tactics, contracts, VC generation and verified builds (PLANNED).**
+1. Expand selected native proof-goal control and checked tactics (`exact`, `refine`, `intro`, `cases`, `induction`, `rewrite`, selected `simp`/`omega`/`grind` where pinned/implementable). Tactics produce proof terms; only official Lean checking accepts them.
+2. Implement exact RC4-origin experimental `given`/`requires`/`ensures`, `assert`, loop `invariant`/`decreasing`, `erased`, selected `Std.WP`/`vcgen` obligations and `where finally | spec` proof attachment. Keep obligations and failure phases explicit.
+3. Build the **assurance ledger** for specification coverage, admitted assumptions/axioms, effects, holes/`sorryAx`, unsafe/partial constructs, termination, erasure and foreign-data validity.
+**Phase D exit:** **a verified executable build emits no artifact while any mandatory proof, specification coverage, effect, assumption, termination or erasure obligation remains unresolved.** Ordinary checked outputs and verified outputs have distinct honest evidence claims, never separate logics.
+
+**Phase E — Full core/essential v7 conformance, evidence and integration closure (PLANNED).**
+1. Build the reference-rule → `PS-CONF-*` positive/negative acceptance/phase matrix for all mandatory P0/P1-selected core features. Differentially compare emitted Core/meaning with pinned Lean 4.35.0-rc4, not green test count or a speculative score.
+2. Freeze/audit source grammar, Standard/notation/handler imports, module and instance identity, trusted primitive signatures/axioms, proof checking, VC/effect closure, erasure and output contracts. Use an independently reviewable cryptographic manifest/digest.
+3. Qualify meaningful end-to-end real multi-module applications and a full cross-target JS/TS/Rust/Wasm GC/component matrix, reproducible artifacts, resource/stack/performance boundaries where relevant and source provenance. Retain minimal high-value failures plus broad integration at architectural milestones.
+4. Resolve every mandatory semantic, proof and emission acceptance gate before using "v7 complete"; no blanket claim from `pscv0-v7-native-bounded/48` or a green CI alone.
+**Phase E exit:** all core and essential v7 acceptance obligations satisfied with exact source SHA, independently checked evidence and reproducible Linux CI.
+
+**AFTER A–E ONLY, separate future work (NOT AUTHORIZED IN THIS LOOP):**
+- **C5** pre-erasure readable Lean/ProofScript source reconstruction, finer source maps/round-trips and formatter/source UX; intentionally deferred until essentials are complete.
+- Separate backend **D** performance/ownership profiling and improvements, preserving correctness/ABI (no invented speed winner).
+- Compiler-source `.ps` migration, bootstrapping/fixed-point self-hosting and alternate `pskernel-core` integration are **out of current scope**; require an explicit later decision. P2 async/resources/UI extensions and wider ecosystem packages are separately scoped after core acceptance, not implicit promises.
+
+## Working method and invariants for the next chat
+
+1. At startup **resolve live branch HEAD** from GitHub, read this TOP handoff, the canonical language reference, the complete roadmap and Standard snapshot; examine affected source/official Lean RC4 definitions before modifications. Keep history and this PR draft.
+2. Build a clean subsystem-level design around actual invariants and dependency graph. Freely refactor obsolete internals when justified, but never weaken source semantics, proof trust, acceptance cases or existing backend contracts to pass tests. Implement coherent feature families before tests when sensible.
+3. Use **GitHub connector** for source reading and atomic/leased commits; **Linux GitHub Actions** for official Lean builds, focused checks, 187+ runtime integration and related negative conformance. No local checkout/build, Desktop Commander, pskernel-core/selfhost or main merge.
+4. Pin every newly qualified executable commit and associated CI. Do not call a documentation commit "qualified executable". A changed Standard environment requires reviewed snapshot/digest regeneration and meaningful negative drift checks.
+5. Continue Phase A → B → C → D → E without stopping solely to report progress. If an actual semantic/CI blocker arises, study the root cause and choose a general architectural correction. No test-fix-patch loop.
+6. Preserve **native portable `.lean`** source, **official Lean 4.35.0-rc4** as checker, Wasm GC language values (linear memory only at explicit Canonical ABI boundaries), JS/TS/Rust/Wasm contracts, exact source and generated-member provenance and an auditably small trusted base. Never claim v7 complete until Phase E exits.
+
 
 
 ---

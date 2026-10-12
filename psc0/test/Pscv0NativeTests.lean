@@ -768,6 +768,22 @@ private def emissionBoundary : IO Unit := do
     | .error e => throw (IO.userError e)
   unless position.line == 0 && position.column == 4 do
     throw (IO.userError "UTF-8 / UTF-16 source coordinate conversion")
+  let sourcePrefix := "/* 😀 */ "
+  let generatedPrefix := "/* 🦀 */ "
+  let sourceText := sourcePrefix ++ "const λ = 1;"
+  let origin : PsSourceOrigin := {
+    identity := { file := "unicode-input.js", declaration := "λ" }
+    span := {
+      start := { byteOffset := sourcePrefix.utf8ByteSize, line := 1, column := 9 }
+      stop := { byteOffset := sourceText.utf8ByteSize, line := 1, column := 21 } } }
+  let fixture ← get "map layout" (psRenderDoc (.append (.text generatedPrefix)
+    (.append (.origin "λ" (psDocBlock "function λ()" [.text "return 1n;"])) (.text "\n// synthetic 😀\n"))))
+  let mapping ← get "map" (psSourceMap
+    { sourceName := "unicode-input.js", sourceText := sourceText, outputStem := "unicode-output", origins := [("λ", origin)] }
+    [{ semanticName := "λ", outputName := "λ" }] fixture)
+  IO.FS.createDirAll "../dist/pscv0-native"
+  IO.FS.writeFile "../dist/pscv0-native/unicode-output.js" fixture.text
+  IO.FS.writeFile "../dist/pscv0-native/unicode-output.js.map" mapping
   IO.println "PSCV0_NATIVE_EMISSION_BOUNDARY: PASS invalid IR refusal, names and layout origins"
 
 def main : IO Unit := do

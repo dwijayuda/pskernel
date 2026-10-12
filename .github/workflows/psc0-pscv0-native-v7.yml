@@ -108,7 +108,7 @@ jobs:
           .lake/build/bin/pscv0_native --audit-primitives | tee ../dist/pscv0-native/primitive-audit.json
           .lake/build/bin/pscv0_native_checks | tee ../dist/pscv0-native/checks.log
           .lake/build/bin/pscv0_native --version | tee ../dist/pscv0-native/native-version.json
-          .lake/build/bin/pscv0_native --emit-both ../dist/pscv0-native/application.ps ../dist/pscv0-native/application | tee ../dist/pscv0-native/emit.log
+          .lake/build/bin/pscv0_native --emit-all ../dist/pscv0-native/application.ps ../dist/pscv0-native/application | tee ../dist/pscv0-native/emit.log
       - name: Compile and run the small emitted application with pinned TypeScript
         run: |
           set -euo pipefail
@@ -116,8 +116,12 @@ jobs:
           TSC="$RUNNER_TEMP/pscv0-native-tools/node_modules/.bin/tsc"
           "$TSC" --version | tee ../dist/pscv0-native/typescript-version.txt
           grep -Fx 'Version 7.0.2' ../dist/pscv0-native/typescript-version.txt
-          "$TSC" --ignoreConfig ../dist/pscv0-native/application.ts --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
-          node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/application.js | tee ../dist/pscv0-native/runtime.log
+          mkdir -p ../dist/pscv0-native/ts-compiled
+          "$TSC" --ignoreConfig ../dist/pscv0-native/application.ts --outDir ../dist/pscv0-native/ts-compiled --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/ts-compiled/application.js typescript | tee ../dist/pscv0-native/runtime.log
+          node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/application.js directjs | tee ../dist/pscv0-native/directjs-runtime.log
+          node ../scripts/pscv0-native-directjs.mjs ../dist/pscv0-native
+          "$TSC" --ignoreConfig ../dist/pscv0-native/consumer.ts --target ES2020 --module ES2020 --moduleResolution bundler --strict --noEmit --pretty false
       - name: Compile and run the same application with pinned Rust
         run: |
           set -euo pipefail

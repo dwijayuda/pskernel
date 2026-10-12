@@ -76,14 +76,20 @@ def exprDoc (dialect : Dialect) : Nat → Expr → Except String PsDoc
     | .conditional c a b => return enclosed "(" (.group (cat [
         ← expr c, txt " ?", .nest 2 (cat [.line, ← expr a, txt " :", .line, ← expr b])])) ")"
     | .member target field optional =>
-        return cat [← expr target, txt ((if optional then "?." else ".") ++ field)]
+        let rendered ← expr target
+        let rendered := match target with
+          | .atom token =>
+              if token.startsWith "-" || (token.toList.head?.map Char.isDigit).getD false
+              then enclosed "(" rendered ")" else rendered
+          | _ => rendered
+        return cat [rendered, txt ((if optional then "?." else ".") ++ field)]
     | .index target key => return cat [← expr target, enclosed "[" (← expr key) "]"]
     | .call fn types args => return cat [← expr fn, txt (typed dialect types), argumentsDoc (← args.mapM expr)]
     | .newE name types args => return cat [txt ("new " ++ name ++ typed dialect types), argumentsDoc (← args.mapM expr)]
     | .array values => return enclosed "[" (.group (psDocJoin (cat [txt ",", .line]) (← values.mapM expr))) "]"
     | .object fields =>
         let fields ← fields.mapM fun (key, value) => do
-          return cat [txt (key ++ ": "), ← expr value]
+          return cat [txt ((if key == "__proto__" then "[\"__proto__\"]" else key) ++ ": "), ← expr value]
         return enclosed "({" (.group (.nest 2 (psDocJoin (cat [txt ",", .line]) fields))) "})"
     | .cast value type =>
         if dialect == .javascript then expr value

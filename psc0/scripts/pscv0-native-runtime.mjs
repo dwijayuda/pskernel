@@ -24,4 +24,4 @@ for (const {name, args, expected} of observations)
   assert.equal(args === null ? output[name] : output[name](...args), expected, name);
 assert.deepEqual(Object.keys(output.checkedPair), ['first', 'second']);
 assert.deepEqual(Object.keys(output.checkedList), ['head', 'tail']);
-console.log('PSCV0_NATIVE_RUNTIME: PASS checked current-source v7 application -> TypeScript -> JavaScript');
+console.log(`PSCV0_NATIVE_RUNTIME: PASS ${observations.length} shared runtime observations (${process.argv[3] ?? 'typescript'})`);

@@ -65,7 +65,7 @@ def psRustDeclarationDoc (ctx : PsRustContext) (d : PsVerifiedIrDeclaration) :
       .text "__PS_VALUE.with(|value| (**value).clone())"])
   return .origin d.name (psDocBlock header [body])
 
-def psRustEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : Except String PsEmissionArtifact := do
+def psRustEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") (origins : List (String × PsSourceOrigin) := []) : Except String PsEmissionArtifact := do
   if !ir.imports.isEmpty then throw "PSCV0-RUST: external capabilities are not qualified"
   let (view, names) ← psCodegenNamesFor ir psRustReservedNames
   let shared ← psRustSharedLayouts view
@@ -85,6 +85,7 @@ def psRustEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : E
   psValidateArtifact {
     target := .rust
     exports := ← psApiExports ir
+    origins := origins
     source := source
     symbols := names.symbols.reverse
     files := [

@@ -1,5 +1,6 @@
 import Ps.Codegen.Doc
 import Ps.Codegen.Names
+import Ps.Codegen.Provenance
 
 inductive PsEmissionTarget where
   | typescript | javascript | rust
@@ -32,6 +33,7 @@ structure PsEmissionArtifact where
   files : List PsArtifactFile := []
   dependencies : List String := []
   exports : List PsApiExport := []
+  origins : List (String × PsSourceOrigin) := []
 
 def psEmissionTargetName : PsEmissionTarget → String
   | .typescript => "typescript"
@@ -41,7 +43,7 @@ def psEmissionTargetName : PsEmissionTarget → String
 -- Portable paths only. A host joins these validated names to its output root.
 -- Reject Windows aliases as well as POSIX traversal and case-folded collisions.
 def psArtifactPathValid (path : String) : Bool :=
-  !path.isEmpty && !(path.toList.any fun c => c == '\\' || c == ':' || c.toNat < 32) &&
+  !path.isEmpty && !(path.toList.any fun c => c == '\\' || c == ':' || ['?', '*', '<', '>', '\"', '|'].contains c || c.toNat < 32) &&
   (path.splitOn "/").all (fun part =>
     !part.isEmpty && part != "." && part != ".." &&
     !part.endsWith "." && !part.endsWith " " &&

@@ -78,3 +78,12 @@ def psSourceMap (context : PsEmissionContext) (symbols : List PsCodegenSymbol)
     psJsonQuote context.sourceText ++ "],\"names\":[" ++
     String.intercalate "," (symbols.map fun s => psJsonQuote s.semanticName) ++
     "],\"mappings\":" ++ psJsonQuote mappings ++ "}"
+
+def psSourceMapUrl (path : String) : String :=
+  let hex := "0123456789ABCDEF".toList
+  String.join (path.toUTF8.toList.map fun byte =>
+    let value := byte.toNat
+    let char := Char.ofNat value
+    if char.isAlphanum && value < 128 || char == '-' || char == '_' || char == '.' then
+      String.singleton char
+    else "%" ++ String.singleton hex[value / 16]! ++ String.singleton hex[value % 16]!)

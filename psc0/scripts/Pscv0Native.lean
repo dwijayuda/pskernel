@@ -20,13 +20,26 @@ private def writeArtifact (output : String) (artifact : PsEmissionArtifact) : IO
   let ranges := artifact.source.ranges.map fun r => Lean.Json.mkObj [
     ("output", toJson r.symbol), ("startByte", toJson r.startByte), ("endByte", toJson r.endByte)]
   IO.FS.writeFile (output ++ ".origins.json") (Lean.Json.mkObj [
-    ("schema", toJson ("pscv0-origins/1" : String)),
+    ("schema", toJson ("pscv0-origins/2" : String)),
     ("target", toJson (psEmissionTargetName artifact.target)),
     ("kernel", toJson ("official-lean4-cpp" : String)),
     ("irValidation", toJson ("accepted-complete" : String)),
     ("leanCommit", toJson Lean.githash), ("profile", toJson profile),
     ("coordinates", toJson ("utf8-bytes" : String)),
     ("runtimeDependencies", toJson artifact.dependencies),
+    ("sourceResolution", toJson ("owning-declaration-span" : String)),
+    ("origins", toJson (artifact.origins.map fun (name, origin) => Lean.Json.mkObj [
+      ("semantic", toJson name), ("file", toJson origin.identity.file),
+      ("sourceStartByte", toJson origin.span.start.byteOffset),
+      ("sourceEndByte", toJson origin.span.stop.byteOffset),
+      ("generatedReason", toJson origin.generatedReason)])),
+    ("exports", toJson (artifact.exports.map fun entry => Lean.Json.mkObj [
+      ("semantic", toJson entry.semanticName),
+      ("typeParameters", toJson (entry.typeParameters.map (·.name))),
+      ("parameters", toJson (entry.parameters.map fun p => Lean.Json.mkObj [
+        ("name", toJson p.name), ("runtimeType", toJson ((psTsEmitType p.type).toOption.getD "unsupported"))])),
+      ("result", toJson ((psTsEmitType entry.result).toOption.getD "unsupported")),
+      ("witRefusal", toJson entry.witReason)])),
     ("symbols", toJson symbols), ("ranges", toJson ranges)]).pretty
 
 private def run (paths : List String) (outputs : List (PsEmissionTarget × String)) : IO UInt32 := do
@@ -38,7 +51,7 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
       | some (_, output) => ((System.FilePath.mk output).fileStem).getD "module"
     return {
       source := ← IO.FS.readFile (System.FilePath.mk path)
-      sourceName := path
+      sourceName := (System.FilePath.mk path).fileName.getD path
       outputStem := outputStem
       targets := outputs.map (·.1) : Request }
   match ← runBatch requests with
@@ -75,12 +88,15 @@ def main (args : List String) : IO UInt32 := do
     | ["--emit", input, output] =>
         let target ← if output.endsWith ".ts" then pure PsEmissionTarget.typescript
           else if output.endsWith ".rs" then pure PsEmissionTarget.rust
-          else throw (IO.userError "PSCV0-NATIVE-OUTPUT: expected .ts or .rs output")
+          else if output.endsWith ".js" then pure PsEmissionTarget.javascript
+          else throw (IO.userError "PSCV0-NATIVE-OUTPUT: expected .ts, .js or .rs output")
         run [input] [(target, output)]
+    | ["--emit-all", input, stem] =>
+        run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs"), (.javascript, stem ++ ".js")]
     | ["--emit-both", input, stem] =>
         run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.rs> | --emit-both <application.ps> <output-stem> | --version"
+        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --audit-primitives | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

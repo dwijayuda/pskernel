@@ -115,7 +115,7 @@ private def compile (prelude : Lean.Environment) (request : Request) :
       match target with
       | .typescript => PsEcma.emit checked .typescript context
       | .javascript => PsEcma.emit checked .javascript context
-      | .rust => psRustEmitReadable checked request.outputStem)
+      | .rust => psRustEmitReadable checked request.outputStem origins)
   let t6 ← IO.monoMsNow
   return {
     declarationCount := output.prepared.declarations.length

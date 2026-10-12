@@ -32,6 +32,7 @@ def psWitTypeReason (api : PsPublicApi) : Nat → List String → PsVerifiedIrTy
     | .function .. => some "function value requires a resource/callback adapter"
     | .primitive .nat | .primitive .int => some "unbounded integer requires an explicit adapter"
     | .primitive .usize | .primitive .isize => some "target word size requires an explicit policy"
+    | .primitive .unit => some "unit requires an explicit omission/empty-record policy"
     | .primitive _ => none
     | .named "Array" [element] => psWitTypeReason api n seen element
     | .named name arguments =>

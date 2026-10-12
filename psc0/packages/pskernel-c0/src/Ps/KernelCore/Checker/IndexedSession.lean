@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Session
 import Ps.KernelCore.Core.IndexedExpr
+import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Admission.Declaration.Admission
 
 /-
@@ -273,3 +274,52 @@ def psKernelC0IndexedSessionAdmitOpaque
     session.checker.context.maxRecDepth
     session.checker.context.maxNatSize
   pure (psKernelC0IndexedSessionCommitEnvironment session environment)
+
+/-
+  Opt-in indexed diagnostic execution linked to an immutable checker session.
+  The source term is imported once. Subsequent operations keep canonical
+  terms inside the same persistent store. The context snapshot is inherited
+  from the session and is never inferred from a numeric term handle.
+
+  This is a syntax-transformation interface, not a checked judgment API:
+  indexed results must still pass the authoritative recursive checker.
+-/
+structure PsKernelC0IndexedWork where
+  session : PsKernelC0IndexedCheckerSession
+  term : Nat
+  progressed : Bool
+  halt : PsKernelC0IndexedFragmentHalt
+
+/-- Import one exact source term into a session-owned indexed work state. -/
+def psKernelC0IndexedSessionStartWork
+    (session : PsKernelC0IndexedCheckerSession)
+    (expr : PsKernelExpr) : Option PsKernelC0IndexedWork := do
+  let retained ← psKernelC0IndexedSessionRetain session expr
+  let id ← psKernelC0IndexedSessionLookup retained expr
+  if psKernelC0StoreValid retained.store id then
+    some {
+      session := retained
+      term := id
+      progressed := false
+      halt := .needsChecker
+    }
+  else none
+
+/-- Apply the supported indexed reduction fragment in this work snapshot.
+    This produces diagnostic syntax only, never proof acceptance. -/
+def psKernelC0IndexedWorkRun
+    (fuel : Nat)
+    (work : PsKernelC0IndexedWork) : PsKernelC0IndexedWork :=
+  let result := psKernelC0IndexedContextFragment
+    fuel work.session.checker.context work.session.store work.term
+  {
+    session := { work.session with store := result.store }
+    term := result.id
+    progressed := result.progressed
+    halt := result.halt
+  }
+
+/-- Decode once when a diagnostic consumer explicitly requests syntax. -/
+def psKernelC0IndexedWorkInspect
+    (work : PsKernelC0IndexedWork) : Option PsKernelExpr :=
+  psKernelC0DecodeExpr work.session.store work.term

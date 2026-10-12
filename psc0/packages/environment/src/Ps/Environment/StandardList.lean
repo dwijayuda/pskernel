@@ -191,11 +191,54 @@ def psStandardListGetQuestionDeclaration : PsDeclaration :=
       (psLogicLam 2 "index" nat body)) .implicit
   .definitionDecl (psNameAppendStr psListName "get?") [] type value
 
+def psStandardListFoldrDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let beta := PsExpr.fvar 1
+  let listAlpha := psSelfHostListOf alpha
+  let functionType := psLogicPi 8 "head" alpha
+    (psLogicPi 9 "acc" beta beta)
+  let motive := psLogicLam 10 "_" listAlpha beta
+  let step := psLogicLam 5 "head" alpha
+    (psLogicLam 6 "tail" listAlpha
+      (psLogicLam 7 "ih" beta
+        (psLogicApply (.fvar 2) [.fvar 5, .fvar 7])))
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "β" psPreludeTypeType
+      (psLogicPi 2 "f" functionType
+        (psLogicPi 3 "init" beta
+          (psLogicPi 4 "xs" listAlpha beta))) .implicit) .implicit
+  let body := psLogicApply psStandardListRecursor
+    [alpha, motive, .fvar 3, step, .fvar 4]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "β" psPreludeTypeType
+      (psLogicLam 2 "f" functionType
+        (psLogicLam 3 "init" beta
+          (psLogicLam 4 "xs" listAlpha body))) .implicit) .implicit
+  .definitionDecl (psNameAppendStr psListName "foldr") [] type value
+
+-- Reverse is a checked specialization of the already qualified List.foldl.
+-- It runs in linear time, without introducing a second recursion primitive.
+def psStandardListReverseDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let listAlpha := psSelfHostListOf alpha
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "xs" listAlpha listAlpha) .implicit
+  let accumulate := psLogicLam 2 "acc" listAlpha
+    (psLogicLam 3 "head" alpha
+      (psSelfHostListConsOf alpha (.fvar 3) (.fvar 2)))
+  let body := psLogicApply
+    (.constE (psNameAppendStr psListName "foldl") [])
+    [alpha, listAlpha, accumulate, psSelfHostListNilOf alpha, .fvar 1]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "xs" listAlpha body) .implicit
+  .definitionDecl (psNameAppendStr psListName "reverse") [] type value
+
 def psStandardListDeclarations : List PsDeclaration :=
   [psStandardListLengthDeclaration, psStandardListMapDeclaration,
    psStandardListAppendDeclaration, psStandardListFilterDeclaration,
    psStandardListFoldlWorkerDeclaration, psStandardListFoldlDeclaration,
-   psStandardListGetWorkerDeclaration, psStandardListGetQuestionDeclaration]
+   psStandardListGetWorkerDeclaration, psStandardListGetQuestionDeclaration,
+   psStandardListFoldrDeclaration, psStandardListReverseDeclaration]
 
 def psStandardPreludeDeclarationsWithList : List PsDeclaration :=
   psStandardPreludeDeclarationsWithOption ++ psStandardListDeclarations

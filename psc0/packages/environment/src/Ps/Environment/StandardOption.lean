@@ -62,10 +62,63 @@ def psStandardOptionBindDeclaration : PsDeclaration :=
         (psLogicLam 3 "f" arrow body)) .implicit) .implicit
   .definitionDecl (psNameAppendStr psOptionName "bind") [] type value
 
+def psStandardOptionIsSomeDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let optionAlpha := psSelfHostOptionOf alpha
+  let bool := PsExpr.constE psBoolName []
+  let motive := psLogicLam 3 "_" optionAlpha bool
+  let someBranch := psLogicLam 4 "value" alpha (.constE psBoolTrueName [])
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "opt" optionAlpha bool) .implicit
+  let body := psLogicApply psStandardOptionRecursor
+    [alpha, motive, .constE psBoolFalseName [], someBranch, .fvar 1]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "opt" optionAlpha body) .implicit
+  .definitionDecl (psNameAppendStr psOptionName "isSome") [] type value
+
+def psStandardOptionIsNoneDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let optionAlpha := psSelfHostOptionOf alpha
+  let bool := PsExpr.constE psBoolName []
+  let motive := psLogicLam 3 "_" optionAlpha bool
+  let someBranch := psLogicLam 4 "value" alpha (.constE psBoolFalseName [])
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "opt" optionAlpha bool) .implicit
+  let body := psLogicApply psStandardOptionRecursor
+    [alpha, motive, .constE psBoolTrueName [], someBranch, .fvar 1]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "opt" optionAlpha body) .implicit
+  .definitionDecl (psNameAppendStr psOptionName "isNone") [] type value
+
+def psStandardOptionFilterDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let optionAlpha := psSelfHostOptionOf alpha
+  let bool := PsExpr.constE psBoolName []
+  let predicate := psLogicPi 5 "value" alpha bool
+  let motive := psLogicLam 3 "_" optionAlpha optionAlpha
+  let boolMotive := psLogicLam 6 "_" bool optionAlpha
+  let someBranch := psLogicLam 4 "value" alpha
+    (psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
+      [boolMotive, psSelfHostOptionNoneOf alpha,
+       psSelfHostOptionSomeOf alpha (.fvar 4),
+       .app (.fvar 1) (.fvar 4)])
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "predicate" predicate
+      (psLogicPi 2 "opt" optionAlpha optionAlpha)) .implicit
+  let body := psLogicApply psStandardOptionRecursor
+    [alpha, motive, psSelfHostOptionNoneOf alpha, someBranch, .fvar 2]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "predicate" predicate
+      (psLogicLam 2 "opt" optionAlpha body)) .implicit
+  .definitionDecl (psNameAppendStr psOptionName "filter") [] type value
+
 def psStandardOptionDeclarations : List PsDeclaration :=
   [psStandardOptionGetDDeclaration,
    psStandardOptionMapDeclaration,
-   psStandardOptionBindDeclaration]
+   psStandardOptionBindDeclaration,
+   psStandardOptionIsSomeDeclaration,
+   psStandardOptionIsNoneDeclaration,
+   psStandardOptionFilterDeclaration]
 
 def psStandardPreludeDeclarationsWithOption : List PsDeclaration :=
   psStandardPreludeDeclarationsWithToString ++ psStandardOptionDeclarations

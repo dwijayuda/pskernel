@@ -989,6 +989,18 @@ private def projectBoundaries : IO Unit := do
     "theorem tailSafeProof: tailSafe = Option.some(20) := by { rfl }\n" ++
     "const beyondSafe: Option Nat := List.get?([10, 20], 5)\n" ++
     "theorem beyondSafeProof: beyondSafe = Option.none := by { rfl }\n"
+  let collectionCompletionSource :=
+    "const hasValue: Bool := Option.isSome(Option.some(3))\n" ++
+    "theorem hasValueProof: hasValue = true := by { rfl }\n" ++
+    "const missingValue: Bool := Option.isNone(Option.none : Option Nat)\n" ++
+    "theorem missingValueProof: missingValue = true := by { rfl }\n" ++
+    "const keptValue: Option Nat := Option.filter(fun (n: Nat) => true, Option.some(3))\n" ++
+    "theorem keptValueProof: keptValue = Option.some(3) := by { rfl }\n" ++
+    "function listConsHead(n: Nat, xs: List Nat): List Nat := List.cons(n, xs)\n" ++
+    "const foldedRight: List Nat := List.foldr(listConsHead, [], [3, 4])\n" ++
+    "theorem foldedRightProof: foldedRight = [3, 4] := by { rfl }\n" ++
+    "const reversedList: List Nat := List.reverse([1, 2, 3])\n" ++
+    "theorem reversedListProof: reversedList = [3, 2, 1] := by { rfl }\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1027,6 +1039,8 @@ private def projectBoundaries : IO Unit := do
     { source := listLibrarySource, moduleName := "StandardList",
       targets := [.javascript, .typescript, .rust] },
     { source := listSafeIndexSource, moduleName := "SafeListIndex",
+      targets := [.javascript, .typescript, .rust] },
+    { source := collectionCompletionSource, moduleName := "StandardCollectionCompletion",
       targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
@@ -1091,6 +1105,12 @@ private def projectBoundaries : IO Unit := do
           throw (IO.userError "List.get? safe-indexing missing checked artifacts")
     | 20, .error error =>
         throw (IO.userError ("List.get? safe-indexing failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 21, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked collection API missing backend artifacts")
+    | 21, .error error =>
+        throw (IO.userError ("collection API completion failed at " ++
           error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do

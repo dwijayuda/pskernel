@@ -822,8 +822,32 @@ def main : IO Unit := do
           throw (IO.userError ("matched dependent binder failed: " ++ err))
     IO.println s!"C0_COMPARE round={round} operation=dependent_binder_order_check result=pass samples=3"
 
-    let mut admitted := 0
-    let mut rejected := 0
+    -- A single binder containing a much larger domain tests whether
+    -- DefEq pays for the tree it never traverses with its own recursion.
+    -- Metadata only wraps the domain; both sides must remain definitionally
+    -- equal under the exact public kernel judgment.
+    for innerDepth in [64, 256, 512] do
+      let domain := c0CompareForallsWithTail innerDepth sort0
+      let left := PsKernelExpr.forallE PsKernelName.anonymous domain sort0
+        PsKernelBinderInfo.default
+      let right := PsKernelExpr.forallE PsKernelName.anonymous
+        (PsKernelExpr.mdata 41 domain) sort0
+        PsKernelBinderInfo.default
+      let samples := if innerDepth == 512 then 8 else 20
+      let mut yes := 0
+      let started ← IO.monoMsNow
+      for _ in [:samples] do
+        match psKernelSessionIsDefEq 4096 session left right with
+        | Except.ok (ok, _) =>
+            if ok then yes := yes + 1
+            else throw (IO.userError "matched large-domain DefEq unexpectedly false")
+        | Except.error err =>
+            throw (IO.userError ("matched large-domain DefEq failed: " ++ err))
+      let finished ← IO.monoMsNow
+      if yes != samples then throw (IO.userError "large-domain DefEq count mismatch")
+      IO.println s!"C0_COMPARE round={round} operation=cold_defeq_large_domain milliseconds={finished-start} binder_domain_depth={innerDepth} samples={samples}"
+
+
     let admissionStart ← IO.monoMsNow
     for _ in [:600] do
       match psKernelAddDefinition 4096 empty valid 4096

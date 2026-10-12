@@ -213,6 +213,63 @@ def main : IO Unit := do
     | Except.error err =>
         throw (IO.userError ("C0 dependent binder DefEq errored: " ++ err))
   IO.println "C0_PERF_REGRESSION dependent_binder_substitution_order=pass"
+  -- Derive a sufficient DefEq recursion budget from the *actual* spine
+  -- geometry. Compare it to the historical whole-tree bound and preserve
+  -- negative classifications at smaller explicit budgets. These are
+  -- nontrivial dependent/open bodies, not just closed Sort terminals.
+  for width in [0, 1, 8, 32, 96] do
+    let app := c0RegressionApps width
+      (PsKernelExpr.mdata 17 sort0) sort0
+    let appWithDifferentArg := c0RegressionApps width
+      (PsKernelExpr.mdata 17 sort0) sort1
+    for right in [app, appWithDifferentArg] do
+      let enough := Nat.succ
+        (psKernelExprGetAppNumArgs app +
+         psKernelExprGetAppNumArgs right)
+      let oldEnough := Nat.succ
+        (psKernelExprNodeCount app + psKernelExprNodeCount right)
+      let callback :=
+        fun (_ : PsKernelCheckerContext) (st : PsKernelCheckerState)
+            (left : PsKernelExpr) (other : PsKernelExpr) =>
+          Except.ok (psKernelExprEq left other, st)
+      match psKernelDefEqArgsWithFuel enough callback
+          session.context session.state app right,
+          psKernelDefEqArgsWithFuel oldEnough callback
+            session.context session.state app right with
+      | Except.ok (fast, _), Except.ok (reference, _) =>
+          if fast != reference then
+            throw (IO.userError "C0 app-spine bound changed congruence")
+      | Except.error fast, Except.error reference =>
+          if fast != reference then
+            throw (IO.userError "C0 app-spine bound changed error")
+      | _, _ =>
+          throw (IO.userError "C0 app-spine bound changed acceptance category")
+    let binders := c0BinderForallTail width (.mdata 99 sort0)
+    let different := c0BinderForallTail width sort0
+    let depthFuel := Nat.succ
+      (psKernelC0ForallSpineLength binders +
+       psKernelC0ForallSpineLength different)
+    let oldFuel := Nat.succ
+      (psKernelExprNodeCount binders + psKernelExprNodeCount different)
+    let eqCallback :=
+      fun (_ : PsKernelCheckerContext) (st : PsKernelCheckerState)
+          (a : PsKernelExpr) (z : PsKernelExpr) =>
+        Except.ok (psKernelExprEq a z, st)
+    match psKernelDefEqForallSpineWithFuel depthFuel eqCallback
+        session.context session.state binders different [] [] [],
+        psKernelDefEqForallSpineWithFuel oldFuel eqCallback
+          session.context session.state binders different [] [] [] with
+    | Except.ok (fast, _), Except.ok (reference, _) =>
+        if fast != reference then
+          throw (IO.userError "C0 forall spine bound changed result")
+    | Except.error fast, Except.error reference =>
+        if fast != reference then
+          throw (IO.userError "C0 forall spine bound changed error")
+    | _, _ =>
+        throw (IO.userError "C0 forall spine bound changed classification")
+  IO.println "C0_PERF_REGRESSION exact_structural_spine_fuel_oracle=pass"
+
+
 
 
 

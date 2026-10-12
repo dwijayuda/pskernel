@@ -86,3 +86,12 @@ Official checking is relative to the reconstructed portable prelude; primitive
 signature fidelity is not automatically checked against imported native Lean.
 The proposed signature/model audit and assumption ledger address that explicit
 boundary without replacing the kernel.
+
+### WIT/component refinement
+
+Architecture revision 2 includes the requested .wit/.wat/.wasm bundle as a
+component milestone C4b. WIT is generated from a checked public API schema;
+typed core Wasm plus Canonical ABI adapters feed a component plan and both
+binary/WAT writers. Internal GC representation remains independent of the
+synchronous memory32/UTF-8 public boundary. Foreign export representability
+does not restrict internal language types. This is a report-only change.

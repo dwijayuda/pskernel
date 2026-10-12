@@ -1,3 +1,35 @@
+# WIT/WAT/Wasm architecture refinement — research only
+
+12 October 2026: the user requested an expanded architecture report covering
+directJS (.js/.d.ts/.map), directWasm (.wit/.wat/.wasm), and readable JavaScript,
+WIT, WAT, TypeScript, Rust, Lean and ProofScript. No implementation is authorized
+by this report-only request.
+
+Revision 2 of docs/PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md preserves the existing
+pipeline and adds a checked public API schema, explicit foreign export selection,
+WIT representability, Canonical ABI planning and a component writer. The proposed
+complete directWasm bundle implements the declared WIT world in a component
+binary; a standalone core module is an explicit separate profile.
+
+Wasm GC remains the recommended internal runtime. Synchronous memory32/UTF-8
+Canonical ABI adapters own boundary conversion/allocation and resource lifetimes.
+The design does not depend on the proposed GC-native Canonical ABI. Recursive
+and generic source types stay intact internally; concrete signatures, value
+views or resource APIs serve the foreign boundary.
+
+C4b now covers WIT/component completion after core runtime parity. C0 includes
+interface representability; C3 includes an early GC-inside-component compatibility
+probe before larger implementation. Native compiler authoring, official checking,
+minimal shared validation and deferred compiler-source migration/self-hosting
+remain unchanged. No compiler, runtime, workflow or acceptance input changed.
+
+The last semantic milestone is still qualified profile 31. Source 9c08a9a
+passed run 38185022674; the subsequent documentation/comment-only source
+7293da886f3e9d71cc94a95d238f7ffca1a7f13e also passed run 38185845549.
+Both are historical evidence, not qualification of proposed backends.
+
+---
+
 # Class output inference qualified; backend design reported, implementation stopped
 
 Profile 31 at **9c08a9a019b2afc2dc7eda15a0c6699832f2c688** passed

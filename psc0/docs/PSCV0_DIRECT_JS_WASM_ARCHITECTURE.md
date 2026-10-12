@@ -1,10 +1,14 @@
-# PSCV0 v7: direct JavaScript, direct WebAssembly, and readable output
+# PSCV0 v7: directJS, WIT/WAT/Wasm, and readable output
 
-Architecture proposal · 12 October 2026 · Implementation stopped at native profile 31
+Architecture proposal, revision 2 · 12 October 2026 · Research/design only · Implementation remains stopped at native profile 31
 
 ## 1. Decision and completed milestone
 
-Keep the existing portable semantic compiler, authored and executed natively in Lean. Add direct JavaScript through a shared ECMAScript lowering layer with TypeScript. Add direct WebAssembly through a separate typed Wasm lowering layer and binary writer. Retain Rust's target-specific ownership/layout work. Generate readable Lean and ProofScript from retained pre-erasure information.
+Keep the existing portable semantic compiler, authored and executed natively in Lean. Add direct JavaScript through a shared ECMAScript lowering layer with TypeScript. Add direct WebAssembly through a typed Wasm lowering layer, Canonical ABI adapters, and a component writer. Generate WIT from a checked public interface schema and WAT from the same module/component structure used by the binary writer. Retain Rust's ownership/layout work. Generate readable Lean and ProofScript from retained pre-erasure information.
+
+The main refinement to the previous proposal is that the requested .wit/.wat/.wasm bundle should describe and implement a real component interface. Placing WIT next to an unrelated core module is insufficient. Core Wasm remains available as an explicit target and development milestone. Internal Wasm GC data and external linear-memory ABI conversion have separate responsibilities.
+
+Research baseline: Component Model repository commit 6c48079bbc808bb3bdeb9554f338ab3a5b187388 (7 October 2026), with only a selected synchronous, memory32, UTF-8 subset. Its binary format remains pre-standard; gated features are not implicitly admitted. This plan does not rely on proposed GC Canonical ABI extensions. [Pinned component binary design](https://github.com/WebAssembly/component-model/blob/6c48079bbc808bb3bdeb9554f338ab3a5b187388/design/mvp/Binary.md), [GC ABI proposal](https://github.com/WebAssembly/component-model/issues/525).
 
 This extends the previous codegen architecture rather than replacing the frontend, canonical Core, erasure, or checked runtime IR. New backends are **proposed, not implemented**. Full v7 remains incomplete.
 
@@ -65,8 +69,10 @@ PS source (selected Lean adapter when qualified)
             ├─ ECMAScript plan → TypeScript
             │                  → JavaScript + declarations + source maps
             ├─ Rust layout / ownership → Rust
-            └─ Wasm representation / closures → typed Wasm module
-                                                   → binary + readable WAT
+            └─ Wasm representation / closures → typed core module
+                    + checked public API → WIT + Canonical ABI adapters
+                    → component plan → binary .wasm + readable .wat
+                    → optional standalone .core.wasm / .core.wat
 ```
 
 Provenance accompanies transformations as metadata. Source reconstruction cannot recover proofs or dependent types from erased runtime IR.
@@ -77,12 +83,15 @@ Suggested ownership, introduced only when the corresponding milestone needs it:
 |---|---|
 | Codegen.Bundle | Target-neutral file bundle, text/binary payloads, roles, dependency manifest |
 | Codegen.Origin / Names / Doc | Source identities, target spelling, layout and render events |
-| Codegen.ExportAbi / Capabilities | Public runtime surface and target support checks |
+| Interop.Api / Codegen.Capabilities | Checked logical public API, export selection and target representability |
+| Interop.Wit / BackendWasm.CanonicalAbi | WIT schema/printing and the corresponding memory/call/lifetime ABI plan |
 | BackendEcma | Shared JS/TS expression, statement, function, module and runtime plan |
 | BackendJs / BackendTs | Small dialect printers and target entry points |
-| BackendWasm | Representation, closure conversion, structured instructions, validation, binary and WAT |
+| BackendWasm.Core / Component | Representation, closures, structured instructions, component wiring, validation, binary and WAT |
 | SourcePresentation | Retained source structure, controlled Core reification, Lean/PS printing |
 | Host | Kernel service, file IO, CLI, diagnostics and external validation tools |
+
+The logical public API schema connects checked declarations to their erased runtime implementations. Target ABI plans then choose JS objects, Rust values, or WIT value/resource encodings. Do not force all targets through WIT's restrictions, derive WIT from JavaScript spelling, or reconstruct public types from arbitrary binary instructions. Verify every exported wrapper against its actual runtime declaration.
 
 Share dependency SCCs and capture analysis only where their semantics are actually common. Rust ownership, Wasm storage and JavaScript call machinery remain separate. A universal low-level IR or a large plugin framework is unnecessary.
 
@@ -108,7 +117,7 @@ Initially preserve the existing generator trampoline and tail-loop behavior. The
 
 The initial target is ESM with an ES2020-or-later feature baseline for BigInt. Emit module.js, module.d.ts, module.js.map, and reachable runtime support with matching map/declaration files when imported by the module. Use explicit .js import specifiers. Document the required ESM package context; .js does not itself guarantee Node treats a file as ESM. Package creation is optional and must not overwrite a user's package metadata. [TypeScript module reference](https://www.typescriptlang.org/docs/handbook/modules/reference.html).
 
-A single export ABI description drives wrappers and declarations. A .d.ts describes actual JavaScript values and calling conventions. It cannot restore erased theorems or imply a dependent guarantee that JavaScript does not enforce. Follow the runtime module's export structure. [TypeScript declaration guidance](https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-d-ts.html).
+A JavaScript ABI view of the checked public API drives wrappers and declarations. A .d.ts describes actual JavaScript values and calling conventions. It cannot restore erased theorems or imply a dependent guarantee that JavaScript does not enforce. Follow the runtime module's export structure. [TypeScript declaration guidance](https://www.typescriptlang.org/docs/handbook/declaration-files/templates/module-d-ts.html).
 
 | Runtime category | Proposed JS/declaration surface |
 |---|---|
@@ -120,7 +129,7 @@ A single export ABI description drives wrappers and declarations. A .d.ts descri
 | Persistent arrays | Readonly public view, with defensive conversion/ownership at foreign ingress |
 | Unsupported machine/effect forms | Capability refusal until explicitly qualified |
 
-Erased parameters do not become fake runtime arguments. Proof-erased APIs cannot promise a caller's proof precondition: mark them as an external trust boundary or generate checked wrappers only where an executable check is defined. Readonly TypeScript types alone do not protect against mutable JS aliases; constructors and public conversion routines must establish the runtime invariants.
+Erased parameters do not become fake runtime arguments. The safe foreign interface refuses uncheckable proof preconditions. Where an executable check is defined, an adapter can validate the precondition before calling the internal erased function. An explicitly selected trusted interface may expose additional operations, but its assumption ledger must say so; .d.ts or WIT types alone cannot authorize fabricated proofs. Readonly TypeScript types alone do not protect against mutable JS aliases; constructors and public conversion routines must establish the runtime invariants.
 
 Keep Nat saturation, division-by-zero behavior, signed arithmetic, Unicode scalar/UTF-8 operations and array persistence in a versioned runtime semantic contract. Raw JavaScript operators are used only when their semantics match. BigInt provides arbitrary-size integers, but this does not equate all of its operations to Lean's. [ECMAScript BigInt specification](https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-ecmascript-language-types-bigint-type).
 
@@ -136,7 +145,7 @@ Pin the published ECMA-426 December 2024 baseline and document any later draft f
 
 Generate mappings after final layout. External formatting or optimization must preserve/compose maps or invalidate them explicitly. Relative source paths are the default; embedding sourcesContent is an option. Runtime helper maps identify runtime sources, not user source. Declaration maps are optional and separate from the required JS map.
 
-For Wasm, attach origin marks to instructions and resolve final offsets during encoding. Supply a name section and optional .wasm.map/sourceMappingURL custom section. Source maps and readable WAT aid inspection but do not promise identical debugger support across engines.
+For Wasm, attach origin marks to instructions and resolve final offsets during encoding. Supply core name metadata and optional core .wasm.map/sourceMappingURL custom sections. Embedded core-module offsets and outer component offsets are distinct: retain module identity and the embedding relation in the manifest, and qualify debugger conventions before advertising component maps. Do not apply an arbitrary outer-file offset to a core map. Source maps and readable WAT aid inspection but do not promise identical debugger support across engines. WIT and WAT also receive generated-text origin ranges; those are not advertised as a standardized WIT debugger-map format.
 
 ## 8. WebAssembly alternatives and recommendation
 
@@ -144,16 +153,16 @@ For Wasm, attach origin marks to instructions and resolve final offsets during e
 |---|---|---|---|
 | Emit Rust, then rustc to Wasm | Reuses part of Rust codegen/runtime | External toolchain, extra compilation, Rust ABI/layout dependence; not direct emission | Retain only as a possible comparison |
 | Direct linear-memory Wasm | Broad baseline engines, explicit layout | Allocator, ownership/RC or tracing, root/call conventions, teardown and alias discipline become compiler responsibilities | Defer unless compatibility requirements demand it |
-| Direct Wasm GC | Typed structs/arrays and managed references fit data and closures; less memory-management code | Requires GC-capable engines; public ABI still needs adaptation | Recommended first directWasm profile |
+| Direct Wasm GC plus Canonical ABI adapter | Typed structs/arrays and managed references fit data and closures; public components remain interoperable | Requires GC-capable engines and a small linear-memory marshalling allocator | Recommended internal runtime and component boundary |
 | Wasm importing JS for all runtime primitives | Small initial runtime | Loses standalone behavior and makes crossings part of basic arithmetic | Not the portable default |
 
 Wasm GC is an architectural size/maintenance recommendation, not a measured speed claim. V8's porting guidance supports using engine-managed data for managed languages; Hoot demonstrates a self-contained language-owned Wasm toolchain. Neither proves PSCV0 performance or qualifies this compiler. [V8 design discussion](https://v8.dev/blog/wasm-gc-porting), [Hoot project](https://spritely.institute/hoot/).
 
-Pin an explicit GC/function-reference feature subset, not “latest Wasm.” The inspected core specification is labeled WebAssembly 3.0, 2026-10-09; the associated JS document is an editor's draft. Freeze the exact referenced revision and engine versions at implementation. Wasmtime lists GC and function references as Tier 1, with a Winch qualification exception. Start with a pinned Wasmtime Cranelift build and pinned Node/V8; do not claim all browsers or embedded engines. [Core types](https://webassembly.github.io/spec/core/syntax/types.html), [Wasmtime feature matrix](https://docs.wasmtime.dev/stability-wasm-proposals.html).
+Pin an explicit GC/function-reference feature subset, not “latest Wasm.” The inspected core specification is labeled WebAssembly 3.0, 2026-10-09; the associated JS document is an editor's draft. Freeze the exact referenced revision and engine versions at implementation. Wasmtime lists GC and function references as Tier 1, with a Winch qualification exception. Qualify the core runtime in pinned Wasmtime Cranelift and Node/V8. Qualify components separately in a pinned component-capable Wasmtime host. Core-engine compatibility does not establish component-loader compatibility; do not claim all browsers or embedded engines. [Core types](https://webassembly.github.io/spec/core/syntax/types.html), [Wasmtime feature matrix](https://docs.wasmtime.dev/stability-wasm-proposals.html).
 
 ## 9. DirectWasm representation and runtime
 
-Use checked runtime IR → representation/closure plan → typed structured Wasm module → binary writer. Print readable WAT from the same module. WAT assembly is not a mandatory compilation stage. Use structured blocks, loops and typed branches, with local assignment to preserve source evaluation order.
+Use checked runtime IR → representation/closure plan → typed structured core Wasm module → binary writer. Add the component layer over this same module and a checked ABI plan. Print readable core/component WAT from the respective structures. Neither WAT nor WIT reparsing is a mandatory compilation stage. Use structured blocks, loops and typed branches, with local assignment to preserve source evaluation order.
 
 | Category | Initial representation decision |
 |---|---|
@@ -176,19 +185,114 @@ Lower known tail recursion to loops. General calls initially use the engine stac
 
 Use append-oriented buffers or a size pass for binary sections and LEB lengths. Assign indices deterministically, resolve relocations once, then finalize maps; avoid repeatedly inserting into a growing byte stream. Emit only reachable declarations and runtime helpers. The binary layout follows the pinned core format. [Wasm binary modules](https://webassembly.github.io/spec/core/binary/modules.html).
 
-## 10. Wasm host ABI and packaging
+## 10. WIT: a deliberate public contract
 
-Separate internal GC layout from exported host representation. Wasm i64 crosses the JS API as a 64-bit BigInt value; it is not PSCV0 Nat/Int. GC records are exposed as opaque host objects rather than ordinary JS records. Explicit conversion is required. [Wasm JS interface, work in progress](https://webassembly.github.io/spec/js-api/).
+WIT describes component interfaces/worlds, not executable behavior. Its named data definitions are not user-generic, and value-type definitions cannot be recursive. Resources express owned/borrowed handles. Therefore, a fully capable internal language does not imply that every source type can cross a WIT boundary unchanged. [WIT overview](https://component-model.bytecodealliance.org/design/wit.html), [pinned WIT specification](https://github.com/WebAssembly/component-model/blob/6c48079bbc808bb3bdeb9554f338ab3a5b187388/design/mvp/WIT.md).
 
-Propose two surfaces: a versioned core ABI with scalar operations and typed opaque values, plus an optional generated JS adapter with a friendly .d.ts. The adapter exposes an asynchronous instantiate operation followed by synchronous pure calls. It may marshal bigint limbs, UTF-8 bytes, arrays and records using generated constructors/accessors. A bounded scratch memory can support bulk transfer without becoming the language heap.
+Introduce an explicit export-root manifest for foreign APIs, without adding new v7 grammar. Preserve the source module's own visibility rules. Each selected export must have a representable signature and implementation; reject unsupported selected exports rather than silently dropping them. Concrete specialization applies only to selected foreign signatures, with a bounded budget and stable names.
 
-Opaque values belong to an instance; reject cross-instance mixing. Provide conversion, ownership/lifetime and error rules. Do not expose unstable internal field offsets or rely on JS object identity as language equality. Avoid permanent integer-handle tables where ordinary GC references suffice; if a host requires handles, make release and resource limits explicit.
+| PSCV0 category | Proposed WIT contract and policy |
+|---|---|
+| Bool, Unicode Char/String | bool, char, string; choose UTF-8 canonical encoding |
+| Qualified fixed-width scalars | Corresponding signed/unsigned/float types only when semantics are qualified |
+| Nat | A named natural record containing little-endian list<u32> limbs; arbitrary precision within resource limits |
+| Int | Sign plus natural magnitude; normalize negative zero |
+| Nonrecursive records / inductives | Named records / variants after concrete type substitution and proof-field erasure |
+| Option / Except / product / arrays | option / result / tuple / list with explicit element conversion |
+| Source List | Finite list conversion where semantics match; sharing is not part of the public value contract |
+| General recursive data | Explicit opaque resource API or user-selected finite view; no recursive WIT type |
+| Generic public functions | Concrete export instantiations; no invented WIT type variables |
+| Closures / dictionaries | Internal by default; explicit resource methods or selected concrete operations at the boundary |
+| Dependent invariants / proofs | Checked external validation where defined; otherwise refuse safe foreign export |
+| USize/ISize, effects, imported callbacks | Explicit target policy and assurance classification before support |
 
-An initial scalar-only backend is an honest intermediate capability, not completion. Generic public exports, callbacks, higher-order foreign values and effects must be implemented by a defined adapter or explicitly refused. Internal closures and dictionaries remain required for current-language parity. The pure core has no default WASI dependency. Components, foreign IO and asynchronous effects are future adapters under their own contracts.
+For natural limbs, accept all finite input lists and normalize redundant leading zero limbs. Emit canonical zero as an empty list. This avoids a hidden invariant that WIT cannot express. Integer input normalizes negative zero. The public limb format is independent of internal bigint storage, so a later small-integer fast path does not change the interface.
 
-## 11. Readable TypeScript, Rust, Lean, and ProofScript
+Illustrative WIT presentation, not generated or qualified output:
+
+```wit
+package pscv0:example@0.1.0;
+
+interface arithmetic {
+    /// Little-endian base-2^32 limbs; zero is an empty list.
+    record natural {
+        limbs: list<u32>,
+    }
+
+    add: func(left: natural, right: natural) -> natural;
+}
+
+world example {
+    export arithmetic;
+}
+```
+
+Preserve meaningful source names using deterministic kebab-case allocation, keyword escaping and a reverse identity map. Group types and operations by source API, not by codegen pass. Public WIT names are versioned ABI identities: a rename, type change or ownership change requires explicit compatibility review. The private helper naming policy must not rename public interfaces.
+
+Avoid opaque resources for every small value: records/lists are easy to consume and inspect. Use resources for recursive, identity-bearing or deliberately persistent objects where behavior matters more than copying representation. Persistent resources may expose an explicit clone/share operation returning a new owned handle to the same immutable value. This is an API operation, not implicit copying of an owned handle.
+
+## 11. Canonical ABI and GC runtime integration
+
+A component embeds core modules and uses canonical lift/lower adapters for its public functions. The selected ABI uses linear memory, flattening and memory/reallocation/post-return options. GC-native canonical conversion is a separate proposal, so it is not a foundation for this compiler. [Component explainer](https://github.com/WebAssembly/component-model/blob/6c48079bbc808bb3bdeb9554f338ab3a5b187388/design/mvp/Explainer.md), [Canonical ABI](https://github.com/WebAssembly/component-model/blob/6c48079bbc808bb3bdeb9554f338ab3a5b187388/design/mvp/CanonicalABI.md), [GC ABI proposal](https://github.com/WebAssembly/component-model/issues/525).
+
+Recommended split: language values live in the GC heap; public strings, lists and structured values cross a dedicated memory32 ABI area. Generated adapters convert between them. The ABI buffer is not a second general-purpose language heap.
+
+One CanonicalAbiPlan computes layouts, alignment, checked size arithmetic, scalar flattening, indirect arguments/results, string encoding, cleanup actions and resource operations. Both the core adapter functions and component wiring consume that plan. Follow the pinned rules for the chosen lift/lower direction; a generic “all results use a pointer” shortcut would be wrong.
+
+Implement a small reusable allocator with the required realloc behavior and explicit allocation ownership. Input conversion may release transferred buffers once copied according to the ABI. Exported results remain live until post-return cleanup. Nested aggregate cleanup follows the plan. Do not reset an arena at ordinary function return while a caller still needs the result; do not retain every call's buffers for the instance lifetime. Reentry, imports and callbacks require a defined call/lifetime protocol before they are admitted.
+
+GC-managed resources need a component-owned root table: the resource representation identifies a live GC object, and its destructor releases that root. Keep runtime canonical handles distinct from guest representation IDs and from internal pointers. Do not retain a borrowed handle beyond its allowed call. Make cross-instance identity, ownership transfer, drops and stale-reference behavior explicit. Shared immutable payloads may survive while another owned root remains.
+
+Bounds, alignment, UTF-8/scalar validity, variant discriminants and numeric narrowing are ABI correctness obligations. Treat malformed boundary data and resource exhaustion according to the selected contract; do not silently turn every trap into a source Except result. Domain errors remain typed result values where the source API specifies them.
+
+The first component profile is synchronous and pure, with no implicit WASI imports. Source effects and foreign callbacks require modelled imports and assurance classification. Async components, threads, memory64 and GC-native Canonical ABI can be added as versioned capabilities later, without changing source/Core semantics.
+
+The principal extra cost compared with the earlier core-only plan is real: a component encoder, ABI adapters, marshalling allocator and resource lifecycle. GC still avoids a custom collector for the language heap, but does not eliminate boundary allocation or copying.
+
+## 12. Exact artifacts, WAT readability, and hosts
+
+| Target/profile | Required outputs | Meaning |
+|---|---|---|
+| directJS | module.js, module.d.ts, module.js.map; reachable runtime companions | Native Lean emits JavaScript directly |
+| directWasm component | module.wit, module.wat, module.wasm; manifest | WIT and component binary describe the same selected world; WAT is its readable text form |
+| Explicit core-Wasm target | module.core.wat, module.core.wasm; manifest and optional JS adapter | Standalone core module; no claim of component interoperability |
+| TypeScript / Rust | module.ts / module.rs and required runtime files | Existing peers, with shared readable presentation infrastructure |
+| Lean / ProofScript | module.lean / module.ps and provenance | Selected checked source reconstruction before erasure |
+
+The requested directWasm bundle is complete only at the component milestone. A scalar core prototype is an intermediate result, not a substitute. The manifest identifies core versus component kind; do not infer it from the .wasm extension.
+
+Use a small ComponentPlan with explicit type/index spaces, embedded core modules, instances, aliases, canonical operations, imports and exports. Its binary encoder and WAT printer share those identities. Generate WIT and component type declarations from one interface schema, then independently compare the emitted binary's extracted interface with that schema.
+
+Emit structured component WAT with readable embedded core modules, not a giant escaped module-byte blob. Use source-derived function/local/type/field labels, meaningful branch labels, multi-line instruction blocks and named ABI helpers. Preserve every instruction and constant: readable WAT must remain complete and assemblable. Example of the intended core presentation:
+
+```wat
+(module
+  (func $both (export "both")
+    (param $left i32)
+    (param $right i32)
+    (result i32)
+    local.get $left
+    local.get $right
+    i32.and
+  )
+)
+```
+
+This illustrative helper assumes normalized Boolean operands; the actual public adapter establishes that condition. WAT is a faithful low-level view, not an attempt to recreate high-level source semantics. Source references connect it to readable Lean/PS and the original input.
+
+Allocate separate core and component indices from stable IDs; debug labels never drive linking. Emit only reachable runtime/ABI helpers. A size pass or buffered sections resolve lengths and offsets without repeated global byte insertion. Standard name metadata and the origin manifest preserve names through independent binary inspection. Embedded-module provenance remains separate from outer component offsets.
+
+Implement both encoders in portable .lean. No rustc, clang, LLVM, WAT assembler, WIT parser, jco or wasm-tools subprocess is required for production emission. Those tools may serve as independent development validators.
+
+Use Wasmtime's component host for component qualification. Use Node/V8 and Wasmtime for the extracted standalone core profile. Browser/Node component consumption needs a separately qualified adapter/tooling route; it is not implied by WebAssembly.instantiate support for core modules. jco demonstrates such a transpilation route and is useful as a reference, not a mandatory compiler dependency. [Wasmtime support matrix](https://docs.wasmtime.dev/stability-wasm-proposals.html), [jco transpilation](https://bytecodealliance.github.io/jco/transpiling.html).
+
+An optional generated browser adapter should consume the same ABI plan and the standalone core artifact. It exposes async instantiation followed by sync pure calls, and may present Nat/Int as JS bigint. It must implement the planned marshalling/cleanup rather than rely on GC objects behaving like JS records. Arbitrary component loading is not a new compiler responsibility.
+
+## 13. Readable output across all seven text formats
 
 Readable output is the default presentation mode. Preserve user declaration, binder and field names; use descriptive generated helpers; render structured multi-line bodies; respect operator precedence; emit shared helpers once; separate runtime support from user modules. Keep stable declaration ordering subject to dependency constraints, source-linked synthetic declarations, and anchored comments where they survive transformations.
+
+WIT should show only the selected public contract, organized into meaningful interfaces and worlds. WAT should show named modules/components, complete structured instructions and clearly separated ABI helpers. Use the same symbol/provenance service, with grammar-specific escaping and naming; no one printer attempts to make all languages look identical.
 
 TS/JS should show normal functions, loops, matches-as-control and small named helpers. Rust keeps its correct Rc, closure, borrow and clone decisions, displayed plainly rather than hidden by new abstractions. Parenthesis reduction and naming cleanup follow the structured plan, never text replacement.
 
@@ -200,7 +304,7 @@ Validate selected generated Lean with pinned official Lean and selected generate
 
 Source-output qualification is separate from translating the compiler itself. Keep native .lean authoritative until sufficient language support exists. Final readable compiler .ps migration and fixed-point/self-host qualification remain later, explicitly scheduled work.
 
-## 12. Small validation surface, meaningful acceptance
+## 14. Small validation surface, meaningful acceptance
 
 Reuse the existing composite and 142 runtime observations. Add targets to that same observation matrix rather than duplicating language tests. Keep all current refusal outcomes and kernel/IR gates.
 
@@ -210,35 +314,41 @@ Reuse the existing composite and 142 runtime observations. Add targets to that s
 | Declarations | One strict consumer exercises exported generics, data, callbacks and erased call conventions; selected type errors remain errors |
 | Source maps | Independent decoder; mapped token checks after supplementary Unicode, line breaks, nested scopes and generated helpers |
 | Wasm encoding | Independent wasm-tools validation; inspect readable WAT; execute the same applicable observations |
-| Wasm parity milestone | All 142 current observations in both pinned engines, plus compact ABI/persistence/large-integer boundaries |
+| Core Wasm parity | All 142 current observations in pinned Node/V8 and Wasmtime, plus compact persistence/large-integer boundaries |
+| Component / WIT | Independent WIT parse, component validation, extracted-world equivalence, and all observations through component wrappers in pinned Wasmtime |
+| WAT correspondence | Independently reassemble core/component WAT and compare decoded semantic structure, allowing only specified debug-metadata differences |
+| ABI lifecycle | Compact repeated-call allocation, aggregate/Unicode conversion, output cleanup and owned/borrowed resource checks where those capabilities are exposed |
 | Source reconstruction | Selected Lean/PS round trips, official checking, correspondence checks, no added proof assumptions |
 | Trust boundary | Native prelude signature/model audit and explicit primitive/assumption closure |
 
-wasm-tools provides independent validation and inspection in CI; it is not required by the Lean production emitter. [wasm-tools](https://github.com/bytecodealliance/wasm-tools).
+wasm-tools supplies an independent WIT parser, component/core validator, WAT assembler and interface extraction route in CI; it is not required by the Lean production emitter. A custom-world component requires a small embedding harness rather than assuming the WASI CLI run command can invoke arbitrary exports. Reuse observation definitions and assert wrapper results, not just extracted type names. [wasm-tools](https://github.com/bytecodealliance/wasm-tools).
 
 Validation cannot replace a preservation proof. Record exact source, toolchain, target features and runtime dependencies for each qualification. Avoid enormous golden outputs and a second self-host test loop. Performance checks should separate native compile time, output size, engine startup, execution and allocation, using a small representative workload only when that performance decision is being made.
 
-## 13. Implementation sequence after this report
+## 15. Implementation sequence after this report
 
 The names below extend the earlier A/B milestones; they do not restart the architecture.
 
 | Milestone | Concrete result and exit condition |
 |---|---|
-| C0 — contracts and provenance | Bundle model, stable identities, real spans, export ABI/capabilities, primitive ledger and native signature/model audit. Current TS/Rust behavior retained. |
+| C0 — contracts and provenance | Bundle model, stable identities, real spans, checked public API/capabilities, export selection and WIT representability, primitive ledger and native signature/model audit. Current TS/Rust behavior retained. |
 | C1 — shared ECMAScript | Structured expressions/control/runtime replace active string paths; TS still passes the existing matrix. Remove replaced emitters after their callers migrate. |
 | C2 — directJS | Real .js, .d.ts and .js.map bundle, optional separate runtime, independent declaration/map checks and all 142 runtime observations. No TS compiler in emission. |
-| C3 — directWasm foundation | Typed module, direct binary/WAT, capability diagnostics and a deliberately bounded scalar profile validated independently. |
-| C4 — current-language Wasm parity | GC data/closures, generic conventions, full current bigint/string/array semantics and host adapter; all 142 observations in two pinned engines. |
+| C3 — directWasm foundation | Typed core module, direct binary/readable WAT, capability diagnostics and a bounded scalar profile. Prove one small GC-containing module can be embedded/lifted by the pinned component toolchain before scaling the runtime. |
+| C4 — current-language core parity | GC data/closures, generic conventions, full current bigint/string/array semantics; all 142 observations in two pinned core engines. |
+| C4b — WIT/component completion | WIT printer, Canonical ABI plan/adapters, component binary/WAT, allocator/lifetime/resource rules. Extracted world matches the declared contract; all observations pass through component exports. This completes the requested .wit/.wat/.wasm bundle for the qualified public profile. |
 | C5 — readable source reconstruction | Complete selected Lean/PS presentation and checked correspondence; no compiler migration or self-hosting yet. |
 | D — measured performance | Reachability, bounded specialization, allocation/call improvements and remaining Rust destruction work, each justified by measurements. |
 
-C0 precedes both source maps and new backends. C1 precedes C2. C3/C4 must use C0 contracts, not invent another public ABI. C5 uses the same origin/name infrastructure but branches before erasure. Complete each acceptance boundary before adding broad optimization.
+C0 precedes both source maps and new backends. C1 precedes C2. C3/C4/C4b must use C0 contracts, not invent another public ABI. C4b makes components part of the requested work; it supersedes the previous proposal's deferral of components. C5 uses the same origin/name infrastructure but branches before erasure. Complete each acceptance boundary before adding broad optimization.
 
-The most substantial cost is C4: arbitrary precision, generic closures, persistent data and host conversion. A binary encoder alone is a small part of a capable backend. DirectJS should be delivered first because it reuses the existing runtime model and immediately completes structured TS expression output.
+The most substantial costs are C4/C4b: arbitrary precision, generic closures, persistent data, Canonical ABI marshalling and component/resource lifetimes. A binary encoder alone is a small part of a capable backend. DirectJS should be delivered first because it reuses the existing runtime model and immediately completes structured TS expression output.
 
-## 14. Risks and limits to keep visible
+## 16. Risks and limits to keep visible
 
 GC engine support is a deliberate portability constraint. If a concrete deployment requires MVP-only or embedded Wasm, reevaluate the representation decision before C3; do not silently maintain two runtimes.
+
+WIT cannot express arbitrary dependent, generic or recursive source types. Explicit concrete exports and resource/view adapters keep this foreign-interface limitation from contaminating internal language capability. Component binary/tooling revisions must be pinned; experimental features do not become defaults through an upstream update.
 
 No performance winner has been measured. GC, boxed polymorphism, adapters, bigint arithmetic and array copying have different costs. Preserve a simple correct baseline, profile, then specialize at explicit boundaries.
 
@@ -246,4 +356,4 @@ Real maps require early source retention; comments cannot be recovered after dis
 
 General modules/libraries, broader inference/recursion/control/effects, selected proof automation and VC generation still remain in the v7 roadmap. New backends do not make those features complete.
 
-Implementation remains stopped at the qualified class-output milestone. The next proposed action is C0, followed by C1/C2; directWasm follows the same checked pipeline. No directJS/directWasm code, compiler-source .ps migration, self-hosting, merge or release is part of this report.
+Implementation remains stopped at the qualified class-output milestone. The next proposed action is C0, followed by C1/C2; directWasm core and component milestones follow the same checked pipeline. No directJS/directWasm code, compiler-source .ps migration, self-hosting, merge or release is part of this report.

@@ -37,3 +37,9 @@ source provenance/export ABI, shared structured ECMAScript emission for TS and
 directJS, a typed directWasm path, and pre-erasure source reconstruction.
 The existing byte-origin records are not debugger source maps. These additions
 are proposed only; implementation is stopped at the class-output milestone.
+
+Revision 2 extends the proposed directWasm output to a matching WIT world,
+component WAT and component binary. The checked public API feeds both WIT and
+Canonical ABI adapters. Internal GC data is separate from boundary linear
+memory/resource lifetimes. Core-Wasm output remains explicitly labelled.
+No compiler implementation changes accompany this research revision.

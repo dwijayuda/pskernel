@@ -953,6 +953,14 @@ private def projectBoundaries : IO Unit := do
     "const characterText: String := toString('x')\n" ++
     "const booleanText: String := toString(true)\n" ++
     "theorem boolRendering: booleanText = \"true\" := by { rfl }\n"
+  let standardEqualitySource :=
+    "const sameBool: Bool := true == true\n" ++
+    "theorem sameBoolProof: sameBool = true := by { rfl }\n" ++
+    "const differentBool: Bool := false == true\n" ++
+    "theorem differentBoolProof: differentBool = false := by { rfl }\n" ++
+    "const sameChar: Bool := 'x' == 'x'\n" ++
+    "const differentChar: Bool := 'x' != 'y'\n" ++
+    "const sameUnit: Bool := () == ()\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -983,7 +991,9 @@ private def projectBoundaries : IO Unit := do
       targets := [.javascript, .typescript, .rust] },
     { source := interpolationSource, moduleName := "Interpolated",
       targets := [.javascript, .typescript, .rust] },
-    { source := invalidInterpolation, moduleName := "InvalidInterpolation" }]
+    { source := invalidInterpolation, moduleName := "InvalidInterpolation" },
+    { source := standardEqualitySource, moduleName := "StandardEquality",
+      targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1024,6 +1034,12 @@ private def projectBoundaries : IO Unit := do
         unless error.phase == "parse" do
           throw (IO.userError ("invalid interpolation was not rejected by the lexical/parser boundary: " ++
             error.phase ++ ": " ++ error.message))
+    | 17, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked BEq instances missing cross-target artifacts")
+    | 17, .error error =>
+        throw (IO.userError ("checked BEq Standard case failed at " ++
+          error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

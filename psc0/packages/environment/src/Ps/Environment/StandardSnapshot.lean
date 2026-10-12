@@ -175,7 +175,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- and deliberately changes with every intentional registered semantic update.
 -- The official kernel is still the authority for checking its declarations.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:3890664716772208725"
+  "fnv1a64:9152255662807064572"
 
 
 -- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing

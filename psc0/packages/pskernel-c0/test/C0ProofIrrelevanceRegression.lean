@@ -824,6 +824,68 @@ def main : IO Unit := do
                 throw (IO.userError "C0 DAG rewrite lost structural sharing")
   IO.println "C0_PERF_REGRESSION memoized_indexed_dag=pass"
 
+  -- Invariant of the canonical term store: cached looseBVarRange is
+  -- exactly max loose index + 1, independent of hash collisions/sharing.
+  -- Confirm against the independent recursive expression predicate at
+  -- every tested binder offset; no cached metadata is used as a proof.
+  let metadataExamples := [
+    PsKernelExpr.bvar 0,
+    PsKernelExpr.bvar 4,
+    PsKernelExpr.app (PsKernelExpr.bvar 3) (PsKernelExpr.bvar 1),
+    PsKernelExpr.lam named leftSort (PsKernelExpr.bvar 1)
+      PsKernelBinderInfo.default,
+    PsKernelExpr.forallE named (PsKernelExpr.bvar 3)
+      (PsKernelExpr.bvar 0) PsKernelBinderInfo.implicit,
+    PsKernelExpr.letE named leftSort rightSort
+      (PsKernelExpr.bvar 2) false,
+    PsKernelExpr.mdata 8 (PsKernelExpr.bvar 3),
+    PsKernelExpr.proj named 0 (PsKernelExpr.bvar 2),
+    PsKernelExpr.lam named leftSort
+      (PsKernelExpr.lam named rightSort (PsKernelExpr.bvar 0)
+        PsKernelBinderInfo.default) PsKernelBinderInfo.default
+  ]
+  for term in metadataExamples do
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty term with
+    | none => throw (IO.userError "C0 loose range encoding failed")
+    | some (stored, id) =>
+        match psKernelC0StoreGet stored id with
+        | none => throw (IO.userError "C0 loose range root absent")
+        | some entry =>
+            for offset in [:8] do
+              let expected := psKernelExprHasLooseAt term offset
+              let actual := entry.looseBVarRange > offset
+              if !(psKernelBoolEq expected actual) then
+                throw (IO.userError "C0 indexed loose-range metadata disagreed with recursive reference")
+            for replacement in [PsKernelExpr.bvar 0, PsKernelExpr.bvar 4, leftSort] do
+              match psKernelC0EncodeExpr stored replacement with
+              | none => throw (IO.userError "C0 loose range replacement encode failed")
+              | some (prepared, replacementId) =>
+                  match psKernelC0Instantiate1Indexed prepared id replacementId,
+                        psKernelC0Instantiate1IndexedReference prepared id replacementId with
+                  | some (memoStore, memoId), some (referenceStore, referenceId) =>
+                      match psKernelC0DecodeExpr memoStore memoId,
+                            psKernelC0DecodeExpr referenceStore referenceId with
+                      | some optimized, some reference =>
+                          if !(psKernelExprEqual optimized reference) then
+                            throw (IO.userError "C0 loose-range pruning changed indexed substitution")
+                      | _, _ =>
+                          throw (IO.userError "C0 loose-range indexed decode failed")
+                  | _, _ =>
+                      throw (IO.userError "C0 loose-range indexed rewrite failed")
+                for start in [0, 1, 3, 6] do
+                  match psKernelC0LiftIndexed stored id start 2 with
+                  | some (liftStore, liftId) =>
+                      match psKernelC0DecodeExpr liftStore liftId with
+                      | some optimized =>
+                          let reference := psKernelExprLiftLooseBVars term start 2
+                          if !(psKernelExprEqual optimized reference) then
+                            throw (IO.userError "C0 loose-range pruning changed indexed lift")
+                      | none =>
+                          throw (IO.userError "C0 loose-range lifted result undecodable")
+                  | none =>
+                      throw (IO.userError "C0 loose-range indexed lift failed")
+  IO.println "C0_PERF_REGRESSION cached_indexed_loose_bvar_range=pass"
+
   -- Indexed WHNF is not an accepting checker, but its supported
   -- beta/zeta/spine fragment must agree with native expression normalization.
   let indexedIdentity := PsKernelExpr.lam named leftSort

@@ -177,6 +177,15 @@ def psEraseOpenDefinitionWithFuel
                 let nextValue :=
                   psExprInstantiate1 valueBody openedVariable;
                 match kind with
+                | PsErasedBinderKind.index =>
+                    -- This checked binder is a higher-kinded type former or
+                    -- predicate. Its value may determine later Core types but
+                    -- cannot be reified as a runtime generic or executable slot.
+                    let nextScope := { scope with
+                      localContext := pushed.context
+                      erasedLocals := pushed.id :: scope.erasedLocals }
+                    smaller nextScope nextType nextValue typeIndex
+                      typeParametersRev parametersRev
                 | PsErasedBinderKind.type =>
                     let parameterName :=
                       String.Internal.append "T" (psNatToString typeIndex);

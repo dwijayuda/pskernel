@@ -4,6 +4,7 @@ structure PsPreparedInductiveParameters where
   scope : PsErasureScope
   values : List PsExpr
   typeParameters : List PsVerifiedIrTypeParameter
+  sourceTypeIndices : List Nat
 
 def psPrepareInductiveParametersWithFuel
     (environment : PsEnvironment) (fuel : Nat) :
@@ -17,7 +18,7 @@ def psPrepareInductiveParametersWithFuel
         let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsExpr -> List PsVerifiedIrTypeParameter -> Except PsErasureError PsPreparedInductiveParameters :=
           psPrepareInductiveParametersWithFuel environment remainingFuel;
         match count with
-        | Nat.zero => Except.ok (PsPreparedInductiveParameters.mk scope (psListReverse valuesRev) (psListReverse parametersRev))
+        | Nat.zero => Except.ok (PsPreparedInductiveParameters.mk scope (psListReverse valuesRev) (psListReverse parametersRev) [])
         | Nat.succ remaining =>
           match
               psWhnf
@@ -63,6 +64,16 @@ def psPrepareInductiveParametersWithFuel
                     (List.cons
                       (PsVerifiedIrTypeParameter.mk parameterName)
                       parametersRev)
+              | .index =>
+                  -- Preserve the Core parameter for dependent constructor
+                  -- substitution; it does not create an IR type argument.
+                  let pushed := psLocalPushBinding scope.localContext name domain binder
+                  let value := PsExpr.fvar pushed.id
+                  let nextScope := { scope with
+                    localContext := pushed.context
+                    erasedLocals := pushed.id :: scope.erasedLocals }
+                  smaller nextScope (psExprInstantiate1 body value)
+                    remaining (index + 1) (value :: valuesRev) parametersRev
               | _ =>
                   Except.error PsErasureError.unsupportedRuntimeTerm
           | _ =>
@@ -72,16 +83,13 @@ def psPrepareInductiveParameters
     (environment : PsEnvironment)
     (scope : PsErasureScope)
     (info : PsInductiveInfo) :
-    Except PsErasureError PsPreparedInductiveParameters :=
-  psPrepareInductiveParametersWithFuel
-    environment
-    4096
-    scope
-    info.type
-    info.numParams
-    0
-    []
-    []
+    Except PsErasureError PsPreparedInductiveParameters := do
+  let result ← psPrepareInductiveParametersWithFuel
+    environment 4096 scope info.type info.numParams 0 [] []
+  let sourceTypeIndices ← psErasureInductiveSourceTypeIndices environment scope info
+  if sourceTypeIndices.length != result.typeParameters.length then
+    throw .binderMismatch
+  return { result with sourceTypeIndices }
 
 def psApplyConstructorParameters
     (environment : PsEnvironment) (scope : PsErasureScope) (values : List PsExpr) :
@@ -329,6 +337,7 @@ def psPrepareRuntimeInductive
                   numParams := info.numParams
                   numIndices := info.numIndices
                   typeParameters := parameters.typeParameters
+                  sourceTypeIndices := parameters.sourceTypeIndices
                   constructors := constructors
                 };
                 let makeEntry :=

@@ -76,6 +76,7 @@ def psPrepareRuntimeStructure
                                 constructorName := constructorName
                                 numParams := info.numParams
                                 typeParameters := parameters.typeParameters
+                                sourceTypeIndices := parameters.sourceTypeIndices
                                 fields := fields
                                 numFields := constructorInfo.numFields
                               };

@@ -1148,6 +1148,59 @@ def main : IO Unit := do
           | none => throw (IO.userError "C0 indexed projection fragment decode failed")
       | _, _ => throw (IO.userError "C0 indexed projection fragment failed")
   IO.println "C0_PERF_REGRESSION indexed_constructor_projection=pass"
+  -- Projection used as the *head of an application* must select its
+  -- constructor field, then reapply the existing argument handles in order.
+  -- The previous projection-root-only dispatcher missed this whole family.
+  for width in [1, 2, 16] do
+    let projectionFn := PsKernelExpr.proj indexInduct 1 structExpr
+    let applied := (List.range width).foldl
+      (fun term i => PsKernelExpr.app term
+        (if i % 2 == 0 then sort0 else sort1))
+      projectionFn
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty applied with
+    | none => throw (IO.userError "C0 applied projection encoding failed")
+    | some (stored, rootId) =>
+        match psKernelC0IndexedReduceProjectionOnce projectionContext
+                stored rootId,
+              psKernelC0IndexedReduceHeadOnce projectionContext
+                stored rootId,
+              psKernelC0IndexedContextFragment 4096 projectionContext
+                stored rootId,
+              psKernelSessionWhnf 4096 {
+                context := projectionContext
+                state := psKernelCheckerStateEmpty
+              } applied with
+        | some (projectionStore, projectionId),
+          some (dispatchedStore, dispatchedId),
+          some (fragmentStore, fragmentId),
+          Except.ok (reference, _) =>
+            match psKernelC0DecodeExpr projectionStore projectionId,
+                  psKernelC0DecodeExpr dispatchedStore dispatchedId,
+                  psKernelC0DecodeExpr fragmentStore fragmentId with
+            | some isolated, some dispatched, some continuous =>
+                if !(psKernelExprEqual reference isolated &&
+                     psKernelExprEqual reference dispatched &&
+                     psKernelExprEqual reference continuous) then
+                  throw (IO.userError
+                    "C0 applied projection changed application order")
+            | _, _, _ =>
+                throw (IO.userError "C0 applied projection decode failed")
+        | _, _, _, _ =>
+            throw (IO.userError "C0 applied projection reduction differed")
+  -- Negative projection heads must remain stuck, not spuriously select an
+  -- indexed field or transform the enclosing application.
+  let wrongProj := PsKernelExpr.app
+    (.proj polymorphicName 1 structExpr) sort0
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty wrongProj with
+  | none => throw (IO.userError "C0 negative projection encoding failed")
+  | some (stored, rootId) =>
+      if (psKernelC0IndexedReduceHeadOnce projectionContext
+          stored rootId).isSome ||
+         (psKernelC0IndexedContextFragment 4096 projectionContext
+          stored rootId).isSome then
+        throw (IO.userError "C0 mismatched projection head was reduced")
+  IO.println "C0_PERF_REGRESSION indexed_applied_projection_head=pass"
+
 
   -- A direct application-spine selector must match the historical
   -- fully materialized argument-list representation for every index.

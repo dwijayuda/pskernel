@@ -112,23 +112,23 @@ def psKernelC0IndexedAppHeadWithFuel
   priority. This helper returns none for absent/opaque/unfoldable heads or
   invalid term stores, not a positive typing/DefEq/normalization verdict.
 -/
-def psKernelC0IndexedUnfoldHeadOnce
+/-- Unfold an already selected local/constant head and reapply the
+    existing canonical arguments. The body is the only source-to-index
+    import; universe substitution and applications stay indexed. -/
+def psKernelC0IndexedUnfoldKnownHead
     (context : PsKernelCheckerContext)
     (store : PsKernelC0TermStore)
-    (id : Nat) : Option (PsKernelC0TermStore × Nat) := do
-  let root ← psKernelC0StoreGet store id
-  let (head, args) ← psKernelC0IndexedAppHeadWithFuel
-    root.depth store id []
-  let headNode ← psKernelC0StoreGet store head
+    (head : PsKernelC0Node)
+    (args : List Nat) : Option (PsKernelC0TermStore × Nat) := do
   let (value, params, levels) ←
-    match headNode.node with
+    match head with
     | .fvar name =>
         match psKernelLocalContextFind context.localContext name with
         | none => none
         | some decl =>
             match psKernelLocalDeclValue decl with
             | none => none
-            | some value => some (value, [], [])
+            | some body => some (body, [], [])
     | .const name levels =>
         match psKernelEnvironmentFind context.environment name with
         | none => none
@@ -138,15 +138,25 @@ def psKernelC0IndexedUnfoldHeadOnce
                 psKernelLevelListLength levels then
               match psKernelConstantInfoDeltaValue info with
               | none => none
-              | some value => some (value, params, levels)
+              | some body => some (body, params, levels)
             else none
     | _ => none
-  -- Encode the *uninstantiated* declaration body only. Universe rewriting
-  -- and application of existing argument handles remain in the arena.
-  let (sourceStore, sourceId) ← psKernelC0EncodeExpr store value
-  let (nextStore, valueId) ←
-    psKernelC0InstantiateLevelsIndexed sourceStore sourceId params levels
-  psKernelC0IndexedApplySpine nextStore valueId args
+  let (importedStore, bodyId) ← psKernelC0EncodeExpr store value
+  let (rewrittenStore, valueId) ←
+    psKernelC0InstantiateLevelsIndexed importedStore bodyId params levels
+  psKernelC0IndexedApplySpine rewrittenStore valueId args
+
+/-- Source-equivalent candidate for local let/global delta single-head
+    unfolding. No checker decision or fuel accounting is inferred. -/
+def psKernelC0IndexedUnfoldHeadOnce
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option (PsKernelC0TermStore × Nat) := do
+  let root ← psKernelC0StoreGet store id
+  let (headId, args) ← psKernelC0IndexedAppHeadWithFuel
+    root.depth store id []
+  let head ← psKernelC0StoreGet store headId
+  psKernelC0IndexedUnfoldKnownHead context store head.node args
 
 /-- Demand-driven WHNF; args are earliest/innermost-first. -/
 def psKernelC0IndexedWhnfWithFuel
@@ -179,40 +189,77 @@ def psKernelC0IndexedWhnf
   resource accounting remain external. A missing match is never evidence
   that a projection is irreducible for the full checker.
 -/
+/-- Select an already constructor-headed field without unpacking source
+    expressions. The original outer application arguments are reapplied in
+    their original left-to-right order. -/
+def psKernelC0IndexedProjectKnownHead
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (typeName : PsKernelName)
+    (index structId : Nat)
+    (args : List Nat) : Option (PsKernelC0TermStore × Nat) := do
+  if psKernelNatGt index psKernelLeanUInt32Max then none
+  else do
+    let structEntry ← psKernelC0StoreGet store structId
+    let (fn, ctorArgs) ← psKernelC0IndexedAppHeadWithFuel
+      structEntry.depth store structId []
+    let ctorHead ← psKernelC0StoreGet store fn
+    match ctorHead.node with
+    | .const ctorName _ =>
+        let info ← psKernelEnvironmentFind context.environment ctorName
+        match info with
+        | .ctorInfo ctor =>
+            if psKernelNameEq ctor.induct typeName then do
+              let field ← ctorArgs[ctor.numParams + index]?
+              psKernelC0IndexedApplySpine store field args
+            else none
+        | _ => none
+    | _ => none
+
+/-- Select a projection, including when the projection is the head of an
+    outer application. It remains only a candidate indexed reduction step. -/
 def psKernelC0IndexedReduceProjectionOnce
     (context : PsKernelCheckerContext)
     (store : PsKernelC0TermStore)
     (id : Nat) : Option (PsKernelC0TermStore × Nat) := do
   let root ← psKernelC0StoreGet store id
-  match root.node with
+  let (fn, args) ← psKernelC0IndexedAppHeadWithFuel
+    root.depth store id []
+  let head ← psKernelC0StoreGet store fn
+  match head.node with
   | .proj typeName index structId =>
-      if psKernelNatGt index psKernelLeanUInt32Max then none
-      else do
-        let structEntry ← psKernelC0StoreGet store structId
-        let (fn, args) ← psKernelC0IndexedAppHeadWithFuel
-          structEntry.depth store structId []
-        let head ← psKernelC0StoreGet store fn
-        match head.node with
-        | .const ctorName _ =>
-            let info ← psKernelEnvironmentFind
-              context.environment ctorName
-            match info with
-            | .ctorInfo ctor =>
-                if psKernelNameEq ctor.induct typeName then do
-                  let field ← args[ctor.numParams + index]?
-                  some (store, field)
-                else none
-            | _ => none
-        | _ => none
+      psKernelC0IndexedProjectKnownHead
+        context store typeName index structId args
+  | _ => none
+
+/-- One head-spine traversal dispatches the supported contextual reduction
+    families. Add future recursor/quotient/native cases here only after their
+    source ordering and fuel behavior have been qualified independently. -/
+def psKernelC0IndexedReduceHeadOnce
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option (PsKernelC0TermStore × Nat) := do
+  let root ← psKernelC0StoreGet store id
+  let (fn, args) ← psKernelC0IndexedAppHeadWithFuel
+    root.depth store id []
+  let head ← psKernelC0StoreGet store fn
+  match head.node with
+  | .proj typeName index structId =>
+      psKernelC0IndexedProjectKnownHead
+        context store typeName index structId args
+  | .fvar _ | .const _ =>
+      psKernelC0IndexedUnfoldKnownHead context store head.node args
   | _ => none
 
 /-
   Opt-in context-sensitive indexed reduction FRAGMENT.
 
   This composes the already independent indexed beta/zeta/metadata engine
-  with one-step local-let/delta unfolding, carrying one canonical arena
+  with one-step local-let/delta/constructor-projection unfolding,
+  carrying one canonical arena
   through an arbitrarily long supported rewrite sequence. It is NOT
-  general WHNF: quotient, recursor/iota, projection, native/Nat primitives,
+  general WHNF: quotient, recursor/iota, projection-of-reducible-values,
+  native/Nat primitives,
   proof irrelevance, checker caches and exact Lean 4.34 resource semantics
   are not implemented here. No accepting operation calls this fragment.
 
@@ -235,15 +282,12 @@ def psKernelC0IndexedContextFragmentWithFuel
   | remaining + 1 => do
       let (syntacticStore, syntacticId) ←
         psKernelC0IndexedWhnf fuel store id
-      -- A projection can select an already constructor-headed indexed
-      -- value without source reconstruction. Otherwise try local/delta.
+      -- All supported contextual rules use the same head-spine dispatch.
+      -- Unknown/unsupported rules remain non-authoritative and must not
+      -- be interpreted as an accepting WHNF/DefEq success.
       let nextStep :=
-        match psKernelC0IndexedReduceProjectionOnce
-            context syntacticStore syntacticId with
-        | some reduction => some reduction
-        | none =>
-            psKernelC0IndexedUnfoldHeadOnce
-              context syntacticStore syntacticId
+        psKernelC0IndexedReduceHeadOnce
+          context syntacticStore syntacticId
       match nextStep with
       | some (nextStore, nextId) =>
           -- Malformed cyclic definitions cannot silently become success.

@@ -191,3 +191,27 @@ C0's full infer-only path wins on this fixture, while checked inference is **~1.
 [CI 38215639174](https://github.com/dwijayuda/pskernel/actions/runs/38215639174), source `30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba`, **passed every native gate**. A second observed *closed* stress measured old precheck 186 ms vs C0 2 ms (9000 calls). A genuinely *open* 48-binder stress measured old precheck/general instantiation 71 ms vs C0 1 ms (4000 calls). These are separate microbenchmarks with fixed input under repeated loops, not entire checker benchmarks. They **contradict the hypothesis** that source-specialized substitution itself is slowing the checked application; no evidence-based reason to revert it.
 
 The opt-in indexed-session wrapper is still slower (ordinary 26–27 ms vs wrapper 53–54 ms over 1,200 warm WHNF calls); it is not production default. Indexed binder-hash interning improvement and infer-only count optimization remain separately measured, not whole-kernel qualification. No self-hosting or fixed-point runs.
+
+
+
+### Controlled original-instantiation ablation and production hybrid qualification — October 12
+
+[Native CI 38222241004](https://github.com/dwijayuda/pskernel/actions/runs/38222241004) restored **only** the original `instantiate1` implementation in a private copy of C0, retaining all other C0 Lean source and identical checked benchmark inputs:
+
+| Same runner, public 48-argument application, 80 fully checked calls/round | Round 0 | Round 1 | Round 2 |
+| --- | ---: | ---: | ---: |
+| C0 before hybrid | 65 ms | 65 ms | 66 ms |
+| Original unmodified kernel | 40 ms | 39 ms | 39 ms |
+| C0 with original instantiate1 (private ablation) | 40 ms | 40 ms | 40 ms |
+
+This establishes a causally relevant subsystem bottleneck that fixed-input isolated instantiation microbenchmarks masked.
+
+[Native CI 38222841665](https://github.com/dwijayuda/pskernel/actions/runs/38222841665) validates the **production Lean-native two-strategy instantiation**. All three native gates and matched original-core and optional ablation comparisons passed.
+
+| Same-run complete public checking | Hybrid C0 | Unmodified original | C0/original-instantiate1 ablation |
+| --- | --- | --- | --- |
+| Infer-only, 200 calls/round, 3 rounds | 19 / 19 / 19 ms | 82 / 81 / 82 ms | 19 / 19 / 19 ms |
+| Fully checked, 80 calls/round, 3 rounds | 39 / 40 / 39 ms | 38 / 39 / 39 ms | 40 / 39 / 39 ms |
+| Independent-process peak VmHWM | 562464 kB | 562452 kB | 563132 kB |
+
+**Interpretation:** the checked-application slowdown is eliminated **on the tested fixture** without reverting one-pass specialization for application-headed terms. Peak RSS is indistinguishable at this resolution and is process-wide. These are limited fixtures and single-run triplicates, not full real-library qualification. The new hybrid keeps mandatory resource/checker judgments unchanged. Benchmark workloads still need broad distribution and p95 measurements. The original core remains unmodified.

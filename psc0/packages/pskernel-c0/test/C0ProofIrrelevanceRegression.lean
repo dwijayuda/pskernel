@@ -559,6 +559,41 @@ def main : IO Unit := do
       throw (IO.userError "C0 original local context lost its entry")
   IO.println "C0_PERF_REGRESSION indexed_local_shadowing=pass"
 
+  -- A local index is non-semantic acceleration: no construction before
+  -- depth 33, exact lookup and shadowing on both sides of promotion, and
+  -- immutable older snapshots with no index.
+  let threshold := psKernelC0LocalIndexThreshold
+  let mut smallCtx := psKernelLocalContextEmpty
+  for k in [:threshold] do
+    let name := PsKernelName.num PsKernelName.anonymous k
+    smallCtx := psKernelLocalContextAddLocal smallCtx name name
+      sort0 PsKernelBinderInfo.default
+  match smallCtx.index with
+  | Option.none => pure ()
+  | Option.some _ => throw (IO.userError "C0 short context eagerly indexed")
+  let deepName := PsKernelName.num PsKernelName.anonymous threshold
+  let deepCtx := psKernelLocalContextAddLet smallCtx deepName
+    deepName sort1 sort0
+  match deepCtx.index with
+  | Option.none => throw (IO.userError "C0 deep context missed radix promotion")
+  | Option.some _ => pure ()
+  for ctx in [smallCtx, deepCtx] do
+    for k in [:threshold + 3] do
+      let name := PsKernelName.num PsKernelName.anonymous k
+      match psKernelLocalContextFindIn name ctx.decls,
+          psKernelLocalContextFind ctx name with
+      | Option.none, Option.none => pure ()
+      | Option.some expected, Option.some actual =>
+          if !(psKernelNameEq (psKernelLocalDeclName expected)
+              (psKernelLocalDeclName actual) &&
+              psKernelExprEqual (psKernelLocalDeclType expected)
+                (psKernelLocalDeclType actual)) then
+            throw (IO.userError "C0 delayed local indexing changed result")
+      | _, _ => throw (IO.userError "C0 delayed local lookup changed presence")
+  if smallCtx.nextIndex != threshold || deepCtx.nextIndex != threshold + 1 then
+    throw (IO.userError "C0 delayed local index changed fresh-name counter")
+  IO.println "C0_PERF_REGRESSION deferred_local_index_promotion=pass"
+
   -- The UTF-8 optimized fingerprint is identical to the original decoder
   -- for ASCII, multi-byte scalar values and mixed names at varied seeds.
   for value in ["", "a", "abc", "A.B", "βeta", "中文", "emoji 😀"] do

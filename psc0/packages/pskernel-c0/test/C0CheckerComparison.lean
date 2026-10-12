@@ -449,12 +449,12 @@ def main : IO Unit := do
     -- Complete checked admission where the body uses an inner, middle or
     -- outer binder. Compare identical semantic decisions and runner-local
     -- costs against the untouched original package.
-    for referenceDepth in [96, 192] do
+    for referenceDepth in [96, 192, 320] do
       let referenceType := c0CompareCheckedPi referenceDepth
       let referenceBase := PsKernelName.str PsKernelName.anonymous "C0LocalReference"
       for offset in [0, referenceDepth / 2, referenceDepth - 1] do
         let referenceBody := c0CompareLocalRefLambdas referenceDepth offset
-        let referenceRuns := if referenceDepth == 96 then 20 else 6
+        let referenceRuns := if referenceDepth == 96 then 20 else if referenceDepth == 192 then 6 else 3
         let mut referenceAccepted := 0
         let referenceStart ← IO.monoMsNow
         for i in [:referenceRuns] do

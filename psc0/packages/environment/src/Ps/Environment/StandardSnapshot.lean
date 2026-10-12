@@ -313,7 +313,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- alias roster, not source notation, deriving handlers, imported Lean
 -- extensions, effects or the whole trusted execution base.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:889fb4913a36309c2f362fb18247eb8648a48c9277e2d67cb6d7ab98a7e0ed2f"
+  "sha256:13e7007c324ca40d0d871d2bc4856084796dd451891d7a0096216e94197b211e"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

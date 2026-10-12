@@ -1,6 +1,6 @@
 # PSKernel-C0 experimental performance measurements
 
-**Scope:** Indexed Rust term-substrate microbenchmarks only, **not** Lean kernel / PSC0 compiler checking and **not** an original PSKernel-Core comparison.
+**Scope:** Historical Rust substrate measurements (first section), Lean-native C0 microbenchmarks, and newer same-run original PSKernel-Core versus C0 complete-checker comparisons. The latest sections supersede the original Rust-only scope statement.
 
 ## Sources and reproduction
 

@@ -61,12 +61,12 @@ def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bo
 def psScopePrivateRewrite (resolver : PsScopeResolver)
     (segments : List String) : Option (List String) :=
   let prefixes := psScopePrefixes segments
-  let some prefix := prefixes.find? (fun candidate =>
+  let some matchPrefix := prefixes.find? (fun candidate =>
     resolver.privateAliases.any (fun entry => entry.fst == candidate))
     | none
-  let some alias := resolver.privateAliases.find? (fun entry => entry.fst == prefix)
+  let some alias := resolver.privateAliases.find? (fun entry => entry.fst == matchPrefix)
     | none
-  some (alias.snd ++ segments.drop prefix.length)
+  some (alias.snd ++ segments.drop matchPrefix.length)
 
 def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     (name : PsSyntaxName) : Except PsElabError (Prod PsSyntaxName (List String)) := do

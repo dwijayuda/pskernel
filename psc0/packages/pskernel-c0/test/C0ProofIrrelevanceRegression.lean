@@ -214,3 +214,51 @@ def main : IO Unit := do
 
 
 
+
+
+  -- Exact recursive-expression <-> indexed-node bridge.
+  -- Compare *full* syntax, not alpha or definitional equality: binder
+  -- names, metadata, info and nondependent let flags must survive.
+  let named := PsKernelName.str PsKernelName.anonymous "c0.bridge"
+  let leftSort := PsKernelExpr.sort PsKernelLevel.zero
+  let rightSort := PsKernelExpr.sort
+    (PsKernelLevel.succ PsKernelLevel.zero)
+  let binder := PsKernelExpr.lam named leftSort
+    (PsKernelExpr.app (PsKernelExpr.bvar 0)
+      (PsKernelExpr.lit (PsKernelLiteral.nat 123)))
+    PsKernelBinderInfo.implicit
+  let piTerm := PsKernelExpr.forallE named rightSort binder
+    PsKernelBinderInfo.strictImplicit
+  let letTerm := PsKernelExpr.letE named rightSort
+    (PsKernelExpr.const named [PsKernelLevel.zero])
+    piTerm true
+  let metadata := PsKernelExpr.mdata 29
+    (PsKernelExpr.proj named 3 letTerm)
+  let examples := [
+    PsKernelExpr.bvar 0, PsKernelExpr.fvar named,
+    PsKernelExpr.mvar named, leftSort, rightSort,
+    PsKernelExpr.const named [PsKernelLevel.zero],
+    PsKernelExpr.lit (PsKernelLiteral.nat 7654321),
+    PsKernelExpr.lit (PsKernelLiteral.str "βeta 中文"),
+    binder, piTerm, letTerm, metadata
+  ]
+  let mut interned := psKernelC0StoreEmpty
+  for expr in examples do
+    match psKernelC0EncodeExpr interned expr with
+    | Option.none => throw (IO.userError "C0 indexed encode rejected valid syntax")
+    | Option.some (next, id) =>
+        match psKernelC0DecodeExpr next id with
+        | Option.none => throw (IO.userError "C0 indexed decode failed")
+        | Option.some restored =>
+            if !(psKernelExprEqual expr restored) then
+              throw (IO.userError "C0 indexed bridge changed exact syntax")
+        match psKernelC0EncodeExpr next expr with
+        | Option.some (again, id2) =>
+            if !(Nat.beq id id2 && Nat.beq next.nodes.size again.nodes.size) then
+              throw (IO.userError "C0 indexed re-encoding broke identity")
+        | Option.none => throw (IO.userError "C0 indexed re-encoding failed")
+        interned := next
+  match psKernelC0DecodeExpr interned interned.nodes.size with
+  | Option.none => pure ()
+  | Option.some _ => throw (IO.userError "C0 decoder accepted invalid handle")
+  IO.println "C0_PERF_REGRESSION indexed_expr_roundtrip=pass"

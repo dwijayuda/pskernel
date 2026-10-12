@@ -36,8 +36,11 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
     let outputStem := match outputs.head? with
       | none => "module"
       | some (_, output) => ((System.FilePath.mk output).fileStem).getD "module"
-    return { source := ← IO.FS.readFile (System.FilePath.mk path), sourceName := path,
-      outputStem, targets := outputs.map (·.1) : Request }
+    return {
+      source := ← IO.FS.readFile (System.FilePath.mk path)
+      sourceName := path
+      outputStem := outputStem
+      targets := outputs.map (·.1) : Request }
   match ← runBatch requests with
   | .error error =>
       IO.eprintln (error.phase ++ ": " ++ error.message)

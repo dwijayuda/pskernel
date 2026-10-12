@@ -69,6 +69,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Core.Declaration,
     `Ps.KernelCore.Core.Expr,
     `Ps.KernelCore.Core.IndexedExpr,
+    `Ps.KernelCore.Core.IndexedReduction,
     `Ps.KernelCore.Core.Level,
     `Ps.KernelCore.Core.LocalContext,
     `Ps.KernelCore.Core.Name,

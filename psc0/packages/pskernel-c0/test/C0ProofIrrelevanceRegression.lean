@@ -170,6 +170,40 @@ def main : IO Unit := do
         | _, _ =>
             throw (IO.userError
               "C0 malformed checked spine changed rejection into acceptance")
+  -- Independently compare the structurally recursive metadata-carrying
+  -- alternative against the original checked core. Its only possible
+  -- acceptance difference must be caught here, including exact resource
+  -- exhaustion, failed heads, typed arguments and metadata-bearing syntax.
+  for arity in [1, 12, 24, 31, 32, 33, 48, 64, 192] do
+    let source := (List.range arity).foldl
+      (fun fn i =>
+        PsKernelExpr.app fn
+          (if i % 3 == 0 then PsKernelExpr.mdata i sort0 else sort0))
+      (c0CheckedSpineFixture arity)
+    let bad := PsKernelExpr.app source sort1
+    for expr in [source, bad] do
+      for fuel in [0, 1, 4, 16, 64, 512, 4096] do
+        let defeq := psKernelIsDefEqWithFuel fuel
+        let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+        match psKernelC0CheckAppRecursive fuel whnf defeq
+            session.context session.state expr,
+            psKernelInferCoreWithFuel fuel whnf defeq
+              session.context session.state expr false with
+        | Except.error candidateError, Except.error originalError =>
+            if candidateError != originalError then
+              throw (IO.userError
+                "C0 recursive Pi metadata changed checked error")
+        | Except.ok (candidateType, candidateState),
+            Except.ok (originalType, originalState) =>
+            if !(psKernelExprEqual candidateType originalType &&
+                candidateState.nextFresh == originalState.nextFresh) then
+              throw (IO.userError
+                "C0 recursive Pi metadata changed type or fresh names")
+        | _, _ =>
+            throw (IO.userError
+              "C0 recursive Pi metadata changed acceptance")
+  IO.println "C0_PERF_REGRESSION recursive_pi_metadata_exact_checker=pass"
+
   IO.println "C0_PERF_REGRESSION checked_spine_malformed_heads_args=pass"
 
   IO.println "C0_PERF_REGRESSION checked_spine_exact_fuel_and_errors=pass"

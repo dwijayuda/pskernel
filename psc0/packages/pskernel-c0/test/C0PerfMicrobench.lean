@@ -471,6 +471,79 @@ def main : IO Unit := do
     throw (IO.userError "C0 checked application counts diverged")
   IO.println s!"C0_BENCH checked_spine_full recursive_ms={originalEnd-originalStart} frames_ms={framesEnd-framesStart} iterations={checkedIterations} args={spineArgs}"
 
+  -- Full-operation three-way comparison across application widths. Syntax,
+  -- admitted environment and checker state are all constructed outside timed
+  -- spans. Keep this diagnostic independent of production route selection.
+  for width in [16, 24, 32, 48, 64, 192] do
+    let name := PsKernelName.num
+      (PsKernelName.str PsKernelName.anonymous "C0RecursiveSpineCompare")
+      width
+    let declaration : PsKernelAxiomInfo := {
+      base := {
+        name := name
+        levelParams := []
+        type := c0BenchCheckedForalls width
+      }
+      isUnsafe := false
+    }
+    let env ←
+      match psKernelAddAxiom 4096 psKernelEnvironmentEmpty declaration
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok checkedEnv => pure checkedEnv
+      | Except.error err =>
+          throw (IO.userError ("C0 recursive spine fixture rejected: " ++ err))
+    let ctx := psKernelCheckerContextEmpty env
+    let term := (List.range width).foldl
+      (fun fn _ => PsKernelExpr.app fn
+        (PsKernelExpr.sort PsKernelLevel.zero))
+      (PsKernelExpr.const name [])
+    let runs := if width < 64 then 200 else 60
+    let mut legacyCount := 0
+    let legacyStart ← IO.monoMsNow
+    for _ in [:runs] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelInferCoreWithFuel 4096 whnf defeq ctx
+          psKernelCheckerStateEmpty term false with
+      | Except.ok (checkedType, _) =>
+          if psKernelExprEqual checkedType (PsKernelExpr.sort PsKernelLevel.zero) then
+            legacyCount := legacyCount + 1
+          else throw (IO.userError "C0 recursive original type diverged")
+      | Except.error err =>
+          throw (IO.userError ("C0 recursive original failed: " ++ err))
+    let legacyEnd ← IO.monoMsNow
+    let mut framedCount := 0
+    let framedStart ← IO.monoMsNow
+    for _ in [:runs] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelC0CheckAppSpineWithFuel 4096 whnf defeq ctx
+          psKernelCheckerStateEmpty term with
+      | Except.ok (checkedType, _) =>
+          if psKernelExprEqual checkedType (PsKernelExpr.sort PsKernelLevel.zero) then
+            framedCount := framedCount + 1
+          else throw (IO.userError "C0 framed alternative type diverged")
+      | Except.error err =>
+          throw (IO.userError ("C0 framed alternative failed: " ++ err))
+    let framedEnd ← IO.monoMsNow
+    let mut recursiveCount := 0
+    let recursiveStart ← IO.monoMsNow
+    for _ in [:runs] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelC0CheckAppRecursive 4096 whnf defeq ctx
+          psKernelCheckerStateEmpty term with
+      | Except.ok (checkedType, _) =>
+          if psKernelExprEqual checkedType (PsKernelExpr.sort PsKernelLevel.zero) then
+            recursiveCount := recursiveCount + 1
+          else throw (IO.userError "C0 recursive alternative type diverged")
+      | Except.error err =>
+          throw (IO.userError ("C0 recursive alternative failed: " ++ err))
+    let recursiveEnd ← IO.monoMsNow
+    if legacyCount != runs || framedCount != runs || recursiveCount != runs then
+      throw (IO.userError "C0 checked spine candidates disagree")
+    IO.println s!"C0_BENCH checked_spine_three_way arguments={width} iterations={runs} old_ms={legacyEnd-legacyStart} frames_ms={framedEnd-framedStart} recursive_ms={recursiveEnd-recursiveStart}"
+
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   -- Build cost includes all radix allocations. Compare against an
   -- identical immutable list-only context while preserving name/order.

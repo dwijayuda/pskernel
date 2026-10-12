@@ -187,6 +187,123 @@ def psKernelC0CheckAppSpineWithFuel
   psKernelC0CheckAppFrames whnf defeq context path.frames ranges
     headType headState
 
+/-
+Alternative checked-application execution substrate.
+
+This worker carries exact Pi suffix metadata alongside a recursive, fuel-indexed
+application walk. It avoids allocating a separate frame list and reconstructing
+the spine context. Every node enters the original recursion context, checks the
+head before its argument, preserves the same decreased fuel for both, uses the
+same WHNF, checked inference, DefEq, eager-reduction, and substitution rules.
+
+Only a syntactically unchanged Pi body with exact loose range zero may bypass
+the old substitution worker. Dependent substitutions and exposed/non-Pi heads
+discard the suffix metadata and fall back. This is not an accepting router:
+the independently qualified explicit-frame path remains production default
+until full checked-operation evidence and negative conformance justify a switch.
+-/
+structure PsKernelC0CheckedAppSummary where
+  type : PsKernelExpr
+  state : PsKernelCheckerState
+  bodyRanges : List Nat
+
+def psKernelC0CheckAppRecursiveWithFuel
+    (fuel : Nat)
+    (rangeFuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Except String PsKernelC0CheckedAppSummary :=
+  match fuel with
+  | 0 =>
+      fun _ _ _ _ _ => Except.error "kernel inference budget exhausted"
+  | Nat.succ remaining =>
+      let smaller :=
+        psKernelC0CheckAppRecursiveWithFuel remaining rangeFuel
+      fun whnf defeq context state expr =>
+        match expr with
+        | .app fn arg => do
+            let nextContext ← psKernelCheckerContextEnterRecDepth context
+            let inferredFn ← smaller whnf defeq nextContext state fn
+            let (view, state1) ←
+              psKernelEnsureForallWith whnf nextContext
+                inferredFn.state inferredFn.type
+            let (argType, state2) ←
+              psKernelInferCoreWithFuel remaining whnf defeq
+                nextContext state1 arg false
+            let nextState ←
+              if psKernelExprEq argType view.domain then
+                Except.ok state2
+              else
+                let eqContext :=
+                  if psKernelExprIsEagerReduce arg then
+                    psKernelCheckerContextWithEagerReduce nextContext true
+                  else nextContext
+                match defeq eqContext state2 argType view.domain with
+                | Except.error error => Except.error error
+                | Except.ok (true, approvedState) =>
+                    Except.ok approvedState
+                | Except.ok (false, _) =>
+                    Except.error "application type mismatch"
+            let (resultType, nextRanges) :=
+              match inferredFn.type, inferredFn.bodyRanges with
+              | .forallE _ _ _ _, range :: suffix =>
+                  if range == 0 then
+                    (view.body, suffix)
+                  else
+                    (psKernelExprInstantiate1 view.body arg, [])
+              | _, _ =>
+                  (psKernelExprInstantiate1 view.body arg, [])
+            pure {
+              type := resultType
+              state := nextState
+              bodyRanges := nextRanges
+            }
+        | _ => do
+            let (inferred, nextState) ←
+              psKernelInferCoreWithFuel (Nat.succ remaining)
+                whnf defeq context state expr false
+            let ranges :=
+              match psKernelC0PiBodyRangesWithFuel rangeFuel inferred with
+              | some (_, suffix) => suffix
+              | none => []
+            pure {
+              type := inferred
+              state := nextState
+              bodyRanges := ranges
+            }
+
+/-- Source-only alternative to framed checked execution; not production. -/
+def psKernelC0CheckAppRecursive
+    (fuel : Nat)
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (defeq :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String (Prod Bool PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (expr : PsKernelExpr) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) := do
+  let result ← psKernelC0CheckAppRecursiveWithFuel fuel
+    (Nat.min 1024 fuel) whnf defeq context state expr
+  pure (result.type, result.state)
+
 def psKernelCheckWithFuel
     (fuel : Nat)
     (whnf :

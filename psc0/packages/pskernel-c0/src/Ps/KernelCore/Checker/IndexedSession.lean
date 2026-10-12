@@ -4,8 +4,9 @@ import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Admission.Declaration.Admission
 
 /-
-Opt-in, session-owned indexed expression retention around the accepting
-recursive-expression checker.
+Opt-in, session-owned indexed syntax around the accepting recursive
+checker. Ordinary checked operations do not encode unused inputs or outputs;
+callers explicitly retain syntax or begin an indexed diagnostic work state.
 
 This is a *staging boundary*, not a new type-checking rule. All judgments,
 environment-dependent reduction, fuel and failure semantics are delegated to
@@ -149,24 +150,13 @@ def psKernelC0IndexedSessionRetain
               rootCount := count
             }
 
-/-- Encoding failure never supplies a kernel result; the accepting result is
-    already established by the checker and remains the authority. -/
-private def psKernelC0IndexedSessionKeep
-    (session : PsKernelC0IndexedCheckerSession)
-    (expr : PsKernelExpr) : PsKernelC0IndexedCheckerSession :=
-  match psKernelC0IndexedSessionRetain session expr with
-  | some next => next
-  | none => session
-
 def psKernelC0IndexedSessionWhnf
     (fuel : Nat)
     (session : PsKernelC0IndexedCheckerSession)
     (expr : PsKernelExpr) :
     Except String (Prod PsKernelExpr PsKernelC0IndexedCheckerSession) := do
   let (value, checked) ← psKernelSessionWhnf fuel session.checker expr
-  let kept := psKernelC0IndexedSessionKeep { session with checker := checked } expr
-  let kept := psKernelC0IndexedSessionKeep kept value
-  pure (value, kept)
+  pure (value, { session with checker := checked })
 
 def psKernelC0IndexedSessionInfer
     (fuel : Nat)
@@ -174,9 +164,7 @@ def psKernelC0IndexedSessionInfer
     (expr : PsKernelExpr) :
     Except String (Prod PsKernelExpr PsKernelC0IndexedCheckerSession) := do
   let (value, checked) ← psKernelSessionInfer fuel session.checker expr
-  let kept := psKernelC0IndexedSessionKeep { session with checker := checked } expr
-  let kept := psKernelC0IndexedSessionKeep kept value
-  pure (value, kept)
+  pure (value, { session with checker := checked })
 
 def psKernelC0IndexedSessionCheck
     (fuel : Nat)
@@ -184,9 +172,7 @@ def psKernelC0IndexedSessionCheck
     (expr : PsKernelExpr) :
     Except String (Prod PsKernelExpr PsKernelC0IndexedCheckerSession) := do
   let (value, checked) ← psKernelSessionCheck fuel session.checker expr
-  let kept := psKernelC0IndexedSessionKeep { session with checker := checked } expr
-  let kept := psKernelC0IndexedSessionKeep kept value
-  pure (value, kept)
+  pure (value, { session with checker := checked })
 
 def psKernelC0IndexedSessionIsDefEq
     (fuel : Nat)
@@ -195,9 +181,7 @@ def psKernelC0IndexedSessionIsDefEq
     Except String (Prod Bool PsKernelC0IndexedCheckerSession) := do
   let (value, checked) ←
     psKernelSessionIsDefEq fuel session.checker left right
-  let kept := psKernelC0IndexedSessionKeep { session with checker := checked } left
-  let kept := psKernelC0IndexedSessionKeep kept right
-  pure (value, kept)
+  pure (value, { session with checker := checked })
 
 /-
   Checked declaration admission on a persistent indexed *syntax* session.

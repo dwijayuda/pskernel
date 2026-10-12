@@ -307,8 +307,9 @@ def psStandardSnapshotSHA256 (text : String) : String := Id.run do
 def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (psStandardSnapshotPayload environment)
 
--- This is the independently qualified digest of the v1 selected Standard
--- payload at source 2a75d31cfee753c90337aa931f09602591ea9907.
+-- SHA-256 was initially qualified at 2a75d31c; this reviewed selected-roster
+-- digest covers 212 declarations after the checked List.take/drop expansion
+-- qualified at 03ea9ac5 (Linux 38296669991).
 -- It covers *only* the encoded closed prelude/declaration/class/instance/
 -- alias roster, not source notation, deriving handlers, imported Lean
 -- extensions, effects or the whole trusted execution base.

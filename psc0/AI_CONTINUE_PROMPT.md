@@ -13,13 +13,13 @@ Resolve the **live GitHub branch HEAD** before editing. Read these GitHub-branch
 4. `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md` — current deterministic Standard serialization/fingerprint and its trust limits.
 5. Inspect the affected native `.lean` source, tests and pinned upstream official Lean 4.35.0-rc4 definitions as required.
 
-**Latest qualified EXECUTABLE SHA (as of this handoff):** `c810d6fe15d064968008d09849efd9ac5b2820de`.
-**Linux Actions all-green:** https://github.com/dwijayuda/pskernel/actions/runs/38292170524.
-**Prior documentation-only SHA:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`. The current documentation handoff commit is later; never confuse it with executable qualification.
+**Latest qualified EXECUTABLE SHA (as of this handoff):** `03ea9ac53664ce0c9b45ee4b23b09c284bf01264`.
+**Linux Actions all-green:** https://github.com/dwijayuda/pskernel/actions/runs/38296669991.
+**Historical FNV-only executable baseline:** `c810d6fe15d064968008d09849efd9ac5b2820de` ([Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524)). Resolve newer live GitHub HEAD and CI before editing; documentation may be newer than this qualified executable source.
 **Pinned official checker:** Lean `4.35.0-rc4` at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 **Bounded source profile:** `pscv0-v7-native-bounded/48` — not complete language conformance.
 
-**Current evidence:** 168 portable/176 native Lean modules; 187 shared runtime observations through direct JS, strict TS, Rust, V8 Wasm GC and Wasmtime; 4 checked programs/92 phase-specific refusals; checked multi-module source/provenance/entry-only linking. Selected Standard snapshot `Ps.Environment.StandardSnapshot`: 208 declarations, 11 classes, 36 ordered instances, `fnv1a64:3890664716772208725`. This is a reviewed **non-cryptographic drift detector**, not final full RC4 environment/verified build certification. `Inhabited`/`BEq` limited deriving, List/Option/Except APIs, raw/interpolated strings and selected typed proof/do already work within the bounded profile.
+**Current evidence:** 168 portable/176 native Lean modules; 187 shared runtime observations through direct JS, strict TS, Rust, V8 Wasm GC and Wasmtime; 4 checked programs/92 phase-specific refusals; checked multi-module source/provenance/entry-only linking. Selected Standard snapshot `Ps.Environment.StandardSnapshot`: **212** declarations, 11 classes, 36 ordered instances, `fnv1a64:9152255662807064572` **and** portable pure-Lean SHA-256 `sha256:13e7007c324ca40d0d871d2bc4856084796dd451891d7a0096216e94197b211e`. Both constants are mandatory fail-closed integrity gates, qualified at 03ea9ac53664ce0c9b45ee4b23b09c284bf01264; the full upstream notation/import/tactic/effect/assumption manifest and verified build certification remain **incomplete**. Checked `List.take`/`List.drop` now add source-level zero/in-range/beyond-length proofs and JS/TS/Rust artifact qualification; the new functions do not yet have independent Wasm runtime observation coverage. `Inhabited`/`BEq` limited deriving, List/Option/Except APIs, raw/interpolated strings and selected typed proof/do already work within the bounded profile.
 
 ### 2. Execute complete language plan without stopping at progress reports
 

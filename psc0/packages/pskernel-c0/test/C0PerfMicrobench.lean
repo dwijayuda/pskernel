@@ -452,10 +452,9 @@ def main : IO Unit := do
   -- substitution/probe measurements. Use the same immutable base environment
   -- and the same well-typed declaration on every fresh invocation.
   let admitName := PsKernelName.str PsKernelName.anonymous "C0.checkedWitness"
+  let sortOne := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
   let validDef : PsKernelDefinitionInfo := {
-    base := { name := admitName, levelParams := [],
-      type := PsKernelExpr.sort
-        (PsKernelLevel.succ PsKernelLevel.zero) }
+    base := { name := admitName, levelParams := [], type := sortOne }
     value := PsKernelExpr.sort PsKernelLevel.zero
     hints := PsKernelReducibilityHints.abbrevHint
     safety := PsKernelDefinitionSafety.safe

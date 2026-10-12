@@ -61,6 +61,8 @@ private def application : String :=
   "const appendSimple: Bool := if (\"left\" ++ \"right\" = \"leftright\") { true } else { false }\n" ++
   "const appendUnicode: Bool := if (\"🍋\" ++ \"é\" = \"🍋é\") { true } else { false }\n" ++
   "const appendGrouped: Bool := if ((\"A\" ++ \"B\") ++ \"C\" = \"ABC\") { true } else { false }\n" ++
+  "const stdStringBeqRuntime: Bool := \"green\" == \"green\"\n" ++
+  "const stdStringNeRuntime: Bool := \"green\" != \"red\"\n" ++
   "const equalityTrue: Bool := 3 + 4 == 7\n" ++
   "const equalityFalse: Bool := 3 * 4 == 11\n" ++
   "const inequalityTrue: Bool := 4 * 5 != 21\n" ++
@@ -1081,6 +1083,10 @@ private def projectBoundaries : IO Unit := do
     "theorem pointsEqualProof: pointsEqual = true := by { rfl }\n" ++
     "const pointsDiffer: Bool := RecordPoint.mk(3, true) == RecordPoint.mk(3, false)\n" ++
     "theorem pointsDifferProof: pointsDiffer = false := by { rfl }\n"
+  let derivingStringBEqSource :=
+    "structure StringTag where {\n  value: String\n} deriving BEq\n" ++
+    "const stringTagEq: Bool := StringTag.mk(\"hi\") == StringTag.mk(\"hi\")\n" ++
+    "const stringTagNe: Bool := StringTag.mk(\"hi\") == StringTag.mk(\"bye\")\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1137,6 +1143,8 @@ private def projectBoundaries : IO Unit := do
       targets := [.javascript, .typescript, .rust] },
     { source := derivingEnumFieldRefusal, moduleName := "DerivingBEqFields" },
     { source := derivingStructureEqualitySource, moduleName := "DerivingStructureBEq",
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingStringBEqSource, moduleName := "DerivingStringBEq",
       targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
@@ -1245,6 +1253,12 @@ private def projectBoundaries : IO Unit := do
           throw (IO.userError "checked structure BEq missing backend artifacts")
     | 31, .error error =>
         throw (IO.userError ("checked structure BEq failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 32, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "derived string structure BEq lacks target artifacts")
+    | 32, .error error =>
+        throw (IO.userError ("derived string structure BEq failed at " ++
           error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do

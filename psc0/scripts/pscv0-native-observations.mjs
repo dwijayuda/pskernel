@@ -165,6 +165,8 @@ export const observations = [
   { name: "appendSimple", args: null, expected: true },
   { name: "appendUnicode", args: null, expected: true },
   { name: "appendGrouped", args: null, expected: true },
+  { name: "stdStringBeqRuntime", args: null, expected: true },
+  { name: "stdStringNeRuntime", args: null, expected: true },
   { name: "equalityTrue", args: null, expected: true },
   { name: "equalityFalse", args: null, expected: false },
   { name: "inequalityTrue", args: null, expected: true },

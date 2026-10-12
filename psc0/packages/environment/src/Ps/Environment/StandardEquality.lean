@@ -66,6 +66,19 @@ def psStandardBEqUnitMethod : PsExpr :=
     (.lam (psRootName "right") unit
       (.constE psBoolTrueName []) .explicit) .explicit
 
+-- String equality is the existing Lean decision procedure reflected to
+-- Bool. Erasure already audits String.decEq as the cross-target stringEq
+-- intrinsic; this dictionary adds no new trusted string operation.
+def psStandardBEqStringMethod : PsExpr :=
+  let str := PsExpr.constE psStringName []
+  let proposition := psLogicEq (.succ .zero) str (.fvar 0) (.fvar 1)
+  let decision := psLogicApply (.constE (psDecisionName "String.decEq") [])
+    [.fvar 0, .fvar 1]
+  let result := psLogicApply (.constE (psDecisionName "Decidable.decide") [])
+    [proposition, decision]
+  psLogicLam 0 "left" str
+    (psLogicLam 1 "right" str result)
+
 def psStandardBEqInstances : List PsDeclaration :=
   [psStandardBEqInstance "Nat" (.constE psNatName [])
       (.constE psNatBeqName []),
@@ -73,6 +86,8 @@ def psStandardBEqInstances : List PsDeclaration :=
       psStandardBEqBoolMethod,
    psStandardBEqInstance "Char" (.constE psCharName [])
       psStandardBEqCharMethod,
+   psStandardBEqInstance "String" (.constE psStringName [])
+      psStandardBEqStringMethod,
    psStandardBEqInstance "Unit" (.constE psUnitName [])
       psStandardBEqUnitMethod]
 

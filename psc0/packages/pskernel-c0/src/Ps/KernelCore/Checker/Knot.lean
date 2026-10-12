@@ -369,7 +369,7 @@ def psKernelIsDefEqWithFuel
                   remaining
                   defeq;
               match
-                  psKernelDefEqQuick
+                  psKernelDefEqQuickAfterCommon
                     defeq
                     nextContext
                     state

@@ -110,8 +110,9 @@ def psKernelWhnfFinish
         state
         nextCache))
 
-def psKernelWhnfCoreWithFuel
-    (fuel : Nat) :
+def psKernelWhnfCoreWithFuelRanges
+    (fuel : Nat)
+    (letRanges : List Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -161,7 +162,7 @@ def psKernelWhnfCoreWithFuel
           "kernel reduction budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelWhnfCoreWithFuel remaining;
+        psKernelWhnfCoreWithFuelRanges remaining;
       fun
         (publicWhnf :
           PsKernelCheckerContext ->
@@ -206,7 +207,7 @@ def psKernelWhnfCoreWithFuel
             | PsKernelExpr.lit _ =>
                 Except.ok (Prod.mk expr state)
             | PsKernelExpr.mdata _ body =>
-                smaller
+                smaller []
                   publicWhnf
                   reduceRecursor
                   nextContext
@@ -228,7 +229,7 @@ def psKernelWhnfCoreWithFuel
                     | Option.none =>
                         Except.ok (Prod.mk expr state)
                     | Option.some value =>
-                        smaller
+                        smaller []
                           publicWhnf
                           reduceRecursor
                           nextContext
@@ -247,12 +248,25 @@ def psKernelWhnfCoreWithFuel
                 | Option.none =>
                     match expr with
                     | PsKernelExpr.letE _ _ value body _ =>
-                        let reduced :=
-                          psKernelExprInstantiate1
-                            body
-                            value;
+                        -- One exact bounded suffix analysis for a long
+                        -- zeta chain; fall back on dependency or failure.
+                        let suffixes :=
+                          match letRanges with
+                          | [] =>
+                              if psKernelC0HasLetPrefix 12 expr then
+                                match psKernelC0LetBodyRangesWithFuel 1024 expr with
+                                | some (_, ranges) => ranges
+                                | none => []
+                              else []
+                          | _ => letRanges
+                        let (reduced, restRanges) :=
+                          match suffixes with
+                          | range :: tail =>
+                              if range == 0 then (body, tail)
+                              else (psKernelExprInstantiate1 body value, [])
+                          | [] => (psKernelExprInstantiate1 body value, [])
                         match
-                            smaller
+                            smaller restRanges
                               publicWhnf
                               reduceRecursor
                               nextContext
@@ -271,7 +285,7 @@ def psKernelWhnfCoreWithFuel
                     | PsKernelExpr.proj typeName index structValue =>
                         let structResult :=
                           if cheapProj then
-                            smaller
+                            smaller []
                               publicWhnf
                               reduceRecursor
                               nextContext
@@ -338,7 +352,7 @@ def psKernelWhnfCoreWithFuel
                                       state2
                                 | Option.some value =>
                                     match
-                                        smaller
+                                        smaller []
                                           publicWhnf
                                           reduceRecursor
                                           nextContext
@@ -362,7 +376,7 @@ def psKernelWhnfCoreWithFuel
                         let fn0 :=
                           psKernelExprGetAppFn expr;
                         match
-                            smaller
+                            smaller []
                               publicWhnf
                               reduceRecursor
                               nextContext
@@ -392,7 +406,7 @@ def psKernelWhnfCoreWithFuel
                                     let rebuilt :=
                                       psKernelC0BetaSpineApply plan;
                                     match
-                                        smaller
+                                        smaller []
                                           publicWhnf
                                           reduceRecursor
                                           nextContext
@@ -428,7 +442,7 @@ def psKernelWhnfCoreWithFuel
                                               expr
                                               (Prod.snd reduction))
                                       | Option.some value =>
-                                          smaller
+                                          smaller []
                                             publicWhnf
                                             reduceRecursor
                                             nextContext
@@ -444,7 +458,7 @@ def psKernelWhnfCoreWithFuel
                                       fn
                                       args;
                                   match
-                                      smaller
+                                      smaller []
                                         publicWhnf
                                         reduceRecursor
                                         nextContext
@@ -463,3 +477,30 @@ def psKernelWhnfCoreWithFuel
                     | _ =>
                         Except.ok
                           (Prod.mk expr state)
+
+
+/-- Accepted WHNF entry retaining exact fuel, context and cache rules. -/
+def psKernelWhnfCoreWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Bool ->
+      Bool ->
+      Except String
+        (Prod
+          (Option PsKernelExpr)
+          PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Bool ->
+    Bool ->
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  psKernelWhnfCoreWithFuelRanges fuel []

@@ -547,6 +547,8 @@ def psIrCheckExpression (options : PsIrCheckOptions) (module : PsVerifiedIrModul
   match expr with
   | PsVerifiedIrExpr.unreachable type =>
       psIrCheckPush (psIrCheckAnnotation options module next scope type) (PsIrCheckValue.mono type)
+  | PsVerifiedIrExpr.panic _ type =>
+      psIrCheckPush (psIrCheckAnnotation options module next scope type) (PsIrCheckValue.mono type)
   | PsVerifiedIrExpr.literal literal =>
       match psIrCheckLiteralType literal with
       | Except.error issue => psIrCheckPush (psIrCheckRecordIssue options next scope issue) PsIrCheckValue.invalid

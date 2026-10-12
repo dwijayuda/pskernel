@@ -14,6 +14,7 @@ def lower (brands tags : List (String × String)) : Nat → PsVerifiedIrExpr →
     let visit := lower brands tags fuel
     match value with
     | .unreachable _ => return invoke [] "never" [fail "unreachable match branch"] []
+    | .panic message _ => return invoke [] "never" [fail message] []
     | .literal value =>
         return .atom (← (psTsEmitLiteral value).mapError (fun _ => "PSCV0-ECMA: unsupported literal"))
     | .var name => return id name

@@ -457,6 +457,9 @@ def psTsEmitExprWithFuel
       let smaller : PsVerifiedIrExpr -> Except PsTsEmitError String := psTsEmitExprWithFuel brands tags remaining;
       match expr with
       | .unreachable _ => Except.ok "((): never => { throw new Error(\"unreachable match branch\"); })()"
+      | .panic message _ =>
+          Except.ok (psTsJoin "" ["((): never => { throw new Error(",
+            psJsonQuote message, "); })()"])
       | .literal literal =>
           psTsEmitLiteral literal
       | .var name =>

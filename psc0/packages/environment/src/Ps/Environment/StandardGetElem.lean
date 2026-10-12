@@ -355,3 +355,39 @@ def psStandardLawfulGetElemExtend (environment : PsEnvironment) : PsEnvironment 
     classParameters := (psStandardLawfulGetElemName,
       { outputs := [2, 3], outputLevels := [] : PsClassParameters }) ::
         environment.classParameters }
+
+-- Core outOfBounds is definitionally equal to Inhabited.default,
+-- while verified target IR explicitly traps. Type-0 selected profile.
+def psStandardOutOfBoundsDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let dictionary := PsExpr.fvar 1
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "inhabited" (psStandardInhabitedType alpha) alpha
+      .instanceImplicit) .implicit
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "inhabited" (psStandardInhabitedType alpha)
+      (psStandardInhabitedDefault (.succ .zero) alpha dictionary)
+      .instanceImplicit) .implicit
+  .definitionDecl (psRootName "outOfBounds") [] type value
+
+-- Kernel-checked reusable bang implementation; a Some result returns the
+-- element and None calls the nonreturning outOfBounds declaration.
+def psStandardGetElemBangDefaultDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let dictionary := PsExpr.fvar 1
+  let candidate := PsExpr.fvar 2
+  let option := psSelfHostOptionOf alpha
+  let motive := psLogicLam 3 "_" option alpha
+  let someBranch := psLogicLam 4 "value" alpha (.fvar 4)
+  let failure := psLogicApply (.constE (psRootName "outOfBounds") [])
+    [alpha, dictionary]
+  let result := psLogicApply (.constE psSelfHostOptionRecName [.succ .zero])
+    [alpha, motive, failure, someBranch, candidate]
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "inhabited" (psStandardInhabitedType alpha)
+      (psLogicPi 2 "candidate" option alpha) .instanceImplicit) .implicit
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "inhabited" (psStandardInhabitedType alpha)
+      (psLogicLam 2 "candidate" option result) .instanceImplicit) .implicit
+  .definitionDecl (psNameAppendStr psStandardGetElemOptionalName "getElem!Default")
+    [] type value

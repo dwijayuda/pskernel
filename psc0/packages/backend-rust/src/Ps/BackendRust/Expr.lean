@@ -55,6 +55,7 @@ def psRustExpr (fuel : Nat) (ctx : PsRustContext) (preserve : List String)
           .text "continue;"]
     match expr with
     | .unreachable _ => return .text "panic!(\"unreachable checked PSCV0 branch\")"
+    | .panic message _ => return .text ("panic!(" ++ psRustQuote message ++ ")")
     | .literal value => return .text (psRustEmitLiteral value)
     | .var name =>
         if ctx.locals.contains name then

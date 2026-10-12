@@ -398,6 +398,13 @@ def psEraseDefinition
                   normalizedValue with
             | Except.error error => Except.error error
             | Except.ok opened =>
+                -- This frozen Standard body is kernel-defeq to default, but
+                -- is intentionally nonreturning in generated runtime code.
+                let opened :=
+                  if psNameEq name (psRootName "outOfBounds") then
+                    { opened with body :=
+                      PsVerifiedIrExpr.panic "index out of bounds" opened.resultType }
+                  else opened
                 -- Keep the actual aligned Core entry prefix. A computed function
                 -- result is evaluated here and returned as a canonical unary value.
                 if psListIsEmpty opened.parameters then

@@ -26,6 +26,7 @@ def lowerExpr (ir : PsVerifiedIrModule) :
       return code ++ ordered
     match expr with
     | .unreachable type => return { code := [.unreachable], type }
+    | .panic _ type => return { code := [.unreachable], type }
     | .literal value => return ← literalCode value
     | .var name =>
       if let some b := bindings.find? (fun b => b.name == name) then

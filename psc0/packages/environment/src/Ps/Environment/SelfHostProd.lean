@@ -117,7 +117,9 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
+  (fun env => [psStandardOutOfBoundsDeclaration,
+      psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
+    <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
     psStandardInhabitedExtend <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl
@@ -149,4 +151,6 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure
     -- through the same pinned, officially checked Standard declarations.
-    psStandardGetElemClass ++ psStandardGetElemOptionalDeclarations ++ psStandardLawfulGetElemClass
+    psStandardGetElemClass ++ psStandardGetElemOptionalDeclarations ++
+    psStandardLawfulGetElemClass ++
+    [psStandardOutOfBoundsDeclaration, psStandardGetElemBangDefaultDeclaration]

@@ -1703,7 +1703,7 @@ def psErasureIrUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Boo
                 | Prod.mk bindings body =>
                     if psListAny bindingUses bindings then true else smaller body name;
         match expr with
-        | .unreachable _ => false
+        | .unreachable _ | .panic .. => false
         | .literal _ => false
         | .var value => psStringEq value name
         | .intrinsic _ _ arguments => psListAny uses arguments
@@ -2148,14 +2148,14 @@ def psErasureResolveEntry
       | Option.some declaration =>
           match declaration with
           | PsDeclaration.definitionDecl _ _ type value =>
-              if psErasureIsProp environment psLocalEmpty type then Except.ok Option.none
+              if psErasureIsNonRuntimeDeclaration environment type then Except.ok Option.none
               else
                 match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
                 | Except.error error => Except.error error
                 | Except.ok entry => Except.ok (Option.some entry)
           | PsDeclaration.partialDecl _ _ type value
           | PsDeclaration.opaqueDecl _ _ type value =>
-              if psErasureIsProp environment psLocalEmpty type then Except.ok Option.none
+              if psErasureIsNonRuntimeDeclaration environment type then Except.ok Option.none
               else
                 match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
                 | Except.error error => Except.error error

@@ -121,10 +121,10 @@ def psStandardExceptIsOkDeclaration : PsDeclaration :=
     errorMinor successMinor
   let type := psLogicPi 0 "ε" psPreludeTypeType
     (psLogicPi 1 "α" psPreludeTypeType
-      (psLogicPi 2 "action" family bool)) .implicit) .implicit
+      (psLogicPi 2 "action" family bool) .implicit) .implicit
   let value := psLogicLam 0 "ε" psPreludeTypeType
     (psLogicLam 1 "α" psPreludeTypeType
-      (psLogicLam 2 "action" family body)) .implicit
+      (psLogicLam 2 "action" family body) .implicit) .implicit
   .definitionDecl (psNameAppendStr psSelfHostExceptName "isOk") [] type value
 
 def psStandardExceptToOptionDeclaration : PsDeclaration :=
@@ -140,10 +140,10 @@ def psStandardExceptToOptionDeclaration : PsDeclaration :=
     errorMinor successMinor
   let type := psLogicPi 0 "ε" psPreludeTypeType
     (psLogicPi 1 "α" psPreludeTypeType
-      (psLogicPi 2 "action" family output)) .implicit) .implicit
+      (psLogicPi 2 "action" family output) .implicit) .implicit
   let value := psLogicLam 0 "ε" psPreludeTypeType
     (psLogicLam 1 "α" psPreludeTypeType
-      (psLogicLam 2 "action" family body)) .implicit
+      (psLogicLam 2 "action" family body) .implicit) .implicit
   .definitionDecl (psNameAppendStr psSelfHostExceptName "toOption") [] type value
 
 def psStandardExceptDeclarations : List PsDeclaration :=

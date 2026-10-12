@@ -1,3 +1,54 @@
+# Active v7 language-first continuation (12 October 2026)
+
+The latest user authorization **defers C5 readable application source reconstruction**
+and prioritizes implementing and qualifying the remaining core and essential
+PSCV0 v7 language features. Native portable .lean is the only compiler source
+and is checked with pinned official Lean 4.35.0-rc4. No pskernel-core, compiler
+.ps migration, bootstrap/self-host testing, main merge, force push or release.
+
+**Latest qualified source:** `fa548339e780805eb315708b19e3cd6de4b16f0d`
+**Profile:** `pscv0-v7-native-bounded/40`
+**Linux CI:** [run 38223491831](https://github.com/dwijayuda/pskernel/actions/runs/38223491831) passed all jobs.
+**Current HAdd candidate:** `1922294d9918c477552db44788208364ba37188a`,
+profile 41, [run 38223957480](https://github.com/dwijayuda/pskernel/actions/runs/38223957480);
+its qualification is **pending**, and it must not inherit profile 40 evidence.
+
+Since qualified C4b profile 35, the same source/semantic/official-kernel/IR/backend
+pipeline gained:
+
+- Profile 36: typed `do` AST, shared scoped condition/continuation elaboration,
+  selected Id/Option/Except effects, and tuple values. [Run 38215524481](https://github.com/dwijayuda/pskernel/actions/runs/38215524481) passed.
+- Profile 37: `#[...]` array literals using checked persistent Array operations.
+  [Run 38216645409](https://github.com/dwijayuda/pskernel/actions/runs/38216645409) passed.
+- Profile 38: `[...]` List literals and one reusable delimited-value reader.
+  [Run 38221786624](https://github.com/dwijayuda/pskernel/actions/runs/38221786624) passed; 493 source declarations, four accepted programs, 92 semantic refusals and seven typed-do refusals.
+- Profile 39: selected right-associative `×` type syntax (Lean RC4 precedence 35),
+  empty List values and trailing commas. [Run 38222423936](https://github.com/dwijayuda/pskernel/actions/runs/38222423936) passed.
+- Profile 40: genuinely opaque, kernel-checked source definitions; the canonical
+  admission codec preserves opacity, and runtime erasure compiles the checked
+  opaque value without exposing it to definitional equality. A negative proof
+  case refuses an illicit `rfl` unfold. [Run 38223491831](https://github.com/dwijayuda/pskernel/actions/runs/38223491831) passed.
+
+The bounded qualified source still passes the shared runtime-observation matrix
+and existing Wasm GC/component, direct JS, TypeScript and Rust gates. Passing
+these does **not** prove compiler preservation or full language conformance.
+
+**Next dependency-driven core work:** complete general typed notation through the
+pinned Standard class/instance environment (rather than Nat-only rewrites);
+selected literal/operator families; module and public-import visibility;
+remaining dependent data and termination/recursion; general typed effects/do
+control and pure state; proof goals, rewriting, proof-producing automation and
+verification obligations. Scope, semantic checking, portable closure, origin
+tracking and ABI boundaries remain shared. Each new language family needs
+minimal targeted semantic/refusal evidence and the existing integration matrix.
+
+## Historical records below
+
+Earlier handoff instructions, including the C5-next request, are superseded by
+this active authorization. Historical success receipts remain source-specific.
+
+---
+
 # Native Wasm C4 and C4b qualified
 
 12 October 2026. The authorized C4 and C4b milestones are complete for the

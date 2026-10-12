@@ -1,5 +1,27 @@
 # PSCV0 v7 native implementation roadmap
 
+## Current priority: core and essential language conformance first
+
+User-directed priority override, 12 October 2026: **do not begin C5** until
+the essential language/compiler semantics are implemented and qualified.
+Keep native portable .lean authoritative; pskernel-core and self-hosting are
+out of scope. Preserve previously qualified JS/TS/Rust and Wasm GC contracts.
+
+The dependency path is: (1) pinned Standard/notation/typeclass environment and
+remaining source forms, (2) module graph, public/private visibility and reusable
+libraries, (3) dependent data and mutual/well-founded recursion with termination
+obligations, (4) generic typed do/effects and structured state/control, and
+(5) proof-producing tactics, rewriting, specs/VCs and an assurance ledger.
+The next stage is chosen by architectural dependencies rather than counting
+green tests. C5 reconstruction and compiler-source migration follow only when
+the selected language surface is sufficient.
+
+Current bounded source profiles 36–40 and candidate 41 are recorded in
+AI_WORK_STATE.md. None constitute complete v7 conformance. All source
+preparation, admission checking, provenance, erasure and target execution
+remain distinct assurance boundaries.
+
+
 The canonical language target is PSCV0_LANGUAGE_REFERENCE.md at its recorded v7
 digest, with Lean 4.35.0-rc4 semantics. This is an implementation dependency map,
 not a conformance claim. Exact qualified sources/runs are in AI_WORK_STATE.md.

@@ -1002,6 +1002,89 @@ def main : IO Unit := do
           | _ => throw (IO.userError "C0 shared indexed levels decode failed")
   IO.println "C0_PERF_REGRESSION indexed_universe_instantiation=pass"
 
+
+  -- A real sequence of context-sensitive rewrites stays indexed across
+  -- delta -> delta -> beta, local let -> delta -> beta, metadata and zeta.
+  -- For these restricted source families, compare against complete public
+  -- WHNF; do NOT extrapolate to native/recursor/quotient/projection cases.
+  let chainOne := PsKernelName.str PsKernelName.anonymous "C0.chainOne"
+  let chainTwo := PsKernelName.str PsKernelName.anonymous "C0.chainTwo"
+  let identityBody : PsKernelExpr :=
+    .lam localName sort0 (.bvar 0) PsKernelBinderInfo.default
+  let oneDef : PsKernelDefinitionInfo := {
+    base := {
+      name := chainOne
+      levelParams := []
+      type := .sort (.succ PsKernelLevel.zero)
+    }
+    value := identityBody
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let twoDef : PsKernelDefinitionInfo := {
+    base := { oneDef.base with name := chainTwo }
+    value := .const chainOne []
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let chainEnv := psKernelEnvironmentAddUnchecked
+    (psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
+      (.defnInfo oneDef)) (.defnInfo twoDef)
+  let chainLocals := psKernelLocalContextAddLet
+    psKernelLocalContextEmpty localName localName sort0
+      (.const chainTwo [])
+  let chainContext := psKernelCheckerContextWithLocalContext
+    (psKernelCheckerContextEmpty chainEnv) chainLocals
+  let referenceSession : PsKernelCheckerSession := {
+    context := chainContext
+    state := psKernelCheckerStateEmpty
+  }
+  let chainApp := PsKernelExpr.app (.const chainTwo []) sort0
+  let fragmentTerms : List PsKernelExpr := [
+    chainApp,
+    .app (.fvar localName) sort0,
+    .mdata 22 chainApp,
+    .app (.mdata 42 (.const chainTwo [])) sort0,
+    .app identityBody sort0,
+    .letE localName sort0 sort0 (.bvar 0) false
+  ]
+  for term in fragmentTerms do
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty term with
+    | none => throw (IO.userError "C0 indexed fragment encode failed")
+    | some (stored, root) =>
+        match psKernelC0IndexedContextFragment 4096
+            chainContext stored root,
+            psKernelSessionWhnf 4096 referenceSession term with
+        | some (rewritten, resultId), Except.ok (reference, _) =>
+            match psKernelC0DecodeExpr rewritten resultId with
+            | none =>
+                throw (IO.userError "C0 indexed fragment result invalid")
+            | some result =>
+                if !(psKernelExprEqual result reference &&
+                      psKernelExprEqual result sort0) then
+                  throw (IO.userError "C0 indexed fragment differs from checked WHNF")
+            -- Repeat on the same session arena. A term that reached a
+            -- stuck supported-fragment state must not allocate or present
+            -- a new purported normalization success.
+            if (psKernelC0IndexedContextFragment 4096
+                  chainContext rewritten resultId).isSome then
+              throw (IO.userError "C0 indexed fragment spuriously rewrote terminal")
+        | _, _ =>
+            throw (IO.userError "C0 indexed fragment check diverged")
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty (.mvar localName) with
+  | none => throw (IO.userError "C0 indexed stuck fixture missing")
+  | some (stored, root) =>
+      if (psKernelC0IndexedContextFragment 4096
+          chainContext stored root).isSome then
+        throw (IO.userError "C0 indexed fragment claimed unrelated WHNF")
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty chainApp with
+  | none => throw (IO.userError "C0 indexed budget fixture missing")
+  | some (stored, root) =>
+      if (psKernelC0IndexedContextFragment 1
+          chainContext stored root).isSome then
+        throw (IO.userError "C0 indexed fragment ignored structural budget")
+  IO.println "C0_PERF_REGRESSION continuous_indexed_context_fragment=pass"
+
   -- A direct application-spine selector must match the historical
   -- fully materialized argument-list representation for every index.
   for arity in [0, 1, 2, 3, 32, 128] do

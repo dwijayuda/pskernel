@@ -167,3 +167,56 @@ def psKernelC0IndexedWhnf
     (id : Nat) :
     Option (Prod PsKernelC0TermStore Nat) :=
   psKernelC0IndexedWhnfWithFuel fuel store id []
+
+/-
+  Opt-in context-sensitive indexed reduction FRAGMENT.
+
+  This composes the already independent indexed beta/zeta/metadata engine
+  with one-step local-let/delta unfolding, carrying one canonical arena
+  through an arbitrarily long supported rewrite sequence. It is NOT
+  general WHNF: quotient, recursor/iota, projection, native/Nat primitives,
+  proof irrelevance, checker caches and exact Lean 4.34 resource semantics
+  are not implemented here. No accepting operation calls this fragment.
+
+  A successful result only means at least one supported syntactic rewrite
+  took place. It is NOT a normal-form or type-checking verdict. Returning
+  none means unchanged, unsupported, malformed, or exhausted: consumers
+  may not convert that into a positive checker judgment. The 'fuel' here
+  bounds this experimental fragment's iterations and indexed path walks;
+  it is NOT a replacement for the source checker reduction budget.
+-/
+def psKernelC0IndexedContextFragmentWithFuel
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (id : Nat)
+    (hadProgress : Bool) :
+    Option (PsKernelC0TermStore × Nat) :=
+  match fuel with
+  | 0 => none
+  | remaining + 1 => do
+      let (syntacticStore, syntacticId) ←
+        psKernelC0IndexedWhnf fuel store id
+      match psKernelC0IndexedUnfoldHeadOnce
+          context syntacticStore syntacticId with
+      | some (nextStore, unfoldedId) =>
+          -- Self-referential local/environment declarations are malformed
+          -- for general admission. Never return a positive result here
+          -- merely because a candidate rewrite made no progress.
+          if unfoldedId == syntacticId then none
+          else psKernelC0IndexedContextFragmentWithFuel
+            remaining context nextStore unfoldedId true
+      | none =>
+          if hadProgress || syntacticId != id then
+            some (syntacticStore, syntacticId)
+          else
+            none
+
+/-- Require an actual supported rewrite, never claim WHNF completeness. -/
+def psKernelC0IndexedContextFragment
+    (fuel : Nat)
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (id : Nat) :
+    Option (PsKernelC0TermStore × Nat) :=
+  psKernelC0IndexedContextFragmentWithFuel fuel context store id false

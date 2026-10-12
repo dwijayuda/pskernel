@@ -105,3 +105,30 @@ def main : IO Unit := do
     throw (IO.userError "local lookup counts diverged")
   IO.println s!"C0_BENCH locals linear_ms={lookupEnd - lookupStart} indexed_ms={indexedEnd - indexedStart} entries=512 queries={queries}"
 
+
+
+  -- The public WHNF core now performs a demand-driven spine probe:
+  -- stuck heads need no argument-list materialization.
+  let mut eagerHits : Nat := 0
+  let eagerStart ← IO.monoMsNow
+  for k in [:iterations] do
+    let current := if k % 2 == 0 then first else second
+    let pair := psKernelExprGetAppFnArgs current
+    if Nat.beq (psKernelExprListLength (Prod.snd pair)) 512 then
+      match Prod.fst pair with
+      | PsKernelExpr.bvar _ => eagerHits := eagerHits + 1
+      | _ => pure ()
+  let eagerEnd ← IO.monoMsNow
+  let mut lazyHits : Nat := 0
+  let lazyStart ← IO.monoMsNow
+  for k in [:iterations] do
+    let current := if k % 2 == 0 then first else second
+    let head := psKernelExprGetAppFn current
+    match head with
+    | PsKernelExpr.bvar _ => lazyHits := lazyHits + 1
+    | _ => pure ()
+  let lazyEnd ← IO.monoMsNow
+  if !(Nat.beq eagerHits lazyHits) then
+    throw (IO.userError "WHNF lazy-head probe changed observable head")
+  IO.println s!"C0_BENCH lazy_spine eager_ms={eagerEnd - eagerStart} head_only_ms={lazyEnd - lazyStart} hits={lazyHits} iterations={iterations}"
+

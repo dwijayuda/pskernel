@@ -1,5 +1,15 @@
 # AI_WORK_STATE — PSKernel-C0 Lean performance architecture
 
+## FOLLOW-UP B/C IMPLEMENTATION — 2026-10-13
+
+**Current source:** `64ae30cf` (then documentation only). **Last fully green baseline:** `8fee6d90`, [CI 38321909818](https://github.com/dwijayuda/pskernel/actions/runs/38321909818). Native source commits: `4092dab9` (new `axiom`/`thm`/`opaque` family and 8 exact-byte official fixtures), `031a1b4d` (Lean reserved identifier correction), `6e38defe` (source-store-bound root read/transfer/staging), `64ae30cf` (same-number cross-store regression). The newer full qualification is [CI 38323005998](https://github.com/dwijayuda/pskernel/actions/runs/38323005998); check its latest conclusion before declaring the new source fully qualified.
+
+**New Phase B breadth:** the strict test-only Lean 4.35 export adapter preserves four distinct source admission kinds rather than treating axioms/theorems/opaques as definitions. Official Lean accepted/rejected all eight new files in the initial attempt. Assumptions remain assumptions, unsafe declaration policies decline. There is still no real Init/Std/Mathlib replay or complete import of inductives/recursors/quot/structured metadata.
+
+**New Phase C invariant:** a numeric indexed root now travels with its actual source store through `PsKernelC0BoundRoot`; independent validation, exact readback and re-encoding prevent accidental same-ID aliasing across separate stores in the explicit transfer API. Root structures remain publicly constructible, so read/transfer **always** validate; this is not sealed StoreWF, type-checking authority or proof of consistency. Existing accepting recursive checker remains untouched.
+
+See [PHASE_B_C_QUALIFICATION_2026-10-13.md](PHASE_B_C_QUALIFICATION_2026-10-13.md). Continue native-only Phase B actual corpus coverage and then representation/caching benchmarks for Phase C; do not mutate original `pskernel-core`, compiler, Rust, self-host or metatheory.
+
 ## PHASE B → C IMPLEMENTATION HANDOFF — 2026-10-13
 
 **Branch:** `perf/pskernel-c0-v7-rust-20261012`. **Latest source/test commit:** [`8fee6d90`](https://github.com/dwijayuda/pskernel/commit/8fee6d90afc5c7bdb356a5e8477a78d783279ea4). **Latest full native [CI 38321909818](https://github.com/dwijayuda/pskernel/actions/runs/38321909818) SUCCESS** on `8fee6d90`, covering Lean 4.35 compilation, 14 official same-byte NDJSON verdicts, negative/fuel checks, canonical replay, verified multi-root/binder/metadata scratch regressions, C0 microbenchmarks and independently rebuilt unchanged-original kernel comparison. Intermediate [CI 38321716254](https://github.com/dwijayuda/pskernel/actions/runs/38321716254) (verdict taxonomy) and [38321631047](https://github.com/dwijayuda/pskernel/actions/runs/38321631047) (strict exporter projection and verified store operation) also fully passed.

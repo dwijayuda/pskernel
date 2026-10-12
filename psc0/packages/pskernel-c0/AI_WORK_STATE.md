@@ -1,5 +1,36 @@
 # AI_WORK_STATE — PSKernel-C0 Lean performance architecture
 
+## LATEST VERIFIED HANDOFF — 2026-10-13 (AUTHORITATIVE; READ FIRST)
+
+> This newest checkpoint **supersedes every older "current", "latest", "next priority" or handoff section below**. The older sections are chronological evidence. Refresh the live branch HEAD and CI before modifying anything; documentation commits may follow this source HEAD.
+
+**Source HEAD qualified:** [`aae8f5f33853`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c) on `perf/pskernel-c0-v7-rust-20261012`, under `psc0/packages/pskernel-c0/`. Toolchain is **Lean 4.34.0**. **Latest native CI:** [38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) **success**, including the complete Lean source build, negative/differential checks, C0 microbenchmarks, and matched independently compiled *unchanged* original `pskernel-core` checker. Previous complete source runs: [38292583191](https://github.com/dwijayuda/pskernel/actions/runs/38292583191) (indexed lifting), [38293687263](https://github.com/dwijayuda/pskernel/actions/runs/38293687263) (distinct indexed hashes after historical fixture correction), and [38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) (mixed-batch latency/allocation benchmark), all **success**. Do not treat CI for an earlier commit as proof for later source without checking its own run.
+
+### Native Lean changes in this continuation
+
+1. [`e8ec74a9`](https://github.com/dwijayuda/pskernel/commit/e8ec74a9c6a20da299153a38a830c8c5cbfbe5b8): **experimental, operation-local memoized indexed lifting** keyed by canonical term handle and binder cutoff. The shift amount is fixed per invocation; the existing recursive indexed lift and recursive source `PsKernelExpr` lift remain independent differential oracles. Shared DAG, varied cutoff/shift, binder, let, metadata, projection and invalid-handle checks pass. **Not an accepting checker operation**.
+2. [`4089835f`](https://github.com/dwijayuda/pskernel/commit/4089835f74a5f7ae3130890bacedbffcdd9c10a3) and [`1f57a8fb`](https://github.com/dwijayuda/pskernel/commit/1f57a8fb6efec1c78a4e6469eda05528eb4e855f): **dual immutable fingerprints** per indexed node. `hash` retains exact interning identity including binder names/info; `checkerHash` matches source `psKernelExprHash`, which omits binder names/info. Both are hash-bucket hints and **never** proof, typing or DefEq evidence. Historical manually constructed benchmark node was updated for the new field; the corrected whole native workflow passed.
+3. [`ffc177e9`](https://github.com/dwijayuda/pskernel/commit/ffc177e91b4e0887da2b48c9a374c8820c72833c): matched **24-sample x 12-declaration** mixed checked-admission distribution in the **same source** for C0 and original, reporting batch latency p50/p95 and thread-local small-allocation counts. This is a constructed library fixture, not imported real-library checking.
+4. [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c): the **opt-in session root index** publishes newly interned roots using `checkerHash`, rather than recursively rehashing source syntax a second time. Independent source-hash lookup and exact-root collision checks are unchanged. Nested lambda/Pi/let/metadata roots and radix promotion pass. No trusted evaluation or admission route has been switched.
+
+### Repeated qualified observations, carefully scoped
+
+| Source | Whole accepting mixed-admission batches (24 x 12) | Native C0 | Unmodified original |
+| --- | --- | --- | --- |
+| [CI 38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) | p50 / p95 batch wall time | **20 / 20 ms** | **38 / 38 ms** |
+| [CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) | p50 / p95 batch wall time | **25 / 26 ms** | **47 / 48 ms** |
+| Both successful runs | p50 / p95 small-allocation counter, per batch | **36,206 / 36,206** | **34,971 / 34,971** |
+
+Both runs accepted all **288** declarations on each checker. These ~1.9x wall-time ratios describe **this one synthetic mixed checker fixture**, not a whole-kernel winner or isolated incremental effect of indexing. The thread-local heartbeat counter is a **small-allocation event proxy**, not bytes, complete allocation accounting or RSS. Its ~3.5% higher C0 value is negative allocation evidence. Whole-process VmHWM: [38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) C0 **1,163,168 kB** / original **1,161,176 kB**; [38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) C0 **1,167,820 kB** / original **1,161,116 kB**. **No memory win**. Twenty-four samples inside each run are not 24 independent runners.
+
+Indexed lift is only a staged fragment: 30 lifts of the same deliberately maximally shared depth-11 DAG took recursive indexed **659 ms** versus new memoized **7 ms** in [38292583191](https://github.com/dwijayuda/pskernel/actions/runs/38292583191); **776 / 8 ms** in [38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928). Never extrapolate these large synthetic gains to source checking, genuine libraries, or memory.
+
+### Remaining P0 architecture — explicitly **not complete**
+
+**The production accepting WHNF/DefEq/inference/declaration-admission engine still operates on recursive `PsKernelExpr`.** The canonical indexed DAG and opt-in session retention are *not* a fully accepting indexed kernel; source-owned checked binder/let/Pi and WHNF improvements remain the only qualified production optimizations. Next implement a genuinely session-owned indexed evaluation state with exact environment/local context, universes, native-evaluator capability and revision provenance. Preserve Lean **4.34.0** reduction priority, recursor/iota/quotient/projection/natives, proof irrelevance, checked inference, DefEq and **identical fuel/error/fresh-state effects**. Carry indexed identities continuously across operations, not round-trip to source at every internal call; fall back only at explicitly unsupported native/foreign boundaries until coverage is complete. Retain independent recursive and original-kernel differential oracles through promotion. Validate negative/resource inputs and complete checked declaration workloads first; quantify independent-run latency, small allocations, process memory and realistic libraries before selecting a faster accepting execution path. Do not presume indexed architecture wins.
+
+**Scope:** Only native `.lean` C0 on this branch. No self-hosting, bootstrap, fixed-point, generated Rust, metatheory or consistency tests; no original `pskernel-core`, compiler or Rust backend edits. GitHub-first (no Desktop Commander). Preserve history, push atomic coherent commits, and update the benchmark/architecture evidence with exact CI links.
+
 ## CURRENT HANDOFF — 2026-10-13 (AUTHORITATIVE; READ FIRST)
 
 > **This section supersedes all earlier "latest checkpoint", "updated" or "next priority" statements lower in this file.** Older entries are retained as chronological engineering evidence, not as current instructions. Consult the live GitHub HEAD and latest native CI before every implementation phase.

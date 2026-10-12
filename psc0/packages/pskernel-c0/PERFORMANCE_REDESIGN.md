@@ -1,5 +1,17 @@
 # PSKernel-C0 performance architecture (implementation checkpoint)
 
+## Current native Lean checkpoint — 2026-10-13 (supersedes initial Rust experiment below)
+
+The original 2026-10-12 Rust-only architecture notes below are historical; the active workstream is **native Lean 4.34.0** on `perf/pskernel-c0-v7-rust-20261012`, inside `psc0/packages/pskernel-c0/`. No original `pskernel-core`, compiler, or Rust backend modifications are authorized.
+
+- Verified source HEAD [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c), [CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) green across native build, soundness-sensitive negative/differential checks, microbenchmarks and the unchanged original kernel. Earlier qualified staged indexed-lifting, dual-fingerprint and distribution runs: [38292583191](https://github.com/dwijayuda/pskernel/actions/runs/38292583191), [38293687263](https://github.com/dwijayuda/pskernel/actions/runs/38293687263), [38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978).
+- Experimental indexed DAG now memoizes capture-avoiding *lifting* per term ID/cutoff with per-operation memo; original reference is retained. Each canonical node has two distinct child-derived fingerprints: **exact** interning `hash` (binder names/info included) and **source-cache-compatible** `checkerHash` (binder names/info omitted per source hash contract). The opt-in session uses the latter for publishing radix roots while using exact source expression equality for lookup.
+- Synthetic depth-11, 30-call indexed shared DAG lifts: original indexed recursion **776 ms** vs memoized **8 ms** in latest CI; not a measured whole-kernel benefit.
+- Independently compiled original vs C0 complete checked *synthetic mixed 12-declaration batch*, 24 samples: C0 p50/p95 **25/26 ms**, unchanged original **47/48 ms**, 288 declarations accepted per checker in latest CI. C0 small-allocation heartbeat samples **36,206** vs original **34,971**, and C0 process VmHWM **1,167,820 kB** vs original **1,161,116 kB**. No memory win, no real-library qualification.
+- **Incomplete:** all accepting WHNF, DefEq, inference, and declaration admission still use recursive source expressions. Implement genuine continuously session-owned indexed execution, complete Lean 4.34 environment/recursor/quotient/projection/native/universe behavior, provenance and exact resource/error/fresh-state semantics before promoting anything into acceptance. Require independent differential and real-library end-to-end evidence; keep staged experimental components opt-in.
+
+Continue native C0 work autonomously in coherent subsystem phases; test at architectural boundaries. Exclude self-host/bootstrap/fixed-point/generated Rust/metatheory/consistency work. For detailed current architecture and acceptance gates, consult the newest top of `AI_WORK_STATE.md` and `C0_LEAN_ARCHITECTURE.md`.
+
 Source: active PSC0 v7 Rust backend branch. C0 retains an untouched copy of the original Lean checker.
 
 ## Measurement and architecture findings

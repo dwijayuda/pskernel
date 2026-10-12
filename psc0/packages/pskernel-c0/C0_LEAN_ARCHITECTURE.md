@@ -7,6 +7,32 @@ PSKernel checker, not the experimental Rust engine or an incomplete indexed
 evaluator. The original `pskernel-core`, the PSC0 compiler, and the Rust backend
 are not modified in this workstream.
 
+## Newest indexed transition design — verified 2026-10-13
+
+Source HEAD [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c), [full native CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) **success**. This is an **indexed substrate and source-checker measurement qualification**, not completion of indexed accepting evaluation.
+
+**Two distinct fingerprints are mandatory.** Every immutable `PsKernelC0StoredNode` now carries:
+
+- `hash`: exact canonical-node interning bucket hash, including names and binder information. Equal *hashes* are never accepted as equal nodes; `psKernelC0NodeEq` confirms exact identity after a bucket hit.
+- `checkerHash`: child-derived hash designed to agree *exactly* with `psKernelExprHash` on the decoded source expression. Source checker hash intentionally omits lambda/Pi/let user binder names and binder information. This value indexes a candidate source-cache bucket only: the actual source-cache equivalence relation still compares complete expressions under its own predicate.
+
+`psKernelC0IndexedSessionRetain` continues to use an independent source hash and **exact** `psKernelExprEqual` for lookup, but now uses the just-interned root's cached `checkerHash` to publish a new radix entry without rehashing the complete source a second time. Nested binder and metadata roots, collisions and persistent snapshots have negative/differential tests. The session wrapper still runs `PsKernelCheckerSession` for **all acceptance**.
+
+**Indexed lifting** gained a store-local, operation-local memo over the exact canonical term ID and binder cutoff, with a fixed shift amount per invocation. It preserves sharing and cutoff semantics. Exact recursive-source lifting, the previous recursive indexed worker and invalid-handle/fuel-independent tests remain oracles. It is not substituted for the accepting source checker and the large synthetic DAG microbenchmark speedups have no whole-kernel interpretation.
+
+### Design contract for a future accepting indexed engine
+
+1. **Ownership and syntax:** one canonical arena persists through an entire accepting session; internal node handles cannot cross separate arenas or mutable environment revisions. A handle denotes syntax **only**. Immutable snapshots preserve old root identities. Separate checked judgment caches by environment, local context, universe parameter scope, evaluator capability and resource regime. Do not infer contextual judgment equality from canonical term equality or a hash.
+2. **Operational accounting:** represent original `fuel`, `maxRecDepth`, `recDepth`, error ordering, cache publication, fresh-name `nextFresh`, local `nextIndex`, and failure state explicitly. Cache acceleration cannot skip resource expenditure that would have produced the original error; match the historical checker *at the same budget*. Structural `depth` is an indexed traversal bound, **not** substitute for checked fuel.
+3. **WHNF ordering:** preserve source public core WHNF -> native evaluator -> Nat reduction -> delta; core covers local free-var unfolding, beta/zeta/metadata, projections and recursor/iota hooks. Quotient and native reductions must use the exact Lean 4.34 policies; do not re-order or silently drop an unsupported family. Carry indexed handles through intermediate reductions; decode/encode only for well-defined foreign/native adapter boundaries, not entire recursive calls.
+4. **DefEq and inference:** build one typed context-aware indexed worker for positive/negative DefEq, proof irrelevance, delta transparency, universes, dependent Pi application and binder-local inference. Keep the existing original checked source engine and independently rebuilt unchanged `pskernel-core` as differential authorities until full semantic coverage. Preserve exact alpha/equality policies and environmental precedence.
+5. **Atomic admission:** definitions, inductives, recursors, quotient and their metadata must pass exactly the historical checked obligations and error rules before any environment update is committed. No partially admitted declaration on a failed indexed check. Verify local freshness and environment isolation across sequential declarations.
+6. **Promotion gate:** qualify each reduction family with positive, malformed, negative, insufficient-fuel, native-evaluator and deep-local cases against both references. Then run real multi-declaration library corpora and controlled *complete-operation* ablations, repeated cold/warm throughput, p50/p95, thread-local small allocations, allocated bytes and RSS. If persistent indexing loses on genuine workloads, redesign it instead of preserving an obsolete representation.
+
+**Measured end-to-end cost, not incremental indexing attribution:** 24 x 12 fully checked mixed safe declarations, repeated paired C0/original: [CI 38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) p50/p95 **20/20 vs 38/38 ms**; [CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) **25/26 vs 47/48 ms**. Small-allocation counter **36,206 C0 vs 34,971 original** and whole-process VmHWM C0 **1,167,820 kB** vs original **1,161,116 kB** latest. The current C0 source path wins on this fixture but does **not** demonstrate memory savings, realistic library superiority or an indexed accepting checker.
+
+
+
 ## Architecture and invariants
 
 The accepting checker still uses recursive `PsKernelExpr` throughout its

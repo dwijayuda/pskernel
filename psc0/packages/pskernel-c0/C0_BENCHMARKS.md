@@ -1,5 +1,33 @@
 # PSKernel-C0 experimental performance measurements
 
+## Newest native qualification — 13 October 2026
+
+The native Lean C0 indexed substrate gained operation-local memoized lifting [`e8ec74a9`](https://github.com/dwijayuda/pskernel/commit/e8ec74a9c6a20da299153a38a830c8c5cbfbe5b8), exact-vs-source-cache-compatible dual node hashes [`4089835f`](https://github.com/dwijayuda/pskernel/commit/4089835f74a5f7ae3130890bacedbffcdd9c10a3) (historical benchmark constructor corrected [`1f57a8fb`](https://github.com/dwijayuda/pskernel/commit/1f57a8fb6efec1c78a4e6469eda05528eb4e855f)), and session root-index publication from the cached checker-compatible hash [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c). All necessary native stages, including unchanged-original checked comparison, passed at [CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928). The indexed engine remains **experimental and not an accepting checker**.
+
+**Indexed lift microbenchmark**, same native indexed store, 30 repeated shifts of a maximally shared depth-11 open DAG:
+
+| CI | Original recursive indexed lift | New memoized indexed lift |
+| --- | ---: | ---: |
+| [38292583191](https://github.com/dwijayuda/pskernel/actions/runs/38292583191) | 659 ms | 7 ms |
+| [38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) | 639 ms | 6 ms |
+| [38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) | 776 ms | 8 ms |
+
+This is a **deliberately DAG-sharing-heavy helper workload**, not source WHNF/DefEq/inference/admission throughput. Per-operation memos do not cross term stores or amounts. Distinct exact syntax fingerprints and source checker cache fingerprints are not interchangeable; all cached candidates still undergo the appropriate complete structural-equality comparison.
+
+**Complete checked declaration batch**, same compiled `test/C0CheckerComparison.lean` source independently run in C0 and the original unmodified `pskernel-core` with Lean 4.34: each batch sequentially admits **12 safe mixed lambda/local-reference/zeta definitions** into an initially empty environment; **24 batches**, **288 declarations admitted** per checker. The 24 duration/allocation samples are reported as p50/p95 for the **whole 12-declaration batch**, not for individual declarations.
+
+| Metric | [CI 38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) C0 / original | [CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) C0 / original |
+| --- | --- | --- |
+| p50 batch latency | **20 / 38 ms** | **25 / 47 ms** |
+| p95 batch latency | **20 / 38 ms** | **26 / 48 ms** |
+| p50 small-allocation counter | **36,206 / 34,971** | **36,206 / 34,971** |
+| p95 small-allocation counter | **36,206 / 34,971** | **36,206 / 34,971** |
+| Whole benchmark-process VmHWM | **1,163,168 / 1,161,176 kB** | **1,167,820 / 1,161,116 kB** |
+
+Interpretation: C0 has roughly **1.9x** better latency on this engineered mixed checker family, with **~3.5% more** small-allocation events and no reliable peak-memory advantage. Lean `IO.getNumHeartbeats` counts current-thread small allocations, **not allocation bytes, all threads, total process allocations or RSS**. These are two different CI runs (each with paired C0/original checker in the same runner), not full Init/Std/Mathlib proof-library throughput or a statistical population of independent hosts. The new indexed substrate is **not responsible for an isolated proven fraction** of this source-path C0 advantage. Short ordinary and inductive workloads remain near parity in earlier checked results. Do not suppress this negative memory evidence.
+
+**Required next measurements:** realistic admitted multi-module libraries and recursor/quotient/native families; cold/warm, independent reruns, quantiles with finer timing than whole milliseconds where useful, per-operation allocations/bytes with instrumentation, peak memory; C0-with-index/without-index controlled ablations at the same complete accepting entry points. No self-hosting or metatheory tests in this phase.
+
 **Scope:** Historical Rust substrate measurements (first section), Lean-native C0 microbenchmarks, and newer same-run original PSKernel-Core versus C0 complete-checker comparisons. The latest sections supersede the original Rust-only scope statement.
 
 ## Sources and reproduction

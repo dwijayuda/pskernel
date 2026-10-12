@@ -176,6 +176,23 @@ def main : IO Unit := do
     throw (IO.userError "C0 projection fixture failed to select field")
   IO.println "C0_PERF_REGRESSION lazy_delta_projection_spines=pass"
 
+  -- A direct application-spine selector must match the historical
+  -- fully materialized argument-list representation for every index.
+  for arity in [0, 1, 2, 3, 32, 128] do
+    let input := (List.range arity).foldl
+      (fun term i => PsKernelExpr.app term (PsKernelExpr.bvar i))
+      (PsKernelExpr.const ctorName [])
+    for index in [:arity + 2] do
+      match psKernelExprListGet (psKernelExprGetAppArgs input) index,
+          psKernelExprGetAppArgAt input index with
+      | Option.none, Option.none => pure ()
+      | Option.some before, Option.some after =>
+          if !(psKernelExprEqual before after) then
+            throw (IO.userError "C0 direct application argument changed value")
+      | _, _ =>
+          throw (IO.userError "C0 direct application argument changed bounds")
+  IO.println "C0_PERF_REGRESSION app_arg_direct_selection=pass"
+
   -- Native accepting DefEq first checks structural equality and successful
   -- pair-cache hits. The guarded quick entry may only be used after both
   -- are known to miss; verify it matches the public path on such inputs.

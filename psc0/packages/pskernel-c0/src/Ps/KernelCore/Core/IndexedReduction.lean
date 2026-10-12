@@ -359,6 +359,98 @@ def psKernelC0Instantiate1Indexed
       entry.depth state id replacement 0
     some (resultState.store, result)
 
+/-
+  Canonical indexed universe-level instantiation.
+
+  Universe parameter/value lists are held fixed throughout *one* rewrite.
+  The existing exact (term ID, offset) collision-checked memo is reused
+  with offset zero, but a fresh table is created for each invocation.
+  No result can cross a different substitution mapping or arena. This is
+  an expression transformation, not universe inference or a kernel verdict.
+
+  Rewriting stays indexed through all children: only the independent
+  PsKernelLevelInstantiateParams/psKernelInstantiateLevelList routines
+  transform the level payloads. KeepOrIntern retains unchanged term IDs.
+-/
+def psKernelC0InstantiateLevelsMemoWithFuel
+    (fuel : Nat)
+    (state : PsKernelC0RewriteState)
+    (id : Nat)
+    (params : List PsKernelName)
+    (levels : List PsKernelLevel) :
+    Option (PsKernelC0RewriteState × Nat) :=
+  match fuel with
+  | 0 => none
+  | remaining + 1 => do
+      let stored ← psKernelC0StoreGet state.store id
+      match psKernelC0RewriteLookup state.memo id 0 with
+      | some cached => some (state, cached)
+      | none => do
+          let (nextState, result) ←
+            match stored.node with
+            | .sort level =>
+                psKernelC0RewriteIntern state id
+                  (.sort (psKernelLevelInstantiateParams
+                    level params levels))
+            | .const name arguments =>
+                psKernelC0RewriteIntern state id
+                  (.const name
+                    (psKernelInstantiateLevelList arguments params levels))
+            | .app fn arg => do
+                let (s1, f) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining state fn params levels
+                let (s2, a) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining s1 arg params levels
+                psKernelC0RewriteIntern s2 id (.app f a)
+            | .lam name ty body info => do
+                let (s1, t) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining state ty params levels
+                let (s2, b) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining s1 body params levels
+                psKernelC0RewriteIntern s2 id (.lam name t b info)
+            | .forallE name ty body info => do
+                let (s1, t) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining state ty params levels
+                let (s2, b) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining s1 body params levels
+                psKernelC0RewriteIntern s2 id (.forallE name t b info)
+            | .letE name ty value body nondep => do
+                let (s1, t) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining state ty params levels
+                let (s2, v) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining s1 value params levels
+                let (s3, b) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining s2 body params levels
+                psKernelC0RewriteIntern s3 id (.letE name t v b nondep)
+            | .mdata metadata body => do
+                let (s1, b) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining state body params levels
+                psKernelC0RewriteIntern s1 id (.mdata metadata b)
+            | .proj name index body => do
+                let (s1, b) ← psKernelC0InstantiateLevelsMemoWithFuel
+                  remaining state body params levels
+                psKernelC0RewriteIntern s1 id (.proj name index b)
+            | _ => some (state, id)
+          some (psKernelC0RewritePublish nextState id 0 result, result)
+
+/-- Lossless universe instantiation on *the existing arena*, with bounded
+    traversal and full syntactic identity checks inside interning. -/
+def psKernelC0InstantiateLevelsIndexed
+    (store : PsKernelC0TermStore)
+    (id : Nat)
+    (params : List PsKernelName)
+    (levels : List PsKernelLevel) : Option (PsKernelC0TermStore × Nat) := do
+  let entry ← psKernelC0StoreGet store id
+  match params, levels with
+  | [], _ => some (store, id)
+  | _, [] => some (store, id)
+  | _, _ =>
+      let initial : PsKernelC0RewriteState :=
+        { store := store, memo := psKernelC0RewriteTableEmpty }
+      let (resultState, result) ← psKernelC0InstantiateLevelsMemoWithFuel
+        entry.depth initial id params levels
+      some (resultState.store, result)
+
 /-- The only reduction performed is beta on an explicit indexed lambda head. -/
 def psKernelC0IndexedBetaStep
     (store : PsKernelC0TermStore)

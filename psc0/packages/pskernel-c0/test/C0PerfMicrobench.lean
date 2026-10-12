@@ -953,6 +953,47 @@ def main : IO Unit := do
         throw (IO.userError "C0 indexed delta benchmark count mismatch")
       IO.println s!"C0_BENCH indexed_head_delta ms={deltaEnd-deltaStart} runs={deltaRuns} depth=24"
 
+  -- Pair recursive-source and canonical-indexed universe substitution on
+  -- preconstructed equivalent shared input; report implementation-family
+  -- cost only, not actual kernel throughput or matched acceptance.
+  let universeName := PsKernelName.str PsKernelName.anonymous "C0.universe"
+  match psKernelC0Intern psKernelC0StoreEmpty (.sort (.param universeName)) with
+  | none => throw (IO.userError "C0 universe microbench root failed")
+  | some (first, seed) =>
+      let mut store := first
+      let mut root := seed
+      for _ in [:11] do
+        match psKernelC0Intern store (.app root root) with
+        | none => throw (IO.userError "C0 universe microbench sharing failed")
+        | some (next, id) =>
+            store := next
+            root := id
+      let source ← match psKernelC0DecodeExpr store root with
+        | none => throw (IO.userError "C0 universe source bridge failed")
+        | some value => pure value
+      let universeRuns := 30
+      let mut originalHits := 0
+      let sourceStart ← IO.monoMsNow
+      for _ in [:universeRuns] do
+        match psKernelExprInstantiateLevelParams source
+            [universeName] [PsKernelLevel.zero] with
+        | .app _ _ => originalHits := originalHits + 1
+        | _ => throw (IO.userError "C0 source universe result differs")
+      let sourceEnd ← IO.monoMsNow
+      let mut indexedHits := 0
+      let indexedStart ← IO.monoMsNow
+      for _ in [:universeRuns] do
+        match psKernelC0InstantiateLevelsIndexed store root
+            [universeName] [PsKernelLevel.zero] with
+        | some (next, valueId) =>
+            if psKernelC0StoreValid next valueId then
+              indexedHits := indexedHits + 1
+        | none => throw (IO.userError "C0 indexed universe result missing")
+      let indexedEnd ← IO.monoMsNow
+      if indexedHits != universeRuns || originalHits != universeRuns then
+        throw (IO.userError "C0 universe benchmark counts changed")
+      IO.println s!"C0_BENCH indexed_universe_dag source_ms={sourceEnd-sourceStart} indexed_ms={indexedEnd-indexedStart} depth=11 runs={universeRuns}"
+
   -- The old indexed WHNF stuck-head path reconstructed the entire application
   -- spine even if the head did not reduce.  Measure that eliminated work
   -- separately from full checker throughput: same canonical term store,

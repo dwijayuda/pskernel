@@ -932,6 +932,76 @@ def main : IO Unit := do
       | _, _ => throw (IO.userError "C0 indexed local unfolding failed")
   IO.println "C0_PERF_REGRESSION indexed_local_head_unfolding=pass"
 
+  -- Universe substitution is now native over canonical term IDs.
+  -- Differential against the independent recursive source implementation
+  -- covers Sort, Const, binders, let, metadata, projection and literal cases.
+  let vName := PsKernelName.str PsKernelName.anonymous "v"
+  let nestedLevel := PsKernelLevel.max (.param uName)
+    (.succ PsKernelLevel.zero)
+  let levelExpressions : List PsKernelExpr := [
+    .sort (.param uName),
+    .sort nestedLevel,
+    .const polymorphicName [.param uName, nestedLevel],
+    .lam localName (.sort (.param uName))
+      (.const polymorphicName [nestedLevel])
+      PsKernelBinderInfo.implicit,
+    .forallE localName (.sort nestedLevel)
+      (.sort (.param uName)) PsKernelBinderInfo.strictImplicit,
+    .letE localName (.sort nestedLevel)
+      (.sort (.param vName))
+      (.mdata 17 (.sort (.param uName))) false,
+    .proj localName 0 (.sort nestedLevel),
+    .lit (PsKernelLiteral.nat 128),
+    .bvar 2
+  ]
+  for expr in levelExpressions do
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty expr with
+    | none => throw (IO.userError "C0 indexed level encoding failed")
+    | some (store, root) =>
+        for paramsAndLevels in [
+          ([uName, vName], [PsKernelLevel.zero, .succ PsKernelLevel.zero]),
+          ([uName], [.succ PsKernelLevel.zero]),
+          ([uName, vName], [PsKernelLevel.zero]),
+          ([uName], []),
+          ([], [PsKernelLevel.zero])
+        ] do
+          let (params, levels) := paramsAndLevels
+          let expected := psKernelExprInstantiateLevelParams
+            expr params levels
+          match psKernelC0InstantiateLevelsIndexed store root params levels with
+          | none => throw (IO.userError "C0 indexed level rewrite failed")
+          | some (next, rewritten) =>
+              match psKernelC0DecodeExpr next rewritten with
+              | none => throw (IO.userError "C0 indexed level decode failed")
+              | some result =>
+                  if !(psKernelExprEqual expected result) then
+                    throw (IO.userError "C0 indexed level substitution diverged")
+  if (psKernelC0InstantiateLevelsIndexed
+      psKernelC0StoreEmpty 0 [uName] [.zero]).isSome then
+    throw (IO.userError "C0 indexed universe accepted invalid handle")
+  -- A huge logical term with 24 levels of binary DAG sharing must not
+  -- be expanded by indexed universe rewriting or by indexed decoding.
+  match psKernelC0Intern psKernelC0StoreEmpty (.sort (.param uName)) with
+  | none => throw (IO.userError "C0 shared indexed level leaf failed")
+  | some (first, seed) =>
+      let mut store := first
+      let mut root := seed
+      for _ in [:24] do
+        match psKernelC0Intern store (.app root root) with
+        | none => throw (IO.userError "C0 shared indexed level DAG failed")
+        | some (next, id) =>
+            store := next
+            root := id
+      match psKernelC0InstantiateLevelsIndexed store root [uName] [.zero] with
+      | none => throw (IO.userError "C0 shared indexed levels failed")
+      | some (next, rewritten) =>
+          if next.nodes.size > store.nodes.size + 28 then
+            throw (IO.userError "C0 indexed levels lost canonical DAG sharing")
+          match psKernelC0DecodeExpr next rewritten with
+          | some (.app _ _) => pure ()
+          | _ => throw (IO.userError "C0 shared indexed levels decode failed")
+  IO.println "C0_PERF_REGRESSION indexed_universe_instantiation=pass"
+
   -- A direct application-spine selector must match the historical
   -- fully materialized argument-list representation for every index.
   for arity in [0, 1, 2, 3, 32, 128] do

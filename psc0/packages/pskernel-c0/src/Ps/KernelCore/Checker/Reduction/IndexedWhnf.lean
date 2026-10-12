@@ -120,12 +120,15 @@ def psKernelC0IndexedUnfoldHeadOnce
   let (head, args) ← psKernelC0IndexedAppHeadWithFuel
     root.depth store id []
   let headNode ← psKernelC0StoreGet store head
-  let value ←
+  let (value, params, levels) ←
     match headNode.node with
     | .fvar name =>
         match psKernelLocalContextFind context.localContext name with
         | none => none
-        | some decl => psKernelLocalDeclValue decl
+        | some decl =>
+            match psKernelLocalDeclValue decl with
+            | none => none
+            | some value => some (value, [], [])
     | .const name levels =>
         match psKernelEnvironmentFind context.environment name with
         | none => none
@@ -135,12 +138,14 @@ def psKernelC0IndexedUnfoldHeadOnce
                 psKernelLevelListLength levels then
               match psKernelConstantInfoDeltaValue info with
               | none => none
-              | some value =>
-                  some (psKernelExprInstantiateLevelParams
-                    value params levels)
+              | some value => some (value, params, levels)
             else none
     | _ => none
-  let (nextStore, valueId) ← psKernelC0EncodeExpr store value
+  -- Encode the *uninstantiated* declaration body only. Universe rewriting
+  -- and application of existing argument handles remain in the arena.
+  let (sourceStore, sourceId) ← psKernelC0EncodeExpr store value
+  let (nextStore, valueId) ←
+    psKernelC0InstantiateLevelsIndexed sourceStore sourceId params levels
   psKernelC0IndexedApplySpine nextStore valueId args
 
 /-- Demand-driven WHNF; args are earliest/innermost-first. -/

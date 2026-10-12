@@ -14,7 +14,6 @@ def psKernelEnvironmentAddUnchecked
         environment.index
         info
     quotInitialized := environment.quotInitialized
-    runtime := environment.runtime
   }
 
 def psKernelEnvironmentReplaceUnchecked
@@ -32,7 +31,6 @@ def psKernelEnvironmentReplaceUnchecked
         environment.index
         info
     quotInitialized := environment.quotInitialized
-    runtime := environment.runtime
   }
 
 def psKernelEnvironmentAdd
@@ -64,5 +62,4 @@ def psKernelEnvironmentMarkQuotInitialized
       constants := environment.constants
       index := environment.index
       quotInitialized := true
-      runtime := environment.runtime
     }

@@ -9,6 +9,7 @@ on:
       - 'psc0/packages/pskernel-c0/lean-toolchain'
       - '.github/workflows/pskernel-c0-lean.yml'
       - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0Lean435MigrationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
       - 'psc0/packages/pskernel-c0/test/C0Ablation.py'
@@ -34,6 +35,9 @@ jobs:
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean
+      - name: Lean 4.35 semantics and obsolete-native rejection (no self-host)
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0Lean435MigrationRegression.lean
       - name: Native Lean C0 performance microbenchmarks (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0PerfMicrobench.lean

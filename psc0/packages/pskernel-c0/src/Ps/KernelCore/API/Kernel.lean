@@ -45,7 +45,7 @@ def psKernelV1CheckedEnvironment
       | Except.error error => Except.error error
       | Except.ok environment =>
           if psKernelResourceAllowsSize session.resources (psKernelEnvironmentSize environment) then
-            Except.ok (psKernelEnvironmentWithNativeEvaluator environment Option.none)
+            Except.ok environment
           else
             Except.error
               (PsKernelError.resourceExhausted PsKernelResourceError.declarationLimit "declaration limit exceeded")

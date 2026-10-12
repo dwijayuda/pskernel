@@ -2,10 +2,9 @@ import Ps.KernelCore.API.KernelContractV1
 
 structure PsKernelProviderCapability where
   target : PsKernelTargetIdentity
-  nativeEvaluator : Option PsKernelNativeEvaluator
 
 def psKernelProviderDefault : PsKernelProviderCapability :=
-  PsKernelProviderCapability.mk psKernelTargetIdentityV1 Option.none
+  PsKernelProviderCapability.mk psKernelTargetIdentityV1
 
 def psKernelProviderCompatible (provider : PsKernelProviderCapability) : Bool :=
   if psKernelStringEq provider.target.contract psKernelTargetIdentityV1.contract then

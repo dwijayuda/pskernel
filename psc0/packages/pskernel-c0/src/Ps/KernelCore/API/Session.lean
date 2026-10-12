@@ -34,7 +34,7 @@ def psKernelKernelSessionPreflight
 
 def psKernelKernelSessionEnvironment
     (session : PsKernelKernelSession) : PsKernelEnvironment :=
-  psKernelEnvironmentWithNativeEvaluator session.environment session.provider.nativeEvaluator
+  session.environment
 
 def psKernelKernelSessionChecker
     (session : PsKernelKernelSession)

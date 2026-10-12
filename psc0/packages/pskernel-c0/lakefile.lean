@@ -87,7 +87,5 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Runtime.Acceleration.Cache,
     `Ps.KernelCore.Runtime.Acceleration.CachePolicy,
     `Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex,
-    `Ps.KernelCore.Runtime.Capability.Lean434NativeReduction,
-    `Ps.KernelCore.Runtime.Capability.Types,
     `Ps.KernelCore.SelfHost
   ]

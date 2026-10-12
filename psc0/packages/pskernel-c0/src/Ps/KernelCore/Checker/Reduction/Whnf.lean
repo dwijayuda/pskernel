@@ -3,8 +3,10 @@ import Ps.KernelCore.Checker.Reduction.WhnfCore
 /-
 Public weak-head normalization pipeline.
 
-The ordering in this module is observable Lean 4.34 behavior:
-  core WHNF -> optional native reduction -> Nat reduction -> delta unfolding.
+The ordering in this module is observable Lean 4.35 behavior:
+  core WHNF -> Nat reduction -> delta unfolding.
+The obsolete Lean.reduceBool/Lean.reduceNat compiler-execution kernel hooks
+were removed upstream and have no replacement trusted reduction here.
 The final public entry point keeps recursor reduction injectable so the same
 core algorithm is reused by the recursor checker without circular semantics.
 -/
@@ -22,58 +24,22 @@ def psKernelWhnfAfterCore
     (core : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  match
-      psKernelReduceNative
-        context
-        core with
-  | Except.error error =>
-      Except.error error
-  | Except.ok nativeResult =>
-      match nativeResult with
+  match psKernelReduceNatWith continueWhnf context state core with
+  | Except.error error => Except.error error
+  | Except.ok natResult =>
+      match Prod.fst natResult with
       | Option.some value =>
-          psKernelWhnfFinish
-            original
-            value
-            state
+          psKernelWhnfFinish original value (Prod.snd natResult)
       | Option.none =>
-          match
-              psKernelReduceNatWith
-                continueWhnf
-                context
-                state
-                core with
-          | Except.error error =>
-              Except.error error
-          | Except.ok natResult =>
-              match Prod.fst natResult with
-              | Option.some value =>
-                  psKernelWhnfFinish
-                    original
-                    value
-                    (Prod.snd natResult)
-              | Option.none =>
-                  match
-                      psKernelUnfoldDefinition
-                        context
-                        core with
-                  | Option.none =>
-                      psKernelWhnfFinish
-                        original
-                        core
-                        (Prod.snd natResult)
-                  | Option.some value =>
-                      match
-                          continueWhnf
-                            context
-                            (Prod.snd natResult)
-                            value with
-                      | Except.error error =>
-                          Except.error error
-                      | Except.ok result =>
-                          psKernelWhnfFinish
-                            original
-                            (Prod.fst result)
-                            (Prod.snd result)
+          match psKernelUnfoldDefinition context core with
+          | Option.none =>
+              psKernelWhnfFinish original core (Prod.snd natResult)
+          | Option.some value =>
+              match continueWhnf context (Prod.snd natResult) value with
+              | Except.error error => Except.error error
+              | Except.ok result =>
+                  psKernelWhnfFinish original
+                    (Prod.fst result) (Prod.snd result)
 
 def psKernelWhnfWithFuel
     (fuel : Nat) :

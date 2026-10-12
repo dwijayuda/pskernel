@@ -413,7 +413,8 @@ def main : IO Unit := do
         throw (IO.userError "matched deep library missing declaration")
     IO.println s!"C0_COMPARE round={round} operation=admit_deep_library_chain milliseconds={deepEnd-deepStart} declarations={deepCount} nested_every=4 binder_depth=48"
 
-    let inductiveRuns := 24
+    -- A larger sample avoids sub-millisecond per-round observations.
+    let inductiveRuns := 2000
     let mut inductiveAccepted := 0
     let inductiveStart ← IO.monoMsNow
     for _ in [:inductiveRuns] do

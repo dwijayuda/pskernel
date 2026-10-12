@@ -203,9 +203,11 @@ def psKernelC0IndexedContextFragmentWithFuel
           -- Self-referential local/environment declarations are malformed
           -- for general admission. Never return a positive result here
           -- merely because a candidate rewrite made no progress.
-          if unfoldedId == syntacticId then none
-          else psKernelC0IndexedContextFragmentWithFuel
-            remaining context nextStore unfoldedId true
+          if unfoldedId == syntacticId then
+            none
+          else
+            psKernelC0IndexedContextFragmentWithFuel remaining
+              context nextStore unfoldedId true
       | none =>
           if hadProgress || syntacticId != id then
             some (syntacticStore, syntacticId)

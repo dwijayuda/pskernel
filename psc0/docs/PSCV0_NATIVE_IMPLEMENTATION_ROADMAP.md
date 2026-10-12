@@ -1,19 +1,27 @@
 # PSCV0 v7 native implementation roadmap
 
-## New checked module-planner milestone (12 October 2026)
+## Latest qualified native project milestone — 12 October 2026
 
-The pure `Ps.Compiler.Pscv0Modules` graph parser/orderer and public-import
-interface preparation are qualified at source
-`d83e8878b4ec305c1783a51cd74925b597d86920`, Linux
-[38243759063](https://github.com/dwijayuda/pskernel/actions/runs/38243759063).
-A single compact graph case checked public re-export through a facade, ordering
-and missing/cyclic dependency refusals. The prior bounded/48 profile,
-171 shared runtime observations and existing ABI gates remain green.
-This is **module graph groundwork**, not complete module/linking support.
-Next: visibility, opaque cross-module bodies, official checked project
-closure, runtime linking and target export selection. Keep native Lean,
-retain minimal tests and defer C5, kernel replacement and self-hosting.
+**Executable source:** `754108eb861ef19642b6f3ae9e17e7313ef179bb`.
+**Green Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38244878977.
+The module foundation was called Profile 49; the executable still identifies
+the bounded language subset as `pscv0-v7-native-bounded/48`. Existing
+171 shared runtime observations passed across direct JS, TS, Rust, Wasm GC
+and Wasmtime. Closure guard: 159 portable and 167 native Lean modules.
 
+`Ps.Compiler.Pscv0Modules` performs pure in-memory graph planning,
+`import`/`public import` interface preparation and dependency refusals.
+The native host and `scripts/Pscv0Native.lean` now provide manifest-driven
+multi-file project checking and JS/TS/Rust/Wasm emission commands.
+The new CLI compiles and the compact module test passes, but standalone
+CLI end-to-end cross-module runtime behavior is not yet independently qualified.
+
+Next: implement precise RC4 public/private source visibility, imported
+definition/theorem body opacity, namespace/open and import re-exports,
+diamond/collision/instance identity handling, executable library linking,
+entry-only export selection and multi-file provenance. Qualify a real
+cross-module executable example with the official Lean checker and existing
+backend gates. C5 and all self-host work remain deferred.
 
 ## Current priority: core and essential language conformance first
 
@@ -31,13 +39,13 @@ The next stage is chosen by architectural dependencies rather than counting
 green tests. C5 reconstruction and compiler-source migration follow only when
 the selected language surface is sufficient.
 
-Current bounded source profiles 36–41 are qualified and recorded in
-AI_WORK_STATE.md; the last validated source is `1922294d9918c477552db44788208364ba37188a`
-([Linux run 38223957480](https://github.com/dwijayuda/pskernel/actions/runs/38223957480)).
-The shared matrix contains 151 runtime observations per target. None of these
-profiles constitutes full v7 conformance. All source
-preparation, admission checking, provenance, erasure and target execution
-remain distinct assurance boundaries.
+Selected language profiles 36–48 and the later module foundation are recorded
+in AI_WORK_STATE.md. Latest qualified executable source:
+`754108eb861ef19642b6f3ae9e17e7313ef179bb`, [Linux run 38244878977](https://github.com/dwijayuda/pskernel/actions/runs/38244878977).
+The shared matrix contains 171 runtime observations per target. This does
+not constitute full v7 conformance or full RC4 module fidelity. Source
+preparation, official admission checking, provenance, erasure and target
+execution remain independent assurance boundaries.
 
 
 The canonical language target is PSCV0_LANGUAGE_REFERENCE.md at its recorded v7
@@ -67,7 +75,7 @@ this development loop.
 | Type inference and environment | Scoped typed metavariable assignment with universe constraints, prioritized global/local instances, output-parameter metadata, dictionary dependency worklists and checked class methods, scoped source universes, symbolic level simplification, RC4 checking | Complete universe constraints/explicit suffixes, tabled non-ground search/semi-output parameters, attributes/default instances and frozen Standard registry |
 | Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, nested/multiple typed pattern matrices and nomatch, proof-field storage erasure | Named discriminants, heterogeneous constraints, Type/existential fields, selected nested/mutual data |
 | Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
-| Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
+| Modules and libraries | Qualified explicit project planning, checked imports/public-import facades and native manifest-driven CLI entry points | Full RC4 body/visibility rules, diamond/instance identity, runtime library linking and entry exports, source provenance and independent end-to-end multi-file qualification |
 | Proofs and contracts | Term proofs and typed goal state, exact/refine/apply/intro/assumption/rfl/constructor, focus/bullets/all_goals/any_goals, cases/induction/case/next checked by official Lean | Complete logical primitives, further goal control/elimination/rewriting, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Prop/Bool and named-proof conditionals, term if-let, pattern-let, matches and inferred matrix results; selected Except do | General typed do and do-pattern sequencing, mutable/early-return/loop lowering, registered effect families |
 | Executable assurance | Checked prepared graph, complete shared IR gate, native primitive signature/model audit, direct JS/TS/Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |

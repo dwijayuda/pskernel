@@ -395,11 +395,6 @@ def psKernelExprEqualLegacy
             else false
         | _ => false
 
-/--
-  C0 exact expression equality without allocating partial comparator closures.
-  Unlike psKernelExprEq, this preserves binder names and binder annotations.
-  Both functions short-circuit on the first mismatching constructor or field.
--/
 /-- Exact syntax equality used for canonical expression storage.
     Unlike checker structural comparison, this compares binder names and
     binder information. The historical implementation remains an independent

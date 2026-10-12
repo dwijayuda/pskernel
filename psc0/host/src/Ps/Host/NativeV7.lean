@@ -135,7 +135,7 @@ private def compile (prelude : Lean.Environment) (request : Request) :
     | some value =>
       value.origins.flatMap fun file =>
         let sourceName := if file.moduleName == request.moduleName then
-          request.sourceName else file.moduleName ++ ".ps"
+          request.sourceName else file.sourceName
         file.batches.map (fun batch => (sourceName, batch))
     | none =>
       match elaborated with
@@ -159,7 +159,7 @@ private def compile (prelude : Lean.Environment) (request : Request) :
     | none => []
     | some value => value.origins.map fun file =>
       (if file.moduleName == request.moduleName then request.sourceName
-       else file.moduleName ++ ".ps", file.source)
+       else file.sourceName, file.source)
   let context : PsEmissionContext := {
     sourceName := request.sourceName
     sourceText := request.source

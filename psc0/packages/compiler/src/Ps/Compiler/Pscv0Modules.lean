@@ -6,10 +6,14 @@ import Ps.Compiler.Pscv0
 structure PsPscv0ModuleSource where
   name : String
   source : String
+  -- Optional real source path (normalized, project-relative). The native
+  -- compiler never reads it; the host uses it for provenance and source maps.
+  sourceName : String := ""
 
 structure PsPscv0ParsedModule where
   name : String
   source : String
+  sourceName : String
   program : PsSyntaxProgram
 
 def psPscv0ImportKey (entry : PsSyntaxImport) : String :=
@@ -24,6 +28,10 @@ def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
   if (sources.map (·.name)).eraseDups.length != sources.length then
     throw "PSCV0-MODULE: duplicate module identity"
   let names := sources.map (·.name)
+  let fileNames := sources.map fun item =>
+    if item.sourceName.isEmpty then item.name ++ ".ps" else item.sourceName
+  if fileNames.eraseDups.length != sources.length then
+    throw "PSCV0-MODULE: duplicate source path identity"
   for entry in sources do
     if !psPscv0ValidModuleKey entry.name then
       throw ("PSCV0-MODULE: invalid module identity " ++ entry.name)
@@ -35,7 +43,10 @@ def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
     for dep in dependencies do
       if !names.contains dep then
         throw ("PSCV0-MODULE: missing module " ++ dep ++ " imported by " ++ input.name)
-    return { name := input.name, source := input.source, program }
+    return {
+      name := input.name, source := input.source
+      sourceName := if input.sourceName.isEmpty then input.name ++ ".ps" else input.sourceName
+      program }
 
 -- Topological planning over the complete explicit graph. A cycle is an error,
 -- not an opportunity to infer mutually recursive cross-file declarations.
@@ -123,6 +134,7 @@ structure PsPscv0BuiltModule where
 
 structure PsPscv0ProjectOrigin where
   moduleName : String
+  sourceName : String
   source : String
   batches : List PsElabBatchOrigin
   parents : List (PsName × PsName)
@@ -179,7 +191,7 @@ def psCompilerPreparePscv0Project (entryName : String)
     built := built ++ [{ name := item.name, interface, ownNames }]
     declarations := declarations ++ own
     origins := origins ++ [{
-      moduleName := item.name, source := item.source,
+      moduleName := item.name, sourceName := item.sourceName, source := item.source,
       batches := elaborated.origins, parents := output.originParents }]
     if item.name == entryName then mainNames := ownNames
     else libraryNames := libraryNames ++ ownNames

@@ -20,17 +20,17 @@ def symbolDoc (dialect : Dialect) (declarations : Bool) (symbol owner : String) 
   if declarations then txt ("declare const " ++ symbol ++ ": unique symbol;")
   else txt ("const " ++ symbol ++ annotation dialect "unique symbol" ++ " = Symbol(" ++ psJsonQuote owner ++ ");")
 
-def structureDocs (dialect : Dialect) (declarations : Bool)
+def structureDocs (dialect : Dialect) (declarations visible : Bool)
     (brands : List (String × String)) (s : PsVerifiedIrStructure) : Except String PsDoc := do
   let some brand := psTsLookup brands s.name | throw "PSCV0-ECMA: missing structure brand"
   let fields ← s.fields.mapM fun f => do return (f.name, ← irType f.type)
-  let type := cat [txt ("export interface " ++ s.name ++ psTsGenericNames s.typeParameters ++ " "),
+  let type := cat [txt ((if visible then "export " else "") ++ "interface " ++ s.name ++ psTsGenericNames s.typeParameters ++ " "),
     fieldsDoc (("[" ++ brand ++ "]", "true") :: fields)]
   return .origin s.name (psDocJoin .hardline (
     [symbolDoc dialect declarations brand s.name] ++
       (if dialect == .typescript then [type] else [])))
 
-def inductiveDocs (dialect : Dialect) (declarations : Bool)
+def inductiveDocs (dialect : Dialect) (declarations visible : Bool)
     (tags : List (String × String)) (i : PsVerifiedIrInductive) : Except String PsDoc := do
   let some tag := psTsLookup tags i.name | throw "PSCV0-ECMA: missing inductive tag"
   let generic := psTsGenericNames i.typeParameters
@@ -38,7 +38,8 @@ def inductiveDocs (dialect : Dialect) (declarations : Bool)
   let variants ← i.constructors.mapM fun c => do
     let fields ← c.fields.mapM fun f => do return (f.name, ← irType f.type)
     return fieldsDoc (("[" ++ tag ++ "]", psJsonQuote c.name) :: fields)
-  let typeDoc := cat [txt ("export type " ++ result ++ " = "),
+  let visibility := if visible then "export " else ""
+  let typeDoc := cat [txt (visibility ++ "type " ++ result ++ " = "),
     if variants.isEmpty then txt "never" else psDocJoin (cat [.hardline, txt "| "]) variants, txt ";"]
   let constructors ← i.constructors.mapM fun c => do
     let parameters ← c.fields.mapM fun f => do return Parameter.mk f.name (← irType f.type) false
@@ -52,8 +53,8 @@ def inductiveDocs (dialect : Dialect) (declarations : Bool)
       else Expr.functionE false generic parameters result [ret value]
     return cat [txt ((if c.name == "__proto__" then "[" ++ psJsonQuote c.name ++ "]" else psJsonQuote c.name) ++ ": "), ← exprDoc dialect 4096 value, txt ","]
   let valueDoc := if declarations then
-      cat [txt ("export declare const " ++ i.name ++ ": "), blockDoc constructors, txt ";"]
-    else cat [txt ("export const " ++ i.name ++ " = "), blockDoc constructors,
+      cat [txt (visibility ++ "declare const " ++ i.name ++ ": "), blockDoc constructors, txt ";"]
+    else cat [txt (visibility ++ "const " ++ i.name ++ " = "), blockDoc constructors,
       txt (typed dialect " as const" ++ ";")]
   return .origin i.name (psDocJoin .hardline (
     [symbolDoc dialect declarations tag i.name] ++
@@ -76,19 +77,24 @@ def plan (ir : PsVerifiedIrModule) : Except String Program := do
     return (d.name, ← declaration brands tags d)
   return { view, symbols := names.symbols.reverse, exports, definitions }
 
-def signatureDoc (d : PsVerifiedIrDeclaration) : Except String PsDoc := do
+def signatureDoc (visible : Bool) (d : PsVerifiedIrDeclaration) : Except String PsDoc := do
   let result ← irType d.resultType
   let parameters ← irParameters d.parameters
-  let text := if d.parameters.isEmpty then "export declare const " ++ d.name ++ ": " ++ result ++ ";"
-    else "export declare function " ++ d.name ++
+  let visibility := if visible then "export " else ""
+  let text := if d.parameters.isEmpty then visibility ++ "declare const " ++ d.name ++ ": " ++ result ++ ";"
+    else visibility ++ "declare function " ++ d.name ++
       signature .typescript (psTsGenericNames d.typeParameters) parameters result ++ ";"
   return .origin d.name (txt text)
 
-def definitionDoc (dialect : Dialect) (definition : String × List Stmt) : Except String PsDoc := do
+def definitionDoc (dialect : Dialect) (visible : Bool)
+    (definition : String × List Stmt) : Except String PsDoc := do
   let docs ← definition.snd.mapM fun statement => do
-    let doc ← stmtDoc dialect 4096 statement
+    let doc ← match statement with
+      | .functionD _ generator name types parameters result body =>
+        stmtDoc dialect 4096 (.functionD visible generator name types parameters result body)
+      | _ => stmtDoc dialect 4096 statement
     match statement with
-    | .binding .. => return cat [txt "export ", doc]
+    | .binding .. => return if visible then cat [txt "export ", doc] else doc
     | _ => return doc
   return .origin definition.fst (psDocJoin .hardline docs)
 
@@ -97,10 +103,14 @@ def moduleDoc (dialect : Dialect) (declarations : Bool) (program : Program) :
   let view := program.view
   let brands := psTsBuildBrandMap view
   let tags := psTsBuildTagMap view
-  let structures ← view.structures.mapM (structureDocs dialect declarations brands)
-  let inductives ← view.inductives.mapM (inductiveDocs dialect declarations tags)
-  let definitions ← if declarations then view.declarations.mapM signatureDoc
-    else program.definitions.mapM (definitionDoc dialect)
+  let structures ← view.structures.mapM fun s =>
+    structureDocs dialect declarations (!view.internalNames.contains s.name) brands s
+  let inductives ← view.inductives.mapM fun i =>
+    inductiveDocs dialect declarations (!view.internalNames.contains i.name) tags i
+  let definitions ← if declarations then view.declarations.mapM fun d =>
+      signatureDoc (!view.internalNames.contains d.name) d
+    else program.definitions.mapM fun d =>
+      definitionDoc dialect (!view.internalNames.contains d.fst) d
   let header := txt "// Generated by native PSCV0; see the emission manifest."
   let runtime ← if declarations then pure ([] : List PsDoc)
     else (runtimeDoc dialect).map (fun doc => [doc])

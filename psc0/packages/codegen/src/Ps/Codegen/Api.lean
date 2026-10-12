@@ -13,14 +13,23 @@ structure PsPublicApi where
 -- not internal reachability or the checked source graph.
 def psPublicApi (ir : PsVerifiedIrModule) (exposure : PsApiExposure := .allRuntime) :
     Except String PsPublicApi := do
+  let known := fun name =>
+    ir.declarations.any (fun d => d.name == name) ||
+    ir.structures.any (fun s => s.name == name) ||
+    ir.inductives.any (fun i => i.name == name)
+  if ir.internalNames.eraseDups.length != ir.internalNames.length ||
+      !ir.internalNames.all known then
+    throw "PSCV0-EXPORT: invalid internal runtime identities"
+  let publicDeclarations := ir.declarations.filter
+    (fun d => !ir.internalNames.contains d.name)
   let exports ← match exposure with
-    | .allRuntime => pure ir.declarations
+    | .allRuntime => pure publicDeclarations
     | .selected names => do
       if names.eraseDups.length != names.length then throw "PSCV0-EXPORT: duplicate selection"
       names.mapM fun name =>
-        match ir.declarations.find? (fun d => d.name == name) with
+        match publicDeclarations.find? (fun d => d.name == name) with
         | some d => pure d
-        | none => throw ("PSCV0-EXPORT: no runtime declaration " ++ name)
+        | none => throw ("PSCV0-EXPORT: no public runtime declaration " ++ name)
   return { structures := ir.structures, inductives := ir.inductives, exports }
 
 -- WIT has no implicit encoding for unbounded integers, recursive values,

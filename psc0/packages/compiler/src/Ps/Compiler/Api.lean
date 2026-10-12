@@ -301,7 +301,8 @@ def psCompilerVerifiedIrFromPrepared
           psEraseCoreModuleWithRuntimePrelude
             environment
             psSelfHostRuntimePreludeDeclarationsWithProd
-            prepared.declarations with
+            prepared.declarations
+            (psStandardBinaryDeclarations.map psDeclarationName) with
       | Except.error error =>
           Except.error (PsCompilerError.erasure error)
       | Except.ok ir =>

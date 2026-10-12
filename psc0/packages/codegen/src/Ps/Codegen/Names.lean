@@ -135,7 +135,8 @@ def psCodegenModule (ir : PsVerifiedIrModule) :
     return { d with localName := ← psCodegenName d.localName, type := ← psCodegenType 65536 d.type }
   let foreignData ← ir.foreignData.mapM fun (name, safe) => do
     return (← psCodegenName name, safe)
-  return { foreignData, imports, structures, inductives, declarations }
+  let internalNames ← ir.internalNames.mapM psCodegenName
+  return { foreignData, imports, structures, inductives, declarations, internalNames }
 
 def psCodegenNamesFor (ir : PsVerifiedIrModule) (reserved : List String) :
     Except String (PsVerifiedIrModule × PsCodegenNames) :=

@@ -248,6 +248,9 @@ structure PsVerifiedIrModule where
   structures : List PsVerifiedIrStructure
   inductives : List PsVerifiedIrInductive
   declarations : List PsVerifiedIrDeclaration
+  -- Internal checked support symbols remain reachable but are never selected
+  -- as the application's public API.
+  internalNames : List String := []
 
 def psVerifiedIrModuleEmpty : PsVerifiedIrModule :=
   {

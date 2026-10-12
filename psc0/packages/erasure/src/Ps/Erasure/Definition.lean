@@ -500,7 +500,8 @@ def psErasureForeignData (scope : PsErasureScope) (declarations : List PsDeclara
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
-    (declarations : List PsDeclaration) :
+    (declarations : List PsDeclaration)
+    (internalRuntimeNames : List PsName := []) :
     Except PsErasureError PsVerifiedIrModule :=
   let runtimeDeclarations :=
     psErasureAppendDeclarations runtimePreludeDeclarations declarations;
@@ -531,12 +532,14 @@ def psEraseCoreModuleWithRuntimePrelude
                   psEraseDefinitionsLoop
                     environment
                     preparedInductives.scope
-                    declarations
+                    runtimeDeclarations
                     [] with
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok {
                     foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
+                     internalNames := internalRuntimeNames.filterMap
+                       (psErasureLookupName preparedInductives.scope.declarationNames)
                     imports := []
                     structures := preparedStructures.ir
                     inductives := preparedInductives.ir

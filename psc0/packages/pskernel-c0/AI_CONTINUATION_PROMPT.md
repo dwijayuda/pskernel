@@ -1,5 +1,15 @@
 # New chat — continue PSKernel-C0 native Lean performance redesign
 
+## NEWEST RESEARCH EXECUTION POINT — 2026-10-13
+
+**Read first:** [C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md](C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md), newest top of `AI_WORK_STATE.md` and `C0_LEAN_ARCHITECTURE.md`. Latest **native source** [`497df6a`](https://github.com/dwijayuda/pskernel/commit/497df6a39947aa3532b2d1a6ffe84342125fd2fc), successful Lean 4.34 [CI 38305932773](https://github.com/dwijayuda/pskernel/actions/runs/38305932773). The full external-source research at [`f943c866`](https://github.com/dwijayuda/pskernel/commit/f943c8662b722f790775f69159c6938b7b8994ad) is documentation-only. Refresh live branch HEAD and CI.
+
+**Change in architectural direction:** Do not assume globally hash-consed indexed syntax is the final accepting engine. Compare official shared expressions, con-leche-style packed metadata and Sokonanoda/MathGraph-style closure values in coherent native Lean designs. First pin independent Lean 4.34 + Kernel Arena conformance with explicit rejected/declined/error/resource categories. Current C0 syntax lacks official binder-info `Rec` and general metadata, and exposed Nat handles must be sealed before trusting indexed state. The project-local unchanged `pskernel-core` is not an independent official oracle. Keep recursive accepted checker as authority until external semantic parity, exhaustive relevant reductions, and complete workloads justify promotion.
+
+**Known current synthetic checker performance:** matched 24 × 12 accepted definitions C0 p50/p95 **25/25 ms** versus unchanged original **47/47 ms**, but small allocations **36,206 versus 34,971** and no attributable memory win. Indexing on demand (120 defs C0 direct/lazy/eager **16/17/24 ms**; 1200 WHNF **26/27/43 ms**) removes wrapper costs but does not outperform direct source. Complete official C++/Arena/full-library performance and indexed accepting engine remain outstanding.
+
+**Scope:** GitHub-first; work only in C0 source, dedicated native CI/tests/docs; preserve branch/history and v4.34 pin. No self-host/bootstrap/fixed-point/generated Rust/metatheory/consistency tests, no original `pskernel-core`, compiler, backend, or unrelated branch changes. Do not present research documents as completed acceptance or native CI validation.
+
 ## UPDATED VERIFIED START POINT — 2026-10-13 (OVERRIDES OLDER CHECKPOINTS BELOW)
 
 Refresh live HEAD; latest **source HEAD** inspected was [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c). Latest **complete native CI [38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928)** succeeded, including build, negative/differential conformance, performance and independently rebuilt unchanged-original checker. Previous successful runs [38292583191](https://github.com/dwijayuda/pskernel/actions/runs/38292583191), [38293687263](https://github.com/dwijayuda/pskernel/actions/runs/38293687263), [38293885978](https://github.com/dwijayuda/pskernel/actions/runs/38293885978) qualify earlier source steps.

@@ -1,5 +1,13 @@
 # PSKernel-C0 performance architecture (implementation checkpoint)
 
+## Architecture research update — 2026-10-13
+
+Read [C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md](C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md) for source-level comparison to official Lean 4 v4.34.0, Lean4Lean, con-leche, Nanoda, Sokonanoda and MathGraph. Latest C0 source [`497df6a`](https://github.com/dwijayuda/pskernel/commit/497df6a39947aa3532b2d1a6ffe84342125fd2fc), native [CI 38305932773](https://github.com/dwijayuda/pskernel/actions/runs/38305932773) all green; this report is documentation-only.
+
+**Do not commit to global indexed hash-consing as the end state.** Lean's shared runtime Expr with metadata, con-leche's independent structural term with computed fields (without global hash-consing), and Sokonanoda/MathGraph's closure-valued evaluator are genuinely different options. Performance requires matched complete-checker *and* memory evidence, not synthetic DAG ratios. C0's recursive accepted path remains authoritative.
+
+**Current P0 blockers:** lossless official Lean 4.34 syntax (binder `Rec`, general metadata, universe/level/projection details), safe ownership of public `Nat` term handles, correct context/fuel/cache provenance, and an independent official C++/Arena differential checker instead of the same-lineage unchanged sibling. Optimize a verified semantic pathway, then compare actual direct-source, optional indexed and closure-based execution with controlled ablations. The con-leche model-consistency theorem applies to its own verified/restricted-axiom implementation, never automatically C0.
+
 ## Current native Lean checkpoint — 2026-10-13 (supersedes initial Rust experiment below)
 
 The original 2026-10-12 Rust-only architecture notes below are historical; the active workstream is **native Lean 4.34.0** on `perf/pskernel-c0-v7-rust-20261012`, inside `psc0/packages/pskernel-c0/`. No original `pskernel-core`, compiler, or Rust backend modifications are authorized.

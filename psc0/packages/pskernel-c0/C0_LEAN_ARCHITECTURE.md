@@ -7,6 +7,18 @@ PSKernel checker, not the experimental Rust engine or an incomplete indexed
 evaluator. The original `pskernel-core`, the PSC0 compiler, and the Rust backend
 are not modified in this workstream.
 
+## Source-grounded architectural decision — 2026-10-13
+
+**Canonical research:** [C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md](C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md). The most recent native C0 source comparison uses [`497df6a`](https://github.com/dwijayuda/pskernel/commit/497df6a39947aa3532b2d1a6ffe84342125fd2fc), full [CI 38305932773](https://github.com/dwijayuda/pskernel/actions/runs/38305932773) **success**; later research-documentation commits do not mean new source qualification.
+
+**Representation is an optimization choice, not a correctness premise.** Official Lean 4.34 C++ uses immutable shared runtime expressions with packed hash, loose-BVar range, approximate depth and semantic flags; con-leche has its own Lean expression type with computed packed metadata and explicitly avoids mandatory global hash-consing; Sokonanoda/MathGraph use closures, neutral values and elimination spines. C0's accepting recursive source is still the authority; its opt-in hash-consed `Nat`-handle arena is a **candidate**, not a proved faster replacement. Prototype/test (A) direct structurally shared/metadata-rich Lean term objects, (B) optional indexed DAG, (C) closure/value evaluation, using identical full accepted operations and real corpora.
+
+**Exact syntax and scope gaps:** official Lean 4.34 `binder_info` has `Rec`, absent from `PsKernelBinderInfo`; official `mdata` is structured metadata, C0 stores a Nat. Current exact round-trip tests apply only to C0's restricted representation. Specify explicit unsupported/declined boundaries rather than claim arbitrary lossless Lean transport. The current indexed node exposes Nat handles, derived metadata and unsealed external store structure: never use external handle identity, hash, or range to approve a checked judgment. Keep environment/local-level/evaluator context and original fuel/error/fresh-name provenance on caches.
+
+**Algorithmic invariants:** official `type_checker.h` warns that success-only DefEq may be **non-transitive as a sound but incomplete semi-decision procedure**, so never adopt Lean4Lean's union-find equivalence closure without carrying its own proof/operational invariants. Official WHNF/DefEq staged ordering and generated recursor-rule type preservation are reference constraints. External C++ v4.34 and independent Arena conformance must precede trusted indexed/closure promotion. Note that Lean4Lean master currently pins v4.33.0-rc2; con-leche master pins v4.35.0-rc3, so neither master is an exact v4.34 differential oracle.
+
+**Current order:** P0 external compatibility/conformance and negative soundness gates; P1 sealed syntax/term metadata/provenance; P2 simultaneous coherent closure-vs-indexed-vs-direct evaluation designs; P3 trusted combined WHNF/DefEq/inference/declaration acceptance; P4 independent-run library performance, memory and allocated bytes. Source acceptance remains mandatory throughout. No self-host/generated Rust/metatheory work.
+
 ## Newest indexed transition design — verified 2026-10-13
 
 Source HEAD [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c), [full native CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928) **success**. This is an **indexed substrate and source-checker measurement qualification**, not completion of indexed accepting evaluation.

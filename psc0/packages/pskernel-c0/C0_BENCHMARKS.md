@@ -1,5 +1,20 @@
 # PSKernel-C0 experimental performance measurements
 
+## Research-qualified baseline and measurement gaps — 2026-10-13
+
+Reference study: [C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md](C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md). Native accepting **C0 source HEAD** [`497df6a`](https://github.com/dwijayuda/pskernel/commit/497df6a39947aa3532b2d1a6ffe84342125fd2fc); full native [CI 38305932773](https://github.com/dwijayuda/pskernel/actions/runs/38305932773) succeeded. Research commits are documentation-only, not tests of new source behavior.
+
+| Same-run actual checked synthetic workload | Native C0 | Project-local unchanged original |
+| --- | ---: | ---: |
+| 24 batches × 12 fully admitted definitions, batch p50 | **25 ms** | **47 ms** |
+| Same, batch p95 | **25 ms** | **47 ms** |
+| Thread-local small-allocation event count, batch p50/p95 | **36,206** | **34,971** |
+| Whole benchmark process VmHWM | **1,165,716 kB** | **1,165,844 kB** |
+
+**Within C0 source only:** 120 sequential checked definitions **16 ms direct**, **17 ms lazy indexed session**, **24 ms old eager root retention**; 1,200 fully checked WHNF requests **26/27/43 ms direct/lazy/eager**. No proved speedup from simply retaining indexed syntax.
+
+The expensive indexed shared-DAG synthetic *universe instantiation*, *lifting* and *decoding* microbenchmarks are distinct from these **complete authoritative** checker operations and cannot be extrapolated. The Arena September 2026 Mathlib numbers in the full research report are **another different benchmark experiment** with different checkers, toolchains, threads and configurations. PSKernel-C0 has no valid Arena or whole-Mathlib result. Record exact corpus, version, options, number of workers, cold/warm state, attribution, latency distributions, actual allocated bytes and RSS when adding external comparisons. Small-allocation heartbeat counts are **not** allocated bytes.
+
 ## Newest native qualification — 13 October 2026
 
 The native Lean C0 indexed substrate gained operation-local memoized lifting [`e8ec74a9`](https://github.com/dwijayuda/pskernel/commit/e8ec74a9c6a20da299153a38a830c8c5cbfbe5b8), exact-vs-source-cache-compatible dual node hashes [`4089835f`](https://github.com/dwijayuda/pskernel/commit/4089835f74a5f7ae3130890bacedbffcdd9c10a3) (historical benchmark constructor corrected [`1f57a8fb`](https://github.com/dwijayuda/pskernel/commit/1f57a8fb6efec1c78a4e6469eda05528eb4e855f)), and session root-index publication from the cached checker-compatible hash [`aae8f5f3`](https://github.com/dwijayuda/pskernel/commit/aae8f5f3385347eeade9880a306086d2dd96150c). All necessary native stages, including unchanged-original checked comparison, passed at [CI 38294019928](https://github.com/dwijayuda/pskernel/actions/runs/38294019928). The indexed engine remains **experimental and not an accepting checker**.

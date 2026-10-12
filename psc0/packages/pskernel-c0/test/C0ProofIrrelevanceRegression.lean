@@ -1,4 +1,4 @@
-import Ps.KernelCore.Core.IndexedReduction
+import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
 import Ps.KernelCore.Checker.Session
 
@@ -346,3 +346,34 @@ def main : IO Unit := do
               if rewritten.nodes.size > 90 then
                 throw (IO.userError "C0 DAG rewrite lost structural sharing")
   IO.println "C0_PERF_REGRESSION memoized_indexed_dag=pass"
+
+  -- Indexed WHNF is not an accepting checker, but its supported
+  -- beta/zeta/spine fragment must agree with native expression normalization.
+  let indexedIdentity := PsKernelExpr.lam named leftSort
+    (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let nestedIdentity := PsKernelExpr.lam named leftSort
+    (PsKernelExpr.lam named leftSort
+      (PsKernelExpr.bvar 1) PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+  let doubleApply := PsKernelExpr.app
+    (PsKernelExpr.app nestedIdentity leftSort) rightSort
+  let metadataOnly := PsKernelExpr.mdata 10 rightSort
+  for (term, expected) in [
+    (stopped, stopped),
+    (PsKernelExpr.app indexedIdentity rightSort, rightSort),
+    (zetaBeta, rightSort),
+    (doubleApply, leftSort),
+    (metadataOnly, rightSort)
+  ] do
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty term with
+    | Option.none => throw (IO.userError "C0 WHNF encode failed")
+    | Option.some (store, id) =>
+        match psKernelC0IndexedWhnf 4096 store id with
+        | Option.none => throw (IO.userError "C0 indexed WHNF exhausted unexpectedly")
+        | Option.some (next, resultId) =>
+            match psKernelC0DecodeExpr next resultId with
+            | Option.none => throw (IO.userError "C0 indexed WHNF decode failed")
+            | Option.some result =>
+                if !(psKernelExprEqual result expected) then
+                  throw (IO.userError "C0 indexed WHNF semantic disagreement")
+  IO.println "C0_PERF_REGRESSION indexed_beta_zeta_whnf=pass"

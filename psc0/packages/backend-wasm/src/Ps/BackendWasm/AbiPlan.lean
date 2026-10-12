@@ -121,7 +121,7 @@ def planAbiType (ir : PsVerifiedIrModule) :
     let readable ← match type with
       | .primitive p => pure (psIrCheckPrimitiveName p)
       | .named name arguments => do
-        let arguments ← arguments.mapM (fun arg => do return ← abiTypeKey 4096 arg)
+        let arguments ← arguments.mapM (fun arg => do pure ← abiTypeKey 4096 arg)
         pure (name ++ (if arguments.isEmpty then "" else "-" ++ String.intercalate "-" arguments))
       | _ => pure key
     let name := witName readable
@@ -196,14 +196,16 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
       let (fields, size, _, flat) ← abiFieldsLayout
         (parameters.map fun (name, node) => (name, node, PsVerifiedIrType.unknown))
       let plan : AbiPlan ← get
-      let resultFlat ← match result with | none => pure 0 | some n => do return (← abiNode plan n).flat
+      let resultFlat ← (match result with
+        | none => pure 0
+        | some n => (abiNode plan n).map AbiNode.flat : Except String Nat)
       let foreignName := witName semanticName
       if plan.exports.any (fun e => e.foreignName == foreignName) ||
           plan.nodes.any (fun n => n.name == foreignName) then
         throw ("PSCV0-WIT-NAME: public collision: " ++ foreignName)
       set { plan with exports := plan.exports ++ [{
         semanticName, foreignName, target := d.name, parameters, result,
-        parameterOffsets := fields.map (·.offset), parameterSize := size,
+        parameterOffsets := fields.map (fun (field : AbiField) => field.offset), parameterSize := size,
         indirectParameters := flat > 16, indirectResult := resultFlat > 1 : AbiExport }] }
   let (_, plan) ← action.run {}
   return plan

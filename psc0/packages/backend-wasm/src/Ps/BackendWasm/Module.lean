@@ -67,11 +67,11 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
   let (wasm, wat, wit, symbols) ← match aggregate with
     | none => do
       let plan ← scalarApi api core locals
-      return (← scalarComponentBinary plan, ← psRenderDoc (scalarComponentWat plan), scalarWit plan,
+      pure (← scalarComponentBinary plan, ← psRenderDoc (scalarComponentWat plan), scalarWit plan,
         plan.exports.map fun e => { semanticName := e.sourceName, outputName := e.foreignName : PsCodegenSymbol })
     | some abi => do
       let plan : AggregateComponent := { core, locals, abi }
-      return (← aggregateComponentBinary plan, ← psRenderDoc (← aggregateComponentWat plan), ← abiWit abi,
+      pure (← aggregateComponentBinary plan, ← psRenderDoc (← aggregateComponentWat plan), ← abiWit abi,
         abi.exports.map fun e => { semanticName := e.semanticName, outputName := e.foreignName : PsCodegenSymbol })
   psValidateArtifact { base with
     source := wat

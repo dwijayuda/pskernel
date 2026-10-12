@@ -23,13 +23,13 @@ def abiComponentTypeIndex (plan : AbiPlan) (id : Nat) : Except String Nat :=
 def abiComponentValueBytes (plan : AbiPlan) (id : Nat) : Except String (List UInt8) := do
   let node ← abiNode plan id
   match abiPrimitive node with
-  | some (_, byte) => do return [byte]
+  | some (_, byte) => do pure [byte]
   | none => return psWasmEncodeSleb (Int.ofNat (← abiComponentTypeIndex plan id))
 
 def abiComponentValueText (plan : AbiPlan) (id : Nat) : Except String String := do
   let node ← abiNode plan id
   match abiPrimitive node with
-  | some (name, _) => do return name
+  | some (name, _) => do pure name
   | none => return watId node.name
 
 def abiSchemaFields (node : AbiNode) : List (String × Nat) :=
@@ -48,7 +48,7 @@ def abiWitDefinition (plan : AbiPlan) (node : AbiNode) : Except String String :=
     let cases ← cases.mapM fun c => do
       let payload ← match c.payload with
         | none => pure ""
-        | some id => do return "(" ++ (← abiWitType plan id) ++ ")"
+        | some id => do pure "(" ++ (← abiWitType plan id) ++ ")"
       return "  %" ++ c.name ++ payload ++ ","
     return "variant " ++ label ++ " {\n" ++ String.intercalate "\n" cases ++ "\n}"
   | _ =>
@@ -63,7 +63,7 @@ def abiWit (plan : AbiPlan) : Except String String := do
       return "%" ++ name ++ ": " ++ (← abiWitType plan id)
     let result ← match e.result with
       | none => pure ""
-      | some id => do return " -> " ++ (← abiWitType plan id)
+      | some id => do pure " -> " ++ (← abiWitType plan id)
     return "export %" ++ e.foreignName ++ ": func(" ++ String.intercalate ", " params ++ ")" ++ result ++ ";"
   let lines := (String.intercalate "\n\n" (types ++ exports)).splitOn "\n"
   return "package proofscript:generated;\n\nworld application {\n" ++
@@ -78,7 +78,7 @@ def abiDefinitionBytes (plan : AbiPlan) (node : AbiNode) : Except String (List U
     let cases ← cases.mapM fun c => do
       let payload ← match c.payload with
         | none => pure [0]
-        | some id => do return [1] ++ (← abiComponentValueBytes plan id)
+        | some id => do pure [1] ++ (← abiComponentValueBytes plan id)
       return psWasmEncodeName c.name ++ payload ++ [0]
     return [0x71] ++ vector cases
   | _ =>
@@ -94,7 +94,7 @@ def abiDefinitionText (plan : AbiPlan) (node : AbiNode) : Except String String :
     let cases ← cases.mapM fun c => do
       let payload ← match c.payload with
         | none => pure ""
-        | some id => do return " " ++ (← abiComponentValueText plan id)
+        | some id => do pure " " ++ (← abiComponentValueText plan id)
       return "(case " ++ watQuote c.name ++ payload ++ ")"
     return "(variant " ++ String.intercalate " " cases ++ ")"
   | _ =>

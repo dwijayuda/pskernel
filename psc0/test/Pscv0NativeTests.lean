@@ -872,6 +872,37 @@ private def projectBoundaries : IO Unit := do
     throw (IO.userError "module graph accepted a cycle")
   if (psPscv0ProjectParse [{ name := "A", source := "import Missing\nconst x: Nat := 1\n" }]).isOk then
     throw (IO.userError "module graph accepted missing import")
+  -- The very same source graph must pass independent official Lean checking and
+  -- target IR admission, not just the pure graph planner.
+  let hiddenFacade : PsPscv0ModuleSource := {
+    name := "HiddenFacade"
+    source := "import Library\nnamespace HiddenFacade\nconst local: Nat := Library.double(2)\nend HiddenFacade\n" }
+  let hiddenClient := "import HiddenFacade\nconst leaked: Nat := Library.double(7)\n"
+  let opacityClient := "import Library\ntheorem cannotUnfold: Library.double(7) = 14 := by { rfl }\n"
+  let requests : Array PsV7Native.Request := #[
+    { source := direct.source, moduleName := "Direct", modules := [library],
+      targets := [.javascript, .typescript, .rust] },
+    { source := client.source, moduleName := "Client", modules := [library, facade] },
+    { source := hiddenClient, moduleName := "HiddenClient", modules := [library, hiddenFacade] },
+    { source := opacityClient, moduleName := "Opacity", modules := [library] }]
+  let checked ← match ← PsV7Native.runBatch requests with
+    | .ok result => pure result
+    | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
+  for i in [:requests.size] do
+    let some outcome := checked.results[i]?
+      | throw (IO.userError "module host outcome missing")
+    match i, outcome with
+    | 0, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "module host target artifact closure")
+        for artifact in value.artifacts do
+          if artifact.exports.any (fun e => e.semanticName == "Library.double") then
+            throw (IO.userError "ordinary imported runtime symbol leaked into public API")
+    | 1, .ok _ => pure ()
+    | 2, .error error | 3, .error error =>
+        unless error.phase == "module" do
+          throw (IO.userError ("module visibility/reflexivity checked at wrong boundary: " ++ error.phase))
+    | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
   IO.println "PSCV0_NATIVE_MODULES: PASS checked public import, order, cycle and missing-module refusal"
 
 def main : IO Unit := do

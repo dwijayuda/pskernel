@@ -7,11 +7,13 @@
 
 ## Follow-up: declaration-family replay and source-store-bound roots
 
-**Native source expansion:** commit `4092dab9` adds dedicated `axiom`, `thm`, and `opaque` export replay, with a follow-up Lean keyword parsing correction in `031a1b4d`. Eight additional exporter-byte files contain four accepted and four rejected cases, including sequential axiom–theorem dependencies. The official pinned Lean 4.35 `leanchecker --from-export` produced all eight expected outcomes. Native C0 results remain subject to a matching complete CI run.
+**Native source expansion:** commit `4092dab9` adds dedicated `axiom`, `thm`, and `opaque` export replay, with a follow-up Lean keyword parsing correction in `031a1b4d`. Eight additional exporter-byte files contain four accepted and four rejected cases, including sequential axiom–theorem dependencies. The official pinned Lean 4.35 `leanchecker --from-export` produced all eight expected outcomes. Native C0 replay also passed the full [CI 38323005998](https://github.com/dwijayuda/pskernel/actions/runs/38323005998), for a total of **22** matched positive/negative export fixtures.
 
 Safe axioms are accepted as *explicit assumptions*, not proof of consistency. The test adapter deliberately declines unsafe axioms and unsafe opaques. Theorems use `psKernelAddTheorem` and opaque definitions use `psKernelAddOpaque`; neither is silently lowered into a reducible ordinary definition.
 
 **Phase C source-bound syntax roots:** commits `6e38defe` and `64ae30cf` pair a numeric root with its original validated canonical store. Rehoming or staging decodes from the original store, independently validates the destination, and verifies exact syntax after import. A regression establishes that two unrelated canonical stores may assign the same numeric root to different expressions. These are diagnostic, non-accepting operations; the structure is unsealed and cannot transfer any existing consistency proof.
+
+**Latest full source qualification:** [CI 38323005998](https://github.com/dwijayuda/pskernel/actions/runs/38323005998) passed at `64ae30cf`, including native compilation, all official exporter comparisons, conformance, store validation and scratch transfer, microbenchmarks and unchanged original kernel. Its same-run synthetic 24 × 12 checked admission p50/p95 C0 **26/26 ms** versus original **49/50 ms**, but C0 used **36,184 vs 34,971** small-allocation events and VmHWM **1,148,736 vs 1,146,344 kB**—no demonstrated memory advantage.
 
 ## Qualified baseline before these changes
 

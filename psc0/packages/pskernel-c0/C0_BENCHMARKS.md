@@ -1,5 +1,9 @@
 # PSKernel-C0 experimental performance measurements
 
+## Phase B/C follow-up source benchmark — CI 38323005998
+
+[Native CI 38323005998](https://github.com/dwijayuda/pskernel/actions/runs/38323005998) **SUCCESS** at `64ae30cf`: 22 official same-byte Lean 4.35 positive/negative cases, C0 source replay, bounded indexed root transfer, native regressions, microbenchmarks and unchanged original comparison. Matched **fully checked synthetic** 24 × 12 declaration batches, 288 admissions per checker: C0 p50/p95 **26/26 ms**, original **49/50 ms**. Small allocations C0 **36,184**, original **34,971**; process VmHWM C0 **1,148,736 kB**, original **1,146,344 kB**. No memory improvement or real-library competitive result is established; comparison is against a project-local shared-lineage original.
+
 ## Latest complete native v4.35.0 C0 measurements — CI 38316694316
 
 **Source commit:** [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836). [Native workflow 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) **SUCCESS** including 14 matched official Lean 4.35 NDJSON cases, two 128-definition streams, negative conformance, index/scratch validation, microbenchmarks, and unchanged original checker.

@@ -1,70 +1,51 @@
-# AI CONTINUATION PROMPT — PSKernel-C0 high-performance Lean architecture
+# New-chat prompt — continue PSKernel-C0 native Lean performance redesign
 
-Continue my **PSKernel-C0** project autonomously from the latest development state.
+Continue my own public open-source compiler/kernel project, **PSKernel-C0**, autonomously.
 
-**My public open-source repository:** https://github.com/dwijayuda/pskernel  
-**Branch:** perf/pskernel-c0-v7-rust-20261012  
-**Work only in:** psc0/packages/pskernel-c0/  
-**Primary implementation:** src/Ps/KernelCore/**/*.lean
+**Repository:** https://github.com/dwijayuda/pskernel
+**Working branch:** `perf/pskernel-c0-v7-rust-20261012`
+**Work directory:** `psc0/packages/pskernel-c0/`
+**Primary code:** `src/Ps/KernelCore/**/*.lean`
+**Pinned toolchain:** Lean 4.34.0 in `psc0/packages/pskernel-c0/lean-toolchain`
 
-**Read these files completely before changes (from the current branch, not main):**
+## Read before changing source
 
-1. [AI_WORK_STATE.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/AI_WORK_STATE.md) — authoritative C0 handoff.
-2. [C0_WORK_STATE.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/C0_WORK_STATE.md) — detailed chronological work.
-3. [C0_BENCHMARKS.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/C0_BENCHMARKS.md) — measured evidence and limitations.
-4. [PERFORMANCE_REDESIGN.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/PERFORMANCE_REDESIGN.md) — architecture and integration direction.
-5. [.github/workflows/pskernel-c0-lean.yml](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/.github/workflows/pskernel-c0-lean.yml) and the native regression/benchmark sources.
+1. [AI_WORK_STATE.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/AI_WORK_STATE.md) — current handoff and exact benchmark/CI qualifications.
+2. [C0_WORK_STATE.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/C0_WORK_STATE.md) — chronological implementation details.
+3. [C0_BENCHMARKS.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/C0_BENCHMARKS.md) — measured costs and rejected optimizations.
+4. [C0_LEAN_ARCHITECTURE.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/C0_LEAN_ARCHITECTURE.md), [PERFORMANCE_REDESIGN.md](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/psc0/packages/pskernel-c0/PERFORMANCE_REDESIGN.md).
+5. [.github/workflows/pskernel-c0-lean.yml](https://github.com/dwijayuda/pskernel/blob/perf/pskernel-c0-v7-rust-20261012/.github/workflows/pskernel-c0-lean.yml), `test/C0CheckerComparison.lean`, `test/C0Ablation.py`, `test/C0ProofIrrelevanceRegression.lean`, and `test/C0PerfMicrobench.lean`.
 
-**Refresh the branch head, recent commits, and actual CI runs** before assuming the handoff commit is still current. At handoff, branch head was a8f93b70f0985bd2b28bf7b0ba1b6818eff73bb4; native Lean CI [38192040598](https://github.com/dwijayuda/pskernel/actions/runs/38192040598) had passed the full C0 build (84 Lake jobs), native negative/differential regressions, and performance microbenchmarks for source commit 06532eac5b8f9cfa2df8b810887ab3f42ba809cb.
+Resolve **current branch HEAD and all latest GitHub Actions results** before editing. Do not assume the checkpoint here is still HEAD. As of this handoff, source commit `688315d51870dd34a2b602771061136a136f2eda` fixed a Python escaped-newline delimiter in the opt-in local-index ablation. CI [38230646350](https://github.com/dwijayuda/pskernel/actions/runs/38230646350) was running when this handoff was prepared. Last fully green prior native workflow: [38225028395](https://github.com/dwijayuda/pskernel/actions/runs/38225028395).
 
-## My priorities
+## Nonnegotiable priorities
 
-- **Make PSKernel-C0 as fast as possible through a major, systematic architectural redesign IN LEAN (.lean).** Focus on the actual checked kernel, not merely the standalone Rust prototype.
-- Prioritize performance **and correct Lean-compatible acceptance**, readability, simple architecture, memory efficiency and portability.
-- **DO NOT run self-hosting, bootstrap, fixed-point or generated Rust self-host tests for now.** Eventually self-hosting may matter, but not in this stage.
-- **DO NOT prioritize metatheory or a consistency proof now.** Preserve known semantic constraints and focused soundness-sensitive negative tests; never bypass checks for speed.
-- Preserve the original psc0/packages/pskernel-core, the existing psc0/packages/backend-rust, the active PSC0 compiler and all other branches. Make C0 changes only on this C0 branch unless I explicitly authorize integration.
-- Work GitHub-first/cloud-only; **do not use Desktop Commander**. Commit and push meaningful checkpoints. Do not rewrite or delete branch history.
-- Think systemically: study complete architecture, dependencies, checker semantics, bottlenecks and benchmark methodology before editing. Avoid one-test-at-a-time patches and one-off cache hacks.
-- After each architectural change, perform **native Lean library build**, **negative/differential checker regressions**, and **native performance benchmarks** only. Measure the whole checker where possible. Do not weaken acceptance conditions.
-- Be realistic about benchmarking: single-run helper microbenchmark speedups are **not** whole-kernel performance, proof of consistency or a validated C0-to-Rust compiler path.
+- **Major architectural redesign and maximum realistic performance in actual native `.lean` PSKernel-C0 checker**, not the separate experimental Rust crate.
+- Do **not** run self-hosting, bootstrapping, fixed-point, generated Rust self-host, or metatheory/consistency proof tests. These are explicitly deferred.
+- Preserve kernel semantic acceptance, exact Lean reduction order, soundness-sensitive negative conformance, resources/fuel classification, environment/context cache scope, and declaration admission.
+- Keep `psc0/packages/pskernel-core`, `psc0/packages/backend-rust`, active PSC0 compiler, and other branches **unchanged**. Do not force push/delete history.
+- Work GitHub-first/cloud-only, **do not use Desktop Commander**. Commit/push meaningful incremental changes.
+- Inspect architecture and subsystem invariants before edits; solve general causes rather than patching individual tests. Benchmark real full checker operations, not only microbench helpers.
 
-## Work already completed
+## Verified performance state
 
-The C0 Lean source implements persistent radix-16 indexes for caches/declarations/local contexts; indexed expression DAG with exact recursive-expression bridge; memoized indexed beta substitution; fragmentary indexed beta/zeta/metadata WHNF; demand-driven application-head checks in the accepting recursive WHNF; specialized one-argument beta; faster lifting and native Unicode hashing; and a guarded quick-DefEq helper that removes duplicate common checks in the accepting checker.
+Native Lean C0 has persistent radix indexes, local-context shadowing-safe lookup, an auxiliary canonical indexed term DAG, exact encode/decode, memoized indexed beta substitution, and a fragmentary indexed WHNF. The **accepting** checker still uses recursive `PsKernelExpr` for full WHNF, DefEq, inference and admission. Improvements already implemented in accepting source include demand-driven WHNF head probing, guarded quick DefEq, Unicode hashing, hybrid substitution, direct lifting, and cheaper infer-only application spines.
 
-Strong measured results include microbenchmark reductions for lifting and single substitution, ~30× deep local-context lookups, ~8.6× head-only spine probing versus eager argument collection, and large memoized-DAG rewrite gains. **These are specific microbenchmarks, not end-to-end kernel speedup claims.**
+Controlled full-checker comparisons have ruled out several overclaims. The opt-in indexed session wrapper was slower and is not production default; a no-list direct projection selector was slower and its accepting integration was reverted. A measured hybrid substitution path eliminated a previous fully checked application regression while preserving large infer-only gains. Latest matched run [38225028395](https://github.com/dwijayuda/pskernel/actions/runs/38225028395) showed:
+- 200 infer-only 48-argument applications: C0 19–20 ms, unchanged original 82–83 ms.
+- 80 fully checked 48-argument applications: C0 39–40 ms, original 39 ms.
+- Varied 160 infer-only applications: C0 16 ms, original 66 ms.
+- Varied 160 checked applications: both ~82–83 ms.
+- Replacing just the C0 environment index with original code changed none of these outcomes materially.
 
-## What to do next — actually implement
+These are matched native benchmark fixtures, **not** evidence that complete real-world Lean kernel checking is faster overall. Full Init/Std/Mathlib or representative library throughput, memory and realistic resource behavior remain unqualified.
 
-1. Inspect the real accepting WHNF, DefEq, inference and admission dependency graph, together with the existing indexed store and native benchmark harness.
-2. Identify the largest remaining costs in *complete checking* and design a session-owned canonical indexed expression representation with explicit lifetime/arena identity and context-safe cache keys. Minimize repeat encoding/decoding between recursive and indexed terms.
-3. Extend the fast **Lean-native** evaluator systematically to cover full environment-sensitive reductions (delta, iota, projections, recursors, quotient, primitives, universes), preserving exact reduction order, resource budgets and fallback correctness.
-4. Optimize the true accepting pipeline, not only experimental helpers; retain an independent reference path and native positive/negative/differential checks.
-5. Benchmark complete cold/warm WHNF, DefEq, inference and declaration admission against unchanged pskernel-core with representative inputs, memory measurements and repeated matched runs. Keep only measured worthwhile optimizations.
-6. Update C0_BENCHMARKS.md and AI_WORK_STATE.md with exact source commits, CI runs, what passed, what remains, and the next autonomous step. Commit/push safely. Continue through the plan.
+## Immediate work
 
-**Commands from the C0 package root (native Lean; no self-host):**
+1. Check [local-index-disabled diagnostic CI 38230646350](https://github.com/dwijayuda/pskernel/actions/runs/38230646350) and investigate its result. The preceding failed [38225068179](https://github.com/dwijayuda/pskernel/actions/runs/38225068179) was a Python ablation delimiter bug, not failure of Lean conformance.
+2. Use controlled source-family ablations to locate meaningful costs in *full checked inference, DefEq, large local contexts, recursor validation, and declaration admission*. Distinguish binder-index construction from lookup savings and memory overhead.
+3. Design and implement systemic performance changes **in .lean** using correct ownership, shared representations, exact checked behavior and context-safe cache keys. The opt-in indexed term store is staging, not currently a qualified accepting engine.
+4. Run only native Lean `lake build PsKernelC0`, negative/differential checker suite, native benchmark suite and matched unchanged original-core checking. Update benchmark evidence and preserve negative/failed findings.
+5. Push all valid improvements to the existing branch and update `AI_WORK_STATE.md`, `C0_BENCHMARKS.md`, and this prompt. Keep going without routine permission requests.
 
-~~~sh
-lake build PsKernelC0
-lake env lean --run test/C0ProofIrrelevanceRegression.lean
-lake env lean --run test/C0PerfMicrobench.lean
-~~~
-
-Use the existing C0 Lean 4.34.0 pin unless a deliberate compatibility migration is justified.
-
-**Do not stop after drafting a plan or producing a progress report. Implement, validate, measure, commit, and continue.** When the effort cannot reach full completion in one chat, leave a precise checked state and next executable task. Do not claim full completion until end-to-end speed and compatibility are established.
-
-
-
-## Latest October 12 validated checkpoint (supersedes old handoff SHA above)
-
-**Current source checkpoint before subsequent documentation updates:** `30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba`.
-**Green native CI:** [38215639174](https://github.com/dwijayuda/pskernel/actions/runs/38215639174) includes 85-job C0 Lean build, negative/fuel/differential regressions, native microbenchmarks, and an independently built **unchanged original-core matched baseline** (81 jobs). It runs no self-host/bootstrap tests.
-
-New `Checker/IndexedSession.lean` is opt-in and syntax-only, with persistent canonical nodes, exact name/metadata identity, small-to-radix root cache, no bare IDs exposed, and no acceptance shortcut. It is currently slower for repeated checked WHNF than the plain session; **do not enable as default** until full indexed execution eliminates its overhead. Indexed term hashing now includes all binder identity fields; measured collision-heavy binder intern 60 ms old vs 8 ms new, only an indexed-substrate microbenchmark.
-
-Production `Checker/Inference/Helpers.lean` now counts infer-only application arguments once per spine (legacy worker ~5 ms vs 1 ms counted in isolated 192-argument microbench). An independently admitted 48-argument benchmark against unchanged original core revealed a **mixed and critical result**: C0 infer-only ~16–19 ms vs core ~65–66 ms per 200 cold calls, but C0 **fully checked** ~50 ms vs original ~30–31 ms per 80 cold calls, three rounds, same runner. Do not claim overall performance superiority. Checked inference source `Checker/Inference/Core.lean` is byte-for-byte the same; follow the actual dependency costs and preserve semantic/fuel classification before rewriting. On synthetic closed and open forall terms, specialized C0 instantiate1 is much faster than an old loose-variable-precheck approach; do not blame/revert substitution without evidence.
-
-**Next actual work:** measure and resolve the full checked-application regression, then implement session-owned indexed delta/WHNF/DefEq/inference and declaration admission with provenance-safe caches and matched tests. Preserve the original core/Rust backend, no self-host or metatheory work, commit and push checkpoints, and update `AI_WORK_STATE.md` and `C0_BENCHMARKS.md` with exact source runs and honest limitations. The architecture is not complete.
+**Do not declare redesign complete** until full checked-path performance across representative workloads improves measurably without semantic regressions. If the work cannot finish in this chat, leave an exact, independently usable checkpoint.

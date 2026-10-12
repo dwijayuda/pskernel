@@ -228,3 +228,28 @@ Next choose **measured full-checker bottlenecks**, likely repeated recursive red
 The original `pskernel-core` and existing Rust backend have not been modified. No self-hosting/bootstrap/fixed-point or metatheory testing was performed. The optional ablation workflow step is retained for manual `workflow_dispatch` diagnosis instead of running on every push (`bc5a47b83e96be72bf2a57a8c4692638448e4fb3`).
 
 **Still open:** representative whole-library throughput, controlled memory/allocation data, soundness under broader Lean conformance and full environment-sensitive accepting indexed WHNF/DefEq/inference/admission with per-session identity and resource-safe provenance. The opt-in indexed wrapper remains slower on repeat WHNF, so do not route production acceptance through it until its internal executor can eliminate representation overhead.
+
+## 2026-10-12, latest native comparison and handoff refresh
+
+**Source head before handoff update:** `688315d51870dd34a2b602771061136a136f2eda` (ablation script correction), based on `b60c1719e29268f3b9b537587816fad5150561eb`. Refresh GitHub head before every write. Toolchain remains **Lean 4.34.0**. Do not run self-host/bootstrap/fixed-point or metatheory jobs.
+
+**New workload families since the earlier handoff:** A matched original-vs-C0 native checker benchmark now includes independently admitted nested safe definitions, rejected invalid declarations, a growing 160-declaration library chain, and 16 varied 48-application inputs. These are useful end-to-end API samples, not full Init/Std/Mathlib qualifications. Native C0, unchanged original core, and private source-family ablations are built separately on the same CI runner.
+
+**Last fully green pre-diagnostic run:** [CI 38225028395](https://github.com/dwijayuda/pskernel/actions/runs/38225028395), source `727a278440c9`, passed C0 Lean compilation, native negative/differential conformance, microbenchmarks, matched original core, and a private original-environment-index ablation. Representative three-round results:
+
+| Full public API workload | C0 (ms) | Original core (ms) | C0 with original environment index (ms) |
+| --- | --- | --- | --- |
+| Cold WHNF, 1,600 calls | 109 / 110 / 109 | 109 / 111 / 111 | 108 / 109 / 109 |
+| Infer-only application, 200 calls | 20 / 19 / 20 | 83 / 82 / 82 | 20 / 19 / 20 |
+| Fully checked application, 80 calls | 39 / 40 / 39 | 39 / 39 / 39 | 39 / 40 / 39 |
+| Varied infer-only application, 160 calls / 16 variants | 16 / 16 / 16 | 66 / 66 / 66 | 16 / 16 / 16 |
+| Varied fully checked application, 160 calls / 16 variants | 82 / 83 / 82 | 82 / 82 / 82 | 82 / 83 / 82 |
+| Growing safe library, 160 declarations | 49–50 | see full run logs | 62–65 |
+
+The source-family ablation supports **no clear advantage from C0's environment index** on those workloads. CPU scheduler effects, run ordering and differing process setup make fine-grained cross-run differences unreliable. Complete-library claim and memory improvement remain unproven. The C0 infer-only improvement is substantial on these *specific* inputs; checked mode is near parity.
+
+**Latest failed diagnostic:** [CI 38225068179](https://github.com/dwijayuda/pskernel/actions/runs/38225068179) at `b60c1719e29268f3b9b537587816fad5150561eb`. Native Lean build, conformance suite, microbenchmark and matched original checker steps **passed**; only the private `local_index_disabled` ablation step failed before compilation. Root cause: `test/C0Ablation.py` used escaped literal `\\n` strings in region delimiters and raised `RuntimeError: ablation region delimiters are not unique`. This was corrected in commit `688315d51870dd34a2b602771061136a136f2eda`; verify [native CI 38230646350](https://github.com/dwijayuda/pskernel/actions/runs/38230646350) for the subsequent ablation result before making any performance claims. The correction does **not** change checked Lean source.
+
+**Next action:** Read the outcome of the local-index-disabled private ablation. Determine whether repeated local radix construction for many binders is material in full checked inference and admission; do not assume. If material, redesign the **real native Lean** local-context/checked-inference cost model (batch/memo ownership and persistent sharing) without changing checked behavior. Retain native negative/fuel/structural differential tests, paired original-core benchmarking, and no self-host tests. Investigate memory and representative library checking next.
+
+**Handoff pointers:** `C0_LEAN_ARCHITECTURE.md`, `C0_BENCHMARKS.md`, `test/C0CheckerComparison.lean`, `test/C0Ablation.py`, `.github/workflows/pskernel-c0-lean.yml`, the native WHNF/DefEq/inference sources and optional `Checker/IndexedSession.lean`. The Rust arena remains experimental; **the accepting kernel remains written in Lean** and the unmodified original remains available as an independent baseline.

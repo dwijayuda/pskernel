@@ -215,3 +215,19 @@ This establishes a causally relevant subsystem bottleneck that fixed-input isola
 | Independent-process peak VmHWM | 562464 kB | 562452 kB | 563132 kB |
 
 **Interpretation:** the checked-application slowdown is eliminated **on the tested fixture** without reverting one-pass specialization for application-headed terms. Peak RSS is indistinguishable at this resolution and is process-wide. These are limited fixtures and single-run triplicates, not full real-library qualification. The new hybrid keeps mandatory resource/checker judgments unchanged. Benchmark workloads still need broad distribution and p95 measurements. The original core remains unmodified.
+
+## Native full-checker three-way source-family comparison — October 12, 2026
+
+[Green CI 38225028395](https://github.com/dwijayuda/pskernel/actions/runs/38225028395) at source `727a278440c9` built C0, unchanged original core, and an isolated C0 variant replacing just `Runtime/Acceleration/EnvironmentIndex.lean` with the original source.
+
+| Complete checked/infer API (same runner, 3 rounds) | C0 (ms) | Original (ms) | Environment-index ablation (ms) |
+| --- | --- | --- | --- |
+| Cold 48-application infer-only, 200 calls | 20/19/20 | 83/82/82 | 20/19/20 |
+| Cold 48-application fully checked, 80 calls | 39/40/39 | 39/39/39 | 39/40/39 |
+| Varied infer-only, 160 calls across 16 terms | 16/16/16 | 66/66/66 | 16/16/16 |
+| Varied fully checked, 160 calls across 16 terms | 82/83/82 | 82/82/82 | 82/83/82 |
+| Cold WHNF, 1,600 calls | 109/110/109 | 109/111/111 | 108/109/109 |
+
+The environment-index change has negligible apparent effect on these *particular full public API* workloads. It is not the cause of the substantial infer-only gain. Fully checked application performance is near parity, not a broad speedup. A growing 160-declaration library-chain and nested safe/invalid admissions are now part of the matched suite but remain too small to qualify full Lean library checking.
+
+At [run 38225068179](https://github.com/dwijayuda/pskernel/actions/runs/38225068179), all standard Lean-native stages passed, but a **private local-index-disabled ablation** failed due to a Python delimiter error *before* producing comparison timings. Commit `688315d51870dd34a2b602771061136a136f2eda` fixes the delimiters; see [run 38230646350](https://github.com/dwijayuda/pskernel/actions/runs/38230646350) for qualification. Never interpret the failed diagnostic as a Lean kernel regression. All of these workflows exclude self-hosting.

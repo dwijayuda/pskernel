@@ -63,6 +63,10 @@ structure PsKernelLocalContext where
   -- Optional persistent index. Small contexts remain list-only.
   -- The list remains the authoritative declaration order (shadowing).
   index : Option (PsKernelC0HashTrie PsKernelLocalDecl) := Option.none
+  -- Newly bound locals after the last indexed snapshot, most recent first.
+  -- Lookup checks this overlay first to preserve exact name shadowing.
+  pending : List PsKernelLocalDecl := []
+  pendingCount : Nat := 0
 
 def psKernelLocalContextEmpty : PsKernelLocalContext :=
   {
@@ -90,22 +94,23 @@ def psKernelLocalContextFindIn
 
 
 /-
-C0 local environment indexing.
+Adaptive local-context indexing.
 
-Local binders often have short lifetimes. In checked definition admission,
-a 16-binder chain spent more time maintaining the radix index than looking up
-locals. Keep shallow contexts as lists through 32 entries and build a radix-16
-index only when adding the 33rd local. Deep contexts then share indexed lookups
-and four-level persistent updates. This prevents the demonstrated premature
-index-maintenance cost without giving up the 512-local indexed lookup benefit.
+Short-lived binder contexts should not pay to build a radix-16 index.
+Measured complete admission workloads through depth 48 were slower with
+eager indexed updates; deep (512-local) repeated lookups benefit strongly.
+Use the ordered declaration list up through depth 64, then build an immutable
+indexed snapshot at the 65th binder.
 
-The ordered list remains authoritative, including name shadowing; each
-persistent snapshot preserves the index appropriate to its own depth.
+Thereafter collect up to sixteen new declarations in an ordered overlay.
+Lookups first inspect the overlay and then the indexed snapshot. Once full,
+publish a new persistent index with all pending entries in original order.
+This amortizes expensive four-level radix path copies without changing
+lookup, shadowing, historical snapshots or the authoritative declaration list.
+No cache value is ever used as proof of well-typedness.
 -/
-/-- Eager indexing is only worth its construction and update cost for
-    sufficiently deep local environments. This threshold is a performance
-    policy; correctness and shadowing never depend on it. -/
-def psKernelC0LocalIndexThreshold : Nat := 32
+def psKernelC0LocalIndexThreshold : Nat := 64
+def psKernelC0LocalIndexBatchSize : Nat := 16
 
 def psKernelC0LocalIndexInsert
     (index : PsKernelC0HashTrie PsKernelLocalDecl)
@@ -123,34 +128,63 @@ def psKernelC0LocalIndexBuild
   | List.cons decl rest =>
       psKernelC0LocalIndexInsert (psKernelC0LocalIndexBuild rest) decl
 
+/-- Commit oldest pending declaration first, so newest equal-name entries
+    remain first in each exact-collision bucket. -/
+def psKernelC0LocalIndexCommit
+    (index : PsKernelC0HashTrie PsKernelLocalDecl)
+    (pending : List PsKernelLocalDecl) :
+    PsKernelC0HashTrie PsKernelLocalDecl :=
+  match pending with
+  | [] => index
+  | decl :: rest =>
+      psKernelC0LocalIndexInsert
+        (psKernelC0LocalIndexCommit index rest) decl
+
+structure PsKernelC0LocalIndexUpdate where
+  index : Option (PsKernelC0HashTrie PsKernelLocalDecl)
+  pending : List PsKernelLocalDecl
+  pendingCount : Nat
+
 def psKernelC0LocalContextNextIndex
     (context : PsKernelLocalContext)
     (decl : PsKernelLocalDecl) :
-    Option (PsKernelC0HashTrie PsKernelLocalDecl) :=
+    PsKernelC0LocalIndexUpdate :=
   match context.index with
   | Option.some index =>
-      Option.some (psKernelC0LocalIndexInsert index decl)
-  | Option.none =>
-      -- No radix maintenance within short-lived binder spines.
-      -- A later extension constructs the complete indexed snapshot once.
-      if Nat.ble psKernelC0LocalIndexThreshold context.decls.length then
-        Option.some
-          (psKernelC0LocalIndexBuild (List.cons decl context.decls))
+      let pending := decl :: context.pending
+      let count := context.pendingCount + 1
+      if count >= psKernelC0LocalIndexBatchSize then
+        { index := some (psKernelC0LocalIndexCommit index pending)
+          pending := []
+          pendingCount := 0 }
       else
-        Option.none
+        { index := some index
+          pending := pending
+          pendingCount := count }
+  | Option.none =>
+      if context.decls.length >= psKernelC0LocalIndexThreshold then
+        { index := some
+            (psKernelC0LocalIndexBuild (decl :: context.decls))
+          pending := []
+          pendingCount := 0 }
+      else
+        { index := none
+          pending := []
+          pendingCount := 0 }
 
 def psKernelLocalContextFind
     (context : PsKernelLocalContext)
     (name : PsKernelName) :
     Option PsKernelLocalDecl :=
   match context.index with
-  | Option.none =>
-      psKernelLocalContextFindIn name context.decls
+  | Option.none => psKernelLocalContextFindIn name context.decls
   | Option.some index =>
-      psKernelLocalContextFindIn
-        name
-        (psKernelC0TrieBucket psKernelC0IndexDepth index
-          (psKernelCacheNameHash name))
+      match psKernelLocalContextFindIn name context.pending with
+      | Option.some decl => Option.some decl
+      | Option.none =>
+          psKernelLocalContextFindIn name
+            (psKernelC0TrieBucket psKernelC0IndexDepth index
+              (psKernelCacheNameHash name))
 
 def psKernelLocalContextAddLocal
     (context : PsKernelLocalContext)
@@ -161,10 +195,13 @@ def psKernelLocalContextAddLocal
     PsKernelLocalContext :=
   let decl := PsKernelLocalDecl.localDecl
     context.nextIndex name userName type binderInfo
+  let update := psKernelC0LocalContextNextIndex context decl
   {
     decls := List.cons decl context.decls
     nextIndex := Nat.succ context.nextIndex
-    index := psKernelC0LocalContextNextIndex context decl
+    index := update.index
+    pending := update.pending
+    pendingCount := update.pendingCount
   }
 
 def psKernelLocalContextAddLet
@@ -176,8 +213,11 @@ def psKernelLocalContextAddLet
     PsKernelLocalContext :=
   let decl := PsKernelLocalDecl.letDecl
     context.nextIndex name userName type value
+  let update := psKernelC0LocalContextNextIndex context decl
   {
     decls := List.cons decl context.decls
     nextIndex := Nat.succ context.nextIndex
-    index := psKernelC0LocalContextNextIndex context decl
+    index := update.index
+    pending := update.pending
+    pendingCount := update.pendingCount
   }

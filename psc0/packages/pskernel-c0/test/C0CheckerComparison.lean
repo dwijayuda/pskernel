@@ -448,40 +448,40 @@ def main : IO Unit := do
     -- Complete checked admission where the body uses an inner, middle or
     -- outer binder. Compare identical semantic decisions and runner-local
     -- costs against the untouched original package.
-    let referenceDepth := 96
-    let referenceType := c0CompareCheckedPi referenceDepth
-    let referenceBase := PsKernelName.str PsKernelName.anonymous "C0LocalReference"
-    for offset in [0, referenceDepth / 2, referenceDepth - 1] do
-      let referenceBody := c0CompareLocalRefLambdas referenceDepth offset
-      let referenceRuns := 20
-      let mut referenceAccepted := 0
-      let referenceStart ← IO.monoMsNow
-      for i in [:referenceRuns] do
-        let declarationName := PsKernelName.num
-          (PsKernelName.num referenceBase offset) i
-        let declaration : PsKernelDefinitionInfo := {
-          base := {
-            name := declarationName
-            levelParams := []
-            type := referenceType
+    for referenceDepth in [96, 192] do
+      let referenceType := c0CompareCheckedPi referenceDepth
+      let referenceBase := PsKernelName.str PsKernelName.anonymous "C0LocalReference"
+      for offset in [0, referenceDepth / 2, referenceDepth - 1] do
+        let referenceBody := c0CompareLocalRefLambdas referenceDepth offset
+        let referenceRuns := if referenceDepth == 96 then 20 else 6
+        let mut referenceAccepted := 0
+        let referenceStart ← IO.monoMsNow
+        for i in [:referenceRuns] do
+          let declarationName := PsKernelName.num
+            (PsKernelName.num referenceBase offset) i
+          let declaration : PsKernelDefinitionInfo := {
+            base := {
+              name := declarationName
+              levelParams := []
+              type := referenceType
+            }
+            value := referenceBody
+            hints := PsKernelReducibilityHints.abbrevHint
+            safety := PsKernelDefinitionSafety.safe
           }
-          value := referenceBody
-          hints := PsKernelReducibilityHints.abbrevHint
-          safety := PsKernelDefinitionSafety.safe
-        }
-        match psKernelAddDefinition 4096 psKernelEnvironmentEmpty declaration
-            4096 psKernelLeanNatMaxSizeDefault with
-        | Except.ok accepted =>
-            if psKernelEnvironmentContains accepted declarationName then
-              referenceAccepted := referenceAccepted + 1
-            else
-              throw (IO.userError "local reference declaration missing after admission")
-        | Except.error err =>
-            throw (IO.userError ("valid local reference declaration rejected: " ++ err))
-      let referenceEnd ← IO.monoMsNow
-      if referenceAccepted != referenceRuns then
-        throw (IO.userError "local reference benchmark admission mismatch")
-      IO.println s!"C0_COMPARE round={round} operation=admit_local_reference milliseconds={referenceEnd-referenceStart} declarations={referenceRuns} binder_depth={referenceDepth} bvar_index={offset}"
+          match psKernelAddDefinition 4096 psKernelEnvironmentEmpty declaration
+              4096 psKernelLeanNatMaxSizeDefault with
+          | Except.ok accepted =>
+              if psKernelEnvironmentContains accepted declarationName then
+                referenceAccepted := referenceAccepted + 1
+              else
+                throw (IO.userError "local reference declaration missing after admission")
+          | Except.error err =>
+              throw (IO.userError ("valid local reference declaration rejected: " ++ err))
+        let referenceEnd ← IO.monoMsNow
+        if referenceAccepted != referenceRuns then
+          throw (IO.userError "local reference benchmark admission mismatch")
+        IO.println s!"C0_COMPARE round={round} operation=admit_local_reference milliseconds={referenceEnd-referenceStart} declarations={referenceRuns} binder_depth={referenceDepth} bvar_index={offset}"
 
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do

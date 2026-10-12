@@ -118,6 +118,22 @@ def c0RegressionApps : Nat → PsKernelExpr → PsKernelExpr → PsKernelExpr
   | 0, fn, _ => fn
   | n + 1, fn, arg => c0RegressionApps n (.app fn arg) arg
 
+/-- Exact closed/open binder-range oracles. The existing independent
+    loose-variable syntax predicate is used at every nested body position. -/
+def c0BinderForallTail : Nat → PsKernelExpr → PsKernelExpr
+  | 0, term => term
+  | n + 1, term =>
+      .forallE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0BinderForallTail n term) PsKernelBinderInfo.default
+
+def c0BinderLambdaTail : Nat → PsKernelExpr → PsKernelExpr
+  | 0, term => term
+  | n + 1, term =>
+      .lam PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0BinderLambdaTail n term) PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let session :=
     psKernelMkCheckerSession
@@ -128,6 +144,43 @@ def main : IO Unit := do
       psKernelLeanNatMaxSizeDefault
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   let sort1 := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
+  -- One bounded bottom-up syntax analysis must agree with the independent
+  -- loose-variable traversal at every binder depth, including a non-closed
+  -- innermost body. Budget exhaustion must leave the checker unchanged.
+  for n in [1, 12, 16, 64, 192] do
+    for isLambda in [false, true] do
+      for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
+        let source :=
+          if isLambda then c0BinderLambdaTail n leaf
+          else c0BinderForallTail n leaf
+        match psKernelC0BinderBodyRangesWithFuel 1024 source with
+        | none =>
+            throw (IO.userError "C0 binder metadata unexpectedly unavailable")
+        | some (_, ranges) =>
+            let mut current := source
+            let mut unread := ranges
+            for _ in [:n] do
+              match current, unread with
+              | PsKernelExpr.lam _ _ body _, range :: rest =>
+                  for cutoff in [:8] do
+                    if (range > cutoff) != psKernelExprHasLooseAt body cutoff then
+                      throw (IO.userError "C0 lambda body range is not exact")
+                  current := body
+                  unread := rest
+              | PsKernelExpr.forallE _ _ body _, range :: rest =>
+                  for cutoff in [:8] do
+                    if (range > cutoff) != psKernelExprHasLooseAt body cutoff then
+                      throw (IO.userError "C0 Pi body range is not exact")
+                  current := body
+                  unread := rest
+              | _, _ => throw (IO.userError "C0 binder metadata spine misaligned")
+            if !unread.isEmpty then
+              throw (IO.userError "C0 binder metadata retained extra ranges")
+    let longPi := c0BinderForallTail n (PsKernelExpr.bvar 0)
+    if psKernelC0BinderBodyRangesWithFuel 1 longPi |>.isSome then
+      throw (IO.userError "C0 binder metadata did not respect recursion budget")
+  IO.println "C0_PERF_REGRESSION exact_binder_body_range_oracle=pass"
+
   -- A genuine dependent first binder, followed by a long closed Pi
   -- suffix, exercises range invalidation followed by exact bounded
   -- resummarization. Both paths must agree with independent recursive

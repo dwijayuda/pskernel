@@ -75,6 +75,22 @@ def c0DependentPiTail (tail : Nat) : PsKernelExpr :=
       PsKernelBinderInfo.default)
     PsKernelBinderInfo.default
 
+/-- Matched DefEq spine workloads: semantic conversion holds while
+    metadata at the terminal body prevents trivial whole-expression equality. -/
+def c0CompareForallsWithTail : Nat → PsKernelExpr → PsKernelExpr
+  | 0, body => body
+  | n + 1, body =>
+      .forallE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0CompareForallsWithTail n body) PsKernelBinderInfo.default
+
+def c0CompareLambdasWithTail : Nat → PsKernelExpr → PsKernelExpr
+  | 0, body => body
+  | n + 1, body =>
+      .lam PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0CompareLambdasWithTail n body) PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -744,6 +760,36 @@ def main : IO Unit := do
           (PsKernelName.num depLibraryName i) then
         throw (IO.userError "matched dependent library missing definition")
     IO.println s!"C0_COMPARE round={round} operation=admit_dependent_pi_library milliseconds={depLibraryEnd-depLibraryStart} declarations=48 tail=64"
+
+    -- Complete public DefEq on lambda/Pi spines with a nontrivial
+    -- metadata-transparent terminal difference. Both implementations run
+    -- identical inputs under an independently staged checker session.
+    for depth in [16, 64, 128, 256] do
+      let iterations := if depth == 256 then 6 else 12
+      for useLambda in [false, true] do
+        let left :=
+          if useLambda then
+            c0CompareLambdasWithTail depth sort0
+          else
+            c0CompareForallsWithTail depth sort0
+        let right :=
+          if useLambda then
+            c0CompareLambdasWithTail depth (.mdata 97 sort0)
+          else
+            c0CompareForallsWithTail depth (.mdata 97 sort0)
+        let mut accepted := 0
+        let start ← IO.monoMsNow
+        for _ in [:iterations] do
+          match psKernelSessionIsDefEq 4096 session left right with
+          | Except.ok (yes, _) =>
+              if yes then accepted := accepted + 1
+              else throw (IO.userError "matched binder DefEq unexpectedly false")
+          | Except.error err =>
+              throw (IO.userError ("matched binder DefEq failed: " ++ err))
+        let finished ← IO.monoMsNow
+        if accepted != iterations then
+          throw (IO.userError "matched binder DefEq count mismatch")
+        IO.println s!"C0_COMPARE round={round} operation=cold_defeq_binder_spine milliseconds={finished-start} binder_depth={depth} lambda={useLambda} samples={iterations}"
 
     let mut admitted := 0
     let mut rejected := 0

@@ -857,7 +857,7 @@ def main : IO Unit := do
   let polyGood := PsKernelExpr.app
     (PsKernelExpr.app
       (PsKernelExpr.const polymorphicName [PsKernelLevel.zero])
-      leftSort) rightSort
+      sort0) sort1
   let polyWrongArity :=
     PsKernelExpr.const polymorphicName []
   let missingHead := PsKernelExpr.const noDelta []
@@ -882,7 +882,7 @@ def main : IO Unit := do
   -- same term handle and persistent snapshot are reused under a changed
   -- definition value; the expected output must follow the NEW context.
   let alternativeDefinition : PsKernelDefinitionInfo :=
-    { definition with value := leftSort }
+    { definition with value := sort0 }
   let altEnv := psKernelEnvironmentAddUnchecked
     psKernelEnvironmentEmpty (.defnInfo alternativeDefinition)
   let altContext := psKernelCheckerContextEmpty altEnv
@@ -896,9 +896,9 @@ def main : IO Unit := do
                 psKernelC0DecodeExpr secondStore secondId with
           | some first, some second =>
               if !(psKernelExprEqual first
-                    (PsKernelExpr.app rightSort leftSort) &&
+                    (PsKernelExpr.app sort1 sort0) &&
                    psKernelExprEqual second
-                    (PsKernelExpr.app leftSort leftSort)) then
+                    (PsKernelExpr.app sort0 sort0)) then
                 throw (IO.userError "C0 indexed delta reused wrong environment")
           | _, _ => throw (IO.userError "C0 context delta decode failed")
       | _, _ => throw (IO.userError "C0 context delta failed")
@@ -908,14 +908,14 @@ def main : IO Unit := do
   -- newest-binding shadowing and no sharing of results between scopes.
   let localName := PsKernelName.str PsKernelName.anonymous "C0.local"
   let firstLocals := psKernelLocalContextAddLet
-    psKernelLocalContextEmpty localName localName rightSort leftSort
+    psKernelLocalContextEmpty localName localName sort1 sort0
   let secondLocals := psKernelLocalContextAddLet
-    firstLocals localName localName rightSort rightSort
+    firstLocals localName localName sort1 sort1
   let firstContext := psKernelCheckerContextWithLocalContext
     fixtureCtx firstLocals
   let secondContext := psKernelCheckerContextWithLocalContext
     fixtureCtx secondLocals
-  let localApp := PsKernelExpr.app (.fvar localName) leftSort
+  let localApp := PsKernelExpr.app (.fvar localName) sort0
   match psKernelC0EncodeExpr psKernelC0StoreEmpty localApp with
   | none => throw (IO.userError "C0 indexed local encoding failed")
   | some (stored, localRoot) =>
@@ -925,8 +925,8 @@ def main : IO Unit := do
           match psKernelC0DecodeExpr firstStore firstId,
                 psKernelC0DecodeExpr secondStore secondId with
           | some first, some second =>
-              if !(psKernelExprEqual first (.app leftSort leftSort) &&
-                    psKernelExprEqual second (.app rightSort leftSort)) then
+              if !(psKernelExprEqual first (.app sort0 sort0) &&
+                    psKernelExprEqual second (.app sort1 sort0)) then
                 throw (IO.userError "C0 indexed local shadowing failed")
           | _, _ => throw (IO.userError "C0 indexed local decode failed")
       | _, _ => throw (IO.userError "C0 indexed local unfolding failed")

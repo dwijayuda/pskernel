@@ -164,10 +164,30 @@ Exact same `test/C0CheckerComparison.lean`, 4.34.0 toolchain, original repositor
 
 These observations show **near-parity**, not a reliable full-checker win. Other matched simple DefEq/inference/admission cases were mostly sub-10-ms samples and cannot support performance rankings. The later test also exercises a genuinely admitted typed 48-application function; record those results separately once its CI run completes.
 
-[CI 38213859123](https://github.com/dwijayuda/pskernel/actions/runs/38213859123): opt-in session-indexed syntactic retention **26 ms** versus ordinary checker **54 ms**? Correct order: *ordinary checker 26 ms; opt-in indexed session 54 ms*, over 1,200 repeated stuck WHNF checks; 50 canonical nodes retained, 1 root. No benefit, do not enable on production default. [CI 38214198674](https://github.com/dwijayuda/pskernel/actions/runs/38214198674) with 40-root radix-promotion tests similarly measured 27 ms ordinary vs 53 ms retained indexed session. The indexed store is only staging.
+[CI 38213859123](https://github.com/dwijayuda/pskernel/actions/runs/38213859123): ordinary checker **26 ms** vs opt-in indexed-session retention **54 ms**, over 1,200 repeated stuck WHNF checks; 50 canonical nodes retained, 1 root. No benefit, do not enable on production default. [CI 38214198674](https://github.com/dwijayuda/pskernel/actions/runs/38214198674) with 40-root radix-promotion tests similarly measured 27 ms ordinary vs 53 ms retained indexed session. The indexed store is only staging.
 
 [CI 38214477987](https://github.com/dwijayuda/pskernel/actions/runs/38214477987) **passed** the full native build/test/benchmark plus original-core comparison. On a cold canonical binder interning stress of eight stores, each with 160 distinct binder names, the pre-change missing-binder-identity hash measured **60 ms**, new full-identity hash **8 ms** (~7.5× reduction in this isolated term-store operation). The new hash covers lambda/forall names and binder info, plus let names. Exact interning remains collision-checked. This is not the accepting checked pipeline.
 
 [CI 38214789693](https://github.com/dwijayuda/pskernel/actions/runs/38214789693) **passed** all native gates. Original infer-only spine worker with repeated list-count scans: **5 ms**, new once-per-spine count worker: **1 ms**, 192 args × 350 calls. Values are too small to support a stable 5× overall throughput assertion; benchmark is isolated and does not include full expression inference or checked admission. No self-host or bootstrap tests run.
 
 C0 peak benchmark process VmHWM includes Lean interpreter, all tests and temporary allocations; treat it as process-level only. Representative complete library throughput, p95, per-operation allocations and proof/semantic correctness evidence beyond differential tests remain open.
+
+
+
+### Matched public inference results and checked-application regression
+
+[CI 38214964079](https://github.com/dwijayuda/pskernel/actions/runs/38214964079), with a 48-argument function admitted through the regular checked axiom API; identical source, same Linux CI runner, original core and C0 compiled under Lean 4.34.0:
+
+| Complete public checker API, three rounds | C0 | Original |
+| --- | --- | --- |
+| Infer-only: 200 cold calls per round | 16, 19, 15 ms | 66, 65, 65 ms |
+| Fully checked: 80 cold calls per round | 50, 50, 50 ms | 31, 31, 30 ms |
+| Whole benchmark-process peak VmHWM | 563564 kB | 562540 kB |
+
+C0's full infer-only path wins on this fixture, while checked inference is **~1.6× slower**. These are three hosted-runner observations, not a population statistic, general Lean library workload or isolated-checker allocation measurement. Record the regression explicitly; do not present the infer-only improvement as an overall kernel speedup. The checked-inference branch in `Checker/Inference/Core.lean` is unchanged from original, so seek the bottleneck in called helpers/caches.
+
+[CI 38215530916](https://github.com/dwijayuda/pskernel/actions/runs/38215530916), source `e3c407617b858987a4081c678934ffbdf4a03b00`, passed native build/regression/benchmarks plus matched baseline. Its closed 48-forall instantiation stress (9000 repeated calls) measured old loose-variable precheck 117 ms vs source-specialized C0 2 ms.
+
+[CI 38215639174](https://github.com/dwijayuda/pskernel/actions/runs/38215639174), source `30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba`, **passed every native gate**. A second observed *closed* stress measured old precheck 186 ms vs C0 2 ms (9000 calls). A genuinely *open* 48-binder stress measured old precheck/general instantiation 71 ms vs C0 1 ms (4000 calls). These are separate microbenchmarks with fixed input under repeated loops, not entire checker benchmarks. They **contradict the hypothesis** that source-specialized substitution itself is slowing the checked application; no evidence-based reason to revert it.
+
+The opt-in indexed-session wrapper is still slower (ordinary 26–27 ms vs wrapper 53–54 ms over 1,200 warm WHNF calls); it is not production default. Indexed binder-hash interning improvement and infer-only count optimization remain separately measured, not whole-kernel qualification. No self-hosting or fixed-point runs.

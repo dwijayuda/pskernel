@@ -1133,11 +1133,11 @@ private def projectBoundaries : IO Unit := do
     "theorem samePairProof: samePair = true := by { rfl }\n" ++
     "const differentPair: Bool := (2, true) == (2, false)\n" ++
     "theorem differentPairProof: differentPair = false := by { rfl }\n" ++
-    "const nestedPair: Prod (Option Nat) (List Bool) := (Option.some(1), [true])\n" ++
+    "const nestedPair: Prod(Option Nat, List Bool) := (Option.some(1), [true])\n" ++
     "const nestedPairEqualsSelf: Bool := nestedPair == nestedPair\n" ++
     "theorem nestedPairProof: nestedPairEqualsSelf = true := by { rfl }\n"
   let productMissingEquality :=
-    "const functions: Prod (Nat -> Nat) Nat := (fun (x: Nat) => x, 1)\n" ++
+    "const functions: Prod((Nat -> Nat), Nat) := (fun (x: Nat) => x, 1)\n" ++
     "const shouldFail: Bool := functions == functions\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++

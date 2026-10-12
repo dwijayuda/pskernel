@@ -226,6 +226,59 @@ def psKernelC0IndexedReduceProjectionOnce
         context store typeName index structId args
   | _ => none
 
+/-
+  Restricted quotient iota on already constructor-headed Quot.mk values.
+
+  The full accepting source reduction normalizes the quotient major with
+  public WHNF and updates its checker state first. This indexed candidate
+  is intentionally narrower: a major whose head is not already Quot.mk
+  is deferred without any statement of irreducibility or kernel fuel cost.
+  Both Quot.lift and Quot.ind share the exact same representative selection
+  and trailing-argument preservation, with their distinct major positions.
+-/
+def psKernelC0IndexedReduceQuotKnownHead
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (name : PsKernelName)
+    (args : List Nat) : Option (PsKernelC0TermStore × Nat) := do
+  if !context.environment.quotInitialized then none
+  else do
+    let majorPosition ←
+      if psKernelNameEq name psKernelQuotLiftName then some 5
+      else if psKernelNameEq name psKernelQuotIndName then some 4
+      else none
+    let majorId ← args[majorPosition]?
+    let major ← psKernelC0StoreGet store majorId
+    let (mkId, mkArgs) ← psKernelC0IndexedAppHeadWithFuel
+      major.depth store majorId []
+    let mkHead ← psKernelC0StoreGet store mkId
+    match mkHead.node with
+    | .const mkName _ =>
+        if psKernelNameEq mkName psKernelQuotMkName &&
+            mkArgs.length == 3 then do
+          let representative ← mkArgs[2]?
+          let fn ← args[3]?
+          let (next, applied) ← psKernelC0Intern store
+            (.app fn representative)
+          psKernelC0IndexedApplySpine next applied
+            (args.drop (majorPosition + 1))
+        else none
+    | _ => none
+
+/-- Explicit quotient-only one-step oracle for differential testing. -/
+def psKernelC0IndexedReduceQuotOnce
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option (PsKernelC0TermStore × Nat) := do
+  let root ← psKernelC0StoreGet store id
+  let (fn, args) ← psKernelC0IndexedAppHeadWithFuel
+    root.depth store id []
+  let head ← psKernelC0StoreGet store fn
+  match head.node with
+  | .const name _ =>
+      psKernelC0IndexedReduceQuotKnownHead context store name args
+  | _ => none
+
 /-- One head-spine traversal dispatches the supported contextual reduction
     families. Add future recursor/quotient/native cases here only after their
     source ordering and fuel behavior have been qualified independently. -/
@@ -241,16 +294,22 @@ def psKernelC0IndexedReduceHeadOnce
   | .proj typeName index structId =>
       psKernelC0IndexedProjectKnownHead
         context store typeName index structId args
-  | .fvar _ | .const _ _ =>
+  | .fvar _ =>
       psKernelC0IndexedUnfoldKnownHead context store head.node args
+  | .const name _ =>
+      match psKernelC0IndexedReduceQuotKnownHead
+          context store name args with
+      | some value => some value
+      | none => psKernelC0IndexedUnfoldKnownHead
+          context store head.node args
   | _ => none
 
 /-
   Opt-in context-sensitive indexed reduction FRAGMENT.
 
   An indexed reduction fragment is not an accepting WHNF/DefEq result.
-  It performs only supported beta/zeta/metadata, local/delta and already
-  constructor-headed projections. Quotient, recursor/iota, projection
+  It performs supported beta/zeta/metadata, local/delta, immediate Quot.mk
+  iota and already constructor-headed projections. Quotient, recursor/iota, projection
   of reducible structure values, native/Nat primitives, source checker
   caches and exact Lean 4.34 checker fuel/error precedence remain external.
 

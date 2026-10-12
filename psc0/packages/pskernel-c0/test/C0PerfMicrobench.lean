@@ -926,3 +926,47 @@ def main : IO Unit := do
       specializedOpenCount != openRuns then
     throw (IO.userError "C0 open substitution outcomes diverged")
   IO.println s!"C0_BENCH instantiate_open legacy_prepass_ms={legacyOpenEnd-legacyOpenStart} specialized_ms={specializedOpenEnd-specializedOpenStart} depth=48 runs={openRuns}"
+
+
+  -- A whole indexed DAG can be closed under its own binders. The stored
+  -- exact loose range allows an unchanged root to bypass *all* recursive
+  -- memo-table setup and subtree reconstruction. Same-store comparison
+  -- retains exact syntax and does not issue any kernel acceptance verdict.
+  match psKernelC0Intern psKernelC0StoreEmpty (.sort PsKernelLevel.zero) with
+  | none => throw (IO.userError "C0 closed DAG sort creation failed")
+  | some (s0, tyId) =>
+      match psKernelC0Intern s0 (.bvar 0) with
+      | none => throw (IO.userError "C0 closed DAG bound leaf failed")
+      | some (s1, bodyId) =>
+          match psKernelC0Intern s1 (.lam PsKernelName.anonymous
+              tyId bodyId PsKernelBinderInfo.default) with
+          | none => throw (IO.userError "C0 closed DAG binder failed")
+          | some (initial, lamId) =>
+              let mut store := initial
+              let mut root := lamId
+              for _ in [:11] do
+                match psKernelC0Intern store (.app root root) with
+                | none => throw (IO.userError "C0 closed DAG sharing failed")
+                | some (next, shared) =>
+                    store := next
+                    root := shared
+              let runs := 100
+              let oldStart ← IO.monoMsNow
+              let mut oldKept := 0
+              for _ in [:runs] do
+                match psKernelC0Instantiate1IndexedReference store root bodyId with
+                | none => throw (IO.userError "C0 closed DAG old rewrite failed")
+                | some (_, result) =>
+                    if result == root then oldKept := oldKept + 1
+              let oldEnd ← IO.monoMsNow
+              let newStart ← IO.monoMsNow
+              let mut newKept := 0
+              for _ in [:runs] do
+                match psKernelC0Instantiate1Indexed store root bodyId with
+                | none => throw (IO.userError "C0 closed DAG new rewrite failed")
+                | some (_, result) =>
+                    if result == root then newKept := newKept + 1
+              let newEnd ← IO.monoMsNow
+              if oldKept != runs || newKept != runs then
+                throw (IO.userError "C0 closed DAG unchanged handle was not retained")
+              IO.println s!"C0_BENCH cached_loose_range old_recursive_ms={oldEnd-oldStart} pruned_memo_ms={newEnd-newStart} depth=11 runs={runs}"

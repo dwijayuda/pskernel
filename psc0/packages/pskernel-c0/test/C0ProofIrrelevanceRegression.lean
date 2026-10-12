@@ -948,6 +948,34 @@ def main : IO Unit := do
       psKernelC0IndexedSessionRootCount promoted != 40 then
     throw (IO.userError "C0 radix-owned root cache duplicated previous nodes")
   IO.println "C0_PERF_REGRESSION indexed_session_radix_roots=pass"
+  -- The radix store must retrieve newly interned nested roots with the
+  -- independent source hash. This crosses the intentionally distinct exact
+  -- node fingerprint and checker-compatible source fingerprint.
+  let nestedRoot : PsKernelExpr :=
+    .forallE rootNameA indexedA (.mdata 7 indexedB)
+      PsKernelBinderInfo.implicit
+  let letRoot : PsKernelExpr :=
+    .letE rootNameB indexedA indexedB (.bvar 0) false
+  let nestedRoots : List PsKernelExpr := [
+    indexedA, indexedB, nestedRoot, letRoot, .mdata 19 letRoot,
+    .app nestedRoot letRoot
+  ]
+  let beforeRootCount := psKernelC0IndexedSessionRootCount promoted
+  for root in nestedRoots do
+    match psKernelC0IndexedSessionRetain promoted root with
+    | none => throw (IO.userError "C0 nested radix root retention failed")
+    | some next => promoted := next
+  let afterRootNodes := psKernelC0IndexedSessionNodeCount promoted
+  for root in nestedRoots do
+    match psKernelC0IndexedSessionRetain promoted root with
+    | none => throw (IO.userError "C0 nested radix source hash lookup missed")
+    | some next => promoted := next
+  if psKernelC0IndexedSessionRootCount promoted !=
+      beforeRootCount + nestedRoots.length ||
+      psKernelC0IndexedSessionNodeCount promoted != afterRootNodes then
+    throw (IO.userError "C0 cached indexed root hash did not match source lookup")
+  IO.println "C0_PERF_REGRESSION indexed_cached_root_publication=pass"
+
 
   -- Old hash buckets discarded binder name/info and let names, producing
   -- long linear collision chains for distinct canonical binder nodes.

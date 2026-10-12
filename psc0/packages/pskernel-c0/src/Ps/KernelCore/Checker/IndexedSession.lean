@@ -25,13 +25,18 @@ abbrev PsKernelC0IndexedRootIndex :=
 
 /-- Coarse expression hash plus exact top-level binder identity. All collisions
     are checked with complete PsKernelExprEqual before reusing a handle. -/
-private def psKernelC0IndexedRootHash (expr : PsKernelExpr) : Nat :=
-  let base := psKernelExprHash expr
+private def psKernelC0IndexedRootHashFromBase
+    (base : Nat) (expr : PsKernelExpr) : Nat :=
   match expr with
   | .lam name _ _ _ => psKernelCacheMix base (psKernelCacheNameHash name)
   | .forallE name _ _ _ => psKernelCacheMix base (psKernelCacheNameHash name)
   | .letE name _ _ _ _ => psKernelCacheMix base (psKernelCacheNameHash name)
   | _ => base
+
+/-- A source-side lookup needs a source hash; successful insertion can reuse
+    the equivalent cached hash of the just-interned canonical root. -/
+private def psKernelC0IndexedRootHash (expr : PsKernelExpr) : Nat :=
+  psKernelC0IndexedRootHashFromBase (psKernelExprHash expr) expr
 
 structure PsKernelC0IndexedCheckerSession where
   checker : PsKernelCheckerSession
@@ -101,14 +106,19 @@ def psKernelC0IndexedSessionRetain
       if psKernelC0StoreValid session.store id then some session else none
   | none => do
       let (store, id) ← psKernelC0EncodeExpr session.store expr
+      let stored ← psKernelC0StoreGet store id
+      -- Root-index publication is syntactic only. The child-derived
+      -- checkerHash matches psKernelExprHash and never decides acceptance.
+      let indexedHash :=
+        psKernelC0IndexedRootHashFromBase stored.checkerHash expr
       let entry := (expr, id)
       let count := session.rootCount + 1
       match session.rootIndex with
       | some index =>
-          let hash := psKernelC0IndexedRootHash expr
-          let bucket := psKernelC0TrieBucket psKernelC0IndexDepth index hash
+          let bucket := psKernelC0TrieBucket psKernelC0IndexDepth
+            index indexedHash
           let next := psKernelC0TrieSet psKernelC0IndexDepth
-            index hash (entry :: bucket)
+            index indexedHash (entry :: bucket)
           some {
             checker := session.checker
             store := store

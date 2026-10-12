@@ -793,3 +793,28 @@ def main : IO Unit := do
         if !(psKernelExprEqual oldResult newResult) then
           throw (IO.userError "C0 specialized WHNF beta changed expression")
   IO.println "C0_PERF_REGRESSION beta_single_specialization=pass"
+
+  -- Binder-family dispatch: the lightweight closed-term probe may skip
+  -- substitution only if the generic simultaneous-instantiation oracle
+  -- confirms that no loose de Bruijn variable is affected. Exercise
+  -- deeply closed and genuinely open binder bodies, plus let and lambdas.
+  let binderName := PsKernelName.str PsKernelName.anonymous "C0BinderProbe"
+  let closedPi := PsKernelExpr.forallE binderName sort0
+    (PsKernelExpr.forallE binderName sort0 sort1
+      PsKernelBinderInfo.default) PsKernelBinderInfo.default
+  let openPi := PsKernelExpr.forallE binderName sort0
+    (PsKernelExpr.bvar 1) PsKernelBinderInfo.default
+  let openLam := PsKernelExpr.lam binderName sort0
+    (PsKernelExpr.bvar 1) PsKernelBinderInfo.default
+  let closedLet := PsKernelExpr.letE binderName sort0 sort1
+    sort0 false
+  let openLet := PsKernelExpr.letE binderName sort0 sort0
+    (PsKernelExpr.bvar 1) false
+  for expr in [closedPi, openPi, openLam, closedLet, openLet] do
+    for replacement in [sort0, sort1, PsKernelExpr.bvar 3] do
+      let expected := psKernelExprInstantiate expr [replacement]
+      let actual := psKernelExprInstantiate1 expr replacement
+      if !(psKernelExprEqual expected actual) then
+        throw (IO.userError "C0 binder-probe instantiation differs from generic reference")
+  IO.println "C0_PERF_REGRESSION instantiate1_binder_family=pass"
+

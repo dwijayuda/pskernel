@@ -10,11 +10,11 @@
 **Newest qualified M1/M2 update (supersedes historical milestone prose below):**
 The selected Type-0 `GetElem?` is automatically derived at low priority from a checked `GetElem` dictionary and a dependent `Decidable` function. Kernel-proof validity remains separate from runtime Bool. Executable `outOfBounds` has a typed multi-target panic path; the selected positive/negative optional observations passed. A general `LawfulGetElem` instance is NOT qualified: reflexivity cannot identify independently provided decision procedures. `Ps.Meta.SynthInstance` now bounds both candidate checks and goal visits independently, postpones unresolved inputs, and reuses validated completed answers. **230 declarations, 14 classes, 40 ordered instances, 198 shared runtime observations**. Detailed proof blocker and next dependencies are in [M1/M2 implementation audit](PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). Full M1/M2 and v7 remain incomplete.
 
-The earlier Lean RC4-style `GetElem` typeclass and proof-carrying
+**Historical M0 checkpoint (superseded by the qualified M1/M2 update above):** The earlier Lean RC4-style `GetElem` typeclass and proof-carrying
 `xs[i]`/`xs[i]'h` elaboration now qualify for user-defined instances.
 The generated validity tactic tries genuine assumptions, definitional
 reflexivity and fuel-bounded recursive constructor proofs, refusing
-unresolved goals. Parsed `xs[i]?` and `xs[i]!` are **not executable conformance**:
+unresolved goals. At the M0 checkpoint, parsed `xs[i]?` and `xs[i]!` were **not yet executable conformance**:
 the full `GetElem?`/default/lawfulness and out-of-bounds panic contracts
 remain open. See [GetElem RC4 design/parity audit](PSCV0_GETELEM_RC4_DESIGN_AUDIT.md).
 

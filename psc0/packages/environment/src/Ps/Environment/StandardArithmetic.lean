@@ -36,7 +36,9 @@ def psStandardBinaryClass (spec : PsStandardBinarySpec) : List PsDeclaration :=
   let vType := PsExpr.sortE (.succ (.param v))
   let wType := PsExpr.sortE (.succ (.param w))
   let outputType := PsExpr.app
-    (.constE (psRootName "outParam") [.succ (.param w)]) wType
+    -- Type w itself inhabits Sort (w+2); outParam's universe describes
+    -- its argument's sort, not the universe indexed by Type.
+    (.constE (psRootName "outParam") [.succ (.succ (.param w))]) wType
   let resultSort := PsExpr.sortE (.succ (.max (.param u) (.max (.param v) (.param w))))
   let family := psLogicApply (.constE name levels) [alpha, beta, gamma]
   let methodType := psLogicPi 4 "a" alpha (psLogicPi 5 "b" beta gamma)

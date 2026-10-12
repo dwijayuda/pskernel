@@ -843,6 +843,8 @@ private def doBoundaries : IO Unit := do
 -- Reuse the production graph planner and checked environment, rather than
 -- introducing a separate project interpreter or a large fixture suite.
 private def projectBoundaries : IO Unit := do
+  let _ ← get "pinned Standard structural registry"
+    (psStandardRegistryAudit psSelfHostProdPreludeEnvironment)
   let library : PsPscv0ModuleSource := {
     name := "Library"
     source := "namespace Library\nfunction double(value: Nat): Nat := Nat.add(value, value)\nend Library\n" }

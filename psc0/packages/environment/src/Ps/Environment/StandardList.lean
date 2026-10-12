@@ -247,3 +247,38 @@ def psStandardListExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardOptionExtend environment
   psStandardListDeclarations.foldl (fun env decl =>
     (psEnvironmentAdd env decl).getD env) environment
+
+-- Fail closed when the selected Standard declaration/instance registry drifts.
+-- This is a portable structural inventory gate, not yet the final pinned
+-- RC4 content digest or proof/effect/axiom closure certification.
+def psStandardRegistryAudit (environment : PsEnvironment) : Except String Unit := do
+  let names := psStandardPreludeDeclarationsWithList.map psDeclarationName
+  let distinct := names.foldl (fun acc name =>
+    if acc.any (psNameEq name) then acc else name :: acc) ([] : List PsName)
+  if distinct.length != names.length then
+    throw "PSCV0-STANDARD: duplicate declaration identity"
+  for name in names do
+    if !psEnvironmentContains environment name then
+      throw ("PSCV0-STANDARD: missing declaration " ++ psNameToString name)
+  let classes := (psStandardBinarySpecs.map fun spec =>
+    psRootName spec.className) ++
+    [psRootName "Neg", psRootName "BEq", psRootName "ToString"]
+  for className in classes do
+    if !environment.classes.any (psNameEq className) ||
+        !environment.classParameters.any (fun entry => psNameEq entry.fst className) then
+      throw ("PSCV0-STANDARD: missing class registration " ++ psNameToString className)
+  let binaryInstances := psStandardBinarySpecs.flatMap fun spec =>
+    spec.natMethod.toList.map (psStandardBinaryInstance spec psNatName) ++
+    spec.intMethod.toList.map (psStandardBinaryInstance spec psIntName) ++
+    spec.stringMethod.toList.map (psStandardBinaryInstance spec psStringName)
+  let instances := binaryInstances ++ psStandardBEqInstances ++
+    psStandardToStringInstances
+  let instanceNames := instances.map psDeclarationName ++
+    [psNameAppendStr (psRootName "PsStandard") "instNegInt"]
+  for name in instanceNames do
+    unless environment.instances.entries.any (fun entry =>
+        match entry.value with
+        | .constE actual _ => psNameEq actual name
+        | _ => false) do
+      throw ("PSCV0-STANDARD: missing instance " ++ psNameToString name)
+  return ()

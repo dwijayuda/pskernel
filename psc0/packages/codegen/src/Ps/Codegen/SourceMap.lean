@@ -9,6 +9,7 @@ structure PsMapSegment where
   line : Nat
   column : Nat
   source : Option (PsSourceCoordinate × Nat) := none
+  sourceIndex : Nat := 0
 
 def psMapBase64 : String := "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 def psMapVlqDigits : Nat → Nat → String
@@ -28,6 +29,7 @@ structure PsMapState where
   column : Nat := 0
   originalLine : Nat := 0
   originalColumn : Nat := 0
+  sourceIndex : Nat := 0
   name : Nat := 0
   hasSegment : Bool := false
   chunks : List String := []
@@ -43,25 +45,36 @@ def psMapEncode (segments : List PsMapSegment) : String :=
     match segment.source with
     | none => { state with chunks := start :: state.chunks }
     | some (original,name) =>
-      let text := start ++ "A" ++
+      let text := start ++
+        psMapVlq (Int.ofNat segment.sourceIndex - Int.ofNat state.sourceIndex) ++
         psMapVlq (Int.ofNat original.line - Int.ofNat state.originalLine) ++
         psMapVlq (Int.ofNat original.column - Int.ofNat state.originalColumn) ++
         psMapVlq (Int.ofNat name - Int.ofNat state.name)
       { state with
         originalLine := original.line
         originalColumn := original.column
+        sourceIndex := segment.sourceIndex
         name := name
         chunks := text :: state.chunks }) ({} : PsMapState)
   String.join state.chunks.reverse
 
 def psSourceMap (context : PsEmissionContext) (symbols : List PsCodegenSymbol)
     (rendered : PsRenderedDoc) : Except String String := do
-  let input := psSourceCoordinates context.sourceText
+  let files := if context.sourceFiles.isEmpty then
+    [(context.sourceName, context.sourceText)]
+    else context.sourceFiles
+  let sources := files.map Prod.fst
+  if sources.eraseDups.length != sources.length then
+    throw "PSCV0-SOURCE-MAP: duplicate source identity"
+  let inputs := files.map (fun (name, content) => (name, psSourceCoordinates content))
   let output := psSourceCoordinates rendered.text
   let mut segments : List PsMapSegment := []
   for range in rendered.ranges do
     let some symbol := symbols.find? (fun s => s.outputName == range.symbol) | continue
     let some origin := psSourceOriginFor context symbol.semanticName | continue
+    let sourceIndex := sources.idxOf origin.identity.file
+    let some (_, input) := inputs[sourceIndex]?
+      | throw ("PSCV0-SOURCE-MAP: missing source " ++ origin.identity.file)
     let original ← psSourceCoordinateAt input origin.span.start.byteOffset
     let start ← psSourceCoordinateAt output range.startByte
     let stop ← psSourceCoordinateAt output range.endByte
@@ -70,12 +83,14 @@ def psSourceMap (context : PsEmissionContext) (symbols : List PsCodegenSymbol)
       segments := {
         line := start.line + line
         column := if line == 0 then start.column else 0
-        source := some (original, name) } :: segments
+        source := some (original, name)
+        sourceIndex } :: segments
     segments := { line := stop.line, column := stop.column } :: segments
   let mappings := psMapEncode segments.reverse
   return "{\"version\":3,\"file\":" ++ psJsonQuote (context.outputStem ++ ".js") ++
-    ",\"sources\":[" ++ psJsonQuote context.sourceName ++ "],\"sourcesContent\":[" ++
-    psJsonQuote context.sourceText ++ "],\"names\":[" ++
+    ",\"sources\":[" ++ String.intercalate "," (sources.map psJsonQuote) ++
+    "],\"sourcesContent\":[" ++ String.intercalate "," (files.map fun pair => psJsonQuote pair.snd) ++
+    "],\"names\":[" ++
     String.intercalate "," (symbols.map fun s => psJsonQuote s.semanticName) ++
     "],\"mappings\":" ++ psJsonQuote mappings ++ "}"
 

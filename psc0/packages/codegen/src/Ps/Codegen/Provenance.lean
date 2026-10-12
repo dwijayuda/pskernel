@@ -18,6 +18,9 @@ structure PsEmissionContext where
   sourceText : String := ""
   outputStem : String := "module"
   origins : List (String × PsSourceOrigin) := []
+  -- Empty selects the legacy single-file source map. In project mode this
+  -- contains each named source exactly once, preserving per-file offsets.
+  sourceFiles : List (String × String) := []
 
 def psSourceOriginFor (context : PsEmissionContext) (semanticName : String) :
     Option PsSourceOrigin :=

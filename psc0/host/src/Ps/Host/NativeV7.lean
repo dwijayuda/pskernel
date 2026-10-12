@@ -154,11 +154,17 @@ private def compile (prelude : Lean.Environment) (request : Request) :
     | some (_, origin) => (psNameToString helper, { origin with
         identity := { origin.identity with declaration := psNameToString helper }
         generatedReason := some ("recursor worker of " ++ psNameToString parent) }) :: origins) origins
+  let sourceFiles := match project with
+    | none => []
+    | some value => value.origins.map fun file =>
+      (if file.moduleName == request.moduleName then request.sourceName
+       else file.moduleName ++ ".ps", file.source)
   let context : PsEmissionContext := {
     sourceName := request.sourceName
     sourceText := request.source
     outputStem := request.outputStem
-    origins := origins }
+    origins := origins
+    sourceFiles }
   let t5 ← IO.monoMsNow
   let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked => do
     let ecma ← if request.targets.any (fun t => t == .typescript || t == .javascript) then

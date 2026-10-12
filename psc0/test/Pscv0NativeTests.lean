@@ -872,7 +872,7 @@ private def projectBoundaries : IO Unit := do
   let shaVectors := [
     ("", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
     ("abc", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"),
-    ("hello world", "b94d27b9934d3e08a52e52d7da7dabfadeb23f88df5f80cde9c4d2e92d6c2d5d"),
+    ("hello world", "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"),
     ("é", "4a99557e4033c3539de2eb65472017cad5f9557f7a0625a09f1c3f6e2ba69c4c")]
   for (input, expectedDigest) in shaVectors do
     let actual := psStandardSnapshotSHA256 input

@@ -302,9 +302,11 @@ def psCompilerVerifiedIrFromPrepared
             environment
             psSelfHostRuntimePreludeDeclarationsWithProd
             prepared.declarations
-            ((psStandardPreludeDeclarationsWithInhabited ++
-              psStandardProductDeclarations ++ psStandardExceptDeclarations ++
-              psStandardGetElemClass).map psDeclarationName) with
+            -- One authoritative runtime prelude also owns its non-exportable
+            -- symbol set. A new Standard class, method or instance must never
+            -- silently become a public user entry merely because a second
+            -- hand-maintained name list was not updated.
+            (psSelfHostRuntimePreludeDeclarationsWithProd.map psDeclarationName) with
       | Except.error error =>
           Except.error (PsCompilerError.erasure error)
       | Except.ok ir =>

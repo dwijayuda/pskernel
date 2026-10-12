@@ -1437,6 +1437,33 @@ def main : IO Unit := do
             throw (IO.userError "C0 exact retention changed old snapshot")
   IO.println "C0_PERF_REGRESSION indexed_checked_operations_lazy_syntax=pass"
 
+  -- The same no-implicit-indexing rule applies to all checked operations,
+  -- including successful typing, checking and negative conversion.
+  match psKernelC0IndexedSessionInfer 4096 emptyOwned indexedA with
+  | Except.error err =>
+      throw (IO.userError ("C0 lazy indexed inference failed: " ++ err))
+  | Except.ok (_, resultSession) =>
+      if psKernelC0IndexedSessionNodeCount resultSession != 0 ||
+          psKernelC0IndexedSessionRootCount resultSession != 0 then
+        throw (IO.userError "C0 inference indexed unrequested syntax")
+  match psKernelC0IndexedSessionCheck 4096 emptyOwned sort0 with
+  | Except.error err =>
+      throw (IO.userError ("C0 lazy indexed check failed: " ++ err))
+  | Except.ok (_, resultSession) =>
+      if psKernelC0IndexedSessionNodeCount resultSession != 0 ||
+          psKernelC0IndexedSessionRootCount resultSession != 0 then
+        throw (IO.userError "C0 checking indexed unrequested syntax")
+  match psKernelC0IndexedSessionIsDefEq 4096 emptyOwned sort0 sort1 with
+  | Except.error err =>
+      throw (IO.userError ("C0 lazy indexed DefEq failed: " ++ err))
+  | Except.ok (yes, resultSession) =>
+      if yes ||
+          psKernelC0IndexedSessionNodeCount resultSession != 0 ||
+          psKernelC0IndexedSessionRootCount resultSession != 0 then
+        throw (IO.userError "C0 DefEq indexed unrequested syntax")
+  IO.println "C0_PERF_REGRESSION indexed_all_checked_ops_lazy_syntax=pass"
+
+
   -- Promotion beyond the tiny-list threshold must not lose old handles,
   -- confuse separately stored syntax, or mutate earlier session snapshots.
   let mut promoted := emptyOwned

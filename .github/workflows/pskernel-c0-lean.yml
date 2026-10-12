@@ -79,6 +79,7 @@ jobs:
             lake env lean --run "$c0/test/C0CheckerComparison.lean")
 
       - name: Diagnose C0 declaration index with unchanged original module (no self-host)
+        if: github.event_name == 'workflow_dispatch'
         shell: bash
         run: |
           set -euo pipefail
@@ -91,5 +92,21 @@ jobs:
           cp "$c0/lean-toolchain" "$temporary/lean-toolchain"
           python3 "$c0/test/C0Ablation.py" "$core" "$temporary" environment_index
           echo "C0_ABLATION label=original_environment_index operation=full_checker"
+          (cd "$temporary" && lake build PsKernelC0 &&
+            lake env lean --run "$c0/test/C0CheckerComparison.lean")
+
+      - name: Diagnose local-index construction inside private C0 copy (no self-host)
+        shell: bash
+        run: |
+          set -euo pipefail
+          c0="$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+          original="$GITHUB_WORKSPACE/psc0/packages/pskernel-core"
+          temporary="$(mktemp -d)"
+          trap 'rm -rf "$temporary"' EXIT
+          cp -R "$c0/src" "$temporary/src"
+          cp "$c0/lakefile.lean" "$temporary/lakefile.lean"
+          cp "$c0/lean-toolchain" "$temporary/lean-toolchain"
+          python3 "$c0/test/C0Ablation.py" "$original" "$temporary" local_index_disabled
+          echo "C0_ABLATION label=local_index_disabled operation=full_checker"
           (cd "$temporary" && lake build PsKernelC0 &&
             lake env lean --run "$c0/test/C0CheckerComparison.lean")

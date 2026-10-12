@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Checker.Session
+import Ps.KernelCore.Admission.Declaration.Admission
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.LocalContext
 
@@ -58,6 +59,15 @@ def c0BenchEagerUnfoldDefinition
   | _ =>
       Option.none
 
+
+/-- Closed proof-function syntax shared between cold and warm inference. -/
+def c0BenchLambdaChain : Nat -> PsKernelExpr
+  | 0 => PsKernelExpr.bvar 0
+  | n + 1 =>
+      PsKernelExpr.lam PsKernelName.anonymous
+        (PsKernelExpr.sort PsKernelLevel.zero)
+        (c0BenchLambdaChain n)
+        PsKernelBinderInfo.default
 
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
@@ -397,3 +407,96 @@ def main : IO Unit := do
   if !(Nat.beq generalMisses guardedMisses) then
     throw (IO.userError "C0 guarded deep quick result count mismatch")
   IO.println s!"C0_BENCH guarded_defeq_quick general_ms={generalEnd - generalStart} guarded_ms={guardedEnd - guardedStart} depth=512 iterations={deepIterations} misses={guardedMisses}"
+
+
+  -- Actual checker-session inference: cold results always start from a
+  -- fresh cache; warm results reuse only the same unchanged environment and
+  -- session. Both must compute a forall expression rather than shortcutting
+  -- to an assumed success on raw indexed nodes.
+  let inferTerm := c0BenchLambdaChain 24
+  let inferSession := psKernelMkCheckerSession psKernelEnvironmentEmpty []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let inferRuns := 180
+  let mut coldInferCount := 0
+  let coldInferStart ← IO.monoMsNow
+  for _ in [:inferRuns] do
+    match psKernelSessionInfer 4096 inferSession inferTerm with
+    | Except.error error =>
+        throw (IO.userError ("C0 cold inference failed: " ++ error))
+    | Except.ok (type, _) =>
+        match type with
+        | PsKernelExpr.forallE _ _ _ _ =>
+            coldInferCount := coldInferCount + 1
+        | _ => throw (IO.userError "C0 cold inference returned non-function")
+  let coldInferEnd ← IO.monoMsNow
+  let mut warmSession := inferSession
+  let mut warmInferCount := 0
+  let warmInferStart ← IO.monoMsNow
+  for _ in [:inferRuns] do
+    match psKernelSessionInfer 4096 warmSession inferTerm with
+    | Except.error error =>
+        throw (IO.userError ("C0 warm inference failed: " ++ error))
+    | Except.ok (type, next) =>
+        match type with
+        | PsKernelExpr.forallE _ _ _ _ =>
+            warmInferCount := warmInferCount + 1
+            warmSession := next
+        | _ => throw (IO.userError "C0 warm inference returned non-function")
+  let warmInferEnd ← IO.monoMsNow
+  if !(Nat.beq coldInferCount warmInferCount &&
+       Nat.beq coldInferCount inferRuns) then
+    throw (IO.userError "C0 cold/warm inference count divergence")
+  IO.println s!"C0_BENCH native_checker_infer cold_ms={coldInferEnd - coldInferStart} warm_ms={warmInferEnd - warmInferStart} lambda_depth=24 runs={inferRuns}"
+
+  -- Admission is a complete checked kernel operation, unlike isolated
+  -- substitution/probe measurements. Use the same immutable base environment
+  -- and the same well-typed declaration on every fresh invocation.
+  let admitName := PsKernelName.str PsKernelName.anonymous "C0.checkedWitness"
+  let validDef : PsKernelDefinitionInfo := {
+    base := { name := admitName, levelParams := [],
+      type := PsKernelExpr.sort
+        (PsKernelLevel.succ PsKernelLevel.zero) }
+    value := PsKernelExpr.sort PsKernelLevel.zero
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let invalidDef : PsKernelDefinitionInfo := {
+    base := validDef.base
+    value := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let admissionRuns := 120
+  let mut admitted := 0
+  let admitStart ← IO.monoMsNow
+  for _ in [:admissionRuns] do
+    match psKernelAddDefinition 4096 psKernelEnvironmentEmpty validDef
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.error error =>
+        throw (IO.userError ("C0 valid declaration rejected: " ++ error))
+    | Except.ok next =>
+        if psKernelEnvironmentContains next admitName then
+          admitted := admitted + 1
+        else throw (IO.userError "C0 declaration missing after admission")
+  let admitEnd ← IO.monoMsNow
+  let mut rejected := 0
+  let rejectStart ← IO.monoMsNow
+  for _ in [:admissionRuns] do
+    match psKernelAddDefinition 4096 psKernelEnvironmentEmpty invalidDef
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.error _ => rejected := rejected + 1
+    | Except.ok _ => throw (IO.userError "C0 invalid declaration accepted")
+  let rejectEnd ← IO.monoMsNow
+  if !(Nat.beq admitted admissionRuns && Nat.beq rejected admissionRuns) then
+    throw (IO.userError "C0 declaration admission result count mismatch")
+  IO.println s!"C0_BENCH native_checker_admission accepted_ms={admitEnd - admitStart} rejected_ms={rejectEnd - rejectStart} runs={admissionRuns}"
+
+  -- Linux process high-water RSS includes the full native benchmark process,
+  -- not a per-case allocation count. Report it separately from throughput.
+  let status ← IO.FS.readFile "/proc/self/status"
+  for line in status.splitOn "\n" do
+    if line.startsWith "VmHWM:" then
+      IO.println s!"C0_BENCH process_peak_rss {line}"
+    else if line.startsWith "VmRSS:" then
+      IO.println s!"C0_BENCH process_current_rss {line}"
+    else pure ()

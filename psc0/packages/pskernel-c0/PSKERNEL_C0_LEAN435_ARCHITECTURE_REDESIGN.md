@@ -1,5 +1,13 @@
 # PSKernel-C0: Lean 4.35 architecture redesign and qualification program
 
+## Latest qualified Lean 4.35 Phase B evidence — 2026-10-13
+
+Source [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836) passed **all** native [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) stages. A strict test-only export adapter and official stable Lean 4.35 `leanchecker --from-export` agreed on 14 cases from exact identical NDJSON bytes, including one entirely valid and one invalid-last 128-definition dependency chain. Full native negative tests, semantic migration, indexed StoreWF-*candidate* replay and scratch promotion and the unchanged project-original kernel check also passed. This supersedes the pending-run description in the older Phase B section below.
+
+The same-run synthetic checked admission batch p50/p95 was C0 **14/15 ms** versus unchanged original **28/29 ms** with **more small allocation events and process VmHWM in C0**. Syntax-only depth-11 selective promotion was **38 ms** versus source reencoding **260 ms** for 24 operations (76 staged nodes, 12 retained). These are no evidence of a con-ron/con-leche/official Lean full-library win or a verified indexed accepting kernel.
+
+Phase B is **not complete**: real `Init`/Std/Mathlib export forms and explicit unsupported/rejected/resource distinction, formal store ownership/refinement, and completely source-equivalent indexed or closure-native WHNF/DefEq/inference/admission remain outstanding.
+
 ## Phase B external source-byte conformance — incremental checkpoint
 
 **Qualified:** version-pinned official Lean 4.35 `leanchecker --from-export` and strict C0 source-byte NDJSON parser agreed on the twelve-fixture accepted/rejected corpus (sort, lambda/forall, let, universe, app and two-definition dependency) under **[CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332)**. Source [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836) added 128 checked sequential definitions and a late rejection counterpart. The official/C0 exact input replay stages both passed in [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316); the full performance/original stage was still running at document time.

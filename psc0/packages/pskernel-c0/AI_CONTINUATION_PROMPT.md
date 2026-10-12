@@ -1,5 +1,13 @@
 # New chat — continue PSKernel-C0 native Lean performance redesign
 
+## NEWEST FULL SOURCE QUALIFICATION — 2026-10-13
+
+At [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836), [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) is fully **green**. The strict test-only C0 Lean v4.35.0 NDJSON decoder and official `leanchecker --from-export` used the same bytes for **14 cases (7 positive, 7 negative)**, including 128 checked dependent declarations with invalid-last-case. Native full build/negative/resource, obsolete-native removal, canonical store replay, experimental scratch promotion, C0 microbench and unchanged original-core comparison also passed. All earlier "pending" statuses lower in this file for 383161/383166 are superseded.
+
+Latest C0 synthetic fully checked mixed admission p50/p95 **14/15 ms** vs original **28/29 ms**, with **more C0 small allocation events and process peak memory**. Selected scratch-DAG transfer 24 runs **38ms** vs source reencoding **260ms** on this runner; indexing remains **non-accepting** and this does not extrapolate to real programs.
+
+Continue with authentic version-pinned Lean 4.35 `Init`/Std export corpus and exact unsupported/declined/resource matrices first, then prototype and benchmark two-tier indexed handles vs immutable computed-fields vs closure/value evaluation on *the same complete checked* workloads. No original-core, PSC0 compiler, Rust backend, selfhost/bootstrap/generated Rust/metatheory edits. Do not imply C0 has inherited con-ron/con-leche's model-consistency theorem.
+
 ## NEWEST CONTINUATION CHECKPOINT — exact NDJSON compatibility
 
 **Lean 4.35.0 stable** and native-only scope unchanged. First verify [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) at source [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836): official kernel and C0 both passed the same-byte direct export replay for a 128-definition accepted dependency chain and a 128-definition stream invalid only at the final declaration; full native comparison was still running when this text was written. The preceding exact-byte parser/application/dependency suite fully passed [CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332).

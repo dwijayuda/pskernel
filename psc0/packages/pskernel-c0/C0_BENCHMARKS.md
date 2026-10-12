@@ -1,5 +1,18 @@
 # PSKernel-C0 experimental performance measurements
 
+## Latest complete native v4.35.0 C0 measurements — CI 38316694316
+
+**Source commit:** [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836). [Native workflow 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) **SUCCESS** including 14 matched official Lean 4.35 NDJSON cases, two 128-definition streams, negative conformance, index/scratch validation, microbenchmarks, and unchanged original checker.
+
+| Same-run measurement | C0 | Baseline | Scope |
+| --- | ---: | ---: | --- |
+| Fully accepted 24 × 12 synthetic mixed declaration batches, p50 / p95 | **14 / 15 ms** | **28 / 29 ms** unchanged original | Whole checked **synthetic fixture** |
+| Thread-local small-allocation events per batch | **36,184** | **34,971** original | C0 worse, not bytes |
+| Whole benchmark-process VmHWM | **1,154,848 kB** | **1,150,888 kB** original | C0 more, no memory win |
+| 24 selected depth-11 shared-DAG transfers, syntax-only | **38 ms** indexed selective promotion | **260 ms** source decode/reencode | 76 staged nodes / 12 promoted; not checked program performance |
+
+Previous [CI 38315455947](https://github.com/dwijayuda/pskernel/actions/runs/38315455947) measured **79 vs 525 ms** on the same synthetic scratch/source transfer and **26/26 versus 49/50 ms** checked mixed admissions; substantial between-run machine variation makes single-digit millisecond ratios tentative. No qualified Mathlib/Init checking or con-ron/con-leche/official C++ benchmark on identical corpora exists.
+
 ## New 4.35 native benchmark qualification — 2026-10-13
 
 **Source and toolchain:** stable Lean 4.35.0, successful native source CI [38315455947](https://github.com/dwijayuda/pskernel/actions/runs/38315455947), before the latest official-NDJSON parser extension. No source-level metatheory, Rust or selfhost qualification.

@@ -1,5 +1,13 @@
 # PSKernel-C0 — performance architecture work state
 
+## FINAL VERIFIED PHASE B MILESTONE — 2026-10-13
+
+Full [native CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) **SUCCESS** at [source `51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836): stable Lean 4.35.0, official `leanchecker` exact-byte NDJSON replay and C0 subset decoder on **14 accept/reject fixtures**, including 128 sequential safe checked definitions and a negative stream invalid only at the 128th; complete native build, negative regressions, canonical store/scratch tests, microbenchmarks, and unchanged original-core comparison all passed. Older "in progress" statements below are historical.
+
+Latest syntax-only DAG promotion **260 vs 38 ms** over 24 same selected depth-11 transfers, 76 staged/12 committed nodes. Latest native complete mixed 24 × 12 admission batch C0 p50/p95 **14/15 ms** versus original **28/29 ms**; C0 small allocations **36,184 vs 34,971**, VmHWM **1,154,848 vs 1,150,888 kB**, **no memory improvement**. These are synthetic same-run observations, not official Lean/con-leche/con-ron throughput.
+
+**Next:** real version-pinned Init/Std/Mathlib subset coverage, explicit unsupported/decline vs invalid/resource, and controlled end-to-end evaluation architecture comparison. C0 remains recursively source-accepting; indexed scratch is non-accepting, lacking con-ron's sealed two-tier well-formedness and any transferable consistency proof.
+
 ## NEWEST EXTERNAL-ORACLE PROGRESS — 2026-10-13
 
 Pinned official `leanchecker --from-export` and C0 now directly parse/check the same v4.35.0 NDJSON records. **Full CI [38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332) passed the twelve-case suite.** New [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836) adds a 128-definition positive dependency chain and a negative chain whose final definition is invalid; their *official and C0 export replay steps* passed within [38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316), with complete CI pending at the time of writing. The direct decoder is a strict **test-only subset** (names, levels, sorts, bvars, binders, lets, apps, constants, sequential checked safe definitions), not full Lean export compatibility.

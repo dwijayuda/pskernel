@@ -176,3 +176,9 @@ Final native selector qualification [CI 38194880437](https://github.com/dwijayud
 Commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` **reverts the production projection call to the measured faster list-based selector**, while retaining the indexed-position helper, its exhaustive differential regression, and the benchmark for future experiments. The earlier lazy delta / projection lookup guards remain in place. This is a deliberately rejected optimization, NOT a claimed speedup. Verify native CI for this final revision before claiming it green.
 
 Next choose **measured full-checker bottlenecks**, likely repeated recursive reductions/inference/DefEq inside realistic environments, before any more broad representation changes. Single-run simple admission samples are too small to rank architecture choices.
+
+
+
+### Final post-rollback native validation (2026-10-12)
+
+[PSKernel-C0 native Lean CI 38195084646](https://github.com/dwijayuda/pskernel/actions/runs/38195084646) at source commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` **passed all three gates**: 84-job full native Lean build; negative and differential semantic checker regression; native Lean performance benchmark suite. The production constructor-projection path again uses list-backed application-field selection. The direct selector remains an experimental helper, never a checked shortcut. Its paired same-run reference-vs-direct result still regressed: 396 ms list / 911 ms direct over 18,000 depth-512 queries (~2.30× slower). Delta eager/lazy miss results 112/111 ms are near parity, not a reliable checker speedup. Native Linux entire benchmark process VmHWM 633996 kB. This validation includes **no self-host/bootstrap or metatheory tests**. Representative entire-library baseline and session-indexed acceptance work remain open.

@@ -678,53 +678,29 @@ def psWasmEncodeInstructions
     (psWasmEncodeInstruction structures arrays functionTypes functions)
     instructions
 
-def psWasmEncodeLocalDeclaration
-    (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType)
-    (type : PsWasmValueType) :
-    Except PsWasmEncodeError (List UInt8) :=
-  match psWasmEncodeValueType structures arrays type with
-  | Except.error error => Except.error error
-  | Except.ok encoded => Except.ok (List.cons (psWasmByte 1) encoded)
+-- Adjacent equal local types form one declaration run. Indices and names keep
+-- their original order, while the binary uses the compact canonical grouping.
+def psWasmEncodeLocalDeclarations (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) (types : List PsWasmValueType) :
+    Except PsWasmEncodeError (List UInt8) := do
+  let encoded ← types.mapM (psWasmEncodeValueType structures arrays)
+  let reversed := encoded.foldl (fun (groups : List (Nat × List UInt8)) type =>
+    match groups with
+    | (count, previous) :: rest =>
+      if previous == type then (count + 1, previous) :: rest else (1, type) :: groups
+    | [] => [(1, type)]) []
+  let groups := reversed.reverse
+  return psWasmEncodeUleb groups.length ++
+    groups.flatMap (fun (count, type) => psWasmEncodeUleb count ++ type)
 
-def psWasmEncodeLocalDeclarations
-    (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType)
-    (types : List PsWasmValueType) :
-    Except PsWasmEncodeError (List UInt8) :=
-  psWasmEncodeMany (psWasmEncodeLocalDeclaration structures arrays) types
-
-def psWasmEncodeFunctionBody
-    (structures : List PsWasmStructType)
-    (arrays : List PsWasmArrayType)
-    (functionTypes : List PsWasmFunctionType)
-    (functions : List PsWasmFunction)
-    (function : PsWasmFunction) :
-    Except PsWasmEncodeError (List UInt8) :=
-  match
-      psWasmEncodeLocalDeclarations
-        structures
-        arrays
-        function.locals with
-  | Except.error error => Except.error error
-  | Except.ok encodedLocals =>
-      match psWasmEncodeInstructions
-          structures
-          arrays
-          functionTypes
-          functions
-          function.body with
-      | Except.error error => Except.error error
-      | Except.ok instructions =>
-          let body :=
-            psListAppend
-              (psWasmEncodeUleb (psListLength function.locals))
-              (psListAppend
-                encodedLocals
-                (psListAppend
-                  instructions
-                  [psWasmByte 11]));
-          Except.ok (psListAppend (psWasmEncodeUleb (psListLength body)) body)
+def psWasmEncodeFunctionBody (structures : List PsWasmStructType)
+    (arrays : List PsWasmArrayType) (functionTypes : List PsWasmFunctionType)
+    (functions : List PsWasmFunction) (function : PsWasmFunction) :
+    Except PsWasmEncodeError (List UInt8) := do
+  let locals ← psWasmEncodeLocalDeclarations structures arrays function.locals
+  let instructions ← psWasmEncodeInstructions structures arrays functionTypes functions function.body
+  let body := locals ++ instructions ++ [11]
+  return psWasmEncodeUleb body.length ++ body
 
 def psWasmEncodeFunctionBodies
     (structures : List PsWasmStructType)

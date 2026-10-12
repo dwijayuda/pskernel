@@ -278,3 +278,35 @@ Three-round *complete checked declaration* timings from that run: 20 checked dec
 A separate binary-trie vs radix-16 diagnostic in native Lean (CI [38235530285](https://github.com/dwijayuda/pskernel/actions/runs/38235530285), all mandatory native steps passed, only optional diagnostic red) measured binary path-copy **77 ms** vs radix **35 ms** for constructing 25×512 locals, and binary **75 ms** vs radix **35 ms** for 20k lookups; no reason to replace the radix. The rejected binary diagnostic was removed from the benchmark source at `4cab1974`.
 
 **Remaining main objective:** full environment-dependent indexed WHNF, DefEq, inference and admission in the trusted checking pipeline, with session-owned provenance, exact reduction priority/fuel, negative conformance, real representative library throughput, peak memory and repeated matched baseline checks. Opt-in indexed session still incurs overhead and should not be promoted on helper timings alone. Keep original `pskernel-core` and PSC0 Rust backend unchanged. No self-host, bootstrap, fixed-point or metatheory tests.
+
+
+
+## 12 October: direct equality rejected; canonical indexed loose range accepted as substrate
+
+[Native CI 38238445255](https://github.com/dwijayuda/pskernel/actions/runs/38238445255), successful: tried direct recursive expression equality in native Lean, with unchanged legacy curried comparators as semantic reference.
+
+| Benchmark | Historical | Candidate |
+| --- | ---: | ---: |
+| 30,000 structural pairs | 2,135 ms | 2,236 ms |
+| 15,000 exact syntax pairs | 753 ms | 805 ms |
+
+The candidate was 4–7% slower on these cases. Production equality was **restored** in source commit `bdec38c4e57bc60f0156393368b66e76737085b9`. No equality speedup claimed.
+
+[Native CI 38239387122](https://github.com/dwijayuda/pskernel/actions/runs/38239387122), source `c8d63e109247fd28b9608cb045562e5699583870`, successful all native gates (including negative/differential and unchanged original-core comparison). New per-node exact loose de Bruijn range metadata permits constant-time unchanged-subtree pruning in indexed substitution and lifting.
+
+| Same-run source-owned indexed operation | Historical indexed reference | Cached range with memo |
+| --- | ---: | ---: |
+| Closed shared DAG, 11 levels, 100 instantiations | 885 ms | 1 ms |
+| General shared DAG, 11 levels, 70 rewrites | 1,134 ms | 15 ms |
+
+The first comparison includes both metadata pruning and existing memoization; it does **not** isolate metadata alone. The fast path returns the identical unchanged handle for closed terms; full decoded-result and range-predicate differential tests passed. The runner reports integer millisecond timing, and this is one run only.
+
+Selected **complete original-vs-C0 native checker** results in the same successful run:
+
+| Public checked workload | C0 | Original |
+| --- | --- | --- |
+| Varied fully checked 48-argument applications, 160 per round | 76/78/78 ms | 75/77/77 ms |
+| Growing safe library, 160 declarations | 46/47/46 ms | 47/47/47 ms |
+| Ordinary inductive admission, 2,000 calls | 46/46/46 ms | 46/46/46 ms |
+
+These are effectively near-parity. No causal end-to-end gain is attributable to indexed metadata because the accepting checker does not execute the indexed engine. No evidence yet for reduced process memory, real representative libraries or indexed resource exhaustion parity. Original package, Rust backend and self-hosting targets unchanged.

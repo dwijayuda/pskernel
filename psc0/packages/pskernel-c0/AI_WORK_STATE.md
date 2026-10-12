@@ -320,3 +320,17 @@ Source commit [`e8952b95a279f5bf82aa7b2c664d17430308bbd7`](https://github.com/dw
 A tagged [diagnostic commit e2fea7fe](https://github.com/dwijayuda/pskernel/commit/e2fea7feac956c0197cb71edfed1770841f3c161) added an **opt-in-by-commit-message, isolated private-copy source-family ablation** that restores only the historical `context.decls.length` threshold in an independently built temporary C0 package. Native [run 38241386784](https://github.com/dwijayuda/pskernel/actions/runs/38241386784) is the exact comparison to inspect next. Normal pushes skip the extra build. Retain or revise the cached-count optimization according to full checked-path and memory evidence; do not infer a benefit from O(1) source complexity alone.
 
 All future work remains restricted to native Lean checker/performance qualification; no self-hosting, fixed-point, generated Rust or metatheory gates were run. Exact resource behavior and checked indexed-engine coverage remain open.
+
+
+## Verified ablation closure — native CI 38241386784, 12 October 2026
+
+[The three-way same-run diagnostic](https://github.com/dwijayuda/pskernel/actions/runs/38241386784) at workflow commit `e2fea7feac956c0197cb71edfed1770841f3c161` completed **successfully**. The C0 build, negative/differential tests, microbenchmarks, unchanged-original checking and **temporary C0 historical list-length ablation** all passed; no other source trees were altered. Three rounds of identical complete-checker fixtures measured C0 cached count versus private C0 with only `context.declCount` promotion restored to `context.decls.length`:
+
+- 160 checked declarations: **37/38/38 ms vs 37/38/38 ms** — identical.
+- Depth-96 local-reference admission (index 0): **127/130/132 vs 129/129/130 ms** — inconclusive.
+- Depth-192 local-reference admission (index 0): **138/138/140 vs 139/139/140 ms** — near parity.
+- Depth-320 local-reference admission (index 0): **185/184/185 vs 185/189/186 ms** — a few milliseconds, not a general performance claim.
+- Depth-512 local-reference admission (index 0): **306/305/306 vs 306/306/306 ms** — parity.
+- Fully checked varied applications: **68/66/66 vs 65/66/66 ms** — parity.
+
+C0, unchanged original and private length-scan benchmark process peaks: **727164 / 725344 / 723916 kB**, measured across entire processes, not isolated allocations. The counter is maintained as exact structural metadata and removes a known linked-list length traversal, but **no material full checked-path performance benefit or memory reduction is established**. Do not advertise this as a whole-checker speedup. Keeping this small internal mechanism does not justify enabling indexed acceptance; prioritize significant measured improvements to DefEq/WHNF/inference/admission and context/resource-safe session ownership. Normal pushes skip the expensive tag-gated ablation.

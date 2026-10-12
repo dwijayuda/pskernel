@@ -329,3 +329,20 @@ Source [e8952b95](https://github.com/dwijayuda/pskernel/commit/e8952b95a279f5bf8
 Native source-owned construction of 160 independent contexts with 128 locals took **9 ms list-only / 14 ms adaptive**. These compare different index policies, **not** cached count versus historical list-length scan. Full matched checker process VmHWM C0 **724508 kB** / original **727748 kB**, process-wide and not a per-operation allocation measurement. Other runs and source changes prevent causal before/after conclusions. No complete library-wide throughput or memory winner is established.
 
 To isolate the counter alone, [commit e2fea7fe](https://github.com/dwijayuda/pskernel/commit/e2fea7feac956c0197cb71edfed1770841f3c161) adds an opt-in tagged temporary-package diagnostic: restore only the prior `context.decls.length` promotion predicate in a private C0 copy and run the same full checker fixture. [Run 38241386784](https://github.com/dwijayuda/pskernel/actions/runs/38241386784) is the target run. This neither edits original `pskernel-core` nor runs self-hosting. Record negative or negligible results without turning micro timing into a full-checker claim.
+
+
+### Same-run cached count versus historical full-checker ablation (completed)
+
+[CI 38241386784](https://github.com/dwijayuda/pskernel/actions/runs/38241386784) **passed** all mandatory native gates and the tagged isolated diagnostic. The third checker run was a **temporary C0 copy** with only the radix-promotion predicate changed back from cached `context.declCount` to historical `context.decls.length`. Original PSKernel-Core was independently and identically benchmarked in the same workflow; it was never modified.
+
+| Three rounds of full public C0 checker (ms) | C0 cached count | C0 private length-scan | Unchanged original core |
+| --- | --- | --- | --- |
+| Varied fully checked applications, 160 | 68 / 66 / 66 | 65 / 66 / 66 | 64 / 65 / 66 |
+| Growing checked library, 160 declarations | 37 / 38 / 38 | 37 / 38 / 38 | 38 / 38 / 39 |
+| Checked depth-48 chain, 64 declarations | 61 / 78 / 62 | 62 / 62 / 63 | 61 / 61 / 62 |
+| Local references depth 96, bvar 0, 20 declarations | 127 / 130 / 132 | 129 / 129 / 130 | 127 / 127 / 128 |
+| Local references depth 192, bvar 0, 6 declarations | 138 / 138 / 140 | 139 / 139 / 140 | 137 / 138 / 138 |
+| Local references depth 320, bvar 0, 3 declarations | 185 / 184 / 185 | 185 / 189 / 186 | 183 / 183 / 184 |
+| Local references depth 512, bvar 0, 2 declarations | 306 / 305 / 306 | 306 / 306 / 306 | 306 / 304 / 305 |
+
+Whole-process `VmHWM`: **727164 kB** cached C0, **723916 kB** length-scan C0, **725344 kB** original. These are process-wide snapshots affected by runtime, compilation/benchmark fixture and garbage collection, not per-operation memory attribution. The 128-declaration isolated build comparison (9 ms list / 14 ms indexed) does not isolate the counter, and the controlled full-checker ablation **does not demonstrate material gain** from caching length. Retain the result as an important *negative qualification*: do not confuse improved asymptotic expression for a measured whole-kernel winner. No self-hosting or metatheory tests were run.

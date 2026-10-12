@@ -28,16 +28,16 @@ def naturalComponentProbe : Except String ScalarComponent := do
   let dividend := 2^130 + 5
   let divisor := 2^65 + 1
   let cases : List (String × String × Nat × Nat × Nat) := [
-    ("carry", "add", large, 1, large + 1),
-    ("borrow", "sub", 2^64, 1, large),
-    ("saturating", "sub", 1, large, 0),
-    ("product", "mul", large, large, large * large),
-    ("quotient", "div", dividend, divisor, dividend / divisor),
-    ("remainder", "mod", dividend, divisor, dividend % divisor),
-    ("wordQuotient", "div", large, 10, large / 10),
-    ("wordRemainder", "mod", large, 10, large % 10),
-    ("divisionZero", "div", large, 0, 0),
-    ("remainderZero", "mod", large, 0, large)]
+    ("checkCarry", "add", large, 1, large + 1),
+    ("checkBorrow", "sub", 2^64, 1, large),
+    ("checkSaturating", "sub", 1, large, 0),
+    ("checkProduct", "mul", large, large, large * large),
+    ("checkQuotient", "div", dividend, divisor, dividend / divisor),
+    ("checkRemainder", "mod", dividend, divisor, dividend % divisor),
+    ("checkWordQuotient", "div", large, 10, large / 10),
+    ("checkWordRemainder", "mod", large, 10, large % 10),
+    ("checkDivisionZero", "div", large, 0, 0),
+    ("checkRemainderZero", "mod", large, 0, large)]
   let checks := cases.map fun (name, operation, left, right, expected) => {
     name, typeName := none, parameters := [], results := [.i32], locals := []
     body := naturalLiteral left ++ naturalLiteral right ++

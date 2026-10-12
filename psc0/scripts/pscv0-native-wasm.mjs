@@ -9,9 +9,11 @@ function run(tool, args) {
   assert.equal(result.status, 0, tool + ' ' + args.join(' ') + '\n' + result.stderr);
   return result.stdout.trim();
 }
-// WAVE accepts quoted names, including WIT keywords such as "borrow".
+// The pinned CLI accepts bare WAVE function names; these fixture exports use
+// descriptive check-* names. C4b uses an embedding harness for arbitrary names
+// and repeated-call/post-return lifecycle checks.
 function componentCall(name, args = []) {
-  return JSON.stringify(name) + '(' + args.map(x => JSON.stringify(x)).join(', ') + ')';
+  return name + '(' + args.map(x => JSON.stringify(x)).join(', ') + ')';
 }
 function exportsOf(wit) {
   return [...wit.matchAll(/export\s+%?([\w-]+):\s*func\(([^)]*)\)(?:\s*->\s*(\w+))?;/g)]

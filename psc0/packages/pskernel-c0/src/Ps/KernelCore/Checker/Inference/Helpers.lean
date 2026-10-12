@@ -22,11 +22,12 @@ structure PsKernelForallView where
   body : PsKernelExpr
   binderInfo : PsKernelBinderInfo
 
-def psKernelCacheInferResult
+def psKernelCacheInferResultWithKnownHash
     (state : PsKernelCheckerState)
     (inferOnly : Bool)
     (expr : PsKernelExpr)
-    (result : PsKernelExpr) :
+    (result : PsKernelExpr)
+    (knownHash : Option Nat) :
     PsKernelCheckerState :=
   if
       psKernelInferCacheEligible
@@ -34,24 +35,26 @@ def psKernelCacheInferResult
         expr then
     if inferOnly then
       let cache :=
-        psKernelExprMapInsert
-          state.inferOnly
-          expr
-          result;
+        psKernelExprMapInsertWithKnownHash
+          state.inferOnly expr result knownHash;
       psKernelCheckerStateWithInferOnly
         state
         cache
     else
       let cache :=
-        psKernelExprMapInsert
-          state.checkedInfer
-          expr
-          result;
+        psKernelExprMapInsertWithKnownHash
+          state.checkedInfer expr result knownHash;
       psKernelCheckerStateWithCheckedInfer
         state
         cache
   else
     state
+
+def psKernelCacheInferResult
+    (state : PsKernelCheckerState)
+    (inferOnly : Bool)
+    (expr result : PsKernelExpr) : PsKernelCheckerState :=
+  psKernelCacheInferResultWithKnownHash state inferOnly expr result none
 
 def psKernelEnsureSortWith
     (whnf :

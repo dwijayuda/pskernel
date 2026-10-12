@@ -22,9 +22,10 @@ abbrev PsKernelC0CheckedAppHook :=
   PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
   Except String (Prod PsKernelExpr PsKernelCheckerState)
 
-def psKernelInferCoreWithFuelUsing
+def psKernelInferCoreWithFuelUsingLetFrames
     (fuel : Nat)
-    (onCheckedApp : Option PsKernelC0CheckedAppHook) :
+    (onCheckedApp : Option PsKernelC0CheckedAppHook)
+    (letFrames : List (Prod Nat Nat)) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -66,7 +67,7 @@ def psKernelInferCoreWithFuelUsing
           "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelInferCoreWithFuelUsing remaining onCheckedApp;
+        psKernelInferCoreWithFuelUsingLetFrames remaining onCheckedApp;
       fun
         (whnf :
           PsKernelCheckerContext ->
@@ -90,16 +91,29 @@ def psKernelInferCoreWithFuelUsing
             state.inferOnly
           else
             state.checkedInfer;
+        -- Only checked inference with an installed callback may carry
+        -- immutable source summaries through a consecutive let suffix.
+        -- The hook-free historical oracle retains its original behavior.
+        let currentFrames :=
+          match expr, onCheckedApp with
+          | .letE _ _ _ _ _, some _ =>
+              match letFrames with
+              | [] =>
+                  if psKernelC0HasLetPrefix 12 expr then
+                    match psKernelC0LetCacheFramesWithFuel 1024 expr with
+                    | some (_, _, frames) => frames
+                    | none => []
+                  else []
+              | _ => letFrames
+          | _, _ => []
+        let currentHash :=
+          match currentFrames with
+          | (_, hash) :: _ => some hash
+          | [] => none;
         let cached :=
-          if
-              psKernelInferCacheEligible
-                inferOnly
-                expr then
-            psKernelExprMapGet
-              cache
-              expr
-          else
-            Option.none;
+          if psKernelInferCacheEligible inferOnly expr then
+            psKernelExprMapGetWithKnownHash cache expr currentHash
+          else Option.none;
         match cached with
         | Option.some cached =>
             match
@@ -282,7 +296,7 @@ def psKernelInferCoreWithFuelUsing
                               result))
                 | PsKernelExpr.mdata _ body =>
                     match
-                        smaller
+                        smaller []
                           whnf
                           defeq
                           nextContext
@@ -310,7 +324,7 @@ def psKernelInferCoreWithFuelUsing
                       let args := spine.snd;
                       let argCount := psKernelExprListLength args;
                       match
-                          smaller
+                          smaller []
                             whnf
                             defeq
                             nextContext
@@ -351,7 +365,7 @@ def psKernelInferCoreWithFuelUsing
                           (Prod PsKernelExpr PsKernelCheckerState) :=
                         fun _ =>
                           match
-                              smaller
+                              smaller []
                                 whnf
                                 defeq
                                 nextContext
@@ -375,7 +389,7 @@ def psKernelInferCoreWithFuelUsing
                                   let state2 :=
                                     Prod.snd forallResult;
                                   match
-                                      smaller
+                                      smaller []
                                         whnf
                                         defeq
                                         nextContext
@@ -455,7 +469,7 @@ def psKernelInferCoreWithFuelUsing
                             state)
                       else
                         match
-                            smaller
+                            smaller []
                               whnf
                               defeq
                               nextContext
@@ -506,7 +520,7 @@ def psKernelInferCoreWithFuelUsing
                             body
                             (PsKernelExpr.fvar fresh);
                         match
-                            smaller
+                            smaller []
                               whnf
                               defeq
                               child
@@ -541,7 +555,7 @@ def psKernelInferCoreWithFuelUsing
                                   result))
                 | PsKernelExpr.forallE name domain body binderInfo =>
                     match
-                        smaller
+                        smaller []
                           whnf
                           defeq
                           nextContext
@@ -584,7 +598,7 @@ def psKernelInferCoreWithFuelUsing
                                 body
                                 (PsKernelExpr.fvar fresh);
                             match
-                                smaller
+                                smaller []
                                   whnf
                                   defeq
                                   child
@@ -625,7 +639,7 @@ def psKernelInferCoreWithFuelUsing
                             state)
                       else
                         match
-                            smaller
+                            smaller []
                               whnf
                               defeq
                               nextContext
@@ -645,7 +659,7 @@ def psKernelInferCoreWithFuelUsing
                                 Except.error error
                             | Except.ok typeSort =>
                                 match
-                                    smaller
+                                    smaller []
                                       whnf
                                       defeq
                                       nextContext
@@ -695,12 +709,18 @@ def psKernelInferCoreWithFuelUsing
                           psKernelCheckerContextWithLocalContext
                             nextContext
                             childLocal;
-                        let openedBody :=
-                          psKernelExprInstantiate1
-                            body
-                            (PsKernelExpr.fvar fresh);
+                        let (openedBody, remainingFrames) :=
+                          match currentFrames with
+                          | (range, _) :: tail =>
+                              if range == 0 then (body, tail)
+                              else
+                                (psKernelExprInstantiate1 body
+                                  (PsKernelExpr.fvar fresh), [])
+                          | [] =>
+                              (psKernelExprInstantiate1 body
+                                (PsKernelExpr.fvar fresh), []);
                         match
-                            smaller
+                            smaller remainingFrames
                               whnf
                               defeq
                               child
@@ -735,18 +755,19 @@ def psKernelInferCoreWithFuelUsing
                             Except.ok
                               (Prod.mk
                                 result
-                                (psKernelCacheInferResult
+                                (psKernelCacheInferResultWithKnownHash
                                   (Prod.snd bodyResult)
                                   inferOnly
                                   expr
-                                  result))
+                                  result
+                                  currentHash))
                 | PsKernelExpr.proj typeName index structValue =>
                     let inferType :=
                       fun
                         (projectionContext : PsKernelCheckerContext)
                         (projectionState : PsKernelCheckerState)
                         (projectionExpr : PsKernelExpr) =>
-                        smaller
+                        smaller []
                           whnf
                           defeq
                           projectionContext
@@ -776,6 +797,30 @@ def psKernelInferCoreWithFuelUsing
                               expr
                               result))
 
+
+/-- The same recursive typing rules, with optional operation-local exact
+    let ranges and precomputed source cache hashes. -/
+def psKernelInferCoreWithFuelUsing
+    (fuel : Nat)
+    (onCheckedApp : Option PsKernelC0CheckedAppHook) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) ->
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      PsKernelExpr ->
+      Except String
+        (Prod Bool PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    PsKernelExpr ->
+    Bool ->
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  psKernelInferCoreWithFuelUsingLetFrames fuel onCheckedApp []
 
 /-- Historical independent inference semantics, retained for all callers
     without a checked-application hook and as the negative/fuel oracle. -/

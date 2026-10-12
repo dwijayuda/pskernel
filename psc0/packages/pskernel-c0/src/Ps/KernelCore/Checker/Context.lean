@@ -566,8 +566,8 @@ def psKernelReduceProjCore
                     psKernelNameEq
                       ctor.induct
                       typeName then
-                  psKernelExprListGet
-                    (psKernelExprGetAppArgs structValue)
+                  psKernelExprGetAppArgAt
+                    structValue
                     (Nat.add
                       ctor.numParams
                       index)

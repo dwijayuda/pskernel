@@ -1109,7 +1109,9 @@ private def projectBoundaries : IO Unit := do
     "theorem equalSomeProof: equalSome = true := by { rfl }\n" ++
     "const otherSome: Bool := a == Option.some(4)\n" ++
     "theorem otherSomeProof: otherSome = false := by { rfl }\n" ++
-    "const noneEqualsNone: Bool := Option.none == Option.none\n"
+    "const emptyBox: Option Nat := Option.none\n" ++
+    "const noneEqualsNone: Bool := emptyBox == emptyBox\n" ++
+    "theorem noneEqualsNoneProof: noneEqualsNone = true := by { rfl }\n"
   let optionEqualityRefusal :=
     "const boxed: Option(Nat -> Nat) := Option.none\n" ++
     "const badEq: Bool := boxed == boxed\n"

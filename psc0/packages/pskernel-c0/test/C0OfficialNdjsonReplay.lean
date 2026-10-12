@@ -12,15 +12,23 @@ input/unsupported errors, never as an accepted or rejected kernel judgment.
 
 This subset includes standard names and levels, sort/bvar/constant,
 applications, lambda/forall, let, projection and literal expressions,
-and sequentially checked ordinary definitions with dependencies. It is intentionally not a general Lean exporter
+and sequentially checked safe axioms, definitions, theorems and opaques with dependencies. It is intentionally not a general Lean exporter
 frontend and does not silently drop mdata, FVar, MVar or inductive records.
 -/
+
+/-- The export adaptor owns the declaration kind rather than treating a
+    theorem, axiom or opaque declaration as a reducible definition. -/
+inductive C0ExportDeclaration where
+  | axiom (value : PsKernelAxiomInfo)
+  | definition (value : PsKernelDefinitionInfo)
+  | theorem (value : PsKernelTheoremInfo)
+  | opaque (value : PsKernelOpaqueInfo)
 
 structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
   levels : Array PsKernelLevel := #[.zero]
   exprs : Array PsKernelExpr := #[]
-  definitions : List PsKernelDefinitionInfo := []
+  declarations : List C0ExportDeclaration := []
   header : Bool := false
 
 def c0JsonObj (j : Lean.Json) (key : String) : Except String Lean.Json :=
@@ -270,31 +278,89 @@ def c0ExportParseRecord
       hints := hints
       safety := .safe
     }
-    return { st with definitions := definition :: st.definitions }
+    return { st with declarations := .definition definition :: st.declarations }
+  if let .ok payload := c0JsonObj j "axiom" then
+    c0ExportOnlyKeys j ["axiom"]
+    c0ExportOnlyKeys payload ["name", "levelParams", "type", "isUnsafe"]
+    let name ← c0ExportName st (← c0JsonNat payload "name")
+    let params ← c0ExportNames st (← c0JsonObj payload "levelParams")
+    let ty ← c0ExportExpr st (← c0JsonNat payload "type")
+    let isUnsafe ← (← c0JsonObj payload "isUnsafe").getBool?
+    if isUnsafe then throw "unsupported unsafe axiom policy"
+    let axiom : PsKernelAxiomInfo := {
+      base := { name := name, levelParams := params, type := ty }
+      isUnsafe := false
+    }
+    return { st with declarations := .axiom axiom :: st.declarations }
+  if let .ok payload := c0JsonObj j "thm" then
+    c0ExportOnlyKeys j ["thm"]
+    c0ExportOnlyKeys payload ["name", "levelParams", "type", "value", "all"]
+    let nameId ← c0JsonNat payload "name"
+    let allIds ← c0JsonNatList (← c0JsonObj payload "all")
+    if !allIds.contains nameId then
+      throw "malformed NDJSON theorem manifest"
+    let name ← c0ExportName st nameId
+    let params ← c0ExportNames st (← c0JsonObj payload "levelParams")
+    let ty ← c0ExportExpr st (← c0JsonNat payload "type")
+    let value ← c0ExportExpr st (← c0JsonNat payload "value")
+    let theorem : PsKernelTheoremInfo := {
+      base := { name := name, levelParams := params, type := ty }
+      value := value
+    }
+    return { st with declarations := .theorem theorem :: st.declarations }
+  if let .ok payload := c0JsonObj j "opaque" then
+    c0ExportOnlyKeys j ["opaque"]
+    c0ExportOnlyKeys payload
+      ["name", "levelParams", "type", "value", "isUnsafe", "all"]
+    let nameId ← c0JsonNat payload "name"
+    let allIds ← c0JsonNatList (← c0JsonObj payload "all")
+    if !allIds.contains nameId then
+      throw "malformed NDJSON opaque manifest"
+    let name ← c0ExportName st nameId
+    let params ← c0ExportNames st (← c0JsonObj payload "levelParams")
+    let ty ← c0ExportExpr st (← c0JsonNat payload "type")
+    let value ← c0ExportExpr st (← c0JsonNat payload "value")
+    let isUnsafe ← (← c0JsonObj payload "isUnsafe").getBool?
+    if isUnsafe then throw "unsupported unsafe opaque policy"
+    let opaque : PsKernelOpaqueInfo := {
+      base := { name := name, levelParams := params, type := ty }
+      value := value
+      isUnsafe := false
+    }
+    return { st with declarations := .opaque opaque :: st.declarations }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/
-def c0ExportReadSubset (input : String) : Except String (List PsKernelDefinitionInfo) := do
+def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaration) := do
   let mut tables : C0ExportTables := {}
   for line in input.splitOn "\n" do
     if line != "" then
       let record ← Lean.Json.parse line
       tables ← c0ExportParseRecord tables record
   if !tables.header then throw "NDJSON missing pinned metadata"
-  match tables.definitions with
+  match tables.declarations with
   | [] => throw "NDJSON missing a supported declaration"
-  | definitions => pure definitions.reverse
+  | declarations => pure declarations.reverse
 
 /-- Sequentially check exactly the declarations recovered from official
     NDJSON bytes in their original order. A failed checked definition cannot
     mutate the previously accepted environment, and unsupported input errors
     remain distinct from legitimate kernel rejection. -/
-def c0ExportCheckDefinitions (infos : List PsKernelDefinitionInfo) :
+def c0ExportCheckDefinitions (infos : List C0ExportDeclaration) :
     Except String Bool := do
   let mut env := psKernelEnvironmentEmpty
   for info in infos do
-    match psKernelAddDefinition 4096 env info
-        4096 psKernelLeanNatMaxSizeDefault with
+    let checked : Except String PsKernelEnvironment :=
+      match info with
+      | .axiom value =>
+          psKernelAddAxiom 4096 env value 4096 psKernelLeanNatMaxSizeDefault
+      | .definition value =>
+          psKernelAddDefinition 4096 env value 4096 psKernelLeanNatMaxSizeDefault
+      | .theorem value =>
+          psKernelAddTheorem 4096 env value 4096 psKernelLeanNatMaxSizeDefault
+      | .opaque value =>
+          psKernelAddOpaque 4096 env value 4096 psKernelLeanNatMaxSizeDefault
+    match checked with
     | .ok next => env := next
     | .error message =>
         match psKernelErrorFromMessage message with
@@ -372,7 +438,15 @@ def main : IO Unit := do
     ("C0OfficialDependencyAccept.ndjson", true),
     ("C0OfficialDependencyReject.ndjson", false),
     ("C0OfficialChainAccept.ndjson", true),
-    ("C0OfficialChainReject.ndjson", false)
+    ("C0OfficialChainReject.ndjson", false),
+    ("C0OfficialAxiomAccept.ndjson", true),
+    ("C0OfficialAxiomReject.ndjson", false),
+    ("C0OfficialTheoremAccept.ndjson", true),
+    ("C0OfficialTheoremReject.ndjson", false),
+    ("C0OfficialOpaqueAccept.ndjson", true),
+    ("C0OfficialOpaqueReject.ndjson", false),
+    ("C0OfficialMixedAccept.ndjson", true),
+    ("C0OfficialMixedReject.ndjson", false)
   ]
   for item in cases do
     let path := "test/" ++ item.fst

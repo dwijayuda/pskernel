@@ -27,3 +27,15 @@ The earlier Rust crate remains a separate experiment. The primary implementation
 **Performance selection rule:** retain an optimization only with executable semantic equivalence and repeated workload measurements; e.g., the first paired-expression-equality implementation was slower on a deep case, so C0 changed to a hybrid instead of claiming improvement.
 
 The next architectural milestone is to make indexed expression storage an internal representation for inference, WHNF and conversion with explicit lossless conversion at the public boundary. That is **not yet implemented**. The original package and PSC0 Rust backend remain unchanged. Self-hosting tests and metatheory are not part of this performance iteration.
+
+
+## Current native Lean execution redesign
+
+The primary performance work now lives in `src/Ps/KernelCore/`, with a two-tier architecture:
+
+1. **Accepted recursive-expression core:** demand-driven WHNF application spines, specialized one-binder beta substitution, indexed local/global caches and the original checker semantics. No acceptance rules were relaxed.
+2. **Experimental internal indexed engine:** exact expression bridge, collision-checked interned nodes with cached hashes/depth, memoized capture-avoiding indexed rewrites and context-free indexed WHNF. Its term handles cannot cross store boundaries and do not by themselves imply definitional equality.
+
+The indexed engine is deliberately not integrated into the accepting DefEq/inference path: it does not yet implement environment-specific reductions and full resource classification. Native Lean benchmarks show compelling speedups on shared-DAG and stuck-head microcases, but end-to-end checker speedups are not established.
+
+Next architectural work is to retain a canonical indexed arena across a *whole checking session* rather than converting expressions independently for each operation. An immutable public-to-internal bridge, explicit environment identity, and cache provenance must precede any trusted use.

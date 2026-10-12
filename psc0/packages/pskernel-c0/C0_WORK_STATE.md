@@ -82,3 +82,22 @@ The checker still uses recursive `PsKernelExpr` values at the public acceptance 
 ### Verified latest full source checkpoint
 
 [Native CI 38185687752](https://github.com/dwijayuda/pskernel/actions/runs/38185687752) at `699ec13a3e3ec785d5e94b85211a29da06a8b84e` **passed** compilation of the full `PsKernelC0` Lean library, negative checker regression, native differential tests and performance microbenchmarks. No self-hosting tests. Varied-input results: exact paired-head semantic equality near parity (2,078 vs 2,055 ms); direct lift 8,948 to 6,640 ms; single substitution 16,694 to 9,358 ms; 512-local context lookup 1,691 to 54 ms. These are one-run subsystem measurements, not whole-kernel throughput or memory qualification.
+
+
+## Native Lean indexed execution and demand-driven WHNF checkpoint (2026-10-12)
+
+Implementation within `src/Ps/KernelCore/**.lean`, **not** Rust-only:
+- `Core/IndexedExpr.lean` now provides an exact recursive-expression ↔ canonical term-ID bridge, including binder names/info, metadata, universe arguments, literals and let flags. Invalid IDs are rejected during decode.
+- `Core/IndexedReduction.lean` adds full-binder-depth indexed lifting and beta substitution. The optimized worker memoizes by (term ID, binder depth) in a collision-checked persistent radix trie. The prior indexed recursive worker remains a differential oracle.
+- `Checker/Reduction/IndexedWhnf.lean` runs context-free beta/zeta/metadata head reduction and application-spine assembly directly on indexed handles. **Not** full Lean WHNF: delta, recursors, quotient, projections, native primitives, environment and kernel admission are not included.
+- `Checker/Reduction/WhnfCore.lean` routes the *accepting* recursive-expression WHNF through demand-driven application-head inspection, avoiding argument-list construction for stuck application heads. This is a direct Lean checker optimization.
+- `Core/Substitution/Beta.lean` now dispatches one-argument beta-spines to the specialized source-owned instantiate1. The multi-argument path remains unchanged; regression is required before performance claims.
+
+Evidence:
+- [Native CI 38189942349](https://github.com/dwijayuda/pskernel/actions/runs/38189942349) passed complete library build, differential regressions and benchmarks.
+- [Native CI 38189961428](https://github.com/dwijayuda/pskernel/actions/runs/38189961428) passed the indexed-WHNF test and complete native workflow.
+- On a single CI runner, 30,000 eager spine decodings required 3,152 ms versus 368 ms for head-only probing (8.6×). This measures the head probe, **not** complete WHNF.
+- A depth-11 shared DAG rewritten 70 times took 903 ms with recursive indexed substitution and 11 ms with memoized indexed substitution (~82×). This is an engineered shared-DAG stress case, **not** an end-to-end kernel throughput result.
+- No self-hosting tests were executed. Full checked inference/DefEq and production indexed acceptance remain future integration steps. Metatheory/consistency proof work remains deferred.
+
+Next: benchmark complete WHNF and definitional-equality workloads using a persistent indexed store, establish provenance-safe scopes for environment-sensitive caches, and integrate the indexed representation into the accepting core only when native differential and resource-policy gates pass.

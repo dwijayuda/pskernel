@@ -52,3 +52,20 @@ The equality implementation was subsequently revised; do not apply the paired-eq
 | Local name lookup (20,000 lookups, 512 locals) | 1,691 ms | 54 ms | ~31× faster on deep-local lookup |
 
 All times are single-run CI runner values and exclude representative end-to-end Lean module checking workloads and memory costs. They should be treated as microbenchmark evidence, not general speedup factors.
+
+
+## Lean-native indexed execution checkpoint (2026-10-12)
+
+[GitHub Actions 38189942349](https://github.com/dwijayuda/pskernel/actions/runs/38189942349) completed successfully with complete native Lean build, negative regressions and subsystem benchmarks. One hosted runner, one sample:
+
+| Workload | Baseline | C0 design | Meaning |
+|---|---:|---:|---|
+| 30,000 stuck-application spine probes | 3,152 ms eager decomposition | 368 ms head-only | ~8.6× faster head-probe suboperation; no argument-list allocation on the stuck path |
+| 70 substitutions on a depth-11 maximally shared indexed DAG | 903 ms recursive indexed | 11 ms memoized indexed | ~82× on a deliberately reuse-heavy DAG |
+| 30,000 lifting traversals | 9,059 ms old | 6,709 ms direct | ~26% faster |
+| 30,000 single-variable substitutions | 16,824 ms generic | 9,331 ms specialized | ~45% faster |
+| 20,000 local lookups in 512-entry environment | 1,691 ms linear | 55 ms indexed | ~31× faster |
+
+The new indexed-execution engine stores canonical subterms and memoizes rewrites by term ID and binder depth. Unlike the **accepting** WHNF demand-driven spine change, indexed WHNF remains experimental and limited to context-free beta/zeta/metadata. It must not issue kernel acceptance judgments.
+
+These are **subsystem measurements**, neither complete kernel throughput nor PSC0 Rust backend compilation or self-hosting results. The Rust prototype measurements earlier in this file are separate. Preserve both cold and warm performance comparisons on identical workloads before adopting more indexed internals.

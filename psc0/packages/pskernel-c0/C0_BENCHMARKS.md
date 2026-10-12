@@ -446,3 +446,17 @@ The source [b5e0472b](https://github.com/dwijayuda/pskernel/commit/b5e0472b1ec4c
 | 30 calls, dependent first binder then 192 independent Pi binders | 114 ms | 27 ms |
 
 Internal full-operation pairs isolate a source-family benefit (about 2× at tail64 and 4.2× at tail192 on these tests), **not** complete library/whole-kernel performance. Three repeated original-vs-C0 public checks in one CI workflow are not independent runner replicates. C0/unchanged original full benchmark process peak VmHWM **1,031,668/1,034,684 kB**; no reliable per-operation memory reduction, p95 or general library improvement established. Prior shorter/ordinary checking negative findings stay recorded; no self-host or metatheory gates.
+
+
+## Binder DefEq stack and range redesign — completed native CI 38270573104
+
+Files: `Core/Expr.lean` (`psKernelC0BinderBodyRangesWithFuel`, `psKernelC0HasBinderPrefix`), `Checker/DefEq/BinderSpines.lean` (both lambda and forall workers), `test/C0ProofIrrelevanceRegression.lean` (independent range and outer-dependent-substitution oracles) and `test/C0CheckerComparison.lean` (matched full public DefEq operations). See [source 3b082900](https://github.com/dwijayuda/pskernel/commit/3b082900184d47109895c4e4e78eae1f6fce8ce8), [tests b6205d34](https://github.com/dwijayuda/pskernel/commit/b6205d34b6d4b3f44477d0bae725a1a424db1296), [dependent cases 4007d03c](https://github.com/dwijayuda/pskernel/commit/4007d03ce4a63e9ea10d51c9052fc95a348beb72). [Native CI 38270573104](https://github.com/dwijayuda/pskernel/actions/runs/38270573104) **success** for pinned Lean 4.34 full build, negative/differential suite, microbenchmarks and same-run unmodified original-core matched checking.
+
+| Matched three full-checker rounds (ms) | C0 forall | Original forall | C0 lambda | Original lambda | Calls / round |
+| --- | --- | --- | --- | --- | --- |
+| Depth 16 | 1/1/1 | 3/2/2 | 1/1/1 | 2/2/2 | 12 |
+| Depth 64 | **4/3/3** | **22/22/22** | **3/3/3** | **22/22/22** | 12 |
+| Depth 128 | **5/6/6** | **82/81/81** | **5/6/6** | **81/81/80** | 12 |
+| Depth 256 | **6/6/5** | **158/156/156** | **6/5/5** | **157/155/155** | 6 |
+
+The whole-expression terms differ by transparent terminal metadata, ensuring DefEq is actually invoked and binder recursion is exercised instead of trivial syntactic equality. The test also checks an outer-binder-referencing inner dependent domain (de Bruijn index 1), whose exact metadata-wrapped equivalent is accepted by both original and C0 on all rounds. This is **strong binder-family evidence**, not whole-kernel performance superiority; ordinary checked chains and inductives remain near parity, and C0/original high-water process RSS **1,064,112 / 1,060,948 kB** is not a per-check memory measure. No selfhost/bootstrap/fixed-point/metatheory tests.

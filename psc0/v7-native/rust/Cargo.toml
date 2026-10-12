@@ -3,10 +3,15 @@ name = "pscv0-native-runtime-check"
 version = "0.0.0"
 edition = "2021"
 publish = false
+default-run = "pscv0-native-runtime-check"
 
 [[bin]]
 name = "pscv0-native-runtime-check"
 path = "../../dist/pscv0-native/rust-checks.rs"
+
+[[bin]]
+name = "pscv0-native-module-check"
+path = "../../dist/pscv0-native/modules/project-checks.rs"
 
 [dependencies]
 num-bigint = "=0.4.6"

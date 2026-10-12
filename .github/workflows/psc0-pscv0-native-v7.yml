@@ -112,6 +112,13 @@ jobs:
           .lake/build/bin/pscv0_native_checks | tee ../dist/pscv0-native/checks.log
           .lake/build/bin/pscv0_native --version | tee ../dist/pscv0-native/native-version.json
           .lake/build/bin/pscv0_native --emit-all ../dist/pscv0-native/application.ps ../dist/pscv0-native/application | tee ../dist/pscv0-native/emit.log
+      - name: Check and emit a real three-module application
+        run: |
+          set -euo pipefail
+          MANIFEST=../v7-native/module-fixture/project.json
+          .lake/build/bin/pscv0_native --check-project "$MANIFEST"
+          .lake/build/bin/pscv0_native --emit-project-all "$MANIFEST" ../dist/pscv0-native/modules/app
+          node ../scripts/pscv0-native-project.mjs ../dist/pscv0-native/modules/app
       - name: Qualify GC core runtime and component formats
         run: |
           set -euo pipefail
@@ -132,6 +139,10 @@ jobs:
           .lake/build/bin/pscv0_native --emit-wasm ../dist/pscv0-native/wasm/aggregate.ps ../dist/pscv0-native/wasm/aggregate ../dist/pscv0-native/wasm/aggregate.exports.json
           node ../scripts/pscv0-native-wasm-abi.mjs ../dist/pscv0-native/wasm | tee ../dist/pscv0-native/wasm/abi-qualification.log
           node ../scripts/pscv0-native-wasm.mjs ../dist/pscv0-native/wasm | tee ../dist/pscv0-native/wasm/qualification.log
+          .lake/build/bin/pscv0_native --emit-project-wasm-core ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/core
+          wasm-tools validate ../dist/pscv0-native/modules/core.wasm
+          .lake/build/bin/pscv0_native --emit-project-wasm ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/component ../v7-native/module-fixture/exports.json
+          wasm-tools validate ../dist/pscv0-native/modules/component.wasm
       - name: Compile and run the small emitted application with pinned TypeScript
         run: |
           set -euo pipefail
@@ -143,6 +154,9 @@ jobs:
           "$TSC" --ignoreConfig ../dist/pscv0-native/application.ts --outDir ../dist/pscv0-native/ts-compiled --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
           node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/ts-compiled/application.js typescript | tee ../dist/pscv0-native/runtime.log
           node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/application.js directjs | tee ../dist/pscv0-native/directjs-runtime.log
+          mkdir -p ../dist/pscv0-native/ts-compiled-modules
+          "$TSC" --ignoreConfig ../dist/pscv0-native/modules/app.ts --outDir ../dist/pscv0-native/ts-compiled-modules --target ES2022 --module ES2022 --moduleResolution bundler --strict --noEmitOnError --skipLibCheck --pretty false
+          node ../scripts/pscv0-native-project.mjs ../dist/pscv0-native/modules/app ../dist/pscv0-native/ts-compiled-modules/app.js
           node ../scripts/pscv0-native-directjs.mjs ../dist/pscv0-native
           "$TSC" --ignoreConfig ../dist/pscv0-native/declaration-consumer/consumer.ts --target ES2020 --module ES2020 --moduleResolution bundler --strict --noEmit --pretty false
       - name: Compile and run the same application with pinned Rust
@@ -152,6 +166,7 @@ jobs:
           rustup run 1.98.1 rustc --version | tee ../dist/pscv0-native/rust-version.txt
           node ../scripts/pscv0-native-rust.mjs ../dist/pscv0-native
           rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release 2>&1 | tee ../dist/pscv0-native/rust-runtime.log
+          rustup run 1.98.1 cargo run --manifest-path rust/Cargo.toml --locked --release --bin pscv0-native-module-check 2>&1 | tee ../dist/pscv0-native/modules/rust-runtime.log
       - uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25
         with:
           path: |

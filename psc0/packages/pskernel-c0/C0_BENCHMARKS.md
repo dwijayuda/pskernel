@@ -409,3 +409,18 @@ Same-run three-way candidate evaluation [CI 38251853231](https://github.com/dwij
 | 60 calls, 192 args | 270 ms | 55 ms | 53 ms |
 
 This justifies replacing frame storage on the measured checked families without changing acceptance semantics. The measured gain is for the **combined source metadata and routing**, not for pointer-based term arena conversion. Negative checks include exact error precedence for malformed heads/args, fuel/context limits, source Pi loose-range oracle and full public-vs-original acceptance around threshold boundaries. The indexed DAG remains non-accepting and the general software/kernel performance redesign is **not complete**.
+
+
+## Nested fully checked expression routing and application-argument admission
+
+Both new native workflows passed: [CI 38264313583](https://github.com/dwijayuda/pskernel/actions/runs/38264313583), source [10974c2d](https://github.com/dwijayuda/pskernel/commit/10974c2d0cc31c8a79ec5bd93de9e91e14f1ed12), and [CI 38265144787](https://github.com/dwijayuda/pskernel/actions/runs/38265144787), source [7d2c6708](https://github.com/dwijayuda/pskernel/commit/7d2c6708982fa1c1629976d7d6272c5cc78cfe15). Entire native Lean 4.34 source build, negative/exact fuel/error/differential suite, C0 microbenchmarks and unchanged original-core matched full checker passed. The new optional checked-app callback in the **same inference core** accelerates nested lambda/let/Pi/metadata checking; default hook-free inference remains the independent oracle. Further recursive routing covers wide checked applications used as arguments, with the original budget preserved.
+
+| Matched complete checked admission, 3 rounds (ms) | C0 | Unchanged original |
+| --- | --- | --- |
+| 64 checked metadata-wrapped 48-arg definitions (CI 38264313583) | **15/14/16** | **23/22/26** |
+| 64 checked lambda-wrapped 48-arg definitions (CI 38264313583) | **17/17/17** | **24/24/26** |
+| 48 checked definitions: one inner 24-arg app used as outer 48-arg argument (CI 38265144787) | **51/51/50** | **63/62/62** |
+| 32 wide 192-arg definitions (CI 38265144787) | **40/40/40** | **156/152/157** |
+| 64 medium 48-arg definitions (CI 38265144787) | **25/25/25** | **39/38/39** |
+
+These are **same-run constructed workload families**, not proof of arbitrary module checking superiority. The inner-app new branch was **not separately ablated** against earlier C0 and its specific causal improvement cannot be claimed from C0-original comparison alone. RSS C0 883760 kB / original 877660 kB in CI 38265144787, process-wide benchmark peaks only; no memory improvement. Short/deep/inductive checked workloads remain near parity. No kernel correctness criteria were relaxed, no self-host or metatheory jobs were run.

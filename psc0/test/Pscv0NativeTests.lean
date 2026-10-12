@@ -867,6 +867,20 @@ private def projectBoundaries : IO Unit := do
   let _ ← get "pinned RC4 Standard snapshot"
     (psStandardSnapshotValidate psSelfHostProdPreludeEnvironment
       psStandardSnapshotExpected)
+  -- Independent published SHA-256 known-answer vectors protect padding,
+  -- expansion, endianness and round arithmetic. Unicode forces UTF-8 input.
+  let shaVectors := [
+    ("", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
+    ("abc", "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"),
+    ("hello world", "b94d27b9934d3e08a52e52d7da7dabfadeb23f88df5f80cde9c4d2e92d6c2d5d"),
+    ("é", "4a99557e4033c3539de2eb65472017cad5f9557f7a0625a09f1c3f6e2ba69c4c")]
+  for (input, expectedDigest) in shaVectors do
+    let actual := psStandardSnapshotSHA256 input
+    unless actual == expectedDigest do
+      throw (IO.userError ("Standard SHA-256 known-answer failure for " ++
+        reprStr input ++ ": " ++ actual))
+  IO.println ("PSCV0_NATIVE_STANDARD_SHA256_CANDIDATE: " ++
+    psStandardSnapshotSHA256Fingerprint psSelfHostProdPreludeEnvironment)
   let unrelatedAlias := {
     psSelfHostProdPreludeEnvironment with
     exportedAliases := (psRootName "unexpectedAlias", psNatName) ::

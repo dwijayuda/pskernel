@@ -35,7 +35,7 @@ def main : IO Unit := do
   | some (next, _) => scratch := next
 
   if !psKernelC0ScratchValid scratch ||
-      psKernelC0ScratchAbort scratch |>.nodes.size != persistent.nodes.size then
+      (psKernelC0ScratchAbort scratch).nodes.size != persistent.nodes.size then
     throw (IO.userError "C0 scratch discarded or mutated persistent nodes")
 
   match psKernelC0ScratchPromote scratch selected with

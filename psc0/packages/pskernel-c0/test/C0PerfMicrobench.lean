@@ -1227,6 +1227,74 @@ def main : IO Unit := do
     throw (IO.userError "C0 declaration admission result count mismatch")
   IO.println s!"C0_BENCH native_checker_admission accepted_ms={admitEnd - admitStart} rejected_ms={rejectEnd - rejectStart} runs={admissionRuns}"
 
+  -- Complete checked admission in a growing dependency environment.
+  -- Pair the ordinary source admission API against the opt-in indexed
+  -- syntax session with *the same* 120 checked definitions. The indexed
+  -- path delegates all actual checking to the original source kernel,
+  -- so any overhead is optional root retention and cache lifecycle cost.
+  -- No result here establishes superiority over the unchanged original.
+  let admissionChain := PsKernelName.str PsKernelName.anonymous
+    "C0.IndexedSessionAdmissionBenchmark"
+  let chainCount := 120
+  let sharedType := PsKernelExpr.sort (.succ PsKernelLevel.zero)
+  let sharedValue := PsKernelExpr.sort PsKernelLevel.zero
+  let mut plainEnvironment := psKernelEnvironmentEmpty
+  let mut previousName := admissionChain
+  let chainStart ← IO.monoMsNow
+  for i in [:chainCount] do
+    let currentName := PsKernelName.num admissionChain i
+    let value := if i == 0 then sharedValue
+      else PsKernelExpr.const previousName []
+    let info : PsKernelDefinitionInfo := {
+      base := {
+        name := currentName
+        levelParams := []
+        type := sharedType
+      }
+      value := value
+      hints := PsKernelReducibilityHints.abbrevHint
+      safety := PsKernelDefinitionSafety.safe
+    }
+    match psKernelAddDefinition 4096 plainEnvironment info
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.error err =>
+        throw (IO.userError ("C0 checked chain rejected: " ++ err))
+    | Except.ok next => plainEnvironment := next
+    previousName := currentName
+  let chainEnd ← IO.monoMsNow
+  let baseChecker := psKernelMkCheckerSession
+    psKernelEnvironmentEmpty [] PsKernelDefinitionSafety.safe
+    4096 psKernelLeanNatMaxSizeDefault
+  let mut retained := psKernelC0IndexedSessionNew baseChecker
+  previousName := admissionChain
+  let retainedStart ← IO.monoMsNow
+  for i in [:chainCount] do
+    let currentName := PsKernelName.num admissionChain i
+    let value := if i == 0 then sharedValue
+      else PsKernelExpr.const previousName []
+    let info : PsKernelDefinitionInfo := {
+      base := {
+        name := currentName
+        levelParams := []
+        type := sharedType
+      }
+      value := value
+      hints := PsKernelReducibilityHints.abbrevHint
+      safety := PsKernelDefinitionSafety.safe
+    }
+    match psKernelC0IndexedSessionAdmitDefinition 4096 retained info with
+    | Except.error err =>
+        throw (IO.userError ("C0 indexed checked chain rejected: " ++ err))
+    | Except.ok next => retained := next
+    previousName := currentName
+  let retainedEnd ← IO.monoMsNow
+  for i in [:chainCount] do
+    let name := PsKernelName.num admissionChain i
+    if !psKernelEnvironmentContains plainEnvironment name ||
+        !psKernelEnvironmentContains retained.checker.context.environment name then
+      throw (IO.userError "C0 indexed checked admission lost declaration")
+  IO.println s!"C0_BENCH indexed_checked_admission source_ms={chainEnd-chainStart} indexed_session_ms={retainedEnd-retainedStart} definitions={chainCount} syntax_nodes={psKernelC0IndexedSessionNodeCount retained}"
+
   -- Linux process high-water RSS includes the full native benchmark process,
   -- not a per-case allocation count. Report it separately from throughput.
   let status ← IO.FS.readFile "/proc/self/status"

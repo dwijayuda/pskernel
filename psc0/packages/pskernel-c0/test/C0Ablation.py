@@ -46,7 +46,7 @@ def main() -> None:
         file = Path("src/Ps/KernelCore/Core/LocalContext.lean")
         current = (variant / file).read_text()
         start = "def psKernelC0LocalContextNextIndex\n"
-        end = "def psKernelC0LocalIndexLookupThreshold\n"
+        end = "def psKernelLocalContextFind\n"
         a, b = unique_region(current, start, end)
         substitute = """def psKernelC0LocalContextNextIndex
     (_context : PsKernelLocalContext)

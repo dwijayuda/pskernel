@@ -35,10 +35,10 @@ structure PsMapState where
 def psMapEncode (segments : List PsMapSegment) : String :=
   let state := segments.foldl (fun state segment =>
     let newline := segment.line != state.line
-    let prefix := if newline then String.ofList (List.replicate (segment.line - state.line) ';')
+    let separator := if newline then String.ofList (List.replicate (segment.line - state.line) ';')
       else if state.hasSegment then "," else ""
     let column := if newline then 0 else state.column
-    let start := prefix ++ psMapVlq (Int.ofNat segment.column - Int.ofNat column)
+    let start := separator ++ psMapVlq (Int.ofNat segment.column - Int.ofNat column)
     let state := { state with line := segment.line, column := segment.column, hasSegment := true }
     match segment.source with
     | none => { state with chunks := start :: state.chunks }

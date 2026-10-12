@@ -123,3 +123,16 @@ The first [native Lean workflow 38191236078](https://github.com/dwijayuda/pskern
 - `test/C0PerfMicrobench.lean` includes deep-sort comparison timing to isolate the removed repeated guard work and cold session DefEq/WHNF baselines.
 - [CI 38191752791](https://github.com/dwijayuda/pskernel/actions/runs/38191752791) at `c02a60a5906324ce80c2ad895ae30e82ae484f93` passed the native Lean build, regressions and existing performance suite. No self-host tests were run.
 - This is a direct production checker-path optimization in Lean, unlike the separately gated indexed-WHNF engine. End-to-end multi-library performance remains unqualified.
+
+
+### Verified latest guarded-DefEq and indexed-WHNF evidence
+
+[Native CI 38192040598](https://github.com/dwijayuda/pskernel/actions/runs/38192040598) at `06532eac5b8f9cfa2df8b810887ab3f42ba809cb` passed the complete C0 native Lean library build, negative/differential regressions and microbenchmarks, without self-hosting tests.
+
+- `Checker/Knot.lean` uses `psKernelDefEqQuickAfterCommon` only after structural equality and success-cache miss have been established. The public `psKernelDefEqQuick` still performs its own guards for independent callers.
+- A 12,000-iteration, 512-application mismatch benchmark measured 516 ms for general quick checks and 6 ms for the pre-guarded shape check. This is an **isolated helper** win; complete DefEq still incurs the mandatory first scan, so it is not an 86× full-checker speedup.
+- Indexed WHNF unchanged-stuck-spine preservation measured 73 ms for 600 iterations, versus 601 ms for the isolated spine-reassembly operation being avoided (not equivalent end-to-end timings). 
+- Cold accepting WHNF measured 20 ms for 400 fresh-state, 128-application terms; no matched prior kernel baseline yet.
+- The original `psc0/packages/pskernel-core` and `psc0/packages/backend-rust` remain untouched; C0 does not emit independent Rust artifacts or run self-host validation in this workflow.
+
+**Next major architectural step:** reduce recursive syntax↔indexed conversion overhead, introduce owned handle identities within the checker session with context-sensitive cache provenance, and compare complete WHNF/DefEq/checking workloads against the original kernel before promoting indexed execution to the accepting path. Preserve negative-conformance and resource-exhaustion checks.

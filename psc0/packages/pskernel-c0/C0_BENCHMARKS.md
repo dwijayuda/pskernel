@@ -86,3 +86,26 @@ These are **subsystem measurements**, neither complete kernel throughput nor PSC
 The 750-ms reconstruction-only comparison is an isolated cost of the *removed work*: unlike a full original indexed WHNF run it omits the head traversal, and therefore the two first rows are **not** matched full-kernel throughput measurements. All 600 calls retained identical term IDs and node-store sizes. The cold actual-checker sample is a baseline and was not paired with the prior original-kernel implementation. Do not generalize these timings to full declaration admission, WHNF with environment unfolding, DefEq, or memory efficiency.
 
 Other same-run subsystem measurements: native expression equality near parity (2,615 vs 2,624 ms), direct lifting 11,439 to 8,393 ms, specialized single substitution 20,882 to 11,965 ms, and indexed deep-local lookup 2,052 to 68 ms. These are workload-specific single-run measurements.
+
+
+## Guarded DefEq and indexed WHNF performance checkpoint — October 12, 2026
+
+[GitHub Actions 38192040598](https://github.com/dwijayuda/pskernel/actions/runs/38192040598), source commit `06532eac5b8f9cfa2df8b810887ab3f42ba809cb`, passed the native Lean library build, native negative/regression suite and benchmark suite. The workflow deliberately excludes self-hosting tests.
+
+| Native Lean isolated operation | Same-run elapsed | Input |
+|---|---:|---|
+| General quick DefEq after a structural mismatch | 516 ms | 12,000 calls, 512-deep application pairs |
+| Shape-specific quick DefEq after common guards already failed | 6 ms | Same terms, same calls |
+| Reassemble an unchanged indexed application spine | 601 ms | 600 × 256 applications |
+| Indexed WHNF preserving the original stuck-spine handle | 73 ms | Same indexed term, 600 calls |
+| Cold native checker WHNF | 20 ms | 400 fresh-state checks, 128 applications |
+| Indexed shared-DAG recursive rewrite | 909 ms | 70 rewrites, depth 11 |
+| Indexed shared-DAG memoized rewrite | 11 ms | Same DAG, 70 rewrites |
+
+**Interpretation:**
+- The ~86× difference between general and already-guarded quick DefEq is a *microbenchmark of the second-stage helper*, not an 86× improvement of whole DefEq. The accepting checker in `Checker/Knot.lean` still executes the required first structural equality and success-cache check; the optimization removes their repetition before shape-specific quick rules.
+- The indexed stuck-spine measurement compares work avoided by short-circuiting with the new head-walking WHNF path, not matched complete kernel checking.
+- Absolute times are a single hosted Linux CI observation, not medians, p95s, memory measurements, or representative Lean library throughput.
+- The syntax representation is still recursive at the full public checker boundary; the indexed WHNF engine covers a context-free subset, not environment-dependent delta/recursor/quotient/native reductions or checked admission. Do not infer full kernel speedup from these subsystem numbers.
+
+The guarded quick path has an explicit differential regression and the full accepting checker retains its external quick API semantics. No metatheory/self-hosting testing was requested in this performance iteration.

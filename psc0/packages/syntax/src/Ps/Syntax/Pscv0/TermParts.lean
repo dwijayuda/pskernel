@@ -47,38 +47,22 @@ def psPscv0TupleConstruct (span : PsSourceSpan) :
       [(none, first), (none, right)] span
   | _ => throw (.unexpectedEnd "tuple requires at least two elements")
 
-def psPscv0TupleElements (read : PsPscv0TermReader) (fuel : Nat)
-    (cursor : PsTokenCursor) (elementsRev : List PsSyntaxTerm) :
+-- One delimiter-owned sequence reader serves tuple, List and Array
+-- values. A comma is required between elements and optionally trails the
+-- final element. A terminator is always consumed by the enclosing construct.
+def psPscv0DelimitedElements (read : PsPscv0TermReader) (closing : String)
+    (fuel : Nat) (cursor : PsTokenCursor) (acc : List PsSyntaxTerm) :
     Except PsParseError (PsParseResult (List PsSyntaxTerm)) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
-    if psTokenCursorAtText cursor ")" then
-      return { value := elementsRev.reverse, cursor }
-    let next ← read cursor
-    let elementsRev := next.value :: elementsRev
-    if psTokenCursorAtText next.cursor "," then
-      let comma ← psTokenCursorExpectText next.cursor ","
-      psPscv0TupleElements read fuel comma.cursor elementsRev
-    else
-      return { value := elementsRev.reverse, cursor := next.cursor }
-
--- Array literals are ordinary checked Array operations, not a new erased
--- runtime representation. The caller's expected type solves the element type
--- of #[]; push arguments solve it for nonempty literals.
-def psPscv0ArrayElements (read : PsPscv0TermReader) (fuel : Nat)
-    (cursor : PsTokenCursor) (acc : List PsSyntaxTerm) :
-    Except PsParseError (PsParseResult (List PsSyntaxTerm)) := do
-  match fuel with
-  | 0 => throw .fuelExhausted
-  | fuel + 1 =>
-    if psTokenCursorAtText cursor "]" then
+    if psTokenCursorAtText cursor closing then
       return { value := acc.reverse, cursor }
     let next ← read cursor
     let acc := next.value :: acc
     if psTokenCursorAtText next.cursor "," then
       let comma ← psTokenCursorExpectText next.cursor ","
-      psPscv0ArrayElements read fuel comma.cursor acc
+      psPscv0DelimitedElements read closing fuel comma.cursor acc
     else
       return { value := acc.reverse, cursor := next.cursor }
 
@@ -90,7 +74,7 @@ def psPscv0ReadArrayLiteral (read : PsPscv0TermReader)
   if bracket.text != "[" || marker.token.span.stop.byteOffset != bracket.span.start.byteOffset then
     throw (psProofScriptExpectedError "adjacent #[ array literal" marker.cursor)
   let opening ← psTokenCursorExpectText marker.cursor "["
-  let values ← psPscv0ArrayElements read (cursor.remaining.length + 1) opening.cursor []
+  let values ← psPscv0DelimitedElements read "]" (cursor.remaining.length + 1) opening.cursor []
   let close ← psTokenCursorExpectText values.cursor "]"
   let span := psSyntaxSpanJoin marker.token.span close.token.span
   let name := fun (text : String) =>
@@ -101,9 +85,25 @@ def psPscv0ReadArrayLiteral (read : PsPscv0TermReader)
     PsSyntaxTerm.call (name "push") [(none, current), (none, element)] span) empty
   return { value := result, cursor := close.cursor }
 
+-- Ordinary lists retain the existing inductive semantics. The empty
+-- constructor remains a reference (not a nullary call), allowing its implicit
+-- element type to be determined from the expected List type.
+def psPscv0ReadListLiteral (read : PsPscv0TermReader)
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let opening ← psTokenCursorExpectText cursor "["
+  let values ← psPscv0DelimitedElements read "]" (cursor.remaining.length + 1) opening.cursor []
+  let close ← psTokenCursorExpectText values.cursor "]"
+  let span := psSyntaxSpanJoin opening.token.span close.token.span
+  let name := fun (field : String) =>
+    PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "List", field] span)
+  let result := values.value.foldr (fun element tail =>
+    PsSyntaxTerm.call (name "cons") [(none, element), (none, tail)] span) (name "nil")
+  return { value := result, cursor := close.cursor }
+
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   if psTokenCursorAtText cursor "#" then return ← psPscv0ReadArrayLiteral read cursor
+  if psTokenCursorAtText cursor "[" then return ← psPscv0ReadListLiteral read cursor
   if psTokenCursorAtText cursor "{" then return ← psPscv0ReadRecord read cursor
   if ["Type", "Sort", "Prop"].any (psTokenCursorAtText cursor) then
     return ← psPscv0ReadSort cursor
@@ -119,7 +119,7 @@ def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
   let annotated ← psPscv0ReadAscription read inner
   if psTokenCursorAtText annotated.cursor "," then
     let comma ← psTokenCursorExpectText annotated.cursor ","
-    let elements ← psPscv0TupleElements read (cursor.remaining.length + 1)
+    let elements ← psPscv0DelimitedElements read ")" (cursor.remaining.length + 1)
       comma.cursor [annotated.value]
     let close ← psTokenCursorExpectText elements.cursor ")"
     let span := psSyntaxSpanJoin opening.token.span close.token.span

@@ -107,7 +107,7 @@ private def application : String :=
   "  | List.cons head tail => sectionFold(tail)\n" ++
   "}\n" ++
   "end Recursive\n" ++
-  "const recursiveSection: Nat := sectionFold(37, List.cons(1, List.nil))\n" ++
+  "const recursiveSection: Nat := sectionFold(37, [1,])\n" ++
   "function strictDefault{{A: Type}}(value: Nat := 3): Nat := value\n" ++
   "const strictCompleted: Nat := strictDefault(A := Nat)\n" ++
   "const quantifiedId: forall A : Type, A -> A := fun (A: Type) x => x\n" ++
@@ -143,7 +143,7 @@ private def application : String :=
   "}\n" ++
   "end Grouped\n" ++
   "const groupSectionAnswer: Nat := groupSection(Nat, Bool, 56, true)\n" ++
-  "const groupFoldAnswer: Nat := groupFold(Nat, Bool, 57, List.cons(true, List.nil), 0)\n" ++
+  "const groupFoldAnswer: Nat := groupFold(Nat, Bool, 57, [true], 0)\n" ++
   "namespace Data\n" ++
   "structure Duo{A B: Type} where {\n" ++
   "  (A spare: A)\n" ++

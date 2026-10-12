@@ -51,5 +51,8 @@ def psTsEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : Exc
       .text psTsRuntimeSupport] ++
     (view.imports.map fun item => .text (psTsEmitImport item)) ++ structures ++ inductives ++ declarations
   let source ← psRenderDoc (.append (psDocJoin (.append .hardline .hardline) docs) .hardline)
-  psValidateArtifact { target := .typescript, source, symbols := names.symbols.reverse,
+  psValidateArtifact {
+    target := .typescript
+    source := source
+    symbols := names.symbols.reverse
     files := [{ path := stem ++ ".ts", role := .implementation, payload := .text source.text }] }

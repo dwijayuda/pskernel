@@ -81,8 +81,11 @@ def psRustEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : E
     .text "use __ps_runtime::*;"]
   let source ← psRenderDoc (.append
     (psDocJoin (.append .hardline .hardline) (header ++ structures ++ inductives ++ declarations)) .hardline)
-  psValidateArtifact { target := .rust, source, symbols := names.symbols.reverse,
+  psValidateArtifact {
+    target := .rust
+    source := source
+    symbols := names.symbols.reverse
     files := [
       { path := stem ++ ".rs", role := .implementation, payload := .text source.text },
-      { path := "pscv0_runtime.rs", role := .runtime, payload := .text psRustRuntimePrelude }],
+      { path := "pscv0_runtime.rs", role := .runtime, payload := .text psRustRuntimePrelude }]
     dependencies := ["num-bigint=0.4.6", "num-traits=0.2.19"] }

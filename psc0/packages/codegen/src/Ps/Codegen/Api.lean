@@ -38,10 +38,10 @@ def psWitTypeReason (api : PsPublicApi) : Nat → List String → PsVerifiedIrTy
       if seen.contains name then some "recursive value requires a resource/view adapter"
       else if !arguments.isEmpty then some "generic data requires concrete instantiation"
       else
-        let fields := match api.structures.find? (fun s => s.name == name) with
-          | some s => some (s.fields.map (·.type))
-          | none => (api.inductives.find? (fun i => i.name == name)).map
-              (fun i => i.constructors.flatMap fun c => c.fields.map (·.type))
+        let fields : Option (List PsVerifiedIrType) := match api.structures.find? (fun (s : PsVerifiedIrStructure) => s.name == name) with
+          | some s => some (s.fields.map PsVerifiedIrStructureField.type)
+          | none => (api.inductives.find? (fun (i : PsVerifiedIrInductive) => i.name == name)).map
+              (fun (i : PsVerifiedIrInductive) => i.constructors.flatMap fun c => c.fields.map PsVerifiedIrConstructorField.type)
         match fields with
         | none => some ("unknown data type " ++ name)
         | some fields => fields.findSome? (psWitTypeReason api n (name :: seen))
@@ -59,9 +59,24 @@ structure PsTargetCapabilities where
   sourceMaps : Bool
 
 def psTargetCapabilities : PsEmissionTarget → PsTargetCapabilities
-  | .typescript => { target := .typescript, dialect := "typescript-es2020", arbitraryPrecision := true,
-      stackSafeCalls := true, externalImports := false, sourceMaps := false }
-  | .javascript => { target := .javascript, dialect := "ecmascript-2020-esm", arbitraryPrecision := true,
-      stackSafeCalls := true, externalImports := false, sourceMaps := true }
-  | .rust => { target := .rust, dialect := "rust-2021", arbitraryPrecision := true,
-      stackSafeCalls := false, externalImports := false, sourceMaps := false }
+  | .typescript => {
+      target := .typescript
+      dialect := "typescript-es2020"
+      arbitraryPrecision := true
+      stackSafeCalls := true
+      externalImports := false
+      sourceMaps := false }
+  | .javascript => {
+      target := .javascript
+      dialect := "ecmascript-2020-esm"
+      arbitraryPrecision := true
+      stackSafeCalls := true
+      externalImports := false
+      sourceMaps := true }
+  | .rust => {
+      target := .rust
+      dialect := "rust-2021"
+      arbitraryPrecision := true
+      stackSafeCalls := false
+      externalImports := false
+      sourceMaps := false }

@@ -160,7 +160,8 @@ def psRecursorLiftDeclarationsWithOrigins (environment : PsEnvironment)
         return (environment, rewritten :: (lifted.state.helpersRev ++ acc.snd.fst),
           (lifted.state.helpersRev.map fun helper => (psDeclarationName helper, name)) ++ acc.snd.snd)
       | _ => return (acc.fst, declaration :: acc.snd.fst, acc.snd.snd)) (environment, [], [])
-  return { result := { environment := result.fst, declarations := result.snd.fst.reverse },
+  return {
+    result := { environment := result.fst, declarations := result.snd.fst.reverse }
     parents := result.snd.snd }
 
 def psRecursorLiftDeclarations (environment : PsEnvironment)

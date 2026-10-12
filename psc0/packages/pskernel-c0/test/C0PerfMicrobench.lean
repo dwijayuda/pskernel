@@ -277,6 +277,21 @@ def c0BenchTypedLetChain : Nat → PsKernelExpr → PsKernelExpr
         (.sort PsKernelLevel.zero)
         (c0BenchTypedLetChain n leaf) false
 
+/-- Closed fully-checked lambda and its exact expected Pi type. -/
+def c0BenchCheckedLambda : Nat → PsKernelExpr
+  | 0 => .sort PsKernelLevel.zero
+  | n + 1 =>
+      .lam PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0BenchCheckedLambda n) PsKernelBinderInfo.default
+
+def c0BenchCheckedLambdaPi : Nat → PsKernelExpr
+  | 0 => .sort (.succ PsKernelLevel.zero)
+  | n + 1 =>
+      .forallE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0BenchCheckedLambdaPi n) PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -640,6 +655,43 @@ def main : IO Unit := do
     if oldOk != samples || optimizedOk != samples then
       throw (IO.userError "C0 dependent suffix results diverged")
     IO.println s!"C0_BENCH dependent_checked_suffix width={width} calls={samples} old_ms={oldEnd-oldStart} rebuilt_ms={optimizedEnd-optimizedStart}"
+
+  -- Complete checked binder judgments, including fresh local allocation,
+  -- Sort checks, closing inferred Pi types and state publication, measured
+  -- against the separate hook-free source worker inside C0.
+  for depth in [16, 64, 128] do
+    let term := c0BenchCheckedLambda depth
+    let expected := c0BenchCheckedLambdaPi depth
+    let session := psKernelMkCheckerSession
+      psKernelEnvironmentEmpty [] PsKernelDefinitionSafety.safe 4096
+      psKernelLeanNatMaxSizeDefault
+    let count := if depth == 128 then 12 else 36
+    let mut oldCount := 0
+    let oldStart ← IO.monoMsNow
+    for _ in [:count] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelInferCoreWithFuel 4096 whnf defeq
+          session.context session.state term false with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty expected then oldCount := oldCount + 1
+          else throw (IO.userError "historical checked lambda type diverged")
+      | Except.error err =>
+          throw (IO.userError ("historical checked lambda failed: " ++ err))
+    let oldFinish ← IO.monoMsNow
+    let mut newCount := 0
+    let newStart ← IO.monoMsNow
+    for _ in [:count] do
+      match psKernelSessionCheck 4096 session term with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty expected then newCount := newCount + 1
+          else throw (IO.userError "metadata checked lambda type diverged")
+      | Except.error err =>
+          throw (IO.userError ("metadata checked lambda failed: " ++ err))
+    let newFinish ← IO.monoMsNow
+    if oldCount != count || newCount != count then
+      throw (IO.userError "checked lambda sample count differs")
+    IO.println s!"C0_BENCH checked_lambda_inference depth={depth} calls={count} old_ms={oldFinish-oldStart} metadata_ms={newFinish-newStart}"
 
   -- Complete checked inference versus the hook-free source oracle
   -- within *one* C0 revision. Both include type/value/local checking and

@@ -326,6 +326,36 @@ def main : IO Unit := do
     if psKernelC0BinderBodyRangesWithFuel 1 longPi |>.isSome then
       throw (IO.userError "C0 binder metadata did not respect recursion budget")
   IO.println "C0_PERF_REGRESSION exact_binder_body_range_oracle=pass"
+  -- Binder summaries are shared with DefEq, but now also guide real
+  -- fully checked inference. Every domain, fresh name and body still goes
+  -- through the original source typing rules; compare exact error/fuel and
+  -- nextFresh against the hook-free recursive reference.
+  for depth in [1, 8, 11, 12, 13, 32, 64, 96] do
+    for isLambda in [true, false] do
+      for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
+        let term :=
+          if isLambda then c0BinderLambdaTail depth leaf
+          else c0BinderForallTail depth leaf
+        for fuel in [0, 1, 8, 32, 128, 4096] do
+          let defeq := psKernelIsDefEqWithFuel fuel
+          let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+          match psKernelSessionCheck fuel session term,
+              psKernelInferCoreWithFuel fuel whnf defeq
+                session.context session.state term false with
+          | Except.error candidate, Except.error reference =>
+              if candidate != reference then
+                throw (IO.userError
+                  "C0 checked binder changed error classification")
+          | Except.ok (candidate, checked), Except.ok (reference, historical) =>
+              if !(psKernelExprEqual candidate reference &&
+                  checked.state.nextFresh == historical.nextFresh) then
+                throw (IO.userError
+                  "C0 checked binder changed type or fresh names")
+          | _, _ =>
+              throw (IO.userError "C0 checked binder changed acceptance")
+  IO.println "C0_PERF_REGRESSION checked_binder_range_inference=pass"
+
+
   -- A dependent Pi domain referencing an *outer* binder must see
   -- substitution variables newest-first. Metadata changes exact syntax
   -- but not definitional equality; the malformed outer-domain case must

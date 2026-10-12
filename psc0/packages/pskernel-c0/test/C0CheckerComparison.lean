@@ -914,6 +914,38 @@ def main : IO Unit := do
         throw (IO.userError "matched checked zeta definition missing")
     IO.println s!"C0_COMPARE round={round} operation=admit_checked_zeta_library milliseconds={admitZetaEnd-admitZetaStart} declarations=40 depth=64"
 
+    -- Complete accepted library of closed checked lambdas. This fixture
+    -- is intentionally source-identical in C0 and unchanged original.
+    for depth in [32, 64] do
+      let baseName := PsKernelName.num
+        (PsKernelName.str PsKernelName.anonymous "C0CheckedLambdaLibrary")
+        depth
+      let value := c0CompareCheckedLambda depth
+      let expectedType := c0CompareCheckedPi depth
+      let mut environment := empty
+      let admissionStart ← IO.monoMsNow
+      for i in [:24] do
+        let declaration : PsKernelDefinitionInfo := {
+          base := {
+            name := PsKernelName.num baseName i
+            levelParams := []
+            type := expectedType
+          }
+          value := value
+          hints := PsKernelReducibilityHints.abbrevHint
+          safety := PsKernelDefinitionSafety.safe
+        }
+        match psKernelAddDefinition 4096 environment declaration
+            4096 psKernelLeanNatMaxSizeDefault with
+        | Except.ok updated => environment := updated
+        | Except.error err =>
+            throw (IO.userError ("matched checked lambda rejected: " ++ err))
+      let admissionFinish ← IO.monoMsNow
+      for i in [:24] do
+        if !psKernelEnvironmentContains environment (PsKernelName.num baseName i) then
+          throw (IO.userError "matched checked lambda definition missing")
+      IO.println s!"C0_COMPARE round={round} operation=admit_checked_lambda_library milliseconds={admissionFinish-admissionStart} declarations=24 binder_depth={depth}"
+
     let mut admitted := 0
     let mut rejected := 0
     let admissionStart ← IO.monoMsNow

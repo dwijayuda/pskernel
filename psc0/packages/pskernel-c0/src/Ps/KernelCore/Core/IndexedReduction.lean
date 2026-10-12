@@ -134,15 +134,6 @@ def psKernelC0Instantiate1IndexedReference
   if !(psKernelC0StoreValid store replacement) then none
   else psKernelC0Instantiate1IndexedWithFuel entry.depth store id replacement 0
 
-/-- The only reduction performed is beta on an explicit indexed lambda head. -/
-def psKernelC0IndexedBetaStep
-    (store : PsKernelC0TermStore)
-    (fn arg : Nat) :
-    Option (Prod PsKernelC0TermStore Nat) := do
-  let entry ← psKernelC0StoreGet store fn
-  match entry.node with
-  | .lam _ _ body _ => psKernelC0Instantiate1Indexed store body arg
-  | _ => none
 
 /-
 Memoized indexed-beta engine.
@@ -283,3 +274,13 @@ def psKernelC0Instantiate1Indexed
     let (resultState, result) ← psKernelC0InstantiateMemoWithFuel
       entry.depth state id replacement 0
     some (resultState.store, result)
+
+/-- The only reduction performed is beta on an explicit indexed lambda head. -/
+def psKernelC0IndexedBetaStep
+    (store : PsKernelC0TermStore)
+    (fn arg : Nat) :
+    Option (Prod PsKernelC0TermStore Nat) := do
+  let entry ← psKernelC0StoreGet store fn
+  match entry.node with
+  | .lam _ _ body _ => psKernelC0Instantiate1Indexed store body arg
+  | _ => none

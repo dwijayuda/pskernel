@@ -1,4 +1,4 @@
-import Ps.Environment.StandardExcept
+import Ps.Environment.StandardGetElem
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -117,7 +117,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardExceptExtend <| psStandardProductExtend <|
+  psStandardGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
     psStandardInhabitedExtend <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl

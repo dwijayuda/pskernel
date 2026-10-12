@@ -1289,6 +1289,112 @@ def main : IO Unit := do
       psKernelC0IndexedSessionNodeCount promoted != afterRootNodes then
     throw (IO.userError "C0 cached indexed root hash did not match source lookup")
   IO.println "C0_PERF_REGRESSION indexed_cached_root_publication=pass"
+  -- Checked declaration admission can extend the environment of an
+  -- indexed syntax session without reusing stale WHNF/inference/DefEq
+  -- caches. A previously stuck constant must reduce after valid admission,
+  -- but failed admission leaves the previous persistent session untouched.
+  let committedName := PsKernelName.str PsKernelName.anonymous
+    "C0.indexedAdmitted"
+  let committedTerm := PsKernelExpr.const committedName []
+  let validIndexedDefinition : PsKernelDefinitionInfo := {
+    base := {
+      name := committedName
+      levelParams := []
+      type := sort1
+    }
+    value := sort0
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let invalidIndexedDefinition : PsKernelDefinitionInfo :=
+    { validIndexedDefinition with value := sort1 }
+  let initialCheckedSession := psKernelMkCheckerSession
+    psKernelEnvironmentEmpty []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let initialIndexedSession := psKernelC0IndexedSessionNew
+    initialCheckedSession
+  match psKernelC0IndexedSessionWhnf 4096
+      initialIndexedSession committedTerm with
+  | Except.error err =>
+      throw (IO.userError ("C0 preadmission const failed: " ++ err))
+  | Except.ok (unfoldedBefore, beforeAdmission) =>
+      if !(psKernelExprEqual unfoldedBefore committedTerm) then
+        throw (IO.userError "C0 unknown constant unfolded before admission")
+      let originalRoots := psKernelC0IndexedSessionRootCount beforeAdmission
+      let seeded : PsKernelC0IndexedCheckerSession := {
+        beforeAdmission with checker := {
+          beforeAdmission.checker with state := {
+            beforeAdmission.checker.state with nextFresh := 37
+          }
+        }
+      }
+      match psKernelC0IndexedSessionAdmitDefinition 4096
+          seeded invalidIndexedDefinition with
+      | Except.error _ => pure ()
+      | Except.ok _ =>
+          throw (IO.userError "C0 invalid indexed definition was admitted")
+      if psKernelEnvironmentContains
+          seeded.checker.context.environment committedName ||
+          psKernelC0IndexedSessionRootCount seeded != originalRoots then
+        throw (IO.userError "C0 rejected indexed admission mutated snapshot")
+      match psKernelC0IndexedSessionAdmitDefinition 4096
+          seeded validIndexedDefinition with
+      | Except.error err =>
+          throw (IO.userError ("C0 indexed admission rejected valid: " ++ err))
+      | Except.ok accepted =>
+          if !psKernelEnvironmentContains accepted.checker.context.environment
+              committedName ||
+              accepted.checker.state.nextFresh != 37 ||
+              psKernelC0IndexedSessionRootCount accepted < originalRoots then
+            throw (IO.userError "C0 indexed admission lost context/syntax/fresh")
+          match psKernelC0IndexedSessionWhnf 4096
+              accepted committedTerm with
+          | Except.ok (afterValue, _) =>
+              if !(psKernelExprEqual afterValue sort0) then
+                throw (IO.userError "C0 indexed admission reused stale WHNF")
+          | Except.error err =>
+              throw (IO.userError ("C0 indexed post-admission WHNF failed: " ++ err))
+          let axiomName := PsKernelName.str PsKernelName.anonymous
+            "C0.indexedAxiom"
+          let axiom : PsKernelAxiomInfo := {
+            base := { name := axiomName, levelParams := [], type := sort1 }
+            isUnsafe := false
+          }
+          match psKernelC0IndexedSessionAdmitAxiom 4096 accepted axiom with
+          | Except.error err =>
+              throw (IO.userError ("C0 indexed axiom rejected: " ++ err))
+          | Except.ok withAxiom =>
+              if !psKernelEnvironmentContains
+                    withAxiom.checker.context.environment axiomName ||
+                  withAxiom.checker.state.nextFresh != 37 then
+                throw (IO.userError "C0 indexed axiom environment or fresh lost")
+              let dependentName := PsKernelName.str PsKernelName.anonymous
+                "C0.indexedDependency"
+              let dependentDefinition : PsKernelDefinitionInfo := {
+                base := {
+                  name := dependentName
+                  levelParams := []
+                  type := sort1
+                }
+                value := .const axiomName []
+                hints := PsKernelReducibilityHints.abbrevHint
+                safety := PsKernelDefinitionSafety.safe
+              }
+              match psKernelC0IndexedSessionAdmitDefinition 4096
+                  withAxiom dependentDefinition with
+              | Except.error err =>
+                  throw (IO.userError ("C0 indexed dependency admission failed: " ++ err))
+              | Except.ok finalSession =>
+                  if !psKernelEnvironmentContains
+                        finalSession.checker.context.environment dependentName ||
+                      finalSession.checker.state.nextFresh != 37 then
+                    throw (IO.userError "C0 indexed dependent admission lost context")
+              if psKernelEnvironmentContains
+                  accepted.checker.context.environment axiomName then
+                throw (IO.userError "C0 indexed admission mutated old environment")
+  IO.println "C0_PERF_REGRESSION indexed_session_checked_admission=pass"
+
+
 
 
   -- Old hash buckets discarded binder name/info and let names, producing

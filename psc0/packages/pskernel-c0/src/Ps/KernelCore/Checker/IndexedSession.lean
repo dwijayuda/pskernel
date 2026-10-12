@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Session
 import Ps.KernelCore.Core.IndexedExpr
+import Ps.KernelCore.Admission.Declaration.Admission
 
 /-
 Opt-in, session-owned indexed expression retention around the accepting
@@ -196,3 +197,98 @@ def psKernelC0IndexedSessionIsDefEq
   let kept := psKernelC0IndexedSessionKeep { session with checker := checked } left
   let kept := psKernelC0IndexedSessionKeep kept right
   pure (value, kept)
+
+/-
+  Checked declaration admission on a persistent indexed *syntax* session.
+
+  The original native checker validates each full declaration atomically.
+  When a declaration is accepted, every environment-dependent checker
+  cache is discarded before the next check, while nextFresh, local context,
+  resource configuration and the immutable indexed syntax store survive.
+  Retained roots are not checked judgments and remain valid syntax across
+  environments. A rejection does not return an updated session.
+
+  This is an opt-in session-management boundary. Inference, DefEq, WHNF
+  and declaration checks are still executed by the recursive accepting
+  checker. No indexed term handle grants admission.
+-/
+private def psKernelC0IndexedSessionCommitEnvironment
+    (session : PsKernelC0IndexedCheckerSession)
+    (environment : PsKernelEnvironment) :
+    PsKernelC0IndexedCheckerSession :=
+  let context := psKernelCheckerContextWithEnvironment
+    session.checker.context environment
+  let state : PsKernelCheckerState :=
+    { psKernelCheckerStateEmpty with
+      nextFresh := session.checker.state.nextFresh }
+  { session with checker := { context := context, state := state } }
+
+/-- Admission syntax is optional acceleration data, never acceptance data. -/
+private def psKernelC0IndexedSessionKeepAdmitted
+    (session : PsKernelC0IndexedCheckerSession)
+    (type : PsKernelExpr)
+    (value : Option PsKernelExpr) : PsKernelC0IndexedCheckerSession :=
+  let kept := psKernelC0IndexedSessionKeep session type
+  match value with
+  | none => kept
+  | some body => psKernelC0IndexedSessionKeep kept body
+
+/-- Exact checked axiom admission, with environment-cache invalidation. -/
+def psKernelC0IndexedSessionAdmitAxiom
+    (fuel : Nat)
+    (session : PsKernelC0IndexedCheckerSession)
+    (info : PsKernelAxiomInfo) :
+    Except String PsKernelC0IndexedCheckerSession := do
+  let environment ← psKernelAddAxiom fuel
+    session.checker.context.environment info
+    session.checker.context.maxRecDepth
+    session.checker.context.maxNatSize
+  let committed := psKernelC0IndexedSessionCommitEnvironment
+    session environment
+  pure (psKernelC0IndexedSessionKeepAdmitted
+    committed info.base.type none)
+
+/-- Exact checked definition admission; no source checker rule is bypassed. -/
+def psKernelC0IndexedSessionAdmitDefinition
+    (fuel : Nat)
+    (session : PsKernelC0IndexedCheckerSession)
+    (info : PsKernelDefinitionInfo) :
+    Except String PsKernelC0IndexedCheckerSession := do
+  let environment ← psKernelAddDefinition fuel
+    session.checker.context.environment info
+    session.checker.context.maxRecDepth
+    session.checker.context.maxNatSize
+  let committed := psKernelC0IndexedSessionCommitEnvironment
+    session environment
+  pure (psKernelC0IndexedSessionKeepAdmitted
+    committed info.base.type (some info.value))
+
+/-- Exact checked theorem admission; retain only admitted source syntax. -/
+def psKernelC0IndexedSessionAdmitTheorem
+    (fuel : Nat)
+    (session : PsKernelC0IndexedCheckerSession)
+    (info : PsKernelTheoremInfo) :
+    Except String PsKernelC0IndexedCheckerSession := do
+  let environment ← psKernelAddTheorem fuel
+    session.checker.context.environment info
+    session.checker.context.maxRecDepth
+    session.checker.context.maxNatSize
+  let committed := psKernelC0IndexedSessionCommitEnvironment
+    session environment
+  pure (psKernelC0IndexedSessionKeepAdmitted
+    committed info.base.type (some info.value))
+
+/-- Exact checked opaque admission; the original checker decides safety. -/
+def psKernelC0IndexedSessionAdmitOpaque
+    (fuel : Nat)
+    (session : PsKernelC0IndexedCheckerSession)
+    (info : PsKernelOpaqueInfo) :
+    Except String PsKernelC0IndexedCheckerSession := do
+  let environment ← psKernelAddOpaque fuel
+    session.checker.context.environment info
+    session.checker.context.maxRecDepth
+    session.checker.context.maxNatSize
+  let committed := psKernelC0IndexedSessionCommitEnvironment
+    session environment
+  pure (psKernelC0IndexedSessionKeepAdmitted
+    committed info.base.type (some info.value))

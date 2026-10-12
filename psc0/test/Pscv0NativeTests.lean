@@ -941,7 +941,7 @@ private def projectBoundaries : IO Unit := do
         psNameToString name == "$psc0Private.PrivateB.same") do
     throw (IO.userError "two private module identities collided or lost scope")
   let rawSource := "const rawQuotes: String := r#\"two \"quotes\" and \\n\"#\ntheorem quotesMatch: rawQuotes = \"two \\\"quotes\\\" and \\\\n\" := by { rfl }\nconst rawLines: String := r\"one\ntwo\"\ntheorem linesMatch: rawLines = \"one\\ntwo\" := by { rfl }\n"
-  unless (psPscv0ParseProgram "const raw: String := r#\"unterminated\n").isOk do
+  if (psPscv0ParseProgram "const raw: String := r#\"unterminated\n").isOk then
     throw (IO.userError "raw literal lexer accepted an unterminated delimiter")
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],

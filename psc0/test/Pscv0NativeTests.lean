@@ -945,6 +945,9 @@ private def projectBoundaries : IO Unit := do
     throw (IO.userError "raw literal lexer accepted an unterminated delimiter")
   let numeralSource := "const decimal: Nat := 1_234_567\ntheorem decCorrect: decimal = 1234567 := by { rfl }\nconst hexadecimal: Nat := 0xDeaD_Beef\ntheorem hexCorrect: hexadecimal = 3735928559 := by { rfl }\nconst binary: Nat := 0B1010_0011\ntheorem binCorrect: binary = 163 := by { rfl }\nconst octal: Nat := 0o17\ntheorem octCorrect: octal = 15 := by { rfl }\n"
   let invalidNumeral := "const broken: Nat := 0x_\n"
+  let tostringSource :=
+    "const echoed: String := ToString.toString(\"ready\")\n" ++
+    "const represented: String := ToString.toString(Int.ofNat(7))\n"
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },
@@ -964,7 +967,9 @@ private def projectBoundaries : IO Unit := do
       modules := [privateA, privateB], targets := [.javascript] },
     { source := rawSource, moduleName := "RawStrings" },
     { source := numeralSource, moduleName := "RadixNumerals" },
-    { source := invalidNumeral, moduleName := "InvalidNumeral" }]
+    { source := invalidNumeral, moduleName := "InvalidNumeral" },
+    { source := tostringSource, moduleName := "StandardToString",
+      targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -989,11 +994,14 @@ private def projectBoundaries : IO Unit := do
     | 2, .error error | 3, .error error | 5, .error error | 9, .error error =>
         unless error.phase == "module" do
           throw (IO.userError ("module visibility/reflexivity checked at wrong boundary: " ++ error.phase))
+    | 14, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked ToString dictionary missing backend artifacts")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
-  IO.println "PSCV0_NATIVE_MODULES: PASS module boundaries, RC4 raw/radix literals, abbreviation exposure and entry exports"
+  IO.println "PSCV0_NATIVE_MODULES: PASS module boundaries, RC4 raw/radix, checked ToString dictionaries, abbreviation exposure and entry exports"
 
 def main : IO Unit := do
   emissionBoundary

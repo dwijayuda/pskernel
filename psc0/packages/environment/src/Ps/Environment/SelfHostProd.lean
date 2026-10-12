@@ -1,4 +1,4 @@
-import Ps.Environment.StandardEquality
+import Ps.Environment.StandardToString
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -137,7 +137,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardPreludeExtend <|
+  psStandardPreludeExtendWithToString <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl
         (PsRecursorInfo.mk
@@ -152,7 +152,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  psEmptyDeclarations ++ psStandardPreludeDeclarations ++ match
+  psEmptyDeclarations ++ psStandardPreludeDeclarationsWithToString ++ match
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with

@@ -123,6 +123,16 @@ def psKernelC0ChildDepth
   | Option.some entry => entry.depth
   | Option.none => 0
 
+/-- Include every binder identity field in the canonical-node hash.
+    This is only an acceleration hint: exact node equality still guards
+    every hash collision. -/
+def psKernelC0BinderInfoHash (info : PsKernelBinderInfo) : Nat :=
+  match info with
+  | .default => 0
+  | .implicit => 1
+  | .strictImplicit => 2
+  | .instImplicit => 3
+
 def psKernelC0NodeHash
     (store : PsKernelC0TermStore)
     (node : PsKernelC0Node) : Nat :=
@@ -139,19 +149,29 @@ def psKernelC0NodeHash
       psKernelCacheMix
         (psKernelCacheMix 26 (psKernelC0ChildHash store fn))
         (psKernelC0ChildHash store arg)
-  | .lam _ ty body _ =>
-      psKernelCacheMix
-        (psKernelCacheMix 27 (psKernelC0ChildHash store ty))
-        (psKernelC0ChildHash store body)
-  | .forallE _ ty body _ =>
-      psKernelCacheMix
-        (psKernelCacheMix 28 (psKernelC0ChildHash store ty))
-        (psKernelC0ChildHash store body)
-  | .letE _ ty value body nondep =>
+  | .lam name ty body info =>
       psKernelCacheMix
         (psKernelCacheMix
           (psKernelCacheMix
-            (psKernelCacheMix 29 (psKernelC0ChildHash store ty))
+            (psKernelCacheMix 27 (psKernelCacheNameHash name))
+            (psKernelC0ChildHash store ty))
+          (psKernelC0ChildHash store body))
+        (psKernelC0BinderInfoHash info)
+  | .forallE name ty body info =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          (psKernelCacheMix
+            (psKernelCacheMix 28 (psKernelCacheNameHash name))
+            (psKernelC0ChildHash store ty))
+          (psKernelC0ChildHash store body))
+        (psKernelC0BinderInfoHash info)
+  | .letE name ty value body nondep =>
+      psKernelCacheMix
+        (psKernelCacheMix
+          (psKernelCacheMix
+            (psKernelCacheMix
+              (psKernelCacheMix 29 (psKernelCacheNameHash name))
+              (psKernelC0ChildHash store ty))
             (psKernelC0ChildHash store value))
           (psKernelC0ChildHash store body))
         (if nondep then 1 else 0)

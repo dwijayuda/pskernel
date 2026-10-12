@@ -1,36 +1,30 @@
 # Current AI handoff — PSCV0 v7 native Lean (12 October 2026)
 
-**Authoritative latest handoff. Historical qualification records below are not current acceptance claims.**
+**Authoritative active status**; older sections below preserve historical checkpoints.
+Repository https://github.com/dwijayuda/pskernel; working branch `psc0/pscv0-v7-native-lean-v1`; draft PR https://github.com/dwijayuda/pskernel/pull/109.
 
-Repository: https://github.com/dwijayuda/pskernel
-Branch: `psc0/pscv0-v7-native-lean-v1` · Draft PR: https://github.com/dwijayuda/pskernel/pull/109.
-**Latest fully qualified executable source:** `1a29ecc9ed77ec0d6ae2c48df79b3bd5973dcddc`.
-**Green Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38249590861 (all jobs passed).
-**Other qualifying checkpoint:** `399cefb64c3d0b719de153738cf38a9393866461`, https://github.com/dwijayuda/pskernel/actions/runs/38249164390 — three-module runtime integration passed.
-**Profile is unchanged:** `pscv0-v7-native-bounded/48`. The named Profile 49 module-foundation milestone was not a complete v7 language profile.
+**Latest qualified executable source:** `54899bd8dbfaa5d118a3cc8c1b2a744bd40d5049`.
+**Full green Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38257103317.
+**Pinned official Lean:** `4.35.0-rc4` at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+**Bounded source profile:** `pscv0-v7-native-bounded/48` (unchanged; full v7 not claimed).
 
-## Qualified module work
+## Qualified coherent v7 work
 
-- Native .lean parser and elaborator now track source `private` visibility on ordinary and registered declarations. Public interfaces exclude private members, preserve private implementations in the checked/runtime closure, and reject public signatures containing private names.
-- RC4-style imported ordinary public `def` bodies stay opaque; public `abbrev` bodies are exposed to downstream elaboration. An exposed abbreviation body that refers to a private name rejects. Compact accepted and refused proof cases pass under the pinned official Lean 4.35.0-rc4 checker (commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
-- `import` and `public import` interfaces resolve transitive facade and diamond paths, deduplicate equal imported instance identities, and reject missing modules, cycles, duplicate source identities and duplicate project declaration identities. Name resolution via namespace and `open` is boundedly tested.
-- Native manifest-driven `--check-project`, `--emit-project-all`, `--emit-project-wasm-core`, `--emit-project-wasm` run for `psc0/v7-native/module-fixture/project.json`. The checked project has three source files (`Vault.ps`, `Facade.ps`, `App.ps`) and one exposed entry `App.compute`. JavaScript, compiled TypeScript and Rust each run `App.compute(7) = 18`; source maps and origins identify all three files; Wasm GC core and component artifacts pass pinned wasm-tools validation.
-- Existing **171 shared runtime observations** remain green in direct JS, TypeScript, Rust, Node/V8 Wasm GC and Wasmtime. The existing native closure and negative checks remain green. No alternate kernel provider or unchecked proof admission is introduced.
-- CI was extended in `.github/workflows/psc0-pscv0-native-v7.yml` rather than creating a separate test harness stack.
+1. **Module identity and interfaces.** Manifest-driven topological import/public-import planning now compiles only the selected entry module's transitive dependency closure. Native source parsing/elaboration support `private` declarations and module-qualified private kernel names. Two separate imported files may both define a private `same` without cross-module collisions. Source uses within its defining module resolve by a portable private-alias map, including tactic-source environments. Public signatures and exposed abbreviation bodies cannot refer to private declarations; private runtime helpers remain linked, not publicly exported.
+2. **RC4 opacity and re-exports.** Ordinary public definitions are not unfolded from importing modules. Selected public `abbrev` bodies remain exposed to the importer. Public-import facades and simple diamond paths are checked, imported instance identities deduplicated, namespace/open source resolution boundedly qualified, and entry-only API selections retained.
+3. **Executable project proof of concept.** `psc0/v7-native/module-fixture/project.json` compiles Vault → Facade → App, officially Lean-checked and emitted through native manifest CLI. Direct JS, compiled TypeScript and Rust execute `App.compute(7) = 18`; JS provenance/source maps retain all three source files, and generated Wasm GC core/component binaries validate with pinned wasm-tools. New fixture-specific Wasm execution remains an open qualification, not claimed.
+4. **Native Lean-literal selection.** Portable lexer and elaborator now handle RC4-style `r"..." ` / `r#"... "#` raw strings with hash-delimited embedded quotes and literal backslashes, LF newlines/CRLF normalization, and invalid unterminated-delimiter refusal. It also supports grouped decimal plus `0b`/`0B`, `0o`/`0O`, `0x`/`0X` integer literals. The same radix parser checks digits and separator boundaries, and compact `rfl` proofs certify expected values. Unsupported scientific/floating literal syntax is not claimed.
+5. **Regression evidence.** Linux run 38257103317 passed the same existing **171 runtime observations** for JS, TS, Rust, V8 Wasm GC, and Wasmtime components/core, including pinned Wasm validation and project artifacts. No kernel replacement, pskernel-core, source migration or self-hosting was introduced. Bounded negative/refusal cases remain green.
 
-## Remaining high-priority module work
+**Source chronology:** module-private hygiene `17fd0ac51aa39ddb4b5cf609ba3a8beaf1df2937`, [38255328142](https://github.com/dwijayuda/pskernel/actions/runs/38255328142); raw literal `fcc4818e601ea383e3c3f42a882fbbbcef9e63a9`, [38256598253](https://github.com/dwijayuda/pskernel/actions/runs/38256598253); radix literal `54899bd8dbfaa5d118a3cc8c1b2a744bd40d5049`, [38257103317](https://github.com/dwijayuda/pskernel/actions/runs/38257103317).
 
-Do **not** mark RC4 modules complete. In particular, source-private declaration identities still need hygienic module-local naming to avoid same-name collisions across separate modules. Prove accurate private/public types and generated declarations, namespace/open collision precedence, exposure/opacity for all supported registrations (including appropriate instance bodies), stable same-priority imported instance ordering and independent import-order behavior. Resolve library/link and public API distinctions for all selected targets, including full Wasm *execution* of the new three-module fixture (the new Wasm project artifact is currently validated, not independently run as a new module observation).
+## Next dependency-driven essentials; do not claim completion early
 
-Then implement remaining core/essential v7 reference capabilities: Standard environment, numeric/floating/scalar literals and GetElem, deriving, dependent/mutual data and termination, generalized typed do/effects/state/control, tactics/rewriting, contracts, VC generation and assumption/effect/erasure assurance closure.
+Finish the RC4 module interface invariants: stable instance/import precedence, all supported private/generated declaration families, complete exported-signature closure and collision diagnostics, independent module-specific Wasm execution, and multifiIe assurance. Then complete the pinned Standard class/notation/coercion registry and selected scalar/Float/Float32/scientific literals, `GetElem` semantics and indexed proofs, interpolation and `ToString` environment, allowlisted checked deriving and generated instances. Subsequently close dependent/mutual inductives, termination and well-founded recursion, generalized typed do effects/state/control, proof-producing rewriting and tactics, `given/requires/ensures`, VC generation and exact assumption/effect/erasure assurance ledger. Validate at coherent architectural milestones with minimal new checks and existing integration matrix. The compiler remains partial relative to the canonical `PSCV0_LANGUAGE_REFERENCE.md` v7 target.
 
-## Mandatory workflow and architecture
+## Required workflow and architecture
 
-Portable native `.lean` compiler only; official Lean **4.35.0-rc4**; GitHub connector for all repository writes/reads and Linux GitHub Actions for compilation/qualification. No local checkout, Desktop Commander, pskernel-core integration, source .ps migration, bootstrap/self-hosting, C5 readable reconstruction, main merge, release, force push or branch deletion. Keep existing draft PR and full history. Preserve Wasm GC internally, linear memory only at Canonical ABI boundaries and existing checked-IR/JS/TS/Rust/Wasm contracts.
-
-Update roadmap/evidence with exact latest qualified **executable** commit and CI run; documentation-only commits do not themselves requalify runtime behavior. Prefer systemic shared fixes and a compact negative/positive qualification rather than repeated test-specific patches.
-
-**Next-chat prompt:** `psc0/AI_CONTINUE_PROMPT.md`.
+Maintain portable native `.lean` source and official Lean 4.35.0-rc4 checker. GitHub connector is the canonical read/write surface; Linux GitHub Actions is the only build/test runner. No local checkout/build, Desktop Commander, pskernel-core integration/replacement, compiler-source `.ps` migration, bootstrap/self-hosting, C5 readable reconstruction, main merge, release, force push, or branch deletion. Keep PR #109 draft. Preserve Wasm GC internally and linear memory only at explicit Canonical ABI boundaries and the current JS/TS/Rust/Wasm contracts. `AI_WORK_STATE.md` and this roadmap must record exact qualified executable SHAs and CI results.
 
 
 ---

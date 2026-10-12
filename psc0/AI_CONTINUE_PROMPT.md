@@ -1,18 +1,34 @@
-# Next-chat prompt — PSCV0 v7 native Lean language-first continuation
+# PSCV0 v7 — Native Lean continuation from latest qualified source
 
-Continue my public open-source ProofScript PSCV0 v7 compiler at https://github.com/dwijayuda/pskernel.
-Branch: `psc0/pscv0-v7-native-lean-v1`. Existing draft PR #109 (do not merge).
+Repository: https://github.com/dwijayuda/pskernel
+Branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+Latest executable checkpoint: `54899bd8dbfaa5d118a3cc8c1b2a744bd40d5049`.
+Linux CI green: https://github.com/dwijayuda/pskernel/actions/runs/38257103317.
 
-First read `psc0/AI_WORK_STATE.md` (the top active handoff takes precedence over older records), `psc0/PSCV0_LANGUAGE_REFERENCE.md`, and `psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md`. Resolve the current GitHub branch HEAD before any writes and inspect the affected implementation.
+Read the TOP of `psc0/AI_WORK_STATE.md`, canonical
+`psc0/PSCV0_LANGUAGE_REFERENCE.md`, and
+`psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md` FIRST. Resolve live
+GitHub HEAD before editing. The new native source supports checked
+module-private identity, entry-reachable project closure, RC4-style public
+definition opacity/exposed abbreviations, runnable 3-file JS/TS/Rust
+linking, Wasm GC binary validation, raw strings and grouped radix literals.
+The source profile stays `pscv0-v7-native-bounded/48`.
+All 171 shared JS/TS/Rust/V8 Wasm/Wasmtime observations passed.
 
-Latest fully green executable checkpoint: `754108eb861ef19642b6f3ae9e17e7313ef179bb`; Linux CI: https://github.com/dwijayuda/pskernel/actions/runs/38244878977. Current bounded source profile is `pscv0-v7-native-bounded/48`. The user calls the newly qualified module foundation Profile 49; this does not imply full v7 conformance. CI passed 171 shared observations in JS, TS, Rust and Wasm; 159 portable and 167 native Lean modules, 4 checked programs, 92 phase-specific refusals and the compact module-planning check.
+Continue dependency-driven work to complete all remaining core and essential
+v7 language features, starting with full module/Standard semantic rules,
+deriving, GetElem, interpolated strings and scalar numeric families, then
+mutual/termination, generalized typed do/effects, proof-producing rewriting,
+contracts/VCs and assurance closure. Implement coherent native Lean
+abstractions before testing; reuse the compact Linux Actions integration
+matrix. Avoid test-driven special-case patches.
 
-Recent implementation: `packages/compiler/src/Ps/Compiler/Pscv0Modules.lean` handles named, in-memory .ps modules, explicit `import`/`public import`, topological dependency planning, checked imported interfaces and missing/cycle refusal. The native host and `scripts/Pscv0Native.lean` now support manifest-driven project checking/emission. Full RC4 module visibility and standalone multi-file executable conformance are still pending.
+Mandatory: .lean-only source, official Lean 4.35.0-rc4 checking, GitHub
+connector-only reads/writes and Linux GitHub Actions builds/tests. Never
+use local checkout/build, Desktop Commander, pskernel-core, .ps compiler
+migration, bootstrap/self-hosting, C5 source reconstruction, main merge,
+release, force push or branch deletion. Preserve Wasm GC internals/Canonical
+ABI linear memory and all backend contracts. Keep AI_WORK_STATE and roadmap
+current with *qualified executable* commit and CI SHA; do not infer full v7
+from green bounded evidence.
 
-PRIORITY: Finish multi-module language semantics and runnable linking before unrelated features: default public/private source declarations, RC4 imported-body opacity, public-import and namespace/open visibility, diamonds/collisions, deterministic class/instance identity, runtime library linking, entry-only exports, and project-relative provenance. Prove actual prepared project closure through official Lean checking, and run a compact multi-file executable case across the existing backend matrix. Do not infer new CLI end-to-end coverage solely from a green legacy integration run.
-
-Then continue all other essential language families from the canonical v7 roadmap: Standard manifest and typeclass completeness, literals/typed scalars/GetElem/deriving, dependent and mutual data, well-founded termination, generalized typed do/effects/state/control, proof-producing rewriting and tactics, contracts/VCs and the assumption/effect/erasure assurance ledger. Think systemically and fix shared causes, not individual failing tests. Keep minimal high-value tests.
-
-CONSTRAINTS: The compiler stays fully native, clean, extensible, portable `.lean` and checked against official pinned Lean 4.35.0-rc4. Use GitHub tools for ALL repository reads/writes, and Linux GitHub Actions for compiling/testing; no local checkout/build or Desktop Commander. Keep the same branch/PR; non-force expected-head writes; preserve history and previously qualified backends, source maps and Wasm GC semantics (linear memory only at Canonical ABI boundaries). No pskernel-core, compiler-source migration to .ps, self-hosting, bootstrap checks, C5 source reconstruction, main merge or release yet.
-
-Work autonomously as far as possible in this chat. Keep `psc0/AI_WORK_STATE.md` and the roadmap current with exact commits and CI receipts. Report qualified capability limits, not just green status.

@@ -63,7 +63,7 @@ private def getElemFoundationCases : IO Unit := do
     "instance alwaysOptional: GetElem?(AlwaysBox, Nat, Nat, fun (_: AlwaysBox) => fun (_: Nat) => True) where {\n" ++
     "  toGetElem := alwaysGet\n" ++
     "  getElem?(xs: AlwaysBox, i: Nat): Option Nat := Option.some(xs.value)\n" ++
-    "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := xs.value\n" ++
+    "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := GetElem?.getElem!Default(Option.some(xs.value))\n" ++
     "}\n" ++
     "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++
     "const bangResult: Nat := (AlwaysBox.mk(41))[42]!\n" ++
@@ -688,7 +688,7 @@ private def application : String :=
   "instance alwaysOptional: GetElem?(AlwaysBox, Nat, Nat, fun (_: AlwaysBox) => fun (_: Nat) => True) where {\n" ++
   "  toGetElem := alwaysGet\n" ++
   "  getElem?(xs: AlwaysBox, i: Nat): Option Nat := Option.some(xs.value)\n" ++
-  "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := xs.value\n" ++
+  "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := GetElem?.getElem!Default(Option.some(xs.value))\n" ++
   "}\n" ++
   "function atOptional(xs: AlwaysBox): Nat := Option.getD(xs[42]?, 0)\n" ++
   "function atBang(xs: AlwaysBox): Nat := xs[42]!\n" ++
@@ -704,7 +704,9 @@ private def application : String :=
   "const indexTrueRuntime: Nat := ProofIndexRuntime.alwaysAt(ProofIndexRuntime.AlwaysBox.mk(319))\n" ++
   "const indexOptionalRuntime: Nat := ProofIndexRuntime.atOptional(ProofIndexRuntime.AlwaysBox.mk(327))\n" ++
   "const indexBangRuntime: Nat := ProofIndexRuntime.atBang(ProofIndexRuntime.AlwaysBox.mk(329))\n" ++
-  "const indexAndRuntime: Nat := ProofIndexRuntime.andAt(ProofIndexRuntime.AndBox.mk(323))\n"
+  "const indexAndRuntime: Nat := ProofIndexRuntime.andAt(ProofIndexRuntime.AndBox.mk(323))\n" ++
+  "const bangDefaultValue: Nat := GetElem?.getElem!Default(Option.some(337))\n" ++
+  "function bangDefaultTrap(n: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

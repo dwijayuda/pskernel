@@ -18,8 +18,10 @@ const wrappers = observations.map(({name, type, args, expected}, i) => {
       : 'Nat.beq(' + call + ', ' + String(expected) + ')';
   return 'const wasmCheck' + i + ': Bool := ' + compare;
 });
-await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' + wrappers.join('\n') + '\n');
+await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' +
+  wrappers.join('\n') + '\n' +
+  'const wasmBangTrap: Bool := Nat.beq(bangDefaultTrap(0), 0)\n');
 await writeFile(path.join(directory, 'wasm/observations.exports.json'),
-  JSON.stringify(observations.map((_, i) => 'wasmCheck' + i)));
+  JSON.stringify([...observations.map((_, i) => 'wasmCheck' + i), 'wasmBangTrap']));
 
 await writeFile(path.join(directory, 'wasm/observation-count.txt'), String(observations.length));

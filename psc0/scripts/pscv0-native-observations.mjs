@@ -15,6 +15,7 @@ export const observations = [
   { name: "indexTrueRuntime", args: null, expected: 319n },
   { name: "indexOptionalRuntime", args: null, expected: 327n },
   { name: "indexBangRuntime", args: null, expected: 329n },
+  { name: "bangDefaultValue", args: null, expected: 337n },
   { name: "indexAndRuntime", args: null, expected: 323n },
   { name: "proofClosure", args: null, expected: 119n },
   { name: "proofEntry", args: null, expected: 119n },

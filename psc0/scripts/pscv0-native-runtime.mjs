@@ -22,6 +22,9 @@ try {
 }
 for (const {name, args, expected} of observations)
   assert.equal(args === null ? output[name] : output[name](...args), expected, name);
+assert.throws(() => output.bangDefaultTrap(0n),
+  error => error instanceof Error && error.message.includes("index out of bounds"),
+  "outOfBounds must not execute its kernel-level default at runtime");
 assert.deepEqual(Object.keys(output.checkedPair), ['first', 'second']);
 assert.deepEqual(Object.keys(output.checkedList), ['head', 'tail']);
 console.log(`PSCV0_NATIVE_RUNTIME: PASS ${observations.length} shared runtime observations (${process.argv[3] ?? 'typescript'})`);

@@ -54,6 +54,19 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
   } else if (name === 'natural-probe' || name === 'observations') {
     for (const [foreign] of exportsOf(declared)) {
       const internal = foreign.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      if (name === 'observations' && internal === 'wasmBangTrap') {
+        assert.throws(() => instance.exports[internal](), WebAssembly.RuntimeError,
+          'outOfBounds must trap under V8 Wasm GC');
+        for (const args of [
+          ['run', '--invoke', internal, stem + '.core.wasm'],
+          ['run', '--invoke', componentCall(foreign), stem + '.wasm']]) {
+          const trapped = spawnSync('wasmtime', args, {encoding: 'utf8'});
+          assert.notEqual(trapped.status, 0, 'outOfBounds returned under Wasmtime');
+          assert.match(trapped.stderr, /trap|unreachable/i,
+            'outOfBounds failure was not a Wasm trap');
+        }
+        continue;
+      }
       assert.equal(instance.exports[internal](), 1, internal);
       // The embedding harness runs the full table once per instance in both
       // core/component forms, avoiding hundreds of engine startups.

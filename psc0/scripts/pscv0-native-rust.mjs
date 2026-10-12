@@ -18,10 +18,24 @@ const assertions = observations.map(({name, type, argTypes, args, expected}) => 
     '(' + (args ?? []).map((v, i) => value(v, argTypes?.[i] ?? 'nat')).join(', ') +
     '), ' + value(expected, type) + ', "' + name + '");';
 });
+const panicName = names.get('bangDefaultTrap');
+assert(panicName, 'missing checked outOfBounds runtime symbol');
+const panicAssertions = [
+  '    let trapped = std::panic::catch_unwind(|| application::' + panicName + '(nat("0")));',
+  '    match trapped {',
+  '        Ok(_) => panic!("outOfBounds returned default"),',
+  '        Err(error) => {',
+  '            let message = error.downcast_ref::<String>().map(String::as_str)',
+  '                .or_else(|| error.downcast_ref::<&str>().copied());',
+  '            assert_eq!(message, Some("index out of bounds"));',
+  '        }',
+  '    }',
+].join('\n');
 await writeFile(path.join(directory, 'rust-checks.rs'),
   '#![forbid(unsafe_code)]\nmod application;\n' +
   'fn nat(text: &str) -> application::PsNat { text.parse().unwrap() }\n' +
   'fn int(text: &str) -> application::PsInt { text.parse().unwrap() }\n' +
   'fn main() {\n' + assertions.join('\n') +
+  '\n' + panicAssertions +
   '\n    println!("PSCV0_NATIVE_RUST_RUNTIME: PASS ' + observations.length + ' shared runtime observations");\n}\n');
 console.log('PSCV0_NATIVE_RUST_HARNESS: ' + observations.length + ' shared observations');

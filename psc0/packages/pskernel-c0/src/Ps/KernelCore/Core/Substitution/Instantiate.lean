@@ -510,10 +510,33 @@ def psKernelExprInstantiate
     subst
     0
 
+/--
+Single-variable instantiation has two genuinely different cost profiles.
+
+Application-heavy open expressions benefit from the one-pass changed-flag
+worker. Binder-headed *closed* expressions (especially nested Pi codomains
+returned by checked application inference) are better served by a lightweight
+loose-variable probe: when no loose variable is present, return the original
+expression without constructing a pair at every binder node.
+
+Do not scan application-headed terms up front; their previous specialized
+one-pass performance would be lost. A positive probe invokes the same
+capture-avoiding worker as before. Both paths preserve the exact original
+instantiate1 semantics; neither can issue any checker acceptance decision.
+-/
 def psKernelExprInstantiate1
     (expr : PsKernelExpr)
     (replacement : PsKernelExpr) : PsKernelExpr :=
-  Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
+  match expr with
+  | .lam _ _ _ _
+  | .forallE _ _ _ _
+  | .letE _ _ _ _ _ =>
+      if psKernelExprHasLooseBVar expr then
+        Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
+      else
+        expr
+  | _ =>
+      Prod.fst (psKernelC0ExprInstantiateOneChanged expr replacement 0)
 
 def psKernelExprInstantiateRev
     (expr : PsKernelExpr)

@@ -886,11 +886,11 @@ private def projectBoundaries : IO Unit := do
   let privateLeak := "import Vault\nconst stolen: Nat := Vault.hidden\n"
   let publicRoot := "public import Vault\nconst answer: Nat := Vault.addHidden(2)\n"
   let privateRoot := "import Vault\nprivate const local: Nat := 2\nconst answer: Nat := Nat.add(local, Vault.addHidden(2))\n"
-  let scoped ← get "private declaration interface"
+  let scopedProject ← get "private declaration interface"
     (psCompilerPreparePscv0Project "PrivateClient" [
       vault, { name := "PrivateClient", source := privateClient }])
-  unless scoped.mainNames.any (fun n => psNameToString n == "answer") &&
-      scoped.libraryNames.any (fun n => psNameToString n == "Vault.hidden") do
+  unless scopedProject.mainNames.any (fun n => psNameToString n == "answer") &&
+      scopedProject.libraryNames.any (fun n => psNameToString n == "Vault.hidden") do
     throw (IO.userError "module private member lost from runtime library closure")
   let left : PsPscv0ModuleSource := {
     name := "Left", source := "public import Vault\nconst left: Nat := 1\n" }

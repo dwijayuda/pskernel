@@ -1116,7 +1116,9 @@ def psLexAllProofScriptWorker
               Except.ok
                 (List.cons token List.nil)
             else
-              let parsed := (psLexRawToken? ready).getD (psLexReadToken ready)
+              let parsed := match psLexRawToken? ready with
+                | some result => result
+                | none => psLexReadToken ready
               match parsed with
               | Except.error error => Except.error error
               | Except.ok pair =>

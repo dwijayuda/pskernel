@@ -202,6 +202,43 @@ def main : IO Unit := do
         | _, _ =>
             throw (IO.userError
               "C0 recursive Pi metadata changed acceptance")
+  -- A wide application argument must use the exact original recursive
+  -- resource budget and preserve checking order. Compare the production
+  -- full checker to the independently retained recursive source worker.
+  for outerWidth in [16, 24, 48] do
+    for innerWidth in [15, 16, 24] do
+      let inner := (List.range innerWidth).foldl
+        (fun fn _ => PsKernelExpr.app fn sort0)
+        (c0CheckedSpineFixture innerWidth)
+      let unknownInner := (List.range innerWidth).foldl
+        (fun fn _ => PsKernelExpr.app fn sort0)
+        (PsKernelExpr.mvar
+          (PsKernelName.str PsKernelName.anonymous "C0NestedAppUnknown"))
+      for nested in [inner, unknownInner] do
+        let outer := (List.range outerWidth).foldl
+          (fun fn i => PsKernelExpr.app fn
+            (if i == outerWidth / 2 then nested else sort0))
+          (c0CheckedSpineFixture outerWidth)
+        for fuel in [0, 1, 8, 16, 32, 64, 512, 4096] do
+          let defeq := psKernelIsDefEqWithFuel fuel
+          let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+          match psKernelSessionCheck fuel session outer,
+              psKernelInferCoreWithFuel fuel whnf defeq
+                session.context session.state outer false with
+          | Except.error fast, Except.error original =>
+              if fast != original then
+                throw (IO.userError
+                  "C0 nested argument application changed error order/fuel")
+          | Except.ok (fastType, fastSession),
+              Except.ok (originalType, originalState) =>
+              if !(psKernelExprEqual fastType originalType &&
+                  fastSession.state.nextFresh == originalState.nextFresh) then
+                throw (IO.userError
+                  "C0 nested argument application changed checked type/state")
+          | _, _ =>
+              throw (IO.userError
+                "C0 nested argument application changed acceptance")
+  IO.println "C0_PERF_REGRESSION nested_app_argument_fuel_and_errors=pass"
   IO.println "C0_PERF_REGRESSION recursive_pi_metadata_exact_checker=pass"
   -- The public production router must match an *independent* recursive
   -- acceptance oracle across the medium-width routing boundary.

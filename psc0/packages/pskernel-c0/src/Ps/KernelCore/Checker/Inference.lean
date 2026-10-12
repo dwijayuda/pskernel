@@ -237,8 +237,22 @@ def psKernelC0CheckAppRecursiveWithFuel
               psKernelEnsureForallWith whnf nextContext
                 inferredFn.state inferredFn.type
             let (argType, state2) ←
-              psKernelInferCoreWithFuel remaining whnf defeq
-                nextContext state1 arg false
+              -- A checked wide application used as another application's
+              -- argument retains the exact remaining fuel and context.
+              -- Only the syntactic application family uses this structural
+              -- callback; all other argument expressions keep the original
+              -- checked worker and its acceptance/cache behavior.
+              match arg with
+              | .app _ _ =>
+                  if psKernelExprGetAppNumArgs arg >= 16 then
+                    let nested ← smaller whnf defeq nextContext state1 arg
+                    Except.ok (nested.type, nested.state)
+                  else
+                    psKernelInferCoreWithFuel remaining whnf defeq
+                      nextContext state1 arg false
+              | _ =>
+                  psKernelInferCoreWithFuel remaining whnf defeq
+                    nextContext state1 arg false
             let nextState ←
               if psKernelExprEq argType view.domain then
                 Except.ok state2

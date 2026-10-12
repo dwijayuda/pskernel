@@ -610,6 +610,42 @@ def main : IO Unit := do
           throw (IO.userError "matched nested library dropped declaration")
       IO.println s!"C0_COMPARE round={round} operation=admit_nested_application_library milliseconds={nestedEnd-nestedStart} declarations=64 arguments=48 style={style}"
 
+    -- Checked dependent-recursion closure: an admitted 48-argument
+    -- application contains a second 24-argument checked application as
+    -- one argument. The full admission cost (not just the argument helper)
+    -- is measured against the unchanged original source on this runner.
+    let nestedInner := c0CompareApps 24 (c0CompareCheckedLambda 24) sort0
+    let nestedAsArgument := (List.range 48).foldl
+      (fun fn i => PsKernelExpr.app fn
+        (if i == 24 then nestedInner else sort0))
+      (PsKernelExpr.const functionName [])
+    let nestedArgumentBase :=
+      PsKernelName.str PsKernelName.anonymous "C0NestedArgumentLibrary"
+    let mut nestedArgumentEnv := functionEnvironment
+    let nestedArgumentStart ← IO.monoMsNow
+    for i in [:48] do
+      let declaration : PsKernelDefinitionInfo := {
+        base := {
+          name := PsKernelName.num nestedArgumentBase i
+          levelParams := []
+          type := sort0
+        }
+        value := nestedAsArgument
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 nestedArgumentEnv declaration
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok next => nestedArgumentEnv := next
+      | Except.error err =>
+          throw (IO.userError ("matched nested argument admission failed: " ++ err))
+    let nestedArgumentEnd ← IO.monoMsNow
+    for i in [:48] do
+      if !psKernelEnvironmentContains nestedArgumentEnv
+          (PsKernelName.num nestedArgumentBase i) then
+        throw (IO.userError "matched nested argument declaration missing")
+    IO.println s!"C0_COMPARE round={round} operation=admit_nested_argument_application milliseconds={nestedArgumentEnd-nestedArgumentStart} declarations=48 outer_arguments=48 inner_arguments=24"
+
     let mut admitted := 0
     let mut rejected := 0
     let admissionStart ← IO.monoMsNow

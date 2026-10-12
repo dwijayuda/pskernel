@@ -248,3 +248,40 @@ def main : IO Unit := do
   if !(Nat.beq coldHits coldRuns) then
     throw (IO.userError "C0 cold WHNF did not return all expected values")
   IO.println s!"C0_BENCH native_checker_cold_whnf ms={coldEnd - coldStart} depth=128 runs={coldRuns} hits={coldHits}"
+
+
+  -- A first cold DefEq baseline through the actual Lean checker session API.
+  -- Fresh sessions avoid conflating cache-hit throughput with checking costs.
+  -- Both positive beta conversion and negative sort comparison are included.
+  let defEqSession := psKernelMkCheckerSession psKernelEnvironmentEmpty []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let sortZero := PsKernelExpr.sort PsKernelLevel.zero
+  let sortOne := PsKernelExpr.sort
+    (PsKernelLevel.succ PsKernelLevel.zero)
+  let identity := PsKernelExpr.lam PsKernelName.anonymous
+    sortZero (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let beta := PsKernelExpr.app identity sortZero
+  let comparisons := 200
+  let mut yesCount := 0
+  let yesStart ← IO.monoMsNow
+  for _ in [:comparisons] do
+    match psKernelSessionIsDefEq 4096 defEqSession beta sortZero with
+    | Except.error message =>
+        throw (IO.userError ("C0 cold positive DefEq error: " ++ message))
+    | Except.ok (ok, _) =>
+        if ok then yesCount := yesCount + 1
+        else throw (IO.userError "C0 beta equality unexpectedly rejected")
+  let yesEnd ← IO.monoMsNow
+  let mut noCount := 0
+  let noStart ← IO.monoMsNow
+  for _ in [:comparisons] do
+    match psKernelSessionIsDefEq 4096 defEqSession sortZero sortOne with
+    | Except.error message =>
+        throw (IO.userError ("C0 cold negative DefEq error: " ++ message))
+    | Except.ok (ok, _) =>
+        if !ok then noCount := noCount + 1
+        else throw (IO.userError "C0 distinct universes accepted")
+  let noEnd ← IO.monoMsNow
+  if !(Nat.beq yesCount comparisons && Nat.beq noCount comparisons) then
+    throw (IO.userError "C0 cold DefEq case counts incorrect")
+  IO.println s!"C0_BENCH native_checker_cold_defeq beta_true_ms={yesEnd - yesStart} sort_false_ms={noEnd - noStart} comparisons={comparisons}"

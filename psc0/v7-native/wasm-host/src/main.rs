@@ -28,11 +28,18 @@ fn main() -> Result<()> {
     config.wasm_gc(true).wasm_function_references(true).wasm_tail_call(true).wasm_component_model(true);
     let engine = Engine::new(&config)?;
     for suffix in [".wasm", ".roundtrip.wasm"] {
+        let count: usize = std::fs::read_to_string(directory.join("observation-count.txt")).unwrap().trim().parse().unwrap();
+        let module = wasmtime::Module::from_file(&engine, directory.join(format!("observations.core{suffix}")))?;
+        let mut core_store = Store::new(&engine, ());
+        let core = wasmtime::Instance::new(&mut core_store, &module, &[])?;
+        for i in 0..count {
+            let function = core.get_typed_func::<(), i32>(&mut core_store, &format!("wasmCheck{i}"))?;
+            assert_eq!(function.call(&mut core_store, ())?, 1, "core observation {i}");
+        }
         let component = Component::from_file(&engine, directory.join(format!("observations{suffix}")))?;
         let mut store = Store::new(&engine, ());
         let instance = Linker::new(&engine).instantiate(&mut store, &component)?;
-        // Count is generated from the shared observation table by the JS driver.
-        let count: usize = std::fs::read_to_string(directory.join("observation-count.txt")).unwrap().trim().parse().unwrap();
+        // Both core and component calls reuse one instance per artifact.
         for i in 0..count {
             invoke(&mut store, instance, &format!("wasm-check{i}"), &[], Val::Bool(true))?;
         }

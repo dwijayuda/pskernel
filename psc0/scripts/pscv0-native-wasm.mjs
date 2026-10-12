@@ -55,9 +55,13 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
     for (const [foreign] of exportsOf(declared)) {
       const internal = foreign.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       assert.equal(instance.exports[internal](), 1, internal);
-      assert.equal(run('wasmtime', ['run', '--invoke', internal, stem + '.core.wasm']), '1', internal);
-      for (const suffix of ['.wasm', '.roundtrip.wasm'])
-        assert.equal(run('wasmtime', ['run', '--invoke', componentCall(foreign), stem + suffix]), 'true', foreign);
+      // The embedding harness runs the full table once per instance in both
+      // core/component forms, avoiding hundreds of engine startups.
+      if (name === 'natural-probe') {
+        assert.equal(run('wasmtime', ['run', '--invoke', internal, stem + '.core.wasm']), '1', internal);
+        for (const suffix of ['.wasm', '.roundtrip.wasm'])
+          assert.equal(run('wasmtime', ['run', '--invoke', componentCall(foreign), stem + suffix]), 'true', foreign);
+      }
     }
   } else {
     for (const a of [0, 1]) {

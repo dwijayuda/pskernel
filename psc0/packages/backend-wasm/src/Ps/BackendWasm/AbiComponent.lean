@@ -23,11 +23,10 @@ def aggregateComponentBinary (plan : AggregateComponent) : Except String ByteArr
   let vector := fun (xs : List (List UInt8)) => u xs.length ++ xs.flatten
   let sect := psWasmEncodeSection
   let mut bytes := [0, 97, 115, 109, 13, 0, 1, 0] ++ sect 1 core ++ sect 2 [1, 0, 0, 0]
-  for (node, _) in abiNamedNodes plan.abi do
-    bytes := bytes ++ sect 7 (vector [← abiDefinitionBytes plan.abi node])
-  let typeCount := (abiNamedNodes plan.abi).length
-  let types ← plan.abi.exports.mapM (abiFunctionTypeBytes plan.abi)
-  bytes := bytes ++ sect 7 (vector types)
+  let dataTypes ← (abiNamedNodes plan.abi).mapM fun (node, _) => abiDefinitionBytes plan.abi node
+  let typeCount := dataTypes.length
+  let functionTypes ← plan.abi.exports.mapM (abiFunctionTypeBytes plan.abi)
+  bytes := bytes ++ sect 7 (vector (dataTypes ++ functionTypes))
   let aliases := [("__ps_abi_realloc", 0), ("__ps_abi_post_return", 0),
       ("__ps_abi_post_return_void", 0), ("memory", 2)] ++
     plan.abi.exports.map fun e => (e.semanticName, 0)

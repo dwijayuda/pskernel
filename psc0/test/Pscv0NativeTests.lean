@@ -955,7 +955,7 @@ private def projectBoundaries : IO Unit := do
     "theorem boolRendering: booleanText = \"true\" := by { rfl }\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
-    "const inner: String := s!\"Embedded {String.append(\"x\", \"y\")}\"\n" ++
+    "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
     "const braces: String := s!\"double {{braces}}\"\n" ++
     "theorem bracesExact: braces = \"double {braces}\" := by { rfl }\n"
   let invalidInterpolation := "const msg: String := s!\"unfinished {12\"\n"

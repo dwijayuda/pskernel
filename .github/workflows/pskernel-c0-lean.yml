@@ -12,8 +12,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0Lean435MigrationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
-      - 'psc0/packages/pskernel-c0/test/C0OfficialAccept.ndjson'
-      - 'psc0/packages/pskernel-c0/test/C0OfficialReject.ndjson'
+      - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
       - 'psc0/packages/pskernel-c0/test/C0Ablation.py'
@@ -42,11 +41,32 @@ jobs:
         run: |
           set -euo pipefail
           command -v leanchecker >/dev/null || { echo "Lean 4.35 leanchecker is required"; exit 1; }
-          leanchecker --from-export test/C0OfficialAccept.ndjson
-          if leanchecker --from-export test/C0OfficialReject.ndjson; then
-            echo "C0_OFFICIAL_REFERENCE false acceptance by the official checker"
-            exit 1
-          fi
+          for fixture in test/C0Official*Accept.ndjson; do
+            echo "C0_OFFICIAL_REFERENCE expected_accept=$fixture"
+            if ! output="$(leanchecker --from-export "$fixture" 2>&1)"; then
+              printf '%s\n' "$output"
+              echo "Official Lean 4.35 rejected valid exported declaration"
+              exit 1
+            fi
+            printf '%s\n' "$output"
+            printf '%s\n' "$output" | grep -Fq "Lean default kernel accepts the solution" || {
+              echo "Official export was not positively checked"
+              exit 1
+            }
+          done
+          for fixture in test/C0Official*Reject.ndjson; do
+            echo "C0_OFFICIAL_REFERENCE expected_reject=$fixture"
+            if output="$(leanchecker --from-export "$fixture" 2>&1)"; then
+              printf '%s\n' "$output"
+              echo "Official Lean 4.35 falsely accepted invalid declaration"
+              exit 1
+            fi
+            printf '%s\n' "$output"
+            printf '%s\n' "$output" | grep -Fq "Lean default kernel rejects the solution" || {
+              echo "Official check did not produce a kernel rejection"
+              exit 1
+            }
+          done
           lake env lean --run test/C0OfficialReferenceRegression.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0

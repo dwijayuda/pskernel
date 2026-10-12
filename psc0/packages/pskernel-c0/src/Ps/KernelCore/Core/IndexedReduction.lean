@@ -199,6 +199,85 @@ def psKernelC0RewriteIntern
   let (nextStore, result) ← psKernelC0KeepOrIntern state.store oldId node
   some ({ store := nextStore, memo := state.memo }, result)
 
+/-
+Indexed lifting with operation-local DAG memoization.
+
+The amount is fixed for one invocation. A memo entry is keyed by the
+canonical child handle and binder cutoff; nested binders advance only the
+cutoff. All rewritten nodes live in the same persistent store, and cached
+IDs are never reused across stores or invocations. A zero loose-variable
+range or an unchanged cutoff returns the original handle without caching.
+This is an untrusted optimization candidate, never a checking verdict.
+-/
+def psKernelC0LiftMemoWithFuel
+    (fuel : Nat)
+    (state : PsKernelC0RewriteState)
+    (id start amount : Nat) :
+    Option (Prod PsKernelC0RewriteState Nat) :=
+  match fuel with
+  | 0 => none
+  | remaining + 1 => do
+      let stored ← psKernelC0StoreGet state.store id
+      if amount == 0 || stored.looseBVarRange <= start then
+        some (state, id)
+      else
+        match psKernelC0RewriteLookup state.memo id start with
+        | some result => some (state, result)
+        | none => do
+            let (nextState, result) ←
+              match stored.node with
+              | .bvar i =>
+                  psKernelC0RewriteIntern state id (.bvar (i + amount))
+              | .app fn arg => do
+                  let (s1, f) ← psKernelC0LiftMemoWithFuel
+                    remaining state fn start amount
+                  let (s2, a) ← psKernelC0LiftMemoWithFuel
+                    remaining s1 arg start amount
+                  psKernelC0RewriteIntern s2 id (.app f a)
+              | .lam name ty body info => do
+                  let (s1, t) ← psKernelC0LiftMemoWithFuel
+                    remaining state ty start amount
+                  let (s2, b) ← psKernelC0LiftMemoWithFuel
+                    remaining s1 body (start + 1) amount
+                  psKernelC0RewriteIntern s2 id (.lam name t b info)
+              | .forallE name ty body info => do
+                  let (s1, t) ← psKernelC0LiftMemoWithFuel
+                    remaining state ty start amount
+                  let (s2, b) ← psKernelC0LiftMemoWithFuel
+                    remaining s1 body (start + 1) amount
+                  psKernelC0RewriteIntern s2 id (.forallE name t b info)
+              | .letE name ty value body nondep => do
+                  let (s1, t) ← psKernelC0LiftMemoWithFuel
+                    remaining state ty start amount
+                  let (s2, v) ← psKernelC0LiftMemoWithFuel
+                    remaining s1 value start amount
+                  let (s3, b) ← psKernelC0LiftMemoWithFuel
+                    remaining s2 body (start + 1) amount
+                  psKernelC0RewriteIntern s3 id (.letE name t v b nondep)
+              | .mdata metadata body => do
+                  let (s1, b) ← psKernelC0LiftMemoWithFuel
+                    remaining state body start amount
+                  psKernelC0RewriteIntern s1 id (.mdata metadata b)
+              | .proj name index body => do
+                  let (s1, b) ← psKernelC0LiftMemoWithFuel
+                    remaining state body start amount
+                  psKernelC0RewriteIntern s1 id (.proj name index b)
+              | _ => some (state, id)
+            some (psKernelC0RewritePublish nextState id start result, result)
+
+/-- Indexed lifting candidate with exact recursive lifting kept as oracle.
+    A per-call memo never outlives its input arena or shift amount. -/
+def psKernelC0LiftIndexedMemoized
+    (store : PsKernelC0TermStore)
+    (id start amount : Nat) :
+    Option (Prod PsKernelC0TermStore Nat) := do
+  let entry ← psKernelC0StoreGet store id
+  let state : PsKernelC0RewriteState :=
+    { store := store, memo := psKernelC0RewriteTableEmpty }
+  let (resultState, result) ← psKernelC0LiftMemoWithFuel
+    entry.depth state id start amount
+  some (resultState.store, result)
+
 def psKernelC0InstantiateMemoWithFuel
     (fuel : Nat)
     (state : PsKernelC0RewriteState)

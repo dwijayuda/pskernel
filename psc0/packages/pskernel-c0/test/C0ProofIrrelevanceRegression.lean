@@ -1550,19 +1550,50 @@ def main : IO Unit := do
                           throw (IO.userError "C0 loose-range indexed decode failed")
                   | _, _ =>
                       throw (IO.userError "C0 loose-range indexed rewrite failed")
-                for start in [0, 1, 3, 6] do
-                  match psKernelC0LiftIndexed stored id start 2 with
-                  | some (liftStore, liftId) =>
-                      match psKernelC0DecodeExpr liftStore liftId with
-                      | some optimized =>
-                          let reference := psKernelExprLiftLooseBVars term start 2
-                          if !(psKernelExprEqual optimized reference) then
-                            throw (IO.userError "C0 loose-range pruning changed indexed lift")
-                      | none =>
-                          throw (IO.userError "C0 loose-range lifted result undecodable")
-                  | none =>
-                      throw (IO.userError "C0 loose-range indexed lift failed")
+            for start in [0, 1, 3, 6] do
+              for amount in [0, 1, 2, 5] do
+                match psKernelC0LiftIndexed stored id start amount,
+                      psKernelC0LiftIndexedMemoized stored id start amount with
+                | some (referenceStore, referenceId),
+                    some (memoStore, memoId) =>
+                    match psKernelC0DecodeExpr referenceStore referenceId,
+                          psKernelC0DecodeExpr memoStore memoId with
+                    | some reference, some optimized =>
+                        let expected := psKernelExprLiftLooseBVars term start amount
+                        if !(psKernelExprEqual reference expected &&
+                            psKernelExprEqual optimized expected) then
+                          throw (IO.userError "C0 memoized indexed lift changed binder semantics")
+                    | _, _ =>
+                        throw (IO.userError "C0 memoized indexed lift decode failed")
+                | _, _ =>
+                    throw (IO.userError "C0 memoized indexed lift unexpectedly failed")
   IO.println "C0_PERF_REGRESSION cached_indexed_loose_bvar_range=pass"
+
+  -- A maximally shared open DAG must be lifted once per distinct
+  -- canonical node, not once per appearance in its exponential tree.
+  -- The independent scalar cases above establish exact binder semantics;
+  -- this case establishes sharing and valid same-store handles.
+  match psKernelC0Intern psKernelC0StoreEmpty (.bvar 1) with
+  | none => throw (IO.userError "C0 shared indexed lift setup failed")
+  | some (initial, leaf) =>
+      let mut store := initial
+      let mut root := leaf
+      for _ in [:24] do
+        match psKernelC0Intern store (.app root root) with
+        | none => throw (IO.userError "C0 shared indexed lift DAG failed")
+        | some (next, id) =>
+            store := next
+            root := id
+      match psKernelC0LiftIndexedMemoized store root 0 3 with
+      | none => throw (IO.userError "C0 shared indexed lifting failed")
+      | some (next, lifted) =>
+          if !(psKernelC0StoreValid next lifted) ||
+              next.nodes.size > store.nodes.size + 32 then
+            throw (IO.userError "C0 shared indexed lift lost bounded DAG sharing")
+  if (psKernelC0LiftIndexedMemoized psKernelC0StoreEmpty 0 0 2).isSome then
+    throw (IO.userError "C0 indexed lifting accepted an invalid arena handle")
+  IO.println "C0_PERF_REGRESSION memoized_indexed_lifting=pass"
+
 
   -- Indexed WHNF is not an accepting checker, but its supported
   -- beta/zeta/spine fragment must agree with native expression normalization.

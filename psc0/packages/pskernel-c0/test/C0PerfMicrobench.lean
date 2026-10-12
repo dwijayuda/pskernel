@@ -863,6 +863,33 @@ def main : IO Unit := do
             throw (IO.userError "C0 indexed rewrite changed success count")
           IO.println s!"C0_BENCH indexed_dag recursive_ms={oldEnd - oldStart} memoized_ms={memoEnd - memoStart} depth=11 runs={runs} passed={memoCount}"
 
+          -- Paired, identical source arena: recursive lifting revisits all
+          -- appearances of a shared open subterm; memoized lifting visits
+          -- each (term ID, cutoff) once. Neither path checks proof terms.
+          let liftRuns := 30
+          let mut legacyLiftHits := 0
+          let legacyLiftStart ← IO.monoMsNow
+          for _ in [:liftRuns] do
+            match psKernelC0LiftIndexed terms input 0 3 with
+            | some (next, result) =>
+                if psKernelC0StoreValid next result then
+                  legacyLiftHits := legacyLiftHits + 1
+            | none => throw (IO.userError "C0 reference indexed lift failed")
+          let legacyLiftEnd ← IO.monoMsNow
+          let mut memoLiftHits := 0
+          let memoLiftStart ← IO.monoMsNow
+          for _ in [:liftRuns] do
+            match psKernelC0LiftIndexedMemoized terms input 0 3 with
+            | some (next, result) =>
+                if psKernelC0StoreValid next result then
+                  memoLiftHits := memoLiftHits + 1
+            | none => throw (IO.userError "C0 memo indexed lift failed")
+          let memoLiftEnd ← IO.monoMsNow
+          if legacyLiftHits != liftRuns || memoLiftHits != liftRuns then
+            throw (IO.userError "C0 indexed lifting success count diverged")
+          IO.println s!"C0_BENCH indexed_lift_dag recursive_ms={legacyLiftEnd-legacyLiftStart} memoized_ms={memoLiftEnd-memoLiftStart} depth=11 runs={liftRuns}"
+
+
 
   -- The old indexed WHNF stuck-head path reconstructed the entire application
   -- spine even if the head did not reduce.  Measure that eliminated work

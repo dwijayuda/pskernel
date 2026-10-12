@@ -115,7 +115,8 @@ lean_lib PsCompiler where
     `Ps.Compiler.Api,
     `Ps.Compiler.RecursorLift,
     `Ps.Compiler.Sh1,
-    `Ps.Compiler.Pscv0
+    `Ps.Compiler.Pscv0,
+    `Ps.Compiler.Pscv0Modules
   ]
 
 lean_lib PsCodegen where

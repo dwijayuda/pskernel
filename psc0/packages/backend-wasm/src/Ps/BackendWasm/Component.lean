@@ -51,7 +51,7 @@ def scalarApi (api : PsPublicApi) (core : PsWasmModule) (locals : LocalNames) :
     if parameters.length > 16 then throw "PSCV0-WIT-C3-CAPABILITY: indirect parameters require C4b"
     let result ← match d.resultType with
       | .primitive .unit => pure none
-      | t => return some (← type t)
+      | t => (type t).map some
     let name := witName d.name
     if seen.contains name then throw ("PSCV0-WIT-NAME: export collision: " ++ name)
     seen := name :: seen
@@ -84,7 +84,7 @@ def scalarComponentBinary (plan : ScalarComponent) : Except String ByteArray := 
   let u := psWasmEncodeUleb
   let str := psWasmEncodeName
   let vec := fun (xs : List (List UInt8)) => u xs.length ++ xs.flatten
-  let section := psWasmEncodeSection
+  let encodeSection :=  psWasmEncodeSection
   let types := plan.exports.map fun e =>
     [0x40] ++ vec (e.parameters.map fun (n, t) => str n ++ [t.byte]) ++
       (match e.result with | none => [0x01, 0x00] | some t => [0x00, t.byte])
@@ -93,9 +93,9 @@ def scalarComponentBinary (plan : ScalarComponent) : Except String ByteArray := 
   let exports := plan.exports.zipIdx |>.map fun (e, i) =>
     [0x00] ++ str e.foreignName ++ [0x01] ++ u i ++ [0x00]
   let bytes := [0x00, 0x61, 0x73, 0x6d, 0x0d, 0x00, 0x01, 0x00] ++
-    section 1 core ++ section 2 [0x01, 0x00, 0x00, 0x00] ++
-    section 7 (vec types) ++ section 6 (vec aliases) ++
-    section 8 (vec lifts) ++ section 11 (vec exports)
+    encodeSection 1 core ++ encodeSection 2 [0x01, 0x00, 0x00, 0x00] ++
+    encodeSection 7 (vec types) ++ encodeSection 6 (vec aliases) ++
+    encodeSection 8 (vec lifts) ++ encodeSection 11 (vec exports)
   return ByteArray.mk bytes.toArray
 
 end PsWasm

@@ -39,6 +39,37 @@ private def parserCases : IO Unit := do
       (← get "source" (c.getObjValAs? String "source"))
       (← get "error" (c.getObjValAs? String "error"))
 
+-- A user-defined GetElem instance demonstrates genuine Prop-indexed,
+-- class-driven lookup without a trusted bounds shortcut. The selected
+-- builtin List/Array validity instances are separate unfinished work.
+private def getElemFoundationCases : IO Unit := do
+  let source :=
+    "structure IndexBox where { value: Nat }\n" ++
+    "instance indexBoxGet: GetElem IndexBox Nat Nat (fun (_: IndexBox) => fun (_: Nat) => True) where {\n" ++
+    "  getElem(xs: IndexBox, i: Nat, h: True): Nat := xs.value\n" ++
+    "}\n" ++
+    "function implicitLookup(xs: IndexBox, i: Nat, h: True): Nat := xs[i]\n" ++
+    "function explicitLookup(xs: IndexBox, i: Nat, h: True): Nat := xs[i]'h\n" ++
+    "const selected: Nat := implicitLookup(IndexBox.mk(17), 0, True.intro)\n" ++
+    "const selectedExplicit: Nat := explicitLookup(IndexBox.mk(19), 3, True.intro)\n"
+  let unproved := source ++
+    "const unproved: Nat := (IndexBox.mk(4))[0]\n"
+  let batch ← PsV7Native.runBatch #[
+    { source := source, targets := [], sourceName := "GetElemGood.ps" },
+    { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]
+  let .ok result := batch
+    | throw (IO.userError "native GetElem batch failed before source checking")
+  let some (.ok accepted) := result.results[0]?
+    | throw (IO.userError ("proof-carrying GetElem source not accepted: " ++
+        reprStr result.results[0]?))
+  unless accepted.declarationCount > 0 do
+    throw (IO.userError "GetElem checked source emitted no declarations")
+  let some (.error refused) := result.results[1]?
+    | throw (IO.userError "unproved indexed term was admitted")
+  unless refused.phase == "elaborate" do
+    throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
+  IO.println "PSCV0_NATIVE_GETELEM: checked indexed proof/instance admitted; missing proof refused"
+
 private def application : String :=
   "function emptyElim{A: Type}(value: Empty): A := nomatch value\n" ++
   "function falseElim{A: Type}(proof: False): A := nomatch proof\n" ++
@@ -1482,6 +1513,7 @@ def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
   parserCases
+  getElemFoundationCases
   semanticCases
   doBoundaries
   projectBoundaries

@@ -123,6 +123,26 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
         { current with context := psElabContextWithMeta current.context unified.context }
       else current
 
+-- Lean-like dependent class application: a pending class dictionary may
+-- determine an outParam validity predicate needed to type-check the *next*
+-- explicit proof argument. Attempt synthesis only once the current explicit
+-- inputs/expected result have constrained its head. If an instance remains
+-- unavailable, preserve the original constraint state and let normal
+-- elaboration fail; never invent a proof or accept unresolved metavariables.
+def psElabResolveDependentClasses (current : PsElabTermResult)
+    (pending : List Nat) (domain : PsExpr) : PsElabTermResult :=
+  if pending.isEmpty ||
+      !psExprHasUnresolvedMeta (psMetaInstantiate current.context.metaContext domain) then
+    current
+  else
+    let synthesize := fun constraints target =>
+      psSynthInstance current.context.environment current.context.localContext
+        current.context.instances constraints target
+    let attempt := psSolveInstanceMetavars synthesize pending current.context.metaContext
+    if attempt.success then
+      psElabResultWithMeta current attempt.context current.type
+    else current
+
 -- One ordered engine owns positional/named arguments, defaults and implicits.
 -- A matching expected function type preserves partial application. Explicit
 -- empty invocation passes no expected type here and requests full completion.
@@ -169,6 +189,7 @@ def psElabApplyOrderedWith {α : Type}
       match selected.1 with
       | some source =>
         let current := psElabPropagateExpected current positions names expected
+        let current := psElabResolveDependentClasses current pending domain
         let argument ← elaborate current.context source
           (some (psMetaInstantiate current.context.metaContext domain))
         psElabApplyOrderedWith elaborate fuel (psElabApplyValue current argument body)

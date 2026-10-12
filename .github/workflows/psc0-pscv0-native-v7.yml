@@ -13,6 +13,7 @@ on:
       - 'psc0/scripts/pscv0-native-*.mjs'
       - 'psc0/scripts/pscv0-m1-cases.json'
       - 'psc0/test/Pscv0NativeTests.lean'
+      - 'psc0/test/Pscv0GetElemOracle.lean'
       - 'psc0/test/Pscv0WasmTests.lean'
       - '.github/workflows/psc0-pscv0-native-v7.yml'
   workflow_dispatch:
@@ -59,6 +60,7 @@ jobs:
             /psc0/host/src/
             /psc0/scripts/
             /psc0/test/Pscv0NativeTests.lean
+            /psc0/test/Pscv0GetElemOracle.lean
             /psc0/test/Pscv0WasmTests.lean
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:

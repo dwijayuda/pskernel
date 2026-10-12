@@ -183,3 +183,36 @@ def psKernelC0ScratchPromote
   let (persistent, ids) ← psKernelC0ScratchPromoteRoots scratch [id]
   let root ← ids.head?
   some (persistent, root)
+
+/-- Checked syntax-store boundary for future indexed execution experiments.
+    This is intentionally more expensive than ordinary promotion: it verifies
+    the *resulting* canonical index independently and re-decodes each selected
+    source/target pair with metadata-sensitive exact syntax equality. A cache
+    hash, numeric ID or an unchecked promotion never establishes this fact.
+    Source acceptance and kernel judgments are deliberately out of scope. -/
+def psKernelC0ScratchPromoteVerifiedRoots
+    (scratch : PsKernelC0Scratch)
+    (roots : List Nat) :
+    Option (PsKernelC0TermStore × List Nat) := do
+  let (committed, targets) ← psKernelC0ScratchPromoteRoots scratch roots
+  if roots.length != targets.length ||
+      !psKernelC0ReplayValidateStore committed then
+    none
+  else do
+    for (source, target) in roots.zip targets do
+      let before ← psKernelC0DecodeExpr scratch.working source
+      let after ← psKernelC0DecodeExpr committed target
+      if !psKernelExprEqual before after then
+        none
+    some (committed, targets)
+
+/-- Single-root counterpart of the independently validated syntax promotion.
+    The exported Nat remains store-local: this API does not seal ownership,
+    grant any typing judgment or transfer con-ron's StoreWF proof. -/
+def psKernelC0ScratchPromoteVerified
+    (scratch : PsKernelC0Scratch)
+    (root : Nat) : Option (PsKernelC0TermStore × Nat) := do
+  let (committed, targets) ←
+    psKernelC0ScratchPromoteVerifiedRoots scratch [root]
+  let target ← targets.head?
+  some (committed, target)

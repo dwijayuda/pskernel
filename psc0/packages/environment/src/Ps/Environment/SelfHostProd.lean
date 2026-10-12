@@ -117,7 +117,8 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  (fun env => [psStandardOutOfBoundsDeclaration,
+  psStandardGetElemOptionalDefaultExtend
+    <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
     psStandardInhabitedExtend <|
@@ -153,4 +154,5 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     -- through the same pinned, officially checked Standard declarations.
     psStandardGetElemClass ++ psStandardGetElemOptionalDeclarations ++
     psStandardLawfulGetElemClass ++
-    [psStandardOutOfBoundsDeclaration, psStandardGetElemBangDefaultDeclaration]
+    [psStandardOutOfBoundsDeclaration, psStandardGetElemBangDefaultDeclaration] ++
+    psStandardGetElemOptionalDefaultDeclarations

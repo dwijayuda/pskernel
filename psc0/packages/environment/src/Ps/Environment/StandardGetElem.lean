@@ -391,3 +391,132 @@ def psStandardGetElemBangDefaultDeclaration : PsDeclaration :=
       (psLogicLam 2 "candidate" option result) .instanceImplicit) .implicit
   .definitionDecl (psNameAppendStr psStandardGetElemOptionalName "getElem!Default")
     [] type value
+
+
+-- The low-priority M1 default derives GetElem? ONLY from a checked
+-- GetElem dictionary plus a dependent Decidable witness at every index.
+-- The proofs carried by Decidable are kernel validated and runtime erased.
+-- Option remains selected Type 0; this does not assert full RC4 polymorphism.
+def psStandardOptionalDefaultDecisionDeclarations : List PsDeclaration :=
+  let truth := PsExpr.constE (psRootName "True") []
+  let falsity := PsExpr.constE (psRootName "False") []
+  let yes := psLogicApply
+    (.constE (psDecisionName "Decidable.isTrue") [])
+    [truth, .constE (psNameAppendStr (psRootName "True") "intro") []]
+  let noProof := psLogicLam 0 "h" falsity (.fvar 0)
+  let no := psLogicApply
+    (.constE (psDecisionName "Decidable.isFalse") [])
+    [falsity, noProof]
+  [ .definitionDecl
+      (psNameAppendStr (psRootName "PsStandard") "instDecidableTrue")
+      [] (psDecisionType truth) yes,
+    .definitionDecl
+      (psNameAppendStr (psRootName "PsStandard") "instDecidableFalse")
+      [] (psDecisionType falsity) no ]
+
+def psStandardGetElemOptionalDefaultInstance : PsDeclaration :=
+  let name := psNameAppendStr (psRootName "PsStandard") "instGetElemOptionalDefault"
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let levels : List PsLevel := [.param u, .param v]
+  let coll := PsExpr.fvar 0
+  let idx := PsExpr.fvar 1
+  let elem := PsExpr.fvar 2
+  let valid := PsExpr.fvar 3
+  let getDictionary := PsExpr.fvar 4
+  let decide := PsExpr.fvar 5
+  let base := psLogicApply
+    (.constE psStandardGetElemName [.param u, .param v, .zero])
+    (psStandardGetElemArgs coll idx elem valid)
+  let optional := psLogicApply
+    (.constE psStandardGetElemOptionalName levels)
+    (psStandardGetElemArgs coll idx elem valid)
+  let validType := psLogicPi 30 "xs" coll
+    (psLogicPi 31 "i" idx (.sortE .zero))
+  let indexedDecision := psLogicPi 6 "xs" coll
+    (psLogicPi 7 "i" idx
+      (psDecisionType (psLogicApply valid [.fvar 6, .fvar 7])))
+  let parameters := fun body =>
+    psLogicPi 0 "coll" (.sortE (.succ (.param u)))
+      (psLogicPi 1 "idx" (.sortE (.succ (.param v)))
+        (psLogicPi 2 "elem" psPreludeTypeType
+          (psLogicPi 3 "valid" validType body .implicit)
+          .implicit) .implicit) .implicit
+  let parameterLams := fun body =>
+    psLogicLam 0 "coll" (.sortE (.succ (.param u)))
+      (psLogicLam 1 "idx" (.sortE (.succ (.param v)))
+        (psLogicLam 2 "elem" psPreludeTypeType
+          (psLogicLam 3 "valid" validType body .implicit)
+          .implicit) .implicit) .implicit
+  let xs := PsExpr.fvar 8
+  let i := PsExpr.fvar 9
+  let prop := psLogicApply valid [xs, i]
+  let h := PsExpr.fvar 10
+  let get := psLogicApply
+    (.constE (psNameAppendStr psStandardGetElemName "getElem")
+      [.param u, .param v, .zero])
+    (psStandardGetElemArgs coll idx elem valid ++
+      [getDictionary, xs, i, h])
+  let yes := psLogicLam 10 "h" prop (psSelfHostOptionSomeOf elem get)
+  let no := psLogicLam 11 "notH"
+    (.app (.constE (psRootName "Not") []) prop)
+    (psSelfHostOptionNoneOf elem)
+  let witness := psLogicApply decide [xs, i]
+  let result := psLogicApply (.constE (psRootName "dite") [.succ .zero])
+    [psSelfHostOptionOf elem, prop, witness, yes, no]
+  let getOptional := psLogicLam 8 "xs" coll
+    (psLogicLam 9 "i" idx result)
+  let inhabited := PsExpr.fvar 12
+  let bangXs := PsExpr.fvar 13
+  let bangI := PsExpr.fvar 14
+  let optionalResult := psLogicApply getOptional [bangXs, bangI]
+  let bang := psLogicApply
+    (.constE (psNameAppendStr psStandardGetElemOptionalName
+      "getElem!Default") [])
+    [elem, inhabited, optionalResult]
+  let getBang := psLogicLam 12 "inhabited" (psStandardInhabitedType elem)
+    (psLogicLam 13 "xs" coll
+      (psLogicLam 14 "i" idx bang))
+    .instanceImplicit
+  let value := psLogicApply
+    (.constE (psNameAppendStr psStandardGetElemOptionalName "mk") levels)
+    (psStandardGetElemArgs coll idx elem valid ++
+      [getDictionary, getOptional, getBang])
+  let type := parameters (psLogicPi 4 "checked" base
+    (psLogicPi 5 "decide" indexedDecision optional .instanceImplicit)
+    .instanceImplicit)
+  let body := parameterLams
+    (psLogicLam 4 "checked" base
+      (psLogicLam 5 "decide" indexedDecision value .instanceImplicit)
+      .instanceImplicit)
+  .definitionDecl name [u, v] type body
+
+def psStandardGetElemOptionalDefaultDeclarations : List PsDeclaration :=
+  psStandardOptionalDefaultDecisionDeclarations ++
+    [psStandardGetElemOptionalDefaultInstance]
+
+-- Use the same checked declaration closure for elaboration and execution.
+-- No new trusted primitive, Boolean proof shortcut, or fallback conversion.
+def psStandardGetElemOptionalDefaultExtend (environment : PsEnvironment) :
+    PsEnvironment :=
+  let environment := psStandardGetElemOptionalDefaultDeclarations.foldl
+    (fun env declaration => psPreludeAdd env declaration) environment
+  let trueName := psNameAppendStr (psRootName "PsStandard") "instDecidableTrue"
+  let falseName := psNameAppendStr (psRootName "PsStandard") "instDecidableFalse"
+  let optionalName := psNameAppendStr (psRootName "PsStandard") "instGetElemOptionalDefault"
+  let choices : List (PsName × PsName × Nat × List PsName) :=
+    [ (trueName, psDecidableName, 1000, []),
+      (falseName, psDecidableName, 1000, []),
+      (optionalName, psStandardGetElemOptionalName, 100,
+        [psRootName "u", psRootName "v"]) ]
+  let index := choices.foldl (fun index (name, className, priority, levelParams) =>
+    match psEnvironmentFind environment name with
+    | some declaration =>
+      psInstanceIndexAdd index {
+        value := .constE name (levelParams.map PsLevel.param)
+        type := psDeclarationType declaration
+        className := some className
+        priority
+        levelParams }
+    | none => index) environment.instances
+  { environment with instances := index }

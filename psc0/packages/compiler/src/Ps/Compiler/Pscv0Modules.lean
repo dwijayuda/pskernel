@@ -205,6 +205,7 @@ structure PsPscv0ProjectOutput where
 -- its exported interface, ordinary imports are deliberately not re-exported.
 def psCompilerPreparePscv0Project (entryName : String)
     (sources : List PsPscv0ModuleSource) : Except String PsPscv0ProjectOutput := do
+  psCompilerValidatePscv0Standard
   let parsed ← psPscv0ProjectParse sources
   if !parsed.any (fun item => item.name == entryName) then
     throw ("PSCV0-MODULE: unknown entry " ++ entryName)

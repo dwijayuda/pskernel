@@ -1,6 +1,7 @@
 import Ps.Compiler.Api
 import Ps.Syntax.Pscv0.Module
 import Ps.Elab.Command
+import Ps.Environment.StandardSnapshot
 
 -- Source-owned v7 entry point. No generated frontend or host elaborator fallback.
 -- Project import/exposure semantics are a later language milestone; never silently
@@ -12,9 +13,19 @@ def psCompilerParsePscv0 (source : String) : Except String PsSyntaxProgram := do
   else
     throw "PSCV0-NATIVE-MODULE-IMPORTS-PENDING"
 
+-- Every v7 entry path must prove that its selected Standard seed matches the
+-- exact audited Core/class/instance/alias roster before elaborating a term.
+-- The SHA-256 digest is integrity evidence for this bounded roster, not proof
+-- authority or the final RC4 notation/tactic/effect/assumption manifest.
+def psCompilerValidatePscv0Standard : Except String Unit :=
+  psStandardSnapshotValidate psSelfHostProdPreludeEnvironment
+    psStandardSnapshotExpected
+
 def psCompilerElaboratePscv0 (program : PsSyntaxProgram) :
-    Except PsCompilerError PsElabModuleResult :=
-  (psElabProgram psSelfHostProdPreludeEnvironment program).mapError PsCompilerError.elaboration
+    Except PsCompilerError PsElabModuleResult := do
+  (psCompilerValidatePscv0Standard).mapError PsCompilerError.normalization
+  (psElabProgram psSelfHostProdPreludeEnvironment program).mapError
+    PsCompilerError.elaboration
 
 def psCompilerPscv0InferError : PsInferError → String
   | .fuelExhausted => "inference budget"

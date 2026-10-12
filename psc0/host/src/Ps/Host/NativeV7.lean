@@ -195,6 +195,10 @@ def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
       phase := "toolchain"
       message := "expected Lean " ++ leanVersion ++ " at " ++ leanCommit ++
         ", got " ++ Lean.versionString ++ " at " ++ Lean.githash }
+  -- Audit once per batch before either isolated single-file elaboration or
+  -- the dependency graph is allowed to prepare executable admissions.
+  if let .error message := psCompilerValidatePscv0Standard then
+    return .error { phase := "prelude", message }
   let t0 ← IO.monoMsNow
   let initial ← PsKernelLean.buildLeanPreludeEnvironment
   let t1 ← IO.monoMsNow

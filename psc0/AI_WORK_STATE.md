@@ -1,3 +1,76 @@
+# Native Wasm C3 qualified; C4 GC runtime foundations
+
+12 October 2026. The user authorized C3, C4 and C4b on the existing draft PR109
+branch. The latest architecture choice is **option A: Wasm GC for language
+values, linear memory only at explicit Canonical ABI boundaries**. This
+supersedes the interim no-linear-memory choice. Aggregate component interop
+remains in scope; it is not yet implemented.
+
+**Qualified source:** df545d7b0951a9556136f13b1f2a569e157d6b4c
+**Profile:** pscv0-v7-native-bounded/33
+**Linux CI:** [run 38193114046](https://github.com/dwijayuda/pskernel/actions/runs/38193114046),
+job 114629912991. All steps passed. Later documentation-only changes do not change
+this source-specific evidence.
+
+## Completed and ongoing boundary
+
+C0–C2 retain shared readable ECMAScript, direct .js/.d.ts/.js.map, Rust,
+artifact/API/provenance contracts and the native primitive signature audit.
+C3 adds a typed Wasm core, direct core/component binary emission, readable
+WAT/WIT, named binary metadata, explicit scalar foreign exports and capability
+diagnostics. Binary and WAT share the retained target IR. Independent function
+signatures remain outside aggregate recursive groups for canonical type
+identity; local declaration runs are compact without changing local indices.
+
+C4 foundations add GC value layouts, named-local runtime authoring combinators,
+tail-call loops and immutable published arbitrary-precision natural values
+backed by owned working limb arrays. Addition, saturating subtraction,
+multiplication, division and remainder are implemented in target runtime code.
+Small-divisor division traverses limbs directly. This runtime has focused
+qualification but is not wired into full source lowering; the public Wasm
+capability remains the bounded C3 scalar profile.
+
+## Validation
+
+- 143 portable / 146 native closure modules; no pskernel-core or host import in
+  the portable closure.
+- 473 composite declarations, four accepted programs, 92 existing refusals,
+  28 parser cases and compact scope/IR/naming checks remain green.
+- 142 observations pass on each of directJS, TypeScript-compiled JS and Rust;
+  declaration consumers and 345 declaration mappings / 14 parent origins pass.
+- Three Wasm fixtures: executed GC allocation inside a scalar component,
+  checked-source Boolean computation, and ten natural-limb runtime observations.
+  Node 22.23.3 / V8 12.4.254.21-node.57 and Wasmtime 49.0.2 execute the cores.
+  Wasmtime executes the direct and reassembled components.
+- wasm-tools 1.261.0 validates binaries, independently assembles WAT and extracts
+  WIT. Core bytes agree after excluding only name metadata. Both release
+  archives are SHA-256 pinned.
+- Official Lean RC4 checks the same prepared source graph. The prelude audit
+  still has 64 axioms: 48 matching native signatures and 16 reviewed models.
+  Backend observations and target typing do not prove semantic preservation.
+
+## Remaining authorized work
+
+Complete C4 shared IR lowering for all current data, generic conventions,
+closures, Int/String/Array intrinsics and all 142 observations in both core
+engines. Complete C4b's aggregate interface/Canonical ABI plan, marshalling
+allocator, post-return ownership, resource lifetimes and component observations.
+The pinned CLI has a WIT-keyword name limitation; C4b requires the embedding
+harness for unrestricted export lookup and repeated-call lifecycle validation.
+C5 readable Lean/ProofScript reconstruction and full v7 language completion
+remain later capabilities.
+
+Native .lean is authoritative, executed natively and checked by official Lean.
+No compiler-source .ps translation, pskernel-core, local build/tests, self-hosting,
+main merge or release. Details: docs/PSCV0_NATIVE_WASM.md and the approved
+docs/PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md.
+
+---
+
+# Historical work records
+
+Earlier stopping instructions and status claims below are historical.
+
 # C0–C2 qualified: native directJS and shared readable ECMAScript
 
 12 October 2026. The user authorized C0, C1 and C2. They are implemented on
@@ -74,7 +147,7 @@ C0–C2 is the completed stopping boundary for this request.
 
 ---
 
-# Historical work records
+
 
 The following sections record earlier requests and evidence. Their stopping
 instructions and status claims are historical; the current state is above.

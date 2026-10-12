@@ -72,7 +72,20 @@ Independent function signatures stay outside aggregate recursive groups to
 preserve canonical function type identity. The word-op descriptor keeps binary
 opcodes, WAT mnemonics and stack signatures synchronized.
 
-The focused runtime probe is pending qualification and does not widen the C3
-source/foreign interface profile. Full runtime lowering, other GC values and
+The focused runtime probe passed at `df545d7b0951a9556136f13b1f2a569e157d6b4c`,
+[Linux run 38193114046](https://github.com/dwijayuda/pskernel/actions/runs/38193114046),
+job 114629912991: ten limb-arithmetic observations in Node/V8 and Wasmtime
+core execution, plus direct and WAT-reassembled components in Wasmtime. All
+three worlds pass independent WIT extraction and core byte correspondence
+excluding only name metadata. Standard binary name sections retain function,
+type, local and field names. The same 142 JS/TS/Rust observations still pass.
+This does not widen the C3 source/foreign interface profile. Full runtime lowering, other GC values and
 closures, 142-case parity, aggregate ABI adapters, allocator/post-return and
 resource lifetimes remain required for C4/C4b completion.
+
+The pinned Wasmtime CLI invokes these scalar custom-world exports using WAVE.
+Its function-name lexer cannot invoke WIT keyword names, although those
+component exports are valid. Qualification fixture names use check-* labels;
+the compiler does not rename real public APIs around this tool limitation.
+C4b still requires the embedding harness for arbitrary names, repeated calls in
+one instance, post-return cleanup and resource lifetimes.

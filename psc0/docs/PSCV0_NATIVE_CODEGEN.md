@@ -1,4 +1,4 @@
-# Native runtime emission: C0–C2
+# Native runtime emission: C0–C3 and GC runtime foundations
 
 The native Lean host retains one immutable prepared graph through official
 Lean kernel admission, typed erasure and the complete shared IR checker.
@@ -16,6 +16,8 @@ v7 syntax + actual command-batch origins
      -> one ECMAScript Program -> TS implementation
                               -> JS implementation + declarations + map
      -> existing Rust ownership/layout plan -> Rust + runtime
+     -> typed Wasm core plan -> direct .core.wasm + readable .core.wat
+                            -> scalar interface/lifts -> .wit + .wat + .wasm
   -> validated portable artifact bundles -> native host publication
 ```
 
@@ -90,9 +92,11 @@ Unit proof-call slots that remain in the ABI are visible in .d.ts.
 The C0 WIT classifier conservatively refuses unbounded integers, generic and
 recursive data, function values, target-sized integers and Unit where explicit
 adapters/policies are required. This does not restrict their internal language
-representation. No WIT printer, Canonical ABI adapter or Wasm emitter exists
-yet. Target capability records describe the bounded qualified profiles, not
-full v7 conformance.
+representation. C3 now supplies native core/component encoders, readable WAT,
+a scalar WIT printer and canonical scalar lifts. Aggregate adapters remain C4b.
+The user selected GC language values with linear memory only at explicit
+Canonical ABI boundaries. Target capability records describe the bounded
+qualified profiles, not full v7 conformance. See PSCV0_NATIVE_WASM.md.
 
 ## Trust ledger
 
@@ -117,6 +121,8 @@ pscv0_native --emit application.ps output.ts
 pscv0_native --emit application.ps output.rs
 pscv0_native --emit-all application.ps output
 pscv0_native --audit-primitives
+pscv0_native --emit-wasm-core application.ps output
+pscv0_native --emit-wasm application.ps output exports.json
 ```
 
 JS emission produces output.js, output.d.ts, output.js.map and a host provenance

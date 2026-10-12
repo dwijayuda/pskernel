@@ -362,5 +362,9 @@ signatures, shared ECMAScript lowering and direct .js/.d.ts/.js.map output.
 Source-map precision is explicitly owning-declaration spans; generated members
 retain parent attribution, and runtime helpers stay unmapped. See
 PSCV0_NATIVE_CODEGEN.md and AI_WORK_STATE.md for implementation and qualification.
-C3/C4/C4b/C5 remain future work. This does not complete v7, Wasm, compiler-source
+The user subsequently authorized C3 through C4b and selected option A:
+GC for language values, linear memory only at explicit Canonical ABI boundaries.
+C3 and the initial C4 natural-limb runtime foundations have focused qualification. C4/C4b/C5
+remain incomplete. See PSCV0_NATIVE_WASM.md for exact evidence and capability
+limits. This does not complete v7, the full Wasm bundle profile, compiler-source
 migration or self-hosting.

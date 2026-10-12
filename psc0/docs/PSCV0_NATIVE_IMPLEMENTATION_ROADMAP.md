@@ -68,16 +68,22 @@ native primitive signature/model audit, shared structured ECMAScript lowering
 and direct JS/declarations/source maps. See PSCV0_NATIVE_CODEGEN.md. Source maps
 currently resolve to the owning declaration; token-level origins are not claimed.
 
-The qualified integration profile is 32; exact source/run evidence is in
+The qualified integration profile is 33; exact source/run evidence is in
 AI_WORK_STATE.md. One ECMAScript Program supplies JS and TS output. Direct JS
 emission does not invoke a TypeScript compiler. The same 142 observations run
 on direct JS, TS-compiled JS and Rust; the new declaration and mapping boundaries
 have independent consumers.
 
-Remaining backend sequence preserves PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md:
-C3 typed directWasm foundation and early GC-in-component compatibility probe,
-C4 current-runtime core parity, C4b WIT/Canonical ABI/component completion,
-C5 readable pre-erasure Lean/ProofScript reconstruction, then D measured
-performance/ownership work. No Wasm, compiler-source .ps migration or self-host
-qualification is included in C0–C2. General v7 language completion remains a
-separate capability ledger.
+C3 is qualified: typed direct core/component binary emission, readable WAT,
+scalar WIT/canonical lifts, independent validation and an executed GC allocation
+inside a lifted component. C4 has new GC value layouts, runtime authoring
+combinators and limb arithmetic with focused qualification. This does not yet
+admit arbitrary-precision source programs through the Wasm CLI.
+
+The latest user choice is option A: GC language values and linear memory only at
+explicit Canonical ABI boundaries. Remaining work preserves
+PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md: C4 full current-runtime core parity, C4b
+aggregate WIT/Canonical ABI/component completion with allocation/post-return and
+resource lifetimes, C5 readable pre-erasure Lean/ProofScript reconstruction,
+then D measured performance/ownership work. Compiler-source .ps migration,
+self-hosting and complete v7 conformance remain separate qualifications.

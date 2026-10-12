@@ -1,5 +1,6 @@
 import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Checker.Session
+import Ps.KernelCore.Checker.IndexedSession
 import Ps.KernelCore.Admission.Declaration.Admission
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.LocalContext
@@ -536,3 +537,38 @@ def main : IO Unit := do
     else if line.startsWith "VmRSS:" then
       IO.println s!"C0_BENCH process_current_rss {line}"
     else pure ()
+
+
+  -- Opt-in persistent indexed retention around *actual* checked WHNF.
+  -- The semantic result must be unchanged. Report overhead rather than
+  -- treating structural sharing as an automatic performance improvement.
+  let rootExpr := c0BenchApps 48 (PsKernelExpr.mvar PsKernelName.anonymous)
+    (PsKernelExpr.bvar 4)
+  let wrappedChecker := psKernelMkCheckerSession psKernelEnvironmentEmpty []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let optRuns := 1200
+  let mut plainSession := wrappedChecker
+  let plainStart ← IO.monoMsNow
+  for _ in [:optRuns] do
+    match psKernelSessionWhnf 4096 plainSession rootExpr with
+    | Except.ok (value, next) =>
+        if !(psKernelExprEqual value rootExpr) then
+          throw (IO.userError "C0 baseline session changed stuck WHNF")
+        plainSession := next
+    | Except.error err =>
+        throw (IO.userError ("C0 baseline session failed: " ++ err))
+  let plainEnd ← IO.monoMsNow
+  let mut ownedSession := psKernelC0IndexedSessionNew wrappedChecker
+  let ownedStart ← IO.monoMsNow
+  for _ in [:optRuns] do
+    match psKernelC0IndexedSessionWhnf 4096 ownedSession rootExpr with
+    | Except.ok (value, next) =>
+        if !(psKernelExprEqual value rootExpr) then
+          throw (IO.userError "C0 opt-in indexed session changed stuck WHNF")
+        ownedSession := next
+    | Except.error err =>
+        throw (IO.userError ("C0 opt-in indexed session failed: " ++ err))
+  let ownedEnd ← IO.monoMsNow
+  if psKernelC0IndexedSessionRootCount ownedSession != 1 then
+    throw (IO.userError "C0 indexed session repeatedly stored the same root")
+  IO.println s!"C0_BENCH optin_indexed_whnf plain_ms={plainEnd-plainStart} indexed_ms={ownedEnd-ownedStart} runs={optRuns} roots={psKernelC0IndexedSessionRootCount ownedSession} nodes={psKernelC0IndexedSessionNodeCount ownedSession}"

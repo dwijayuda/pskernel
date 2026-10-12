@@ -1,5 +1,9 @@
 # PSKernel-C0 — performance architecture work state
 
+## LATEST VERIFIED PHASE B/C SOURCE SLICES — 2026-10-13
+
+Native [CI 38321909818](https://github.com/dwijayuda/pskernel/actions/runs/38321909818) **SUCCESS** at [`8fee6d90`](https://github.com/dwijayuda/pskernel/commit/8fee6d90afc5c7bdb356a5e8477a78d783279ea4), including official 4.35 NDJSON positive/negative replay, strict no-loss importer categories, native negative/fuel regressions, canonical-store and verified-scratch readback, C0 benchmarks and independently compiled original-core comparisons. Detailed [Phase B/C ledger](PHASE_B_C_QUALIFICATION_2026-10-13.md). **Phase B and C remain incomplete overall:** no full Init/Std/Mathlib corpus, complete checker-grade source/import/resource coverage, sealed StoreWF/provenance or indexed accepting kernel. No Rust/compiler/self-host/metatheory changes.
+
 ## FINAL VERIFIED PHASE B MILESTONE — 2026-10-13
 
 Full [native CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) **SUCCESS** at [source `51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836): stable Lean 4.35.0, official `leanchecker` exact-byte NDJSON replay and C0 subset decoder on **14 accept/reject fixtures**, including 128 sequential safe checked definitions and a negative stream invalid only at the 128th; complete native build, negative regressions, canonical store/scratch tests, microbenchmarks, and unchanged original-core comparison all passed. Older "in progress" statements below are historical.

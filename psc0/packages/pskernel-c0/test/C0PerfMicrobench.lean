@@ -444,8 +444,10 @@ def main : IO Unit := do
   for _ in [:checkedIterations] do
     let defeq := psKernelIsDefEqWithFuel 4096
     let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
-    match psKernelCheckWithFuel 4096 whnf defeq checkedContext
-        psKernelCheckerStateEmpty checkedSpine with
+    -- Explicit historical recursive engine, even when public checking
+    -- elects the framed route for wide spines.
+    match psKernelInferCoreWithFuel 4096 whnf defeq checkedContext
+        psKernelCheckerStateEmpty checkedSpine false with
     | Except.ok (type, _) =>
         if psKernelExprEqual type (PsKernelExpr.sort PsKernelLevel.zero) then
           originalOk := originalOk + 1

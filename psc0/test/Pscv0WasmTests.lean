@@ -20,8 +20,8 @@ def main : IO Unit := do
   let directory := "../dist/pscv0-native/wasm"
   IO.FS.createDirAll directory
   writePlan (directory ++ "/gc-probe") PsWasm.gcComponentProbe
-  let source := "function both(left: Bool, right: Bool): Bool := Bool.and(left, right)\n" ++
-    "function invert(value: Bool): Bool := Bool.not(value)\n"
+  let source := "function both(left: Bool, right: Bool): Bool := if (left) { right } else { false }\n" ++
+    "function invert(value: Bool): Bool := if (value) { false } else { true }\n"
   IO.FS.writeFile (directory ++ "/scalar.ps") source
   IO.FS.writeFile (directory ++ "/exports.json") "[\"both\", \"invert\"]"
   let requests : Array PsV7Native.Request := #[

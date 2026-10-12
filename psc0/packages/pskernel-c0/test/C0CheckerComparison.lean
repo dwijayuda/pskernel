@@ -554,6 +554,70 @@ def main : IO Unit := do
           throw (IO.userError "local reference benchmark admission mismatch")
         IO.println s!"C0_COMPARE round={round} operation=admit_local_reference milliseconds={referenceEnd-referenceStart} declarations={referenceRuns} binder_depth={referenceDepth} bvar_index={offset}"
 
+
+    -- Deep *reused* local references: a curried axiom of type
+    -- (Sort 1) -> ... -> Sort 1 is applied 24 times to the same bound
+    -- local under deep checked lambdas. Unlike a single BVar reference,
+    -- each checked argument independently invokes local-context lookup.
+    -- This measures whether memoized local indexing repays construction.
+    let reuseArity := 24
+    let reuseAxiomName := PsKernelName.str PsKernelName.anonymous "C0ReuseLocal"
+    let reuseAxiom : PsKernelAxiomInfo := {
+      base := {
+        name := reuseAxiomName
+        levelParams := []
+        type := c0CompareCheckedPi reuseArity
+      }
+      isUnsafe := false
+    }
+    let reuseEnv ←
+      match psKernelAddAxiom 4096 psKernelEnvironmentEmpty reuseAxiom
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok accepted => pure accepted
+      | Except.error err =>
+          throw (IO.userError ("matched reusable local axiom rejected: " ++ err))
+    for reuseDepth in [192, 320, 512] do
+      let expectedType := c0CompareCheckedPi reuseDepth
+      for offset in [0, reuseDepth / 2, reuseDepth - 1] do
+        let applied := c0CompareApps reuseArity
+          (PsKernelExpr.const reuseAxiomName [])
+          (PsKernelExpr.bvar offset)
+        let source := (List.range reuseDepth).foldl
+          (fun body _ => PsKernelExpr.lam PsKernelName.anonymous
+            (PsKernelExpr.sort (.succ PsKernelLevel.zero)) body
+            PsKernelBinderInfo.default)
+          applied
+        let declarationName := PsKernelName.num
+          (PsKernelName.str PsKernelName.anonymous "C0RepeatedReference")
+          (reuseDepth + offset)
+        let declaration : PsKernelDefinitionInfo := {
+          base := {
+            name := declarationName
+            levelParams := []
+            type := expectedType
+          }
+          value := source
+          hints := PsKernelReducibilityHints.abbrevHint
+          safety := PsKernelDefinitionSafety.safe
+        }
+        let repeats := if reuseDepth == 192 then 3 else 2
+        let mut verified := 0
+        let repeatedStart ← IO.monoMsNow
+        for _ in [:repeats] do
+          match psKernelAddDefinition 4096 reuseEnv declaration
+              4096 psKernelLeanNatMaxSizeDefault with
+          | Except.ok accepted =>
+              if psKernelEnvironmentContains accepted declarationName then
+                verified := verified + 1
+              else
+                throw (IO.userError "reused-local definition missing after checked admission")
+          | Except.error err =>
+              throw (IO.userError ("reused-local checked admission failed: " ++ err))
+        let repeatedEnd ← IO.monoMsNow
+        if verified != repeats then
+          throw (IO.userError "reused-local checked admission count mismatch")
+        IO.println s!"C0_COMPARE round={round} operation=admit_local_reference_reused milliseconds={repeatedEnd-repeatedStart} declarations={repeats} binder_depth={reuseDepth} bvar_index={offset} applications={reuseArity}"
+
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do
     if line.startsWith "VmHWM:" then IO.println s!"C0_COMPARE process_peak {line}"

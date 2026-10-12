@@ -162,8 +162,10 @@ def psPscv0CallArguments (read : PsPscv0TermReader) (fuel : Nat)
 
 -- All four Lean GetElem spellings share one postfix owner and ordinary
 -- typed application. Proofs are never discarded or translated to Bool.
--- Until the selected get_elem_tactic proof extension is complete, the
--- generated proof goal uses its highest-priority safe rule: assumption.
+-- The implicit validity proof remains a typed goal. A bounded Lean-style
+-- index tactic attempts only checked local evidence/reflexivity/trivial
+-- constructors; arithmetic and extensible simplification remain explicit
+-- conformance obligations, never assumed away.
 def psPscv0IndexMethod (name : String) (args : List PsSyntaxTerm)
     (span : PsSourceSpan) : PsSyntaxTerm :=
   .call (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
@@ -199,7 +201,7 @@ def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
             proof.cursor, psSyntaxTermSpan proof.value)
         else
           let assumption : PsSyntaxTerm :=
-            .byE [.assumption close.token.span] {} close.token.span
+            .byE [.indexValidity close.token.span] {} close.token.span
           pure ("GetElem.getElem", [current, index.value, assumption],
             close.cursor, close.token.span)
       let span := psSyntaxSpanJoin (psSyntaxTermSpan current) lastSpan

@@ -135,6 +135,26 @@ def psProofShow (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
     | .error _ => pure ()
   throw (.proof "show did not match any goal")
 
+-- Match Lean RC4's safe opening tactics before arithmetic and user extensions.
+-- Each candidate starts from the *same* immutable proof state; failure cannot
+-- leak metavariable assignments into a later choice. A constructor is accepted
+-- only if it actually closes the index side condition (not when it creates
+-- further unsolved obligations). A bounded solver must never admit a term
+-- merely because a tactic made progress.
+def psProofIndexValidity (state : PsProofState) : Except PsElabError PsProofState := do
+  let state ← psProofNormalize state
+  let some originalGoal := state.goals.head?
+    | return state
+  for candidate in [psProofAssumption, psProofReflexivity, psProofConstructor] do
+    match candidate state with
+    | .error _ => pure ()
+    | .ok progressed =>
+      let normalized ← psProofNormalize progressed
+      if !normalized.goals.any (fun goal => goal.id == originalGoal.id) &&
+          normalized.goals.length < state.goals.length then
+        return normalized
+  throw (.proof "get_elem_tactic could not establish index validity; provide an explicit proof using xs[i]'h or use xs[i]?")
+
 def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : Nat)
     (state : PsProofState) (tactics : List PsSyntaxTactic) : Except PsElabError PsProofState := do
   match fuel with
@@ -162,6 +182,7 @@ def psProofRun (elaborate : PsElaborator) (scope : PsSyntaxProofScope) (fuel : N
           if names.isEmpty then psProofIntro state none
           else names.foldlM (fun current name => psProofIntro current (some name)) state
         | .assumption _ => psProofAssumption state
+        | .indexValidity _ => psProofIndexValidity state
         | .reflexivity _ => psProofReflexivity state
         | .constructor _ => psProofConstructor state
         | .each body any _ => do

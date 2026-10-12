@@ -50,6 +50,14 @@ private def getElemFoundationCases : IO Unit := do
     "}\n" ++
     "function implicitLookup(xs: IndexBox, i: Nat, h: i = 0): Nat := xs[i]\n" ++
     "function explicitLookup(xs: IndexBox, i: Nat, h: i = 0): Nat := xs[i]'h\n" ++
+    "function reflectedIndex(xs: IndexBox): Nat := xs[0]\n" ++
+    "structure AlwaysBox where { value: Nat }\n" ++
+    "instance alwaysGet: GetElem(AlwaysBox, Nat, Nat, fun (_: AlwaysBox) => fun (_: Nat) => True) where {\n" ++
+    "  getElem(xs: AlwaysBox, i: Nat, h: True): Nat := xs.value\n" ++
+    "}\n" ++
+    "function triviallyValid(xs: AlwaysBox): Nat := xs[42]\n" ++
+    "const reflexiveResult: Nat := reflectedIndex(IndexBox.mk(23))\n" ++
+    "const trivialResult: Nat := triviallyValid(AlwaysBox.mk(29))\n" ++
     "const selected: Nat := implicitLookup(IndexBox.mk(17), 0, by { rfl })\n" ++
     "const selectedExplicit: Nat := explicitLookup(IndexBox.mk(19), 0, by { rfl })\n"
   let unproved := source ++

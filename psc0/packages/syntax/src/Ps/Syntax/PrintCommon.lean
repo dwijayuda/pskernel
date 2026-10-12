@@ -166,6 +166,7 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
         let rendered ← psPrintSyntaxNames names
         return "intro" ++ (if rendered.isEmpty then "" else " " ++ psPrintJoin " " rendered)
       | .assumption _ => return "assumption"
+      | .indexValidity _ => return "get_elem_tactic"
       | .reflexivity _ => return "rfl"
       | .constructor _ => return "constructor"
       | .focus body close _ =>

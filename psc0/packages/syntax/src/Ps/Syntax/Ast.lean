@@ -148,6 +148,9 @@ inductive PsSyntaxTactic where
       (body : List PsSyntaxTactic) (span : PsSourceSpan)
   | intro (names : List PsSyntaxName) (span : PsSourceSpan)
   | assumption (span : PsSourceSpan)
+  -- Compiler-generated index side-condition solver. It never introduces
+  -- axioms, guesses inequalities or leaves unsolved proof metavariables.
+  | indexValidity (span : PsSourceSpan)
   | reflexivity (span : PsSourceSpan)
   | constructor (span : PsSourceSpan)
   | focus (body : List PsSyntaxTactic) (mustClose : Bool) (span : PsSourceSpan)

@@ -85,7 +85,7 @@ def psCodegenCollectCapturesWorker
                 (field : String × PsVerifiedIrExpr) =>
                 collect (Prod.snd field) state;
             match expr with
-            | .literal _ | .unreachable _ => captures
+            | .literal _ | .unreachable _ | .panic .. => captures
             | .var name =>
                 psCodegenAppendCaptureForName
                   outerNames

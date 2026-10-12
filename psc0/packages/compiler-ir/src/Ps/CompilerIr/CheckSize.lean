@@ -242,6 +242,9 @@ def psIrCheckModuleSizeWorker
               match value with
               | .unreachable type =>
                   psIrCheckModuleSizeWorker limit remaining (PsIrCheckSizeTask.type type :: rest) next
+              | .panic message type =>
+                  psIrCheckModuleSizeWorker limit remaining
+                    (PsIrCheckSizeTask.text message :: PsIrCheckSizeTask.type type :: rest) next
               | .literal literal =>
                   psIrCheckModuleSizeWorker limit remaining
                     (List.cons (PsIrCheckSizeTask.literal literal) rest) next

@@ -69,6 +69,7 @@ def psCodegenExpr : Nat → PsVerifiedIrExpr →
           return (← psCodegenName name, ← psCodegenExpr n value)
       match expr with
       | .unreachable type => return .unreachable (← psCodegenType 65536 type)
+      | .panic message type => return .panic message (← psCodegenType 65536 type)
       | .literal _ => return expr
       | .var name => return .var (← psCodegenName name)
       | .intrinsic op ts args => return .intrinsic op (← types ts) (← args.mapM (psCodegenExpr n))

@@ -18,6 +18,8 @@ def psPscv0InfixInfo : String → Option PsPscv0Infix
   | "∧" | "/\\" => some { kind := .constant "And", precedence := 35, rightPrecedence := 35 }
   | "∨" | "\\/" => some { kind := .constant "Or", precedence := 30, rightPrecedence := 30 }
   | "↔" | "<->" => some { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }
+  -- Pinned Lean RC4 Init/Notation.lean: infixr:35 " × " => Prod.
+  | "×" => some { kind := .constant "Prod", precedence := 35, rightPrecedence := 35 }
   | "→" | "->" => some { kind := .arrow, precedence := 25, rightPrecedence := 25 }
   | "matches" => some { kind := .matches, precedence := 50, rightPrecedence := 51, nonAssociative := true }
   | _ => none

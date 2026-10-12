@@ -182,7 +182,9 @@ def psPrepareConstructorFieldsWithFuel
                     erasedLocals := pushed.id :: scope.erasedLocals }
                     (psExprInstantiate1 body (.fvar pushed.id))
                     remaining (index + 1) fieldsRev
-              | .type =>
+              | .type | .index =>
+                  -- A higher-kinded constructor field is outside this selected
+                  -- runtime shape; do not silently store proof/type indices.
                   Except.error PsErasureError.unsupportedRuntimeTerm
           | _ =>
               Except.error PsErasureError.binderMismatch

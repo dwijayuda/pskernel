@@ -24,6 +24,45 @@ def main : IO Unit := do
         throw (IO.userError "unsound: Sort 0 equated with Sort 1")
       else
         IO.println "C0_PROOF_AUDIT sort0_sort1_distinct=pass"
+
+  -- Native accepting DefEq first checks structural equality and successful
+  -- pair-cache hits. The guarded quick entry may only be used after both
+  -- are known to miss; verify it matches the public path on such inputs.
+  let quickContext := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let quickState := psKernelCheckerStateEmpty
+  let quickDefeq :=
+    fun (ctx : PsKernelCheckerContext)
+        (st : PsKernelCheckerState)
+        (left : PsKernelExpr)
+        (right : PsKernelExpr) =>
+      psKernelIsDefEq 128 ctx st left right
+  for (left, right) in [
+    (sort0, sort1),
+    (PsKernelExpr.bvar 0, sort0),
+    (PsKernelExpr.app (PsKernelExpr.mvar PsKernelName.anonymous)
+      sort0, sort1)
+  ] do
+    if psKernelExprEq left right ||
+        psKernelExprPairSetContains quickState.success left right then
+      throw (IO.userError "C0 guarded quick test did not miss outer guards")
+    match
+        psKernelDefEqQuick quickDefeq quickContext quickState left right,
+        psKernelDefEqQuickAfterCommon quickDefeq quickContext quickState left right with
+    | Except.ok general, Except.ok guarded =>
+        match Prod.fst general, Prod.fst guarded with
+        | Option.none, Option.none => pure ()
+        | Option.some x, Option.some y =>
+            if !(psKernelBoolEq x y) then
+              throw (IO.userError "C0 guarded quick comparison changed result")
+        | _, _ =>
+            throw (IO.userError "C0 guarded quick comparison changed decision")
+    | Except.error x, Except.error y =>
+        if !(psKernelStringEq x y) then
+          throw (IO.userError "C0 guarded quick comparison changed error")
+    | _, _ =>
+        throw (IO.userError "C0 guarded quick comparison changed result category")
+  IO.println "C0_PERF_REGRESSION defeq_guarded_quick=pass"
+
   match psKernelSessionCheck 4096 session (PsKernelExpr.bvar 0) with
   | Except.error _ =>
       IO.println "C0_PROOF_AUDIT unbound_bvar_rejected=pass"

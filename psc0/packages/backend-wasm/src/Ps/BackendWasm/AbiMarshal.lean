@@ -174,9 +174,9 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
   | fuel + 1, id, pointer, values => do
     let node ← abiNode plan id
     if values.length != node.flat then throw "PSCV0-ABI-PLAN: flat input arity"
-    let at := fun index => match values[index]? with
+    let slot := fun (index : Nat) => (match values[index]? with
       | some value => pure value
-      | none => throw "PSCV0-ABI-PLAN: missing flat slot"
+      | none => throw "PSCV0-ABI-PLAN: missing flat slot" : Except String R)
     let fields := fun (fields : List AbiField) => do
       let mut start := 0
       let mut code : List R := []
@@ -188,21 +188,21 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
       return seq code
     match node.shape with
     | .scalar scalar =>
-      let value ← at 0
+      let value ← slot 0
       let value := match scalar with
         | .bool => c "__ps_abi_check_bool" [value]
         | .char => c "__ps_abi_check_char" [value]
         | .word => value
       return o (.memory (if scalar == .bool then .store8 else .store32)) [pointer, value]
     | .string | .list _ | .limbs =>
-      return seq [store pointer (← at 0), store (offset pointer 4) (← at 1)]
+      return seq [store pointer (← slot 0), store (offset pointer 4) (← slot 1)]
     | .natural limbs => abiStoreFlat plan fuel limbs pointer values
     | .integer negative magnitude =>
       return seq [← abiStoreFlat plan fuel negative pointer (values.take 1),
         ← abiStoreFlat plan fuel magnitude (offset pointer 4) (values.drop 1)]
     | .record _ fs | .payload fs => fields fs
     | .variant _ cases payloadOffset tagSize =>
-      let tag ← at 0
+      let tag ← slot 0
       let storeOp := if tagSize == 1 then PsWasmMemoryOp.store8 else if tagSize == 2 then .store16 else .store32
       let cases ← cases.mapM fun alternative => do
         let body ← match alternative.payload with
@@ -254,10 +254,12 @@ def abiExportWrapper (plan : AbiPlan) (e : AbiExport) : Except String RuntimeDef
     | some id => do
       let node ← abiNode plan id
       locals := locals ++ [("result_value", ← abiRepresentation node), ("result_pointer", .i32)]
+      let result ← if e.indirectResult then pure (g "result_pointer")
+        else abiSingleResult plan 4096 id (g "result_pointer")
       pure (seq (prepare ++ [put "result_value" (c e.target arguments),
         put "result_pointer" (abiAllocate (k node.size) (k node.alignment)),
         ← abiWrite plan id (g "result_pointer") (g "result_value"),
-        if e.indirectResult then g "result_pointer" else ← abiSingleResult plan 4096 id (g "result_pointer")]))
+        result]))
   runtimeDefinition ("__ps_abi_export_" ++ e.target) parameters
     (if e.result.isSome then [.i32] else []) locals body
 

@@ -204,10 +204,10 @@ def watModuleDoc (m : PsWasmModule) (names : LocalNames := []) (header := "(modu
       (.append .hardline (.text ")")))]
   let refs := if m.functionRefs.isEmpty then [] else [
     PsDoc.text ("(elem declare func " ++ String.intercalate " " (m.functionRefs.map watId) ++ ")")]
-  let exports := m.exports.map fun (external, internal) =>
-    PsDoc.text ("(export " ++ watQuote external ++ " (func " ++ watId internal ++ "))")
-  let memory := if m.abiMemory then [PsDoc.text "(memory $abi_buffers 1 32768)",
-    .text "(export \"memory\" (memory $abi_buffers))"] else []
+  let exports := (m.exports.map fun (external, internal) =>
+    PsDoc.text ("(export " ++ watQuote external ++ " (func " ++ watId internal ++ "))")) ++
+    (if m.abiMemory then [PsDoc.text "(export \"memory\" (memory $abi_buffers))"] else [])
+  let memory := if m.abiMemory then [PsDoc.text "(memory $abi_buffers 1 32768)"] else []
   let globals := m.abiGlobals.map fun (name, value) =>
     PsDoc.text ("(global " ++ watId name ++ " (mut i32) (i32.const " ++ toString value ++ "))")
   let functions := m.functions.zipIdx |>.map fun (f, i) =>

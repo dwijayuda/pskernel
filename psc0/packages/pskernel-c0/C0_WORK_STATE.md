@@ -152,3 +152,9 @@ The direct selector's dedicated differential/benchmark run is being qualified; n
 ### Negative performance selection: direct expression argument retrieval
 
 Native [run 38194880437](https://github.com/dwijayuda/pskernel/actions/runs/38194880437) successfully validated the added direct-selector differential regression and all other negative checker tests. However the paired 18,000-query depth-512 microbenchmark reported 560 ms for historical full argument list + selection versus 1298 ms for the proposed direct two-pass traversal. Consequently **commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` restored the production projection path to historical single-pass list selection**; the new `Expr.lean` helper remains experimental for its tested API and historical performance record. It is not a reported speedup. Continue verifying the final commit's native workflow and prioritize measured systemic throughput over unmeasured allocation hypotheses.
+
+
+
+### Final post-rollback native validation (2026-10-12)
+
+[PSKernel-C0 native Lean CI 38195084646](https://github.com/dwijayuda/pskernel/actions/runs/38195084646) at source commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` **passed all three gates**: 84-job full native Lean build; negative and differential semantic checker regression; native Lean performance benchmark suite. The production constructor-projection path again uses list-backed application-field selection. The direct selector remains an experimental helper, never a checked shortcut. Its paired same-run reference-vs-direct result still regressed: 396 ms list / 911 ms direct over 18,000 depth-512 queries (~2.30× slower). Delta eager/lazy miss results 112/111 ms are near parity, not a reliable checker speedup. Native Linux entire benchmark process VmHWM 633996 kB. This validation includes **no self-host/bootstrap or metatheory tests**. Representative entire-library baseline and session-indexed acceptance work remain open.

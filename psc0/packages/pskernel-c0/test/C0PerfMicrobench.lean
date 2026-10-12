@@ -1,4 +1,4 @@
-import Ps.KernelCore.Core.IndexedReduction
+import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.LocalContext
 
@@ -173,3 +173,47 @@ def main : IO Unit := do
           if !(Nat.beq oldCount memoCount) then
             throw (IO.userError "C0 indexed rewrite changed success count")
           IO.println s!"C0_BENCH indexed_dag recursive_ms={oldEnd - oldStart} memoized_ms={memoEnd - memoStart} depth=11 runs={runs} passed={memoCount}"
+
+
+  -- The old indexed WHNF stuck-head path reconstructed the entire application
+  -- spine even if the head did not reduce.  Measure that eliminated work
+  -- separately from full checker throughput: same canonical term store,
+  -- same 256-node stuck spine, no metadata or local environment.
+  match psKernelC0Intern psKernelC0StoreEmpty (.bvar 0) with
+  | Option.none => throw (IO.userError "C0 indexed WHNF benchmark head failed")
+  | Option.some (headStore, headId) =>
+      match psKernelC0Intern headStore (.bvar 1) with
+      | Option.none => throw (IO.userError "C0 indexed WHNF benchmark arg failed")
+      | Option.some (initialStore, argId) =>
+          let mut terms := initialStore
+          let mut root := headId
+          let mut args : List Nat := []
+          for _ in [:256] do
+            match psKernelC0Intern terms (.app root argId) with
+            | Option.none => throw (IO.userError "C0 indexed WHNF benchmark build failed")
+            | Option.some (next, id) =>
+                terms := next
+                root := id
+                args := argId :: args
+          let runs := 600
+          let mut rebuiltHits := 0
+          let rebuiltStart ← IO.monoMsNow
+          for _ in [:runs] do
+            match psKernelC0IndexedApplySpine terms headId args with
+            | Option.some (next, id) =>
+                if Nat.beq id root && Nat.beq next.nodes.size terms.nodes.size then
+                  rebuiltHits := rebuiltHits + 1
+            | Option.none => throw (IO.userError "C0 indexed spine rebuild failed")
+          let rebuiltEnd ← IO.monoMsNow
+          let mut originalHits := 0
+          let nativeStart ← IO.monoMsNow
+          for _ in [:runs] do
+            match psKernelC0IndexedWhnf 1024 terms root with
+            | Option.some (next, id) =>
+                if Nat.beq id root && Nat.beq next.nodes.size terms.nodes.size then
+                  originalHits := originalHits + 1
+            | Option.none => throw (IO.userError "C0 indexed stuck-head WHNF failed")
+          let nativeEnd ← IO.monoMsNow
+          if !(Nat.beq rebuiltHits runs && Nat.beq originalHits runs) then
+            throw (IO.userError "C0 indexed stuck-spine outcomes diverged")
+          IO.println s!"C0_BENCH indexed_stuck_spine reassemble_only_ms={rebuiltEnd - rebuiltStart} unchanged_head_whnf_ms={nativeEnd - nativeStart} depth=256 runs={runs} hits={originalHits}"

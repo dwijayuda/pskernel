@@ -318,6 +318,33 @@ def main : IO Unit := do
                 | none => throw (IO.userError "C0 binder kind handle invalid")
   IO.println "C0_PERF_REGRESSION indexed_binder_hash_identity=pass"
 
+  -- The infer-only application-spine worker keeps the same fuel and callback
+  -- classification while counting an immutable argument list only once.
+  let inferSpine := PsKernelExpr.forallE PsKernelName.anonymous sort0
+    (PsKernelExpr.forallE PsKernelName.anonymous sort0 sort0
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+  let spineArgs := [sort0, sort1]
+  let inertWhnf :=
+    fun (_ctx : PsKernelCheckerContext)
+        (st : PsKernelCheckerState)
+        (term : PsKernelExpr) =>
+      Except.ok (term, st)
+  for fuel in [0, 1, 2, 3, 4, 8] do
+    match psKernelInferAppOnlyLoopWithFuel fuel inertWhnf
+        quickContext psKernelCheckerStateEmpty spineArgs 0 0 inferSpine,
+        psKernelInferAppOnlyLoopWithFuelCount fuel 2 inertWhnf
+          quickContext psKernelCheckerStateEmpty spineArgs 0 0 inferSpine with
+    | Except.ok (oldType, _), Except.ok (newType, _) =>
+        if !(psKernelExprEqual oldType newType) then
+          throw (IO.userError "C0 counted infer-only spine changed type")
+    | Except.error oldError, Except.error newError =>
+        if !(psKernelStringEq oldError newError) then
+          throw (IO.userError "C0 counted infer-only spine changed exhaustion error")
+    | _, _ =>
+        throw (IO.userError "C0 counted infer-only spine changed fuel decision")
+  IO.println "C0_PERF_REGRESSION infer_only_spine_count_fuel=pass"
+
 
   -- Native accepting DefEq first checks structural equality and successful
   -- pair-cache hits. The guarded quick entry may only be used after both

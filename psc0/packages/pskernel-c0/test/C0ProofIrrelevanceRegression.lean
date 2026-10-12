@@ -1,4 +1,4 @@
-import Ps.KernelCore.Core.IndexedExpr
+import Ps.KernelCore.Core.IndexedReduction
 import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
 import Ps.KernelCore.Checker.Session
 
@@ -294,3 +294,29 @@ def main : IO Unit := do
       if !(psKernelExprEqual result rightSort) then
         throw (IO.userError "C0 WHNF changed reducible application head")
   IO.println "C0_PERF_REGRESSION demand_driven_whnf=pass"
+
+  -- Native indexed de Bruijn rewrite must match the current Lean expression
+  -- substitution exactly, including binder shifting and changed let bodies.
+  for expr in examples do
+    for replacement in [PsKernelExpr.bvar 0, PsKernelExpr.bvar 3,
+        leftSort, binder, metadata] do
+      match psKernelC0EncodeExpr psKernelC0StoreEmpty expr with
+      | Option.none =>
+          throw (IO.userError "C0 indexed substitution setup failed")
+      | Option.some (st1, inputId) =>
+          match psKernelC0EncodeExpr st1 replacement with
+          | Option.none =>
+              throw (IO.userError "C0 indexed replacement setup failed")
+          | Option.some (st2, replacementId) =>
+              match psKernelC0Instantiate1Indexed st2 inputId replacementId with
+              | Option.none =>
+                  throw (IO.userError "C0 indexed substitution failed")
+              | Option.some (st3, resultId) =>
+                  match psKernelC0DecodeExpr st3 resultId with
+                  | Option.none =>
+                      throw (IO.userError "C0 indexed rewritten expression is invalid")
+                  | Option.some result =>
+                      let expected := psKernelExprInstantiate1 expr replacement
+                      if !(psKernelExprEqual result expected) then
+                        throw (IO.userError "C0 indexed beta substitution differs from reference")
+  IO.println "C0_PERF_REGRESSION indexed_beta_substitution=pass"

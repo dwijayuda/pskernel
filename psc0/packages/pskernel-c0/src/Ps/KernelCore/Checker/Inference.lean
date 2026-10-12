@@ -207,12 +207,14 @@ def psKernelCheckWithFuel
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  -- Promote only long root application spines. Smaller applications
-  -- continue using the historical recursive checked inference to avoid
-  -- frame allocation overhead where amortization is unproven.
+  -- Use the exact-frame/Pi-range checked route for medium and large
+  -- application spines. Smaller applications retain historical recursive
+  -- checking to avoid frame allocation overhead. The 32-argument boundary
+  -- is checked by independent recursive differential and same-run original
+  -- kernel whole-checker benchmarks; this is a routing heuristic only.
   match expr with
   | .app _ _ =>
-      if psKernelExprGetAppNumArgs expr >= 64 then
+      if psKernelExprGetAppNumArgs expr >= 32 then
         psKernelC0CheckAppSpineWithFuel
           fuel whnf defeq context state expr
       else

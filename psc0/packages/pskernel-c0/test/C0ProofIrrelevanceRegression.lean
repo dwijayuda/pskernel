@@ -113,7 +113,7 @@ def main : IO Unit := do
   -- The flattened checked-spine candidate must have identical fully checked
   -- outcomes, exact error strings, resource exhaustion and fresh-name state.
   -- This includes a deeply nested app, a bad argument and tight fuel limits.
-  for arity in [1, 4, 12, 48, 63, 64, 65, 192, 320] do
+  for arity in [1, 4, 12, 24, 31, 32, 33, 48, 63, 64, 65, 192, 320] do
     let source := (List.range arity).foldl
       (fun expr _ => PsKernelExpr.app expr sort0)
       (c0CheckedSpineFixture arity)
@@ -146,7 +146,7 @@ def main : IO Unit := do
       session with
       context := { session.context with maxRecDepth := bound }
     }
-    for arity in [12, 192] do
+    for arity in [12, 31, 32, 33, 48, 192] do
       let expr := (List.range arity).foldl
         (fun term _ => PsKernelExpr.app term sort0)
         (c0CheckedSpineFixture arity)

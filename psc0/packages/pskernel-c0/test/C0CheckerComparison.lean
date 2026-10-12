@@ -137,6 +137,28 @@ def main : IO Unit := do
     PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
   let wideApp := c0CompareApps 192 (PsKernelExpr.const wideName []) sort0
 
+  -- A separate admitted medium-arity function exercises the exact
+  -- 31/32/33 production-routing boundary through whole checked judgments.
+  let mediumName :=
+    PsKernelName.str PsKernelName.anonymous "C0MediumFunction"
+  let mediumDecl : PsKernelAxiomInfo := {
+    base := {
+      name := mediumName
+      levelParams := []
+      type := c0CompareForalls 32
+    }
+    isUnsafe := false
+  }
+  let mediumEnvironment ←
+    match psKernelAddAxiom 4096 empty mediumDecl
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("matched medium benchmark axiom rejected: " ++ err))
+  let mediumSession := psKernelMkCheckerSession mediumEnvironment []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let mediumApp := c0CompareApps 32 (PsKernelExpr.const mediumName []) sort0
+
   let safeDefinition : PsKernelDefinitionInfo := {
     base := {
       name := PsKernelName.str PsKernelName.anonymous "C0ComparedSafeDef"
@@ -347,6 +369,23 @@ def main : IO Unit := do
     if variedCheckedOk != variedCount then
       throw (IO.userError "matched varied checked count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=cold_check_application_varied milliseconds={variedCheckedEnd-variedCheckedStart} samples={variedCount} variants=16"
+
+    -- The medium case is a complete accepting check (not a helper).
+    -- Compare the identical input on the independent unchanged original
+    -- kernel and C0, with construction outside the measured loop.
+    let mut mediumOk := 0
+    let mediumStart ← IO.monoMsNow
+    for _ in [:160] do
+      match psKernelSessionCheck 4096 mediumSession mediumApp with
+      | Except.ok (result, _) =>
+          if psKernelExprEqual result sort0 then
+            mediumOk := mediumOk + 1
+          else throw (IO.userError "matched medium checked type changed")
+      | Except.error err =>
+          throw (IO.userError ("matched medium checked failed: " ++ err))
+    let mediumEnd ← IO.monoMsNow
+    if mediumOk != 160 then throw (IO.userError "medium checked count changed")
+    IO.println s!"C0_COMPARE round={round} operation=cold_check_application_medium milliseconds={mediumEnd-mediumStart} samples=160 arguments=32"
 
     let mut wideInferOk := 0
     let wideInferStart ← IO.monoMsNow

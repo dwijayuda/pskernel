@@ -21,7 +21,7 @@ def psPscv0ValidModuleKey (name : String) : Bool :=
 def psPscv0ProjectParse (sources : List PsPscv0ModuleSource) :
     Except String (List PsPscv0ParsedModule) := do
   if sources.length > 256 then throw "PSCV0-MODULE: project source count budget"
-  if sources.map (·.name) |>.eraseDups |>.length != sources.length then
+  if (sources.map (·.name)).eraseDups.length != sources.length then
     throw "PSCV0-MODULE: duplicate module identity"
   let names := sources.map (·.name)
   for entry in sources do
@@ -79,7 +79,9 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
     if acc.any (fun entry => psNameEq entry.fst item.fst) then acc else acc ++ [item])
     left.classParameters
   let instances := right.instances.foldl (fun acc item =>
-    if acc.any (fun entry => entry.value == item.value) then acc else acc ++ [item])
+    if acc.any (fun entry => match entry.value, item.value with
+      | .constE left _, .constE right _ => psNameEq left right
+      | _, _ => false) then acc else acc ++ [item])
     left.instances
   { declarations, classes, classParameters, instances }
 

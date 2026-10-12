@@ -234,6 +234,36 @@ def psKernelExprHash
           index)
         (psKernelExprHash body)
 
+/-- Exact immutable structural hashes and loose ranges for a let
+    chain, bottom-up. Each frame stores (body range, *current let* hash).
+    Hashes only select buckets; all cache hits still compare full syntax. -/
+def psKernelC0LetCacheFramesWithFuel (fuel : Nat) :
+    PsKernelExpr ->
+    Option (Prod Nat (Prod Nat (List (Prod Nat Nat)))) :=
+  match fuel with
+  | 0 => fun _ => none
+  | Nat.succ remaining =>
+      let smaller := psKernelC0LetCacheFramesWithFuel remaining
+      fun expr =>
+        match expr with
+        | .letE _ ty value body nondep => do
+            let tyRange ← psKernelC0SourceLooseRangeWithFuel remaining ty
+            let valueRange ← psKernelC0SourceLooseRangeWithFuel remaining value
+            let (bodyRange, bodyHash, suffixes) ← smaller body
+            let h :=
+              psKernelCacheMix
+                (psKernelCacheMix
+                  (psKernelCacheMix
+                    (psKernelCacheMix 29 (psKernelExprHash ty))
+                    (psKernelExprHash value))
+                  bodyHash)
+                (if nondep then 1 else 0)
+            pure (Nat.max (Nat.max tyRange valueRange) (Nat.pred bodyRange),
+              h, (bodyRange, h) :: suffixes)
+        | _ => do
+            let range ← psKernelC0SourceLooseRangeWithFuel remaining expr
+            pure (range, psKernelExprHash expr, [])
+
 /-
 PSKernel-C0 radix-16 cache index.
 
@@ -356,9 +386,10 @@ def psKernelExprMapGetIn
           expr
           rest
 
-def psKernelExprMapGet
+def psKernelExprMapGetWithKnownHash
     (cache : PsKernelExprMap)
-    (expr : PsKernelExpr) :
+    (expr : PsKernelExpr)
+    (knownHash : Option Nat) :
     Option PsKernelExpr :=
   match cache.index with
   | Option.none =>
@@ -371,7 +402,14 @@ def psKernelExprMapGet
         (psKernelExprMapIndexBucket
           psKernelC0IndexDepth
           index
-          (psKernelExprHash expr))
+          (match knownHash with
+           | some h => h
+           | none => psKernelExprHash expr))
+
+def psKernelExprMapGet
+    (cache : PsKernelExprMap)
+    (expr : PsKernelExpr) : Option PsKernelExpr :=
+  psKernelExprMapGetWithKnownHash cache expr none
 
 def psKernelExprMapInsertIn
     (expr : PsKernelExpr)
@@ -428,10 +466,11 @@ def psKernelExprMapBuildIndex
           (Prod.snd entry)
           bucket)
 
-def psKernelExprMapInsert
+def psKernelExprMapInsertWithKnownHash
     (cache : PsKernelExprMap)
     (expr : PsKernelExpr)
-    (value : PsKernelExpr) :
+    (value : PsKernelExpr)
+    (knownHash : Option Nat) :
     PsKernelExprMap :=
   match cache.index with
   | Option.none =>
@@ -457,7 +496,9 @@ def psKernelExprMapInsert
         }
   | Option.some index =>
       let hash :=
-        psKernelExprHash expr;
+        match knownHash with
+        | some h => h
+        | none => psKernelExprHash expr;
       let bucket :=
         psKernelExprMapIndexBucket
           psKernelC0IndexDepth
@@ -476,6 +517,11 @@ def psKernelExprMapInsert
                 value
                 bucket))
       }
+
+def psKernelExprMapInsert
+    (cache : PsKernelExprMap)
+    (expr value : PsKernelExpr) : PsKernelExprMap :=
+  psKernelExprMapInsertWithKnownHash cache expr value none
 
 def psKernelExprPairEq
     (left : PsKernelExpr)

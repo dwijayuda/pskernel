@@ -4,7 +4,7 @@ import Ps.Codegen.Captures
 abbrev psRustStringListContains := psCodegenStringListContains
 abbrev psRustAddParameterNames := psCodegenAddParameterNames
 abbrev psRustAddBindingNames := psCodegenAddBindingNames
-abbrev psRustListFoldl := psCodegenListFoldl
+abbrev psRustListFoldl := @psCodegenListFoldl
 abbrev psRustAppendCaptureForName := psCodegenAppendCaptureForName
 abbrev psRustParameterNames := psCodegenParameterNames
 abbrev psRustMatchBindingNames := psCodegenMatchBindingNames

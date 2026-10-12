@@ -29,7 +29,8 @@ def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
         let wrapper : PsWasmFunction := {
           name, typeName := none, parameters, results := [], locals := []
           body := (parameters.zipIdx.map fun (_, i) => .localGet i) ++ [.call (nameOf d.name), .drop] }
-        core := { core with functions := core.functions ++ [wrapper],
+        core := { core with
+          functions := core.functions ++ [wrapper],
           exports := core.exports.map fun (exportedName, target) => (exportedName, if exportedName == d.name then name else target) }
   let core ← pruneFunctions core
   let binary ← checkedCore core locals

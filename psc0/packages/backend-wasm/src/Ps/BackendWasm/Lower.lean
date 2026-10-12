@@ -103,7 +103,8 @@ def lowerExpr (ir : PsVerifiedIrModule) :
       let captures := captureNames.filterMap fun n => bindings.find? (fun b => b.name == n)
       let outer ← get
       let name := "__ps_closure_" ++ outer.owner ++ "_" ++ toString outer.next
-      set { outer with locals := [], names := [], next := outer.next + 1,
+      set { outer with
+        locals := [], names := [], next := outer.next + 1,
         arities := parameters.length :: outer.arities }
       let self ← allocateLocal "closure" closureType
       let arguments ← parameters.mapM fun p => allocateLocal (p.name ++ "_boxed") valueType
@@ -127,7 +128,8 @@ def lowerExpr (ir : PsVerifiedIrModule) :
         results := [valueType]
         locals := innerState.locals.drop (parameters.length + 1)
         body := psWasmTailCalls (initial ++ (← converted compiled result) ++ (← box result)) }
-      set { innerState with locals := outer.locals, names := outer.names,
+      set { innerState with
+        locals := outer.locals, names := outer.names,
         lifted := innerState.lifted ++ [{ function, names := innerState.names }] }
       let captureCode ← captures.mapM fun b => do
         return [.localGet b.index] ++ (← box b.type)
@@ -205,7 +207,7 @@ def lowerDeclaration (ir : PsVerifiedIrModule) (d : PsVerifiedIrDeclaration) :
 def lowerModule (ir : PsVerifiedIrModule) :
     Except String (PsWasmModule × List (String × List String)) := do
   if !ir.imports.isEmpty then throw "PSCV0-WASM-CAPABILITY: external imports are not admitted"
-  let definitions ← ir.declarations.mapM (lowerDeclaration ir)
+  let definitions : List (List RuntimeDefinition × List Nat) ← ir.declarations.mapM (lowerDeclaration ir)
   let runtime ← runtimeDefinitions
   let functions := definitions.flatMap (·.1) ++ runtime
   let arities := ((definitions.flatMap (·.2)) ++ [1, 2]).eraseDups

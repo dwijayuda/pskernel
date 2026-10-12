@@ -800,7 +800,9 @@ private def doBoundaries : IO Unit := do
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
   for i in [:cases.size] do
-    match batch.results[i]! with
+    let some outcome := batch.results[i]? |
+      throw (IO.userError s!"missing do boundary result {i}")
+    match outcome with
     | .error error =>
       unless error.phase == cases[i]!.snd do
         throw (IO.userError s!"do boundary {i}: {error.phase}: {error.message}")

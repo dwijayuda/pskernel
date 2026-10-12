@@ -474,6 +474,27 @@ def psErasureAppendDeclarations (declarations : List PsDeclaration) : List PsDec
       let smaller : List PsDeclaration -> List PsDeclaration := psErasureAppendDeclarations rest;
       fun (tail : List PsDeclaration) => List.cons declaration (smaller tail)
 
+-- Foreign marshalling cannot reconstruct erased proof obligations. Preserve a
+-- conservative algebraic-data classification while the source layout is still
+-- available. Indices, value parameters and erased constructor fields require
+-- an explicit validating adapter instead of an automatic structural export.
+def psErasureForeignData (scope : PsErasureScope) (declarations : List PsDeclaration) :
+    List (String × Bool) :=
+  declarations.filterMap fun declaration =>
+    match declaration with
+    | .inductiveDecl info =>
+      match psErasureLookupStructure scope.runtimeStructures info.name with
+      | some runtime => some (runtime.name,
+          info.numIndices == 0 && info.numParams == runtime.typeParameters.length &&
+          runtime.numFields == runtime.fields.length)
+      | none =>
+        match psErasureLookupRecursor scope.runtimeRecursors (psNameAppendStr info.name "rec") with
+        | none => none
+        | some runtime => some (runtime.name,
+            info.numIndices == 0 && info.numParams == runtime.typeParameters.length &&
+            runtime.constructors.all (fun c => c.numFields == c.fields.length))
+    | _ => none
+
 def psEraseCoreModuleWithRuntimePrelude
     (environment : PsEnvironment)
     (runtimePreludeDeclarations : List PsDeclaration)
@@ -513,6 +534,7 @@ def psEraseCoreModuleWithRuntimePrelude
               | Except.error error => Except.error error
               | Except.ok lowered =>
                   Except.ok {
+                    foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
                     imports := []
                     structures := preparedStructures.ir
                     inductives := preparedInductives.ir

@@ -82,7 +82,7 @@ def abiTypeKey : Nat → PsVerifiedIrType → Except String String
     | _ => throw "PSCV0-WIT-CAPABILITY: concrete first-order value required"
 
 def addAbiNode (node : AbiNode) : AbiM Nat := do
-  let plan ← get
+  let plan : AbiPlan ← get
   if let some (_, index) := plan.nodes.zipIdx.find? (fun p => p.1.key == node.key) then return index
   if plan.nodes.any (fun n => n.name == node.name) then
     throw ("PSCV0-WIT-NAME: type collision: " ++ node.name)
@@ -91,7 +91,7 @@ def addAbiNode (node : AbiNode) : AbiM Nat := do
 
 def abiFieldsLayout (fields : List (String × Nat × PsVerifiedIrType)) :
     AbiM (List AbiField × Nat × Nat × Nat) := do
-  let plan ← get
+  let plan : AbiPlan ← get
   let mut result : List AbiField := []
   let mut size := 0
   let mut alignment := 1
@@ -114,14 +114,14 @@ def planAbiType (ir : PsVerifiedIrModule) :
   | 0, _, _ => throw "PSCV0-ABI-RESOURCE: type planning exhausted"
   | fuel + 1, seen, type => do
     let key ← abiTypeKey 4096 type
-    let plan ← get
+    let plan : AbiPlan ← get
     if let some (_, index) := plan.nodes.zipIdx.find? (fun p => p.1.key == key) then return index
     if seen.contains key then throw ("PSCV0-WIT-CAPABILITY: recursive value requires an explicit resource/view API: " ++ key)
     let child := planAbiType ir fuel (key :: seen)
     let readable ← match type with
       | .primitive p => pure (psIrCheckPrimitiveName p)
       | .named name arguments => do
-        let arguments ← arguments.mapM (abiTypeKey 4096)
+        let arguments ← arguments.mapM (fun arg => do return ← abiTypeKey 4096 arg)
         pure (name ++ (if arguments.isEmpty then "" else "-" ++ String.intercalate "-" arguments))
       | _ => pure key
     let name := witName readable
@@ -144,6 +144,8 @@ def planAbiType (ir : PsVerifiedIrModule) :
       let element ← child element
       make (.list element) 8 4 2
     | .named runtimeName arguments =>
+      if !((ir.foreignData.find? (fun p => p.1 == runtimeName)).map (·.2)).getD false then
+        throw ("PSCV0-WIT-INVARIANT: dependent/proof-bearing data requires an explicit validating adapter: " ++ runtimeName)
       if let some s := ir.structures.find? (fun s => s.name == runtimeName) then
         let fields ← s.fields.mapM fun field => do
           let concrete ← substitute s.typeParameters arguments field.type
@@ -193,8 +195,8 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
         | type => (planAbiType ir 4096 [] type).map some
       let (fields, size, _, flat) ← abiFieldsLayout
         (parameters.map fun (name, node) => (name, node, PsVerifiedIrType.unknown))
-      let plan ← get
-      let resultFlat ← match result with | none => pure 0 | some n => return (← abiNode plan n).flat
+      let plan : AbiPlan ← get
+      let resultFlat ← match result with | none => pure 0 | some n => do return (← abiNode plan n).flat
       let foreignName := witName semanticName
       if plan.exports.any (fun e => e.foreignName == foreignName) ||
           plan.nodes.any (fun n => n.name == foreignName) then
@@ -202,7 +204,7 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
       set { plan with exports := plan.exports ++ [{
         semanticName, foreignName, target := d.name, parameters, result,
         parameterOffsets := fields.map (·.offset), parameterSize := size,
-        indirectParameters := flat > 16, indirectResult := resultFlat > 1 }] }
+        indirectParameters := flat > 16, indirectResult := resultFlat > 1 : AbiExport }] }
   let (_, plan) ← action.run {}
   return plan
 

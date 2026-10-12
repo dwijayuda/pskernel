@@ -241,6 +241,9 @@ structure PsVerifiedIrExternalImport where
   type : PsVerifiedIrType
 
 structure PsVerifiedIrModule where
+  -- Conservative pre-erasure evidence for safe structural foreign values.
+  -- Empty/absent metadata never authorizes a named aggregate export.
+  foreignData : List (String × Bool) := []
   imports : List PsVerifiedIrExternalImport
   structures : List PsVerifiedIrStructure
   inductives : List PsVerifiedIrInductive

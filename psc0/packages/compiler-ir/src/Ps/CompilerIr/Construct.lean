@@ -50,7 +50,7 @@ def psIrCheckMakeModule (imports : List PsVerifiedIrExternalImport)
     (structures : List PsVerifiedIrStructure)
     (inductives : List PsVerifiedIrInductive)
     (declarations : List PsVerifiedIrDeclaration) : PsVerifiedIrModule :=
-  PsVerifiedIrModule.mk imports structures inductives declarations
+  { imports, structures, inductives, declarations }
 
 def psIrCheckMakePair {alpha : Type} {beta : Type}
     (first : alpha) (second : beta) : alpha × beta :=

@@ -13,7 +13,7 @@ def abiFunctionTypeBytes (plan : AbiPlan) (e : AbiExport) : Except String (List 
     return psWasmEncodeName name ++ (← abiComponentValueBytes plan id)
   let result ← match e.result with
     | none => pure [1, 0]
-    | some id => return [0] ++ (← abiComponentValueBytes plan id)
+    | some id => do return [0] ++ (← abiComponentValueBytes plan id)
   return [0x40] ++ psWasmEncodeUleb parameters.length ++ parameters.flatten ++ result
 
 def aggregateComponentBinary (plan : AggregateComponent) : Except String ByteArray := do
@@ -56,7 +56,7 @@ def aggregateComponentWat (plan : AggregateComponent) : Except String PsDoc := d
       return " (param " ++ watQuote name ++ " " ++ (← abiComponentValueText plan.abi id) ++ ")"
     let result ← match e.result with
       | none => pure ""
-      | some id => return " (result " ++ (← abiComponentValueText plan.abi id) ++ ")"
+      | some id => do return " (result " ++ (← abiComponentValueText plan.abi id) ++ ")"
     declarations := declarations ++ [.text ("(type $__ps_signature" ++ toString index ++ " (func" ++
       String.join parameters ++ result ++ "))")]
   declarations := declarations ++ [

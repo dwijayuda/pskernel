@@ -319,9 +319,27 @@ def psErasureIsTypeFamily (environment : PsEnvironment) (fuel : Nat)
         (psExprInstantiate1 body (.fvar pushed.id))
     | _ => false
 
+-- The type of a proof-producing declaration is often a telescope, e.g.
+--  ∀ (xs : coll) (i : idx) [Decidable (valid xs i)], lhs = rhs.
+-- Looking only for a syntactic Sort result misses its Prop-valued codomain.
+-- Open each checked binder in context; a computational function with a Nat
+-- codomain is NOT erased. This is the same property for every user theorem,
+-- proof-valued class method and proof-only Standard projection.
+def psErasureIsProofFamily (environment : PsEnvironment) (fuel : Nat)
+    (localContext : PsLocalContext) (type : PsExpr) : Bool :=
+  match fuel with
+  | 0 => false
+  | fuel + 1 =>
+    match psWhnf environment psMetaEmpty localContext type with
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding localContext name domain binder
+      psErasureIsProofFamily environment fuel pushed.context
+        (psExprInstantiate1 body (.fvar pushed.id))
+    | residual => psErasureIsProp environment localContext residual
+
 def psErasureIsNonRuntimeDeclaration (environment : PsEnvironment)
     (type : PsExpr) : Bool :=
-  psErasureIsProp environment psLocalEmpty type ||
+  psErasureIsProofFamily environment 4096 psLocalEmpty type ||
     psErasureIsTypeFamily environment 4096 psLocalEmpty type
 
 def psErasureClassifyBinder

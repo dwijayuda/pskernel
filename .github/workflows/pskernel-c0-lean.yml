@@ -57,11 +57,28 @@ jobs:
           trap 'rm -rf "$baseline"' EXIT
           cp -R "$core/src" "$baseline/src"
           cp "$c0/lean-toolchain" "$baseline/lean-toolchain"
-          sed -e '/`Ps.KernelCore.Checker.IndexedSession,/d' \
-              -e '/`Ps.KernelCore.Core.IndexedExpr,/d' \
-              -e '/`Ps.KernelCore.Core.IndexedReduction,/d' \
-              -e '/`Ps.KernelCore.Checker.Reduction.IndexedWhnf,/d' \
-              "$c0/lakefile.lean" > "$baseline/lakefile.lean"
+          # The unchanged original owns a different import graph from C0.
+          # Generate the original Lake module roots from its actual source
+          # files, not from the redesigned C0 Lake list. This keeps the
+          # comparison independent as C0 removes obsolete modules.
+          python3 - "$baseline" <<'PY'
+          from pathlib import Path
+          import sys
+
+          root = Path(sys.argv[1])
+          modules = sorted((root / "src" / "Ps" / "KernelCore").rglob("*.lean"))
+          if not modules:
+              raise RuntimeError("original checker copy has no Lean modules")
+          roots = [
+              "    `" + ".".join(p.relative_to(root / "src").with_suffix("").parts) + ","
+              for p in modules
+          ]
+          text = ("import Lake\nopen Lake DSL\n\npackage pskernelOriginal\n"
+                  "lean_lib PsKernelC0 where\n  srcDir := \"src\"\n"
+                  "  roots := #[\n" + "\n".join(roots) + "\n  ]\n")
+          (root / "lakefile.lean").write_text(text)
+          print(f"C0_ORIGINAL_BUILD discovered_modules={len(modules)}")
+          PY
           echo "Original PSKernel-Core benchmark (identical inputs)"
           (cd "$baseline" && lake build PsKernelC0 && lake env lean --run "$c0/test/C0CheckerComparison.lean")
 

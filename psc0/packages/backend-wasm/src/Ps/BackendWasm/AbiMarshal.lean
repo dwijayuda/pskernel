@@ -157,6 +157,8 @@ def abiMarshalNode (plan : AbiPlan) (node : AbiNode) : Except String (List Runti
       let getArray := if element.isSome then o (.structGet PsWasm.arrayName 0) [value] else value
       pure (
         seq [put "data" (load pointer), put "count" (load (offset pointer 4)),
+          if element.isSome then seq [] else
+            choice none (o .i32GtU [count, k 134217727]) trap (seq []),
           c "__ps_abi_check_range" [data, c "__ps_abi_checked_product" [count, k stride], k alignment],
           put "buffer" (c readLoop [data, allocate, k 0]), result],
         seq [put "buffer" getArray, put "count" (o .arrayLen [buffer]),

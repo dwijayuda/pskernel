@@ -59,7 +59,7 @@ list as the independent lookup reference. After 128 declarations a
 `Thunk` may represent an immutable radix snapshot, with a 16-entry pending
 overlay for later bindings. Constructing a deeper context records a lazy
 computation rather than eagerly materializing or copying the trie. For
-lookup contexts with `nextIndex` below 256, direct list lookup does not
+lookup contexts with `nextIndex` below 512, direct list lookup does not
 force the index at all. Above that heuristic, a lookup checks pending entries
 first and, if needed, forces the memoized snapshot with `Thunk.get`.
 This moves potentially expensive index allocation from binder introduction
@@ -72,8 +72,8 @@ once. Its caching is **not** a kernel equality or acceptance rule. The
 fresh-name counter equals the number of declarations. Every lookup branch
 uses the same exact-name/shadowing semantics.
 
-This design avoids eagerly building an index for one-shot 192-binder
-declarations while retaining an indexed representation for heavily queried
+This design avoids eagerly building an index for one-shot 192- and
+320-binder declarations while retaining an indexed representation for heavily queried
 512-local contexts. The native build, negative/differential tests, matched
 benchmark, and memory results for the lazy strategy must pass before it can
 be called a performance improvement. Any future non-Lean backend must

@@ -39,6 +39,10 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .refinement message => "PSCV0-MATCH: " ++ message
   | .matchNonExhaustive => "PSCV0-MATCH: missing feasible constructor branch"
   | .invalidArgument message => "PSCV0-ARGUMENT: " ++ message
+  | .invalidNatural value => "PSCV0-LITERAL: invalid natural " ++ value
+  | .invalidString _ => "PSCV0-LITERAL: invalid string"
+  | .invalidCharacter _ => "PSCV0-LITERAL: invalid character"
+  | .unsupportedTerm => "PSCV0-UNSUPPORTED-SOURCE-TERM"
   | .emptyCallUnsupported => "PSCV0-APP-03"
   | .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"
   | .typeMismatch => "PSCV0-TYPE-MISMATCH"

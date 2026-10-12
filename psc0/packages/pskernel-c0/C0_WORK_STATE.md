@@ -113,3 +113,13 @@ Next: benchmark complete WHNF and definitional-equality workloads using a persis
 - The indexed WHNF engine is still an experimental context-free subset; full checked delta, recursive and native reductions, definitional equality, type inference and admission remain in the original Lean checker. These changes do not claim that indexed WHNF itself is a complete proof-checking engine.
 
 The first [native Lean workflow 38191236078](https://github.com/dwijayuda/pskernel/actions/runs/38191236078) at `8d52cd385e40654fb25f56d9113bcab69ffd7515` passed the library build, native negative checks and existing microbenchmarks. The newer benchmark observations must be read from their own workflow run before claiming speedups.
+
+
+## Accepting DefEq guard sharing checkpoint (2026-10-12)
+
+- `Checker/DefEq/Quick.lean` now exposes a shape-only `psKernelDefEqQuickAfterCommon` entry for callers that have already checked exact structural equality and the successful conversion-pair cache. The original `psKernelDefEqQuick` API still performs both guards for other callers.
+- `Checker/Knot.lean` directly uses the guarded entry after its existing checks. This removes one redundant full syntax-equality traversal and one duplicate successful-pair cache lookup on every missed top-level quick comparison without changing the reduction/conversion decision ordering.
+- `test/C0ProofIrrelevanceRegression.lean` differentially checks the general and guarded paths on mismatching sorts, bound variables and applications, alongside all earlier native negative rules.
+- `test/C0PerfMicrobench.lean` includes deep-sort comparison timing to isolate the removed repeated guard work and cold session DefEq/WHNF baselines.
+- [CI 38191752791](https://github.com/dwijayuda/pskernel/actions/runs/38191752791) at `c02a60a5906324ce80c2ad895ae30e82ae484f93` passed the native Lean build, regressions and existing performance suite. No self-host tests were run.
+- This is a direct production checker-path optimization in Lean, unlike the separately gated indexed-WHNF engine. End-to-end multi-library performance remains unqualified.

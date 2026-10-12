@@ -94,7 +94,9 @@ def c0BenchOldBinderIntern
     | none =>
         let id := store.nodes.size
         let entry : PsKernelC0StoredNode :=
-          { node := node, hash := hash, depth := psKernelC0NodeDepth store node,
+          { node := node, hash := hash,
+            checkerHash := psKernelC0NodeCheckerHash store node,
+            depth := psKernelC0NodeDepth store node,
             looseBVarRange := psKernelC0NodeLooseRange store node }
         let index := psKernelC0TermTrieReplace
           psKernelC0IndexDepth store.index hash (id :: bucket)

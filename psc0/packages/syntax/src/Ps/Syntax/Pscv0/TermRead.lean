@@ -1,5 +1,6 @@
 import Ps.Syntax.Pscv0.QuantifierRead
 import Ps.Syntax.Pscv0.ProofRead
+import Ps.Syntax.Pscv0.DoRead
 
 -- V7 term dispatch owns assignment boundaries. In an annotation, the caller
 -- owns :=; an identifier immediately before it is still a type argument.
@@ -190,9 +191,7 @@ def psPscv0ParseTermAtPrecedence
           else if psTokenCursorAtText cursor "by" then
             psPscv0ReadProof smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "do" then
-              Except.error
-                (psProofScriptExpectedError
-                  "supported pure term; do is not enabled in this source subset" cursor)
+            psPscv0ReadTypedDo smaller readAnnotation (remaining + 1) cursor
           else if psTokenCursorAtText cursor "nomatch" then
             psPscv0ReadMatch smaller remaining true cursor
           else if psTokenCursorAtText cursor "match" then

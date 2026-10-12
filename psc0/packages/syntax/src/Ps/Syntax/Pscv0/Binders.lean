@@ -5,7 +5,7 @@ abbrev PsPscv0TermReader :=
 
 def psPscv0ReservedArgument (text : String) : Bool :=
   psProofScriptReservedArgument text ||
-    ["by", "have", "show", "suffices", "exists", "∃", "from"].contains text
+    ["by", "have", "show", "suffices", "exists", "∃", "from", "return", "do", "←", "<-"].contains text
 
 -- All binder contexts use the caller's v7 annotation reader. Grammar policy
 -- stays here: declarations own comma groups/defaults; terms own native binders.

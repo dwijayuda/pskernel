@@ -175,6 +175,55 @@ def psScopeTacticDependencies (fuel : Nat) (visit : PsScopeVisitor)
         | _ => pure ([], bound)
       return psScopeUnion used (← psScopeTacticDependencies fuel visit next rest)
 
+structure PsScopeDoResult where
+  items : List PsSyntaxDoItem
+  used : List String
+
+def psScopePatternKeys (patterns : List PsSyntaxPattern) : Except PsElabError (List String) := do
+  let keys := (patterns.flatMap (psSyntaxPatternNames 4096)).map psScopeKey
+  if keys.any (fun key => (keys.filter (· == key)).length > 1) then
+    throw (.scope "duplicate pattern variable")
+  return keys
+
+def psScopeDo (fuel : Nat) (resolver : PsScopeResolver) (visit : PsScopeVisitor)
+    (bound : List String) (items : List PsSyntaxDoItem) : Except PsElabError PsScopeDoResult := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 => match items with
+    | [] => return { items := [], used := [] }
+    | item :: rest =>
+      let (item, used, nextBound) ← match item with
+        | .binding pattern type value monadic span => do
+          let pattern ← psScopePattern fuel resolver pattern
+          let keys ← psScopePatternKeys [pattern]
+          let type ← type.mapM (visit bound)
+          let value ← visit bound value
+          pure (.binding pattern (type.map (·.term)) value.term monadic span,
+            psScopeUnion (type.map (·.used) |>.getD []) value.used, keys ++ bound)
+        | .action value span | .returnValue value span => do
+          let value ← visit bound value
+          let item := match item with
+            | .action .. => PsSyntaxDoItem.action value.term span
+            | _ => PsSyntaxDoItem.returnValue value.term span
+          pure (item, value.used, bound)
+        | .conditional name condition yes no span => do
+          let condition ← visit bound condition
+          let branchBound := name.toList.map psScopeKey ++ bound
+          let yes ← psScopeDo fuel resolver visit branchBound yes
+          let no ← psScopeDo fuel resolver visit branchBound no
+          pure (.conditional name condition.term yes.items no.items span,
+            psScopeUnion condition.used (psScopeUnion yes.used no.used), bound)
+        | .conditionalPattern pattern value yes no span => do
+          let pattern ← psScopePattern fuel resolver pattern
+          let keys ← psScopePatternKeys [pattern]
+          let value ← visit bound value
+          let yes ← psScopeDo fuel resolver visit (keys ++ bound) yes
+          let no ← psScopeDo fuel resolver visit bound no
+          pure (.conditionalPattern pattern value.term yes.items no.items span,
+            psScopeUnion value.used (psScopeUnion yes.used no.used), bound)
+      let rest ← psScopeDo fuel resolver visit nextBound rest
+      return { items := item :: rest.items, used := psScopeUnion used rest.used }
+
 -- This single capture-aware walk qualifies references and collects section
 -- dependencies. Labels/field names stay labels; binders and patterns delimit
 -- visibility explicitly. It never rewrites printed text.
@@ -185,6 +234,9 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
   | fuel + 1 =>
     let visit := psScopeTerm fuel resolver
     match source with
+    | .doE items span =>
+      let resolved ← psScopeDo fuel resolver visit bound items
+      return { term := .doE resolved.items span, used := resolved.used }
     | .byE tactics _ span =>
       let used ← psScopeTacticDependencies fuel
         (psScopeTerm fuel { resolver with deferProofNames := true }) bound tactics

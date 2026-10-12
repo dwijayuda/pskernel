@@ -539,7 +539,8 @@ private def application : String :=
   "const outputInferredAnswer: Nat := Outputs.inferred\n" ++
   "const outputLocalAnswer: Nat := Outputs.localAnswer\n" ++
   "const outputFlagAnswer: Nat := Outputs.flagAnswer\n" ++
-  "const outputNestedAnswer: Nat := Outputs.nested\n"
+  "const outputNestedAnswer: Nat := Outputs.nested\n" ++
+  "namespace DoCore\nfunction pair(value: Nat): Except String (Prod Nat Nat) := do {\n  return (value, value + 1)\n}\nfunction flow(flag: Bool, fail: Bool): Except String Nat := do {\n  let base: Nat := 300\n  if (flag) {\n    return base\n  }\n  let (left, right) ← pair(base)\n  let _: Unit ← if (fail) { Except.error(\"stopped\") } else { Except.ok(()) }\n  return left + right\n}\nfunction read(value: Except String Nat): Nat :=\n  match value with { | .error _ => 399 | .ok n => n }\nfunction optionFlow(found: Bool): Option Nat := do {\n  let n: Nat ← if (found) { Option.some(302) } else { Option.none }\n  if let .some extra := Option.some(2) {\n    return n + extra\n  }\n  return 0\n}\nfunction readOption(value: Option Nat): Nat :=\n  match value with { | .none => 398 | .some n => n }\nfunction Identity(A: Type): Type := Id A\nfunction identityFlow(flag: Bool): Identity Nat := do {\n  let x: Nat ← do {\n    return 303\n  }\n  if (h : flag) {\n    let proof: flag = true := h\n    return x\n  }\n  let (a, b): Prod Nat Nat := (x, 2)\n  return a + b\n}\nfunction identityOption(flag: Bool): Id (Option Nat) := do {\n  if (flag) {\n    return Option.some(306)\n  }\n  return Option.none\n}\nfunction ignoredUnit(flag: Bool): Except String Nat := do {\n  if (flag) {\n    Except.ok(())\n    Except.ok(())\n  }\n  return 307\n}\nend DoCore\nconst doEarlyAnswer: Nat := DoCore.read(DoCore.flow(true, false))\nconst doBindAnswer: Nat := DoCore.read(DoCore.flow(false, false))\nconst doErrorAnswer: Nat := DoCore.read(DoCore.flow(false, true))\nconst doOptionAnswer: Nat := DoCore.readOption(DoCore.optionFlow(true))\nconst doNoneAnswer: Nat := DoCore.readOption(DoCore.optionFlow(false))\nconst doIdentityEarly: Nat := DoCore.identityFlow(true)\nconst doIdentityTail: Nat := DoCore.identityFlow(false)\nconst doIdentityOption: Nat := DoCore.readOption(DoCore.identityOption(true))\nconst doIgnoredUnit: Nat := DoCore.read(DoCore.ignoredUnit(true))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++
@@ -786,9 +787,30 @@ private def emissionBoundary : IO Unit := do
   IO.FS.writeFile "../dist/pscv0-native/unicode-output.js.map" mapping
   IO.println "PSCV0_NATIVE_EMISSION_BOUNDARY: PASS invalid IR refusal, names and layout origins"
 
+private def doBoundaries : IO Unit := do
+  let cases : Array (String × String) := #[
+    ("function bad: Except String Nat := do { return 1; return 2 }\n", "parse"),
+    ("function bad: Option Nat := do {\n  let n: Nat ← Except.ok(1)\n  return n\n}\n", "elaborate"),
+    ("function bad: Except String Nat := do {\n  Except.ok(1)\n  return 2\n}\n", "elaborate"),
+    ("function bad: Id Nat := do {\n  let .some n := Option.none\n  return n\n}\n", "elaborate"),
+    ("function bad(flag: Bool): Id Nat := do {\n  if (h : flag) { return 1 }\n  return h\n}\n", "elaborate"),
+    ("function bad: Id Nat := do {\n  if let .some n ← Option.some(1) { return n }\n  return 0\n}\n", "parse"),
+    ("function bad: Id Nat := do {\n  let (x, x) := (1, 2)\n  return x\n}\n", "elaborate")]
+  let batch ← match ← PsV7Native.runBatch (cases.map fun (source, _) => { source }) with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError (reprStr error))
+  for i in [:cases.size] do
+    match batch.results[i]! with
+    | .error error =>
+      unless error.phase == cases[i]!.snd do
+        throw (IO.userError s!"do boundary {i}: {error.phase}: {error.message}")
+    | .ok _ => throw (IO.userError s!"do boundary {i}: invalid source accepted")
+  IO.println "PSCV0_NATIVE_DO: PASS 7 focused scope/type/category refusals"
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
   parserCases
   semanticCases
+  doBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

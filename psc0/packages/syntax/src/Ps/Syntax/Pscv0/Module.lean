@@ -124,13 +124,15 @@ structure PsPscv0SourceInput where
 
 -- Both declaration-only translation and ordered-program compilation use the
 -- same lexical budgets, do-block reader, hygiene and source validation.
-def psPscv0PrepareSource (proofScript : Bool) (source : String) :
+def psPscv0PrepareSource (proofScript : Bool) (source : String) (legacyDo : Bool := true) :
     Except String PsPscv0SourceInput := do
   if source.utf8ByteSize > 1048576 then throw "PSCV0-SOURCE-BYTE-BUDGET"
   let tokens ← (if proofScript then psLexProofScript source else psLex source).mapError
     (fun _ => "PSCV0-LEXICAL-SOURCE-ERROR")
   if tokens.length > 65536 then throw "PSCV0-SOURCE-TOKEN-BUDGET"
-  let rewritten ← psPscv0RewriteTokens proofScript 65537 (PsTokenCursor.mk tokens) "" 0 [] []
+  let rewritten ← if legacyDo then
+      psPscv0RewriteTokens proofScript 65537 (PsTokenCursor.mk tokens) "" 0 [] []
+    else pure (PsPscv0Rewritten.mk tokens [])
   let pos := PsSourcePos.mk 0 1 1
   let span := PsSourceSpan.mk pos pos
   let errorName ← psPscv0FreshName tokens "pscv0InternalError" span
@@ -176,26 +178,23 @@ def psPscv0LowerDeclaration (errorName discardName : PsSyntaxName)
           | Except.ok body => Except.ok (PsSyntaxDeclaration.definition name binders type body span)
       | _ => Except.error "PSCV0-DO-DECLARATION-BODY-ONLY"
 
+-- The native program API retains typed do syntax. Legacy source translation
+-- keeps its explicitly bounded Except-only contract and never serves compilation.
 def psPscv0ParseProgram (source : String) : Except String PsSyntaxProgram := do
-  let input ← psPscv0PrepareSource true source
-  let parsed ← psPscv0ParseProgramTokens input.rewritten.tokens
-  let attached ← parsed.commands.mapM fun command => do
+  let input ← psPscv0PrepareSource true source false
+  let parsed ← psPscv0ParseProgramTokens input.tokens
+  for command in parsed.commands do
     match command with
     | .declaration declaration | .registeredDeclaration declaration _ =>
-      let surface ← psPscv0AttachDeclaration true input.tokens input.rewritten.blocks
-        input.errorName input.discardName declaration
-      let lowered ← psPscv0LowerDeclaration input.errorName input.discardName surface
-      let command := match command with
-        | .registeredDeclaration _ registration => .registeredDeclaration lowered registration
-        | _ => PsSyntaxCommand.declaration lowered
-      return (command, if surface.doBody.isSome then 1 else 0)
+      match declaration with
+      | .partialDefinition .. => throw "PSCV0-PARTIAL-EXCLUDED"
+      | _ => pure ()
+      for term in psPscv0DeclarationTerms declaration do
+        psPscv0ValidateTermWithFuel input.tokens 4096 term
     | .variableCmd binders _ =>
-      let _ ← binders.mapM (fun binder => psPscv0ValidateTermWithFuel input.tokens 4096 binder.snd)
-      return (command, 0)
-    | _ => return (command, 0)
-  if (attached.map Prod.snd).foldl Nat.add 0 != input.rewritten.blocks.length then
-    throw "PSCV0-DO-DECLARATION-BODY-ONLY"
-  return { imports := parsed.imports, commands := attached.map Prod.fst }
+      for (_, type) in binders do psPscv0ValidateTermWithFuel input.tokens 4096 type
+    | _ => pure ()
+  return parsed
 
 def psPscv0LowerModule (surface : PsPscv0SurfaceModule) : Except String PsSyntaxModule :=
   let lower : PsPscv0SurfaceDeclaration -> Except String PsSyntaxDeclaration :=

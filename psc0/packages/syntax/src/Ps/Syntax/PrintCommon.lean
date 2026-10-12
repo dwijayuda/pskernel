@@ -175,3 +175,41 @@ def psPrintTactics (printTerm : PsSyntaxTerm → Except PsSourcePrintError Strin
         let body ← psPrintTactics printTerm fuel body
         return (if any then "any_goals" else "all_goals") ++ "\n  " ++ body.replace "\n" "\n  "
     return psPrintJoin "\n" lines
+
+-- Shared readable do layout; only delimiter/conditional spelling is target-owned.
+def psPrintDoItems (proofScript : Bool)
+    (printTerm : PsSyntaxTerm → Except PsSourcePrintError String)
+    (fuel : Nat) (items : List PsSyntaxDoItem) : Except PsSourcePrintError String := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let block := fun text => if proofScript then
+        " {\n  " ++ text.replace "\n" "\n  " ++ "\n}"
+      else "\n  " ++ text.replace "\n" "\n  "
+    let lines ← items.mapM fun item => do
+      match item with
+      | .binding pattern type value monadic _ =>
+        let annotation ← match type with
+          | none => pure ""
+          | some type => do pure (" : " ++ (← printTerm type))
+        return "let " ++ (← psPrintPattern pattern) ++ annotation ++
+          (if monadic then " ← " else " := ") ++ (← printTerm value)
+      | .action value _ => printTerm value
+      | .returnValue value _ => return "return " ++ (← printTerm value)
+      | .conditional name condition yes no _ =>
+        let proof ← match name with
+          | none => pure ""
+          | some name => do pure ((← psPrintSyntaxName name) ++ " : ")
+        let condition ← printTerm condition
+        let yes ← psPrintDoItems proofScript printTerm fuel yes
+        let noText ← if no.isEmpty then pure "" else do
+          pure (" else" ++ block (← psPrintDoItems proofScript printTerm fuel no))
+        return (if proofScript then "if (" ++ proof ++ condition ++ ")"
+                else "if " ++ proof ++ condition ++ " then") ++ block yes ++ noText
+      | .conditionalPattern pattern value yes no _ =>
+        let yes ← psPrintDoItems proofScript printTerm fuel yes
+        let noText ← if no.isEmpty then pure "" else do
+          pure (" else" ++ block (← psPrintDoItems proofScript printTerm fuel no))
+        return "if let " ++ (← psPrintPattern pattern) ++ " := " ++ (← printTerm value) ++
+          (if proofScript then "" else " then") ++ block yes ++ noText
+    return psPrintJoin "\n" lines

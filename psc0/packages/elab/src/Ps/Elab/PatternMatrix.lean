@@ -54,7 +54,7 @@ def psElabPatternBody (row : PsElabPatternRow) : PsSyntaxTerm :=
 -- A matrix split delegates its entire typed elimination to Match. Row
 -- specialization only changes patterns and lexical aliases; it never constructs
 -- a recursor, mutates a dependent type, or assumes an impossible branch.
-def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
+def psElabPatternMatrix (fuel : Nat) (elaborate branch : PsElaborator)
     (context : PsElabContext) (columns : List PsElabPatternColumn)
     (rows : List PsElabPatternRow) (expected : PsExpr) :
     Except PsElabError PsElabTermResult := do
@@ -64,7 +64,7 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
     match columns with
     | [] =>
       let some row := rows.head? | throw .matchNonExhaustive
-      elaborate context (psElabPatternBody row) (some expected)
+      branch context (psElabPatternBody row) (some expected)
     | column :: rest =>
       if rows.isEmpty then
         -- Probe each remaining discriminant for checked impossibility. Do not
@@ -83,7 +83,7 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
         let rows ← rows.mapM fun row => do
           let pattern :: patterns := row.patterns | throw .matchPatternUnsupported
           return { (psElabPatternBind column pattern row) with patterns }
-        return ← psElabPatternMatrix fuel elaborate context rest rows expected
+        return ← psElabPatternMatrix fuel elaborate branch context rest rows expected
       psElabMatchWith elaborate (fun current info => do
         -- Resolve and validate this column once, independently of row priority.
         let rows ← rows.mapM fun row => do
@@ -125,8 +125,8 @@ def psElabPatternMatrix (fuel : Nat) (elaborate : PsElaborator)
           return {
             constructorName := name
             fieldNames := fields
-            elaborate := fun branch =>
-              psElabPatternMatrix fuel elaborate branch.context (fieldColumns ++ rest) selected branch.target
+            elaborate := fun child =>
+              psElabPatternMatrix fuel elaborate branch child.context (fieldColumns ++ rest) selected child.target
             span }) context column.major (some expected)
 
 structure PsElabPatternInputs where
@@ -165,7 +165,7 @@ def psElabPatternInputs (elaborate : PsElaborator) (context : PsElabContext)
       columns := { major, value := reference } :: tail.columns
       locals := (PsElabTypedBinder.mk pushed.id name value.type .explicit, value.term) :: tail.locals }
 
-def psElabMatchMatrix (elaborate : PsElaborator) (context : PsElabContext)
+def psElabMatchMatrixWith (elaborate branch : PsElaborator) (context : PsElabContext)
     (sources : List PsSyntaxTerm)
     (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
@@ -186,7 +186,12 @@ def psElabMatchMatrix (elaborate : PsElaborator) (context : PsElabContext)
       | some (.variable _) => true
       | _ => false
   let inputs ← psElabPatternInputs elaborate target.context sources capture
-  let result ← psElabPatternMatrix 4096 elaborate inputs.context inputs.columns rows expected
+  let result ← psElabPatternMatrix 4096 elaborate branch inputs.context inputs.columns rows expected
   let abstractions := inputs.locals.reverse.map fun (binder, value) =>
     PsMetaAbstraction.letE binder.id binder.name binder.type value
   psElabAbstract context result.context abstractions result.term expected
+
+def psElabMatchMatrix (elaborate : PsElaborator) : PsElabContext →
+    List PsSyntaxTerm → List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan) →
+    Option PsExpr → Except PsElabError PsElabTermResult :=
+  psElabMatchMatrixWith elaborate elaborate

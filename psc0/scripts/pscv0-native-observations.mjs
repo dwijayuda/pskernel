@@ -1,5 +1,14 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "doEarlyAnswer", args: null, expected: 300n },
+  { name: "doBindAnswer", args: null, expected: 601n },
+  { name: "doErrorAnswer", args: null, expected: 399n },
+  { name: "doOptionAnswer", args: null, expected: 304n },
+  { name: "doNoneAnswer", args: null, expected: 398n },
+  { name: "doIdentityEarly", args: null, expected: 303n },
+  { name: "doIdentityTail", args: null, expected: 305n },
+  { name: "doIdentityOption", args: null, expected: 306n },
+  { name: "doIgnoredUnit", args: null, expected: 307n },
   { name: "proofClosure", args: null, expected: 119n },
   { name: "proofEntry", args: null, expected: 119n },
   { name: "answer", args: null, expected: 42n },

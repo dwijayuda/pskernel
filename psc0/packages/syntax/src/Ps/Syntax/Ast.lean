@@ -74,6 +74,7 @@ structure PsSyntaxProofScope where
 
 mutual
 inductive PsSyntaxTerm where
+  | doE (items : List PsSyntaxDoItem) (span : PsSourceSpan)
   | byE (tactics : List PsSyntaxTactic) (scope : PsSyntaxProofScope) (span : PsSourceSpan)
   | sortE (isType : Bool) (level : PsSyntaxLevel) (span : PsSourceSpan)
   | reference (name : PsSyntaxName)
@@ -122,6 +123,17 @@ inductive PsSyntaxTerm where
       (alternatives : List (List PsSyntaxPattern × PsSyntaxTerm × PsSourceSpan))
       (span : PsSourceSpan)
 
+-- Do is source control syntax. Effect selection belongs to typed elaboration.
+inductive PsSyntaxDoItem where
+  | binding (pattern : PsSyntaxPattern) (type : Option PsSyntaxTerm)
+      (value : PsSyntaxTerm) (monadic : Bool) (span : PsSourceSpan)
+  | action (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | returnValue (value : PsSyntaxTerm) (span : PsSourceSpan)
+  | conditional (name : Option PsSyntaxName) (condition : PsSyntaxTerm)
+      (yes no : List PsSyntaxDoItem) (span : PsSourceSpan)
+  | conditionalPattern (pattern : PsSyntaxPattern) (value : PsSyntaxTerm)
+      (yes no : List PsSyntaxDoItem) (span : PsSourceSpan)
+
 inductive PsSyntaxTactic where
   | exactE (value : PsSyntaxTerm) (refine : Bool) (span : PsSourceSpan)
   | applyE (value : PsSyntaxTerm) (span : PsSourceSpan)
@@ -138,6 +150,19 @@ inductive PsSyntaxTactic where
   | focus (body : List PsSyntaxTactic) (mustClose : Bool) (span : PsSourceSpan)
   | each (body : List PsSyntaxTactic) (any : Bool) (span : PsSourceSpan)
 end
+
+def psSyntaxDoTerms (fuel : Nat) (item : PsSyntaxDoItem) : List PsSyntaxTerm :=
+  match fuel with
+  | 0 => []
+  | fuel + 1 => match item with
+    | .binding _ type value _ _ => type.toList ++ [value]
+    | .action value _ | .returnValue value _ => [value]
+    | .conditional _ condition yes no _ | .conditionalPattern _ condition yes no _ =>
+      condition :: (yes ++ no).flatMap (psSyntaxDoTerms fuel)
+
+def psSyntaxDoSpan : PsSyntaxDoItem → PsSourceSpan
+  | .binding _ _ _ _ span | .action _ span | .returnValue _ span
+  | .conditional _ _ _ _ span | .conditionalPattern _ _ _ _ span => span
 
 def psSyntaxTacticTerms (fuel : Nat) (tactic : PsSyntaxTactic) : List PsSyntaxTerm :=
   match fuel with
@@ -158,6 +183,7 @@ def psSyntaxSpanJoin (start : PsSourceSpan) (stop : PsSourceSpan) : PsSourceSpan
   { start := start.start, stop := stop.stop }
 
 def psSyntaxTermSpan : PsSyntaxTerm -> PsSourceSpan
+  | .doE _ span => span
   | .byE _ _ span => span
   | .sortE _ _ span => span
   | .hole span => span

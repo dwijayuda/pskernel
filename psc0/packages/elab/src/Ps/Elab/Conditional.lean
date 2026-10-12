@@ -46,21 +46,21 @@ def psElabConditionBranch (elaborate : PsElaborator) (context : PsElabContext)
     [.lambdaE pushed.id name proofType .explicit] branch.term type
   return (closed, resultType)
 
-def psElabIf (elaborate : PsElaborator) (context : PsElabContext)
+def psElabIfWith (elaborate branch : PsElaborator) (context : PsElabContext)
     (name : Option PsSyntaxName) (condition thenBranch elseBranch : PsSyntaxTerm)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
   let condition ← psElabCondition elaborate context condition
   let (yes, type) ← match name with
     | none => do
-      let yes ← elaborate condition.context thenBranch expected
+      let yes ← branch condition.context thenBranch expected
       pure (yes, expected.getD yes.type)
     | some name =>
-      psElabConditionBranch elaborate condition.context name condition.proposition thenBranch expected
+      psElabConditionBranch branch condition.context name condition.proposition thenBranch expected
   let no ← match name with
-    | none => elaborate yes.context elseBranch (some type)
+    | none => branch yes.context elseBranch (some type)
     | some name => do
       let notP := PsExpr.app (.constE (psRootName "Not") []) condition.proposition
-      pure (← psElabConditionBranch elaborate yes.context name notP elseBranch (some type)).fst
+      pure (← psElabConditionBranch branch yes.context name notP elseBranch (some type)).fst
   let context := psElabLeaveScope context no.context
   let type := psMetaInstantiate context.metaContext type
   let level ← psElabExpressionSort context type
@@ -68,3 +68,8 @@ def psElabIf (elaborate : PsElaborator) (context : PsElabContext)
   let term := psExprApplyMany (.constE head [level])
     [type, condition.proposition, condition.decision, yes.term, no.term]
   psElabResolvedTerm context (psMetaInstantiate context.metaContext term) expected
+
+def psElabIf (elaborate : PsElaborator) : PsElabContext →
+    Option PsSyntaxName → PsSyntaxTerm → PsSyntaxTerm → PsSyntaxTerm →
+    Option PsExpr → Except PsElabError PsElabTermResult :=
+  psElabIfWith elaborate elaborate

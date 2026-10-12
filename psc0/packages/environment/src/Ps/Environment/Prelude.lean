@@ -899,8 +899,16 @@ def psOptParamDeclaration : PsDeclaration :=
     (.forallE alpha sort (.forallE value (.bvar 0) sort .explicit) .explicit)
     (.lam alpha sort (.lam value (.bvar 0) (.bvar 1) .explicit) .explicit)
 
+-- RC4 Init.Control.Id: the identity effect is an ordinary reducible type.
+def psIdDeclaration : PsDeclaration :=
+  let u := psRootName "u"
+  let type := PsExpr.sortE (.succ (.param u))
+  .definitionDecl (psRootName "Id") [u]
+    (.forallE (psRootName "type") type type .explicit)
+    (.lam (psRootName "type") type (.bvar 0) .explicit)
+
 def psBootstrapPreludeEnvironment : PsEnvironment :=
-  psDecisionPrelude <| psConnectivePrelude <| psLogicPrelude <| psPreludeAdd
+  psDecisionPrelude <| psConnectivePrelude <| psLogicPrelude <| (fun env => psPreludeAdd env psIdDeclaration) <| psPreludeAdd
     (psPreludeAdd psPreludeEnv19
       (PsDeclaration.axiomDecl psIteName [psPreludeUName] psPreludeIteType))
     psOptParamDeclaration

@@ -1,5 +1,11 @@
 # PSKernel-C0: Lean 4.35 architecture redesign and qualification program
 
+## Phase B external source-byte conformance — incremental checkpoint
+
+**Qualified:** version-pinned official Lean 4.35 `leanchecker --from-export` and strict C0 source-byte NDJSON parser agreed on the twelve-fixture accepted/rejected corpus (sort, lambda/forall, let, universe, app and two-definition dependency) under **[CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332)**. Source [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836) added 128 checked sequential definitions and a late rejection counterpart. The official/C0 exact input replay stages both passed in [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316); the full performance/original stage was still running at document time.
+
+**Scope warning:** generated repeated-definition streams demonstrate late rejection under growing dependency environments, **not** coverage of real Init, Std or Mathlib, and the direct adapter is a test-only strict subset. Extend to actual exported declaration forms with explicit decline before designing a trusted importer. Still no full indexed accepting kernel, model-consistency theorem, full-corpus compatibility or con-ron competitive memory/throughput evidence.
+
 ## Phase A and early Phase B — verified progress, 2026-10-13
 
 The stable v4.35.0 pin and deletion of Lean 4.34 compiler-evaluated reduceBool/reduceNat callbacks have been qualified by [CI 38313664552](https://github.com/dwijayuda/pskernel/actions/runs/38313664552). The imported project-local original baseline now regenerates its own Lake roots from its unchanged source tree, rather than reusing C0's roots; this is essential when old capability modules are deleted from redesigned C0.

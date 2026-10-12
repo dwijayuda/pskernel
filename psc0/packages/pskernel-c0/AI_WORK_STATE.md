@@ -1,5 +1,11 @@
 # AI_WORK_STATE — PSKernel-C0 Lean performance architecture
 
+## NEWEST PHASE B SOURCE HANDOFF — 2026-10-13
+
+**Branch:** `perf/pskernel-c0-v7-rust-20261012`, Lean **4.35.0 stable**. The strict test-only C0 NDJSON subset importer now consumes **exactly the same bytes as official `leanchecker --from-export`**, including sort, universe, binder, let, app, const and sequential dependent definitions, rather than relying on manually reconstructed ASTs. Twelve isolated/short fixtures passed the **full** [CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332). The newer source [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836) adds a **128-declaration acceptance chain** and a negative 128-declaration stream rejected at its final definition. Both official `leanchecker` and C0 already passed their respective direct export replay stages on [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316); **the complete native benchmark/original comparison was still in progress at this handoff**, so do not claim the whole CI was green without checking.
+
+These are tiny **synthetic typed declaration corpora**, not realistic Init/Std/Mathlib, and only the supported NDJSON subset is decoded. Malformed versions, dangling references, unsupported metadata or declaration families are explicit input errors, not accepting judgments. Continue extending the supported importer incrementally only after each coherent family is qualified against official v4.35; keep the original recursively accepting checker authoritative. The next high-value step is actual version-pinned `Init`/Std semantic and resource coverage, not mere generation of longer repeated synthetic chains. This note supersedes the last handoff's twelve-case/pending parser status.
+
 ## NEWEST LEAN 4.35 NATIVE REDESIGN HANDOFF — 2026-10-13 (AUTHORITATIVE)
 
 > This section supersedes every older "latest", "current" or Lean 4.34 checkpoint below. Preserve older entries only as historical evidence. Refresh branch HEAD and CI: the source may advance independently of documentation.

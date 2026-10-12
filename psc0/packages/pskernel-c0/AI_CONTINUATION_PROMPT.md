@@ -1,5 +1,11 @@
 # New chat — continue PSKernel-C0 native Lean performance redesign
 
+## NEWEST CONTINUATION CHECKPOINT — exact NDJSON compatibility
+
+**Lean 4.35.0 stable** and native-only scope unchanged. First verify [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) at source [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836): official kernel and C0 both passed the same-byte direct export replay for a 128-definition accepted dependency chain and a 128-definition stream invalid only at the final declaration; full native comparison was still running when this text was written. The preceding exact-byte parser/application/dependency suite fully passed [CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332).
+
+**Current next steps:** scale *actual* v4.35 Init/Std exported programs, record exact unsupported/rejected/resource distinctions, investigate external semantic gaps and memory/throughput under identical corpora. Source-side checked WHNF/DefEq/inference/admission remain authoritative; indexed DAG scratch/promotion is only a qualified **syntax candidate**. Read the latest sections of `AI_WORK_STATE.md`, `PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md`, and `C0_BENCHMARKS.md` before code. GitHub-first, preserve history, no original `pskernel-core`, compiler, Rust backend, selfhost/bootstrap or metatheory edits.
+
 ## NEWEST LEAN 4.35 AUTONOMOUS-WORK HANDOFF — 2026-10-13
 
 Read [PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md](PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md) and the topmost `AI_WORK_STATE.md` first. GitHub branch `perf/pskernel-c0-v7-rust-20261012`, native `psc0/packages/pskernel-c0/`, pinned **Lean v4.35.0 stable** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Refresh live HEAD and CI; older Lean 4.34 instructions below are HISTORICAL and no longer current.

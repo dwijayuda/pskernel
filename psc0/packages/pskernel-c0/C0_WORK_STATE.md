@@ -1,5 +1,11 @@
 # PSKernel-C0 — performance architecture work state
 
+## NEWEST EXTERNAL-ORACLE PROGRESS — 2026-10-13
+
+Pinned official `leanchecker --from-export` and C0 now directly parse/check the same v4.35.0 NDJSON records. **Full CI [38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332) passed the twelve-case suite.** New [`51f32f59`](https://github.com/dwijayuda/pskernel/commit/51f32f5982f29919ac290c726cac36a5da750836) adds a 128-definition positive dependency chain and a negative chain whose final definition is invalid; their *official and C0 export replay steps* passed within [38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316), with complete CI pending at the time of writing. The direct decoder is a strict **test-only subset** (names, levels, sorts, bvars, binders, lets, apps, constants, sequential checked safe definitions), not full Lean export compatibility.
+
+Current native 4.35 accepting C0 remains recursive `PsKernelExpr`; the experimental two-lifetime indexed DAG, full index replay, source-to-canonical promotion and all reduction fragments are **non-accepting**. Focus next on a real external corpus with versioned profile/decline/resource matrix and fair direct-source/optional-indexed/closure-value benchmarks; do not extrapolate from 128 synthetic declarations.
+
 ## CURRENT 4.35 IMPLEMENTATION STATE — 2026-10-13
 
 **Read first:** [PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md](PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md) and the newest top of `AI_WORK_STATE.md`. The compiler and semantic target is **stable Lean 4.35.0** pinned at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Older 4.34 and RC handoffs are historical.

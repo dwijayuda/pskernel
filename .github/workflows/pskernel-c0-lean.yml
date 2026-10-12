@@ -61,6 +61,27 @@ jobs:
           echo "Original PSKernel-Core benchmark (identical inputs)"
           (cd "$baseline" && lake build PsKernelC0 && lake env lean --run "$c0/test/C0CheckerComparison.lean")
 
+      # This expensive three-way performance diagnostic is opt-in per tagged
+      # commit. It never modifies or builds the original source in place.
+      - name: Ablate cached local declaration count (private C0 only)
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[c0-local-count-ablation]')
+        shell: bash
+        run: |
+          set -euo pipefail
+          c0="$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+          scratch="$(mktemp -d)"
+          trap 'rm -rf "$scratch"' EXIT
+          cp -R "$c0/src" "$scratch/src"
+          cp "$c0/lakefile.lean" "$scratch/lakefile.lean"
+          cp "$c0/lean-toolchain" "$scratch/lean-toolchain"
+          path="$scratch/src/Ps/KernelCore/Core/LocalContext.lean"
+          grep -Fq 'if context.declCount >= psKernelC0LocalIndexThreshold then' "$path"
+          sed -i 's/if context.declCount >= psKernelC0LocalIndexThreshold then/if context.decls.length >= psKernelC0LocalIndexThreshold then/' "$path"
+          grep -Fq 'if context.decls.length >= psKernelC0LocalIndexThreshold then' "$path"
+          echo "C0_ABLATION label=historical_local_length_scan operation=full_checker"
+          (cd "$scratch" && lake build PsKernelC0 &&
+            lake env lean --run "$c0/test/C0CheckerComparison.lean")
+
       - name: Isolate original instantiation inside private C0 copy (no self-host)
         if: github.event_name == 'workflow_dispatch'
         shell: bash

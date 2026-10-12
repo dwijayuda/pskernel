@@ -54,7 +54,19 @@ def psScopeHasGlobal (resolver : PsScopeResolver) (segments : List String) : Boo
 -- through the environment index, using the same rule as term elaboration.
 def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bool :=
   (psScopePrefixes segments).any fun namePrefix =>
-    !namePrefix.isEmpty && psScopeHasGlobal resolver namePrefix
+    !namePrefix.isEmpty && (psScopeHasGlobal resolver namePrefix ||
+      (psScopeExportedRewrite resolver namePrefix).isSome)
+
+def psScopeExportedRewrite (resolver : PsScopeResolver)
+    (segments : List String) : Option (List String) := do
+  let requested := psSyntaxNameAppendSegments segments .anonymous
+  -- A real declaration in the nearest namespace shadows an exported alias.
+  if psEnvironmentContains resolver.environment requested ||
+      resolver.selfName == some segments then none
+  else
+    let alias ← resolver.environment.exportedAliases.find? (fun entry =>
+      psNameEq entry.fst requested)
+    return (psNameToString alias.snd).splitOn "."
 
 -- Resolve the longest private prefix first. This also preserves projection
 -- suffixes on a private structure and recursive references to its members.
@@ -81,9 +93,12 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     else (psScopePrefixes resolver.scope.namePrefix).map (· ++ segments)
   let available := fun (key : List String) =>
     (psScopePrivateRewrite resolver key).isSome || psScopeGlobalBase resolver key
+  let canonical := fun key =>
+    (psScopePrivateRewrite resolver key).getD
+      ((psScopeExportedRewrite resolver key).getD key)
   match candidates.find? available with
   | some full =>
-    let resolved := (psScopePrivateRewrite resolver full).getD full
+    let resolved := canonical full
     return ({ name with segments := "_root_" :: resolved }, [])
   | none => pure ()
   if rooted then throw (.scope ("unknown global " ++ psScopeKey name))
@@ -91,7 +106,7 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
   let unique := opened.foldl (fun acc item => if acc.contains item then acc else item :: acc) []
   match unique with
   | [full] =>
-    let resolved := (psScopePrivateRewrite resolver full).getD full
+    let resolved := canonical full
     return ({ name with segments := "_root_" :: resolved }, [])
   | [] => throw (.scope ("unknown name " ++ psScopeKey name))
   | _ => throw (.scope ("ambiguous open name " ++ psScopeKey name))

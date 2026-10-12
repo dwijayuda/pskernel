@@ -118,6 +118,9 @@ structure PsEnvironment where
   classes : List PsName := []
   classParameters : List (PsName × PsClassParameters) := []
   instances : PsInstanceIndex := psInstanceIndexEmpty
+  -- Pure source-name routing analogous to Lean's 'export' command.
+  -- Aliases never create kernel declarations or new proof authority.
+  exportedAliases : List (PsName × PsName) := []
 
 def psEnvironmentEmpty : PsEnvironment :=
   { declarations := [], index := .empty }

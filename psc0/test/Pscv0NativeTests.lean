@@ -946,8 +946,9 @@ private def projectBoundaries : IO Unit := do
   let numeralSource := "const decimal: Nat := 1_234_567\ntheorem decCorrect: decimal = 1234567 := by { rfl }\nconst hexadecimal: Nat := 0xDeaD_Beef\ntheorem hexCorrect: hexadecimal = 3735928559 := by { rfl }\nconst binary: Nat := 0B1010_0011\ntheorem binCorrect: binary = 163 := by { rfl }\nconst octal: Nat := 0o17\ntheorem octCorrect: octal = 15 := by { rfl }\n"
   let invalidNumeral := "const broken: Nat := 0x_\n"
   let tostringSource :=
-    "const echoed: String := ToString.toString(\"ready\")\n" ++
-    "const represented: String := ToString.toString(Int.ofNat(7))\n"
+    "const echoed: String := toString(\"ready\")\n" ++
+    "theorem stringIdentity: echoed = \"ready\" := by { rfl }\n" ++
+    "const represented: String := toString(Int.ofNat(7))\n"
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },

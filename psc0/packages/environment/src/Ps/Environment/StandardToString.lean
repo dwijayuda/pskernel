@@ -61,4 +61,6 @@ def psStandardPreludeExtendWithToString (environment : PsEnvironment) : PsEnviro
     classes := name :: environment.classes
     classParameters := (name, { outputs := [], outputLevels := [] }) ::
       environment.classParameters
-    instances }
+    instances
+    exportedAliases := (psRootName "toString", psNameAppendStr name "toString") ::
+      environment.exportedAliases }

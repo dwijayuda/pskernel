@@ -789,13 +789,13 @@ private def emissionBoundary : IO Unit := do
 
 private def doBoundaries : IO Unit := do
   let cases : Array (String × String) := #[
-    ("function bad: Except String Nat := do { return 1; return 2 }\n", "parse"),
-    ("function bad: Option Nat := do {\n  let n: Nat ← Except.ok(1)\n  return n\n}\n", "elaborate"),
-    ("function bad: Except String Nat := do {\n  Except.ok(1)\n  return 2\n}\n", "elaborate"),
-    ("function bad: Id Nat := do {\n  let .some n := Option.none\n  return n\n}\n", "elaborate"),
+    ("const bad: Except String Nat := do { return 1; return 2 }\n", "parse"),
+    ("const bad: Option Nat := do {\n  let n: Nat ← Except.ok(1)\n  return n\n}\n", "elaborate"),
+    ("const bad: Except String Nat := do {\n  Except.ok(1)\n  return 2\n}\n", "elaborate"),
+    ("const bad: Id Nat := do {\n  let .some n := Option.none\n  return n\n}\n", "elaborate"),
     ("function bad(flag: Bool): Id Nat := do {\n  if (h : flag) { return 1 }\n  return h\n}\n", "elaborate"),
-    ("function bad: Id Nat := do {\n  if let .some n ← Option.some(1) { return n }\n  return 0\n}\n", "parse"),
-    ("function bad: Id Nat := do {\n  let (x, x) := (1, 2)\n  return x\n}\n", "elaborate")]
+    ("const bad: Id Nat := do {\n  if let .some n ← Option.some(1) { return n }\n  return 0\n}\n", "parse"),
+    ("const bad: Id Nat := do {\n  let (x, x) := (1, 2)\n  return x\n}\n", "elaborate")]
   let batch ← match ← PsV7Native.runBatch (cases.map fun (source, _) => { source }) with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))

@@ -1028,6 +1028,22 @@ private def projectBoundaries : IO Unit := do
   unless convertibleMemo.result.value.isSome &&
       convertibleMemo.table.visits == memoFirst.table.visits do
     throw (IO.userError "definitionally equal instance target was not safely reused")
+  -- Genuine Pi-introduced evidence remains fully checked and is not
+  -- exported into a different goal's local-instance memo.
+  let universalGoal := psLogicPi 71 "n" (.constE psNatName [])
+    (psStandardInhabitedType (.constE psNatName []))
+  let universalResult := psSynthInstanceWithTable psSelfHostProdPreludeEnvironment
+    psLocalEmpty psSelfHostProdPreludeEnvironment.instances psMetaEmpty
+    64 universalGoal
+  let some witness := universalResult.result.value
+    | throw (IO.userError "Pi-indexed class synthesis rejected")
+  let inferred ← get "kernel-shape Pi dictionary"
+    ((psInferType psSelfHostProdPreludeEnvironment universalResult.result.context
+      psLocalEmpty witness).mapError (fun _ =>
+        "Pi dictionary witness did not typecheck"))
+  unless psDefEqReadOnlyWithEnv psSelfHostProdPreludeEnvironment
+      universalResult.result.context psLocalEmpty inferred universalGoal do
+    throw (IO.userError "Pi dictionary synthesized an incorrect function type")
   IO.println ("PSCV0_NATIVE_INSTANCE_MEMO: PASS checked ground-answer reuse; expansions=" ++
     toString memoFirst.table.visits)
   let wrongDigest := "sha256:" ++ String.ofList (List.replicate 64 '0')

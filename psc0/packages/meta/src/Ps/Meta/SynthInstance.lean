@@ -417,7 +417,39 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
       if table.visits >= 4096 then psInstanceTableFailure context table else
       let table := { table with visits := table.visits + 1 }
       match psPrepareInstanceTarget environment localContext context target with
-      | none => psInstanceTableFailure context table
+      | none =>
+        -- Synthesize dependent dictionary functions, e.g.
+        -- [∀ xs i, Decidable (valid xs i)], with actual typed lambdas.
+        -- New binders change the local instance environment, so nested
+        -- answer tables are isolated; only the global visit budget is shared.
+        match psWhnf environment context localContext
+            (psMetaInstantiate context target) with
+        | .forallE name domain body binder =>
+          let pushed := psLocalPushBinding localContext name domain binder
+          let opened := psExprInstantiate1 body (.fvar pushed.id)
+          let childTable : PsInstanceSearchTable :=
+            { answers := [], visits := table.visits }
+          let child := psSynthInstanceSearch fuel environment pushed.context
+            index [] childTable context opened
+          let parent := { table with visits := child.table.visits }
+          match child.result.value with
+          | none => psInstanceTableFailure context parent
+          | some witness =>
+            let witness := psMetaInstantiate child.result.context witness
+            let result := PsExpr.lam name domain
+              (psExprAbstractFVar pushed.id witness) binder
+            match psInferType environment child.result.context
+                localContext result with
+            | .error _ => psInstanceTableFailure context parent
+            | .ok inferred =>
+              let checked := psUnify environment localContext
+                child.result.context inferred target
+              if checked.success &&
+                  !psExprHasUnresolvedMeta (psMetaInstantiate checked.context result) then
+                psInstanceTableSuccess checked.context
+                  (psMetaInstantiate checked.context result) parent
+              else psInstanceTableFailure context parent
+        | _ => psInstanceTableFailure context table
       | some prepared =>
         let cyclic := active.any fun prior =>
           psDefEqReadOnlyWithEnv environment prepared.context

@@ -1,7 +1,7 @@
 // Independent consumer of final JS, declarations and ECMA-426 mappings.
 // No compiler implementation is imported by these checks.
 import assert from 'node:assert/strict';
-import {readFile, writeFile} from 'node:fs/promises';
+import {readFile, writeFile, mkdir, copyFile} from 'node:fs/promises';
 import path from 'node:path';
 const root = path.resolve(process.argv[2]);
 const read = name => readFile(path.join(root, name), 'utf8');
@@ -100,7 +100,13 @@ assert(!declaration.includes('export declare function inductionTrue'));
 assert(js.includes('function* __ps$impl$') && ts.includes('__ps$Computation<'));
 assert(js.includes('while (true)') && ts.includes('while (true)'));
 assert(!js.includes(': bigint') && !js.includes(' as const'));
-await writeFile(path.join(root, 'consumer.ts'), `import { answer, keep, choose, apply, identity, useUnit, checkedPair } from "./application.js";
+// Isolate the declarations: a sibling application.ts would take precedence
+// over application.d.ts when TypeScript resolves an application.js import.
+const consumerRoot = path.join(root, 'declaration-consumer');
+await mkdir(consumerRoot, {recursive: true});
+await copyFile(path.join(root, 'application.d.ts'), path.join(consumerRoot, 'application.d.ts'));
+await copyFile(path.join(root, 'application.js'), path.join(consumerRoot, 'application.js'));
+await writeFile(path.join(consumerRoot, 'consumer.ts'), `import { answer, keep, choose, apply, identity, useUnit, checkedPair } from "./application.js";
 const value: bigint = keep(answer);
 const generic: string = choose<string>("first", "second");
 const higher: bigint = apply(identity, value);
@@ -117,3 +123,10 @@ answer();
 checkedPair.first = 0n;
 `);
 console.log(`PSCV0_DIRECTJS_ARTIFACTS: PASS ${mapped} declaration mappings; ${generatedParents} generated-parent origins; Unicode UTF-16 boundaries; declaration consumer prepared`);
+
+// A compact review sample, not a golden-file acceptance requirement.
+const start = js.indexOf('export function keep(');
+console.log('PSCV0_READABLE_JS_SAMPLE\n' + js.slice(start, js.indexOf('\n\n', start)));
+console.log(JSON.stringify({artifactBytes: {js: Buffer.byteLength(js), typescript: Buffer.byteLength(ts),
+  declarations: Buffer.byteLength(declaration), sourceMap: Buffer.byteLength(JSON.stringify(map))},
+  javascriptLines: js.split('\n').length}));

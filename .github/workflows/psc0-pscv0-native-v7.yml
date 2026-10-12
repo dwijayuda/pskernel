@@ -121,7 +121,7 @@ jobs:
           node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/ts-compiled/application.js typescript | tee ../dist/pscv0-native/runtime.log
           node ../scripts/pscv0-native-runtime.mjs ../dist/pscv0-native/application.js directjs | tee ../dist/pscv0-native/directjs-runtime.log
           node ../scripts/pscv0-native-directjs.mjs ../dist/pscv0-native
-          "$TSC" --ignoreConfig ../dist/pscv0-native/consumer.ts --target ES2020 --module ES2020 --moduleResolution bundler --strict --noEmit --pretty false
+          "$TSC" --ignoreConfig ../dist/pscv0-native/declaration-consumer/consumer.ts --target ES2020 --module ES2020 --moduleResolution bundler --strict --noEmit --pretty false
       - name: Compile and run the same application with pinned Rust
         run: |
           set -euo pipefail

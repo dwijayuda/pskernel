@@ -15,7 +15,9 @@ def psPublicApi (ir : PsVerifiedIrModule) (exposure : PsApiExposure := .allRunti
     Except String PsPublicApi := do
   let exports ← match exposure with
     | .allRuntime => pure ir.declarations
-    | .selected names => names.mapM fun name =>
+    | .selected names => do
+      if names.eraseDups.length != names.length then throw "PSCV0-EXPORT: duplicate selection"
+      names.mapM fun name =>
         match ir.declarations.find? (fun d => d.name == name) with
         | some d => pure d
         | none => throw ("PSCV0-EXPORT: no runtime declaration " ++ name)

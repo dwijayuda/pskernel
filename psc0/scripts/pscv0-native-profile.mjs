@@ -77,7 +77,7 @@ async function closure(roots, portable) {
 }
 
 const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.BackendRust.Module', 'Ps.CompilerIr.Checked'], true);
-const native = await closure(['Ps.Host.NativeV7'], false);
+const native = await closure(['Ps.Host.NativeV7', 'Ps.Host.PrimitiveAudit'], false);
 const toolchain = (await readFile(path.join(root, 'v7-native/lean-toolchain'), 'utf8')).trim();
 assert.equal(toolchain, 'leanprover/lean4:v4.35.0-rc4');
 const report = {

@@ -4,22 +4,15 @@ import Ps.Host.PrimitiveAudit
 open Lean (toJson)
 open PsV7Native
 
-private def writeArtifact (output : String) (artifact : PsEmissionArtifact) : IO Unit := do
-  let file := System.FilePath.mk output
-  let directory := file.parent.getD "."
-  IO.FS.createDirAll directory
-  -- All selected targets have succeeded before any artifact is published.
-  -- Validation and generation finish before publication. The host does not
-  -- claim crash-atomic replacement of unrelated filesystem paths.
-  for entry in artifact.files do
-    match entry.payload with
-    | .text value => IO.FS.writeFile (directory / entry.path) value
-    | .binary value => IO.FS.writeBinFile (directory / entry.path) value
+private def artifactFiles (output : String) (artifact : PsEmissionArtifact) :
+    List (System.FilePath × PsArtifactPayload) :=
+  let directory := (System.FilePath.mk output).parent.getD "."
+  let capabilities := psTargetCapabilities artifact.target
   let symbols := artifact.symbols.map fun s => Lean.Json.mkObj [
     ("semantic", toJson s.semanticName), ("output", toJson s.outputName)]
   let ranges := artifact.source.ranges.map fun r => Lean.Json.mkObj [
     ("output", toJson r.symbol), ("startByte", toJson r.startByte), ("endByte", toJson r.endByte)]
-  IO.FS.writeFile (output ++ ".origins.json") (Lean.Json.mkObj [
+  let manifest := (Lean.Json.mkObj [
     ("schema", toJson ("pscv0-origins/2" : String)),
     ("target", toJson (psEmissionTargetName artifact.target)),
     ("kernel", toJson ("official-lean4-cpp" : String)),
@@ -27,6 +20,12 @@ private def writeArtifact (output : String) (artifact : PsEmissionArtifact) : IO
     ("leanCommit", toJson Lean.githash), ("profile", toJson profile),
     ("coordinates", toJson ("utf8-bytes" : String)),
     ("runtimeDependencies", toJson artifact.dependencies),
+    ("capabilities", Lean.Json.mkObj [
+      ("dialect", toJson capabilities.dialect),
+      ("arbitraryPrecision", toJson capabilities.arbitraryPrecision),
+      ("stackSafeCalls", toJson capabilities.stackSafeCalls),
+      ("externalImports", toJson capabilities.externalImports),
+      ("sourceMaps", toJson capabilities.sourceMaps)]),
     ("sourceResolution", toJson ("owning-declaration-span" : String)),
     ("origins", toJson (artifact.origins.map fun (name, origin) => Lean.Json.mkObj [
       ("semantic", toJson name), ("file", toJson origin.identity.file),
@@ -41,6 +40,22 @@ private def writeArtifact (output : String) (artifact : PsEmissionArtifact) : IO
       ("result", toJson ((psTsEmitType entry.result).toOption.getD "unsupported")),
       ("witRefusal", toJson entry.witReason)])),
     ("symbols", toJson symbols), ("ranges", toJson ranges)]).pretty
+
+  (artifact.files.map fun entry => (directory / entry.path, entry.payload)) ++
+    [(System.FilePath.mk (output ++ ".origins.json"), .text manifest)]
+
+private def writeFiles (files : List (System.FilePath × PsArtifactPayload)) : IO Unit := do
+  -- Resolve every bundle and manifest before publication. Collision checks run
+  -- before any write; this is not a multi-file filesystem transaction.
+  let _ ← files.foldlM (fun seen (path, _) => do
+    let key := path.toString.toLower
+    if seen.contains key then throw (IO.userError ("PSCV0-OUTPUT-COLLISION: " ++ path.toString))
+    return key :: seen) ([] : List String)
+  for (path, payload) in files do
+    IO.FS.createDirAll (path.parent.getD ".")
+    match payload with
+    | .text value => IO.FS.writeFile path value
+    | .binary value => IO.FS.writeBinFile path value
 
 private def run (paths : List String) (outputs : List (PsEmissionTarget × String)) : IO UInt32 := do
   let requests ← paths.toArray.mapM fun (path : String) => do
@@ -67,10 +82,11 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
         match result with
         | .error _ => failed := true
         | .ok value =>
-            for (target, output) in outputs do
+            let files ← outputs.mapM fun (target, output) => do
               let some artifact := value.artifacts.find? (fun artifact => artifact.target == target)
                 | throw (IO.userError "PSCV0-NATIVE-OUTPUT-MISSING")
-              writeArtifact output artifact
+              return artifactFiles output artifact
+            writeFiles files.flatten
       return if failed then 1 else 0
 
 def main (args : List String) : IO UInt32 := do

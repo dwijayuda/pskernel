@@ -110,11 +110,16 @@ private def compile (prelude : Lean.Environment) (request : Request) :
     outputStem := request.outputStem
     origins := origins }
   let t5 ← IO.monoMsNow
-  let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked =>
+  let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked => do
+    let ecma ← if request.targets.any (fun t => t == .typescript || t == .javascript) then
+      (PsEcma.plan checked).map some else pure none
     request.targets.mapM fun target =>
       match target with
-      | .typescript => PsEcma.emit checked .typescript context
-      | .javascript => PsEcma.emit checked .javascript context
+      | .typescript | .javascript =>
+        match ecma with
+        | none => .error "PSCV0-ECMA: missing planned program"
+        | some program => PsEcma.emitProgram program
+            (if target == .typescript then .typescript else .javascript) context
       | .rust => psRustEmitReadable checked request.outputStem origins)
   let t6 ← IO.monoMsNow
   return {

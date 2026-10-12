@@ -39,3 +39,16 @@ The primary performance work now lives in `src/Ps/KernelCore/`, with a two-tier 
 The indexed engine is deliberately not integrated into the accepting DefEq/inference path: it does not yet implement environment-specific reductions and full resource classification. Native Lean benchmarks show compelling speedups on shared-DAG and stuck-head microcases, but end-to-end checker speedups are not established.
 
 Next architectural work is to retain a canonical indexed arena across a *whole checking session* rather than converting expressions independently for each operation. An immutable public-to-internal bridge, explicit environment identity, and cache provenance must precede any trusted use.
+
+
+
+## Checked-path substitution family correction — 2026-10-12
+
+A three-way **full checked-application** same-run comparison was used rather than relying on isolated helper timings. The benchmark built unchanged PSKernel-Core, C0, and a diagnostic private C0 copy restoring the original single-variable instantiation. Before correction, the original helper in C0 erased a reproducible full checked-path slowdown, establishing root cause. See `C0_BENCHMARKS.md`, [CI 38222241004](https://github.com/dwijayuda/pskernel/actions/runs/38222241004).
+
+The adopted Lean design recognizes **two substitution workload families** without changing semantics:
+
+- For *binder-rooted* lambda, forall and let terms, perform a fast loose-variable existence probe. If there are no loose variables, preserve the original immutable term. Otherwise invoke the specialized capture-avoiding changed-flag worker.
+- For application-rooted and other non-binder terms, use the specialized one-pass worker directly to avoid repeating a whole-expression prepass on beta-heavy workloads.
+
+A matched native original-core comparison and negative/differential regressions validated the correction in [CI 38222841665](https://github.com/dwijayuda/pskernel/actions/runs/38222841665): checked C0 39/40/39 ms vs original 38/39/39 ms across three rounds of 80 typed 48-argument applications; infer-only C0 19 ms vs original ~81–82 ms across three rounds of 200. This **does not** complete the indexed acceptance architecture or prove an overall kernel speedup. The opt-in indexed session remains non-authoritative and slower on repeated small WHNF workloads. Research and integration must continue with measured complete checking and context/fuel-safe indexed reduction.

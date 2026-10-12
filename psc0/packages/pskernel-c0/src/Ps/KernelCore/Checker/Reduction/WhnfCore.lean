@@ -355,12 +355,12 @@ def psKernelWhnfCoreWithFuel
                                           (Prod.fst result)
                                           (Prod.snd result)
                     | PsKernelExpr.app _ _ =>
-                        let spine :=
-                          psKernelExprGetAppFnArgs expr;
+                        -- C0 demand-driven application spine: most applications
+                        -- have a stuck head. Examine only the function first,
+                        -- allocating the argument list *only* after a beta
+                        -- or head-rewrite decision actually requires it.
                         let fn0 :=
-                          Prod.fst spine;
-                        let args :=
-                          Prod.snd spine;
+                          psKernelExprGetAppFn expr;
                         match
                             smaller
                               publicWhnf
@@ -379,6 +379,8 @@ def psKernelWhnfCoreWithFuel
                               Prod.snd fnResult;
                             match fn with
                             | PsKernelExpr.lam _ _ _ _ =>
+                                let args :=
+                                  psKernelExprGetAppArgs expr;
                                 match
                                     psKernelC0BetaSpinePlan
                                       fn
@@ -435,6 +437,8 @@ def psKernelWhnfCoreWithFuel
                                             cheapRec
                                             cheapProj
                                 else
+                                  let args :=
+                                    psKernelExprGetAppArgs expr;
                                   let rebuilt :=
                                     psKernelExprApplyArgsCheap
                                       fn

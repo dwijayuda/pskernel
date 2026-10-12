@@ -22,10 +22,11 @@ abbrev PsKernelC0CheckedAppHook :=
   PsKernelCheckerContext -> PsKernelCheckerState -> PsKernelExpr ->
   Except String (Prod PsKernelExpr PsKernelCheckerState)
 
-def psKernelInferCoreWithFuelUsingLetFrames
+def psKernelInferCoreWithFuelUsingSourceFrames
     (fuel : Nat)
     (onCheckedApp : Option PsKernelC0CheckedAppHook)
-    (letFrames : List (Prod Nat Nat)) :
+    (letFrames : List (Prod Nat Nat))
+    (binderRanges : List Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -67,7 +68,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
           "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelInferCoreWithFuelUsingLetFrames remaining onCheckedApp;
+        psKernelInferCoreWithFuelUsingSourceFrames remaining onCheckedApp;
       fun
         (whnf :
           PsKernelCheckerContext ->
@@ -105,6 +106,31 @@ def psKernelInferCoreWithFuelUsingLetFrames
                     | none => []
                   else []
               | _ => letFrames
+          | _, _ => []
+        -- Exact syntactic binder ranges are already used by the DefEq
+        -- spine worker. Fully checked inference can reuse those *read-only*
+        -- ranges to avoid repeated no-op substitutions under closed bodies.
+        -- The historical hook-free worker remains untouched.
+        let currentBinderRanges :=
+          match expr, onCheckedApp with
+          | .lam _ _ _ _, some _ =>
+              match binderRanges with
+              | [] =>
+                  if psKernelC0HasBinderPrefix 12 true expr then
+                    match psKernelC0BinderBodyRangesWithFuel 1024 expr with
+                    | some (_, ranges) => ranges
+                    | none => []
+                  else []
+              | _ => binderRanges
+          | .forallE _ _ _ _, some _ =>
+              match binderRanges with
+              | [] =>
+                  if psKernelC0HasBinderPrefix 12 false expr then
+                    match psKernelC0BinderBodyRangesWithFuel 1024 expr with
+                    | some (_, ranges) => ranges
+                    | none => []
+                  else []
+              | _ => binderRanges
           | _, _ => []
         let currentHash :=
           match currentFrames with
@@ -296,7 +322,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                               result))
                 | PsKernelExpr.mdata _ body =>
                     match
-                        smaller []
+                        smaller [] []
                           whnf
                           defeq
                           nextContext
@@ -324,7 +350,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                       let args := spine.snd;
                       let argCount := psKernelExprListLength args;
                       match
-                          smaller []
+                          smaller [] []
                             whnf
                             defeq
                             nextContext
@@ -365,7 +391,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                           (Prod PsKernelExpr PsKernelCheckerState) :=
                         fun _ =>
                           match
-                              smaller []
+                              smaller [] []
                                 whnf
                                 defeq
                                 nextContext
@@ -389,7 +415,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                                   let state2 :=
                                     Prod.snd forallResult;
                                   match
-                                      smaller []
+                                      smaller [] []
                                         whnf
                                         defeq
                                         nextContext
@@ -469,7 +495,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                             state)
                       else
                         match
-                            smaller []
+                            smaller [] []
                               whnf
                               defeq
                               nextContext
@@ -515,12 +541,16 @@ def psKernelInferCoreWithFuelUsingLetFrames
                           psKernelCheckerContextWithLocalContext
                             nextContext
                             childLocal;
-                        let openedBody :=
-                          psKernelExprInstantiate1
-                            body
-                            (PsKernelExpr.fvar fresh);
+                        let (openedBody, restRanges) :=
+                          match currentBinderRanges with
+                          | range :: tail =>
+                              if range == 0 then (body, tail)
+                              else (psKernelExprInstantiate1 body
+                                (PsKernelExpr.fvar fresh), [])
+                          | [] => (psKernelExprInstantiate1 body
+                              (PsKernelExpr.fvar fresh), []);
                         match
-                            smaller []
+                            smaller [] restRanges
                               whnf
                               defeq
                               child
@@ -555,7 +585,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                                   result))
                 | PsKernelExpr.forallE name domain body binderInfo =>
                     match
-                        smaller []
+                        smaller [] []
                           whnf
                           defeq
                           nextContext
@@ -593,12 +623,16 @@ def psKernelInferCoreWithFuelUsingLetFrames
                               psKernelCheckerContextWithLocalContext
                                 nextContext
                                 childLocal;
-                            let openedBody :=
-                              psKernelExprInstantiate1
-                                body
-                                (PsKernelExpr.fvar fresh);
+                            let (openedBody, restRanges) :=
+                              match currentBinderRanges with
+                              | range :: tail =>
+                                  if range == 0 then (body, tail)
+                                  else (psKernelExprInstantiate1 body
+                                    (PsKernelExpr.fvar fresh), [])
+                              | [] => (psKernelExprInstantiate1 body
+                                  (PsKernelExpr.fvar fresh), []);
                             match
-                                smaller []
+                                smaller [] restRanges
                                   whnf
                                   defeq
                                   child
@@ -639,7 +673,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                             state)
                       else
                         match
-                            smaller []
+                            smaller [] []
                               whnf
                               defeq
                               nextContext
@@ -659,7 +693,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                                 Except.error error
                             | Except.ok typeSort =>
                                 match
-                                    smaller []
+                                    smaller [] []
                                       whnf
                                       defeq
                                       nextContext
@@ -720,7 +754,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                               (psKernelExprInstantiate1 body
                                 (PsKernelExpr.fvar fresh), []);
                         match
-                            smaller remainingFrames
+                            smaller remainingFrames []
                               whnf
                               defeq
                               child
@@ -767,7 +801,7 @@ def psKernelInferCoreWithFuelUsingLetFrames
                         (projectionContext : PsKernelCheckerContext)
                         (projectionState : PsKernelCheckerState)
                         (projectionExpr : PsKernelExpr) =>
-                        smaller []
+                        smaller [] []
                           whnf
                           defeq
                           projectionContext
@@ -820,7 +854,7 @@ def psKernelInferCoreWithFuelUsing
     Bool ->
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  psKernelInferCoreWithFuelUsingLetFrames fuel onCheckedApp []
+  psKernelInferCoreWithFuelUsingSourceFrames fuel onCheckedApp [] []
 
 /-- Historical independent inference semantics, retained for all callers
     without a checked-application hook and as the negative/fuel oracle. -/

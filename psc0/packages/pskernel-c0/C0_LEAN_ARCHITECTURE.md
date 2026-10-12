@@ -54,13 +54,31 @@ near parity on a 160-declaration library chain while maintaining a substantial
 [CI 38233818758](https://github.com/dwijayuda/pskernel/actions/runs/38233818758)
 and `C0_BENCHMARKS.md`.
 
-**Current candidate:** defer promotion through 128 declarations, with a
-16-entry pending overlay once indexed. A checked 96-binder benchmark with
-actual local references exposed roughly 10% overhead when promotion began at
-depth 65; a matched 192-binder comparison has been added to confirm that
-deep lookup still justifies index construction. Until the latest CI finishes,
-this 128-entry policy is **under qualification**, not a proved global optimum.
-Threshold is a performance policy, never a semantic condition.
+**Under native qualification:** local contexts retain the ordered declaration
+list as the independent lookup reference. After 128 declarations a
+`Thunk` may represent an immutable radix snapshot, with a 16-entry pending
+overlay for later bindings. Constructing a deeper context records a lazy
+computation rather than eagerly materializing or copying the trie. For
+lookup contexts with `nextIndex` below 256, direct list lookup does not
+force the index at all. Above that heuristic, a lookup checks pending entries
+first and, if needed, forces the memoized snapshot with `Thunk.get`.
+This moves potentially expensive index allocation from binder introduction
+to the deep lookup that could amortize it.
+
+Lean's `Thunk` has a pure logical model as a delayed computation and runtime
+call-by-need memoization; repeated forcing of the same snapshot computes it
+once. Its caching is **not** a kernel equality or acceptance rule. The
+`nextIndex` threshold is a performance heuristic, not an assumption that the
+fresh-name counter equals the number of declarations. Every lookup branch
+uses the same exact-name/shadowing semantics.
+
+This design avoids eagerly building an index for one-shot 192-binder
+declarations while retaining an indexed representation for heavily queried
+512-local contexts. The native build, negative/differential tests, matched
+benchmark, and memory results for the lazy strategy must pass before it can
+be called a performance improvement. Any future non-Lean backend must
+implement equivalent lazy snapshot caching or transparently fall back to
+the original exact list lookup without changing acceptance.
 
 ### Substitution cost model
 

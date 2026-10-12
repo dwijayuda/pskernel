@@ -22,6 +22,12 @@ lean_lib PsV7ParserChecks where
   srcDir := "../scripts"
   roots := #[`Pscv0M1Harness]
 
+-- Independent official Lean RC4 GetElem source oracle. It is not part of
+-- the portable compiler, restored Standard environment or trusted checker.
+lean_lib PsV7GetElemOracle where
+  srcDir := "../test"
+  roots := #[`Pscv0GetElemOracle]
+
 @[default_target]
 lean_exe pscv0_native where
   srcDir := "../scripts"

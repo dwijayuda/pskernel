@@ -154,6 +154,6 @@ export const observations = [
   { name: "arithmeticAssociative", args: null, expected: 3n },
   { name: "arithmeticModulo", args: null, expected: 7n },
   { name: "signedLiteral", type: "int", args: null, expected: -42n },
-  { name: "signedArithmetic", type: "int", args: [5n, 2n], expected: -5n },
+  { name: "signedArithmetic", type: "int", argTypes: ["int", "int"], args: [5n, 2n], expected: -5n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

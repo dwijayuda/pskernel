@@ -705,6 +705,24 @@ private def application : String :=
   "const indexOptionalRuntime: Nat := ProofIndexRuntime.atOptional(ProofIndexRuntime.AlwaysBox.mk(327))\n" ++
   "const indexBangRuntime: Nat := ProofIndexRuntime.atBang(ProofIndexRuntime.AlwaysBox.mk(329))\n" ++
   "const indexAndRuntime: Nat := ProofIndexRuntime.andAt(ProofIndexRuntime.AndBox.mk(323))\n" ++
+  -- Prove that the low-priority optional dictionary is derivable without a
+  -- user-defined GetElem? instance, using real dependent True/False evidence.
+  "namespace DerivedIndex\n" ++
+  "structure Positive where { value: Nat }\n" ++
+  "instance positiveGet: GetElem(Positive, Nat, Nat, fun (_: Positive) => fun (_: Nat) => True) where {\n" ++
+  "  getElem(xs: Positive, i: Nat, h: True): Nat := xs.value\n" ++
+  "}\n" ++
+  "function opt(xs: Positive): Nat := Option.getD(xs[99]?, 0)\n" ++
+  "function bang(xs: Positive): Nat := xs[99]!\n" ++
+  "structure Negative where { value: Nat }\n" ++
+  "instance negativeGet: GetElem(Negative, Nat, Nat, fun (_: Negative) => fun (_: Nat) => False) where {\n" ++
+  "  getElem(xs: Negative, i: Nat, h: False): Nat := xs.value\n" ++
+  "}\n" ++
+  "function absent(xs: Negative): Bool := Option.isNone(xs[0]?)\n" ++
+  "end DerivedIndex\n" ++
+  "const derivedPositiveRuntime: Nat := DerivedIndex.opt(DerivedIndex.Positive.mk(347))\n" ++
+  "const derivedBangRuntime: Nat := DerivedIndex.bang(DerivedIndex.Positive.mk(349))\n" ++
+  "const derivedNegativeRuntime: Bool := DerivedIndex.absent(DerivedIndex.Negative.mk(351))\n" ++
   "const bangDefaultValue: Nat := GetElem?.getElem!Default(Option.some(337))\n" ++
   "function bangDefaultTrap(n: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n"
 

@@ -27,8 +27,71 @@ for (const name of ['gc-probe', 'scalar']) {
     run('wasm-tools', ['parse', stem + kind + '.wat', '-o', stem + kind + '.roundtrip.wasm']);
     run('wasm-tools', ['validate', stem + kind + '.roundtrip.wasm']);
     if (kind === '.core') {
-      run('wasm-tools', ['strip', binary, '-o', stem + '.stripped.wasm']);
+      run('wasm-tools', ['strip', '--delete', '^namebinary, '-o', stem + '.stripped.wasm']);
       run('wasm-tools', ['strip', stem + kind + '.roundtrip.wasm', '-o', stem + '.roundtrip.stripped.wasm']);
+      assert.deepEqual(await readFile(stem + '.stripped.wasm'), await readFile(stem + '.roundtrip.stripped.wasm'),
+        'direct binary and reassembled readable core WAT');
+    } else {
+      assert.deepEqual(exportsOf(run('wasm-tools', ['component', 'wit', stem + '.roundtrip.wasm'])),
+        exportsOf(declared), 'reassembled component world');
+    }
+  }
+  const bytes = await readFile(stem + '.core.wasm');
+  const { instance } = await WebAssembly.instantiate(bytes, {});
+  if (name === 'gc-probe') {
+    assert.equal(instance.exports.readCaptured(42), 42);
+    assert.equal(run('wasmtime', ['run', '--invoke', 'readCaptured', stem + '.core.wasm', '42']), '42');
+    for (const suffix of ['.wasm', '.roundtrip.wasm'])
+      assert.equal(run('wasmtime', ['run', '--invoke', 'read-captured(42)', stem + suffix]), '42');
+  } else {
+    for (const a of [0, 1]) {
+      assert.equal(instance.exports.invert(a), 1 - a);
+      for (const b of [0, 1]) {
+        assert.equal(instance.exports.both(a, b), a & b);
+        assert.equal(run('wasmtime', ['run', '--invoke', 'both', stem + '.core.wasm', String(a), String(b)]), String(a & b));
+        for (const suffix of ['.wasm', '.roundtrip.wasm'])
+          assert.equal(run('wasmtime', ['run', '--invoke', 'both(' + !!a + ', ' + !!b + ')', stem + suffix]), String(!!(a & b)));
+      }
+    }
+  }
+  console.log(await readFile(stem + '.wit', 'utf8'));
+}
+console.log(JSON.stringify({profile:'pscv0-wasm-c3/1', node:process.version, v8:process.versions.v8,
+  wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
+  gcInsideComponent:true, scalarWorlds:2, coreBinaryWatEqual:true}));
+, binary, '-o', stem + '.stripped.wasm']);
+      run('wasm-tools', ['strip', '--delete', '^namestem + kind + '.roundtrip.wasm', '-o', stem + '.roundtrip.stripped.wasm']);
+      assert.deepEqual(await readFile(stem + '.stripped.wasm'), await readFile(stem + '.roundtrip.stripped.wasm'),
+        'direct binary and reassembled readable core WAT');
+    } else {
+      assert.deepEqual(exportsOf(run('wasm-tools', ['component', 'wit', stem + '.roundtrip.wasm'])),
+        exportsOf(declared), 'reassembled component world');
+    }
+  }
+  const bytes = await readFile(stem + '.core.wasm');
+  const { instance } = await WebAssembly.instantiate(bytes, {});
+  if (name === 'gc-probe') {
+    assert.equal(instance.exports.readCaptured(42), 42);
+    assert.equal(run('wasmtime', ['run', '--invoke', 'readCaptured', stem + '.core.wasm', '42']), '42');
+    for (const suffix of ['.wasm', '.roundtrip.wasm'])
+      assert.equal(run('wasmtime', ['run', '--invoke', 'read-captured(42)', stem + suffix]), '42');
+  } else {
+    for (const a of [0, 1]) {
+      assert.equal(instance.exports.invert(a), 1 - a);
+      for (const b of [0, 1]) {
+        assert.equal(instance.exports.both(a, b), a & b);
+        assert.equal(run('wasmtime', ['run', '--invoke', 'both', stem + '.core.wasm', String(a), String(b)]), String(a & b));
+        for (const suffix of ['.wasm', '.roundtrip.wasm'])
+          assert.equal(run('wasmtime', ['run', '--invoke', 'both(' + !!a + ', ' + !!b + ')', stem + suffix]), String(!!(a & b)));
+      }
+    }
+  }
+  console.log(await readFile(stem + '.wit', 'utf8'));
+}
+console.log(JSON.stringify({profile:'pscv0-wasm-c3/1', node:process.version, v8:process.versions.v8,
+  wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
+  gcInsideComponent:true, scalarWorlds:2, coreBinaryWatEqual:true}));
+, stem + kind + '.roundtrip.wasm', '-o', stem + '.roundtrip.stripped.wasm']);
       assert.deepEqual(await readFile(stem + '.stripped.wasm'), await readFile(stem + '.roundtrip.stripped.wasm'),
         'direct binary and reassembled readable core WAT');
     } else {

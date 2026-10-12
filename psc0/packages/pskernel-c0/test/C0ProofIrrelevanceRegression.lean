@@ -6,6 +6,91 @@ import Ps.KernelCore.Checker.Session
    The old metatheory equated arbitrary terms, while the executable
    conversion checker must reject distinct universe sorts. -/
 
+
+/- Before the lazy-spine refactor: differential oracles only. These are
+   deliberately not used by the accepting checker. -/
+def c0ReferenceReduceProjCore
+    (context : PsKernelCheckerContext)
+    (typeName : PsKernelName)
+    (index : Nat)
+    (structValue : PsKernelExpr) :
+    Option PsKernelExpr :=
+  if psKernelNatGt index psKernelLeanUInt32Max then
+    Option.none
+  else
+    let fn :=
+      psKernelExprGetAppFn structValue;
+    let args :=
+      psKernelExprGetAppArgs structValue;
+    match fn with
+    | PsKernelExpr.const ctorName _ =>
+        match
+            psKernelEnvironmentFind
+              context.environment
+              ctorName with
+        | Option.some info =>
+            match info with
+            | PsKernelConstantInfo.ctorInfo ctor =>
+                if
+                    psKernelNameEq
+                      ctor.induct
+                      typeName then
+                  psKernelExprListGet
+                    args
+                    (Nat.add
+                      ctor.numParams
+                      index)
+                else
+                  Option.none
+            | _ =>
+                Option.none
+        | Option.none =>
+            Option.none
+    | _ =>
+        Option.none
+
+
+def c0ReferenceUnfoldDefinition
+    (context : PsKernelCheckerContext)
+    (expr : PsKernelExpr) :
+    Option PsKernelExpr :=
+  let fn :=
+    psKernelExprGetAppFn expr;
+  let args :=
+    psKernelExprGetAppArgs expr;
+  match fn with
+  | PsKernelExpr.const name levels =>
+      match
+          psKernelEnvironmentFind
+            context.environment
+            name with
+      | Option.none =>
+          Option.none
+      | Option.some info =>
+          match
+              psKernelConstantInfoDeltaValue info with
+          | Option.none =>
+              Option.none
+          | Option.some value =>
+              let params :=
+                psKernelConstantInfoLevelParams info;
+              if
+                  Nat.beq
+                    (psKernelNameListLength params)
+                    (psKernelLevelListLength levels) then
+                Option.some
+                  (psKernelApplyArgs
+                    (psKernelExprInstantiateLevelParams
+                      value
+                      params
+                      levels)
+                    args)
+              else
+                Option.none
+  | _ =>
+      Option.none
+
+
 def main : IO Unit := do
   let session :=
     psKernelMkCheckerSession
@@ -24,6 +109,72 @@ def main : IO Unit := do
         throw (IO.userError "unsound: Sort 0 equated with Sort 1")
       else
         IO.println "C0_PROOF_AUDIT sort0_sort1_distinct=pass"
+
+
+  -- Compare the accepting lazy argument-spine operations with the exact
+  -- pre-refactor helpers. Exercise no-op, unfoldable, opaque, and constructor
+  -- cases using an isolated immutable environment. No declaration admission
+  -- shortcut or cache decision is introduced by these optimizations.
+  let deltaName := PsKernelName.str PsKernelName.anonymous "C0.delta"
+  let ctorName := PsKernelName.str PsKernelName.anonymous "C0.mk"
+  let inductName := PsKernelName.str PsKernelName.anonymous "C0"
+  let definition : PsKernelDefinitionInfo := {
+    base := { name := deltaName, levelParams := [], type := sort0 }
+    value := sort1
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let constructor : PsKernelConstructorInfo := {
+    base := { name := ctorName, levelParams := [], type := sort0 }
+    induct := inductName
+    cidx := 0
+    numParams := 0
+    numFields := 1
+    isUnsafe := false
+  }
+  let deltaEnv :=
+    psKernelEnvironmentAddUnchecked psKernelEnvironmentEmpty
+      (PsKernelConstantInfo.defnInfo definition)
+  let fixtureEnv :=
+    psKernelEnvironmentAddUnchecked deltaEnv
+      (PsKernelConstantInfo.ctorInfo constructor)
+  let fixtureCtx := psKernelCheckerContextEmpty fixtureEnv
+  let noDelta := PsKernelName.str PsKernelName.anonymous "C0.noDelta"
+  let namedMVar := PsKernelExpr.mvar noDelta
+  let shallow := PsKernelExpr.app namedMVar sort0
+  let deep := PsKernelExpr.app (PsKernelExpr.app shallow sort1) sort0
+  let defined := PsKernelExpr.app (PsKernelExpr.const deltaName []) sort0
+  let opaque := PsKernelExpr.app (PsKernelExpr.const ctorName []) sort0
+  let missing := PsKernelExpr.app (PsKernelExpr.const noDelta []) sort0
+  for expr in [sort0, shallow, deep, defined, opaque, missing] do
+    match c0ReferenceUnfoldDefinition fixtureCtx expr,
+        psKernelUnfoldDefinition fixtureCtx expr with
+    | Option.none, Option.none => pure ()
+    | Option.some before, Option.some after =>
+        if !(psKernelExprEqual before after) then
+          throw (IO.userError "C0 lazy-delta changed unfolded expression")
+    | _, _ =>
+        throw (IO.userError "C0 lazy-delta changed unfold decision")
+  let ctorTerm := PsKernelExpr.app (PsKernelExpr.const ctorName []) sort1
+  for expr in [sort0, shallow, deep, ctorTerm, defined, missing] do
+    for typeName in [inductName, deltaName] do
+      match c0ReferenceReduceProjCore fixtureCtx typeName 0 expr,
+          psKernelReduceProjCore fixtureCtx typeName 0 expr with
+      | Option.none, Option.none => pure ()
+      | Option.some before, Option.some after =>
+          if !(psKernelExprEqual before after) then
+            throw (IO.userError "C0 lazy-projection changed selected field")
+      | _, _ =>
+          throw (IO.userError "C0 lazy-projection changed decision")
+  if !(psKernelExprEqual
+      (psKernelUnfoldDefinition fixtureCtx defined).getD sort0
+      (PsKernelExpr.app sort1 sort0)) then
+    throw (IO.userError "C0 delta fixture failed to unfold")
+  if !(psKernelExprEqual
+      (psKernelReduceProjCore fixtureCtx inductName 0 ctorTerm).getD sort0
+      sort1) then
+    throw (IO.userError "C0 projection fixture failed to select field")
+  IO.println "C0_PERF_REGRESSION lazy_delta_projection_spines=pass"
 
   -- Native accepting DefEq first checks structural equality and successful
   -- pair-cache hits. The guarded quick entry may only be used after both

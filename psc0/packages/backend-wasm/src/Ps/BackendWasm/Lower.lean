@@ -101,7 +101,7 @@ def lowerExpr (ir : PsVerifiedIrModule) :
       let captureNames := psCodegenCollectCapturesWorker (bindings.map (·.name)).eraseDups
         fuel (parameters.map (·.name)) body []
       let captures := captureNames.filterMap fun n => bindings.find? (fun b => b.name == n)
-      let outer ← get
+      let outer : LowerState ← get
       let name := "__ps_closure_" ++ outer.owner ++ "_" ++ toString outer.next
       set { outer with
         locals := [], names := [], next := outer.next + 1,
@@ -121,7 +121,7 @@ def lowerExpr (ir : PsVerifiedIrModule) :
           (← unbox capture.type) ++ [.localSet b.index]
         inner := inner ++ [b]
       let compiled ← lowerExpr ir fuel inner (some result) body
-      let innerState ← get
+      let innerState : LowerState ← get
       let function : PsWasmFunction := {
         name, typeName := some (closureCodeName parameters.length)
         parameters := closureType :: List.replicate parameters.length valueType
@@ -130,7 +130,7 @@ def lowerExpr (ir : PsVerifiedIrModule) :
         body := psWasmTailCalls (initial ++ (← converted compiled result) ++ (← box result)) }
       set { innerState with
         locals := outer.locals, names := outer.names,
-        lifted := innerState.lifted ++ [{ function, names := innerState.names }] }
+        lifted := innerState.lifted ++ [{ function, names := innerState.names : RuntimeDefinition }] }
       let captureCode ← captures.mapM fun b => do
         return [.localGet b.index] ++ (← box b.type)
       return {
@@ -179,10 +179,10 @@ def lowerExpr (ir : PsVerifiedIrModule) :
         | none => match branches.head? with
           | some (_, b) => pure b.type
           | none => throw "PSCV0-WASM-MATCH: empty elimination requires its checked expected type"
-      let branches ← branches.mapM fun (tag, body) => do
+      let branchCodes ← branches.mapM fun (tag, body) => do
         return (tag, ← converted body type)
       let result ← representation type
-      let tree := branches.foldr (fun (tag, body) rest =>
+      let tree := branchCodes.foldr (fun (tag, body) rest =>
         [.localGet index, .structGet name 0, .i32Const (Int.ofNat tag), .i32Eq,
          .ifStart (some result)] ++ body ++ [.else_] ++ rest ++ [.end_]) [.unreachable]
       return { type, code := target.code ++ [.localSet index] ++ tree }
@@ -210,7 +210,7 @@ def lowerModule (ir : PsVerifiedIrModule) :
   let definitions : List (List RuntimeDefinition × List Nat) ← ir.declarations.mapM (lowerDeclaration ir)
   let runtime ← runtimeDefinitions
   let functions := definitions.flatMap (·.1) ++ runtime
-  let arities := ((definitions.flatMap (·.2)) ++ [1, 2]).eraseDups
+  let arities : List Nat := (definitions.flatMap (fun (entry : List RuntimeDefinition × List Nat) => entry.2) ++ [1, 2]).eraseDups
   let core : PsWasmModule := {
     psWasmModuleEmpty with
     structures := valueStructures ++ (← dataLayouts ir)

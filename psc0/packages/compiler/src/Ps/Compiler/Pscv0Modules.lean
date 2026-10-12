@@ -99,9 +99,10 @@ def psPscv0OwnInterface (environment : PsEnvironment)
 def psPscv0InstallInterface (environment : PsEnvironment)
     (view : PsPscv0ModuleInterface) : Except String PsEnvironment := do
   let environment ← view.declarations.foldlM (fun env decl => do
+    -- A public-import diamond may present the same checked identity through
+    -- two paths. Global project declaration uniqueness is checked separately.
     if psEnvironmentContains env (psDeclarationName decl) then
-      throw ("PSCV0-MODULE: conflicting imported declaration " ++
-        psNameToString (psDeclarationName decl))
+      return env
     let some next := psEnvironmentAdd env decl
       | throw "PSCV0-MODULE: failed to load imported declaration"
     pure next) environment
@@ -181,5 +182,12 @@ def psCompilerPreparePscv0Project (entryName : String)
     if item.name == entryName then mainNames := ownNames
     else libraryNames := libraryNames ++ ownNames
   let prepared : PsCompilerAdmissionReadyModule := { declarations }
+  -- Only a public-imported dependency of the entry is re-exported. The
+  -- ordinary imported declarations remain linked for execution but internal
+  -- to the application's public target API.
+  let some root := built.find? (fun item => item.name == entryName)
+    | throw "PSCV0-MODULE: entry graph identity missing"
+  let exported := root.interface.declarations.map psDeclarationName
+  libraryNames := libraryNames.filter (fun name => !exported.any (psNameEq name))
   let admissions ← (psCompilerAdmissionsFromPrepared prepared).mapError psCompilerPscv0Error
   return { prepared, admissions, mainNames, libraryNames, origins }

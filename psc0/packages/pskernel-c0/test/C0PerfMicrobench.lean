@@ -982,6 +982,40 @@ def main : IO Unit := do
         throw (IO.userError "C0 indexed head dispatcher counts diverged")
       IO.println s!"C0_BENCH indexed_head_dispatch two_probes_ms={doubleEnd-doubleStart} one_probe_ms={singleEnd-singleStart} depth=24 runs={deltaRuns}"
 
+      -- Measure the same indexed reduction after either re-importing its
+      -- source root each time or retaining one exact canonical work root.
+      -- The trusted checker is NOT invoked by either timed path.
+      let diagnosticChecker : PsKernelCheckerSession := {
+        context := deltaContext
+        state := psKernelCheckerStateEmpty
+      }
+      let diagnosticSession := psKernelC0IndexedSessionNew diagnosticChecker
+      let workRuns := 200
+      let mut coldHits := 0
+      let coldStart ← IO.monoMsNow
+      for _ in [:workRuns] do
+        match psKernelC0IndexedSessionStartWork
+            diagnosticSession deltaRoot with
+        | none => throw (IO.userError "C0 cold indexed work import failed")
+        | some work =>
+            if (psKernelC0IndexedWorkRun 4096 work).progressed then
+              coldHits := coldHits + 1
+      let coldEnd ← IO.monoMsNow
+      let retainedWork ← match psKernelC0IndexedSessionStartWork
+          diagnosticSession deltaRoot with
+        | some work => pure work
+        | none => throw (IO.userError "C0 retained indexed work import failed")
+      let mut reuseHits := 0
+      let reusedStart ← IO.monoMsNow
+      for _ in [:workRuns] do
+        if (psKernelC0IndexedWorkRun 4096 retainedWork).progressed then
+          reuseHits := reuseHits + 1
+      let reusedEnd ← IO.monoMsNow
+      if coldHits != workRuns || reuseHits != workRuns then
+        throw (IO.userError "C0 indexed work boundary results diverged")
+      IO.println s!"C0_BENCH indexed_work_boundaries source_reimport_ms={coldEnd-coldStart} retained_root_ms={reusedEnd-reusedStart} runs={workRuns} depth=24"
+
+
   -- Pair recursive-source and canonical-indexed universe substitution on
   -- preconstructed equivalent shared input; report implementation-family
   -- cost only, not actual kernel throughput or matched acceptance.

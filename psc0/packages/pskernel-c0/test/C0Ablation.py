@@ -4,7 +4,7 @@
 Only the requested source region/module in a copied C0 package is altered.
 Checker tests, resource policies and acceptance criteria remain unchanged.
 
-Usage: python3 C0Ablation.py ORIGINAL_CORE COPY_OF_C0 [instantiate1|environment_index]
+Usage: python3 C0Ablation.py ORIGINAL_CORE COPY_OF_C0 [instantiate1|environment_index|local_index_disabled]
 """
 from pathlib import Path
 import sys
@@ -40,6 +40,22 @@ def main() -> None:
         file = Path("src/Ps/KernelCore/Runtime/Acceleration/EnvironmentIndex.lean")
         current = (variant / file).read_text()
         changed = (original / file).read_text()
+    elif kind == "local_index_disabled":
+        # Turn off *only* the optional index builder. The authoritative
+        # ordered declaration list, exact shadowing and checker rules remain.
+        file = Path("src/Ps/KernelCore/Core/LocalContext.lean")
+        current = (variant / file).read_text()
+        start = "def psKernelC0LocalContextNextIndex\\n"
+        end = "def psKernelLocalContextFind\\n"
+        a, b = unique_region(current, start, end)
+        substitute = """def psKernelC0LocalContextNextIndex
+    (_context : PsKernelLocalContext)
+    (_decl : PsKernelLocalDecl) :
+    Option (PsKernelC0HashTrie PsKernelLocalDecl) :=
+  Option.none
+
+"""
+        changed = current[:a] + substitute + current[b:]
     else:
         raise RuntimeError(f"unknown ablation kind: {kind}")
     if changed == current:

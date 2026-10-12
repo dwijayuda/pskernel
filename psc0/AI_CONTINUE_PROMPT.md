@@ -1,38 +1,36 @@
-# Continue PSCV0 v7 — native Lean, core/essential Phase A
+# Continue PSCV0 v7 — native Lean Phase A
 
-Repository: https://github.com/dwijayuda/pskernel
-Branch: `psc0/pscv0-v7-native-lean-v1` (draft PR #109).
-**Latest qualified executable:** `70415686f1e7c13e4690c4f8bed549b1c882fe61`.
-**Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38286641968.
+Repository https://github.com/dwijayuda/pskernel; branch `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
+Latest qualified executable: `c810d6fe15d064968008d09849efd9ac5b2820de`.
+Linux Actions green: https://github.com/dwijayuda/pskernel/actions/runs/38292170524.
+Official checker: Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+Bounded source profile `pscv0-v7-native-bounded/48`, not full conformance.
 
-Read the CURRENT TOP of `psc0/AI_WORK_STATE.md`, the authoritative
-`psc0/PSCV0_LANGUAGE_REFERENCE.md`, and
-`psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md`; resolve live GitHub
-branch HEAD before editing.
+First read TOP `psc0/AI_WORK_STATE.md`, canonical `psc0/PSCV0_LANGUAGE_REFERENCE.md`,
+`psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md` and
+`psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md`, then resolve live GitHub
+HEAD. The new portable `Ps.Environment.StandardSnapshot` pins
+`fnv1a64:3890664716772208725` across 208 checked declarations,
+11 classes and 36 instances, with class metadata and source aliases.
+168 portable/176 native modules and 187 JS/TS/Rust/V8 GC/Wasmtime
+shared observations all qualify. Source/instance body audits and
+negative alias-drift refusal also pass.
 
-Qualified source: 168 portable / 176 native .lean modules; 185 shared
-direct JS, TypeScript, Rust, V8 Wasm GC and Wasmtime runtime observations.
-Selected Lean RC4 module-private/public identity and linked application
-execution work. Typechecked Standard provides checked BEq/Inhabited/ToString,
-polymorphic List/Option/Product instances, and now Type-0 Except.bind/map/
-mapError/tryCatch/isOk/toOption with kernel-reducible proof cases and real
-runtime error/recovery observations. All checks are bounded; not full v7.
+Continue autonomously and dependency-first toward all core and essentials
+v7 features. Next Phase A: faithful Lean RC4 GetElem validity proofs
+and safe/checked indexing, remaining allowlisted deriving/float/fixed-width
+and Standard registry/notation completeness. Use the pinned upstream
+Lean `src/Init/GetElem.lean` to preserve GetElem versus GetElem?
+semantic differences; do not replace proof validity with Bool bounds.
+Implement substantial coherent native Lean abstractions first, then
+focused negative checking and the existing Linux CI integration matrix.
+Update the expected selected Standard fingerprint only after reviewing
+and qualifying intentional changes to the installed environment.
 
-Continue dependency-driven implementation of core/essential Phase A:
-faithful RC4 GetElem/GetElem? classes and genuine index proofs,
-allowlisted deriving Repr/DecidableEq/Hashable and broader recursive/
-parametric generated dictionaries, Float/Float32/scientific/fixed-width
-source and selected library semantics, and the full frozen Standard
-environment/notation/import/instance manifest + digest. Preserve true
-typeclass dependencies, proof checking, effect/assumption closure and
-separate check/erasure/runtime evidence. Implement coherent mechanisms
-before testing, reuse compact Linux integration; fix causes, not cases.
-Keep AI_WORK_STATE and roadmap synchronized with executable SHA and CI.
-
-Constraints: portable native .lean compiler only, official Lean 4.35.0-rc4,
-GitHub connector reads/writes and Linux GitHub Actions builds/tests.
-No local checkout/build, Desktop Commander, pskernel-core, alternate kernel,
-compiler-source .ps migration, bootstrap/self-hosting, C5 source
-reconstruction, main merge, release, force push or branch deletion.
-Keep PR #109 draft; preserve Wasm GC internally, linear memory only at
-Canonical ABI boundaries, and JS/TS/Rust/Wasm contracts.
+Mandatory: native portable .lean compiler only; official Lean 4.35 RC4
+checking, GitHub-only repo reads/writes and Linux Actions builds/tests.
+No local checkout, Desktop Commander, pskernel-core integration,
+compiler .ps migration, bootstrap/self-hosting, C5 readable reconstruction,
+main merge, release, force push or branch deletion. Preserve existing draft
+PR, Wasm GC internals/Canonical ABI linear memory, JS/TS/Rust/Wasm contracts
+and all trust/assurance boundaries.

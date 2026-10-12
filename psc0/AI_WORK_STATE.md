@@ -1,30 +1,35 @@
 # Current AI handoff — PSCV0 v7 native Lean (13 October 2026)
 
-**Active handoff. All checkpoints below the historical divider are older.**
+**Authoritative active checkpoint; everything below the historical divider is earlier evidence.**
 
-Repository: https://github.com/dwijayuda/pskernel
-Branch: `psc0/pscv0-v7-native-lean-v1` | draft PR https://github.com/dwijayuda/pskernel/pull/109
-**Latest qualified executable SHA:** `70415686f1e7c13e4690c4f8bed549b1c882fe61`
-**Successful Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38286641968
-**Checker:** official Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`
-**Source profile:** `pscv0-v7-native-bounded/48` (not full v7 conformance).
+**Repository:** https://github.com/dwijayuda/pskernel
+**Branch:** `psc0/pscv0-v7-native-lean-v1` · **Draft PR:** https://github.com/dwijayuda/pskernel/pull/109
+**Latest qualified executable SHA:** `c810d6fe15d064968008d09849efd9ac5b2820de`
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38292170524
+**Official checker:** Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`
+**Bounded source profile:** `pscv0-v7-native-bounded/48`, **not full v7 conformance**.
 
-## Newly qualified work
+## Newly qualified Phase A — reproducible Standard environment identity
 
-- **168 portable .lean modules / 176 native closure modules**, no compiler-source .ps migration or alternate kernel.
-- The same **185 runtime observations** now pass in direct JS, TypeScript, Rust, V8 Wasm GC and Wasmtime. Four kernel-checked semantic programs, 92 phase-specific refusals and compact parser/module/Standard checks pass. Checked three-module JS/TS/Rust and four-module Wasm executable projects remain green.
-- Compositional checked **BEq (Prod α β)** and **Inhabited (Prod α β)** with required component dictionaries and shared constructor/structure representation. Nested Option/List cases, proof-level equality/default checks, unsupported component refusal and cross-target emission qualified in `82c601f56c8ffbe46dd380e2211b3a3623841690`, [run 38285466474](https://github.com/dwijayuda/pskernel/actions/runs/38285466474).
-- Checked Type-0 **Except.bind/map/mapError/tryCatch/isOk/toOption**. These use the existing Except.rec eliminator; map delegates to bind. No extra runtime primitive or ad-hoc proof authority. Pure kernel-reducible proofs passed at `9c6442329102c8d172f54bd5e55176d58579a105`, [run 38286353072](https://github.com/dwijayuda/pskernel/actions/runs/38286353072). Real runtime error propagation/transformation/recovery, including modeled String length, passes all targets at the latest executable SHA.
-- Registry auditing now includes the selected checked product and Except declarations/instances. This is not the full pinned RC4 Standard manifest/digest, instance-import identity proof, or source/proof/effect/assumption closure.
+- `Ps.Environment.StandardSnapshot` is a new **portable native .lean** module. It serializes the installed checked Core declarations, binder/universe types and bodies, metadata for constructors/recursors, class identities and input/output parameters, ordered typeclass instances with priorities, and exported source aliases.
+- Canonical serialization uses tagged, UTF-8-length-delimited fields. Its **FNV-1a 64-bit** fingerprint is deterministic across host word sizes. It is a non-cryptographic **drift detector**, not a proof certificate or replacement for checked Lean admission.
+- The frozen selected fingerprint is **`fnv1a64:3890664716772208725`**, covering **208 declarations, 11 registered classes, 36 instance entries** at Lean 4.35.0-rc4. Audit invokes the existing exact declaration-body/signature/class/instance checks before requiring the pinned fingerprint. A compact negative check ensures a newly injected source alias is rejected despite passing the old structural declaration audit.
+- Implementation checkpoint `c3445fc108856617e20aa86b64ca35a19a513425`, [Linux run 38291606077](https://github.com/dwijayuda/pskernel/actions/runs/38291606077); pinned validation checkpoint `c810d6fe15d064968008d09849efd9ac5b2820de`, [run 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524) — both passed.
+- Full preexisting integration remains green: **168 portable / 176 native Lean modules**, **187 shared runtime observations** each in direct JS, strict TS, Rust, V8 Wasm GC and Wasmtime. Multi-file executable projects, 4 checked semantic programs and 92 phase-specific refusals are still qualified.
+- `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md` documents the serialized inputs, trust boundaries, digest purpose, versioning rules and deliberate omissions.
 
-## Remaining essential Phase A, in dependency order
+## Phase A remaining — dependency-driven
 
-The exact Lean RC4 GetElem / GetElem? classes, validity propositions, proof side conditions and source `xs[i]`, `xs[i]'h`, `xs[i]?`, `xs[i]!` are **not complete**. Existing total `List.get?` is useful but not a substitute. Allowlisted deriving Repr/DecidableEq/Hashable and broader recursive/parametric BEq, Float/Float32/scientific/fixed-width semantics, stronger Array/ByteArray APIs, the frozen notation/coercion/instance/import snapshot and digest also remain open. Then close dependent/mutual data, well-founded termination, generalized effect/control, rewriting/tactics, contracts/VCs, and audited verified-artifact obligations. Do not claim full v7 from green bounded qualification.
+1. Implement **exact RC4 `GetElem` / `GetElem?`** classes with index-validity propositions/proof obligations, auto/explicit proof behavior and `xs[i]`, `xs[i]'h`, `xs[i]?`, `xs[i]!` notation. Pinned Lean source `src/Init/GetElem.lean` confirms these are distinct: safe `List.get?` alone is **not** implementation of GetElem. The current prelude still needs the appropriate `Nat.lt` proposition/proof/Decidable foundations; do not invent unchecked indexing or substitute Bool comparisons for proof terms.
+2. Finish supported trailing `deriving` handlers (current checked bounded `Inhabited` and `BEq` support is qualified; `DecidableEq`, `Repr`, `Hashable`, broader recursive/parametric data and exact handler origin are not).
+3. Close Float/Float32/scientific and fixed-width/scalar/coercion semantics, further actual Lean-standard `List`/`Array`/`ByteArray` APIs, complete language notation and imported instance precedence.
+4. Complete the final **cryptographically pinned Standard/notation/deriving/import/effect/axiom manifest**, not just this selected non-cryptographic environment fingerprint, and the final assurance ledger.
 
-## Mandatory process and constraints
+After Phase A, continue dependent/mutual induction/termination, generalized typed do/effects/state, proof-producing tactics/rewriting, contracts/VCs and verified emission obligations. The whole v7 core and essentials remain incomplete.
 
-Keep portable native `.lean` authoritative; GitHub connector for all repo reads/writes; Linux GitHub Actions for builds and tests; official Lean 4.35.0-rc4 checker. No local checkout/build, Desktop Commander, pskernel-core, alternate kernel, compiler .ps migration, bootstrap/self-hosting, C5 readable reconstruction, main merge, release, force push or branch deletion. Preserve draft PR #109, Wasm GC internally, Canonical ABI-only linear memory, and all JS/TS/Rust/Wasm behavioral contracts. Update roadmap and handoff with exact executable SHA + CI evidence after qualifying each coherent implementation.
+## Mandatory workflow
 
+Maintain the shared, clean, portable native `.lean` compiler; use official Lean 4.35.0-rc4 checking. GitHub is canonical for all source reads/writes, Linux GitHub Actions for builds/tests. Preserve existing JS/TS/Rust/Wasm and Wasm GC/Canonical ABI contracts, branch and draft PR #109. No local checkout/build, Desktop Commander, pskernel-core integration/replacement, compiler-source `.ps` migration, bootstrap/self-hosting, C5 reconstruction, main merge, release, force push or branch deletion. Keep handoff and roadmap current after each qualified semantic milestone.
 
 
 ---

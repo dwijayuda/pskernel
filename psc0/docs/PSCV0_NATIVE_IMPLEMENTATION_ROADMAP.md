@@ -2,33 +2,37 @@
 
 ## Latest qualified native compiler milestone — 13 October 2026
 
-**Executable source:** `70415686f1e7c13e4690c4f8bed549b1c882fe61`.
-**Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38286641968.
-**Official checker:** Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
-**Profile:** `pscv0-v7-native-bounded/48`, not complete v7.
+**Qualified executable SHA:** `c810d6fe15d064968008d09849efd9ac5b2820de`.
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38292170524.
+**Official Lean:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
+**Bounded source profile:** `pscv0-v7-native-bounded/48`, not complete v7.
 
-The portable semantic source now contains **168 portable / 176 native Lean
-modules**, and **185 shared runtime observations** pass across direct JS,
-TypeScript, Rust, V8 Wasm GC and Wasmtime. The checked three-file JS/TS/Rust
-and four-module Wasm projects still run. Four checked semantic programs,
-92 phase-specific refusals and compact module/Standard checks remain green.
+The selected native Lean Standard environment now has a **reproducible
+fingerprint**, `fnv1a64:3890664716772208725`. The portable serializer
+captures all **208 installed declarations**, exact Core signatures/bodies
+and constructor/recursor metadata, **11 class registrations**, **36 ordered
+instance registrations**, priority/level metadata, and source aliases.
+It length-prefixes every UTF-8 field and pins the upstream RC4 commit;
+the FNV64 result is intentionally **not cryptographically strong** and
+does **not confer proof authority**.
 
-Recent coherent Phase A work: selected checked `BEq` and `Inhabited`
-dictionaries for `Prod α β`, requiring appropriate component instances
-(qualified `82c601f5`, Linux run 38285466474); checked Type-0
-`Except.bind/map/mapError/tryCatch/isOk/toOption` over the existing
-`Except.rec` eliminator (qualified `9c644232`, run 38286353072);
-and execution of success/error/recovery/mapError paths, including the
-modeled String length primitive, in all five shared backend lanes
-(qualified latest SHA, run 38286641968). Ordinary kernel proof checking,
-erasure and runtime-model checking remain separate evidence boundaries.
+The separate exact Standard declaration/instance audit and expected
+fingerprint gate now reject structural and metadata drift, including an
+additional source-alias regression. Both the initial snapshot at
+`c3445fc1`, [Linux 38291606077](https://github.com/dwijayuda/pskernel/actions/runs/38291606077),
+and the pinned gate at `c810d6fe`, [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524),
+passed. The 168 portable/176 native Lean modules, 187 shared JS/TS/Rust/
+V8 Wasm GC/Wasmtime observations, executable multi-module projects,
+4 checked semantic programs and 92 negative observations remain green.
+See `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md` for the deterministic
+representation and trust limits.
 
-No new primitive or alternate proof authority was introduced.
-The native Standard signature/body/class/instance audit includes the new
-declarations, but exact RC4 GetElem/index validity, selected remaining
-deriving handlers, Float/scientific/fixed-width data, complete library APIs,
-frozen Standard registry digest and final assurance closure remain open.
-No C5, pskernel-core integration, or self-hosting yet.
+Next core/essential requirements: fully faithful RC4 GetElem/GetElem?
+with dependent validity proofs, allowlisted deriving handlers,
+Float/scientific/fixed-width types, expanded collection/IO boundaries,
+and the final cryptographic notation/import/tactic/effect/assumption
+environment manifest. This selected fingerprint is a checkpoint, not
+full v7 or full Standard conformance.
 
 ## Current priority: core and essential language conformance first
 
@@ -48,8 +52,8 @@ the selected language surface is sufficient.
 
 Selected language profiles 36–48 and the later module foundation are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`70415686f1e7c13e4690c4f8bed549b1c882fe61`, [Linux run 38286641968](https://github.com/dwijayuda/pskernel/actions/runs/38286641968).
-The shared matrix contains 185 runtime observations per target. This does
+`c810d6fe15d064968008d09849efd9ac5b2820de`, [Linux run 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524).
+The shared matrix contains 187 runtime observations per target. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
 execution remain independent assurance boundaries.

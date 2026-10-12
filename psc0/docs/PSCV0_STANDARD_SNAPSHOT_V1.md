@@ -4,8 +4,8 @@
 
 - Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - Selected native environment: `psSelfHostProdPreludeEnvironment`.
-- Qualified snapshot source: `c3445fc108856617e20aa86b64ca35a19a513425`.
-- Successful Linux Actions: https://github.com/dwijayuda/pskernel/actions/runs/38291606077
+- Qualified serializer source: `c3445fc108856617e20aa86b64ca35a19a513425`; pinned validation source: `c810d6fe15d064968008d09849efd9ac5b2820de`.
+- Successful Linux Actions: https://github.com/dwijayuda/pskernel/actions/runs/38292170524
 - Snapshot records: **208 checked declarations; 11 registered classes; 36 instance entries**.
 - Fingerprint: **`fnv1a64:3890664716772208725`**.
 

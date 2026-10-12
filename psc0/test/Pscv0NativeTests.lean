@@ -998,6 +998,9 @@ private def projectBoundaries : IO Unit := do
     | 14, .ok value =>
         unless value.artifacts.length == 3 do
           throw (IO.userError "checked ToString dictionary missing backend artifacts")
+    | 14, .error error =>
+        throw (IO.userError ("ToString exported-alias check failed at " ++
+          error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

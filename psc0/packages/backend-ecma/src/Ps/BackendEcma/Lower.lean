@@ -93,9 +93,13 @@ def tailBody (brands tags : List (String × String)) (d : PsVerifiedIrDeclaratio
         let values ← args.mapM pureExpr
         return [set (.array (d.parameters.map fun p => id p.name)) (.array values), .continueE]
     | .letE name type value body =>
-      if !psTsTailBindingSafe d aliases name then none else do
+      if psTsExprUsesNameWithFuel 4096 value name ||
+          !psTsTailBindingSafe d aliases name then none else do
         match psTsTailAliasValue d.name name value with
-        | some alias => visit (alias :: aliases) body
+        | some alias =>
+          if alias.captured.all (psTsTailPureWithFuel aliases 4096) then
+            visit (alias :: aliases) body
+          else none
         | none =>
           let value ← pureExpr value
           let body ← visit aliases body
@@ -105,15 +109,19 @@ def tailBody (brands tags : List (String × String)) (d : PsVerifiedIrDeclaratio
     | .matchE name _ value alternatives =>
       let tag ← psTsLookup tags name
       let target ← pureExpr value
-      let temp := psTsFreshMatchTemp (.matchE name [] value alternatives)
+      let _ ← if alternatives.isEmpty then none else some ()
+      let temp := psTsFreshMatchTemp d.body
+      let _ ← if psTsTailBindingSafe d aliases temp then some () else none
       let cases ← alternatives.mapM fun (constructor, bindings, body) => do
         if !bindings.all (fun b => psTsTailBindingSafe d aliases b.name) then none else do
           let bindings ← bindings.mapM fun b => do
             let type ← (irType b.type).toOption
             return Stmt.binding false b.name type (some (.member (id temp) b.field))
           return (str constructor, bindings ++ (← visit aliases body))
-      return [const temp target, .switchE (.index (id temp) (id tag)) cases,
-        fail "invalid ProofScript constructor tag"]
+      -- Each match owns a lexical block. A nested match's temporary must not
+      -- enter the scope of the outer branch field initializers (JS TDZ).
+      return [.block [const temp target, .switchE (.index (id temp) (id tag)) cases,
+        fail "invalid ProofScript constructor tag"]]
     | _ => return [ret (← pureExpr value)]
 
 def declaration (brands tags : List (String × String)) (d : PsVerifiedIrDeclaration) :

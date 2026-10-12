@@ -168,11 +168,11 @@ def c0ExportDecodeExpr
 def c0ExportParseRecord
     (st : C0ExportTables)
     (j : Lean.Json) : Except String C0ExportTables := do
-  if let .ok meta := c0JsonObj j "meta" then
+  if let .ok headerData := c0JsonObj j "meta" then
     if st.header then throw "duplicate NDJSON export metadata"
-    let version ← c0JsonString (← c0JsonObj meta "lean") "version"
-    let hash ← c0JsonString (← c0JsonObj meta "lean") "githash"
-    let format ← c0JsonString (← c0JsonObj meta "format") "version"
+    let version ← c0JsonString (← c0JsonObj headerData "lean") "version"
+    let hash ← c0JsonString (← c0JsonObj headerData "lean") "githash"
+    let format ← c0JsonString (← c0JsonObj headerData "format") "version"
     if version != "4.35.0" ||
         hash != "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" ||
         format != "3.1.0" then

@@ -797,3 +797,33 @@ def main : IO Unit := do
   if oldPiPassed != piRuns || newPiPassed != piRuns then
     throw (IO.userError "C0 infer-only spine results diverged")
   IO.println s!"C0_BENCH infer_only_arity historical_ms={oldPiEnd-oldPiStart} counted_ms={newPiEnd-newPiStart} depth={piDepth} runs={piRuns}"
+
+
+  -- Diagnosis for a complete checked-application slowdown observed in the
+  -- matched original-vs-C0 benchmark. Closed forall codomains exercise the
+  -- old loose-variable prepass and C0's always-traversing specialization.
+  let closedCodomain := c0BenchForallSpine 48
+  let instReplacement := PsKernelExpr.sort PsKernelLevel.zero
+  let closedRuns := 9000
+  let mut originalClosedCount := 0
+  let originalClosedStart ← IO.monoMsNow
+  for _ in [:closedRuns] do
+    let result :=
+      if psKernelExprHasLooseBVar closedCodomain then
+        psKernelExprInstantiate closedCodomain [instReplacement]
+      else closedCodomain
+    if psKernelExprEqual result closedCodomain then
+      originalClosedCount := originalClosedCount + 1
+    else throw (IO.userError "C0 reference closed instantiate changed term")
+  let originalClosedEnd ← IO.monoMsNow
+  let mut c0ClosedCount := 0
+  let c0ClosedStart ← IO.monoMsNow
+  for _ in [:closedRuns] do
+    let result := psKernelExprInstantiate1 closedCodomain instReplacement
+    if psKernelExprEqual result closedCodomain then
+      c0ClosedCount := c0ClosedCount + 1
+    else throw (IO.userError "C0 specialized closed instantiate changed term")
+  let c0ClosedEnd ← IO.monoMsNow
+  if originalClosedCount != c0ClosedCount || c0ClosedCount != closedRuns then
+    throw (IO.userError "C0 closed substitution result divergence")
+  IO.println s!"C0_BENCH instantiate_closed legacy_prepass_ms={originalClosedEnd-originalClosedStart} specialized_ms={c0ClosedEnd-c0ClosedStart} depth=48 runs={closedRuns}"

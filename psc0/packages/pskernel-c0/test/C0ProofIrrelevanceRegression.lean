@@ -1052,11 +1052,13 @@ def main : IO Unit := do
     match psKernelC0EncodeExpr psKernelC0StoreEmpty term with
     | none => throw (IO.userError "C0 indexed fragment encode failed")
     | some (stored, root) =>
-        match psKernelC0IndexedContextFragment 4096
-            chainContext stored root,
-            psKernelSessionWhnf 4096 referenceSession term with
-        | some (rewritten, resultId), Except.ok (reference, _) =>
-            match psKernelC0DecodeExpr rewritten resultId with
+        let observed := psKernelC0IndexedContextFragment 4096
+          chainContext stored root
+        match observed.halt, psKernelSessionWhnf 4096 referenceSession term with
+        | .needsChecker, Except.ok (reference, _) =>
+            if !observed.progressed then
+              throw (IO.userError "C0 indexed fragment lost actual rewrite")
+            match psKernelC0DecodeExpr observed.store observed.id with
             | none =>
                 throw (IO.userError "C0 indexed fragment result invalid")
             | some result =>
@@ -1066,23 +1068,67 @@ def main : IO Unit := do
             -- Repeat on the same session arena. A term that reached a
             -- stuck supported-fragment state must not allocate or present
             -- a new purported normalization success.
-            if (psKernelC0IndexedContextFragment 4096
-                  chainContext rewritten resultId).isSome then
+            let observedAgain := psKernelC0IndexedContextFragment 4096
+              chainContext observed.store observed.id
+            if observedAgain.progressed then
               throw (IO.userError "C0 indexed fragment spuriously rewrote terminal")
         | _, _ =>
             throw (IO.userError "C0 indexed fragment check diverged")
   match psKernelC0EncodeExpr psKernelC0StoreEmpty (.mvar localName) with
   | none => throw (IO.userError "C0 indexed stuck fixture missing")
   | some (stored, root) =>
-      if (psKernelC0IndexedContextFragment 4096
-          chainContext stored root).isSome then
-        throw (IO.userError "C0 indexed fragment claimed unrelated WHNF")
+      let observed := psKernelC0IndexedContextFragment 4096
+        chainContext stored root
+      match observed.halt with
+      | .needsChecker =>
+          if observed.progressed then
+            throw (IO.userError "C0 indexed fragment claimed unrelated WHNF")
+      | _ =>
+          throw (IO.userError "C0 stuck indexed fragment changed stop reason")
   match psKernelC0EncodeExpr psKernelC0StoreEmpty chainApp with
   | none => throw (IO.userError "C0 indexed budget fixture missing")
   | some (stored, root) =>
-      if (psKernelC0IndexedContextFragment 1
-          chainContext stored root).isSome then
+      let observed := psKernelC0IndexedContextFragment 1
+        chainContext stored root
+      if observed.progressed then
         throw (IO.userError "C0 indexed fragment ignored structural budget")
+      match observed.halt with
+      | .indexedUnavailable => pure ()
+      | _ =>
+          throw (IO.userError "C0 exhausted indexed syntax was classified as success")
+  match (psKernelC0IndexedContextFragment 0 chainContext
+      psKernelC0StoreEmpty 0).halt with
+  | .budgetExhausted => pure ()
+  | _ => throw (IO.userError "C0 zero fragment budget was not recorded")
+  match (psKernelC0IndexedContextFragment 8 chainContext
+      psKernelC0StoreEmpty 0).halt with
+  | .invalidRoot => pure ()
+  | _ => throw (IO.userError "C0 invalid indexed root was not classified")
+  -- A self-referential unchecked definition is not a valid admitted
+  -- declaration. Its canonical rewrite must not produce false success
+  -- or be confused with a stable typed normal form.
+  let cyclicName := PsKernelName.str PsKernelName.anonymous "C0.cyclic"
+  let cyclicInfo : PsKernelDefinitionInfo := {
+    base := { name := cyclicName, levelParams := [], type := sort1 }
+    value := .const cyclicName []
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let cyclicEnv := psKernelEnvironmentAddUnchecked
+    psKernelEnvironmentEmpty (.defnInfo cyclicInfo)
+  let cyclicContext := psKernelCheckerContextEmpty cyclicEnv
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty
+      (.const cyclicName []) with
+  | none => throw (IO.userError "C0 cyclic indexed term encoding failed")
+  | some (stored, root) =>
+      let observed := psKernelC0IndexedContextFragment 64
+        cyclicContext stored root
+      match observed.halt with
+      | .nonProgressCycle =>
+          if observed.progressed then
+            throw (IO.userError "C0 cyclic definition was recorded as progress")
+      | _ =>
+          throw (IO.userError "C0 cyclic definition was not deferred")
   IO.println "C0_PERF_REGRESSION continuous_indexed_context_fragment=pass"
 
   -- Indexed constructor projection observes the exact already-reduced
@@ -1134,14 +1180,16 @@ def main : IO Unit := do
   match psKernelC0EncodeExpr psKernelC0StoreEmpty projectionExpr with
   | none => throw (IO.userError "C0 indexed projection fragment encode failed")
   | some (stored, id) =>
-      match psKernelC0IndexedContextFragment 4096
-          projectionContext stored id,
-          psKernelSessionWhnf 4096 {
-            context := projectionContext
-            state := psKernelCheckerStateEmpty
-          } projectionExpr with
-      | some (next, resultId), Except.ok (reference, _) =>
-          match psKernelC0DecodeExpr next resultId with
+      let observed := psKernelC0IndexedContextFragment 4096
+        projectionContext stored id
+      match observed.halt, psKernelSessionWhnf 4096 {
+          context := projectionContext
+          state := psKernelCheckerStateEmpty
+        } projectionExpr with
+      | .needsChecker, Except.ok (reference, _) =>
+          if !observed.progressed then
+            throw (IO.userError "C0 indexed projection lost reduction")
+          match psKernelC0DecodeExpr observed.store observed.id with
           | some value =>
               if !(psKernelExprEqual value reference) then
                 throw (IO.userError "C0 indexed projection fragment WHNF diverged")
@@ -1160,11 +1208,11 @@ def main : IO Unit := do
     match psKernelC0EncodeExpr psKernelC0StoreEmpty applied with
     | none => throw (IO.userError "C0 applied projection encoding failed")
     | some (stored, rootId) =>
+        let observed := psKernelC0IndexedContextFragment 4096
+          projectionContext stored rootId
         match psKernelC0IndexedReduceProjectionOnce projectionContext
                 stored rootId,
               psKernelC0IndexedReduceHeadOnce projectionContext
-                stored rootId,
-              psKernelC0IndexedContextFragment 4096 projectionContext
                 stored rootId,
               psKernelSessionWhnf 4096 {
                 context := projectionContext
@@ -1172,11 +1220,15 @@ def main : IO Unit := do
               } applied with
         | some (projectionStore, projectionId),
           some (dispatchedStore, dispatchedId),
-          some (fragmentStore, fragmentId),
           Except.ok (reference, _) =>
+            if !observed.progressed then
+              throw (IO.userError "C0 applied indexed projection made no progress")
+            match observed.halt with
+            | .needsChecker => pure ()
+            | _ => throw (IO.userError "C0 applied projection stop was not deferred")
             match psKernelC0DecodeExpr projectionStore projectionId,
                   psKernelC0DecodeExpr dispatchedStore dispatchedId,
-                  psKernelC0DecodeExpr fragmentStore fragmentId with
+                  psKernelC0DecodeExpr observed.store observed.id with
             | some isolated, some dispatched, some continuous =>
                 if !(psKernelExprEqual reference isolated &&
                      psKernelExprEqual reference dispatched &&
@@ -1185,7 +1237,7 @@ def main : IO Unit := do
                     "C0 applied projection changed application order")
             | _, _, _ =>
                 throw (IO.userError "C0 applied projection decode failed")
-        | _, _, _, _ =>
+        | _, _, _ =>
             throw (IO.userError "C0 applied projection reduction differed")
   -- Negative projection heads must remain stuck, not spuriously select an
   -- indexed field or transform the enclosing application.
@@ -1194,11 +1246,14 @@ def main : IO Unit := do
   match psKernelC0EncodeExpr psKernelC0StoreEmpty wrongProj with
   | none => throw (IO.userError "C0 negative projection encoding failed")
   | some (stored, rootId) =>
+      let observed := psKernelC0IndexedContextFragment 4096
+        projectionContext stored rootId
       if (psKernelC0IndexedReduceHeadOnce projectionContext
-          stored rootId).isSome ||
-         (psKernelC0IndexedContextFragment 4096 projectionContext
-          stored rootId).isSome then
+          stored rootId).isSome || observed.progressed then
         throw (IO.userError "C0 mismatched projection head was reduced")
+      match observed.halt with
+      | .needsChecker => pure ()
+      | _ => throw (IO.userError "C0 unknown projection claimed indexed verdict")
   IO.println "C0_PERF_REGRESSION indexed_applied_projection_head=pass"
 
 

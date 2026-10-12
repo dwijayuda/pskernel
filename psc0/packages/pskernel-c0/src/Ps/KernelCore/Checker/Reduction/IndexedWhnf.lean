@@ -248,59 +248,81 @@ def psKernelC0IndexedReduceHeadOnce
 /-
   Opt-in context-sensitive indexed reduction FRAGMENT.
 
-  This composes the already independent indexed beta/zeta/metadata engine
-  with one-step local-let/delta/constructor-projection unfolding,
-  carrying one canonical arena
-  through an arbitrarily long supported rewrite sequence. It is NOT
-  general WHNF: quotient, recursor/iota, projection-of-reducible-values,
-  native/Nat primitives,
-  proof irrelevance, checker caches and exact Lean 4.34 resource semantics
-  are not implemented here. No accepting operation calls this fragment.
+  An indexed reduction fragment is not an accepting WHNF/DefEq result.
+  It performs only supported beta/zeta/metadata, local/delta and already
+  constructor-headed projections. Quotient, recursor/iota, projection
+  of reducible structure values, native/Nat primitives, source checker
+  caches and exact Lean 4.34 checker fuel/error precedence remain external.
 
-  A successful result only means at least one supported syntactic rewrite
-  took place. It is NOT a normal-form or type-checking verdict. Returning
-  none means unchanged, unsupported, malformed, or exhausted: consumers
-  may not convert that into a positive checker judgment. The 'fuel' here
-  bounds this experimental fragment's iterations and indexed path walks;
-  it is NOT a replacement for the source checker reduction budget.
+  Every outcome carries an explicit reason why execution stopped, and
+  *every* reason requires the authoritative checker for judgments.
+  In particular, a missing rule, malformed store or exhausted fragment
+  budget is never interpreted as irreducibility, type correctness or DefEq.
 -/
+
+/-- Why the opt-in indexed fragment stopped. NONE is a kernel verdict. -/
+inductive PsKernelC0IndexedFragmentHalt where
+  | needsChecker
+  | budgetExhausted
+  | indexedUnavailable
+  | invalidRoot
+  | nonProgressCycle
+
+/-- A candidate intermediate syntax term, not a checked normal form. -/
+structure PsKernelC0IndexedFragmentOutcome where
+  store : PsKernelC0TermStore
+  id : Nat
+  progressed : Bool
+  halt : PsKernelC0IndexedFragmentHalt
+
+/-- Traverse only supported indexed syntax families with a separate
+    fragment budget. This is NOT the Lean 4.34 checker resource policy. -/
 def psKernelC0IndexedContextFragmentWithFuel
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (store : PsKernelC0TermStore)
     (id : Nat)
     (hadProgress : Bool) :
-    Option (PsKernelC0TermStore × Nat) :=
+    PsKernelC0IndexedFragmentOutcome :=
   match fuel with
-  | 0 => none
-  | remaining + 1 => do
-      let (syntacticStore, syntacticId) ←
-        psKernelC0IndexedWhnf fuel store id
-      -- All supported contextual rules use the same head-spine dispatch.
-      -- Unknown/unsupported rules remain non-authoritative and must not
-      -- be interpreted as an accepting WHNF/DefEq success.
-      let nextStep :=
-        psKernelC0IndexedReduceHeadOnce
-          context syntacticStore syntacticId
-      match nextStep with
-      | some (nextStore, nextId) =>
-          -- Malformed cyclic definitions cannot silently become success.
-          if nextId == syntacticId then
-            none
-          else
-            psKernelC0IndexedContextFragmentWithFuel remaining
-              context nextStore nextId true
+  | 0 =>
+      { store := store, id := id, progressed := hadProgress,
+        halt := .budgetExhausted }
+  | remaining + 1 =>
+      match psKernelC0StoreGet store id with
       | none =>
-          if hadProgress || syntacticId != id then
-            some (syntacticStore, syntacticId)
-          else
-            none
+          { store := store, id := id, progressed := hadProgress,
+            halt := .invalidRoot }
+      | some _ =>
+          match psKernelC0IndexedWhnf fuel store id with
+          | none =>
+              -- A failed indexed traversal can mean malformed descendants
+              -- or insufficient *fragment* recursion. Do not guess which,
+              -- and do not turn this into an accepting resource error.
+              { store := store, id := id, progressed := hadProgress,
+                halt := .indexedUnavailable }
+          | some (syntacticStore, syntacticId) =>
+              let progressed := hadProgress || syntacticId != id
+              match psKernelC0IndexedReduceHeadOnce
+                  context syntacticStore syntacticId with
+              | some (nextStore, nextId) =>
+                  if nextId == syntacticId then
+                    { store := syntacticStore, id := syntacticId,
+                      progressed := progressed, halt := .nonProgressCycle }
+                  else
+                    psKernelC0IndexedContextFragmentWithFuel remaining
+                      context nextStore nextId true
+              | none =>
+                  { store := syntacticStore, id := syntacticId,
+                    progressed := progressed, halt := .needsChecker }
 
-/-- Require an actual supported rewrite, never claim WHNF completeness. -/
+/-- Return an explicit diagnostic status; the authoritative source checker
+    must still run before accepting any typing, WHNF or DefEq judgment. -/
 def psKernelC0IndexedContextFragment
     (fuel : Nat)
     (context : PsKernelCheckerContext)
     (store : PsKernelC0TermStore)
     (id : Nat) :
-    Option (PsKernelC0TermStore × Nat) :=
-  psKernelC0IndexedContextFragmentWithFuel fuel context store id false
+    PsKernelC0IndexedFragmentOutcome :=
+  psKernelC0IndexedContextFragmentWithFuel
+    fuel context store id false

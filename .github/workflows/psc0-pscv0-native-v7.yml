@@ -143,6 +143,13 @@ jobs:
           wasm-tools validate ../dist/pscv0-native/modules/core.core.wasm
           .lake/build/bin/pscv0_native --emit-project-wasm ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/component ../v7-native/module-fixture/exports.json
           wasm-tools validate ../dist/pscv0-native/modules/component.wasm
+          # Exercise the module dependency graph in real Wasm engines, not
+          # merely in a binary validator. The generated Bool probe calls the
+          # existing App -> Facade -> Vault graph and privately linked seed.
+          .lake/build/bin/pscv0_native --check-project ../v7-native/module-fixture/project-wasm.json
+          .lake/build/bin/pscv0_native --emit-project-wasm-core ../v7-native/module-fixture/project-wasm.json ../dist/pscv0-native/modules/probe
+          .lake/build/bin/pscv0_native --emit-project-wasm ../v7-native/module-fixture/project-wasm.json ../dist/pscv0-native/modules/probe-component ../v7-native/module-fixture/wasm-exports.json
+          node ../scripts/pscv0-native-project-wasm.mjs ../dist/pscv0-native/modules/probe ../dist/pscv0-native/modules/probe-component | tee ../dist/pscv0-native/modules/wasm-runtime.log
       - name: Compile and run the small emitted application with pinned TypeScript
         run: |
           set -euo pipefail

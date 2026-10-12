@@ -1,0 +1,21 @@
+{
+  "entry": "WasmEntry",
+  "modules": [
+    {
+      "name": "WasmEntry",
+      "path": "WasmEntry.ps"
+    },
+    {
+      "name": "App",
+      "path": "App.ps"
+    },
+    {
+      "name": "Facade",
+      "path": "Facade.ps"
+    },
+    {
+      "name": "Vault",
+      "path": "Vault.ps"
+    }
+  ]
+}

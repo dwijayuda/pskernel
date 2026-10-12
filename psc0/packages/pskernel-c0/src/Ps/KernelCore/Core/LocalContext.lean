@@ -62,7 +62,7 @@ structure PsKernelLocalContext where
   nextIndex : Nat
   -- Optional persistent index. Small contexts remain list-only.
   -- The list remains the authoritative declaration order (shadowing).
-  index : Option (PsKernelC0HashTrie PsKernelLocalDecl) := Option.none
+  index : Option (Thunk (PsKernelC0HashTrie PsKernelLocalDecl)) := Option.none
   -- Newly bound locals after the last indexed snapshot, most recent first.
   -- Lookup checks this overlay first to preserve exact name shadowing.
   pending : List PsKernelLocalDecl := []
@@ -99,16 +99,20 @@ Adaptive local-context indexing.
 Short-lived binder contexts should not pay to build a radix-16 index.
 Measured complete admission workloads through depth 48 were slower with
 eager indexed updates; deep (512-local) repeated lookups benefit strongly.
-Matched full-checker benchmarks show one-shot local references at depth 96
-still do not amortize index construction, while repeated 512-local lookups
-benefit strongly. Use the ordered declaration list through depth 128 and
-build an immutable indexed snapshot at the 129th binder.
+A static binder-depth threshold alone cannot represent both one-shot
+local reads and heavily reused deep contexts. Keep only cheap thunks after
+depth 128; no radix nodes are materialized while bindings are added. After
+depth 256, a deep lookup can force the immutable snapshot at most once per
+persistent context. For moderate-depth lookups we use the authoritative
+ordered list without ever forcing a snapshot.
 
-Thereafter collect up to sixteen new declarations in an ordered overlay.
-Lookups first inspect the overlay and then the indexed snapshot. Once full,
-publish a new persistent index with all pending entries in original order.
-This amortizes expensive four-level radix path copies without changing
-lookup, shadowing, historical snapshots or the authoritative declaration list.
+Each group of sixteen later bindings is recorded in a newest-first pending
+overlay. Snapshot publication itself is deferred as a thunk that captures
+the previous immutable snapshot and a complete ordered pending batch.
+Lookups check pending before the snapshot, preserving shadowing even across
+previously published contexts. This avoids eager index maintenance for
+one-shot deeply nested checked declarations, without sacrificing persistent
+radix lookup where it can amortize construction.
 No cache value is ever used as proof of well-typedness.
 -/
 def psKernelC0LocalIndexThreshold : Nat := 128
@@ -143,7 +147,7 @@ def psKernelC0LocalIndexCommit
         (psKernelC0LocalIndexCommit index rest) decl
 
 structure PsKernelC0LocalIndexUpdate where
-  index : Option (PsKernelC0HashTrie PsKernelLocalDecl)
+  index : Option (Thunk (PsKernelC0HashTrie PsKernelLocalDecl))
   pending : List PsKernelLocalDecl
   pendingCount : Nat
 
@@ -156,7 +160,8 @@ def psKernelC0LocalContextNextIndex
       let pending := decl :: context.pending
       let count := context.pendingCount + 1
       if count >= psKernelC0LocalIndexBatchSize then
-        { index := some (psKernelC0LocalIndexCommit index pending)
+        { index := some (Thunk.mk (fun _ =>
+            psKernelC0LocalIndexCommit index.get pending))
           pending := []
           pendingCount := 0 }
       else
@@ -165,8 +170,8 @@ def psKernelC0LocalContextNextIndex
           pendingCount := count }
   | Option.none =>
       if context.decls.length >= psKernelC0LocalIndexThreshold then
-        { index := some
-            (psKernelC0LocalIndexBuild (decl :: context.decls))
+        { index := some (Thunk.mk (fun _ =>
+            psKernelC0LocalIndexBuild (decl :: context.decls)))
           pending := []
           pendingCount := 0 }
       else
@@ -174,19 +179,32 @@ def psKernelC0LocalContextNextIndex
           pending := []
           pendingCount := 0 }
 
+/-- Small/medium locals use exact ordered-list lookup. Thunk forcing is
+    allowed only for sufficiently deep contexts, where repeated lookups
+    amortize the construction of an immutable snapshot.
+
+    nextIndex is a performance heuristic, NOT a semantic proof of list
+    length; all branches use the exact same ordered declaration names and
+    therefore preserve shadowing even if a continuation has a larger
+    fresh-name counter than its local declaration count. -/
+def psKernelC0LocalIndexLookupThreshold : Nat := 256
+
 def psKernelLocalContextFind
     (context : PsKernelLocalContext)
     (name : PsKernelName) :
     Option PsKernelLocalDecl :=
-  match context.index with
-  | Option.none => psKernelLocalContextFindIn name context.decls
-  | Option.some index =>
-      match psKernelLocalContextFindIn name context.pending with
-      | Option.some decl => Option.some decl
-      | Option.none =>
-          psKernelLocalContextFindIn name
-            (psKernelC0TrieBucket psKernelC0IndexDepth index
-              (psKernelCacheNameHash name))
+  if context.nextIndex < psKernelC0LocalIndexLookupThreshold then
+    psKernelLocalContextFindIn name context.decls
+  else
+    match context.index with
+    | Option.none => psKernelLocalContextFindIn name context.decls
+    | Option.some snapshot =>
+        match psKernelLocalContextFindIn name context.pending with
+        | Option.some decl => Option.some decl
+        | Option.none =>
+            psKernelLocalContextFindIn name
+              (psKernelC0TrieBucket psKernelC0IndexDepth snapshot.get
+                (psKernelCacheNameHash name))
 
 def psKernelLocalContextAddLocal
     (context : PsKernelLocalContext)

@@ -151,3 +151,18 @@ Measure representative entire-module/library checking, cold/warm throughput, pea
 6. Continue independently through the plan without stopping for routine “continue” prompts.
 
 **Final acceptance criterion:** a measurably faster, correct Lean-native C0 checking pipeline for representative entire declarations/libraries, with realistic memory/resource behavior and no acceptance regressions. This criterion has **not** yet been met.
+
+
+
+## 9. Continuation: production-spine integration and whole-checker measurement (2026-10-12)
+
+Source changes on the **same** C0 branch:
+- `717dfeb89da66253ab9f42d5b5b0951d7dacd545`: delay argument-list materialization in real Lean-native delta unfolding and constructor projection until their matching environment decisions have passed. Neither uses indexed handles to decide acceptance.
+- `b290a8dde0482ab195ffc59bd4eabf74f745a50b`: native historical-oracle differential checks for matched/missing delta and projections. [CI 38194277302](https://github.com/dwijayuda/pskernel/actions/runs/38194277302) passed 84 Lake jobs, negative/differential checks and native microbenchmarks.
+- `cf0e3da4ee8ccf1870232316210110a9d02499f0`: native benchmark suite expanded with complete cold/warm inference, checked positive/negative declaration admission, and Linux process RSS reporting. [CI 38194545945](https://github.com/dwijayuda/pskernel/actions/runs/38194545945) passed build, checks, benchmark.
+- `7cf4c49748f87fb171339da61c6a80804a5b7eb6` and `e6e005541e78b38d70ec4ecc8f9d7177c50d2267`: added source-native direct application argument selection and wired constructor projection to it, avoiding allocation of a full application-argument list when choosing a single field.
+- `641b57aaf696da4da61b8aebddcff809d7a99be1` and `a96a4f1fd76432ddaeafcc64e035b6b426223f86`: added argument-selection differential tests across various arities and indices and paired 512-deep selector benchmarks.
+
+**Observed native CI evidence:** the initial eager/lazy delta case ran 193 ms vs 192 ms over 12,000 deep misses in [38194277302](https://github.com/dwijayuda/pskernel/actions/runs/38194277302). In [38194545945](https://github.com/dwijayuda/pskernel/actions/runs/38194545945), it ran 193 vs 183 ms on another hosted runner observation; do **not** claim a reliable improvement from this noise. Native inference (180 × lambda depth 24) measured 2 ms cold/7 ms warm; valid admission (120 declarations) 2 ms; invalid admissions (120) below timer resolution; cold WHNF (400 stuck terms) 26 ms. Peak Linux process VmHWM was 612868 kB (whole benchmark process, not per-kernel allocated bytes). These fixtures are too small and the observations too noisy for broader throughput, memory or warm-cache claims.
+
+**Critical outstanding gates:** obtain final native selector benchmark result; profile meaningful whole declarations and representative modules against unchanged original PSKernel-Core, with matched hardware and resource policy; integrate persistent indexed representation into session owned checking with provenance-safe cache keys, then extend the exact checked WHNF/DefEq/inference semantics. Do not treat the existing indexed fragment as an accepting kernel. No self-host or metatheory tests were run.

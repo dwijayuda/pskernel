@@ -246,28 +246,94 @@ def psElabDeriveInhabited (environment : PsEnvironment)
     | .error _ => pure ()
   throw (.data "Inhabited deriving requires a constructor with inhabitable fields")
 
+-- Checked finite-enumeration Boolean equality, lowered through the
+-- generated inductive recursor without new runtime primitives.
+-- This initial selected handler refuses parameterized or payload cases.
+def psElabDeriveEnumBEq (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
+  let some member := origin.members.find? (fun member =>
+    match member.role with
+    | .inductiveType | .structureType => true
+    | _ => false)
+    | throw (.data "deriving BEq requires a data declaration")
+  let some (.inductiveDecl info) := psEnvironmentFind environment member.name
+    | throw (.data "deriving BEq family missing")
+  if info.numParams != 0 || info.numIndices != 0 ||
+      !info.levelParams.isEmpty || info.constructors.isEmpty then
+    throw (.data "bounded BEq deriving requires a closed finite enumeration")
+  let .sortE level := info.type
+    | throw (.data "BEq deriving requires a Type 0 enumeration")
+  if !psLevelEquivalent level (.succ .zero) then
+    throw (.data "BEq deriving requires a Type 0 enumeration")
+  for constructorName in info.constructors do
+    let some constructor := psEnvironmentFindConstructor environment constructorName
+      | throw (.data "BEq deriving constructor missing")
+    if constructor.numParams != 0 || constructor.numFields != 0 ||
+        !constructor.levelParams.isEmpty then
+      throw (.data "bounded BEq deriving requires fieldless constructors")
+  let family := PsExpr.constE info.name []
+  let bool := PsExpr.constE psBoolName []
+  let recursor := PsExpr.constE (psNameAppendStr info.name "rec") [.succ .zero]
+  let rightMotive := psLogicLam 6 "_" family bool
+  let outerMotive := psLogicLam 7 "_" family
+    (psLogicPi 8 "right" family bool)
+  let outerBranches := (info.constructors.zipIdx).map fun (_, leftIndex) =>
+    let compareRight := (info.constructors.zipIdx).map fun (_, rightIndex) =>
+      if leftIndex == rightIndex then PsExpr.constE psBoolTrueName []
+      else PsExpr.constE psBoolFalseName []
+    psLogicLam 5 "right" family
+      (psLogicApply recursor ([rightMotive] ++ compareRight ++ [.fvar 5]))
+  let outer := psLogicApply recursor
+    ([outerMotive] ++ outerBranches ++ [.fvar 0])
+  let method := psLogicLam 0 "left" family
+    (psLogicLam 1 "right" family (.app outer (.fvar 1)))
+  let className := psRootName "BEq"
+  let dictionaryType := PsExpr.app (.constE className [.zero]) family
+  let value := psLogicApply (.constE (psNameAppendStr className "mk") [.zero])
+    [family, method]
+  return .definitionDecl (psNameAppendStr info.name "instBEq") []
+    dictionaryType value
+
+def psElabDeriveHandler (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin) (handler : PsSyntaxName) :
+    Except PsElabError PsDeclaration :=
+  match handler.segments with
+  | ["Inhabited"] => psElabDeriveInhabited environment origin
+  | ["BEq"] => psElabDeriveEnumBEq environment origin
+  | _ => .error (.data "deriving handler is selected but not yet implemented")
+
 def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration)
     (handlers : List PsSyntaxName) (isPrivate : Bool) :
     Except PsElabError PsCommandState := do
-  if handlers.map (·.segments) != [["Inhabited"]] then
-    throw (.data "deriving handler is allowlisted but not yet implemented")
   let next ← psElabCommandDeclaration state source none isPrivate
   let origin :: previous := next.originsRev
     | throw (.data "deriving lost source provenance")
-  let generated ← psElabDeriveInhabited next.environment origin
-  let name := psDeclarationName generated
-  let some added := psEnvironmentAdd next.environment generated
-    | throw (.duplicateDeclaration name)
-  let environment ← psElabRegisterInstance added name 1000
-  let member : PsElabMemberOrigin := {
-    index := origin.members.length
-    name
-    role := .derivedInstance }
+  -- Preserve handler source order. Generated definitions are inserted through
+  -- the same checked environment and registered like explicit instances.
+  let (environment, declarationsRev, members, privateNames) ← handlers.foldlM
+    (fun (acc : PsEnvironment × List PsDeclaration ×
+        List PsElabMemberOrigin × List PsName) handler => do
+      let (env, declarations, derivedMembers, privateNames) := acc
+      let generated ← psElabDeriveHandler env origin handler
+      let name := psDeclarationName generated
+      let some added := psEnvironmentAdd env generated
+        | throw (.duplicateDeclaration name)
+      let updated ← psElabRegisterInstance added name 1000
+      let member : PsElabMemberOrigin := {
+        index := origin.members.length + derivedMembers.length
+        name
+        role := .derivedInstance }
+      return (updated, generated :: declarations,
+        derivedMembers ++ [member],
+        if isPrivate then name :: privateNames else privateNames))
+    (next.environment, next.declarationsRev,
+      ([] : List PsElabMemberOrigin), next.privateNames)
   return { next with
     environment
-    declarationsRev := generated :: next.declarationsRev
-    originsRev := { origin with members := origin.members ++ [member] } :: previous
-    privateNames := if isPrivate then name :: next.privateNames else next.privateNames }
+    declarationsRev
+    originsRev := { origin with members := origin.members ++ members } :: previous
+    privateNames }
+
 
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do

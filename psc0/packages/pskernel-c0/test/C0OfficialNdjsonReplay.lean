@@ -12,7 +12,7 @@ input/unsupported errors, never as an accepted or rejected kernel judgment.
 
 This subset includes standard names and levels, sort/bvar/constant,
 applications, lambda/forall, let, projection and literal expressions,
-and ordinary definitions. It is intentionally not a general Lean exporter
+and sequentially checked ordinary definitions with dependencies. It is intentionally not a general Lean exporter
 frontend and does not silently drop mdata, FVar, MVar or inductive records.
 -/
 
@@ -20,7 +20,7 @@ structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
   levels : Array PsKernelLevel := #[.zero]
   exprs : Array PsKernelExpr := #[]
-  definition : Option PsKernelDefinitionInfo := none
+  definitions : List PsKernelDefinitionInfo := []
   header : Bool := false
 
 def c0JsonObj (j : Lean.Json) (key : String) : Except String Lean.Json :=
@@ -179,7 +179,6 @@ def c0ExportParseRecord
       throw "NDJSON exported by an unsupported Lean version or format"
     return { st with header := true }
   if !st.header then throw "NDJSON declaration preceded export metadata"
-  if st.definition.isSome then throw "multiple definitions or trailing data unsupported"
   if let .ok value := c0JsonObj j "in" then
     let idx ← value.getNat?
     if idx != st.names.size then throw "NDJSON name IDs not sequential"
@@ -217,31 +216,37 @@ def c0ExportParseRecord
       hints := hints
       safety := .safe
     }
-    return { st with definition := some definition }
+    return { st with definitions := definition :: st.definitions }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/
-def c0ExportReadSubset (input : String) : Except String PsKernelDefinitionInfo := do
+def c0ExportReadSubset (input : String) : Except String (List PsKernelDefinitionInfo) := do
   let mut tables : C0ExportTables := {}
   for line in input.splitOn "\n" do
     if line != "" then
       let record ← Lean.Json.parse line
       tables ← c0ExportParseRecord tables record
   if !tables.header then throw "NDJSON missing pinned metadata"
-  match tables.definition with
-  | some definition => pure definition
-  | none => throw "NDJSON missing a supported declaration"
+  match tables.definitions with
+  | [] => throw "NDJSON missing a supported declaration"
+  | definitions => pure definitions.reverse
 
-/-- Return a real *checked* acceptance or rejection, not an import result. -/
-def c0ExportCheckDefinition (info : PsKernelDefinitionInfo) :
-    Except String Bool :=
-  match psKernelAddDefinition 4096 psKernelEnvironmentEmpty info
-      4096 psKernelLeanNatMaxSizeDefault with
-  | .ok _ => .ok true
-  | .error message =>
-      match psKernelErrorFromMessage message with
-      | .rejectedInvalid _ => .ok false
-      | _ => .error ("C0 check did not yield a normal rejection: " ++ message)
+/-- Sequentially check exactly the declarations recovered from official
+    NDJSON bytes in their original order. A failed checked definition cannot
+    mutate the previously accepted environment, and unsupported input errors
+    remain distinct from legitimate kernel rejection. -/
+def c0ExportCheckDefinitions (infos : List PsKernelDefinitionInfo) :
+    Except String Bool := do
+  let mut env := psKernelEnvironmentEmpty
+  for info in infos do
+    match psKernelAddDefinition 4096 env info
+        4096 psKernelLeanNatMaxSizeDefault with
+    | .ok next => env := next
+    | .error message =>
+        match psKernelErrorFromMessage message with
+        | .rejectedInvalid _ => return false
+        | _ => throw ("C0 check did not yield a normal rejection: " ++ message)
+  return true
 
 def main : IO Unit := do
   let cases : List (String × Bool) := [
@@ -252,7 +257,11 @@ def main : IO Unit := do
     ("C0OfficialLetAccept.ndjson", true),
     ("C0OfficialLetReject.ndjson", false),
     ("C0OfficialUniverseAccept.ndjson", true),
-    ("C0OfficialUniverseReject.ndjson", false)
+    ("C0OfficialUniverseReject.ndjson", false),
+    ("C0OfficialAppAccept.ndjson", true),
+    ("C0OfficialAppReject.ndjson", false),
+    ("C0OfficialDependencyAccept.ndjson", true),
+    ("C0OfficialDependencyReject.ndjson", false)
   ]
   for item in cases do
     let path := "test/" ++ item.fst
@@ -260,8 +269,8 @@ def main : IO Unit := do
     match c0ExportReadSubset input with
     | .error message =>
         throw (IO.userError (path ++ ": " ++ message))
-    | .ok definition =>
-        match c0ExportCheckDefinition definition with
+    | .ok definitions =>
+        match c0ExportCheckDefinitions definitions with
         | .error message =>
             throw (IO.userError (path ++ ": " ++ message))
         | .ok accepted =>

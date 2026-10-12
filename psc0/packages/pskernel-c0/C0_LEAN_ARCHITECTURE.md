@@ -135,3 +135,37 @@ regressions in `C0_BENCHMARKS.md`.
 
 **Status:** performance architecture in progress; no complete indexed
 accepting kernel or whole-library superiority has been established.
+
+
+
+## Indexed loose de Bruijn range metadata — qualified experimental substrate
+
+The immutable source-owned canonical indexed store now retains three independent
+node metadata fields: `hash` (candidate index only), `depth` (bounded decoder
+and rewrite recursion) and `looseBVarRange` (maximum free de Bruijn index + 1).
+Every node is interned after its children; the range is computed from child
+metadata in O(1) per constructor. Lambda/Pi/let body ranges shift down one
+after binding; domains and let values remain at the parent depth.
+
+Indexed lifting skips subterms when `range <= start`. Indexed one-binder
+substitution at binder offset `offset` skips subterms when `range <= offset`.
+These shortcuts are exact for capture-avoiding substitution and preserve
+canonical IDs of unchanged subterms. The unoptimized indexed reference
+remains an executable differential oracle; positive/negative/metadata and
+multi-offset tests protect correctness.
+
+[CI 38239387122](https://github.com/dwijayuda/pskernel/actions/runs/38239387122)
+passed the native source build, all negative/differential checks, performance
+suite and matched original-core checks. On an isolated closed shared DAG,
+reference instantiation took 885 ms versus 1 ms for the memoized pruned route
+over 100 operations. This does **not** change the accepted checker or prove
+complete-kernel speedup. Metadata from an unvalidated external arena, raw
+handle equality across stores, and context-free indexed WHNF must **never**
+be accepted as checked conversion or declaration admission.
+
+A separate attempt to replace the recursive-source comparator with direct
+structural recursion measured slower and was rolled back. In current
+production, binder-aware substitution and demand-driven reduction remain
+the established accepting-path optimizations; the indexed range is a
+prerequisite for future zero-reconstruction evaluation, not permission to
+prematurely switch the trusted execution path.

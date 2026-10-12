@@ -1,61 +1,119 @@
-# PSKernel-C0 Lean-native performance architecture
+# PSKernel-C0 — Lean-native performance architecture
 
-This work is in `src/Ps/KernelCore/**/*.lean`, not the experimental Rust engine.
-The original `psc0/packages/pskernel-core` and PSC0 compiler are unchanged.
+**Scope:** `psc0/packages/pskernel-c0/src/Ps/KernelCore/**/*.lean` on
+`perf/pskernel-c0-v7-rust-20261012`.
+**Semantic target:** Lean 4.34.0. **Authoritative verdicts:** the existing
+PSKernel checker, not the experimental Rust engine or an incomplete indexed
+evaluator. The original `pskernel-core`, the PSC0 compiler, and the Rust backend
+are not modified in this workstream.
 
-## Radix-16 cache index
+## Architecture and invariants
 
-`Runtime/Acceleration/Cache.lean` now implements a single generic, persistent, array-backed radix-16 trie used by both the expression-result map and expression-pair equality sets. The prior implementation duplicated a radix-2 binary trie for both uses.
+The accepting checker still uses recursive `PsKernelExpr` throughout its
+resource-bounded WHNF, DefEq, inference, projection/recursor reduction and
+declaration-admission operations. Its environment lookup, local-context
+shadowing, universe levels, proof irrelevance, native primitives and rejection
+behavior remain authoritative. An optimization must never interpret a cache
+miss, unsupported reduction or depleted fuel as a successful check.
 
-- The bounded 16-bit C0 expression hash is split into four nibbles, so the lookup path uses four levels rather than sixteen.
-- The small-cache list path remains in place (up to eight entries).
-- Hash collisions are always resolved by the existing `psKernelExprEq` / `psKernelExprPairEq`. Hash equality is not proof of definitional equality.
-- The semantic cache APIs and accepting kernel operation are unchanged.
-- The radix trie is a structural performance experiment, not a measured improvement yet. Benchmark native Lean workloads before making speedup claims.
+The current native architecture has three distinct layers:
 
-A standalone C0 `lakefile.lean` and a focused GitHub Actions build validate the native Lean semantic closure without running any self-host/compiler/bootstrap checks.
+1. **Checked operations:** `Checker/Knot.lean` owns recursive orchestration;
+   `Checker/Inference/Core.lean` and `Checker/Reduction/{Whnf,WhnfCore}.lean`
+   preserve the checked semantics. C0's demand-driven stuck-application head,
+   pre-guarded DefEq quick checks, family-aware single-variable substitution,
+   and once-per-spine infer-only arity calculation reduce specific repeated work.
+2. **Persistent acceleration:** `Runtime/Acceleration/Cache.lean` uses
+   collision-checked radix-16 expression/pair indexes. The global declaration
+   index and the local declaration index are separate, and are not a
+   substitute for exact name or expression comparisons.
+3. **Opt-in canonical DAG:** `Core/{IndexedExpr,IndexedReduction}.lean` and
+   `Checker/Reduction/IndexedWhnf.lean` implement exact term sharing, capture-
+   avoiding indexed substitution and a context-free WHNF fragment.
+   `Checker/IndexedSession.lean` can retain syntax across session operations
+   without exposing raw arena IDs. It still delegates **all acceptance
+   decisions** to the recursive checker, and is slower on the measured small
+   warm-WHNF workload. Do not enable it in production on present evidence.
 
-## Next architectural steps
+### Local-context cost model
 
-- Remove redundant substitution prepasses for actual beta/zeta hot paths.
-- Reduce repeated full-term hashing with a stronger shared metadata representation or context-scoped indexed terms.
-- Measure cache loads, cold/warm WHNF/DefEq, allocation and peak RSS against the copied original kernel.
-- Build toward a compact Lean-authored term DAG/handle execution representation only with a lossless bridge and semantic qualification.
+`Core/LocalContext.lean` keeps the ordered declaration list authoritative.
+Short-lived binder contexts use direct list lookup and do not maintain a trie.
+Deep contexts may build an immutable radix snapshot and collect later bindings
+in a small, newest-first pending overlay. Lookup checks pending entries before
+the snapshot, preserving correct shadowing. Publication adds older pending
+entries first, so the newest exact-name match wins. Old context snapshots
+remain immutable; `nextIndex` continues to determine fresh-name identity.
 
-Metatheory and consistency proofs are not part of the performance sprint; no change may cause false acceptance of malformed terms.
+The former eager promotion after eight local declarations was measured to
+regress complete checked admission. Isolated diagnostic builds showed that
+suppressing the optional local index recovered the time without changing
+accept/reject outcomes. Deferred promotion and batch publication recovered
+near parity on a 160-declaration library chain while maintaining a substantial
+512-local lookup advantage. See
+[CI 38233818758](https://github.com/dwijayuda/pskernel/actions/runs/38233818758)
+and `C0_BENCHMARKS.md`.
 
+**Current candidate:** defer promotion through 128 declarations, with a
+16-entry pending overlay once indexed. A checked 96-binder benchmark with
+actual local references exposed roughly 10% overhead when promotion began at
+depth 65; a matched 192-binder comparison has been added to confirm that
+deep lookup still justifies index construction. Until the latest CI finishes,
+this 128-entry policy is **under qualification**, not a proved global optimum.
+Threshold is a performance policy, never a semantic condition.
 
+### Substitution cost model
 
-## Adaptive local binder contexts — measured write/read separation
+A controlled full-checker ablation showed that the original general-purpose
+`instantiate1` removed an observed checked-application slowdown, despite
+synthetic C0 substitution microbenchmarks favoring one-pass traversal.
+The accepted hybrid now probes loose variables for binder-headed
+lambda/forall/let expressions and returns closed terms unchanged. Other
+expression families retain the specialized capture-avoiding one-pass worker.
+On the admitted 48-argument application benchmark, this restored fully
+checked time to parity while keeping the infer-only gain.
+See [CI 38222841665](https://github.com/dwijayuda/pskernel/actions/runs/38222841665).
 
-The generic radix trie remains useful for repeated **deep** lookups but is
-too expensive to maintain at every binder extension in short-lived contexts.
-End-to-end native controlled ablations established that eager indexing at the
-ninth binder caused a checked definition-admission slowdown; merely moving
-the threshold to 32 left depth-48 regression visible.
+## Measurement and release gates
 
-The Lean-native local-context representation is now:
+The repository-owned native CI does **not** run self-host, bootstrap/fixed-point,
+generated Rust or metatheory tests. It performs:
 
-- An authoritative persistent `decls` list and monotonically growing
-  `nextIndex` used for local identities and observable ordering.
-- For contexts of up to 64 declarations, direct ordered-list lookup only.
-- Beyond that, an immutable `index` snapshot plus `pending` recent
-  declarations and `pendingCount` (strictly below 16).
-- Lookup checks `pending` newest-first, then structurally checks the radix
-  bucket. The 16th new pending binder publishes a new index with oldest-first
-  insertion; persistent older scopes keep their exact old snapshot.
+- Full native Lake build, resource/soundness-sensitive negative and differential
+  conformance tests, and native Lean microbenchmarks.
+- Matched complete-checker tests against the **unchanged original
+  `pskernel-core/src`**, built in a temporary package on the same runner with
+  Lean 4.34.0. Checked workloads include WHNF, positive/negative DefEq,
+  infer-only and fully checked applications, nested definitions and growing
+  declaration environments. These are still generated fixtures, not qualified
+  full Lean libraries.
+- Optional private source-family ablations which change **only** the copied
+  diagnostic package, never the original core. A diagnostic is not adopted
+  merely because an isolated helper microbenchmark is favorable.
 
-The index is **never** trusted as a typing/equality verdict. Snapshot
-publication and collision handling do not alter acceptance, resource/fuel
-exhaustion, local name shadowing, or fresh-name numbering. Explicit ordinary
-and mutual inductive continuation constructors preserve all three
-index-related fields. Native differential tests compare lookup and shadowing
-with the authoritative list around promotion and batching boundaries.
+Record source commit, exact CI run, workload, elapsed time, failed as well as
+passed cases, and process-wide peak RSS separately from isolated allocations.
+Interpret sub-millisecond/integer-millisecond samples cautiously and preserve
+regressions in `C0_BENCHMARKS.md`.
 
-The actual checked 16-/48-binder declaration benchmark recovered parity
-with original PSKernel-Core after this redesign. 512-local repeated lookups
-retain a large measured advantage relative to linear scanning at the cost of
-more expensive index construction. See `C0_BENCHMARKS.md` for exact CI
-numbers and limitations. The canonical indexed expression arena is **still
-not** used for full accepting evaluation; that separate architecture gate
-remains unfinished.
+## Remaining architectural milestones
+
+1. Quantify representative complete-module/library checking, cold and warm
+   effects, allocation/peak memory, stack/fuel behavior and p50/p95 throughput
+   across unchanged original and C0 builds.
+2. Make canonical term ownership and environment/context provenance explicit
+   within the **real** checker so that indexed WHNF, DefEq and inference can
+   avoid round-trip reconstruction. No handle from another arena can be a
+   trusted equality assertion; no cache result may cross environment/local
+   scopes or forget resource costs.
+3. Complete context- and environment-dependent indexed reduction families
+   (delta, projections, recursors/iota, primitives, quotient, universes) with
+   identical reduction priority, checked inference and exhaustion behavior.
+4. Optimize full declaration admission and restored recursor/nested-inductive
+   validation without shortcutting obligations.
+5. Promote a new accepting execution path only after extensive positive,
+   negative, resource-budget and original-kernel differential qualification,
+   with **measurable** end-to-end performance and memory benefits.
+
+**Status:** performance architecture in progress; no complete indexed
+accepting kernel or whole-library superiority has been established.

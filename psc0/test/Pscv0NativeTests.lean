@@ -852,8 +852,14 @@ private def doBoundaries : IO Unit := do
 -- Reuse the production graph planner and checked environment, rather than
 -- introducing a separate project interpreter or a large fixture suite.
 private def projectBoundaries : IO Unit := do
-  let _ ← get "pinned Standard structural registry"
+  let _ ← get "pinned Standard declaration and instance registry"
     (psStandardInhabitedAudit psSelfHostProdPreludeEnvironment)
+  let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
+    (.definitionDecl
+      (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []
+      (.constE psBoolName []) (.constE psBoolTrueName []))
+  if (psStandardInhabitedAudit badStandard).isOk then
+    throw (IO.userError "Standard registry admitted a same-name type/body drift")
   let library : PsPscv0ModuleSource := {
     name := "Library"
     source := "namespace Library\nfunction double(value: Nat): Nat := Nat.add(value, value)\nend Library\n" }

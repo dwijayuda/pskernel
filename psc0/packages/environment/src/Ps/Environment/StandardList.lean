@@ -251,15 +251,82 @@ def psStandardListExtend (environment : PsEnvironment) : PsEnvironment :=
 -- Fail closed when the selected Standard declaration/instance registry drifts.
 -- This is a portable structural inventory gate, not yet the final pinned
 -- RC4 content digest or proof/effect/axiom closure certification.
+-- A Standard name alone is not sufficient assurance: a former checked
+-- definition replaced by an axiom, or a changed type/body, must be detected
+-- before the prepared graph reaches proof checking and executable erasure.
+def psStandardSameDeclarationKind (left right : PsDeclaration) : Bool :=
+  match left, right with
+  | .axiomDecl .., .axiomDecl .. => true
+  | .definitionDecl .., .definitionDecl .. => true
+  | .theoremDecl .., .theoremDecl .. => true
+  | .partialDecl .., .partialDecl .. => true
+  | .opaqueDecl .., .opaqueDecl .. => true
+  | .inductiveDecl .., .inductiveDecl .. => true
+  | .constructorDecl .., .constructorDecl .. => true
+  | .recursorDecl .., .recursorDecl .. => true
+  | _, _ => false
+
+def psStandardNamesEqual (left right : List PsName) : Bool :=
+  left.length == right.length &&
+    (left.zip right).all (fun pair => psNameEq pair.fst pair.snd)
+
+def psStandardSameDeclarationMetadata (expected actual : PsDeclaration) : Bool :=
+  match expected, actual with
+  | .inductiveDecl a, .inductiveDecl b =>
+      a.numParams == b.numParams && a.numIndices == b.numIndices &&
+      a.isStructure == b.isStructure &&
+      psStandardNamesEqual a.constructors b.constructors
+  | .constructorDecl a, .constructorDecl b =>
+      a.numParams == b.numParams && a.numFields == b.numFields &&
+      a.constructorIndex == b.constructorIndex &&
+      a.recursiveFields == b.recursiveFields &&
+      psNameEq a.inductiveName b.inductiveName
+  | .recursorDecl a, .recursorDecl b =>
+      a.numParams == b.numParams && a.numIndices == b.numIndices &&
+      a.numMotives == b.numMotives && a.numMinors == b.numMinors &&
+      psStandardNamesEqual a.inductiveNames b.inductiveNames
+  | _, _ => true
+
+def psStandardAuditDeclaration (environment : PsEnvironment)
+    (expected : PsDeclaration) : Except String Unit := do
+  let name := psDeclarationName expected
+  let some actual := psEnvironmentFind environment name
+    | throw ("PSCV0-STANDARD: missing declaration " ++ psNameToString name)
+  if !psStandardSameDeclarationKind expected actual then
+    throw ("PSCV0-STANDARD: declaration kind drift " ++ psNameToString name)
+  if !psStandardNamesEqual (psDeclarationLevelParams expected)
+      (psDeclarationLevelParams actual) ||
+      !psExprAlphaEq (psDeclarationType expected) (psDeclarationType actual) ||
+      !psStandardSameDeclarationMetadata expected actual then
+    throw ("PSCV0-STANDARD: signature drift " ++ psNameToString name)
+  let valueEqual := match psDeclarationValue expected, psDeclarationValue actual with
+    | some a, some b => psExprAlphaEq a b
+    | none, none => true
+    | _, _ => false
+  if !valueEqual then
+    throw ("PSCV0-STANDARD: checked body drift " ++ psNameToString name)
+
+def psStandardAuditInstance (environment : PsEnvironment)
+    (expected : PsDeclaration) : Except String Unit := do
+  let name := psDeclarationName expected
+  let registrations := environment.instances.entries.filter (fun entry =>
+    match entry.value with
+    | .constE actual _ => psNameEq actual name
+    | _ => false)
+  let [actual] := registrations
+    | throw ("PSCV0-STANDARD: missing or duplicate instance " ++ psNameToString name)
+  if actual.priority != 1000 ||
+      !psExprAlphaEq actual.type (psDeclarationType expected) then
+    throw ("PSCV0-STANDARD: instance signature/priority drift " ++ psNameToString name)
+
 def psStandardRegistryAudit (environment : PsEnvironment) : Except String Unit := do
   let names := psStandardPreludeDeclarationsWithList.map psDeclarationName
   let distinct := names.foldl (fun acc name =>
     if acc.any (psNameEq name) then acc else name :: acc) ([] : List PsName)
   if distinct.length != names.length then
     throw "PSCV0-STANDARD: duplicate declaration identity"
-  for name in names do
-    if !psEnvironmentContains environment name then
-      throw ("PSCV0-STANDARD: missing declaration " ++ psNameToString name)
+  for declaration in psStandardPreludeDeclarationsWithList do
+    psStandardAuditDeclaration environment declaration
   let classes := (psStandardBinarySpecs.map fun spec =>
     psRootName spec.className) ++
     [psRootName "Neg", psRootName "BEq", psRootName "ToString"]
@@ -275,6 +342,8 @@ def psStandardRegistryAudit (environment : PsEnvironment) : Except String Unit :
     psStandardToStringInstances
   let instanceNames := instances.map psDeclarationName ++
     [psNameAppendStr (psRootName "PsStandard") "instNegInt"]
+  for declaration in instances do
+    psStandardAuditInstance environment declaration
   for name in instanceNames do
     unless environment.instances.entries.any (fun entry =>
         match entry.value with

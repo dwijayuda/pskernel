@@ -108,13 +108,8 @@ def psStandardInhabitedExtend (environment : PsEnvironment) : PsEnvironment :=
 def psStandardInhabitedAudit (environment : PsEnvironment) : Except String Unit := do
   psStandardRegistryAudit environment
   for declaration in psStandardInhabitedDeclarations do
-    if !psEnvironmentContains environment (psDeclarationName declaration) then
-      throw "PSCV0-STANDARD: missing Inhabited declaration"
+    psStandardAuditDeclaration environment declaration
   if !environment.classes.any (psNameEq (psRootName "Inhabited")) then
     throw "PSCV0-STANDARD: missing Inhabited class registration"
   for declaration in psStandardInhabitedInstances do
-    unless environment.instances.entries.any (fun entry =>
-      match entry.value with
-      | .constE name _ => psNameEq name (psDeclarationName declaration)
-      | _ => false) do
-      throw "PSCV0-STANDARD: missing Inhabited instance"
+    psStandardAuditInstance environment declaration

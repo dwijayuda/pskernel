@@ -50,13 +50,6 @@ def psScopeHasGlobal (resolver : PsScopeResolver) (segments : List String) : Boo
   resolver.selfName == some segments ||
     psEnvironmentContains resolver.environment (psSyntaxNameAppendSegments segments .anonymous)
 
--- A qualified global may be followed by projections. Match the longest namePrefix
--- through the environment index, using the same rule as term elaboration.
-def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bool :=
-  (psScopePrefixes segments).any fun namePrefix =>
-    !namePrefix.isEmpty && (psScopeHasGlobal resolver namePrefix ||
-      (psScopeExportedRewrite resolver namePrefix).isSome)
-
 def psScopeExportedRewrite (resolver : PsScopeResolver)
     (segments : List String) : Option (List String) := do
   let requested := psSyntaxNameAppendSegments segments .anonymous
@@ -67,6 +60,13 @@ def psScopeExportedRewrite (resolver : PsScopeResolver)
     let alias ← resolver.environment.exportedAliases.find? (fun entry =>
       psNameEq entry.fst requested)
     return (psNameToString alias.snd).splitOn "."
+
+-- A qualified global may be followed by projections. Match the longest namePrefix
+-- through the environment index, using the same rule as term elaboration.
+def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bool :=
+  (psScopePrefixes segments).any fun namePrefix =>
+    !namePrefix.isEmpty && (psScopeHasGlobal resolver namePrefix ||
+      (psScopeExportedRewrite resolver namePrefix).isSome)
 
 -- Resolve the longest private prefix first. This also preserves projection
 -- suffixes on a private structure and recursive references to its members.

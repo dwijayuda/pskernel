@@ -58,14 +58,16 @@ def main : IO Unit := do
       -- equality now detects both incorrect bucket memberships.
       let bucket := psKernelC0TermTrieBucket psKernelC0IndexDepth
         store.index root.hash
+      let forgedIndex := psKernelC0TermTrieReplace
+        psKernelC0IndexDepth store.index root.hash
+        ((store.nodes.size + 3) :: bucket)
+      let repeatedIndex := psKernelC0TermTrieReplace
+        psKernelC0IndexDepth store.index root.hash
+        (id :: bucket)
       let forged : PsKernelC0TermStore :=
-        { store with index := psKernelC0TermTrieReplace
-            psKernelC0IndexDepth store.index root.hash
-            ((store.nodes.size + 3) :: bucket) }
+        { store with index := forgedIndex }
       let repeatedId : PsKernelC0TermStore :=
-        { store with index := psKernelC0TermTrieReplace
-            psKernelC0IndexDepth store.index root.hash
-            (id :: bucket) }
+        { store with index := repeatedIndex }
       let malformed := [
         corruptHash, corruptCheckerHash, corruptDepth, corruptRange,
         missingIndex, duplicate, cycle, dangling, forged, repeatedId

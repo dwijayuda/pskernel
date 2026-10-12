@@ -34,6 +34,35 @@ def psPscv0ReadAscription (read : PsPscv0TermReader)
       (psSyntaxSpanJoin (psSyntaxTermSpan value.value) (psSyntaxTermSpan type.value))
     cursor := type.cursor }
 
+-- Tuple values share the same right-nested Prod meaning as tuple patterns.
+-- One comma introduces a tuple; a trailing comma is allowed only after
+-- at least two terms. The type/application elaborator supplies implicit
+-- Prod.mk type arguments instead of inventing a second tuple type system.
+def psPscv0TupleConstruct (span : PsSourceSpan) :
+    List PsSyntaxTerm → Except PsParseError PsSyntaxTerm
+  | first :: second :: rest => do
+    let right ← if rest.isEmpty then pure second
+      else psPscv0TupleConstruct span (second :: rest)
+    return .call (.reference (PsSyntaxName.mk ["_root_", "Prod", "mk"] span))
+      [(none, first), (none, right)] span
+  | _ => throw (.unexpectedEnd "tuple requires at least two elements")
+
+def psPscv0TupleElements (read : PsPscv0TermReader) (fuel : Nat)
+    (cursor : PsTokenCursor) (elementsRev : List PsSyntaxTerm) :
+    Except PsParseError (PsParseResult (List PsSyntaxTerm)) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if psTokenCursorAtText cursor ")" then
+      return { value := elementsRev.reverse, cursor }
+    let next ← read cursor
+    let elementsRev := next.value :: elementsRev
+    if psTokenCursorAtText next.cursor "," then
+      let comma ← psTokenCursorExpectText next.cursor ","
+      psPscv0TupleElements read fuel comma.cursor elementsRev
+    else
+      return { value := elementsRev.reverse, cursor := next.cursor }
+
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   if psTokenCursorAtText cursor "{" then return ← psPscv0ReadRecord read cursor
@@ -49,6 +78,13 @@ def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     return ← psParseProofScriptPrimary read cursor
   let inner ← read opening.cursor
   let annotated ← psPscv0ReadAscription read inner
+  if psTokenCursorAtText annotated.cursor "," then
+    let comma ← psTokenCursorExpectText annotated.cursor ","
+    let elements ← psPscv0TupleElements read (cursor.remaining.length + 1)
+      comma.cursor [annotated.value]
+    let close ← psTokenCursorExpectText elements.cursor ")"
+    let span := psSyntaxSpanJoin opening.token.span close.token.span
+    return { value := ← psPscv0TupleConstruct span elements.value, cursor := close.cursor }
   let close ← psTokenCursorExpectText annotated.cursor ")"
   return {
     value := psProofScriptTermWithSpan annotated.value

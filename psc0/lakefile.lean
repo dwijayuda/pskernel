@@ -230,6 +230,7 @@ lean_lib PsElab where
     `Ps.Elab.Data,
     `Ps.Elab.Declaration,
     `Ps.Elab.Class,
+    `Ps.Elab.Deriving,
     `Ps.Elab.Scope,
     `Ps.Elab.Command
   ]

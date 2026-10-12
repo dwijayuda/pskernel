@@ -7,18 +7,20 @@ import Ps.Environment.SelfHostPrelude
 structure PsStandardBinarySpec where
   className : String
   fieldName : String
-  natMethod : PsName
+  natMethod : Option PsName := none
   intMethod : Option PsName := none
+  stringMethod : Option PsName := none
 
 def psStandardBinarySpecs : List PsStandardBinarySpec :=
-  [ { className := "HAdd", fieldName := "hAdd", natMethod := psNatAddName,
+  [ { className := "HAdd", fieldName := "hAdd", natMethod := some psNatAddName,
       intMethod := some psIntAddName },
-    { className := "HSub", fieldName := "hSub", natMethod := psNatSubName,
+    { className := "HSub", fieldName := "hSub", natMethod := some psNatSubName,
       intMethod := some psIntSubName },
-    { className := "HMul", fieldName := "hMul", natMethod := psNatMulName,
+    { className := "HMul", fieldName := "hMul", natMethod := some psNatMulName,
       intMethod := some psIntMulName },
-    { className := "HDiv", fieldName := "hDiv", natMethod := psNatDivName },
-    { className := "HMod", fieldName := "hMod", natMethod := psNatModName } ]
+    { className := "HDiv", fieldName := "hDiv", natMethod := some psNatDivName },
+    { className := "HMod", fieldName := "hMod", natMethod := some psNatModName },
+    { className := "HAppend", fieldName := "hAppend", stringMethod := some psStringAppendName } ]
 
 def psStandardBinaryClass (spec : PsStandardBinarySpec) : List PsDeclaration :=
   let name := psRootName spec.className
@@ -73,8 +75,9 @@ def psStandardBinaryInstance (spec : PsStandardBinarySpec)
 def psStandardBinaryDeclarations : List PsDeclaration :=
   psStandardBinarySpecs.flatMap fun spec =>
     psStandardBinaryClass spec ++
-    [psStandardBinaryInstance spec psNatName spec.natMethod] ++
-    spec.intMethod.toList.map (psStandardBinaryInstance spec psIntName)
+    spec.natMethod.toList.map (psStandardBinaryInstance spec psNatName) ++
+    spec.intMethod.toList.map (psStandardBinaryInstance spec psIntName) ++
+    spec.stringMethod.toList.map (psStandardBinaryInstance spec psStringName)
 
 def psStandardBinaryExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardBinaryDeclarations.foldl
@@ -90,10 +93,15 @@ def psStandardBinaryExtend (environment : PsEnvironment) : PsEnvironment :=
         value := .constE (psDeclarationName declaration) []
         type := psDeclarationType declaration
         className := some className }
-    let idx := add idx psNatName spec.natMethod
-    match spec.intMethod with
+    let idx := match spec.natMethod with
+      | none => idx
+      | some natMethod => add idx psNatName natMethod
+    let idx := match spec.intMethod with
+      | none => idx
+      | some intMethod => add idx psIntName intMethod
+    match spec.stringMethod with
     | none => idx
-    | some intMethod => add idx psIntName intMethod) environment.instances
+    | some stringMethod => add idx psStringName stringMethod) environment.instances
   { environment with
     classes := names ++ environment.classes
     classParameters := classParameters ++ environment.classParameters

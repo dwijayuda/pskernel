@@ -33,6 +33,8 @@ def psPscv0InfixInfo : String → Option PsPscv0Infix
   | "::" => some { kind := .constant "List.cons", precedence := 67, rightPrecedence := 67 }
   -- Pinned Lean RC4 Init/Notation.lean: infixl:65 "+" => HAdd.hAdd.
   | "+" => some { kind := .constant "HAdd.hAdd", precedence := 65, rightPrecedence := 66 }
+  -- Lean RC4 Init/Notation.lean infixl:65 "++" => HAppend.hAppend.
+  | "++" => some { kind := .constant "HAppend.hAppend", precedence := 65, rightPrecedence := 66 }
   | "-" => some { kind := .constant "HSub.hSub", precedence := 65, rightPrecedence := 66 }
   -- Lean 4.35.0-rc4 Init/Notation: infixl:70 for *, / and %.
   | "*" => some { kind := .constant "HMul.hMul", precedence := 70, rightPrecedence := 71 }

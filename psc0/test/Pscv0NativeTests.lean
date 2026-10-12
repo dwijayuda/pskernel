@@ -50,6 +50,9 @@ private def application : String :=
   "}\n" ++
   "const listConsSecond: Nat := secondInList(1 :: 2 :: [])\n" ++
   "const listConsSingle: Nat := secondInList(3 :: [])\n" ++
+  "const appendSimple: Bool := if (\"left\" ++ \"right\" = \"leftright\") { true } else { false }\n" ++
+  "const appendUnicode: Bool := if (\"🍋\" ++ \"é\" = \"🍋é\") { true } else { false }\n" ++
+  "const appendGrouped: Bool := if ((\"A\" ++ \"B\") ++ \"C\" = \"ABC\") { true } else { false }\n" ++
   "const equalityTrue: Bool := 3 + 4 == 7\n" ++
   "const equalityFalse: Bool := 3 * 4 == 11\n" ++
   "const inequalityTrue: Bool := 4 * 5 != 21\n" ++

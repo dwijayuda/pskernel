@@ -66,6 +66,25 @@ def psPscv0ProjectOrder : Nat → List PsPscv0ParsedModule →
           (pending.filter (fun item => item.name != ready.name))
           (ready :: doneRev)
 
+-- Keep global manifest validation, but compile and link only the transitive
+-- dependency closure of the chosen executable entry. Otherwise unrelated
+-- source declarations could collide or enter a checked runtime graph.
+def psPscv0ProjectReachable (fuel : Nat) (modules : List PsPscv0ParsedModule)
+    (pending visited : List String) : Except String (List String) := do
+  match fuel with
+  | 0 => throw "PSCV0-MODULE: reachability budget"
+  | fuel + 1 =>
+    match pending with
+    | [] => return visited
+    | current :: rest =>
+      if visited.contains current then
+        psPscv0ProjectReachable fuel modules rest visited
+      else
+        let some selected := modules.find? (fun entry => entry.name == current)
+          | throw ("PSCV0-MODULE: missing dependency " ++ current)
+        let imports := selected.program.imports.map psPscv0ImportKey
+        psPscv0ProjectReachable fuel modules (imports ++ rest) (current :: visited)
+
 -- The imported view carries checked declaration identities and typeclass
 -- registrations, but not definitional bodies. Ordinary public names are
 -- externally opaque in Lean RC4 module-style semantics by default.
@@ -189,7 +208,10 @@ def psCompilerPreparePscv0Project (entryName : String)
   let parsed ← psPscv0ProjectParse sources
   if !parsed.any (fun item => item.name == entryName) then
     throw ("PSCV0-MODULE: unknown entry " ++ entryName)
-  let order ← psPscv0ProjectOrder (parsed.length + 1) parsed []
+  let budget := parsed.foldl (fun total item => total + item.program.imports.length + 1) 1
+  let reachable ← psPscv0ProjectReachable budget parsed [entryName] []
+  let active := parsed.filter (fun item => reachable.contains item.name)
+  let order ← psPscv0ProjectOrder (active.length + 1) active []
   let mut built : List PsPscv0BuiltModule := []
   let mut declarations : List PsDeclaration := []
   let mut globalNames : List PsName := []

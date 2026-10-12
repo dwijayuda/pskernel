@@ -859,6 +859,13 @@ private def projectBoundaries : IO Unit := do
   let ordered ← get "dependency ordering" (psPscv0ProjectOrder 3 parsed [])
   unless ordered.map (·.name) == ["Library", "Direct"] do
     throw (IO.userError "module graph dependency order")
+  let unused : PsPscv0ModuleSource := {
+    name := "Unused", source := "const answer: Nat := 99\n" }
+  let trimmed ← get "entry dependency closure"
+    (psCompilerPreparePscv0Project "Direct" [unused, direct, library])
+  unless trimmed.origins.length == 2 &&
+      !trimmed.origins.any (fun origin => origin.moduleName == "Unused") do
+    throw (IO.userError "unreachable module entered compiled project closure")
   let prepared ← get "checked public imports"
     (psCompilerPreparePscv0Project "Client" [client, facade, library])
   unless prepared.mainNames.any (fun n => psNameToString n == "answer") &&

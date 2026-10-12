@@ -136,3 +136,13 @@ The first [native Lean workflow 38191236078](https://github.com/dwijayuda/pskern
 - The original `psc0/packages/pskernel-core` and `psc0/packages/backend-rust` remain untouched; C0 does not emit independent Rust artifacts or run self-host validation in this workflow.
 
 **Next major architectural step:** reduce recursive syntax↔indexed conversion overhead, introduce owned handle identities within the checker session with context-sensitive cache provenance, and compare complete WHNF/DefEq/checking workloads against the original kernel before promoting indexed execution to the accepting path. Preserve negative-conformance and resource-exhaustion checks.
+
+
+
+## Lean-native continuation checkpoint — 2026-10-12
+
+Production `Checker/Context.lean` delta/projection helpers now defer allocating application argument spines until meaningful unfold/constructor decisions; `Core/Expr.lean` adds a direct position-from-head selector used by constructor projection, reducing intermediate list pressure for single field lookup. Differential tests retain the exact pre-change implementations as independent regression oracles, and test direct selection across arities and out-of-range indices. Changes in `717dfeb8`, `e6e00554`, `641b57aa`; paired benchmark commit `a96a4f1f`.
+
+Completed native CI [38194277302](https://github.com/dwijayuda/pskernel/actions/runs/38194277302) (full build/test/benchmark), and [38194545945](https://github.com/dwijayuda/pskernel/actions/runs/38194545945) (full build/test/expanded inference and admission benchmark). Lazy delta measurements were near parity, **not a proven speedup**. Full inference 180× and admission 120× elapsed 0–7ms in simple fixtures; too short for production claims. Full benchmark-process peak RSS 612868 kB cannot be assigned to checker alone.
+
+The direct selector's dedicated differential/benchmark run is being qualified; no hypothetical gains have been recorded. Remaining major milestone is persistent provenance-safe session-owned indexed storage and accepting WHNF/DefEq/inference/admission with robust complete-workload baseline and memory measurements. No self-host, bootstrap or metatheory activities in this checkpoint.

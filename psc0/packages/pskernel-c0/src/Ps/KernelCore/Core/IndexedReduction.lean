@@ -126,7 +126,7 @@ def psKernelC0Instantiate1IndexedWithFuel
   Substitution over same-store handles; result is *not* a checked proof term.
   It remains the caller's job to compare against the normal kernel semantics.
 -/
-def psKernelC0Instantiate1Indexed
+def psKernelC0Instantiate1IndexedReference
     (store : PsKernelC0TermStore)
     (id replacement : Nat) :
     Option (Prod PsKernelC0TermStore Nat) := do
@@ -143,3 +143,143 @@ def psKernelC0IndexedBetaStep
   match entry.node with
   | .lam _ _ body _ => psKernelC0Instantiate1Indexed store body arg
   | _ => none
+
+/-
+Memoized indexed-beta engine.
+
+The original indexed recursive worker above remains an executable oracle.
+The accepting checker remains unchanged. Canonical handles and an immutable
+trie support a per-operation table keyed by (term ID, binder depth): every
+shared DAG node is rewritten at most once at each scope depth. Hash collisions
+are resolved by exact pair comparisons. No cached result is shared between
+different source stores, replacements, or checked contexts.
+-/
+
+abbrev PsKernelC0RewriteTable :=
+  PsKernelC0HashTrie (Prod Nat (Prod Nat Nat))
+
+structure PsKernelC0RewriteState where
+  store : PsKernelC0TermStore
+  memo : PsKernelC0RewriteTable
+
+def psKernelC0RewriteTableEmpty : PsKernelC0RewriteTable :=
+  PsKernelC0HashTrie.empty
+
+def psKernelC0RewriteKey (id offset : Nat) : Nat :=
+  psKernelCacheMix (psKernelCacheMix 43 id) offset
+
+def psKernelC0RewriteFind
+    (id offset : Nat) :
+    List (Prod Nat (Prod Nat Nat)) -> Option Nat
+  | [] => none
+  | entry :: rest =>
+      if Nat.beq (Prod.fst entry) id &&
+         Nat.beq (Prod.fst (Prod.snd entry)) offset then
+        some (Prod.snd (Prod.snd entry))
+      else
+        psKernelC0RewriteFind id offset rest
+
+def psKernelC0RewriteLookup
+    (memo : PsKernelC0RewriteTable)
+    (id offset : Nat) : Option Nat :=
+  psKernelC0RewriteFind id offset
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo
+      (psKernelC0RewriteKey id offset))
+
+def psKernelC0RewriteInsert
+    (memo : PsKernelC0RewriteTable)
+    (id offset result : Nat) : PsKernelC0RewriteTable :=
+  let hash := psKernelC0RewriteKey id offset
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
+  psKernelC0TrieSet psKernelC0IndexDepth memo hash
+    ((Prod.mk id (Prod.mk offset result)) :: bucket)
+
+def psKernelC0RewritePublish
+    (state : PsKernelC0RewriteState)
+    (id offset result : Nat) : PsKernelC0RewriteState :=
+  { store := state.store
+    memo := psKernelC0RewriteInsert state.memo id offset result }
+
+def psKernelC0RewriteIntern
+    (state : PsKernelC0RewriteState)
+    (oldId : Nat)
+    (node : PsKernelC0Node) :
+    Option (Prod PsKernelC0RewriteState Nat) := do
+  let (nextStore, result) ← psKernelC0KeepOrIntern state.store oldId node
+  some ({ store := nextStore, memo := state.memo }, result)
+
+def psKernelC0InstantiateMemoWithFuel
+    (fuel : Nat)
+    (state : PsKernelC0RewriteState)
+    (id replacement offset : Nat) :
+    Option (Prod PsKernelC0RewriteState Nat) :=
+  match fuel with
+  | 0 => none
+  | remaining + 1 => do
+      match psKernelC0RewriteLookup state.memo id offset with
+      | some cached => some (state, cached)
+      | none =>
+          let stored ← psKernelC0StoreGet state.store id
+          let (nextState, result) ←
+            match stored.node with
+            | .bvar i =>
+                if i < offset then some (state, id)
+                else if i == offset then do
+                  let (nextStore, lifted) ←
+                    psKernelC0LiftIndexed state.store replacement 0 offset
+                  some ({ store := nextStore, memo := state.memo }, lifted)
+                else psKernelC0RewriteIntern state id (.bvar (i - 1))
+            | .app fn arg => do
+                let (s1, f) ← psKernelC0InstantiateMemoWithFuel
+                  remaining state fn replacement offset
+                let (s2, a) ← psKernelC0InstantiateMemoWithFuel
+                  remaining s1 arg replacement offset
+                psKernelC0RewriteIntern s2 id (.app f a)
+            | .lam name ty body info => do
+                let (s1, t) ← psKernelC0InstantiateMemoWithFuel
+                  remaining state ty replacement offset
+                let (s2, b) ← psKernelC0InstantiateMemoWithFuel
+                  remaining s1 body replacement (offset + 1)
+                psKernelC0RewriteIntern s2 id (.lam name t b info)
+            | .forallE name ty body info => do
+                let (s1, t) ← psKernelC0InstantiateMemoWithFuel
+                  remaining state ty replacement offset
+                let (s2, b) ← psKernelC0InstantiateMemoWithFuel
+                  remaining s1 body replacement (offset + 1)
+                psKernelC0RewriteIntern s2 id (.forallE name t b info)
+            | .letE name ty value body nondep => do
+                let (s1, t) ← psKernelC0InstantiateMemoWithFuel
+                  remaining state ty replacement offset
+                let (s2, v) ← psKernelC0InstantiateMemoWithFuel
+                  remaining s1 value replacement offset
+                let (s3, b) ← psKernelC0InstantiateMemoWithFuel
+                  remaining s2 body replacement (offset + 1)
+                psKernelC0RewriteIntern s3 id (.letE name t v b nondep)
+            | .mdata metadata body => do
+                let (s1, b) ← psKernelC0InstantiateMemoWithFuel
+                  remaining state body replacement offset
+                psKernelC0RewriteIntern s1 id (.mdata metadata b)
+            | .proj name index body => do
+                let (s1, b) ← psKernelC0InstantiateMemoWithFuel
+                  remaining state body replacement offset
+                psKernelC0RewriteIntern s1 id (.proj name index b)
+            | _ => some (state, id)
+          some (psKernelC0RewritePublish nextState id offset result, result)
+
+/--
+  Memoized beta-substitution on one immutable, indexed term store.
+  The table is deliberately fresh for every call: the replacement and arena
+  must not be conflated with those from another operation.
+-/
+def psKernelC0Instantiate1Indexed
+    (store : PsKernelC0TermStore)
+    (id replacement : Nat) :
+    Option (Prod PsKernelC0TermStore Nat) := do
+  let entry ← psKernelC0StoreGet store id
+  if !(psKernelC0StoreValid store replacement) then none
+  else
+    let state : PsKernelC0RewriteState :=
+      { store := store, memo := psKernelC0RewriteTableEmpty }
+    let (resultState, result) ← psKernelC0InstantiateMemoWithFuel
+      entry.depth state id replacement 0
+    some (resultState.store, result)

@@ -192,10 +192,10 @@ def watModuleDoc (m : PsWasmModule) (names : LocalNames := []) (header := "(modu
       (if a.mutable then "(mut " ++ storage ++ ")" else storage) ++ "))")
   let signatures := m.functionTypes.map fun t =>
     PsDoc.text ("(type " ++ watId t.name ++ " (func" ++ watParams t.parameters ++ watResults t.results ++ "))")
-  -- Match the encoder's recursive-group identity, including anonymous signatures.
+  -- Independent singleton function signatures retain Canonical ABI type identity.
   let anonymous := m.functions.zipIdx |>.map fun (f, i) =>
     PsDoc.text ("(type " ++ watId (anonymousTypeName m i) ++ " (func" ++ watParams f.parameters ++ watResults f.results ++ "))")
-  let types := structures ++ arrays ++ signatures ++ anonymous
+  let types := structures ++ arrays
   let group := if types.isEmpty then [] else [
     PsDoc.append (.text "(rec") (.append (.nest 2 (.append .hardline (psDocJoin .hardline types)))
       (.append .hardline (.text ")")))]
@@ -206,7 +206,7 @@ def watModuleDoc (m : PsWasmModule) (names : LocalNames := []) (header := "(modu
   let functions := m.functions.zipIdx |>.map fun (f, i) =>
     watFunction names { f with typeName := some (f.typeName.getD (anonymousTypeName m i)) }
   .append (.text header)
-    (.append (.nest 2 (.append .hardline (psDocJoin .hardline (group ++ refs ++ functions ++ exports))))
+    (.append (.nest 2 (.append .hardline (psDocJoin .hardline (group ++ signatures ++ anonymous ++ refs ++ functions ++ exports))))
       (.append .hardline (.text ")")))
 
 end PsWasm

@@ -39,7 +39,7 @@ def c0JsonString (j : Lean.Json) (key : String) : Except String String := do
 def c0ExportOnlyKeys (j : Lean.Json) (allowed : List String) :
     Except String Unit := do
   let object ← j.getObj?
-  let fields := object.fold (fun acc key _ => key :: acc) ([] : List String)
+  let fields := object.toList.map Prod.fst
   for key in fields do
     if !allowed.contains key then
       throw ("unsupported NDJSON field: " ++ key)

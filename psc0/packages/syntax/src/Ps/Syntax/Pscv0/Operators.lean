@@ -5,6 +5,7 @@ inductive PsPscv0InfixKind where
   | arrow
   | booleanAnd
   | booleanOr
+  | booleanNotEqual
   | matches
 
 structure PsPscv0Infix where
@@ -17,6 +18,8 @@ structure PsPscv0Infix where
 -- grammar. Precedence comes from the pinned RC4 parser/notation declarations.
 def psPscv0InfixInfo : String → Option PsPscv0Infix
   | "=" => some { kind := .constant "Eq", precedence := 50, rightPrecedence := 51, nonAssociative := true }
+  | "==" => some { kind := .constant "BEq.beq", precedence := 50, rightPrecedence := 51, nonAssociative := true }
+  | "!=" => some { kind := .booleanNotEqual, precedence := 50, rightPrecedence := 51, nonAssociative := true }
   | "∧" | "/\\" => some { kind := .constant "And", precedence := 35, rightPrecedence := 35 }
   | "∨" | "\\/" => some { kind := .constant "Or", precedence := 30, rightPrecedence := 30 }
   -- Pinned RC4 Init/Notation.lean: infixl:35 "&&", infixl:30 "||".
@@ -82,6 +85,9 @@ def psPscv0OperatorTail (read : Nat → PsPscv0TermReader) (minimum fuel : Nat)
           | .constant name => psPscv0NotationCall name [left.value, right.value] span
           | .booleanAnd => .ifE none left.value right.value (.bool false span) span
           | .booleanOr => .ifE none left.value (.bool true span) right.value span
+          | .booleanNotEqual =>
+            .ifE none (psPscv0NotationCall "BEq.beq" [left.value, right.value] span)
+              (.bool false span) (.bool true span) span
           | .matches => left.value
         pure { value, cursor := right.cursor }
     if info.nonAssociative then

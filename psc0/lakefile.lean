@@ -71,6 +71,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.StandardArithmetic,
+    `Ps.Environment.StandardEquality,
     `Ps.Environment.SelfHostProd
   ]
 

@@ -1,3 +1,4 @@
+import Ps.KernelCore.Core.IndexedReduction
 import Ps.KernelCore.Core.Substitution.Instantiate
 import Ps.KernelCore.Core.LocalContext
 
@@ -132,3 +133,43 @@ def main : IO Unit := do
     throw (IO.userError "WHNF lazy-head probe changed observable head")
   IO.println s!"C0_BENCH lazy_spine eager_ms={eagerEnd - eagerStart} head_only_ms={lazyEnd - lazyStart} hits={lazyHits} iterations={iterations}"
 
+
+  -- Compare two *identical indexed* representations: old recursive
+  -- rewriting and the new memoized DAG rewrite. This is not a whole-kernel
+  -- benchmark and includes all per-call memo table construction costs.
+  match psKernelC0Intern psKernelC0StoreEmpty (.bvar 0) with
+  | Option.none => throw (IO.userError "C0 benchmark leaf failed")
+  | Option.some (initial, leaf) =>
+      match psKernelC0Intern initial (.bvar 23) with
+      | Option.none => throw (IO.userError "C0 benchmark replacement failed")
+      | Option.some (prepared, replacement) =>
+          let mut terms := prepared
+          let mut input := leaf
+          for _ in [:11] do
+            match psKernelC0Intern terms (.app input input) with
+            | Option.none => throw (IO.userError "C0 benchmark shared node failed")
+            | Option.some (next, id) =>
+                terms := next
+                input := id
+          let runs := 70
+          let mut oldCount := 0
+          let oldStart ← IO.monoMsNow
+          for _ in [:runs] do
+            match psKernelC0Instantiate1IndexedReference terms input replacement with
+            | Option.some (next, result) =>
+                if psKernelC0StoreValid next result then
+                  oldCount := oldCount + 1
+            | Option.none => throw (IO.userError "C0 recursive indexed rewrite failed")
+          let oldEnd ← IO.monoMsNow
+          let mut memoCount := 0
+          let memoStart ← IO.monoMsNow
+          for _ in [:runs] do
+            match psKernelC0Instantiate1Indexed terms input replacement with
+            | Option.some (next, result) =>
+                if psKernelC0StoreValid next result then
+                  memoCount := memoCount + 1
+            | Option.none => throw (IO.userError "C0 memoized indexed rewrite failed")
+          let memoEnd ← IO.monoMsNow
+          if !(Nat.beq oldCount memoCount) then
+            throw (IO.userError "C0 indexed rewrite changed success count")
+          IO.println s!"C0_BENCH indexed_dag recursive_ms={oldEnd - oldStart} memoized_ms={memoEnd - memoStart} depth=11 runs={runs} passed={memoCount}"

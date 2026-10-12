@@ -8,6 +8,7 @@ structure PsCommandState where
   frames : List PsScopeFrame := []
   namespaces : List (List String) := []
   originsRev : List PsElabBatchOrigin := []
+  privateNames : List PsName := []
 
 def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration) :
     Except PsElabError PsSyntaxDeclaration := do
@@ -117,7 +118,8 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
   return { state with scope := { state.scope with included } }
 
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
-    (registration : Option PsSyntaxRegistration) : Except PsElabError PsCommandState := do
+    (registration : Option PsSyntaxRegistration) (isPrivate : Bool := false) :
+    Except PsElabError PsCommandState := do
   let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
   let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
   let originBatch ← (psElabDeclarationBatchWithOrigins state.environment
@@ -154,7 +156,10 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
       members := originBatch.origin.members ++
         psElabStableMemberOrigins (batch.declarations.drop originBatch.result.declarations.length)
           originBatch.result.declarations.length } :: state.originsRev
-    declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev }
+    declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev
+    privateNames := if isPrivate then
+      batch.declarations.map psDeclarationName ++ state.privateNames
+    else state.privateNames }
 
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
@@ -190,6 +195,9 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
   | .declaration source => psElabCommandDeclaration state source none
   | .registeredDeclaration source registration =>
     psElabCommandDeclaration state source (some registration)
+  | .privateDeclaration source => psElabCommandDeclaration state source none true
+  | .privateRegisteredDeclaration source registration =>
+    psElabCommandDeclaration state source (some registration) true
 
 def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram) :
     Except PsElabError PsElabModuleWithOriginsResult := do
@@ -200,7 +208,8 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   if !state.frames.isEmpty then throw (.scope "unclosed namespace or section")
   return {
     result := { environment := state.environment, declarations := state.declarationsRev.reverse }
-    origins := state.originsRev.reverse }
+    origins := state.originsRev.reverse
+    privateNames := state.privateNames }
 
 def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
     Except PsElabError PsElabModuleResult :=

@@ -274,6 +274,9 @@ inductive PsSyntaxCommand where
   | universeCmd (names : List PsSyntaxName) (span : PsSourceSpan)
   | registeredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
   | declaration (value : PsSyntaxDeclaration)
+  -- Modifier ownership stays in command syntax; data/term ASTs are unchanged.
+  | privateDeclaration (value : PsSyntaxDeclaration)
+  | privateRegisteredDeclaration (value : PsSyntaxDeclaration) (registration : PsSyntaxRegistration)
   | namespaceCmd (name : PsSyntaxName) (span : PsSourceSpan)
   | sectionCmd (name : Option PsSyntaxName) (span : PsSourceSpan)
   | endCmd (name : Option PsSyntaxName) (span : PsSourceSpan)

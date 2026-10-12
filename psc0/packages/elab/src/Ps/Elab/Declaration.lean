@@ -55,6 +55,8 @@ structure PsElabDeclarationBatchWithOriginsResult where
 structure PsElabModuleWithOriginsResult where
   result : PsElabModuleResult
   origins : List PsElabBatchOrigin
+  -- Includes all compiler-generated members owned by a private source command.
+  privateNames : List PsName := []
 
 -- These two internal results attribute only phases known at the call boundary.
 structure PsElabOriginPhaseError where

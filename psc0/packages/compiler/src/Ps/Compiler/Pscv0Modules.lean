@@ -96,9 +96,13 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
     left.instances
   { declarations, classes, classParameters, instances }
 
+-- Public identity is selected from source-command ownership, rather than from
+-- the final runtime IR (which also contains private and generated workers).
 def psPscv0OwnInterface (environment : PsEnvironment)
-    (own : List PsDeclaration) : PsPscv0ModuleInterface :=
-  let names := own.map psDeclarationName
+    (own : List PsDeclaration) (hidden : List PsName) : PsPscv0ModuleInterface :=
+  let publicDecls := own.filter (fun decl =>
+    !hidden.any (psNameEq (psDeclarationName decl)))
+  let names := publicDecls.map psDeclarationName
   let owned := fun name => names.any (psNameEq name)
   let classes := environment.classes.filter owned
   let classParameters := environment.classParameters.filter (fun item => owned item.fst)
@@ -106,9 +110,16 @@ def psPscv0OwnInterface (environment : PsEnvironment)
     match item.value with
     | .constE name _ => owned name
     | _ => false
-  { declarations := own.map psPscv0ImportedDeclaration,
+  { declarations := publicDecls.map psPscv0ImportedDeclaration,
     classes, classParameters, instances }
 
+def psPscv0SameInstanceIdentity (left right : PsInstanceEntry) : Bool :=
+  match left.value, right.value with
+  | .constE a _, .constE b _ => psNameEq a b
+  | _, _ => false
+
+-- The same instance may reach a client through two public-import paths.
+-- Register it exactly once, without changing the relative instance priorities.
 def psPscv0InstallInterface (environment : PsEnvironment)
     (view : PsPscv0ModuleInterface) : Except String PsEnvironment := do
   let environment ← view.declarations.foldlM (fun env decl => do
@@ -124,8 +135,28 @@ def psPscv0InstallInterface (environment : PsEnvironment)
   let classParameters := view.classParameters.foldl (fun acc item =>
     if acc.any (fun existing => psNameEq existing.fst item.fst) then acc
     else item :: acc) environment.classParameters
-  let instances := view.instances.foldl psInstanceIndexAdd environment.instances
+  let instances := view.instances.foldl (fun index entry =>
+    if index.entries.any (psPscv0SameInstanceIdentity entry) then index
+    else psInstanceIndexAdd index entry) environment.instances
   return { environment with classes, classParameters, instances }
+
+def psPscv0ExprConstants : PsExpr → List PsName
+  | .constE name _ => [name]
+  | .app fn arg => psPscv0ExprConstants fn ++ psPscv0ExprConstants arg
+  | .lam _ type body _ | .forallE _ type body _ =>
+      psPscv0ExprConstants type ++ psPscv0ExprConstants body
+  | .letE _ type value body =>
+      psPscv0ExprConstants type ++ psPscv0ExprConstants value ++
+        psPscv0ExprConstants body
+  | .proj _ _ value => psPscv0ExprConstants value
+  | _ => []
+
+def psPscv0GeneratedPrivateNames (origins : List PsElabBatchOrigin) : List PsName :=
+  origins.flatMap fun origin =>
+    origin.members.filterMap fun member =>
+      match member.role with
+      | .normalizedWorker => some member.name
+      | _ => none
 
 structure PsPscv0BuiltModule where
   name : String
@@ -161,7 +192,6 @@ def psCompilerPreparePscv0Project (entryName : String)
   let mut globalNames : List PsName := []
   let mut origins : List PsPscv0ProjectOrigin := []
   let mut mainNames : List PsName := []
-  let mut libraryNames : List PsName := []
   for item in order do
     let importEnvironment ← item.program.imports.foldlM (fun env imp => do
       let some linked := built.find? (fun module =>
@@ -180,8 +210,18 @@ def psCompilerPreparePscv0Project (entryName : String)
           psNameToString (psDeclarationName decl))
       globalNames := psDeclarationName decl :: globalNames
     let ownNames := own.map psDeclarationName
-    let mut interface := psPscv0OwnInterface
-      elaborated.result.environment elaborated.result.declarations
+    let hidden := elaborated.privateNames ++
+      psPscv0GeneratedPrivateNames elaborated.origins
+    let ownPublic := psPscv0OwnInterface elaborated.result.environment
+      elaborated.result.declarations hidden
+    -- A public type must never refer to this module's private constants, even
+    -- though public executable bodies may call those constants internally.
+    for decl in ownPublic.declarations do
+      if (psPscv0ExprConstants (psDeclarationType decl)).any
+          (fun dependency => hidden.any (psNameEq dependency)) then
+        throw ("PSCV0-MODULE: public signature references private name in " ++
+          psNameToString (psDeclarationName decl))
+    let mut interface := ownPublic
     for imp in item.program.imports do
       if imp.isPublic then
         let some linked := built.find? (fun module =>
@@ -193,15 +233,13 @@ def psCompilerPreparePscv0Project (entryName : String)
     origins := origins ++ [{
       moduleName := item.name, sourceName := item.sourceName, source := item.source,
       batches := elaborated.origins, parents := output.originParents }]
-    if item.name == entryName then mainNames := ownNames
-    else libraryNames := libraryNames ++ ownNames
+    if item.name == entryName then
+      mainNames := ownPublic.declarations.map psDeclarationName
   let prepared : PsCompilerAdmissionReadyModule := { declarations }
-  -- Only a public-imported dependency of the entry is re-exported. The
-  -- ordinary imported declarations remain linked for execution but internal
-  -- to the application's public target API.
-  let some root := built.find? (fun item => item.name == entryName)
-    | throw "PSCV0-MODULE: entry graph identity missing"
-  let exported := root.interface.declarations.map psDeclarationName
-  libraryNames := libraryNames.filter (fun name => !exported.any (psNameEq name))
+  -- Source-level 'public import' is a transitive API view for importing
+  -- modules, not an instruction to export dependency functions from the
+  -- executable entry artifact. Link every dependency, expose entry names only.
+  let libraryNames := globalNames.reverse.filter (fun name =>
+    !mainNames.any (psNameEq name))
   let admissions ← (psCompilerAdmissionsFromPrepared prepared).mapError psCompilerPscv0Error
   return { prepared, admissions, mainNames, libraryNames, origins }

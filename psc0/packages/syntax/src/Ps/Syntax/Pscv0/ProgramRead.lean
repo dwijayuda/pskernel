@@ -14,25 +14,45 @@ def psPscv0CommandNames (line fuel : Nat) (cursor : PsTokenCursor)
 
 def psPscv0ReadCommand (cursor : PsTokenCursor) :
     Except String (PsParseResult PsSyntaxCommand) := do
-  let some token := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
+  let some first := psTokenCursorPeek cursor | throw "PSCV0-COMMAND-MISSING"
+  let isPrivate := first.text == "private"
+  let cursor ← if isPrivate then
+    let marker ← psPscv0Expect cursor "private"
+    pure marker.cursor
+  else pure cursor
+  let some token := psTokenCursorPeek cursor | throw "PSCV0-PRIVATE-DECLARATION-MISSING"
+  if isPrivate && !["instance", "abbrev", "opaque", "class", "def", "const",
+      "function", "theorem", "structure", "inductive"].contains token.text then
+    throw "PSCV0-PRIVATE-DECLARATION-EXPECTED"
   if token.text == "instance" then
     let parsed ← (psPscv0ReadInstance cursor).mapError psPscv0ParseError
     let .registeredDeclaration declaration _ := parsed.value | throw "PSCV0-INSTANCE-DECLARATION"
     let next ← (psParseProofScriptCommandSeparator
       (psProofScriptDeclarationStop declaration) parsed.cursor).mapError psPscv0ParseError
-    return { parsed with cursor := next }
+    let command := match parsed.value with
+      | .registeredDeclaration source registration =>
+          if isPrivate then .privateRegisteredDeclaration source registration
+          else parsed.value
+      | _ => parsed.value
+    return { value := command, cursor := next }
   if token.text == "abbrev" || token.text == "opaque" then
     let parsed ← psPscv0ReadValueDeclaration cursor
     let next ← (psParseProofScriptCommandSeparator
       (psProofScriptDeclarationStop parsed.value) parsed.cursor).mapError psPscv0ParseError
     let registration : PsSyntaxRegistration :=
       if token.text == "abbrev" then .abbrevDecl else .opaqueDecl
-    return { value := .registeredDeclaration parsed.value registration, cursor := next }
+    let command := if isPrivate then
+      PsSyntaxCommand.privateRegisteredDeclaration parsed.value registration
+    else PsSyntaxCommand.registeredDeclaration parsed.value registration
+    return { value := command, cursor := next }
   if token.text == "class" then
     let parsed ← (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
     let next ← (psParseProofScriptCommandSeparator
       (psProofScriptDeclarationStop parsed.value) parsed.cursor).mapError psPscv0ParseError
-    return { value := .registeredDeclaration parsed.value .classDecl, cursor := next }
+    let command := if isPrivate then
+      PsSyntaxCommand.privateRegisteredDeclaration parsed.value .classDecl
+    else PsSyntaxCommand.registeredDeclaration parsed.value .classDecl
+    return { value := command, cursor := next }
   if ["namespace", "section", "end", "open", "include", "omit", "universe"].contains token.text then
     let head ← psPscv0Expect cursor token.text
     let names ← psPscv0CommandNames token.span.start.line 4096 head.cursor []
@@ -60,7 +80,8 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
   let declaration ← psPscv0ReadDeclaration cursor
   let next ← (psParseProofScriptCommandSeparator
     (psProofScriptDeclarationStop declaration.value) declaration.cursor).mapError psPscv0ParseError
-  return { value := .declaration declaration.value, cursor := next }
+  return { value := if isPrivate then .privateDeclaration declaration.value
+                    else .declaration declaration.value, cursor := next }
 
 def psPscv0ReadCommands (fuel : Nat) (cursor : PsTokenCursor)
     (acc : List PsSyntaxCommand) : Except String (List PsSyntaxCommand) := do

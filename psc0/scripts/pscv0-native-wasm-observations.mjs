@@ -5,11 +5,17 @@ import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 const directory = path.resolve(process.argv[2]);
 const source = await readFile(path.join(directory, 'application.ps'), 'utf8');
-const wrappers = observations.map(({name, args, expected}, i) => {
+const wrappers = observations.map(({name, type, args, expected}, i) => {
   const call = name + (args === null ? '' : '(' + args.map(String).join(', ') + ')');
+  // Check Int through its already modeled, canonical decimal representation.
+  // This uses String's existing decidable equality and adds no kernel axiom.
+  // Never infer the source type from the sign of the expected output.
   const compare = typeof expected === 'boolean'
     ? (expected ? call : 'if (' + call + ') { false } else { true }')
-    : 'Nat.beq(' + call + ', ' + String(expected) + ')';
+    : type === 'int'
+      ? 'if (Int.repr(' + call + ') = ' + JSON.stringify(String(expected)) +
+        ') { true } else { false }'
+      : 'Nat.beq(' + call + ', ' + String(expected) + ')';
   return 'const wasmCheck' + i + ': Bool := ' + compare;
 });
 await writeFile(path.join(directory, 'wasm/observations.ps'), source + '\n' + wrappers.join('\n') + '\n');

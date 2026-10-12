@@ -5,6 +5,9 @@ import Ps.BackendWasm.ValidateIr
 namespace PsWasm
 
 def checkedCore (core : PsWasmModule) (locals : LocalNames := []) : Except String ByteArray := do
+  let typeNames := core.structures.map (·.name) ++ core.arrays.map (·.name) ++ core.functionTypes.map (·.name)
+  let duplicates := typeNames.filter (fun name => (typeNames.filter (· == name)).length > 1)
+  if !duplicates.isEmpty then throw ("PSCV0-WASM-TYPE: duplicate target type identities: " ++ String.intercalate ", " duplicates.eraseDups)
   let _ ← (psWasmIrValidateModule core).mapError (fun e => "PSCV0-WASM-TYPE: " ++ reprStr e)
   let bytes ← namedCoreBinary core locals
   return ByteArray.mk bytes.toArray

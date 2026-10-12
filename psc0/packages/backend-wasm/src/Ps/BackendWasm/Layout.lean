@@ -2,7 +2,7 @@ import Ps.BackendWasm.Value
 
 namespace PsWasm
 
-def constructorTypeName (name : String) := "__ps_constructor_" ++ name
+def constructorTypeName (owner name : String) := "__ps_constructor_" ++ owner ++ "__" ++ name
 
 def dataLayouts (ir : PsVerifiedIrModule) : Except String (List PsWasmStructType) := do
   let records ← ir.structures.mapM fun s => do
@@ -15,7 +15,7 @@ def dataLayouts (ir : PsVerifiedIrModule) : Except String (List PsWasmStructType
       let fields ← ctor.fields.mapM fun f => do
         return { name := f.name, storageType := .value (← representation f.type) : PsWasmStructField }
       return {
-        name := constructorTypeName ctor.name, superType := some i.name,
+        name := constructorTypeName i.name ctor.name, superType := some i.name,
         isFinal := true, fields := tag :: fields : PsWasmStructType }
     return base :: constructors
   return records ++ variants.flatten

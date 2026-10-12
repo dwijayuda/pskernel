@@ -149,7 +149,7 @@ def lowerExpr (ir : PsVerifiedIrModule) :
       -- A tag is required even for structurally identical constructor types.
       return {
         type := .named name types
-        code := [.i32Const (Int.ofNat tag)] ++ fields ++ [.structNew (constructorTypeName ctor.name)] }
+        code := [.i32Const (Int.ofNat tag)] ++ fields ++ [.structNew (constructorTypeName name ctor.name)] }
     | .projection name types target field =>
       let s ← requireStructure ir name
       let (formal, index) ← fieldIndex (s.fields.map fun f => (f.name, f.type)) field
@@ -168,8 +168,8 @@ def lowerExpr (ir : PsVerifiedIrModule) :
         for field in fields do
           let (formal, position) ← fieldIndex (ctor.fields.map fun f => (f.name, f.type)) field.field
           let binding ← allocateBinding field.name field.type
-          code := code ++ [.localGet index, .refCast (constructorTypeName ctor.name),
-            .structGet (constructorTypeName ctor.name) (position + 1)] ++
+          code := code ++ [.localGet index, .refCast (constructorTypeName name ctor.name),
+            .structGet (constructorTypeName name ctor.name) (position + 1)] ++
               (← convert formal field.type) ++ [.localSet binding.index]
           inner := binding :: inner
         let body ← lowerExpr ir fuel inner expected body

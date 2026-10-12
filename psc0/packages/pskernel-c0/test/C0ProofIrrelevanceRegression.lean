@@ -377,3 +377,26 @@ def main : IO Unit := do
                 if !(psKernelExprEqual result expected) then
                   throw (IO.userError "C0 indexed WHNF semantic disagreement")
   IO.println "C0_PERF_REGRESSION indexed_beta_zeta_whnf=pass"
+
+
+  -- Native accepting-beta helper: single-argument specialization agrees with
+  -- the historical generic list-instantiation path, including multi-spines.
+  for (fn, supplied) in [
+    (indexedIdentity, [rightSort]),
+    (nestedIdentity, [leftSort, rightSort]),
+    (nestedIdentity, [leftSort]),
+    (indexedIdentity, [rightSort, leftSort])
+  ] do
+    match psKernelC0BetaSpinePlan fn supplied with
+    | Option.none =>
+        throw (IO.userError "C0 beta-spine plan unexpectedly missing")
+    | Option.some plan =>
+        let body := Prod.fst plan
+        let selected := Prod.fst (Prod.snd plan)
+        let remaining := Prod.snd (Prod.snd plan)
+        let oldResult := psKernelExprApplyArgsCheap
+          (psKernelExprInstantiate body selected) remaining
+        let newResult := psKernelC0BetaSpineApply plan
+        if !(psKernelExprEqual oldResult newResult) then
+          throw (IO.userError "C0 specialized WHNF beta changed expression")
+  IO.println "C0_PERF_REGRESSION beta_single_specialization=pass"

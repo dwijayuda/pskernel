@@ -593,6 +593,45 @@ def main : IO Unit := do
   if smallCtx.nextIndex != threshold || deepCtx.nextIndex != threshold + 1 then
     throw (IO.userError "C0 delayed local index changed fresh-name counter")
   IO.println "C0_PERF_REGRESSION deferred_local_index_promotion=pass"
+
+  -- Force the immutable local-index thunk only beyond the deep lookup
+  -- threshold. The same stored context must be safely reused, while
+  -- snapshots predating a shadowed declaration remain unchanged.
+  let mut lazyDeep := psKernelLocalContextEmpty
+  for i in [:psKernelC0LocalIndexLookupThreshold + 8] do
+    let name := PsKernelName.num PsKernelName.anonymous i
+    lazyDeep := psKernelLocalContextAddLocal lazyDeep name name
+      sort0 PsKernelBinderInfo.default
+  match lazyDeep.index with
+  | none => throw (IO.userError "C0 deep lazy context has no available snapshot")
+  | some _ => pure ()
+  for _ in [:3] do
+    for k in [0, 1, 8, 60, 127, 128, 191,
+        psKernelC0LocalIndexLookupThreshold - 1,
+        psKernelC0LocalIndexLookupThreshold + 7,
+        psKernelC0LocalIndexLookupThreshold + 8] do
+      let name := PsKernelName.num PsKernelName.anonymous k
+      match psKernelLocalContextFindIn name lazyDeep.decls,
+          psKernelLocalContextFind lazyDeep name with
+      | none, none => pure ()
+      | some before, some after =>
+          if !(psKernelNameEq (psKernelLocalDeclName before)
+              (psKernelLocalDeclName after) &&
+              psKernelExprEqual (psKernelLocalDeclType before)
+                (psKernelLocalDeclType after)) then
+            throw (IO.userError "C0 lazy indexed local lookup changed declaration")
+      | _, _ => throw (IO.userError "C0 lazy indexed local lookup changed presence")
+  let lazyShadowName := PsKernelName.num PsKernelName.anonymous 8
+  let lazyShadow := psKernelLocalContextAddLet lazyDeep lazyShadowName
+    lazyShadowName sort1 sort0
+  match psKernelLocalContextFind lazyShadow lazyShadowName,
+      psKernelLocalContextFind lazyDeep lazyShadowName with
+  | some newDecl, some previousDecl =>
+      if !(psKernelExprEqual (psKernelLocalDeclType newDecl) sort1 &&
+          psKernelExprEqual (psKernelLocalDeclType previousDecl) sort0) then
+        throw (IO.userError "C0 lazy snapshot shadowing or persistence changed")
+  | _, _ => throw (IO.userError "C0 lazy snapshot shadowed name missing")
+  IO.println "C0_PERF_REGRESSION forced_lazy_local_snapshot=pass"
   -- A persistent indexed snapshot plus a small overlay must preserve
   -- precedence for a new shadowing let, including the batch commit edge.
   let mut pendingCtx := deepCtx

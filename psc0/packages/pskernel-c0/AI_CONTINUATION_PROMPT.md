@@ -55,3 +55,16 @@ lake env lean --run test/C0PerfMicrobench.lean
 Use the existing C0 Lean 4.34.0 pin unless a deliberate compatibility migration is justified.
 
 **Do not stop after drafting a plan or producing a progress report. Implement, validate, measure, commit, and continue.** When the effort cannot reach full completion in one chat, leave a precise checked state and next executable task. Do not claim full completion until end-to-end speed and compatibility are established.
+
+
+
+## Latest October 12 validated checkpoint (supersedes old handoff SHA above)
+
+**Current source checkpoint before subsequent documentation updates:** `30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba`.
+**Green native CI:** [38215639174](https://github.com/dwijayuda/pskernel/actions/runs/38215639174) includes 85-job C0 Lean build, negative/fuel/differential regressions, native microbenchmarks, and an independently built **unchanged original-core matched baseline** (81 jobs). It runs no self-host/bootstrap tests.
+
+New `Checker/IndexedSession.lean` is opt-in and syntax-only, with persistent canonical nodes, exact name/metadata identity, small-to-radix root cache, no bare IDs exposed, and no acceptance shortcut. It is currently slower for repeated checked WHNF than the plain session; **do not enable as default** until full indexed execution eliminates its overhead. Indexed term hashing now includes all binder identity fields; measured collision-heavy binder intern 60 ms old vs 8 ms new, only an indexed-substrate microbenchmark.
+
+Production `Checker/Inference/Helpers.lean` now counts infer-only application arguments once per spine (legacy worker ~5 ms vs 1 ms counted in isolated 192-argument microbench). An independently admitted 48-argument benchmark against unchanged original core revealed a **mixed and critical result**: C0 infer-only ~16–19 ms vs core ~65–66 ms per 200 cold calls, but C0 **fully checked** ~50 ms vs original ~30–31 ms per 80 cold calls, three rounds, same runner. Do not claim overall performance superiority. Checked inference source `Checker/Inference/Core.lean` is byte-for-byte the same; follow the actual dependency costs and preserve semantic/fuel classification before rewriting. On synthetic closed and open forall terms, specialized C0 instantiate1 is much faster than an old loose-variable-precheck approach; do not blame/revert substitution without evidence.
+
+**Next actual work:** measure and resolve the full checked-application regression, then implement session-owned indexed delta/WHNF/DefEq/inference and declaration admission with provenance-safe caches and matched tests. Preserve the original core/Rust backend, no self-host or metatheory work, commit and push checkpoints, and update `AI_WORK_STATE.md` and `C0_BENCHMARKS.md` with exact source runs and honest limitations. The architecture is not complete.

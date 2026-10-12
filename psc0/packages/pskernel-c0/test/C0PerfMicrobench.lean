@@ -917,6 +917,39 @@ def main : IO Unit := do
 
 
 
+  -- Indexed delta selects the source definition by the context passed
+  -- to each operation, while retaining the existing indexed argument spine.
+  -- Report operation cost only, not a speedup against source decoding.
+  let microDeltaName := PsKernelName.str PsKernelName.anonymous
+    "C0.IndexedDeltaBench"
+  let microDeltaDef : PsKernelDefinitionInfo := {
+    base := { name := microDeltaName, levelParams := [],
+      type := PsKernelExpr.sort (.succ PsKernelLevel.zero) }
+    value := PsKernelExpr.sort PsKernelLevel.zero
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let deltaEnv := psKernelEnvironmentAddUnchecked
+    psKernelEnvironmentEmpty (.defnInfo microDeltaDef)
+  let deltaContext := psKernelCheckerContextEmpty deltaEnv
+  let deltaRoot := c0BenchApps 24
+    (PsKernelExpr.const microDeltaName []) (PsKernelExpr.bvar 1)
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty deltaRoot with
+  | none => throw (IO.userError "C0 indexed delta benchmark encode failed")
+  | some (stored, root) =>
+      let deltaRuns := 1200
+      let mut hits := 0
+      let deltaStart ← IO.monoMsNow
+      for _ in [:deltaRuns] do
+        match psKernelC0IndexedUnfoldHeadOnce deltaContext stored root with
+        | some (next, id) =>
+            if psKernelC0StoreValid next id then hits := hits + 1
+        | none => throw (IO.userError "C0 indexed delta benchmark missed")
+      let deltaEnd ← IO.monoMsNow
+      if hits != deltaRuns then
+        throw (IO.userError "C0 indexed delta benchmark count mismatch")
+      IO.println s!"C0_BENCH indexed_head_delta ms={deltaEnd-deltaStart} runs={deltaRuns} depth=24"
+
   -- The old indexed WHNF stuck-head path reconstructed the entire application
   -- spine even if the head did not reduce.  Measure that eliminated work
   -- separately from full checker throughput: same canonical term store,

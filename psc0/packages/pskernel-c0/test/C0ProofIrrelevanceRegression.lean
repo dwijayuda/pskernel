@@ -835,6 +835,103 @@ def main : IO Unit := do
     throw (IO.userError "C0 projection fixture failed to select field")
   IO.println "C0_PERF_REGRESSION lazy_delta_projection_spines=pass"
 
+  -- Context-dependent indexed head unfolding is an isolated one-step
+  -- primitive, NOT indexed accepting WHNF. It must exactly match source
+  -- delta unfolding, including argument order and universe substitution.
+  let uName := PsKernelName.str PsKernelName.anonymous "u"
+  let polymorphicName :=
+    PsKernelName.str PsKernelName.anonymous "C0.polyDefinition"
+  let polymorphicDef : PsKernelDefinitionInfo := {
+    base := {
+      name := polymorphicName
+      levelParams := [uName]
+      type := PsKernelExpr.sort (.succ (.param uName))
+    }
+    value := PsKernelExpr.sort (.param uName)
+    hints := PsKernelReducibilityHints.abbrevHint
+    safety := PsKernelDefinitionSafety.safe
+  }
+  let polyEnv := psKernelEnvironmentAddUnchecked fixtureEnv
+    (.defnInfo polymorphicDef)
+  let polyContext := psKernelCheckerContextEmpty polyEnv
+  let polyGood := PsKernelExpr.app
+    (PsKernelExpr.app
+      (PsKernelExpr.const polymorphicName [PsKernelLevel.zero])
+      leftSort) rightSort
+  let polyWrongArity :=
+    PsKernelExpr.const polymorphicName []
+  let missingHead := PsKernelExpr.const noDelta []
+  let opaqueHead := PsKernelExpr.const ctorName []
+  for term in [polyGood, polyWrongArity, missingHead,
+      opaqueHead, defined, shallow] do
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty term with
+    | none => throw (IO.userError "C0 indexed delta encoding failed")
+    | some (store, id) =>
+        match psKernelUnfoldDefinition polyContext term,
+              psKernelC0IndexedUnfoldHeadOnce polyContext store id with
+        | none, none => pure ()
+        | some reference, some (next, valueId) =>
+            match psKernelC0DecodeExpr next valueId with
+            | none => throw (IO.userError "C0 indexed delta cannot decode")
+            | some result =>
+                if !(psKernelExprEqual reference result) then
+                  throw (IO.userError "C0 indexed delta changed universe/spine")
+        | _, _ => throw (IO.userError "C0 indexed delta changed presence")
+
+  -- No environment-dependent delta result can escape its context. The
+  -- same term handle and persistent snapshot are reused under a changed
+  -- definition value; the expected output must follow the NEW context.
+  let alternativeDefinition : PsKernelDefinitionInfo :=
+    { definition with value := leftSort }
+  let altEnv := psKernelEnvironmentAddUnchecked
+    psKernelEnvironmentEmpty (.defnInfo alternativeDefinition)
+  let altContext := psKernelCheckerContextEmpty altEnv
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty defined with
+  | none => throw (IO.userError "C0 indexed context delta input failed")
+  | some (store, id) =>
+      match psKernelC0IndexedUnfoldHeadOnce fixtureCtx store id,
+            psKernelC0IndexedUnfoldHeadOnce altContext store id with
+      | some (firstStore, firstId), some (secondStore, secondId) =>
+          match psKernelC0DecodeExpr firstStore firstId,
+                psKernelC0DecodeExpr secondStore secondId with
+          | some first, some second =>
+              if !(psKernelExprEqual first
+                    (PsKernelExpr.app rightSort leftSort) &&
+                   psKernelExprEqual second
+                    (PsKernelExpr.app leftSort leftSort)) then
+                throw (IO.userError "C0 indexed delta reused wrong environment")
+          | _, _ => throw (IO.userError "C0 context delta decode failed")
+      | _, _ => throw (IO.userError "C0 context delta failed")
+  IO.println "C0_PERF_REGRESSION indexed_delta_universe_context=pass"
+
+  -- Local let lookup has the same indexed spine behavior, with correct
+  -- newest-binding shadowing and no sharing of results between scopes.
+  let localName := PsKernelName.str PsKernelName.anonymous "C0.local"
+  let firstLocals := psKernelLocalContextAddLet
+    psKernelLocalContextEmpty localName localName rightSort leftSort
+  let secondLocals := psKernelLocalContextAddLet
+    firstLocals localName localName rightSort rightSort
+  let firstContext := psKernelCheckerContextWithLocalContext
+    fixtureCtx firstLocals
+  let secondContext := psKernelCheckerContextWithLocalContext
+    fixtureCtx secondLocals
+  let localApp := PsKernelExpr.app (.fvar localName) leftSort
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty localApp with
+  | none => throw (IO.userError "C0 indexed local encoding failed")
+  | some (stored, localRoot) =>
+      match psKernelC0IndexedUnfoldHeadOnce firstContext stored localRoot,
+            psKernelC0IndexedUnfoldHeadOnce secondContext stored localRoot with
+      | some (firstStore, firstId), some (secondStore, secondId) =>
+          match psKernelC0DecodeExpr firstStore firstId,
+                psKernelC0DecodeExpr secondStore secondId with
+          | some first, some second =>
+              if !(psKernelExprEqual first (.app leftSort leftSort) &&
+                    psKernelExprEqual second (.app rightSort leftSort)) then
+                throw (IO.userError "C0 indexed local shadowing failed")
+          | _, _ => throw (IO.userError "C0 indexed local decode failed")
+      | _, _ => throw (IO.userError "C0 indexed local unfolding failed")
+  IO.println "C0_PERF_REGRESSION indexed_local_head_unfolding=pass"
+
   -- A direct application-spine selector must match the historical
   -- fully materialized argument-list representation for every index.
   for arity in [0, 1, 2, 3, 32, 128] do

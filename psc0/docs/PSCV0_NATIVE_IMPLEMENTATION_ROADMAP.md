@@ -1,36 +1,34 @@
 # PSCV0 v7 native implementation roadmap
 
-## Latest qualified native compiler milestone — 12 October 2026
+## Latest qualified native compiler milestone — 13 October 2026
 
-**Qualified executable SHA:** `32ee1e2efbeebd08f4c86745bd3d27981cd19f6b`.
-**Green Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38275596470.
-**Lean checker:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
-**Source profile:** `pscv0-v7-native-bounded/48`; no full v7 claim.
+**Executable source:** `70415686f1e7c13e4690c4f8bed549b1c882fe61`.
+**Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38286641968.
+**Official checker:** Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
+**Profile:** `pscv0-v7-native-bounded/48`, not complete v7.
 
-The native .lean dependency closure is **164 portable modules / 172 native
-modules**. Selected RC4 module visibility, private hygiene, public import
-and executable JS/TS/Rust and V8/Wasmtime GC four-module links are qualified.
-The complete shared runtime matrix is **178 observations** per target.
-Four checked programs, 92 negative semantic observations and compact
-module/parser/effect/Standard checks remain green.
+The portable semantic source now contains **168 portable / 176 native Lean
+modules**, and **185 shared runtime observations** pass across direct JS,
+TypeScript, Rust, V8 Wasm GC and Wasmtime. The checked three-file JS/TS/Rust
+and four-module Wasm projects still run. Four checked semantic programs,
+92 phase-specific refusals and compact module/Standard checks remain green.
 
-The current pinned Standard environment includes checked arithmetic, equality,
-ToString and universe-polymorphic Inhabited class models; supported concrete
-default dictionaries cover Nat, Int, Bool, String, Char, Unit, Option,
-List and Array. Checked List and Option operations are computed from
-inductive recursors, including continuation-valued recursion with correct
-IR erasure. Safe `List.get?` returns an Option; the complete RC4
-`GetElem`/GetElem? proof/indexing system is **still pending**. Syntactic
-raw/interpolated strings and radix numerals have focused kernel/checking
-evidence. The current Standard audit establishes registry presence and
-nonduplication, not the complete versioned digest or assurance closure.
+Recent coherent Phase A work: selected checked `BEq` and `Inhabited`
+dictionaries for `Prod α β`, requiring appropriate component instances
+(qualified `82c601f5`, Linux run 38285466474); checked Type-0
+`Except.bind/map/mapError/tryCatch/isOk/toOption` over the existing
+`Except.rec` eliminator (qualified `9c644232`, run 38286353072);
+and execution of success/error/recovery/mapError paths, including the
+modeled String length primitive, in all five shared backend lanes
+(qualified latest SHA, run 38286641968). Ordinary kernel proof checking,
+erasure and runtime-model checking remain separate evidence boundaries.
 
-The next implementation boundary is: (1) faithful Lean GetElem class/validity
-proofs and indexed notation, (2) allowlisted deriving with checked generated
-instances, (3) selected floating/fixed-width/scalar semantics and APIs, and
-(4) frozen Standard/import/notation registries. Remaining dependent/mutual
-recursion, effects/state/control, proof automation, contracts/VCs and
-assurance requirements follow. No pskernel-core/self-hosting/C5 work yet.
+No new primitive or alternate proof authority was introduced.
+The native Standard signature/body/class/instance audit includes the new
+declarations, but exact RC4 GetElem/index validity, selected remaining
+deriving handlers, Float/scientific/fixed-width data, complete library APIs,
+frozen Standard registry digest and final assurance closure remain open.
+No C5, pskernel-core integration, or self-hosting yet.
 
 ## Current priority: core and essential language conformance first
 
@@ -50,8 +48,8 @@ the selected language surface is sufficient.
 
 Selected language profiles 36–48 and the later module foundation are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`32ee1e2efbeebd08f4c86745bd3d27981cd19f6b`, [Linux run 38275596470](https://github.com/dwijayuda/pskernel/actions/runs/38275596470).
-The shared matrix contains 178 runtime observations per target. This does
+`70415686f1e7c13e4690c4f8bed549b1c882fe61`, [Linux run 38286641968](https://github.com/dwijayuda/pskernel/actions/runs/38286641968).
+The shared matrix contains 185 runtime observations per target. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
 execution remain independent assurance boundaries.
@@ -81,12 +79,12 @@ this development loop.
 | Capability family | Existing implementation/evidence | Remaining mechanisms |
 |---|---|---|
 | Source categories and scopes | Native scoped terms/calls/binders, raw strings, grouped/radix literals, checked `s!` interpolation, selected proof/section grammar | Float/Float32/scientific tokens, exact GetElem and deriving syntax, remaining modifiers and source diagnostics |
-| Type inference and environment | Typed unification/levels/instances and checked arithmetic/BEq/ToString/Inhabited dictionaries, selected Standard registry audit, official RC4 checking | RC4 GetElem/proof-index classes, deriving handler registry, further instances/coercions, complete universe/search semantics and frozen Standard digest |
+| Type inference and environment | Scoped unification/levels/typeclasses, checked arithmetic/BEq/ToString/Inhabited with polymorphic Prod, List and Option dictionaries, Standard signature/body/instance audit, official Lean RC4 checker | Exact GetElem proof-index classes, remaining deriving handlers, floating/scalar/coercion semantics, full universe/search and pinned manifest/digest |
 | Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, nested/multiple typed pattern matrices and nomatch, proof-field storage erasure | Named discriminants, heterogeneous constraints, Type/existential fields, selected nested/mutual data |
 | Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
 | Modules and libraries | Reachable import closure, private hygiene, selected re-exports/body opacity, JS/TS/Rust 3-file executable and V8/Wasmtime GC four-module execution, provenance and entry API | Complete RC4 generated public signature, collision/instance precedence and import ordering semantics |
 | Proofs and contracts | Term proofs and typed goal state, exact/refine/apply/intro/assumption/rfl/constructor, focus/bullets/all_goals/any_goals, cases/induction/case/next checked by official Lean | Complete logical primitives, further goal control/elimination/rewriting, selected automation, VC/effect/spec generation and assumption closure |
-| Control and effects | Checked Bool/Prop/if-let/pattern/nomatch conditionals and selected Id/Option/Except typed do | General effect classes, mutable/early-return/loops, try/catch/finally and registered effect/fidelity laws |
+| Control and effects | Checked Bool/Prop/if-let/match and selected Id/Option/Except typed do, checked Type-0 Except.bind/map/mapError/tryCatch/isOk/toOption and real cross-target error/recovery observations | General effect classes, mutable/early-return/loops, generalized do try/catch/finally and effect/fidelity laws |
 | Executable assurance | Checked prepared graph, complete shared IR gate, native primitive signature/model audit, direct JS/TS/Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
 | Portable source end state | Native portable authoring/import guard | Translate sufficient implemented closure to readable .ps, then explicit source/semantic/fixed-point qualification |
 

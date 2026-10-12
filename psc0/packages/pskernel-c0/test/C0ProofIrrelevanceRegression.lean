@@ -134,6 +134,25 @@ def c0BinderLambdaTail : Nat → PsKernelExpr → PsKernelExpr
         (.sort (.succ PsKernelLevel.zero))
         (c0BinderLambdaTail n term) PsKernelBinderInfo.default
 
+/-- Two nested dependent Pi binder domains. The innermost binder
+    refers past the middle binder to the outermost binder (bvar 1). -/
+def c0BinderDependentPair (width : Nat) (annotate : Bool) :
+    PsKernelExpr :=
+  let innerDomain :=
+    if annotate then PsKernelExpr.mdata 71 (PsKernelExpr.bvar 1)
+    else PsKernelExpr.bvar 1
+  PsKernelExpr.forallE PsKernelName.anonymous
+    (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+    (PsKernelExpr.forallE PsKernelName.anonymous
+      (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+      (PsKernelExpr.forallE PsKernelName.anonymous
+        innerDomain
+        (c0BinderForallTail width
+          (PsKernelExpr.sort PsKernelLevel.zero))
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let session :=
     psKernelMkCheckerSession
@@ -180,6 +199,22 @@ def main : IO Unit := do
     if psKernelC0BinderBodyRangesWithFuel 1 longPi |>.isSome then
       throw (IO.userError "C0 binder metadata did not respect recursion budget")
   IO.println "C0_PERF_REGRESSION exact_binder_body_range_oracle=pass"
+  -- A dependent Pi domain referencing an *outer* binder must see
+  -- substitution variables newest-first. Metadata changes exact syntax
+  -- but not definitional equality; the malformed outer-domain case must
+  -- continue to be rejected by full checking, not accepted by metadata.
+  for width in [0, 4, 12, 64] do
+    let left := c0BinderDependentPair width false
+    let right := c0BinderDependentPair width true
+    match psKernelSessionIsDefEq 4096 session left right with
+    | Except.ok (true, _) => pure ()
+    | Except.ok (false, _) =>
+        throw (IO.userError "C0 dependent binder DefEq lost equivalence")
+    | Except.error err =>
+        throw (IO.userError ("C0 dependent binder DefEq errored: " ++ err))
+  IO.println "C0_PERF_REGRESSION dependent_binder_substitution_order=pass"
+
+
 
   -- A genuine dependent first binder, followed by a long closed Pi
   -- suffix, exercises range invalidation followed by exact bounded

@@ -91,6 +91,23 @@ def c0CompareLambdasWithTail : Nat → PsKernelExpr → PsKernelExpr
         (.sort (.succ PsKernelLevel.zero))
         (c0CompareLambdasWithTail n body) PsKernelBinderInfo.default
 
+def c0CompareDependentForallPair (width : Nat) (annotate : Bool) :
+    PsKernelExpr :=
+  let innerDomain :=
+    if annotate then PsKernelExpr.mdata 71 (PsKernelExpr.bvar 1)
+    else PsKernelExpr.bvar 1
+  PsKernelExpr.forallE PsKernelName.anonymous
+    (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+    (PsKernelExpr.forallE PsKernelName.anonymous
+      (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+      (PsKernelExpr.forallE PsKernelName.anonymous
+        innerDomain
+        (c0CompareForallsWithTail width
+          (PsKernelExpr.sort PsKernelLevel.zero))
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default)
+    PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -790,6 +807,20 @@ def main : IO Unit := do
         if accepted != iterations then
           throw (IO.userError "matched binder DefEq count mismatch")
         IO.println s!"C0_COMPARE round={round} operation=cold_defeq_binder_spine milliseconds={finished-start} binder_depth={depth} lambda={useLambda} samples={iterations}"
+
+    -- DefEq must open de Bruijn variables in the same order across both
+    -- implementations. This is a semantic correctness gate, not a speed
+    -- claim, and uses public checker operations on identical source.
+    for depth in [0, 12, 64] do
+      let left := c0CompareDependentForallPair depth false
+      let right := c0CompareDependentForallPair depth true
+      match psKernelSessionIsDefEq 4096 session left right with
+      | Except.ok (true, _) => pure ()
+      | Except.ok (false, _) =>
+          throw (IO.userError "matched dependent binder was not definitionally equal")
+      | Except.error err =>
+          throw (IO.userError ("matched dependent binder failed: " ++ err))
+    IO.println s!"C0_COMPARE round={round} operation=dependent_binder_order_check result=pass samples=3"
 
     let mut admitted := 0
     let mut rejected := 0

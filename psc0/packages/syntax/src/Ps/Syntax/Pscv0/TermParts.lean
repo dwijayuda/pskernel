@@ -63,8 +63,47 @@ def psPscv0TupleElements (read : PsPscv0TermReader) (fuel : Nat)
     else
       return { value := elementsRev.reverse, cursor := next.cursor }
 
+-- Array literals are ordinary checked Array operations, not a new erased
+-- runtime representation. The caller's expected type solves the element type
+-- of #[]; push arguments solve it for nonempty literals.
+def psPscv0ArrayElements (read : PsPscv0TermReader) (fuel : Nat)
+    (cursor : PsTokenCursor) (acc : List PsSyntaxTerm) :
+    Except PsParseError (PsParseResult (List PsSyntaxTerm)) := do
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    if psTokenCursorAtText cursor "]" then
+      return { value := acc.reverse, cursor }
+    let next ← read cursor
+    let acc := next.value :: acc
+    if psTokenCursorAtText next.cursor "," then
+      let comma ← psTokenCursorExpectText next.cursor ","
+      psPscv0ArrayElements read fuel comma.cursor acc
+    else
+      return { value := acc.reverse, cursor := next.cursor }
+
+def psPscv0ReadArrayLiteral (read : PsPscv0TermReader)
+    (cursor : PsTokenCursor) : Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  let marker ← psTokenCursorExpectText cursor "#"
+  let some bracket := psTokenCursorPeek marker.cursor
+    | throw (.unexpectedEnd "array literal opening")
+  if bracket.text != "[" || marker.token.span.stop.byteOffset != bracket.span.start.byteOffset then
+    throw (psProofScriptExpectedError "adjacent #[ array literal" marker.cursor)
+  let opening ← psTokenCursorExpectText marker.cursor "["
+  let values ← psPscv0ArrayElements read (cursor.remaining.length + 1) opening.cursor []
+  let close ← psTokenCursorExpectText values.cursor "]"
+  let span := psSyntaxSpanJoin marker.token.span close.token.span
+  let name := fun (text : String) =>
+    PsSyntaxTerm.reference (PsSyntaxName.mk ["_root_", "Array", text] span)
+  let empty := PsSyntaxTerm.call (name "emptyWithCapacity")
+    [(none, .natural "0" span)] span
+  let result := values.value.foldl (fun current element =>
+    PsSyntaxTerm.call (name "push") [(none, current), (none, element)] span) empty
+  return { value := result, cursor := close.cursor }
+
 def psPscv0Primary (read : PsPscv0TermReader) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
+  if psTokenCursorAtText cursor "#" then return ← psPscv0ReadArrayLiteral read cursor
   if psTokenCursorAtText cursor "{" then return ← psPscv0ReadRecord read cursor
   if ["Type", "Sort", "Prop"].any (psTokenCursorAtText cursor) then
     return ← psPscv0ReadSort cursor

@@ -216,3 +216,48 @@ def psKernelC0ScratchPromoteVerified
     psKernelC0ScratchPromoteVerifiedRoots scratch [root]
   let target ← targets.head?
   some (committed, target)
+
+/-- A root paired with its exact source store. Constructing this structure
+    makes no validity claim; every observation replays its owning store. -/
+structure PsKernelC0BoundRoot where
+  store : PsKernelC0TermStore
+  root : Nat
+
+/-- Checked source readback: a numeric handle alone is never portable. -/
+def psKernelC0BoundRootRead
+    (bound : PsKernelC0BoundRoot) : Option PsKernelExpr := do
+  if !psKernelC0ReplayValidateStore bound.store then none
+  else psKernelC0DecodeExpr bound.store bound.root
+
+/-- Copy a validated source root into another canonical store by preserving
+    its complete expression, never by reinterpreting its numeric handle.
+    This is a syntax-only operation and supplies no typing judgment. -/
+def psKernelC0BoundRootRehome
+    (target : PsKernelC0TermStore)
+    (bound : PsKernelC0BoundRoot) : Option PsKernelC0BoundRoot := do
+  let expression ← psKernelC0BoundRootRead bound
+  if !psKernelC0ReplayValidateStore target then none
+  else do
+    let (store, root) ← psKernelC0EncodeExpr target expression
+    if !psKernelC0ReplayValidateStore store then none
+    else do
+      let result ← psKernelC0DecodeExpr store root
+      if psKernelExprEqual expression result then
+        some { store := store, root := root }
+      else none
+
+/-- Transactional staging from an independently stored expression. Each
+    source and destination receives its own canonical replay validation. -/
+def psKernelC0ScratchStageBoundRoot
+    (scratch : PsKernelC0Scratch)
+    (bound : PsKernelC0BoundRoot) :
+    Option (PsKernelC0Scratch × Nat) := do
+  if !psKernelC0ScratchValid scratch then none
+  else do
+    let expression ← psKernelC0BoundRootRead bound
+    let (next, root) ← psKernelC0ScratchEncode scratch expression
+    if !psKernelC0ScratchValid next then none
+    else do
+      let actual ← psKernelC0DecodeExpr next.working root
+      if psKernelExprEqual expression actual then some (next, root)
+      else none

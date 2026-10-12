@@ -182,3 +182,15 @@ Native [run 38194880437](https://github.com/dwijayuda/pskernel/actions/runs/3819
 - Original package and Rust backend untouched; no selfhost, bootstrap, fixed-point, or metatheory tasks were run.
 
 **Next engineering work:** instrument the checked application dependency graph and design a family-wide resource-semantics-preserving checked-spine optimization or safe session-canonicalized checker operations only with robust positive/negative differential and matched library evidence. Avoid rewriting acceptance around experimental indexed WHNF until its environment-dependent reduction and exact fuel decisions are complete.
+
+
+
+### 2026-10-12 validated root-cause architecture checkpoint
+
+A standalone private-copy original-instantiation ablation, [CI 38222241004](https://github.com/dwijayuda/pskernel/actions/runs/38222241004), established a clear cause of the whole-checked-application performance regression: C0 fully checked 65/65/66 ms vs original core 40/39/39 ms, while C0 with **only** original instantiate1 substituted returned 40/40/40 ms on the same 48-argument, 80-check fixture. This overturned earlier implications from fixed-input helper microbenchmarks.
+
+C0 `Core/Substitution/Instantiate.lean` now uses a systemic two-strategy single-binder policy: exact closed-term precheck for binder-headed lambda/Pi/let trees avoids changed-flag pair construction; genuinely open binder trees and application-headed terms continue specialized capture-avoiding one-pass substitution. There is no new acceptance shortcut; generic substitution and checking semantics are preserved. Open/closed binder-family differential tests were added.
+
+[CI 38222841665](https://github.com/dwijayuda/pskernel/actions/runs/38222841665) at source `09e68c27822eb45e93e071dc124b81e373383c4d` passed native C0 full build (85 jobs), negative/differential suite, microbenchmarks, original-core matched benchmark, and ablation. C0 hybrid infer-only 19/19/19 ms vs original 82/81/82; fully checked C0 39/40/39 vs original 38/39/39; original-substitution ablation fully checked 40/39/39. All are per-round observations from a single hosted runner, not proof of complete checker superiority. The original core and Rust backend are intact. No self-host or metatheory tests.
+
+An optional workflow_dispatch ablation tool is retained for investigating related regressions; it no longer runs on every source push. **Still pending:** accepting indexed WHNF/DefEq, provenance-safe session term caches, real library checking, memory attribution, and broader conformance.

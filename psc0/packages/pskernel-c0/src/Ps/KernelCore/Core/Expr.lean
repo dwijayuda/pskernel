@@ -391,6 +391,11 @@ def psKernelExprEqualLegacy
             else false
         | _ => false
 
+/--
+  C0 exact expression equality without allocating partial comparator closures.
+  Unlike psKernelExprEq, this preserves binder names and binder annotations.
+  Both functions short-circuit on the first mismatching constructor or field.
+-/
 def psKernelExprEqual
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=

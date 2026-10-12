@@ -23,27 +23,21 @@ def main : IO Unit := do
         | throw (IO.userError "C0 StoreWF root missing")
 
       let corruptHash : PsKernelC0TermStore :=
-        { store with nodes := store.nodes.set! id
-            { root with hash := root.hash + 1 } }
+        { store with nodes := store.nodes.set! id ({ root with hash := root.hash + 1 } })
       let corruptCheckerHash : PsKernelC0TermStore :=
-        { store with nodes := store.nodes.set! id
-            { root with checkerHash := root.checkerHash + 1 } }
+        { store with nodes := store.nodes.set! id ({ root with checkerHash := root.checkerHash + 1 } })
       let corruptDepth : PsKernelC0TermStore :=
-        { store with nodes := store.nodes.set! id
-            { root with depth := root.depth + 1 } }
+        { store with nodes := store.nodes.set! id ({ root with depth := root.depth + 1 } })
       let corruptRange : PsKernelC0TermStore :=
-        { store with nodes := store.nodes.set! id
-            { root with looseBVarRange := root.looseBVarRange + 1 } }
+        { store with nodes := store.nodes.set! id ({ root with looseBVarRange := root.looseBVarRange + 1 } })
       let missingIndex : PsKernelC0TermStore :=
         { store with index := PsKernelC0HashTrie.empty }
       let duplicate : PsKernelC0TermStore :=
         { store with nodes := store.nodes.push root }
       let cycle : PsKernelC0TermStore :=
-        { store with nodes := store.nodes.set! id
-            { root with node := .app id id } }
+        { store with nodes := store.nodes.set! id ({ root with node := .app id id } })
       let dangling : PsKernelC0TermStore :=
-        { store with nodes := store.nodes.set! id
-            { root with node := .app (store.nodes.size + 5) 0 } }
+        { store with nodes := store.nodes.set! id ({ root with node := .app (store.nodes.size + 5) 0 } })
       let malformed := [
         corruptHash, corruptCheckerHash, corruptDepth, corruptRange,
         missingIndex, duplicate, cycle, dangling

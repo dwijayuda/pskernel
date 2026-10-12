@@ -1,4 +1,4 @@
-import Ps.Compiler.Pscv0
+import Ps.Compiler.Pscv0Modules
 import Ps.BackendTs.Readable
 import Ps.BackendRust.Module
 import Ps.BackendWasm.Module
@@ -29,6 +29,10 @@ structure Request where
   outputStem : String := "module"
   targets : List PsEmissionTarget := []
   exports : PsApiExposure := .allRuntime
+  -- Optional explicitly named source dependencies. Empty preserves the
+  -- original isolated single-file entry point and its strict import refusal.
+  moduleName : String := "Main"
+  modules : List PsPscv0ModuleSource := []
 
 structure Timings where
   parseMs : Nat := 0
@@ -70,17 +74,41 @@ private def check (prelude : Lean.Environment) (admissions : String) :
 private def compile (prelude : Lean.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do
   let t0 ← IO.monoMsNow
-  let parsed ← fromResult "parse" (psCompilerParsePscv0 request.source)
+  let project ← if request.modules.isEmpty then
+    pure none
+  else
+    (fromResult "module" (psCompilerPreparePscv0Project request.moduleName
+      (request.modules ++ [{ name := request.moduleName, source := request.source }]))).map some
+  let parsed ← match project with
+    | some _ => pure none
+    | none => (fromResult "parse" (psCompilerParsePscv0 request.source)).map some
   let t1 ← IO.monoMsNow
-  let elaborated ← fromResult "elaborate"
-    ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)
+  let elaborated ← match parsed with
+    | none => pure none
+    | some parsed =>
+      (fromResult "elaborate" ((psElabProgramWithOrigins
+        psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)).map some
   let t2 ← IO.monoMsNow
-  let output ← fromResult "prepare"
-    ((psCompilerPrepareElaboratedWithOutput elaborated.result).mapError psCompilerPscv0Error)
+  let output ← match project with
+    | some value =>
+      pure ({ prepared := value.prepared
+              environment := psSelfHostProdPreludeEnvironment
+              admissions := value.admissions
+              originParents := value.origins.flatMap (·.parents) :
+        PsCompilerPreparationOutput })
+    | none =>
+      match elaborated with
+      | some value => fromResult "prepare"
+          ((psCompilerPrepareElaboratedWithOutput value.result).mapError psCompilerPscv0Error)
+      | none => throw { phase := "prepare", message := "missing prepared source" }
   let t3 ← IO.monoMsNow
   let _ ← fromResult "kernel" (check prelude output.admissions)
   let t4 ← IO.monoMsNow
-  let timings : Timings := {
+  let timings : Timings := if project.isSome then {
+    -- The graph planner owns parsing and each module's elaboration/preparation.
+    parseMs := 0, elaborateMs := 0,
+    prepareMs := t3 - t0, kernelMs := t4 - t3 }
+  else {
     parseMs := t1 - t0, elaborateMs := t2 - t1,
     prepareMs := t3 - t2, kernelMs := t4 - t3 }
   if request.targets.isEmpty then
@@ -92,10 +120,30 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   -- Existing erasure validation is retained until profiling justifies changing it.
   let ir ← fromResult "erase"
     ((psCompilerVerifiedIrFromPrepared output.prepared).mapError psCompilerPscv0Error)
-  let origins := elaborated.origins.flatMap fun batch =>
+  let ir := match project with
+    | none => ir
+    | some value =>
+      let libraryNames := value.libraryNames.map psNameToString
+      let names := libraryNames.filter fun name =>
+        ir.declarations.any (fun d => d.name == name) ||
+        ir.structures.any (fun s => s.name == name) ||
+        ir.inductives.any (fun i => i.name == name)
+      { ir with internalNames := ir.internalNames ++ names }
+  let originBatches : List (String × PsElabBatchOrigin) :=
+    match project with
+    | some value =>
+      value.origins.flatMap fun file =>
+        let sourceName := if file.moduleName == request.moduleName then
+          request.sourceName else file.moduleName ++ ".ps"
+        file.batches.map (fun batch => (sourceName, batch))
+    | none =>
+      match elaborated with
+      | some value => value.origins.map (fun batch => (request.sourceName, batch))
+      | none => []
+  let origins := originBatches.flatMap fun (fileName, batch) =>
     batch.members.map fun member =>
       (psNameToString member.name, {
-        identity := { file := request.sourceName, declaration := psNameToString member.name }
+        identity := { file := fileName, declaration := psNameToString member.name }
         span := batch.span
         generatedReason := match member.role with
           | .sourceDeclaration | .inductiveType | .structureType => none

@@ -147,7 +147,7 @@ def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
   | .error error =>
       -- Old provider diagnostics carry its old version label; do not reuse that
       -- identity in this RC4 host. The error kind still identifies the boundary.
-      return .error { phase := "prelude", message := error.kind.code }
+      return .error { phase := "prelude", message := error.kind.code ++ ": " ++ error.message }
   | .ok prelude =>
       let results ← requests.mapM (fun request => (compile prelude request).run)
       return .ok { preludeMs := t1 - t0, results }

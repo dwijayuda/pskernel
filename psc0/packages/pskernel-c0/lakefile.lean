@@ -62,6 +62,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Checker.Reduction.PrimitiveNat,
     `Ps.KernelCore.Checker.Reduction.Primitives,
     `Ps.KernelCore.Checker.Reduction.Whnf,
+    `Ps.KernelCore.Checker.Reduction.IndexedWhnf,
     `Ps.KernelCore.Checker.Reduction.WhnfCore,
     `Ps.KernelCore.Checker.ResourcePolicy,
     `Ps.KernelCore.Checker.Session,

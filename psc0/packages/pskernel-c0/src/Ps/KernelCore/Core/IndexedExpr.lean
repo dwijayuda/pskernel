@@ -233,3 +233,108 @@ def psKernelC0Intern
         Option.some (Prod.mk next id)
   else
     Option.none
+
+/-
+C0 expression bridge.
+
+The accepting checker continues to use PsKernelExpr. This bridge is exact:
+binder names, binder kinds, metadata, literals, universe arguments and let
+nondependence all round-trip. The representation is *not* a defeq oracle.
+
+Encode only creates children before parents. Decode is bounded by the stored
+node depth, so malformed cycles or dangling IDs cannot silently become terms.
+All identifiers are scoped to a single PsKernelC0TermStore.
+-/
+
+def psKernelC0EncodeExpr
+    (store : PsKernelC0TermStore)
+    (expr : PsKernelExpr) :
+    Option (Prod PsKernelC0TermStore Nat) :=
+  match expr with
+  | .bvar i => psKernelC0Intern store (.bvar i)
+  | .fvar n => psKernelC0Intern store (.fvar n)
+  | .mvar n => psKernelC0Intern store (.mvar n)
+  | .sort l => psKernelC0Intern store (.sort l)
+  | .const n ls => psKernelC0Intern store (.const n ls)
+  | .lit value => psKernelC0Intern store (.lit value)
+  | .app fn arg => do
+      let (s1, f) ← psKernelC0EncodeExpr store fn
+      let (s2, a) ← psKernelC0EncodeExpr s1 arg
+      psKernelC0Intern s2 (.app f a)
+  | .lam name ty body info => do
+      let (s1, t) ← psKernelC0EncodeExpr store ty
+      let (s2, b) ← psKernelC0EncodeExpr s1 body
+      psKernelC0Intern s2 (.lam name t b info)
+  | .forallE name ty body info => do
+      let (s1, t) ← psKernelC0EncodeExpr store ty
+      let (s2, b) ← psKernelC0EncodeExpr s1 body
+      psKernelC0Intern s2 (.forallE name t b info)
+  | .letE name ty value body nondep => do
+      let (s1, t) ← psKernelC0EncodeExpr store ty
+      let (s2, v) ← psKernelC0EncodeExpr s1 value
+      let (s3, b) ← psKernelC0EncodeExpr s2 body
+      psKernelC0Intern s3 (.letE name t v b nondep)
+  | .mdata metadata body => do
+      let (s1, b) ← psKernelC0EncodeExpr store body
+      psKernelC0Intern s1 (.mdata metadata b)
+  | .proj name index body => do
+      let (s1, b) ← psKernelC0EncodeExpr store body
+      psKernelC0Intern s1 (.proj name index b)
+
+/--
+  Fail-closed decoder: the available depth strictly decreases along every
+  legitimate interned edge. No unchecked array indexing or default terms.
+-/
+def psKernelC0DecodeExprWithFuel
+    (fuel : Nat)
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option PsKernelExpr :=
+  match fuel with
+  | 0 => none
+  | remaining + 1 => do
+      let stored ← psKernelC0StoreGet store id
+      match stored.node with
+      | .bvar i => some (.bvar i)
+      | .fvar n => some (.fvar n)
+      | .mvar n => some (.mvar n)
+      | .sort l => some (.sort l)
+      | .const n ls => some (.const n ls)
+      | .lit value => some (.lit value)
+      | .app fn arg => do
+          let f ← psKernelC0DecodeExprWithFuel remaining store fn
+          let a ← psKernelC0DecodeExprWithFuel remaining store arg
+          some (.app f a)
+      | .lam name ty body info => do
+          let t ← psKernelC0DecodeExprWithFuel remaining store ty
+          let b ← psKernelC0DecodeExprWithFuel remaining store body
+          some (.lam name t b info)
+      | .forallE name ty body info => do
+          let t ← psKernelC0DecodeExprWithFuel remaining store ty
+          let b ← psKernelC0DecodeExprWithFuel remaining store body
+          some (.forallE name t b info)
+      | .letE name ty value body nondep => do
+          let t ← psKernelC0DecodeExprWithFuel remaining store ty
+          let v ← psKernelC0DecodeExprWithFuel remaining store value
+          let b ← psKernelC0DecodeExprWithFuel remaining store body
+          some (.letE name t v b nondep)
+      | .mdata metadata body => do
+          let b ← psKernelC0DecodeExprWithFuel remaining store body
+          some (.mdata metadata b)
+      | .proj name index body => do
+          let b ← psKernelC0DecodeExprWithFuel remaining store body
+          some (.proj name index b)
+
+/-- Public decode checks valid arena-local handles before decoding. -/
+def psKernelC0DecodeExpr
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option PsKernelExpr := do
+  let stored ← psKernelC0StoreGet store id
+  psKernelC0DecodeExprWithFuel stored.depth store id
+
+/-- Exact syntactic equality via same-store canonical IDs. -/
+def psKernelC0EqualNodeIds
+    (store : PsKernelC0TermStore)
+    (left right : Nat) : Bool :=
+  psKernelC0StoreValid store left &&
+  psKernelC0StoreValid store right &&
+  Nat.beq left right

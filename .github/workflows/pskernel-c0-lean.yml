@@ -52,7 +52,8 @@ jobs:
           trap 'rm -rf "$baseline"' EXIT
           cp -R "$core/src" "$baseline/src"
           cp "$c0/lean-toolchain" "$baseline/lean-toolchain"
-          sed -e '/`Ps.KernelCore.Core.IndexedExpr,/d' \
+          sed -e '/`Ps.KernelCore.Checker.IndexedSession,/d' \
+              -e '/`Ps.KernelCore.Core.IndexedExpr,/d' \
               -e '/`Ps.KernelCore.Core.IndexedReduction,/d' \
               -e '/`Ps.KernelCore.Checker.Reduction.IndexedWhnf,/d' \
               "$c0/lakefile.lean" > "$baseline/lakefile.lean"

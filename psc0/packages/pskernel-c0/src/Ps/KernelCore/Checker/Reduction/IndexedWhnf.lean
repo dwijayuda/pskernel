@@ -169,6 +169,44 @@ def psKernelC0IndexedWhnf
   psKernelC0IndexedWhnfWithFuel fuel store id []
 
 /-
+  Constructor projection is another exact *one-step* indexed family.
+  It observes the already constructor-shaped value, not a reconstructed
+  source term. This mirrors psKernelReduceProjCore exactly: UInt32 index
+  limit, constructor lookup, inductive-name match, field position after
+  numParams, and original application argument order.
+
+  Struct-value WHNF, literal-string expansion, recursor/native hooks and
+  resource accounting remain external. A missing match is never evidence
+  that a projection is irreducible for the full checker.
+-/
+def psKernelC0IndexedReduceProjectionOnce
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option (PsKernelC0TermStore × Nat) := do
+  let root ← psKernelC0StoreGet store id
+  match root.node with
+  | .proj typeName index structId =>
+      if psKernelNatGt index psKernelLeanUInt32Max then none
+      else do
+        let structEntry ← psKernelC0StoreGet store structId
+        let (fn, args) ← psKernelC0IndexedAppHeadWithFuel
+          structEntry.depth store structId []
+        let head ← psKernelC0StoreGet store fn
+        match head.node with
+        | .const ctorName _ =>
+            let info ← psKernelEnvironmentFind
+              context.environment ctorName
+            match info with
+            | .ctorInfo ctor =>
+                if psKernelNameEq ctor.induct typeName then do
+                  let field ← args[ctor.numParams + index]?
+                  some (store, field)
+                else none
+            | _ => none
+        | _ => none
+  | _ => none
+
+/-
   Opt-in context-sensitive indexed reduction FRAGMENT.
 
   This composes the already independent indexed beta/zeta/metadata engine
@@ -197,17 +235,23 @@ def psKernelC0IndexedContextFragmentWithFuel
   | remaining + 1 => do
       let (syntacticStore, syntacticId) ←
         psKernelC0IndexedWhnf fuel store id
-      match psKernelC0IndexedUnfoldHeadOnce
-          context syntacticStore syntacticId with
-      | some (nextStore, unfoldedId) =>
-          -- Self-referential local/environment declarations are malformed
-          -- for general admission. Never return a positive result here
-          -- merely because a candidate rewrite made no progress.
-          if unfoldedId == syntacticId then
+      -- A projection can select an already constructor-headed indexed
+      -- value without source reconstruction. Otherwise try local/delta.
+      let nextStep :=
+        match psKernelC0IndexedReduceProjectionOnce
+            context syntacticStore syntacticId with
+        | some reduction => some reduction
+        | none =>
+            psKernelC0IndexedUnfoldHeadOnce
+              context syntacticStore syntacticId
+      match nextStep with
+      | some (nextStore, nextId) =>
+          -- Malformed cyclic definitions cannot silently become success.
+          if nextId == syntacticId then
             none
           else
             psKernelC0IndexedContextFragmentWithFuel remaining
-              context nextStore unfoldedId true
+              context nextStore nextId true
       | none =>
           if hadProgress || syntacticId != id then
             some (syntacticStore, syntacticId)

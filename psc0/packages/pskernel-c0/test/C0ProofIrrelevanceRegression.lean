@@ -1085,6 +1085,70 @@ def main : IO Unit := do
         throw (IO.userError "C0 indexed fragment ignored structural budget")
   IO.println "C0_PERF_REGRESSION continuous_indexed_context_fragment=pass"
 
+  -- Indexed constructor projection observes the exact already-reduced
+  -- constructor spine and returns an existing field handle. Verify the
+  -- same success/failure categories as source psKernelReduceProjCore for
+  -- a multi-parameter constructor, including arity and UInt32 bounds.
+  let indexCtor := PsKernelName.str PsKernelName.anonymous "C0.IndexedCtor"
+  let indexInduct := PsKernelName.str PsKernelName.anonymous "C0.IndexedType"
+  let indexCtorInfo : PsKernelConstructorInfo := {
+    base := { name := indexCtor, levelParams := [], type := sort0 }
+    induct := indexInduct
+    cidx := 0
+    numParams := 1
+    numFields := 2
+    isUnsafe := false
+  }
+  let projectionEnv := psKernelEnvironmentAddUnchecked
+    psKernelEnvironmentEmpty (.ctorInfo indexCtorInfo)
+  let projectionContext := psKernelCheckerContextEmpty projectionEnv
+  let structExpr := PsKernelExpr.app
+    (PsKernelExpr.app
+      (PsKernelExpr.app (.const indexCtor []) sort0) sort1)
+    (.bvar 6)
+  for inductName in [indexInduct, polymorphicName] do
+    for index in [0, 1, 2, psKernelLeanUInt32Max + 1] do
+      let expression := PsKernelExpr.proj inductName index structExpr
+      match psKernelC0EncodeExpr psKernelC0StoreEmpty expression with
+      | none => throw (IO.userError "C0 indexed projection encode failed")
+      | some (stored, id) =>
+          match psKernelReduceProjCore projectionContext inductName index
+                structExpr,
+                psKernelC0IndexedReduceProjectionOnce
+                  projectionContext stored id with
+          | none, none => pure ()
+          | some reference, some (next, resultId) =>
+              match psKernelC0DecodeExpr next resultId with
+              | some result =>
+                  if !(psKernelExprEqual reference result) ||
+                      next.nodes.size != stored.nodes.size then
+                    throw (IO.userError "C0 indexed projection selected wrong field")
+              | none =>
+                  throw (IO.userError "C0 indexed projection result undecodable")
+          | _, _ =>
+              throw (IO.userError "C0 indexed projection mismatch")
+
+  -- The full experimental fragment can now combine an existing constructor
+  -- projection with indexed beta/zeta/local/delta without source roundtrip.
+  let projectionExpr := PsKernelExpr.proj indexInduct 1 structExpr
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty projectionExpr with
+  | none => throw (IO.userError "C0 indexed projection fragment encode failed")
+  | some (stored, id) =>
+      match psKernelC0IndexedContextFragment 4096
+          projectionContext stored id,
+          psKernelSessionWhnf 4096 {
+            context := projectionContext
+            state := psKernelCheckerStateEmpty
+          } projectionExpr with
+      | some (next, resultId), Except.ok (reference, _) =>
+          match psKernelC0DecodeExpr next resultId with
+          | some value =>
+              if !(psKernelExprEqual value reference) then
+                throw (IO.userError "C0 indexed projection fragment WHNF diverged")
+          | none => throw (IO.userError "C0 indexed projection fragment decode failed")
+      | _, _ => throw (IO.userError "C0 indexed projection fragment failed")
+  IO.println "C0_PERF_REGRESSION indexed_constructor_projection=pass"
+
   -- A direct application-spine selector must match the historical
   -- fully materialized argument-list representation for every index.
   for arity in [0, 1, 2, 3, 32, 128] do

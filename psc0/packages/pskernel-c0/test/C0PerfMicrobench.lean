@@ -329,6 +329,34 @@ def main : IO Unit := do
     throw (IO.userError "equality comparison results diverged")
   IO.println s!"C0_BENCH paired_equality legacy_ms={finishedOld - startedOld} paired_ms={finishedNew - startedNew} hits={fastHits} iterations={iterations}"
 
+  -- Exact (binder-name-sensitive) equality also feeds syntax interning and
+  -- session-owned term retention. Keep a paired historical comparison rather
+  -- than treating equality's reduced allocation as a throughput guarantee.
+  let nameA := PsKernelName.str PsKernelName.anonymous "ExactA"
+  let nameB := PsKernelName.str PsKernelName.anonymous "ExactB"
+  let closedA := PsKernelExpr.lam nameA (PsKernelExpr.sort PsKernelLevel.zero)
+    first PsKernelBinderInfo.default
+  let closedB := PsKernelExpr.lam nameB (PsKernelExpr.sort PsKernelLevel.zero)
+    first PsKernelBinderInfo.default
+  let exactRuns := 15000
+  let mut legacyExact := 0
+  let exactLegacyStart ← IO.monoMsNow
+  for k in [:exactRuns] do
+    let right := if k % 2 == 0 then closedA else closedB
+    if psKernelExprEqualLegacy closedA right then
+      legacyExact := legacyExact + 1
+  let exactLegacyEnd ← IO.monoMsNow
+  let mut directExact := 0
+  let exactDirectStart ← IO.monoMsNow
+  for k in [:exactRuns] do
+    let right := if k % 2 == 0 then closedA else closedB
+    if psKernelExprEqual closedA right then
+      directExact := directExact + 1
+  let exactDirectEnd ← IO.monoMsNow
+  if legacyExact != directExact then
+    throw (IO.userError "C0 exact equality implementation changed matches")
+  IO.println s!"C0_BENCH exact_equality legacy_ms={exactLegacyEnd-exactLegacyStart} direct_ms={exactDirectEnd-exactDirectStart} iterations={exactRuns} hits={directExact}"
+
   let mut oldChanged : Nat := 0
   let oldStart ← IO.monoMsNow
   for k in [:iterations] do

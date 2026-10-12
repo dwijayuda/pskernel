@@ -985,10 +985,20 @@ private def projectBoundaries : IO Unit := do
     psSelfHostProdPreludeEnvironment psLocalEmpty runtimeFunction
   let proofKind := psErasureClassifyBinder
     psSelfHostProdPreludeEnvironment psLocalEmpty (.constE (psRootName "True") [])
-  unless (match psIndexKind with | .type => true | _ => false) &&
+  unless (match psIndexKind with | .index => true | _ => false) &&
       (match runtimeKind with | .runtime => true | _ => false) &&
       (match proofKind with | .proof => true | _ => false) do
     throw (IO.userError "type-family parameter erasure confused predicates with runtime functions/proofs")
+  let some getElemFamily := psEnvironmentFindInductive
+      psSelfHostProdPreludeEnvironment psStandardGetElemName
+    | throw (IO.userError "checked GetElem family is missing")
+  let reifiedSourceIndices ← get "GetElem source/type parameter plan"
+    ((psErasureInductiveSourceTypeIndices psSelfHostProdPreludeEnvironment
+      (psErasureScopeEmpty []) getElemFamily).mapError (fun _ =>
+      "GetElem parameter telescope cannot be classified"))
+  unless reifiedSourceIndices == [0, 1, 2] do
+    throw (IO.userError "GetElem.valid escaped the erased predicate-index contract")
+
   let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
     (.definitionDecl
       (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []

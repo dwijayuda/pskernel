@@ -4,7 +4,7 @@
 
 - Official Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - Selected native environment: `psSelfHostProdPreludeEnvironment`.
-- Current qualified executable source: `03ea9ac53664ce0c9b45ee4b23b09c284bf01264`; [all-green Linux run 38296669991](https://github.com/dwijayuda/pskernel/actions/runs/38296669991).
+- Current qualified executable source: `748a4fb216cebde4feb155946fed574a9fde4a5f`; [all-green Linux run 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372).
 - Earlier 208-declaration FNV qualification: `c810d6fe15d064968008d09849efd9ac5b2820de`, [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524). Portable SHA-256 first qualified in `2a75d31c`, [Linux 38295519668](https://github.com/dwijayuda/pskernel/actions/runs/38295519668); mandatory dual gate qualified `381ae99f`, [Linux 38295808926](https://github.com/dwijayuda/pskernel/actions/runs/38295808926).
 - Snapshot records: **212 checked declarations**, **11 registered classes**, **36 ordered instance registrations**.
 - Selected roster FNV: **`fnv1a64:9152255662807064572`**.
@@ -27,7 +27,11 @@ UTF-8 bytes (FIPS 180-4 algorithm); it is tested against the published empty,
 ASCII and Unicode known-answer vectors. `psStandardSnapshotValidate` must
 first pass exact selected declaration/instance auditing, then match the
 explicit FNV and SHA-256 constants. Wrong expected SHA-256 and added alias
-registrations fail closed. No crypto FFI or unchecked hash primitive is used.
+registrations fail closed.
+This mandatory validator is now called by direct PSCV0 elaboration, the native
+multi-module project planner and once per native batch host invocation before
+admission or executable emission. The host reports Standard integrity drift
+at the `prelude` phase; it does not substitute for official Lean kernel checks. No crypto FFI or unchecked hash primitive is used.
 
 The four new declarations since the previous 208-entry freeze implement
 `List.take`/`List.drop` and their checked `List.rec`/`Nat.rec`

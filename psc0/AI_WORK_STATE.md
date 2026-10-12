@@ -4,8 +4,8 @@
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** `psc0/pscv0-v7-native-lean-v1`
 **Existing draft PR:** https://github.com/dwijayuda/pskernel/pull/109
-**Last qualified EXECUTABLE source commit:** `03ea9ac53664ce0c9b45ee4b23b09c284bf01264`
-**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38296669991 — all jobs passed.
+**Last qualified EXECUTABLE source commit:** `748a4fb216cebde4feb155946fed574a9fde4a5f`
+**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38297363372 — all jobs passed.
 **Prior documentation-only commit:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`.
 **Official checker:** Lean `4.35.0-rc4`, upstream SHA `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 **Source qualification profile:** `pscv0-v7-native-bounded/48`. Profile 49's module foundation is not a claim of completed language conformance.
@@ -30,6 +30,8 @@
 - **Native selected Standard digest:** checked and pinned portable SHA-256 in `Ps.Environment.StandardSnapshot`, with the existing canonical serializer, exact-declaration audits, published test vectors (including UTF-8), and mandatory FNV + SHA-256 drift refusal. Current 212/11/36 roster: FNV `fnv1a64:9152255662807064572`, SHA-256 `sha256:13e7007c324ca40d0d871d2bc4856084796dd451891d7a0096216e94197b211e`. No external crypto service, unchecked FFI or new trusted kernel primitive was added. This protects integrity of the *selected* payload only. The complete import/notation/coercion/deriving/tactic/effect/axiom closure and independent supply-chain attestation remain unresolved.
 - **Native checked collection APIs:** added `List.take(count, xs)` and `List.drop(count, xs)` as ordinary recursor-backed definitions with source tests that prove zero-count, in-range and beyond-length results by kernel-checked `rfl`. These source programs passed official admission and emitted JS/TS/Rust artifacts in the existing native integration test. The existing shared 187-observation execution regression across JS/TS/Rust/Wasm remained green; do not count new API-specific Wasm runtime parity as independently proven until added to the shared observation corpus.
 - **Qualified executable SHA and CI:** `03ea9ac53664ce0c9b45ee4b23b09c284bf01264`, [Linux Actions 38296669991](https://github.com/dwijayuda/pskernel/actions/runs/38296669991) — passed. Source remains entirely portable native `.lean` and PR #109 remains draft.
+- **Production integrity fail-closed:** commit `748a4fb216cebde4feb155946fed574a9fde4a5f`, [Linux 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372) — **PASSED**. `psCompilerValidatePscv0Standard` now gates direct single-module compilation and multi-module preparation; the native host also checks once before batch preparation and emits a `prelude` diagnostic for registry drift. This makes FNV+SHA-256 expected values enforced on the actual native production admission paths, not only in the test harness. This is distinct from outstanding verified-emission proof/assumption/effect closure.
+
 - **Phase A not complete:** no general proof-carrying `GetElem`/`GetElem?` or index-validity automation; no full allowlisted deriving, numeric/Float/BitVec/ByteArray and selected IO/effect APIs; no complete cryptographic Standard/assumption manifest. Phases B, C, D and E remain open. Explicitly avoid claiming final verification-gated emission.
 
 ## Full execution phases — one integrated dependency-driven plan

@@ -2,8 +2,8 @@
 
 ## Latest qualified native compiler milestone — 13 October 2026
 
-**Qualified executable SHA:** `03ea9ac53664ce0c9b45ee4b23b09c284bf01264`.
-**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38296669991.
+**Qualified executable SHA:** `748a4fb216cebde4feb155946fed574a9fde4a5f`.
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38297363372.
 **Official Lean:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
 **Bounded source profile:** `pscv0-v7-native-bounded/48`, not complete v7.
 
@@ -26,7 +26,7 @@ Float/Float32/scientific/fixed-width/BitVec, collection and IO API closure;
 complete cryptographic provenance/axiom/environment closure. B–E remain open.
 Previously qualified selected roster was 208/11/36 at `c810d6fe`,
 [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524).
-The new source checkpoint passed [Linux 38296669991](https://github.com/dwijayuda/pskernel/actions/runs/38296669991).
+The collection/dual-digest source checkpoint passed [Linux 38296669991](https://github.com/dwijayuda/pskernel/actions/runs/38296669991). The subsequent production-integrity source gate qualified at `748a4fb216cebde4feb155946fed574a9fde4a5f`, [Linux 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372): single-file, project-graph and batch compiler entry points now fail closed on selected Standard roster drift.
 
 ## Current priority: core and essential language conformance first
 
@@ -46,7 +46,7 @@ the selected language surface is sufficient.
 
 Selected language profiles 36–48 and the later module foundation are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`03ea9ac53664ce0c9b45ee4b23b09c284bf01264`, [Linux run 38296669991](https://github.com/dwijayuda/pskernel/actions/runs/38296669991).
+`748a4fb216cebde4feb155946fed574a9fde4a5f`, [Linux run 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372).
 The shared matrix contains 187 runtime observations per target. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target

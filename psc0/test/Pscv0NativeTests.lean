@@ -58,6 +58,13 @@ private def application : String :=
   "const stdListReverseRuntime: Nat := Option.getD(List.get?(List.reverse([4, 5]), 0), 0)\n" ++
   "const stdListGetOutsideRuntime: Nat := Option.getD(List.get?([4, 5], 8), 99)\n" ++
   "const stdOptionRuntime: Nat := Option.getD(Option.bind(Option.some(3), fun (n: Nat) => Option.some(Nat.succ(n))), 0)\n" ++
+  "const stdExceptSeed: Except String Nat := Except.ok(4)\n" ++
+  "const stdExceptBad: Except String Nat := Except.error(\"bad\")\n" ++
+  "const stdExceptMapRuntime: Nat := Option.getD(Except.toOption(Except.map(Nat.succ, stdExceptSeed)), 0)\n" ++
+  "const stdExceptBindRuntime: Nat := Option.getD(Except.toOption(Except.bind(stdExceptSeed, fun (n: Nat) => Except.ok(Nat.add(n, 2)))), 0)\n" ++
+  "const stdExceptRecoveryRuntime: Nat := Option.getD(Except.toOption(Except.tryCatch(Except.mapError(fun (s: String) => String.Internal.length(s), stdExceptBad), fun (len: Nat) => Except.ok(len))), 0)\n" ++
+  "const stdExceptIsOkRuntime: Bool := Except.isOk(stdExceptSeed)\n" ++
+  "const stdExceptFailureRuntime: Nat := Option.getD(Except.toOption(stdExceptBad), 77)\n" ++
   "const appendSimple: Bool := if (\"left\" ++ \"right\" = \"leftright\") { true } else { false }\n" ++
   "const appendUnicode: Bool := if (\"🍋\" ++ \"é\" = \"🍋é\") { true } else { false }\n" ++
   "const appendGrouped: Bool := if ((\"A\" ++ \"B\") ++ \"C\" = \"ABC\") { true } else { false }\n" ++

@@ -21,7 +21,7 @@ def unique_region(text: str, start: str, end: str) -> tuple[int, int]:
 
 def main() -> None:
     if len(sys.argv) not in (3, 4):
-        raise SystemExit("usage: C0Ablation.py ORIGINAL_CORE COPY_OF_C0 [instantiate1|environment_index]")
+        raise SystemExit("usage: C0Ablation.py ORIGINAL_CORE COPY_OF_C0 [instantiate1|environment_index|local_index_disabled]")
     original = Path(sys.argv[1]).resolve()
     variant = Path(sys.argv[2]).resolve()
     kind = sys.argv[3] if len(sys.argv) == 4 else "instantiate1"
@@ -45,8 +45,8 @@ def main() -> None:
         # ordered declaration list, exact shadowing and checker rules remain.
         file = Path("src/Ps/KernelCore/Core/LocalContext.lean")
         current = (variant / file).read_text()
-        start = "def psKernelC0LocalContextNextIndex\\n"
-        end = "def psKernelLocalContextFind\\n"
+        start = "def psKernelC0LocalContextNextIndex\n"
+        end = "def psKernelLocalContextFind\n"
         a, b = unique_region(current, start, end)
         substitute = """def psKernelC0LocalContextNextIndex
     (_context : PsKernelLocalContext)

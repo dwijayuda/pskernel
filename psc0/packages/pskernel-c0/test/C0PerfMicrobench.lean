@@ -117,6 +117,119 @@ def c0BenchBinderStore (historical : Bool) (count : Nat) :
     store := next
   pure store
 
+/- Exact historical production worker, isolated to native benchmark source. -/
+def c0BenchLegacyInferAppOnlyLoopWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    List PsKernelExpr ->
+    Nat ->
+    Nat ->
+    PsKernelExpr ->
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  match fuel with
+  | Nat.zero =>
+      fun
+        (_whnf :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          Except String
+            (Prod PsKernelExpr PsKernelCheckerState))
+        (_context : PsKernelCheckerContext)
+        (_state : PsKernelCheckerState)
+        (_args : List PsKernelExpr)
+        (_index : Nat)
+        (_instantiated : Nat)
+        (_current : PsKernelExpr) =>
+        Except.error
+          "kernel inference budget exhausted"
+  | Nat.succ remaining =>
+      let smaller :=
+        c0BenchLegacyInferAppOnlyLoopWithFuel remaining;
+      fun
+        (whnf :
+          PsKernelCheckerContext ->
+          PsKernelCheckerState ->
+          PsKernelExpr ->
+          Except String
+            (Prod PsKernelExpr PsKernelCheckerState))
+        (context : PsKernelCheckerContext)
+        (state : PsKernelCheckerState)
+        (args : List PsKernelExpr)
+        (index : Nat)
+        (instantiated : Nat)
+        (current : PsKernelExpr) =>
+        let argCount :=
+          psKernelExprListLength args;
+        if psKernelNatLt index argCount then
+          match current with
+          | PsKernelExpr.forallE _ _ body _ =>
+              smaller
+                whnf
+                context
+                state
+                args
+                (Nat.succ index)
+                instantiated
+                body
+          | _ =>
+              let pending :=
+                psKernelExprListTake
+                  (Nat.sub index instantiated)
+                  (psKernelExprListDrop
+                    instantiated
+                    args);
+              let exposed :=
+                psKernelExprInstantiateRev
+                  current
+                  pending;
+              match
+                  psKernelEnsureForallWith
+                    whnf
+                    context
+                    state
+                    exposed with
+              | Except.error error =>
+                  Except.error error
+              | Except.ok forallResult =>
+                  let view :=
+                    Prod.fst forallResult;
+                  smaller
+                    whnf
+                    context
+                    (Prod.snd forallResult)
+                    args
+                    (Nat.succ index)
+                    index
+                    view.body
+        else
+          Except.ok
+            (Prod.mk
+              (psKernelExprInstantiateRev
+                current
+                (psKernelExprListDrop
+                  instantiated
+                  args))
+              state)
+
+
+/-- Large forall spine with a constant result, to isolate repeated argument
+    counting rather than environment-dependent reduction or type checking. -/
+def c0BenchForallSpine : Nat → PsKernelExpr
+  | 0 => .sort PsKernelLevel.zero
+  | n + 1 =>
+      .forallE PsKernelName.anonymous
+        (.sort PsKernelLevel.zero)
+        (c0BenchForallSpine n)
+        PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -643,3 +756,44 @@ def main : IO Unit := do
       nextNodeTotal != binderRuns * (binderCount + 2) then
     throw (IO.userError "C0 canonical binder benchmark node divergence")
   IO.println s!"C0_BENCH binder_intern_hash legacy_ms={legacyBinderEnd-legacyBinderStart} exact_ms={exactBinderEnd-exactBinderStart} runs={binderRuns} binders={binderCount}"
+
+
+  let piDepth := 192
+  let piArgs : List PsKernelExpr :=
+    List.replicate piDepth (PsKernelExpr.sort PsKernelLevel.zero)
+  let piType := c0BenchForallSpine piDepth
+  let count := psKernelExprListLength piArgs
+  let piContext := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
+  let piWhnf :=
+    fun (_ctx : PsKernelCheckerContext)
+        (st : PsKernelCheckerState)
+        (term : PsKernelExpr) =>
+      Except.ok (term, st)
+  let piRuns := 350
+  let mut oldPiPassed := 0
+  let oldPiStart ← IO.monoMsNow
+  for _ in [:piRuns] do
+    match c0BenchLegacyInferAppOnlyLoopWithFuel
+        (count+1) piWhnf piContext psKernelCheckerStateEmpty piArgs
+        0 0 piType with
+    | Except.ok (result, _) =>
+        if psKernelExprEqual result (PsKernelExpr.sort PsKernelLevel.zero) then
+          oldPiPassed := oldPiPassed + 1
+        else throw (IO.userError "C0 old infer-only spine returned unexpected type")
+    | Except.error err => throw (IO.userError ("C0 old infer-only spine failed: " ++ err))
+  let oldPiEnd ← IO.monoMsNow
+  let mut newPiPassed := 0
+  let newPiStart ← IO.monoMsNow
+  for _ in [:piRuns] do
+    match psKernelInferAppOnlyLoopWithFuelCount
+        (count+1) count piWhnf piContext psKernelCheckerStateEmpty piArgs
+        0 0 piType with
+    | Except.ok (result, _) =>
+        if psKernelExprEqual result (PsKernelExpr.sort PsKernelLevel.zero) then
+          newPiPassed := newPiPassed + 1
+        else throw (IO.userError "C0 counted infer-only spine returned unexpected type")
+    | Except.error err => throw (IO.userError ("C0 counted infer-only spine failed: " ++ err))
+  let newPiEnd ← IO.monoMsNow
+  if oldPiPassed != piRuns || newPiPassed != piRuns then
+    throw (IO.userError "C0 infer-only spine results diverged")
+  IO.println s!"C0_BENCH infer_only_arity historical_ms={oldPiEnd-oldPiStart} counted_ms={newPiEnd-newPiStart} depth={piDepth} runs={piRuns}"

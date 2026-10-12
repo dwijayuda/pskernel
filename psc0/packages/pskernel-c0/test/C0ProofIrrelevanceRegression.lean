@@ -320,3 +320,29 @@ def main : IO Unit := do
                       if !(psKernelExprEqual result expected) then
                         throw (IO.userError "C0 indexed beta substitution differs from reference")
   IO.println "C0_PERF_REGRESSION indexed_beta_substitution=pass"
+
+  -- Every index-reused application contains two references to the same
+  -- child. Without per-(term, binder-depth) memoization, substitution would
+  -- revisit an exponentially growing logical tree.
+  match psKernelC0Intern psKernelC0StoreEmpty (.bvar 0) with
+  | Option.none => throw (IO.userError "C0 shared-DAG leaf admission failed")
+  | Option.some (seedStore, seedId) =>
+      match psKernelC0Intern seedStore (.bvar 42) with
+      | Option.none => throw (IO.userError "C0 shared-DAG replacement failed")
+      | Option.some (seed2, replacementId) =>
+          let mut dagStore := seed2
+          let mut dagId := seedId
+          for _ in [:24] do
+            match psKernelC0Intern dagStore (.app dagId dagId) with
+            | Option.none => throw (IO.userError "C0 shared DAG construction failed")
+            | Option.some (next, nextId) =>
+                dagStore := next
+                dagId := nextId
+          match psKernelC0Instantiate1Indexed dagStore dagId replacementId with
+          | Option.none => throw (IO.userError "C0 memoized DAG rewrite failed")
+          | Option.some (rewritten, resultId) =>
+              if !(psKernelC0StoreValid rewritten resultId) then
+                throw (IO.userError "C0 rewrite produced invalid handle")
+              if rewritten.nodes.size > 90 then
+                throw (IO.userError "C0 DAG rewrite lost structural sharing")
+  IO.println "C0_PERF_REGRESSION memoized_indexed_dag=pass"

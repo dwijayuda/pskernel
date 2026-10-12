@@ -50,6 +50,18 @@ def c0CompareCheckedLambda : Nat → PsKernelExpr
         (c0CompareCheckedLambda n)
         PsKernelBinderInfo.default
 
+/-- Closed lambda source that genuinely uses a binder under the full
+    spine. With depth binders, any index < depth refers to a local with type
+    Sort 1; the expected function type is c0CompareCheckedPi depth.
+    These cases exercise exact local-context lookup, unlike a constant body. -/
+def c0CompareLocalRefLambdas : Nat → Nat → PsKernelExpr
+  | 0, index => .bvar index
+  | n + 1, index =>
+      .lam PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (c0CompareLocalRefLambdas n index)
+        PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -371,6 +383,44 @@ def main : IO Unit := do
       if !psKernelEnvironmentContains deepEnv (PsKernelName.num deepBase i) then
         throw (IO.userError "matched deep library missing declaration")
     IO.println s!"C0_COMPARE round={round} operation=admit_deep_library_chain milliseconds={deepEnd-deepStart} declarations={deepCount} nested_every=4 binder_depth=48"
+
+    -- Complete checked admission where the body uses an inner, middle or
+    -- outer binder. Compare identical semantic decisions and runner-local
+    -- costs against the untouched original package.
+    let referenceDepth := 96
+    let referenceType := c0CompareCheckedPi referenceDepth
+    let referenceBase := PsKernelName.str PsKernelName.anonymous "C0LocalReference"
+    for offset in [0, referenceDepth / 2, referenceDepth - 1] do
+      let referenceBody := c0CompareLocalRefLambdas referenceDepth offset
+      let referenceRuns := 20
+      let mut referenceAccepted := 0
+      let referenceStart ← IO.monoMsNow
+      for i in [:referenceRuns] do
+        let declarationName := PsKernelName.num
+          (PsKernelName.num referenceBase offset) i
+        let declaration : PsKernelDefinitionInfo := {
+          base := {
+            name := declarationName
+            levelParams := []
+            type := referenceType
+          }
+          value := referenceBody
+          hints := PsKernelReducibilityHints.abbrevHint
+          safety := PsKernelDefinitionSafety.safe
+        }
+        match psKernelAddDefinition 4096 psKernelEnvironmentEmpty declaration
+            4096 psKernelLeanNatMaxSizeDefault with
+        | Except.ok accepted =>
+            if psKernelEnvironmentContains accepted declarationName then
+              referenceAccepted := referenceAccepted + 1
+            else
+              throw (IO.userError "local reference declaration missing after admission")
+        | Except.error err =>
+            throw (IO.userError ("valid local reference declaration rejected: " ++ err))
+      let referenceEnd ← IO.monoMsNow
+      if referenceAccepted != referenceRuns then
+        throw (IO.userError "local reference benchmark admission mismatch")
+      IO.println s!"C0_COMPARE round={round} operation=admit_local_reference milliseconds={referenceEnd-referenceStart} declarations={referenceRuns} binder_depth={referenceDepth} bvar_index={offset}"
 
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do

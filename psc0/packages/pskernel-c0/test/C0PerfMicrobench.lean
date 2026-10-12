@@ -249,6 +249,14 @@ def c0BenchCheckedSpine : Nat → PsKernelExpr
         (PsKernelExpr.sort (.succ PsKernelLevel.zero))
         (c0BenchCheckedSpine n) PsKernelBinderInfo.default
 
+/-- A real admitted 192-argument function type. -/
+def c0BenchCheckedForalls : Nat → PsKernelExpr
+  | 0 => PsKernelExpr.sort PsKernelLevel.zero
+  | n + 1 =>
+      PsKernelExpr.forallE PsKernelName.anonymous
+        (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+        (c0BenchCheckedForalls n) PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -408,13 +416,26 @@ def main : IO Unit := do
 
   -- Compare whole fully checked application judgments in two C0 paths.
   -- Preserve the original recursive accepting checker as differential oracle.
-  let spineArgs := 48
+  let spineArgs := 192
+  let spineName :=
+    PsKernelName.str PsKernelName.anonymous "C0FramedCheckedAxiom"
+  let spineAxiom : PsKernelAxiomInfo := {
+    base := { name := spineName, levelParams := [],
+      type := c0BenchCheckedForalls spineArgs }
+    isUnsafe := false
+  }
+  let spineEnv ←
+    match psKernelAddAxiom 4096 psKernelEnvironmentEmpty spineAxiom
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("checked spine axiom rejected: " ++ err))
   let checkedSpine := (List.range spineArgs).foldl
     (fun expr _ => PsKernelExpr.app expr
       (PsKernelExpr.sort PsKernelLevel.zero))
-    (c0BenchCheckedSpine spineArgs)
-  let checkedContext := psKernelCheckerContextEmpty psKernelEnvironmentEmpty
-  let checkedIterations := 80
+    (PsKernelExpr.const spineName [])
+  let checkedContext := psKernelCheckerContextEmpty spineEnv
+  let checkedIterations := 60
   let originalStart ← IO.monoMsNow
   let mut originalOk := 0
   for _ in [:checkedIterations] do
@@ -423,7 +444,7 @@ def main : IO Unit := do
     match psKernelCheckWithFuel 4096 whnf defeq checkedContext
         psKernelCheckerStateEmpty checkedSpine with
     | Except.ok (type, _) =>
-        if psKernelExprEqual type (PsKernelExpr.sort (.succ PsKernelLevel.zero)) then
+        if psKernelExprEqual type (PsKernelExpr.sort PsKernelLevel.zero) then
           originalOk := originalOk + 1
         else throw (IO.userError "original checked spine type mismatch")
     | Except.error err => throw (IO.userError ("original checked spine: " ++ err))
@@ -436,7 +457,7 @@ def main : IO Unit := do
     match psKernelC0CheckAppSpineWithFuel 4096 whnf defeq checkedContext
         psKernelCheckerStateEmpty checkedSpine with
     | Except.ok (type, _) =>
-        if psKernelExprEqual type (PsKernelExpr.sort (.succ PsKernelLevel.zero)) then
+        if psKernelExprEqual type (PsKernelExpr.sort PsKernelLevel.zero) then
           framesOk := framesOk + 1
         else throw (IO.userError "framed checked spine type mismatch")
     | Except.error err => throw (IO.userError ("framed checked spine: " ++ err))

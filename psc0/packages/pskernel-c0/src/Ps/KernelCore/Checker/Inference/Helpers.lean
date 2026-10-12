@@ -125,8 +125,11 @@ def psKernelEnsureForallWith
           | _ =>
               Except.error "expected function type"
 
-def psKernelInferAppOnlyLoopWithFuel
-    (fuel : Nat) :
+/-- A single argument-count computation is shared by every recursive step.
+    Fuel, WHNF callbacks, and result reconstruction are unchanged. -/
+def psKernelInferAppOnlyLoopWithFuelCount
+    (fuel : Nat)
+    (argCount : Nat) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -159,7 +162,7 @@ def psKernelInferAppOnlyLoopWithFuel
           "kernel inference budget exhausted"
   | Nat.succ remaining =>
       let smaller :=
-        psKernelInferAppOnlyLoopWithFuel remaining;
+        psKernelInferAppOnlyLoopWithFuelCount remaining argCount;
       fun
         (whnf :
           PsKernelCheckerContext ->
@@ -173,8 +176,6 @@ def psKernelInferAppOnlyLoopWithFuel
         (index : Nat)
         (instantiated : Nat)
         (current : PsKernelExpr) =>
-        let argCount :=
-          psKernelExprListLength args;
         if psKernelNatLt index argCount then
           match current with
           | PsKernelExpr.forallE _ _ body _ =>
@@ -225,3 +226,36 @@ def psKernelInferAppOnlyLoopWithFuel
                   instantiated
                   args))
               state)
+
+
+/-- Compatibility entry: old signature, count materialized once per call. -/
+def psKernelInferAppOnlyLoopWithFuel
+    (fuel : Nat) :
+    (PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String
+        (Prod PsKernelExpr PsKernelCheckerState)) ->
+    PsKernelCheckerContext ->
+    PsKernelCheckerState ->
+    List PsKernelExpr ->
+    Nat ->
+    Nat ->
+    PsKernelExpr ->
+    Except String
+      (Prod PsKernelExpr PsKernelCheckerState) :=
+  fun
+    (whnf :
+      PsKernelCheckerContext ->
+      PsKernelCheckerState ->
+      PsKernelExpr ->
+      Except String (Prod PsKernelExpr PsKernelCheckerState))
+    (context : PsKernelCheckerContext)
+    (state : PsKernelCheckerState)
+    (args : List PsKernelExpr)
+    (index : Nat)
+    (instantiated : Nat)
+    (current : PsKernelExpr) =>
+    psKernelInferAppOnlyLoopWithFuelCount fuel
+      (psKernelExprListLength args)
+      whnf context state args index instantiated current

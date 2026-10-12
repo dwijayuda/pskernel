@@ -160,12 +160,51 @@ def psPscv0CallArguments (read : PsPscv0TermReader) (fuel : Nat)
       let _ ← psTokenCursorExpectText value.cursor ")"
       return { value := next.reverse, cursor := value.cursor }
 
+-- All four Lean GetElem spellings share one postfix owner and ordinary
+-- typed application. Proofs are never discarded or translated to Bool.
+-- Until the selected get_elem_tactic proof extension is complete, the
+-- generated proof goal uses its highest-priority safe rule: assumption.
+def psPscv0IndexMethod (name : String) (args : List PsSyntaxTerm)
+    (span : PsSourceSpan) : PsSyntaxTerm :=
+  .call (.reference (PsSyntaxName.mk ("_root_" :: name.splitOn ".") span))
+    (args.map fun arg => (none, arg)) span
+
 def psPscv0Postfix (read : PsPscv0TermReader) (fuel : Nat)
     (current : PsSyntaxTerm) (cursor : PsTokenCursor) :
     Except PsParseError (PsParseResult PsSyntaxTerm) := do
   match fuel with
   | 0 => throw .fuelExhausted
   | fuel + 1 =>
+    if psTokenCursorAtText cursor "[" && psProofScriptCallAdjacent current cursor then
+      let opening ← psTokenCursorExpectText cursor "["
+      let index ← read opening.cursor
+      let close ← psTokenCursorExpectText index.cursor "]"
+      let suffix := psTokenCursorPeek close.cursor
+      let adjacent := suffix.any fun token =>
+        token.span.start.byteOffset == close.token.span.stop.byteOffset
+      let (method, args, finalCursor, lastSpan) ←
+        if adjacent && psTokenCursorAtText close.cursor "?" then do
+          let question ← psTokenCursorExpectText close.cursor "?"
+          pure ("GetElem?.getElem?", [current, index.value], question.cursor,
+            question.token.span)
+        else if adjacent && psTokenCursorAtText close.cursor "!" then do
+          let bang ← psTokenCursorExpectText close.cursor "!"
+          pure ("GetElem?.getElem!", [current, index.value], bang.cursor,
+            bang.token.span)
+        else if adjacent && psTokenCursorAtText close.cursor "'" then do
+          let quote ← psTokenCursorExpectText close.cursor "'"
+          let primary ← psPscv0Primary read quote.cursor
+          let proof ← psPscv0Postfix read fuel primary.value primary.cursor
+          pure ("GetElem.getElem", [current, index.value, proof.value],
+            proof.cursor, psSyntaxTermSpan proof.value)
+        else
+          let assumption : PsSyntaxTerm :=
+            .byE [.assumption close.token.span] {} close.token.span
+          pure ("GetElem.getElem", [current, index.value, assumption],
+            close.cursor, close.token.span)
+      let span := psSyntaxSpanJoin (psSyntaxTermSpan current) lastSpan
+      return ← psPscv0Postfix read fuel
+        (psPscv0IndexMethod method args span) finalCursor
     if !(psTokenCursorAtText cursor "(" && psProofScriptCallAdjacent current cursor) then
       return { value := current, cursor }
     let opening ← psTokenCursorExpectText cursor "("

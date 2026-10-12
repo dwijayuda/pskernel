@@ -819,7 +819,21 @@ def psLexReadToken
               afterOpen
               start
               (List.cons first List.nil) with
-        | Except.error error => Except.error error
+        | Except.error error =>
+            -- Lean's xs[i]'h proof-index suffix starts with a quote but is not
+            -- a character literal. Prefer an actual complete character token;
+            -- otherwise keep a quote token only before a proof identifier or
+            -- parenthesized term. All other malformed characters still fail.
+            match rest with
+            | proofStart :: _ =>
+              if psLexIdentifierStart proofStart || psLexCharEq proofStart '(' then
+                let read : PsLexRead := {
+                  cursor := { remaining := rest, position := afterOpen }
+                  charsRev := ['\\''] }
+                Except.ok (Prod.mk
+                  (psLexTokenFromRead PsTokenKind.symbol start read) read.cursor)
+              else Except.error error
+            | [] => Except.error error
         | Except.ok read =>
             Except.ok
               (Prod.mk

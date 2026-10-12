@@ -11,6 +11,18 @@ private def get {α : Type} (label : String) (result : Except String α) : IO α
   | .error error => throw (IO.userError (label ++ ": " ++ error))
 
 private def parserCases : IO Unit := do
+  -- Exact source ownership for all four Lean RC4 index spellings.
+  -- These are parser cases, not a claim that List/Array GetElem instances or
+  -- automatic arithmetic proof discharge are already installed.
+  for (label, input) in [
+      ("checked indexing", "function sample(xs: List Nat, i: Nat, h: True): Nat := xs[i]'h\n"),
+      ("implicit proof indexing", "function sample(xs: List Nat, i: Nat): Nat := xs[i]\n"),
+      ("safe optional indexing", "const result: Option Nat := xs[0]?\n"),
+      ("panic/default indexing", "const result: Nat := xs[0]!\n"),
+      ("nested optional indexing", "const result: Option Nat := nested[0][1]?\n"),
+      ("ordinary char literal", "const mark: Char := 'x'\n")] do
+    unless (psPscv0ParseProgram input).isOk do
+      throw (IO.userError ("GetElem parser rejected " ++ label))
   let json ← get "parser corpus" (Lean.Json.parse
     (← IO.FS.readFile "../scripts/pscv0-m1-cases.json"))
   let good ← get "good cases" ((json.getObjVal? "good").bind Lean.Json.getArr?)

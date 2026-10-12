@@ -90,6 +90,78 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
             writeFiles files.flatten
       return if failed then 1 else 0
 
+-- The host reads an explicit project manifest. The portable compiler receives
+-- only immutable named source strings and never consults the filesystem.
+-- Paths are project-relative POSIX spellings with no parent traversal.
+private def projectField (object : Lean.Json) (key : String) : IO String :=
+  match object.getObjValAs? String key with
+  | .ok value => pure value
+  | .error _ => throw (IO.userError ("PSCV0-PROJECT-MANIFEST: expected string " ++ key))
+
+private def projectPathValid (path : String) : Bool :=
+  !path.isEmpty && path.endsWith ".ps" &&
+  !path.startsWith "/" && !path.startsWith "\\" &&
+  !path.toList.contains '\\' && !path.toList.contains ':' &&
+  (path.splitOn "/").all (fun component =>
+    !component.isEmpty && component != "." && component != "..")
+
+private def readProjectManifest (manifest : String) :
+    IO (String × PsPscv0ModuleSource × List PsPscv0ModuleSource) := do
+  let json ← match Lean.Json.parse (← IO.FS.readFile (System.FilePath.mk manifest)) with
+    | .ok value => pure value
+    | .error message => throw (IO.userError ("PSCV0-PROJECT-MANIFEST: " ++ message))
+  let entry ← projectField json "entry"
+  let rows ← match json.getObjValAs? (Array Lean.Json) "modules" with
+    | .ok entries => pure entries
+    | .error _ => throw (IO.userError "PSCV0-PROJECT-MANIFEST: expected modules array")
+  if rows.isEmpty || rows.size > 256 then
+    throw (IO.userError "PSCV0-PROJECT-MANIFEST: source count budget")
+  let root := (System.FilePath.mk manifest).parent.getD "."
+  let sources ← rows.toList.mapM fun row => do
+    let name ← projectField row "name"
+    let relativePath ← projectField row "path"
+    if !projectPathValid relativePath then
+      throw (IO.userError ("PSCV0-PROJECT-MANIFEST: unsafe source path " ++ relativePath))
+    let source ← IO.FS.readFile (root / relativePath)
+    return ({ name, source, sourceName := relativePath } : PsPscv0ModuleSource)
+  let some selected := sources.find? (fun item => item.name == entry)
+    | throw (IO.userError ("PSCV0-PROJECT-MANIFEST: missing entry " ++ entry))
+  return (entry, selected, sources.filter (fun item => item.name != entry))
+
+private def runProject (manifest : String)
+    (outputs : List (PsEmissionTarget × String))
+    (exposure : PsApiExposure := .allRuntime) : IO UInt32 := do
+  let (entry, selected, dependencies) ← readProjectManifest manifest
+  let outputStem := match outputs.head? with
+    | none => "module"
+    | some (_, output) => ((System.FilePath.mk output).fileStem).getD "module"
+  let request : Request := {
+    source := selected.source
+    sourceName := selected.sourceName
+    moduleName := entry
+    modules := dependencies
+    outputStem
+    targets := outputs.map (·.1)
+    exports := exposure }
+  match ← runBatch #[request] with
+  | .error error =>
+    IO.eprintln (error.phase ++ ": " ++ error.message)
+    return 1
+  | .ok batch =>
+    IO.println (Lean.Json.mkObj [
+      ("phase", toJson ("prelude" : String)), ("elapsedMs", toJson batch.preludeMs)]).compress
+    let some outcome := batch.results[0]? | throw (IO.userError "PSCV0-PROJECT: result missing")
+    IO.println (resultJson selected.sourceName outcome).compress
+    match outcome with
+    | .error _ => return 1
+    | .ok value =>
+      let files ← outputs.mapM fun (target, output) => do
+        let some artifact := value.artifacts.find? (fun artifact => artifact.target == target)
+          | throw (IO.userError "PSCV0-PROJECT: missing target artifact")
+        return artifactFiles output artifact
+      writeFiles files.flatten
+      return 0
+
 def main (args : List String) : IO UInt32 := do
   try
     match args with
@@ -101,6 +173,28 @@ def main (args : List String) : IO UInt32 := do
           ("leanVersion", toJson Lean.versionString), ("leanCommit", toJson Lean.githash),
           ("profile", toJson profile)]).compress
         return 0
+    | ["--check-project", manifest] =>
+        runProject manifest []
+    | ["--emit-project", manifest, output] =>
+        let target ← if output.endsWith ".ts" then pure PsEmissionTarget.typescript
+          else if output.endsWith ".rs" then pure PsEmissionTarget.rust
+          else if output.endsWith ".js" then pure PsEmissionTarget.javascript
+          else throw (IO.userError "PSCV0-PROJECT-OUTPUT: expected .ts, .js or .rs")
+        runProject manifest [(target, output)]
+    | ["--emit-project-all", manifest, stem] =>
+        runProject manifest [(.typescript, stem ++ ".ts"),
+          (.rust, stem ++ ".rs"), (.javascript, stem ++ ".js")]
+    | ["--emit-project-wasm-core", manifest, stem] =>
+        runProject manifest [(.wasmCore, stem ++ ".wasm")]
+    | ["--emit-project-wasm", manifest, stem, exportManifest] =>
+        let json ← match Lean.Json.parse (← IO.FS.readFile exportManifest) with
+          | .ok value => pure value
+          | .error message => throw (IO.userError message)
+        let names ← match Lean.fromJson? json with
+          | .ok (names : List String) => pure names
+          | .error message => throw (IO.userError ("PSCV0-EXPORT-MANIFEST: " ++ message))
+        if names.isEmpty then throw (IO.userError "PSCV0-EXPORT-MANIFEST: empty selection")
+        runProject manifest [(.wasmComponent, stem ++ ".wasm")] (.selected names)
     | "--check" :: first :: rest => run (first :: rest) []
     | ["--emit", input, output] =>
         let target ← if output.endsWith ".ts" then pure PsEmissionTarget.typescript
@@ -124,7 +218,7 @@ def main (args : List String) : IO UInt32 := do
     | ["--emit-both", input, stem] =>
         run [input] [(.typescript, stem ++ ".ts"), (.rust, stem ++ ".rs")]
     | _ =>
-        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --audit-primitives | --version"
+        IO.eprintln "usage: pscv0_native --check <application.ps>... | --emit <application.ps> <output.ts|output.js|output.rs> | --emit-both <application.ps> <output-stem> | --emit-all <application.ps> <output-stem> | --emit-wasm-core <application.ps> <output-stem> | --emit-wasm <application.ps> <output-stem> <exports.json> | --check-project <manifest.json> | --emit-project <manifest.json> <output.ts|output.js|output.rs> | --emit-project-all <manifest.json> <stem> | --emit-project-wasm-core <manifest.json> <stem> | --emit-project-wasm <manifest.json> <stem> <exports.json> | --audit-primitives | --version"
         return 2
   catch error =>
     IO.eprintln (toString error)

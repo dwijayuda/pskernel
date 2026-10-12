@@ -57,3 +57,19 @@ VerifiedIR or a target-neutral OptimizedIR and preserve PSC semantics.
 The automated neutrality guard catches obvious lexical leakage. Architectural
 review remains authoritative because a target-shaped design can exist without
 using a forbidden target name.
+
+## Retained source invariants for foreign construction
+
+`foreignData` is target-neutral evidence retained by erasure about source data:
+a named declaration is an ordinary algebraic type only when it has no indices
+or value parameters and no erased constructor fields. It contains no WIT,
+memory or target-layout information. Renaming transports its semantic identity.
+Absent evidence is conservative; an optimization that cannot preserve it drops
+the evidence instead of guessing.
+
+A backend may use this classification to decide whether untrusted foreign data
+can construct a source value automatically. Proof-bearing/dependent values need
+a validating source adapter even if their erased storage resembles an ordinary
+record. This classification supplements runtime IR checking; it is not a
+validation certificate for externally fabricated IR. Native emission obtains
+it only from the same officially checked graph passed to erasure.

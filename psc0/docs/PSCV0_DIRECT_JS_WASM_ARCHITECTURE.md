@@ -1,6 +1,6 @@
 # PSCV0 v7: directJS, WIT/WAT/Wasm, and readable output
 
-Architecture proposal, revision 2 · 12 October 2026 · Research baseline: native profile 31; C0–C2 implementation update: profile 32 (see §16 and PSCV0_NATIVE_CODEGEN.md)
+Architecture proposal, revision 2 · 12 October 2026 · Research baseline: native profile 31; C0–C4b implementation update: profile 35 (see §16 and PSCV0_NATIVE_CODEGEN.md)
 
 ## 1. Decision and completed milestone
 
@@ -364,7 +364,10 @@ retain parent attribution, and runtime helpers stay unmapped. See
 PSCV0_NATIVE_CODEGEN.md and AI_WORK_STATE.md for implementation and qualification.
 The user subsequently authorized C3 through C4b and selected option A:
 GC for language values, linear memory only at explicit Canonical ABI boundaries.
-C3 and the initial C4 natural-limb runtime foundations have focused qualification. C4/C4b/C5
-remain incomplete. See PSCV0_NATIVE_WASM.md for exact evidence and capability
-limits. This does not complete v7, the full Wasm bundle profile, compiler-source
-migration or self-hosting.
+C3/C4/C4b are now qualified for current-runtime parity and the synchronous pure
+public profile. The .wit/.wat/.wasm component bundle includes real aggregate
+marshalling, an exported interface instance and post-return cleanup. No resources,
+callbacks or effect imports are exposed; recursive/dependent/proof-bearing
+foreign construction requires explicit view/resource/validating APIs.
+See PSCV0_NATIVE_WASM.md and AI_WORK_STATE.md for exact evidence and boundaries.
+C5, full v7, compiler-source migration and self-hosting remain separate.

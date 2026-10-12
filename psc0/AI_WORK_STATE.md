@@ -1,3 +1,81 @@
+# Native Wasm C4 and C4b qualified
+
+12 October 2026. The authorized C4 and C4b milestones are complete for the
+current checked runtime and synchronous pure foreign profile. The selected
+architecture is **Wasm GC internally, linear memory only at explicit Canonical
+ABI boundaries**. Native .lean remains authoritative.
+
+**Qualified implementation:** 8bbbf8c3fed5d30e9af31ddf8bdd2f6c154b1976
+**Profile:** pscv0-v7-native-bounded/35
+**Linux CI:** [run 38197107365](https://github.com/dwijayuda/pskernel/actions/runs/38197107365),
+job 114642113277. Every step passed. This run resolved the Wasmtime harness
+lockfile subsequently retained verbatim in the repository; final committed-lock
+qualification is recorded below when complete.
+
+## Completed boundary
+
+C4 supplies GC data/closures, generic representation crossings, source lowering
+and current Nat/Int/String/Array semantics. Published values are persistent;
+arithmetic uses normalized u32 limbs and fresh working arrays. Direct concrete
+calls stay unboxed, runtime/tail calls use Wasm tail calls, and unused functions
+are pruned. Shared lexical capture analysis replaces duplicated Rust traversal.
+The obsolete scalar-only source lowerer is removed.
+
+C4b supplies one concrete interface/layout plan, readable WIT/WAT, native binary
+component/core encoders, checked GC-to-ABI marshalling, realloc and post-return.
+Scalar worlds need no memory; aggregate/indirect worlds expose an api interface.
+The component bundle includes .wit/.wat/.wasm and explicit standalone core
+companions. Proof/dependent foreign construction is refused using source
+classification retained before erasure. Whole-call cleanup is valid for this
+pure synchronous, non-reentrant profile.
+
+The admitted foreign profile includes Bool/Char/String/Nat/Int, lists, ordinary
+nonrecursive records/variants and concrete generic data, plus void Unit results.
+It does not expose resources, callbacks, imports/effects, recursive foreign
+values or automatic proof-bearing constructors. Those require explicit
+resource/view/validating APIs; no integer-handle shortcut is implemented.
+Details and lifetime rules: docs/PSCV0_NATIVE_WASM.md.
+
+## Qualification
+
+- 155 portable / 162 native closure modules; no pskernel-core or host imports in
+  the portable compiler.
+- Official Lean RC4 checks the same prepared graph. Existing 473-declaration
+  composite, four accepted programs, 92 refusals, 28 parser cases and compact
+  scope/IR checks remain green.
+- The same 142 observations pass in Node/V8 core and in Wasmtime core and
+  component instances, including WAT-reassembled artifacts. The embedding
+  harness batches calls per instance instead of repeating engine startup.
+- All 142 directJS, TypeScript and Rust observations still pass, along with
+  the strict declaration consumer and 345 mappings / 14 parent origins.
+- Ten limb probes and one aggregate fixture cover large integers, normalization,
+  Unicode, arrays, records/variants, generic field boxing, flat/indirect calls,
+  Char and void post-return.
+- 64 repeated 98,304-byte Unicode calls reach a stable 262,144-byte arena.
+  Buffers remain live before post-return and the allocation cursor resets
+  after cleanup. Four malformed UTF-8 and nine other ABI refusals pass.
+- wasm-tools 1.261.0 parses WIT, extracts the complete contract, validates
+  binaries and reassembles WAT. Core and component bytes match after removing
+  only name/component-name metadata. Package/world labels absent from the
+  binary and formatting are the only WIT normalization.
+- Wasmtime 49.0.2, Node 22.23.3 / V8 12.4.254.21-node.57 and Rust 1.98.1 are pinned.
+  Production emission uses only native Lean, with no external assembler.
+- Prelude audit: 64 axioms, 48 native signature matches and 16 reviewed models.
+  Target typing/observations do not prove semantic preservation.
+
+## Following work
+
+C5 readable pre-erasure Lean/ProofScript reconstruction, measured performance
+work and remaining v7 language capabilities are separate milestones. C4/C4b
+completion does not imply full v7 conformance. No compiler-source .ps migration,
+self-hosting, local build/tests, pskernel-core, main merge or release occurred.
+
+---
+
+# Historical work records
+
+Earlier status and stopping instructions below are historical.
+
 # Native Wasm C3 qualified; C4 GC runtime foundations
 
 12 October 2026. The user authorized C3, C4 and C4b on the existing draft PR109

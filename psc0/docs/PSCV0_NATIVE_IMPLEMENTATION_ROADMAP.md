@@ -68,22 +68,22 @@ native primitive signature/model audit, shared structured ECMAScript lowering
 and direct JS/declarations/source maps. See PSCV0_NATIVE_CODEGEN.md. Source maps
 currently resolve to the owning declaration; token-level origins are not claimed.
 
-The qualified integration profile is 33; exact source/run evidence is in
-AI_WORK_STATE.md. One ECMAScript Program supplies JS and TS output. Direct JS
-emission does not invoke a TypeScript compiler. The same 142 observations run
-on direct JS, TS-compiled JS and Rust; the new declaration and mapping boundaries
-have independent consumers.
+The qualified integration profile is 35; exact source/run evidence is in
+AI_WORK_STATE.md. One ECMAScript Program supplies JS and TS output, and direct
+JS emission needs no TypeScript compiler. The same 142 observations now run
+on JS, TS, Rust, Node/V8 Wasm core, and Wasmtime core/components.
 
-C3 is qualified: typed direct core/component binary emission, readable WAT,
-scalar WIT/canonical lifts, independent validation and an executed GC allocation
-inside a lifted component. C4 has new GC value layouts, runtime authoring
-combinators and limb arithmetic with focused qualification. This does not yet
-admit arbitrary-precision source programs through the Wasm CLI.
+C3, C4 and C4b are qualified for the current checked runtime and synchronous
+pure public profile. GC data/closures, generic conventions and current
+Nat/Int/String/Array semantics use shared runtime IR. WIT, readable WAT and
+direct component binaries share one explicit Canonical ABI plan, including
+memory32 marshalling, allocation and post-return. Complete extracted contracts
+and WAT/binary correspondence have independent qualification. The public profile
+admits ordinary nonrecursive concrete aggregates and integer adapters; resources,
+callbacks, recursive/proof-bearing foreign construction and effects require
+separate explicit APIs. See PSCV0_NATIVE_WASM.md.
 
-The latest user choice is option A: GC language values and linear memory only at
-explicit Canonical ABI boundaries. Remaining work preserves
-PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md: C4 full current-runtime core parity, C4b
-aggregate WIT/Canonical ABI/component completion with allocation/post-return and
-resource lifetimes, C5 readable pre-erasure Lean/ProofScript reconstruction,
-then D measured performance/ownership work. Compiler-source .ps migration,
-self-hosting and complete v7 conformance remain separate qualifications.
+The user-selected option A is preserved: GC language values, linear memory only
+at explicit ABI boundaries. Remaining backend work is C5 readable pre-erasure
+Lean/ProofScript reconstruction and D measured performance/ownership work.
+Compiler-source .ps migration, self-hosting and full v7 remain separate.

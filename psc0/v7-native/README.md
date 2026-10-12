@@ -281,8 +281,10 @@ ff83ff5e927bdc4bf5d31f57bef688f4b146537b passed
 285 officially checked declarations and the same 102 runtime observations in
 both targets. The existing semantic/refusal suite is retained.
 
-Source Lean/ProofScript output and full TS expression layout remain a separate
-milestone. See [runtime emission](../docs/PSCV0_NATIVE_CODEGEN.md) and
+C0–C4b now add shared structured ECMAScript, direct JS/declarations/maps, and
+GC Wasm core/component output. The current 142-observation matrix also passes
+Wasm core/component hosts; see ../AI_WORK_STATE.md and
+../docs/PSCV0_NATIVE_WASM.md. Readable Lean/ProofScript output remains C5. See [runtime emission](../docs/PSCV0_NATIVE_CODEGEN.md) and
 [Rust design and limits](../docs/PSCV0_NATIVE_RUST.md).
 
 ## Remaining semantic milestones
@@ -314,16 +316,16 @@ typeclass resolution and source attributes remain pending.
 
 ## Readable runtime targets
 
-The native CLI supports --emit application.ps application.ts and
---emit application.ps application.rs. Use --emit-both application.ps application
-to retain one checked/erased/validated artifact for both targets. Rust writes
-pscv0_runtime.rs beside the selected module; Cargo dependencies are num-bigint
-=0.4.6 and num-traits =0.2.19. Each output has a .origins.json with semantic names
-and generated UTF-8 declaration ranges. Original source-span mapping is pending.
+The native CLI supports --emit for .js, .ts and .rs, --emit-all for all three,
+--emit-wasm-core for a GC-only module and --emit-wasm with an explicit export
+manifest for a WIT/WAT/component bundle. Rust emits pscv0_runtime.rs; JS emits
+.d.ts/.js.map. Provenance retains semantic names, actual declaration spans and
+generated-parent origins. Maps resolve to owning declarations.
 
-Rust integration uses the current pure single-module profile; it does not mean
-full v7, compiler-source translation, self-hosting, cross-platform qualification,
-or formal backend preservation. See ../docs/PSCV0_NATIVE_RUST.md.
+Wasm uses GC for language values and linear memory only in explicit ABI
+adapters. C4/C4b qualify the current checked runtime and a synchronous pure
+component profile; see ../docs/PSCV0_NATIVE_WASM.md. This does not imply full v7,
+compiler-source translation, self-hosting or formal backend preservation.
 
 Record literals require an expected nominal structure type. Single-source updates
 share ordered constructor application and retain dependent field checks; see

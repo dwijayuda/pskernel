@@ -92,8 +92,12 @@ Unit proof-call slots that remain in the ABI are visible in .d.ts.
 The C0 WIT classifier conservatively refuses unbounded integers, generic and
 recursive data, function values, target-sized integers and Unit where explicit
 adapters/policies are required. This does not restrict their internal language
-representation. C3 now supplies native core/component encoders, readable WAT,
-a scalar WIT printer and canonical scalar lifts. Aggregate adapters remain C4b.
+representation. C4/C4b supply the selected integer/aggregate adapters, typed
+GC runtime/lowering, direct component/core encoders, readable WAT and WIT,
+and Canonical ABI allocation/post-return. Pre-erasure source-invariant evidence
+prevents erased proof obligations from disappearing at foreign construction.
+The selected ABI plan supersedes the conservative C0 classification only for
+an actually admitted component bundle.
 The user selected GC language values with linear memory only at explicit
 Canonical ABI boundaries. Target capability records describe the bounded
 qualified profiles, not full v7 conformance. See PSCV0_NATIVE_WASM.md.
@@ -132,7 +136,9 @@ are inputs; compiler sources remain handwritten .lean.
 
 Validation reuses the same 473-declaration composite, four accepted programs,
 92 phase-specific refusals and 28 parser cases. Its 142 runtime observations run
-on direct JS, TS-compiled JS and Rust. Added checks are confined to the new
+on direct JS, TS-compiled JS, Rust and both Wasm core/component forms.
+The Wasm qualification reuses the table through a batched Wasmtime embedding
+harness, plus focused binary/WIT/ABI checks. Added checks are confined to the new
 boundaries: artifact paths, primitive signatures, independent map decoding
 (including non-BMP UTF-16 columns and generated/unmapped regions) and an isolated
 strict .d.ts consumer with negative type cases. The consumer directory contains

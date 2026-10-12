@@ -59,14 +59,11 @@ def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bo
 -- Resolve the longest private prefix first. This also preserves projection
 -- suffixes on a private structure and recursive references to its members.
 def psScopePrivateRewrite (resolver : PsScopeResolver)
-    (segments : List String) : Option (List String) :=
-  let prefixes := psScopePrefixes segments
-  let some matchPrefix := prefixes.find? (fun candidate =>
+    (segments : List String) : Option (List String) := do
+  let matchPrefix ← (psScopePrefixes segments).find? (fun candidate =>
     resolver.privateAliases.any (fun entry => entry.fst == candidate))
-    | none
-  let some alias := resolver.privateAliases.find? (fun entry => entry.fst == matchPrefix)
-    | none
-  some (alias.snd ++ segments.drop matchPrefix.length)
+  let alias ← resolver.privateAliases.find? (fun entry => entry.fst == matchPrefix)
+  return alias.snd ++ segments.drop matchPrefix.length
 
 def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     (name : PsSyntaxName) : Except PsElabError (Prod PsSyntaxName (List String)) := do

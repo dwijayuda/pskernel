@@ -238,6 +238,10 @@ This intentionally keeps the old semantics: lambda and forall binder names
 and binderInfo are ignored, and let binder names are ignored. The separate
 psKernelExprEqual function is full exact (metadata-sensitive) syntax equality.
 -/
+/-- One direct recursive comparison, with no curried closure allocation
+    for each nested application/binder. This deliberately ignores binder
+    names and binder-info exactly as the original kernel relation did.
+    Hash equality and this relation do not imply definitional equality. -/
 def psKernelExprEq
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=
@@ -249,19 +253,19 @@ def psKernelExprEq
   | .const a als, .const b bls =>
       psKernelNameEq a b && psKernelLevelListEq als bls
   | .app af aa, .app bf ba =>
-      psKernelExprEqLegacy af bf && psKernelExprEqLegacy aa ba
+      psKernelExprEq af bf && psKernelExprEq aa ba
   | .lam _ aty ab _, .lam _ bty bb _ =>
-      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
+      psKernelExprEq aty bty && psKernelExprEq ab bb
   | .forallE _ aty ab _, .forallE _ bty bb _ =>
-      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
+      psKernelExprEq aty bty && psKernelExprEq ab bb
   | .letE _ aty av ab an, .letE _ bty bv bb bn =>
-      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy av bv &&
-      psKernelExprEqLegacy ab bb && psKernelBoolEq an bn
+      psKernelExprEq aty bty && psKernelExprEq av bv &&
+      psKernelExprEq ab bb && psKernelBoolEq an bn
   | .lit a, .lit b => psKernelLiteralEq a b
   | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelExprEqLegacy ab bb
+      Nat.beq am bm && psKernelExprEq ab bb
   | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqLegacy ab bb
+      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEq ab bb
   | _, _ => false
 
 def psKernelExprEqualLegacy
@@ -396,6 +400,10 @@ def psKernelExprEqualLegacy
   Unlike psKernelExprEq, this preserves binder names and binder annotations.
   Both functions short-circuit on the first mismatching constructor or field.
 -/
+/-- Exact syntax equality used for canonical expression storage.
+    Unlike checker structural comparison, this compares binder names and
+    binder information. The historical implementation remains an independent
+    regression oracle, never an acceptance shortcut. -/
 def psKernelExprEqual
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=
@@ -407,22 +415,22 @@ def psKernelExprEqual
   | .const a als, .const b bls =>
       psKernelNameEq a b && psKernelLevelListEq als bls
   | .app af aa, .app bf ba =>
-      psKernelExprEqualLegacy af bf && psKernelExprEqualLegacy aa ba
+      psKernelExprEqual af bf && psKernelExprEqual aa ba
   | .lam an aty ab ai, .lam bn bty bb bi =>
-      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
-      psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
+      psKernelNameEq an bn && psKernelExprEqual aty bty &&
+      psKernelExprEqual ab bb && psKernelBinderInfoEq ai bi
   | .forallE an aty ab ai, .forallE bn bty bb bi =>
-      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
-      psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
+      psKernelNameEq an bn && psKernelExprEqual aty bty &&
+      psKernelExprEqual ab bb && psKernelBinderInfoEq ai bi
   | .letE an aty av ab adn, .letE bn bty bv bb bdn =>
-      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
-      psKernelExprEqualLegacy av bv && psKernelExprEqualLegacy ab bb &&
+      psKernelNameEq an bn && psKernelExprEqual aty bty &&
+      psKernelExprEqual av bv && psKernelExprEqual ab bb &&
       psKernelBoolEq adn bdn
   | .lit a, .lit b => psKernelLiteralEq a b
   | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelExprEqualLegacy ab bb
+      Nat.beq am bm && psKernelExprEqual ab bb
   | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqualLegacy ab bb
+      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqual ab bb
   | _, _ => false
 
 def psKernelExprHasLooseAt

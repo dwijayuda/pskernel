@@ -378,6 +378,39 @@ def main : IO Unit := do
                   throw (IO.userError "C0 indexed WHNF semantic disagreement")
   IO.println "C0_PERF_REGRESSION indexed_beta_zeta_whnf=pass"
 
+  -- A stuck indexed spine must retain the *exact* original term handle
+  -- without allocating a second application chain.
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty stopped with
+  | Option.none => throw (IO.userError "C0 stuck spine encoding failed")
+  | Option.some (st, id) =>
+      match psKernelC0IndexedWhnf 4096 st id with
+      | Option.some (next, resultId) =>
+          if !(Nat.beq id resultId &&
+               Nat.beq st.nodes.size next.nodes.size) then
+            throw (IO.userError "C0 stuck indexed spine rebuilt unnecessarily")
+      | Option.none => throw (IO.userError "C0 stuck indexed spine rejected")
+
+  -- The no-reconstruction shortcut must NOT return the original handle
+  -- when metadata disappears from an application head.
+  let metadataHead := PsKernelExpr.app
+    (PsKernelExpr.mdata 99 (PsKernelExpr.mvar named)) rightSort
+  let metadataReduced := PsKernelExpr.app (PsKernelExpr.mvar named) rightSort
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty metadataHead with
+  | Option.none => throw (IO.userError "C0 metadata-head encoding failed")
+  | Option.some (st, id) =>
+      match psKernelC0IndexedWhnf 4096 st id with
+      | Option.some (next, resultId) =>
+          if Nat.beq id resultId then
+            throw (IO.userError "C0 indexed metadata incorrectly reused original")
+          match psKernelC0DecodeExpr next resultId with
+          | Option.some restored =>
+              if !(psKernelExprEqual restored metadataReduced) then
+                throw (IO.userError "C0 metadata-head rewrite changed meaning")
+          | Option.none => throw (IO.userError "C0 metadata-head decoder rejected result")
+      | Option.none => throw (IO.userError "C0 indexed metadata-head rejected")
+  IO.println "C0_PERF_REGRESSION indexed_stuck_spine_identity=pass"
+
+
 
   -- Native accepting-beta helper: single-argument specialization agrees with
   -- the historical generic list-instantiation path, including multi-spines.

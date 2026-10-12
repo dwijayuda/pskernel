@@ -29,6 +29,8 @@ proofs, `GetElem?`/panic boundaries, complete deriving and scalar/API
 coverage, and pinned imports/notation/tactic/effect/assumption closure.
 Phases B–E and C5 remain as documented below.
 
+**Architecture audit (current branch HEAD, NOT qualified):** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`, [Linux 38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) failed at `ir/emit` because dependent `GetElem` predicate/index arguments become `unknown` runtime IR type annotations. Lean RC4 source-level oracle passed. See [`PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md`](PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md). **The last green executable remains `e1d463e10cbf5edd817e362ed35b21ee82c8c85b` and run 38304955212.**
+
 ## Current priority: core and essential language conformance first
 
 User-directed priority override, 12 October 2026: **do not begin C5** until

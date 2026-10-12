@@ -14,6 +14,12 @@
 **Standard snapshot details:** `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md`.
 **Ready-to-paste continuation:** `psc0/AI_CONTINUE_PROMPT.md`.
 
+## Source architecture audit — 13 October 2026
+
+- **Audited source branch HEAD:** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`; [Linux 38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) **FAILED** at `ir/emit` with `unknown-type` dependent `GetElem` annotations. The official Lean source oracle did compile. **Last green executable SHA remains `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`**, [Linux 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212). The audit is not an executable qualification.
+- **Detailed Lean RC4 vs PSCV0 review:** [`psc0/docs/PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md`](docs/PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md). Root cause family: dependent predicate/type-level indices are being converted into IR `.unknown` runtime type arguments; IR correctly rejects them. Fix binder-kind erasure uniformly across declarations, calls, dictionaries and backends; never loosen validator.
+- **Priority:** complete checked dependent erasure and emitted user `GetElem` parity; then `GetElem?`, lawfulness and List/Array/Fin validity, typeclass resolution and closure. Maintain all Phase A–E honesty and existing restrictions.
+
 ## Verified current baseline — what actually passed
 
 - Native, portable `.lean` compiler with **170 portable / 178 native Lean modules**, with no pskernel-core integration or compiler-source self-hosting.

@@ -74,6 +74,43 @@ def main : IO Unit := do
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
   let second := c0BenchApps 512 (PsKernelExpr.bvar 1) arg
   let iterations := 30000
+
+  -- Same-run matched direct application argument selection. Deep constructor
+  -- spines expose the cost of allocating a full intermediate argument list.
+  let selectionName := PsKernelName.str PsKernelName.anonymous "C0.argSelector"
+  let selectionTerm := (List.range 512).foldl
+    (fun term i => PsKernelExpr.app term (PsKernelExpr.bvar i))
+    (PsKernelExpr.const selectionName [])
+  let selectionRuns := 18000
+  let mut oldSelected := 0
+  let oldSelectStart ← IO.monoMsNow
+  for k in [:selectionRuns] do
+    let pos := k % 512
+    match psKernelExprListGet (psKernelExprGetAppArgs selectionTerm) pos with
+    | Option.some value =>
+        match value with
+        | PsKernelExpr.bvar i =>
+            if Nat.beq i pos then oldSelected := oldSelected + 1
+            else throw (IO.userError "C0 eager selector returned wrong index")
+        | _ => throw (IO.userError "C0 eager selector returned wrong kind")
+    | Option.none => throw (IO.userError "C0 eager selector missing argument")
+  let oldSelectEnd ← IO.monoMsNow
+  let mut newSelected := 0
+  let directSelectStart ← IO.monoMsNow
+  for k in [:selectionRuns] do
+    let pos := k % 512
+    match psKernelExprGetAppArgAt selectionTerm pos with
+    | Option.some value =>
+        match value with
+        | PsKernelExpr.bvar i =>
+            if Nat.beq i pos then newSelected := newSelected + 1
+            else throw (IO.userError "C0 direct selector returned wrong index")
+        | _ => throw (IO.userError "C0 direct selector returned wrong kind")
+    | Option.none => throw (IO.userError "C0 direct selector missing argument")
+  let directSelectEnd ← IO.monoMsNow
+  if !(Nat.beq oldSelected newSelected && Nat.beq newSelected selectionRuns) then
+    throw (IO.userError "C0 direct argument selection diverged")
+  IO.println s!"C0_BENCH app_arg_selection list_ms={oldSelectEnd - oldSelectStart} direct_ms={directSelectEnd - directSelectStart} depth=512 queries={selectionRuns}"
   -- Matched same-run hot-path benchmark, not a full kernel comparison.
   -- Both paths perform the exact delta lookup; the reference eagerly
   -- allocates the entire argument spine even when the head is stuck.

@@ -130,3 +130,16 @@ Native source commit `cf0e3da4ee8ccf1870232316210110a9d02499f0`, [CI 38194545945
 Source commits `7cf4c49748f87fb171339da61c6a80804a5b7eb6` and `e6e005541e78b38d70ec4ecc8f9d7177c50d2267` added direct indexed-position argument selection on the **real projection checker helper**; follow-up `a96a4f1fd76432ddaeafcc64e035b6b426223f86` added a paired 18,000-query depth-512 selector benchmark with matching outcomes and native differential tests. This is distinct from indexed expression DAG term IDs. Record final run measurements only once its CI has completed; benchmark timing has not yet been certified at this written checkpoint.
 
 All CI jobs in this workstream exclude self-hosting/bootstrap tests. **Still missing:** matched original PSKernel-Core whole-library time, multiple-run medians/p95, isolated allocations, peak memory and actual indexed acceptance-engine qualification.
+
+
+
+### Two-pass direct selection rejected by paired native measurement
+
+[CI 38194880437](https://github.com/dwijayuda/pskernel/actions/runs/38194880437), commit `a96a4f1fd76432ddaeafcc64e035b6b426223f86`: native Lean library (84 jobs), negative/differential regression, and performance microbenchmarks **all succeeded**. The test included application spines with arities 0, 1, 2, 3, 32, 128 and every in-bounds/out-of-bounds index; the direct result matched historical list-backed selection.
+
+| Same-run 512-application, 18,000 varied-index queries | Elapsed |
+| --- | ---: |
+| List-backed one-pass GetAppArgs + ListGet | **560 ms** |
+| No-intermediate-list direct two-pass ArgAt | **1298 ms** |
+
+The no-list selector is **~2.32× slower** on this workload. It is therefore **not** the production projection implementation: `5de4773f8fdbbfcc2e4acc0377524c1a92231683` restores the list-backed lookup after confirming constructor matching. The direct API and comparison benchmark are retained as negative performance evidence, not an acceleration claim. Complete-module throughput and per-operation memory were not measured. Other observed same-run values: eager/lazy delta miss 150/150 ms (parity), cold WHNF 20 ms for 400, full cold/warm 180× inference 1/6 ms, process peak VmHWM 632960 kB (entire benchmark process). These are not meaningful whole-library gains.

@@ -1,3 +1,84 @@
+# C0–C2 qualified: native directJS and shared readable ECMAScript
+
+12 October 2026. The user authorized C0, C1 and C2. They are implemented on
+the existing draft PR109 branch. Compiler authoring/execution remains native
+Lean; official Lean checking, portable closure boundaries and Rust remain in
+place. No pskernel-core, compiler-source .ps translation, self-hosting, main
+merge or release was performed.
+
+**Qualified source:** dc36fc477ecba23abcac2b3c9b0bd264c2317f3e
+**Profile:** pscv0-v7-native-bounded/32
+**Linux CI:** [run 38189763277](https://github.com/dwijayuda/pskernel/actions/runs/38189763277),
+job 114619794223. All steps passed. Documentation updates after that source do not
+change the qualified implementation.
+
+## Implemented boundary
+
+- C0: validated text/binary artifact bundles, roles/dependencies, source identity
+  and actual declaration spans; generated projection/normalization/recursor
+  parent attribution; runtime API selection and conservative WIT representability;
+  target capability records; reviewed native primitive signature/model audit.
+- C1: one planned ECMAScript program supplies both JS and TS. Structured AST/Doc
+  emission covers expressions, control flow, generators, runtime helpers and
+  intrinsics. Existing count/tail semantics and lexical capture guards remain.
+  Nonrecursive functions emit ordinary straight-line bodies. The native path
+  no longer imports the old expression/module string emitters.
+- C2: direct .js, .d.ts and .js.map output plus provenance/API manifests. No TS
+  compiler participates in emission. Maps use ECMA-426 UTF-16 coordinates from
+  final layout and real source spans. The host prepares and collision-checks
+  all outputs before writes; multi-file crash atomicity is not claimed.
+
+Source maps resolve to the **owning declaration span**, including nested lowered
+code and explicitly attributed generated members. Runtime-only helpers are
+unmapped. Token/statement stepping, original comments and readable Lean/PS
+reconstruction are not claimed. The export-selection schema is available for
+foreign ABI planning; existing JS/TS/Rust runtime exposure remains compatible.
+
+## Qualification evidence
+
+- 128 portable / 135 native modules; excluded-checker and host-dependency guards pass.
+- 473 declarations admitted in the unchanged composite application.
+- Existing four accepted programs, 92 phase-specific refusals, 28 parser cases
+  and compact scope/IR/naming checks pass.
+- The same **142 runtime observations pass on each of direct JS, TS-compiled JS
+  and Rust**. TypeScript 7.0.2, Node 22.23.3 and Rust 1.98.1 remain pinned.
+- Independent source-map decoding validates 345 declaration mappings,
+  14 generated-parent origins, Unicode/non-BMP UTF-16 columns and unmapped
+  generated regions. A strict isolated .d.ts consumer passes positive and
+  negative type cases; no sibling implementation .ts can shadow the .d.ts.
+- Native Init signature audit: 64 prelude axioms, 48 alpha-equivalent native
+  signatures and 16 explicitly reviewed representation/universe models.
+  Unexpected mismatches fail. This is not a proof of runtime bodies.
+
+Single-run measurements (not benchmarks): incremental native build 4,247 ms;
+warm build 396 ms. Parse/elaborate/prepare/kernel/erase-and-origin/IR-and-all-target-
+emission: 31/33/28/36/27/39 ms. Emitted composite sizes: JS 102,327 bytes, TS
+133,933, declarations 27,136, map 58,593. The map includes source content.
+
+## Entry points and next boundary
+
+```text
+pscv0_native --emit application.ps output.js
+pscv0_native --emit-all application.ps output
+pscv0_native --audit-primitives
+```
+
+The default checked native workflow uses --emit-all once; TS compilation writes
+to ts-compiled/ so it cannot overwrite or substitute for direct JS.
+
+Architecture: docs/PSCV0_NATIVE_CODEGEN.md.
+Remaining backend sequence: C3 directWasm foundation, C4 core runtime parity,
+C4b WIT/Canonical ABI/component completion, C5 pre-erasure readable Lean/PS,
+then measured performance work. No Wasm or general v7 completion is claimed.
+C0–C2 is the completed stopping boundary for this request.
+
+---
+
+# Historical work records
+
+The following sections record earlier requests and evidence. Their stopping
+instructions and status claims are historical; the current state is above.
+
 # WIT/WAT/Wasm architecture refinement — research only
 
 12 October 2026: the user requested an expanded architecture report covering

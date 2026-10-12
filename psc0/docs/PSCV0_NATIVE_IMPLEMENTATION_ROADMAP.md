@@ -30,7 +30,7 @@ this development loop.
 | Modules and libraries | Pure single-module v7 compiler; imports explicitly refused | Portable dependency graph/visibility, RC4 module exposure, pinned Standard/library manifests |
 | Proofs and contracts | Term proofs and typed goal state, exact/refine/apply/intro/assumption/rfl/constructor, focus/bullets/all_goals/any_goals, cases/induction/case/next checked by official Lean | Complete logical primitives, further goal control/elimination/rewriting, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Prop/Bool and named-proof conditionals, term if-let, pattern-let, matches and inferred matrix results; selected Except do | General typed do and do-pattern sequencing, mutable/early-return/loop lowering, registered effect families |
-| Executable assurance | Checked prepared graph, complete shared IR gate, TS/JS and Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
+| Executable assurance | Checked prepared graph, complete shared IR gate, native primitive signature/model audit, direct JS/TS/Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
 | Portable source end state | Native portable authoring/import guard | Translate sufficient implemented closure to readable .ps, then explicit source/semantic/fixed-point qualification |
 
 ## Dependency-driven sequence
@@ -62,36 +62,22 @@ origin artifacts, plus Rust alongside TS. The same 285-declaration composite and
 representation and runtime policy remain in backend modules, never elaboration.
 See PSCV0_NATIVE_CODEGEN.md and PSCV0_NATIVE_RUST.md for exact boundaries.
 
-Milestone C remains readable pre-erasure Lean/ProofScript source output, full TS
-expression layout, original-source spans/comments and stronger incremental name
-stability. Milestone D remains broader allocation/scaling qualification and
-stack-safe recursive destruction. Neither is implied by this bounded Rust
-milestone. Language coverage, compiler-source migration and self-hosting remain
-separate acceptance boundaries.
+C0–C2 now implement validated artifact bundles, retained declaration spans and
+generated-parent origins, a runtime API/WIT representability boundary, the
+native primitive signature/model audit, shared structured ECMAScript lowering
+and direct JS/declarations/source maps. See PSCV0_NATIVE_CODEGEN.md. Source maps
+currently resolve to the owning declaration; token-level origins are not claimed.
 
-## Backend design stopping point (12 October 2026)
+The qualified integration profile is 32; exact source/run evidence is in
+AI_WORK_STATE.md. One ECMAScript Program supplies JS and TS output. Direct JS
+emission does not invoke a TypeScript compiler. The same 142 observations run
+on direct JS, TS-compiled JS and Rust; the new declaration and mapping boundaries
+have independent consumers.
 
-Native profile 31 qualifies class output inference and dictionary dependencies:
-473 composite declarations, 92 phase-specific refusals and 142 shared TS/Rust
-observations. Language implementation is stopped at the user's request.
-
-PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md refines the remaining milestone C into
-C0 contracts/provenance/primitive audit, C1 shared ECMAScript, C2 directJS,
-C3 directWasm foundation, C4 current-runtime Wasm parity and C5 readable
-pre-erasure Lean/ProofScript output. Milestone D remains measured performance
-work. This proposal preserves the earlier A/B architecture and does not
-implement new backends or begin compiler migration/self-hosting.
-
-Official checking is relative to the reconstructed portable prelude; primitive
-signature fidelity is not automatically checked against imported native Lean.
-The proposed signature/model audit and assumption ledger address that explicit
-boundary without replacing the kernel.
-
-### WIT/component refinement
-
-Architecture revision 2 includes the requested .wit/.wat/.wasm bundle as a
-component milestone C4b. WIT is generated from a checked public API schema;
-typed core Wasm plus Canonical ABI adapters feed a component plan and both
-binary/WAT writers. Internal GC representation remains independent of the
-synchronous memory32/UTF-8 public boundary. Foreign export representability
-does not restrict internal language types. This is a report-only change.
+Remaining backend sequence preserves PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md:
+C3 typed directWasm foundation and early GC-in-component compatibility probe,
+C4 current-runtime core parity, C4b WIT/Canonical ABI/component completion,
+C5 readable pre-erasure Lean/ProofScript reconstruction, then D measured
+performance/ownership work. No Wasm, compiler-source .ps migration or self-host
+qualification is included in C0–C2. General v7 language completion remains a
+separate capability ledger.

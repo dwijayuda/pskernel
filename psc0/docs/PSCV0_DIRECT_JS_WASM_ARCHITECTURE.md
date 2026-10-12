@@ -1,6 +1,6 @@
 # PSCV0 v7: directJS, WIT/WAT/Wasm, and readable output
 
-Architecture proposal, revision 2 · 12 October 2026 · Research/design only · Implementation remains stopped at native profile 31
+Architecture proposal, revision 2 · 12 October 2026 · Research baseline: native profile 31; C0–C2 implementation update: profile 32 (see §16 and PSCV0_NATIVE_CODEGEN.md)
 
 ## 1. Decision and completed milestone
 
@@ -10,7 +10,7 @@ The main refinement to the previous proposal is that the requested .wit/.wat/.wa
 
 Research baseline: Component Model repository commit 6c48079bbc808bb3bdeb9554f338ab3a5b187388 (7 October 2026), with only a selected synchronous, memory32, UTF-8 subset. Its binary format remains pre-standard; gated features are not implicitly admitted. This plan does not rely on proposed GC Canonical ABI extensions. [Pinned component binary design](https://github.com/WebAssembly/component-model/blob/6c48079bbc808bb3bdeb9554f338ab3a5b187388/design/mvp/Binary.md), [GC ABI proposal](https://github.com/WebAssembly/component-model/issues/525).
 
-This extends the previous codegen architecture rather than replacing the frontend, canonical Core, erasure, or checked runtime IR. New backends are **proposed, not implemented**. Full v7 remains incomplete.
+This extends the previous codegen architecture rather than replacing the frontend, canonical Core, erasure, or checked runtime IR. This document preserves the researched design. C0–C2 were subsequently implemented and qualified; directWasm and source reconstruction remain proposed. Full v7 remains incomplete.
 
 The requested stopping milestone is complete: registered class output parameters, output-only universes, output-insensitive cycle detection, and shared dependency-ordered dictionary solving. The worklist replaces duplicated fixed-order solvers; candidate selection precedes output reconciliation. Scope and priority invariants remain intact.
 
@@ -356,4 +356,11 @@ Real maps require early source retention; comments cannot be recovered after dis
 
 General modules/libraries, broader inference/recursion/control/effects, selected proof automation and VC generation still remain in the v7 roadmap. New backends do not make those features complete.
 
-Implementation remains stopped at the qualified class-output milestone. The next proposed action is C0, followed by C1/C2; directWasm core and component milestones follow the same checked pipeline. No directJS/directWasm code, compiler-source .ps migration, self-hosting, merge or release is part of this report.
+Implementation update (12 October 2026): the user subsequently authorized C0–C2.
+The native implementation now has artifact/API contracts, reviewed primitive
+signatures, shared ECMAScript lowering and direct .js/.d.ts/.js.map output.
+Source-map precision is explicitly owning-declaration spans; generated members
+retain parent attribution, and runtime helpers stay unmapped. See
+PSCV0_NATIVE_CODEGEN.md and AI_WORK_STATE.md for implementation and qualification.
+C3/C4/C4b/C5 remain future work. This does not complete v7, Wasm, compiler-source
+migration or self-hosting.

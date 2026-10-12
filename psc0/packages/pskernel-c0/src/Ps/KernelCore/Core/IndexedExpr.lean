@@ -61,6 +61,9 @@ structure PsKernelC0StoredNode where
   node : PsKernelC0Node
   hash : Nat
   depth : Nat
+  -- Exact upper bound for loose de Bruijn variables: max loose index + 1.
+  -- Zero means no loose variables. Derived only from canonical children.
+  looseBVarRange : Nat
 
 /--
   Share the persistent radix-16 index with the checker caches.
@@ -122,6 +125,32 @@ def psKernelC0ChildDepth
   match psKernelC0StoreGet store id with
   | Option.some entry => entry.depth
   | Option.none => 0
+
+/-- Term-store-local loose-variable metadata, never a checked typing oracle. -/
+def psKernelC0ChildLooseRange
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Nat :=
+  match psKernelC0StoreGet store id with
+  | Option.some entry => entry.looseBVarRange
+  | Option.none => 0
+
+/-- Maximum loose de Bruijn variable + 1 in the exact indexed node.
+    Binder bodies close the zero-index variable and shift all others down.
+    Computation is O(arity) using already checked child metadata. -/
+def psKernelC0NodeLooseRange
+    (store : PsKernelC0TermStore)
+    (node : PsKernelC0Node) : Nat :=
+  let range := psKernelC0ChildLooseRange store
+  match node with
+  | .bvar i => i + 1
+  | .app fn arg => Nat.max (range fn) (range arg)
+  | .lam _ ty body _ => Nat.max (range ty) (range body - 1)
+  | .forallE _ ty body _ => Nat.max (range ty) (range body - 1)
+  | .letE _ ty value body _ =>
+      Nat.max (range ty) (Nat.max (range value) (range body - 1))
+  | .mdata _ body => range body
+  | .proj _ _ body => range body
+  | _ => 0
 
 /-- Include every binder identity field in the canonical-node hash.
     This is only an acceleration hint: exact node equality still guards
@@ -244,7 +273,8 @@ def psKernelC0Intern
     | Option.none =>
         let id := store.nodes.size
         let entry : PsKernelC0StoredNode :=
-          { node := node, hash := hash, depth := psKernelC0NodeDepth store node }
+          { node := node, hash := hash, depth := psKernelC0NodeDepth store node,
+            looseBVarRange := psKernelC0NodeLooseRange store node }
         let index :=
           psKernelC0TermTrieReplace
             psKernelC0IndexDepth store.index hash (List.cons id bucket)

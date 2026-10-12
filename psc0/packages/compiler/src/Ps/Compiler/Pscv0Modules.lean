@@ -75,8 +75,10 @@ structure PsPscv0ModuleInterface where
   classParameters : List (PsName × PsClassParameters) := []
   instances : List PsInstanceEntry := []
 
-def psPscv0ImportedDeclaration : PsDeclaration → PsDeclaration
-  | .definitionDecl name levels type value => .opaqueDecl name levels type value
+def psPscv0ImportedDeclaration (exposed : List PsName) : PsDeclaration → PsDeclaration
+  | .definitionDecl name levels type value =>
+    if exposed.any (psNameEq name) then .definitionDecl name levels type value
+    else .opaqueDecl name levels type value
   | declaration => declaration
 
 def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
@@ -99,7 +101,8 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
 -- Public identity is selected from source-command ownership, rather than from
 -- the final runtime IR (which also contains private and generated workers).
 def psPscv0OwnInterface (environment : PsEnvironment)
-    (own : List PsDeclaration) (hidden : List PsName) : PsPscv0ModuleInterface :=
+    (own : List PsDeclaration) (hidden exposed : List PsName) :
+    PsPscv0ModuleInterface :=
   let publicDecls := own.filter (fun decl =>
     !hidden.any (psNameEq (psDeclarationName decl)))
   let names := publicDecls.map psDeclarationName
@@ -110,7 +113,7 @@ def psPscv0OwnInterface (environment : PsEnvironment)
     match item.value with
     | .constE name _ => owned name
     | _ => false
-  { declarations := publicDecls.map psPscv0ImportedDeclaration,
+  { declarations := publicDecls.map (psPscv0ImportedDeclaration exposed),
     classes, classParameters, instances }
 
 def psPscv0SameInstanceIdentity (left right : PsInstanceEntry) : Bool :=
@@ -213,7 +216,7 @@ def psCompilerPreparePscv0Project (entryName : String)
     let hidden := elaborated.privateNames ++
       psPscv0GeneratedPrivateNames elaborated.origins
     let ownPublic := psPscv0OwnInterface elaborated.result.environment
-      elaborated.result.declarations hidden
+      elaborated.result.declarations hidden elaborated.exposedNames
     -- A public type must never refer to this module's private constants, even
     -- though public executable bodies may call those constants internally.
     for decl in ownPublic.declarations do
@@ -221,6 +224,11 @@ def psCompilerPreparePscv0Project (entryName : String)
           (fun dependency => hidden.any (psNameEq dependency)) then
         throw ("PSCV0-MODULE: public signature references private name in " ++
           psNameToString (psDeclarationName decl))
+      if let some body := psDeclarationValue decl then
+        if (psPscv0ExprConstants body).any
+            (fun dependency => hidden.any (psNameEq dependency)) then
+          throw ("PSCV0-MODULE: exposed body references private name in " ++
+            psNameToString (psDeclarationName decl))
     let mut interface := ownPublic
     for imp in item.program.imports do
       if imp.isPublic then

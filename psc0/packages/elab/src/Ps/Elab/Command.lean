@@ -9,6 +9,7 @@ structure PsCommandState where
   namespaces : List (List String) := []
   originsRev : List PsElabBatchOrigin := []
   privateNames : List PsName := []
+  exposedNames : List PsName := []
 
 def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration) :
     Except PsElabError PsSyntaxDeclaration := do
@@ -135,6 +136,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
       | _ => throw (.data "opaque requires one checked definition; normalized workers pending")
     | _ => pure originBatch.result
   let isClass := match registration with | some .classDecl => true | _ => false
+  let isAbbrev := match registration with | some .abbrevDecl => true | _ => false
   let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
     (.atDeclaration name)
   let environment ← (psAddDeclarationList state.environment batch.declarations).mapError
@@ -159,7 +161,10 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev
     privateNames := if isPrivate then
       batch.declarations.map psDeclarationName ++ state.privateNames
-    else state.privateNames }
+    else state.privateNames
+    exposedNames := if isAbbrev then
+      batch.declarations.map psDeclarationName ++ state.exposedNames
+    else state.exposedNames }
 
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
@@ -209,7 +214,8 @@ def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxPr
   return {
     result := { environment := state.environment, declarations := state.declarationsRev.reverse }
     origins := state.originsRev.reverse
-    privateNames := state.privateNames }
+    privateNames := state.privateNames
+    exposedNames := state.exposedNames }
 
 def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
     Except PsElabError PsElabModuleResult :=

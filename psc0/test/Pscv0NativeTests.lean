@@ -903,6 +903,18 @@ private def projectBoundaries : IO Unit := do
     (psCompilerPreparePscv0Project "Diamond" [diamond, left, right, vault])
   unless closure.mainNames.any (fun n => psNameToString n == "answer") do
     throw (IO.userError "diamond import lost its checked public identity")
+  let aliases : PsPscv0ModuleSource := {
+    name := "Aliases"
+    source := "namespace Aliases\nabbrev six: Nat := 6\nfunction twice(value: Nat): Nat := Nat.add(value, value)\nend Aliases\n" }
+  let abbreviationClient :=
+    "import Aliases\ntheorem exposed: Aliases.six = 6 := by { rfl }\n"
+  let abbreviationOpacity :=
+    "import Aliases\ntheorem cannotUnfold: Aliases.twice(3) = 6 := by { rfl }\n"
+  let invalidExposed : PsPscv0ModuleSource := {
+    name := "InvalidExposed"
+    source := "namespace InvalidExposed\nprivate const seed: Nat := 9\nabbrev leaked: Nat := seed\nend InvalidExposed\n" }
+  if (psCompilerPreparePscv0Project "InvalidExposed" [invalidExposed]).isOk then
+    throw (IO.userError "exposed abbreviation body leaked private declaration")
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },
@@ -915,7 +927,9 @@ private def projectBoundaries : IO Unit := do
     { source := publicRoot, moduleName := "PublicRoot", modules := [vault],
       targets := [.javascript] },
     { source := privateRoot, moduleName := "PrivateRoot", modules := [vault],
-      targets := [.javascript] }]
+      targets := [.javascript] },
+    { source := abbreviationClient, moduleName := "AbbrevClient", modules := [aliases] },
+    { source := abbreviationOpacity, moduleName := "AbbrevOpacity", modules := [aliases] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -929,7 +943,7 @@ private def projectBoundaries : IO Unit := do
         for artifact in value.artifacts do
           if artifact.exports.any (fun e => e.semanticName == "Library.double") then
             throw (IO.userError "ordinary imported runtime symbol leaked into public API")
-    | 1, .ok _ => pure ()
+    | 1, .ok _ | 8, .ok _ => pure ()
     | 4, .ok value | 6, .ok value | 7, .ok value =>
         unless value.artifacts.length == 1 do
           throw (IO.userError "module linked JS artifact missing")
@@ -937,11 +951,11 @@ private def projectBoundaries : IO Unit := do
           | throw (IO.userError "module linked artifact missing")
         unless artifact.exports.all (fun e => e.semanticName == "answer") do
           throw (IO.userError "private or re-exported library name leaked into entry API")
-    | 2, .error error | 3, .error error | 5, .error error =>
+    | 2, .error error | 3, .error error | 5, .error error | 9, .error error =>
         unless error.phase == "module" do
           throw (IO.userError ("module visibility/reflexivity checked at wrong boundary: " ++ error.phase))
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
-  IO.println "PSCV0_NATIVE_MODULES: PASS private/public scope, opaque imports, diamond identity, entry exports and graph refusals"
+  IO.println "PSCV0_NATIVE_MODULES: PASS source scope, exposed abbrev, non-exposed defs, diamonds, entry exports and graph refusals"
 
 def main : IO Unit := do
   emissionBoundary

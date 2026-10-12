@@ -57,6 +57,8 @@ structure PsElabModuleWithOriginsResult where
   origins : List PsElabBatchOrigin
   -- Includes all compiler-generated members owned by a private source command.
   privateNames : List PsName := []
+  -- RC4 public 'abbrev' bodies are exposed, unlike ordinary public 'def' bodies.
+  exposedNames : List PsName := []
 
 -- These two internal results attribute only phases known at the call boundary.
 structure PsElabOriginPhaseError where
@@ -571,7 +573,7 @@ def psElabDeclarationsWithOriginsWorker
           (PsElabModuleResult.mk
             environment
             (psElabReverseDeclarations declarationsRev))
-          (psListReverse originsRev) [])
+          (psListReverse originsRev) [] [])
   | List.cons source rest =>
       match psElabDeclarationBatchWithOrigins environment sourceIndex source with
       | Except.error error => Except.error error

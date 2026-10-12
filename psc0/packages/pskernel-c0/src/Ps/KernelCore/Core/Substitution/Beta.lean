@@ -228,6 +228,15 @@ def psKernelC0BetaSpineApply
   let body := Prod.fst plan;
   let selectedRev := Prod.fst (Prod.snd plan);
   let remaining := Prod.snd (Prod.snd plan);
+  -- C0 single-binder specialization. The common one-argument beta case
+  -- avoids the generic list-substitution interpreter; multi-binder spines
+  -- retain the existing simultaneous instantiation order.
+  let opened :=
+    match selectedRev with
+    | List.cons replacement List.nil =>
+        psKernelExprInstantiate1 body replacement
+    | _ =>
+        psKernelExprInstantiate body selectedRev;
   psKernelExprApplyArgsCheap
-    (psKernelExprInstantiate body selectedRev)
+    opened
     remaining

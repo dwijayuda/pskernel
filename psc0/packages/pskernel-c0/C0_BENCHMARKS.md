@@ -424,3 +424,25 @@ Both new native workflows passed: [CI 38264313583](https://github.com/dwijayuda/
 | 64 medium 48-arg definitions (CI 38265144787) | **25/25/25** | **39/38/39** |
 
 These are **same-run constructed workload families**, not proof of arbitrary module checking superiority. The inner-app new branch was **not separately ablated** against earlier C0 and its specific causal improvement cannot be claimed from C0-original comparison alone. RSS C0 883760 kB / original 877660 kB in CI 38265144787, process-wide benchmark peaks only; no memory improvement. Short/deep/inductive checked workloads remain near parity. No kernel correctness criteria were relaxed, no self-host or metatheory jobs were run.
+
+
+## Dependent Pi suffix re-analysis (successful native CI 38267860486)
+
+The source [b5e0472b](https://github.com/dwijayuda/pskernel/commit/b5e0472b1ec4cd6f62229a239f30179f576317f7) promotes exact, bounded suffix reanalysis after checked dependent substitution, after [three-way candidate CI 38267242015](https://github.com/dwijayuda/pskernel/actions/runs/38267242015). Native [production CI 38267860486](https://github.com/dwijayuda/pskernel/actions/runs/38267860486) **success** with full C0 Lean 4.34 build, negative/differential, native microbenchmarks and unchanged original-core checker. The prior accepting invalidation-only mode stays callable. The new source metadata may be reused only after an exact dependent substitution has yielded a new immutable Pi type with >=12 syntactic binders remaining, and only if bounded analysis succeeds. No environment-dependent conversion result is cached and no acceptance criterion changes.
+
+| Same-run three rounds, complete public checked workload (ms) | Native C0 | Unchanged original core |
+| --- | --- | --- |
+| 80 fully checked dependent Pi applications, 64 independent trailing binders | **30 / 31 / 32** | **52 / 52 / 51** |
+| 48 sequentially admitted safe dependent Pi definitions, tail64 | **23 / 23 / 23** | **37 / 37 / 36** |
+| 160 varied fully checked 48-argument applications | 40 / 39 / 39 | 62 / 62 / 63 |
+| 160 ordinary checked library declarations | 36 / 38 / 37 | 39 / 37 / 35 |
+| 64 deep checked library declarations | 60 / 59 / 60 | 59 / 57 / 57 |
+| Ordinary inductive admission | 35 / 33 / 33 | 35 / 33 / 35 |
+
+| Full checked operation in one C0 process | Prior C0 invalidation-only | New C0 bounded rebuild |
+| --- | ---: | ---: |
+| 80 calls, dependent first binder then 24 independent Pi binders | 16 ms | 13 ms |
+| 80 calls, dependent first binder then 64 independent Pi binders | 51 ms | 26 ms |
+| 30 calls, dependent first binder then 192 independent Pi binders | 114 ms | 27 ms |
+
+Internal full-operation pairs isolate a source-family benefit (about 2× at tail64 and 4.2× at tail192 on these tests), **not** complete library/whole-kernel performance. Three repeated original-vs-C0 public checks in one CI workflow are not independent runner replicates. C0/unchanged original full benchmark process peak VmHWM **1,031,668/1,034,684 kB**; no reliable per-operation memory reduction, p95 or general library improvement established. Prior shorter/ordinary checking negative findings stay recorded; no self-host or metatheory gates.

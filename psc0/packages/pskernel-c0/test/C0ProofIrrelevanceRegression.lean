@@ -1449,11 +1449,15 @@ def main : IO Unit := do
     match psKernelC0EncodeExpr interned expr with
     | Option.none => throw (IO.userError "C0 indexed encode rejected valid syntax")
     | Option.some (next, id) =>
-        match psKernelC0DecodeExpr next id with
-        | Option.none => throw (IO.userError "C0 indexed decode failed")
-        | Option.some restored =>
-            if !(psKernelExprEqual expr restored) then
+        match psKernelC0DecodeExpr next id,
+              psKernelC0DecodeExprWithFuel
+                (psKernelC0ChildDepth next id) next id with
+        | some restored, some reference =>
+            if !(psKernelExprEqual expr restored &&
+                  psKernelExprEqual reference restored) then
               throw (IO.userError "C0 indexed bridge changed exact syntax")
+        | _, _ =>
+            throw (IO.userError "C0 indexed memo decoder changed success")
         match psKernelC0EncodeExpr next expr with
         | Option.some (again, id2) =>
             if !(Nat.beq id id2 && Nat.beq next.nodes.size again.nodes.size) then
@@ -1464,6 +1468,57 @@ def main : IO Unit := do
   | Option.none => pure ()
   | Option.some _ => throw (IO.userError "C0 decoder accepted invalid handle")
   IO.println "C0_PERF_REGRESSION indexed_expr_roundtrip=pass"
+
+  -- Fuel is part of the decoder cache key, not just the root's depth.
+  -- A shared term reached with different budgets must agree with the
+  -- original recursive decoder, even under insufficient recursion depth.
+  let sample := PsKernelExpr.app (PsKernelExpr.mdata 5 binder)
+    (PsKernelExpr.app letTerm piTerm)
+  match psKernelC0EncodeExpr interned sample with
+  | none => throw (IO.userError "C0 shared decoder fixture encode failed")
+  | some (prepared, id) =>
+      for fuel in [0, 1, 2, 3, 4, 6, 9, 15, 48] do
+        match psKernelC0DecodeExprWithFuel fuel prepared id,
+              psKernelC0DecodeExprMemoizedWithFuel fuel prepared id with
+        | none, none => pure ()
+        | some reference, some optimized =>
+            if !(psKernelExprEqual reference optimized) then
+              throw (IO.userError "C0 memo decoder altered exact syntax")
+        | _, _ =>
+            throw (IO.userError "C0 memo decoder changed fuel exhaustion")
+      let record ← match psKernelC0StoreGet prepared id with
+        | some value => pure value
+        | none => throw (IO.userError "C0 decoder root disappeared")
+      -- Public indexed stores can be constructed by clients; malformed
+      -- self cycles or dangling children must fail closed, not be hidden
+      -- by a memo hit or unchecked stored structural depth metadata.
+      let bad : PsKernelC0TermStore := {
+        prepared with
+        nodes := prepared.nodes.set! id
+          { record with node := .app id (prepared.nodes.size + 1) }
+      }
+      if (psKernelC0DecodeExpr bad id).isSome ||
+          (psKernelC0DecodeExprWithFuel record.depth bad id).isSome then
+        throw (IO.userError "C0 indexed memo decode accepted malformed cycle")
+
+  -- Decoding a depth-24 maximally shared DAG is linear in distinct nodes
+  -- with operation-local memoization, instead of an exponential tree walk.
+  -- Avoid recursively comparing/rehashing this huge logical tree here.
+  match psKernelC0Intern psKernelC0StoreEmpty (.bvar 0) with
+  | none => throw (IO.userError "C0 shared decoder leaf missing")
+  | some (first, leaf) =>
+      let mut terms := first
+      let mut root := leaf
+      for _ in [:24] do
+        match psKernelC0Intern terms (.app root root) with
+        | none => throw (IO.userError "C0 shared decoder DAG intern failed")
+        | some (next, id) =>
+            terms := next
+            root := id
+      match psKernelC0DecodeExpr terms root with
+      | some (.app _ _) => pure ()
+      | _ => throw (IO.userError "C0 shared decoder did not return app root")
+  IO.println "C0_PERF_REGRESSION memoized_indexed_decode=pass"
 
 
   -- Demand-driven application-spine WHNF must preserve the old outcomes.

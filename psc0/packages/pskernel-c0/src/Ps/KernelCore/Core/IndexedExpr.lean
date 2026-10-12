@@ -439,12 +439,122 @@ def psKernelC0DecodeExprWithFuel
           let b ← psKernelC0DecodeExprWithFuel remaining store body
           some (.proj name index b)
 
+/-
+  Indexed-to-source conversion is a DAG traversal, not an AST tree walk.
+  A canonical node may appear exponentially often in the unfolded term.
+  Memoize decoded immutable source subterms within *one* decode operation.
+
+  The remaining recursion budget is part of the key. This matters for
+  malformed/stale/cyclic externally constructed stores: a result decoded
+  with generous fuel must never authorize the same node under less fuel.
+  No memo or term handle crosses stores or decode operations. The historical
+  pure recursive decoder above stays an independent exact oracle.
+-/
+abbrev PsKernelC0DecodeMemo :=
+  PsKernelC0HashTrie (Nat × Nat × PsKernelExpr)
+
+/-- Exact key comparison; hash collisions never authorize a decoded term. -/
+def psKernelC0DecodeMemoFind
+    (id fuel : Nat) :
+    List (Nat × Nat × PsKernelExpr) → Option PsKernelExpr
+  | [] => none
+  | (savedId, savedFuel, expr) :: rest =>
+      if savedId == id && savedFuel == fuel then some expr
+      else psKernelC0DecodeMemoFind id fuel rest
+
+def psKernelC0DecodeMemoHash (id fuel : Nat) : Nat :=
+  psKernelCacheMix (psKernelCacheMix 67 id) fuel
+
+def psKernelC0DecodeMemoLookup
+    (memo : PsKernelC0DecodeMemo)
+    (id fuel : Nat) : Option PsKernelExpr :=
+  psKernelC0DecodeMemoFind id fuel
+    (psKernelC0TrieBucket psKernelC0IndexDepth memo
+      (psKernelC0DecodeMemoHash id fuel))
+
+def psKernelC0DecodeMemoInsert
+    (memo : PsKernelC0DecodeMemo)
+    (id fuel : Nat)
+    (expr : PsKernelExpr) : PsKernelC0DecodeMemo :=
+  let hash := psKernelC0DecodeMemoHash id fuel
+  let bucket := psKernelC0TrieBucket psKernelC0IndexDepth memo hash
+  psKernelC0TrieSet psKernelC0IndexDepth memo hash
+    ((id, fuel, expr) :: bucket)
+
+/-- Decode with the exact historical fuel-bound semantics, sharing already
+    decoded immutable subexpressions of the same canonical store. -/
+def psKernelC0DecodeMemoWithFuel
+    (fuel : Nat)
+    (store : PsKernelC0TermStore)
+    (memo : PsKernelC0DecodeMemo)
+    (id : Nat) : Option (PsKernelExpr × PsKernelC0DecodeMemo) :=
+  match fuel with
+  | 0 => none
+  | remaining + 1 => do
+      let stored ← psKernelC0StoreGet store id
+      match psKernelC0DecodeMemoLookup memo id fuel with
+      | some cached => some (cached, memo)
+      | none => do
+          let (decoded, nextMemo) ←
+            match stored.node with
+            | .bvar i => some (.bvar i, memo)
+            | .fvar n => some (.fvar n, memo)
+            | .mvar n => some (.mvar n, memo)
+            | .sort l => some (.sort l, memo)
+            | .const n ls => some (.const n ls, memo)
+            | .lit value => some (.lit value, memo)
+            | .app fn arg => do
+                let (f, memo1) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo fn
+                let (a, memo2) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo1 arg
+                some (.app f a, memo2)
+            | .lam name ty body info => do
+                let (t, memo1) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo ty
+                let (b, memo2) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo1 body
+                some (.lam name t b info, memo2)
+            | .forallE name ty body info => do
+                let (t, memo1) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo ty
+                let (b, memo2) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo1 body
+                some (.forallE name t b info, memo2)
+            | .letE name ty value body nondep => do
+                let (t, memo1) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo ty
+                let (v, memo2) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo1 value
+                let (b, memo3) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo2 body
+                some (.letE name t v b nondep, memo3)
+            | .mdata metadata body => do
+                let (b, memo1) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo body
+                some (.mdata metadata b, memo1)
+            | .proj name index body => do
+                let (b, memo1) ← psKernelC0DecodeMemoWithFuel
+                  remaining store memo body
+                some (.proj name index b, memo1)
+          some (decoded, psKernelC0DecodeMemoInsert nextMemo id fuel decoded)
+
+/-- Memo storage is intentionally fresh for every operation, and never
+    determines DefEq, typing, or environment-specific reduction. -/
+def psKernelC0DecodeExprMemoizedWithFuel
+    (fuel : Nat)
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Option PsKernelExpr := do
+  let (expr, _) ← psKernelC0DecodeMemoWithFuel
+    fuel store PsKernelC0HashTrie.empty id
+  some expr
+
 /-- Public decode checks valid arena-local handles before decoding. -/
 def psKernelC0DecodeExpr
     (store : PsKernelC0TermStore)
     (id : Nat) : Option PsKernelExpr := do
   let stored ← psKernelC0StoreGet store id
-  psKernelC0DecodeExprWithFuel stored.depth store id
+  psKernelC0DecodeExprMemoizedWithFuel stored.depth store id
 
 /-- Exact syntactic equality via same-store canonical IDs. -/
 def psKernelC0EqualNodeIds

@@ -891,6 +891,30 @@ def main : IO Unit := do
             throw (IO.userError "C0 indexed lifting success count diverged")
           IO.println s!"C0_BENCH indexed_lift_dag recursive_ms={legacyLiftEnd-legacyLiftStart} memoized_ms={memoLiftEnd-memoLiftStart} depth=11 runs={liftRuns}"
 
+          -- Paired indexed-to-source bridge cost, keeping the exact
+          -- old decoder as an independent reference. The source tree is
+          -- deliberately shared at every application node; this is not
+          -- an accepting kernel microbenchmark.
+          let decodeRuns := 40
+          let storedDepth := psKernelC0ChildDepth terms input
+          let mut referenceDecodes := 0
+          let oldDecodeStart ← IO.monoMsNow
+          for _ in [:decodeRuns] do
+            match psKernelC0DecodeExprWithFuel storedDepth terms input with
+            | some (.app _ _) => referenceDecodes := referenceDecodes + 1
+            | _ => throw (IO.userError "C0 old DAG decode failed")
+          let oldDecodeEnd ← IO.monoMsNow
+          let mut memoDecodes := 0
+          let newDecodeStart ← IO.monoMsNow
+          for _ in [:decodeRuns] do
+            match psKernelC0DecodeExpr terms input with
+            | some (.app _ _) => memoDecodes := memoDecodes + 1
+            | _ => throw (IO.userError "C0 memoized DAG decode failed")
+          let newDecodeEnd ← IO.monoMsNow
+          if referenceDecodes != decodeRuns || memoDecodes != decodeRuns then
+            throw (IO.userError "C0 DAG decoder counts diverged")
+          IO.println s!"C0_BENCH indexed_decode_dag recursive_ms={oldDecodeEnd-oldDecodeStart} memoized_ms={newDecodeEnd-newDecodeStart} depth=11 runs={decodeRuns}"
+
 
 
   -- The old indexed WHNF stuck-head path reconstructed the entire application

@@ -175,7 +175,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- and deliberately changes with every intentional registered semantic update.
 -- The official kernel is still the authority for checking its declarations.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:4160132988510892817"
+  "fnv1a64:10479628382106927687"
 
 
 -- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing
@@ -314,7 +314,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- alias roster, not source notation, deriving handlers, imported Lean
 -- extensions, effects or the whole trusted execution base.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:a02c9f39e6de1830497114edfaad5e9bdd5730110b562585e3f6ecc30b80b6d3"
+  "sha256:69423cd179d5dd9e00c0a83e241e2120df694fb48f90d92035456e4ba9d79860"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

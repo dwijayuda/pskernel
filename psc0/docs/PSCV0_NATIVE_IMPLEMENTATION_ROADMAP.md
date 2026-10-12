@@ -2,12 +2,15 @@
 
 ## Latest qualified native compiler milestone — 13 October 2026
 
-**Qualified executable SHA:** `f8900407eaaa921097e6cd49d58551ca6558ed96`.
-**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38315275940.
+**Qualified executable SHA:** `fc8bc8b1f16ed993fb144e2d396c0760c068630b`.
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38323422371.
 **Official Lean:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
 **Bounded source profile:** `pscv0-v7-native-bounded/48`, **not** complete v7.
 
-The Lean RC4-style `GetElem` typeclass and proof-carrying
+**Newest qualified M1/M2 update (supersedes historical milestone prose below):**
+The selected Type-0 `GetElem?` is automatically derived at low priority from a checked `GetElem` dictionary and a dependent `Decidable` function. Kernel-proof validity remains separate from runtime Bool. Executable `outOfBounds` has a typed multi-target panic path; the selected positive/negative optional observations passed. A general `LawfulGetElem` instance is NOT qualified: reflexivity cannot identify independently provided decision procedures. `Ps.Meta.SynthInstance` now bounds both candidate checks and goal visits independently, postpones unresolved inputs, and reuses validated completed answers. **230 declarations, 14 classes, 40 ordered instances, 198 shared runtime observations**. Detailed proof blocker and next dependencies are in [M1/M2 implementation audit](PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). Full M1/M2 and v7 remain incomplete.
+
+The earlier Lean RC4-style `GetElem` typeclass and proof-carrying
 `xs[i]`/`xs[i]'h` elaboration now qualify for user-defined instances.
 The generated validity tactic tries genuine assumptions, definitional
 reflexivity and fuel-bounded recursive constructor proofs, refusing
@@ -15,7 +18,7 @@ unresolved goals. Parsed `xs[i]?` and `xs[i]!` are **not executable conformance*
 the full `GetElem?`/default/lawfulness and out-of-bounds panic contracts
 remain open. See [GetElem RC4 design/parity audit](PSCV0_GETELEM_RC4_DESIGN_AUDIT.md).
 
-The **selected** pinned prelude is now **221 declarations, 13 classes and
+The **historical** selected prelude milestone was **221 declarations, 13 classes and
 37 ordered instances**, at FNV `fnv1a64:4160132988510892817` and SHA-256
 `sha256:a02c9f39e6de1830497114edfaad5e9bdd5730110b562585e3f6ecc30b80b6d3`. The source-closure guard passed
 **170 portable / 178 native Lean modules**. All established **194 shared
@@ -52,7 +55,7 @@ the selected language surface is sufficient.
 Selected language profiles 36–48, module foundation and M0 erasure redesign are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
 `f8900407eaaa921097e6cd49d58551ca6558ed96`, [Linux run 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940).
-The shared matrix contains 194 runtime observations per target, including five original proof-indexed dictionary computations and two selected optional/bang observations. This does
+The current shared matrix contains 198 runtime observations per target, including five original proof-indexed dictionary computations and two selected optional/bang observations. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
 execution remain independent assurance boundaries.

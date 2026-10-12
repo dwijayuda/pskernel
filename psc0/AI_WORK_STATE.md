@@ -4,8 +4,8 @@
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** `psc0/pscv0-v7-native-lean-v1`
 **Existing draft PR:** https://github.com/dwijayuda/pskernel/pull/109
-**Last qualified EXECUTABLE source commit:** `f8900407eaaa921097e6cd49d58551ca6558ed96`
-**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38315275940 — all jobs passed.
+**Last qualified EXECUTABLE source commit:** `fc8bc8b1f16ed993fb144e2d396c0760c068630b`
+**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38323422371 — all jobs passed.
 **Prior documentation-only commit:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`.
 **Official checker:** Lean `4.35.0-rc4`, upstream SHA `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 **Source qualification profile:** `pscv0-v7-native-bounded/48`. Profile 49's module foundation is not a claim of completed language conformance.
@@ -14,6 +14,19 @@
 **Standard snapshot details:** `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md`.
 **Ready-to-paste continuation:** `psc0/AI_CONTINUE_PROMPT.md`.
 
+## Latest qualified M1/M2 architecture milestone — 13 October 2026
+
+**Qualified executable:** [`fc8bc8b1f16ed993fb144e2d396c0760c068630b`](https://github.com/dwijayuda/pskernel/commit/fc8bc8b1f16ed993fb144e2d396c0760c068630b), [Linux Actions 38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371) — **PASSED** official Lean and the established JS/TS/Rust/Wasm GC/Wasmtime integration.
+
+- **M1 default indexing:** A **low-priority checked GetElem? instance** now follows from a kernel-checkable `GetElem` dictionary plus a real dependent `forall xs i, Decidable (valid xs i)` function. New `Decidable True` and `Decidable False` instances are ordinary checked source declarations. No Bool-as-Prop shortcut. Selected `GetElem?` still restricts elements to Type 0 until Option/universe generalization.
+- **M1 runtime:** Selected optional success, bang success and optional failure (`none`) pass the same runtime matrix. The existing `outOfBounds` term reduces to `Inhabited.default` for kernel proofs but explicitly produces a typed panic in executable JS/TS/Rust/Wasm GC; both success and failure runtime behavior had independent qualified tests in earlier `f6afea5`-ancestry CI.
+- **M1 lawfulness honesty:** The checked `LawfulGetElem` class remains with mandatory two equality proofs; **no general automatically synthesized LawfulGetElem proof was admitted**. A proposed `Eq.refl` instance was rejected by the official kernel because the default implementation captures a dependent decision procedure while the law quantifies over an independent Decidable dictionary. The proposal was withdrawn with history preserved, not turned into an axiom. A correct proof requires propositionally reconciling those dictionaries (e.g. through genuine Decidable subsingleton/constructor reasoning).
+- **M2 solver:** Scope-isolated positive-answer memoization and proof-witness revalidation remain. The sole candidate engine now tracks **4096 goal visits and 4096 candidate attempts independently**, makes resource exhaustion fail closed, and postpones dependent dictionary subgoals until their class inputs are known. A nested Pi-indexed synthesis retains its resource accounting without reusing local-context answers. Obsolete duplicate candidate-solving code was removed. Complete Lean generator/consumer waiter tabling is still outstanding.
+- **Exact selected Standard:** **230 declarations, 14 classes, 40 registered instances**. FNV `fnv1a64:17137083495666611555` and SHA-256 `sha256:b0ddaa7acc463b9457aac13bd8f08a2f6f8e64bba32b76f7e469ebf1a973f08f`. These identify the *selected prelude*; they are not whole-compiler proofs or full Lean Standard closure.
+- **Evidence:** **198 shared runtime observations** passed TypeScript, direct JavaScript, Rust, V8 Wasm GC and native Wasmtime/component workflows, plus checked source/refusal suite and 170 portable/178 native Lean closure modules. This is bounded acceptance, NOT full M1, M2, v7, metatheory or Lean performance parity.
+- **Next:** finish genuine lawfulness proofs and List/Array/Fin bounds, explicit general panic/Option universe closure, true cyclic tabled generator/consumer scheduling and reproducible solver/runtime benchmarks. Keep entirely native .lean; no pskernel-core, C5 or self-hosting.
+
+### Prior M1/M2 implementation checkpoint (historical)
 ## M1 selected optional indexing and M2 answer-table solver — qualified 13 October 2026
 
 **Latest qualified executable:** `f8900407eaaa921097e6cd49d58551ca6558ed96`, [all-green Linux 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940). The native compiler still uses **170 portable / 178 native Lean modules**, no pskernel-core or self-hosting. The selected Standard is **221 declarations, 13 classes, 37 instances**, frozen at FNV `fnv1a64:4160132988510892817` and SHA-256 `sha256:a02c9f39e6de1830497114edfaad5e9bdd5730110b562585e3f6ecc30b80b6d3`. **194** shared JS/TS/Rust/Wasm-related observations passed, including selected `xs[i]?` and `xs[i]!` dispatch on a user-defined lawful-total-in-practice collection.

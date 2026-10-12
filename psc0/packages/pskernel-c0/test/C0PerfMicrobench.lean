@@ -1440,9 +1440,29 @@ def main : IO Unit := do
     | Except.error err =>
         throw (IO.userError ("C0 opt-in indexed session failed: " ++ err))
   let ownedEnd ← IO.monoMsNow
-  if psKernelC0IndexedSessionRootCount ownedSession != 1 then
-    throw (IO.userError "C0 indexed session repeatedly stored the same root")
-  IO.println s!"C0_BENCH optin_indexed_whnf plain_ms={plainEnd-plainStart} indexed_ms={ownedEnd-ownedStart} runs={optRuns} roots={psKernelC0IndexedSessionRootCount ownedSession} nodes={psKernelC0IndexedSessionNodeCount ownedSession}"
+  if psKernelC0IndexedSessionRootCount ownedSession != 0 ||
+      psKernelC0IndexedSessionNodeCount ownedSession != 0 then
+    throw (IO.userError "C0 checked session eagerly indexed unrequested syntax")
+  -- Recreate the old eager policy only in this diagnostic ablation:
+  -- both paths use the identical authoritative session WHNF operation.
+  let mut eagerSession := psKernelC0IndexedSessionNew wrappedChecker
+  let eagerStart ← IO.monoMsNow
+  for _ in [:optRuns] do
+    match psKernelC0IndexedSessionWhnf 4096 eagerSession rootExpr with
+    | Except.error err =>
+        throw (IO.userError ("C0 eager diagnostic WHNF failed: " ++ err))
+    | Except.ok (value, next) =>
+        match psKernelC0IndexedSessionRetain next rootExpr with
+        | none => throw (IO.userError "C0 eager input indexing failed")
+        | some withInput =>
+            match psKernelC0IndexedSessionRetain withInput value with
+            | none => throw (IO.userError "C0 eager result indexing failed")
+            | some withResult => eagerSession := withResult
+  let eagerEnd ← IO.monoMsNow
+  if psKernelC0IndexedSessionRootCount eagerSession != 1 ||
+      psKernelC0IndexedSessionNodeCount eagerSession == 0 then
+    throw (IO.userError "C0 eager WHNF ablation did not retain syntax")
+  IO.println s!"C0_BENCH indexed_checked_whnf_retention plain_ms={plainEnd-plainStart} lazy_ms={ownedEnd-ownedStart} eager_ms={eagerEnd-eagerStart} runs={optRuns} lazy_nodes={psKernelC0IndexedSessionNodeCount ownedSession} eager_nodes={psKernelC0IndexedSessionNodeCount eagerSession}"
 
 
   -- Same-run canonical-DAG binder-storm measurement. Exactly the same nodes

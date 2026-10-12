@@ -263,6 +263,7 @@ structure PsSyntaxModule where
 -- retains the shared binder, scope and elaboration representation.
 inductive PsSyntaxRegistration where
   | classDecl
+  | abbrevDecl
   | instanceDecl (priority : Nat)
 
 inductive PsSyntaxCommand where

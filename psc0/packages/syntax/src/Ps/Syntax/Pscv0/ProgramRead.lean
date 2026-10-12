@@ -21,6 +21,11 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
     let next ← (psParseProofScriptCommandSeparator
       (psProofScriptDeclarationStop declaration) parsed.cursor).mapError psPscv0ParseError
     return { parsed with cursor := next }
+  if token.text == "abbrev" then
+    let parsed ← psPscv0ReadValueDeclaration cursor
+    let next ← (psParseProofScriptCommandSeparator
+      (psProofScriptDeclarationStop parsed.value) parsed.cursor).mapError psPscv0ParseError
+    return { value := .registeredDeclaration parsed.value .abbrevDecl, cursor := next }
   if token.text == "class" then
     let parsed ← (psPscv0ReadDataDeclaration cursor).mapError psPscv0ParseError
     let next ← (psParseProofScriptCommandSeparator

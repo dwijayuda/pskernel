@@ -1,5 +1,6 @@
 import Ps.Host.NativeV7
 import Ps.Compiler.Pscv0Modules
+import Ps.Environment.StandardSnapshot
 import Pscv0M1Harness
 
 open Lean (toJson)
@@ -863,6 +864,12 @@ private def doBoundaries : IO Unit := do
 private def projectBoundaries : IO Unit := do
   let _ ← get "pinned Standard declaration and instance registry"
     (psStandardExceptAudit psSelfHostProdPreludeEnvironment)
+  let selectedSnapshot := psStandardSnapshotFingerprint psSelfHostProdPreludeEnvironment
+  IO.println ("PSCV0_NATIVE_STANDARD_SNAPSHOT: declarations=" ++
+    toString psSelfHostProdPreludeEnvironment.declarations.length ++
+    " classes=" ++ toString psSelfHostProdPreludeEnvironment.classes.length ++
+    " instances=" ++ toString psSelfHostProdPreludeEnvironment.instances.entries.length ++
+    " fingerprint=" ++ selectedSnapshot)
   let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
     (.definitionDecl
       (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []

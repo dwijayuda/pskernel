@@ -80,7 +80,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardInhabited,
     `Ps.Environment.StandardProduct,
     `Ps.Environment.StandardExcept,
-    `Ps.Environment.SelfHostProd
+    `Ps.Environment.SelfHostProd,
+    `Ps.Environment.StandardSnapshot
   ]
 
 lean_lib PsBridge where

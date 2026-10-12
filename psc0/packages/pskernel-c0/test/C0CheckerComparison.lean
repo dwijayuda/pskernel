@@ -117,6 +117,21 @@ def c0CompareZetaChain : Nat → PsKernelExpr → PsKernelExpr
         (.sort PsKernelLevel.zero)
         (c0CompareZetaChain n leaf) false
 
+/-- Small fixed-size order-statistics helper, shared unchanged by C0 and
+    the original kernel performance harness. No timing occurs inside sorting. -/
+def c0CompareInsertSorted (value : Nat) : List Nat → List Nat
+  | [] => [value]
+  | first :: rest =>
+      if value <= first then value :: first :: rest
+      else first :: c0CompareInsertSorted value rest
+
+def c0CompareOrderStatistic (values : List Nat) (zeroBasedIndex : Nat) : Nat :=
+  let ordered := values.foldl (fun soFar value =>
+    c0CompareInsertSorted value soFar) []
+  match (ordered.drop zeroBasedIndex).head? with
+  | some value => value
+  | none => 0
+
 def main : IO Unit := do
   let empty := psKernelEnvironmentEmpty
   let context := psKernelCheckerContextEmpty empty
@@ -1233,6 +1248,73 @@ def main : IO Unit := do
         if verified != repeats then
           throw (IO.userError "reused-local checked admission count mismatch")
         IO.println s!"C0_COMPARE round={round} operation=admit_local_reference_reused milliseconds={repeatedEnd-repeatedStart} declarations={repeats} binder_depth={reuseDepth} bvar_index={offset} applications={reuseArity}"
+
+  -- Fixed, fully checked declaration batches report sample distributions,
+  -- not just the three aggregate rounds above. Each sample creates a new
+  -- checked environment and admits the same mixed sequence of lambda,
+  -- local-reference lambda and let/zeta definitions. All expressions are
+  -- prebuilt outside the timed block. The unchanged original runs this exact
+  -- same source in its own independently compiled checker process.
+  --
+  -- IO.getNumHeartbeats counts thread-local small allocations, not bytes,
+  -- total allocations or peak RSS; record it as an allocation proxy only.
+  let batchDepth := 64
+  let batchSize := 12
+  let sampleCount := 24
+  let lambdaType := c0CompareCheckedPi batchDepth
+  let lambdaValue := c0CompareCheckedLambda batchDepth
+  let referenceType := c0CompareCheckedPi 32
+  let referenceValue := c0CompareLocalRefLambdas 32 0
+  let zetaValue := c0CompareZetaChain 64 sort0
+  let batchBase := PsKernelName.str PsKernelName.anonymous
+    "C0MixedLatencyAdmission"
+  let mut timings : List Nat := []
+  let mut smallAllocationCounts : List Nat := []
+  let mut sampleAdmissions := 0
+  for _ in [:sampleCount] do
+    let mut acceptedEnvironment := empty
+    let firstHeartbeat ← IO.getNumHeartbeats
+    let firstTime ← IO.monoMsNow
+    for i in [:batchSize] do
+      let kind := i % 3
+      let expectedType :=
+        if kind == 0 then lambdaType
+        else if kind == 1 then referenceType
+        else sort1
+      let checkedValue :=
+        if kind == 0 then lambdaValue
+        else if kind == 1 then referenceValue
+        else zetaValue
+      let declName := PsKernelName.num batchBase i
+      let declaration : PsKernelDefinitionInfo := {
+        base := { name := declName, levelParams := [], type := expectedType }
+        value := checkedValue
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 acceptedEnvironment declaration
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("mixed checked admission rejected: " ++ err))
+      | Except.ok accepted =>
+          if !psKernelEnvironmentContains accepted declName then
+            throw (IO.userError "mixed checked admission omitted declaration")
+          acceptedEnvironment := accepted
+          sampleAdmissions := sampleAdmissions + 1
+    let lastTime ← IO.monoMsNow
+    let lastHeartbeat ← IO.getNumHeartbeats
+    timings := (lastTime - firstTime) :: timings
+    smallAllocationCounts := (lastHeartbeat - firstHeartbeat) ::
+      smallAllocationCounts
+  if sampleAdmissions != sampleCount * batchSize ||
+      timings.length != sampleCount ||
+      smallAllocationCounts.length != sampleCount then
+    throw (IO.userError "mixed declaration latency samples incomplete")
+  let timeP50 := c0CompareOrderStatistic timings 11
+  let timeP95 := c0CompareOrderStatistic timings 22
+  let hbP50 := c0CompareOrderStatistic smallAllocationCounts 11
+  let hbP95 := c0CompareOrderStatistic smallAllocationCounts 22
+  IO.println s!"C0_COMPARE_DISTRIBUTION operation=admit_mixed_checked_declarations samples={sampleCount} batch_size={batchSize} per_sample_ms_p50={timeP50} per_sample_ms_p95={timeP95} small_allocations_p50={hbP50} small_allocations_p95={hbP95} admitted={sampleAdmissions}"
 
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do

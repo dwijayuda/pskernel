@@ -103,6 +103,7 @@ def psKernelC0CheckAppFrames
       PsKernelExpr ->
       Except String (Prod Bool PsKernelCheckerState))
     (frames : List PsKernelC0CheckedAppFrame)
+    (bodyRanges : List Nat)
     (current : PsKernelExpr)
     (state : PsKernelCheckerState) :
     Except String (Prod PsKernelExpr PsKernelCheckerState) :=
@@ -127,8 +128,21 @@ def psKernelC0CheckAppFrames
           | Except.ok (true, nextState) => Except.ok nextState
           | Except.ok (false, _) =>
               Except.error "application type mismatch"
-      psKernelC0CheckAppFrames whnf defeq tail
-        (psKernelExprInstantiate1 view.body frame.argument) state3
+      -- A range of zero means this *exact* Pi body has no loose
+      -- de Bruijn variable. Instantiation would return it unchanged.
+      -- Non-Pi exposure or any dependent instantiation invalidates all
+      -- precomputed suffix metadata and uses the original worker.
+      let (nextType, nextRanges) :=
+        match current, bodyRanges with
+        | .forallE _ _ _ _, range :: suffixes =>
+            if range == 0 then
+              (view.body, suffixes)
+            else
+              (psKernelExprInstantiate1 view.body frame.argument, [])
+        | _, _ =>
+            (psKernelExprInstantiate1 view.body frame.argument, [])
+      psKernelC0CheckAppFrames whnf defeq tail nextRanges
+        nextType state3
 
 /-- Candidate exact checked spine, not yet used by production checking. -/
 def psKernelC0CheckAppSpineWithFuel
@@ -152,7 +166,17 @@ def psKernelC0CheckAppSpineWithFuel
   let (headType, headState) ←
     psKernelInferCoreWithFuel path.fuel whnf defeq
       path.context state path.head false
-  psKernelC0CheckAppFrames whnf defeq path.frames headType headState
+  -- Only large spines amortize a bounded full-suffix analysis. Short
+  -- or unsupported spines keep exact historical substitution behavior.
+  let ranges :=
+    if path.frames.length < 32 then
+      []
+    else
+      match psKernelC0PiBodyRangesWithFuel 1024 headType with
+      | some (_, suffixes) => suffixes
+      | none => []
+  psKernelC0CheckAppFrames whnf defeq path.frames ranges
+    headType headState
 
 def psKernelCheckWithFuel
     (fuel : Nat)

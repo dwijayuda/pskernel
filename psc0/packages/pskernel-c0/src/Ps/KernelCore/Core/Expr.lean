@@ -640,6 +640,66 @@ def psKernelExprInferImplicitAll
       fun (_considerRange : Bool) =>
         expr
 
+/-
+Exact source-side loose de Bruijn range for bounded, read-only acceleration.
+
+Range is maximum loose variable index + 1. Binder bodies decrement by one;
+domain/value fields remain at their original scope. Failure to analyze within
+the bounded recursion budget NEVER changes an inference judgment: callers
+fall back to ordinary substitution. This metadata is not a proof or cache of
+well-typedness, and is validated against the recursive loose-variable oracle.
+-/
+def psKernelC0SourceLooseRangeWithFuel
+    (fuel : Nat) :
+    PsKernelExpr -> Option Nat :=
+  match fuel with
+  | 0 => fun _ => none
+  | Nat.succ remaining =>
+      let smaller := psKernelC0SourceLooseRangeWithFuel remaining
+      fun expr =>
+        match expr with
+        | .bvar index => some (index + 1)
+        | .app fn arg => do
+            let a ← smaller fn
+            let b ← smaller arg
+            pure (Nat.max a b)
+        | .lam _ domain body _
+        | .forallE _ domain body _ => do
+            let a ← smaller domain
+            let b ← smaller body
+            pure (Nat.max a (Nat.pred b))
+        | .letE _ type value body _ => do
+            let a ← smaller type
+            let b ← smaller value
+            let c ← smaller body
+            pure (Nat.max (Nat.max a b) (Nat.pred c))
+        | .mdata _ body
+        | .proj _ _ body =>
+            smaller body
+        | _ => some 0
+
+/-- Return exact loose ranges for Pi bodies in outer-to-inner order.
+    Each Pi suffix is analyzed only once, rather than independently rescanned
+    at every application. A bounded failure requests ordinary checking. -/
+def psKernelC0PiBodyRangesWithFuel
+    (fuel : Nat) :
+    PsKernelExpr -> Option (Prod Nat (List Nat)) :=
+  match fuel with
+  | 0 => fun _ => none
+  | Nat.succ remaining =>
+      let smaller := psKernelC0PiBodyRangesWithFuel remaining
+      fun expr =>
+        match expr with
+        | .forallE _ domain body _ => do
+            let domainRange ←
+              psKernelC0SourceLooseRangeWithFuel remaining domain
+            let (bodyRange, suffixes) ← smaller body
+            pure (Nat.max domainRange (Nat.pred bodyRange),
+              bodyRange :: suffixes)
+        | _ => do
+            let range ← psKernelC0SourceLooseRangeWithFuel remaining expr
+            pure (range, [])
+
 def psKernelExprGetAppFnArgsWorker
     (expr : PsKernelExpr) :
     List PsKernelExpr ->

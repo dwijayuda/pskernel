@@ -999,6 +999,23 @@ private def projectBoundaries : IO Unit := do
   let _ ← get "cryptographic Standard registry fingerprint"
     (psStandardSnapshotValidateCrypto psSelfHostProdPreludeEnvironment
       psStandardSnapshotExpectedSHA256)
+  -- A ground result is cached only after genuine type inference/unification.
+  -- Re-query the *same* immutable environment and local context to ensure the
+  -- answer is reused without another candidate expansion.
+  let inhabitedGoal := psStandardInhabitedType (.constE psNatName [])
+  let memoFirst := psSynthInstanceSearch 64
+    psSelfHostProdPreludeEnvironment psLocalEmpty
+    psSelfHostProdPreludeEnvironment.instances [] {} psMetaEmpty inhabitedGoal
+  unless memoFirst.result.value.isSome && !memoFirst.table.answers.isEmpty do
+    throw (IO.userError "tabled instance solver did not validate a closed witness")
+  let memoAgain := psSynthInstanceSearch 64
+    psSelfHostProdPreludeEnvironment psLocalEmpty
+    psSelfHostProdPreludeEnvironment.instances [] memoFirst.table psMetaEmpty inhabitedGoal
+  unless memoAgain.result.value.isSome &&
+      memoAgain.table.visits == memoFirst.table.visits do
+    throw (IO.userError "closed typeclass goal bypassed the checked answer table")
+  IO.println ("PSCV0_NATIVE_INSTANCE_MEMO: PASS checked ground-answer reuse; expansions=" ++
+    toString memoFirst.table.visits)
   let wrongDigest := "sha256:" ++ String.ofList (List.replicate 64 '0')
   if (psStandardSnapshotValidateCrypto psSelfHostProdPreludeEnvironment
       wrongDigest).isOk then

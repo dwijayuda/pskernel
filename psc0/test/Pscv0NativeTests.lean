@@ -2,6 +2,7 @@ import Ps.Host.NativeV7
 import Ps.Compiler.Pscv0Modules
 import Ps.Environment.StandardSnapshot
 import Pscv0M1Harness
+import Pscv0GetElemOracle
 
 open Lean (toJson)
 
@@ -69,7 +70,8 @@ private def getElemFoundationCases : IO Unit := do
   let unproved := source ++
     "const unproved: Nat := (IndexBox.mk(4))[1]\n"
   let batch ← PsV7Native.runBatch #[
-    { source := source, targets := [], sourceName := "GetElemGood.ps" },
+    { source := source, targets := [.javascript, .typescript, .rust],
+      sourceName := "GetElemGood.ps" },
     { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]
   let result ← match batch with
     | .ok result => pure result
@@ -84,6 +86,8 @@ private def getElemFoundationCases : IO Unit := do
   | .ok accepted =>
     unless accepted.declarationCount > 0 do
       throw (IO.userError "GetElem checked source emitted no declarations")
+    unless accepted.artifacts.length == 3 do
+      throw (IO.userError "GetElem checked source missing JS/TS/Rust artifacts")
   let some rejected := result.results[1]?
     | throw (IO.userError "GetElem negative result missing")
   match rejected with

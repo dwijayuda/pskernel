@@ -153,6 +153,15 @@ def c0BinderDependentPair (width : Nat) (annotate : Bool) :
       PsKernelBinderInfo.default)
     PsKernelBinderInfo.default
 
+/-- Long source let/zeta spine used only by negative and WHNF regression. -/
+def c0ZetaFixture : Nat → PsKernelExpr → PsKernelExpr
+  | 0, leaf => leaf
+  | n + 1, leaf =>
+      .letE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (.sort PsKernelLevel.zero)
+        (c0ZetaFixture n leaf) false
+
 def main : IO Unit := do
   let session :=
     psKernelMkCheckerSession
@@ -163,6 +172,38 @@ def main : IO Unit := do
       psKernelLeanNatMaxSizeDefault
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   let sort1 := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
+  -- Exact body-range oracle and actual WHNF for long let chains.
+  -- A syntax summary is never allowed to authorize ill-typed checking.
+  for depth in [1, 12, 24, 48, 96] do
+    for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
+      match psKernelC0LetBodyRangesWithFuel 1024
+          (c0ZetaFixture depth leaf) with
+      | none => throw (IO.userError "C0 zeta summary unexpectedly absent")
+      | some (_, ranges) =>
+          let mut current := c0ZetaFixture depth leaf
+          let mut tail := ranges
+          for _ in [:depth] do
+            match current, tail with
+            | .letE _ _ _ body _, range :: rest =>
+                for cutoff in [:8] do
+                  if (range > cutoff) != psKernelExprHasLooseAt body cutoff then
+                    throw (IO.userError "C0 zeta range differs from oracle")
+                current := body
+                tail := rest
+            | _, _ => throw (IO.userError "C0 zeta ranges misaligned")
+          if !tail.isEmpty then
+            throw (IO.userError "C0 zeta ranges contain excess entries")
+    match psKernelSessionWhnf 4096 session (c0ZetaFixture depth sort0) with
+    | Except.ok (result, _) =>
+        if !psKernelExprEqual result sort0 then
+          throw (IO.userError "C0 closed zeta WHNF changed result")
+    | Except.error err =>
+        throw (IO.userError ("C0 closed zeta WHNF failed: " ++ err))
+  if (psKernelC0LetBodyRangesWithFuel 1
+      (c0ZetaFixture 32 sort0)).isSome then
+    throw (IO.userError "C0 zeta metadata exceeded recursion budget")
+  IO.println "C0_PERF_REGRESSION exact_zeta_suffix_oracle=pass"
+
   -- One bounded bottom-up syntax analysis must agree with the independent
   -- loose-variable traversal at every binder depth, including a non-closed
   -- innermost body. Budget exhaustion must leave the checker unchanged.

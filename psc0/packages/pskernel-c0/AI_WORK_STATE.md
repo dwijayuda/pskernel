@@ -1,13 +1,13 @@
 # AI_WORK_STATE — PSKernel-C0 Lean performance architecture
 
-**Updated:** 2026-10-12, approximately 08:45 Asia/Jakarta (WIB)
+**Updated:** 2026-10-12, approximately 14:10 Asia/Jakarta (WIB)
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** perf/pskernel-c0-v7-rust-20261012
 **Working directory:** psc0/packages/pskernel-c0/
 **Source branch:** psc0/pscv0-v7-native-lean-v1
 **Original source commit:** a8fbc17f1ad2d24efbde14a7cbe993a4400d4c01
-**Latest branch commit inspected before this handoff:** a8f93b70f0985bd2b28bf7b0ba1b6818eff73bb4
-**Latest completed native Lean CI for actual implementation:** [38192040598](https://github.com/dwijayuda/pskernel/actions/runs/38192040598), success at commit 06532eac5b8f9cfa2df8b810887ab3f42ba809cb.
+**Latest source checkpoint verified:** 30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba
+**Latest completed native Lean CI for actual implementation:** [38215639174](https://github.com/dwijayuda/pskernel/actions/runs/38215639174), success at source commit 30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba, including native original-core matched baseline.
 **Status:** Active performance development. Native Lean implementations and focused checks work, but the *full* indexed architecture is **not** integrated into all accepting kernel operations. Do not report the kernel redesign as complete.
 
 ## 1. User intent and operating rules (important)

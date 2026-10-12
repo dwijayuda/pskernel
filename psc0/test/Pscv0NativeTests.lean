@@ -51,6 +51,13 @@ private def application : String :=
   "}\n" ++
   "const listConsSecond: Nat := secondInList(1 :: 2 :: [])\n" ++
   "const listConsSingle: Nat := secondInList(3 :: [])\n" ++
+  "const stdListFoldlRuntime: Nat := List.foldl(Nat.add, 0, [1, 2, 3])\n" ++
+  "const stdListFoldrRuntime: Nat := List.foldr(Nat.add, 0, [1, 2, 3])\n" ++
+  "const stdListMapRuntime: Nat := List.length(List.map(Nat.succ, [1, 2, 3]))\n" ++
+  "const stdListFilterRuntime: Nat := List.length(List.filter(fun (n: Nat) => Nat.blt(n, 3), [1, 2, 3, 4]))\n" ++
+  "const stdListReverseRuntime: Nat := Option.getD(List.get?(List.reverse([4, 5]), 0), 0)\n" ++
+  "const stdListGetOutsideRuntime: Nat := Option.getD(List.get?([4, 5], 8), 99)\n" ++
+  "const stdOptionRuntime: Nat := Option.getD(Option.bind(Option.some(3), fun (n: Nat) => Option.some(Nat.succ(n))), 0)\n" ++
   "const appendSimple: Bool := if (\"left\" ++ \"right\" = \"leftright\") { true } else { false }\n" ++
   "const appendUnicode: Bool := if (\"🍋\" ++ \"é\" = \"🍋é\") { true } else { false }\n" ++
   "const appendGrouped: Bool := if ((\"A\" ++ \"B\") ++ \"C\" = \"ABC\") { true } else { false }\n" ++

@@ -51,6 +51,15 @@ def psStandardGetElemClass : List PsDeclaration :=
         (psLogicPi 2 "elem" outputElem
           (psLogicPi 3 "valid" outputValid body .implicit)
           .implicit) .implicit) .implicit
+  -- Lean RC4 class type constructors expose coll/idx/elem/valid as
+  -- explicit parameters; the generated constructor and projection hide
+  -- those same parameters implicitly. Conflating these Pi telescopes makes
+  -- source class specialization fail before any indexing proof is checked.
+  let classParameters := fun body =>
+    psLogicPi 0 "coll" typeU
+      (psLogicPi 1 "idx" typeV
+        (psLogicPi 2 "elem" outputElem
+          (psLogicPi 3 "valid" outputValid body)))
   let paramLams := fun body =>
     psLogicLam 0 "coll" typeU
       (psLogicLam 1 "idx" typeV
@@ -58,7 +67,7 @@ def psStandardGetElemClass : List PsDeclaration :=
           (psLogicLam 3 "valid" outputValid body .implicit)
           .implicit) .implicit) .implicit
   [ .inductiveDecl (.mk name [u, v, w]
-      (parameters classSort) 4 0 [ctor] true),
+      (classParameters classSort) 4 0 [ctor] true),
     .constructorDecl (.mk ctor [u, v, w]
       (parameters (psLogicPi 8 "getElem" fieldType family))
       name 0 4 1 []),

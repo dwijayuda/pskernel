@@ -57,6 +57,16 @@ private def getElemFoundationCases : IO Unit := do
     "  getElem(xs: AlwaysBox, i: Nat, h: True): Nat := xs.value\n" ++
     "}\n" ++
     "function triviallyValid(xs: AlwaysBox): Nat := xs[42]\n" ++
+
+    -- The selected Type-0 optional class carries its checked GetElem
+    -- superclass dictionary; no unchecked validity proof is introduced.
+    "instance alwaysOptional: GetElem?(AlwaysBox, Nat, Nat, fun (_: AlwaysBox) => fun (_: Nat) => True) where {\n" ++
+    "  toGetElem := alwaysGet\n" ++
+    "  getElem?(xs: AlwaysBox, i: Nat): Option Nat := Option.some(xs.value)\n" ++
+    "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := xs.value\n" ++
+    "}\n" ++
+    "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++
+    "const bangResult: Nat := (AlwaysBox.mk(41))[42]!\n" ++
     "structure ProductProofBox where { value: Nat }\n" ++
     "instance productProofGet: GetElem(ProductProofBox, Nat, Nat, fun (_: ProductProofBox) => fun (_: Nat) => True ∧ True) where {\n" ++
     "  getElem(xs: ProductProofBox, i: Nat, h: True ∧ True): Nat := xs.value\n" ++
@@ -675,6 +685,13 @@ private def application : String :=
   "  getElem(xs: AlwaysBox, i: Nat, h: True): Nat := xs.value\n" ++
   "}\n" ++
   "function alwaysAt(xs: AlwaysBox): Nat := xs[42]\n" ++
+  "instance alwaysOptional: GetElem?(AlwaysBox, Nat, Nat, fun (_: AlwaysBox) => fun (_: Nat) => True) where {\n" ++
+  "  toGetElem := alwaysGet\n" ++
+  "  getElem?(xs: AlwaysBox, i: Nat): Option Nat := Option.some(xs.value)\n" ++
+  "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := xs.value\n" ++
+  "}\n" ++
+  "function atOptional(xs: AlwaysBox): Nat := Option.getD(xs[42]?, 0)\n" ++
+  "function atBang(xs: AlwaysBox): Nat := xs[42]!\n" ++
   "structure AndBox where { value: Nat }\n" ++
   "instance andGet: GetElem(AndBox, Nat, Nat, fun (_: AndBox) => fun (_: Nat) => True ∧ True) where {\n" ++
   "  getElem(xs: AndBox, i: Nat, h: True ∧ True): Nat := xs.value\n" ++
@@ -685,6 +702,8 @@ private def application : String :=
   "const indexExplicitRuntime: Nat := ProofIndexRuntime.atExplicit(ProofIndexRuntime.IndexBox.mk(313), 0, by { rfl })\n" ++
   "const indexAssumedRuntime: Nat := ProofIndexRuntime.atAssumed(ProofIndexRuntime.IndexBox.mk(317), 0, by { rfl })\n" ++
   "const indexTrueRuntime: Nat := ProofIndexRuntime.alwaysAt(ProofIndexRuntime.AlwaysBox.mk(319))\n" ++
+  "const indexOptionalRuntime: Nat := ProofIndexRuntime.atOptional(ProofIndexRuntime.AlwaysBox.mk(327))\n" ++
+  "const indexBangRuntime: Nat := ProofIndexRuntime.atBang(ProofIndexRuntime.AlwaysBox.mk(329))\n" ++
   "const indexAndRuntime: Nat := ProofIndexRuntime.andAt(ProofIndexRuntime.AndBox.mk(323))\n"
 
 private def instanceProgram : String :=

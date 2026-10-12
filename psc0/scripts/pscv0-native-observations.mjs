@@ -13,6 +13,8 @@ export const observations = [
   { name: "indexExplicitRuntime", args: null, expected: 313n },
   { name: "indexAssumedRuntime", args: null, expected: 317n },
   { name: "indexTrueRuntime", args: null, expected: 319n },
+  { name: "indexOptionalRuntime", args: null, expected: 327n },
+  { name: "indexBangRuntime", args: null, expected: 329n },
   { name: "indexAndRuntime", args: null, expected: 323n },
   { name: "proofClosure", args: null, expected: 119n },
   { name: "proofEntry", args: null, expected: 119n },

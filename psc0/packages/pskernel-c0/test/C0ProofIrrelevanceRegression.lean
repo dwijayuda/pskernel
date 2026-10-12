@@ -332,9 +332,9 @@ def main : IO Unit := do
       Except.ok (term, st)
   for fuel in [0, 1, 2, 3, 4, 8] do
     match psKernelInferAppOnlyLoopWithFuel fuel inertWhnf
-        quickContext psKernelCheckerStateEmpty spineArgs 0 0 inferSpine,
+        session.context psKernelCheckerStateEmpty spineArgs 0 0 inferSpine,
         psKernelInferAppOnlyLoopWithFuelCount fuel 2 inertWhnf
-          quickContext psKernelCheckerStateEmpty spineArgs 0 0 inferSpine with
+          session.context psKernelCheckerStateEmpty spineArgs 0 0 inferSpine with
     | Except.ok (oldType, _), Except.ok (newType, _) =>
         if !(psKernelExprEqual oldType newType) then
           throw (IO.userError "C0 counted infer-only spine changed type")

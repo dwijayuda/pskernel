@@ -74,8 +74,11 @@ def psErasureIndexPrepend (Value : Type) (entries : List (Prod PsName Value)) : 
         match entry with
         | Prod.mk name value => psErasureIndexInsert Value (smaller tail) name value
 
+-- Roles are determined by the checked Core telescope, not source syntax.
+-- Erased dependent type indices are NOT reifiable runtime generic types.
 inductive PsErasedBinderKind where
   | type
+  | index
   | proof
   | runtime
 
@@ -128,6 +131,7 @@ structure PsRuntimeStructureInfo where
   constructorName : PsName
   numParams : Nat
   typeParameters : List PsVerifiedIrTypeParameter
+  sourceTypeIndices : List Nat
   fields : List PsRuntimeStructureField
   numFields : Nat
 
@@ -153,6 +157,7 @@ structure PsRuntimeInductiveInfo where
   typeParameters : List PsVerifiedIrTypeParameter
   constructors : List PsRuntimeConstructorInfo
   numIndices : Nat := 0
+  sourceTypeIndices : List Nat := []
 
 -- Used by both partial-application completion and recursor lowering.
 def psRuntimeRecursorArity (info : PsRuntimeInductiveInfo) : Nat :=
@@ -184,12 +189,12 @@ def psErasureNatRecursor : PsRuntimeInductiveInfo :=
       (List.cons
         (PsRuntimeConstructorInfo.mk "Nat" "succ" psNatSuccName 0
           (List.cons (PsRuntimeConstructorField.mk 0 "predecessor" (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat) true) List.nil) 1)
-        List.nil)) 0
+        List.nil)) 0 []
 
 def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
   PsRuntimeInductiveInfo.mk "Bool" psBoolName (psNameAppendStr psBoolName "rec") 0 []
     [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [] 0,
-     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0
+     PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0 []
 
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
@@ -341,7 +346,7 @@ def psErasureClassifyBinder
         -- Higher-kinded type and predicate families (e.g. coll → idx → Prop)
         -- are compile-time indices, not runtime functions. Lean erases them.
         -- Unlike a function returning Nat/Bool, their codomain is a Sort.
-        PsErasedBinderKind.type
+        PsErasedBinderKind.index
       else
         PsErasedBinderKind.runtime
 
@@ -636,6 +641,75 @@ def psErasureMapRuntimeTypes
           | Except.ok results => Except.ok (List.cons result results)
 
 
+-- Compute the retained source positions from the checked family telescope.
+-- This must agree with the stored plan in runtime inductive/structure metadata.
+def psErasureInductiveSourceTypeIndicesWithFuel
+    (environment : PsEnvironment) (fuel : Nat)
+    (context : PsLocalContext) (cursor : PsExpr) (count sourceIndex : Nat)
+    (indicesRev : List Nat) : Except PsErasureError (List Nat) := do
+  match count with
+  | 0 => return indicesRev.reverse
+  | count + 1 =>
+    match fuel with
+    | 0 => throw .fuelExhausted
+    | remaining + 1 =>
+      let .forallE name domain body binder :=
+        psWhnf environment psMetaEmpty context cursor | throw .binderMismatch
+      let pushed := psLocalPushBinding context name domain binder
+      let next := psExprInstantiate1 body (.fvar pushed.id)
+      match psErasureClassifyBinder environment context domain with
+      | .type =>
+        psErasureInductiveSourceTypeIndicesWithFuel environment remaining
+          pushed.context next count (sourceIndex + 1) (sourceIndex :: indicesRev)
+      | .index =>
+        psErasureInductiveSourceTypeIndicesWithFuel environment remaining
+          pushed.context next count (sourceIndex + 1) indicesRev
+      | _ => throw .unsupportedRuntimeTerm
+
+def psErasureInductiveSourceTypeIndices
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (info : PsInductiveInfo) : Except PsErasureError (List Nat) :=
+  psErasureInductiveSourceTypeIndicesWithFuel environment 4096
+    scope.localContext info.type info.numParams 0 []
+
+def psErasureSelectSourceTypeArguments (arguments : List PsExpr)
+    (positions : List Nat) : Except PsErasureError (List PsExpr) := do
+  positions.mapM fun position =>
+    match arguments[position]? with
+    | some argument => pure argument
+    | none => throw .binderMismatch
+
+-- Reify data/class arguments using the same Core binder roles as declaration
+-- erasure; never lower a predicate former as an unknown or Unit generic.
+def psErasureReifyInductiveArgumentsWithFuel
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (erase : PsExpr → Except PsErasureError PsVerifiedIrType)
+    (fuel : Nat) (cursor : PsExpr) (arguments : List PsExpr)
+    (typesRev : List PsVerifiedIrType) :
+    Except PsErasureError (List PsVerifiedIrType) := do
+  match arguments with
+  | [] => return typesRev.reverse
+  | argument :: rest =>
+    match fuel with
+    | 0 => throw .fuelExhausted
+    | remaining + 1 =>
+      let .forallE _ domain body _ :=
+        psWhnf environment psMetaEmpty scope.localContext cursor
+        | throw .binderMismatch
+      let next := psExprInstantiate1 body argument
+      match psErasureClassifyBinder environment scope.localContext domain with
+      | .type =>
+        let value ← erase argument
+        match value with
+        | .unknown => throw .unsupportedRuntimeTerm
+        | _ =>
+          psErasureReifyInductiveArgumentsWithFuel environment scope erase
+            remaining next rest (value :: typesRev)
+      | .index =>
+        psErasureReifyInductiveArgumentsWithFuel environment scope erase
+          remaining next rest typesRev
+      | _ => throw .unsupportedRuntimeTerm
+
 def psEraseRuntimeTypeWithFuelWorker
     (environment : PsEnvironment)
     (fuel : Nat) :
@@ -691,12 +765,18 @@ def psEraseRuntimeTypeWithFuelWorker
                         psErasureSafeIdentifier
                           (psNameToString name)
                           "Type";
-                  -- Indexed families retain only uniform type parameters in the
-                  -- runtime representation; constructor fields carry runtime data.
+                  -- Higher-kinded predicate indices cannot become runtime types.
+                  -- Interpret only the Core family's retained type parameters.
                   let arguments := match psEnvironmentFindInductive environment name with
-                    | some info => view.args.take info.numParams
-                    | none => view.args
-                  match psErasureMapRuntimeTypes (smaller scope) arguments with
+                    | some info =>
+                      if view.args.length < info.numParams then
+                        Except.error PsErasureError.binderMismatch
+                      else
+                        psErasureReifyInductiveArgumentsWithFuel environment scope
+                          (smaller scope) 4096 info.type
+                          (view.args.take info.numParams) []
+                    | none => psErasureMapRuntimeTypes (smaller scope) view.args
+                  match arguments with
                   | Except.error error => Except.error error
                   | Except.ok arguments =>
                       Except.ok
@@ -765,6 +845,12 @@ def psEraseRuntimeTypeWithFuelWorker
                 | .ok result => .ok (.function [psErasureProofSlotType] result)
             | .type =>
                 Except.ok PsVerifiedIrType.unknown
+            | .index =>
+                let pushed := psLocalPushBinding scope.localContext name domain binder
+                let nextScope := { scope with
+                  localContext := pushed.context
+                  erasedLocals := pushed.id :: scope.erasedLocals }
+                smaller nextScope (psExprInstantiate1 body (.fvar pushed.id))
         | _ =>
             Except.ok PsVerifiedIrType.unknown
 

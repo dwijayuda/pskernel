@@ -146,3 +146,9 @@ Production `Checker/Context.lean` delta/projection helpers now defer allocating 
 Completed native CI [38194277302](https://github.com/dwijayuda/pskernel/actions/runs/38194277302) (full build/test/benchmark), and [38194545945](https://github.com/dwijayuda/pskernel/actions/runs/38194545945) (full build/test/expanded inference and admission benchmark). Lazy delta measurements were near parity, **not a proven speedup**. Full inference 180× and admission 120× elapsed 0–7ms in simple fixtures; too short for production claims. Full benchmark-process peak RSS 612868 kB cannot be assigned to checker alone.
 
 The direct selector's dedicated differential/benchmark run is being qualified; no hypothetical gains have been recorded. Remaining major milestone is persistent provenance-safe session-owned indexed storage and accepting WHNF/DefEq/inference/admission with robust complete-workload baseline and memory measurements. No self-host, bootstrap or metatheory activities in this checkpoint.
+
+
+
+### Negative performance selection: direct expression argument retrieval
+
+Native [run 38194880437](https://github.com/dwijayuda/pskernel/actions/runs/38194880437) successfully validated the added direct-selector differential regression and all other negative checker tests. However the paired 18,000-query depth-512 microbenchmark reported 560 ms for historical full argument list + selection versus 1298 ms for the proposed direct two-pass traversal. Consequently **commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` restored the production projection path to historical single-pass list selection**; the new `Expr.lean` helper remains experimental for its tested API and historical performance record. It is not a reported speedup. Continue verifying the final commit's native workflow and prioritize measured systemic throughput over unmeasured allocation hypotheses.

@@ -491,9 +491,90 @@ def psStandardGetElemOptionalDefaultInstance : PsDeclaration :=
       .instanceImplicit)
   .definitionDecl name [u, v] type body
 
+
+-- The low-priority optional implementation has definitional correctness
+-- proofs for both branches. Construct genuine Eq.refl proof terms, checked by
+-- the official kernel; no general lawfulness axiom or blanket instance exists.
+def psStandardGetElemOptionalDefaultLawfulInstance : PsDeclaration :=
+  let name := psNameAppendStr (psRootName "PsStandard")
+    "instLawfulGetElemOptionalDefault"
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let levels : List PsLevel := [.param u, .param v]
+  let coll := PsExpr.fvar 0
+  let idx := PsExpr.fvar 1
+  let elem := PsExpr.fvar 2
+  let valid := PsExpr.fvar 3
+  let checked := PsExpr.fvar 4
+  let decide := PsExpr.fvar 5
+  let familyArgs := psStandardGetElemArgs coll idx elem valid
+  let indexedPredicate := psLogicPi 30 "xs" coll
+    (psLogicPi 31 "i" idx (.sortE .zero))
+  let decisionFamily := psLogicPi 6 "xs" coll
+    (psLogicPi 7 "i" idx
+      (psDecisionType (psLogicApply valid [.fvar 6, .fvar 7])))
+  let base := psLogicApply
+    (.constE psStandardGetElemName [.param u, .param v, .zero])
+    familyArgs
+  let optionalDict := psLogicApply
+    (.constE (psNameAppendStr (psRootName "PsStandard")
+      "instGetElemOptionalDefault") levels)
+    (familyArgs ++ [checked, decide])
+  let lawFamily := psLogicApply (.constE psStandardLawfulGetElemName levels)
+    (familyArgs ++ [optionalDict])
+  let getOptional := fun (xs i : PsExpr) =>
+    psLogicApply
+      (.constE (psNameAppendStr psStandardGetElemOptionalName "getElem?") levels)
+      (familyArgs ++ [optionalDict, xs, i])
+  let getBang := fun (inhabited xs i : PsExpr) =>
+    psLogicApply
+      (.constE (psNameAppendStr psStandardGetElemOptionalName "getElem!") levels)
+      (familyArgs ++ [optionalDict, inhabited, xs, i])
+  let xs := PsExpr.fvar 20
+  let i := PsExpr.fvar 21
+  let prop := psLogicApply valid [xs, i]
+  let optionalWitness := psLogicLam 20 "xs" coll
+    (psLogicLam 21 "i" idx
+      (psLogicLam 22 "decision" (psDecisionType prop)
+        (psLogicRefl (.succ .zero) (psSelfHostOptionOf elem)
+          (getOptional xs i)) .instanceImplicit))
+  let inhabited := PsExpr.fvar 23
+  let bangXs := PsExpr.fvar 24
+  let bangI := PsExpr.fvar 25
+  let bangWitness := psLogicLam 23 "inhabited"
+    (psStandardInhabitedType elem)
+    (psLogicLam 24 "xs" coll
+      (psLogicLam 25 "i" idx
+        (psLogicRefl (.succ .zero) elem
+          (getBang inhabited bangXs bangI))))
+    .instanceImplicit
+  let proof := psLogicApply
+    (.constE (psNameAppendStr psStandardLawfulGetElemName "mk") levels)
+    (familyArgs ++ [optionalDict, optionalWitness, bangWitness])
+  let params := fun body =>
+    psLogicPi 0 "coll" (.sortE (.succ (.param u)))
+      (psLogicPi 1 "idx" (.sortE (.succ (.param v)))
+        (psLogicPi 2 "elem" psPreludeTypeType
+          (psLogicPi 3 "valid" indexedPredicate body .implicit)
+          .implicit) .implicit) .implicit
+  let lams := fun body =>
+    psLogicLam 0 "coll" (.sortE (.succ (.param u)))
+      (psLogicLam 1 "idx" (.sortE (.succ (.param v)))
+        (psLogicLam 2 "elem" psPreludeTypeType
+          (psLogicLam 3 "valid" indexedPredicate body .implicit)
+          .implicit) .implicit) .implicit
+  let type := params (psLogicPi 4 "checked" base
+    (psLogicPi 5 "decide" decisionFamily lawFamily .instanceImplicit)
+    .instanceImplicit)
+  let value := lams (psLogicLam 4 "checked" base
+    (psLogicLam 5 "decide" decisionFamily proof .instanceImplicit)
+    .instanceImplicit)
+  .definitionDecl name [u, v] type value
+
 def psStandardGetElemOptionalDefaultDeclarations : List PsDeclaration :=
   psStandardOptionalDefaultDecisionDeclarations ++
-    [psStandardGetElemOptionalDefaultInstance]
+    [psStandardGetElemOptionalDefaultInstance,
+     psStandardGetElemOptionalDefaultLawfulInstance]
 
 -- Use the same checked declaration closure for elaboration and execution.
 -- No new trusted primitive, Boolean proof shortcut, or fallback conversion.
@@ -508,6 +589,10 @@ def psStandardGetElemOptionalDefaultExtend (environment : PsEnvironment) :
     [ (trueName, psDecidableName, 1000, []),
       (falseName, psDecidableName, 1000, []),
       (optionalName, psStandardGetElemOptionalName, 100,
+        [psRootName "u", psRootName "v"]),
+      (psNameAppendStr (psRootName "PsStandard")
+         "instLawfulGetElemOptionalDefault",
+        psStandardLawfulGetElemName, 100,
         [psRootName "u", psRootName "v"]) ]
   let index := choices.foldl (fun index (name, className, priority, levelParams) =>
     match psEnvironmentFind environment name with

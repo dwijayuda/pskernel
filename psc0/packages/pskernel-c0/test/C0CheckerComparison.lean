@@ -1,5 +1,6 @@
 import Ps.KernelCore.Admission.Declaration.Admission
 import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
+import Ps.KernelCore.Admission.Inductive.Mutual.Admission
 
 /-
 Matched complete-checker benchmark that intentionally imports *only* APIs
@@ -161,6 +162,43 @@ def main : IO Unit := do
     ]
     isUnsafe := false
     numParams := 0
+  }
+
+  let mutualLeft := PsKernelName.str PsKernelName.anonymous "C0MutualLeft"
+  let mutualRight := PsKernelName.str PsKernelName.anonymous "C0MutualRight"
+  let mutualDecl : PsKernelSimpleMutualInductiveDecl := {
+    levelParams := []
+    numParams := 0
+    types := [
+      { name := mutualLeft
+        type := PsKernelExpr.sort (.succ PsKernelLevel.zero)
+        ctors := [
+          { name := PsKernelName.str mutualLeft "mk",
+            type := PsKernelExpr.const mutualLeft [] }
+        ]
+      },
+      { name := mutualRight
+        type := PsKernelExpr.sort (.succ PsKernelLevel.zero)
+        ctors := [
+          { name := PsKernelName.str mutualRight "mk",
+            type := PsKernelExpr.const mutualRight [] }
+        ]
+      }
+    ]
+    isUnsafe := false
+  }
+  let invalidMutual : PsKernelSimpleMutualInductiveDecl := {
+    levelParams := []
+    numParams := 0
+    types := [
+      { name := mutualLeft,
+        type := PsKernelExpr.sort (.succ PsKernelLevel.zero),
+        ctors := [] },
+      { name := mutualLeft,
+        type := PsKernelExpr.sort (.succ PsKernelLevel.zero),
+        ctors := [] }
+    ]
+    isUnsafe := false
   }
 
   for round in [:3] do
@@ -445,6 +483,38 @@ def main : IO Unit := do
     if malformedRejected != inductiveRuns then
       throw (IO.userError "matched invalid inductive count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=reject_ordinary_inductive milliseconds={malformedEnd-malformedStart} samples={inductiveRuns}"
+
+    -- Validate checked mutual-inductive header/constructor/recursor machinery
+    -- on the same positive and negative inputs in both reference kernels.
+    let mutualRuns := 400
+    let mut mutualAccepted := 0
+    let mutualStart ← IO.monoMsNow
+    for _ in [:mutualRuns] do
+      match psKernelAddSimpleMutualInductive 4096 empty mutualDecl
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("matched mutual inductive rejected: " ++ err))
+      | Except.ok result =>
+          if psKernelEnvironmentContains result mutualLeft &&
+              psKernelEnvironmentContains result mutualRight then
+            mutualAccepted := mutualAccepted + 1
+          else throw (IO.userError "matched mutual inductive missing datatype")
+    let mutualEnd ← IO.monoMsNow
+    if mutualAccepted != mutualRuns then
+      throw (IO.userError "matched mutual admission count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=admit_mutual_inductive milliseconds={mutualEnd-mutualStart} samples={mutualRuns} types=2"
+
+    let mut mutualRejected := 0
+    let mutualRejectStart ← IO.monoMsNow
+    for _ in [:mutualRuns] do
+      match psKernelAddSimpleMutualInductive 4096 empty invalidMutual
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error _ => mutualRejected := mutualRejected + 1
+      | Except.ok _ => throw (IO.userError "matched invalid mutual accepted")
+    let mutualRejectEnd ← IO.monoMsNow
+    if mutualRejected != mutualRuns then
+      throw (IO.userError "matched mutual rejection count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=reject_mutual_inductive milliseconds={mutualRejectEnd-mutualRejectStart} samples={mutualRuns}"
 
     -- Complete checked admission where the body uses an inner, middle or
     -- outer binder. Compare identical semantic decisions and runner-local

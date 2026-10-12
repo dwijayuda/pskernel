@@ -879,12 +879,43 @@ private def projectBoundaries : IO Unit := do
     source := "import Library\nnamespace HiddenFacade\nconst local: Nat := Library.double(2)\nend HiddenFacade\n" }
   let hiddenClient := "import HiddenFacade\nconst leaked: Nat := Library.double(7)\n"
   let opacityClient := "import Library\ntheorem cannotUnfold: Library.double(7) = 14 := by { rfl }\n"
+  let vault : PsPscv0ModuleSource := {
+    name := "Vault"
+    source := "namespace Vault\nprivate const hidden: Nat := 4\nfunction addHidden(value: Nat): Nat := Nat.add(hidden, value)\nend Vault\n" }
+  let privateClient := "import Vault\nopen Vault\nconst answer: Nat := addHidden(3)\n"
+  let privateLeak := "import Vault\nconst stolen: Nat := Vault.hidden\n"
+  let publicRoot := "public import Vault\nconst answer: Nat := Vault.addHidden(2)\n"
+  let privateRoot := "import Vault\nprivate const local: Nat := 2\nconst answer: Nat := Nat.add(local, Vault.addHidden(2))\n"
+  let scoped ← get "private declaration interface"
+    (psCompilerPreparePscv0Project "PrivateClient" [
+      vault, { name := "PrivateClient", source := privateClient }])
+  unless scoped.mainNames.any (fun n => psNameToString n == "answer") &&
+      scoped.libraryNames.any (fun n => psNameToString n == "Vault.hidden") do
+    throw (IO.userError "module private member lost from runtime library closure")
+  let left : PsPscv0ModuleSource := {
+    name := "Left", source := "public import Vault\nconst left: Nat := 1\n" }
+  let right : PsPscv0ModuleSource := {
+    name := "Right", source := "public import Vault\nconst right: Nat := 2\n" }
+  let diamond : PsPscv0ModuleSource := {
+    name := "Diamond"
+    source := "import Left\nimport Right\nconst answer: Nat := Vault.addHidden(3)\n" }
+  let closure ← get "checked diamond import"
+    (psCompilerPreparePscv0Project "Diamond" [diamond, left, right, vault])
+  unless closure.mainNames.any (fun n => psNameToString n == "answer") do
+    throw (IO.userError "diamond import lost its checked public identity")
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },
     { source := client.source, moduleName := "Client", modules := [library, facade] },
     { source := hiddenClient, moduleName := "HiddenClient", modules := [library, hiddenFacade] },
-    { source := opacityClient, moduleName := "Opacity", modules := [library] }]
+    { source := opacityClient, moduleName := "Opacity", modules := [library] },
+    { source := privateClient, moduleName := "PrivateClient", modules := [vault],
+      targets := [.javascript] },
+    { source := privateLeak, moduleName := "Leaker", modules := [vault] },
+    { source := publicRoot, moduleName := "PublicRoot", modules := [vault],
+      targets := [.javascript] },
+    { source := privateRoot, moduleName := "PrivateRoot", modules := [vault],
+      targets := [.javascript] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -899,11 +930,18 @@ private def projectBoundaries : IO Unit := do
           if artifact.exports.any (fun e => e.semanticName == "Library.double") then
             throw (IO.userError "ordinary imported runtime symbol leaked into public API")
     | 1, .ok _ => pure ()
-    | 2, .error error | 3, .error error =>
+    | 4, .ok value | 6, .ok value | 7, .ok value =>
+        unless value.artifacts.length == 1 do
+          throw (IO.userError "module linked JS artifact missing")
+        let some artifact := value.artifacts.head?
+          | throw (IO.userError "module linked artifact missing")
+        unless artifact.exports.all (fun e => e.semanticName == "answer") do
+          throw (IO.userError "private or re-exported library name leaked into entry API")
+    | 2, .error error | 3, .error error | 5, .error error =>
         unless error.phase == "module" do
           throw (IO.userError ("module visibility/reflexivity checked at wrong boundary: " ++ error.phase))
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
-  IO.println "PSCV0_NATIVE_MODULES: PASS checked public import, order, cycle and missing-module refusal"
+  IO.println "PSCV0_NATIVE_MODULES: PASS private/public scope, opaque imports, diamond identity, entry exports and graph refusals"
 
 def main : IO Unit := do
   emissionBoundary

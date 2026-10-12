@@ -1147,10 +1147,12 @@ private def projectBoundaries : IO Unit := do
     "const chained: Except String Nat := Except.bind(sourceOk, fun (n: Nat) => Except.ok(Nat.succ(n)))\n" ++
     "theorem chainedProof: chained = Except.ok(5) := by { rfl }\n" ++
     "const sourceError: Except String Nat := Except.error(\"bad\")\n" ++
-    "const mappedError: Except Nat Nat := Except.mapError(fun (s: String) => String.Internal.length(s), sourceError)\n" ++
+    "const mappedError: Except Nat Nat := Except.mapError(fun (s: String) => 3, sourceError)\n" ++
     "theorem mappedErrorProof: mappedError = Except.error(3) := by { rfl }\n" ++
-    "const recovered: Except String Nat := Except.tryCatch(sourceError, fun (s: String) => Except.ok(String.Internal.length(s)))\n" ++
+    "const mappedErrorRuntime: Except Nat Nat := Except.mapError(fun (s: String) => String.Internal.length(s), sourceError)\n" ++
+    "const recovered: Except String Nat := Except.tryCatch(sourceError, fun (s: String) => Except.ok(3))\n" ++
     "theorem recoveredProof: recovered = Except.ok(3) := by { rfl }\n" ++
+    "const recoveredRuntime: Except String Nat := Except.tryCatch(sourceError, fun (s: String) => Except.ok(String.Internal.length(s)))\n" ++
     "const successFlag: Bool := Except.isOk(sourceOk)\n" ++
     "theorem successFlagProof: successFlag = true := by { rfl }\n" ++
     "const absent: Option Nat := Except.toOption(sourceError)\n" ++

@@ -714,6 +714,30 @@ def psKernelExprGetAppNumArgs
     (expr : PsKernelExpr) : Nat :=
   psKernelExprAppArityLoop expr 0
 
+/--
+  Read a single application argument by its position from the head,
+  without materializing the entire argument list. Two spine walks replace
+  an O(arity) intermediate list; exact position semantics match GetAppArgs.
+  This is used only after the checker confirms a matching constructor.
+-/
+def psKernelExprGetAppArgFromRight
+    (expr : PsKernelExpr) (offset : Nat) : Option PsKernelExpr :=
+  match expr with
+  | PsKernelExpr.app fn arg =>
+      match offset with
+      | 0 => Option.some arg
+      | Nat.succ remaining =>
+          psKernelExprGetAppArgFromRight fn remaining
+  | _ => Option.none
+
+def psKernelExprGetAppArgAt
+    (expr : PsKernelExpr) (index : Nat) : Option PsKernelExpr :=
+  let arity := psKernelExprGetAppNumArgs expr
+  if Nat.blt index arity then
+    psKernelExprGetAppArgFromRight expr (arity - index - 1)
+  else
+    Option.none
+
 def psKernelTypeAnnotationOutParamName : PsKernelName :=
   PsKernelName.str PsKernelName.anonymous "outParam"
 

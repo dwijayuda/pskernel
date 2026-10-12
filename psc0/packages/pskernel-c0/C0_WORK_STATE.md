@@ -101,3 +101,15 @@ Evidence:
 - No self-hosting tests were executed. Full checked inference/DefEq and production indexed acceptance remain future integration steps. Metatheory/consistency proof work remains deferred.
 
 Next: benchmark complete WHNF and definitional-equality workloads using a persistent indexed store, establish provenance-safe scopes for environment-sensitive caches, and integrate the indexed representation into the accepting core only when native differential and resource-policy gates pass.
+
+
+## Indexed WHNF unchanged-spine architecture checkpoint (2026-10-12)
+
+- `src/Ps/KernelCore/Checker/Reduction/IndexedWhnf.lean` now tracks whether a head traversal performed metadata erasure, beta or zeta reduction. When no reduction occurs, the indexed engine returns the original canonical handle directly instead of re-interning every application on the spine.
+- The previous public `psKernelC0IndexedWhnfWithFuel` signature is preserved. The internal worker carries the initial handle and a change flag; externally supplied partial-spine arguments force reconstruction rather than a false identity shortcut.
+- `test/C0ProofIrrelevanceRegression.lean` checks unchanged stuck-spine handle identity and store size as well as metadata-head reduction, which must not reuse the original handle.
+- `test/C0PerfMicrobench.lean` now separately times eliminated indexed-spine reassembly and unchanged-handle WHNF, and adds a cold end-to-end native checker WHNF sample with a fresh state on each call.
+- Native tests and benchmarks are intentionally separate from self-hosting. No self-hosting test was run or requested.
+- The indexed WHNF engine is still an experimental context-free subset; full checked delta, recursive and native reductions, definitional equality, type inference and admission remain in the original Lean checker. These changes do not claim that indexed WHNF itself is a complete proof-checking engine.
+
+The first [native Lean workflow 38191236078](https://github.com/dwijayuda/pskernel/actions/runs/38191236078) at `8d52cd385e40654fb25f56d9113bcab69ffd7515` passed the library build, native negative checks and existing microbenchmarks. The newer benchmark observations must be read from their own workflow run before claiming speedups.

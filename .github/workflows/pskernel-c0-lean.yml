@@ -10,6 +10,7 @@ on:
       - '.github/workflows/pskernel-c0-lean.yml'
       - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,3 +36,25 @@ jobs:
       - name: Native Lean C0 performance microbenchmarks (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0PerfMicrobench.lean
+
+      - name: Matched original vs C0 native checker (no self-host)
+        shell: bash
+        run: |
+          set -euo pipefail
+          c0="$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+          core="$GITHUB_WORKSPACE/psc0/packages/pskernel-core"
+          echo "C0 benchmark (identical inputs)"
+          (cd "$c0" && lake env lean --run test/C0CheckerComparison.lean)
+          # Build the unchanged 79-module original tree in an isolated
+          # temporary Lake package with the *same* pinned Lean toolchain.
+          # No original source, package metadata, compiler or backend is edited.
+          baseline="$(mktemp -d)"
+          trap 'rm -rf "$baseline"' EXIT
+          cp -R "$core/src" "$baseline/src"
+          cp "$c0/lean-toolchain" "$baseline/lean-toolchain"
+          sed -e '/`Ps.KernelCore.Core.IndexedExpr,/d' \
+              -e '/`Ps.KernelCore.Core.IndexedReduction,/d' \
+              -e '/`Ps.KernelCore.Checker.Reduction.IndexedWhnf,/d' \
+              "$c0/lakefile.lean" > "$baseline/lakefile.lean"
+          echo "Original PSKernel-Core benchmark (identical inputs)"
+          (cd "$baseline" && lake build PsKernelC0 && lake env lean --run "$c0/test/C0CheckerComparison.lean")

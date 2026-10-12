@@ -92,11 +92,21 @@ def psKernelLocalContextFindIn
 /-
 C0 local environment indexing.
 
-Small local contexts stay as simple lists. At the ninth binder, construct a
-radix-16 trie keyed by full name hashes, with collision buckets checked by
-exact PsKernelName equality. Future extensions update only four trie levels.
-Previously captured contexts remain immutable and retain their prior index.
+Local binders often have short lifetimes. In checked definition admission,
+a 16-binder chain spent more time maintaining the radix index than looking up
+locals. Keep shallow contexts as lists through 32 entries and build a radix-16
+index only when adding the 33rd local. Deep contexts then share indexed lookups
+and four-level persistent updates. This prevents the demonstrated premature
+index-maintenance cost without giving up the 512-local indexed lookup benefit.
+
+The ordered list remains authoritative, including name shadowing; each
+persistent snapshot preserves the index appropriate to its own depth.
 -/
+/-- Eager indexing is only worth its construction and update cost for
+    sufficiently deep local environments. This threshold is a performance
+    policy; correctness and shadowing never depend on it. -/
+def psKernelC0LocalIndexThreshold : Nat := 32
+
 def psKernelC0LocalIndexInsert
     (index : PsKernelC0HashTrie PsKernelLocalDecl)
     (decl : PsKernelLocalDecl) :
@@ -121,8 +131,9 @@ def psKernelC0LocalContextNextIndex
   | Option.some index =>
       Option.some (psKernelC0LocalIndexInsert index decl)
   | Option.none =>
-      -- The linear check is bounded to the eight-entry small-context path.
-      if Nat.ble 8 context.decls.length then
+      -- No radix maintenance within short-lived binder spines.
+      -- A later extension constructs the complete indexed snapshot once.
+      if Nat.ble psKernelC0LocalIndexThreshold context.decls.length then
         Option.some
           (psKernelC0LocalIndexBuild (List.cons decl context.decls))
       else

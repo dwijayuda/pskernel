@@ -172,7 +172,7 @@ def psKernelC0CheckAppSpineWithFuel
     if path.frames.length < 32 then
       []
     else
-      match psKernelC0PiBodyRangesWithFuel 1024 headType with
+      match psKernelC0PiBodyRangesWithFuel (Nat.min 1024 fuel) headType with
       | some (_, suffixes) => suffixes
       | none => []
   psKernelC0CheckAppFrames whnf defeq path.frames ranges
@@ -198,11 +198,17 @@ def psKernelCheckWithFuel
     (expr : PsKernelExpr) :
     Except String
       (Prod PsKernelExpr PsKernelCheckerState) :=
-  psKernelInferCoreWithFuel
-    fuel
-    whnf
-    defeq
-    context
-    state
-    expr
-    false
+  -- Promote only long root application spines. Smaller applications
+  -- continue using the historical recursive checked inference to avoid
+  -- frame allocation overhead where amortization is unproven.
+  match expr with
+  | .app _ _ =>
+      if psKernelExprGetAppNumArgs expr >= 64 then
+        psKernelC0CheckAppSpineWithFuel
+          fuel whnf defeq context state expr
+      else
+        psKernelInferCoreWithFuel
+          fuel whnf defeq context state expr false
+  | _ =>
+      psKernelInferCoreWithFuel
+        fuel whnf defeq context state expr false

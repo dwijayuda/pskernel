@@ -113,7 +113,7 @@ def main : IO Unit := do
   -- The flattened checked-spine candidate must have identical fully checked
   -- outcomes, exact error strings, resource exhaustion and fresh-name state.
   -- This includes a deeply nested app, a bad argument and tight fuel limits.
-  for arity in [1, 4, 12, 48] do
+  for arity in [1, 4, 12, 48, 192] do
     let source := (List.range arity).foldl
       (fun expr _ => PsKernelExpr.app expr sort0)
       (c0CheckedSpineFixture arity)
@@ -135,6 +135,34 @@ def main : IO Unit := do
         | _, _ =>
             throw (IO.userError "C0 checked spine changed success/rejection")
   IO.println "C0_PERF_REGRESSION checked_spine_exact_fuel_and_errors=pass"
+  -- A finite recursive-context limit is independent of expression fuel.
+  -- The production router must preserve the exact recursion-depth rejection
+  -- on both shorter and wider application spines.
+  for bound in [1, 2, 64, 192, 256] do
+    let bounded : PsKernelCheckerSession := {
+      session with
+      context := { session.context with maxRecDepth := bound }
+    }
+    for arity in [12, 192] do
+      let expr := (List.range arity).foldl
+        (fun term _ => PsKernelExpr.app term sort0)
+        (c0CheckedSpineFixture arity)
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelC0CheckAppSpineWithFuel 4096 whnf defeq
+          bounded.context bounded.state expr,
+          psKernelInferCoreWithFuel 4096 whnf defeq
+            bounded.context bounded.state expr false with
+      | Except.error a, Except.error b =>
+          if a != b then
+            throw (IO.userError "C0 framed spine recursion error differed")
+      | Except.ok (a, _), Except.ok (b, _) =>
+          if !(psKernelExprEqual a b) then
+            throw (IO.userError "C0 framed spine recursion result differed")
+      | _, _ =>
+          throw (IO.userError "C0 framed spine recursion classification differed")
+  IO.println "C0_PERF_REGRESSION checked_spine_context_bounds=pass"
+
 
   -- Exact source cached-range oracle: a range greater than the cutoff
   -- must agree with the independent recursive loose-variable predicate

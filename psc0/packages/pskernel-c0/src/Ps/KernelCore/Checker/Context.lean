@@ -552,8 +552,7 @@ def psKernelReduceProjCore
   else
     let fn :=
       psKernelExprGetAppFn structValue;
-    let args :=
-      psKernelExprGetAppArgs structValue;
+    -- A missing or non-constructor head must not build an argument list.
     match fn with
     | PsKernelExpr.const ctorName _ =>
         match
@@ -568,7 +567,7 @@ def psKernelReduceProjCore
                       ctor.induct
                       typeName then
                   psKernelExprListGet
-                    args
+                    (psKernelExprGetAppArgs structValue)
                     (Nat.add
                       ctor.numParams
                       index)
@@ -610,8 +609,8 @@ def psKernelUnfoldDefinition
     Option PsKernelExpr :=
   let fn :=
     psKernelExprGetAppFn expr;
-  let args :=
-    psKernelExprGetAppArgs expr;
+  -- Delay materializing the spine until a definition and its universe
+  -- instantiation have actually been established.
   match fn with
   | PsKernelExpr.const name levels =>
       match
@@ -638,7 +637,7 @@ def psKernelUnfoldDefinition
                       value
                       params
                       levels)
-                    args)
+                    (psKernelExprGetAppArgs expr))
               else
                 Option.none
   | _ =>

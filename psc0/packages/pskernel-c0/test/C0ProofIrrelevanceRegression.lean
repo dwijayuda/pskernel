@@ -258,6 +258,34 @@ def main : IO Unit := do
              psKernelExprEqual hashed sort0) then
           throw (IO.userError "C0 prehashed cache changed returned expression")
     | _, _ => throw (IO.userError "C0 prehashed cache missed original entry")
+  -- Checked inference has stronger obligations than WHNF: every
+  -- let domain and value must be checked, each binder allocates its fresh
+  -- local, and the closed body is inferred under the new local context.
+  -- Compare the optimized public checker to the independent hook-free
+  -- historical syntax-directed engine at exact resource budgets.
+  for depth in [1, 8, 11, 12, 13, 24, 48, 96] do
+    for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
+      let term := c0ZetaFixture depth leaf
+      for fuel in [0, 1, 8, 24, 64, 512, 4096] do
+        let defeq := psKernelIsDefEqWithFuel fuel
+        let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+        match psKernelSessionCheck fuel session term,
+            psKernelInferCoreWithFuel fuel whnf defeq
+              session.context session.state term false with
+        | Except.error candidate, Except.error reference =>
+            if candidate != reference then
+              throw (IO.userError
+                "C0 checked zeta changed resource/error classification")
+        | Except.ok (candidate, checked), Except.ok (reference, originalState) =>
+            if !(psKernelExprEqual candidate reference &&
+                checked.state.nextFresh == originalState.nextFresh) then
+              throw (IO.userError
+                "C0 checked zeta changed type or fresh-name state")
+        | _, _ =>
+            throw (IO.userError
+              "C0 checked zeta changed acceptance/rejection")
+  IO.println "C0_PERF_REGRESSION checked_zeta_fingerprint_inference=pass"
+
   IO.println "C0_PERF_REGRESSION zeta_hash_cache_exactness=pass"
 
   IO.println "C0_PERF_REGRESSION exact_zeta_suffix_oracle=pass"

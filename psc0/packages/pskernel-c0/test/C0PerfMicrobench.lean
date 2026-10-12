@@ -267,6 +267,16 @@ def c0BenchDependentPiTail (tail : Nat) : PsKernelExpr :=
       PsKernelBinderInfo.default)
     PsKernelBinderInfo.default
 
+/-- Entire typed let-chain expression used for checker acceptance and
+    cost comparisons, with each binding Sort 0 : Sort 1. -/
+def c0BenchTypedLetChain : Nat → PsKernelExpr → PsKernelExpr
+  | 0, leaf => leaf
+  | n + 1, leaf =>
+      .letE PsKernelName.anonymous
+        (.sort (.succ PsKernelLevel.zero))
+        (.sort PsKernelLevel.zero)
+        (c0BenchTypedLetChain n leaf) false
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -630,6 +640,47 @@ def main : IO Unit := do
     if oldOk != samples || optimizedOk != samples then
       throw (IO.userError "C0 dependent suffix results diverged")
     IO.println s!"C0_BENCH dependent_checked_suffix width={width} calls={samples} old_ms={oldEnd-oldStart} rebuilt_ms={optimizedEnd-optimizedStart}"
+
+  -- Complete checked inference versus the hook-free source oracle
+  -- within *one* C0 revision. Both include type/value/local checking and
+  -- differ only in immutable let-cache metadata. The same suite also runs
+  -- matched unchanged-original full admission in C0CheckerComparison.
+  for depth in [16, 64, 128] do
+    let term := c0BenchTypedLetChain depth
+      (PsKernelExpr.sort PsKernelLevel.zero)
+    let initialSession := psKernelMkCheckerSession
+      psKernelEnvironmentEmpty [] PsKernelDefinitionSafety.safe 4096
+      psKernelLeanNatMaxSizeDefault
+    let context := initialSession.context
+    let initialState := initialSession.state
+    let expected := PsKernelExpr.sort (.succ PsKernelLevel.zero)
+    let rounds := if depth == 128 then 20 else 60
+    let mut oldOk := 0
+    let oldStart ← IO.monoMsNow
+    for _ in [:rounds] do
+      let defeq := psKernelIsDefEqWithFuel 4096
+      let whnf := psKernelWhnfWithRecursorFuel 4096 defeq
+      match psKernelInferCoreWithFuel 4096 whnf defeq
+          context initialState term false with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty expected then oldOk := oldOk + 1
+          else throw (IO.userError "old checked zeta inference type differed")
+      | Except.error err =>
+          throw (IO.userError ("old checked zeta inference failed: " ++ err))
+    let oldEnd ← IO.monoMsNow
+    let mut optimizedOk := 0
+    let optimizedStart ← IO.monoMsNow
+    for _ in [:rounds] do
+      match psKernelSessionCheck 4096 initialSession term with
+      | Except.ok (ty, _) =>
+          if psKernelExprEqual ty expected then optimizedOk := optimizedOk + 1
+          else throw (IO.userError "optimized checked zeta type differed")
+      | Except.error err =>
+          throw (IO.userError ("optimized checked zeta failed: " ++ err))
+    let optimizedEnd ← IO.monoMsNow
+    if oldOk != rounds || optimizedOk != rounds then
+      throw (IO.userError "checked zeta inference sample count changed")
+    IO.println s!"C0_BENCH checked_zeta_inference depth={depth} calls={rounds} historical_ms={oldEnd-oldStart} metadata_ms={optimizedEnd-optimizedStart}"
 
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   -- Build cost includes all radix allocations. Compare against an

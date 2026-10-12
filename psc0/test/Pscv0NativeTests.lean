@@ -58,7 +58,7 @@ private def getElemFoundationCases : IO Unit := do
     { source := source, targets := [], sourceName := "GetElemGood.ps" },
     { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]
   let .ok result := batch
-    | throw (IO.userError "native GetElem batch failed before source checking")
+    | throw (IO.userError ("native GetElem batch failed before source checking: " ++ reprStr batch))
   let some admitted := result.results[0]?
     | throw (IO.userError "GetElem checked-source result missing")
   match admitted with

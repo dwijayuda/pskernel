@@ -36,7 +36,7 @@ private def application : String :=
   "function guarded(value: Nat, proof: False): Nat := nomatch proof\n" ++
   "const proofClosure: Nat := ignoreGuard(fun (proof: False) => nomatch proof)\n" ++
   "const proofEntry: Nat := ignoreGuard(guarded(120))\n" ++
-  "function keep(value: Nat): Nat := {\n" ++
+  "opaque keep(value: Nat): Nat := {\n" ++
   "  let selected: _ := value\n" ++
   "  selected\n" ++
   "}\n" ++
@@ -797,7 +797,8 @@ private def doBoundaries : IO Unit := do
     ("const bad: Id Nat := do {\n  let .some n := Option.none\n  return n\n}\n", "elaborate"),
     ("function bad(flag: Bool): Id Nat := do {\n  if (h : flag) { return 1 }\n  return h\n}\n", "elaborate"),
     ("const bad: Id Nat := do {\n  if let .some n ← Option.some(1) { return n }\n  return 0\n}\n", "parse"),
-    ("const bad: Id Nat := do {\n  let (x, x) := (1, 2)\n  return x\n}\n", "elaborate")]
+    ("const bad: Id Nat := do {\n  let (x, x) := (1, 2)\n  return x\n}\n", "elaborate"),
+    ("opaque hidden: Nat := 1\ntheorem bad: hidden = 1 := by { rfl }\n", "elaborate")]
   let batch ← match ← PsV7Native.runBatch (cases.map fun (source, _) => { source }) with
     | .ok batch => pure batch
     | .error error => throw (IO.userError (reprStr error))
@@ -809,7 +810,7 @@ private def doBoundaries : IO Unit := do
       unless error.phase == cases[i]!.snd do
         throw (IO.userError s!"do boundary {i}: {error.phase}: {error.message}")
     | .ok _ => throw (IO.userError s!"do boundary {i}: invalid source accepted")
-  IO.println "PSCV0_NATIVE_DO: PASS 7 focused scope/type/category refusals"
+  IO.println "PSCV0_NATIVE_DO: PASS 7 do refusals and 1 opaque definitional-opacity refusal"
 
 def main : IO Unit := do
   emissionBoundary

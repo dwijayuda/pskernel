@@ -547,6 +547,18 @@ def psEncodeCodecTheorem
               psCheckedAdmissionJsonField "v" (encodedValue)
             ])
 
+-- Opaque bodies are checked by the official kernel, without a reducibility hint.
+def psEncodeCodecOpaque (name : PsName) (levelParams : List PsName)
+    (type value : PsExpr) : Except PsCheckedAdmissionCodecError String := do
+  let encodedType ← psEncodeCodecExpr type
+  let encodedValue ← psEncodeCodecExpr value
+  return psJsonObject [
+    psCheckedAdmissionJsonField "k" (psJsonQuote "opaque"),
+    psCheckedAdmissionJsonField "lp" (psEncodeCodecNameList levelParams),
+    psCheckedAdmissionJsonField "n" (psEncodeCodecName name),
+    psCheckedAdmissionJsonField "t" encodedType,
+    psCheckedAdmissionJsonField "v" encodedValue ]
+
 def psEncodeConstantAdmission (declaration : String) : String :=
   psJsonObject [
     psCheckedAdmissionJsonField "declaration" (declaration),
@@ -630,9 +642,13 @@ def psEncodeCheckedAdmissionsLoop
         | .axiomDecl _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration
-        | .opaqueDecl _ _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
+        | .opaqueDecl name levelParams type value =>
+            match psEncodeCodecOpaque name levelParams type value with
+            | .error error => .error error
+            | .ok encoded =>
+              smaller { state with
+                admissionsRev := List.cons (psEncodeConstantAdmission encoded)
+                  state.admissionsRev }
         | .partialDecl _ _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration
@@ -976,6 +992,10 @@ def psCheckedNestedNormalize (wrappers : List (Prod PsName PsDeclaration)) (decl
           List.cons (PsDeclaration.definitionDecl name levels (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) tail
       | PsDeclaration.theoremDecl name levels type value =>
           List.cons (PsDeclaration.theoremDecl name levels (psCheckedNestedRewrite wrappers type) (psCheckedNestedRewrite wrappers value)) tail
+      | PsDeclaration.opaqueDecl name levels type value =>
+          List.cons (PsDeclaration.opaqueDecl name levels
+            (psCheckedNestedRewrite wrappers type)
+            (psCheckedNestedRewrite wrappers value)) tail
       | PsDeclaration.inductiveDecl info =>
           match psCheckedNestedFind wrappers info.name with
           | Option.none => List.cons declaration tail

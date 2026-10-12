@@ -2142,7 +2142,8 @@ def psErasureResolveEntry
                 match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
                 | Except.error error => Except.error error
                 | Except.ok entry => Except.ok (Option.some entry)
-          | PsDeclaration.partialDecl _ _ type value =>
+          | PsDeclaration.partialDecl _ _ type value
+          | PsDeclaration.opaqueDecl _ _ type value =>
               if psErasureIsProp environment psLocalEmpty type then Except.ok Option.none
               else
                 match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with

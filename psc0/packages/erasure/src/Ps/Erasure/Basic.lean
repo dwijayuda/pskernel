@@ -408,7 +408,8 @@ def psErasureDeclarationEntryIndex
           match declaration with
           | PsDeclaration.definitionDecl name _ type value =>
               psErasureAddDeclarationEntry environment name type value tail
-          | PsDeclaration.partialDecl name _ type value =>
+          | PsDeclaration.partialDecl name _ type value
+          | PsDeclaration.opaqueDecl name _ type value =>
               psErasureAddDeclarationEntry environment name type value tail
           | _ => Except.ok tail
 

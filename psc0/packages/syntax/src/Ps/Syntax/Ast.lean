@@ -264,6 +264,7 @@ structure PsSyntaxModule where
 inductive PsSyntaxRegistration where
   | classDecl
   | abbrevDecl
+  | opaqueDecl
   | instanceDecl (priority : Nat)
 
 inductive PsSyntaxCommand where

@@ -45,6 +45,7 @@ def psBuildErasureDeclarationNamesWorker
       let sourceName : Option PsName :=
         match declaration with
         | PsDeclaration.definitionDecl name _ _ _ => Option.some name
+        | PsDeclaration.opaqueDecl name _ _ _ => Option.some name
         | PsDeclaration.partialDecl name _ _ _ => Option.some name
         | PsDeclaration.theoremDecl name _ _ _ => Option.some name
         | PsDeclaration.inductiveDecl info => Option.some info.name
@@ -446,7 +447,8 @@ def psEraseDefinitionsLoopWorker
               | Option.some lowered =>
                   psEraseDefinitionsLoopWorker environment scope rest
                     (List.cons lowered declarationsRev)
-      | PsDeclaration.partialDecl name _ type value =>
+      | PsDeclaration.partialDecl name _ type value
+      | PsDeclaration.opaqueDecl name _ type value =>
           match psEraseDefinition environment scope name type value with
           | Except.error error => Except.error (.inDeclaration name error)
           | Except.ok result =>

@@ -123,7 +123,15 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   let originBatch ← (psElabDeclarationBatchWithOrigins state.environment
     state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
       (fun error => PsElabError.atDeclaration name error.error)
-  let batch := originBatch.result
+  let batch ← match registration with
+    | some .opaqueDecl =>
+      -- Preserve actual kernel opacity, rather than a display-only declaration tag.
+      match originBatch.result.declarations with
+      | [.definitionDecl declarationName levels type value] =>
+        pure { originBatch.result with
+          declarations := [.opaqueDecl declarationName levels type value] }
+      | _ => throw (.data "opaque requires one checked definition; normalized workers pending")
+    | _ => pure originBatch.result
   let isClass := match registration with | some .classDecl => true | _ => false
   let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
     (.atDeclaration name)
@@ -131,7 +139,7 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     (.atDeclaration name)
   let environment ← (match registration with
     | none => pure environment
-    | some .abbrevDecl => pure environment
+    | some .abbrevDecl | some .opaqueDecl => pure environment
     | some .classDecl => psElabRegisterClass environment name
     | some (.instanceDecl priority) => psElabRegisterInstance environment name priority).mapError
       (.atDeclaration name)

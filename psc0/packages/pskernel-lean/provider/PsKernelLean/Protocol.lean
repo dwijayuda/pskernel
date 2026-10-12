@@ -103,6 +103,20 @@ def decodeDefinition (value : PsJsonValue) :
     safety := .safe
   }
 
+def decodeOpaque (value : PsJsonValue) :
+    Except PsKernelLeanError Lean.Declaration := do
+  let levelParams ← decodeLevelParamList (← jsonField value "lp")
+  let name ← decodeLeanName (← jsonField value "n")
+  let type ← decodeLeanExpr (← jsonField value "t")
+  let body ← decodeLeanExpr (← jsonField value "v")
+  pure <| .opaqueDecl {
+    name := name
+    levelParams := levelParams
+    type := type
+    value := body
+    isUnsafe := false
+  }
+
 def decodeTheorem (value : PsJsonValue) :
     Except PsKernelLeanError Lean.Declaration := do
   let levelParams ← decodeLevelParamList (← jsonField value "lp")
@@ -149,6 +163,8 @@ def decodeConstantAdmission (value : PsJsonValue) :
     decodeDefinition value
   else if declarationKind == "theorem" then
     decodeTheorem value
+  else if declarationKind == "opaque" then
+    decodeOpaque value
   else
     throw (malformedRequest "unsupported constant declaration kind")
 

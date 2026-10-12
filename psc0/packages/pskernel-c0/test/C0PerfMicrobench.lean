@@ -923,8 +923,11 @@ def main : IO Unit := do
   let microDeltaName := PsKernelName.str PsKernelName.anonymous
     "C0.IndexedDeltaBench"
   let microDeltaDef : PsKernelDefinitionInfo := {
-    base := { name := microDeltaName, levelParams := [],
-      type := PsKernelExpr.sort (.succ PsKernelLevel.zero) }
+    base := {
+      name := microDeltaName
+      levelParams := []
+      type := PsKernelExpr.sort (.succ PsKernelLevel.zero)
+    }
     value := PsKernelExpr.sort PsKernelLevel.zero
     hints := PsKernelReducibilityHints.abbrevHint
     safety := PsKernelDefinitionSafety.safe

@@ -1,27 +1,32 @@
 # PSCV0 v7 native implementation roadmap
 
-## Latest qualified native project milestone — 12 October 2026
+## Latest qualified native module implementation — 12 October 2026
 
-**Executable source:** `754108eb861ef19642b6f3ae9e17e7313ef179bb`.
-**Green Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38244878977.
-The module foundation was called Profile 49; the executable still identifies
-the bounded language subset as `pscv0-v7-native-bounded/48`. Existing
-171 shared runtime observations passed across direct JS, TS, Rust, Wasm GC
-and Wasmtime. Closure guard: 159 portable and 167 native Lean modules.
+**Executable SHA:** `1a29ecc9ed77ec0d6ae2c48df79b3bd5973dcddc`.
+**Green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38249590861.
+**Standalone 3-module integration checkpoint:** `399cefb64c3d0b719de153738cf38a9393866461`, https://github.com/dwijayuda/pskernel/actions/runs/38249164390.
 
-`Ps.Compiler.Pscv0Modules` performs pure in-memory graph planning,
-`import`/`public import` interface preparation and dependency refusals.
-The native host and `scripts/Pscv0Native.lean` now provide manifest-driven
-multi-file project checking and JS/TS/Rust/Wasm emission commands.
-The new CLI compiles and the compact module test passes, but standalone
-CLI end-to-end cross-module runtime behavior is not yet independently qualified.
+The native project compiler now accepts source-level private declarations,
+filters public interfaces, checks public-signature and exposed-abbreviation
+body dependencies on private names, keeps imported ordinary definition bodies
+opaque, and preserves RC4's exposed public abbreviation bodies. A compact
+source test verifies private/public scope, open/namespace visibility,
+transitive public imports, diamond identity, and selected refusals.
 
-Next: implement precise RC4 public/private source visibility, imported
-definition/theorem body opacity, namespace/open and import re-exports,
-diamond/collision/instance identity handling, executable library linking,
-entry-only export selection and multi-file provenance. Qualify a real
-cross-module executable example with the official Lean checker and existing
-backend gates. C5 and all self-host work remain deferred.
+The manifest-driven `module-fixture` is a real three-file linked application.
+Official Lean checks the whole project, direct JS / TypeScript / Rust execute
+`App.compute(7) = 18`, public artifacts expose only entry declarations,
+and JS origins/maps retain three source files. Existing 171 shared runtime
+observations remain green; project Wasm GC core/component binaries pass
+pinned validation. A separate project-specific Wasm execution observation
+remains to be added. This establishes runnable cross-module integration,
+**not full RC4 module conformance or full v7 language completion**.
+
+Next: hygienic module-local private names, complete collision/re-export
+precedence, typed instance exposure and stable registry semantics, correct
+dependent signature closure, full module/target assurance. Continue the
+remaining Standard/data/effects/proof/contract language roadmap after the
+module invariants are closed. No C5, pskernel-core or self-hosting.
 
 ## Current priority: core and essential language conformance first
 
@@ -41,7 +46,7 @@ the selected language surface is sufficient.
 
 Selected language profiles 36–48 and the later module foundation are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`754108eb861ef19642b6f3ae9e17e7313ef179bb`, [Linux run 38244878977](https://github.com/dwijayuda/pskernel/actions/runs/38244878977).
+`1a29ecc9ed77ec0d6ae2c48df79b3bd5973dcddc`, [Linux run 38249590861](https://github.com/dwijayuda/pskernel/actions/runs/38249590861).
 The shared matrix contains 171 runtime observations per target. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
@@ -75,7 +80,7 @@ this development loop.
 | Type inference and environment | Scoped typed metavariable assignment with universe constraints, prioritized global/local instances, output-parameter metadata, dictionary dependency worklists and checked class methods, scoped source universes, symbolic level simplification, RC4 checking | Complete universe constraints/explicit suffixes, tabled non-ground search/semi-output parameters, attributes/default instances and frozen Standard registry |
 | Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, nested/multiple typed pattern matrices and nomatch, proof-field storage erasure | Named discriminants, heterogeneous constraints, Type/existential fields, selected nested/mutual data |
 | Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
-| Modules and libraries | Qualified explicit project planning, checked imports/public-import facades and native manifest-driven CLI entry points | Full RC4 body/visibility rules, diamond/instance identity, runtime library linking and entry exports, source provenance and independent end-to-end multi-file qualification |
+| Modules and libraries | Explicit module graph, private/public source boundary, ordinary-body opacity and exposed abbrevs, public facades/diamonds, runnable JS/TS/Rust 3-file app, entry-only APIs and three-source maps, Wasm core/component validation | Hygienic private identities, comprehensive RC4 visibility/import collision/instance semantics, public signature closure, project-specific Wasm execution, complete conformance |
 | Proofs and contracts | Term proofs and typed goal state, exact/refine/apply/intro/assumption/rfl/constructor, focus/bullets/all_goals/any_goals, cases/induction/case/next checked by official Lean | Complete logical primitives, further goal control/elimination/rewriting, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Prop/Bool and named-proof conditionals, term if-let, pattern-let, matches and inferred matrix results; selected Except do | General typed do and do-pattern sequencing, mutable/early-return/loop lowering, registered effect families |
 | Executable assurance | Checked prepared graph, complete shared IR gate, native primitive signature/model audit, direct JS/TS/Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |

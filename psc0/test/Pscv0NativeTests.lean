@@ -853,7 +853,7 @@ private def doBoundaries : IO Unit := do
 -- introducing a separate project interpreter or a large fixture suite.
 private def projectBoundaries : IO Unit := do
   let _ ← get "pinned Standard declaration and instance registry"
-    (psStandardProductAudit psSelfHostProdPreludeEnvironment)
+    (psStandardExceptAudit psSelfHostProdPreludeEnvironment)
   let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
     (.definitionDecl
       (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []
@@ -1139,6 +1139,24 @@ private def projectBoundaries : IO Unit := do
   let productMissingEquality :=
     "const functions: Prod((Nat -> Nat), Nat) := (fun (x: Nat) => x, 1)\n" ++
     "const shouldFail: Bool := functions == functions\n"
+  let checkedExcept :=
+    "function increment(n: Nat): Nat := Nat.succ(n)\n" ++
+    "const sourceOk: Except String Nat := Except.ok(4)\n" ++
+    "const mapped: Except String Nat := Except.map(increment, sourceOk)\n" ++
+    "theorem mappedProof: mapped = Except.ok(5) := by { rfl }\n" ++
+    "const chained: Except String Nat := Except.bind(sourceOk, fun (n: Nat) => Except.ok(Nat.succ(n)))\n" ++
+    "theorem chainedProof: chained = Except.ok(5) := by { rfl }\n" ++
+    "const sourceError: Except String Nat := Except.error(\"bad\")\n" ++
+    "const mappedError: Except Nat Nat := Except.mapError(fun (s: String) => String.Internal.length(s), sourceError)\n" ++
+    "theorem mappedErrorProof: mappedError = Except.error(3) := by { rfl }\n" ++
+    "const recovered: Except String Nat := Except.tryCatch(sourceError, fun (s: String) => Except.ok(String.Internal.length(s)))\n" ++
+    "theorem recoveredProof: recovered = Except.ok(3) := by { rfl }\n" ++
+    "const successFlag: Bool := Except.isOk(sourceOk)\n" ++
+    "theorem successFlagProof: successFlag = true := by { rfl }\n" ++
+    "const absent: Option Nat := Except.toOption(sourceError)\n" ++
+    "theorem absentProof: absent = Option.none := by { rfl }\n"
+  let exceptTypeMismatch :=
+    "const bad: Except String Nat := Except.map(Nat.succ, Option.some(1))\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1209,7 +1227,10 @@ private def projectBoundaries : IO Unit := do
     { source := listEqualityRefusal, moduleName := "ListBEqMissingElem" },
     { source := checkedProducts, moduleName := "CheckedProduct",
       targets := [.javascript, .typescript, .rust] },
-    { source := productMissingEquality, moduleName := "ProductBEqMissingElem" }]
+    { source := productMissingEquality, moduleName := "ProductBEqMissingElem" },
+    { source := checkedExcept, moduleName := "CheckedExcept",
+      targets := [.javascript, .typescript, .rust] },
+    { source := exceptTypeMismatch, moduleName := "ExceptTypeMismatch" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1360,6 +1381,15 @@ private def projectBoundaries : IO Unit := do
     | 40, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "unsupported Prod component equality accepted")
+    | 41, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked Except operations missing backend artifacts")
+    | 41, .error error =>
+        throw (IO.userError ("checked Except operations failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 42, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "ill-typed Except.map argument accepted")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

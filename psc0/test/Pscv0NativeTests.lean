@@ -59,15 +59,22 @@ private def getElemFoundationCases : IO Unit := do
     { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]
   let .ok result := batch
     | throw (IO.userError "native GetElem batch failed before source checking")
-  let some (.ok accepted) := result.results[0]?
-    | throw (IO.userError ("proof-carrying GetElem source not accepted: " ++
-        reprStr result.results[0]?))
-  unless accepted.declarationCount > 0 do
-    throw (IO.userError "GetElem checked source emitted no declarations")
-  let some (.error refused) := result.results[1]?
-    | throw (IO.userError "unproved indexed term was admitted")
-  unless refused.phase == "elaborate" do
-    throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
+  let some admitted := result.results[0]?
+    | throw (IO.userError "GetElem checked-source result missing")
+  match admitted with
+  | .error reason =>
+    throw (IO.userError ("proof-carrying GetElem source not accepted: " ++
+      reason.phase ++ ": " ++ reason.message))
+  | .ok accepted =>
+    unless accepted.declarationCount > 0 do
+      throw (IO.userError "GetElem checked source emitted no declarations")
+  let some rejected := result.results[1]?
+    | throw (IO.userError "GetElem negative result missing")
+  match rejected with
+  | .ok _ => throw (IO.userError "unproved indexed term was admitted")
+  | .error refused =>
+    unless refused.phase == "elaborate" do
+      throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
   IO.println "PSCV0_NATIVE_GETELEM: checked indexed proof/instance admitted; missing proof refused"
 
 private def application : String :=

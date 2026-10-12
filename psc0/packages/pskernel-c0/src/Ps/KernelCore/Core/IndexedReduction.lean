@@ -38,7 +38,7 @@ def psKernelC0LiftIndexedWithFuel
   | 0 => none
   | remaining + 1 => do
       let stored ← psKernelC0StoreGet store id
-      if amount == 0 then
+      if amount == 0 || stored.looseBVarRange <= start then
         some (store, id)
       else
         match stored.node with
@@ -211,51 +211,56 @@ def psKernelC0InstantiateMemoWithFuel
       | some cached => some (state, cached)
       | none =>
           let stored ← psKernelC0StoreGet state.store id
-          let (nextState, result) ←
-            match stored.node with
-            | .bvar i =>
-                if i < offset then some (state, id)
-                else if i == offset then do
-                  let (nextStore, lifted) ←
-                    psKernelC0LiftIndexed state.store replacement 0 offset
-                  some ({ store := nextStore, memo := state.memo }, lifted)
-                else psKernelC0RewriteIntern state id (.bvar (i - 1))
-            | .app fn arg => do
-                let (s1, f) ← psKernelC0InstantiateMemoWithFuel
-                  remaining state fn replacement offset
-                let (s2, a) ← psKernelC0InstantiateMemoWithFuel
-                  remaining s1 arg replacement offset
-                psKernelC0RewriteIntern s2 id (.app f a)
-            | .lam name ty body info => do
-                let (s1, t) ← psKernelC0InstantiateMemoWithFuel
-                  remaining state ty replacement offset
-                let (s2, b) ← psKernelC0InstantiateMemoWithFuel
-                  remaining s1 body replacement (offset + 1)
-                psKernelC0RewriteIntern s2 id (.lam name t b info)
-            | .forallE name ty body info => do
-                let (s1, t) ← psKernelC0InstantiateMemoWithFuel
-                  remaining state ty replacement offset
-                let (s2, b) ← psKernelC0InstantiateMemoWithFuel
-                  remaining s1 body replacement (offset + 1)
-                psKernelC0RewriteIntern s2 id (.forallE name t b info)
-            | .letE name ty value body nondep => do
-                let (s1, t) ← psKernelC0InstantiateMemoWithFuel
-                  remaining state ty replacement offset
-                let (s2, v) ← psKernelC0InstantiateMemoWithFuel
-                  remaining s1 value replacement offset
-                let (s3, b) ← psKernelC0InstantiateMemoWithFuel
-                  remaining s2 body replacement (offset + 1)
-                psKernelC0RewriteIntern s3 id (.letE name t v b nondep)
-            | .mdata metadata body => do
-                let (s1, b) ← psKernelC0InstantiateMemoWithFuel
-                  remaining state body replacement offset
-                psKernelC0RewriteIntern s1 id (.mdata metadata b)
-            | .proj name index body => do
-                let (s1, b) ← psKernelC0InstantiateMemoWithFuel
-                  remaining state body replacement offset
-                psKernelC0RewriteIntern s1 id (.proj name index b)
-            | _ => some (state, id)
-          some (psKernelC0RewritePublish nextState id offset result, result)
+          -- Every affected de Bruijn variable must have index >= offset.
+          -- Skip complete closed sub-DAGs without constructing memo entries.
+          if stored.looseBVarRange <= offset then
+            some (state, id)
+          else
+            let (nextState, result) ←
+              match stored.node with
+              | .bvar i =>
+                  if i < offset then some (state, id)
+                  else if i == offset then do
+                    let (nextStore, lifted) ←
+                      psKernelC0LiftIndexed state.store replacement 0 offset
+                    some ({ store := nextStore, memo := state.memo }, lifted)
+                  else psKernelC0RewriteIntern state id (.bvar (i - 1))
+              | .app fn arg => do
+                  let (s1, f) ← psKernelC0InstantiateMemoWithFuel
+                    remaining state fn replacement offset
+                  let (s2, a) ← psKernelC0InstantiateMemoWithFuel
+                    remaining s1 arg replacement offset
+                  psKernelC0RewriteIntern s2 id (.app f a)
+              | .lam name ty body info => do
+                  let (s1, t) ← psKernelC0InstantiateMemoWithFuel
+                    remaining state ty replacement offset
+                  let (s2, b) ← psKernelC0InstantiateMemoWithFuel
+                    remaining s1 body replacement (offset + 1)
+                  psKernelC0RewriteIntern s2 id (.lam name t b info)
+              | .forallE name ty body info => do
+                  let (s1, t) ← psKernelC0InstantiateMemoWithFuel
+                    remaining state ty replacement offset
+                  let (s2, b) ← psKernelC0InstantiateMemoWithFuel
+                    remaining s1 body replacement (offset + 1)
+                  psKernelC0RewriteIntern s2 id (.forallE name t b info)
+              | .letE name ty value body nondep => do
+                  let (s1, t) ← psKernelC0InstantiateMemoWithFuel
+                    remaining state ty replacement offset
+                  let (s2, v) ← psKernelC0InstantiateMemoWithFuel
+                    remaining s1 value replacement offset
+                  let (s3, b) ← psKernelC0InstantiateMemoWithFuel
+                    remaining s2 body replacement (offset + 1)
+                  psKernelC0RewriteIntern s3 id (.letE name t v b nondep)
+              | .mdata metadata body => do
+                  let (s1, b) ← psKernelC0InstantiateMemoWithFuel
+                    remaining state body replacement offset
+                  psKernelC0RewriteIntern s1 id (.mdata metadata b)
+              | .proj name index body => do
+                  let (s1, b) ← psKernelC0InstantiateMemoWithFuel
+                    remaining state body replacement offset
+                  psKernelC0RewriteIntern s1 id (.proj name index b)
+              | _ => some (state, id)
+            some (psKernelC0RewritePublish nextState id offset result, result)
 
 /--
   Memoized beta-substitution on one immutable, indexed term store.

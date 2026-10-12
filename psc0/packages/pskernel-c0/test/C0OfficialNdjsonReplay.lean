@@ -302,33 +302,59 @@ def c0ExportCheckDefinitions (infos : List PsKernelDefinitionInfo) :
         | _ => throw ("C0 check did not yield a normal rejection: " ++ message)
   return true
 
+/-- The conformance harness distinguishes official acceptance/rejection from
+    a test-adapter decline, malformed source and inconclusive checker work.
+    A declined feature is never counted as an official kernel rejection. -/
+inductive C0ExportVerdict where
+  | accepted
+  | rejected
+  | unsupported
+  | malformed
+  | inconclusive
+  deriving BEq, Repr
+
+def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
+  if message.startsWith "unsupported" ||
+      message.startsWith "NDJSON exported by an unsupported" then
+    .unsupported
+  else
+    .malformed
+
+def c0ExportVerdictOf (input : String) : C0ExportVerdict :=
+  match c0ExportReadSubset input with
+  | .error message => c0ExportClassifyInputError message
+  | .ok declarations =>
+      match c0ExportCheckDefinitions declarations with
+      | .ok true => .accepted
+      | .ok false => .rejected
+      | .error _ => .inconclusive
+
 /-- No exporter, unsupported field or malformed input may become a positive
     or negative *kernel* verdict. Failure must occur before checking. -/
 def c0ExportRejectLossyImports : IO Unit := do
   let valid ← IO.FS.readFile "test/C0OfficialAccept.ndjson"
-  let invalidInputs : List (String × String) := [
+  let invalidInputs : List (String × String × C0ExportVerdict) := [
     ("unknown-definition-field",
-      valid.replace "\"safety\":\"safe\"" "\"safety\":\"safe\",\"trustedShortcut\":true"),
+      valid.replace "\"safety\":\"safe\"" "\"safety\":\"safe\",\"trustedShortcut\":true", .unsupported),
     ("unknown-expression-field",
-      valid.replace "\"ie\":0,\"sort\":0" "\"ie\":0,\"sort\":0,\"mdata\":42"),
+      valid.replace "\"ie\":0,\"sort\":0" "\"ie\":0,\"sort\":0,\"mdata\":42", .unsupported),
     ("unknown-exporter-field",
       valid.replace "\"format\":{\"version\":\"3.1.0\"}"
-        "\"format\":{\"version\":\"3.1.0\",\"unsafe\":true}"),
+        "\"format\":{\"version\":\"3.1.0\",\"unsafe\":true}", .unsupported),
     ("unknown-formatter-version",
-      valid.replace "\"version\":\"3.1.0\"" "\"version\":\"999.0\""),
+      valid.replace "\"version\":\"3.1.0\"" "\"version\":\"999.0\"", .unsupported),
     ("missing-declaration-manifest",
-      valid.replace "\"all\":[1]" "\"all\":[]"),
+      valid.replace "\"all\":[1]" "\"all\":[]", .malformed),
     ("unknown-name-field",
       valid.replace "\"pre\":0,\"str\":\"C0OfficialReference\""
-        "\"pre\":0,\"str\":\"C0OfficialReference\",\"untrusted\":true")
+        "\"pre\":0,\"str\":\"C0OfficialReference\",\"untrusted\":true", .unsupported)
   ]
-  for (label, input) in invalidInputs do
+  for (label, input, expected) in invalidInputs do
     if input == valid then
       throw (IO.userError ("ineffective negative export mutation: " ++ label))
-    match c0ExportReadSubset input with
-    | .ok _ =>
-        throw (IO.userError ("lossy NDJSON importer accepted: " ++ label))
-    | .error _ => pure ()
+    let result := c0ExportVerdictOf input
+    if result != expected then
+      throw (IO.userError s!"wrong input category {label}: {repr result}")
 
 def main : IO Unit := do
   c0ExportRejectLossyImports
@@ -351,14 +377,9 @@ def main : IO Unit := do
   for item in cases do
     let path := "test/" ++ item.fst
     let input ← IO.FS.readFile path
-    match c0ExportReadSubset input with
-    | .error message =>
-        throw (IO.userError (path ++ ": " ++ message))
-    | .ok definitions =>
-        match c0ExportCheckDefinitions definitions with
-        | .error message =>
-            throw (IO.userError (path ++ ": " ++ message))
-        | .ok accepted =>
-            if accepted != item.snd then
-              throw (IO.userError ("C0/official NDJSON verdict mismatch: " ++ path))
+    let expected := if item.snd then C0ExportVerdict.accepted
+      else C0ExportVerdict.rejected
+    let actual := c0ExportVerdictOf input
+    if actual != expected then
+      throw (IO.userError s!"C0/official NDJSON verdict mismatch {path}: {repr actual}")
   IO.println "C0_LEAN435 exact_official_ndjson_subset_replay=pass"

@@ -1,39 +1,29 @@
-# Current AI handoff — PSCV0 v7 native Lean (12 October 2026)
+# Current AI handoff — PSCV0 v7 native Lean (13 October 2026)
 
-**Active authoritative handoff. Historical records below describe their own older checkpoints.**
+**Active handoff. All checkpoints below the historical divider are older.**
 
 Repository: https://github.com/dwijayuda/pskernel
-Branch: `psc0/pscv0-v7-native-lean-v1`; draft PR: https://github.com/dwijayuda/pskernel/pull/109.
+Branch: `psc0/pscv0-v7-native-lean-v1` | draft PR https://github.com/dwijayuda/pskernel/pull/109
+**Latest qualified executable SHA:** `70415686f1e7c13e4690c4f8bed549b1c882fe61`
+**Successful Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38286641968
+**Checker:** official Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`
+**Source profile:** `pscv0-v7-native-bounded/48` (not full v7 conformance).
 
-**Latest qualified executable SHA:** `32ee1e2efbeebd08f4c86745bd3d27981cd19f6b`.
-**Successful Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38275596470.
-**Official Lean:** `4.35.0-rc4` (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
-**Source profile:** `pscv0-v7-native-bounded/48`. **This is not complete v7 conformance.**
+## Newly qualified work
 
-## Latest qualified compiler capabilities
+- **168 portable .lean modules / 176 native closure modules**, no compiler-source .ps migration or alternate kernel.
+- The same **185 runtime observations** now pass in direct JS, TypeScript, Rust, V8 Wasm GC and Wasmtime. Four kernel-checked semantic programs, 92 phase-specific refusals and compact parser/module/Standard checks pass. Checked three-module JS/TS/Rust and four-module Wasm executable projects remain green.
+- Compositional checked **BEq (Prod α β)** and **Inhabited (Prod α β)** with required component dictionaries and shared constructor/structure representation. Nested Option/List cases, proof-level equality/default checks, unsupported component refusal and cross-target emission qualified in `82c601f56c8ffbe46dd380e2211b3a3623841690`, [run 38285466474](https://github.com/dwijayuda/pskernel/actions/runs/38285466474).
+- Checked Type-0 **Except.bind/map/mapError/tryCatch/isOk/toOption**. These use the existing Except.rec eliminator; map delegates to bind. No extra runtime primitive or ad-hoc proof authority. Pure kernel-reducible proofs passed at `9c6442329102c8d172f54bd5e55176d58579a105`, [run 38286353072](https://github.com/dwijayuda/pskernel/actions/runs/38286353072). Real runtime error propagation/transformation/recovery, including modeled String length, passes all targets at the latest executable SHA.
+- Registry auditing now includes the selected checked product and Except declarations/instances. This is not the full pinned RC4 Standard manifest/digest, instance-import identity proof, or source/proof/effect/assumption closure.
 
-- Portable source closure: **164 .lean portable / 172 native closure modules**, with no pskernel-core or compiler-source .ps migration.
-- Four checked semantic programs and **92 phase-specific semantic refusals**, plus compact lexical, scope, module, do, class and API checks.
-- Native import/public-import planning, reachable entry-module closure, module-hygienic private names, selected RC4 opaque/public-abbrev interfaces, re-export/diamond behavior, checked imported instances, linking and entry-only export boundaries.
-- An independent **three-file runnable JS/TS/Rust application** and a **four-module V8 Wasm GC + Wasmtime component** application; all use native project manifests and preserve source provenance, the verified prepared Core, and a single checked emission boundary.
-- Native RC4-oriented raw strings, grouped decimal/binary/octal/hex numerals, checked `s!"..."` interpolation using `ToString`/HAppend, and source lexical refusals.
-- Checked Standard classes/dictionaries for arithmetic, `BEq`, `ToString` and now **`Inhabited`**. `Inhabited` is universe-polymorphic (`Sort u → Sort (max 1 u)`); nine selected Type-0 `Nat`, `Int`, `Bool`, `String`, `Char`, `Unit`, `Option`, `List` and `Array` instances are registered, with parameterized collection defaults.
-- Checked `Option.getD/map/bind/isSome/isNone/filter`; `List.length/map/append/filter/foldl/foldr/reverse/get?`. `List.get?` is total safe optional indexing, **not** yet a claim of RC4 `GetElem`/proof-index notation.
-- **178 shared runtime observations**, passing in direct JS, TypeScript, Rust, V8 Wasm GC and Wasmtime; verified `List.foldl` and higher-order recursor worker erasure avoid an unchecked recursion escape.
-- `psStandardInhabitedAudit` extends the selected Standard declaration/class/instance inventory. It does **not** yet freeze the final RC4 semantic registry, its digest, assumption ledger or proof/erasure coverage.
+## Remaining essential Phase A, in dependency order
 
-## Remaining Phase A (core/essential language first)
+The exact Lean RC4 GetElem / GetElem? classes, validity propositions, proof side conditions and source `xs[i]`, `xs[i]'h`, `xs[i]?`, `xs[i]!` are **not complete**. Existing total `List.get?` is useful but not a substitute. Allowlisted deriving Repr/DecidableEq/Hashable and broader recursive/parametric BEq, Float/Float32/scientific/fixed-width semantics, stronger Array/ByteArray APIs, the frozen notation/coercion/instance/import snapshot and digest also remain open. Then close dependent/mutual data, well-founded termination, generalized effect/control, rewriting/tactics, contracts/VCs, and audited verified-artifact obligations. Do not claim full v7 from green bounded qualification.
 
-1. The exact Lean RC4 `GetElem` and `GetElem?` classes, valid-index proof side conditions and source `xs[i]`, `xs[i]'h`, `xs[i]?`, `xs[i]!` variants; do not substitute unchecked array/list indexing or claim safe `List.get?` is equivalent to every GetElem form.
-2. Allowlisted trailing `deriving` handlers (`Repr`, `BEq`, `DecidableEq`, `Inhabited`, `Hashable`) with checked generated instances and exact pinned handler origins; no unrestricted elaborator extensions.
-3. Float/Float32/scientific literals, selected fixed-width/BitVec semantics and their actual class instances, complete scalar conversions, stronger List/Array/ByteArray APIs and the frozen Standard/notation/import manifest.
-4. Complete module-private/public generated-identity, import ordering/collision/instance precedence and signature/closure rules.
+## Mandatory process and constraints
 
-Then proceed through dependent/mutual data and termination, generalized typed effects/control, rewriting and proof-producing tactics, contracts/VCs and assurance closure. Do **not** count green bounded qualification as the complete v7 target.
-
-## Mandatory architecture and workflow
-
-Keep native portable `.lean` authoritative, official Lean 4.35.0-rc4 checking, GitHub reads/writes and Linux GitHub Actions builds/tests. No local checkout/build, Desktop Commander, pskernel-core integration/replacement, source `.ps` compiler migration, bootstrap/self-hosting, C5 readable-source reconstruction, main merge, release, force push or branch deletion. Keep draft PR #109. Preserve Wasm GC internals, Canonical ABI-only linear memory and JS/TS/Rust/Wasm contracts. Update this handoff and the roadmap with exact source SHA/CI evidence after meaningful qualification.
+Keep portable native `.lean` authoritative; GitHub connector for all repo reads/writes; Linux GitHub Actions for builds and tests; official Lean 4.35.0-rc4 checker. No local checkout/build, Desktop Commander, pskernel-core, alternate kernel, compiler .ps migration, bootstrap/self-hosting, C5 readable reconstruction, main merge, release, force push or branch deletion. Preserve draft PR #109, Wasm GC internally, Canonical ABI-only linear memory, and all JS/TS/Rust/Wasm behavioral contracts. Update roadmap and handoff with exact executable SHA + CI evidence after qualifying each coherent implementation.
 
 
 

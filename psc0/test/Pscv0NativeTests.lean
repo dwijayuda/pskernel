@@ -57,8 +57,10 @@ private def getElemFoundationCases : IO Unit := do
   let batch ← PsV7Native.runBatch #[
     { source := source, targets := [], sourceName := "GetElemGood.ps" },
     { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]
-  let .ok result := batch
-    | throw (IO.userError ("native GetElem batch failed before source checking: " ++ reprStr batch))
+  let result ← match batch with
+    | .ok result => pure result
+    | .error reason => throw (IO.userError ("native GetElem batch failed: " ++
+        reason.phase ++ ": " ++ reason.message))
   let some admitted := result.results[0]?
     | throw (IO.userError "GetElem checked-source result missing")
   match admitted with

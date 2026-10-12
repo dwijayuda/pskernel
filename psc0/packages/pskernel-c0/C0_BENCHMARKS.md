@@ -252,3 +252,13 @@ The subsequent native Lean `Core/LocalContext.lean` redesign retains shallow con
 | 64 declarations, nested body every 4, depth 48 | 45 / 44 / 45 ms | 44 / 44 / 43 ms |
 
 The index increases construction cost at very deep scopes but substantially reduces repeated lookup cost. The improvements are **workload-dependent** and the entire checked pipeline has not yet been qualified against representative large Lean library exports or per-operation allocations. A corrected local-index-disabled diagnostic is retained as a manual `workflow_dispatch` option. No self-host, fixed-point or metatheory jobs were run.
+
+
+
+### Native CI closure: batched local index qualification
+
+[CI 38233818758](https://github.com/dwijayuda/pskernel/actions/runs/38233818758), source `fd622395f03e1af40e7e4d18865fd1171aba6de2`, finished **successfully** with complete C0 Lean build (85 jobs), negative/differential tests (including batched shadowing), native microbenchmarks, matched independently built original core (81 jobs), and the corrected optional no-local-index private diagnostic (85 jobs). Same-run full checker declaration admission in that run: depth-16 chain C0 24/27/25 ms vs original 25/25/27 ms; depth-48 chain C0 41/42/41 ms vs original 41/40/43 ms; local-index-disabled C0 24/24/24 ms depth16 and 40/40/40 ms depth48. The net advantage of local indexed storage is lookup-dependent, **not** demonstrated across all declaration workloads.
+
+[CI 38233883497](https://github.com/dwijayuda/pskernel/actions/runs/38233883497) at source/workflow commit `593f83df4d75a72ec17202e8cd04476a068e08a8` also **completed successfully**, with ordinary native Lean build, negative conformance/differential tests, native microbenchmarks and original-core matched checker. The private `local_index_disabled` ablation is available only on manual workflow_dispatch because its performance and the structural impact have already been isolated. All mandatory production checks are green; there were no self-hosting, bootstrap/fixed-point, Rust-generated, or metatheory tests.
+
+**Current trustworthy baseline:** local-context short-list threshold 64, 16-local staged radix updates, immutable snapshots, separate original-core matched checking. Deep index construction still costs more than raw lists; 512-local repeated lookups are measurably faster. Avoid promoting opt-in indexed expression WHNF/DefEq to accepting verification before environment-dependent semantics, exact fuel and safe cache ownership are qualified. This project is not complete; representative large-library whole-checker speed/memory and indexed accepting-engine coverage remain open.

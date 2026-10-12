@@ -78,6 +78,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardOption,
     `Ps.Environment.StandardList,
     `Ps.Environment.StandardInhabited,
+    `Ps.Environment.StandardProduct,
     `Ps.Environment.SelfHostProd
   ]
 

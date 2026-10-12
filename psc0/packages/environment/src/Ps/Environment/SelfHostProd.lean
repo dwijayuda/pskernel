@@ -1,27 +1,7 @@
-import Ps.Environment.StandardInhabited
+import Ps.Environment.StandardProduct
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
-
-def psSelfHostProdOf
-    (alpha beta : PsExpr) : PsExpr :=
-  PsExpr.app
-    (PsExpr.app
-      (PsExpr.constE psProdName [])
-      alpha)
-    beta
-
-def psSelfHostProdMkOf
-    (alpha beta fst snd : PsExpr) : PsExpr :=
-  PsExpr.app
-    (PsExpr.app
-      (PsExpr.app
-        (PsExpr.app
-          (PsExpr.constE psProdMkName [])
-          alpha)
-        beta)
-      fst)
-    snd
 
 def psSelfHostProdPreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u";
@@ -56,7 +36,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           (PsExpr.forallE
             sndName
             (PsExpr.bvar 1)
-            (psSelfHostProdOf
+            (psStandardProductOf
               (PsExpr.bvar 3)
               (PsExpr.bvar 2))
             PsBinderInfo.explicit)
@@ -66,7 +46,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
   let motiveType :=
     PsExpr.forallE
       majorName
-      (psSelfHostProdOf
+      (psStandardProductOf
         (PsExpr.bvar 1)
         (PsExpr.bvar 0))
       (PsExpr.sortE (PsLevel.param uName))
@@ -80,7 +60,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
         (PsExpr.bvar 2)
         (PsExpr.app
           (PsExpr.bvar 2)
-          (psSelfHostProdMkOf
+          (psStandardProductMkOf
             (PsExpr.bvar 4)
             (PsExpr.bvar 3)
             (PsExpr.bvar 1)
@@ -102,7 +82,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
             minorType
             (PsExpr.forallE
               majorName
-              (psSelfHostProdOf
+              (psStandardProductOf
                 (PsExpr.bvar 3)
                 (PsExpr.bvar 2))
               (PsExpr.app
@@ -137,7 +117,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardInhabitedExtend <|
+  psStandardProductExtend <| psStandardInhabitedExtend <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl
         (PsRecursorInfo.mk
@@ -152,7 +132,8 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  psEmptyDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++ match
+  psEmptyDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+    (match
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with
@@ -176,4 +157,5 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
                   prodMkDeclaration
                   (List.cons
                     prodRecDeclaration
-                    psSelfHostRuntimePreludeDeclarations))
+                    psSelfHostRuntimePreludeDeclarations)) ++
+    psStandardProductDeclarations

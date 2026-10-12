@@ -302,7 +302,8 @@ def psCompilerVerifiedIrFromPrepared
             environment
             psSelfHostRuntimePreludeDeclarationsWithProd
             prepared.declarations
-            (psStandardPreludeDeclarationsWithInhabited.map psDeclarationName) with
+            ((psStandardPreludeDeclarationsWithInhabited ++
+              psStandardProductDeclarations).map psDeclarationName) with
       | Except.error error =>
           Except.error (PsCompilerError.erasure error)
       | Except.ok ir =>

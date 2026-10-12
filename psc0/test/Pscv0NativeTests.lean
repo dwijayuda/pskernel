@@ -853,7 +853,7 @@ private def doBoundaries : IO Unit := do
 -- introducing a separate project interpreter or a large fixture suite.
 private def projectBoundaries : IO Unit := do
   let _ ← get "pinned Standard declaration and instance registry"
-    (psStandardInhabitedAudit psSelfHostProdPreludeEnvironment)
+    (psStandardProductAudit psSelfHostProdPreludeEnvironment)
   let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
     (.definitionDecl
       (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []
@@ -1126,6 +1126,19 @@ private def projectBoundaries : IO Unit := do
   let listEqualityRefusal :=
     "const listOfFunctions: List(Nat -> Nat) := []\n" ++
     "const missingEq: Bool := listOfFunctions == listOfFunctions\n"
+  let checkedProducts :=
+    "const productDefault: Prod Nat Bool := Inhabited.default\n" ++
+    "theorem productDefaultProof: productDefault = (0, false) := by { rfl }\n" ++
+    "const samePair: Bool := (2, true) == (2, true)\n" ++
+    "theorem samePairProof: samePair = true := by { rfl }\n" ++
+    "const differentPair: Bool := (2, true) == (2, false)\n" ++
+    "theorem differentPairProof: differentPair = false := by { rfl }\n" ++
+    "const nestedPair: Prod (Option Nat) (List Bool) := (Option.some(1), [true])\n" ++
+    "const nestedPairEqualsSelf: Bool := nestedPair == nestedPair\n" ++
+    "theorem nestedPairProof: nestedPairEqualsSelf = true := by { rfl }\n"
+  let productMissingEquality :=
+    "const functions: Prod (Nat -> Nat) Nat := (fun (x: Nat) => x, 1)\n" ++
+    "const shouldFail: Bool := functions == functions\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1193,7 +1206,10 @@ private def projectBoundaries : IO Unit := do
     { source := optionEqualityRefusal, moduleName := "OptionBEqMissingElem" },
     { source := listEqualitySource, moduleName := "PolymorphicListBEq",
       targets := [.javascript, .typescript, .rust] },
-    { source := listEqualityRefusal, moduleName := "ListBEqMissingElem" }]
+    { source := listEqualityRefusal, moduleName := "ListBEqMissingElem" },
+    { source := checkedProducts, moduleName := "CheckedProduct",
+      targets := [.javascript, .typescript, .rust] },
+    { source := productMissingEquality, moduleName := "ProductBEqMissingElem" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1335,6 +1351,15 @@ private def projectBoundaries : IO Unit := do
     | 38, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "missing list-element BEq failed outside elaboration")
+    | 39, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked Prod dictionaries missing backend artifacts")
+    | 39, .error error =>
+        throw (IO.userError ("checked Prod dictionaries failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 40, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "unsupported Prod component equality accepted")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

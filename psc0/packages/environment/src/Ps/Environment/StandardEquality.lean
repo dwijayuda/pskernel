@@ -10,15 +10,15 @@ def psStandardBEqDeclarations : List PsDeclaration :=
   let u := psRootName "u"
   let alpha := PsExpr.fvar 0
   let self := PsExpr.fvar 1
-  let universe := PsExpr.sortE (.succ (.param u))
+  let typeSort := PsExpr.sortE (.succ (.param u))
   let family := PsExpr.app (.constE name [.param u]) alpha
   let bool := PsExpr.constE psBoolName []
   let methodType := psLogicPi 2 "a" alpha (psLogicPi 3 "b" alpha bool)
-  let params := fun body => psLogicPi 0 "α" universe body .implicit
-  let paramLams := fun body => psLogicLam 0 "α" universe body .implicit
+  let params := fun body => psLogicPi 0 "α" typeSort body .implicit
+  let paramLams := fun body => psLogicLam 0 "α" typeSort body .implicit
   let nat := PsExpr.constE psNatName []
   let instanceName := psNameAppendStr (psRootName "PsStandard") "instBEqNat"
-  [ .inductiveDecl (.mk name [u] (psLogicPi 0 "α" universe universe)
+  [ .inductiveDecl (.mk name [u] (psLogicPi 0 "α" typeSort typeSort)
       1 0 [ctor] true),
     .constructorDecl (.mk ctor [u]
       (params (psLogicPi 2 "beq" methodType family)) name 0 1 1 []),

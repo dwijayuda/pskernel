@@ -143,3 +143,9 @@ All CI jobs in this workstream exclude self-hosting/bootstrap tests. **Still mis
 | No-intermediate-list direct two-pass ArgAt | **1298 ms** |
 
 The no-list selector is **~2.32× slower** on this workload. It is therefore **not** the production projection implementation: `5de4773f8fdbbfcc2e4acc0377524c1a92231683` restores the list-backed lookup after confirming constructor matching. The direct API and comparison benchmark are retained as negative performance evidence, not an acceleration claim. Complete-module throughput and per-operation memory were not measured. Other observed same-run values: eager/lazy delta miss 150/150 ms (parity), cold WHNF 20 ms for 400, full cold/warm 180× inference 1/6 ms, process peak VmHWM 632960 kB (entire benchmark process). These are not meaningful whole-library gains.
+
+
+
+### Final post-rollback native validation (2026-10-12)
+
+[PSKernel-C0 native Lean CI 38195084646](https://github.com/dwijayuda/pskernel/actions/runs/38195084646) at source commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` **passed all three gates**: 84-job full native Lean build; negative and differential semantic checker regression; native Lean performance benchmark suite. The production constructor-projection path again uses list-backed application-field selection. The direct selector remains an experimental helper, never a checked shortcut. Its paired same-run reference-vs-direct result still regressed: 396 ms list / 911 ms direct over 18,000 depth-512 queries (~2.30× slower). Delta eager/lazy miss results 112/111 ms are near parity, not a reliable checker speedup. Native Linux entire benchmark process VmHWM 633996 kB. This validation includes **no self-host/bootstrap or metatheory tests**. Representative entire-library baseline and session-indexed acceptance work remain open.

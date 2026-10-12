@@ -340,7 +340,7 @@ def psStandardRegistryAudit (environment : PsEnvironment) : Except String Unit :
     spec.intMethod.toList.map (psStandardBinaryInstance spec psIntName) ++
     spec.stringMethod.toList.map (psStandardBinaryInstance spec psStringName)
   let instances := binaryInstances ++ psStandardBEqInstances ++
-    psStandardToStringInstances
+    [psStandardBEqListInstance] ++ psStandardToStringInstances
   let instanceNames := instances.map psDeclarationName ++
     [psNameAppendStr (psRootName "PsStandard") "instNegInt"]
   for declaration in instances do

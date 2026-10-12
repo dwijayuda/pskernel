@@ -1,4 +1,4 @@
-import Ps.Environment.StandardEquality
+import Ps.Environment.StandardCollectionEquality
 
 -- Lean 4.35.0-rc4 Init.Data.ToString.Basic: ToString is a one-field
 -- kernel-checked structure class, not a source-only elaboration intrinsic.
@@ -61,10 +61,10 @@ def psStandardToStringDeclarations : List PsDeclaration :=
   psStandardToStringClass ++ psStandardToStringInstances
 
 def psStandardPreludeDeclarationsWithToString : List PsDeclaration :=
-  psStandardPreludeDeclarations ++ psStandardToStringDeclarations
+  psStandardPreludeDeclarationsWithCollectionBEq ++ psStandardToStringDeclarations
 
 def psStandardPreludeExtendWithToString (environment : PsEnvironment) : PsEnvironment :=
-  let environment := psStandardPreludeExtend environment
+  let environment := psStandardCollectionBEqExtend environment
   let environment := psStandardToStringDeclarations.foldl
     (fun env decl => (psEnvironmentAdd env decl).getD env) environment
   let name := psRootName "ToString"

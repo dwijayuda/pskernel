@@ -1115,6 +1115,17 @@ private def projectBoundaries : IO Unit := do
   let optionEqualityRefusal :=
     "const boxed: Option(Nat -> Nat) := Option.none\n" ++
     "const badEq: Bool := boxed == boxed\n"
+  let listEqualitySource :=
+    "const listEqLeft: List Nat := [1, 2, 3]\n" ++
+    "const listEqRight: List Nat := [1, 2, 3]\n" ++
+    "const listEqual: Bool := listEqLeft == listEqRight\n" ++
+    "theorem listEqualProof: listEqual = true := by { rfl }\n" ++
+    "const listOther: List Nat := [1, 2, 4]\n" ++
+    "const listDifferent: Bool := listEqLeft == listOther\n" ++
+    "theorem listDifferentProof: listDifferent = false := by { rfl }\n"
+  let listEqualityRefusal :=
+    "const listOfFunctions: List(Nat -> Nat) := []\n" ++
+    "const missingEq: Bool := listOfFunctions == listOfFunctions\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1179,7 +1190,10 @@ private def projectBoundaries : IO Unit := do
     { source := derivingRecursiveBEqRefusal, moduleName := "DerivingRecursiveBEq" },
     { source := optionEqualitySource, moduleName := "PolymorphicOptionBEq",
       targets := [.javascript, .typescript, .rust] },
-    { source := optionEqualityRefusal, moduleName := "OptionBEqMissingElem" }]
+    { source := optionEqualityRefusal, moduleName := "OptionBEqMissingElem" },
+    { source := listEqualitySource, moduleName := "PolymorphicListBEq",
+      targets := [.javascript, .typescript, .rust] },
+    { source := listEqualityRefusal, moduleName := "ListBEqMissingElem" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1312,6 +1326,15 @@ private def projectBoundaries : IO Unit := do
     | 36, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "missing element BEq failed outside elaboration")
+    | 37, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "polymorphic List BEq missing target artifacts")
+    | 37, .error error =>
+        throw (IO.userError ("polymorphic List BEq failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 38, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "missing list-element BEq failed outside elaboration")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

@@ -566,8 +566,11 @@ def psKernelReduceProjCore
                     psKernelNameEq
                       ctor.induct
                       typeName then
-                  psKernelExprGetAppArgAt
-                    structValue
+                  -- A measured two-pass direct selector regressed
+                  -- compared with the single-pass list-backed selector.
+                  -- Keep this accepting path on the proven faster choice.
+                  psKernelExprListGet
+                    (psKernelExprGetAppArgs structValue)
                     (Nat.add
                       ctor.numParams
                       index)

@@ -38,6 +38,27 @@ def main : IO Unit := do
       (psKernelC0ScratchAbort scratch).nodes.size != persistent.nodes.size then
     throw (IO.userError "C0 scratch discarded or mutated persistent nodes")
 
+  -- The stronger diagnostic gate replays the complete output store and
+  -- compares metadata-sensitive source syntax at every promoted root.
+  match psKernelC0ScratchPromoteVerifiedRoots scratch
+      [selected, original, selected] with
+  | none => throw (IO.userError "C0 verified scratch promotion failed")
+  | some (verified, ids) =>
+      if !psKernelC0ReplayValidateStore verified ||
+          verified.nodes.size != persistent.nodes.size + 14 then
+        throw (IO.userError "C0 verified promotion corrupted persistent store")
+      match ids with
+      | [first, second, third] =>
+          if first != third || second != original then
+            throw (IO.userError "C0 verified promotion lost shared roots")
+          let some expected := psKernelC0DecodeExpr scratch.working selected
+            | throw (IO.userError "C0 verified source root missing")
+          let some actual := psKernelC0DecodeExpr verified first
+            | throw (IO.userError "C0 verified target root missing")
+          if !psKernelExprEqual expected actual then
+            throw (IO.userError "C0 verified promotion lost exact source metadata")
+      | _ => throw (IO.userError "C0 verified promotion lost root order")
+
   match psKernelC0ScratchPromote scratch selected with
   | none => throw (IO.userError "C0 scratch canonical promotion failed")
   | some (committed, rootId) =>
@@ -69,6 +90,9 @@ def main : IO Unit := do
         throw (IO.userError "C0 persistent handle did not retain identity")
   | none => throw (IO.userError "C0 existing root lost on promotion")
 
+  if (psKernelC0ScratchPromoteVerified
+      scratch (scratch.working.nodes.size + 10)).isSome then
+    throw (IO.userError "C0 verified promotion accepted dangling root")
   if (psKernelC0ScratchPromote
       scratch (scratch.working.nodes.size + 10)).isSome then
     throw (IO.userError "C0 dangling handle was promoted")
@@ -95,6 +119,8 @@ def main : IO Unit := do
       nodes := scratch.working.nodes.set! selected badNode }
   let forged : PsKernelC0Scratch :=
     { scratch with working := badWorking }
+  if (psKernelC0ScratchPromoteVerified forged selected).isSome then
+    throw (IO.userError "C0 verified promotion accepted forged metadata")
   if psKernelC0ScratchValid forged ||
       (psKernelC0ScratchPromote forged selected).isSome then
     throw (IO.userError "C0 accepted forged derived node metadata")

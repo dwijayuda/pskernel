@@ -5,6 +5,14 @@
 **Target:** pinned stable `leanprover/lean4:v4.35.0`  
 **Scope:** native `.lean`; no original-core changes, self-hosting, Rust provider or metatheory promotion.
 
+## Follow-up: declaration-family replay and source-store-bound roots
+
+**Native source expansion:** commit `4092dab9` adds dedicated `axiom`, `thm`, and `opaque` export replay, with a follow-up Lean keyword parsing correction in `031a1b4d`. Eight additional exporter-byte files contain four accepted and four rejected cases, including sequential axiom–theorem dependencies. The official pinned Lean 4.35 `leanchecker --from-export` produced all eight expected outcomes. Native C0 results remain subject to a matching complete CI run.
+
+Safe axioms are accepted as *explicit assumptions*, not proof of consistency. The test adapter deliberately declines unsafe axioms and unsafe opaques. Theorems use `psKernelAddTheorem` and opaque definitions use `psKernelAddOpaque`; neither is silently lowered into a reducible ordinary definition.
+
+**Phase C source-bound syntax roots:** commits `6e38defe` and `64ae30cf` pair a numeric root with its original validated canonical store. Rehoming or staging decodes from the original store, independently validates the destination, and verifies exact syntax after import. A regression establishes that two unrelated canonical stores may assign the same numeric root to different expressions. These are diagnostic, non-accepting operations; the structure is unsealed and cannot transfer any existing consistency proof.
+
 ## Qualified baseline before these changes
 
 The native [CI 38316694316](https://github.com/dwijayuda/pskernel/actions/runs/38316694316) passed all source, semantic, store and benchmark stages at `51f32f59`. A **test-only** NDJSON decoder and official `leanchecker --from-export` agreed on 14 pinned exact-byte cases (7 accept, 7 reject), including an accepted 128-definition dependency chain and a rejected-last 128-definition chain. This does **not** establish a real Init/Std/Mathlib kernel-corpus result.

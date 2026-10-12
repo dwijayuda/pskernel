@@ -1,4 +1,36 @@
-# Active qualification checkpoint — PSCV0 v7 module foundation
+# Current AI handoff — PSCV0 v7 native Lean (12 October 2026)
+
+**Authoritative active status; historical records below may include superseded C5 instructions and older green checkpoints.**
+
+Repository: https://github.com/dwijayuda/pskernel
+Branch: `psc0/pscv0-v7-native-lean-v1` · draft PR: https://github.com/dwijayuda/pskernel/pull/109.
+**Latest fully qualified executable SHA:** `754108eb861ef19642b6f3ae9e17e7313ef179bb`.
+**Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38244878977 — passed all jobs.
+**Reported bounded source profile:** `pscv0-v7-native-bounded/48`; the separately named **Profile 49 module-foundation milestone** does not change this string or establish full v7 language conformance. The branch has documentation-only changes after that source; resolve the live HEAD before editing.
+
+## Qualified scope
+
+The official pinned Lean 4.35.0-rc4 checker (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`) checked the selected compiled graph. Existing qualification reports 513 composite declarations, four accepted programs, 92 phase-specific semantic refusals, seven typed-do refusals and one opacity refusal. The existing **171 shared runtime observations** passed direct JS, TypeScript, Rust, Node/V8 Wasm GC and Wasmtime component/core paths. Closure: **159 portable and 167 native `.lean` modules**, no pskernel-core.
+
+Completed selected core language additions since profile 35 include typed do (Id/Option/Except), tuple/list/array literals, type ×, genuinely opaque checked declarations, class-resolved + - * / % and unary negation, Boolean && || !, BEq equality == and !=, list :: and String ++. The Standard environment remains incomplete; green target observations do not imply formal compiler preservation.
+
+**Module foundation:** `packages/compiler/src/Ps/Compiler/Pscv0Modules.lean` plans named in-memory .ps sources with import/public import, dependency ordering, checked interface preparation, and missing/cycle refusals. A compact facade re-export case passed (`PSCV0_NATIVE_MODULES`). The host `host/src/Ps/Host/NativeV7.lean` now integrates project admission, project-relative origins and linked library runtime identities. `scripts/Pscv0Native.lean` now exposes manifest-driven `--check-project`, `--emit-project`, `--emit-project-all`, `--emit-project-wasm-core`, and `--emit-project-wasm`. All are native Lean. **Caveat:** compiling these CLI paths under the existing green workflow does not independently demonstrate end-to-end runnable multi-file linking for every target.
+
+## Next dependency-driven work
+
+Finish RC4-accurate **multi-module** semantics: private/public source declarations, imported signature/body opacity, namespace/open and public-import visibility, diamond/collision/instance identity rules, checked complete project closure, runtime linking, entry-only public exports, project-relative source maps and manifest/CLI conformance. Exercise one compact executable cross-module example plus focused rejection cases, with the existing JS/TS/Rust/Wasm matrix and official Lean checking.
+
+Then close remaining essential v7 families: frozen Standard and universe/typeclass rules, typed scalar/fixed-int/float/literal coverage, raw/interpolated strings, GetElem and selected deriving, dependent/mutual data and termination, generalized typed do/effects/state/control, proof-producing rewriting/automation, given/requires/ensures, VCs and assumption/effect/erasure assurance ledger. Full v7 remains unfinished.
+
+## Non-negotiable workflow
+
+Compiler source is **portable native `.lean` only**. Use GitHub tools as canonical source and Linux GitHub Actions for builds/tests; no local checkout/build or Desktop Commander. Keep existing branch and draft PR, preserve unrelated changes/history, use expected-head non-force writes. No pskernel-core, compiler .ps migration, bootstrap/self-hosting, C5 readable source reconstruction, main merge, force push or release. **C5 remains deferred until core and essential language capabilities are qualified.** Preserve Wasm GC internally and linear memory only at explicit Canonical ABI boundaries, plus the existing backend contracts and provenance. Prefer root-cause shared abstractions and minimal relevant tests.
+
+**Next-chat instructions:** `psc0/AI_CONTINUE_PROMPT.md`. Read the canonical `psc0/PSCV0_LANGUAGE_REFERENCE.md` and `psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md` before changing sources.
+
+---
+
+# Historical qualification checkpoint — PSCV0 v7 module foundation
 
 **Current scope:** core/essential language before C5; native portable `.lean` only.
 No pskernel-core, compiler `.ps` migration, self-hosting, local builds, main

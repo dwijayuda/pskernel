@@ -232,3 +232,13 @@ Three-round *complete checked declaration* timings from that run: 20 checked dec
 A separate binary-trie vs radix-16 diagnostic in native Lean (CI [38235530285](https://github.com/dwijayuda/pskernel/actions/runs/38235530285), all mandatory native steps passed, only optional diagnostic red) measured binary path-copy **77 ms** vs radix **35 ms** for constructing 25×512 locals, and binary **75 ms** vs radix **35 ms** for 20k lookups; no reason to replace the radix. The rejected binary diagnostic was removed from the benchmark source at `4cab1974`.
 
 **Remaining main objective:** full environment-dependent indexed WHNF, DefEq, inference and admission in the trusted checking pipeline, with session-owned provenance, exact reduction priority/fuel, negative conformance, real representative library throughput, peak memory and repeated matched baseline checks. Opt-in indexed session still incurs overhead and should not be promoted on helper timings alone. Keep original `pskernel-core` and PSC0 Rust backend unchanged. No self-host, bootstrap, fixed-point or metatheory tests.
+
+
+
+### Current 12 October native substrate milestone
+
+At source `c8d63e109247fd28b9608cb045562e5699583870`, [CI 38239387122](https://github.com/dwijayuda/pskernel/actions/runs/38239387122) passed full native Lean build, negative/fuel/differential tests, indexed microbenchmarks, and matched original PSKernel-Core. Introduced O(1)-per-node exact `looseBVarRange` in the source-owned indexed term DAG; indexed lift and memoized one-binder instantiation skip entire unaffected subtrees. Tested against independent recursive de Bruijn predicate and indexed reference substitution/lift on open/closed terms. Closed shared DAG indexed instantiation 885 ms recursive vs 1 ms cached-range memo for 100 calls (isolated, one runner; not the accepting checker). No cross-store handles may be compared for identity.
+
+A direct-recursion rewrite of recursive syntax equality was rejected by measured regression and production source restored at `bdec38c4`. Matched public checking remains near parity vs original, with no claim of full-kernel or memory superiority. The original kernel/Rust backend remain intact and no selfhost/bootstrap/metatheory testing occurred.
+
+**Next:** integrate metadata and indexed representation only at an accepting session boundary that preserves declaration/environment and local-context provenance, exact resource budgets, universe/recursor/quotient/native rules and rejection behavior. Benchmark real full libraries and cold/warm memory. The opt-in indexed session wrapper still adds overhead until it avoids recursive-source↔indexed rematerialization. Do not treat indexed fragment results as soundness or accepted executable artifacts.

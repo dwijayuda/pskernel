@@ -137,6 +137,41 @@ def main : IO Unit := do
               throw (IO.userError "C0 checked spine changed type or fresh names")
         | _, _ =>
             throw (IO.userError "C0 checked spine changed success/rejection")
+  -- Medium and wide application paths must reject malformed function heads
+  -- and malformed arguments exactly as the independent recursive checker.
+  -- These checks include cases where an earlier error must take precedence
+  -- over later argument validation and resource exhaustion.
+  let missingHead :=
+    PsKernelExpr.const
+      (PsKernelName.str PsKernelName.anonymous "C0MissingCheckedHead")
+      []
+  let unknownArgument :=
+    PsKernelExpr.mvar
+      (PsKernelName.str PsKernelName.anonymous "C0InvalidCheckedArgument")
+  for arity in [31, 32, 33, 48, 64] do
+    let malformedHead := (List.range arity).foldl
+      (fun fn _ => PsKernelExpr.app fn sort0) missingHead
+    let malformedArgument := (List.range arity).foldl
+      (fun fn i =>
+        PsKernelExpr.app fn
+          (if i == arity / 2 then unknownArgument else sort0))
+      (c0CheckedSpineFixture arity)
+    for expr in [malformedHead, malformedArgument] do
+      for fuel in [1, 2, 16, 64, 512, 4096] do
+        let defeq := psKernelIsDefEqWithFuel fuel
+        let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+        match psKernelSessionCheck fuel session expr,
+            psKernelInferCoreWithFuel fuel whnf defeq
+              session.context session.state expr false with
+        | Except.error checkedError, Except.error originalError =>
+            if checkedError != originalError then
+              throw (IO.userError
+                "C0 malformed checked spine changed error precedence")
+        | _, _ =>
+            throw (IO.userError
+              "C0 malformed checked spine changed rejection into acceptance")
+  IO.println "C0_PERF_REGRESSION checked_spine_malformed_heads_args=pass"
+
   IO.println "C0_PERF_REGRESSION checked_spine_exact_fuel_and_errors=pass"
   -- A finite recursive-context limit is independent of expression fuel.
   -- The production router must preserve the exact recursion-depth rejection

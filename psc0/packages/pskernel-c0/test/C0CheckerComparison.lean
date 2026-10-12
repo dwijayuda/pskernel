@@ -446,6 +446,59 @@ def main : IO Unit := do
         throw (IO.userError "matched wide library dropped declaration")
     IO.println s!"C0_COMPARE round={round} operation=admit_wide_checked_library milliseconds={wideChainEnd-wideChainStart} declarations={wideChainLength} arguments=192"
 
+    -- End-to-end medium application declaration admission. Both regimes
+    -- exercise verified definitions and persistent environment extension,
+    -- unlike a stand-alone inference microbenchmark.
+    for arity in [32, 48] do
+      let baseEnvironment :=
+        if arity == 32 then mediumEnvironment else functionEnvironment
+      let body := if arity == 32 then mediumApp else application
+      let mediumChainBase :=
+        PsKernelName.num
+          (PsKernelName.str PsKernelName.anonymous "C0MediumCheckedLibrary")
+          arity
+      let mediumChainLength := 64
+      let mut mediumChainEnvironment := baseEnvironment
+      let mediumChainStart ← IO.monoMsNow
+      for i in [:mediumChainLength] do
+        let checkedDefinition : PsKernelDefinitionInfo := {
+          base := {
+            name := PsKernelName.num mediumChainBase i
+            levelParams := []
+            type := sort0
+          }
+          value := body
+          hints := PsKernelReducibilityHints.abbrevHint
+          safety := PsKernelDefinitionSafety.safe
+        }
+        match psKernelAddDefinition 4096 mediumChainEnvironment checkedDefinition
+            4096 psKernelLeanNatMaxSizeDefault with
+        | Except.error err =>
+            throw (IO.userError ("matched medium library admission failed: " ++ err))
+        | Except.ok next =>
+            mediumChainEnvironment := next
+      let mediumChainEnd ← IO.monoMsNow
+      for i in [:mediumChainLength] do
+        if !psKernelEnvironmentContains mediumChainEnvironment
+            (PsKernelName.num mediumChainBase i) then
+          throw (IO.userError "matched medium library lost declaration")
+      let malformedDefinition : PsKernelDefinitionInfo := {
+        base := {
+          name := PsKernelName.num mediumChainBase mediumChainLength
+          levelParams := []
+          type := sort1
+        }
+        value := body
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 mediumChainEnvironment
+          malformedDefinition 4096 psKernelLeanNatMaxSizeDefault with
+      | Except.ok _ =>
+          throw (IO.userError "matched medium library accepted wrong type")
+      | Except.error _ => pure ()
+      IO.println s!"C0_COMPARE round={round} operation=admit_medium_checked_library milliseconds={mediumChainEnd-mediumChainStart} declarations={mediumChainLength} arguments={arity} malformed_rejected=true"
+
     let mut admitted := 0
     let mut rejected := 0
     let admissionStart ← IO.monoMsNow

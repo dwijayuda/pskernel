@@ -2,31 +2,32 @@
 
 ## Latest qualified native compiler milestone — 13 October 2026
 
-**Qualified executable SHA:** `748a4fb216cebde4feb155946fed574a9fde4a5f`.
-**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38297363372.
+**Qualified executable SHA:** `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`.
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38304955212.
 **Official Lean:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
-**Bounded source profile:** `pscv0-v7-native-bounded/48`, not complete v7.
+**Bounded source profile:** `pscv0-v7-native-bounded/48`, **not** complete v7.
 
-Phase A progress: the native selected Standard snapshot is now **212 declarations,
-11 classes and 36 ordered instances**, cryptographically pinned over an exact
-length-delimited UTF-8 serialization by `sha256:13e7007c324ca40d0d871d2bc4856084796dd451891d7a0096216e94197b211e` and also
-guarded by the structural-drift FNV `fnv1a64:9152255662807064572`. The pure native
-SHA-256 implementation passed published known-answer vectors and fail-closed
-expected-digest/source-alias cases. The checked `List.take` and `List.drop`
-collection APIs passed boundary `rfl` proofs and JS/TS/Rust artifact emission.
-Existing 187 shared runtime observations and all qualified cross-target Linux
-jobs remain green, but no new API-specific Wasm runtime corpus has been added.
-This is integrity of the *selected* Core/class/instance/alias payload, not
-the complete upstream RC4 Standard/module/notation/deriving/tactic/effect/
-assumption manifest and not a proof certificate. See the snapshot v1 record.
+The Lean RC4-style `GetElem` typeclass and proof-carrying
+`xs[i]`/`xs[i]'h` elaboration now qualify for user-defined instances.
+The generated validity tactic tries genuine assumptions, definitional
+reflexivity and fuel-bounded recursive constructor proofs, refusing
+unresolved goals. Parsed `xs[i]?` and `xs[i]!` are **not executable conformance**:
+the full `GetElem?`/default/lawfulness and out-of-bounds panic contracts
+remain open. See [GetElem RC4 design/parity audit](PSCV0_GETELEM_RC4_DESIGN_AUDIT.md).
 
-**Outstanding Phase A:** proof-carrying RC4 `GetElem`/`GetElem?` with actual
-Prop validity and all four indexing notations; remaining checked deriving,
-Float/Float32/scientific/fixed-width/BitVec, collection and IO API closure;
-complete cryptographic provenance/axiom/environment closure. B–E remain open.
-Previously qualified selected roster was 208/11/36 at `c810d6fe`,
-[Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524).
-The collection/dual-digest source checkpoint passed [Linux 38296669991](https://github.com/dwijayuda/pskernel/actions/runs/38296669991). The subsequent production-integrity source gate qualified at `748a4fb216cebde4feb155946fed574a9fde4a5f`, [Linux 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372): single-file, project-graph and batch compiler entry points now fail closed on selected Standard roster drift.
+The **selected** pinned prelude is now **215 declarations, 12 classes and
+36 ordered instances**, at FNV `fnv1a64:2902463666082847583` and SHA-256
+`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`. The source-closure guard passed
+**170 portable / 178 native Lean modules**. All established **187 shared
+JS/TS/Rust/Wasm runtime observations** and official Lean native checks
+remain green. These are bounded qualification observations, not a proof
+of full Lean RC4 Standard or complete v7.
+
+Further Phase A work: universe-polymorphic `Option`/related Standard
+prerequisites, actual indexed List/Array/Fin validity and lawfulness
+proofs, `GetElem?`/panic boundaries, complete deriving and scalar/API
+coverage, and pinned imports/notation/tactic/effect/assumption closure.
+Phases B–E and C5 remain as documented below.
 
 ## Current priority: core and essential language conformance first
 
@@ -46,7 +47,7 @@ the selected language surface is sufficient.
 
 Selected language profiles 36–48 and the later module foundation are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`748a4fb216cebde4feb155946fed574a9fde4a5f`, [Linux run 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372).
+`e1d463e10cbf5edd817e362ed35b21ee82c8c85b`, [Linux run 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212).
 The shared matrix contains 187 runtime observations per target. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
@@ -64,7 +65,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 
 | Phase | Focus | Status and completion evidence |
 |---|---|---|
-| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** 212-declaration/11-class/36-instance selected FNV + SHA-256 snapshot and checked List.take/drop are qualified; exact RC4 GetElem validity/proof semantics, remaining deriving, Float/scientific/fixed-width/BitVec, complete curated APIs and complete cryptographic notation/import/effect/assumption manifest remain |
+| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** 215-declaration/12-class/36-instance selected FNV + SHA-256 snapshot; generic proof-bearing GetElem, source forms and bounded recursive index proofs qualified. GetElem?, built-in lawful index instances, complete omega/simp, remaining deriving, Float/scientific/fixed-width/BitVec, curated APIs and full notation/import/effect/assumption manifest remain |
 | **B** | Dependent and mutual data, elimination, strict positivity and total recursive programming | **Planned.** Complete heterogeneous index reasoning, dependent motives, nested/mutual inductives, recursive pattern matrices and well-founded/structural termination; refuse invalid/partial constructs |
 | **C** | General class-driven typed do, state, effectful control and explicit IO/FFI boundaries | **Planned.** Complete Monad/Except/State/Reader and selected transformers, mutable/erased state, loops/early returns, try/catch/finally, effect/capability evidence and all-target preservation |
 | **D** | Kernel-checked tactics, intrinsic specifications, VC generation and assurance ledger | **Planned.** Complete selected rewrite/simp/automation, RC4 given/requires/ensures/assert/invariant/decreasing, WP/VC proof attachment, and verified-emission block on *any* unresolved mandatory obligation |
@@ -75,7 +76,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 - **GetElem:** implement pinned RC4 `GetElem` and `GetElem?` with actual Prop-valued validity and Decidable/proof instances; `xs[i]` and `xs[i]'h` cannot discard proofs; `xs[i]?` returns Option safely; `xs[i]!` is a separately declared panic/default behavior, not a bounds proof. Do not confuse existing checked `List.get?` with the four forms.
 - **Deriving:** accepted selected trailing handlers `Inhabited`/`BEq`/`DecidableEq`/`Repr`/`Hashable` must produce genuine checked and registered definitions with generated-source provenance. Unsupported cases and arbitrary handlers fail closed.
 - **Scalars/libraries:** complete pinned `Float`/`Float32`/scientific, fixed-width/`BitVec` and selected arrays/bytes/string/collection conversions, then prove and execute target parity.
-- **Registry:** preserve the selected SHA-256 (`sha256:13e7007c324ca40d0d871d2bc4856084796dd451891d7a0096216e94197b211e`) and FNV (`fnv1a64:9152255662807064572`) roster drift gates; separately finish a comprehensive cryptographic RC4 module/notation/deriving/class/instance/tactic/effect/axiom manifest (not yet qualified). Recompute/approve intentional semantic changes; never silently overwrite a frozen expected hash.
+- **Registry:** preserve the selected SHA-256 (`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`) and FNV (`fnv1a64:2902463666082847583`) roster drift gates; separately finish a comprehensive cryptographic RC4 module/notation/deriving/class/instance/tactic/effect/axiom manifest (not yet qualified). Recompute/approve intentional semantic changes; never silently overwrite a frozen expected hash.
 
 ### Phase B detailed exit gate
 

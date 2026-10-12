@@ -1,14 +1,14 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
-**Status:** Reviewed and frozen *selected* 212-declaration source roster, not the full Lean RC4 Standard universe, dependency closure or ProofScript v7 conformance.
+**Status:** Reviewed and frozen *selected* 215-declaration source roster, not the full Lean RC4 Standard universe, dependency closure or ProofScript v7 conformance.
 
 - Official Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - Selected native environment: `psSelfHostProdPreludeEnvironment`.
-- Current qualified executable source: `748a4fb216cebde4feb155946fed574a9fde4a5f`; [all-green Linux run 38297363372](https://github.com/dwijayuda/pskernel/actions/runs/38297363372).
+- Current qualified executable source: `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`; [all-green Linux run 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212).
 - Earlier 208-declaration FNV qualification: `c810d6fe15d064968008d09849efd9ac5b2820de`, [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524). Portable SHA-256 first qualified in `2a75d31c`, [Linux 38295519668](https://github.com/dwijayuda/pskernel/actions/runs/38295519668); mandatory dual gate qualified `381ae99f`, [Linux 38295808926](https://github.com/dwijayuda/pskernel/actions/runs/38295808926).
-- Snapshot records: **212 checked declarations**, **11 registered classes**, **36 ordered instance registrations**.
-- Selected roster FNV: **`fnv1a64:9152255662807064572`**.
-- Selected roster SHA-256: **`sha256:13e7007c324ca40d0d871d2bc4856084796dd451891d7a0096216e94197b211e`**.
+- Snapshot records: **215 checked declarations**, **12 registered classes**, **36 ordered instance registrations**.
+- Selected roster FNV: **`fnv1a64:2902463666082847583`**.
+- Selected roster SHA-256: **`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`**.
 
 ## Canonical encoding and exact coverage
 
@@ -33,10 +33,13 @@ multi-module project planner and once per native batch host invocation before
 admission or executable emission. The host reports Standard integrity drift
 at the `prelude` phase; it does not substitute for official Lean kernel checks. No crypto FFI or unchecked hash primitive is used.
 
-The four new declarations since the previous 208-entry freeze implement
-`List.take`/`List.drop` and their checked `List.rec`/`Nat.rec`
-workers. Their boundary cases were checked by Lean equality proofs before the
-212-entry roster was explicitly reviewed and pinned.
+The previous 212-entry freeze added four checked `List.take`/`List.drop`
+and `List.rec`/`Nat.rec` worker definitions. The current 215-entry
+selected roster adds exactly the kernel-checked `GetElem` inductive class,
+constructor and method projection, with one extra class registration; no
+List/Array `GetElem` instance has been installed. Its full selected
+Core/class/instance/alias serialization and both digests were explicitly
+reviewed and pinned at `e1d463e10cbf5edd817e362ed35b21ee82c8c85b` ([Linux 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212)).
 
 ## Limitations and remaining acceptance gates
 

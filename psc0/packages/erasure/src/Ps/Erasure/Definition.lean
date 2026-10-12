@@ -538,8 +538,8 @@ def psEraseCoreModuleWithRuntimePrelude
               | Except.ok lowered =>
                   Except.ok {
                     foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
-                     internalNames := internalRuntimeNames.filterMap
-                       (psErasureLookupName preparedInductives.scope.declarationNames)
+                    internalNames := internalRuntimeNames.filterMap
+                      (psErasureLookupName preparedInductives.scope.declarationNames)
                     imports := []
                     structures := preparedStructures.ir
                     inductives := preparedInductives.ir

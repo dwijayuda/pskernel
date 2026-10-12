@@ -98,8 +98,9 @@ private def compile (prelude : Lean.Environment) (request : Request) :
         PsCompilerPreparationOutput })
     | none =>
       match elaborated with
-      | some value => fromResult "prepare"
-          ((psCompilerPrepareElaboratedWithOutput value.result).mapError psCompilerPscv0Error)
+      | some value =>
+        fromResult "prepare" ((psCompilerPrepareElaboratedWithOutput value.result).mapError
+          psCompilerPscv0Error)
       | none => throw { phase := "prepare", message := "missing prepared source" }
   let t3 ← IO.monoMsNow
   let _ ← fromResult "kernel" (check prelude output.admissions)

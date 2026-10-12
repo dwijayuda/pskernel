@@ -272,6 +272,52 @@ def main : IO Unit := do
     throw (IO.userError "C0 radix-owned root cache duplicated previous nodes")
   IO.println "C0_PERF_REGRESSION indexed_session_radix_roots=pass"
 
+  -- Old hash buckets discarded binder name/info and let names, producing
+  -- long linear collision chains for distinct canonical binder nodes.
+  -- Each new fingerprint must still agree with the exact structural node.
+  match psKernelC0Intern psKernelC0StoreEmpty (.sort PsKernelLevel.zero) with
+  | none => throw (IO.userError "C0 binder-hash sort fixture rejected")
+  | some (initial, domainId) =>
+      match psKernelC0Intern initial (.bvar 0) with
+      | none => throw (IO.userError "C0 binder-hash body fixture rejected")
+      | some (prepared, bodyId) =>
+          let mut store := prepared
+          let mut hashes : List Nat := []
+          for i in [:96] do
+            let binderName := PsKernelName.num PsKernelName.anonymous i
+            let canonical : PsKernelC0Node :=
+              .lam binderName domainId bodyId PsKernelBinderInfo.default
+            let hashed := psKernelC0NodeHash store canonical
+            if !hashes.contains hashed then hashes := hashed :: hashes
+            match psKernelC0Intern store canonical with
+            | none => throw (IO.userError "C0 exact binder interning rejected")
+            | some (next, id) =>
+                store := next
+                match psKernelC0StoreGet next id with
+                | none => throw (IO.userError "C0 exact binder handle invalid")
+                | some stored =>
+                    if !(psKernelC0NodeEq stored.node canonical) then
+                      throw (IO.userError "C0 distinct binder node was aliased")
+          if hashes.length < 60 || store.nodes.size != 98 then
+            throw (IO.userError "C0 binder hashes still form a degenerate bucket")
+          let name := PsKernelName.str PsKernelName.anonymous "BinderKinds"
+          for node in [
+            PsKernelC0Node.lam name domainId bodyId PsKernelBinderInfo.default,
+            PsKernelC0Node.lam name domainId bodyId PsKernelBinderInfo.implicit,
+            PsKernelC0Node.forallE name domainId bodyId PsKernelBinderInfo.default,
+            PsKernelC0Node.letE name domainId domainId bodyId false
+          ] do
+            match psKernelC0Intern store node with
+            | none => throw (IO.userError "C0 binder-kind store refused node")
+            | some (next, id) =>
+                store := next
+                match psKernelC0StoreGet store id with
+                | some stored =>
+                    if !(psKernelC0NodeEq stored.node node) then
+                      throw (IO.userError "C0 binder kinds aliased")
+                | none => throw (IO.userError "C0 binder kind handle invalid")
+  IO.println "C0_PERF_REGRESSION indexed_binder_hash_identity=pass"
+
 
   -- Native accepting DefEq first checks structural equality and successful
   -- pair-cache hits. The guarded quick entry may only be used after both

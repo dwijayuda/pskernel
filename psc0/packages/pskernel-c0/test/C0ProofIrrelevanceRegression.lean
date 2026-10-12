@@ -199,6 +199,17 @@ def main : IO Unit := do
           throw (IO.userError "C0 closed zeta WHNF changed result")
     | Except.error err =>
         throw (IO.userError ("C0 closed zeta WHNF failed: " ++ err))
+  -- An innermost de Bruijn variable reaching the *outermost* let
+  -- exercises real substitution and invalidation of all suffix metadata.
+  for depth in [1, 12, 24, 64] do
+    let dependentTerm := c0ZetaFixture depth (.bvar (depth - 1))
+    match psKernelSessionWhnf 4096 session dependentTerm with
+    | Except.ok (result, _) =>
+        if !psKernelExprEqual result sort0 then
+          throw (IO.userError "C0 dependent zeta WHNF skipped substitution")
+    | Except.error err =>
+        throw (IO.userError ("C0 dependent zeta WHNF failed: " ++ err))
+  IO.println "C0_PERF_REGRESSION dependent_zeta_substitution=pass"
   if (psKernelC0LetBodyRangesWithFuel 1
       (c0ZetaFixture 32 sort0)).isSome then
     throw (IO.userError "C0 zeta metadata exceeded recursion budget")

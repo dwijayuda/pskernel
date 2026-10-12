@@ -874,6 +874,19 @@ def main : IO Unit := do
       let zetaEnd ← IO.monoMsNow
       if passes != samples then throw (IO.userError "matched zeta count changed")
       IO.println s!"C0_COMPARE round={round} operation=cold_whnf_zeta_spine milliseconds={zetaEnd-zetaStart} depth={depth} samples={samples}"
+    -- Matched accepting oracle for true dependency: innermost BVar refers
+    -- across every inner binder to the outermost let. Each kernel must
+    -- substitute rather than merely return syntactically closed bodies.
+    for depth in [1, 12, 24, 64] do
+      let dependent := c0CompareZetaChain depth (.bvar (depth - 1))
+      match psKernelSessionWhnf 4096 session dependent with
+      | Except.ok (value, _) =>
+          if !psKernelExprEqual value sort0 then
+            throw (IO.userError "matched dependent zeta lost substitution")
+      | Except.error err =>
+          throw (IO.userError ("matched dependent zeta failed: " ++ err))
+    IO.println s!"C0_COMPARE round={round} operation=dependent_zeta_substitution result=pass depths=4"
+
     let zetaValue := c0CompareZetaChain 64 sort0
     let zetaBase := PsKernelName.str PsKernelName.anonymous
       "C0CheckedZetaLibrary"

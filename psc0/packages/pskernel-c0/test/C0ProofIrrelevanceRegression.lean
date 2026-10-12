@@ -1514,6 +1514,51 @@ def main : IO Unit := do
                 throw (IO.userError "C0 indexed admission mutated old environment")
   IO.println "C0_PERF_REGRESSION indexed_session_checked_admission=pass"
 
+  -- An indexed work snapshot owns one syntax store and the precise checker
+  -- context at creation. An admitted definition changes only newer sessions.
+  -- Source checking still determines all trusted WHNF judgments.
+  match psKernelC0IndexedSessionStartWork
+      initialIndexedSession committedTerm with
+  | none => throw (IO.userError "C0 indexed work initial import failed")
+  | some previous =>
+      let before := psKernelC0IndexedWorkRun 4096 previous
+      if before.progressed then
+        throw (IO.userError "C0 indexed work reduced an unknown constant")
+      match before.halt, psKernelC0IndexedWorkInspect before with
+      | .needsChecker, some expr =>
+          if !psKernelExprEqual expr committedTerm then
+            throw (IO.userError "C0 initial work syntax diverged")
+      | _, _ => throw (IO.userError "C0 initial work status diverged")
+      match psKernelC0IndexedSessionAdmitDefinition 4096
+          previous.session validIndexedDefinition with
+      | Except.error err =>
+          throw (IO.userError ("C0 indexed work admission failed: " ++ err))
+      | Except.ok accepted =>
+          match psKernelC0IndexedSessionStartWork accepted committedTerm with
+          | none => throw (IO.userError "C0 later work import failed")
+          | some later =>
+              let after := psKernelC0IndexedWorkRun 4096 later
+              match after.halt, psKernelC0IndexedWorkInspect after,
+                    psKernelSessionWhnf 4096 accepted.checker committedTerm with
+              | .needsChecker, some candidate, Except.ok (reference, _) =>
+                  if !after.progressed ||
+                     !psKernelExprEqual candidate reference ||
+                     !psKernelExprEqual candidate sort0 then
+                    throw (IO.userError "C0 indexed work differed from checked WHNF")
+              | _, _, _ =>
+                  throw (IO.userError "C0 indexed work status or source check diverged")
+              let repeated := psKernelC0IndexedWorkRun 4096 after
+              if repeated.progressed ||
+                 repeated.session.store.nodes.size !=
+                   after.session.store.nodes.size then
+                throw (IO.userError "C0 indexed work reprocessed its final term")
+              let originalAgain := psKernelC0IndexedWorkRun 4096 previous
+              if originalAgain.progressed ||
+                 previous.session.checker.context.environment.constants.length != 0 then
+                throw (IO.userError "C0 old indexed work observed later declaration")
+  IO.println "C0_PERF_REGRESSION indexed_session_continuous_work=pass"
+
+
 
 
 

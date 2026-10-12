@@ -361,3 +361,19 @@ Whole-process `VmHWM`: **727164 kB** cached C0, **723916 kB** length-scan C0, **
 | 64 checked depth-48 declarations | 51 / 47 / 46 | 46 / 46 / 45 |
 
 An isolated **whole checked operation, not a helper** in C0 with 60 repeated 192-argument admitted axiom applications measured **158 ms** explicit recursive worker / **31 ms** framed metadata route. These same-run numbers show a ~4–5× speedup only on large non-dependent Pi-spine checked application workloads. They are not whole-kernel/library or memory claims. Full comparison VmHWM: C0 844060 kB, original 841284 kB; per-check allocations, p95 and library RSS remain unknown. Preserve slight regressions in short checked paths and declaration chains; avoid overclaiming from high-arity fixtures. Prior unsafe `ptrEq` comparator was rejected by Lean and reverted, as documented. No self-host or metatheory tests.
+
+
+## Compact checked-frame / real wide admission qualification (CI 38248015655)
+
+[All-green native CI 38248015655](https://github.com/dwijayuda/pskernel/actions/runs/38248015655), source [0859097f](https://github.com/dwijayuda/pskernel/commit/0859097f6c1f8bdd6b869d477db829575bc2823c). Original PSKernel-Core was built unchanged in an independently staged Lean 4.34.0 source package on the same runner; the C0 source now stores only argument/fuel/recursion-depth in immutable checked application frames, with full checker context shared. Regression directly compares against the original recursive **C0 inference worker** for wide source terms, exact errors and resource bounds.
+
+| Three matched complete checker rounds, milliseconds | C0 production | Unchanged original |
+| --- | --- | --- |
+| 32 fully checked admitted definitions applying 192-argument function | **32 / 32 / 32** | **130 / 131 / 132** |
+| 12 fully checked 192-argument function calls | **11 / 11 / 11** | **48 / 47 / 48** |
+| 48 infer-only 192-argument calls | **10 / 11 / 11** | **189 / 188 / 189** |
+| 160 varied fully checked 48-argument applications | 69 / 70 / 70 | 67 / 68 / 68 |
+| 160 growing depth-16 checked declarations | 40 / 40 / 40 | 40 / 41 / 41 |
+| 64 growing depth-48 checked declarations | 64 / 64 / 64 | 64 / 64 / 64 |
+
+Within C0 itself, full 60-call typed 192-argument check: explicit recursive oracle **230 ms** versus framed route **44 ms**. The library fixture includes environment extension and completed declaration admission, not only a subroutine. These one-run three-round observations establish about **4.1× speedup on that specific engineered library**, not arbitrary library/whole kernel speedup. The source does **not** separately ablate compact frame context versus the earlier full-context frames; crediting frame compaction for the entire gain would be incorrect. Entire benchmark-process peak VmHWM **862312 kB C0** vs **857292 kB original**; no attributable memory saving. Preserve slightly slower short checked cases. Full Init/Std/Mathlib checking and p95/memory distribution unqualified. Do not run excluded bootstrap/self-hosting or metatheory gates.

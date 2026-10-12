@@ -49,3 +49,13 @@ These are matched native benchmark fixtures, **not** evidence that complete real
 5. Push all valid improvements to the existing branch and update `AI_WORK_STATE.md`, `C0_BENCHMARKS.md`, and this prompt. Keep going without routine permission requests.
 
 **Do not declare redesign complete** until full checked-path performance across representative workloads improves measurably without semantic regressions. If the work cannot finish in this chat, leave an exact, independently usable checkpoint.
+
+
+
+## Latest verified native Lean checkpoint — indexed loose range
+
+**Last verified source commit:** `c8d63e109247fd28b9608cb045562e5699583870`; [native CI 38239387122](https://github.com/dwijayuda/pskernel/actions/runs/38239387122) passed complete C0 Lake build, negative/differential regression, native microbenchmarks and unchanged-original matched full checker. The prior direct recursion replacement for expression equality was slower and explicitly reverted to baseline in `bdec38c4`.
+
+**New indexed-term invariant:** `PsKernelC0StoredNode.looseBVarRange` stores maximum *loose* index + 1 from exact canonical children, including binder-body decrement. `Core/IndexedReduction.lean` prunes lifting and memoized single-binder substitution for sub-DAGs where the range is no greater than the current cutoff. The old indexed reference worker remains a differential oracle. `C0ProofIrrelevanceRegression.lean` checks range against recursive syntax across offsets and exact lift/substitution values. Same-run isolated closed shared DAG reference 885 ms versus pruned memo 1 ms for 100 calls; **not** an accepted checker result. Complete C0 checker remained near parity with original on qualified fixtures; no memory improvement established.
+
+**Next engineering priority:** unify cached term metadata and session-owned arena provenance with the *real* WHNF/DefEq/inference checker, without repeated recursive/indexed conversion. Audit exact environment/context/resource-sensitive reduction families (including iota/recursors/quotient/projection/native/universe levels) before enabling an accepting indexed path. Preserve the original kernel, Rust backend, soundness-sensitive negative tests and fixed Lean 4.34 semantics. Continue native builds and original-core matched full-checker benchmarks; do NOT run self-host/bootstrap/fixed-point or metatheory tests. All future performance claims must explicitly distinguish isolated indexed DAG benchmarks from full checker speed and memory.

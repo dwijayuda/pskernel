@@ -1,4 +1,5 @@
 import Ps.KernelCore.Admission.Declaration.Admission
+import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
 
 /-
 Matched complete-checker benchmark that intentionally imports *only* APIs
@@ -132,6 +133,34 @@ def main : IO Unit := do
     value := c0CompareCheckedLambda 23
     hints := PsKernelReducibilityHints.abbrevHint
     safety := PsKernelDefinitionSafety.safe
+  }
+
+  -- Ordinary inductives exercise checked datatype/constructor admission
+  -- and recursor validation in both implementations, not only definitions.
+  let enumName := PsKernelName.str PsKernelName.anonymous "C0ComparedEnum"
+  let enumDecl : PsKernelSimpleInductiveDecl := {
+    levelParams := []
+    name := enumName
+    type := PsKernelExpr.sort (.succ PsKernelLevel.zero)
+    ctors := [
+      { name := PsKernelName.str enumName "first",
+        type := PsKernelExpr.const enumName [] },
+      { name := PsKernelName.str enumName "second",
+        type := PsKernelExpr.const enumName [] }
+    ]
+    isUnsafe := false
+    numParams := 0
+  }
+  let malformedEnum : PsKernelSimpleInductiveDecl := {
+    levelParams := []
+    name := enumName
+    type := enumDecl.type
+    ctors := [
+      { name := PsKernelName.str enumName "invalid",
+        type := PsKernelExpr.sort (.succ PsKernelLevel.zero) }
+    ]
+    isUnsafe := false
+    numParams := 0
   }
 
   for round in [:3] do
@@ -383,6 +412,38 @@ def main : IO Unit := do
       if !psKernelEnvironmentContains deepEnv (PsKernelName.num deepBase i) then
         throw (IO.userError "matched deep library missing declaration")
     IO.println s!"C0_COMPARE round={round} operation=admit_deep_library_chain milliseconds={deepEnd-deepStart} declarations={deepCount} nested_every=4 binder_depth=48"
+
+    let inductiveRuns := 24
+    let mut inductiveAccepted := 0
+    let inductiveStart ← IO.monoMsNow
+    for _ in [:inductiveRuns] do
+      match psKernelAddSimpleInductive 4096 empty enumDecl
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("matched ordinary inductive rejected: " ++ err))
+      | Except.ok result =>
+          if psKernelEnvironmentContains result enumName &&
+              psKernelEnvironmentContains result
+                (PsKernelName.str enumName "rec") then
+            inductiveAccepted := inductiveAccepted + 1
+          else throw (IO.userError "matched inductive incomplete admission")
+    let inductiveEnd ← IO.monoMsNow
+    if inductiveAccepted != inductiveRuns then
+      throw (IO.userError "matched inductive count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=admit_ordinary_inductive milliseconds={inductiveEnd-inductiveStart} samples={inductiveRuns} constructors=2"
+
+    let mut malformedRejected := 0
+    let malformedStart ← IO.monoMsNow
+    for _ in [:inductiveRuns] do
+      match psKernelAddSimpleInductive 4096 empty malformedEnum
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error _ => malformedRejected := malformedRejected + 1
+      | Except.ok _ =>
+          throw (IO.userError "matched invalid inductive accepted")
+    let malformedEnd ← IO.monoMsNow
+    if malformedRejected != inductiveRuns then
+      throw (IO.userError "matched invalid inductive count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=reject_ordinary_inductive milliseconds={malformedEnd-malformedStart} samples={inductiveRuns}"
 
     -- Complete checked admission where the body uses an inner, middle or
     -- outer binder. Compare identical semantic decisions and runner-local

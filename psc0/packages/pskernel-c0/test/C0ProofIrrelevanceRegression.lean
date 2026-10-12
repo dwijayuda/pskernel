@@ -251,6 +251,27 @@ def main : IO Unit := do
   | Except.error _, Except.error _ => pure ()
   | _, _ => throw (IO.userError "C0 indexed session accepted an unbound variable")
   IO.println "C0_PERF_REGRESSION indexed_session_owned_roots=pass"
+  -- Promotion beyond the tiny-list threshold must not lose old handles,
+  -- confuse separately stored syntax, or mutate earlier session snapshots.
+  let mut promoted := emptyOwned
+  for i in [:40] do
+    match psKernelC0IndexedSessionRetain promoted (PsKernelExpr.bvar i) with
+    | none => throw (IO.userError "C0 radix-owned root retention failed")
+    | some next => promoted := next
+  if psKernelC0IndexedSessionRootCount promoted != 40 ||
+      psKernelC0IndexedSessionNodeCount promoted != 40 ||
+      psKernelC0IndexedSessionRootCount emptyOwned != 0 then
+    throw (IO.userError "C0 radix-owned session count or snapshot mismatch")
+  let originalCount := psKernelC0IndexedSessionNodeCount promoted
+  for i in [:40] do
+    match psKernelC0IndexedSessionRetain promoted (PsKernelExpr.bvar i) with
+    | none => throw (IO.userError "C0 radix-owned lookup failed")
+    | some next => promoted := next
+  if psKernelC0IndexedSessionNodeCount promoted != originalCount ||
+      psKernelC0IndexedSessionRootCount promoted != 40 then
+    throw (IO.userError "C0 radix-owned root cache duplicated previous nodes")
+  IO.println "C0_PERF_REGRESSION indexed_session_radix_roots=pass"
+
 
   -- Native accepting DefEq first checks structural equality and successful
   -- pair-cache hits. The guarded quick entry may only be used after both

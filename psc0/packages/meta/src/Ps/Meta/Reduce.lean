@@ -103,6 +103,13 @@ def psWhnfWithFuel
               let reducedFn := smaller fn;
               if psExprAlphaEq reducedFn fn then core
               else smaller (PsExpr.app reducedFn arg)
+        | .proj typeName index major =>
+            match psReduceProjectionIota smaller environment typeName index major with
+            | some field => smaller field
+            | none =>
+              let reducedMajor := smaller major
+              if psExprAlphaEq reducedMajor major then core
+              else .proj typeName index reducedMajor
         | _ => core
 
 def psWhnf

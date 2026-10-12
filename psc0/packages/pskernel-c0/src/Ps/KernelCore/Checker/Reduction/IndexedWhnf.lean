@@ -279,6 +279,21 @@ def psKernelC0IndexedReduceQuotOnce
       psKernelC0IndexedReduceQuotKnownHead context store name args
   | _ => none
 
+/-- Quot constructor reduction takes priority over ordinary delta
+    unfolding, just as in the source checker. Unsupported Quot majors
+    continue to the existing delta candidate without an acceptance verdict. -/
+def psKernelC0IndexedReduceConstKnownHead
+    (context : PsKernelCheckerContext)
+    (store : PsKernelC0TermStore)
+    (name : PsKernelName)
+    (head : PsKernelC0Node)
+    (args : List Nat) : Option (PsKernelC0TermStore × Nat) :=
+  match psKernelC0IndexedReduceQuotKnownHead
+      context store name args with
+  | some reduced => some reduced
+  | none => psKernelC0IndexedUnfoldKnownHead
+      context store head args
+
 /-- One head-spine traversal dispatches the supported contextual reduction
     families. Add future recursor/quotient/native cases here only after their
     source ordering and fuel behavior have been qualified independently. -/
@@ -297,11 +312,8 @@ def psKernelC0IndexedReduceHeadOnce
   | .fvar _ =>
       psKernelC0IndexedUnfoldKnownHead context store head.node args
   | .const name _ =>
-      match psKernelC0IndexedReduceQuotKnownHead
-          context store name args with
-      | some value => some value
-      | none => psKernelC0IndexedUnfoldKnownHead
-          context store head.node args
+      psKernelC0IndexedReduceConstKnownHead
+        context store name head.node args
   | _ => none
 
 /-

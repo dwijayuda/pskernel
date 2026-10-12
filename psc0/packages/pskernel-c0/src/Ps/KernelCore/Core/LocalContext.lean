@@ -117,6 +117,9 @@ No cache value is ever used as proof of well-typedness.
 -/
 def psKernelC0LocalIndexThreshold : Nat := 128
 def psKernelC0LocalIndexBatchSize : Nat := 16
+-- Index lookup is a separate performance policy from index availability.
+-- Keep it outside the replaceable index-update implementation.
+def psKernelC0LocalIndexLookupThreshold : Nat := 256
 
 def psKernelC0LocalIndexInsert
     (index : PsKernelC0HashTrie PsKernelLocalDecl)
@@ -187,8 +190,6 @@ def psKernelC0LocalContextNextIndex
     length; all branches use the exact same ordered declaration names and
     therefore preserve shadowing even if a continuation has a larger
     fresh-name counter than its local declaration count. -/
-def psKernelC0LocalIndexLookupThreshold : Nat := 256
-
 def psKernelLocalContextFind
     (context : PsKernelLocalContext)
     (name : PsKernelName) :

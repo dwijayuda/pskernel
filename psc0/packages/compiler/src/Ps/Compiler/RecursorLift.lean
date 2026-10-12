@@ -140,10 +140,14 @@ def psRecursorLiftVisit (fuel : Nat) (root : Bool) (entryIds : List Nat)
       psRecursorLiftHelper state locals view
     | _ => return { state, term := expr }
 
-def psRecursorLiftDeclarations (environment : PsEnvironment)
-    (declarations : List PsDeclaration) : Except String PsElabModuleResult := do
+structure PsRecursorLiftOutput where
+  result : PsElabModuleResult
+  parents : List (PsName × PsName)
+
+def psRecursorLiftDeclarationsWithOrigins (environment : PsEnvironment)
+    (declarations : List PsDeclaration) : Except String PsRecursorLiftOutput := do
   let result ← declarations.foldlM
-    (fun (acc : PsEnvironment × List PsDeclaration) declaration => do
+    (fun (acc : PsEnvironment × List PsDeclaration × List (PsName × PsName)) declaration => do
       match declaration with
       | .definitionDecl name levels type value =>
         let state : PsRecursorLiftState := { environment := acc.fst, owner := name, levels }
@@ -153,6 +157,12 @@ def psRecursorLiftDeclarations (environment : PsEnvironment)
         let environment := { lifted.state.environment with
           declarations := rewritten :: psEnvironmentRemoveName name lifted.state.environment.declarations
           index := psEnvironmentIndexInsert lifted.state.environment.index rewritten }
-        return (environment, rewritten :: (lifted.state.helpersRev ++ acc.snd))
-      | _ => return (acc.fst, declaration :: acc.snd)) (environment, [])
-  return { environment := result.fst, declarations := result.snd.reverse }
+        return (environment, rewritten :: (lifted.state.helpersRev ++ acc.snd.fst),
+          (lifted.state.helpersRev.map fun helper => (psDeclarationName helper, name)) ++ acc.snd.snd)
+      | _ => return (acc.fst, declaration :: acc.snd.fst, acc.snd.snd)) (environment, [], [])
+  return { result := { environment := result.fst, declarations := result.snd.fst.reverse },
+    parents := result.snd.snd }
+
+def psRecursorLiftDeclarations (environment : PsEnvironment)
+    (declarations : List PsDeclaration) : Except String PsElabModuleResult :=
+  (psRecursorLiftDeclarationsWithOrigins environment declarations).map (·.result)

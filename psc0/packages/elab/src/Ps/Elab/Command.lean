@@ -7,6 +7,7 @@ structure PsCommandState where
   scope : PsCommandScope := {}
   frames : List PsScopeFrame := []
   namespaces : List (List String) := []
+  originsRev : List PsElabBatchOrigin := []
 
 def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration) :
     Except PsElabError PsSyntaxDeclaration := do
@@ -119,7 +120,10 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     (registration : Option PsSyntaxRegistration) : Except PsElabError PsCommandState := do
   let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
   let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
-  let batch ← (psElabDeclarationBatch state.environment source (state.scope.levelNames.map psRootName)).mapError (.atDeclaration name)
+  let originBatch ← (psElabDeclarationBatchWithOrigins state.environment
+    state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
+      (fun error => PsElabError.atDeclaration name error.error)
+  let batch := originBatch.result
   let isClass := match registration with | some .classDecl => true | _ => false
   let batch ← (psElabAddStructureProjections state.environment isClass batch).mapError
     (.atDeclaration name)
@@ -137,6 +141,10 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
   return { state with
     environment := environment
     namespaces := namespaces
+    originsRev := { originBatch.origin with
+      members := originBatch.origin.members ++
+        psElabStableMemberOrigins (batch.declarations.drop originBatch.result.declarations.length)
+          originBatch.result.declarations.length } :: state.originsRev
     declarationsRev := psPrependBatchReverse batch.declarations state.declarationsRev }
 
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
@@ -174,11 +182,17 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
   | .registeredDeclaration source registration =>
     psElabCommandDeclaration state source (some registration)
 
-def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
-    Except PsElabError PsElabModuleResult := do
+def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram) :
+    Except PsElabError PsElabModuleWithOriginsResult := do
   if !program.imports.isEmpty then throw (.scope "module imports are not available in this entry point")
   let namespaces := environment.declarations.foldl (fun acc decl =>
     ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) []
   let state ← program.commands.foldlM psElabCommand { environment, namespaces }
   if !state.frames.isEmpty then throw (.scope "unclosed namespace or section")
-  return { environment := state.environment, declarations := state.declarationsRev.reverse }
+  return {
+    result := { environment := state.environment, declarations := state.declarationsRev.reverse }
+    origins := state.originsRev.reverse }
+
+def psElabProgram (environment : PsEnvironment) (program : PsSyntaxProgram) :
+    Except PsElabError PsElabModuleResult :=
+  (psElabProgramWithOrigins environment program).map (·.result)

@@ -64,7 +64,7 @@ def psRustDeclarationDoc (ctx : PsRustContext) (d : PsVerifiedIrDeclaration) :
       .text "__PS_VALUE.with(|value| (**value).clone())"])
   return .origin d.name (psDocBlock header [body])
 
-def psRustEmitReadable (ir : PsVerifiedIrModule) : Except String PsEmissionArtifact := do
+def psRustEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : Except String PsEmissionArtifact := do
   if !ir.imports.isEmpty then throw "PSCV0-RUST: external capabilities are not qualified"
   let (view, names) ← psCodegenNamesFor ir psRustReservedNames
   let shared ← psRustSharedLayouts view
@@ -81,4 +81,8 @@ def psRustEmitReadable (ir : PsVerifiedIrModule) : Except String PsEmissionArtif
     .text "use __ps_runtime::*;"]
   let source ← psRenderDoc (.append
     (psDocJoin (.append .hardline .hardline) (header ++ structures ++ inductives ++ declarations)) .hardline)
-  return { target := .rust, source, symbols := names.symbols.reverse, runtime := psRustRuntimePrelude }
+  psValidateArtifact { target := .rust, source, symbols := names.symbols.reverse,
+    files := [
+      { path := stem ++ ".rs", role := .implementation, payload := .text source.text },
+      { path := "pscv0_runtime.rs", role := .runtime, payload := .text psRustRuntimePrelude }],
+    dependencies := ["num-bigint=0.4.6", "num-traits=0.2.19"] }

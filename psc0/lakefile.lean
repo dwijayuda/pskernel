@@ -117,7 +117,7 @@ lean_lib PsCompiler where
 
 lean_lib PsCodegen where
   srcDir := "packages/codegen/src"
-  roots := #[`Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact]
+  roots := #[`Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact, `Ps.Codegen.Provenance, `Ps.Codegen.Api]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"

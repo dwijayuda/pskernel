@@ -30,7 +30,7 @@ def psTsDeclarationDoc (brands tags : List (String × String))
       [.text ("return " ++ body ++ ";")],
     .text ("__ps$implementations.set(" ++ d.name ++ ", " ++ implementation ++ ");")])
 
-def psTsEmitReadable (ir : PsVerifiedIrModule) : Except String PsEmissionArtifact := do
+def psTsEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : Except String PsEmissionArtifact := do
   let (view, names) ← psCodegenNamesFor ir psTsReservedNames
   let brands := psTsBuildBrandMap view
   let tags := psTsBuildTagMap view
@@ -51,4 +51,5 @@ def psTsEmitReadable (ir : PsVerifiedIrModule) : Except String PsEmissionArtifac
       .text psTsRuntimeSupport] ++
     (view.imports.map fun item => .text (psTsEmitImport item)) ++ structures ++ inductives ++ declarations
   let source ← psRenderDoc (.append (psDocJoin (.append .hardline .hardline) docs) .hardline)
-  return { target := .typescript, source, symbols := names.symbols.reverse }
+  psValidateArtifact { target := .typescript, source, symbols := names.symbols.reverse,
+    files := [{ path := stem ++ ".ts", role := .implementation, payload := .text source.text }] }

@@ -1,4 +1,5 @@
 import Ps.Host.NativeV7
+import Ps.Host.PrimitiveAudit
 
 open Lean (toJson)
 open PsV7Native
@@ -8,9 +9,12 @@ private def writeArtifact (output : String) (artifact : PsEmissionArtifact) : IO
   let directory := file.parent.getD "."
   IO.FS.createDirAll directory
   -- All selected targets have succeeded before any artifact is published.
-  IO.FS.writeFile file artifact.source.text
-  if !artifact.runtime.isEmpty then
-    IO.FS.writeFile (directory / "pscv0_runtime.rs") artifact.runtime
+  -- Validation and generation finish before publication. The host does not
+  -- claim crash-atomic replacement of unrelated filesystem paths.
+  for entry in artifact.files do
+    match entry.payload with
+    | .text value => IO.FS.writeFile (directory / entry.path) value
+    | .binary value => IO.FS.writeBinFile (directory / entry.path) value
   let symbols := artifact.symbols.map fun s => Lean.Json.mkObj [
     ("semantic", toJson s.semanticName), ("output", toJson s.outputName)]
   let ranges := artifact.source.ranges.map fun r => Lean.Json.mkObj [
@@ -22,15 +26,18 @@ private def writeArtifact (output : String) (artifact : PsEmissionArtifact) : IO
     ("irValidation", toJson ("accepted-complete" : String)),
     ("leanCommit", toJson Lean.githash), ("profile", toJson profile),
     ("coordinates", toJson ("utf8-bytes" : String)),
-    ("runtimeDependencies", toJson (if artifact.target == .rust then
-      ["num-bigint=0.4.6", "num-traits=0.2.19"] else [])),
+    ("runtimeDependencies", toJson artifact.dependencies),
     ("symbols", toJson symbols), ("ranges", toJson ranges)]).pretty
 
 private def run (paths : List String) (outputs : List (PsEmissionTarget × String)) : IO UInt32 := do
   let requests ← paths.toArray.mapM fun (path : String) => do
     if !path.endsWith ".ps" then
       throw (IO.userError "PSCV0-NATIVE-INPUT: expected .ps application input")
-    return { source := ← IO.FS.readFile (System.FilePath.mk path), targets := outputs.map (·.1) : Request }
+    let outputStem := match outputs.head? with
+      | none => "module"
+      | some (_, output) => ((System.FilePath.mk output).fileStem).getD "module"
+    return { source := ← IO.FS.readFile (System.FilePath.mk path), sourceName := path,
+      outputStem, targets := outputs.map (·.1) : Request }
   match ← runBatch requests with
   | .error error =>
       IO.eprintln (error.phase ++ ": " ++ error.message)
@@ -53,6 +60,9 @@ private def run (paths : List String) (outputs : List (PsEmissionTarget × Strin
 def main (args : List String) : IO UInt32 := do
   try
     match args with
+    | ["--audit-primitives"] =>
+        IO.println (← primitiveAudit).pretty
+        return 0
     | ["--version"] =>
         IO.println (Lean.Json.mkObj [
           ("leanVersion", toJson Lean.versionString), ("leanCommit", toJson Lean.githash),

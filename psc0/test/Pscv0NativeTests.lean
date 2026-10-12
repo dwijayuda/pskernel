@@ -759,6 +759,15 @@ private def emissionBoundary : IO Unit := do
   unless rendered.text.contains '\n' && rendered.ranges.length == 1 &&
       rendered.ranges.all (fun r => r.startByte <= r.endByte && r.endByte <= rendered.text.utf8ByteSize) do
     throw (IO.userError "structured layout/origin range invalid")
+  unless ["module.js", "module.d.ts", "nested/module.wasm"].all psArtifactPathValid &&
+      ["../x.js", "/x", "C:/x", "CON.js", "x./y"].all (fun p => !psArtifactPathValid p) do
+    throw (IO.userError "artifact path boundary")
+  let coords := psSourceCoordinates "a😀é\nβ"
+  let position ← match psSourceCoordinateAt coords 7 with
+    | .ok p => pure p
+    | .error e => throw (IO.userError e)
+  unless position.line == 0 && position.column == 4 do
+    throw (IO.userError "UTF-8 / UTF-16 source coordinate conversion")
   IO.println "PSCV0_NATIVE_EMISSION_BOUNDARY: PASS invalid IR refusal, names and layout origins"
 
 def main : IO Unit := do

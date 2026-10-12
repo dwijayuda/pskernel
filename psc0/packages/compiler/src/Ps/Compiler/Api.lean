@@ -34,6 +34,7 @@ structure PsCompilerPreparationOutput where
   prepared : PsCompilerAdmissionReadyModule
   environment : PsEnvironment
   admissions : String
+  originParents : List (PsName × PsName) := []
 
 structure PsCompilerPreparationStepWithOriginsResult where
   state : PsCompilerPreparationState
@@ -103,8 +104,9 @@ def psCompilerElaborateSource
 def psCompilerPrepareElaboratedWithOutput
     (elaborated : PsElabModuleResult) :
     Except PsCompilerError PsCompilerPreparationOutput := do
-  let elaborated ← (psRecursorLiftDeclarations elaborated.environment
+  let lifted ← (psRecursorLiftDeclarationsWithOrigins elaborated.environment
     elaborated.declarations).mapError PsCompilerError.normalization
+  let elaborated := lifted.result
   match
       psEncodeCheckedAdmissionsCanonical
         elaborated.declarations with
@@ -115,7 +117,7 @@ def psCompilerPrepareElaboratedWithOutput
         PsCompilerAdmissionReadyModule.mk elaborated.declarations;
       let admissions : String := String.Internal.append canonicalAdmissions "\n";
       Except.ok
-        (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions)
+        (PsCompilerPreparationOutput.mk prepared elaborated.environment admissions lifted.parents)
 
 def psCompilerPrepareElaborated
     (elaborated : PsElabModuleResult) :

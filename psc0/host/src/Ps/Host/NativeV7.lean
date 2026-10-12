@@ -2,6 +2,8 @@ import Ps.Compiler.Pscv0
 import Ps.BackendTs.Readable
 import Ps.BackendRust.Module
 import Ps.CompilerIr.Checked
+import Ps.Codegen.Api
+import Ps.Codegen.Provenance
 import PsKernelLean.Protocol
 import PsKernelLean.Prelude
 
@@ -22,6 +24,8 @@ structure Diagnostic where
 
 structure Request where
   source : String
+  sourceName : String := "application.ps"
+  outputStem : String := "module"
   targets : List PsEmissionTarget := []
 
 structure Timings where
@@ -67,10 +71,10 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   let parsed ← fromResult "parse" (psCompilerParsePscv0 request.source)
   let t1 ← IO.monoMsNow
   let elaborated ← fromResult "elaborate"
-    ((psCompilerElaboratePscv0 parsed).mapError psCompilerPscv0Error)
+    ((psElabProgramWithOrigins psSelfHostProdPreludeEnvironment parsed).mapError psCompilerPscv0ElabError)
   let t2 ← IO.monoMsNow
   let output ← fromResult "prepare"
-    ((psCompilerPrepareElaboratedWithOutput elaborated).mapError psCompilerPscv0Error)
+    ((psCompilerPrepareElaboratedWithOutput elaborated.result).mapError psCompilerPscv0Error)
   let t3 ← IO.monoMsNow
   let _ ← fromResult "kernel" (check prelude output.admissions)
   let t4 ← IO.monoMsNow
@@ -90,8 +94,9 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked =>
     request.targets.mapM fun target =>
       match target with
-      | .typescript => psTsEmitReadable checked
-      | .rust => psRustEmitReadable checked)
+      | .typescript => psTsEmitReadable checked request.outputStem
+      | .javascript => .error "PSCV0-JAVASCRIPT: C1/C2 pending"
+      | .rust => psRustEmitReadable checked request.outputStem)
   let t6 ← IO.monoMsNow
   return {
     declarationCount := output.prepared.declarations.length

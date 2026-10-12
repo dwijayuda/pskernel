@@ -109,3 +109,24 @@ Other same-run subsystem measurements: native expression equality near parity (2
 - The syntax representation is still recursive at the full public checker boundary; the indexed WHNF engine covers a context-free subset, not environment-dependent delta/recursor/quotient/native reductions or checked admission. Do not infer full kernel speedup from these subsystem numbers.
 
 The guarded quick path has an explicit differential regression and the full accepting checker retains its external quick API semantics. No metatheory/self-hosting testing was requested in this performance iteration.
+
+
+
+## Continued Lean-native actual-checker measurements — October 12, 2026
+
+Native source commit `b290a8dde0482ab195ffc59bd4eabf74f745a50b`, [CI 38194277302](https://github.com/dwijayuda/pskernel/actions/runs/38194277302) **passed** 84-job Lean build, soundness-sensitive negative/differential suite and matched microbenchmarks. The previously eager and newly deferred delta-miss helper both returned no reduction on 12,000 depth-512 stuck applications: **193 ms eager / 192 ms lazy**. No reliable speedup is established. Delta and constructor projections were differentially tested against exact previous helper implementations; the acceptance path remains recursive-source based.
+
+Native source commit `cf0e3da4ee8ccf1870232316210110a9d02499f0`, [CI 38194545945](https://github.com/dwijayuda/pskernel/actions/runs/38194545945) **passed** all three native steps. Results:
+
+| Same-run C0 workload | Observation | Important limitation |
+| --- | --- | --- |
+| Eager/lazy delta miss, 12k depth-512 calls | 193 / 183 ms | One run; timing noise, not whole WHNF |
+| Cold/warm full session inference, 180 depth-24 lambdas | 2 / 7 ms | Too short to resolve reliably; no old-core baseline |
+| Checked definition admission, 120 valid / 120 invalid | 2 / 0 ms | Under resolution, trivial small declaration |
+| Cold complete WHNF, 400 depth-128 stuck apps | 26 ms | C0-only, unpaired across implementations |
+| Process peak VmHWM | 612868 kB | Includes Lean process and all benchmarks, not checker-only RSS |
+| Process current VmRSS | 605788 kB | End-of-process memory, not a per-case delta |
+
+Source commits `7cf4c49748f87fb171339da61c6a80804a5b7eb6` and `e6e005541e78b38d70ec4ecc8f9d7177c50d2267` added direct indexed-position argument selection on the **real projection checker helper**; follow-up `a96a4f1fd76432ddaeafcc64e035b6b426223f86` added a paired 18,000-query depth-512 selector benchmark with matching outcomes and native differential tests. This is distinct from indexed expression DAG term IDs. Record final run measurements only once its CI has completed; benchmark timing has not yet been certified at this written checkpoint.
+
+All CI jobs in this workstream exclude self-hosting/bootstrap tests. **Still missing:** matched original PSKernel-Core whole-library time, multiple-run medians/p95, isolated allocations, peak memory and actual indexed acceptance-engine qualification.

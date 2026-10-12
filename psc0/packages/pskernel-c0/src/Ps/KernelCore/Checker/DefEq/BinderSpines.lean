@@ -66,6 +66,22 @@ def psKernelDefEqWithLocal
         localContext)
       nextState)
 
+/-
+DefEq spine recursion budgets are bounded by the shape of the traversal,
+not by the number of nodes in binder domains or application arguments.
+The old whole-expression node-count prepasses revisit arbitrarily large,
+possibly shared subtrees even when the worker only descends along a spine.
+The extra successor covers the terminal mismatched/non-binder comparison;
+it preserves the exact old worker's budget and error behavior.
+-/
+def psKernelC0LambdaSpineLength : PsKernelExpr → Nat
+  | .lam _ _ body _ => Nat.succ (psKernelC0LambdaSpineLength body)
+  | _ => 0
+
+def psKernelC0ForallSpineLength : PsKernelExpr → Nat
+  | .forallE _ _ body _ => Nat.succ (psKernelC0ForallSpineLength body)
+  | _ => 0
+
 def psKernelDefEqLambdaSpineWithFuel
     (fuel : Nat) :
     (PsKernelCheckerContext ->
@@ -235,8 +251,8 @@ def psKernelDefEqLambdaSpine
   psKernelDefEqLambdaSpineWithFuel
     (Nat.succ
       (Nat.add
-        (psKernelExprNodeCount left)
-        (psKernelExprNodeCount right)))
+        (psKernelC0LambdaSpineLength left)
+        (psKernelC0LambdaSpineLength right)))
     defeq
     context
     state
@@ -415,8 +431,8 @@ def psKernelDefEqForallSpine
   psKernelDefEqForallSpineWithFuel
     (Nat.succ
       (Nat.add
-        (psKernelExprNodeCount left)
-        (psKernelExprNodeCount right)))
+        (psKernelC0ForallSpineLength left)
+        (psKernelC0ForallSpineLength right)))
     defeq
     context
     state
@@ -522,8 +538,8 @@ def psKernelDefEqArgs
   psKernelDefEqArgsWithFuel
     (Nat.succ
       (Nat.add
-        (psKernelExprNodeCount left)
-        (psKernelExprNodeCount right)))
+        (psKernelExprGetAppNumArgs left)
+        (psKernelExprGetAppNumArgs right)))
     defeq
     context
     state
@@ -666,12 +682,14 @@ def psKernelDefEqApp
             Nat.beq
               (psKernelExprListLength leftArgs)
               (psKernelExprListLength rightArgs) then
-          psKernelDefEqCompareExprLists
-            defeq
-            context
-            (Prod.snd headResult)
-            leftArgs
-            rightArgs
+          -- The list lengths are already known from the shape guard.
+          -- Pass the same exact historical sufficient fuel, without walking
+          -- both argument lists a second time.
+          psKernelDefEqCompareExprListsWithFuel
+            (Nat.succ (Nat.add
+              (psKernelExprListLength leftArgs)
+              (psKernelExprListLength rightArgs)))
+            defeq context (Prod.snd headResult) leftArgs rightArgs
         else
           Except.ok
             (Prod.mk

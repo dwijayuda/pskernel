@@ -338,6 +338,40 @@ def main : IO Unit := do
         throw (IO.userError "matched library chain lost an admitted declaration")
     IO.println s!"C0_COMPARE round={round} operation=admit_library_chain milliseconds={chainEnd-chainStart} declarations={chainLength} nested_every=8 binder_depth=16"
 
+    -- A separate deep-binding regime makes the adaptive-index tradeoff
+    -- observable beyond its promotion threshold. This remains a complete
+    -- checked declaration operation, not an isolated lookup benchmark.
+    let deepCount := 64
+    let deepBase := PsKernelName.str PsKernelName.anonymous "C0DeepLibraryChain"
+    let deepType := c0CompareCheckedPi 48
+    let deepBody := c0CompareCheckedLambda 48
+    let mut deepEnv := psKernelEnvironmentEmpty
+    let mut deepPrevious := deepBase
+    let deepStart ← IO.monoMsNow
+    for i in [:deepCount] do
+      let name := PsKernelName.num deepBase i
+      let body :=
+        if i % 4 == 0 then deepBody
+        else PsKernelExpr.const deepPrevious []
+      let decl : PsKernelDefinitionInfo := {
+        base := { name := name, levelParams := [], type := deepType }
+        value := body
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 deepEnv decl
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("matched deep declaration rejected: " ++ err))
+      | Except.ok next =>
+          deepEnv := next
+          deepPrevious := name
+    let deepEnd ← IO.monoMsNow
+    for i in [:deepCount] do
+      if !psKernelEnvironmentContains deepEnv (PsKernelName.num deepBase i) then
+        throw (IO.userError "matched deep library missing declaration")
+    IO.println s!"C0_COMPARE round={round} operation=admit_deep_library_chain milliseconds={deepEnd-deepStart} declarations={deepCount} nested_every=4 binder_depth=48"
+
   let status ← IO.FS.readFile "/proc/self/status"
   for line in status.splitOn "\n" do
     if line.startsWith "VmHWM:" then IO.println s!"C0_COMPARE process_peak {line}"

@@ -547,8 +547,17 @@ def psEraseCoreModuleWithRuntimePrelude
               | Except.ok lowered =>
                   Except.ok {
                     foreignData := psErasureForeignData preparedInductives.scope runtimeDeclarations
-                    internalNames := internalRuntimeNames.filterMap
-                      (psErasureLookupName preparedInductives.scope.declarationNames)
+                    -- The canonical Standard declaration roster includes
+                    -- proof-valued class methods. They have no executable
+                    -- representation and therefore no IR export identity.
+                    -- Keep only names with actual checked runtime output;
+                    -- never weaken the downstream internal-name validator.
+                    internalNames := (internalRuntimeNames.filterMap
+                      (psErasureLookupName preparedInductives.scope.declarationNames)).filter
+                      (fun name =>
+                        lowered.any (fun entry => entry.name == name) ||
+                        preparedStructures.ir.any (fun entry => entry.name == name) ||
+                        preparedInductives.ir.any (fun entry => entry.name == name))
                     imports := []
                     structures := preparedStructures.ir
                     inductives := preparedInductives.ir

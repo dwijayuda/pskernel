@@ -119,6 +119,24 @@ def main : IO Unit := do
       c0CompareApps 48 (PsKernelExpr.const functionName [])
         (PsKernelExpr.mdata metadata sort0))
 
+  -- Wider checked and infer-only spines measure complete checker behavior,
+  -- not helper-level list traversal. All inputs are prebuilt and admitted
+  -- through exactly the same public API in original-core and C0.
+  let wideName := PsKernelName.str PsKernelName.anonymous "C0WideFunction"
+  let wideDecl : PsKernelAxiomInfo := {
+    base := { name := wideName, levelParams := [], type := c0CompareForalls 192 }
+    isUnsafe := false
+  }
+  let wideEnv ←
+    match psKernelAddAxiom 4096 empty wideDecl
+        4096 psKernelLeanNatMaxSizeDefault with
+    | Except.ok accepted => pure accepted
+    | Except.error err =>
+        throw (IO.userError ("matched wide benchmark axiom rejected: " ++ err))
+  let wideSession := psKernelMkCheckerSession wideEnv []
+    PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
+  let wideApp := c0CompareApps 192 (PsKernelExpr.const wideName []) sort0
+
   let safeDefinition : PsKernelDefinitionInfo := {
     base := {
       name := PsKernelName.str PsKernelName.anonymous "C0ComparedSafeDef"
@@ -329,6 +347,34 @@ def main : IO Unit := do
     if variedCheckedOk != variedCount then
       throw (IO.userError "matched varied checked count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=cold_check_application_varied milliseconds={variedCheckedEnd-variedCheckedStart} samples={variedCount} variants=16"
+
+    let mut wideInferOk := 0
+    let wideInferStart ← IO.monoMsNow
+    for _ in [:48] do
+      match psKernelSessionInfer 4096 wideSession wideApp with
+      | Except.ok (result, _) =>
+          if psKernelExprEqual result sort0 then
+            wideInferOk := wideInferOk + 1
+          else throw (IO.userError "matched wide infer-only type changed")
+      | Except.error err =>
+          throw (IO.userError ("matched wide infer-only failed: " ++ err))
+    let wideInferEnd ← IO.monoMsNow
+    if wideInferOk != 48 then throw (IO.userError "wide infer-only count changed")
+    IO.println s!"C0_COMPARE round={round} operation=cold_infer_application_wide milliseconds={wideInferEnd-wideInferStart} samples=48 arguments=192"
+
+    let mut wideCheckedOk := 0
+    let wideCheckedStart ← IO.monoMsNow
+    for _ in [:12] do
+      match psKernelSessionCheck 4096 wideSession wideApp with
+      | Except.ok (result, _) =>
+          if psKernelExprEqual result sort0 then
+            wideCheckedOk := wideCheckedOk + 1
+          else throw (IO.userError "matched wide checked type changed")
+      | Except.error err =>
+          throw (IO.userError ("matched wide checked application failed: " ++ err))
+    let wideCheckedEnd ← IO.monoMsNow
+    if wideCheckedOk != 12 then throw (IO.userError "wide checked count changed")
+    IO.println s!"C0_COMPARE round={round} operation=cold_check_application_wide milliseconds={wideCheckedEnd-wideCheckedStart} samples=12 arguments=192"
 
     let mut admitted := 0
     let mut rejected := 0

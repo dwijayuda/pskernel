@@ -146,10 +146,69 @@ def psStandardExceptToOptionDeclaration : PsDeclaration :=
       (psLogicLam 2 "action" family body) .implicit) .implicit
   .definitionDecl (psNameAppendStr psSelfHostExceptName "toOption") [] type value
 
+-- Ordinary constructor-backed pure is the checked Except.ok function;
+-- no runtime handler or extra proof authority is introduced.
+def psStandardExceptPureDeclaration : PsDeclaration :=
+  let epsilon := PsExpr.fvar 0
+  let alpha := PsExpr.fvar 1
+  let family := psSelfHostExceptOf epsilon alpha
+  let type := psLogicPi 0 "ε" psPreludeTypeType
+    (psLogicPi 1 "α" psPreludeTypeType
+      (psLogicPi 2 "value" alpha family) .implicit) .implicit
+  let value := psLogicLam 0 "ε" psPreludeTypeType
+    (psLogicLam 1 "α" psPreludeTypeType
+      (psLogicLam 2 "value" alpha
+        (psSelfHostExceptOkOf epsilon alpha (.fvar 2))) .implicit) .implicit
+  .definitionDecl (psNameAppendStr psSelfHostExceptName "pure") [] type value
+
+-- toBool is definitionally the existing isOk observer, not an additional
+-- Boolean evaluation primitive.
+def psStandardExceptToBoolDeclaration : PsDeclaration :=
+  let epsilon := PsExpr.fvar 0
+  let alpha := PsExpr.fvar 1
+  let family := psSelfHostExceptOf epsilon alpha
+  let bool := PsExpr.constE psBoolName []
+  let type := psLogicPi 0 "ε" psPreludeTypeType
+    (psLogicPi 1 "α" psPreludeTypeType
+      (psLogicPi 2 "action" family bool) .implicit) .implicit
+  let body := psLogicApply
+    (.constE (psNameAppendStr psSelfHostExceptName "isOk") [])
+    [epsilon, alpha, .fvar 2]
+  let value := psLogicLam 0 "ε" psPreludeTypeType
+    (psLogicLam 1 "α" psPreludeTypeType
+      (psLogicLam 2 "action" family body) .implicit) .implicit
+  .definitionDecl (psNameAppendStr psSelfHostExceptName "toBool") [] type value
+
+-- A fallback thunk is evaluated only in the error branch. Reusing Except.rec
+-- preserves the exact short-circuit semantics across every checked backend.
+def psStandardExceptOrElseLazyDeclaration : PsDeclaration :=
+  let epsilon := PsExpr.fvar 0
+  let alpha := PsExpr.fvar 1
+  let family := psSelfHostExceptOf epsilon alpha
+  let unit := PsExpr.constE psUnitName []
+  let callback := psLogicPi 6 "_" unit family
+  let errorMinor := psLogicLam 4 "err" epsilon
+    (.app (.fvar 3) (.constE psUnitUnitName []))
+  let successMinor := psLogicLam 5 "value" alpha
+    (psSelfHostExceptOkOf epsilon alpha (.fvar 5))
+  let body := psStandardExceptEliminate epsilon alpha family (.fvar 2)
+    errorMinor successMinor
+  let type := psLogicPi 0 "ε" psPreludeTypeType
+    (psLogicPi 1 "α" psPreludeTypeType
+      (psLogicPi 2 "action" family
+        (psLogicPi 3 "fallback" callback family)) .implicit) .implicit
+  let value := psLogicLam 0 "ε" psPreludeTypeType
+    (psLogicLam 1 "α" psPreludeTypeType
+      (psLogicLam 2 "action" family
+        (psLogicLam 3 "fallback" callback body)) .implicit) .implicit
+  .definitionDecl (psNameAppendStr psSelfHostExceptName "orElseLazy") [] type value
+
 def psStandardExceptDeclarations : List PsDeclaration :=
   [psStandardExceptBindDeclaration, psStandardExceptMapDeclaration,
    psStandardExceptMapErrorDeclaration, psStandardExceptTryCatchDeclaration,
-   psStandardExceptIsOkDeclaration, psStandardExceptToOptionDeclaration]
+   psStandardExceptIsOkDeclaration, psStandardExceptToOptionDeclaration,
+   psStandardExceptPureDeclaration, psStandardExceptToBoolDeclaration,
+   psStandardExceptOrElseLazyDeclaration]
 
 -- Called only after the existing Except type, constructors and recursor have
 -- already been installed and checked, together with the Standard dictionaries.

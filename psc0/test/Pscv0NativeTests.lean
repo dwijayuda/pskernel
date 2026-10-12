@@ -65,6 +65,8 @@ private def application : String :=
   "const stdExceptRecoveryRuntime: Nat := Option.getD(Except.toOption(Except.tryCatch(Except.mapError(fun (s: String) => String.Internal.length(s), stdExceptBad), fun (len: Nat) => Except.ok(len))), 0)\n" ++
   "const stdExceptIsOkRuntime: Bool := Except.isOk(stdExceptSeed)\n" ++
   "const stdExceptFailureRuntime: Nat := Option.getD(Except.toOption(stdExceptBad), 77)\n" ++
+  "const stdExceptFallbackRuntime: Nat := Option.getD(Except.toOption(Except.orElseLazy(stdExceptBad, fun (_: Unit) => Except.ok(12))), 0)\n" ++
+  "const stdExceptToBoolRuntime: Bool := Except.toBool(stdExceptSeed)\n" ++
   "const appendSimple: Bool := if (\"left\" ++ \"right\" = \"leftright\") { true } else { false }\n" ++
   "const appendUnicode: Bool := if (\"🍋\" ++ \"é\" = \"🍋é\") { true } else { false }\n" ++
   "const appendGrouped: Bool := if ((\"A\" ++ \"B\") ++ \"C\" = \"ABC\") { true } else { false }\n" ++
@@ -1163,7 +1165,15 @@ private def projectBoundaries : IO Unit := do
     "const successFlag: Bool := Except.isOk(sourceOk)\n" ++
     "theorem successFlagProof: successFlag = true := by { rfl }\n" ++
     "const absent: Option Nat := Except.toOption(sourceError)\n" ++
-    "theorem absentProof: absent = Option.none := by { rfl }\n"
+    "theorem absentProof: absent = Option.none := by { rfl }\n" ++
+    "const returned: Except String Nat := Except.pure(7)\n" ++
+    "theorem returnedProof: returned = Except.ok(7) := by { rfl }\n" ++
+    "const reflected: Bool := Except.toBool(sourceOk)\n" ++
+    "theorem reflectedProof: reflected = true := by { rfl }\n" ++
+    "const fallbackResult: Except String Nat := Except.orElseLazy(sourceError, fun (_: Unit) => Except.ok(12))\n" ++
+    "theorem fallbackResultProof: fallbackResult = Except.ok(12) := by { rfl }\n" ++
+    "const keptSuccess: Except String Nat := Except.orElseLazy(sourceOk, fun (_: Unit) => Except.ok(19))\n" ++
+    "theorem keptSuccessProof: keptSuccess = sourceOk := by { rfl }\n"
   let exceptTypeMismatch :=
     "const bad: Except String Nat := Except.map(Nat.succ, Option.some(1))\n"
   let interpolationSource :=

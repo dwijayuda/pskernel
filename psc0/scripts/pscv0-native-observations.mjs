@@ -167,6 +167,8 @@ export const observations = [
   { name: "stdExceptRecoveryRuntime", args: null, expected: 3n },
   { name: "stdExceptIsOkRuntime", args: null, expected: true },
   { name: "stdExceptFailureRuntime", args: null, expected: 77n },
+  { name: "stdExceptFallbackRuntime", args: null, expected: 12n },
+  { name: "stdExceptToBoolRuntime", args: null, expected: true },
   { name: "appendSimple", args: null, expected: true },
   { name: "appendUnicode", args: null, expected: true },
   { name: "appendGrouped", args: null, expected: true },

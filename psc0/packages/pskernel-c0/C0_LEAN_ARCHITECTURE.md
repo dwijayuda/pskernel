@@ -1,5 +1,17 @@
 # PSKernel-C0 — Lean-native performance architecture
 
+## Latest native Lean 4.35 architecture qualification — 2026-10-13
+
+Master design: [PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md](PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md). This version-pinned evidence **supersedes** all older 4.34 "next" assumptions below. Last complete source+CI before the newest exact-byte parser expansion: [CI 38315455947](https://github.com/dwijayuda/pskernel/actions/runs/38315455947), Lean **v4.35.0**.
+
+**Authority and trust:** production accepts only through recursive `PsKernelExpr` WHNF/DefEq/inference/admission, with Lean 4.35 native compiler-execution callbacks removed. The indexed DAG and the new selective two-lifetime scratch prototype are *non-accepting*. Whole-canonical radix replay rejects duplicated/forged entries and validates per-node metadata/acyclicity, but exported public `Nat` handles still lack a fully sealed ownership/provenance abstraction and no formal con-ron-style `StoreWF` proof exists. The scratch prototype uses immutable snapshots and reachability promotion; unlike con-ron, it does not yet have compact tagged u32 handles, physical per-constructor arrays or proved scratch/persistent invariants.
+
+**Measured representation data:** selecting only a depth-11 DAG from 76 staged nodes retained 12 persistent nodes, 24 source reencodes **525 ms** versus memoized indexed promotion **79 ms** (syntax-only). The *complete* checked synthetic 24 × 12 mixed admission benchmark was C0 p50/p95 **26/26 ms**, unchanged original **49/50**, with **more** C0 small allocations and process memory. No evidence that this representation is the faster accepting engine.
+
+**External fidelity:** Lean 4.35 official `leanchecker --from-export` runs on the same small pinned NDJSON bytes as a strict C0 subset adapter. Initial sorts, lambda/forall, let, universe cases passed prior qualification steps; most recent [`4f74295e`](https://github.com/dwijayuda/pskernel/commit/4f74295e518d16bc797f56585233e84a47a54b0f) adds app and sequential dependency fixtures, pending complete [CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332) at handoff writing. Unsupported Lean metadata/inductive forms are refused, not silently interpreted.
+
+**Next:** grow exact-byte conformance with typed accept/reject/decline/resource distinctions; model a sealed two-tier arena and cheap per-node metadata; compare against native structural sharing and closure-based evaluator under identical full checked workloads; only then promote a complete 4.35 indexed/closure WHNF+DefEq+typing+admission with external oracle parity and explicit formal assumptions.
+
 **Scope:** `psc0/packages/pskernel-c0/src/Ps/KernelCore/**/*.lean` on
 `perf/pskernel-c0-v7-rust-20261012`.
 **Semantic target:** Lean 4.34.0. **Authoritative verdicts:** the existing

@@ -1,5 +1,15 @@
 # PSKernel-C0: Lean 4.35 architecture redesign and qualification program
 
+## Phase A and early Phase B — verified progress, 2026-10-13
+
+The stable v4.35.0 pin and deletion of Lean 4.34 compiler-evaluated reduceBool/reduceNat callbacks have been qualified by [CI 38313664552](https://github.com/dwijayuda/pskernel/actions/runs/38313664552). The imported project-local original baseline now regenerates its own Lake roots from its unchanged source tree, rather than reusing C0's roots; this is essential when old capability modules are deleted from redesigned C0.
+
+Full canonical store/radix replay including malformed/duplicate/ghost reference rejection passed [CI 38314757371](https://github.com/dwijayuda/pskernel/actions/runs/38314757371). A **non-accepting** prototype of persistent/scratch indexed term stores with selective memoized promotion, immutable abort and cross-prefix integrity passed [CI 38315348542](https://github.com/dwijayuda/pskernel/actions/runs/38315348542). The [CI 38315455947](https://github.com/dwijayuda/pskernel/actions/runs/38315455947) comparison measured 24 source reencodes **525 ms** versus selective indexed promotion **79 ms**, 76 staged/12 committed nodes. This is *syntax-only*; no full-checker or memory win follows. Checked 24 × 12 synthetic C0 batches p50/p95 **26/26 ms**, unchanged original **49/50 ms**, and C0 uses more small allocations.
+
+Official Lean 4.35 `leanchecker --from-export` accepts/rejects pinned NDJSON fixtures with the *exact same bytes* parsed by C0's new strict test-only subset importer. A further [`4f74295e`](https://github.com/dwijayuda/pskernel/commit/4f74295e518d16bc797f56585233e84a47a54b0f) expands the set to 12, including dependent sequential definitions; its [CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332) was in progress at writing and must be rechecked. Unsupported metadata/inductives explicitly fail parsing, not a checker verdict.
+
+**Current quality gap remains:** no full indexed *accepting* source-equivalent v4.35 WHNF/DefEq/inference/admission, no sealed native StoreWF/denotation theorem, no official full Init/Std/Mathlib corpus, and no con-leche/con-ron consistency assurance for C0. Phase B/C must prioritize official semantically identical exported inputs, exact decline/accept distinctions and selected full-workload architectural ablations.
+
 **Date:** 2026-10-13  
 **Target compiler and trusted semantic oracle:** `leanprover/lean4:v4.35.0` (stable, released 2026-10-12); [tag commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`](https://github.com/leanprover/lean4/commit/eb6cafb7290e8bd5f2937522d8d804f58f02bafc).  
 **Repository:** [dwijayuda/pskernel](https://github.com/dwijayuda/pskernel); branch `perf/pskernel-c0-v7-rust-20261012`; package `psc0/packages/pskernel-c0/`.  

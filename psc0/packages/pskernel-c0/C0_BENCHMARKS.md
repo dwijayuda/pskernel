@@ -1,5 +1,18 @@
 # PSKernel-C0 experimental performance measurements
 
+## New 4.35 native benchmark qualification — 2026-10-13
+
+**Source and toolchain:** stable Lean 4.35.0, successful native source CI [38315455947](https://github.com/dwijayuda/pskernel/actions/runs/38315455947), before the latest official-NDJSON parser extension. No source-level metatheory, Rust or selfhost qualification.
+
+| Measured same-run workload | C0 | Baseline | Interpretation |
+| --- | --- | --- | --- |
+| 24 × 12 accepted mixed safe-declaration batches, wall time p50/p95 | **26 / 26 ms** | **49 / 50 ms** unchanged original `pskernel-core` | Synthetic **complete checked** workload, not external C++ or real library |
+| Same batch, thread-local small-allocation event proxy | **36,184** | **34,971** | C0 has **more** allocation events; not allocated bytes |
+| Whole benchmark-process VmHWM | **1,151,824 kB** | **1,145,152 kB** | No memory win |
+| 24 selected depth-11 shared-DAG transfers | **79 ms indexed scratch promotion** | **525 ms source decode+reencode** | Experimental syntax transfer only; 76 temporary nodes/12 committed |
+
+The indexed scratch implementation [CI 38315348542](https://github.com/dwijayuda/pskernel/actions/runs/38315348542) passed canonical sharing, removal of unselected scratch nodes, immutable snapshots and negative/malformed-node tests. The full-trie replay validator [CI 38314757371](https://github.com/dwijayuda/pskernel/actions/runs/38314757371) passed; this is not a formal `StoreWF` proof or an accepting kernel operation. Source-side `leanchecker` v4.35 same-byte NDJSON tests currently involve a **tiny, selected** exported declaration subset only; no Mathlib/Init conformance or independent whole-library throughput exists. Compare con-ron and con-leche against C0 only after matching exact corpus/version/policy/worker count and resource metrics.
+
 ## Research-qualified baseline and measurement gaps — 2026-10-13
 
 Reference study: [C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md](C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md). Native accepting **C0 source HEAD** [`497df6a`](https://github.com/dwijayuda/pskernel/commit/497df6a39947aa3532b2d1a6ffe84342125fd2fc); full native [CI 38305932773](https://github.com/dwijayuda/pskernel/actions/runs/38305932773) succeeded. Research commits are documentation-only, not tests of new source behavior.

@@ -1,5 +1,17 @@
 # PSKernel-C0 — performance architecture work state
 
+## CURRENT 4.35 IMPLEMENTATION STATE — 2026-10-13
+
+**Read first:** [PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md](PSKERNEL_C0_LEAN435_ARCHITECTURE_REDESIGN.md) and the newest top of `AI_WORK_STATE.md`. The compiler and semantic target is **stable Lean 4.35.0** pinned at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`. Older 4.34 and RC handoffs are historical.
+
+**Verified:** removal of 4.34's compiler-native reduction hooks, their provider and state coupling, and corrected standalone original-core CI fixture [38313664552](https://github.com/dwijayuda/pskernel/actions/runs/38313664552); exact-node and entire-radix index replay with negative malformed-index tests [38314757371](https://github.com/dwijayuda/pskernel/actions/runs/38314757371); scratch/persistent indexed snapshots with selective, memoized reachability promotion [38315348542](https://github.com/dwijayuda/pskernel/actions/runs/38315348542); complete native microbench and unchanged original comparison [38315455947](https://github.com/dwijayuda/pskernel/actions/runs/38315455947). These are distinct successful source runs, all still **recursive-source accepting**; indexed helpers remain diagnostic.
+
+**Synthetic observations:** 24 transfers of a selected depth-11 DAG source-reencode **525 ms** vs indexed promotion **79 ms**, 76 scratch nodes vs 12 committed; 24 × 12 mixed checked admission C0 p50/p95 **26/26 ms** vs unchanged original **49/50**, small allocations C0 **36,184** vs original **34,971**, VmHWM C0 **1,151,824 kB** vs original **1,145,152 kB**. No proven full-program indexed performance or memory win.
+
+**External official source conformance:** direct 4.35 NDJSON subset replay (meta/version/name/level/sort/bvar/forall/lam/let/app/const, sequential defs) tested against same input files consumed by official `leanchecker --from-export`. Newest source [`4f74295e`](https://github.com/dwijayuda/pskernel/commit/4f74295e518d16bc797f56585233e84a47a54b0f) added 4 more files and sequential dependency checks. **Check [CI 38316177332](https://github.com/dwijayuda/pskernel/actions/runs/38316177332) before calling this expanded milestone green.** Adapter still explicitly refuses unsupported metadata/inductives; it is not a general export parser.
+
+**Architecture path:** validate exact official 4.35 semantics and explicit decline boundaries first; investigate con-ron's compressed per-constructor dual-tier arena vs con-leche's computed-field immutable terms vs closure-based value machine, with complete checked workload measurements. Do not infer C0 consistency from either external checker. No selfhosting/Rust/backend/original-core changes.
+
 ## NEWEST SOURCE RESEARCH HANDOFF — 2026-10-13 (READ FIRST)
 
 **Full comparative research:** [C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md](C0_LEAN4_KERNEL_COMPARATIVE_SOURCE_RESEARCH_2026-10-13.md). Source inspected [`497df6a`](https://github.com/dwijayuda/pskernel/commit/497df6a39947aa3532b2d1a6ffe84342125fd2fc), **CI [38305932773](https://github.com/dwijayuda/pskernel/actions/runs/38305932773) green** across native Lean 4.34 build, negative/differential tests, microbenches and unchanged sibling-original checker. Research documentation source [`f943c866`](https://github.com/dwijayuda/pskernel/commit/f943c8662b722f790775f69159c6938b7b8994ad) is docs-only. Refresh live HEAD and CI. Historical handoffs below remain engineering evidence.

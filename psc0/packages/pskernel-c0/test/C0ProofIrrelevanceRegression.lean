@@ -593,6 +593,49 @@ def main : IO Unit := do
   if smallCtx.nextIndex != threshold || deepCtx.nextIndex != threshold + 1 then
     throw (IO.userError "C0 delayed local index changed fresh-name counter")
   IO.println "C0_PERF_REGRESSION deferred_local_index_promotion=pass"
+  -- A persistent indexed snapshot plus a small overlay must preserve
+  -- precedence for a new shadowing let, including the batch commit edge.
+  let mut pendingCtx := deepCtx
+  for k in [:psKernelC0LocalIndexBatchSize - 1] do
+    let name := PsKernelName.num PsKernelName.anonymous
+      (threshold + 1 + k)
+    pendingCtx := psKernelLocalContextAddLocal pendingCtx name name
+      sort0 PsKernelBinderInfo.default
+  if pendingCtx.pendingCount != psKernelC0LocalIndexBatchSize - 1 ||
+      pendingCtx.pending.length != psKernelC0LocalIndexBatchSize - 1 then
+    throw (IO.userError "C0 batched local context lost pending entries")
+  let oldPending := pendingCtx
+  let shadowKey := PsKernelName.num PsKernelName.anonymous 3
+  let committed := psKernelLocalContextAddLet pendingCtx shadowKey
+    shadowKey sort1 sort0
+  if committed.pendingCount != 0 || !committed.pending.isEmpty then
+    throw (IO.userError "C0 local index failed to publish pending batch")
+  match psKernelLocalContextFind committed shadowKey with
+  | Option.none => throw (IO.userError "C0 committed local shadow missing")
+  | Option.some decl =>
+      if !(psKernelExprEqual (psKernelLocalDeclType decl) sort1) then
+        throw (IO.userError "C0 committed local shadow selected older entry")
+  match psKernelLocalContextFind oldPending shadowKey with
+  | Option.none => throw (IO.userError "C0 predecessor lost shadowed local")
+  | Option.some decl =>
+      if !(psKernelExprEqual (psKernelLocalDeclType decl) sort0) then
+        throw (IO.userError "C0 batched local update mutated predecessor")
+  for ctx in [deepCtx, oldPending, committed] do
+    for k in [:threshold + psKernelC0LocalIndexBatchSize + 3] do
+      let name := PsKernelName.num PsKernelName.anonymous k
+      match psKernelLocalContextFindIn name ctx.decls,
+          psKernelLocalContextFind ctx name with
+      | Option.none, Option.none => pure ()
+      | Option.some a, Option.some b =>
+          if !(psKernelNameEq (psKernelLocalDeclName a)
+              (psKernelLocalDeclName b) &&
+              psKernelExprEqual (psKernelLocalDeclType a)
+                (psKernelLocalDeclType b)) then
+            throw (IO.userError "C0 local overlay lookup diverged")
+      | _, _ =>
+          throw (IO.userError "C0 local overlay changed entry presence")
+  IO.println "C0_PERF_REGRESSION batched_local_context_shadowing=pass"
+
 
   -- The UTF-8 optimized fingerprint is identical to the original decoder
   -- for ASCII, multi-byte scalar values and mixed names at varied seeds.

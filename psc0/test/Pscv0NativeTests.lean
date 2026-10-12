@@ -920,6 +920,32 @@ private def projectBoundaries : IO Unit := do
     (psCompilerPreparePscv0Project "Diamond" [diamond, left, right, vault])
   unless closure.mainNames.any (fun n => psNameToString n == "answer") do
     throw (IO.userError "diamond import lost its checked public identity")
+  -- A generated, checked typeclass instance is part of the public module
+  -- interface and must survive two re-export routes without duplicate
+  -- registration or loss of its actual source declaration provenance.
+  let palette : PsPscv0ModuleSource := {
+    name := "Palette"
+    source := "namespace Palette\ninductive Shade where { | red | blue } deriving Inhabited\nend Palette\n" }
+  let leftExport : PsPscv0ModuleSource := {
+    name := "LeftExport", source := "public import Palette\nconst leftTag: Nat := 1\n" }
+  let rightExport : PsPscv0ModuleSource := {
+    name := "RightExport", source := "public import Palette\nconst rightTag: Nat := 2\n" }
+  let derivedClient : PsPscv0ModuleSource := {
+    name := "DerivedClient"
+    source := "import LeftExport\nimport RightExport\nconst chosen: Palette.Shade := Inhabited.default\n" }
+  let derived ← get "public derived-instance diamond"
+    (psCompilerPreparePscv0Project "DerivedClient"
+      [derivedClient, leftExport, rightExport, palette])
+  unless derived.mainNames.any (fun name => psNameToString name == "chosen") &&
+      derived.libraryNames.any (fun name =>
+        psNameToString name == "Palette.Shade.instInhabited") &&
+      derived.origins.any (fun owner => owner.moduleName == "Palette" &&
+        owner.batches.any (fun batch =>
+          batch.members.any (fun member =>
+            match member.role with
+            | .derivedInstance => true
+            | _ => false))) do
+    throw (IO.userError "derived typeclass instance lost across public-import diamond")
   let aliases : PsPscv0ModuleSource := {
     name := "Aliases"
     source := "namespace Aliases\nabbrev six: Nat := 6\nfunction twice(value: Nat): Nat := Nat.add(value, value)\nend Aliases\n" }

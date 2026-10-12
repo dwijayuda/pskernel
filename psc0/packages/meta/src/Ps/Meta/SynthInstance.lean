@@ -302,8 +302,25 @@ def psInstanceTableInsert (environment : PsEnvironment)
 -- Unresolved inputs are postponed until another dictionary constrains them.
 -- Successful subgoal answers are shared across sibling candidates; failed
 -- speculative META assignments are always rolled back to the caller context.
+-- A postponed dictionary goal must have sufficient known inputs before
+-- candidate search. Output arguments are still solved by the ordinary
+-- outParam-aware target preparation; Pi-indexed dictionaries can introduce
+-- their own checked binder immediately. This avoids consuming the resource
+-- budget on goals another pending dictionary has not yet constrained.
+def psInstanceTableGoalReady
+    (environment : PsEnvironment) (localContext : PsLocalContext)
+    (context : PsMetaContext) (target : PsExpr) : Bool :=
+  match psPrepareInstanceTarget environment localContext context target with
+  | some _ => true
+  | none =>
+    match psWhnf environment context localContext
+      (psMetaInstantiate context target) with
+    | .forallE _ _ _ _ => true
+    | _ => false
+
 def psInstanceTableSolvePass
     (synthesize : PsInstanceSearchTable → PsMetaContext → PsExpr → PsInstanceTabledResult)
+    (ready : PsMetaContext → PsExpr → Bool)
     (pending : List Nat) (context : PsMetaContext)
     (table : PsInstanceSearchTable) : PsInstanceTableSolvePass :=
   match pending with
@@ -313,14 +330,17 @@ def psInstanceTableSolvePass
       match psMetaFindAssignment context id, psMetaFindDecl context id with
       | some _, _ => psInstanceTableSuccess context (.fvar id) table
       | none, some declaration =>
-        synthesize table context (psMetaInstantiate context declaration.type)
+        let goal := psMetaInstantiate context declaration.type
+        if table.resourceExceeded || !ready context goal then
+          psInstanceTableFailure context table
+        else synthesize table context goal
       | _, _ => psInstanceTableFailure context table
     let assigned : Option PsMetaContext :=
       match psMetaFindAssignment context id with
       | some _ => some context
       | none => attempt.result.value.bind fun value =>
         psMetaAssign attempt.result.context id value
-    let tail := psInstanceTableSolvePass synthesize rest
+    let tail := psInstanceTableSolvePass synthesize ready rest
       (assigned.getD context) attempt.table
     { context := tail.context
       table := tail.table
@@ -328,21 +348,23 @@ def psInstanceTableSolvePass
 
 def psInstanceTableSolvePendingWithFuel
     (synthesize : PsInstanceSearchTable → PsMetaContext → PsExpr → PsInstanceTabledResult)
+    (ready : PsMetaContext → PsExpr → Bool)
     (fuel : Nat) (pending : List Nat) (context : PsMetaContext)
     (table : PsInstanceSearchTable) : PsInstanceTableSolveResult :=
   match fuel with
   | 0 => { context, table, success := pending.isEmpty }
   | fuel + 1 =>
-    let pass := psInstanceTableSolvePass synthesize pending context table
+    let pass := psInstanceTableSolvePass synthesize ready pending context table
     if pass.pending.isEmpty then
       { context := pass.context, table := pass.table, success := true }
     else if pass.pending.length >= pending.length then
       { context, table := pass.table, success := false }
     else
-      psInstanceTableSolvePendingWithFuel synthesize fuel
+      psInstanceTableSolvePendingWithFuel synthesize ready fuel
         pass.pending pass.context pass.table
 
 def psInstanceTableSolvePrepared
+    (environment : PsEnvironment) (localContext : PsLocalContext)
     (synthesize : PsInstanceSearchTable → PsMetaContext → PsExpr → PsInstanceTabledResult)
     (args : List PsPreparedInstanceArgument)
     (context : PsMetaContext) (table : PsInstanceSearchTable) :
@@ -352,6 +374,7 @@ def psInstanceTableSolvePrepared
       match arg.expr with | .mvar id => some id | _ => none
     else none
   let solved := psInstanceTableSolvePendingWithFuel synthesize
+    (psInstanceTableGoalReady environment localContext)
     (pending.length + 1) pending context table
   if solved.success && args.all (fun arg =>
     !psExprHasUnresolvedMeta (psMetaInstantiate solved.context arg.expr)) then solved
@@ -370,7 +393,7 @@ def psInstanceTableTryCandidate
   let matchTarget := psUnify environment localContext
     prepared.context prepared.resultType target
   if !matchTarget.success then psInstanceTableFailure original table else
-  let solved := psInstanceTableSolvePrepared synthesize
+  let solved := psInstanceTableSolvePrepared environment localContext synthesize
     prepared.arguments matchTarget.context table
   if !solved.success then psInstanceTableFailure original solved.table else
   let value := psMetaInstantiate solved.context prepared.value

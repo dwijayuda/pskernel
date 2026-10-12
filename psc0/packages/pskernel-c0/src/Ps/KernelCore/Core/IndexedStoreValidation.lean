@@ -32,7 +32,7 @@ def psKernelC0IndexReplayEqualWithFuel
   | remaining + 1 =>
       match left, right with
       | .empty, .empty => true
-      | .branch first second =>
+      | .branch first, .branch second =>
           if first.size != second.size then false
           else Id.run do
             for i in [:first.size] do

@@ -1,5 +1,56 @@
 # AI_WORK_STATE — PSKernel-C0 Lean performance architecture
 
+## CURRENT HANDOFF — 2026-10-13 (AUTHORITATIVE; READ FIRST)
+
+> **This section supersedes all earlier "latest checkpoint", "updated" or "next priority" statements lower in this file.** Older entries are retained as chronological engineering evidence, not as current instructions. Consult the live GitHub HEAD and latest native CI before every implementation phase.
+
+### Repository and verified state
+
+- Repository: [dwijayuda/pskernel](https://github.com/dwijayuda/pskernel), the owner's public open-source kernel/compiler project.
+- Working branch: `perf/pskernel-c0-v7-rust-20261012`; root: `psc0/packages/pskernel-c0/`; **latest source/benchmark/documentation HEAD inspected**: [`cfc393f6b713`](https://github.com/dwijayuda/pskernel/commit/cfc393f6b713e546d987ffb099a85de958d2f4d5). The documentation handoff commit after this section is written may be newer; refresh HEAD.
+- Pinned native source compiler: Lean **4.34.0** (`lean-toolchain`). GitHub CI: `.github/workflows/pskernel-c0-lean.yml`.
+- **Latest verified source milestone:** [`4e07bde0`](https://github.com/dwijayuda/pskernel/commit/4e07bde098f4a9b58fdc36080b6c17feaf6bc160) and [`21bf7176`](https://github.com/dwijayuda/pskernel/commit/21bf71762a08801267c5ea6ccccac19b2b91531e), [native CI 38285916402](https://github.com/dwijayuda/pskernel/actions/runs/38285916402), **all green**: native Lean library build; negative/exact error, fuel and fresh-state differential regression; C0 microbenchmarks; independently compiled unchanged original kernel matched comparison.
+- Previous decisive source milestone: [`a90b22ed`](https://github.com/dwijayuda/pskernel/commit/a90b22ed59e9a61eaf344ddf058c3b73a17d289f) + [`b951023d`](https://github.com/dwijayuda/pskernel/commit/b951023d4f8c37bb7396c5f814b93fa9673dfa29), [native CI 38284834874](https://github.com/dwijayuda/pskernel/actions/runs/38284834874), **all green**, including direct previous-C0-versus-optimized-C0 checked-inference comparisons.
+- Last commit before this handoff, [`cfc393f6`](https://github.com/dwijayuda/pskernel/commit/cfc393f6b713e546d987ffb099a85de958d2f4d5), is **documentation-only**. Source validation belongs to the two green source runs above; never misstate a documentation checkpoint as having run CI.
+
+### Implemented native accepting checker capabilities (not a complete indexed kernel)
+
+1. **Checked source let inference:** `Checker/Inference/Core.lean` contains the single syntax-directed `psKernelInferCoreWithFuelUsingSourceFrames` worker with immutable exact source let-body loose-variable ranges and structural hashes. For unchanged, sufficiently long checked `let` spines it skips only mathematically no-op substitution and reuses exact fingerprints at collision-checked caches. Real dependence, exhausted metadata, or changed structure uses original inference/substitution. No separate accepting type-rule interpreter was introduced. Historical `psKernelInferCoreWithFuel` is hook-free and independently callable as differential oracle.
+2. **Checked lambda/forall inference:** the **same** worker now also uses already-validated `psKernelC0BinderBodyRangesWithFuel` for sufficiently long source binder spines. Range zero means fresh-local instantiation cannot change the immutable body; otherwise the original capture-avoiding worker runs. Fresh names, locals, domains, Sorts, DefEq/WHNF, state, fuel and errors are still authoritative.
+3. **Checked application inference:** fuel-indexed Pi metadata and exact suffix re-analysis handle medium/wide root apps, nested apps/arguments and dependent Pi tails. Preserve the original checked head/argument order, eager reduction, DefEq and recursion depth. Distinct frame and historical workers remain diagnostics/oracles, not independent trusted languages.
+4. **DefEq:** lambda/forall binder spines use newest-first substitution and optional exact body ranges, avoiding append/reverse and repeated nested scans. Explicit outer binder references and negative cases match unchanged original. DefEq recursion budgets for binder/app workers now follow the actual traversed structural spine, not the full recursive AST size.
+5. **WHNF:** consecutive zeta/let reductions use one bottom-up exact range+fingerprint summary. `Runtime/Acceleration/Cache.lean` supports prehashed bucket lookup and insertion, **always** checking complete expression equality on collisions. Dependent zeta substitutions and all non-zeta reduction families remain on original rules.
+6. **Indexed representation remains opt-in:** `Core/IndexedExpr.lean`, `Core/IndexedReduction.lean`, `Checker/Reduction/IndexedWhnf.lean`, and `Checker/IndexedSession.lean` do **not** constitute a fully accepting independent indexed WHNF/DefEq/inference/admission engine. The session wrapper still delegates acceptance to the recursive checker and may encode/decode; do not claim otherwise.
+
+### Latest quantitative observations (all benchmark-specific)
+
+| Complete operation | Native C0 | Unmodified original | Evidence |
+| --- | --- | --- | --- |
+| 40 sequential checked **64-let** definitions | **45 / 44 / 45 ms** | **184 / 187 / 185 ms** | [CI 38284834874](https://github.com/dwijayuda/pskernel/actions/runs/38284834874) |
+| 60 fully checked **64-let** inference calls, previous C0 versus optimized C0 | **265 ms previous C0** | **62 ms new C0** | Internal three-way native [CI 38284834874](https://github.com/dwijayuda/pskernel/actions/runs/38284834874) (columns here are *previous/new C0*, not C0/original) |
+| 20 fully checked **128-let** inference calls, previous C0 versus optimized C0 | **318 ms previous C0** | **40 ms new C0** | Same internal run; distinguish compared variants |
+| 36 checked lambda inferences, depth64, previous C0 versus new C0 | **56 ms previous C0** | **48 ms new C0** | [CI 38285916402](https://github.com/dwijayuda/pskernel/actions/runs/38285916402) (columns are *previous/new*) |
+| 24 sequential checked **64-binder lambda** definitions | **43 / 42 / 41 ms** | **51 / 50 / 51 ms** | [CI 38285916402](https://github.com/dwijayuda/pskernel/actions/runs/38285916402) |
+| Complete DefEq, 256 Pi/lambda binders (6 calls) | **roughly 5–6 ms** | **roughly 155–162 ms** | [CI 38270573104](https://github.com/dwijayuda/pskernel/actions/runs/38270573104) and [38278625946](https://github.com/dwijayuda/pskernel/actions/runs/38278625946) |
+| Complete WHNF of 192 consecutive lets (24 calls) | **47–49 ms** | **1,037–1,068 ms** | [CI 38281966846](https://github.com/dwijayuda/pskernel/actions/runs/38281966846) |
+
+**Careful attribution:** The first result qualifies about **4.1×** better sequential checked admission on that engineered 64-let source family. The two within-C0 rows isolate a checked-inference algorithm change but are not comparisons to unchanged original. Lambda range sharing is a modest **~15–20%** family gain. The large WHNF/DefEq ratios are narrow synthetic workloads, **not** an entire kernel speedup. Short ordinary checked-library chains and inductive admission stayed near parity. No general full-library throughput, per-operation memory improvement, p95 distribution, or formal performance winner has been established. In [CI 38285916402](https://github.com/dwijayuda/pskernel/actions/runs/38285916402), whole-process peak VmHWM was C0 **1,169,940 kB** versus original **1,157,732 kB**—**not** a memory win.
+
+### Immutable kernel invariants and scope
+
+Preserve every externally required check: exact Lean 4.34 kernel judgments; original error/rejection and fuel/recursion resource precedence; environment-local/universe/native-evaluator provenance; delta/iota/recursor/quotient/projection/native reduction ordering; capture-avoiding substitution; coherent checker state/fresh names; atomic declaration admission. Hashes/ranges are *syntactic hints*, never proof/type/DefEq authority; fingerprint collisions are confirmed with exact structural equality. Never relax negative tests, change semantics for speed, infer correctness from green synthetic cases, or promote incomplete indexed reduction into trusted acceptance.
+
+**User-directed exclusions during current performance work:** no self-hosting/bootstrap/fixed-point tests, no generated Rust compilation, and no metatheory/consistency proofs. Work only within `psc0/packages/pskernel-c0/` and its dedicated native CI unless newly authorized; do **not** edit original `pskernel-core`, active PSC0 compiler or Rust backend. GitHub is canonical: GitHub-first, avoid Desktop Commander, preserve branches/history, use compare-and-swap branch updates with `expected_sha`.
+
+### Remaining major architecture and next coherent phase
+
+**The redesign is not complete.** The accepted checker is still predominantly recursive `PsKernelExpr` in WHNF, DefEq, inference and admission. Design an actual **session-owned canonical indexed representation** that persists across entire accepting operations—not a wrapper re-encoding every call. Qualify complete environment-sensitive Lean 4.34 WHNF/DefEq/inference/admission rules (delta/iota, recursors, quotient, projection, native primitives, universes), exact resource/caching semantics, source↔indexed identity and environment/local provenance. Implement coherent reduction families and independent differential regression before routing them into acceptance. At the same time, build realistic multi-declaration/representative library corpora and independent repeated-run throughput, allocation, p50/p95 and peak memory evidence; use targeted ablations when attributing a speed improvement. If indexing has no measured cost advantage, redesign freely rather than keeping it for historical reasons.
+
+Next assistant: **first** refresh live branch HEAD, re-read this *top* handoff and source boundaries; inspect latest GitHub CI, then design and execute a coherent next subsystem in native Lean and update this handoff. Do not treat the historical sections below as the latest instructions.
+
+---
+
+
 **Updated:** 2026-10-12, approximately 14:10 Asia/Jakarta (WIB)
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** perf/pskernel-c0-v7-rust-20261012

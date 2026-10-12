@@ -1,5 +1,20 @@
 # PSKernel-C0 — performance architecture work state
 
+## CURRENT NATIVE LEAN C0 HANDOFF — 2026-10-13 (READ FIRST)
+
+**Canonical branch:** `perf/pskernel-c0-v7-rust-20261012`, source under `psc0/packages/pskernel-c0/src/Ps/KernelCore/`. Latest inspected HEAD before handoff: [`cfc393f6b713`](https://github.com/dwijayuda/pskernel/commit/cfc393f6b713e546d987ffb099a85de958d2f4d5) (documentation-only). The verified **latest source** is [4e07bde0](https://github.com/dwijayuda/pskernel/commit/4e07bde098f4a9b58fdc36080b6c17feaf6bc160) + [21bf7176](https://github.com/dwijayuda/pskernel/commit/21bf71762a08801267c5ea6ccccac19b2b91531e), [CI 38285916402](https://github.com/dwijayuda/pskernel/actions/runs/38285916402), *green across native Lean build, negative/differential, microbenchmarks, and unchanged-original checker*. Earlier [CI 38284834874](https://github.com/dwijayuda/pskernel/actions/runs/38284834874) separately qualified source-fingerprinted checked let inference.
+
+**Implementations in acceptance:** source-owned, fuel-indexed checked-app Pi ranges; structural dependent Pi resummarization; newest-first DefEq lambda/forall substitutions with exact binder-range summaries; structural DefEq spine fuel bounds; combined exact syntactic range/fingerprint zeta WHNF cache; and one checked inference worker combining the same let fingerprint frames and binder-body range frames. The original hook-free recursive inference remains the differential oracle. Hash and range metadata are non-semantic and always fall back; collisions use full expression comparison, not hash equality.
+
+**Quantified:** 40 safely admitted depth64 let defs C0 **45/44/45 ms** versus unchanged original **184/187/185 ms** ([CI 38284834874](https://github.com/dwijayuda/pskernel/actions/runs/38284834874)); 24 admitted depth64 binder-lambda defs C0 **43/42/41** vs original **51/50/51 ms** ([CI 38285916402](https://github.com/dwijayuda/pskernel/actions/runs/38285916402)). Within-C0 60 fully checked depth64 let calls historical **265 ms** vs optimized **62 ms**; 20 depth128 historical **318** vs optimized **40**. Deep 256-binder DefEq and 192-let WHNF have much larger narrow synthetic gains. Ordinary/inductive admission near parity. Memory/large real-library/p95 qualifications missing.
+
+**Main gap:** actual provenance-safe indexed DAG used *throughout* accepting WHNF/DefEq/inference/admission. Current indexed node/reduction/session work is opt-in and not complete for Lean 4.34 environment/recursor/quotient/projection/native/universe/resource semantics. Do not mistake staged indexed helper benchmarks for acceptance speedups. More authentic checker/library workloads and repeatable per-operation memory/latency evidence are required.
+
+**Explicit scope:** Lean 4.34 C0 only. Do not run self-host/bootstrap/fixed-point/generated-Rust/metatheory checks; do not change `pskernel-core`, PSC0 compiler, Rust backend or other branches. Preserve negative conformance, exact error/fuel/fresh-state rules and Git history; redesign internals freely. Use GitHub-first, not Desktop Commander. Current AI work handoff is **the top of `AI_WORK_STATE.md`**; below this top section, historical sections are retained for traceability.
+
+---
+
+
 ## Branch and isolation
 
 - Source: `psc0/pscv0-v7-native-lean-v1` at `a8fbc17f1ad2d24efbde14a7cbe993a4400d4c01`.

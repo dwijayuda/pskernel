@@ -346,3 +346,18 @@ To isolate the counter alone, [commit e2fea7fe](https://github.com/dwijayuda/psk
 | Local references depth 512, bvar 0, 2 declarations | 306 / 305 / 306 | 306 / 306 / 306 | 306 / 304 / 305 |
 
 Whole-process `VmHWM`: **727164 kB** cached C0, **723916 kB** length-scan C0, **725344 kB** original. These are process-wide snapshots affected by runtime, compilation/benchmark fixture and garbage collection, not per-operation memory attribution. The 128-declaration isolated build comparison (9 ms list / 14 ms indexed) does not isolate the counter, and the controlled full-checker ablation **does not demonstrate material gain** from caching length. Retain the result as an important *negative qualification*: do not confuse improved asymptotic expression for a measured whole-kernel winner. No self-hosting or metatheory tests were run.
+
+
+## Large accepting checked application performance — new qualified source-family win
+
+[Production promotion 23e088a6](https://github.com/dwijayuda/pskernel/commit/23e088a645599ab4930a6ae42c491c842e101c00) and [explicit recursive benchmark-oracle 501cd77c](https://github.com/dwijayuda/pskernel/commit/501cd77ce5d600115c7e82b3efa30b3a2e75657a). [All-green native Lean CI 38246930574](https://github.com/dwijayuda/pskernel/actions/runs/38246930574). C0 new checked route collects original-fuel/context application frames and uses a single bounded exact loose-variable Pi-body summary. Pi bodies with range 0 return unchanged, while every dependent/unsupported case continues ordinary checked substitution. Root spines shorter than 64 and all other roots use original recursive `psKernelInferCoreWithFuel`. The native C0 build and negative tests (including fuel/depth and exact loose-variable oracle) passed, as did unchanged original-core comparison.
+
+| Same-run complete public checker (three rounds, ms) | C0 accepting | Unchanged original |
+| --- | --- | --- |
+| Typed 192-arg fully checked applications (12 calls) | **9 / 7 / 7** | **33 / 34 / 34** |
+| Typed 192-arg infer-only applications (48 calls) | **7 / 8 / 8** | **127 / 128 / 127** |
+| Varied 48-arg fully checked applications (160 calls) | 52 / 50 / 50 | 48 / 48 / 48 |
+| 160 checked declaration chain | 32 / 28 / 29 | 29 / 29 / 29 |
+| 64 checked depth-48 declarations | 51 / 47 / 46 | 46 / 46 / 45 |
+
+An isolated **whole checked operation, not a helper** in C0 with 60 repeated 192-argument admitted axiom applications measured **158 ms** explicit recursive worker / **31 ms** framed metadata route. These same-run numbers show a ~4–5× speedup only on large non-dependent Pi-spine checked application workloads. They are not whole-kernel/library or memory claims. Full comparison VmHWM: C0 844060 kB, original 841284 kB; per-check allocations, p95 and library RSS remain unknown. Preserve slight regressions in short checked paths and declaration chains; avoid overclaiming from high-arity fixtures. Prior unsafe `ptrEq` comparator was rejected by Lean and reverted, as documented. No self-host or metatheory tests.

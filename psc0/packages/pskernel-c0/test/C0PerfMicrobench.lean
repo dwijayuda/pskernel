@@ -1,3 +1,4 @@
+import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Checker.Session
 import Ps.KernelCore.Checker.IndexedSession
@@ -1014,6 +1015,56 @@ def main : IO Unit := do
       if coldHits != workRuns || reuseHits != workRuns then
         throw (IO.userError "C0 indexed work boundary results diverged")
       IO.println s!"C0_BENCH indexed_work_boundaries source_reimport_ms={coldEnd-coldStart} retained_root_ms={reusedEnd-reusedStart} runs={workRuns} depth=24"
+
+  -- Matched syntax-only promotion workload. A staged, maximally shared
+  -- application DAG is selected while many other scratch nodes are dead.
+  -- Compare (a) decoding a selected source term and re-encoding it from
+  -- scratch versus (b) memoized indexed promotion. Neither timed path
+  -- is a kernel verdict or a complete checking benchmark.
+  let promotionSeed := psKernelC0ScratchBegin psKernelC0StoreEmpty
+  match psKernelC0ScratchIntern promotionSeed (.bvar 0) with
+  | none => throw (IO.userError "C0 scratch microbench seed failed")
+  | some (initial, leaf) =>
+      let mut scratch := initial
+      let mut selected := leaf
+      for _ in [:11] do
+        match psKernelC0ScratchIntern scratch (.app selected selected) with
+        | none => throw (IO.userError "C0 scratch microbench DAG failed")
+        | some (next, id) =>
+            scratch := next
+            selected := id
+      for i in [:64] do
+        match psKernelC0ScratchIntern scratch (.mdata (i + 1) selected) with
+        | none => throw (IO.userError "C0 scratch microbench temporary failed")
+        | some (next, _) => scratch := next
+      let sourceTerm ← match psKernelC0DecodeExpr scratch.working selected with
+        | some term => pure term
+        | none => throw (IO.userError "C0 scratch microbench source missing")
+      let promoteRuns := 24
+      let mut sourceHits := 0
+      let sourceStart ← IO.monoMsNow
+      for _ in [:promoteRuns] do
+        match psKernelC0EncodeExpr psKernelC0StoreEmpty sourceTerm with
+        | some (next, id) =>
+            if psKernelC0StoreValid next id &&
+                next.nodes.size == 12 then
+              sourceHits := sourceHits + 1
+        | none => throw (IO.userError "C0 source promotion baseline failed")
+      let sourceEnd ← IO.monoMsNow
+      let mut scratchHits := 0
+      let scratchStart ← IO.monoMsNow
+      for _ in [:promoteRuns] do
+        match psKernelC0ScratchPromote scratch selected with
+        | some (next, id) =>
+            if psKernelC0StoreValid next id &&
+                next.nodes.size == 12 then
+              scratchHits := scratchHits + 1
+        | none => throw (IO.userError "C0 indexed scratch promotion failed")
+      let scratchEnd ← IO.monoMsNow
+      if sourceHits != promoteRuns || scratchHits != promoteRuns then
+        throw (IO.userError "C0 scratch promotion results diverged")
+      IO.println s!"C0_BENCH indexed_scratch_promotion source_reencode_ms={sourceEnd-sourceStart} selected_promotion_ms={scratchEnd-scratchStart} source_nodes=12 scratch_nodes={scratch.working.nodes.size} published_nodes=12 runs={promoteRuns} depth=11"
+
 
 
   -- Pair recursive-source and canonical-indexed universe substitution on

@@ -3,7 +3,9 @@ import Ps.Meta.Recursor
 
 -- A root recursor can reuse the current function only when its varying locals
 -- are absent from all minors. Otherwise a recursive call would silently change
--- captured values. Unsupported folds keep their IH erased and fail if it is used.
+-- captured values. Higher-order folds/indexers must first normalize to a
+-- function-valued worker with the structural major as an explicit parameter.
+-- When no valid worker plan exists, the IH stays erased and cannot be used.
 structure PsErasureRecursionPlan where
   family : PsName
   numParams : Nat

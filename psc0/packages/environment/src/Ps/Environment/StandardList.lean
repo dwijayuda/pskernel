@@ -142,10 +142,60 @@ def psStandardListFoldlDeclaration : PsDeclaration :=
           (psLogicLam 4 "xs" listAlpha body))) .implicit) .implicit
   .definitionDecl (psNameAppendStr psListName "foldl") [] type value
 
+-- The safe-indexing worker is total and has no validity-proof axiom.
+-- Its List-recursive hypothesis is itself a Nat → Option α function, so
+-- reaching the tail reuses the existing checked root recursion plan.
+-- Nat.rec performs the zero/successor index split without a partial get.
+def psStandardListGetWorkerName : PsName :=
+  psNameAppendStr (psRootName "$psc0Standard") "listGetWorker"
+
+def psStandardListGetWorkerDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let listAlpha := psSelfHostListOf alpha
+  let nat := PsExpr.constE psNatName []
+  let optionAlpha := psSelfHostOptionOf alpha
+  let resultArrow := psLogicPi 20 "index" nat optionAlpha
+  let motive := psLogicLam 21 "_" listAlpha resultArrow
+  let nilBranch := psLogicLam 22 "index" nat (psSelfHostOptionNoneOf alpha)
+  let natMotive := psLogicLam 23 "_" nat optionAlpha
+  let consBranch := psLogicLam 5 "head" alpha
+    (psLogicLam 6 "tail" listAlpha
+      (psLogicLam 7 "ih" resultArrow
+        (psLogicLam 8 "index" nat
+          (psLogicApply (.constE psNatRecName [.succ .zero])
+            [natMotive,
+             psSelfHostOptionSomeOf alpha (.fvar 5),
+             psLogicLam 9 "previous" nat
+               (psLogicLam 10 "_" optionAlpha (.app (.fvar 7) (.fvar 9))),
+             .fvar 8]))))
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "xs" listAlpha resultArrow) .implicit
+  let body := psLogicApply psStandardListRecursor
+    [alpha, motive, nilBranch, consBranch, .fvar 1]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "xs" listAlpha body) .implicit
+  .definitionDecl psStandardListGetWorkerName [] type value
+
+def psStandardListGetQuestionDeclaration : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let listAlpha := psSelfHostListOf alpha
+  let nat := PsExpr.constE psNatName []
+  let optionAlpha := psSelfHostOptionOf alpha
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "xs" listAlpha
+      (psLogicPi 2 "index" nat optionAlpha)) .implicit
+  let body := psLogicApply (.constE psStandardListGetWorkerName [])
+    [alpha, .fvar 1, .fvar 2]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "xs" listAlpha
+      (psLogicLam 2 "index" nat body)) .implicit
+  .definitionDecl (psNameAppendStr psListName "get?") [] type value
+
 def psStandardListDeclarations : List PsDeclaration :=
   [psStandardListLengthDeclaration, psStandardListMapDeclaration,
    psStandardListAppendDeclaration, psStandardListFilterDeclaration,
-   psStandardListFoldlWorkerDeclaration, psStandardListFoldlDeclaration]
+   psStandardListFoldlWorkerDeclaration, psStandardListFoldlDeclaration,
+   psStandardListGetWorkerDeclaration, psStandardListGetQuestionDeclaration]
 
 def psStandardPreludeDeclarationsWithList : List PsDeclaration :=
   psStandardPreludeDeclarationsWithOption ++ psStandardListDeclarations

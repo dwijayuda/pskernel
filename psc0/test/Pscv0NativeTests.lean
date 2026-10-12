@@ -982,6 +982,13 @@ private def projectBoundaries : IO Unit := do
     "theorem listFilteredProof: listFiltered = [2, 3] := by { rfl }\n" ++
     "const listFolded: Nat := List.foldl(addList, 0, [1, 2, 3])\n" ++
     "theorem listFoldedProof: listFolded = 6 := by { rfl }\n"
+  let listSafeIndexSource :=
+    "const headSafe: Option Nat := List.get?([10, 20], 0)\n" ++
+    "theorem headSafeProof: headSafe = Option.some(10) := by { rfl }\n" ++
+    "const tailSafe: Option Nat := List.get?([10, 20], 1)\n" ++
+    "theorem tailSafeProof: tailSafe = Option.some(20) := by { rfl }\n" ++
+    "const beyondSafe: Option Nat := List.get?([10, 20], 5)\n" ++
+    "theorem beyondSafeProof: beyondSafe = Option.none := by { rfl }\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1018,6 +1025,8 @@ private def projectBoundaries : IO Unit := do
     { source := optionLibrarySource, moduleName := "StandardOption",
       targets := [.javascript, .typescript, .rust] },
     { source := listLibrarySource, moduleName := "StandardList",
+      targets := [.javascript, .typescript, .rust] },
+    { source := listSafeIndexSource, moduleName := "SafeListIndex",
       targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
@@ -1076,6 +1085,12 @@ private def projectBoundaries : IO Unit := do
           throw (IO.userError "checked List APIs missing multi-target artifacts")
     | 19, .error error =>
         throw (IO.userError ("checked List APIs failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 20, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "List.get? safe-indexing missing checked artifacts")
+    | 20, .error error =>
+        throw (IO.userError ("List.get? safe-indexing failed at " ++
           error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do

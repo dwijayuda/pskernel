@@ -150,5 +150,8 @@ export const observations = [
   { name: "outputLocalAnswer", args: null, expected: 292n },
   { name: "outputFlagAnswer", args: null, expected: 293n },
   { name: "outputNestedAnswer", args: null, expected: 295n },
+  { name: "arithmeticMixed", args: null, expected: 10n },
+  { name: "arithmeticAssociative", args: null, expected: 3n },
+  { name: "arithmeticModulo", args: null, expected: 7n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

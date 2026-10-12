@@ -44,6 +44,34 @@ private def application : String :=
   "instance nativeNatAdd: HAdd Nat Nat Nat where {\n" ++
   "  hAdd(a: Nat, b: Nat): Nat := Nat.add(a, b)\n" ++
   "}\n" ++
+  "class HSub(A: Type, B: Type, C: outParam(Type)) where {\n" ++
+  "  hSub: A -> B -> C\n" ++
+  "}\n" ++
+  "instance nativeNatHSub: HSub Nat Nat Nat where {\n" ++
+  "  hSub(a: Nat, b: Nat): Nat := Nat.sub(a, b)\n" ++
+  "}\n" ++
+  "class HMul(A: Type, B: Type, C: outParam(Type)) where {\n" ++
+  "  hMul: A -> B -> C\n" ++
+  "}\n" ++
+  "instance nativeNatHMul: HMul Nat Nat Nat where {\n" ++
+  "  hMul(a: Nat, b: Nat): Nat := Nat.mul(a, b)\n" ++
+  "}\n" ++
+  "class HDiv(A: Type, B: Type, C: outParam(Type)) where {\n" ++
+  "  hDiv: A -> B -> C\n" ++
+  "}\n" ++
+  "instance nativeNatHDiv: HDiv Nat Nat Nat where {\n" ++
+  "  hDiv(a: Nat, b: Nat): Nat := Nat.div(a, b)\n" ++
+  "}\n" ++
+  "class HMod(A: Type, B: Type, C: outParam(Type)) where {\n" ++
+  "  hMod: A -> B -> C\n" ++
+  "}\n" ++
+  "instance nativeNatHMod: HMod Nat Nat Nat where {\n" ++
+  "  hMod(a: Nat, b: Nat): Nat := Nat.mod(a, b)\n" ++
+  "}\n" ++
+  "function arithmeticPrecedence(a: Nat, b: Nat, c: Nat): Nat := a + b * c - Nat.div(Nat.add(a, c), b)\n" ++
+  "const arithmeticMixed: Nat := arithmeticPrecedence(10, 2, 3)\n" ++
+  "const arithmeticAssociative: Nat := 8 - 3 - 2\n" ++
+  "const arithmeticModulo: Nat := 17 % 5 * 2 + 3\n" ++
   "opaque keep(value: Nat): Nat := {\n" ++
   "  let selected: _ := value\n" ++
   "  selected\n" ++

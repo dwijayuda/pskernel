@@ -206,7 +206,10 @@ def psKernelC0IndexedSessionIsDefEq
   cache is discarded before the next check, while nextFresh, local context,
   resource configuration and the immutable indexed syntax store survive.
   Retained roots are not checked judgments and remain valid syntax across
-  environments. A rejection does not return an updated session.
+  environments. Admission deliberately does NOT encode every accepted body:
+  the checked environment owns those expressions and indexed reduction may
+  import a body on demand. Eager indexing adds unused allocations to ordinary
+  declaration chains. A rejection does not return an updated session.
 
   This is an opt-in session-management boundary. Inference, DefEq, WHNF
   and declaration checks are still executed by the recursive accepting
@@ -223,16 +226,6 @@ private def psKernelC0IndexedSessionCommitEnvironment
       nextFresh := session.checker.state.nextFresh }
   { session with checker := { context := context, state := state } }
 
-/-- Admission syntax is optional acceleration data, never acceptance data. -/
-private def psKernelC0IndexedSessionKeepAdmitted
-    (session : PsKernelC0IndexedCheckerSession)
-    (type : PsKernelExpr)
-    (value : Option PsKernelExpr) : PsKernelC0IndexedCheckerSession :=
-  let kept := psKernelC0IndexedSessionKeep session type
-  match value with
-  | none => kept
-  | some body => psKernelC0IndexedSessionKeep kept body
-
 /-- Exact checked axiom admission, with environment-cache invalidation. -/
 def psKernelC0IndexedSessionAdmitAxiom
     (fuel : Nat)
@@ -243,10 +236,7 @@ def psKernelC0IndexedSessionAdmitAxiom
     session.checker.context.environment info
     session.checker.context.maxRecDepth
     session.checker.context.maxNatSize
-  let committed := psKernelC0IndexedSessionCommitEnvironment
-    session environment
-  pure (psKernelC0IndexedSessionKeepAdmitted
-    committed info.base.type none)
+  pure (psKernelC0IndexedSessionCommitEnvironment session environment)
 
 /-- Exact checked definition admission; no source checker rule is bypassed. -/
 def psKernelC0IndexedSessionAdmitDefinition
@@ -258,12 +248,9 @@ def psKernelC0IndexedSessionAdmitDefinition
     session.checker.context.environment info
     session.checker.context.maxRecDepth
     session.checker.context.maxNatSize
-  let committed := psKernelC0IndexedSessionCommitEnvironment
-    session environment
-  pure (psKernelC0IndexedSessionKeepAdmitted
-    committed info.base.type (some info.value))
+  pure (psKernelC0IndexedSessionCommitEnvironment session environment)
 
-/-- Exact checked theorem admission; retain only admitted source syntax. -/
+/-- Exact checked theorem admission; index syntax only if later requested. -/
 def psKernelC0IndexedSessionAdmitTheorem
     (fuel : Nat)
     (session : PsKernelC0IndexedCheckerSession)
@@ -273,10 +260,7 @@ def psKernelC0IndexedSessionAdmitTheorem
     session.checker.context.environment info
     session.checker.context.maxRecDepth
     session.checker.context.maxNatSize
-  let committed := psKernelC0IndexedSessionCommitEnvironment
-    session environment
-  pure (psKernelC0IndexedSessionKeepAdmitted
-    committed info.base.type (some info.value))
+  pure (psKernelC0IndexedSessionCommitEnvironment session environment)
 
 /-- Exact checked opaque admission; the original checker decides safety. -/
 def psKernelC0IndexedSessionAdmitOpaque
@@ -288,7 +272,4 @@ def psKernelC0IndexedSessionAdmitOpaque
     session.checker.context.environment info
     session.checker.context.maxRecDepth
     session.checker.context.maxNatSize
-  let committed := psKernelC0IndexedSessionCommitEnvironment
-    session environment
-  pure (psKernelC0IndexedSessionKeepAdmitted
-    committed info.base.type (some info.value))
+  pure (psKernelC0IndexedSessionCommitEnvironment session environment)

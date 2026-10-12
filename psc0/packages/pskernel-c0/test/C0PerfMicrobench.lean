@@ -1293,7 +1293,48 @@ def main : IO Unit := do
     if !psKernelEnvironmentContains plainEnvironment name ||
         !psKernelEnvironmentContains retained.checker.context.environment name then
       throw (IO.userError "C0 indexed checked admission lost declaration")
-  IO.println s!"C0_BENCH indexed_checked_admission source_ms={chainEnd-chainStart} indexed_session_ms={retainedEnd-retainedStart} definitions={chainCount} syntax_nodes={psKernelC0IndexedSessionNodeCount retained}"
+  -- Diagnostic ablation of the *previous* eager-retention policy:
+  -- exactly the same accepting session operations followed by an explicit
+  -- syntax-only retain of every admitted type and value. This code is
+  -- benchmark-only, not a second trusted admission implementation.
+  let mut eager := psKernelC0IndexedSessionNew baseChecker
+  previousName := admissionChain
+  let eagerStart ← IO.monoMsNow
+  for i in [:chainCount] do
+    let currentName := PsKernelName.num admissionChain i
+    let value := if i == 0 then sharedValue
+      else PsKernelExpr.const previousName []
+    let info : PsKernelDefinitionInfo := {
+      base := {
+        name := currentName
+        levelParams := []
+        type := sharedType
+      }
+      value := value
+      hints := PsKernelReducibilityHints.abbrevHint
+      safety := PsKernelDefinitionSafety.safe
+    }
+    match psKernelC0IndexedSessionAdmitDefinition 4096 eager info with
+    | Except.error err =>
+        throw (IO.userError ("C0 eager diagnostic admission rejected: " ++ err))
+    | Except.ok next =>
+        match psKernelC0IndexedSessionRetain next info.base.type with
+        | none => throw (IO.userError "C0 eager diagnostic type retention failed")
+        | some keptType =>
+            match psKernelC0IndexedSessionRetain keptType info.value with
+            | none => throw (IO.userError "C0 eager diagnostic value retention failed")
+            | some keptValue => eager := keptValue
+    previousName := currentName
+  let eagerEnd ← IO.monoMsNow
+  if psKernelC0IndexedSessionRootCount retained != 0 ||
+      psKernelC0IndexedSessionNodeCount retained != 0 ||
+      psKernelC0IndexedSessionNodeCount eager <= 1 then
+    throw (IO.userError "C0 lazy/eager admission indexing boundary diverged")
+  for i in [:chainCount] do
+    let name := PsKernelName.num admissionChain i
+    if !psKernelEnvironmentContains eager.checker.context.environment name then
+      throw (IO.userError "C0 eager diagnostic environment lost declaration")
+  IO.println s!"C0_BENCH indexed_checked_admission source_ms={chainEnd-chainStart} lazy_session_ms={retainedEnd-retainedStart} eager_retention_ms={eagerEnd-eagerStart} definitions={chainCount} lazy_syntax_nodes={psKernelC0IndexedSessionNodeCount retained} eager_syntax_nodes={psKernelC0IndexedSessionNodeCount eager}"
 
   -- Linux process high-water RSS includes the full native benchmark process,
   -- not a per-case allocation count. Report it separately from throughput.

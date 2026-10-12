@@ -1345,8 +1345,10 @@ def main : IO Unit := do
           if !psKernelEnvironmentContains accepted.checker.context.environment
               committedName ||
               accepted.checker.state.nextFresh != 37 ||
-              psKernelC0IndexedSessionRootCount accepted < originalRoots then
-            throw (IO.userError "C0 indexed admission lost context/syntax/fresh")
+              psKernelC0IndexedSessionRootCount accepted != originalRoots ||
+              psKernelC0IndexedSessionNodeCount accepted !=
+                psKernelC0IndexedSessionNodeCount seeded then
+            throw (IO.userError "C0 indexed admission eagerly indexed unused syntax")
           match psKernelC0IndexedSessionWhnf 4096
               accepted committedTerm with
           | Except.ok (afterValue, _) =>
@@ -1354,6 +1356,16 @@ def main : IO Unit := do
                 throw (IO.userError "C0 indexed admission reused stale WHNF")
           | Except.error err =>
               throw (IO.userError ("C0 indexed post-admission WHNF failed: " ++ err))
+          -- Import a checked body only when a consumer explicitly
+          -- requests its syntax handle, without changing the old snapshot.
+          match psKernelC0IndexedSessionRetain accepted
+              validIndexedDefinition.value with
+          | none => throw (IO.userError "C0 on-demand admitted syntax missing")
+          | some withBody =>
+              if psKernelC0IndexedSessionRootCount withBody !=
+                    originalRoots + 1 ||
+                  psKernelC0IndexedSessionRootCount accepted != originalRoots then
+                throw (IO.userError "C0 on-demand syntax mutated prior snapshot")
           let axiomName := PsKernelName.str PsKernelName.anonymous
             "C0.indexedAxiom"
           let axiomInfo : PsKernelAxiomInfo := {

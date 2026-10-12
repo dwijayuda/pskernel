@@ -144,9 +144,9 @@ def main : IO Unit := do
   let shallow := PsKernelExpr.app namedMVar sort0
   let deep := PsKernelExpr.app (PsKernelExpr.app shallow sort1) sort0
   let defined := PsKernelExpr.app (PsKernelExpr.const deltaName []) sort0
-  let opaque := PsKernelExpr.app (PsKernelExpr.const ctorName []) sort0
+  let opaqueTerm := PsKernelExpr.app (PsKernelExpr.const ctorName []) sort0
   let missing := PsKernelExpr.app (PsKernelExpr.const noDelta []) sort0
-  for expr in [sort0, shallow, deep, defined, opaque, missing] do
+  for expr in [sort0, shallow, deep, defined, opaqueTerm, missing] do
     match c0ReferenceUnfoldDefinition fixtureCtx expr,
         psKernelUnfoldDefinition fixtureCtx expr with
     | Option.none, Option.none => pure ()

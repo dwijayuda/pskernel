@@ -231,3 +231,24 @@ This establishes a causally relevant subsystem bottleneck that fixed-input isola
 The environment-index change has negligible apparent effect on these *particular full public API* workloads. It is not the cause of the substantial infer-only gain. Fully checked application performance is near parity, not a broad speedup. A growing 160-declaration library-chain and nested safe/invalid admissions are now part of the matched suite but remain too small to qualify full Lean library checking.
 
 At [run 38225068179](https://github.com/dwijayuda/pskernel/actions/runs/38225068179), all standard Lean-native stages passed, but a **private local-index-disabled ablation** failed due to a Python delimiter error *before* producing comparison timings. Commit `688315d51870dd34a2b602771061136a136f2eda` fixes the delimiters; see [run 38230646350](https://github.com/dwijayuda/pskernel/actions/runs/38230646350) for qualification. Never interpret the failed diagnostic as a Lean kernel regression. All of these workflows exclude self-hosting.
+
+
+
+## Local-context promotion and batched index: measured architecture tradeoff (2026-10-12)
+
+[CI 38230646350](https://github.com/dwijayuda/pskernel/actions/runs/38230646350), same-run complete 160-definition checked library with 16-binder bodies: eager index after 8 locals **61/62/61 ms**, C0 no-local-index diagnostic **47/47/47 ms**, unchanged original **49/49/49 ms**. The first delayed 32-local policy passed [CI 38232026730](https://github.com/dwijayuda/pskernel/actions/runs/38232026730) with C0 **49/48/47 ms**, original **49/49/49 ms** on that workload. However [CI 38232378403](https://github.com/dwijayuda/pskernel/actions/runs/38232378403) found a remaining deeper-case regression: depth-48 checked library C0 **75/77/76 ms**, original **62/62/62 ms**, disabled index **61/61/61 ms**.
+
+The subsequent native Lean `Core/LocalContext.lean` redesign retains shallow contexts as lists through 64 binders, then stores a structurally shared radix-index snapshot plus a **bounded pending overlay**. Deep index commits occur once per 16 new binders. `Checker/Context` and ordinary/mutual admission keep exact snapshot, shadowing, fresh-name, lookup semantics. [Native run 38233477973](https://github.com/dwijayuda/pskernel/actions/runs/38233477973) passed production C0 build, native negative/differential suite, C0 microbenchmarks and original-core matched full checker. Its only failing step was an *obsolete optional ablation generator* for the changed return type; not an accepting Lean source failure.
+
+| Normal native same-run measurement at `7a0470d0` | List/reference | Adaptive index |
+| --- | ---: | ---: |
+| Build 160 contexts, 64 locals each | 3 ms | 4 ms |
+| Build 15 contexts, 512 locals each | 2 ms | 24 ms |
+| 20,000 lookups among 512 locals | 1,279 ms linear | 76 ms indexed |
+
+| Checked declarations, 3 rounds, same runner | C0 batched | Original PSKernel-Core |
+| --- | --- | --- |
+| 160 declarations, nested body every 8, depth 16 | 28 / 28 / 27 ms | 28 / 28 / 27 ms |
+| 64 declarations, nested body every 4, depth 48 | 45 / 44 / 45 ms | 44 / 44 / 43 ms |
+
+The index increases construction cost at very deep scopes but substantially reduces repeated lookup cost. The improvements are **workload-dependent** and the entire checked pipeline has not yet been qualified against representative large Lean library exports or per-operation allocations. A corrected local-index-disabled diagnostic is retained as a manual `workflow_dispatch` option. No self-host, fixed-point or metatheory jobs were run.

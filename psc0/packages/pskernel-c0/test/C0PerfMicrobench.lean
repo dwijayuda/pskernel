@@ -230,6 +230,15 @@ def c0BenchForallSpine : Nat → PsKernelExpr
         (c0BenchForallSpine n)
         PsKernelBinderInfo.default
 
+/-- Forall spine with one genuinely loose de Bruijn variable. -/
+def c0BenchOpenForallSpine : Nat → Nat → PsKernelExpr
+  | 0, loose => .bvar loose
+  | n + 1, loose =>
+      .forallE PsKernelName.anonymous
+        (.sort PsKernelLevel.zero)
+        (c0BenchOpenForallSpine n loose)
+        PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let arg := PsKernelExpr.bvar 2
   let first := c0BenchApps 512 (PsKernelExpr.bvar 0) arg
@@ -827,3 +836,30 @@ def main : IO Unit := do
   if originalClosedCount != c0ClosedCount || c0ClosedCount != closedRuns then
     throw (IO.userError "C0 closed substitution result divergence")
   IO.println s!"C0_BENCH instantiate_closed legacy_prepass_ms={originalClosedEnd-originalClosedStart} specialized_ms={c0ClosedEnd-c0ClosedStart} depth=48 runs={closedRuns}"
+
+
+  let openCodomain := c0BenchOpenForallSpine 48 48
+  let openRuns := 4000
+  let mut legacyOpenCount := 0
+  let legacyOpenStart ← IO.monoMsNow
+  for _ in [:openRuns] do
+    let result :=
+      if psKernelExprHasLooseBVar openCodomain then
+        psKernelExprInstantiate openCodomain [instReplacement]
+      else openCodomain
+    if !(psKernelExprEqual result openCodomain) then
+      legacyOpenCount := legacyOpenCount + 1
+    else throw (IO.userError "C0 open oracle unexpectedly unchanged")
+  let legacyOpenEnd ← IO.monoMsNow
+  let mut specializedOpenCount := 0
+  let specializedOpenStart ← IO.monoMsNow
+  for _ in [:openRuns] do
+    let result := psKernelExprInstantiate1 openCodomain instReplacement
+    if !(psKernelExprEqual result openCodomain) then
+      specializedOpenCount := specializedOpenCount + 1
+    else throw (IO.userError "C0 open specialization unexpectedly unchanged")
+  let specializedOpenEnd ← IO.monoMsNow
+  if legacyOpenCount != specializedOpenCount ||
+      specializedOpenCount != openRuns then
+    throw (IO.userError "C0 open substitution outcomes diverged")
+  IO.println s!"C0_BENCH instantiate_open legacy_prepass_ms={legacyOpenEnd-legacyOpenStart} specialized_ms={specializedOpenEnd-specializedOpenStart} depth=48 runs={openRuns}"

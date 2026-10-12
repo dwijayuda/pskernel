@@ -44,6 +44,12 @@ private def application : String :=
   "const arithmeticMixed: Nat := arithmeticPrecedence(10, 2, 3)\n" ++
   "const arithmeticAssociative: Nat := 8 - 3 - 2\n" ++
   "const arithmeticModulo: Nat := 17 % 5 * 2 + 3\n" ++
+  "function secondInList(xs: List Nat): Nat := match xs with {\n" ++
+  "  | List.cons first (List.cons second tail) => second\n" ++
+  "  | _ => 0\n" ++
+  "}\n" ++
+  "const listConsSecond: Nat := secondInList(1 :: 2 :: [])\n" ++
+  "const listConsSingle: Nat := secondInList(3 :: [])\n" ++
   "const equalityTrue: Bool := 3 + 4 == 7\n" ++
   "const equalityFalse: Bool := 3 * 4 == 11\n" ++
   "const inequalityTrue: Bool := 4 * 5 != 21\n" ++

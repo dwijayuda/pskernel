@@ -29,6 +29,8 @@ def psPscv0InfixInfo : String → Option PsPscv0Infix
   | "↔" | "<->" => some { kind := .constant "Iff", precedence := 20, rightPrecedence := 21, nonAssociative := true }
   -- Pinned Lean RC4 Init/Notation.lean: infixr:35 " × " => Prod.
   | "×" => some { kind := .constant "Prod", precedence := 35, rightPrecedence := 35 }
+  -- Pinned RC4 Init/Notation.lean: infixr:67 "::" => List.cons.
+  | "::" => some { kind := .constant "List.cons", precedence := 67, rightPrecedence := 67 }
   -- Pinned Lean RC4 Init/Notation.lean: infixl:65 "+" => HAdd.hAdd.
   | "+" => some { kind := .constant "HAdd.hAdd", precedence := 65, rightPrecedence := 66 }
   | "-" => some { kind := .constant "HSub.hSub", precedence := 65, rightPrecedence := 66 }

@@ -153,6 +153,8 @@ export const observations = [
   { name: "arithmeticMixed", args: null, expected: 10n },
   { name: "arithmeticAssociative", args: null, expected: 3n },
   { name: "arithmeticModulo", args: null, expected: 7n },
+  { name: "listConsSecond", args: null, expected: 2n },
+  { name: "listConsSingle", args: null, expected: 0n },
   { name: "equalityTrue", args: null, expected: true },
   { name: "equalityFalse", args: null, expected: false },
   { name: "inequalityTrue", args: null, expected: true },

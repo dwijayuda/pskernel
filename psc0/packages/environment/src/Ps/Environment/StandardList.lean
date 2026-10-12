@@ -1,4 +1,5 @@
 import Ps.Environment.StandardOption
+import Ps.Core.Equality
 
 -- Selected RC4 List operations, defined entirely with the checked List.rec
 -- eliminator. The current portable Standard roster uses Type-0 parameters,

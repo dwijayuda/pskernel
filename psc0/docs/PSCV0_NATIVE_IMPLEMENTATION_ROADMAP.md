@@ -1,5 +1,20 @@
 # PSCV0 v7 native implementation roadmap
 
+## New checked module-planner milestone (12 October 2026)
+
+The pure `Ps.Compiler.Pscv0Modules` graph parser/orderer and public-import
+interface preparation are qualified at source
+`d83e8878b4ec305c1783a51cd74925b597d86920`, Linux
+[38243759063](https://github.com/dwijayuda/pskernel/actions/runs/38243759063).
+A single compact graph case checked public re-export through a facade, ordering
+and missing/cyclic dependency refusals. The prior bounded/48 profile,
+171 shared runtime observations and existing ABI gates remain green.
+This is **module graph groundwork**, not complete module/linking support.
+Next: visibility, opaque cross-module bodies, official checked project
+closure, runtime linking and target export selection. Keep native Lean,
+retain minimal tests and defer C5, kernel replacement and self-hosting.
+
+
 ## Current priority: core and essential language conformance first
 
 User-directed priority override, 12 October 2026: **do not begin C5** until

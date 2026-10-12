@@ -1,3 +1,39 @@
+# Active qualification checkpoint — PSCV0 v7 module foundation
+
+**Current scope:** core/essential language before C5; native portable `.lean` only.
+No pskernel-core, compiler `.ps` migration, self-hosting, local builds, main
+merge or release.
+
+**Latest qualified source:** `d83e8878b4ec305c1783a51cd74925b597d86920`
+**Profile:** `pscv0-v7-native-bounded/48` (module planner is a separate
+pre-emission capability, not a new public source-profile number).
+**Linux qualification:** [38243759063](https://github.com/dwijayuda/pskernel/actions/runs/38243759063)
+passed all jobs on 12 October 2026. The existing integration matrix passed
+**171 shared observations** for JS, TS, Rust, Node/V8 Wasm and Wasmtime
+component/core, **159 portable/166 native closure modules**, four accepted
+programs and 92 phase-specific refusals. `PSCV0_NATIVE_MODULES` passed a
+checked public import through a facade, dependency ordering, missing import and
+cycle rejection. This verifies the bounded cases only, not full RC4 module
+semantics or cross-module executable artifact emission.
+
+The new pure `Ps.Compiler.Pscv0Modules` source graph uses explicit
+`PsSyntaxImport.isPublic`, topological planning, immutable prelude-relative
+interface installation and checked admission preparation. It has no filesystem
+IO or alternative proof checker. Graph identity, body visibility and
+instance registration must be extended conservatively. Remaining module work:
+private/public declaration visibility, true RC4 module-body opacity for
+imported theorems and definitions, full diamond/collision and namespace
+semantics, module-scoped API exports, linking library runtime IR and official
+kernel validation of the project closure. None are marked complete.
+
+Further language essentials remain pending: Standard instances and notation
+completeness; specialized scalar, raw/interpolated strings and GetElem;
+nested/mutual data and termination; generalized typed do/effects/state;
+proof-producing rewriting/automation, contracts, VC obligations, and the
+assurance ledger. C5 is still deferred by user direction.
+
+---
+
 # Active v7 language-first continuation (12 October 2026)
 
 The latest user authorization **defers C5 readable application source reconstruction**

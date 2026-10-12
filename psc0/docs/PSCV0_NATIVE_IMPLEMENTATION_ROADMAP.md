@@ -16,8 +16,11 @@ The next stage is chosen by architectural dependencies rather than counting
 green tests. C5 reconstruction and compiler-source migration follow only when
 the selected language surface is sufficient.
 
-Current bounded source profiles 36–40 and candidate 41 are recorded in
-AI_WORK_STATE.md. None constitute complete v7 conformance. All source
+Current bounded source profiles 36–41 are qualified and recorded in
+AI_WORK_STATE.md; the last validated source is `1922294d9918c477552db44788208364ba37188a`
+([Linux run 38223957480](https://github.com/dwijayuda/pskernel/actions/runs/38223957480)).
+The shared matrix contains 151 runtime observations per target. None of these
+profiles constitutes full v7 conformance. All source
 preparation, admission checking, provenance, erasure and target execution
 remain distinct assurance boundaries.
 

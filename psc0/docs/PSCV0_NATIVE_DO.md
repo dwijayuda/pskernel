@@ -1,6 +1,9 @@
 # Native typed do control
 
-Implementation draft, 12 October 2026; qualification pending.
+Implementation boundary, 12 October 2026. The selected Id/Option/Except typed-do
+profile passed Linux run 38215524481 (native profile 36); it remains qualified
+in profile 41, run 38223957480. Full v7 base-do, verified state and effect
+families are not implied.
 
 The native program parser retains do items in the shared source AST. It no
 longer substitutes tokens with Except-specific declaration placeholders.

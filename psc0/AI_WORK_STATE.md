@@ -6,12 +6,19 @@ PSCV0 v7 language features. Native portable .lean is the only compiler source
 and is checked with pinned official Lean 4.35.0-rc4. No pskernel-core, compiler
 .ps migration, bootstrap/self-host testing, main merge, force push or release.
 
-**Latest qualified source:** `fa548339e780805eb315708b19e3cd6de4b16f0d`
-**Profile:** `pscv0-v7-native-bounded/40`
-**Linux CI:** [run 38223491831](https://github.com/dwijayuda/pskernel/actions/runs/38223491831) passed all jobs.
-**Current HAdd candidate:** `1922294d9918c477552db44788208364ba37188a`,
-profile 41, [run 38223957480](https://github.com/dwijayuda/pskernel/actions/runs/38223957480);
-its qualification is **pending**, and it must not inherit profile 40 evidence.
+**Latest qualified source:** `1922294d9918c477552db44788208364ba37188a`
+**Profile:** `pscv0-v7-native-bounded/41`
+**Linux CI:** [run 38223957480](https://github.com/dwijayuda/pskernel/actions/runs/38223957480) passed every job.
+**Subsequent branch head:** `7218cf6b75caa1a10d1734b0cf69cdb5c9fafe63`, documentation-only against this qualified source.
+
+Qualification at profile 41 checked 498 composite declarations in the existing main
+application, four accepted programs, 92 phase-specific semantic refusals,
+seven typed-do and one opaque-opacity refusal. The same **151 shared runtime
+observations** passed through direct JS, pinned TypeScript, pinned Rust, Node/V8
+Wasm core and pinned Wasmtime component/core execution. Source guard: 157
+portable / 164 native modules, no pskernel-core. Declaration-map testing
+observed 366 mappings and 14 generated-parent origins. Official Lean RC4
+remains pinned to `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 
 Since qualified C4b profile 35, the same source/semantic/official-kernel/IR/backend
 pipeline gained:
@@ -28,6 +35,11 @@ pipeline gained:
   admission codec preserves opacity, and runtime erasure compiles the checked
   opaque value without exposing it to definitional equality. A negative proof
   case refuses an illicit `rfl` unfold. [Run 38223491831](https://github.com/dwijayuda/pskernel/actions/runs/38223491831) passed.
+- Profile 41: selected `+` notation uses Lean RC4 precedence and resolves the
+  explicit user-defined `HAdd.hAdd` class instance through the existing generic
+  class/instance elaborator, rather than a Nat-specific syntax rewrite. Automatic
+  Lean/Standard instance registration, other numeric operators and full scalar
+  literal coverage are still pending. [Run 38223957480](https://github.com/dwijayuda/pskernel/actions/runs/38223957480) passed.
 
 The bounded qualified source still passes the shared runtime-observation matrix
 and existing Wasm GC/component, direct JS, TypeScript and Rust gates. Passing

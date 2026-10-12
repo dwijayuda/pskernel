@@ -11,6 +11,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0Lean435MigrationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0IndexedScratchRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
@@ -77,6 +78,9 @@ jobs:
       - name: Indexed store replay and malformed metadata qualification (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0IndexedStoreValidationRegression.lean
+      - name: Experimental indexed scratch lifecycle and promotion
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0IndexedScratchRegression.lean
       - name: Native Lean C0 performance microbenchmarks (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0PerfMicrobench.lean

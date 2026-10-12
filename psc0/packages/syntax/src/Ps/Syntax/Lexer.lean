@@ -394,6 +394,49 @@ def psLexReadNatural
             charsRev := charsRev
           }
 
+-- RC4 numeric lexing supports binary/octal/hexadecimal and internal
+-- separators. The reader intentionally does not interpret numeric values.
+def psLexRadixBase (char : Char) : Option Nat :=
+  if psLexCharEq char 'b' || psLexCharEq char 'B' then some 2
+  else if psLexCharEq char 'o' || psLexCharEq char 'O' then some 8
+  else if psLexCharEq char 'x' || psLexCharEq char 'X' then some 16
+  else none
+
+def psLexRadixDigit (base : Nat) (char : Char) : Bool :=
+  let code := Char.toNat char
+  if psLexCharEq char '_' then true
+  else if base == 2 then psLexNatBetween 48 code 49
+  else if base == 8 then psLexNatBetween 48 code 55
+  else if base == 16 then psLexDigit char ||
+    psLexNatBetween 65 code 70 || psLexNatBetween 97 code 102
+  else psLexDigit char
+
+def psLexReadRadixDigits (base : Nat) (remaining : List Char)
+    (position : PsSourcePos) (charsRev : List Char) : PsLexRead :=
+  match remaining with
+  | [] => { cursor := { remaining := [], position }, charsRev }
+  | char :: rest =>
+    if psLexRadixDigit base char then
+      psLexReadRadixDigits base rest (psLexAdvanceChar position char)
+        (char :: charsRev)
+    else
+      { cursor := { remaining := char :: rest, position }, charsRev }
+
+def psLexReadNumeral (first : Char) (remaining : List Char)
+    (start : PsSourcePos) : PsLexRead :=
+  let firstPosition := psLexAdvanceChar start first
+  if !psLexCharEq first '0' then
+    psLexReadNatural remaining firstPosition [first]
+  else
+    match remaining with
+    | [] => psLexReadNatural remaining firstPosition [first]
+    | radix :: rest =>
+      match psLexRadixBase radix with
+      | none => psLexReadNatural remaining firstPosition [first]
+      | some base =>
+        psLexReadRadixDigits base rest (psLexAdvanceChar firstPosition radix)
+          [radix, first]
+
 def psLexReadStringBodyWithFuel
     (fuel : Nat) :
     List Char ->
@@ -803,10 +846,7 @@ def psLexReadToken
                   read.cursor)
             else if psLexDigit first then
               let read :=
-                psLexReadNatural
-                  List.nil
-                  (psLexAdvanceChar start first)
-                  (List.cons first List.nil);
+                psLexReadNumeral first List.nil start;
               Except.ok
                 (Prod.mk
                   (psLexTokenFromRead
@@ -846,10 +886,7 @@ def psLexReadToken
                   read.cursor)
             else if psLexDigit first then
               let read :=
-                psLexReadNatural
-                  (List.cons second tail)
-                  (psLexAdvanceChar start first)
-                  (List.cons first List.nil);
+                psLexReadNumeral first (List.cons second tail) start;
               Except.ok
                 (Prod.mk
                   (psLexTokenFromRead

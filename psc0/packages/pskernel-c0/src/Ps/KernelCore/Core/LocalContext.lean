@@ -101,8 +101,8 @@ Measured complete admission workloads through depth 48 were slower with
 eager indexed updates; deep (512-local) repeated lookups benefit strongly.
 A static binder-depth threshold alone cannot represent both one-shot
 local reads and heavily reused deep contexts. Keep only cheap thunks after
-depth 128; no radix nodes are materialized while bindings are added. After
-depth 256, a deep lookup can force the immutable snapshot at most once per
+depth 128; no radix nodes are materialized while bindings are added. At
+depth 512, a deep lookup can force the immutable snapshot at most once per
 persistent context. For moderate-depth lookups we use the authoritative
 ordered list without ever forcing a snapshot.
 
@@ -119,7 +119,7 @@ def psKernelC0LocalIndexThreshold : Nat := 128
 def psKernelC0LocalIndexBatchSize : Nat := 16
 -- Index lookup is a separate performance policy from index availability.
 -- Keep it outside the replaceable index-update implementation.
-def psKernelC0LocalIndexLookupThreshold : Nat := 256
+def psKernelC0LocalIndexLookupThreshold : Nat := 512
 
 def psKernelC0LocalIndexInsert
     (index : PsKernelC0HashTrie PsKernelLocalDecl)

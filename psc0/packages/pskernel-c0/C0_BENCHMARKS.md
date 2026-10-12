@@ -460,3 +460,16 @@ Files: `Core/Expr.lean` (`psKernelC0BinderBodyRangesWithFuel`, `psKernelC0HasBin
 | Depth 256 | **6/6/5** | **158/156/156** | **6/5/5** | **157/155/155** | 6 |
 
 The whole-expression terms differ by transparent terminal metadata, ensuring DefEq is actually invoked and binder recursion is exercised instead of trivial syntactic equality. The test also checks an outer-binder-referencing inner dependent domain (de Bruijn index 1), whose exact metadata-wrapped equivalent is accepted by both original and C0 on all rounds. This is **strong binder-family evidence**, not whole-kernel performance superiority; ordinary checked chains and inductives remain near parity, and C0/original high-water process RSS **1,064,112 / 1,060,948 kB** is not a per-check memory measure. No selfhost/bootstrap/fixed-point/metatheory tests.
+
+
+## Spine-only DefEq fuel bounds: same-run complete checker qualification
+
+[Native CI 38278625946](https://github.com/dwijayuda/pskernel/actions/runs/38278625946) **all stages passed**, source [10e7066a](https://github.com/dwijayuda/pskernel/commit/10e7066a9f276ddad8ada147a54d06cd5e9cf737), expanded matching tests [1e4100a1](https://github.com/dwijayuda/pskernel/commit/1e4100a1eca4e526dc96b59b100ed8853350802b) corrected [634e1076](https://github.com/dwijayuda/pskernel/commit/634e10762df6411373b3084c4aebf07db1854e50). Deep binder and application workers are fuel-indexed by *the shape actually visited*, not the full AST node count of binder domains, terminal bodies or arguments. No new accepted judgments or environment-sensitive cache is introduced. The regression directly compares sufficiently high old whole-tree and new spine-only worker budgets before allowing the faster route.
+
+| Whole public DefEq on a one-binder term with a large wrapped domain (ms) | C0, 3 rounds | Unchanged original, 3 rounds | Calls/round |
+| --- | --- | --- | --- |
+| Domain depth64 | **1 / 1 / 1** | **2 / 2 / 2** | 20 |
+| Domain depth256 | **2 / 3 / 3** | **6 / 6 / 6** | 20 |
+| Domain depth512 | **2 / 2 / 2** | **4 / 5 / 4** | 8 |
+
+The already-qualified full DefEq depth256 *multi*-binder fixture stays at C0 forall **6/5/5** ms vs unchanged original **162/162/162**, lambda **5/5/6** ms vs original **162/162/163** over six calls. Ordinary short/deep library and inductive admission remained near parity. Full benchmark VmHWM was C0 **1,092,300 kB** / unchanged original **1,087,788 kB**, not evidence of a memory reduction. All figures are on a single hosted runner with three within-run rounds, not statistical p95 or full-library throughput. Do not extrapolate to arbitrary proof developments.

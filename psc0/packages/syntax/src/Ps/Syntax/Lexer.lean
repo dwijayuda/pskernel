@@ -1116,6 +1116,151 @@ def psLexRawToken? (cursor : PsLexCursor) :
           cursor.position reversed).map fun read =>
             (psLexTokenFromRead .string cursor.position read, read.cursor))
 
+-- An interpolated token retains its exact input span, while the same
+-- scanner records literal chunks and embedded source terms. Text, escapes,
+-- expression nesting, quotes and Lean comments are lexed separately.
+-- The embedded source is parsed later by the ordinary v7 term parser.
+inductive PsLexInterpolationPart where
+  | literal (value : String)
+  | expression (value : String)
+
+inductive PsLexInterpolationMode where
+  | text (escaped : Bool)
+  | expression (depth : Nat) (quote : Option Char) (escaped : Bool)
+      (lineComment : Bool) (blockDepth : Nat)
+
+structure PsLexInterpolatedRead where
+  cursor : PsLexCursor
+  charsRev : List Char
+  partsRev : List PsLexInterpolationPart
+
+def psLexScanInterpolated (fuel : Nat) (remaining : List Char)
+    (position start : PsSourcePos) (charsRev segmentRev : List Char)
+    (partsRev : List PsLexInterpolationPart) (mode : PsLexInterpolationMode) :
+    Except PsLexError PsLexInterpolatedRead :=
+  match fuel with
+  | 0 => .error (.unterminatedString (psLexSpan start position))
+  | fuel + 1 =>
+    match remaining with
+    | [] => .error (.unterminatedString (psLexSpan start position))
+    | char :: rest =>
+      let step := fun nextMode =>
+        psLexScanInterpolated fuel rest (psLexAdvanceChar position char)
+          start (char :: charsRev) (char :: segmentRev) partsRev nextMode
+      let stepTwo := fun (second : Char) (tail : List Char) nextMode =>
+        psLexScanInterpolated fuel tail (psLexAdvanceTwo position char second)
+          start (second :: char :: charsRev) (second :: char :: segmentRev)
+          partsRev nextMode
+      match mode with
+      | .text escaped =>
+        if escaped then step (.text false)
+        else if psLexCharEq char '\\' then step (.text true)
+        else if psLexCharEq char '"' then
+          let parts := if segmentRev.isEmpty then partsRev
+            else .literal (psLexString segmentRev) :: partsRev
+          .ok {
+            cursor := { remaining := rest, position := psLexAdvanceChar position char }
+            charsRev := char :: charsRev
+            partsRev := parts }
+        else if psLexCharEq char '\n' || psLexCharEq char '\r' then
+          .error (.newlineInString (psLexSpan start position))
+        else if psLexCharEq char '{' then
+          match rest with
+          | '{' :: tail =>
+            psLexScanInterpolated fuel tail (psLexAdvanceTwo position char '{')
+              start ('{' :: char :: charsRev) ('{' :: segmentRev) partsRev (.text false)
+          | _ =>
+            let parts := if segmentRev.isEmpty then partsRev
+              else .literal (psLexString segmentRev) :: partsRev
+            psLexScanInterpolated fuel rest (psLexAdvanceChar position char)
+              start (char :: charsRev) [] parts (.expression 1 none false false 0)
+        else if psLexCharEq char '}' then
+          match rest with
+          | '}' :: tail =>
+            psLexScanInterpolated fuel tail (psLexAdvanceTwo position char '}')
+              start ('}' :: char :: charsRev) ('}' :: segmentRev) partsRev (.text false)
+          | _ => .error (.invalidSource "unescaped closing brace in interpolation"
+                    (psLexSpan position (psLexAdvanceChar position char)))
+        else step (.text false)
+      | .expression depth quote escaped lineComment blockDepth =>
+        if blockDepth > 0 then
+          match rest with
+          | second :: tail =>
+            if psLexPairEq char second '/' '-' then
+              stepTwo second tail (.expression depth none false false (blockDepth + 1))
+            else if psLexPairEq char second '-' '/' then
+              stepTwo second tail (.expression depth none false false (blockDepth - 1))
+            else step (.expression depth none false false blockDepth)
+          | [] => step (.expression depth none false false blockDepth)
+        else if lineComment then
+          step (.expression depth none false (char != '\n') 0)
+        else if quote.isSome then
+          if escaped then step (.expression depth quote false false 0)
+          else if psLexCharEq char '\\' then
+            step (.expression depth quote true false 0)
+          else if quote == some char then
+            step (.expression depth none false false 0)
+          else step (.expression depth quote false false 0)
+        else
+          match rest with
+          | second :: tail =>
+            if psLexPairEq char second '-' '-' then
+              stepTwo second tail (.expression depth none false true 0)
+            else if psLexPairEq char second '/' '-' then
+              stepTwo second tail (.expression depth none false false 1)
+            else if psLexCharEq char '"' then
+              step (.expression depth (some '"') false false 0)
+            else if psLexCharEq char '\'' then
+              let characterLiteral := match rest with
+                | _ :: '\'' :: _ => true
+                | '\\' :: _ :: '\'' :: _ => true
+                | _ => false
+              step (.expression depth (if characterLiteral then some '\'' else none) false false 0)
+            else if psLexCharEq char '{' then
+              step (.expression (depth + 1) none false false 0)
+            else if psLexCharEq char '}' then
+              if depth == 1 then
+                let parts := .expression (psLexString segmentRev) :: partsRev
+                psLexScanInterpolated fuel rest (psLexAdvanceChar position char)
+                  start (char :: charsRev) [] parts (.text false)
+              else step (.expression (depth - 1) none false false 0)
+            else step (.expression depth none false false 0)
+          | [] =>
+            if psLexCharEq char '"' then
+              step (.expression depth (some '"') false false 0)
+            else if psLexCharEq char '{' then
+              step (.expression (depth + 1) none false false 0)
+            else if psLexCharEq char '}' && depth == 1 then
+              let parts := .expression (psLexString segmentRev) :: partsRev
+              psLexScanInterpolated fuel rest (psLexAdvanceChar position char)
+                start (char :: charsRev) [] parts (.text false)
+            else if psLexCharEq char '}' then
+              step (.expression (depth - 1) none false false 0)
+            else step (.expression depth none false false 0)
+
+def psLexInterpolatedRead? (cursor : PsLexCursor) :
+    Option (Except PsLexError PsLexInterpolatedRead) :=
+  match cursor.remaining with
+  | 's' :: '!' :: '"' :: rest =>
+    let opening : List Char := ['s', '!', '"']
+    let position := opening.foldl psLexAdvanceChar cursor.position
+    let reversed := opening.foldl (fun acc char => char :: acc) ([] : List Char)
+    some (psLexScanInterpolated (rest.length + 1) rest position cursor.position
+      reversed [] [] (.text false))
+  | _ => none
+
+def psLexInterpolatedToken? (cursor : PsLexCursor) :
+    Option (Except PsLexError (PsToken × PsLexCursor)) :=
+  (psLexInterpolatedRead? cursor).map fun result =>
+    result.map fun read =>
+      ({ kind := .string, text := psLexString read.charsRev,
+         span := psLexSpan cursor.position read.cursor.position }, read.cursor)
+
+def psLexInterpolationParts? (text : String) : Option (List PsLexInterpolationPart) := do
+  let result ← psLexInterpolatedRead? (psLexCursorFromString text)
+  let read ← result.toOption
+  if read.cursor.remaining.isEmpty then some read.partsRev.reverse else none
+
 def psLexAllProofScriptWorker
     (inputBound : Nat)
     (fuel : Nat) :
@@ -1153,9 +1298,11 @@ def psLexAllProofScriptWorker
               Except.ok
                 (List.cons token List.nil)
             else
-              let parsed := match psLexRawToken? ready with
+              let parsed := match psLexInterpolatedToken? ready with
                 | some result => result
-                | none => psLexReadToken ready
+                | none => match psLexRawToken? ready with
+                  | some result => result
+                  | none => psLexReadToken ready
               match parsed with
               | Except.error error => Except.error error
               | Except.ok pair =>

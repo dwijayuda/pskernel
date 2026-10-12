@@ -1,14 +1,14 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
-**Status:** Reviewed and frozen *selected* 215-declaration source roster, not the full Lean RC4 Standard universe, dependency closure or ProofScript v7 conformance.
+**Status:** Reviewed and frozen *selected* 221-declaration source roster, not the full Lean RC4 Standard universe, dependency closure or ProofScript v7 conformance.
 
 - Official Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - Selected native environment: `psSelfHostProdPreludeEnvironment`.
-- Current qualified executable source: `a678594001d94c9aaade968ce951f44e1e66ba81`; [all-green Linux run 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188).
+- Current qualified executable source: `f8900407eaaa921097e6cd49d58551ca6558ed96`; [all-green Linux run 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940).
 - Earlier 208-declaration FNV qualification: `c810d6fe15d064968008d09849efd9ac5b2820de`, [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524). Portable SHA-256 first qualified in `2a75d31c`, [Linux 38295519668](https://github.com/dwijayuda/pskernel/actions/runs/38295519668); mandatory dual gate qualified `381ae99f`, [Linux 38295808926](https://github.com/dwijayuda/pskernel/actions/runs/38295808926).
-- Snapshot records: **215 checked declarations**, **12 registered classes**, **36 ordered instance registrations**.
-- Selected roster FNV: **`fnv1a64:2902463666082847583`**.
-- Selected roster SHA-256: **`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`**.
+- Snapshot records: **221 checked declarations**, **13 registered classes**, **37 ordered instance registrations**.
+- Selected roster FNV: **`fnv1a64:4160132988510892817`**.
+- Selected roster SHA-256: **`sha256:a02c9f39e6de1830497114edfaad5e9bdd5730110b562585e3f6ecc30b80b6d3`**.
 
 ## Canonical encoding and exact coverage
 

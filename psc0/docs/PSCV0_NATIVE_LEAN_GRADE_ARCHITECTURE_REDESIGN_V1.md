@@ -6,6 +6,8 @@
 
 **M0 implementation status (qualified):** Replaced the obsolete assumption that all type-formers reify as IR generic types. The four-kind checked binder classification and shared source-position masks are implemented across data/structure declarations, typed applications, partial/canonical call handling and projections. `GetElem.valid` is erased as an index without weakening IR checks. The official Lean source oracle, JS/TS/Rust source artifact checks and new **192-observation JS/TS/Rust/Wasm/Wasmtime matrix** are all green at `a678594`, [Linux 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188). This qualifies a selected M0 vertical slice, **not** every higher-order dependent erasure shape, a semantics-preservation proof, or the M1–M5 end state.
 
+**M1 and M2 implementation evidence:** [`PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md`](PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). New native qualified executable `f8900407eaaa921097e6cd49d58551ca6558ed96`, [Linux 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940): selected Type-0 optional indexing, 194 cross-target observations and checked per-invocation class answer memoization passed. Full M1/M2 and Lean parity remain incomplete.
+
 ## 0. Outcome and evaluation standard
 
 Deliver a **maintainable, soundly checked selected language compiler**, with a sufficiently generic elaborator, explicit dependent erasure, one audited target-neutral IR, and high-performance JS/TS/Rust/Wasm GC backends. Architecture quality must be assessed against *actual pinned Lean designs*, not simply by matching source syntax or number of features.

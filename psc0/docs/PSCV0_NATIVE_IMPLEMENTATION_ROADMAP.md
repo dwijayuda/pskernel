@@ -2,8 +2,8 @@
 
 ## Latest qualified native compiler milestone — 13 October 2026
 
-**Qualified executable SHA:** `a678594001d94c9aaade968ce951f44e1e66ba81`.
-**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38312162188.
+**Qualified executable SHA:** `f8900407eaaa921097e6cd49d58551ca6558ed96`.
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38315275940.
 **Official Lean:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
 **Bounded source profile:** `pscv0-v7-native-bounded/48`, **not** complete v7.
 
@@ -15,10 +15,10 @@ unresolved goals. Parsed `xs[i]?` and `xs[i]!` are **not executable conformance*
 the full `GetElem?`/default/lawfulness and out-of-bounds panic contracts
 remain open. See [GetElem RC4 design/parity audit](PSCV0_GETELEM_RC4_DESIGN_AUDIT.md).
 
-The **selected** pinned prelude is now **215 declarations, 12 classes and
-36 ordered instances**, at FNV `fnv1a64:2902463666082847583` and SHA-256
-`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`. The source-closure guard passed
-**170 portable / 178 native Lean modules**. All established **192 shared
+The **selected** pinned prelude is now **221 declarations, 13 classes and
+37 ordered instances**, at FNV `fnv1a64:4160132988510892817` and SHA-256
+`sha256:a02c9f39e6de1830497114edfaad5e9bdd5730110b562585e3f6ecc30b80b6d3`. The source-closure guard passed
+**170 portable / 178 native Lean modules**. All established **194 shared
 JS/TS/Rust/Wasm runtime observations** and official Lean native checks
 remain green. These are bounded qualification observations, not a proof
 of full Lean RC4 Standard or complete v7.
@@ -30,6 +30,8 @@ coverage, and pinned imports/notation/tactic/effect/assumption closure.
 Phases B–E and C5 remain as documented below.
 
 **Historical architecture audit (failed precursor, now resolved by M0):** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`, [Linux 38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) failed at `ir/emit` because dependent `GetElem` predicate/index arguments become `unknown` runtime IR type annotations. Lean RC4 source-level oracle passed. See [`PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md`](PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md). **The last green executable remains `e1d463e10cbf5edd817e362ed35b21ee82c8c85b` and run 38304955212.**
+
+**M1/M2 accepted subset:** See [native M1/M2 implementation audit](PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md) for precise status. `GetElem?` Type-0 selected and tabled positive-answer memoization passed 194 observations, but neither full M1 nor full M2 is complete. This supersedes the older “parsed only” status above and the historical GetElem audit statements.
 
 ## Current priority: core and essential language conformance first
 
@@ -49,8 +51,8 @@ the selected language surface is sufficient.
 
 Selected language profiles 36–48, module foundation and M0 erasure redesign are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`a678594001d94c9aaade968ce951f44e1e66ba81`, [Linux run 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188).
-The shared matrix contains 192 runtime observations per target, including five proof-carrying indexed dictionary computations. This does
+`f8900407eaaa921097e6cd49d58551ca6558ed96`, [Linux run 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940).
+The shared matrix contains 194 runtime observations per target, including five original proof-indexed dictionary computations and two selected optional/bang observations. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
 execution remain independent assurance boundaries.

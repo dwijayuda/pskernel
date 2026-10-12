@@ -3,8 +3,10 @@
 **Date:** 13 October 2026. **Status:** native proof-carrying GetElem foundation **qualified**, full RC4 indexing **not qualified**. No compatibility or performance superiority claim is made.
 
 - **ProofScript repository:** [dwijayuda/pskernel](https://github.com/dwijayuda/pskernel), branch `psc0/pscv0-v7-native-lean-v1`, draft PR [#109](https://github.com/dwijayuda/pskernel/pull/109).
-- **Latest qualified executable:** `a678594001d94c9aaade968ce951f44e1e66ba81`, [Linux Actions 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188) — passed official Lean 4.35.0-rc4 compile/validation and established integration.
+- **Latest qualified executable:** `f8900407eaaa921097e6cd49d58551ca6558ed96`, [Linux Actions 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940) — passed official Lean 4.35.0-rc4 compile/validation and established integration.
 - **Upstream pin:** Lean `v4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Key source: [`Init/GetElem.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/GetElem.lean), [`Init/Tactics.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Tactics.lean), [`Init/Prelude.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Prelude.lean), [`Init/Data/List/Basic.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Data/List/Basic.lean), [`Init/Data/List/Impl.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Data/List/Impl.lean).
+
+**Newer selected M1 implementation:** `GetElem?` now has a checked Type-0 superclass dictionary and user-defined optional/bang method dispatch. Both methods passed 194-observation JS/TS/Rust/Wasm-related qualification. This is **not** general Lean `GetElem?` or validated out-of-bounds panic; read [the M1/M2 implementation audit](PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). The historical comparison table below predates this bounded milestone.
 
 ## Exact Lean4 design decisions that must be preserved
 

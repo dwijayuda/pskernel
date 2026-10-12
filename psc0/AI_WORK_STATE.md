@@ -4,8 +4,8 @@
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** `psc0/pscv0-v7-native-lean-v1`
 **Existing draft PR:** https://github.com/dwijayuda/pskernel/pull/109
-**Last qualified EXECUTABLE source commit:** `a678594001d94c9aaade968ce951f44e1e66ba81`
-**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38312162188 — all jobs passed.
+**Last qualified EXECUTABLE source commit:** `f8900407eaaa921097e6cd49d58551ca6558ed96`
+**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38315275940 — all jobs passed.
 **Prior documentation-only commit:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`.
 **Official checker:** Lean `4.35.0-rc4`, upstream SHA `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 **Source qualification profile:** `pscv0-v7-native-bounded/48`. Profile 49's module foundation is not a claim of completed language conformance.
@@ -13,6 +13,16 @@
 **Dependency roadmap:** `psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md` (now includes the complete Phase A–E plan).
 **Standard snapshot details:** `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md`.
 **Ready-to-paste continuation:** `psc0/AI_CONTINUE_PROMPT.md`.
+
+## M1 selected optional indexing and M2 answer-table solver — qualified 13 October 2026
+
+**Latest qualified executable:** `f8900407eaaa921097e6cd49d58551ca6558ed96`, [all-green Linux 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940). The native compiler still uses **170 portable / 178 native Lean modules**, no pskernel-core or self-hosting. The selected Standard is **221 declarations, 13 classes, 37 instances**, frozen at FNV `fnv1a64:4160132988510892817` and SHA-256 `sha256:a02c9f39e6de1830497114edfaad5e9bdd5730110b562585e3f6ecc30b80b6d3`. **194** shared JS/TS/Rust/Wasm-related observations passed, including selected `xs[i]?` and `xs[i]!` dispatch on a user-defined lawful-total-in-practice collection.
+
+- **M1 implemented (bounded):** a genuine checked `GetElem?` data/class family with `toGetElem` superclass, optional method and bang method (currently selected `Type 0` elements). User-supplied positive methods pass official checking, erasure, multi-target artifact emission and runtime observations. `Ps.Compiler.Api` now derives internal Standard export names from the canonical runtime-prelude closure, eliminating a duplicate symbol inventory. The existing `GetElem` side-condition/refusal still holds.
+- **M1 NOT complete:** general universe-polymorphic `Option`, default decidable optional lookup, `LawfulGetElem` proofs, true List/Array/Fin bounds, and mandatory `getElem!` out-of-bounds **panic** remain. The qualified bang sample only covers an in-bounds value and cannot stand as panic parity evidence.
+- **M2 implemented (bounded):** `Ps.Meta.SynthInstance` now maintains a per-invocation positive answer table keyed by fully resolved goals, re-checks reused witnesses by inference and unification, shares successes through postponed dictionary-dependency passes, preserves priorities/snapshot rollback, and enforces a total-visit cap plus depth fuel. Native memo test passed with initial one expansion and zero additional expansion on reuse.
+- **M2 NOT complete:** Lean's generator/consumer waiter graph, general cyclic tabled resolution, complete universe/expected-type constraint scheduling, and comparative performance benchmarks are pending.
+- **Exact detailed report:** [`PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md`](docs/PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). Continue M1's semantics and M2's full solver architecture from this accepted source; never weaken kernel, IR, assumption or proof gates.
 
 ## Qualified M0 architecture and five-target indexed runtime milestone — 13 October 2026
 

@@ -961,6 +961,14 @@ private def projectBoundaries : IO Unit := do
     "const sameChar: Bool := 'x' == 'x'\n" ++
     "const differentChar: Bool := 'x' != 'y'\n" ++
     "const sameUnit: Bool := () == ()\n"
+  let optionLibrarySource :=
+    "function bump(n: Nat): Nat := Nat.succ(n)\n" ++
+    "const mapped: Option Nat := Option.map(bump, Option.some(3))\n" ++
+    "theorem mappedCorrect: mapped = Option.some(4) := by { rfl }\n" ++
+    "const fallback: Nat := Option.getD(Option.none, 9)\n" ++
+    "theorem fallbackCorrect: fallback = 9 := by { rfl }\n" ++
+    "const bound: Option Nat := Option.bind(Option.some(3), Option.some)\n" ++
+    "theorem boundCorrect: bound = Option.some(3) := by { rfl }\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -993,6 +1001,8 @@ private def projectBoundaries : IO Unit := do
       targets := [.javascript, .typescript, .rust] },
     { source := invalidInterpolation, moduleName := "InvalidInterpolation" },
     { source := standardEqualitySource, moduleName := "StandardEquality",
+      targets := [.javascript, .typescript, .rust] },
+    { source := optionLibrarySource, moduleName := "StandardOption",
       targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
@@ -1039,6 +1049,12 @@ private def projectBoundaries : IO Unit := do
           throw (IO.userError "checked BEq instances missing cross-target artifacts")
     | 17, .error error =>
         throw (IO.userError ("checked BEq Standard case failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 18, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked Option API missing backend artifacts")
+    | 18, .error error =>
+        throw (IO.userError ("checked Option API failed at " ++
           error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do

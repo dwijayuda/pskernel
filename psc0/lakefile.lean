@@ -74,6 +74,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardArithmetic,
     `Ps.Environment.StandardEquality,
     `Ps.Environment.StandardToString,
+    `Ps.Environment.StandardOption,
     `Ps.Environment.SelfHostProd
   ]
 

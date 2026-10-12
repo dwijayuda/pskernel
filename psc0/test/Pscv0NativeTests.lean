@@ -1,4 +1,5 @@
 import Ps.Host.NativeV7
+import Ps.Compiler.Pscv0Modules
 import Pscv0M1Harness
 
 open Lean (toJson)
@@ -839,10 +840,45 @@ private def doBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError s!"do boundary {i}: invalid source accepted")
   IO.println "PSCV0_NATIVE_DO: PASS 7 do refusals and 1 opaque definitional-opacity refusal"
 
+-- Reuse the production graph planner and checked environment, rather than
+-- introducing a separate project interpreter or a large fixture suite.
+private def projectBoundaries : IO Unit := do
+  let library : PsPscv0ModuleSource := {
+    name := "Library"
+    source := "namespace Library\nfunction double(value: Nat): Nat := Nat.add(value, value)\nend Library\n" }
+  let facade : PsPscv0ModuleSource := {
+    name := "Facade"
+    source := "public import Library\nnamespace Facade\nconst greeting: Nat := 3\nend Facade\n" }
+  let client : PsPscv0ModuleSource := {
+    name := "Client"
+    source := "import Facade\nconst answer: Nat := Library.double(7)\n" }
+  let direct : PsPscv0ModuleSource := {
+    name := "Direct"
+    source := "import Library\nconst answer: Nat := Library.double(7)\n" }
+  let parsed ← get "project parse" (psPscv0ProjectParse [direct, library])
+  let ordered ← get "dependency ordering" (psPscv0ProjectOrder 3 parsed [])
+  unless ordered.map (·.name) == ["Library", "Direct"] do
+    throw (IO.userError "module graph dependency order")
+  let prepared ← get "checked public imports"
+    (psCompilerPreparePscv0Project "Client" [client, facade, library])
+  unless prepared.mainNames.any (fun n => psNameToString n == "answer") &&
+      prepared.libraryNames.any (fun n => psNameToString n == "Library.double") do
+    throw (IO.userError "module graph missing imported checked declaration")
+  let cycleA : PsPscv0ModuleSource := {
+    name := "A", source := "import B\nconst one: Nat := 1\n" }
+  let cycleB : PsPscv0ModuleSource := {
+    name := "B", source := "import A\nconst two: Nat := 2\n" }
+  if (psCompilerPreparePscv0Project "A" [cycleA, cycleB]).isOk then
+    throw (IO.userError "module graph accepted a cycle")
+  if (psPscv0ProjectParse [{ name := "A", source := "import Missing\nconst x: Nat := 1\n" }]).isOk then
+    throw (IO.userError "module graph accepted missing import")
+  IO.println "PSCV0_NATIVE_MODULES: PASS checked public import, order, cycle and missing-module refusal"
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
   parserCases
   semanticCases
   doBoundaries
+  projectBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

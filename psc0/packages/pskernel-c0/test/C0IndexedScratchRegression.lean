@@ -140,4 +140,48 @@ def main : IO Unit := do
       (psKernelC0ScratchPromote forged selected).isSome then
     throw (IO.userError "C0 accepted forged derived node metadata")
 
+
+  -- Two valid stores may allocate handle zero for different terms.
+  -- A bound-root transfer must use the source expression, not that number.
+  let (leftStore, leftId) ←
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty (.sort .zero) with
+    | some result => pure result
+    | none => throw (IO.userError "C0 first bound store unavailable")
+  let (rightStore, rightId) ←
+    match psKernelC0EncodeExpr psKernelC0StoreEmpty (.lit (.nat 42)) with
+    | some result => pure result
+    | none => throw (IO.userError "C0 second bound store unavailable")
+  if leftId != rightId then
+    throw (IO.userError "C0 bound root alias fixture is ineffective")
+  let rightRoot : PsKernelC0BoundRoot :=
+    { store := rightStore, root := rightId }
+  let some imported := psKernelC0BoundRootRehome leftStore rightRoot
+    | throw (IO.userError "C0 source-preserving import failed")
+  if imported.root == leftId then
+    throw (IO.userError "C0 cross-store numeric handle was reused")
+  match psKernelC0BoundRootRead imported with
+  | some (.lit (.nat 42)) => pure ()
+  | _ => throw (IO.userError "C0 source-preserving import changed expression")
+  let some (stagedRoot, stagedId) :=
+      psKernelC0ScratchStageBoundRoot (psKernelC0ScratchBegin leftStore) rightRoot
+    | throw (IO.userError "C0 source-preserving staging failed")
+  match psKernelC0ScratchPromoteVerified stagedRoot stagedId with
+  | none => throw (IO.userError "C0 source-preserving promotion failed")
+  | some (committedStore, committedId) =>
+      match psKernelC0DecodeExpr committedStore committedId with
+      | some (.lit (.nat 42)) => pure ()
+      | _ => throw (IO.userError "C0 staged root changed its meaning")
+  let invalidRoot : PsKernelC0BoundRoot :=
+    { store := badWorking, root := selected }
+  if (psKernelC0BoundRootRead invalidRoot).isSome ||
+      (psKernelC0BoundRootRehome leftStore invalidRoot).isSome ||
+      (psKernelC0ScratchStageBoundRoot
+        (psKernelC0ScratchBegin leftStore) invalidRoot).isSome then
+    throw (IO.userError "C0 accepted inconsistent bound-root metadata")
+  let outOfRange : PsKernelC0BoundRoot :=
+    { store := rightStore, root := rightStore.nodes.size }
+  if (psKernelC0BoundRootRead outOfRange).isSome ||
+      (psKernelC0BoundRootRehome leftStore outOfRange).isSome then
+    throw (IO.userError "C0 accepted an out-of-range bound root")
+
   IO.println "C0_LEAN435 indexed_scratch_promotion=pass"

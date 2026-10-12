@@ -117,7 +117,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardGetElemOptionalExtend <| psStandardExceptExtend <| psStandardProductExtend <|
+  psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
     psStandardInhabitedExtend <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl
@@ -149,4 +149,4 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure
     -- through the same pinned, officially checked Standard declarations.
-    psStandardGetElemClass ++ psStandardGetElemOptionalDeclarations
+    psStandardGetElemClass ++ psStandardGetElemOptionalDeclarations ++ psStandardLawfulGetElemClass

@@ -222,3 +222,136 @@ def psStandardGetElemOptionalExtend (environment : PsEnvironment) : PsEnvironmen
       { outputs := [2, 3], outputLevels := [] : PsClassParameters }) ::
         environment.classParameters
     instances := psInstanceIndexAdd environment.instances instanceEntry }
+
+
+-- Checked M1 lawfulness contract. This is a Prop-valued class, not a
+-- runtime certificate: neither field may be constructed without an actual
+-- kernel-checkable equality proof. It intentionally uses the currently
+-- qualified Type-0 Option / element contract.
+--
+-- The two fields follow Init/GetElem.lean at pinned Lean 4.35.0-rc4:
+--  * optional lookup is equal to the dependent decidable branch;
+--  * bang lookup is equal, propositionally, to matching Option with
+--    Inhabited.default on none. The latter equality is NOT permission
+--    for a runtime implementation to silently return default: the required
+--    out-of-bounds panic remains a separate compiler/runtime obligation.
+def psStandardLawfulGetElemName : PsName := psRootName "LawfulGetElem"
+
+def psStandardLawfulGetElemClass : List PsDeclaration :=
+  let name := psStandardLawfulGetElemName
+  let ctor := psNameAppendStr name "mk"
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let levels : List PsLevel := [.param u, .param v]
+  let coll := PsExpr.fvar 0
+  let idx := PsExpr.fvar 1
+  let elem := PsExpr.fvar 2
+  let valid := PsExpr.fvar 3
+  let optionalDict := PsExpr.fvar 4
+  let self := PsExpr.fvar 5
+  let typeU := PsExpr.sortE (.succ (.param u))
+  let typeV := PsExpr.sortE (.succ (.param v))
+  let optionElem := psSelfHostOptionOf elem
+  let validType := psLogicPi 30 "xs" coll
+    (psLogicPi 31 "i" idx (.sortE .zero))
+  let outputElem := PsExpr.app
+    (.constE (psRootName "outParam") [.succ (.succ .zero)])
+    psPreludeTypeType
+  let validLevel := PsLevel.succ (.max (.param u) (.param v))
+  let outputValid := PsExpr.app
+    (.constE (psRootName "outParam") [validLevel]) validType
+  let optFamily := psLogicApply (.constE psStandardGetElemOptionalName levels)
+    (psStandardGetElemArgs coll idx elem valid)
+  let family := psLogicApply (.constE name levels)
+    (psStandardGetElemArgs coll idx elem valid ++ [optionalDict])
+  let parameters := fun body =>
+    psLogicPi 0 "coll" typeU
+      (psLogicPi 1 "idx" typeV
+        (psLogicPi 2 "elem" outputElem
+          (psLogicPi 3 "valid" outputValid body .implicit)
+          .implicit) .implicit) .implicit
+  let classParameters := fun body =>
+    psLogicPi 0 "coll" typeU
+      (psLogicPi 1 "idx" typeV
+        (psLogicPi 2 "elem" outputElem
+          (psLogicPi 3 "valid" outputValid body)))
+  let paramLams := fun body =>
+    psLogicLam 0 "coll" typeU
+      (psLogicLam 1 "idx" typeV
+        (psLogicLam 2 "elem" outputElem
+          (psLogicLam 3 "valid" outputValid body .implicit)
+          .implicit) .implicit) .implicit
+  let getOptional := fun (xs i : PsExpr) =>
+    psLogicApply (.constE (psNameAppendStr psStandardGetElemOptionalName "getElem?") levels)
+      (psStandardGetElemArgs coll idx elem valid ++ [optionalDict, xs, i])
+  let getBang := fun (dict xs i : PsExpr) =>
+    psLogicApply (.constE (psNameAppendStr psStandardGetElemOptionalName "getElem!") levels)
+      (psStandardGetElemArgs coll idx elem valid ++ [optionalDict, dict, xs, i])
+  let superclass :=
+    psLogicApply (.constE (psNameAppendStr psStandardGetElemOptionalName "toGetElem") levels)
+      (psStandardGetElemArgs coll idx elem valid ++ [optionalDict])
+  let getChecked := fun (xs i proof : PsExpr) =>
+    psLogicApply
+      (.constE (psNameAppendStr psStandardGetElemName "getElem")
+        [.param u, .param v, .zero])
+      (psStandardGetElemArgs coll idx elem valid ++
+        [superclass, xs, i, proof])
+  let xs := PsExpr.fvar 7
+  let i := PsExpr.fvar 8
+  let decision := PsExpr.fvar 9
+  let proposition := psLogicApply valid [xs, i]
+  let positive := psLogicLam 10 "proof" proposition
+    (psSelfHostOptionSomeOf elem (getChecked xs i (.fvar 10)))
+  let negative := psLogicLam 11 "notProof"
+    (PsExpr.app (.constE (psRootName "Not") []) proposition)
+    (psSelfHostOptionNoneOf elem)
+  let expectedOpt := psLogicApply (.constE (psRootName "dite") [.succ .zero])
+    [optionElem, proposition, decision, positive, negative]
+  let optionalLaw := psLogicPi 7 "xs" coll
+    (psLogicPi 8 "i" idx
+      (psLogicPi 9 "decision" (psDecisionType proposition)
+        (psLogicEq (.succ .zero) optionElem (getOptional xs i) expectedOpt)
+        .instanceImplicit))
+  let inhabited := PsExpr.fvar 10
+  let bangXs := PsExpr.fvar 11
+  let bangI := PsExpr.fvar 12
+  let option := getOptional bangXs bangI
+  let motive := psLogicLam 13 "_value" optionElem elem
+  let someBranch := psLogicLam 14 "value" elem (.fvar 14)
+  let folded := psLogicApply
+    (.constE psSelfHostOptionRecName [.succ .zero])
+    [elem, motive, psStandardInhabitedDefault (.succ .zero) elem inhabited,
+      someBranch, option]
+  let bangLaw := psLogicPi 10 "inhabited" (psStandardInhabitedType elem)
+    (psLogicPi 11 "xs" coll
+      (psLogicPi 12 "i" idx
+        (psLogicEq (.succ .zero) elem (getBang inhabited bangXs bangI) folded)))
+    .instanceImplicit
+  let projection := fun (field : String) (index : Nat) (fieldType : PsExpr) =>
+    .definitionDecl (psNameAppendStr name field) [u, v]
+      (parameters (psLogicPi 4 "optional" optFamily
+        (psLogicPi 5 "self" family fieldType .instanceImplicit)
+        .instanceImplicit))
+      (paramLams (psLogicLam 4 "optional" optFamily
+        (psLogicLam 5 "self" family (.proj name index self) .instanceImplicit)
+        .instanceImplicit))
+  [ .inductiveDecl (.mk name [u, v]
+      (classParameters (psLogicPi 4 "optional" optFamily (.sortE .zero) .instanceImplicit))
+      5 0 [ctor] true),
+    .constructorDecl (.mk ctor [u, v]
+      (parameters (psLogicPi 4 "optional" optFamily
+        (psLogicPi 5 "getElem?_def" optionalLaw
+          (psLogicPi 6 "getElem!_def" bangLaw family))
+        .instanceImplicit)) name 0 5 2 []),
+    projection "getElem?_def" 0 optionalLaw,
+    projection "getElem!_def" 1 bangLaw ]
+
+def psStandardLawfulGetElemExtend (environment : PsEnvironment) : PsEnvironment :=
+  let environment := psStandardGetElemOptionalExtend environment
+  let environment := psStandardLawfulGetElemClass.foldl
+    (fun env decl => (psEnvironmentAdd env decl).getD env) environment
+  { environment with
+    classes := psStandardLawfulGetElemName :: environment.classes
+    classParameters := (psStandardLawfulGetElemName,
+      { outputs := [2, 3], outputLevels := [] : PsClassParameters }) ::
+        environment.classParameters }

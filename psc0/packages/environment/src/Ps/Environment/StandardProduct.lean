@@ -96,8 +96,10 @@ def psStandardProductAudit (environment : PsEnvironment) : Except String Unit :=
   for (declaration, className) in psStandardProductInstances do
     psStandardAuditDeclaration environment declaration
     unless environment.instances.entries.any (fun entry =>
-      entry.className == some className &&
-      match entry.value with
+      let ownsClass := match entry.className with
+        | some registered => psNameEq registered className
+        | none => false
+      ownsClass && match entry.value with
       | .constE name _ => psNameEq name (psDeclarationName declaration)
       | _ => false) do
       throw "PSCV0-STANDARD: missing checked product instance"

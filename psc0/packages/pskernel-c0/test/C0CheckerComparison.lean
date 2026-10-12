@@ -376,6 +376,37 @@ def main : IO Unit := do
     if wideCheckedOk != 12 then throw (IO.userError "wide checked count changed")
     IO.println s!"C0_COMPARE round={round} operation=cold_check_application_wide milliseconds={wideCheckedEnd-wideCheckedStart} samples=12 arguments=192"
 
+    -- Real checked-library admission: every declaration is verified against
+    -- the same previously admitted wide function, and the environment is
+    -- extended in the timed span. This measures acceptance, not just infer.
+    let wideChainBase :=
+      PsKernelName.str PsKernelName.anonymous "C0WideCheckedLibrary"
+    let wideChainLength := 32
+    let mut wideChainEnv := wideEnv
+    let wideChainStart ← IO.monoMsNow
+    for i in [:wideChainLength] do
+      let declaration : PsKernelDefinitionInfo := {
+        base := {
+          name := PsKernelName.num wideChainBase i
+          levelParams := []
+          type := sort0
+        }
+        value := wideApp
+        hints := PsKernelReducibilityHints.abbrevHint
+        safety := PsKernelDefinitionSafety.safe
+      }
+      match psKernelAddDefinition 4096 wideChainEnv declaration
+          4096 psKernelLeanNatMaxSizeDefault with
+      | Except.error err =>
+          throw (IO.userError ("matched wide library admission rejected: " ++ err))
+      | Except.ok next => wideChainEnv := next
+    let wideChainEnd ← IO.monoMsNow
+    for i in [:wideChainLength] do
+      if !psKernelEnvironmentContains wideChainEnv
+          (PsKernelName.num wideChainBase i) then
+        throw (IO.userError "matched wide library dropped declaration")
+    IO.println s!"C0_COMPARE round={round} operation=admit_wide_checked_library milliseconds={wideChainEnd-wideChainStart} declarations={wideChainLength} arguments=192"
+
     let mut admitted := 0
     let mut rejected := 0
     let admissionStart ← IO.monoMsNow

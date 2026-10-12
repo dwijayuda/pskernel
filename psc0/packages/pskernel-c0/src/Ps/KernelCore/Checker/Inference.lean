@@ -42,8 +42,9 @@ def psKernelInferWithFuel
 Experimental complete checked-application spine with explicit frames.
 
 Every application node is assigned the exact decreasing inference fuel and
-recursion-depth context of the original recursive walk. The head and each
-argument still go through ordinary, fully checked core inference; Pi exposure,
+recursion depth of the original recursive walk. Application frames share the
+immutable operation context instead of retaining full context snapshots.
+The head and each argument still go through ordinary checked inference; Pi exposure,
 DefEq, eagerReduce and single-binder substitution retain their original
 order. This path must be differentially qualified before production promotion.
 
@@ -52,14 +53,17 @@ argument checks or use the infer-only cache. The existing cache policy never
 caches checked application nodes, so flattening these frames cannot bypass
 a valid cached application judgment.
 -/
+/-- A frame retains only its argument, checked-inference fuel and the exact
+    recursion depth of the historical application walk. All other context
+    fields are shared immutable data belonging to one checking operation. -/
 structure PsKernelC0CheckedAppFrame where
   argument : PsKernelExpr
-  context : PsKernelCheckerContext
   fuel : Nat
+  recDepth : Nat
 
 structure PsKernelC0CheckedAppPath where
   head : PsKernelExpr
-  context : PsKernelCheckerContext
+  headRecDepth : Nat
   fuel : Nat
   frames : List PsKernelC0CheckedAppFrame
 
@@ -80,12 +84,12 @@ def psKernelC0CollectCheckedAppPath
               psKernelC0CollectCheckedAppPath
                 fn remaining nextContext
                 ({ argument := arg
-                   context := nextContext
-                   fuel := remaining } :: frames)
+                   fuel := remaining
+                   recDepth := nextContext.recDepth } :: frames)
   | _ =>
       Except.ok {
         head := expr
-        context := context
+        headRecDepth := context.recDepth
         fuel := fuel
         frames := frames
       }
@@ -102,6 +106,7 @@ def psKernelC0CheckAppFrames
       PsKernelExpr ->
       PsKernelExpr ->
       Except String (Prod Bool PsKernelCheckerState))
+    (baseContext : PsKernelCheckerContext)
     (frames : List PsKernelC0CheckedAppFrame)
     (bodyRanges : List Nat)
     (current : PsKernelExpr)
@@ -110,19 +115,22 @@ def psKernelC0CheckAppFrames
   match frames with
   | [] => Except.ok (current, state)
   | frame :: tail => do
+      -- Restore only the historical recursion depth on demand. The stored
+      -- base context retains environment, locals, safety and native evaluator.
+      let frameContext := { baseContext with recDepth := frame.recDepth }
       let (view, state1) ←
-        psKernelEnsureForallWith whnf frame.context state current
+        psKernelEnsureForallWith whnf frameContext state current
       let (argType, state2) ←
         psKernelInferCoreWithFuel frame.fuel whnf defeq
-          frame.context state1 frame.argument false
+          frameContext state1 frame.argument false
       let state3 ←
         if psKernelExprEq argType view.domain then
           Except.ok state2
         else
           let eqContext :=
             if psKernelExprIsEagerReduce frame.argument then
-              psKernelCheckerContextWithEagerReduce frame.context true
-            else frame.context
+              psKernelCheckerContextWithEagerReduce frameContext true
+            else frameContext
           match defeq eqContext state2 argType view.domain with
           | Except.error error => Except.error error
           | Except.ok (true, nextState) => Except.ok nextState
@@ -141,7 +149,7 @@ def psKernelC0CheckAppFrames
               (psKernelExprInstantiate1 view.body frame.argument, [])
         | _, _ =>
             (psKernelExprInstantiate1 view.body frame.argument, [])
-      psKernelC0CheckAppFrames whnf defeq tail nextRanges
+      psKernelC0CheckAppFrames whnf defeq baseContext tail nextRanges
         nextType state3
 
 /-- Candidate exact checked spine, not yet used by production checking. -/
@@ -165,7 +173,8 @@ def psKernelC0CheckAppSpineWithFuel
   let path ← psKernelC0CollectCheckedAppPath expr fuel context []
   let (headType, headState) ←
     psKernelInferCoreWithFuel path.fuel whnf defeq
-      path.context state path.head false
+      { context with recDepth := path.headRecDepth }
+      state path.head false
   -- Only large spines amortize a bounded full-suffix analysis. Short
   -- or unsupported spines keep exact historical substitution behavior.
   let ranges :=
@@ -175,7 +184,7 @@ def psKernelC0CheckAppSpineWithFuel
       match psKernelC0PiBodyRangesWithFuel (Nat.min 1024 fuel) headType with
       | some (_, suffixes) => suffixes
       | none => []
-  psKernelC0CheckAppFrames whnf defeq path.frames ranges
+  psKernelC0CheckAppFrames whnf defeq context path.frames ranges
     headType headState
 
 def psKernelCheckWithFuel

@@ -348,7 +348,7 @@ def psEraseDefinition
     (name : PsName)
     (type value : PsExpr) :
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
-  if psErasureIsProp environment psLocalEmpty type then
+  if psErasureIsNonRuntimeDeclaration environment type then
     Except.ok Option.none
   else
     let outputName : String :=

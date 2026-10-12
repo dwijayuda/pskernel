@@ -297,6 +297,28 @@ def psErasureIsProp
           psLevelNormalizesToZero level
       | _ => false
 
+-- A closed declaration whose result lies in Sort is a type family,
+-- not an executable function. Open dependent binders before inspecting its
+-- codomain; an ordinary polymorphic value (for example {A : Type} → A → A)
+-- still has a value result and must remain in the runtime closure.
+def psErasureIsTypeFamily (environment : PsEnvironment) (fuel : Nat)
+    (localContext : PsLocalContext) (type : PsExpr) : Bool :=
+  match fuel with
+  | 0 => false
+  | fuel + 1 =>
+    match psWhnf environment psMetaEmpty localContext type with
+    | .sortE _ => true
+    | .forallE name domain body binder =>
+      let pushed := psLocalPushBinding localContext name domain binder
+      psErasureIsTypeFamily environment fuel pushed.context
+        (psExprInstantiate1 body (.fvar pushed.id))
+    | _ => false
+
+def psErasureIsNonRuntimeDeclaration (environment : PsEnvironment)
+    (type : PsExpr) : Bool :=
+  psErasureIsProp environment psLocalEmpty type ||
+    psErasureIsTypeFamily environment 4096 psLocalEmpty type
+
 def psErasureClassifyBinder
     (environment : PsEnvironment)
     (localContext : PsLocalContext)
@@ -367,7 +389,7 @@ def psErasureAddDeclarationEntry
     (entries : PsErasureNameIndex PsErasureEntryInfo) :
     Except PsErasureError (PsErasureNameIndex PsErasureEntryInfo) :=
   -- The emitted declaration loop drops these definitions before opening binders.
-  if psErasureIsProp environment psLocalEmpty type then Except.ok entries
+  if psErasureIsNonRuntimeDeclaration environment type then Except.ok entries
   else
     match psErasureEntryInfoWithFuel environment 4096 psLocalEmpty type value with
     | Except.error error => Except.error error

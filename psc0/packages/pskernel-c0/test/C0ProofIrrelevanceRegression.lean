@@ -1,6 +1,7 @@
 import Ps.KernelCore.Checker.Reduction.IndexedWhnf
 import Ps.KernelCore.Runtime.Acceleration.EnvironmentIndex
 import Ps.KernelCore.Checker.Session
+import Ps.KernelCore.Checker.IndexedSession
 
 /- Native checker regression only. No bootstrap or self-host tests.
    The old metatheory equated arbitrary terms, while the executable
@@ -192,6 +193,64 @@ def main : IO Unit := do
       | _, _ =>
           throw (IO.userError "C0 direct application argument changed bounds")
   IO.println "C0_PERF_REGRESSION app_arg_direct_selection=pass"
+
+  -- Session-owned indexed roots do not escape into checked decisions.
+  -- Retaining the same exact syntax twice preserves the arena and root count,
+  -- while binder names are represented exactly (unlike semantic alpha Eq).
+  let rootNameA := PsKernelName.str PsKernelName.anonymous "Alpha"
+  let rootNameB := PsKernelName.str PsKernelName.anonymous "Beta"
+  let indexedA := PsKernelExpr.lam rootNameA sort0
+    (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let indexedB := PsKernelExpr.lam rootNameB sort0
+    (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  let emptyOwned := psKernelC0IndexedSessionNew session
+  match psKernelC0IndexedSessionRetain emptyOwned indexedA with
+  | none => throw (IO.userError "C0 session failed to index exact lambda")
+  | some ownedA =>
+      match psKernelC0IndexedSessionRetain ownedA indexedA with
+      | none => throw (IO.userError "C0 session failed repeated retention")
+      | some repeated =>
+          if psKernelC0IndexedSessionNodeCount emptyOwned != 0 ||
+              psKernelC0IndexedSessionRootCount emptyOwned != 0 ||
+              psKernelC0IndexedSessionNodeCount repeated !=
+                psKernelC0IndexedSessionNodeCount ownedA ||
+              psKernelC0IndexedSessionRootCount repeated != 1 then
+            throw (IO.userError "C0 indexed session lost persistent root sharing")
+          match psKernelC0IndexedSessionRetain repeated indexedB with
+          | none => throw (IO.userError "C0 session failed distinct binder retention")
+          | some ownedB =>
+              if psKernelC0IndexedSessionNodeCount ownedB <=
+                  psKernelC0IndexedSessionNodeCount ownedA ||
+                  psKernelC0IndexedSessionRootCount ownedB != 2 then
+                throw (IO.userError "C0 binder-name-sensitive indexing aliased roots")
+              match psKernelC0IndexedSessionIsDefEq 4096 ownedB sort0 sort1,
+                    psKernelSessionIsDefEq 4096 session sort0 sort1 with
+              | Except.ok (fastNo, next), Except.ok (referenceNo, _) =>
+                  if fastNo || referenceNo ||
+                      psKernelC0IndexedSessionRootCount next != 4 then
+                    throw (IO.userError "C0 indexed negative DefEq changed behavior")
+              | _, _ =>
+                  throw (IO.userError "C0 indexed negative DefEq changed category")
+  match psKernelC0IndexedSessionWhnf 4096 emptyOwned
+      (PsKernelExpr.app indexedA sort0),
+      psKernelSessionWhnf 4096 session (PsKernelExpr.app indexedA sort0) with
+  | Except.ok (indexedValue, owned), Except.ok (plainValue, _) =>
+      if !(psKernelExprEqual indexedValue plainValue &&
+            psKernelExprEqual indexedValue sort0 &&
+            psKernelC0IndexedSessionRootCount owned == 2) then
+        throw (IO.userError "C0 indexed WHNF differed from checked result")
+  | _, _ => throw (IO.userError "C0 indexed WHNF changed outcome")
+  match psKernelC0IndexedSessionInfer 4096 emptyOwned indexedA,
+        psKernelSessionInfer 4096 session indexedA with
+  | Except.ok (a, _), Except.ok (b, _) =>
+      if !(psKernelExprEqual a b) then
+        throw (IO.userError "C0 indexed inference changed checked type")
+  | _, _ => throw (IO.userError "C0 indexed inference changed outcome")
+  match psKernelC0IndexedSessionCheck 4096 emptyOwned (PsKernelExpr.bvar 0),
+        psKernelSessionCheck 4096 session (PsKernelExpr.bvar 0) with
+  | Except.error _, Except.error _ => pure ()
+  | _, _ => throw (IO.userError "C0 indexed session accepted an unbound variable")
+  IO.println "C0_PERF_REGRESSION indexed_session_owned_roots=pass"
 
   -- Native accepting DefEq first checks structural equality and successful
   -- pair-cache hits. The guarded quick entry may only be used after both

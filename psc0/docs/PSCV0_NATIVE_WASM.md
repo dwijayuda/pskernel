@@ -4,6 +4,9 @@ C4 and C4b implement current-runtime core parity and the synchronous pure
 component profile described here. Native profile 35 remains authored and
 executed in portable .lean and checked by official Lean 4.35.0-rc4. Exact source
 and Linux qualification evidence are recorded in AI_WORK_STATE.md.
+Source `26f68bd3038869d16ba4e3a97957de8f16a531ed` passed
+[Linux run 38197409359](https://github.com/dwijayuda/pskernel/actions/runs/38197409359),
+job 114643060557, including the committed-lock embedding harness.
 
 ## Pipeline and architectural boundaries
 

@@ -5,12 +5,12 @@ current checked runtime and synchronous pure foreign profile. The selected
 architecture is **Wasm GC internally, linear memory only at explicit Canonical
 ABI boundaries**. Native .lean remains authoritative.
 
-**Qualified implementation:** 8bbbf8c3fed5d30e9af31ddf8bdd2f6c154b1976
+**Qualified implementation:** 26f68bd3038869d16ba4e3a97957de8f16a531ed
 **Profile:** pscv0-v7-native-bounded/35
-**Linux CI:** [run 38197107365](https://github.com/dwijayuda/pskernel/actions/runs/38197107365),
-job 114642113277. Every step passed. This run resolved the Wasmtime harness
-lockfile subsequently retained verbatim in the repository; final committed-lock
-qualification is recorded below when complete.
+**Linux CI:** [run 38197409359](https://github.com/dwijayuda/pskernel/actions/runs/38197409359),
+job 114643060557. Every step passed using the committed Cargo.lock and --locked.
+The earlier successful integration run 38197107365 supplied that exact lockfile.
+Only documentation/PR metadata follow this qualified source.
 
 ## Completed boundary
 

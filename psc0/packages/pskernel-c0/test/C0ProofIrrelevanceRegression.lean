@@ -594,6 +594,26 @@ def main : IO Unit := do
     throw (IO.userError "C0 delayed local index changed fresh-name counter")
   IO.println "C0_PERF_REGRESSION deferred_local_index_promotion=pass"
 
+  -- Recursor continuations may advance fresh names without adding locals.
+  -- The exact declaration count must remain independent of nextIndex,
+  -- preventing premature index promotion and keeping shadowing unchanged.
+  let jumpedBase := psKernelLocalContextWithNextIndex locals 1024
+  let jumpedName := PsKernelName.num PsKernelName.anonymous 1024
+  let jumped := psKernelLocalContextAddLocal jumpedBase jumpedName
+    jumpedName sort0 PsKernelBinderInfo.default
+  if jumped.declCount != locals.declCount + 1 ||
+      jumped.nextIndex != 1025 then
+    throw (IO.userError "C0 continuation corrupted local count or fresh counter")
+  match jumped.index with
+  | none => pure ()
+  | some _ => throw (IO.userError "C0 continuation promoted short local context")
+  match psKernelLocalContextFind jumped jumpedName with
+  | some found =>
+      if !(psKernelNameEq (psKernelLocalDeclName found) jumpedName) then
+        throw (IO.userError "C0 continuation lost fresh local")
+  | none => throw (IO.userError "C0 continuation fresh local missing")
+  IO.println "C0_PERF_REGRESSION exact_local_count_independent_of_fresh_names=pass"
+
   -- Force the immutable local-index thunk only beyond the deep lookup
   -- threshold. The same stored context must be safely reused, while
   -- snapshots predating a shadowed declaration remain unchanged.

@@ -67,12 +67,23 @@ structure PsKernelLocalContext where
   -- Lookup checks this overlay first to preserve exact name shadowing.
   pending : List PsKernelLocalDecl := []
   pendingCount : Nat := 0
+  -- Exact number of declarations, distinct from the fresh-name counter.
+  -- This avoids O(depth) list-length scans on every binder extension.
+  declCount : Nat := 0
 
 def psKernelLocalContextEmpty : PsKernelLocalContext :=
   {
     decls := List.nil
     nextIndex := 0
   }
+
+/-- A recursor analysis may advance fresh-name generation while resuming
+    an earlier local declaration snapshot. Preserve every other field,
+    including the index overlay and exact declaration count. -/
+def psKernelLocalContextWithNextIndex
+    (context : PsKernelLocalContext)
+    (nextIndex : Nat) : PsKernelLocalContext :=
+  { context with nextIndex := nextIndex }
 
 def psKernelLocalContextFindIn
     (name : PsKernelName)
@@ -97,6 +108,8 @@ def psKernelLocalContextFindIn
 Adaptive local-context indexing.
 
 Short-lived binder contexts should not pay to build a radix-16 index.
+Promotion uses an exact O(1) declaration count, NOT nextIndex: recursor
+continuations can carry a larger fresh-name counter than live declarations.
 Measured complete admission workloads through depth 48 were slower with
 eager indexed updates; deep (512-local) repeated lookups benefit strongly.
 A static binder-depth threshold alone cannot represent both one-shot
@@ -172,7 +185,7 @@ def psKernelC0LocalContextNextIndex
           pending := pending
           pendingCount := count }
   | Option.none =>
-      if context.decls.length >= psKernelC0LocalIndexThreshold then
+      if context.declCount >= psKernelC0LocalIndexThreshold then
         { index := some (Thunk.mk (fun _ =>
             psKernelC0LocalIndexBuild (decl :: context.decls)))
           pending := []
@@ -223,6 +236,7 @@ def psKernelLocalContextAddLocal
     index := update.index
     pending := update.pending
     pendingCount := update.pendingCount
+    declCount := context.declCount + 1
   }
 
 def psKernelLocalContextAddLet
@@ -241,4 +255,5 @@ def psKernelLocalContextAddLet
     index := update.index
     pending := update.pending
     pendingCount := update.pendingCount
+    declCount := context.declCount + 1
   }

@@ -401,7 +401,7 @@ def main : IO Unit := do
   -- Build cost includes all radix allocations. Compare against an
   -- identical immutable list-only context while preserving name/order.
   -- This distinguishes index maintenance overhead from deep lookup savings.
-  for entryCount in [16, 32, 64, 512] do
+  for entryCount in [16, 32, 64, 128, 512] do
     let buildRuns := if entryCount == 512 then 15 else 160
     let buildStart ← IO.monoMsNow
     let mut indexedEntries := 0

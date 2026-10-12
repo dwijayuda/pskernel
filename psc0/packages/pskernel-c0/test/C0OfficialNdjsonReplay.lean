@@ -19,10 +19,10 @@ frontend and does not silently drop mdata, FVar, MVar or inductive records.
 /-- The export adaptor owns the declaration kind rather than treating a
     theorem, axiom or opaque declaration as a reducible definition. -/
 inductive C0ExportDeclaration where
-  | axiom (value : PsKernelAxiomInfo)
+  | axiomDecl (value : PsKernelAxiomInfo)
   | definition (value : PsKernelDefinitionInfo)
-  | theorem (value : PsKernelTheoremInfo)
-  | opaque (value : PsKernelOpaqueInfo)
+  | theoremDecl (value : PsKernelTheoremInfo)
+  | opaqueDecl (value : PsKernelOpaqueInfo)
 
 structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
@@ -287,11 +287,11 @@ def c0ExportParseRecord
     let ty ← c0ExportExpr st (← c0JsonNat payload "type")
     let isUnsafe ← (← c0JsonObj payload "isUnsafe").getBool?
     if isUnsafe then throw "unsupported unsafe axiom policy"
-    let axiom : PsKernelAxiomInfo := {
+    let axiomInfo : PsKernelAxiomInfo := {
       base := { name := name, levelParams := params, type := ty }
       isUnsafe := false
     }
-    return { st with declarations := .axiom axiom :: st.declarations }
+    return { st with declarations := .axiomDecl axiomInfo :: st.declarations }
   if let .ok payload := c0JsonObj j "thm" then
     c0ExportOnlyKeys j ["thm"]
     c0ExportOnlyKeys payload ["name", "levelParams", "type", "value", "all"]
@@ -303,11 +303,11 @@ def c0ExportParseRecord
     let params ← c0ExportNames st (← c0JsonObj payload "levelParams")
     let ty ← c0ExportExpr st (← c0JsonNat payload "type")
     let value ← c0ExportExpr st (← c0JsonNat payload "value")
-    let theorem : PsKernelTheoremInfo := {
+    let theoremInfo : PsKernelTheoremInfo := {
       base := { name := name, levelParams := params, type := ty }
       value := value
     }
-    return { st with declarations := .theorem theorem :: st.declarations }
+    return { st with declarations := .theoremDecl theoremInfo :: st.declarations }
   if let .ok payload := c0JsonObj j "opaque" then
     c0ExportOnlyKeys j ["opaque"]
     c0ExportOnlyKeys payload
@@ -322,12 +322,12 @@ def c0ExportParseRecord
     let value ← c0ExportExpr st (← c0JsonNat payload "value")
     let isUnsafe ← (← c0JsonObj payload "isUnsafe").getBool?
     if isUnsafe then throw "unsupported unsafe opaque policy"
-    let opaque : PsKernelOpaqueInfo := {
+    let opaqueInfo : PsKernelOpaqueInfo := {
       base := { name := name, levelParams := params, type := ty }
       value := value
       isUnsafe := false
     }
-    return { st with declarations := .opaque opaque :: st.declarations }
+    return { st with declarations := .opaqueDecl opaqueInfo :: st.declarations }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/
@@ -352,13 +352,13 @@ def c0ExportCheckDefinitions (infos : List C0ExportDeclaration) :
   for info in infos do
     let checked : Except String PsKernelEnvironment :=
       match info with
-      | .axiom value =>
+      | .axiomDecl value =>
           psKernelAddAxiom 4096 env value 4096 psKernelLeanNatMaxSizeDefault
       | .definition value =>
           psKernelAddDefinition 4096 env value 4096 psKernelLeanNatMaxSizeDefault
-      | .theorem value =>
+      | .theoremDecl value =>
           psKernelAddTheorem 4096 env value 4096 psKernelLeanNatMaxSizeDefault
-      | .opaque value =>
+      | .opaqueDecl value =>
           psKernelAddOpaque 4096 env value 4096 psKernelLeanNatMaxSizeDefault
     match checked with
     | .ok next => env := next

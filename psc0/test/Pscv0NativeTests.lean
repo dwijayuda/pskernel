@@ -851,7 +851,7 @@ private def doBoundaries : IO Unit := do
 -- introducing a separate project interpreter or a large fixture suite.
 private def projectBoundaries : IO Unit := do
   let _ ← get "pinned Standard structural registry"
-    (psStandardRegistryAudit psSelfHostProdPreludeEnvironment)
+    (psStandardInhabitedAudit psSelfHostProdPreludeEnvironment)
   let library : PsPscv0ModuleSource := {
     name := "Library"
     source := "namespace Library\nfunction double(value: Nat): Nat := Nat.add(value, value)\nend Library\n" }
@@ -1011,6 +1011,18 @@ private def projectBoundaries : IO Unit := do
     "theorem foldedRightProof: foldedRight = [3, 4] := by { rfl }\n" ++
     "const reversedList: List Nat := List.reverse([1, 2, 3])\n" ++
     "theorem reversedListProof: reversedList = [3, 2, 1] := by { rfl }\n"
+  let inhabitedSource :=
+    "const defaultNat: Nat := Inhabited.default\n" ++
+    "theorem defaultNatProof: defaultNat = 0 := by { rfl }\n" ++
+    "const defaultBool: Bool := Inhabited.default\n" ++
+    "theorem defaultBoolProof: defaultBool = false := by { rfl }\n" ++
+    "const defaultString: String := Inhabited.default\n" ++
+    "const defaultOption: Option Nat := Inhabited.default\n" ++
+    "theorem defaultOptionProof: defaultOption = Option.none := by { rfl }\n" ++
+    "const defaultList: List Nat := Inhabited.default\n" ++
+    "theorem defaultListProof: defaultList = [] := by { rfl }\n" ++
+    "const defaultArray: Array Nat := Inhabited.default\n"
+  let noInhabited := "const impossible: Empty := Inhabited.default\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1051,7 +1063,10 @@ private def projectBoundaries : IO Unit := do
     { source := listSafeIndexSource, moduleName := "SafeListIndex",
       targets := [.javascript, .typescript, .rust] },
     { source := collectionCompletionSource, moduleName := "StandardCollectionCompletion",
-      targets := [.javascript, .typescript, .rust] }]
+      targets := [.javascript, .typescript, .rust] },
+    { source := inhabitedSource, moduleName := "StandardInhabited",
+      targets := [.javascript, .typescript, .rust] },
+    { source := noInhabited, moduleName := "NoInhabited" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1122,6 +1137,15 @@ private def projectBoundaries : IO Unit := do
     | 21, .error error =>
         throw (IO.userError ("collection API completion failed at " ++
           error.phase ++ ": " ++ error.message))
+    | 22, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked Inhabited Standard missing backend artifacts")
+    | 22, .error error =>
+        throw (IO.userError ("checked Inhabited Standard failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 23, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "uninhabited Empty was not rejected during synthesis")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

@@ -241,28 +241,33 @@ psKernelExprEqual function is full exact (metadata-sensitive) syntax equality.
 def psKernelExprEq
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=
-  match left, right with
-  | .bvar a, .bvar b => Nat.beq a b
-  | .fvar a, .fvar b => psKernelNameEq a b
-  | .mvar a, .mvar b => psKernelNameEq a b
-  | .sort a, .sort b => psKernelLevelEq a b
-  | .const a als, .const b bls =>
-      psKernelNameEq a b && psKernelLevelListEq als bls
-  | .app af aa, .app bf ba =>
-      psKernelExprEqLegacy af bf && psKernelExprEqLegacy aa ba
-  | .lam _ aty ab _, .lam _ bty bb _ =>
-      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
-  | .forallE _ aty ab _, .forallE _ bty bb _ =>
-      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
-  | .letE _ aty av ab an, .letE _ bty bv bb bn =>
-      psKernelExprEqLegacy aty bty && psKernelExprEqLegacy av bv &&
-      psKernelExprEqLegacy ab bb && psKernelBoolEq an bn
-  | .lit a, .lit b => psKernelLiteralEq a b
-  | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelExprEqLegacy ab bb
-  | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqLegacy ab bb
-  | _, _ => false
+  -- Shared immutable syntax has exact identity; a miss retains full structural
+  -- comparison, including metadata in the exact-equality variant.
+  if ptrEq left right then
+    true
+  else
+    match left, right with
+    | .bvar a, .bvar b => Nat.beq a b
+    | .fvar a, .fvar b => psKernelNameEq a b
+    | .mvar a, .mvar b => psKernelNameEq a b
+    | .sort a, .sort b => psKernelLevelEq a b
+    | .const a als, .const b bls =>
+        psKernelNameEq a b && psKernelLevelListEq als bls
+    | .app af aa, .app bf ba =>
+        psKernelExprEqLegacy af bf && psKernelExprEqLegacy aa ba
+    | .lam _ aty ab _, .lam _ bty bb _ =>
+        psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
+    | .forallE _ aty ab _, .forallE _ bty bb _ =>
+        psKernelExprEqLegacy aty bty && psKernelExprEqLegacy ab bb
+    | .letE _ aty av ab an, .letE _ bty bv bb bn =>
+        psKernelExprEqLegacy aty bty && psKernelExprEqLegacy av bv &&
+        psKernelExprEqLegacy ab bb && psKernelBoolEq an bn
+    | .lit a, .lit b => psKernelLiteralEq a b
+    | .mdata am ab, .mdata bm bb =>
+        Nat.beq am bm && psKernelExprEqLegacy ab bb
+    | .proj an ai ab, .proj bn bi bb =>
+        psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqLegacy ab bb
+    | _, _ => false
 
 def psKernelExprEqualLegacy
     (left : PsKernelExpr) :
@@ -399,31 +404,36 @@ def psKernelExprEqualLegacy
 def psKernelExprEqual
     (left : PsKernelExpr)
     (right : PsKernelExpr) : Bool :=
-  match left, right with
-  | .bvar a, .bvar b => Nat.beq a b
-  | .fvar a, .fvar b => psKernelNameEq a b
-  | .mvar a, .mvar b => psKernelNameEq a b
-  | .sort a, .sort b => psKernelLevelEq a b
-  | .const a als, .const b bls =>
-      psKernelNameEq a b && psKernelLevelListEq als bls
-  | .app af aa, .app bf ba =>
-      psKernelExprEqualLegacy af bf && psKernelExprEqualLegacy aa ba
-  | .lam an aty ab ai, .lam bn bty bb bi =>
-      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
-      psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
-  | .forallE an aty ab ai, .forallE bn bty bb bi =>
-      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
-      psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
-  | .letE an aty av ab adn, .letE bn bty bv bb bdn =>
-      psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
-      psKernelExprEqualLegacy av bv && psKernelExprEqualLegacy ab bb &&
-      psKernelBoolEq adn bdn
-  | .lit a, .lit b => psKernelLiteralEq a b
-  | .mdata am ab, .mdata bm bb =>
-      Nat.beq am bm && psKernelExprEqualLegacy ab bb
-  | .proj an ai ab, .proj bn bi bb =>
-      psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqualLegacy ab bb
-  | _, _ => false
+  -- Shared immutable syntax has exact identity; a miss retains full structural
+  -- comparison, including metadata in the exact-equality variant.
+  if ptrEq left right then
+    true
+  else
+    match left, right with
+    | .bvar a, .bvar b => Nat.beq a b
+    | .fvar a, .fvar b => psKernelNameEq a b
+    | .mvar a, .mvar b => psKernelNameEq a b
+    | .sort a, .sort b => psKernelLevelEq a b
+    | .const a als, .const b bls =>
+        psKernelNameEq a b && psKernelLevelListEq als bls
+    | .app af aa, .app bf ba =>
+        psKernelExprEqualLegacy af bf && psKernelExprEqualLegacy aa ba
+    | .lam an aty ab ai, .lam bn bty bb bi =>
+        psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
+        psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
+    | .forallE an aty ab ai, .forallE bn bty bb bi =>
+        psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
+        psKernelExprEqualLegacy ab bb && psKernelBinderInfoEq ai bi
+    | .letE an aty av ab adn, .letE bn bty bv bb bdn =>
+        psKernelNameEq an bn && psKernelExprEqualLegacy aty bty &&
+        psKernelExprEqualLegacy av bv && psKernelExprEqualLegacy ab bb &&
+        psKernelBoolEq adn bdn
+    | .lit a, .lit b => psKernelLiteralEq a b
+    | .mdata am ab, .mdata bm bb =>
+        Nat.beq am bm && psKernelExprEqualLegacy ab bb
+    | .proj an ai ab, .proj bn bi bb =>
+        psKernelNameEq an bn && Nat.beq ai bi && psKernelExprEqualLegacy ab bb
+    | _, _ => false
 
 def psKernelExprHasLooseAt
     (expr : PsKernelExpr) :

@@ -203,19 +203,6 @@ def psSolveInstanceMetavars
     (pending : List Nat) (context : PsMetaContext) : PsSolveInstanceArgsResult :=
   psSolveInstanceMetavarsWithFuel synthesize (pending.length + 1) pending context
 
-def psSolvePreparedInstanceArguments
-    (synthesize : PsMetaContext → PsExpr → PsSynthInstanceResult)
-    (arguments : List PsPreparedInstanceArgument)
-    (current : PsMetaContext) : PsSolveInstanceArgsResult :=
-  let pending := arguments.filterMap fun argument =>
-    if argument.isInstance then
-      match argument.expr with | .mvar id => some id | _ => none
-    else none
-  let solved := psSolveInstanceMetavars synthesize pending current
-  if solved.success && arguments.all (fun argument =>
-      !psExprHasUnresolvedMeta (psMetaInstantiate solved.context argument.expr)) then solved
-  else { context := current, success := false }
-
 -- M2 answer table. It is scoped to a single environment/local instance set
 -- and one synthesis invocation. Never share an entry across source modules,
 -- local contexts or registries. Cache only closed, independently validated
@@ -225,9 +212,16 @@ structure PsInstanceTableAnswer where
   goal : PsExpr
   value : PsExpr
 
+-- Search budgets include the total candidate count, not only recursive
+-- goal visits. Wide classes must not bypass the resource contract.
+def psInstanceMaxGoalVisits : Nat := 4096
+def psInstanceMaxCandidateChecks : Nat := 4096
+
 structure PsInstanceSearchTable where
   answers : List PsInstanceTableAnswer := []
   visits : Nat := 0
+  candidateChecks : Nat := 0
+  resourceExceeded : Bool := false
 
 structure PsInstanceTabledResult where
   result : PsSynthInstanceResult
@@ -394,12 +388,20 @@ def psInstanceTableTryCandidates
   match entries with
   | [] => psInstanceTableFailure original table
   | entry :: rest =>
-    let attempt := psInstanceTableTryCandidate environment localContext
-      original target table synthesize entry
-    match attempt.result.value with
-    | some _ => attempt
-    | none => psInstanceTableTryCandidates environment localContext
-        original target attempt.table synthesize rest
+    if table.resourceExceeded then psInstanceTableFailure original table
+    else if table.candidateChecks >= psInstanceMaxCandidateChecks then
+      psInstanceTableFailure original { table with resourceExceeded := true }
+    else
+      let counted := { table with candidateChecks := table.candidateChecks + 1 }
+      let attempt := psInstanceTableTryCandidate environment localContext
+        original target counted synthesize entry
+      if attempt.table.resourceExceeded then
+        psInstanceTableFailure original attempt.table
+      else
+        match attempt.result.value with
+        | some _ => attempt
+        | none => psInstanceTableTryCandidates environment localContext
+            original target attempt.table synthesize rest
 
 -- Global node cap bounds total search work even in a wide diamond DAG;
 -- depth fuel bounds individual recursive evidence paths. Both fail closed.
@@ -411,10 +413,13 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
   match fuel with
   | 0 => psInstanceTableFailure context table
   | fuel + 1 =>
+    if table.resourceExceeded then psInstanceTableFailure context table else
     match psInstanceTableLookup environment localContext context target table with
     | some cached => { result := cached, table }
     | none =>
-      if table.visits >= 4096 then psInstanceTableFailure context table else
+      if table.visits >= psInstanceMaxGoalVisits then
+        psInstanceTableFailure context { table with resourceExceeded := true }
+      else
       let table := { table with visits := table.visits + 1 }
       match psPrepareInstanceTarget environment localContext context target with
       | none =>
@@ -428,10 +433,15 @@ def psSynthInstanceSearch (fuel : Nat) (environment : PsEnvironment)
           let pushed := psLocalPushBinding localContext name domain binder
           let opened := psExprInstantiate1 body (.fvar pushed.id)
           let childTable : PsInstanceSearchTable :=
-            { answers := [], visits := table.visits }
+            { answers := [], visits := table.visits,
+              candidateChecks := table.candidateChecks,
+              resourceExceeded := table.resourceExceeded }
           let child := psSynthInstanceSearch fuel environment pushed.context
             index [] childTable context opened
-          let parent := { table with visits := child.table.visits }
+          let parent := { table with
+            visits := child.table.visits
+            candidateChecks := child.table.candidateChecks
+            resourceExceeded := child.table.resourceExceeded }
           match child.result.value with
           | none => psInstanceTableFailure context parent
           | some witness =>

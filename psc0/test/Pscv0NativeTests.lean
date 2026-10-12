@@ -1034,6 +1034,13 @@ private def projectBoundaries : IO Unit := do
   unless memoAgain.result.value.isSome &&
       memoAgain.table.visits == memoFirst.table.visits do
     throw (IO.userError "closed typeclass goal bypassed the checked answer table")
+  let exhausted := psSynthInstanceSearch 64
+    psSelfHostProdPreludeEnvironment psLocalEmpty
+    psSelfHostProdPreludeEnvironment.instances []
+    { candidateChecks := psInstanceMaxCandidateChecks }
+    psMetaEmpty inhabitedGoal
+  unless exhausted.result.value.isNone && exhausted.table.resourceExceeded do
+    throw (IO.userError "candidate budget did not fail closed")
   -- The table should also reuse *definitionally equal* closed goals.
   -- Id Nat and Nat denote the same type; the cached witness must still be
   -- independently checked against the exact new dependent class target.

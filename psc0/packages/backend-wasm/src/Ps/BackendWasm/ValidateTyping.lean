@@ -280,6 +280,13 @@ def psWasmTypingLocalSet
           else if psWasmTypingNatIn next.initialized index then Option.some next
           else Option.some (PsWasmTypingState.mk next.operands next.unreachable (List.cons index next.initialized) next.frames)
 
+-- Core result matching is covariant, including return_call and return_call_ref.
+-- This uses the same heap subtyping relation as ordinary value return.
+def psWasmTypingResultsMatch (module : PsWasmModule)
+    (actual expected : List PsWasmValueType) : Bool :=
+  actual.length == expected.length &&
+    (actual.zip expected).all (fun (a, e) => psWasmTypingValueMatches module a e)
+
 def psWasmTypingCall
     (module : PsWasmModule) (function : PsWasmFunction) (name : String)
     (tail : Bool) (state : PsWasmTypingState) : Option PsWasmTypingState :=
@@ -287,7 +294,7 @@ def psWasmTypingCall
   | Option.none => Option.none
   | Option.some callee =>
       if tail then
-        if psWasmIrValueTypeListsEq callee.results function.results then
+        if psWasmTypingResultsMatch module callee.results function.results then
           match psWasmTypingApply module callee.parameters List.nil state with
           | Option.none => Option.none
           | Option.some next => Option.some (psWasmTypingUnreachable next)
@@ -312,7 +319,7 @@ def psWasmTypingCallRef
       | Option.some popped =>
           if psWasmTypingFunctionOperandMatches (Prod.fst popped) name then
             if tail then
-              if psWasmIrValueTypeListsEq type.results function.results then
+              if psWasmTypingResultsMatch module type.results function.results then
                 match psWasmTypingApply module type.parameters List.nil (Prod.snd popped) with
                 | Option.none => Option.none
                 | Option.some next => Option.some (psWasmTypingUnreachable next)

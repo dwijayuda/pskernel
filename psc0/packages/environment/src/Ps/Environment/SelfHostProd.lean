@@ -146,4 +146,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
         | some recursor => [prod, constructor, recursor]
   psEmptyDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
-    psStandardProductDeclarations ++ psStandardExceptDeclarations
+    psStandardProductDeclarations ++ psStandardExceptDeclarations ++
+    -- Class evidence and method projections must enter typed runtime erasure
+    -- through the same pinned, officially checked Standard declarations.
+    psStandardGetElemClass

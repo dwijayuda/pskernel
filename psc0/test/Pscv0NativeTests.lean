@@ -44,6 +44,8 @@ private def application : String :=
   "const arithmeticMixed: Nat := arithmeticPrecedence(10, 2, 3)\n" ++
   "const arithmeticAssociative: Nat := 8 - 3 - 2\n" ++
   "const arithmeticModulo: Nat := 17 % 5 * 2 + 3\n" ++
+  "const signedLiteral: Int := -42\n" ++
+  "function signedArithmetic(a: Int, b: Int): Int := -a * b + a\n" ++
   "opaque keep(value: Nat): Nat := {\n" ++
   "  let selected: _ := value\n" ++
   "  selected\n" ++

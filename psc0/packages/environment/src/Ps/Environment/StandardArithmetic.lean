@@ -99,3 +99,47 @@ def psStandardBinaryExtend (environment : PsEnvironment) : PsEnvironment :=
     classParameters := classParameters ++ environment.classParameters
     instances }
 
+
+-- Lean RC4 Init/Prelude.lean: Neg (α : Type u) is a one-field class.
+-- Its method and instance are kernel-checked, never admitted as new axioms.
+def psStandardNegDeclarations : List PsDeclaration :=
+  let name := psRootName "Neg"
+  let ctor := psNameAppendStr name "mk"
+  let u := psRootName "u"
+  let a := PsExpr.fvar 0
+  let self := PsExpr.fvar 1
+  let type := PsExpr.sortE (.succ (.param u))
+  let family := PsExpr.app (.constE name [.param u]) a
+  let methodType := psLogicPi 2 "value" a a
+  let params := fun body => psLogicPi 0 "α" type body .implicit
+  let paramLams := fun body => psLogicLam 0 "α" type body .implicit
+  let instName := psNameAppendStr (psRootName "PsStandard") "instNegInt"
+  let int := PsExpr.constE psIntName []
+  [ .inductiveDecl (.mk name [u] (psLogicPi 0 "α" type type) 1 0 [ctor] true),
+    .constructorDecl (.mk ctor [u]
+      (params (psLogicPi 2 "neg" methodType family)) name 0 1 1 []),
+    .definitionDecl (psNameAppendStr name "neg") [u]
+      (params (psLogicPi 1 "self" family methodType .instanceImplicit))
+      (paramLams (psLogicLam 1 "self" family (.proj name 0 self) .instanceImplicit)),
+    .definitionDecl instName []
+      (PsExpr.app (.constE name [.zero]) int)
+      (psLogicApply (.constE ctor [.zero]) [int, .constE psIntNegName []]) ]
+
+def psStandardOperatorDeclarations : List PsDeclaration :=
+  psStandardBinaryDeclarations ++ psStandardNegDeclarations
+
+def psStandardOperatorExtend (environment : PsEnvironment) : PsEnvironment :=
+  let environment := psStandardBinaryExtend environment
+  let environment := psStandardNegDeclarations.foldl
+    (fun env decl => (psEnvironmentAdd env decl).getD env) environment
+  let className := psRootName "Neg"
+  let instName := psNameAppendStr (psRootName "PsStandard") "instNegInt"
+  let instanceType := PsExpr.app (.constE className [.zero]) (.constE psIntName [])
+  { environment with
+    classes := className :: environment.classes
+    classParameters := (className, { outputs := [], outputLevels := [] }) ::
+      environment.classParameters
+    instances := psInstanceIndexAdd environment.instances {
+      value := .constE instName []
+      type := instanceType
+      className := some className } }

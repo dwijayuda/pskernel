@@ -153,5 +153,7 @@ export const observations = [
   { name: "arithmeticMixed", args: null, expected: 10n },
   { name: "arithmeticAssociative", args: null, expected: 3n },
   { name: "arithmeticModulo", args: null, expected: 7n },
+  { name: "signedLiteral", args: null, expected: -42n },
+  { name: "signedArithmetic", args: [5n, 2n], expected: -5n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];

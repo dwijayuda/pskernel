@@ -137,7 +137,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardBinaryExtend <|
+  psStandardOperatorExtend <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl
         (PsRecursorInfo.mk
@@ -152,7 +152,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  psEmptyDeclarations ++ psStandardBinaryDeclarations ++ match
+  psEmptyDeclarations ++ psStandardOperatorDeclarations ++ match
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with

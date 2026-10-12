@@ -323,11 +323,16 @@ def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     throw ("PSCV0-STANDARD: SHA-256 registry digest drift; expected " ++
       expected ++ ", got " ++ observed)
 
+-- Compare both snapshots of the *same* canonical payload before refusing.
+-- When reviewing an intentional Standard expansion, expose both observed
+-- values in one trusted Linux run; never silently pin either observed value.
 def psStandardSnapshotValidate (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
   psStandardExceptAudit environment
-  let observed := psStandardSnapshotFingerprint environment
-  if observed != expected then
-    throw ("PSCV0-STANDARD: registry snapshot drift; expected " ++ expected ++
-      ", got " ++ observed)
-  psStandardSnapshotValidateCrypto environment psStandardSnapshotExpectedSHA256
+  let observedFNV := psStandardSnapshotFingerprint environment
+  let observedSHA := psStandardSnapshotSHA256Fingerprint environment
+  if observedFNV != expected ||
+      observedSHA != psStandardSnapshotExpectedSHA256 then
+    throw ("PSCV0-STANDARD: selected registry drift; expected FNV " ++ expected ++
+      " and SHA-256 " ++ psStandardSnapshotExpectedSHA256 ++
+      "; got FNV " ++ observedFNV ++ " and SHA-256 " ++ observedSHA)

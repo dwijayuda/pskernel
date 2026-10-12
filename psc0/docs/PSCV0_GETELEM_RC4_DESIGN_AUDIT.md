@@ -3,7 +3,7 @@
 **Date:** 13 October 2026. **Status:** native proof-carrying GetElem foundation **qualified**, full RC4 indexing **not qualified**. No compatibility or performance superiority claim is made.
 
 - **ProofScript repository:** [dwijayuda/pskernel](https://github.com/dwijayuda/pskernel), branch `psc0/pscv0-v7-native-lean-v1`, draft PR [#109](https://github.com/dwijayuda/pskernel/pull/109).
-- **Latest qualified executable:** `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`, [Linux Actions 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212) — passed official Lean 4.35.0-rc4 compile/validation and established integration.
+- **Latest qualified executable:** `a678594001d94c9aaade968ce951f44e1e66ba81`, [Linux Actions 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188) — passed official Lean 4.35.0-rc4 compile/validation and established integration.
 - **Upstream pin:** Lean `v4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`. Key source: [`Init/GetElem.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/GetElem.lean), [`Init/Tactics.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Tactics.lean), [`Init/Prelude.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Prelude.lean), [`Init/Data/List/Basic.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Data/List/Basic.lean), [`Init/Data/List/Impl.lean`](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Init/Data/List/Impl.lean).
 
 ## Exact Lean4 design decisions that must be preserved
@@ -29,9 +29,9 @@
 | `LawfulGetElem` and defaults | **Not implemented** | Produce and check actual lawfulness proofs, no lawfulness-by-assertion |
 | List/Array/Fin proof-aware indexing | **Not implemented** | Exact Nat order proposition, total proof-dependent accessor and optimized checked/runtime paths |
 | Type/universe-wide `GetElem?` | **Not implemented** | Selected `Option` and other library families are still Type-0-specialized; generalize without fabricating a false RC4 signature |
-| Runtime parity and performance for new indexes | **Not yet independently measured** | Cross-backend index acceptance/negative and runtime benchmarks |
+| Runtime parity and performance for new indexes | **Five selected indexed cases now execute** in the 192-observation shared JS/TS/Rust/Wasm GC/Wasmtime matrix | Broader dependent cases, exact panic behavior and quantitative benchmarks remain pending |
 
-The `GetElem` foundation adds **three Core declarations and one class registration** to the previous selected Standard roster: now **215 declarations, 12 classes and 36 ordered instance entries**. Both roster drift gates are enforced in production: FNV **`fnv1a64:2902463666082847583`** and SHA-256 **`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`**. Source closure: **170 portable / 178 native Lean modules**. Established **187** shared JS/TS/Rust/Wasm runtime observations passed at the qualified SHA. No built-in indexing performance conclusion can be drawn from those existing 187 observations.
+The `GetElem` foundation adds **three Core declarations and one class registration** to the previous selected Standard roster: now **215 declarations, 12 classes and 36 ordered instance entries**. Both roster drift gates are enforced in production: FNV **`fnv1a64:2902463666082847583`** and SHA-256 **`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`**. Source closure: **170 portable / 178 native Lean modules**. Established **192** shared JS/TS/Rust/Wasm runtime observations passed at the qualified SHA, including five proof-indexed dictionary cases. No broader indexed collection performance conclusion can be drawn from those observations.
 
 ## Quality issue outside indexing: List.take / List.drop
 

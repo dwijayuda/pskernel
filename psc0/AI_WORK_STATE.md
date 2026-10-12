@@ -4,8 +4,8 @@
 **Repository:** https://github.com/dwijayuda/pskernel
 **Working branch:** `psc0/pscv0-v7-native-lean-v1`
 **Existing draft PR:** https://github.com/dwijayuda/pskernel/pull/109
-**Last qualified EXECUTABLE source commit:** `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`
-**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38304955212 — all jobs passed.
+**Last qualified EXECUTABLE source commit:** `a678594001d94c9aaade968ce951f44e1e66ba81`
+**Qualified Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38312162188 — all jobs passed.
 **Prior documentation-only commit:** `4ad36eba7a1a2902f652cbb9d9ac54193720cd2c`.
 **Official checker:** Lean `4.35.0-rc4`, upstream SHA `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 **Source qualification profile:** `pscv0-v7-native-bounded/48`. Profile 49's module foundation is not a claim of completed language conformance.
@@ -14,7 +14,17 @@
 **Standard snapshot details:** `psc0/docs/PSCV0_STANDARD_SNAPSHOT_V1.md`.
 **Ready-to-paste continuation:** `psc0/AI_CONTINUE_PROMPT.md`.
 
-## Source architecture audit — 13 October 2026
+## Qualified M0 architecture and five-target indexed runtime milestone — 13 October 2026
+
+**Latest green executable:** `a678594001d94c9aaade968ce951f44e1e66ba81`, [Linux 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188) — **PASSED**, including official Lean 4.35.0-rc4 validation and the full existing cross-target CI. All changes are native portable `.lean` (plus test fixtures), no pskernel-core, self-hosting or C5 changes.
+
+- **M0 checked dependent-erasure redesign complete for selected indexing:** `Ps.Erasure.Basic` now classifies `.type` (runtime-reifiable generic), `.index` (erased higher-kinded or Prop-valued dependent index), `.proof`, and `.runtime`. The same original Core parameter-position masks are used to construct the reifiable class/inductive/structure IR types and to lower applications, constructors, recursors, dictionary projections, lambdas and definitions. The checked `GetElem.valid : coll → idx → Prop` does not become an `.unknown` IR type. `Ps.CompilerIr` still **rejects** `.unknown` runtime annotations. Unqualified type-level constructor fields remain fail-closed.
+- **Native source oracle and code emission:** the pinned official Lean `Pscv0GetElemOracle.lean` compiles; the PSCV0 checked `GetElem` source with `i=0`, `True` and `True ∧ True` yields JS/TS/Rust artifacts, while invalid proof is refused. Added negative invariant that `GetElem` source parameter 3 (validity predicate) does not leak as an IR type: retained original source indices **[0,1,2]**.
+- **Runtime verification, not just emission:** expanded the *same* JS/TS/Rust/Wasm GC/Wasmtime shared runtime observation table from **187 → 192**, with five genuine proof-carrying dictionary cases: implicit rfl, explicit proof, local assumption, `True` and `True ∧ True`. CI reports **192** passed TypeScript, direct JavaScript and Rust observations; generated Wasm GC observation wrappers, module execution and Wasmtime component-host also passed. No general dependent runtime preservation theorem or cross-language performance parity is claimed.
+- **Selected Standard unchanged:** **215 declarations, 12 classes, 36 ordered instances**, FNV `fnv1a64:2902463666082847583`, SHA-256 `sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`. These hashes protect the selected Core environment payload, not the entire compiler/backends/assumptions.
+- **Next feature work:** complete faithful `GetElem?`/decidability/lawfulness, List/Array/Fin bound proofs, exact `!` panic semantics and more automation; then tabled typeclass search, dependent recursion, class-driven typed effects, contracts/VCs and full verification-gated emission. `psc0/docs/PSCV0_NATIVE_LEAN_GRADE_ARCHITECTURE_REDESIGN_V1.md` is the current architectural target. Do not claim all Phase A–E or Lean parity.
+
+## Historical source architecture audit — 13 October 2026 (the failing checkpoint was resolved)
 
 - **Audited source branch HEAD:** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`; [Linux 38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) **FAILED** at `ir/emit` with `unknown-type` dependent `GetElem` annotations. The official Lean source oracle did compile. **Last green executable SHA remains `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`**, [Linux 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212). The audit is not an executable qualification.
 - **Detailed Lean RC4 vs PSCV0 review:** [`psc0/docs/PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md`](docs/PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md). Root cause family: dependent predicate/type-level indices are being converted into IR `.unknown` runtime type arguments; IR correctly rejects them. Fix binder-kind erasure uniformly across declarations, calls, dictionaries and backends; never loosen validator.
@@ -23,7 +33,7 @@
 ## Verified current baseline — what actually passed
 
 - Native, portable `.lean` compiler with **170 portable / 178 native Lean modules**, with no pskernel-core integration or compiler-source self-hosting.
-- **187 shared runtime observations** qualified through direct JavaScript, strict TypeScript, Rust, V8 Wasm GC and Wasmtime component/core execution; existing multi-module checking, linking, entry-only exports and original-file provenance passed.
+- **192 shared runtime observations** qualified through direct JavaScript, strict TypeScript, Rust, V8 Wasm GC and Wasmtime component/core execution; existing multi-module checking, linking, entry-only exports and original-file provenance passed.
 - **Four checked semantic programs and 92 phase-specific refusals**, plus the bounded lexical/module/do/Standard and negative-regression cases. These counts are qualification cases, NOT a coverage percentage.
 - One official-Lean-admitted prepared Core graph shared through checking → typed erasure → complete target-neutral IR validation → JS/TS/Rust/direct Wasm and Component emission. Preserve proof, assumption, type and source/provenance boundaries; do not substitute a fallback checker.
 - Selected modules: public/private declarations, re-exports/diamonds, dependency ordering, opaque imported definitions versus exposed abbreviations, module-local private names, executable library closure.

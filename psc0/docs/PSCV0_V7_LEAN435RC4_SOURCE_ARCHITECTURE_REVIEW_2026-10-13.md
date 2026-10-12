@@ -6,7 +6,11 @@
 
 **Audited PSCV0 source HEAD:** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`. **Most recent green executable checkpoint:** `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`, [Linux CI 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212). **Current source CI:** [38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) — **FAILED**. **Upstream Lean source:** `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`, official 4.35.0-rc4. Don't conflate a documentation HEAD with executable qualification. Re-query branch HEAD and CI when continuing.
 
-## Executive assessment
+## Later qualified implementation update — 13 October 2026
+
+**The original failure below has been resolved for the selected `GetElem` vertical slice.** The audited source at `1cc7deb` had the correctly rejecting `unknown-type` diagnostic. The M0 redesign now explicitly separates checked Core `runtime`, `type`, erased higher-kinded `index`, and `proof` binders, preserving only reifiable source-type-parameter positions throughout data, dictionary and application erasure. The latest qualifying executable is `a678594001d94c9aaade968ce951f44e1e66ba81`, [Linux 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188) — **PASS** with **192** shared observations across JS/TS/Rust/Wasm-related targets, five of them new proof-indexed computations. The pinned official Lean oracle and the invalid-proof refusal also passed. **This update does not establish general Lean compiler parity, complete dependent erasure, optimized performance or full v7.** For the exact redesign architecture and further milestones see [Native Lean-Grade Architecture Redesign v1](PSCV0_NATIVE_LEAN_GRADE_ARCHITECTURE_REDESIGN_V1.md).
+
+## Historical source assessment (pre-M0 redesign)
 
 **Conclusion:** PSCV0 has a defensible *architecture for an independent, selected language plus multiple target backends*, and it correctly relies on the official Lean kernel for the admitted Core declaration boundary. However, PSCV0 is **not** equal to Lean 4 in the quality, coverage, completeness, optimization or diagnostic maturity of its elaborator, recursive definitions, Standard universe, proof automation, compiler lowering, incremental build graph or runtime. Current CI exposes a structural, not cosmetic, issue: dependent / Prop-valued index arguments survive erasure as unrepresentable runtime types and the IR checker correctly refuses them.
 

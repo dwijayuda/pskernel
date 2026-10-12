@@ -2,8 +2,8 @@
 
 ## Latest qualified native compiler milestone — 13 October 2026
 
-**Qualified executable SHA:** `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`.
-**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38304955212.
+**Qualified executable SHA:** `a678594001d94c9aaade968ce951f44e1e66ba81`.
+**All-green Linux Actions:** https://github.com/dwijayuda/pskernel/actions/runs/38312162188.
 **Official Lean:** 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`).
 **Bounded source profile:** `pscv0-v7-native-bounded/48`, **not** complete v7.
 
@@ -18,7 +18,7 @@ remain open. See [GetElem RC4 design/parity audit](PSCV0_GETELEM_RC4_DESIGN_AUDI
 The **selected** pinned prelude is now **215 declarations, 12 classes and
 36 ordered instances**, at FNV `fnv1a64:2902463666082847583` and SHA-256
 `sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`. The source-closure guard passed
-**170 portable / 178 native Lean modules**. All established **187 shared
+**170 portable / 178 native Lean modules**. All established **192 shared
 JS/TS/Rust/Wasm runtime observations** and official Lean native checks
 remain green. These are bounded qualification observations, not a proof
 of full Lean RC4 Standard or complete v7.
@@ -29,7 +29,7 @@ proofs, `GetElem?`/panic boundaries, complete deriving and scalar/API
 coverage, and pinned imports/notation/tactic/effect/assumption closure.
 Phases B–E and C5 remain as documented below.
 
-**Architecture audit (current branch HEAD, NOT qualified):** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`, [Linux 38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) failed at `ir/emit` because dependent `GetElem` predicate/index arguments become `unknown` runtime IR type annotations. Lean RC4 source-level oracle passed. See [`PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md`](PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md). **The last green executable remains `e1d463e10cbf5edd817e362ed35b21ee82c8c85b` and run 38304955212.**
+**Historical architecture audit (failed precursor, now resolved by M0):** `1cc7deb56b2b6ec37ee3a6c1eac148d113899ac7`, [Linux 38307096314](https://github.com/dwijayuda/pskernel/actions/runs/38307096314) failed at `ir/emit` because dependent `GetElem` predicate/index arguments become `unknown` runtime IR type annotations. Lean RC4 source-level oracle passed. See [`PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md`](PSCV0_V7_LEAN435RC4_SOURCE_ARCHITECTURE_REVIEW_2026-10-13.md). **The last green executable remains `e1d463e10cbf5edd817e362ed35b21ee82c8c85b` and run 38304955212.**
 
 ## Current priority: core and essential language conformance first
 
@@ -47,10 +47,10 @@ The next stage is chosen by architectural dependencies rather than counting
 green tests. C5 reconstruction and compiler-source migration follow only when
 the selected language surface is sufficient.
 
-Selected language profiles 36–48 and the later module foundation are recorded
+Selected language profiles 36–48, module foundation and M0 erasure redesign are recorded
 in AI_WORK_STATE.md. Latest qualified executable source:
-`e1d463e10cbf5edd817e362ed35b21ee82c8c85b`, [Linux run 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212).
-The shared matrix contains 187 runtime observations per target. This does
+`a678594001d94c9aaade968ce951f44e1e66ba81`, [Linux run 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188).
+The shared matrix contains 192 runtime observations per target, including five proof-carrying indexed dictionary computations. This does
 not constitute full v7 conformance or full RC4 module fidelity. Source
 preparation, official admission checking, provenance, erasure and target
 execution remain independent assurance boundaries.

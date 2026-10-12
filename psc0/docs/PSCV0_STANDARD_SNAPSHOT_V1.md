@@ -4,7 +4,7 @@
 
 - Official Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - Selected native environment: `psSelfHostProdPreludeEnvironment`.
-- Current qualified executable source: `e1d463e10cbf5edd817e362ed35b21ee82c8c85b`; [all-green Linux run 38304955212](https://github.com/dwijayuda/pskernel/actions/runs/38304955212).
+- Current qualified executable source: `a678594001d94c9aaade968ce951f44e1e66ba81`; [all-green Linux run 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188).
 - Earlier 208-declaration FNV qualification: `c810d6fe15d064968008d09849efd9ac5b2820de`, [Linux 38292170524](https://github.com/dwijayuda/pskernel/actions/runs/38292170524). Portable SHA-256 first qualified in `2a75d31c`, [Linux 38295519668](https://github.com/dwijayuda/pskernel/actions/runs/38295519668); mandatory dual gate qualified `381ae99f`, [Linux 38295808926](https://github.com/dwijayuda/pskernel/actions/runs/38295808926).
 - Snapshot records: **215 checked declarations**, **12 registered classes**, **36 ordered instance registrations**.
 - Selected roster FNV: **`fnv1a64:2902463666082847583`**.

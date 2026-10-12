@@ -4,6 +4,8 @@
 **Branch:** `psc0/pscv0-v7-native-lean-v1` · **Baseline studied:** `b16ce3ae23cf04b330882d17d5bba15c5cd3fa88` · **Pinned upstream:** Lean `4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.  
 **Execution constraints:** portable native `.lean` compiler, official Lean checker, GitHub-first / Linux CI, no pskernel-core, no self-hosting, no C5 migration, retain Wasm GC internals and explicit Canonical ABI adapters. Preserve history and existing external contracts; internal abstractions may be removed.
 
+**M0 implementation status (qualified):** Replaced the obsolete assumption that all type-formers reify as IR generic types. The four-kind checked binder classification and shared source-position masks are implemented across data/structure declarations, typed applications, partial/canonical call handling and projections. `GetElem.valid` is erased as an index without weakening IR checks. The official Lean source oracle, JS/TS/Rust source artifact checks and new **192-observation JS/TS/Rust/Wasm/Wasmtime matrix** are all green at `a678594`, [Linux 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188). This qualifies a selected M0 vertical slice, **not** every higher-order dependent erasure shape, a semantics-preservation proof, or the M1–M5 end state.
+
 ## 0. Outcome and evaluation standard
 
 Deliver a **maintainable, soundly checked selected language compiler**, with a sufficiently generic elaborator, explicit dependent erasure, one audited target-neutral IR, and high-performance JS/TS/Rust/Wasm GC backends. Architecture quality must be assessed against *actual pinned Lean designs*, not simply by matching source syntax or number of features.

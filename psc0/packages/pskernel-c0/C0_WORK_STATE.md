@@ -170,3 +170,15 @@ Native [run 38194880437](https://github.com/dwijayuda/pskernel/actions/runs/3819
 - Original core, backend-rust, other PSC0 packages, all branches and history remain intact. No self-hosting, fixed-point, or metatheory tests.
 
 **Not done:** indexed acceptance for full environment-sensitive WHNF/DefEq/checked inference/admission; representative entire-library speedups; proven memory reduction; cross-store handle transport. Do not call the performance redesign complete.
+
+
+
+### Final matched performance checkpoint and outstanding checked inference bottleneck
+
+- [38214964079](https://github.com/dwijayuda/pskernel/actions/runs/38214964079) passed a same-run baseline with an admitted, well-typed 48-argument application against original unchanged `pskernel-core`: C0 infer-only 16/19/15 ms vs original 66/65/65 ms (200 fresh sessions each round); C0 fully checked 50/50/50 ms vs original 31/31/30 ms (80 fresh sessions each round). **Significant checked-path regression remains open.** Peak benchmark-process RSS 563564 vs 562540 kB is not proof of memory savings.
+- [38215126574](https://github.com/dwijayuda/pskernel/actions/runs/38215126574) passed negative/fuel differential tests for the once-per-spine argument count.
+- [38215639174](https://github.com/dwijayuda/pskernel/actions/runs/38215639174) at `30ba64034dc52e3a6a18344a2f5d220a9a5eb9ba` passed full native Lean build (85 Lake jobs), native conformance, C0 benchmarks and independent original-core comparison. On synthetic 48-binder instantiation, C0 specialization outperformed historical precheck on *both* closed and open terms (186/2 ms over 9000 closed, 71/1 ms over 4000 open), so the checked-path slowdown is not explained by the changed single-argument substitution in this evidence.
+- The indexed session remains opt-in and non-authoritative; root memo is persistent, small-first, collision-checked radix after eight entries; no raw ID crosses the accepted API.
+- Original package and Rust backend untouched; no selfhost, bootstrap, fixed-point, or metatheory tasks were run.
+
+**Next engineering work:** instrument the checked application dependency graph and design a family-wide resource-semantics-preserving checked-spine optimization or safe session-canonicalized checker operations only with robust positive/negative differential and matched library evidence. Avoid rewriting acceptance around experimental indexed WHNF until its environment-dependent reduction and exact fuel decisions are complete.

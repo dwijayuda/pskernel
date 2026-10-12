@@ -845,9 +845,11 @@ def main : IO Unit := do
             throw (IO.userError ("matched large-domain DefEq failed: " ++ err))
       let finished ← IO.monoMsNow
       if yes != samples then throw (IO.userError "large-domain DefEq count mismatch")
-      IO.println s!"C0_COMPARE round={round} operation=cold_defeq_large_domain milliseconds={finished-start} binder_domain_depth={innerDepth} samples={samples}"
+      IO.println s!"C0_COMPARE round={round} operation=cold_defeq_large_domain milliseconds={finished-started} binder_domain_depth={innerDepth} samples={samples}"
 
 
+    let mut admitted := 0
+    let mut rejected := 0
     let admissionStart ← IO.monoMsNow
     for _ in [:600] do
       match psKernelAddDefinition 4096 empty valid 4096

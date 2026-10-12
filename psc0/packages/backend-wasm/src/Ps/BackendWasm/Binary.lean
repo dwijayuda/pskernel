@@ -398,6 +398,7 @@ def psWasmEncodeInstruction
     (instruction : PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
   match instruction with
+  | .word operation => pure [(psWasmWordInstruction operation).opcode]
   | .localGet index =>
       Except.ok
         (List.cons

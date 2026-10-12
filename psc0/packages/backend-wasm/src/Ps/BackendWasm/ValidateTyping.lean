@@ -514,6 +514,9 @@ def psWasmTypingInstruction
   | PsWasmInstruction.ifStart result => psWasmTypingEnterIf module result state
   | PsWasmInstruction.else_ => psWasmTypingElse module state
   | PsWasmInstruction.end_ => psWasmTypingEnd module state
+  | PsWasmInstruction.word operation =>
+      let descriptor := psWasmWordInstruction operation
+      psWasmTypingApply module descriptor.parameters [descriptor.result] state
   | PsWasmInstruction.i32Const _ =>
       Option.some (psWasmTypingPush (PsWasmOperandType.value PsWasmValueType.i32) state)
   | PsWasmInstruction.i64Const _ =>

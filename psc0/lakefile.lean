@@ -153,7 +153,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Binary, `Ps.BackendWasm.ValidateStructure,
     `Ps.BackendWasm.ValidateTyping, `Ps.BackendWasm.ValidateIr,
     `Ps.BackendWasm.Wat, `Ps.BackendWasm.Scalar,
-    `Ps.BackendWasm.Component, `Ps.BackendWasm.Module]
+    `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
+    `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
+    `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"

@@ -1,6 +1,12 @@
 # Native direct Wasm implementation
 
-C3 checkpoint under development; qualification is pending.
+C3 is qualified at `72808b14346f1adbdf0ad519b0c30f9ff55de41a`.
+Linux run 38192391633 / job 114627733636 passed native official-Lean checks,
+direct binary validation, core WAT/binary correspondence (excluding only name
+metadata), WIT extraction, and GC allocation/read through component lifting.
+The exact run URL is recorded below. Node 22.23.3 reports V8
+12.4.254.21-node.57. All 142 existing JS, TypeScript and Rust observations pass.
+C4 runtime development is underway; full C4/C4b qualification is pending.
 
 User architecture clarification (latest choice, option A): **Wasm GC for the
 runtime, linear memory only at explicit Canonical ABI boundaries.** This
@@ -53,3 +59,20 @@ it represents Nat as one GC node per bit and relies on an older specialization
 and validation boundary. C4 will retain useful algorithms while implementing
 the planned limb-array representation and clean lowering responsibilities.
 No compiler .ps translation, pskernel-core, local build or self-hosting is used.
+
+C3 qualification: https://github.com/dwijayuda/pskernel/actions/runs/38192391633
+
+C4 foundations now use a separate Value representation, named-local runtime
+authoring combinators, and unsigned 32-bit limb arithmetic. Published natural
+values are immutable; arithmetic mutates only fresh working arrays. Division
+uses a dividend-bit traversal rather than quotient-sized repeated subtraction.
+The initial representation caps arrays at 134217727 limbs so bit indices cannot
+wrap memory32 words; resource limits trap rather than truncate numbers.
+Independent function signatures stay outside aggregate recursive groups to
+preserve canonical function type identity. The word-op descriptor keeps binary
+opcodes, WAT mnemonics and stack signatures synchronized.
+
+The focused runtime probe is pending qualification and does not widen the C3
+source/foreign interface profile. Full runtime lowering, other GC values and
+closures, 142-case parity, aggregate ABI adapters, allocator/post-return and
+resource lifetimes remain required for C4/C4b completion.

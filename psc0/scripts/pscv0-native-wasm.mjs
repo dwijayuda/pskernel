@@ -14,7 +14,7 @@ function exportsOf(wit) {
     .map(m => [m[1], m[2].replaceAll('%', '').replace(/\s/g, ''), m[3] ?? ''])
     .sort((a, b) => a[0].localeCompare(b[0]));
 }
-for (const name of ['gc-probe', 'scalar']) {
+for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
   const stem = path.join(directory, name);
   const declared = run('wasm-tools', ['component', 'wit', stem + '.wit']);
   const extracted = run('wasm-tools', ['component', 'wit', stem + '.wasm']);
@@ -43,6 +43,14 @@ for (const name of ['gc-probe', 'scalar']) {
     assert.equal(run('wasmtime', ['run', '--invoke', 'readCaptured', stem + '.core.wasm', '42']), '42');
     for (const suffix of ['.wasm', '.roundtrip.wasm'])
       assert.equal(run('wasmtime', ['run', '--invoke', 'read-captured(42)', stem + suffix]), '42');
+  } else if (name === 'natural-probe') {
+    for (const [foreign] of exportsOf(declared)) {
+      const internal = foreign.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+      assert.equal(instance.exports[internal](), 1, internal);
+      assert.equal(run('wasmtime', ['run', '--invoke', internal, stem + '.core.wasm']), '1', internal);
+      for (const suffix of ['.wasm', '.roundtrip.wasm'])
+        assert.equal(run('wasmtime', ['run', '--invoke', foreign + '()', stem + suffix]), 'true', foreign);
+    }
   } else {
     for (const a of [0, 1]) {
       assert.equal(instance.exports.invert(a), 1 - a);
@@ -58,4 +66,4 @@ for (const name of ['gc-probe', 'scalar']) {
 }
 console.log(JSON.stringify({profile:'pscv0-wasm-c3/1', node:process.version, v8:process.versions.v8,
   wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
-  gcInsideComponent:true, scalarWorlds:2, coreBinaryWatEqual:true}));
+  gcInsideComponent:true, scalarWorlds:3, naturalLimbChecks:8, coreBinaryWatEqual:true}));

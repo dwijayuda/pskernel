@@ -43,20 +43,5 @@ def emitScalar (ir : PsVerifiedIrModule) (context : PsEmissionContext)
       { path := stem ++ ".wat", role := .debugText, payload := .text (wat.text ++ "\n") },
       { path := stem ++ ".wit", role := .interface, payload := .text (scalarWit plan) }] }
 
--- Focused compatibility fixture: a GC allocation/read lies on the executed
--- path of a lifted component export. No JS semantic imports or WAT assembler.
-def gcComponentProbe : ScalarComponent := {
-  core := { psWasmModuleEmpty with
-    structures := [{
-      name := "CapturedValue", superType := none, isFinal := true,
-      fields := [{ name := "value", storageType := .value .i32 }] }]
-    functions := [{
-      name := "readCaptured", typeName := none, parameters := [.i32], results := [.i32], locals := [],
-      body := [.localGet 0, .structNew "CapturedValue", .structGet "CapturedValue" 0] }]
-    exports := [("readCaptured", "readCaptured")] }
-  locals := [("readCaptured", ["value"])]
-  exports := [{
-    sourceName := "readCaptured", foreignName := "read-captured",
-    parameters := [("value", .u32)], result := some .u32 }] }
 
 end PsWasm

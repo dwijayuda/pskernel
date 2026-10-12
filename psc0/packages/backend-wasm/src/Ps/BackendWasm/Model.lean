@@ -25,7 +25,40 @@ structure PsWasmLoweredType where
   valueType : PsWasmValueType
   storageType : PsWasmStorageType
 
+-- Word operations needed by the limb runtime. A single descriptor supplies
+-- their mnemonic, binary opcode and stack signature to all target consumers.
+inductive PsWasmWordOp where
+  | i32Clz
+  | i32DivU
+  | i32RemU
+  | i32Shl
+  | i64DivU
+  | i64RemU
+  | i64Shl
+  | i64ShrU
+  | i32WrapI64
+  | i64ExtendI32U
+
+structure PsWasmWordInstruction where
+  mnemonic : String
+  opcode : UInt8
+  parameters : List PsWasmValueType
+  result : PsWasmValueType
+
+def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
+  | .i32Clz => { mnemonic := "i32.clz", opcode := 103, parameters := [.i32], result := .i32 }
+  | .i32DivU => { mnemonic := "i32.div_u", opcode := 110, parameters := [.i32, .i32], result := .i32 }
+  | .i32RemU => { mnemonic := "i32.rem_u", opcode := 112, parameters := [.i32, .i32], result := .i32 }
+  | .i32Shl => { mnemonic := "i32.shl", opcode := 116, parameters := [.i32, .i32], result := .i32 }
+  | .i64DivU => { mnemonic := "i64.div_u", opcode := 128, parameters := [.i64, .i64], result := .i64 }
+  | .i64RemU => { mnemonic := "i64.rem_u", opcode := 130, parameters := [.i64, .i64], result := .i64 }
+  | .i64Shl => { mnemonic := "i64.shl", opcode := 134, parameters := [.i64, .i64], result := .i64 }
+  | .i64ShrU => { mnemonic := "i64.shr_u", opcode := 136, parameters := [.i64, .i64], result := .i64 }
+  | .i32WrapI64 => { mnemonic := "i32.wrap_i64", opcode := 167, parameters := [.i64], result := .i32 }
+  | .i64ExtendI32U => { mnemonic := "i64.extend_i32_u", opcode := 173, parameters := [.i32], result := .i64 }
+
 inductive PsWasmInstruction where
+  | word (operation : PsWasmWordOp)
   | localGet (index : Nat)
   | localSet (index : Nat)
   | drop

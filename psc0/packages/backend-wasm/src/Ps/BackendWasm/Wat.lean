@@ -61,6 +61,7 @@ def watFloat (bits fractionBits exponentBits : Nat) : String :=
     sign ++ "0x" ++ hexNat 16 significand ++ "p" ++ toString power
 
 def watInstruction (locals : List String) : PsWasmInstruction → String
+  | .word operation => (psWasmWordInstruction operation).mnemonic
   | .localGet i => "local.get " ++ watId (locals[i]?.getD ("local" ++ toString i))
   | .localSet i => "local.set " ++ watId (locals[i]?.getD ("local" ++ toString i))
   | .drop => "drop" | .unreachable => "unreachable"

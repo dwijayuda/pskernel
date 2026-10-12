@@ -87,8 +87,10 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
       return { value := .derivingDeclaration parsed.value handlers.value isPrivate,
         cursor := next }
     let next ← (psParseProofScriptCommandSeparator stop parsed.cursor).mapError psPscv0ParseError
-    return { value := if isPrivate then .privateDeclaration parsed.value
-      else .declaration parsed.value, cursor := next }
+    let command := if isPrivate then
+      PsSyntaxCommand.privateDeclaration parsed.value
+    else PsSyntaxCommand.declaration parsed.value
+    return { value := command, cursor := next }
   if ["namespace", "section", "end", "open", "include", "omit", "universe"].contains token.text then
     let head ← psPscv0Expect cursor token.text
     let names ← psPscv0CommandNames token.span.start.line 4096 head.cursor []

@@ -220,9 +220,9 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
   let next ← psElabCommandDeclaration state source none isPrivate
   let origin :: previous := next.originsRev
     | throw (.data "deriving lost source provenance")
-  let instance ← psElabDeriveInhabited next.environment origin
-  let name := psDeclarationName instance
-  let some added := psEnvironmentAdd next.environment instance
+  let generated ← psElabDeriveInhabited next.environment origin
+  let name := psDeclarationName generated
+  let some added := psEnvironmentAdd next.environment generated
     | throw (.duplicateDeclaration name)
   let environment ← psElabRegisterInstance added name 1000
   let member : PsElabMemberOrigin := {
@@ -231,7 +231,7 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
     role := .derivedInstance }
   return { next with
     environment
-    declarationsRev := instance :: next.declarationsRev
+    declarationsRev := generated :: next.declarationsRev
     originsRev := { origin with members := origin.members ++ [member] } :: previous
     privateNames := if isPrivate then name :: next.privateNames else next.privateNames }
 

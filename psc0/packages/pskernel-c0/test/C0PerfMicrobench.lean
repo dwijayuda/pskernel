@@ -420,8 +420,11 @@ def main : IO Unit := do
   let spineName :=
     PsKernelName.str PsKernelName.anonymous "C0FramedCheckedAxiom"
   let spineAxiom : PsKernelAxiomInfo := {
-    base := { name := spineName, levelParams := [],
-      type := c0BenchCheckedForalls spineArgs }
+    base := {
+      name := spineName
+      levelParams := []
+      type := c0BenchCheckedForalls spineArgs
+    }
     isUnsafe := false
   }
   let spineEnv ←

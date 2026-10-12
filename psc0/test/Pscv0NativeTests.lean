@@ -969,6 +969,19 @@ private def projectBoundaries : IO Unit := do
     "theorem fallbackCorrect: fallback = 9 := by { rfl }\n" ++
     "const bound: Option Nat := Option.bind(Option.some(3), Option.some)\n" ++
     "theorem boundCorrect: bound = Option.some(3) := by { rfl }\n"
+  let listLibrarySource :=
+    "function bumpList(n: Nat): Nat := Nat.succ(n)\n" ++
+    "function addList(a: Nat, b: Nat): Nat := Nat.add(a, b)\n" ++
+    "const listCount: Nat := List.length([2, 3, 4])\n" ++
+    "theorem listCountProof: listCount = 3 := by { rfl }\n" ++
+    "const listMapped: List Nat := List.map(bumpList, [2, 3])\n" ++
+    "theorem listMappedProof: listMapped = [3, 4] := by { rfl }\n" ++
+    "const listAppended: List Nat := List.append([2, 3], [4])\n" ++
+    "theorem listAppendedProof: listAppended = [2, 3, 4] := by { rfl }\n" ++
+    "const listFiltered: List Nat := List.filter(fun (n: Nat) => true, [2, 3])\n" ++
+    "theorem listFilteredProof: listFiltered = [2, 3] := by { rfl }\n" ++
+    "const listFolded: Nat := List.foldl(addList, 0, [1, 2, 3])\n" ++
+    "theorem listFoldedProof: listFolded = 6 := by { rfl }\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1003,6 +1016,8 @@ private def projectBoundaries : IO Unit := do
     { source := standardEqualitySource, moduleName := "StandardEquality",
       targets := [.javascript, .typescript, .rust] },
     { source := optionLibrarySource, moduleName := "StandardOption",
+      targets := [.javascript, .typescript, .rust] },
+    { source := listLibrarySource, moduleName := "StandardList",
       targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
@@ -1055,6 +1070,12 @@ private def projectBoundaries : IO Unit := do
           throw (IO.userError "checked Option API missing backend artifacts")
     | 18, .error error =>
         throw (IO.userError ("checked Option API failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 19, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked List APIs missing multi-target artifacts")
+    | 19, .error error =>
+        throw (IO.userError ("checked List APIs failed at " ++
           error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do

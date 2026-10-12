@@ -1,4 +1,4 @@
-import Ps.Environment.StandardOption
+import Ps.Environment.StandardList
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -137,7 +137,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardOptionExtend <|
+  psStandardListExtend <|
     psPreludeAdd withProdMk
       (PsDeclaration.recursorDecl
         (PsRecursorInfo.mk
@@ -152,7 +152,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  psEmptyDeclarations ++ psStandardPreludeDeclarationsWithOption ++ match
+  psEmptyDeclarations ++ psStandardPreludeDeclarationsWithList ++ match
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with

@@ -92,6 +92,14 @@ def c0ReferenceUnfoldDefinition
       Option.none
 
 
+/-- Prebuilt well-typed lambda spine with every binder domain Sort 1. -/
+def c0CheckedSpineFixture : Nat → PsKernelExpr
+  | 0 => PsKernelExpr.bvar 0
+  | n + 1 =>
+      PsKernelExpr.lam PsKernelName.anonymous
+        (PsKernelExpr.sort (.succ PsKernelLevel.zero))
+        (c0CheckedSpineFixture n) PsKernelBinderInfo.default
+
 def main : IO Unit := do
   let session :=
     psKernelMkCheckerSession
@@ -102,6 +110,32 @@ def main : IO Unit := do
       psKernelLeanNatMaxSizeDefault
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
   let sort1 := PsKernelExpr.sort (PsKernelLevel.succ PsKernelLevel.zero)
+  -- The flattened checked-spine candidate must have identical fully checked
+  -- outcomes, exact error strings, resource exhaustion and fresh-name state.
+  -- This includes a deeply nested app, a bad argument and tight fuel limits.
+  for arity in [1, 4, 12, 48] do
+    let source := (List.range arity).foldl
+      (fun expr _ => PsKernelExpr.app expr sort0)
+      (c0CheckedSpineFixture arity)
+    let invalid := PsKernelExpr.app source sort1
+    for expr in [source, invalid] do
+      for fuel in [0, 1, 2, 4, 12, 64, 4096] do
+        let defeq := psKernelIsDefEqWithFuel fuel
+        let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+        match psKernelC0CheckAppSpineWithFuel fuel whnf defeq
+            session.context session.state expr,
+            psKernelSessionCheck fuel session expr with
+        | Except.error candidate, Except.error reference =>
+            if candidate != reference then
+              throw (IO.userError "C0 checked spine changed rejection category")
+        | Except.ok (candidate, state), Except.ok (reference, next) =>
+            if !(psKernelExprEqual candidate reference &&
+                state.nextFresh == next.state.nextFresh) then
+              throw (IO.userError "C0 checked spine changed type or fresh names")
+        | _, _ =>
+            throw (IO.userError "C0 checked spine changed success/rejection")
+  IO.println "C0_PERF_REGRESSION checked_spine_exact_fuel_and_errors=pass"
+
   match psKernelSessionIsDefEq 4096 session sort0 sort1 with
   | Except.error message =>
       throw (IO.userError ("unexpected sort comparison error: " ++ message))

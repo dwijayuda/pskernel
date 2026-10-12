@@ -34,6 +34,16 @@ def c0JsonString (j : Lean.Json) (key : String) : Except String String := do
   let value ← c0JsonObj j key
   value.getStr?
 
+/-- Fail closed on unknown fields, including apparently harmless metadata:
+    a lossy source projection cannot be used as an official conformance verdict. -/
+def c0ExportOnlyKeys (j : Lean.Json) (allowed : List String) :
+    Except String Unit := do
+  let object ← j.getObj?
+  let fields := object.fold (fun acc key _ => key :: acc) ([] : List String)
+  for key in fields do
+    if !allowed.contains key then
+      throw ("unsupported NDJSON field: " ++ key)
+
 def c0JsonNatList (j : Lean.Json) : Except String (List Nat) := do
   let arr ← j.getArr?
   arr.toList.mapM (fun value => value.getNat?)
@@ -84,10 +94,14 @@ def c0ExportDecodeName
     (tables : C0ExportTables)
     (j : Lean.Json) : Except String PsKernelName := do
   if let .ok entry := c0JsonObj j "str" then
+    c0ExportOnlyKeys j ["in", "str"]
+    c0ExportOnlyKeys entry ["pre", "str"]
     let pre ← c0ExportName tables (← c0JsonNat entry "pre")
     let part ← c0JsonString entry "str"
     return .str pre part
   if let .ok entry := c0JsonObj j "num" then
+    c0ExportOnlyKeys j ["in", "num"]
+    c0ExportOnlyKeys entry ["pre", "i"]
     let pre ← c0ExportName tables (← c0JsonNat entry "pre")
     let part ← c0JsonNat entry "i"
     return .num pre part
@@ -98,18 +112,22 @@ def c0ExportDecodeLevel
     (tables : C0ExportTables)
     (j : Lean.Json) : Except String PsKernelLevel := do
   if let .ok value := c0JsonObj j "succ" then
+    c0ExportOnlyKeys j ["il", "succ"]
     return .succ (← c0ExportLevel tables (← value.getNat?))
   if let .ok value := c0JsonObj j "max" then
+    c0ExportOnlyKeys j ["il", "max"]
     match ← c0JsonNatList value with
     | [a, b] =>
         return .max (← c0ExportLevel tables a) (← c0ExportLevel tables b)
     | _ => throw "malformed NDJSON level max pair"
   if let .ok value := c0JsonObj j "imax" then
+    c0ExportOnlyKeys j ["il", "imax"]
     match ← c0JsonNatList value with
     | [a, b] =>
         return .imax (← c0ExportLevel tables a) (← c0ExportLevel tables b)
     | _ => throw "malformed NDJSON level imax pair"
   if let .ok value := c0JsonObj j "param" then
+    c0ExportOnlyKeys j ["il", "param"]
     return .param (← c0ExportName tables (← value.getNat?))
   throw "unsupported NDJSON level constructor"
 
@@ -119,47 +137,63 @@ def c0ExportDecodeExpr
     (tables : C0ExportTables)
     (j : Lean.Json) : Except String PsKernelExpr := do
   if let .ok value := c0JsonObj j "bvar" then
+    c0ExportOnlyKeys j ["ie", "bvar"]
     return .bvar (← value.getNat?)
   if let .ok value := c0JsonObj j "sort" then
+    c0ExportOnlyKeys j ["ie", "sort"]
     return .sort (← c0ExportLevel tables (← value.getNat?))
   if let .ok value := c0JsonObj j "const" then
+    c0ExportOnlyKeys j ["ie", "const"]
+    c0ExportOnlyKeys value ["name", "us"]
     let name ← c0ExportName tables (← c0JsonNat value "name")
     let levels ← c0ExportLevels tables (← c0JsonObj value "us")
     return .const name levels
   if let .ok value := c0JsonObj j "app" then
+    c0ExportOnlyKeys j ["ie", "app"]
+    c0ExportOnlyKeys value ["fn", "arg"]
     let fn ← c0ExportExpr tables (← c0JsonNat value "fn")
     let arg ← c0ExportExpr tables (← c0JsonNat value "arg")
     return .app fn arg
   if let .ok value := c0JsonObj j "lam" then
+    c0ExportOnlyKeys j ["ie", "lam"]
+    c0ExportOnlyKeys value ["name", "type", "body", "binderInfo"]
     let name ← c0ExportName tables (← c0JsonNat value "name")
     let ty ← c0ExportExpr tables (← c0JsonNat value "type")
     let body ← c0ExportExpr tables (← c0JsonNat value "body")
     let bi ← c0ExportBinderInfo (← c0JsonString value "binderInfo")
     return .lam name ty body bi
   if let .ok value := c0JsonObj j "forallE" then
+    c0ExportOnlyKeys j ["ie", "forallE"]
+    c0ExportOnlyKeys value ["name", "type", "body", "binderInfo"]
     let name ← c0ExportName tables (← c0JsonNat value "name")
     let ty ← c0ExportExpr tables (← c0JsonNat value "type")
     let body ← c0ExportExpr tables (← c0JsonNat value "body")
     let bi ← c0ExportBinderInfo (← c0JsonString value "binderInfo")
     return .forallE name ty body bi
   if let .ok value := c0JsonObj j "letE" then
+    c0ExportOnlyKeys j ["ie", "letE"]
     let name ← c0ExportName tables (← c0JsonNat value "name")
     let ty ← c0ExportExpr tables (← c0JsonNat value "type")
     let val ← c0ExportExpr tables (← c0JsonNat value "value")
     let body ← c0ExportExpr tables (← c0JsonNat value "body")
+    c0ExportOnlyKeys value ["name", "type", "value", "body", "nondep"]
     let nd ← (← c0JsonObj value "nondep").getBool?
     return .letE name ty val body nd
   if let .ok value := c0JsonObj j "proj" then
+    c0ExportOnlyKeys j ["ie", "proj"]
+    c0ExportOnlyKeys value ["typeName", "idx", "struct"]
     let name ← c0ExportName tables (← c0JsonNat value "typeName")
     let idx ← c0JsonNat value "idx"
     let body ← c0ExportExpr tables (← c0JsonNat value "struct")
     return .proj name idx body
   if let .ok value := c0JsonObj j "natVal" then
+    c0ExportOnlyKeys j ["ie", "natVal"]
     let s ← value.getStr?
     match s.toNat? with
     | some n => return .lit (.nat n)
     | none => throw "malformed NDJSON Nat literal"
   if let .ok value := c0JsonObj j "strVal" then
+    c0ExportOnlyKeys j ["ie", "strVal"]
     return .lit (.str (← value.getStr?))
   throw "unsupported NDJSON expression constructor or metadata"
 
@@ -169,6 +203,18 @@ def c0ExportParseRecord
     (st : C0ExportTables)
     (j : Lean.Json) : Except String C0ExportTables := do
   if let .ok headerData := c0JsonObj j "meta" then
+    c0ExportOnlyKeys j ["meta"]
+    c0ExportOnlyKeys headerData ["exporter", "format", "lean"]
+    let exporter ← c0JsonObj headerData "exporter"
+    c0ExportOnlyKeys exporter ["name", "version"]
+    let exporterName ← c0JsonString exporter "name"
+    let exporterVersion ← c0JsonString exporter "version"
+    let leanData ← c0JsonObj headerData "lean"
+    c0ExportOnlyKeys leanData ["version", "githash"]
+    let formatData ← c0JsonObj headerData "format"
+    c0ExportOnlyKeys formatData ["version"]
+    if exporterName != "lean4export" || exporterVersion != "3.1.0" then
+      throw "unsupported NDJSON exporter identity"
     if st.header then throw "duplicate NDJSON export metadata"
     let version ← c0JsonString (← c0JsonObj headerData "lean") "version"
     let hash ← c0JsonString (← c0JsonObj headerData "lean") "githash"
@@ -195,7 +241,14 @@ def c0ExportParseRecord
     let newExpr ← c0ExportDecodeExpr st j
     return { st with exprs := st.exprs.push newExpr }
   if let .ok payload := c0JsonObj j "def" then
-    let name ← c0ExportName st (← c0JsonNat payload "name")
+    c0ExportOnlyKeys j ["def"]
+    c0ExportOnlyKeys payload
+      ["all", "hints", "levelParams", "name", "safety", "type", "value"]
+    let declarationId ← c0JsonNat payload "name"
+    let allIds ← c0JsonNatList (← c0JsonObj payload "all")
+    if !allIds.contains declarationId then
+      throw "malformed NDJSON declaration manifest"
+    let name ← c0ExportName st declarationId
     let params ← c0ExportNames st (← c0JsonObj payload "levelParams")
     let ty ← c0ExportExpr st (← c0JsonNat payload "type")
     let value ← c0ExportExpr st (← c0JsonNat payload "value")
@@ -208,6 +261,7 @@ def c0ExportParseRecord
       | .ok "opaque" => pure PsKernelReducibilityHints.opaqueHint
       | .ok _ => throw "unsupported reducibility hint"
       | .error _ =>
+          c0ExportOnlyKeys hintValue ["regular"]
           let height ← c0JsonNat hintValue "regular"
           pure (PsKernelReducibilityHints.regular height)
     let definition : PsKernelDefinitionInfo := {
@@ -248,7 +302,36 @@ def c0ExportCheckDefinitions (infos : List PsKernelDefinitionInfo) :
         | _ => throw ("C0 check did not yield a normal rejection: " ++ message)
   return true
 
+/-- No exporter, unsupported field or malformed input may become a positive
+    or negative *kernel* verdict. Failure must occur before checking. -/
+def c0ExportRejectLossyImports : IO Unit := do
+  let valid ← IO.FS.readFile "test/C0OfficialAccept.ndjson"
+  let invalidInputs : List (String × String) := [
+    ("unknown-definition-field",
+      valid.replace "\"safety\":\"safe\"" "\"safety\":\"safe\",\"trustedShortcut\":true"),
+    ("unknown-expression-field",
+      valid.replace "\"ie\":0,\"sort\":0" "\"ie\":0,\"sort\":0,\"mdata\":42"),
+    ("unknown-exporter-field",
+      valid.replace "\"format\":{\"version\":\"3.1.0\"}"
+        "\"format\":{\"version\":\"3.1.0\",\"unsafe\":true}"),
+    ("unknown-formatter-version",
+      valid.replace "\"version\":\"3.1.0\"" "\"version\":\"999.0\""),
+    ("missing-declaration-manifest",
+      valid.replace "\"all\":[1]" "\"all\":[]"),
+    ("unknown-name-field",
+      valid.replace "\"pre\":0,\"str\":\"C0OfficialReference\""
+        "\"pre\":0,\"str\":\"C0OfficialReference\",\"untrusted\":true")
+  ]
+  for (label, input) in invalidInputs do
+    if input == valid then
+      throw (IO.userError ("ineffective negative export mutation: " ++ label))
+    match c0ExportReadSubset input with
+    | .ok _ =>
+        throw (IO.userError ("lossy NDJSON importer accepted: " ++ label))
+    | .error _ => pure ()
+
 def main : IO Unit := do
+  c0ExportRejectLossyImports
   let cases : List (String × Bool) := [
     ("C0OfficialAccept.ndjson", true),
     ("C0OfficialReject.ndjson", false),

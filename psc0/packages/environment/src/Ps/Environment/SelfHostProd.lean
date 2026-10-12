@@ -1,4 +1,4 @@
-import Ps.Environment.SelfHostPrelude
+import Ps.Environment.StandardArithmetic
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -137,21 +137,22 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psPreludeAdd withProdMk
-    (PsDeclaration.recursorDecl
-      (PsRecursorInfo.mk
-        psSelfHostProdRecName
-        [uName]
-        recType
-        [psProdName]
-        2
-        0
-        1
-        1))
+  psStandardBinaryExtend <|
+    psPreludeAdd withProdMk
+      (PsDeclaration.recursorDecl
+        (PsRecursorInfo.mk
+          psSelfHostProdRecName
+          [uName]
+          recType
+          [psProdName]
+          2
+          0
+          1
+          1))
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
-  psEmptyDeclarations ++ match
+  psEmptyDeclarations ++ psStandardBinaryDeclarations ++ match
       psEnvironmentFind
         psSelfHostProdPreludeEnvironment
         psProdName with

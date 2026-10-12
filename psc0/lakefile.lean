@@ -70,6 +70,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.Decision,
     `Ps.Environment.Prelude,
     `Ps.Environment.SelfHostPrelude,
+    `Ps.Environment.StandardArithmetic,
     `Ps.Environment.SelfHostProd
   ]
 

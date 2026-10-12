@@ -38,10 +38,6 @@ def watResults (ts : List PsWasmValueType) : String :=
 def watParams (ts : List PsWasmValueType) : String :=
   if ts.isEmpty then "" else " (param " ++ String.intercalate " " (ts.map watType) ++ ")"
 
-def watBlock (header : String) (body : List PsDoc) : PsDoc :=
-  .append (.text (header ++ "\n"))
-    (.append (.nest 2 (psDocJoin .hardline body)) (.append .hardline (.text ")")))
-
 def hexNat : Nat → Nat → String
   | 0, _ => ""
   | n + 1, value =>
@@ -159,10 +155,13 @@ def watBody (locals : List String) (body : List PsWasmInstruction) : List PsDoc 
 
 abbrev LocalNames := List (String × List String)
 
-def watFunction (names : LocalNames) (f : PsWasmFunction) : PsDoc :=
+def functionLocalNames (names : LocalNames) (f : PsWasmFunction) : List String :=
   let given := (names.find? (fun p => p.1 == f.name)).map (·.2) |>.getD []
-  let locals := (List.range (f.parameters.length + f.locals.length)).map fun i =>
+  (List.range (f.parameters.length + f.locals.length)).map fun i =>
     given[i]?.getD ((if i < f.parameters.length then "arg" else "local") ++ toString i)
+
+def watFunction (names : LocalNames) (f : PsWasmFunction) : PsDoc :=
+  let locals := functionLocalNames names f
   let params := f.parameters.zipIdx |>.map fun (t, i) =>
     "(param " ++ watId (locals[i]!) ++ " " ++ watType t ++ ")"
   let localDecls := f.locals.zipIdx |>.map fun (t, i) =>
@@ -180,7 +179,7 @@ def anonymousTypeName (m : PsWasmModule) (i : Nat) : String :=
 
 def watModuleDoc (m : PsWasmModule) (names : LocalNames := []) (header := "(module") : PsDoc :=
   let structures := m.structures.map fun s =>
-    let fields := s.fields.map fun field => PsDoc.text ("(field " ++ watStorage field.storageType ++ ")")
+    let fields := s.fields.map fun field => PsDoc.text ("(field " ++ watId field.name ++ " " ++ watStorage field.storageType ++ ")")
     let sub := if s.superType.isSome || !s.isFinal then
       "(sub " ++ (if s.isFinal then "final " else "") ++
         (s.superType.map (fun n => watId n ++ " ")).getD "" else ""

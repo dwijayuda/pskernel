@@ -1,4 +1,4 @@
-import Ps.BackendWasm.Wat
+import Ps.BackendWasm.Names
 import Ps.Codegen.Api
 
 namespace PsWasm
@@ -80,7 +80,7 @@ def scalarComponentWat (plan : ScalarComponent) : PsDoc :=
       (.append .hardline (.text ")")))
 
 def scalarComponentBinary (plan : ScalarComponent) : Except String ByteArray := do
-  let core ← (psWasmEncodeModule plan.core).mapError (fun e => "PSCV0-WASM-ENCODE: " ++ reprStr e)
+  let core ← namedCoreBinary plan.core plan.locals
   let u := psWasmEncodeUleb
   let str := psWasmEncodeName
   let vec := fun (xs : List (List UInt8)) => u xs.length ++ xs.flatten

@@ -4,9 +4,9 @@ import Ps.BackendWasm.ValidateIr
 
 namespace PsWasm
 
-def checkedCore (core : PsWasmModule) : Except String ByteArray := do
+def checkedCore (core : PsWasmModule) (locals : LocalNames := []) : Except String ByteArray := do
   let _ ← (psWasmIrValidateModule core).mapError (fun e => "PSCV0-WASM-TYPE: " ++ reprStr e)
-  let bytes ← (psWasmEncodeModule core).mapError (fun e => "PSCV0-WASM-ENCODE: " ++ reprStr e)
+  let bytes ← namedCoreBinary core locals
   return ByteArray.mk bytes.toArray
 
 -- Caller must enter through psWithCheckedIr. The independently checked target
@@ -17,7 +17,7 @@ def emitScalar (ir : PsVerifiedIrModule) (context : PsEmissionContext)
   let api ← psPublicApi ir exposure
   let (lowered, locals) ← scalarModule ir
   let core := { lowered with exports := api.exports.map fun d => (d.name, d.name) }
-  let binary ← checkedCore core
+  let binary ← checkedCore core locals
   let source ← psRenderDoc (watModuleDoc core locals)
   let stem := context.outputStem
   let coreFiles : List PsArtifactFile := [

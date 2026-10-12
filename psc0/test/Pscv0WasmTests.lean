@@ -62,7 +62,7 @@ private def unwrap {α : Type} (result : Except String α) : IO α :=
   | .error message => throw (IO.userError message)
 
 private def writePlan (stem : String) (plan : PsWasm.ScalarComponent) : IO Unit := do
-  let core ← unwrap (PsWasm.checkedCore plan.core)
+  let core ← unwrap (PsWasm.checkedCore plan.core plan.locals)
   let wasm ← unwrap (PsWasm.scalarComponentBinary plan)
   let wat ← unwrap (psRenderDoc (PsWasm.scalarComponentWat plan))
   let coreWat ← unwrap (psRenderDoc (PsWasm.watModuleDoc plan.core plan.locals))

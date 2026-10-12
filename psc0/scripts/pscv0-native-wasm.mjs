@@ -9,6 +9,10 @@ function run(tool, args) {
   assert.equal(result.status, 0, tool + ' ' + args.join(' ') + '\n' + result.stderr);
   return result.stdout.trim();
 }
+// WAVE accepts quoted names, including WIT keywords such as "borrow".
+function componentCall(name, args = []) {
+  return JSON.stringify(name) + '(' + args.map(x => JSON.stringify(x)).join(', ') + ')';
+}
 function exportsOf(wit) {
   return [...wit.matchAll(/export\s+%?([\w-]+):\s*func\(([^)]*)\)(?:\s*->\s*(\w+))?;/g)]
     .map(m => [m[1], m[2].replaceAll('%', '').replace(/\s/g, ''), m[3] ?? ''])
@@ -42,14 +46,14 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
     assert.equal(instance.exports.readCaptured(42), 42);
     assert.equal(run('wasmtime', ['run', '--invoke', 'readCaptured', stem + '.core.wasm', '42']), '42');
     for (const suffix of ['.wasm', '.roundtrip.wasm'])
-      assert.equal(run('wasmtime', ['run', '--invoke', 'read-captured(42)', stem + suffix]), '42');
+      assert.equal(run('wasmtime', ['run', '--invoke', componentCall('read-captured', [42]), stem + suffix]), '42');
   } else if (name === 'natural-probe') {
     for (const [foreign] of exportsOf(declared)) {
       const internal = foreign.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       assert.equal(instance.exports[internal](), 1, internal);
       assert.equal(run('wasmtime', ['run', '--invoke', internal, stem + '.core.wasm']), '1', internal);
       for (const suffix of ['.wasm', '.roundtrip.wasm'])
-        assert.equal(run('wasmtime', ['run', '--invoke', foreign + '()', stem + suffix]), 'true', foreign);
+        assert.equal(run('wasmtime', ['run', '--invoke', componentCall(foreign), stem + suffix]), 'true', foreign);
     }
   } else {
     for (const a of [0, 1]) {
@@ -58,7 +62,7 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
         assert.equal(instance.exports.both(a, b), a & b);
         assert.equal(run('wasmtime', ['run', '--invoke', 'both', stem + '.core.wasm', String(a), String(b)]), String(a & b));
         for (const suffix of ['.wasm', '.roundtrip.wasm'])
-          assert.equal(run('wasmtime', ['run', '--invoke', 'both(' + !!a + ', ' + !!b + ')', stem + suffix]), String(!!(a & b)));
+          assert.equal(run('wasmtime', ['run', '--invoke', componentCall('both', [!!a, !!b]), stem + suffix]), String(!!(a & b)));
       }
     }
   }

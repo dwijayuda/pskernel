@@ -310,3 +310,22 @@ Selected **complete original-vs-C0 native checker** results in the same successf
 | Ordinary inductive admission, 2,000 calls | 46/46/46 ms | 46/46/46 ms |
 
 These are effectively near-parity. No causal end-to-end gain is attributable to indexed metadata because the accepting checker does not execute the indexed engine. No evidence yet for reduced process memory, real representative libraries or indexed resource exhaustion parity. Original package, Rust backend and self-hosting targets unchanged.
+
+
+## Exact local declaration count and controlled list-length ablation — 12 October 2026
+
+Source [e8952b95](https://github.com/dwijayuda/pskernel/commit/e8952b95a279f5bf82aa7b2c664d17430308bbd7); [successful native CI 38240821497](https://github.com/dwijayuda/pskernel/actions/runs/38240821497). The cached count eliminates a linked-list length traversal during each pre-promotion local extension, with regression coverage for fresh-name counters not equal to live declaration depth. It adds one Nat field per persistent local-context node; exact allocation and memory benefit have **not** been isolated.
+
+| Native same-run matched complete checking (round 0) | C0 | Unchanged original |
+| --- | ---: | ---: |
+| Varied infer-only applications, 160 | 14 ms | 58 ms |
+| Varied fully checked applications, 160 | 73 ms | 72 ms |
+| Growing checked library, 160 declarations | 41 ms | 43 ms |
+| Checked depth-48 library, 64 declarations | 70 ms | 67 ms |
+| Local-reference admission at depth 192 (three indices) | 151–154 ms | 149–153 ms |
+| Local-reference admission at depth 320 (three indices) | 201–204 ms | 204–210 ms |
+| Local-reference admission at depth 512 (three indices) | 339–348 ms | 332–350 ms |
+
+Native source-owned construction of 160 independent contexts with 128 locals took **9 ms list-only / 14 ms adaptive**. These compare different index policies, **not** cached count versus historical list-length scan. Full matched checker process VmHWM C0 **724508 kB** / original **727748 kB**, process-wide and not a per-operation allocation measurement. Other runs and source changes prevent causal before/after conclusions. No complete library-wide throughput or memory winner is established.
+
+To isolate the counter alone, [commit e2fea7fe](https://github.com/dwijayuda/pskernel/commit/e2fea7feac956c0197cb71edfed1770841f3c161) adds an opt-in tagged temporary-package diagnostic: restore only the prior `context.decls.length` promotion predicate in a private C0 copy and run the same full checker fixture. [Run 38241386784](https://github.com/dwijayuda/pskernel/actions/runs/38241386784) is the target run. This neither edits original `pskernel-core` nor runs self-hosting. Record negative or negligible results without turning micro timing into a full-checker claim.

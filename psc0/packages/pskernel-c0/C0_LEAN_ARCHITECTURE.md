@@ -169,3 +169,10 @@ production, binder-aware substitution and demand-driven reduction remain
 the established accepting-path optimizations; the indexed range is a
 prerequisite for future zero-reconstruction evaluation, not permission to
 prematurely switch the trusted execution path.
+
+
+### Incrementally maintained live-local count (October 12 native checkpoint)
+
+The native `PsKernelLocalContext` now tracks `declCount` alongside the authoritative `decls` and independent fresh-name `nextIndex`. AddLocal/AddLet advance the live count once; the lazy radix promotion policy reads it in O(1) instead of traversing a list of up to 128 locals each extension. A recursor continuation must not equate `nextIndex` with binder depth; `psKernelLocalContextWithNextIndex` preserves the entire previous snapshot, its overlay and count while altering only the fresh-name counter. An elevated fresh index over a shallow context must not force index promotion. This field is an internal acceleration invariant, never an acceptance/type judgment.
+
+[CI 38240821497](https://github.com/dwijayuda/pskernel/actions/runs/38240821497) passed native source build, negative/differential regression and full original-core matched checking. Fully checked timings were near parity. The single-family private historical list-scan ablation [38241386784](https://github.com/dwijayuda/pskernel/actions/runs/38241386784) is required before attributing any checker speedup to this field. Additional one-field storage may change memory; process peak is not sufficient attribution.

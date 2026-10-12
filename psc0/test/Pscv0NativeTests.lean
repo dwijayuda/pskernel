@@ -1064,7 +1064,17 @@ private def projectBoundaries : IO Unit := do
     "const recordDefault: Defaults := Inhabited.default\n" ++
     "theorem countProof: recordDefault.count = 0 := by { rfl }\n"
   let derivingPending :=
-    "inductive Shade where { | dark | light } deriving BEq\n"
+    "inductive Shade where { | dark | light } deriving Repr\n"
+  let derivingEnumEqualitySource :=
+    "inductive Traffic where { | red | yellow | green } deriving BEq, Inhabited\n" ++
+    "const equalRed: Bool := Traffic.red == Traffic.red\n" ++
+    "theorem equalRedCorrect: equalRed = true := by { rfl }\n" ++
+    "const differentTags: Bool := Traffic.red == Traffic.green\n" ++
+    "theorem differentTagsCorrect: differentTags = false := by { rfl }\n" ++
+    "const defaultTraffic: Traffic := Inhabited.default\n" ++
+    "theorem defaultTrafficCorrect: defaultTraffic = Traffic.red := by { rfl }\n"
+  let derivingEnumFieldRefusal :=
+    "structure Label where { value: Nat } deriving BEq\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1116,7 +1126,10 @@ private def projectBoundaries : IO Unit := do
     { source := derivingPayload, moduleName := "DerivingPayload",
       targets := [.javascript, .typescript, .rust] },
     { source := derivingStructure, moduleName := "DerivingStructure",
-      targets := [.javascript, .typescript, .rust] }]
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingEnumEqualitySource, moduleName := "DerivingEnumBEq",
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingEnumFieldRefusal, moduleName := "DerivingBEqFields" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1210,6 +1223,15 @@ private def projectBoundaries : IO Unit := do
     | 27, .error error | 28, .error error =>
         throw (IO.userError ("derived payload/structure failed at " ++
           error.phase ++ ": " ++ error.message))
+    | 29, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "derived enumeration BEq missing target artifacts")
+    | 29, .error error =>
+        throw (IO.userError ("derived enumeration BEq failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 30, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "field-bearing BEq deriving did not fail at elaboration")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

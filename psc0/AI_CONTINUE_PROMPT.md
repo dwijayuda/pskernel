@@ -1,34 +1,32 @@
-# PSCV0 v7 — Native Lean continuation from latest qualified source
+# Continue PSCV0 v7 — Native Lean Phase A
 
-Repository: https://github.com/dwijayuda/pskernel
-Branch: `psc0/pscv0-v7-native-lean-v1`; draft PR #109.
-Latest executable checkpoint: `54899bd8dbfaa5d118a3cc8c1b2a744bd40d5049`.
-Linux CI green: https://github.com/dwijayuda/pskernel/actions/runs/38257103317.
+Repository https://github.com/dwijayuda/pskernel
+Branch `psc0/pscv0-v7-native-lean-v1`, draft PR #109.
+**Latest qualified executable:** `32ee1e2efbeebd08f4c86745bd3d27981cd19f6b`.
+**Linux CI:** https://github.com/dwijayuda/pskernel/actions/runs/38275596470.
 
-Read the TOP of `psc0/AI_WORK_STATE.md`, canonical
-`psc0/PSCV0_LANGUAGE_REFERENCE.md`, and
-`psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md` FIRST. Resolve live
-GitHub HEAD before editing. The new native source supports checked
-module-private identity, entry-reachable project closure, RC4-style public
-definition opacity/exposed abbreviations, runnable 3-file JS/TS/Rust
-linking, Wasm GC binary validation, raw strings and grouped radix literals.
-The source profile stays `pscv0-v7-native-bounded/48`.
-All 171 shared JS/TS/Rust/V8 Wasm/Wasmtime observations passed.
+Read the top of `psc0/AI_WORK_STATE.md`, canonical
+`psc0/PSCV0_LANGUAGE_REFERENCE.md` and
+`psc0/docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md`, then resolve
+the live branch HEAD before editing. Latest qualified source:
+164 portable/172 native Lean modules; 178 JS/TS/Rust/V8 GC/Wasmtime
+runtime observations; runnable three/four-module projects; checked
+Option/List Standard APIs, safe List.get?, exact raw/interpolated
+strings and selected numerals; typed BEq/ToString/Inhabited classes.
 
-Continue dependency-driven work to complete all remaining core and essential
-v7 language features, starting with full module/Standard semantic rules,
-deriving, GetElem, interpolated strings and scalar numeric families, then
-mutual/termination, generalized typed do/effects, proof-producing rewriting,
-contracts/VCs and assurance closure. Implement coherent native Lean
-abstractions before testing; reuse the compact Linux Actions integration
-matrix. Avoid test-driven special-case patches.
+Continue dependency-driven Phase A work, particularly exact Lean RC4
+GetElem/index proof semantics, selected deriving handler generation,
+Float/scientific/fixed-width scalars and the frozen Standard registry.
+Prefer coherent native Lean abstractions to patching tests. Check
+the formal interface/erasure/runtime invariants and qualify through
+the Linux Actions integration matrix; add only high-value negative
+tests. Update exact qualified SHA/CI evidence in AI_WORK_STATE and
+roadmap without claiming full v7 from bounded green results.
 
-Mandatory: .lean-only source, official Lean 4.35.0-rc4 checking, GitHub
-connector-only reads/writes and Linux GitHub Actions builds/tests. Never
-use local checkout/build, Desktop Commander, pskernel-core, .ps compiler
-migration, bootstrap/self-hosting, C5 source reconstruction, main merge,
-release, force push or branch deletion. Preserve Wasm GC internals/Canonical
-ABI linear memory and all backend contracts. Keep AI_WORK_STATE and roadmap
-current with *qualified executable* commit and CI SHA; do not infer full v7
-from green bounded evidence.
-
+Mandatory: native portable .lean implementation only; official
+Lean 4.35.0-rc4 checking; GitHub for all reads/writes; Linux GitHub
+Actions for builds/tests. No local checkout/build, Desktop Commander,
+pskernel-core, compiler-source .ps migration, self-hosting, C5 source
+reconstruction, main merge, release, branch deletion or force push.
+Preserve Wasm GC internally/Canonical ABI linear memory and existing
+JS/TS/Rust/Wasm contracts.

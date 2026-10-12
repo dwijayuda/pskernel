@@ -69,9 +69,10 @@ def psKernelWhnfCountLambdas
     argCount
     0
 
-def psKernelWhnfCoreFinish
+def psKernelWhnfCoreFinishWithKnownHash
     (original : PsKernelExpr)
     (cheapProj : Bool)
+    (knownHash : Option Nat)
     (result : PsKernelExpr)
     (state : PsKernelCheckerState) :
     Except String
@@ -81,16 +82,26 @@ def psKernelWhnfCoreFinish
       (Prod.mk result state)
   else
     let nextCache :=
-      psKernelExprMapInsert
+      psKernelExprMapInsertWithKnownHash
         state.whnfCore
         original
-        result;
+        result
+        knownHash;
     Except.ok
       (Prod.mk
         result
         (psKernelCheckerStateWithWhnfCore
           state
           nextCache))
+
+def psKernelWhnfCoreFinish
+    (original : PsKernelExpr)
+    (cheapProj : Bool)
+    (result : PsKernelExpr)
+    (state : PsKernelCheckerState) :
+    Except String (Prod PsKernelExpr PsKernelCheckerState) :=
+  psKernelWhnfCoreFinishWithKnownHash
+    original cheapProj none result state
 
 def psKernelWhnfFinish
     (original : PsKernelExpr)
@@ -112,7 +123,7 @@ def psKernelWhnfFinish
 
 def psKernelWhnfCoreWithFuelRanges
     (fuel : Nat)
-    (letRanges : List Nat) :
+    (letFrames : List (Prod Nat Nat)) :
     (PsKernelCheckerContext ->
       PsKernelCheckerState ->
       PsKernelExpr ->
@@ -238,35 +249,44 @@ def psKernelWhnfCoreWithFuelRanges
                           cheapRec
                           cheapProj
             | _ =>
-                match
-                    psKernelExprMapGet
-                      state.whnfCore
-                      expr with
+                -- A zeta suffix has its *exact* current-expression hash.
+                -- Only consecutive unchanged let bodies inherit frames.
+                let currentFrames :=
+                  match expr with
+                  | .letE _ _ _ _ _ =>
+                      match letFrames with
+                      | [] =>
+                          if psKernelC0HasLetPrefix 12 expr then
+                            match psKernelC0LetCacheFramesWithFuel 1024 expr with
+                            | some (_, _, frames) => frames
+                            | none => []
+                          else []
+                      | _ => letFrames
+                  | _ => []
+                let cached :=
+                  match currentFrames with
+                  | (_, hash) :: _ =>
+                      psKernelExprMapGetWithKnownHash state.whnfCore expr
+                        (some hash)
+                  | [] => psKernelExprMapGet state.whnfCore expr
+                match cached with
                 | Option.some cached =>
                     Except.ok
                       (Prod.mk cached state)
                 | Option.none =>
                     match expr with
                     | PsKernelExpr.letE _ _ value body _ =>
-                        -- One exact bounded suffix analysis for a long
-                        -- zeta chain; fall back on dependency or failure.
-                        let suffixes :=
-                          match letRanges with
-                          | [] =>
-                              if psKernelC0HasLetPrefix 12 expr then
-                                match psKernelC0LetBodyRangesWithFuel 1024 expr with
-                                | some (_, ranges) => ranges
-                                | none => []
-                              else []
-                          | _ => letRanges
-                        let (reduced, restRanges) :=
-                          match suffixes with
-                          | range :: tail =>
+                        -- Metadata is syntax-only; exact range zero proves
+                        -- substitution is a no-op. Any dependency discards
+                        -- both range and hash because the syntax changes.
+                        let (reduced, restFrames) :=
+                          match currentFrames with
+                          | (range, _) :: tail =>
                               if range == 0 then (body, tail)
                               else (psKernelExprInstantiate1 body value, [])
                           | [] => (psKernelExprInstantiate1 body value, [])
                         match
-                            smaller restRanges
+                            smaller restFrames
                               publicWhnf
                               reduceRecursor
                               nextContext
@@ -277,9 +297,12 @@ def psKernelWhnfCoreWithFuelRanges
                         | Except.error error =>
                             Except.error error
                         | Except.ok result =>
-                            psKernelWhnfCoreFinish
+                            psKernelWhnfCoreFinishWithKnownHash
                               expr
                               cheapProj
+                              (match currentFrames with
+                               | (_, hash) :: _ => some hash
+                               | [] => none)
                               (Prod.fst result)
                               (Prod.snd result)
                     | PsKernelExpr.proj typeName index structValue =>

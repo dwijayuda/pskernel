@@ -149,3 +149,25 @@ The no-list selector is **~2.32× slower** on this workload. It is therefore **n
 ### Final post-rollback native validation (2026-10-12)
 
 [PSKernel-C0 native Lean CI 38195084646](https://github.com/dwijayuda/pskernel/actions/runs/38195084646) at source commit `5de4773f8fdbbfcc2e4acc0377524c1a92231683` **passed all three gates**: 84-job full native Lean build; negative and differential semantic checker regression; native Lean performance benchmark suite. The production constructor-projection path again uses list-backed application-field selection. The direct selector remains an experimental helper, never a checked shortcut. Its paired same-run reference-vs-direct result still regressed: 396 ms list / 911 ms direct over 18,000 depth-512 queries (~2.30× slower). Delta eager/lazy miss results 112/111 ms are near parity, not a reliable checker speedup. Native Linux entire benchmark process VmHWM 633996 kB. This validation includes **no self-host/bootstrap or metatheory tests**. Representative entire-library baseline and session-indexed acceptance work remain open.
+
+
+
+## October 12: same-run original-versus-C0 native checker qualification
+
+Exact same `test/C0CheckerComparison.lean`, 4.34.0 toolchain, original repository `pskernel-core/src` staged into an isolated temporary Lake package (source unchanged). Initial successful [CI 38213558411](https://github.com/dwijayuda/pskernel/actions/runs/38213558411):
+
+| Full cold WHNF 1,600 calls/round | Original core | C0 |
+| --- | ---: | ---: |
+| Round 0 | 109 ms | 112 ms |
+| Round 1 | 107 ms | 102 ms |
+| Round 2 | 104 ms | 103 ms |
+
+These observations show **near-parity**, not a reliable full-checker win. Other matched simple DefEq/inference/admission cases were mostly sub-10-ms samples and cannot support performance rankings. The later test also exercises a genuinely admitted typed 48-application function; record those results separately once its CI run completes.
+
+[CI 38213859123](https://github.com/dwijayuda/pskernel/actions/runs/38213859123): opt-in session-indexed syntactic retention **26 ms** versus ordinary checker **54 ms**? Correct order: *ordinary checker 26 ms; opt-in indexed session 54 ms*, over 1,200 repeated stuck WHNF checks; 50 canonical nodes retained, 1 root. No benefit, do not enable on production default. [CI 38214198674](https://github.com/dwijayuda/pskernel/actions/runs/38214198674) with 40-root radix-promotion tests similarly measured 27 ms ordinary vs 53 ms retained indexed session. The indexed store is only staging.
+
+[CI 38214477987](https://github.com/dwijayuda/pskernel/actions/runs/38214477987) **passed** the full native build/test/benchmark plus original-core comparison. On a cold canonical binder interning stress of eight stores, each with 160 distinct binder names, the pre-change missing-binder-identity hash measured **60 ms**, new full-identity hash **8 ms** (~7.5× reduction in this isolated term-store operation). The new hash covers lambda/forall names and binder info, plus let names. Exact interning remains collision-checked. This is not the accepting checked pipeline.
+
+[CI 38214789693](https://github.com/dwijayuda/pskernel/actions/runs/38214789693) **passed** all native gates. Original infer-only spine worker with repeated list-count scans: **5 ms**, new once-per-spine count worker: **1 ms**, 192 args × 350 calls. Values are too small to support a stable 5× overall throughput assertion; benchmark is isolated and does not include full expression inference or checked admission. No self-host or bootstrap tests run.
+
+C0 peak benchmark process VmHWM includes Lean interpreter, all tests and temporary allocations; treat it as process-level only. Representative complete library throughput, p95, per-operation allocations and proof/semantic correctness evidence beyond differential tests remain open.

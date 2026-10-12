@@ -140,7 +140,7 @@ jobs:
           node ../scripts/pscv0-native-wasm-abi.mjs ../dist/pscv0-native/wasm | tee ../dist/pscv0-native/wasm/abi-qualification.log
           node ../scripts/pscv0-native-wasm.mjs ../dist/pscv0-native/wasm | tee ../dist/pscv0-native/wasm/qualification.log
           .lake/build/bin/pscv0_native --emit-project-wasm-core ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/core
-          wasm-tools validate ../dist/pscv0-native/modules/core.wasm
+          wasm-tools validate ../dist/pscv0-native/modules/core.core.wasm
           .lake/build/bin/pscv0_native --emit-project-wasm ../v7-native/module-fixture/project.json ../dist/pscv0-native/modules/component ../v7-native/module-fixture/exports.json
           wasm-tools validate ../dist/pscv0-native/modules/component.wasm
       - name: Compile and run the small emitted application with pinned TypeScript

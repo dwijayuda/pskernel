@@ -1,4 +1,5 @@
 // Independent format/engine checks. Production emission never invokes these tools.
+import { observations } from './pscv0-native-observations.mjs';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -20,7 +21,7 @@ function exportsOf(wit) {
     .map(m => [m[1], m[2].replaceAll('%', '').replace(/\s/g, ''), m[3] ?? ''])
     .sort((a, b) => a[0].localeCompare(b[0]));
 }
-for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
+for (const name of ['gc-probe', 'scalar', 'natural-probe', 'observations']) {
   const stem = path.join(directory, name);
   const declared = run('wasm-tools', ['component', 'wit', stem + '.wit']);
   const extracted = run('wasm-tools', ['component', 'wit', stem + '.wasm']);
@@ -49,7 +50,7 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
     assert.equal(run('wasmtime', ['run', '--invoke', 'readCaptured', stem + '.core.wasm', '42']), '42');
     for (const suffix of ['.wasm', '.roundtrip.wasm'])
       assert.equal(run('wasmtime', ['run', '--invoke', componentCall('read-captured', [42]), stem + suffix]), '42');
-  } else if (name === 'natural-probe') {
+  } else if (name === 'natural-probe' || name === 'observations') {
     for (const [foreign] of exportsOf(declared)) {
       const internal = foreign.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
       assert.equal(instance.exports[internal](), 1, internal);
@@ -70,6 +71,6 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
   }
   console.log(await readFile(stem + '.wit', 'utf8'));
 }
-console.log(JSON.stringify({profile:'pscv0-wasm-c3/1', node:process.version, v8:process.versions.v8,
+console.log(JSON.stringify({profile:'pscv0-wasm-c4-candidate/1', node:process.version, v8:process.versions.v8,
   wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
-  gcInsideComponent:true, scalarWorlds:3, naturalLimbChecks:10, coreBinaryWatEqual:true}));
+  gcInsideComponent:true, scalarWorlds:4, sharedObservations:observations.length, naturalLimbChecks:10, coreBinaryWatEqual:true}));

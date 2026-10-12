@@ -117,7 +117,7 @@ lean_lib PsCompiler where
 
 lean_lib PsCodegen where
   srcDir := "packages/codegen/src"
-  roots := #[`Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact, `Ps.Codegen.Provenance, `Ps.Codegen.Api, `Ps.Codegen.SourceMap]
+  roots := #[`Ps.Codegen.Captures, `Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact, `Ps.Codegen.Provenance, `Ps.Codegen.Api, `Ps.Codegen.SourceMap]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
@@ -155,7 +155,9 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.Wat, `Ps.BackendWasm.Names, `Ps.BackendWasm.Scalar,
     `Ps.BackendWasm.Component, `Ps.BackendWasm.Module,
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
-    `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural]
+    `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
+    `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Intrinsic,
+    `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower]
 
 lean_lib PsBootstrap where
   srcDir := "packages/bootstrap/src"

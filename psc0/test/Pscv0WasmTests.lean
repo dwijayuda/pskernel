@@ -84,7 +84,7 @@ def main : IO Unit := do
   let requests : Array PsV7Native.Request := #[
     { source, targets := [.wasmComponent], outputStem := "scalar",
       exports := .selected ["both", "invert"] },
-    { source := "const bigint: Nat := 18446744073709551617\n", targets := [.wasmCore] },
+    { source := "const bigint: Nat := 18446744073709551617\n", targets := [.wasmComponent] },
     { source, targets := [.wasmComponent], exports := .selected ["missing"] }]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok b => pure b
@@ -105,4 +105,4 @@ def main : IO Unit := do
       | .ok _ => throw (IO.userError "expected bounded-profile/export refusal")
       | .error e =>
         if e.phase != "ir/emit" then throw (IO.userError ("unexpected refusal phase: " ++ e.phase))
-  IO.println "Wasm C3: scalar native pipeline, two refusals, typed GC/component fixture emitted."
+  IO.println "Wasm: scalar native pipeline, two refusals, typed GC/component fixture emitted."

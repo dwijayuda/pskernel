@@ -1,4 +1,4 @@
-import Ps.BackendWasm.Scalar
+import Ps.BackendWasm.Lower
 import Ps.BackendWasm.Component
 import Ps.BackendWasm.ValidateIr
 
@@ -11,12 +11,27 @@ def checkedCore (core : PsWasmModule) (locals : LocalNames := []) : Except Strin
 
 -- Caller must enter through psWithCheckedIr. The independently checked target
 -- module is retained unchanged for both binary and readable text serialization.
-def emitScalar (ir : PsVerifiedIrModule) (context : PsEmissionContext)
+def emit (ir : PsVerifiedIrModule) (context : PsEmissionContext)
     (component : Bool) (exposure : PsApiExposure := .allRuntime) :
     Except String PsEmissionArtifact := do
   let api ← psPublicApi ir exposure
-  let (lowered, locals) ← scalarModule ir
-  let core := { lowered with exports := api.exports.map fun d => (d.name, d.name) }
+  let (view, names) ← psCodegenNamesFor ir []
+  let nameOf := fun name => ((names.symbols.find? (fun s => s.semanticName == name)).map (·.outputName)).getD name
+  let (lowered, locals) ← lowerModule view
+  let mut core := { lowered with exports := api.exports.map fun d => (d.name, nameOf d.name) }
+  -- Scalar component compatibility: internal Unit is a value; WIT Unit result
+  -- is an explicitly omitted result at the boundary.
+  if component then
+    for d in api.exports do
+      if let .primitive .unit := d.resultType then
+        let name := "__ps_abi_unit_" ++ nameOf d.name
+        let parameters ← d.parameters.mapM (fun p => representation p.type)
+        let wrapper : PsWasmFunction := {
+          name, typeName := none, parameters, results := [], locals := []
+          body := (parameters.zipIdx.map fun (_, i) => .localGet i) ++ [.call (nameOf d.name), .drop] }
+        core := { core with functions := core.functions ++ [wrapper],
+          exports := core.exports.map fun (exportedName, target) => (exportedName, if exportedName == d.name then name else target) }
+  let core ← pruneFunctions core
   let binary ← checkedCore core locals
   let source ← psRenderDoc (watModuleDoc core locals)
   let stem := context.outputStem

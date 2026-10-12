@@ -1092,7 +1092,19 @@ private def projectBoundaries : IO Unit := do
     "const foldedRight: List Nat := List.foldr(listConsHead, [], [3, 4])\n" ++
     "theorem foldedRightProof: foldedRight = [3, 4] := by { rfl }\n" ++
     "const reversedList: List Nat := List.reverse([1, 2, 3])\n" ++
-    "theorem reversedListProof: reversedList = [3, 2, 1] := by { rfl }\n"
+    "theorem reversedListProof: reversedList = [3, 2, 1] := by { rfl }\n" ++
+    "const firstTwo: List Nat := List.take(2, [10, 20, 30])\n" ++
+    "theorem firstTwoProof: firstTwo = [10, 20] := by { rfl }\n" ++
+    "const beyondLength: List Nat := List.take(9, [10, 20])\n" ++
+    "theorem beyondLengthProof: beyondLength = [10, 20] := by { rfl }\n" ++
+    "const emptyPrefix: List Nat := List.take(0, [10, 20])\n" ++
+    "theorem emptyPrefixProof: emptyPrefix = [] := by { rfl }\n" ++
+    "const remaining: List Nat := List.drop(2, [10, 20, 30])\n" ++
+    "theorem remainingProof: remaining = [30] := by { rfl }\n" ++
+    "const noneRemain: List Nat := List.drop(9, [10, 20])\n" ++
+    "theorem noneRemainProof: noneRemain = [] := by { rfl }\n" ++
+    "const allRemain: List Nat := List.drop(0, [10, 20])\n" ++
+    "theorem allRemainProof: allRemain = [10, 20] := by { rfl }\n"
   let inhabitedSource :=
     "const defaultNat: Nat := Inhabited.default\n" ++
     "theorem defaultNatProof: defaultNat = 0 := by { rfl }\n" ++

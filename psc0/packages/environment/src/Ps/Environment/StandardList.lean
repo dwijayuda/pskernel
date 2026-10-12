@@ -192,6 +192,66 @@ def psStandardListGetQuestionDeclaration : PsDeclaration :=
       (psLogicLam 2 "index" nat body)) .implicit
   .definitionDecl (psNameAppendStr psListName "get?") [] type value
 
+-- Standard List.take/drop are entirely checked structural programs, sharing
+-- the List.rec / Nat.rec worker architecture used for the qualified List.get?.
+-- The recursive hypothesis has type Nat → List α; the index split is performed
+-- by Nat.rec, with no implicit index validity assumption, unchecked projection
+-- or new trusted runtime primitive.
+def psStandardListTakeWorkerName : PsName :=
+  psNameAppendStr (psRootName "$psc0Standard") "listTakeWorker"
+
+def psStandardListDropWorkerName : PsName :=
+  psNameAppendStr (psRootName "$psc0Standard") "listDropWorker"
+
+def psStandardListSliceWorkerDeclaration (take : Bool) : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let listAlpha := psSelfHostListOf alpha
+  let nat := PsExpr.constE psNatName []
+  let resultArrow := psLogicPi 20 "count" nat listAlpha
+  let motive := psLogicLam 21 "_" listAlpha resultArrow
+  let nilBranch := psLogicLam 22 "count" nat (psSelfHostListNilOf alpha)
+  let natMotive := psLogicLam 23 "_" nat listAlpha
+  let consBranch := psLogicLam 5 "head" alpha
+    (psLogicLam 6 "tail" listAlpha
+      (psLogicLam 7 "ih" resultArrow
+        (psLogicLam 8 "count" nat
+          (psLogicApply (.constE psNatRecName [.succ .zero])
+            [natMotive,
+             if take then psSelfHostListNilOf alpha
+             else psSelfHostListConsOf alpha (.fvar 5) (.fvar 6),
+             psLogicLam 9 "previous" nat
+               (psLogicLam 10 "_" listAlpha
+                 (if take then
+                   psSelfHostListConsOf alpha (.fvar 5) (.app (.fvar 7) (.fvar 9))
+                 else .app (.fvar 7) (.fvar 9))),
+             .fvar 8]))))
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "xs" listAlpha resultArrow) .implicit
+  let body := psLogicApply psStandardListRecursor
+    [alpha, motive, nilBranch, consBranch, .fvar 1]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "xs" listAlpha body) .implicit
+  .definitionDecl
+    (if take then psStandardListTakeWorkerName else psStandardListDropWorkerName)
+    [] type value
+
+def psStandardListSliceDeclaration (take : Bool) : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let nat := PsExpr.constE psNatName []
+  let listAlpha := psSelfHostListOf alpha
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "count" nat
+      (psLogicPi 2 "xs" listAlpha listAlpha)) .implicit
+  let worker := if take then psStandardListTakeWorkerName else
+    psStandardListDropWorkerName
+  let body := psLogicApply (.constE worker []) [alpha, .fvar 2, .fvar 1]
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "count" nat
+      (psLogicLam 2 "xs" listAlpha body)) .implicit
+  .definitionDecl
+    (psNameAppendStr psListName (if take then "take" else "drop"))
+    [] type value
+
 def psStandardListFoldrDeclaration : PsDeclaration :=
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
@@ -239,7 +299,11 @@ def psStandardListDeclarations : List PsDeclaration :=
    psStandardListAppendDeclaration, psStandardListFilterDeclaration,
    psStandardListFoldlWorkerDeclaration, psStandardListFoldlDeclaration,
    psStandardListGetWorkerDeclaration, psStandardListGetQuestionDeclaration,
-   psStandardListFoldrDeclaration, psStandardListReverseDeclaration]
+   psStandardListSliceWorkerDeclaration true,
+    psStandardListSliceWorkerDeclaration false,
+    psStandardListSliceDeclaration true,
+    psStandardListSliceDeclaration false,
+    psStandardListFoldrDeclaration, psStandardListReverseDeclaration]
 
 def psStandardPreludeDeclarationsWithList : List PsDeclaration :=
   psStandardPreludeDeclarationsWithOption ++ psStandardListDeclarations

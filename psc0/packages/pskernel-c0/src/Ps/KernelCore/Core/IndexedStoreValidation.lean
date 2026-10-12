@@ -10,16 +10,48 @@ formal proof. This deliberately slow checker reconstructs interned nodes in
 their stored order and checks the required local facts before a caller may
 even *consider* an indexed store as well formed.
 
-This is not a proof of StoreWF, not a seal against handles copied from
-another store, not a complete check that an index contains no extraneous
-unreachable entries, and not an accepting kernel operation.
+This is not a formal StoreWF proof and cannot seal an external Nat handle
+against reuse in another store. However, it now checks the *entire* radix trie
+against deterministic replay, including the absence of extraneous bucket
+entries. It remains an offline, non-accepting diagnostic.
 -/
+
+/-- Entire canonical radix index equality, bounded by the fixed trie
+    depth. This compares all child slots and leaf ID lists, including empty
+    slots, so a reachable index cannot hide a ghost/duplicate entry. The
+    replayed trie was built independently using canonical PsKernelC0Intern. -/
+def psKernelC0IndexReplayEqualWithFuel
+    (fuel : Nat)
+    (left right : PsKernelC0Trie) : Bool :=
+  match fuel with
+  | 0 =>
+      match left, right with
+      | .empty, .empty => true
+      | .bucket xs, .bucket ys => xs == ys
+      | _, _ => false
+  | remaining + 1 =>
+      match left, right with
+      | .empty, .empty => true
+      | .branch first second =>
+          if first.size != second.size then false
+          else Id.run do
+            for i in [:first.size] do
+              let some lhs := first[i]?
+                | return false
+              let some rhs := second[i]?
+                | return false
+              if !psKernelC0IndexReplayEqualWithFuel remaining lhs rhs then
+                return false
+            return true
+      | _, _ => false
 
 /-- Replaying nodes against an initially empty canonical store enforces:
     (1) every child points to a strictly earlier valid node;
     (2) no duplicate node has a distinct canonical handle;
     (3) hash/checkerHash, depth and loose-bvar range equal recomputation;
     (4) each stored node is discoverable in its own collision-checked bucket.
+    (5) the **entire** radix index exactly matches independently replayed
+    canonical insertion, including no ghost or duplicate bucket entries.
     Validation costs a full replay and is never used as a hot-path shortcut. -/
 def psKernelC0ReplayValidateStore
     (store : PsKernelC0TermStore) : Bool := Id.run do
@@ -46,4 +78,5 @@ def psKernelC0ReplayValidateStore
         | some found =>
             if found != i then return false
         rebuilt := next
-  return true
+  return psKernelC0IndexReplayEqualWithFuel
+    psKernelC0IndexDepth store.index rebuilt.index

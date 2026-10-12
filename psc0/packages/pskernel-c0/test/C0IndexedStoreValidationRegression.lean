@@ -53,9 +53,22 @@ def main : IO Unit := do
         { store with nodes := store.nodes.set! id cycleNode }
       let dangling : PsKernelC0TermStore :=
         { store with nodes := store.nodes.set! id danglingNode }
+      -- The original per-node lookup still succeeds if the index
+      -- also contains a forged/duplicated candidate ID. Full replay
+      -- equality now detects both incorrect bucket memberships.
+      let bucket := psKernelC0TermTrieBucket psKernelC0IndexDepth
+        store.index root.hash
+      let forged : PsKernelC0TermStore :=
+        { store with index := psKernelC0TermTrieReplace
+            psKernelC0IndexDepth store.index root.hash
+            ((store.nodes.size + 3) :: bucket) }
+      let repeatedId : PsKernelC0TermStore :=
+        { store with index := psKernelC0TermTrieReplace
+            psKernelC0IndexDepth store.index root.hash
+            (id :: bucket) }
       let malformed := [
         corruptHash, corruptCheckerHash, corruptDepth, corruptRange,
-        missingIndex, duplicate, cycle, dangling
+        missingIndex, duplicate, cycle, dangling, forged, repeatedId
       ]
       for bad in malformed do
         if psKernelC0ReplayValidateStore bad then

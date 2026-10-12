@@ -124,6 +124,18 @@ def tailBody (brands tags : List (String × String)) (d : PsVerifiedIrDeclaratio
         fail "invalid ProofScript constructor tag"]]
     | _ => return [ret (← pureExpr value)]
 
+-- Continue belongs to the current tail loop only. Do not inspect expression
+-- functions: their control flow has its own lexical/function boundary.
+def tailHasContinue : Nat → Stmt → Bool
+  | 0, _ => true
+  | fuel + 1, statement =>
+    match statement with
+    | .continueE => true
+    | .block statements => statements.any (tailHasContinue fuel)
+    | .ifE _ yes no => yes.any (tailHasContinue fuel) || no.any (tailHasContinue fuel)
+    | .switchE _ cases => cases.any (fun c => c.snd.any (tailHasContinue fuel))
+    | _ => false
+
 def declaration (brands tags : List (String × String)) (d : PsVerifiedIrDeclaration) :
     Except String (List Stmt) := do
   if let some loop := countLoop tags d then return [loop]
@@ -132,7 +144,9 @@ def declaration (brands tags : List (String × String)) (d : PsVerifiedIrDeclara
   let body := psTsInlineEtaApplication d.body
   if d.typeParameters.isEmpty && !parameters.isEmpty then
     if let some tail := tailBody brands tags d 4096 [] body then
-      return [.functionD true false d.name "" parameters result [.whileE (id "true") tail]]
+      let statements := if tail.any (tailHasContinue 4096) then [.whileE (id "true") tail]
+        else match tail with | [.block body] => body | _ => tail
+      return [.functionD true false d.name "" parameters result statements]
   let body ← lower brands tags 4096 body
   let computation := "__ps$Computation<" ++ result ++ ">"
   if parameters.isEmpty then

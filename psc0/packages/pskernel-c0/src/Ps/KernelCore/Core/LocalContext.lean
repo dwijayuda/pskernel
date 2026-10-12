@@ -99,8 +99,10 @@ Adaptive local-context indexing.
 Short-lived binder contexts should not pay to build a radix-16 index.
 Measured complete admission workloads through depth 48 were slower with
 eager indexed updates; deep (512-local) repeated lookups benefit strongly.
-Use the ordered declaration list up through depth 64, then build an immutable
-indexed snapshot at the 65th binder.
+Matched full-checker benchmarks show one-shot local references at depth 96
+still do not amortize index construction, while repeated 512-local lookups
+benefit strongly. Use the ordered declaration list through depth 128 and
+build an immutable indexed snapshot at the 129th binder.
 
 Thereafter collect up to sixteen new declarations in an ordered overlay.
 Lookups first inspect the overlay and then the indexed snapshot. Once full,
@@ -109,7 +111,7 @@ This amortizes expensive four-level radix path copies without changing
 lookup, shadowing, historical snapshots or the authoritative declaration list.
 No cache value is ever used as proof of well-typedness.
 -/
-def psKernelC0LocalIndexThreshold : Nat := 64
+def psKernelC0LocalIndexThreshold : Nat := 128
 def psKernelC0LocalIndexBatchSize : Nat := 16
 
 def psKernelC0LocalIndexInsert

@@ -12,6 +12,10 @@ inductive PsWasmEncodeError where
   | unknownStructure (name : String)
   deriving Repr
 
+def psWasmEncodeMany {α : Type} (encode : α → Except PsWasmEncodeError (List UInt8))
+    (values : List α) : Except PsWasmEncodeError (List UInt8) := do
+  return (← values.mapM encode).flatten
+
 def psWasmByte (value : Nat) : UInt8 :=
   UInt8.ofNat value
 
@@ -261,7 +265,7 @@ def psWasmEncodeValueTypes
     (arrays : List PsWasmArrayType)
     (types : List PsWasmValueType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeValueType structures arrays)
     types
 
@@ -332,7 +336,7 @@ def psWasmEncodeNamedFunctionTypes
     (arrays : List PsWasmArrayType)
     (functionTypesToEncode : List PsWasmFunctionType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeNamedFunctionType structures arrays)
     functionTypesToEncode
 
@@ -355,7 +359,7 @@ def psWasmEncodeFunctionTypes
     (arrays : List PsWasmArrayType)
     (functionsToEncode : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeFunctionType structures arrays)
     functionsToEncode
 
@@ -669,7 +673,7 @@ def psWasmEncodeInstructions
     (functions : List PsWasmFunction)
     (instructions : List PsWasmInstruction) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeInstruction structures arrays functionTypes functions)
     instructions
 
@@ -687,7 +691,7 @@ def psWasmEncodeLocalDeclarations
     (arrays : List PsWasmArrayType)
     (types : List PsWasmValueType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept (psWasmEncodeLocalDeclaration structures arrays) types
+  psWasmEncodeMany (psWasmEncodeLocalDeclaration structures arrays) types
 
 def psWasmEncodeFunctionBody
     (structures : List PsWasmStructType)
@@ -728,7 +732,7 @@ def psWasmEncodeFunctionBodies
     (functions : List PsWasmFunction)
     (functionsToEncode : List PsWasmFunction) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeFunctionBody structures arrays functionTypes functions)
     functionsToEncode
 
@@ -758,7 +762,7 @@ def psWasmEncodeStructFields
     (arrays : List PsWasmArrayType)
     (fields : List PsWasmStructField) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeStructField structures arrays)
     fields
 
@@ -806,7 +810,7 @@ def psWasmEncodeStructTypes
     (arrays : List PsWasmArrayType)
     (structTypes : List PsWasmStructType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeStructType structures arrays)
     structTypes
 
@@ -833,7 +837,7 @@ def psWasmEncodeArrayTypes
     (arrays : List PsWasmArrayType)
     (arrayTypes : List PsWasmArrayType) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept
+  psWasmEncodeMany
     (psWasmEncodeArrayType structures arrays)
     arrayTypes
 
@@ -931,7 +935,7 @@ def psWasmEncodeFunctionRefIndices
     (functions : List PsWasmFunction)
     (names : List String) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept (psWasmEncodeFunctionRefIndex functions) names
+  psWasmEncodeMany (psWasmEncodeFunctionRefIndex functions) names
 
 def psWasmEncodeDeclarativeFunctionRefs
     (functions : List PsWasmFunction)
@@ -972,7 +976,7 @@ def psWasmEncodeExports
     (functions : List PsWasmFunction)
     (exports : List (String × String)) :
     Except PsWasmEncodeError (List UInt8) :=
-  psListFlatMapExcept (psWasmEncodeExport functions) exports
+  psWasmEncodeMany (psWasmEncodeExport functions) exports
 
 def psWasmEncodeSection
     (sectionId : Nat)

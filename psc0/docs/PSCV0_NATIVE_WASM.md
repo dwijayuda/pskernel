@@ -1,6 +1,13 @@
 # Native direct Wasm implementation
 
-C3 checkpoint under development; qualification is pending. C4/C4b are not
+C3 checkpoint under development; qualification is pending.
+
+User architecture clarification: **Wasm GC only; no linear memory anywhere.**
+All language data and runtime allocation remain in Wasm GC. Standard aggregate
+Canonical ABI adapters are deferred; they require linear memory. C4b is now
+limited to scalar component interfaces. Aggregate/resource lifecycle completion
+from the original C4b plan is not claimed. No alternative linear-memory backend
+or hidden ABI-memory fallback will be introduced. C4/C4b are not
 complete. The approved architecture remains PSCV0_DIRECT_JS_WASM_ARCHITECTURE.md.
 
 The native v7 pipeline retains official Lean checking and complete runtime-IR

@@ -18,10 +18,10 @@ def scalarType : PsVerifiedIrType → Except String PsWasmValueType
   | _ => throw "PSCV0-WASM-C3-CAPABILITY: expected Bool, Char or Unit; aggregate/bigint runtime requires C4"
 
 def scalarLocal (name : String) (type : PsWasmValueType) : ScalarM Nat := do
-  let state ← get
+  let state : ScalarState ← get
   let index := state.types.length
   let output := psCodegenFresh (state.names.length + 1) state.names (psCodegenBaseName name)
-  set { types := state.types ++ [type], names := state.names ++ [output] }
+  set ({ types := state.types ++ [type], names := state.names ++ [output] } : ScalarState)
   return index
 
 def scalarExpr (module : PsVerifiedIrModule) :

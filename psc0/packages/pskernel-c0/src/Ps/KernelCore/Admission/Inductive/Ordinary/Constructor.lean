@@ -520,7 +520,9 @@ def psKernelOpenSimpleConstructorFieldsWithFuel
                                 PsKernelLocalContext.mk
                                   child0.context.localContext.decls
                                   analysisLocal.nextIndex
-                                  child0.context.localContext.index;
+                                  child0.context.localContext.index
+                                  child0.context.localContext.pending
+                                  child0.context.localContext.pendingCount;
                               let child :=
                                 PsKernelCheckerSession.mk
                                   (psKernelCheckerContextWithLocalContext

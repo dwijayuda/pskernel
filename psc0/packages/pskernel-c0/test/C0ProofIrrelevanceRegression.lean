@@ -818,3 +818,32 @@ def main : IO Unit := do
         throw (IO.userError "C0 binder-probe instantiation differs from generic reference")
   IO.println "C0_PERF_REGRESSION instantiate1_binder_family=pass"
 
+  -- Independently retained fuel-bounded original substitution worker checks
+  -- the entire family, not merely the new generic C0 entry. Generate varied
+  -- binder depths and embed the bound-variable case into every expression
+  -- constructor that can carry a substitutable child.
+  let oracleName := PsKernelName.str PsKernelName.anonymous "C0SubstOracle"
+  for depth in [0, 1, 2, 4, 8, 12] do
+    let mut nested := PsKernelExpr.bvar (depth + 1)
+    for i in [:depth] do
+      nested := PsKernelExpr.forallE
+        (PsKernelName.num oracleName i) sort0 nested
+        PsKernelBinderInfo.default
+    let forms := [
+      nested,
+      PsKernelExpr.lam oracleName sort0 nested PsKernelBinderInfo.default,
+      PsKernelExpr.letE oracleName sort0 sort0 nested false,
+      PsKernelExpr.app nested sort1,
+      PsKernelExpr.mdata depth nested,
+      PsKernelExpr.proj oracleName depth nested
+    ]
+    for term in forms do
+      for replacement in [sort0, PsKernelExpr.bvar 2] do
+        let reference := psKernelExprInstantiateAtChangedWithFuel
+          (Nat.succ (psKernelExprNodeCount term))
+          term 0 [replacement] 0
+        let actual := psKernelExprInstantiate1 term replacement
+        if !(psKernelExprEqual (Prod.fst reference) actual) then
+          throw (IO.userError "C0 instantiated term differs from independent old worker")
+  IO.println "C0_PERF_REGRESSION instantiate1_independent_binder_oracle=pass"
+

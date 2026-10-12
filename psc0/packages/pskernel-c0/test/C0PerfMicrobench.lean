@@ -369,6 +369,40 @@ def main : IO Unit := do
   IO.println s!"C0_BENCH instantiate1 generic_ms={subsEnd - subsStart} specialized_ms={c0End - c0Start} apps={specializedApps} iterations={iterations}"
 
   let sort0 := PsKernelExpr.sort PsKernelLevel.zero
+  -- Build cost includes all radix allocations. Compare against an
+  -- identical immutable list-only context while preserving name/order.
+  -- This distinguishes index maintenance overhead from deep lookup savings.
+  for entryCount in [16, 32, 64, 512] do
+    let buildRuns := if entryCount == 512 then 15 else 160
+    let buildStart ← IO.monoMsNow
+    let mut indexedEntries := 0
+    for _ in [:buildRuns] do
+      let mut next := psKernelLocalContextEmpty
+      for k in [:entryCount] do
+        let name := PsKernelName.num PsKernelName.anonymous k
+        next := psKernelLocalContextAddLocal next name name
+          sort0 PsKernelBinderInfo.default
+      indexedEntries := indexedEntries + next.decls.length
+    let buildEnd ← IO.monoMsNow
+    let linearStart ← IO.monoMsNow
+    let mut linearEntries := 0
+    for _ in [:buildRuns] do
+      let mut next := psKernelLocalContextEmpty
+      for k in [:entryCount] do
+        let name := PsKernelName.num PsKernelName.anonymous k
+        let decl := PsKernelLocalDecl.localDecl
+          next.nextIndex name name sort0 PsKernelBinderInfo.default
+        next := {
+          decls := decl :: next.decls
+          nextIndex := next.nextIndex + 1
+          index := Option.none
+        }
+      linearEntries := linearEntries + next.decls.length
+    let linearEnd ← IO.monoMsNow
+    if indexedEntries != linearEntries ||
+        indexedEntries != entryCount * buildRuns then
+      throw (IO.userError "C0 local construction benchmark mismatch")
+    IO.println s!"C0_BENCH locals_build list_ms={linearEnd-linearStart} adaptive_ms={buildEnd-buildStart} entries={entryCount} runs={buildRuns}"
   let mut locals := psKernelLocalContextEmpty
   for k in [:512] do
     let name := PsKernelName.num PsKernelName.anonymous k

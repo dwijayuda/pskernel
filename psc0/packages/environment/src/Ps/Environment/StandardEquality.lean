@@ -79,6 +79,48 @@ def psStandardBEqStringMethod : PsExpr :=
   psLogicLam 0 "left" str
     (psLogicLam 1 "right" str result)
 
+-- A parameterized BEq instance over Option α. Its only assumption is a
+-- checked BEq α dictionary supplied by ordinary typeclass search. Both
+-- constructor splits are real Option.rec eliminations, not a host shortcut.
+def psStandardBEqOptionInstance : PsDeclaration :=
+  let alpha := PsExpr.fvar 0
+  let dictionaryType := PsExpr.app (.constE (psRootName "BEq") [.zero]) alpha
+  let option := psSelfHostOptionOf alpha
+  let bool := PsExpr.constE psBoolName []
+  let recursor := PsExpr.constE psSelfHostOptionRecName [.succ .zero]
+  let innerMotive := psLogicLam 8 "_" option bool
+  let outerMotive := psLogicLam 9 "_" option
+    (psLogicPi 10 "other" option bool)
+  let noneBranch := psLogicLam 3 "other" option
+    (psLogicApply recursor
+      [alpha, innerMotive,
+       .constE psBoolTrueName [],
+       psLogicLam 5 "_" alpha (.constE psBoolFalseName []),
+       .fvar 3])
+  let elementEquality := psLogicApply
+    (.constE (psNameAppendStr (psRootName "BEq") "beq") [.zero])
+    [alpha, .fvar 1, .fvar 4, .fvar 5]
+  let someBranch := psLogicLam 4 "leftValue" alpha
+    (psLogicLam 3 "other" option
+      (psLogicApply recursor
+        [alpha, innerMotive,
+         .constE psBoolFalseName [],
+         psLogicLam 5 "rightValue" alpha elementEquality,
+         .fvar 3]))
+  let outer := psLogicApply recursor
+    [alpha, outerMotive, noneBranch, someBranch, .fvar 2]
+  let method := psLogicLam 2 "left" option
+    (psLogicLam 3 "right" option (.app outer (.fvar 3)))
+  let classType := PsExpr.app (.constE (psRootName "BEq") [.zero]) option
+  let result := psLogicApply (.constE
+    (psNameAppendStr (psRootName "BEq") "mk") [.zero]) [option, method]
+  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psLogicPi 1 "instance" dictionaryType classType .instanceImplicit) .implicit
+  let value := psLogicLam 0 "α" psPreludeTypeType
+    (psLogicLam 1 "instance" dictionaryType result .instanceImplicit) .implicit
+  .definitionDecl (psNameAppendStr (psRootName "PsStandard") "instBEqOption")
+    [] type value
+
 def psStandardBEqInstances : List PsDeclaration :=
   [psStandardBEqInstance "Nat" (.constE psNatName [])
       (.constE psNatBeqName []),
@@ -89,7 +131,8 @@ def psStandardBEqInstances : List PsDeclaration :=
    psStandardBEqInstance "String" (.constE psStringName [])
       psStandardBEqStringMethod,
    psStandardBEqInstance "Unit" (.constE psUnitName [])
-      psStandardBEqUnitMethod]
+      psStandardBEqUnitMethod,
+   psStandardBEqOptionInstance]
 
 def psStandardBEqDeclarations : List PsDeclaration :=
   psStandardBEqClass ++ psStandardBEqInstances

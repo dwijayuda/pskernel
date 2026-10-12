@@ -1074,7 +1074,13 @@ private def projectBoundaries : IO Unit := do
     "const defaultTraffic: Traffic := Inhabited.default\n" ++
     "theorem defaultTrafficCorrect: defaultTraffic = Traffic.red := by { rfl }\n"
   let derivingEnumFieldRefusal :=
-    "structure Label where { value: Nat } deriving BEq\n"
+    "structure UnsupportedRecord where {\n  fn: Nat -> Nat\n} deriving BEq\n"
+  let derivingStructureEqualitySource :=
+    "structure RecordPoint where {\n  first: Nat\n  enabled: Bool\n} deriving BEq\n" ++
+    "const pointsEqual: Bool := RecordPoint.mk(3, true) == RecordPoint.mk(3, true)\n" ++
+    "theorem pointsEqualProof: pointsEqual = true := by { rfl }\n" ++
+    "const pointsDiffer: Bool := RecordPoint.mk(3, true) == RecordPoint.mk(3, false)\n" ++
+    "theorem pointsDifferProof: pointsDiffer = false := by { rfl }\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1129,7 +1135,9 @@ private def projectBoundaries : IO Unit := do
       targets := [.javascript, .typescript, .rust] },
     { source := derivingEnumEqualitySource, moduleName := "DerivingEnumBEq",
       targets := [.javascript, .typescript, .rust] },
-    { source := derivingEnumFieldRefusal, moduleName := "DerivingBEqFields" }]
+    { source := derivingEnumFieldRefusal, moduleName := "DerivingBEqFields" },
+    { source := derivingStructureEqualitySource, moduleName := "DerivingStructureBEq",
+      targets := [.javascript, .typescript, .rust] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1231,7 +1239,13 @@ private def projectBoundaries : IO Unit := do
           error.phase ++ ": " ++ error.message))
     | 30, .error error =>
         unless error.phase == "elaborate" do
-          throw (IO.userError "field-bearing BEq deriving did not fail at elaboration")
+          throw (IO.userError "missing field BEq instance did not refuse at elaboration")
+    | 31, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "checked structure BEq missing backend artifacts")
+    | 31, .error error =>
+        throw (IO.userError ("checked structure BEq failed at " ++
+          error.phase ++ ": " ++ error.message))
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

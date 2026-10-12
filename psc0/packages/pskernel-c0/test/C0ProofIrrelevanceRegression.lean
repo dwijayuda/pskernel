@@ -861,6 +861,25 @@ def main : IO Unit := do
     (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
   let indexedB := PsKernelExpr.lam rootNameB sort0
     (PsKernelExpr.bvar 0) PsKernelBinderInfo.default
+  -- Cache fingerprints deliberately abstract binder names/info, but exact
+  -- interning may not. They can share a cache bucket without sharing nodes.
+  match psKernelC0EncodeExpr psKernelC0StoreEmpty indexedA with
+  | none => throw (IO.userError "C0 indexed cache-hash setup failed")
+  | some (firstStore, firstId) =>
+      match psKernelC0EncodeExpr firstStore indexedB with
+      | none => throw (IO.userError "C0 indexed renamed binder encoding failed")
+      | some (secondStore, secondId) =>
+          match psKernelC0StoreGet secondStore firstId,
+                psKernelC0StoreGet secondStore secondId with
+          | some first, some second =>
+              if firstId == secondId ||
+                  first.checkerHash != second.checkerHash ||
+                  first.checkerHash != psKernelExprHash indexedA ||
+                  second.checkerHash != psKernelExprHash indexedB then
+                throw (IO.userError "C0 binder cache hash confused exact intern identity")
+          | _, _ =>
+              throw (IO.userError "C0 indexed cache-hash handles invalid")
+  IO.println "C0_PERF_REGRESSION indexed_checker_cache_hash=pass"
   let emptyOwned := psKernelC0IndexedSessionNew session
   match psKernelC0IndexedSessionRetain emptyOwned indexedA with
   | none => throw (IO.userError "C0 session failed to index exact lambda")
@@ -1529,6 +1548,8 @@ def main : IO Unit := do
         match psKernelC0StoreGet stored id with
         | none => throw (IO.userError "C0 loose range root absent")
         | some entry =>
+            if entry.checkerHash != psKernelExprHash term then
+              throw (IO.userError "C0 indexed checker-cache hash differs from source")
             for offset in [:8] do
               let expected := psKernelExprHasLooseAt term offset
               let actual := entry.looseBVarRange > offset

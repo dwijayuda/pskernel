@@ -59,7 +59,12 @@ def psKernelC0NodeEq
 
 structure PsKernelC0StoredNode where
   node : PsKernelC0Node
+  -- Exact interning fingerprint, including binder user names and info.
   hash : Nat
+  -- Fingerprint compatible with the accepting source expression caches.
+  -- Unlike 'hash', this deliberately ignores binder names and binder info.
+  -- It is an index hint, NEVER an equality/DefEq/typing decision.
+  checkerHash : Nat
   depth : Nat
   -- Exact upper bound for loose de Bruijn variables: max loose index + 1.
   -- Zero means no loose variables. Derived only from canonical children.
@@ -162,59 +167,118 @@ def psKernelC0BinderInfoHash (info : PsKernelBinderInfo) : Nat :=
   | .strictImplicit => 2
   | .instImplicit => 3
 
+/--
+  Produce both fingerprints from immutable, already-interned child nodes.
+
+  The first hash identifies exact syntax for canonical node interning,
+  including binder user names and binder information. The second matches
+  psKernelExprHash exactly, which intentionally omits those binder fields
+  because checker cache keys use psKernelExprEq. A cache lookup still checks
+  the full applicable equality predicate on hash collisions. Neither hash
+  establishes definitional equality or a checked judgment.
+-/
+def psKernelC0ChildCheckerHash
+    (store : PsKernelC0TermStore)
+    (id : Nat) : Nat :=
+  match psKernelC0StoreGet store id with
+  | some entry => entry.checkerHash
+  | none => 0
+
+def psKernelC0NodeHashes
+    (store : PsKernelC0TermStore)
+    (node : PsKernelC0Node) : Prod Nat Nat :=
+  let exact := psKernelC0ChildHash store
+  let checked := psKernelC0ChildCheckerHash store
+  match node with
+  | .bvar i =>
+      let hash := psKernelCacheMix 21 i
+      (hash, hash)
+  | .fvar n =>
+      let hash := psKernelCacheMix 22 (psKernelCacheNameHash n)
+      (hash, hash)
+  | .mvar n =>
+      let hash := psKernelCacheMix 23 (psKernelCacheNameHash n)
+      (hash, hash)
+  | .sort l =>
+      let hash := psKernelCacheMix 24 (psKernelCacheLevelHash l)
+      (hash, hash)
+  | .const n ls =>
+      let hash := psKernelCacheMix
+        (psKernelCacheMix 25 (psKernelCacheNameHash n))
+        (psKernelCacheLevelListHash ls)
+      (hash, hash)
+  | .app fn arg =>
+      (psKernelCacheMix (psKernelCacheMix 26 (exact fn)) (exact arg),
+       psKernelCacheMix (psKernelCacheMix 26 (checked fn)) (checked arg))
+  | .lam name ty body info =>
+      (psKernelCacheMix
+         (psKernelCacheMix
+           (psKernelCacheMix
+             (psKernelCacheMix 27 (psKernelCacheNameHash name))
+             (exact ty))
+           (exact body))
+         (psKernelC0BinderInfoHash info),
+       psKernelCacheMix
+         (psKernelCacheMix 27 (checked ty))
+         (checked body))
+  | .forallE name ty body info =>
+      (psKernelCacheMix
+         (psKernelCacheMix
+           (psKernelCacheMix
+             (psKernelCacheMix 28 (psKernelCacheNameHash name))
+             (exact ty))
+           (exact body))
+         (psKernelC0BinderInfoHash info),
+       psKernelCacheMix
+         (psKernelCacheMix 28 (checked ty))
+         (checked body))
+  | .letE name ty value body nondep =>
+      let flag := if nondep then 1 else 0
+      (psKernelCacheMix
+         (psKernelCacheMix
+           (psKernelCacheMix
+             (psKernelCacheMix
+               (psKernelCacheMix 29 (psKernelCacheNameHash name))
+               (exact ty))
+             (exact value))
+           (exact body))
+         flag,
+       psKernelCacheMix
+         (psKernelCacheMix
+           (psKernelCacheMix
+             (psKernelCacheMix 29 (checked ty))
+             (checked value))
+           (checked body))
+         flag)
+  | .lit l =>
+      let hash := psKernelCacheMix 30 (psKernelCacheLiteralHash l)
+      (hash, hash)
+  | .mdata m body =>
+      (psKernelCacheMix (psKernelCacheMix 31 m) (exact body),
+       psKernelCacheMix (psKernelCacheMix 31 m) (checked body))
+  | .proj n i body =>
+      (psKernelCacheMix
+         (psKernelCacheMix
+           (psKernelCacheMix 32 (psKernelCacheNameHash n))
+           i)
+         (exact body),
+       psKernelCacheMix
+         (psKernelCacheMix
+           (psKernelCacheMix 32 (psKernelCacheNameHash n))
+           i)
+         (checked body))
+
+/-- Exact syntactic interning hash; do not substitute checker cache hash. -/
 def psKernelC0NodeHash
     (store : PsKernelC0TermStore)
     (node : PsKernelC0Node) : Nat :=
-  match node with
-  | .bvar i => psKernelCacheMix 21 i
-  | .fvar n => psKernelCacheMix 22 (psKernelCacheNameHash n)
-  | .mvar n => psKernelCacheMix 23 (psKernelCacheNameHash n)
-  | .sort l => psKernelCacheMix 24 (psKernelCacheLevelHash l)
-  | .const n ls =>
-      psKernelCacheMix
-        (psKernelCacheMix 25 (psKernelCacheNameHash n))
-        (psKernelCacheLevelListHash ls)
-  | .app fn arg =>
-      psKernelCacheMix
-        (psKernelCacheMix 26 (psKernelC0ChildHash store fn))
-        (psKernelC0ChildHash store arg)
-  | .lam name ty body info =>
-      psKernelCacheMix
-        (psKernelCacheMix
-          (psKernelCacheMix
-            (psKernelCacheMix 27 (psKernelCacheNameHash name))
-            (psKernelC0ChildHash store ty))
-          (psKernelC0ChildHash store body))
-        (psKernelC0BinderInfoHash info)
-  | .forallE name ty body info =>
-      psKernelCacheMix
-        (psKernelCacheMix
-          (psKernelCacheMix
-            (psKernelCacheMix 28 (psKernelCacheNameHash name))
-            (psKernelC0ChildHash store ty))
-          (psKernelC0ChildHash store body))
-        (psKernelC0BinderInfoHash info)
-  | .letE name ty value body nondep =>
-      psKernelCacheMix
-        (psKernelCacheMix
-          (psKernelCacheMix
-            (psKernelCacheMix
-              (psKernelCacheMix 29 (psKernelCacheNameHash name))
-              (psKernelC0ChildHash store ty))
-            (psKernelC0ChildHash store value))
-          (psKernelC0ChildHash store body))
-        (if nondep then 1 else 0)
-  | .lit l => psKernelCacheMix 30 (psKernelCacheLiteralHash l)
-  | .mdata m body =>
-      psKernelCacheMix
-        (psKernelCacheMix 31 m)
-        (psKernelC0ChildHash store body)
-  | .proj n i body =>
-      psKernelCacheMix
-        (psKernelCacheMix
-          (psKernelCacheMix 32 (psKernelCacheNameHash n))
-          i)
-        (psKernelC0ChildHash store body)
+  (psKernelC0NodeHashes store node).fst
+
+/-- Source checker cache hash; used only as a candidate bucket selector. -/
+def psKernelC0NodeCheckerHash
+    (store : PsKernelC0TermStore)
+    (node : PsKernelC0Node) : Nat :=
+  (psKernelC0NodeHashes store node).snd
 
 def psKernelC0NodeDepth
     (store : PsKernelC0TermStore)
@@ -265,7 +329,7 @@ def psKernelC0Intern
     (node : PsKernelC0Node) :
     Option (Prod PsKernelC0TermStore Nat) :=
   if psKernelC0NodeValid store node then
-    let hash := psKernelC0NodeHash store node
+    let (hash, checkerHash) := psKernelC0NodeHashes store node
     let bucket := psKernelC0TermTrieBucket psKernelC0IndexDepth store.index hash
     match psKernelC0FindNode store node bucket with
     | Option.some id =>
@@ -273,7 +337,8 @@ def psKernelC0Intern
     | Option.none =>
         let id := store.nodes.size
         let entry : PsKernelC0StoredNode :=
-          { node := node, hash := hash, depth := psKernelC0NodeDepth store node,
+          { node := node, hash := hash, checkerHash := checkerHash,
+            depth := psKernelC0NodeDepth store node,
             looseBVarRange := psKernelC0NodeLooseRange store node }
         let index :=
           psKernelC0TermTrieReplace

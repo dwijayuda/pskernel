@@ -33,13 +33,13 @@ def psStandardOptionMapDeclaration : PsDeclaration :=
   let type := psLogicPi 0 "α" psPreludeTypeType
     (psLogicPi 1 "β" psPreludeTypeType
       (psLogicPi 2 "f" arrow
-        (psLogicPi 3 "opt" optionAlpha optionBeta))) .implicit
+        (psLogicPi 3 "opt" optionAlpha optionBeta)) .implicit) .implicit
   let body := psLogicApply psStandardOptionRecursor
     [alpha, motive, psSelfHostOptionNoneOf beta, someBranch, .fvar 3]
   let value := psLogicLam 0 "α" psPreludeTypeType
     (psLogicLam 1 "β" psPreludeTypeType
       (psLogicLam 2 "f" arrow
-        (psLogicLam 3 "opt" optionAlpha body))) .implicit
+        (psLogicLam 3 "opt" optionAlpha body)) .implicit) .implicit
   .definitionDecl (psNameAppendStr psOptionName "map") [] type value
 
 def psStandardOptionBindDeclaration : PsDeclaration :=
@@ -53,13 +53,13 @@ def psStandardOptionBindDeclaration : PsDeclaration :=
   let type := psLogicPi 0 "α" psPreludeTypeType
     (psLogicPi 1 "β" psPreludeTypeType
       (psLogicPi 2 "opt" optionAlpha
-        (psLogicPi 3 "f" arrow optionBeta))) .implicit
+        (psLogicPi 3 "f" arrow optionBeta)) .implicit) .implicit
   let body := psLogicApply psStandardOptionRecursor
     [alpha, motive, psSelfHostOptionNoneOf beta, someBranch, .fvar 2]
   let value := psLogicLam 0 "α" psPreludeTypeType
     (psLogicLam 1 "β" psPreludeTypeType
       (psLogicLam 2 "opt" optionAlpha
-        (psLogicLam 3 "f" arrow body))) .implicit
+        (psLogicLam 3 "f" arrow body)) .implicit) .implicit
   .definitionDecl (psNameAppendStr psOptionName "bind") [] type value
 
 def psStandardOptionDeclarations : List PsDeclaration :=

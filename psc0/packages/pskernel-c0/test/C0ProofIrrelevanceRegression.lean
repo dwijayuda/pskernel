@@ -1395,7 +1395,7 @@ def main : IO Unit := do
                     psKernelSessionIsDefEq 4096 session sort0 sort1 with
               | Except.ok (fastNo, next), Except.ok (referenceNo, _) =>
                   if fastNo || referenceNo ||
-                      psKernelC0IndexedSessionRootCount next != 4 then
+                      psKernelC0IndexedSessionRootCount next != 2 then
                     throw (IO.userError "C0 indexed negative DefEq changed behavior")
               | _, _ =>
                   throw (IO.userError "C0 indexed negative DefEq changed category")
@@ -1405,7 +1405,7 @@ def main : IO Unit := do
   | Except.ok (indexedValue, owned), Except.ok (plainValue, _) =>
       if !(psKernelExprEqual indexedValue plainValue &&
             psKernelExprEqual indexedValue sort0 &&
-            psKernelC0IndexedSessionRootCount owned == 2) then
+            psKernelC0IndexedSessionRootCount owned == 0) then
         throw (IO.userError "C0 indexed WHNF differed from checked result")
   | _, _ => throw (IO.userError "C0 indexed WHNF changed outcome")
   match psKernelC0IndexedSessionInfer 4096 emptyOwned indexedA,
@@ -1419,6 +1419,24 @@ def main : IO Unit := do
   | Except.error _, Except.error _ => pure ()
   | _, _ => throw (IO.userError "C0 indexed session accepted an unbound variable")
   IO.println "C0_PERF_REGRESSION indexed_session_owned_roots=pass"
+  -- Source WHNF, inference, checking and DefEq must not implicitly
+  -- allocate canonical syntax. A caller must explicitly request retention.
+  match psKernelC0IndexedSessionWhnf 4096 emptyOwned
+      (PsKernelExpr.app indexedA sort0) with
+  | Except.error err =>
+      throw (IO.userError ("C0 lazy indexed WHNF failed: " ++ err))
+  | Except.ok (value, checked) =>
+      if psKernelC0IndexedSessionRootCount checked != 0 ||
+          psKernelC0IndexedSessionNodeCount checked != 0 then
+        throw (IO.userError "C0 WHNF eagerly indexed unused syntax")
+      match psKernelC0IndexedSessionRetain checked value with
+      | none => throw (IO.userError "C0 explicit syntax retention failed")
+      | some kept =>
+          if psKernelC0IndexedSessionRootCount kept != 1 ||
+              psKernelC0IndexedSessionNodeCount checked != 0 then
+            throw (IO.userError "C0 exact retention changed old snapshot")
+  IO.println "C0_PERF_REGRESSION indexed_checked_operations_lazy_syntax=pass"
+
   -- Promotion beyond the tiny-list threshold must not lose old handles,
   -- confuse separately stored syntax, or mutate earlier session snapshots.
   let mut promoted := emptyOwned

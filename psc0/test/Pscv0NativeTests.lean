@@ -881,12 +881,22 @@ private def projectBoundaries : IO Unit := do
         reprStr input ++ ": " ++ actual))
   IO.println ("PSCV0_NATIVE_STANDARD_SHA256_CANDIDATE: " ++
     psStandardSnapshotSHA256Fingerprint psSelfHostProdPreludeEnvironment)
+  let _ ← get "cryptographic Standard registry fingerprint"
+    (psStandardSnapshotValidateCrypto psSelfHostProdPreludeEnvironment
+      psStandardSnapshotExpectedSHA256)
+  let wrongDigest := "sha256:" ++ String.ofList (List.replicate 64 '0')
+  if (psStandardSnapshotValidateCrypto psSelfHostProdPreludeEnvironment
+      wrongDigest).isOk then
+    throw (IO.userError "Standard SHA-256 accepted a deliberately wrong expected digest")
   let unrelatedAlias := {
     psSelfHostProdPreludeEnvironment with
     exportedAliases := (psRootName "unexpectedAlias", psNatName) ::
       psSelfHostProdPreludeEnvironment.exportedAliases }
   if (psStandardSnapshotValidate unrelatedAlias psStandardSnapshotExpected).isOk then
     throw (IO.userError "pinned Standard snapshot accepted alias registry drift")
+  if (psStandardSnapshotValidateCrypto unrelatedAlias
+      psStandardSnapshotExpectedSHA256).isOk then
+    throw (IO.userError "Standard SHA-256 accepted alias registry drift")
   IO.println ("PSCV0_NATIVE_STANDARD_SNAPSHOT: declarations=" ++
     toString psSelfHostProdPreludeEnvironment.declarations.length ++
     " classes=" ++ toString psSelfHostProdPreludeEnvironment.classes.length ++

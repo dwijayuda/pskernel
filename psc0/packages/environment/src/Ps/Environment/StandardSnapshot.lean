@@ -307,6 +307,21 @@ def psStandardSnapshotSHA256 (text : String) : String := Id.run do
 def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :=
   "sha256:" ++ psStandardSnapshotSHA256 (psStandardSnapshotPayload environment)
 
+-- This is the independently qualified digest of the v1 selected Standard
+-- payload at source 2a75d31cfee753c90337aa931f09602591ea9907.
+-- It covers *only* the encoded closed prelude/declaration/class/instance/
+-- alias roster, not source notation, deriving handlers, imported Lean
+-- extensions, effects or the whole trusted execution base.
+def psStandardSnapshotExpectedSHA256 : String :=
+  "sha256:889fb4913a36309c2f362fb18247eb8648a48c9277e2d67cb6d7ab98a7e0ed2f"
+
+def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
+    (expected : String) : Except String Unit := do
+  let observed := psStandardSnapshotSHA256Fingerprint environment
+  if observed != expected then
+    throw ("PSCV0-STANDARD: SHA-256 registry digest drift; expected " ++
+      expected ++ ", got " ++ observed)
+
 def psStandardSnapshotValidate (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
   psStandardExceptAudit environment
@@ -314,3 +329,4 @@ def psStandardSnapshotValidate (environment : PsEnvironment)
   if observed != expected then
     throw ("PSCV0-STANDARD: registry snapshot drift; expected " ++ expected ++
       ", got " ++ observed)
+  psStandardSnapshotValidateCrypto environment psStandardSnapshotExpectedSHA256

@@ -15,18 +15,41 @@ acceptance through this component.
 Snapshots are persistent: extending one session leaves earlier snapshots
 untouched. Root entries use exact syntax equality (including binder names and
 metadata), not the kernel's binder-name-insensitive semantic comparator.
-Small root-list lookup is deliberate at this phase; profile before replacing
-it with a provenance-scoped trie.
+Root memo starts with a tiny list and promotes to a collision-checked radix
+index. Root caching is purely syntactic, independent of contextual judgments.
 -/
+
+/-- A root-only memo index: never an environment-dependent judgment. -/
+abbrev PsKernelC0IndexedRootIndex :=
+  PsKernelC0HashTrie (Prod PsKernelExpr Nat)
+
+/-- Coarse expression hash plus exact top-level binder identity. All collisions
+    are checked with complete PsKernelExprEqual before reusing a handle. -/
+private def psKernelC0IndexedRootHash (expr : PsKernelExpr) : Nat :=
+  let base := psKernelExprHash expr
+  match expr with
+  | .lam name _ _ _ => psKernelCacheMix base (psKernelCacheNameHash name)
+  | .forallE name _ _ _ => psKernelCacheMix base (psKernelCacheNameHash name)
+  | .letE name _ _ _ _ => psKernelCacheMix base (psKernelCacheNameHash name)
+  | _ => base
 
 structure PsKernelC0IndexedCheckerSession where
   checker : PsKernelCheckerSession
   store : PsKernelC0TermStore
+  -- Small-first root memo, promoted to collision-checked radix-16 index.
   roots : List (Prod PsKernelExpr Nat)
+  rootIndex : Option PsKernelC0IndexedRootIndex
+  rootCount : Nat
 
 def psKernelC0IndexedSessionNew
     (checker : PsKernelCheckerSession) : PsKernelC0IndexedCheckerSession :=
-  { checker := checker, store := psKernelC0StoreEmpty, roots := [] }
+  {
+    checker := checker
+    store := psKernelC0StoreEmpty
+    roots := []
+    rootIndex := none
+    rootCount := 0
+  }
 
 def psKernelC0IndexedSessionNodeCount
     (session : PsKernelC0IndexedCheckerSession) : Nat :=
@@ -34,7 +57,7 @@ def psKernelC0IndexedSessionNodeCount
 
 def psKernelC0IndexedSessionRootCount
     (session : PsKernelC0IndexedCheckerSession) : Nat :=
-  session.roots.length
+  session.rootCount
 
 private def psKernelC0IndexedRootFind
     (expr : PsKernelExpr) :
@@ -44,24 +67,75 @@ private def psKernelC0IndexedRootFind
       if psKernelExprEqual expr saved then some id
       else psKernelC0IndexedRootFind expr rest
 
-/-- Retain a root only in the arena of this immutable checker session. -/
+private def psKernelC0IndexedRootsToTrie
+    (roots : List (Prod PsKernelExpr Nat))
+    (index : PsKernelC0IndexedRootIndex) : PsKernelC0IndexedRootIndex :=
+  match roots with
+  | [] => index
+  | entry :: rest =>
+      let hash := psKernelC0IndexedRootHash entry.fst
+      let bucket := psKernelC0TrieBucket psKernelC0IndexDepth index hash
+      let next := psKernelC0TrieSet psKernelC0IndexDepth
+        index hash (entry :: bucket)
+      psKernelC0IndexedRootsToTrie rest next
+
+private def psKernelC0IndexedSessionLookup
+    (session : PsKernelC0IndexedCheckerSession)
+    (expr : PsKernelExpr) : Option Nat :=
+  match session.rootIndex with
+  | none => psKernelC0IndexedRootFind expr session.roots
+  | some index =>
+      let hash := psKernelC0IndexedRootHash expr
+      psKernelC0IndexedRootFind expr
+        (psKernelC0TrieBucket psKernelC0IndexDepth index hash)
+
+/-- Retain a root only in the arena of this immutable checker session.
+    Small sessions scan at most eight roots; large sessions share a radix trie.
+    Never use a root-cache hit as a type-checking or DefEq success predicate. -/
 def psKernelC0IndexedSessionRetain
     (session : PsKernelC0IndexedCheckerSession)
     (expr : PsKernelExpr) :
     Option PsKernelC0IndexedCheckerSession :=
-  match psKernelC0IndexedRootFind expr session.roots with
+  match psKernelC0IndexedSessionLookup session expr with
   | some id =>
-      if psKernelC0StoreValid session.store id then
-        some session
-      else
-        none
+      if psKernelC0StoreValid session.store id then some session else none
   | none => do
       let (store, id) ← psKernelC0EncodeExpr session.store expr
-      some {
-        checker := session.checker
-        store := store
-        roots := (expr, id) :: session.roots
-      }
+      let entry := (expr, id)
+      let count := session.rootCount + 1
+      match session.rootIndex with
+      | some index =>
+          let hash := psKernelC0IndexedRootHash expr
+          let bucket := psKernelC0TrieBucket psKernelC0IndexDepth index hash
+          let next := psKernelC0TrieSet psKernelC0IndexDepth
+            index hash (entry :: bucket)
+          some {
+            checker := session.checker
+            store := store
+            roots := []
+            rootIndex := some next
+            rootCount := count
+          }
+      | none =>
+          let small := entry :: session.roots
+          if count <= 8 then
+            some {
+              checker := session.checker
+              store := store
+              roots := small
+              rootIndex := none
+              rootCount := count
+            }
+          else
+            some {
+              checker := session.checker
+              store := store
+              roots := []
+              rootIndex :=
+                some (psKernelC0IndexedRootsToTrie small
+                  PsKernelC0HashTrie.empty)
+              rootCount := count
+            }
 
 /-- Encoding failure never supplies a kernel result; the accepting result is
     already established by the checker and remains the authority. -/

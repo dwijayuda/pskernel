@@ -97,6 +97,13 @@ def main : IO Unit := do
     PsKernelDefinitionSafety.safe 4096 psKernelLeanNatMaxSizeDefault
   let application := c0CompareApps 48
     (PsKernelExpr.const functionName []) sort0
+  -- Sixteen metadata-distinct but equally well-typed argument expressions.
+  -- Reuse prebuilt source terms rather than charging syntax construction
+  -- inside the timed checker loops.
+  let applicationVariants :=
+    (List.range 16).map (fun metadata =>
+      c0CompareApps 48 (PsKernelExpr.const functionName [])
+        (PsKernelExpr.mdata metadata sort0))
 
   let safeDefinition : PsKernelDefinitionInfo := {
     base := {
@@ -206,6 +213,43 @@ def main : IO Unit := do
     if appCheckedOk != 80 then
       throw (IO.userError "matched checked application count mismatch")
     IO.println s!"C0_COMPARE round={round} operation=cold_check_application milliseconds={appCheckedEnd-appCheckedStart} samples=80"
+
+    let variedCount := 160
+    let mut variedInferOk := 0
+    let variedInferStart ← IO.monoMsNow
+    for i in [:variedCount] do
+      match psKernelExprListGet applicationVariants (i % 16) with
+      | none => throw (IO.userError "matched varied-app fixture missing")
+      | some nextExpr =>
+          match psKernelSessionInfer 4096 functionSession nextExpr with
+          | Except.ok (type, _) =>
+              if psKernelExprEqual type sort0 then
+                variedInferOk := variedInferOk + 1
+              else throw (IO.userError "matched varied infer-only type mismatch")
+          | Except.error err =>
+              throw (IO.userError ("matched varied infer-only failed: " ++ err))
+    let variedInferEnd ← IO.monoMsNow
+    if variedInferOk != variedCount then
+      throw (IO.userError "matched varied infer-only count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=cold_infer_application_varied milliseconds={variedInferEnd-variedInferStart} samples={variedCount} variants=16"
+
+    let mut variedCheckedOk := 0
+    let variedCheckedStart ← IO.monoMsNow
+    for i in [:variedCount] do
+      match psKernelExprListGet applicationVariants (i % 16) with
+      | none => throw (IO.userError "matched varied-check fixture missing")
+      | some nextExpr =>
+          match psKernelSessionCheck 4096 functionSession nextExpr with
+          | Except.ok (type, _) =>
+              if psKernelExprEqual type sort0 then
+                variedCheckedOk := variedCheckedOk + 1
+              else throw (IO.userError "matched varied checked type mismatch")
+          | Except.error err =>
+              throw (IO.userError ("matched varied checked failed: " ++ err))
+    let variedCheckedEnd ← IO.monoMsNow
+    if variedCheckedOk != variedCount then
+      throw (IO.userError "matched varied checked count mismatch")
+    IO.println s!"C0_COMPARE round={round} operation=cold_check_application_varied milliseconds={variedCheckedEnd-variedCheckedStart} samples={variedCount} variants=16"
 
     let mut admitted := 0
     let mut rejected := 0

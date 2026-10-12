@@ -11,6 +11,9 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0ProofIrrelevanceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0Lean435MigrationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialAccept.ndjson'
+      - 'psc0/packages/pskernel-c0/test/C0OfficialReject.ndjson'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
       - 'psc0/packages/pskernel-c0/test/C0Ablation.py'
@@ -33,6 +36,18 @@ jobs:
       - name: Compile C0 Lean semantic closure (no self-host tests)
         working-directory: psc0/packages/pskernel-c0
         run: lake build PsKernelC0
+      - name: Official Lean 4.35 export replay versus C0 checked declaration fixtures
+        working-directory: psc0/packages/pskernel-c0
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v leanchecker >/dev/null || { echo "Lean 4.35 leanchecker is required"; exit 1; }
+          leanchecker --from-export test/C0OfficialAccept.ndjson
+          if leanchecker --from-export test/C0OfficialReject.ndjson; then
+            echo "C0_OFFICIAL_REFERENCE false acceptance by the official checker"
+            exit 1
+          fi
+          lake env lean --run test/C0OfficialReferenceRegression.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

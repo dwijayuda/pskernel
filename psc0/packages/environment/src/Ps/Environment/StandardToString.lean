@@ -33,12 +33,29 @@ def psStandardToStringInstance (suffix : String) (type primitive : PsExpr) :
   let body := psLogicApply (.constE (psNameAppendStr name "mk") [.zero]) [type, primitive]
   .definitionDecl instanceName [] typeOfInstance body
 
+-- Every instance is a checked constructor with a concrete Lean-grounded
+-- implementation, never an unconstrained formatting axiom. Nat reuses
+-- Int.repr on its nonnegative embedding; Char uses String.singleton;
+-- Bool uses its ordinary recursor and two literal strings.
 def psStandardToStringInstances : List PsDeclaration :=
   let str := PsExpr.constE psStringName []
   let int := PsExpr.constE psIntName []
+  let nat := PsExpr.constE psNatName []
+  let char := PsExpr.constE psCharName []
+  let bool := PsExpr.constE psBoolName []
+  let natPrinter := PsExpr.lam (psRootName "n") nat
+    (.app (.constE psIntReprName [])
+      (.app (.constE psIntOfNatName []) (.bvar 0))) .explicit
+  let boolMotive := PsExpr.lam (psRootName "_") bool str .explicit
+  let boolPrinter := PsExpr.lam (psRootName "value") bool
+    (psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
+      [boolMotive, .lit (.string "false"), .lit (.string "true"), .bvar 0]) .explicit
   [ psStandardToStringInstance "String" str
       (PsExpr.lam (psRootName "s") str (.bvar 0) .explicit),
-    psStandardToStringInstance "Int" int (.constE psIntReprName []) ]
+    psStandardToStringInstance "Int" int (.constE psIntReprName []),
+    psStandardToStringInstance "Nat" nat natPrinter,
+    psStandardToStringInstance "Char" char (.constE psStringSingletonName []),
+    psStandardToStringInstance "Bool" bool boolPrinter ]
 
 def psStandardToStringDeclarations : List PsDeclaration :=
   psStandardToStringClass ++ psStandardToStringInstances

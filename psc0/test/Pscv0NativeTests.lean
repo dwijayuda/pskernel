@@ -948,7 +948,11 @@ private def projectBoundaries : IO Unit := do
   let tostringSource :=
     "const echoed: String := toString(\"ready\")\n" ++
     "theorem stringIdentity: echoed = \"ready\" := by { rfl }\n" ++
-    "const represented: String := toString(Int.ofNat(7))\n"
+    "const represented: String := toString(Int.ofNat(7))\n" ++
+    "const naturalText: String := toString(42)\n" ++
+    "const characterText: String := toString('x')\n" ++
+    "const booleanText: String := toString(true)\n" ++
+    "theorem boolRendering: booleanText = \"true\" := by { rfl }\n"
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },

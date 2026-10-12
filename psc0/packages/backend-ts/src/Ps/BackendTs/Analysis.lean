@@ -33,7 +33,7 @@ def psTsExprUsesNameWithFuel (fuel : Nat) : PsVerifiedIrExpr -> String -> Bool :
                 | Prod.mk bindings body =>
                     if psListAny bindingUses bindings then true else smaller body name;
         match expr with
-        | .unreachable _ => false
+        | .unreachable _ | .panic .. => false
         | .literal _ => false
         | .var value => psStringEq value name
         | .intrinsic _ _ arguments => psListAny uses arguments

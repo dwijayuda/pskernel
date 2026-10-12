@@ -23,6 +23,24 @@ def psReduceConstructorView (value : PsExpr) : PsReduceAppView :=
     { head := .constE psNatSuccName [], args := [.lit (.natural n)] }
   | _ => psReduceAppView value
 
+-- Definitional iota for constructor-headed structure projections.
+-- Validate the family's single constructor and saturated field telescope.
+def psReduceProjectionIota (reduce : PsExpr → PsExpr)
+    (environment : PsEnvironment) (typeName : PsName) (fieldIndex : Nat)
+    (major : PsExpr) : Option PsExpr := do
+  let inductive ← psEnvironmentFindInductive environment typeName
+  if !inductive.isStructure || inductive.constructors.length != 1 then none else do
+    let applied := psReduceConstructorView (reduce major)
+    let .constE ctorName ctorLevels := applied.head | none
+    let constructor ← psEnvironmentFindConstructor environment ctorName
+    if !psNameEq constructor.inductiveName typeName ||
+        !inductive.constructors.any (psNameEq ctorName) ||
+        constructor.constructorIndex != 0 ||
+        ctorLevels.length != constructor.levelParams.length ||
+        applied.args.length != constructor.numParams + constructor.numFields ||
+        fieldIndex >= constructor.numFields then none
+    else applied.args[constructor.numParams + fieldIndex]?
+
 def psReduceApplyType (reduce : PsExpr -> PsExpr) (type : PsExpr)
     (arguments : List PsExpr) : Option PsExpr := do
   match arguments with

@@ -100,6 +100,7 @@ def psWasmIrEncodeInstruction
     (value : PsWasmInstruction) :
     Except PsWasmIrEncodeError String :=
   match value with
+  | PsWasmInstruction.word _ => Except.error PsWasmIrEncodeError.unsupportedInstruction
   | PsWasmInstruction.localGet index =>
       psWasmIrEncodeNode
         "localGet"

@@ -66,4 +66,4 @@ for (const name of ['gc-probe', 'scalar', 'natural-probe']) {
 }
 console.log(JSON.stringify({profile:'pscv0-wasm-c3/1', node:process.version, v8:process.versions.v8,
   wasmTools:run('wasm-tools',['--version']), wasmtime:run('wasmtime',['--version']),
-  gcInsideComponent:true, scalarWorlds:3, naturalLimbChecks:8, coreBinaryWatEqual:true}));
+  gcInsideComponent:true, scalarWorlds:3, naturalLimbChecks:10, coreBinaryWatEqual:true}));

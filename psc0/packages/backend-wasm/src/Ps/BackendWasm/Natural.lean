@@ -5,13 +5,13 @@ namespace PsWasm
 -- Little-endian unsigned 32-bit limbs. Published Natural values are immutable;
 -- only freshly allocated working arrays are mutated. Zero has no limbs.
 -- Loops are emitted as typed tail calls, including nested multiplication loops.
-private def g := R.get
-private def k := R.i32
-private def o := R.op
-private def c := R.call
-private def put := R.set
-private def seq := R.seq
-private def choice := R.ite
+private def g := RuntimeCode.get
+private def k := RuntimeCode.i32
+private def o := RuntimeCode.op
+private def c := RuntimeCode.call
+private def put := RuntimeCode.set
+private def seq := RuntimeCode.seq
+private def choice := RuntimeCode.ite
 private def wide (v : R) := o (.word .i64ExtendI32U) [v]
 private def low (v : R) := o (.word .i32WrapI64) [v]
 private def high (v : R) := o (.word .i64ShrU) [v, .i64 32]
@@ -158,6 +158,20 @@ def naturalRuntime : Except String (List RuntimeDefinition) := do
           (seq [write (g "quotient") index (o .i32Or [limb (g "quotient") index, g "mask"]),
             c "__ps_nat_divide_bits" [a, g "divisor", g "quotient",
               c "__ps_nat_sub" [g "next", g "divisor"], g "position", g "want_remainder"]])]))]
+  -- Single-limb division is linear in the numerator's limb count. This is the
+  -- common path for small divisors and decimal formatting.
+  functions := functions ++ [← emit "divide_word"
+    [("a", limbsType), ("divisor", .i64), ("quotient", limbsType),
+     ("size", .i32), ("carry", .i64), ("want_remainder", .i32)] naturalType [("total", .i64)]
+    (choice (some naturalType) (eq size (k 0))
+      (choice (some naturalType) (g "want_remainder")
+        (c "__ps_nat_from_u32" [low carry])
+        (c "__ps_nat_trim" [g "quotient", len (g "quotient")]))
+      (seq [put "size" (sub size (k 1)),
+        put "total" (o .i64Or [o (.word .i64Shl) [carry, .i64 32], wide (limb a size)]),
+        write (g "quotient") size (low (o (.word .i64DivU) [total, g "divisor"])),
+        c "__ps_nat_divide_word" [a, g "divisor", g "quotient", size,
+          o (.word .i64RemU) [total, g "divisor"], g "want_remainder"]]))]
   functions := functions ++ [← emit "divide"
     [("left", naturalType), ("right", naturalType), ("want_remainder", .i32)] naturalType
     [("a", limbsType), ("size", .i32)]
@@ -165,8 +179,11 @@ def naturalRuntime : Except String (List RuntimeDefinition) := do
       (choice (some naturalType) (g "want_remainder") (g "left") (c "__ps_nat_zero" []))
       (seq [put "a" (limbs (g "left")),
         put "size" (c "__ps_nat_checked_size" [len a, k 0]),
-        c "__ps_nat_divide_bits" [a, g "right", allocate size, c "__ps_nat_zero" [],
-          o (.word .i32Shl) [size, k 5], g "want_remainder"]]))]
+        choice (some naturalType) (eq (len (limbs (g "right"))) (k 1))
+          (c "__ps_nat_divide_word" [a, wide (limb (limbs (g "right")) (k 0)), allocate size,
+            size, .i64 0, g "want_remainder"])
+          (c "__ps_nat_divide_bits" [a, g "right", allocate size, c "__ps_nat_zero" [],
+            o (.word .i32Shl) [size, k 5], g "want_remainder"])]))]
   for (suffix, instruction) in [
       ("eq", PsWasmInstruction.i32Eq), ("ne", .i32Ne),
       ("lt", .i32LtS), ("le", .i32LeS)] do

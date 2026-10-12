@@ -34,6 +34,8 @@ def naturalComponentProbe : Except String ScalarComponent := do
     ("product", "mul", large, large, large * large),
     ("quotient", "div", dividend, divisor, dividend / divisor),
     ("remainder", "mod", dividend, divisor, dividend % divisor),
+    ("wordQuotient", "div", large, 10, large / 10),
+    ("wordRemainder", "mod", large, 10, large % 10),
     ("divisionZero", "div", large, 0, 0),
     ("remainderZero", "mod", large, 0, large)]
   let checks := cases.map fun (name, operation, left, right, expected) => {

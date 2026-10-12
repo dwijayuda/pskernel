@@ -176,15 +176,15 @@ def main : IO Unit := do
   -- A syntax summary is never allowed to authorize ill-typed checking.
   for depth in [1, 12, 24, 48, 96] do
     for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
-      match psKernelC0LetBodyRangesWithFuel 1024
+      match psKernelC0LetCacheFramesWithFuel 1024
           (c0ZetaFixture depth leaf) with
       | none => throw (IO.userError "C0 zeta summary unexpectedly absent")
-      | some (_, ranges) =>
+      | some (_, _, ranges) =>
           let mut current := c0ZetaFixture depth leaf
           let mut tail := ranges
           for _ in [:depth] do
             match current, tail with
-            | .letE _ _ _ body _, range :: rest =>
+            | .letE _ _ _ body _, (range, _) :: rest =>
                 for cutoff in [:8] do
                   if (range > cutoff) != psKernelExprHasLooseAt body cutoff then
                     throw (IO.userError "C0 zeta range differs from oracle")
@@ -210,7 +210,7 @@ def main : IO Unit := do
     | Except.error err =>
         throw (IO.userError ("C0 dependent zeta WHNF failed: " ++ err))
   IO.println "C0_PERF_REGRESSION dependent_zeta_substitution=pass"
-  if (psKernelC0LetBodyRangesWithFuel 1
+  if (psKernelC0LetCacheFramesWithFuel 1
       (c0ZetaFixture 32 sort0)).isSome then
     throw (IO.userError "C0 zeta metadata exceeded recursion budget")
   -- Exact structural hash and range equivalence at *every* intermediate
@@ -219,26 +219,26 @@ def main : IO Unit := do
   for depth in [1, 12, 16, 24, 48, 96] do
     for leaf in [sort0, PsKernelExpr.bvar 0, PsKernelExpr.bvar 5] do
       let source := c0ZetaFixture depth leaf
-      match psKernelC0LetCacheFramesWithFuel 1024 source,
-            psKernelC0LetBodyRangesWithFuel 1024 source with
-      | some (_, fullHash, frames), some (_, oldRanges) =>
+      match psKernelC0LetCacheFramesWithFuel 1024 source with
+      | some (_, fullHash, frames) =>
           if fullHash != psKernelExprHash source then
             throw (IO.userError "C0 cached zeta root hash differs")
           let mut term := source
           let mut remainingFrames := frames
-          let mut remainingRanges := oldRanges
           for _ in [:depth] do
-            match term, remainingFrames, remainingRanges with
-            | .letE _ _ _ body _, (range, hash) :: tail, oldRange :: tailRanges =>
-                if range != oldRange || hash != psKernelExprHash term then
-                  throw (IO.userError "C0 zeta source cache metadata differs")
+            match term, remainingFrames with
+            | .letE _ _ _ body _, (range, hash) :: tail =>
+                if hash != psKernelExprHash term then
+                  throw (IO.userError "C0 zeta suffix fingerprint differs")
+                for cutoff in [:8] do
+                  if (range > cutoff) != psKernelExprHasLooseAt body cutoff then
+                    throw (IO.userError "C0 zeta suffix range differs")
                 term := body
                 remainingFrames := tail
-                remainingRanges := tailRanges
-            | _, _, _ => throw (IO.userError "C0 zeta hash frames misaligned")
-          if !remainingFrames.isEmpty || !remainingRanges.isEmpty then
+            | _, _ => throw (IO.userError "C0 zeta hash frames misaligned")
+          if !remainingFrames.isEmpty then
             throw (IO.userError "C0 zeta cache frame size differs")
-      | _, _ => throw (IO.userError "C0 zeta cache metadata unavailable")
+      | none => throw (IO.userError "C0 zeta cache metadata unavailable")
   -- Exact hash-key fast paths must be observationally equivalent across
   -- both the small-list cache and promoted collision-checked radix index.
   let mut ordinaryCache := psKernelExprMapEmpty

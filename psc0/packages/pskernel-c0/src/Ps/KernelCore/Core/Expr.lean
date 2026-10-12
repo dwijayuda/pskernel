@@ -734,26 +734,6 @@ def psKernelC0HasBinderPrefix : Nat -> Bool -> PsKernelExpr -> Bool
       psKernelC0HasBinderPrefix n false body
   | _, _, _ => false
 
-/-- Exact loose-variable ranges for consecutive let/zeta bodies, ordered
-    outermost-first. Bounded failure always requests ordinary substitution. -/
-def psKernelC0LetBodyRangesWithFuel (fuel : Nat) :
-    PsKernelExpr -> Option (Prod Nat (List Nat)) :=
-  match fuel with
-  | 0 => fun _ => none
-  | Nat.succ remaining =>
-      let smaller := psKernelC0LetBodyRangesWithFuel remaining
-      fun expr =>
-        match expr with
-        | .letE _ ty value body _ => do
-            let tyRange ← psKernelC0SourceLooseRangeWithFuel remaining ty
-            let valueRange ← psKernelC0SourceLooseRangeWithFuel remaining value
-            let (bodyRange, suffixes) ← smaller body
-            pure (Nat.max (Nat.max tyRange valueRange)
-              (Nat.pred bodyRange), bodyRange :: suffixes)
-        | _ => do
-            let range ← psKernelC0SourceLooseRangeWithFuel remaining expr
-            pure (range, [])
-
 /-- Avoid analyzing short let spines. Pure syntactic heuristic only. -/
 def psKernelC0HasLetPrefix : Nat -> PsKernelExpr -> Bool
   | 0, _ => true

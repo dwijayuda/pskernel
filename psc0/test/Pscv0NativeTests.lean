@@ -1087,6 +1087,16 @@ private def projectBoundaries : IO Unit := do
     "structure StringTag where {\n  value: String\n} deriving BEq\n" ++
     "const stringTagEq: Bool := StringTag.mk(\"hi\") == StringTag.mk(\"hi\")\n" ++
     "const stringTagNe: Bool := StringTag.mk(\"hi\") == StringTag.mk(\"bye\")\n"
+  let derivingPayloadBEqSource :=
+    "inductive CellLabel where { | empty | count(value: Nat) | enabled(value: Bool) } deriving BEq\n" ++
+    "const samePayload: Bool := CellLabel.count(3) == CellLabel.count(3)\n" ++
+    "theorem samePayloadProof: samePayload = true := by { rfl }\n" ++
+    "const otherPayload: Bool := CellLabel.count(3) == CellLabel.count(4)\n" ++
+    "theorem otherPayloadProof: otherPayload = false := by { rfl }\n" ++
+    "const otherCtor: Bool := CellLabel.count(3) == CellLabel.enabled(true)\n" ++
+    "theorem otherCtorProof: otherCtor = false := by { rfl }\n"
+  let derivingRecursiveBEqRefusal :=
+    "inductive RecursiveCell where { | nil | cons(next: RecursiveCell) } deriving BEq\n"
   let interpolationSource :=
     "const msg: String := s!\"Value {42}, flag {true}\"\n" ++
     "const inner: String := s!\"Embedded {String.Internal.append(\"x\", \"y\")}\"\n" ++
@@ -1145,7 +1155,10 @@ private def projectBoundaries : IO Unit := do
     { source := derivingStructureEqualitySource, moduleName := "DerivingStructureBEq",
       targets := [.javascript, .typescript, .rust] },
     { source := derivingStringBEqSource, moduleName := "DerivingStringBEq",
-      targets := [.javascript, .typescript, .rust] }]
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingPayloadBEqSource, moduleName := "DerivingPayloadBEq",
+      targets := [.javascript, .typescript, .rust] },
+    { source := derivingRecursiveBEqRefusal, moduleName := "DerivingRecursiveBEq" }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -1260,6 +1273,15 @@ private def projectBoundaries : IO Unit := do
     | 32, .error error =>
         throw (IO.userError ("derived string structure BEq failed at " ++
           error.phase ++ ": " ++ error.message))
+    | 33, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "nonrecursive payload BEq lacks checked artifacts")
+    | 33, .error error =>
+        throw (IO.userError ("nonrecursive payload BEq failed at " ++
+          error.phase ++ ": " ++ error.message))
+    | 34, .error error =>
+        unless error.phase == "elaborate" do
+          throw (IO.userError "recursive payload BEq did not fail during elaboration")
     | 13, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "invalid radix literal was not refused by elaboration")

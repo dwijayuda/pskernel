@@ -136,6 +136,42 @@ def main : IO Unit := do
             throw (IO.userError "C0 checked spine changed success/rejection")
   IO.println "C0_PERF_REGRESSION checked_spine_exact_fuel_and_errors=pass"
 
+  -- Exact source cached-range oracle: a range greater than the cutoff
+  -- must agree with the independent recursive loose-variable predicate
+  -- at every offset, including under let/lambda/Pi binders.
+  let dependentPi :=
+    PsKernelExpr.forallE PsKernelName.anonymous sort0
+      (PsKernelExpr.forallE PsKernelName.anonymous
+        (PsKernelExpr.bvar 0) (PsKernelExpr.bvar 1)
+        PsKernelBinderInfo.default)
+      PsKernelBinderInfo.default
+  let sourceRanges : List PsKernelExpr := [
+    sort0,
+    PsKernelExpr.bvar 0,
+    PsKernelExpr.bvar 3,
+    PsKernelExpr.app (PsKernelExpr.bvar 2) sort0,
+    dependentPi,
+    PsKernelExpr.lam PsKernelName.anonymous sort0
+      (PsKernelExpr.bvar 0) PsKernelBinderInfo.default,
+    PsKernelExpr.letE PsKernelName.anonymous sort0
+      (PsKernelExpr.bvar 4) (PsKernelExpr.bvar 1) false
+  ]
+  for expr in sourceRanges do
+    match psKernelC0SourceLooseRangeWithFuel 1024 expr with
+    | none => throw (IO.userError "C0 bounded metadata unexpectedly exhausted")
+    | some range =>
+        for cutoff in [:range + 3] do
+          if (range > cutoff) != psKernelExprHasLooseAt expr cutoff then
+            throw (IO.userError "C0 source loose range diverged from syntax")
+  match psKernelC0PiBodyRangesWithFuel 1024 dependentPi with
+  | some (_, [first, second]) =>
+      if first != 1 || second != 2 then
+        throw (IO.userError "C0 Pi suffix ranges lost binder shift")
+  | _ => throw (IO.userError "C0 Pi suffix metadata shape diverged")
+  if (psKernelC0PiBodyRangesWithFuel 1 dependentPi).isSome then
+    throw (IO.userError "C0 bounded Pi metadata failed to exhaust safely")
+  IO.println "C0_PERF_REGRESSION source_pi_range_oracle=pass"
+
   match psKernelSessionIsDefEq 4096 session sort0 sort1 with
   | Except.error message =>
       throw (IO.userError ("unexpected sort comparison error: " ++ message))

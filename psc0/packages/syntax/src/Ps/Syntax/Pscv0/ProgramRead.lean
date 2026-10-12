@@ -84,8 +84,9 @@ def psPscv0ReadCommand (cursor : PsTokenCursor) :
         | throw "PSCV0-DERIVE-HANDLER-REQUIRED"
       let next ← (psParseProofScriptCommandSeparator finalHandler.span.stop
         handlers.cursor).mapError psPscv0ParseError
-      return { value := .derivingDeclaration parsed.value handlers.value isPrivate,
-        cursor := next }
+      let command := PsSyntaxCommand.derivingDeclaration
+        parsed.value handlers.value isPrivate
+      return { value := command, cursor := next }
     let next ← (psParseProofScriptCommandSeparator stop parsed.cursor).mapError psPscv0ParseError
     let command := if isPrivate then
       PsSyntaxCommand.privateDeclaration parsed.value

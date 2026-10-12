@@ -864,12 +864,20 @@ private def doBoundaries : IO Unit := do
 private def projectBoundaries : IO Unit := do
   let _ ← get "pinned Standard declaration and instance registry"
     (psStandardExceptAudit psSelfHostProdPreludeEnvironment)
-  let selectedSnapshot := psStandardSnapshotFingerprint psSelfHostProdPreludeEnvironment
+  let _ ← get "pinned RC4 Standard snapshot"
+    (psStandardSnapshotValidate psSelfHostProdPreludeEnvironment
+      psStandardSnapshotExpected)
+  let unrelatedAlias := {
+    psSelfHostProdPreludeEnvironment with
+    exportedAliases := (psRootName "unexpectedAlias", psNatName) ::
+      psSelfHostProdPreludeEnvironment.exportedAliases }
+  if (psStandardSnapshotValidate unrelatedAlias psStandardSnapshotExpected).isOk then
+    throw (IO.userError "pinned Standard snapshot accepted alias registry drift")
   IO.println ("PSCV0_NATIVE_STANDARD_SNAPSHOT: declarations=" ++
     toString psSelfHostProdPreludeEnvironment.declarations.length ++
     " classes=" ++ toString psSelfHostProdPreludeEnvironment.classes.length ++
     " instances=" ++ toString psSelfHostProdPreludeEnvironment.instances.entries.length ++
-    " fingerprint=" ++ selectedSnapshot)
+    " fingerprint=" ++ psStandardSnapshotExpected)
   let badStandard := psEnvironmentInsert psSelfHostProdPreludeEnvironment
     (.definitionDecl
       (psNameAppendStr (psRootName "PsStandard") "instBEqNat") []

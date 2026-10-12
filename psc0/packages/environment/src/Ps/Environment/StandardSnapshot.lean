@@ -171,6 +171,12 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
   "fnv1a64:" ++ toString (psStandardSnapshotFNV64
     (psStandardSnapshotPayload environment))
 
+-- This expected value is generated only from the qualified selected prelude
+-- and deliberately changes with every intentional registered semantic update.
+-- The official kernel is still the authority for checking its declarations.
+def psStandardSnapshotExpected : String :=
+  "fnv1a64:3890664716772208725"
+
 def psStandardSnapshotValidate (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
   psStandardExceptAudit environment

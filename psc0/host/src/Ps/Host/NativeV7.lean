@@ -12,7 +12,7 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/31"
+def profile : String := "pscv0-v7-native-bounded/32"
 
 def leanVersion : String := "4.35.0-rc4"
 def leanCommit : String := "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
@@ -90,12 +90,31 @@ private def compile (prelude : Lean.Environment) (request : Request) :
   -- Existing erasure validation is retained until profiling justifies changing it.
   let ir ← fromResult "erase"
     ((psCompilerVerifiedIrFromPrepared output.prepared).mapError psCompilerPscv0Error)
+  let origins := elaborated.origins.flatMap fun batch =>
+    batch.members.map fun member =>
+      (psNameToString member.name, {
+        identity := { file := request.sourceName, declaration := psNameToString member.name }
+        span := batch.span
+        generatedReason := match member.role with
+          | .sourceDeclaration | .inductiveType | .structureType => none
+          | _ => some "elaboration member of source declaration" : PsSourceOrigin })
+  let origins := output.originParents.foldl (fun origins (helper, parent) =>
+    match origins.find? (fun entry => entry.fst == psNameToString parent) with
+    | none => origins
+    | some (_, origin) => (psNameToString helper, { origin with
+        identity := { origin.identity with declaration := psNameToString helper }
+        generatedReason := some ("recursor worker of " ++ psNameToString parent) }) :: origins) origins
+  let context : PsEmissionContext := {
+    sourceName := request.sourceName
+    sourceText := request.source
+    outputStem := request.outputStem
+    origins := origins }
   let t5 ← IO.monoMsNow
   let (_, artifacts) ← fromResult "ir/emit" (psWithCheckedIr psIrCheckDefaultOptions ir fun checked =>
     request.targets.mapM fun target =>
       match target with
-      | .typescript => psTsEmitReadable checked request.outputStem
-      | .javascript => .error "PSCV0-JAVASCRIPT: C1/C2 pending"
+      | .typescript => PsEcma.emit checked .typescript context
+      | .javascript => PsEcma.emit checked .javascript context
       | .rust => psRustEmitReadable checked request.outputStem)
   let t6 ← IO.monoMsNow
   return {

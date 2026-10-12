@@ -1,6 +1,7 @@
 import Ps.BackendRust.Tail
 import Ps.BackendRust.Runtime
 import Ps.Codegen.Artifact
+import Ps.Codegen.Api
 
 def psRustGenericNames (ps : List PsVerifiedIrTypeParameter) (bounds : Bool) : String :=
   if ps.isEmpty then "" else
@@ -83,6 +84,7 @@ def psRustEmitReadable (ir : PsVerifiedIrModule) (stem : String := "module") : E
     (psDocJoin (.append .hardline .hardline) (header ++ structures ++ inductives ++ declarations)) .hardline)
   psValidateArtifact {
     target := .rust
+    exports := ← psApiExports ir
     source := source
     symbols := names.symbols.reverse
     files := [

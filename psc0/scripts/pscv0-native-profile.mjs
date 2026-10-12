@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const packages = ['foundation','syntax','core','environment','meta','elab',
-  'bridge','compiler-ir','erasure','compiler','codegen','backend-ts','backend-rust'];
+  'bridge','compiler-ir','erasure','compiler','codegen','backend-ts','backend-rust','backend-ecma'];
 const sourceRoots = packages.map(name => 'packages/' + name + '/src');
 const hostRoots = [...sourceRoots, 'host/src', 'packages/pskernel-lean/provider'];
 const sha = text => createHash('sha256').update(text).digest('hex');

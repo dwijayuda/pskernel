@@ -80,3 +80,12 @@ def psTargetCapabilities : PsEmissionTarget → PsTargetCapabilities
       stackSafeCalls := false
       externalImports := false
       sourceMaps := false }
+
+def psApiExports (ir : PsVerifiedIrModule) : Except String (List PsApiExport) := do
+  let api ← psPublicApi ir
+  return api.exports.map fun d => {
+    semanticName := d.name
+    typeParameters := d.typeParameters
+    parameters := d.parameters
+    result := d.resultType
+    witReason := psWitExportReason api d }

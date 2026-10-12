@@ -18,12 +18,20 @@ structure PsArtifactFile where
   role : PsArtifactRole
   payload : PsArtifactPayload
 
+structure PsApiExport where
+  semanticName : String
+  typeParameters : List PsVerifiedIrTypeParameter
+  parameters : List PsVerifiedIrParameter
+  result : PsVerifiedIrType
+  witReason : Option String
+
 structure PsEmissionArtifact where
   target : PsEmissionTarget
   source : PsRenderedDoc
   symbols : List PsCodegenSymbol
   files : List PsArtifactFile := []
   dependencies : List String := []
+  exports : List PsApiExport := []
 
 def psEmissionTargetName : PsEmissionTarget → String
   | .typescript => "typescript"

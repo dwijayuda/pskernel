@@ -117,12 +117,13 @@ lean_lib PsCompiler where
 
 lean_lib PsCodegen where
   srcDir := "packages/codegen/src"
-  roots := #[`Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact, `Ps.Codegen.Provenance, `Ps.Codegen.Api]
+  roots := #[`Ps.Codegen.Doc, `Ps.Codegen.Names, `Ps.Codegen.Artifact, `Ps.Codegen.Provenance, `Ps.Codegen.Api, `Ps.Codegen.SourceMap]
 
 lean_lib PsBackendTs where
   srcDir := "packages/backend-ts/src"
   roots := #[
     `Ps.BackendTs.Type,
+    `Ps.BackendTs.Analysis,
     `Ps.BackendTs.Expr,
     `Ps.BackendTs.Module,
     `Ps.BackendTs.Readable,
@@ -131,6 +132,11 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler
   ]
+
+lean_lib PsBackendEcma where
+  srcDir := "packages/backend-ecma/src"
+  roots := #[`Ps.BackendEcma.Syntax, `Ps.BackendEcma.Runtime,
+    `Ps.BackendEcma.Intrinsic, `Ps.BackendEcma.Lower, `Ps.BackendEcma.Module]
 
 lean_lib PsBackendRust where
   srcDir := "packages/backend-rust/src"

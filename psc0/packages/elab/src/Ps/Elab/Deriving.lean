@@ -186,6 +186,117 @@ def psElabDeriveStructureBEq (environment : PsEnvironment)
   return .definitionDecl (psNameAppendStr info.name "instBEq") []
     dictionaryType value
 
+-- One constructor-field profile is shared by both argument lists of a
+-- finite nonrecursive inductive. All field types must be closed and Type 0:
+-- allowing dependent fields would require a heterogeneous transport proof.
+def psElabDeriveBEqFields (environment : PsEnvironment)
+    (constructor : PsConstructorInfo) : Except PsElabError (List PsExpr) := do
+  if constructor.numParams != 0 || !constructor.levelParams.isEmpty ||
+      !constructor.recursiveFields.isEmpty then
+    throw (.data "BEq deriving requires a nonrecursive closed constructor")
+  let mut cursor := constructor.type
+  let mut fields : List PsExpr := []
+  for fieldIndex in [:constructor.numFields] do
+    let .forallE _ domain body _ :=
+      psWhnf environment psMetaEmpty psLocalEmpty cursor
+      | throw (.data "BEq deriving field telescope incomplete")
+    let sort ← (psInferType environment psMetaEmpty psLocalEmpty domain).mapError
+      (fun _ => PsElabError.data "BEq deriving requires independent field types")
+    let .sortE level := psWhnf environment psMetaEmpty psLocalEmpty sort
+      | throw (.data "BEq deriving field is not a type")
+    if !psLevelEquivalent level (.succ .zero) then
+      throw (.data "BEq deriving fields must inhabit Type 0")
+    fields := domain :: fields
+    cursor := psExprInstantiate1 body (.fvar (1000 + fieldIndex))
+  let some info := psEnvironmentFindInductive environment constructor.inductiveName
+    | throw (.data "BEq deriving family missing")
+  if !psDefEqReadOnlyWithEnv environment psMetaEmpty psLocalEmpty cursor
+      (.constE info.name []) then
+    throw (.data "BEq deriving constructor result mismatch")
+  return fields.reverse
+
+-- Synthesized field dictionaries are genuine checked instances. The equality
+-- result is Bool-rec elimination so source `rfl` can normalize concrete fields.
+def psElabDeriveBEqComparedFields (environment : PsEnvironment)
+    (types : List PsExpr) (left right : List Nat) : Except PsElabError PsExpr := do
+  if types.length != left.length || types.length != right.length then
+    throw (.data "BEq deriving field alignment mismatch")
+  let bool := PsExpr.constE psBoolName []
+  let boolMotive := psLogicLam 940 "_" bool bool
+  let mut combined := PsExpr.constE psBoolTrueName []
+  for ((type, l), r) in (types.zip left).zip right do
+    let target := PsExpr.app (.constE (psRootName "BEq") [.zero]) type
+    let candidate := psSynthInstance environment psLocalEmpty
+      environment.instances psMetaEmpty target
+    let some dictionary := candidate.value
+      | throw (.data "BEq deriving field has no checked BEq instance")
+    let dictionary := psMetaInstantiate candidate.context dictionary
+    if psExprHasUnresolvedMeta dictionary then
+      throw (.data "BEq deriving field leaves unsolved instance variables")
+    let equality := psLogicApply
+      (.constE (psNameAppendStr (psRootName "BEq") "beq") [.zero])
+      [type, dictionary, .fvar l, .fvar r]
+    combined := psLogicApply
+      (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
+      [boolMotive, .constE psBoolFalseName [], equality, combined]
+  return combined
+
+def psElabDerivePayloadBEq (environment : PsEnvironment)
+    (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
+  let some member := origin.members.find? (fun member =>
+    match member.role with
+    | .inductiveType => true
+    | _ => false)
+    | throw (.data "payload BEq deriving requires an inductive")
+  let some (.inductiveDecl info) := psEnvironmentFind environment member.name
+    | throw (.data "payload BEq deriving family missing")
+  if info.isStructure || info.numParams != 0 || info.numIndices != 0 ||
+      !info.levelParams.isEmpty || info.constructors.isEmpty then
+    throw (.data "bounded BEq deriving requires a closed non-indexed inductive")
+  let .sortE level := info.type
+    | throw (.data "BEq deriving requires Type 0")
+  if !psLevelEquivalent level (.succ .zero) then
+    throw (.data "BEq deriving requires Type 0")
+  let families ← info.constructors.mapM fun ctorName => do
+    let some ctor := psEnvironmentFindConstructor environment ctorName
+      | throw (.data "BEq deriving constructor missing")
+    psElabDeriveBEqFields environment ctor
+  let family := PsExpr.constE info.name []
+  let bool := PsExpr.constE psBoolName []
+  let recursor := PsExpr.constE
+    (psNameAppendStr info.name "rec") [.succ .zero]
+  let outerMotive := psLogicLam 990 "_" family
+    (psLogicPi 991 "other" family bool)
+  let rightMotive := psLogicLam 992 "_" family bool
+  let mut outerBranches : List PsExpr := []
+  for (leftTypes, leftIndex) in families.zipIdx do
+    let leftIds := (List.range leftTypes.length).map (fun i => 100 + i)
+    let mut rightBranches : List PsExpr := []
+    for (rightTypes, rightIndex) in families.zipIdx do
+      let rightIds := (List.range rightTypes.length).map (fun i => 200 + i)
+      let comparison ← if leftIndex == rightIndex then
+        psElabDeriveBEqComparedFields environment leftTypes leftIds rightIds
+      else pure (.constE psBoolFalseName [])
+      let minor := (rightTypes.zip rightIds).foldr
+        (fun (type, id) body => psLogicLam id "field" type body) comparison
+      rightBranches := rightBranches ++ [minor]
+    let inner := psLogicApply recursor
+      ([rightMotive] ++ rightBranches ++ [.fvar 400])
+    let method := psLogicLam 400 "right" family inner
+    let outerMinor := (leftTypes.zip leftIds).foldr
+      (fun (type, id) body => psLogicLam id "field" type body) method
+    outerBranches := outerBranches ++ [outerMinor]
+  let leftRec := psLogicApply recursor
+    ([outerMotive] ++ outerBranches ++ [.fvar 0])
+  let beq := psLogicLam 0 "left" family
+    (psLogicLam 1 "right" family (.app leftRec (.fvar 1)))
+  let className := psRootName "BEq"
+  let dictionaryType := PsExpr.app (.constE className [.zero]) family
+  let value := psLogicApply (.constE (psNameAppendStr className "mk") [.zero])
+    [family, beq]
+  return .definitionDecl (psNameAppendStr info.name "instBEq") []
+    dictionaryType value
+
 def psElabDeriveBEq (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) : Except PsElabError PsDeclaration := do
   let some member := origin.members.find? (fun member =>
@@ -196,7 +307,12 @@ def psElabDeriveBEq (environment : PsEnvironment)
   let some (.inductiveDecl info) := psEnvironmentFind environment member.name
     | throw (.data "BEq deriving family missing")
   if info.isStructure then psElabDeriveStructureBEq environment origin
-  else psElabDeriveEnumBEq environment origin
+  else if (info.constructors.all fun name =>
+      match psEnvironmentFindConstructor environment name with
+      | some ctor => ctor.numFields == 0
+      | none => false) then
+    psElabDeriveEnumBEq environment origin
+  else psElabDerivePayloadBEq environment origin
 
 def psElabDeriveHandler (environment : PsEnvironment)
     (origin : PsElabBatchOrigin) (handler : PsSyntaxName) :

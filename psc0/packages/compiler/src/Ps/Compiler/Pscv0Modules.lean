@@ -224,7 +224,7 @@ def psCompilerPreparePscv0Project (entryName : String)
         | throw "PSCV0-MODULE: unresolved topological dependency"
       psPscv0InstallInterface env linked.interface) psSelfHostProdPreludeEnvironment
     let program := { item.program with imports := [] }
-    let elaborated ← (psElabProgramWithOrigins importEnvironment program).mapError
+    let elaborated ← (psElabProgramWithOrigins importEnvironment program item.name).mapError
       psCompilerPscv0ElabError
     let output ← (psCompilerPrepareElaboratedWithOutput elaborated.result).mapError
       psCompilerPscv0Error

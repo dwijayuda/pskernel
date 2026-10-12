@@ -71,6 +71,9 @@ inductive PsSyntaxLevel where
 structure PsSyntaxProofScope where
   namePrefix : List String := []
   opened : List (List String) := []
+  -- Module-owned private names are resolved within tactic terms, never
+  -- serialized as public names or made visible to external importers.
+  privateAliases : List (List String × List String) := []
 
 mutual
 inductive PsSyntaxTerm where

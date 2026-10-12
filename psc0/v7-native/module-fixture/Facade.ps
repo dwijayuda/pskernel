@@ -1,4 +1,5 @@
 public import Vault
+private const seed: Nat := 0
 namespace Facade
-function twiceWithSeed(value: Nat): Nat := Vault.withSeed(Nat.add(value, value))
+function twiceWithSeed(value: Nat): Nat := Vault.withSeed(Nat.add(Nat.add(value, value), seed))
 end Facade

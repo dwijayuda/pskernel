@@ -10,11 +10,15 @@ structure PsCommandState where
   originsRev : List PsElabBatchOrigin := []
   privateNames : List PsName := []
   exposedNames : List PsName := []
+  moduleIdentity : String := ""
+  privateAliases : List (List String × List String) := []
 
 def psScopeDeclaration (resolver : PsScopeResolver) (source : PsSyntaxDeclaration) :
     Except PsElabError PsSyntaxDeclaration := do
   let sourceName := (psElabOriginSource source).fst
-  let name := psScopeQualified resolver.scope sourceName
+  let sourceQualified := psScopeQualified resolver.scope sourceName
+  let resolved := (psScopePrivateRewrite resolver sourceQualified.segments).getD sourceQualified.segments
+  let name := { sourceQualified with segments := resolved }
   let resolver := { resolver with selfName := some name.segments }
   let visit := psScopeTerm 4096 resolver
   match source with
@@ -121,7 +125,17 @@ def psScopeInclusion (state : PsCommandState) (names : List PsSyntaxName) (add :
 def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclaration)
     (registration : Option PsSyntaxRegistration) (isPrivate : Bool := false) :
     Except PsElabError PsCommandState := do
-  let source ← psScopeDeclaration { environment := state.environment, scope := state.scope } source
+  let qualified := psScopeQualified state.scope (psElabOriginSource source).fst
+  -- Only explicit project modules mangle private identities. Single-file
+  -- elaboration retains its existing standalone naming contract.
+  let aliases := if isPrivate && !state.moduleIdentity.isEmpty then
+    (qualified.segments,
+      ["$psc0Private"] ++ state.moduleIdentity.splitOn "." ++ qualified.segments)
+      :: state.privateAliases
+    else state.privateAliases
+  let source ← psScopeDeclaration {
+    environment := state.environment, scope := state.scope,
+    privateAliases := aliases } source
   let some name := psSyntaxNameToName (psElabOriginSource source).fst | throw .emptyName
   let originBatch ← (psElabDeclarationBatchWithOrigins state.environment
     state.originsRev.length source (state.scope.levelNames.map psRootName)).mapError
@@ -164,7 +178,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     else state.privateNames
     exposedNames := if isAbbrev then
       batch.declarations.map psDeclarationName ++ state.exposedNames
-    else state.exposedNames }
+    else state.exposedNames
+    privateAliases := aliases }
 
 def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
     Except PsElabError PsCommandState := do
@@ -204,12 +219,14 @@ def psElabCommand (state : PsCommandState) (command : PsSyntaxCommand) :
   | .privateRegisteredDeclaration source registration =>
     psElabCommandDeclaration state source (some registration) true
 
-def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram) :
+def psElabProgramWithOrigins (environment : PsEnvironment) (program : PsSyntaxProgram)
+    (moduleIdentity : String := "") :
     Except PsElabError PsElabModuleWithOriginsResult := do
   if !program.imports.isEmpty then throw (.scope "module imports are not available in this entry point")
   let namespaces := environment.declarations.foldl (fun acc decl =>
     ((psScopeNamePrefixes (psDeclarationName decl)).drop 1).foldl psScopeRemember acc) []
-  let state ← program.commands.foldlM psElabCommand { environment, namespaces }
+  let state ← program.commands.foldlM psElabCommand {
+    environment, namespaces, moduleIdentity }
   if !state.frames.isEmpty then throw (.scope "unclosed namespace or section")
   return {
     result := { environment := state.environment, declarations := state.declarationsRev.reverse }

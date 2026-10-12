@@ -7,7 +7,8 @@ def psProofSource (scope : PsSyntaxProofScope) (context : PsElabContext)
     psNameLastComponent (psLocalDeclUserName entry)
   let resolved ← psScopeTerm 4096 {
     environment := context.environment
-    scope := { namePrefix := scope.namePrefix, opened := scope.opened } } bound source
+    scope := { namePrefix := scope.namePrefix, opened := scope.opened }
+    privateAliases := scope.privateAliases } bound source
   return resolved.term
 
 def psProofMain (state : PsProofState) :

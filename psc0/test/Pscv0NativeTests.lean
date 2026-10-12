@@ -897,7 +897,8 @@ private def projectBoundaries : IO Unit := do
     (psCompilerPreparePscv0Project "PrivateClient" [
       vault, { name := "PrivateClient", source := privateClient }])
   unless scopedProject.mainNames.any (fun n => psNameToString n == "answer") &&
-      scopedProject.libraryNames.any (fun n => psNameToString n == "Vault.hidden") do
+      scopedProject.libraryNames.any (fun n =>
+        psNameToString n == "$psc0Private.Vault.Vault.hidden") do
     throw (IO.userError "module private member lost from runtime library closure")
   let left : PsPscv0ModuleSource := {
     name := "Left", source := "public import Vault\nconst left: Nat := 1\n" }
@@ -922,6 +923,23 @@ private def projectBoundaries : IO Unit := do
     source := "namespace InvalidExposed\nprivate const seed: Nat := 9\nabbrev leaked: Nat := seed\nend InvalidExposed\n" }
   if (psCompilerPreparePscv0Project "InvalidExposed" [invalidExposed]).isOk then
     throw (IO.userError "exposed abbreviation body leaked private declaration")
+  let privateA : PsPscv0ModuleSource := {
+    name := "PrivateA"
+    source := "private const same: Nat := 3\nfunction leftValue(value: Nat): Nat := Nat.add(same, value)\n" }
+  let privateB : PsPscv0ModuleSource := {
+    name := "PrivateB"
+    source := "private const same: Nat := 5\nfunction rightValue(value: Nat): Nat := Nat.add(same, value)\n" }
+  let sharedClient : PsPscv0ModuleSource := {
+    name := "SharedClient"
+    source := "import PrivateA\nimport PrivateB\nconst answer: Nat := Nat.add(leftValue(1), rightValue(1))\n" }
+  let isolated ← get "module-local private name hygiene"
+    (psCompilerPreparePscv0Project "SharedClient" [sharedClient, privateA, privateB])
+  unless isolated.mainNames.any (fun name => psNameToString name == "answer") &&
+      isolated.libraryNames.any (fun name =>
+        psNameToString name == "$psc0Private.PrivateA.same") &&
+      isolated.libraryNames.any (fun name =>
+        psNameToString name == "$psc0Private.PrivateB.same") do
+    throw (IO.userError "two private module identities collided or lost scope")
   let requests : Array PsV7Native.Request := #[
     { source := direct.source, moduleName := "Direct", modules := [library],
       targets := [.javascript, .typescript, .rust] },
@@ -936,7 +954,9 @@ private def projectBoundaries : IO Unit := do
     { source := privateRoot, moduleName := "PrivateRoot", modules := [vault],
       targets := [.javascript] },
     { source := abbreviationClient, moduleName := "AbbrevClient", modules := [aliases] },
-    { source := abbreviationOpacity, moduleName := "AbbrevOpacity", modules := [aliases] }]
+    { source := abbreviationOpacity, moduleName := "AbbrevOpacity", modules := [aliases] },
+    { source := sharedClient.source, moduleName := "SharedClient",
+      modules := [privateA, privateB], targets := [.javascript] }]
   let checked ← match ← PsV7Native.runBatch requests with
     | .ok result => pure result
     | .error error => throw (IO.userError ("module host prelude: " ++ error.message))
@@ -951,7 +971,7 @@ private def projectBoundaries : IO Unit := do
           if artifact.exports.any (fun e => e.semanticName == "Library.double") then
             throw (IO.userError "ordinary imported runtime symbol leaked into public API")
     | 1, .ok _ | 8, .ok _ => pure ()
-    | 4, .ok value | 6, .ok value | 7, .ok value =>
+    | 4, .ok value | 6, .ok value | 7, .ok value | 10, .ok value =>
         unless value.artifacts.length == 1 do
           throw (IO.userError "module linked JS artifact missing")
         let some artifact := value.artifacts.head?
@@ -962,7 +982,7 @@ private def projectBoundaries : IO Unit := do
         unless error.phase == "module" do
           throw (IO.userError ("module visibility/reflexivity checked at wrong boundary: " ++ error.phase))
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
-  IO.println "PSCV0_NATIVE_MODULES: PASS source scope, exposed abbrev, non-exposed defs, diamonds, entry exports and graph refusals"
+  IO.println "PSCV0_NATIVE_MODULES: PASS module-private hygiene, abbrev exposure, diamonds, entry closure/exports and graph refusals"
 
 def main : IO Unit := do
   emissionBoundary

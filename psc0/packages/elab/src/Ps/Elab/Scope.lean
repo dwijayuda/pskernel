@@ -23,6 +23,8 @@ structure PsScopeResolver where
   selfName : Option (List String) := none
   selfArguments : List PsSyntaxTerm := []
   deferProofNames : Bool := false
+  -- Source-visible qualified private name to stable module-local kernel name.
+  privateAliases : List (List String × List String) := []
 
 def psScopeKey (name : PsSyntaxName) : String := String.intercalate "." name.segments
 
@@ -54,6 +56,18 @@ def psScopeGlobalBase (resolver : PsScopeResolver) (segments : List String) : Bo
   (psScopePrefixes segments).any fun namePrefix =>
     !namePrefix.isEmpty && psScopeHasGlobal resolver namePrefix
 
+-- Resolve the longest private prefix first. This also preserves projection
+-- suffixes on a private structure and recursive references to its members.
+def psScopePrivateRewrite (resolver : PsScopeResolver)
+    (segments : List String) : Option (List String) :=
+  let prefixes := psScopePrefixes segments
+  let some prefix := prefixes.find? (fun candidate =>
+    resolver.privateAliases.any (fun entry => entry.fst == candidate))
+    | none
+  let some alias := resolver.privateAliases.find? (fun entry => entry.fst == prefix)
+    | none
+  some (alias.snd ++ segments.drop prefix.length)
+
 def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     (name : PsSyntaxName) : Except PsElabError (Prod PsSyntaxName (List String)) := do
   let segments := psSyntaxNameRootSegments name.segments
@@ -68,14 +82,20 @@ def psScopeResolve (resolver : PsScopeResolver) (bound : List String)
     return ({ name with segments := ["_root_"] ++ segments }, [])
   let candidates := if rooted then [segments]
     else (psScopePrefixes resolver.scope.namePrefix).map (· ++ segments)
-  match candidates.find? (psScopeGlobalBase resolver) with
-  | some full => return ({ name with segments := "_root_" :: full }, [])
+  let available := fun (key : List String) =>
+    (psScopePrivateRewrite resolver key).isSome || psScopeGlobalBase resolver key
+  match candidates.find? available with
+  | some full =>
+    let resolved := (psScopePrivateRewrite resolver full).getD full
+    return ({ name with segments := "_root_" :: resolved }, [])
   | none => pure ()
   if rooted then throw (.scope ("unknown global " ++ psScopeKey name))
-  let opened := (resolver.scope.opened.map (· ++ segments)).filter (psScopeGlobalBase resolver)
+  let opened := (resolver.scope.opened.map (· ++ segments)).filter available
   let unique := opened.foldl (fun acc item => if acc.contains item then acc else item :: acc) []
   match unique with
-  | [full] => return ({ name with segments := "_root_" :: full }, [])
+  | [full] =>
+    let resolved := (psScopePrivateRewrite resolver full).getD full
+    return ({ name with segments := "_root_" :: resolved }, [])
   | [] => throw (.scope ("unknown name " ++ psScopeKey name))
   | _ => throw (.scope ("ambiguous open name " ++ psScopeKey name))
 
@@ -241,7 +261,8 @@ def psScopeTerm (fuel : Nat) (resolver : PsScopeResolver) (bound : List String)
       let used ← psScopeTacticDependencies fuel
         (psScopeTerm fuel { resolver with deferProofNames := true }) bound tactics
       return { term := .byE tactics {
-        namePrefix := resolver.scope.namePrefix, opened := resolver.scope.opened } span, used }
+        namePrefix := resolver.scope.namePrefix, opened := resolver.scope.opened,
+        privateAliases := resolver.privateAliases } span, used }
     | .reference name =>
       let resolved ← psScopeResolve resolver bound name
       return { term := .reference resolved.fst, used := resolved.snd }

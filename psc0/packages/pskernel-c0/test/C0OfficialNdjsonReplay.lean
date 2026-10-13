@@ -342,30 +342,36 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
   | [] => throw "NDJSON missing a supported declaration"
   | declarations => pure declarations.reverse
 
-/-- Sequentially check exactly the declarations recovered from official
-    NDJSON bytes in their original order. A failed checked definition cannot
-    mutate the previously accepted environment, and unsupported input errors
-    remain distinct from legitimate kernel rejection. -/
+/-- One declaration check, preserving the kernel's typed error category.
+    The source recursive checker is the *only* acceptance authority. -/
+def c0ExportCheckOne
+    (env : PsKernelEnvironment)
+    (info : C0ExportDeclaration)
+    (fuel : Nat := 4096) : Except PsKernelError PsKernelEnvironment :=
+  let result : Except String PsKernelEnvironment :=
+    match info with
+    | .axiomDecl value =>
+        psKernelAddAxiom fuel env value 4096 psKernelLeanNatMaxSizeDefault
+    | .definition value =>
+        psKernelAddDefinition fuel env value 4096 psKernelLeanNatMaxSizeDefault
+    | .theoremDecl value =>
+        psKernelAddTheorem fuel env value 4096 psKernelLeanNatMaxSizeDefault
+    | .opaqueDecl value =>
+        psKernelAddOpaque fuel env value 4096 psKernelLeanNatMaxSizeDefault
+  match result with
+  | .ok next => .ok next
+  | .error message => .error (psKernelErrorFromMessage message)
+
+/-- The retained batch replay is an independent test reference for online
+    declaration admission. It never converts a resource failure to rejection. -/
 def c0ExportCheckDefinitions (infos : List C0ExportDeclaration) :
-    Except String Bool := do
+    Except PsKernelError Bool := do
   let mut env := psKernelEnvironmentEmpty
   for info in infos do
-    let checked : Except String PsKernelEnvironment :=
-      match info with
-      | .axiomDecl value =>
-          psKernelAddAxiom 4096 env value 4096 psKernelLeanNatMaxSizeDefault
-      | .definition value =>
-          psKernelAddDefinition 4096 env value 4096 psKernelLeanNatMaxSizeDefault
-      | .theoremDecl value =>
-          psKernelAddTheorem 4096 env value 4096 psKernelLeanNatMaxSizeDefault
-      | .opaqueDecl value =>
-          psKernelAddOpaque 4096 env value 4096 psKernelLeanNatMaxSizeDefault
-    match checked with
+    match c0ExportCheckOne env info with
     | .ok next => env := next
-    | .error message =>
-        match psKernelErrorFromMessage message with
-        | .rejectedInvalid _ => return false
-        | _ => throw ("C0 check did not yield a normal rejection: " ++ message)
+    | .error (.rejectedInvalid _) => return false
+    | .error error => throw error
   return true
 
 /-- The conformance harness distinguishes official acceptance/rejection from
@@ -376,6 +382,7 @@ inductive C0ExportVerdict where
   | rejected
   | unsupported
   | malformed
+  | resourceExhausted
   | inconclusive
   deriving BEq, Repr
 
@@ -386,14 +393,59 @@ def c0ExportClassifyInputError (message : String) : C0ExportVerdict :=
   else
     .malformed
 
-def c0ExportVerdictOf (input : String) : C0ExportVerdict :=
+/-- Categorise kernel outcomes without confusing a fuel/size limit,
+    unsupported semantics or an unknown diagnostic with invalid proof terms. -/
+def c0ExportFromKernelError : PsKernelError → C0ExportVerdict
+  | .rejectedInvalid _ => .rejected
+  | .declinedUnsupported _ => .unsupported
+  | .resourceExhausted _ _ => .resourceExhausted
+  | .internalError _ => .inconclusive
+
+/-- Retained whole-batch oracle: parses all source records before checking.
+    Its distinct ordering is useful for detecting online replay drift. -/
+def c0ExportVerdictBatch (input : String) : C0ExportVerdict :=
   match c0ExportReadSubset input with
   | .error message => c0ExportClassifyInputError message
   | .ok declarations =>
       match c0ExportCheckDefinitions declarations with
       | .ok true => .accepted
       | .ok false => .rejected
-      | .error _ => .inconclusive
+      | .error error => c0ExportFromKernelError error
+
+/-- Decode source in order and admit each declaration immediately, rather
+    than materialising and retaining a separate list of *all* declarations.
+    Name, level and expression tables are still retained, and input is still
+    read into a String; this is not yet a bounded-memory streaming importer.
+    On the first invalid declaration, return rejected without admitting any
+    later record. Every unknown input form fails closed. -/
+def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
+    C0ExportVerdict := Id.run do
+  let mut tables : C0ExportTables := {}
+  let mut env := psKernelEnvironmentEmpty
+  let mut checkedCount := 0
+  for line in input.splitOn "\n" do
+    if line != "" then
+      let .ok record := Lean.Json.parse line
+        | return .malformed
+      let .ok parsed := c0ExportParseRecord tables record
+        | match c0ExportParseRecord tables record with
+          | .error message => return c0ExportClassifyInputError message
+          | .ok _ => return .inconclusive
+      -- Parsed declarations are transferred to the environment immediately.
+      -- Clearing this field prevents the online path from keeping the entire
+      -- declaration stream as a second, redundant list.
+      tables := { parsed with declarations := [] }
+      for declaration in parsed.declarations do
+        match c0ExportCheckOne env declaration fuel with
+        | .ok next =>
+            env := next
+            checkedCount := checkedCount + 1
+        | .error error => return c0ExportFromKernelError error
+  if !tables.header || checkedCount == 0 then .malformed
+  else .accepted
+
+def c0ExportVerdictOf (input : String) : C0ExportVerdict :=
+  c0ExportVerdictOnline input
 
 /-- No exporter, unsupported field or malformed input may become a positive
     or negative *kernel* verdict. Failure must occur before checking. -/
@@ -422,8 +474,31 @@ def c0ExportRejectLossyImports : IO Unit := do
     if result != expected then
       throw (IO.userError s!"wrong input category {label}: {repr result}")
 
+/-- Cross-check category handling and bounded-fuel exhaustion without
+    weakening the checked source rules to make an expected result pass. -/
+def c0ExportOnlineOutcomes : IO Unit := do
+  let simple ← IO.FS.readFile "test/C0OfficialAccept.ndjson"
+  if c0ExportVerdictOnline simple 0 != .resourceExhausted then
+    throw (IO.userError "C0 online replay misclassified fuel exhaustion")
+  if c0ExportFromKernelError
+      (.declinedUnsupported "unsupported feature") != .unsupported ||
+      c0ExportFromKernelError
+      (.resourceExhausted .fuel "budget exhausted") != .resourceExhausted ||
+      c0ExportFromKernelError
+      (.internalError "unknown") != .inconclusive then
+    throw (IO.userError "C0 online verdict categories are not disjoint")
+  let invalid ← IO.FS.readFile "test/C0OfficialChainReject.ndjson"
+  if c0ExportVerdictOnline invalid != .rejected then
+    throw (IO.userError "C0 online replay lost late invalid declaration")
+  -- Supported source prefixes must preserve the first invalid judgment:
+  -- later syntactically invalid records cannot turn it into acceptance.
+  let withSuffix := invalid ++ "{broken-json}\n"
+  if c0ExportVerdictOnline withSuffix != .rejected then
+    throw (IO.userError "C0 online replay lost first failure precedence")
+
 def main : IO Unit := do
   c0ExportRejectLossyImports
+  c0ExportOnlineOutcomes
   let cases : List (String × Bool) := [
     ("C0OfficialAccept.ndjson", true),
     ("C0OfficialReject.ndjson", false),
@@ -454,6 +529,9 @@ def main : IO Unit := do
     let expected := if item.snd then C0ExportVerdict.accepted
       else C0ExportVerdict.rejected
     let actual := c0ExportVerdictOf input
+    let reference := c0ExportVerdictBatch input
+    if actual != reference then
+      throw (IO.userError s!"C0 online/batch replay divergence {path}: {repr actual}, {repr reference}")
     if actual != expected then
       throw (IO.userError s!"C0/official NDJSON verdict mismatch {path}: {repr actual}")
   IO.println "C0_LEAN435 exact_official_ndjson_subset_replay=pass"

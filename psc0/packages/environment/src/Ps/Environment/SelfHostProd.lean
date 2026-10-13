@@ -149,7 +149,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
             psSelfHostProdRecName with
         | none => []
         | some recursor => [prod, constructor, recursor]
-  psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardOfNatDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure

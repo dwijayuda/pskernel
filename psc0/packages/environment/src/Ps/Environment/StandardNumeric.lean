@@ -35,12 +35,35 @@ def psStandardOfNatDeclarations : List PsDeclaration :=
     instanceDecl "Nat" nat n,
     instanceDecl "Int" (.constE psIntName []) (.app (.constE psIntOfNatName []) n) ]
 
+-- Lean 4.35.0 Init/Control/Id.lean supplies this instance explicitly:
+-- Id is not instance-transparent. Reuse the provided dictionary by ordinary
+-- checked conversion; do not broaden instance-search transparency.
+def psStandardOfNatId : PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
+  let alpha := PsExpr.fvar 0
+  let n := PsExpr.fvar 1
+  let id := PsExpr.app (.constE (psRootName "Id") [level]) alpha
+  let family := fun type => psLogicApply (.constE (psRootName "OfNat") [level]) [type, n]
+  .definitionDecl (psDecisionName "PsStandard.instOfNatId") [u]
+    (psLogicPi 0 "α" (.sortE (.succ level))
+      (psLogicPi 1 "n" (.constE psNatName [])
+        (psLogicPi 2 "self" (family alpha) (family id) .instanceImplicit) .implicit) .implicit)
+    (psLogicLam 0 "α" (.sortE (.succ level))
+      (psLogicLam 1 "n" (.constE psNatName [])
+        (psLogicLam 2 "self" (family alpha) (.fvar 2) .instanceImplicit) .implicit) .implicit)
+
+def psStandardNumericDeclarations : List PsDeclaration :=
+  psStandardOfNatDeclarations ++ [psStandardOfNatId]
+
 def psStandardNumericExtend (environment : PsEnvironment) : PsEnvironment :=
-  let environment := psStandardOfNatDeclarations.foldl psPreludeAdd environment
+  let environment := psStandardNumericDeclarations.foldl psPreludeAdd environment
   let name := psRootName "OfNat"
-  let instances := (psStandardOfNatDeclarations.drop 3).foldl (fun index declaration =>
+  let instances := (psStandardNumericDeclarations.drop 3).foldl (fun index declaration =>
     psInstanceIndexAdd index {
-      value := .constE (psDeclarationName declaration) []
+      value := .constE (psDeclarationName declaration)
+        ((psDeclarationLevelParams declaration).map PsLevel.param)
+      levelParams := psDeclarationLevelParams declaration
       type := psDeclarationType declaration
       className := some name }) environment.instances
   { environment with

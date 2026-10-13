@@ -261,3 +261,11 @@ methods plus Decidable method/instance), one added instance and changed printer
 references. New FNV fnv1a64:2066895107454337978; SHA-256
 sha256:94a92697fa582ab59fd6b0e466a4dd68b8386f2503af16d703d5603f7b07644b.
 Both guards remain strict. Runtime qualification still pending.
+
+Id display revealed its missing upstream numeral dictionary, not a Repr or
+unification defect. Stable Init/Control/Id.lean explicitly declares
+[OfNat α n] : OfNat (Id α) n because Id is not instance-transparent. The
+portable Numeric module now reproduces that universe-aware checked dictionary
+and records its level parameters in the instance index. General instance
+transparency remains unchanged. The existing Id observation covers the path;
+no duplicate fixture or special-case literal rewrite is added.

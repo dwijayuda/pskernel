@@ -813,6 +813,40 @@ def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
 
 /-- Result and one-based physical NDJSON record count, including a
     failed record. This is a diagnostic, never a proof receipt. -/
+/-- Only invoked *after* authoritative rejection, never for admission.
+    Diagnose whether the theorem's type or proof body failed and compare the
+    optimized checked-application engine against its original source-owned
+    syntax-directed checker, with identical environment, local context, fuel
+    and DefEq/WHNF callbacks. No reference result changes the kernel verdict. -/
+def c0ExportDiagnosticTheoremMismatch
+    (environment : PsKernelEnvironment)
+    (info : PsKernelTheoremInfo)
+    (fuel : Nat) : IO Unit := do
+  let initial := psKernelMkCheckerSession environment
+    info.base.levelParams .safe 4096 psKernelLeanNatMaxSizeDefault
+  match psKernelCheckConstantBaseWithSession fuel initial info.base with
+  | .error why =>
+      IO.println ("C0_REAL_THEOREM_FAILURE_STAGE=type " ++ why)
+  | .ok afterHeader =>
+      match psKernelSessionIsProp fuel afterHeader info.base.type with
+      | .error why =>
+          IO.println ("C0_REAL_THEOREM_FAILURE_STAGE=proposition " ++ why)
+      | .ok (_, proofSession) =>
+          match psKernelSessionCheck fuel proofSession info.value with
+          | .ok _ =>
+              IO.println "C0_REAL_THEOREM_FAILURE_STAGE=post-check"
+          | .error why =>
+              IO.println ("C0_REAL_THEOREM_FAILURE_STAGE=proof " ++ why)
+              let defeq := psKernelIsDefEqWithFuel fuel
+              let whnf := psKernelWhnfWithRecursorFuel fuel defeq
+              match psKernelInferCoreWithFuel fuel whnf defeq
+                  proofSession.context proofSession.state info.value false with
+              | .ok _ =>
+                  IO.println "C0_REAL_THEOREM_REFERENCE_CHECK=accepted"
+              | .error historical =>
+                  IO.println
+                    ("C0_REAL_THEOREM_REFERENCE_CHECK=rejected " ++ historical)
+
 def c0ExportVerdictFromFileTrace
     (path : System.FilePath) (fuel : Nat := 4096) :
     IO (C0ExportVerdict × Nat) := do
@@ -843,6 +877,10 @@ def c0ExportVerdictFromFileTrace
                     match c0ExportCheckOne state.environment declaration fuel with
                     | .error (.rejectedInvalid message) =>
                         IO.println ("C0_REAL_EXPORT_REJECT_MESSAGE=" ++ message)
+                        match declaration with
+                        | .theoremDecl info =>
+                            c0ExportDiagnosticTheoremMismatch state.environment info fuel
+                        | _ => pure ()
                     | .error (.declinedUnsupported message) =>
                         IO.println ("C0_REAL_EXPORT_DECLINED_REASON=" ++ message)
                     | .error (.resourceExhausted _ message) =>

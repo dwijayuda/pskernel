@@ -119,6 +119,24 @@ The opt-in metered candidate now reserves budget before source `δ` definition b
 
 **CDE-8A.3 qualification update (2026-10-14):** Executable commit [`d76e2cc4`](https://github.com/dwijayuda/pskernel/commit/d76e2cc4d5d2a0b5f107f37847c75e280c15c060) received **full native [CI 38453561566](https://github.com/dwijayuda/pskernel/actions/runs/38453561566) SUCCESS**. The run qualified native Lean 4.35 compilation, official positive/negative replay fixtures, CDE-0–8 candidate/source regressions (including delta-body/recursor-RHS preflight and neutral missing-rule cases), negative/resource/semantics and scratch-store checks, performance microbenchmarks and independent original-C0 checker comparison. The latest code is therefore qualified for this **bounded candidate-work-preflight slice**, not the full CDE-8A resource exit, a soundness/refinement proof, or trusted kernel replacement. Full C/D/E, B, F and G exits remain open; the original source checker remains the only accepting authority.
 
+## CDE-8A.4 — candidate intermediate-rewrite syntactic-work coverage
+
+The opt-in `Architecture/Budget.lean` runner now debits **one operation
+quota** for active syntax, captured environments, saved continuation frames,
+identifier/universe/numeral/String payloads, δ and ordinary iota source-body
+universe substitution, application reconstruction, metered intermediate
+quotation and every newly returned machine state. Primitive Nat numerical
+work—including inner primitives beneath saved Nat frames—has preflight
+allowances; recursor/Quot blocked resumes share the same saved-readback
+charges as normal halted frames. Deep names debit before recursion.
+Final readback uses only remaining work quota.
+
+**Audit:** [C0_INTERMEDIATE_REWRITE_RESOURCE_AUDIT.md](C0_INTERMEDIATE_REWRITE_RESOURCE_AUDIT.md).
+Executable `bf95088c`, [native CI 38459330291](https://github.com/dwijayuda/pskernel/actions/runs/38459330291).
+This covers the declared *candidate syntactic-work* reduction families; it
+does **not** prove a precise Lean runtime heap/CPU bound or complete phase
+C/D/E. Source WHNF and checked admission remain exclusively authoritative.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

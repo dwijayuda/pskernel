@@ -1,10 +1,14 @@
 import Ps.Erasure.Inductive
 
-def psErasureTypeHasUnknown : PsVerifiedIrType → Bool
-  | .unknown => true
-  | .function args result => args.any psErasureTypeHasUnknown || psErasureTypeHasUnknown result
-  | .named _ args => args.any psErasureTypeHasUnknown
-  | _ => false
+def psErasureTypeHasUnknown (fuel : Nat) (type : PsVerifiedIrType) : Bool :=
+  match fuel with
+  | 0 => true
+  | fuel + 1 => match type with
+    | .unknown => true
+    | .function args result =>
+      args.any (psErasureTypeHasUnknown fuel) || psErasureTypeHasUnknown fuel result
+    | .named _ args => args.any (psErasureTypeHasUnknown fuel)
+    | _ => false
 
 structure PsPreparedStructureResult where
   scope : PsErasureScope
@@ -80,7 +84,7 @@ def psPrepareRuntimeStructure
                               let unboxed := constructorInfo.numFields == 1 &&
                                 constructorInfo.recursiveFields.isEmpty &&
                                 parameters.sourceTypeIndices.length < info.numParams &&
-                                fields.any (fun field => psErasureTypeHasUnknown field.type);
+                                fields.any (fun field => psErasureTypeHasUnknown 4096 field.type);
                               let runtimeInfo : PsRuntimeStructureInfo := {
                                 unboxed
                                 name := outputName

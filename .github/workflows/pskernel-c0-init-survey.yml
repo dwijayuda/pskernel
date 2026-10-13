@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Identify reducible definition responsible for nested WHNF exhaustion
+      - name: Inspect SyntaxNodeKind delta expansion causing nested WHNF exhaustion
         shell: bash
         run: |
           set -euo pipefail

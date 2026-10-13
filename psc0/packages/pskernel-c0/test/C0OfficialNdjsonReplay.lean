@@ -946,14 +946,26 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
     if verdict == .accepted || verdict == .rejected then
       throw (IO.userError s!"forged inductive metadata was treated as kernel verdict {label}: {repr verdict}")
 
+/-- The real-export command accepts an *explicit* larger fuel profile
+    without changing ordinary source acceptance, reference fixture budgets,
+    or any kernel rule. The emitted outcome remains separate from host failure. -/
+def c0ExportPrintFileOutcome
+    (path : String) (fuel : Nat) : IO Unit := do
+  let (outcome, lines) ← c0ExportVerdictFromFileTrace path fuel
+  IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome} consumed_records={lines} fuel={fuel}"
+
 def main (args : List String) : IO Unit := do
   match args with
   | [path] =>
-      let (outcome, lines) ← c0ExportVerdictFromFileTrace path
-      IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome} consumed_records={lines}"
+      c0ExportPrintFileOutcome path 4096
+      return ()
+  | [path, fuelText] =>
+      let some fuel := fuelText.toNat?
+        | throw (IO.userError "expected decimal fuel budget")
+      c0ExportPrintFileOutcome path fuel
       return ()
   | [] => pure ()
-  | _ => throw (IO.userError "expected zero arguments or one NDJSON path")
+  | _ => throw (IO.userError "expected zero arguments or NDJSON path [fuel]")
   c0ExportRejectLossyImports
   c0ExportRejectForgedInductiveMetadata
   c0ExportOnlineOutcomes

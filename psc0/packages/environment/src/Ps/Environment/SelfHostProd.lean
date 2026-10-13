@@ -1,4 +1,4 @@
-import Ps.Environment.StandardListIndex
+import Ps.Environment.StandardArray
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -117,7 +117,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
+  psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
     <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
@@ -156,4 +156,5 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
     psStandardLawfulGetElemClass ++
     [psStandardOutOfBoundsDeclaration, psStandardGetElemBangDefaultDeclaration] ++
     psStandardGetElemOptionalDefaultDeclarations ++ psStandardNatOrderDeclarations ++
-    psStandardFinAllDeclarations ++ psStandardListIndexDeclarations
+    psStandardFinAllDeclarations ++ psStandardListIndexDeclarations ++
+    psStandardArrayRuntimeDeclarations

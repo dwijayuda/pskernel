@@ -522,6 +522,11 @@ def psIrCheckIntrinsicSignature
   | .stringAtEnd => psIrCheckSignatureNoTypes typeArguments [string, nat] bool
   | .stringExtract => psIrCheckSignatureNoTypes typeArguments [string, nat, nat] string
   | .stringEq => psIrCheckSignatureNoTypes typeArguments [string, string] bool
+  | .arrayBuild =>
+      psIrCheckSignatureTwoTypes typeArguments (fun element state =>
+        PsIrCheckSignature.mk
+          [nat, state, .function [state] element, .function [state] state]
+          (psIrCheckArrayType element))
   | .arrayEmptyWithCapacity =>
       let build : PsVerifiedIrType -> PsIrCheckSignature :=
         fun (element : PsVerifiedIrType) =>

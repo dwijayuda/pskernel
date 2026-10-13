@@ -83,7 +83,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardGetElem,
     `Ps.Environment.StandardNatOrder,
     `Ps.Environment.StandardFin,
-    `Ps.Environment.StandardListIndex,
+    `Ps.Environment.StandardArray, `Ps.Environment.StandardListIndex,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]
@@ -117,6 +117,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
+    `Ps.Erasure.Array,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]

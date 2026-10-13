@@ -28,6 +28,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .stringUtf8ByteSize => pure "string_byte_size" | .stringNext => pure "string_next"
     | .stringGet => pure "string_get" | .stringAtEnd => pure "string_at_end"
     | .stringExtract => pure "string_extract" | .stringEq => pure "string_eq"
+    | .arrayBuild => pure "array_build"
     | .arrayEmptyWithCapacity => pure "array_empty" | .arraySize => pure "array_size"
     | .arrayPush => pure "array_push" | .arrayGet => pure "array_get" | .arrayGetD => pure "array_get_default"
     | .arraySet => pure "array_set" | .arraySetIfInBounds => pure "array_set_if_in_bounds"

@@ -370,6 +370,11 @@ def psTsEmitIntrinsicFromPrinted
         fun (left : String) (right : String) =>
           Except.ok (psTsJoin "" ["(((", left, ") as string) === ((", right, ") as string))"]);
       psTsPrinted2 emit arguments
+  | .arrayBuild =>
+      match arguments with
+      | [count, seed, head, tail] =>
+          .ok ("(<T, S>(count: bigint, state: S, head: (s: S) => T, tail: (s: S) => S): T[] => { const result: T[] = []; for (let i = 0n; i < count; i++) { result.push(head(state)); state = tail(state); } return result; })(" ++ count ++ ", " ++ seed ++ ", " ++ head ++ ", " ++ tail ++ ")")
+      | _ => .error .intrinsicArity
   | .arrayEmptyWithCapacity =>
       let emit : String -> Except PsTsEmitError String :=
         fun (capacity : String) =>

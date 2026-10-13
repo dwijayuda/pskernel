@@ -1,4 +1,5 @@
 import Ps.Erasure.Recursion
+import Ps.Erasure.Array
 import Ps.CompilerIr.CheckTypes
 import Ps.Meta.TypeView
 
@@ -855,6 +856,10 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if text == "Array.mk" || text == "Array.toList" then do
+        let [alpha, value] := view.args | throw .unsupportedApplication
+        let element ← psEraseRuntimeType environment scope alpha
+        return some (← psEraseArrayConversion scope element (← erase value) (text == "Array.mk"))
       else if psErasureBoolAnd (psStringEq text "Array.emptyWithCapacity") (Nat.beq (psListLength view.args) 2) then
         match
             psEraseTypedIntrinsic
@@ -1809,7 +1814,7 @@ def psErasureSpecialEntry
         "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
         "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
         "String.Internal.get", "String.Internal.atEnd", "Array.emptyWithCapacity",
-        "Array.size"] then
+        "Array.size", "Array.mk", "Array.toList"] then
     Option.some (PsErasureSpecialEntry.mk 2 true)
   else if psListAny named
       ["String.Internal.extract", "Prod.fst", "Prod.snd", "Array.push"] then
@@ -2550,6 +2555,12 @@ def psEraseRuntimeExprWithFuelWorker
           if psNameEq typeName psDecidableName then
             if index == 0 then smaller scope target
             else Except.error PsErasureError.unsupportedRuntimeTerm
+          else if psNameEq typeName psArrayName then do
+            if index != 0 then throw .unsupportedRuntimeTerm
+            let sourceType ← psErasureCheckedTypeView environment scope.localContext target
+            let .named "Array" [element] ← psEraseRuntimeType environment scope sourceType
+              | throw .unsupportedRuntimeTerm
+            psEraseArrayConversion scope element (← smaller scope target) false
           else match
               psErasureLookupStructure
                 scope.runtimeStructures

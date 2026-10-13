@@ -87,6 +87,19 @@ pub(super) fn __ps_string_eq(left: &String, right: &String) -> bool { left == ri
 pub(super) fn __ps_array_empty_with_capacity<T>(capacity: &PsNat) -> PsArray<T> {
     Rc::new(Vec::with_capacity(capacity.to_usize().unwrap_or(0)))
 }
+// This builder owns its unpublished Vec; no persistent prefix is copied.
+pub(super) fn __ps_array_build<T, S: Clone>(
+    count: &PsNat, mut state: S,
+    head: Rc<dyn Fn(S) -> T>, tail: Rc<dyn Fn(S) -> S>,
+) -> PsArray<T> {
+    let count = count.to_usize().expect("Array allocation size fits usize");
+    let mut result = Vec::with_capacity(count);
+    for _ in 0..count {
+        result.push(head(state.clone()));
+        state = tail(state);
+    }
+    Rc::new(result)
+}
 pub(super) fn __ps_array_size<T>(value: &PsArray<T>) -> PsNat { PsNat::from(value.len()) }
 pub(super) fn __ps_array_push<T: Clone>(mut array: PsArray<T>, value: T) -> PsArray<T> {
     Rc::make_mut(&mut array).push(value);

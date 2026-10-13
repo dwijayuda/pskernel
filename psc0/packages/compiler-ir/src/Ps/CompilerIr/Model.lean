@@ -134,6 +134,8 @@ inductive PsVerifiedIrIntrinsic where
   | stringAtEnd
   | stringExtract
   | stringEq
+  -- Sized pure sequence builder; mutable storage never escapes before completion.
+  | arrayBuild
   | arrayEmptyWithCapacity
   | arraySize
   | arrayPush

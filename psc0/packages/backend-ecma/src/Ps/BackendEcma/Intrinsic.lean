@@ -83,6 +83,21 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
       "boolean" [ret (bin ">=" (id "__ps_position") (field (call "__ps$utf8" [id "__ps_text"]) "size"))] [a,b])
   | .stringExtract, [a,b,c] => pure (call "__ps$stringExtract" [a,b,c])
   | .stringEq, [a,b] => pure (equal "string" "===" a b)
+  | .arrayBuild, [count,seed,head,tail] =>
+      let [a,s] ← types.mapM irType | throw "PSCV0-ECMA: arrayBuild type arguments"
+      pure (delegate [
+        .binding false "__ps_result" (a ++ "[]") (some (.array [])),
+        letE "__ps_cursor" (id "__ps_seed"), letE "__ps_index" (id "0n"),
+        .whileE (bin "<" (id "__ps_index") (id "__ps_count")) [
+          .expression (method (id "__ps_result") "push" [
+            unary "yield* " (call "__ps$invoke" [id "__ps_head", id "__ps_cursor"])]),
+          set (id "__ps_cursor") (unary "yield* " (call "__ps$invoke" [id "__ps_tail", id "__ps_cursor"])),
+          inc "__ps_index" (id "1n")],
+        ret (id "__ps_result")]
+        [{ name := "__ps_count", type := "bigint" }, { name := "__ps_seed", type := s },
+         { name := "__ps_head", type := "(state: " ++ s ++ ") => " ++ a },
+         { name := "__ps_tail", type := "(state: " ++ s ++ ") => " ++ s }]
+        [count,seed,head,tail] ("__ps$Computation<" ++ a ++ "[]>"))
   | .arrayEmptyWithCapacity, [capacity] =>
       pure (invoke [{ name := "__ps_capacity", type := "bigint" }] ""
         [.expression (unary "void " (id "__ps_capacity")), ret (.array [])] [capacity])

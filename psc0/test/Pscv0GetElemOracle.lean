@@ -91,4 +91,17 @@ example : LawfulGetElem (List Nat) Nat Nat (fun xs i => i < xs.length) := inferI
 example : LawfulGetElem (List Nat) (Fin 10) Nat (fun xs i => i.val < xs.length) := inferInstance
 example : (List.get [509, 521] ⟨1, by decide⟩) = 521 := rfl
 
+-- The logical Array structure and optimized operations have the same observables.
+example : (#[541, 547] : Array Nat)[1] = 547 := rfl
+example : (#[577] : Array Nat)[184467440737095516170]? = none := rfl
+example : (#[587] : Array Nat)[finSeed]? = none := rfl
+example : LawfulGetElem (Array Nat) Nat Nat (fun xs i => i < xs.size) := inferInstance
+example : (Array.mk [613, 617])[1] = 617 := rfl
+example : ([619, 631].toArray.toList)[1]? = some 631 := rfl
+example : (Array.mk [false, true]).toList[1]? = some true := rfl
+example : (#[2, 3, 5, 7] : Array Nat).foldl Nat.add 0 1 3 = 8 := rfl
+example : (#[2, 3] : Array Nat).foldl Nat.add 661
+    184467440737095516170 184467440737095516171 = 661 := rfl
+example : (#[653] : Array Nat).setIfInBounds 184467440737095516170 0 = #[653] := rfl
+
 end Pscv0GetElemOracle

@@ -114,7 +114,9 @@ private def getElemFoundationCases : IO Unit := do
     { source := "theorem bad: Nat.le(5, 2) := PsStandard.natBleReflects(5, 2)\n",
       targets := [], sourceName := "OrderFalse.ps" },
     { source := "const i: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\nconst bad: Nat := [1][i]\n", targets := [], sourceName := "FinWrongCollection.ps" },
-    { source := "const bad: Nat := [1, 2][2]\n", targets := [], sourceName := "ListOutOfBounds.ps" }]
+    { source := "const bad: Nat := [1, 2][2]\n", targets := [], sourceName := "ListOutOfBounds.ps" },
+    { source := "const bad: Nat := #[1, 2][2]\n", targets := [], sourceName := "ArrayOutOfBounds.ps" },
+    { source := "const i: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\nconst bad: Nat := #[1][i]\n", targets := [], sourceName := "FinWrongArray.ps" }]
   let result ← match batch with
     | .ok result => pure result
     | .error reason => throw (IO.userError ("native GetElem batch failed: " ++
@@ -137,7 +139,7 @@ private def getElemFoundationCases : IO Unit := do
   | .error refused =>
     unless refused.phase == "elaborate" do
       throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
-  for i in [2:5] do
+  for i in [2:7] do
     match result.results[i]? with
     | some (.error error) =>
       unless error.phase == "elaborate" do
@@ -818,7 +820,28 @@ private def application : String :=
   "const finLawfulRuntime: Nat := finLawful(n := 10, xs := [499, 503])\n" ++
   "const finListGetRuntime: Nat := listFinChecked([509, 521], Fin.mk(1, PsStandard.natBleReflects(2, 2)))\n" ++
   "function listBangPanic(unit: Nat): Nat := ([] : List Nat)[0]!\n" ++
-  "function finBangPanic(unit: Nat): Nat := [523][finIndexSeed]!\n"
+  "function finBangPanic(unit: Nat): Nat := [523][finIndexSeed]!\n" ++
+  "function arrayChecked(xs: Array Nat, i: Nat, h: Nat.lt(i, Array.size(xs))): Nat := xs[i]\n" ++
+  "function arrayLawful[LawfulGetElem(Array Nat, Nat, Nat, fun xs => fun i => Nat.lt(i, Array.size(xs)))](xs: Array Nat): Nat := Array.size(xs)\n" ++
+  "const arrayProofRuntime: Nat := arrayChecked(#[541, 547], 1, PsStandard.natBleReflects(2, 2))\n" ++
+  "const arrayAutoRuntime: Nat := #[551, 557][1]\n" ++
+  "const arrayOptionalRuntime: Nat := Option.getD(#[563][0]?, 0)\n" ++
+  "const arrayBangRuntime: Nat := #[571][0]!\n" ++
+  "const arrayEmptyRuntime: Bool := Option.isNone((#[] : Array Nat)[0]?)\n" ++
+  "const arrayHugeRuntime: Bool := Option.isNone(#[577][184467440737095516170]?)\n" ++
+  "const arrayFinMismatchRuntime: Bool := Option.isNone(#[587][finIndexSeed]?)\n" ++
+  "const arrayLawfulRuntime: Nat := arrayLawful(#[593, 599])\n" ++
+  "const arrayFinGetRuntime: Nat := Array.get(#[601, 607], Fin.mk(1, PsStandard.natBleReflects(2, 2)))\n" ++
+  "const arrayConstructRuntime: Nat := (Array.mk([613, 617]))[1]\n" ++
+  "const arrayRoundtripRuntime: Nat := Option.getD(List.get?(Array.toList(List.toArray([619, 631])), 1), 0)\n" ++
+  "const arrayBoolRoundtripRuntime: Bool := Option.getD(List.get?(Array.toList(Array.mk([false, true])), 1), false)\n" ++
+  "function arraySetAlias(seed: Nat): Nat := {\n  let original: Array Nat := #[seed, 641]\n  let changed: Array Nat := Array.set(original, 1, 643, PsStandard.natBleReflects(2, 2))\n  Nat.add(original[1]!, changed[1]!)\n}\n" ++
+  "const arraySetAliasRuntime: Nat := arraySetAlias(647)\n" ++
+  "const arraySetHugeRuntime: Nat := (Array.setIfInBounds(#[653], 184467440737095516170, 0))[0]!\n" ++
+  "const arrayFoldSliceRuntime: Nat := Array.foldl(fun acc => fun item => Nat.add(acc, item), 0, #[2, 3, 5, 7], 1, 3)\n" ++
+  "const arrayFoldHugeRuntime: Nat := Array.foldl(fun acc => fun item => Nat.add(acc, item), 661, #[2, 3], 184467440737095516170, 184467440737095516171)\n" ++
+  "const arrayMapRuntime: Nat := (Array.map(fun item => Nat.add(item, 1), #[673]))[0]!\n" ++
+  "function arrayBangPanic(unit: Nat): Nat := (#[] : Array Nat)[0]!\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

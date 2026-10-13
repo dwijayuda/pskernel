@@ -63,6 +63,34 @@ Preserve persistent aliases and compare arbitrary-precision indices before any
 machine-index conversion. Wasm stores arrays using GC; linear memory remains
 restricted to explicit component ABI boundaries.
 
+## Conversion lowering and complexity
+
+Array's kernel catalog now defines mk/toList/size/getInternal and the selected
+primitive models using checked List recursion. The executable catalog contains
+the public wrappers and dictionaries; model-only structure/primitive bodies
+must not become a second runtime Array representation.
+
+A single typed IR `arrayBuild` operation accepts a count, state and two unary
+selectors. Its type signature validates the state and element types. Only the
+Array.mk adapter constructs this operation from the exact List.length and
+prepared List constructor metadata: no backend hardcodes List tags, field
+names or generated symbols. The selectors' nil arms are unreachable under
+that adapter's length invariant; no Core witness is invented.
+
+The builder allocates private storage and visits each list cell once after a
+linear length pass. JS pushes into one unpublished array, Rust fills one Vec,
+and Wasm fills one newly allocated GC array. Array.toList uses the existing
+typed array fold and checked List.reverse, also linear time. The extra reverse
+pass is explicit; later measured optimization can add reverse traversal without
+changing the source contract. These paths avoid quadratic persistent pushes.
+
+Array proof access is a checked List proof-worker application in the logical
+model and the existing O(1) typed arrayGet intrinsic in execution. Its optional
+dictionary specializes the already checked generic lawful default with actual
+Nat.decLt(size), retaining O(1) size/access. The exact specialized optional
+dictionary owns the lawful witness. The backend/model correspondence is
+runtime qualification evidence, not an erasure semantics theorem.
+
 ## Qualification
 
 Use one compact source corpus plus the independent pinned oracle. Exercise

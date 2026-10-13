@@ -36,6 +36,16 @@ def arrayRuntime : Except String (List RuntimeDefinition) := do
   let size := g "size"
   let fn := g "fn"
   return [
+    ← emit "build_loop" [("head", closureType), ("tail", closureType), ("state", valueType),
+        ("output", valuesType), ("index", .i32)] arrayType []
+      (choice (some arrayType) (eq index (len output)) (array output)
+        (seq [write output index (invokeClosure (g "head") [g "state"]),
+          c "__ps_array_build_loop" [g "head", g "tail",
+            invokeClosure (g "tail") [g "state"], output, add index (k 1)]])),
+    ← emit "build" [("count", naturalType), ("state", valueType),
+        ("head", closureType), ("tail", closureType)] arrayType []
+      (c "__ps_array_build_loop" [g "head", g "tail", g "state",
+        allocate (narrow (g "count")), k 0]),
     ← emit "empty" [("capacity", naturalType)] arrayType []
       (array (o (.arrayNewFixed valuesName 0) [])),
     ← emit "size" [("a", arrayType)] naturalType [] (nat (len (values a))),

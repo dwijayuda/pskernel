@@ -226,6 +226,23 @@ export const observations = [
   { name: "boolLazyBranch", args: [false, false], expected: false },
   { name: "signedLiteral", type: "int", args: null, expected: -42n },
   { name: "signedArithmetic", type: "int", argTypes: ["int", "int"], args: [5n, 2n], expected: -5n },
+  { name: "arrayProofRuntime", args: null, expected: 547n },
+  { name: "arrayAutoRuntime", args: null, expected: 557n },
+  { name: "arrayOptionalRuntime", args: null, expected: 563n },
+  { name: "arrayBangRuntime", args: null, expected: 571n },
+  { name: "arrayEmptyRuntime", args: null, expected: true },
+  { name: "arrayHugeRuntime", args: null, expected: true },
+  { name: "arrayFinMismatchRuntime", args: null, expected: true },
+  { name: "arrayLawfulRuntime", args: null, expected: 2n },
+  { name: "arrayFinGetRuntime", args: null, expected: 607n },
+  { name: "arrayConstructRuntime", args: null, expected: 617n },
+  { name: "arrayRoundtripRuntime", args: null, expected: 631n },
+  { name: "arrayBoolRoundtripRuntime", args: null, expected: true },
+  { name: "arraySetAliasRuntime", args: null, expected: 1284n },
+  { name: "arraySetHugeRuntime", args: null, expected: 653n },
+  { name: "arrayFoldSliceRuntime", args: null, expected: 8n },
+  { name: "arrayFoldHugeRuntime", args: null, expected: 661n },
+  { name: "arrayMapRuntime", args: null, expected: 674n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];
 
@@ -233,5 +250,6 @@ export const observations = [
 export const panicObservations = [
   { name: "bangDefaultTrap", wasm: "wasmBangTrap" },
   { name: "listBangPanic", wasm: "wasmListBangTrap" },
-  { name: "finBangPanic", wasm: "wasmFinBangTrap" }
+  { name: "finBangPanic", wasm: "wasmFinBangTrap" },
+  { name: "arrayBangPanic", wasm: "wasmArrayBangTrap" }
 ];

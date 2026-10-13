@@ -640,6 +640,11 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | PsVerifiedIrIntrinsic.arrayBuild =>
+      match arguments with
+      | [count, seed, head, tail] =>
+          .ok ("__ps_array_build(&(" ++ count ++ "), " ++ seed ++ ", " ++ head ++ ", " ++ tail ++ ")")
+      | _ => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity =>
       match psRustExactOneArgument arguments with
       | Option.some capacity =>
@@ -749,6 +754,7 @@ def psRustEmitIntrinsicFromPrinted
 
 def psRustIntrinsicConsumes (op : PsVerifiedIrIntrinsic) (index : Nat) : Bool :=
   match op with
+  | .arrayBuild => index != 0
   | .arrayPush => true
   | .arraySet | .arraySetIfInBounds => index == 0 || index == 2
   | .arrayMap | .arrayFoldl | .stringPush | .stringAppend => index == 0

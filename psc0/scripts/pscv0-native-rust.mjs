@@ -1,4 +1,5 @@
 // Prepare a compact target harness; the compiler and backend remain native Lean.
+import {quotedSourceString} from './pscv0-native-literals.mjs';
 import assert from 'node:assert/strict';
 import {readFile, writeFile} from 'node:fs/promises';
 import path from 'node:path';
@@ -10,7 +11,9 @@ assert.equal(manifest.target, 'rust');
 const names = new Map(manifest.symbols.map(s => [s.semantic, s.output]));
 // Each typed observation chooses the target's concrete source scalar. Result
 // and argument types are independent, even when a current fixture uses both Int.
-const value = (v, type = 'nat') => typeof v === 'bigint'
+const value = (v, type = 'nat') => typeof v === 'string'
+  ? quotedSourceString(v) + '.to_owned()'
+  : typeof v === 'bigint'
   ? (type === 'int' ? 'int("' : 'nat("') + String(v) + '")' : String(v);
 const assertions = observations.map(({name, type, argTypes, args, expected}) => {
   assert(names.has(name), 'missing source export: ' + name);

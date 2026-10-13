@@ -133,7 +133,7 @@ def tryPreludeDeclaration
       | .error (.unknownConstant _ _) => pure .deferred
       | .error error =>
           throw (preludeMismatch
-            ("Lean 4.34 kernel rejected PSC2 provider prelude declaration " ++
+            ("official Lean kernel rejected portable Standard declaration " ++
               psNameToString (psDeclarationName declaration) ++
               " (" ++ kernelExceptionSummary error ++ ")"))
 
@@ -161,7 +161,7 @@ partial def replayPreludeDeclarations
   | first :: _ =>
       if deferred.length == pending.length then
         throw (preludeMismatch
-          ("unresolved PSC2 provider prelude dependencies; first pending declaration: " ++
+          ("unresolved portable Standard dependencies; first pending declaration: " ++
             psNameToString (psDeclarationName first)))
       else
         replayPreludeDeclarations allDeclarations deferred next

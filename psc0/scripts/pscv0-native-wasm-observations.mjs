@@ -1,26 +1,12 @@
 // Reuse the shared expected-value table; wrappers execute the actual compiled
 // source operation, then compare its result inside the GC runtime.
+import { quotedSourceString } from './pscv0-native-literals.mjs';
 import { observations, panicObservations } from './pscv0-native-observations.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 const directory = path.resolve(process.argv[2]);
 const source = await readFile(path.join(directory, 'application.ps'), 'utf8');
-// Encode source literals, not JavaScript display strings. In particular,
-// JSON escapes and JSON's unescaped DEL do not define PSCV0 string syntax.
-function sourceLiteral(value) {
-  if (typeof value !== 'string') return String(value);
-  let result = '"';
-  for (const character of value) {
-    const code = character.codePointAt(0);
-    if (character === '"') result += '\\"';
-    else if (character === '\\') result += '\\\\';
-    else if (character === '\n') result += '\\n';
-    else if (character === '\t') result += '\\t';
-    else if (code < 32 || code === 127) result += '\\x' + code.toString(16).padStart(2, '0');
-    else result += character;
-  }
-  return result + '"';
-}
+const sourceLiteral = value => typeof value === 'string' ? quotedSourceString(value) : String(value);
 const wrappers = observations.map(({name, type, args, expected}, i) => {
   const call = name + (args === null ? '' : '(' + args.map(sourceLiteral).join(', ') + ')');
   // Check Int through its already modeled, canonical decimal representation.

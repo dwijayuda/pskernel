@@ -319,7 +319,7 @@ theorem psKernelC0AuditedNoOrdinaryAxioms
     (hEmpty : work.allowedAxioms = []) :
     psKernelC0HistoryAxiomSignatures work.trusted.history = [] := by
   cases h : psKernelC0HistoryAxiomSignatures work.trusted.history with
-  | nil => exact h
+  | nil => rfl
   | cons head tail =>
       have hMember :
           head ∈ psKernelC0HistoryAxiomSignatures work.trusted.history := by
@@ -336,7 +336,7 @@ theorem psKernelC0AuditedNoTrustCapabilities
     (hEmpty : work.allowedCapabilities = []) :
     psKernelC0HistoryTrustCapabilities work.trusted.history = [] := by
   cases h : psKernelC0HistoryTrustCapabilities work.trusted.history with
-  | nil => exact h
+  | nil => rfl
   | cons head tail =>
       have hMember :
           head ∈ psKernelC0HistoryTrustCapabilities work.trusted.history := by

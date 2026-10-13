@@ -1,5 +1,18 @@
 # PSKernel-C0 experimental performance measurements
 
+## Online official-export and atomic bound-root checkpoint — CI 38332583934
+
+Full [native CI 38332583934](https://github.com/dwijayuda/pskernel/actions/runs/38332583934) **SUCCESS** at `7035d682` with 22 original-byte official Lean 4.35 fixtures, online/batch outcome cross-check, negative resource tests, atomic canonical store transfer and matched unchanged original checker.
+
+| Same-run synthetic complete checked workload | C0 | Original PSKernel-Core |
+| --- | ---: | ---: |
+| 24 × 12 declaration batch median latency | **24 ms** | **46 ms** |
+| p95 batch latency | **25 ms** | **47 ms** |
+| Small-allocation events per batch (not bytes) | **36,184** | **34,971** |
+| Whole checker benchmark VmHWM | **1,147,396 kB** | **1,151,148 kB** |
+
+No isolation of the new *test adapter* or non-accepting source-store API as a kernel throughput improvement; accepting kernel source remains unchanged. Different CI runs vary. No real Init/Std/Mathlib performance or con-ron/con-leche/official Lean C++ benchmark exists on an identical accepted corpus.
+
 ## Phase B/C follow-up source benchmark — CI 38323005998
 
 [Native CI 38323005998](https://github.com/dwijayuda/pskernel/actions/runs/38323005998) **SUCCESS** at `64ae30cf`: 22 official same-byte Lean 4.35 positive/negative cases, C0 source replay, bounded indexed root transfer, native regressions, microbenchmarks and unchanged original comparison. Matched **fully checked synthetic** 24 × 12 declaration batches, 288 admissions per checker: C0 p50/p95 **26/26 ms**, original **49/50 ms**. Small allocations C0 **36,184**, original **34,971**; process VmHWM C0 **1,148,736 kB**, original **1,146,344 kB**. No memory improvement or real-library competitive result is established; comparison is against a project-local shared-lineage original.

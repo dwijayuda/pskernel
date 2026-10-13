@@ -5,6 +5,16 @@
 **Target:** pinned stable `leanprover/lean4:v4.35.0`  
 **Scope:** native `.lean`; no original-core changes, self-hosting, Rust provider or metatheory promotion.
 
+## Additional native source qualification — 2026-10-13
+
+[Native CI 38332583934](https://github.com/dwijayuda/pskernel/actions/runs/38332583934) **SUCCESS** at [source `7035d682`](https://github.com/dwijayuda/pskernel/commit/7035d682e09e9af96c0ebf7542ff6a9e56d97e3b). Phase B now has an **online declaration admission** path that processes records in order and does not retain the additional list of checked declarations. It compares each of the 22 official Lean 4.35 exact-byte fixtures against the retained batch reference. It also tests first-invalid precedence in a 128-definition stream and recognizes resource exhaustion separately. Source bytes, name/level/expression tables and the source-owned recursive checker remain unchanged; a whole-library streaming contract is not claimed.
+
+Phase C adds **atomic multi-root syntax transfer**, `psKernelC0ScratchImportBoundRoots`, to the existing fully replay-validated `PsKernelC0BoundRoot` operations. Independent same-number source handles, duplicate roots, empty transactions and failed malformed inputs are covered by negative tests. This operation is not an indexed type checker or a sealed proof-carrying handle.
+
+The same-run synthetic whole checked 24 × 12 batch comparison was **24/25 ms p50/p95 C0** versus **46/47 ms unchanged original**, with C0 having **36,184 versus 34,971 small-allocation events** and VmHWM **1,147,396 versus 1,151,148 kB**. No real-library or reliable memory performance ranking follows.
+
+**Real source next gate:** `.github/workflows/pskernel-c0-init-survey.yml` uses a pinned upstream Lean 4.35 exporter to analyze actual `Init` source forms, separately from bounded C0 acceptance. Its survey outcome must be inspected independently; metadata counts are not conformance verdicts.
+
 ## Follow-up: declaration-family replay and source-store-bound roots
 
 **Native source expansion:** commit `4092dab9` adds dedicated `axiom`, `thm`, and `opaque` export replay, with a follow-up Lean keyword parsing correction in `031a1b4d`. Eight additional exporter-byte files contain four accepted and four rejected cases, including sequential axiom–theorem dependencies. The official pinned Lean 4.35 `leanchecker --from-export` produced all eight expected outcomes. Native C0 replay also passed the full [CI 38323005998](https://github.com/dwijayuda/pskernel/actions/runs/38323005998), for a total of **22** matched positive/negative export fixtures.

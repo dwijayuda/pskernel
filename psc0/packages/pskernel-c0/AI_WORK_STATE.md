@@ -1,3 +1,15 @@
+## LATEST PHASE B/C NATIVE QUALIFICATION — 2026-10-13
+
+**Full source [CI 38332583934](https://github.com/dwijayuda/pskernel/actions/runs/38332583934) SUCCESS at [`7035d682`](https://github.com/dwijayuda/pskernel/commit/7035d682e09e9af96c0ebf7542ff6a9e56d97e3b)**: pinned stable Lean 4.35.0, 22 official same-byte export cases and C0 online-versus-batch cross-check, explicit fuel/resource classification, negative/migration regression, canonical-store checks, atomic cross-store bound-root import, C0 native microbenchmarks and unchanged original-core comparison. No implementation outside the native C0 scope was changed.
+
+**Phase B source milestone:** `8aa30bdc` and `76dbf023` added typed one-declaration admission and online checking in source order. Accepted / rejected / unsupported / malformed / resource exhausted / inconclusive are distinct. The older full-list batch parser remains a differential reference. Online replay still buffers the input string and retains names, levels and expressions; it is **not** a bounded-memory complete Init importer and does not authorize unsupported feature acceptance.
+
+**Phase C source milestone:** `dcc7e203` and `7035d682` added `psKernelC0ScratchImportBoundRoots`, an atomic multi-source syntax-only import using independently validated originating stores, exact source roundtrip and verified selective root promotion. Tests cover identical numeric handles assigned to different expressions, repeated roots and canonical sharing, empty imports, malformed sources and fail-closed rollback. **No sealed ownership API, formal StoreWF proof or accepting indexed kernel exists.**
+
+**Latest same-run synthetic 24 × 12 fully checked admission benchmark:** C0 p50/p95 **24/25 ms**, project-local unchanged original **46/47 ms**, both admitted 288. Small-allocation events **36,184 vs 34,971** (C0 worse); VmHWM **1,147,396 vs 1,151,148 kB** (run-local difference, not reproducible memory advantage). Do not claim con-ron/con-leche/official Lean competitive throughput.
+
+**Actual Init survey launched separately:** [`.github/workflows/pskernel-c0-init-survey.yml`](../../../.github/workflows/pskernel-c0-init-survey.yml) pins upstream `lean4export` to `5a9a355d` at Lean 4.35.0, checks the real exported corpus against official `leanchecker`, and inventories declaration/expr forms without equating shape counts with C0 support. Recheck its own workflow outcome; do not mark the survey qualified from a workflow creation commit. Current Phase B/C exit criteria remain unsatisfied: real accepted Init/Std/Mathlib C0 replay, complete unsupported/error/resource discipline, selecting a competitive execution engine and independent formal assurance.
+
 # AI_WORK_STATE — PSKernel-C0 Lean performance architecture
 
 ## FOLLOW-UP B/C IMPLEMENTATION — 2026-10-13

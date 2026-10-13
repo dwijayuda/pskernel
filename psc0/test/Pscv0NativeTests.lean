@@ -65,6 +65,25 @@ private def getElemFoundationCases : IO Unit := do
     "  getElem?(xs: AlwaysBox, i: Nat): Option Nat := Option.some(xs.value)\n" ++
     "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := GetElem?.getElem!Default(Option.some(xs.value))\n" ++
     "}\n" ++
+    -- Genuine decision coherence: both independently supplied dictionaries
+    -- must agree because their Bool choices reflect the same proposition.
+    -- No assumed subsingleton lemma, unchecked cast or Boolean-as-Prop proof.
+    "theorem psDecidableUnique(P: Prop)(left right: Decidable P): left = right := by {\n" ++
+    "  cases left\n" ++
+    "  case intro bl hl =>\n" ++
+    "    cases right\n" ++
+    "    case intro br hr =>\n" ++
+    "      cases bl\n" ++
+    "      case false =>\n" ++
+    "        cases br\n" ++
+    "        case false => rfl\n" ++
+    "        case true => exact False.elim(hl(hr))\n" ++
+    "      case true =>\n" ++
+    "        cases br\n" ++
+    "        case false => exact False.elim(hr(hl))\n" ++
+    "        case true => rfl\n" ++
+    "}\n" ++
+
     "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++
     "const bangResult: Nat := (AlwaysBox.mk(41))[42]!\n" ++
     "structure ProductProofBox where { value: Nat }\n" ++

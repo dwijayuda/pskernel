@@ -471,6 +471,81 @@ def main : IO Unit := do
       throw (IO.userError "nested Quot demand ignored shared fuel")
   IO.println "C0_ARCHITECTURE shared_budget_quot_lift_ind_differential=pass"
 
+  -- CDE-6: non-K recursor iota via source-owned rule metadata.
+  -- These are WHNF-only synthetic fixtures, never an admission shortcut.
+  let recName := c0DeltaName "C0RecursorPair.rec"
+  let recFirst : PsKernelExpr :=
+    .lam (c0DeltaName "fst") sort
+      (.lam (c0DeltaName "snd") sort (.bvar 1) .default) .default
+  let recInfo : PsKernelRecursorInfo := {
+    base := { name := recName, levelParams := [], type := type }
+    all := [pairType]
+    numParams := 0
+    numIndices := 0
+    numMotives := 0
+    numMinors := 0
+    rules := [{ ctor := ctorName, nFields := 2, rhs := recFirst }]
+    k := false
+    isUnsafe := false
+  }
+  let recEnv := psKernelEnvironmentAddUnchecked ctorEnv (.recInfo recInfo)
+  let recSession := psKernelMkCheckerSession recEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let recCall : PsKernelExpr := .app (.const recName []) pairValue
+  c0DemandCheck "recursor-constructor-first-of-two" recSession
+    recCall (c0DeltaNatLit 11)
+  c0DemandCheck "recursor-beta-major" recSession
+    (.app (.const recName []) (.app idRecord pairValue))
+    (c0DeltaNatLit 11)
+  c0DemandCheck "recursor-zeta-major" recSession
+    (.app (.const recName [])
+      (.letE recordBinder type pairValue (.bvar 0) false))
+    (c0DeltaNatLit 11)
+  c0DemandCheck "recursor-surplus-argument" recSession
+    (.app recCall (c0DeltaNatLit 9))
+    (.app (c0DeltaNatLit 11) (c0DeltaNatLit 9))
+  c0DemandCheck "recursor-partial-application" recSession
+    (.const recName []) (.const recName [])
+  let wrongLevels : PsKernelExpr :=
+    .app (.const recName [.zero]) pairValue
+  c0DemandCheck "recursor-wrong-universe-arity" recSession
+    wrongLevels wrongLevels
+  let badMajor : PsKernelExpr :=
+    .app (.const (c0DeltaName "UnrelatedConstructor") []) (c0DeltaNatLit 9)
+  c0DemandCheck "recursor-wrong-constructor-neutral" recSession
+    (.app (.const recName []) badMajor)
+    (.app (.const recName []) badMajor)
+  let natRecName := c0DeltaName "C0NatLiteralRecursor.rec"
+  let constNat : PsKernelExpr := .lit (.nat 71)
+  let succRhs : PsKernelExpr :=
+    .lam (c0DeltaName "prev") sort (c0DeltaNatLit 72) .default
+  let natRecInfo : PsKernelRecursorInfo := {
+    base := { name := natRecName, levelParams := [], type := type }
+    all := [c0DeltaName "Nat"]
+    numParams := 0
+    numIndices := 0
+    numMotives := 0
+    numMinors := 0
+    rules := [
+      { ctor := psKernelNatZeroName, nFields := 0, rhs := constNat },
+      { ctor := psKernelNatSuccName, nFields := 1, rhs := succRhs }
+    ]
+    k := false
+    isUnsafe := false
+  }
+  let natRecEnv := psKernelEnvironmentAddUnchecked env2 (.recInfo natRecInfo)
+  let natRecSession := psKernelMkCheckerSession natRecEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DemandCheck "recursor-nat-literal-zero" natRecSession
+    (.app (.const natRecName []) (c0DeltaNatLit 0)) (c0DeltaNatLit 71)
+  c0DemandCheck "recursor-nat-literal-succ" natRecSession
+    (.app (.const natRecName []) (c0DeltaNatLit 9)) (c0DeltaNatLit 72)
+  match psKernelC0ArchitectureCandidateDemand 3 recSession.context
+      (.app (.const recName []) (.app idRecord pairValue)) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "recursor-major demand ignored shared fuel")
+  IO.println "C0_ARCHITECTURE non_k_recursor_constructor_nat_iota_differential=pass"
   match psKernelC0ArchitectureCandidateDemand 3 ctorSession.context
       (c0DeltaNatBinary psKernelNatAddName
         (c0DeltaNatLit 1)

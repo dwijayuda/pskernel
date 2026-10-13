@@ -6,6 +6,7 @@ Generated upstream bodies retain their Apache-2.0 attribution.
 This tool is not imported by the portable compiler.
 -/
 import Ps.Host.StandardClosure
+import Ps.Meta.Reduce
 
 namespace PsV7Native
 

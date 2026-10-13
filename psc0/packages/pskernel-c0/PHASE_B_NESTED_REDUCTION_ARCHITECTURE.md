@@ -1,5 +1,13 @@
 # PSKernel-C0 — Phase B nested-inductive reduction architecture
 
+## Verified superseding checkpoint — 2026-10-13
+
+The nested performance bottleneck described below **has been resolved in the current source**. [Native CI 38383818618](https://github.com/dwijayuda/pskernel/actions/runs/38383818618) and [real Init CI 38383848731](https://github.com/dwijayuda/pskernel/actions/runs/38383848731) passed on the precise pinned 4.35.0 exporter and checker. C0 accepted the **79,416-record** real `Init` prefix including `Lean.Syntax` using default 4,096 fuel. The general correction recognizes a checked irreducible inductive head after at most one valid delta step; it keeps target-bearing, unknown and longer reducible chains on the full original checking route. Exported recursors remain subject to independently generated exact metadata checks, never trusted as axioms.
+
+The next real corpus divergence is at **record 86,383**, theorem `Std.PRange.UpwardEnumerable.succMany?_add`: C0 returns `application type mismatch`, while official Lean accepts. Both C0's wide-application optimization and its historical syntax-directed checking reject the proof under the same source session; [diagnostic CI 38393365781](https://github.com/dwijayuda/pskernel/actions/runs/38393365781) qualified that distinction. The current investigation is therefore shared type inference, definitional equality and recursor semantics. Phase B is still **incomplete**, and no full `Init`, Std, or Mathlib C0 acceptance has been established.
+
+The older nested bottleneck descriptions below are retained as historical root-cause evidence, not current blocking status.
+
 **Status:** engineering investigation, **not Phase B acceptance**  
 **Target:** native Lean 4.35.0 (`leanprover/lean4:v4.35.0`)  
 **Scope:** C0's checked importer, inference, WHNF and inductive admission only. No original `pskernel-core`, compiler, Rust, self-hosting or metatheory changes.

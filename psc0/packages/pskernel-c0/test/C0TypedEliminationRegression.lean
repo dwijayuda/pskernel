@@ -207,6 +207,50 @@ def main : IO Unit := do
       if !equal then
         throw (IO.userError "source DefEq did not justify verified structure eta")
 
+  -- Build a genuine Box.rec application with a constant Box-valued
+  -- motive and a constructor-building minor case. The neutral structure
+  -- major needs SOURCE-JUSTIFIED eta conversion before ordinary iota may
+  -- fire. The metered candidate then executes the same demand machine.
+  let boxRecName := psKernelSimpleRecName c0TypedBoxName
+  let motive : PsKernelExpr :=
+    .lam (c0TypedName "major") (.const c0TypedBoxName [])
+      (.const c0TypedBoxName []) .default
+  let minor : PsKernelExpr :=
+    .lam (c0TypedName "a") (.sort .zero)
+      (.lam (c0TypedName "b") (.sort .zero)
+        (.app (.app (.const c0TypedBoxCtor []) (.bvar 1)) (.bvar 0))
+        .default) .default
+  let boxRecHead : PsKernelExpr := .const boxRecName [.succ .zero]
+  let boxRecInput := psKernelExprApplyArgs boxRecHead [motive, minor, boxTerm]
+  let rewrittenRec := psKernelExprApplyArgs
+    boxRecHead [motive, minor, expectedEta]
+  match psKernelC0ArchitectureSourceTypedRecursorMajor
+      32768 boxSession boxRecInput with
+  | none =>
+      throw (IO.userError "source-justified structure eta was not materialized")
+  | some actual =>
+      if !psKernelExprEqual actual rewrittenRec then
+        throw (IO.userError "typed-major recursor wrapper changed unrelated args")
+  match psKernelC0ArchitecturePreviewTypedDemand
+      32768 131072 boxScoped boxRecInput with
+  | .error reason =>
+      throw (IO.userError ("typed-demand source check failed: " ++ reason))
+  | .ok (observation, _) =>
+      if !observation.agrees ||
+          !psKernelExprEqual observation.sourceValue expectedEta ||
+          !observation.candidateValue.any
+            (fun result => psKernelExprEqual result expectedEta) then
+        throw (IO.userError
+          "source-justified structure recursor did not match metered demand")
+  -- A deliberately underfunded candidate must not change source WHNF.
+  match psKernelC0ArchitecturePreviewTypedDemand
+      32768 8 boxScoped boxRecInput with
+  | .error reason =>
+      throw (IO.userError ("typed candidate quota polluted checker: " ++ reason))
+  | .ok (observation, _) =>
+      if observation.candidateValue.isSome ||
+          !psKernelExprEqual observation.sourceValue expectedEta then
+        throw (IO.userError "typed-demand resource decline changed source WHNF")
   -- A major belonging to a different verified inductive must not be
   -- converted by the K branch based merely on constructor names.
   match psKernelC0ArchitecturePreviewTypedMajor 8192 boxScoped
@@ -353,6 +397,7 @@ def main : IO Unit := do
       throw (IO.userError "quotient bootstrap accepted without checked Eq")
   IO.println "C0_TYPED verified_k_prop_source_admission=pass"
   IO.println "C0_TYPED verified_structure_eta_source_infer_defeq=pass"
+  IO.println "C0_TYPED source_justified_metered_eta_demand=pass"
   IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
   IO.println "C0_TYPED checked_eq_quot_bootstrap_and_idempotence=pass"
   IO.println "C0_TYPED indexed_k_defeq_side_conditions=pass"

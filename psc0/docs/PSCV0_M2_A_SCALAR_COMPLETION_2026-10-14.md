@@ -338,3 +338,12 @@ dependencies without dropping them from replay. Candidates/replacements are
 removed from that stage before insertion, preventing collisions. New helpers
 do not silently change old asset cuts; all three prior assets must still
 regenerate byte-for-byte. Standard snapshot drift remains a separate strict gate.
+
+Large candidate source transport exceeded the GitHub job-log connector's
+response capacity at run38473683098. Source review therefore uses eight
+bounded read-only artifact log parts, each carrying its position, full length
+and SHA256. The native compiler still emits and kernel-checks the whole asset
+once; these readers neither compile nor admit it. The main log retains concise
+replay/snapshot receipts. Full byte-for-byte regeneration remains required
+after source admission. This is transport infrastructure, not a new compiler
+milestone or an acceptance relaxation.

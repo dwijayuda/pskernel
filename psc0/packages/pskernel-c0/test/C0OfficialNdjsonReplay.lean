@@ -803,7 +803,22 @@ def c0ExportVerdictFromFileTrace
     else if line != "\n" then
       consumed := consumed + 1
       match c0ExportStep state line fuel with
-      | .error verdict => return (verdict, consumed)
+      | .error verdict =>
+          -- Diagnostics are computed only after the first failure. The
+          -- authoritative verdict above is never changed by this replay.
+          if verdict == .rejected then
+            match Lean.Json.parse line with
+            | .error _ => pure ()
+            | .ok record =>
+                match c0ExportParseRecord state.tables record with
+                | .error _ => pure ()
+                | .ok parsed =>
+                    for declaration in parsed.declarations do
+                      match c0ExportCheckOne state.environment declaration fuel with
+                      | .error (.rejectedInvalid message) =>
+                          IO.println ("C0_REAL_EXPORT_REJECT_MESSAGE=" ++ message)
+                      | _ => pure ()
+          return (verdict, consumed)
       | .ok next => state := next
   return (c0ExportFinish state, consumed)
 

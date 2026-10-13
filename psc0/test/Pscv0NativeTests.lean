@@ -75,6 +75,24 @@ private def getElemFoundationCases : IO Unit := do
     "    case true => exact Or.inl(reflects)\n" ++
     "}\n" ++
 
+    -- Every two decisions of one proposition must agree. Branches with
+    -- contradictory reflections eliminate False, not manufacture equality.
+    "theorem psDecidableUnique(P: Prop, left: Decidable P, right: Decidable P): left = right := by {\n" ++
+    "  cases left\n" ++
+    "  case intro bl hl =>\n" ++
+    "    cases right\n" ++
+    "    case intro br hr =>\n" ++
+    "      cases bl\n" ++
+    "      case false =>\n" ++
+    "        cases br\n" ++
+    "        case false => rfl\n" ++
+    "        case true => exact (nomatch hl(hr))\n" ++
+    "      case true =>\n" ++
+    "        cases br\n" ++
+    "        case false => exact (nomatch hr(hl))\n" ++
+    "        case true => rfl\n" ++
+    "}\n" ++
+
     "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++
     "const bangResult: Nat := (AlwaysBox.mk(41))[42]!\n" ++
     "structure ProductProofBox where { value: Nat }\n" ++

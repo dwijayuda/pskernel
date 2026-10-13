@@ -29,6 +29,17 @@ def main : IO Unit := do
   match psKernelC0ChargeName veryLong 102 with
   | some 0 => pure ()
   | _ => throw (IO.userError "exact wide name cost changed")
+  -- Deeply nested names are charged before descending into the parent:
+  -- even a tiny quota fails closed without a full untrusted-name traversal.
+  let deepName : PsKernelName :=
+    (List.range 256).foldl
+      (fun parent (_ : Nat) => PsKernelName.str parent "x")
+      .anonymous
+  if (psKernelC0ChargeName deepName 16).isSome then
+    throw (IO.userError "deep-name source work exceeded finite quota")
+  match psKernelC0ChargeName deepName 513 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "deep-name exact component cost changed")
   let lvl : PsKernelLevel := .max .zero (.param named)
   match psKernelC0ChargeLevel lvl 6 with
   | some 0 => pure ()

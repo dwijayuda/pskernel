@@ -77,6 +77,15 @@ def main : IO Unit := do
         throw (IO.userError "audited source admitted altered axiom signature")
     if (psKernelC0AuditTrustedSource reviewed.trusted [modified]).isSome then
       throw (IO.userError "accepted axiom history was re-audited under wrong type")
+  if member : approvedSignature ∈
+      psKernelC0HistoryAxiomSignatures reviewed.trusted.history then
+    let _fullyTypedAuthorization :
+        approvedSignature ∈ reviewed.allowedAxioms :=
+      psKernelC0AuditedAxiomSignatureAllowed
+        reviewed approvedSignature member
+    pure ()
+  else
+    throw (IO.userError "reviewed full axiom signature had no history membership")
   match psKernelC0HistoryAxiomSignatures reviewed.trusted.history with
   | [actual] =>
       if !decide (actual = approvedSignature) then
@@ -313,6 +322,16 @@ def main : IO Unit := do
   | _ => throw (IO.userError "checked history lost quotient trust event")
   if (psKernelC0AuditTrustedSource quotWork.trusted []).isSome then
     throw (IO.userError "approved Quot history was downgraded to no-capability audit")
+  if member : PsKernelC0TrustCapability.quotientBootstrap ∈
+      psKernelC0HistoryTrustCapabilities quotWork.trusted.history then
+    let _formalAuthorization :
+        PsKernelC0TrustCapability.quotientBootstrap ∈
+          quotWork.allowedCapabilities :=
+      psKernelC0AuditedCapabilityAllowed
+        quotWork .quotientBootstrap member
+    pure ()
+  else
+    throw (IO.userError "approved Quot capability missing from checked history")
   let _quotApproved := psKernelC0AuditedSourceCapabilitiesApproved quotWork
   let (quotChecked, afterQuotCheck) ← match psKernelC0AuditedSourceCheck
       32768 quotWork (.sort .zero) with

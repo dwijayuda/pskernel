@@ -245,4 +245,37 @@ def main : IO Unit := do
         throw (IO.userError "C0 failed to reduce a checked inductive alias")
   | .error message =>
       throw (IO.userError ("C0 simple delta alias WHNF failed: " ++ message))
+  match psKernelMutualNeutralAfterOneDelta
+      aliasedSession [freshTarget] aliasDomain with
+  | some value =>
+      if !psKernelExprEqual value neutralDomain then
+        throw (IO.userError "C0 one-delta neutral path altered meaning")
+  | none =>
+      throw (IO.userError "C0 one-delta neutral shortcut missed checked alias")
+  if (psKernelMutualNeutralAfterOneDelta
+      aliasedSession [freshTarget] recursiveDomain).isSome then
+    throw (IO.userError "C0 one-delta neutral path accepted target-bearing domain")
+  if (psKernelMutualNeutralAfterOneDelta
+      aliasedSession [freshTarget] (.const freshTarget [])).isSome then
+    throw (IO.userError "C0 one-delta path accepted the inductive target")
+  let anotherAlias : PsKernelName :=
+    .str .anonymous "ChainedAlias"
+  let chainInfo : PsKernelDefinitionInfo := {
+    base := {
+      name := anotherAlias
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := .const aliasName []
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let chainEnv := psKernelEnvironmentAddUnchecked aliasedEnv
+    (.defnInfo chainInfo)
+  let chainSession := psKernelMkCheckerSession chainEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  if (psKernelMutualNeutralAfterOneDelta
+      chainSession [freshTarget] (.const anotherAlias [])).isSome then
+    throw (IO.userError "C0 one-delta shortcut bypassed remaining alias")
+  IO.println "C0_LEAN435 one_delta_to_inductive_neutral=pass"
   IO.println "C0_LEAN435 inductive_alias_delta_whnf=pass"

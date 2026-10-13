@@ -1,3 +1,11 @@
+# Current work — M2 instance graph qualification pending (13 October 2026)
+
+Replaced recursive active-cycle rejection with a bounded generator/consumer queue.
+Source implementation and focused checks are committed for Linux native qualification;
+do not treat them as qualified until the new run succeeds. See
+[M2 design and boundaries](docs/PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+M1's last green executable remains c00e146bd5c97788a4a6a39221849973aeafda84.
+
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
 ## Current roadmap integration — readable outputs (13 October 2026)

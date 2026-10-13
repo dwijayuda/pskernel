@@ -527,6 +527,17 @@ private def application : String :=
   "instance (priority := 777): Flag where { enabled := true }\n" ++
   "const anonymous: Bool := Flag.enabled\n" ++
   "end Classes\n" ++
+  "namespace Waiters\n" ++
+  "class A where { value: Nat }\n" ++
+  "class B where { value: Nat }\n" ++
+  "class Result where { value: Nat }\n" ++
+  "instance seed: A where { value := 733 }\n" ++
+  "instance (priority := high) fromB[B]: A where { value := B.value }\n" ++
+  "instance fromA[A]: B where { value := A.value }\n" ++
+  "instance combine[A][B]: Result where { value := Nat.add(A.value, B.value) }\n" ++
+  "const result: Nat := Result.value\n" ++
+  "end Waiters\n" ++
+  "const instanceWaiterRuntime: Nat := Waiters.result\n" ++
   "const classSelected: Nat := Classes.selected\n" ++
   "const classNested: Nat := Classes.nested\n" ++
   "const classLocal: Nat := Classes.local\n" ++
@@ -1142,58 +1153,88 @@ private def projectBoundaries : IO Unit := do
   let _ ← get "cryptographic Standard registry fingerprint"
     (psStandardSnapshotValidateCrypto psSelfHostProdPreludeEnvironment
       psStandardSnapshotExpectedSHA256)
-  -- A ground result is cached only after genuine type inference/unification.
-  -- Re-query the *same* immutable environment and local context to ensure the
-  -- answer is reused without another candidate expansion.
-  let inhabitedGoal := psStandardInhabitedType (.constE psNatName [])
-  let memoFirst := psSynthInstanceSearch 64
-    psSelfHostProdPreludeEnvironment psLocalEmpty
-    psSelfHostProdPreludeEnvironment.instances [] {} psMetaEmpty inhabitedGoal
-  unless memoFirst.result.value.isSome && !memoFirst.table.answers.isEmpty do
-    throw (IO.userError "tabled instance solver did not validate a closed witness")
-  let memoAgain := psSynthInstanceSearch 64
-    psSelfHostProdPreludeEnvironment psLocalEmpty
-    psSelfHostProdPreludeEnvironment.instances [] memoFirst.table psMetaEmpty inhabitedGoal
-  unless memoAgain.result.value.isSome &&
-      memoAgain.table.visits == memoFirst.table.visits do
-    throw (IO.userError "closed typeclass goal bypassed the checked answer table")
-  let exhausted := psSynthInstanceSearch 64
-    psSelfHostProdPreludeEnvironment psLocalEmpty
-    psSelfHostProdPreludeEnvironment.instances []
-    { candidateChecks := psInstanceMaxCandidateChecks }
-    psMetaEmpty inhabitedGoal
-  unless exhausted.result.value.isNone && exhausted.table.resourceExceeded do
-    throw (IO.userError "candidate budget did not fail closed")
-  -- The table should also reuse *definitionally equal* closed goals.
-  -- Id Nat and Nat denote the same type; the cached witness must still be
-  -- independently checked against the exact new dependent class target.
+  -- One graph contains a seeded mutual cycle, a diamond, and a convertible
+  -- duplicate. Local hypotheses are real typed evidence; the graph never
+  -- manufactures recursive dictionaries to close the cycle.
+  let environment := psSelfHostProdPreludeEnvironment
+  let a := psStandardInhabitedType (.constE psNatName [])
+  let b := psStandardInhabitedType (.constE (psRootName "Bool") [])
+  let resultGoal := psStandardInhabitedType (.constE (psRootName "String") [])
   let idNat := PsExpr.app (.constE (psRootName "Id") [.zero]) (.constE psNatName [])
-  let convertibleGoal := psStandardInhabitedType idNat
-  let convertibleMemo := psSynthInstanceSearch 64
-    psSelfHostProdPreludeEnvironment psLocalEmpty
-    psSelfHostProdPreludeEnvironment.instances [] memoFirst.table psMetaEmpty
-    convertibleGoal
-  unless convertibleMemo.result.value.isSome &&
-      convertibleMemo.table.visits == memoFirst.table.visits do
-    throw (IO.userError "definitionally equal instance target was not safely reused")
-  -- Genuine Pi-introduced evidence remains fully checked and is not
-  -- exported into a different goal's local-instance memo.
-  let universalGoal := psLogicPi 71 "n" (.constE psNatName [])
-    (psStandardInhabitedType (.constE psNatName []))
-  let universalResult := psSynthInstanceWithTable psSelfHostProdPreludeEnvironment
-    psLocalEmpty psSelfHostProdPreludeEnvironment.instances psMetaEmpty
-    64 universalGoal
+  let aliasA := psStandardInhabitedType idNat
+  let need := fun domain result =>
+    PsExpr.forallE (psRootName "dictionary") domain result .instanceImplicit
+  let add := fun locals name type =>
+    (psLocalPushBinding locals (psRootName name) type .instanceImplicit).context
+  let locals := add psLocalEmpty "seed" a
+  let locals := add locals "aFromB" (need b a)
+  let locals := add locals "bFromA" (need a b)
+  let locals := add locals "finish" (need a (need b (need aliasA resultGoal)))
+  let graph := psSynthInstanceWithTable environment locals psInstanceIndexEmpty
+    psMetaEmpty 64 resultGoal
+  let some graphWitness := graph.result.value |
+    throw (IO.userError "seeded cycle/diamond did not produce finite evidence")
+  unless (psInstanceReplay environment locals psMetaEmpty resultGoal graphWitness).isSome &&
+      graph.table.visits == 3 && graph.table.answers == 3 &&
+      graph.table.reusedGoals >= 3 && graph.table.resumed >= 4 &&
+      !graph.table.resourceExceeded do
+    throw (IO.userError ("instance graph failed sharing or waiter propagation: " ++
+      toString graph.table.visits ++ "/" ++ toString graph.table.reusedGoals ++
+      "/" ++ toString graph.table.resumed))
+  -- Duplicating a dependency must not repeat candidate expansion. Queue
+  -- transitions grow with dependency edges, not with all paths in a diamond.
+  let mut previousChecks := 0
+  for width in [1, 8, 32] do
+    let telescope := (List.replicate width aliasA).foldr need resultGoal
+    let repeated := add (add psLocalEmpty "seed" a) "finish" telescope
+    let measured := psSynthInstanceWithTable environment repeated psInstanceIndexEmpty
+      psMetaEmpty 64 resultGoal
+    unless measured.result.value.isSome && measured.table.visits == 2 &&
+        measured.table.reusedGoals == width - 1 &&
+        measured.table.transitions <= 4 * width + 8 &&
+        (previousChecks == 0 || measured.table.candidateChecks == previousChecks) do
+      throw (IO.userError "repeated dictionary dependencies expanded duplicate candidates")
+    previousChecks := measured.table.candidateChecks
+    IO.println ("PSCV0_NATIVE_INSTANCE_GROWTH: edges=" ++ toString width ++
+      " generators=" ++ toString measured.table.visits ++
+      " candidates=" ++ toString measured.table.candidateChecks ++
+      " transitions=" ++ toString measured.table.transitions)
+  let unseeded := add (add psLocalEmpty "aFromB" (need b a)) "bFromA" (need a b)
+  let cycle := psSynthInstanceWithTable environment unseeded psInstanceIndexEmpty
+    psMetaEmpty 64 a
+  unless cycle.result.value.isNone && cycle.table.visits == 2 &&
+      !cycle.table.resourceExceeded do
+    throw (IO.userError "unseeded cycle fabricated evidence or spun until exhaustion")
+  -- Each independent resource limit fails closed, as does evidence height.
+  for limits in [
+      ({ goals := 0 } : PsInstanceSearchLimits),
+      ({ candidates := 0 } : PsInstanceSearchLimits),
+      ({ transitions := 0 } : PsInstanceSearchLimits)] do
+    let exhausted := psSynthInstanceWithLimits environment locals psInstanceIndexEmpty
+      psMetaEmpty 64 limits resultGoal
+    unless exhausted.result.value.isNone && exhausted.table.resourceExceeded do
+      throw (IO.userError "instance graph resource limit did not fail closed")
+  let shallow := psSynthInstanceWithTable environment locals psInstanceIndexEmpty
+    psMetaEmpty 1 resultGoal
+  unless shallow.result.value.isNone do
+    throw (IO.userError "instance graph exceeded evidence height")
+  -- Pi scope ownership: a local dictionary introduced while solving the first
+  -- argument must not leak into the second argument's parent-scope goal.
+  let piA := need a a
+  let isolated := add psLocalEmpty "finish" (need piA (need a resultGoal))
+  let leaked := psSynthInstanceWithTable environment isolated psInstanceIndexEmpty
+    psMetaEmpty 64 resultGoal
+  unless leaked.result.value.isNone do
+    throw (IO.userError "Pi-local dictionary escaped its generator scope")
+  let universalGoal := psLogicPi 71 "n" (.constE psNatName []) a
+  let universalResult := psSynthInstanceWithTable environment
+    psLocalEmpty environment.instances psMetaEmpty 64 universalGoal
   let some witness := universalResult.result.value
     | throw (IO.userError "Pi-indexed class synthesis rejected")
-  let inferred ← get "kernel-shape Pi dictionary"
-    ((psInferType psSelfHostProdPreludeEnvironment universalResult.result.context
-      psLocalEmpty witness).mapError (fun _ =>
-        "Pi dictionary witness did not typecheck"))
-  unless psDefEqReadOnlyWithEnv psSelfHostProdPreludeEnvironment
-      universalResult.result.context psLocalEmpty inferred universalGoal do
+  unless (psInstanceReplay environment psLocalEmpty psMetaEmpty universalGoal witness).isSome do
     throw (IO.userError "Pi dictionary synthesized an incorrect function type")
-  IO.println ("PSCV0_NATIVE_INSTANCE_MEMO: PASS checked ground-answer reuse; expansions=" ++
-    toString memoFirst.table.visits)
+  IO.println ("PSCV0_NATIVE_INSTANCE_GRAPH: PASS cycle/diamond/conversion, " ++
+    "scope isolation, evidence replay and independent resource limits")
   let wrongDigest := "sha256:" ++ String.ofList (List.replicate 64 '0')
   if (psStandardSnapshotValidateCrypto psSelfHostProdPreludeEnvironment
       wrongDigest).isOk then

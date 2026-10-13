@@ -119,3 +119,22 @@ example : True := by
   trivial
 
 end Pscv0GetElemOracle
+
+-- Independent pinned-Lean oracle for deterministic seeded-cycle resolution.
+namespace Pscv0InstanceGraphOracle
+class A where
+  value : Nat
+class B where
+  value : Nat
+class Result where
+  value : Nat
+instance seed : A where
+  value := 733
+instance (priority := high) fromB [B] : A where
+  value := B.value
+instance fromA [A] : B where
+  value := A.value
+instance combine [A] [B] : Result where
+  value := A.value + B.value
+example : Result.value = 1466 := rfl
+end Pscv0InstanceGraphOracle

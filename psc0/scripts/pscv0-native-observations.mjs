@@ -1,5 +1,6 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "instanceWaiterRuntime", args: null, expected: 1466n },
   { name: "listProofRuntime", args: null, expected: 409n },
   { name: "listAutoRuntime", args: null, expected: 421n },
   { name: "listOptionalRuntime", args: null, expected: 433n },

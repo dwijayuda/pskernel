@@ -208,6 +208,8 @@ lean_lib PsMeta where
     `Ps.Meta.NatReduce, `Ps.Meta.Reduce,
     `Ps.Meta.Unify,
     `Ps.Meta.InstanceTarget,
+    `Ps.Meta.InstanceCandidate,
+    `Ps.Meta.InstanceSearch,
     `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView

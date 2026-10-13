@@ -70,8 +70,9 @@ def psReduceRecursorHypothesis (reduce : PsExpr → PsExpr) (fuel : Nat)
       let fieldType := psReduceAppView result
       let .constE owner _ := fieldType.head | none
       if !psNameEq owner family || fieldType.args.length != numParams + numIndices then none
-      else return psReduceApply head
-        (fixedArgs ++ fieldType.args.drop numParams ++ [field])
+      else
+        return psReduceApply head
+          (fixedArgs ++ fieldType.args.drop numParams ++ [field])
 
 -- Metadata-driven iota for one family, including function-valued recursive
 -- fields. Unsupported nested/mutual recursors remain stuck; never guess.

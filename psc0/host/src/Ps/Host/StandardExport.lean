@@ -207,10 +207,10 @@ private def checkRecursorRules (native : Lean.Environment)
       let mut expected ← match exportExpr rule.rhs with
         | .ok expr => pure expr
         | .error error => throw (IO.userError error)
-      let prefix := info.numParams + info.numMotives + info.numMinors
+      let fixedCount := info.numParams + info.numMotives + info.numMinors
       let mut locals := psLocalEmpty
       let mut arguments : List PsExpr := []
-      for _ in [:prefix + rule.nfields] do
+      for _ in [:fixedCount + rule.nfields] do
         let .lam name domain body binder := expected
           | throw (IO.userError "native rule lambda telescope mismatch")
         let pushed := psLocalPushBinding locals name domain binder
@@ -219,7 +219,7 @@ private def checkRecursorRules (native : Lean.Environment)
         arguments := arguments ++ [value]
         expected := psExprInstantiate1 body value
       let reduce := psWhnf environment psMetaEmpty locals
-      let ctorArguments := arguments.take info.numParams ++ arguments.drop prefix
+      let ctorArguments := arguments.take info.numParams ++ arguments.drop fixedCount
       let some resultType := psReduceApplyType reduce constructor.type ctorArguments
         | throw (IO.userError "cannot instantiate exported constructor result")
       let indices := (psReduceAppView resultType).args.drop info.numParams
@@ -228,7 +228,7 @@ private def checkRecursorRules (native : Lean.Environment)
       let major := psReduceApply
         (.constE constructor.name (constructor.levelParams.map PsLevel.param)) ctorArguments
       let redex := psReduceApply (.constE info.name (info.levelParams.map PsLevel.param))
-        (arguments.take prefix ++ indices ++ [major])
+        (arguments.take fixedCount ++ indices ++ [major])
       let some actual := psReduceIota reduce environment redex
         | throw (IO.userError ("portable iota stuck: " ++ toString original.name))
       unless psExprAlphaEq actual expected do

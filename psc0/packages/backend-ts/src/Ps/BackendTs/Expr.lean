@@ -9,32 +9,6 @@ def psTsEmitTypeArguments (arguments : List PsVerifiedIrType) : Except PsTsEmitE
       if psListIsEmpty printed then Except.ok ""
       else Except.ok (psTsJoin "" ["<", psTsJoin ", " printed, ">"])
 
-def psTsNormalizeMachineInteger
-    (type : PsVerifiedIrMachineIntegerType)
-    (value : String) :
-    Except PsTsEmitError String :=
-  match type with
-  | .uint8 =>
-      Except.ok (psTsJoin "" ["((", value, ") & 255)"])
-  | .uint16 =>
-      Except.ok (psTsJoin "" ["((", value, ") & 65535)"])
-  | .uint32 =>
-      Except.ok (psTsJoin "" ["((", value, ") >>> 0)"])
-  | .int8 =>
-      Except.ok (psTsJoin "" ["(((", value, ") << 24) >> 24)"])
-  | .int16 =>
-      Except.ok (psTsJoin "" ["(((", value, ") << 16) >> 16)"])
-  | .int32 =>
-      Except.ok (psTsJoin "" ["((", value, ") | 0)"])
-  | .uint64 =>
-      Except.ok (psTsJoin "" ["BigInt.asUintN(64, (", value, "))"])
-  | .int64 =>
-      Except.ok (psTsJoin "" ["BigInt.asIntN(64, (", value, "))"])
-  | .usize =>
-      Except.error PsTsEmitError.targetWordSizeRequired
-  | .isize =>
-      Except.error PsTsEmitError.targetWordSizeRequired
-
 -- The legacy printer delegates machine arithmetic to the same ECMAScript
 -- expression plan as direct JS/TS; there is only one numeric semantics owner.
 def psTsEmitMachineIntegerBinary

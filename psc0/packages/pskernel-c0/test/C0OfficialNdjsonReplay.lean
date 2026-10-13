@@ -810,6 +810,7 @@ def main : IO Unit := do
     ("C0OfficialOpaqueReject.ndjson", false),
     ("C0OfficialMixedAccept.ndjson", true),
     ("C0OfficialInitSubtypeAccept.ndjson", true),
+    ("C0OfficialInitThreeInductivesAccept.ndjson", true),
     ("C0OfficialMixedReject.ndjson", false)
   ]
   for item in cases do

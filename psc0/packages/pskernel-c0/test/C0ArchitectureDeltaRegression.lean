@@ -100,6 +100,30 @@ def main : IO Unit := do
       (.const unsafeName []) with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "C0 candidate unfolded unsafe declaration")
+  -- A reducible definition whose value is a lambda must hand control back
+  -- to the lazy argument-spine machine for actual beta reduction.
+  let functionName := c0DeltaName "C0DeltaFunction"
+  let binder := c0DeltaName "argument"
+  let identity : PsKernelDefinitionInfo := {
+    base := {
+      name := functionName
+      levelParams := []
+      type := .forallE binder sort sort .default
+    }
+    value := .lam binder sort (.bvar 0) .default
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let functionEnv ← match psKernelAddDefinition 4096 polyEnv identity
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error err => throw (IO.userError ("delta function setup: " ++ err))
+  let functionSession := psKernelMkCheckerSession functionEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DeltaCheck "delta-then-beta" functionSession
+    (.app (.const functionName []) (.sort .zero)) (.sort .zero)
+  c0DeltaCheck "nested-delta-then-beta" functionSession
+    (.app (.const functionName []) (.const first [])) (.sort .zero)
   let opaqueName := c0DeltaName "C0DeltaOpaque"
   let info : PsKernelOpaqueInfo := {
     base := { name := opaqueName, levelParams := [], type := type }

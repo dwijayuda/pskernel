@@ -87,6 +87,23 @@ def c0TypedNestedDecl : PsKernelSimpleMutualInductiveDecl := {
   isUnsafe := false
 }
 
+/-- Source-exact Eq and Eq.refl types used by the checked quotient
+    bootstrap. The inductive has two uniform parameters (α, a) and one
+    index b, making the generated ordinary recursor a K-family. -/
+def c0TypedEqUniverse : PsKernelName := c0TypedName "u"
+def c0TypedEqCtor : PsKernelName := .str psKernelEqName "refl"
+def c0TypedEqDecl : PsKernelSimpleInductiveDecl := {
+  levelParams := [c0TypedEqUniverse]
+  name := psKernelEqName
+  type := psKernelExpectedEqType c0TypedEqUniverse
+  ctors := [
+    { name := c0TypedEqCtor
+      type := psKernelExpectedEqReflType c0TypedEqUniverse }
+  ]
+  isUnsafe := false
+  numParams := 2
+}
+
 def c0TypedExpectRecursor
     (environment : PsKernelEnvironment)
     (inductiveName : PsKernelName)
@@ -232,6 +249,41 @@ def main : IO Unit := do
     c0TypedNestedName false
   -- A nested-dispatch singleton is not evidence for arbitrary genuine
   -- nested inductives. This test proves source checked interface wiring.
+  -- Quot requires the *source-checked* Eq and Eq.refl signatures;
+  -- a boolean initialization flag or unchecked declaration stub must not
+  -- be used as an admission shortcut.
+  let eqWork ← match psKernelC0ArchitectureAdmit 32768 nestedWork
+      (.ordinaryInductive c0TypedEqDecl) with
+    | .error reason =>
+        throw (IO.userError ("checked Eq admission failed: " ++ reason))
+    | .ok next => pure next
+  c0TypedExpectRecursor eqWork.checker.context.environment psKernelEqName true
+  match psKernelCheckEqForQuot eqWork.checker.context.environment with
+  | .error reason =>
+      throw (IO.userError ("source Eq/Quot shape rejected: " ++ reason))
+  | .ok _ => pure ()
+  let quotWork ← match psKernelC0ArchitectureAdmit 32768 eqWork .quotient with
+    | .error reason =>
+        throw (IO.userError ("checked quotient bootstrap failed: " ++ reason))
+    | .ok next => pure next
+  if !quotWork.checker.context.environment.quotInitialized then
+    throw (IO.userError "checked quotient environment flag not set")
+  for name in [psKernelQuotName, psKernelQuotMkName,
+      psKernelQuotLiftName, psKernelQuotIndName] do
+    match psKernelEnvironmentFind quotWork.checker.context.environment name with
+    | some (.quotInfo _) => pure ()
+    | _ =>
+        throw (IO.userError "checked quotient constant was not published")
+  -- Quot initialization must be idempotent without changing the
+  -- independently checked declaration count.
+  let quotientAgain ← match psKernelC0ArchitectureAdmit 32768 quotWork .quotient with
+    | .error reason =>
+        throw (IO.userError ("idempotent checked Quot bootstrap failed: " ++ reason))
+    | .ok next => pure next
+  if psKernelEnvironmentSize quotientAgain.checker.context.environment !=
+      psKernelEnvironmentSize quotWork.checker.context.environment then
+    throw (IO.userError "idempotent Quot changed admitted declarations")
+
   -- Duplicate admission, invalid declaration and ill-typed source terms
   -- must not mutate an accepted environment or promote candidate values.
   match psKernelC0ArchitectureAdmit 8192 boxWork
@@ -249,4 +301,5 @@ def main : IO Unit := do
   IO.println "C0_TYPED verified_k_prop_source_admission=pass"
   IO.println "C0_TYPED verified_structure_eta_source_infer_defeq=pass"
   IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
+  IO.println "C0_TYPED checked_eq_quot_bootstrap_and_idempotence=pass"
   IO.println "C0_TYPED checked_declaration_atomicity_and_source_authority=pass"

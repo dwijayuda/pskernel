@@ -1,18 +1,18 @@
 # PSCV0 v7 native implementation roadmap
 
-## Current qualified boundary — checked scalar foundation (14 October 2026)
+## Current qualified boundary — unsigned scalar foundation (14 October 2026)
 
-Executable `cb4e8617cf7c9e19a567b391b093e3fac65fa143`;
-[green Linux 38458234955](https://github.com/dwijayuda/pskernel/actions/runs/38458234955).
-**341 shared runtime observations**, four panic contracts, **206 portable /
-216 native modules**, profile `pscv0-v7-native-bounded/58`.
+Executable `fd554c4612d14ff154bced721a4ea6e5dd16df64`;
+[green Linux 38463484850](https://github.com/dwijayuda/pskernel/actions/runs/38463484850).
+**359 shared runtime observations**, four panic contracts, **211 portable /
+221 native modules**, profile `pscv0-v7-native-bounded/59`.
 Official **Lean 4.35.0**, independent oracle, semantic/refusal/search checks,
 strict IR, JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, projects and
 existing performance gates pass. Performance parity is not established.
 
-Standard: **561 declarations /22 classes /88 instances**.
-FNV `fnv1a64:6200500133443239461`;
-SHA `sha256:c40b99aa82ba0be17ae07354e65b731a99e95d2e5bf9b3708ef56cec0be599b1`.
+Standard: **637 declarations /22 classes /92 instances**.
+FNV `fnv1a64:13920538106612433129`;
+SHA `sha256:0dfde0fc7fe625fcedadcb150bc41234fbf57fac8197a663229a867e0f221bb7`.
 
 ToFormat/Repr and selected nonrecursive deriving remain qualified. Checked
 Nat.add/sub/mul/beq and ite models replace earlier axioms. The actual pinned
@@ -30,9 +30,14 @@ elaboration; resource limits and acceptance criteria are unchanged. This is
 a specific regression repair, not general performance parity.
 
 [Design, sources and qualification](PSCV0_A_FORMAT_REPR_2026-10-14.md).
-**Full M2+A remains incomplete.** Continue UInt/BitVec/Hashable, remaining
+UInt/BitVec conversions, arbitrary Nat wrapping and unsigned Canonical ABI widths
+are now qualified. Hashable /60 is implemented but pending qualification; the
+strict Standard snapshot intentionally awaits independent native observation.
+
+**Full M2+A remains incomplete.** Continue Hashable qualification, remaining
 selected Standard APIs, comprehensive manifest, broader M2 evidence and C5
 semantic retention. Recursive/indexed/dependent deriving remains M3+B.
+
 
 ## Historical qualified boundary — stable Lean and pure Format (14 October 2026)
 
@@ -598,7 +603,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 - **GetElem:** implement pinned RC4 `GetElem` and `GetElem?` with actual Prop-valued validity and Decidable/proof instances; `xs[i]` and `xs[i]'h` cannot discard proofs; `xs[i]?` returns Option safely; `xs[i]!` is a separately declared panic/default behavior, not a bounds proof. Do not confuse existing checked `List.get?` with the four forms.
 - **Deriving:** accepted selected trailing handlers `Inhabited`/`BEq`/`DecidableEq`/`Repr`/`Hashable` must produce genuine checked and registered definitions with generated-source provenance. Unsupported cases and arbitrary handlers fail closed.
 - **Scalars/libraries:** complete pinned `Float`/`Float32`/scientific, fixed-width/`BitVec` and selected arrays/bytes/string/collection conversions, then prove and execute target parity.
-- **Registry:** preserve the current selected SHA-256 (`sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`) and FNV (`fnv1a64:5949916575031563783`) roster drift gates; separately finish a comprehensive cryptographic RC4 module/notation/deriving/class/instance/tactic/effect/axiom manifest (not yet qualified). Recompute/approve intentional semantic changes; never silently overwrite a frozen expected hash.
+- **Registry:** preserve both strict expected hashes in `StandardSnapshot.lean` for the current qualified selected roster; separately finish the comprehensive pinned module/notation/deriving/class/instance/tactic/effect/axiom manifest. Intentional semantic expansions require source review and independently observed digest values. A selected declaration snapshot is not the full environment manifest.
 
 ### Phase B detailed exit gate
 

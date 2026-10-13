@@ -1,3 +1,13 @@
+# AI_WORK_STATE — PSKernel-C0 Lean performance architecture
+
+## REAL LEAN 4.35 INIT EXPORT SURVEY — QUALIFIED 2026-10-13
+
+**[CI 38332890884](https://github.com/dwijayuda/pskernel/actions/runs/38332890884) SUCCESS:** commit-pinned `lean4export` `5a9a355d` (Lean 4.35.0) exported the real `Init` module with transitive dependencies into **345,690,182 bytes / 6,452,982 NDJSON records**. Stable official `leanchecker --from-export` independently accepted the exact source bytes. SHA256: `c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179`. Total **57,919 declarations**: 41,920 theorems, 15,143 definitions, 604 inductive groups, 244 opaques, 4 axioms and 4 Quot declarations. First unsupported declaration in current **C0 test-only** importer occurs at record **69** (inductive group).
+
+**Not C0 acceptance:** the above is an exporter/official Lean qualification plus a shape inventory, not 57,919 C0-checked declarations, full Init conformance, or a kernel throughput comparison. Online C0 presently reads an entire `String` and retains expression/name/level tables, so it is not a bounded-memory reader for the 345 MB corpus.
+
+**Next Phase B:** implement complete semantic checks for one exported inductive/mutual group by independently constructing constructors and recursors and validating the export's redundant metadata rather than admitting it as axioms. Next: Quot, actual Init prefixes, resource/error taxonomy, then complete Init/Std/Mathlib. Phase C source-store transactions remain non-accepting until sealed ownership and qualified whole-checker behavior. The preceding **[CI 38332583934](https://github.com/dwijayuda/pskernel/actions/runs/38332583934) succeeded** for online replay and atomic multi-root copy.
+
 ## LATEST PHASE B/C NATIVE QUALIFICATION — 2026-10-13
 
 **Full source [CI 38332583934](https://github.com/dwijayuda/pskernel/actions/runs/38332583934) SUCCESS at [`7035d682`](https://github.com/dwijayuda/pskernel/commit/7035d682e09e9af96c0ebf7542ff6a9e56d97e3b)**: pinned stable Lean 4.35.0, 22 official same-byte export cases and C0 online-versus-batch cross-check, explicit fuel/resource classification, negative/migration regression, canonical-store checks, atomic cross-store bound-root import, C0 native microbenchmarks and unchanged original-core comparison. No implementation outside the native C0 scope was changed.

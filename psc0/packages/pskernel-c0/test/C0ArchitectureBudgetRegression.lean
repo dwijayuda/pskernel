@@ -15,6 +15,32 @@ def c0BudgetAssertQuote
 def main : IO Unit := do
   let v : PsKernelExpr := .lit (.nat 23)
   let x := c0BudgetName "x"
+  -- Names, universe levels and binder metadata must not be free:
+  -- an arbitrarily wide name or nested level previously cost one AST node.
+  let named := c0BudgetName "X"
+  match psKernelC0ChargeName named 3 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "exact name component cost was not charged")
+  if (psKernelC0ChargeName named 2).isSome then
+    throw (IO.userError "name UTF-8 storage bypassed quota")
+  let veryLong := c0BudgetName (String.ofList (List.replicate 100 'x'))
+  if (psKernelC0ChargeName veryLong 100).isSome then
+    throw (IO.userError "wide name evaded the shared quota")
+  match psKernelC0ChargeName veryLong 102 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "exact wide name cost changed")
+  let lvl : PsKernelLevel := .max .zero (.param named)
+  match psKernelC0ChargeLevel lvl 6 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "nested max/param level work not charged")
+  if (psKernelC0ChargeLevel lvl 5).isSome then
+    throw (IO.userError "nested universe level bypassed work quota")
+  let poly : PsKernelExpr := .const named [.zero, .succ .zero]
+  match psKernelC0ChargeExpr poly 7 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "constant name/universe work cost changed")
+  if (psKernelC0ChargeExpr poly 6).isSome then
+    throw (IO.userError "polymorphic constant readback bypassed quota")
   let captured : PsKernelC0Closure := .mk (.app (.bvar 0) (.bvar 0))
     [.mk v []]
   c0BudgetAssertQuote "duplicated-capture" 64 128 captured (.app v v)

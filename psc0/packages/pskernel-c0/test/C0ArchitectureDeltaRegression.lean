@@ -595,6 +595,30 @@ def main : IO Unit := do
   c0DemandCheck "recursor-fixed-argument-and-fields" fixedRecSession
     (psKernelExprApplyArgsCheap (.const fixedRecName [])
       [sort, sort, sort, pairValue]) (c0DeltaNatLit 22)
+  -- Proof-irrelevant K recursors and unsafe recursors remain outside this
+  -- candidate iota family; neither may be silently treated as the ordinary
+  -- constructor rule merely because a matching synthetic rule is present.
+  let kRecEnv := psKernelEnvironmentAddUnchecked ctorEnv
+    (.recInfo { recInfo with k := true })
+  let kRecSession := psKernelMkCheckerSession kRecEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  match psKernelC0ArchitectureCandidateDemand 4096 kRecSession.context recCall with
+  | .ok (value, _) =>
+      if !psKernelExprEqual value recCall then
+        throw (IO.userError "C0 candidate incorrectly used ordinary rule for K")
+  | .error reason =>
+      throw (IO.userError ("C0 candidate K neutrality failed: " ++ reason))
+  let unsafeRecEnv := psKernelEnvironmentAddUnchecked ctorEnv
+    (.recInfo { recInfo with isUnsafe := true })
+  let unsafeRecSession := psKernelMkCheckerSession unsafeRecEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  match psKernelC0ArchitectureCandidateDemand 4096 unsafeRecSession.context
+      recCall with
+  | .ok (value, _) =>
+      if !psKernelExprEqual value recCall then
+        throw (IO.userError "C0 candidate reduced unsafe recursor")
+  | .error reason =>
+      throw (IO.userError ("C0 unsafe recursor neutrality failed: " ++ reason))
   match psKernelC0ArchitectureCandidateDemand 3 recSession.context
       (.app (.const recName []) (.app idRecord pairValue)) with
   | .error _ => pure ()

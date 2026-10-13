@@ -1811,6 +1811,17 @@ def psErasureEtaFunction
                 (PsVerifiedIrExpr.call body List.nil (psListMap asVariable extraParameters)))
     | _ => Except.ok (PsVerifiedIrExpr.lambda parameters resultType body)
 
+-- Audited nullary runtime identities are independent of whether their checked
+-- declaration is a constructor, an alias definition, or a foundation primitive.
+-- Unit is Lean's abbreviation for PUnit; both have the same runtime carrier.
+def psErasureLiteral (name : PsName) : Option PsVerifiedIrLiteral :=
+  if psNameEq name psBoolTrueName then some (.bool true)
+  else if psNameEq name psBoolFalseName then some (.bool false)
+  else if psNameEq name psUnitUnitName ||
+      psNameEq name (psNameAppendStr (psRootName "PUnit") "unit") then some .unit
+  else if psNameEq name psNatZeroName then some (.natural 0)
+  else none
+
 structure PsErasureSpecialEntry where
   arity : Nat
   mayComplete : Bool
@@ -2120,6 +2131,11 @@ def psEraseSpecialBoundary
     (view : PsErasureAppView) : Except PsErasureError (Option PsVerifiedIrExpr) :=
   match view.head with
   | PsExpr.constE name _ =>
+      match psErasureLiteral name with
+      | some value =>
+          if view.args.isEmpty then .ok (some (.literal value))
+          else .error .unsupportedApplication
+      | none =>
       match (psErasureSpecialEntry scope name).orElse
           (fun _ => psErasureProofRecursorEntry environment name) with
       | Option.none => Except.ok Option.none
@@ -2334,22 +2350,7 @@ def psEraseRuntimeExprWithFuelWorker
                                         match psErasureLookupName scope.declarationNames name with
                                         | Option.some known => Except.ok (PsVerifiedIrExpr.var known)
                                         | Option.none =>
-                                            if psNameEq name psBoolTrueName then
-                                              Except.ok
-                                                (PsVerifiedIrExpr.literal
-                                                  (PsVerifiedIrLiteral.bool true))
-                                            else if psNameEq name psBoolFalseName then
-                                              Except.ok
-                                                (PsVerifiedIrExpr.literal
-                                                  (PsVerifiedIrLiteral.bool false))
-                                            else if psNameEq name psUnitUnitName then
-                                              Except.ok
-                                                (PsVerifiedIrExpr.literal
-                                                  PsVerifiedIrLiteral.unit)
-                                            else if psNameEq name psNatZeroName then
-                                              Except.ok (PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 0))
-                                            else
-                                              Except.error (PsErasureError.unknownConstant name)
+                                            Except.error (PsErasureError.unknownConstant name)
         | .app _ _ =>
             let view := psErasureAppView expr;
             let erase :=

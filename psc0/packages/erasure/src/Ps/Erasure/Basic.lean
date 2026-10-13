@@ -700,7 +700,7 @@ def psErasurePrimitiveType
     Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.string)
-  else if psNameEq name psUnitName then
+  else if psNameEq name psUnitName || psNameEq name (psRootName "PUnit") then
     Option.some
       (PsVerifiedIrType.primitive
         PsVerifiedIrPrimitiveType.unit)

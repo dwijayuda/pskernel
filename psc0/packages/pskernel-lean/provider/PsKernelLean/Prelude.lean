@@ -131,6 +131,39 @@ inductive PreludeAdmissionAttempt where
   | admitted (env : Lean.Environment)
   | deferred
 
+-- Lean's kernel initializes all four quotient constants atomically. Its public
+-- Environment.addDeclCore additionally publishes each name to AsyncConsts, so
+-- repeating .quotDecl is not an idempotent environment operation.
+def quotientGroupPresent (env : Lean.Environment) : Except PsKernelLeanError Bool := do
+  let members : List (Lean.Name × Lean.QuotKind) :=
+    [(`Quot, .type), (`Quot.mk, .ctor), (`Quot.lift, .lift), (`Quot.ind, .ind)]
+  let mut present := 0
+  for (name, kind) in members do
+    match env.checked.get.find? name with
+    | none => pure ()
+    | some (.quotInfo info) =>
+        unless info.name == name && info.kind == kind do
+          throw (preludeMismatch "kernel quotient group has inconsistent identities")
+        present := present + 1
+    | some _ => throw (preludeMismatch "kernel quotient name is already occupied")
+  unless present == 0 || present == members.length do
+    throw (preludeMismatch "kernel quotient group is incomplete")
+  return present != 0
+
+def validateQuotientDescriptor (env : Lean.Environment) (declaration : PsDeclaration) :
+    Except PsKernelLeanError Unit := do
+  if let .quotientDecl name levels type kind := declaration then
+    let some (.quotInfo generated) := env.checked.get.find? (toLeanName name)
+      | throw (preludeMismatch "missing regenerated quotient metadata")
+    let generatedKind := match generated.kind with
+      | .type => PsQuotientKind.type | .ctor => .ctor
+      | .lift => .lift | .ind => .ind
+    let convertedType ← toLeanExpr type
+    unless generated.levelParams == toLeanNames levels &&
+        generated.type == convertedType &&
+        psQuotientKindTag generatedKind == psQuotientKindTag kind do
+      throw (preludeMismatch "regenerated quotient signature or kind differs")
+
 def tryPreludeDeclaration
     (allDeclarations : List PsDeclaration)
     (env : Lean.Environment)
@@ -140,19 +173,13 @@ def tryPreludeDeclaration
   match converted? with
   | none => pure (.admitted env)
   | some converted =>
+      if let .quotientDecl .. := declaration then
+        if ← quotientGroupPresent env then
+          validateQuotientDescriptor env declaration
+          return .admitted env
       match env.addDeclCore 2000000 20000 converted none true with
       | .ok next =>
-          if let .quotientDecl name levels type kind := declaration then
-            let some (.quotInfo generated) := next.checked.get.find? (toLeanName name)
-              | throw (preludeMismatch "missing regenerated quotient metadata")
-            let generatedKind := match generated.kind with
-              | .type => PsQuotientKind.type | .ctor => .ctor
-              | .lift => .lift | .ind => .ind
-            let convertedType ← toLeanExpr type
-            unless generated.levelParams == toLeanNames levels &&
-                generated.type == convertedType &&
-                psQuotientKindTag generatedKind == psQuotientKindTag kind do
-              throw (preludeMismatch "regenerated quotient signature or kind differs")
+          validateQuotientDescriptor next declaration
           pure (.admitted next)
       | .error (.unknownConstant _ _) => pure .deferred
       | .error error =>

@@ -262,13 +262,22 @@ def checkQuotientFoundation : IO Unit := do
   let empty ← Lean.mkEmptyEnvironment 0
   let .ok checked := PsKernelLean.replayPreludeDeclarations base base.reverse empty
     | throw (IO.userError "quotient test prelude failed")
+  -- Replaying supplied descriptors must validate an already generated group
+  -- without publishing the same names to Lean's AsyncConsts again.
+  let .ok registered := PsKernelLean.replayPreludeDeclarations declarations
+      (candidates ++ candidates.reverse) checked
+    | throw (IO.userError "repeated quotient descriptor validation failed")
   let wrong := PsDeclaration.quotientDecl (psDecisionName "Quot.lift") [] nat .lift
+  if (PsKernelLean.tryPreludeDeclaration declarations registered wrong).isOk then
+    throw (IO.userError "forged existing quotient signature accepted")
   if (PsKernelLean.tryPreludeDeclaration declarations checked wrong).isOk then
     throw (IO.userError "forged quotient signature accepted")
   -- Mirror pinned kernelQuotNameCollision in an isolated discarded environment.
   let .ok collision := checked.addDeclCore 2000000 20000
       (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none true
     | throw (IO.userError "cannot construct isolated quotient collision probe")
+  if (PsKernelLean.tryPreludeDeclaration declarations collision candidates.head!).isOk then
+    throw (IO.userError "provider accepted a quotient name collision")
   if (collision.addDeclCore 2000000 20000 .quotDecl none true).isOk then
     throw (IO.userError "kernel quotient registration overwrote an existing name")
   IO.println "PSCV0_QUOTIENT_FOUNDATION: PASS kernel regeneration, lift/ind computation, signature/collision refusal; no added assumptions"

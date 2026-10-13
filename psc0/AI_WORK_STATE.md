@@ -5,7 +5,19 @@ are the active handoff. **Update both after every milestone slice**, as requeste
 by the user because usage is low. Record the exact code revision, CI evidence,
 remaining work and next action before beginning another slice.
 
-## Current state: M2+A incomplete; /61 integration repair next
+## Active repair slice — implemented, awaiting CI
+
+The next code commit after checkpoint `85b35cd` implements quotient group
+admission once with per-descriptor validation, shared nullary literal handling
+before definition lookup, normalized PUnit's unit carrier, and removal of the
+temporary cache fallback. The existing quotient probe covers repeated/reversed
+descriptors, forged existing signatures and provider collisions.
+[Design and pinned source references](docs/PSCV0_M2_A_SCALAR_COMPLETION_2026-10-14.md).
+These changes are **not yet qualified**. Fetch live HEAD and its native workflow;
+record results in both handoff files. Historical failure details below identify
+the causes addressed by this slice, not a new observed result.
+
+## Current state: M2+A incomplete; /61 qualification pending
 
 - Repository: `dwijayuda/pskernel`; branch: `psc0/pscv0-v7-native-lean-v1`.
 - Existing draft [PR 109](https://github.com/dwijayuda/pskernel/pull/109).

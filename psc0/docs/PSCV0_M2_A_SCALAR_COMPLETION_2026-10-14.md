@@ -437,3 +437,41 @@ Build cache keys now retain the exact toolchain identity while Lake validates
 changed module/configuration traces. One exact old-key fallback seeds this
 transition; remove it after the new cache is populated. Source/ABI checks stay
 mandatory.
+
+## Quotient admission and runtime identity boundaries
+
+Run38478159236 passed build, exact asset regeneration and reviewed strict
+digests, then exposed two integration invariants. This repair is under
+qualification; /60 remains the last full green.
+
+Pinned Lean `src/kernel/quot.cpp:environment::add_quot` generates four constants
+atomically, checking all names first. The kernel operation itself is idempotent,
+but `src/Lean/Environment.lean:addDeclCore` publishes declaration names to
+AsyncConsts on each call, where duplicates panic. PSC0 now checks for a complete
+kernel quotient group before generation, refuses partial/colliding groups and
+validates every supplied member's type, universe parameters and kind against
+the generated metadata. Repeated descriptor validation never re-adds the group.
+Other declaration duplicate semantics are unchanged. The existing isolated probe
+now also validates reverse replay and rejects forged existing signatures/provider
+collisions. References: pinned `Lean/Declaration.lean:getNames`,
+`tests/elab/quotInd.lean`, `tests/elab_fail/kernelQuotNameCollision.lean`.
+
+Pinned `Init/Prelude.lean` defines Unit/Unit.unit as PUnit/PUnit.unit
+abbreviations. Native proof-closure admission converted PSC0's previous axioms
+to those checked definitions. Ordinary definition lookup then hid the old late
+Unit literal fallback. Nullary runtime identities now have one shared boundary,
+before definition resolution for constants and applications; overapplication
+is refused. Unit/PUnit share the existing unit carrier after type normalization.
+Bool and Nat nullaries use the same mechanism. The obsolete late fallback is
+removed; no proof closure is pulled into runtime support.
+
+Pinned `Lean/Compiler/LCNF/Types.lean:toLCNFType` expands type definitions;
+`ToLCNF.lean` separates proof/type erasure, constant handling and eta saturation.
+PSC0 retains its smaller typed IR and explicit audited builtin representation,
+rather than importing host LCNF or its erased/any runtime convention.
+Implementation is original; no copied upstream source.
+
+Latest digest optimization evidence: run38478159236 native rebuild12,317ms,
+warm561ms; audit/export calls roughly2–5s versus about73s previously. The
+migration cache fallback is removed now that the new cache is populated.
+Complete backend qualification remains required.

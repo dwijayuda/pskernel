@@ -45,7 +45,16 @@ https://github.com/dwijayuda/pskernel/actions/runs/38466179341
 Standard672/23/109. ToFormat/Repr, selected Hashable/nonrecursive deriving,
 UInt/BitVec construction/conversions and typed unsigned ABI were qualified there.
 
-## First coherent slice
+## Repair slice has now been implemented; qualification first
+
+A code commit after checkpoint 85b35cd implements quotient-group single admission,
+exact descriptor validation, shared nullary erasure including PUnit's normalized
+carrier and cache cleanup. It expands the existing quotient probe only.
+Fetch the latest code/run and qualify this slice before the unsigned interface.
+The steps below record the implementation's intended invariants, not missing
+changes to apply again. Update both documents after CI.
+
+## Repair design and validation
 
 1. Study pinned kernel/quot.cpp, Lean/Environment.lean, Lean/Declaration.lean
    and quotient/collision tests. In

@@ -1,7 +1,7 @@
 import Ps.KernelCore.Architecture.Structural
 
 /-!
-CDE-4/5/6: fuel-accounted Nat, projection, Quot and recursor demand.
+CDE-4/5/6/7: fuel-accounted Nat, projection, Quot and recursor demand.
 
 This small-step machine evaluates the major premise of a projection and the
 necessary operands of a recognized Nat primitive without borrowing the source
@@ -13,8 +13,9 @@ Every result is an observation. The authoritative checker continues to
 compute typing, WHNF, definitional equality and declaration admission.
 Ordinary non-K recursors over constructor-headed or Nat literal majors use
 the source's recursor rule metadata; quotient demand follows source arities.
-K-reduction, structure eta and String-literal constructor expansion remain
-outside the candidate scope.
+K-reduction and structure eta remain outside the candidate scope.
+String-literal recursor majors now re-enter the existing demand machine as
+source String.ofList syntax, with an explicit pre-expansion size bound.
 -/
 
 /-- A saved parent expression is preserved verbatim when a demanded operand
@@ -259,11 +260,27 @@ def psKernelC0DemandResume
                   | _, _ => psKernelC0DemandStuck state parent remaining
             | _ => psKernelC0DemandStuck state parent remaining
       | .recursor parent recursor levels =>
-          match psKernelC0RecursorRewrite quoteFuel parent recursor
-              levels reduced with
-          | some result =>
-              psKernelC0DemandValue state parent result [] remaining
-          | none => psKernelC0DemandStuck state parent remaining
+          match reduced with
+          | .lit (.str value) =>
+              -- Lean expands a String literal to String.ofList and runs
+              -- source WHNF on that expression before selecting an iota
+              -- rule. Re-enter the *same* candidate demand machine instead
+              -- of recursively calling the source checker or resetting
+              -- operation fuel. Bound materialization by the original
+              -- quotation budget, including UTF-8 multibyte input.
+              if String.utf8ByteSize value > quoteFuel then
+                .declined "candidate String constructor expansion budget exhausted"
+              else
+                psKernelC0DemandEnter
+                  { state with frames := remaining }
+                  (.mk (psKernelStringLitToConstructor value) [])
+                  (.recursor parent recursor levels)
+          | _ =>
+              match psKernelC0RecursorRewrite quoteFuel parent recursor
+                  levels reduced with
+              | some result =>
+                  psKernelC0DemandValue state parent result [] remaining
+              | none => psKernelC0DemandStuck state parent remaining
 
 /-- One total transition. 'blocked' means the finished subexpression must
     return to its saved caller rather than retrying an already failed head. -/

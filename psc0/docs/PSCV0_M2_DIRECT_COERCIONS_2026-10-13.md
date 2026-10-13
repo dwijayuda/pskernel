@@ -28,3 +28,12 @@ an error. Postponed source terms retry through the existing captured-scope queue
 No backend changes or host elaborator delegation are involved. The compact
 positive fixture is shared across existing targets and mirrored independently
 in native Lean; negative checks cover chaining and non-Pi/non-Sort dictionaries.
+
+Reference boundary: native instance synthesis does not unfold the ordinary
+Carrier-valued definition `natural` to find an OfNat dictionary. The selected
+portable reducer currently unfolds transparent definitions more aggressively.
+The CoeSort observation uses an explicitly Nat-typed value on both sides to
+qualify conversion to sorts independently of that existing transparency gap.
+Full synthesis-transparency parity remains an M2 acceptance item; this fixture
+does not establish it. The original unannotated native probe failed at OfNat,
+not CoeSort, on Linux 38425764333.

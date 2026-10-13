@@ -69,6 +69,14 @@ The mandatory delta regression was extended to all 14 binary primitive operation
 
 The mandatory native regression now includes local-let shadowing, constructor field projection with parameter offset, wrong type/index neutrality, β/ζ capture, and zero fuel, plus source-exclusive structural preview and ill-typed rejection tests. Constructor metadata injected by test code is for source-WHNF comparison only, **not inductive declaration admission**. This is implementation evidence, not compilation/CI qualification: previous success 38412434965 predates both CDE-2 and CDE-3. Architectural next step is one shared fuel-threaded nested-demand evaluator rather than ad hoc recursor/Quot helper fallbacks. Full C/D/E exit remains unclaimed.
 
+## CDE-4 — shared-fuel nested demand stack (code pushed, qualification pending)
+
+To avoid building another recursive evaluator with reset per-premise budgets, `Architecture/Demand.lean` adds continuation frames to the existing closure/spine machine. A source-recognized Nat head may demand one or two operands; a projection may demand its scrutinee. Each nested descent, return and primitive/structural transition consumes **the same** structurally recursive transition fuel. Source arithmetic size policy and source projection-selector metadata are reused, but *source WHNF* is never invoked within the candidate evaluation loop. When an operand remains stuck, the exact parent head/spine is restored, preserving source-visible weak-head syntax.
+
+Integration through `Architecture/Work.lean` remains preview-only: the checked session normalizes first; candidates never issue checking verdicts or admission. Mandatory native regression fixtures now cover nested Nat, projection β/ζ majors, projection-as-operand, local lets, neutral/nonmatching heads and low shared fuel. CDE-2, CDE-3, and CDE-4 have **no newly confirmed passing native CI** in this session; [38412434965](https://github.com/dwijayuda/pskernel/actions/runs/38412434965) is a prior CDE-1 checkpoint. CDE-4 does not implement quotient/recursor, full typing/DefEq, globally metered quotation allocation, or C/D/E exit criteria.
+
+**Next gate:** native Lean 4.35 compilation and exhaustive current mandatory source/negative tests, then a semantics-driven quotient/recursor demand extension with one fuel policy. Do not claim independent checked equivalence, whole Init compatibility or verified soundness from this partial candidate.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

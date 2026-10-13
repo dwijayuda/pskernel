@@ -62,6 +62,8 @@ checking caches. Native [CI 38465553974](https://github.com/dwijayuda/pskernel/a
 is the qualification gate for that follow-up and the corrected documentation
 syntax. No latest full CI success is asserted until that run completes.
 
+**Latest full source qualification:** [`e49e14e8`](https://github.com/dwijayuda/pskernel/commit/e49e14e8820ecf77a861e97ddba239778dd432a5) — **full [native CI 38465553974](https://github.com/dwijayuda/pskernel/actions/runs/38465553974) SUCCESS**. This includes all new typed regression and checked work interface tests. Source `infer` remains inference-only; full `check` validates the two deliberately mistyped Quot.lift applications. The executable passes architecture regressions and the project CI suite, not an independent proof of kernel equivalence.
+
 ## 4. Qualification evidence and remaining gates
 
 Earlier full native CI [38462459034](https://github.com/dwijayuda/pskernel/actions/runs/38462459034) verifies the initial checked singleton proposition and structure tests; [38464230358](https://github.com/dwijayuda/pskernel/actions/runs/38464230358) verifies metered source-justified typed-demand integration. [38464486308](https://github.com/dwijayuda/pskernel/actions/runs/38464486308) has also passed the combined positive checked proposition and unified source-judgment API.

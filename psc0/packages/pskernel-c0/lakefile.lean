@@ -7,6 +7,7 @@ package pskernelC0
 lean_lib PsKernelC0 where
   srcDir := "src"
   roots := #[
+    `Ps.KernelCore.Architecture.Execution,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,

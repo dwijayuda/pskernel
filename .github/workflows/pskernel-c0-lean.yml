@@ -15,6 +15,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
       - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'
+      - 'psc0/packages/pskernel-c0/test/C0ArchitectureExecutionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
       - 'psc0/packages/pskernel-c0/test/C0Ablation.py'
@@ -71,6 +72,9 @@ jobs:
           done
           lake env lean --run test/C0OfficialReferenceRegression.lean
           lake env lean --run test/C0OfficialNdjsonReplay.lean
+      - name: C0 architecture-first lazy execution versus source WHNF (non-accepting)
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ArchitectureExecutionRegression.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

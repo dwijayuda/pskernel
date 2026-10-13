@@ -1,6 +1,7 @@
 import Ps.Foundation.Name
 import Ps.Foundation.Index
 import Ps.Core.Declaration
+import Ps.Core.Subst
 import Ps.Environment.Instances
 
 def psDeclarationName : PsDeclaration -> PsName
@@ -37,12 +38,27 @@ def psDeclarationValue : PsDeclaration -> Option PsExpr
   | .definitionDecl _ _ _ value => Option.some value
   | _ => Option.none
 
--- An alias must carry the target's universe telescope together with its type.
--- Referencing the target avoids duplicating a body or silently specializing it.
+-- Reify precisely the target's raw lambda entry prefix. Following the pinned
+-- LCNF etaExpandN/etaIfUnderApplied discipline, never expand a computed function
+-- result: the point at which the target starts evaluating must stay unchanged.
+-- This is checked Core authoring, not a backend-specific alias exception.
+def psDeclarationAliasEntry : PsExpr → PsExpr → PsExpr → PsExpr
+  | .forallE name domain codomain binder, .lam _ _ body _, reference =>
+      .lam name domain
+        (psDeclarationAliasEntry codomain body
+          (.app (psExprLiftBVars 1 0 reference) (.bvar 0))) binder
+  | _, _, reference => reference
+
+-- Universe telescope, type and executable entry prefix travel together.
+-- The final body references its target; no implementation is copied.
 def psDeclarationAlias (name : PsName) (target : PsDeclaration) : PsDeclaration :=
   let levels := psDeclarationLevelParams target
-  .definitionDecl name levels (psDeclarationType target)
-    (.constE (psDeclarationName target) (levels.map PsLevel.param))
+  let type := psDeclarationType target
+  let reference := PsExpr.constE (psDeclarationName target) (levels.map PsLevel.param)
+  let value := match psDeclarationValue target with
+    | some body => psDeclarationAliasEntry type body reference
+    | none => reference
+  .definitionDecl name levels type value
 
 def psDeclarationInductiveInfo : PsDeclaration -> Option PsInductiveInfo
   | .inductiveDecl info => Option.some info

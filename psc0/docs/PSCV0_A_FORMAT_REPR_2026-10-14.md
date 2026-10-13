@@ -221,3 +221,15 @@ Array Repr always uses bracketFill, independently of ReprAtom.
 Eight additional shared observations extend the same small native oracle group.
 No new runtime primitive. Prod/Array retain their explicit selected Type-0
 boundary. Kernel/runtime qualification is still pending.
+
+Kernel admission now accepts the promoted prelude. Executable qualification
+then exposed a second part of the alias contract: a bare polymorphic constant
+has no raw lambda entry prefix in the portable IR. After studying pinned
+Lean/Compiler/LCNF/ToLCNF.lean (etaExpandN, etaIfUnderApplied, visitLambda,
+mkOverApplication), tests/compile/arity_bug1.lean, tests/elab/eta_lambda_lift.lean
+and compiler_reduce_arity_fully.lean, psDeclarationAlias now builds precisely
+the target's existing raw lambda prefix around the reference. It does not copy
+the implementation or expand a computed function result. The ordinary kernel
+checks the resulting alias, and the established erasure entry/calling convention
+remains shared across all backends. This preserves the earlier M0 evaluation
+boundary rather than introducing an alias-specific backend path.

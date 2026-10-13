@@ -1,50 +1,39 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
-## Current qualification — M2 bounded instance graph (13 October 2026)
+## Current qualification — M2 + Phase A deriving (13 October 2026)
 
-- **Executable:** `a98062b2ac346c66c7f687bfe7e190d12470ba4d`.
-- **Green Linux CI:** [38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889).
-- **251 shared runtime observations**, four panic contracts, official Lean RC4
-  kernel/oracle, negative/coherence, strict IR and existing JS/TS/Rust/Wasm gates.
-- **177 portable / 185 native modules**; native `.lean`, no pskernel-core or self-hosting.
-- Standard unchanged: **292 declarations / 14 classes / 52 ordered instances**.
-  FNV `fnv1a64:5949916575031563783`; SHA-256
-  `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+Executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
+[green Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952):
+260 shared runtime observations, four panic contracts, 180 portable / 188 native
+modules. Official Lean RC4 kernel/oracle, semantic refusals, strict IR and all
+existing JS/TS/Rust/GC-Wasm/component gates passed. Standard remains
+292 declarations / 14 classes / 52 instances with unchanged M1 FNV/SHA digests.
 
-Active-cycle rejection is replaced by one bounded generator/consumer queue.
-Repeated goals subscribe to existing generators; finite answers resume waiting
-candidates. Candidate preparation, graph scheduling and public synthesis are
-separate native modules. Original ordered priority, output selection, rollback
-and typed Pi dictionary behavior remain qualified.
+Parameter/universe-aware `Inhabited` and independent nonrecursive `BEq` now
+share one family telescope and checked instance-search path. Inhabited uses
+RC4 two-pass constructor selection and prunes unused requirements. Structures
+keep projection comparisons; fieldless/payload inductives share a recursor
+builder with actual motive universes and fresh local identities.
 
-The creator of a generator owns its snapshot and may commit the selected
-descendant context. Shared subscribers replay only checked meta-closed evidence
-in their own snapshots. A nested private-context case confirms that output
-assignments inside local dictionary types survive even when absent from the
-result type. Pi scope isolation and unseeded-cycle refusal also passed.
+M2 also gains actual-universe projection inference, common-successor maximum
+normalization, and checked rigid-spine matching that can defer head-level
+constraints until typed arguments determine them. No unresolved equality is
+committed, and the generator/consumer ownership/replay contract is unchanged.
 
-Measured repeated-dependency growth:
+[Design, boundaries and qualification](docs/PSCV0_M2_A_DERIVING_2026-10-13.md);
+[prior graph invariants and growth evidence](docs/PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+**Follow M2+A → M3+B → M4+C/D**, then M5/E. Full M2, A and v7 remain incomplete.
+Continue generalized answer abstraction/freshening and shared synthetic
+constraints alongside remaining A requirements; keep dependent/indexed/recursive
+deriving with M3+B. Repr/DecidableEq/Hashable and the other documented A gaps
+remain open. Native Lean / official checking only; no pskernel-core or self-hosting.
 
-| Dependency edges | Generators | Candidate attempts | Queue transitions |
-| ---: | ---: | ---: | ---: |
-| 1 | 2 | 3 | 7 |
-| 8 | 2 | 3 | 21 |
-| 32 | 2 | 3 | 69 |
-
-This is focused growth evidence, not a general complexity or performance-parity
-proof. Search has independent generator/candidate/transition limits and an
-evidence-height bound. Lookup still scans keys linearly. Generalized answers,
-term/universe abstraction and freshening, the shared synthetic-constraint
-scheduler, and broader adversarial qualification remain M2 work.
-
-**Next:** interleave remaining A with M2 by extending the existing deriving
-handlers through a shared parameter/universe telescope mechanism. Inspect
-pinned Lean deriving and current declaration/constructor telescope owners first;
-preserve checked field dictionaries and constructor prerequisites. Do not create
-a separate elaborator or claim all deriving handlers are implemented. Continue
-M2 generalization/scheduling where those feature dependencies require it.
-
-[Design, invariants and exact qualification](docs/PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+The complete current Standard identity remains:
+FNV `fnv1a64:5949916575031563783`;
+SHA-256 `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+Runtime type-valued record fields are outside the selected backend subset;
+their projection-universe check is kernel-only. Nested `Option α` projections
+and the nine new deriving observations run through every qualified runtime.
 
 ## Current roadmap integration — readable outputs (13 October 2026)
 
@@ -60,8 +49,9 @@ M2–M4 semantic owners; complete C5 source publication and correspondence under
 M5/E after the required A–D language closure. This replaces the old blanket
 C5-after-all-A–E scheduling rule. No new milestone track is added.
 
-**Current code boundary:** the bounded M2 waiter engine is qualified above;
-generalized answers and the full synthetic-constraint scheduler remain open.
+**Current code boundary:** bounded M2 instance search and the parameter/universe
+deriving slice are qualified above. Generalized answers and the full
+synthetic-constraint scheduler remain open.
 No C5 source emitter or source-authority migration was added. Native `.lean`, official checking,
 GitHub source operations and Linux CI remain authoritative. No pskernel-core
 or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.

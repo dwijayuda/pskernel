@@ -1,19 +1,32 @@
 # PSCV0 native M1 and M2 — Implementation evidence and remaining Lean parity
 
-## Current qualification — M2 bounded instance graph (13 October 2026)
+## Current qualification — M2 + Phase A deriving (13 October 2026)
 
-Executable `a98062b2ac346c66c7f687bfe7e190d12470ba4d`;
-[green Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889):
-251 shared runtime observations, four panic contracts, 177 portable / 185 native
-modules. The bounded generator/consumer engine, private-context ownership,
-checked shared replay and Pi scope isolation are qualified. Standard remains
-292 declarations / 14 classes / 52 instances with the unchanged M1 FNV/SHA digests.
+Executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
+[green Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952):
+260 shared runtime observations, four panic contracts, 180 portable / 188 native
+modules. Official Lean RC4 kernel/oracle, semantic refusals, strict IR and all
+existing JS/TS/Rust/GC-Wasm/component gates passed. Standard remains
+292 declarations / 14 classes / 52 instances with unchanged M1 FNV/SHA digests.
 
-[Design, invariants, growth measurements and remaining work](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md)
-are the authoritative M2 slice record. Full M2, A and v7 remain incomplete.
-Next interleave parameter/universe-aware deriving with its M2 dependencies;
-then M3+B, M4+C/D, and M5/E. Preserve the readable-output plan below.
-Native Lean / official checking only; no pskernel-core or self-hosting.
+Parameter/universe-aware `Inhabited` and independent nonrecursive `BEq` now
+share one family telescope and checked instance-search path. Inhabited uses
+RC4 two-pass constructor selection and prunes unused requirements. Structures
+keep projection comparisons; fieldless/payload inductives share a recursor
+builder with actual motive universes and fresh local identities.
+
+M2 also gains actual-universe projection inference, common-successor maximum
+normalization, and checked rigid-spine matching that can defer head-level
+constraints until typed arguments determine them. No unresolved equality is
+committed, and the generator/consumer ownership/replay contract is unchanged.
+
+[Design, boundaries and qualification](PSCV0_M2_A_DERIVING_2026-10-13.md);
+[prior graph invariants and growth evidence](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+**Follow M2+A → M3+B → M4+C/D**, then M5/E. Full M2, A and v7 remain incomplete.
+Continue generalized answer abstraction/freshening and shared synthetic
+constraints alongside remaining A requirements; keep dependent/indexed/recursive
+deriving with M3+B. Repr/DecidableEq/Hashable and the other documented A gaps
+remain open. Native Lean / official checking only; no pskernel-core or self-hosting.
 
 ## Current roadmap integration — readable outputs (13 October 2026)
 
@@ -29,8 +42,9 @@ M2–M4 semantic owners; complete C5 source publication and correspondence under
 M5/E after the required A–D language closure. This replaces the old blanket
 C5-after-all-A–E scheduling rule. No new milestone track is added.
 
-**Current code boundary:** the bounded M2 waiter engine is qualified above;
-generalized answers and the full synthetic-constraint scheduler remain open.
+**Current code boundary:** bounded M2 instance search and the parameter/universe
+deriving slice are qualified above. Generalized answers and the full
+synthetic-constraint scheduler remain open.
 No C5 source emitter or source-authority migration was added. Native `.lean`, official checking,
 GitHub source operations and Linux CI remain authoritative. No pskernel-core
 or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.

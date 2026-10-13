@@ -92,8 +92,11 @@ synthetic constraints for defaults/expected types/unknown inputs, and broader
 adversarial scaling remain M2 work. Goal lookup is a linear scan with conversion
 comparison, not a claim of indexed asymptotic lookup. No performance-parity claim.
 
-Next extend the existing Phase A deriving handlers with shared parameter/universe
-telescope handling, using checked local field dictionaries and constructor
-prerequisites. Continue M2 generalization as those dependencies require it; retain
-binder/resolution/occurrence information for C5 at semantic owners. Do not recreate
-qualified readable JS/TS/Rust/WAT/WIT infrastructure or start self-hosting.
+The subsequent [M2+A deriving slice](PSCV0_M2_A_DERIVING_2026-10-13.md)
+qualifies shared parameter/universe telescopes and checked local field
+dictionaries for Inhabited and independent nonrecursive BEq. It also strengthens
+shared universe projection and rigid-spine constraints without changing graph
+ownership. Continue M2 generalization as remaining A dependencies require it,
+then M3+B and M4+C/D. Retain binder/resolution/occurrence information for C5
+at semantic owners. Do not recreate qualified readable JS/TS/Rust/WAT/WIT
+infrastructure or start self-hosting.

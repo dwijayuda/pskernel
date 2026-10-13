@@ -1,6 +1,7 @@
 # M2 + Phase A: parameter and universe-aware deriving
 
-Date: 13 October 2026. Implementation staged; qualification pending.
+Date: 13 October 2026. Qualified executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
+[green Linux run 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952).
 
 ## Roadmap placement
 
@@ -67,7 +68,7 @@ The generator/consumer instance graph and its ownership, replay and resource
 bounds are unchanged. This slice exercises local polymorphic requirements
 through that public synthesis API.
 
-## Focused qualification plan
+## Focused qualification and evidence
 
 One combined source fixture adds generic, phantom, value-parameter,
 Sort-polymorphic and mixed-universe families, kernel-checked reduction
@@ -78,8 +79,39 @@ constructor selection, assumption pruning and runtime equality semantics.
 A runtime nested `Option α` projection checks actual universe substitution;
 a separate kernel-only type-valued projection checks the same invariant without
 claiming runtime support for type-valued fields.
-Run the existing complete native Linux workflow once the code is committed;
-retain all existing checks and snapshot digest guards.
+The complete existing native Linux workflow passed, including all existing
+checks and unchanged snapshot digest guards.
+
+The final qualification has **260 shared observations** (251 retained + nine),
+four panic contracts, 180 portable / 188 native closure modules, 92 existing
+phase-specific semantic refusals, the three deriving refusals, and the pinned
+source oracle. JS, TS, Rust, GC core V8/Wasmtime, repeated component calls,
+WIT/WAT/binary/ABI, strict IR, module interfaces and project linking all passed.
+Direct JS has **572 declaration mappings / 26 generated-parent origins**;
+mapping precision remains declaration-level. The Standard environment remains
+292 declarations / 14 classes / 52 instances with unchanged identities:
+`fnv1a64:5949916575031563783` and
+`sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+
+The deriving implementation is 46 source lines smaller than the previous
+combined handler after splitting shared context and the two handlers.
+This is a source-size observation, not a performance proof. No benchmark
+speedup is claimed. The existing M1 samples in this run record checked-index
+elaboration at 4/27 ms for 16/128 declarations, versus 1/4 ms for direct-return
+bodies; prelude admission is 12 ms. Generated-JS/native-Lean ratios span roughly
+500–4123x on the small existing workloads. These uncontrolled run-to-run
+samples do not establish a regression or improvement; raw evidence is retained
+in the CI artifact. High-performance parity remains open M5 work.
+
+Initial build attempts found Lean do/pattern scoping and a harness API-name
+error; these were corrected without changing the design. Semantic qualification
+then exposed the composite-universe matching gap fixed in shared congruence.
+The additional type-valued-field probe passed the kernel but exposed the
+existing runtime subset boundary, so it remains an explicit kernel-only check;
+a nested Option field validates runtime universe projection across all targets.
+No existing acceptance criteria, digest guards or supported runtime observations
+were weakened. Full M2, Phase A, v7 and compiler semantic-preservation proofs
+remain incomplete. pskernel-core and self-hosting remain deferred.
 
 ## Pinned design references
 
@@ -94,3 +126,4 @@ Official Lean at `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`:
 
 This uses the reference algorithms and invariants, not the host's syntax or
 deriving implementation inside the portable compiler.
+

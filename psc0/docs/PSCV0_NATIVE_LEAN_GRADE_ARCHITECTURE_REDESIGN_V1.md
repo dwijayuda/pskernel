@@ -7,12 +7,15 @@ required A–D closure. C5 branches from retained checked information before
 erasure. Backend performance D belongs to M5. No new milestone sequence,
 compiler-source migration, self-hosting or pskernel-core work is introduced.
 
-**M2 bounded graph qualification (13 October 2026):** `a98062b2ac346c66c7f687bfe7e190d12470ba4d`,
-[Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889), 251 observations.
-The generator/consumer work queue, owned-context propagation and checked shared
-answer replay are implemented; generalized answers and the unified constraint
-scheduler remain open. See [design and measured boundaries](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
-Interleave remaining A deriving work with these M2 dependencies.
+**M2+A qualification (13 October 2026):** `f1ce3840c1943c9f78be20a5428fd4adfa9053af`,
+[Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952), 260 observations.
+Parameter/universe-aware Inhabited and independent nonrecursive BEq now share
+ordinary telescope and instance machinery. Shared projection and rigid
+universe-constraint mechanisms were strengthened; the bounded instance graph's
+snapshot ownership is preserved. See [deriving design/evidence](PSCV0_M2_A_DERIVING_2026-10-13.md)
+and [graph contract](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+Continue **M2+A → M3+B → M4+C/D**, then M5/E. Generalized answers, unified
+synthetic constraints and remaining deriving handlers remain open.
 
 **M1 qualification (13 October 2026):** M1 is complete for its declared
 selected scope at `c00e146bd5c97788a4a6a39221849973aeafda84`,

@@ -1,11 +1,13 @@
 # Readable output: implementation audit and integrated roadmap
 
-**Subsequent M2 qualification:** [Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889)
-at `a98062b2ac346c66c7f687bfe7e190d12470ba4d` preserves the backends and plan audited here.
-The enlarged source fixture has 251 shared observations and 531 declaration
-mappings; the 14 generated-parent origins and mapping precision are unchanged.
-No C5 emitter was added. The historical audit evidence below remains tied to
-its stated source revisions.
+**Subsequent M2+A qualification:** [Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952)
+at `f1ce3840c1943c9f78be20a5428fd4adfa9053af` preserves the backends and plan audited here.
+The enlarged source fixture has 260 shared observations, 572 declaration
+mappings and 26 generated-parent origins. The added origins include ordinary
+derived instances; mapping precision is still declaration-level.
+[Generic deriving and its shared M2 mechanisms](PSCV0_M2_A_DERIVING_2026-10-13.md)
+fit **M2+A → M3+B → M4+C/D**, then M5/E. No C5 emitter was added.
+The historical audit evidence below remains tied to its stated revisions.
 
 Audit date: 13 October 2026. Source inspected:
 `b2e47ab9f5a45f6f3bdbd10db7ccb22a9bbe2a68` on

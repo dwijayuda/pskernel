@@ -1,4 +1,4 @@
-# PSCV0 v7 — Continue Phase A deriving with M2 and retained source information
+# PSCV0 v7 — Continue M2+A after generic deriving qualification
 
 ## Qualified starting point — 13 October 2026
 
@@ -7,15 +7,15 @@ https://github.com/dwijayuda/pskernel · branch:
 `psc0/pscv0-v7-native-lean-v1` · preserve draft PR
 https://github.com/dwijayuda/pskernel/pull/109.
 
-**M1 is complete for its declared selected scope; the first M2 graph slice is qualified.**
-Executable `a98062b2ac346c66c7f687bfe7e190d12470ba4d`;
-[green Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889).
+**M1 is complete for its selected scope; bounded M2 search and generic deriving are qualified.**
+Executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
+[green Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952).
 Later documentation commits are not newer executable qualifications.
 
 - Official Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
 - 292 selected Standard declarations / 14 classes / 52 ordered instances.
-- 177 portable / 185 native modules; profile `pscv0-v7-native-bounded/48`.
-- 251 shared runtime observations; all preceding 250 retained; four panic cases.
+- 180 portable / 188 native modules; profile `pscv0-v7-native-bounded/48`.
+- 260 shared runtime observations; all preceding 251 retained; four panic cases.
 - FNV `fnv1a64:5949916575031563783`.
 - SHA-256 `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
 
@@ -88,15 +88,31 @@ negative/coherence and all backend gates passed. This is not full Lean tabling:
 generalized term/universe answers need abstraction/freshening, broader synthetic
 constraints need one deterministic scheduler, and key lookup still scans linearly.
 
-**Next capability:** inspect the complete `Ps.Elab.Deriving`, class/inductive
-registration, constructor/family telescope helpers and pinned Lean deriving
-implementations. The current Inhabited and BEq handlers are bounded to closed
-families (BEq payloads also nonrecursive and independent). Extend parameter and
-universe handling through a shared checked telescope mechanism, preserving
-constructor prerequisites and local field dictionaries. Do not add blanket
-requirements for unused parameters without checking the pinned semantics.
-Keep indexed/recursive dependencies aligned with M3 rather than introducing
-unchecked casts or ad hoc recursive witnesses.
+**Completed M2+A capability:** read
+[generic deriving design and evidence](docs/PSCV0_M2_A_DERIVING_2026-10-13.md).
+`DerivingContext`, `DerivingInhabited` and `DerivingBEq` replace duplicated
+closed-Type-0 handlers. Family parameters/universes, local class requirements,
+constructor application and declaration closure use existing elaboration owners.
+Inhabited tries all constructors without new assumptions first and exports only
+used requirements. BEq supports independent nonrecursive fields at multiple
+universes, retains direct structure projections and unifies enum/payload
+recursor generation. No numeric local-ID reservations remain.
+
+Shared M2 fixes instantiate projection constructor universes, normalize
+`max (succ u) (succ v)`, and defer a rigid head-universe equation within its
+spine until typed arguments resolve it. The final universe equation must pass;
+speculative contexts roll back. This is not a complete universe solver or the
+full synthetic-constraint scheduler.
+
+**Next:** continue **M2+A → M3+B → M4+C/D**, then M5/E. Use the current source
+and pinned references to choose the next coherent A capability and its required
+M2 work. Generalized term/universe answer abstraction/freshening, unified
+synthetic constraints and broader scaling remain open. Repr/DecidableEq/Hashable,
+Inhabited structure defaults and BEq proof-field treatment are still incomplete.
+Indexed/dependent/recursive deriving requires M3 data/transport/recursion
+mechanisms; do not manufacture casts or recursive evidence. Kernel-only
+type-valued projection qualification does not claim runtime type-valued-field
+support. Preserve all nine new runtime observations and the earlier 251.
 
 Use real deriving needs to drive the remaining M2 generalization/constraint
 work; do not duplicate existing elaboration or add a separate deriving solver.

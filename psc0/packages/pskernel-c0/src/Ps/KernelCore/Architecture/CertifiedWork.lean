@@ -204,6 +204,12 @@ def psKernelC0CertifiedWorkCommitChecked
   let mut checkedWork := work
   let mut typed : List (PsKernelC0CertifiedRoot × PsKernelExpr) := []
   for root in roots do
+    -- A locally well-typed fvar is NOT a closed proof/executable root.
+    -- Source declaration validation owns these exact closure and universe
+    -- rules; do not turn a locally inferred term into a published artifact.
+    let _ ← psKernelCheckNoMVarNoFVar root.expression
+    let _ ← psKernelCheckLevelParams
+      root.expression checkedWork.raw.checker.context.levelParams
     let (ty, next) ← psKernelC0CertifiedWorkCheckRoot fuel checkedWork root
     checkedWork := next
     typed := (root, ty) :: typed

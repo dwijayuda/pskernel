@@ -289,6 +289,28 @@ theorem psKernelC0AuditedSourceCapabilitiesApproved
       work.trusted.history work.allowedCapabilities :=
   work.capabilitiesApproved
 
+/-- Every exact ordinary-axiom signature in the checked history
+    is a member of the explicit, structurally matched approval manifest. -/
+theorem psKernelC0AuditedAxiomSignatureAllowed
+    (work : PsKernelC0AuditedSourceWork)
+    (info : PsKernelAxiomInfo)
+    (member :
+      info ∈ psKernelC0HistoryAxiomSignatures work.trusted.history) :
+    info ∈ work.allowedAxioms := by
+  have h := List.all_eq_true.mp work.approved info member
+  exact of_decide_eq_true h
+
+/-- Every trust-bearing quotient/unsafe/partial event in the checked
+    history is similarly present in the caller's explicit capabilities. -/
+theorem psKernelC0AuditedCapabilityAllowed
+    (work : PsKernelC0AuditedSourceWork)
+    (event : PsKernelC0TrustCapability)
+    (member :
+      event ∈ psKernelC0HistoryTrustCapabilities work.trusted.history) :
+    event ∈ work.allowedCapabilities := by
+  have h := List.all_eq_true.mp work.capabilitiesApproved event member
+  exact of_decide_eq_true h
+
 /-- A checked state or staged syntax may change, but its exact
     source environment is fixed. Transport the *whole* approved history
     package across that environment equality, rather than rescanning every

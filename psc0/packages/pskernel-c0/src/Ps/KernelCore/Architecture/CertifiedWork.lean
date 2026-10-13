@@ -29,10 +29,10 @@ def psKernelC0ArchitectureCertifyWork
     (work : PsKernelC0ArchitectureWork) :
     Option PsKernelC0CertifiedWork :=
   if h : psKernelC0ArchitectureWorkValid work = true then
-    let some ⟨working, owned⟩ :=
-        psKernelC0CertifyStoreOwned work.scratch.working
-      | none
-    some { raw := work, valid := h, working := working, owned := owned }
+    match psKernelC0CertifyStoreOwned work.scratch.working with
+    | some ⟨working, owned⟩ =>
+        some { raw := work, valid := h, working := working, owned := owned }
+    | none => none
   else none
 
 /-- Source-checked sessions may update only the checker field. Store and

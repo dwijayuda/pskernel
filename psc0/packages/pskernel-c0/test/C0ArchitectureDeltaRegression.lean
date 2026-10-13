@@ -540,6 +540,61 @@ def main : IO Unit := do
     (.app (.const natRecName []) (c0DeltaNatLit 0)) (c0DeltaNatLit 71)
   c0DemandCheck "recursor-nat-literal-succ" natRecSession
     (.app (.const natRecName []) (c0DeltaNatLit 9)) (c0DeltaNatLit 72)
+  -- The rule RHS's universe parameters must instantiate at the recursor
+  -- occurrence, and its constructor fields must be supplied after fixed args.
+  let recUniv := c0DeltaName "rec.u"
+  let polyRecName := c0DeltaName "C0PolyRecursor.rec"
+  let polyRule : PsKernelExpr :=
+    .lam (c0DeltaName "poly.f1") sort
+      (.lam (c0DeltaName "poly.f2") sort
+        (.sort (.param recUniv)) .default) .default
+  let polyRecInfo : PsKernelRecursorInfo := {
+    base := { name := polyRecName, levelParams := [recUniv], type := type }
+    all := [pairType]
+    numParams := 0
+    numIndices := 0
+    numMotives := 0
+    numMinors := 0
+    rules := [{ ctor := ctorName, nFields := 2, rhs := polyRule }]
+    k := false
+    isUnsafe := false
+  }
+  let polyRecEnv := psKernelEnvironmentAddUnchecked ctorEnv
+    (.recInfo polyRecInfo)
+  let polyRecSession := psKernelMkCheckerSession polyRecEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DemandCheck "recursor-universe-level-zero" polyRecSession
+    (.app (.const polyRecName [.zero]) pairValue) (.sort .zero)
+  c0DemandCheck "recursor-universe-level-one" polyRecSession
+    (.app (.const polyRecName [.succ .zero]) pairValue)
+    (.sort (.succ .zero))
+  let fixedRecName := c0DeltaName "C0FixedArgumentsRecursor.rec"
+  let fieldLast : PsKernelExpr :=
+    .lam (c0DeltaName "field1") sort
+      (.lam (c0DeltaName "field2") sort (.bvar 0) .default) .default
+  let fixedRhs : PsKernelExpr :=
+    .lam (c0DeltaName "param") sort
+      (.lam (c0DeltaName "motive") sort
+        (.lam (c0DeltaName "minor") sort fieldLast .default)
+        .default) .default
+  let fixedRecInfo : PsKernelRecursorInfo := {
+    base := { name := fixedRecName, levelParams := [], type := type }
+    all := [pairType]
+    numParams := 1
+    numIndices := 0
+    numMotives := 1
+    numMinors := 1
+    rules := [{ ctor := ctorName, nFields := 2, rhs := fixedRhs }]
+    k := false
+    isUnsafe := false
+  }
+  let fixedRecEnv := psKernelEnvironmentAddUnchecked ctorEnv
+    (.recInfo fixedRecInfo)
+  let fixedRecSession := psKernelMkCheckerSession fixedRecEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DemandCheck "recursor-fixed-argument-and-fields" fixedRecSession
+    (psKernelExprApplyArgsCheap (.const fixedRecName [])
+      [sort, sort, sort, pairValue]) (c0DeltaNatLit 22)
   match psKernelC0ArchitectureCandidateDemand 3 recSession.context
       (.app (.const recName []) (.app idRecord pairValue)) with
   | .error _ => pure ()

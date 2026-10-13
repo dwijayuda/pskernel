@@ -171,6 +171,26 @@ whole-workload qualification. This work does not waive B/F/G exit gates.
 
 **Latest qualified bounded CDE-8B/8C checkpoint:** [`e49e14e8`](https://github.com/dwijayuda/pskernel/commit/e49e14e8820ecf77a861e97ddba239778dd432a5), full [native CI 38465553974](https://github.com/dwijayuda/pskernel/actions/runs/38465553974) **SUCCESS**, including the latest full-check `Quot.lift` negative tests and reduction-policy-preserving checked admission. This supersedes earlier pending verification notes. Source checker authority remains exclusive; full independent accepting implementation, compatibility and formal refinement still open.
 
+## CDE-9 — proof-carrying canonical representation, stable checked-work and closed checked publication
+
+The next Phase C/E architecture milestone introduces Lean *proof-carrying*
+immutable canonical replay validation, owner-bound decoded term roots and
+exact source-syntax cross-store transfers. A certified work transaction keeps
+the same validated scratch store while the source-only checker state changes;
+WHNF, infer, DefEq, full Check, isProp and typed candidate previews no longer
+need to replay the whole immutable index each time. Any staging or admission
+change is independently recertified.
+
+Syntax-only promotion remains distinct from **closed checked publication**,
+which first validates all selected roots, excludes FVars/MVars and undeclared
+universe parameters and then independently FULL source-checks every root
+before returning an all-or-nothing immutable result. Source infer-only and
+candidate WHNF are never substituted for `Check`. Owner/raw Nat handles do
+not cross stores by pointer/number reinterpretation. See
+[C0_CERTIFIED_STORE_AND_CHECKED_PUBLICATION.md](C0_CERTIFIED_STORE_AND_CHECKED_PUBLICATION.md).
+
+Initial implementation [`8bd68a06`](https://github.com/dwijayuda/pskernel/commit/8bd68a06f6f697814ddaca1a236c365ea94bf7d3) passed [CI 38472302759](https://github.com/dwijayuda/pskernel/actions/runs/38472302759); expanded negative/transfer/closed-check source `76fd5f88` requires [CI 38472570733](https://github.com/dwijayuda/pskernel/actions/runs/38472570733) before full bounded qualification. The mathematical StoreWF theorem, exact equality soundness, independent optimized accepting kernel and B/F/G exits remain OPEN.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

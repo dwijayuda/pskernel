@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Execution
+import Ps.KernelCore.Architecture.NatLiteral
 
 /-!
 CDE-1: environment-aware candidate delta evaluation.
@@ -12,6 +12,40 @@ admission. Unsafe/partial definitions are explicitly declined.
 
 /-- Diagnostics and resource limits are separate from the kernel's typed
     rejection/acceptance contract. -/
+/-- Source-policy delta on one exact, reified constant application. -/
+def psKernelC0ArchitectureDefinitionStep
+    (quoteFuel : Nat)
+    (context : PsKernelCheckerContext)
+    (machine : PsKernelC0Machine) : PsKernelC0MachineStep :=
+  match machine.control with
+  | .mk (.const name _) _ =>
+      match psKernelEnvironmentFind context.environment name with
+      | some declaration =>
+          if psKernelConstantInfoIsUnsafe declaration ||
+              psKernelConstantInfoIsPartial declaration then
+            .declined "candidate unsafe or partial delta definition"
+          else
+            match psKernelC0QuoteMachine quoteFuel machine with
+            | none => .declined "candidate delta quotation budget exhausted"
+            | some exact =>
+                match psKernelUnfoldDefinition context exact with
+                | none => .halted
+                | some unfolded =>
+                    if psKernelExprEqual exact unfolded then
+                      .declined "candidate unchanged delta unfolding"
+                    else
+                      .next {
+                        control := .mk unfolded []
+                        arguments := []
+                        steps := machine.steps + 1
+                      }
+      | none => .halted
+  | _ => .halted
+
+
+/-- Candidate reduction order follows source WHNF: try literal Nat
+    primitives before unfolding ordinary definitions. All candidate
+    results remain outside the checked admission boundary. -/
 def psKernelC0ArchitectureDeltaStep
     (quoteFuel : Nat)
     (context : PsKernelCheckerContext)
@@ -20,30 +54,11 @@ def psKernelC0ArchitectureDeltaStep
   | .next next => .next next
   | .declined reason => .declined reason
   | .halted =>
-      match machine.control with
-      | .mk (.const name _) _ =>
-          match psKernelEnvironmentFind context.environment name with
-          | some declaration =>
-              if psKernelConstantInfoIsUnsafe declaration ||
-                  psKernelConstantInfoIsPartial declaration then
-                .declined "candidate unsafe or partial delta definition"
-              else
-                match psKernelC0QuoteMachine quoteFuel machine with
-                | none => .declined "candidate delta quotation budget exhausted"
-                | some exact =>
-                    match psKernelUnfoldDefinition context exact with
-                    | none => .halted
-                    | some unfolded =>
-                        if psKernelExprEqual exact unfolded then
-                          .declined "candidate unchanged delta unfolding"
-                        else
-                          .next {
-                            control := .mk unfolded []
-                            arguments := []
-                            steps := machine.steps + 1
-                          }
-          | none => .halted
-      | _ => .halted
+      match psKernelC0CandidateNatStep quoteFuel context machine with
+      | .next next => .next next
+      | .declined reason => .declined reason
+      | .halted =>
+          psKernelC0ArchitectureDefinitionStep quoteFuel context machine
 
 /-- Fuel is charged for each syntactic and delta step. Quotation has its own
     explicit structural budget and cannot affect the checked source verdict. -/

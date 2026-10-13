@@ -357,9 +357,16 @@ example [Evidence Nat] : True := by
 end Pscv0TransparencyOracle
 
 namespace Pscv0QuoteOracle
-example : String.quote "" = "\"\"" := rfl
-example : String.quote "a\\b\"c\n\t\r\x7f" = "\"a\\\\b\\\"c\\n\\t\\x0d\\x7f\"" := rfl
-example : String.quote "λ😀'" = "\"λ😀'\"" := rfl
-example : Char.quote (Char.ofNat 39) = "'\\''" := rfl
-example : Char.quoteCore (Char.ofNat 39) true = "'" := rfl
+-- Upstream String.Internal.append is opaque to kernel reduction. Compare the
+-- native implementation directly; these are runtime oracle checks, not proofs.
+#eval do
+  let cases : List (String × String) :=
+    [(String.quote "", "\"\""),
+     (String.quote "a\\b\"c\n\t\r\x7f", "\"a\\\\b\\\"c\\n\\t\\x0d\\x7f\""),
+     (String.quote "λ😀'", "\"λ😀'\""),
+     (Char.quote (Char.ofNat 39), "'\\''"),
+     (Char.quoteCore (Char.ofNat 39) true, "'")]
+  for (actual, expected) in cases do
+    unless actual == expected do
+      throw (IO.userError s!"quoting oracle mismatch: {actual.quote} != {expected.quote}")
 end Pscv0QuoteOracle

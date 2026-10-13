@@ -188,6 +188,32 @@ def main : IO Unit := do
           !psKernelExprEqual checkedRoot.checkedType (.sort (.succ .zero)) then
         throw (IO.userError "source-checked publication returned wrong root/type")
   | _ => throw (IO.userError "source-checked publication lost selected root ordering")
+  -- Two valid roots are checked in source order, with separate
+  -- proof-carrying source-check results and immutable session updates.
+  let some positiveOne := psKernelC0CertifiedWorkStage
+      initial (.sort .zero)
+    | throw (IO.userError "positive batch first stage failed")
+  let some positiveTwo := psKernelC0CertifiedWorkStage
+      positiveOne (.sort (.succ .zero))
+    | throw (IO.userError "positive batch second stage failed")
+  let (_, positiveReceipts, _) ← match
+      psKernelC0CertifiedWorkCommitChecked 4096 positiveTwo with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("positive checked batch failed: " ++ e))
+  match positiveReceipts with
+  | [firstReceipt, secondReceipt] =>
+      let _firstProof :=
+        psKernelC0SourceCheckedRootExact firstReceipt
+      let _secondProof :=
+        psKernelC0SourceCheckedRootExact secondReceipt
+      if !psKernelExprEqual firstReceipt.root.expression (.sort .zero) ||
+          !psKernelExprEqual firstReceipt.checkedType (.sort (.succ .zero)) ||
+          !psKernelExprEqual secondReceipt.root.expression (.sort (.succ .zero)) ||
+          !psKernelExprEqual secondReceipt.checkedType
+            (.sort (.succ (.succ .zero))) then
+        throw (IO.userError "checked batch altered source term order or type")
+  | _ => throw (IO.userError "checked batch dropped one valid root")
   let some mixedFirst := psKernelC0CertifiedWorkStage initial (.sort .zero)
     | throw (IO.userError "mixed publication failed first stage")
   let some mixedSecond := psKernelC0CertifiedWorkStage mixedFirst (.bvar 0)

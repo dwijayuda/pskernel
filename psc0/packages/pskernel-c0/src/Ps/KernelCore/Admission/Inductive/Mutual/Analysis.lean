@@ -1,5 +1,15 @@
 import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
 
+/-- Diagnostic-only attribution of exhausted reduction budgets.
+    The admission rules and limits do not change, and invalid declarations
+    retain their original messages. These labels locate the actual expensive
+    coherent subsystem before any WHNF architecture redesign. -/
+def psKernelMutualBudgetAt (stage message : String) : String :=
+  if message == "kernel reduction budget exhausted" then
+    "mutual-" ++ stage ++ ": " ++ message
+  else message
+
+
 /-
 Mutual-inductive declaration analysis.
 
@@ -601,7 +611,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
               session
               type with
         | Except.error error =>
-            Except.error error
+            Except.error (psKernelMutualBudgetAt "field-whnf" error)
         | Except.ok reduced =>
             match Prod.fst reduced with
             | PsKernelExpr.forallE
@@ -615,7 +625,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                       (Prod.snd reduced)
                       domain with
                 | Except.error error =>
-                    Except.error error
+                    Except.error (psKernelMutualBudgetAt "field-domain-check" error)
                 | Except.ok domainType =>
                     match
                         psKernelSessionEnsureSort
@@ -623,7 +633,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                           (Prod.snd domainType)
                           (Prod.fst domainType) with
                     | Except.error error =>
-                        Except.error error
+                        Except.error (psKernelMutualBudgetAt "field-ensure-sort" error)
                     | Except.ok fieldLevel =>
                         if
                             if
@@ -663,7 +673,7 @@ def psKernelOpenSimpleMutualConstructorFieldsWithFuel
                                 field
                                 domain with
                           | Except.error error =>
-                              Except.error error
+                              Except.error (psKernelMutualBudgetAt "field-recursive-analysis" error)
                           | Except.ok recursiveResult =>
                               let child0 :=
                                 child;

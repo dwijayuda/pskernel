@@ -37,15 +37,8 @@ def psElabDerivePrepare (environment : PsEnvironment)
 def psElabDeriveClassType (context : PsElabContext) (className : PsName)
     (argument : PsExpr) : Except PsElabError PsExpr := do
   let (fresh, head) ← psElabResolvedReference context (.global className)
-  let type ← (psInferType fresh.environment fresh.metaContext fresh.localContext head).mapError
-    PsElabError.infer
-  let pi ← (psInferEnsureForall fresh.environment fresh.metaContext fresh.localContext type).mapError
-    PsElabError.infer
-  let actual ← (psInferType fresh.environment fresh.metaContext fresh.localContext argument).mapError
-    PsElabError.infer
-  let unified := psUnify fresh.environment fresh.localContext fresh.metaContext pi.domain actual
-  if !unified.success then throw .typeMismatch
-  let target := psMetaInstantiate unified.context (.app head argument)
+  let applied ← psElabApplyCore fresh head [argument]
+  let target := applied.term
   if psExprHasUnresolvedMeta target then throw .unresolvedMetavariable
   let _ ← psElabExpressionSort context target
   return target

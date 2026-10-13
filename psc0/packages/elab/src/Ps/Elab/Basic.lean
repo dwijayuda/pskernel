@@ -155,6 +155,27 @@ def psElabResultWithMeta
     type := psMetaInstantiate metaContext type
   }
 
+-- Apply already elaborated Core arguments through the declared telescope.
+-- This solves domain/universe constraints before handing a goal to instance
+-- search; it never inserts source implicits or fabricates a binder type.
+def psElabApplyCore (context : PsElabContext) (head : PsExpr)
+    (arguments : List PsExpr) : Except PsElabError PsElabTermResult := do
+  let type ← (psInferType context.environment context.metaContext context.localContext head).mapError
+    PsElabError.infer
+  arguments.foldlM (fun (current : PsElabTermResult) argument => do
+    let pi ← (psInferEnsureForall current.context.environment current.context.metaContext
+      current.context.localContext current.type).mapError PsElabError.infer
+    let actual ← (psInferType current.context.environment current.context.metaContext
+      current.context.localContext argument).mapError PsElabError.infer
+    let unified := psUnify current.context.environment current.context.localContext
+      current.context.metaContext pi.domain actual
+    if !unified.success then throw .typeMismatch
+    return psElabResultWithMeta {
+      context := current.context, term := .app current.term argument
+      type := psExprInstantiate1 pi.body argument } unified.context
+        (psExprInstantiate1 pi.body argument))
+    { context, term := head, type }
+
 def psElabFinalizeExpected
     (result : PsElabTermResult)
     (expected : Option PsExpr) :
@@ -511,10 +532,10 @@ def psElabNatural
 where
   elabOfNat (natural expectedType : PsExpr) : Except PsElabError PsElabTermResult := do
     let fresh := psMetaFreshLevel context.metaContext
-    let target := psExprApplyMany (.constE (psRootName "OfNat") [fresh.level])
-      [expectedType, natural]
+    let goal ← psElabApplyCore (psElabContextWithMeta context fresh.context)
+      (.constE (psRootName "OfNat") [fresh.level]) [expectedType, natural]
     let synthesized := psSynthInstance context.environment context.localContext
-      context.instances fresh.context target
+      context.instances goal.context.metaContext goal.term
     let some dictionary := synthesized.value | throw .typeMismatch
     let term := psExprApplyMany
       (.constE (psNameAppendStr (psRootName "OfNat") "ofNat") [fresh.level])

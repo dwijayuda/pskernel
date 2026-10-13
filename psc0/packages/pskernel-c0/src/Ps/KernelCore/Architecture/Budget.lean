@@ -17,6 +17,49 @@ charged against the operation quota. This remains a candidate *syntactic
 work* model, not a formally proven bound on Lean runtime/heap allocations.
 -/
 
+/-- Spend a nonnegative number of syntactic-work units. Resource
+    depletion is not a logical rejection in the source kernel. -/
+def psKernelC0SpendWork (quota cost : Nat) : Option Nat :=
+  if cost > quota then none else some (quota - cost)
+
+/-- Charge all name components, including UTF-8 segment storage and Nat
+    components, rather than treating an arbitrarily long name as one node. -/
+def psKernelC0ChargeName
+    (name : PsKernelName) (quota : Nat) : Option Nat :=
+  match name with
+  | .anonymous => psKernelC0SpendWork quota 1
+  | .str parent value => do
+      let left ← psKernelC0ChargeName parent quota
+      psKernelC0SpendWork left (String.utf8ByteSize value + 1)
+  | .num parent value => do
+      let left ← psKernelC0ChargeName parent quota
+      psKernelC0SpendWork left (psKernelNatSizeInBytes value + 1)
+
+/-- Recursive universe levels and named parameters also consume syntactic
+    work. A deeply nested max/imax/succ expression therefore cannot hide
+    unbounded reconstruction behind one .sort or constant occurrence. -/
+def psKernelC0ChargeLevel
+    (level : PsKernelLevel) (quota : Nat) : Option Nat := do
+  let left ← psKernelC0SpendWork quota 1
+  match level with
+  | .zero => some left
+  | .succ inner => psKernelC0ChargeLevel inner left
+  | .max a b => do
+      let rest ← psKernelC0ChargeLevel a left
+      psKernelC0ChargeLevel b rest
+  | .imax a b => do
+      let rest ← psKernelC0ChargeLevel a left
+      psKernelC0ChargeLevel b rest
+  | .param name => psKernelC0ChargeName name left
+  | .mvar name => psKernelC0ChargeName name left
+
+/-- Constant universe instantiations reuse the same quota across all levels. -/
+def psKernelC0ChargeLevelList
+    (levels : List PsKernelLevel) (quota : Nat) : Option Nat :=
+  levels.foldlM
+    (fun remaining level => psKernelC0ChargeLevel level remaining)
+    quota
+
 /-- Consume one unit per visited expression node, traversing immediate
     children with one monotonically decreasing quota. None means exhausted.
     The expression recursion is structural; no unchecked node count prepass. -/
@@ -29,25 +72,42 @@ def psKernelC0ChargeExpr
       | .app fn arg => do
           let left ← psKernelC0ChargeExpr fn remaining
           psKernelC0ChargeExpr arg left
-      | .lam _ ty body _ => do
-          let left ← psKernelC0ChargeExpr ty remaining
+      | .lam name ty body _ => do
+          let afterName ← psKernelC0ChargeName name remaining
+          let left ← psKernelC0ChargeExpr ty afterName
           psKernelC0ChargeExpr body left
-      | .forallE _ ty body _ => do
-          let left ← psKernelC0ChargeExpr ty remaining
+      | .forallE name ty body _ => do
+          let afterName ← psKernelC0ChargeName name remaining
+          let left ← psKernelC0ChargeExpr ty afterName
           psKernelC0ChargeExpr body left
-      | .letE _ ty value body _ => do
-          let afterTy ← psKernelC0ChargeExpr ty remaining
+      | .letE name ty value body _ => do
+          let afterName ← psKernelC0ChargeName name remaining
+          let afterTy ← psKernelC0ChargeExpr ty afterName
           let afterValue ← psKernelC0ChargeExpr value afterTy
           psKernelC0ChargeExpr body afterValue
-      | .mdata _ body => psKernelC0ChargeExpr body remaining
-      | .proj _ _ struct => psKernelC0ChargeExpr struct remaining
+      | .mdata metadata body => do
+          let left ← psKernelC0SpendWork remaining
+            (psKernelNatSizeInBytes metadata)
+          psKernelC0ChargeExpr body left
+      | .proj typeName index struct => do
+          let afterName ← psKernelC0ChargeName typeName remaining
+          let afterIndex ← psKernelC0SpendWork afterName
+            (psKernelNatSizeInBytes index)
+          psKernelC0ChargeExpr struct afterIndex
       | .lit (.nat value) =>
           let bytes := psKernelNatSizeInBytes value
           if bytes > remaining then none else some (remaining - bytes)
       | .lit (.str value) =>
           let bytes := String.utf8ByteSize value
           if bytes > remaining then none else some (remaining - bytes)
-      | _ => some remaining
+      | .bvar index =>
+          psKernelC0SpendWork remaining (psKernelNatSizeInBytes index)
+      | .fvar name => psKernelC0ChargeName name remaining
+      | .mvar name => psKernelC0ChargeName name remaining
+      | .sort level => psKernelC0ChargeLevel level remaining
+      | .const name levels => do
+          let afterName ← psKernelC0ChargeName name remaining
+          psKernelC0ChargeLevelList levels afterName
 
 /-- A conservative quota is also charged for *possible* binder-occurrence
     substitution duplication before invoking source capture-avoiding

@@ -1,5 +1,12 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
+## Latest qualified selected roster — 13 October 2026
+
+**Newest independently qualified executable:** [`e0ac8c69c928261e21e9593ed3f2f4aa5157385a`](https://github.com/dwijayuda/pskernel/commit/e0ac8c69c928261e21e9593ed3f2f4aa5157385a), Linux GitHub Actions [38335736466](https://github.com/dwijayuda/pskernel/actions/runs/38335736466) **passed** (13 October 2026). This supersedes older executable-status statements below, which remain as preserved history. The pinned upstream is Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`). The selected Standard now contains **234 declarations, 14 classes, 40 instances**, FNV `fnv1a64:403111548970955669`, SHA-256 `sha256:6e6f1fad15d4f0cb401a09c1ebc219c3f60dd50acb21061ca9eee4ab782bd85e`; portable/native closure remains 170/178 `.lean` modules with 198 shared runtime observations on TS, direct JS, Rust, and Wasm GC/Wasmtime.
+
+The four additional checked declarations reconstruct `Decidable` as a computational decision with checked reflection evidence, rather than relying on the older opaque declarations. Both digest gates use the exact new selected AST payload and were tested by GitHub Actions. The older 230-declaration counts and fingerprints below are preserved historical baselines, not the current selected registry. This does **not** prove consistency, complete Lean compatibility or runtime correctness beyond tested observations.
+
+
 **Status:** Reviewed and frozen *selected* 230-declaration source roster, not the full Lean RC4 Standard universe, dependency closure or ProofScript v7 conformance.
 
 - Official Lean baseline: **4.35.0-rc4**, source commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.

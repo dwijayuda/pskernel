@@ -111,6 +111,7 @@ def primitiveAudit : IO Lean.Json := do
   -- Record every selected definition's pinned status, including deliberate
   -- portable helper identities absent from the native environment.
   let mut reduction := []
+  let mut statusMismatches : List String := []
   for declaration in psSelfHostProdPreludeEnvironment.declarations do
     if (psDeclarationValue declaration).isSome then
       let name := PsKernelLean.toLeanName (psDeclarationName declaration)
@@ -121,12 +122,14 @@ def primitiveAudit : IO Lean.Json := do
         (psEnvironmentReducibility psSelfHostProdPreludeEnvironment (psDeclarationName declaration))
       if let some status := status then
         unless status == portableStatus do
-          throw (IO.userError ("reducibility mismatch: " ++ toString name ++
-            "; native " ++ status ++ "; portable " ++ portableStatus))
+          statusMismatches := (toString name ++ "; native " ++ status ++
+            "; portable " ++ portableStatus) :: statusMismatches
       reduction := Lean.Json.mkObj [
         ("name", Lean.toJson (toString name)),
         ("nativeStatus", Lean.toJson status),
         ("portableStatus", Lean.toJson portableStatus)] :: reduction
+  unless statusMismatches.isEmpty do
+    throw (IO.userError ("reducibility mismatches:\\n" ++ String.intercalate "\\n" statusMismatches.reverse))
   return Lean.Json.mkObj [
     ("reducibilityReference", Lean.toJson reduction.reverse),
     ("schema", Lean.toJson ("pscv0-primitive-signature-audit/2" : String)),

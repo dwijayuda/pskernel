@@ -22,3 +22,12 @@ Authors: Jeremy Avigad, Leonardo de Moura.
 Modifications: construct the inductive, constructors, recursor and definition
 as portable Core terms; keep the checked logical model separate from typed
 backend runtime implementations.
+
+The Std.Format algebra and pure layout implementation in StandardFormat*.lean
+adapt src/Init/Data/Format/Basic.lean at the same pinned version:
+Copyright (c) 2018 Microsoft Corporation. All rights reserved.
+Author: Leonardo de Moura.
+Modifications: checked Core declaration builders, explicit Unicode prefix scan,
+pure work-state records, and total input-weight-bounded transitions in place of
+private partial worklists. Pure rendering ignores tags as upstream does; this
+does not implement or substitute for effectful MonadPrettyFormat callbacks.

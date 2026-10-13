@@ -87,6 +87,14 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
     `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
     `Ps.Environment.StandardArray, `Ps.Environment.StandardListIndex,
+    `Ps.Environment.StandardData,
+    `Ps.Environment.StandardFormatData,
+    `Ps.Environment.StandardFormatBasic,
+    `Ps.Environment.StandardFormatSupport,
+    `Ps.Environment.StandardFormatMeasure,
+    `Ps.Environment.StandardFormatWork,
+    `Ps.Environment.StandardFormatRender,
+    `Ps.Environment.StandardFormat,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]

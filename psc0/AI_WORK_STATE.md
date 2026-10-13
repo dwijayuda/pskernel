@@ -13,26 +13,28 @@ A–E, C5 and all future development; do not preserve obsolete internals merely
 for compatibility.
 
 
-## Current qualified boundary — stable Lean and quoting (14 October 2026)
+## Current qualified boundary — stable Lean and integer conversion (14 October 2026)
 
-Executable `0c6b7ee6896524b69858d3524356d7a30a4c7272`;
-[green Linux 38437704653](https://github.com/dwijayuda/pskernel/actions/runs/38437704653).
-**298 shared runtime observations**, four panic contracts, **189 portable /
-197 native modules**, profile `pscv0-v7-native-bounded/53`.
+Executable `80c73a473808434f2b945bf97ff751f1201e6f3a`;
+[green Linux 38439035494](https://github.com/dwijayuda/pskernel/actions/runs/38439035494).
+**302 shared runtime observations**, four panic contracts, **190 portable /
+198 native modules**, profile `pscv0-v7-native-bounded/54`.
 Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
 independent oracle, semantic/refusal and graph gates, strict IR,
-JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and performance gates passed.
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and existing performance gates passed.
+These measurements do not establish performance parity.
 
-Standard: **313 declarations /18 classes /54 instances**, canonical v2:
-FNV `fnv1a64:723655421381520752`;
-SHA `sha256:41b2e17bbe8468c04e69a11df63e1656603e88ecd67b9965ffcc3e2953769e8e`.
-Character and Unicode string quoting use five checked definitions and existing
-scalar/string operations; no added axiom or primitive. Quoting is independently
-compared through native evaluation because upstream String.Internal.append
-is kernel-opaque. Historical RC4 receipts retain their original identities.
+Standard: **315 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:5885345544530235680`;
+SHA `sha256:739169c3254d48e26471fd8be9bda480341a21788dcf67d683c5982e996ac634`.
+Character and Unicode string quoting use checked definitions; native evaluation
+provides independent comparison because upstream String.Internal.append is
+kernel-opaque. Int/ofNat/negSucc now have actual checked datatype declarations,
+with Int.rec and checked Int.toNat; the typed runtime override clamps negatives
+without narrowing positive integers. Direct and first-class observations pass.
+Historical RC4 receipts retain their original identities.
 
-Full M2+A is **not complete**. Next: checked Int constructors/recursor/toNat
-with typed runtime conversion, then faithful Std.Format/Repr and remaining A/M2.
+Full M2+A is **not complete**. Next: faithful Std.Format/Repr and remaining A/M2.
 
 ## Active request and execution contract
 
@@ -122,8 +124,8 @@ Quoting and stable-pin qualification are complete at the boundary above.
 replaces three assumptions with the real Int inductive/constructors and adds
 the recursor plus checked toNat. A typed runtime override preserves arbitrary
 precision and clamps negatives; first-class conversion uses common completion.
-Four shared observations and native equations are prepared. Profile /54.
-Qualification/digest review pending; do not present this next change as green.
+Four shared observations and native equations pass at the qualified boundary.
+[Format/Repr design](docs/PSCV0_A_FORMAT_REPR_2026-10-14.md) records the next implementation.
 
 Continue Repr with real Std.Format document algebra, rendering and precedence;
 Hashable with real UInt64/modular operations/mixHash. No String/Nat replacements

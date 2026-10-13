@@ -64,3 +64,20 @@ JS/TS/Rust/GC-Wasm integration gates. Do not add backend-specific format printer
 weaken unknown-type checks or use formatting axioms to obtain green output.
 
 Status: design recorded; Format/Repr source implementation remains pending.
+
+## Pure layout implementation (qualification pending)
+
+StandardFormatData/Basic own the real algebra and document operations;
+Support owns scalar scanning and Core construction vocabulary; Measure and Work
+own fitting; Render owns pure transitions and the input-weight-bounded driver.
+StandardFormat integrates this closure with normal kernel admission and typed
+runtime erasure. No backend formatter, new axiom or runtime primitive is added.
+The static data helper allocates constructor fields beyond every minor's binder
+IDs and is limited to closed nonindexed Type-0 declarations.
+
+Eleven shared observations cover upstream hard-line/fill regressions, scalar
+column widths, negative nesting, alignment/forced alignment, initial column,
+and empty-versus-nil. The independent native oracle checks the same expected
+values. Profile /55 identifies this expansion. Signature/status/digest review
+and full cross-target qualification are pending. Repr, ToFormat, polymorphic
+joinSep and effectful prettyM are not implemented by this foundation.

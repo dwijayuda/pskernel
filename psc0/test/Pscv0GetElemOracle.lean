@@ -379,3 +379,29 @@ example : Int.toNat 184467440737095516170 = 184467440737095516170 := rfl
 def useConversion (convert : Int → Nat) (value : Int) : Nat := convert value
 example : useConversion Int.toNat 4294967295 = 4294967295 := rfl
 end Pscv0IntConversionOracle
+
+namespace Pscv0FormatOracle
+open Std.Format
+def pair (a b : Std.Format) := append a (append line b)
+#eval show IO Unit from do
+  let hard := pair (text "A\nB") (text "C")
+  let filled := append (fill (pair (text "a") (pair (text "b\nlooooooooong") (text "c"))))
+    (append line (text "d"))
+  let unicode := group (pair (text "λ😀") (text "x"))
+  let aligned := fun force => append (text ".") (append (align force) (pair (text "a") (text "b")))
+  let cases : List (String × String) := [
+    (pretty hard, "A\nB\nC"),
+    (pretty (group hard) 10, "A\nB C"),
+    (pretty filled 5, "a b\nlooooooooong\nc\nd"),
+    (pretty unicode 4, "λ😀 x"),
+    (pretty unicode 3, "λ😀\nx"),
+    (pretty (nest (-4) (group (pair (text "a") (text "b")))) 1 2, "a\nb"),
+    (pretty (nest 2 (aligned false)), ". a\n  b"),
+    (pretty (nest 2 (group (aligned true))), ". a b"),
+    (pretty (group (pair (text "a") (text "b"))) 3 2 1, "a\n  b")]
+  for (actual, expected) in cases do
+    unless actual == expected do
+      throw (IO.userError s!"format oracle mismatch: {String.quote actual} != {String.quote expected}")
+  unless isEmpty (tag 17 (append (text "") (align false))) && !isNil (text "") do
+    throw (IO.userError "format empty/nil oracle mismatch")
+end Pscv0FormatOracle

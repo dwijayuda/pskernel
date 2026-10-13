@@ -57,3 +57,26 @@ FNV `fnv1a64:5885345544530235680` and SHA-256
 `sha256:739169c3254d48e26471fd8be9bda480341a21788dcf67d683c5982e996ac634`.
 Both strict values are reviewed and pinned; official prelude admission and full
 cross-target qualification follow in the next run.
+
+## Qualification complete
+
+Executable `80c73a473808434f2b945bf97ff751f1201e6f3a`;
+[green Linux 38439035494](https://github.com/dwijayuda/pskernel/actions/runs/38439035494).
+**302 shared runtime observations**, four panic contracts, **190 portable /
+198 native modules**, profile `pscv0-v7-native-bounded/54`.
+Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+independent oracle, semantic/refusal and graph gates, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and existing performance gates passed.
+These measurements do not establish performance parity.
+
+Standard: **315 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:5885345544530235680`;
+SHA `sha256:739169c3254d48e26471fd8be9bda480341a21788dcf67d683c5982e996ac634`.
+Character and Unicode string quoting use checked definitions; native evaluation
+provides independent comparison because upstream String.Internal.append is
+kernel-opaque. Int/ofNat/negSucc now have actual checked datatype declarations,
+with Int.rec and checked Int.toNat; the typed runtime override clamps negatives
+without narrowing positive integers. Direct and first-class observations pass.
+Historical RC4 receipts retain their original identities.
+
+Full M2+A is **not complete**. Next: faithful Std.Format/Repr and remaining A/M2.

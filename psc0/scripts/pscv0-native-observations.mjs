@@ -1,5 +1,16 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  {"name":"formatHardOutside","args":null,"expected":"A\nB\nC"},
+  {"name":"formatHardInside","args":null,"expected":"A\nB C"},
+  {"name":"formatFillResult","args":null,"expected":"a b\nlooooooooong\nc\nd"},
+  {"name":"formatUnicode","args":[4n],"expected":"λ😀 x"},
+  {"name":"formatUnicode","args":[3n],"expected":"λ😀\nx"},
+  {"name":"formatNegativeNest","args":null,"expected":"a\nb"},
+  {"name":"formatAlignment","args":null,"expected":". a\n  b"},
+  {"name":"formatForcedAlignment","args":null,"expected":". a b"},
+  {"name":"formatInitialColumn","args":null,"expected":"a\n  b"},
+  {"name":"formatEmptyTagged","args":null,"expected":true},
+  {"name":"formatTextNotNil","args":null,"expected":false},
   { name: "integerToNatural", argTypes: ["int"], args: [-184467440737095516170n], expected: 0n },
   { name: "integerToNatural", argTypes: ["int"], args: [0n], expected: 0n },
   { name: "integerToNatural", argTypes: ["int"], args: [184467440737095516170n], expected: 184467440737095516170n },

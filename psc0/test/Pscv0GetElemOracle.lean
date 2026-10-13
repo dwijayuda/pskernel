@@ -60,4 +60,19 @@ example (n m : Nat) (h : Nat.lt (Nat.succ n) (Nat.succ m)) :
     Nat.lt n m := Nat.lt_of_succ_lt_succ h
 example : decide (184467440737095516170 ≤ 184467440737095516171) = true := rfl
 
+universe u v
+
+structure UniverseBox (α : Type u) where
+  value : α
+instance {α : Type u} : GetElem (UniverseBox α) Nat α (fun _ _ => True) where
+  getElem xs _ _ := xs.value
+example {α : Type u} : LawfulGetElem (UniverseBox α) Nat α (fun _ _ => True) := inferInstance
+def bindUniverses {α : Type u} {β : Type v} (f : α → β) (xs : Option α) : Option β := do
+  let x ← xs
+  return f x
+example : bindUniverses (fun n : Nat => ULift.up.{1} n) (some 373) = some ⟨373⟩ := rfl
+example : (⟨ULift.up.{1} 359⟩ : UniverseBox (ULift.{1} Nat))[0]? = some ⟨359⟩ := rfl
+example {α : Type u} : (default : Option α) = none := rfl
+example (i j size : Nat) (h : i < j) (k : j ≤ size) : i < size := by omega
+
 end Pscv0GetElemOracle

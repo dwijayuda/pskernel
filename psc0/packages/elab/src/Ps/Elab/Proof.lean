@@ -140,6 +140,90 @@ def psProofShow (elaborate : PsElaborator) (scope : PsSyntaxProofScope)
 -- The recursion discharges *every* constructor-produced goal before success:
 -- unification progress is never confused with a completed proof.
 -- Arithmetic/omega and user-extensible tactics are separate pending rules.
+-- A small proof-producing natural-order solver. It recognizes only the
+-- checked Nat.le relation after definitional normalization. Closed bounds
+-- use the reflection theorem; symbolic reasoning composes checked order
+-- lemmas. No Boolean answer is treated as a proof, and failure is explicit.
+def psProofNatLeView (context : PsElabContext) (type : PsExpr) :
+    Option (PsExpr × PsExpr) :=
+  let view := psExprAppView
+    (psWhnf context.environment context.metaContext context.localContext type)
+  match view.head, view.args with
+  | .constE name [], [left, right] =>
+    if psNameEq name (psNameAppendStr psNatName "le") then some (left, right)
+    else none
+  | _, _ => none
+
+def psProofNatCall (name : String) (args : List PsExpr) : PsExpr :=
+  psLogicApply (.constE ((name.splitOn ".").foldl psNameAppendStr psNatName) []) args
+
+def psProofNatPrevious (expr : PsExpr) : Option PsExpr :=
+  match expr with
+  | .lit (.natural (n + 1)) => some (.lit (.natural n))
+  | .app (.constE name []) previous =>
+    if psNameEq name psNatSuccName then some previous else none
+  | _ => none
+
+def psProofNatBound (context : PsElabContext) (fuel : Nat)
+    (left right : PsExpr) : Option PsExpr := do
+  let fuel + 1 := fuel | none
+  let norm := psWhnf context.environment context.metaContext context.localContext
+  let left := norm left
+  let right := norm right
+  if psExprHasTermMeta left || psExprHasTermMeta right then none else
+  if psExprAlphaEq left right then return psProofNatCall "le.refl" [left] else
+  match left, right with
+  | .lit (.natural a), .lit (.natural b) =>
+    if a <= b then
+      return psLogicApply
+        (.constE (psNameAppendStr (psRootName "PsStandard") "natBleReflects") [])
+        [left, right]
+    else none
+  | .lit (.natural 0), _ => return psProofNatCall "zero_le" [right]
+  | _, _ =>
+    match psProofNatPrevious left, psProofNatPrevious right with
+    | some a, some b =>
+      let proof ← psProofNatBound context fuel a b
+      return psProofNatCall "succ_le_succ" [a, b, proof]
+    | none, some b =>
+      let proof ← psProofNatBound context fuel left b
+      return psLogicApply
+        (.constE (psNameAppendStr (psNameAppendStr psNatName "le") "step") [])
+        [left, b, proof]
+    | _, _ => none
+
+-- Bounded graph search over the local order facts. Each endpoint is visited
+-- once, avoiding recursive branching over the same transitivity chains.
+-- Every edge carries its checked proof and retains the original local scope.
+def psProofNatChain (context : PsElabContext) (fuel : Nat)
+    (start target : PsExpr) (facts : List (PsExpr × PsExpr × PsExpr))
+    (pending : List (PsExpr × PsExpr)) (visited : List PsExpr) : Option PsExpr := do
+  let fuel + 1 := fuel | none
+  let (at, proof) :: rest := pending | none
+  if visited.any (psExprAlphaEq at) then
+    psProofNatChain context fuel start target facts rest visited
+  else
+    if let some tail := psProofNatBound context 64 at target then
+      return psProofNatCall "le_trans" [start, at, target, proof, tail]
+    let next := facts.filterMap fun (left, right, evidence) =>
+      if visited.any (psExprAlphaEq right) then none else do
+        let reach ← psProofNatBound context 64 at left
+        let edge := psProofNatCall "le_trans" [at, left, right, reach, evidence]
+        return (right, psProofNatCall "le_trans" [start, at, right, proof, edge])
+    psProofNatChain context fuel start target facts (rest ++ next) (at :: visited)
+
+def psProofNaturalBounds (state : PsProofState) : Except PsElabError PsProofState := do
+  let (goal, context, target) ← psProofMain state
+  let some (left, right) := psProofNatLeView context target
+    | throw (.proof "not a natural-order goal")
+  let facts := context.localContext.declarations.filterMap fun declaration => do
+    let (a, b) ← psProofNatLeView context (psLocalDeclType declaration)
+    return (a, b, PsExpr.fvar (psLocalDeclId declaration))
+  let some proof := psProofNatChain context 64 left right facts
+      [(left, psProofNatCall "le.refl" [left])] []
+    | throw (.proof "natural-order facts do not establish this bound")
+  psProofNormalize (← psProofAssign state goal.id proof)
+
 def psProofIndexValiditySolve (fuel : Nat) (state : PsProofState) :
     Except PsElabError PsProofState := do
   match fuel with
@@ -148,7 +232,7 @@ def psProofIndexValiditySolve (fuel : Nat) (state : PsProofState) :
     let state ← psProofNormalize state
     if state.goals.isEmpty then return state
     let mut solved : Option PsProofState := none
-    for candidate in [psProofAssumption, psProofReflexivity] do
+    for candidate in [psProofAssumption, psProofReflexivity, psProofNaturalBounds] do
       if solved.isNone then
         match candidate state with
         | .ok progressed => solved := some progressed

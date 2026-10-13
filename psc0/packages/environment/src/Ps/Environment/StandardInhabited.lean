@@ -26,12 +26,14 @@ def psStandardInhabitedClass : List PsDeclaration :=
 
 -- Executable values inhabit Type 0 = Sort 1; instantiation of the class
 -- therefore uses universe 1, not universe 0 (Prop).
-def psStandardInhabitedType (type : PsExpr) : PsExpr :=
-  .app (.constE (psRootName "Inhabited") [.succ .zero]) type
+def psStandardInhabitedType (type : PsExpr)
+    (level : PsLevel := .succ .zero) : PsExpr :=
+  .app (.constE (psRootName "Inhabited") [level]) type
 
-def psStandardInhabitedValue (type value : PsExpr) : PsExpr :=
+def psStandardInhabitedValue (type value : PsExpr)
+    (level : PsLevel := .succ .zero) : PsExpr :=
   psLogicApply (.constE (psNameAppendStr (psRootName "Inhabited") "mk")
-    [.succ .zero]) [type, value]
+    [level]) [type, value]
 
 -- Construct a proof-checkable default application after typeclass search.
 -- The universe is the inferred sort of the requested field type, not a
@@ -58,6 +60,18 @@ def psStandardInhabitedContainer (suffix : String) (typeName : PsName)
   .definitionDecl (psNameAppendStr (psRootName "PsStandard")
     ("instInhabited" ++ suffix)) [] declarationType declarationValue
 
+def psStandardInhabitedOption : PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
+  let alpha := PsExpr.fvar 0
+  let type := psSelfHostOptionOf alpha level
+  let result := psStandardInhabitedType type (.succ level)
+  let value := psStandardInhabitedValue type
+    (psSelfHostOptionNoneOf alpha level) (.succ level)
+  .definitionDecl (psDecisionName "PsStandard.instInhabitedOption") [u]
+    (psLogicPi 0 "α" (.sortE (.succ level)) result .implicit)
+    (psLogicLam 0 "α" (.sortE (.succ level)) value .implicit)
+
 -- All entries are ordinary checked data or existing audited runtime primitives.
 -- Crucially the collection defaults do not require Inhabited α.
 def psStandardInhabitedInstances : List PsDeclaration :=
@@ -75,7 +89,7 @@ def psStandardInhabitedInstances : List PsDeclaration :=
     psStandardInhabitedGround "Char" char
       (.app (.constE psCharOfNatName []) (.lit (.natural 0))),
     psStandardInhabitedGround "Unit" unit (.constE psUnitUnitName []),
-    psStandardInhabitedContainer "Option" psOptionName psSelfHostOptionNoneOf,
+    psStandardInhabitedOption,
     psStandardInhabitedContainer "List" psListName psSelfHostListNilOf,
     psStandardInhabitedContainer "Array" psArrayName
       (fun alpha => psLogicApply (.constE psArrayEmptyWithCapacityName [])
@@ -94,7 +108,9 @@ def psStandardInhabitedExtend (environment : PsEnvironment) : PsEnvironment :=
   let className := psRootName "Inhabited"
   let instances := psStandardInhabitedInstances.foldl (fun index declaration =>
     psInstanceIndexAdd index {
-      value := .constE (psDeclarationName declaration) []
+      value := .constE (psDeclarationName declaration)
+        ((psDeclarationLevelParams declaration).map PsLevel.param)
+      levelParams := psDeclarationLevelParams declaration
       type := psDeclarationType declaration
       className := some className }) environment.instances
   { environment with

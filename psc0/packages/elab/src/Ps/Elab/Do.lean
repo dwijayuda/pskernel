@@ -9,11 +9,26 @@ inductive PsElabDoOps where
   | option
   | except (error : PsExpr)
 
-def psElabDoType (ops : PsElabDoOps) (type : PsExpr) : PsExpr :=
+-- Construct the effect type through ordinary universe constraints. A bind
+-- may change element universe, so the Option universe belongs to each value
+-- type, not to a hardcoded Type-0 operation or the surrounding return type.
+def psElabDoType (context : PsElabContext) (ops : PsElabDoOps)
+    (type : PsExpr) : Except PsElabError PsElabTypeResult := do
   match ops with
-  | .identity => type
-  | .option => .app (.constE psOptionName []) type
-  | .except error => psExprApplyMany (.constE (psRootName "Except") []) [error, type]
+  | .identity => return { context, type }
+  | .option =>
+    let sort ← psElabExpressionSort context type
+    let fresh := psMetaFreshLevel context.metaContext
+    let unified := psUnify context.environment context.localContext fresh.context
+      (.sortE sort) (.sortE (.succ fresh.level))
+    if !unified.success then throw .typeMismatch
+    return {
+      context := psElabContextWithMeta context unified.context
+      type := .app (.constE psOptionName
+        [psLevelInstantiate unified.context.levels fresh.level]) type }
+  | .except error =>
+    return { context
+      type := psExprApplyMany (.constE (psRootName "Except") []) [error, type] }
 
 -- Expose aliases one head at a time, stopping before Id erases the effect
 -- choice. Full WHNF would confuse Id (Option A) with the Option effect.
@@ -52,25 +67,38 @@ def psElabDoSelect (context : PsElabContext) (expected : Option PsExpr) :
   | _, _ => return (.identity, type)
 
 def psElabDoPure (ops : PsElabDoOps) (context : PsElabContext)
-    (type value : PsExpr) : Except PsElabError PsElabTermResult :=
+    (type value : PsExpr) : Except PsElabError PsElabTermResult := do
+  let wrapped ← psElabDoType context ops type
   let term := match ops with
     | .identity => value
-    | .option => psExprApplyMany (.constE (psNameAppendStr psOptionName "some") []) [type, value]
+    | .option =>
+      let levels := match (psExprAppView wrapped.type).head with
+        | .constE _ levels => levels
+        | _ => []
+      psExprApplyMany (.constE (psNameAppendStr psOptionName "some") levels) [type, value]
     | .except error =>
       psExprApplyMany (.constE (psNameAppendStr (psRootName "Except") "ok") []) [error, type, value]
-  psElabResolvedTerm context term (some (psElabDoType ops type))
+  psElabResolvedTerm wrapped.context term (some wrapped.type)
 
 def psElabDoBind (ops : PsElabDoOps) (context : PsElabContext)
     (alpha beta action continuation : PsExpr) : Except PsElabError PsElabTermResult := do
-  let result := psElabDoType ops beta
-  let level ← psElabExpressionSort context result
-  let motive := PsExpr.lam (psRootName "_") (psElabDoType ops alpha)
-    (psExprLiftBVars 1 0 result) .explicit
+  let result ← psElabDoType context ops beta
+  let input ← psElabDoType result.context ops alpha
+  let level ← psElabExpressionSort input.context result.type
+  let motive := PsExpr.lam (psRootName "_") input.type
+    (psExprLiftBVars 1 0 result.type) .explicit
   let term := match ops with
     | .identity => .app continuation action
     | .option =>
-      let noneValue := psExprApplyMany (.constE (psNameAppendStr psOptionName "none") []) [beta]
-      psExprApplyMany (.constE (psNameAppendStr psOptionName "rec") [level])
+      let sourceLevels := match (psExprAppView input.type).head with
+        | .constE _ levels => levels
+        | _ => []
+      let resultLevels := match (psExprAppView result.type).head with
+        | .constE _ levels => levels
+        | _ => []
+      let noneValue := psExprApplyMany
+        (.constE (psNameAppendStr psOptionName "none") resultLevels) [beta]
+      psExprApplyMany (.constE (psNameAppendStr psOptionName "rec") (level :: sourceLevels))
         [alpha, motive, noneValue, continuation, action]
     | .except error =>
       let errorValue := psExprApplyMany (.constE (psNameAppendStr (psRootName "Except") "error") [])
@@ -78,7 +106,7 @@ def psElabDoBind (ops : PsElabDoOps) (context : PsElabContext)
       let errorBranch := PsExpr.lam (psRootName "error") error errorValue .explicit
       psExprApplyMany (.constE (psNameAppendStr (psRootName "Except") "rec") [level])
         [error, alpha, motive, errorBranch, continuation, action]
-  psElabResolvedTerm context term (some result)
+  psElabResolvedTerm input.context term (some result.type)
 
 abbrev PsElabDoContinuation := PsElabContext → Except PsElabError PsElabTermResult
 
@@ -96,8 +124,9 @@ def psElabDoThen (ops : PsElabDoOps) (beta : PsExpr) (action : PsElabTermResult)
     Except PsElabError PsElabTermResult := do
   let pushed := psLocalPushBinding action.context.localContext name alpha .explicit
   let body ← next pushed.id (psElabContextWithLocal action.context pushed.context)
-  let type := PsExpr.forallE name alpha (psExprLiftBVars 1 0 (psElabDoType ops beta)) .explicit
-  let closed ← psElabAbstract action.context body.context
+  let wrapped ← psElabDoType body.context ops beta
+  let type := PsExpr.forallE name alpha (psExprLiftBVars 1 0 wrapped.type) .explicit
+  let closed ← psElabAbstract action.context wrapped.context
     [.lambdaE pushed.id name alpha .explicit] body.term type
   psElabDoBind ops closed.context alpha beta action.term closed.term
 
@@ -147,12 +176,15 @@ def psElabDoItems (fuel : Nat) (elaborate : PsElaborator)
       let branch := fun next => psElabDoBranch fuel elaborate fun items current expected => do
         let some branchType := expected | throw (.invalidArgument "missing do branch type")
         let fresh := psElabFreshType current
-        let unified := psUnify current.environment current.localContext fresh.context.metaContext
-          (psElabDoType ops fresh.type) branchType
+        let wrapped ← psElabDoType fresh.context ops fresh.type
+        let unified := psUnify current.environment current.localContext wrapped.context.metaContext
+          wrapped.type branchType
         if !unified.success then throw .typeMismatch
         let current := psElabContextWithMeta current unified.context
         psElabDoItems fuel elaborate ops (psMetaInstantiate unified.context fresh.type) next current items
-      let expected := some (psElabDoType ops result)
+      let wrapped ← psElabDoType context ops result
+      let context := wrapped.context
+      let expected := some wrapped.type
       match item with
       | .returnValue value _ =>
         let value ← elaborate context value (some result)
@@ -161,7 +193,8 @@ def psElabDoItems (fuel : Nat) (elaborate : PsElaborator)
         if rest.isEmpty && next.isNone then elaborate context value expected
         else
           let unit := PsExpr.constE psUnitName []
-          let action ← elaborate context value (some (psElabDoType ops unit))
+          let wrapped ← psElabDoType context ops unit
+          let action ← elaborate wrapped.context value (some wrapped.type)
           psElabDoThen ops result action unit (psRootName "_") (fun _ => tail)
       | .binding pattern annotation value monadic span =>
         let syntaxName := match pattern with
@@ -177,7 +210,8 @@ def psElabDoItems (fuel : Nat) (elaborate : PsElaborator)
           let type ← match annotation with
             | some annotation => psElabType elaborate context annotation
             | none => pure (psElabFreshType context)
-          let action ← elaborate type.context value (some (psElabDoType ops type.type))
+          let wrapped ← psElabDoType type.context ops type.type
+          let action ← elaborate wrapped.context value (some wrapped.type)
           psElabDoThen ops result action type.type name (fun _ => bindBody)
         else
           let value ← psElabLocalValue elaborate context annotation value

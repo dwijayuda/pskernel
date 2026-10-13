@@ -764,7 +764,35 @@ private def application : String :=
   "function orderLeRuntime(n: Nat, m: Nat): Bool := if (Nat.le(n, m)) { true } else { false }\n" ++
   "function orderLtRuntime(n: Nat, m: Nat): Bool := if (Nat.lt(n, m)) { true } else { false }\n" ++
   "function decisionFlag{P: Prop}(decision: Decidable P): Bool := by {\n  cases decision\n  case intro flag reflection => exact flag\n}\n" ++
-  "function orderDecisionRuntime(n: Nat, m: Nat): Bool := decisionFlag(Nat.decLe(n, m))\n"
+  "function orderDecisionRuntime(n: Nat, m: Nat): Bool := decisionFlag(Nat.decLe(n, m))\n" ++
+  "namespace M1Universes\n" ++
+  "universe u v\n" ++
+  "structure Box(A: Type u): Type u where { value: A }\n" ++
+  "instance boxed{A: Type u}: GetElem(Box A, Nat, A, fun (_: Box A) => fun (_: Nat) => True) where {\n" ++
+  "  getElem(xs: Box A, i: Nat, h: True): A := xs.value\n" ++
+  "}\n" ++
+  "function lookup{A: Type u}(xs: Box A): Option A := xs[0]?\n" ++
+  "function requireLaw{A: Type u}[LawfulGetElem(Box A, Nat, A, fun (_: Box A) => fun (_: Nat) => True)](xs: Box A): Nat := 1\n" ++
+  "function bindMap{A: Type u}{B: Type v}(f: A -> B, xs: Option A): Option B := do {\n" ++
+  "  let x: A ← xs\n" ++
+  "  return f(x)\n" ++
+  "}\n" ++
+  "function defaultOption{A: Type u}(unit: Unit): Option A := Inhabited.default\n" ++
+  "end M1Universes\n" ++
+  "function highRead(xs: Option(ExplicitHigh Nat)): Nat := (Option.getD(xs, ExplicitHigh.mk(0))).value\n" ++
+  "const highOptionalRuntime: Nat := highRead(M1Universes.lookup(M1Universes.Box.mk(ExplicitHigh.mk(359))))\n" ++
+  "const highMapRuntime: Nat := highRead(Option.map(fun n => ExplicitHigh.mk(n), Option.some(367)))\n" ++
+  "const highDoRuntime: Nat := highRead(M1Universes.bindMap(fun n => ExplicitHigh.mk(n), Option.some(373)))\n" ++
+  "const highNoneRuntime: Bool := Option.isNone((Option.none : Option(ExplicitHigh Nat)))\n" ++
+  "const highDefaultRuntime: Bool := Option.isNone(M1Universes.defaultOption(A := ExplicitHigh Nat, unit := ()))\n" ++
+  "const highLawfulRuntime: Nat := M1Universes.requireLaw(M1Universes.Box.mk(ExplicitHigh.mk(379)))\n" ++
+  "structure BoundedBox where {\n  value: Nat\n  size: Nat\n}\n" ++
+  "instance boundedBoxGet: GetElem(BoundedBox, Nat, Nat, fun (xs: BoundedBox) => fun (i: Nat) => Nat.lt(i, xs.size)) where {\n" ++
+  "  getElem(xs: BoundedBox, i: Nat, h: Nat.lt(i, xs.size)): Nat := xs.value\n" ++
+  "}\n" ++
+  "function boundedByChain(xs: BoundedBox, i: Nat, j: Nat, h: Nat.lt(i, j), k: Nat.le(j, xs.size)): Nat := xs[i]\n" ++
+  "const bigBoundIndexRuntime: Nat := (BoundedBox.mk(383, 184467440737095516171))[184467440737095516170]\n" ++
+  "const symbolicBoundRuntime: Nat := boundedByChain(BoundedBox.mk(389, 5), 1, 3, PsStandard.natBleReflects(2, 3), PsStandard.natBleReflects(3, 5))\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

@@ -1,5 +1,13 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "highOptionalRuntime", args: null, expected: 359n },
+  { name: "highMapRuntime", args: null, expected: 367n },
+  { name: "highDoRuntime", args: null, expected: 373n },
+  { name: "highNoneRuntime", args: null, expected: true },
+  { name: "highDefaultRuntime", args: null, expected: true },
+  { name: "highLawfulRuntime", args: null, expected: 1n },
+  { name: "bigBoundIndexRuntime", args: null, expected: 383n },
+  { name: "symbolicBoundRuntime", args: null, expected: 389n },
   { name: "orderDecisionRuntime", args: [9n, 10n], expected: true },
   { name: "orderDecisionRuntime", args: [10n, 9n], expected: false },
   { name: "orderLeRuntime", args: [0n, 0n], expected: true },

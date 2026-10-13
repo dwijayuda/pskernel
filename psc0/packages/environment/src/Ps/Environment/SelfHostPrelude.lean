@@ -50,21 +50,21 @@ def psSelfHostListConsOf
       head)
     tail
 
-def psSelfHostOptionOf (alpha : PsExpr) : PsExpr :=
+def psSelfHostOptionOf (alpha : PsExpr) (level : PsLevel := .zero) : PsExpr :=
   PsExpr.app
-    (PsExpr.constE psOptionName [])
+    (PsExpr.constE psOptionName [level])
     alpha
 
-def psSelfHostOptionNoneOf (alpha : PsExpr) : PsExpr :=
+def psSelfHostOptionNoneOf (alpha : PsExpr) (level : PsLevel := .zero) : PsExpr :=
   PsExpr.app
-    (PsExpr.constE psSelfHostOptionNoneName [])
+    (PsExpr.constE psSelfHostOptionNoneName [level])
     alpha
 
 def psSelfHostOptionSomeOf
-    (alpha value : PsExpr) : PsExpr :=
+    (alpha value : PsExpr) (level : PsLevel := .zero) : PsExpr :=
   PsExpr.app
     (PsExpr.app
-      (PsExpr.constE psSelfHostOptionSomeName [])
+      (PsExpr.constE psSelfHostOptionSomeName [level])
       alpha)
     value
 
@@ -103,6 +103,38 @@ def psSelfHostReplacePreludeAxiom
   | none => environment
   | some next => next
 
+-- Universe-polymorphic Option. The recursor's result sort and element
+-- universe are independent, in the kernel-generated order [v, u].
+def psSelfHostOptionDeclarations : List PsDeclaration :=
+  let u := psRootName "u"
+  let v := psRootName "v"
+  let level := PsLevel.param u
+  let type := PsExpr.sortE (.succ level)
+  let alpha := PsExpr.fvar 0
+  let option := psSelfHostOptionOf alpha level
+  let motive := PsExpr.fvar 1
+  let noneValue := psSelfHostOptionNoneOf alpha level
+  let value := PsExpr.fvar 4
+  let someValue := psSelfHostOptionSomeOf alpha value level
+  let parameters := fun body => psLogicPi 0 "α" type body .implicit
+  let recType := parameters
+    (psLogicPi 1 "motive"
+      (psLogicPi 5 "value" option (.sortE (.param v)))
+      (psLogicPi 2 "none" (.app motive noneValue)
+        (psLogicPi 3 "some"
+          (psLogicPi 4 "value" alpha (.app motive someValue))
+          (psLogicPi 5 "value" option (.app motive (.fvar 5)))))
+      .implicit)
+  [ .inductiveDecl (.mk psOptionName [u]
+      (psLogicPi 0 "α" type type) 1 0
+      [psSelfHostOptionNoneName, psSelfHostOptionSomeName] false),
+    .constructorDecl (.mk psSelfHostOptionNoneName [u]
+      (parameters option) psOptionName 0 1 0 []),
+    .constructorDecl (.mk psSelfHostOptionSomeName [u]
+      (parameters (psLogicPi 4 "value" alpha option)) psOptionName 1 1 1 []),
+    .recursorDecl (.mk psSelfHostOptionRecName [v, u] recType
+      [psOptionName] 1 0 1 2) ]
+
 def psSelfHostPreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u";
   let alphaName := psRootName "α";
@@ -111,8 +143,6 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
   let motiveName := psRootName "_motive";
   let nilMinorName := psRootName "_nil";
   let consMinorName := psRootName "_cons";
-  let noneMinorName := psRootName "_none";
-  let someMinorName := psRootName "_some";
   let errorMinorName := psRootName "_error";
   let okMinorName := psRootName "_ok";
   let headName := psRootName "head";
@@ -195,72 +225,6 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
             (PsExpr.forallE
               majorName
               (psSelfHostListOf (PsExpr.bvar 3))
-              (PsExpr.app
-                (PsExpr.bvar 3)
-                (PsExpr.bvar 0))
-              PsBinderInfo.explicit)
-            PsBinderInfo.explicit)
-          PsBinderInfo.explicit)
-        PsBinderInfo.explicit)
-      PsBinderInfo.implicit;
-  let optionType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      typeType
-      PsBinderInfo.explicit;
-  let noneType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (psSelfHostOptionOf (PsExpr.bvar 0))
-      PsBinderInfo.implicit;
-  let someType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (PsExpr.forallE
-        valueName
-        (PsExpr.bvar 0)
-        (psSelfHostOptionOf (PsExpr.bvar 1))
-        PsBinderInfo.explicit)
-      PsBinderInfo.implicit;
-  let optionMotiveType :=
-    PsExpr.forallE
-      majorName
-      (psSelfHostOptionOf (PsExpr.bvar 0))
-      (PsExpr.sortE (PsLevel.param uName))
-      PsBinderInfo.explicit;
-  let noneMinorType :=
-    PsExpr.app
-      (PsExpr.bvar 0)
-      (psSelfHostOptionNoneOf (PsExpr.bvar 1));
-  let someMinorType :=
-    PsExpr.forallE
-      valueName
-      (PsExpr.bvar 2)
-      (PsExpr.app
-        (PsExpr.bvar 2)
-        (psSelfHostOptionSomeOf
-          (PsExpr.bvar 3)
-          (PsExpr.bvar 0)))
-      PsBinderInfo.explicit;
-  let optionRecType :=
-    PsExpr.forallE
-      alphaName
-      typeType
-      (PsExpr.forallE
-        motiveName
-        optionMotiveType
-        (PsExpr.forallE
-          noneMinorName
-          noneMinorType
-          (PsExpr.forallE
-            someMinorName
-            someMinorType
-            (PsExpr.forallE
-              majorName
-              (psSelfHostOptionOf (PsExpr.bvar 3))
               (PsExpr.app
                 (PsExpr.bvar 3)
                 (PsExpr.bvar 0))
@@ -419,54 +383,8 @@ def psSelfHostPreludeEnvironment : PsEnvironment :=
           0
           1
           2));
-  let withOption :=
-    psSelfHostReplacePreludeAxiom
-      withListRec
-      (PsDeclaration.inductiveDecl
-        (PsInductiveInfo.mk
-          psOptionName
-          []
-          optionType
-          1
-          0
-          [psSelfHostOptionNoneName, psSelfHostOptionSomeName]
-          false));
-  let withNone :=
-    psPreludeAdd withOption
-      (PsDeclaration.constructorDecl
-        (PsConstructorInfo.mk
-          psSelfHostOptionNoneName
-          []
-          noneType
-          psOptionName
-          0
-          1
-          0
-          []));
-  let withSome :=
-    psPreludeAdd withNone
-      (PsDeclaration.constructorDecl
-        (PsConstructorInfo.mk
-          psSelfHostOptionSomeName
-          []
-          someType
-          psOptionName
-          1
-          1
-          1
-          []));
   let withOptionRec :=
-    psPreludeAdd withSome
-      (PsDeclaration.recursorDecl
-        (PsRecursorInfo.mk
-          psSelfHostOptionRecName
-          [uName]
-          optionRecType
-          [psOptionName]
-          1
-          0
-          1
-          2));
+    psSelfHostOptionDeclarations.foldl psSelfHostReplacePreludeAxiom withListRec;
   let withExcept :=
     psSelfHostReplacePreludeAxiom
       withOptionRec

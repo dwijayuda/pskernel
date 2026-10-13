@@ -83,11 +83,12 @@ def psStandardBEqStringMethod : PsExpr :=
 -- checked BEq α dictionary supplied by ordinary typeclass search. Both
 -- constructor splits are real Option.rec eliminations, not a host shortcut.
 def psStandardBEqOptionInstance : PsDeclaration :=
+  let u := psRootName "u"
   let alpha := PsExpr.fvar 0
-  let dictionaryType := PsExpr.app (.constE (psRootName "BEq") [.zero]) alpha
-  let option := psSelfHostOptionOf alpha
+  let dictionaryType := PsExpr.app (.constE (psRootName "BEq") [.param u]) alpha
+  let option := psSelfHostOptionOf alpha (.param u)
   let bool := PsExpr.constE psBoolName []
-  let recursor := PsExpr.constE psSelfHostOptionRecName [.succ .zero]
+  let recursor := PsExpr.constE psSelfHostOptionRecName [.succ .zero, .param u]
   let innerMotive := psLogicLam 8 "_" option bool
   let outerMotive := psLogicLam 9 "_" option
     (psLogicPi 10 "other" option bool)
@@ -98,7 +99,7 @@ def psStandardBEqOptionInstance : PsDeclaration :=
        psLogicLam 5 "_" alpha (.constE psBoolFalseName []),
        .fvar 3])
   let elementEquality := psLogicApply
-    (.constE (psNameAppendStr (psRootName "BEq") "beq") [.zero])
+    (.constE (psNameAppendStr (psRootName "BEq") "beq") [.param u])
     [alpha, .fvar 1, .fvar 4, .fvar 5]
   let someBranch := psLogicLam 4 "leftValue" alpha
     (psLogicLam 3 "other" option
@@ -111,15 +112,15 @@ def psStandardBEqOptionInstance : PsDeclaration :=
     [alpha, outerMotive, noneBranch, someBranch, .fvar 2]
   let method := psLogicLam 2 "left" option
     (psLogicLam 3 "right" option (.app outer (.fvar 3)))
-  let classType := PsExpr.app (.constE (psRootName "BEq") [.zero]) option
+  let classType := PsExpr.app (.constE (psRootName "BEq") [.param u]) option
   let result := psLogicApply (.constE
-    (psNameAppendStr (psRootName "BEq") "mk") [.zero]) [option, method]
-  let type := psLogicPi 0 "α" psPreludeTypeType
+    (psNameAppendStr (psRootName "BEq") "mk") [.param u]) [option, method]
+  let type := psLogicPi 0 "α" (.sortE (.succ (.param u)))
     (psLogicPi 1 "instance" dictionaryType classType .instanceImplicit) .implicit
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ (.param u)))
     (psLogicLam 1 "instance" dictionaryType result .instanceImplicit) .implicit
   .definitionDecl (psNameAppendStr (psRootName "PsStandard") "instBEqOption")
-    [] type value
+    [u] type value
 
 def psStandardBEqInstances : List PsDeclaration :=
   [psStandardBEqInstance "Nat" (.constE psNatName [])
@@ -147,7 +148,9 @@ def psStandardPreludeExtend (environment : PsEnvironment) : PsEnvironment :=
   let className := psRootName "BEq"
   let instances := psStandardBEqInstances.foldl (fun index declaration =>
     psInstanceIndexAdd index {
-      value := .constE (psDeclarationName declaration) []
+      value := .constE (psDeclarationName declaration)
+        ((psDeclarationLevelParams declaration).map PsLevel.param)
+      levelParams := psDeclarationLevelParams declaration
       type := psDeclarationType declaration
       className := some className }) environment.instances
   { environment with

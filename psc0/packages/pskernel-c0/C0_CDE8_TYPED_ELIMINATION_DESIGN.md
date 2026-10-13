@@ -5,6 +5,12 @@
 **Branch:** `perf/pskernel-c0-v7-rust-20261012`.  
 **Scope:** native Lean under `psc0/packages/pskernel-c0/`; no original `pskernel-core`, compiler, Rust/Wasm or bootstrap edits.
 
+## Current implementation checkpoint (2026-10-14)
+
+* `Architecture/Budget.lean` and mandatory `C0ArchitectureBudgetRegression.lean` implement an **opt-in readback/syntax-traversal work quota**. Exact expression-node walks, captured closure/environment readback, conservative pre-instantiation reserve, final spine precharge and demand-step active syntax consumption share one operation-scoped quota. Source WHNF is still computed independently first in preview and is unaffected by candidate declines.
+* `Architecture/Typed.lean` adds **source-typed observation**, not an optimized accepting K/eta evaluator. It resolves recursor metadata from the source environment and invokes existing source K/structure-eta helpers with source infer/WHNF/DefEq callbacks. Missing, unsafe or ill-scoped inputs cannot fabricate a constructor. Validation and checked-work authority remain in `Architecture/Work.lean`.
+* Known remaining gap: internal callbacks and temporary allocations within δ/Nat/Quot/recursor/projection reductions are not fully metered; K/eta positive real checked families and formal resource/refinement equivalence are still incomplete. This implementation is an architecture foundation, not the full CDE-8A/B completion or Phase C/D/E exit.
+
 ## 1. Why the present WHNF candidate cannot yet become accepting
 
 CDE-0–7 implement a non-accepting closure/spine machine, source-bounded arithmetic,

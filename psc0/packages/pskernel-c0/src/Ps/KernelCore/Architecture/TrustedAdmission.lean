@@ -174,3 +174,33 @@ def psKernelC0TrustedSourceDefEq
     Except String (Bool × PsKernelC0TrustedSourceWork) :=
   psKernelC0TrustedSourceRun work
     (fun context state => psKernelIsDefEq fuel context state left right)
+
+/-- Stage syntax without discarding proven source-admission provenance.
+    The stage operation carries an exact proof that the checked environment
+    did not change, while recertification validates the new immutable store. -/
+def psKernelC0TrustedSourceStage
+    (work : PsKernelC0TrustedSourceWork)
+    (expr : PsKernelExpr) : Option PsKernelC0TrustedSourceWork := do
+  let ⟨certified, unchanged⟩ ←
+    psKernelC0CertifiedWorkStageWithEnvProof work.certified expr
+  let history :
+      PsKernelC0SourceEnvironmentHistory
+        certified.raw.checker.context.environment := by
+    rw [unchanged]
+    exact work.history
+  some { certified := certified, history := history }
+
+/-- Publish exact owner-bound source-check results only after every staged
+    root is closed, uses declared universe parameters, and passes full source
+    checking. This operation leaves the trusted input untouched on failure.
+    The optional temporary checker cache returned by checked publication is
+    intentionally not transported into admission history: the immutable
+    original work still carries its independently validated provenance. -/
+def psKernelC0TrustedSourceCommitChecked
+    (fuel : Nat)
+    (work : PsKernelC0TrustedSourceWork) :
+    Except String
+      (PsKernelC0CertifiedStore × List PsKernelC0SourceCheckedRoot) := do
+  let (owner, receipts, _) ← psKernelC0CertifiedWorkCommitChecked
+    fuel work.certified
+  return (owner, receipts)

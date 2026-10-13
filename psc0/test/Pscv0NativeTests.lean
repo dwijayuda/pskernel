@@ -1273,6 +1273,46 @@ private def projectBoundaries : IO Unit := do
       " generators=" ++ toString measured.table.visits ++
       " candidates=" ++ toString measured.table.candidateChecks ++
       " transitions=" ++ toString measured.table.transitions)
+  -- The cached registry must preserve exact global priority/tie order,
+  -- including entries whose class metadata is absent.
+  let registryEntries := environment.instances.entries
+  let mixed : PsInstanceIndex := { entries := registryEntries.zipIdx.map fun (entry, i) =>
+    if i % 3 == 0 then { entry with className := none } else entry }
+  let registry := psInstanceRegistry mixed
+  for className in environment.classes do
+    let expected := mixed.entries.filter fun entry =>
+      entry.className.isNone || entry.className.any (psNameEq className)
+    let actual := psInstanceRegistryEntries registry className
+    unless actual.length == expected.length &&
+        (actual.zip expected).all (fun (a, b) =>
+          a.priority == b.priority && psExprAlphaEq a.value b.value) do
+      throw (IO.userError "class-index lookup changed global instance order")
+  -- Distinct rigid heads partition safely. Same-head, different arguments
+  -- remain an explicit comparison workload; no unsafe structural-key shortcut.
+  for width in [1, 8, 32] do
+    for partitioned in [true, false] do
+      let mut measuredEnv := environment
+      let mut measuredLocals := psLocalEmpty
+      let mut goals := []
+      for i in List.range width do
+        let name := PsName.num (psRootName "MeasuredClass") i
+        let goal := if partitioned then PsExpr.constE name [] else
+          psStandardInhabitedType (psStandardFinOf (.lit (.natural (i + 1))))
+        if partitioned then
+          measuredEnv := psPreludeAdd measuredEnv
+            (.axiomDecl name [] psPreludeTypeType)
+        measuredLocals := add measuredLocals ("seed" ++ toString i) goal
+        goals := goal :: goals
+      measuredLocals := add measuredLocals "finish" (goals.reverse.foldr need resultGoal)
+      let measured := psSynthInstanceWithTable measuredEnv measuredLocals
+        psInstanceIndexEmpty psMetaEmpty 64 resultGoal
+      unless measured.result.value.isSome && measured.table.visits == width + 1 &&
+          (!partitioned || measured.table.goalComparisons <= width) do
+        throw (IO.userError "instance head partitioning changed checked graph results")
+      IO.println ("PSCV0_INSTANCE_LOOKUP_GROWTH: goals=" ++ toString width ++
+        " partitioned=" ++ toString partitioned ++
+        " comparisons=" ++ toString measured.table.goalComparisons ++
+        " candidates=" ++ toString measured.table.candidateChecks)
   let unseeded := add (add psLocalEmpty "aFromB" (need b a)) "bFromA" (need a b)
   let cycle := psSynthInstanceWithTable environment unseeded psInstanceIndexEmpty
     psMetaEmpty 64 a

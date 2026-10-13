@@ -1,4 +1,5 @@
 import Ps.Meta.InstanceCandidate
+import Ps.Foundation.Index
 
 -- The table belongs to one environment, registry and synthesis invocation.
 -- A Pi introduction gets a distinct scope, even when local IDs coincide.
@@ -27,6 +28,7 @@ structure PsInstanceSearchLimits where
 structure PsInstanceSearchTable where
   visits : Nat := 0
   candidateChecks : Nat := 0
+  goalComparisons : Nat := 0
   transitions : Nat := 0
   answers : Nat := 0
   generalizedAnswers : Nat := 0
@@ -82,7 +84,49 @@ inductive PsInstanceWork where
   | consume (consumer : PsInstanceConsumer)
   | resume (subscription : PsInstanceSubscription) (answer : PsInstanceTableAnswer)
 
+-- Registry order remains authoritative, including unclassified entries.
+-- A hash bucket narrows selection; it never changes priority or tie order.
+structure PsInstanceRegistry where
+  entries : Array PsInstanceEntry := #[]
+  byClass : PsBucketIndex Nat := .empty
+  unclassified : List Nat := []
+
+def psInstanceRegistry (index : PsInstanceIndex) : PsInstanceRegistry :=
+  let state := index.entries.foldl (fun registry entry =>
+    let id := registry.entries.size
+    match entry.className with
+    | none => { registry with
+        entries := registry.entries.push entry
+        unclassified := id :: registry.unclassified }
+    | some name => { registry with
+        entries := registry.entries.push entry
+        byClass := psBucketInsert 16 registry.byClass (psEnvironmentNameHash name) id })
+    ({} : PsInstanceRegistry)
+  { state with unclassified := state.unclassified.reverse }
+
+def psInstanceMergeOrder (left right : List Nat) : List Nat :=
+  match left, right with
+  | [], _ => right
+  | _, [] => left
+  | x :: xs, y :: ys =>
+    if x < y then x :: psInstanceMergeOrder xs right
+    else y :: psInstanceMergeOrder left ys
+termination_by left.length + right.length
+
+def psInstanceRegistryEntries (registry : PsInstanceRegistry) (name : PsName) :
+    List PsInstanceEntry :=
+  let ids := psInstanceMergeOrder
+    (psBucketFind 16 registry.byClass (psEnvironmentNameHash name)).reverse
+    registry.unclassified
+  ids.filterMap fun id => do
+    let entry ← registry.entries[id]?
+    match entry.className with
+    | none => some entry
+    | some className => if psNameEq className name then some entry else none
+
 structure PsInstanceSearchState where
+  registry : PsInstanceRegistry := {}
+  goalBuckets : PsBucketIndex Nat := .empty
   generators : Array PsInstanceGenerator := #[]
   work : List PsInstanceWork := []
   nextScope : Nat := 1
@@ -115,16 +159,12 @@ def psInstanceSameLocalSignature (locals : PsLocalContext)
       | _ => true
 
 def psInstancePrepareGenerator (environment : PsEnvironment)
-    (index : PsInstanceIndex) (scope : Nat) (locals : PsLocalContext)
+    (registry : PsInstanceRegistry) (scope : Nat) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) : Option PsInstanceGenerator :=
   match psPrepareInstanceTarget environment locals context target with
   | some prepared =>
-    let head := (psInferAppView prepared.type).head
-    let entries := (psAllInstanceEntries locals index).filter fun entry =>
-      match entry.className, head with
-      | some className, .constE name _ => psNameEq className name
-      | none, _ => true
-      | _, _ => false
+    let .constE name _ := (psInferAppView prepared.type).head | none
+    let entries := psLocalInstanceEntries locals ++ psInstanceRegistryEntries registry name
     some {
       scope, locals, context := prepared.context,
       target := prepared.type, key := some prepared.key, entries }
@@ -137,26 +177,45 @@ def psInstancePrepareGenerator (environment : PsEnvironment)
 -- A canonical class key masks outputs during selection, as in InstanceTarget.
 -- Comparing keys never supplies proof evidence. Every replay below is checked
 -- against the receiver's complete, original dependent target.
-def psInstanceFindGenerator (environment : PsEnvironment)
-    (state : PsInstanceSearchState) (goal : PsInstanceGenerator) : Option Nat :=
-  goal.key.bind fun key =>
-    state.generators.findIdx? fun prior =>
-      prior.scope == goal.scope &&
-      psInstanceSameLocalSignature goal.locals prior.context goal.context &&
-      match prior.key with
-      | none => false
-      | some priorKey =>
-        psExprAlphaEq priorKey key ||
-          psDefEqReadOnlyWithEnv environment goal.context goal.locals priorKey key
+def psInstanceGoalHash (goal : PsInstanceGenerator) : Option Nat := do
+  let key ← goal.key
+  let .constE name _ := (psInferAppView key).head | none
+  return (psEnvironmentNameHash name + 31 * goal.scope) % 65521
 
-def psInstanceAcquire (environment : PsEnvironment) (index : PsInstanceIndex)
+-- Partition only by rigid class identity and lexical scope. Terms that are
+-- definitionally equal may have different syntax, so term hashes cannot
+-- safely exclude a candidate. Full checked comparison remains in the bucket.
+def psInstanceFindGenerator (environment : PsEnvironment)
+    (state : PsInstanceSearchState) (goal : PsInstanceGenerator) : Option Nat × Nat :=
+  match goal.key, psInstanceGoalHash goal with
+  | some key, some hash =>
+    let ids := (psBucketFind 16 state.goalBuckets hash).reverse
+    ids.foldl (fun (found, comparisons) id =>
+      if found.isSome then (found, comparisons) else
+      match state.generators[id]? with
+      | none => (none, comparisons + 1)
+      | some prior =>
+        let same := prior.scope == goal.scope &&
+          psInstanceSameLocalSignature goal.locals prior.context goal.context &&
+          match prior.key with
+          | none => false
+          | some priorKey =>
+            psExprAlphaEq priorKey key ||
+              psDefEqReadOnlyWithEnv environment goal.context goal.locals priorKey key
+        (if same then some id else none, comparisons + 1)) (none, 0)
+  | _, _ => (none, 0)
+
+def psInstanceAcquire (environment : PsEnvironment)
     (state : PsInstanceSearchState) (scope : Nat) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) :
     PsInstanceSearchState × Option Nat :=
-  match psInstancePrepareGenerator environment index scope locals context target with
+  match psInstancePrepareGenerator environment state.registry scope locals context target with
   | none => (state, none)
   | some goal =>
-    match psInstanceFindGenerator environment state goal with
+    let (found, comparisons) := psInstanceFindGenerator environment state goal
+    let state := { state with table := { state.table with
+      goalComparisons := state.table.goalComparisons + comparisons } }
+    match found with
     | some id =>
       ({ state with table := { state.table with
           reusedGoals := state.table.reusedGoals + 1 } }, some id)
@@ -166,16 +225,19 @@ def psInstanceAcquire (environment : PsEnvironment) (index : PsInstanceIndex)
       else
         let id := state.generators.size
         ({ state with
+           goalBuckets := match psInstanceGoalHash goal with
+             | none => state.goalBuckets
+             | some hash => psBucketInsert 16 state.goalBuckets hash id
            generators := state.generators.push goal
            work := .generate id :: state.work
            table := { state.table with visits := state.table.visits + 1 } }, some id)
 
-def psInstanceAwait (environment : PsEnvironment) (index : PsInstanceIndex)
+def psInstanceAwait (environment : PsEnvironment)
     (state : PsInstanceSearchState) (scope : Nat) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) (waiter : PsInstanceWaiter) :
     PsInstanceSearchState :=
   let priorSize := state.generators.size
-  let (state, id) := psInstanceAcquire environment index state scope locals context target
+  let (state, id) := psInstanceAcquire environment state scope locals context target
   match id.bind (fun id => (state.generators[id]?).map (id, ·)) with
   | none => state
   | some (id, generator) =>
@@ -229,7 +291,7 @@ def psInstancePublish (environment : PsEnvironment) (state : PsInstanceSearchSta
               answers := state.table.answers + 1
               generalizedAnswers := state.table.generalizedAnswers + (if generalized then 1 else 0) } }
 
-def psInstanceGenerate (environment : PsEnvironment) (index : PsInstanceIndex)
+def psInstanceGenerate (environment : PsEnvironment)
     (state : PsInstanceSearchState) (id : Nat) : PsInstanceSearchState :=
   match state.generators[id]? with
   | none => state
@@ -249,7 +311,7 @@ def psInstanceGenerate (environment : PsEnvironment) (index : PsInstanceIndex)
           owner := id, locals := pushed.context, localId := pushed.id,
           name, domain, binder, target }
         let scope := state.nextScope
-        psInstanceAwait environment index { state with nextScope := scope + 1 }
+        psInstanceAwait environment { state with nextScope := scope + 1 }
           scope pushed.context generator.context target (.abstraction abstraction)
       | _ => state
     | some _ =>
@@ -277,7 +339,7 @@ def psInstanceGenerate (environment : PsEnvironment) (index : PsInstanceIndex)
             arguments := candidate.arguments, pending }
           { state with work := .consume consumer :: state.work }
 
-def psInstanceConsume (environment : PsEnvironment) (index : PsInstanceIndex)
+def psInstanceConsume (environment : PsEnvironment)
     (state : PsInstanceSearchState) (consumer : PsInstanceConsumer) :
     PsInstanceSearchState :=
   match state.generators[consumer.owner]? with
@@ -301,7 +363,7 @@ def psInstanceConsume (environment : PsEnvironment) (index : PsInstanceIndex)
       match ready with
       | none => state
       | some (id, target) =>
-        psInstanceAwait environment index state generator.scope generator.locals
+        psInstanceAwait environment state generator.scope generator.locals
           consumer.context target (.argument { consumer with pending } id target)
 
 def psInstanceReceive (environment : PsEnvironment) (locals : PsLocalContext)
@@ -355,7 +417,7 @@ def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchStat
 -- The sole scheduler. Recursive source instances cannot recurse on the host
 -- stack; cycles subscribe to an existing node. Fuel bounds evidence height,
 -- independently of graph visits, candidate attempts and queue transitions.
-def psInstanceRun (fuel : Nat) (environment : PsEnvironment) (index : PsInstanceIndex)
+def psInstanceRun (fuel : Nat) (environment : PsEnvironment)
     (state : PsInstanceSearchState) : PsInstanceSearchState :=
   if state.table.resourceExceeded || psInstanceOwnerAnswered state 0 then state else
   match state.work with
@@ -368,18 +430,19 @@ def psInstanceRun (fuel : Nat) (environment : PsEnvironment) (index : PsInstance
         work := rest
         table := { state.table with transitions := state.table.transitions + 1 } }
       let next := match work with
-        | .generate id => psInstanceGenerate environment index state id
-        | .consume consumer => psInstanceConsume environment index state consumer
+        | .generate id => psInstanceGenerate environment state id
+        | .consume consumer => psInstanceConsume environment state consumer
         | .resume waiter answer => psInstanceResume environment state waiter answer
-      psInstanceRun fuel environment index next
+      psInstanceRun fuel environment next
 
 def psSynthInstanceWithLimits (environment : PsEnvironment) (locals : PsLocalContext)
     (index : PsInstanceIndex) (context : PsMetaContext) (height : Nat)
     (limits : PsInstanceSearchLimits) (target : PsExpr) : PsInstanceTabledResult :=
   if height == 0 then { result := psSynthFailure context, table := {} } else
-  let initial : PsInstanceSearchState := { limits, maxHeight := height }
-  let (initial, _) := psInstanceAcquire environment index initial 0 locals context target
-  let final := psInstanceRun limits.transitions environment index initial
+  let initial : PsInstanceSearchState := { limits, maxHeight := height,
+    registry := psInstanceRegistry index }
+  let (initial, _) := psInstanceAcquire environment initial 0 locals context target
+  let final := psInstanceRun limits.transitions environment initial
   let result := if final.table.resourceExceeded then psSynthFailure context else
     match (final.generators[0]?).bind (·.answer) with
     | none => psSynthFailure context

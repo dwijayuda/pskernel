@@ -31,3 +31,20 @@ One combined fixture covers later-inferred records, a captured lambda projection
 a delayed tactic, expected Int numerals, Nat fallback and named arguments.
 Negative cases retain invalid field/proof refusal. Existing scope, synthetic
 rollback, kernel and backend integration checks remain required.
+
+## Instance lookup scaling
+
+Global instance entries are indexed once per synthesis invocation by class hash.
+Unclassified entries are merged by their original registry positions. Lexical
+locals still precede all globals. Generator buckets partition by rigid class
+identity and scope only: syntactically different, definitionally equal inputs
+must remain shareable, so arbitrary term hashes cannot exclude candidates.
+Collision checks retain the existing full key and closed-local-signature tests.
+The first matching generator remains authoritative.
+
+The shared persistent bucket implementation is in Foundation.Index; it contains
+no semantic equality or proof authority. Measurements cover 1/8/32 distinct-head
+goals and the deliberate same-head/different-input comparison workload, alongside
+existing cycle/diamond/generalized-answer and resource rollback checks.
+Same-head buckets can still require quadratic comparisons; bounded work and
+actual operation counts are reported instead of asserting general linearity.

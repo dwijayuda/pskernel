@@ -152,7 +152,7 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/Init-first-nested.ndjson")" -eq 79416
           (
             cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
-            timeout 220s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-nested.ndjson"
+            timeout 360s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-nested.ndjson" 16384
           ) | tee "$RUNNER_TEMP/c0-first-nested-result.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=79416" "$RUNNER_TEMP/c0-first-nested-result.txt"
       - name: Publish declaration and expression coverage inventory

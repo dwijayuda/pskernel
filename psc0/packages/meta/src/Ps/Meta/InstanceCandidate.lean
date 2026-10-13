@@ -48,7 +48,7 @@ def psPrepareInstanceWithFuel (environment : PsEnvironment)
   | 0 => { context, value, resultType := type,
            arguments := arguments.reverse, success := false }
   | fuel + 1 =>
-    let type := psWhnf environment context localContext type
+    let type := psWhnfWithTransparency .instances environment context localContext type
     match type with
     | .forallE _ domain body binder =>
       let isInstance := psBinderInfoIsInstance binder
@@ -101,6 +101,6 @@ def psInstanceGoalReady (environment : PsEnvironment) (locals : PsLocalContext)
   match psPrepareInstanceTarget environment locals context target with
   | some _ => true
   | none =>
-    match psWhnf environment context locals (psMetaInstantiate context target) with
+    match psWhnfWithTransparency .instances environment context locals (psMetaInstantiate context target) with
     | .forallE _ _ _ _ => true
     | _ => false

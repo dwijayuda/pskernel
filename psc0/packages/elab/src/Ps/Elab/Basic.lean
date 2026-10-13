@@ -598,7 +598,7 @@ def psElabNatural
   let some value := psParseNaturalText text | throw (.invalidNatural text)
   let natural := PsExpr.lit (.natural value)
   let some expectedType := expected | psElabResolvedTerm context natural none
-  let reduced := psWhnf context.environment context.metaContext
+  let reduced := psWhnfWithTransparency .instances context.environment context.metaContext
     context.localContext expectedType
   -- An unconstrained numeral defaults only at the scheduler's default phase.
   -- Nat literals keep their kernel representation; all other types use OfNat.

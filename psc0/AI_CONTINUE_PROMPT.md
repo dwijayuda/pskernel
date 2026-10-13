@@ -1,5 +1,41 @@
 # PSCV0 v7 — Complete remaining M2+A
 
+## Current qualification — direct coercions and typed postponed results (13 October 2026)
+
+Executable `35641f810e31f3c9d309c01028acd53ebe4112d9`;
+[green Linux 38430940757](https://github.com/dwijayuda/pskernel/actions/runs/38430940757).
+**293 shared runtime observations**, four panic contracts, **187 portable /
+195 native modules**, profile `pscv0-v7-native-bounded/50`. Official RC4
+kernel, independent oracle, all semantic/refusal gates, strict IR, readable
+JS/TS/Rust, GC-Wasm V8/Wasmtime, WIT/WAT/components and project gates passed.
+
+- Direct Coe, CoeFun and CoeSort use one checked class projection; no coercion
+  chains or implicit lifting. Applications, annotations and expected types share
+  these operations. Local dictionaries and APP-03 completion are qualified.
+- Expected-term adaptation joins the transactional source/Core worklist.
+  Mandatory defaults resolve before blocked result adaptation; failed attempts
+  retain the original lexical scope and cannot leak assignments.
+- Nonrecursive one-field wrappers whose erased uniform parameter determines
+  their field use the concrete field representation. Type/proof-only fields
+  erase; runtime fields depending on existential type fields remain refused.
+  This does not introduce general higher-rank or existential runtime IR.
+
+Standard: **308 declarations / 18 classes / 54 instances**, adding nine checked
+coercion declarations and no global instances, axioms or primitives.
+FNV `fnv1a64:946298686920218861`;
+SHA `sha256:9afbebe8bf188a119b1bc223bc7f793da6f2dc08db9caa98e381d9e97662b234`.
+See [direct coercion design/evidence](PSCV0_M2_DIRECT_COERCIONS_2026-10-13.md).
+
+**M2+A remains incomplete.** The next source change introduces explicit
+instance-search transparency, module-preserved reducibility and a reviewed
+digest update; it is not yet qualified. Continue remaining Repr/Hashable,
+faithful selected scalar/Float/BitVec/bytes/string/collection APIs, comprehensive
+manifest, broader M2 coverage and C5 semantic retention. Keep the accepted
+**M2+A → M3+B → M4+C/D → M5/E** dependencies and unchanged exit gates.
+Native .lean and official Lean only; no pskernel-core, self-hosting or
+compiler-source migration.
+
+
 ## Current qualification — M2+A scheduling, indexed lookup and literals (13 October 2026)
 
 Executable `4d2e644d3974a6e6a4b68a15b7148bdb4f83e372`;

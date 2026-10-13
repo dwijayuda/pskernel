@@ -157,7 +157,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     (.atDeclaration name)
   let environment ← (match registration with
     | none => pure environment
-    | some .abbrevDecl | some .opaqueDecl => pure environment
+    | some .abbrevDecl => pure (psEnvironmentSetReducibility environment name .reducible)
+    | some .opaqueDecl => pure environment
     | some .classDecl => psElabRegisterClass environment name
     | some (.instanceDecl priority) => psElabRegisterInstance environment name priority).mapError
       (.atDeclaration name)

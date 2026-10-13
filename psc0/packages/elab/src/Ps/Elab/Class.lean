@@ -164,4 +164,6 @@ def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priori
     type := psDeclarationType declaration
     priority
     className := some className }
-  return { environment with instances := psInstanceIndexAdd environment.instances entry }
+  return psEnvironmentSetReducibility
+    { environment with instances := psInstanceIndexAdd environment.instances entry }
+    name .instanceReducible

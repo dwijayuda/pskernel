@@ -2163,6 +2163,35 @@ private def postponedBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError "invalid postponed term was accepted")
   IO.println "PSCV0_POSTPONED: PASS scoped syntax, tactics, numeral fallback and delayed refusal"
 
+private def transparencyBoundaries : IO Unit := do
+  let requests : Array PsV7Native.Request := #[
+    { source := "abbrev Clear: Type := Nat\nconst numeral: Clear := 937\nconst value: Clear := Inhabited.default\nconst Hidden: Type := Nat\nfunction localEvidence[Inhabited Hidden](unit: Unit): Hidden := Inhabited.default\nconst explicit: Hidden := (937 : Nat)\n" },
+    { source := "const Hidden: Type := Nat\nconst bad: Hidden := Inhabited.default\n" },
+    { source := "const Hidden: Type := Nat\nconst bad: Hidden := 937\n" },
+    { moduleName := "Client",
+      source := "import Types\nconst value: Clear := Inhabited.default\nconst numeral: Clear := 937\n",
+      modules := [{ name := "Types", source := "abbrev Clear: Type := Nat\n" }] }
+  ]
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError ("transparency prelude: " ++ error.message))
+  unless batch.results.size == requests.size do
+    throw (IO.userError "transparency result count")
+  for (result, i) in batch.results.toList.zipIdx do
+    match result with
+    | .ok _ =>
+      if i == 1 || i == 2 then throw (IO.userError "ordinary type alias unfolded during instance search")
+    | .error error =>
+      unless (i == 1 || i == 2) && error.phase == "elaborate" do
+        throw (IO.userError ("transparency boundary " ++ toString i ++ ": " ++ error.message))
+  -- Metadata changes are semantic drift even when every Core declaration is
+  -- byte-identical. Cached bucket layout is deliberately absent from the hash.
+  let original := psSelfHostProdPreludeEnvironment
+  let changed := psEnvironmentSetReducibility original psOptParamName .semireducible
+  unless psStandardSnapshotPayload original != psStandardSnapshotPayload changed do
+    throw (IO.userError "reducibility missing from frozen semantic payload")
+  IO.println "PSCV0_TRANSPARENCY: PASS source/imported abbreviations, local evidence, rigid refusal and metadata drift"
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
@@ -2174,4 +2203,5 @@ def main : IO Unit := do
   derivingBoundaries
   syntheticBoundaries
   postponedBoundaries
+  transparencyBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

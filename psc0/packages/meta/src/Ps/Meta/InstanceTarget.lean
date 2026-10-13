@@ -17,7 +17,7 @@ def psInstanceTargetArguments (fuel : Nat) (environment : PsEnvironment)
     else some { context, type := target, key }
   | 0, _ => none
   | fuel + 1, argument :: arguments =>
-    let .forallE _ domain body _ := psWhnf environment context locals type | none
+    let .forallE _ domain body _ := psWhnfWithTransparency .instances environment context locals type | none
     let (context, value, keyValue) :=
       if outputs.contains position then
         let fresh := psMetaFresh context locals domain .natural
@@ -32,7 +32,7 @@ def psInstanceTargetArguments (fuel : Nat) (environment : PsEnvironment)
 def psPrepareInstanceTarget (environment : PsEnvironment) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) : Option PsInstanceTarget := do
   let target := psMetaInstantiate context target
-  let view := psInferAppView (psWhnf environment context locals target)
+  let view := psInferAppView (psWhnfWithTransparency .instances environment context locals target)
   let .constE name levels := view.head | none
   let some declaration := psEnvironmentFind environment name | none
   let parameters := ((environment.classParameters.find? fun entry =>

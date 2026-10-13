@@ -172,7 +172,7 @@ def psInstancePrepareGenerator (environment : PsEnvironment)
       scope, locals, context := prepared.context,
       target := prepared.type, key := some prepared.key, entries }
   | none =>
-    match psWhnf environment context locals (psMetaInstantiate context target) with
+    match psWhnfWithTransparency .instances environment context locals (psMetaInstantiate context target) with
     | .forallE _ _ _ _ =>
       some { scope, locals, context, target, key := none, entries := [] }
     | _ => none
@@ -204,7 +204,7 @@ def psInstanceFindGenerator (environment : PsEnvironment)
           | none => false
           | some priorKey =>
             psExprAlphaEq priorKey key ||
-              psDefEqReadOnlyWithEnv environment goal.context goal.locals priorKey key
+              psDefEqReadOnlyWithTransparency .instances environment goal.context goal.locals priorKey key
         (if same then some id else none, comparisons + 1)) (none, 0)
   | _, _ => (none, 0)
 
@@ -305,7 +305,7 @@ def psInstanceGenerate (environment : PsEnvironment)
       if generator.opened then state else
       let state := { state with
         generators := state.generators.setIfInBounds id { generator with opened := true } }
-      match psWhnf environment generator.context generator.locals
+      match psWhnfWithTransparency .instances environment generator.context generator.locals
           (psMetaInstantiate generator.context generator.target) with
       | .forallE name domain body binder =>
         let pushed := psLocalPushBinding generator.locals name domain binder
@@ -330,7 +330,7 @@ def psInstanceGenerate (environment : PsEnvironment)
             table := { state.table with candidateChecks := state.table.candidateChecks + 1 } }
           let candidate := psPrepareInstance environment generator.locals generator.context entry
           if !candidate.success then state else
-          let checked := psUnify environment generator.locals candidate.context
+          let checked := psUnifyWithTransparency .instances environment generator.locals candidate.context
             candidate.resultType generator.target
           if !checked.success then state else
           let pending := candidate.arguments.filterMap fun arg =>

@@ -93,6 +93,7 @@ structure PsPscv0ModuleInterface where
   classes : List PsName := []
   classParameters : List (PsName × PsClassParameters) := []
   instances : List PsInstanceEntry := []
+  reducibility : List (PsName × PsReducibility) := []
 
 def psPscv0ImportedDeclaration (exposed : List PsName) : PsDeclaration → PsDeclaration
   | .definitionDecl name levels type value =>
@@ -115,7 +116,10 @@ def psPscv0InterfaceMerge (left right : PsPscv0ModuleInterface) :
       | .constE left _, .constE right _ => psNameEq left right
       | _, _ => false) then acc else acc ++ [item])
     left.instances
-  { declarations, classes, classParameters, instances }
+  let reducibility := right.reducibility.foldl (fun acc item =>
+    if acc.any (fun prior => psNameEq prior.fst item.fst) then acc else acc ++ [item])
+    left.reducibility
+  { declarations, classes, classParameters, instances, reducibility }
 
 -- Public identity is selected from source-command ownership, rather than from
 -- the final runtime IR (which also contains private and generated workers).
@@ -133,7 +137,8 @@ def psPscv0OwnInterface (environment : PsEnvironment)
     | .constE name _ => owned name
     | _ => false
   { declarations := publicDecls.map (psPscv0ImportedDeclaration exposed),
-    classes, classParameters, instances }
+    classes, classParameters, instances,
+    reducibility := names.map (fun name => (name, psEnvironmentReducibility environment name)) }
 
 def psPscv0SameInstanceIdentity (left right : PsInstanceEntry) : Bool :=
   match left.value, right.value with
@@ -160,6 +165,8 @@ def psPscv0InstallInterface (environment : PsEnvironment)
   let instances := view.instances.foldl (fun index entry =>
     if index.entries.any (psPscv0SameInstanceIdentity entry) then index
     else psInstanceIndexAdd index entry) environment.instances
+  let environment := view.reducibility.foldl (fun env (name, status) =>
+    psEnvironmentSetReducibility env name status) environment
   return { environment with classes, classParameters, instances }
 
 def psPscv0ExprConstants : PsExpr → List PsName

@@ -65,7 +65,7 @@ def psDefEqReadOnly
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
-def psWhnfWithFuel
+def psWhnfWithTransparencyFuel (transparency : PsTransparency)
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)
@@ -76,7 +76,7 @@ def psWhnfWithFuel
   | Nat.succ remaining =>
       fun (expr : PsExpr) =>
         let smaller : PsExpr -> PsExpr :=
-          psWhnfWithFuel environment metaContext localContext remaining;
+          psWhnfWithTransparencyFuel transparency environment metaContext localContext remaining;
         let core := psWhnfCoreWithFuel metaContext localContext remaining expr;
         match core with
         | .constE name levels =>
@@ -84,7 +84,8 @@ def psWhnfWithFuel
             match psEnvironmentFind environment name with
             | none => core
             | some declaration =>
-                match psDeclarationValue declaration with
+                match if psTransparencyAllows transparency (psEnvironmentReducibility environment name)
+                    then psDeclarationValue declaration else none with
                 | none => core
                 | some value =>
                     let parameters := psDeclarationLevelParams declaration;
@@ -112,6 +113,13 @@ def psWhnfWithFuel
               else .proj typeName index reducedMajor
         | _ => core
 
+def psWhnfWithFuel := psWhnfWithTransparencyFuel .all
+
+def psWhnfWithTransparency (transparency : PsTransparency)
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (localContext : PsLocalContext) (expr : PsExpr) : PsExpr :=
+  psWhnfWithTransparencyFuel transparency environment metaContext localContext 256 expr
+
 def psWhnf
     (environment : PsEnvironment)
     (metaContext : PsMetaContext)
@@ -123,17 +131,17 @@ def psWhnf
 -- inference capability may supply typed proof irrelevance as an additional
 -- closed rule; plain reduction callers use the same walker without that rule.
 -- Bodies are opened in a real local context before invoking the typed rule.
-def psDefEqReadOnlyWithProofs
+def psDefEqReadOnlyWithTransparencyProofs (transparency : PsTransparency)
     (environment : PsEnvironment) (metaContext : PsMetaContext)
     (proofEq : PsLocalContext → PsExpr → PsExpr → Bool)
     (fuel : Nat) (localContext : PsLocalContext) (left right : PsExpr) : Bool :=
-  let left := psWhnf environment metaContext localContext left
-  let right := psWhnf environment metaContext localContext right
+  let left := psWhnfWithTransparency transparency environment metaContext localContext left
+  let right := psWhnfWithTransparency transparency environment metaContext localContext right
   if psExprAlphaEq left right then true else
   match fuel with
   | 0 => false
   | fuel + 1 =>
-    let smaller := psDefEqReadOnlyWithProofs environment metaContext proofEq fuel
+    let smaller := psDefEqReadOnlyWithTransparencyProofs transparency environment metaContext proofEq fuel
     let structural := match left, right with
       | .sortE a, .sortE b => psLevelEquivalent a b
       | .constE a levels, .constE b other =>
@@ -151,6 +159,14 @@ def psDefEqReadOnlyWithProofs
         psNameEq owner otherOwner && index == otherIndex && smaller localContext value otherValue
       | _, _ => false
     structural || proofEq localContext left right
+
+def psDefEqReadOnlyWithProofs := psDefEqReadOnlyWithTransparencyProofs .all
+
+def psDefEqReadOnlyWithTransparency (transparency : PsTransparency)
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (locals : PsLocalContext) (left right : PsExpr) : Bool :=
+  psDefEqReadOnlyWithTransparencyProofs transparency environment metaContext
+    (fun _ _ _ => false) 256 locals left right
 
 def psDefEqReadOnlyWithEnvFuel
     (environment : PsEnvironment) (metaContext : PsMetaContext)

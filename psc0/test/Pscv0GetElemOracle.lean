@@ -336,3 +336,16 @@ def familyBox : FamilyBox Nat (fun _ => Nat) := ⟨fun x => x + 2⟩
 example : invoke (Callable.mk (fun x => x + 1)) = 920 := rfl
 example : familyBox.value 927 = 929 := rfl
 end Pscv0CoercionOracle
+
+namespace Pscv0TransparencyOracle
+def Hidden : Type := Nat
+abbrev Clear : Type := Nat
+example : Clear := 937
+example : Inhabited Clear := inferInstance
+example [Inhabited Hidden] : Inhabited Hidden := inferInstance
+example : Hidden := (937 : Nat)
+example : True := by
+  fail_if_success have : Inhabited Hidden := inferInstance
+  fail_if_success have : Hidden := 937
+  trivial
+end Pscv0TransparencyOracle

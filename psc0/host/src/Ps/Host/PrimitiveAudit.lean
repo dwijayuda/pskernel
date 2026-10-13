@@ -117,9 +117,16 @@ def primitiveAudit : IO Lean.Json := do
       let status := if (native.find? name).isSome then
         some ((Lean.getReducibilityStatusCore native name).toAttrString)
         else none
+      let portableStatus := psReducibilityName
+        (psEnvironmentReducibility psSelfHostProdPreludeEnvironment (psDeclarationName declaration))
+      if let some status := status then
+        unless status == portableStatus do
+          throw (IO.userError ("reducibility mismatch: " ++ toString name ++
+            "; native " ++ status ++ "; portable " ++ portableStatus))
       reduction := Lean.Json.mkObj [
         ("name", Lean.toJson (toString name)),
-        ("nativeStatus", Lean.toJson status)] :: reduction
+        ("nativeStatus", Lean.toJson status),
+        ("portableStatus", Lean.toJson portableStatus)] :: reduction
   return Lean.Json.mkObj [
     ("reducibilityReference", Lean.toJson reduction.reverse),
     ("schema", Lean.toJson ("pscv0-primitive-signature-audit/2" : String)),

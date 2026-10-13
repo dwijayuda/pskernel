@@ -1,4 +1,5 @@
 import Ps.Foundation.Name
+import Ps.Foundation.Index
 import Ps.Core.Declaration
 import Ps.Environment.Instances
 
@@ -112,6 +113,29 @@ structure PsClassParameters where
   outputs : List Nat := []
   outputLevels : List Nat := []
 
+-- Search transparency is metadata, never part of checked Core identity.
+inductive PsReducibility where
+  | reducible | instanceReducible | implicitReducible | semireducible | irreducible
+
+def psReducibilityName : PsReducibility → String
+  | .reducible => "[reducible]"
+  | .instanceReducible => "[instance_reducible]"
+  | .implicitReducible => "[implicit_reducible]"
+  | .semireducible => "[semireducible]"
+  | .irreducible => "[irreducible]"
+
+inductive PsTransparency where
+  | reducible | instances | «implicit» | «default» | all
+
+def psTransparencyAllows (mode : PsTransparency) (status : PsReducibility) : Bool :=
+  match mode, status with
+  | .all, _ | _, .reducible => true
+  | .instances, .instanceReducible => true
+  | .«implicit», .instanceReducible | .«implicit», .implicitReducible => true
+  | .«default», .instanceReducible | .«default», .implicitReducible
+  | .«default», .semireducible => true
+  | _, _ => false
+
 structure PsEnvironment where
   declarations : List PsDeclaration
   index : PsEnvironmentIndex
@@ -121,6 +145,16 @@ structure PsEnvironment where
   -- Pure source-name routing analogous to Lean's 'export' command.
   -- Aliases never create kernel declarations or new proof authority.
   exportedAliases : List (PsName × PsName) := []
+  reducibility : PsBucketIndex (PsName × PsReducibility) := .empty
+
+def psEnvironmentReducibility (environment : PsEnvironment) (name : PsName) : PsReducibility :=
+  ((psBucketFind 16 environment.reducibility (psEnvironmentNameHash name)).find?
+    (fun entry => psNameEq entry.fst name)).map (·.snd) |>.getD .semireducible
+
+def psEnvironmentSetReducibility (environment : PsEnvironment) (name : PsName)
+    (status : PsReducibility) : PsEnvironment :=
+  { environment with reducibility :=
+      psBucketInsert 16 environment.reducibility (psEnvironmentNameHash name) (name, status) }
 
 def psEnvironmentEmpty : PsEnvironment :=
   { declarations := [], index := .empty }

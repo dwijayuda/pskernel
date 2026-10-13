@@ -148,14 +148,19 @@ def psStandardSnapshotAlias (value : PsName × PsName) : String :=
     psStandardSnapshotName value.fst, psStandardSnapshotName value.snd]
 
 def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
-  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v1" [
+  psStandardSnapshotNode "PSCV0-STDENV-FNV64-v2" [
     "Lean-4.35.0-rc4@c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
     psStandardSnapshotList psStandardSnapshotDeclaration environment.declarations,
     psStandardSnapshotList psStandardSnapshotName environment.classes,
     psStandardSnapshotList psStandardSnapshotClassParameters
       environment.classParameters,
     psStandardSnapshotList psStandardSnapshotInstance environment.instances.entries,
-    psStandardSnapshotList psStandardSnapshotAlias environment.exportedAliases]
+    psStandardSnapshotList psStandardSnapshotAlias environment.exportedAliases,
+    psStandardSnapshotList (fun declaration =>
+      let name := psDeclarationName declaration
+      psStandardSnapshotNode "reducibility" [psStandardSnapshotName name,
+        psReducibilityName (psEnvironmentReducibility environment name)])
+      environment.declarations]
 
 -- FNV-1a (64-bit) over UTF-8 bytes, computed with arbitrary-precision Nat
 -- and an explicit modulus. The result is independent of host pointer width,

@@ -94,10 +94,10 @@ def psUnifyLevelLists
 -- be definitionally equal, and verify that the proposition has sort Prop.
 -- Defer when metavariables are unresolved instead of guessing assignments.
 -- The official Lean kernel remains the final checker of constructed terms.
-def psUnifyGroundProofIrrelevance
+def psUnifyGroundProofIrrelevance (transparency : PsTransparency)
     (environment : PsEnvironment) (localContext : PsLocalContext)
     (context : PsMetaContext) (left right : PsExpr) : Bool :=
-  psInferGroundProofIrrelevance (psInferType environment context)
+  psInferGroundProofIrrelevanceAt transparency (psInferType environment context)
     environment context localContext left right
 
 -- Try congruence before delta-reducing a shared named head. Expanding a
@@ -128,7 +128,7 @@ def psUnifyRigidApplication
     if args.success then psUnifyLevelLists leftLevels args.context rightLevels else args
   if result.success then some result else none
 
-def psUnifyWithFuelWorker
+def psUnifyWithFuelWorker (transparency : PsTransparency)
     (fuel : Nat) :
     PsEnvironment ->
     PsLocalContext ->
@@ -157,18 +157,18 @@ def psUnifyWithFuelWorker
             PsExpr ->
             PsExpr ->
             PsUnifyResult :=
-          psUnifyWithFuelWorker remaining;
+          psUnifyWithFuelWorker transparency remaining;
         let assign : Nat -> PsExpr -> PsUnifyResult :=
           psUnifyAssign (smaller environment localContext) environment localContext context;
         match psUnifyRigidApplication (smaller environment localContext)
             context localContext left right with
         | some result => result
         | none =>
-          let leftValue := psWhnf environment context localContext left;
-          let rightValue := psWhnf environment context localContext right;
+          let leftValue := psWhnfWithTransparency transparency environment context localContext left;
+          let rightValue := psWhnfWithTransparency transparency environment context localContext right;
           if psExprAlphaEq leftValue rightValue then
             psUnifySuccess context
-          else if psUnifyGroundProofIrrelevance environment localContext context leftValue rightValue then
+          else if psUnifyGroundProofIrrelevance transparency environment localContext context leftValue rightValue then
             psUnifySuccess context
           else
             match leftValue with
@@ -353,7 +353,7 @@ def psUnifyWithFuel
     (fuel : Nat)
     (left : PsExpr)
     (right : PsExpr) : PsUnifyResult :=
-  psUnifyWithFuelWorker
+  psUnifyWithFuelWorker .all
     fuel
     environment
     localContext
@@ -369,4 +369,12 @@ def psUnify
     (right : PsExpr) : PsUnifyResult :=
   let result :=
     psUnifyWithFuel environment localContext context 512 left right;
+  if result.success then result else psUnifyFailure context
+
+-- Search restricts delta reduction without changing kernel conversion.
+-- Roll back the entire attempt on failure, including universes.
+def psUnifyWithTransparency (transparency : PsTransparency)
+    (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (left right : PsExpr) : PsUnifyResult :=
+  let result := psUnifyWithFuelWorker transparency 512 environment locals context left right
   if result.success then result else psUnifyFailure context

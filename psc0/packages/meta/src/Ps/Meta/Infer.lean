@@ -321,7 +321,7 @@ def psInferProjectionType
 -- terms with convertible inferred propositions may use proof irrelevance.
 -- The inference callback is fuel-decreasing at recursive inference call sites;
 -- this rule never assigns a metavariable or treats runtime data as proof.
-def psInferGroundProofIrrelevance
+def psInferGroundProofIrrelevanceAt (transparency : PsTransparency)
     (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)
     (environment : PsEnvironment) (context : PsMetaContext)
     (locals : PsLocalContext) (left right : PsExpr) : Bool :=
@@ -329,14 +329,16 @@ def psInferGroundProofIrrelevance
   match infer locals left, infer locals right with
   | .ok leftType, .ok rightType =>
     if psExprHasUnresolvedMeta leftType || psExprHasUnresolvedMeta rightType ||
-        !psDefEqReadOnlyWithEnv environment context locals leftType rightType then false else
+        !psDefEqReadOnlyWithTransparency transparency environment context locals leftType rightType then false else
     match infer locals leftType with
     | .ok sort =>
-      match psWhnf environment context locals sort with
+      match psWhnfWithTransparency transparency environment context locals sort with
       | .sortE level => psLevelEquivalent level .zero
       | _ => false
     | .error _ => false
   | _, _ => false
+
+def psInferGroundProofIrrelevance := psInferGroundProofIrrelevanceAt .all
 
 def psInferDefEq
     (infer : PsLocalContext → PsExpr → Except PsInferError PsExpr)

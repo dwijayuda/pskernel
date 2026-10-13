@@ -1,5 +1,7 @@
 # PSCV0 v7 native implementation roadmap
 
+**New-chat handoff (13 October 2026):** `psc0/AI_WORK_STATE.md` and `psc0/AI_CONTINUE_PROMPT.md` now specify the M1-then-M2 implementation order. Last green executable remains `fc8bc8b`, [CI 38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371); newer documents are not executable qualifications. M1's checked optional default and target panic are done; generic lawfulness and collections are open. M2's scoped answer memo and independent budgets are done; generator/consumer waiters remain open. Keep native `.lean`, minimal milestone tests, no pskernel-core/self-hosting/C5.
+
 ## Latest qualified native compiler milestone — 13 October 2026
 
 **Qualified executable SHA:** `fc8bc8b1f16ed993fb144e2d396c0760c068630b`.
@@ -72,7 +74,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 
 | Phase | Focus | Status and completion evidence |
 |---|---|---|
-| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** 215-declaration/12-class/36-instance selected FNV + SHA-256 snapshot; generic proof-bearing GetElem, source forms and bounded recursive index proofs qualified. GetElem?, built-in lawful index instances, complete omega/simp, remaining deriving, Float/scientific/fixed-width/BitVec, curated APIs and full notation/import/effect/assumption manifest remain |
+| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** Current selected Standard **230 declarations / 14 classes / 40 instances**, FNV + SHA-256 gated, 198 shared observations. Qualified proof-carrying `GetElem`, Type-0 derived `GetElem?` from checked dependent `Decidable`, typed panic, and selected runtime results. Pending **generic `LawfulGetElem` proof**, faithful List/Array/Fin validity, Option universes, broader proof-producing index automation, further deriving/scalars/APIs and full notation/import/effect/assumption closure |
 | **B** | Dependent and mutual data, elimination, strict positivity and total recursive programming | **Planned.** Complete heterogeneous index reasoning, dependent motives, nested/mutual inductives, recursive pattern matrices and well-founded/structural termination; refuse invalid/partial constructs |
 | **C** | General class-driven typed do, state, effectful control and explicit IO/FFI boundaries | **Planned.** Complete Monad/Except/State/Reader and selected transformers, mutable/erased state, loops/early returns, try/catch/finally, effect/capability evidence and all-target preservation |
 | **D** | Kernel-checked tactics, intrinsic specifications, VC generation and assurance ledger | **Planned.** Complete selected rewrite/simp/automation, RC4 given/requires/ensures/assert/invariant/decreasing, WP/VC proof attachment, and verified-emission block on *any* unresolved mandatory obligation |

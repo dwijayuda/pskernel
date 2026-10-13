@@ -113,7 +113,8 @@ def psInstancePrepareGenerator (environment : PsEnvironment)
       | some className, .constE name _ => psNameEq className name
       | none, _ => true
       | _, _ => false
-    some { scope, locals, context := prepared.context,
+    some {
+      scope, locals, context := prepared.context,
       target := prepared.type, key := some prepared.key, entries }
   | none =>
     match psWhnf environment context locals (psMetaInstantiate context target) with
@@ -152,7 +153,8 @@ def psInstanceAcquire (environment : PsEnvironment) (index : PsInstanceIndex)
         ({ state with table := { state.table with resourceExceeded := true } }, none)
       else
         let id := state.generators.size
-        ({ state with generators := state.generators.push goal
+        ({ state with
+           generators := state.generators.push goal
            work := .generate id :: state.work
            table := { state.table with visits := state.table.visits + 1 } }, some id)
 
@@ -207,8 +209,8 @@ def psInstanceGenerate (environment : PsEnvironment) (index : PsInstanceIndex)
     match generator.key with
     | none =>
       if generator.opened then state else
-      let state := { state with generators := state.generators.setIfInBounds id
-        { generator with opened := true } }
+      let state := { state with
+        generators := state.generators.setIfInBounds id { generator with opened := true } }
       match psWhnf environment generator.context generator.locals
           (psMetaInstantiate generator.context generator.target) with
       | .forallE name domain body binder =>
@@ -320,7 +322,8 @@ def psInstanceRun (fuel : Nat) (environment : PsEnvironment) (index : PsInstance
     match fuel with
     | 0 => { state with table := { state.table with resourceExceeded := true } }
     | fuel + 1 =>
-      let state := { state with work := rest,
+      let state := { state with
+        work := rest
         table := { state.table with transitions := state.table.transitions + 1 } }
       let next := match work with
         | .generate id => psInstanceGenerate environment index state id

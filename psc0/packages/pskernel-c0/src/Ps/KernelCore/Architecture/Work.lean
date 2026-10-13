@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Budget
+import Ps.KernelCore.Architecture.Typed
 import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Admission.Declaration.Admission
 
@@ -117,6 +117,21 @@ def psKernelC0ArchitecturePreviewDemandMetered
   let (observation, session) ←
     psKernelC0ArchitectureObserveDemandMetered
       fuel quoteQuota work.checker expr
+  return (observation, { work with checker := session })
+
+/-- Typed major observation reuses source K/eta inference and DefEq.
+    It is intentionally absent from the declaration-admission constructor
+    and cannot approve an expression from a candidate conversion. -/
+def psKernelC0ArchitecturePreviewTypedMajor
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (recName : PsKernelName)
+    (major : PsKernelExpr) :
+    Except String (PsKernelC0TypedMajorObservation × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveTypedMajor fuel work.checker recName major
   return (observation, { work with checker := session })
 
 /-- Phase E authority seam. On failure no next work exists: the caller retains

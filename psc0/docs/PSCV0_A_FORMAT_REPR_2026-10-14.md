@@ -505,3 +505,25 @@ over `dite`, with `implicitReducible` status. It is a general repair to the
 logical conditional contract; no theorem-specific rewrite or proof replacement.
 Two open-proposition branch equations join the existing compact source/oracle
 batch. Existing backend branch lowering and panic tests retain lazy execution.
+
+
+### Scalar arithmetic asset admission
+
+Linux [38457448536](https://github.com/dwijayuda/pskernel/actions/runs/38457448536)
+at `ed64b95cfd9da44bef2c5c70ddfe374088f771ef` exported **102 declarations,
+386,235 UTF-8 bytes** after fresh official kernel replay of the converted
+candidate. No new axioms, partial/unsafe declarations or quotient primitives.
+This closes `Nat.mod_lt` with the actual upstream `Nat.mod` logical model.
+The subsequent compact checks stopped at the intentionally unchanged registry
+drift gate; this authoring receipt is not full compiler qualification.
+
+The reviewed machine-owned `StandardScalarArithmeticData.lean` asset is admitted
+by a small environment owner. It adds 101 names and replaces the old Nat.mod
+axiom; ite was separately replaced by its checked definition. The frozen 459-name
+boundary makes regeneration stable when other libraries are added later. Linux
+regenerates and byte-compares the asset. Production compilation imports portable
+Core data only; the host exporter is not a portable dependency. Imported logical
+class/dictionary dependencies do not automatically become search registrations
+or public executable APIs. Existing Nat.mod intrinsic lowering remains in use.
+The existing source/oracle batch gains open-term zero reduction, the general
+bound and a proof-carrying Fin constructor; no new test suite is added.

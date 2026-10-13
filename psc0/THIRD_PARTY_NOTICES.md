@@ -62,3 +62,11 @@ The checked `ite` Core model in `Ps.Environment.Decision` adapts the
 nondependent conditional wrapper from Lean 4.35.0 `src/Init/Prelude.lean`
 (commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`), copyright 2020 Microsoft
 Corporation, authors Leonardo de Moura and Mario Carneiro, Apache-2.0.
+
+`Ps.Environment.StandardScalarArithmeticData` contains modified, converted
+closed declaration data from Lean 4.35.0 `src/Init/Prelude.lean` at the same
+commit. Copyright (c) 2020 Microsoft Corporation; authors Leonardo de Moura and
+Mario Carneiro; Apache-2.0. `Ps.Host.StandardExport` removes expression metadata,
+records the dependency cut and converts the checked declarations to portable
+Core; proof bodies and universe/binder semantics are retained. The existing
+Apache-2.0 license and attribution apply to this asset.

@@ -1,3 +1,4 @@
+import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
 import Ps.Environment.StandardReprCollections
@@ -119,7 +120,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardReducibilityExtend <| psStandardReprCollectionsExtend <| psStandardFormatStringExtend <| psStandardReprExtend <| psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
+  psStandardReducibilityExtend <| psStandardScalarArithmeticExtend <| psStandardReprCollectionsExtend <| psStandardFormatStringExtend <| psStandardReprExtend <| psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
     <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|

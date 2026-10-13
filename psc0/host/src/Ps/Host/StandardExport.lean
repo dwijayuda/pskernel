@@ -192,10 +192,12 @@ def exportScalarArithmetic (output : System.FilePath) : IO Unit := do
   let native ← Lean.importModules #[{ module := `Init }] {}
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "Standard export requires the pinned Lean 4.35.0 commit")
+  let boundary := psStandardScalarArithmeticBoundary.foldl
+    (fun (names : Lean.NameSet) name => names.insert (PsKernelLean.toLeanName name)) {}
   let base := psSelfHostProdPreludeEnvironment.declarations.filter
-    (fun d => psNameToString (psDeclarationName d) != "Nat.mod")
-  let boundary := base.foldl
-    (fun (names : Lean.NameSet) d => names.insert (PsKernelLean.toLeanName (psDeclarationName d))) {}
+    (fun d => boundary.contains (PsKernelLean.toLeanName (psDeclarationName d)))
+  unless base.length == psStandardScalarArithmeticBoundary.length do
+    throw (IO.userError "frozen Standard export boundary has missing or duplicate declarations")
   let entries := (← standardDependencyClosure native `Nat.mod_lt boundary).filter
     (fun info => !boundary.contains info.name)
   let declarations ← entries.toList.mapM fun info => do

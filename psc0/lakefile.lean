@@ -83,6 +83,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardExcept,
     `Ps.Environment.StandardGetElem,
     `Ps.Environment.StandardNatOrder,
+    `Ps.Environment.StandardScalarArithmeticData, `Ps.Environment.StandardScalarArithmetic,
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
     `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,

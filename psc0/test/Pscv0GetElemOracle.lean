@@ -497,3 +497,8 @@ end Pscv0ArithmeticModelOracle
 -- Nondependent conditionals retain the decision's checked computational branch.
 example (P : Prop) (h : P) (n : Nat) : @ite Nat P (.isTrue h) n 0 = n := rfl
 example (P : Prop) (h : ¬P) (n : Nat) : @ite Nat P (.isFalse h) 0 n = n := rfl
+
+-- Genuine upstream modulus reduction and proof, independent of exported Core.
+example (n : Nat) : Nat.mod 0 n = 0 := rfl
+example (x y : Nat) (h : Nat.lt 0 y) : Nat.lt (Nat.mod x y) y := Nat.mod_lt x h
+def boundedModOracle (x y : Nat) (h : Nat.lt 0 y) : Fin y := ⟨Nat.mod x y, Nat.mod_lt x h⟩

@@ -86,6 +86,9 @@ private def getElemFoundationCases : IO Unit := do
     "theorem orderPositive: Nat.le(2, 5) := PsStandard.natBleReflects(2, 5)\n" ++
     "theorem orderNegative: ¬Nat.le(5, 2) := PsStandard.natBleReflects(5, 2)\n" ++
     "theorem orderZero(n: Nat): Nat.le(0, n) := Nat.zero_le(n)\n" ++
+    "theorem modZero(n: Nat): Nat.mod(0, n) = 0 := by { rfl }\n" ++
+    "theorem modBound(x: Nat, y: Nat, h: Nat.lt(0, y)): Nat.lt(Nat.mod(x, y), y) := Nat.mod_lt(x, h)\n" ++
+    "function boundedMod(x: Nat, y: Nat, h: Nat.lt(0, y)): Fin(y) := Fin.mk(Nat.mod(x, y), Nat.mod_lt(x, h))\n" ++
     "theorem conditionalKnown(P: Prop, h: P, n: Nat): ite(P, n, 0, h := Decidable.isTrue(h)) = n := by { rfl }\n" ++
     "theorem conditionalRefuted(P: Prop, h: Not P, n: Nat): ite(P, 0, n, h := Decidable.isFalse(h)) = n := by { rfl }\n" ++
     "theorem addZeroRight(n: Nat): Nat.add(n, 0) = n := by { rfl }\n" ++

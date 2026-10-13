@@ -134,6 +134,82 @@ def psDecisionDiteDeclaration : PsDeclaration :=
             body)) .instanceImplicit)) .implicit
   .definitionDecl (psRootName "dite") [u] dtype value
 
+-- Proof-theoretic coherence of two independent Decidable dictionaries.
+-- This is ordinary checked Core, NOT an axiom or a trusted host rewrite.
+-- Eliminate both Decidable structures, then case split on their Boolean
+-- choices: matching choices are equal by proof irrelevance of reflection
+-- evidence; disagreeing choices imply False by the two reflection fields.
+-- The helper returns a Prop proof and is erased before executable IR.
+def psDecisionUniqueDeclaration : PsDeclaration :=
+  let p := PsExpr.fvar 0
+  let a := PsExpr.fvar 1
+  let b := PsExpr.fvar 2
+  let bool := PsExpr.constE psBoolName []
+  let tt := PsExpr.constE psBoolTrueName []
+  let ff := PsExpr.constE psBoolFalseName []
+  let family := psDecisionType p
+  let intro := fun (flag proof : PsExpr) =>
+    psLogicApply (.constE (psDecisionName "Decidable.intro") [])
+      [p, flag, proof]
+  let eq := fun (lhs rhs : PsExpr) =>
+    psLogicEq (.succ .zero) family lhs rhs
+  let reflect := fun (flag : PsExpr) => psDecisionReflects flag p
+  let boolRec := fun (motive onFalse onTrue major : PsExpr) =>
+    psLogicApply (.constE (psDecisionName "Bool.rec") [.zero])
+      [motive, onFalse, onTrue, major]
+  let decRec := fun (motive minor major : PsExpr) =>
+    psLogicApply (.constE (psDecisionName "Decidable.rec") [.zero])
+      [p, motive, minor, major]
+  let branch := fun (positive : Bool) =>
+    let flagA := if positive then tt else ff
+    let reflectionA := PsExpr.fvar 7
+    let innerB := PsExpr.fvar 8
+    let flagB := PsExpr.fvar 9
+    let reflectionB := PsExpr.fvar 10
+    let left := intro flagA reflectionA
+    let right := intro flagB reflectionB
+    let motiveBoolB := psLogicLam 9 "flagB" bool
+      (psLogicPi 10 "reflectionB" (reflect flagB) (eq left right))
+    let same := psLogicLam 10 "reflectionB" (reflect flagA)
+      (psLogicRefl (.succ .zero) family left)
+    let opposite := if positive then ff else tt
+    let contradiction := if positive
+      then PsExpr.app reflectionB reflectionA
+      else PsExpr.app reflectionA reflectionB
+    let impossible := psLogicLam 10 "reflectionB" (reflect opposite)
+      (psLogicApply (.constE (psDecisionName "False.elim") [.zero])
+        [eq left (intro opposite reflectionB), contradiction])
+    let minorFalse := if positive then impossible else same
+    let minorTrue := if positive then same else impossible
+    let innerDecision := boolRec motiveBoolB minorFalse minorTrue flagB
+    let minorDecB := psLogicLam 9 "flagB" bool
+      (psLogicLam 10 "reflectionB" (reflect flagB)
+        (.app innerDecision reflectionB))
+    let motiveDecB := psLogicLam 8 "right" family (eq left innerB)
+    let fromDecB := decRec motiveDecB minorDecB innerB
+    psLogicLam 7 "reflectionA" (reflect flagA)
+      (psLogicLam 8 "right" family fromDecB)
+  let flagA := PsExpr.fvar 3
+  let reflectionA := PsExpr.fvar 4
+  let innerB := PsExpr.fvar 8
+  let motiveBoolA := psLogicLam 3 "flagA" bool
+    (psLogicPi 4 "reflectionA" (reflect flagA)
+      (psLogicPi 8 "right" family (eq (intro flagA reflectionA) innerB)))
+  let fromBoolA := boolRec motiveBoolA (branch false) (branch true) flagA
+  let minorDecA := psLogicLam 3 "flagA" bool
+    (psLogicLam 4 "reflectionA" (reflect flagA)
+      (.app fromBoolA reflectionA))
+  let motiveDecA := psLogicLam 1 "left" family
+    (psLogicPi 2 "right" family (eq a b))
+  let body := .app (decRec motiveDecA minorDecA a) b
+  let type := psLogicPi 0 "p" (.sortE .zero)
+    (psLogicPi 1 "left" family
+      (psLogicPi 2 "right" family (eq a b)))
+  let value := psLogicLam 0 "p" (.sortE .zero)
+    (psLogicLam 1 "left" family
+      (psLogicLam 2 "right" family body))
+  .definitionDecl (psDecisionName "PsStandard.decidableUnique") [] type value
+
 def psDecisionDeclarations : List PsDeclaration :=
   let decEq := fun (name : String) (type : PsExpr) =>
     PsDeclaration.axiomDecl (psDecisionName name) []
@@ -145,6 +221,7 @@ def psDecisionDeclarations : List PsDeclaration :=
       (psLogicLam 0 "α" (.sortE (.param (psRootName "u"))) (.fvar 0)),
     psDecisionReflectsDeclaration ] ++
   psDecisionCheckedClass ++ psDecisionCheckedConstructors ++
+  [psDecisionUniqueDeclaration] ++
   [decEq "Nat.decEq" (.constE psNatName []),
    decEq "String.decEq" (.constE psStringName []),
    psDecisionDiteDeclaration]

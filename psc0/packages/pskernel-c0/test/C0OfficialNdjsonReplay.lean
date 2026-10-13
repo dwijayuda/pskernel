@@ -838,6 +838,23 @@ def c0ExportMismatchTerm : Nat → PsKernelExpr → String
       "(Proj " ++ psKernelMutualDiagnosticName name ++ "." ++
       toString idx ++ " " ++ c0ExportMismatchTerm n value ++ ")"
 
+/-- Dissect outer application arguments without additional conversion
+    or speculative reductions. A witness is printed only after rejection. -/
+def c0ExportMismatchArgument (xs : List PsKernelExpr) (index : Nat) :
+    String :=
+  match psKernelExprListGet xs index with
+  | some value => c0ExportMismatchTerm 10 value
+  | none => "<missing>"
+
+def c0ExportMismatchOutline (expr : PsKernelExpr) : String :=
+  let head := psKernelExprGetAppFn expr
+  let args := psKernelExprGetAppArgs expr
+  "head=" ++ c0ExportMismatchTerm 3 head ++
+  " argc=" ++ toString (psKernelExprListLength args) ++
+  " arg0=" ++ c0ExportMismatchArgument args 0 ++
+  " arg1=" ++ c0ExportMismatchArgument args 1 ++
+  " arg2=" ++ c0ExportMismatchArgument args 2
+
 /-- Only invoked *after* authoritative rejection, never for admission.
     Diagnose whether the theorem's type or proof body failed and compare the
     optimized checked-application engine against its original source-owned
@@ -882,7 +899,9 @@ def c0ExportDiagnosticTheoremMismatch
                     | .ok (false, _) =>
                         .error ("first-false lhs=" ++
                           c0ExportMismatchTerm 7 left ++
-                          " rhs=" ++ c0ExportMismatchTerm 7 right)
+                          " rhs=" ++ c0ExportMismatchTerm 7 right ++
+                          " | lhs-parts: " ++ c0ExportMismatchOutline left ++
+                          " | rhs-parts: " ++ c0ExportMismatchOutline right)
                     | result => result
                   let witnessWhnf := psKernelWhnfWithRecursorFuel fuel witnessDefEq
                   match psKernelInferCoreWithFuel fuel witnessWhnf witnessDefEq

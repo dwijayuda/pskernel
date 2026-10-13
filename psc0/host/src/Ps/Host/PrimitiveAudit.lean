@@ -129,7 +129,7 @@ def primitiveAudit : IO Lean.Json := do
         ("nativeStatus", Lean.toJson status),
         ("portableStatus", Lean.toJson portableStatus)] :: reduction
   unless statusMismatches.isEmpty do
-    throw (IO.userError ("reducibility mismatches:\\n" ++ String.intercalate "\\n" statusMismatches.reverse))
+    throw (IO.userError ("reducibility mismatches:\n" ++ String.intercalate "\n" statusMismatches.reverse))
   return Lean.Json.mkObj [
     ("reducibilityReference", Lean.toJson reduction.reverse),
     ("schema", Lean.toJson ("pscv0-primitive-signature-audit/2" : String)),

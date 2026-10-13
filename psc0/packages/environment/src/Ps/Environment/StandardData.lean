@@ -57,8 +57,14 @@ def psStandardDataDeclarations (name : PsName)
     type := psLogicPi 0 "motive" motiveType type .implicit
     inductiveNames := [name]
     numParams := 0, numIndices := 0, numMotives := 1, numMinors := constructors.length }
-  .inductiveDecl { name, levelParams := [], type := psPreludeTypeType,
-      numParams := 0, numIndices := 0, constructors := names, isStructure } ::
+  .inductiveDecl {
+    name := name
+    levelParams := []
+    type := psPreludeTypeType
+    numParams := 0
+    numIndices := 0
+    constructors := names
+    isStructure := isStructure } ::
     (declarations ++ [recursor])
 
 -- Closed record support uses ordinary projections; all field types are closed.

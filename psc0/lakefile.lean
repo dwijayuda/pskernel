@@ -193,6 +193,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.TailCalls, `Ps.BackendWasm.RuntimeBuilder,
     `Ps.BackendWasm.Value, `Ps.BackendWasm.Natural, `Ps.BackendWasm.Integer,
     `Ps.BackendWasm.String, `Ps.BackendWasm.Array, `Ps.BackendWasm.Intrinsic,
+    `Ps.BackendWasm.LowerInt, `Ps.BackendWasm.Type,
     `Ps.BackendWasm.Layout, `Ps.BackendWasm.LowerState, `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.AbiPlan, `Ps.BackendWasm.AbiRuntime, `Ps.BackendWasm.AbiSchema,
     `Ps.BackendWasm.AbiMarshal, `Ps.BackendWasm.AbiComponent]

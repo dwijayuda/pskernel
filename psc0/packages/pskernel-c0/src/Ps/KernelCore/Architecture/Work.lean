@@ -38,11 +38,10 @@ def psKernelC0ArchitectureBegin
     }
   else none
 
-/-- Stage source syntax by exact validated readback. This can also stage an
-    ill-typed expression; no typing or proof approval follows from storage. -/
-/-- Validated staging preserves the EXACT checker session. The
-    ownership equality lets trusted admission history survive syntax-only
-    staging without a run-time comparison of entire environments. -/
+/-- Stage exact, replay-validated source syntax without deciding its
+    typing. Validated staging preserves the EXACT checker session; the
+    equality lets trusted admission history survive syntax-only changes
+    without comparing entire environments at runtime. -/
 def psKernelC0ArchitectureStageWithOwner
     (work : PsKernelC0ArchitectureWork)
     (expr : PsKernelExpr) :

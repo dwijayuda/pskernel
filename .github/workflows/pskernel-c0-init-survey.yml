@@ -214,7 +214,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: C0 native streaming boundary diagnostic on real Init
+      - name: C0 native streaming boundary diagnostic after max-offset normalization
         shell: bash
         run: |
           set -euo pipefail

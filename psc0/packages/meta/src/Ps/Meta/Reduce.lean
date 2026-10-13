@@ -7,18 +7,6 @@ import Ps.Environment.Basic
 import Ps.Environment.LocalContext
 import Ps.Meta.Context
 
-def psReduceNameListLength
-    (values : List PsName) : Nat :=
-  match values with
-  | [] => 0
-  | _ :: rest => Nat.succ (psReduceNameListLength rest)
-
-def psReduceLevelListLength
-    (values : List PsLevel) : Nat :=
-  match values with
-  | [] => 0
-  | _ :: rest => Nat.succ (psReduceLevelListLength rest)
-
 def psWhnfCoreWithFuel
     (metaContext : PsMetaContext)
     (localContext : PsLocalContext)

@@ -437,3 +437,40 @@ exception is added. Projection majors are normalized once. Transparency rules,
 opaque boundaries and public resource limits remain unchanged. The existing
 large derived BEq proof, scalar runtime observations and scope/transparency/search
 gates validate the change; no new isolated test loop is added.
+
+
+### Checked upstream scalar Core authoring
+
+The native-only `Ps.Host.StandardExport` authoring tool converts the minimal
+`Nat.mod_lt` dependency closure, cutting at the existing portable declarations
+except `Nat.mod`. It preserves types, universes, binder information, proof bodies
+and definition reducibility. It removes kernel-irrelevant expression metadata.
+It refuses new axioms, quotient primitives, unsafe/partial declarations,
+metavariables/free variables and currently unsupported mutual/nested/reflexive
+families. Inductive admission regenerates constructors/recursors; their converted
+signatures are compared with the kernel-generated signatures. The complete
+candidate, including the existing portable boundary, must pass fresh trust-zero
+official kernel replay before any source is exported.
+
+This is an authoring tool, not a host-library import into the portable compiler.
+It emits a reviewed `.lean` Core data asset with a frozen regeneration boundary
+and upstream Apache-2.0 provenance. Logical dependency availability does not
+automatically register native classes/instances or promise executable backend
+support for every helper. Existing runtime primitives remain separate obligations.
+The first export is a candidate, not production admission or qualification.
+
+References at the stable pin: `Lean/Declaration.lean`, `Lean/Expr.lean`,
+`Lean/Structure.lean`, `Lean/ReducibilityAttrs.lean`,
+`Lean/Util/CollectAxioms.lean`, `tests/elab/collectAxioms.lean`,
+`Init/Prelude.lean` (Nat.modCore/mod and bound proofs).
+
+Checked elementary arithmetic and the complete-spine normalizer passed Linux
+[38454972480](https://github.com/dwijayuda/pskernel/actions/runs/38454972480)
+at `0f16a4ec6b6d9f3137649f47364dd7b17efd8877`: existing native semantic
+and independent oracle checks, 341 cross-target observations, four panic
+contracts, Wasm GC/component/ABI/project and performance gates. Standard has
+460 declarations /22 classes /88 instances, profile /57;
+FNV `fnv1a64:16989132783207094075`, SHA
+`sha256:be1c0bcd7657628f0efc6e24164ff1439cda6162c0b85f3e96448f22806a0ecf`.
+The source guard's native inventory previously omitted the authoring audit;
+it is corrected to include the audit/export roots in the next change.

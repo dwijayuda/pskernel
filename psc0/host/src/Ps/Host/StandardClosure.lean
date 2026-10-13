@@ -13,7 +13,7 @@ private def closureDependencies (info : Lean.ConstantInfo) : Array Lean.Name :=
   let expressions := info.type.getUsedConstants ++
     ((info.value? true).map Lean.Expr.getUsedConstants).getD #[]
   let family := match info with
-    | .inductInfo v => v.all.toArray ++ v.ctors.toArray
+    | .inductInfo v => v.all.toArray ++ v.ctors.toArray ++ #[.str v.name "rec"]
     | .ctorInfo v => #[v.induct]
     | .recInfo v => v.all.toArray ++
         (v.rules.toArray.flatMap fun rule => #[rule.ctor] ++ rule.rhs.getUsedConstants)
@@ -32,7 +32,7 @@ private def closureKind : Lean.ConstantInfo → String
 
 -- Worklist with a visited set handles inductive/constructor/recursor cycles
 -- without imposing the compiler's elaboration resource policy on this audit.
-private def closure (environment : Lean.Environment) (root : Lean.Name)
+def standardDependencyClosure (environment : Lean.Environment) (root : Lean.Name)
     (boundary : Lean.NameSet := {}) :
     IO (Array Lean.ConstantInfo) := do
   let mut pending := [root]
@@ -96,7 +96,7 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
   let .ok initial ← PsKernelLean.buildLeanPreludeEnvironment
     | throw (IO.userError "cannot construct checked portable prelude for reuse probe")
   let mut environment := initial
-  let mut pending := (← closure native root boundary).filter
+  let mut pending := (← standardDependencyClosure native root boundary).filter
     (fun info => !boundary.contains info.name)
   let mut admitted : Array String := #[]
   let mut failures : Array Lean.Json := #[]
@@ -144,7 +144,7 @@ def standardClosureAudit : IO Lean.Json := do
   let portableNames := psSelfHostProdPreludeEnvironment.declarations.foldl
     (fun (names : Lean.NameSet) d => names.insert (PsKernelLean.toLeanName (psDeclarationName d))) {}
   let reports ← roots.mapM fun root => do
-    let entries ← closure native root
+    let entries ← standardDependencyClosure native root
     let summarize := fun (info : Lean.ConstantInfo) => Lean.Json.mkObj [
       ("name", Lean.toJson (toString info.name)),
       ("kind", Lean.toJson (closureKind info)),

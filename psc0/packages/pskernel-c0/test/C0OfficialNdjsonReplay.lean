@@ -18,11 +18,20 @@ frontend and does not silently drop mdata, FVar, MVar or inductive records.
 
 /-- The export adaptor owns the declaration kind rather than treating a
     theorem, axiom or opaque declaration as a reducible definition. -/
+/-- Exporter metadata is never a kernel axiom: all generated entries must be
+    reconstructed from checked inductive source and independently compared. -/
+structure C0ExportOrdinaryInductive where
+  source : PsKernelSimpleInductiveDecl
+  expectedType : PsKernelInductiveInfo
+  expectedCtors : List PsKernelConstructorInfo
+  expectedRecs : List PsKernelRecursorInfo
+
 inductive C0ExportDeclaration where
   | axiomDecl (value : PsKernelAxiomInfo)
   | definition (value : PsKernelDefinitionInfo)
   | theoremDecl (value : PsKernelTheoremInfo)
   | opaqueDecl (value : PsKernelOpaqueInfo)
+  | ordinaryInductive (value : C0ExportOrdinaryInductive)
 
 structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
@@ -205,6 +214,159 @@ def c0ExportDecodeExpr
     return .lit (.str (← value.getStr?))
   throw "unsupported NDJSON expression constructor or metadata"
 
+/-- Exact shape check for exporter Name lists; binder display names in
+    encoded expressions are not proof semantics, so types use kernel equality. -/
+def c0ExportSameNames (xs ys : List PsKernelName) : Bool :=
+  xs.length == ys.length &&
+    (xs.zip ys).all (fun (x, y) => psKernelNameEq x y)
+
+def c0ExportSameBase (a b : PsKernelConstantBase) : Bool :=
+  psKernelNameEq a.name b.name &&
+  c0ExportSameNames a.levelParams b.levelParams &&
+  psKernelExprEq a.type b.type
+
+def c0ExportReadInductiveType
+    (st : C0ExportTables) (j : Lean.Json) :
+    Except String PsKernelInductiveInfo := do
+  c0ExportOnlyKeys j
+    ["name", "levelParams", "type", "numParams", "numIndices",
+     "all", "ctors", "numNested", "isRec", "isUnsafe", "isReflexive"]
+  let name ← c0ExportName st (← c0JsonNat j "name")
+  let levels ← c0ExportNames st (← c0JsonObj j "levelParams")
+  let type ← c0ExportExpr st (← c0JsonNat j "type")
+  let all ← c0ExportNames st (← c0JsonObj j "all")
+  let ctors ← c0ExportNames st (← c0JsonObj j "ctors")
+  let numParams ← c0JsonNat j "numParams"
+  let numIndices ← c0JsonNat j "numIndices"
+  let numNested ← c0JsonNat j "numNested"
+  let isRec ← (← c0JsonObj j "isRec").getBool?
+  let isUnsafe ← (← c0JsonObj j "isUnsafe").getBool?
+  let isReflexive ← (← c0JsonObj j "isReflexive").getBool?
+  return {
+    base := { name := name, levelParams := levels, type := type }
+    numParams := numParams
+    numIndices := numIndices
+    all := all
+    ctors := ctors
+    numNested := numNested
+    isRec := isRec
+    isUnsafe := isUnsafe
+    isReflexive := isReflexive
+  }
+
+def c0ExportReadConstructor
+    (st : C0ExportTables) (j : Lean.Json) :
+    Except String PsKernelConstructorInfo := do
+  c0ExportOnlyKeys j
+    ["name", "levelParams", "type", "induct", "cidx",
+     "numParams", "numFields", "isUnsafe"]
+  let name ← c0ExportName st (← c0JsonNat j "name")
+  let levels ← c0ExportNames st (← c0JsonObj j "levelParams")
+  let type ← c0ExportExpr st (← c0JsonNat j "type")
+  let induct ← c0ExportName st (← c0JsonNat j "induct")
+  let cidx ← c0JsonNat j "cidx"
+  let numParams ← c0JsonNat j "numParams"
+  let numFields ← c0JsonNat j "numFields"
+  let isUnsafe ← (← c0JsonObj j "isUnsafe").getBool?
+  return {
+    base := { name := name, levelParams := levels, type := type }
+    induct := induct
+    cidx := cidx
+    numParams := numParams
+    numFields := numFields
+    isUnsafe := isUnsafe
+  }
+
+def c0ExportReadRecursorRule
+    (st : C0ExportTables) (j : Lean.Json) :
+    Except String PsKernelRecursorRule := do
+  c0ExportOnlyKeys j ["ctor", "nfields", "rhs"]
+  let ctor ← c0ExportName st (← c0JsonNat j "ctor")
+  let fields ← c0JsonNat j "nfields"
+  let rhs ← c0ExportExpr st (← c0JsonNat j "rhs")
+  return { ctor := ctor, nFields := fields, rhs := rhs }
+
+def c0ExportReadRecursor
+    (st : C0ExportTables) (j : Lean.Json) :
+    Except String PsKernelRecursorInfo := do
+  c0ExportOnlyKeys j
+    ["name", "levelParams", "type", "all", "numParams",
+     "numIndices", "numMotives", "numMinors", "rules", "k", "isUnsafe"]
+  let name ← c0ExportName st (← c0JsonNat j "name")
+  let levels ← c0ExportNames st (← c0JsonObj j "levelParams")
+  let type ← c0ExportExpr st (← c0JsonNat j "type")
+  let all ← c0ExportNames st (← c0JsonObj j "all")
+  let numParams ← c0JsonNat j "numParams"
+  let numIndices ← c0JsonNat j "numIndices"
+  let numMotives ← c0JsonNat j "numMotives"
+  let numMinors ← c0JsonNat j "numMinors"
+  let rules ← (← c0JsonObj j "rules").getArr?
+  let rules ← rules.toList.mapM (c0ExportReadRecursorRule st)
+  let k ← (← c0JsonObj j "k").getBool?
+  let isUnsafe ← (← c0JsonObj j "isUnsafe").getBool?
+  return {
+    base := { name := name, levelParams := levels, type := type }
+    all := all
+    numParams := numParams
+    numIndices := numIndices
+    numMotives := numMotives
+    numMinors := numMinors
+    rules := rules
+    k := k
+    isUnsafe := isUnsafe
+  }
+
+/-- A complete ordinary export block is reconstructed, never admitted by
+    trusting its precomputed recursor or constructor declarations.
+    Mutual/nested/safety variants remain explicit declines. -/
+def c0ExportReadOrdinaryInductive
+    (st : C0ExportTables) (block : Lean.Json) :
+    Except String C0ExportOrdinaryInductive := do
+  c0ExportOnlyKeys block ["types", "ctors", "recs"]
+  let ts ← (← c0JsonObj block "types").getArr?
+  let cs ← (← c0JsonObj block "ctors").getArr?
+  let rs ← (← c0JsonObj block "recs").getArr?
+  if ts.size != 1 then throw "unsupported NDJSON mutual inductive group"
+  let expectedType ← c0ExportReadInductiveType st ts[0]!
+  let expectedCtors ← cs.toList.mapM (c0ExportReadConstructor st)
+  let expectedRecs ← rs.toList.mapM (c0ExportReadRecursor st)
+  if expectedType.numNested != 0 then
+    throw "unsupported NDJSON nested inductive group"
+  if expectedType.isUnsafe ||
+      expectedCtors.any (fun c => c.isUnsafe) ||
+      expectedRecs.any (fun c => c.isUnsafe) then
+    throw "unsupported NDJSON unsafe inductive group"
+  if !c0ExportSameNames expectedType.all [expectedType.base.name] ||
+      expectedCtors.map (fun c => c.base.name) != expectedType.ctors then
+    -- Check exact names separately (Name need not expose BEq).
+    if !c0ExportSameNames
+        (expectedCtors.map (fun c => c.base.name)) expectedType.ctors then
+      throw "malformed NDJSON inductive constructor manifest"
+    if !c0ExportSameNames expectedType.all [expectedType.base.name] then
+      throw "unsupported NDJSON inductive all-names group"
+  for (c, i) in expectedCtors.zipIdx do
+    if !psKernelNameEq c.induct expectedType.base.name ||
+        c.cidx != i || c.numParams != expectedType.numParams ||
+        !c0ExportSameNames c.base.levelParams expectedType.base.levelParams then
+      throw "malformed NDJSON inductive constructor metadata"
+  let source : PsKernelSimpleInductiveDecl := {
+    levelParams := expectedType.base.levelParams
+    name := expectedType.base.name
+    type := expectedType.base.type
+    ctors := expectedCtors.map (fun c => {
+      name := c.base.name
+      type := c.base.type
+    })
+    isUnsafe := false
+    numParams := expectedType.numParams
+  }
+  return {
+    source := source
+    expectedType := expectedType
+    expectedCtors := expectedCtors
+    expectedRecs := expectedRecs
+  }
+
 /-- Track the original exporter IDs; never confuse an unresolved reference
     or malformed format with a checked kernel rejection. -/
 def c0ExportParseRecord
@@ -328,6 +490,11 @@ def c0ExportParseRecord
       isUnsafe := false
     }
     return { st with declarations := .opaqueDecl opaqueInfo :: st.declarations }
+  if let .ok payload := c0JsonObj j "inductive" then
+    c0ExportOnlyKeys j ["inductive"]
+    let group ← c0ExportReadOrdinaryInductive st payload
+    return { st with declarations :=
+      .ordinaryInductive group :: st.declarations }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/
@@ -341,6 +508,56 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
   match tables.declarations with
   | [] => throw "NDJSON missing a supported declaration"
   | declarations => pure declarations.reverse
+
+/-- Independent post-admission comparison with all emitted inductive,
+    constructor and recursor metadata. No exported derived item gets admitted
+    unchecked; any divergence declines the input and preserves the old env. -/
+def c0ExportVerifyOrdinaryInductive
+    (env : PsKernelEnvironment) (group : C0ExportOrdinaryInductive) :
+    Except String Unit := do
+  let some (.inductInfo ty) :=
+      psKernelEnvironmentFind env group.expectedType.base.name
+    | throw "unsupported generated inductive type missing"
+  let expected := group.expectedType
+  if !c0ExportSameBase ty.base expected.base ||
+      ty.numParams != expected.numParams ||
+      ty.numIndices != expected.numIndices ||
+      ty.numNested != expected.numNested ||
+      ty.isRec != expected.isRec ||
+      ty.isReflexive != expected.isReflexive ||
+      ty.isUnsafe != expected.isUnsafe ||
+      !c0ExportSameNames ty.all expected.all ||
+      !c0ExportSameNames ty.ctors expected.ctors then
+    throw "unsupported generated inductive metadata differs from exporter"
+  for expectedCtor in group.expectedCtors do
+    let some (.ctorInfo got) :=
+        psKernelEnvironmentFind env expectedCtor.base.name
+      | throw "unsupported generated constructor missing"
+    if !c0ExportSameBase got.base expectedCtor.base ||
+        !psKernelNameEq got.induct expectedCtor.induct ||
+        got.cidx != expectedCtor.cidx ||
+        got.numParams != expectedCtor.numParams ||
+        got.numFields != expectedCtor.numFields ||
+        got.isUnsafe != expectedCtor.isUnsafe then
+      throw "unsupported generated constructor metadata differs from exporter"
+  for expectedRec in group.expectedRecs do
+    let some (.recInfo got) :=
+        psKernelEnvironmentFind env expectedRec.base.name
+      | throw "unsupported generated recursor missing"
+    if !c0ExportSameBase got.base expectedRec.base ||
+        !c0ExportSameNames got.all expectedRec.all ||
+        got.numParams != expectedRec.numParams ||
+        got.numIndices != expectedRec.numIndices ||
+        got.numMotives != expectedRec.numMotives ||
+        got.numMinors != expectedRec.numMinors ||
+        got.k != expectedRec.k ||
+        got.isUnsafe != expectedRec.isUnsafe ||
+        got.rules.length != expectedRec.rules.length then
+      throw "unsupported generated recursor metadata differs from exporter"
+    for (a, b) in got.rules.zip expectedRec.rules do
+      if !psKernelNameEq a.ctor b.ctor ||
+          a.nFields != b.nFields || !psKernelExprEq a.rhs b.rhs then
+        throw "unsupported generated recursor reduction rule differs"
 
 /-- One declaration check, preserving the kernel's typed error category.
     The source recursive checker is the *only* acceptance authority. -/
@@ -358,8 +575,17 @@ def c0ExportCheckOne
         psKernelAddTheorem fuel env value 4096 psKernelLeanNatMaxSizeDefault
     | .opaqueDecl value =>
         psKernelAddOpaque fuel env value 4096 psKernelLeanNatMaxSizeDefault
+    | .ordinaryInductive group =>
+        psKernelAddSimpleInductive fuel env group.source
+          4096 psKernelLeanNatMaxSizeDefault
   match result with
-  | .ok next => .ok next
+  | .ok next =>
+      match info with
+      | .ordinaryInductive group =>
+          match c0ExportVerifyOrdinaryInductive next group with
+          | .ok _ => .ok next
+          | .error message => .error (.declinedUnsupported message)
+      | _ => .ok next
   | .error message => .error (psKernelErrorFromMessage message)
 
 /-- The retained batch replay is an independent test reference for online

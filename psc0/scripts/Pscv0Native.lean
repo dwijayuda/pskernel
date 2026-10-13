@@ -166,6 +166,9 @@ private def runProject (manifest : String)
 def main (args : List String) : IO UInt32 := do
   try
     match args with
+    | ["--check-quotient-foundation"] =>
+        checkQuotientFoundation
+        return 0
     | ["--export-unsigned-operations-candidate", output] =>
         exportUnsignedOperationsCandidate (System.FilePath.mk output)
         return 0

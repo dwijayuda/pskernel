@@ -126,6 +126,7 @@ jobs:
           cmp ../packages/environment/src/Ps/Environment/StandardUnsignedFoundationData.lean ../dist/pscv0-native/StandardUnsignedFoundationData.lean
           .lake/build/bin/pscv0_native --export-hash-foundation ../dist/pscv0-native/StandardHashFoundationData.lean > ../dist/pscv0-native/hash-export.log
           cmp ../packages/environment/src/Ps/Environment/StandardHashFoundationData.lean ../dist/pscv0-native/StandardHashFoundationData.lean
+          .lake/build/bin/pscv0_native --check-quotient-foundation | tee ../dist/pscv0-native/quotient-foundation.log
           # The complete operation slice needs two additional pinned Lean
           # assumptions. Until explicitly approved, verify the current policy
           # refuses it; this is not operation-slice qualification.

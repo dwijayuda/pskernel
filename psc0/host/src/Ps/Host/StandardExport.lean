@@ -245,6 +245,70 @@ private def checkRecursorRules (native : Lean.Environment)
       count := count + 1
   return count
 
+-- Validate the kernel mechanism independently of any additional assumptions.
+-- The temporary environment contains only the existing checked prelude plus
+-- four kernel-generated descriptors. It is discarded, never used by compiling.
+def checkQuotientFoundation : IO Unit := do
+  Lean.initSearchPath (← Lean.findSysroot)
+  let native ← Lean.importModules #[{ module := `Init }] {}
+  let candidates ← [`Quot, `Quot.mk, `Quot.lift, `Quot.ind].mapM fun name => do
+    let some info := native.find? name | throw (IO.userError "missing native quotient primitive")
+    match exportDeclaration native info with
+    | .ok value => pure value
+    | .error reason => throw (IO.userError reason)
+  let base := psSelfHostProdPreludeEnvironment.declarations
+  let declarations := candidates ++ base
+  checkCandidate declarations candidates
+  let environment := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
+  let level := PsLevel.succ .zero
+  let nat := PsExpr.constE psNatName []
+  let prop := PsExpr.constE (psRootName "True") []
+  let intro := PsExpr.constE (psDecisionName "True.intro") []
+  let eq := fun type a b => psReduceApply (.constE (psRootName "Eq") [level]) [type, a, b]
+  let refl := fun type value => psReduceApply (.constE (psDecisionName "Eq.refl") [level]) [type, value]
+  let relation := .app (.constE (psRootName "Eq") [level]) nat
+  let quotient := psReduceApply (.constE (psRootName "Quot") [level]) [nat, relation]
+  let major := psReduceApply (.constE (psDecisionName "Quot.mk") [level])
+    [nat, relation, .lit (.natural 41)]
+  let identity := PsExpr.lam (psRootName "n") nat (.bvar 0) .explicit
+  let functionType := PsExpr.forallE (psRootName "n") nat nat .explicit
+  let function := PsExpr.lam (psRootName "a") nat identity .explicit
+  let respects := PsExpr.lam (psRootName "a") nat
+    (.lam (psRootName "b") nat
+      (.lam (psRootName "h") (eq nat (.bvar 1) (.bvar 0))
+        (refl functionType identity) .explicit) .explicit) .explicit
+  let lift := psReduceApply (.constE (psDecisionName "Quot.lift") [level, level])
+    [nat, relation, functionType, function, respects, major, .lit (.natural 7)]
+  let ind := psReduceApply (.constE (psDecisionName "Quot.ind") [level])
+    [nat, relation, .lam (psRootName "q") quotient prop .explicit,
+      .lam (psRootName "a") nat intro .explicit, major]
+  let reduce := psWhnf environment psMetaEmpty psLocalEmpty
+  unless psExprAlphaEq (reduce lift) (.lit (.natural 7)) &&
+      psExprAlphaEq (reduce ind) intro do
+    throw (IO.userError "portable quotient computation differs from kernel rules")
+  let probes := [
+    PsDeclaration.theoremDecl (psRootName "_psQuotientLiftProbe") []
+      (eq nat lift (.lit (.natural 7))) (refl nat (.lit (.natural 7))),
+    PsDeclaration.theoremDecl (psRootName "_psQuotientIndProbe") [] prop ind]
+  -- The official kernel independently validates both computations.
+  checkCandidate (probes ++ declarations) probes
+  unless (psReduceQuotientIota (fun value => value)
+      psSelfHostProdPreludeEnvironment lift).isNone do
+    throw (IO.userError "unregistered quotient spelling activated reduction")
+  let empty ← Lean.mkEmptyEnvironment 0
+  let .ok checked := PsKernelLean.replayPreludeDeclarations base base.reverse empty
+    | throw (IO.userError "quotient test prelude failed")
+  let wrong := PsDeclaration.quotientDecl (psDecisionName "Quot.lift") [] nat .lift
+  unless (PsKernelLean.tryPreludeDeclaration declarations checked wrong).isError do
+    throw (IO.userError "forged quotient signature accepted")
+  -- Mirror pinned kernelQuotNameCollision in an isolated discarded environment.
+  let .ok collision := checked.addDeclCore 2000000 20000
+      (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none true
+    | throw (IO.userError "cannot construct isolated quotient collision probe")
+  unless (collision.addDeclCore 2000000 20000 .quotDecl none true).isError do
+    throw (IO.userError "kernel quotient registration overwrote an existing name")
+  IO.println "PSCV0_QUOTIENT_FOUNDATION: PASS kernel regeneration, lift/ind computation, signature/collision refusal; no added assumptions"
+
 structure StandardExportSpec where
   roots : List Lean.Name
   boundary : List PsName

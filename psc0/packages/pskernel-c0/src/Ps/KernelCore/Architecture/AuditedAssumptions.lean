@@ -16,38 +16,52 @@ and independent proof obligations. A permitted axiom remains an explicit
 assumption, not a theorem the checker derived.
 -/
 
-/-- A checked request contributes zero or one ordinary axiom name.
-    This exact local projection supports efficient proof extension. -/
-def psKernelC0RequestOrdinaryAxioms :
-    PsKernelC0ArchitectureDeclaration → List PsKernelName
-  | .axiomDecl info => [info.base.name]
+/- The exact declaration signature, including nested source expression
+   binder metadata, is the unit of ordinary-axiom authorization. A name
+   match alone does NOT approve a different proposition or universe. -/
+deriving instance DecidableEq for PsKernelConstantBase
+deriving instance DecidableEq for PsKernelAxiomInfo
+
+/-- One source request contributes an actual, fully typed ordinary axiom
+    signature, not just an identifier string. -/
+def psKernelC0RequestAxiomSignatures :
+    PsKernelC0ArchitectureDeclaration → List PsKernelAxiomInfo
+  | .axiomDecl info => [info]
   | _ => []
 
-/-- Reconstruct the exact immutable assumption ledger for explicit policy
-    (re-)audits. Normal admission extends the existing proof incrementally
-    instead of replaying all prior declarations. -/
-def psKernelC0HistoryOrdinaryAxioms :
+/-- Exact checked signatures in the immutable source history. This is used
+    only for initial/changed policy re-audits; admission increments proofs. -/
+def psKernelC0HistoryAxiomSignatures :
     {env : PsKernelEnvironment} →
-      PsKernelC0SourceEnvironmentHistory env → List PsKernelName
+      PsKernelC0SourceEnvironmentHistory env → List PsKernelAxiomInfo
   | _, .genesis => []
   | _, .admitted earlier step =>
-      psKernelC0RequestOrdinaryAxioms step.request ++
-        psKernelC0HistoryOrdinaryAxioms earlier
+      psKernelC0RequestAxiomSignatures step.request ++
+        psKernelC0HistoryAxiomSignatures earlier
 
-/-- The entire finite history must satisfy *decidable structural*
-    membership in the approved list. The result is a Lean proposition
-    asserting every Boolean `decide (name ∈ allowed)` was true, not the
-    portable `psKernelNameMember` comparator. -/
+/-- Human-facing ordinary axiom names are derived from the fully typed
+    signatures but never used to authorize a declaration. -/
+def psKernelC0HistoryOrdinaryAxioms
+    {env : PsKernelEnvironment}
+    (history : PsKernelC0SourceEnvironmentHistory env) :
+    List PsKernelName :=
+  (psKernelC0HistoryAxiomSignatures history).map
+    (fun info => info.base.name)
+
+/-- Each exact axiom declaration—name, permitted universe parameters,
+    proposition syntax including binder metadata, and unsafe flag—must be
+    present in the explicitly approved signature manifest. An identically
+    named axiom with a different type is therefore NOT approved. -/
 def psKernelC0HistoryAxiomsApproved
     {env : PsKernelEnvironment}
     (history : PsKernelC0SourceEnvironmentHistory env)
-    (allowed : List PsKernelName) : Prop :=
-  (psKernelC0HistoryOrdinaryAxioms history).all
-    (fun name => decide (name ∈ allowed)) = true
+    (allowed : List PsKernelAxiomInfo) : Prop :=
+  (psKernelC0HistoryAxiomSignatures history).all
+    (fun info => decide (info ∈ allowed)) = true
 
 instance {env : PsKernelEnvironment}
     (history : PsKernelC0SourceEnvironmentHistory env)
-    (allowed : List PsKernelName) :
+    (allowed : List PsKernelAxiomInfo) :
     Decidable (psKernelC0HistoryAxiomsApproved history allowed) := by
   unfold psKernelC0HistoryAxiomsApproved
   infer_instance
@@ -129,7 +143,7 @@ def psKernelC0RequestCapabilitiesApproved
     source-admission history, not about any cache or untrusted snapshot. -/
 structure PsKernelC0AuditedSourceWork where
   trusted : PsKernelC0TrustedSourceWork
-  allowedAxioms : List PsKernelName
+  allowedAxioms : List PsKernelAxiomInfo
   allowedCapabilities : List PsKernelC0TrustCapability
   approved :
     psKernelC0HistoryAxiomsApproved trusted.history allowedAxioms
@@ -141,7 +155,7 @@ structure PsKernelC0AuditedSourceWork where
     silently added by inference, normalization or staging. -/
 def psKernelC0AuditTrustedSourceWithCapabilities
     (trusted : PsKernelC0TrustedSourceWork)
-    (allowedAxioms : List PsKernelName)
+    (allowedAxioms : List PsKernelAxiomInfo)
     (allowedCapabilities : List PsKernelC0TrustCapability) :
     Option PsKernelC0AuditedSourceWork :=
   if h : psKernelC0HistoryAxiomsApproved
@@ -162,14 +176,14 @@ def psKernelC0AuditTrustedSourceWithCapabilities
     nonordinary trust capability, including quotient bootstrap. -/
 def psKernelC0AuditTrustedSource
     (trusted : PsKernelC0TrustedSourceWork)
-    (allowedAxioms : List PsKernelName) :
+    (allowedAxioms : List PsKernelAxiomInfo) :
     Option PsKernelC0AuditedSourceWork :=
   psKernelC0AuditTrustedSourceWithCapabilities trusted allowedAxioms []
 
 /-- Only an actual canonical genesis can begin this audited profile. -/
 def psKernelC0AuditedSourceBeginWithCapabilities
     (maxRecDepth maxNatSize : Nat)
-    (allowedAxioms : List PsKernelName)
+    (allowedAxioms : List PsKernelAxiomInfo)
     (allowedCapabilities : List PsKernelC0TrustCapability) :
     Option PsKernelC0AuditedSourceWork := do
   let genesis ← psKernelC0TrustedSourceBegin maxRecDepth maxNatSize
@@ -178,16 +192,16 @@ def psKernelC0AuditedSourceBeginWithCapabilities
 
 def psKernelC0AuditedSourceBegin
     (maxRecDepth maxNatSize : Nat)
-    (allowedAxioms : List PsKernelName) :
+    (allowedAxioms : List PsKernelAxiomInfo) :
     Option PsKernelC0AuditedSourceWork :=
   psKernelC0AuditedSourceBeginWithCapabilities
     maxRecDepth maxNatSize allowedAxioms []
 
 def psKernelC0OrdinaryAxiomRequestApproved
     (request : PsKernelC0ArchitectureDeclaration)
-    (allowed : List PsKernelName) : Bool :=
-  (psKernelC0RequestOrdinaryAxioms request).all
-    (fun name => decide (name ∈ allowed))
+    (allowed : List PsKernelAxiomInfo) : Bool :=
+  (psKernelC0RequestAxiomSignatures request).all
+    (fun info => decide (info ∈ allowed))
 
 /-- Incremental all-of proof: a new event batch and the previously
     certified entire history suffice to certify their concatenation.
@@ -233,12 +247,12 @@ def psKernelC0AuditedSourceAdmit
           psKernelC0HistoryAxiomsApproved
             next.history work.allowedAxioms := by
         unfold psKernelC0HistoryAxiomsApproved
-        change (psKernelC0RequestOrdinaryAxioms step.request ++
-            psKernelC0HistoryOrdinaryAxioms work.trusted.history).all
-          (fun name => decide (name ∈ work.allowedAxioms)) = true
+        change (psKernelC0RequestAxiomSignatures step.request ++
+            psKernelC0HistoryAxiomSignatures work.trusted.history).all
+          (fun info => decide (info ∈ work.allowedAxioms)) = true
         exact psKernelC0AllAppendTrue _
-          (psKernelC0RequestOrdinaryAxioms step.request)
-          (psKernelC0HistoryOrdinaryAxioms work.trusted.history)
+          (psKernelC0RequestAxiomSignatures step.request)
+          (psKernelC0HistoryAxiomSignatures work.trusted.history)
           hA work.approved
       let completeCapabilities :
           psKernelC0HistoryCapabilitiesApproved

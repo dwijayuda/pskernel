@@ -47,13 +47,23 @@ def main : IO Unit := do
         throw (IO.userError ("approved axiom source checking failed: " ++ e))
   let _reviewedProof :
       psKernelC0HistoryAxiomsApproved reviewed.trusted.history
-        reviewed.allowedAxioms = true :=
+        reviewed.allowedAxioms :=
     psKernelC0AuditedSourceAxiomsApproved reviewed
   match psKernelC0HistoryOrdinaryAxioms reviewed.trusted.history with
   | [actual] =>
       if !psKernelNameEq actual firstName then
         throw (IO.userError "audited history recorded wrong ordinary axiom")
   | _ => throw (IO.userError "audited history lost source axiom provenance")
+  -- Authorization proves actual structural name membership, even for
+  -- non-ASCII source identifiers and nested numeric name components.
+  let nestedAxiomName : PsKernelName :=
+    .num (.str .anonymous "Reviewed🧪") 17
+  let nestedRequest : PsKernelC0ArchitectureDeclaration :=
+    .axiomDecl (c0AuditedAxiom nestedAxiomName)
+  match psKernelC0AuditedSourceAdmit 4096 reviewed nestedRequest with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "unlisted composite axiom name was authorized")
   if psKernelEnvironmentSize reviewed.trusted.certified.raw.checker.context.environment != 1 then
     throw (IO.userError "reviewed source axiom not admitted")
 

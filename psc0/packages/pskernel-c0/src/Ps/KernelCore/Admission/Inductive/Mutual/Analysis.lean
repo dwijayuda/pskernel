@@ -459,7 +459,7 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                   session
                   domain with
             | Except.error error =>
-                Except.error error
+                Except.error (psKernelMutualBudgetAt "recursive-domain-whnf" error)
             | Except.ok reduced =>
                 match
                     psKernelSimpleMutualAppInfo

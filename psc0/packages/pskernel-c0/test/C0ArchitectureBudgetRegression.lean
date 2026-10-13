@@ -119,6 +119,73 @@ def main : IO Unit := do
     throw (IO.userError "String major reservation ignored UTF-8 byte size")
   if psKernelC0DemandStringReserve withContinuation != 0 then
     throw (IO.userError "non-String demand unexpectedly reserves expansion")
+  -- Source-controlled delta may allocate a definition body and app spine
+  -- in one machine transition; charge its body before unfolding.
+  let deltaName := c0BudgetName "BudgetDeltaAlias"
+  let definition : PsKernelDefinitionInfo := {
+    base := {
+      name := deltaName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := deepValue
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let deltaEnv := psKernelEnvironmentAddUnchecked
+    psKernelEnvironmentEmpty (.defnInfo definition)
+  let deltaSession := psKernelMkCheckerSession deltaEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let deltaMachine : PsKernelC0Machine := {
+    control := .mk (.const deltaName []) []
+  }
+  if (psKernelC0ReserveDeltaSyntax deltaSession.context
+      deltaMachine 2).isSome then
+    throw (IO.userError "unfolding bypassed definition body reservation")
+  match psKernelC0ReserveDeltaSyntax deltaSession.context
+      deltaMachine 128 with
+  | none => throw (IO.userError "valid delta RHS declined generous quota")
+  | some left =>
+      if left >= 128 then
+        throw (IO.userError "delta body incurred no work charge")
+  -- Recursor iota rules clone/instantiate a source rule RHS. Precharge the
+  -- selected rule, but leave unmatched constructor majors observationally
+  -- neutral rather than falsely classifying them as resource exhaustion.
+  let ctorName := c0BudgetName "BudgetCtor"
+  let recName := c0BudgetName "BudgetRecursor"
+  let recursor : PsKernelRecursorInfo := {
+    base := { name := recName, levelParams := [], type := .sort .zero }
+    all := []
+    numParams := 0
+    numIndices := 0
+    numMotives := 0
+    numMinors := 0
+    rules := [{ ctor := ctorName, nFields := 0, rhs := deepValue }]
+    k := false
+    isUnsafe := false
+  }
+  let recParent : PsKernelC0Machine := {
+    control := .mk (.const recName []) []
+  }
+  let recState : PsKernelC0DemandState := {
+    machine := { control := .mk (.const ctorName []) [] }
+    frames := [.recursor recParent recursor []]
+  }
+  if (psKernelC0ReserveRecursorSyntax recState 2).isSome then
+    throw (IO.userError "recursor RHS bypassed preflight reservation")
+  match psKernelC0ReserveRecursorSyntax recState 128 with
+  | none => throw (IO.userError "valid iota rule exhausted generous quota")
+  | some left =>
+      if left >= 128 then
+        throw (IO.userError "recursor RHS incurred zero charge")
+  let unknownState : PsKernelC0DemandState := {
+    recState with machine := {
+      control := .mk (.const (c0BudgetName "UnknownCtor") []) []
+    }
+  }
+  match psKernelC0ReserveRecursorSyntax unknownState 10 with
+  | some 10 => pure ()
+  | _ => throw (IO.userError "nonmatching recursor major should stay neutral")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app

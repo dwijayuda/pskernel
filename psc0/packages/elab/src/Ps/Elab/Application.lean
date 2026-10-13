@@ -246,6 +246,11 @@ def psElabSolveSynthetic (current : PsElabTermResult)
     current.context.metaContext pending (!current.context.postponing)
   if solved.resourceExceeded then throw .fuelExhausted
   if current.context.postponing then
+    for constraint in solved.pending do
+      if !psSyntheticMayRetry solved.context constraint then
+        match constraint with
+        | .instanceGoal _ => throw .implicitApplicationUnsupported
+        | _ => throw .typeMismatch
     let result := psElabResultWithMeta current solved.context current.type
     let scope := psElabSaveScope result.context
     return { result with context := { result.context with

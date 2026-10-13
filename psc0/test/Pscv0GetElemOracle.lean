@@ -277,7 +277,8 @@ structure Box where
 def choose {A : Type} (first second : A) : A := first
 def apply {A B : Type} (fn : A → B) (value : A) : B := fn value
 def proof {P : Prop} (_ _ : P) : Nat := 823
-example : (choose { value := 821 } (Box.mk 0)).value = 821 := rfl
+def readLater {A : Type} (first _ : A) (read : A → Nat) : Nat := read first
+example : readLater { value := 821 } (Box.mk 0) Box.value = 821 := rfl
 example : apply (fun x => x.value) (Box.mk 827) = 827 := rfl
 example : proof (by constructor) True.intro = 823 := rfl
 example : choose 829 (Int.ofNat 0) = (829 : Int) := rfl

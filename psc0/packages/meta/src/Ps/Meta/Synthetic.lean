@@ -44,6 +44,26 @@ def psSyntheticAttempt (environment : PsEnvironment) (index : PsInstanceIndex)
       let value ← result.value
       psSyntheticAssign environment result.context id value
 
+-- A rigid failure cannot be repaired by running unrelated work. Refuse it at
+-- its owning boundary, before an ill-typed intermediate term is constructed.
+def psSyntheticMayRetry (context : PsMetaContext) : PsSyntheticConstraint → Bool
+  | .expectedType locals actual expected =>
+    let unresolved := fun term => psExprHasUnresolvedMeta (psMetaInstantiate context term)
+    unresolved actual || unresolved expected ||
+      locals.declarations.any (fun localDecl => unresolved (psLocalDeclType localDecl))
+  | .defaultValue _ _ => true
+  | .instanceGoal id =>
+    match psMetaFindDecl context id with
+    | none => false
+    | some declaration =>
+      let unresolved := fun term => psExprHasUnresolvedMeta (psMetaInstantiate context term)
+      unresolved declaration.type ||
+        declaration.localContext.declarations.any
+          (fun localDecl => unresolved (psLocalDeclType localDecl)) ||
+        match psMetaFindAssignment context id with
+        | some value => unresolved value
+        | none => false
+
 def psSyntheticIsDefault : PsSyntheticConstraint → Bool
   | .defaultValue _ _ => true
   | _ => false

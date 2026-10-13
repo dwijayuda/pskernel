@@ -38,6 +38,7 @@ def psElabDelayBefore (context : PsElabContext) (source : PsSyntaxTerm)
   let type := psWhnf context.environment context.metaContext context.localContext type
   match source with
   | .natural _ _ => match type with | .mvar _ => some true | _ => none
+  | .record _ _ => match type with | .mvar _ => some false | _ => none
   | .byE _ _ _ => if psExprHasTermMeta type then some false else none
   | _ => none
 

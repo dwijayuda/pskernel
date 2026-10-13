@@ -7,7 +7,14 @@ required A–D closure. C5 branches from retained checked information before
 erasure. Backend performance D belongs to M5. No new milestone sequence,
 compiler-source migration, self-hosting or pskernel-core work is introduced.
 
-**Current qualification (13 October 2026):** M1 is complete for its declared
+**M2 bounded graph qualification (13 October 2026):** `a98062b2ac346c66c7f687bfe7e190d12470ba4d`,
+[Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889), 251 observations.
+The generator/consumer work queue, owned-context propagation and checked shared
+answer replay are implemented; generalized answers and the unified constraint
+scheduler remain open. See [design and measured boundaries](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+Interleave remaining A deriving work with these M2 dependencies.
+
+**M1 qualification (13 October 2026):** M1 is complete for its declared
 selected scope at `c00e146bd5c97788a4a6a39221849973aeafda84`,
 [Linux 38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
 See [acceptance and measured limits](PSCV0_M1_COMPLETION_2026-10-13.md).

@@ -1,5 +1,20 @@
 # PSCV0 native M1 and M2 — Implementation evidence and remaining Lean parity
 
+## Current qualification — M2 bounded instance graph (13 October 2026)
+
+Executable `a98062b2ac346c66c7f687bfe7e190d12470ba4d`;
+[green Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889):
+251 shared runtime observations, four panic contracts, 177 portable / 185 native
+modules. The bounded generator/consumer engine, private-context ownership,
+checked shared replay and Pi scope isolation are qualified. Standard remains
+292 declarations / 14 classes / 52 instances with the unchanged M1 FNV/SHA digests.
+
+[Design, invariants, growth measurements and remaining work](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md)
+are the authoritative M2 slice record. Full M2, A and v7 remain incomplete.
+Next interleave parameter/universe-aware deriving with its M2 dependencies;
+then M3+B, M4+C/D, and M5/E. Preserve the readable-output plan below.
+Native Lean / official checking only; no pskernel-core or self-hosting.
+
 ## Current roadmap integration — readable outputs (13 October 2026)
 
 The [source, historical-branch and qualification audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) is now the
@@ -14,16 +29,16 @@ M2–M4 semantic owners; complete C5 source publication and correspondence under
 M5/E after the required A–D language closure. This replaces the old blanket
 C5-after-all-A–E scheduling rule. No new milestone track is added.
 
-**Current code boundary:** the M2 waiter engine remains unimplemented; this
-output audit is documentation, not a new executable qualification. No C5 source
-emitter or source-authority migration was added. Native `.lean`, official checking,
+**Current code boundary:** the bounded M2 waiter engine is qualified above;
+generalized answers and the full synthetic-constraint scheduler remain open.
+No C5 source emitter or source-authority migration was added. Native `.lean`, official checking,
 GitHub source operations and Linux CI remain authoritative. No pskernel-core
 or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.
 
-## Current qualified state — M1 complete; M2 + A next (13 October 2026)
+## M1 completion checkpoint — preserved baseline (13 October 2026)
 
-This section is authoritative for current status. Older sections below are
-historical checkpoints; their pending-M1 statements are superseded.
+This section records the M1 completion baseline. The M2 qualification above
+supersedes its executable status. Older pending-M1 statements are historical.
 
 - **Qualified executable:** `c00e146bd5c97788a4a6a39221849973aeafda84`.
 - **Green Linux CI:** [38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
@@ -42,8 +57,8 @@ or formal compiler semantic preservation.
 
 **Accepted interleaving:** M2 with remaining A; M3 with B; M4 with C/D;
 final M5/E qualification. Collect E evidence and apply measured M5 improvements
-throughout. Next implement the shared instance-search architecture before
-expanding the Phase A handlers that rely on it. Preserve native portable Lean,
+throughout. Continue the shared instance-search architecture alongside
+the Phase A handlers that rely on it. Preserve native portable Lean,
 official checking, GitHub source operations, Linux CI, branch/draft PR 109,
 Wasm GC internals and explicit ABI-only linear memory. C5 is integrated as above; compiler-source migration,
 pskernel-core and self-hosting remain deferred.

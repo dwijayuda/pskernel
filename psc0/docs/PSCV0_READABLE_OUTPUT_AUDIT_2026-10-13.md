@@ -1,5 +1,12 @@
 # Readable output: implementation audit and integrated roadmap
 
+**Subsequent M2 qualification:** [Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889)
+at `a98062b2ac346c66c7f687bfe7e190d12470ba4d` preserves the backends and plan audited here.
+The enlarged source fixture has 251 shared observations and 531 declaration
+mappings; the 14 generated-parent origins and mapping precision are unchanged.
+No C5 emitter was added. The historical audit evidence below remains tied to
+its stated source revisions.
+
 Audit date: 13 October 2026. Source inspected:
 `b2e47ab9f5a45f6f3bdbd10db7ccb22a9bbe2a68` on
 `psc0/pscv0-v7-native-lean-v1`; qualified executable:

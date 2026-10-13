@@ -107,6 +107,8 @@ Mandatory source-WHNF differentials exercise direct and β/ζ-major constructors
 
 **Status:** sources pushed; use the completed native CI for the latest *executable* source to qualify this bounded milestone. These foundations are not Phase C/D/E exit. Complete intermediate work accounting, real checked K/eta positive/negative families and unified accepting-kernel refinement before promoting candidate results.
 
+**CDE-8 executable qualification update (2026-10-14):** The latest bounded implementation [`d5a179dc`](https://github.com/dwijayuda/pskernel/commit/d5a179dc08cd361f70a5d34001d1eea4cc99e736) has **full native [CI 38448498595](https://github.com/dwijayuda/pskernel/actions/runs/38448498595) SUCCESS**, including Lean 4.35 compilation, official source/reject fixtures, the mandatory bounded-resource and K/eta observation regressions, negative/resource/migration checks, microbenchmarks and independently rebuilt original checker comparison. The scope is **candidate work-budget foundation and source-typed observation only**; globally complete allocation metering, positive real-checked K/eta coverage, Phase C/D/E exits, full Phase B acceptance and formal soundness remain outstanding. Documentation commits after `d5a179dc` do not represent new executable qualification.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

@@ -226,6 +226,28 @@ def main : IO Unit := do
   }
   if (psKernelC0ChargeDemandStateSyntax 64 rewritten 2).isSome then
     throw (IO.userError "newly materialized intermediate bypassed quota")
+  -- Primitive computation must reserve numerical byte-work before
+  -- dispatch, including potentially expanding pow and shifts.
+  if (psKernelC0ReserveNatBinaryWork psKernelNatPowName 2 64 128).isSome then
+    throw (IO.userError "Nat.pow growth bypassed primitive preflight")
+  match psKernelC0ReserveNatBinaryWork psKernelNatPowName 2 5 4096 with
+  | none => throw (IO.userError "small Nat.pow preflight declined")
+  | some left =>
+      if left >= 4096 then
+        throw (IO.userError "Nat.pow preflight spent zero work")
+  if (psKernelC0ReserveNatBinaryWork
+      psKernelNatShiftLeftName 3 200 64).isSome then
+    throw (IO.userError "Nat.shiftLeft bypassed count work cap")
+  match psKernelC0ReserveNatBinaryWork
+      psKernelNatAddName 20 30 128 with
+  | none => throw (IO.userError "small Nat.add arithmetic declined")
+  | some left =>
+      if left >= 128 then
+        throw (IO.userError "Nat.add arithmetic spent no work")
+  match psKernelC0ReserveNatBinaryWork
+      (c0BudgetName "Unrelated") 20 30 11 with
+  | some 11 => pure ()
+  | _ => throw (IO.userError "unknown primitive incurred inferred work")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app

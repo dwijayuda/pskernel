@@ -51,8 +51,50 @@ def main : IO Unit := do
     | .ok next => pure next
     | .error reason =>
         throw (IO.userError ("trusted first admission failed: " ++ reason))
+  -- Source checking, inference, WHNF and DefEq may change checker
+  -- caches, but none may replace the *checked environment history*.
+  let (inferred, afterInfer) ← match psKernelC0TrustedSourceInfer
+      4096 admittedOnce (.sort .zero) with
+    | .ok result => pure result
+    | .error reason =>
+        throw (IO.userError ("trusted source inference failed: " ++ reason))
+  if !psKernelExprEqual inferred (.sort (.succ .zero)) then
+    throw (IO.userError "trusted inference changed source type")
+  let (checked, afterCheck) ← match psKernelC0TrustedSourceCheck
+      4096 afterInfer (.sort .zero) with
+    | .ok result => pure result
+    | .error reason =>
+        throw (IO.userError ("trusted full source check failed: " ++ reason))
+  if !psKernelExprEqual checked inferred then
+    throw (IO.userError "trusted full check disagreed with inference")
+  let (same, afterDefEq) ← match psKernelC0TrustedSourceDefEq
+      4096 afterCheck (.const nameOne []) (.sort .zero) with
+    | .ok result => pure result
+    | .error reason =>
+        throw (IO.userError ("trusted source DefEq failed: " ++ reason))
+  if !same then
+    throw (IO.userError "trusted DefEq lost checked definition unfolding")
+  let (normalized, afterWhnf) ← match psKernelC0TrustedSourceWhnf
+      4096 afterDefEq (.const nameOne []) with
+    | .ok result => pure result
+    | .error reason =>
+        throw (IO.userError ("trusted source WHNF failed: " ++ reason))
+  if !psKernelExprEqual normalized (.sort .zero) then
+    throw (IO.userError "trusted WHNF changed original kernel semantics")
+  let _historyAfterQueries :
+      PsKernelC0SourceEnvironmentHistory
+        afterWhnf.certified.raw.checker.context.environment :=
+    afterWhnf.history
+  if psKernelEnvironmentSize afterWhnf.certified.raw.checker.context.environment != 1 then
+    throw (IO.userError "checked query changed admitted environment")
+  match psKernelC0TrustedSourceCheck 4096 afterWhnf
+      (.app (.sort .zero) (.sort .zero)) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "trusted full checker authorized an invalid application")
+
   let admittedTwice ← match psKernelC0TrustedSourceAdmit
-      4096 admittedOnce second with
+      4096 afterWhnf second with
     | .ok next => pure next
     | .error reason =>
         throw (IO.userError ("trusted second admission failed: " ++ reason))
@@ -101,4 +143,5 @@ def main : IO Unit := do
     throw (IO.userError "failed trusted admission mutated accepted source prefix")
   IO.println "C0_TRUSTED checked_empty_genesis_provenance=pass"
   IO.println "C0_TRUSTED chained_source_admissions_exact_receipts=pass"
+  IO.println "C0_TRUSTED history_preserved_across_source_judgments=pass"
   IO.println "C0_TRUSTED immutable_rejection_and_checked_environment=pass"

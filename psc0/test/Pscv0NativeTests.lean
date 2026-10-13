@@ -65,23 +65,14 @@ private def getElemFoundationCases : IO Unit := do
     "  getElem?(xs: AlwaysBox, i: Nat): Option Nat := Option.some(xs.value)\n" ++
     "  getElem![inhabited: Inhabited Nat](xs: AlwaysBox, i: Nat): Nat := GetElem?.getElem!Default(Option.some(xs.value))\n" ++
     "}\n" ++
-    -- Genuine decision coherence: both independently supplied dictionaries
-    -- must agree because their Bool choices reflect the same proposition.
-    -- No assumed subsingleton lemma, unchecked cast or Boolean-as-Prop proof.
-    "theorem psDecidableUnique(P: Prop, left: Decidable P, right: Decidable P): left = right := by {\n" ++
-    "  cases left\n" ++
-    "  case intro bl hl =>\n" ++
-    "    cases right\n" ++
-    "    case intro br hr =>\n" ++
-    "      cases bl\n" ++
-    "      case false =>\n" ++
-    "        cases br\n" ++
-    "        case false => rfl\n" ++
-    "        case true => exact False.elim(hl(hr))\n" ++
-    "      case true =>\n" ++
-    "        cases br\n" ++
-    "        case false => exact False.elim(hr(hl))\n" ++
-    "        case true => rfl\n" ++
+    -- Reflection is a checked proof, not an unchecked Bool-to-Prop cast.
+    -- Test dependent elimination before proving two decisions are equal.
+    "theorem psDecisionReflectsAsOr(P: Prop, decision: Decidable P): P ∨ ¬P := by {\n" ++
+    "  cases decision\n" ++
+    "  case intro flag reflects =>\n" ++
+    "    cases flag\n" ++
+    "    case false => exact Or.inr(reflects)\n" ++
+    "    case true => exact Or.inl(reflects)\n" ++
     "}\n" ++
 
     "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++

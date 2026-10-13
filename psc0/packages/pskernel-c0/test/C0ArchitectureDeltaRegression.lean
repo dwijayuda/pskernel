@@ -18,6 +18,14 @@ def c0DeltaCheck
             (fun value => psKernelExprEqual value expected)) then
         throw (IO.userError (name ++ ": candidate/source delta divergence"))
 
+/-- Literal-spine fixtures use the same source Nat names and expression
+    forms as the trusted checker. -/
+def c0DeltaNatLit (n : Nat) : PsKernelExpr := .lit (.nat n)
+
+def c0DeltaNatBinary
+    (name : PsKernelName) (a b : PsKernelExpr) : PsKernelExpr :=
+  .app (.app (.const name []) a) b
+
 def main : IO Unit := do
   let type := PsKernelExpr.sort (.succ .zero)
   let sort := PsKernelExpr.sort .zero
@@ -145,5 +153,53 @@ def main : IO Unit := do
   match psKernelSessionCheck 4096 session (.app sort sort) with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "C0 checked invalid application")
+  -- CDE-2: source-owned Nat primitives on a delayed candidate spine.
+  c0DeltaCheck "nat-literal-successor" session
+    (.app (.const psKernelNatSuccName []) (c0DeltaNatLit 9))
+    (c0DeltaNatLit 10)
+  c0DeltaCheck "nat-literal-add" session
+    (c0DeltaNatBinary psKernelNatAddName
+      (c0DeltaNatLit 17) (c0DeltaNatLit 25))
+    (c0DeltaNatLit 42)
+  c0DeltaCheck "nat-literal-sub" session
+    (c0DeltaNatBinary psKernelNatSubName
+      (c0DeltaNatLit 2) (c0DeltaNatLit 9))
+    (c0DeltaNatLit 0)
+  c0DeltaCheck "nat-literal-mul" session
+    (c0DeltaNatBinary psKernelNatMulName
+      (c0DeltaNatLit 6) (c0DeltaNatLit 7))
+    (c0DeltaNatLit 42)
+  c0DeltaCheck "nat-literal-div-zero" session
+    (c0DeltaNatBinary psKernelNatDivName
+      (c0DeltaNatLit 7) (c0DeltaNatLit 0))
+    (c0DeltaNatLit 0)
+  c0DeltaCheck "nat-literal-eq" session
+    (c0DeltaNatBinary psKernelNatBeqName
+      (c0DeltaNatLit 7) (c0DeltaNatLit 7))
+    (psKernelBoolExpr true)
+  -- Delayed arguments must retain the beta/zeta environment until readback.
+  let natBinder := c0DeltaName "n"
+  let add2 := c0DeltaNatBinary psKernelNatAddName
+    (.bvar 0) (c0DeltaNatLit 2)
+  c0DeltaCheck "nat-beta-environment" session
+    (.app (.lam natBinder (.sort .zero) add2 .default)
+      (c0DeltaNatLit 40))
+    (c0DeltaNatLit 42)
+  c0DeltaCheck "nat-zeta-environment" session
+    (.letE natBinder (.sort .zero) (c0DeltaNatLit 40)
+      add2 false)
+    (c0DeltaNatLit 42)
+  let neutral : PsKernelExpr := .const (c0DeltaName "NatNeutral") []
+  let stuckNat := c0DeltaNatBinary psKernelNatAddName neutral
+    (c0DeltaNatLit 2)
+  c0DeltaCheck "nat-nonliteral-remains-neutral" session
+    stuckNat stuckNat
+  match psKernelC0ArchitectureCandidateDelta 0 session.context
+      (c0DeltaNatBinary psKernelNatMulName
+        (c0DeltaNatLit 2) (c0DeltaNatLit 3)) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "Nat candidate accepted exhausted execution fuel")
   IO.println "C0_ARCHITECTURE checked_delta_and_closure_spine_differential=pass"
+  IO.println "C0_ARCHITECTURE bounded_nat_literal_spine_differential=pass"
   IO.println "C0_ARCHITECTURE opaque_and_resource_boundaries=pass"

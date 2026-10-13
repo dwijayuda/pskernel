@@ -26,7 +26,8 @@ def psElabDoType (context : PsElabContext) (ops : PsElabDoOps)
       type := .app (.constE psOptionName
         [psLevelInstantiate unified.context.levels optionLevel]) type }
   | .except error =>
-    return { context := context
+    return {
+      context := context
       type := psExprApplyMany (.constE (psRootName "Except") []) [error, type] }
 
 -- Expose aliases one head at a time, stopping before Id erases the effect

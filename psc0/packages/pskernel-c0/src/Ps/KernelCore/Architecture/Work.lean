@@ -40,9 +40,14 @@ def psKernelC0ArchitectureBegin
 
 /-- Stage source syntax by exact validated readback. This can also stage an
     ill-typed expression; no typing or proof approval follows from storage. -/
-def psKernelC0ArchitectureStage
+/-- Validated staging preserves the EXACT checker session. The
+    ownership equality lets trusted admission history survive syntax-only
+    staging without a run-time comparison of entire environments. -/
+def psKernelC0ArchitectureStageWithOwner
     (work : PsKernelC0ArchitectureWork)
-    (expr : PsKernelExpr) : Option PsKernelC0ArchitectureWork := do
+    (expr : PsKernelExpr) :
+    Option { next : PsKernelC0ArchitectureWork //
+      next.checker = work.checker } := do
   if !psKernelC0ArchitectureWorkValid work then none
   else do
     let (next, id) ← psKernelC0ScratchEncode work.scratch expr
@@ -51,8 +56,17 @@ def psKernelC0ArchitectureStage
       let found ← psKernelC0DecodeExpr next.working id
       if !psKernelExprEqual found expr then none
       else
-        some { work with scratch := next
-                         stagedRoots := id :: work.stagedRoots }
+        some ⟨{
+          work with scratch := next
+                    stagedRoots := id :: work.stagedRoots
+        }, rfl⟩
+
+/-- Preserve the original staging API while its provenance-preserving
+    counterpart keeps the explicit exact checker-owner equality. -/
+def psKernelC0ArchitectureStage
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) : Option PsKernelC0ArchitectureWork :=
+  (psKernelC0ArchitectureStageWithOwner work expr).map Subtype.val
 
 /-- Candidate preview is an observation. The source checker WHNF remains the
     authority even if the lazy evaluator declines or disagrees. -/

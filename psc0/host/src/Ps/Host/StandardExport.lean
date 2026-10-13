@@ -215,7 +215,7 @@ private def exportStandardCore (spec : StandardExportSpec)
       if !boundary.contains info.name && !seen.contains info.name then
         seen := seen.insert info.name
         entries := entries.push info
-  let entries := entries.qsort (fun a b => Lean.Name.lt a.name b.name)
+  entries := entries.qsort (fun a b => Lean.Name.lt a.name b.name)
   let declarations ← entries.toList.mapM fun info => do
     match exportDeclaration native info with
     | .ok value => pure value

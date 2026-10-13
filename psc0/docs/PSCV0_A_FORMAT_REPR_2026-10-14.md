@@ -540,3 +540,26 @@ class registration or global instance. Accept the observed canonical payload:
 FNV `fnv1a64:6200500133443239461`; SHA
 `sha256:c40b99aa82ba0be17ae07354e65b731a99e95d2e5bf9b3708ef56cec0be599b1`.
 Keep both exact guards; source/backend qualification is the next run.
+
+
+### Qualified scalar foundation and conversion performance
+
+Executable `cb4e8617cf7c9e19a567b391b093e3fac65fa143`, Linux
+[38458234955](https://github.com/dwijayuda/pskernel/actions/runs/38458234955)
+is green: all native/oracle/source/refusal/search and existing backend,
+component, project, ABI and performance gates; 341 shared observations and four
+panic contracts retained. The open conditional equations, mod-zero equation,
+general bound and proof-carrying Fin source compile and check successfully.
+The same 1,323-declaration Wasm source now elaborates in **172 ms**, versus
+536,228 ms before reflexivity was tested before normalization. Its 190 ms erasure
+and 403 ms emission remain separately measured. No budgets were increased.
+
+Next scalar design references additionally studied at the pin:
+`Lean/Compiler/LCNF/Irrelevant.lean`, `MonoTypes.lean`, `ToImpureType.lean`,
+`Types.lean`, and `Lean/Compiler/IR/ToIRType.lean`. Lean distinguishes builtin
+machine representations from single-relevant-field structure elimination.
+PSC0 already has machine integer IR and arithmetic/comparison backends. Extend
+that mechanism for conversions and shifts. Keep logical bounds and explicit
+foreign API construction constraints despite proof erasure; generalizing the
+current special wrapper unboxing without preserving the public API plan would
+be incorrect. Full A remains open.

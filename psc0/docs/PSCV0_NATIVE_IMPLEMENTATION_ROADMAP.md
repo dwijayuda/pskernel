@@ -1,35 +1,38 @@
 # PSCV0 v7 native implementation roadmap
 
-## Current qualified boundary — ToFormat/Repr (14 October 2026)
+## Current qualified boundary — checked scalar foundation (14 October 2026)
 
-Executable `e565bbe6bab75baf4fa511640e1f82744f400032`;
-[green Linux 38451656694](https://github.com/dwijayuda/pskernel/actions/runs/38451656694).
-**341 shared runtime observations**, four panic contracts, **204 portable /
-212 native modules**, profile `pscv0-v7-native-bounded/56`.
+Executable `cb4e8617cf7c9e19a567b391b093e3fac65fa143`;
+[green Linux 38458234955](https://github.com/dwijayuda/pskernel/actions/runs/38458234955).
+**341 shared runtime observations**, four panic contracts, **206 portable /
+216 native modules**, profile `pscv0-v7-native-bounded/58`.
 Official **Lean 4.35.0**, independent oracle, semantic/refusal/search checks,
 strict IR, JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, projects and
 existing performance gates pass. Performance parity is not established.
 
-Standard: **460 declarations /22 classes /88 instances**.
-FNV `fnv1a64:2548399426123262483`;
-SHA `sha256:79e34c4fd2bb8e491d624c86ccb644bf96b2442e090137d01b3c74ca72bfaeaf`.
+Standard: **561 declarations /22 classes /88 instances**.
+FNV `fnv1a64:6200500133443239461`;
+SHA `sha256:c40b99aa82ba0be17ae07354e65b731a99e95d2e5bf9b3708ef56cec0be599b1`.
 
-Genuine ToFormat/Repr/ReprAtom/ReprTuple classes, checked scalar/collection
-display methods, selected nonrecursive Repr deriving, precedence, quoting,
-proof/type placeholders, UTF-8 soft lines, tuple flattening and fill layouts
-are qualified. List and selected APIs/defaults/BEq retain element universes;
-map/folds retain independent result universes. Array/Prod and proof-taking
-List indexing retain their documented Type-0 boundary.
+ToFormat/Repr and selected nonrecursive deriving remain qualified. Checked
+Nat.add/sub/mul/beq and ite models replace earlier axioms. The actual pinned
+Nat.mod model and Nat.mod_lt proof closure are portable Core data: 102
+declarations, 101 new names, no new axioms. A native-only authoring exporter
+kernel-checks converted candidates and regenerates the frozen-boundary asset
+byte-identically. Native class/instance registrations are not imported merely
+because their logical declarations are dependencies.
 
-Shared fixes preserve aliases' actual raw lambda entry prefixes, complete
-omitted defaults under unknown expected types, and retain empty Type-valued
-class dictionaries as runtime singletons. Explicit OfNat Id follows upstream;
-no broader instance transparency or special literal rewrite was introduced.
+Shared weak-head reduction preserves complete application spines across
+beta/delta/projection steps, keeping saturated arithmetic on native literal
+paths. Conversion/unification test structural reflexivity before evaluation.
+The same Wasm observation source improved from **536,228 ms to 172 ms**
+elaboration; resource limits and acceptance criteria are unchanged. This is
+a specific regression repair, not general performance parity.
 
 [Design, sources and qualification](PSCV0_A_FORMAT_REPR_2026-10-14.md).
-**Full M2+A remains incomplete.** Continue Hashable/scalar dependencies,
-remaining selected Standard APIs, comprehensive manifest, broader M2 evidence
-and C5 semantic retention. Recursive/indexed/dependent deriving remains M3+B.
+**Full M2+A remains incomplete.** Continue UInt/BitVec/Hashable, remaining
+selected Standard APIs, comprehensive manifest, broader M2 evidence and C5
+semantic retention. Recursive/indexed/dependent deriving remains M3+B.
 
 ## Historical qualified boundary — stable Lean and pure Format (14 October 2026)
 

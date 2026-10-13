@@ -122,6 +122,7 @@ jobs:
           .lake/build/bin/pscv0_native --audit-standard-closure > ../dist/pscv0-native/standard-closure.json
           .lake/build/bin/pscv0_native --export-scalar-arithmetic ../dist/pscv0-native/StandardScalarArithmeticData.lean > ../dist/pscv0-native/standard-export.log
           cmp ../packages/environment/src/Ps/Environment/StandardScalarArithmeticData.lean ../dist/pscv0-native/StandardScalarArithmeticData.lean
+          .lake/build/bin/pscv0_native --export-unsigned-foundation ../dist/pscv0-native/StandardUnsignedFoundationData.lean | tee ../dist/pscv0-native/unsigned-export.log
           .lake/build/bin/pscv0_native_checks | tee ../dist/pscv0-native/checks.log
           .lake/build/bin/pscv0_native --version | tee ../dist/pscv0-native/native-version.json
           .lake/build/bin/pscv0_native --emit-all ../dist/pscv0-native/application.ps ../dist/pscv0-native/application | tee ../dist/pscv0-native/emit.log

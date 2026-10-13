@@ -11,13 +11,18 @@ Study pinned upstream source and relevant tests before each substantial feature.
 Prefer coherent shared mechanisms, minimal validation at architectural milestones,
 no fabricated axioms, weakened acceptance or backend-specific semantic patches.
 
-Latest qualified executable: e565bbe6bab75baf4fa511640e1f82744f400032;
-Linux38451656694 passed with 341 shared observations/four panic contracts,
-204 portable/212 native modules, Standard460/22/88, profile/56.
+Latest qualified executable: cb4e8617cf7c9e19a567b391b093e3fac65fa143;
+Linux38458234955 passed with 341 shared observations/four panic contracts,
+206 portable/216 native modules, Standard561/22/88, profile/58.
 See AI_WORK_STATE for exact digests. ToFormat/Repr and selected deriving are
-qualified; full M2+A is incomplete.
+qualified, as are checked elementary arithmetic, ite and the genuine Nat.mod_lt
+proof closure. Complete-spine WHNF and reflexivity-before-evaluation reduced
+Wasm observation elaboration from 536228ms to 172ms. Full M2+A is incomplete.
 
-Next: inspect the native-only StandardClosure audit output for Nat.mod_lt,
+Next: use the native-only StandardExport candidate for UInt8/16/32/64 and
+BitVec construction/conversions; freeze and kernel-check its boundary before
+admission, then complete shared typed runtime conversion/representation paths.
+Inspect StandardClosure output for remaining
 BitVec/UInt64, mixHash/String.hash and Float/scientific. Choose the smallest
 correct checked logical-library closure. Existing portable names are collisions,
 not compatible imports. Implement the real UInt64 foundation then Hashable,

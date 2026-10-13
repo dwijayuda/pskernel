@@ -84,7 +84,7 @@ def psWhnfWithTransparencyFuel (transparency : PsTransparency)
             match psEnvironmentFind environment name with
             | none => core
             | some declaration =>
-                match if psTransparencyAllows transparency (psEnvironmentReducibility environment name)
+                match if psEnvironmentCanUnfold environment transparency name
                     then psDeclarationValue declaration else none with
                 | none => core
                 | some value =>

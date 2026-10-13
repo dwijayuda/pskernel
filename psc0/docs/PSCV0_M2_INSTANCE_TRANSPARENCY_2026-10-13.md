@@ -39,3 +39,19 @@ Current last qualified executable is 35641f810e31f3c9d309c01028acd53ebe4112d9,
 Linux run 38430940757, 293 shared observations. The intentional metadata payload
 change must be reviewed and both expected digests repinned only after the strict
 guard reports them. This is not full M2+A or v7 completion.
+
+## Reviewed payload update
+
+Native compilation and independent source oracle passed at
+5cb1352d201506f93131cecdd6c0b4b864e94380, Linux 38431987071.
+PrimitiveAudit checked the selected native definition statuses successfully.
+The strict production guard then refused the old digest, as intended:
+FNV `fnv1a64:1901246055571366448`,
+SHA `sha256:799539fdf6557760d1c9134439ac6ea811915c7c6b054164310c11aa3e017136`.
+
+Review: the v2 payload adds declaration-ordered reducibility records. Core
+declarations, class/instance order and aliases are unchanged: 308/18/54.
+The 36 upstream nondefault statuses are explicit; registered portable helper
+instances use instanceReducible, all other portable definitions use semireducible.
+No new axiom, primitive or assumption. Both expected hashes are now repinned;
+full runtime qualification remains pending.

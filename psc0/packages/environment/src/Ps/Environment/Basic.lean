@@ -151,6 +151,12 @@ def psEnvironmentReducibility (environment : PsEnvironment) (name : PsName) : Ps
   ((psBucketFind 16 environment.reducibility (psEnvironmentNameHash name)).find?
     (fun entry => psNameEq entry.fst name)).map (·.snd) |>.getD .semireducible
 
+def psEnvironmentCanUnfold (environment : PsEnvironment) (mode : PsTransparency)
+    (name : PsName) : Bool :=
+  match mode with
+  | .all => true
+  | _ => psTransparencyAllows mode (psEnvironmentReducibility environment name)
+
 def psEnvironmentSetReducibility (environment : PsEnvironment) (name : PsName)
     (status : PsReducibility) : PsEnvironment :=
   { environment with

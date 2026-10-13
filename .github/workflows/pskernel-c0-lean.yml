@@ -17,6 +17,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureExecutionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureWorkRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ArchitectureDeltaRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
       - 'psc0/packages/pskernel-c0/test/C0Ablation.py'
@@ -79,6 +80,9 @@ jobs:
       - name: C0 architecture-first validated scratch transaction and source authority
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureWorkRegression.lean
+      - name: C0 architecture-first delta closure comparison (non-accepting)
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ArchitectureDeltaRegression.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

@@ -1,0 +1,83 @@
+import Ps.KernelCore.Architecture.Delta
+import Ps.KernelCore.Admission.Declaration.Admission
+
+def c0DeltaName (name : String) : PsKernelName :=
+  .str .anonymous name
+
+def c0DeltaCheck
+    (name : String)
+    (session : PsKernelCheckerSession)
+    (input expected : PsKernelExpr) : IO Unit := do
+  match psKernelC0ArchitectureObserveDelta 4096 session input with
+  | .error err =>
+      throw (IO.userError (name ++ ": source WHNF rejected: " ++ err))
+  | .ok (observation, _) =>
+      if !observation.agrees ||
+          !psKernelExprEqual observation.sourceValue expected ||
+          !((observation.candidateValue).any
+            (fun value => psKernelExprEqual value expected)) then
+        throw (IO.userError (name ++ ": candidate/source delta divergence"))
+
+def main : IO Unit := do
+  let type := PsKernelExpr.sort (.succ .zero)
+  let sort := PsKernelExpr.sort .zero
+  let first := c0DeltaName "C0DeltaFirst"
+  let second := c0DeltaName "C0DeltaSecond"
+  let a : PsKernelDefinitionInfo := {
+    base := { name := first, levelParams := [], type := type }
+    value := sort
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let b : PsKernelDefinitionInfo := {
+    base := { name := second, levelParams := [], type := type }
+    value := .const first []
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let env1 ← match psKernelAddDefinition 4096 psKernelEnvironmentEmpty a
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error err => throw (IO.userError ("setup first delta: " ++ err))
+  let env2 ← match psKernelAddDefinition 4096 env1 b
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error err => throw (IO.userError ("setup second delta: " ++ err))
+  let session := psKernelMkCheckerSession env2 []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DeltaCheck "one-delta" session (.const first []) sort
+  c0DeltaCheck "chained-delta" session (.const second []) sort
+  c0DeltaCheck "neutral-constant" session
+    (.const (c0DeltaName "UnboundNeutral") [])
+    (.const (c0DeltaName "UnboundNeutral") [])
+  let x := c0DeltaName "x"
+  let ty := .sort .zero
+  let lam : PsKernelExpr := .lam x ty (.bvar 0) .default
+  let argument : PsKernelExpr := .const first []
+  c0DeltaCheck "delta-under-beta" session
+    (.app lam argument) sort
+  c0DeltaCheck "delta-under-zeta" session
+    (.letE x ty (.const second []) (.bvar 0) false) sort
+  let opaqueName := c0DeltaName "C0DeltaOpaque"
+  let info : PsKernelOpaqueInfo := {
+    base := { name := opaqueName, levelParams := [], type := type }
+    value := sort
+    isUnsafe := false
+  }
+  let opaqueEnv ← match psKernelAddOpaque 4096 env2 info
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error err => throw (IO.userError ("setup opaque: " ++ err))
+  c0DeltaCheck "opaque-is-neutral"
+    (psKernelMkCheckerSession opaqueEnv [] .safe 4096 psKernelLeanNatMaxSizeDefault)
+    (.const opaqueName []) (.const opaqueName [])
+  match psKernelC0ArchitectureCandidateDelta 0 session (.const first []) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "C0 delta candidate accepted zero fuel")
+  -- The source authority rejects an ill-typed application; even a candidate
+  -- value must never convert that into a valid checked judgment.
+  match psKernelSessionCheck 4096 session (.app sort sort) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "C0 checked invalid application")
+  IO.println "C0_ARCHITECTURE checked_delta_and_closure_spine_differential=pass"
+  IO.println "C0_ARCHITECTURE opaque_and_resource_boundaries=pass"

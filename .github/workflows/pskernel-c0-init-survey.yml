@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Isolate nested constructor field reduction and typing bottleneck
+      - name: Verify recursive-domain WHNF as first nested reduction failure
         shell: bash
         run: |
           set -euo pipefail

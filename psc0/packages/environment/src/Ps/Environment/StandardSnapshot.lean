@@ -166,15 +166,12 @@ def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
         psReducibilityName (psEnvironmentReducibility environment name)])
       environment.declarations]
 
--- FNV-1a (64-bit) over UTF-8 bytes, computed with arbitrary-precision Nat
--- and an explicit modulus. The result is independent of host pointer width,
--- locale, JavaScript numeric precision and filesystem order.
+-- Fixed-width FNV-1a over the canonical UTF-8 bytes. Lean 4.35.0 UInt64
+-- arithmetic is exactly modulo 2^64 and uses native word operations. The
+-- public result and serialized payload are unchanged and platform-independent.
 def psStandardSnapshotFNV64 (text : String) : Nat :=
-  let modulus : Nat := 18446744073709551616
-  let prime : Nat := 1099511628211
-  text.toUTF8.data.foldl (fun acc b =>
-    ((Nat.xor acc b.toNat) * prime) % modulus)
-    14695981039346656037
+  (text.toUTF8.foldl (fun (acc : UInt64) byte =>
+    (acc ^^^ byte.toUInt64) * 1099511628211) 14695981039346656037).toNat
 
 def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
   "fnv1a64:" ++ toString (psStandardSnapshotFNV64
@@ -188,48 +185,45 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- No new axiom. Linux 38464681852 compiled the native compiler/oracle,
 -- regenerated all assets exactly and passed the signature/status audit before
 -- independently reporting both strict selected-registry digests.
+-- Reviewed /61: native product/list equations, 16 unsigned display/default
+-- dictionaries and the 803-declaration unsigned proof slice (six old axioms
+-- replaced), plus 24 arithmetic dictionaries. Exactly the two user-approved
+-- pinned assumptions. Linux38476108793 compiled both oracles, kernel-replayed
+-- all assets and reproduced source byte-for-byte, then independently reported
+-- both strict digests using the previous Nat-based checksum implementation.
+-- The native-word implementation below must reproduce those exact digests.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:10680386315174967875"
+  "fnv1a64:16613033526791726173"
 
 
--- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing
--- FNV drift detector. Every intermediate word is explicitly reduced to 32 bits.
--- This implementation uses Lean Nat arithmetic only; no shell, OpenSSL, FFI,
--- host-dependent HashMap iteration or unchecked compiler backend is involved.
--- A digest is integrity evidence, not a proof of the serialized environment's
--- completeness, runtime semantics, or logical consistency.
-private def psStandardSHA256Mod : Nat := 4294967296
+-- FIPS 180-4 sections 4.1.2 and 6.2 define SHA-256 over 32-bit words.
+-- Use pinned Lean 4.35.0 UInt32 and packed ByteArray operations directly:
+-- wraparound is the required modular arithmetic, without boxed Nat remainders.
+-- The canonical payload, padding, digest text and trust boundary do not change.
+-- Source references: Init/Data/UInt/{Basic,BasicAux}.lean and ByteArray/Basic.lean.
+-- A digest is integrity evidence, not proof of consistency or semantic coverage.
+@[inline] private def psStandardSHA256ROR (word shift : UInt32) : UInt32 :=
+  (word >>> shift) ||| (word <<< (32 - shift))
 
-private def psStandardSHA256Word (n : Nat) : Nat :=
-  n % psStandardSHA256Mod
+@[inline] private def psStandardSHA256Small0 (word : UInt32) : UInt32 :=
+  psStandardSHA256ROR word 7 ^^^ psStandardSHA256ROR word 18 ^^^ (word >>> 3)
 
-private def psStandardSHA256ROR (word shift : Nat) : Nat :=
-  (word / (2 ^ shift) + (word % (2 ^ shift)) * (2 ^ (32 - shift))) %
-    psStandardSHA256Mod
+@[inline] private def psStandardSHA256Small1 (word : UInt32) : UInt32 :=
+  psStandardSHA256ROR word 17 ^^^ psStandardSHA256ROR word 19 ^^^ (word >>> 10)
 
-private def psStandardSHA256Small0 (word : Nat) : Nat :=
-  Nat.xor (Nat.xor (psStandardSHA256ROR word 7) (psStandardSHA256ROR word 18))
-    (word / (2 ^ 3))
+@[inline] private def psStandardSHA256Big0 (word : UInt32) : UInt32 :=
+  psStandardSHA256ROR word 2 ^^^ psStandardSHA256ROR word 13 ^^^ psStandardSHA256ROR word 22
 
-private def psStandardSHA256Small1 (word : Nat) : Nat :=
-  Nat.xor (Nat.xor (psStandardSHA256ROR word 17) (psStandardSHA256ROR word 19))
-    (word / (2 ^ 10))
+@[inline] private def psStandardSHA256Big1 (word : UInt32) : UInt32 :=
+  psStandardSHA256ROR word 6 ^^^ psStandardSHA256ROR word 11 ^^^ psStandardSHA256ROR word 25
 
-private def psStandardSHA256Big0 (word : Nat) : Nat :=
-  Nat.xor (Nat.xor (psStandardSHA256ROR word 2) (psStandardSHA256ROR word 13))
-    (psStandardSHA256ROR word 22)
+@[inline] private def psStandardSHA256Choice (a b c : UInt32) : UInt32 :=
+  (a &&& b) ^^^ (~~~a &&& c)
 
-private def psStandardSHA256Big1 (word : Nat) : Nat :=
-  Nat.xor (Nat.xor (psStandardSHA256ROR word 6) (psStandardSHA256ROR word 11))
-    (psStandardSHA256ROR word 25)
+@[inline] private def psStandardSHA256Majority (a b c : UInt32) : UInt32 :=
+  (a &&& b) ^^^ (a &&& c) ^^^ (b &&& c)
 
-private def psStandardSHA256Choice (a b c : Nat) : Nat :=
-  Nat.xor (Nat.land a b) (Nat.land (Nat.xor 4294967295 a) c)
-
-private def psStandardSHA256Majority (a b c : Nat) : Nat :=
-  Nat.xor (Nat.xor (Nat.land a b) (Nat.land a c)) (Nat.land b c)
-
-private def psStandardSHA256RoundConstants : Array Nat := #[
+private def psStandardSHA256RoundConstants : Array UInt32 := #[
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
   0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
   0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -247,7 +241,7 @@ private def psStandardSHA256RoundConstants : Array Nat := #[
   0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
   0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2]
 
-private def psStandardSHA256Initial : Array Nat := #[
+private def psStandardSHA256Initial : Array UInt32 := #[
   0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
   0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]
 
@@ -258,33 +252,34 @@ private def psStandardSHA256HexByte (n : Nat) : String :=
   String.ofList [psStandardSHA256HexDigit (n / 16),
     psStandardSHA256HexDigit (n % 16)]
 
-private def psStandardSHA256HexWord (n : Nat) : String :=
+private def psStandardSHA256HexWord (word : UInt32) : String :=
+  let n := word.toNat
   String.join ((List.range 4).map fun i =>
     psStandardSHA256HexByte ((n / 256 ^ (3 - i)) % 256))
 
 -- FIPS 180-4 padding: 1-bit, zeros through byte 56 modulo 64, then the
 -- original bit length in eight network-order bytes (modulo 2^64).
 def psStandardSnapshotSHA256 (text : String) : String := Id.run do
-  let mut bytes := text.toUTF8.data.map (fun b => b.toNat)
-  let bitLength := (bytes.size * 8) % 18446744073709551616
+  let mut bytes := text.toUTF8
+  let bitLength := UInt64.ofNat bytes.size * 8
   bytes := bytes.push 128
   while bytes.size % 64 != 56 do
     bytes := bytes.push 0
   for i in [:8] do
-    bytes := bytes.push ((bitLength / 256 ^ (7 - i)) % 256)
+    bytes := bytes.push ((bitLength >>> UInt64.ofNat (8 * (7 - i))).toUInt8)
   let mut state := psStandardSHA256Initial
   for block in [:(bytes.size / 64)] do
-    let mut words : Array Nat := #[]
+    let mut words : Array UInt32 := Array.emptyWithCapacity 64
     for i in [:16] do
       let pos := block * 64 + i * 4
-      let word := bytes[pos]! * 16777216 +
-        bytes[pos + 1]! * 65536 +
-        bytes[pos + 2]! * 256 + bytes[pos + 3]!
+      let word := (bytes[pos]!.toUInt32 <<< 24) |||
+        (bytes[pos + 1]!.toUInt32 <<< 16) |||
+        (bytes[pos + 2]!.toUInt32 <<< 8) ||| bytes[pos + 3]!.toUInt32
       words := words.push word
     for i in [16:64] do
-      words := words.push (psStandardSHA256Word
+      words := words.push
         (psStandardSHA256Small1 (words[i - 2]!) + words[i - 7]! +
-         psStandardSHA256Small0 (words[i - 15]!) + words[i - 16]!))
+         psStandardSHA256Small0 (words[i - 15]!) + words[i - 16]!)
     let mut a := state[0]!
     let mut b := state[1]!
     let mut c := state[2]!
@@ -294,28 +289,26 @@ def psStandardSnapshotSHA256 (text : String) : String := Id.run do
     let mut g := state[6]!
     let mut h := state[7]!
     for i in [:64] do
-      let t1 := psStandardSHA256Word
-        (h + psStandardSHA256Big1 e + psStandardSHA256Choice e f g +
-         psStandardSHA256RoundConstants[i]! + words[i]!)
-      let t2 := psStandardSHA256Word
-        (psStandardSHA256Big0 a + psStandardSHA256Majority a b c)
+      let t1 := h + psStandardSHA256Big1 e + psStandardSHA256Choice e f g +
+        psStandardSHA256RoundConstants[i]! + words[i]!
+      let t2 := psStandardSHA256Big0 a + psStandardSHA256Majority a b c
       h := g
       g := f
       f := e
-      e := psStandardSHA256Word (d + t1)
+      e := d + t1
       d := c
       c := b
       b := a
-      a := psStandardSHA256Word (t1 + t2)
+      a := t1 + t2
     state := #[
-      psStandardSHA256Word (state[0]! + a),
-      psStandardSHA256Word (state[1]! + b),
-      psStandardSHA256Word (state[2]! + c),
-      psStandardSHA256Word (state[3]! + d),
-      psStandardSHA256Word (state[4]! + e),
-      psStandardSHA256Word (state[5]! + f),
-      psStandardSHA256Word (state[6]! + g),
-      psStandardSHA256Word (state[7]! + h)]
+      state[0]! + a,
+      state[1]! + b,
+      state[2]! + c,
+      state[3]! + d,
+      state[4]! + e,
+      state[5]! + f,
+      state[6]! + g,
+      state[7]! + h]
   return String.join (state.toList.map psStandardSHA256HexWord)
 
 def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :=
@@ -362,7 +355,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:9a54d5747d3047abff68e3bd872b791f3489f719cf83e8aba6776d342f045cc0"
+  "sha256:8aea3c6be714db09f4a5a442e9fab57a40bdf13c11d86e811c2574165d55b04d"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
@@ -377,8 +370,9 @@ def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
 def psStandardSnapshotValidate (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
   psStandardExceptAudit environment
-  let observedFNV := psStandardSnapshotFingerprint environment
-  let observedSHA := psStandardSnapshotSHA256Fingerprint environment
+  let payload := psStandardSnapshotPayload environment
+  let observedFNV := "fnv1a64:" ++ toString (psStandardSnapshotFNV64 payload)
+  let observedSHA := "sha256:" ++ psStandardSnapshotSHA256 payload
   if observedFNV != expected ||
       observedSHA != psStandardSnapshotExpectedSHA256 then
     throw ("PSCV0-STANDARD: selected registry drift; expected FNV " ++ expected ++

@@ -275,3 +275,25 @@ FNV fnv1a64:10063720084149863531; SHA-256
 sha256:eef203f0a5b182e3cc21330d1d39e670013e48b9aab48b6485f8d9eb89bafce5.
 Native build and oracle pass. Strict guard values updated to this exact roster;
 341 shared runtime observations and four panic contracts await qualification.
+
+## Universe and empty-marker representation closure
+
+Stable Init/Prelude.lean and Init/Data/List/Basic.lean define Inhabited List
+without an element dictionary and BEq/List.beq at the element universe.
+The remaining ground-only dictionaries now carry that universe, including the
+function-valued outer recursor result sort. Public List.beq and the dictionary
+share one body; the private duplicate worker name is removed. One existing
+kernel conformance group and its pinned Lean oracle cover arbitrary universes
+and the Type-valued empty-list default. Selected Array remains Type-0.
+
+Linux 38450541085 passed every native semantic/module/deriving/search gate,
+then strict IR rejected a reference to an omitted ReprAtom dictionary. This
+was a mismatch between definition filtering and ordinary binder representation:
+a vacuous all-fields-erased predicate discarded zero-field Type-valued classes,
+while applications correctly retained their singleton values. Studied pinned
+Lean/Compiler/LCNF/ToLCNF.lean visit/visitAppArg/visitCtor: proofs and type formers
+are erased; ordinary constructors remain data. Restrict specialized dictionary
+filtering to classes with actual erased fields. Empty classes now use the
+existing shared empty-structure representation at definitions and uses.
+No Repr-specific erasure/backend exception; existing atomic-list observations
+exercise the invariant on all targets. Runtime qualification remains pending.

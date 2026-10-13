@@ -2023,7 +2023,7 @@ private def derivingBoundaries : IO Unit := do
   -- Type-valued fields exercise kernel projection inference only; their runtime
   -- representation is outside the selected backend subset.
   let projection : PsV7Native.Request := {
-    source := "universe u\nstructure TypeField: Type (u + 1) where { value: Type u }\nconst record: TypeField := TypeField.mk(Nat)\nconst projected: Type := record.value\ntheorem correct: projected = Nat := by { rfl }\n" }
+    source := "universe u\nstructure TypeField: Type (u + 1) where { value: Type u }\nconst record: TypeField := TypeField.mk(Nat)\nconst projected: Type := record.value\ntheorem correct: projected = Nat := by { rfl }\nfunction emptyList{A: Type u}(unit: Unit): List A := Inhabited.default\nfunction equalLists{A: Type u}[BEq A](xs: List A, ys: List A): Bool := List.beq(xs, ys)\ntheorem emptyTypes: emptyList(A := Type, unit := Unit.unit) = List.nil := by { rfl }\n" }
   let requests : Array PsV7Native.Request := #[
     { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
     { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },

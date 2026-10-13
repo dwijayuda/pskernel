@@ -1,8 +1,8 @@
 import Ps.Environment.StandardList
 
--- Lean 4.35-rc4 Inhabited α: an inhabited Sort u has a designated element.
+-- Lean 4.35.0 Inhabited α: an inhabited Sort u has a designated element.
 -- The class itself is universe-polymorphic (including Prop); supported
--- executable instances below are selected Type 0 data families.
+-- executable instances carry each selected family's actual universe.
 def psStandardInhabitedClass : List PsDeclaration :=
   let name := psRootName "Inhabited"
   let ctor := psNameAppendStr name "mk"
@@ -49,28 +49,27 @@ def psStandardInhabitedGround (suffix : String) (type value : PsExpr) :
     ("instInhabited" ++ suffix)) []
       (psStandardInhabitedType type) (psStandardInhabitedValue type value)
 
-def psStandardInhabitedContainer (suffix : String) (typeName : PsName)
-    (defaultValue : PsExpr → PsExpr) : PsDeclaration :=
-  let alpha := PsExpr.fvar 0
-  let type := .app (.constE typeName (if psNameEq typeName psListName then [.zero] else [])) alpha
-  let declarationType := psLogicPi 0 "α" psPreludeTypeType
-    (psStandardInhabitedType type) .implicit
-  let declarationValue := psLogicLam 0 "α" psPreludeTypeType
-    (psStandardInhabitedValue type (defaultValue alpha)) .implicit
-  .definitionDecl (psNameAppendStr (psRootName "PsStandard")
-    ("instInhabited" ++ suffix)) [] declarationType declarationValue
+-- One constructor for empty-container dictionaries at their actual universe.
+-- Array retains its selected Type-0 model; List/Option carry their element level.
+def psStandardInhabitedContainer (suffix : String) (parameters : List PsName)
+    (level : PsLevel) (type value : PsExpr) : PsDeclaration :=
+  .definitionDecl (psDecisionName ("PsStandard.instInhabited" ++ suffix)) parameters
+    (psLogicPi 0 "α" (.sortE (.succ level))
+      (psStandardInhabitedType type (.succ level)) .implicit)
+    (psLogicLam 0 "α" (.sortE (.succ level))
+      (psStandardInhabitedValue type value (.succ level)) .implicit)
 
 def psStandardInhabitedOption : PsDeclaration :=
   let u := psRootName "u"
   let level := PsLevel.param u
-  let alpha := PsExpr.fvar 0
-  let type := psSelfHostOptionOf alpha level
-  let result := psStandardInhabitedType type (.succ level)
-  let value := psStandardInhabitedValue type
-    (psSelfHostOptionNoneOf alpha level) (.succ level)
-  .definitionDecl (psDecisionName "PsStandard.instInhabitedOption") [u]
-    (psLogicPi 0 "α" (.sortE (.succ level)) result .implicit)
-    (psLogicLam 0 "α" (.sortE (.succ level)) value .implicit)
+  psStandardInhabitedContainer "Option" [u] level
+    (psSelfHostOptionOf (.fvar 0) level) (psSelfHostOptionNoneOf (.fvar 0) level)
+
+def psStandardInhabitedList : PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
+  psStandardInhabitedContainer "List" [u] level
+    (psSelfHostListOf (.fvar 0) level) (psSelfHostListNilOf (.fvar 0) level)
 
 -- All entries are ordinary checked data or existing audited runtime primitives.
 -- Crucially the collection defaults do not require Inhabited α.
@@ -90,10 +89,10 @@ def psStandardInhabitedInstances : List PsDeclaration :=
       (.app (.constE psCharOfNatName []) (.lit (.natural 0))),
     psStandardInhabitedGround "Unit" unit (.constE psUnitUnitName []),
     psStandardInhabitedOption,
-    psStandardInhabitedContainer "List" psListName (fun alpha => psSelfHostListNilOf alpha),
-    psStandardInhabitedContainer "Array" psArrayName
-      (fun alpha => psLogicApply (.constE psArrayEmptyWithCapacityName [])
-        [alpha, .lit (.natural 0)]) ]
+    psStandardInhabitedList,
+    psStandardInhabitedContainer "Array" [] .zero (psPreludeArrayOf (.fvar 0))
+      (psLogicApply (.constE psArrayEmptyWithCapacityName [])
+        [.fvar 0, .lit (.natural 0)]) ]
 
 def psStandardInhabitedDeclarations : List PsDeclaration :=
   psStandardInhabitedClass ++ psStandardInhabitedInstances

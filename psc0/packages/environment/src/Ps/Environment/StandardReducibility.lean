@@ -24,6 +24,7 @@ def psStandardReducibility : List (String × PsReducibility) := [
   ("Nat.pred", .implicitReducible),
   ("GetElem?.toGetElem", .instanceReducible),
   ("Except.isOk", .reducible),
+  ("List.beq", .implicitReducible),
   ("List.append", .implicitReducible),
   ("List.map", .implicitReducible),
   ("List.length", .instanceReducible),

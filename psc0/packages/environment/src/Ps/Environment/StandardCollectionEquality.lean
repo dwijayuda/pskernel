@@ -4,19 +4,22 @@ import Ps.Environment.StandardEquality
 -- List.rec worker. It returns a predicate on the right list; only the left
 -- recursive child supplies the inductive hypothesis. Every element comparison
 -- uses the existing BEq α dictionary. No backend equality intrinsic is added.
-def psStandardBEqListWorkerName : PsName :=
-  psNameAppendStr (psRootName "$psc0Standard") "beqListWorker"
+def psStandardBEqListName : PsName :=
+  psNameAppendStr psListName "beq"
 
-def psStandardBEqListWorkerDeclaration : PsDeclaration :=
+def psStandardBEqListDeclaration : PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
   let alpha := PsExpr.fvar 0
-  let elemDictionary := PsExpr.app (.constE (psRootName "BEq") [.zero]) alpha
-  let list := psSelfHostListOf alpha
+  let elemDictionary := PsExpr.app (.constE (psRootName "BEq") [level]) alpha
+  let list := psSelfHostListOf alpha level
   let bool := PsExpr.constE psBoolName []
   let boolMotive := psLogicLam 18 "_" bool bool
   let resultArrow := psLogicPi 19 "right" list bool
   let outerMotive := psLogicLam 20 "_" list resultArrow
   let innerMotive := psLogicLam 21 "_" list bool
-  let recursor := PsExpr.constE psSelfHostListRecName [.succ .zero, .zero]
+  let recursor := PsExpr.constE psSelfHostListRecName [.succ .zero, level]
+  let outerRecursor := PsExpr.constE psSelfHostListRecName [.succ level, level]
   let innerConsNone := psLogicLam 11 "rightHead" alpha
     (psLogicLam 12 "rightTail" list
       (psLogicLam 13 "rightIH" bool (.constE psBoolFalseName [])))
@@ -25,7 +28,7 @@ def psStandardBEqListWorkerDeclaration : PsDeclaration :=
       [alpha, innerMotive, .constE psBoolTrueName [],
        innerConsNone, .fvar 6])
   let elemEquality := psLogicApply
-    (.constE (psNameAppendStr (psRootName "BEq") "beq") [.zero])
+    (.constE (psNameAppendStr (psRootName "BEq") "beq") [level])
     [alpha, .fvar 1, .fvar 7, .fvar 11]
   let tailEquality := .app (.fvar 9) (.fvar 12)
   let consEquality := psLogicApply
@@ -41,37 +44,39 @@ def psStandardBEqListWorkerDeclaration : PsDeclaration :=
           (psLogicApply recursor
             [alpha, innerMotive, .constE psBoolFalseName [],
              innerConsSome, .fvar 10]))))
-  let body := psLogicApply recursor
+  let body := psLogicApply outerRecursor
     [alpha, outerMotive, nilMinor, consMinor, .fvar 2]
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ level))
     (psLogicPi 1 "dictionary" elemDictionary
       (psLogicPi 2 "left" list resultArrow) .instanceImplicit) .implicit
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ level))
     (psLogicLam 1 "dictionary" elemDictionary
       (psLogicLam 2 "left" list body) .instanceImplicit) .implicit
-  .definitionDecl psStandardBEqListWorkerName [] type value
+  .definitionDecl psStandardBEqListName [u] type value
 
 def psStandardBEqListInstance : PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
   let alpha := PsExpr.fvar 0
-  let elemDictionary := PsExpr.app (.constE (psRootName "BEq") [.zero]) alpha
-  let list := psSelfHostListOf alpha
-  let classType := PsExpr.app (.constE (psRootName "BEq") [.zero]) list
+  let elemDictionary := PsExpr.app (.constE (psRootName "BEq") [level]) alpha
+  let list := psSelfHostListOf alpha level
+  let classType := PsExpr.app (.constE (psRootName "BEq") [level]) list
   let method := psLogicLam 2 "left" list
     (psLogicLam 3 "right" list
-      (psLogicApply (.constE psStandardBEqListWorkerName [])
+      (psLogicApply (.constE psStandardBEqListName [level])
         [alpha, .fvar 1, .fvar 2, .fvar 3]))
   let result := psLogicApply
-    (.constE (psNameAppendStr (psRootName "BEq") "mk") [.zero])
+    (.constE (psNameAppendStr (psRootName "BEq") "mk") [level])
     [list, method]
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ level))
     (psLogicPi 1 "dictionary" elemDictionary classType .instanceImplicit) .implicit
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ level))
     (psLogicLam 1 "dictionary" elemDictionary result .instanceImplicit) .implicit
   .definitionDecl (psNameAppendStr (psRootName "PsStandard") "instBEqList")
-    [] type value
+    [u] type value
 
 def psStandardBEqListDeclarations : List PsDeclaration :=
-  [psStandardBEqListWorkerDeclaration, psStandardBEqListInstance]
+  [psStandardBEqListDeclaration, psStandardBEqListInstance]
 
 def psStandardPreludeDeclarationsWithCollectionBEq : List PsDeclaration :=
   psStandardPreludeDeclarations ++ psStandardBEqListDeclarations
@@ -84,6 +89,7 @@ def psStandardCollectionBEqExtend (environment : PsEnvironment) :
   let instanceName := psDeclarationName psStandardBEqListInstance
   { environment with
     instances := psInstanceIndexAdd environment.instances {
-      value := .constE instanceName []
+      value := .constE instanceName ((psDeclarationLevelParams psStandardBEqListInstance).map PsLevel.param)
+      levelParams := psDeclarationLevelParams psStandardBEqListInstance
       type := psDeclarationType psStandardBEqListInstance
       className := some (psRootName "BEq") } }

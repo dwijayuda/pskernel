@@ -365,7 +365,11 @@ def psErasureIsErasedDictionary (environment : PsEnvironment) (fuel : Nat)
       let some info := psEnvironmentFindInductive environment name | return false
       let [constructor] := info.constructors | return false
       let some ctor := psEnvironmentFindConstructor environment constructor | return false
-      if view.args.length != info.numParams || !ctor.recursiveFields.isEmpty then return false
+      -- A zero-field Type-valued marker is still an ordinary runtime singleton.
+      -- Its dictionaries and uses must share the existing empty-structure plan.
+      -- This specialization applies only when actual fields carry erased data.
+      if ctor.numFields == 0 || view.args.length != info.numParams ||
+          !ctor.recursiveFields.isEmpty then return false
       let cursor := psExprInstantiateLevelParams ctor.levelParams levels ctor.type
       let some cursor := psReduceApplyType (psWhnf environment psMetaEmpty locals)
         cursor view.args | return false

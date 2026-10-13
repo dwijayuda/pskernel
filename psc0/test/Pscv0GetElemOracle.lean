@@ -476,3 +476,11 @@ namespace Pscv0CollectionDisplayOracle
     unless actual == expected do
       throw (IO.userError s!"collection display oracle: {String.quote actual} != {String.quote expected}")
 end Pscv0CollectionDisplayOracle
+
+namespace Pscv0ListUniverseOracle
+universe u
+def emptyList {A : Type u} (_ : Unit) : List A := default
+def equalLists {A : Type u} [BEq A] (xs ys : List A) : Bool := List.beq xs ys
+example : emptyList (A := Type) () = [] := rfl
+example {A : Type u} [BEq A] : equalLists ([] : List A) [] = true := rfl
+end Pscv0ListUniverseOracle

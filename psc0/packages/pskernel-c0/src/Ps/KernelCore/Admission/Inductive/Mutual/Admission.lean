@@ -10,15 +10,6 @@ validate recursors, then commit the checked mutual bundle.
 Detailed setup and loops live in `Header.lean` and `AdmissionLoops.lean`.
 -/
 
-/-- Diagnostic-only attribution of exhausted reduction budgets.
-    The admission rules and limits do not change, and invalid declarations
-    retain their original messages. These labels locate the actual expensive
-    coherent subsystem before any WHNF architecture redesign. -/
-def psKernelMutualBudgetAt (stage message : String) : String :=
-  if message == "kernel reduction budget exhausted" then
-    "mutual-" ++ stage ++ ": " ++ message
-  else message
-
 def psKernelAddSimpleMutualInductive
     (fuel : Nat)
     (environment : PsKernelEnvironment)

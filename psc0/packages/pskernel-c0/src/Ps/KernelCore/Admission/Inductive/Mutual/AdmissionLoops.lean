@@ -12,6 +12,15 @@ After the shared header has been established, this module:
 The final all-or-nothing bundle transaction remains in `Admission.lean`.
 -/
 
+/-- Diagnostic-only attribution of exhausted reduction budgets.
+    The admission rules and limits do not change, and invalid declarations
+    retain their original messages. These labels locate the actual expensive
+    coherent subsystem before any WHNF architecture redesign. -/
+def psKernelMutualBudgetAt (stage message : String) : String :=
+  if message == "kernel reduction budget exhausted" then
+    "mutual-" ++ stage ++ ": " ++ message
+  else message
+
 def psKernelAddSimpleMutualConstructorsForTypeWorker
     (ctors : List PsKernelSimpleConstructorDecl) :
     Nat ->
@@ -64,7 +73,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
         (work : PsKernelEnvironment)
         (ctorIndex : Nat) =>
         match psKernelCheckNoMVarNoFVar ctor.type with
-        | Except.error error =>
+        | Except.error (psKernelMutualBudgetAt "constructor-sort" error) =>
             Except.error error
         | Except.ok _ =>
             match
@@ -86,7 +95,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                       fuel
                       closedSession
                       ctor.type with
-                | Except.error error =>
+                | Except.error (psKernelMutualBudgetAt "constructor-type-check" error) =>
                     Except.error error
                 | Except.ok ctorType =>
                     match
@@ -107,7 +116,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                               ctorSession
                               params
                               ctor.type with
-                        | Except.error error =>
+                        | Except.error (psKernelMutualBudgetAt "constructor-parameters" error) =>
                             Except.error error
                         | Except.ok afterParams =>
                             match
@@ -120,7 +129,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                                   params
                                   resultLevel
                                   afterParams.result with
-                            | Except.error error =>
+                            | Except.error (psKernelMutualBudgetAt "constructor-fields" error) =>
                                 Except.error error
                             | Except.ok fieldsResult =>
                                 match

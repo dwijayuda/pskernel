@@ -81,6 +81,10 @@ private def getElemFoundationCases : IO Unit := do
     -- without a checked dependent reflection proof.
     "theorem psPropProofIrrelevance(P: Prop, a: P, b: P): a = b := by { rfl }\n" ++
 
+    -- RC4 Nat.lt unfolds to the kernel-checked Nat.le inductive. These
+    -- witnesses are actual proofs, not the value of Nat.blt or a cast.
+    "theorem naturalBoundDirect: Nat.lt(0, Nat.succ(0)) := Nat.le.refl\n" ++
+    "theorem naturalBoundConstructor: Nat.lt(0, Nat.succ(0)) := by { constructor }\n" ++
     "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++
     "const bangResult: Nat := (AlwaysBox.mk(41))[42]!\n" ++
     "structure ProductProofBox where { value: Nat }\n" ++

@@ -30,26 +30,33 @@ operations, expected-HEAD non-force pushes and Linux Actions only. No local
 checkout/build/desktop automation. Preserve Wasm GC internally and ABI-only
 linear memory.
 
-Last qualified executable: `35e239193e69cc466b81ac57282df1b1500f4927`;
-[green 38433276797](https://github.com/dwijayuda/pskernel/actions/runs/38433276797).
-293 shared runtime observations, four panic contracts, 188 portable/196 native
-modules, profile /51. Standard 308/18/54:
-FNV `fnv1a64:1901246055571366448`;
-SHA `sha256:799539fdf6557760d1c9134439ac6ea811915c7c6b054164310c11aa3e017136`.
+Latest qualified executable and evidence
 
-Latest qualified changes: shared postponed source/Core/expected-term work,
-indexed instance lookup, genuine OfNat and direct Coe/CoeFun/CoeSort,
-type-only field erasure, explicit instance-search transparency and
-module-preserved reducibility. Flexible inference retains original checked
-types before delta reduction. Reference/native audits and all backend gates
-passed. Full M2+A and v7 remain incomplete.
+Executable `0c6b7ee6896524b69858d3524356d7a30a4c7272`;
+[green Linux 38437704653](https://github.com/dwijayuda/pskernel/actions/runs/38437704653).
+**298 shared runtime observations**, four panic contracts, **189 portable /
+197 native modules**, profile `pscv0-v7-native-bounded/53`.
+Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+independent oracle, semantic/refusal and graph gates, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and performance gates passed.
 
-Current new implementation is checked character/string quoting, needed by Repr:
-read [its design/status](docs/PSCV0_A_STRING_QUOTING_2026-10-13.md), inspect live
-source/run, finish strict digest review and cross-target qualification.
-Then continue faithful Std.Format/Repr, UInt64/mixHash/Hashable, remaining
-selected scalar/library APIs, the comprehensive manifest and C5 semantic
-retention. Keep indexed/dependent/recursive deriving with M3's general machinery.
+Standard: **313 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:723655421381520752`;
+SHA `sha256:41b2e17bbe8468c04e69a11df63e1656603e88ecd67b9965ffcc3e2953769e8e`.
+Character and Unicode string quoting use five checked definitions and existing
+scalar/string operations; no added axiom or primitive. Quoting is independently
+compared through native evaluation because upstream String.Internal.append
+is kernel-opaque. Historical RC4 receipts retain their original identities.
+
+Full M2+A is **not complete**. Next: checked Int constructors/recursor/toNat
+with typed runtime conversion, then faithful Std.Format/Repr and remaining A/M2.
+
+
+Finish the checked Int conversion qualification/digest review; read its design
+and live CI. Then continue faithful Std.Format/Repr, UInt64/mixHash/Hashable,
+remaining selected scalar/library APIs, the comprehensive manifest and C5
+semantic retention. Keep indexed/dependent/recursive deriving with M3's general
+machinery. The remaining A–E exits are unchanged.
 
 Understand each subsystem and its invariants before editing. Implement coherent
 features, validate at architectural boundaries, fix shared causes, remove obsolete

@@ -1,5 +1,9 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "integerToNatural", argTypes: ["int"], args: [-184467440737095516170n], expected: 0n },
+  { name: "integerToNatural", argTypes: ["int"], args: [0n], expected: 0n },
+  { name: "integerToNatural", argTypes: ["int"], args: [184467440737095516170n], expected: 184467440737095516170n },
+  { name: "integerConversionAsValue", args: null, expected: 4294967295n },
   {"name":"quoteText","args":[""],"expected":"\"\""},
   {"name":"quoteText","args":["a\\b\"c\n\t\r"],"expected":"\"a\\\\b\\\"c\\n\\t\\x0d\\x7f\""},
   {"name":"quoteText","args":["λ😀'"],"expected":"\"λ😀'\""},

@@ -678,6 +678,12 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
+      else if psStringEq text "Int.toNat" then
+        if Nat.beq (psListLength view.args) 1 then
+          match psEraseMappedIntrinsic erase PsVerifiedIrIntrinsic.intToNat view.args with
+          | Except.error error => Except.error error
+          | Except.ok result => Except.ok (Option.some result)
+        else Except.error PsErasureError.unsupportedApplication
       else if psStringEq text "Int.repr" then
         if Nat.beq (psListLength view.args) 1 then
           match psEraseMappedIntrinsic erase PsVerifiedIrIntrinsic.intRepr view.args with
@@ -1809,7 +1815,7 @@ def psErasureSpecialEntry
   if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
   else if named "False.elim" || named "False.rec" then some (PsErasureSpecialEntry.mk 2 false)
   else if psListAny named
-      ["Int.ofNat", "Int.repr", "Int.negSucc", "Int.neg", "Nat.succ",
+      ["Int.ofNat", "Int.repr", "Int.toNat", "Int.negSucc", "Int.neg", "Nat.succ",
         "Bool.not", "Char.ofNat", "Char.toNat", "String.Pos.Raw.mk",
         "String.Pos.Raw.byteIdx", "String.singleton", "String.Internal.length",
         "String.utf8ByteSize"] then

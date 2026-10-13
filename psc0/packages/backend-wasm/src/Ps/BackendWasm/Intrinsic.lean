@@ -19,6 +19,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
     | .natDiv => pure "nat_div" | .natMod => pure "nat_mod"
     | .natEq => pure "nat_eq" | .natNe => pure "nat_ne" | .natLt => pure "nat_lt" | .natLe => pure "nat_le"
+    | .intToNat => pure "int_to_nat"
     | .intOfNat => pure "int_of_nat" | .intNegSucc => pure "int_neg_succ"
     | .intNeg => pure "int_neg" | .intAdd => pure "int_add" | .intSub => pure "int_sub" | .intMul => pure "int_mul"
     | .intEq => pure "int_eq" | .intLt => pure "int_lt" | .intLe => pure "int_le" | .intRepr => pure "int_repr"

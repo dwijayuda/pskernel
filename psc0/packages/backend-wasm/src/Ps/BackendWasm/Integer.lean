@@ -20,6 +20,9 @@ def integerRuntime : Except String (List RuntimeDefinition) := do
     ← emit "make" [("sign", .i32), ("magnitude", naturalType)] integerType []
       (o (.structNew integerName) [
         choice (some .i32) (c "__ps_nat_is_zero" [g "magnitude"]) (k 0) (g "sign"), g "magnitude"]),
+    ← emit "to_nat" [("value", integerType)] naturalType []
+      (choice (some naturalType) (o .i32LtS [sign (g "value"), k 0])
+        (c "__ps_nat_from_u32" [k 0]) (magnitude (g "value"))),
     ← emit "of_nat" [("value", naturalType)] integerType [] (make (k 1) (g "value")),
     ← emit "neg_succ" [("value", naturalType)] integerType []
       (make (k (-1)) (c "__ps_nat_add" [g "value", c "__ps_nat_from_u32" [k 1]])),

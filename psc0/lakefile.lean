@@ -85,7 +85,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardNatOrder,
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
-    `Ps.Environment.StandardReducibility, `Ps.Environment.StandardString,
+    `Ps.Environment.StandardReducibility, `Ps.Environment.StandardInt, `Ps.Environment.StandardString,
     `Ps.Environment.StandardArray, `Ps.Environment.StandardListIndex,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot

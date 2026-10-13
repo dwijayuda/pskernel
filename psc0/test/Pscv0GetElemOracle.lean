@@ -370,3 +370,12 @@ namespace Pscv0QuoteOracle
     unless actual == expected do
       throw (IO.userError s!"quoting oracle mismatch: {String.quote actual} != {String.quote expected}")
 end Pscv0QuoteOracle
+
+namespace Pscv0IntConversionOracle
+-- Structural definition cases plus the boundary from upstream int_to_nat_bug.
+example : Int.toNat (-184467440737095516170) = 0 := rfl
+example : Int.toNat 0 = 0 := rfl
+example : Int.toNat 184467440737095516170 = 184467440737095516170 := rfl
+def useConversion (convert : Int → Nat) (value : Int) : Nat := convert value
+example : useConversion Int.toNat 4294967295 = 4294967295 := rfl
+end Pscv0IntConversionOracle

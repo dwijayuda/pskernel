@@ -496,6 +496,7 @@ def psIrCheckIntrinsicSignature
   | .natLe => psIrCheckSignatureNoTypes typeArguments [nat, nat] bool
   | .natLt => psIrCheckSignatureNoTypes typeArguments [nat, nat] bool
   | .intOfNat => psIrCheckSignatureNoTypes typeArguments [nat] int
+  | .intToNat => psIrCheckSignatureNoTypes typeArguments [int] nat
   | .intRepr => psIrCheckSignatureNoTypes typeArguments [int] string
   | .intNegSucc => psIrCheckSignatureNoTypes typeArguments [nat] int
   | .intNeg => psIrCheckSignatureNoTypes typeArguments [int] int

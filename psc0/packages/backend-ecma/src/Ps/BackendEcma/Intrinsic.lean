@@ -60,6 +60,8 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
   | .natLe, [a,b] | .intLe, [a,b] => pure (bin "<=" a b)
   | .natLt, [a,b] | .intLt, [a,b] => pure (bin "<" a b)
   | .intOfNat, [a] | .stringSingleton, [a] => pure a
+  | .intToNat, [a] => pure (invoke [{ name := "__ps_value", type := "bigint" }] "bigint"
+      [ret (.conditional (bin "<" (id "__ps_value") (id "0n")) (id "0n") (id "__ps_value"))] [a])
   | .intRepr, [a] => pure (method a "toString" [])
   | .intNeg, [a] => pure (unary "-" a)
   | .intNegSucc, [a] => pure (unary "-" (bin "+" a (id "1n")))

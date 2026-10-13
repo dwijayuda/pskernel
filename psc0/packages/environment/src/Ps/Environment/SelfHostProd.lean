@@ -1,6 +1,6 @@
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
-import Ps.Environment.StandardString
+import Ps.Environment.StandardInt
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -119,7 +119,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardReducibilityExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
+  psStandardReducibilityExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
     <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|

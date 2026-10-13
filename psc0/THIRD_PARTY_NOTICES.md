@@ -13,3 +13,12 @@ Modifications: represent the algorithms as portable PsExpr declarations;
 replace native String.Internal.foldl with a total Nat.rec worker whose traversal
 bound is derived from the input UTF-8 byte size; retain exact quoting behavior.
 This is an adaptation, not unmodified upstream source.
+
+The Int.toNat logical model in
+packages/environment/src/Ps/Environment/StandardInt.lean follows
+src/Init/Data/Int/Basic.lean:
+Copyright (c) 2016 Jeremy Avigad. All rights reserved.
+Authors: Jeremy Avigad, Leonardo de Moura.
+Modifications: construct the inductive, constructors, recursor and definition
+as portable Core terms; keep the checked logical model separate from typed
+backend runtime implementations.

@@ -232,6 +232,9 @@ def psTsEmitIntrinsicFromPrinted
         fun (value : String) =>
           Except.ok value;
       psTsPrinted1 emit arguments
+  | .intToNat =>
+      psTsPrinted1 (fun value => Except.ok
+        (psTsJoin "" ["((value: bigint): bigint => value < 0n ? 0n : value)(", value, ")"])) arguments
   | .intRepr =>
       let emit : String -> Except PsTsEmitError String :=
         fun (value : String) =>

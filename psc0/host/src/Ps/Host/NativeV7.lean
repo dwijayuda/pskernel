@@ -13,7 +13,7 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/53"
+def profile : String := "pscv0-v7-native-bounded/54"
 
 def leanVersion : String := "4.35.0"
 def leanCommit : String := "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"

@@ -109,6 +109,7 @@ inductive PsVerifiedIrIntrinsic where
   | natLt
   | intOfNat
   | intRepr
+  | intToNat
   | intNegSucc
   | intNeg
   | intAdd

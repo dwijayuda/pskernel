@@ -1,5 +1,27 @@
 # Readable output: implementation audit and integrated roadmap
 
+## Current qualified boundary — stable Lean and quoting (14 October 2026)
+
+Executable `0c6b7ee6896524b69858d3524356d7a30a4c7272`;
+[green Linux 38437704653](https://github.com/dwijayuda/pskernel/actions/runs/38437704653).
+**298 shared runtime observations**, four panic contracts, **189 portable /
+197 native modules**, profile `pscv0-v7-native-bounded/53`.
+Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+independent oracle, semantic/refusal and graph gates, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and performance gates passed.
+
+Standard: **313 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:723655421381520752`;
+SHA `sha256:41b2e17bbe8468c04e69a11df63e1656603e88ecd67b9965ffcc3e2953769e8e`.
+Character and Unicode string quoting use five checked definitions and existing
+scalar/string operations; no added axiom or primitive. Quoting is independently
+compared through native evaluation because upstream String.Internal.append
+is kernel-opaque. Historical RC4 receipts retain their original identities.
+
+Full M2+A is **not complete**. Next: checked Int constructors/recursor/toNat
+with typed runtime conversion, then faithful Std.Format/Repr and remaining A/M2.
+
+
 **Latest M2+A qualification:** [Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663)
 at `d7e28a3870cdc399eca3c63c6d305b10109d2eca`. Checked equality/defaults use the existing
 shared IR and JS/TS/Rust/WAT/WIT paths. 276 observations, 629 declaration mappings,

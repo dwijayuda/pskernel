@@ -26,6 +26,9 @@ pub(super) fn __ps_nat_div(a: &PsNat, b: &PsNat) -> PsNat {
 pub(super) fn __ps_nat_mod(a: &PsNat, b: &PsNat) -> PsNat {
     if b.is_zero() { a.clone() } else { a % b }
 }
+pub(super) fn __ps_int_to_nat(value: &PsInt) -> PsNat {
+    value.to_biguint().unwrap_or_else(PsNat::zero)
+}
 pub(super) fn __ps_int_of_nat(value: &PsNat) -> PsInt { PsInt::from(value.clone()) }
 pub(super) fn __ps_int_neg_succ(value: &PsNat) -> PsInt {
     -(PsInt::from(value.clone()) + PsInt::from(1u8))

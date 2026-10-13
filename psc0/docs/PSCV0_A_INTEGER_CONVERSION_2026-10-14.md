@@ -1,0 +1,48 @@
+# Checked Int conversion for selected Standard
+
+## Pinned reference and comparison
+
+Before implementation, inspected stable Lean 4.35.0
+[Init/Data/Int/Basic.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Int/Basic.lean)
+and [int_to_nat_bug.lean](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/tests/elab/int_to_nat_bug.lean).
+The complete RC4-to-stable comparison confirms these files are unchanged.
+Lean defines Int with ofNat/negSucc; toNat returns n for ofNat n and zero
+for negSucc, and has implicit_reducible status. The upstream regression
+preserves a positive value at the 32-bit unsigned boundary.
+
+PSC0 already has arbitrary-precision signed runtime values and arithmetic.
+Its selected logical environment still declared Int and its constructors as
+assumptions, and had no checked toNat. Std.Format's signed indentation needs
+this conversion; machine-word truncation would be incorrect.
+
+## Design and invariants
+
+Replace three assumptions with the actual inductive and constructors.
+Add the real recursor and checked toNat definition, preserving its native
+reducibility status. The official kernel independently reconstructs and checks
+the inductive/recursor and admits the conversion. No new axiom is introduced.
+
+Keep the logical model outside the executable declaration catalogue, as already
+done for Array. A typed intToNat intrinsic has signature Int -> Nat:
+ECMAScript clamps one evaluated BigInt; Rust uses BigInt.to_biguint or zero;
+GC Wasm returns zero for a negative sign and the existing magnitude otherwise.
+No host-width narrowing, string conversion, linear memory, or unchecked cast.
+All targets keep arbitrary precision. First-class application uses the existing
+typed application completion machinery.
+
+The primitive audit records both portable and native conversion signatures
+and labels the runtime override separately from kernel admission.
+This does not claim a formal backend equivalence theorem or arbitrary Int.rec
+runtime elimination support.
+
+## Qualification
+
+Prepared four shared observations: negative and positive values beyond 64 bits,
+zero and first-class conversion at 4294967295. The independent official Lean
+oracle proves the corresponding structural equations. These run through the
+existing compact native/kernel/IR and all-target gates. Full qualification and
+the changed Standard digest remain pending.
+
+At this draft boundary, the logical roster should grow from 313 to 315
+declarations with classes/instances unchanged. Verify the observed inventory;
+do not treat this expectation as evidence. Profile /54.

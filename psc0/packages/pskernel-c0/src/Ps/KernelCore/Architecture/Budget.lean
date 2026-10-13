@@ -313,15 +313,6 @@ def psKernelC0ReserveSourceRewrites
     psKernelC0ReserveDeltaSyntax context state.machine quota
   psKernelC0ReserveRecursorSyntax state afterDelta
 
-/-- Before a step that can inspect its scrutinee or a resumed
-    continuation, reify that intermediate using the *metered* quotation
-    path. This gives every source quotation inside the existing demand
-    dispatcher a conservative charge against the SAME operation quota.
-    No checked value or proof is produced by this speculative preflight.
-
-    Syntactic β/ζ/app transitions do not need eager quotation and remain
-    lazy; unsupported neutral heads may conservatively decline at very low
-    budgets without affecting the authoritative source checker. -/
 /-- The saved parent of an ordinary recursor and the eliminator
     function of Quot are separately quoted when their major premise
     resumes. These obligations are identical for an ordinary halted child
@@ -342,6 +333,15 @@ def psKernelC0ReserveResumeReadbacks
           some left
   | _ => some quota
 
+/-- Before a step that can inspect its scrutinee or a resumed
+    continuation, reify that intermediate using the *metered* quotation
+    path. This gives every source quotation inside the existing demand
+    dispatcher a conservative charge against the SAME operation quota.
+    No checked value or proof is produced by this speculative preflight.
+
+    Syntactic β/ζ/app transitions do not need eager quotation and remain
+    lazy; unsupported neutral heads may conservatively decline at very low
+    budgets without affecting the authoritative source checker. -/
 def psKernelC0ReserveIntermediateReadbacks
     (depth : Nat)
     (state : PsKernelC0DemandState)

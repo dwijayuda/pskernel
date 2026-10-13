@@ -275,30 +275,75 @@ theorem psKernelC0AuditedSourceCapabilitiesApproved
       work.trusted.history work.allowedCapabilities :=
   work.capabilitiesApproved
 
-/-- Source judgments do not add axioms, but a returned checked state must
-    still satisfy the *entire* immutable axiom-history allowance. -/
+/-- A checked state or staged syntax may change, but its exact
+    source environment is fixed. Transport the *whole* approved history
+    package across that environment equality, rather than rescanning every
+    previously admitted declaration after each WHNF/DefEq/check operation.
+
+    This uses only Lean equality transport; neither a hash nor a Boolean
+    approximation authorizes the result. The old certified admission chain
+    and both audit proofs remain preserved. -/
+private def psKernelC0AuditedSourceRebind
+    (work : PsKernelC0AuditedSourceWork)
+    (certified : PsKernelC0CertifiedWork)
+    (unchanged :
+      certified.raw.checker.context.environment =
+        work.trusted.certified.raw.checker.context.environment) :
+    PsKernelC0AuditedSourceWork :=
+  let prior :
+      { h : PsKernelC0SourceEnvironmentHistory
+          work.trusted.certified.raw.checker.context.environment //
+        psKernelC0HistoryAxiomsApproved h work.allowedAxioms ∧
+          psKernelC0HistoryCapabilitiesApproved h work.allowedCapabilities } :=
+    ⟨work.trusted.history,
+      ⟨work.approved, work.capabilitiesApproved⟩⟩
+  let next :
+      { h : PsKernelC0SourceEnvironmentHistory
+          certified.raw.checker.context.environment //
+        psKernelC0HistoryAxiomsApproved h work.allowedAxioms ∧
+          psKernelC0HistoryCapabilitiesApproved h work.allowedCapabilities } :=
+    cast
+      (congrArg (fun env : PsKernelEnvironment =>
+        { h : PsKernelC0SourceEnvironmentHistory env //
+          psKernelC0HistoryAxiomsApproved h work.allowedAxioms ∧
+            psKernelC0HistoryCapabilitiesApproved
+              h work.allowedCapabilities }) unchanged.symm)
+      prior
+  {
+    trusted := { certified := certified, history := next.val }
+    allowedAxioms := work.allowedAxioms
+    allowedCapabilities := work.allowedCapabilities
+    approved := next.property.1
+    capabilitiesApproved := next.property.2
+  }
+
+/-- Checked source judgments update only their checked state. One exact
+    environment-equality witness transports the previously certified
+    admission history and both permissions with *no history scan*. -/
 private def psKernelC0AuditedSourceContinue
     {α : Type}
     (work : PsKernelC0AuditedSourceWork)
-    (response :
-      Except String (α × PsKernelC0TrustedSourceWork)) :
+    (source :
+      PsKernelCheckerContext → PsKernelCheckerState →
+        Except String (α × PsKernelCheckerState)) :
     Except String (α × PsKernelC0AuditedSourceWork) := do
-  let (result, trusted) ← response
-  let some next := psKernelC0AuditTrustedSourceWithCapabilities
-      trusted work.allowedAxioms work.allowedCapabilities
-    | throw "source query lost approved trust-provenance history"
-  return (result, next)
+  let (result, state) ← source
+    work.trusted.certified.raw.checker.context
+    work.trusted.certified.raw.checker.state
+  let ⟨certified, unchanged⟩ :=
+    psKernelC0CertifiedWorkWithStateOwned work.trusted.certified state
+  return (result, psKernelC0AuditedSourceRebind work certified unchanged)
 
-/-- The same source checker remains authoritative for WHNF, inference,
-    full term checking and DefEq. Every operation retains the exact
-    approved source-environment assumption history. -/
+/-- The source kernel exclusively owns WHNF, inference, full term checking,
+    and DefEq. All preserve the exact checked environment and audited
+    assumption histories in the same immutable stateful workflow. -/
 def psKernelC0AuditedSourceWhnf
     (fuel : Nat)
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
   psKernelC0AuditedSourceContinue work
-    (psKernelC0TrustedSourceWhnf fuel work.trusted expr)
+    (fun context state => psKernelCheckerWhnf fuel context state expr)
 
 def psKernelC0AuditedSourceInfer
     (fuel : Nat)
@@ -306,7 +351,7 @@ def psKernelC0AuditedSourceInfer
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
   psKernelC0AuditedSourceContinue work
-    (psKernelC0TrustedSourceInfer fuel work.trusted expr)
+    (fun context state => psKernelCheckerInfer fuel context state expr)
 
 def psKernelC0AuditedSourceCheck
     (fuel : Nat)
@@ -314,7 +359,7 @@ def psKernelC0AuditedSourceCheck
     (expr : PsKernelExpr) :
     Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
   psKernelC0AuditedSourceContinue work
-    (psKernelC0TrustedSourceCheck fuel work.trusted expr)
+    (fun context state => psKernelCheckerCheck fuel context state expr)
 
 def psKernelC0AuditedSourceDefEq
     (fuel : Nat)
@@ -322,17 +367,17 @@ def psKernelC0AuditedSourceDefEq
     (left right : PsKernelExpr) :
     Except String (Bool × PsKernelC0AuditedSourceWork) :=
   psKernelC0AuditedSourceContinue work
-    (psKernelC0TrustedSourceDefEq fuel work.trusted left right)
+    (fun context state => psKernelIsDefEq fuel context state left right)
 
-/-- Staging changes only immutable syntax, not the admitted source
-    environment. Both the StoreWF certificate and full axiom-history
-    authorization are recertified before exposing the new work. -/
+/-- Staging changes only syntax and the working store. The certified
+    staging operation supplies the SAME environment-equality proof so the
+    complete audit survives without a second full-history traversal. -/
 def psKernelC0AuditedSourceStage
     (work : PsKernelC0AuditedSourceWork)
     (expr : PsKernelExpr) : Option PsKernelC0AuditedSourceWork := do
-  let staged ← psKernelC0TrustedSourceStage work.trusted expr
-  psKernelC0AuditTrustedSourceWithCapabilities
-    staged work.allowedAxioms work.allowedCapabilities
+  let ⟨certified, unchanged⟩ ←
+    psKernelC0CertifiedWorkStageWithEnvProof work.trusted.certified expr
+  some (psKernelC0AuditedSourceRebind work certified unchanged)
 
 /-- Axiom auditing never substitutes for actual closed-source validation.
     The source root checker still must accept every staged root before

@@ -1,6 +1,40 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
-## Current qualification — M2 + Phase A deriving (13 October 2026)
+## Current qualification — M2+A generalized answers and synthetic constraints (13 October 2026)
+
+Executable `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`;
+[green Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335):
+**263 shared runtime observations**, four panic contracts, **182 portable /
+190 native modules**. Official Lean RC4 kernel and independent oracle,
+92 phase-specific semantic refusals, existing do/opacity checks, strict IR,
+JS/TS/Rust, V8/Wasmtime GC/component/ABI, declarations/maps and project gates passed.
+Standard remains 292 declarations / 14 classes / 52 instances, with unchanged
+FNV `fnv1a64:5949916575031563783` and
+SHA-256 `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+
+Scoped natural term/universe answer templates now freshen on shared replay.
+The graph retains generalized answers and checks each receiving target;
+root answers cannot retain term parameters. One scoped queue handles expected
+types, instance holes and mandatory omitted defaults for calls/records/proof
+applications. The old instance-only retry loop is removed. Global registration
+also checks synthesis order and determined outputs. All mechanisms remain
+portable native Lean under official checking.
+
+[Design, exact evidence and boundaries](PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md).
+The type-polymorphic local-dictionary case is kernel-qualified and explicitly
+refused at erasure pending higher-rank runtime IR. Nat-indexed dictionary
+sharing is qualified across every existing target. Generalized graph evidence:
+6 generators / 6 answers / 1 generalized / 1 freshened shared answer. Earlier
+widths 1/8/32 retain 2 generators, 3 candidates and 7/21/69 transitions.
+
+**This completes the selected M2+A milestone, not full M2, A or v7.**
+Continue **M2+A → M3+B → M4+C/D → M5/E**. Remaining M2 includes broader
+postponed syntax/tactic scheduling, scoping/depth parity, search scaling and C5
+occurrence retention. Remaining A includes Repr/DecidableEq/Hashable, structure
+defaults, proof-field deriving and the comprehensive manifest. Keep dependent/
+indexed/recursive deriving with M3+B. No pskernel-core or self-hosting.
+
+## Prior qualification — M2 + Phase A deriving (13 October 2026)
 
 Executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
 [green Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952):
@@ -23,8 +57,8 @@ committed, and the generator/consumer ownership/replay contract is unchanged.
 [Design, boundaries and qualification](PSCV0_M2_A_DERIVING_2026-10-13.md);
 [prior graph invariants and growth evidence](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
 **Follow M2+A → M3+B → M4+C/D**, then M5/E. Full M2, A and v7 remain incomplete.
-Continue generalized answer abstraction/freshening and shared synthetic
-constraints alongside remaining A requirements; keep dependent/indexed/recursive
+The later qualification above adds generalized answer abstraction/freshening
+and the selected shared constraint queue; keep dependent/indexed/recursive
 deriving with M3+B. Repr/DecidableEq/Hashable and the other documented A gaps
 remain open. Native Lean / official checking only; no pskernel-core or self-hosting.
 
@@ -42,9 +76,9 @@ M2–M4 semantic owners; complete C5 source publication and correspondence under
 M5/E after the required A–D language closure. This replaces the old blanket
 C5-after-all-A–E scheduling rule. No new milestone track is added.
 
-**Current code boundary:** bounded M2 instance search and the parameter/universe
-deriving slice are qualified above. Generalized answers and the full
-synthetic-constraint scheduler remain open.
+**Current code boundary:** the qualifications above cover bounded M2 instance
+search, generic deriving, generalized answers and the selected shared constraint
+queue. Full postponed-syntax/tactic scheduling remains open.
 No C5 source emitter or source-authority migration was added. Native `.lean`, official checking,
 GitHub source operations and Linux CI remain authoritative. No pskernel-core
 or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.

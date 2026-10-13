@@ -1,5 +1,11 @@
 # M2 instance graph — 13 October 2026
 
+**Subsequent qualification:** [generalized answers and shared constraints](PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md)
+at `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`, [Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335).
+It supersedes the earlier closed-answer/pending-instance boundary while
+preserving deriving and ownership invariants. The evidence below remains tied
+to its original revision; full M2/A/v7 remain open.
+
 Status: **qualified** at `a98062b2ac346c66c7f687bfe7e190d12470ba4d`,
 [Linux 38398901889](https://github.com/dwijayuda/pskernel/actions/runs/38398901889).
 This is the first bounded M2 generator/consumer slice, not completion of M2,

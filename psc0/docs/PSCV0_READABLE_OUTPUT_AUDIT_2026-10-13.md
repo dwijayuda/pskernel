@@ -1,5 +1,15 @@
 # Readable output: implementation audit and integrated roadmap
 
+**Latest M2+A qualification:** [Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335)
+at `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279` preserves this output architecture.
+263 shared runtime observations, 591 declaration mappings and 26 generated-parent
+origins passed; maps remain at declaration precision. Generalized Nat-indexed
+local dictionaries now run across JS/TS/Rust/GC-Wasm. Type-polymorphic runtime
+dictionary values are kernel-qualified and explicitly refused before IR emission;
+their higher-rank representation remains future shared IR work.
+[Current design/evidence](PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md).
+No C5 emitter or source-authority migration was added.
+
 **Subsequent M2+A qualification:** [Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952)
 at `f1ce3840c1943c9f78be20a5428fd4adfa9053af` preserves the backends and plan audited here.
 The enlarged source fixture has 260 shared observations, 572 declaration

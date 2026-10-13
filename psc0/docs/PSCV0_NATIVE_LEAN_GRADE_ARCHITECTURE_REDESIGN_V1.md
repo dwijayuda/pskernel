@@ -14,8 +14,14 @@ ordinary telescope and instance machinery. Shared projection and rigid
 universe-constraint mechanisms were strengthened; the bounded instance graph's
 snapshot ownership is preserved. See [deriving design/evidence](PSCV0_M2_A_DERIVING_2026-10-13.md)
 and [graph contract](PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
-Continue **M2+A → M3+B → M4+C/D**, then M5/E. Generalized answers, unified
-synthetic constraints and remaining deriving handlers remain open.
+Continue **M2+A → M3+B → M4+C/D**, then M5/E. The subsequent
+[generalized-answer/shared-constraint milestone](PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md)
+is qualified at `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`,
+[Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335),
+263 observations. Scoped templates, deterministic selected synthetic constraints
+and global instance information-flow validation are implemented. Full postponed
+syntax/tactic scheduling, broader scoping/search scaling, remaining A handlers
+and higher-rank runtime dictionary IR remain open. M2/A/v7 are incomplete.
 
 **M1 qualification (13 October 2026):** M1 is complete for its declared
 selected scope at `c00e146bd5c97788a4a6a39221849973aeafda84`,

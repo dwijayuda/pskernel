@@ -1,124 +1,116 @@
-# PSCV0 v7 — Continue M2+A after generic deriving qualification
+# PSCV0 v7 — Continue M2+A after generalized answers and synthetic constraints
 
 ## Qualified starting point — 13 October 2026
 
-Read live branch HEAD and latest CI before editing. Repository:
+Read live HEAD and CI before editing. Repository:
 https://github.com/dwijayuda/pskernel · branch:
 `psc0/pscv0-v7-native-lean-v1` · preserve draft PR
 https://github.com/dwijayuda/pskernel/pull/109.
 
-**M1 is complete for its selected scope; bounded M2 search and generic deriving are qualified.**
-Executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
-[green Linux 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952).
-Later documentation commits are not newer executable qualifications.
+Executable `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`; [green Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335).
+Later docs-only commits do not change executable qualification.
 
-- Official Lean 4.35.0-rc4, `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
-- 292 selected Standard declarations / 14 classes / 52 ordered instances.
-- 180 portable / 188 native modules; profile `pscv0-v7-native-bounded/48`.
-- 260 shared runtime observations; all preceding 251 retained; four panic cases.
+- Official Lean 4.35.0-rc4: `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+- 182 portable / 190 native modules; profile `pscv0-v7-native-bounded/48`.
+- 263 shared runtime observations, retaining all earlier 260; four panic contracts.
+- Standard: 292 declarations / 14 classes / 52 instances.
 - FNV `fnv1a64:5949916575031563783`.
 - SHA-256 `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
 
-Kernel/RC4 oracle, negative/coherence cases, strict IR, JS/TS/Rust, V8/Wasmtime,
-WIT/WAT/binary/ABI, declarations/maps and project integration all passed.
-This does not complete M2, Phase A, v7, performance parity or compiler
-semantic-preservation proofs.
+Official kernel, independent RC4 oracle, semantic refusals, strict IR,
+JS/TS/Rust, V8/Wasmtime, WIT/WAT/binary/ABI, declarations/maps and project
+integration passed. **This completes a bounded M2+A milestone, not all M2,
+Phase A, v7, high-performance parity or formal compiler preservation.**
 
-## Recover the canonical state
+## Recover canonical state
 
-Read:
-
-1. [AI work state](AI_WORK_STATE.md), current top sections first.
-2. [M1 completion and measured limits](docs/PSCV0_M1_COMPLETION_2026-10-13.md).
-3. [Readable-output source/history audit and placement](docs/PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
-4. [M2 graph design, ownership and qualification](docs/PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+Read current top sections of:
+1. [AI work state](AI_WORK_STATE.md).
+2. [Generalized answers and shared constraints](docs/PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md).
+3. [Instance graph ownership](docs/PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
+4. [Parameter/universe-aware deriving](docs/PSCV0_M2_A_DERIVING_2026-10-13.md).
 5. [M0–M5 architecture](docs/PSCV0_NATIVE_LEAN_GRADE_ARCHITECTURE_REDESIGN_V1.md).
 6. [A–E roadmap](docs/PSCV0_NATIVE_IMPLEMENTATION_ROADMAP.md).
 7. [M1/M2 audit](docs/PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md).
-8. [Frozen Standard](docs/PSCV0_STANDARD_SNAPSHOT_V1.md) and
-   [canonical v7 language reference](PSCV0_LANGUAGE_REFERENCE.md).
+8. [Readable-output audit](docs/PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md),
+   [Standard identity](docs/PSCV0_STANDARD_SNAPSHOT_V1.md), and
+   [canonical v7 specification](PSCV0_LANGUAGE_REFERENCE.md).
 
-History is retained in AI_WORK_STATE and the
-[prior continuation version](https://github.com/dwijayuda/pskernel/blob/b2e47ab9f5a45f6f3bdbd10db7ccb22a9bbe2a68/psc0/AI_CONTINUE_PROMPT.md).
-Its instructions to finish M1 are superseded. Do not repeat qualified work.
+Keep **M2+A → M3+B → M4+C/D → M5/E**. Collect E evidence and measured M5
+improvements throughout. M1 is complete for its selected indexing/Standard
+scope. Do not repeat qualified work or invent another milestone track.
 
-## Accepted interleaving
+## Current M2 owners and invariants
 
-M2 with remaining A; M3 with B; M4 with C/D; final M5/E.
-Collect E evidence at each feature slice. Apply measured M5 improvements when
-dependencies justify them.
+- `Ps.Meta.Abstract`: dependency-ordered natural term/universe templates and
+  fresh opening. Template indices are private binders, not donor meta IDs.
+  Each term parameter retains its allowed local scope.
+- `Ps.Meta.InstanceCandidate`: speculative preparation and typed witness checks.
+- `Ps.Meta.InstanceSearch`: per-invocation generator/consumer graph, generalized
+  answer propagation and canonical closed answers. Earlier generalized answers
+  remain available to later subscribers after a closed answer appears.
+- `Ps.Meta.Synthetic`: scoped expected-type, dictionary and omitted-default
+  queue; checked progress, quiescence, default phase and transactional limits.
+- `Ps.Meta.SynthInstance`: facade only. The old pending-instance retry loop is
+  removed; do not restore it.
+- `Ps.Elab.Application` and `Proof`: shared queue callers and typed diagnostics.
+- `Ps.Elab.Class`: global registration checks synthesis order and determined
+  outputs through parameter-type dependency closure.
 
-M0 supplies typed proof/type/index erasure. M1 supplies exact selected indexing
-and Standard closure. M2 strengthens elaboration/search; M3 dependent data and
-total recursion; M4 class-driven effects/specs/verification obligations; M5
-incremental compilation, optimization, tooling and final source presentation.
+A newly created generator has one owning subscription (or root). Only that
+owner may adopt the descendant context, including assignments in local
+dictionary types. Other consumers open fresh answer templates in their own
+snapshots and re-infer/unify the witness against their exact target. Sharing
+still requires a closed identical local signature; Pi introductions get
+distinct scope IDs. Synthetic/opaque obligations, delayed abstractions and
+scope escapes cannot be generalized.
 
-A finishes selected libraries/deriving/manifest; B dependent data and recursion;
-C effects/control/IO boundaries; D checked tactics/specs/VCs; E final conformance.
-Do not finish all M0–M5 before starting A–E; these are views of the same project.
+Preserve ordered priorities and fresh output arguments/output levels during
+selection. Reconcile caller outputs only after selection; preferred outputs
+must not choose lower-priority dictionaries. Root answers require no residual
+term parameters. Universe parameters have separate closure/generalization rules.
 
-## Next implementation: interleave Phase A deriving with M2
+Limits: 4096 generators, 4096 candidates, 4096 answers, 32768 transitions,
+default evidence height 64. Queue attempts are bounded by 32768; productive
+rounds remove constraints. Resource refusal returns the original state.
 
-The bounded generator/consumer engine is implemented and qualified. Do not
-restore the old active-cycle DFS or caller-reusable memo. Read:
+Omitted defaults use opaque holes, then checked explicit assignment of the
+declared default. Expected types cannot replace them. Ordinary constraints
+reach quiescence before defaults; retries retain individually checked progress.
+A completed application requires an empty queue. Preserve mismatch versus
+missing-dictionary diagnostics at this boundary.
 
-- `Ps.Meta.InstanceCandidate`: speculative telescope preparation, checked replay.
-- `Ps.Meta.InstanceSearch`: scope-owned generators, consumers, subscriptions,
-  answer propagation, diagnostics and limits.
-- `Ps.Meta.SynthInstance`: public facade plus Application's existing pending
-  dictionary passes; those helpers still have callers.
+Global instances must determine their outputs; a polymorphic local dictionary
+is a different valid source of generalized answers. The independent RC4 oracle
+covers both type-polymorphic and Nat-indexed local dictionary consumers.
+Type-polymorphic runtime dictionary values remain outside the current
+higher-rank IR: kernel acceptance and explicit erasure refusal are qualified.
+Nat-indexed local dictionaries run across every existing target. Do not weaken
+IR checks or introduce casts to force the higher-rank example through.
 
-A newly created generator has exactly one owning subscription (or the root).
-Its selected descendant snapshot may return to that owner. Later subscribers
-have unrelated snapshots: replay only meta-closed evidence, re-infer and unify
-the exact target, never copy the donor context. Closed identical local signatures
-are required for sharing. Each Pi introduction gets a fresh scope.
+Compact graph evidence: 6 generators / 6 answers / 1 generalized answer /
+1 freshened shared answer for two output specializations. Earlier repeated
+dependency widths 1/8/32 still take 2 generators, 3 candidates and 7/21/69
+transitions. These are bounded samples, not a general complexity proof.
 
-Preserve local/global ordered priority, fresh output arguments/output levels
-during selection and post-selection reconciliation. Caller-preferred outputs
-must not make lower-priority dictionaries win. Exhaustion returns the original
-context. Limits: 4096 generators, 4096 candidate attempts, 32768 transitions;
-default fuel 64 bounds derivation height, not host recursion depth.
+## Next work in M2+A
 
-Qualified compact evidence covers seeded/unseeded cycles, a diamond, conversion
-reuse, Pi scope isolation, nested private-context output assignments and independent
-budget refusals. Repeated dependency widths 1/8/32 use 2 generators, 3 candidates
-and 7/21/69 transitions. One source oracle/runtime case yields 1466. Existing M1,
-negative/coherence and all backend gates passed. This is not full Lean tabling:
-generalized term/universe answers need abstraction/freshening, broader synthetic
-constraints need one deterministic scheduler, and key lookup still scans linearly.
+Use real Phase A needs to drive remaining M2 work. Repr/DecidableEq/Hashable,
+Inhabited structure defaults, BEq proof-field treatment, wider selected APIs and
+the comprehensive environment manifest remain incomplete. Existing deriving
+already shares the parameter/universe telescope and instance machinery; preserve
+two-pass Inhabited selection/pruning and independent nonrecursive BEq fields.
 
-**Completed M2+A capability:** read
-[generic deriving design and evidence](docs/PSCV0_M2_A_DERIVING_2026-10-13.md).
-`DerivingContext`, `DerivingInhabited` and `DerivingBEq` replace duplicated
-closed-Type-0 handlers. Family parameters/universes, local class requirements,
-constructor application and declaration closure use existing elaboration owners.
-Inhabited tries all constructors without new assumptions first and exports only
-used requirements. BEq supports independent nonrecursive fields at multiple
-universes, retains direct structure projections and unifies enum/payload
-recursor generation. No numeric local-ID reservations remain.
+Remaining M2 includes arbitrary postponed syntax, broader synthetic/tactic
+scheduling and metavariable-depth/scoping parity, search/key scaling and C5
+occurrence/decision retention. The new queue covers selected Core constraints,
+not arbitrary syntax continuations or host elaborator parity.
 
-Shared M2 fixes instantiate projection constructor universes, normalize
-`max (succ u) (succ v)`, and defer a rigid head-universe equation within its
-spine until typed arguments resolve it. The final universe equation must pass;
-speculative contexts roll back. This is not a complete universe solver or the
-full synthetic-constraint scheduler.
-
-**Next:** continue **M2+A → M3+B → M4+C/D**, then M5/E. Use the current source
-and pinned references to choose the next coherent A capability and its required
-M2 work. Generalized term/universe answer abstraction/freshening, unified
-synthetic constraints and broader scaling remain open. Repr/DecidableEq/Hashable,
-Inhabited structure defaults and BEq proof-field treatment are still incomplete.
-Indexed/dependent/recursive deriving requires M3 data/transport/recursion
-mechanisms; do not manufacture casts or recursive evidence. Kernel-only
-type-valued projection qualification does not claim runtime type-valued-field
-support. Preserve all nine new runtime observations and the earlier 251.
-
-Use real deriving needs to drive the remaining M2 generalization/constraint
-work; do not duplicate existing elaboration or add a separate deriving solver.
-Repr/DecidableEq/Hashable, broader scalar/APIs and the comprehensive environment
-manifest remain Phase A work. Qualify coherent slices with minimal focused
-checks and the existing integration gate, then update this handoff and work state.
+Keep indexed/dependent/recursive deriving with **M3+B**, using general
+data/transport/termination mechanisms. Higher-rank runtime dictionary values
+need a deliberate shared IR/representation design, not an emitter workaround.
+M4+C/D owns effects/specs/VCs; M5/E owns final optimization/tooling/source
+publication and overall conformance.
 
 ## Readable output is part of the same implementation
 
@@ -156,7 +148,7 @@ and runtime-override trust ledger. Review intentional Standard changes before
 updating FNV/SHA expectations; never weaken guards.
 
 The M1 benchmark records substantial generated-JS overhead versus native Lean
-(roughly 492–3357x for its small batches). Preserve raw workload/checksum/timing
+(roughly 480–3881x in the latest retained run for its small batches). Preserve raw workload/checksum/timing
 evidence. General shared specialization/call/allocation work belongs to measured
 M5 slices; no Standard-name shortcuts or high-performance parity claims.
 
@@ -175,6 +167,4 @@ M5 slices; no Standard-name shortcuts or high-performance parity claims.
 - Update the TOP of AI_WORK_STATE, this prompt, roadmap and audit at qualified
   boundaries. Keep the Standard documentation aligned when its closure changes.
 
-Start by reading live HEAD/CI, the qualified M2 graph and the full deriving subsystem. Continue autonomously through
-coherent dependency-driven slices; do not request repeated permission for
-already authorized work or present a partial slice as complete v7.
+Start with live HEAD/CI and the current abstraction, graph, synthetic, application, class-registration and deriving owners. Continue coherent dependency-driven work; update the work state at the next qualified boundary.

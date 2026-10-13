@@ -1,5 +1,11 @@
 # M2 + Phase A: parameter and universe-aware deriving
 
+**Subsequent qualification:** [generalized answers and shared constraints](PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md)
+at `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`, [Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335).
+It supersedes the earlier closed-answer/pending-instance boundary while
+preserving deriving and ownership invariants. The evidence below remains tied
+to its original revision; full M2/A/v7 remain open.
+
 Date: 13 October 2026. Qualified executable `f1ce3840c1943c9f78be20a5428fd4adfa9053af`;
 [green Linux run 38403318952](https://github.com/dwijayuda/pskernel/actions/runs/38403318952).
 

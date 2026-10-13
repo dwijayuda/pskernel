@@ -140,13 +140,23 @@ structure PsKernelC0CertifiedStore where
 
 /-- Check exactly once at construction. Future code using the same immutable
     value may rely on the proof, not on an untrusted cache or a hash. -/
-def psKernelC0CertifyStore
-    (store : PsKernelC0TermStore) : Option PsKernelC0CertifiedStore :=
+/-- Keep the certified immutable store tied to the EXACT argument
+    snapshot with propositional equality, not just the same hash or a
+    coincidentally equal numeric root handle. -/
+def psKernelC0CertifyStoreOwned
+    (store : PsKernelC0TermStore) :
+    Option { cert : PsKernelC0CertifiedStore // cert.store = store } :=
   if h : psKernelC0ReplayValidateStore store = true then
     if wf : psKernelC0StoreWF store then
-      some { store := store, canonical := h, wellFormed := wf }
+      some ⟨{ store := store, canonical := h, wellFormed := wf }, rfl⟩
     else none
   else none
+
+/-- Ordinary certificate API; preserve the provenance-aware variant for
+    callers that must transport a proof across checked work sessions. -/
+def psKernelC0CertifyStore
+    (store : PsKernelC0TermStore) : Option PsKernelC0CertifiedStore :=
+  (psKernelC0CertifyStoreOwned store).map Subtype.val
 
 /-- The owner snapshot, root-in-bounds witness, and exact decoded syntax are
     bound together. A bare Nat handle cannot cross snapshot boundaries. -/

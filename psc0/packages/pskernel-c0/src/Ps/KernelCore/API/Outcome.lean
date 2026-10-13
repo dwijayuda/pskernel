@@ -84,6 +84,10 @@ def psKernelStripOneNestedAdmissionPrefix (message : String) : String :=
     message.replace "mutual-field-recursive-analysis: " ""
   else if message.startsWith "mutual-recursive-domain-whnf: " then
     message.replace "mutual-recursive-domain-whnf: " ""
+  else if message.startsWith "mutual-recursive-domain-with-target: " then
+    message.replace "mutual-recursive-domain-with-target: " ""
+  else if message.startsWith "mutual-recursive-domain-without-target: " then
+    message.replace "mutual-recursive-domain-without-target: " ""
   else
     message
 

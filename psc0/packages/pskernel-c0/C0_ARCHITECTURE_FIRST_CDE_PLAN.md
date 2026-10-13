@@ -211,6 +211,25 @@ do not mark it green until the entire workflow succeeds.
 
 **Qualified CDE-9B checked-root receipts:** [`2d55fd03`](https://github.com/dwijayuda/pskernel/commit/2d55fd039a2c9ae4d51586c640988b3ae23a2124) passed full [native CI 38473598945](https://github.com/dwijayuda/pskernel/actions/runs/38473598945). Per-root Lean equality witnesses record actual full source checker success for exact owner-bound syntax under a specific context, state and fuel; the all-or-nothing publication gate enforces closure/universe validation. Both one-root and multi-root positive cases and mixed invalid cases are qualified. This strengthens **checked-result provenance**, not the source checker's independent soundness. Full mathematical StoreWF and executable-resource refinement, independent accepting WHNF/DefEq/inference, whole Init/Std/Mathlib, full-workload benchmark parity and metatheory remain required.
 
+## CDE-10 — exact source assumption manifests and amortized admission audit
+
+The audited native source-history profile is extended beyond ordinary
+axiom-name allowlists to **exact approved axiom declarations** (name,
+complete proposition syntax and binder metadata, universe parameters and
+unsafe classification). Separate explicit capabilities are required for
+`Quot` bootstrap, unsafe axioms/definitions/opaques/inductives and partial
+definitions. Source `Eq` checking by itself does not imply approval of the
+Quot trusted foundation.
+
+The complete immutable ledger carries Lean membership proofs. Per-source
+declaration admission adds only the new events to the previously approved
+proof, avoiding O(n²) whole-history replay; source judgments and staging
+transport the existing audit proof along exact environment ownership.
+Re-auditing an *explicitly changed policy* still checks the entire history.
+See [C0_TRUSTED_FOUNDATION_AUDIT.md](C0_TRUSTED_FOUNDATION_AUDIT.md).
+
+**Qualified:** [`e6900e27`](https://github.com/dwijayuda/pskernel/commit/e6900e2770437b6210ae19862adc7e6c6ec971dc), [native CI 38484702307](https://github.com/dwijayuda/pskernel/actions/runs/38484702307) SUCCESS, plus full green incremental and capability source runs. Later direct-membership/no-trust proof source `6979d7e9` awaits [CI 38485235073](https://github.com/dwijayuda/pskernel/actions/runs/38485235073). This does not finish the independent optimized accepting checker, full Lean Init/Std/Mathlib, real-workload performance or soundness refinement.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

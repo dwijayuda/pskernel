@@ -327,6 +327,31 @@ def main : IO Unit := do
     | throw (IO.userError "checked mutual ctor was not published")
   if !psKernelNameEq evenCtorInfo.induct c0TypedEvenName then
     throw (IO.userError "checked mutual ctor lost family ownership")
+  -- Mutually recursive inductive families cannot be treated as
+  -- nonrecursive structures. A neutral major stays unchanged instead of
+  -- being rebuilt from projections by a constructor-name heuristic.
+  let some (.inductInfo evenInfo) :=
+      psKernelEnvironmentFind mutualWork.checker.context.environment
+        c0TypedEvenName
+    | throw (IO.userError "checked mutual inductive metadata missing")
+  if !evenInfo.isRec then
+    throw (IO.userError "checked mutual recursion was not classified recursive")
+  let evenLocal := c0TypedName "neutralEven"
+  let evenLocals := psKernelLocalContextAddLocal
+    mutualWork.checker.context.localContext evenLocal evenLocal
+    (.const c0TypedEvenName []) .default
+  let evenSession : PsKernelCheckerSession := {
+    mutualWork.checker with
+    context := { mutualWork.checker.context with localContext := evenLocals }
+  }
+  match psKernelC0ArchitectureObserveTypedMajor 32768 evenSession
+      (psKernelSimpleRecName c0TypedEvenName) (.fvar evenLocal) with
+  | .error reason =>
+      throw (IO.userError ("checked recursive eta guard failed: " ++ reason))
+  | .ok (observation, _) =>
+      if observation.changed ||
+          !psKernelExprEqual observation.sourceResult (.fvar evenLocal) then
+        throw (IO.userError "recursive family received invalid structure eta")
   let nestedWork ← match psKernelC0ArchitectureAdmit 32768 mutualWork
       (.nestedInductive c0TypedNestedDecl) with
     | .error reason =>
@@ -447,6 +472,7 @@ def main : IO Unit := do
   IO.println "C0_TYPED source_justified_metered_eta_demand=pass"
   IO.println "C0_TYPED checked_prop_structure_eta_exclusion=pass"
   IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
+  IO.println "C0_TYPED checked_recursive_eta_exclusion=pass"
   IO.println "C0_TYPED checked_eq_quot_bootstrap_and_idempotence=pass"
   IO.println "C0_TYPED indexed_k_defeq_side_conditions=pass"
   IO.println "C0_TYPED checked_declaration_atomicity_and_source_authority=pass"

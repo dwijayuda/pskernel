@@ -75,6 +75,7 @@ jobs:
                              "letE", "proj", "natVal", "strVal", "mdata", "fvar", "mvar"}
           expr_counts, decl_counts = Counter(), Counter()
           unknown_counts, examples = Counter(), []
+          inductive_shapes, special_inductives = Counter(), []
           header = None
           hasher = hashlib.sha256()
           lines = 0
@@ -93,6 +94,24 @@ jobs:
                       if len(kinds) == 1:
                           kind = next(iter(kinds))
                           decl_counts[kind] += 1
+                          if kind == "inductive":
+                              block = item["inductive"]
+                              families = block["types"]
+                              group_size = len(families)
+                              inductive_shapes["ordinary" if group_size == 1 else "mutual"] += 1
+                              if any(t.get("numNested", 0) != 0 for t in families):
+                                  inductive_shapes["nested"] += 1
+                              if any(t.get("isUnsafe", False) for t in families):
+                                  inductive_shapes["unsafe"] += 1
+                              if any(t.get("isRec", False) for t in families):
+                                  inductive_shapes["recursive"] += 1
+                              if group_size != 1 or any(t.get("numNested", 0) for t in families):
+                                  if len(special_inductives) < 16:
+                                      special_inductives.append({
+                                          "line": lines,
+                                          "type_count": group_size,
+                                          "nested": any(t.get("numNested", 0) for t in families),
+                                      })
                           if kind not in supported and len(examples) < 12:
                               examples.append({"line": lines, "tag": kind})
                       else:
@@ -114,6 +133,8 @@ jobs:
               "declaration_counts": dict(sorted(decl_counts.items())),
               "expression_counts": dict(sorted(expr_counts.items())),
               "unknown_record_counts": dict(sorted(unknown_counts.items())),
+              "inductive_shapes": dict(sorted(inductive_shapes.items())),
+              "first_complex_inductive_groups": special_inductives,
               "first_unsupported_records": examples,
               "scope": "coverage survey only; not a C0 kernel acceptance claim",
           }

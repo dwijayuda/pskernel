@@ -58,6 +58,19 @@ jobs:
           echo "C0_REAL_INIT_PREFIX_BEGIN"
           cat "$RUNNER_TEMP/Init-first-inductive.ndjson"
           echo "C0_REAL_INIT_PREFIX_END"
+      - name: Qualify corrected first 12244 real Init export records in C0
+        shell: bash
+        run: |
+          set -euo pipefail
+          head -n 12244 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-first-12244.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/Init-first-12244.ndjson")" -eq 12244
+          c0="$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+          (
+            cd "$c0"
+            lake build PsKernelC0
+            lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-12244.ndjson"
+          ) | tee "$RUNNER_TEMP/c0-first-12244-result.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=12244" "$RUNNER_TEMP/c0-first-12244-result.txt"
       - name: Publish declaration and expression coverage inventory
         shell: bash
         run: |
@@ -241,5 +254,6 @@ jobs:
             ${{ runner.temp }}/first-inductive-official.txt
             ${{ runner.temp }}/leanchecker-result.txt
             ${{ runner.temp }}/c0-real-init-435-result.txt
+            ${{ runner.temp }}/c0-first-12244-result.txt
           if-no-files-found: warn
           retention-days: 14

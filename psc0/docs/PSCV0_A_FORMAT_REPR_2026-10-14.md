@@ -359,3 +359,24 @@ and C5 semantic retention. Recursive/indexed/dependent deriving remains M3+B.
 
 The next commit adds only a host-side dependency audit; its new native module
 has not yet been qualified at this receipt. Portable sources are unchanged.
+
+Pinned-source closure audit qualified in green Linux38452305890 at
+41773101289525e4b1e5c062cb0c6721323740b7 (204 portable/213 native modules;
+all 341 existing observations remain green). Counts: Nat.mod_lt 211,
+BitVec.ofNat 249, UInt64.ofNat 252, UInt64.xor 550, mixHash 156,
+String.hash 337, Float 739 and Float.ofScientific 2288. The first three
+closures contain no axioms; UInt64.xor/Float include propext/Quot.sound and
+scientific conversion additionally includes Classical.choice. This argues
+against a blanket full scalar-library import. Source tests studied include
+collectAxioms.lean and the native ofScientific bit-pattern harness (including
+subnormal double-rounding vectors); decimal text equality is insufficient.
+
+Next authoring experiment: cut Nat.mod_lt's native dependency graph at existing
+portable names and submit its remaining genuine upstream declarations to a
+fresh officially checked portable prelude. Regenerate inductive constructors/
+recursors through the kernel; reject new axioms, quotient primitives, unsafe and
+partial declarations. Record exact rejected declarations and blocked dependents.
+The experiment discards its environment; no imports or failures enter production
+compilation. Its purpose is to identify which old logical models must change
+coherently before exporting a small reviewed closure, rather than assuming
+shared names imply compatible semantics.

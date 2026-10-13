@@ -96,8 +96,9 @@ def psKernelC0DemandStart
       some (psKernelC0DemandEnter state (.mk structValue env)
         (.projection state.machine typeName fieldIndex))
   | .mk (.const name levels) _ =>
-      -- Quot eliminators carry universe arguments; the empty-level
-      -- restriction below is specific to specialized Nat primitives.
+      -- Classify environment-dependent eliminators before the Nat-only
+      -- empty-universe check: both Quot and polymorphic recursors have
+      -- genuine level instantiations.
       if context.environment.quotInitialized &&
           (psKernelNameEq name psKernelQuotLiftName ||
             psKernelNameEq name psKernelQuotIndName) then
@@ -108,22 +109,12 @@ def psKernelC0DemandStart
             some (psKernelC0DemandEnter state major
               (.quotient state.machine majorIndex))
         | none => none
-      else if !levels.isEmpty then none
-      else if psKernelNameEq name psKernelNatSuccName then
-        match state.machine.arguments with
-        | arg :: _ =>
-            some (psKernelC0DemandEnter state arg (.natSucc state.machine))
-        | [] => none
-      else if psKernelC0CandidateIsNatBinary name then
-        match state.machine.arguments with
-        | left :: right :: _ =>
-            some (psKernelC0DemandEnter state left
-              (.natLeft state.machine right))
-        | _ => none
       else
         match psKernelEnvironmentFind context.environment name with
         | some (.recInfo recursor) =>
-            if recursor.k || recursor.isUnsafe then none
+            if recursor.k || recursor.isUnsafe ||
+                recursor.base.levelParams.length != levels.length then
+              none
             else
               let majorIndex :=
                 recursor.numParams + recursor.numMotives +
@@ -133,7 +124,21 @@ def psKernelC0DemandStart
                   some (psKernelC0DemandEnter state major
                     (.recursor state.machine recursor levels))
               | none => none
-        | _ => none
+        | _ =>
+            if !levels.isEmpty then none
+            else if psKernelNameEq name psKernelNatSuccName then
+              match state.machine.arguments with
+              | arg :: _ =>
+                  some (psKernelC0DemandEnter state arg
+                    (.natSucc state.machine))
+              | [] => none
+            else if psKernelC0CandidateIsNatBinary name then
+              match state.machine.arguments with
+              | left :: right :: _ =>
+                  some (psKernelC0DemandEnter state left
+                    (.natLeft state.machine right))
+              | _ => none
+            else none
   | _ => none
 
 /-- Source-aligned literal-to-constructor view used only for ordinary

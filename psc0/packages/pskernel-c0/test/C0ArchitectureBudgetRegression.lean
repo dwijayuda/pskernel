@@ -186,6 +186,45 @@ def main : IO Unit := do
   match psKernelC0ReserveRecursorSyntax unknownState 10 with
   | some 10 => pure ()
   | _ => throw (IO.userError "nonmatching recursor major should stay neutral")
+  -- Intermediate quotation must not reset its allowance between
+  -- declaration heads, projection scrutinees and saved recursor parents.
+  let quoteState : PsKernelC0DemandState := {
+    machine := { control := .mk (.const deltaName []) [] }
+  }
+  if (psKernelC0ReserveIntermediateReadbacks 64 quoteState 1).isSome then
+    throw (IO.userError "constant-head quotation bypassed quota")
+  match psKernelC0ReserveIntermediateReadbacks 64 quoteState 128 with
+  | none => throw (IO.userError "ample constant-head quotation declined")
+  | some remaining =>
+      if remaining >= 128 then
+        throw (IO.userError "constant-head quotation charged zero work")
+  let projected : PsKernelC0DemandState := {
+    machine := { control := .mk
+      (.proj (c0BudgetName "T") 0 deepValue) [] }
+  }
+  if (psKernelC0ReserveIntermediateReadbacks 64 projected 4).isSome then
+    throw (IO.userError "projection scrutinee quotation was unmetered")
+  match psKernelC0ReserveIntermediateReadbacks 64 projected 256 with
+  | none => throw (IO.userError "projection quotation declined wide quota")
+  | some remaining =>
+      if remaining >= 256 then
+        throw (IO.userError "projection quotation spent no quota")
+  match psKernelC0ReserveIntermediateReadbacks 64 recState 2 with
+  | none => pure ()
+  | some _ =>
+      throw (IO.userError "recursor parent quotation bypassed work limit")
+  match psKernelC0ReserveIntermediateReadbacks 64 recState 256 with
+  | none =>
+      throw (IO.userError "valid recursor intermediate reification declined")
+  | some remaining =>
+      if remaining >= 256 then
+        throw (IO.userError "recursor intermediate quotation cost missing")
+  -- Exact finished syntax of each rewrite is counted, not only its input.
+  let rewritten : PsKernelC0DemandState := {
+    machine := { control := .mk deepValue [] }
+  }
+  if (psKernelC0ChargeDemandStateSyntax 64 rewritten 2).isSome then
+    throw (IO.userError "newly materialized intermediate bypassed quota")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app

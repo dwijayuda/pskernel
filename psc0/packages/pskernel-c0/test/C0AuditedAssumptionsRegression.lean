@@ -282,14 +282,15 @@ def main : IO Unit := do
   if psKernelC0RequestCapabilitiesApproved
       (.ordinaryInductive unsafeInductive) [] then
     throw (IO.userError "unsafe ordinary inductive escaped capability audit")
+  let unsafeMutualName := c0AuditedName "UnreviewedMutual"
+  let unsafeMutualOther := c0AuditedName "UnreviewedMutualOther"
   let unsafeMutual : PsKernelSimpleMutualInductiveDecl := {
     levelParams := []
     numParams := 0
-    types := [{
-      name := c0AuditedName "UnreviewedMutual"
-      type := .sort .zero
-      ctors := []
-    }]
+    types := [
+      { name := unsafeMutualName, type := .sort .zero, ctors := [] },
+      { name := unsafeMutualOther, type := .sort .zero, ctors := [] }
+    ]
     isUnsafe := true
   }
   if psKernelC0RequestCapabilitiesApproved
@@ -297,6 +298,19 @@ def main : IO Unit := do
       psKernelC0RequestCapabilitiesApproved
         (.nestedInductive unsafeMutual) [] then
     throw (IO.userError "unsafe mutual/nested declaration escaped capability audit")
+  if psKernelC0RequestCapabilitiesApproved
+      (.mutualInductive unsafeMutual) [.unsafeInductive unsafeMutualName] ||
+      psKernelC0RequestCapabilitiesApproved
+        (.nestedInductive unsafeMutual) [.unsafeInductive unsafeMutualName] then
+    throw (IO.userError "partial unsafe family approval was treated as complete")
+  let approvedFamily : List PsKernelC0TrustCapability :=
+    [.unsafeInductive unsafeMutualName,
+      .unsafeInductive unsafeMutualOther]
+  if !psKernelC0RequestCapabilitiesApproved
+      (.mutualInductive unsafeMutual) approvedFamily ||
+      !psKernelC0RequestCapabilitiesApproved
+        (.nestedInductive unsafeMutual) approvedFamily then
+    throw (IO.userError "complete unsafe family permission was not recognized")
 
   -- A real Eq followed by real quotient initialization requires an
   -- explicit quotient capability *even with a fully valid source Eq*.

@@ -400,11 +400,6 @@ def psKernelC0ReserveNatBinaryWork
         input * 2
     if cost > quota then none else some (quota - cost)
 
-/-- Every direct primitive step and every resumed Nat frame consumes the
-    same numerical-work allowance. Operand quotation is itself metered,
-    including delayed environments; no separate recursive evaluation budget
-    is granted to a primitive. Neutral, nonliteral operands retain their
-    existing source-semantic stuck/decline behavior. -/
 /-- Inspect the active Nat head independently of any enclosing
     continuation. A nested Nat.pow under an outer Nat argument must pay for
     its own primitive before it can create a large intermediate numeral. -/

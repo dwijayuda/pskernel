@@ -383,7 +383,46 @@ def psKernelC0ReserveNatBinaryWork
     including delayed environments; no separate recursive evaluation budget
     is granted to a primitive. Neutral, nonliteral operands retain their
     existing source-semantic stuck/decline behavior. -/
-def psKernelC0ReservePrimitiveWork
+/-- Inspect the active Nat head independently of any enclosing
+    continuation. A nested Nat.pow under an outer Nat argument must pay for
+    its own primitive before it can create a large intermediate numeral. -/
+def psKernelC0ReservePrimitiveHeadWork
+    (depth : Nat)
+    (machine : PsKernelC0Machine)
+    (quota : Nat) : Option Nat := do
+  match machine.control with
+  | .mk (.const op levels) _ =>
+      if !levels.isEmpty then some quota
+      else if psKernelNameEq op psKernelNatSuccName then
+        match machine.arguments with
+        | [] => some quota
+        | arg :: _ => do
+            let (valueExpr, afterQuote) ←
+              psKernelC0QuoteClosureMetered depth arg quota
+            match psKernelExprNatLiteralValue valueExpr with
+            | none => some afterQuote
+            | some n =>
+                psKernelC0SpendWork afterQuote
+                  (psKernelNatSizeInBytes (n + 1))
+      else if psKernelC0CandidateIsNatBinary op then
+        match machine.arguments with
+        | left :: right :: _ => do
+            let (aExpr, afterA) ←
+              psKernelC0QuoteClosureMetered depth left quota
+            let (bExpr, afterB) ←
+              psKernelC0QuoteClosureMetered depth right afterA
+            match psKernelExprNatLiteralValue aExpr,
+                  psKernelExprNatLiteralValue bExpr with
+            | some a, some b =>
+                psKernelC0ReserveNatBinaryWork op a b afterB
+            | _, _ => some afterB
+        | _ => some quota
+      else some quota
+  | _ => some quota
+
+/-- A finished nested operand may trigger Nat.succ or a binary primitive
+    in its saved parent frame; that additional work is never free. -/
+def psKernelC0ReservePrimitiveResumeWork
     (depth : Nat)
     (state : PsKernelC0DemandState)
     (quota : Nat) : Option Nat := do
@@ -401,38 +440,26 @@ def psKernelC0ReservePrimitiveWork
       match psKernelExprNatLiteralValue valueExpr with
       | none => some afterQuote
       | some n =>
-          let size := psKernelNatSizeInBytes (n + 1)
-          if size > afterQuote then none else some (afterQuote - size)
-  | _ =>
-      match state.machine.control with
-      | .mk (.const op levels) _ =>
-          if !levels.isEmpty then some quota
-          else if psKernelNameEq op psKernelNatSuccName then
-            match state.machine.arguments with
-            | [] => some quota
-            | arg :: _ => do
-                let (valueExpr, afterQuote) ←
-                  psKernelC0QuoteClosureMetered depth arg quota
-                match psKernelExprNatLiteralValue valueExpr with
-                | none => some afterQuote
-                | some n =>
-                    let size := psKernelNatSizeInBytes (n + 1)
-                    if size > afterQuote then none else some (afterQuote - size)
-          else if psKernelC0CandidateIsNatBinary op then
-            match state.machine.arguments with
-            | left :: right :: _ => do
-                let (aExpr, afterA) ←
-                  psKernelC0QuoteClosureMetered depth left quota
-                let (bExpr, afterB) ←
-                  psKernelC0QuoteClosureMetered depth right afterA
-                match psKernelExprNatLiteralValue aExpr,
-                      psKernelExprNatLiteralValue bExpr with
-                | some a, some b =>
-                    psKernelC0ReserveNatBinaryWork op a b afterB
-                | _, _ => some afterB
-            | _ => some quota
-          else some quota
-      | _ => some quota
+          psKernelC0SpendWork afterQuote (psKernelNatSizeInBytes (n + 1))
+  | _ => some quota
+
+/-- Primitive accounting is composed head-first and resume-second, sharing
+    the *same* decreasing quota. We only preflight a saved frame when the
+    machine has halted (or is explicitly blocked): syntactic app/beta/zeta
+    steps do not force a neutral operand or reset the work budget. -/
+def psKernelC0ReservePrimitiveWork
+    (depth : Nat)
+    (state : PsKernelC0DemandState)
+    (quota : Nat) : Option Nat := do
+  let afterHead ←
+    psKernelC0ReservePrimitiveHeadWork depth state.machine quota
+  if state.blocked then
+    psKernelC0ReservePrimitiveResumeWork depth state afterHead
+  else
+    match psKernelC0MachineStep state.machine with
+    | .halted =>
+        psKernelC0ReservePrimitiveResumeWork depth state afterHead
+    | _ => some afterHead
 
 /-- One transition loop and one remaining quota. This delegates *all*
     reduction rules to the existing demand dispatcher and therefore cannot

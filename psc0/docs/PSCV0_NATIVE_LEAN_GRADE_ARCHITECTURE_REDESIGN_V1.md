@@ -13,14 +13,18 @@ A–E, C5 and all future development; do not preserve obsolete internals merely
 for compatibility.
 
 
-**Current M2+A qualification:** `d7e28a3870cdc399eca3c63c6d305b10109d2eca`,
+**Current M2+A qualification:** `49324765c1dc4e1c601dc0cded6118822c1922bc`,
+[Linux 38442705296](https://github.com/dwijayuda/pskernel/actions/runs/38442705296),
+313 shared observations, native Lean 4.35.0. The pure Std.Format document and
+layout foundation is checked and qualified through all current runtime targets;
+see [design/evidence](PSCV0_A_FORMAT_REPR_2026-10-14.md). ToFormat/Repr, Hashable
+and the remaining A/M2 exits remain open. Indexed/dependent/recursive deriving
+still belongs to M3+B. The roadmap remains **M2+A → M3+B → M4+C/D → M5/E**.
+[Work state](../AI_WORK_STATE.md) records current exact identities and limitations.
+
+**Earlier equality/default qualification:** `d7e28a3870cdc399eca3c63c6d305b10109d2eca`,
 [Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663),
-276 observations. [Equality/defaults design and evidence](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md)
-extends the existing architecture with shared typed proof conversion and
-recursor construction, checked DecidableEq, BEq proof fields and structure
-defaults. Repr/Hashable foundations remain A work; computational dependent,
-indexed and recursive deriving depends on M3+B. The interleaved roadmap and
-existing backend/C5 ownership remain unchanged.
+276 observations; [design/evidence](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md).
 
 **Readable-output integration (13 October 2026):** [audit and dependency plan](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
 Preserve qualified JS/TS/Rust/WAT/WIT. Build C5 source retention with M2–M4's
@@ -53,7 +57,7 @@ M2 and remaining A now interleave; full architecture and v7 remain incomplete.
 The implementation-status paragraphs below describe historical checkpoints.
 
 **Date:** 2026-10-13 · **State:** normative target architecture and migration plan, **not** an implementation-complete or verified claim.  
-**Branch:** `psc0/pscv0-v7-native-lean-v1` · **Baseline studied:** `b16ce3ae23cf04b330882d17d5bba15c5cd3fa88` · **Pinned upstream:** Lean `4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.  
+**Branch:** `psc0/pscv0-v7-native-lean-v1` · **Baseline studied:** `b16ce3ae23cf04b330882d17d5bba15c5cd3fa88` · **Historical upstream studied:** Lean `4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.  
 **Execution constraints:** portable native `.lean` compiler, official Lean checker, GitHub-first / Linux CI, no pskernel-core, no self-hosting, no C5 migration, retain Wasm GC internals and explicit Canonical ABI adapters. Preserve history and existing external contracts; internal abstractions may be removed.
 
 **M0 implementation status (qualified):** Replaced the obsolete assumption that all type-formers reify as IR generic types. The four-kind checked binder classification and shared source-position masks are implemented across data/structure declarations, typed applications, partial/canonical call handling and projections. `GetElem.valid` is erased as an index without weakening IR checks. The official Lean source oracle, JS/TS/Rust source artifact checks and new **192-observation JS/TS/Rust/Wasm/Wasmtime matrix** are all green at `a678594`, [Linux 38312162188](https://github.com/dwijayuda/pskernel/actions/runs/38312162188). This qualifies a selected M0 vertical slice, **not** every higher-order dependent erasure shape, a semantics-preservation proof, or the M1–M5 end state.

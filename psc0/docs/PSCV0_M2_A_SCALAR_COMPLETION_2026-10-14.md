@@ -270,3 +270,11 @@ the official pinned native classes. Existing all-target observations are
 retained. This change awaits native compilation, strict snapshot review,
 candidate replay and the broader integration gate; no completed qualification
 or M2+A completion is claimed here.
+
+The native signature audit canonicalizes universe arithmetic with pinned
+Lean/Level.lean:Level.normalize after parameter renaming. This respects
+Level.isEquiv's normalization rule (including successor/max distribution);
+it does not delta-unfold declarations or accept arbitrary type mismatches.
+Failure diagnostics retain both original signatures. The compiler and
+independent mixed-universe native oracle compiled at Linux38472091325;
+full replay and integration remain pending.

@@ -5,12 +5,19 @@ namespace PsV7Native
 -- This is a signature audit, not a proof that foreign runtime bodies implement
 -- Lean definitions. Prelude axioms and checked-model runtime overrides are
 -- separate trust categories: replacing an axiom must not hide its backend.
-private def normalizeLevel (parameters : List Lean.Name) : Lean.Level → Lean.Level
+private def renameLevel (parameters : List Lean.Name) : Lean.Level → Lean.Level
   | .param name => .param (.num (.str .anonymous "u") (parameters.idxOf name))
-  | .succ value => .succ (normalizeLevel parameters value)
-  | .max a b => .max (normalizeLevel parameters a) (normalizeLevel parameters b)
-  | .imax a b => .imax (normalizeLevel parameters a) (normalizeLevel parameters b)
+  | .succ value => .succ (renameLevel parameters value)
+  | .max a b => .max (renameLevel parameters a) (renameLevel parameters b)
+  | .imax a b => .imax (renameLevel parameters a) (renameLevel parameters b)
   | value => value
+
+-- Normalize universe arithmetic after alpha-renaming parameters, using the
+-- pinned Lean Level.normalize/isEquiv algorithm. succ(max u v) and
+-- max(succ u)(succ v) denote the same sort; structural Expr equality alone
+-- must not turn that representation choice into a signature mismatch.
+private def normalizeLevel (parameters : List Lean.Name) (level : Lean.Level) : Lean.Level :=
+  (renameLevel parameters level).normalize
 
 private def normalizeType (parameters : List Lean.Name) : Lean.Expr → Lean.Expr
   | .sort level => .sort (normalizeLevel parameters level)
@@ -74,10 +81,12 @@ def primitiveAudit : IO Lean.Json := do
         let found := modeledSignatures.any fun (name, expected, nativeType) =>
           name == toString nativeName && expected == portable.dbgToString &&
             some nativeType == original.map (fun info => info.type.dbgToString)
-        if !found then throw (IO.userError ("unreviewed primitive signature mismatch: " ++ toString nativeName))
+        if !found then throw (IO.userError ("unreviewed primitive signature mismatch: " ++ toString nativeName ++
+          "; portable=" ++ portable.dbgToString ++ "; native=" ++
+          (original.map (fun info => info.type.dbgToString)).getD "<missing>"))
       entries := Lean.Json.mkObj [
         ("name", Lean.toJson (toString nativeName)),
-        ("signature", Lean.toJson (if matched then "native-alpha-match" else "portable-model")),
+        ("signature", Lean.toJson (if matched then "native-level-normalized-alpha-match" else "portable-model")),
         ("portableType", Lean.toJson portable.dbgToString),
         ("nativeType", Lean.toJson (original.map (fun info => info.type.dbgToString))),
         ("bodyTrust", Lean.toJson (if logicalAssumption then "approved-pinned-Lean-logical-assumption"

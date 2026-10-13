@@ -200,8 +200,9 @@ def main : IO Unit := do
       if remaining >= 128 then
         throw (IO.userError "constant-head quotation charged zero work")
   let projected : PsKernelC0DemandState := {
-    machine := { control := .mk
-      (.proj (c0BudgetName "T") 0 deepValue) [] }
+    machine := {
+      control := .mk (.proj (c0BudgetName "T") 0 deepValue) []
+    }
   }
   if (psKernelC0ReserveIntermediateReadbacks 64 projected 4).isSome then
     throw (IO.userError "projection scrutinee quotation was unmetered")

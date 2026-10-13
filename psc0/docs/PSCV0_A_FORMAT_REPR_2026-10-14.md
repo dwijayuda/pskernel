@@ -417,3 +417,23 @@ Reviewed unchanged 460/22/88 roster with four axiom-to-definition replacements
 and three reducibility changes: FNV fnv1a64:16989132783207094075; SHA-256
 sha256:be1c0bcd7657628f0efc6e24164ff1439cda6162c0b85f3e96448f22806a0ecf.
 Both strict guards are repinned; full runtime qualification remains pending.
+
+## Preserve application spines during weak-head reduction
+
+The arithmetic models passed official kernel checks and all six open-term
+source/oracle equations. Existing derivingHighEqualProof then exposed a shared
+normalizer defect at the ordinary 751 comparison: projection/delta reduction
+normalized the function in isolation, unfolding Nat.beq's logical recursor
+before its pending literal arguments could reach primitive reduction. This
+exhausted the existing reduction bound; increasing that bound would hide the
+same family of failures for larger literals.
+
+Studied stable Lean/Meta/WHNF.lean whnfCore, deltaBetaDefinition, unfoldDefinition?,
+reduceNat? and whnfImp, plus tests/elab/whnfProj.lean and 6123_mod_cast.lean.
+The environment-aware portable worker now carries the entire pending application
+spine through beta/delta/local-let/projection steps. It reuses psReduceAppView,
+primitive reduction and metadata-driven iota; no primitive-specific dictionary
+exception is added. Projection majors are normalized once. Transparency rules,
+opaque boundaries and public resource limits remain unchanged. The existing
+large derived BEq proof, scalar runtime observations and scope/transparency/search
+gates validate the change; no new isolated test loop is added.

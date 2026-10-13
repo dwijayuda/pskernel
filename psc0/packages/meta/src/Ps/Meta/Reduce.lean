@@ -65,53 +65,62 @@ def psDefEqReadOnly
   let rightValue := psWhnfCore metaContext localContext right;
   psExprAlphaEq leftValue rightValue
 
-def psWhnfWithTransparencyFuel (transparency : PsTransparency)
-    (environment : PsEnvironment)
-    (metaContext : PsMetaContext)
-    (localContext : PsLocalContext)
-    (fuel : Nat) : PsExpr -> PsExpr :=
+-- Normalize a complete application spine. Pending arguments survive beta,
+-- delta, local-let and projection steps, so a dictionary method exposing a
+-- primitive is recognized while it is still saturated. Reducing the function
+-- alone first would unfold its logical model and lose the native fast path.
+-- This follows pinned Lean Meta/WHNF.lean's whnfCore -> reduceNat? -> delta
+-- ordering, using the existing portable spine and iota mechanisms.
+def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (localContext : PsLocalContext) (fuel : Nat) :
+    PsExpr → List PsExpr → PsExpr :=
   match fuel with
-  | Nat.zero =>
-      fun (expr : PsExpr) => psWhnfCore metaContext localContext expr
-  | Nat.succ remaining =>
-      fun (expr : PsExpr) =>
-        let smaller : PsExpr -> PsExpr :=
-          psWhnfWithTransparencyFuel transparency environment metaContext localContext remaining;
-        let core := psWhnfCoreWithFuel metaContext localContext remaining expr;
-        match core with
-        | .constE name levels =>
-            if psNameEq name psNatZeroName then .lit (.natural 0) else
-            match psEnvironmentFind environment name with
-            | none => core
-            | some declaration =>
-                match if psEnvironmentCanUnfold environment transparency name
-                    then psDeclarationValue declaration else none with
-                | none => core
-                | some value =>
-                    let parameters := psDeclarationLevelParams declaration;
-                    if Nat.beq
-                        (psReduceNameListLength parameters)
-                        (psReduceLevelListLength levels) then
-                      smaller
-                        (psExprInstantiateLevelParams parameters levels value)
-                    else
-                      core
-        | .app fn arg =>
-            match (psReduceNatPrimitive smaller core).orElse
-                (fun _ => psReduceIota smaller environment core) with
-            | some value => smaller value
-            | none =>
-              let reducedFn := smaller fn;
-              if psExprAlphaEq reducedFn fn then core
-              else smaller (PsExpr.app reducedFn arg)
-        | .proj typeName index major =>
-            match psReduceProjectionIota smaller environment typeName index major with
-            | some field => smaller field
-            | none =>
-              let reducedMajor := smaller major
-              if psExprAlphaEq reducedMajor major then core
-              else .proj typeName index reducedMajor
-        | _ => core
+  | 0 => fun expr args => psWhnfCore metaContext localContext (psReduceApply expr args)
+  | remaining + 1 => fun expr args =>
+    let step := psWhnfSpineWithTransparencyFuel transparency environment
+      metaContext localContext remaining
+    let reduce := fun value => step value []
+    let view := psReduceAppView (psMetaInstantiate metaContext expr) args
+    let applied := psReduceApply view.head view.args
+    match (psReduceNatPrimitive reduce applied).orElse
+        (fun _ => psReduceIota reduce environment applied) with
+    | some value => step value []
+    | none => match view.head with
+      | .fvar id =>
+        match psLocalFindById localContext id with
+        | some (.letDecl _ _ _ value) => step value view.args
+        | _ => applied
+      | .letE _ _ value body =>
+        step (psExprInstantiate1 body value) view.args
+      | .lam _ _ body _ =>
+        match view.args with
+        | [] => view.head
+        | argument :: rest => step (psExprInstantiate1 body argument) rest
+      | .constE name levels =>
+        if psNameEq name psNatZeroName then step (.lit (.natural 0)) view.args else
+        match psEnvironmentFind environment name with
+        | none => applied
+        | some declaration =>
+          match if psEnvironmentCanUnfold environment transparency name
+              then psDeclarationValue declaration else none with
+          | none => applied
+          | some value =>
+            let parameters := psDeclarationLevelParams declaration
+            if parameters.length == levels.length then
+              step (psExprInstantiateLevelParams parameters levels value) view.args
+            else applied
+      | .proj typeName index major =>
+        let major := reduce major
+        match psReduceProjectionIota (fun value => value) environment typeName index major with
+        | some field => step field view.args
+        | none => psReduceApply (.proj typeName index major) view.args
+      | _ => applied
+
+def psWhnfWithTransparencyFuel (transparency : PsTransparency)
+    (environment : PsEnvironment) (metaContext : PsMetaContext)
+    (localContext : PsLocalContext) (fuel : Nat) (expr : PsExpr) : PsExpr :=
+  psWhnfSpineWithTransparencyFuel transparency environment metaContext localContext fuel expr []
 
 def psWhnfWithFuel := psWhnfWithTransparencyFuel .all
 

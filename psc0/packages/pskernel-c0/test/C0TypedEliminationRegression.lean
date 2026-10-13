@@ -221,8 +221,8 @@ def main : IO Unit := do
         (.app (.app (.const c0TypedBoxCtor []) (.bvar 1)) (.bvar 0))
         .default) .default
   let boxRecHead : PsKernelExpr := .const boxRecName [.succ .zero]
-  let boxRecInput := psKernelExprApplyArgs boxRecHead [motive, minor, boxTerm]
-  let rewrittenRec := psKernelExprApplyArgs
+  let boxRecInput := psKernelApplyArgs boxRecHead [motive, minor, boxTerm]
+  let rewrittenRec := psKernelApplyArgs
     boxRecHead [motive, minor, expectedEta]
   match psKernelC0ArchitectureSourceTypedRecursorMajor
       32768 boxSession boxRecInput with

@@ -118,6 +118,23 @@ def main : IO Unit := do
       | .ok _ =>
           throw (IO.userError
             "C0 nested candidate authorized an invalid application")
+      match psKernelC0ArchitecturePreviewDemandMetered
+          4096 4096 admitted nestedNat with
+      | .error err =>
+          throw (IO.userError ("metered checked-work preview failed: " ++ err))
+      | .ok (observation, _) =>
+          if !observation.agrees ||
+              !psKernelExprEqual observation.sourceValue (.lit (.nat 43)) then
+            throw (IO.userError "metered preview lost source agreement")
+      match psKernelC0ArchitecturePreviewDemandMetered
+          4096 1 admitted nestedNat with
+      | .error err =>
+          throw (IO.userError ("quota decline changed source result: " ++ err))
+      | .ok (observation, _) =>
+          if observation.candidateValue.isSome ||
+              !psKernelExprEqual observation.sourceValue (.lit (.nat 43)) then
+            throw (IO.userError
+              "metered candidate quota failure altered checked WHNF")
       -- Re-admitting the same name must reject atomically.
       match psKernelC0ArchitectureAdmit 4096 admitted (.definition alias) with
       | .error _ => pure ()

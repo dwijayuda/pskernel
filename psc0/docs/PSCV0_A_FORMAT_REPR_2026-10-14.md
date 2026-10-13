@@ -527,3 +527,16 @@ class/dictionary dependencies do not automatically become search registrations
 or public executable APIs. Existing Nat.mod intrinsic lowering remains in use.
 The existing source/oracle batch gains open-term zero reduction, the general
 bound and a proof-carrying Fin constructor; no new test suite is added.
+
+
+Linux [38457886177](https://github.com/dwijayuda/pskernel/actions/runs/38457886177)
+at `2bf14d5b0364722112b32890216aa7fb2a7cc9b8` compiled the actual portable
+asset, passed byte-identical regeneration and native signature/reducibility
+audits, then stopped at the unchanged registry guard. The reviewed /58 roster
+is **561 declarations /22 classes /88 instances**, **206 portable /216 native
+modules**. Intentional drift: ite's axiom becomes a definition; Nat.mod's axiom
+becomes the native model; 101 checked dependencies are added. No added axiom,
+class registration or global instance. Accept the observed canonical payload:
+FNV `fnv1a64:6200500133443239461`; SHA
+`sha256:c40b99aa82ba0be17ae07354e65b731a99e95d2e5bf9b3708ef56cec0be599b1`.
+Keep both exact guards; source/backend qualification is the next run.

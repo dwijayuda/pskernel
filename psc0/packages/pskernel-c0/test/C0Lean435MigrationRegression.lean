@@ -154,3 +154,52 @@ def main : IO Unit := do
     | .resourceExhausted .fuel _ => pure ()
     | _ => throw (IO.userError "C0 lost stage-qualified nested fuel classification")
   IO.println "C0_LEAN435 nested_typed_error_outcomes=pass"
+
+  -- A checked inductive type cannot delta unfold, beta reduce, or trigger
+  -- recursor computation at its type head. Only an occurrence-free source
+  -- syntax may use the neutral positivity shortcut. Malformed/unknown heads
+  -- and target-bearing arguments continue through ordinary checking.
+  let existing : PsKernelName :=
+    .str .anonymous "NeutralExistingInductive"
+  let freshTarget : PsKernelName :=
+    .str .anonymous "FreshRecursiveTarget"
+  let existingInfo : PsKernelInductiveInfo := {
+    base := {
+      name := existing
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    numParams := 0
+    numIndices := 0
+    all := [existing]
+    ctors := []
+    numNested := 0
+    isRec := false
+    isReflexive := false
+    isUnsafe := false
+  }
+  -- This unchecked *test fixture* constructs a semantic environment only to
+  -- exercise a syntax classification. It is not a kernel admission verdict.
+  let neutralEnv := psKernelEnvironmentAddUnchecked
+    psKernelEnvironmentEmpty (.inductInfo existingInfo)
+  let neutralSession := psKernelMkCheckerSession neutralEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let neutralDomain : PsKernelExpr :=
+    .app (.const existing []) (.sort .zero)
+  if !psKernelMutualInductiveNeutralDomain
+      neutralSession [freshTarget] neutralDomain then
+    throw (IO.userError "C0 failed to recognize stuck inductive type head")
+  let recursiveDomain : PsKernelExpr :=
+    .app (.const existing []) (.const freshTarget [])
+  if psKernelMutualInductiveNeutralDomain
+      neutralSession [freshTarget] recursiveDomain ||
+      psKernelMutualInductiveNeutralDomain
+        neutralSession [freshTarget] (.const freshTarget []) ||
+      psKernelMutualInductiveNeutralDomain
+        neutralSession [freshTarget] (.const (.str .anonymous "Unknown") []) ||
+      psKernelMutualInductiveNeutralDomain
+        neutralSession [freshTarget]
+        (.app (.const psKernelNatAddName []) (.lit (.nat 2))) then
+    throw (IO.userError
+      "C0 shortcut permitted target occurrence or unqualified head")
+  IO.println "C0_LEAN435 neutral_inductive_positivity_shortcut=pass"

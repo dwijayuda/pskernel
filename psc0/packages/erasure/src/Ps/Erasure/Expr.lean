@@ -1151,8 +1151,7 @@ def psOpenMatchMinorFields
     let pushed := psLocalPushBinding state.scope.localContext name domain binder
     let cursor := psExprInstantiate1 body (.fvar pushed.id)
     match psErasureClassifyBinder environment state.scope.localContext domain with
-    | .type | .index => throw .unsupportedRuntimeTerm
-    | .proof =>
+    | .type | .index | .proof =>
       if fields.head?.any (fun field => field.sourceIndex <= index) then throw .binderMismatch
       let scope := { state.scope with
         localContext := pushed.context

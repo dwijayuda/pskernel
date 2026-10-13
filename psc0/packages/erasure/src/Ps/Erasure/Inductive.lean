@@ -113,96 +113,52 @@ def psApplyConstructorParameters
 structure PsPreparedConstructorFields where
   fields : List PsRuntimeConstructorField
 
+-- Type/proof fields have no storage. A runtime field may not depend on an
+-- existential type field: that needs an explicit existential IR representation.
+-- Uniform type parameters remain ordinary target generics.
 def psPrepareConstructorFieldsWithFuel
-    (environment : PsEnvironment) (fuel : Nat) :
-    PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=
+    (environment : PsEnvironment) (fuel : Nat)
+    (scope : PsErasureScope) (cursor : PsExpr) (count index : Nat)
+    (erasedTypeFields : List Nat) (fieldsRev : List PsRuntimeConstructorField) :
+    Except PsErasureError PsPreparedConstructorFields := do
   match fuel with
-  | Nat.zero =>
-      fun (_scope : PsErasureScope) (_cursor : PsExpr) (_count : Nat) (_index : Nat) (_fields : List PsRuntimeConstructorField) =>
-        Except.error PsErasureError.fuelExhausted
-  | Nat.succ remainingFuel =>
-      fun (scope : PsErasureScope) (cursor : PsExpr) (count : Nat) (index : Nat) (fieldsRev : List PsRuntimeConstructorField) =>
-        let smaller : PsErasureScope -> PsExpr -> Nat -> Nat -> List PsRuntimeConstructorField -> Except PsErasureError PsPreparedConstructorFields :=
-          psPrepareConstructorFieldsWithFuel environment remainingFuel;
-        match count with
-        | Nat.zero => Except.ok (PsPreparedConstructorFields.mk (psListReverse fieldsRev))
-        | Nat.succ remaining =>
-          match
-              psWhnf
-                environment
-                psMetaEmpty
-                scope.localContext
-                cursor with
-          | .forallE name domain body binder =>
-              match
-                  psErasureClassifyBinder
-                    environment
-                    scope.localContext
-                    domain with
-              | .runtime =>
-                  match psEraseRuntimeType environment scope domain with
-                  | Except.error error => Except.error error
-                  | Except.ok fieldType =>
-                      let fieldName :=
-                        psErasureSafeIdentifier
-                          (psNameToString name)
-                          (String.Internal.append "field" (psNatToString index));
-                      let pushed :=
-                        psLocalPushBinding
-                          scope.localContext
-                          name
-                          domain
-                          binder;
-                      let nextScope : PsErasureScope := {
-                        localContext := pushed.context
-                        runtimeLocals :=
-                          List.cons (Prod.mk pushed.id fieldName) scope.runtimeLocals
-                        typeLocals := scope.typeLocals
-                        erasedLocals := scope.erasedLocals
-                        declarationNames := scope.declarationNames
-                        runtimeConstructors := scope.runtimeConstructors
-                        runtimeRecursors := scope.runtimeRecursors
-                        runtimeStructures := scope.runtimeStructures
-                        runtimeStructureConstructors := scope.runtimeStructureConstructors
-                        runtimeExpressions := scope.runtimeExpressions
-                        currentDefinition := scope.currentDefinition
-                      };
-                      smaller
-                        nextScope
-                        (psExprInstantiate1
-                          body
-                          (PsExpr.fvar pushed.id))
-                        remaining
-                        (Nat.add index 1)
-                        (List.cons (PsRuntimeConstructorField.mk index fieldName fieldType false) fieldsRev)
-              | .proof =>
-                  let pushed := psLocalPushBinding scope.localContext name domain binder
-                  smaller { scope with
-                    localContext := pushed.context
-                    erasedLocals := pushed.id :: scope.erasedLocals }
-                    (psExprInstantiate1 body (.fvar pushed.id))
-                    remaining (index + 1) fieldsRev
-              | .type | .index =>
-                  -- A higher-kinded constructor field is outside this selected
-                  -- runtime shape; do not silently store proof/type indices.
-                  Except.error PsErasureError.unsupportedRuntimeTerm
-          | _ =>
-              Except.error PsErasureError.binderMismatch
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    match count with
+    | 0 => return ⟨fieldsRev.reverse⟩
+    | count + 1 =>
+      let .forallE name domain body binder :=
+        psWhnf environment psMetaEmpty scope.localContext cursor | throw .binderMismatch
+      let pushed := psLocalPushBinding scope.localContext name domain binder
+      let cursor := psExprInstantiate1 body (.fvar pushed.id)
+      match psErasureClassifyBinder environment scope.localContext domain with
+      | .runtime =>
+        if (psExprFVarIds (psWhnf environment psMetaEmpty scope.localContext domain)).any
+            erasedTypeFields.contains then
+          throw .unsupportedRuntimeTerm
+        let fieldType ← psEraseRuntimeType environment scope domain
+        let fieldName := psErasureSafeIdentifier (psNameToString name)
+          ("field" ++ psNatToString index)
+        let scope := { scope with
+          localContext := pushed.context
+          runtimeLocals := (pushed.id, fieldName) :: scope.runtimeLocals }
+        psPrepareConstructorFieldsWithFuel environment fuel scope cursor count (index + 1)
+          erasedTypeFields (⟨index, fieldName, fieldType, false⟩ :: fieldsRev)
+      | kind =>
+        let scope := { scope with
+          localContext := pushed.context
+          erasedLocals := pushed.id :: scope.erasedLocals }
+        let erasedTypeFields := match kind with
+          | .type | .index => pushed.id :: erasedTypeFields
+          | _ => erasedTypeFields
+        psPrepareConstructorFieldsWithFuel environment fuel scope cursor count (index + 1)
+          erasedTypeFields fieldsRev
 
 def psPrepareConstructorFields
-    (environment : PsEnvironment)
-    (scope : PsErasureScope)
-    (cursor : PsExpr)
-    (fieldCount : Nat) :
+    (environment : PsEnvironment) (scope : PsErasureScope)
+    (cursor : PsExpr) (fieldCount : Nat) :
     Except PsErasureError PsPreparedConstructorFields :=
-  psPrepareConstructorFieldsWithFuel
-    environment
-    4096
-    scope
-    cursor
-    fieldCount
-    0
-    []
+  psPrepareConstructorFieldsWithFuel environment 4096 scope cursor fieldCount 0 [] []
 
 def psFindConstructorDeclaration (declarations : List PsDeclaration) : PsName -> Option PsConstructorInfo :=
   match declarations with

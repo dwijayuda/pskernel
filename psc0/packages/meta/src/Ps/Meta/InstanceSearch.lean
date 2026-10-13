@@ -182,7 +182,8 @@ def psInstanceAwait (environment : PsEnvironment) (index : PsInstanceIndex)
     let subscription : PsInstanceSubscription := { waiter, ownsContext := decide (id >= priorSize) }
     match generator.answer with
     | some answer =>
-      { state with work := (generator.generalized ++ [answer]).map
+      { state with
+        work := (generator.generalized ++ [answer]).map
           (PsInstanceWork.resume subscription) ++ state.work }
     | none =>
       { state with

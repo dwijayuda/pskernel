@@ -137,6 +137,21 @@ def psKernelC0ArchitecturePreviewTypedMajor
     psKernelC0ArchitectureObserveTypedMajor fuel work.checker recName major
   return (observation, { work with checker := session })
 
+/-- Source-justified typed-major normalization is *only* an opt-in
+    checked-work preview. The checked source WHNF runs before the candidate,
+    and candidate agreement cannot issue a proof or admit declarations. -/
+def psKernelC0ArchitecturePreviewTypedDemand
+    (fuel quota : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0ExecutionObservation × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveTypedDemand
+      fuel quota work.checker expr
+  return (observation, { work with checker := session })
+
 /-- Phase E authority seam. On failure no next work exists: the caller retains
     the original immutable transaction. No candidate or arena result enters
     the source judgment. -/

@@ -3,7 +3,7 @@ on:
   push:
     branches: [psc0/pscv0-v7-native-lean-v1]
     paths:
-      - 'psc0/packages/*/src/**'
+      - 'psc0/packages/**/src/**'
       - 'psc0/packages/pskernel-lean/provider/**'
       - 'psc0/host/src/Ps/Host/*.lean'
       - 'psc0/v7-native/**'

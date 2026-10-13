@@ -16,10 +16,8 @@ and sequentially checked safe axioms, definitions, theorems and opaques with dep
 frontend and does not silently drop mdata, FVar, MVar or inductive records.
 -/
 
-/-- The export adaptor owns the declaration kind rather than treating a
-    theorem, axiom or opaque declaration as a reducible definition. -/
-/-- Exporter metadata is never a kernel axiom: all generated entries must be
-    reconstructed from checked inductive source and independently compared. -/
+/-- Exporter metadata is never a kernel axiom: all generated entries must
+    be reconstructed from checked inductive source and independently compared. -/
 structure C0ExportOrdinaryInductive where
   source : PsKernelSimpleInductiveDecl
   expectedType : PsKernelInductiveInfo
@@ -341,7 +339,9 @@ def c0ExportReadOrdinaryInductive
   if !c0ExportSameNames
       (expectedCtors.map (fun c => c.base.name)) expectedType.ctors then
     throw "malformed NDJSON inductive constructor manifest"
-  for (c, i) in expectedCtors.zipIdx do
+  for i in [:expectedCtors.length] do
+    let some c := expectedCtors[i]?
+      | throw "malformed NDJSON constructor index"
     if !psKernelNameEq c.induct expectedType.base.name ||
         c.cidx != i || c.numParams != expectedType.numParams ||
         !c0ExportSameNames c.base.levelParams expectedType.base.levelParams then

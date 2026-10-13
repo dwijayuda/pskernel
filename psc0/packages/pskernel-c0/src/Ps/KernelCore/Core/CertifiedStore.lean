@@ -245,14 +245,24 @@ def psKernelC0CertifyPromotedRoots
   if checked.length == roots.length then some (owner, checked)
   else none
 
+/-- Compute actual structural propositional equality for source terms.
+    Unlike the project's two Boolean cache/equality helpers, this
+    DecidableEq is generated directly from the constructors of Name, Level,
+    Literal, BinderInfo and Expr, including all source binder metadata. -/
+deriving instance DecidableEq for PsKernelName
+deriving instance DecidableEq for PsKernelLevel
+deriving instance DecidableEq for PsKernelBinderInfo
+deriving instance DecidableEq for PsKernelLiteral
+deriving instance DecidableEq for PsKernelExpr
+
 /-- Two certified roots can belong to different immutable stores. This
-    witness certifies their exact metadata-sensitive source syntax agrees;
-    it never treats coincident numeric indices or hashes as equality. -/
+    witness certifies their exact *propositional* source expression equality.
+    It never treats coincident numeric indices, hashes, or a Boolean
+    comparison as proof of full structural equality. -/
 structure PsKernelC0CertifiedTransfer where
   source : PsKernelC0CertifiedRoot
   target : PsKernelC0CertifiedRoot
-  sameSyntax :
-    psKernelExprEqual source.expression target.expression = true
+  sameSyntax : source.expression = target.expression
 
 /-- Rehome by decoding the source's certified expression and encoding it
     into the target owner. The target is independently replay-certified,
@@ -265,12 +275,11 @@ def psKernelC0CertifiedRootRehome
   let (store, targetId) ←
     psKernelC0EncodeExpr destination.store source.expression
   let target ← psKernelC0CertifyRoot store targetId
-  if h : psKernelExprEqual source.expression target.expression = true then
+  if h : source.expression = target.expression then
     some { source := source, target := target, sameSyntax := h }
   else none
 
 theorem psKernelC0CertifiedTransferExact
     (transfer : PsKernelC0CertifiedTransfer) :
-    psKernelExprEqual transfer.source.expression
-      transfer.target.expression = true :=
+    transfer.source.expression = transfer.target.expression :=
   transfer.sameSyntax

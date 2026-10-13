@@ -13,6 +13,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedScratchRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0TrustedAdmissionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkPerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
@@ -87,6 +88,9 @@ jobs:
       - name: C0 proof-carrying canonical store and checked work
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0CertifiedWorkRegression.lean
+      - name: C0 source admission history from checked empty genesis
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0TrustedAdmissionRegression.lean
       - name: C0 typed K/eta on source-admitted inductive declarations
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0TypedEliminationRegression.lean

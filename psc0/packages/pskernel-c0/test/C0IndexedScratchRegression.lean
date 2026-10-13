@@ -184,4 +184,37 @@ def main : IO Unit := do
       (psKernelC0BoundRootRehome leftStore outOfRange).isSome then
     throw (IO.userError "C0 accepted an out-of-range bound root")
 
+
+  -- Atomic multi-source transfer validates every source before publication.
+  -- Root zero means different terms in these two independent canonical stores.
+  let leftBound : PsKernelC0BoundRoot :=
+    { store := leftStore, root := leftId }
+  match psKernelC0ScratchImportBoundRoots leftStore
+      [rightRoot, leftBound, rightRoot] with
+  | none => throw (IO.userError "C0 atomic multi-store root import failed")
+  | some (complete, ids) =>
+      if !psKernelC0ReplayValidateStore complete ||
+          complete.nodes.size != leftStore.nodes.size + 1 then
+        throw (IO.userError "C0 atomic import lost canonical sharing")
+      match ids with
+      | [a, b, c] =>
+          if a != c || a == b || b != leftId then
+            throw (IO.userError "C0 atomic import confused foreign root IDs")
+          match psKernelC0DecodeExpr complete a,
+                psKernelC0DecodeExpr complete b with
+          | some (.lit (.nat 42)), some (.sort .zero) => pure ()
+          | _, _ =>
+              throw (IO.userError "C0 atomic import changed source semantics")
+      | _ => throw (IO.userError "C0 atomic import reordered roots")
+  match psKernelC0ScratchImportBoundRoots leftStore [] with
+  | some (unchanged, []) =>
+      if unchanged.nodes.size != leftStore.nodes.size then
+        throw (IO.userError "C0 empty atomic import changed store")
+  | _ => throw (IO.userError "C0 empty atomic import failed")
+  if (psKernelC0ScratchImportBoundRoots leftStore
+      [rightRoot, invalidRoot]).isSome ||
+      (psKernelC0ScratchImportBoundRoots leftStore
+      [rightRoot, outOfRange]).isSome then
+    throw (IO.userError "C0 atomic import accepted a malformed source")
+
   IO.println "C0_LEAN435 indexed_scratch_promotion=pass"

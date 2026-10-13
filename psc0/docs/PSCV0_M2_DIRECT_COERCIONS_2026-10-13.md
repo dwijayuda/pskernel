@@ -37,3 +37,9 @@ qualify conversion to sorts independently of that existing transparency gap.
 Full synthesis-transparency parity remains an M2 acceptance item; this fixture
 does not establish it. The original unannotated native probe failed at OfNat,
 not CoeSort, on Linux 38425764333.
+
+The source and pinned oracle compiled on Linux 38426692213. The independent
+strict guard reported the reviewed nine-declaration/three-class addition:
+FNV `fnv1a64:946298686920218861`,
+SHA-256 `sha256:9afbebe8bf188a119b1bc223bc7f793da6f2dc08db9caa98e381d9e97662b234`.
+These exact digests are pinned. Full runtime qualification is pending.

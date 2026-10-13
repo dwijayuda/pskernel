@@ -815,20 +815,28 @@ def c0ExportVerdictFromFileTrace
       consumed := consumed + 1
       match c0ExportStep state line fuel with
       | .error verdict =>
-          -- Diagnostics are computed only after the first failure. The
-          -- authoritative verdict above is never changed by this replay.
-          if verdict == .rejected then
-            match Lean.Json.parse line with
-            | .error _ => pure ()
-            | .ok record =>
-                match c0ExportParseRecord state.tables record with
-                | .error _ => pure ()
-                | .ok parsed =>
-                    for declaration in parsed.declarations do
-                      match c0ExportCheckOne state.environment declaration fuel with
-                      | .error (.rejectedInvalid message) =>
-                          IO.println ("C0_REAL_EXPORT_REJECT_MESSAGE=" ++ message)
-                      | _ => pure ()
+          -- Diagnostics are computed *after* the authoritative failure.
+          -- Keep malformed/unsupported/resource reasons separate from a
+          -- checked invalid declaration; no subsequent record is admitted.
+          match Lean.Json.parse line with
+          | .error message =>
+              IO.println ("C0_REAL_EXPORT_PARSE_ERROR=" ++ message)
+          | .ok record =>
+              match c0ExportParseRecord state.tables record with
+              | .error message =>
+                  IO.println ("C0_REAL_EXPORT_INPUT_REASON=" ++ message)
+              | .ok parsed =>
+                  for declaration in parsed.declarations do
+                    match c0ExportCheckOne state.environment declaration fuel with
+                    | .error (.rejectedInvalid message) =>
+                        IO.println ("C0_REAL_EXPORT_REJECT_MESSAGE=" ++ message)
+                    | .error (.declinedUnsupported message) =>
+                        IO.println ("C0_REAL_EXPORT_DECLINED_REASON=" ++ message)
+                    | .error (.resourceExhausted _ message) =>
+                        IO.println ("C0_REAL_EXPORT_RESOURCE_REASON=" ++ message)
+                    | .error (.internalError message) =>
+                        IO.println ("C0_REAL_EXPORT_INTERNAL_REASON=" ++ message)
+                    | .ok _ => pure ()
           return (verdict, consumed)
       | .ok next => state := next
   return (c0ExportFinish state, consumed)

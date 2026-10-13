@@ -241,7 +241,7 @@ def psKernelC0DemandRunWithBudget :
       if reserve > rest then
         throw "candidate String expansion work quota exhausted"
       let afterReserve := rest - reserve
-      let some afterRewrites ←
+      let some afterRewrites :=
           psKernelC0ReserveSourceRewrites context state afterReserve
         | throw "candidate source-rewrite work quota exhausted"
       match psKernelC0DemandTransition depth context state with

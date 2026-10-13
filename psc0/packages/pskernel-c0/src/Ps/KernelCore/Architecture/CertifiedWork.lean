@@ -184,11 +184,30 @@ def psKernelC0CertifiedWorkAdmit
 /-- A syntax stage can change the store, so replay and certify the entire
     new state again. Unchecked/ill-typed syntax may be staged but never
     becomes a checked term by being present in a certified snapshot. -/
+/-- The admitted environment is preserved *exactly* when only staged
+    syntax changes. Derive the equality from the existing validated stage
+    operation and dependent recertification; no environment fingerprint,
+    unchecked cast, or fresh acceptance rule is needed. -/
+def psKernelC0CertifiedWorkStageWithEnvProof
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Option { next : PsKernelC0CertifiedWork //
+      next.raw.checker.context.environment =
+        work.raw.checker.context.environment } := do
+  let ⟨rawNext, checkedOwner⟩ ←
+    psKernelC0ArchitectureStageWithOwner work.raw expr
+  let ⟨next, sourceOwner⟩ ←
+    psKernelC0ArchitectureCertifyWorkOwned rawNext
+  let unchanged :
+      next.raw.checker.context.environment =
+        work.raw.checker.context.environment := by
+    rw [sourceOwner, checkedOwner]
+  some ⟨next, unchanged⟩
+
 def psKernelC0CertifiedWorkStage
     (work : PsKernelC0CertifiedWork)
-    (expr : PsKernelExpr) : Option PsKernelC0CertifiedWork := do
-  let next ← psKernelC0ArchitectureStage work.raw expr
-  psKernelC0ArchitectureCertifyWork next
+    (expr : PsKernelExpr) : Option PsKernelC0CertifiedWork :=
+  (psKernelC0CertifiedWorkStageWithEnvProof work expr).map Subtype.val
 
 /-- Return proof-carrying root certificates for the atomically promoted
     stage. No source type or DefEq judgment is created by this operation. -/

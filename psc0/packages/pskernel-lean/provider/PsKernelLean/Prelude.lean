@@ -170,7 +170,9 @@ def validateQuotientDescriptor (env : Lean.Kernel.Environment) (declaration : Ps
 def tryPreludeDeclaration
     (allDeclarations : List PsDeclaration)
     (env : Lean.Kernel.Environment)
-    (declaration : PsDeclaration) :
+    (declaration : PsDeclaration)
+    (maxHeartbeats : USize := 2000000)
+    (maxRecDepth : USize := 20000) :
     Except PsKernelLeanError PreludeAdmissionAttempt := do
   let converted? ← toLeanPreludeDeclaration allDeclarations declaration
   match converted? with
@@ -180,7 +182,7 @@ def tryPreludeDeclaration
         if ← quotientGroupPresent env then
           validateQuotientDescriptor env declaration
           return .admitted env
-      match env.addDeclCore 2000000 20000 converted none with
+      match env.addDeclCore maxHeartbeats maxRecDepth converted none with
       | .ok next =>
           validateQuotientDescriptor next declaration
           pure (.admitted next)
@@ -191,25 +193,32 @@ def tryPreludeDeclaration
               psNameToString (psDeclarationName declaration) ++
               " (" ++ kernelExceptionSummary error ++ ")" ++ kernelExceptionContext error))
 
+-- The frozen, reviewed Standard can use Lean's import-time kernel budget
+-- (0/0). Standalone authoring and untrusted submissions keep finite budgets.
+-- Every declaration is still checked at trust zero, regardless of budget.
 def replayPreludePass
-    (allDeclarations : List PsDeclaration) :
+    (allDeclarations : List PsDeclaration)
+    (maxHeartbeats : USize := 2000000)
+    (maxRecDepth : USize := 20000) :
     List PsDeclaration -> Lean.Kernel.Environment ->
     Except PsKernelLeanError (Lean.Kernel.Environment × List PsDeclaration)
   | [], env => .ok (env, [])
   | declaration :: rest, env => do
-      let attempt ← tryPreludeDeclaration allDeclarations env declaration
+      let attempt ← tryPreludeDeclaration allDeclarations env declaration maxHeartbeats maxRecDepth
       match attempt with
       | .admitted next =>
-          replayPreludePass allDeclarations rest next
+          replayPreludePass allDeclarations maxHeartbeats maxRecDepth rest next
       | .deferred =>
-          let (next, deferred) ← replayPreludePass allDeclarations rest env
+          let (next, deferred) ← replayPreludePass allDeclarations maxHeartbeats maxRecDepth rest env
           pure (next, declaration :: deferred)
 
 partial def replayPreludeDeclarations
     (allDeclarations pending : List PsDeclaration)
-    (env : Lean.Kernel.Environment) :
+    (env : Lean.Kernel.Environment)
+    (maxHeartbeats : USize := 2000000)
+    (maxRecDepth : USize := 20000) :
     Except PsKernelLeanError Lean.Kernel.Environment := do
-  let (next, deferred) ← replayPreludePass allDeclarations pending env
+  let (next, deferred) ← replayPreludePass allDeclarations maxHeartbeats maxRecDepth pending env
   match deferred with
   | [] => pure next
   | first :: _ =>
@@ -218,11 +227,16 @@ partial def replayPreludeDeclarations
           ("unresolved portable Standard dependencies; first pending declaration: " ++
             psNameToString (psDeclarationName first)))
       else
-        replayPreludeDeclarations allDeclarations deferred next
+        replayPreludeDeclarations allDeclarations deferred next maxHeartbeats maxRecDepth
 
 def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Kernel.Environment) := do
   let env := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   let declarations := psSelfHostProdPreludeEnvironment.declarations
-  pure <| replayPreludeDeclarations declarations declarations.reverse env
+  -- Lean 4.35.0 Environment.lean import path checks immutable declarations
+  -- with kenv.addDeclCore 0 0. This provider entry is only for the selected,
+  -- separately SHA/FNV-guarded Standard. Ordinary source admission retains
+  -- 2,000,000 heartbeats and depth 20,000 in NativeV7.check/Admission.
+  -- 0 is Lean's import-time resource policy, NOT unchecked insertion.
+  pure <| replayPreludeDeclarations declarations declarations.reverse env 0 0
 
 end PsKernelLean

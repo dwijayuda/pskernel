@@ -890,7 +890,14 @@ def c0ExportRejectForgedInductiveMetadata : IO Unit := do
     if verdict == .accepted || verdict == .rejected then
       throw (IO.userError s!"forged inductive metadata was treated as kernel verdict {label}: {repr verdict}")
 
-def main : IO Unit := do
+def main (args : List String) : IO Unit := do
+  match args with
+  | [path] =>
+      let outcome ← c0ExportVerdictFromFile path
+      IO.println s!"C0_REAL_EXPORT replay_outcome={repr outcome}"
+      return ()
+  | [] => pure ()
+  | _ => throw (IO.userError "expected zero arguments or one NDJSON path")
   c0ExportRejectLossyImports
   c0ExportRejectForgedInductiveMetadata
   c0ExportOnlineOutcomes

@@ -62,3 +62,10 @@ expectation was incorrect. The same cycle/diamond/growth acceptance assertions
 now use the genuinely reducible `optParam Nat 0`; a separate source-oracle
 and graph refusal retain coverage of Id at the restricted policy. No resource,
 sharing, replay or evidence-height assertion was weakened.
+
+Expected-type propagation must preserve the original checked term, even when
+a reduced view is used to inspect its shape. The shared unifier now attempts
+typed flexible-head assignment before delta reduction. This keeps
+`?A := Hidden` rather than silently changing it to `?A := Nat` before search.
+Failed assignment attempts remain transactional and can fall back to ordinary
+conversion. This also avoids unnecessary reduction on successful inference.

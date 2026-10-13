@@ -2189,7 +2189,7 @@ private def transparencyBoundaries : IO Unit := do
   for (result, i) in batch.results.toList.zipIdx do
     match result with
     | .ok _ =>
-      if i == 1 || i == 2 then throw (IO.userError "ordinary type alias unfolded during instance search")
+      if i == 1 || i == 2 then throw (IO.userError ("ordinary type alias unfolded during instance search: " ++ toString i))
     | .error error =>
       unless (i == 1 || i == 2) && error.phase == "elaborate" do
         throw (IO.userError ("transparency boundary " ++ toString i ++ ": " ++ error.message))

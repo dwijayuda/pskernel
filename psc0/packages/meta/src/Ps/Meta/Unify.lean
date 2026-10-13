@@ -128,6 +128,26 @@ def psUnifyRigidApplication
     if args.success then psUnifyLevelLists leftLevels args.context rightLevels else args
   if result.success then some result else none
 
+-- Solve flexible heads before delta reduction. In particular ?A := Alias
+-- must retain the checked source identity: reducing Alias to Nat here would
+-- silently change the later instance-search problem.
+def psUnifyFlexible
+    (assign : Nat → PsExpr → PsUnifyResult) (context : PsMetaContext)
+    (left right : PsExpr) : Option PsUnifyResult := do
+  let result ← match left, right with
+    | .mvar a, .mvar b =>
+      if a == b then some (psUnifySuccess context)
+      else if psMetaVarIsNatural context b then
+        if psMetaVarIsNatural context a && psMetaVarAssignable context a then
+          some (assign a right)
+        else some (assign b left)
+      else if psMetaVarAssignable context a then some (assign a right)
+      else some (assign b left)
+    | .mvar a, _ => some (assign a right)
+    | _, .mvar b => some (assign b left)
+    | _, _ => none
+  if result.success then some result else none
+
 def psUnifyWithFuelWorker (transparency : PsTransparency)
     (fuel : Nat) :
     PsEnvironment ->
@@ -160,8 +180,11 @@ def psUnifyWithFuelWorker (transparency : PsTransparency)
           psUnifyWithFuelWorker transparency remaining;
         let assign : Nat -> PsExpr -> PsUnifyResult :=
           psUnifyAssign (smaller environment localContext) environment localContext context;
-        match psUnifyRigidApplication (smaller environment localContext)
-            context localContext left right with
+        let flexible := psUnifyFlexible assign context
+          (psWhnfCore context localContext left) (psWhnfCore context localContext right)
+        match flexible.orElse (fun _ =>
+          psUnifyRigidApplication (smaller environment localContext)
+            context localContext left right) with
         | some result => result
         | none =>
           let leftValue := psWhnfWithTransparency transparency environment context localContext left;

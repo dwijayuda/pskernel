@@ -107,9 +107,9 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
   match expected with
   | none => current
   | some target =>
-    let target := psWhnf current.context.environment current.context.metaContext
+    let targetShape := psWhnf current.context.environment current.context.metaContext
       current.context.localContext target
-    let enabled := match target with
+    let enabled := match targetShape with
       | .mvar _ => false
       | .sortE level => !psLevelEquivalent level .zero
       | _ => true

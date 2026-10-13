@@ -3,7 +3,7 @@ export const observations = [
   { name: "postponedRecord", args: null, expected: 821n },
   { name: "postponedLambda", args: null, expected: 827n },
   { name: "postponedProof", args: null, expected: 823n },
-  { name: "postponedInteger", args: null, expected: 829n },
+  { name: "postponedInteger", type: "int", args: null, expected: 829n },
   { name: "postponedDefaultNatural", args: null, expected: 839n },
   { name: "postponedNamedRecord", args: null, expected: 853n },
   { name: "derivingNestedRuntime", args: null, expected: 761n },

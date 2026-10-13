@@ -297,3 +297,10 @@ filtering to classes with actual erased fields. Empty classes now use the
 existing shared empty-structure representation at definitions and uses.
 No Repr-specific erasure/backend exception; existing atomic-list observations
 exercise the invariant on all targets. Runtime qualification remains pending.
+
+Reviewed List-universe delta after the native build/oracle in Linux38451439577:
+List Inhabited/BEq now bind the element universe; the former private comparison
+worker is the public List.beq with its pinned reducibility. Roster counts remain
+460/22/88. FNV fnv1a64:2548399426123262483; SHA-256
+sha256:79e34c4fd2bb8e491d624c86ccb644bf96b2442e090137d01b3c74ca72bfaeaf.
+Both strict digest guards are updated to the reviewed semantics, not bypassed.

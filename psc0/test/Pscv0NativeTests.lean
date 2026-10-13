@@ -83,6 +83,14 @@ private def getElemFoundationCases : IO Unit := do
 
     -- RC4 Nat.lt unfolds to the kernel-checked Nat.le inductive. These
     -- witnesses are actual proofs, not the value of Nat.blt or a cast.
+    "theorem orderPositive: Nat.le(2, 5) := PsStandard.natBleReflects(2, 5)\n" ++
+    "theorem orderNegative: ¬Nat.le(5, 2) := PsStandard.natBleReflects(5, 2)\n" ++
+    "theorem orderZero(n: Nat): Nat.le(0, n) := Nat.zero_le(n)\n" ++
+    "theorem orderRaise(n: Nat, m: Nat, h: Nat.le(n, m)): Nat.le(Nat.succ(n), Nat.succ(m)) := Nat.succ_le_succ(h)\n" ++
+    "theorem orderLower(n: Nat, m: Nat, h: Nat.le(Nat.succ(n), Nat.succ(m))): Nat.le(n, m) := Nat.le_of_succ_le_succ(h)\n" ++
+    "theorem orderImpossible(n: Nat): ¬Nat.lt(n, 0) := Nat.not_lt_zero(n)\n" ++
+    "theorem orderCompose(n: Nat, m: Nat, k: Nat, h: Nat.le(n, m), q: Nat.le(m, k)): Nat.le(n, k) := Nat.le_trans(h, q)\n" ++
+    "theorem orderStrictLower(n: Nat, m: Nat, h: Nat.lt(Nat.succ(n), Nat.succ(m))): Nat.lt(n, m) := Nat.lt_of_succ_lt_succ(h)\n" ++
     "theorem naturalBoundDirect: Nat.lt(0, Nat.succ(0)) := Nat.le.refl\n" ++
     "theorem naturalBoundConstructor: Nat.lt(0, Nat.succ(0)) := by { constructor }\n" ++
     "const optionalResult: Option Nat := (AlwaysBox.mk(37))[42]?\n" ++
@@ -102,7 +110,9 @@ private def getElemFoundationCases : IO Unit := do
   let batch ← PsV7Native.runBatch #[
     { source := source, targets := [.javascript, .typescript, .rust],
       sourceName := "GetElemGood.ps" },
-    { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" }]
+    { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" },
+    { source := "theorem bad: Nat.le(5, 2) := PsStandard.natBleReflects(5, 2)\n",
+      targets := [], sourceName := "OrderFalse.ps" }]
   let result ← match batch with
     | .ok result => pure result
     | .error reason => throw (IO.userError ("native GetElem batch failed: " ++
@@ -125,6 +135,9 @@ private def getElemFoundationCases : IO Unit := do
   | .error refused =>
     unless refused.phase == "elaborate" do
       throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
+  match result.results[2]? with
+  | some (.error _) => pure ()
+  | _ => throw (IO.userError "false natural inequality was accepted")
   IO.println "PSCV0_NATIVE_GETELEM: checked indexed proof/instance admitted; missing proof refused"
 
 private def application : String :=
@@ -747,7 +760,9 @@ private def application : String :=
   "const derivedBangRuntime: Nat := DerivedIndex.bang(DerivedIndex.Positive.mk(349))\n" ++
   "const derivedNegativeRuntime: Bool := DerivedIndex.absent(DerivedIndex.Negative.mk(351))\n" ++
   "const bangDefaultValue: Nat := GetElem?.getElem!Default(Option.some(337))\n" ++
-  "function bangDefaultTrap(n: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n"
+  "function bangDefaultTrap(n: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n" ++
+  "function orderLeRuntime(n: Nat, m: Nat): Bool := if (Nat.le(n, m)) { true } else { false }\n" ++
+  "function orderLtRuntime(n: Nat, m: Nat): Bool := if (Nat.lt(n, m)) { true } else { false }\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

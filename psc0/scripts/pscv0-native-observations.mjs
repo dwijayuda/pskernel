@@ -1,5 +1,11 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "orderLeRuntime", args: [0n, 0n], expected: true },
+  { name: "orderLeRuntime", args: [7n, 3n], expected: false },
+  { name: "orderLtRuntime", args: [3n, 7n], expected: true },
+  { name: "orderLtRuntime", args: [7n, 7n], expected: false },
+  { name: "orderLeRuntime", args: [184467440737095516170n, 184467440737095516171n], expected: true },
+  { name: "orderLtRuntime", args: [184467440737095516171n, 184467440737095516170n], expected: false },
   { name: "doEarlyAnswer", args: null, expected: 300n },
   { name: "doBindAnswer", args: null, expected: 601n },
   { name: "doErrorAnswer", args: null, expected: 399n },

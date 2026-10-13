@@ -81,6 +81,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardProduct,
     `Ps.Environment.StandardExcept,
     `Ps.Environment.StandardGetElem,
+    `Ps.Environment.StandardNatOrder,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]

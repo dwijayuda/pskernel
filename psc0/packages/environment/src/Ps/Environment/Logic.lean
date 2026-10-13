@@ -61,10 +61,29 @@ def psNatOrderDeclarations : List PsDeclaration :=
   let ltType := psLogicPi 0 "n" nat (psLogicPi 1 "m" nat prop)
   let ltValue := psLogicLam 0 "n" nat
     (psLogicLam 1 "m" nat (le (succ n) m))
+  -- Nat.le is a multi-constructor Prop: its recursor eliminates into Prop
+  -- only. The checked kernel generates this same indexed telescope.
+  let motive := PsExpr.fvar 3
+  let motiveType := psLogicPi 1 "m" nat (psLogicPi 2 "h" (le n m) prop)
+  let refl := PsExpr.app (.constE reflName []) n
+  let step := psLogicApply (.constE stepName []) [n, m, h]
+  let minorStep := psLogicPi 1 "m" nat
+    (psLogicPi 2 "h" (le n m)
+      (psLogicPi 4 "ih" (psLogicApply motive [m, h])
+        (psLogicApply motive [succ m, step]))) .implicit
+  let recType := psLogicPi 0 "n" nat
+    (psLogicPi 3 "motive" motiveType
+      (psLogicPi 5 "refl" (psLogicApply motive [n, refl])
+        (psLogicPi 6 "step" minorStep
+          (psLogicPi 1 "m" nat
+            (psLogicPi 2 "h" (le n m) (psLogicApply motive [m, h]))
+            .implicit))) .implicit) .implicit
   [ .inductiveDecl (.mk leName [] inductiveType 1 1
         [reflName, stepName] false),
     .constructorDecl (.mk reflName [] reflType leName 0 1 0 []),
     .constructorDecl (.mk stepName [] stepType leName 1 1 2 [1]),
+    .recursorDecl (.mk (psNameAppendStr leName "rec") [] recType
+      [leName] 1 1 1 2),
     .definitionDecl ltName [] ltType ltValue ]
 
 def psLogicDeclarations : List PsDeclaration :=

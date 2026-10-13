@@ -97,6 +97,27 @@ def main : IO Unit := do
       | .ok _ =>
           throw (IO.userError
             "C0 structural preview polluted trusted checker admission")
+      -- The new shared-fuel demand candidate remains an observation; it
+      -- does not rewrite source-session caches or authorize admission.
+      let nestedNat : PsKernelExpr :=
+        .app (.app (.const psKernelNatAddName [])
+          (.lit (.nat 1)))
+          (.app (.app (.const psKernelNatMulName [])
+            (.lit (.nat 6))) (.lit (.nat 7)))
+      match psKernelC0ArchitecturePreviewDemand 4096 admitted nestedNat with
+      | .error err =>
+          throw (IO.userError ("C0 nested-demand preview rejected: " ++ err))
+      | .ok (observation, _) =>
+          if !observation.agrees ||
+              !psKernelExprEqual observation.sourceValue (.lit (.nat 43)) then
+            throw (IO.userError
+              "C0 nested demand preview diverged from source WHNF")
+      match psKernelC0ArchitectureCheckWork 4096 admitted
+          (.app (.sort .zero) (.sort .zero)) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError
+            "C0 nested candidate authorized an invalid application")
       -- Re-admitting the same name must reject atomically.
       match psKernelC0ArchitectureAdmit 4096 admitted (.definition alias) with
       | .error _ => pure ()

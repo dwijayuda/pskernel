@@ -183,6 +183,53 @@ def psKernelC0CertifiedWorkInferRoot
     Except String (PsKernelExpr × PsKernelC0CertifiedWork) :=
   psKernelC0CertifiedWorkInfer fuel work root.expression
 
+/-- A proof-carrying RECORD of a full source checker success.
+    The equality is tied to the exact certified decoded syntax, source
+    environment/local context, pre-check state and fuel. This is stronger
+    than an easily substituted (expression, reportedType) tuple.
+
+    It proves the specified executable source checker returned `.ok`;
+    it does not prove the source checker sound, the environment consistent,
+    or the source expression a closed theorem in every context. -/
+structure PsKernelC0SourceCheckedRoot where
+  root : PsKernelC0CertifiedRoot
+  context : PsKernelCheckerContext
+  stateBefore : PsKernelCheckerState
+  fuel : Nat
+  checkedType : PsKernelExpr
+  stateAfter : PsKernelCheckerState
+  sourceCheck :
+    psKernelCheckerCheck fuel context stateBefore root.expression =
+      .ok (checkedType, stateAfter)
+
+/-- Produce the checked-result witness in the SAME run as source checking,
+    not from a candidate reduction, type synthesis, or an assumed hash. -/
+def psKernelC0SourceCheckCertifiedRoot
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (root : PsKernelC0CertifiedRoot) :
+    Except String (PsKernelC0SourceCheckedRoot × PsKernelCheckerSession) :=
+  match h : psKernelCheckerCheck fuel session.context session.state
+      root.expression with
+  | .error reason => .error reason
+  | .ok (ty, nextState) =>
+      .ok ({
+        root := root
+        context := session.context
+        stateBefore := session.state
+        fuel := fuel
+        checkedType := ty
+        stateAfter := nextState
+        sourceCheck := h
+      }, { session with state := nextState })
+
+theorem psKernelC0SourceCheckedRootExact
+    (checked : PsKernelC0SourceCheckedRoot) :
+    psKernelCheckerCheck checked.fuel checked.context
+        checked.stateBefore checked.root.expression =
+      .ok (checked.checkedType, checked.stateAfter) :=
+  checked.sourceCheck
+
 /-- Atomic source-checked publication of selected staged expressions.
     Unlike syntax-only `CertifiedWorkCommit`, EVERY selected root must
     pass independent full source checking before this operation returns a
@@ -197,12 +244,12 @@ def psKernelC0CertifiedWorkCommitChecked
     (work : PsKernelC0CertifiedWork) :
     Except String
       (PsKernelC0CertifiedStore ×
-        List (PsKernelC0CertifiedRoot × PsKernelExpr) ×
+        List PsKernelC0SourceCheckedRoot ×
         PsKernelC0CertifiedWork) := do
   let some (owner, roots) := psKernelC0CertifiedWorkCommit work
     | throw "source-certified root promotion failed canonical validation"
   let mut checkedWork := work
-  let mut typed : List (PsKernelC0CertifiedRoot × PsKernelExpr) := []
+  let mut typed : List PsKernelC0SourceCheckedRoot := []
   for root in roots do
     -- A locally well-typed fvar is NOT a closed proof/executable root.
     -- Source declaration validation owns these exact closure and universe
@@ -210,7 +257,9 @@ def psKernelC0CertifiedWorkCommitChecked
     let _ ← psKernelCheckNoMVarNoFVar root.expression
     let _ ← psKernelCheckLevelParams
       root.expression checkedWork.raw.checker.context.levelParams
-    let (ty, next) ← psKernelC0CertifiedWorkCheckRoot fuel checkedWork root
-    checkedWork := next
-    typed := (root, ty) :: typed
+    let (receipt, nextSession) ← psKernelC0SourceCheckCertifiedRoot
+      fuel checkedWork.raw.checker root
+    checkedWork := psKernelC0CertifiedWorkWithSession
+      checkedWork nextSession
+    typed := receipt :: typed
   return (owner, typed.reverse, checkedWork)

@@ -152,6 +152,51 @@ def psKernelC0ArchitecturePreviewTypedDemand
       fuel quota work.checker expr
   return (observation, { work with checker := session })
 
+/-- Unified source-checked work operations. Every judgment validates the
+    work transaction and delegates to the SAME authoritative checked session
+    used by declaration admission. Neither candidate syntax nor preview
+    agreement may authorize a type, DefEq result, or checked environment. -/
+def psKernelC0ArchitectureWhnfWork
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid checked architecture transaction"
+  let (value, session) ← psKernelSessionWhnf fuel work.checker expr
+  return (value, { work with checker := session })
+
+def psKernelC0ArchitectureInferWork
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid checked architecture transaction"
+  let (type, session) ← psKernelSessionInfer fuel work.checker expr
+  return (type, { work with checker := session })
+
+def psKernelC0ArchitectureDefEqWork
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (left right : PsKernelExpr) :
+    Except String (Bool × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid checked architecture transaction"
+  let (same, session) ← psKernelSessionIsDefEq
+    fuel work.checker left right
+  return (same, { work with checker := session })
+
+def psKernelC0ArchitectureIsPropWork
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (Bool × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid checked architecture transaction"
+  let (isProp, session) ← psKernelSessionIsProp fuel work.checker expr
+  return (isProp, { work with checker := session })
+
 /-- Phase E authority seam. On failure no next work exists: the caller retains
     the original immutable transaction. No candidate or arena result enters
     the source judgment. -/

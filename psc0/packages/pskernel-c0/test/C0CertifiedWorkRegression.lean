@@ -83,6 +83,33 @@ def main : IO Unit := do
     | throw (IO.userError "ill-typed syntax should be stageable")
   let _stageValid : psKernelC0ArchitectureWorkValid staged.raw = true :=
     staged.valid
+  -- A staged root can itself carry an immutable source-store proof.
+  -- That proof authorizes *readback*, never full term acceptance.
+  let some (stagedWithRoot, stagedBound) :=
+      psKernelC0CertifiedWorkStageRoot initial (.bvar 0)
+    | throw (IO.userError "exact staged root certificate was unavailable")
+  let _rootValid :
+      psKernelC0DecodeExpr stagedBound.owner.store stagedBound.root =
+        some stagedBound.expression :=
+    psKernelC0CertifiedRootRead_exact stagedBound
+  if !psKernelExprEqual stagedBound.expression (.bvar 0) then
+    throw (IO.userError "staged root did not preserve exact loose bvar")
+  match psKernelC0CertifiedWorkCheckRoot 4096 stagedWithRoot stagedBound with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "certified staged root bypassed full source check")
+  let some (wellFormedStage, wellFormedRoot) :=
+      psKernelC0CertifiedWorkStageRoot initial (.sort .zero)
+    | throw (IO.userError "source-sort staging did not certify")
+  let (checkedRootTy, checkedRootWork) ← match
+      psKernelC0CertifiedWorkCheckRoot 4096 wellFormedStage
+        wellFormedRoot with
+    | .ok result => pure result
+    | .error reason =>
+        throw (IO.userError ("certified valid root failed checking: " ++ reason))
+  if !psKernelExprEqual checkedRootTy (.sort (.succ .zero)) ||
+      !psKernelC0ArchitectureWorkValid checkedRootWork.raw then
+    throw (IO.userError "certified root checking changed source typing")
   -- Stage validation is syntax-only. The same ill-typed bvar must fail
   -- mandatory checking even though it lives in a certified canonical store.
   match psKernelC0CertifiedWorkCheck 4096 staged (.bvar 0) with

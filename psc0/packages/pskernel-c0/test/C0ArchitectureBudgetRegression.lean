@@ -275,6 +275,30 @@ def main : IO Unit := do
       (c0BudgetName "Unrelated") 20 30 11 with
   | some 11 => pure ()
   | _ => throw (IO.userError "unknown primitive incurred inferred work")
+  -- A Nat primitive nested under another Nat argument must be charged
+  -- by its *own* head, even though a .natRight continuation is still saved.
+  -- Previously the outer frame took precedence and could skip the inner
+  -- power-growth preflight.
+  let outerNat : PsKernelC0Machine := {
+    control := .mk (.const psKernelNatAddName []) []
+  }
+  let nestedPowState : PsKernelC0DemandState := {
+    machine := {
+      control := .mk (.const psKernelNatPowName []) []
+      arguments := [
+        .mk (.lit (.nat 2)) [],
+        .mk (.lit (.nat 100)) []
+      ]
+    }
+    frames := [.natRight outerNat 5]
+  }
+  if (psKernelC0ReservePrimitiveWork 64 nestedPowState 128).isSome then
+    throw (IO.userError "nested Nat.pow skipped inner growth reservation")
+  match psKernelC0ReservePrimitiveWork 64 nestedPowState 16384 with
+  | none => throw (IO.userError "nested Nat.pow declined generous quota")
+  | some left =>
+      if left >= 16384 then
+        throw (IO.userError "nested arithmetic did not debit shared work")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app

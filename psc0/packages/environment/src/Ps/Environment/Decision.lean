@@ -26,7 +26,7 @@ def psDecisionReflectsDeclaration : PsDeclaration :=
   let boolean := PsExpr.fvar 0
   let motive := psLogicLam 2 "_value" bool (.sortE .zero)
   let result := psLogicApply
-    (.constE (psNameAppendStr psBoolName "rec") [.zero])
+    (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
     [motive, psDecisionNot proposition, proposition, boolean]
   .definitionDecl (psDecisionName "Bool.Reflects") []
     (psLogicPi 0 "value" bool

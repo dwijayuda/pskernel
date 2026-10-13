@@ -72,6 +72,15 @@ def main : IO Unit := do
           if observation.agrees ||
               !psKernelExprEqual observation.sourceValue (.sort .zero) then
             throw (IO.userError "C0 candidate cache authorized a delta judgment")
+      match psKernelC0ArchitecturePreviewDelta
+          4096 admitted (.const aliasName []) with
+      | .error err =>
+          throw (IO.userError ("C0 delta preview failed: " ++ err))
+      | .ok (observation, _) =>
+          if !observation.agrees ||
+              !psKernelExprEqual observation.sourceValue (.sort .zero) then
+            throw (IO.userError
+              "C0 environment-aware lazy delta did not match source WHNF")
       -- Re-admitting the same name must reject atomically.
       match psKernelC0ArchitectureAdmit 4096 admitted (.definition alias) with
       | .error _ => pure ()

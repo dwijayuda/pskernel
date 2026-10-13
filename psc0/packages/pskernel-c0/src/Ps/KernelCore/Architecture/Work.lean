@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Execution
+import Ps.KernelCore.Architecture.Delta
 import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Admission.Declaration.Admission
 
@@ -62,6 +62,20 @@ def psKernelC0ArchitecturePreview
     throw "invalid candidate architecture transaction"
   let (observation, session) ←
     psKernelC0ObserveWhnf fuel work.checker expr
+  return (observation, { work with checker := session })
+
+/-- Environment-aware lazy evaluation is still *observational*:
+    checked WHNF runs first and retains exclusive judgment authority.
+    No candidate result enters cached source judgments or admission. -/
+def psKernelC0ArchitecturePreviewDelta
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0ExecutionObservation × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveDelta fuel work.checker expr
   return (observation, { work with checker := session })
 
 /-- Phase E authority seam. On failure no next work exists: the caller retains

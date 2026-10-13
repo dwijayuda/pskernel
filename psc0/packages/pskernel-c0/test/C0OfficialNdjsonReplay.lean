@@ -321,49 +321,80 @@ def c0ExportReadRecursor
 /-- A complete ordinary export block is reconstructed, never admitted by
     trusting its precomputed recursor or constructor declarations.
     Mutual/nested/safety variants remain explicit declines. -/
-def c0ExportReadOrdinaryInductive
+def c0ExportReadInductiveGroup
     (st : C0ExportTables) (block : Lean.Json) :
     Except String C0ExportInductiveGroup := do
   c0ExportOnlyKeys block ["types", "ctors", "recs"]
   let ts ← (← c0JsonObj block "types").getArr?
   let cs ← (← c0JsonObj block "ctors").getArr?
   let rs ← (← c0JsonObj block "recs").getArr?
-  if ts.size != 1 then throw "unsupported NDJSON mutual inductive group"
-  let expectedType ← c0ExportReadInductiveType st ts[0]!
+  let types ← ts.toList.mapM (c0ExportReadInductiveType st)
   let expectedCtors ← cs.toList.mapM (c0ExportReadConstructor st)
   let expectedRecs ← rs.toList.mapM (c0ExportReadRecursor st)
-  if expectedType.numNested != 0 then
+  let some first := types.head?
+    | throw "malformed NDJSON empty inductive group"
+  let names := types.map (fun t => t.base.name)
+  if types.any (fun t => t.numNested != 0) then
     throw "unsupported NDJSON nested inductive group"
-  if expectedType.isUnsafe ||
+  if types.any (fun t => t.isUnsafe) ||
       expectedCtors.any (fun c => c.isUnsafe) ||
       expectedRecs.any (fun c => c.isUnsafe) then
     throw "unsupported NDJSON unsafe inductive group"
-  if !c0ExportSameNames expectedType.all [expectedType.base.name] then
-    throw "unsupported NDJSON inductive all-names group"
-  if !c0ExportSameNames
-      (expectedCtors.map (fun c => c.base.name)) expectedType.ctors then
-    throw "malformed NDJSON inductive constructor manifest"
-  for i in [:expectedCtors.length] do
-    let some c := expectedCtors[i]?
-      | throw "malformed NDJSON constructor index"
-    if !psKernelNameEq c.induct expectedType.base.name ||
-        c.cidx != i || c.numParams != expectedType.numParams ||
-        !c0ExportSameNames c.base.levelParams expectedType.base.levelParams then
-      throw "malformed NDJSON inductive constructor metadata"
-  let source : PsKernelSimpleInductiveDecl := {
-    levelParams := expectedType.base.levelParams
-    name := expectedType.base.name
-    type := expectedType.base.type
-    ctors := expectedCtors.map (fun c => {
-      name := c.base.name
-      type := c.base.type
-    })
-    isUnsafe := false
-    numParams := expectedType.numParams
-  }
+  for ty in types do
+    if !c0ExportSameNames ty.all names ||
+        !c0ExportSameNames ty.base.levelParams first.base.levelParams ||
+        ty.numParams != first.numParams then
+      throw "unsupported NDJSON inconsistent mutual inductive header"
+    let constructors := expectedCtors.filter
+      (fun c => psKernelNameEq c.induct ty.base.name)
+    if !c0ExportSameNames
+        (constructors.map (fun c => c.base.name)) ty.ctors then
+      throw "malformed NDJSON inductive constructor manifest"
+    for i in [:constructors.length] do
+      let some c := constructors[i]?
+        | throw "malformed NDJSON constructor index"
+      if c.cidx != i || c.numParams != ty.numParams ||
+          !c0ExportSameNames c.base.levelParams ty.base.levelParams then
+        throw "malformed NDJSON inductive constructor metadata"
+  let listedCount := (types.map (fun ty =>
+    (expectedCtors.filter (fun c =>
+      psKernelNameEq c.induct ty.base.name)).length)).foldl (· + ·) 0
+  if listedCount != expectedCtors.length then
+    throw "malformed NDJSON constructor with unknown inductive owner"
+  let recNames := expectedRecs.map (fun r => r.base.name)
+  let generatedNames := types.map (fun t =>
+    psKernelSimpleRecName t.base.name)
+  if !c0ExportSameNames recNames generatedNames then
+    throw "unsupported NDJSON recursor family is not canonical"
+  let source :=
+    if types.length == 1 then
+      let constructors := expectedCtors.map (fun c =>
+        { name := c.base.name, type := c.base.type } :
+          PsKernelSimpleConstructorDecl)
+      C0ExportInductiveSource.ordinary {
+        levelParams := first.base.levelParams
+        name := first.base.name
+        type := first.base.type
+        ctors := constructors
+        isUnsafe := false
+        numParams := first.numParams
+      }
+    else
+      C0ExportInductiveSource.mutual {
+        levelParams := first.base.levelParams
+        numParams := first.numParams
+        types := types.map (fun ty => {
+          name := ty.base.name
+          type := ty.base.type
+          ctors := (expectedCtors.filter (fun c =>
+            psKernelNameEq c.induct ty.base.name)).map (fun c =>
+              { name := c.base.name, type := c.base.type })
+        })
+        isUnsafe := false
+      }
   return {
     source := source
-    expectedType := expectedType
+    expectedTypes := types
     expectedCtors := expectedCtors
     expectedRecs := expectedRecs
   }
@@ -493,9 +524,9 @@ def c0ExportParseRecord
     return { st with declarations := .opaqueDecl opaqueInfo :: st.declarations }
   if let .ok payload := c0JsonObj j "inductive" then
     c0ExportOnlyKeys j ["inductive"]
-    let group ← c0ExportReadOrdinaryInductive st payload
+    let group ← c0ExportReadInductiveGroup st payload
     return { st with declarations :=
-      .ordinaryInductive group :: st.declarations }
+      .inductiveGroup group :: st.declarations }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/

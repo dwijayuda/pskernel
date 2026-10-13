@@ -71,7 +71,7 @@ def main : IO Unit := do
   c0DeltaCheck "opaque-is-neutral"
     (psKernelMkCheckerSession opaqueEnv [] .safe 4096 psKernelLeanNatMaxSizeDefault)
     (.const opaqueName []) (.const opaqueName [])
-  match psKernelC0ArchitectureCandidateDelta 0 session (.const first []) with
+  match psKernelC0ArchitectureCandidateDelta 0 session.context (.const first []) with
   | .error _ => pure ()
   | .ok _ => throw (IO.userError "C0 delta candidate accepted zero fuel")
   -- The source authority rejects an ill-typed application; even a candidate

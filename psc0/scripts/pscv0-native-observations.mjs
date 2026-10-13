@@ -1,5 +1,6 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "productHighFold", args: null, expected: 6n },
   { name: "productHighLeft", args: null, expected: 5n },
   { name: "productHighRight", args: null, expected: 7n },
   { name: "productHighDefault", args: null, expected: 0n },

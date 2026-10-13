@@ -392,8 +392,14 @@ private def exportStandardCore (spec : StandardExportSpec)
     match exportDeclaration native spec.allowedAssumptions info with
     | .ok value => pure value
     | .error reason => throw (IO.userError (toString info.name ++ ": " ++ reason))
-  checkCandidate (declarations ++ base) declarations
-  let recursorRules ← checkRecursorRules native (declarations ++ base) declarations
+  -- The cut names are frozen, but current implementations of cut declarations
+  -- may acquire new checked helper dependencies. Replay the complete declared
+  -- pre-admission stage, excluding every replacement. Keep its extra helpers
+  -- out of the frozen cut so earlier assets still regenerate byte-for-byte.
+  let replayBase := spec.baseDeclarations.filter
+    (fun d => !seen.contains (PsKernelLean.toLeanName (psDeclarationName d)))
+  checkCandidate (declarations ++ replayBase) declarations
+  let recursorRules ← checkRecursorRules native (declarations ++ replayBase) declarations
   let boundaryNames := (base.map psDeclarationName).mergeSort
     (fun a b => Lean.Name.lt (PsKernelLean.toLeanName a) (PsKernelLean.toLeanName b))
   let mut definitions := []

@@ -133,26 +133,28 @@ def psStandardListFoldlWorkerDeclaration : PsDeclaration :=
         (psLogicLam 3 "xs" listAlpha body)) .implicit) .implicit
   .definitionDecl psStandardListFoldlWorkerName [psRootName "u", psRootName "v"] type value
 
+-- Native public order: accumulator α : Type u, element β : Type v.
+-- The private worker retains its list-first telescope for structural lowering.
 def psStandardListFoldlDeclaration : PsDeclaration :=
   let u := PsLevel.param (psRootName "u")
   let v := PsLevel.param (psRootName "v")
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let listAlpha := psSelfHostListOf alpha u
-  let functionType := psLogicPi 10 "acc" beta
-    (psLogicPi 11 "item" alpha beta)
+  let listBeta := psSelfHostListOf beta v
+  let functionType := psLogicPi 10 "acc" alpha
+    (psLogicPi 11 "item" beta alpha)
   let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "β" (.sortE (.succ v))
       (psLogicPi 2 "f" functionType
-        (psLogicPi 3 "init" beta
-          (psLogicPi 4 "xs" listAlpha beta))) .implicit) .implicit
-  let body := psLogicApply (.constE psStandardListFoldlWorkerName [u, v])
-    [alpha, beta, .fvar 2, .fvar 4, .fvar 3]
+        (psLogicPi 3 "init" alpha
+          (psLogicPi 4 "xs" listBeta alpha))) .implicit) .implicit
+  let body := psLogicApply (.constE psStandardListFoldlWorkerName [v, u])
+    [beta, alpha, .fvar 2, .fvar 4, .fvar 3]
   let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "β" (.sortE (.succ v))
       (psLogicLam 2 "f" functionType
-        (psLogicLam 3 "init" beta
-          (psLogicLam 4 "xs" listAlpha body))) .implicit) .implicit
+        (psLogicLam 3 "init" alpha
+          (psLogicLam 4 "xs" listBeta body))) .implicit) .implicit
   .definitionDecl (psNameAppendStr psListName "foldl") [psRootName "u", psRootName "v"] type value
 
 -- The safe-indexing worker is total and has no validity-proof axiom.
@@ -295,22 +297,39 @@ def psStandardListFoldrDeclaration : PsDeclaration :=
           (psLogicLam 4 "xs" listAlpha body))) .implicit) .implicit
   .definitionDecl (psNameAppendStr psListName "foldr") [psRootName "u", psRootName "v"] type value
 
--- Reverse is a checked specialization of the already qualified List.foldl.
--- It runs in linear time, without introducing a second recursion primitive.
+-- Pinned Init/Data/List/Basic: the accumulator is an argument to the
+-- recursive result. Both the open reverseAux equations and reverse's public
+-- definition must compute exactly; a merely extensionally equal fold is not
+-- a compatible boundary for native proofs that unfold these definitions.
+def psStandardListReverseAuxDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
+  let alpha := PsExpr.fvar 0
+  let list := psSelfHostListOf alpha u
+  let arrow := psLogicPi 2 "acc" list list
+  let motive := psLogicLam 3 "_" list arrow
+  let initial := psLogicLam 2 "acc" list (.fvar 2)
+  let step := psLogicLam 4 "head" alpha
+    (psLogicLam 5 "tail" list (psLogicLam 6 "ih" arrow
+      (psLogicLam 2 "acc" list
+        (.app (.fvar 6) (psSelfHostListConsOf alpha (.fvar 4) (.fvar 2) u)))))
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
+    (psLogicPi 1 "xs" list arrow) .implicit
+  let body := psLogicApply (psStandardListRecursor u (.succ u))
+    [alpha, motive, initial, step, .fvar 1]
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
+    (psLogicLam 1 "xs" list body) .implicit
+  .definitionDecl (psNameAppendStr psListName "reverseAux") [psRootName "u"] type value
+
 def psStandardListReverseDeclaration : PsDeclaration :=
   let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha u
+  let list := psSelfHostListOf alpha u
   let type := psLogicPi 0 "α" (.sortE (.succ u))
-    (psLogicPi 1 "xs" listAlpha listAlpha) .implicit
-  let accumulate := psLogicLam 2 "acc" listAlpha
-    (psLogicLam 3 "head" alpha
-      (psSelfHostListConsOf alpha (.fvar 3) (.fvar 2) u))
-  let body := psLogicApply
-    (.constE (psNameAppendStr psListName "foldl") [u, u])
-    [alpha, listAlpha, accumulate, psSelfHostListNilOf alpha u, .fvar 1]
+    (psLogicPi 1 "xs" list list) .implicit
+  let body := psStandardListCall "reverseAux"
+    [alpha, .fvar 1, psSelfHostListNilOf alpha u] [u]
   let value := psLogicLam 0 "α" (.sortE (.succ u))
-    (psLogicLam 1 "xs" listAlpha body) .implicit
+    (psLogicLam 1 "xs" list body) .implicit
   .definitionDecl (psNameAppendStr psListName "reverse") [psRootName "u"] type value
 
 def psStandardListDeclarations : List PsDeclaration :=
@@ -322,7 +341,8 @@ def psStandardListDeclarations : List PsDeclaration :=
     psStandardListSliceWorkerDeclaration false,
     psStandardListSliceDeclaration true,
     psStandardListSliceDeclaration false,
-    psStandardListFoldrDeclaration, psStandardListReverseDeclaration]
+    psStandardListFoldrDeclaration, psStandardListReverseAuxDeclaration,
+    psStandardListReverseDeclaration]
 
 def psStandardPreludeDeclarationsWithList : List PsDeclaration :=
   psStandardPreludeDeclarationsWithOption ++ psStandardListDeclarations

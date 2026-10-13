@@ -312,3 +312,29 @@ prohibits source export. The production checker is unchanged. Separate CI
 steps run candidate diagnostics and current-source checks after a successful
 build; the workflow still fails if either gate fails. This gives one complete
 dependency picture and independent snapshot evidence in the same run.
+
+## Complete List computation-boundary repair
+
+The aggregate inventory38473183392 found exactly one independent kernel
+failure (List.reverse_cons), with 25 blocked dependents. It also independently
+reported the strict digest drift from the reviewed product/Boolean changes.
+
+Pinned Init/Prelude.lean:List.foldl orders the accumulator type/universe before
+the element type/universe. PSC0's public declaration and all explicit Standard
+callers (Array.foldl, formatting and hashing) now follow that order. The private
+structural worker remains an implementation detail. A mixed-universe named-type
+fold case checks this convention against native Lean and all runtime targets.
+
+Pinned Init/Data/List/Basic.lean:reverseAux/reverse and the accompanying
+reverseAux_cons/reverse_cons proofs require a named accumulator recursion.
+The checked portable reverseAux now has those same open equations, and reverse
+calls it with []. This keeps linear traversal and shared structural lowering.
+Native signatures of foldl/reverse/reverseAux join the audit. The imported
+native proof closure checks the general equations beyond the compact fixture.
+
+Frozen export cuts remain exact name sets. Fresh replay uses the complete
+explicit pre-admission stage so checked implementations may acquire helper
+dependencies without dropping them from replay. Candidates/replacements are
+removed from that stage before insertion, preventing collisions. New helpers
+do not silently change old asset cuts; all three prior assets must still
+regenerate byte-for-byte. Standard snapshot drift remains a separate strict gate.

@@ -126,7 +126,7 @@ def psStandardArrayPrimitiveDeclarations : List PsDeclaration :=
         (psLogicLam 5 "f" (psLogicPi 10 "acc" beta (psLogicPi 11 "value" alpha beta))
           (psLogicLam 6 "init" beta (psLogicLam 1 "xs" array
             (psLogicLam 7 "start" psOrderNat (psLogicLam 8 "stop" psOrderNat
-              (psStandardListCall "foldl" [alpha, beta, fn, init, sliced] [.zero, .zero]))))))
+              (psStandardListCall "foldl" [beta, alpha, fn, init, sliced] [.zero, .zero]))))))
         .implicit)) ]
 
 def psStandardArrayInstances : List PsDeclaration :=

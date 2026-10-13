@@ -610,3 +610,7 @@ end ProductLevels
 
 -- Upstream Bool equality is intentionally right-biased in open reduction.
 example (a : Bool) : (a == true) = a := rfl
+
+example {A : Type u} (xs : List A) : xs.reverse = List.reverseAux xs [] := rfl
+#guard (List.foldl (α := ProductLevels.High) (β := Nat)
+  (fun acc n => ProductLevels.High.mk (acc.value + n)) (ProductLevels.High.mk 0) [1, 2, 3]).value == 6

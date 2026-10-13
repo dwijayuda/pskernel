@@ -25,7 +25,7 @@ def psFormatJoinDeclaration (mode : Nat) : PsDeclaration :=
     (if mode == 2 then append (append (.fvar 7) next) separator
      else append (append (.fvar 7) separator) next))
   let rest := psStandardListCall "foldl"
-    [alpha, format, combine, initial, .fvar 5] [level, .zero]
+    [format, alpha, combine, initial, .fvar 5] [.zero, level]
   let step := psLogicLam 4 "head" alpha
     (psLogicLam 5 "tail" list (psLogicLam 6 "unused" format rest))
   let body := psLogicApply (psStandardListRecursor level)

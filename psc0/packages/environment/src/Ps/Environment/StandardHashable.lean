@@ -88,7 +88,7 @@ def psHashContainerInstances : List PsDeclaration :=
   let step := psLogicLam 3 "acc" psHashUInt64 (psLogicLam 4 "value" alpha
     (psHashMix (.fvar 3) (psHashMethod alpha (.fvar 1) (.fvar 4) (.succ level))))
   let listMethod := psLogicLam 2 "values" list
-    (psStandardListCall "foldl" [alpha, psHashUInt64, step, psHashSeed 7, .fvar 2] [level, .zero])
+    (psStandardListCall "foldl" [psHashUInt64, alpha, step, psHashSeed 7, .fvar 2] [.zero, level])
   let array := psPreludeArrayOf alpha
   let arrayStep := psLogicLam 3 "acc" psHashUInt64 (psLogicLam 4 "value" alpha
     (psHashMix (.fvar 3) (psHashMethod alpha (.fvar 1) (.fvar 4))))

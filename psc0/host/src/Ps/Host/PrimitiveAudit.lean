@@ -64,7 +64,8 @@ def primitiveAudit : IO Lean.Json := do
     let opaquePrimitive := ["mixHash", "String.hash"].contains (psNameToString name)
     let logicalAssumption := ["propext", "Quot.sound"].contains (psNameToString name)
     let kernelQuotient := match declaration with | .quotientDecl .. => true | _ => false
-    let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd"].contains
+    let checkedFoundation := ["Prod", "Prod.mk", "Prod.rec", "Prod.fst", "Prod.snd",
+      "List.foldl", "List.reverse", "List.reverseAux"].contains
       (psNameToString name)
     if assumption || reviewed || opaquePrimitive || kernelQuotient || checkedFoundation then
       let nativeName := PsKernelLean.toLeanName name

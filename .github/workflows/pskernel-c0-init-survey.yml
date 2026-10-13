@@ -71,6 +71,17 @@ jobs:
             lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-12244.ndjson"
           ) | tee "$RUNNER_TEMP/c0-first-12244-result.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=12244" "$RUNNER_TEMP/c0-first-12244-result.txt"
+      - name: Qualify real Init prefix through first nested inductive
+        shell: bash
+        run: |
+          set -euo pipefail
+          head -n 79416 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-first-nested.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/Init-first-nested.ndjson")" -eq 79416
+          (
+            cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
+            timeout 220s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-nested.ndjson"
+          ) | tee "$RUNNER_TEMP/c0-first-nested-result.txt"
+          grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=79416" "$RUNNER_TEMP/c0-first-nested-result.txt"
       - name: Publish declaration and expression coverage inventory
         shell: bash
         run: |
@@ -255,5 +266,6 @@ jobs:
             ${{ runner.temp }}/leanchecker-result.txt
             ${{ runner.temp }}/c0-real-init-435-result.txt
             ${{ runner.temp }}/c0-first-12244-result.txt
+            ${{ runner.temp }}/c0-first-nested-result.txt
           if-no-files-found: warn
           retention-days: 14

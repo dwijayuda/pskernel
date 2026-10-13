@@ -94,6 +94,15 @@ def main : IO Unit := do
     | throw (IO.userError "ill-typed syntax should be stageable")
   let _stageValid : psKernelC0ArchitectureWorkValid staged.raw = true :=
     staged.valid
+  -- A canonical syntax-only commit is allowed, but the stronger checked
+  -- publication must FAIL atomically on a loose, ill-typed variable.
+  match psKernelC0CertifiedWorkCommitChecked 4096 staged with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "checked publication accepted an unbound staged term")
+  if (psKernelC0ArchitectureAbort staged.raw).nodes.size !=
+      rawStore.nodes.size then
+    throw (IO.userError "failed checked publication modified persistent input")
   -- A staged root can itself carry an immutable source-store proof.
   -- That proof authorizes *readback*, never full term acceptance.
   let some (stagedWithRoot, stagedBound) :=
@@ -121,6 +130,33 @@ def main : IO Unit := do
   if !psKernelExprEqual checkedRootTy (.sort (.succ .zero)) ||
       !psKernelC0ArchitectureWorkValid checkedRootWork.raw then
     throw (IO.userError "certified root checking changed source typing")
+  -- Publication is now explicitly gated by full checking of EVERY
+  -- selected root; syntax provenance alone cannot issue this result.
+  let (published, typedRoots, checkedPublished) ← match
+      psKernelC0CertifiedWorkCommitChecked 4096 wellFormedStage with
+    | .ok data => pure data
+    | .error e =>
+        throw (IO.userError ("checked root publication failed: " ++ e))
+  if !psKernelC0ReplayValidateStore published.store ||
+      !psKernelC0ArchitectureWorkValid checkedPublished.raw then
+    throw (IO.userError "checked publication lost canonical work validation")
+  match typedRoots with
+  | [(root, ty)] =>
+      if !psKernelExprEqual root.expression (.sort .zero) ||
+          !psKernelExprEqual ty (.sort (.succ .zero)) then
+        throw (IO.userError "checked publication returned wrong root/type pair")
+  | _ => throw (IO.userError "checked publication lost selected root ordering")
+  let some mixedFirst := psKernelC0CertifiedWorkStage initial (.sort .zero)
+    | throw (IO.userError "mixed publication failed first stage")
+  let some mixedSecond := psKernelC0CertifiedWorkStage mixedFirst (.bvar 0)
+    | throw (IO.userError "mixed publication failed second stage")
+  match psKernelC0CertifiedWorkCommitChecked 4096 mixedSecond with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "mixed checked publication partially accepted invalid root")
+  if (psKernelC0ArchitectureAbort mixedSecond.raw).nodes.size !=
+      rawStore.nodes.size then
+    throw (IO.userError "mixed rejection mutated persistent source snapshot")
   -- Stage validation is syntax-only. The same ill-typed bvar must fail
   -- mandatory checking even though it lives in a certified canonical store.
   match psKernelC0CertifiedWorkCheck 4096 staged (.bvar 0) with
@@ -242,3 +278,4 @@ def main : IO Unit := do
   IO.println "C0_CERTIFIED canonical_store_and_owned_root_proofs=pass"
   IO.println "C0_CERTIFIED immutable_transaction_checking=pass"
   IO.println "C0_CERTIFIED admitted_source_and_cache_revision=pass"
+  IO.println "C0_CERTIFIED all_or_nothing_checked_root_publication=pass"

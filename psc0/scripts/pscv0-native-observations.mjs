@@ -6,6 +6,8 @@ export const observations = [
   { name: "coercionEmpty", args: null, expected: 883n },
   { name: "coercionSort", args: null, expected: 887n },
   { name: "coercionLocal", args: null, expected: 907n },
+  { name: "coercionLocalFunction", args: null, expected: 920n },
+  { name: "familyBoxValue", args: null, expected: 929n },
   { name: "numericTicket", args: null, expected: 859n },
   { name: "numericGeneric", args: null, expected: 857n },
   { name: "numericHigh", args: null, expected: 863n },

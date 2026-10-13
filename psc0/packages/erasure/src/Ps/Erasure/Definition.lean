@@ -358,7 +358,9 @@ def psEraseDefinition
     (name : PsName)
     (type value : PsExpr) :
     Except PsErasureError (Option PsVerifiedIrDeclaration) :=
-  if psErasureIsNonRuntimeDeclaration environment type then
+  if psErasureIsNonRuntimeDeclaration environment type ||
+      psErasureIsErasedDictionary environment 4096 psLocalEmpty type ||
+      psErasureUnboxedProjection scope value then
     Except.ok Option.none
   else
     let outputName : String :=
@@ -502,7 +504,7 @@ def psErasureForeignData (scope : PsErasureScope) (declarations : List PsDeclara
     match declaration with
     | .inductiveDecl info =>
       match psErasureLookupStructure scope.runtimeStructures info.name with
-      | some runtime => some (runtime.name,
+      | some runtime => if runtime.unboxed then none else some (runtime.name,
           info.numIndices == 0 && info.numParams == runtime.typeParameters.length &&
           runtime.numFields == runtime.fields.length)
       | none =>

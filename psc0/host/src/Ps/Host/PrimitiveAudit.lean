@@ -107,7 +107,21 @@ def primitiveAudit : IO Lean.Json := do
       ("nativeType", Lean.toJson original.type.dbgToString),
       ("signature", Lean.toJson ("recorded-selected-model; no alpha-equivalence claim" : String)),
       ("bodyTrust", Lean.toJson ("kernel-checked-logical-model/runtime-override" : String))] :: models
+  -- Reference reducibility is a separate semantic input to instance search.
+  -- Record every selected definition's pinned status, including deliberate
+  -- portable helper identities absent from the native environment.
+  let mut reduction := []
+  for declaration in psSelfHostProdPreludeEnvironment.declarations do
+    if (psDeclarationValue declaration).isSome then
+      let name := PsKernelLean.toLeanName (psDeclarationName declaration)
+      let status := if (native.find? name).isSome then
+        some ((Lean.getReducibilityStatusCore native name).toAttrString)
+        else none
+      reduction := Lean.Json.mkObj [
+        ("name", Lean.toJson (toString name)),
+        ("nativeStatus", Lean.toJson status)] :: reduction
   return Lean.Json.mkObj [
+    ("reducibilityReference", Lean.toJson reduction.reverse),
     ("schema", Lean.toJson ("pscv0-primitive-signature-audit/2" : String)),
     ("leanCommit", Lean.toJson Lean.githash),
     ("limitation", Lean.toJson ("Signature comparison for entries; checkedRuntimeModels record deliberate model boundaries without asserting native type equivalence. Kernel admission and runtime equivalence are separate obligations; no runtime equivalence theorem." : String)),

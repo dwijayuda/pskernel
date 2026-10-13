@@ -43,3 +43,26 @@ strict guard reported the reviewed nine-declaration/three-class addition:
 FNV `fnv1a64:946298686920218861`,
 SHA-256 `sha256:9afbebe8bf188a119b1bc223bc7f793da6f2dc08db9caa98e381d9e97662b234`.
 These exact digests are pinned. Full runtime qualification is pending.
+
+## Shared runtime representation
+
+The first full run (38426963318) rejected an unknown field in the generic
+CoeFun template, even in programs that did not use it. This exposed a general
+erasure boundary: a compile-time type former determines the runtime field type.
+
+Nonrecursive one-field families whose erased parameter makes their generic
+field unrepresentable now retain a Core layout template. At each concrete use,
+the checked constructor telescope supplies the actual field type. The wrapper
+is represented by this field; construction/projection are identity operations.
+Generic projection definitions expand at their typed use sites. No CoeFun
+name-specific backend rule or unknown/any representation is introduced.
+Unresolved concrete types still fail the existing IR gate. Such wrappers do
+not acquire an automatic foreign aggregate-construction capability.
+
+A second general rule erases specialized class dictionaries whose instantiated
+fields all contain only types/proofs. This handles CoeSort-to-Type dictionaries
+without turning an erased type argument into a fake runtime generic.
+
+The original six runtime observations remain required; two more exercise
+local CoeFun dictionaries and a user-defined dependent-field wrapper.
+This does not add general existential/higher-rank runtime data.

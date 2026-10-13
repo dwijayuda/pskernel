@@ -329,4 +329,10 @@ example : (Callable.mk (fun x => x + 1)) 880 = 881 := rfl
 example : (Action.mk (fun _ => 883)) () = 883 := rfl
 example : identity (887 : Nat) = (887 : Nat) := rfl
 example : fromLocal (Box.mk 907) = 907 := rfl
+def invoke [CoeFun Callable (fun _ => Nat → Nat)] (value : Callable) : Nat := value 919
+structure FamilyBox (A : Type) (F : A → Type) where
+  value : (x : A) → F x
+def familyBox : FamilyBox Nat (fun _ => Nat) := ⟨fun x => x + 2⟩
+example : invoke (Callable.mk (fun x => x + 1)) = 920 := rfl
+example : familyBox.value 927 = 929 := rfl
 end Pscv0CoercionOracle

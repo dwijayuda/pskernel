@@ -1,8 +1,15 @@
 import Ps.Erasure.Inductive
 
+def psErasureTypeHasUnknown : PsVerifiedIrType → Bool
+  | .unknown => true
+  | .function args result => args.any psErasureTypeHasUnknown || psErasureTypeHasUnknown result
+  | .named _ args => args.any psErasureTypeHasUnknown
+  | _ => false
+
 structure PsPreparedStructureResult where
   scope : PsErasureScope
   ir : PsVerifiedIrStructure
+  unboxed : Bool := false
 
 def psPrepareRuntimeStructure
     (environment : PsEnvironment)
@@ -70,7 +77,12 @@ def psPrepareRuntimeStructure
                               let makeIrField : PsRuntimeStructureField -> PsVerifiedIrStructureField :=
                                 fun (field : PsRuntimeStructureField) =>
                                   PsVerifiedIrStructureField.mk field.name field.type;
+                              let unboxed := constructorInfo.numFields == 1 &&
+                                constructorInfo.recursiveFields.isEmpty &&
+                                parameters.sourceTypeIndices.length < info.numParams &&
+                                fields.any (fun field => psErasureTypeHasUnknown field.type);
                               let runtimeInfo : PsRuntimeStructureInfo := {
+                                unboxed
                                 name := outputName
                                 coreName := info.name
                                 constructorName := constructorName
@@ -97,7 +109,7 @@ def psPrepareRuntimeStructure
                                 currentDefinition := Option.none
                               };
                               Except.ok (PsPreparedStructureResult.mk nextScope
-                                (PsVerifiedIrStructure.mk outputName parameters.typeParameters (psListMap makeIrField fields)))
+                                (PsVerifiedIrStructure.mk outputName parameters.typeParameters (psListMap makeIrField fields)) unboxed)
         | List.cons _ _ => Except.error PsErasureError.unsupportedRuntimeTerm
     | _ => Except.error PsErasureError.unsupportedRuntimeTerm
 
@@ -133,7 +145,7 @@ def psPrepareRuntimeStructures
                   declarations
                   rest
                   prepared.scope
-                  (List.cons prepared.ir structuresRev)
+                  (if prepared.unboxed then structuresRev else List.cons prepared.ir structuresRev)
           else
             psPrepareRuntimeStructures
               environment

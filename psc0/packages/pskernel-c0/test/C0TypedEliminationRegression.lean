@@ -274,6 +274,59 @@ def main : IO Unit := do
     | some (.quotInfo _) => pure ()
     | _ =>
         throw (IO.userError "checked quotient constant was not published")
+  -- Indexed K on a *source-admitted Eq*. The proof is a neutral local
+  -- variable; only source type inference + DefEq of the candidate refl type
+  -- may justify replacing it with Eq.refl.
+  let alpha : PsKernelExpr := .sort .zero
+  let p : PsKernelExpr := .const c0TypedPropName []
+  let eqHead : PsKernelExpr := .const psKernelEqName [.succ .zero]
+  let reflexiveEq := psKernelApplyArgs eqHead [alpha, p, p]
+  let eqProofName := c0TypedName "verifiedEqProof"
+  let eqLocals := psKernelLocalContextAddLocal
+    quotWork.checker.context.localContext eqProofName eqProofName
+    reflexiveEq .default
+  let eqSession : PsKernelCheckerSession := {
+    quotWork.checker with
+    context := { quotWork.checker.context with localContext := eqLocals }
+  }
+  let eqScoped : PsKernelC0ArchitectureWork := {
+    quotWork with checker := eqSession
+  }
+  let expectedRefl := psKernelApplyArgs
+    (.const c0TypedEqCtor [.succ .zero]) [alpha, p]
+  match psKernelC0ArchitecturePreviewTypedMajor 32768 eqScoped
+      (psKernelSimpleRecName psKernelEqName) (.fvar eqProofName) with
+  | .error reason =>
+      throw (IO.userError ("checked dependent K failed: " ++ reason))
+  | .ok (observation, _) =>
+      if !observation.changed ||
+          !psKernelExprEqual observation.sourceResult expectedRefl then
+        throw (IO.userError "real indexed K failed to use verified Eq.refl")
+  -- A non-reflexive index is not definitionally equal to the refl type.
+  -- Even if a local context hypothetically contains such a proof, source
+  -- K must refuse the candidate constructor instead of accepting by name.
+  let otherProposition : PsKernelExpr :=
+    .forallE (c0TypedName "h") p p .default
+  let unequalEq := psKernelApplyArgs eqHead [alpha, p, otherProposition]
+  let unequalProofName := c0TypedName "unequalEqProof"
+  let unequalLocals := psKernelLocalContextAddLocal
+    quotWork.checker.context.localContext unequalProofName unequalProofName
+    unequalEq .default
+  let unequalSession : PsKernelCheckerSession := {
+    quotWork.checker with
+    context := { quotWork.checker.context with localContext := unequalLocals }
+  }
+  let unequalWork : PsKernelC0ArchitectureWork := {
+    quotWork with checker := unequalSession
+  }
+  match psKernelC0ArchitecturePreviewTypedMajor 32768 unequalWork
+      (psKernelSimpleRecName psKernelEqName) (.fvar unequalProofName) with
+  | .error reason =>
+      throw (IO.userError ("indexed K negative typecheck failed: " ++ reason))
+  | .ok (observation, _) =>
+      if observation.changed ||
+          !psKernelExprEqual observation.sourceResult (.fvar unequalProofName) then
+        throw (IO.userError "K rewrote non-definitionally-equal Eq indices")
   -- Quot initialization must be idempotent without changing the
   -- independently checked declaration count.
   let quotientAgain ← match psKernelC0ArchitectureAdmit 32768 quotWork .quotient with
@@ -302,4 +355,5 @@ def main : IO Unit := do
   IO.println "C0_TYPED verified_structure_eta_source_infer_defeq=pass"
   IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
   IO.println "C0_TYPED checked_eq_quot_bootstrap_and_idempotence=pass"
+  IO.println "C0_TYPED indexed_k_defeq_side_conditions=pass"
   IO.println "C0_TYPED checked_declaration_atomicity_and_source_authority=pass"

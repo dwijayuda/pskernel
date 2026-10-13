@@ -1,6 +1,7 @@
 # M1 collection indexing implementation design
 
-Status: implementation under qualification; not M1 acceptance.
+Status: List/Fin qualified at e73ce2bb / Linux 38384869133; Array design follows.
+M1 acceptance remains incomplete.
 
 ## Reference and dependency order
 

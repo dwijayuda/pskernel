@@ -8,6 +8,33 @@
 
 **M1 and M2 implementation evidence:** [`PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md`](PSCV0_M1_M2_IMPLEMENTATION_AUDIT_2026-10-13.md). New native qualified executable `f8900407eaaa921097e6cd49d58551ca6558ed96`, [Linux 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940): selected Type-0 optional indexing, 194 cross-target observations and checked per-invocation class answer memoization passed. Full M1/M2 and Lean parity remain incomplete.
 
+## Architecture milestones and feature phases: execution order
+
+M0–M5 and A–E are two dependency-linked views of one project, not sequential
+checklists. Finish the current M1 acceptance boundary before full M2. Thereafter,
+interleave coherent feature slices with their enabling architecture:
+
+| Milestone | Architecture | Feature phase |
+| --- | --- | --- |
+| M0 | Shared typed erasure, proof/type/index masks, strict runtime IR | Foundation for A–E |
+| M1 | Checked indexing and selected Standard closure | Indexing portion of A |
+| M2 | Instance search, expected types, universes, priorities and rollback | Remaining A; enables B–D |
+| M3 | Dependent/mutual data, elimination and total recursion | Primarily B |
+| M4 | Class-driven effects, specifications, VC generation and assurance | Primarily C and D |
+| M5 | Incremental compilation, validated optimization, tooling and performance | Consolidates A–D; final E integration |
+
+A completes selected Standard APIs, deriving and the supported-language manifest.
+B completes dependent data and total recursive programming. C completes typed
+effects, state/control flow and explicit IO/FFI. D completes selected checked
+tactics, specifications and verified-emission obligations. E establishes complete
+conformance and cross-target integration evidence.
+
+Collect E evidence with every feature slice; apply M5 performance/tooling work
+when measurements and dependencies justify it. Do not delay all feature work
+until M5: M5 acceptance itself requires A–E conformance. Do not implement feature
+special cases ahead of their shared mechanisms. These dependencies do not claim
+that M0's qualified subset or any later full milestone is already complete.
+
 ## 0. Outcome and evaluation standard
 
 Deliver a **maintainable, soundly checked selected language compiler**, with a sufficiently generic elaborator, explicit dependent erasure, one audited target-neutral IR, and high-performance JS/TS/Rust/Wasm GC backends. Architecture quality must be assessed against *actual pinned Lean designs*, not simply by matching source syntax or number of features.

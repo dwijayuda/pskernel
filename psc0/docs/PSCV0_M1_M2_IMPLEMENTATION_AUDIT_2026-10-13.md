@@ -1,6 +1,36 @@
 # PSCV0 native M1 and M2 — Implementation evidence and remaining Lean parity
 
-## Current qualified checkpoint — M1 universes and bounded index proofs (13 October 2026)
+## Current qualified checkpoint — M1 List/Fin indexing (13 October 2026)
+
+This section supersedes older checkpoint claims below.
+
+- **Executable:** [e73ce2bbff522e5888a409b7b114042877d71943](https://github.com/dwijayuda/pskernel/commit/e73ce2bbff522e5888a409b7b114042877d71943).
+- **Green Linux qualification:** [38384869133](https://github.com/dwijayuda/pskernel/actions/runs/38384869133), official Lean 4.35.0-rc4.
+- **Selected Standard:** 277 declarations, 14 classes, 49 ordered instances; 173 portable / 181 native Lean modules.
+- **Frozen FNV:** `fnv1a64:1660797324209886684`.
+- **Frozen SHA-256:** `sha256:1937840a8a4fda1612e3e03e17860b4abad97b355beb6a896eee4c2171abbb3d`.
+- **227 shared runtime observations** passed in direct JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 observations remain.
+- Three panic cases passed in JS/TS/Rust and V8/Wasmtime core/component execution.
+
+Qualified: checked Fin structure and original-predicate-preserving Nat-to-Fin
+index adapters; List proof/automatic/optional/bang access; both List lawfulness
+proofs; matching Fin adapter lawfulness. Optional List access uses a single
+structural traversal, without a preliminary length pass. The official kernel
+accepted every added logical definition. The pinned source oracle, negative
+invalid-bound cases, strict IR and existing integration gates passed.
+
+One family-parameter classification now erases numeric datatype parameters
+without erasing ordinary computational Nat function arguments. List.get's Fin
+value survives while its bound proof does not. A Fin bound does not authorize
+access to a smaller collection. The selected List universe is still Type 0;
+Option and generic Fin adapters retain their qualified universe parameters.
+
+**M1 remains incomplete.** Next: checked Array logical model, genuine size-bound
+indexing, explicit linear-time logical/runtime conversions, alias/large-index
+coverage, and controlled representative performance comparisons. No full M2,
+C5, pskernel-core or self-hosting work is authorized by this checkpoint.
+
+## Prior qualified checkpoint — M1 universes and bounded index proofs (13 October 2026)
 
 This section supersedes older checkpoint claims below.
 

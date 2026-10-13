@@ -66,3 +66,75 @@ def psKernelC0ArchitectureObserveTypedMajor
     changed := !psKernelExprEqual major result
   : PsKernelC0TypedMajorObservation }
   return (observation, { session with state := nextState })
+
+/-!
+CDE-8B.2: typed-major normalization as a source-justified *input* to the
+existing candidate demand machine. This is not independent acceptance:
+the source still normalizes first and owns every trusted state change.
+-/
+
+/-- The candidate never guesses a K or structure-eta constructor. It may
+    rewrite exactly one recursor major only when the existing source
+    inference/WHNF/DefEq algorithms explicitly produced the constructor.
+
+    Source errors, unsupported metadata, unsafe declarations or wrong major
+    shapes yield no candidate rewrite, not a theorem-checking success. -/
+def psKernelC0ArchitectureSourceTypedRecursorMajor
+    (fuel : Nat)
+    (session : PsKernelCheckerSession)
+    (expr : PsKernelExpr) : Option PsKernelExpr := do
+  let .const recName levels := psKernelExprGetAppFn expr
+    | none
+  let some (.recInfo recursor) :=
+      psKernelEnvironmentFind session.context.environment recName
+    | none
+  if recursor.isUnsafe ||
+      recursor.base.levelParams.length != levels.length then none
+  else do
+    let majorIndex := recursor.numParams + recursor.numMotives +
+      recursor.numMinors + recursor.numIndices
+    let args := psKernelExprGetAppArgs expr
+    let major ← args[majorIndex]?
+    let (observation, _) ←
+      match psKernelC0ArchitectureObserveTypedMajor
+          fuel session recName major with
+      | .ok result => some result
+      | .error _ => none
+    if !observation.changed then none
+    else
+      let revisedArgs := args.take majorIndex ++
+        [observation.sourceResult] ++ args.drop (majorIndex + 1)
+      some (psKernelExprApplyArgs
+        (.const recName levels) revisedArgs)
+
+/-- Source owns the first and only checked WHNF observation. The optional
+    typed candidate reconstructs the same input with a source-justified major,
+    then uses the already fuel/work-accounted demand evaluator. Disagreement
+    and exhausted candidate resources remain observational failures. -/
+def psKernelC0ArchitectureObserveTypedDemand
+    (fuel quota : Nat)
+    (session : PsKernelCheckerSession)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0ExecutionObservation × PsKernelCheckerSession) := do
+  let (source, checkedSession) ← psKernelSessionWhnf fuel session expr
+  let candidateExpr :=
+    (psKernelC0ArchitectureSourceTypedRecursorMajor fuel session expr).getD expr
+  let candidate : Except String (PsKernelExpr × Nat × Nat) :=
+    match psKernelC0ChargeExpr candidateExpr quota with
+    | none => .error "typed major candidate work quota exhausted"
+    | some _ =>
+        psKernelC0ArchitectureCandidateDemandMetered
+          fuel quota session.context candidateExpr
+  let observation : PsKernelC0ExecutionObservation :=
+    match candidate with
+    | .ok (result, steps, _) =>
+        { sourceValue := source
+          candidateValue := some result
+          agrees := psKernelExprEqual source result
+          candidateSteps := steps }
+    | .error _ =>
+        { sourceValue := source
+          candidateValue := none
+          agrees := false
+          candidateSteps := 0 }
+  return (observation, checkedSession)

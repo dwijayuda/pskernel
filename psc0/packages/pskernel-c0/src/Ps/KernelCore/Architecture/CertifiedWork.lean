@@ -181,13 +181,10 @@ def psKernelC0CertifiedWorkAdmit
     | throw "source-admitted work did not validate its scratch store"
   return certified
 
-/-- A syntax stage can change the store, so replay and certify the entire
-    new state again. Unchecked/ill-typed syntax may be staged but never
-    becomes a checked term by being present in a certified snapshot. -/
-/-- The admitted environment is preserved *exactly* when only staged
-    syntax changes. Derive the equality from the existing validated stage
-    operation and dependent recertification; no environment fingerprint,
-    unchecked cast, or fresh acceptance rule is needed. -/
+/-- Staging changes the canonical syntax store, requiring fresh replay
+    certification. It preserves the EXACT admitted environment through
+    source-validated staging and dependent recertification, without
+    relying on fingerprints or relaxing source type checking. -/
 def psKernelC0CertifiedWorkStageWithEnvProof
     (work : PsKernelC0CertifiedWork)
     (expr : PsKernelExpr) :

@@ -77,6 +77,17 @@ private def submissionDependencies (declaration : Lean.Declaration) : Array Lean
   Id.run <| declaration.foldExprM
     (fun names expr => pure (names ++ expr.getUsedConstants)) #[]
 
+private def kernelProbeDetails (error : Lean.Kernel.Exception) : Lean.Json :=
+  let summary := ("reason", Lean.toJson (PsKernelLean.kernelExceptionSummary error))
+  match error with
+  | .appTypeMismatch _ _ app functionType argumentType =>
+    Lean.Json.mkObj [summary, ("application", Lean.toJson app.dbgToString),
+      ("functionType", Lean.toJson functionType.dbgToString),
+      ("argumentType", Lean.toJson argumentType.dbgToString)]
+  | .declTypeMismatch _ _ type =>
+    Lean.Json.mkObj [summary, ("givenType", Lean.toJson type.dbgToString)]
+  | _ => Lean.Json.mkObj [summary]
+
 -- Read-only compatibility experiment against a fresh officially checked
 -- portable prelude. Its environment is discarded, never used by compilation.
 -- A failed kernel check stays failed; dependents are reported as blocked.
@@ -116,7 +127,7 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
           | .error error =>
             failures := failures.push (Lean.Json.mkObj [
               ("name", Lean.toJson (toString info.name)),
-              ("reason", Lean.toJson (PsKernelLean.kernelExceptionSummary error))])
+              ("kernel", kernelProbeDetails error)])
     pending := deferred
   return Lean.Json.mkObj [
     ("root", Lean.toJson (toString root)),

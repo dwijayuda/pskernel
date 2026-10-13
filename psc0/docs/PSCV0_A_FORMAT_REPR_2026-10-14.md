@@ -407,3 +407,13 @@ dependents include Nat.mod_lt. This is a negative compatibility result, not
 an imported library or a failing acceptance test. The arithmetic logical-model
 phase addresses the opaque arithmetic cause; remaining failures require exact
 kernel type diagnostics before selecting any additional architecture change.
+
+Linux38453677893 built the arithmetic models, independent oracle and native
+signature/reducibility audit. The reuse probe now admits all dependencies and
+rejects only Nat.mod_lt against the still-opaque Nat.mod. This isolates the
+remaining dependency to the genuine modulo logical model; the other apparent
+proof failures were all consequences of opaque elementary arithmetic.
+Reviewed unchanged 460/22/88 roster with four axiom-to-definition replacements
+and three reducibility changes: FNV fnv1a64:16989132783207094075; SHA-256
+sha256:be1c0bcd7657628f0efc6e24164ff1439cda6162c0b85f3e96448f22806a0ecf.
+Both strict guards are repinned; full runtime qualification remains pending.

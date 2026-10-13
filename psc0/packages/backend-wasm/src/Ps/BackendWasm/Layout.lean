@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Value
+import Ps.Codegen.Names
 
 namespace PsWasm
 
@@ -8,7 +9,11 @@ def dataLayouts (ir : PsVerifiedIrModule) : Except String (List PsWasmStructType
   let records ← ir.structures.mapM fun s => do
     return valueStructure s.name (← s.fields.mapM fun f => do return (f.name, ← representation f.type))
   let variants ← ir.inductives.mapM fun i => do
-    let tag : PsWasmStructField := { name := "tag", storageType := .value .i32 }
+    -- Backend-owned fields have a distinct identity from source payloads.
+    -- Allocate once against every constructor so inherited field names agree.
+    let payloadNames := i.constructors.flatMap fun ctor => ctor.fields.map (·.name)
+    let tagName := psCodegenFresh (payloadNames.length + 1) payloadNames "__ps_tag"
+    let tag : PsWasmStructField := { name := tagName, storageType := .value .i32 }
     let base : PsWasmStructType := {
       name := i.name, superType := some valueName, isFinal := false, fields := [tag] }
     let constructors ← i.constructors.mapM fun ctor => do

@@ -93,3 +93,26 @@ instance or alias. Expected roster: 394 declarations /18 classes /54 instances.
 Reviewed FNV `fnv1a64:17804548636281664114`; SHA-256
 `sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1`.
 Full kernel/IR/runtime qualification follows; it is not established by compilation.
+
+## Constructor field identity correction
+
+At `f8832f0` / Linux 38442244676, native source/oracle, all semantic
+and official-kernel checks, selected snapshot (394/18/54), typed IR and project
+emission passed. WAT round-trip parsing exposed a pre-existing target naming
+error: a compiler discriminator called `tag` collided with Format.tag's payload.
+
+Before changing the layout, studied pinned Lean
+[NameMangling](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Compiler/NameMangling.lean),
+[EmitC](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Compiler/LCNF/EmitC.lean)
+and [mangling tests](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/tests/elab/mangling.lean).
+Lean separates runtime constructor tags from source-name mangling; it has no
+corresponding WAT emitter. The WebAssembly
+[text type rules](https://webassembly.github.io/spec/core/text/types.html#composite-types)
+require a well-formed local field identifier context.
+
+PSC0 now allocates the backend discriminator once per family against every
+constructor's payload names using the existing fresh-name allocator. The base
+and every subtype retain the same allocated spelling; field indices and physical
+layout are unchanged. The target validator rejects duplicate names in every
+structure before rendering. WAT and binary debug metadata consume the same
+layout field table. No Format-specific field rename or printer exception.

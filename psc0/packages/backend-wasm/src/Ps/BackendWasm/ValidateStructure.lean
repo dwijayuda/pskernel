@@ -4,6 +4,7 @@ import Ps.Foundation.Name
 
 inductive PsWasmIrValidationError where
   | duplicateTypeName (name : String)
+  | duplicateFieldName (owner : String)
   | duplicateFunctionName (name : String)
   | duplicateExportName (name : String)
   | duplicateFunctionRef (name : String)
@@ -289,7 +290,9 @@ def psWasmIrValidateStructures
   | List.nil =>
       Except.ok Unit.unit
   | List.cons value rest =>
-      match value.superType with
+      if !psWasmIrUnique (value.fields.map (·.name)) then
+        Except.error (.duplicateFieldName value.name)
+      else match value.superType with
       | Option.some parent =>
           match psWasmIrFindStructure module.structures parent with
           | Option.none =>

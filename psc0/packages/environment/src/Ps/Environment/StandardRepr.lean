@@ -51,6 +51,16 @@ def psReprApiDeclarations : List PsDeclaration :=
 def psReprAddAppParen (document precedence : PsExpr) : PsExpr :=
   psOrderCall "Repr.addAppParen" [document, precedence]
 
+-- Public scalar methods and their dictionaries share one checked body.
+def psReprScalarMethods : List PsDeclaration :=
+  let bool := PsExpr.constE psBoolName []
+  let str := PsExpr.constE psStringName []
+  [ psFormatDefinition "Bool.repr"
+      [{ name := "value", type := bool }, { name := "prec", type := psOrderNat }]
+      psFormatType (psFormatIf psFormatType (.fvar 0) (psReprText "true") (psReprText "false")),
+    psFormatDefinition "Nat.repr" [{ name := "value", type := psOrderNat }] str
+      (.app (.constE psIntReprName []) (psFormatInt (.fvar 0))) ]
+
 def psReprGroundInstances : List PsDeclaration :=
   let printer := fun (type body : PsExpr) =>
     psLogicLam 0 "value" type (psLogicLam 1 "prec" psOrderNat body)
@@ -66,10 +76,10 @@ def psReprGroundInstances : List PsDeclaration :=
   let negative := psFormatPositive (.app (.constE psIntNegName []) (.fvar 0))
   let emptyBody := psLogicApply (.constE (psDecisionName "Empty.rec") [.succ .zero])
     [psLogicLam 2 "_" empty psFormatType, .fvar 0]
-  [ ground "Bool" bool (psFormatIf psFormatType (.fvar 0) (psReprText "true") (psReprText "false")),
+  [ ground "Bool" bool (psOrderCall "Bool.repr" [.fvar 0, .fvar 1]),
     ground "Unit" (.constE psUnitName []) (psReprText "()"),
     ground "Nat" nat (psFormatCall "text"
-      [.app (.constE psIntReprName []) (psFormatInt (.fvar 0))]),
+      [psOrderCall "Nat.repr" [.fvar 0]]),
     ground "Int" int (psFormatIf psFormatType negative
       (psReprAddAppParen intText (.fvar 1)) intText),
     ground "String" str (psFormatCall "text" [psOrderCall "String.quote" [.fvar 0]]),
@@ -112,37 +122,75 @@ def psReprListMethod (level : PsLevel) (atomic : Bool) : PsExpr :=
        (psLogicLam 6 "unused" psFormatType document)), .fvar 2]
   psLogicLam 2 "xs" list (psLogicLam 3 "prec" psOrderNat body)
 
+-- Atomic List rendering has an additional marker dictionary. Keep the
+-- binder in the public method and instance even though its value is erased.
+def psReprAtomicTelescope (body : PsExpr) (level : PsLevel) (lambda : Bool) : PsExpr :=
+  let repr := psFormatClassType "Repr" (.fvar 0) level
+  let atom := psFormatClassType "ReprAtom" (.fvar 0) level
+  let bind := fun id name type body binder =>
+    if lambda then psLogicLam id name type body binder else psLogicPi id name type body binder
+  bind 0 "α" (.sortE (.succ level))
+    (bind 1 "self" repr (bind 9 "atomic" atom body .instanceImplicit) .instanceImplicit) .implicit
+
+def psReprPublicMethods : List PsDeclaration :=
+  let u := psRootName "u"
+  let level := PsLevel.param u
+  let list := psSelfHostListOf (.fvar 0) level
+  let methodType := fun type => psLogicPi 2 "value" type
+    (psLogicPi 3 "prec" psOrderNat psFormatType)
+  [ psFormatContainerMethodDeclaration "Option.repr" "Repr"
+      (methodType (psSelfHostOptionOf (.fvar 0) level)) (psReprOptionMethod level) level [u],
+    psFormatContainerMethodDeclaration "List.repr" "Repr"
+      (methodType list) (psReprListMethod level false) level [u],
+    .definitionDecl (psDecisionName "List.repr'") [u]
+      (psReprAtomicTelescope (methodType list) level false)
+      (psReprAtomicTelescope (psReprListMethod level true) level true) ]
+
 def psReprContainerInstances : List PsDeclaration :=
   let u := psRootName "u"
   let level := PsLevel.param u
   let alpha := PsExpr.fvar 0
   let list := psSelfHostListOf alpha level
+  let method := fun name arguments =>
+    psLogicApply (.constE (psDecisionName name) [level]) arguments
   let ordinary := psFormatContainerDeclaration "PsStandard.instReprList" "Repr" list
-    (psReprListMethod level false) level [u]
-  let atomType := psFormatClassType "ReprAtom" alpha level
-  let reprType := psFormatClassType "Repr" alpha level
+    (method "List.repr" [alpha, .fvar 1]) level [u]
   let atomic := PsDeclaration.definitionDecl (psDecisionName "PsStandard.instReprListAtom") [u]
-    (psLogicPi 0 "α" (.sortE (.succ level))
-      (psLogicPi 1 "self" reprType
-        (psLogicPi 9 "atomic" atomType (psFormatClassType "Repr" list level) .instanceImplicit)
-        .instanceImplicit) .implicit)
-    (psLogicLam 0 "α" (.sortE (.succ level))
-      (psLogicLam 1 "self" reprType
-        (psLogicLam 9 "atomic" atomType
-          (psFormatClassValue "Repr" list (psReprListMethod level true) level) .instanceImplicit)
-        .instanceImplicit) .implicit)
+    (psReprAtomicTelescope (psFormatClassType "Repr" list level) level false)
+    (psReprAtomicTelescope
+      (psFormatClassValue "Repr" list (method "List.repr'" [alpha, .fvar 1, .fvar 9]) level) level true)
   [ psFormatContainerDeclaration "PsStandard.instReprOption" "Repr"
-      (psSelfHostOptionOf alpha level) (psReprOptionMethod level) level [u],
+      (psSelfHostOptionOf alpha level) (method "Option.repr" [alpha, .fvar 1]) level [u],
     ordinary, atomic ]
 
+-- Upstream Decidable is a Bool with checked reflection evidence. Display
+-- inspects that same Bool and never eliminates proof evidence into runtime data.
+def psReprDecidableDeclarations : List PsDeclaration :=
+  let prop := PsExpr.sortE .zero
+  let decision := psDecisionType (.fvar 0)
+  let methodType := psLogicPi 1 "value" decision (psLogicPi 2 "prec" psOrderNat psFormatType)
+  let body := psReprAddAppParen
+    (psFormatIf psFormatType (.proj psDecidableName 0 (.fvar 1))
+      (psReprText "isTrue _") (psReprText "isFalse _")) (.fvar 2)
+  [ .definitionDecl (psDecisionName "Decidable.repr") []
+      (psLogicPi 0 "p" prop methodType .implicit)
+      (psLogicLam 0 "p" prop
+        (psLogicLam 1 "value" decision (psLogicLam 2 "prec" psOrderNat body)) .implicit),
+    .definitionDecl (psDecisionName "PsStandard.instReprDecidable") []
+      (psLogicPi 0 "p" prop (psFormatClassType "Repr" decision) .implicit)
+      (psLogicLam 0 "p" prop (psFormatClassValue "Repr" decision
+        (psOrderCall "Decidable.repr" [.fvar 0])) .implicit) ]
+
 def psStandardReprDeclarations : List PsDeclaration :=
-  psReprClassDeclarations ++ psReprApiDeclarations ++ psReprGroundInstances ++
-    psReprAtomInstances ++ psReprContainerInstances
+  psReprClassDeclarations ++ psReprApiDeclarations ++ psReprScalarMethods ++ psReprGroundInstances ++
+    psReprAtomInstances ++ psReprPublicMethods ++ psReprContainerInstances ++ psReprDecidableDeclarations
 
 def psStandardReprExtend (environment : PsEnvironment) : PsEnvironment :=
   let environment := psStandardReprDeclarations.foldl psPreludeAdd environment
   let environment := psFormatRegisterClass (psFormatRegisterClass environment "Repr") "ReprAtom"
-  let environment := psFormatRegister environment "Repr" (psReprGroundInstances ++ psReprContainerInstances)
+  let environment := psFormatRegister environment "Repr" (psReprGroundInstances ++ psReprContainerInstances ++
+      psReprDecidableDeclarations.filter (fun d =>
+        psNameLastComponent (psDeclarationName d) == "instReprDecidable"))
   let environment := psFormatRegister environment "ReprAtom" psReprAtomInstances
   { environment with exportedAliases :=
       (psRootName "reprPrec", psDecisionName "Repr.reprPrec") :: environment.exportedAliases }

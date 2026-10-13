@@ -55,6 +55,9 @@ def psCompilerPscv0ElabError : PsElabError → String
   | .invalidCharacter _ => "PSCV0-LITERAL: invalid character"
   | .unsupportedTerm => "PSCV0-UNSUPPORTED-SOURCE-TERM"
   | .emptyCallUnsupported => "PSCV0-APP-03"
+  | .fuelExhausted => "PSCV0-ELABORATION: resource budget exhausted"
+  | .implicitApplicationUnsupported => "PSCV0-ELABORATION: instance synthesis failed"
+  | .emptyName => "PSCV0-ELABORATION: empty name"
   | .unresolvedMetavariable => "PSCV0-UNSOLVED-INFERENCE"
   | .typeMismatch => "PSCV0-TYPE-MISMATCH"
   | .structuralRecursionInvariantArgument =>

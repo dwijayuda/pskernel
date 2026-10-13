@@ -233,3 +233,23 @@ the implementation or expand a computed function result. The ordinary kernel
 checks the resulting alias, and the established erasure entry/calling convention
 remains shared across all backends. This preserves the earlier M0 evaluation
 boundary rather than introducing an alias-specific backend path.
+
+## Shared public methods and default completion
+
+The same checked bodies now own public Bool.repr, Nat.repr, Option.repr,
+List.repr and List.repr' plus their dictionaries. Decidable.repr examines the
+checked computational Bool; reflection proofs remain erased. This adds seven
+declarations and one instance to the pending display roster, without an axiom
+or primitive. Char.repr already existed and is retained.
+
+A nested generic call exposed an M2 application invariant: an unconstrained
+expected metavariable must not preserve an omitted optParam as a function value.
+Study: stable Lean src/Lean/Elab/App.lean processExplicitArg/finalize and
+ tests/elab/optParam.lean, floatOptParam.lean, defaultValueParamIssue.lean.
+The shared application engine now fills such defaults before assigning the
+unknown expected type. PSCV0's previously qualified explicit expected-function
+partial applications remain intact. displayIdentity exercises this through the
+independent Lean oracle and every runtime target. Diagnostics distinguish
+instance failure and resource exhaustion instead of reporting a generic failure.
+Three additional existing-batch observations cover positive/negative decision
+representations and direct public numeric representation. Qualification pending.

@@ -468,7 +468,10 @@ namespace Pscv0CollectionDisplayOracle
     ((Std.Format.group (("a" : Std.Format) ++ Std.Format.line ++ "b")).pretty 3, "a b"),
     ((Std.format ("x", true)).pretty, "(x, true)"),
     ((Std.format (#[1, 2, 3] : Array Nat)).pretty, "#[1, 2, 3]"),
-    (reprStr (31 : Id Nat), "31")]
+    (reprStr (31 : Id Nat), "31"),
+    ((reprArg (Decidable.isTrue True.intro)).pretty, "(isTrue _)"),
+    (reprStr (Nat.decLt 4 3), "isFalse _"),
+    (Nat.repr 47, "47")]
   for (actual, expected) in cases do
     unless actual == expected do
       throw (IO.userError s!"collection display oracle: {String.quote actual} != {String.quote expected}")

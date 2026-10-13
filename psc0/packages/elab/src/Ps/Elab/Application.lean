@@ -147,13 +147,16 @@ def psElabApplyOrderedWith {α : Type}
     if positions.isEmpty && names.isEmpty then
       match expected with
       | some target =>
-        -- An unconstrained expected metavariable is not evidence that an
-        -- implicit Pi should be preserved as a polymorphic function value.
-        -- Insert its implicit arguments before constraining that expected type.
+        -- An unconstrained expected type cannot request a polymorphic or
+        -- default-parameter function value. As in Lean Elab/App processExplicitArg,
+        -- fill omitted defaults before inferring that type. A concrete expected
+        -- function type still preserves PSCV0's existing partial-application rule.
         let targetType := psWhnf current.context.environment current.context.metaContext
           current.context.localContext target
         let preserve := match currentType, targetType with
-          | .forallE _ _ _ binder, .mvar _ => psBinderAcceptsExplicitArgument binder
+          | .forallE _ domain _ binder, .mvar _ =>
+              psBinderAcceptsExplicitArgument binder &&
+                (!complete || (psElabDefaultValue current.context domain).isNone)
           | _, _ => true
         if preserve then
           match psElabUnifyExpected current (some target) with

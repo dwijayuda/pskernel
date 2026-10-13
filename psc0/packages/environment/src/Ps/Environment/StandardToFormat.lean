@@ -31,7 +31,8 @@ def psFormatJoinDeclaration (mode : Nat) : PsDeclaration :=
   let body := psLogicApply (psStandardListRecursor level)
     [alpha, psLogicLam 9 "_" list format, psFormatCall "nil", step, .fvar 2]
   let close := fun (body : PsExpr) (lambda : Bool) =>
-    let bind := if lambda then psLogicLam else psLogicPi
+    let bind := fun id name type body binder =>
+      if lambda then psLogicLam id name type body binder else psLogicPi id name type body binder
     bind 0 "α" (.sortE (.succ level))
       (bind 1 "self" dictionary
         (if mode == 1 then bind 3 "pre" format (bind 2 "xs" list body .explicit) .explicit

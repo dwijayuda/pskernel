@@ -17,7 +17,7 @@ def psElabDeriveReprPlan (plan : PsElabDeriveContext) (name : PsName) :
     Except PsElabError PsElabDeriveReprConstructor := do
   let fields ← psElabDeriveFields plan name
   let printers ← (fields.fields.zip fields.proofs).mapM fun (field, proof) => do
-    if proof then return none
+    if proof || (!plan.info.isStructure && !psBinderInfoEq field.binder .explicit) then return none
     match psWhnf plan.context.environment plan.context.metaContext
         plan.context.localContext field.type with
     | .sortE _ => return none

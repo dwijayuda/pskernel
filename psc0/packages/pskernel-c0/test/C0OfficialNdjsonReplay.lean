@@ -366,16 +366,16 @@ def c0ExportReadInductiveGroup
     psKernelSimpleRecName t.base.name)
   if !c0ExportSameNames recNames generatedNames then
     throw "unsupported NDJSON recursor family is not canonical"
-  let source :=
+  let toCtor (c : PsKernelConstructorInfo) :
+      PsKernelSimpleConstructorDecl :=
+    { name := c.base.name, type := c.base.type }
+  let source : C0ExportInductiveSource :=
     if types.length == 1 then
-      let constructors := expectedCtors.map (fun c =>
-        { name := c.base.name, type := c.base.type } :
-          PsKernelSimpleConstructorDecl)
       C0ExportInductiveSource.ordinary {
         levelParams := first.base.levelParams
         name := first.base.name
         type := first.base.type
-        ctors := constructors
+        ctors := expectedCtors.map toCtor
         isUnsafe := false
         numParams := first.numParams
       }
@@ -387,8 +387,7 @@ def c0ExportReadInductiveGroup
           name := ty.base.name
           type := ty.base.type
           ctors := (expectedCtors.filter (fun c =>
-            psKernelNameEq c.induct ty.base.name)).map (fun c =>
-              { name := c.base.name, type := c.base.type })
+            psKernelNameEq c.induct ty.base.name)).map toCtor
         })
         isUnsafe := false
       }

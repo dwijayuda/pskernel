@@ -34,6 +34,39 @@ def psEmptyDeclarations : List PsDeclaration :=
   [ .inductiveDecl (.mk name [] (.sortE (.succ .zero)) 0 0 [] false),
     .recursorDecl (.mk (psNameAppendStr name "rec") [u] recursorType [name] 0 0 1 0) ]
 
+-- Lean 4.35.0-rc4, Init/Prelude.lean: proposition-valued natural order.
+-- This is the actual inductive Nat.le, not an axiom, Nat.blt Boolean, or an
+-- asserted conversion from a runtime comparison into erased proof evidence.
+-- The Nat.lt definition is exactly Nat.le (Nat.succ n) m. General decidability,
+-- automation and proof-bearing collection workers are separate dependencies.
+def psNatOrderDeclarations : List PsDeclaration :=
+  let nat := PsExpr.constE psNatName []
+  let prop := PsExpr.sortE .zero
+  let leName := psNameAppendStr psNatName "le"
+  let reflName := psNameAppendStr leName "refl"
+  let stepName := psNameAppendStr leName "step"
+  let ltName := psNameAppendStr psNatName "lt"
+  let n := PsExpr.fvar 0
+  let m := PsExpr.fvar 1
+  let h := PsExpr.fvar 2
+  let le := fun (a b : PsExpr) =>
+    psLogicApply (.constE leName []) [a, b]
+  let succ := fun (a : PsExpr) => .app (.constE psNatSuccName []) a
+  let inductiveType := psLogicPi 0 "n" nat (psLogicPi 1 "m" nat prop)
+  let reflType := psLogicPi 0 "n" nat (le n n) .implicit
+  let stepType := psLogicPi 0 "n" nat
+    (psLogicPi 1 "m" nat
+      (psLogicPi 2 "h" (le n m) (le n (succ m)))
+      .implicit) .implicit
+  let ltType := psLogicPi 0 "n" nat (psLogicPi 1 "m" nat prop)
+  let ltValue := psLogicLam 0 "n" nat
+    (psLogicLam 1 "m" nat (le (succ n) m))
+  [ .inductiveDecl (.mk leName [] inductiveType 1 1
+        [reflName, stepName] false),
+    .constructorDecl (.mk reflName [] reflType leName 0 1 0 []),
+    .constructorDecl (.mk stepName [] stepType leName 1 1 2 [1]),
+    .definitionDecl ltName [] ltType ltValue ]
+
 def psLogicDeclarations : List PsDeclaration :=
   let u := psRootName "u"
   let v := psRootName "v"
@@ -94,7 +127,7 @@ def psLogicDeclarations : List PsDeclaration :=
     .constructorDecl (.mk psBoolFalseName [] boolType psBoolName 0 0 0 []),
     .constructorDecl (.mk psBoolTrueName [] boolType psBoolName 1 0 0 []),
     .recursorDecl (.mk (psNameAppendStr psBoolName "rec") [u] boolRecType [psBoolName] 0 0 1 2)
-  ]
+  ] ++ psNatOrderDeclarations
 
 def psLogicPrelude (environment : PsEnvironment) : PsEnvironment :=
   psLogicDeclarations.foldl (fun current declaration =>

@@ -17,6 +17,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureExecutionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureWorkRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0TypedEliminationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureDeltaRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureBudgetRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
@@ -81,6 +82,9 @@ jobs:
       - name: C0 architecture-first validated scratch transaction and source authority
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureWorkRegression.lean
+      - name: C0 typed K/eta on source-admitted inductive declarations
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0TypedEliminationRegression.lean
       - name: C0 architecture-first delta closure comparison (non-accepting)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureDeltaRegression.lean

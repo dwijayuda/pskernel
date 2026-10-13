@@ -180,7 +180,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- and deliberately changes with every intentional registered semantic update.
 -- The official kernel is still the authority for checking its declarations.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:5885345544530235680"
+  "fnv1a64:17804548636281664114"
 
 
 -- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing
@@ -332,8 +332,13 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- Checked Int review: replace Int/ofNat/negSucc assumptions, add rec/toNat;
 -- no new axioms, classes or instances. Linux 38438411914 independently built
 -- the native compiler/oracle and reported these exact payload digests.
+-- Pure Format review: 79 declarations for the real document algebra,
+-- checked pure measurement/worklist/rendering definitions and helper records.
+-- No new axiom, primitive, class, instance or alias. Linux 38442009692 built
+-- the native compiler/oracle and passed the signature/status audit before
+-- independently reporting both strict payload digests.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:739169c3254d48e26471fd8be9bda480341a21788dcf67d683c5982e996ac634"
+  "sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

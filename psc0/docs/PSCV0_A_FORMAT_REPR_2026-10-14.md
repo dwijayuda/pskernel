@@ -81,3 +81,15 @@ and empty-versus-nil. The independent native oracle checks the same expected
 values. Profile /55 identifies this expansion. Signature/status/digest review
 and full cross-target qualification are pending. Repr, ToFormat, polymorphic
 joinSep and effectful prettyM are not implemented by this foundation.
+
+## Reviewed snapshot
+
+Linux [38442009692](https://github.com/dwijayuda/pskernel/actions/runs/38442009692)
+at `32aab6ae2be26d101449489c4a0a14ea011ab686` compiled all 198 portable /
+206 native modules, including the independent native formatting oracle, and
+passed primitive signature/reducibility audits. The strict registry gate then
+reported the expected 79-declaration expansion: no new axiom, primitive, class,
+instance or alias. Expected roster: 394 declarations /18 classes /54 instances.
+Reviewed FNV `fnv1a64:17804548636281664114`; SHA-256
+`sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1`.
+Full kernel/IR/runtime qualification follows; it is not established by compilation.

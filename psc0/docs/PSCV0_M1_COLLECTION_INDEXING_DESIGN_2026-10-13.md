@@ -1,7 +1,7 @@
 # M1 collection indexing implementation design
 
-Status: List/Fin qualified at e73ce2bb / Linux 38384869133; Array design follows.
-M1 acceptance remains incomplete.
+Status: List/Fin qualified at e73ce2bb / Linux 38384869133; Array qualified at
+af96aa40 / Linux 38386745772. Final M1 coherence/performance evidence is pending.
 
 ## Reference and dependency order
 
@@ -101,3 +101,23 @@ runtime observations and all existing kernel, strict IR, JS/TS/Rust, V8 and
 Wasmtime gates. Review and pin each intentional Standard roster digest change.
 Final M1 still requires Array coverage and controlled representative performance
 comparisons; green List/Fin tests alone do not satisfy M1.
+
+## Final measurements and adverse dictionary checks
+
+Use a host-only native Lean harness, outside the portable closure. Compare
+the same compiler with direct-return and checked-index bodies under identical
+Array/proof binder telescopes at 16 and 128 declarations; collect three samples
+after warmup, preserving all six compilation phase timings. Prelude admission
+is amortized and reported separately.
+
+Compare generated JS and official native Lean collection operations at 256 and
+8192 elements: head/tail optional lookup and both conversions. Exclude collection
+setup, verify checksums, retain five timing samples after warmup. These are
+different runtimes: report measured costs and scaling, not a universal performance
+parity claim. Rust/Wasm retain functional matrix qualification; no claim that
+these JS/Lean timings benchmark those runtimes. Do not install flaky time limits.
+
+Explicit custom optional instances must take priority over derived defaults.
+Both direct and Fin-adapted lawfulness must refuse an optional dictionary that
+returns none for a valid True predicate. Independent RC4 source cases check the
+same boundary.

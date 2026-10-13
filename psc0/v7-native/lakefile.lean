@@ -40,3 +40,8 @@ lean_exe pscv0_native_checks where
 lean_exe pscv0_wasm_checks where
   srcDir := "../test"
   root := `Pscv0WasmTests
+
+-- Host-only measurements against the pinned native Lean library.
+lean_exe pscv0_m1_performance where
+  srcDir := "../test"
+  root := `Pscv0M1Performance

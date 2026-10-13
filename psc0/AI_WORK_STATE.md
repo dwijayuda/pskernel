@@ -1,27 +1,46 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
-## Active execution plan — accepted by the user (13 October 2026)
+## Current qualified checkpoint — M1 checked Array and conversions (13 October 2026)
 
-Finish M1 first. Then interleave the two tracks: M2 with remaining feature A;
-M3 with B; M4 with C/D; measured M5 tooling/performance throughout and final E
-qualification. Do not wait for all M0–M5 infrastructure before implementing
-features, and do not add features ahead of their required shared mechanisms.
+This section supersedes older implementation-status statements below.
 
-**Current source under qualification:** `6138ccf434b04ab198626d7e80426416970fb898`,
-[Linux 38386217562](https://github.com/dwijayuda/pskernel/actions/runs/38386217562).
-The Array change includes checked logical definitions, lawful optional indexing,
-a typed sized builder for linear List-to-Array conversion, explicit Array-to-List
-conversion, and cross-target cases. This is **pending**, not a green checkpoint.
-The qualified checkpoint below remains the evidence boundary until current CI
-and reviewed registry drift qualification finish. After that, finish M1's
-remaining coherence/performance evidence before declaring M1 complete.
+- **Executable:** [af96aa405a2b2f94df9a5dada607b4fc455fc624](https://github.com/dwijayuda/pskernel/commit/af96aa405a2b2f94df9a5dada607b4fc455fc624).
+- **Green Linux qualification:** [38386745772](https://github.com/dwijayuda/pskernel/actions/runs/38386745772), official Lean 4.35.0-rc4.
+- **Selected Standard:** 292 declarations, 14 classes, 52 ordered instances; 175 portable / 183 native modules.
+- **Frozen FNV:** `fnv1a64:5949916575031563783`.
+- **Frozen SHA-256:** `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+- **244 shared runtime observations** passed in JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 remain.
+- Four shared panic contracts passed, including empty Array bang access.
 
-Continue natively in portable Lean, checked by official Lean, via GitHub source
-operations and Linux CI. Preserve the branch and draft PR 109. No pskernel-core,
-self-hosting or C5 source migration. Wasm remains GC internally with linear
-memory only at explicit ABI boundaries.
+Array now has a checked List-backed logical model, actual size bounds, proof
+access, optimized optional/bang dictionaries and both checked lawfulness laws.
+The seven previous selected Array primitive axioms are replaced by checked
+logical definitions. Efficient backend intrinsics remain a separately audited
+runtime boundary; kernel checking is not a proof of backend equivalence.
 
-## Current qualified checkpoint — M1 List/Fin indexing (13 October 2026)
+Explicit Array.mk/List.toArray conversion uses a typed sized builder with
+prepared List metadata. Every backend allocates private array storage and
+traverses linearly; no backend hardcodes List tags or copies each persistent
+prefix. Array.toList uses a typed fold and checked reverse, also linear.
+Persistent updates, oversized indices, Fin adapter behavior and Nat/Bool
+conversion cases passed. Array and List remain selected Type-0 collections;
+Option and generic indexing/adapters retain the qualified universe closure.
+
+**M1 remains incomplete pending final evidence:** explicit adverse-dictionary
+coherence/priority checks and representative compiler/runtime performance
+comparisons. Full M2 begins only after M1 acceptance, then interleaves with A.
+No C5, self-hosting or pskernel-core.
+
+## Active execution plan — accepted by the user
+
+Finish M1 first, then M2 with remaining A, M3 with B, M4 with C/D, and final
+M5/E qualification. Collect E evidence and apply measured M5 improvements
+throughout. The final M1 coherence/performance evidence is the active work;
+the Array checkpoint above is independently green. Preserve branch and draft
+PR 109, native portable Lean, official checking, GitHub source operations and
+Linux CI. Wasm uses GC internally and linear memory only at explicit ABI boundaries.
+
+## Prior qualified checkpoint — M1 List/Fin indexing (13 October 2026)
 
 This section supersedes older checkpoint claims below.
 

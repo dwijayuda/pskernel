@@ -42,7 +42,7 @@ private def parserCases : IO Unit := do
 
 -- A user-defined GetElem instance demonstrates genuine Prop-indexed,
 -- class-driven lookup without a trusted bounds shortcut. The selected
--- builtin List/Array validity instances are separate unfinished work.
+-- builtin collection instances and dictionary coherence are exercised below.
 private def getElemFoundationCases : IO Unit := do
   let source :=
     "structure IndexBox where { value: Nat }\n" ++
@@ -116,7 +116,9 @@ private def getElemFoundationCases : IO Unit := do
     { source := "const i: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\nconst bad: Nat := [1][i]\n", targets := [], sourceName := "FinWrongCollection.ps" },
     { source := "const bad: Nat := [1, 2][2]\n", targets := [], sourceName := "ListOutOfBounds.ps" },
     { source := "const bad: Nat := #[1, 2][2]\n", targets := [], sourceName := "ArrayOutOfBounds.ps" },
-    { source := "const i: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\nconst bad: Nat := #[1][i]\n", targets := [], sourceName := "FinWrongArray.ps" }]
+    { source := "const i: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\nconst bad: Nat := #[1][i]\n", targets := [], sourceName := "FinWrongArray.ps" },
+    { source := "structure CustomIndex where { value: Nat }\ninstance customChecked: GetElem(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True) where { getElem(xs: CustomIndex, i: Nat, h: True): Nat := xs.value }\ninstance (priority := high) customOptional: GetElem?(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True) where {\n  toGetElem := customChecked\n  getElem?(xs: CustomIndex, i: Nat): Option Nat := Option.none\n  getElem![inhabited: Inhabited Nat](xs: CustomIndex, i: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n}\nfunction requireLaw[LawfulGetElem(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True, optional := customOptional)](xs: CustomIndex): Nat := xs.value\nconst bad: Nat := requireLaw(CustomIndex.mk(701))\n", targets := [], sourceName := "UnlawfulOptional.ps" },
+    { source := "structure CustomIndex where { value: Nat }\ninstance customChecked: GetElem(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True) where { getElem(xs: CustomIndex, i: Nat, h: True): Nat := xs.value }\ninstance (priority := high) customOptional: GetElem?(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True) where {\n  toGetElem := customChecked\n  getElem?(xs: CustomIndex, i: Nat): Option Nat := Option.none\n  getElem![inhabited: Inhabited Nat](xs: CustomIndex, i: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n}\nfunction requireFinLaw[LawfulGetElem(CustomIndex, Fin(10), Nat, fun (_: CustomIndex) => fun (_: Fin(10)) => True)](xs: CustomIndex): Nat := xs.value\nconst bad: Nat := requireFinLaw(CustomIndex.mk(701))\n", targets := [], sourceName := "UnlawfulFinOptional.ps" }]
   let result ← match batch with
     | .ok result => pure result
     | .error reason => throw (IO.userError ("native GetElem batch failed: " ++
@@ -139,7 +141,7 @@ private def getElemFoundationCases : IO Unit := do
   | .error refused =>
     unless refused.phase == "elaborate" do
       throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
-  for i in [2:7] do
+  for i in [2:9] do
     match result.results[i]? with
     | some (.error error) =>
       unless error.phase == "elaborate" do
@@ -841,7 +843,8 @@ private def application : String :=
   "const arrayFoldSliceRuntime: Nat := Array.foldl(fun acc => fun item => Nat.add(acc, item), 0, #[2, 3, 5, 7], 1, 3)\n" ++
   "const arrayFoldHugeRuntime: Nat := Array.foldl(fun acc => fun item => Nat.add(acc, item), 661, #[2, 3], 184467440737095516170, 184467440737095516171)\n" ++
   "const arrayMapRuntime: Nat := (Array.map(fun item => Nat.add(item, 1), #[673]))[0]!\n" ++
-  "function arrayBangPanic(unit: Nat): Nat := (#[] : Array Nat)[0]!\n"
+  "function arrayBangPanic(unit: Nat): Nat := (#[] : Array Nat)[0]!\n" ++
+  "structure CustomIndex where { value: Nat }\ninstance customChecked: GetElem(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True) where { getElem(xs: CustomIndex, i: Nat, h: True): Nat := xs.value }\ninstance (priority := high) customOptional: GetElem?(CustomIndex, Nat, Nat, fun (_: CustomIndex) => fun (_: Nat) => True) where {\n  toGetElem := customChecked\n  getElem?(xs: CustomIndex, i: Nat): Option Nat := Option.none\n  getElem![inhabited: Inhabited Nat](xs: CustomIndex, i: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n}\nconst customPriorityRuntime: Bool := Option.isNone((CustomIndex.mk(701))[0]?)\nconst customFinPriorityRuntime: Bool := Option.isNone((CustomIndex.mk(701))[finIndexSeed]?)\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

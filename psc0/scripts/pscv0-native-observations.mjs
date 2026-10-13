@@ -243,6 +243,8 @@ export const observations = [
   { name: "arrayFoldSliceRuntime", args: null, expected: 8n },
   { name: "arrayFoldHugeRuntime", args: null, expected: 661n },
   { name: "arrayMapRuntime", args: null, expected: 674n },
+  { name: "customPriorityRuntime", args: null, expected: true },
+  { name: "customFinPriorityRuntime", args: null, expected: true },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];
 

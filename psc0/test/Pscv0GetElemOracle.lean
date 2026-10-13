@@ -104,4 +104,18 @@ example : (#[2, 3] : Array Nat).foldl Nat.add 661
     184467440737095516170 184467440737095516171 = 661 := rfl
 example : (#[653] : Array Nat).setIfInBounds 184467440737095516170 0 = #[653] := rfl
 
+structure CustomIndex where
+  value : Nat
+instance : GetElem CustomIndex Nat Nat (fun _ _ => True) where
+  getElem xs _ _ := xs.value
+instance (priority := high) customOptional : GetElem? CustomIndex Nat Nat (fun _ _ => True) where
+  getElem? _ _ := none
+  getElem! _ _ := default
+example : (CustomIndex.mk 701)[0]? = none := rfl
+example : (CustomIndex.mk 701)[finSeed]? = none := rfl
+example : True := by
+  fail_if_success have := (inferInstance : LawfulGetElem CustomIndex Nat Nat (fun _ _ => True))
+  fail_if_success have := (inferInstance : LawfulGetElem CustomIndex (Fin 10) Nat (fun _ _ => True))
+  trivial
+
 end Pscv0GetElemOracle

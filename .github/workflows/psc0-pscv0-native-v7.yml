@@ -14,6 +14,7 @@ on:
       - 'psc0/scripts/pscv0-m1-cases.json'
       - 'psc0/test/Pscv0NativeTests.lean'
       - 'psc0/test/Pscv0GetElemOracle.lean'
+      - 'psc0/test/Pscv0M1Performance.lean'
       - 'psc0/test/Pscv0WasmTests.lean'
       - '.github/workflows/psc0-pscv0-native-v7.yml'
   workflow_dispatch:
@@ -61,6 +62,7 @@ jobs:
             /psc0/scripts/
             /psc0/test/Pscv0NativeTests.lean
             /psc0/test/Pscv0GetElemOracle.lean
+            /psc0/test/Pscv0M1Performance.lean
             /psc0/test/Pscv0WasmTests.lean
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
@@ -95,9 +97,9 @@ jobs:
           grep -F '4.35.0-rc4' ../dist/pscv0-native/toolchain.txt
           grep -F 'c29b6dd' ../dist/pscv0-native/toolchain.txt
           START=$(date +%s%3N)
-          lake build pscv0_native pscv0_native_checks pscv0_wasm_checks 2>&1 | tee ../dist/pscv0-native/build.log
+          lake build pscv0_native pscv0_native_checks pscv0_wasm_checks pscv0_m1_performance 2>&1 | tee ../dist/pscv0-native/build.log
           BUILT=$(date +%s%3N)
-          lake build pscv0_native pscv0_native_checks pscv0_wasm_checks > ../dist/pscv0-native/warm-build.log 2>&1
+          lake build pscv0_native pscv0_native_checks pscv0_wasm_checks pscv0_m1_performance > ../dist/pscv0-native/warm-build.log 2>&1
           WARM=$(date +%s%3N)
           printf '{"initialBuildMs":%s,"warmBuildMs":%s}\n' "$((BUILT-START))" "$((WARM-BUILT))" | tee ../dist/pscv0-native/build-timings.json
       - uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25
@@ -197,6 +199,11 @@ jobs:
             psc0/v7-native/wasm-host/target
             ~/.cargo/registry
           key: pscv0-wasm-host-${{ runner.os }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.toml') }}-${{ hashFiles('psc0/v7-native/wasm-host/Cargo.lock') }}-${{ github.sha }}
+      - name: Measure M1 compiler and collection runtime costs
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_m1_performance ../dist/pscv0-native/m1-performance
+          node ../scripts/pscv0-native-m1-performance.mjs ../dist/pscv0-native/m1-performance | tee ../dist/pscv0-native/m1-performance/comparison.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

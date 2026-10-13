@@ -1,6 +1,37 @@
 # PSCV0 v7 — New-chat continuation prompt (M1, then M2)
 
-## Current qualified checkpoint — M1 List/Fin indexing (13 October 2026)
+## Current qualified checkpoint — M1 checked Array and conversions (13 October 2026)
+
+This section supersedes older implementation-status statements below.
+
+- **Executable:** [af96aa405a2b2f94df9a5dada607b4fc455fc624](https://github.com/dwijayuda/pskernel/commit/af96aa405a2b2f94df9a5dada607b4fc455fc624).
+- **Green Linux qualification:** [38386745772](https://github.com/dwijayuda/pskernel/actions/runs/38386745772), official Lean 4.35.0-rc4.
+- **Selected Standard:** 292 declarations, 14 classes, 52 ordered instances; 175 portable / 183 native modules.
+- **Frozen FNV:** `fnv1a64:5949916575031563783`.
+- **Frozen SHA-256:** `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+- **244 shared runtime observations** passed in JS, strict TS, Rust, V8 Wasm GC and the native Wasmtime component host. All prior 198 remain.
+- Four shared panic contracts passed, including empty Array bang access.
+
+Array now has a checked List-backed logical model, actual size bounds, proof
+access, optimized optional/bang dictionaries and both checked lawfulness laws.
+The seven previous selected Array primitive axioms are replaced by checked
+logical definitions. Efficient backend intrinsics remain a separately audited
+runtime boundary; kernel checking is not a proof of backend equivalence.
+
+Explicit Array.mk/List.toArray conversion uses a typed sized builder with
+prepared List metadata. Every backend allocates private array storage and
+traverses linearly; no backend hardcodes List tags or copies each persistent
+prefix. Array.toList uses a typed fold and checked reverse, also linear.
+Persistent updates, oversized indices, Fin adapter behavior and Nat/Bool
+conversion cases passed. Array and List remain selected Type-0 collections;
+Option and generic indexing/adapters retain the qualified universe closure.
+
+**M1 remains incomplete pending final evidence:** explicit adverse-dictionary
+coherence/priority checks and representative compiler/runtime performance
+comparisons. Full M2 begins only after M1 acceptance, then interleaves with A.
+No C5, self-hosting or pskernel-core.
+
+## Prior qualified checkpoint — M1 List/Fin indexing (13 October 2026)
 
 This section supersedes older checkpoint claims below.
 

@@ -245,7 +245,12 @@ def psElabSolveSynthetic (current : PsElabTermResult)
   let solved := psSyntheticSolve current.context.environment current.context.instances
     current.context.metaContext pending
   if solved.resourceExceeded then throw .fuelExhausted
-  if !solved.pending.isEmpty then throw .implicitApplicationUnsupported
+  -- Preserve the reason for failure at the elaborator boundary; a blocked
+  -- expected/default equality is a type mismatch, not a missing dictionary.
+  match solved.pending.head? with
+  | some (.expectedType _ _ _) | some (.defaultValue _ _) => throw .typeMismatch
+  | some (.instanceGoal _) => throw .implicitApplicationUnsupported
+  | none => pure ()
   return psElabResultWithMeta current solved.context current.type
 
 def psElabFinishApplication (application : PsElabApplicationResult)

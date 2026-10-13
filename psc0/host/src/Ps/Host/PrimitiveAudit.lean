@@ -57,7 +57,9 @@ def primitiveAudit : IO Lean.Json := do
     let assumption := match declaration with | .axiomDecl .. => true | _ => false
     let reviewed := modeledSignatures.any (fun entry => entry.1 == psNameToString name)
     let opaquePrimitive := ["mixHash", "String.hash"].contains (psNameToString name)
-    if assumption || reviewed || opaquePrimitive then
+    let logicalAssumption := ["propext", "Quot.sound"].contains (psNameToString name)
+    let kernelQuotient := match declaration with | .quotientDecl .. => true | _ => false
+    if assumption || reviewed || opaquePrimitive || kernelQuotient then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -78,7 +80,9 @@ def primitiveAudit : IO Lean.Json := do
         ("signature", Lean.toJson (if matched then "native-alpha-match" else "portable-model")),
         ("portableType", Lean.toJson portable.dbgToString),
         ("nativeType", Lean.toJson (original.map (fun info => info.type.dbgToString))),
-        ("bodyTrust", Lean.toJson (if assumption then "assumption/runtime-primitive"
+        ("bodyTrust", Lean.toJson (if logicalAssumption then "approved-pinned-Lean-logical-assumption"
+          else if kernelQuotient then "kernel-generated-quotient-primitive"
+          else if assumption then "assumption/runtime-primitive"
           else if opaquePrimitive then "checked-opaque-inhabitant/runtime-primitive"
           else "checked-logical-model/runtime-override"))] :: entries
   -- Newly exposed representation conversions and proof-taking operations have

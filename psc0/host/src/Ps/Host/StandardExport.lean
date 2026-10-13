@@ -302,13 +302,13 @@ def checkQuotientFoundation : IO Unit := do
   let .ok checked := PsKernelLean.replayPreludeDeclarations base base.reverse empty
     | throw (IO.userError "quotient test prelude failed")
   let wrong := PsDeclaration.quotientDecl (psDecisionName "Quot.lift") [] nat .lift
-  unless (PsKernelLean.tryPreludeDeclaration declarations checked wrong).isError do
+  if (PsKernelLean.tryPreludeDeclaration declarations checked wrong).isOk then
     throw (IO.userError "forged quotient signature accepted")
   -- Mirror pinned kernelQuotNameCollision in an isolated discarded environment.
   let .ok collision := checked.addDeclCore 2000000 20000
       (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none true
     | throw (IO.userError "cannot construct isolated quotient collision probe")
-  unless (collision.addDeclCore 2000000 20000 .quotDecl none true).isError do
+  if (collision.addDeclCore 2000000 20000 .quotDecl none true).isOk then
     throw (IO.userError "kernel quotient registration overwrote an existing name")
   IO.println "PSCV0_QUOTIENT_FOUNDATION: PASS kernel regeneration, lift/ind computation, signature/collision refusal; no added assumptions"
 
@@ -352,7 +352,7 @@ private def exportStandardCore (spec : StandardExportSpec)
     ("quotientPrimitives", Lean.toJson (entries.filterMap fun info =>
       match info with | .quotInfo _ => some (toString info.name) | _ => none))]).compress
   let declarations ← entries.toList.mapM fun info => do
-    match exportDeclaration native info with
+    match exportDeclaration native spec.allowedAssumptions info with
     | .ok value => pure value
     | .error reason => throw (IO.userError (toString info.name ++ ": " ++ reason))
   checkCandidate (declarations ++ base) declarations
@@ -370,7 +370,9 @@ private def exportStandardCore (spec : StandardExportSpec)
     if (psDeclarationValue declaration).isSome then
       let name := psDeclarationName declaration
       statuses := ("(" ++ sourceName name ++ ", " ++ sourceStatus native (PsKernelLean.toLeanName name) ++ ")") :: statuses
-  let header := spec.provenance
+  let header := spec.provenance ++ (if spec.allowedAssumptions.isEmpty then "" else
+    "-- Explicitly approved pinned Lean assumptions: " ++
+      String.intercalate ", " (spec.allowedAssumptions.map toString) ++ ".\n\n")
   let source := header ++ "def " ++ spec.publicPrefix ++ "Boundary : List PsName :=\n  " ++
     sourceList (boundaryNames.map sourceName) ++ "\n\n" ++ String.intercalate "\n" definitions.reverse ++
     "\ndef " ++ spec.publicPrefix ++ "Declarations : List PsDeclaration :=\n  " ++ sourceList identifiers.reverse ++

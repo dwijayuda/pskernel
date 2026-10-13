@@ -104,7 +104,7 @@ def psKernelC0ArchitectureSourceTypedRecursorMajor
     else
       let revisedArgs := args.take majorIndex ++
         [observation.sourceResult] ++ args.drop (majorIndex + 1)
-      some (psKernelExprApplyArgs
+      some (psKernelApplyArgs
         (.const recName levels) revisedArgs)
 
 /-- Source owns the first and only checked WHNF observation. The optional

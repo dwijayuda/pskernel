@@ -1,5 +1,11 @@
 # M2+A: generalized answers and shared synthetic constraints
 
+**Subsequent qualification:** [checked equality/defaults](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md)
+at `d7e28a3870cdc399eca3c63c6d305b10109d2eca`, [Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663).
+This adds selected DecidableEq, proof-field BEq, structure defaults and shared
+typed proof conversion. The historical evidence below remains revision-specific;
+the latest Standard has 294 declarations / 14 classes / 52 instances.
+
 ## Contract and design
 
 This is the next bounded M2+A milestone in M2+A → M3+B → M4+C/D → M5/E.

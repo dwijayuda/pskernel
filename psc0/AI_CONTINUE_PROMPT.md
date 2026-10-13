@@ -1,4 +1,4 @@
-# PSCV0 v7 — Continue M2+A after generalized answers and synthetic constraints
+# PSCV0 v7 — Continue M2+A after checked equality and structure defaults
 
 ## Qualified starting point — 13 October 2026
 
@@ -7,15 +7,15 @@ https://github.com/dwijayuda/pskernel · branch:
 `psc0/pscv0-v7-native-lean-v1` · preserve draft PR
 https://github.com/dwijayuda/pskernel/pull/109.
 
-Executable `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`; [green Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335).
+Executable `d7e28a3870cdc399eca3c63c6d305b10109d2eca`; [green Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663).
 Later docs-only commits do not change executable qualification.
 
 - Official Lean 4.35.0-rc4: `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
-- 182 portable / 190 native modules; profile `pscv0-v7-native-bounded/48`.
-- 263 shared runtime observations, retaining all earlier 260; four panic contracts.
-- Standard: 292 declarations / 14 classes / 52 instances.
-- FNV `fnv1a64:5949916575031563783`.
-- SHA-256 `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+- 183 portable / 191 native modules; profile `pscv0-v7-native-bounded/49`.
+- 276 shared runtime observations, retaining all earlier 263; four panic contracts.
+- Standard: 294 declarations / 14 classes / 52 instances.
+- FNV `fnv1a64:8231265721298810139`.
+- SHA-256 `sha256:89c4125cc3ca36bf198421e64673659a0acdf0207004af46738d36d32fcfd540`.
 
 Official kernel, independent RC4 oracle, semantic refusals, strict IR,
 JS/TS/Rust, V8/Wasmtime, WIT/WAT/binary/ABI, declarations/maps and project
@@ -26,7 +26,8 @@ Phase A, v7, high-performance parity or formal compiler preservation.**
 
 Read current top sections of:
 1. [AI work state](AI_WORK_STATE.md).
-2. [Generalized answers and shared constraints](docs/PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md).
+2. [Checked equality/defaults](docs/PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md), then
+   [Generalized answers and shared constraints](docs/PSCV0_M2_GENERALIZED_CONSTRAINTS_2026-10-13.md).
 3. [Instance graph ownership](docs/PSCV0_M2_INSTANCE_GRAPH_2026-10-13.md).
 4. [Parameter/universe-aware deriving](docs/PSCV0_M2_A_DERIVING_2026-10-13.md).
 5. [M0–M5 architecture](docs/PSCV0_NATIVE_LEAN_GRADE_ARCHITECTURE_REDESIGN_V1.md).
@@ -39,6 +40,28 @@ Read current top sections of:
 Keep **M2+A → M3+B → M4+C/D → M5/E**. Collect E evidence and measured M5
 improvements throughout. M1 is complete for its selected indexing/Standard
 scope. Do not repeat qualified work or invent another milestone track.
+
+## Just completed: equality/defaults
+
+- `DerivingContext` owns shared field classification and actual-minor recursor
+  construction. The old BEq-only builder is removed.
+- `DerivingDecEq` supports non-indexed, nonrecursive families with independent
+  runtime fields, mixed universes, empty families and dependent proof fields.
+  Positive evidence uses existing context transport and reflexivity; negative
+  evidence uses projection congruence or constructor discrimination.
+- BEq skips proof fields. Inhabited honors explicit structure defaults before
+  dictionary synthesis, preserving two-pass selection and requirement pruning.
+  Records use the shared completion queue and retain missing-field diagnostics.
+- `Meta.Reduce.psDefEqReadOnlyWithProofs` shares conversion/congruence;
+  `Meta.Infer.psInferGroundProofIrrelevance` is used by both inference and
+  unification. Open binder bodies in their scoped contexts and require
+  metavariable-free inferred propositions. Different runtime values and
+  propositions remain distinct; there are focused negative checks.
+- Standard adds exactly the checked aliases/API definitions DecidableEq and
+  decEq. DecidableEq is a Sort-polymorphic Pi alias, not a new class; existing
+  Pi-aware search solves its Decidable body. No axiom/primitive is added.
+- 13 new observations, independent RC4 oracle, 629 declaration mappings and
+  37 generated-parent origins are qualified. Maps retain declaration precision.
 
 ## Current M2 owners and invariants
 
@@ -95,12 +118,19 @@ transitions. These are bounded samples, not a general complexity proof.
 
 ## Next work in M2+A
 
-Use real Phase A needs to drive remaining M2 work. Repr/DecidableEq/Hashable,
-Inhabited structure defaults, BEq proof-field treatment, wider selected APIs and
-the comprehensive environment manifest remain incomplete. Existing deriving
-already shares the parameter/universe telescope and instance machinery; preserve
-two-pass Inhabited selection/pruning and independent nonrecursive BEq fields.
+Use real Phase A needs to drive remaining M2 work. Repr and Hashable are the
+remaining unimplemented allowlisted handlers. First implement their faithful
+Standard dependencies: Std.Format document algebra/rendering, quoting and
+precedence-aware instances for Repr; UInt64, exact modular operations and
+mixHash/runtime correspondence for Hashable. Do not replace their public types
+with String or Nat or fabricate opaque implementations. Reuse the shared field
+and recursor mechanisms; interleave M3 data/recursion support where needed.
 
+Broader selected libraries/scalars/APIs and the comprehensive environment
+manifest remain open. DecidableEq, proof-field BEq and explicit structure
+defaults are now qualified for the selected slice; do not reimplement them.
+Keep dependent computational fields, indices and recursive deriving with the
+general M3 data/transport/termination machinery.
 Remaining M2 includes arbitrary postponed syntax, broader synthetic/tactic
 scheduling and metavariable-depth/scoping parity, search/key scaling and C5
 occurrence/decision retention. The new queue covers selected Core constraints,
@@ -148,7 +178,7 @@ and runtime-override trust ledger. Review intentional Standard changes before
 updating FNV/SHA expectations; never weaken guards.
 
 The M1 benchmark records substantial generated-JS overhead versus native Lean
-(roughly 480–3881x in the latest retained run for its small batches). Preserve raw workload/checksum/timing
+(roughly 495–3291x in the latest retained run for its small batches). Preserve raw workload/checksum/timing
 evidence. General shared specialization/call/allocation work belongs to measured
 M5 slices; no Standard-name shortcuts or high-performance parity claims.
 
@@ -167,4 +197,4 @@ M5 slices; no Standard-name shortcuts or high-performance parity claims.
 - Update the TOP of AI_WORK_STATE, this prompt, roadmap and audit at qualified
   boundaries. Keep the Standard documentation aligned when its closure changes.
 
-Start with live HEAD/CI and the current abstraction, graph, synthetic, application, class-registration and deriving owners. Continue coherent dependency-driven work; update the work state at the next qualified boundary.
+Start with live HEAD/CI, the equality/defaults design and the current abstraction, graph, synthetic, typed-conversion and deriving owners. Continue coherent dependency-driven work; update the work state at the next qualified boundary.

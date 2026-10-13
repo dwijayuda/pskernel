@@ -1,6 +1,42 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
-## Current qualification — M2+A generalized answers and synthetic constraints (13 October 2026)
+## Current qualification — M2+A checked equality and structure defaults (13 October 2026)
+
+Executable `d7e28a3870cdc399eca3c63c6d305b10109d2eca`; [green Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663).
+**276 shared runtime observations** (all prior 263 retained), four panic
+contracts, **183 portable / 191 native modules**, profile
+`pscv0-v7-native-bounded/49`. Official Lean RC4 kernel, independent upstream
+deriving oracle, 92 semantic refusals, existing do/opacity checks, strict IR,
+JS/TS/Rust, V8/Wasmtime GC/component/ABI, declarations/maps and project gates pass.
+
+- `DecidableEq` derives checked decisions for non-indexed, nonrecursive
+  families with independent runtime fields, including generic universes,
+  empty families and dependent proof fields. It uses Eq.rec/congruence and
+  existing dependent-context substitution; no BEq-to-equality axiom.
+- `BEq` skips proof fields and shares the new recursor builder.
+  `Inhabited` honors explicit structure defaults and still prunes unused
+  parameter assumptions. Record/constructor completion uses the shared queue.
+- Typed proof conversion is shared by application/let inference and
+  unification. Different propositions and runtime values remain distinct.
+  Record and deriving diagnostics retain their source/constructor owners.
+
+Standard now has **294 declarations / 14 classes / 52 instances**. The only
+additions are checked `DecidableEq`/`decEq` definitions; no new axiom,
+primitive, class or global instance.
+FNV `fnv1a64:8231265721298810139`;
+SHA-256 `sha256:89c4125cc3ca36bf198421e64673659a0acdf0207004af46738d36d32fcfd540`.
+
+[Design, reviewed Standard change and exact evidence](docs/PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md).
+**Selected milestone complete; full M2, Phase A and v7 remain open.**
+Continue **M2+A → M3+B → M4+C/D → M5/E**. Repr needs faithful Std.Format,
+quoting and rendering; Hashable needs UInt64/mixHash and their audited runtime
+correspondence. Keep indexed/recursive deriving and dependent computational
+fields with M3's general data/transport/termination mechanisms. Broader M2
+scheduling/scoping/scaling, selected APIs, the complete manifest and C5
+retention/publication remain on the existing roadmap. Native Lean only;
+no pskernel-core, self-hosting or compiler-source migration.
+
+## Prior qualification — M2+A generalized answers and synthetic constraints (13 October 2026)
 
 Executable `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279`;
 [green Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335):

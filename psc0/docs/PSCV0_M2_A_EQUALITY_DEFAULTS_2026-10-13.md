@@ -1,7 +1,9 @@
 # M2+A: checked equality deriving and structure defaults
 
-Implementation revision: `503825c29ae3f0e89842c1ddb6c0ac811ded5024`.
-Qualification is pending. This document records the design, not a green result.
+Qualified executable `d7e28a3870cdc399eca3c63c6d305b10109d2eca`;
+[green Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663),
+job `115368221664`. Profile `pscv0-v7-native-bounded/49`.
+This completes this bounded M2+A milestone, not all M2, Phase A or v7.
 
 ## Placement and scope
 
@@ -89,7 +91,8 @@ later defaults, including proof defaults.
 
 Record completion uses the shared application/synthetic-constraint queue.
 An omitted declared default remains mandatory; it is not a unification choice.
-Missing required fields still leave an incompatible function result and reject.
+Missing required explicit fields retain the source-owned missing-field diagnostic;
+completed applications also require an empty queue and the expected family result.
 Record updates retain omitted projections and only use defaults when constructing
 a new value.
 
@@ -110,3 +113,40 @@ All source references are pinned to Lean RC4
 Independent upstream oracle examples and one combined portable fixture validate
 the intended correspondence; executable checking is not a formal compiler
 preservation proof.
+
+## Qualification and review
+
+- 183 portable / 191 native modules; official Lean 4.35.0-rc4 at the pin above.
+- 276 observations across the existing JS/TS/Rust/GC-Wasm lanes, retaining all
+  previous 263; four panic contracts. The added 13 cover public decEq,
+  mixed-universe/generic dictionaries, payload equality/inequality and distinct
+  tags, Unicode String payloads, declared/overridden/seeded defaults and proof fields.
+- Independent upstream oracle, positive/negative typed-conversion invariants,
+  92 existing phase-specific refusals, 8 do refusals and 1 opacity refusal pass.
+  Focused deriving refusals cover missing dictionaries, dependent computational
+  fields, recursion, indices, ill-typed defaults and missing required fields.
+- Strict IR, source maps/declaration consumer, native project linking,
+  WIT/WAT/binary/Canonical ABI, V8/Wasmtime and repeated component calls/post-return pass.
+  629 declaration mappings and 37 generated-parent origins; declaration precision.
+- Standard: 294 declarations / 14 classes / 52 instances.
+  FNV `fnv1a64:8231265721298810139`;
+  SHA `sha256:89c4125cc3ca36bf198421e64673659a0acdf0207004af46738d36d32fcfd540`.
+  Two definitions were reviewed before updating strict drift guards, using
+  independently observed digests from Linux 38416389933. Primitive/axiom
+  authority is unchanged.
+- The generalized-answer graph still reports 6 generators / 6 answers /
+  1 generalized / 1 freshened answer. Ownership/replay limits remain unchanged.
+- Restored-cache build: 7437 ms; warm build: 506 ms, not a cold-build result.
+  Existing M1 elaboration samples: indexed 4/32 ms versus direct 1/5 ms at
+  16/128 declarations; prelude 13 ms. Generated JS/native Lean ratios are
+  roughly 495–3291x on the retained small runtime batches. These uncontrolled
+  measurements establish neither performance parity nor a causal speedup or
+  regression. General specialization/call/allocation improvements remain M5.
+
+Architecture review: obsolete private BEq recursor construction and duplicated
+proof-irrelevance code have been removed. Shared conversion, field planning,
+recursor construction and synthetic completion own the general mechanisms.
+No backend-specific deriving path, unchecked cast, new proof axiom, source
+migration or self-host loop was introduced. Binary constructor dispatch is
+still quadratic in constructor count; shared tag/same-constructor machinery
+belongs to a measured general M3/M5 improvement, not a handler-specific patch.

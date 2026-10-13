@@ -1,6 +1,14 @@
 # Readable output: implementation audit and integrated roadmap
 
-**Latest M2+A qualification:** [Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335)
+**Latest M2+A qualification:** [Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663)
+at `d7e28a3870cdc399eca3c63c6d305b10109d2eca`. Checked equality/defaults use the existing
+shared IR and JS/TS/Rust/WAT/WIT paths. 276 observations, 629 declaration mappings,
+37 generated-parent origins and the declaration consumer pass. No new emitter
+or C5 implementation; maps remain at declaration precision. Source optional
+annotations retain defaults; command/member origins retain derived ownership.
+[Design/evidence and remaining dependencies](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md).
+
+**Prior M2+A qualification:** [Linux 38411211335](https://github.com/dwijayuda/pskernel/actions/runs/38411211335)
 at `c6468b17ef8f0a97c9e0df76c1ffe49f35c68279` preserves this output architecture.
 263 shared runtime observations, 591 declaration mappings and 26 generated-parent
 origins passed; maps remain at declaration precision. Generalized Nat-indexed

@@ -1,5 +1,14 @@
 # PSCV0 — Native Compiler Architecture Redesign v1
 
+**Current M2+A qualification:** `d7e28a3870cdc399eca3c63c6d305b10109d2eca`,
+[Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663),
+276 observations. [Equality/defaults design and evidence](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md)
+extends the existing architecture with shared typed proof conversion and
+recursor construction, checked DecidableEq, BEq proof fields and structure
+defaults. Repr/Hashable foundations remain A work; computational dependent,
+indexed and recursive deriving depends on M3+B. The interleaved roadmap and
+existing backend/C5 ownership remain unchanged.
+
 **Readable-output integration (13 October 2026):** [audit and dependency plan](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
 Preserve qualified JS/TS/Rust/WAT/WIT. Build C5 source retention with M2–M4's
 semantic owners and finish selected PS/Lean reconstruction under M5/E after

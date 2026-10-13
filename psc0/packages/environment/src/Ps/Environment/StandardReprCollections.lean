@@ -6,6 +6,7 @@ Apache-2.0; see THIRD_PARTY_NOTICES.md.
 Modified: checked Core builders; Prod/Array retain the selected Type-0 model.
 -/
 import Ps.Environment.StandardRepr
+import Ps.Environment.StandardArray
 import Ps.Environment.StandardFormatString
 
 def psReprTupleClassDeclarations : List PsDeclaration :=

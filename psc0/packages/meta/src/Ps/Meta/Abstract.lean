@@ -90,17 +90,17 @@ def psMetaAbstract (context : PsMetaContext) (locals : PsLocalContext)
   let levels := ((value :: type :: types).flatMap psMetaExprLevelIds).eraseDups
   if !levels.all context.levels.declarations.contains then none else
   let terms := fun id => (psMetaTemplateIndex id ordered).map PsExpr.mvar
-  let universe := fun id => (psMetaTemplateIndex id levels).map PsLevel.mvar
+  let levelMap := fun id => (psMetaTemplateIndex id levels).map PsLevel.mvar
   let parameters ← (declarations.zip types).mapM fun (declaration, type) => do
     let parameter : PsMetaTemplateParameter := {
-      type := (← psMetaMapExpr terms universe type)
+      type := (← psMetaMapExpr terms levelMap type)
       locals := declaration.localContext.declarations.map psLocalDeclId }
     return parameter
   return {
     levels := levels.length
     parameters
-    value := (← psMetaMapExpr terms universe value)
-    type := (← psMetaMapExpr terms universe type) }
+    value := (← psMetaMapExpr terms levelMap value)
+    type := (← psMetaMapExpr terms levelMap type) }
 
 def psMetaOpenTemplate (context : PsMetaContext) (locals : PsLocalContext)
     (template : PsMetaTemplate) : Option (PsMetaContext × PsExpr × PsExpr) := do
@@ -111,8 +111,10 @@ def psMetaOpenTemplate (context : PsMetaContext) (locals : PsLocalContext)
   let (context, terms) ← template.parameters.foldlM
     (fun (state : PsMetaContext × List PsExpr) parameter => do
       if !parameter.locals.all (psLocalContainsId locals) then none else
-      let scope := { locals with declarations := locals.declarations.filter
-        (fun declaration => parameter.locals.contains (psLocalDeclId declaration)) }
+      let scope : PsLocalContext := {
+        locals with
+        declarations := locals.declarations.filter (fun declaration =>
+          parameter.locals.contains (psLocalDeclId declaration)) }
       let type ← psMetaMapExpr (state.2[·]?) (levels[·]?) parameter.type
       if !psExprFVarsInContext scope type then none else
       let fresh := psMetaFresh state.1 scope type .natural

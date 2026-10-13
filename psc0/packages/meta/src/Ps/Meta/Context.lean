@@ -446,3 +446,10 @@ def psExprHasUnresolvedMeta
         psExprHasUnresolvedMeta body
   | .proj _ _ value => psExprHasUnresolvedMeta value
   | _ => false
+
+def psExprFVarIds : PsExpr → List Nat
+  | .fvar id => [id]
+  | .app a b | .lam _ a b _ | .forallE _ a b _ => psExprFVarIds a ++ psExprFVarIds b
+  | .letE _ a b c => psExprFVarIds a ++ psExprFVarIds b ++ psExprFVarIds c
+  | .proj _ _ value => psExprFVarIds value
+  | _ => []

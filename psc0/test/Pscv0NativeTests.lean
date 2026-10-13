@@ -150,11 +150,11 @@ private def getElemFoundationCases : IO Unit := do
   IO.println "PSCV0_NATIVE_GETELEM: checked indexed proof/instance admitted; missing proof refused"
 
 private def generalizedFixture : String :=
-  "namespace Generalized\nuniverse u\nclass Evidence(A: outParam(Type u)): Type u where { value: Nat }\ninstance generic{A: Type u}: Evidence A where { value := 773 }\nclass Select(n: Nat, A: outParam(Type)) where { value: Nat }\ninstance selectNat: Select 0 Nat where { value := 5 }\ninstance selectBool: Select 1 Bool where { value := 7 }\nclass Branch(n: Nat) where { value: Nat }\ninstance branch{n: Nat}{A: Type}[Evidence A][Select n A]: Branch n where { value := Nat.add(Evidence.value(A := A), Select.value(n := n, A := A)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(n := 0), Branch.value(n := 1)) }\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend Generalized\n"
+  "namespace Generalized\nuniverse u\nclass Evidence(A: outParam(Type u)): Type u where { value: Nat }\nfunction generic(A: Type u): Evidence A := { value := 773 }\nclass Select(n: Nat, A: outParam(Type)) where { value: Nat }\ninstance selectNat: Select 0 Nat where { value := 5 }\ninstance selectBool: Select 1 Bool where { value := 7 }\nclass Branch(n: Nat) where { value: Nat }\ninstance branch{n: Nat}{A: Type}[Evidence A][Select n A]: Branch n where { value := Nat.add(Evidence.value(A := A), Select.value(n := n, A := A)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(n := 0), Branch.value(n := 1)) }\nfunction combined[poly: forall(A: Type), Evidence A](unit: Unit): Nat := Result.value\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend Generalized\n"
 
 private def application : String :=
   generalizedFixture ++
-  "const generalizedSharedRuntime: Nat := Generalized.Result.value\n" ++
+  "const generalizedSharedRuntime: Nat := Generalized.combined(poly := Generalized.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := Generalized.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := Generalized.expected(())\n" ++
   "function emptyElim{A: Type}(value: Empty): A := nomatch value\n" ++
@@ -1947,8 +1947,8 @@ private def syntheticBoundaries : IO Unit := do
   let type := PsExpr.sortE (.succ .zero)
   -- A dependent template contains A : Sort ?u followed by x : A. Opening it
   -- twice in one recipient must allocate independent term and universe IDs.
-  let universe := psMetaFreshLevel psMetaEmpty
-  let a := psMetaFresh universe.context psLocalEmpty (.sortE universe.level) .natural
+  let freshLevel := psMetaFreshLevel psMetaEmpty
+  let a := psMetaFresh freshLevel.context psLocalEmpty (.sortE freshLevel.level) .natural
   let x := psMetaFresh a.context psLocalEmpty a.expr .natural
   let some template := psMetaAbstract x.context psLocalEmpty x.expr a.expr |
     throw (IO.userError "dependent natural answer could not be abstracted")
@@ -2007,7 +2007,12 @@ private def syntheticBoundaries : IO Unit := do
   let elaborated ← get "generalized fixture elaboration"
     ((psElabProgram environment parsed).mapError psCompilerPscv0ElabError)
   let resultName := psNameAppendStr (psRootName "Generalized") "Result"
-  let graph := psSynthInstanceWithTable elaborated.environment psLocalEmpty
+  let evidence := psNameAppendStr (psRootName "Generalized") "Evidence"
+  let genericType := PsExpr.forallE (psRootName "A") type
+    (.app (.constE evidence [.zero]) (.bvar 0)) .explicit
+  let locals := (psLocalPushBinding psLocalEmpty (psRootName "poly")
+    genericType .instanceImplicit).context
+  let graph := psSynthInstanceWithTable elaborated.environment locals
     elaborated.environment.instances psMetaEmpty 64 (.constE resultName [])
   unless graph.result.value.isSome && graph.table.generalizedAnswers >= 1 &&
       graph.table.freshenedAnswers >= 1 && graph.table.reusedGoals >= 1 do
@@ -2017,8 +2022,9 @@ private def syntheticBoundaries : IO Unit := do
     " freshened=" ++ toString graph.table.freshenedAnswers ++
     " generators=" ++ toString graph.table.visits)
   let requests : Array PsV7Native.Request := #[
-    { source := generalizedFixture ++ "const bad: Nat := Generalized.Evidence.value\n" },
-    { source := generalizedFixture ++ "const bad: Bool := Generalized.selected()\n" }]
+    { source := generalizedFixture ++ "function bad[poly: forall(A: Type), Generalized.Evidence A](unit: Unit): Nat := Generalized.Evidence.value\n" },
+    { source := generalizedFixture ++ "const bad: Bool := Generalized.selected()\n" },
+    { source := generalizedFixture ++ "instance bad{A: Type}: Generalized.Evidence A where { value := 0 }\n" }]
   let batch ← match ← PsV7Native.runBatch requests with
     | .ok batch => pure batch
     | .error error => throw (IO.userError ("synthetic host prelude: " ++ error.message))

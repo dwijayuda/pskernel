@@ -46,6 +46,13 @@ use this mechanism. The old pending-instance worklist is removed. Proof goals
 remain under the proof elaborator; this queue does not fabricate evidence or
 claim full tactic/postponed-syntax scheduling.
 
+Global instance registration now checks parameter information flow before
+adding a declaration to the ordered registry: result inputs determine
+parameters, ready dictionary inputs enable their outputs, and dependencies in
+parameter types close transitively. Stuck dependency orders and undetermined
+result outputs are refused. This is distinct from a well-typed polymorphic
+local dictionary, which may produce a generalized answer for its consumers.
+
 ## Reference design
 
 Pinned Lean 4.35.0-rc4 commit
@@ -56,7 +63,11 @@ Pinned Lean 4.35.0-rc4 commit
 - [Meta/SynthInstance.lean](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Meta/SynthInstance.lean):
   generator/consumer answer propagation and root term-parameter closure.
 - [Elab/SyntheticMVars.lean](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Elab/SyntheticMVars.lean):
-  progress-based retry and default phases.
+  progress-based retry and phase separation. Its default-instance phase is
+  broader than this milestone's mandatory optParam-value phase.
+
+- [Meta/Instances.lean](https://github.com/leanprover/lean4/blob/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364/src/Lean/Meta/Instances.lean):
+  registration-time synthesis-order and concrete-output validation.
 
 These are design references, not imported host elaborator dependencies.
 
@@ -64,9 +75,10 @@ These are design references, not imported host elaborator dependencies.
 
 Pending Linux build and existing full native/backend qualification at this commit.
 Focused additions exercise dependent term/universe freshening, scoped refusal,
-synthetic-obligation refusal, shared generic dictionaries specialized to Nat
+synthetic-obligation refusal, shared polymorphic local dictionaries specialized to Nat
 and Bool by later subgoals, mandatory-default conflict, resource rollback,
-and expected/default/instance wake-up. Three runtime observations extend the
+and expected/default/instance wake-up. Global arbitrary-output instances are
+refused, matching the pinned registration oracle. Three runtime observations extend the
 shared target table. The independent pinned Lean oracle covers the same source
 semantics. Existing cycle/diamond/growth and all prior acceptance criteria remain.
 

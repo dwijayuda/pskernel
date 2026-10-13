@@ -185,8 +185,7 @@ namespace Pscv0GeneralizedOracle
 universe u
 class Evidence (A : outParam (Type u)) where
   value : Nat
-instance {A : Type u} : Evidence A where
-  value := 773
+def generic (A : Type u) : Evidence A := ⟨773⟩
 class Select (n : Nat) (A : outParam Type) where
   value : Nat
 instance : Select 0 Nat where
@@ -201,12 +200,13 @@ class Result where
   value : Nat
 instance [Branch 0] [Branch 1] : Result where
   value := Branch.value (n := 0) + Branch.value (n := 1)
-example : Result.value = 1558 := rfl
+def combined [poly : (A : Type) → Evidence A] (_ : Unit) : Nat := Result.value
+example : combined (poly := generic) () = 1558 := rfl
 def selected (A : Type := Nat) [Inhabited A] (value : A := default) : A := value
 def expected {A : Type} [Inhabited A] (_ : Unit) (value : A := default) : A := value
 example : selected = 0 := rfl
 example : expected () = false := rfl
-example : True := by
+example [poly : (A : Type) → Evidence A] : True := by
   fail_if_success have : Nat := Evidence.value
   fail_if_success have : Bool := selected
   trivial

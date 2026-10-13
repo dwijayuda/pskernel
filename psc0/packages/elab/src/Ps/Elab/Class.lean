@@ -93,6 +93,59 @@ def psElabRegisterClass (environment : PsEnvironment) (name : PsName) :
     classes := name :: environment.classes
     classParameters := (name, parameters) :: environment.classParameters }
 
+-- Registration checks information flow, not the existence of particular
+-- dictionaries. Inputs determine parameters; ready dictionaries determine
+-- their outputs. Closing dependencies through binder types mirrors RC4's
+-- synthesis-order check without running search or inventing proof terms.
+def psElabInstanceKnown (fuel : Nat) (binders : List PsElabTypedBinder)
+    (known : List Nat) : List Nat :=
+  match fuel with
+  | 0 => known
+  | fuel + 1 =>
+    let next := (known ++ (binders.filter (fun b => known.contains b.id)).flatMap
+      (fun b => psExprFVarIds b.type)).eraseDups
+    if next.length == known.length then known else psElabInstanceKnown fuel binders next
+
+def psElabInstanceInputs (context : PsElabContext) (type : PsExpr) :
+    Except PsElabError (List Nat) := do
+  let goal ← psElabOpenCoreTelescope 4096 context type none
+  let view := psExprAppView goal.body
+  let .constE name _ := view.head | throw (.data "instance dependency must produce a class")
+  if !context.environment.classes.any (psNameEq name) then
+    throw (.data "instance dependency must produce a class")
+  let outputs := ((context.environment.classParameters.find? fun entry =>
+    psNameEq entry.fst name).map (·.snd.outputs)).getD []
+  let inputs := view.args.zipIdx.filterMap fun (argument, position) =>
+    if outputs.contains position then none else some argument
+  -- Locals introduced by a Pi dependency are bound by that dependency.
+  return ((inputs.flatMap psExprFVarIds).filter
+    (psLocalContainsId context.localContext)).eraseDups
+
+def psElabInstanceOrder (fuel : Nat) (context : PsElabContext)
+    (binders pending : List PsElabTypedBinder) (known : List Nat) :
+    Except PsElabError (List Nat) := do
+  if pending.isEmpty then return known
+  match fuel with
+  | 0 => throw .fuelExhausted
+  | fuel + 1 =>
+    let ready ← pending.findM? fun binder => do
+      let inputs ← psElabInstanceInputs context binder.type
+      return inputs.all known.contains
+    let some ready := ready | throw (.data "instance dependencies have no synthesis order")
+    let known := psElabInstanceKnown (binders.length + 1) binders
+      ((ready.id :: known ++ psExprFVarIds ready.type).eraseDups)
+    psElabInstanceOrder fuel context binders
+      (pending.filter (fun binder => binder.id != ready.id)) known
+
+def psElabCheckInstanceOrder (telescope : PsElabOpenTelescope) : Except PsElabError Unit := do
+  let binders := telescope.bindersRev.reverse
+  let inputs ← psElabInstanceInputs telescope.context telescope.body
+  let known := psElabInstanceKnown (binders.length + 1) binders inputs
+  let pending := binders.filter (fun binder => psBinderInfoIsInstance binder.binder)
+  let known ← psElabInstanceOrder (pending.length + 1) telescope.context binders pending known
+  if !(psExprFVarIds telescope.body).all known.contains then
+    throw (.data "instance does not determine its output parameters")
+
 def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priority : Nat) :
     Except PsElabError PsEnvironment := do
   let some declaration := psEnvironmentFind environment name
@@ -104,6 +157,7 @@ def psElabRegisterInstance (environment : PsEnvironment) (name : PsName) (priori
   let .constE className _ := head | throw (.data "instance result must be a registered class")
   if !environment.classes.any (psNameEq className) then
     throw (.data "instance result must be a registered class")
+  psElabCheckInstanceOrder telescope
   let entry : PsInstanceEntry := {
     value := .constE name ((psDeclarationLevelParams declaration).map PsLevel.param)
     levelParams := psDeclarationLevelParams declaration

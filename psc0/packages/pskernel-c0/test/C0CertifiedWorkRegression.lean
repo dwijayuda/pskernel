@@ -90,6 +90,43 @@ def main : IO Unit := do
     | throw (IO.userError "valid work did not acquire proof witness")
   let _initialValid : psKernelC0ArchitectureWorkValid initial.raw = true :=
     initial.valid
+  -- A locally checked free variable is NOT a closed deployable root.
+  -- Checking may legitimately succeed inside a local hypothesis context,
+  -- but the stronger checked-publication gate must reject that context-
+  -- dependent syntax rather than silently treating it as global evidence.
+  let localName := c0CertificateName "contextProof"
+  let scopedLocals := psKernelLocalContextAddLocal
+    initial.raw.checker.context.localContext localName localName
+    (.sort (.succ .zero)) .default
+  let scopedSession : PsKernelCheckerSession := {
+    initial.raw.checker with
+    context := { initial.raw.checker.context with
+      localContext := scopedLocals }
+  }
+  let scopedRaw : PsKernelC0ArchitectureWork := {
+    initial.raw with checker := scopedSession
+  }
+  let some scopedWork := psKernelC0ArchitectureCertifyWork scopedRaw
+    | throw (IO.userError "valid local scope did not certify")
+  let some openStage := psKernelC0CertifiedWorkStage
+      scopedWork (.fvar localName)
+    | throw (IO.userError "typed local syntax could not be staged")
+  match psKernelC0CertifiedWorkCheck 4096 openStage (.fvar localName) with
+  | .error err =>
+      throw (IO.userError ("locally typed free variable unexpectedly failed: " ++ err))
+  | .ok _ => pure ()
+  match psKernelC0CertifiedWorkCommitChecked 4096 openStage with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "checked publication leaked a local hypothesis")
+  let levelName := c0CertificateName "undeclaredLevel"
+  let some invalidLevelStage := psKernelC0CertifiedWorkStage initial
+      (.sort (.param levelName))
+    | throw (IO.userError "undeclared universe syntax stage was rejected")
+  match psKernelC0CertifiedWorkCommitChecked 4096 invalidLevelStage with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "checked publication leaked an undeclared universe")
   let some staged := psKernelC0CertifiedWorkStage initial (.bvar 0)
     | throw (IO.userError "ill-typed syntax should be stageable")
   let _stageValid : psKernelC0ArchitectureWorkValid staged.raw = true :=

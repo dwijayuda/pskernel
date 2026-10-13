@@ -261,3 +261,31 @@ def psKernelC0ScratchStageBoundRoot
       let actual ← psKernelC0DecodeExpr next.working root
       if psKernelExprEqual expression actual then some (next, root)
       else none
+
+/-- Import a list of independently owned syntax roots into one checked
+    canonical snapshot. Foreign Nat handles are *never* interpreted against
+    the destination. Staging is immutable and the final promotion is atomic:
+    any malformed root fails the entire import without changing the input.
+    Repeated roots retain canonical sharing and source order. This is solely
+    a representation boundary, not a kernel judgment or a StoreWF proof. -/
+def psKernelC0ScratchImportBoundRoots
+    (persistent : PsKernelC0TermStore)
+    (sources : List PsKernelC0BoundRoot) :
+    Option (PsKernelC0TermStore × List Nat) := do
+  if !psKernelC0ReplayValidateStore persistent then none
+  else do
+    let mut scratch := psKernelC0ScratchBegin persistent
+    let mut stagedIds : List Nat := []
+    for bound in sources do
+      let (next, id) ← psKernelC0ScratchStageBoundRoot scratch bound
+      scratch := next
+      stagedIds := id :: stagedIds
+    let (committed, outputs) ←
+      psKernelC0ScratchPromoteVerifiedRoots scratch stagedIds.reverse
+    if outputs.length != sources.length then none
+    else do
+      for (bound, id) in sources.zip outputs do
+        let original ← psKernelC0BoundRootRead bound
+        let copied ← psKernelC0DecodeExpr committed id
+        if !psKernelExprEqual original copied then none
+      some (committed, outputs)

@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Delta
+import Ps.KernelCore.Architecture.Structural
 import Ps.KernelCore.Admission.Declaration.Admission
 
 def c0DeltaName (name : String) : PsKernelName :=
@@ -25,6 +25,21 @@ def c0DeltaNatLit (n : Nat) : PsKernelExpr := .lit (.nat n)
 def c0DeltaNatBinary
     (name : PsKernelName) (a b : PsKernelExpr) : PsKernelExpr :=
   .app (.app (.const name []) a) b
+
+/-- Bounded constructor/local-context source differential: syntax can
+    be untrusted, but the source checker remains the WHNF oracle. -/
+def c0StructuralCheck
+    (label : String)
+    (session : PsKernelCheckerSession)
+    (input expected : PsKernelExpr) : IO Unit := do
+  match psKernelC0ArchitectureObserveStructural 4096 session input with
+  | .error reason =>
+      throw (IO.userError (label ++ ": source structural WHNF failed: " ++ reason))
+  | .ok (observation, _) =>
+      if !observation.agrees ||
+          !psKernelExprEqual observation.sourceValue expected ||
+          !observation.candidateValue.any (psKernelExprEqual expected) then
+        throw (IO.userError (label ++ ": structural/source disagreement"))
 
 def main : IO Unit := do
   let type := PsKernelExpr.sort (.succ .zero)
@@ -245,6 +260,77 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ =>
       throw (IO.userError "Nat candidate accepted exhausted execution fuel")
+
+  -- CDE-3: a local let is unfolded, while a local hypothesis is neutral.
+  let localName := c0DeltaName "C0LocalLet"
+  let letContext := psKernelLocalContextAddLet
+    session.context.localContext localName localName type (.const first [])
+  let localSession : PsKernelCheckerSession := {
+    session with context := { session.context with localContext := letContext }
+  }
+  c0StructuralCheck "local-let-to-delta" localSession
+    (.fvar localName) sort
+  let localHypothesis := c0DeltaName "C0LocalHypothesis"
+  let hypothesisContext := psKernelLocalContextAddLocal
+    letContext localHypothesis localHypothesis type .default
+  let hypothesisSession : PsKernelCheckerSession := {
+    session with context := {
+      session.context with localContext := hypothesisContext
+    }
+  }
+  c0StructuralCheck "local-hypothesis-neutral" hypothesisSession
+    (.fvar localHypothesis) (.fvar localHypothesis)
+  -- A shadowing hypothesis must block an older let of the same name.
+  let shadowContext := psKernelLocalContextAddLocal
+    letContext localName localName type .default
+  let shadowSession : PsKernelCheckerSession := {
+    session with context := { session.context with localContext := shadowContext }
+  }
+  c0StructuralCheck "shadowed-local-let-neutral" shadowSession
+    (.fvar localName) (.fvar localName)
+
+  -- The checked source helper owns constructor membership and parameter
+  -- offset. This fixture injects metadata only for WHNF differential tests;
+  -- it must never be used as a declaration-admission acceptance fixture.
+  let pairType := c0DeltaName "C0ProjectionPair"
+  let ctorName := c0DeltaName "C0ProjectionPair.mk"
+  let ctorInfo : PsKernelConstructorInfo := {
+    base := { name := ctorName, levelParams := [], type := type }
+    induct := pairType
+    cidx := 0
+    numParams := 1
+    numFields := 2
+    isUnsafe := false
+  }
+  let ctorEnv := psKernelEnvironmentAddUnchecked env2 (.ctorInfo ctorInfo)
+  let ctorSession := psKernelMkCheckerSession ctorEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let pairValue : PsKernelExpr :=
+    .app (.app (.app (.const ctorName []) sort)
+      (c0DeltaNatLit 11)) (c0DeltaNatLit 22)
+  c0StructuralCheck "projection-field-zero-with-parameter"
+    ctorSession (.proj pairType 0 pairValue) (c0DeltaNatLit 11)
+  c0StructuralCheck "projection-field-one-with-parameter"
+    ctorSession (.proj pairType 1 pairValue) (c0DeltaNatLit 22)
+  let badType := c0DeltaName "C0UnrelatedStructure"
+  c0StructuralCheck "projection-wrong-type-remains-neutral"
+    ctorSession (.proj badType 1 pairValue) (.proj badType 1 pairValue)
+  c0StructuralCheck "projection-invalid-field-remains-neutral"
+    ctorSession (.proj pairType 3 pairValue) (.proj pairType 3 pairValue)
+  let recordBinder := c0DeltaName "record"
+  let projectionLambda : PsKernelExpr :=
+    .lam recordBinder type (.proj pairType 1 (.bvar 0)) .default
+  c0StructuralCheck "projection-captured-beta-scrutinee"
+    ctorSession (.app projectionLambda pairValue) (c0DeltaNatLit 22)
+  c0StructuralCheck "projection-captured-zeta-scrutinee"
+    ctorSession (.letE recordBinder type pairValue
+      (.proj pairType 0 (.bvar 0)) false) (c0DeltaNatLit 11)
+  match psKernelC0ArchitectureCandidateStructural 0 ctorSession.context
+      (.proj pairType 1 pairValue) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "structural candidate accepted exhausted fuel")
+  IO.println "C0_ARCHITECTURE local_let_constructor_projection_differential=pass"
   IO.println "C0_ARCHITECTURE checked_delta_and_closure_spine_differential=pass"
   IO.println "C0_ARCHITECTURE bounded_nat_literal_spine_differential=pass"
   IO.println "C0_ARCHITECTURE opaque_and_resource_boundaries=pass"

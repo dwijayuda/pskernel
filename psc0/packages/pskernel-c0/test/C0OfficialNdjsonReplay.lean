@@ -811,6 +811,33 @@ def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
       | .ok next => state := next
   return c0ExportFinish state
 
+/-- Bounded expression rendering for test-only DefEq mismatch investigation.
+    The kernel and its proof receipts never consult these summaries. -/
+def c0ExportMismatchTerm : Nat → PsKernelExpr → String
+  | 0, _ => "…"
+  | _ + 1, .const name _ => psKernelMutualDiagnosticName name
+  | _ + 1, .fvar name => "fvar:" ++ psKernelMutualDiagnosticName name
+  | _ + 1, .mvar name => "mvar:" ++ psKernelMutualDiagnosticName name
+  | _ + 1, .bvar idx => "#" ++ toString idx
+  | _ + 1, .sort _ => "Sort"
+  | n + 1, .app fn arg =>
+      "(" ++ c0ExportMismatchTerm n fn ++ " " ++
+      c0ExportMismatchTerm n arg ++ ")"
+  | n + 1, .forallE _ ty body _ =>
+      "(Pi " ++ c0ExportMismatchTerm n ty ++ ". " ++
+      c0ExportMismatchTerm n body ++ ")"
+  | n + 1, .lam _ ty body _ =>
+      "(Lam " ++ c0ExportMismatchTerm n ty ++ ". " ++
+      c0ExportMismatchTerm n body ++ ")"
+  | n + 1, .letE _ ty _ body _ =>
+      "(Let :" ++ c0ExportMismatchTerm n ty ++ ". " ++
+      c0ExportMismatchTerm n body ++ ")"
+  | _ + 1, .lit _ => "literal"
+  | n + 1, .mdata _ body => c0ExportMismatchTerm n body
+  | n + 1, .proj name idx value =>
+      "(Proj " ++ psKernelMutualDiagnosticName name ++ "." ++
+      toString idx ++ " " ++ c0ExportMismatchTerm n value ++ ")"
+
 /-- Only invoked *after* authoritative rejection, never for admission.
     Diagnose whether the theorem's type or proof body failed and compare the
     optimized checked-application engine against its original source-owned
@@ -844,6 +871,26 @@ def c0ExportDiagnosticTheoremMismatch
               | .error historical =>
                   IO.println
                     ("C0_REAL_THEOREM_REFERENCE_CHECK=rejected " ++ historical)
+                  -- A first false DefEq comparison is a diagnostic candidate,
+                  -- not necessarily the final source of the failed theorem.
+                  -- This re-evaluation is never used for admission.
+                  let witnessDefEq := fun
+                      (ctx : PsKernelCheckerContext)
+                      (st : PsKernelCheckerState)
+                      (left right : PsKernelExpr) =>
+                    match defeq ctx st left right with
+                    | .ok (false, _) =>
+                        .error ("first-false lhs=" ++
+                          c0ExportMismatchTerm 7 left ++
+                          " rhs=" ++ c0ExportMismatchTerm 7 right)
+                    | result => result
+                  let witnessWhnf := psKernelWhnfWithRecursorFuel fuel witnessDefEq
+                  match psKernelInferCoreWithFuel fuel witnessWhnf witnessDefEq
+                      proofSession.context proofSession.state info.value false with
+                  | .ok _ =>
+                      IO.println "C0_REAL_THEOREM_FIRST_FALSE=none"
+                  | .error reason =>
+                      IO.println ("C0_REAL_THEOREM_FIRST_FALSE=" ++ reason)
 
 /-- Result and one-based physical NDJSON record count, including a
     failed record. This is a diagnostic, never a proof receipt. -/

@@ -21,7 +21,7 @@ def main : IO Unit := do
   let some genesis := psKernelC0AuditedSourceBegin
       4096 psKernelLeanNatMaxSizeDefault []
     | throw (IO.userError "audited empty source genesis declined")
-  if !psKernelC0HistoryOrdinaryAxioms genesis.trusted.history |>.isEmpty then
+  if !(psKernelC0HistoryOrdinaryAxioms genesis.trusted.history).isEmpty then
     throw (IO.userError "empty checked genesis unexpectedly assumed an axiom")
   let firstName := c0AuditedName "ReviewedAxiom"
   let secondName := c0AuditedName "UnapprovedAxiom"

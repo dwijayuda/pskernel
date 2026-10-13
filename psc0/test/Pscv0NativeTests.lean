@@ -1920,10 +1920,11 @@ private def derivingBoundaries : IO Unit := do
   let batch ← match ← PsV7Native.runBatch (#[projection] ++ requests) with
     | .ok batch => pure batch
     | .error error => throw (IO.userError ("deriving host prelude: " ++ error.message))
-  match batch.results[0]? with
-  | some (.ok _) => pure ()
-  | some (.error error) => throw (IO.userError ("projection universe inference: " ++ error.message))
-  | none => throw (IO.userError "projection qualification missing")
+  let some projectionResult := batch.results[0]?
+    | throw (IO.userError "projection qualification missing")
+  match projectionResult with
+  | .ok _ => pure ()
+  | .error error => throw (IO.userError ("projection universe inference: " ++ error.message))
   for result in batch.results.toList.drop 1 do
     match result with
     | .error error =>

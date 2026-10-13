@@ -62,6 +62,19 @@ private def psKernelC0CertifiedWorkWithSession
       exact work.owned
   }
 
+/-- Change ONLY the source-checker state and retain an explicit
+    equality witness that the immutable environment was not replaced.
+    Source-authoritative query paths may reuse this to preserve checked
+    admission history without rebuilding the canonical store certificate. -/
+def psKernelC0CertifiedWorkWithStateOwned
+    (work : PsKernelC0CertifiedWork)
+    (state : PsKernelCheckerState) :
+    { next : PsKernelC0CertifiedWork //
+      next.raw.checker.context.environment =
+        work.raw.checker.context.environment } :=
+  ⟨psKernelC0CertifiedWorkWithSession work
+    { work.raw.checker with state := state }, rfl⟩
+
 /-- Every validated work transaction now carries the exact full
     mathematical StoreWF proof for its CURRENT immutable working snapshot.
     It is retained without rechecking on source operations that change

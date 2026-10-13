@@ -607,48 +607,59 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
 /-- Independent post-admission comparison with all emitted inductive,
     constructor and recursor metadata. No exported derived item gets admitted
     unchecked; any divergence declines the input and preserves the old env. -/
+/-- Independent metadata fidelity: each exported generated declaration
+    must exactly match a declaration produced by native kernel admission.
+    Report the first mismatching *field family* for real-library conformance
+    diagnostics; no comparison here grants typing or admits an export axiom. -/
 def c0ExportVerifyOrdinaryInductive
     (env : PsKernelEnvironment) (group : C0ExportInductiveGroup) :
     Except String Unit := do
   for expected in group.expectedTypes do
-    let some (.inductInfo ty) :=
+    let some (.inductInfo got) :=
         psKernelEnvironmentFind env expected.base.name
       | throw "unsupported generated inductive type missing"
-    if !c0ExportSameBase ty.base expected.base ||
-        ty.numParams != expected.numParams ||
-        ty.numIndices != expected.numIndices ||
-        ty.numNested != expected.numNested ||
-        ty.isRec != expected.isRec ||
-        ty.isReflexive != expected.isReflexive ||
-        ty.isUnsafe != expected.isUnsafe ||
-        !c0ExportSameNames ty.all expected.all ||
-        !c0ExportSameNames ty.ctors expected.ctors then
-      throw "unsupported generated inductive metadata differs from exporter"
+    if !c0ExportSameBase got.base expected.base then
+      throw "unsupported generated inductive name/universes/type mismatch"
+    if got.numParams != expected.numParams ||
+        got.numIndices != expected.numIndices ||
+        got.numNested != expected.numNested then
+      throw "unsupported generated inductive parameter/index/nested count mismatch"
+    if got.isRec != expected.isRec ||
+        got.isReflexive != expected.isReflexive ||
+        got.isUnsafe != expected.isUnsafe then
+      throw "unsupported generated inductive recursion/reflexivity/safety mismatch"
+    if !c0ExportSameNames got.all expected.all ||
+        !c0ExportSameNames got.ctors expected.ctors then
+      throw "unsupported generated inductive family/constructor manifest mismatch"
   for expectedCtor in group.expectedCtors do
     let some (.ctorInfo got) :=
         psKernelEnvironmentFind env expectedCtor.base.name
       | throw "unsupported generated constructor missing"
-    if !c0ExportSameBase got.base expectedCtor.base ||
-        !psKernelNameEq got.induct expectedCtor.induct ||
+    if !c0ExportSameBase got.base expectedCtor.base then
+      throw "unsupported generated constructor name/universes/type mismatch"
+    if !psKernelNameEq got.induct expectedCtor.induct ||
         got.cidx != expectedCtor.cidx ||
         got.numParams != expectedCtor.numParams ||
         got.numFields != expectedCtor.numFields ||
         got.isUnsafe != expectedCtor.isUnsafe then
-      throw "unsupported generated constructor metadata differs from exporter"
+      throw "unsupported generated constructor owner/index/fields/safety mismatch"
   for expectedRec in group.expectedRecs do
     let some (.recInfo got) :=
         psKernelEnvironmentFind env expectedRec.base.name
       | throw "unsupported generated recursor missing"
-    if !c0ExportSameBase got.base expectedRec.base ||
-        !c0ExportSameNames got.all expectedRec.all ||
+    if !c0ExportSameBase got.base expectedRec.base then
+      throw "unsupported generated recursor name/universes/type mismatch"
+    if !c0ExportSameNames got.all expectedRec.all ||
         got.numParams != expectedRec.numParams ||
         got.numIndices != expectedRec.numIndices ||
         got.numMotives != expectedRec.numMotives ||
-        got.numMinors != expectedRec.numMinors ||
-        got.k != expectedRec.k ||
-        got.isUnsafe != expectedRec.isUnsafe ||
-        got.rules.length != expectedRec.rules.length then
-      throw "unsupported generated recursor metadata differs from exporter"
+        got.numMinors != expectedRec.numMinors then
+      throw "unsupported generated recursor family/arity mismatch"
+    if got.k != expectedRec.k ||
+        got.isUnsafe != expectedRec.isUnsafe then
+      throw "unsupported generated recursor K/safety mismatch"
+    if got.rules.length != expectedRec.rules.length then
+      throw "unsupported generated recursor reduction rule count mismatch"
     for (a, b) in got.rules.zip expectedRec.rules do
       if !psKernelNameEq a.ctor b.ctor ||
           a.nFields != b.nFields || !psKernelExprEq a.rhs b.rhs then

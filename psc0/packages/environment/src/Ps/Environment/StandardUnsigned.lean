@@ -21,7 +21,18 @@ def psStandardUnsignedScalarInstances : List (String × PsDeclaration) :=
       (psDecisionName ("PsStandard.instReprAtom" ++ owner)) []
       (psFormatClassType "ReprAtom" type)
       (.app (.constE (psDecisionName "ReprAtom.mk") [.zero]) type)
-    [("Inhabited", psStandardInhabitedGround owner type
+    -- Lean's general BEq fallback uses DecidableEq. Here each selected
+    -- UInt has an injective bounded-Nat model with a checked toNat method.
+    -- Comparing its canonical Nat representations via checked Nat.beq
+    -- preserves the upstream Boolean equality without importing unrelated
+    -- DecidableEq proof dependencies. All widths share this construction.
+    let equality := psLogicLam 0 "left" type
+      (psLogicLam 1 "right" type
+        (psOrderCall "Nat.beq"
+          [psOrderCall (owner ++ ".toNat") [.fvar 0],
+           psOrderCall (owner ++ ".toNat") [.fvar 1]]))
+    [("BEq", psStandardBEqInstance owner type equality),
+     ("Inhabited", psStandardInhabitedGround owner type
        (psOrderCall (owner ++ ".ofNat") [.lit (.natural 0)])),
      ("ToString", psStandardToStringInstance owner type printer),
      ("Repr", psFormatGroundInstance "Repr" ("Repr" ++ owner) type repr),

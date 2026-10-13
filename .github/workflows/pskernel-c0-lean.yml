@@ -18,6 +18,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureExecutionRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureWorkRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0ArchitectureDeltaRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0ArchitectureBudgetRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0PerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0CheckerComparison.lean'
       - 'psc0/packages/pskernel-c0/test/C0Ablation.py'

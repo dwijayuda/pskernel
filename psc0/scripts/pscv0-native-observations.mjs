@@ -262,6 +262,8 @@ export const observations = [
   { name: "generalizedSharedRuntime", args: null, expected: 1558n },
   { name: "syntheticDefaultRuntime", args: null, expected: 0n },
   { name: "syntheticExpectedRuntime", args: null, expected: false },
+  { name: "derivedExplicitDecision", args: [821n, 821n], expected: true },
+  { name: "derivedExplicitDecision", args: [821n, 823n], expected: false },
   { name: "derivedDecisionEqual", args: null, expected: true },
   { name: "derivedDecisionDifferent", args: null, expected: false },
   { name: "derivedDecisionTag", args: null, expected: false },

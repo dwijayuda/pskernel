@@ -274,6 +274,14 @@ def psKernelC0ArchitectureAdmit
     | .nestedInductive info =>
         psKernelAddSimpleNestedInductive fuel environment info
           prior.maxRecDepth prior.maxNatSize
-  let newSession := psKernelMkCheckerSession next
+  let freshSession := psKernelMkCheckerSession next
     prior.levelParams prior.safety prior.maxRecDepth prior.maxNatSize
+  -- Changing the environment invalidates all cached judgments, but it
+  -- must not silently change an explicitly selected reduction policy.
+  let newSession : PsKernelCheckerSession := {
+    freshSession with
+    context := {
+      freshSession.context with eagerReduce := prior.eagerReduce
+    }
+  }
   return { work with checker := newSession }

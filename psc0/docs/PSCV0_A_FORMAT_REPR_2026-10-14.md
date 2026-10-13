@@ -269,3 +269,9 @@ portable Numeric module now reproduces that universe-aware checked dictionary
 and records its level parameters in the instance index. General instance
 transparency remains unchanged. The existing Id observation covers the path;
 no duplicate fixture or special-case literal rewrite is added.
+
+Reviewed Id dictionary delta (one declaration/instance only), Linux38450100204:
+FNV fnv1a64:10063720084149863531; SHA-256
+sha256:eef203f0a5b182e3cc21330d1d39e670013e48b9aab48b6485f8d9eb89bafce5.
+Native build and oracle pass. Strict guard values updated to this exact roster;
+341 shared runtime observations and four panic contracts await qualification.

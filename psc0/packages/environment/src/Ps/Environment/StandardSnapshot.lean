@@ -180,7 +180,7 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- and deliberately changes with every intentional registered semantic update.
 -- The official kernel is still the authority for checking its declarations.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:2066895107454337978"
+  "fnv1a64:10063720084149863531"
 
 
 -- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing
@@ -353,7 +353,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:94a92697fa582ab59fd6b0e466a4dd68b8386f2503af16d703d5603f7b07644b"
+  "sha256:eef203f0a5b182e3cc21330d1d39e670013e48b9aab48b6485f8d9eb89bafce5"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do

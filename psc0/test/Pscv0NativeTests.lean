@@ -1205,6 +1205,32 @@ private def projectBoundaries : IO Unit := do
   unless cycle.result.value.isNone && cycle.table.visits == 2 &&
       !cycle.table.resourceExceeded do
     throw (IO.userError "unseeded cycle fabricated evidence or spun until exhaustion")
+  -- Private continuations retain assignments in local dictionary types,
+  -- even when those outputs do not occur in the final result class. Replaying
+  -- only the witness against the result type would lose these constraints.
+  let natType := PsExpr.constE psNatName []
+  let arrayType := psPreludeArrayOf natType
+  let elemMeta := psMetaFresh psMetaEmpty psLocalEmpty (.sortE (.succ .zero)) .natural
+  let validityType := psLogicPi 101 "xs" arrayType
+    (psLogicPi 102 "i" natType (.sortE .zero))
+  let validMeta := psMetaFresh elemMeta.context psLocalEmpty validityType .natural
+  let indexing := psLogicApply (.constE psStandardGetElemName [.zero, .zero, .zero])
+    [arrayType, natType, elemMeta.expr, validMeta.expr]
+  let ownedLocals := add (add psLocalEmpty "resolveOutput" (need indexing resultGoal))
+    "finish" (need resultGoal b)
+  let indexingOnly : PsInstanceIndex := {
+    entries := environment.instances.entries.filter fun entry =>
+      match entry.className with
+      | some name => psNameEq name psStandardGetElemName
+      | none => false }
+  let owned := psSynthInstanceWithTable environment ownedLocals indexingOnly
+    validMeta.context 64 b
+  let some ownedWitness := owned.result.value |
+    throw (IO.userError "owned instance continuation dropped local-type assignments")
+  unless psExprAlphaEq (psMetaInstantiate owned.result.context elemMeta.expr) natType &&
+      !psExprHasUnresolvedMeta (psMetaInstantiate owned.result.context validMeta.expr) &&
+      (psInstanceReplay environment ownedLocals owned.result.context b ownedWitness).isSome do
+    throw (IO.userError "owned instance assignments were not checked and returned")
   -- Each independent resource limit fails closed, as does evidence height.
   for limits in [
       ({ goals := 0 } : PsInstanceSearchLimits),

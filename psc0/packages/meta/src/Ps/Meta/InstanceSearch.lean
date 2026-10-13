@@ -2,12 +2,16 @@ import Ps.Meta.InstanceCandidate
 
 -- The table belongs to one environment, registry and synthesis invocation.
 -- A Pi introduction gets a distinct scope, even when local IDs coincide.
--- Only meta-closed evidence crosses snapshots. Generalized answers require
--- abstraction/freshening and are deliberately outside this first M2 slice.
+-- Only meta-closed evidence crosses unrelated snapshots. The creator of a
+-- generator owns its speculative context; later subscribers never adopt it.
+-- Generalized answers still require abstraction/freshening beyond this slice.
 structure PsInstanceTableAnswer where
   goal : PsExpr
   value : PsExpr
   height : Nat
+  -- Adopted only by the root or the unique subscription that created this
+  -- generator. Shared consumers replay value in their own saved context.
+  context : PsMetaContext
 
 def psInstanceMaxGoalVisits : Nat := 4096
 def psInstanceMaxCandidateChecks : Nat := 4096
@@ -54,6 +58,10 @@ inductive PsInstanceWaiter where
   | argument (consumer : PsInstanceConsumer) (id : Nat) (target : PsExpr)
   | abstraction (abstraction : PsInstanceAbstraction)
 
+structure PsInstanceSubscription where
+  waiter : PsInstanceWaiter
+  ownsContext : Bool
+
 structure PsInstanceGenerator where
   scope : Nat
   locals : PsLocalContext
@@ -63,12 +71,12 @@ structure PsInstanceGenerator where
   entries : List PsInstanceEntry
   opened : Bool := false
   answer : Option PsInstanceTableAnswer := none
-  waiters : List PsInstanceWaiter := []
+  waiters : List PsInstanceSubscription := []
 
 inductive PsInstanceWork where
   | generate (id : Nat)
   | consume (consumer : PsInstanceConsumer)
-  | resume (waiter : PsInstanceWaiter) (answer : PsInstanceTableAnswer)
+  | resume (subscription : PsInstanceSubscription) (answer : PsInstanceTableAnswer)
 
 structure PsInstanceSearchState where
   generators : Array PsInstanceGenerator := #[]
@@ -162,16 +170,18 @@ def psInstanceAwait (environment : PsEnvironment) (index : PsInstanceIndex)
     (state : PsInstanceSearchState) (scope : Nat) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) (waiter : PsInstanceWaiter) :
     PsInstanceSearchState :=
+  let priorSize := state.generators.size
   let (state, id) := psInstanceAcquire environment index state scope locals context target
   match id.bind (fun id => (state.generators[id]?).map (id, ·)) with
   | none => state
   | some (id, generator) =>
+    let subscription : PsInstanceSubscription := { waiter, ownsContext := decide (id >= priorSize) }
     match generator.answer with
-    | some answer => { state with work := .resume waiter answer :: state.work }
+    | some answer => { state with work := .resume subscription answer :: state.work }
     | none =>
       { state with
         generators := state.generators.setIfInBounds id
-          { generator with waiters := waiter :: generator.waiters }
+          { generator with waiters := subscription :: generator.waiters }
         table := { state.table with suspended := state.table.suspended + 1 } }
 
 def psInstancePublish (environment : PsEnvironment) (state : PsInstanceSearchState)
@@ -189,11 +199,11 @@ def psInstancePublish (environment : PsEnvironment) (state : PsInstanceSearchSta
       | some value =>
         let goal := psMetaInstantiate checked.context generator.target
         if psExprHasUnresolvedMeta goal then state else
-        let answer : PsInstanceTableAnswer := { goal, value, height }
+        let answer : PsInstanceTableAnswer := { goal, value, height, context := checked.context }
         -- Oldest waiters resume first, before alternative generator candidates.
-        let resumed := generator.waiters.reverse.filterMap fun waiter =>
-          if psInstanceOwnerAnswered state (psInstanceWaiterOwner waiter) then none
-          else some (PsInstanceWork.resume waiter answer)
+        let resumed := generator.waiters.reverse.filterMap fun subscription =>
+          if psInstanceOwnerAnswered state (psInstanceWaiterOwner subscription.waiter) then none
+          else some (PsInstanceWork.resume subscription answer)
         { state with
           generators := state.generators.setIfInBounds owner
             { generator with answer := some answer, waiters := [] }
@@ -279,8 +289,9 @@ def psInstanceConsume (environment : PsEnvironment) (index : PsInstanceIndex)
           consumer.context target (.argument { consumer with pending } id target)
 
 def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchState)
-    (waiter : PsInstanceWaiter) (answer : PsInstanceTableAnswer) :
+    (subscription : PsInstanceSubscription) (answer : PsInstanceTableAnswer) :
     PsInstanceSearchState :=
+  let waiter := subscription.waiter
   let owner := psInstanceWaiterOwner waiter
   match state.generators[owner]? with
   | none => state
@@ -291,7 +302,8 @@ def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchStat
     | .argument consumer id target =>
       let height := max consumer.height (answer.height + 1)
       if height > state.maxHeight then state else
-      match psInstanceReplay environment generator.locals consumer.context target answer.value with
+      let context := if subscription.ownsContext then answer.context else consumer.context
+      match psInstanceReplay environment generator.locals context target answer.value with
       | none => state
       | some checked =>
         match psMetaAssign checked.context id answer.value with
@@ -301,7 +313,8 @@ def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchStat
     | .abstraction abstraction =>
       let height := answer.height + 1
       if height > state.maxHeight then state else
-      match psInstanceReplay environment abstraction.locals generator.context
+      let context := if subscription.ownsContext then answer.context else generator.context
+      match psInstanceReplay environment abstraction.locals context
           abstraction.target answer.value with
       | none => state
       | some checked =>
@@ -344,5 +357,5 @@ def psSynthInstanceWithLimits (environment : PsEnvironment) (locals : PsLocalCon
     | some answer =>
       -- Selection ignores outputs; this final check intentionally cannot
       -- backtrack into lower-priority instances to satisfy a preferred output.
-      (psInstanceReplay environment locals context target answer.value).getD (psSynthFailure context)
+      (psInstanceReplay environment locals answer.context target answer.value).getD (psSynthFailure context)
   { result, table := final.table }

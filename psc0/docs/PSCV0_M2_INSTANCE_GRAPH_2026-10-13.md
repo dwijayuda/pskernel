@@ -25,9 +25,14 @@ elaboration into the portable closure.
 Ordered local/global candidates are unchanged. Output parameters/output-only
 universes are fresh for selection; callers reconcile against their original
 target only after an answer is selected. A mismatched preferred output cannot
-choose a lower-priority instance. Failed speculative assignments never escape:
-replay infers a meta-closed witness in the receiving context and unifies its
-actual type against that context's exact target. No donor context is imported.
+choose a lower-priority instance. Failed speculative assignments never escape. The first requester owns the new
+generator's snapshot and may commit its checked descendant context when it
+resumes. This preserves output constraints inside local dictionary types even
+when they do not appear in the result class. The root likewise commits only its
+selected branch. Later subscribers own unrelated snapshots: they receive only
+the meta-closed witness, re-infer it and unify its actual type against their exact
+target. A shared consumer never imports a donor context. Unresolved local
+signatures cannot share a generator, so ownership is unambiguous.
 
 Each Pi introduction owns a fresh local-instance scope. Sharing also checks that
 the instantiated local signature is closed and identical across snapshots.
@@ -43,7 +48,8 @@ Every exhausted resource fails closed and returns the original caller context.
 The returned table is diagnostics, not a caller-reusable cache.
 
 The compact native check contains one seeded cycle/diamond/conversion graph,
-one unseeded cycle, a Pi scope leak refusal, independent budget refusals, and
+one unseeded cycle, a Pi scope leak refusal, private-context output propagation,
+independent budget refusals, and
 repeated-dependency widths 1/8/32. Growth counters must show constant generators
 and candidate checks, with transitions linear in dependency edges. Existing
 output-priority, unknown-input, rollback, universe and M1 checks remain intact.

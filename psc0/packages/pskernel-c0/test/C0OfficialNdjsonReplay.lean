@@ -34,12 +34,14 @@ inductive C0ExportDeclaration where
   | theoremDecl (value : PsKernelTheoremInfo)
   | opaqueDecl (value : PsKernelOpaqueInfo)
   | inductiveGroup (value : C0ExportInductiveGroup)
+  | quotientDecl (value : PsKernelQuotInfo)
 
 structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
   levels : Array PsKernelLevel := #[.zero]
   exprs : Array PsKernelExpr := #[]
   declarations : List C0ExportDeclaration := []
+  quotientParts : Nat := 0
   header : Bool := false
 
 def c0JsonObj (j : Lean.Json) (key : String) : Except String Lean.Json :=
@@ -321,6 +323,36 @@ def c0ExportReadRecursor
 /-- A complete ordinary export block is reconstructed, never admitted by
     trusting its precomputed recursor or constructor declarations.
     Mutual/nested/safety variants remain explicit declines. -/
+/-- Exported Quot is four records, not four independent axioms. The
+    official native kernel initializes the whole package once after Eq is
+    checked. Each source record must agree with that generated environment. -/
+def c0ExportQuotKind (s : String) : Except String PsKernelQuotKind :=
+  match s with
+  | "type" => .ok .typeQ
+  | "ctor" => .ok .ctorQ
+  | "lift" => .ok .liftQ
+  | "ind" => .ok .indQ
+  | _ => .error "unsupported NDJSON quotient declaration kind"
+
+def c0ExportSameQuotKind (a b : PsKernelQuotKind) : Bool :=
+  match a, b with
+  | .typeQ, .typeQ => true
+  | .ctorQ, .ctorQ => true
+  | .liftQ, .liftQ => true
+  | .indQ, .indQ => true
+  | _, _ => false
+
+def c0ExportReadQuot
+    (st : C0ExportTables) (j : Lean.Json) :
+    Except String PsKernelQuotInfo := do
+  c0ExportOnlyKeys j ["name", "levelParams", "type", "kind"]
+  let name ← c0ExportName st (← c0JsonNat j "name")
+  let levels ← c0ExportNames st (← c0JsonObj j "levelParams")
+  let type ← c0ExportExpr st (← c0JsonNat j "type")
+  let kind ← c0ExportQuotKind (← c0JsonString j "kind")
+  return { base := { name := name, levelParams := levels, type := type },
+           kind := kind }
+
 def c0ExportReadInductiveGroup
     (st : C0ExportTables) (block : Lean.Json) :
     Except String C0ExportInductiveGroup := do
@@ -526,6 +558,18 @@ def c0ExportParseRecord
     let group ← c0ExportReadInductiveGroup st payload
     return { st with declarations :=
       .inductiveGroup group :: st.declarations }
+  if let .ok payload := c0JsonObj j "quot" then
+    c0ExportOnlyKeys j ["quot"]
+    let info ← c0ExportReadQuot st payload
+    let expected : List PsKernelQuotKind :=
+      [.typeQ, .ctorQ, .liftQ, .indQ]
+    let some orderedKind := expected[st.quotientParts]?
+      | throw "malformed NDJSON extra quotient declaration"
+    if !c0ExportSameQuotKind info.kind orderedKind then
+      throw "unsupported NDJSON noncanonical quotient declaration order"
+    return { st with
+      quotientParts := st.quotientParts + 1
+      declarations := .quotientDecl info :: st.declarations }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/
@@ -536,6 +580,8 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
       let record ← Lean.Json.parse line
       tables ← c0ExportParseRecord tables record
   if !tables.header then throw "NDJSON missing pinned metadata"
+  if tables.quotientParts != 0 && tables.quotientParts != 4 then
+    throw "malformed NDJSON incomplete quotient group"
   match tables.declarations with
   | [] => throw "NDJSON missing a supported declaration"
   | declarations => pure declarations.reverse
@@ -614,6 +660,8 @@ def c0ExportCheckOne
         | .mutual decl =>
             psKernelAddSimpleMutualInductive fuel env decl
               4096 psKernelLeanNatMaxSizeDefault
+    | .quotientDecl _ =>
+        psKernelAddQuot env
   match result with
   | .ok next =>
       match info with
@@ -621,6 +669,15 @@ def c0ExportCheckOne
           match c0ExportVerifyOrdinaryInductive next group with
           | .ok _ => .ok next
           | .error message => .error (.declinedUnsupported message)
+      | .quotientDecl expected =>
+          match psKernelEnvironmentFind next expected.base.name with
+          | some (.quotInfo got) =>
+              if c0ExportSameBase got.base expected.base &&
+                  c0ExportSameQuotKind got.kind expected.kind then .ok next
+              else .error (.declinedUnsupported
+                "exported quotient metadata differs from generated checked Quot")
+          | _ => .error (.declinedUnsupported
+              "exported quotient member missing from checked Quot environment")
       | _ => .ok next
   | .error message => .error (psKernelErrorFromMessage message)
 
@@ -708,6 +765,8 @@ def c0ExportStep
 
 def c0ExportFinish (state : C0ExportOnlineState) : C0ExportVerdict :=
   if !state.tables.header || state.checkedCount == 0 then .malformed
+  else if state.tables.quotientParts != 0 &&
+      state.tables.quotientParts != 4 then .malformed
   else .accepted
 
 /-- In-memory regression entry point shares the exact same step semantics

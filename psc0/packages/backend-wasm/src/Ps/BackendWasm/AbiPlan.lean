@@ -3,15 +3,16 @@ import Ps.BackendWasm.Component
 
 namespace PsWasm
 
-inductive AbiScalar where
-  | bool | char | word
-  deriving BEq
+abbrev AbiScalar := WitScalar
 
-def AbiScalar.wit : AbiScalar → String
-  | .bool => "bool" | .char => "char" | .word => "u32"
-
-def AbiScalar.byte : AbiScalar → UInt8
-  | .bool => 0x7f | .char => 0x74 | .word => 0x79
+-- The active integer scalar profile joins differing variant payload slots to
+-- i64, as required by Canonical ABI flatten_variant/join. Width is retained
+-- throughout planning; a scalar count alone cannot describe this signature.
+def abiJoinFlat : List PsWasmValueType → List PsWasmValueType → List PsWasmValueType
+  | [], ys => ys
+  | xs, [] => xs
+  | x :: xs, y :: ys =>
+    (match x, y with | .i32, .i32 => .i32 | _, _ => .i64) :: abiJoinFlat xs ys
 
 structure AbiField where
   name : String
@@ -45,7 +46,7 @@ structure AbiNode where
   shape : AbiShape
   size : Nat
   alignment : Nat
-  flat : Nat
+  flat : List PsWasmValueType
 
 structure AbiExport where
   semanticName : String
@@ -96,7 +97,7 @@ def abiTypeLabel : Nat → PsVerifiedIrType → Except String String
 
 def addAbiNode (node : AbiNode) : AbiM Nat := do
   let plan : AbiPlan ← get
-  if node.size > 2147483647 || node.flat > 65536 then
+  if node.size > 2147483647 || node.flat.length > 65536 then
     throw ("PSCV0-ABI-RESOURCE: boundary layout exceeds the memory32 profile: " ++ node.name)
   if let some (_, index) := plan.nodes.zipIdx.find? (fun p => p.1.key == node.key) then return index
   if plan.nodes.any (fun n => n.name == node.name) || plan.exports.any (fun e => e.foreignName == node.name) then
@@ -105,19 +106,19 @@ def addAbiNode (node : AbiNode) : AbiM Nat := do
   return plan.nodes.length
 
 def abiFieldsLayout (fields : List (String × Nat × PsVerifiedIrType)) :
-    AbiM (List AbiField × Nat × Nat × Nat) := do
+    AbiM (List AbiField × Nat × Nat × List PsWasmValueType) := do
   let plan : AbiPlan ← get
   let mut result : List AbiField := []
   let mut size := 0
   let mut alignment := 1
-  let mut flat := 0
+  let mut flat : List PsWasmValueType := []
   for ((name, node, formal), index) in fields.zipIdx do
     let child ← abiNode plan node
     let offset := abiAlign size child.alignment
     result := result ++ [{ name := witName name, node, offset, formal, index }]
     size := offset + child.size
     alignment := max alignment child.alignment
-    flat := flat + child.flat
+    flat := flat ++ child.flat
   if (result.map (·.name)).eraseDups.length != result.length then throw "PSCV0-WIT-NAME: field collision"
   return (result, abiAlign size alignment, alignment, flat)
 
@@ -138,21 +139,25 @@ def planAbiType (ir : PsVerifiedIrModule) :
     let make := fun shape size alignment flat =>
       addAbiNode { key, name, type, shape, size, alignment, flat }
     match type with
-    | .primitive .bool => make (.scalar .bool) 1 1 1
-    | .primitive .char => make (.scalar .char) 4 4 1
-    | .primitive .string => make .string 8 4 2
+    | .primitive .bool => make (.scalar .bool) 1 1 [.i32]
+    | .primitive .char => make (.scalar .char) 4 4 [.i32]
+    | .primitive .uint8 => make (.scalar .u8) 1 1 [.i32]
+    | .primitive .uint16 => make (.scalar .u16) 2 2 [.i32]
+    | .primitive .uint32 => make (.scalar .u32) 4 4 [.i32]
+    | .primitive .uint64 => make (.scalar .u64) 8 8 [.i64]
+    | .primitive .string => make .string 8 4 [.i32, .i32]
     | .primitive .nat =>
       let limbs ← addAbiNode {
         key := "@natural-limbs", name := "natural-limbs", type := .primitive .nat,
-        shape := .limbs, size := 8, alignment := 4, flat := 2 }
-      make (.natural limbs) 8 4 2
+        shape := .limbs, size := 8, alignment := 4, flat := [.i32, .i32] }
+      make (.natural limbs) 8 4 [.i32, .i32]
     | .primitive .int =>
       let negative ← child (.primitive .bool)
       let magnitude ← child (.primitive .nat)
-      make (.integer negative magnitude) 12 4 3
+      make (.integer negative magnitude) 12 4 [.i32, .i32, .i32]
     | .named "Array" [element] =>
       let element ← child element
-      make (.list element) 8 4 2
+      make (.list element) 8 4 [.i32, .i32]
     | .named runtimeName arguments =>
       if !((ir.foreignData.find? (fun p => p.1 == runtimeName)).map (·.2)).getD false then
         throw ("PSCV0-WIT-INVARIANT: dependent/proof-bearing data requires an explicit validating adapter: " ++ runtimeName)
@@ -169,7 +174,7 @@ def planAbiType (ir : PsVerifiedIrModule) :
         let mut cases : List AbiCase := []
         let mut payloadSize := 0
         let mut payloadAlignment := 1
-        let mut payloadFlat := 0
+        let mut payloadFlat : List PsWasmValueType := []
         for (ctor, tag) in i.constructors.zipIdx do
           let fields ← ctor.fields.mapM fun field => do
             return (field.name, ← child (← substitute i.typeParameters arguments field.type), field.type)
@@ -183,13 +188,13 @@ def planAbiType (ir : PsVerifiedIrModule) :
             name := witName ctor.name, constructor := constructorTypeName runtimeName ctor.name, fields, payload, tag }]
           payloadSize := max payloadSize size
           payloadAlignment := max payloadAlignment alignment
-          payloadFlat := max payloadFlat flat
+          payloadFlat := abiJoinFlat payloadFlat flat
         if (cases.map (·.name)).eraseDups.length != cases.length then throw "PSCV0-WIT-NAME: variant case collision"
         let tagSize := if cases.length <= 256 then 1 else if cases.length <= 65536 then 2 else 4
         let offset := abiAlign tagSize payloadAlignment
         let alignment := max tagSize payloadAlignment
         make (.variant runtimeName cases offset tagSize)
-          (abiAlign (offset + payloadSize) alignment) alignment (1 + payloadFlat)
+          (abiAlign (offset + payloadSize) alignment) alignment (.i32 :: payloadFlat)
     | .primitive .unit => throw "PSCV0-WIT-CAPABILITY: Unit/proof slots are omitted only as results"
     | _ => throw ("PSCV0-WIT-CAPABILITY: explicit foreign adapter required: " ++ name)
 
@@ -208,7 +213,7 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
       let plan : AbiPlan ← get
       let resultFlat ← (match result with
         | none => pure 0
-        | some n => (abiNode plan n).map AbiNode.flat : Except String Nat)
+        | some n => (abiNode plan n).map (fun node => node.flat.length) : Except String Nat)
       let foreignName := witName semanticName
       if plan.exports.any (fun e => e.foreignName == foreignName) ||
           plan.nodes.any (fun n => n.name == foreignName) then
@@ -217,8 +222,20 @@ def canonicalAbiPlan (ir : PsVerifiedIrModule) (exports : List (String × PsVeri
         semanticName, foreignName, target := d.name, parameters, result,
         parameterOffsets := fields.map (fun (field : AbiField) => field.offset), parameterSize := size,
         parameterAlignment := alignment,
-        indirectParameters := flat > 16, indirectResult := resultFlat > 1 : AbiExport }] }
+        indirectParameters := flat.length > 16, indirectResult := resultFlat > 1 : AbiExport }] }
   let (_, plan) ← action.run {}
   return plan
+
+def abiExportResultTypes (plan : AbiPlan) (e : AbiExport) : Except String (List PsWasmValueType) :=
+  match e.result with
+  | none => pure []
+  | some id => if e.indirectResult then pure [.i32] else (abiNode plan id).map (·.flat)
+
+def abiPostReturnIndex (plan : AbiPlan) (e : AbiExport) : Except String Nat := do
+  match ← abiExportResultTypes plan e with
+  | [] => pure 2
+  | [.i32] => pure 1
+  | [.i64] => pure 3
+  | _ => throw "PSCV0-ABI-PLAN: unsupported post-return signature"
 
 end PsWasm

@@ -60,9 +60,11 @@ def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
 -- Memory operations are admitted only in explicitly marked ABI modules.
 inductive PsWasmMemoryOp where
   | load32
+  | load64
   | load8
   | load16
   | store32
+  | store64
   | store8
   | store16
   | size
@@ -76,9 +78,11 @@ structure PsWasmMemoryInstruction where
   results : List PsWasmValueType
 
 def psWasmMemoryInstruction : PsWasmMemoryOp → PsWasmMemoryInstruction
+  | .load64 => { mnemonic := "i64.load", bytes := [41, 3, 0], parameters := [.i32], results := [.i64] }
   | .load32 => { mnemonic := "i32.load", bytes := [40, 2, 0], parameters := [.i32], results := [.i32] }
   | .load8 => { mnemonic := "i32.load8_u", bytes := [45, 0, 0], parameters := [.i32], results := [.i32] }
   | .load16 => { mnemonic := "i32.load16_u", bytes := [47, 1, 0], parameters := [.i32], results := [.i32] }
+  | .store64 => { mnemonic := "i64.store", bytes := [55, 3, 0], parameters := [.i32, .i64], results := [] }
   | .store32 => { mnemonic := "i32.store", bytes := [54, 2, 0], parameters := [.i32, .i32], results := [] }
   | .store8 => { mnemonic := "i32.store8", bytes := [58, 0, 0], parameters := [.i32, .i32], results := [] }
   | .store16 => { mnemonic := "i32.store16", bytes := [59, 1, 0], parameters := [.i32, .i32], results := [] }

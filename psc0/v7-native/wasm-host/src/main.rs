@@ -65,6 +65,14 @@ fn main() -> Result<()> {
         let boxed = Val::Record(vec![("value".into(), Val::Bool(true))]);
         invoke(&mut store, instance, "echo-box", &[boxed.clone()], boxed)?;
         invoke(&mut store, instance, "echo-char", &[Val::Char('🙂')], Val::Char('🙂'))?;
+        invoke(&mut store, instance, "echo-wide", &[Val::U64(u64::MAX)], Val::U64(u64::MAX))?;
+        invoke(&mut store, instance, "wide-result", &[Val::String("x".into())], Val::U64(u64::MAX))?;
+        let unsigned = Val::Record(vec![("narrow".into(), Val::U8(255)), ("wide".into(), Val::U64(u64::MAX))]);
+        invoke(&mut store, instance, "echo-unsigned-box", &[unsigned.clone()], unsigned)?;
+        for (case, value) in [("narrow", Val::U8(255)), ("wide", Val::U64(u64::MAX))] {
+            let choice = Val::Variant(case.into(), Some(Box::new(Val::Record(vec![("value".into(), value)]))));
+            invoke(&mut store, instance, "echo-unsigned-choice", &[choice.clone()], choice)?;
+        }
         let consume = lookup(&mut store, instance, "consume");
         consume.call(&mut store, &[Val::String("discarded".into())], &mut [])?;
         consume.post_return(&mut store)?;

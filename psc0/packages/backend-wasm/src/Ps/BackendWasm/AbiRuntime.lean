@@ -68,6 +68,8 @@ def abiMemoryRuntime : Except String (List RuntimeDefinition) := do
     ← emit "post_return" [("result", .i32)] [] []
       (seq [choice none (eq active (k 0)) trap (seq []),
         o (.globalSet 0) [k 16], o (.globalSet 1) [k 0]]),
+    ← emit "post_return_i64" [("result", .i64)] [] []
+      (c "__ps_abi_post_return" [k 0]),
     ← emit "post_return_void" [] [] []
       (c "__ps_abi_post_return" [k 0]),
     ← emit "usage" [] [.i32] [] cursor,

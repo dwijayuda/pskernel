@@ -168,6 +168,7 @@ def main (args : List String) : IO UInt32 := do
     match args with
     | ["--export-hash-foundation", output] =>
         exportHashFoundation (System.FilePath.mk output)
+        return 0
     | ["--export-unsigned-foundation", output] =>
         exportUnsignedFoundation (System.FilePath.mk output)
         return 0

@@ -71,12 +71,12 @@ def abiMarshalNode (plan : AbiPlan) (node : AbiNode) : Except String (List Runti
   let mut extras : List RuntimeDefinition := []
   let (readBody, writeBody) ← match node.shape with
     | .scalar scalar => do
-      let memoryOp := if scalar == .bool then PsWasmMemoryOp.load8 else .load32
-      let storeOp := if scalar == .bool then PsWasmMemoryOp.store8 else .store32
+      let memoryOp := scalar.loadOp
+      let storeOp := scalar.storeOp
       let validate := fun value => match scalar with
         | .bool => c "__ps_abi_check_bool" [value]
         | .char => c "__ps_abi_check_char" [value]
-        | .word => value
+        | _ => value
       pure (validate (o (.memory memoryOp) [pointer]), o (.memory storeOp) [pointer, validate value])
     | .string => do
       loadLocals := [("buffer", bytesType), ("count", .i32), ("data", .i32)]
@@ -175,7 +175,7 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
   | 0, _, _, _ => throw "PSCV0-ABI-RESOURCE: flattening traversal exhausted"
   | fuel + 1, id, pointer, values => do
     let node ← abiNode plan id
-    if values.length != node.flat then throw "PSCV0-ABI-PLAN: flat input arity"
+    if values.length != node.flat.length then throw "PSCV0-ABI-PLAN: flat input arity"
     let slot := fun (index : Nat) => (match values[index]? with
       | some value => pure value
       | none => throw "PSCV0-ABI-PLAN: missing flat slot" : Except String R)
@@ -185,8 +185,8 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
       for field in fields do
         let child ← abiNode plan field.node
         code := code ++ [← abiStoreFlat plan fuel field.node (offset pointer field.offset)
-          ((values.drop start).take child.flat)]
-        start := start + child.flat
+          ((values.drop start).take child.flat.length)]
+        start := start + child.flat.length
       return seq code
     match node.shape with
     | .scalar scalar =>
@@ -194,8 +194,8 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
       let value := match scalar with
         | .bool => c "__ps_abi_check_bool" [value]
         | .char => c "__ps_abi_check_char" [value]
-        | .word => value
-      return o (.memory (if scalar == .bool then .store8 else .store32)) [pointer, value]
+        | _ => value
+      return o (.memory scalar.storeOp) [pointer, value]
     | .string | .list _ | .limbs =>
       return seq [store pointer (← slot 0), store (offset pointer 4) (← slot 1)]
     | .natural limbs => abiStoreFlat plan fuel limbs pointer values
@@ -211,7 +211,15 @@ def abiStoreFlat (plan : AbiPlan) : Nat → Nat → R → List R → Except Stri
           | none => pure (seq [])
           | some id => do
             let child ← abiNode plan id
-            abiStoreFlat plan fuel id (offset pointer payloadOffset) ((values.drop 1).take child.flat)
+            -- Core variant slots use the joined width. Restore this case's
+            -- own signature before storing its canonical payload.
+            let payload := ((values.drop 1).zip (node.flat.drop 1)).zip child.flat
+            let converted ← payload.mapM fun ((value, joined), actual) =>
+              match joined, actual with
+              | .i64, .i32 => pure (o (.word .i32WrapI64) [value])
+              | .i32, .i32 | .i64, .i64 => pure value
+              | _, _ => throw "PSCV0-ABI-PLAN: unsupported flat scalar conversion"
+            abiStoreFlat plan fuel id (offset pointer payloadOffset) converted
         return (alternative.tag, body)
       -- Validate before narrowing the discriminant into its compact memory slot.
       return seq [cases.foldr (fun (n, body) rest => choice none (eq tag (k n)) body rest) trap,
@@ -221,9 +229,9 @@ def abiSingleResult (plan : AbiPlan) : Nat → Nat → R → Except String R
   | 0, _, _ => throw "PSCV0-ABI-RESOURCE: result flattening traversal exhausted"
   | fuel + 1, id, pointer => do
     let node ← abiNode plan id
-    if node.flat != 1 then throw "PSCV0-ABI-PLAN: result must have one flat slot"
+    if node.flat.length != 1 then throw "PSCV0-ABI-PLAN: result must have one flat slot"
     match node.shape with
-    | .scalar scalar => return o (.memory (if scalar == .bool then .load8 else .load32)) [pointer]
+    | .scalar scalar => return o (.memory scalar.loadOp) [pointer]
     | .variant _ _ _ tagSize =>
       return o (.memory (if tagSize == 1 then .load8 else if tagSize == 2 then .load16 else .load32)) [pointer]
     | .record _ fields | .payload fields =>
@@ -245,8 +253,8 @@ def abiExportWrapper (plan : AbiPlan) (e : AbiExport) : Except String RuntimeDef
     let pointer := if e.indirectParameters then offset (g "arguments") (e.parameterOffsets[index]?.getD 0)
       else g temporary
     if !e.indirectParameters then
-      let flatNames := (List.range node.flat).map fun i => name ++ "_" ++ toString i
-      parameters := parameters ++ flatNames.map fun n => (n, .i32)
+      let flatNames := (List.range node.flat.length).map fun i => name ++ "_" ++ toString i
+      parameters := parameters ++ flatNames.zip node.flat
       locals := locals ++ [(temporary, .i32)]
       prepare := prepare ++ [put temporary (abiAllocate (k node.size) (k node.alignment)),
         ← abiStoreFlat plan 4096 id pointer (flatNames.map g)]
@@ -262,8 +270,8 @@ def abiExportWrapper (plan : AbiPlan) (e : AbiExport) : Except String RuntimeDef
         put "result_pointer" (abiAllocate (k node.size) (k node.alignment)),
         ← abiWrite plan id (g "result_pointer") (g "result_value"),
         result]))
-  runtimeDefinition ("__ps_abi_export_" ++ e.target) parameters
-    (if e.result.isSome then [.i32] else []) locals body
+  let results ← abiExportResultTypes plan e
+  runtimeDefinition ("__ps_abi_export_" ++ e.target) parameters results locals body
 
 def addCanonicalAdapters (core : PsWasmModule) (names : LocalNames) (plan : AbiPlan) :
     Except String (PsWasmModule × LocalNames) := do
@@ -275,6 +283,7 @@ def addCanonicalAdapters (core : PsWasmModule) (names : LocalNames) (plan : AbiP
     ("__ps_abi_realloc", "__ps_abi_realloc"),
     ("__ps_abi_post_return", "__ps_abi_post_return"),
     ("__ps_abi_post_return_void", "__ps_abi_post_return_void"),
+    ("__ps_abi_post_return_i64", "__ps_abi_post_return_i64"),
     ("__ps_abi_usage", "__ps_abi_usage")]
   let core : PsWasmModule := {
     core with

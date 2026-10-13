@@ -32,6 +32,27 @@ for (const kind of ['', '.core']) {
 const bytes = await readFile(stem+'.core.wasm');
 const fresh = async () => (await WebAssembly.instantiate(bytes, {})).instance.exports;
 const api = await fresh();
+// i64 scalar results retain their width, including post-return. Variant
+// payload slots join u8/u64 to i64, then narrow for the selected u8 case.
+const wide = (1n << 64n) - 1n;
+assert.equal(BigInt.asUintN(64, api.echoWide(wide)), wide);
+api.__ps_abi_post_return_i64(wide);
+let unsignedResult = api.echoUnsignedBox(255, wide);
+let unsignedView = new DataView(api.memory.buffer);
+assert.equal(unsignedView.getUint8(unsignedResult), 255);
+assert.equal(unsignedView.getBigUint64(unsignedResult + 8, true), wide);
+api.__ps_abi_post_return(unsignedResult);
+for (const [tag, value] of [[0,255n],[1,wide]]) {
+  unsignedResult = api.echoUnsignedChoice(tag, value);
+  unsignedView = new DataView(api.memory.buffer);
+  assert.equal(unsignedView.getUint8(unsignedResult), tag);
+  assert.equal(tag === 0 ? BigInt(unsignedView.getUint8(unsignedResult+8))
+    : unsignedView.getBigUint64(unsignedResult+8,true), value);
+  api.__ps_abi_post_return(unsignedResult);
+}
+assert.equal(BigInt.asUintN(64,api.wideResult(0,0)),wide);
+api.__ps_abi_post_return_i64(wide);
+assert.equal(api.__ps_abi_usage(),16);
 const encoder = new TextEncoder(), decoder = new TextDecoder('utf8', {fatal:true});
 const text = 'é🙂'.repeat(16384), encoded = encoder.encode(text);
 let stablePages;

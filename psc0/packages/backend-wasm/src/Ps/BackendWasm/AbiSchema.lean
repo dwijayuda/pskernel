@@ -4,7 +4,7 @@ namespace PsWasm
 
 def abiPrimitive (node : AbiNode) : Option (String × UInt8) :=
   match node.shape with
-  | .scalar scalar => some (scalar.wit, scalar.byte)
+  | .scalar scalar => some (scalar.name, scalar.byte)
   | .string => some ("string", 0x73)
   | _ => none
 

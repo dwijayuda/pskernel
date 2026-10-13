@@ -600,3 +600,17 @@ was incorrect once UInt axioms became structures: old assets would see the
 new type without its constructor metadata. Core, scalar-arithmetic and unsigned
 stages now make that dependency explicit; no mutable/latest lookup is used to
 replay an earlier asset. Both regeneration comparisons remain mandatory.
+
+The Canonical ABI plan now retains a list of typed flat slots, replacing a
+count that implicitly meant i32. Unsigned scalars share one WIT descriptor;
+records concatenate slots and variants join differing integer slots to i64.
+Incoming joined slots are narrowed to the chosen case before canonical storage.
+Memory operations include explicit ABI-only 64-bit load/store; scalar results
+select a matching i32/i64 post-return signature. Pure scalar components remain
+memory-free; GC runtime storage has not moved to linear memory.
+
+Reference: WebAssembly/component-model design/mvp/CanonicalABI.md, sections
+alignment, element size, flatten_type, flatten_variant/join and lift_flat
+(read 14 October 2026); format qualification retains pinned wasm-tools 1.261.0
+and Wasmtime 49.0.2. Existing aggregate fixtures now also cover mixed u8/u64
+records, joined variants, and repeated i64 result/post-return lifetimes.

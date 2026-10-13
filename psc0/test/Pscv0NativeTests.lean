@@ -196,7 +196,7 @@ private def productUniverseFixture : String :=
 -- broken product instance matching or numeric result elaboration. Each
 -- request must be kernel accepted, with no fallback or silent omission.
 private def highUniverseHashableCases : IO Unit := do
-  let [prefix, _] := productUniverseFixture.splitOn "end ProductLevels\\n"
+  let [sourcePrefix, _] := productUniverseFixture.splitOn "end ProductLevels\\n"
     | throw (IO.userError "mixed-universe Hashable fixture lacks namespace terminator")
   let base := prefix ++ "end ProductLevels\\n"
   let samples := #[

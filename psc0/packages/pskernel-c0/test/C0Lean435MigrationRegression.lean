@@ -81,3 +81,28 @@ def main : IO Unit := do
   | Except.ok _ =>
       throw (IO.userError "C0 admitted undeclared legacy compiler-native marker")
   IO.println "C0_LEAN435 obsolete_native_admission_rejected=pass"
+
+  -- Lean 4.35 level.cpp::normalize distributes succ offsets over every
+  -- max branch. These closed-under-universe-parameter identities matter for
+  -- checking fields of real Init.Functor-style inductive declarations.
+  let univU : PsKernelLevel :=
+    .param (PsKernelName.str PsKernelName.anonymous "u")
+  let univV : PsKernelLevel :=
+    .param (PsKernelName.str PsKernelName.anonymous "v")
+  let sourceLevel : PsKernelLevel :=
+    .succ (.max (.succ univU) univV)
+  let distributedLevel : PsKernelLevel :=
+    .max (.succ (.succ univU)) (.succ univV)
+  if !psKernelLevelEquivalent sourceLevel distributedLevel ||
+      !psKernelLevelLe sourceLevel distributedLevel ||
+      !psKernelLevelLe distributedLevel sourceLevel ||
+      !psKernelLevelLe (.succ (.succ univU)) sourceLevel ||
+      !psKernelLevelLe (.succ univV) sourceLevel then
+    throw (IO.userError
+      "C0 did not normalize successor offsets across universe maxima")
+  if psKernelLevelLe (.succ (.succ (.succ univU))) sourceLevel ||
+      psKernelLevelLe sourceLevel (.succ (.succ univU)) ||
+      psKernelLevelLe sourceLevel (.succ univV) then
+    throw (IO.userError
+      "C0 universe maximum normalization falsely accepted strict inequality")
+  IO.println "C0_LEAN435 distributed_max_universe_offsets=pass"

@@ -252,8 +252,8 @@ private def unsignedOperatorSourceCases : IO Unit := do
       "String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y)]))")]
   let requests : Array PsV7Native.Request := syntax.map fun (_, resultType, expression) =>
     { source := "function operation(a: Nat, b: Nat): " ++ resultType ++
-        " := { let x: UInt8 := UInt8.ofNat(a)\\n let y: UInt8 := UInt8.ofNat(b)\\n " ++
-        expression ++ " }\\n" }
+        " := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n " ++
+        expression ++ " }\n" }
   let result ← PsV7Native.runBatch requests
   let batch ← match result with
     | .error error => throw (IO.userError ("unsigned source matrix: " ++ error.message))

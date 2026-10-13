@@ -18,9 +18,13 @@ frontend and does not silently drop mdata, FVar, MVar or inductive records.
 
 /-- Exporter metadata is never a kernel axiom: all generated entries must
     be reconstructed from checked inductive source and independently compared. -/
-structure C0ExportOrdinaryInductive where
-  source : PsKernelSimpleInductiveDecl
-  expectedType : PsKernelInductiveInfo
+inductive C0ExportInductiveSource where
+  | ordinary (decl : PsKernelSimpleInductiveDecl)
+  | mutual (decl : PsKernelSimpleMutualInductiveDecl)
+
+structure C0ExportInductiveGroup where
+  source : C0ExportInductiveSource
+  expectedTypes : List PsKernelInductiveInfo
   expectedCtors : List PsKernelConstructorInfo
   expectedRecs : List PsKernelRecursorInfo
 
@@ -29,7 +33,7 @@ inductive C0ExportDeclaration where
   | definition (value : PsKernelDefinitionInfo)
   | theoremDecl (value : PsKernelTheoremInfo)
   | opaqueDecl (value : PsKernelOpaqueInfo)
-  | ordinaryInductive (value : C0ExportOrdinaryInductive)
+  | inductiveGroup (value : C0ExportInductiveGroup)
 
 structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
@@ -319,7 +323,7 @@ def c0ExportReadRecursor
     Mutual/nested/safety variants remain explicit declines. -/
 def c0ExportReadOrdinaryInductive
     (st : C0ExportTables) (block : Lean.Json) :
-    Except String C0ExportOrdinaryInductive := do
+    Except String C0ExportInductiveGroup := do
   c0ExportOnlyKeys block ["types", "ctors", "recs"]
   let ts ← (← c0JsonObj block "types").getArr?
   let cs ← (← c0JsonObj block "ctors").getArr?
@@ -510,7 +514,7 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
     constructor and recursor metadata. No exported derived item gets admitted
     unchecked; any divergence declines the input and preserves the old env. -/
 def c0ExportVerifyOrdinaryInductive
-    (env : PsKernelEnvironment) (group : C0ExportOrdinaryInductive) :
+    (env : PsKernelEnvironment) (group : C0ExportInductiveGroup) :
     Except String Unit := do
   let some (.inductInfo ty) :=
       psKernelEnvironmentFind env group.expectedType.base.name

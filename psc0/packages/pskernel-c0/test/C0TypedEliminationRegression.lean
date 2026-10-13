@@ -41,6 +41,52 @@ def c0TypedBoxDecl : PsKernelSimpleInductiveDecl := {
   numParams := 0
 }
 
+def c0TypedEvenName : PsKernelName := c0TypedName "C0VerifiedEven"
+def c0TypedOddName : PsKernelName := c0TypedName "C0VerifiedOdd"
+
+def c0TypedMutualDecl : PsKernelSimpleMutualInductiveDecl := {
+  levelParams := []
+  numParams := 0
+  types := [
+    {
+      name := c0TypedEvenName
+      type := .sort (.succ .zero)
+      ctors := [
+        { name := .str c0TypedEvenName "zero"
+          type := .const c0TypedEvenName [] },
+        { name := .str c0TypedEvenName "step"
+          type := .forallE .anonymous (.const c0TypedOddName [])
+            (.const c0TypedEvenName []) .default }
+      ]
+    },
+    {
+      name := c0TypedOddName
+      type := .sort (.succ .zero)
+      ctors := [
+        { name := .str c0TypedOddName "step"
+          type := .forallE .anonymous (.const c0TypedEvenName [])
+            (.const c0TypedOddName []) .default }
+      ]
+    }
+  ]
+  isUnsafe := false
+}
+
+def c0TypedNestedName : PsKernelName := c0TypedName "C0NestedDispatch"
+def c0TypedNestedDecl : PsKernelSimpleMutualInductiveDecl := {
+  levelParams := []
+  numParams := 0
+  types := [{
+    name := c0TypedNestedName
+    type := .sort (.succ .zero)
+    ctors := [{
+      name := .str c0TypedNestedName "mk"
+      type := .const c0TypedNestedName []
+    }]
+  }]
+  isUnsafe := false
+}
+
 def c0TypedExpectRecursor
     (environment : PsKernelEnvironment)
     (inductiveName : PsKernelName)
@@ -155,6 +201,37 @@ def main : IO Unit := do
           !psKernelExprEqual observation.sourceResult boxTerm then
         throw (IO.userError "K converted major of the wrong inductive family")
 
+  -- The same validated, atomic work transaction must handle generated
+  -- mutual recursors and the nested-family dispatcher—not just ordinary
+  -- inductives. These use real source admission, never synthetic metadata.
+  let mutualWork ← match psKernelC0ArchitectureAdmit 32768 boxWork
+      (.mutualInductive c0TypedMutualDecl) with
+    | .error reason =>
+        throw (IO.userError ("checked mutual admission failed: " ++ reason))
+    | .ok next => pure next
+  c0TypedExpectRecursor mutualWork.checker.context.environment
+    c0TypedEvenName false
+  c0TypedExpectRecursor mutualWork.checker.context.environment
+    c0TypedOddName false
+  let some (.ctorInfo evenCtorInfo) :=
+      psKernelEnvironmentFind mutualWork.checker.context.environment
+        (.str c0TypedEvenName "zero")
+    | throw (IO.userError "checked mutual ctor was not published")
+  if !psKernelNameEq evenCtorInfo.induct c0TypedEvenName then
+    throw (IO.userError "checked mutual ctor lost family ownership")
+  let nestedWork ← match psKernelC0ArchitectureAdmit 32768 mutualWork
+      (.nestedInductive c0TypedNestedDecl) with
+    | .error reason =>
+        throw (IO.userError ("checked nested dispatch failed: " ++ reason))
+    | .ok next => pure next
+  let some (.inductInfo _) :=
+      psKernelEnvironmentFind nestedWork.checker.context.environment
+        c0TypedNestedName
+    | throw (IO.userError "nested family dispatch did not publish checked type")
+  c0TypedExpectRecursor nestedWork.checker.context.environment
+    c0TypedNestedName false
+  -- A nested-dispatch singleton is not evidence for arbitrary genuine
+  -- nested inductives. This test proves source checked interface wiring.
   -- Duplicate admission, invalid declaration and ill-typed source terms
   -- must not mutate an accepted environment or promote candidate values.
   match psKernelC0ArchitectureAdmit 8192 boxWork
@@ -171,4 +248,5 @@ def main : IO Unit := do
       throw (IO.userError "quotient bootstrap accepted without checked Eq")
   IO.println "C0_TYPED verified_k_prop_source_admission=pass"
   IO.println "C0_TYPED verified_structure_eta_source_infer_defeq=pass"
+  IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
   IO.println "C0_TYPED checked_declaration_atomicity_and_source_authority=pass"

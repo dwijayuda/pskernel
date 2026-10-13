@@ -30,12 +30,22 @@ def psKernelC0HistoryOrdinaryAxioms :
       | _ =>
           psKernelC0HistoryOrdinaryAxioms earlier
 
+/-- Mathematical exact-name membership, with a decidable proof for
+    every ordinary axiom in the immutable source history. This deliberately
+    does not depend on the portable Boolean name comparator. -/
 def psKernelC0HistoryAxiomsApproved
     {env : PsKernelEnvironment}
     (history : PsKernelC0SourceEnvironmentHistory env)
-    (allowed : List PsKernelName) : Bool :=
-  (psKernelC0HistoryOrdinaryAxioms history).all
-    (fun name => psKernelNameMember name allowed)
+    (allowed : List PsKernelName) : Prop :=
+  (psKernelC0HistoryOrdinaryAxioms history).Forall
+    (fun name => name ∈ allowed)
+
+instance {env : PsKernelEnvironment}
+    (history : PsKernelC0SourceEnvironmentHistory env)
+    (allowed : List PsKernelName) :
+    Decidable (psKernelC0HistoryAxiomsApproved history allowed) := by
+  unfold psKernelC0HistoryAxiomsApproved
+  infer_instance
 
 /-- The authorization is a Lean proof about the complete immutable
     source-admission history, not about any cache or untrusted snapshot. -/
@@ -43,14 +53,14 @@ structure PsKernelC0AuditedSourceWork where
   trusted : PsKernelC0TrustedSourceWork
   allowedAxioms : List PsKernelName
   approved :
-    psKernelC0HistoryAxiomsApproved trusted.history allowedAxioms = true
+    psKernelC0HistoryAxiomsApproved trusted.history allowedAxioms
 
 def psKernelC0AuditTrustedSource
     (trusted : PsKernelC0TrustedSourceWork)
     (allowedAxioms : List PsKernelName) :
     Option PsKernelC0AuditedSourceWork :=
   if h : psKernelC0HistoryAxiomsApproved
-      trusted.history allowedAxioms = true then
+      trusted.history allowedAxioms then
     some {
       trusted := trusted
       allowedAxioms := allowedAxioms
@@ -70,7 +80,7 @@ def psKernelC0OrdinaryAxiomRequestApproved
     (request : PsKernelC0ArchitectureDeclaration)
     (allowed : List PsKernelName) : Bool :=
   match request with
-  | .axiomDecl info => psKernelNameMember info.base.name allowed
+  | .axiomDecl info => decide (info.base.name ∈ allowed)
   | _ => true
 
 /-- Verify the assumption policy BEFORE calling source admission, then
@@ -93,7 +103,7 @@ def psKernelC0AuditedSourceAdmit
 theorem psKernelC0AuditedSourceAxiomsApproved
     (work : PsKernelC0AuditedSourceWork) :
     psKernelC0HistoryAxiomsApproved
-      work.trusted.history work.allowedAxioms = true :=
+      work.trusted.history work.allowedAxioms :=
   work.approved
 
 /-- Source judgments do not add axioms, but a returned checked state must

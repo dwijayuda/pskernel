@@ -1,7 +1,8 @@
 # M1 collection indexing implementation design
 
-Status: List/Fin qualified at e73ce2bb / Linux 38384869133; Array qualified at
-af96aa40 / Linux 38386745772. Final M1 coherence/performance evidence is pending.
+Status: M1 fully qualified at c00e146b / Linux 38388627512.
+See [completion, acceptance and measured limits](PSCV0_M1_COMPLETION_2026-10-13.md).
+List/Fin and Array intermediate qualification remains in the historical work state.
 
 ## Reference and dependency order
 
@@ -50,7 +51,7 @@ The selected List element universe remains Type 0; Option and generic Fin
 adapters retain their explicit universe parameters. Do not call the selected
 List roster unrestricted host-library parity.
 
-## Array logical/runtime boundary (next)
+## Array logical/runtime boundary
 
 The opaque Array type and getD primitive cannot supply total proof access without
 an element or a new axiom. Replace the logical model with Lean's checked
@@ -99,8 +100,9 @@ indices, Fin bounds different from collection bounds, and both lawfulness
 dictionaries. Reject missing or false collection bounds. Preserve all previous
 runtime observations and all existing kernel, strict IR, JS/TS/Rust, V8 and
 Wasmtime gates. Review and pin each intentional Standard roster digest change.
-Final M1 still requires Array coverage and controlled representative performance
-comparisons; green List/Fin tests alone do not satisfy M1.
+Final qualification includes Array representation boundaries, adverse-dictionary
+coherence and controlled compiler/runtime comparisons. Detailed evidence and
+remaining performance limits are in the completion document.
 
 ## Final measurements and adverse dictionary checks
 

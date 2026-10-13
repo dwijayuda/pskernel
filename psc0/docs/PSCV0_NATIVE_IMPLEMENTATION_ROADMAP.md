@@ -1,6 +1,34 @@
 # PSCV0 v7 native implementation roadmap
 
-## Current qualified checkpoint — M1 coherence and measurements (13 October 2026)
+## Current qualified state — M1 complete; M2 + A next (13 October 2026)
+
+This section is authoritative for current status. Older sections below are
+historical checkpoints; their pending-M1 statements are superseded.
+
+- **Qualified executable:** `c00e146bd5c97788a4a6a39221849973aeafda84`.
+- **Green Linux CI:** [38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
+- **250 shared runtime observations**, four shared panic cases, official kernel,
+  independent RC4 oracle, negative/coherence and all existing backend gates passed.
+- **292 declarations / 14 classes / 52 instances**; **175 portable / 183 native modules**.
+- FNV: `fnv1a64:5949916575031563783`.
+- SHA-256: `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+
+M1 acceptance, selected universe/proof-automation scope, runtime-override ledger
+and measured compiler/runtime costs are recorded in
+[M1 completion evidence](PSCV0_M1_COMPLETION_2026-10-13.md). Generated JS still has substantial overhead
+versus native Lean (roughly 492–3357x in these small batch measurements).
+M1 completion does not establish performance parity, full M2/A/v7 completion,
+or formal compiler semantic preservation.
+
+**Accepted interleaving:** M2 with remaining A; M3 with B; M4 with C/D;
+final M5/E qualification. Collect E evidence and apply measured M5 improvements
+throughout. Next implement the shared instance-search architecture before
+expanding the Phase A handlers that rely on it. Preserve native portable Lean,
+official checking, GitHub source operations, Linux CI, branch/draft PR 109,
+Wasm GC internals and explicit ABI-only linear memory. No C5, pskernel-core
+or self-hosting.
+
+## Prior qualified checkpoint — M1 coherence and measurements (13 October 2026)
 
 - **Executable:** `6a6037c311f306d82e43221ed527c7326e5785dc`.
 - **Green Linux qualification:** [38387492672](https://github.com/dwijayuda/pskernel/actions/runs/38387492672).
@@ -274,7 +302,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 
 | Phase | Focus | Status and completion evidence |
 |---|---|---|
-| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** Current selected Standard **230 declarations / 14 classes / 40 instances**, FNV + SHA-256 gated, 198 shared observations. Qualified proof-carrying `GetElem`, Type-0 derived `GetElem?` from checked dependent `Decidable`, typed panic, and selected runtime results. Pending **generic `LawfulGetElem` proof**, faithful List/Array/Fin validity, Option universes, broader proof-producing index automation, further deriving/scalars/APIs and full notation/import/effect/assumption closure |
+| **A** | Pinned Standard environment, selected P0 language and runtime APIs | **In progress.** M1 indexing/universe/proof closure is qualified: 292 declarations / 14 classes / 52 instances, 250 observations. Remaining: broader deriving/scalars/APIs and comprehensive notation/import/effect/assumption manifest; develop these with M2 and later dependencies. |
 | **B** | Dependent and mutual data, elimination, strict positivity and total recursive programming | **Planned.** Complete heterogeneous index reasoning, dependent motives, nested/mutual inductives, recursive pattern matrices and well-founded/structural termination; refuse invalid/partial constructs |
 | **C** | General class-driven typed do, state, effectful control and explicit IO/FFI boundaries | **Planned.** Complete Monad/Except/State/Reader and selected transformers, mutable/erased state, loops/early returns, try/catch/finally, effect/capability evidence and all-target preservation |
 | **D** | Kernel-checked tactics, intrinsic specifications, VC generation and assurance ledger | **Planned.** Complete selected rewrite/simp/automation, RC4 given/requires/ensures/assert/invariant/decreasing, WP/VC proof attachment, and verified-emission block on *any* unresolved mandatory obligation |
@@ -285,7 +313,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 - **GetElem:** implement pinned RC4 `GetElem` and `GetElem?` with actual Prop-valued validity and Decidable/proof instances; `xs[i]` and `xs[i]'h` cannot discard proofs; `xs[i]?` returns Option safely; `xs[i]!` is a separately declared panic/default behavior, not a bounds proof. Do not confuse existing checked `List.get?` with the four forms.
 - **Deriving:** accepted selected trailing handlers `Inhabited`/`BEq`/`DecidableEq`/`Repr`/`Hashable` must produce genuine checked and registered definitions with generated-source provenance. Unsupported cases and arbitrary handlers fail closed.
 - **Scalars/libraries:** complete pinned `Float`/`Float32`/scientific, fixed-width/`BitVec` and selected arrays/bytes/string/collection conversions, then prove and execute target parity.
-- **Registry:** preserve the selected SHA-256 (`sha256:9c865069b931ad1bb44a9c4861cb9748964c99368d3a7e2c4f2c75e5a099d265`) and FNV (`fnv1a64:2902463666082847583`) roster drift gates; separately finish a comprehensive cryptographic RC4 module/notation/deriving/class/instance/tactic/effect/axiom manifest (not yet qualified). Recompute/approve intentional semantic changes; never silently overwrite a frozen expected hash.
+- **Registry:** preserve the current selected SHA-256 (`sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`) and FNV (`fnv1a64:5949916575031563783`) roster drift gates; separately finish a comprehensive cryptographic RC4 module/notation/deriving/class/instance/tactic/effect/axiom manifest (not yet qualified). Recompute/approve intentional semantic changes; never silently overwrite a frozen expected hash.
 
 ### Phase B detailed exit gate
 

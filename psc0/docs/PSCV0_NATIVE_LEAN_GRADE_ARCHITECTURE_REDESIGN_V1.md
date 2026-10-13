@@ -1,5 +1,12 @@
 # PSCV0 — Native Compiler Architecture Redesign v1
 
+**Current qualification (13 October 2026):** M1 is complete for its declared
+selected scope at `c00e146bd5c97788a4a6a39221849973aeafda84`,
+[Linux 38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
+See [acceptance and measured limits](PSCV0_M1_COMPLETION_2026-10-13.md).
+M2 and remaining A now interleave; full architecture and v7 remain incomplete.
+The implementation-status paragraphs below describe historical checkpoints.
+
 **Date:** 2026-10-13 · **State:** normative target architecture and migration plan, **not** an implementation-complete or verified claim.  
 **Branch:** `psc0/pscv0-v7-native-lean-v1` · **Baseline studied:** `b16ce3ae23cf04b330882d17d5bba15c5cd3fa88` · **Pinned upstream:** Lean `4.35.0-rc4`, commit `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.  
 **Execution constraints:** portable native `.lean` compiler, official Lean checker, GitHub-first / Linux CI, no pskernel-core, no self-hosting, no C5 migration, retain Wasm GC internals and explicit Canonical ABI adapters. Preserve history and existing external contracts; internal abstractions may be removed.

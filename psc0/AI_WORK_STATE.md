@@ -1,6 +1,34 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
-## Current qualified checkpoint — M1 coherence and measurements (13 October 2026)
+## Current qualified state — M1 complete; M2 + A next (13 October 2026)
+
+This section is authoritative for current status. Older sections below are
+historical checkpoints; their pending-M1 statements are superseded.
+
+- **Qualified executable:** `c00e146bd5c97788a4a6a39221849973aeafda84`.
+- **Green Linux CI:** [38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
+- **250 shared runtime observations**, four shared panic cases, official kernel,
+  independent RC4 oracle, negative/coherence and all existing backend gates passed.
+- **292 declarations / 14 classes / 52 instances**; **175 portable / 183 native modules**.
+- FNV: `fnv1a64:5949916575031563783`.
+- SHA-256: `sha256:f33d923e45baf8aa5dfa6755819737acabc09daf6d60934eb232133acaad069f`.
+
+M1 acceptance, selected universe/proof-automation scope, runtime-override ledger
+and measured compiler/runtime costs are recorded in
+[M1 completion evidence](docs/PSCV0_M1_COMPLETION_2026-10-13.md). Generated JS still has substantial overhead
+versus native Lean (roughly 492–3357x in these small batch measurements).
+M1 completion does not establish performance parity, full M2/A/v7 completion,
+or formal compiler semantic preservation.
+
+**Accepted interleaving:** M2 with remaining A; M3 with B; M4 with C/D;
+final M5/E qualification. Collect E evidence and apply measured M5 improvements
+throughout. Next implement the shared instance-search architecture before
+expanding the Phase A handlers that rely on it. Preserve native portable Lean,
+official checking, GitHub source operations, Linux CI, branch/draft PR 109,
+Wasm GC internals and explicit ABI-only linear memory. No C5, pskernel-core
+or self-hosting.
+
+## Prior qualified checkpoint — M1 coherence and measurements (13 October 2026)
 
 - **Executable:** `6a6037c311f306d82e43221ed527c7326e5785dc`.
 - **Green Linux qualification:** [38387492672](https://github.com/dwijayuda/pskernel/actions/runs/38387492672).
@@ -70,8 +98,8 @@ No C5, self-hosting or pskernel-core.
 
 Finish M1 first, then M2 with remaining A, M3 with B, M4 with C/D, and final
 M5/E qualification. Collect E evidence and apply measured M5 improvements
-throughout. The final M1 coherence/performance evidence is the active work;
-the Array checkpoint above is independently green. Preserve branch and draft
+throughout. M1 is fully qualified at c00e146b / Linux 38388627512.
+The next active work is M2 instance-search architecture with Phase A integration. Preserve branch and draft
 PR 109, native portable Lean, official checking, GitHub source operations and
 Linux CI. Wasm uses GC internally and linear memory only at explicit ABI boundaries.
 

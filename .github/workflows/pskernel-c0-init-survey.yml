@@ -75,6 +75,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          head -n 86383 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-first-mismatch.ndjson"
+          test "$(wc -l < "$RUNNER_TEMP/Init-first-mismatch.ndjson")" -eq 86383
           python3 - "$RUNNER_TEMP/Init-4.35.0.ndjson" <<'PY'
           import json
           import sys
@@ -238,7 +240,7 @@ jobs:
           output.write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
-      - name: Inspect first post-nested C0 application disagreement
+      - name: Preserve and inspect first post-nested C0 application disagreement
         shell: bash
         run: |
           set -euo pipefail
@@ -312,7 +314,7 @@ jobs:
           if line_num != target:
               raise RuntimeError("did not reach record 86383")
           PY
-      - name: Compare historical and optimized C0 theorem check on corrected source
+      - name: Record first false DefEq candidate in shared C0 theorem checking
         shell: bash
         run: |
           set -euo pipefail
@@ -337,6 +339,7 @@ jobs:
             ${{ runner.temp }}/Init-4.35.0-survey.json
             ${{ runner.temp }}/Init-first-inductive.ndjson
             ${{ runner.temp }}/Init-first-nested.ndjson
+            ${{ runner.temp }}/Init-first-mismatch.ndjson
             ${{ runner.temp }}/first-inductive-official.txt
             ${{ runner.temp }}/leanchecker-result.txt
             ${{ runner.temp }}/c0-real-init-435-result.txt

@@ -84,6 +84,9 @@ jobs:
       - name: C0 architecture-first delta closure comparison (non-accepting)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureDeltaRegression.lean
+      - name: C0 architecture-first bounded readback quota and source authority
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0ArchitectureBudgetRegression.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

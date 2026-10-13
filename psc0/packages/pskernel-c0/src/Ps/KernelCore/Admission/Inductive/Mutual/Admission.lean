@@ -57,7 +57,7 @@ def psKernelAddSimpleMutualInductive
           psKernelCheckFreshInductiveNames
             allNames
             environment with
-      | Except.error (psKernelMutualBudgetAt "recursor-validation" error) =>
+      | Except.error error =>
           Except.error error
       | Except.ok _ =>
           match
@@ -108,8 +108,8 @@ def psKernelAddSimpleMutualInductive
                                 fuel
                                 firstSession
                                 first.type with
-                          | Except.error (psKernelMutualBudgetAt "first-type-check" error) =>
-                              Except.error error
+                          | Except.error error =>
+                              Except.error (psKernelMutualBudgetAt "first-type-check" error)
                           | Except.ok firstTypeType =>
                               match
                                   psKernelSessionEnsureSort
@@ -133,8 +133,8 @@ def psKernelAddSimpleMutualInductive
                                             fuel
                                             paramResult.session
                                             paramResult.result with
-                                      | Except.error (psKernelMutualBudgetAt "header-indices" error) =>
-                                          Except.error error
+                                      | Except.error error =>
+                                          Except.error (psKernelMutualBudgetAt "header-indices" error)
                                       | Except.ok firstIndices =>
                                           match firstIndices.result with
                                           | PsKernelExpr.sort resultLevel =>
@@ -156,8 +156,8 @@ def psKernelAddSimpleMutualInductive
                                                     paramResult.session
                                                     params
                                                     resultLevel with
-                                              | Except.error (psKernelMutualBudgetAt "remaining-types" error) =>
-                                                  Except.error error
+                                              | Except.error error =>
+                                                  Except.error (psKernelMutualBudgetAt "remaining-types" error)
                                               | Except.ok tailShapes =>
                                                   let typeShapes :=
                                                     List.cons
@@ -185,8 +185,8 @@ def psKernelAddSimpleMutualInductive
                                                         paramResult.session
                                                         work0
                                                         0 with
-                                                  | Except.error (psKernelMutualBudgetAt "constructor-family" error) =>
-                                                      Except.error error
+                                                  | Except.error error =>
+                                                      Except.error (psKernelMutualBudgetAt "constructor-family" error)
                                                   | Except.ok ctorResult =>
                                                       let ctorShapes :=
                                                         ctorResult.shapes;
@@ -284,7 +284,7 @@ def psKernelAddSimpleMutualInductive
                                                                     ctorShapes
                                                                     0 with
                                                               | Except.error error =>
-                                                                  Except.error error
+                                                                  Except.error (psKernelMutualBudgetAt "recursor-validation" error)
                                                               | Except.ok _ =>
                                                                   Except.ok
                                                                     work2

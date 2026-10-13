@@ -53,6 +53,10 @@ G: prove source/optimized denotation, substitution/reification, canonical-store 
 
 The architecture-first route has moved beyond planning. `Architecture/Execution.lean` now contains explicit control closures, delayed binder environments and an argument-spine machine for small syntactic β/ζ/metadata WHNF. `Architecture/Work.lean` implements an exact validated scratch syntax transaction, source-authoritative preview/check and atomic declaration admission through the existing checked kernel, with fresh session caches after environment changes. New `C0ArchitectureExecutionRegression.lean` and `C0ArchitectureWorkRegression.lean` run as mandatory native CI steps. Passing their small coherent source-differential slice establishes no formal refinement, full optimized WHNF or new accepting kernel. Source-owned proof checking remains the exclusive admission authority.
 
+## CDE-1 — environment-aware lazy delta (2026-10-13)
+
+`Architecture/Delta.lean` extends the closure/spine candidate with one source-owned, safety-guarded delta step on precisely reified syntax at a stuck constant head. It reenters the lazy execution machine for subsequent β/ζ steps, preserving an explicit reduction and quotation budget; partial/unsafe definitions are declined, opaque constants remain neutral. `Architecture/Work.lean` exposes `psKernelC0ArchitecturePreviewDelta`, which always computes the authoritative checked WHNF **first** and never publishes the candidate result as a proof. The mandatory `C0ArchitectureDeltaRegression.lean` checks direct/chained and universe-parametric aliases, delta-to-lambda β, ζ, non-reducible opaque heads, malformed/unsafe policy and fuel exhaustion. This is still a **non-accepting partial evaluator**, not complete Lean WHNF or Phase D exit acceptance.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

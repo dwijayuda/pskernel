@@ -1,5 +1,7 @@
 # PSCV0 v7 — New-chat continuation prompt (M1, then M2)
 
+**Handoff refreshed 13 October 2026 (Asia/Jakarta).** GitHub branch was verified at documentation-only commit `b57849d2b7fe30c9e9da448568f0d2bbb50c1f79`; the current document update will advance HEAD again. Compare `fc8bc8b1f16ed993fb144e2d396c0760c068630b...b57849d2b7fe30c9e9da448568f0d2bbb50c1f79` reported **five commits changing documentation only**. **Latest independently CI-qualified executable remains `fc8bc8b1f16ed993fb144e2d396c0760c068630b`, Linux [38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371), passed.** In the next chat, re-read HEAD and CI and do not confuse documentation commits with executed acceptance.
+
 Continue implementing **my PSCV0 v7 native Lean compiler** autonomously, systematically and dependency-first, completing **M1 before M2**. Do not redo already qualified work.
 
 **GitHub repo:** https://github.com/dwijayuda/pskernel

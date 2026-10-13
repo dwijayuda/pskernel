@@ -1,5 +1,7 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
+**Handoff refreshed 13 October 2026 (Asia/Jakarta).** GitHub branch was verified at documentation-only commit `b57849d2b7fe30c9e9da448568f0d2bbb50c1f79`; the current document update will advance HEAD again. Compare `fc8bc8b1f16ed993fb144e2d396c0760c068630b...b57849d2b7fe30c9e9da448568f0d2bbb50c1f79` reported **five commits changing documentation only**. **Latest independently CI-qualified executable remains `fc8bc8b1f16ed993fb144e2d396c0760c068630b`, Linux [38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371), passed.** In the next chat, re-read HEAD and CI and do not confuse documentation commits with executed acceptance.
+
 ## NEW CHAT: AUTHORITATIVE M1 → M2 HANDOFF (13 October 2026)
 
 **Working branch:** `psc0/pscv0-v7-native-lean-v1` · draft PR [#109](https://github.com/dwijayuda/pskernel/pull/109). **Live HEAD at this handoff preparation:** `216ac7770c8b6c16fca9cb22ca3a1fc87a7f7ea1` (documentation-only since the checked source below); **always re-query GitHub** because this handoff itself creates another documentation commit. Do **not** treat a documentation HEAD as a newly qualified executable.

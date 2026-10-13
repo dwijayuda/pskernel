@@ -314,7 +314,7 @@ jobs:
           if line_num != target:
               raise RuntimeError("did not reach record 86383")
           PY
-      - name: Record first false DefEq candidate in shared C0 theorem checking
+      - name: Dissect first false Eq application arguments at post-nested theorem
         shell: bash
         run: |
           set -euo pipefail

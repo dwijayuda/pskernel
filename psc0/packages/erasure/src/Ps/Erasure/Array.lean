@@ -10,9 +10,12 @@ def psEraseArrayConversion (scope : PsErasureScope) (element : PsVerifiedIrType)
     (psNameAppendStr psListName "nil") | throw .unsupportedRuntimeTerm
   let some consInfo := psErasureLookupConstructor scope.runtimeConstructors
     (psNameAppendStr psListName "cons") | throw .unsupportedRuntimeTerm
+  -- Prepared source positions include the uniform parameter telescope.
   let [head, tail] := consInfo.fields | throw .unsupportedRuntimeTerm
   if !nilInfo.fields.isEmpty || nilInfo.inductiveName != consInfo.inductiveName ||
-      head.sourceIndex != 0 || tail.sourceIndex != 1 then
+      nilInfo.numParams != 1 || consInfo.numParams != 1 ||
+      head.sourceIndex != consInfo.numParams ||
+      tail.sourceIndex != consInfo.numParams + 1 then
     throw .unsupportedRuntimeTerm
   let list := PsVerifiedIrType.named consInfo.inductiveName [element]
   let array := PsVerifiedIrType.named "Array" [element]

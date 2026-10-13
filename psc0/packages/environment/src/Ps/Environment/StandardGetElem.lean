@@ -498,6 +498,7 @@ def psStandardGetElemOptionalDefaultInstance : PsDeclaration :=
 -- are reconciled by PsStandard.decidableUnique (checked in Decision.lean).
 def psStandardLawfulGetElemOptionalDefaultDeclarations : List PsDeclaration :=
   let name := psDecisionName "PsStandard.instLawfulGetElemOptionalDefault"
+  let unfoldingLemma := psDecisionName "PsStandard.getElemOptionalDefaultDefinition"
   let optionalLemma := psDecisionName "PsStandard.getElemOptionalDefaultLaw"
   let bangLemma := psDecisionName "PsStandard.getElemBangDefaultLaw"
   let u := psRootName "u"
@@ -598,6 +599,20 @@ def psStandardLawfulGetElemOptionalDefaultDeclarations : List PsDeclaration :=
     .instanceImplicit
   -- Independent checked lemma declarations make each definitional contract
   -- auditable before constructor assembly. Their bodies contain no axioms.
+  -- First check definitional equality of this precise dictionary projection
+  -- before transporting it across independently supplied Decidable evidence.
+  let unfoldingType := params (psLogicPi 4 "checked" base
+    (psLogicPi 5 "decide" indexedDecision
+      (psLogicPi 20 "xs" coll
+        (psLogicPi 21 "i" idx
+          (optEq getOptionalMethod (decideOptional ownDecision)))
+      .instanceImplicit) .instanceImplicit))
+  let unfoldingValue := lams (psLogicLam 4 "checked" base
+    (psLogicLam 5 "decide" indexedDecision
+      (psLogicLam 20 "xs" coll
+        (psLogicLam 21 "i" idx
+          (psLogicRefl (.succ .zero) optType getOptionalMethod)))
+      .instanceImplicit) .instanceImplicit)
   let optionalLemmaType := params (psLogicPi 4 "checked" base
     (psLogicPi 5 "decide" indexedDecision
       (psLogicPi 20 "xs" coll
@@ -631,7 +646,8 @@ def psStandardLawfulGetElemOptionalDefaultDeclarations : List PsDeclaration :=
   let body := lams (psLogicLam 4 "checked" base
     (psLogicLam 5 "decide" indexedDecision value .instanceImplicit)
     .instanceImplicit)
-  [ .definitionDecl optionalLemma [u, v] optionalLemmaType optionalLemmaValue,
+  [ .definitionDecl unfoldingLemma [u, v] unfoldingType unfoldingValue,
+    .definitionDecl optionalLemma [u, v] optionalLemmaType optionalLemmaValue,
     .definitionDecl bangLemma [u, v] bangLemmaType bangLemmaValue,
     .definitionDecl name [u, v] type body ]
 

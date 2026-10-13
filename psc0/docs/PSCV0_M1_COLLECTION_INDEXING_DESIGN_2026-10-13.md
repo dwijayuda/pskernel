@@ -121,3 +121,7 @@ Explicit custom optional instances must take priority over derived defaults.
 Both direct and Fin-adapted lawfulness must refuse an optional dictionary that
 returns none for a valid True predicate. Independent RC4 source cases check the
 same boundary.
+
+The primitive ledger must retain checked logical definitions whose execution is
+replaced by intrinsics. Signature comparisons and explicitly recorded selected
+model boundaries are separate fields; neither is a runtime-equivalence theorem.

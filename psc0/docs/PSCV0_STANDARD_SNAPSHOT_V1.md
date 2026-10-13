@@ -1,6 +1,41 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
-## Current qualified checkpoint — M1 checked Array and conversions (13 October 2026)
+## Current qualified checkpoint — M1 coherence and measurements (13 October 2026)
+
+- **Executable:** `6a6037c311f306d82e43221ed527c7326e5785dc`.
+- **Green Linux qualification:** [38387492672](https://github.com/dwijayuda/pskernel/actions/runs/38387492672).
+- **246 shared runtime observations**, all prior observations retained, four panic
+  contracts, official kernel/RC4 oracle and all backend gates passed.
+- Standard remains **292 declarations / 14 classes / 52 instances** and
+  **175 portable / 183 native modules**, with the Array checkpoint digests below.
+
+Explicit high-priority custom optional dictionaries take precedence over the
+generic default. Direct and Fin-adapted lawfulness refuse the deliberately
+unlawful optional implementation. Independent RC4 negative cases passed.
+
+Controlled samples now exist in the CI artifact's `m1-performance/` directory.
+At 16/128 declarations, checked-index elaboration medians were 2/15 ms versus
+1/2 ms for direct-return bodies under identical binder telescopes; prelude
+admission was 8 ms. Phase timings are recorded separately.
+
+Generated JS lookup/conversion costs are substantially above native Lean:
+the first measurement shows roughly 451–3206x batch-time ratios across these
+small operations. Array and List-head lookup remain roughly size-independent;
+List-tail and conversion costs grow with size. This is evidence of significant
+remaining runtime overhead, not high-performance parity or a formal complexity
+proof. Native Lean uses a different runtime and optimized standard library.
+Retain the raw samples, setup exclusions and checksums when comparing changes.
+M5 should address shared calling conventions, specialization and allocation,
+not add Standard-name-specific backend shortcuts.
+
+**Final M1 qualification is still pending** for the runtime-override ledger and
+remaining representation-boundary probes (partial conversions, Array elimination,
+empty Fin access and position coverage). Tail benchmark repetitions are reduced
+from 128 to 16 per sample to keep routine CI economical while retaining five
+measured samples and matched native/JS workloads. This changes measurement
+duration, not correctness or acceptance criteria.
+
+## Prior qualified checkpoint — M1 checked Array and conversions (13 October 2026)
 
 This section supersedes older implementation-status statements below.
 

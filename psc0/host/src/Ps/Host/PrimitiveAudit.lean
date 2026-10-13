@@ -3,7 +3,8 @@ import PsKernelLean.Prelude
 namespace PsV7Native
 
 -- This is a signature audit, not a proof that foreign runtime bodies implement
--- Lean definitions. Prelude axioms remain explicit assumptions.
+-- Lean definitions. Prelude axioms and checked-model runtime overrides are
+-- separate trust categories: replacing an axiom must not hide its backend.
 private def normalizeLevel (parameters : List Lean.Name) : Lean.Level → Lean.Level
   | .param name => .param (.num (.str .anonymous "u") (parameters.idxOf name))
   | .succ value => .succ (normalizeLevel parameters value)
@@ -50,8 +51,12 @@ def primitiveAudit : IO Lean.Json := do
   let native ← Lean.importModules #[{ module := `Init }] {}
   let mut entries := []
   for declaration in psSelfHostProdPreludeEnvironment.declarations do
-    match declaration with
-    | .axiomDecl name parameters type =>
+    let name := psDeclarationName declaration
+    let parameters := psDeclarationLevelParams declaration
+    let type := psDeclarationType declaration
+    let assumption := match declaration with | .axiomDecl .. => true | _ => false
+    let reviewed := modeledSignatures.any (fun entry => entry.1 == psNameToString name)
+    if assumption || reviewed then
       let nativeName := PsKernelLean.toLeanName name
       let portable ← match PsKernelLean.toLeanExpr type with
         | .ok value => pure value
@@ -72,12 +77,41 @@ def primitiveAudit : IO Lean.Json := do
         ("signature", Lean.toJson (if matched then "native-alpha-match" else "portable-model")),
         ("portableType", Lean.toJson portable.dbgToString),
         ("nativeType", Lean.toJson (original.map (fun info => info.type.dbgToString))),
-        ("bodyTrust", Lean.toJson ("assumption/runtime-primitive" : String))] :: entries
+        ("bodyTrust", Lean.toJson (if assumption then "assumption/runtime-primitive"
+          else "checked-logical-model/runtime-override"))] :: entries
+  -- Newly exposed representation conversions and proof-taking operations have
+  -- checked portable models. Record both signatures without claiming alpha
+  -- equality: RC4 uses universe-polymorphic collections, LT and optParam.
+  -- The exact portable bodies remain protected by the Standard snapshot and
+  -- separately admitted by the kernel; the source oracle checks observations.
+  let modelNames := ["Array.mk", "Array.toList", "Array.getInternal", "Array.set",
+    "Nat.ble", "outOfBounds"]
+  let mut models := []
+  for name in modelNames do
+    let some declaration := psSelfHostProdPreludeEnvironment.declarations.find?
+      (fun d => psNameToString (psDeclarationName d) == name)
+      | throw (IO.userError ("missing checked runtime model: " ++ name))
+    match declaration with
+    | .axiomDecl .. | .partialDecl .. =>
+        throw (IO.userError ("unchecked runtime model: " ++ name))
     | _ => pure ()
+    let nativeName := PsKernelLean.toLeanName (psDeclarationName declaration)
+    let some original := native.find? nativeName
+      | throw (IO.userError ("missing pinned runtime-model reference: " ++ name))
+    let portable ← match PsKernelLean.toLeanExpr (psDeclarationType declaration) with
+      | .ok value => pure value
+      | .error _ => throw (IO.userError ("runtime-model type conversion failed: " ++ name))
+    models := Lean.Json.mkObj [
+      ("name", Lean.toJson name),
+      ("portableType", Lean.toJson portable.dbgToString),
+      ("nativeType", Lean.toJson original.type.dbgToString),
+      ("signature", Lean.toJson ("recorded-selected-model; no alpha-equivalence claim" : String)),
+      ("bodyTrust", Lean.toJson ("kernel-checked-logical-model/runtime-override" : String))] :: models
   return Lean.Json.mkObj [
-    ("schema", Lean.toJson ("pscv0-primitive-signature-audit/1" : String)),
+    ("schema", Lean.toJson ("pscv0-primitive-signature-audit/2" : String)),
     ("leanCommit", Lean.toJson Lean.githash),
-    ("limitation", Lean.toJson ("Signature comparison only; alpha matching ignores binder annotations. No runtime equivalence theorem." : String)),
-    ("entries", Lean.toJson entries.reverse)]
+    ("limitation", Lean.toJson ("Signature comparison for entries; checkedRuntimeModels record deliberate model boundaries without asserting native type equivalence. Kernel admission and runtime equivalence are separate obligations; no runtime equivalence theorem." : String)),
+    ("entries", Lean.toJson entries.reverse),
+    ("checkedRuntimeModels", Lean.toJson models.reverse)]
 
 end PsV7Native

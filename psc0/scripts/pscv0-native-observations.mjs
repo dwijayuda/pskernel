@@ -245,6 +245,10 @@ export const observations = [
   { name: "arrayMapRuntime", args: null, expected: 674n },
   { name: "customPriorityRuntime", args: null, expected: true },
   { name: "customFinPriorityRuntime", args: null, expected: true },
+  { name: "indexingPositionsRuntime", args: null, expected: 41n },
+  { name: "finEmptyRuntime", args: null, expected: true },
+  { name: "arrayPartialConversionRuntime", args: null, expected: 719n },
+  { name: "arrayEliminationRuntime", args: null, expected: 3n },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];
 

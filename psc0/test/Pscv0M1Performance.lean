@@ -31,7 +31,7 @@ private def runtimeReference : IO (Array Lean.Json) := do
     let array := xs.toArray
     for (name, operation, iterations, expected) in [
         ("listHead", fun i => referenceListAt xs (i % 2), 128, 192),
-        ("listTail", fun i => referenceListAt xs (size - 1 + i % 2), 128, 64 * size),
+        ("listTail", fun i => referenceListAt xs (size - 1 + i % 2), 16, 8 * size),
         ("arrayHead", fun i => referenceArrayAt array (i % 2), 128, 192),
         ("arrayTail", fun i => referenceArrayAt array (size - 1 + i % 2), 128, 64 * size),
         ("fromList", fun i => (referenceFromList xs).size + i % 2, 8, 8 * size + 4),

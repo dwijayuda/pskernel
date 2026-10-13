@@ -13,7 +13,7 @@ for (const size of [256, 8192]) {
   const array = generated.m1MakeArray(n);
   for (const [name, operation, iterations, expected] of [
     ['listHead', i => generated.m1ListAt(xs, i % 2n), 128, 192n],
-    ['listTail', i => generated.m1ListAt(xs, n - 1n + i % 2n), 128, 64n * n],
+    ['listTail', i => generated.m1ListAt(xs, n - 1n + i % 2n), 16, 8n * n],
     ['arrayHead', i => generated.m1ArrayAt(array, i % 2n), 128, 192n],
     ['arrayTail', i => generated.m1ArrayAt(array, n - 1n + i % 2n), 128, 64n * n],
     ['fromList', i => generated.m1FromList(xs) + i % 2n, 8, 8n * n + 4n],

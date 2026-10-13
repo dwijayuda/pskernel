@@ -1,7 +1,7 @@
 import Ps.KernelCore.Architecture.Structural
 
 /-!
-CDE-4/5: fuel-accounted Nat, projection, and Quot demand for candidate WHNF.
+CDE-4/5/6: fuel-accounted Nat, projection, Quot and recursor demand.
 
 This small-step machine evaluates the major premise of a projection and the
 necessary operands of a recognized Nat primitive without borrowing the source
@@ -11,8 +11,10 @@ bounds *every* transition, including entering and resuming a premise.
 
 Every result is an observation. The authoritative checker continues to
 compute typing, WHNF, definitional equality and declaration admission.
-Ordinary recursor major premises remain unimplemented here. Quotient demand
-matches the already existing source reduction's arity and initialization rules.
+Ordinary non-K recursors over constructor-headed or Nat literal majors use
+the source's recursor rule metadata; quotient demand follows source arities.
+K-reduction, structure eta and String-literal constructor expansion remain
+outside the candidate scope.
 -/
 
 /-- A saved parent expression is preserved verbatim when a demanded operand
@@ -25,6 +27,8 @@ inductive PsKernelC0DemandFrame where
   | projection (parent : PsKernelC0Machine)
       (typeName : PsKernelName) (fieldIndex : Nat)
   | quotient (parent : PsKernelC0Machine) (majorIndex : Nat)
+  | recursor (parent : PsKernelC0Machine)
+      (metadata : PsKernelRecursorInfo) (levels : List PsKernelLevel)
 
 structure PsKernelC0DemandState where
   machine : PsKernelC0Machine
@@ -116,8 +120,70 @@ def psKernelC0DemandStart
             some (psKernelC0DemandEnter state left
               (.natLeft state.machine right))
         | _ => none
-      else none
+      else
+        match psKernelEnvironmentFind context.environment name with
+        | some (.recInfo recursor) =>
+            if recursor.k || recursor.isUnsafe then none
+            else
+              let majorIndex :=
+                recursor.numParams + recursor.numMotives +
+                  recursor.numMinors + recursor.numIndices
+              match state.machine.arguments[majorIndex]? with
+              | some major =>
+                  some (psKernelC0DemandEnter state major
+                    (.recursor state.machine recursor levels))
+              | none => none
+        | _ => none
   | _ => none
+
+/-- Source-aligned literal-to-constructor view used only for ordinary
+    recursor pattern selection. Full String literal expansion is deferred. -/
+def psKernelC0RecursorMajorConstructor
+    (major : PsKernelExpr) : Option PsKernelExpr :=
+  match major with
+  | .lit (.nat 0) =>
+      some (.const psKernelNatZeroName [])
+  | .lit (.nat (n + 1)) =>
+      some (.app (.const psKernelNatSuccName []) (.lit (.nat n)))
+  | .lit (.str _) => none
+  | _ => some major
+
+/-- Build the source recursor's exact rule application using one reified
+    parent spine, selected constructor fields and source universe instantiation.
+    This is a candidate rewrite only; no type/DefEq decision is inferred. -/
+def psKernelC0RecursorRewrite
+    (quoteFuel : Nat)
+    (parent : PsKernelC0Machine)
+    (recursor : PsKernelRecursorInfo)
+    (levels : List PsKernelLevel)
+    (normalizedMajor : PsKernelExpr) : Option PsKernelExpr := do
+  if recursor.k || recursor.isUnsafe then none
+  else if recursor.base.levelParams.length != levels.length then none
+  else do
+    let major ← psKernelC0RecursorMajorConstructor normalizedMajor
+    let head := psKernelExprGetAppFn major
+    let ctorName ← match head with
+      | .const name _ => some name
+      | _ => none
+    let rule ← psKernelFindRecursorRule ctorName recursor.rules
+    let majorArgs := psKernelExprGetAppArgs major
+    if rule.nFields > majorArgs.length then none
+    else do
+      let quotedParent ← psKernelC0QuoteMachine quoteFuel parent
+      let args := psKernelExprGetAppArgs quotedParent
+      let fixedCount := recursor.numParams + recursor.numMotives +
+        recursor.numMinors
+      let majorIndex := fixedCount + recursor.numIndices
+      if args.length <= majorIndex then none
+      else
+        let rhs0 := psKernelExprInstantiateLevelParams
+          rule.rhs recursor.base.levelParams levels
+        let rhs1 := psKernelExprApplyArgsCheap rhs0 (args.take fixedCount)
+        let ctorParams := majorArgs.length - rule.nFields
+        let rhs2 := psKernelExprApplyArgsCheap rhs1
+          ((majorArgs.drop ctorParams).take rule.nFields)
+        some (psKernelExprApplyArgsCheap rhs2
+          (args.drop (majorIndex + 1)))
 
 /-- Demand frames only consult a value returned from the *same* candidate
     evaluator. Arithmetic and constructor selection reuse the source's
@@ -187,6 +253,12 @@ def psKernelC0DemandResume
                             remaining
                   | _, _ => psKernelC0DemandStuck state parent remaining
             | _ => psKernelC0DemandStuck state parent remaining
+      | .recursor parent recursor levels =>
+          match psKernelC0RecursorRewrite quoteFuel parent recursor
+              levels reduced with
+          | some result =>
+              psKernelC0DemandValue state parent result [] remaining
+          | none => psKernelC0DemandStuck state parent remaining
 
 /-- One total transition. 'blocked' means the finished subexpression must
     return to its saved caller rather than retrying an already failed head. -/

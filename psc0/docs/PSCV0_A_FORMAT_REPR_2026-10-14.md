@@ -593,3 +593,10 @@ runtime. Both logical/exporter admission and runtime conformance are required;
 kernel acceptance does not prove backend equivalence. A compact fixture is
 added to the existing native oracle and shared runtime table; qualification is
 pending. Signed, target-sized and floating capabilities remain separate.
+
+Export boundary invariant: a frozen name set is paired with its explicit
+pre-admission Standard stage. Reading those names from the final environment
+was incorrect once UInt axioms became structures: old assets would see the
+new type without its constructor metadata. Core, scalar-arithmetic and unsigned
+stages now make that dependency explicit; no mutable/latest lookup is used to
+replay an earlier asset. Both regeneration comparisons remain mandatory.

@@ -7,7 +7,7 @@ import Ps.Environment.StandardReprCollections
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+def psSelfHostProdCorePreludeEnvironment : PsEnvironment :=
   let uName := psRootName "u";
   let alphaName := psRootName "α";
   let betaName := psRootName "β";
@@ -121,7 +121,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardReducibilityExtend <| psStandardUnsignedExtend <| psStandardScalarArithmeticExtend <| psStandardReprCollectionsExtend <| psStandardFormatStringExtend <| psStandardReprExtend <| psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
+  psStandardReducibilityExtend <| psStandardReprCollectionsExtend <| psStandardFormatStringExtend <| psStandardReprExtend <| psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
     <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
@@ -137,6 +137,14 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           0
           1
           1))
+
+-- Explicit library stages also own the frozen authoring-export boundaries.
+-- Later structure replacements cannot change an earlier asset's replay base.
+def psSelfHostProdScalarPreludeEnvironment : PsEnvironment :=
+  psStandardScalarArithmeticExtend psSelfHostProdCorePreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardUnsignedExtend psSelfHostProdScalarPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=

@@ -396,7 +396,12 @@ def c0ExportReadInductiveGroup
   let recNames := expectedRecs.map (fun r => r.base.name)
   let generatedNames := types.map (fun t =>
     psKernelSimpleRecName t.base.name)
-  if !c0ExportSameNames recNames generatedNames then
+  -- Ordinary and simple mutual groups have one conventional .rec name
+  -- per type. Nested preprocessing may produce extra recursors or different
+  -- auxiliary names: do not guess their spelling here. Instead, every
+  -- exported recursor is checked *after* independent native generation,
+  -- including its type, motive/indices, constructor rules and safety.
+  if !hasNested && !c0ExportSameNames recNames generatedNames then
     throw "unsupported NDJSON recursor family is not canonical"
   let toCtor (c : PsKernelConstructorInfo) :
       PsKernelSimpleConstructorDecl :=

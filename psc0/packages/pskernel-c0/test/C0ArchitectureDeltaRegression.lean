@@ -624,6 +624,44 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ =>
       throw (IO.userError "recursor-major demand ignored shared fuel")
+  -- CDE-7: source String literal expansion is String.ofList syntax,
+  -- normalized in the *same* demand fuel. In this synthetic WHNF-only
+  -- fixture String.ofList is a checked-rule-shaped safe alias whose body
+  -- ignores the list and returns a known constructor. This exercises the
+  -- string expansion/resumption mechanism, NOT real library String typing.
+  let listBinder := c0DeltaName "stringChars"
+  let listConverter : PsKernelDefinitionInfo := {
+    base := {
+      name := psKernelStringOfListName
+      levelParams := []
+      type := .forallE listBinder sort type .default
+    }
+    value := .lam listBinder sort pairValue .default
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let stringEnv := psKernelEnvironmentAddUnchecked recEnv
+    (.defnInfo listConverter)
+  let stringSession := psKernelMkCheckerSession stringEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DemandCheck "recursor-string-literal-empty" stringSession
+    (.app (.const recName []) (.lit (.str ""))) (c0DeltaNatLit 11)
+  c0DemandCheck "recursor-string-literal-ascii" stringSession
+    (.app (.const recName []) (.lit (.str "hi"))) (c0DeltaNatLit 11)
+  c0DemandCheck "recursor-string-literal-utf8" stringSession
+    (.app (.const recName []) (.lit (.str "é"))) (c0DeltaNatLit 11)
+  c0DemandCheck "recursor-string-literal-beta-major" stringSession
+    (.app (.const recName [])
+      (.app idRecord (.lit (.str "xy")))) (c0DeltaNatLit 11)
+  -- Explicitly decline oversized materialization before calling the source
+  -- String expansion helper. This is a resource failure, not rejection.
+  let tooLong := String.ofList (List.replicate 300 'a')
+  match psKernelC0ArchitectureCandidateDemand 96 stringSession.context
+      (.app (.const recName []) (.lit (.str tooLong))) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "C0 shared-demand String expansion ignored budget")
+  IO.println "C0_ARCHITECTURE string_literal_major_reentry_differential=pass"
   IO.println "C0_ARCHITECTURE non_k_recursor_constructor_nat_iota_differential=pass"
   match psKernelC0ArchitectureCandidateDemand 3 ctorSession.context
       (c0DeltaNatBinary psKernelNatAddName

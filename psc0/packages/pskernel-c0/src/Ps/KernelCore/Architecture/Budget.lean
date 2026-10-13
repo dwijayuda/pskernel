@@ -320,6 +320,26 @@ def psKernelC0ReserveSourceRewrites
     Syntactic β/ζ/app transitions do not need eager quotation and remain
     lazy; unsupported neutral heads may conservatively decline at very low
     budgets without affecting the authoritative source checker. -/
+/-- The saved parent of an ordinary recursor and the eliminator
+    function of Quot are separately quoted when their major premise
+    resumes. These obligations are identical for an ordinary halted child
+    and a 'blocked' child: neither path may skip the shared quota. -/
+def psKernelC0ReserveResumeReadbacks
+    (depth : Nat)
+    (frames : List PsKernelC0DemandFrame)
+    (quota : Nat) : Option Nat := do
+  match frames with
+  | .recursor parent _ _ :: _ => do
+      let (_, left) ← psKernelC0QuoteMachineMetered depth quota parent
+      some left
+  | .quotient parent _ :: _ =>
+      match parent.arguments[3]? with
+      | none => some quota
+      | some fn => do
+          let (_, left) ← psKernelC0QuoteClosureMetered depth fn quota
+          some left
+  | _ => some quota
+
 def psKernelC0ReserveIntermediateReadbacks
     (depth : Nat)
     (state : PsKernelC0DemandState)
@@ -327,10 +347,10 @@ def psKernelC0ReserveIntermediateReadbacks
   if state.blocked then
     match state.frames with
     | [] => some quota
-    | _ =>
+    | _ => do
         let (_, left) ←
           psKernelC0QuoteMachineMetered depth quota state.machine
-        some left
+        psKernelC0ReserveResumeReadbacks depth state.frames left
   else
     match psKernelC0MachineStep state.machine with
     | .next _ => some quota
@@ -354,24 +374,12 @@ def psKernelC0ReserveIntermediateReadbacks
           | _ => some afterProjection
         match state.frames with
         | [] => some afterHead
-        | frame :: _ => do
+        | _ => do
             let (_, afterResume) ←
               psKernelC0QuoteMachineMetered
                 depth afterHead state.machine
-            match frame with
-            | .recursor parent _ _ => do
-                let (_, left) ←
-                  psKernelC0QuoteMachineMetered
-                    depth afterResume parent
-                some left
-            | .quotient parent _ =>
-                match parent.arguments[3]? with
-                | none => some afterResume
-                | some fn => do
-                    let (_, left) ←
-                      psKernelC0QuoteClosureMetered depth fn afterResume
-                    some left
-            | _ => some afterResume
+            psKernelC0ReserveResumeReadbacks
+              depth state.frames afterResume
 
 /-- The cost of primitive numeral work is checked BEFORE calling the
     existing Nat reducer. The bound is conservative in units of numerical

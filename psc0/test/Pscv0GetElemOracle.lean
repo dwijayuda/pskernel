@@ -484,3 +484,12 @@ def equalLists {A : Type u} [BEq A] (xs ys : List A) : Bool := List.beq xs ys
 example : emptyList (A := Type) () = [] := rfl
 example {A : Type u} [BEq A] : equalLists ([] : List A) [] = true := rfl
 end Pscv0ListUniverseOracle
+
+namespace Pscv0ArithmeticModelOracle
+example (n : Nat) : Nat.add n 0 = n := rfl
+example (n m : Nat) : Nat.add n (Nat.succ m) = Nat.succ (Nat.add n m) := rfl
+example (n : Nat) : Nat.sub n 0 = n := rfl
+example (n m : Nat) : Nat.sub n (Nat.succ m) = Nat.pred (Nat.sub n m) := rfl
+example (n m : Nat) : Nat.mul n (Nat.succ m) = Nat.add (Nat.mul n m) n := rfl
+example (n m : Nat) : Nat.beq (Nat.succ n) (Nat.succ m) = Nat.beq n m := rfl
+end Pscv0ArithmeticModelOracle

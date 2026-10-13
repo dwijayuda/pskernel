@@ -380,3 +380,30 @@ The experiment discards its environment; no imports or failures enter production
 compilation. Its purpose is to identify which old logical models must change
 coherently before exporting a small reviewed closure, rather than assuming
 shared names imply compatible semantics.
+
+## Arithmetic logical models
+
+Source study of pinned Prelude.lean (Nat.add/sub/mul/beq and the modCore/fuel
+proofs) identifies opaque arithmetic assumptions as an obstacle to reusing
+upstream general proofs. Replace the four selected opaque declarations with
+small checked recursor definitions preserving the upstream open-term equations:
+add/sub/mul recurse on the right operand; beq compares constructor shapes.
+The existing Nat.pred and Nat.ble models are shared. Closed primitive reduction
+and typed backend intrinsics retain their fast path. Source-observable
+reducibility of add/sub/mul is instance_reducible, as in stable Lean.
+
+Six open-term rfl equations extend the existing checked source/oracle group;
+all existing cross-target arithmetic observations remain the runtime validation.
+The primitive audit records these as checked logical models with separate
+runtime implementations. No new axiom or runtime operation. Both Standard
+digests remain strict pending intentional body/metadata review.
+
+First reuse probe (green Linux38453128536, 3619d97dbed4a9e6c7defc7df07e1428cf65dd8b)
+admitted 58 new genuine declarations against the unchanged portable prelude.
+Five upstream bodies failed kernel checking: Nat.sub_le,
+Nat.succ_sub_succ_eq_sub, Nat.eq_or_lt_of_le._f, Nat.not_succ_le_self._f
+and _private.Init.Prelude.0.noConfusion_of_Nat.aux._f. Their 20 blocked
+dependents include Nat.mod_lt. This is a negative compatibility result, not
+an imported library or a failing acceptance test. The arithmetic logical-model
+phase addresses the opaque arithmetic cause; remaining failures require exact
+kernel type diagnostics before selecting any additional architecture change.

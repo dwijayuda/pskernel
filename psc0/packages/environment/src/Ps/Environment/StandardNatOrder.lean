@@ -19,6 +19,43 @@ def psOrderLeRec (n motive refl step m h : PsExpr) : PsExpr :=
 def psOrderDecl (name : String) (type value : PsExpr) : PsDeclaration :=
   .definitionDecl (psDecisionName name) [] type value
 
+-- Pinned Prelude.lean defines arithmetic by recursion on the right operand.
+-- Retain those open-term equations while native/runtime primitive reductions
+-- still handle closed numerals efficiently. Locals 0/1 are operands, 2/3 the
+-- predecessor/inductive result, and 4 the unused motive argument.
+def psStandardNatBinaryRec (name : String) (zero step : PsExpr) : PsDeclaration :=
+  let nat := psOrderNat
+  psOrderDecl name (psLogicPi 0 "n" nat (psLogicPi 1 "m" nat nat))
+    (psLogicLam 0 "n" nat (psLogicLam 1 "m" nat
+      (psOrderNatRec (.succ .zero) (psLogicLam 4 "_" nat nat) zero
+        (psLogicLam 2 "previous" nat (psLogicLam 3 "ih" nat step)) (.fvar 1))))
+
+def psStandardNatArithmeticDeclarations : List PsDeclaration :=
+  [ psStandardNatBinaryRec "Nat.add" (.fvar 0) (psOrderSucc (.fvar 3)),
+    psStandardNatBinaryRec "Nat.sub" (.fvar 0) (psOrderCall "Nat.pred" [.fvar 3]),
+    psStandardNatBinaryRec "Nat.mul" (.lit (.natural 0))
+      (psOrderCall "Nat.add" [.fvar 3, .fvar 0]) ]
+
+-- Equality's logical model follows the same two-operand constructor equations
+-- as the existing comparison model. No Bool-to-proof assumption is introduced.
+def psStandardNatBeqDeclaration : PsDeclaration :=
+  let nat := psOrderNat
+  let bool := PsExpr.constE psBoolName []
+  let result := psLogicPi 1 "m" nat bool
+  let motive := psLogicLam 4 "_" nat bool
+  let yes := PsExpr.constE psBoolTrueName []
+  let no := PsExpr.constE psBoolFalseName []
+  let zero := psLogicLam 1 "m" nat
+    (psOrderNatRec (.succ .zero) motive yes
+      (psLogicLam 2 "_" nat (psLogicLam 3 "_" bool no)) (.fvar 1))
+  let step := psLogicLam 2 "previous" nat (psLogicLam 3 "ih" result
+    (psLogicLam 1 "m" nat (psOrderNatRec (.succ .zero) motive no
+      (psLogicLam 5 "previousM" nat (psLogicLam 6 "_" bool
+        (.app (.fvar 3) (.fvar 5)))) (.fvar 1))))
+  psOrderDecl "Nat.beq" (psLogicPi 0 "n" nat result)
+    (psLogicLam 0 "n" nat
+      (psOrderNatRec (.succ .zero) (psLogicLam 4 "_" nat result) zero step (.fvar 0)))
+
 def psStandardNatOrderProofDeclarations : List PsDeclaration :=
   let nat := psOrderNat
   let n := PsExpr.fvar 0
@@ -211,7 +248,8 @@ def psStandardNatDecisionDeclarations : List PsDeclaration :=
   [reflection, decideLe, decideLt]
 
 def psStandardNatOrderDeclarations : List PsDeclaration :=
-  psStandardNatOrderProofDeclarations ++ [psStandardNatBleDeclaration] ++
+  psStandardNatArithmeticDeclarations ++ psStandardNatOrderProofDeclarations ++
+    [psStandardNatBeqDeclaration, psStandardNatBleDeclaration] ++
     psStandardNatDecisionDeclarations
 
 def psStandardNatOrderExtend (environment : PsEnvironment) : PsEnvironment :=

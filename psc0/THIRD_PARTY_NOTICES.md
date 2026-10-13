@@ -52,3 +52,8 @@ of Lean/Util/CollectAxioms.lean (Copyright (c) 2020 Microsoft Corporation;
 author Leonardo de Moura; Apache-2.0). Modifications: explicit native worklist,
 recursor-rule/mutual-family closure and portable-name collision reporting.
 It exports no declarations and changes no compiler trust boundary.
+
+The Nat.add/sub/mul/beq logical models in StandardNatOrder follow the constructor
+equations in Lean 4.35.0 Init/Prelude.lean (Copyright (c) Microsoft Corporation,
+Apache-2.0). Modifications: compact portable Core recursor construction using
+existing logical builders, while retaining separate native runtime intrinsics.

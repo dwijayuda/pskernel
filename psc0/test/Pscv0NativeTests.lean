@@ -86,6 +86,12 @@ private def getElemFoundationCases : IO Unit := do
     "theorem orderPositive: Nat.le(2, 5) := PsStandard.natBleReflects(2, 5)\n" ++
     "theorem orderNegative: ¬Nat.le(5, 2) := PsStandard.natBleReflects(5, 2)\n" ++
     "theorem orderZero(n: Nat): Nat.le(0, n) := Nat.zero_le(n)\n" ++
+    "theorem addZeroRight(n: Nat): Nat.add(n, 0) = n := by { rfl }\n" ++
+    "theorem addSuccessor(n: Nat, m: Nat): Nat.add(n, Nat.succ(m)) = Nat.succ(Nat.add(n, m)) := by { rfl }\n" ++
+    "theorem subZeroRight(n: Nat): Nat.sub(n, 0) = n := by { rfl }\n" ++
+    "theorem subSuccessor(n: Nat, m: Nat): Nat.sub(n, Nat.succ(m)) = Nat.pred(Nat.sub(n, m)) := by { rfl }\n" ++
+    "theorem mulSuccessor(n: Nat, m: Nat): Nat.mul(n, Nat.succ(m)) = Nat.add(Nat.mul(n, m), n) := by { rfl }\n" ++
+    "theorem beqSuccessors(n: Nat, m: Nat): Nat.beq(Nat.succ(n), Nat.succ(m)) = Nat.beq(n, m) := by { rfl }\n" ++
     "theorem orderRaise(n: Nat, m: Nat, h: Nat.le(n, m)): Nat.le(Nat.succ(n), Nat.succ(m)) := Nat.succ_le_succ(h)\n" ++
     "theorem orderLower(n: Nat, m: Nat, h: Nat.le(Nat.succ(n), Nat.succ(m))): Nat.le(n, m) := Nat.le_of_succ_le_succ(h)\n" ++
     "theorem orderImpossible(n: Nat): ¬Nat.lt(n, 0) := Nat.not_lt_zero(n)\n" ++

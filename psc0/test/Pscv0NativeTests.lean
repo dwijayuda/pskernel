@@ -1120,7 +1120,7 @@ private def metavariableBoundary : IO Unit := do
       (.app (.fvar function.id) (psLogicRefl (.succ .zero) type (.lit (.natural 0))))).isOk then
     throw (IO.userError "proof irrelevance identified different propositions")
   let locals := (psLocalPushBinding psLocalEmpty (psRootName "consume")
-    (.forallE .anonymous (psLogicEq (.succ .zero) type (.lit (.natural 0)) (.lit (.natural 0))) type .explicit))
+    (.forallE .anonymous (psLogicEq (.succ .zero) type (.lit (.natural 0)) (.lit (.natural 0))) type .explicit) .explicit)
   if (psInferType environment psMetaEmpty locals.context
       (.app (.fvar locals.id) (psLogicRefl (.succ .zero) type (.lit (.natural 1))))).isOk then
     throw (IO.userError "proof irrelevance identified runtime values")

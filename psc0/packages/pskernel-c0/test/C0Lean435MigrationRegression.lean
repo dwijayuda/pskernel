@@ -106,3 +106,27 @@ def main : IO Unit := do
     throw (IO.userError
       "C0 universe maximum normalization falsely accepted strict inequality")
   IO.println "C0_LEAN435 distributed_max_universe_offsets=pass"
+
+  -- Nested wrappers preserve their full context for diagnostics but must
+  -- not erase a known typed resource/invalid/unsupported outcome.
+  match psKernelErrorFromMessage
+      "nested transformed admission: kernel reduction budget exhausted" with
+  | .resourceExhausted .fuel _ => pure ()
+  | _ =>
+      throw (IO.userError "C0 misclassified nested resource exhaustion")
+  match psKernelErrorFromMessage
+      "nested transformed admission: simple inductive constructor field universe is too large" with
+  | .rejectedInvalid _ => pure ()
+  | _ =>
+      throw (IO.userError "C0 lost known nested invalid declaration category")
+  match psKernelErrorFromMessage
+      "nested preprocessing: nested or invalid mutual inductive occurrence is not supported" with
+  | .declinedUnsupported _ => pure ()
+  | _ =>
+      throw (IO.userError "C0 lost nested unsupported classification")
+  match psKernelErrorFromMessage
+      "nested transformed admission: unrecognized provider error" with
+  | .internalError _ => pure ()
+  | _ =>
+      throw (IO.userError "C0 treated unknown nested error as kernel verdict")
+  IO.println "C0_LEAN435 nested_typed_error_outcomes=pass"

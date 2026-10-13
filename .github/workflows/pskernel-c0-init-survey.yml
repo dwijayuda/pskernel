@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Inspect SyntaxNodeKind delta expansion causing nested WHNF exhaustion
+      - name: Qualify one-delta checked-inductive WHNF boundary on real Init
         shell: bash
         run: |
           set -euo pipefail

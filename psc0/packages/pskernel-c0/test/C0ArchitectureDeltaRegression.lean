@@ -653,6 +653,11 @@ def main : IO Unit := do
   c0DemandCheck "recursor-string-literal-beta-major" stringSession
     (.app (.const recName [])
       (.app idRecord (.lit (.str "xy")))) (c0DeltaNatLit 11)
+  c0DemandCheck "projection-string-literal-source-conversion" stringSession
+    (.proj pairType 1 (.lit (.str "two"))) (c0DeltaNatLit 22)
+  c0DemandCheck "projection-string-literal-beta-major" stringSession
+    (.proj pairType 0
+      (.app idRecord (.lit (.str "ø")))) (c0DeltaNatLit 11)
   -- Explicitly decline oversized materialization before calling the source
   -- String expansion helper. This is a resource failure, not rejection.
   let tooLong := String.ofList (List.replicate 300 'a')

@@ -99,6 +99,14 @@ Mandatory source-WHNF differentials exercise direct and β/ζ-major constructors
 
 **Full bounded executable qualification:** [`d4fb56e3`](https://github.com/dwijayuda/pskernel/commit/d4fb56e3b453f3a159f8441392642bb4429c3d34), [native CI 38443008075](https://github.com/dwijayuda/pskernel/actions/runs/38443008075) SUCCESS. The run covers native Lean 4.35 compilation, existing and new source differentials, official replay fixtures, negative/semantics/resource checks, microbenchmarks and independent original-checker comparison. This is not genuine String-library checked compatibility, full Phase D/E, or soundness proof. `C0_CDE8_TYPED_ELIMINATION_DESIGN.md` governs the next typed K/structure-eta and global resource work.
 
+## CDE-8A/8B implementation foundations — source authority preserved
+
+`Architecture/Budget.lean` adds monotone bounded expression-node traversal, captured-environment readback and conservative substitution expansion reservation, precharged final application-spine construction, and an opt-in `psKernelC0DemandRunWithBudget` that charges active expression syntax across transitions and sends the *remaining* quota to readback. No second reduction implementation was added; demand transitions still use the established CDE-4/7 dispatcher. It is **not** a full runtime-allocation bound until intermediate primitive, δ, projection and recursor reconstruction are also metered.
+
+`Architecture/Typed.lean` introduces an explicitly non-accepting observation seam: K and structure-eta major conversion call the source's own type inference, WHNF and DefEq-dependent helpers using active environment recursor metadata. Invalid/missing/unsafe input declines and the original checking session retains all judgment authority. `Architecture/Work.lean` exposes both operations through validated transaction previews. Tests cover low quotas, nested/repeated captures, binder fidelity, typed major inference constraints and rejection of ill-typed applications.
+
+**Status:** sources pushed; use the completed native CI for the latest *executable* source to qualify this bounded milestone. These foundations are not Phase C/D/E exit. Complete intermediate work accounting, real checked K/eta positive/negative families and unified accepting-kernel refinement before promoting candidate results.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

@@ -811,8 +811,6 @@ def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
       | .ok next => state := next
   return c0ExportFinish state
 
-/-- Result and one-based physical NDJSON record count, including a
-    failed record. This is a diagnostic, never a proof receipt. -/
 /-- Only invoked *after* authoritative rejection, never for admission.
     Diagnose whether the theorem's type or proof body failed and compare the
     optimized checked-application engine against its original source-owned
@@ -847,6 +845,8 @@ def c0ExportDiagnosticTheoremMismatch
                   IO.println
                     ("C0_REAL_THEOREM_REFERENCE_CHECK=rejected " ++ historical)
 
+/-- Result and one-based physical NDJSON record count, including a
+    failed record. This is a diagnostic, never a proof receipt. -/
 def c0ExportVerdictFromFileTrace
     (path : System.FilePath) (fuel : Nat := 4096) :
     IO (C0ExportVerdict × Nat) := do

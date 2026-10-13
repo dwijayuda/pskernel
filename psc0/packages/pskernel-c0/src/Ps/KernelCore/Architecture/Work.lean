@@ -156,6 +156,8 @@ def psKernelC0ArchitecturePreviewTypedDemand
     work transaction and delegates to the SAME authoritative checked session
     used by declaration admission. Neither candidate syntax nor preview
     agreement may authorize a type, DefEq result, or checked environment. -/
+/-- Source WHNF is a reduction observation, not expression validation.
+    Full validation still requires CheckWork before declaring acceptance. -/
 def psKernelC0ArchitectureWhnfWork
     (fuel : Nat)
     (work : PsKernelC0ArchitectureWork)
@@ -166,6 +168,9 @@ def psKernelC0ArchitectureWhnfWork
   let (value, session) ← psKernelSessionWhnf fuel work.checker expr
   return (value, { work with checker := session })
 
+/-- Source inference synthesizes a type but is NOT an admission verdict:
+    applications can have malformed arguments until full source checking.
+    psKernelC0ArchitectureCheckWork is the mandatory validation gate. -/
 def psKernelC0ArchitectureInferWork
     (fuel : Nat)
     (work : PsKernelC0ArchitectureWork)
@@ -176,6 +181,8 @@ def psKernelC0ArchitectureInferWork
   let (type, session) ← psKernelSessionInfer fuel work.checker expr
   return (type, { work with checker := session })
 
+/-- Source DefEq compares expressions under the active checked context.
+    DefEq alone does not certify that arbitrary inputs were well typed. -/
 def psKernelC0ArchitectureDefEqWork
     (fuel : Nat)
     (work : PsKernelC0ArchitectureWork)

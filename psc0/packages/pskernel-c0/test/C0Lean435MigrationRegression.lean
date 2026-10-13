@@ -214,3 +214,35 @@ def main : IO Unit := do
     throw (IO.userError
       "C0 shortcut permitted target occurrence or unqualified head")
   IO.println "C0_LEAN435 neutral_inductive_positivity_shortcut=pass"
+
+  -- A reducible alias of an inductive type must unfold to that type at WHNF.
+  -- This checks the general delta path independently of the 79K-record Init
+  -- fixture and prevents a stuck self-alias being mistaken for neutrality.
+  let aliasName : PsKernelName :=
+    .str .anonymous "NeutralTypeAlias"
+  let aliasInfo : PsKernelDefinitionInfo := {
+    base := {
+      name := aliasName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := .const existing []
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let aliasedEnv := psKernelEnvironmentAddUnchecked neutralEnv
+    (.defnInfo aliasInfo)
+  let aliasedSession := psKernelMkCheckerSession aliasedEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  let aliasDomain : PsKernelExpr :=
+    .app (.const aliasName []) (.sort .zero)
+  if psKernelMutualInductiveNeutralDomain
+      aliasedSession [freshTarget] aliasDomain then
+    throw (IO.userError "C0 incorrectly treated a delta alias as neutral")
+  match psKernelSessionWhnf 4096 aliasedSession aliasDomain with
+  | .ok (value, _) =>
+      if !psKernelExprEqual value neutralDomain then
+        throw (IO.userError "C0 failed to reduce a checked inductive alias")
+  | .error message =>
+      throw (IO.userError ("C0 simple delta alias WHNF failed: " ++ message))
+  IO.println "C0_LEAN435 inductive_alias_delta_whnf=pass"

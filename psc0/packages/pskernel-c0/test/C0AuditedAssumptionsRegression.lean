@@ -99,6 +99,45 @@ def main : IO Unit := do
         throw (IO.userError ("source definition under approved policy failed: " ++ e))
   if (psKernelC0HistoryOrdinaryAxioms next.trusted.history).length != 1 then
     throw (IO.userError "ordinary definition changed assumptions ledger")
+  -- Checked judgments and syntax staging must retain the same approved
+  -- history. Even an approved axiom does not turn ill-typed syntax into a
+  -- closed checked publication.
+  let (checkedType, afterCheck) ← match psKernelC0AuditedSourceCheck
+      4096 next (.sort .zero) with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("audited source check failed: " ++ e))
+  if !psKernelExprEqual checkedType (.sort (.succ .zero)) then
+    throw (IO.userError "audited check changed source Sort typing")
+  let (unfolded, afterWhnf) ← match psKernelC0AuditedSourceWhnf
+      4096 afterCheck (.const defName []) with
+    | .ok result => pure result
+    | .error e => throw (IO.userError ("audited source WHNF failed: " ++ e))
+  if !psKernelExprEqual unfolded (.sort .zero) then
+    throw (IO.userError "audited checked definition did not unfold")
+  let _stillApproved := psKernelC0AuditedSourceAxiomsApproved afterWhnf
+  let some staged := psKernelC0AuditedSourceStage
+      afterWhnf (.sort .zero)
+    | throw (IO.userError "audited staging declined closed source syntax")
+  let (_, receipts) ← match psKernelC0AuditedSourceCommitChecked
+      4096 staged with
+    | .ok result => pure result
+    | .error e =>
+        throw (IO.userError ("audited checked publication failed: " ++ e))
+  match receipts with
+  | [receipt] =>
+      let _sourceProof := psKernelC0SourceCheckedRootExact receipt
+      if !psKernelExprEqual receipt.checkedType (.sort (.succ .zero)) then
+        throw (IO.userError "audited publication returned wrong source type")
+  | _ => throw (IO.userError "audited publication dropped a closed root")
+  let some malformed := psKernelC0AuditedSourceStage staged (.bvar 0)
+    | throw (IO.userError "audited syntax-only stage refused unbound bvar")
+  match psKernelC0AuditedSourceCommitChecked 4096 malformed with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "approved assumption bypassed full root checking")
+  let _malformedStillApproved :=
+    psKernelC0AuditedSourceAxiomsApproved malformed
   IO.println "C0_AUDITED unapproved_axiom_blocked_atomically=pass"
   IO.println "C0_AUDITED authorized_source_assumptions_and_history=pass"
   IO.println "C0_AUDITED narrowed_policy_rejected_and_definitions_preserved=pass"
+  IO.println "C0_AUDITED source_judgments_and_closed_publication=pass"

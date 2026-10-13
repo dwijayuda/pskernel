@@ -1,7 +1,7 @@
 import Ps.KernelCore.Architecture.NatLiteral
 
 /-!
-CDE-1: environment-aware candidate delta evaluation.
+CDE-1/2: environment-aware candidate delta and primitive Nat evaluation.
 
 The pure closure machine remains separate. This *non-accepting* layer uses the
 source checker's own delta-unfolding function for one fully reified stuck

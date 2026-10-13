@@ -134,6 +134,14 @@ def main : IO Unit := do
     | throw (IO.userError "valid work did not acquire proof witness")
   let _initialValid : psKernelC0ArchitectureWorkValid initial.raw = true :=
     initial.valid
+  let _initialOwned :
+      initial.working.store = initial.raw.scratch.working :=
+    initial.owned
+  let _initialWF : psKernelC0StoreWF initial.raw.scratch.working :=
+    psKernelC0CertifiedWorkStoreWF initial
+  let _initialCanonical :
+      psKernelC0ReplayValidateStore initial.raw.scratch.working = true :=
+    psKernelC0CertifiedWorkCanonical initial
   -- A locally checked free variable is NOT a closed deployable root.
   -- Checking may legitimately succeed inside a local hypothesis context,
   -- but the stronger checked-publication gate must reject that context-
@@ -175,6 +183,10 @@ def main : IO Unit := do
     | throw (IO.userError "ill-typed syntax should be stageable")
   let _stageValid : psKernelC0ArchitectureWorkValid staged.raw = true :=
     staged.valid
+  let _stageWF : psKernelC0StoreWF staged.raw.scratch.working :=
+    psKernelC0CertifiedWorkStoreWF staged
+  if staged.working.store.nodes.size != staged.raw.scratch.working.nodes.size then
+    throw (IO.userError "staging certificate changed underlying owner snapshot")
   -- A canonical syntax-only commit is allowed, but the stronger checked
   -- publication must FAIL atomically on a loose, ill-typed variable.
   match psKernelC0CertifiedWorkCommitChecked 4096 staged with
@@ -377,6 +389,11 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ =>
       throw (IO.userError "non-recursor metadata received typed K judgment")
+  let _admittedWF : psKernelC0StoreWF admitted.raw.scratch.working :=
+    psKernelC0CertifiedWorkStoreWF admitted
+  let _admittedOwner :
+      admitted.working.store = admitted.raw.scratch.working :=
+    admitted.owned
   let (unfolded, _) ← match psKernelC0CertifiedWorkWhnf 4096
       admitted (.const defName []) with
     | .ok x => pure x

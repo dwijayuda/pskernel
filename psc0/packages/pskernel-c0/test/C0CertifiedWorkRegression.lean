@@ -27,6 +27,12 @@ def main : IO Unit := do
     psKernelC0CertifiedRootStore_canonical certified
   let _topology : psKernelC0StoreTopological certified.owner.store :=
     psKernelC0CertifiedRootStore_topological certified
+  let _columns : psKernelC0StoreColumnsCorrect certified.owner.store :=
+    psKernelC0CertifiedRootColumns_correct certified
+  let _index : psKernelC0StoreIndexed certified.owner.store :=
+    psKernelC0CertifiedRootIndex_correct certified
+  let _storeWF : psKernelC0StoreWF certified.owner.store :=
+    psKernelC0CertifiedRootStore_wf certified
   if psKernelC0NodeTopological 0 (.app 0 0) then
     throw (IO.userError "forward-ref node satisfied topology invariant")
   let _exact :
@@ -65,6 +71,25 @@ def main : IO Unit := do
     psKernelC0CertifiedRootStore_canonical transferred.target
   let some rootNode := psKernelC0StoreGet rawStore id
     | throw (IO.userError "certified test root disappeared")
+  -- The mathematical StoreWF propositions independently reject changed
+  -- derived columns or forged indices; canonical replay is still required
+  -- for the *entire* radix trie, including ghost entries.
+  let wrongDepthNode : PsKernelC0StoredNode :=
+    { rootNode with depth := rootNode.depth + 1 }
+  let wrongDepthStore : PsKernelC0TermStore :=
+    { rawStore with nodes := rawStore.nodes.set! id wrongDepthNode }
+  if psKernelC0StoreColumnsCorrect wrongDepthStore then
+    throw (IO.userError "altered indexed depth satisfied metadata invariant")
+  if psKernelC0StoreWF wrongDepthStore then
+    throw (IO.userError "StoreWF accepted corrupt derived metadata")
+  if (psKernelC0CertifyStore wrongDepthStore).isSome then
+    throw (IO.userError "corrupted derived column gained StoreWF certificate")
+  let wrongRangeNode : PsKernelC0StoredNode :=
+    { rootNode with looseBVarRange := rootNode.looseBVarRange + 1 }
+  let wrongRangeStore : PsKernelC0TermStore :=
+    { rawStore with nodes := rawStore.nodes.set! id wrongRangeNode }
+  if psKernelC0StoreColumnsCorrect wrongRangeStore then
+    throw (IO.userError "altered loose-bound range passed column invariant")
   let malformed : PsKernelC0TermStore :=
     { rawStore with
       nodes := rawStore.nodes.set! id
@@ -87,6 +112,13 @@ def main : IO Unit := do
     ((rawStore.nodes.size + 5) :: candidates)
   let ghostStore : PsKernelC0TermStore :=
     { rawStore with index := forgedIndex }
+  if psKernelC0StoreIndexed
+      { rawStore with index := PsKernelC0HashTrie.empty } then
+    throw (IO.userError "missing canonical node lookup passed index invariant")
+  -- An extra bucket entry may still let every proper node resolve;
+  -- the separate canonical-replay certificate must reject that ghost.
+  if !psKernelC0StoreIndexed ghostStore then
+    throw (IO.userError "index reachability falsely covered ghost validation")
   if (psKernelC0CertifyStore ghostStore).isSome then
     throw (IO.userError "forged canonical trie acquired proof certificate")
   if (psKernelC0CertifyStore malformed).isSome then

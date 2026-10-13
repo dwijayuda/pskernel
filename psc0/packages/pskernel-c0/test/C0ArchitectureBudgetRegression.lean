@@ -287,6 +287,35 @@ def main : IO Unit := do
   | some remaining =>
       if remaining >= 256 then
         throw (IO.userError "recursor intermediate quotation cost missing")
+  -- A blocked recursor or Quot child resumes directly without visiting
+  -- the ordinary halted path. Its saved parent/function quotation must
+  -- still debit the SAME quota, rather than obtaining an unmetered readback.
+  let blockedRec : PsKernelC0DemandState := {
+    recState with blocked := true
+  }
+  if (psKernelC0ReserveIntermediateReadbacks 64 blockedRec 40).isSome then
+    throw (IO.userError "blocked recursor parent quotation was unmetered")
+  match psKernelC0ReserveIntermediateReadbacks 64 blockedRec 512 with
+  | none => throw (IO.userError "blocked recursor declined sufficient quota")
+  | some left =>
+      if left >= 512 then
+        throw (IO.userError "blocked recursor spent zero quote work")
+  let quotParent : PsKernelC0Machine := {
+    control := .mk (.const (c0BudgetName "Quot.lift") []) []
+    arguments := [.mk v [], .mk v [], .mk v [], .mk deepValue []]
+  }
+  let blockedQuot : PsKernelC0DemandState := {
+    machine := { control := .mk v [] }
+    frames := [.quotient quotParent 5]
+    blocked := true
+  }
+  if (psKernelC0ReserveIntermediateReadbacks 64 blockedQuot 40).isSome then
+    throw (IO.userError "blocked Quot function quotation was unmetered")
+  match psKernelC0ReserveIntermediateReadbacks 64 blockedQuot 512 with
+  | none => throw (IO.userError "blocked Quot declined sufficient quota")
+  | some left =>
+      if left >= 512 then
+        throw (IO.userError "blocked Quot function incurred no cost")
   -- Exact finished syntax of each rewrite is counted, not only its input.
   let rewritten : PsKernelC0DemandState := {
     machine := { control := .mk deepValue [] }

@@ -10,9 +10,9 @@ not synthesize new reducibility rules, mutate a checked session or authorize
 admission. Unsafe/partial definitions are explicitly declined.
 -/
 
-/-- Diagnostics and resource limits are separate from the kernel's typed
-    rejection/acceptance contract. -/
-/-- Source-policy delta on one exact, reified constant application. -/
+/-- Source-policy delta on one exact, reified constant application.
+    Candidate diagnostics and resource limits are separate from the kernel's
+    typed rejection/acceptance contract. -/
 def psKernelC0ArchitectureDefinitionStep
     (quoteFuel : Nat)
     (context : PsKernelCheckerContext)

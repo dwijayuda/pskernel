@@ -29,11 +29,13 @@ def psKernelC0ChargeName
   match name with
   | .anonymous => psKernelC0SpendWork quota 1
   | .str parent value => do
-      let left ← psKernelC0ChargeName parent quota
-      psKernelC0SpendWork left (String.utf8ByteSize value + 1)
+      -- Charge the outer node BEFORE descending: low quota must cut off a
+      -- deeply nested untrusted name without first traversing its full tail.
+      let left ← psKernelC0SpendWork quota (String.utf8ByteSize value + 1)
+      psKernelC0ChargeName parent left
   | .num parent value => do
-      let left ← psKernelC0ChargeName parent quota
-      psKernelC0SpendWork left (psKernelNatSizeInBytes value + 1)
+      let left ← psKernelC0SpendWork quota (psKernelNatSizeInBytes value + 1)
+      psKernelC0ChargeName parent left
 
 /-- Recursive universe levels and named parameters also consume syntactic
     work. A deeply nested max/imax/succ expression therefore cannot hide

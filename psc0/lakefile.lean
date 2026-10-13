@@ -221,6 +221,7 @@ lean_lib PsElab where
     `Ps.Elab.Context,
     `Ps.Elab.Literal,
     `Ps.Elab.Basic,
+    `Ps.Elab.Postponed,
     `Ps.Elab.Universe,
     `Ps.Elab.Abstraction,
     `Ps.Elab.Binders,

@@ -1,3 +1,4 @@
+import Ps.Elab.Postponed
 import Ps.Elab.Record
 import Ps.Elab.Universe
 import Ps.Elab.Proof
@@ -163,7 +164,7 @@ def psElabTermWithFuel
                     Except.error PsElabError.structuralRecursionEscapingReference
                   else psElabReference ctx name target
               | _ => smaller ctx source target
-            match term with
+            psElabWithPostponement (fun _ => match term with
             | .doE items _ => psElabDo smaller context items expected
             | .byE tactics scope _ => psElabProof smaller context tactics scope expected
             | .hole _ => Except.ok (psElabHole context expected)
@@ -279,11 +280,14 @@ def psElabTermWithFuel
                                     [] expected with
                                 | Except.error error => Except.error error
                                 | Except.ok application =>
-                                    psElabFinishApplication application expected
+                                    psElabFinishApplication application expected) context term expected
 
 def psElabTerm
     (context : PsElabContext)
     (term : PsSyntaxTerm)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
-  psElabTermWithFuel 4096 context term expected
+  do
+    let result ← psElabTermWithFuel 4096 { context with postponing := true } term expected
+    let result ← psElabDrainPending (psElabTermWithFuel 4096) result
+    return { result with context := { result.context with postponing := context.postponing } }

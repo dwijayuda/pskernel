@@ -155,11 +155,14 @@ private def generalizedFixture : String :=
 private def generalizedRuntimeFixture : String :=
   "namespace GeneralizedRuntime\nclass Evidence(n: outParam(Nat)) where { value: Nat }\nfunction generic(n: Nat): Evidence n := { value := n }\nclass Select(key: Nat, n: outParam(Nat)) where { value: Nat }\ninstance selectFirst: Select 0 5 where { value := 773 }\ninstance selectSecond: Select 1 7 where { value := 773 }\nclass Branch(key: Nat) where { value: Nat }\ninstance branch{key: Nat}{n: Nat}[Evidence n][Select key n]: Branch key where { value := Nat.add(Evidence.value(n := n), Select.value(key := key, n := n)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(key := 0), Branch.value(key := 1)) }\nfunction combined[poly: forall(n: Nat), Evidence n](unit: Unit): Nat := Result.value\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend GeneralizedRuntime\n"
 
+private def postponedFixture : String :=
+  "namespace Postponed\nstructure Box where { value: Nat }\nfunction choose{A: Type}(first: A, second: A): A := first\nfunction apply{A: Type}{B: Type}(fn: A -> B, value: A): B := fn(value)\nfunction proof{P: Prop}(witness: P, anchor: P): Nat := 823\nfunction boxValue(x: Box): Nat := x.value\nfunction withDefault{A: Type}(first: A, second: A := first): A := second\nend Postponed\nconst postponedRecord: Nat := Postponed.boxValue(Postponed.choose({ value := 821 }, Postponed.Box.mk(0)))\nconst postponedLambda: Nat := Postponed.apply(fun x => x.value, Postponed.Box.mk(827))\nconst postponedProof: Nat := Postponed.proof(by { constructor }, True.intro)\nconst postponedInteger: Int := Postponed.choose(829, Int.ofNat(0))\nconst postponedDefaultNatural: Nat := Postponed.choose(839, 0)\nconst postponedNamedRecord: Nat := Postponed.boxValue(Postponed.choose(second := Postponed.Box.mk(0), first := { value := 853 }))\n"
+
 private def derivingEqualityFixture : String :=
   "namespace DerivingEquality\nuniverse u v\nstructure Pair(A: Type u, B: Type v) where {\n  first: A\n  second: B\n} deriving DecidableEq, BEq\ninductive Event(A: Type u): Type u where {\n  | empty\n  | value(payload: A)\n  | label(text: String)\n} deriving DecidableEq, BEq\nstructure Lift(A: Type): Type 1 where { value: A } deriving DecidableEq\nstructure Checked where {\n  count: Nat := 797\n  witness: count = count := by { rfl }\n} deriving Inhabited, BEq, DecidableEq\nstructure Seeded(A: Type u, seed: A): Type u where { value: A := seed } deriving Inhabited\ninductive Void where { } deriving BEq, DecidableEq\nfunction seeded{A: Type u}(seed: A): Seeded(A, seed) := Inhabited.default\nfunction same{A: Type u}[DecidableEq A](a: A, b: A): Bool := if (a = b) { true } else { false }\nend DerivingEquality\nfunction derivedExplicitDecision(a: Nat, b: Nat): Bool := Decidable.decide(self := decEq(a, b))\nconst derivedDecisionEqual: Bool := DerivingEquality.same(DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"), DerivingEquality.Pair.mk(DerivingEquality.Lift.mk(787), \"x\"))\nconst derivedDecisionDifferent: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.value(788))\nconst derivedDecisionTag: Bool := DerivingEquality.same(DerivingEquality.Event.value(787), DerivingEquality.Event.label(\"x\"))\nconst derivedDecisionString: Bool := DerivingEquality.same((DerivingEquality.Event.label(\"λ😀\") : DerivingEquality.Event Nat), DerivingEquality.Event.label(\"λ😀\"))\nconst derivedDefaultRecord: DerivingEquality.Checked := {}\nconst derivedDefaultOverride: DerivingEquality.Checked := { count := 809 }\nconst derivedDefaultRuntime: Nat := DerivingEquality.Checked.count((Inhabited.default : DerivingEquality.Checked))\nconst derivedDefaultRecordRuntime: Nat := derivedDefaultRecord.count\nconst derivedDefaultOverrideRuntime: Nat := derivedDefaultOverride.count\nconst derivedSeedRuntime: Nat := DerivingEquality.Seeded.value(DerivingEquality.seeded(811))\nconst derivedProofBEq: Bool := derivedDefaultRecord == derivedDefaultRecord\nconst derivedProofDecision: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultRecord)\nconst derivedProofDifferent: Bool := DerivingEquality.same(derivedDefaultRecord, derivedDefaultOverride)\ntheorem defaultCorrect: derivedDefaultRuntime = 797 := by { rfl }\ntheorem recordDefaultCorrect: derivedDefaultRecordRuntime = 797 := by { rfl }\ntheorem overrideCorrect: derivedDefaultOverrideRuntime = 809 := by { rfl }\ntheorem seedCorrect: derivedSeedRuntime = 811 := by { rfl }\n"
 
 private def application : String :=
-  derivingEqualityFixture ++ generalizedRuntimeFixture ++
+  postponedFixture ++ derivingEqualityFixture ++ generalizedRuntimeFixture ++
   "const generalizedSharedRuntime: Nat := GeneralizedRuntime.combined(poly := GeneralizedRuntime.generic, unit := ())\n" ++
   "const syntheticDefaultRuntime: Nat := GeneralizedRuntime.selected()\n" ++
   "const syntheticExpectedRuntime: Bool := GeneralizedRuntime.expected(())\n" ++
@@ -2088,6 +2091,25 @@ private def syntheticBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError "unresolved root/default conflict was accepted")
   IO.println "PSCV0_NATIVE_SYNTHETIC: PASS scoped templates, independent replay, mandatory defaults, quiescence and rollback"
 
+private def postponedBoundaries : IO Unit := do
+  let requests : Array PsV7Native.Request := #[
+    { source := postponedFixture ++
+        "const bad: Nat := Postponed.choose({ absent := 1 }, 0)\n" },
+    { source := postponedFixture ++
+        "const bad: Nat := Postponed.proof(by { rfl }, True.intro)\n" },
+    { source := postponedFixture ++
+        "const bad: Nat := Postponed.apply(fun x => x.absent, Postponed.Box.mk(0))\n" }]
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError ("postponed prelude: " ++ error.message))
+  for result in batch.results do
+    match result with
+    | .error error =>
+      unless error.phase == "elaborate" do
+        throw (IO.userError ("postponed refusal escaped elaboration: " ++ error.message))
+    | .ok _ => throw (IO.userError "invalid postponed term was accepted")
+  IO.println "PSCV0_POSTPONED: PASS scoped syntax, tactics, numeral fallback and delayed refusal"
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
@@ -2098,4 +2120,5 @@ def main : IO Unit := do
   projectBoundaries
   derivingBoundaries
   syntheticBoundaries
+  postponedBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

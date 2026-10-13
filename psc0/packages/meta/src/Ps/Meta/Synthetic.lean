@@ -7,11 +7,15 @@ inductive PsSyntheticConstraint where
   | expectedType (locals : PsLocalContext) (actual expected : PsExpr)
   | defaultValue (id : Nat) (value : PsExpr)
 
-structure PsSyntheticResult where
-  context : PsMetaContext
-  pending : List PsSyntheticConstraint
+-- One transactional worklist serves Core constraints and elaborator-owned
+-- syntax continuations. Payloads and captured scopes remain with their owner.
+structure PsSyntheticQueueResult (σ α : Type) where
+  context : σ
+  pending : List α
   attempts : Nat := 0
   resourceExceeded : Bool := false
+
+abbrev PsSyntheticResult := PsSyntheticQueueResult PsMetaContext PsSyntheticConstraint
 
 def psSyntheticAssign (environment : PsEnvironment) (context : PsMetaContext)
     (id : Nat) (value : PsExpr) : Option PsMetaContext := do
@@ -44,52 +48,59 @@ def psSyntheticIsDefault : PsSyntheticConstraint → Bool
   | .defaultValue _ _ => true
   | _ => false
 
-def psSyntheticPass (environment : PsEnvironment) (index : PsInstanceIndex)
-    (defaults : Bool) (limit : Nat) (pending : List PsSyntheticConstraint)
-    (state : PsSyntheticResult) : PsSyntheticResult :=
+def psSyntheticQueuePass {σ α : Type}
+    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+    (defaults : Bool) (limit : Nat) (pending : List α)
+    (state : PsSyntheticQueueResult σ α) : PsSyntheticQueueResult σ α :=
   match pending with
   | [] => { state with pending := state.pending.reverse }
   | constraint :: rest =>
-    if psSyntheticIsDefault constraint != defaults then
-      psSyntheticPass environment index defaults limit rest
+    if isDefault constraint != defaults then
+      psSyntheticQueuePass attempt isDefault defaults limit rest
         { state with pending := constraint :: state.pending }
     else if state.attempts >= limit then
       { state with pending := state.pending.reverse ++ pending, resourceExceeded := true }
     else
-      let solved := psSyntheticAttempt environment index state.context constraint
-      psSyntheticPass environment index defaults limit rest {
+      let solved := attempt state.context constraint
+      psSyntheticQueuePass attempt isDefault defaults limit rest {
         state with context := solved.getD state.context
                    pending := if solved.isSome then state.pending else constraint :: state.pending
                    attempts := state.attempts + 1 }
 
--- Every productive round removes a constraint, so no-progress detection is
--- structural. Defaults run only after ordinary constraints reach quiescence;
--- their assignments may unlock an earlier expected type or instance.
-def psSyntheticRun (fuel : Nat) (environment : PsEnvironment) (index : PsInstanceIndex)
-    (allowDefaults : Bool) (limit : Nat) (state : PsSyntheticResult) : PsSyntheticResult :=
+-- Every productive round removes a constraint. Defaults run only after
+-- ordinary work reaches quiescence; defaults may wake ordinary work again.
+def psSyntheticQueueRun {σ α : Type} (fuel : Nat)
+    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+    (allowDefaults : Bool) (limit : Nat)
+    (state : PsSyntheticQueueResult σ α) : PsSyntheticQueueResult σ α :=
   match fuel with
   | 0 => { state with resourceExceeded := !state.pending.isEmpty }
   | fuel + 1 =>
     if state.pending.isEmpty then state else
-    let ordinary := psSyntheticPass environment index false limit state.pending
+    let ordinary := psSyntheticQueuePass attempt isDefault false limit state.pending
       { state with pending := [] }
     if ordinary.resourceExceeded then ordinary else
     if ordinary.pending.length < state.pending.length then
-      psSyntheticRun fuel environment index allowDefaults limit ordinary
+      psSyntheticQueueRun fuel attempt isDefault allowDefaults limit ordinary
     else if !allowDefaults then ordinary else
-      let defaults := psSyntheticPass environment index true limit ordinary.pending
+      let defaults := psSyntheticQueuePass attempt isDefault true limit ordinary.pending
         { ordinary with pending := [] }
       if defaults.resourceExceeded then defaults else
       if defaults.pending.length < ordinary.pending.length then
-        psSyntheticRun fuel environment index allowDefaults limit defaults
+        psSyntheticQueueRun fuel attempt isDefault allowDefaults limit defaults
       else defaults
+
+def psSyntheticQueueSolve {σ α : Type}
+    (attempt : σ → α → Option σ) (isDefault : α → Bool)
+    (context : σ) (pending : List α)
+    (allowDefaults : Bool := true) (limit : Nat := 32768) :
+    PsSyntheticQueueResult σ α :=
+  let result := psSyntheticQueueRun (pending.length + 1) attempt isDefault
+    allowDefaults limit { context, pending }
+  if result.resourceExceeded then { result with context, pending } else result
 
 def psSyntheticSolve (environment : PsEnvironment) (index : PsInstanceIndex)
     (context : PsMetaContext) (pending : List PsSyntheticConstraint)
     (allowDefaults : Bool := true) (limit : Nat := 32768) : PsSyntheticResult :=
-  let result := psSyntheticRun (pending.length + 1) environment index allowDefaults limit
-    { context, pending }
-  -- Resource refusal is transactional, including earlier successful attempts.
-  if result.resourceExceeded then
-    { result with context, pending }
-  else result
+  psSyntheticQueueSolve (psSyntheticAttempt environment index) psSyntheticIsDefault
+    context pending allowDefaults limit

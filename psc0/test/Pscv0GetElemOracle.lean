@@ -270,3 +270,17 @@ example : (({} : Checked) == {}) = true := rfl
 example : decide (({} : Checked) = {}) = true := rfl
 example : decide (({} : Checked) = { count := 809 }) = false := rfl
 end Pscv0DerivingEqualityOracle
+
+namespace Pscv0PostponedOracle
+structure Box where
+  value : Nat
+def choose {A : Type} (first second : A) : A := first
+def apply {A B : Type} (fn : A → B) (value : A) : B := fn value
+def proof {P : Prop} (_ _ : P) : Nat := 823
+example : (choose { value := 821 } (Box.mk 0)).value = 821 := rfl
+example : apply (fun x => x.value) (Box.mk 827) = 827 := rfl
+example : proof (by constructor) True.intro = 823 := rfl
+example : choose 829 (Int.ofNat 0) = (829 : Int) := rfl
+example : choose 839 0 = 839 := rfl
+example : (choose (second := Box.mk 0) (first := { value := 853 })).value = 853 := rfl
+end Pscv0PostponedOracle

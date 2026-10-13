@@ -208,3 +208,11 @@ and from the four generative quotient primitives. Arbitrary axiom import,
 source axioms and runtime quotient emission remain refused. Approval covers
 this explicit logical assumption delta; it does not certify compiler soundness
 or native/backend semantic equivalence.
+
+### Approval received
+
+On 14 October 2026 the user explicitly approved: “Approve these two pinned
+Lean assumptions.” The unsigned candidate now has exactly this per-slice
+allowlist. Earlier blocked/pending statements above record the review history;
+there is no remaining approval blocker for this delta. Candidate export,
+public admission and full qualification remain separate subsequent steps.

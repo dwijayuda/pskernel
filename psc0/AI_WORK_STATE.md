@@ -1,3 +1,14 @@
+# Foundation approval received — 14 October 2026
+
+The user explicitly approved exactly Lean 4.35.0 `propext` and `Quot.sound`.
+The native exporter now permits those two names in the unsigned operation slice
+only; other slices retain an empty new-assumption allowlist. Continue kernel
+replay, review, admission, strict digest qualification and all-target checks.
+The earlier approval-pending entry below is historical; do not ask again.
+The candidate is not yet admitted and full M2+A remains incomplete.
+
+---
+
 # Active continuation — 14 October 2026: foundation approval pending
 
 Latest published implementation before this note: `c5aa4b2285249eced0bc69b306e488768c5118c3`.

@@ -105,13 +105,16 @@ def psInstanceRegistry (index : PsInstanceIndex) : PsInstanceRegistry :=
   { state with unclassified := state.unclassified.reverse }
 
 def psInstanceMergeOrder (left right : List Nat) : List Nat :=
-  match left, right with
-  | [], _ => right
-  | _, [] => left
-  | x :: xs, y :: ys =>
-    if x < y then x :: psInstanceMergeOrder xs right
-    else y :: psInstanceMergeOrder left ys
-termination_by left.length + right.length
+  match left with
+  | [] => right
+  | x :: xs =>
+    let rec insertBefore (right : List Nat) : List Nat :=
+      match right with
+      | [] => x :: xs
+      | y :: ys =>
+        if x < y then x :: psInstanceMergeOrder xs right
+        else y :: insertBefore ys
+    insertBefore right
 
 def psInstanceRegistryEntries (registry : PsInstanceRegistry) (name : PsName) :
     List PsInstanceEntry :=
@@ -162,7 +165,7 @@ def psInstancePrepareGenerator (environment : PsEnvironment)
     (registry : PsInstanceRegistry) (scope : Nat) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) : Option PsInstanceGenerator :=
   match psPrepareInstanceTarget environment locals context target with
-  | some prepared =>
+  | some prepared => do
     let .constE name _ := (psInferAppView prepared.type).head | none
     let entries := psLocalInstanceEntries locals ++ psInstanceRegistryEntries registry name
     some {
@@ -439,8 +442,8 @@ def psSynthInstanceWithLimits (environment : PsEnvironment) (locals : PsLocalCon
     (index : PsInstanceIndex) (context : PsMetaContext) (height : Nat)
     (limits : PsInstanceSearchLimits) (target : PsExpr) : PsInstanceTabledResult :=
   if height == 0 then { result := psSynthFailure context, table := {} } else
-  let initial : PsInstanceSearchState := { limits, maxHeight := height,
-    registry := psInstanceRegistry index }
+  let initial : PsInstanceSearchState := {
+    limits, maxHeight := height, registry := psInstanceRegistry index }
   let (initial, _) := psInstanceAcquire environment initial 0 locals context target
   let final := psInstanceRun limits.transitions environment initial
   let result := if final.table.resourceExceeded then psSynthFailure context else

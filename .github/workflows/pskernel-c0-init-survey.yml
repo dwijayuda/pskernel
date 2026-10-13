@@ -1,0 +1,115 @@
+name: PSKernel-C0 real Lean 4.35 Init exporter survey
+on:
+  push:
+    branches:
+      - perf/pskernel-c0-v7-rust-20261012
+    paths:
+      - '.github/workflows/pskernel-c0-init-survey.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  init-export-survey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: psc0/packages/pskernel-c0
+          auto-config: false
+          build: false
+          test: false
+          use-github-cache: true
+      - name: Reproduce exporter source and compiler identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(cat psc0/packages/pskernel-c0/lean-toolchain)" = "leanprover/lean4:v4.35.0"
+          git clone --quiet https://github.com/leanprover/lean4export.git "$RUNNER_TEMP/lean4export"
+          git -C "$RUNNER_TEMP/lean4export" checkout --quiet 5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe
+          test "$(cat "$RUNNER_TEMP/lean4export/lean-toolchain")" = "leanprover/lean4:v4.35.0"
+          (cd "$RUNNER_TEMP/lean4export" && lake build lean4export)
+      - name: Export and independently verify real Init
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd "$RUNNER_TEMP/lean4export" && lake env .lake/build/bin/lean4export Init > "$RUNNER_TEMP/Init-4.35.0.ndjson")
+          test -s "$RUNNER_TEMP/Init-4.35.0.ndjson"
+          leanchecker --from-export "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/leanchecker-result.txt" 2>&1 || {
+            cat "$RUNNER_TEMP/leanchecker-result.txt"
+            exit 1
+          }
+          cat "$RUNNER_TEMP/leanchecker-result.txt"
+          grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/leanchecker-result.txt"
+      - name: Publish declaration and expression coverage inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/Init-4.35.0.ndjson" "$RUNNER_TEMP/Init-4.35.0-survey.json" <<'PY'
+          from collections import Counter
+          import hashlib
+          import json
+          from pathlib import Path
+          import sys
+          source, output = (Path(p) for p in sys.argv[1:])
+          declaration_tags = {"axiom", "def", "thm", "opaque", "quot", "inductive"}
+          supported = {"axiom", "def", "thm", "opaque"}
+          expression_tags = {"bvar", "sort", "const", "app", "lam", "forallE",
+                             "letE", "proj", "natVal", "strVal", "mdata", "fvar", "mvar"}
+          expr_counts, decl_counts = Counter(), Counter()
+          unknown_counts, examples = Counter(), []
+          header = None
+          hasher = hashlib.sha256()
+          lines = 0
+          with source.open("rb") as f:
+              for raw in f:
+                  hasher.update(raw)
+                  lines += 1
+                  item = json.loads(raw)
+                  keys = set(item)
+                  if "meta" in keys:
+                      header = item["meta"]
+                  elif "ie" in keys:
+                      expr_counts.update(keys & expression_tags)
+                  elif not (keys & {"in", "il"}):
+                      kinds = keys & declaration_tags
+                      if len(kinds) == 1:
+                          kind = next(iter(kinds))
+                          decl_counts[kind] += 1
+                          if kind not in supported and len(examples) < 12:
+                              examples.append({"line": lines, "tag": kind})
+                      else:
+                          unknown_counts.update(keys)
+                          if len(examples) < 12:
+                              examples.append({"line": lines, "tags": sorted(keys)})
+          if not header or header.get("lean", {}).get("version") != "4.35.0" or (
+              header.get("lean", {}).get("githash") !=
+              "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          ):
+              raise ValueError("unmatched Lean 4.35.0 exporter metadata")
+          report = {
+              "corpus": "real Lean Init + transitive dependencies",
+              "toolchain": "leanprover/lean4:v4.35.0",
+              "lean4export_commit": "5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe",
+              "sha256": hasher.hexdigest(),
+              "byte_size": source.stat().st_size,
+              "ndjson_record_count": lines,
+              "declaration_counts": dict(sorted(decl_counts.items())),
+              "expression_counts": dict(sorted(expr_counts.items())),
+              "unknown_record_counts": dict(sorted(unknown_counts.items())),
+              "first_unsupported_records": examples,
+              "scope": "coverage survey only; not a C0 kernel acceptance claim",
+          }
+          output.write_text(json.dumps(report, indent=2) + "\n")
+          print(json.dumps(report, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-c0-real-init-435-survey
+          path: |
+            ${{ runner.temp }}/Init-4.35.0-survey.json
+            ${{ runner.temp }}/leanchecker-result.txt
+          if-no-files-found: warn
+          retention-days: 14

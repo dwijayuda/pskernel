@@ -40,14 +40,40 @@ def psKernelKnownUnsupportedDiagnostic (message : String) : Bool :=
   psKernelDiagnosticMember message (List.cons "nested or invalid mutual inductive occurrence is not supported" (List.cons "simple inductive admission does not yet support nested recursive occurrences" List.nil))
 
 
-/- Exact diagnostic adaptation preserves all legacy messages. Unknown messages,
-   including provider failures, conservatively fail closed as internalError. -/
+/-- Nested admission decorates underlying checker diagnostics with a
+    phase-specific context. Strip only explicit, known wrappers for *category*
+    recognition; preserve the original diagnostic in the returned typed error.
+    This does not change the accepting checker, safety rules, or resource
+    budget, and unknown diagnostics still fail closed as internal errors. -/
+def psKernelStripOneNestedAdmissionPrefix (message : String) : String :=
+  if message.startsWith "nested preprocessing: " then
+    message.replace "nested preprocessing: " ""
+  else if message.startsWith "nested transformed admission: " then
+    message.replace "nested transformed admission: " ""
+  else if message.startsWith "nested original restoration: " then
+    message.replace "nested original restoration: " ""
+  else if message.startsWith "nested auxiliary restoration: " then
+    message.replace "nested auxiliary restoration: " ""
+  else if message.startsWith "nested restored validation: " then
+    message.replace "nested restored validation: " ""
+  else
+    message
+
+def psKernelStripNestedAdmissionPrefixes (message : String) : String :=
+  let one := psKernelStripOneNestedAdmissionPrefix message
+  let two := psKernelStripOneNestedAdmissionPrefix one
+  psKernelStripOneNestedAdmissionPrefix two
+
+/- Typed diagnostic adaptation preserves original messages and interprets
+   only known category identities. Unknown host/provider errors are never
+   converted into kernel rejections or successes. -/
 def psKernelErrorFromMessage (message : String) : PsKernelError :=
-  match psKernelResourceMessage message with
+  let diagnostic := psKernelStripNestedAdmissionPrefixes message
+  match psKernelResourceMessage diagnostic with
   | Option.some resource => PsKernelError.resourceExhausted resource message
   | Option.none =>
-      if psKernelKnownUnsupportedDiagnostic message then
+      if psKernelKnownUnsupportedDiagnostic diagnostic then
         PsKernelError.declinedUnsupported message
-      else if psKernelKnownInvalidDiagnostic message then
+      else if psKernelKnownInvalidDiagnostic diagnostic then
         PsKernelError.rejectedInvalid message
       else PsKernelError.internalError message

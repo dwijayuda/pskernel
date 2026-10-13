@@ -57,6 +57,7 @@ def psElabWithPostponement (attempt : Unit → Except PsElabError PsElabTermResu
 
 def psElabPendingIsDefault : PsElabPendingWork → Bool
   | .core _ constraint => psSyntheticIsDefault constraint
+  | .expectedTerm _ _ _ _ => false
   | .sourceTerm _ _ _ defaulting => defaulting
 
 def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
@@ -69,6 +70,16 @@ def psElabResumeWork (elaborate : PsElaborator) (context : PsElabContext)
       | .instanceGoal _ => throw .implicitApplicationUnsupported
       | _ => throw .typeMismatch
     return psElabContextWithMeta context metaContext
+  | .expectedTerm scope id value actual =>
+    let saved := psElabRestoreScope { context with postponing := false } scope
+    let some declaration := psMetaFindDecl saved.metaContext id | throw .unresolvedMetavariable
+    let result ← psElabFinalizeExpected
+      { context := saved, term := psMetaInstantiate saved.metaContext value,
+        type := psMetaInstantiate saved.metaContext actual }
+      (some (psMetaInstantiate saved.metaContext declaration.type))
+    let some metaContext := psSyntheticAssign saved.environment result.context.metaContext
+        id result.term | throw .typeMismatch
+    return psElabLeaveScope context (psElabContextWithMeta result.context metaContext)
   | .sourceTerm scope id source _ =>
     let saved := psElabRestoreScope { context with postponing := false } scope
     let some declaration := psMetaFindDecl saved.metaContext id

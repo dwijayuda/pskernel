@@ -156,7 +156,7 @@ def psElabApplyOrderedWith {α : Type}
           | .forallE _ _ _ binder, .mvar _ => psBinderAcceptsExplicitArgument binder
           | _, _ => true
         if preserve then
-          match psElabFinalizeExpected current (some target) with
+          match psElabUnifyExpected current (some target) with
           | .ok result => return { result, constraintsRev := pending }
           | .error _ => pure ()
       | none => pure ()
@@ -269,7 +269,11 @@ def psElabSolveSynthetic (current : PsElabTermResult)
 def psElabFinishApplication (application : PsElabApplicationResult)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
   do
-    let current ← psElabSolveSynthetic application.result application.constraintsRev.reverse
+    -- Propagate convertible result information before dictionary/default work.
+    -- A failed attempt is speculative; adaptation is retried after the queue.
+    let current := (psElabUnifyExpected application.result expected).toOption.getD
+      application.result
+    let current ← psElabSolveSynthetic current application.constraintsRev.reverse
     psElabFinalizeExpected current expected
 
 -- APP-03 is an elaboration request, distinct from a written Unit argument.

@@ -234,6 +234,19 @@ def psElabFinalizeExpected (result : PsElabTermResult) (expected : Option PsExpr
   | .ok checked => return checked
   | .error error =>
     let some target := expected | throw error
+    -- Keep a typed result hole while its actual/expected type is blocked.
+    -- Mandatory defaults and later arguments may resolve it before a Coe
+    -- dictionary can be selected. Retrying owns the original lexical scope.
+    let context := result.context
+    let constraint := PsSyntheticConstraint.expectedType context.localContext result.type target
+    if context.postponing && psSyntheticMayRetry context.metaContext constraint then
+      let fresh := psMetaFresh context.metaContext context.localContext target .syntheticOpaque
+      let .mvar id := fresh.expr | throw .unresolvedMetavariable
+      return { context := { context with
+                 metaContext := fresh.context
+                 pending := .expectedTerm (psElabSaveScope context) id result.term result.type ::
+                   context.pending },
+               term := fresh.expr, type := target }
     -- The failed conversion is speculative. Synthesis starts from the original
     -- context, and the final strict check cannot insert a second coercion.
     let converted ← (psElabCoerce result "Coe" (some target)).mapError fun failure =>

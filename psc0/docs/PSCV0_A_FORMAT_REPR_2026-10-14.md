@@ -156,3 +156,9 @@ Repr-specific source study additionally includes pinned Init/Data/Int/Repr.lean
 (negative integer parentheses), tests/elab/repr.lean (tuples/atomic lists),
 repr_empty.lean (Empty as a parameter) and repr_issue.lean (opaque Id wrappers).
 Keep those requirements distinct from this qualified pure Format boundary.
+
+The additional early-refusal case and full existing integration suite also pass
+at `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`,
+[Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672).
+This is the newest qualified source/test boundary; 313 shared observations,
+394/18/54 Standard roster and both digests are unchanged.

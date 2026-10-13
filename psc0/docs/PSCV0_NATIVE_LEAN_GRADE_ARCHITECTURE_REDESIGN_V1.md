@@ -13,8 +13,8 @@ A–E, C5 and all future development; do not preserve obsolete internals merely
 for compatibility.
 
 
-**Current M2+A qualification:** `49324765c1dc4e1c601dc0cded6118822c1922bc`,
-[Linux 38442705296](https://github.com/dwijayuda/pskernel/actions/runs/38442705296),
+**Current M2+A qualification:** `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`,
+[Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672),
 313 shared observations, native Lean 4.35.0. The pure Std.Format document and
 layout foundation is checked and qualified through all current runtime targets;
 see [design/evidence](PSCV0_A_FORMAT_REPR_2026-10-14.md). ToFormat/Repr, Hashable

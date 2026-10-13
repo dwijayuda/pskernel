@@ -15,8 +15,8 @@ for compatibility.
 
 ## Current qualified boundary — stable Lean and pure Format (14 October 2026)
 
-Executable `49324765c1dc4e1c601dc0cded6118822c1922bc`;
-[green Linux 38442705296](https://github.com/dwijayuda/pskernel/actions/runs/38442705296).
+Executable `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`;
+[green Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672).
 **313 shared runtime observations**, four panic contracts, **198 portable /
 206 native modules**, profile `pscv0-v7-native-bounded/55`.
 Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
@@ -135,7 +135,7 @@ with String or public joinSep with a monomorphic API. The current selected List
 remains Type-0: universe-polymorphic collection APIs require its coherent
 promotion within M2+A. Effectful prettyM callbacks remain separate from the
 qualified pure renderer; pure tags are inert exactly as in native Lean.
-Hashable with real UInt64/modular operations/mixHash. No String/Nat replacements
+Then implement Hashable with real UInt64/modular operations/mixHash. No String/Nat replacements
 for their public types. Other A exits: faithful Float/Float32/scientific,
 fixed-width/BitVec/bytes/string/collection APIs and comprehensive cryptographic
 module/public/import/notation/handler/class/instance/tactic/effect/axiom manifest.

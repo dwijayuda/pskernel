@@ -1,5 +1,17 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "listProofRuntime", args: null, expected: 409n },
+  { name: "listAutoRuntime", args: null, expected: 421n },
+  { name: "listOptionalRuntime", args: null, expected: 433n },
+  { name: "listBangRuntime", args: null, expected: 443n },
+  { name: "listEmptyRuntime", args: null, expected: true },
+  { name: "listHugeRuntime", args: null, expected: true },
+  { name: "listLawfulRuntime", args: null, expected: 2n },
+  { name: "finOptionalRuntime", args: null, expected: 467n },
+  { name: "finMismatchRuntime", args: null, expected: true },
+  { name: "finProofRuntime", args: null, expected: 491n },
+  { name: "finLawfulRuntime", args: null, expected: 2n },
+  { name: "finListGetRuntime", args: null, expected: 521n },
   { name: "highBEqRuntime", args: null, expected: true },
   { name: "highOptionalRuntime", args: null, expected: 359n },
   { name: "highMapRuntime", args: null, expected: 367n },

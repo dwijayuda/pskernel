@@ -78,4 +78,17 @@ example : (⟨ULift.up.{1} 359⟩ : UniverseBox (ULift.{1} Nat))[0]? = some ⟨3
 example {α : Type u} : (default : Option α) = none := rfl
 example (i j size : Nat) (h : i < j) (k : j ≤ size) : i < size := by omega
 
+
+-- List algorithms and Fin adapters retain the collection-specific bound.
+example : ([401, 409] : List Nat)[1] = 409 := rfl
+example : ([431, 433] : List Nat)[1]? = some 433 := rfl
+example : ([] : List Nat)[0]? = none := rfl
+example : ([449] : List Nat)[184467440737095516170]? = none := rfl
+def finSeed : Fin 10 := ⟨1, by decide⟩
+example : ([463, 467] : List Nat)[finSeed]? = some 467 := rfl
+example : ([479] : List Nat)[finSeed]? = none := rfl
+example : LawfulGetElem (List Nat) Nat Nat (fun xs i => i < xs.length) := inferInstance
+example : LawfulGetElem (List Nat) (Fin 10) Nat (fun xs i => i.val < xs.length) := inferInstance
+example : (List.get [509, 521] ⟨1, by decide⟩) = 521 := rfl
+
 end Pscv0GetElemOracle

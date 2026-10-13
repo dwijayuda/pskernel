@@ -28,7 +28,7 @@ def psPrepareInductiveParametersWithFuel
                 cursor with
           | .forallE name domain body binder =>
               match
-                  psErasureClassifyBinder
+                  psErasureClassifyFamilyParameter
                     environment
                     scope.localContext
                     domain with

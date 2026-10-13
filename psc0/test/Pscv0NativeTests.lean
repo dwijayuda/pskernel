@@ -112,7 +112,9 @@ private def getElemFoundationCases : IO Unit := do
       sourceName := "GetElemGood.ps" },
     { source := unproved, targets := [], sourceName := "GetElemUnproved.ps" },
     { source := "theorem bad: Nat.le(5, 2) := PsStandard.natBleReflects(5, 2)\n",
-      targets := [], sourceName := "OrderFalse.ps" }]
+      targets := [], sourceName := "OrderFalse.ps" },
+    { source := "const i: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\nconst bad: Nat := [1][i]\n", targets := [], sourceName := "FinWrongCollection.ps" },
+    { source := "const bad: Nat := [1, 2][2]\n", targets := [], sourceName := "ListOutOfBounds.ps" }]
   let result ← match batch with
     | .ok result => pure result
     | .error reason => throw (IO.userError ("native GetElem batch failed: " ++
@@ -135,9 +137,12 @@ private def getElemFoundationCases : IO Unit := do
   | .error refused =>
     unless refused.phase == "elaborate" do
       throw (IO.userError ("unproved indexed term failed in wrong phase: " ++ refused.phase))
-  match result.results[2]? with
-  | some (.error _) => pure ()
-  | _ => throw (IO.userError "false natural inequality was accepted")
+  for i in [2:5] do
+    match result.results[i]? with
+    | some (.error error) =>
+      unless error.phase == "elaborate" do
+        throw (IO.userError s!"invalid bound {i} failed outside elaboration")
+    | _ => throw (IO.userError s!"false natural or collection bound {i} was accepted")
   IO.println "PSCV0_NATIVE_GETELEM: checked indexed proof/instance admitted; missing proof refused"
 
 private def application : String :=
@@ -794,7 +799,26 @@ private def application : String :=
   "}\n" ++
   "function boundedByChain(xs: BoundedBox, i: Nat, j: Nat, h: Nat.lt(i, j), k: Nat.le(j, xs.size)): Nat := xs[i]\n" ++
   "const bigBoundIndexRuntime: Nat := (BoundedBox.mk(383, 184467440737095516171))[184467440737095516170]\n" ++
-  "const symbolicBoundRuntime: Nat := boundedByChain(BoundedBox.mk(389, 5), 1, 3, PsStandard.natBleReflects(2, 3), PsStandard.natBleReflects(3, 5))\n"
+  "const symbolicBoundRuntime: Nat := boundedByChain(BoundedBox.mk(389, 5), 1, 3, PsStandard.natBleReflects(2, 3), PsStandard.natBleReflects(3, 5))\n" ++
+  "function listChecked(xs: List Nat, i: Nat, h: Nat.lt(i, List.length(xs))): Nat := xs[i]\n" ++
+  "function listFinChecked(xs: List Nat, i: Fin(List.length(xs))): Nat := List.get(xs, i)\n" ++
+  "function listLawful[LawfulGetElem(List Nat, Nat, Nat, fun xs => fun i => Nat.lt(i, List.length(xs)))](xs: List Nat): Nat := List.length(xs)\n" ++
+  "function finLawful{n: Nat}[LawfulGetElem(List Nat, Fin n, Nat, fun xs => fun i => Nat.lt(Fin.val(i), List.length(xs)))](xs: List Nat): Nat := List.length(xs)\n" ++
+  "const listProofRuntime: Nat := listChecked([401, 409], 1, PsStandard.natBleReflects(2, 2))\n" ++
+  "const listAutoRuntime: Nat := [419, 421][1]\n" ++
+  "const listOptionalRuntime: Nat := Option.getD([431, 433][1]?, 0)\n" ++
+  "const listBangRuntime: Nat := [439, 443][1]!\n" ++
+  "const listEmptyRuntime: Bool := Option.isNone(([] : List Nat)[0]?)\n" ++
+  "const listHugeRuntime: Bool := Option.isNone([449][184467440737095516170]?)\n" ++
+  "const listLawfulRuntime: Nat := listLawful([457, 461])\n" ++
+  "const finIndexSeed: Fin(10) := Fin.mk(1, PsStandard.natBleReflects(2, 10))\n" ++
+  "const finOptionalRuntime: Nat := Option.getD([463, 467][finIndexSeed]?, 0)\n" ++
+  "const finMismatchRuntime: Bool := Option.isNone([479][finIndexSeed]?)\n" ++
+  "const finProofRuntime: Nat := [487, 491][finIndexSeed]\n" ++
+  "const finLawfulRuntime: Nat := finLawful(n := 10, xs := [499, 503])\n" ++
+  "const finListGetRuntime: Nat := listFinChecked([509, 521], Fin.mk(1, PsStandard.natBleReflects(2, 2)))\n" ++
+  "function listBangPanic(unit: Unit): Nat := ([] : List Nat)[0]!\n" ++
+  "function finBangPanic(unit: Unit): Nat := [523][finIndexSeed]!\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

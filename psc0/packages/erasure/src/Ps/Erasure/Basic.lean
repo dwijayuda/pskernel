@@ -368,6 +368,17 @@ def psErasureClassifyBinder
       else
         PsErasedBinderKind.runtime
 
+-- Uniform datatype parameters occur in a checked family telescope, not in
+-- the stored constructor fields. Retain only type parameters in target types;
+-- numeric and proof parameters still participate in Core substitution. Ordinary
+-- function binders keep psErasureClassifyBinder, so computational Nat arguments
+-- are not discarded by this representation-specific rule.
+def psErasureClassifyFamilyParameter (environment : PsEnvironment)
+    (localContext : PsLocalContext) (type : PsExpr) : PsErasedBinderKind :=
+  match psErasureClassifyBinder environment localContext type with
+  | .type => .type
+  | _ => .index
+
 -- Mirror psEraseOpenDefinition's aligned raw forall/lambda prefix. In particular,
 -- do not weak-head normalize the value or turn an instantiated result arrow into
 -- another declaration parameter. Structure-recursor lowering preserves this prefix.
@@ -675,7 +686,7 @@ def psErasureInductiveSourceTypeIndicesWithFuel
         psWhnf environment psMetaEmpty context cursor | throw .binderMismatch
       let pushed := psLocalPushBinding context name domain binder
       let next := psExprInstantiate1 body (.fvar pushed.id)
-      match psErasureClassifyBinder environment context domain with
+      match psErasureClassifyFamilyParameter environment context domain with
       | .type =>
         psErasureInductiveSourceTypeIndicesWithFuel environment remaining
           pushed.context next count (sourceIndex + 1) (sourceIndex :: indicesRev)
@@ -715,7 +726,7 @@ def psErasureReifyInductiveArgumentsWithFuel
         psWhnf environment psMetaEmpty scope.localContext cursor
         | throw .binderMismatch
       let next := psExprInstantiate1 body argument
-      match psErasureClassifyBinder environment scope.localContext domain with
+      match psErasureClassifyFamilyParameter environment scope.localContext domain with
       | .type =>
         let value ← erase argument
         match value with

@@ -14,6 +14,7 @@ lean_lib PsKernelC0 where
     `Ps.KernelCore.Architecture.Structural,
     `Ps.KernelCore.Architecture.Demand,
     `Ps.KernelCore.Architecture.Budget,
+    `Ps.KernelCore.Architecture.Typed,
     `Ps.KernelCore.API.Kernel,
     `Ps.KernelCore.API.KernelContractV1,
     `Ps.KernelCore.API.Outcome,

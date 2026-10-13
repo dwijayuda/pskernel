@@ -55,6 +55,14 @@ Level normalization factors a common successor:
 law needed for mixed-universe record sorts to unify with `BEq : Type u → Type u`;
 handlers do not guess universe predecessors or add a separate level solver.
 
+Rigid application congruence retains the existing universe-first path and can
+defer a failed head-universe equation until its typed arguments have fixed the
+universe metavariables. The argument-first attempt starts from the original
+snapshot, checks every argument, then must discharge all head-level equations
+before committing. This handles max-universe instances without guessing levels
+or publishing delayed unchecked equalities. It is a bounded spine mechanism,
+not the still-open unified synthetic-constraint scheduler.
+
 The generator/consumer instance graph and its ownership, replay and resource
 bounds are unchanged. This slice exercises local polymorphic requirements
 through that public synthesis API.

@@ -796,12 +796,16 @@ private def application : String :=
   "structure Tagged(A: Type u, n: Nat): Type u where { value: A } deriving Inhabited, BEq\n" ++
   "structure Lift(A: Type): Type 1 where { value: A } deriving Inhabited, BEq\n" ++
   "structure SortBox(A: Sort u) where { value: A } deriving Inhabited\n" ++
+  "structure TypeField: Type (u + 1) where { value: Type u }\n" ++
   "function defaultChoice{A: Type u}(unit: Unit): Choice A := Inhabited.default\n" ++
   "function defaultPhantom{A: Type u}{B: Type v}[Inhabited A](unit: Unit): Phantom(A, B) := Inhabited.default\n" ++
   "function defaultSort{A: Sort u}[Inhabited A](unit: Unit): SortBox A := Inhabited.default\n" ++
   "theorem choiceDefault{A: Type u}: defaultChoice(A := A, unit := ()) = Choice.empty := by { rfl }\n" ++
   "theorem phantomDefault{A: Type u}{B: Type v}[Inhabited A]: Phantom.value(defaultPhantom(A := A, B := B, unit := ())) = (Inhabited.default : A) := by { rfl }\n" ++
   "end DerivingParameters\n" ++
+  "const derivingTypeField: DerivingParameters.TypeField := DerivingParameters.TypeField.mk(Nat)\n" ++
+  "const derivingProjectedType: Type := derivingTypeField.value\n" ++
+  "theorem derivingProjectionUniverse: derivingProjectedType = Nat := by { rfl }\n" ++
   "const derivingMinimalRuntime: Bool := match DerivingParameters.defaultChoice(A := Empty, unit := ()) with { | .value value => nomatch value | .empty => true }\n" ++
   "const derivingPhantomRuntime: Nat := DerivingParameters.Phantom.value(DerivingParameters.defaultPhantom(A := Nat, B := Empty, unit := ()))\n" ++
   "const derivingHighDefault: DerivingParameters.Pair(DerivingParameters.Lift Nat, Nat) := Inhabited.default\n" ++

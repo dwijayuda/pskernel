@@ -132,10 +132,16 @@ def psUnifyRigidApplication
   let .constE rightName rightLevels := right.head | none
   if !psNameEq leftName rightName || left.args.isEmpty ||
       left.args.length != right.args.length then none else
+  let arguments := fun initial =>
+    (left.args.zip right.args).foldl (fun current (a, b) =>
+      if current.success then unify current.context a b else current) initial
   let levels := psUnifyLevelLists leftLevels context rightLevels
-  if !levels.success then none else
-  let result := (left.args.zip right.args).foldl (fun current (a, b) =>
-    if current.success then unify current.context a b else current) levels
+  let result := if levels.success then arguments levels else
+    -- A composite level such as max ?u ?v need not be solvable until the
+    -- typed arguments fix ?u and ?v. Defer that equation within this spine;
+    -- retry from the original snapshot and require it before committing.
+    let args := arguments (psUnifySuccess context)
+    if args.success then psUnifyLevelLists leftLevels args.context rightLevels else args
   if result.success then some result else none
 
 def psUnifyWithFuelWorker

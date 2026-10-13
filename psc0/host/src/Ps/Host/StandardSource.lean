@@ -54,7 +54,7 @@ def sourceExpr : PsExpr → String
 -- runtime primitive enters generated portable Core.
 structure Pool where
   enabled : Bool := false
-  prefix : String := "standardNode"
+  namePrefix : String := "standardNode"
   nodes : Std.HashMap String String := {}
   definitions : Array String := #[]
 
@@ -62,7 +62,7 @@ private def intern (type body : String) : StateM Pool String := do
   let state ← get
   let key := type ++ ":" ++ body
   if let some name := state.nodes[key]? then return name
-  let name := state.prefix ++ toString state.definitions.size
+  let name := state.namePrefix ++ toString state.definitions.size
   set { state with
     nodes := state.nodes.insert key name
     definitions := state.definitions.push

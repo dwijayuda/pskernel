@@ -107,3 +107,24 @@ Copyright (c) 2018, 2019 Microsoft Corporation; author Leonardo de Moura;
 Apache-2.0. Modifications: portable Core, capture-avoiding bound-variable
 construction, explicit registered quotient descriptors and bounded reduction.
 The official Lean provider regenerates quotient metadata and checks signatures.
+
+### Product, collection, scalar-display and source-sharing updates
+
+StandardProduct follows the two-universe Prod foundation in Init/Prelude.lean
+(2020 Microsoft Corporation; Leonardo de Moura, Mario Carneiro). StandardList
+follows the native foldl telescope and reverseAux/reverse equations from
+Init/Prelude.lean and Init/Data/List/Basic.lean (2020 and 2016 Microsoft
+Corporation respectively; Leonardo de Moura, with Mario Carneiro for Prelude). StandardEquality preserves the Prelude
+Bool.beq reduction orientation. Modified: portable Core declarations, checked
+recursors and explicit dictionary construction.
+
+Unsigned Inhabited/ToString/Repr/ReprAtom dictionaries adapt Init/Prelude.lean,
+Init/Data/ToString/Basic.lean and Init/Data/Repr.lean; copyright Microsoft
+Corporation, authors Leonardo de Moura and Mario Carneiro, Apache-2.0.
+Modified: explicit portable dictionary registration over the checked model.
+
+The host-only StandardSource design follows the interning architecture of
+Lean/Util/ShareCommon.lean and Init/ShareCommon.lean (2020 Microsoft Corporation;
+Leonardo de Moura, Mario Carneiro). Its safe exact structural-key implementation
+does not copy the unsafe object/pointer primitives. It emits shared ordinary
+Lean constants without changing portable declaration semantics.

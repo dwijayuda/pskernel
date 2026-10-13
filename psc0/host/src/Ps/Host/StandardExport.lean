@@ -346,7 +346,7 @@ private def exportStandardCore (spec : StandardExportSpec)
   let boundaryNames := (base.map psDeclarationName).mergeSort
     (fun a b => Lean.Name.lt (PsKernelLean.toLeanName a) (PsKernelLean.toLeanName b))
   let mut pool : StandardSource.Pool := {
-    enabled := spec.shareSource, prefix := spec.privatePrefix ++ "Node" }
+    enabled := spec.shareSource, namePrefix := spec.privatePrefix ++ "Node" }
   let mut definitions := []
   let mut identifiers := []
   let mut statuses := []

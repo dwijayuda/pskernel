@@ -152,12 +152,10 @@ def psKernelC0ArchitecturePreviewTypedDemand
       fuel quota work.checker expr
   return (observation, { work with checker := session })
 
-/-- Unified source-checked work operations. Every judgment validates the
-    work transaction and delegates to the SAME authoritative checked session
-    used by declaration admission. Neither candidate syntax nor preview
-    agreement may authorize a type, DefEq result, or checked environment. -/
 /-- Source WHNF is a reduction observation, not expression validation.
-    Full validation still requires CheckWork before declaring acceptance. -/
+    This validated work operation delegates to the same authoritative
+    checked session used by declaration admission. Full validation still
+    requires CheckWork; no candidate result authorizes acceptance. -/
 def psKernelC0ArchitectureWhnfWork
     (fuel : Nat)
     (work : PsKernelC0ArchitectureWork)

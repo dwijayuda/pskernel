@@ -85,6 +85,14 @@ Integration through `Architecture/Work.lean` remains preview-only: the checked s
 
 Next architecture focus: ordinary recursor-major demand with precise constructor-rule/universe/fixed-argument semantics and careful K/literal cases, plus globally metered quotation and gradual consolidation of candidate-only execution before any accepting integration.
 
+## CDE-6 — non-K constructor and Nat-literal recursors (2026-10-14)
+
+The candidate continuation evaluator now recognizes source environment `recInfo` before the specialized zero-level Nat primitive gate. It does not admit K or unsafe recursors to the ordinary iota rewrite. A major premise is evaluated in the *same* fuel loop. Ordinary recursor rules are selected from the source environment, with exact occurrence universe instantiation, fixed parameter/motive/minor arguments, trailing constructor fields and surplus recursor arguments. Nat literals are normalized to `Nat.zero`/`Nat.succ` constructor shapes for rule matching; String-literal constructor expansion and structure/K handling are deferred.
+
+Mandatory source-WHNF differentials exercise direct and β/ζ-major constructors, Nat zero/succ, polymorphic RHS, fixed argument ordering, constructor parameter skip, wrong names/arities, low fuel, and explicit K/unsafe policy distinction. The source checker remains the only authority for admission.
+
+**Executable qualification:** [`7917de8a`](https://github.com/dwijayuda/pskernel/commit/7917de8a0f9ad08a967f3399599bbaa665bcb4d7), full [native CI 38441627839](https://github.com/dwijayuda/pskernel/actions/runs/38441627839) **SUCCESS**, including original-vs-C0 checker comparison. These are bounded experimental source differentials with synthetic WHNF fixtures, **not** complete Phase D/E, real checked inductive-recursive conformance or formal soundness evidence. Next: coherent K/structure/String families and one globally metered closure/resource contract, followed by whole-checker integration without candidate acceptance shortcuts.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

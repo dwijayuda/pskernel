@@ -1,5 +1,6 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "highBEqRuntime", args: null, expected: true },
   { name: "highOptionalRuntime", args: null, expected: 359n },
   { name: "highMapRuntime", args: null, expected: 367n },
   { name: "highDoRuntime", args: null, expected: 373n },

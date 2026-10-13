@@ -108,7 +108,8 @@ def psStandardBEqOptionInstance : PsDeclaration :=
          .constE psBoolFalseName [],
          psLogicLam 5 "rightValue" alpha elementEquality,
          .fvar 3]))
-  let outer := psLogicApply recursor
+  let outer := psLogicApply
+    (.constE psSelfHostOptionRecName [.succ (.param u), .param u])
     [alpha, outerMotive, noneBranch, someBranch, .fvar 2]
   let method := psLogicLam 2 "left" option
     (psLogicLam 3 "right" option (.app outer (.fvar 3)))

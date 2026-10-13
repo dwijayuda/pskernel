@@ -780,6 +780,8 @@ private def application : String :=
   "function defaultOption{A: Type u}(unit: Unit): Option A := Inhabited.default\n" ++
   "end M1Universes\n" ++
   "function highRead(xs: Option(ExplicitHigh Nat)): Nat := (Option.getD(xs, ExplicitHigh.mk(0))).value\n" ++
+  "instance highNatBEq: BEq(ExplicitHigh Nat) where { beq(left: ExplicitHigh Nat, right: ExplicitHigh Nat): Bool := left.value == right.value }\n" ++
+  "const highBEqRuntime: Bool := Option.some(ExplicitHigh.mk(397)) == Option.some(ExplicitHigh.mk(397))\n" ++
   "const highOptionalRuntime: Nat := highRead(M1Universes.lookup(M1Universes.Box.mk(ExplicitHigh.mk(359))))\n" ++
   "const highMapRuntime: Nat := highRead(Option.map(fun n => ExplicitHigh.mk(n), Option.some(367)))\n" ++
   "const highDoRuntime: Nat := highRead(M1Universes.bindMap(fun value => value, Option.some(ExplicitHigh.mk(373))))\n" ++
@@ -1041,6 +1043,7 @@ private def emissionBoundary : IO Unit := do
 
 private def doBoundaries : IO Unit := do
   let cases : Array (String × String) := #[
+    ("universe u v\nfunction bad{A: Type u}{B: Type v}(xs: Option A, f: A -> B): Option B := do {\n  let x: A ← xs\n  return f(x)\n}\n", "elaborate"),
     ("const bad: Except String Nat := do { return 1; return 2 }\n", "parse"),
     ("const bad: Option Nat := do {\n  let n: Nat ← Except.ok(1)\n  return n\n}\n", "elaborate"),
     ("const bad: Except String Nat := do {\n  Except.ok(1)\n  return 2\n}\n", "elaborate"),
@@ -1060,7 +1063,7 @@ private def doBoundaries : IO Unit := do
       unless error.phase == cases[i]!.snd do
         throw (IO.userError s!"do boundary {i}: {error.phase}: {error.message}")
     | .ok _ => throw (IO.userError s!"do boundary {i}: invalid source accepted")
-  IO.println "PSCV0_NATIVE_DO: PASS 7 do refusals and 1 opaque definitional-opacity refusal"
+  IO.println "PSCV0_NATIVE_DO: PASS 8 do refusals and 1 opaque definitional-opacity refusal"
 
 -- Reuse the production graph planner and checked environment, rather than
 -- introducing a separate project interpreter or a large fixture suite.

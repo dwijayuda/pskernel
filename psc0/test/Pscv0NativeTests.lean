@@ -190,6 +190,38 @@ private def formatFixture : String :=
 private def productUniverseFixture : String :=
   "namespace ProductLevels\nuniverse u v\nstructure High: Type 1 where { value: Nat } deriving Inhabited, BEq, Repr, Hashable\ninstance highFormat: Std.ToFormat(High) where { format(value: High): Std.Format := Std.Format.text(\"hi\") }\nfunction first{A: Type u}{B: Type v}(pair: Prod(A, B)): A := pair.fst\nfunction second{A: Type u}{B: Type v}(pair: Prod(A, B)): B := match pair with { | Prod.mk a b => b }\ntheorem firstPair{A: Type u}{B: Type v}(a: A, b: B): Prod.fst(Prod.mk(a, b)) = a := by { rfl }\ntheorem reverseDefinition{A: Type u}(xs: List A): List.reverse(xs) = List.reverseAux(xs, []) := by { rfl }\nend ProductLevels\nconst productHighFold: Nat := (List.foldl(fun (acc: ProductLevels.High) => fun (n: Nat) => ProductLevels.High.mk(acc.value + n), ProductLevels.High.mk(0), [1, 2, 3], α := ProductLevels.High, β := Nat)).value\nconst productHighLeft: Nat := ProductLevels.first(Prod.mk(ProductLevels.High.mk(5), true)).value\nconst productHighRight: Nat := ProductLevels.second(Prod.mk(true, ProductLevels.High.mk(7))).value\nconst productHighDefault: Nat := (Inhabited.default : Prod(ProductLevels.High, Nat)).fst.value\nconst productHighEqual: Bool := Prod.mk(ProductLevels.High.mk(5), true) == Prod.mk(ProductLevels.High.mk(5), true)\nconst productHighUnequal: Bool := Prod.mk(true, ProductLevels.High.mk(5)) == Prod.mk(true, ProductLevels.High.mk(7))\nconst productHighRepr: String := reprStr(Prod.mk(ProductLevels.High.mk(5), true))\nconst productHighFormat: String := Std.Format.pretty(Std.format(Prod.mk(true, ProductLevels.High.mk(5))))\nconst productHighHash: Bool := hash(Prod.mk(ProductLevels.High.mk(5), true)) == mixHash(hash(ProductLevels.High.mk(5)), hash(true))\n"
 
+-- A single pinned-Lean differential family checks the Hashable class on a
+-- higher-universe structure, an ordinary Bool and a mixed-universe product.
+-- These independent requests distinguish a missing derived dictionary from
+-- broken product instance matching or numeric result elaboration. Each
+-- request must be kernel accepted, with no fallback or silent omission.
+private def highUniverseHashableCases : IO Unit := do
+  let [prefix, _] := productUniverseFixture.splitOn "end ProductLevels\\n"
+    | throw (IO.userError "mixed-universe Hashable fixture lacks namespace terminator")
+  let base := prefix ++ "end ProductLevels\\n"
+  let samples := #[
+    ("high structure",
+      "const highValueHash: UInt64 := hash(ProductLevels.High.mk(5))\\n"),
+    ("ordinary Boolean",
+      "const boolValueHash: UInt64 := hash(true)\\n"),
+    ("mixed-universe product",
+      "const mixedPairHash: UInt64 := hash(Prod.mk(ProductLevels.High.mk(5), true))\\n"),
+    ("mixed-universe hash equality",
+      "const mixedPairCheck: Bool := hash(Prod.mk(ProductLevels.High.mk(5), true)) == mixHash(hash(ProductLevels.High.mk(5)), hash(true))\\n")]
+  let requests := samples.map fun (_, source) =>
+    { source := base ++ source, targets := ([] : List PsV7Native.Target) : PsV7Native.Request }
+  let result ← PsV7Native.runBatch requests
+  let batch ← match result with
+    | .error error => throw (IO.userError ("Hashable universe batch: " ++ error.message))
+    | .ok batch => pure batch
+  for i in [:samples.size] do
+    let some (label, _) := samples[i]? | throw (IO.userError "missing Hashable case label")
+    let some answer := batch.results[i]? | throw (IO.userError "missing Hashable batch result")
+    match answer with
+    | .ok _ => IO.println ("PSCV0_HASHABLE_UNIVERSE: PASS " ++ label)
+    | .error problem => throw (IO.userError ("PSCV0_HASHABLE_UNIVERSE: " ++
+        label ++ " refused at " ++ problem.phase ++ ": " ++ problem.message))
+
 private def hashFixture : String :=
   "namespace Hashing\nuniverse u\nstructure Box(A: Type u): Type u where { value: A } deriving Hashable\nstructure Checked where { value: Nat\n witness: value = value } deriving Hashable\ninductive Choice where { | none | value(payload: Nat) } deriving Hashable\ninductive Hidden where { | value{secret: Nat}(payload: Nat) } deriving Hashable\ninductive Void where { } deriving Hashable\nfunction generic{A: Type u}[inst: Hashable(A)](value: A): UInt64 := hash(value)\nfunction ignoreSort{A: Sort u}(value: A, answer: Nat): Nat := answer\nend Hashing\nfunction hashText(value: String): Nat := UInt64.toNat(hash(value))\nfunction hashNatural(value: Nat): Nat := UInt64.toNat(hash(value))\nfunction hashInteger(value: Int): Nat := UInt64.toNat(hash(value))\nfunction hashPair(first: Nat, second: Nat): Nat := UInt64.toNat(mixHash(UInt64.ofNat(first), UInt64.ofNat(second)))\nconst hashRecord: Nat := UInt64.toNat(hash(Hashing.Box.mk((23 : Nat))))\nconst hashProof: Nat := UInt64.toNat(hash(Hashing.Checked.mk(19, by { rfl })))\nconst hashCtor: Nat := UInt64.toNat(hash(Hashing.Choice.value(29)))\nconst hashNullary: Nat := UInt64.toNat(hash(Hashing.Choice.none))\nconst hashImplicit: Nat := UInt64.toNat(hash(Hashing.Hidden.value(secret := 31, payload := 37)))\nconst hashOption: Nat := UInt64.toNat(hash(Option.some((41 : Nat))))\nconst hashNone: Nat := UInt64.toNat(hash((Option.none : Option Nat)))\nconst hashList: Nat := UInt64.toNat(hash([1, 2, 3]))\nconst hashArray: Nat := UInt64.toNat(hash(Array.mk([1, 2, 3])))\nconst hashTuple: Nat := UInt64.toNat(hash(Prod.mk((43 : Nat), true)))\nconst hashProposition: Nat := UInt64.toNat(hash(True.intro))\nconst sortPropositionEntry: Nat := Hashing.ignoreSort(True.intro, 61)\nconst sortPropositionPartial: Nat := (Hashing.ignoreSort(True.intro))(67)\nfunction integerCases(value: Int): Nat := match Int.neg(value) with { | Int.ofNat n => Nat.add(n, 71) | Int.negSucc n => Nat.add(n, 73) }\nconst hashFin: Nat := UInt64.toNat(hash(Fin.mk(n := 4, val := 3, isLt := Nat.lt_succ_self(3))))\nconst hashPoly: Nat := UInt64.toNat(Hashing.generic((47 : Nat)))\nconst hashScalar: Nat := UInt64.toNat(hash((18446744073709551615 : UInt64)))\nconst hashNarrow: Nat := UInt64.toNat(hash((255 : UInt8)))\nconst hashChar: Nat := UInt64.toNat(hash(Char.ofNat(128512)))\nconst hashUnit: Nat := UInt64.toNat(hash(()))\nconst hash64Value: Nat := UInt64.toNat(hash64((53 : UInt64)))\n"
 
@@ -2268,6 +2300,7 @@ def main : IO Unit := do
   metavariableBoundary
   parserCases
   getElemFoundationCases
+  highUniverseHashableCases
   semanticCases
   doBoundaries
   projectBoundaries

@@ -63,9 +63,10 @@ width and application parentheses. Then use existing kernel/strict IR and
 JS/TS/Rust/GC-Wasm integration gates. Do not add backend-specific format printers,
 weaken unknown-type checks or use formatting axioms to obtain green output.
 
-Status: design recorded; Format/Repr source implementation remains pending.
+Current status: pure Format is implemented and qualified below; ToFormat/Repr
+and the effectful callback API remain pending.
 
-## Pure layout implementation (qualification pending)
+## Pure layout implementation
 
 StandardFormatData/Basic own the real algebra and document operations;
 Support owns scalar scanning and Core construction vocabulary; Measure and Work
@@ -116,3 +117,42 @@ and every subtype retain the same allocated spelling; field indices and physical
 layout are unchanged. The target validator rejects duplicate names in every
 structure before rendering. WAT and binary debug metadata consume the same
 layout field table. No Format-specific field rename or printer exception.
+
+The sibling-backend review found ECMAScript discriminator keys use fresh Symbols
+(rather than source string field keys), while Rust uses native enum variants;
+neither shares this WAT field-name collision. One existing Wasm qualification
+batch now also requires early refusal of a duplicate target field table.
+
+## Qualification complete
+
+Executable `49324765c1dc4e1c601dc0cded6118822c1922bc`;
+[green Linux 38442705296](https://github.com/dwijayuda/pskernel/actions/runs/38442705296).
+**313 shared runtime observations**, four panic contracts, **198 portable /
+206 native modules**, profile `pscv0-v7-native-bounded/55`.
+Official **Lean 4.35.0** at `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
+independent oracle, official kernel, semantic/refusal and graph gates, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, project and existing performance
+gates passed. These measurements do not establish performance parity.
+
+Standard: **394 declarations /18 classes /54 instances**, canonical v2:
+FNV `fnv1a64:17804548636281664114`;
+SHA `sha256:ec394b9e9c70bf92cb829060fcfee1e36aaf38f1f5e92b198a646c553ff259b1`.
+The pure Std.Format algebra, measurement and renderer are ordinary checked
+definitions over the shared IR, including hard-line/fill behavior, Unicode
+columns, signed nesting, alignment and initial column. No formatting axiom,
+backend formatter or new runtime primitive. WAT constructor discriminator names
+are allocated separately from payload fields; physical indices are unchanged.
+
+Quoting and checked Int.toNat remain qualified. Quoting comparisons use native
+evaluation because upstream String.Internal.append is kernel-opaque; they are
+not kernel equality proofs. Int runtime conversion preserves arbitrary precision.
+Historical RC4 receipts retain their original identities.
+
+Full M2+A is **not complete**. Next: ToFormat/Repr and remaining A/M2.
+
+The weight argument justifies termination for public pretty's derived bound;
+it is not a formally checked termination or renderer-equivalence theorem.
+Repr-specific source study additionally includes pinned Init/Data/Int/Repr.lean
+(negative integer parentheses), tests/elab/repr.lean (tuples/atomic lists),
+repr_empty.lean (Empty as a parameter) and repr_issue.lean (opaque Id wrappers).
+Keep those requirements distinct from this qualified pure Format boundary.

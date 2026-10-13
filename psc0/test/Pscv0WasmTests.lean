@@ -73,6 +73,18 @@ private def writePlan (stem : String) (plan : PsWasm.ScalarComponent) : IO Unit 
   IO.FS.writeFile (stem ++ ".wit") (PsWasm.scalarWit plan)
 
 def main : IO Unit := do
+  -- WAT and binary debug names share the target field table. A malformed
+  -- table must fail before either artifact can be emitted.
+  let duplicateFields : PsWasmModule := {
+    psWasmModuleEmpty with
+    structures := [{
+      name := "DuplicateFields", superType := none, isFinal := true
+      fields := [
+        { name := "payload", storageType := .value .i32 },
+        { name := "payload", storageType := .value .i32 }] }] }
+  match psWasmIrValidateModuleStructure duplicateFields with
+  | .error (.duplicateFieldName "DuplicateFields") => pure ()
+  | _ => throw (IO.userError "duplicate target field names escaped validation")
   let directory := "../dist/pscv0-native/wasm"
   IO.FS.createDirAll directory
   writePlan (directory ++ "/gc-probe") PsWasm.gcComponentProbe

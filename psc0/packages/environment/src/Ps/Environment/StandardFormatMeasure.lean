@@ -51,12 +51,12 @@ def psFormatMeasureDeclaration : PsDeclaration :=
   let line := psFormatSpace (psFormatBool true) (psFormatBool false) (psFormatNat 0)
   let apply := fun ih m w => psLogicApply ih [flatten, m, w]
   let text := fun s =>
-    let prefix := PsExpr.fvar 13
-    let pos := psFormatField "TextPrefix" 0 prefix
+    let prefixInfo := PsExpr.fvar 13
+    let pos := psFormatField "TextPrefix" 0 prefixInfo
     let found := psFormatNot (psLogicApply (.constE psStringAtEndName []) [s, pos])
-    psFormatLet 13 "prefix" (psFormatPrivateType "TextPrefix")
+    psFormatLet 13 "prefixInfo" (psFormatPrivateType "TextPrefix")
       (psFormatPrivateCall "textPrefix" [s])
-      (psFormatSpace found (psFormatAnd flatten found) (psFormatField "TextPrefix" 1 prefix))
+      (psFormatSpace found (psFormatAnd flatten found) (psFormatField "TextPrefix" 1 prefixInfo))
   let body := psFormatFold arrow (.fvar 0) 100 {
     nil := bind psFormatZeroSpace
     line := bind (psFormatIf psFormatSpaceType flatten

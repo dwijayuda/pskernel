@@ -78,15 +78,15 @@ def psFormatRenderItemDeclaration : PsDeclaration :=
         (psFormatMachine trial (psFormatEmit state (.lit (.string " ")))) breakFill))
     breakFill
   let text := fun source =>
-    let prefix := PsExpr.fvar 8
-    let position := psFormatField "TextPrefix" 0 prefix
+    let prefixInfo := PsExpr.fvar 8
+    let position := psFormatField "TextPrefix" 0 prefixInfo
     let first := psLogicApply (.constE psStringExtractName []) [source, psFormatNat 0, position]
     let tail := psLogicApply (.constE psStringExtractName [])
       [source, psLogicApply (.constE psStringNextName []) [source, position],
        .app (.constE psStringUtf8ByteSizeName []) source]
     let items := replace (psFormatCall "text" [tail])
     let newState := psFormatNewline (psFormatEmit state first) (psOrderCall "Int.toNat" [indent])
-    psFormatLet 8 "prefix" (psFormatPrivateType "TextPrefix")
+    psFormatLet 8 "prefixInfo" (psFormatPrivateType "TextPrefix")
       (psFormatPrivateCall "textPrefix" [source])
       (psFormatIf psFormatMachineType
         (psLogicApply (.constE psStringAtEndName []) [source, position])

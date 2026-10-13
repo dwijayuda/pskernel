@@ -12,6 +12,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0Lean435MigrationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedScratchRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
       - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'

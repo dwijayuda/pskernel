@@ -201,15 +201,18 @@ def psKernelC0ReserveRecursorSyntax
     (quota : Nat) : Option Nat := do
   match state.frames with
   | .recursor _ metadata _ :: _ =>
-      let ruleName ←
+      let ruleName : Option PsKernelName :=
         match state.machine.control with
         | .mk (.const name _) _ => some name
         | .mk (.lit (.nat 0)) _ => some psKernelNatZeroName
         | .mk (.lit (.nat (_ + 1))) _ => some psKernelNatSuccName
         | _ => none
-      match psKernelFindRecursorRule ruleName metadata.rules with
-      | some rule => psKernelC0ChargeExpr rule.rhs quota
+      match ruleName with
       | none => some quota
+      | some name =>
+          match psKernelFindRecursorRule name metadata.rules with
+          | some rule => psKernelC0ChargeExpr rule.rhs quota
+          | none => some quota
   | _ => some quota
 
 /-- Resource preflight shares the operation quota between source-definition

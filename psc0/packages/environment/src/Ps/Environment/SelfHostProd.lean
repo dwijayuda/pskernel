@@ -1,5 +1,6 @@
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
+import Ps.Environment.StandardString
 
 def psSelfHostProdRecName : PsName :=
   psNameAppendStr psProdName "rec"
@@ -118,7 +119,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardReducibilityExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
+  psStandardReducibilityExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
     <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
@@ -148,7 +149,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
             psSelfHostProdRecName with
         | none => []
         | some recursor => [prod, constructor, recursor]
-  psStandardCoercionDeclarations ++ psStandardOfNatDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardOfNatDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure

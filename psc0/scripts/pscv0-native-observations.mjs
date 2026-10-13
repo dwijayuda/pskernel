@@ -1,5 +1,10 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  {"name":"quoteText","args":[""],"expected":"\"\""},
+  {"name":"quoteText","args":["a\\b\"c\n\t\r"],"expected":"\"a\\\\b\\\"c\\n\\t\\x0d\\x7f\""},
+  {"name":"quoteText","args":["λ😀'"],"expected":"\"λ😀'\""},
+  {"name":"quoteCharacter","args":null,"expected":"'\\''"},
+  {"name":"quoteInString","args":null,"expected":"'"},
   { name: "coercionArgument", args: null, expected: 877n },
   { name: "coercionApplication", args: null, expected: 877n },
   { name: "coercionFunction", args: null, expected: 881n },

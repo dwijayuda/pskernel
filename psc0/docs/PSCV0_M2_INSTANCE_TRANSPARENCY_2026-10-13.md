@@ -69,3 +69,14 @@ typed flexible-head assignment before delta reduction. This keeps
 `?A := Hidden` rather than silently changing it to `?A := Nat` before search.
 Failed assignment attempts remain transactional and can fall back to ordinary
 conversion. This also avoids unnecessary reduction on successful inference.
+
+## Qualification complete
+
+Executable `35e239193e69cc466b81ac57282df1b1500f4927`,
+[Linux 38433276797](https://github.com/dwijayuda/pskernel/actions/runs/38433276797).
+All **293 shared runtime observations**, four panic contracts, official RC4
+kernel and independent oracle, graph/refusal tests, strict IR, JS/TS/Rust,
+GC-Wasm V8/Wasmtime, WIT/WAT/components, project and performance gates passed.
+**188 portable / 196 native modules**, profile `pscv0-v7-native-bounded/51`.
+Standard remains 308 declarations / 18 classes / 54 instances; reviewed v2
+digests above. Full M2+A remains open.

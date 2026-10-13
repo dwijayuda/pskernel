@@ -355,3 +355,11 @@ example [Evidence Nat] : True := by
   fail_if_success have : Evidence (Id Nat) := inferInstance
   trivial
 end Pscv0TransparencyOracle
+
+namespace Pscv0QuoteOracle
+example : String.quote "" = "\"\"" := rfl
+example : String.quote "a\\b\"c\n\t\r\x7f" = "\"a\\\\b\\\"c\\n\\t\\x0d\\x7f\"" := rfl
+example : String.quote "λ😀'" = "\"λ😀'\"" := rfl
+example : Char.quote (Char.ofNat 39) = "'\\''" := rfl
+example : Char.quoteCore (Char.ofNat 39) true = "'" := rfl
+end Pscv0QuoteOracle

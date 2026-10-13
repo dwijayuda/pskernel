@@ -1,5 +1,30 @@
 # PSCV0 v7 native implementation roadmap
 
+## Current qualified boundary — M2+A transparency (13 October 2026)
+
+Executable `35e239193e69cc466b81ac57282df1b1500f4927`;
+[green Linux 38433276797](https://github.com/dwijayuda/pskernel/actions/runs/38433276797).
+**293 shared runtime observations**, four panic contracts, **188 portable /
+196 native modules**, profile `pscv0-v7-native-bounded/51`.
+Official RC4 kernel and independent oracle, all existing semantic/refusal and
+instance graph gates, strict IR, readable JS/TS/Rust, V8/Wasmtime GC,
+WIT/WAT/component/ABI, project and performance gates passed.
+
+Standard remains **308 declarations /18 classes /54 instances**. Its canonical
+v2 payload includes declaration reducibility:
+FNV `fnv1a64:1901246055571366448`;
+SHA `sha256:799539fdf6557760d1c9134439ac6ea811915c7c6b054164310c11aa3e017136`.
+
+Instance target/candidate preparation, selection unification and generator keys
+now use pinned instance transparency. Checked evidence/default assignment uses
+ordinary conversion. Flexible type inference preserves original checked terms
+before delta reduction. Abbreviations and instance metadata survive imports.
+The independent audit verifies selected upstream definition statuses.
+
+[Transparency design and evidence](PSCV0_M2_INSTANCE_TRANSPARENCY_2026-10-13.md).
+Full M2+A is **not complete**. Checked string quoting is the next implementation,
+pending a strict digest review and all-target qualification.
+
 ## Current qualification — direct coercions and typed postponed results (13 October 2026)
 
 Executable `35641f810e31f3c9d309c01028acd53ebe4112d9`;

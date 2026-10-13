@@ -417,6 +417,34 @@ def psKernelMutualInductiveNeutralDomain
         | _ => false
     | _ => false
 
+/-- Diagnostics only: classify the already resolved head *declaration* kind
+    of the first exhausting recursive field. No reduction or type judgment
+    changes, and unknown heads never gain an accepting shortcut. -/
+def psKernelMutualRecursiveDomainHeadKind
+    (session : PsKernelCheckerSession)
+    (domain : PsKernelExpr) : String :=
+  match psKernelExprGetAppFn domain with
+  | .const name _ =>
+      match psKernelEnvironmentFind session.context.environment name with
+      | some (.defnInfo _) => "definition"
+      | some (.inductInfo _) => "inductive"
+      | some (.recInfo _) => "recursor"
+      | some (.ctorInfo _) => "constructor"
+      | some (.axiomInfo _) => "axiom"
+      | some (.thmInfo _) => "theorem"
+      | some (.opaqueInfo _) => "opaque"
+      | some (.quotInfo _) => "quotient"
+      | none => "unknown"
+  | .fvar name =>
+      match psKernelLocalContextFind session.context.localContext name with
+      | some (.localDecl ..) => "local-variable"
+      | some (.letDecl ..) => "local-let"
+      | none => "unknown-variable"
+  | .lam .. => "lambda"
+  | .forallE .. => "forall"
+  | .proj .. => "projection"
+  | _ => "other"
+
 def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
     (fuel : Nat) :
     PsKernelCheckerSession ->
@@ -490,7 +518,9 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                     "recursive-domain-with-target" error)
                 else
                   Except.error (psKernelMutualBudgetAt
-                    "recursive-domain-without-target" error)
+                    ("recursive-domain-without-target-" ++
+                      psKernelMutualRecursiveDomainHeadKind session domain)
+                    error)
             | Except.ok reduced =>
                 match
                     psKernelSimpleMutualAppInfo

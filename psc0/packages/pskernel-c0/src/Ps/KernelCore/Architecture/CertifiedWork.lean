@@ -8,7 +8,8 @@ Phase C/E proof-carrying validated work transactions.
 each call. A source-authored immutable `CertifiedWork` carries a proof of
 this exact predicate across source checking, inference, DefEq and WHNF,
 where ONLY the checker state changes. The syntax/store never changes under
-those four operations, so full replay need not be repeated.
+those operations, so full replay need not be repeated. The work now owns
+the same mathematical StoreWF certificate as its immutable working store.
 
 Staging, admission and promotion remain their existing atomic and
 independently validated operations. This wrapper does not turn syntax into
@@ -21,12 +22,16 @@ typing evidence and cannot use experimental demand for proof acceptance.
 structure PsKernelC0CertifiedWork where
   raw : PsKernelC0ArchitectureWork
   valid : psKernelC0ArchitectureWorkValid raw = true
+  working : PsKernelC0CertifiedStore
+  owned : working.store = raw.scratch.working
 
 def psKernelC0ArchitectureCertifyWork
     (work : PsKernelC0ArchitectureWork) :
     Option PsKernelC0CertifiedWork :=
   if h : psKernelC0ArchitectureWorkValid work = true then
-    some { raw := work, valid := h }
+    let some working := psKernelC0CertifyStore work.scratch.working
+      | none
+    some { raw := work, valid := h, working := working, owned := rfl }
   else none
 
 /-- Source-checked sessions may update only the checker field. Store and
@@ -40,7 +45,27 @@ private def psKernelC0CertifiedWorkWithSession
     valid := by
       change psKernelC0ArchitectureWorkValid work.raw = true
       exact work.valid
+    working := work.working
+    owned := by
+      change work.working.store = work.raw.scratch.working
+      exact work.owned
   }
+
+/-- Every validated work transaction now carries the exact full
+    mathematical StoreWF proof for its CURRENT immutable working snapshot.
+    It is retained without rechecking on source operations that change
+    only the checker session. This is syntax integrity, not a typing proof. -/
+theorem psKernelC0CertifiedWorkStoreWF
+    (work : PsKernelC0CertifiedWork) :
+    psKernelC0StoreWF work.raw.scratch.working := by
+  rw [← work.owned]
+  exact work.working.wellFormed
+
+theorem psKernelC0CertifiedWorkCanonical
+    (work : PsKernelC0CertifiedWork) :
+    psKernelC0ReplayValidateStore work.raw.scratch.working = true := by
+  rw [← work.owned]
+  exact work.working.canonical
 
 /-- The checked source WHNF is used without revalidating an immutable store
     on every normalization call. It remains a reduction observation, not a
@@ -158,8 +183,9 @@ def psKernelC0CertifiedWorkStageRoot
     Option (PsKernelC0CertifiedWork × PsKernelC0CertifiedRoot) := do
   let staged ← psKernelC0CertifiedWorkStage work expr
   let root ← staged.raw.stagedRoots.head?
-  let owner ← psKernelC0CertifyStore staged.raw.scratch.working
-  let bound ← psKernelC0CertifyRootIn owner root
+  -- Stage already produced a certificate for this exact immutable
+  -- working snapshot; reuse its proof rather than replaying a second time.
+  let bound ← psKernelC0CertifyRootIn staged.working root
   if psKernelExprEqual bound.expression expr then
     some (staged, bound)
   else none

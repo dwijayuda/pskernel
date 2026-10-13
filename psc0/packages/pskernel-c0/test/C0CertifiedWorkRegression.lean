@@ -31,6 +31,34 @@ def main : IO Unit := do
     psKernelC0CertifiedRootRead_exact certified
   if (psKernelC0CertifyRoot rawStore (rawStore.nodes.size + 8)).isSome then
     throw (IO.userError "foreign numeric handle acquired certificate")
+  -- The same numeric root ID has no meaning outside its owner.
+  -- A different canonical store may use an overlapping ID for distinct
+  -- binder metadata; cross-store transfer must re-encode and prove exact
+  -- source syntax equality, not simply copy the original number.
+  let alternate : PsKernelExpr :=
+    .lam (c0CertificateName "x") (.sort .zero)
+      (.mdata 18 (.bvar 0)) .implicit
+  let some (foreignStore, foreignId) :=
+      psKernelC0EncodeExpr psKernelC0StoreEmpty alternate
+    | throw (IO.userError "cross-store collision fixture failed")
+  let some foreignRoot := psKernelC0CertifyRoot foreignStore foreignId
+    | throw (IO.userError "foreign canonical snapshot was not certifiable")
+  if psKernelExprEqual (psKernelC0CertifiedRootRead certified)
+      (psKernelC0CertifiedRootRead foreignRoot) then
+    throw (IO.userError "different immutable stores lost source metadata")
+  let some transferred := psKernelC0CertifiedRootRehome
+      certified foreignRoot.owner
+    | throw (IO.userError "certified root failed cross-store rehome")
+  let _transferProof :
+      psKernelExprEqual transferred.source.expression
+        transferred.target.expression = true :=
+    psKernelC0CertifiedTransferExact transferred
+  if !psKernelExprEqual (psKernelC0CertifiedRootRead transferred.target)
+      term then
+    throw (IO.userError "rehome reused a foreign handle incorrectly")
+  let _transferValid :
+      psKernelC0ReplayValidateStore transferred.target.owner.store = true :=
+    psKernelC0CertifiedRootStore_canonical transferred.target
   let some rootNode := psKernelC0StoreGet rawStore id
     | throw (IO.userError "certified test root disappeared")
   let malformed : PsKernelC0TermStore :=

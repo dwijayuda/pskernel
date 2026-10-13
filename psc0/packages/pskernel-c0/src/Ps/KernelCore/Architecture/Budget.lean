@@ -41,6 +41,9 @@ def psKernelC0ChargeExpr
           psKernelC0ChargeExpr body afterValue
       | .mdata _ body => psKernelC0ChargeExpr body remaining
       | .proj _ _ struct => psKernelC0ChargeExpr struct remaining
+      | .lit (.nat value) =>
+          let bytes := psKernelNatSizeInBytes value
+          if bytes > remaining then none else some (remaining - bytes)
       | .lit (.str value) =>
           let bytes := String.utf8ByteSize value
           if bytes > remaining then none else some (remaining - bytes)
@@ -288,6 +291,89 @@ def psKernelC0ReserveIntermediateReadbacks
                     some left
             | _ => some afterResume
 
+/-- The cost of primitive numeral work is checked BEFORE calling the
+    existing Nat reducer. The bound is conservative in units of numerical
+    byte-work, not a claim about Lean heap allocations or runtime cycles.
+    In particular, pow/left-shift reserve space proportional to possible
+    output growth, and other arithmetic reserves operand-dependent work.
+    Unknown operations do not incur a speculative rewrite charge. -/
+def psKernelC0ReserveNatBinaryWork
+    (name : PsKernelName)
+    (left right quota : Nat) : Option Nat :=
+  if !psKernelC0CandidateIsNatBinary name then some quota
+  else
+    let leftBytes := psKernelNatSizeInBytes left
+    let rightBytes := psKernelNatSizeInBytes right
+    let input := leftBytes + rightBytes + 1
+    let cost :=
+      if psKernelNameEq name psKernelNatPowName then
+        input * (right + 1)
+      else if psKernelNameEq name psKernelNatShiftLeftName then
+        input + right + leftBytes
+      else if psKernelNameEq name psKernelNatShiftRightName then
+        input + leftBytes * 8
+      else if psKernelNameEq name psKernelNatGcdName then
+        input * input
+      else
+        input * 2
+    if cost > quota then none else some (quota - cost)
+
+/-- Every direct primitive step and every resumed Nat frame consumes the
+    same numerical-work allowance. Operand quotation is itself metered,
+    including delayed environments; no separate recursive evaluation budget
+    is granted to a primitive. Neutral, nonliteral operands retain their
+    existing source-semantic stuck/decline behavior. -/
+def psKernelC0ReservePrimitiveWork
+    (depth : Nat)
+    (state : PsKernelC0DemandState)
+    (quota : Nat) : Option Nat := do
+  match state.frames with
+  | .natRight parent left :: _ => do
+      let (rightExpr, afterQuote) ←
+        psKernelC0QuoteMachineMetered depth quota state.machine
+      match parent.control, psKernelExprNatLiteralValue rightExpr with
+      | .mk (.const op _) _, some right =>
+          psKernelC0ReserveNatBinaryWork op left right afterQuote
+      | _, _ => some afterQuote
+  | .natSucc _ :: _ => do
+      let (valueExpr, afterQuote) ←
+        psKernelC0QuoteMachineMetered depth quota state.machine
+      match psKernelExprNatLiteralValue valueExpr with
+      | none => some afterQuote
+      | some n =>
+          let size := psKernelNatSizeInBytes (n + 1)
+          if size > afterQuote then none else some (afterQuote - size)
+  | _ =>
+      match state.machine.control with
+      | .mk (.const op levels) _ =>
+          if !levels.isEmpty then some quota
+          else if psKernelNameEq op psKernelNatSuccName then
+            match state.machine.arguments with
+            | [] => some quota
+            | arg :: _ => do
+                let (valueExpr, afterQuote) ←
+                  psKernelC0QuoteClosureMetered depth arg quota
+                match psKernelExprNatLiteralValue valueExpr with
+                | none => some afterQuote
+                | some n =>
+                    let size := psKernelNatSizeInBytes (n + 1)
+                    if size > afterQuote then none else some (afterQuote - size)
+          else if psKernelC0CandidateIsNatBinary op then
+            match state.machine.arguments with
+            | left :: right :: _ => do
+                let (aExpr, afterA) ←
+                  psKernelC0QuoteClosureMetered depth left quota
+                let (bExpr, afterB) ←
+                  psKernelC0QuoteClosureMetered depth right afterA
+                match psKernelExprNatLiteralValue aExpr,
+                      psKernelExprNatLiteralValue bExpr with
+                | some a, some b =>
+                    psKernelC0ReserveNatBinaryWork op a b afterB
+                | _, _ => some afterB
+            | _ => some quota
+          else some quota
+      | _ => some quota
+
 /-- One transition loop and one remaining quota. This delegates *all*
     reduction rules to the existing demand dispatcher and therefore cannot
     introduce separate candidate reduction semantics. -/
@@ -309,16 +395,19 @@ def psKernelC0DemandRunWithBudget :
       let some afterQuotes :=
           psKernelC0ReserveIntermediateReadbacks depth state afterRewrites
         | throw "candidate intermediate quotation work quota exhausted"
+      let some afterPrimitive :=
+          psKernelC0ReservePrimitiveWork depth state afterQuotes
+        | throw "candidate primitive numerical work quota exhausted"
       match psKernelC0DemandTransition depth context state with
       | .next next =>
           -- A transition may create a fresh intermediate expression. Count
           -- the entire reachable result (including its saved frames) before
           -- allowing the next candidate transition to consume it.
           let some afterResult :=
-              psKernelC0ChargeDemandStateSyntax depth next afterQuotes
+              psKernelC0ChargeDemandStateSyntax depth next afterPrimitive
             | throw "candidate intermediate rewrite work quota exhausted"
           psKernelC0DemandRunWithBudget fuel depth afterResult context next
-      | .halted => return (state, afterQuotes)
+      | .halted => return (state, afterPrimitive)
       | .declined reason => throw reason
 
 /-- Non-accepting, explicit-quota candidate bridge. The existing demand

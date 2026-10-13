@@ -584,6 +584,17 @@ def psKernelLevelNormalizeListWith
           normalize
           tail)
 
+/-- Distribute an outer successor offset over the individual maxima.
+    The official Lean 4.35 kernel normalises
+      succ^k(max a b) = max (succ^k a) (succ^k b).
+    Applying k to a rebuilt max instead leaves a syntactically stuck offset
+    that the universe-geq procedure cannot compare branchwise. No semantic
+    rule is relaxed: this is an exact identity of natural-number max. -/
+def psKernelLevelMaxBranchOffsets
+    (levels : List PsKernelLevel)
+    (amount : Nat) : List PsKernelLevel :=
+  levels.map (fun level => psKernelLevelAddOffset level amount)
+
 def psKernelLevelNormalizeWithFuel
     (fuel : Nat) :
     PsKernelLevel -> PsKernelLevel :=
@@ -624,9 +635,8 @@ def psKernelLevelNormalizeWithFuel
               psKernelLevelTrimExplicit sorted;
             let unique :=
               psKernelLevelDedupOffsets trimmed;
-            psKernelLevelAddOffset
-              (psKernelLevelMkMaxList unique)
-              amount
+            psKernelLevelMkMaxList
+              (psKernelLevelMaxBranchOffsets unique amount)
 
 def psKernelLevelNormalize
     (level : PsKernelLevel) : PsKernelLevel :=

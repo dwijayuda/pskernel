@@ -269,6 +269,12 @@ private def exportStandardCore (spec : StandardExportSpec)
         seen := seen.insert info.name
         entries := entries.push info
   entries := entries.qsort (fun a b => Lean.Name.lt a.name b.name)
+  IO.println (Lean.Json.mkObj [
+    ("schema", Lean.toJson ("pscv0-standard-candidate-policy/1" : String)),
+    ("declarations", Lean.toJson entries.size),
+    ("axioms", Lean.toJson ((entries.filter Lean.ConstantInfo.isAxiom).map (fun info => toString info.name))),
+    ("quotientPrimitives", Lean.toJson (entries.filterMap fun info =>
+      match info with | .quotInfo _ => some (toString info.name) | _ => none))]).compress
   let declarations ← entries.toList.mapM fun info => do
     match exportDeclaration native info with
     | .ok value => pure value

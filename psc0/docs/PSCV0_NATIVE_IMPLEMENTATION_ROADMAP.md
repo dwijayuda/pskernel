@@ -1,5 +1,12 @@
 # PSCV0 v7 native implementation roadmap
 
+## Latest M1 foundation qualification — 13 October 2026
+
+**Newest independently qualified executable:** [`e0ac8c69c928261e21e9593ed3f2f4aa5157385a`](https://github.com/dwijayuda/pskernel/commit/e0ac8c69c928261e21e9593ed3f2f4aa5157385a), Linux GitHub Actions [38335736466](https://github.com/dwijayuda/pskernel/actions/runs/38335736466) **passed** (13 October 2026). This supersedes older executable-status statements below, which remain as preserved history. The pinned upstream is Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`). The selected Standard now contains **234 declarations, 14 classes, 40 instances**, FNV `fnv1a64:403111548970955669`, SHA-256 `sha256:6e6f1fad15d4f0cb401a09c1ebc219c3f60dd50acb21061ca9eee4ab782bd85e`; portable/native closure remains 170/178 `.lean` modules with 198 shared runtime observations on TS, direct JS, Rust, and Wasm GC/Wasmtime.
+
+The selected RC4-compatible decision foundation has been replaced with checked `Decidable` structure, constructor, projections, Boolean reflection predicate and reducible dependent `dite`. Native metavariable-closed proof irrelevance unifies **actual proofs of the same checked Prop**, not arbitrary data or Bool terms. An official-kernel source oracle proves excluded middle from a provided `Decidable` and equality of any two witnesses of one proposition. The independently quantified decision-dictionary uniqueness theorem remains **unproved**, following a dependent-elaboration mismatch, and there is still **no generic `LawfulGetElem` instance**. List/Array/Fin indexing, Type-0 Option generalization and M2 waiter tabling remain unqualified. The older `fc8bc8b` milestone below is historical.
+
+
 **New-chat handoff (13 October 2026):** `psc0/AI_WORK_STATE.md` and `psc0/AI_CONTINUE_PROMPT.md` now specify the M1-then-M2 implementation order. Last green executable remains `fc8bc8b`, [CI 38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371); newer documents are not executable qualifications. M1's checked optional default and target panic are done; generic lawfulness and collections are open. M2's scoped answer memo and independent budgets are done; generator/consumer waiters remain open. Keep native `.lean`, minimal milestone tests, no pskernel-core/self-hosting/C5.
 
 ## Latest qualified native compiler milestone — 13 October 2026

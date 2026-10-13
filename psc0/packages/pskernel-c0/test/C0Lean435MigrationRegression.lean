@@ -142,7 +142,8 @@ def main : IO Unit := do
     "mutual-field-whnf: ",
     "mutual-field-domain-check: ",
     "mutual-field-ensure-sort: ",
-    "mutual-field-recursive-analysis: "
+    "mutual-field-recursive-analysis: ",
+    "mutual-recursive-domain-whnf: "
   ]
   for stage in stages do
     match psKernelErrorFromMessage

@@ -1,7 +1,8 @@
 # M2+A scalar completion design — Lean 4.35.0
 
-Status: design/research only; unsigned conversion /59 is qualified, Hashable /60
-is undergoing qualification. Float, signed words and expanded BitVec operations
+Status: unsigned conversion /59 and Hashable /60 are qualified. Shared word
+lowering and logical foundation support are under qualification; the complete
+unsigned operation slice is blocked on explicit foundation approval. Float, signed words and expanded BitVec operations
 are not enabled by this document.
 
 All Lean references below use commit
@@ -187,3 +188,23 @@ foundation assumptions must appear in the strict snapshot and manifest. No arbit
 `Classical.choice`, sorry, unsafe definition or proof replacement is allowed.
 Previous “no new axioms” receipts describe their historical snapshots; they
 must not be used to conceal this intentional trust-boundary expansion.
+
+### Concrete pending assumption change
+
+If authorized, the native export specification would allow exactly
+`[`propext, `Quot.sound]` for this slice and no other axioms. Native signatures:
+
+```lean
+axiom propext {a b : Prop} : (a ↔ b) → a = b
+axiom Quot.sound : ∀ {α : Sort u} {r : α → α → Prop} {a b : α},
+  r a b → Eq (Quot.mk r a) (Quot.mk r b)
+```
+
+The signatures come from pinned Init/Core.lean and Init/Prelude.lean. The
+exported proof bodies would remain unchanged; all converted declarations
+would undergo fresh official kernel replay. The snapshot and final assumption
+manifest would distinguish these two foundations from ordinary definitions
+and from the four generative quotient primitives. Arbitrary axiom import,
+source axioms and runtime quotient emission remain refused. Approval covers
+this explicit logical assumption delta; it does not certify compiler soundness
+or native/backend semantic equivalence.

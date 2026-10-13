@@ -266,7 +266,7 @@ def checkQuotientFoundation : IO Unit := do
   let intro := PsExpr.constE (psDecisionName "True.intro") []
   let eq := fun type a b => psReduceApply (.constE (psRootName "Eq") [level]) [type, a, b]
   let refl := fun type value => psReduceApply (.constE (psDecisionName "Eq.refl") [level]) [type, value]
-  let relation := .app (.constE (psRootName "Eq") [level]) nat
+  let relation := PsExpr.app (.constE (psRootName "Eq") [level]) nat
   let quotient := psReduceApply (.constE (psRootName "Quot") [level]) [nat, relation]
   let major := psReduceApply (.constE (psDecisionName "Quot.mk") [level])
     [nat, relation, .lit (.natural 41)]

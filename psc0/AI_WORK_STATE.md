@@ -1,3 +1,47 @@
+# Active continuation — 14 October 2026: foundation approval pending
+
+Latest published implementation before this note: `c5aa4b2285249eced0bc69b306e488768c5118c3`.
+The ToFormat/Repr/Hashable /60 checkpoint below remains the last full green.
+Current quotient-mechanism and shared word-backend changes are under Linux
+qualification; do not claim unsigned operations or full M2+A complete.
+
+**Actual blocker:** automatic approval review rejected publishing a proposed
+per-slice allowlist for exactly pinned Lean `propext` and `Quot.sound`.
+The user was asked explicitly via the asynchronous question. Until approved,
+retain the current refusal. If approved, do not ask again: apply the documented
+trust change, export/review/admit the full unsigned slice, update both strict
+digests from independent CI evidence, and continue remaining M2+A.
+
+The candidate policy inventory at
+[38469424406](https://github.com/dwijayuda/pskernel/actions/runs/38469424406)
+reported 794 new declarations, exactly those two axioms and three used kernel
+quotient descriptors. The exporter now closes the four-descriptor family.
+No candidate asset has been admitted; no new assumption is in the active
+Standard environment. CI explicitly verifies refusal at `Quot.sound` and
+runs the unchanged /60 integration matrix afterward.
+
+Implemented infrastructure: capture-avoiding function-valued recursive iota,
+symbolic differential checks against actual Lean recursor rules; explicit
+kernel quotient metadata, official generative admission/signature checks,
+registered lift/ind reduction, isolated kernel computation and collision probes.
+This is logical foundation work, not source well-founded recursion or general
+quotient runtime support. Shared integer div/rem/shift lowering is implemented
+but the full operation family still awaits source admission and qualification.
+
+Next unsigned admission: freeze the current hash-stage replay base before
+extending it; retain actual Nat.div instead of its old axiom; add explicit
+HAdd/HSub/HMul/HDiv/HMod/Neg registrations for four widths; qualify the compact
+12-operation vectors, zero division, wrapped shifts and higher-order/generic
+calls against native Lean and all existing targets. Preserve all /60 cases.
+Signed/word-sized values, Float/scientific, expanded BitVec/selected APIs,
+comprehensive manifest, broader M2 evidence and C5 retention remain open.
+
+See [reviewed design and approval boundary](docs/PSCV0_M2_A_SCALAR_COMPLETION_2026-10-14.md).
+No local shell/build, pskernel-core, compiler-source .ps migration or self-hosting.
+Pinned official Lean 4.35.0; GitHub connector writes and Linux Actions only.
+
+---
+
 # PSCV0 v7 — Active work state
 
 ## Pinned Lean reference rule (14 October 2026)

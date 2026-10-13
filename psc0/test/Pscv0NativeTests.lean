@@ -1677,8 +1677,9 @@ private def projectBoundaries : IO Unit := do
     "structure Defaults where {\n  count: Nat\n  enabled: Bool\n} deriving Inhabited\n" ++
     "const recordDefault: Defaults := Inhabited.default\n" ++
     "theorem countProof: recordDefault.count = 0 := by { rfl }\n"
-  let derivingPending :=
-    "inductive Shade where { | dark | light } deriving Repr\n"
+  let derivingEnumRepr :=
+    "inductive Shade where { | dark | light } deriving Repr\n" ++
+    "const shadeText: String := reprStr(Shade.dark)\n"
   let derivingEnumEqualitySource :=
     "inductive Traffic where { | red | yellow | green } deriving BEq, Inhabited\n" ++
     "const equalRed: Bool := Traffic.red == Traffic.red\n" ++
@@ -1820,7 +1821,8 @@ private def projectBoundaries : IO Unit := do
     { source := derivingInhabitedSource, moduleName := "DerivingInhabited",
       targets := [.javascript, .typescript, .rust] },
     { source := derivingMissingCtor, moduleName := "DerivingMissingCtor" },
-    { source := derivingPending, moduleName := "DerivingPending" },
+    { source := derivingEnumRepr, moduleName := "DerivingEnumRepr",
+      targets := [.javascript, .typescript, .rust] },
     { source := derivingPayload, moduleName := "DerivingPayload",
       targets := [.javascript, .typescript, .rust] },
     { source := derivingStructure, moduleName := "DerivingStructure",
@@ -1931,7 +1933,12 @@ private def projectBoundaries : IO Unit := do
           throw (IO.userError "derived Inhabited instance missing checked artifacts")
     | 24, .error error =>
         throw (IO.userError ("deriving Inhabited rejected at " ++ error.phase ++ ": " ++ error.message))
-    | 25, .error error | 26, .error error =>
+    | 26, .ok value =>
+        unless value.artifacts.length == 3 do
+          throw (IO.userError "derived enum Repr missing checked target artifacts")
+    | 26, .error error =>
+        throw (IO.userError ("derived enum Repr failed at " ++ error.phase ++ ": " ++ error.message))
+    | 25, .error error =>
         unless error.phase == "elaborate" do
           throw (IO.userError "unsupported deriving did not fail during elaboration")
     | 27, .ok value | 28, .ok value =>

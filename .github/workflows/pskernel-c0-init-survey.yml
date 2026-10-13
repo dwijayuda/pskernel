@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Identify real nested recursive domain head declaration kind
+      - name: Identify reducible definition responsible for nested WHNF exhaustion
         shell: bash
         run: |
           set -euo pipefail

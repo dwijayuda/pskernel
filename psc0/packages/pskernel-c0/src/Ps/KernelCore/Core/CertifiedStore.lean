@@ -10,19 +10,55 @@ the whole store at every *read*. Raw Nat handles from different stores
 remain unrelated. No certificate expresses typing or proof admission.
 -/
 
+/-- The mathematical children-before-parent ordering invariant for
+    one node at a specific location in its owning immutable store. Leaf
+    nodes have no child handles; composite nodes must refer only backward. -/
+def psKernelC0NodeTopological (index : Nat)
+    (node : PsKernelC0Node) : Prop :=
+  match node with
+  | .app fn arg => fn < index ∧ arg < index
+  | .lam _ ty body _ => ty < index ∧ body < index
+  | .forallE _ ty body _ => ty < index ∧ body < index
+  | .letE _ ty value body _ =>
+      ty < index ∧ value < index ∧ body < index
+  | .mdata _ body => body < index
+  | .proj _ _ body => body < index
+  | _ => True
+
+instance (index : Nat) (node : PsKernelC0Node) :
+    Decidable (psKernelC0NodeTopological index node) := by
+  cases node <;> dsimp [psKernelC0NodeTopological] <;> infer_instance
+
+/-- Explicit mathematical acyclicity-by-order property of the whole store,
+    independent of hashes or memoization. Unlike the replay Boolean, this
+    is a dependent proposition over every valid node index. -/
+def psKernelC0StoreTopological (store : PsKernelC0TermStore) : Prop :=
+  ∀ i : Fin store.nodes.size,
+    match psKernelC0StoreGet store i.val with
+    | some entry => psKernelC0NodeTopological i.val entry.node
+    | none => False
+
+instance (store : PsKernelC0TermStore) :
+    Decidable (psKernelC0StoreTopological store) := by
+  unfold psKernelC0StoreTopological
+  infer_instance
+
 /-- An immutable store together with a proof that deterministic canonical
     replay accepts its entire node graph and index. A hash alone is never
     sufficient to construct this value. -/
 structure PsKernelC0CertifiedStore where
   store : PsKernelC0TermStore
   canonical : psKernelC0ReplayValidateStore store = true
+  topology : psKernelC0StoreTopological store
 
 /-- Check exactly once at construction. Future code using the same immutable
     value may rely on the proof, not on an untrusted cache or a hash. -/
 def psKernelC0CertifyStore
     (store : PsKernelC0TermStore) : Option PsKernelC0CertifiedStore :=
   if h : psKernelC0ReplayValidateStore store = true then
-    some { store := store, canonical := h }
+    if topology : psKernelC0StoreTopological store then
+      some { store := store, canonical := h, topology := topology }
+    else none
   else none
 
 /-- The owner snapshot, root-in-bounds witness, and exact decoded syntax are
@@ -75,6 +111,13 @@ theorem psKernelC0CertifiedRootStore_canonical
     (cert : PsKernelC0CertifiedRoot) :
     psKernelC0ReplayValidateStore cert.owner.store = true :=
   cert.owner.canonical
+
+/-- A certified root is attached to a store satisfying an actual
+    Lean proposition that all composite nodes reference earlier nodes. -/
+theorem psKernelC0CertifiedRootStore_topological
+    (cert : PsKernelC0CertifiedRoot) :
+    psKernelC0StoreTopological cert.owner.store :=
+  cert.owner.topology
 
 /-- Atomically promote selected scratch roots through the existing replay-
     validated implementation, then construct proof-carrying owner/root pairs

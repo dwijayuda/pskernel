@@ -49,6 +49,10 @@ F: independently measure Lean 4.35 official, project-local original, con-leche, 
 
 G: prove source/optimized denotation, substitution/reification, canonical-store invariants and sound refinement or connect an independent verified acceptance gate. Consistency is a theorem under explicit axioms, not inferred from green tests.
 
+## CDE-0 executable foundation (2026-10-13)
+
+The architecture-first route has moved beyond planning. `Architecture/Execution.lean` now contains explicit control closures, delayed binder environments and an argument-spine machine for small syntactic β/ζ/metadata WHNF. `Architecture/Work.lean` implements an exact validated scratch syntax transaction, source-authoritative preview/check and atomic declaration admission through the existing checked kernel, with fresh session caches after environment changes. New `C0ArchitectureExecutionRegression.lean` and `C0ArchitectureWorkRegression.lean` run as mandatory native CI steps. Passing their small coherent source-differential slice establishes no formal refinement, full optimized WHNF or new accepting kernel. Source-owned proof checking remains the exclusive admission authority.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

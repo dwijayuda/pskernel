@@ -417,6 +417,26 @@ def psKernelMutualInductiveNeutralDomain
         | _ => false
     | _ => false
 
+/-- A single *actual* delta step may reveal a canonical, already checked
+    inductive type head. Delta unfolding is exactly the same operation used by
+    the authoritative WHNF engine; a checked inductive type head is irreducible.
+    Both source and expansion must be free of freshly declared family names.
+    All other definitions, recursive heads, local values and target-bearing
+    expressions use the original full WHNF and positivity analysis. -/
+def psKernelMutualNeutralAfterOneDelta
+    (session : PsKernelCheckerSession)
+    (targets : List PsKernelName)
+    (domain : PsKernelExpr) : Option PsKernelExpr :=
+  if psKernelSimpleMutualContainsConst targets domain then
+    none
+  else
+    match psKernelUnfoldDefinition session.context domain with
+    | some expanded =>
+        if psKernelMutualInductiveNeutralDomain session targets expanded then
+          some expanded
+        else none
+    | none => none
+
 /-- Render the failing *head only*, never the full (potentially huge)
     type expression. No source-level identifier is used as an acceptance rule. -/
 def psKernelMutualDiagnosticName : PsKernelName → String
@@ -537,7 +557,9 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
               if psKernelMutualInductiveNeutralDomain session targets domain then
                 Except.ok (Prod.mk domain session)
               else
-                psKernelSessionWhnf remaining session domain
+                match psKernelMutualNeutralAfterOneDelta session targets domain with
+                | some expanded => Except.ok (Prod.mk expanded session)
+                | none => psKernelSessionWhnf remaining session domain
             match whnfResult with
             | Except.error error =>
                 -- Pure diagnostic distinction: an occurrence-free constructor

@@ -73,7 +73,8 @@ def psWhnfSpineWithTransparencyFuel (transparency : PsTransparency)
     let view := psReduceAppView (psMetaInstantiate metaContext expr) args
     let applied := psReduceApply view.head view.args
     match (psReduceNatPrimitive reduce applied).orElse
-        (fun _ => psReduceIota reduce environment applied) with
+        (fun _ => (psReduceIota reduce environment applied).orElse
+          (fun _ => psReduceQuotientIota reduce environment applied)) with
     | some value => step value []
     | none => match view.head with
       | .fvar id =>

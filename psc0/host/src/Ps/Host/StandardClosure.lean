@@ -15,6 +15,7 @@ private def closureDependencies (info : Lean.ConstantInfo) : Array Lean.Name :=
   let family := match info with
     | .inductInfo v => v.all.toArray ++ v.ctors.toArray ++ #[.str v.name "rec"]
     | .ctorInfo v => #[v.induct]
+    | .quotInfo _ => #[`Quot, `Quot.mk, `Quot.lift, `Quot.ind]
     | .recInfo v => v.all.toArray ++
         (v.rules.toArray.flatMap fun rule => #[rule.ctor] ++ rule.rhs.getUsedConstants)
     | _ => #[]

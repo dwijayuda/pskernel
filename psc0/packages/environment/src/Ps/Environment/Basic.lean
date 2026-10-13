@@ -5,6 +5,7 @@ import Ps.Core.Subst
 import Ps.Environment.Instances
 
 def psDeclarationName : PsDeclaration -> PsName
+  | .quotientDecl name _ _ _ => name
   | .axiomDecl name _ _ => name
   | .definitionDecl name _ _ _ => name
   | .theoremDecl name _ _ _ => name
@@ -15,6 +16,7 @@ def psDeclarationName : PsDeclaration -> PsName
   | .recursorDecl info => info.name
 
 def psDeclarationLevelParams : PsDeclaration -> List PsName
+  | .quotientDecl _ levelParams _ _ => levelParams
   | .axiomDecl _ levelParams _ => levelParams
   | .definitionDecl _ levelParams _ _ => levelParams
   | .theoremDecl _ levelParams _ _ => levelParams
@@ -25,6 +27,7 @@ def psDeclarationLevelParams : PsDeclaration -> List PsName
   | .recursorDecl info => info.levelParams
 
 def psDeclarationType : PsDeclaration -> PsExpr
+  | .quotientDecl _ _ type _ => type
   | .axiomDecl _ _ type => type
   | .definitionDecl _ _ type _ => type
   | .theoremDecl _ _ type _ => type

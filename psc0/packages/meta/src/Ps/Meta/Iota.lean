@@ -104,3 +104,22 @@ def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
           recursor.numParams recursor.numIndices view.head
           (view.args.take (recursor.numParams + 1 + recursor.numMinors)) domain field
       return psReduceApply minor (fields ++ hypotheses ++ view.args.drop (majorPosition + 1))
+
+
+// Lean Meta/WHNF.lean reduceQuotRec. Dispatch requires registered kernel
+// quotient metadata; a familiar spelling alone never grants reduction.
+def psReduceQuotientIota (reduce : PsExpr → PsExpr) (environment : PsEnvironment)
+    (expr : PsExpr) : Option PsExpr := do
+  let view := psReduceAppView expr
+  let .constE name levels := view.head | none
+  let some (.quotientDecl _ parameters _ kind) := psEnvironmentFind environment name | none
+  if levels.length != parameters.length then none else do
+    let majorPosition ← match kind with | .lift => some 5 | .ind => some 4 | _ => none
+    let major ← view.args[majorPosition]?
+    let constructor := psReduceAppView (reduce major)
+    let .constE ctorName ctorLevels := constructor.head | none
+    let some (.quotientDecl _ ctorParameters _ .ctor) := psEnvironmentFind environment ctorName | none
+    if ctorLevels.length != ctorParameters.length || constructor.args.length != 3 then none else do
+      let field ← constructor.args[2]?
+      let minor ← view.args[3]?
+      return psReduceApply (.app minor field) (view.args.drop (majorPosition + 1))

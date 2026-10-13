@@ -77,6 +77,10 @@ def psStandardSnapshotBool (value : Bool) : String :=
   if value then "1" else "0"
 
 def psStandardSnapshotDeclaration : PsDeclaration → String
+  | .quotientDecl name levels type kind => psStandardSnapshotNode "kernel-quotient" [
+      psStandardSnapshotName name,
+      psStandardSnapshotList psStandardSnapshotName levels,
+      psStandardSnapshotExpr type, psQuotientKindTag kind]
   | .axiomDecl name levels type => psStandardSnapshotNode "axiom" [
       psStandardSnapshotName name,
       psStandardSnapshotList psStandardSnapshotName levels,

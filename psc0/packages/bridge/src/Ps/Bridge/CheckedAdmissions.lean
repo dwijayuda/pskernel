@@ -639,7 +639,7 @@ def psEncodeCheckedAdmissionsLoop
             smaller state
         | .recursorDecl _ =>
             smaller state
-        | .axiomDecl _ _ _ =>
+        | .quotientDecl .. | .axiomDecl _ _ _ =>
             Except.error
               PsCheckedAdmissionCodecError.unsupportedDeclaration
         | .opaqueDecl name levelParams type value =>

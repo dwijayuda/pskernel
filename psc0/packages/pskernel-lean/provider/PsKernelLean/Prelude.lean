@@ -68,6 +68,9 @@ def convertConstructors
 def toLeanPreludeDeclaration
     (allDeclarations : List PsDeclaration) :
     PsDeclaration -> Except PsKernelLeanError (Option Lean.Declaration)
+  | .quotientDecl name _ _ kind =>
+      if psNameEq name (psQuotientKindName kind) then pure (some .quotDecl)
+      else throw (preludeMismatch "invalid kernel quotient identity")
   | .axiomDecl name levelParams type => do
       let convertedType ← toLeanExpr type
       pure <| some <| .axiomDecl {
@@ -138,7 +141,19 @@ def tryPreludeDeclaration
   | none => pure (.admitted env)
   | some converted =>
       match env.addDeclCore 2000000 20000 converted none true with
-      | .ok next => pure (.admitted next)
+      | .ok next =>
+          if let .quotientDecl name levels type kind := declaration then
+            let some (.quotInfo generated) := next.checked.get.find? (toLeanName name)
+              | throw (preludeMismatch "missing regenerated quotient metadata")
+            let generatedKind := match generated.kind with
+              | .type => PsQuotientKind.type | .ctor => .ctor
+              | .lift => .lift | .ind => .ind
+            let convertedType ← toLeanExpr type
+            unless generated.levelParams == toLeanNames levels &&
+                generated.type == convertedType &&
+                psQuotientKindTag generatedKind == psQuotientKindTag kind do
+              throw (preludeMismatch "regenerated quotient signature or kind differs")
+          pure (.admitted next)
       | .error (.unknownConstant _ _) => pure .deferred
       | .error error =>
           throw (preludeMismatch

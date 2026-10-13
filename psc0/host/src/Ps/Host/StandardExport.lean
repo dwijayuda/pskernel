@@ -101,7 +101,13 @@ private def exportDeclaration (native : Lean.Environment) (info : Lean.ConstantI
       numParams := value.numParams, numIndices := value.numIndices,
       numMotives := value.numMotives, numMinors := value.numMinors }
   | .axiomInfo _ => throw "new axiom prohibited in Standard asset"
-  | .quotInfo _ => throw "new quotient primitive prohibited in Standard asset"
+  | .quotInfo value =>
+    let kind := match value.kind with
+      | .type => PsQuotientKind.type | .ctor => .ctor
+      | .lift => .lift | .ind => .ind
+    unless psNameEq name (psQuotientKindName kind) do
+      throw "invalid native quotient identity"
+    return .quotientDecl name levels type kind
 
 private def sourceList (items : List String) : String :=
   "[" ++ String.intercalate ", " items ++ "]"
@@ -160,7 +166,9 @@ private def sourceDeclaration (declaration : PsDeclaration) : String :=
   | .recursorDecl value => ".recursorDecl (PsRecursorInfo.mk " ++ common ++ " " ++
       sourceList (value.inductiveNames.map sourceName) ++ " " ++ toString value.numParams ++ " " ++
       toString value.numIndices ++ " " ++ toString value.numMotives ++ " " ++ toString value.numMinors ++ ")"
-  | .axiomDecl .. | .partialDecl .. => "" -- Refused before rendering.
+  | .quotientDecl _ _ _ kind => ".quotientDecl " ++ common ++ " ." ++ psQuotientKindTag kind
+  | .axiomDecl .. => "" -- Refused before rendering.
+  | .partialDecl .. => "" -- Refused before rendering.
 
 private def sourceStatus (native : Lean.Environment) (name : Lean.Name) : String :=
   match Lean.getReducibilityStatusCore native name with
@@ -181,7 +189,7 @@ private def checkCandidate (declarations candidates : List PsDeclaration) : IO U
   -- supplied portable signatures agree with what was actually generated.
   for declaration in candidates do
     match declaration with
-    | .constructorDecl _ | .recursorDecl _ =>
+    | .constructorDecl _ | .recursorDecl _ | .quotientDecl .. =>
       let name := PsKernelLean.toLeanName (psDeclarationName declaration)
       let some info := checked.checked.get.find? name
         | throw (IO.userError ("missing regenerated metadata: " ++ toString name))

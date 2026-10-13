@@ -96,3 +96,14 @@ Modifications: explicit fixed-width arithmetic and little-endian UTF-8 byte
 decoding, GC byte arrays in Wasm and target-native loops. The original
 runtime's host-endian memcpy is deliberately replaced with canonical little
 endian; conformance is qualified against the pinned little-endian Linux host.
+
+### Logical recursion and quotient foundation
+
+Meta/Iota's recursive-field telescope and quotient reduction adapt the
+algorithms in Lean 4.35.0 `src/kernel/inductive.cpp`, `src/kernel/quot.cpp`
+and `src/Lean/Meta/WHNF.lean` at commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Copyright (c) 2018, 2019 Microsoft Corporation; author Leonardo de Moura;
+Apache-2.0. Modifications: portable Core, capture-avoiding bound-variable
+construction, explicit registered quotient descriptors and bounded reduction.
+The official Lean provider regenerates quotient metadata and checks signatures.

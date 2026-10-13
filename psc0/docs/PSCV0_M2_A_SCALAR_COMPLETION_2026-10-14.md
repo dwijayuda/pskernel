@@ -148,3 +148,42 @@ reflexive datatypes. Every exported constructor iota rule is now compared
 symbolically with the actual pinned native rule after fresh kernel replay.
 This does not enable general source well-founded or higher-order recursive
 runtime compilation; those remain M3+B with their full acceptance criteria.
+
+## Required Lean logical foundation (reviewed dependency, qualification pending)
+
+The complete 48-operation unsigned candidate at Linux 38469424406 contains
+794 declarations beyond the old boundary. Its only imported axioms are
+Lean's `propext` and `Quot.sound`; quotient primitives support the checked
+`funext` theorem in native arithmetic proof dependencies. A fully populated
+quotient family adds the previously unused `Quot.ind` metadata. The canonical
+language inventory already requires Lean's quotient foundation with restricted
+source use. This dependency is implemented here; general runtime quotient
+support and source proof automation are not implied.
+
+Studied pinned `src/kernel/quot.cpp`, `Lean/Declaration.lean`,
+`Lean/Meta/WHNF.lean:reduceQuotRec`, `Init/Prelude.lean:Quot.sound/funext`,
+`Init/Core.lean:propext`, `tests/elab/quotInd.lean` and the security regression
+`tests/elab_fail/kernelQuotNameCollision.lean`. The latter requires collision
+rejection before kernel insertion; a quotient is not an ordinary axiom or
+inductive. The upstream quotInd example uses admit, so it is a semantic source
+reference, not accepted validation evidence.
+
+Portable Core now distinguishes four kernel quotient descriptor kinds. The
+official provider submits Lean's generative `quotDecl`, then checks every
+regenerated signature and kind. No unchecked insertion or overwrite is used.
+WHNF reduces registered lift/ind applications on registered quotient
+constructors, retaining trailing arguments. Arbitrary familiar names do not
+activate reduction. The checked-admission wire format refuses these descriptors
+instead of silently pretending that another provider supports them.
+
+A proposed per-slice assumption allowlist would permit exactly pinned
+`propext` and `Quot.sound`, with their original signatures. **Publishing this
+trust expansion was rejected by automatic approval review; explicit user
+approval is pending.** No assumption has been added to the active environment.
+The exporter still refuses all new axioms. CI verifies refusal of the full
+unsigned candidate and continues the existing /60 integration suite. The
+candidate is not qualified or admitted. If approved, these imported Lean
+foundation assumptions must appear in the strict snapshot and manifest. No arbitrary/source axiom,
+`Classical.choice`, sorry, unsafe definition or proof replacement is allowed.
+Previous “no new axioms” receipts describe their historical snapshots; they
+must not be used to conceal this intentional trust-boundary expansion.

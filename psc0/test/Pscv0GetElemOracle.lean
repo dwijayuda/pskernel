@@ -457,3 +457,19 @@ example {A : Type u} (xs : List A) : List.map (fun x => x) xs = xs := by simp
 example {A : Type u} [Std.ToFormat A] : Std.Format :=
   Std.Format.joinSep ([] : List A) Std.Format.line
 end Display
+
+namespace Pscv0CollectionDisplayOracle
+#eval show IO Unit from do
+  let cases : List (String × String) := [
+    (reprStr ((3 : Nat), "x", true), "(3, \"x\", true)"),
+    ((repr #[some (1 : Nat), some 2, some 3]).pretty 20, "#[some 1, some 2,\n  some 3]"),
+    (reprStr (⟨3, by decide⟩ : Fin 4), "3"),
+    ((Std.Format.group (String.toFormat "λ\n\nx")).pretty, "λ  x"),
+    ((Std.Format.group (("a" : Std.Format) ++ Std.Format.line ++ "b")).pretty 3, "a b"),
+    ((Std.format ("x", true)).pretty, "(x, true)"),
+    ((Std.format (#[1, 2, 3] : Array Nat)).pretty, "#[1, 2, 3]"),
+    (reprStr (31 : Id Nat), "31")]
+  for (actual, expected) in cases do
+    unless actual == expected do
+      throw (IO.userError s!"collection display oracle: {String.quote actual} != {String.quote expected}")
+end Pscv0CollectionDisplayOracle

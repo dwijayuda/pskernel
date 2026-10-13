@@ -37,6 +37,13 @@ def psDeclarationValue : PsDeclaration -> Option PsExpr
   | .definitionDecl _ _ _ value => Option.some value
   | _ => Option.none
 
+-- An alias must carry the target's universe telescope together with its type.
+-- Referencing the target avoids duplicating a body or silently specializing it.
+def psDeclarationAlias (name : PsName) (target : PsDeclaration) : PsDeclaration :=
+  let levels := psDeclarationLevelParams target
+  .definitionDecl name levels (psDeclarationType target)
+    (.constE (psDeclarationName target) (levels.map PsLevel.param))
+
 def psDeclarationInductiveInfo : PsDeclaration -> Option PsInductiveInfo
   | .inductiveDecl info => Option.some info
   | _ => Option.none

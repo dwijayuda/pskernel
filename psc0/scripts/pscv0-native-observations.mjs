@@ -1,5 +1,13 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  {"name":"displayTuple","args":null,"expected":"(3, \"x\", true)"},
+  {"name":"displayArray","args":null,"expected":"#[some 1, some 2,\n  some 3]"},
+  {"name":"displayFin","args":null,"expected":"3"},
+  {"name":"displaySoftLines","args":null,"expected":"λ  x"},
+  {"name":"displayAppend","args":null,"expected":"a b"},
+  {"name":"displayTupleFormat","args":null,"expected":"(x, true)"},
+  {"name":"displayArrayFormat","args":null,"expected":"#[1, 2, 3]"},
+  {"name":"displayId","args":null,"expected":"31"},
   {"name":"displayQuoted","args":null,"expected":"\"λ😀\\n\""},
   {"name":"displayNegative","args":null,"expected":"(-17)"},
   {"name":"displayOption","args":null,"expected":"some (some 17)"},

@@ -205,3 +205,19 @@ digest guards remain strict pending explicit review of the new roster.
 Remaining selected formatting APIs/instances, Hashable/numeric dependencies,
 broader M2 evidence and the Phase A manifest remain open; this is not M2+A
 completion.
+
+The first kernel pass found one old alias constructor that copied List.get?'s
+type while discarding its universe parameters. Replace that pattern with
+psDeclarationAlias: target identity, universe telescope and type travel together.
+The sibling copied-type registrations were reviewed; they already retain their
+levels. List.get?Internal now shares the actual polymorphic target.
+
+The same phase also supplies String.toFormat soft-line conversion, Format
+append/coercion/default instances, tuple flattening through ReprTuple, Array
+fill rendering, Fin display and the explicit Id instance. String conversion
+uses one byte-bounded UTF-8 cursor pass and no intermediate split list. Tuple
+formatting accumulates a reversed document list and reverses once, as upstream.
+Array Repr always uses bracketFill, independently of ReprAtom.
+Eight additional shared observations extend the same small native oracle group.
+No new runtime primitive. Prod/Array retain their explicit selected Type-0
+boundary. Kernel/runtime qualification is still pending.

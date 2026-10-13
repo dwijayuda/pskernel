@@ -98,6 +98,8 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatClass,
     `Ps.Environment.StandardToFormat,
     `Ps.Environment.StandardRepr,
+    `Ps.Environment.StandardFormatString,
+    `Ps.Environment.StandardReprCollections,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]

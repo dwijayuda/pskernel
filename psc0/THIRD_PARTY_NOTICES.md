@@ -42,3 +42,7 @@ parameter/universe-aware deriving without host elaboration, and direct projectio
 for structures. Recursive/indexed deriving remains in M3+B.
 List declarations and recursor-based algorithms follow Init/Prelude.lean and
 Init/Data/List/Basic.lean, with explicit independent element/result universes.
+
+StandardFormatString and StandardReprCollections adapt the same Format/Repr
+sources and Init/Data/Array/Basic.lean. Modifications: single total UTF-8 scan,
+checked collection projections and existing Array conversion adapters.

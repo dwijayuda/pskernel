@@ -194,12 +194,9 @@ def psStandardListIndexPublicDeclarations : List PsDeclaration :=
   let bangAlias := lams (psLogicLam 3 "inhabited" (psStandardInhabitedType alpha)
     (psLogicLam 1 "xs" list (psLogicLam 2 "i" psOrderNat
       (psOrderCall "List.get!" [alpha, inhabited, xs, i]))) .instanceImplicit)
-  let optionalAlias := lams (psLogicLam 1 "xs" list (psLogicLam 2 "i" psOrderNat
-    (psListIndexOptionalGet alpha xs i)))
   [get, .definitionDecl (psDecisionName "List.get!") [] bangType bangValue,
    .definitionDecl (psDecisionName "List.get!Internal") [] bangType bangAlias,
-   .definitionDecl (psDecisionName "List.get?Internal") []
-     (psDeclarationType psStandardListGetQuestionDeclaration) optionalAlias]
+   psDeclarationAlias (psDecisionName "List.get?Internal") psStandardListGetQuestionDeclaration]
 
 def psStandardListIndexInstances : List PsDeclaration :=
   let alpha := PsExpr.fvar 0

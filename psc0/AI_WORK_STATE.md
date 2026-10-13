@@ -45,7 +45,9 @@ a specific regression repair, not general performance parity.
 [Design, sources and qualification](docs/PSCV0_A_FORMAT_REPR_2026-10-14.md).
 UInt/BitVec conversions, arbitrary Nat wrapping and unsigned Canonical ABI widths
 are now qualified. Hashable /60 is implemented but pending qualification; the
-strict Standard snapshot intentionally awaits independent native observation.
+strict Standard snapshot now records the independently observed /60 fingerprint.
+Qualification exposed missing builtin Int elimination; the shared Int recursor and
+declaration-stable Sort/Prop erased-call repairs are awaiting Linux validation.
 
 **Full M2+A remains incomplete.** Continue Hashable qualification, remaining
 selected Standard APIs, comprehensive manifest, broader M2 evidence and C5

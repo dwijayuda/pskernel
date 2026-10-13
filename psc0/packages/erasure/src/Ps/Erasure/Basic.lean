@@ -199,6 +199,16 @@ def psErasureBoolRecursor : PsRuntimeInductiveInfo :=
     [PsRuntimeConstructorInfo.mk "Bool" "false" psBoolFalseName 0 [] 0,
      PsRuntimeConstructorInfo.mk "Bool" "true" psBoolTrueName 0 [] 0] 0 []
 
+-- Int has two Nat payloads, neither recursively contains an Int. Its runtime
+-- representation is primitive, so elimination uses a sign split rather than
+-- a tagged constructor allocation (Lean 4.35.0 Init/Prelude, LCNF/ToImpureType).
+def psErasureIntRecursor : PsRuntimeInductiveInfo :=
+  PsRuntimeInductiveInfo.mk "Int" psIntName (psNameAppendStr psIntName "rec") 0 []
+    [PsRuntimeConstructorInfo.mk "Int" "ofNat" psIntOfNatName 0
+       [PsRuntimeConstructorField.mk 0 "magnitude" (.primitive .nat) false] 1,
+     PsRuntimeConstructorInfo.mk "Int" "negSucc" psIntNegSuccName 0
+       [PsRuntimeConstructorField.mk 0 "predecessor" (.primitive .nat) false] 1] 0 []
+
 def psErasureScopeEmpty
     (declarationNames : List (PsName × String)) :
     PsErasureScope :=
@@ -210,8 +220,10 @@ def psErasureScopeEmpty
     declarationNames := psErasureDeclarationNameIndex declarationNames
     runtimeConstructors := PsErasureNameIndex.empty
     runtimeRecursors := psErasureIndexInsert PsRuntimeInductiveInfo
-      (psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor)
-      (psNameAppendStr psBoolName "rec") psErasureBoolRecursor
+      (psErasureIndexInsert PsRuntimeInductiveInfo
+        (psErasureIndexInsert PsRuntimeInductiveInfo PsErasureNameIndex.empty psNatRecName psErasureNatRecursor)
+        (psNameAppendStr psBoolName "rec") psErasureBoolRecursor)
+      (psNameAppendStr psIntName "rec") psErasureIntRecursor
     runtimeStructures := PsErasureNameIndex.empty
     runtimeStructureConstructors := PsErasureNameIndex.empty
     runtimeExpressions := []
@@ -846,7 +858,12 @@ def psEraseRuntimeTypeWithFuelWorker
             psMetaEmpty
             scope.localContext
             type;
-        match psErasureUnboxedFieldType environment scope value with
+        -- A checked proposition has an irrelevant carrier. This lets a
+        -- Sort-polymorphic datatype retain its declared type-parameter layout
+        -- at universe zero; it does not invent a type for unsupported indices.
+        if psErasureIsProp environment scope.localContext value then
+          Except.ok psErasureProofSlotType
+        else match psErasureUnboxedFieldType environment scope value with
         | some fieldType => smaller scope fieldType
         | none => match value with
           | .fvar id =>

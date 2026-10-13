@@ -655,3 +655,28 @@ JS/TS share an AST implementation; Rust uses wrapping u64 arithmetic;
 Wasm traverses GC bytes with i64 operations, with no linear memory.
 The existing native oracle and shared backend observation table receive
 boundary, tail-byte, Unicode/NUL, proof-field, implicit-field and container cases.
+
+### Scalar elimination and declaration-stable erased calls
+
+Hashable qualification at `fc8c73b` exposed missing builtin `Int.rec`
+lowering. The repair adds the ordinary two-constructor metadata (`ofNat n`,
+`negSucc n`) and translates elimination to a sign split, with payloads
+`toNat x` and `toNat (-x) - 1`. A computed major is captured once, sharing
+the existing Nat elimination mechanism. Partial recursor applications continue
+through the existing special-entry completion path; no Hashable-specific rule.
+
+The same review identified a general ABI invariant: calls must retain the
+binder mask of the original declaration, even when a Sort-polymorphic type
+parameter is instantiated at Prop. Reclassifying its instantiated telescope
+can change type-argument count. Known entries now consume their recorded mask;
+proof-specialized runtime slots and actual proposition carriers use the existing
+ignored Unit representation. This does not assign types to unsupported indices.
+
+Primary reference: Lean `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
+`src/Lean/Compiler/LCNF/Types.lean` (`toLCNFType`, `isPropFormer`),
+`MonoTypes.lean`, `Irrelevant.lean`, and `ToImpureType.lean`.
+PSC0 preserves its stricter typed IR and rejects unsupported dependent carriers
+rather than importing Lean's any-type fallback. These are independently written
+adaptations of the invariants. Validation combines existing hash proof-field
+cases, a Sort-to-Prop entry/partial entry, and positive/zero/negative Int matches
+against the pinned native oracle and the shared backend suite. Qualification pending.

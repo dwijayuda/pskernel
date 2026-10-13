@@ -564,6 +564,7 @@ def generic {A : Type u} [Hashable A] (value : A) : UInt64 := hash value
     (hash (#[1, 2, 3] : Array Nat), 3064673849197682702),
     (hash ((43 : Nat), true), 16816133431411836267),
     (hash True.intro, 0), (hash (-17 : Int), 33),
+    (hash (0 : Int), 0), (hash (17 : Int), 34),
     (hash (18446744073709551619 : Nat), 3),
     (hash (⟨3, by decide⟩ : Fin 4), 3),
     (generic (47 : Nat), 47), (hash (255 : UInt8), 255),
@@ -572,4 +573,14 @@ def generic {A : Type u} [Hashable A] (value : A) : UInt64 := hash value
   for (actual, expected) in cases do
     unless actual.toNat == expected do
       throw (IO.userError s!"hash oracle mismatch: {actual.toNat} != {expected}")
+def ignoreSort {A : Sort u} (_value : A) (answer : Nat) : Nat := answer
+def integerCases (value : Int) : Nat :=
+  match -value with
+  | .ofNat n => n + 71
+  | .negSucc n => n + 73
+#guard ignoreSort True.intro 61 == 61
+#guard (ignoreSort True.intro) 67 == 67
+#guard integerCases (-17) == 88
+#guard integerCases 0 == 71
+#guard integerCases 17 == 89
 end Hashing

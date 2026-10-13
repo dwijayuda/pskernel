@@ -20,81 +20,55 @@ def psErasureAppendRuntimeArgument
         psErasureAppendRuntimeArgument rest;
       fun (argument : PsVerifiedIrExpr) => List.cons head (smaller argument)
 
+-- Calls use the declaration's binder mask. Reclassifying the instantiated
+-- telescope changes the ABI when a Sort parameter specializes to Prop.
+def psErasureInstantiatedEntryBinder (environment : PsEnvironment)
+    (scope : PsErasureScope) (kind : PsErasedBinderKind) (domain : PsExpr) :
+    PsErasedBinderKind :=
+  match kind with
+  | .runtime =>
+    if psErasureIsProp environment scope.localContext domain then .proof else .runtime
+  | _ => kind
+
 def psEraseApplicationArgumentsWorker
     (erase : PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (environment : PsEnvironment) (scope : PsErasureScope)
-    (arguments : List PsExpr) :
+    (arguments : List (PsExpr × PsErasedBinderKind)) :
     PsExpr -> PsErasureAppliedArguments -> Except PsErasureError PsErasureAppliedArguments :=
   match arguments with
-  | List.nil =>
-    fun (functionType : PsExpr) (state : PsErasureAppliedArguments) =>
-      Except.ok {
-        typeArgumentsRev := state.typeArgumentsRev
-        runtimeArgumentsRev := state.runtimeArgumentsRev
-        runtimeArgumentTypesRev := state.runtimeArgumentTypesRev
-        remainingType := functionType
-      }
-  | List.cons argument rest =>
-    let smaller : PsExpr -> PsErasureAppliedArguments -> Except PsErasureError PsErasureAppliedArguments :=
-      psEraseApplicationArgumentsWorker erase environment scope rest;
-    fun (functionType : PsExpr) (state : PsErasureAppliedArguments) =>
-      match
-          psWhnf
-            environment
-            psMetaEmpty
-            scope.localContext
-            functionType with
+  | [] => fun functionType state => .ok { state with remainingType := functionType }
+  | (argument, kind) :: rest =>
+    let smaller := psEraseApplicationArgumentsWorker erase environment scope rest
+    fun functionType state =>
+      match psWhnf environment psMetaEmpty scope.localContext functionType with
       | .forallE _ domain body _ =>
-          match
-              psErasureClassifyBinder
-                environment
-                scope.localContext
-                domain with
-          | .index =>
-              smaller (psExprInstantiate1 body argument) state
-          | .type =>
-              match psEraseRuntimeType environment scope argument with
-              | Except.error error => Except.error error
-              | Except.ok erasedType =>
-                  smaller (psExprInstantiate1 body argument)
-                    {
-                      typeArgumentsRev :=
-                        List.cons erasedType state.typeArgumentsRev
-                      runtimeArgumentsRev :=
-                        state.runtimeArgumentsRev
-                      runtimeArgumentTypesRev :=
-                        state.runtimeArgumentTypesRev
-                      remainingType := state.remainingType
-                    }
-          | .proof =>
-              smaller (psExprInstantiate1 body argument)
-                { state with
-                  runtimeArgumentsRev := psErasureProofSlotValue :: state.runtimeArgumentsRev
-                  runtimeArgumentTypesRev := .constE psUnitName [] :: state.runtimeArgumentTypesRev }
-          | .runtime =>
-              match erase argument with
-              | Except.error error => Except.error error
-              | Except.ok erasedArgument =>
-                  smaller (psExprInstantiate1 body argument)
-                    {
-                      typeArgumentsRev :=
-                        state.typeArgumentsRev
-                      runtimeArgumentsRev :=
-                        List.cons erasedArgument state.runtimeArgumentsRev
-                      runtimeArgumentTypesRev :=
-                        List.cons domain state.runtimeArgumentTypesRev
-                      remainingType := state.remainingType
-                    }
-      | _ => Except.error PsErasureError.unsupportedApplication
-
+        let remainingType := psExprInstantiate1 body argument
+        match psErasureInstantiatedEntryBinder environment scope kind domain with
+        | .index => smaller remainingType state
+        | .type => do
+          let erasedType ← psEraseRuntimeType environment scope argument
+          smaller remainingType { state with
+            typeArgumentsRev := erasedType :: state.typeArgumentsRev }
+        | .proof =>
+          smaller remainingType { state with
+            runtimeArgumentsRev := psErasureProofSlotValue :: state.runtimeArgumentsRev
+            runtimeArgumentTypesRev := .constE psUnitName [] :: state.runtimeArgumentTypesRev }
+        | .runtime => do
+          let erasedArgument ← erase argument
+          smaller remainingType { state with
+            runtimeArgumentsRev := erasedArgument :: state.runtimeArgumentsRev
+            runtimeArgumentTypesRev := domain :: state.runtimeArgumentTypesRev }
+      | _ => .error PsErasureError.unsupportedApplication
 
 def psEraseApplicationArguments
     (erase : PsExpr -> Except PsErasureError PsVerifiedIrExpr)
     (environment : PsEnvironment) (scope : PsErasureScope)
     (functionType : PsExpr) (arguments : List PsExpr)
+    (binders : List PsErasedBinderKind)
     (state : PsErasureAppliedArguments) : Except PsErasureError PsErasureAppliedArguments :=
-  psEraseApplicationArgumentsWorker erase environment scope arguments functionType state
-
+  if arguments.length != binders.length then .error PsErasureError.binderMismatch
+  else psEraseApplicationArgumentsWorker erase environment scope
+    (psListZip arguments binders) functionType state
 
 -- Captures are target bindings only. The supplied runtime domains are recorded
 -- before each telescope substitution advances; proof slots use Unit, types are omitted.
@@ -391,7 +365,7 @@ def psEraseFinishEntryWithFuel
       | List.cons kind rest =>
           match psWhnf environment psMetaEmpty scope.localContext functionType with
           | PsExpr.forallE name domain body binder =>
-              match kind with
+              match psErasureInstantiatedEntryBinder environment scope kind domain with
               | PsErasedBinderKind.type | PsErasedBinderKind.index =>
                   Except.error PsErasureError.unsupportedApplication
               | PsErasedBinderKind.proof =>
@@ -448,6 +422,7 @@ def psEraseKnownEntryApplication
   let remainingBinders :=
     psErasureDropPrefix PsErasedBinderKind (psListLength suppliedPrefix) entry.binders;
   match psEraseApplicationArguments erase environment scope headType suppliedPrefix
+      (psListTake (psListLength suppliedPrefix) entry.binders)
       (PsErasureAppliedArguments.mk List.nil List.nil List.nil headType) with
   | Except.error error => Except.error error
   | Except.ok applied =>
@@ -1538,6 +1513,21 @@ def psEraseNatRecursorAlternatives
                                             [scrutinee, PsVerifiedIrExpr.literal (PsVerifiedIrLiteral.natural 1)])
                                           succBody))
 
+def psEraseIntRecursorAlternatives
+    (scrutinee : PsVerifiedIrExpr)
+    (alternatives : List (String × List PsVerifiedIrMatchBinding × PsVerifiedIrExpr)) :
+    Except PsErasureError PsVerifiedIrExpr :=
+  match alternatives with
+  | [("ofNat", [nonnegative], positiveBody), ("negSucc", [negative], negativeBody)] =>
+    .ok (.ifE (.intrinsic .intLt [] [scrutinee, .literal (.integer 0)])
+      (.letE negative.name (.primitive .nat)
+        (.intrinsic .natSub []
+          [.intrinsic .intToNat [] [.intrinsic .intNeg [] [scrutinee]],
+           .literal (.natural 1)]) negativeBody)
+      (.letE nonnegative.name (.primitive .nat)
+        (.intrinsic .intToNat [] [scrutinee]) positiveBody))
+  | _ => .error PsErasureError.binderMismatch
+
 def psEraseRuntimeRecursorApplication
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -1589,26 +1579,29 @@ def psEraseRuntimeRecursorApplication
                           let minors := (view.args.drop minorStart).take inductiveInfo.constructors.length;
                           let recursionPlan := psErasurePlanRecursion scope inductiveInfo.coreName
                             inductiveInfo.numParams major indices minors;
-                          -- Reusing a computed Nat major in both the zero test and
-                          -- predecessor expression would evaluate it twice on succ.
-                          -- Variables and natural literals already denote values.
+                          -- Scalar elimination inspects a major and extracts its
+                          -- payload. Capture computations once before either use.
                           let majorIsValue : Bool :=
                             match scrutinee with
                             | PsVerifiedIrExpr.var _ => true
                             | PsVerifiedIrExpr.literal literal =>
                                 match literal with
-                                | PsVerifiedIrLiteral.natural _ => true
+                                | PsVerifiedIrLiteral.natural _ | PsVerifiedIrLiteral.integer _ => true
                                 | _ => false
                             | _ => false;
-                          let natMajorName : Option String :=
-                            if psNameEq inductiveInfo.coreName psNatName then
+                          let isNat := psNameEq inductiveInfo.coreName psNatName;
+                          let isInt := psNameEq inductiveInfo.coreName psIntName;
+                          let scalarType := if isNat then PsVerifiedIrPrimitiveType.nat
+                            else PsVerifiedIrPrimitiveType.int;
+                          let scalarMajorName : Option String :=
+                            if isNat || isInt then
                               if majorIsValue then Option.none
                               else Option.some
-                                (psErasureLocalName scope "_psNatMajor" "_psNatMajor"
+                                (psErasureLocalName scope "_psScalarMajor" "_psScalarMajor"
                                   scope.localContext.nextId)
                             else Option.none;
                           let majorNameFresh : Bool :=
-                            match natMajorName with
+                            match scalarMajorName with
                             | Option.none => true
                             | Option.some localName =>
                                 psErasureBoolNot (psErasureLocalNameUsed scope localName);
@@ -1619,7 +1612,7 @@ def psEraseRuntimeRecursorApplication
                             -- byCore and every Core local remain unchanged. count is
                             -- the freshness bound and includes this one reservation.
                             let minorScope : PsErasureScope :=
-                              match natMajorName with
+                              match scalarMajorName with
                               | Option.none => scope
                               | Option.some localName =>
                                   let reservedNames : PsErasureDeclarationNames :=
@@ -1654,20 +1647,23 @@ def psEraseRuntimeRecursorApplication
                                   | [(_, [], onFalse), (_, [], onTrue)] =>
                                     Except.ok (some (.ifE scrutinee onTrue onFalse))
                                   | _ => Except.error PsErasureError.binderMismatch
-                                else if psNameEq inductiveInfo.coreName psNatName then
+                                else if isNat || isInt then
                                   let majorReference : PsVerifiedIrExpr :=
-                                    match natMajorName with
+                                    match scalarMajorName with
                                     | Option.none => scrutinee
                                     | Option.some localName => PsVerifiedIrExpr.var localName;
-                                  match psEraseNatRecursorAlternatives majorReference alternatives with
+                                  let lowered := if isNat then
+                                    psEraseNatRecursorAlternatives majorReference alternatives
+                                    else psEraseIntRecursorAlternatives majorReference alternatives;
+                                  match lowered with
                                   | Except.error error => Except.error error
                                   | Except.ok lowered =>
                                       let result : PsVerifiedIrExpr :=
-                                        match natMajorName with
+                                        match scalarMajorName with
                                         | Option.none => lowered
                                         | Option.some localName =>
                                             PsVerifiedIrExpr.letE localName
-                                              (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
+                                              (PsVerifiedIrType.primitive scalarType)
                                               scrutinee lowered;
                                       Except.ok (Option.some result)
                                 else

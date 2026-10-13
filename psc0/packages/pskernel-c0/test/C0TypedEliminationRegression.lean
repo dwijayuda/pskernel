@@ -41,6 +41,23 @@ def c0TypedBoxDecl : PsKernelSimpleInductiveDecl := {
   numParams := 0
 }
 
+/-- A nonrecursive Prop-valued inductive with a constructor field.
+    Its generated recursor is non-K, but structure-eta must still be
+    suppressed because its type is a proposition. -/
+def c0TypedPropRecordName : PsKernelName := c0TypedName "C0VerifiedPropRecord"
+def c0TypedPropRecordDecl : PsKernelSimpleInductiveDecl := {
+  levelParams := []
+  name := c0TypedPropRecordName
+  type := .sort .zero
+  ctors := [{
+    name := .str c0TypedPropRecordName "intro"
+    type := .forallE (c0TypedName "field") (.sort .zero)
+      (.const c0TypedPropRecordName []) .default
+  }]
+  isUnsafe := false
+  numParams := 0
+}
+
 def c0TypedEvenName : PsKernelName := c0TypedName "C0VerifiedEven"
 def c0TypedOddName : PsKernelName := c0TypedName "C0VerifiedOdd"
 
@@ -251,6 +268,36 @@ def main : IO Unit := do
       if observation.candidateValue.isSome ||
           !psKernelExprEqual observation.sourceValue expectedEta then
         throw (IO.userError "typed-demand resource decline changed source WHNF")
+  -- Prop-valued, field-bearing types must not receive structure eta,
+  -- even though they have one constructor and no recursive occurrences.
+  let propRecordWork ← match psKernelC0ArchitectureAdmit 32768 boxWork
+      (.ordinaryInductive c0TypedPropRecordDecl) with
+    | .error reason =>
+        throw (IO.userError ("checked Prop record admission failed: " ++ reason))
+    | .ok next => pure next
+  c0TypedExpectRecursor propRecordWork.checker.context.environment
+    c0TypedPropRecordName false
+  let propRecordLocal := c0TypedName "propRecordProof"
+  let propRecordLocals := psKernelLocalContextAddLocal
+    propRecordWork.checker.context.localContext
+    propRecordLocal propRecordLocal
+    (.const c0TypedPropRecordName []) .default
+  let propRecordSession : PsKernelCheckerSession := {
+    propRecordWork.checker with
+    context := {
+      propRecordWork.checker.context with
+      localContext := propRecordLocals
+    }
+  }
+  match psKernelC0ArchitectureObserveTypedMajor 32768 propRecordSession
+      (psKernelSimpleRecName c0TypedPropRecordName)
+      (.fvar propRecordLocal) with
+  | .error reason =>
+      throw (IO.userError ("checked Prop eta guard failed: " ++ reason))
+  | .ok (observation, _) =>
+      if observation.changed ||
+          !psKernelExprEqual observation.sourceResult (.fvar propRecordLocal) then
+        throw (IO.userError "Prop-valued structure received invalid eta")
   -- A major belonging to a different verified inductive must not be
   -- converted by the K branch based merely on constructor names.
   match psKernelC0ArchitecturePreviewTypedMajor 8192 boxScoped
@@ -398,6 +445,7 @@ def main : IO Unit := do
   IO.println "C0_TYPED verified_k_prop_source_admission=pass"
   IO.println "C0_TYPED verified_structure_eta_source_infer_defeq=pass"
   IO.println "C0_TYPED source_justified_metered_eta_demand=pass"
+  IO.println "C0_TYPED checked_prop_structure_eta_exclusion=pass"
   IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
   IO.println "C0_TYPED checked_eq_quot_bootstrap_and_idempotence=pass"
   IO.println "C0_TYPED indexed_k_defeq_side_conditions=pass"

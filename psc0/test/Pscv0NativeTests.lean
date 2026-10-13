@@ -68,7 +68,7 @@ private def getElemFoundationCases : IO Unit := do
     -- Genuine decision coherence: both independently supplied dictionaries
     -- must agree because their Bool choices reflect the same proposition.
     -- No assumed subsingleton lemma, unchecked cast or Boolean-as-Prop proof.
-    "theorem psDecidableUnique(P: Prop)(left right: Decidable P): left = right := by {\n" ++
+    "theorem psDecidableUnique(P: Prop, left: Decidable P, right: Decidable P): left = right := by {\n" ++
     "  cases left\n" ++
     "  case intro bl hl =>\n" ++
     "    cases right\n" ++

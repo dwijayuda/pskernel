@@ -196,18 +196,18 @@ private def productUniverseFixture : String :=
 -- broken product instance matching or numeric result elaboration. Each
 -- request must be kernel accepted, with no fallback or silent omission.
 private def highUniverseHashableCases : IO Unit := do
-  let [sourcePrefix, _] := productUniverseFixture.splitOn "end ProductLevels\\n"
+  let [sourcePrefix, _] := productUniverseFixture.splitOn "end ProductLevels\n"
     | throw (IO.userError "mixed-universe Hashable fixture lacks namespace terminator")
-  let base := prefix ++ "end ProductLevels\\n"
+  let base := sourcePrefix ++ "end ProductLevels\n"
   let samples := #[
     ("high structure",
-      "const highValueHash: UInt64 := hash(ProductLevels.High.mk(5))\\n"),
+      "const highValueHash: UInt64 := hash(ProductLevels.High.mk(5))\n"),
     ("ordinary Boolean",
-      "const boolValueHash: UInt64 := hash(true)\\n"),
+      "const boolValueHash: UInt64 := hash(true)\n"),
     ("mixed-universe product",
-      "const mixedPairHash: UInt64 := hash(Prod.mk(ProductLevels.High.mk(5), true))\\n"),
+      "const mixedPairHash: UInt64 := hash(Prod.mk(ProductLevels.High.mk(5), true))\n"),
     ("mixed-universe hash equality",
-      "const mixedPairCheck: Bool := hash(Prod.mk(ProductLevels.High.mk(5), true)) == mixHash(hash(ProductLevels.High.mk(5)), hash(true))\\n")]
+      "const mixedPairCheck: Bool := hash(Prod.mk(ProductLevels.High.mk(5), true)) == mixHash(hash(ProductLevels.High.mk(5)), hash(true))\n")]
   let requests : Array PsV7Native.Request := samples.map fun (_, source) =>
     { source := base ++ source }
   let result ← PsV7Native.runBatch requests

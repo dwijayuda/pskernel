@@ -34,7 +34,7 @@ inductive C0ExportDeclaration where
   | theoremDecl (value : PsKernelTheoremInfo)
   | opaqueDecl (value : PsKernelOpaqueInfo)
   | inductiveGroup (value : C0ExportInductiveGroup)
-  | quotientDecl (value : PsKernelQuotInfo)
+  | quotientGroup (parts : List PsKernelQuotInfo)
 
 structure C0ExportTables where
   names : Array PsKernelName := #[.anonymous]
@@ -42,6 +42,7 @@ structure C0ExportTables where
   exprs : Array PsKernelExpr := #[]
   declarations : List C0ExportDeclaration := []
   quotientParts : Nat := 0
+  quotientPending : List PsKernelQuotInfo := []
   header : Bool := false
 
 def c0JsonObj (j : Lean.Json) (key : String) : Except String Lean.Json :=
@@ -567,9 +568,16 @@ def c0ExportParseRecord
       | throw "malformed NDJSON extra quotient declaration"
     if !c0ExportSameQuotKind info.kind orderedKind then
       throw "unsupported NDJSON noncanonical quotient declaration order"
-    return { st with
-      quotientParts := st.quotientParts + 1
-      declarations := .quotientDecl info :: st.declarations }
+    if st.quotientParts == 3 then
+      return { st with
+        quotientParts := 4
+        quotientPending := []
+        declarations := .quotientGroup
+          (st.quotientPending.reverse ++ [info]) :: st.declarations }
+    else
+      return { st with
+        quotientParts := st.quotientParts + 1
+        quotientPending := info :: st.quotientPending }
   throw "unsupported NDJSON declaration tag"
 
 /-- A supported record may be parsed once; everything else fails closed. -/
@@ -660,7 +668,7 @@ def c0ExportCheckOne
         | .mutual decl =>
             psKernelAddSimpleMutualInductive fuel env decl
               4096 psKernelLeanNatMaxSizeDefault
-    | .quotientDecl _ =>
+    | .quotientGroup _ =>
         psKernelAddQuot env
   match result with
   | .ok next =>
@@ -669,15 +677,16 @@ def c0ExportCheckOne
           match c0ExportVerifyOrdinaryInductive next group with
           | .ok _ => .ok next
           | .error message => .error (.declinedUnsupported message)
-      | .quotientDecl expected =>
-          match psKernelEnvironmentFind next expected.base.name with
-          | some (.quotInfo got) =>
-              if c0ExportSameBase got.base expected.base &&
-                  c0ExportSameQuotKind got.kind expected.kind then .ok next
-              else .error (.declinedUnsupported
-                "exported quotient metadata differs from generated checked Quot")
-          | _ => .error (.declinedUnsupported
-              "exported quotient member missing from checked Quot environment")
+      | .quotientGroup group =>
+          let matches := group.length == 4 && group.all (fun expected =>
+            match psKernelEnvironmentFind next expected.base.name with
+            | some (.quotInfo got) =>
+                c0ExportSameBase got.base expected.base &&
+                  c0ExportSameQuotKind got.kind expected.kind
+            | _ => false)
+          if matches then .ok next
+          else .error (.declinedUnsupported
+            "exported quotient package differs from generated checked Quot")
       | _ => .ok next
   | .error message => .error (psKernelErrorFromMessage message)
 
@@ -841,6 +850,11 @@ def c0ExportOnlineOutcomes : IO Unit := do
       c0ExportFromKernelError
       (.internalError "unknown") != .inconclusive then
     throw (IO.userError "C0 online verdict categories are not disjoint")
+  let partialQuot := simple ++
+    "{\"quot\":{\"name\":1,\"levelParams\":[],\"type\":0,\"kind\":\"type\"}}\n"
+  if c0ExportVerdictOnline partialQuot != .malformed ||
+      c0ExportVerdictBatch partialQuot != .malformed then
+    throw (IO.userError "C0 admitted incomplete four-record quotient export")
   let invalid ← IO.FS.readFile "test/C0OfficialChainReject.ndjson"
   if c0ExportVerdictOnline invalid != .rejected then
     throw (IO.userError "C0 online replay lost late invalid declaration")

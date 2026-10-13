@@ -296,3 +296,19 @@ proof bodies and acceptance are unchanged. Actual native opaque primitives
 retain their existing boundary. This removes the general invalid cut, including
 Nat.div and Bool.decEq, without a growing list of failing-proof exceptions.
 After review/admission, the asset's resulting name cut is frozen as before.
+
+The same Prelude study also identified a source-level mismatch in the existing
+portable BEq Bool dictionary: it split the left operand, whereas Bool.beq
+splits the right. Closed truth tables coincide, but the required open reduction
+(a == true) = a does not. The shared dictionary now uses the native orientation,
+with one independent native/portable rfl conformance witness. No new primitive
+or specialized elaborator rewrite is involved.
+
+The next replay (38472745065) found List.reverse_cons, exposing definition
+rather than assumption compatibility. Before changing collection algorithms,
+the native authoring replay now collects all independent kernel failures and
+their blocked dependents. No rejected declaration is inserted, and any failure
+prohibits source export. The production checker is unchanged. Separate CI
+steps run candidate diagnostics and current-source checks after a successful
+build; the workflow still fails if either gate fails. This gives one complete
+dependency picture and independent snapshot evidence in the same run.

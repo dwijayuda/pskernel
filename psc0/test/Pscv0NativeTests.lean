@@ -91,6 +91,7 @@ private def getElemFoundationCases : IO Unit := do
     "function boundedMod(x: Nat, y: Nat, h: Nat.lt(0, y)): Fin(y) := Fin.mk(Nat.mod(x, y), Nat.mod_lt(x, h))\n" ++
     "theorem conditionalKnown(P: Prop, h: P, n: Nat): ite(P, n, 0, h := Decidable.isTrue(h)) = n := by { rfl }\n" ++
     "theorem conditionalRefuted(P: Prop, h: Not P, n: Nat): ite(P, 0, n, h := Decidable.isFalse(h)) = n := by { rfl }\n" ++
+    "theorem booleanEqualsTrue(a: Bool): (a == true) = a := by { rfl }\n" ++
     "theorem addZeroRight(n: Nat): Nat.add(n, 0) = n := by { rfl }\n" ++
     "theorem addSuccessor(n: Nat, m: Nat): Nat.add(n, Nat.succ(m)) = Nat.succ(Nat.add(n, m)) := by { rfl }\n" ++
     "theorem subZeroRight(n: Nat): Nat.sub(n, 0) = n := by { rfl }\n" ++

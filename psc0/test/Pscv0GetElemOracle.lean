@@ -607,3 +607,6 @@ example {A : Type u} {B : Type v} (a : A) (b : B) : (a, b).fst = a := rfl
 #guard (Std.format (true, High.mk 5)).pretty == "(true, hi)"
 #guard hash (High.mk 5, true) == mixHash (hash (High.mk 5)) (hash true)
 end ProductLevels
+
+-- Upstream Bool equality is intentionally right-biased in open reduction.
+example (a : Bool) : (a == true) = a := rfl

@@ -35,16 +35,17 @@ def psStandardBEqInstance (suffix : String) (type method : PsExpr) :
     [type, method]
   .definitionDecl instanceName [] instanceType value
 
--- Lean Bool.beq: false == b is !b, true == b is b.
+-- Lean 4.35.0 Bool.beq splits on its RIGHT operand:
+-- (a == true) reduces to a, and (a == false) reduces to not a.
 -- Use the checked Bool recursor rather than inventing a new primitive.
 def psStandardBEqBoolMethod : PsExpr :=
   let bool := PsExpr.constE psBoolName []
   let motive := PsExpr.lam (psRootName "_") bool bool .explicit
   let recursor := PsExpr.constE (psNameAppendStr psBoolName "rec") [.succ .zero]
-  let notRight := psLogicApply recursor
-    [motive, .constE psBoolTrueName [], .constE psBoolFalseName [], .bvar 0]
+  let notLeft := psLogicApply recursor
+    [motive, .constE psBoolTrueName [], .constE psBoolFalseName [], .bvar 1]
   let result := psLogicApply recursor
-    [motive, notRight, .bvar 0, .bvar 1]
+    [motive, notLeft, .bvar 1, .bvar 0]
   .lam (psRootName "left") bool
     (.lam (psRootName "right") bool result .explicit) .explicit
 

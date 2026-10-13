@@ -799,9 +799,12 @@ def c0ExportVerdictFromFile
     IO C0ExportVerdict := do
   let handle ← IO.FS.Handle.mk path .read
   let mut state : C0ExportOnlineState := {}
-  while !(← handle.isEof) do
+  let mut reading := true
+  while reading do
     let line ← handle.getLine
-    if line != "\n" then
+    if line.isEmpty then
+      reading := false
+    else if line != "\n" then
       match c0ExportStep state line fuel with
       | .error verdict => return verdict
       | .ok next => state := next

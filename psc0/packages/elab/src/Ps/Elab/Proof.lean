@@ -41,7 +41,7 @@ def psProofApplied (state : PsProofState) (goal : PsProofGoal) (before : Nat)
     match entry.kind with
     | .synthetic => if entry.id >= before then some entry.id else none
     | _ => none
-  let value ← psElabSolvePendingInstances value pending
+  let value ← psElabSolveSynthetic value (pending.map PsSyntheticConstraint.instanceGoal)
   let goals := (psProofFreshGoals before value.context).map fun child =>
     { child with tag := psProofTag goal.tag child.tag }
   let dependent := fun goal => goals.any fun other =>

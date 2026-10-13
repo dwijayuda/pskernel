@@ -259,6 +259,9 @@ export const observations = [
   { name: "finEmptyRuntime", args: null, expected: true },
   { name: "arrayPartialConversionRuntime", args: null, expected: 719n },
   { name: "arrayEliminationRuntime", args: null, expected: 3n },
+  { name: "generalizedSharedRuntime", args: null, expected: 1558n },
+  { name: "syntheticDefaultRuntime", args: null, expected: 0n },
+  { name: "syntheticExpectedRuntime", args: null, expected: false },
   { name: "borrowedBeforeMove", args: [4n], expected: 8n }
 ];
 

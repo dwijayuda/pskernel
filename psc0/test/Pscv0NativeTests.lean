@@ -149,7 +149,14 @@ private def getElemFoundationCases : IO Unit := do
     | _ => throw (IO.userError s!"false natural or collection bound {i} was accepted")
   IO.println "PSCV0_NATIVE_GETELEM: checked indexed proof/instance admitted; missing proof refused"
 
+private def generalizedFixture : String :=
+  "namespace Generalized\nuniverse u\nclass Evidence(A: outParam(Type u)): Type u where { value: Nat }\ninstance generic{A: Type u}: Evidence A where { value := 773 }\nclass Select(n: Nat, A: outParam(Type)) where { value: Nat }\ninstance selectNat: Select 0 Nat where { value := 5 }\ninstance selectBool: Select 1 Bool where { value := 7 }\nclass Branch(n: Nat) where { value: Nat }\ninstance branch{n: Nat}{A: Type}[Evidence A][Select n A]: Branch n where { value := Nat.add(Evidence.value(A := A), Select.value(n := n, A := A)) }\nclass Result where { value: Nat }\ninstance combine[Branch 0][Branch 1]: Result where { value := Nat.add(Branch.value(n := 0), Branch.value(n := 1)) }\nfunction selected(A: Type := Nat)[Inhabited A](value: A := Inhabited.default): A := value\nfunction expected{A: Type}[Inhabited A](unit: Unit, value: A := Inhabited.default): A := value\nend Generalized\n"
+
 private def application : String :=
+  generalizedFixture ++
+  "const generalizedSharedRuntime: Nat := Generalized.Result.value\n" ++
+  "const syntheticDefaultRuntime: Nat := Generalized.selected()\n" ++
+  "const syntheticExpectedRuntime: Bool := Generalized.expected(())\n" ++
   "function emptyElim{A: Type}(value: Empty): A := nomatch value\n" ++
   "function falseElim{A: Type}(proof: False): A := nomatch proof\n" ++
   "inductive Void(A: Type) where { }\n" ++
@@ -1272,7 +1279,8 @@ private def projectBoundaries : IO Unit := do
   for limits in [
       ({ goals := 0 } : PsInstanceSearchLimits),
       ({ candidates := 0 } : PsInstanceSearchLimits),
-      ({ transitions := 0 } : PsInstanceSearchLimits)] do
+      ({ transitions := 0 } : PsInstanceSearchLimits),
+      ({ answers := 0 } : PsInstanceSearchLimits)] do
     let exhausted := psSynthInstanceWithLimits environment locals psInstanceIndexEmpty
       psMetaEmpty 64 limits resultGoal
     unless exhausted.result.value.isNone && exhausted.table.resourceExceeded do
@@ -1933,6 +1941,95 @@ private def derivingBoundaries : IO Unit := do
     | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
   IO.println "PSCV0_DERIVING_BOUNDARIES: PASS missing parameter dictionary, dependent field, recursive family"
 
+private def syntheticBoundaries : IO Unit := do
+  let environment := psSelfHostProdPreludeEnvironment
+  let nat := PsExpr.constE psNatName []
+  let type := PsExpr.sortE (.succ .zero)
+  -- A dependent template contains A : Sort ?u followed by x : A. Opening it
+  -- twice in one recipient must allocate independent term and universe IDs.
+  let universe := psMetaFreshLevel psMetaEmpty
+  let a := psMetaFresh universe.context psLocalEmpty (.sortE universe.level) .natural
+  let x := psMetaFresh a.context psLocalEmpty a.expr .natural
+  let some template := psMetaAbstract x.context psLocalEmpty x.expr a.expr |
+    throw (IO.userError "dependent natural answer could not be abstracted")
+  let occupied := psMetaFresh psMetaEmpty psLocalEmpty nat .natural
+  let some (firstContext, firstValue, firstType) :=
+      psMetaOpenTemplate occupied.context psLocalEmpty template |
+    throw (IO.userError "first dependent answer could not be opened")
+  let some (secondContext, secondValue, secondType) :=
+      psMetaOpenTemplate firstContext psLocalEmpty template |
+    throw (IO.userError "second dependent answer could not be opened")
+  unless template.parameters.length == 2 && template.levels == 1 &&
+      !psExprAlphaEq firstValue secondValue && !psExprAlphaEq firstType secondType &&
+      secondContext.levels.nextId == 2 do
+    throw (IO.userError "template replay aliased term or universe variables")
+  let first := psUnify environment psLocalEmpty secondContext firstType nat
+  let second := psUnify environment psLocalEmpty first.context secondType (.constE psBoolName [])
+  unless first.success && second.success &&
+      psExprAlphaEq (psMetaInstantiate second.context firstType) nat &&
+      psExprAlphaEq (psMetaInstantiate second.context secondType) (.constE psBoolName []) do
+    throw (IO.userError "shared answer specializations interfered")
+  for kind in [PsMetaVarKind.synthetic, .syntheticOpaque] do
+    let obligation := psMetaFresh psMetaEmpty psLocalEmpty nat kind
+    if (psMetaAbstract obligation.context psLocalEmpty obligation.expr nat).isSome then
+      throw (IO.userError "an outstanding synthetic obligation became an answer parameter")
+  let scoped := psLocalPushBinding psLocalEmpty (psRootName "n") nat .explicit
+  let hole := psMetaFresh psMetaEmpty scoped.context nat .natural
+  let some scopedTemplate := psMetaAbstract hole.context scoped.context hole.expr nat |
+    throw (IO.userError "scoped answer abstraction failed")
+  if (psMetaOpenTemplate psMetaEmpty psLocalEmpty scopedTemplate).isSome then
+    throw (IO.userError "answer template escaped its captured scope")
+  -- A mandatory type default unlocks an earlier dictionary and equality.
+  let defaultType := psMetaFresh psMetaEmpty psLocalEmpty type .syntheticOpaque
+  let .mvar defaultId := defaultType.expr | throw (IO.userError "default ID")
+  let dictionary := psMetaFresh defaultType.context psLocalEmpty
+    (psStandardInhabitedType defaultType.expr) .synthetic
+  let .mvar dictionaryId := dictionary.expr | throw (IO.userError "dictionary ID")
+  let constraints : List PsSyntheticConstraint := [
+    .expectedType psLocalEmpty defaultType.expr nat,
+    .instanceGoal dictionaryId, .defaultValue defaultId nat]
+  let solved := psSyntheticSolve environment environment.instances dictionary.context constraints
+  unless solved.pending.isEmpty && !solved.resourceExceeded &&
+      (psMetaFindAssignment solved.context dictionaryId).isSome do
+    throw (IO.userError "default did not wake shared expected/instance constraints")
+  let incompatible := psSyntheticSolve environment environment.instances dictionary.context
+    [.expectedType psLocalEmpty defaultType.expr (.constE psBoolName []),
+     .defaultValue defaultId nat]
+  unless !incompatible.pending.isEmpty &&
+      psExprAlphaEq (psMetaInstantiate incompatible.context defaultType.expr) nat do
+    throw (IO.userError "expected result replaced a mandatory omitted default")
+  let exhausted := psSyntheticSolve environment environment.instances dictionary.context
+    constraints true 1
+  unless exhausted.resourceExceeded &&
+      exhausted.context.assignments.length == dictionary.context.assignments.length do
+    throw (IO.userError "synthetic resource refusal leaked assignments")
+  let parsed ← get "generalized fixture parse" (psCompilerParsePscv0 generalizedFixture)
+  let elaborated ← get "generalized fixture elaboration"
+    ((psElabProgram environment parsed).mapError psCompilerPscv0ElabError)
+  let resultName := psNameAppendStr (psRootName "Generalized") "Result"
+  let graph := psSynthInstanceWithTable elaborated.environment psLocalEmpty
+    elaborated.environment.instances psMetaEmpty 64 (.constE resultName [])
+  unless graph.result.value.isSome && graph.table.generalizedAnswers >= 1 &&
+      graph.table.freshenedAnswers >= 1 && graph.table.reusedGoals >= 1 do
+    throw (IO.userError "generalized generator was not shared between specializations")
+  IO.println ("PSCV0_NATIVE_GENERALIZED: answers=" ++ toString graph.table.answers ++
+    " generalized=" ++ toString graph.table.generalizedAnswers ++
+    " freshened=" ++ toString graph.table.freshenedAnswers ++
+    " generators=" ++ toString graph.table.visits)
+  let requests : Array PsV7Native.Request := #[
+    { source := generalizedFixture ++ "const bad: Nat := Generalized.Evidence.value\n" },
+    { source := generalizedFixture ++ "const bad: Bool := Generalized.selected()\n" }]
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError ("synthetic host prelude: " ++ error.message))
+  for result in batch.results do
+    match result with
+    | .error error =>
+      unless error.phase == "elaborate" do
+        throw (IO.userError ("synthetic refusal escaped elaboration: " ++ error.message))
+    | .ok _ => throw (IO.userError "unresolved root/default conflict was accepted")
+  IO.println "PSCV0_NATIVE_SYNTHETIC: PASS scoped templates, independent replay, mandatory defaults, quiescence and rollback"
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
@@ -1942,4 +2039,5 @@ def main : IO Unit := do
   doBoundaries
   projectBoundaries
   derivingBoundaries
+  syntheticBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

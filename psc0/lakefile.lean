@@ -202,7 +202,7 @@ lean_lib PsMeta where
   roots := #[
     `Ps.Meta.LevelNormalize,
     `Ps.Meta.LevelContext,
-    `Ps.Meta.Context,
+    `Ps.Meta.Context, `Ps.Meta.Abstract,
     `Ps.Meta.Iota,
     `Ps.Meta.Recursor,
     `Ps.Meta.NatReduce, `Ps.Meta.Reduce,
@@ -210,7 +210,7 @@ lean_lib PsMeta where
     `Ps.Meta.InstanceTarget,
     `Ps.Meta.InstanceCandidate,
     `Ps.Meta.InstanceSearch,
-    `Ps.Meta.SynthInstance,
+    `Ps.Meta.Synthetic, `Ps.Meta.SynthInstance,
     `Ps.Meta.Infer,
     `Ps.Meta.Inductive, `Ps.Meta.TypeView
   ]

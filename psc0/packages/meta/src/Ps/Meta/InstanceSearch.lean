@@ -2,11 +2,11 @@ import Ps.Meta.InstanceCandidate
 
 -- The table belongs to one environment, registry and synthesis invocation.
 -- A Pi introduction gets a distinct scope, even when local IDs coincide.
--- Only meta-closed evidence crosses unrelated snapshots. The creator of a
--- generator owns its speculative context; later subscribers never adopt it.
--- Generalized answers still require abstraction/freshening beyond this slice.
+-- Evidence crosses unrelated snapshots through scoped, freshened templates.
+-- The creator owns its speculative context; shared subscribers never adopt it.
 structure PsInstanceTableAnswer where
   goal : PsExpr
+  template : PsMetaTemplate
   value : PsExpr
   height : Nat
   -- Adopted only by the root or the unique subscription that created this
@@ -21,6 +21,7 @@ structure PsInstanceSearchLimits where
   goals : Nat := psInstanceMaxGoalVisits
   candidates : Nat := psInstanceMaxCandidateChecks
   transitions : Nat := psInstanceMaxTransitions
+  answers : Nat := 4096
 
 -- Diagnostics, not an externally reusable cache. Reuse lives inside the graph.
 structure PsInstanceSearchTable where
@@ -28,6 +29,8 @@ structure PsInstanceSearchTable where
   candidateChecks : Nat := 0
   transitions : Nat := 0
   answers : Nat := 0
+  generalizedAnswers : Nat := 0
+  freshenedAnswers : Nat := 0
   reusedGoals : Nat := 0
   suspended : Nat := 0
   resumed : Nat := 0
@@ -71,6 +74,7 @@ structure PsInstanceGenerator where
   entries : List PsInstanceEntry
   opened : Bool := false
   answer : Option PsInstanceTableAnswer := none
+  generalized : List PsInstanceTableAnswer := []
   waiters : List PsInstanceSubscription := []
 
 inductive PsInstanceWork where
@@ -177,11 +181,14 @@ def psInstanceAwait (environment : PsEnvironment) (index : PsInstanceIndex)
   | some (id, generator) =>
     let subscription : PsInstanceSubscription := { waiter, ownsContext := decide (id >= priorSize) }
     match generator.answer with
-    | some answer => { state with work := .resume subscription answer :: state.work }
+    | some answer =>
+      { state with work := (generator.generalized ++ [answer]).map
+          (PsInstanceWork.resume subscription) ++ state.work }
     | none =>
       { state with
         generators := state.generators.setIfInBounds id
           { generator with waiters := subscription :: generator.waiters }
+        work := generator.generalized.map (PsInstanceWork.resume subscription) ++ state.work
         table := { state.table with suspended := state.table.suspended + 1 } }
 
 def psInstancePublish (environment : PsEnvironment) (state : PsInstanceSearchState)
@@ -191,24 +198,35 @@ def psInstancePublish (environment : PsEnvironment) (state : PsInstanceSearchSta
   | none => state
   | some generator =>
     if generator.answer.isSome || height > state.maxHeight then state else
-    match psInstanceReplay environment generator.locals context generator.target value with
+    match psInstanceCheck environment generator.locals context generator.target value with
     | none => state
     | some checked =>
-      match checked.value with
+      match checked.value.bind (fun value =>
+          (psMetaAbstract checked.context generator.locals value generator.target).map (value, ·)) with
       | none => state
-      | some value =>
-        let goal := psMetaInstantiate checked.context generator.target
-        if psExprHasUnresolvedMeta goal then state else
-        let answer : PsInstanceTableAnswer := { goal, value, height, context := checked.context }
-        -- Oldest waiters resume first, before alternative generator candidates.
-        let resumed := generator.waiters.reverse.filterMap fun subscription =>
-          if psInstanceOwnerAnswered state (psInstanceWaiterOwner subscription.waiter) then none
-          else some (PsInstanceWork.resume subscription answer)
-        { state with
-          generators := state.generators.setIfInBounds owner
-            { generator with answer := some answer, waiters := [] }
-          work := resumed ++ state.work
-          table := { state.table with answers := state.table.answers + 1 } }
+      | some (value, template) =>
+        if generator.generalized.any (fun prior => psMetaTemplateSameType prior.template template) then state
+        else if state.table.answers >= state.limits.answers then
+          { state with table := { state.table with resourceExceeded := true } }
+        else
+          let answer : PsInstanceTableAnswer := {
+            goal := psMetaInstantiate checked.context generator.target
+            template, value, height, context := checked.context }
+          let generalized := !template.parameters.isEmpty
+          -- An abstract answer can solve a consumer whose later subgoals
+          -- constrain its parameters, but cannot finish a root on its own.
+          -- Keep its waiters and remaining candidates available.
+          let resumed := generator.waiters.reverse.filterMap fun subscription =>
+            if psInstanceOwnerAnswered state (psInstanceWaiterOwner subscription.waiter) then none
+            else some (PsInstanceWork.resume subscription answer)
+          { state with
+            generators := state.generators.setIfInBounds owner
+              (if generalized then { generator with generalized := generator.generalized ++ [answer] }
+               else { generator with answer := some answer, waiters := [] })
+            work := resumed ++ state.work
+            table := { state.table with
+              answers := state.table.answers + 1
+              generalizedAnswers := state.table.generalizedAnswers + (if generalized then 1 else 0) } }
 
 def psInstanceGenerate (environment : PsEnvironment) (index : PsInstanceIndex)
     (state : PsInstanceSearchState) (id : Nat) : PsInstanceSearchState :=
@@ -268,11 +286,8 @@ def psInstanceConsume (environment : PsEnvironment) (index : PsInstanceIndex)
     let pending := consumer.pending.filter fun id =>
       (psMetaFindAssignment consumer.context id).isNone
     if pending.isEmpty then
-      if consumer.arguments.all (fun arg =>
-          !psExprHasUnresolvedMeta (psMetaInstantiate consumer.context arg.expr)) then
-        psInstancePublish environment state consumer.owner consumer.context
-          (psMetaInstantiate consumer.context consumer.value) consumer.height
-      else state
+      psInstancePublish environment state consumer.owner consumer.context
+        (psMetaInstantiate consumer.context consumer.value) consumer.height
     else
       -- Do not mistake an unknown input for a failing class. Another ready
       -- dictionary may determine it, including one later in the telescope.
@@ -288,6 +303,15 @@ def psInstanceConsume (environment : PsEnvironment) (index : PsInstanceIndex)
         psInstanceAwait environment index state generator.scope generator.locals
           consumer.context target (.argument { consumer with pending } id target)
 
+def psInstanceReceive (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (target : PsExpr) (ownsContext : Bool)
+    (answer : PsInstanceTableAnswer) : Option PsSynthInstanceResult := do
+  if ownsContext then
+    psInstanceCheck environment locals answer.context target answer.value
+  else do
+    let (context, value, _) ← psMetaOpenTemplate context locals answer.template
+    psInstanceCheck environment locals context target value
+
 def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchState)
     (subscription : PsInstanceSubscription) (answer : PsInstanceTableAnswer) :
     PsInstanceSearchState :=
@@ -297,31 +321,35 @@ def psInstanceResume (environment : PsEnvironment) (state : PsInstanceSearchStat
   | none => state
   | some generator =>
     if generator.answer.isSome then state else
-    let state := { state with table := { state.table with resumed := state.table.resumed + 1 } }
+    let state := { state with table := { state.table with
+      resumed := state.table.resumed + 1
+      freshenedAnswers := state.table.freshenedAnswers + (if subscription.ownsContext then 0 else 1) } }
     match waiter with
     | .argument consumer id target =>
       let height := max consumer.height (answer.height + 1)
       if height > state.maxHeight then state else
-      let context := if subscription.ownsContext then answer.context else consumer.context
-      match psInstanceReplay environment generator.locals context target answer.value with
+      match psInstanceReceive environment generator.locals consumer.context target
+          subscription.ownsContext answer with
       | none => state
       | some checked =>
-        match psMetaAssign checked.context id answer.value with
+        match checked.value.bind (psMetaAssign checked.context id) with
         | none => state
         | some context =>
           { state with work := .consume { consumer with context, height } :: state.work }
     | .abstraction abstraction =>
       let height := answer.height + 1
       if height > state.maxHeight then state else
-      let context := if subscription.ownsContext then answer.context else generator.context
-      match psInstanceReplay environment abstraction.locals context
-          abstraction.target answer.value with
+      match psInstanceReceive environment abstraction.locals generator.context abstraction.target
+          subscription.ownsContext answer with
       | none => state
       | some checked =>
-        let value := PsExpr.lam abstraction.name
-          (psMetaInstantiate checked.context abstraction.domain)
-          (psExprAbstractFVar abstraction.localId answer.value) abstraction.binder
-        psInstancePublish environment state owner checked.context value height
+        match checked.value with
+        | none => state
+        | some value =>
+          let value := PsExpr.lam abstraction.name
+            (psMetaInstantiate checked.context abstraction.domain)
+            (psExprAbstractFVar abstraction.localId value) abstraction.binder
+          psInstancePublish environment state owner checked.context value height
 
 -- The sole scheduler. Recursive source instances cannot recurse on the host
 -- stack; cycles subscribe to an existing node. Fuel bounds evidence height,
@@ -357,5 +385,13 @@ def psSynthInstanceWithLimits (environment : PsEnvironment) (locals : PsLocalCon
     | some answer =>
       -- Selection ignores outputs; this final check intentionally cannot
       -- backtrack into lower-priority instances to satisfy a preferred output.
-      (psInstanceReplay environment locals answer.context target answer.value).getD (psSynthFailure context)
+      match psInstanceCheck environment locals answer.context target answer.value with
+      | some checked =>
+        match checked.value with
+        | some value =>
+          if psExprHasTermMeta value ||
+              psExprHasTermMeta (psMetaInstantiate checked.context target) then psSynthFailure context
+          else checked
+        | none => psSynthFailure context
+      | none => psSynthFailure context
   { result, table := final.table }

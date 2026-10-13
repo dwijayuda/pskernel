@@ -7,6 +7,7 @@ import Ps.Meta.Context
 import Ps.Meta.Reduce
 import Ps.Meta.Unify
 import Ps.Meta.InstanceTarget
+import Ps.Meta.Abstract
 
 structure PsPreparedInstanceArgument where
   expr : PsExpr
@@ -23,10 +24,6 @@ structure PsPreparedInstance where
 structure PsSynthInstanceResult where
   context : PsMetaContext
   value : Option PsExpr
-
-structure PsSolveInstanceArgsResult where
-  context : PsMetaContext
-  success : Bool
 
 def psSynthFailure (context : PsMetaContext) : PsSynthInstanceResult :=
   { context := context, value := Option.none }
@@ -82,17 +79,22 @@ def psPrepareInstance
     []
     128
 
--- Answers crossing a snapshot boundary contain no term or universe metas.
--- Re-inference and unification recover only constraints justified by evidence,
--- including the receiver's exact output parameters. Never copy donor contexts.
-def psInstanceReplay (environment : PsEnvironment) (locals : PsLocalContext)
+-- A template replay is re-inferred in the receiver's own snapshot. Natural
+-- inference parameters may remain while a consumer resolves later subgoals;
+-- publication separately verifies that no synthetic obligations were abstracted.
+def psInstanceCheck (environment : PsEnvironment) (locals : PsLocalContext)
     (context : PsMetaContext) (target value : PsExpr) : Option PsSynthInstanceResult := do
-  if psExprHasUnresolvedMeta value then none else
   let .ok type := psInferType environment context locals value | none
   let checked := psUnify environment locals context type target
   if checked.success then
     some (psSynthSuccess checked.context (psMetaInstantiate checked.context value))
   else none
+
+-- Closed evidence remains a useful stronger boundary for callers and audits.
+def psInstanceReplay (environment : PsEnvironment) (locals : PsLocalContext)
+    (context : PsMetaContext) (target value : PsExpr) : Option PsSynthInstanceResult :=
+  if psExprHasUnresolvedMeta value then none
+  else psInstanceCheck environment locals context target value
 
 def psInstanceGoalReady (environment : PsEnvironment) (locals : PsLocalContext)
     (context : PsMetaContext) (target : PsExpr) : Bool :=

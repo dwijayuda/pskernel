@@ -17,7 +17,7 @@ def psBinderIsInstanceImplicit (binder : PsBinderInfo) : Bool :=
 
 structure PsElabApplicationResult where
   result : PsElabTermResult
-  pendingInstancesRev : List Nat
+  constraintsRev : List PsSyntheticConstraint
 
 def psSyntaxTermListIsEmpty
     (values : List PsSyntaxTerm) : Bool :=
@@ -117,31 +117,18 @@ def psElabPropagateExpected {α : Type} (current : PsElabTermResult)
     match psElabApplicationResultType current.context 4096 current.type positions.length (names.map (·.fst)) with
     | none => current
     | some result =>
-      let unified := psUnify current.context.environment current.context.localContext
-        current.context.metaContext result target
-      if unified.success then
-        { current with context := psElabContextWithMeta current.context unified.context }
-      else current
+      let solved := psSyntheticSolve current.context.environment current.context.instances
+        current.context.metaContext [.expectedType current.context.localContext result target] false
+      psElabResultWithMeta current solved.context current.type
 
--- Lean-like dependent class application: a pending class dictionary may
--- determine an outParam validity predicate needed to type-check the *next*
--- explicit proof argument. Attempt synthesis only once the current explicit
--- inputs/expected result have constrained its head. If an instance remains
--- unavailable, preserve the original constraint state and let normal
--- elaboration fail; never invent a proof or accept unresolved metavariables.
-def psElabResolveDependentClasses (current : PsElabTermResult)
-    (pending : List Nat) (domain : PsExpr) : PsElabTermResult :=
-  if pending.isEmpty ||
-      !psExprHasUnresolvedMeta (psMetaInstantiate current.context.metaContext domain) then
-    current
-  else
-    let synthesize := fun constraints target =>
-      psSynthInstance current.context.environment current.context.localContext
-        current.context.instances constraints target
-    let attempt := psSolveInstanceMetavars synthesize pending current.context.metaContext
-    if attempt.success then
-      psElabResultWithMeta current attempt.context current.type
-    else current
+-- Drain scoped constraints before a dependent argument. Individually checked
+-- progress is retained even when another item still needs a later argument.
+def psElabResolveSynthetic (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : PsElabApplicationResult :=
+  let solved := psSyntheticSolve current.context.environment current.context.instances
+    current.context.metaContext pending.reverse
+  { result := psElabResultWithMeta current solved.context current.type
+    constraintsRev := solved.pending.reverse }
 
 -- One ordered engine owns positional/named arguments, defaults and implicits.
 -- A matching expected function type preserves partial application. Explicit
@@ -149,7 +136,7 @@ def psElabResolveDependentClasses (current : PsElabTermResult)
 def psElabApplyOrderedWith {α : Type}
     (elaborate : PsElabContext → α → Option PsExpr → Except PsElabError PsElabTermResult) (fuel : Nat)
     (current : PsElabTermResult) (positions : List α)
-    (names : List (PsName × α)) (pending : List Nat)
+    (names : List (PsName × α)) (pending : List PsSyntheticConstraint)
     (complete : Bool := true) (expected : Option PsExpr := none) :
     Except PsElabError PsElabApplicationResult := do
   match fuel with
@@ -170,7 +157,7 @@ def psElabApplyOrderedWith {α : Type}
           | _, _ => true
         if preserve then
           match psElabFinalizeExpected current (some target) with
-          | .ok result => return { result, pendingInstancesRev := pending }
+          | .ok result => return { result, constraintsRev := pending }
           | .error _ => pure ()
       | none => pure ()
     match currentType with
@@ -189,7 +176,9 @@ def psElabApplyOrderedWith {α : Type}
       match selected.1 with
       | some source =>
         let current := psElabPropagateExpected current positions names expected
-        let current := psElabResolveDependentClasses current pending domain
+        let resolved := psElabResolveSynthetic current pending
+        let current := resolved.result
+        let pending := resolved.constraintsRev
         let argument ← elaborate current.context source
           (some (psMetaInstantiate current.context.metaContext domain))
         psElabApplyOrderedWith elaborate fuel (psElabApplyValue current argument body)
@@ -198,13 +187,20 @@ def psElabApplyOrderedWith {α : Type}
         if explicit && (complete || !names.isEmpty) then
           match psElabDefaultValue current.context domain with
           | some value =>
-            let argument ← psElabResolvedTerm current.context value (some domain)
+            -- An omitted default is mandatory, not a unification choice.
+            let fresh := psMetaFresh current.context.metaContext current.context.localContext
+              domain .syntheticOpaque
+            let .mvar id := fresh.expr | throw .implicitApplicationUnsupported
+            let argument : PsElabTermResult := {
+              context := psElabContextWithMeta current.context fresh.context
+              term := fresh.expr, type := domain }
             return ← psElabApplyOrderedWith elaborate fuel
-              (psElabApplyValue current argument body) positions names pending complete expected
+              (psElabApplyValue current argument body) positions names
+              (.defaultValue id value :: pending) complete expected
           | none => pure ()
         if (explicit || (psBinderIsStrictImplicit binder && !complete)) &&
             positions.isEmpty && names.isEmpty then
-          return { result := current, pendingInstancesRev := pending }
+          return { result := current, constraintsRev := pending }
         let kind := if psBinderIsInstanceImplicit binder then
           PsMetaVarKind.synthetic else PsMetaVarKind.natural
         let fresh := psMetaFresh current.context.metaContext current.context.localContext domain kind
@@ -213,57 +209,53 @@ def psElabApplyOrderedWith {α : Type}
           term := .app current.term fresh.expr
           type := psExprInstantiate1 body fresh.expr }
         let pending := if psBinderIsInstanceImplicit binder then
-          match fresh.expr with | .mvar id => id :: pending | _ => pending
+          match fresh.expr with | .mvar id => .instanceGoal id :: pending | _ => pending
           else pending
         psElabApplyOrderedWith elaborate fuel next positions names pending complete expected
     | _ =>
       if !names.isEmpty then throw (.invalidArgument "unknown named argument")
       if !positions.isEmpty then throw (.infer .expectedFunction)
-      return { result := current, pendingInstancesRev := pending }
+      return { result := current, constraintsRev := pending }
 
 -- Ordinary calls and records share the same telescope walk. A record update
 -- supplies either source syntax or an already typed Core projection.
 def psElabApplyOrdered (elaborate : PsElaborator) (fuel : Nat)
     (current : PsElabTermResult) (positions : List PsSyntaxTerm)
-    (names : PsElabNamedArguments) (pending : List Nat)
+    (names : PsElabNamedArguments) (pending : List PsSyntheticConstraint)
     (complete : Bool := true) (expected : Option PsExpr := none) :
     Except PsElabError PsElabApplicationResult :=
   psElabApplyOrderedWith elaborate fuel current positions names pending complete expected
 
 def psElabApplyArgsWithFuelWorker (elaborate : PsElaborator) (fuel : Nat)
-    (current : PsElabTermResult) (arguments : List PsSyntaxTerm) (pending : List Nat) :
+    (current : PsElabTermResult) (arguments : List PsSyntaxTerm) (pending : List PsSyntheticConstraint) :
     Except PsElabError PsElabApplicationResult :=
   psElabApplyOrdered elaborate fuel current arguments [] pending
 
 def psElabApplyArgsWithFuel := psElabApplyArgsWithFuelWorker
 
 def psElabApplyArgs (elaborate : PsElaborator) (current : PsElabTermResult)
-    (arguments : List PsSyntaxTerm) (pending : List Nat)
+    (arguments : List PsSyntaxTerm) (pending : List PsSyntheticConstraint)
     (expected : Option PsExpr := none) :
     Except PsElabError PsElabApplicationResult :=
   psElabApplyOrdered elaborate 4096 current arguments [] pending
     (!arguments.isEmpty || expected.isSome) expected
 
-def psElabSolvePendingInstances
-    (current : PsElabTermResult) (pendingInstances : List Nat) :
-    Except PsElabError PsElabTermResult := do
-  let synthesize := fun constraints target =>
-    psSynthInstance current.context.environment current.context.localContext
-      current.context.instances constraints target
-  let solved := psSolveInstanceMetavars synthesize pendingInstances current.context.metaContext
-  if !solved.success then throw .implicitApplicationUnsupported
+def psElabSolveSynthetic (current : PsElabTermResult)
+    (pending : List PsSyntheticConstraint) : Except PsElabError PsElabTermResult := do
+  let solved := psSyntheticSolve current.context.environment current.context.instances
+    current.context.metaContext pending
+  if solved.resourceExceeded then throw .fuelExhausted
+  if !solved.pending.isEmpty then throw .implicitApplicationUnsupported
   return psElabResultWithMeta current solved.context current.type
 
-def psElabFinishApplication
-    (application : PsElabApplicationResult)
-    (expected : Option PsExpr) :
-    Except PsElabError PsElabTermResult :=
-  match psElabFinalizeExpected application.result expected with
-  | Except.error error => Except.error error
-  | Except.ok finalized =>
-      psElabSolvePendingInstances
-        finalized
-        application.pendingInstancesRev
+def psElabFinishApplication (application : PsElabApplicationResult)
+    (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
+  let current := application.result
+  let pending := application.constraintsRev.reverse
+  let pending := match expected with
+    | none => pending
+    | some target => .expectedType current.context.localContext current.type target :: pending
+  psElabSolveSynthetic current pending
 
 -- APP-03 is an elaboration request, distinct from a written Unit argument.
 -- Only a callable head may be completed. An unresolved domain is never guessed
@@ -280,7 +272,7 @@ def psElabCompleteEmpty (elaborate : PsElaborator) (application : PsElabApplicat
     if !psExprAlphaEq domain (.constE psUnitName []) then throw .emptyCallUnsupported
     let unit ← psElabUnit current.context (some domain)
     let completed ← psElabApplyOrdered elaborate 4096
-      (psElabApplyValue current unit body) [] [] application.pendingInstancesRev
+      (psElabApplyValue current unit body) [] [] application.constraintsRev
     match psWhnf completed.result.context.environment completed.result.context.metaContext
         completed.result.context.localContext completed.result.type with
     | .forallE _ _ _ _ => throw .emptyCallUnsupported

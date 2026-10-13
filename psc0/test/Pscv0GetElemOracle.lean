@@ -178,3 +178,36 @@ deriving Inhabited, BEq
 example {α : Type u} : (default : Nested α).value = none := rfl
 example : ((Nested.mk (some (Lift.mk 761))).value.getD (Lift.mk 0)).value = 761 := rfl
 end Pscv0DerivingOracle
+
+-- Generalized instance answers are specialized by later dependencies; the
+-- same generic generator must be reusable at independent output types.
+namespace Pscv0GeneralizedOracle
+universe u
+class Evidence (A : outParam (Type u)) where
+  value : Nat
+instance {A : Type u} : Evidence A where
+  value := 773
+class Select (n : Nat) (A : outParam Type) where
+  value : Nat
+instance : Select 0 Nat where
+  value := 5
+instance : Select 1 Bool where
+  value := 7
+class Branch (n : Nat) where
+  value : Nat
+instance {n : Nat} {A : Type} [Evidence A] [Select n A] : Branch n where
+  value := Evidence.value (A := A) + Select.value (n := n) (A := A)
+class Result where
+  value : Nat
+instance [Branch 0] [Branch 1] : Result where
+  value := Branch.value (n := 0) + Branch.value (n := 1)
+example : Result.value = 1558 := rfl
+def selected (A : Type := Nat) [Inhabited A] (value : A := default) : A := value
+def expected {A : Type} [Inhabited A] (_ : Unit) (value : A := default) : A := value
+example : selected = 0 := rfl
+example : expected () = false := rfl
+example : True := by
+  fail_if_success have : Nat := Evidence.value
+  fail_if_success have : Bool := selected
+  trivial
+end Pscv0GeneralizedOracle

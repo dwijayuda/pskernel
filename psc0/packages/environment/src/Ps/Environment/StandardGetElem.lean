@@ -496,8 +496,10 @@ def psStandardGetElemOptionalDefaultInstance : PsDeclaration :=
 -- dictionary. It specializes LawfulGetElem's implicit superclass parameter
 -- to the default dictionary's actual term. Independent decision witnesses
 -- are reconciled by PsStandard.decidableUnique (checked in Decision.lean).
-def psStandardLawfulGetElemOptionalDefaultInstance : PsDeclaration :=
+def psStandardLawfulGetElemOptionalDefaultDeclarations : List PsDeclaration :=
   let name := psDecisionName "PsStandard.instLawfulGetElemOptionalDefault"
+  let optionalLemma := psDecisionName "PsStandard.getElemOptionalDefaultLaw"
+  let bangLemma := psDecisionName "PsStandard.getElemBangDefaultLaw"
   let u := psRootName "u"
   let v := psRootName "v"
   let levels : List PsLevel := [.param u, .param v]
@@ -549,6 +551,9 @@ def psStandardLawfulGetElemOptionalDefaultInstance : PsDeclaration :=
   let decideOptional := fun (d : PsExpr) =>
     psLogicApply (.constE (psRootName "dite") [.succ .zero])
       [optType, proposition, d, positive, negative]
+  let getOptionalMethod := psLogicApply
+    (.constE (psNameAppendStr psStandardGetElemOptionalName "getElem?") levels)
+    (psStandardGetElemArgs coll idx elem valid ++ [getOpt, xs, i])
   let optEq := fun (left right : PsExpr) =>
     psLogicEq (.succ .zero) optType left right
   let decisionEq := psLogicApply
@@ -591,6 +596,28 @@ def psStandardLawfulGetElemOptionalDefaultInstance : PsDeclaration :=
       (psLogicLam 29 "i" idx
         (psLogicRefl (.succ .zero) elem bangCall)))
     .instanceImplicit
+  -- Independent checked lemma declarations make each definitional contract
+  -- auditable before constructor assembly. Their bodies contain no axioms.
+  let optionalLemmaType := params (psLogicPi 4 "checked" base
+    (psLogicPi 5 "decide" indexedDecision
+      (psLogicPi 20 "xs" coll
+        (psLogicPi 21 "i" idx
+          (psLogicPi 22 "decision" (psDecisionType proposition)
+            (optEq getOptionalMethod (decideOptional decision))
+            .instanceImplicit))) .instanceImplicit) .instanceImplicit)
+  let optionalLemmaValue := lams (psLogicLam 4 "checked" base
+    (psLogicLam 5 "decide" indexedDecision optionalLaw .instanceImplicit)
+    .instanceImplicit)
+  let bangLemmaType := params (psLogicPi 4 "checked" base
+    (psLogicPi 5 "decide" indexedDecision
+      (psLogicPi 27 "inhabited" (psStandardInhabitedType elem)
+        (psLogicPi 28 "xs" coll
+          (psLogicPi 29 "i" idx
+            (psLogicEq (.succ .zero) elem bangCall matchOptional)))
+        .instanceImplicit) .instanceImplicit) .instanceImplicit)
+  let bangLemmaValue := lams (psLogicLam 4 "checked" base
+    (psLogicLam 5 "decide" indexedDecision bangProof .instanceImplicit)
+    .instanceImplicit)
   let value := psLogicApply
     (.constE (psNameAppendStr psStandardLawfulGetElemName "mk") levels)
     (psStandardGetElemArgs coll idx elem valid ++
@@ -604,12 +631,14 @@ def psStandardLawfulGetElemOptionalDefaultInstance : PsDeclaration :=
   let body := lams (psLogicLam 4 "checked" base
     (psLogicLam 5 "decide" indexedDecision value .instanceImplicit)
     .instanceImplicit)
-  .definitionDecl name [u, v] type body
+  [ .definitionDecl optionalLemma [u, v] optionalLemmaType optionalLemmaValue,
+    .definitionDecl bangLemma [u, v] bangLemmaType bangLemmaValue,
+    .definitionDecl name [u, v] type body ]
 
 def psStandardGetElemOptionalDefaultDeclarations : List PsDeclaration :=
   psStandardOptionalDefaultDecisionDeclarations ++
-    [psStandardGetElemOptionalDefaultInstance,
-     psStandardLawfulGetElemOptionalDefaultInstance]
+    [psStandardGetElemOptionalDefaultInstance] ++
+    psStandardLawfulGetElemOptionalDefaultDeclarations
 
 -- Use the same checked declaration closure for elaboration and execution.
 -- No new trusted primitive, Boolean proof shortcut, or fallback conversion.

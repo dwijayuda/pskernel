@@ -134,6 +134,31 @@ def psDecisionDiteDeclaration : PsDeclaration :=
             body)) .instanceImplicit)) .implicit
   .definitionDecl (psRootName "dite") [u] dtype value
 
+-- Lean 4.35.0 ite is the nondependent wrapper over checked dite.
+-- Keeping ite opaque blocks ordinary open-term conditional proofs (including
+-- Nat.mod_lt), even when the runtime's conditional behavior is correct.
+def psDecisionIteDeclaration : PsDeclaration :=
+  let u := psRootName "u"
+  let alpha := PsExpr.fvar 0
+  let p := PsExpr.fvar 1
+  let decision := PsExpr.fvar 2
+  let positive := PsExpr.fvar 3
+  let negative := PsExpr.fvar 4
+  let body := psLogicApply (.constE (psRootName "dite") [.param u])
+    [alpha, p, decision, psLogicLam 5 "_" p positive,
+      psLogicLam 5 "_" (psDecisionNot p) negative]
+  let type := psLogicPi 0 "α" (.sortE (.param u))
+    (psLogicPi 1 "c" (.sortE .zero)
+      (psLogicPi 2 "h" (psDecisionType p)
+        (psLogicPi 3 "t" alpha (psLogicPi 4 "e" alpha alpha))
+        .instanceImplicit)) .implicit
+  let value := psLogicLam 0 "α" (.sortE (.param u))
+    (psLogicLam 1 "c" (.sortE .zero)
+      (psLogicLam 2 "h" (psDecisionType p)
+        (psLogicLam 3 "t" alpha (psLogicLam 4 "e" alpha body))
+        .instanceImplicit)) .implicit
+  .definitionDecl psIteName [u] type value
+
 -- Proof-theoretic coherence of two independent Decidable dictionaries.
 -- This is ordinary checked Core, NOT an axiom or a trusted host rewrite.
 -- Eliminate both Decidable structures, then case split on their Boolean
@@ -242,7 +267,7 @@ def psDecisionDeclarations : List PsDeclaration :=
   [psDecisionUniqueDeclaration] ++ psDecisionEqualityDeclarations ++
   [decEq "Nat.decEq" (.constE psNatName []),
    decEq "String.decEq" (.constE psStringName []),
-   psDecisionDiteDeclaration]
+   psDecisionDiteDeclaration, psDecisionIteDeclaration]
 
 def psDecisionPrelude (environment : PsEnvironment) : PsEnvironment :=
   let environment := psDecisionDeclarations.foldl (fun current declaration =>

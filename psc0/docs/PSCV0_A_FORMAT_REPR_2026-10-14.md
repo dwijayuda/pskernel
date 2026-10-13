@@ -495,3 +495,13 @@ Pinned source: `Lean/Meta/ExprDefEq.lean`, especially
 `isDefEqCheckAssignmentBug.lean`. Reuse the existing independent semantics,
 negative inference/search gates and all runtime wrappers to measure the result;
 do not raise limits, bypass proof checks or change the test expressions.
+
+
+The converted candidate's kernel diagnostic isolated another missing logical
+model: `ite` was still an axiom although `dite` was checked. In the positive
+branch of `Nat.mod_lt`, Lean needs `ite P (.isTrue h) t e` to reduce to `t`.
+The conditional subsystem now defines `ite` as the pinned nondependent wrapper
+over `dite`, with `implicitReducible` status. It is a general repair to the
+logical conditional contract; no theorem-specific rewrite or proof replacement.
+Two open-proposition branch equations join the existing compact source/oracle
+batch. Existing backend branch lowering and panic tests retain lazy execution.

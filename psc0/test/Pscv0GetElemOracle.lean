@@ -493,3 +493,7 @@ example (n m : Nat) : Nat.sub n (Nat.succ m) = Nat.pred (Nat.sub n m) := rfl
 example (n m : Nat) : Nat.mul n (Nat.succ m) = Nat.add (Nat.mul n m) n := rfl
 example (n m : Nat) : Nat.beq (Nat.succ n) (Nat.succ m) = Nat.beq n m := rfl
 end Pscv0ArithmeticModelOracle
+
+-- Nondependent conditionals retain the decision's checked computational branch.
+example (P : Prop) (h : P) (n : Nat) : @ite Nat P (.isTrue h) n 0 = n := rfl
+example (P : Prop) (h : ¬P) (n : Nat) : @ite Nat P (.isFalse h) 0 n = n := rfl

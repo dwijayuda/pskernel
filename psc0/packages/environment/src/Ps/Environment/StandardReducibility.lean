@@ -38,6 +38,7 @@ def psStandardReducibility : List (String × PsReducibility) := [
   ("Option.map", .implicitReducible),
   ("Option.getD", .implicitReducible),
   ("dite", .implicitReducible),
+  ("ite", .implicitReducible),
   ("DecidableEq", .reducible),
   ("Decidable.isFalse", .reducible),
   ("Decidable.isTrue", .reducible),

@@ -359,7 +359,7 @@ end Pscv0TransparencyOracle
 namespace Pscv0QuoteOracle
 -- Upstream String.Internal.append is opaque to kernel reduction. Compare the
 -- native implementation directly; these are runtime oracle checks, not proofs.
-#eval do
+#eval show IO Unit from do
   let cases : List (String × String) :=
     [(String.quote "", "\"\""),
      (String.quote "a\\b\"c\n\t\r\x7f", "\"a\\\\b\\\"c\\n\\t\\x0d\\x7f\""),
@@ -368,5 +368,5 @@ namespace Pscv0QuoteOracle
      (Char.quoteCore (Char.ofNat 39) true, "'")]
   for (actual, expected) in cases do
     unless actual == expected do
-      throw (IO.userError s!"quoting oracle mismatch: {actual.quote} != {expected.quote}")
+      throw (IO.userError s!"quoting oracle mismatch: {String.quote actual} != {String.quote expected}")
 end Pscv0QuoteOracle

@@ -547,20 +547,20 @@ def c0ExportReadSubset (input : String) : Except String (List C0ExportDeclaratio
 def c0ExportVerifyOrdinaryInductive
     (env : PsKernelEnvironment) (group : C0ExportInductiveGroup) :
     Except String Unit := do
-  let some (.inductInfo ty) :=
-      psKernelEnvironmentFind env group.expectedType.base.name
-    | throw "unsupported generated inductive type missing"
-  let expected := group.expectedType
-  if !c0ExportSameBase ty.base expected.base ||
-      ty.numParams != expected.numParams ||
-      ty.numIndices != expected.numIndices ||
-      ty.numNested != expected.numNested ||
-      ty.isRec != expected.isRec ||
-      ty.isReflexive != expected.isReflexive ||
-      ty.isUnsafe != expected.isUnsafe ||
-      !c0ExportSameNames ty.all expected.all ||
-      !c0ExportSameNames ty.ctors expected.ctors then
-    throw "unsupported generated inductive metadata differs from exporter"
+  for expected in group.expectedTypes do
+    let some (.inductInfo ty) :=
+        psKernelEnvironmentFind env expected.base.name
+      | throw "unsupported generated inductive type missing"
+    if !c0ExportSameBase ty.base expected.base ||
+        ty.numParams != expected.numParams ||
+        ty.numIndices != expected.numIndices ||
+        ty.numNested != expected.numNested ||
+        ty.isRec != expected.isRec ||
+        ty.isReflexive != expected.isReflexive ||
+        ty.isUnsafe != expected.isUnsafe ||
+        !c0ExportSameNames ty.all expected.all ||
+        !c0ExportSameNames ty.ctors expected.ctors then
+      throw "unsupported generated inductive metadata differs from exporter"
   for expectedCtor in group.expectedCtors do
     let some (.ctorInfo got) :=
         psKernelEnvironmentFind env expectedCtor.base.name
@@ -607,13 +607,18 @@ def c0ExportCheckOne
         psKernelAddTheorem fuel env value 4096 psKernelLeanNatMaxSizeDefault
     | .opaqueDecl value =>
         psKernelAddOpaque fuel env value 4096 psKernelLeanNatMaxSizeDefault
-    | .ordinaryInductive group =>
-        psKernelAddSimpleInductive fuel env group.source
-          4096 psKernelLeanNatMaxSizeDefault
+    | .inductiveGroup group =>
+        match group.source with
+        | .ordinary decl =>
+            psKernelAddSimpleInductive fuel env decl
+              4096 psKernelLeanNatMaxSizeDefault
+        | .mutual decl =>
+            psKernelAddSimpleMutualInductive fuel env decl
+              4096 psKernelLeanNatMaxSizeDefault
   match result with
   | .ok next =>
       match info with
-      | .ordinaryInductive group =>
+      | .inductiveGroup group =>
           match c0ExportVerifyOrdinaryInductive next group with
           | .ok _ => .ok next
           | .error message => .error (.declinedUnsupported message)

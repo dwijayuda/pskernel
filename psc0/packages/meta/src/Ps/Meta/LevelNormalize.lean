@@ -24,7 +24,9 @@ def psLevelLeqWithFuel (fuel : Nat) (a b : PsLevel) : Bool :=
 def psLevelMax (a b : PsLevel) : PsLevel :=
   if psLevelLeqWithFuel 256 a b then b
   else if psLevelLeqWithFuel 256 b a then a
-  else .max a b
+  else match a, b with
+    | .succ a, .succ b => .succ (psLevelMax a b)
+    | _, _ => .max a b
 
 def psLevelNormalize : PsLevel → PsLevel
   | .succ a => .succ (psLevelNormalize a)

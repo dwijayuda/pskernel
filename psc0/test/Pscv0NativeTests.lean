@@ -785,6 +785,37 @@ private def application : String :=
   "function orderLtRuntime(n: Nat, m: Nat): Bool := if (Nat.lt(n, m)) { true } else { false }\n" ++
   "function decisionFlag{P: Prop}(decision: Decidable P): Bool := by {\n  cases decision\n  case intro flag reflection => exact flag\n}\n" ++
   "function orderDecisionRuntime(n: Nat, m: Nat): Bool := decisionFlag(Nat.decLe(n, m))\n" ++
+  "namespace DerivingParameters\n" ++
+  "universe u v\n" ++
+  "inductive Choice(A: Type u): Type u where { | value(payload: A) | empty } deriving Inhabited, BEq\n" ++
+  "structure Pair(A: Type u, B: Type v) where {\n" ++
+  "  first: A\n" ++
+  "  second: B\n" ++
+  "} deriving Inhabited, BEq\n" ++
+  "structure Phantom(A: Type u, B: Type v) where { value: A } deriving Inhabited\n" ++
+  "structure Tagged(A: Type u, n: Nat): Type u where { value: A } deriving Inhabited, BEq\n" ++
+  "structure Lift(A: Type): Type 1 where { value: A } deriving Inhabited, BEq\n" ++
+  "structure SortBox(A: Sort u) where { value: A } deriving Inhabited\n" ++
+  "function defaultChoice{A: Type u}(unit: Unit): Choice A := Inhabited.default\n" ++
+  "function defaultPhantom{A: Type u}{B: Type v}[Inhabited A](unit: Unit): Phantom(A, B) := Inhabited.default\n" ++
+  "function defaultSort{A: Sort u}[Inhabited A](unit: Unit): SortBox A := Inhabited.default\n" ++
+  "theorem choiceDefault{A: Type u}: defaultChoice(A := A, unit := ()) = Choice.empty := by { rfl }\n" ++
+  "theorem phantomDefault{A: Type u}{B: Type v}[Inhabited A]: Phantom.value(defaultPhantom(A := A, B := B, unit := ())) = (Inhabited.default : A) := by { rfl }\n" ++
+  "end DerivingParameters\n" ++
+  "const derivingMinimalRuntime: Bool := match DerivingParameters.defaultChoice(A := Empty, unit := ()) with { | .value value => nomatch value | .empty => true }\n" ++
+  "const derivingPhantomRuntime: Nat := DerivingParameters.Phantom.value(DerivingParameters.defaultPhantom(A := Nat, B := Empty, unit := ()))\n" ++
+  "const derivingHighDefault: DerivingParameters.Pair(DerivingParameters.Lift Nat, Nat) := Inhabited.default\n" ++
+  "const derivingHighDefaultRuntime: Nat := DerivingParameters.Lift.value(derivingHighDefault.first)\n" ++
+  "const derivingHighEqualRuntime: Bool := DerivingParameters.Pair.mk(DerivingParameters.Lift.mk(751), 3) == DerivingParameters.Pair.mk(DerivingParameters.Lift.mk(751), 3)\n" ++
+  "const derivingHighUnequalRuntime: Bool := DerivingParameters.Pair.mk(DerivingParameters.Lift.mk(751), 3) == DerivingParameters.Pair.mk(DerivingParameters.Lift.mk(751), 4)\n" ++
+  "const derivingPayloadEqualRuntime: Bool := DerivingParameters.Choice.value(DerivingParameters.Lift.mk(757)) == DerivingParameters.Choice.value(DerivingParameters.Lift.mk(757))\n" ++
+  "const derivingPayloadTagRuntime: Bool := DerivingParameters.Choice.value(DerivingParameters.Lift.mk(757)) == DerivingParameters.Choice.empty\n" ++
+  "const derivingValueParamRuntime: Bool := DerivingParameters.Tagged.mk(A := Nat, n := 7, value := 5) == DerivingParameters.Tagged.mk(A := Nat, n := 7, value := 5)\n" ++
+  "theorem derivingHighDefaultProof: derivingHighDefaultRuntime = 0 := by { rfl }\n" ++
+  "theorem derivingHighEqualProof: derivingHighEqualRuntime = true := by { rfl }\n" ++
+  "theorem derivingHighUnequalProof: derivingHighUnequalRuntime = false := by { rfl }\n" ++
+  "theorem derivingPayloadEqualProof: derivingPayloadEqualRuntime = true := by { rfl }\n" ++
+  "theorem derivingPayloadTagProof: derivingPayloadTagRuntime = false := by { rfl }\n" ++
   "namespace M1Universes\n" ++
   "universe u v\n" ++
   "structure Box(A: Type u): Type u where { value: A }\n" ++
@@ -1870,6 +1901,21 @@ private def projectBoundaries : IO Unit := do
     | _, _ => throw (IO.userError s!"module official checker acceptance mismatch {i}")
   IO.println "PSCV0_NATIVE_MODULES: PASS module boundaries, RC4 raw/radix, checked ToString dictionaries, abbreviation exposure and entry exports"
 
+private def derivingBoundaries : IO Unit := do
+  let requests : Array PsV7Native.Request := #[
+    { source := "universe u\nstructure Box(A: Type u): Type u where { value: A } deriving BEq\nfunction bad(x: Box(Nat -> Nat)): Bool := x == x\n" },
+    { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
+    { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: Chain A) } deriving BEq\n" }
+  ]
+  let results ← PsV7Native.compileBatch requests
+  for result in results do
+    match result with
+    | .error error =>
+      unless error.phase == "elaborate" do
+        throw (IO.userError ("deriving refusal escaped elaboration: " ++ error.phase ++ ": " ++ error.message))
+    | .ok _ => throw (IO.userError "deriving admitted an unsupported comparison")
+  IO.println "PSCV0_DERIVING_BOUNDARIES: PASS missing parameter dictionary, dependent field, recursive family"
+
 def main : IO Unit := do
   emissionBoundary
   metavariableBoundary
@@ -1878,4 +1924,5 @@ def main : IO Unit := do
   semanticCases
   doBoundaries
   projectBoundaries
+  derivingBoundaries
   IO.println "PSCV0_NATIVE_CHECKS: PASS; no compiler-source translation or self-host regeneration"

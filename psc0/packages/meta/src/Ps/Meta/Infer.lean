@@ -258,7 +258,7 @@ def psInferProjectionType
         localContext
         targetType);
   match view.head with
-  | .constE actualName _ =>
+  | .constE actualName levels =>
       if psInferBoolNot (psNameEq actualName typeName) then
         Except.error PsInferError.projectionUnsupported
       else
@@ -288,7 +288,9 @@ def psInferProjectionType
                       | some constructorInfo =>
                           if
                               psInferBoolOr
-                                (psInferNatNe constructorInfo.numParams info.numParams)
+                                (psInferBoolOr
+                                  (psInferNatNe constructorInfo.levelParams.length levels.length)
+                                  (psInferNatNe constructorInfo.numParams info.numParams))
                                 (Nat.ble constructorInfo.numFields index) then
                             Except.error PsInferError.projectionUnsupported
                           else
@@ -297,7 +299,7 @@ def psInferProjectionType
                                   environment
                                   metaContext
                                   localContext
-                                  constructorInfo.type
+                                  (psExprInstantiateLevelParams constructorInfo.levelParams levels constructorInfo.type)
                                   view.args with
                             | Except.error error => Except.error error
                             | Except.ok fieldCursor =>

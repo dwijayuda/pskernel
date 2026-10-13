@@ -138,3 +138,38 @@ instance combine [A] [B] : Result where
   value := A.value + B.value
 example : Result.value = 1466 := rfl
 end Pscv0InstanceGraphOracle
+
+-- Pinned deriving semantics, independent of the portable Core generator.
+namespace Pscv0DerivingOracle
+universe u v
+inductive Choice (α : Type u) : Type u where
+  | value (payload : α)
+  | empty
+deriving Inhabited, BEq
+structure Pair (α : Type u) (β : Type v) where
+  first : α
+  second : β
+deriving Inhabited, BEq
+structure Phantom (α : Type u) (β : Type v) where
+  value : α
+deriving Inhabited
+structure Tagged (α : Type u) (n : Nat) where
+  value : α
+deriving Inhabited, BEq
+structure Lift (α : Type) : Type 1 where
+  value : α
+deriving Inhabited, BEq
+structure SortBox (α : Sort u) where
+  value : α
+deriving Inhabited
+example {α : Type u} : (default : Choice α) = .empty := rfl
+example {α : Type u} {β : Type v} [Inhabited α] :
+    (default : Phantom α β).value = (default : α) := rfl
+example {α : Sort u} [Inhabited α] : (default : SortBox α).value = (default : α) := rfl
+example : ((default : Pair (Lift Nat) Nat).first).value = 0 := rfl
+example : (Pair.mk (Lift.mk 751) 3 == Pair.mk (Lift.mk 751) 3) = true := rfl
+example : (Pair.mk (Lift.mk 751) 3 == Pair.mk (Lift.mk 751) 4) = false := rfl
+example : (Choice.value (Lift.mk 757) == Choice.value (Lift.mk 757)) = true := rfl
+example : (Choice.value (Lift.mk 757) == Choice.empty) = false := rfl
+example : ((Tagged.mk 5 : Tagged Nat 7) == Tagged.mk 5) = true := rfl
+end Pscv0DerivingOracle

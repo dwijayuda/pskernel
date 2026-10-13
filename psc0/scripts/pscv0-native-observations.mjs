@@ -1,5 +1,13 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "derivingMinimalRuntime", args: null, expected: true },
+  { name: "derivingPhantomRuntime", args: null, expected: 0n },
+  { name: "derivingHighDefaultRuntime", args: null, expected: 0n },
+  { name: "derivingHighEqualRuntime", args: null, expected: true },
+  { name: "derivingHighUnequalRuntime", args: null, expected: false },
+  { name: "derivingPayloadEqualRuntime", args: null, expected: true },
+  { name: "derivingPayloadTagRuntime", args: null, expected: false },
+  { name: "derivingValueParamRuntime", args: null, expected: true },
   { name: "instanceWaiterRuntime", args: null, expected: 1466n },
   { name: "listProofRuntime", args: null, expected: 409n },
   { name: "listAutoRuntime", args: null, expected: 421n },

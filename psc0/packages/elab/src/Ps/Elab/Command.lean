@@ -181,13 +181,8 @@ def psElabCommandDeclaration (state : PsCommandState) (source : PsSyntaxDeclarat
     else state.exposedNames
     privateAliases := aliases }
 
--- The first bounded deriving handler generates an ordinary checked
--- instance from a non-dependent fieldless constructor. It never admits
--- arbitrary elaborator extensions or fabricated typeclass inhabitants.
--- Compute a default for each constructor field from the registered,
--- checked Inhabited dictionaries. Instantiating the remaining telescope
--- after every field also supports field types dependent on earlier defaults.
--- Source params/indices are handled separately, so this worker has neither.
+-- Deriving owns Core generation in a shared parameter/universe telescope.
+-- This command owns source order, registration and provenance for all handlers.
 def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration)
     (handlers : List PsSyntaxName) (isPrivate : Bool) :
     Except PsElabError PsCommandState := do

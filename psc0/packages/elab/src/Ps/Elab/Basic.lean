@@ -283,7 +283,7 @@ def psElabProjectionStep
       current.type;
   let view := psInferAppView reducedType;
   match view.head with
-  | .constE typeName _ =>
+  | .constE typeName levels =>
       match psEnvironmentFindInductive current.context.environment typeName with
       | none => Except.error PsElabError.unsupportedTerm
       | some info =>
@@ -317,7 +317,7 @@ def psElabProjectionStep
                             psElabProjectionApplyParameters
                               current.context
                               view.args
-                              constructorInfo.type with
+                              (psExprInstantiateLevelParams constructorInfo.levelParams levels constructorInfo.type) with
                         | Except.error error => Except.error error
                         | Except.ok fieldCursor =>
                             match

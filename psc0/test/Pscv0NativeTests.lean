@@ -1907,8 +1907,10 @@ private def derivingBoundaries : IO Unit := do
     { source := "structure Dependent where {\n  n: Nat\n  value: Fin n\n} deriving BEq\n" },
     { source := "universe u\ninductive Chain(A: Type u): Type u where { | nil | cons(head: A, tail: Chain A) } deriving BEq\n" }
   ]
-  let results ← PsV7Native.compileBatch requests
-  for result in results do
+  let batch ← match ← PsV7Native.runBatch requests with
+    | .ok batch => pure batch
+    | .error error => throw (IO.userError ("deriving host prelude: " ++ error.message))
+  for result in batch.results do
     match result with
     | .error error =>
       unless error.phase == "elaborate" do

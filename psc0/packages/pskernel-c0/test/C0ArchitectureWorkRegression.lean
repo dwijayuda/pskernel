@@ -65,6 +65,52 @@ def main : IO Unit := do
       if !psKernelC0ArchitectureWorkValid admitted ||
           !admitted.stagedRoots.isEmpty then
         throw (IO.userError "C0 admission mutated syntax staging")
+      -- One validated work boundary must own every *accepting* checked
+      -- judgment, not just declarations. None of these methods reads a
+      -- candidate as a proof or reuses the pre-admission environment cache.
+      match psKernelC0ArchitectureWhnfWork 4096 admitted
+          (.const aliasName []) with
+      | .error reason =>
+          throw (IO.userError ("checked WHNF interface failed: " ++ reason))
+      | .ok (value, next) =>
+          if !psKernelExprEqual value (.sort .zero) ||
+              !psKernelC0ArchitectureWorkValid next then
+            throw (IO.userError "checked WHNF changed source semantics")
+      match psKernelC0ArchitectureInferWork 4096 admitted (.sort .zero) with
+      | .error reason =>
+          throw (IO.userError ("checked inference interface failed: " ++ reason))
+      | .ok (ty, _) =>
+          if !psKernelExprEqual ty (.sort (.succ .zero)) then
+            throw (IO.userError "checked inference returned wrong Sort")
+      match psKernelC0ArchitectureDefEqWork 4096 admitted
+          (.const aliasName []) (.sort .zero) with
+      | .error reason =>
+          throw (IO.userError ("checked DefEq interface failed: " ++ reason))
+      | .ok (same, _) =>
+          if !same then
+            throw (IO.userError "checked DefEq missed admitted alias")
+      match psKernelC0ArchitectureDefEqWork 4096 admitted
+          (.sort .zero) (.sort (.succ .zero)) with
+      | .error reason =>
+          throw (IO.userError ("checked negative DefEq failed: " ++ reason))
+      | .ok (same, _) =>
+          if same then
+            throw (IO.userError "checked DefEq equated different universes")
+      match psKernelC0ArchitectureIsPropWork 4096 admitted (.sort .zero) with
+      | .error reason =>
+          throw (IO.userError ("checked isProp interface failed: " ++ reason))
+      | .ok (isProp, _) =>
+          if isProp then
+            throw (IO.userError "Sort0 was classified as a proposition term")
+      match psKernelC0ArchitectureInferWork 4096 forged (.sort .zero) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError "forged scratch roots authorized checked inference")
+      match psKernelC0ArchitectureDefEqWork 4096 forged
+          (.sort .zero) (.sort .zero) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError "forged scratch roots authorized checked equality")
       match psKernelC0ArchitecturePreview 4096 admitted (.const aliasName []) with
       | .error err =>
           throw (IO.userError ("C0 admitted source delta failed: " ++ err))
@@ -157,3 +203,4 @@ def main : IO Unit := do
   IO.println "C0_ARCHITECTURE atomic_declaration_and_cache_revision=pass"
   IO.println "C0_ARCHITECTURE validated_scratch_transaction=pass"
   IO.println "C0_ARCHITECTURE candidate_does_not_authorize_admission=pass"
+  IO.println "C0_ARCHITECTURE unified_source_whnf_infer_defeq_prop=pass"

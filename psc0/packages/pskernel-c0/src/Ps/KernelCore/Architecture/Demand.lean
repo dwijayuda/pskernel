@@ -14,8 +14,8 @@ compute typing, WHNF, definitional equality and declaration admission.
 Ordinary non-K recursors over constructor-headed or Nat literal majors use
 the source's recursor rule metadata; quotient demand follows source arities.
 K-reduction and structure eta remain outside the candidate scope.
-String-literal recursor majors now re-enter the existing demand machine as
-source String.ofList syntax, with an explicit pre-expansion size bound.
+String-literal projection and recursor majors now re-enter the same demand
+machine as source String.ofList syntax, with a shared expansion guard.
 -/
 
 /-- A saved parent expression is preserved verbatim when a demanded operand
@@ -191,6 +191,23 @@ def psKernelC0RecursorRewrite
         some (psKernelExprApplyArgsCheap rhs2
           (args.drop (majorIndex + 1)))
 
+/-- The source expands String literals through String.ofList before
+    constructor inspection in both projection and recursor reductions. Keep
+    the saved continuation frame, charge transitions to the same operation,
+    and refuse materialization when UTF-8 input exceeds the quote budget. -/
+def psKernelC0DemandEnterString
+    (quoteFuel : Nat)
+    (state : PsKernelC0DemandState)
+    (remaining : List PsKernelC0DemandFrame)
+    (frame : PsKernelC0DemandFrame)
+    (value : String) : PsKernelC0DemandStep :=
+  if String.utf8ByteSize value > quoteFuel then
+    .declined "candidate String constructor expansion budget exhausted"
+  else
+    psKernelC0DemandEnter
+      { state with frames := remaining }
+      (.mk (psKernelStringLitToConstructor value) []) frame
+
 /-- Demand frames only consult a value returned from the *same* candidate
     evaluator. Arithmetic and constructor selection reuse the source's
     existing primitive rules but not its trusted WHNF judgment. -/
@@ -231,10 +248,16 @@ def psKernelC0DemandResume
               | .ok none => psKernelC0DemandStuck state parent remaining
           | _, _, _ => psKernelC0DemandStuck state parent remaining
       | .projection parent typeName fieldIndex =>
-          match psKernelReduceProjCore context typeName fieldIndex reduced with
-          | some result =>
-              psKernelC0DemandValue state parent result parent.arguments remaining
-          | none => psKernelC0DemandStuck state parent remaining
+          match reduced with
+          | .lit (.str value) =>
+              psKernelC0DemandEnterString quoteFuel state remaining
+                (.projection parent typeName fieldIndex) value
+          | _ =>
+              match psKernelReduceProjCore context typeName fieldIndex reduced with
+              | some result =>
+                  psKernelC0DemandValue state parent result
+                    parent.arguments remaining
+              | none => psKernelC0DemandStuck state parent remaining
       | .quotient parent majorIndex =>
           -- Reuse the source's exact Quot.mk arity and representative index.
           -- An invalid/unfinished major remains unchanged.
@@ -262,19 +285,8 @@ def psKernelC0DemandResume
       | .recursor parent recursor levels =>
           match reduced with
           | .lit (.str value) =>
-              -- Lean expands a String literal to String.ofList and runs
-              -- source WHNF on that expression before selecting an iota
-              -- rule. Re-enter the *same* candidate demand machine instead
-              -- of recursively calling the source checker or resetting
-              -- operation fuel. Bound materialization by the original
-              -- quotation budget, including UTF-8 multibyte input.
-              if String.utf8ByteSize value > quoteFuel then
-                .declined "candidate String constructor expansion budget exhausted"
-              else
-                psKernelC0DemandEnter
-                  { state with frames := remaining }
-                  (.mk (psKernelStringLitToConstructor value) [])
-                  (.recursor parent recursor levels)
+              psKernelC0DemandEnterString quoteFuel state remaining
+                (.recursor parent recursor levels) value
           | _ =>
               match psKernelC0RecursorRewrite quoteFuel parent recursor
                   levels reduced with

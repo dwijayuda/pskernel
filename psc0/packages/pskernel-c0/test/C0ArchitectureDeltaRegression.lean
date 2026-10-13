@@ -598,8 +598,20 @@ def main : IO Unit := do
   -- Proof-irrelevant K recursors and unsafe recursors remain outside this
   -- candidate iota family; neither may be silently treated as the ordinary
   -- constructor rule merely because a matching synthetic rule is present.
+  -- A K fixture must expose its major inductive in the recursor's
+  -- declared forall type; otherwise the source correctly bypasses the
+  -- typing/DefEq K path before reaching inference.
+  let kRecInfo : PsKernelRecursorInfo := {
+    recInfo with
+    k := true
+    base := {
+      recInfo.base with
+      type := .forallE (c0DeltaName "k.major")
+        (.const pairType []) sort .default
+    }
+  }
   let kRecEnv := psKernelEnvironmentAddUnchecked ctorEnv
-    (.recInfo { recInfo with k := true })
+    (.recInfo kRecInfo)
   let kRecSession := psKernelMkCheckerSession kRecEnv []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   match psKernelC0ArchitectureCandidateDemand 4096 kRecSession.context recCall with

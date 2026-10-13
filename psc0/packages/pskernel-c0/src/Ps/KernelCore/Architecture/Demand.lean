@@ -92,8 +92,8 @@ def psKernelC0DemandStart
       some (psKernelC0DemandEnter state (.mk structValue env)
         (.projection state.machine typeName fieldIndex))
   | .mk (.const name levels) _ =>
-      -- Quot eliminators have universe arguments; the empty-level
-      -- restriction applies only to the specialized Nat primitives.
+      -- Quot eliminators carry universe arguments; the empty-level
+      -- restriction below is specific to specialized Nat primitives.
       if context.environment.quotInitialized &&
           (psKernelNameEq name psKernelQuotLiftName ||
             psKernelNameEq name psKernelQuotIndName) then
@@ -116,18 +116,6 @@ def psKernelC0DemandStart
             some (psKernelC0DemandEnter state left
               (.natLeft state.machine right))
         | _ => none
-      else none
-  | _ => none
-      else if context.environment.quotInitialized &&
-          (psKernelNameEq name psKernelQuotLiftName ||
-            psKernelNameEq name psKernelQuotIndName) then
-        let majorIndex :=
-          if psKernelNameEq name psKernelQuotLiftName then 5 else 4
-        match state.machine.arguments[majorIndex]? with
-        | some major =>
-            some (psKernelC0DemandEnter state major
-              (.quotient state.machine majorIndex))
-        | none => none
       else none
   | _ => none
 

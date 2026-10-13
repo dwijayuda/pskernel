@@ -1973,9 +1973,9 @@ private def syntheticBoundaries : IO Unit := do
     let obligation := psMetaFresh psMetaEmpty psLocalEmpty nat kind
     if (psMetaAbstract obligation.context psLocalEmpty obligation.expr nat).isSome then
       throw (IO.userError "an outstanding synthetic obligation became an answer parameter")
-  let scoped := psLocalPushBinding psLocalEmpty (psRootName "n") nat .explicit
-  let hole := psMetaFresh psMetaEmpty scoped.context nat .natural
-  let some scopedTemplate := psMetaAbstract hole.context scoped.context hole.expr nat |
+  let captured := psLocalPushBinding psLocalEmpty (psRootName "n") nat .explicit
+  let hole := psMetaFresh psMetaEmpty captured.context nat .natural
+  let some scopedTemplate := psMetaAbstract hole.context captured.context hole.expr nat |
     throw (IO.userError "scoped answer abstraction failed")
   if (psMetaOpenTemplate psMetaEmpty psLocalEmpty scopedTemplate).isSome then
     throw (IO.userError "answer template escaped its captured scope")

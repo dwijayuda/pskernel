@@ -189,6 +189,13 @@ def main : IO Unit := do
   if !psKernelMutualInductiveNeutralDomain
       neutralSession [freshTarget] neutralDomain then
     throw (IO.userError "C0 failed to recognize stuck inductive type head")
+  -- Differential check against the source-owned authoritative WHNF operation.
+  match psKernelSessionWhnf 4096 neutralSession neutralDomain with
+  | .ok (reduced, _) =>
+      if !psKernelExprEqual reduced neutralDomain then
+        throw (IO.userError "C0 neutral inductive head was not actually WHNF")
+  | .error message =>
+      throw (IO.userError ("C0 neutral inductive WHNF failed: " ++ message))
   let recursiveDomain : PsKernelExpr :=
     .app (.const existing []) (.const freshTarget [])
   if psKernelMutualInductiveNeutralDomain

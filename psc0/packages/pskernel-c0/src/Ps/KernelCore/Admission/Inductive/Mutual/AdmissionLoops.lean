@@ -73,7 +73,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
         (work : PsKernelEnvironment)
         (ctorIndex : Nat) =>
         match psKernelCheckNoMVarNoFVar ctor.type with
-        | Except.error (psKernelMutualBudgetAt "constructor-sort" error) =>
+        | Except.error error =>
             Except.error error
         | Except.ok _ =>
             match
@@ -103,7 +103,7 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                           fuel
                           (Prod.snd ctorType)
                           (Prod.fst ctorType) with
-                    | Except.error error =>
+                    | Except.error (psKernelMutualBudgetAt "constructor-sort" error) =>
                         Except.error error
                     | Except.ok _ =>
                         let ctorSession :=

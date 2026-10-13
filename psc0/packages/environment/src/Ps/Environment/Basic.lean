@@ -153,8 +153,8 @@ def psEnvironmentReducibility (environment : PsEnvironment) (name : PsName) : Ps
 
 def psEnvironmentSetReducibility (environment : PsEnvironment) (name : PsName)
     (status : PsReducibility) : PsEnvironment :=
-  { environment with reducibility :=
-      psBucketInsert 16 environment.reducibility (psEnvironmentNameHash name) (name, status) }
+  { environment with
+    reducibility := psBucketInsert 16 environment.reducibility (psEnvironmentNameHash name) (name, status) }
 
 def psEnvironmentEmpty : PsEnvironment :=
   { declarations := [], index := .empty }

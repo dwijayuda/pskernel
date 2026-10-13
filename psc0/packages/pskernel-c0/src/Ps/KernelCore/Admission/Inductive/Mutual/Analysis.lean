@@ -459,7 +459,15 @@ def psKernelAnalyzeSimpleMutualRecursiveArgumentWithFuel
                   session
                   domain with
             | Except.error error =>
-                Except.error (psKernelMutualBudgetAt "recursive-domain-whnf" error)
+                -- Pure diagnostic distinction: an occurrence-free constructor
+                -- domain and a domain mentioning an in-progress inductive
+                -- must not be optimized by the same positivity shortcut.
+                if psKernelSimpleMutualContainsConst targets domain then
+                  Except.error (psKernelMutualBudgetAt
+                    "recursive-domain-with-target" error)
+                else
+                  Except.error (psKernelMutualBudgetAt
+                    "recursive-domain-without-target" error)
             | Except.ok reduced =>
                 match
                     psKernelSimpleMutualAppInfo

@@ -234,7 +234,7 @@ private def unsignedDisplayFixture : String :=
 -- Native official-kernel acceptance is mandatory; no unknown reference,
 -- implicit model fallback or silent dictionary replacement is permitted.
 private def unsignedOperatorSourceCases : IO Unit := do
-  let syntax : Array (String × String × String) := #[
+  let samples : Array (String × String × String) := #[
     ("add", "Nat", "UInt8.toNat(x + y)"),
     ("sub", "Nat", "UInt8.toNat(x - y)"),
     ("mul", "Nat", "UInt8.toNat(x * y)"),
@@ -250,7 +250,7 @@ private def unsignedOperatorSourceCases : IO Unit := do
     ("map", "List String", "List.map(Nat.repr, [UInt8.toNat(x + y)])"),
     ("display", "String",
       "String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y)]))")]
-  let requests : Array PsV7Native.Request := syntax.map fun (_, resultType, expression) =>
+  let requests : Array PsV7Native.Request := samples.map fun (_, resultType, expression) =>
     { source := "function operation(a: Nat, b: Nat): " ++ resultType ++
         " := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n " ++
         expression ++ " }\n" }
@@ -258,8 +258,8 @@ private def unsignedOperatorSourceCases : IO Unit := do
   let batch ← match result with
     | .error error => throw (IO.userError ("unsigned source matrix: " ++ error.message))
     | .ok batch => pure batch
-  for i in [:syntax.size] do
-    let some (label, _, _) := syntax[i]? | throw (IO.userError "missing unsigned label")
+  for i in [:samples.size] do
+    let some (label, _, _) := samples[i]? | throw (IO.userError "missing unsigned label")
     let some answer := batch.results[i]? | throw (IO.userError "missing unsigned result")
     match answer with
     | .ok _ => IO.println ("PSCV0_UNSIGNED_SOURCE: PASS " ++ label)

@@ -79,10 +79,12 @@ def psElabSaveScope (context : PsElabContext) : PsElabSavedScope :=
     levelNames := context.levelNames }
 
 def psElabRestoreScope (context : PsElabContext) (scope : PsElabSavedScope) : PsElabContext :=
-  { context with environment := scope.environment,
+  { context with
+    environment := scope.environment
     localContext := { scope.localContext with
-      nextId := max scope.localContext.nextId context.localContext.nextId },
-    instances := scope.instances, structuralRecursion := scope.structuralRecursion,
+      nextId := max scope.localContext.nextId context.localContext.nextId }
+    instances := scope.instances
+    structuralRecursion := scope.structuralRecursion
     levelNames := scope.levelNames }
 
 -- Root fields keep their established call map in every nested body. Only the

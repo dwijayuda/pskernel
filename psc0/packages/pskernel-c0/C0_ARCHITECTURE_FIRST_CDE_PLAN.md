@@ -77,6 +77,14 @@ Integration through `Architecture/Work.lean` remains preview-only: the checked s
 
 **Next gate:** native Lean 4.35 compilation and exhaustive current mandatory source/negative tests, then a semantics-driven quotient/recursor demand extension with one fuel policy. Do not claim independent checked equivalence, whole Init compatibility or verified soundness from this partial candidate.
 
+## CDE-5 — quotient major-demand and qualified CDE-2–5 (2026-10-14)
+
+`Architecture/Demand.lean` now carries Quot.lift and Quot.ind major premises through the existing single-operation fuel/continuation stack; reduction requires the source quotient-initialized flag and exact `Quot.mk` three-argument shape. Function/representative selection and additional application arguments follow the source quotient reduction rule. Unlike Nat primitives, quotient eliminators have universe arguments; the head-dispatcher explicitly checks them before applying the Nat empty-level guard. Synthetic positive/negative source-WHNF differential tests cover lift, ind, nested β/ζ major, quotient result consumed by Nat, surplus args, wrong/missing constructor shapes, no initialization, and budget decline. The source checker is still the sole trusted judgment path.
+
+**Qualified source:** [`e2eaac64`](https://github.com/dwijayuda/pskernel/commit/e2eaac64e8a17325c847e761c62d36a00e440639), full [native CI 38439633705](https://github.com/dwijayuda/pskernel/actions/runs/38439633705) **SUCCESS**. Compilation, source differentials CDE-0–5, official replay fixtures, negative conformance, performance microbenchmarks and independent original-core comparison passed. Prior CDE-2/3/4 historical notes saying 'CI pending' are superseded for their *bounded feature slices*. This is **not** complete Phase D/E qualification, formal refinement, full real Init/Std/Mathlib C0 acceptance, real Quot-admission proof, or competitive full-workload benchmark evidence.
+
+Next architecture focus: ordinary recursor-major demand with precise constructor-rule/universe/fixed-argument semantics and careful K/literal cases, plus globally metered quotation and gradual consolidation of candidate-only execution before any accepting integration.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

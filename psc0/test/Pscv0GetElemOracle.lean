@@ -614,3 +614,15 @@ example (a : Bool) : (a == true) = a := rfl
 example {A : Type u} (xs : List A) : xs.reverse = List.reverseAux xs [] := rfl
 #guard (List.foldl (α := ProductLevels.High) (β := Nat)
   (fun acc n => ProductLevels.High.mk (acc.value + n)) (ProductLevels.High.mk 0) [1, 2, 3]).value == 6
+
+namespace Pscv0UnsignedDisplayOracle
+def display (value : Nat) : String :=
+  String.intercalate "," [reprStr (UInt8.ofNat value), reprStr (UInt16.ofNat value),
+    reprStr (UInt32.ofNat value), reprStr (UInt64.ofNat value),
+    (Std.format (UInt64.ofNat value)).pretty]
+#guard display 18446744073709551615 ==
+  "255,65535,4294967295,18446744073709551615,18446744073709551615"
+#guard (default : UInt8).toNat + (default : UInt16).toNat +
+  (default : UInt32).toNat + (default : UInt64).toNat == 0
+#guard (repr ([1, 2, 3, 4] : List UInt8)).pretty 8 == "[1, 2,\n 3, 4]"
+end Pscv0UnsignedDisplayOracle

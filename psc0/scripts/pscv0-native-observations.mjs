@@ -1,5 +1,8 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "unsignedDisplay", args: [18446744073709551615n], expected: "255,65535,4294967295,18446744073709551615,18446744073709551615" },
+  { name: "unsignedDefaults", args: null, expected: 0n },
+  { name: "unsignedListDisplay", args: null, expected: "[1, 2,\n 3, 4]" },
   { name: "productHighFold", args: null, expected: 6n },
   { name: "productHighLeft", args: null, expected: 5n },
   { name: "productHighRight", args: null, expected: 7n },

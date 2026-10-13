@@ -7,8 +7,11 @@ This tool is not imported by the portable compiler.
 -/
 import Ps.Host.StandardClosure
 import Ps.Meta.Reduce
+import Ps.Host.StandardSource
 
 namespace PsV7Native
+
+open StandardSource
 
 private def exportName : Lean.Name → PsName
   | .anonymous => .anonymous
@@ -111,67 +114,6 @@ private def exportDeclaration (native : Lean.Environment) (allowedAssumptions : 
     unless psNameEq name (psQuotientKindName kind) do
       throw "invalid native quotient identity"
     return .quotientDecl name levels type kind
-
-private def sourceList (items : List String) : String :=
-  "[" ++ String.intercalate ", " items ++ "]"
-
-private def sourceName : PsName → String
-  | .anonymous => ".anonymous"
-  | .str parent value => "(.str " ++ sourceName parent ++ " " ++ reprStr value ++ ")"
-  | .num parent value => "(.num " ++ sourceName parent ++ " " ++ toString value ++ ")"
-
-private def sourceLevel : PsLevel → String
-  | .zero => ".zero"
-  | .succ value => "(.succ " ++ sourceLevel value ++ ")"
-  | .max a b => "(.max " ++ sourceLevel a ++ " " ++ sourceLevel b ++ ")"
-  | .imax a b => "(.imax " ++ sourceLevel a ++ " " ++ sourceLevel b ++ ")"
-  | .param name => "(.param " ++ sourceName name ++ ")"
-  | .mvar index => "(.mvar " ++ toString index ++ ")"
-
-private def sourceBinder : PsBinderInfo → String
-  | .explicit => ".explicit"
-  | .implicit => ".implicit"
-  | .strictImplicit => ".strictImplicit"
-  | .instanceImplicit => ".instanceImplicit"
-
-private def sourceExpr : PsExpr → String
-  | .bvar index => "(.bvar " ++ toString index ++ ")"
-  | .fvar index => "(.fvar " ++ toString index ++ ")"
-  | .mvar index => "(.mvar " ++ toString index ++ ")"
-  | .sortE level => "(.sortE " ++ sourceLevel level ++ ")"
-  | .constE name levels => "(.constE " ++ sourceName name ++ " " ++ sourceList (levels.map sourceLevel) ++ ")"
-  | .app fn arg => "(.app " ++ sourceExpr fn ++ " " ++ sourceExpr arg ++ ")"
-  | .lam name type body binder =>
-    "(.lam " ++ sourceName name ++ " " ++ sourceExpr type ++ " " ++ sourceExpr body ++ " " ++ sourceBinder binder ++ ")"
-  | .forallE name type body binder =>
-    "(.forallE " ++ sourceName name ++ " " ++ sourceExpr type ++ " " ++ sourceExpr body ++ " " ++ sourceBinder binder ++ ")"
-  | .letE name type value body =>
-    "(.letE " ++ sourceName name ++ " " ++ sourceExpr type ++ " " ++ sourceExpr value ++ " " ++ sourceExpr body ++ ")"
-  | .lit (.natural value) => "(.lit (.natural " ++ toString value ++ "))"
-  | .lit (.string value) => "(.lit (.string " ++ reprStr value ++ "))"
-  | .proj name index value => "(.proj " ++ sourceName name ++ " " ++ toString index ++ " " ++ sourceExpr value ++ ")"
-
-private def sourceDeclaration (declaration : PsDeclaration) : String :=
-  let common := sourceName (psDeclarationName declaration) ++ " " ++
-    sourceList ((psDeclarationLevelParams declaration).map sourceName) ++ " " ++
-    sourceExpr (psDeclarationType declaration)
-  match declaration with
-  | .definitionDecl _ _ _ value => ".definitionDecl " ++ common ++ "\n    " ++ sourceExpr value
-  | .theoremDecl _ _ _ value => ".theoremDecl " ++ common ++ "\n    " ++ sourceExpr value
-  | .opaqueDecl _ _ _ value => ".opaqueDecl " ++ common ++ "\n    " ++ sourceExpr value
-  | .inductiveDecl value => ".inductiveDecl (PsInductiveInfo.mk " ++ common ++ " " ++
-      toString value.numParams ++ " " ++ toString value.numIndices ++ " " ++
-      sourceList (value.constructors.map sourceName) ++ " " ++ toString value.isStructure ++ ")"
-  | .constructorDecl value => ".constructorDecl (PsConstructorInfo.mk " ++ common ++ " " ++
-      sourceName value.inductiveName ++ " " ++ toString value.constructorIndex ++ " " ++
-      toString value.numParams ++ " " ++ toString value.numFields ++ " " ++
-      sourceList (value.recursiveFields.map toString) ++ ")"
-  | .recursorDecl value => ".recursorDecl (PsRecursorInfo.mk " ++ common ++ " " ++
-      sourceList (value.inductiveNames.map sourceName) ++ " " ++ toString value.numParams ++ " " ++
-      toString value.numIndices ++ " " ++ toString value.numMotives ++ " " ++ toString value.numMinors ++ ")"
-  | .quotientDecl _ _ _ kind => ".quotientDecl " ++ common ++ " ." ++ psQuotientKindTag kind
-  | .axiomDecl .. => ".axiomDecl " ++ common
-  | .partialDecl .. => "" -- Refused before rendering.
 
 private def sourceStatus (native : Lean.Environment) (name : Lean.Name) : String :=
   match Lean.getReducibilityStatusCore native name with
@@ -342,6 +284,7 @@ structure StandardExportSpec where
   -- Candidate authoring may replace reached legacy assumptions with their
   -- actual native definitions. Frozen assets record the resulting exact cut.
   replaceDefinitionAxioms : Bool := false
+  shareSource : Bool := false
 
 -- One conversion, admission and source-rendering pipeline for reviewed library
 -- slices. Profiles choose roots and a boundary; they cannot bypass checking.
@@ -402,13 +345,17 @@ private def exportStandardCore (spec : StandardExportSpec)
   let recursorRules ← checkRecursorRules native (declarations ++ replayBase) declarations
   let boundaryNames := (base.map psDeclarationName).mergeSort
     (fun a b => Lean.Name.lt (PsKernelLean.toLeanName a) (PsKernelLean.toLeanName b))
+  let mut pool : StandardSource.Pool := {
+    enabled := spec.shareSource, prefix := spec.privatePrefix ++ "Node" }
   let mut definitions := []
   let mut identifiers := []
   let mut statuses := []
   for (declaration, index) in declarations.zipIdx do
     let identifier := spec.privatePrefix ++ toString index
+    let (body, nextPool) := (StandardSource.renderDeclaration declaration).run pool
+    pool := nextPool
     definitions := ("-- " ++ psNameToString (psDeclarationName declaration) ++
-      "\nprivate def " ++ identifier ++ " : PsDeclaration :=\n  " ++ sourceDeclaration declaration ++ "\n") :: definitions
+      "\nprivate def " ++ identifier ++ " : PsDeclaration :=\n  " ++ body ++ "\n") :: definitions
     identifiers := identifier :: identifiers
     if (psDeclarationValue declaration).isSome then
       let name := psDeclarationName declaration
@@ -416,7 +363,8 @@ private def exportStandardCore (spec : StandardExportSpec)
   let header := spec.provenance ++ (if spec.allowedAssumptions.isEmpty then "" else
     "-- Explicitly approved pinned Lean assumptions: " ++
       String.intercalate ", " (spec.allowedAssumptions.map toString) ++ ".\n\n")
-  let source := header ++ "def " ++ spec.publicPrefix ++ "Boundary : List PsName :=\n  " ++
+  let shared := String.join pool.definitions.toList
+  let source := header ++ (if shared.isEmpty then "" else shared ++ "\n") ++ "def " ++ spec.publicPrefix ++ "Boundary : List PsName :=\n  " ++
     sourceList (boundaryNames.map sourceName) ++ "\n\n" ++ String.intercalate "\n" definitions.reverse ++
     "\ndef " ++ spec.publicPrefix ++ "Declarations : List PsDeclaration :=\n  " ++ sourceList identifiers.reverse ++
     "\n\ndef " ++ spec.publicPrefix ++ "Reducibility : List (PsName × PsReducibility) :=\n  " ++
@@ -426,6 +374,7 @@ private def exportStandardCore (spec : StandardExportSpec)
     ("schema", Lean.toJson ("pscv0-standard-core-export/1" : String)),
     ("roots", Lean.toJson (spec.roots.map toString)), ("declarations", Lean.toJson declarations.length),
     ("sourceBytes", Lean.toJson source.utf8ByteSize),
+    ("sharedSourceNodes", Lean.toJson pool.definitions.size),
     ("kernelChecked", Lean.toJson true), ("recursorRulesCompared", Lean.toJson recursorRules),
     ("importedAssumptions", Lean.toJson (spec.allowedAssumptions.map toString)),
     ("leanCommit", Lean.toJson Lean.githash)]).compress
@@ -496,6 +445,7 @@ def exportUnsignedOperationsCandidate (output : System.FilePath) : IO Unit :=
   exportStandardCore {
     roots, boundary, baseDeclarations := declarations
     replaceDefinitionAxioms := true
+    shareSource := true
     allowedAssumptions := [`propext, `Quot.sound]
     publicPrefix := "psStandardUnsignedOperations"
     privatePrefix := "unsignedOperationDecl"

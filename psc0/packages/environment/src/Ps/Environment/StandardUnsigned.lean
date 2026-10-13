@@ -1,6 +1,31 @@
 import Ps.Environment.StandardUnsignedFoundationData
 import Ps.Environment.StandardNumeric
 import Ps.Environment.StandardScalarArithmetic
+import Ps.Environment.StandardRepr
+
+/-
+Selected scalar dictionaries follow Lean 4.35.0 Init/Prelude.lean,
+Init/Data/Repr.lean and Init/Data/ToString/Basic.lean.
+Copyright (c) Microsoft Corporation. Apache-2.0; see THIRD_PARTY_NOTICES.md.
+Modified: checked Core dictionary builders over the admitted UInt model.
+-/
+def psStandardUnsignedScalarInstances : List (String × PsDeclaration) :=
+  ["UInt8", "UInt16", "UInt32", "UInt64"].flatMap fun owner =>
+    let type := PsExpr.constE (psRootName owner) []
+    let natural := psOrderCall (owner ++ ".toNat") [.fvar 0]
+    let text := psOrderCall "Nat.repr" [natural]
+    let printer := psLogicLam 0 "value" type text
+    let repr := psLogicLam 0 "value" type (psLogicLam 1 "prec" psOrderNat
+      (psFormatCall "text" [text]))
+    let atom := PsDeclaration.definitionDecl
+      (psDecisionName ("PsStandard.instReprAtom" ++ owner)) []
+      (psFormatClassType "ReprAtom" type)
+      (.app (.constE (psDecisionName "ReprAtom.mk") [.zero]) type)
+    [("Inhabited", psStandardInhabitedGround owner type
+       (psOrderCall (owner ++ ".ofNat") [.lit (.natural 0)])),
+     ("ToString", psStandardToStringInstance owner type printer),
+     ("Repr", psFormatGroundInstance "Repr" ("Repr" ++ owner) type repr),
+     ("ReprAtom", atom)]
 
 -- Reviewed native closure: 80 declarations, four former UInt axioms replaced
 -- by their actual BitVec structures, no new axiom. Native instance extensions
@@ -18,12 +43,15 @@ def psStandardUnsignedExtend (environment : PsEnvironment) : PsEnvironment :=
         type := psDeclarationType d
         className := some (psRootName "OfNat") }
     else index) environment.instances
-  { environment with instances }
+  let environment := { environment with instances }
+  let environment := (psStandardUnsignedScalarInstances.map Prod.snd).foldl psEnvironmentInsert environment
+  psStandardUnsignedScalarInstances.foldl (fun env (className, declaration) =>
+    psStandardRegisterInstances env className [declaration]) environment
 
 -- Intrinsic bodies and their proof closure are not emitted as support code.
 -- BitVec/Fin keep their prepared record layout; UInt uses the scalar boundary.
 def psStandardUnsignedRuntimeDeclarations : List PsDeclaration :=
-  (psStandardUnsignedFoundationDeclarations.filter fun d =>
+  psStandardUnsignedScalarInstances.map Prod.snd ++ (psStandardUnsignedFoundationDeclarations.filter fun d =>
     ["UInt8.size", "UInt16.size", "UInt32.size", "UInt64.size",
       "BitVec", "BitVec.ofFin", "BitVec.rec", "UInt8.instOfNat",
       "UInt16.instOfNat", "UInt32.instOfNat", "UInt64.instOfNat"].contains

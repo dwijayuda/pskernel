@@ -347,3 +347,42 @@ once; these readers neither compile nor admit it. The main log retains concise
 replay/snapshot receipts. Full byte-for-byte regeneration remains required
 after source admission. This is transport infrastructure, not a new compiler
 milestone or an acceptance relaxation.
+
+## Complete unsigned scalar display dictionaries
+
+Pinned Init/Data/Repr.lean delegates UInt8/16/32/64 rendering to toNat and
+marks those types ReprAtom. Init/Data/ToString/Basic.lean uses the same natural
+display; the existing lower-priority ToFormat fallback must therefore work
+without a UInt-specific formatter. Init/Prelude.lean gives each a zero default.
+
+Sixteen checked ground dictionaries provide Inhabited, ToString, Repr and
+ReprAtom for the four qualified widths. They reuse the existing conversion,
+natural renderer, class registration and runtime erasure paths. No new
+rendering intrinsic or backend formatter. Three compact observations plus the
+independent native oracle cover all widths, fallback formatting, zero defaults
+and atomic list layout. Qualification is pending. Signed/platform and floating
+display remain dependent on their own faithful scalar models.
+
+## Structural sharing before large asset admission
+
+Linux38474304332 fully kernel-checked the 803-declaration unsigned candidate,
+with exactly two approved imported assumptions and all 33 recursor rules
+matching the native generated rules. The List repair removed the last replay
+failure. Strict current-source digest drift was independently reported; the
+candidate has not yet entered the compiler environment.
+
+The initial source renderer expanded repeated proof expression trees into
+23,489,134 bytes. Before admission, the host-only renderer now interns exact
+name/level/expression nodes into shared ordinary Lean constants. The design
+follows pinned Lean/Util/ShareCommon.lean and Init/ShareCommon.lean's
+map/set architecture; it deliberately avoids their unsafe pointer/object
+primitives. Keys include constructor tags, exact names and all child identities,
+so it preserves binding and declaration contents rather than alpha-collapsing
+proofs. Postorder creation gives deterministic, acyclic references.
+
+Earlier small frozen assets retain their existing textual format and must
+still regenerate byte-for-byte. New large slices opt into sharing through
+the same source renderer. No decoder, new Core constructor, native-host
+dependency or trust bypass enters the portable compiler. Official replay,
+native recursor comparison, later compiled-asset replay and exact regeneration
+remain required. Record the measured reduction after qualification.

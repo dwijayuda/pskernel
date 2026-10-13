@@ -235,6 +235,12 @@ private def unsignedDisplayFixture : String :=
 -- implicit model fallback or silent dictionary replacement is permitted.
 private def unsignedOperatorSourceCases : IO Unit := do
   let samples : Array (String × String × String) := #[
+    -- Differentially isolate ordinary projection/conversion, direct checked
+    -- method call, typeclass projection, and composed result transport.
+    ("toNat", "Nat", "UInt8.toNat(x)"),
+    ("directAdd", "UInt8", "UInt8.add(x, y)"),
+    ("operatorAdd", "UInt8", "x + y"),
+    ("directToNatAdd", "Nat", "UInt8.toNat(UInt8.add(x, y))"),
     ("add", "Nat", "UInt8.toNat(x + y)"),
     ("sub", "Nat", "UInt8.toNat(x - y)"),
     ("mul", "Nat", "UInt8.toNat(x * y)"),
@@ -258,13 +264,20 @@ private def unsignedOperatorSourceCases : IO Unit := do
   let batch ← match result with
     | .error error => throw (IO.userError ("unsigned source matrix: " ++ error.message))
     | .ok batch => pure batch
+  let mut failures : List String := []
   for i in [:samples.size] do
     let some (label, _, _) := samples[i]? | throw (IO.userError "missing unsigned label")
     let some answer := batch.results[i]? | throw (IO.userError "missing unsigned result")
     match answer with
     | .ok _ => IO.println ("PSCV0_UNSIGNED_SOURCE: PASS " ++ label)
-    | .error problem => throw (IO.userError ("PSCV0_UNSIGNED_SOURCE: " ++ label ++
-        " refused at " ++ problem.phase ++ ": " ++ problem.message))
+    | .error problem =>
+      let message := "PSCV0_UNSIGNED_SOURCE: " ++ label ++
+        " refused at " ++ problem.phase ++ ": " ++ problem.message
+      IO.println message
+      failures := message :: failures
+  unless failures.isEmpty do
+    throw (IO.userError ("PSCV0_UNSIGNED_SOURCE: " ++
+      toString failures.length ++ " checked operation cases failed"))
 
 private def wordFixture : String :=
   "function wordOperations8(a: Nat, b: Nat): String := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y), UInt8.toNat(x - y), UInt8.toNat(x * y), UInt8.toNat(x / y), UInt8.toNat(x % y), UInt8.toNat(-x), UInt8.toNat(UInt8.complement(x)), UInt8.toNat(UInt8.land(x, y)), UInt8.toNat(UInt8.lor(x, y)), UInt8.toNat(UInt8.xor(x, y)), UInt8.toNat(UInt8.shiftLeft(x, y)), UInt8.toNat(UInt8.shiftRight(x, y))])) }\nfunction wordOperations16(a: Nat, b: Nat): String := { let x: UInt16 := UInt16.ofNat(a)\n let y: UInt16 := UInt16.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt16.toNat(x + y), UInt16.toNat(x - y), UInt16.toNat(x * y), UInt16.toNat(x / y), UInt16.toNat(x % y), UInt16.toNat(-x), UInt16.toNat(UInt16.complement(x)), UInt16.toNat(UInt16.land(x, y)), UInt16.toNat(UInt16.lor(x, y)), UInt16.toNat(UInt16.xor(x, y)), UInt16.toNat(UInt16.shiftLeft(x, y)), UInt16.toNat(UInt16.shiftRight(x, y))])) }\nfunction wordOperations32(a: Nat, b: Nat): String := { let x: UInt32 := UInt32.ofNat(a)\n let y: UInt32 := UInt32.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt32.toNat(x + y), UInt32.toNat(x - y), UInt32.toNat(x * y), UInt32.toNat(x / y), UInt32.toNat(x % y), UInt32.toNat(-x), UInt32.toNat(UInt32.complement(x)), UInt32.toNat(UInt32.land(x, y)), UInt32.toNat(UInt32.lor(x, y)), UInt32.toNat(UInt32.xor(x, y)), UInt32.toNat(UInt32.shiftLeft(x, y)), UInt32.toNat(UInt32.shiftRight(x, y))])) }\nfunction wordOperations64(a: Nat, b: Nat): String := { let x: UInt64 := UInt64.ofNat(a)\n let y: UInt64 := UInt64.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt64.toNat(x + y), UInt64.toNat(x - y), UInt64.toNat(x * y), UInt64.toNat(x / y), UInt64.toNat(x % y), UInt64.toNat(-x), UInt64.toNat(UInt64.complement(x)), UInt64.toNat(UInt64.land(x, y)), UInt64.toNat(UInt64.lor(x, y)), UInt64.toNat(UInt64.xor(x, y)), UInt64.toNat(UInt64.shiftLeft(x, y)), UInt64.toNat(UInt64.shiftRight(x, y))])) }\nfunction wordApply(operation: UInt64 -> UInt64 -> UInt64, left: UInt64, right: UInt64): Nat := UInt64.toNat(operation(left)(right))\nconst wordHigherOrder: Nat := wordApply(UInt64.shiftLeft, (3 : UInt64), (65 : UInt64))\nfunction wordGeneric{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\nconst wordGenericWrap: Nat := UInt8.toNat(wordGeneric((255 : UInt8), (2 : UInt8)))\ntheorem wordModel: UInt8.toNat(UInt8.add((255 : UInt8), (2 : UInt8))) = 1 := by { rfl }\n"

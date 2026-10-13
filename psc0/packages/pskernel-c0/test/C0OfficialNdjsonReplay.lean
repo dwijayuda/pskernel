@@ -427,20 +427,18 @@ def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
     if line != "" then
       let .ok record := Lean.Json.parse line
         | return .malformed
-      let .ok parsed := c0ExportParseRecord tables record
-        | match c0ExportParseRecord tables record with
-          | .error message => return c0ExportClassifyInputError message
-          | .ok _ => return .inconclusive
-      -- Parsed declarations are transferred to the environment immediately.
-      -- Clearing this field prevents the online path from keeping the entire
-      -- declaration stream as a second, redundant list.
-      tables := { parsed with declarations := [] }
-      for declaration in parsed.declarations do
-        match c0ExportCheckOne env declaration fuel with
-        | .ok next =>
-            env := next
-            checkedCount := checkedCount + 1
-        | .error error => return c0ExportFromKernelError error
+      match c0ExportParseRecord tables record with
+      | .error message => return c0ExportClassifyInputError message
+      | .ok parsed =>
+          -- The environment consumes declarations immediately, while indexed
+          -- names/levels/expressions remain for subsequent source references.
+          tables := { parsed with declarations := [] }
+          for declaration in parsed.declarations do
+            match c0ExportCheckOne env declaration fuel with
+            | .ok next =>
+                env := next
+                checkedCount := checkedCount + 1
+            | .error error => return c0ExportFromKernelError error
   if !tables.header || checkedCount == 0 then .malformed
   else .accepted
 

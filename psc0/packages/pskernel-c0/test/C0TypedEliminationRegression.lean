@@ -443,6 +443,24 @@ def main : IO Unit := do
   | .ok (equal, _) =>
       if !equal then
         throw (IO.userError "checked Quot.lift was not definitionally equal")
+  -- The same checked interface must reject a Quot.lift application
+  -- whose relation-preservation proof has the wrong type. Syntactic
+  -- quotient computation or candidate agreement cannot make it valid.
+  let badQuotLift : PsKernelExpr :=
+    psKernelApplyArgs (.const psKernelQuotLiftName [.zero, .succ .zero])
+      [propTy, relation, boxTy, liftFunction, (.sort .zero), quotMajor]
+  match psKernelC0ArchitectureInferWork 32768 quotWork badQuotLift with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError
+        "checked Quot.lift accepted invalid relation-preservation proof")
+  let wrongQuotLevels : PsKernelExpr :=
+    psKernelApplyArgs (.const psKernelQuotLiftName [.succ .zero, .succ .zero])
+      [propTy, relation, boxTy, liftFunction, liftRespectful, quotMajor]
+  match psKernelC0ArchitectureInferWork 32768 quotWork wrongQuotLevels with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "checked Quot.lift ignored source universe levels")
   -- Indexed K on a *source-admitted Eq*. The proof is a neutral local
   -- variable; only source type inference + DefEq of the candidate refl type
   -- may justify replacing it with Eq.refl.

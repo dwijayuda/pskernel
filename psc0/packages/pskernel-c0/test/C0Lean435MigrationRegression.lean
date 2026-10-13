@@ -134,7 +134,11 @@ def main : IO Unit := do
     "mutual-header-indices: ",
     "mutual-remaining-types: ",
     "mutual-constructor-family: ",
-    "mutual-recursor-validation: "
+    "mutual-recursor-validation: ",
+    "mutual-constructor-type-check: ",
+    "mutual-constructor-sort: ",
+    "mutual-constructor-parameters: ",
+    "mutual-constructor-fields: "
   ]
   for stage in stages do
     match psKernelErrorFromMessage

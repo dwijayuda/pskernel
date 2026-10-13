@@ -66,6 +66,14 @@ def psKernelStripOneNestedAdmissionPrefix (message : String) : String :=
     message.replace "mutual-constructor-family: " ""
   else if message.startsWith "mutual-recursor-validation: " then
     message.replace "mutual-recursor-validation: " ""
+  else if message.startsWith "mutual-constructor-type-check: " then
+    message.replace "mutual-constructor-type-check: " ""
+  else if message.startsWith "mutual-constructor-sort: " then
+    message.replace "mutual-constructor-sort: " ""
+  else if message.startsWith "mutual-constructor-parameters: " then
+    message.replace "mutual-constructor-parameters: " ""
+  else if message.startsWith "mutual-constructor-fields: " then
+    message.replace "mutual-constructor-fields: " ""
   else
     message
 

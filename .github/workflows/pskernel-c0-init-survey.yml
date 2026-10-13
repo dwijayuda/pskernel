@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Qualify real Init nested group at explicit 65536-fuel profile
+      - name: Diagnose and qualify first real Init nested group
         shell: bash
         run: |
           set -euo pipefail
@@ -152,7 +152,7 @@ jobs:
           test "$(wc -l < "$RUNNER_TEMP/Init-first-nested.ndjson")" -eq 79416
           (
             cd "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0"
-            timeout 600s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-nested.ndjson" 65536
+            timeout 180s lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-nested.ndjson" 4096
           ) | tee "$RUNNER_TEMP/c0-first-nested-result.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=79416" "$RUNNER_TEMP/c0-first-nested-result.txt"
       - name: Publish declaration and expression coverage inventory

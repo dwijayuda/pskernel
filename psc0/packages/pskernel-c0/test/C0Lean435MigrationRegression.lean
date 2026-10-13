@@ -138,7 +138,11 @@ def main : IO Unit := do
     "mutual-constructor-type-check: ",
     "mutual-constructor-sort: ",
     "mutual-constructor-parameters: ",
-    "mutual-constructor-fields: "
+    "mutual-constructor-fields: ",
+    "mutual-field-whnf: ",
+    "mutual-field-domain-check: ",
+    "mutual-field-ensure-sort: ",
+    "mutual-field-recursive-analysis: "
   ]
   for stage in stages do
     match psKernelErrorFromMessage

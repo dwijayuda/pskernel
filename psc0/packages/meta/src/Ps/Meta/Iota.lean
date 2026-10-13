@@ -106,8 +106,8 @@ def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
       return psReduceApply minor (fields ++ hypotheses ++ view.args.drop (majorPosition + 1))
 
 
-// Lean Meta/WHNF.lean reduceQuotRec. Dispatch requires registered kernel
-// quotient metadata; a familiar spelling alone never grants reduction.
+-- Lean Meta/WHNF.lean reduceQuotRec. Dispatch requires registered kernel
+-- quotient metadata; a familiar spelling alone never grants reduction.
 def psReduceQuotientIota (reduce : PsExpr → PsExpr) (environment : PsEnvironment)
     (expr : PsExpr) : Option PsExpr := do
   let view := psReduceAppView expr

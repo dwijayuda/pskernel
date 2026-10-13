@@ -276,7 +276,9 @@ def checkQuotientFoundation : IO Unit := do
   let .ok collision := checked.addDeclCore 2000000 20000
       (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none true
     | throw (IO.userError "cannot construct isolated quotient collision probe")
-  if (PsKernelLean.tryPreludeDeclaration declarations collision candidates.head!).isOk then
+  let some candidate := candidates.head?
+    | throw (IO.userError "quotient candidate group is empty")
+  if (PsKernelLean.tryPreludeDeclaration declarations collision candidate).isOk then
     throw (IO.userError "provider accepted a quotient name collision")
   if (collision.addDeclCore 2000000 20000 .quotDecl none true).isOk then
     throw (IO.userError "kernel quotient registration overwrote an existing name")

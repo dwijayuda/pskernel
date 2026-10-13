@@ -445,6 +445,25 @@ def main : IO Unit := do
       [sort, quotRelation, sort, quotFunction, quotWitness, quotMkTooShort]
   c0DemandCheck "quot-constructor-wrong-arity" quotSession
     quotLiftStuck quotLiftStuck
+  -- A Quot result may be consumed by a different primitive without
+  -- allocating a fresh execution budget.
+  c0DemandCheck "quot-result-fed-to-nat" quotSession
+    (c0DeltaNatBinary psKernelNatAddName quotLiftDelayed (c0DeltaNatLit 1))
+    (c0DeltaNatLit 42)
+  let wrongCtor : PsKernelExpr :=
+    psKernelExprApplyArgsCheap
+      (.const (c0DeltaName "UnrelatedQuotConstructor") [.zero])
+      [sort, quotRelation, c0DeltaNatLit 41]
+  let quotLiftWrongCtor : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotLiftName [.zero, .zero])
+      [sort, quotRelation, sort, quotFunction, quotWitness, wrongCtor]
+  c0DemandCheck "quot-wrong-constructor-neutral" quotSession
+    quotLiftWrongCtor quotLiftWrongCtor
+  let quotLiftNoMajor : PsKernelExpr :=
+    psKernelExprApplyArgsCheap (.const psKernelQuotLiftName [.zero, .zero])
+      [sort, quotRelation, sort, quotFunction, quotWitness]
+  c0DemandCheck "quot-missing-major-neutral" quotSession
+    quotLiftNoMajor quotLiftNoMajor
   match psKernelC0ArchitectureCandidateDemand 2 quotSession.context
       quotLiftDelayed with
   | .error _ => pure ()

@@ -95,3 +95,71 @@ theorem psKernelC0AuditedSourceAxiomsApproved
     psKernelC0HistoryAxiomsApproved
       work.trusted.history work.allowedAxioms = true :=
   work.approved
+
+/-- Source judgments do not add axioms, but a returned checked state must
+    still satisfy the *entire* immutable axiom-history allowance. -/
+private def psKernelC0AuditedSourceContinue
+    {α : Type}
+    (work : PsKernelC0AuditedSourceWork)
+    (response :
+      Except String (α × PsKernelC0TrustedSourceWork)) :
+    Except String (α × PsKernelC0AuditedSourceWork) := do
+  let (result, trusted) ← response
+  let some next := psKernelC0AuditTrustedSource
+      trusted work.allowedAxioms
+    | throw "source query lost approved ordinary-axiom provenance"
+  return (result, next)
+
+/-- The same source checker remains authoritative for WHNF, inference,
+    full term checking and DefEq. Every operation retains the exact
+    approved source-environment assumption history. -/
+def psKernelC0AuditedSourceWhnf
+    (fuel : Nat)
+    (work : PsKernelC0AuditedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
+  psKernelC0AuditedSourceContinue work
+    (psKernelC0TrustedSourceWhnf fuel work.trusted expr)
+
+def psKernelC0AuditedSourceInfer
+    (fuel : Nat)
+    (work : PsKernelC0AuditedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
+  psKernelC0AuditedSourceContinue work
+    (psKernelC0TrustedSourceInfer fuel work.trusted expr)
+
+def psKernelC0AuditedSourceCheck
+    (fuel : Nat)
+    (work : PsKernelC0AuditedSourceWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelExpr × PsKernelC0AuditedSourceWork) :=
+  psKernelC0AuditedSourceContinue work
+    (psKernelC0TrustedSourceCheck fuel work.trusted expr)
+
+def psKernelC0AuditedSourceDefEq
+    (fuel : Nat)
+    (work : PsKernelC0AuditedSourceWork)
+    (left right : PsKernelExpr) :
+    Except String (Bool × PsKernelC0AuditedSourceWork) :=
+  psKernelC0AuditedSourceContinue work
+    (psKernelC0TrustedSourceDefEq fuel work.trusted left right)
+
+/-- Staging changes only immutable syntax, not the admitted source
+    environment. Both the StoreWF certificate and full axiom-history
+    authorization are recertified before exposing the new work. -/
+def psKernelC0AuditedSourceStage
+    (work : PsKernelC0AuditedSourceWork)
+    (expr : PsKernelExpr) : Option PsKernelC0AuditedSourceWork := do
+  let staged ← psKernelC0TrustedSourceStage work.trusted expr
+  psKernelC0AuditTrustedSource staged work.allowedAxioms
+
+/-- Axiom auditing never substitutes for actual closed-source validation.
+    The source root checker still must accept every staged root before
+    an atomic immutable result is published. -/
+def psKernelC0AuditedSourceCommitChecked
+    (fuel : Nat)
+    (work : PsKernelC0AuditedSourceWork) :
+    Except String
+      (PsKernelC0CertifiedStore × List PsKernelC0SourceCheckedRoot) :=
+  psKernelC0TrustedSourceCommitChecked fuel work.trusted

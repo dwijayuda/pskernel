@@ -612,13 +612,13 @@ def main : IO Unit := do
     (.recInfo { recInfo with isUnsafe := true })
   let unsafeRecSession := psKernelMkCheckerSession unsafeRecEnv []
     .safe 4096 psKernelLeanNatMaxSizeDefault
+  -- Unsafe declarations are explicitly *declined*, never normalized
+  -- or returned as successful neutral candidate values.
   match psKernelC0ArchitectureCandidateDemand 4096 unsafeRecSession.context
       recCall with
-  | .ok (value, _) =>
-      if !psKernelExprEqual value recCall then
-        throw (IO.userError "C0 candidate reduced unsafe recursor")
-  | .error reason =>
-      throw (IO.userError ("C0 unsafe recursor neutrality failed: " ++ reason))
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "C0 candidate did not decline unsafe recursor")
   match psKernelC0ArchitectureCandidateDemand 3 recSession.context
       (.app (.const recName []) (.app idRecord pairValue)) with
   | .error _ => pure ()

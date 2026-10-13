@@ -23,6 +23,20 @@ def main : IO Unit := do
     | throw (IO.userError "audited empty source genesis declined")
   if !(psKernelC0HistoryOrdinaryAxioms genesis.trusted.history).isEmpty then
     throw (IO.userError "empty checked genesis unexpectedly assumed an axiom")
+  -- These are real propositional no-assumption theorems over the entire
+  -- checked source-admission history, not a claim of kernel consistency.
+  if hA : genesis.allowedAxioms = [] then
+    let _zeroAxioms :=
+      psKernelC0AuditedNoOrdinaryAxioms genesis hA
+    pure ()
+  else
+    throw (IO.userError "empty audited genesis changed signature allowance")
+  if hC : genesis.allowedCapabilities = [] then
+    let _zeroCapabilities :=
+      psKernelC0AuditedNoTrustCapabilities genesis hC
+    pure ()
+  else
+    throw (IO.userError "empty audited genesis changed capability allowance")
   let firstName := c0AuditedName "ReviewedAxiom"
   let secondName := c0AuditedName "UnapprovedAxiom"
   let firstRequest : PsKernelC0ArchitectureDeclaration :=
@@ -401,3 +415,4 @@ def main : IO Unit := do
   IO.println "C0_AUDITED quotient_and_unsafe_capability_history=pass"
   IO.println "C0_AUDITED incremental_history_proof_matches_full_replay=pass"
   IO.println "C0_AUDITED exact_axiom_type_universe_safety_manifest=pass"
+  IO.println "C0_AUDITED empty_foundation_has_no_source_admission_assumptions=pass"

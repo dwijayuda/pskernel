@@ -25,15 +25,25 @@ structure PsKernelC0CertifiedWork where
   working : PsKernelC0CertifiedStore
   owned : working.store = raw.scratch.working
 
-def psKernelC0ArchitectureCertifyWork
+/-- Preserve dependent equality to the exact work supplied by the
+    caller. Admission receipts need this equality to prove that their
+    certified result is precisely the source checker's successful result. -/
+def psKernelC0ArchitectureCertifyWorkOwned
     (work : PsKernelC0ArchitectureWork) :
-    Option PsKernelC0CertifiedWork :=
+    Option { cert : PsKernelC0CertifiedWork // cert.raw = work } :=
   if h : psKernelC0ArchitectureWorkValid work = true then
     match psKernelC0CertifyStoreOwned work.scratch.working with
     | some ⟨working, owned⟩ =>
-        some { raw := work, valid := h, working := working, owned := owned }
+        some ⟨{
+          raw := work, valid := h, working := working, owned := owned
+        }, rfl⟩
     | none => none
   else none
+
+def psKernelC0ArchitectureCertifyWork
+    (work : PsKernelC0ArchitectureWork) :
+    Option PsKernelC0CertifiedWork :=
+  (psKernelC0ArchitectureCertifyWorkOwned work).map Subtype.val
 
 /-- Source-checked sessions may update only the checker field. Store and
     staged-root predicates are structurally unchanged, so the original

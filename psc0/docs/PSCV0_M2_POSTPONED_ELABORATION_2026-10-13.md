@@ -73,3 +73,8 @@ Its strict registry guard independently reported FNV
 Review confirms only OfNat/constructor/projection and Nat/Int dictionaries,
 plus one class and two instance registrations; no new axiom or primitive.
 These exact values are now pinned; full numeric qualification is pending.
+
+Numeric qualification completed at `4d2e644d3974a6e6a4b68a15b7148bdb4f83e372`,
+[Linux 38425066964](https://github.com/dwijayuda/pskernel/actions/runs/38425066964):
+285 shared observations, 186/194 portable/native modules; all existing gates passed.
+Standard is 299 declarations / 15 classes / 54 instances with the reviewed hashes above.

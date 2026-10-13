@@ -236,106 +236,30 @@ def psElabDeclarationParts
     else PsDeclaration.definitionDecl name levels closed.snd closed.fst
   return { declaration, metaContext := constraints }
 
-def psElabPartialDeclaration
-    (environment : PsEnvironment)
+def psElabPartialDeclaration (environment : PsEnvironment)
     (nameSyntax : PsSyntaxName)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm))
-    (typeSyntax : PsSyntaxTerm)
-    (valueSyntax : PsSyntaxTerm) :
-    Except PsElabError PsElabDeclarationResult :=
-  match psSyntaxNameToName nameSyntax with
-  | Option.none => Except.error PsElabError.emptyName
-  | Option.some name =>
-      let initial := psElabContextEmpty environment;
-      match
-          psElabTypedBinders
-            psElabDeclarationTermCallback
-            initial
-            binders with
-      | Except.error error =>
-          Except.error error
-      | Except.ok binderResult =>
-          match
-              psElabTerm
-                binderResult.context
-                typeSyntax
-                Option.none with
-          | Except.error error =>
-              Except.error error
-          | Except.ok typeResult =>
-              match
-                  psInferEnsureSort
-                    typeResult.context.environment
-                    typeResult.context.metaContext
-                    typeResult.context.localContext
-                    typeResult.type with
-              | Except.error error =>
-                  Except.error (PsElabError.infer error)
-              | Except.ok _ =>
-                  let typeMeta := typeResult.context.metaContext;
-                  let openType :=
-                    psMetaInstantiate typeMeta typeResult.term;
-                  let closedType :=
-                    psCloseElabForallBinders
-                      typeMeta
-                      binderResult.bindersRev
-                      openType;
-                  if psExprHasUnresolvedMeta closedType then
-                    Except.error PsElabError.unresolvedMetavariable
-                  else
-                    let selfHeader :=
-                      PsDeclaration.axiomDecl name List.nil closedType;
-                    match psEnvironmentAdd environment selfHeader with
-                    | Option.none =>
-                        Except.error
-                          (PsElabError.duplicateDeclaration name)
-                    | Option.some withSelf =>
-                        let valueContext :=
-                          psElabContextWithEnvironment
-                            typeResult.context
-                            withSelf;
-                        match
-                            psElabTerm
-                              valueContext
-                              valueSyntax
-                              (Option.some openType) with
-                        | Except.error error => Except.error error
-                        | Except.ok valueResult =>
-                            let metaContext :=
-                              valueResult.context.metaContext;
-                            let openValue :=
-                              psMetaInstantiate
-                                metaContext
-                                valueResult.term;
-                            let finalOpenType :=
-                              psMetaInstantiate
-                                metaContext
-                                openType;
-                            let closed :=
-                              psCloseElabTypedBinders
-                                metaContext
-                                binderResult.bindersRev
-                                openValue
-                                finalOpenType;
-                            if
-                                psExprHasUnresolvedMeta
-                                  (Prod.fst closed) then
-                              Except.error
-                                PsElabError.unresolvedMetavariable
-                            else if
-                                psExprHasUnresolvedMeta
-                                  (Prod.snd closed) then
-                              Except.error
-                                PsElabError.unresolvedMetavariable
-                            else
-                              Except.ok
-                                (PsElabDeclarationResult.mk
-                                  (PsDeclaration.partialDecl
-                                    name
-                                    List.nil
-                                    (Prod.snd closed)
-                                    (Prod.fst closed))
-                                  metaContext)
+    (typeSyntax valueSyntax : PsSyntaxTerm) :
+    Except PsElabError PsElabDeclarationResult := do
+  let some name := psSyntaxNameToName nameSyntax | throw .emptyName
+  let binderResult ← psElabTypedBinders psElabDeclarationTermCallback
+    (psElabContextEmpty environment) binders
+  let annotation ← psElabType psElabDeclarationTermCallback binderResult.context typeSyntax
+  let openType := psMetaInstantiate annotation.context.metaContext annotation.type
+  let closedType := psCloseElabForallBinders annotation.context.metaContext
+    binderResult.bindersRev openType
+  if psExprHasUnresolvedMeta closedType then throw .unresolvedMetavariable
+  let header := PsDeclaration.axiomDecl name [] closedType
+  let some withSelf := psEnvironmentAdd environment header
+    | throw (.duplicateDeclaration name)
+  let value ← psElabTerm (psElabContextWithEnvironment annotation.context withSelf)
+    valueSyntax (some openType)
+  let metaContext := value.context.metaContext
+  let closed := psCloseElabTypedBinders metaContext binderResult.bindersRev
+    (psMetaInstantiate metaContext value.term) (psMetaInstantiate metaContext openType)
+  if psExprHasUnresolvedMeta closed.fst || psExprHasUnresolvedMeta closed.snd then
+    throw .unresolvedMetavariable
+  return { declaration := .partialDecl name [] closed.snd closed.fst, metaContext }
 
 def psElabDeclaration
     (environment : PsEnvironment)

@@ -1,5 +1,11 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "coercionArgument", args: null, expected: 877n },
+  { name: "coercionApplication", args: null, expected: 877n },
+  { name: "coercionFunction", args: null, expected: 881n },
+  { name: "coercionEmpty", args: null, expected: 883n },
+  { name: "coercionSort", args: null, expected: 887n },
+  { name: "coercionLocal", args: null, expected: 907n },
   { name: "numericTicket", args: null, expected: 859n },
   { name: "numericGeneric", args: null, expected: 857n },
   { name: "numericHigh", args: null, expected: 863n },

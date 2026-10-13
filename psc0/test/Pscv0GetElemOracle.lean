@@ -300,3 +300,33 @@ example : (859 : Ticket).value = 859 := rfl
 example : (generic () : Ticket).value = 857 := rfl
 example : (863 : Lift Nat).value = 863 := rfl
 end Pscv0NumericOracle
+
+namespace Pscv0CoercionOracle
+structure Box where
+  value : Nat
+instance : Coe Box Nat where
+  coe := Box.value
+def boxed (_ : Unit) : Box := Box.mk 877
+def accept (value : Nat) := value
+structure Callable where
+  run : Nat → Nat
+instance : CoeFun Callable (fun _ => Nat → Nat) where
+  coe := Callable.run
+structure Action where
+  run : Unit → Nat
+instance : CoeFun Action (fun _ => Unit → Nat) where
+  coe := Action.run
+structure Carrier where
+  carrier : Type
+instance : CoeSort Carrier Type where
+  coe := Carrier.carrier
+def natural : Carrier := Carrier.mk Nat
+def identity (value : natural) : natural := value
+def fromLocal {A : Type} [Coe A Nat] (value : A) : Nat := value
+example : accept (Box.mk 877) = 877 := rfl
+example : (boxed () : Nat) = 877 := rfl
+example : (Callable.mk (fun x => x + 1)) 880 = 881 := rfl
+example : (Action.mk (fun _ => 883)) () = 883 := rfl
+example : identity 887 = 887 := rfl
+example : fromLocal (Box.mk 907) = 907 := rfl
+end Pscv0CoercionOracle

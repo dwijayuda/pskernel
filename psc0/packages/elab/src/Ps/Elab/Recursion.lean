@@ -708,7 +708,7 @@ def psElabPlanStructuralNormalizationWithOrigin
                   if psElabBoolNot (psElabRecursionContains explicitIds majorId) then
                     Except.ok Option.none
                   else
-                    match psElabTerm binderResult.context typeSyntax Option.none with
+                    match psElabTerm binderResult.context typeSyntax Option.none >>= psElabEnsureType with
                     | Except.error error => Except.error error
                     | Except.ok typeResult =>
                         match psInferEnsureSort typeResult.context.environment

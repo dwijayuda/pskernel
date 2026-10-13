@@ -1,26 +1,45 @@
-# PSCV0 v7 — Continue M2+A after checked equality and structure defaults
+# PSCV0 v7 — Complete remaining M2+A
 
-## Qualified starting point — 13 October 2026
+## Current qualification — M2+A scheduling, indexed lookup and literals (13 October 2026)
 
-Read live HEAD and CI before editing. Repository:
-https://github.com/dwijayuda/pskernel · branch:
-`psc0/pscv0-v7-native-lean-v1` · preserve draft PR
-https://github.com/dwijayuda/pskernel/pull/109.
+Executable `4d2e644d3974a6e6a4b68a15b7148bdb4f83e372`;
+[green Linux 38425066964](https://github.com/dwijayuda/pskernel/actions/runs/38425066964).
+**285 shared runtime observations**, four panic contracts, **186 portable /
+194 native modules**, profile `pscv0-v7-native-bounded/50`.
+Official Lean RC4 kernel, independent oracle, semantic refusals, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI and project checks passed.
 
-Executable `d7e28a3870cdc399eca3c63c6d305b10109d2eca`; [green Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663).
-Later docs-only commits do not change executable qualification.
+- One transactional worklist now serves Core constraints and captured source
+  terms. Later arguments can determine record/lambda/tactic types; numeral
+  fallback and mandatory defaults run after ordinary work reaches quiescence.
+- Global instances are indexed by class while preserving priority/tie order.
+  Generator buckets use rigid class plus lexical scope, followed by full
+  definitionally-equal input checks. At 32 goals: zero generator comparisons
+  across classes, 528 within one class. No general linearity claim.
+- Numeric literals use genuine checked OfNat dictionaries. Typed Core
+  application resolves class universes before search; deriving reuses it.
+  Custom numeric types, local dictionaries and higher universes are qualified.
 
-- Official Lean 4.35.0-rc4: `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
-- 183 portable / 191 native modules; profile `pscv0-v7-native-bounded/49`.
-- 276 shared runtime observations, retaining all earlier 263; four panic contracts.
-- Standard: 294 declarations / 14 classes / 52 instances.
-- FNV `fnv1a64:8231265721298810139`.
-- SHA-256 `sha256:89c4125cc3ca36bf198421e64673659a0acdf0207004af46738d36d32fcfd540`.
+Standard: **299 declarations / 15 classes / 54 instances**.
+The reviewed change adds OfNat/constructor/projection and Nat/Int dictionaries,
+without new axioms or primitives.
+FNV `fnv1a64:4206739069382061916`;
+SHA-256 `sha256:00c6142b5f5b0e47abb8b317dc4fff3d595ab9f5e931822c4f48fca809758647`.
 
-Official kernel, independent RC4 oracle, semantic refusals, strict IR,
-JS/TS/Rust, V8/Wasmtime, WIT/WAT/binary/ABI, declarations/maps and project
-integration passed. **This completes a bounded M2+A milestone, not all M2,
-Phase A, v7, high-performance parity or formal compiler preservation.**
+Direct Coe/CoeFun/CoeSort boundaries are implemented but **qualification is
+pending** in subsequent source commits. They add nine checked declarations,
+three classes and no global instances. Keep strict digest review.
+See [scheduling and lookup](docs/PSCV0_M2_POSTPONED_ELABORATION_2026-10-13.md)
+and [direct coercion design](docs/PSCV0_M2_DIRECT_COERCIONS_2026-10-13.md).
+
+**M2+A is not complete.** Continue autonomously: remaining Repr/Hashable,
+faithful scalar/Float/BitVec/bytes/string/collection APIs, comprehensive
+module/notation/handler/tactic/effect/assumption manifest, broader M2 coverage
+and C5 semantic retention. Keep dependent/indexed/recursive deriving with M3's
+shared data/transport/termination work. Preserve
+**M2+A → M3+B → M4+C/D → M5/E**; do not redefine the exit gates.
+Native .lean, official kernel, GitHub source operations and Linux CI only.
+No pskernel-core, self-hosting or compiler-source migration.
 
 ## Recover canonical state
 
@@ -41,7 +60,7 @@ Keep **M2+A → M3+B → M4+C/D → M5/E**. Collect E evidence and measured M5
 improvements throughout. M1 is complete for its selected indexing/Standard
 scope. Do not repeat qualified work or invent another milestone track.
 
-## Just completed: equality/defaults
+## Prior completed milestone: equality/defaults
 
 - `DerivingContext` owns shared field classification and actual-minor recursor
   construction. The old BEq-only builder is removed.
@@ -100,7 +119,7 @@ rounds remove constraints. Resource refusal returns the original state.
 Omitted defaults use opaque holes, then checked explicit assignment of the
 declared default. Expected types cannot replace them. Ordinary constraints
 reach quiescence before defaults; retries retain individually checked progress.
-A completed application requires an empty queue. Preserve mismatch versus
+A declaration-facing term requires an empty shared queue; nested applications may defer captured syntax/Core work. Preserve mismatch versus
 missing-dictionary diagnostics at this boundary.
 
 Global instances must determine their outputs; a polymorphic local dictionary

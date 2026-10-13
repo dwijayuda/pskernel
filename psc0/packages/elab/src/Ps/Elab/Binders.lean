@@ -187,7 +187,7 @@ def psElabForall (elaborate : PsElaborator) (context : PsElabContext)
     (binders : List (PsSyntaxBinderHead × PsSyntaxTerm)) (body : PsSyntaxTerm)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
   let prepared ← psElabTypedBinders elaborate context binders
-  let result ← elaborate prepared.context body none
+  let result ← elaborate prepared.context body none >>= psElabEnsureType
   let abstractions := prepared.bindersRev.map fun binder =>
     PsMetaAbstraction.forallE binder.id binder.name binder.type binder.binder
   let closed ← psElabAbstractType context result.context abstractions result.term

@@ -176,7 +176,7 @@ def psElabApplyCore (context : PsElabContext) (head : PsExpr)
         (psExprInstantiate1 pi.body argument))
     { context, term := head, type }
 
-def psElabFinalizeExpected
+def psElabUnifyExpected
     (result : PsElabTermResult)
     (expected : Option PsExpr) :
     Except PsElabError PsElabTermResult :=
@@ -198,6 +198,72 @@ def psElabFinalizeExpected
             expectedType)
       else
         Except.error PsElabError.typeMismatch
+
+-- A coercion is an ordinary checked class projection. The caller supplies
+-- input/output arguments; this operation performs exactly one registry lookup.
+def psElabCoerce (result : PsElabTermResult) (classText : String)
+    (target : Option PsExpr) (dependent : Bool := false) :
+    Except PsElabError PsElabTermResult := do
+  let context := result.context
+  let sourceSort ← (psInferType context.environment context.metaContext context.localContext
+    result.type).mapError PsElabError.infer
+  let u ← (psInferEnsureSort context.environment context.metaContext context.localContext
+    sourceSort).mapError PsElabError.infer
+  let v := psMetaFreshLevel context.metaContext
+  let outputType := if dependent then
+      PsExpr.forallE (psRootName "value") result.type (.sortE v.level) .explicit
+    else .sortE v.level
+  let (context, output) := match target with
+    | some type => (psElabContextWithMeta context v.context, type)
+    | none =>
+      let fresh := psMetaFresh v.context context.localContext outputType .natural
+      (psElabContextWithMeta context fresh.context, fresh.expr)
+  let className := psRootName classText
+  let goal ← psElabApplyCore context (.constE className [u, v.level]) [result.type, output]
+  let search := psSynthInstanceWithLimits context.environment context.localContext
+    context.instances goal.context.metaContext 64 {} goal.term
+  if search.table.resourceExceeded then throw .fuelExhausted
+  let some dictionary := search.result.value | throw .typeMismatch
+  psElabApplyCore (psElabContextWithMeta context search.result.context)
+    (.constE (psNameAppendStr className "coe") [u, v.level])
+    [result.type, output, dictionary, result.term]
+
+def psElabFinalizeExpected (result : PsElabTermResult) (expected : Option PsExpr) :
+    Except PsElabError PsElabTermResult := do
+  match psElabUnifyExpected result expected with
+  | .ok checked => return checked
+  | .error error =>
+    let some target := expected | throw error
+    -- The failed conversion is speculative. Synthesis starts from the original
+    -- context, and the final strict check cannot insert a second coercion.
+    let converted ← (psElabCoerce result "Coe" (some target)).mapError fun failure =>
+      match failure with | .fuelExhausted => failure | _ => error
+    psElabUnifyExpected converted expected
+
+def psElabEnsureFunction (result : PsElabTermResult) :
+    Except PsElabError PsElabTermResult := do
+  match psWhnf result.context.environment result.context.metaContext
+      result.context.localContext result.type with
+  | .forallE _ _ _ _ => return result
+  | _ =>
+    let converted ← (psElabCoerce result "CoeFun" none true).mapError fun error =>
+      match error with | .fuelExhausted => error | _ => .infer .expectedFunction
+    match psWhnf converted.context.environment converted.context.metaContext
+        converted.context.localContext converted.type with
+    | .forallE _ _ _ _ => return converted
+    | _ => throw (.infer .expectedFunction)
+
+def psElabEnsureType (result : PsElabTermResult) :
+    Except PsElabError PsElabTermResult := do
+  match psWhnf result.context.environment result.context.metaContext
+      result.context.localContext result.type with
+  | .sortE _ => return result
+  | _ =>
+    let converted ← (psElabCoerce result "CoeSort" none).mapError fun error =>
+      match error with | .fuelExhausted => error | _ => .infer .expectedSort
+    let _ ← (psInferEnsureSort converted.context.environment converted.context.metaContext
+      converted.context.localContext converted.type).mapError PsElabError.infer
+    return converted
 
 def psElabResolvedTerm
     (context : PsElabContext)
@@ -619,7 +685,7 @@ def psElabHole (context : PsElabContext) (expected : Option PsExpr) : PsElabTerm
 
 def psElabOptionalType (elaborate : PsElaborator) (context : PsElabContext)
     (type value : PsSyntaxTerm) : Except PsElabError PsElabTypeResult := do
-  let annotation ← elaborate context type none
+  let annotation ← elaborate context type none >>= psElabEnsureType
   let level ← (psInferEnsureSort annotation.context.environment annotation.context.metaContext
     annotation.context.localContext annotation.type).mapError PsElabError.infer
   let value ← elaborate annotation.context value (some annotation.term)
@@ -633,7 +699,7 @@ def psElabType (elaborate : PsElaborator) (context : PsElabContext)
   | .hole _ => return psElabFreshType context
   | .optionalType type value _ => psElabOptionalType elaborate context type value
   | _ =>
-    let result ← elaborate context source none
+    let result ← elaborate context source none >>= psElabEnsureType
     let _ ← (psInferEnsureSort result.context.environment result.context.metaContext
       result.context.localContext result.type).mapError PsElabError.infer
     return { context := result.context, type := result.term }

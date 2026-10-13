@@ -1,6 +1,47 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
-## Current qualification — M2+A checked equality and structure defaults (13 October 2026)
+## Current qualification — M2+A scheduling, indexed lookup and literals (13 October 2026)
+
+Executable `4d2e644d3974a6e6a4b68a15b7148bdb4f83e372`;
+[green Linux 38425066964](https://github.com/dwijayuda/pskernel/actions/runs/38425066964).
+**285 shared runtime observations**, four panic contracts, **186 portable /
+194 native modules**, profile `pscv0-v7-native-bounded/50`.
+Official Lean RC4 kernel, independent oracle, semantic refusals, strict IR,
+JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI and project checks passed.
+
+- One transactional worklist now serves Core constraints and captured source
+  terms. Later arguments can determine record/lambda/tactic types; numeral
+  fallback and mandatory defaults run after ordinary work reaches quiescence.
+- Global instances are indexed by class while preserving priority/tie order.
+  Generator buckets use rigid class plus lexical scope, followed by full
+  definitionally-equal input checks. At 32 goals: zero generator comparisons
+  across classes, 528 within one class. No general linearity claim.
+- Numeric literals use genuine checked OfNat dictionaries. Typed Core
+  application resolves class universes before search; deriving reuses it.
+  Custom numeric types, local dictionaries and higher universes are qualified.
+
+Standard: **299 declarations / 15 classes / 54 instances**.
+The reviewed change adds OfNat/constructor/projection and Nat/Int dictionaries,
+without new axioms or primitives.
+FNV `fnv1a64:4206739069382061916`;
+SHA-256 `sha256:00c6142b5f5b0e47abb8b317dc4fff3d595ab9f5e931822c4f48fca809758647`.
+
+Direct Coe/CoeFun/CoeSort boundaries are implemented but **qualification is
+pending** in subsequent source commits. They add nine checked declarations,
+three classes and no global instances. Keep strict digest review.
+See [scheduling and lookup](PSCV0_M2_POSTPONED_ELABORATION_2026-10-13.md)
+and [direct coercion design](PSCV0_M2_DIRECT_COERCIONS_2026-10-13.md).
+
+**M2+A is not complete.** Continue autonomously: remaining Repr/Hashable,
+faithful scalar/Float/BitVec/bytes/string/collection APIs, comprehensive
+module/notation/handler/tactic/effect/assumption manifest, broader M2 coverage
+and C5 semantic retention. Keep dependent/indexed/recursive deriving with M3's
+shared data/transport/termination work. Preserve
+**M2+A → M3+B → M4+C/D → M5/E**; do not redefine the exit gates.
+Native .lean, official kernel, GitHub source operations and Linux CI only.
+No pskernel-core, self-hosting or compiler-source migration.
+
+## Prior qualification — M2+A checked equality and structure defaults (13 October 2026)
 
 Executable `d7e28a3870cdc399eca3c63c6d305b10109d2eca`; [green Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663).
 **276 shared runtime observations** (all prior 263 retained), four panic

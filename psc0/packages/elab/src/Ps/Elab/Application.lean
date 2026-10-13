@@ -213,9 +213,11 @@ def psElabApplyOrderedWith {α : Type}
           else pending
         psElabApplyOrderedWith elaborate fuel next positions names pending complete expected
     | _ =>
-      if !names.isEmpty then throw (.invalidArgument "unknown named argument")
-      if !positions.isEmpty then throw (.infer .expectedFunction)
-      return { result := current, constraintsRev := pending }
+      if !positions.isEmpty || !names.isEmpty then
+        let callable ← (psElabEnsureFunction current).mapError fun error =>
+          if positions.isEmpty then .invalidArgument "unknown named argument" else error
+        psElabApplyOrderedWith elaborate fuel callable positions names pending complete expected
+      else return { result := current, constraintsRev := pending }
 
 -- Ordinary calls and records share the same telescope walk. A record update
 -- supplies either source syntax or an already typed Core projection.
@@ -266,12 +268,9 @@ def psElabSolveSynthetic (current : PsElabTermResult)
 
 def psElabFinishApplication (application : PsElabApplicationResult)
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult :=
-  let current := application.result
-  let pending := application.constraintsRev.reverse
-  let pending := match expected with
-    | none => pending
-    | some target => .expectedType current.context.localContext current.type target :: pending
-  psElabSolveSynthetic current pending
+  do
+    let current ← psElabSolveSynthetic application.result application.constraintsRev.reverse
+    psElabFinalizeExpected current expected
 
 -- APP-03 is an elaboration request, distinct from a written Unit argument.
 -- Only a callable head may be completed. An unresolved domain is never guessed
@@ -298,10 +297,7 @@ def psElabCompleteEmpty (elaborate : PsElaborator) (application : PsElabApplicat
 def psElabCall (elaborate : PsElaborator) (head : PsElabTermResult)
     (args : List (Prod (Option PsSyntaxName) PsSyntaxTerm))
     (expected : Option PsExpr) : Except PsElabError PsElabTermResult := do
-  if args.isEmpty then
-    match psWhnf head.context.environment head.context.metaContext head.context.localContext head.type with
-    | .forallE _ _ _ _ => pure ()
-    | _ => throw (.infer .expectedFunction)
+  let head ← if args.isEmpty then psElabEnsureFunction head else pure head
   let arguments ← psElabCallArguments args [] []
   let application ← psElabApplyOrdered elaborate 4096 head arguments.fst arguments.snd [] true
     (if args.isEmpty then none else expected)

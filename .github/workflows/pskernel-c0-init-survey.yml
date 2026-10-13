@@ -36,7 +36,7 @@ jobs:
           set -euo pipefail
           (cd "$RUNNER_TEMP/lean4export" && lake env .lake/build/bin/lean4export Init > "$RUNNER_TEMP/Init-4.35.0.ndjson")
           test -s "$RUNNER_TEMP/Init-4.35.0.ndjson"
-          leanchecker --from-export "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/leanchecker-result.txt" 2>&1 || {
+          (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$RUNNER_TEMP/Init-4.35.0.ndjson") > "$RUNNER_TEMP/leanchecker-result.txt" 2>&1 || {
             cat "$RUNNER_TEMP/leanchecker-result.txt"
             exit 1
           }

@@ -37,7 +37,7 @@ def main : IO Unit := do
     throw (IO.userError "failed axiom authorization mutated the genesis")
 
   let some allowed := psKernelC0AuditTrustedSource
-      genesis.trusted [firstName]
+      genesis.trusted [c0AuditedAxiom firstName]
     | throw (IO.userError "explicit one-axiom policy could not be certified")
   let _emptyApproved := psKernelC0AuditedSourceAxiomsApproved allowed
   let reviewed ← match psKernelC0AuditedSourceAdmit
@@ -49,6 +49,39 @@ def main : IO Unit := do
       psKernelC0HistoryAxiomsApproved reviewed.trusted.history
         reviewed.allowedAxioms :=
     psKernelC0AuditedSourceAxiomsApproved reviewed
+  -- An approved AXIOM NAME must not authorize a different proposition,
+  -- universe signature, or safety classification at the same name.
+  let approvedSignature := c0AuditedAxiom firstName
+  let wrongProposition : PsKernelAxiomInfo := {
+    approvedSignature with
+    base := { approvedSignature.base with type := .sort (.succ .zero) }
+  }
+  let wrongUniverse : PsKernelAxiomInfo := {
+    approvedSignature with
+    base := {
+      approvedSignature.base with
+      levelParams := [c0AuditedName "differentUniverse"]
+    }
+  }
+  let wrongSafety : PsKernelAxiomInfo := {
+    approvedSignature with isUnsafe := true
+  }
+  for modified in [wrongProposition, wrongUniverse, wrongSafety] do
+    if psKernelC0OrdinaryAxiomRequestApproved
+        (.axiomDecl modified) [approvedSignature] then
+      throw (IO.userError "name-only match authorized altered axiom signature")
+    match psKernelC0AuditedSourceAdmit 4096 allowed
+        (.axiomDecl modified) with
+    | .error _ => pure ()
+    | .ok _ =>
+        throw (IO.userError "audited source admitted altered axiom signature")
+    if (psKernelC0AuditTrustedSource reviewed.trusted [modified]).isSome then
+      throw (IO.userError "accepted axiom history was re-audited under wrong type")
+  match psKernelC0HistoryAxiomSignatures reviewed.trusted.history with
+  | [actual] =>
+      if !decide (actual = approvedSignature) then
+        throw (IO.userError "exact checked axiom declaration provenance lost")
+  | _ => throw (IO.userError "typed history lost reviewed axiom signature")
   match psKernelC0HistoryOrdinaryAxioms reviewed.trusted.history with
   | [actual] =>
       if !psKernelNameEq actual firstName then
@@ -76,7 +109,7 @@ def main : IO Unit := do
   | .ok _ =>
       throw (IO.userError "source checker admitted a duplicate reviewed axiom")
   let some reopened := psKernelC0AuditTrustedSource
-      reviewed.trusted [firstName, secondName]
+      reviewed.trusted [c0AuditedAxiom firstName, c0AuditedAxiom secondName]
     | throw (IO.userError "explicitly expanded axiom policy was not certifiable")
   let expanded ← match psKernelC0AuditedSourceAdmit
       4096 reopened secondRequest with
@@ -86,7 +119,7 @@ def main : IO Unit := do
   if (psKernelC0HistoryOrdinaryAxioms expanded.trusted.history).length != 2 then
     throw (IO.userError "expanded checked axiom history lost assumptions")
   if (psKernelC0AuditTrustedSource
-      expanded.trusted [firstName]).isSome then
+      expanded.trusted [c0AuditedAxiom firstName]).isSome then
     throw (IO.userError "history was downgraded to narrower false axiom policy")
 
   -- The policy affects assumption admission only: a source-checked
@@ -188,7 +221,7 @@ def main : IO Unit := do
       isUnsafe := true
     }
   let some nameApprovedUnsafe := psKernelC0AuditTrustedSourceWithCapabilities
-      genesis.trusted [unsafeAxiomName] []
+      genesis.trusted [{ (c0AuditedAxiom unsafeAxiomName) with isUnsafe := true }] []
     | throw (IO.userError "unsafe axiom name allowlist was not certifiable")
   match psKernelC0AuditedSourceAdmit 4096
       nameApprovedUnsafe unsafeAxiomRequest with
@@ -348,3 +381,4 @@ def main : IO Unit := do
   IO.println "C0_AUDITED source_judgments_and_closed_publication=pass"
   IO.println "C0_AUDITED quotient_and_unsafe_capability_history=pass"
   IO.println "C0_AUDITED incremental_history_proof_matches_full_replay=pass"
+  IO.println "C0_AUDITED exact_axiom_type_universe_safety_manifest=pass"

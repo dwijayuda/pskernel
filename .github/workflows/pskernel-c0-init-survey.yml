@@ -71,6 +71,79 @@ jobs:
             lake env lean --run test/C0OfficialNdjsonReplay.lean "$RUNNER_TEMP/Init-first-12244.ndjson"
           ) | tee "$RUNNER_TEMP/c0-first-12244-result.txt"
           grep -Fq "C0_REAL_EXPORT replay_outcome=C0ExportVerdict.accepted consumed_records=12244" "$RUNNER_TEMP/c0-first-12244-result.txt"
+      - name: Inspect the first real Init nested-inductive metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/Init-4.35.0.ndjson" <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          source = Path(sys.argv[1])
+          target = 79416
+          names = {0: ""}
+          levels = {0: "0"}
+          expressions = {}
+          def render_level(index):
+              return levels.get(index, f"<missing-level-{index}>")
+          def render_expr(index, depth=0):
+              if depth > 24:
+                  return f"<depth:{index}>"
+              x = expressions.get(index)
+              if x is None:
+                  return f"<missing-expr-{index}>"
+              if "sort" in x:
+                  return f"Sort({render_level(x['sort'])})"
+              if "bvar" in x:
+                  return f"#{x['bvar']}"
+              if "const" in x:
+                  c = x["const"]
+                  return names.get(c["name"], "?") + ("[" + ",".join(render_level(u) for u in c["us"]) + "]")
+              if "app" in x:
+                  c = x["app"]
+                  return f"({render_expr(c['fn'], depth+1)} {render_expr(c['arg'],depth+1)})"
+              for kind in ("forallE", "lam"):
+                  if kind in x:
+                      c = x[kind]
+                      return f"({kind} {names.get(c['name'],'_')}:{render_expr(c['type'],depth+1)}. {render_expr(c['body'],depth+1)})"
+              if "letE" in x:
+                  c = x["letE"]
+                  return f"(let {names.get(c['name'],'_')}:{render_expr(c['type'],depth+1)} := {render_expr(c['value'],depth+1)}; {render_expr(c['body'],depth+1)})"
+              return f"expr[{index}]:{list(x)}"
+          with source.open(encoding="utf-8") as file:
+              for line_no, raw in enumerate(file, 1):
+                  obj = json.loads(raw)
+                  if "in" in obj:
+                      part = obj.get("str") or obj.get("num")
+                      parent = names.get(part["pre"], "?")
+                      suffix = part.get("str", part.get("i"))
+                      names[obj["in"]] = parent + ("." if parent else "") + str(suffix)
+                  elif "il" in obj:
+                      if "param" in obj:
+                          levels[obj["il"]] = names.get(obj["param"], "?")
+                      elif "succ" in obj:
+                          levels[obj["il"]] = "succ(" + render_level(obj["succ"]) + ")"
+                      elif "max" in obj:
+                          levels[obj["il"]] = "max(" + ",".join(render_level(k) for k in obj["max"]) + ")"
+                      elif "imax" in obj:
+                          levels[obj["il"]] = "imax(" + ",".join(render_level(k) for k in obj["imax"]) + ")"
+                  elif "ie" in obj:
+                      expressions[obj["ie"]] = obj
+                  if line_no == target:
+                      print(f"C0_REAL_INIT_DIVERGENCE record={line_no} tag={list(obj)}")
+                      if "inductive" in obj:
+                          group = obj["inductive"]
+                          for typ in group["types"]:
+                              print(f"  TYPE {names.get(typ['name'])} universe={list(map(render_level,typ['levelParams']))} numParams={typ['numParams']} numIndices={typ['numIndices']} type={render_expr(typ['type'])}")
+                          for ctor in group["ctors"]:
+                              print(f"  CTOR {names.get(ctor['name'])} fields={ctor['numFields']} type={render_expr(ctor['type'])}")
+                      else:
+                          print(json.dumps(obj)[:8000])
+                      break
+          if line_no != target:
+              raise RuntimeError("did not reach C0 first divergence record")
+          PY
       - name: Qualify real Init prefix through first nested inductive
         shell: bash
         run: |
@@ -164,79 +237,6 @@ jobs:
           }
           output.write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
-          PY
-      - name: Inspect the first real Init nested-inductive metadata
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - "$RUNNER_TEMP/Init-4.35.0.ndjson" <<'PY'
-          import json
-          import sys
-          from pathlib import Path
-
-          source = Path(sys.argv[1])
-          target = 79416
-          names = {0: ""}
-          levels = {0: "0"}
-          expressions = {}
-          def render_level(index):
-              return levels.get(index, f"<missing-level-{index}>")
-          def render_expr(index, depth=0):
-              if depth > 24:
-                  return f"<depth:{index}>"
-              x = expressions.get(index)
-              if x is None:
-                  return f"<missing-expr-{index}>"
-              if "sort" in x:
-                  return f"Sort({render_level(x['sort'])})"
-              if "bvar" in x:
-                  return f"#{x['bvar']}"
-              if "const" in x:
-                  c = x["const"]
-                  return names.get(c["name"], "?") + ("[" + ",".join(render_level(u) for u in c["us"]) + "]")
-              if "app" in x:
-                  c = x["app"]
-                  return f"({render_expr(c['fn'], depth+1)} {render_expr(c['arg'],depth+1)})"
-              for kind in ("forallE", "lam"):
-                  if kind in x:
-                      c = x[kind]
-                      return f"({kind} {names.get(c['name'],'_')}:{render_expr(c['type'],depth+1)}. {render_expr(c['body'],depth+1)})"
-              if "letE" in x:
-                  c = x["letE"]
-                  return f"(let {names.get(c['name'],'_')}:{render_expr(c['type'],depth+1)} := {render_expr(c['value'],depth+1)}; {render_expr(c['body'],depth+1)})"
-              return f"expr[{index}]:{list(x)}"
-          with source.open(encoding="utf-8") as file:
-              for line_no, raw in enumerate(file, 1):
-                  obj = json.loads(raw)
-                  if "in" in obj:
-                      part = obj.get("str") or obj.get("num")
-                      parent = names.get(part["pre"], "?")
-                      suffix = part.get("str", part.get("i"))
-                      names[obj["in"]] = parent + ("." if parent else "") + str(suffix)
-                  elif "il" in obj:
-                      if "param" in obj:
-                          levels[obj["il"]] = names.get(obj["param"], "?")
-                      elif "succ" in obj:
-                          levels[obj["il"]] = "succ(" + render_level(obj["succ"]) + ")"
-                      elif "max" in obj:
-                          levels[obj["il"]] = "max(" + ",".join(render_level(k) for k in obj["max"]) + ")"
-                      elif "imax" in obj:
-                          levels[obj["il"]] = "imax(" + ",".join(render_level(k) for k in obj["imax"]) + ")"
-                  elif "ie" in obj:
-                      expressions[obj["ie"]] = obj
-                  if line_no == target:
-                      print(f"C0_REAL_INIT_DIVERGENCE record={line_no} tag={list(obj)}")
-                      if "inductive" in obj:
-                          group = obj["inductive"]
-                          for typ in group["types"]:
-                              print(f"  TYPE {names.get(typ['name'])} universe={list(map(render_level,typ['levelParams']))} numParams={typ['numParams']} numIndices={typ['numIndices']} type={render_expr(typ['type'])}")
-                          for ctor in group["ctors"]:
-                              print(f"  CTOR {names.get(ctor['name'])} fields={ctor['numFields']} type={render_expr(ctor['type'])}")
-                      else:
-                          print(json.dumps(obj)[:8000])
-                      break
-          if line_no != target:
-              raise RuntimeError("did not reach C0 first divergence record")
           PY
       - name: C0 native streaming boundary diagnostic after max-offset normalization
         shell: bash

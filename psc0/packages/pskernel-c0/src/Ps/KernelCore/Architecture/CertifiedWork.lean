@@ -82,6 +82,43 @@ def psKernelC0CertifiedWorkCheck
   let (ty, session) ← psKernelSessionCheck fuel work.raw.checker expr
   return (ty, psKernelC0CertifiedWorkWithSession work session)
 
+/-- Source proposition classification shares the immutable certificate
+    and advances only the source-owned checker state. -/
+def psKernelC0CertifiedWorkIsProp
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String (Bool × PsKernelC0CertifiedWork) := do
+  let (isProp, session) ← psKernelSessionIsProp fuel work.raw.checker expr
+  return (isProp, psKernelC0CertifiedWorkWithSession work session)
+
+/-- Typed K/structure-eta is an observation from the original checker,
+    not a new proof. An immutable validated scratch store does not need
+    another full replay to receive the source-owned observer state. -/
+def psKernelC0CertifiedWorkObserveTypedMajor
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (recName : PsKernelName)
+    (major : PsKernelExpr) :
+    Except String
+      (PsKernelC0TypedMajorObservation × PsKernelC0CertifiedWork) := do
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveTypedMajor fuel work.raw.checker recName major
+  return (observation, psKernelC0CertifiedWorkWithSession work session)
+
+/-- Source-authoritative typed-demand preview with the existing operation
+    work quota. It cannot change the replay certificate or admit a term. -/
+def psKernelC0CertifiedWorkPreviewTypedDemand
+    (fuel quota : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Except String
+      (PsKernelC0ExecutionObservation × PsKernelC0CertifiedWork) := do
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveTypedDemand
+      fuel quota work.raw.checker expr
+  return (observation, psKernelC0CertifiedWorkWithSession work session)
+
 /-- The source admission operation is still the only environment authority.
     Its exact checked result gets a *new* work certificate, preventing
     transfer of a proof to any unvalidated transaction. -/

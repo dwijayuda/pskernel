@@ -71,10 +71,13 @@ through that public synthesis API.
 
 One combined source fixture adds generic, phantom, value-parameter,
 Sort-polymorphic and mixed-universe families, kernel-checked reduction
-equalities, and eight observations shared by JS/TS/Rust/GC-Wasm. Three
+equalities, and nine observations shared by JS/TS/Rust/GC-Wasm. Three
 elaboration refusals cover missing parameter dictionaries, dependent fields
 and a recursive generic family. The pinned Lean oracle independently checks
 constructor selection, assumption pruning and runtime equality semantics.
+A runtime nested `Option α` projection checks actual universe substitution;
+a separate kernel-only type-valued projection checks the same invariant without
+claiming runtime support for type-valued fields.
 Run the existing complete native Linux workflow once the code is committed;
 retain all existing checks and snapshot digest guards.
 

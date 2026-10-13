@@ -1,5 +1,6 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "derivingNestedRuntime", args: null, expected: 761n },
   { name: "derivingMinimalRuntime", args: null, expected: true },
   { name: "derivingPhantomRuntime", args: null, expected: 0n },
   { name: "derivingHighDefaultRuntime", args: null, expected: 0n },

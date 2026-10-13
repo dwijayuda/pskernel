@@ -172,4 +172,9 @@ example : (Pair.mk (Lift.mk 751) 3 == Pair.mk (Lift.mk 751) 4) = false := rfl
 example : (Choice.value (Lift.mk 757) == Choice.value (Lift.mk 757)) = true := rfl
 example : (Choice.value (Lift.mk 757) == Choice.empty) = false := rfl
 example : ((Tagged.mk 5 : Tagged Nat 7) == Tagged.mk 5) = true := rfl
+structure Nested (α : Type u) where
+  value : Option α
+deriving Inhabited, BEq
+example {α : Type u} : (default : Nested α).value = none := rfl
+example : ((Nested.mk (some (Lift.mk 761))).value.getD (Lift.mk 0)).value = 761 := rfl
 end Pscv0DerivingOracle

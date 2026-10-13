@@ -32,6 +32,25 @@ def psKernelC0CandidateNatContinue
     steps := machine.steps + 1
   }
 
+/-- Intentionally bounded candidate family. Test the head before quoting
+    arguments; an unrelated neutral application must stay genuinely lazy.
+    This only restricts candidate coverage, never the source kernel. -/
+def psKernelC0CandidateIsNatBinary (name : PsKernelName) : Bool :=
+  psKernelNameEq name psKernelNatAddName ||
+  psKernelNameEq name psKernelNatSubName ||
+  psKernelNameEq name psKernelNatMulName ||
+  psKernelNameEq name psKernelNatPowName ||
+  psKernelNameEq name psKernelNatGcdName ||
+  psKernelNameEq name psKernelNatModName ||
+  psKernelNameEq name psKernelNatDivName ||
+  psKernelNameEq name psKernelNatBeqName ||
+  psKernelNameEq name psKernelNatBleName ||
+  psKernelNameEq name psKernelNatLandName ||
+  psKernelNameEq name psKernelNatLorName ||
+  psKernelNameEq name psKernelNatXorName ||
+  psKernelNameEq name psKernelNatShiftLeftName ||
+  psKernelNameEq name psKernelNatShiftRightName
+
 /-- Evaluate only primitive Nat heads with exactly the literal arguments
     needed for the operation. No speculative evaluation of neutral operands
     or unchecked declaration unfolding is performed here.
@@ -60,6 +79,8 @@ def psKernelC0CandidateNatStep
                 | .ok _ =>
                     psKernelC0CandidateNatContinue machine
                       (.lit (.nat successor)) remaining
+      else if !psKernelC0CandidateIsNatBinary name then
+        .halted
       else
         match machine.arguments with
         | left :: right :: remaining =>

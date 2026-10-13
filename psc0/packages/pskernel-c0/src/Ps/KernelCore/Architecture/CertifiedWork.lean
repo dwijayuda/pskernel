@@ -182,3 +182,29 @@ def psKernelC0CertifiedWorkInferRoot
     (root : PsKernelC0CertifiedRoot) :
     Except String (PsKernelExpr × PsKernelC0CertifiedWork) :=
   psKernelC0CertifiedWorkInfer fuel work root.expression
+
+/-- Atomic source-checked publication of selected staged expressions.
+    Unlike syntax-only `CertifiedWorkCommit`, EVERY selected root must
+    pass independent full source checking before this operation returns a
+    published store and its checked source type. A single error rejects the
+    complete result; the input work and persistent prefix are immutable.
+
+    The returned types are observational checked-session results, not
+    forge-resistant public proof receipts: nothing here allows candidates
+    or root hashes to authorize theorem/declaration admission. -/
+def psKernelC0CertifiedWorkCommitChecked
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork) :
+    Except String
+      (PsKernelC0CertifiedStore ×
+        List (PsKernelC0CertifiedRoot × PsKernelExpr) ×
+        PsKernelC0CertifiedWork) := do
+  let some (owner, roots) := psKernelC0CertifiedWorkCommit work
+    | throw "source-certified root promotion failed canonical validation"
+  let mut checkedWork := work
+  let mut typed : List (PsKernelC0CertifiedRoot × PsKernelExpr) := []
+  for root in roots do
+    let (ty, next) ← psKernelC0CertifiedWorkCheckRoot fuel checkedWork root
+    checkedWork := next
+    typed := (root, ty) :: typed
+  return (owner, typed.reverse, checkedWork)

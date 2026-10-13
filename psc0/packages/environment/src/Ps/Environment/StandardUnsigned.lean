@@ -1,5 +1,6 @@
 import Ps.Environment.StandardUnsignedFoundationData
 import Ps.Environment.StandardNumeric
+import Ps.Environment.StandardScalarArithmetic
 
 -- Reviewed native closure: 80 declarations, four former UInt axioms replaced
 -- by their actual BitVec structures, no new axiom. Native instance extensions
@@ -22,7 +23,10 @@ def psStandardUnsignedExtend (environment : PsEnvironment) : PsEnvironment :=
 -- Intrinsic bodies and their proof closure are not emitted as support code.
 -- BitVec/Fin keep their prepared record layout; UInt uses the scalar boundary.
 def psStandardUnsignedRuntimeDeclarations : List PsDeclaration :=
-  psStandardUnsignedFoundationDeclarations.filter fun d =>
-    ["BitVec", "BitVec.ofFin", "BitVec.rec", "UInt8.instOfNat",
+  (psStandardUnsignedFoundationDeclarations.filter fun d =>
+    ["UInt8.size", "UInt16.size", "UInt32.size", "UInt64.size",
+      "BitVec", "BitVec.ofFin", "BitVec.rec", "UInt8.instOfNat",
       "UInt16.instOfNat", "UInt32.instOfNat", "UInt64.instOfNat"].contains
-      (psNameToString (psDeclarationName d))
+      (psNameToString (psDeclarationName d))) ++
+  psStandardScalarArithmeticDeclarations.filter (fun d =>
+    psNameToString (psDeclarationName d) == "instOfNatNat")

@@ -114,6 +114,43 @@ def main : IO Unit := do
   if !psKernelExprEqual value (.sort .zero) then
     throw (IO.userError "trusted source declarations did not unfold")
 
+  -- Syntax staging is not admission. Its dependent environment-equality
+  -- witness carries the verified source history across a changed scratch
+  -- graph, without reinterpreting a numeric handle as a checked term.
+  let some staged := psKernelC0TrustedSourceStage
+      admittedTwice (.sort .zero)
+    | throw (IO.userError "trusted verified syntax stage declined")
+  let _stageHistory :
+      PsKernelC0SourceEnvironmentHistory
+        staged.certified.raw.checker.context.environment :=
+    staged.history
+  let (published, receipts) ← match
+      psKernelC0TrustedSourceCommitChecked 4096 staged with
+    | .ok result => pure result
+    | .error reason =>
+        throw (IO.userError ("trusted checked publication failed: " ++ reason))
+  if !psKernelC0ReplayValidateStore published.store then
+    throw (IO.userError "trusted publication returned a noncanonical store")
+  match receipts with
+  | [receipt] =>
+      let _exactCheck := psKernelC0SourceCheckedRootExact receipt
+      if !psKernelExprEqual receipt.root.expression (.sort .zero) ||
+          !psKernelExprEqual receipt.checkedType (.sort (.succ .zero)) then
+        throw (IO.userError "trusted staged source check changed term/type")
+  | _ => throw (IO.userError "trusted publication lost selected roots")
+  let some invalidStage := psKernelC0TrustedSourceStage
+      staged (.bvar 0)
+    | throw (IO.userError "trusted syntax stage preemptively checked bvar")
+  match psKernelC0TrustedSourceCommitChecked 4096 invalidStage with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "verified environment history approved unbound root")
+  if psKernelEnvironmentSize
+      invalidStage.certified.raw.checker.context.environment != 2 then
+    throw (IO.userError "staging changed the checked environment history")
+  if psKernelEnvironmentSize admittedTwice.certified.raw.checker.context.environment != 2 then
+    throw (IO.userError "rejected trusted publication mutated accepted declarations")
+
   -- The evidence itself must be the source admission's exact output,
   -- not a candidate expression or a hash-only environment stamp.
   let step ← match psKernelC0SourceAdmitWithProof 4096 genesis.certified first with
@@ -144,4 +181,5 @@ def main : IO Unit := do
   IO.println "C0_TRUSTED checked_empty_genesis_provenance=pass"
   IO.println "C0_TRUSTED chained_source_admissions_exact_receipts=pass"
   IO.println "C0_TRUSTED history_preserved_across_source_judgments=pass"
+  IO.println "C0_TRUSTED staged_checked_root_publication_with_history=pass"
   IO.println "C0_TRUSTED immutable_rejection_and_checked_environment=pass"

@@ -129,4 +129,17 @@ def main : IO Unit := do
   | .internalError _ => pure ()
   | _ =>
       throw (IO.userError "C0 treated unknown nested error as kernel verdict")
+  let stages : List String := [
+    "mutual-first-type-check: ",
+    "mutual-header-indices: ",
+    "mutual-remaining-types: ",
+    "mutual-constructor-family: ",
+    "mutual-recursor-validation: "
+  ]
+  for stage in stages do
+    match psKernelErrorFromMessage
+        ("nested transformed admission: " ++ stage ++
+         "kernel reduction budget exhausted") with
+    | .resourceExhausted .fuel _ => pure ()
+    | _ => throw (IO.userError "C0 lost stage-qualified nested fuel classification")
   IO.println "C0_LEAN435 nested_typed_error_outcomes=pass"

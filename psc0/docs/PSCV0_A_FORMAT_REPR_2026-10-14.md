@@ -680,3 +680,16 @@ rather than importing Lean's any-type fallback. These are independently written
 adaptations of the invariants. Validation combines existing hash proof-field
 cases, a Sort-to-Prop entry/partial entry, and positive/zero/negative Int matches
 against the pinned native oracle and the shared backend suite. Qualification pending.
+
+### Qualified /60 receipt
+
+Executable `d72fc7779b2e8d130915dfe4ace339634ba0addd`,
+[Linux38466179341](https://github.com/dwijayuda/pskernel/actions/runs/38466179341),
+passed all existing gates: native source/oracle, official kernel, strict Standard
+fingerprints, semantic/refusal/search checks, IR, 399 shared JS/TS/Rust/GC-Wasm
+observations, four panic contracts, WIT/WAT/components, public ABI, projects and
+performance budgets. Closure: 217 portable /227 native modules; Standard672
+/23 classes /109 instances. Fingerprints: FNV10680386315174967875;
+SHA2569a54d5747d3047abff68e3bd872b791f3489f719cf83e8aba6776d342f045cc0.
+This qualifies the selected Hashable and scalar-erasure boundary above; it does
+not complete M2+A or recursive/indexed/dependent deriving.

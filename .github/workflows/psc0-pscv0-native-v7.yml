@@ -217,6 +217,10 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_m1_performance ../dist/pscv0-native/m1-performance
           node ../scripts/pscv0-native-m1-performance.mjs ../dist/pscv0-native/m1-performance | tee ../dist/pscv0-native/m1-performance/comparison.log
+      - name: Export the pinned unsigned operation candidate for source review
+        run: |
+          set -euo pipefail
+          .lake/build/bin/pscv0_native --export-unsigned-operations-candidate ../dist/pscv0-native/StandardUnsignedOperationsData.lean | tee ../dist/pscv0-native/unsigned-operations-candidate.log
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

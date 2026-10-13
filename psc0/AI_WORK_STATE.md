@@ -13,45 +13,43 @@ A–E, C5 and all future development; do not preserve obsolete internals merely
 for compatibility.
 
 
-## Current qualified boundary — unsigned scalar foundation (14 October 2026)
+## Current qualified boundary — Hashable and stable erased calls (14 October 2026)
 
-Executable `fd554c4612d14ff154bced721a4ea6e5dd16df64`;
-[green Linux 38463484850](https://github.com/dwijayuda/pskernel/actions/runs/38463484850).
-**359 shared runtime observations**, four panic contracts, **211 portable /
-221 native modules**, profile `pscv0-v7-native-bounded/59`.
+Executable `d72fc7779b2e8d130915dfe4ace339634ba0addd`;
+[green Linux 38466179341](https://github.com/dwijayuda/pskernel/actions/runs/38466179341).
+**399 shared runtime observations**, four panic contracts, **217 portable /
+227 native modules**, profile `pscv0-v7-native-bounded/60`.
 Official **Lean 4.35.0**, independent oracle, semantic/refusal/search checks,
 strict IR, JS/TS/Rust, V8/Wasmtime GC, WIT/WAT/component/ABI, projects and
 existing performance gates pass. Performance parity is not established.
 
-Standard: **637 declarations /22 classes /92 instances**.
-FNV `fnv1a64:13920538106612433129`;
-SHA `sha256:0dfde0fc7fe625fcedadcb150bc41234fbf57fac8197a663229a867e0f221bb7`.
+Standard: **672 declarations /23 classes /109 instances**.
+FNV `fnv1a64:10680386315174967875`;
+SHA `sha256:9a54d5747d3047abff68e3bd872b791f3489f719cf83e8aba6776d342f045cc0`.
 
-ToFormat/Repr and selected nonrecursive deriving remain qualified. Checked
-Nat.add/sub/mul/beq and ite models replace earlier axioms. The actual pinned
-Nat.mod model and Nat.mod_lt proof closure are portable Core data: 102
-declarations, 101 new names, no new axioms. A native-only authoring exporter
-kernel-checks converted candidates and regenerates the frozen-boundary asset
-byte-identically. Native class/instance registrations are not imported merely
-because their logical declarations are dependencies.
+Qualified: ToFormat/Repr and selected nonrecursive deriving; real UInt/BitVec
+construction/conversions; unsigned Canonical ABI widths; Hashable class,
+17 checked instances, selected nonrecursive deriving, native-compatible pair
+and UTF-8 string hashes. Hashable's Prop and implicit fields retain pinned
+semantics. Hash runtime algorithms are separately audited overrides of checked
+opaque declarations, not kernel proofs of runtime implementation equivalence.
 
-Shared weak-head reduction preserves complete application spines across
-beta/delta/projection steps, keeping saturated arithmetic on native literal
-paths. Conversion/unification test structural reflexivity before evaluation.
-The same Wasm observation source improved from **536,228 ms to 172 ms**
-elaboration; resource limits and acceptance criteria are unchanged. This is
-a specific regression repair, not general performance parity.
+Shared erasure now lowers builtin Int.rec through a once-evaluated sign split.
+Known generic calls preserve their original declaration binder masks when Sort
+parameters specialize to Prop; irrelevant carriers and proof slots use Unit.
+The same integration suite covers these mechanisms across every existing target.
+
+The Nat.mod_lt and UInt/BitVec and hash foundation assets regenerate byte-for-byte
+through the native-only exporter and fresh official kernel replay.
+No new axioms, pskernel-core or self-hosting. Prior complete-spine WHNF and
+reflexivity-before-evaluation repairs remain in place; the latest Wasm observation
+source elaborates in 243 ms. This is a bounded measurement, not performance parity.
 
 [Design, sources and qualification](docs/PSCV0_A_FORMAT_REPR_2026-10-14.md).
-UInt/BitVec conversions, arbitrary Nat wrapping and unsigned Canonical ABI widths
-are now qualified. Hashable /60 is implemented but pending qualification; the
-strict Standard snapshot now records the independently observed /60 fingerprint.
-Qualification exposed missing builtin Int elimination; the shared Int recursor and
-declaration-stable Sort/Prop erased-call repairs are awaiting Linux validation.
-
-**Full M2+A remains incomplete.** Continue Hashable qualification, remaining
-selected Standard APIs, comprehensive manifest, broader M2 evidence and C5
-semantic retention. Recursive/indexed/dependent deriving remains M3+B.
+**Full M2+A remains incomplete.** Continue the unsigned-operation closure
+candidate, signed/platform words, Float/scientific/BitVec/selected library APIs,
+comprehensive manifest, broader M2 evidence and C5 semantic retention.
+Recursive/indexed/dependent deriving remains M3+B.
 
 ## Active request and execution contract
 

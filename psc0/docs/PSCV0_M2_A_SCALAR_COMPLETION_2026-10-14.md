@@ -90,3 +90,20 @@ bit-reinterpretation rules; do not build a second ABI planner.
 This research does not establish implementation, runtime parity or full M2+A
 completion. Native logical admission, runtime conformance and performance
 remain distinct evidence.
+
+## Unsigned operation closure review
+
+The native-only authoring candidate selects all four widths' add/sub/mul,
+div/mod, neg/complement, bitwise and/or/xor, and left/right shifts together.
+It also selects the actual Nat.div logical definition, replacing the earlier
+axiom in the candidate replay base. Native division bound proofs unfold that
+model; retaining an axiom at this dependency cut would be invalid reuse.
+
+References additionally studied: `Init/Data/BitVec/BasicAux.lean`,
+`Init/Data/Nat/Div/Basic.lean`, `tests/compile/uint_fold.lean` and
+`tests/elab/bv_uint.lean` at the pinned commit. Logical export, instance
+registration and runtime selection remain separate. The authoring command
+cannot modify the compiler's admitted environment. All candidates undergo
+fresh trust-zero kernel replay before source transport. No qualification or
+public availability of this operation closure is claimed until it is reviewed,
+integrated and checked across the existing target matrix.

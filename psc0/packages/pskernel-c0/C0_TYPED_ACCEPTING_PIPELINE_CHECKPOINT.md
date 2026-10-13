@@ -39,6 +39,29 @@ A real checked `Box.rec` with a neutral structure major must agree with source W
 
 This is a qualified observational integration slice, **not an independent typed K/eta implementation**: the typed premise still uses source infer/WHNF/DefEq. Complete native acceptance, proof/refinement, full resource/error parity, and competitive whole-workload evidence remain open.
 
+## Recent source qualification and acceptance-contract clarification
+
+The positive real checked `Eq`/`Quot` bootstrap, indexed K side-condition,
+source-justified metered structure recursor, and source-delegated checked
+WHNF/Infer/DefEq/IsProp work APIs have passed native CI in their bounded
+slices, including [38464230358](https://github.com/dwijayuda/pskernel/actions/runs/38464230358),
+[38464486308](https://github.com/dwijayuda/pskernel/actions/runs/38464486308) and
+[38464668623](https://github.com/dwijayuda/pskernel/actions/runs/38464668623).
+
+A deliberately ill-typed `Quot.lift` argument was found to be **inferable**
+without being **checkable**, as required by the source kernel's two distinct
+operations: `InferWithFuel` uses inference-only mode, while
+`CheckWithFuel` uses full checking mode. The strengthened negative regression
+requires `ArchitectureCheckWork` to reject the invalid relation proof and
+universe instantiation. [Native CI 38465192514](https://github.com/dwijayuda/pskernel/actions/runs/38465192514)
+passed this full-check negative test.
+
+The latest work additionally preserves an explicitly selected source
+`eagerReduce` policy across successful admission while rebuilding all
+checking caches. Native [CI 38465553974](https://github.com/dwijayuda/pskernel/actions/runs/38465553974)
+is the qualification gate for that follow-up and the corrected documentation
+syntax. No latest full CI success is asserted until that run completes.
+
 ## 4. Qualification evidence and remaining gates
 
 Earlier full native CI [38462459034](https://github.com/dwijayuda/pskernel/actions/runs/38462459034) verifies the initial checked singleton proposition and structure tests; [38464230358](https://github.com/dwijayuda/pskernel/actions/runs/38464230358) verifies metered source-justified typed-demand integration. [38464486308](https://github.com/dwijayuda/pskernel/actions/runs/38464486308) has also passed the combined positive checked proposition and unified source-judgment API.

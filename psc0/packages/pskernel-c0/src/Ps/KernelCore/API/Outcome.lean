@@ -56,6 +56,16 @@ def psKernelStripOneNestedAdmissionPrefix (message : String) : String :=
     message.replace "nested auxiliary restoration: " ""
   else if message.startsWith "nested restored validation: " then
     message.replace "nested restored validation: " ""
+  else if message.startsWith "mutual-first-type-check: " then
+    message.replace "mutual-first-type-check: " ""
+  else if message.startsWith "mutual-header-indices: " then
+    message.replace "mutual-header-indices: " ""
+  else if message.startsWith "mutual-remaining-types: " then
+    message.replace "mutual-remaining-types: " ""
+  else if message.startsWith "mutual-constructor-family: " then
+    message.replace "mutual-constructor-family: " ""
+  else if message.startsWith "mutual-recursor-validation: " then
+    message.replace "mutual-recursor-validation: " ""
   else
     message
 

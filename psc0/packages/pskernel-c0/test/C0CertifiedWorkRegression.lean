@@ -60,8 +60,7 @@ def main : IO Unit := do
       certified foreignRoot.owner
     | throw (IO.userError "certified root failed cross-store rehome")
   let _transferProof :
-      psKernelExprEqual transferred.source.expression
-        transferred.target.expression = true :=
+      transferred.source.expression = transferred.target.expression :=
     psKernelC0CertifiedTransferExact transferred
   if !psKernelExprEqual (psKernelC0CertifiedRootRead transferred.target)
       term then
@@ -69,6 +68,13 @@ def main : IO Unit := do
   let _transferValid :
       psKernelC0ReplayValidateStore transferred.target.owner.store = true :=
     psKernelC0CertifiedRootStore_canonical transferred.target
+  -- Different metadata gives actual propositional inequality (not only
+  -- a matching or mismatching hash hint).
+  if h : certified.expression = foreignRoot.expression then
+    throw (IO.userError "distinct binder metadata gained propositional equality")
+  else
+    let _notEqual : certified.expression ≠ foreignRoot.expression := h
+    pure ()
   let some rootNode := psKernelC0StoreGet rawStore id
     | throw (IO.userError "certified test root disappeared")
   -- The mathematical StoreWF propositions independently reject changed

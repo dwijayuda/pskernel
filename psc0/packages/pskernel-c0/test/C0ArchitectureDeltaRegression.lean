@@ -60,15 +60,15 @@ def main : IO Unit := do
     (.letE x ty (.const second []) (.bvar 0) false) sort
   -- A delta body must instantiate the declaration's universe parameters
   -- using the actual constant occurrence, not a cached default level.
-  let universe := c0DeltaName "u"
+  let univParam := c0DeltaName "u"
   let polymorphic := c0DeltaName "C0PolymorphicAlias"
   let poly : PsKernelDefinitionInfo := {
     base := {
       name := polymorphic
-      levelParams := [universe]
-      type := .sort (.succ (.param universe))
+      levelParams := [univParam]
+      type := .sort (.succ (.param univParam))
     }
-    value := .sort (.param universe)
+    value := .sort (.param univParam)
     hints := .abbrevHint
     safety := .safe
   }

@@ -1,5 +1,6 @@
 import Ps.KernelCore.Architecture.Execution
 import Ps.KernelCore.Core.IndexedScratch
+import Ps.KernelCore.Admission.Declaration.Admission
 
 /-!
 Architecture-first Phase C/E operation boundary.
@@ -92,3 +93,38 @@ def psKernelC0ArchitectureCommitSyntax
 def psKernelC0ArchitectureAbort
     (work : PsKernelC0ArchitectureWork) : PsKernelC0TermStore :=
   psKernelC0ScratchAbort work.scratch
+
+/-- A whole source declaration is the only authority for environment changes.
+    The candidate evaluator is deliberately absent from this data type. -/
+inductive PsKernelC0ArchitectureDeclaration where
+  | axiomDecl (info : PsKernelAxiomInfo)
+  | definition (info : PsKernelDefinitionInfo)
+  | theoremDecl (info : PsKernelTheoremInfo)
+  | opaqueDecl (info : PsKernelOpaqueInfo)
+
+/-- Atomic, checked declaration admission with mandatory cache invalidation.
+    It never publishes a partially checked environment: only existing source
+    admission functions can return the next environment. Constructing a fresh
+    checker session discards environment-dependent WHNF/DefEq/infer caches.
+    Scratch syntax is retained as syntax, not treated as validated judgments. -/
+def psKernelC0ArchitectureAdmit
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (decl : PsKernelC0ArchitectureDeclaration) :
+    Except String PsKernelC0ArchitectureWork := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let prior := work.checker.context
+  let environment := prior.environment
+  let next ← match decl with
+    | .axiomDecl info =>
+        psKernelAddAxiom fuel environment info prior.maxRecDepth prior.maxNatSize
+    | .definition info =>
+        psKernelAddDefinition fuel environment info prior.maxRecDepth prior.maxNatSize
+    | .theoremDecl info =>
+        psKernelAddTheorem fuel environment info prior.maxRecDepth prior.maxNatSize
+    | .opaqueDecl info =>
+        psKernelAddOpaque fuel environment info prior.maxRecDepth prior.maxNatSize
+  let newSession := psKernelMkCheckerSession next
+    prior.levelParams prior.safety prior.maxRecDepth prior.maxNatSize
+  return { work with checker := newSession }

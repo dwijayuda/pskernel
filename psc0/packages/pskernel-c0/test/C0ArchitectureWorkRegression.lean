@@ -45,5 +45,38 @@ def main : IO Unit := do
   | .ok (_, work) =>
       if !psKernelC0ArchitectureWorkValid work then
         throw (IO.userError "C0 checked transaction became invalid")
+  -- A checked declaration atomically extends only the checked environment.
+  -- Retained scratch syntax stays unaffected; the session cache is rebuilt.
+  let aliasName : PsKernelName := .str .anonymous "ArchitectureAlias"
+  let alias : PsKernelDefinitionInfo := {
+    base := {
+      name := aliasName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := .sort .zero
+    hints := .abbrevHint
+    safety := .safe
+  }
+  match psKernelC0ArchitectureAdmit 4096 initial (.definition alias) with
+  | .error err =>
+      throw (IO.userError ("C0 source declaration admission failed: " ++ err))
+  | .ok admitted =>
+      if !psKernelC0ArchitectureWorkValid admitted ||
+          !admitted.stagedRoots.isEmpty then
+        throw (IO.userError "C0 admission mutated syntax staging")
+      match psKernelC0ArchitecturePreview 4096 admitted (.const aliasName []) with
+      | .error err =>
+          throw (IO.userError ("C0 admitted source delta failed: " ++ err))
+      | .ok (observation, _) =>
+          if observation.agrees ||
+              !psKernelExprEqual observation.sourceValue (.sort .zero) then
+            throw (IO.userError "C0 candidate cache authorized a delta judgment")
+      -- Re-admitting the same name must reject atomically.
+      match psKernelC0ArchitectureAdmit 4096 admitted (.definition alias) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError "C0 architecture admitted duplicate declaration")
+  IO.println "C0_ARCHITECTURE atomic_declaration_and_cache_revision=pass"
   IO.println "C0_ARCHITECTURE validated_scratch_transaction=pass"
   IO.println "C0_ARCHITECTURE candidate_does_not_authorize_admission=pass"

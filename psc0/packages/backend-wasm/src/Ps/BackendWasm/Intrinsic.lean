@@ -1,5 +1,5 @@
 import Ps.BackendWasm.Array
-import Ps.BackendWasm.LowerInt
+import Ps.BackendWasm.Word
 import Ps.BackendWasm.Hash
 
 namespace PsWasm
@@ -56,6 +56,6 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
   return { parameters := signature.parameters, result := signature.resultType, instructions }
 
 def runtimeDefinitions : Except String (List RuntimeDefinition) := do
-  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime)
+  return (← naturalRuntime) ++ (← integerRuntime) ++ (← stringRuntime) ++ (← arrayRuntime) ++ (← hashRuntime) ++ (← wordRuntime)
 
 end PsWasm

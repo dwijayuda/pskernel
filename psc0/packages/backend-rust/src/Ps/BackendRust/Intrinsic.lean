@@ -1,33 +1,23 @@
 import Ps.BackendRust.Type
 
 def psRustEmitMachineIntegerBinary
-    (operation : PsVerifiedIrIntegerBinaryOp)
-    (left right : String) : String :=
+    (operation : PsVerifiedIrIntegerBinaryOp) (left right : String) : String :=
+  let method := fun name => "((" ++ left ++ ")." ++ name ++ "(" ++ right ++ "))"
   match operation with
-  | PsVerifiedIrIntegerBinaryOp.add =>
-      psRustConcat4
-        "(("
-        left
-        ").wrapping_add("
-        (psRustConcat2 right "))")
-  | PsVerifiedIrIntegerBinaryOp.sub =>
-      psRustConcat4
-        "(("
-        left
-        ").wrapping_sub("
-        (psRustConcat2 right "))")
-  | PsVerifiedIrIntegerBinaryOp.mul =>
-      psRustConcat4
-        "(("
-        left
-        ").wrapping_mul("
-        (psRustConcat2 right "))")
-  | PsVerifiedIrIntegerBinaryOp.bitAnd =>
-      psRustConcat4 "((" left ") & (" (psRustConcat2 right "))")
-  | PsVerifiedIrIntegerBinaryOp.bitOr =>
-      psRustConcat4 "((" left ") | (" (psRustConcat2 right "))")
-  | PsVerifiedIrIntegerBinaryOp.bitXor =>
-      psRustConcat4 "((" left ") ^ (" (psRustConcat2 right "))")
+  | .add => method "wrapping_add"
+  | .sub => method "wrapping_sub"
+  | .mul => method "wrapping_mul"
+  | .bitAnd => "((" ++ left ++ ") & (" ++ right ++ "))"
+  | .bitOr => "((" ++ left ++ ") | (" ++ right ++ "))"
+  | .bitXor => "((" ++ left ++ ") ^ (" ++ right ++ "))"
+  | .shiftLeft => "((" ++ left ++ ").wrapping_shl((" ++ right ++ ") as u32))"
+  | .shiftRight => "((" ++ left ++ ").wrapping_shr((" ++ right ++ ") as u32))"
+  | .div | .mod =>
+    let remainder := match operation with | .mod => true | _ => false
+    "{ let __ps_a = (" ++ left ++ "); let __ps_b = (" ++ right ++
+      "); if __ps_b == 0 { " ++ (if remainder then "__ps_a" else "0") ++
+      " } else { __ps_a." ++ (if remainder then "wrapping_rem" else "wrapping_div") ++
+      "(__ps_b) } }"
 
 def psRustEmitMachineIntegerCompare
     (operation : PsVerifiedIrIntegerCompareOp)

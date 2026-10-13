@@ -107,3 +107,44 @@ cannot modify the compiler's admitted environment. All candidates undergo
 fresh trust-zero kernel replay before source transport. No qualification or
 public availability of this operation closure is claimed until it is reviewed,
 integrated and checked across the existing target matrix.
+
+### Shared integer operation lowering
+
+The existing machine-integer operation family now carries division, remainder
+and shifts. Division/remainder guard zero; signed minimum / -1 wraps without
+trapping. Shift amounts reduce modulo the value width, including 8/16-bit
+values on a 32-bit Wasm stack. Operands evaluate once. Negation and complement
+reuse subtraction and xor with width-correct constants.
+
+Direct JS/TS and the legacy TS printer share one ECMAScript numeric expression
+plan. Rust uses wrapping operations and explicit zero guards. Wasm uses pure
+scalar helpers, with no memory allocation; its word descriptor continues to
+supply one mnemonic/opcode/signature to both WAT and binary output. Pinned
+`src/include/lean/lean.h` supplies runtime edge-case semantics. Additional
+signed helper coverage remains gated by the signed Standard/IR milestone.
+Opcodes were verified against the official
+[Wasm numeric instruction encoding](https://webassembly.github.io/spec/core/binary/instructions.html).
+Source exposure and all-target conformance await logical closure review.
+
+### Required logical recursion dependency
+
+Candidate run38466911457 passed all existing /60 qualification gates, then
+refused `Acc` at the authoring policy. The complete unsigned bound-proof
+closure uses function-valued recursive fields in this proposition. This is a
+missing logical iota mechanism, not a reason to replace the proof with an axiom.
+
+At the pinned Lean commit, `kernel/inductive.cpp` (`is_rec_argument`,
+`mk_rec_rules`) abstracts each recursive field's dependent function telescope,
+then recurses at its instantiated indices and applied field value.
+`Lean/Meta/WHNF.lean:reduceRec` applies the generated rule to parameters,
+motives, minors and fields. Relevant upstream tests include
+`tests/elab/casesOnAcc.lean` and `indPredRecursion.lean`.
+
+PSC0's single-family iota now constructs that telescope using capture-avoiding
+bound-variable lifting. Its existing recursive-field indices suffice; no new
+wire schema or stored rule language is needed. The exporter admits reflexive
+**propositions** only, still refusing nested/mutual families and computational
+reflexive datatypes. Every exported constructor iota rule is now compared
+symbolically with the actual pinned native rule after fresh kernel replay.
+This does not enable general source well-founded or higher-order recursive
+runtime compilation; those remain M3+B with their full acceptance criteria.

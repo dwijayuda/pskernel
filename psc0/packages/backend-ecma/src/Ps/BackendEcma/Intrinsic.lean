@@ -18,13 +18,32 @@ def machineNormalize (type : PsVerifiedIrMachineIntegerType) (value : Expr) : Ex
   | .int64 => pure (call "BigInt.asIntN" [num 64, value])
   | .usize | .isize => .error "PSCV0-ECMA: target word size required"
 def machineBinary (type : PsVerifiedIrMachineIntegerType) (op : PsVerifiedIrIntegerBinaryOp)
-    (a b : Expr) : Except String Expr :=
-  machineNormalize type (match op with
-    | .add => bin "+" a b | .sub => bin "-" a b
-    | .bitAnd => bin "&" a b | .bitOr => bin "|" a b | .bitXor => bin "^" a b
-    | .mul => match type with
-      | .uint64 | .int64 => bin "*" a b
-      | _ => call "Math.imul" [a, b])
+    (a b : Expr) : Except String Expr := do
+  let some width := psIrMachineIntegerFixedWidth type
+    | throw "PSCV0-ECMA: target word size required"
+  let wide := width == 64
+  let scalar := if wide then "bigint" else "number"
+  let zero := if wide then id "0n" else num 0
+  let shiftMask := if wide then id "63n" else num (width - 1)
+  let raw ← match op with
+    | .add => pure (bin "+" a b) | .sub => pure (bin "-" a b)
+    | .bitAnd => pure (bin "&" a b) | .bitOr => pure (bin "|" a b)
+    | .bitXor => pure (bin "^" a b)
+    | .mul => pure (if wide then bin "*" a b else call "Math.imul" [a, b])
+    | .shiftLeft => pure (bin "<<" a (bin "&" b shiftMask))
+    | .shiftRight => pure (bin
+        (if wide || psIrMachineIntegerIsSigned type then ">>" else ">>>")
+        a (bin "&" b shiftMask))
+    | .div | .mod =>
+      let remainder := match op with | .mod => true | _ => false
+      let lhs := id "__ps_a"
+      let rhs := id "__ps_b"
+      let arithmetic := bin (if remainder then "%" else "/") lhs rhs
+      let arithmetic := if wide || remainder then arithmetic else call "Math.trunc" [arithmetic]
+      pure (invoke [{ name := "__ps_a", type := scalar }, { name := "__ps_b", type := scalar }]
+        scalar [ret (.conditional (bin "===" rhs zero)
+          (if remainder then lhs else zero) arithmetic)] [a, b])
+  machineNormalize type raw
 
 def bigPair (a b : Expr) (body : Expr) : Expr :=
   invoke [{ name := "__ps_a", type := "bigint" }, { name := "__ps_b", type := "bigint" }]

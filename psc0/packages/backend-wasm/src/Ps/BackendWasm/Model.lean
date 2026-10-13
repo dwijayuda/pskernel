@@ -29,12 +29,18 @@ structure PsWasmLoweredType where
 -- their mnemonic, binary opcode and stack signature to all target consumers.
 inductive PsWasmWordOp where
   | i32Clz
+  | i32DivS
   | i32DivU
+  | i32RemS
   | i32RemU
   | i32Shl
+  | i32ShrS
+  | i64DivS
   | i64DivU
+  | i64RemS
   | i64RemU
   | i64Shl
+  | i64ShrS
   | i64ShrU
   | i32WrapI64
   | i64ExtendI32U
@@ -46,6 +52,12 @@ structure PsWasmWordInstruction where
   result : PsWasmValueType
 
 def psWasmWordInstruction : PsWasmWordOp → PsWasmWordInstruction
+  | .i64ShrS => { mnemonic := "i64.shr_s", opcode := 135, parameters := [.i64, .i64], result := .i64 }
+  | .i64RemS => { mnemonic := "i64.rem_s", opcode := 129, parameters := [.i64, .i64], result := .i64 }
+  | .i64DivS => { mnemonic := "i64.div_s", opcode := 127, parameters := [.i64, .i64], result := .i64 }
+  | .i32ShrS => { mnemonic := "i32.shr_s", opcode := 117, parameters := [.i32, .i32], result := .i32 }
+  | .i32RemS => { mnemonic := "i32.rem_s", opcode := 111, parameters := [.i32, .i32], result := .i32 }
+  | .i32DivS => { mnemonic := "i32.div_s", opcode := 109, parameters := [.i32, .i32], result := .i32 }
   | .i32Clz => { mnemonic := "i32.clz", opcode := 103, parameters := [.i32], result := .i32 }
   | .i32DivU => { mnemonic := "i32.div_u", opcode := 110, parameters := [.i32, .i32], result := .i32 }
   | .i32RemU => { mnemonic := "i32.rem_u", opcode := 112, parameters := [.i32, .i32], result := .i32 }

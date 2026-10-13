@@ -51,6 +51,13 @@ candidate, signed/platform words, Float/scientific/BitVec/selected library APIs,
 comprehensive manifest, broader M2 evidence and C5 semantic retention.
 Recursive/indexed/dependent deriving remains M3+B.
 
+Unsigned-operation candidate run38466911457 preserved all /60 gates, then
+refused Acc's reflexive proof field. The follow-up implements general single-family
+logical iota under recursive function telescopes and adds symbolic comparison of
+every exported recursor rule with pinned Lean. Machine division/remainder/shifts
+are prepared across backends; unsigned source methods await the checked asset.
+See the scalar completion design; none of this marks M2+A complete.
+
 ## Active request and execution contract
 
 Continue **remaining M2+A until completed**, then follow **M3+B → M4+C/D → M5/E**.

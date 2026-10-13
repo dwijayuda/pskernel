@@ -8,6 +8,13 @@ def psErasureUnsignedWidth (owner : PsName) : Option PsVerifiedIrMachineIntegerT
   | "UInt32" => some .uint32 | "UInt64" => some .uint64
   | _ => none
 
+def psErasureUnsignedBinary : String → Option PsVerifiedIrIntegerBinaryOp
+  | "add" => some .add | "sub" => some .sub | "mul" => some .mul
+  | "div" => some .div | "mod" => some .mod
+  | "land" => some .bitAnd | "lor" => some .bitOr | "xor" => some .bitXor
+  | "shiftLeft" => some .shiftLeft | "shiftRight" => some .shiftRight
+  | _ => none
+
 def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
   match name with
   | .str owner method =>
@@ -15,6 +22,9 @@ def psErasureUnsignedEntryArity (name : PsName) : Option Nat :=
       match method with
       | "ofNat" | "ofBitVec" | "toNat" | "toBitVec" | "toFin" => some 1
       | "ofNatLT" => some 2
+      | "neg" | "complement" => some 1
+      | "add" | "sub" | "mul" | "div" | "mod" | "land" | "lor" | "xor"
+      | "shiftLeft" | "shiftRight" => some 2
       | _ => none
     else if psNameToString owner == "BitVec" then
       match method with
@@ -57,7 +67,17 @@ def psEraseUnsignedApplication (scope : PsErasureScope)
     Except PsErasureError (Option PsVerifiedIrExpr) := do
   let .constE (.str owner method) _ := view.head | return none
   if let some width := psErasureUnsignedWidth owner then
+    if let some operation := psErasureUnsignedBinary method then
+      let [left, right] := view.args | throw .unsupportedApplication
+      return some (.intrinsic (.machineIntBinary width operation) [] [← erase left, ← erase right])
     match method, view.args with
+    | "neg", [value] =>
+      return some (.intrinsic (.machineIntBinary width .sub) []
+        [.literal (.machineInteger width 0), ← erase value])
+    | "complement", [value] =>
+      let some bits := psIrMachineIntegerFixedWidth width | throw .unsupportedRuntimeTerm
+      return some (.intrinsic (.machineIntBinary width .bitXor) []
+        [← erase value, .literal (.machineInteger width (Int.ofNat (2 ^ bits - 1)))])
     | "ofNat", [value] | "ofNatLT", [value, _] =>
       return some (.intrinsic (.unsignedOfNat width) [] [← erase value])
     | "ofBitVec", [value] =>

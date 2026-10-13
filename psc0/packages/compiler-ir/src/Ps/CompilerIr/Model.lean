@@ -41,6 +41,19 @@ inductive PsVerifiedIrMachineIntegerType where
   | int64
   | isize
 
+def psIrMachineIntegerFixedWidth : PsVerifiedIrMachineIntegerType → Option Nat
+  | .uint8 | .int8 => some 8
+  | .uint16 | .int16 => some 16
+  | .uint32 | .int32 => some 32
+  | .uint64 | .int64 => some 64
+  | .usize | .isize => none
+
+def psIrMachineIntegerIsSigned : PsVerifiedIrMachineIntegerType → Bool
+  | .int8 | .int16 | .int32 | .int64 | .isize => true
+  | _ => false
+
+-- Division truncates toward zero; /0 = 0 and %0 = the dividend.
+-- Shifts reduce their second operand modulo the value width.
 inductive PsVerifiedIrIntegerBinaryOp where
   | add
   | sub
@@ -48,6 +61,10 @@ inductive PsVerifiedIrIntegerBinaryOp where
   | bitAnd
   | bitOr
   | bitXor
+  | div
+  | mod
+  | shiftLeft
+  | shiftRight
 
 inductive PsVerifiedIrIntegerCompareOp where
   | eq

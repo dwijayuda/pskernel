@@ -46,8 +46,9 @@ private def exportExpr : Lean.Expr → Except String PsExpr
   | .mdata _ value => exportExpr value
   | .proj name index value => return .proj (exportName name) index (← exportExpr value)
 
--- Portable recursor metadata currently represents direct recursive fields.
--- Reject nested/reflexive families instead of silently inventing that metadata.
+-- Single-family recursor fields follow kernel/inductive.cpp is_rec_argument:
+-- peel a dependent Pi telescope, then require the family at its result head.
+-- Nested occurrences remain refused; official replay checks positivity.
 private def recursiveFields (family : Lean.Name) (parameters fields : Nat)
     (type : Lean.Expr) : Except String (List Nat) := do
   let rec skip : Nat → Lean.Expr → Except String Lean.Expr
@@ -58,9 +59,9 @@ private def recursiveFields (family : Lean.Name) (parameters fields : Nat)
     | 0, _, _ => pure []
     | n + 1, index, .forallE _ domain body _ => do
       let rest ← collect n (index + 1) body
-      if domain.getAppFn.isConstOf family then return index :: rest
+      if domain.getForallBody.getAppFn.isConstOf family then return index :: rest
       if domain.getUsedConstants.contains family then
-        throw "nested or reflexive recursive field is outside Standard asset policy"
+        throw "nested recursive field is outside Standard asset policy"
       return rest
     | _, _, _ => throw "constructor field telescope mismatch"
   collect fields 0 (← skip parameters type)
@@ -76,8 +77,12 @@ private def exportDeclaration (native : Lean.Environment) (info : Lean.ConstantI
   | .thmInfo value => return .theoremDecl name levels type (← exportExpr value.value)
   | .opaqueInfo value => return .opaqueDecl name levels type (← exportExpr value.value)
   | .inductInfo value =>
-    unless value.all == [value.name] && value.numNested == 0 && !value.isReflexive do
-      throw "mutual, nested or reflexive inductive is outside Standard asset policy"
+    let logical := match value.type.getForallBody with
+      | .sort .zero => true
+      | _ => false
+    unless value.all == [value.name] && value.numNested == 0 &&
+        (!value.isReflexive || logical) do
+      throw "mutual, nested or computational reflexive inductive is outside Standard asset policy"
     return .inductiveDecl {
       name, levelParams := levels, type, numParams := value.numParams,
       numIndices := value.numIndices, constructors := value.ctors.map exportName,
@@ -185,6 +190,52 @@ private def checkCandidate (declarations candidates : List PsDeclaration) : IO U
         throw (IO.userError ("regenerated metadata signature differs: " ++ toString name))
     | _ => pure ()
 
+-- Differentially compare each exported one-step iota rule against the actual
+-- pinned kernel-generated rule. Symbolic typed locals keep this independent of
+-- concrete examples and cover every recursive field telescope in the asset.
+private def checkRecursorRules (native : Lean.Environment)
+    (declarations candidates : List PsDeclaration) : IO Nat := do
+  let environment := declarations.foldl psEnvironmentInsert psEnvironmentEmpty
+  let mut count := 0
+  for declaration in candidates do
+    let .recursorDecl info := declaration | continue
+    let some (.recInfo original) := native.find? (PsKernelLean.toLeanName info.name)
+      | throw (IO.userError "missing native recursor rule reference")
+    for rule in original.rules do
+      let some constructor := psEnvironmentFindConstructor environment (exportName rule.ctor)
+        | throw (IO.userError "missing exported rule constructor")
+      let mut expected ← match exportExpr rule.rhs with
+        | .ok expr => pure expr
+        | .error error => throw (IO.userError error)
+      let prefix := info.numParams + info.numMotives + info.numMinors
+      let mut locals := psLocalEmpty
+      let mut arguments : List PsExpr := []
+      for _ in [:prefix + rule.nfields] do
+        let .lam name domain body binder := expected
+          | throw (IO.userError "native rule lambda telescope mismatch")
+        let pushed := psLocalPushBinding locals name domain binder
+        locals := pushed.context
+        let value := PsExpr.fvar pushed.id
+        arguments := arguments ++ [value]
+        expected := psExprInstantiate1 body value
+      let reduce := psWhnf environment psMetaEmpty locals
+      let ctorArguments := arguments.take info.numParams ++ arguments.drop prefix
+      let some resultType := psReduceApplyType reduce constructor.type ctorArguments
+        | throw (IO.userError "cannot instantiate exported constructor result")
+      let indices := (psReduceAppView resultType).args.drop info.numParams
+      unless indices.length == info.numIndices do
+        throw (IO.userError "exported recursor index count differs")
+      let major := psReduceApply
+        (.constE constructor.name (constructor.levelParams.map PsLevel.param)) ctorArguments
+      let redex := psReduceApply (.constE info.name (info.levelParams.map PsLevel.param))
+        (arguments.take prefix ++ indices ++ [major])
+      let some actual := psReduceIota reduce environment redex
+        | throw (IO.userError ("portable iota stuck: " ++ toString original.name))
+      unless psExprAlphaEq actual expected do
+        throw (IO.userError ("portable/native iota rule differs: " ++ toString rule.ctor))
+      count := count + 1
+  return count
+
 structure StandardExportSpec where
   roots : List Lean.Name
   boundary : List PsName
@@ -222,6 +273,7 @@ private def exportStandardCore (spec : StandardExportSpec)
     | .ok value => pure value
     | .error reason => throw (IO.userError (toString info.name ++ ": " ++ reason))
   checkCandidate (declarations ++ base) declarations
+  let recursorRules ← checkRecursorRules native (declarations ++ base) declarations
   let boundaryNames := (base.map psDeclarationName).mergeSort
     (fun a b => Lean.Name.lt (PsKernelLean.toLeanName a) (PsKernelLean.toLeanName b))
   let mut definitions := []
@@ -246,7 +298,8 @@ private def exportStandardCore (spec : StandardExportSpec)
     ("schema", Lean.toJson ("pscv0-standard-core-export/1" : String)),
     ("roots", Lean.toJson (spec.roots.map toString)), ("declarations", Lean.toJson declarations.length),
     ("sourceBytes", Lean.toJson source.utf8ByteSize),
-    ("kernelChecked", Lean.toJson true), ("leanCommit", Lean.toJson Lean.githash)]).compress
+    ("kernelChecked", Lean.toJson true), ("recursorRulesCompared", Lean.toJson recursorRules),
+    ("leanCommit", Lean.toJson Lean.githash)]).compress
   -- Review transport uses bounded, JSON-escaped lines; the file is also uploaded
   -- as an Actions artifact. This does not introduce a runtime wire format.
   let mut chunk := ""

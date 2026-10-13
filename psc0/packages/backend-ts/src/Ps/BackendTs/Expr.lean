@@ -1,5 +1,6 @@
 import Ps.BackendTs.Analysis
 import Ps.BackendEcma.Hash
+import Ps.BackendEcma.Intrinsic
 
 def psTsEmitTypeArguments (arguments : List PsVerifiedIrType) : Except PsTsEmitError String :=
   match psListMapExcept psTsEmitType arguments with
@@ -34,34 +35,17 @@ def psTsNormalizeMachineInteger
   | .isize =>
       Except.error PsTsEmitError.targetWordSizeRequired
 
-def psTsMachineIntegerBinaryRaw
-    (type : PsVerifiedIrMachineIntegerType)
-    (operation : PsVerifiedIrIntegerBinaryOp)
-    (left right : String) : String :=
-  match operation with
-  | .add => psTsJoin "" ["(", left, " + ", right, ")"]
-  | .sub => psTsJoin "" ["(", left, " - ", right, ")"]
-  | .mul =>
-      match type with
-      | .uint8 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .uint16 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .uint32 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .int8 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .int16 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | .int32 => psTsJoin "" ["Math.imul(", left, ", ", right, ")"]
-      | _ => psTsJoin "" ["(", left, " * ", right, ")"]
-  | .bitAnd => psTsJoin "" ["(", left, " & ", right, ")"]
-  | .bitOr => psTsJoin "" ["(", left, " | ", right, ")"]
-  | .bitXor => psTsJoin "" ["(", left, " ^ ", right, ")"]
-
+-- The legacy printer delegates machine arithmetic to the same ECMAScript
+-- expression plan as direct JS/TS; there is only one numeric semantics owner.
 def psTsEmitMachineIntegerBinary
     (type : PsVerifiedIrMachineIntegerType)
     (operation : PsVerifiedIrIntegerBinaryOp)
-    (left right : String) :
-    Except PsTsEmitError String :=
-  psTsNormalizeMachineInteger
-    type
-    (psTsMachineIntegerBinaryRaw type operation left right)
+    (left right : String) : Except PsTsEmitError String := do
+  let expression ← (PsEcma.machineBinary type operation (PsEcma.id left) (PsEcma.id right)).mapError
+    (fun _ => .targetWordSizeRequired)
+  let doc ← (PsEcma.exprDoc .typescript 4096 expression).mapError (fun _ => .intrinsicArity)
+  let rendered ← (psRenderDoc doc).mapError (fun _ => .intrinsicArity)
+  return rendered.text
 
 def psTsEmitMachineIntegerCompare
     (operation : PsVerifiedIrIntegerCompareOp)

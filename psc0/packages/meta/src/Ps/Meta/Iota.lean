@@ -49,8 +49,32 @@ def psReduceApplyType (reduce : PsExpr -> PsExpr) (type : PsExpr)
     let .forallE _ _ body _ := reduce type | none
     psReduceApplyType reduce (psExprInstantiate1 body value) rest
 
--- Metadata-driven iota for a single family and direct recursive fields.
--- Unsupported nested/mutual recursors remain stuck; reduction never guesses.
+-- Lean kernel/inductive.cpp mk_rec_rules: a recursive field may be a
+-- dependent function returning the family. Its induction hypothesis abstracts
+-- the same telescope and recurses at the field applied to those arguments.
+-- Bound variables are lifted when entering each lambda; no fresh free variable
+-- can escape the caller's checked context.
+def psReduceRecursorHypothesis (reduce : PsExpr → PsExpr) (fuel : Nat)
+    (family : PsName) (numParams numIndices : Nat)
+    (head : PsExpr) (fixedArgs : List PsExpr) (domain field : PsExpr) : Option PsExpr := do
+  match fuel with
+  | 0 => none
+  | fuel + 1 =>
+    match reduce domain with
+    | .forallE name parameter body binder =>
+      let lift := psExprLiftBVars 1 0
+      let hypothesis ← psReduceRecursorHypothesis reduce fuel family numParams numIndices
+        (lift head) (fixedArgs.map lift) body (.app (lift field) (.bvar 0))
+      return .lam name parameter hypothesis binder
+    | result =>
+      let fieldType := psReduceAppView result
+      let .constE owner _ := fieldType.head | none
+      if !psNameEq owner family || fieldType.args.length != numParams + numIndices then none
+      else return psReduceApply head
+        (fixedArgs ++ fieldType.args.drop numParams ++ [field])
+
+-- Metadata-driven iota for one family, including function-valued recursive
+-- fields. Unsupported nested/mutual recursors remain stuck; never guess.
 def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
     (expr : PsExpr) : Option PsExpr := do
   let view := psReduceAppView expr
@@ -75,11 +99,7 @@ def psReduceIota (reduce : PsExpr -> PsExpr) (environment : PsEnvironment)
           (psExprInstantiateLevelParams ctor.levelParams ctorLevels ctor.type)
           (constructor.args.take (ctor.numParams + index))
         let .forallE _ domain _ _ := reduce fieldCursor | none
-        let fieldType := psReduceAppView (reduce domain)
-        let .constE family _ := fieldType.head | none
-        if !psNameEq family ctor.inductiveName ||
-            fieldType.args.length != recursor.numParams + recursor.numIndices then none else
-          return psReduceApply view.head
-            (view.args.take (recursor.numParams + 1 + recursor.numMinors) ++
-              fieldType.args.drop recursor.numParams ++ [field])
+        psReduceRecursorHypothesis reduce 4096 ctor.inductiveName
+          recursor.numParams recursor.numIndices view.head
+          (view.args.take (recursor.numParams + 1 + recursor.numMinors)) domain field
       return psReduceApply minor (fields ++ hypotheses ++ view.args.drop (majorPosition + 1))

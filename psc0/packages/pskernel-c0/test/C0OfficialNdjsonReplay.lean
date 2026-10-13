@@ -717,8 +717,35 @@ def c0ExportOnlineOutcomes : IO Unit := do
   if c0ExportVerdictOnline withSuffix != .rejected then
     throw (IO.userError "C0 online replay lost first failure precedence")
 
+/-- The first actual pinned Init inductive verifies that derived
+    constructor/recursor metadata is not an independently trusted source.
+    Mutations must never be accepted or reclassified as kernel rejection. -/
+def c0ExportRejectForgedInductiveMetadata : IO Unit := do
+  let valid ← IO.FS.readFile "test/C0OfficialInitSubtypeAccept.ndjson"
+  if c0ExportVerdictOnline valid != .accepted then
+    throw (IO.userError "C0 could not replay real Init Subtype inductive")
+  let mutations : List (String × String) := [
+    ("constructor-field-count",
+      valid.replace "\"numFields\":2" "\"numFields\":3"),
+    ("recursor-field-count",
+      valid.replace "\"nfields\":2" "\"nfields\":3"),
+    ("recursor-rule-expression",
+      valid.replace "\"rhs\":45" "\"rhs\":44"),
+    ("nested-group-decline",
+      valid.replace "\"numNested\":0" "\"numNested\":1"),
+    ("type-name-manifest",
+      valid.replace "\"all\":[1]" "\"all\":[]")
+  ]
+  for (label, input) in mutations do
+    if input == valid then
+      throw (IO.userError ("ineffective inductive metadata mutation: " ++ label))
+    let verdict := c0ExportVerdictOnline input
+    if verdict == .accepted || verdict == .rejected then
+      throw (IO.userError s!"forged inductive metadata was treated as kernel verdict {label}: {repr verdict}")
+
 def main : IO Unit := do
   c0ExportRejectLossyImports
+  c0ExportRejectForgedInductiveMetadata
   c0ExportOnlineOutcomes
   let cases : List (String × Bool) := [
     ("C0OfficialAccept.ndjson", true),

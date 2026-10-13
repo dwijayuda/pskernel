@@ -1,5 +1,25 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
+## Current roadmap integration — readable outputs (13 October 2026)
+
+The [source, historical-branch and qualification audit](docs/PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) is now the
+current output plan. JS/TS/Rust/WAT/WIT are implemented for the qualified native
+subset; existing bounded Lean/PS printers and historical round trips are reusable,
+but full C5 reconstruction is not implemented. Do not rebuild existing emitters
+or merge unrelated historical backends.
+
+M1 is complete at the executable/run below. Next: M2 + remaining A, then M3 + B,
+M4 + C/D, and M5/E. Retain C5 source/binder/occurrence information alongside its
+M2–M4 semantic owners; complete C5 source publication and correspondence under
+M5/E after the required A–D language closure. This replaces the old blanket
+C5-after-all-A–E scheduling rule. No new milestone track is added.
+
+**Current code boundary:** the M2 waiter engine remains unimplemented; this
+output audit is documentation, not a new executable qualification. No C5 source
+emitter or source-authority migration was added. Native `.lean`, official checking,
+GitHub source operations and Linux CI remain authoritative. No pskernel-core
+or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.
+
 ## Current qualified state — M1 complete; M2 + A next (13 October 2026)
 
 This section is authoritative for current status. Older sections below are
@@ -25,8 +45,8 @@ final M5/E qualification. Collect E evidence and apply measured M5 improvements
 throughout. Next implement the shared instance-search architecture before
 expanding the Phase A handlers that rely on it. Preserve native portable Lean,
 official checking, GitHub source operations, Linux CI, branch/draft PR 109,
-Wasm GC internals and explicit ABI-only linear memory. No C5, pskernel-core
-or self-hosting.
+Wasm GC internals and explicit ABI-only linear memory. C5 is integrated as above; compiler-source migration,
+pskernel-core and self-hosting remain deferred.
 
 ## Prior qualified checkpoint — M1 coherence and measurements (13 October 2026)
 
@@ -96,12 +116,31 @@ No C5, self-hosting or pskernel-core.
 
 ## Active execution plan — accepted by the user
 
-Finish M1 first, then M2 with remaining A, M3 with B, M4 with C/D, and final
-M5/E qualification. Collect E evidence and apply measured M5 improvements
-throughout. M1 is fully qualified at c00e146b / Linux 38388627512.
-The next active work is M2 instance-search architecture with Phase A integration. Preserve branch and draft
-PR 109, native portable Lean, official checking, GitHub source operations and
-Linux CI. Wasm uses GC internally and linear memory only at explicit ABI boundaries.
+M1 is complete at c00e146b / Linux 38388627512. Continue M2 with remaining A,
+M3 with B, M4 with C/D, and final M5/E. Collect E evidence and measured M5
+improvements throughout. Preserve native Lean, official checking, GitHub-only
+source operations, Linux qualification, branch history and draft PR 109.
+
+M2's next coherent change is answer-tabled generator/consumer search replacing
+active-key cycle rejection. Preserve candidate/local priority, post-selection
+outParam reconciliation, context rollback, scope-safe checked answer replay and
+bounded resource accounting. Current closed-answer memoization and Pi evidence
+are qualified, but waiter tabling is not implemented. Study the pinned
+Lean/Meta/SynthInstance.lean reference and whole affected elaboration subsystem
+before changing search. Generalized answers/universes and delayed expected-type
+constraints remain full M2 obligations; a closed-answer graph alone is not M2.
+
+As M2/A develops, retain the exact binder groups, resolved references, default/
+implicit decisions and source occurrence relations needed by C5. Extend the
+existing syntax/provenance owner, not kernel expression identity. Match/data
+retention follows M3/B; effects/spec/proof retention follows M4/C-D. M5 finishes
+readable PS/Lean reconstruction with E correspondence after those semantics exist.
+Existing JS/TS/Rust/WAT/WIT grow through their current checked plans.
+
+See [output audit and milestone placement](docs/PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md). The historical
+five-source closure is confirmed green at 0e8996d2 / Linux 38134451122, but remains
+bounded prior source-product evidence. Do not run that self-host pipeline or
+promote its source manifest in the current native loop.
 
 ## Prior qualified checkpoint — M1 List/Fin indexing (13 October 2026)
 

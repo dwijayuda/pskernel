@@ -1,5 +1,12 @@
 # PSCV0 — Native Compiler Architecture Redesign v1
 
+**Readable-output integration (13 October 2026):** [audit and dependency plan](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
+Preserve qualified JS/TS/Rust/WAT/WIT. Build C5 source retention with M2–M4's
+semantic owners and finish selected PS/Lean reconstruction under M5/E after
+required A–D closure. C5 branches from retained checked information before
+erasure. Backend performance D belongs to M5. No new milestone sequence,
+compiler-source migration, self-hosting or pskernel-core work is introduced.
+
 **Current qualification (13 October 2026):** M1 is complete for its declared
 selected scope at `c00e146bd5c97788a4a6a39221849973aeafda84`,
 [Linux 38388627512](https://github.com/dwijayuda/pskernel/actions/runs/38388627512).
@@ -177,19 +184,19 @@ Faithfully implement `GetElem?` *extending* `GetElem`, dependent valid propositi
 
 ### M2 — Elaborator architecture
 
-Replace depth-first recomputation with normalized, answer-tabled instance resolution and suspended dependencies. Integrate expected-type constraints, universe metavariables, default argument priority and local/ordered instance registries; retain deterministic budgets and rollback. Implement against pinned source oracle with differential cases and measured worst-case complexity, not merely green happy paths.
+Replace depth-first recomputation with normalized, answer-tabled instance resolution and suspended dependencies. Integrate expected-type constraints, universe metavariables, default argument priority and local/ordered instance registries; retain deterministic budgets and rollback. Implement against pinned source oracle with differential cases and measured worst-case complexity, not merely green happy paths. Retain ordered binder groups, resolved references, default/implicit decisions and occurrence provenance at these owners for C5; metadata must not change Core identity.
 
 ### M3 — Dependent data and recursion
 
-Normalize data/recursor declarations and their runtime masks; generalize positivity/elimination plans, mutual SCC, nested uniform parameters, WF termination obligations, recursion erasure and proof irrelevance. Fail closed on unrepresentable recursion.
+Normalize data/recursor declarations and their runtime masks; generalize positivity/elimination plans, mutual SCC, nested uniform parameters, WF termination obligations, recursion erasure and proof irrelevance. Fail closed on unrepresentable recursion. Retain source-to-generated motives, equation/recursor associations and totality evidence for C5 rather than recovering them from erased IR.
 
 ### M4 — Class-driven effects, specifications, verification factory
 
-One monad/effect dictionary elaborator; `State`, `Reader`, `Except` and selected transformers; effect/capability provenance and indexed `do`. Produce `given`/`requires`/`ensures` and VC proof constraints using the pinned `Std.WP` where suitable. Build a full proof/spec/effect/assumption/erasure ledger; *verified* emission gated on every mandatory obligation.
+One monad/effect dictionary elaborator; `State`, `Reader`, `Except` and selected transformers; effect/capability provenance and indexed `do`. Produce `given`/`requires`/`ensures` and VC proof constraints using the pinned `Std.WP` where suitable. Build a full proof/spec/effect/assumption/erasure ledger; *verified* emission gated on every mandatory obligation. Preserve typed source control/specification/proof provenance for all output projections.
 
 ### M5 — Lean-grade compilation and tooling
 
-Incremental dependency graph with stable hash keys including frozen syntax/instance/environment state; typed ANF/LCNF-inspired phases and validations; selective specialization and closure layout; documented cost models and benchmarks for compiler+runtime. Use Lean's proven `@[csimp]` pattern conceptually for direct checked `List.take/drop` worker parity, without assuming a target-level optimization is proof. Full Phase A–E conformance and independent differential/negative/cross-backend evidence required before any claim of equivalence.
+Incremental dependency graph with stable hash keys including frozen syntax/instance/environment state; typed ANF/LCNF-inspired phases and validations; selective specialization and closure layout; documented cost models and benchmarks for compiler+runtime. Use Lean's proven `@[csimp]` pattern conceptually for direct checked `List.take/drop` worker parity, without assuming a target-level optimization is proof. Complete C5 readable Lean/PS publication and checked correspondence after the required A–D semantics are available, using retention built during M2–M4. Finish shared naming/layout/origin precision alongside measured code improvements. Full Phase A–E conformance and independent differential/negative/cross-backend/source-correspondence evidence are required before any claim of equivalence.
 
 ## 5. Research/conformance registry for M0
 

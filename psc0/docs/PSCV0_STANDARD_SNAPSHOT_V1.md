@@ -1,5 +1,25 @@
 # PSCV0 Native Standard Environment Snapshot v1
 
+## Current roadmap integration — readable outputs (13 October 2026)
+
+The [source, historical-branch and qualification audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) is now the
+current output plan. JS/TS/Rust/WAT/WIT are implemented for the qualified native
+subset; existing bounded Lean/PS printers and historical round trips are reusable,
+but full C5 reconstruction is not implemented. Do not rebuild existing emitters
+or merge unrelated historical backends.
+
+M1 is complete at the executable/run below. Next: M2 + remaining A, then M3 + B,
+M4 + C/D, and M5/E. Retain C5 source/binder/occurrence information alongside its
+M2–M4 semantic owners; complete C5 source publication and correspondence under
+M5/E after the required A–D language closure. This replaces the old blanket
+C5-after-all-A–E scheduling rule. No new milestone track is added.
+
+**Current code boundary:** the M2 waiter engine remains unimplemented; this
+output audit is documentation, not a new executable qualification. No C5 source
+emitter or source-authority migration was added. Native `.lean`, official checking,
+GitHub source operations and Linux CI remain authoritative. No pskernel-core
+or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.
+
 ## Current qualified state — M1 complete; M2 + A next (13 October 2026)
 
 This section is authoritative for current status. Older sections below are
@@ -25,8 +45,8 @@ final M5/E qualification. Collect E evidence and apply measured M5 improvements
 throughout. Next implement the shared instance-search architecture before
 expanding the Phase A handlers that rely on it. Preserve native portable Lean,
 official checking, GitHub source operations, Linux CI, branch/draft PR 109,
-Wasm GC internals and explicit ABI-only linear memory. No C5, pskernel-core
-or self-hosting.
+Wasm GC internals and explicit ABI-only linear memory. C5 is integrated as above; compiler-source migration,
+pskernel-core and self-hosting remain deferred.
 
 ## Prior qualified checkpoint — M1 coherence and measurements (13 October 2026)
 

@@ -1,5 +1,11 @@
 # PSCV0 v7: directJS, WIT/WAT/Wasm, and readable output
 
+Current implementation audit, 13 October 2026: C0–C4b are qualified for the
+selected native runtime; directWasm is implemented, despite proposal-era wording
+below. C5 has bounded historical printer assets but full native reconstruction
+is missing. [Current audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) integrates retention into M2–M4 and final
+C5 correspondence into M5/E; no replacement backend sequence is introduced.
+
 Architecture proposal, revision 2 · 12 October 2026 · Research baseline: native profile 31; C0–C4b implementation update: profile 35 (see §16 and PSCV0_NATIVE_CODEGEN.md)
 
 ## 1. Decision and completed milestone

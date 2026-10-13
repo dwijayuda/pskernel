@@ -1,5 +1,11 @@
 # Native direct Wasm implementation
 
+Current status, 13 October 2026: the selected GC core and synchronous component
+profiles are requalified at c00e146b / Linux 38388627512 with 250 observations,
+four-module execution and existing WIT/WAT/binary/ABI gates. The original
+profile-35 / 142-observation receipt below remains historical.
+[Output audit and integrated remaining work](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
+
 C4 and C4b implement current-runtime core parity and the synchronous pure
 component profile described here. Native profile 35 remains authored and
 executed in portable .lean and checked by official Lean 4.35.0-rc4. Exact source

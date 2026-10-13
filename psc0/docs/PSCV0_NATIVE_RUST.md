@@ -1,5 +1,10 @@
 # Native Rust backend
 
+Current status, 13 October 2026: the selected native Rust backend is requalified
+at c00e146b / Linux 38388627512, including 250 observations and three-module
+linking. Source origins and current shared plans supersede the early status
+paragraphs below. [Output audit and integrated remaining work](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md).
+
 Rust is a peer of TS behind official Lean admission, typed erasure and the
 complete shared IR checker. Compiler authoring and execution remain native Lean.
 The pure single-module profile has no pskernel-core or self-host dependency.

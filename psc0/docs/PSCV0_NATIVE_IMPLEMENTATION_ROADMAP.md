@@ -1,5 +1,25 @@
 # PSCV0 v7 native implementation roadmap
 
+## Current roadmap integration — readable outputs (13 October 2026)
+
+The [source, historical-branch and qualification audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) is now the
+current output plan. JS/TS/Rust/WAT/WIT are implemented for the qualified native
+subset; existing bounded Lean/PS printers and historical round trips are reusable,
+but full C5 reconstruction is not implemented. Do not rebuild existing emitters
+or merge unrelated historical backends.
+
+M1 is complete at the executable/run below. Next: M2 + remaining A, then M3 + B,
+M4 + C/D, and M5/E. Retain C5 source/binder/occurrence information alongside its
+M2–M4 semantic owners; complete C5 source publication and correspondence under
+M5/E after the required A–D language closure. This replaces the old blanket
+C5-after-all-A–E scheduling rule. No new milestone track is added.
+
+**Current code boundary:** the M2 waiter engine remains unimplemented; this
+output audit is documentation, not a new executable qualification. No C5 source
+emitter or source-authority migration was added. Native `.lean`, official checking,
+GitHub source operations and Linux CI remain authoritative. No pskernel-core
+or self-hosting; Wasm GC internally and linear memory only at explicit ABI boundaries.
+
 ## Current qualified state — M1 complete; M2 + A next (13 October 2026)
 
 This section is authoritative for current status. Older sections below are
@@ -25,8 +45,8 @@ final M5/E qualification. Collect E evidence and apply measured M5 improvements
 throughout. Next implement the shared instance-search architecture before
 expanding the Phase A handlers that rely on it. Preserve native portable Lean,
 official checking, GitHub source operations, Linux CI, branch/draft PR 109,
-Wasm GC internals and explicit ABI-only linear memory. No C5, pskernel-core
-or self-hosting.
+Wasm GC internals and explicit ABI-only linear memory. C5 is integrated as above; compiler-source migration,
+pskernel-core and self-hosting remain deferred.
 
 ## Prior qualified checkpoint — M1 coherence and measurements (13 October 2026)
 
@@ -268,33 +288,22 @@ Phases B–E and C5 remain as documented below.
 
 ## Current priority: core and essential language conformance first
 
-User-directed priority override, 12 October 2026: **do not begin C5** until
-the essential language/compiler semantics are implemented and qualified.
-Keep native portable .lean authoritative; pskernel-core and self-hosting are
-out of scope. Preserve previously qualified JS/TS/Rust and Wasm GC contracts.
+Keep native portable .lean authoritative and preserve the qualified runtime
+targets. M1 is complete at c00e146b / Linux 38388627512; the current matrix has
+250 shared observations. M2 with remaining A is next, followed by M3/B, M4/C-D
+and final M5/E. Full v7 remains incomplete.
 
-The dependency path is: (1) pinned Standard/notation/typeclass environment and
-remaining source forms, (2) module graph, public/private visibility and reusable
-libraries, (3) dependent data and mutual/well-founded recursion with termination
-obligations, (4) generic typed do/effects and structured state/control, and
-(5) proof-producing tactics, rewriting, specs/VCs and an assurance ledger.
-The next stage is chosen by architectural dependencies rather than counting
-green tests. C5 reconstruction and compiler-source migration follow only when
-the selected language surface is sufficient.
+The 12 October priority to finish semantics before full C5 publication remains
+the guiding dependency. The 13 October integration refines it: retain source
+information during M2–M4, then finish C5 under M5/E once required A–D semantics
+exist. Compiler-source migration and self-hosting remain separate.
 
-Selected language profiles 36–48, module foundation and M0 erasure redesign are recorded
-in AI_WORK_STATE.md. Latest qualified executable source:
-`f8900407eaaa921097e6cd49d58551ca6558ed96`, [Linux run 38315275940](https://github.com/dwijayuda/pskernel/actions/runs/38315275940).
-The current shared matrix contains 198 runtime observations per target, including five original proof-indexed dictionary computations and two selected optional/bang observations. This does
-not constitute full v7 conformance or full RC4 module fidelity. Source
-preparation, official admission checking, provenance, erasure and target
-execution remain independent assurance boundaries.
-
-
-The canonical language target is PSCV0_LANGUAGE_REFERENCE.md at its recorded v7
-digest, with Lean 4.35.0-rc4 semantics. This is an implementation dependency map,
-not a conformance claim. Exact qualified sources/runs are in AI_WORK_STATE.md.
-Historical generated-source milestones do not certify the current native source.
+The canonical target is PSCV0_LANGUAGE_REFERENCE.md at its recorded v7 digest,
+with Lean 4.35.0-rc4 semantics. Source preparation, official admission,
+provenance, erasure, target execution and source correspondence are separate
+assurance boundaries. Historical generated-source receipts do not certify the
+current native source. Exact current evidence is recorded at the top of
+AI_WORK_STATE.md and in the M1 completion and readable-output audits.
 
 ## Complete Phase A–E language-first execution plan (authoritative overview)
 
@@ -306,7 +315,7 @@ This is the full dependency plan for **core/essential `pscv0` v7**, not five ind
 | **B** | Dependent and mutual data, elimination, strict positivity and total recursive programming | **Planned.** Complete heterogeneous index reasoning, dependent motives, nested/mutual inductives, recursive pattern matrices and well-founded/structural termination; refuse invalid/partial constructs |
 | **C** | General class-driven typed do, state, effectful control and explicit IO/FFI boundaries | **Planned.** Complete Monad/Except/State/Reader and selected transformers, mutable/erased state, loops/early returns, try/catch/finally, effect/capability evidence and all-target preservation |
 | **D** | Kernel-checked tactics, intrinsic specifications, VC generation and assurance ledger | **Planned.** Complete selected rewrite/simp/automation, RC4 given/requires/ensures/assert/invariant/decreasing, WP/VC proof attachment, and verified-emission block on *any* unresolved mandatory obligation |
-| **E** | Comprehensive conformance, independent evidence and final core/essential v7 integration | **Planned.** Reference-to-`PS-CONF-*` matrix, differential RC4 checking, reproducible cryptographic Standard+assumption closure, multi-module runtime matrix and audited verified acceptance gates |
+| **E** | Comprehensive conformance, independent evidence and final core/essential v7 integration | **Collected throughout; final gate open.** Reference-to-`PS-CONF-*` matrix, differential RC4 checking, cryptographic Standard/assumption closure, existing cross-target matrix, C5 source correspondence and audited verified acceptance gates. |
 
 ### Phase A detailed exit gate
 
@@ -331,9 +340,24 @@ Proof-producing tactics and rewriting/selected simp/omega/grind require pinned p
 
 Close a source-rule → positive/negative case → exact failure phase → Lean RC4 elaborated-term/semantic correspondence → verified IR/backend matrix. Independently validate assumption/primitive/erasure safety, crypto-pinned environment closure, multi-module linking and public APIs, JS/TS/Rust/Wasm GC/Wasmtime parity, and reproducible CI with fully recorded SHA, version/digest and evidence. Only then say core/essential v7 is complete. A green bounded profile is insufficient.
 
-### Separate deferred workstreams: C5, backend D and later migration
+### Readable outputs within M2–M5, and deferred source migration
 
-**C5** readable pre-erasure source reconstruction, round-trip formatting and finer source maps happens **after** the A–E essential language closure. Existing backend **D** means *measured performance and ownership work*, not language Phase D. Compiler-source `.ps` migration, bootstrap/self-hosting, `pskernel-core` and wider P2 ecosystem are **not in this authorization**. Keep original protected branches/history, draft PR #109, Wasm GC internals and Canonical ABI-only linear memory.
+C0–C4b are delivered runtime/output foundations, not milestones to repeat.
+[The current audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md) places C5 information retention in M2/A,
+M3/B and M4/C-D, with full selected Lean/PS reconstruction and correspondence
+completed under M5/E after required A–D semantics exist. This supersedes the
+earlier blanket C5-after-all-A–E rule. Existing JS/TS/Rust/WAT/WIT are extended
+through the same plans as features become available.
+
+Existing backend **D** means measured performance/ownership work and is part
+of **M5**; it is distinct from language Phase D proof/specification features.
+Collect evidence throughout rather than waiting for a final integration pass.
+Fine-grained Wasm debugger maps and optional TS/declaration maps remain explicit
+capabilities, not hidden additions to the existing artifact acceptance gate.
+
+Compiler-source `.ps` migration, bootstrap/self-hosting, `pskernel-core` and a
+Rust-only source dialect remain deferred. Preserve branch history, draft PR 109,
+Wasm GC internals and Canonical ABI-only linear memory.
 
 
 ## End state and current development contract
@@ -354,15 +378,15 @@ this development loop.
 
 | Capability family | Existing implementation/evidence | Remaining mechanisms |
 |---|---|---|
-| Source categories and scopes | Native scoped terms/calls/binders, raw strings, grouped/radix literals, checked `s!` interpolation, selected proof/section grammar | Float/Float32/scientific tokens, exact GetElem and deriving syntax, remaining modifiers and source diagnostics |
-| Type inference and environment | Scoped unification/levels/typeclasses, checked arithmetic/BEq/ToString/Inhabited with polymorphic Prod, List and Option dictionaries, Standard signature/body/instance audit, official Lean RC4 checker | Exact GetElem proof-index classes, remaining deriving handlers, floating/scalar/coercion semantics, full universe/search and pinned manifest/digest |
+| Source categories and scopes | Native scoped terms/calls/binders, raw strings, grouped/radix literals, checked `s!` interpolation, selected proof/section grammar | Float/Float32/scientific tokens, remaining deriving handlers/modifiers and finer source diagnostics |
+| Type inference and environment | Scoped unification/levels/typeclasses, checked arithmetic/BEq/ToString/Inhabited with polymorphic Prod, List and Option dictionaries, Standard signature/body/instance audit, official Lean RC4 checker | Remaining deriving handlers, floating/scalar/coercion semantics, full elaboration/search and comprehensive module/notation/effect/assumption manifest |
 | Data and elimination | Structures, uniform indexed families, recursor-driven motives, dependent context reversion, homogeneous index constraints and impossible cases, nested/multiple typed pattern matrices and nomatch, proof-field storage erasure | Named discriminants, heterogeneous constraints, Type/existential fields, selected nested/mutual data |
 | Recursion and runtime closure | Direct indexed recursion, changing-state workers; captured/nested recursor lifting qualified with typed traversal | Recursive pattern matrices, well-founded and mutual source recursion, complete runtime field profiles |
 | Modules and libraries | Reachable import closure, private hygiene, selected re-exports/body opacity, JS/TS/Rust 3-file executable and V8/Wasmtime GC four-module execution, provenance and entry API | Complete RC4 generated public signature, collision/instance precedence and import ordering semantics |
 | Proofs and contracts | Term proofs and typed goal state, exact/refine/apply/intro/assumption/rfl/constructor, focus/bullets/all_goals/any_goals, cases/induction/case/next checked by official Lean | Complete logical primitives, further goal control/elimination/rewriting, selected automation, VC/effect/spec generation and assumption closure |
 | Control and effects | Checked Bool/Prop/if-let/match and selected Id/Option/Except typed do, checked Type-0 Except.bind/map/mapError/tryCatch/isOk/toOption and real cross-target error/recovery observations | General effect classes, mutable/early-return/loops, generalized do try/catch/finally and effect/fidelity laws |
 | Executable assurance | Checked prepared graph, complete shared IR gate, native primitive signature/model audit, direct JS/TS/Rust integration with the same observations | Complete v7 assurance/axiom/effect ledger, specified runtime/library fidelity and final release criteria |
-| Portable source end state | Native portable authoring/import guard | Translate sufficient implemented closure to readable .ps, then explicit source/semantic/fixed-point qualification |
+| Readable source and later source authority | Qualified readable runtime targets; bounded historical Lean/PS printers and round trips; native portable authoring/import guard | C5 retention in M2–M4 and source reconstruction/correspondence in M5/E. Compiler-source migration and fixed-point qualification remain separate later work. |
 
 ## Dependency-driven sequence
 
@@ -399,10 +423,10 @@ native primitive signature/model audit, shared structured ECMAScript lowering
 and direct JS/declarations/source maps. See PSCV0_NATIVE_CODEGEN.md. Source maps
 currently resolve to the owning declaration; token-level origins are not claimed.
 
-The qualified integration profile is 35; exact source/run evidence is in
-AI_WORK_STATE.md. One ECMAScript Program supplies JS and TS output, and direct
-JS emission needs no TypeScript compiler. The same 142 observations now run
-on JS, TS, Rust, Node/V8 Wasm core, and Wasmtime core/components.
+The original C4/C4b integration profile was 35 with 142 observations; the current
+profile is 48 with 250 observations at c00e146b / Linux 38388627512. One
+ECMAScript Program supplies JS and TS output, and direct JS emission needs no
+TypeScript compiler. Current qualification includes all existing runtime targets.
 
 C3, C4 and C4b are qualified for the current checked runtime and synchronous
 pure public profile. GC data/closures, generic conventions and current

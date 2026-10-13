@@ -1,5 +1,11 @@
 # Native runtime emission: C0–C3 and GC runtime foundations
 
+Current status, 13 October 2026: C0–C4b runtime/output foundations are qualified
+at c00e146b / Linux 38388627512 with 250 shared observations. The current primitive
+audit is schema /2 and includes checked logical models with runtime overrides;
+the original counts below are historical. [Current seven-format audit](PSCV0_READABLE_OUTPUT_AUDIT_2026-10-13.md)
+distinguishes complete bounded outputs from remaining C5 and map precision work.
+
 The native Lean host retains one immutable prepared graph through official
 Lean kernel admission, typed erasure and the complete shared IR checker.
 Only then does it plan requested targets. Reports and raw lowering APIs do

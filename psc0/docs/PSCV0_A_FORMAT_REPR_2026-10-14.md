@@ -253,3 +253,11 @@ independent Lean oracle and every runtime target. Diagnostics distinguish
 instance failure and resource exhaustion instead of reporting a generic failure.
 Three additional existing-batch observations cover positive/negative decision
 representations and direct public numeric representation. Qualification pending.
+
+Reviewed stable public-method extension, Linux 38449538089: the native build,
+independent oracle and signature/reducibility audit passed. The strict digest
+guard intentionally refused the seven added declarations (five shared public
+methods plus Decidable method/instance), one added instance and changed printer
+references. New FNV fnv1a64:2066895107454337978; SHA-256
+sha256:94a92697fa582ab59fd6b0e466a4dd68b8386f2503af16d703d5603f7b07644b.
+Both guards remain strict. Runtime qualification still pending.

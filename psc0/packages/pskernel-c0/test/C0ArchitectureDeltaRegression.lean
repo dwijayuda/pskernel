@@ -58,6 +58,48 @@ def main : IO Unit := do
     (.app lam argument) sort
   c0DeltaCheck "delta-under-zeta" session
     (.letE x ty (.const second []) (.bvar 0) false) sort
+  -- A delta body must instantiate the declaration's universe parameters
+  -- using the actual constant occurrence, not a cached default level.
+  let universe := c0DeltaName "u"
+  let polymorphic := c0DeltaName "C0PolymorphicAlias"
+  let poly : PsKernelDefinitionInfo := {
+    base := {
+      name := polymorphic
+      levelParams := [universe]
+      type := .sort (.succ (.param universe))
+    }
+    value := .sort (.param universe)
+    hints := .abbrevHint
+    safety := .safe
+  }
+  let polyEnv ← match psKernelAddDefinition 4096 env2 poly
+      4096 psKernelLeanNatMaxSizeDefault with
+    | .ok env => pure env
+    | .error err =>
+        throw (IO.userError ("polymorphic setup rejected: " ++ err))
+  let polySession := psKernelMkCheckerSession polyEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  c0DeltaCheck "universe-level-zero" polySession
+    (.const polymorphic [.zero]) (.sort .zero)
+  c0DeltaCheck "universe-level-one" polySession
+    (.const polymorphic [.succ .zero]) (.sort (.succ .zero))
+  -- An unsafe declaration can be syntactically represented in an
+  -- untrusted test fixture but must never authorize candidate delta.
+  let unsafeName := c0DeltaName "C0UnsafeAlias"
+  let unsafeDefinition : PsKernelDefinitionInfo := {
+    base := { name := unsafeName, levelParams := [], type := type }
+    value := sort
+    hints := .abbrevHint
+    safety := .unsafeDef
+  }
+  let unsafeEnv := psKernelEnvironmentAddUnchecked polyEnv
+    (.defnInfo unsafeDefinition)
+  let unsafeSession := psKernelMkCheckerSession unsafeEnv []
+    .safe 4096 psKernelLeanNatMaxSizeDefault
+  match psKernelC0ArchitectureCandidateDelta 100 unsafeSession.context
+      (.const unsafeName []) with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "C0 candidate unfolded unsafe declaration")
   let opaqueName := c0DeltaName "C0DeltaOpaque"
   let info : PsKernelOpaqueInfo := {
     base := { name := opaqueName, levelParams := [], type := type }

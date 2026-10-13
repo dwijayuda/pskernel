@@ -34,12 +34,13 @@ def psIrCheckPrimitiveName (type : PsVerifiedIrPrimitiveType) : String :=
   | .string => "string"
   | .unit => "unit"
 
--- Optional scalar capabilities are outside the current active runtime contract.
+-- Target-sized and signed/floating capabilities need separate qualification.
 def psIrCheckPrimitive (type : PsVerifiedIrPrimitiveType) :
     Except PsIrCheckIssue Unit :=
   match type with
   | .nat => Except.ok Unit.unit
   | .int => Except.ok Unit.unit
+  | .uint8 | .uint16 | .uint32 | .uint64 => Except.ok Unit.unit
   | .bool => Except.ok Unit.unit
   | .char => Except.ok Unit.unit
   | .string => Except.ok Unit.unit
@@ -401,6 +402,17 @@ def psIrCheckSubstitute
     (List.cons (PsIrCheckSubstitutionTask.type type) List.nil)
     List.nil
 
+-- Fixed-width unsigned values have the same semantics on every target.
+-- The descriptor refuses target-sized/signed conversions rather than guessing.
+def psIrUnsignedType (type : PsVerifiedIrMachineIntegerType) :
+    Except PsIrCheckIssue PsVerifiedIrType :=
+  match type with
+  | .uint8 => .ok (.primitive .uint8)
+  | .uint16 => .ok (.primitive .uint16)
+  | .uint32 => .ok (.primitive .uint32)
+  | .uint64 => .ok (.primitive .uint64)
+  | _ => .error (psIrCheckIssue "scalar-capability-unqualified" "unsigned-width")
+
 def psIrCheckLiteralType
     (literal : PsVerifiedIrLiteral) :
     Except PsIrCheckIssue PsVerifiedIrType :=
@@ -409,9 +421,13 @@ def psIrCheckLiteralType
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat)
   | .integer _ =>
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.int)
-  | .machineInteger _ _ =>
-      Except.error
-        (psIrCheckIssue "scalar-capability-unqualified" "machine-integer-literal")
+  | .machineInteger type value => do
+      let result ← psIrUnsignedType type
+      let bits := match type with
+        | .uint8 => 8 | .uint16 => 16 | .uint32 => 32 | .uint64 => 64 | _ => 0
+      if value < 0 || value ≥ Int.ofNat (2 ^ bits) then
+        throw (psIrCheckIssue "machine-integer-literal-range" "unsigned-canonical")
+      return result
   | .string _ =>
       Except.ok (PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string)
   | .bool _ =>
@@ -476,12 +492,16 @@ def psIrCheckIntrinsicSignature
   let char := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.char;
   let string := PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.string;
   match operation with
-  | .machineIntBinary _ _ =>
-      Except.error
-        (psIrCheckIssue "scalar-capability-unqualified" "machine-integer-operation")
-  | .machineIntCompare _ _ =>
-      Except.error
-        (psIrCheckIssue "scalar-capability-unqualified" "machine-integer-operation")
+  | .unsignedOfNat type => do
+      psIrCheckSignatureNoTypes typeArguments [nat] (← psIrUnsignedType type)
+  | .unsignedToNat type => do
+      psIrCheckSignatureNoTypes typeArguments [← psIrUnsignedType type] nat
+  | .machineIntBinary type _ => do
+      let value ← psIrUnsignedType type
+      psIrCheckSignatureNoTypes typeArguments [value, value] value
+  | .machineIntCompare type _ => do
+      let value ← psIrUnsignedType type
+      psIrCheckSignatureNoTypes typeArguments [value, value] bool
   | .floatBinary _ _ =>
       Except.error (psIrCheckIssue "scalar-capability-unqualified" "floating-operation")
   | .floatCompare _ _ =>
@@ -489,6 +509,7 @@ def psIrCheckIntrinsicSignature
   | .natAdd => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natSub => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMul => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
+  | .natPow => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natDiv => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natMod => psIrCheckSignatureNoTypes typeArguments [nat, nat] nat
   | .natEq => psIrCheckSignatureNoTypes typeArguments [nat, nat] bool

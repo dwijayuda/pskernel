@@ -5,6 +5,7 @@ def psReduceNatBinary (name : PsName) : Option (Nat → Nat → PsExpr) :=
   if psNameEq name psNatAddName then some (fun a b => .lit (.natural (a + b)))
   else if psNameEq name psNatSubName then some (fun a b => .lit (.natural (a - b)))
   else if psNameEq name psNatMulName then some (fun a b => .lit (.natural (a * b)))
+  else if psNameEq name (psNameAppendStr psNatName "pow") then some (fun a b => .lit (.natural (a ^ b)))
   else if psNameEq name psNatDivName then some (fun a b => .lit (.natural (a / b)))
   else if psNameEq name psNatModName then some (fun a b => .lit (.natural (a % b)))
   else if psNameEq name psNatBeqName then

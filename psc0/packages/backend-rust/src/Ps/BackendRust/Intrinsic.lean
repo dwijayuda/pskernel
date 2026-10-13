@@ -173,6 +173,19 @@ def psRustEmitIntrinsicFromPrinted
     (arguments : List String) :
     Except PsRustEmitError String :=
   match operation with
+  | .unsignedOfNat type =>
+      match arguments with
+      | [value] =>
+        let suffix := match type with
+          | .uint8 => "u8" | .uint16 => "u16" | .uint32 => "u32" | .uint64 => "u64"
+          | _ => ""
+        if suffix.isEmpty then .error .intrinsicArity else
+          .ok ("((" ++ value ++ ").to_u64_digits().first().copied().unwrap_or(0) as " ++ suffix ++ ")")
+      | _ => .error .intrinsicArity
+  | .unsignedToNat _ =>
+      match arguments with
+      | [value] => .ok ("PsNat::from(" ++ value ++ ")")
+      | _ => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.machineIntBinary _ integerOperation =>
       match psRustExactTwoArguments arguments with
       | Option.some pair =>
@@ -247,6 +260,10 @@ def psRustEmitIntrinsicFromPrinted
               (psRustConcat2 right "))"))
       | Option.none =>
           Except.error PsRustEmitError.intrinsicArity
+  | .natPow =>
+      match arguments with
+      | [a, b] => .ok ("__ps_nat_pow(&(" ++ a ++ "), &(" ++ b ++ "))")
+      | _ => .error .intrinsicArity
   | PsVerifiedIrIntrinsic.natMul =>
       match psRustExactTwoArguments arguments with
       | Option.some pair =>

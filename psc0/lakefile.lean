@@ -83,6 +83,7 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardExcept,
     `Ps.Environment.StandardGetElem,
     `Ps.Environment.StandardNatOrder,
+    `Ps.Environment.StandardUnsignedFoundationData, `Ps.Environment.StandardUnsigned,
     `Ps.Environment.StandardScalarArithmeticData, `Ps.Environment.StandardScalarArithmetic,
     `Ps.Environment.StandardFin,
     `Ps.Environment.StandardNumeric, `Ps.Environment.StandardCoercion,
@@ -134,7 +135,7 @@ lean_lib PsErasure where
     `Ps.Erasure.Structure,
     `Ps.Erasure.StructureRecursor,
     `Ps.Erasure.Recursion,
-    `Ps.Erasure.Array,
+    `Ps.Erasure.Array, `Ps.Erasure.Unsigned,
     `Ps.Erasure.Expr,
     `Ps.Erasure.Definition
   ]

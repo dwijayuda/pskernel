@@ -86,6 +86,8 @@ inductive PsVerifiedIrLiteral where
   | unit
 
 inductive PsVerifiedIrIntrinsic where
+  | unsignedOfNat (type : PsVerifiedIrMachineIntegerType)
+  | unsignedToNat (type : PsVerifiedIrMachineIntegerType)
   | machineIntBinary
       (type : PsVerifiedIrMachineIntegerType)
       (operation : PsVerifiedIrIntegerBinaryOp)
@@ -101,6 +103,7 @@ inductive PsVerifiedIrIntrinsic where
   | natAdd
   | natSub
   | natMul
+  | natPow
   | natDiv
   | natMod
   | natEq

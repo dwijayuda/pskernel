@@ -49,6 +49,15 @@ def naturalRuntime : Except String (List RuntimeDefinition) := do
     (choice (some naturalType) (eq (g "value") (k 0))
       (c "__ps_nat_zero" [])
       (natural (o (.arrayNewFixed limbsName 1) [g "value"])))]
+  functions := functions ++ [← emit "from_u64" [("value", .i64)] naturalType []
+    (choice (some naturalType) (o .i64Eq [high (g "value"), .i64 0])
+      (c "__ps_nat_from_u32" [low (g "value")])
+      (natural (o (.arrayNewFixed limbsName 2) [low (g "value"), low (high (g "value"))])))]
+  functions := functions ++ [← emit "wrap_u32" [("value", naturalType)] .i32 []
+    (c "__ps_nat_at" [limbs (g "value"), k 0])]
+  functions := functions ++ [← emit "wrap_u64" [("value", naturalType)] .i64 []
+    (o .i64Or [wide (c "__ps_nat_at" [limbs (g "value"), k 0]),
+      o (.word .i64Shl) [wide (c "__ps_nat_at" [limbs (g "value"), k 1]), .i64 32]])]
   functions := functions ++ [← emit "trim" [("a", limbsType), ("size", .i32)] naturalType [("output", limbsType)]
     (choice (some naturalType) (eq size (k 0)) (c "__ps_nat_zero" [])
       (choice (some naturalType) (eq (limb a (sub size (k 1))) (k 0))
@@ -192,6 +201,18 @@ def naturalRuntime : Except String (List RuntimeDefinition) := do
   for (suffix, remainder) in [("div", false), ("mod", true)] do
     functions := functions ++ [← emit suffix [("left", naturalType), ("right", naturalType)] naturalType []
       (c "__ps_nat_divide" [g "left", g "right", k (if remainder then 1 else 0)])]
+  functions := functions ++ [← emit "pow_loop"
+    [("base", naturalType), ("exponent", naturalType), ("result", naturalType)] naturalType
+    [("next", naturalType), ("product", naturalType)]
+    (choice (some naturalType) (c "__ps_nat_is_zero" [g "exponent"]) (g "result")
+      (seq [put "product" (choice (some naturalType)
+          (o .i32And [c "__ps_nat_wrap_u32" [g "exponent"], k 1])
+          (c "__ps_nat_mul" [g "result", g "base"]) (g "result")),
+        put "next" (c "__ps_nat_div" [g "exponent", c "__ps_nat_from_u32" [k 2]]),
+        choice (some naturalType) (c "__ps_nat_is_zero" [g "next"]) (g "product")
+          (c "__ps_nat_pow_loop" [c "__ps_nat_mul" [g "base", g "base"], g "next", g "product"])]))]
+  functions := functions ++ [← emit "pow" [("base", naturalType), ("exponent", naturalType)] naturalType []
+    (c "__ps_nat_pow_loop" [g "base", g "exponent", c "__ps_nat_from_u32" [k 1]])]
   return functions
 
 -- Literal work is proportional to limb count, including huge source literals.

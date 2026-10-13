@@ -1,4 +1,5 @@
 import Ps.Environment.StandardScalarArithmetic
+import Ps.Environment.StandardUnsigned
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
 import Ps.Environment.StandardReprCollections
@@ -120,7 +121,7 @@ def psSelfHostProdPreludeEnvironment : PsEnvironment :=
           2
           2
           []));
-  psStandardReducibilityExtend <| psStandardScalarArithmeticExtend <| psStandardReprCollectionsExtend <| psStandardFormatStringExtend <| psStandardReprExtend <| psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
+  psStandardReducibilityExtend <| psStandardUnsignedExtend <| psStandardScalarArithmeticExtend <| psStandardReprCollectionsExtend <| psStandardFormatStringExtend <| psStandardReprExtend <| psStandardToFormatExtend <| psStandardFormatExtend <| psStandardIntExtend <| psStandardStringExtend <| psStandardCoercionExtend <| psStandardNumericExtend <| psStandardArrayExtend <| psStandardListIndexExtend <| psStandardFinExtend <| psStandardNatOrderExtend <| psStandardGetElemOptionalDefaultExtend
     <| (fun env => [psStandardOutOfBoundsDeclaration,
       psStandardGetElemBangDefaultDeclaration].foldl psPreludeAdd env)
     <| psStandardLawfulGetElemExtend <| psStandardExceptExtend <| psStandardProductExtend <|
@@ -150,7 +151,7 @@ def psSelfHostRuntimePreludeDeclarationsWithProd :
             psSelfHostProdRecName with
         | none => []
         | some recursor => [prod, constructor, recursor]
-  psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure

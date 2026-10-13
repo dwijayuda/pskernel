@@ -502,3 +502,19 @@ example (P : Prop) (h : ¬P) (n : Nat) : @ite Nat P (.isFalse h) 0 n = n := rfl
 example (n : Nat) : Nat.mod 0 n = 0 := rfl
 example (x y : Nat) (h : Nat.lt 0 y) : Nat.lt (Nat.mod x y) y := Nat.mod_lt x h
 def boundedModOracle (x y : Nat) (h : Nat.lt 0 y) : Fin y := ⟨Nat.mod x y, Nat.mod_lt x h⟩
+
+-- Pinned native conversion oracle, independent of the portable Core asset.
+namespace Pscv0UnsignedOracle
+example (value : UInt64) : Nat.lt (UInt64.toNat value) UInt64.size := Fin.isLt (UInt64.toFin value)
+#guard (UInt8.ofNat 259).toNat == 3
+#guard (UInt16.ofNat 65539).toNat == 3
+#guard (UInt32.ofNat 4294967299).toNat == 3
+#guard (UInt64.ofNat 340282366920938463481821351505477763075).toNat == 3
+#guard (UInt64.ofNat 18446744073709551615).toNat == 18446744073709551615
+#guard (18446744073709551619 : UInt64).toNat == 3
+#guard (BitVec.ofNat 0 15).toNat == 0
+#guard (BitVec.ofNat 4 17).toNat == 1
+#guard (BitVec.ofNat 128 340282366920938463463374607431768211459).toNat == 3
+#guard Nat.pow 0 0 == 1
+#guard Nat.pow 3 40 == 12157665459056928801
+end Pscv0UnsignedOracle

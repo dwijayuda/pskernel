@@ -20,6 +20,17 @@ pub(super) fn __ps_nat_sub(a: &PsNat, b: &PsNat) -> PsNat {
     if a >= b { a - b } else { PsNat::zero() }
 }
 pub(super) fn __ps_nat_mul(a: &PsNat, b: &PsNat) -> PsNat { a * b }
+pub(super) fn __ps_nat_pow(base: &PsNat, exponent: &PsNat) -> PsNat {
+    let mut base = base.clone();
+    let mut exponent = exponent.clone();
+    let mut result = PsNat::from(1u8);
+    while !exponent.is_zero() {
+        if exponent.bit(0) { result *= &base; }
+        exponent >>= 1usize;
+        if !exponent.is_zero() { base = &base * &base; }
+    }
+    result
+}
 pub(super) fn __ps_nat_div(a: &PsNat, b: &PsNat) -> PsNat {
     if b.is_zero() { PsNat::zero() } else { a / b }
 }

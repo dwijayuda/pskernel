@@ -40,6 +40,13 @@ def arrayAt : Expr := .nonnull (.index (id "__ps_array") (call "Number" [id "__p
 def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args : List Expr) :
     Except String Expr := do
   match op, args with
+  | .unsignedOfNat type, [value] => do
+    let width ← match type with
+      | .uint8 => pure 8 | .uint16 => pure 16 | .uint32 => pure 32 | .uint64 => pure 64
+      | _ => throw "PSCV0-ECMA: unsupported unsigned width"
+    let wrapped := call "BigInt.asUintN" [num width, value]
+    pure (match type with | .uint64 => wrapped | _ => call "Number" [wrapped])
+  | .unsignedToNat _, [value] => pure (call "BigInt" [value])
   | .machineIntBinary type op, [a,b] => machineBinary type op a b
   | .machineIntCompare _ op, [a,b] => pure (bin (compareOp op) a b)
   | .floatBinary type op, [a,b] =>
@@ -47,6 +54,7 @@ def intrinsic (op : PsVerifiedIrIntrinsic) (types : List PsVerifiedIrType) (args
     pure (match type with | .float => value | .float32 => call "Math.fround" [value])
   | .floatCompare _ op, [a,b] => pure (bin (floatCompareOp op) a b)
   | .natAdd, [a,b] | .intAdd, [a,b] | .stringPush, [a,b] | .stringAppend, [a,b] => pure (bin "+" a b)
+  | .natPow, [a,b] => pure (bin "**" a b)
   | .natMul, [a,b] | .intMul, [a,b] => pure (bin "*" a b)
   | .intSub, [a,b] => pure (bin "-" a b)
   | .natSub, [a,b] => pure (bigPair a b (.conditional

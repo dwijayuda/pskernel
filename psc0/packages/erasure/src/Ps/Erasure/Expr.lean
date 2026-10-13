@@ -1,5 +1,6 @@
 import Ps.Erasure.Recursion
 import Ps.Erasure.Array
+import Ps.Erasure.Unsigned
 import Ps.CompilerIr.CheckTypes
 import Ps.Meta.TypeView
 
@@ -665,6 +666,10 @@ def psErasePrimitiveApplication
                 | Except.error error => Except.error error
                 | Except.ok result => Except.ok (Option.some result)
           else Except.error PsErasureError.unsupportedApplication;
+      match psEraseUnsignedApplication scope erase view with
+      | .error error => .error error
+      | .ok (some value) => .ok (some value)
+      | .ok none =>
       if psStringEq text "Prod.fst" then productProjection 0
       else if psStringEq text "Prod.snd" then productProjection 1
       else if psStringEq text "Int.ofNat" then
@@ -737,6 +742,8 @@ def psErasePrimitiveApplication
         binary PsVerifiedIrIntrinsic.natSub
       else if psStringEq text "Nat.mul" then
         binary PsVerifiedIrIntrinsic.natMul
+      else if psStringEq text "Nat.pow" then
+        binary PsVerifiedIrIntrinsic.natPow
       else if psStringEq text "Nat.div" then
         binary PsVerifiedIrIntrinsic.natDiv
       else if psStringEq text "Nat.mod" then
@@ -1812,7 +1819,9 @@ def psErasureSpecialEntry
     (scope : PsErasureScope) (name : PsName) : Option PsErasureSpecialEntry :=
   let text := psNameToString name;
   let named : String -> Bool := fun (candidate : String) => psStringEq text candidate;
-  if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
+  if let some arity := psErasureUnsignedEntryArity name then
+    some (PsErasureSpecialEntry.mk arity true)
+  else if named "Eq.rec" then some (PsErasureSpecialEntry.mk 6 false)
   else if named "False.elim" || named "False.rec" then some (PsErasureSpecialEntry.mk 2 false)
   else if psListAny named
       ["Int.ofNat", "Int.repr", "Int.toNat", "Int.negSucc", "Int.neg", "Nat.succ",
@@ -1822,7 +1831,7 @@ def psErasureSpecialEntry
     Option.some (PsErasureSpecialEntry.mk 1 true)
   else if psListAny named
       ["Int.add", "Int.sub", "Int.mul", "Nat.add", "Nat.sub", "Nat.mul",
-        "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
+        "Nat.pow", "Nat.div", "Nat.mod", "Nat.beq", "Nat.ble", "Nat.blt", "Bool.and",
         "Bool.or", "String.push", "String.Internal.append", "String.Internal.next",
         "String.Internal.get", "String.Internal.atEnd", "Array.emptyWithCapacity",
         "Array.size", "Array.mk", "Array.toList"] then
@@ -2568,6 +2577,9 @@ def psEraseRuntimeExprWithFuelWorker
             if psNameEq typeName psDecidableName then
               if index == 0 then smaller scope target
               else Except.error PsErasureError.unsupportedRuntimeTerm
+            else if let some width := psErasureUnsignedWidth typeName then do
+              if index != 0 then throw .unsupportedRuntimeTerm
+              psEraseUnsignedProjection scope width (← smaller scope target)
             else if psNameEq typeName psArrayName then do
               if index != 0 then throw .unsupportedRuntimeTerm
               let sourceType ← psErasureCheckedTypeView environment scope.localContext target

@@ -70,3 +70,12 @@ Mario Carneiro; Apache-2.0. `Ps.Host.StandardExport` removes expression metadata
 records the dependency cut and converts the checked declarations to portable
 Core; proof bodies and universe/binder semantics are retained. The existing
 Apache-2.0 license and attribution apply to this asset.
+
+### Checked unsigned Standard Core data
+
+StandardUnsignedFoundationData.lean is generated from Lean 4.35.0 commit
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Init/Prelude.lean and
+Init/Data/UInt/BasicAux.lean. Copyright (c) 2018, 2020 Microsoft Corporation;
+authors Leonardo de Moura and Mario Carneiro; Apache-2.0. Conversion removes
+expression metadata and records the dependency boundary; kernel checking
+retains the original definitions, proof bodies and universe/binder semantics.

@@ -65,7 +65,9 @@ def literalCode (literal : PsVerifiedIrLiteral) : Except String Compiled := do
   | .string value => return { code := stringLiteral value, type := .primitive .string }
   | .bool value => return { code := [.i32Const (if value then 1 else 0)], type := .primitive .bool }
   | .unit => return { code := [.i32Const 0], type := .primitive .unit }
-  | _ => throw "PSCV0-WASM-CAPABILITY: literal outside the checked profile"
+  | .machineInteger width value =>
+    let type ← (psIrCheckLiteralType literal).mapError (fun e => "PSCV0-WASM-LITERAL: " ++ e.code)
+    return { code := psWasmLowerMachineIntegerLiteral ⟨.wasm32⟩ width value, type }
 
 def fieldIndex (fields : List (String × PsVerifiedIrType)) (name : String) :
     Except String (PsVerifiedIrType × Nat) :=

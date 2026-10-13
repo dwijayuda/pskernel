@@ -1,4 +1,5 @@
 import Ps.BackendWasm.Array
+import Ps.BackendWasm.LowerInt
 
 namespace PsWasm
 
@@ -17,6 +18,7 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     (fun e => "PSCV0-WASM-INTRINSIC: " ++ e.detail)
   let runtime : String ← match op with
     | .natAdd => pure "nat_add" | .natSub => pure "nat_sub" | .natMul => pure "nat_mul"
+    | .natPow => pure "nat_pow"
     | .natDiv => pure "nat_div" | .natMod => pure "nat_mod"
     | .natEq => pure "nat_eq" | .natNe => pure "nat_ne" | .natLt => pure "nat_lt" | .natLe => pure "nat_le"
     | .intToNat => pure "int_to_nat"
@@ -34,9 +36,17 @@ def intrinsicPlan (op : PsVerifiedIrIntrinsic) (arguments : List PsVerifiedIrTyp
     | .arrayPush => pure "array_push" | .arrayGet => pure "array_get" | .arrayGetD => pure "array_get_default"
     | .arraySet => pure "array_set" | .arraySetIfInBounds => pure "array_set_if_in_bounds"
     | .arrayMap => pure "array_map" | .arrayFoldl => pure "array_fold"
-    | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe => pure ""
+    | .boolNot | .boolAnd | .boolOr | .boolEq | .boolNe
+    | .unsignedOfNat _ | .unsignedToNat _ | .machineIntBinary .. | .machineIntCompare .. => pure ""
     | _ => throw "PSCV0-WASM-CAPABILITY: scalar intrinsic outside the checked runtime profile"
   let instructions := if runtime.isEmpty then match op with
+    | .unsignedOfNat type =>
+      [.call (match type with | .uint64 => "__ps_nat_wrap_u64" | _ => "__ps_nat_wrap_u32")] ++
+        psWasmNormalizeMachineInteger type
+    | .unsignedToNat type =>
+      [.call (match type with | .uint64 => "__ps_nat_from_u64" | _ => "__ps_nat_from_u32")]
+    | .machineIntBinary type op => psWasmLowerMachineIntegerBinary ⟨.wasm32⟩ type op
+    | .machineIntCompare type op => psWasmLowerMachineIntegerCompare ⟨.wasm32⟩ type op
     | .boolNot => [.i32Const 0, .i32Eq]
     | .boolAnd => [.i32And] | .boolOr => [.i32Or] | .boolEq => [.i32Eq] | .boolNe => [.i32Ne]
     | _ => []

@@ -563,3 +563,33 @@ that mechanism for conversions and shifts. Keep logical bounds and explicit
 foreign API construction constraints despite proof erasure; generalizing the
 current special wrapper unboxing without preserving the public API plan would
 be incorrect. Full A remains open.
+
+## Unsigned scalar boundary (implementation in progress)
+
+Lean reference: pinned Init/Prelude (BitVec.ofFin, UInt.ofBitVec, projections,
+ofNatLT), Init/Data/UInt/BasicAux (wrapping conversions and OfNat), and
+Lean/Compiler/LCNF/ToImpureType.builtinImpureType? / IR/ToIRType. Relevant
+upstream tests: tests/elab/bitvec_fin_literal_norm.lean and
+tests/compile/initUnboxed.lean. Lean preserves checked Fin bounds in the logic
+and chooses machine representations at compilation; PSC0 follows that split.
+
+Linux 38459688059 checked the 80-declaration unsigned dependency closure in
+a fresh trust-zero official kernel and passed the existing integration suite.
+It adds no axiom and replaces the four UInt type axioms with actual BitVec
+structures. Its 557-name boundary is now frozen for byte-identical regeneration.
+The executable environment explicitly registers only the four OfNat instances;
+proof dependencies do not implicitly gain search/runtime entries.
+
+One unsigned conversion family extends existing machine arithmetic IR. Only
+target-independent unsigned 8/16/32/64 widths are admitted. Nat conversion
+wraps modulo the width before Number conversion in JS/TS, uses low BigUint
+digits in Rust, and takes low immutable GC limbs in Wasm. Generic UInt64
+crossings use a distinct i64 GC box. Fin/BitVec retain their prepared records,
+and their proof-bearing foreign construction remains refused. Constructor,
+projection, higher-order conversion and structure matching share this boundary.
+
+Nat.pow uses its exported checked native model and binary exponentiation at
+runtime. Both logical/exporter admission and runtime conformance are required;
+kernel acceptance does not prove backend equivalence. A compact fixture is
+added to the existing native oracle and shared runtime table; qualification is
+pending. Signed, target-sized and floating capabilities remain separate.

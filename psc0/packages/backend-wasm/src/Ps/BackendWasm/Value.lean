@@ -9,6 +9,7 @@ namespace PsWasm
 def valueName := "__ps_Value"
 def valueType : PsWasmValueType := .refT valueName
 def scalarBoxName := "__ps_Scalar"
+def wideScalarBoxName := "__ps_WideScalar"
 def naturalName := "__ps_Natural"
 def limbsName := "__ps_Limbs"
 def integerName := "__ps_Integer"
@@ -33,7 +34,9 @@ def representation : PsVerifiedIrType → Except String PsWasmValueType
   | .primitive .nat => pure naturalType
   | .primitive .int => pure integerType
   | .primitive .string => pure stringType
-  | .primitive .bool | .primitive .char | .primitive .unit => pure .i32
+  | .primitive .bool | .primitive .char | .primitive .unit
+  | .primitive .uint8 | .primitive .uint16 | .primitive .uint32 => pure .i32
+  | .primitive .uint64 => pure .i64
   | .named "Array" [_] => pure arrayType
   | .named name _ => pure (.refT name)
   | .function .. => pure closureType
@@ -42,12 +45,14 @@ def representation : PsVerifiedIrType → Except String PsWasmValueType
 def box (type : PsVerifiedIrType) : Except String (List PsWasmInstruction) := do
   match ← representation type with
   | .i32 => return [.structNew scalarBoxName]
+  | .i64 => return [.structNew wideScalarBoxName]
   | .refT _ => return []
   | _ => throw "PSCV0-WASM-BOX: unsupported scalar representation"
 
 def unbox (type : PsVerifiedIrType) : Except String (List PsWasmInstruction) := do
   match ← representation type with
   | .i32 => return [.refCast scalarBoxName, .structGet scalarBoxName 0]
+  | .i64 => return [.refCast wideScalarBoxName, .structGet wideScalarBoxName 0]
   | .refT name => return if name == valueName then [] else [.refCast name]
   | _ => throw "PSCV0-WASM-BOX: unsupported scalar representation"
 
@@ -67,6 +72,7 @@ def valueStructure (name : String) (fields : List (String × PsWasmValueType)) :
 def valueStructures : List PsWasmStructType := [
   { name := valueName, superType := none, isFinal := false, fields := [] },
   valueStructure scalarBoxName [("value", .i32)],
+  valueStructure wideScalarBoxName [("value", .i64)],
   valueStructure naturalName [("limbs", limbsType)],
   valueStructure integerName [("sign", .i32), ("magnitude", naturalType)],
   valueStructure stringName [("bytes", bytesType), ("length", .i32)],

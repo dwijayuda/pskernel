@@ -300,6 +300,9 @@ def psIrCheckModuleSizeWorker
                     rest next
           | .intrinsic value =>
               match value with
+              | .unsignedOfNat _ | .unsignedToNat _ =>
+                  psIrCheckModuleSizeWorker limit remaining
+                    (List.cons PsIrCheckSizeTask.scalar rest) next
               | .machineIntBinary _ _ =>
                   psIrCheckModuleSizeWorker limit remaining
                     (List.cons PsIrCheckSizeTask.scalar (List.cons PsIrCheckSizeTask.scalar rest)) next

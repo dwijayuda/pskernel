@@ -779,7 +779,7 @@ private def application : String :=
   "}\n" ++
   "function defaultOption{A: Type u}(unit: Unit): Option A := Inhabited.default\n" ++
   "end M1Universes\n" ++
-  "function highRead(xs: Option(ExplicitHigh Nat)): Nat := (Option.getD(xs, ExplicitHigh.mk(0))).value\n" ++
+  "function highRead(xs: Option(ExplicitHigh Nat)): Nat := ExplicitHigh.value(Option.getD(xs, ExplicitHigh.mk(0)))\n" ++
   "instance highNatBEq: BEq(ExplicitHigh Nat) where { beq(left: ExplicitHigh Nat, right: ExplicitHigh Nat): Bool := left.value == right.value }\n" ++
   "const highBEqRuntime: Bool := Option.some(ExplicitHigh.mk(397)) == Option.some(ExplicitHigh.mk(397))\n" ++
   "const highOptionalRuntime: Nat := highRead(M1Universes.lookup(M1Universes.Box.mk(ExplicitHigh.mk(359))))\n" ++

@@ -1,48 +1,33 @@
 # Active continuation — 14 October 2026
 
-Current product-universe implementation: `ab79de4408f233177933381a64ef2c9f2f948b1f`.
-Linux38472303998 passed product signature and quotient gates, then exposed
-legacy axiom cuts at Bool.decEq. Candidate boundary selection now traverses
-and replaces all reached native definitions represented as portable axioms;
-qualification of this general repair is pending. The last complete green remains /60 at
-`d72fc7779b2e8d130915dfe4ace339634ba0addd` / Linux38466179341 below.
+Profile /61 is under qualification. Last fully green remains /60 at
+`d72fc7779b2e8d130915dfe4ace339634ba0addd`, Linux38466179341.
 **M2+A is incomplete; continue autonomously through its remaining exit gates.**
 
-The user explicitly approved exactly pinned Lean 4.35.0 `propext` and
-`Quot.sound`. The unsigned native exporter now has that precise per-slice
-allowlist. Other slices retain an empty allowlist. Do not ask again.
-No candidate asset or additional assumption has yet entered the active Standard.
+User explicitly approved exactly pinned Lean 4.35.0 propext and Quot.sound.
+Do not ask again. The unsigned operation closure has passed native authoring
+replay: 803 declarations, 33 symbolic recursor rules, exactly two approved
+assumptions and four generated quotient descriptors (Linux38475351678).
+Its reviewed shared source (6.46 MB; 49,978 exact nodes) is now admitted for
+fresh compiled-asset qualification, frozen regeneration and runtime integration.
+Strict FNV/SHA pins intentionally remain /60 until CI independently reports
+and the new full payload is reviewed. No weakened gate or auto-accept.
 
-Linux38470857650 passed isolated official quotient regeneration, lift/ind
-computation, forged-signature and collision refusal. The unsigned candidate has
-795 declarations, exactly the two approved axioms and all four kernel quotient
-descriptors. Replay exposed Type0-only Prod in the old foundation.
+In this coherent batch: native two-universe Prod and its dictionaries; Bool.beq
+open reduction; correct List.foldl telescope and reverseAux equations; 16 UInt
+default/display dictionaries; 48 unsigned arithmetic/bitwise/shift operations
+with 24 arithmetic dictionaries; exact source sharing. Minimal added vectors
+run through the shared native/all-target harness. Temporary source transport
+jobs were removed. Runtime support excludes logical proof dependencies.
 
-The shared Prod/mk/rec/fst/snd foundation now carries independent universes and
-checked projection definitions. Inhabited/BEq/ReprTuple/Repr/ToFormat/Hashable
-use the same levels. The old projection axioms/signature exceptions are removed.
-Native compiler and independent high-universe oracle compile. Strict signature
-comparison now uses Lean's own level normalization; qualification is pending.
-Eight observations cover mixed levels, defaults, equality, display and hashing.
+Next: qualify compiled shared source and exact regeneration, review strict
+snapshot, then complete all backend/native/kernel gates. Continue unsigned
+comparisons/conversions/dictionaries, signed/platform words, Float/scientific,
+expanded BitVec/bytes/selected APIs, full manifest, broader M2 coverage and C5
+retention. Keep M2+A → M3+B → M4+C/D → M5/E. Recursive/indexed deriving belongs
+to M3+B. See [source study](docs/PSCV0_M2_A_SCALAR_COMPLETION_2026-10-14.md).
 
-Next: finish product/native replay qualification and strict digest review;
-review/export/admit the complete unsigned-operation slice; freeze its hash-stage
-boundary; register the existing arithmetic classes for four widths. Retain all
-prior observations and add the compact native/all-target operation vectors.
-Unsigned runtime div/rem/shift implementations are compiled but not yet fully
-qualified through admitted source operations.
-
-Shared infrastructure already present: function-valued recursive logical iota
-with native-rule comparison; explicit generative quotient descriptors and
-official checked admission; registered lift/ind reduction. These do not enable
-source well-founded recursion or general runtime quotients.
-
-Remaining M2+A: signed/platform words, Float/scientific, expanded BitVec and
-selected APIs, comprehensive manifest, broader M2 coverage and C5 retention.
-Keep M2+A → M3+B → M4+C/D → M5/E. Recursive/indexed deriving stays with M3+B.
-See [source study and design](docs/PSCV0_M2_A_SCALAR_COMPLETION_2026-10-14.md).
-
-Native .lean, official Lean4.35.0, GitHub connector source operations and Linux
+Native .lean; official Lean4.35.0; GitHub connector source operations and Linux
 Actions only. No local shell/build, pskernel-core, self-hosting or source migration.
 
 ---

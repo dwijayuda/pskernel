@@ -626,3 +626,40 @@ def display (value : Nat) : String :=
   (default : UInt32).toNat + (default : UInt64).toNat == 0
 #guard (repr ([1, 2, 3, 4] : List UInt8)).pretty 8 == "[1, 2,\n 3, 4]"
 end Pscv0UnsignedDisplayOracle
+
+-- Pinned unsigned operation semantics, including exact 32-bit multiplication.
+private def wordOperations8 (a b : Nat) : String :=
+  let x := UInt8.ofNat a
+  let y := UInt8.ofNat b
+  String.intercalate "," ([(x + y).toNat, (x - y).toNat, (x * y).toNat, (x / y).toNat, (x % y).toNat, (-x).toNat, (UInt8.complement x).toNat, (UInt8.land x y).toNat, (UInt8.lor x y).toNat, (UInt8.xor x y).toNat, (UInt8.shiftLeft x y).toNat, (UInt8.shiftRight x y).toNat].map Nat.repr)
+#guard wordOperations8 255 9 == "8,246,247,28,3,1,0,9,255,246,254,127"
+#guard wordOperations8 255 0 == "255,255,0,0,255,1,0,0,255,255,255,255"
+#guard wordOperations8 5 7 == "12,254,35,0,5,251,250,5,7,2,128,0"
+private def wordOperations16 (a b : Nat) : String :=
+  let x := UInt16.ofNat a
+  let y := UInt16.ofNat b
+  String.intercalate "," ([(x + y).toNat, (x - y).toNat, (x * y).toNat, (x / y).toNat, (x % y).toNat, (-x).toNat, (UInt16.complement x).toNat, (UInt16.land x y).toNat, (UInt16.lor x y).toNat, (UInt16.xor x y).toNat, (UInt16.shiftLeft x y).toNat, (UInt16.shiftRight x y).toNat].map Nat.repr)
+#guard wordOperations16 65535 17 == "16,65518,65519,3855,0,1,0,17,65535,65518,65534,32767"
+#guard wordOperations16 65535 0 == "65535,65535,0,0,65535,1,0,0,65535,65535,65535,65535"
+#guard wordOperations16 5 7 == "12,65534,35,0,5,65531,65530,5,7,2,640,0"
+private def wordOperations32 (a b : Nat) : String :=
+  let x := UInt32.ofNat a
+  let y := UInt32.ofNat b
+  String.intercalate "," ([(x + y).toNat, (x - y).toNat, (x * y).toNat, (x / y).toNat, (x % y).toNat, (-x).toNat, (UInt32.complement x).toNat, (UInt32.land x y).toNat, (UInt32.lor x y).toNat, (UInt32.xor x y).toNat, (UInt32.shiftLeft x y).toNat, (UInt32.shiftRight x y).toNat].map Nat.repr)
+#guard wordOperations32 4294967295 33 == "32,4294967262,4294967263,130150524,3,1,0,33,4294967295,4294967262,4294967294,2147483647"
+#guard wordOperations32 4294967295 0 == "4294967295,4294967295,0,0,4294967295,1,0,0,4294967295,4294967295,4294967295,4294967295"
+#guard wordOperations32 5 7 == "12,4294967294,35,0,5,4294967291,4294967290,5,7,2,640,0"
+private def wordOperations64 (a b : Nat) : String :=
+  let x := UInt64.ofNat a
+  let y := UInt64.ofNat b
+  String.intercalate "," ([(x + y).toNat, (x - y).toNat, (x * y).toNat, (x / y).toNat, (x % y).toNat, (-x).toNat, (UInt64.complement x).toNat, (UInt64.land x y).toNat, (UInt64.lor x y).toNat, (UInt64.xor x y).toNat, (UInt64.shiftLeft x y).toNat, (UInt64.shiftRight x y).toNat].map Nat.repr)
+#guard wordOperations64 18446744073709551615 65 == "64,18446744073709551550,18446744073709551551,283796062672454640,15,1,0,65,18446744073709551615,18446744073709551550,18446744073709551614,9223372036854775807"
+#guard wordOperations64 18446744073709551615 0 == "18446744073709551615,18446744073709551615,0,0,18446744073709551615,1,0,0,18446744073709551615,18446744073709551615,18446744073709551615,18446744073709551615"
+#guard wordOperations64 5 7 == "12,18446744073709551614,35,0,5,18446744073709551611,18446744073709551610,5,7,2,640,0"
+example : (UInt8.add 255 2).toNat = 1 := rfl
+
+#guard wordOperations32 4294967295 4294967295 == "4294967294,0,1,1,0,1,0,4294967295,4294967295,0,2147483648,1"
+private def wordApply (operation : UInt64 → UInt64 → UInt64) (left right : UInt64) : Nat := (operation left right).toNat
+#guard wordApply UInt64.shiftLeft 3 65 == 6
+private def wordGeneric {A : Type} [HAdd A A A] (left right : A) : A := left + right
+#guard (wordGeneric (255 : UInt8) 2).toNat == 1

@@ -31,8 +31,6 @@ jobs:
   native:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    outputs:
-      unsigned-source-ready: ${{ steps.candidate-source.outputs.ready }}
     defaults:
       run:
         working-directory: psc0/v7-native
@@ -129,12 +127,13 @@ jobs:
           .lake/build/bin/pscv0_native --export-hash-foundation ../dist/pscv0-native/StandardHashFoundationData.lean > ../dist/pscv0-native/hash-export.log
           cmp ../packages/environment/src/Ps/Environment/StandardHashFoundationData.lean ../dist/pscv0-native/StandardHashFoundationData.lean
           .lake/build/bin/pscv0_native --check-quotient-foundation | tee ../dist/pscv0-native/quotient-foundation.log
-      - name: Replay unsigned operation candidate with complete dependency diagnostics
+      - name: Regenerate and check the admitted unsigned proof asset
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
           .lake/build/bin/pscv0_native --export-unsigned-operations-candidate ../dist/pscv0-native/StandardUnsignedOperationsData.lean | tee ../dist/pscv0-native/unsigned-operations-candidate.log | grep -v '^PSCV0_STANDARD_SOURCE '
-      - name: Qualify current checked source independently of candidate admission
+          cmp ../packages/environment/src/Ps/Environment/StandardUnsignedOperationsData.lean ../dist/pscv0-native/StandardUnsignedOperationsData.lean
+      - name: Qualify checked source and admitted Standard
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           set -euo pipefail
@@ -229,15 +228,6 @@ jobs:
           set -euo pipefail
           .lake/build/bin/pscv0_m1_performance ../dist/pscv0-native/m1-performance
           node ../scripts/pscv0-native-m1-performance.mjs ../dist/pscv0-native/m1-performance | tee ../dist/pscv0-native/m1-performance/comparison.log
-      - name: Inventory checked candidate source transport
-        id: candidate-source
-        if: always() && !cancelled()
-        run: |
-          if test -f ../dist/pscv0-native/StandardUnsignedOperationsData.lean; then
-            echo 'ready=true' >> "$GITHUB_OUTPUT"
-            wc -c ../dist/pscv0-native/StandardUnsignedOperationsData.lean
-            sha256sum ../dist/pscv0-native/StandardUnsignedOperationsData.lean
-          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
@@ -245,37 +235,3 @@ jobs:
           path: psc0/dist/pscv0-native/
           if-no-files-found: warn
           retention-days: 30
-
-  # Read-only transport for native-generated source review. These jobs never
-  # build, test, admit or publish compiler code. Bound each log response so the
-  # GitHub connector can retrieve a large checked proof asset without truncation.
-  unsigned-source-review:
-    needs: native
-    if: ${{ always() && !cancelled() && needs.native.outputs.unsigned-source-ready == 'true' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    strategy:
-      fail-fast: false
-      matrix:
-        part: [0, 1, 2, 3, 4, 5, 6, 7]
-    steps:
-      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0
-        with:
-          name: pscv0-v7-native-${{ github.sha }}
-          path: candidate
-      - name: Emit bounded candidate source part
-        env:
-          PSCV0_SOURCE_PART: ${{ matrix.part }}
-        run: |
-          node --input-type=module <<'NODE'
-          import {readFileSync} from 'node:fs';
-          import {createHash} from 'node:crypto';
-          const source = readFileSync('candidate/StandardUnsignedOperationsData.lean', 'utf8');
-          const part = Number(process.env.PSCV0_SOURCE_PART), parts = 8;
-          const size = Math.ceil(source.length / parts);
-          const text = source.slice(part * size, (part + 1) * size);
-          console.log('PSCV0_SOURCE_PART ' + JSON.stringify({
-            part, parts, length: source.length,
-            sha256: createHash('sha256').update(source).digest('hex'), text
-          }));
-          NODE

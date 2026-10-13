@@ -386,3 +386,25 @@ the same source renderer. No decoder, new Core constructor, native-host
 dependency or trust bypass enters the portable compiler. Official replay,
 native recursor comparison, later compiled-asset replay and exact regeneration
 remain required. Record the measured reduction after qualification.
+
+## Unsigned operation admission candidate, 14 October
+
+Linux [38475351678](https://github.com/dwijayuda/pskernel/actions/runs/38475351678)
+checked 803 converted declarations, exactly propext/Quot.sound, four generated
+quotient primitives and 33 symbolic recursor equations. Source interning emits
+49,978 exact typed nodes and reduces 23,489,134 bytes to 6,457,592 bytes.
+The complete source was retrieved through eight bounded read-only artifact
+receipts with common SHA-256 b33dc2e256f17da29a3236a24c2d8267bf04de4338d73c568cafc44ee686f2de.
+Temporary transport jobs are removed after review. Regeneration now freezes the
+hash-stage cut and requires byte-for-byte identity with the admitted source.
+
+The operation stage replaces six old axioms with checked native definitions,
+adds the approved proof closure and 24 ordinary arithmetic/Neg dictionaries.
+Only dictionaries join runtime support; the proof closure remains logical data.
+One shared compact vector family covers all 48 methods, wrapping, zero divisors,
+shift masking, exact 32-bit multiplication, generic dictionaries and partial
+application, independently checked against the pinned native library. Product,
+List and unsigned display additions remain in the same qualification batch.
+This is profile /61 under qualification; /60 is the last fully green boundary.
+M2+A remains incomplete, including unsigned comparison/conversion dictionaries,
+signed/platform words, Float/scientific, expanded BitVec and selected APIs.

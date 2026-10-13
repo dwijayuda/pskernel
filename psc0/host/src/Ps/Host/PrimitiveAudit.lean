@@ -102,7 +102,8 @@ def primitiveAudit : IO Lean.Json := do
   -- The exact portable bodies remain protected by the Standard snapshot and
   -- separately admitted by the kernel; the source oracle checks observations.
   let unsignedModels := ["UInt8", "UInt16", "UInt32", "UInt64"].flatMap fun owner =>
-    ["ofNat", "ofNatLT", "ofBitVec", "toNat", "toBitVec", "toFin"].map (fun method => owner ++ "." ++ method)
+    ["ofNat", "ofNatLT", "ofBitVec", "toNat", "toBitVec", "toFin",
+      "add", "sub", "mul", "div", "mod", "neg", "complement", "land", "lor", "xor", "shiftLeft", "shiftRight"].map (fun method => owner ++ "." ++ method)
   let modelNames := unsignedModels ++ ["BitVec.ofNat", "BitVec.ofNatLT", "Nat.pow", "ite", "Nat.mod", "Nat.add", "Nat.sub", "Nat.mul", "Nat.beq", "Int.toNat", "Array.mk", "Array.toList", "Array.getInternal", "Array.set",
     "Nat.ble", "outOfBounds"]
   let mut models := []

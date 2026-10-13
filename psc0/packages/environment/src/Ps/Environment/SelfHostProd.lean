@@ -1,5 +1,6 @@
 import Ps.Environment.StandardScalarArithmetic
 import Ps.Environment.StandardUnsigned
+import Ps.Environment.StandardUnsignedOperations
 import Ps.Environment.StandardHashable
 import Ps.Environment.StandardCoercion
 import Ps.Environment.StandardReducibility
@@ -30,13 +31,16 @@ def psSelfHostProdScalarPreludeEnvironment : PsEnvironment :=
 def psSelfHostProdUnsignedPreludeEnvironment : PsEnvironment :=
   psStandardUnsignedExtend psSelfHostProdScalarPreludeEnvironment
 
-def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+def psSelfHostProdHashPreludeEnvironment : PsEnvironment :=
   psStandardHashableExtend psSelfHostProdUnsignedPreludeEnvironment
+
+def psSelfHostProdPreludeEnvironment : PsEnvironment :=
+  psStandardUnsignedOperationsExtend psSelfHostProdHashPreludeEnvironment
 
 def psSelfHostRuntimePreludeDeclarationsWithProd :
     List PsDeclaration :=
   let prodDeclarations := psStandardProductDataDeclarations
-  psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
+  psStandardUnsignedOperationsRuntimeDeclarations ++ psStandardHashRuntimeDeclarations ++ psStandardUnsignedRuntimeDeclarations ++ psStandardReprCollectionDeclarations ++ psStandardFormatStringDeclarations ++ psStandardReprDeclarations ++ psStandardToFormatDeclarations ++ psStandardFormatDeclarations ++ psStandardStringDeclarations ++ psStandardCoercionDeclarations ++ psStandardNumericDeclarations ++ psEmptyDeclarations ++ psDecisionEqualityDeclarations ++ psStandardPreludeDeclarationsWithInhabited ++
     prodDeclarations ++ psSelfHostRuntimePreludeDeclarations ++
     psStandardProductDeclarations ++ psStandardExceptDeclarations ++
     -- Class evidence and method projections must enter typed runtime erasure

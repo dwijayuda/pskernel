@@ -309,7 +309,7 @@ jobs:
                           for d in rec["inductive"]["types"]:
                               print(f"  inductive={label(d['name'])} type={render_expr(d['type'])}")
                       break
-          else:
+          if line_num != target:
               raise RuntimeError("did not reach record 86383")
           PY
       - name: C0 native streaming boundary diagnostic after max-offset normalization

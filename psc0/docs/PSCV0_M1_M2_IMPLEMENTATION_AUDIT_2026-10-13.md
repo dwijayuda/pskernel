@@ -1,5 +1,20 @@
 # PSCV0 native M1 and M2 — Implementation evidence and remaining Lean parity
 
+## Latest independently qualified M1 proof-theory milestone (13 October 2026)
+
+**Newest independently qualified executable:** [`e0ac8c69c928261e21e9593ed3f2f4aa5157385a`](https://github.com/dwijayuda/pskernel/commit/e0ac8c69c928261e21e9593ed3f2f4aa5157385a), Linux GitHub Actions [38335736466](https://github.com/dwijayuda/pskernel/actions/runs/38335736466) **passed** (13 October 2026). This supersedes older executable-status statements below, which remain as preserved history. The pinned upstream is Lean 4.35.0-rc4 (`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`). The selected Standard now contains **234 declarations, 14 classes, 40 instances**, FNV `fnv1a64:403111548970955669`, SHA-256 `sha256:6e6f1fad15d4f0cb401a09c1ebc219c3f60dd50acb21061ca9eee4ab782bd85e`; portable/native closure remains 170/178 `.lean` modules with 198 shared runtime observations on TS, direct JS, Rust, and Wasm GC/Wasmtime.
+
+| Boundary | Evidence | Status |
+| --- | --- | --- |
+| Portable native `.lean` source and selected prelude | `Decision.lean` implements `Decidable` as checked structure, `Bool.Reflects`, `isTrue`/`isFalse`, and proof-driven `dite` | **Qualified** only within selected Standard |
+| Native unification | Closed, typed proof irrelevance requires both values have definitionally equal types of sort `Prop`; unresolved metavariables fail closed | **Qualified** on established tests, no formal completeness/performance parity claim |
+| Source proof/kernel | `Decidable P → P ∨ ¬P` and `∀ (a b : P), a = b` accepted, full native and cross-target matrix green | **Qualified** source proofs, not compiler correctness proof |
+| Generic `LawfulGetElem` | Two laws remain mandatory; independent `Decidable` witnesses not yet related by a checked equality proof; attempted source theorem failed in dependent application elaboration | **Open; no instance admitted** |
+| List/Array/Fin and M2 generator/consumer tabling | No additional implementations in this milestone | **Open** |
+
+The previously recorded 230-declaration FNV/SHA source roster is superseded by 234/14/40 and the digests above. Linux green CI and exact SHA are evidence of this bounded implementation, not RC4/full-v7 parity or Lean-scale performance.
+
+
 **Date:** 2026-10-13 · **Repository:** https://github.com/dwijayuda/pskernel · **Branch:** `psc0/pscv0-v7-native-lean-v1` · **Draft PR:** [#109](https://github.com/dwijayuda/pskernel/pull/109).
 
 **Latest green executable:** [`fc8bc8b1f16ed993fb144e2d396c0760c068630b`](https://github.com/dwijayuda/pskernel/commit/fc8bc8b1f16ed993fb144e2d396c0760c068630b), [Linux CI 38323422371](https://github.com/dwijayuda/pskernel/actions/runs/38323422371) — **PASSED**. **Pinned upstream Lean:** 4.35.0-rc4, [`c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`](https://github.com/leanprover/lean4/tree/c29b6dda4f7c20e3eeaa717c4e565663c5cfa364). **Qualification remains bounded:** NOT full PSCV0 v7, Lean feature parity, metatheory, verified-emission or self-hosting.

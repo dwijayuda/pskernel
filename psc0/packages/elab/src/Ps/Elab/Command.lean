@@ -195,7 +195,9 @@ def psElabCommandDeriving (state : PsCommandState) (source : PsSyntaxDeclaration
     (fun (acc : PsEnvironment × List PsDeclaration ×
         List PsElabMemberOrigin × List PsName) handler => do
       let (env, declarations, derivedMembers, privateNames) := acc
-      let generated ← psElabDeriveHandler env origin handler
+      let sourceName := (psSyntaxNameToName origin.sourceName).getD .anonymous
+      let generated ← (psElabDeriveHandler env origin handler).mapError
+        (.atDeclaration (psNameAppendStr sourceName ("deriving " ++ String.intercalate "." handler.segments)))
       let name := psDeclarationName generated
       let some added := psEnvironmentAdd env generated
         | throw (.duplicateDeclaration name)

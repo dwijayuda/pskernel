@@ -88,8 +88,17 @@ def psElabRecord (elaborate : PsElaborator) (context : PsElabContext)
     | throw (.invalidArgument "record requires an expected nominal structure type")
   let shape ← psElabRecordShape context target
   let names ← psElabRecordFields shape fields
-  -- The shared application queue fills declared defaults and instance fields;
-  -- any missing required field leaves an unapplied telescope and is rejected.
+  -- Retain the source diagnostic for a missing required explicit field.
+  -- Defaults and implicit dictionaries are completed by the shared queue below.
+  if names.length != shape.fieldNames.length then
+    let constructor ← psElabRecordConstructor context shape target
+    let telescope ← psElabOpenCoreTelescope 4096 constructor.context constructor.type
+      (some shape.fieldNames.length)
+    for field in telescope.bindersRev do
+      let explicit := match field.binder with | .explicit => true | _ => false
+      if explicit && (psElabTakeNamed field.name names).fst.isNone &&
+          (psElabDefaultValue telescope.context field.type).isNone then
+        throw (.invalidArgument "missing required record field")
   psElabBuildRecord elaborate context shape target (names.map fun (name, value) =>
     (name, PsElabRecordArgument.source value))
 

@@ -166,7 +166,7 @@ def psElabDeriveEliminate (plan : PsElabDeriveContext) (context : PsElabContext)
       let fields := opened.bindersRev.reverse
       let value := psExprApplyMany (.constE name (plan.info.levelParams.map PsLevel.param))
         (parameters ++ fields.map (fun field => .fvar field.id))
-      let body ← branch opened.context ctor fields value
+      let body ← (branch opened.context ctor fields value).mapError (.atDeclaration name)
       let body := psCloseElabLambdaBinders context.metaContext opened.bindersRev body
       pure (psExprInstantiate1 minor.body body, body :: state.snd)) (cursor, [])
   return psLogicLam major.id "value" plan.family

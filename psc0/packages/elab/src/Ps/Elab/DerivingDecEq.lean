@@ -102,7 +102,8 @@ def psElabDeriveDecEqSame (plan : PsElabDeriveContext)
       return some ({
         level, type := lhs.type, left := leftValue, right := rightValue,
         decision := psExprApplyMany method [leftValue, rightValue], projection } : PsElabDeriveDecEqField)
-  let proof ← psElabDeriveDecEqProof context fields rightFields target
+  let proof ← (psElabDeriveDecEqProof context fields rightFields target).mapError
+    (.atDeclaration (psNameAppendStr entry.fields.constructor.name "fieldEquality"))
   psElabDeriveDecEqChoose context familyLevel plan.family left right target proof [] fields
 
 def psElabDeriveDecEqDifferent (plan : PsElabDeriveContext)

@@ -211,7 +211,7 @@ jobs:
                       else:
                           print(json.dumps(obj)[:8000])
                       break
-          else:
+          if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
       - name: C0 native streaming boundary diagnostic on real Init

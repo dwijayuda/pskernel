@@ -137,6 +137,38 @@ This covers the declared *candidate syntactic-work* reduction families; it
 does **not** prove a precise Lean runtime heap/CPU bound or complete phase
 C/D/E. Source WHNF and checked admission remain exclusively authoritative.
 
+## CDE-8B/8C — checked inductive/quotient and typed-observation integration
+
+The checked architecture transaction now dispatches *all* source declaration
+families (ordinary/mutual/nested inductives, Eq-dependent Quot and ordinary
+declarations) and exposes validated, source-authoritative WHNF, infer, DefEq,
+isProp and **full check** operations. Only full source checking certifies a
+term; inference-only success is not an admission verdict. Successful source
+admission replaces the session to invalidate caches, preserving the
+explicit reduction policy. The candidate evaluator remains opt-in.
+
+Real source-admitted K/structure-eta, dependent indexed Eq K, Quot
+initialization and typed Quot.lift fixtures now demonstrate positive and
+negative typed semantics. The source-justified K/eta major is allowed into
+the *same* metered experimental demand machine, passing only quota remaining
+after the wrapper charge. Synthetic recursor metadata does not grant an
+admission. See
+[C0_TYPED_ACCEPTING_PIPELINE_CHECKPOINT.md](C0_TYPED_ACCEPTING_PIPELINE_CHECKPOINT.md).
+
+**Evidence:** native CI
+[38462459034](https://github.com/dwijayuda/pskernel/actions/runs/38462459034),
+[38464230358](https://github.com/dwijayuda/pskernel/actions/runs/38464230358),
+[38464668623](https://github.com/dwijayuda/pskernel/actions/runs/38464668623),
+and [38465192514](https://github.com/dwijayuda/pskernel/actions/runs/38465192514)
+passed bounded checkpoints. Later `e49e14e8` must pass
+[CI 38465553974](https://github.com/dwijayuda/pskernel/actions/runs/38465553974)
+before qualification is extended to policy preservation.
+
+**Still required for C/D/E:** a completely source-equivalent *independent*
+typed evaluator and chosen representation, semantics/resource/error
+refinement, one accepting WHNF/DefEq/inference/admission implementation and
+whole-workload qualification. This work does not waive B/F/G exit gates.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

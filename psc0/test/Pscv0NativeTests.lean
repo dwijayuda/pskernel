@@ -228,6 +228,44 @@ private def hashFixture : String :=
 private def unsignedDisplayFixture : String :=
   "function unsignedDisplay(value: Nat): String := String.intercalate(\",\", [reprStr(UInt8.ofNat(value)), reprStr(UInt16.ofNat(value)), reprStr(UInt32.ofNat(value)), reprStr(UInt64.ofNat(value)), Std.Format.pretty(Std.format(UInt64.ofNat(value)))])\nconst unsignedDefaults: Nat := UInt8.toNat(Inhabited.default) + UInt16.toNat(Inhabited.default) + UInt32.toNat(Inhabited.default) + UInt64.toNat(Inhabited.default)\nconst unsignedListDisplay: String := Std.Format.pretty(repr([(1 : UInt8), (2 : UInt8), (3 : UInt8), (4 : UInt8)]), 8)\n"
 
+-- Run source-level checks for the *entire* fixed-width method family before
+-- the combined List/map/display fixture. This is a coherent unsigned-operation
+-- API conformance gate, not a one-off workaround for an individual expression.
+-- Native official-kernel acceptance is mandatory; no unknown reference,
+-- implicit model fallback or silent dictionary replacement is permitted.
+private def unsignedOperatorSourceCases : IO Unit := do
+  let syntax : Array (String × String × String) := #[
+    ("add", "Nat", "UInt8.toNat(x + y)"),
+    ("sub", "Nat", "UInt8.toNat(x - y)"),
+    ("mul", "Nat", "UInt8.toNat(x * y)"),
+    ("div", "Nat", "UInt8.toNat(x / y)"),
+    ("mod", "Nat", "UInt8.toNat(x % y)"),
+    ("neg", "Nat", "UInt8.toNat(-x)"),
+    ("complement", "Nat", "UInt8.toNat(UInt8.complement(x))"),
+    ("and", "Nat", "UInt8.toNat(UInt8.land(x, y))"),
+    ("or", "Nat", "UInt8.toNat(UInt8.lor(x, y))"),
+    ("xor", "Nat", "UInt8.toNat(UInt8.xor(x, y))"),
+    ("shiftLeft", "Nat", "UInt8.toNat(UInt8.shiftLeft(x, y))"),
+    ("shiftRight", "Nat", "UInt8.toNat(UInt8.shiftRight(x, y))"),
+    ("map", "List String", "List.map(Nat.repr, [UInt8.toNat(x + y)])"),
+    ("display", "String",
+      "String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y)]))")]
+  let requests : Array PsV7Native.Request := syntax.map fun (_, resultType, expression) =>
+    { source := "function operation(a: Nat, b: Nat): " ++ resultType ++
+        " := { let x: UInt8 := UInt8.ofNat(a)\\n let y: UInt8 := UInt8.ofNat(b)\\n " ++
+        expression ++ " }\\n" }
+  let result ← PsV7Native.runBatch requests
+  let batch ← match result with
+    | .error error => throw (IO.userError ("unsigned source matrix: " ++ error.message))
+    | .ok batch => pure batch
+  for i in [:syntax.size] do
+    let some (label, _, _) := syntax[i]? | throw (IO.userError "missing unsigned label")
+    let some answer := batch.results[i]? | throw (IO.userError "missing unsigned result")
+    match answer with
+    | .ok _ => IO.println ("PSCV0_UNSIGNED_SOURCE: PASS " ++ label)
+    | .error problem => throw (IO.userError ("PSCV0_UNSIGNED_SOURCE: " ++ label ++
+        " refused at " ++ problem.phase ++ ": " ++ problem.message))
+
 private def wordFixture : String :=
   "function wordOperations8(a: Nat, b: Nat): String := { let x: UInt8 := UInt8.ofNat(a)\n let y: UInt8 := UInt8.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt8.toNat(x + y), UInt8.toNat(x - y), UInt8.toNat(x * y), UInt8.toNat(x / y), UInt8.toNat(x % y), UInt8.toNat(-x), UInt8.toNat(UInt8.complement(x)), UInt8.toNat(UInt8.land(x, y)), UInt8.toNat(UInt8.lor(x, y)), UInt8.toNat(UInt8.xor(x, y)), UInt8.toNat(UInt8.shiftLeft(x, y)), UInt8.toNat(UInt8.shiftRight(x, y))])) }\nfunction wordOperations16(a: Nat, b: Nat): String := { let x: UInt16 := UInt16.ofNat(a)\n let y: UInt16 := UInt16.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt16.toNat(x + y), UInt16.toNat(x - y), UInt16.toNat(x * y), UInt16.toNat(x / y), UInt16.toNat(x % y), UInt16.toNat(-x), UInt16.toNat(UInt16.complement(x)), UInt16.toNat(UInt16.land(x, y)), UInt16.toNat(UInt16.lor(x, y)), UInt16.toNat(UInt16.xor(x, y)), UInt16.toNat(UInt16.shiftLeft(x, y)), UInt16.toNat(UInt16.shiftRight(x, y))])) }\nfunction wordOperations32(a: Nat, b: Nat): String := { let x: UInt32 := UInt32.ofNat(a)\n let y: UInt32 := UInt32.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt32.toNat(x + y), UInt32.toNat(x - y), UInt32.toNat(x * y), UInt32.toNat(x / y), UInt32.toNat(x % y), UInt32.toNat(-x), UInt32.toNat(UInt32.complement(x)), UInt32.toNat(UInt32.land(x, y)), UInt32.toNat(UInt32.lor(x, y)), UInt32.toNat(UInt32.xor(x, y)), UInt32.toNat(UInt32.shiftLeft(x, y)), UInt32.toNat(UInt32.shiftRight(x, y))])) }\nfunction wordOperations64(a: Nat, b: Nat): String := { let x: UInt64 := UInt64.ofNat(a)\n let y: UInt64 := UInt64.ofNat(b)\n String.intercalate(\",\", List.map(Nat.repr, [UInt64.toNat(x + y), UInt64.toNat(x - y), UInt64.toNat(x * y), UInt64.toNat(x / y), UInt64.toNat(x % y), UInt64.toNat(-x), UInt64.toNat(UInt64.complement(x)), UInt64.toNat(UInt64.land(x, y)), UInt64.toNat(UInt64.lor(x, y)), UInt64.toNat(UInt64.xor(x, y)), UInt64.toNat(UInt64.shiftLeft(x, y)), UInt64.toNat(UInt64.shiftRight(x, y))])) }\nfunction wordApply(operation: UInt64 -> UInt64 -> UInt64, left: UInt64, right: UInt64): Nat := UInt64.toNat(operation(left)(right))\nconst wordHigherOrder: Nat := wordApply(UInt64.shiftLeft, (3 : UInt64), (65 : UInt64))\nfunction wordGeneric{A: Type}[operation: HAdd(A, A, A)](left: A, right: A): A := left + right\nconst wordGenericWrap: Nat := UInt8.toNat(wordGeneric((255 : UInt8), (2 : UInt8)))\ntheorem wordModel: UInt8.toNat(UInt8.add((255 : UInt8), (2 : UInt8))) = 1 := by { rfl }\n"
 
@@ -2301,6 +2339,7 @@ def main : IO Unit := do
   parserCases
   getElemFoundationCases
   highUniverseHashableCases
+  unsignedOperatorSourceCases
   semanticCases
   doBoundaries
   projectBoundaries

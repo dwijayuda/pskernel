@@ -327,6 +327,6 @@ example : accept (Box.mk 877) = 877 := rfl
 example : (boxed () : Nat) = 877 := rfl
 example : (Callable.mk (fun x => x + 1)) 880 = 881 := rfl
 example : (Action.mk (fun _ => 883)) () = 883 := rfl
-example : (identity (887 : Nat) : Nat) = 887 := rfl
+example : identity (887 : Nat) = (887 : Nat) := rfl
 example : fromLocal (Box.mk 907) = 907 := rfl
 end Pscv0CoercionOracle

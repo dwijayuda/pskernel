@@ -320,6 +320,9 @@ structure StandardExportSpec where
   privatePrefix : String
   provenance : String
   allowedAssumptions : List Lean.Name := []
+  -- Candidate authoring may replace reached legacy assumptions with their
+  -- actual native definitions. Frozen assets record the resulting exact cut.
+  replaceDefinitionAxioms : Bool := false
 
 -- One conversion, admission and source-rendering pipeline for reviewed library
 -- slices. Profiles choose roots and a boundary; they cannot bypass checking.
@@ -329,12 +332,22 @@ private def exportStandardCore (spec : StandardExportSpec)
   let native ← Lean.importModules #[{ module := `Init }] {}
   unless Lean.githash == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" do
     throw (IO.userError "Standard export requires the pinned Lean 4.35.0 commit")
-  let boundary := spec.boundary.foldl
+  let originalBoundary := spec.boundary.foldl
     (fun (names : Lean.NameSet) name => names.insert (PsKernelLean.toLeanName name)) {}
-  let base := spec.baseDeclarations.filter
-    (fun d => boundary.contains (PsKernelLean.toLeanName (psDeclarationName d)))
-  unless base.length == spec.boundary.length do
+  let originalBase := spec.baseDeclarations.filter
+    (fun d => originalBoundary.contains (PsKernelLean.toLeanName (psDeclarationName d)))
+  unless originalBase.length == spec.boundary.length do
     throw (IO.userError "frozen Standard export boundary has missing or duplicate declarations")
+  -- A portable axiom cannot cut a native definition whose computation a proof
+  -- uses. Follow these definitions in the same closure traversal, then replace
+  -- only the reached declarations. Unrelated primitives stay in the base.
+  let boundary := originalBase.foldl (fun (names : Lean.NameSet) declaration =>
+    let name := PsKernelLean.toLeanName (psDeclarationName declaration)
+    let replace := spec.replaceDefinitionAxioms && match declaration, native.find? name with
+      | .axiomDecl .., some (.defnInfo _) => true
+      | .axiomDecl .., some (.thmInfo _) => true
+      | _, _ => false
+    if replace then names else names.insert name) {}
   let mut seen : Lean.NameSet := {}
   let mut entries : Array Lean.ConstantInfo := #[]
   for root in spec.roots do
@@ -345,9 +358,14 @@ private def exportStandardCore (spec : StandardExportSpec)
         seen := seen.insert info.name
         entries := entries.push info
   entries := entries.qsort (fun a b => Lean.Name.lt a.name b.name)
+  let base := originalBase.filter
+    (fun d => !seen.contains (PsKernelLean.toLeanName (psDeclarationName d)))
+  let replaced := originalBase.filter
+    (fun d => seen.contains (PsKernelLean.toLeanName (psDeclarationName d)))
   IO.println (Lean.Json.mkObj [
     ("schema", Lean.toJson ("pscv0-standard-candidate-policy/1" : String)),
     ("declarations", Lean.toJson entries.size),
+    ("replacedDefinitionAxioms", Lean.toJson (replaced.map (fun d => psNameToString (psDeclarationName d)))),
     ("axioms", Lean.toJson ((entries.filter Lean.ConstantInfo.isAxiom).map (fun info => toString info.name))),
     ("quotientPrimitives", Lean.toJson (entries.filterMap fun info =>
       match info with | .quotInfo _ => some (toString info.name) | _ => none))]).compress
@@ -449,11 +467,10 @@ def exportUnsignedOperationsCandidate (output : System.FilePath) : IO Unit :=
   let roots := [`Nat.div] ++ owners.flatMap (fun owner =>
     methods.map (fun method => Lean.Name.str (Lean.Name.str .anonymous owner) method))
   let declarations := psSelfHostProdPreludeEnvironment.declarations
-  let boundary := declarations.filterMap fun declaration =>
-    let name := psDeclarationName declaration
-    if psNameToString name == "Nat.div" then none else some name
+  let boundary := declarations.map psDeclarationName
   exportStandardCore {
     roots, boundary, baseDeclarations := declarations
+    replaceDefinitionAxioms := true
     allowedAssumptions := [`propext, `Quot.sound]
     publicPrefix := "psStandardUnsignedOperations"
     privatePrefix := "unsignedOperationDecl"

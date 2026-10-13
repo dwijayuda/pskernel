@@ -41,8 +41,9 @@ UInt shifts reduce the shift operand modulo the width. General
 accept Nat or bitvector shifts and have their own width semantics; a UInt shift
 plan cannot silently stand in for arbitrary-width BitVec shifting.
 
-The native exporter rejects new axioms/unsafe/partial/quotient primitives,
-rechecks converted data with the official kernel, and compares regenerated
+The native exporter refuses unapproved new axioms, unsafe/partial declarations,
+and unsupported primitives. The reviewed unsigned slice permits exactly the
+two approved logical assumptions and four checked quotient descriptors. It rechecks converted data with the official kernel, and compares regenerated
 constructor/recursor signatures. A name collision is not evidence of semantic
 compatibility. Keep every exported asset's exact pre-admission declaration
 stage and frozen name boundary.
@@ -278,3 +279,20 @@ it does not delta-unfold declarations or accept arbitrary type mismatches.
 Failure diagnostics retain both original signatures. The compiler and
 independent mixed-universe native oracle compiled at Linux38472091325;
 full replay and integration remain pending.
+
+## Native definition cuts, not name-only reuse
+
+Linux38472303998 passed normalized product signatures and the isolated
+quotient gate. The next proof refused was instDecidableIff._proof_1:
+its decision must compute Bool equality, but PSC0's old Bool.decEq was an
+axiom. Pinned Init/Prelude.lean:Bool.decEq and Init/Core.lean's
+Decidable-Iff instance show the required reduction through the reflected Bool.
+
+Candidate closure selection now traverses reached native safe definitions or
+theorems that had been represented as portable axioms. It replaces exactly
+those reached declarations, records the replacement list, and retains unused
+base primitives. Conversion and fresh official kernel replay remain mandatory;
+proof bodies and acceptance are unchanged. Actual native opaque primitives
+retain their existing boundary. This removes the general invalid cut, including
+Nat.div and Bool.decEq, without a growing list of failing-proof exceptions.
+After review/admission, the asset's resulting name cut is frozen as before.

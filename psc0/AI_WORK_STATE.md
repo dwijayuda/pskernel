@@ -1,55 +1,49 @@
-# Foundation approval received — 14 October 2026
+# Active continuation — 14 October 2026
 
-The user explicitly approved exactly Lean 4.35.0 `propext` and `Quot.sound`.
-The native exporter now permits those two names in the unsigned operation slice
-only; other slices retain an empty new-assumption allowlist. Continue kernel
-replay, review, admission, strict digest qualification and all-target checks.
-The earlier approval-pending entry below is historical; do not ask again.
-The candidate is not yet admitted and full M2+A remains incomplete.
+Current product-universe implementation: `ab79de4408f233177933381a64ef2c9f2f948b1f`.
+Linux38472303998 passed product signature and quotient gates, then exposed
+legacy axiom cuts at Bool.decEq. Candidate boundary selection now traverses
+and replaces all reached native definitions represented as portable axioms;
+qualification of this general repair is pending. The last complete green remains /60 at
+`d72fc7779b2e8d130915dfe4ace339634ba0addd` / Linux38466179341 below.
+**M2+A is incomplete; continue autonomously through its remaining exit gates.**
 
----
+The user explicitly approved exactly pinned Lean 4.35.0 `propext` and
+`Quot.sound`. The unsigned native exporter now has that precise per-slice
+allowlist. Other slices retain an empty allowlist. Do not ask again.
+No candidate asset or additional assumption has yet entered the active Standard.
 
-# Active continuation — 14 October 2026: foundation approval pending
+Linux38470857650 passed isolated official quotient regeneration, lift/ind
+computation, forged-signature and collision refusal. The unsigned candidate has
+795 declarations, exactly the two approved axioms and all four kernel quotient
+descriptors. Replay exposed Type0-only Prod in the old foundation.
 
-Latest published implementation before this note: `c5aa4b2285249eced0bc69b306e488768c5118c3`.
-The ToFormat/Repr/Hashable /60 checkpoint below remains the last full green.
-Current quotient-mechanism and shared word-backend changes are under Linux
-qualification; do not claim unsigned operations or full M2+A complete.
+The shared Prod/mk/rec/fst/snd foundation now carries independent universes and
+checked projection definitions. Inhabited/BEq/ReprTuple/Repr/ToFormat/Hashable
+use the same levels. The old projection axioms/signature exceptions are removed.
+Native compiler and independent high-universe oracle compile. Strict signature
+comparison now uses Lean's own level normalization; qualification is pending.
+Eight observations cover mixed levels, defaults, equality, display and hashing.
 
-**Actual blocker:** automatic approval review rejected publishing a proposed
-per-slice allowlist for exactly pinned Lean `propext` and `Quot.sound`.
-The user was asked explicitly via the asynchronous question. Until approved,
-retain the current refusal. If approved, do not ask again: apply the documented
-trust change, export/review/admit the full unsigned slice, update both strict
-digests from independent CI evidence, and continue remaining M2+A.
+Next: finish product/native replay qualification and strict digest review;
+review/export/admit the complete unsigned-operation slice; freeze its hash-stage
+boundary; register the existing arithmetic classes for four widths. Retain all
+prior observations and add the compact native/all-target operation vectors.
+Unsigned runtime div/rem/shift implementations are compiled but not yet fully
+qualified through admitted source operations.
 
-The candidate policy inventory at
-[38469424406](https://github.com/dwijayuda/pskernel/actions/runs/38469424406)
-reported 794 new declarations, exactly those two axioms and three used kernel
-quotient descriptors. The exporter now closes the four-descriptor family.
-No candidate asset has been admitted; no new assumption is in the active
-Standard environment. CI explicitly verifies refusal at `Quot.sound` and
-runs the unchanged /60 integration matrix afterward.
+Shared infrastructure already present: function-valued recursive logical iota
+with native-rule comparison; explicit generative quotient descriptors and
+official checked admission; registered lift/ind reduction. These do not enable
+source well-founded recursion or general runtime quotients.
 
-Implemented infrastructure: capture-avoiding function-valued recursive iota,
-symbolic differential checks against actual Lean recursor rules; explicit
-kernel quotient metadata, official generative admission/signature checks,
-registered lift/ind reduction, isolated kernel computation and collision probes.
-This is logical foundation work, not source well-founded recursion or general
-quotient runtime support. Shared integer div/rem/shift lowering is implemented
-but the full operation family still awaits source admission and qualification.
+Remaining M2+A: signed/platform words, Float/scientific, expanded BitVec and
+selected APIs, comprehensive manifest, broader M2 coverage and C5 retention.
+Keep M2+A → M3+B → M4+C/D → M5/E. Recursive/indexed deriving stays with M3+B.
+See [source study and design](docs/PSCV0_M2_A_SCALAR_COMPLETION_2026-10-14.md).
 
-Next unsigned admission: freeze the current hash-stage replay base before
-extending it; retain actual Nat.div instead of its old axiom; add explicit
-HAdd/HSub/HMul/HDiv/HMod/Neg registrations for four widths; qualify the compact
-12-operation vectors, zero division, wrapped shifts and higher-order/generic
-calls against native Lean and all existing targets. Preserve all /60 cases.
-Signed/word-sized values, Float/scientific, expanded BitVec/selected APIs,
-comprehensive manifest, broader M2 evidence and C5 retention remain open.
-
-See [reviewed design and approval boundary](docs/PSCV0_M2_A_SCALAR_COMPLETION_2026-10-14.md).
-No local shell/build, pskernel-core, compiler-source .ps migration or self-hosting.
-Pinned official Lean 4.35.0; GitHub connector writes and Linux Actions only.
+Native .lean, official Lean4.35.0, GitHub connector source operations and Linux
+Actions only. No local shell/build, pskernel-core, self-hosting or source migration.
 
 ---
 

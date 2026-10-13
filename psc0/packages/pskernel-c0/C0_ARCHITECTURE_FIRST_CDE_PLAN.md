@@ -169,6 +169,8 @@ typed evaluator and chosen representation, semantics/resource/error
 refinement, one accepting WHNF/DefEq/inference/admission implementation and
 whole-workload qualification. This work does not waive B/F/G exit gates.
 
+**Latest qualified bounded CDE-8B/8C checkpoint:** [`e49e14e8`](https://github.com/dwijayuda/pskernel/commit/e49e14e8820ecf77a861e97ddba239778dd432a5), full [native CI 38465553974](https://github.com/dwijayuda/pskernel/actions/runs/38465553974) **SUCCESS**, including the latest full-check `Quot.lift` negative tests and reduction-policy-preserving checked admission. This supersedes earlier pending verification notes. Source checker authority remains exclusive; full independent accepting implementation, compatibility and formal refinement still open.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

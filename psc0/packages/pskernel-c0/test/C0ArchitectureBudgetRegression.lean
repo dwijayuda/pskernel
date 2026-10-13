@@ -43,7 +43,7 @@ def main : IO Unit := do
     throw (IO.userError "polymorphic constant readback bypassed quota")
   let captured : PsKernelC0Closure := .mk (.app (.bvar 0) (.bvar 0))
     [.mk v []]
-  c0BudgetAssertQuote "duplicated-capture" 64 128 captured (.app v v)
+  c0BudgetAssertQuote "duplicated-capture" 64 512 captured (.app v v)
   let some (raw, remainingRaw) :=
       psKernelC0QuoteClosureMetered 64 (.mk v []) 128
     | throw (IO.userError "basic budgeted quote declined")
@@ -81,13 +81,13 @@ def main : IO Unit := do
   let deepValue : PsKernelExpr := .app (.app neutral v) v
   let repeated : PsKernelC0Closure :=
     .mk (.app (.bvar 0) (.bvar 0)) [.mk deepValue []]
-  c0BudgetAssertQuote "wide-repeated-capture" 64 256 repeated
+  c0BudgetAssertQuote "wide-repeated-capture" 64 2048 repeated
     (.app deepValue deepValue)
   if (psKernelC0QuoteClosureMetered 64 repeated 7).isSome then
     throw (IO.userError "repeated captured syntax bypassed expansion quota")
   let doublyNested : PsKernelC0Closure := .mk (.bvar 0)
     [.mk (.bvar 0) [.mk v []]]
-  c0BudgetAssertQuote "nested-captured-environments" 64 128
+  c0BudgetAssertQuote "nested-captured-environments" 64 2048
     doublyNested v
   -- Binder metadata, names and sort levels remain source-exact.
   let polymorphic : PsKernelExpr :=

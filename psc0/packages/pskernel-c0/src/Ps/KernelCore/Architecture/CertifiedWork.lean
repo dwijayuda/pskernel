@@ -111,3 +111,37 @@ def psKernelC0CertifiedWorkCommit
     Option (PsKernelC0CertifiedStore × List PsKernelC0CertifiedRoot) :=
   psKernelC0CertifyPromotedRoots
     work.raw.scratch work.raw.stagedRoots.reverse
+
+/-- Stage exact source syntax in an immutable transaction, then certify
+    the resulting *owned* working root. The root proof is about syntax
+    readback only; type approval still requires a separate source check. -/
+def psKernelC0CertifiedWorkStageRoot
+    (work : PsKernelC0CertifiedWork)
+    (expr : PsKernelExpr) :
+    Option (PsKernelC0CertifiedWork × PsKernelC0CertifiedRoot) := do
+  let staged ← psKernelC0CertifiedWorkStage work expr
+  let root ← staged.raw.stagedRoots.head?
+  let owner ← psKernelC0CertifyStore staged.raw.scratch.working
+  let bound ← psKernelC0CertifyRootIn owner root
+  if psKernelExprEqual bound.expression expr then
+    some (staged, bound)
+  else none
+
+/-- Check the *exact decoded* expression of a certified immutable source
+    root. The root certificate is NOT a type certificate: the existing
+    independent source checker must still perform the full check. -/
+def psKernelC0CertifiedWorkCheckRoot
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (root : PsKernelC0CertifiedRoot) :
+    Except String (PsKernelExpr × PsKernelC0CertifiedWork) :=
+  psKernelC0CertifiedWorkCheck fuel work root.expression
+
+/-- The same deliberate distinction holds for type synthesis: a
+    certified expression can be inferable while not fully well typed. -/
+def psKernelC0CertifiedWorkInferRoot
+    (fuel : Nat)
+    (work : PsKernelC0CertifiedWork)
+    (root : PsKernelC0CertifiedRoot) :
+    Except String (PsKernelExpr × PsKernelC0CertifiedWork) :=
+  psKernelC0CertifiedWorkInfer fuel work root.expression

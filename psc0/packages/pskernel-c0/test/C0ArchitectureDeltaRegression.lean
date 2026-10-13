@@ -369,10 +369,17 @@ def main : IO Unit := do
     (c0DeltaNatBinary psKernelNatAddName
       (.proj pairType 1 (.app idRecord pairValue)) (c0DeltaNatLit 20))
     (c0DeltaNatLit 42)
-  c0DemandCheck "nat-demand-local-let" localSession
+  let localNatName := c0DeltaName "C0LocalNatLiteral"
+  let natLocalContext := psKernelLocalContextAddLet
+    session.context.localContext localNatName localNatName type (c0DeltaNatLit 40)
+  let natLocalSession : PsKernelCheckerSession := {
+    session with context := {
+      session.context with localContext := natLocalContext
+    }
+  }
+  c0DemandCheck "nat-demand-local-let" natLocalSession
     (c0DeltaNatBinary psKernelNatAddName
-      (c0DeltaNatLit 1)
-      (.app (.const psKernelNatSuccName []) (c0DeltaNatLit 40)))
+      (.fvar localNatName) (c0DeltaNatLit 2))
     (c0DeltaNatLit 42)
   let nestedNeutral : PsKernelExpr :=
     c0DeltaNatBinary psKernelNatAddName

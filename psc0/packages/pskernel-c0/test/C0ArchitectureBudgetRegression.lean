@@ -106,10 +106,28 @@ def main : IO Unit := do
   -- shared work quota; no nested environment bypasses the depth cutoff.
   if (psKernelC0ChargeMachineSyntax 1 capturedControl 128).isSome then
     throw (IO.userError "captured closure exceeded finite depth")
+  -- UTF-8 expansion reservation is charged before String.ofList
+  -- syntax materialization for projection/recursor major premises.
+  let stringProjectionState : PsKernelC0DemandState := {
+    machine := { control := .mk (.lit (.str "é")) [] }
+    frames := [
+      .projection { control := .mk (.proj (c0BudgetName "T") 0
+        (.lit (.str "é"))) [] } (c0BudgetName "T") 0
+    ]
+  }
+  if psKernelC0DemandStringReserve stringProjectionState != 48 then
+    throw (IO.userError "String major reservation ignored UTF-8 byte size")
+  if psKernelC0DemandStringReserve initial != 0 then
+    throw (IO.userError "non-String demand unexpectedly reserves expansion")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app
     (.lam x (.sort .zero) (.bvar 0) .default) v
+  match psKernelC0DemandRunWithBudget 128 128 32
+      session.context stringProjectionState with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "String expansion bypassed preallocation guard")
   match psKernelC0ArchitectureObserveDemandMetered 4096 4096 session arg with
   | .error reason =>
       throw (IO.userError ("trusted source WHNF declined: " ++ reason))

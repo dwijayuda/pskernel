@@ -46,3 +46,14 @@ the changed Standard digest remain pending.
 At this draft boundary, the logical roster should grow from 313 to 315
 declarations with classes/instances unchanged. Verify the observed inventory;
 do not treat this expectation as evidence. Profile /54.
+
+## Reviewed Standard change
+
+Linux [38438411914](https://github.com/dwijayuda/pskernel/actions/runs/38438411914)
+at `996635e5409956f2369ae5f0c5027a8dd3ffe736` compiled the full native closure
+and independent structural equations, then passed signature/reducibility audit.
+The intentional three-assumption replacement plus recursor/toNat addition reports
+FNV `fnv1a64:5885345544530235680` and SHA-256
+`sha256:739169c3254d48e26471fd8be9bda480341a21788dcf67d683c5982e996ac634`.
+Both strict values are reviewed and pinned; official prelude admission and full
+cross-target qualification follow in the next run.

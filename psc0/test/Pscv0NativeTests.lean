@@ -762,7 +762,8 @@ private def application : String :=
   "const bangDefaultValue: Nat := GetElem?.getElem!Default(Option.some(337))\n" ++
   "function bangDefaultTrap(n: Nat): Nat := GetElem?.getElem!Default((Option.none : Option Nat))\n" ++
   "function orderLeRuntime(n: Nat, m: Nat): Bool := if (Nat.le(n, m)) { true } else { false }\n" ++
-  "function orderLtRuntime(n: Nat, m: Nat): Bool := if (Nat.lt(n, m)) { true } else { false }\n"
+  "function orderLtRuntime(n: Nat, m: Nat): Bool := if (Nat.lt(n, m)) { true } else { false }\n" ++
+  "function orderDecisionRuntime(n: Nat, m: Nat): Bool := by {\n  cases Nat.decLe(n, m)\n  case intro flag reflection => exact flag\n}\n"
 
 private def instanceProgram : String :=
   "namespace Effects\n" ++

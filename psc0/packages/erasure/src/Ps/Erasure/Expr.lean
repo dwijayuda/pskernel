@@ -1821,6 +1821,8 @@ def psErasureSpecialEntry
     Option.some (PsErasureSpecialEntry.mk 5 true)
   else if named "Array.foldl" then
     Option.some (PsErasureSpecialEntry.mk 7 true)
+  else if named "Decidable.intro" then
+    Option.some (PsErasureSpecialEntry.mk 3 true)
   else if psListAny named ["Decidable.isTrue", "Decidable.isFalse", "Decidable.decide",
       "Bool.decEq", "Nat.decEq", "String.decEq"] then
     Option.some (PsErasureSpecialEntry.mk 2 true)
@@ -2032,6 +2034,7 @@ def psEraseDecisionApplication
   let text := psNameToString name
   let erase := eraseAt scope
   match text, view.args with
+  | "Decidable.intro", [_, choice, _] => return some (← erase choice)
   | "Decidable.isTrue", [_, _] => return some (.literal (.bool true))
   | "Decidable.isFalse", [_, _] => return some (.literal (.bool false))
   | "Decidable.decide", [_, decision] => return some (← erase decision)
@@ -2542,7 +2545,12 @@ def psEraseRuntimeExprWithFuelWorker
       | .forallE _ _ _ _ =>
           Except.error PsErasureError.unsupportedRuntimeTerm
       | .proj typeName index target =>
-          match
+          -- RC4 Decidable is represented by its sole computational Bool
+          -- field. The reflection field has no runtime projection.
+          if psNameEq typeName psDecidableName then
+            if index == 0 then erase target
+            else Except.error PsErasureError.unsupportedRuntimeTerm
+          else match
               psErasureLookupStructure
                 scope.runtimeStructures
                 typeName with

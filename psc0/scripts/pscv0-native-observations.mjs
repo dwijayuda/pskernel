@@ -1,5 +1,7 @@
 // One observation table shared by both generated runtimes.
 export const observations = [
+  { name: "orderDecisionRuntime", args: [9n, 10n], expected: true },
+  { name: "orderDecisionRuntime", args: [10n, 9n], expected: false },
   { name: "orderLeRuntime", args: [0n, 0n], expected: true },
   { name: "orderLeRuntime", args: [7n, 3n], expected: false },
   { name: "orderLtRuntime", args: [3n, 7n], expected: true },

@@ -428,6 +428,23 @@ def psKernelMutualDiagnosticName : PsKernelName → String
       let head := psKernelMutualDiagnosticName parent
       if head.isEmpty then toString suffix else head ++ "." ++ toString suffix
 
+/-- Only invoked after genuine fuel exhaustion. Inspect one exact delta step
+    without treating that inspection as proof, fuel credit, or a checked result. -/
+def psKernelMutualRecursiveDeltaHead
+    (session : PsKernelCheckerSession)
+    (domain : PsKernelExpr) : String :=
+  match psKernelUnfoldDefinition session.context domain with
+  | none => "no-delta"
+  | some unfolded =>
+      if psKernelExprEqual unfolded domain then
+        "unchanged-delta"
+      else
+        match psKernelExprGetAppFn unfolded with
+        | .const name _ => "delta-to-" ++ psKernelMutualDiagnosticName name
+        | .lam .. => "delta-to-lambda"
+        | .fvar .. => "delta-to-fvar"
+        | _ => "delta-to-other"
+
 /-- Diagnostics only: classify the already resolved head *declaration* kind
     of the first exhausting recursive field. No reduction or type judgment
     changes, and unknown heads never gain an accepting shortcut. -/
@@ -438,7 +455,8 @@ def psKernelMutualRecursiveDomainHeadKind
   | .const name _ =>
       match psKernelEnvironmentFind session.context.environment name with
       | some (.defnInfo _) =>
-          "definition-" ++ psKernelMutualDiagnosticName name
+          "definition-" ++ psKernelMutualDiagnosticName name ++ "-" ++
+            psKernelMutualRecursiveDeltaHead session domain
       | some (.inductInfo _) => "inductive"
       | some (.recInfo _) => "recursor"
       | some (.ctorInfo _) => "constructor"

@@ -444,23 +444,24 @@ def main : IO Unit := do
       if !equal then
         throw (IO.userError "checked Quot.lift was not definitionally equal")
   -- The same checked interface must reject a Quot.lift application
-  -- whose relation-preservation proof has the wrong type. Syntactic
-  -- quotient computation or candidate agreement cannot make it valid.
+  -- whose relation-preservation proof has the wrong type. Type INFERENCE
+  -- alone does not validate all arguments, so require full source CHECKING.
+  -- Syntactic quotient computation or candidate agreement cannot approve it.
   let badQuotLift : PsKernelExpr :=
     psKernelApplyArgs (.const psKernelQuotLiftName [.zero, .succ .zero])
       [propTy, relation, boxTy, liftFunction, (.sort .zero), quotMajor]
-  match psKernelC0ArchitectureInferWork 32768 quotWork badQuotLift with
+  match psKernelC0ArchitectureCheckWork 32768 quotWork badQuotLift with
   | .error _ => pure ()
   | .ok _ =>
       throw (IO.userError
-        "checked Quot.lift accepted invalid relation-preservation proof")
+        "full checker accepted invalid Quot.lift relation proof")
   let wrongQuotLevels : PsKernelExpr :=
     psKernelApplyArgs (.const psKernelQuotLiftName [.succ .zero, .succ .zero])
       [propTy, relation, boxTy, liftFunction, liftRespectful, quotMajor]
-  match psKernelC0ArchitectureInferWork 32768 quotWork wrongQuotLevels with
+  match psKernelC0ArchitectureCheckWork 32768 quotWork wrongQuotLevels with
   | .error _ => pure ()
   | .ok _ =>
-      throw (IO.userError "checked Quot.lift ignored source universe levels")
+      throw (IO.userError "full checker accepted invalid Quot.lift universe levels")
   -- Indexed K on a *source-admitted Eq*. The proof is a neutral local
   -- variable; only source type inference + DefEq of the candidate refl type
   -- may justify replacing it with Eq.refl.

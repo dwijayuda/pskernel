@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Diagnose exact transformed nested constructor reduction stage
+      - name: Identify constructor WHNF substage for nested Lean.Syntax
         shell: bash
         run: |
           set -euo pipefail

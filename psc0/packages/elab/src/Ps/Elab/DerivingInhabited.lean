@@ -13,10 +13,10 @@ def psElabDeriveInhabitedConstructor (plan : PsElabDeriveContext)
     let field ← (psInferEnsureForall context.environment context.metaContext
       context.localContext cursor).mapError PsElabError.infer
     let defaultValue ← match psElabDefaultValue context field.domain with
-      | some value => do
+      | some defaultCore => do
         -- A declared structure default wins over Inhabited synthesis and is
         -- checked after preceding fields have been substituted into its type.
-        let checked ← psElabResolvedTerm context value (some field.domain)
+        let checked ← psElabResolvedTerm context defaultCore (some field.domain)
         pure checked.term
       | none => do
         let level ← psElabExpressionSort context field.domain

@@ -1,5 +1,6 @@
 import Ps.Elab.DerivingContext
 import Ps.Elab.Equality
+import Ps.Environment.Decision
 
 structure PsElabDeriveDecEqConstructor where
   fields : PsElabDeriveFields
@@ -41,7 +42,9 @@ def psElabDeriveDecEqProof (context : PsElabContext)
       equation.left equation.right
     if !checked.success then
       throw (.data "derived equality did not close after field transport")
-    pure ({ context := psElabContextWithMeta context checked.context, type := target,
+    pure ({
+      context := psElabContextWithMeta context checked.context
+      type := target
       term := psLogicRefl equation.level equation.type equation.left } : PsElabTermResult)
   let proof ← psElabSolveIndexConstraints 4096 fields.length
     (right.map (·.id)) [] finish context telescope
@@ -93,8 +96,9 @@ def psElabDeriveDecEqSame (plan : PsElabDeriveContext)
       let projection ← if plan.info.isStructure then do
           let major := context.localContext.nextId
           pure (psLogicLam major "value" plan.family (.proj plan.info.name index (.fvar major)))
-        else psElabIndexFunction context left entry.fields.constructor.name (some index)
-          lhs.type leftValue leftValue
+        else
+          psElabIndexFunction context left entry.fields.constructor.name (some index)
+            lhs.type leftValue leftValue
       return some ({
         level, type := lhs.type, left := leftValue, right := rightValue,
         decision := psExprApplyMany method [leftValue, rightValue], projection } : PsElabDeriveDecEqField)

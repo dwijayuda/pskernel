@@ -89,3 +89,33 @@ def psKernelC0CertifyPromotedRoots
   let checked ← ids.mapM (psKernelC0CertifyRootIn owner)
   if checked.length == roots.length then some (owner, checked)
   else none
+
+/-- Two certified roots can belong to different immutable stores. This
+    witness certifies their exact metadata-sensitive source syntax agrees;
+    it never treats coincident numeric indices or hashes as equality. -/
+structure PsKernelC0CertifiedTransfer where
+  source : PsKernelC0CertifiedRoot
+  target : PsKernelC0CertifiedRoot
+  sameSyntax :
+    psKernelExprEqual source.expression target.expression = true
+
+/-- Rehome by decoding the source's certified expression and encoding it
+    into the target owner. The target is independently replay-certified,
+    and exact source syntax is checked before recording the relationship.
+    No checked term/type judgment is implied. -/
+def psKernelC0CertifiedRootRehome
+    (source : PsKernelC0CertifiedRoot)
+    (destination : PsKernelC0CertifiedStore) :
+    Option PsKernelC0CertifiedTransfer := do
+  let (store, targetId) ←
+    psKernelC0EncodeExpr destination.store source.expression
+  let target ← psKernelC0CertifyRoot store targetId
+  if h : psKernelExprEqual source.expression target.expression = true then
+    some { source := source, target := target, sameSyntax := h }
+  else none
+
+theorem psKernelC0CertifiedTransferExact
+    (transfer : PsKernelC0CertifiedTransfer) :
+    psKernelExprEqual transfer.source.expression
+      transfer.target.expression = true :=
+  transfer.sameSyntax

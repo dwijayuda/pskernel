@@ -173,6 +173,42 @@ def main : IO Unit := do
     (c0DeltaNatBinary psKernelNatDivName
       (c0DeltaNatLit 7) (c0DeltaNatLit 0))
     (c0DeltaNatLit 0)
+  c0DeltaCheck "nat-literal-pow" session
+    (c0DeltaNatBinary psKernelNatPowName
+      (c0DeltaNatLit 2) (c0DeltaNatLit 5))
+    (c0DeltaNatLit 32)
+  c0DeltaCheck "nat-literal-gcd" session
+    (c0DeltaNatBinary psKernelNatGcdName
+      (c0DeltaNatLit 18) (c0DeltaNatLit 12))
+    (c0DeltaNatLit 6)
+  c0DeltaCheck "nat-literal-mod" session
+    (c0DeltaNatBinary psKernelNatModName
+      (c0DeltaNatLit 7) (c0DeltaNatLit 3))
+    (c0DeltaNatLit 1)
+  c0DeltaCheck "nat-literal-ble" session
+    (c0DeltaNatBinary psKernelNatBleName
+      (c0DeltaNatLit 3) (c0DeltaNatLit 5))
+    (psKernelBoolExpr true)
+  c0DeltaCheck "nat-literal-land" session
+    (c0DeltaNatBinary psKernelNatLandName
+      (c0DeltaNatLit 6) (c0DeltaNatLit 3))
+    (c0DeltaNatLit 2)
+  c0DeltaCheck "nat-literal-lor" session
+    (c0DeltaNatBinary psKernelNatLorName
+      (c0DeltaNatLit 6) (c0DeltaNatLit 3))
+    (c0DeltaNatLit 7)
+  c0DeltaCheck "nat-literal-xor" session
+    (c0DeltaNatBinary psKernelNatXorName
+      (c0DeltaNatLit 6) (c0DeltaNatLit 3))
+    (c0DeltaNatLit 5)
+  c0DeltaCheck "nat-literal-shift-left" session
+    (c0DeltaNatBinary psKernelNatShiftLeftName
+      (c0DeltaNatLit 3) (c0DeltaNatLit 2))
+    (c0DeltaNatLit 12)
+  c0DeltaCheck "nat-literal-shift-right" session
+    (c0DeltaNatBinary psKernelNatShiftRightName
+      (c0DeltaNatLit 9) (c0DeltaNatLit 2))
+    (c0DeltaNatLit 2)
   c0DeltaCheck "nat-literal-eq" session
     (c0DeltaNatBinary psKernelNatBeqName
       (c0DeltaNatLit 7) (c0DeltaNatLit 7))
@@ -189,6 +225,15 @@ def main : IO Unit := do
     (.letE natBinder (.sort .zero) (c0DeltaNatLit 40)
       add2 false)
     (c0DeltaNatLit 42)
+  -- Candidate size exhaustion must not silently turn into acceptance.
+  let tinySession := psKernelMkCheckerSession env2 []
+    .safe 4096 1
+  match psKernelC0ArchitectureCandidateDelta 4096 tinySession.context
+      (c0DeltaNatBinary psKernelNatAddName
+        (c0DeltaNatLit 255) (c0DeltaNatLit 1)) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "Nat candidate bypassed checked numeral-size policy")
   let neutral : PsKernelExpr := .const (c0DeltaName "NatNeutral") []
   let stuckNat := c0DeltaNatBinary psKernelNatAddName neutral
     (c0DeltaNatLit 2)

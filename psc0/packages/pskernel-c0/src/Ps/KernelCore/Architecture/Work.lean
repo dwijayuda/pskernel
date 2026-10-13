@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Structural
+import Ps.KernelCore.Architecture.Demand
 import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Admission.Declaration.Admission
 
@@ -89,6 +89,19 @@ def psKernelC0ArchitecturePreviewStructural
     throw "invalid candidate architecture transaction"
   let (observation, session) ←
     psKernelC0ArchitectureObserveStructural fuel work.checker expr
+  return (observation, { work with checker := session })
+
+/-- Fuel-accounted, nested-demand candidate preview. The source checker
+    WHNF is still the only authoritative observation or cache producer. -/
+def psKernelC0ArchitecturePreviewDemand
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0ExecutionObservation × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveDemand fuel work.checker expr
   return (observation, { work with checker := session })
 
 /-- Phase E authority seam. On failure no next work exists: the caller retains

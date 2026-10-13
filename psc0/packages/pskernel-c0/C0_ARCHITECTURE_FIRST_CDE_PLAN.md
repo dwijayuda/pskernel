@@ -109,6 +109,10 @@ Mandatory source-WHNF differentials exercise direct and β/ζ-major constructors
 
 **CDE-8 executable qualification update (2026-10-14):** The latest bounded implementation [`d5a179dc`](https://github.com/dwijayuda/pskernel/commit/d5a179dc08cd361f70a5d34001d1eea4cc99e736) has **full native [CI 38448498595](https://github.com/dwijayuda/pskernel/actions/runs/38448498595) SUCCESS**, including Lean 4.35 compilation, official source/reject fixtures, the mandatory bounded-resource and K/eta observation regressions, negative/resource/migration checks, microbenchmarks and independently rebuilt original checker comparison. The scope is **candidate work-budget foundation and source-typed observation only**; globally complete allocation metering, positive real-checked K/eta coverage, Phase C/D/E exits, full Phase B acceptance and formal soundness remain outstanding. Documentation commits after `d5a179dc` do not represent new executable qualification.
 
+## CDE-8A.2 — whole demand-state work footprint (2026-10-14)
+
+`Budget.lean` now charges the live closure environment, delayed argument environments and retained parent continuation frames at every transition using one shared finite-depth work quota. It additionally charges UTF-8 String literal storage and pre-reserves conservative `String.ofList` expansion work before the existing reduction dispatcher materializes it. Final quotation receives the remaining quota. Negative regressions cover hidden captures, saved frames, string bytes, and source-authoritative decline. The implementation is opt-in, not a new accepting kernel, and the cost units are conservative syntactic-work units rather than proved heap bytes. Latest code `57cbdd4e`; native qualification run [38452517448](https://github.com/dwijayuda/pskernel/actions/runs/38452517448) must finish before claiming the full gate. Remaining: meter *all* intermediate rewrites under a stated cost model, validate large checked workloads, then typed K/eta and trusted integration.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

@@ -40,7 +40,8 @@ def psElabDeriveInhabited (environment : PsEnvironment)
     | .ok value => pure (plan, value)
     | .error _ => do
       let plan := psElabDeriveRequirements plan (psRootName "Inhabited")
-      return (plan, ← psElabDeriveInhabitedValue plan)
+      let value ← psElabDeriveInhabitedValue plan
+      pure (plan, value)
   let level ← psElabExpressionSort plan.context plan.family
   psElabDeriveFinish plan "instInhabited"
     (psStandardInhabitedType plan.family level)

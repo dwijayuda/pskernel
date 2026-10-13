@@ -1,5 +1,25 @@
 # PSKernel-C0 — Lean 4.35 Phase B/C qualification ledger
 
+## Real Lean 4.35 Init export: qualified external source baseline
+
+[Real Init survey CI 38332890884](https://github.com/dwijayuda/pskernel/actions/runs/38332890884) **passed** using pinned `lean4export` commit `5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe` with Lean 4.35.0. Official `leanchecker --from-export` accepted the actual `Init` plus transitive dependencies. The exact NDJSON SHA256 is `c1b2071a6d2132ace8c4711499f078aab2117d925213d5a222a1fe843a59a179`. The original large export is not committed; a compact inventory is available in the CI artifact.
+
+| Source observation | Count |
+| --- | ---: |
+| NDJSON bytes | 345,690,182 |
+| Source records | 6,452,982 |
+| Top-level declarations | 57,919 |
+| Theorems | 41,920 |
+| Definitions | 15,143 |
+| Inductive groups | 604 |
+| Opaque declarations | 244 |
+| Axioms | 4 |
+| Quotient declarations | 4 |
+
+The first *currently unsupported* top-level family for C0's strict test adapter is an **inductive group at record 69**. The survey also observed 5,189,376 application nodes, 535,415 lambdas, 300,072 foralls and 56,957 constant expression nodes. This guides realistic cost and completeness work, but **does not establish that C0 checked any real Init declaration** or that its current importer is memory-efficient. It also does not measure C0 vs official Lean on an identical accepted corpus.
+
+**Next coherent Phase B gate:** reconstruct entire exported inductive groups through existing checked native C0 inductive admission, derive and cross-validate all exported constructor/recursor metadata instead of treating derived declarations as axioms, and explicitly decline unsupported mutual/nested/safety forms. Only after official per-family parity should actual Init prefixes become native C0 acceptance tests. Quot support, real library resource/error/fuel categories and bounded-memory source decoding remain separate gates. Phase C's numeric handles must not determine type-checking verdicts until provenance and refinement are qualified.
+
 **Date:** 2026-10-13  
 **Branch:** `perf/pskernel-c0-v7-rust-20261012`  
 **Target:** pinned stable `leanprover/lean4:v4.35.0`  

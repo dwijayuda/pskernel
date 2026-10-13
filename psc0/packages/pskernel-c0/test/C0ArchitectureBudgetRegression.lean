@@ -67,6 +67,45 @@ def main : IO Unit := do
     .lam x (.sort (.succ .zero)) (.bvar 0) .implicit
   c0BudgetAssertQuote "binder-exact-readback" 64 128
     (.mk polymorphic []) polymorphic
+  -- UTF-8 byte storage must be charged in addition to the literal node.
+  -- "é" occupies two bytes; a zero-sized String still costs one AST node.
+  match psKernelC0ChargeExpr (.lit (.str "é")) 3 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "UTF-8 source work charge was not exact")
+  if (psKernelC0ChargeExpr (.lit (.str "é")) 2).isSome then
+    throw (IO.userError "UTF-8 literal bypassed shared work quota")
+  match psKernelC0ChargeExpr (.lit (.str "")) 1 with
+  | some 0 => pure ()
+  | _ => throw (IO.userError "empty String literal node not charged")
+  -- Previously machine-step charging ignored captured environments; a
+  -- large delayed value could be hidden inside one cheap .bvar control.
+  let capturedControl : PsKernelC0Machine := {
+    control := .mk (.bvar 0) [.mk deepValue []]
+  }
+  if (psKernelC0ChargeMachineSyntax 32 capturedControl 3).isSome then
+    throw (IO.userError "captured environment evaded work quota")
+  match psKernelC0ChargeMachineSyntax 32 capturedControl 64 with
+  | none => throw (IO.userError "captured syntax declined adequate quota")
+  | some remaining =>
+      if remaining >= 64 then
+        throw (IO.userError "captured environment charged zero work")
+  -- Delayed arguments and saved parent continuation frames are both
+  -- part of the reachable operation state, not free resources.
+  let withContinuation : PsKernelC0DemandState := {
+    machine := { control := .mk v [] }
+    frames := [.natLeft machine (.mk deepValue [])]
+  }
+  if (psKernelC0ChargeDemandStateSyntax 32 withContinuation 5).isSome then
+    throw (IO.userError "saved Nat continuation was not charged")
+  match psKernelC0ChargeDemandStateSyntax 32 withContinuation 128 with
+  | none => throw (IO.userError "valid continuation exhausted wide quota")
+  | some remaining =>
+      if remaining >= 128 then
+        throw (IO.userError "continuation footprint did not consume budget")
+  -- Every quoted environment has a finite recursion depth as well as a
+  -- shared work quota; no nested environment bypasses the depth cutoff.
+  if (psKernelC0ChargeMachineSyntax 1 capturedControl 128).isSome then
+    throw (IO.userError "captured closure exceeded finite depth")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
   let arg : PsKernelExpr := .app

@@ -58,21 +58,93 @@ instance (store : PsKernelC0TermStore) :
   unfold psKernelC0StoreTopological
   infer_instance
 
+/-- The stored columns must equal their *actual* child-derived
+    values in this immutable store. This is a mathematical proposition over
+    the exact stored entry, not an assumption based on a hash match. -/
+def psKernelC0NodeColumnsCorrect
+    (store : PsKernelC0TermStore)
+    (i : Fin store.nodes.size) : Prop :=
+  let entry := store.nodes[i]
+  let hashes := psKernelC0NodeHashes store entry.node
+  entry.hash = hashes.fst ∧
+    entry.checkerHash = hashes.snd ∧
+    entry.depth = psKernelC0NodeDepth store entry.node ∧
+    entry.looseBVarRange = psKernelC0NodeLooseRange store entry.node
+
+private instance (store : PsKernelC0TermStore)
+    (i : Fin store.nodes.size) :
+    Decidable (psKernelC0NodeColumnsCorrect store i) := by
+  unfold psKernelC0NodeColumnsCorrect
+  infer_instance
+
+/-- All stored hash, checker-hash, depth and de Bruijn-range columns
+    are exactly recomputed from the immutable graph. -/
+def psKernelC0StoreColumnsCorrect
+    (store : PsKernelC0TermStore) : Prop :=
+  ∀ i : Fin store.nodes.size, psKernelC0NodeColumnsCorrect store i
+
+instance (store : PsKernelC0TermStore) :
+    Decidable (psKernelC0StoreColumnsCorrect store) := by
+  unfold psKernelC0StoreColumnsCorrect
+  infer_instance
+
+/-- Each node must be discoverable in its own collision-checked index
+    bucket at its exact canonical ID. This expresses per-node index
+    ownership without quadratic all-pairs comparison or trusting a hash
+    collision as equality. Global absence of ghost bucket entries is
+    separately established by the canonical replay proof. -/
+def psKernelC0NodeIndexedAt
+    (store : PsKernelC0TermStore)
+    (i : Fin store.nodes.size) : Prop :=
+  let entry := store.nodes[i]
+  psKernelC0FindNode store entry.node
+    (psKernelC0TermTrieBucket psKernelC0IndexDepth
+      store.index entry.hash) = some i.val
+
+private instance (store : PsKernelC0TermStore)
+    (i : Fin store.nodes.size) :
+    Decidable (psKernelC0NodeIndexedAt store i) := by
+  unfold psKernelC0NodeIndexedAt
+  infer_instance
+
+def psKernelC0StoreIndexed
+    (store : PsKernelC0TermStore) : Prop :=
+  ∀ i : Fin store.nodes.size, psKernelC0NodeIndexedAt store i
+
+instance (store : PsKernelC0TermStore) :
+    Decidable (psKernelC0StoreIndexed store) := by
+  unfold psKernelC0StoreIndexed
+  infer_instance
+
+/-- A coherent, explicit mathematical representation invariant:
+    topological acyclicity, exact derived columns, canonical per-node
+    index discovery, and the independently replayed whole collision
+    index (the latter carried separately in CertifiedStore). -/
+def psKernelC0StoreWF (store : PsKernelC0TermStore) : Prop :=
+  psKernelC0StoreTopological store ∧
+    psKernelC0StoreColumnsCorrect store ∧
+    psKernelC0StoreIndexed store
+
+instance (store : PsKernelC0TermStore) :
+    Decidable (psKernelC0StoreWF store) := by
+  unfold psKernelC0StoreWF
+  infer_instance
+
 /-- An immutable store together with a proof that deterministic canonical
     replay accepts its entire node graph and index. A hash alone is never
     sufficient to construct this value. -/
 structure PsKernelC0CertifiedStore where
   store : PsKernelC0TermStore
   canonical : psKernelC0ReplayValidateStore store = true
-  topology : psKernelC0StoreTopological store
+  wellFormed : psKernelC0StoreWF store
 
 /-- Check exactly once at construction. Future code using the same immutable
     value may rely on the proof, not on an untrusted cache or a hash. -/
 def psKernelC0CertifyStore
     (store : PsKernelC0TermStore) : Option PsKernelC0CertifiedStore :=
   if h : psKernelC0ReplayValidateStore store = true then
-    if topology : psKernelC0StoreTopological store then
-      some { store := store, canonical := h, topology := topology }
+    if wf : psKernelC0StoreWF store then
+      some { store := store, canonical := h, wellFormed := wf }
     else none
   else none
 
@@ -132,7 +204,24 @@ theorem psKernelC0CertifiedRootStore_canonical
 theorem psKernelC0CertifiedRootStore_topological
     (cert : PsKernelC0CertifiedRoot) :
     psKernelC0StoreTopological cert.owner.store :=
-  cert.owner.topology
+  cert.owner.wellFormed.1
+
+/-- The derived metadata and canonical-index ownership are proven
+    properties of this exact immutable stored expression graph. -/
+theorem psKernelC0CertifiedRootColumns_correct
+    (cert : PsKernelC0CertifiedRoot) :
+    psKernelC0StoreColumnsCorrect cert.owner.store :=
+  cert.owner.wellFormed.2.1
+
+theorem psKernelC0CertifiedRootIndex_correct
+    (cert : PsKernelC0CertifiedRoot) :
+    psKernelC0StoreIndexed cert.owner.store :=
+  cert.owner.wellFormed.2.2
+
+theorem psKernelC0CertifiedRootStore_wf
+    (cert : PsKernelC0CertifiedRoot) :
+    psKernelC0StoreWF cert.owner.store :=
+  cert.owner.wellFormed
 
 /-- Atomically promote selected scratch roots through the existing replay-
     validated implementation, then construct proof-carrying owner/root pairs

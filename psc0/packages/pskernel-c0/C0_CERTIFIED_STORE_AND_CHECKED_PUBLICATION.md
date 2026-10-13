@@ -4,6 +4,8 @@
 **Repository:** `dwijayuda/pskernel` · **Branch:** `perf/pskernel-c0-v7-rust-20261012`  
 **Language/toolchain:** native Lean 4.35 · **Scope:** `psc0/packages/pskernel-c0/`
 
+**Full bounded qualification:** executable [`2d55fd03`](https://github.com/dwijayuda/pskernel/commit/2d55fd039a2c9ae4d51586c640988b3ae23a2124) — **native [CI 38473598945](https://github.com/dwijayuda/pskernel/actions/runs/38473598945) SUCCESS**. This run qualified the proof-carrying checked-root equality witnesses, multi-root source-checked publication, closure/universe negative tests, mandatory kernel/source conformance, native microbenchmarks and independent original-C0 checker comparison. Separately [CI 38473185917](https://github.com/dwijayuda/pskernel/actions/runs/38473185917) qualified the matched replay-vs-certified WHNF/DefEq overhead microbenchmark. Not a formal StoreWF soundness theorem or independent optimized kernel.
+
 ## 1. Architecture objective
 
 The existing C0 indexed-expression representation provides persistent/scratch

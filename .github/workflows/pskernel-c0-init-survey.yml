@@ -42,6 +42,22 @@ jobs:
           }
           cat "$RUNNER_TEMP/leanchecker-result.txt"
           grep -Fq "Lean default kernel accepts the solution" "$RUNNER_TEMP/leanchecker-result.txt"
+      - name: Preserve and inspect real first inductive export prefix
+        shell: bash
+        run: |
+          set -euo pipefail
+          head -n 69 "$RUNNER_TEMP/Init-4.35.0.ndjson" > "$RUNNER_TEMP/Init-first-inductive.ndjson"
+          # This prefix includes the first real exported inductive group.
+          # A verdict on the prefix is separate from the full Init check.
+          (cd "$RUNNER_TEMP/lean4export" && lake env leanchecker --from-export "$RUNNER_TEMP/Init-first-inductive.ndjson") > "$RUNNER_TEMP/first-inductive-official.txt" 2>&1 || {
+            cat "$RUNNER_TEMP/first-inductive-official.txt"
+            echo "C0_REAL_INIT_PREFIX_OFFICIAL verdict=not_accepted"
+            exit 0
+          }
+          cat "$RUNNER_TEMP/first-inductive-official.txt"
+          echo "C0_REAL_INIT_PREFIX_BEGIN"
+          cat "$RUNNER_TEMP/Init-first-inductive.ndjson"
+          echo "C0_REAL_INIT_PREFIX_END"
       - name: Publish declaration and expression coverage inventory
         shell: bash
         run: |
@@ -110,6 +126,8 @@ jobs:
           name: pskernel-c0-real-init-435-survey
           path: |
             ${{ runner.temp }}/Init-4.35.0-survey.json
+            ${{ runner.temp }}/Init-first-inductive.ndjson
+            ${{ runner.temp }}/first-inductive-official.txt
             ${{ runner.temp }}/leanchecker-result.txt
           if-no-files-found: warn
           retention-days: 14

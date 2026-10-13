@@ -144,7 +144,7 @@ jobs:
           if line_no != target:
               raise RuntimeError("did not reach C0 first divergence record")
           PY
-      - name: Verify recursive-domain WHNF as first nested reduction failure
+      - name: Determine fresh target occurrence in failing recursive WHNF domain
         shell: bash
         run: |
           set -euo pipefail

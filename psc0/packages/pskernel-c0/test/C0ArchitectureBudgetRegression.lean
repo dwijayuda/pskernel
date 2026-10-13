@@ -163,6 +163,24 @@ def main : IO Unit := do
     psKernelEnvironmentEmpty (.defnInfo definition)
   let deltaSession := psKernelMkCheckerSession deltaEnv []
     .safe 4096 psKernelLeanNatMaxSizeDefault
+  -- End-to-end source-owned δ agreement using the same metered
+  -- candidate work allowance across reification, unfolding and readback.
+  match psKernelC0ArchitectureObserveDemandMetered 4096 16384
+      deltaSession (.const deltaName []) with
+  | .error err =>
+      throw (IO.userError ("metered delta changed checked source: " ++ err))
+  | .ok (observation, _) =>
+      if !observation.agrees ||
+          !psKernelExprEqual observation.sourceValue deepValue then
+        throw (IO.userError "metered delta/source syntax disagreement")
+  match psKernelC0ArchitectureObserveDemandMetered 4096 16
+      deltaSession (.const deltaName []) with
+  | .error err =>
+      throw (IO.userError ("delta resource limit changed source: " ++ err))
+  | .ok (observation, _) =>
+      if observation.candidateValue.isSome ||
+          !psKernelExprEqual observation.sourceValue deepValue then
+        throw (IO.userError "metered δ decline polluted source WHNF")
   let deltaMachine : PsKernelC0Machine := {
     control := .mk (.const deltaName []) []
   }
@@ -323,6 +341,27 @@ def main : IO Unit := do
         throw (IO.userError "nested arithmetic did not debit shared work")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault
+  -- Metered primitive evaluation is independently source-differential:
+  -- a limited quota only removes the speculative candidate result.
+  let natSum : PsKernelExpr :=
+    .app (.app (.const psKernelNatAddName []) (.lit (.nat 17)))
+      (.lit (.nat 25))
+  match psKernelC0ArchitectureObserveDemandMetered 4096 16384
+      session natSum with
+  | .error err =>
+      throw (IO.userError ("metered Nat primitive source failed: " ++ err))
+  | .ok (observation, _) =>
+      if !observation.agrees ||
+          !psKernelExprEqual observation.sourceValue (.lit (.nat 42)) then
+        throw (IO.userError "metered Nat/source agreement changed")
+  match psKernelC0ArchitectureObserveDemandMetered 4096 16
+      session natSum with
+  | .error err =>
+      throw (IO.userError ("Nat quota changed source checker: " ++ err))
+  | .ok (observation, _) =>
+      if observation.candidateValue.isSome ||
+          !psKernelExprEqual observation.sourceValue (.lit (.nat 42)) then
+        throw (IO.userError "Nat numerical budget bypassed source isolation")
   let arg : PsKernelExpr := .app
     (.lam x (.sort .zero) (.bvar 0) .default) v
   match psKernelC0DemandRunWithBudget 128 128 32

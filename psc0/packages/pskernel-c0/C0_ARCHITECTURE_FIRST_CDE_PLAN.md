@@ -63,6 +63,12 @@ The source-authoritative `Execution`/ `Delta` pipeline now includes `Architectur
 
 The mandatory delta regression was extended to all 14 binary primitive operation names, successor, captured β/ζ operands, neutral heads, explicit zero fuel and limited numeral size; a non-accepting result cannot enter checker admission. The code was pushed, but there is **no independently confirmed CDE-2 native CI success yet**: do not confuse the prior CDE-1 run 38412434965 with CDE-2 qualification. The next required gate is native compilation and successful source-differential/negative checks on the new HEAD. C, D and E remain incomplete.
 
+## CDE-3 — local context and constructor-head projection (code pushed; CI pending)
+
+`Architecture/Structural.lean` adds a single dispatcher on top of the CDE-2 closure machine, preserving β/ζ, primitive Nat, δ, and the existing checked authority seam. When the machine head is a local `fvar`, only source local-let declarations unfold; hypotheses are neutral. When the head is a `proj`, the delayed scrutinee is reified exactly and the **source** `psKernelReduceProjCore` checks constructor metadata and selects the field with the correct parameter offset. This is a bounded fast WHNF family; it does not recursively normalize a projection scrutinee yet. Unsupported scenarios remain candidate/source disagreements, never checked acceptance.
+
+The mandatory native regression now includes local-let shadowing, constructor field projection with parameter offset, wrong type/index neutrality, β/ζ capture, and zero fuel, plus source-exclusive structural preview and ill-typed rejection tests. Constructor metadata injected by test code is for source-WHNF comparison only, **not inductive declaration admission**. This is implementation evidence, not compilation/CI qualification: previous success 38412434965 predates both CDE-2 and CDE-3. Architectural next step is one shared fuel-threaded nested-demand evaluator rather than ad hoc recursor/Quot helper fallbacks. Full C/D/E exit remains unclaimed.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

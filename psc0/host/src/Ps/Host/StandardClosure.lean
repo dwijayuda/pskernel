@@ -44,7 +44,7 @@ def standardDependencyClosure (environment : Lean.Environment) (root : Lean.Name
     pending := pending.tail!
     if !seen.contains name then
       seen := seen.insert name
-      let some info := environment.checked.get.find? name
+      let some info := environment.find? name
         | throw (IO.userError ("missing upstream closure declaration: " ++ toString name))
       entries := entries.push info
       if !boundary.contains name then
@@ -106,7 +106,7 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
     progress := false
     let mut deferred := #[]
     for info in pending do
-      if (environment.checked.get.find? info.name).isSome then
+      if (environment.find? info.name).isSome then
         progress := true
         continue
       match nativeSubmission native info with
@@ -118,10 +118,10 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
       | .ok (some declaration) =>
         let provided := declaration.getNames
         let ready := (submissionDependencies declaration).all fun name =>
-          provided.contains name || (environment.checked.get.find? name).isSome
+          provided.contains name || (environment.find? name).isSome
         if !ready then deferred := deferred.push info else
           progress := true
-          match environment.addDeclCore 2000000 20000 declaration none true with
+          match environment.addDeclCore 2000000 20000 declaration none with
           | .ok next =>
             environment := next
             admitted := admitted.push (toString info.name)
@@ -132,7 +132,7 @@ private def compatibilityProbe (native : Lean.Environment) (root : Lean.Name)
     pending := deferred
   return Lean.Json.mkObj [
     ("root", Lean.toJson (toString root)),
-    ("accepted", Lean.toJson ((environment.checked.get.find? root).isSome)),
+    ("accepted", Lean.toJson ((environment.find? root).isSome)),
     ("admitted", Lean.toJson admitted),
     ("failures", .arr failures),
     ("blocked", Lean.toJson (pending.map (fun info => toString info.name)))]

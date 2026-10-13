@@ -126,7 +126,7 @@ private def sourceStatus (native : Lean.Environment) (name : Lean.Name) : String
 -- Always check the converted portable candidate, not just the original native
 -- entries. No axiom replacement for failed proofs, no unchecked addDecl path.
 private def checkCandidate (declarations candidates : List PsDeclaration) : IO Unit := do
-  let empty ← Lean.mkEmptyEnvironment 0
+  let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   -- Authoring diagnostics collect independent root failures in one pass.
   -- A rejected declaration is never inserted; its dependents stay blocked.
   -- This temporary environment is discarded on any error and cannot publish.
@@ -155,7 +155,7 @@ private def checkCandidate (declarations candidates : List PsDeclaration) : IO U
     match declaration with
     | .constructorDecl _ | .recursorDecl _ | .quotientDecl .. =>
       let name := PsKernelLean.toLeanName (psDeclarationName declaration)
-      let some info := checked.checked.get.find? name
+      let some info := checked.find? name
         | throw (IO.userError ("missing regenerated metadata: " ++ toString name))
       let .ok type := PsKernelLean.toLeanExpr (psDeclarationType declaration)
         | throw (IO.userError "metadata type conversion failed")
@@ -259,7 +259,7 @@ def checkQuotientFoundation : IO Unit := do
   unless (psReduceQuotientIota (fun value => value)
       psSelfHostProdHashPreludeEnvironment lift).isNone do
     throw (IO.userError "unregistered quotient spelling activated reduction")
-  let empty ← Lean.mkEmptyEnvironment 0
+  let empty := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   let .ok checked := PsKernelLean.replayPreludeDeclarations base base.reverse empty
     | throw (IO.userError "quotient test prelude failed")
   -- Replaying supplied descriptors must validate an already generated group
@@ -274,13 +274,13 @@ def checkQuotientFoundation : IO Unit := do
     throw (IO.userError "forged quotient signature accepted")
   -- Mirror pinned kernelQuotNameCollision in an isolated discarded environment.
   let .ok collision := checked.addDeclCore 2000000 20000
-      (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none true
+      (.axiomDecl { name := `Quot.lift, levelParams := [], type := .const `False [], isUnsafe := false }) none
     | throw (IO.userError "cannot construct isolated quotient collision probe")
   let some candidate := candidates.head?
     | throw (IO.userError "quotient candidate group is empty")
   if (PsKernelLean.tryPreludeDeclaration declarations collision candidate).isOk then
     throw (IO.userError "provider accepted a quotient name collision")
-  if (collision.addDeclCore 2000000 20000 .quotDecl none true).isOk then
+  if (collision.addDeclCore 2000000 20000 .quotDecl none).isOk then
     throw (IO.userError "kernel quotient registration overwrote an existing name")
   IO.println "PSCV0_QUOTIENT_FOUNDATION: PASS kernel regeneration, lift/ind computation, signature/collision refusal; no added assumptions"
 

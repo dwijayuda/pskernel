@@ -475,3 +475,31 @@ Latest digest optimization evidence: run38478159236 native rebuild12,317ms,
 warm561ms; audit/export calls roughly2–5s versus about73s previously. The
 migration cache fallback is removed now that the new cache is populated.
 Complete backend qualification remains required.
+
+## Kernel environment owns checked replay
+
+Run38479812733 passed the quotient probe, exact asset regeneration and the
+GetElem source/erasure gate. It then exposed imported private-name collisions
+in Lean's elaborator AsyncConsts index: Nat.bitwise.eq_def from two different
+native modules has distinct full names but the same normalized display name.
+
+The checker and authoring replay now retain `Lean.Kernel.Environment` directly.
+Pinned `Lean/Environment.lean` exposes the official checked
+`Kernel.Environment.addDeclCore` (`lean_add_decl`) independently of elaborator
+asynchronous publication. Start from `(← Lean.mkEmptyEnvironment 0).toKernelEnv`;
+every insertion still goes through the official kernel with the existing limits.
+No raw/unchecked insertion, renaming, proof alteration or additional assumptions.
+The imported native environment remains a Lean environment for source metadata;
+only the standalone checker/replay state changes. The provider admission caller,
+native batch checker and dependency probe share this boundary. Its legacy
+admission module is compiled as an additional native root to check API coherence.
+
+This removes the entire family of display-name collisions while preserving exact
+kernel identities. Quotient group/member validation remains, including checking
+the kernel's quotInit invariant. The admitted asset itself already contains both
+distinct private declarations and exercises the behavior.
+
+That run also reached a newly added fixture whose List.foldl call put named
+arguments before positional ones. PSCV0 APP-03 deliberately requires the opposite
+order. The fixture now places α/β last; parser acceptance criteria are unchanged.
+The full /61 integration matrix remains pending.

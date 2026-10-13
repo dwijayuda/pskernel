@@ -128,18 +128,19 @@ def toLeanPreludeDeclaration
   | .recursorDecl _ => .ok none
 
 inductive PreludeAdmissionAttempt where
-  | admitted (env : Lean.Environment)
+  | admitted (env : Lean.Kernel.Environment)
   | deferred
 
--- Lean's kernel initializes all four quotient constants atomically. Its public
--- Environment.addDeclCore additionally publishes each name to AsyncConsts, so
--- repeating .quotDecl is not an idempotent environment operation.
-def quotientGroupPresent (env : Lean.Environment) : Except PsKernelLeanError Bool := do
+-- Checking owns a Kernel.Environment, not the elaborator's AsyncConsts index.
+-- Full imported private names remain distinct. Every declaration is checked by
+-- the official C++ kernel at trust zero; no unchecked insertion API is used.
+-- Quotient descriptors validate members of one atomically generated group.
+def quotientGroupPresent (env : Lean.Kernel.Environment) : Except PsKernelLeanError Bool := do
   let members : List (Lean.Name × Lean.QuotKind) :=
     [(`Quot, .type), (`Quot.mk, .ctor), (`Quot.lift, .lift), (`Quot.ind, .ind)]
   let mut present := 0
   for (name, kind) in members do
-    match env.checked.get.find? name with
+    match env.find? name with
     | none => pure ()
     | some (.quotInfo info) =>
         unless info.name == name && info.kind == kind do
@@ -148,12 +149,14 @@ def quotientGroupPresent (env : Lean.Environment) : Except PsKernelLeanError Boo
     | some _ => throw (preludeMismatch "kernel quotient name is already occupied")
   unless present == 0 || present == members.length do
     throw (preludeMismatch "kernel quotient group is incomplete")
+  unless env.quotInit == (present != 0) do
+    throw (preludeMismatch "kernel quotient initialization flag differs from its group")
   return present != 0
 
-def validateQuotientDescriptor (env : Lean.Environment) (declaration : PsDeclaration) :
+def validateQuotientDescriptor (env : Lean.Kernel.Environment) (declaration : PsDeclaration) :
     Except PsKernelLeanError Unit := do
   if let .quotientDecl name levels type kind := declaration then
-    let some (.quotInfo generated) := env.checked.get.find? (toLeanName name)
+    let some (.quotInfo generated) := env.find? (toLeanName name)
       | throw (preludeMismatch "missing regenerated quotient metadata")
     let generatedKind := match generated.kind with
       | .type => PsQuotientKind.type | .ctor => .ctor
@@ -166,7 +169,7 @@ def validateQuotientDescriptor (env : Lean.Environment) (declaration : PsDeclara
 
 def tryPreludeDeclaration
     (allDeclarations : List PsDeclaration)
-    (env : Lean.Environment)
+    (env : Lean.Kernel.Environment)
     (declaration : PsDeclaration) :
     Except PsKernelLeanError PreludeAdmissionAttempt := do
   let converted? ← toLeanPreludeDeclaration allDeclarations declaration
@@ -177,7 +180,7 @@ def tryPreludeDeclaration
         if ← quotientGroupPresent env then
           validateQuotientDescriptor env declaration
           return .admitted env
-      match env.addDeclCore 2000000 20000 converted none true with
+      match env.addDeclCore 2000000 20000 converted none with
       | .ok next =>
           validateQuotientDescriptor next declaration
           pure (.admitted next)
@@ -190,8 +193,8 @@ def tryPreludeDeclaration
 
 def replayPreludePass
     (allDeclarations : List PsDeclaration) :
-    List PsDeclaration -> Lean.Environment ->
-    Except PsKernelLeanError (Lean.Environment × List PsDeclaration)
+    List PsDeclaration -> Lean.Kernel.Environment ->
+    Except PsKernelLeanError (Lean.Kernel.Environment × List PsDeclaration)
   | [], env => .ok (env, [])
   | declaration :: rest, env => do
       let attempt ← tryPreludeDeclaration allDeclarations env declaration
@@ -204,8 +207,8 @@ def replayPreludePass
 
 partial def replayPreludeDeclarations
     (allDeclarations pending : List PsDeclaration)
-    (env : Lean.Environment) :
-    Except PsKernelLeanError Lean.Environment := do
+    (env : Lean.Kernel.Environment) :
+    Except PsKernelLeanError Lean.Kernel.Environment := do
   let (next, deferred) ← replayPreludePass allDeclarations pending env
   match deferred with
   | [] => pure next
@@ -217,8 +220,8 @@ partial def replayPreludeDeclarations
       else
         replayPreludeDeclarations allDeclarations deferred next
 
-def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Environment) := do
-  let env ← Lean.mkEmptyEnvironment 0
+def buildLeanPreludeEnvironment : IO (Except PsKernelLeanError Lean.Kernel.Environment) := do
+  let env := (← Lean.mkEmptyEnvironment 0).toKernelEnv
   let declarations := psSelfHostProdPreludeEnvironment.declarations
   pure <| replayPreludeDeclarations declarations declarations.reverse env
 

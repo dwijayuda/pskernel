@@ -5,6 +5,19 @@ are the active handoff. **Update both after every milestone slice**, as requeste
 by the user because usage is low. Record the exact code revision, CI evidence,
 remaining work and next action before beginning another slice.
 
+## Latest continuation: kernel-only replay, awaiting qualification
+
+Run [38479812733](https://github.com/dwijayuda/pskernel/actions/runs/38479812733)
+at `15cea236` passed build, quotient probes, frozen regeneration and GetElem
+erasure. It failed later on a malformed new List.foldl fixture; it also exposed
+AsyncConsts collisions between distinct imported private names.
+The next code commit moves standalone checking/replay to official
+`Lean.Kernel.Environment.addDeclCore` at trust zero, preserving full names and
+all kernel checks. It fixes the fixture's APP-03 argument order and compiles the
+provider Admission module to validate the changed API. No new assumptions.
+The earlier quotient/Unit failure descriptions below are historical diagnoses.
+Fetch the new run and inspect complete results; /60 remains the last full green.
+
 ## Active repair slice — implemented, awaiting CI
 
 The next code commit after checkpoint `85b35cd` implements quotient group

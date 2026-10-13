@@ -16,24 +16,24 @@ def kernelRejection
   }
 
 def admitDeclarationList :
-    Nat -> List Lean.Declaration -> Lean.Environment ->
-    Except PsKernelLeanError Lean.Environment
+    Nat -> List Lean.Declaration -> Lean.Kernel.Environment ->
+    Except PsKernelLeanError Lean.Kernel.Environment
   | _, [], env => .ok env
   | declarationIndex, declaration :: rest, env =>
-      match env.addDeclCore 2000000 20000 declaration none true with
+      match env.addDeclCore 2000000 20000 declaration none with
       | .ok next =>
           admitDeclarationList (declarationIndex + 1) rest next
       | .error error =>
           .error (kernelRejection declarationIndex error)
 
 def admitDeclarations
-    (env : Lean.Environment)
+    (env : Lean.Kernel.Environment)
     (declarations : Array Lean.Declaration) :
-    Except PsKernelLeanError Lean.Environment :=
+    Except PsKernelLeanError Lean.Kernel.Environment :=
   admitDeclarationList 0 declarations.toList env
 
 def admitCanonicalAdmissions
-    (source : String) : IO (Except PsKernelLeanError Lean.Environment) := do
+    (source : String) : IO (Except PsKernelLeanError Lean.Kernel.Environment) := do
   match decodeCanonicalAdmissions source with
   | .error error => pure (.error error)
   | .ok declarations =>

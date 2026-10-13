@@ -60,18 +60,18 @@ private def fromResult {α : Type} (phase : String)
 -- Use the established canonical bridge, including nested-recursion adaptation.
 -- Kernel submission is synchronous and explicitly enables checking.
 -- No elaborator recovery, unchecked admission, or alternate checker fallback.
-private def check (prelude : Lean.Environment) (admissions : String) :
+private def check (prelude : Lean.Kernel.Environment) (admissions : String) :
     Except String Unit := do
   let declarations ← (PsKernelLean.decodeCanonicalAdmissions admissions).mapError
     (fun error => error.kind.code ++ ": " ++ error.message)
   let mut environment := prelude
   for declaration in declarations do
-    match environment.addDeclCore 2000000 20000 declaration none true with
+    match environment.addDeclCore 2000000 20000 declaration none with
     | .ok next => environment := next
     | .error error => throw (PsKernelLean.kernelExceptionSummary error)
   pure ()
 
-private def compile (prelude : Lean.Environment) (request : Request) :
+private def compile (prelude : Lean.Kernel.Environment) (request : Request) :
     ExceptT Diagnostic IO Result := do
   let t0 ← IO.monoMsNow
   let project ← if request.modules.isEmpty then

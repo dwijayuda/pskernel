@@ -27,8 +27,9 @@ Option and generic Fin adapters retain their qualified universe parameters.
 
 **M1 remains incomplete.** Next: checked Array logical model, genuine size-bound
 indexing, explicit linear-time logical/runtime conversions, alias/large-index
-coverage, and controlled representative performance comparisons. No full M2,
-C5, pskernel-core or self-hosting work is authorized by this checkpoint.
+coverage, and controlled representative performance comparisons. Full M2 starts
+after M1 acceptance, interleaved with feature A as the user requested. C5,
+pskernel-core and self-hosting remain excluded.
 
 ## Prior qualified checkpoint — M1 universes and bounded index proofs (13 October 2026)
 

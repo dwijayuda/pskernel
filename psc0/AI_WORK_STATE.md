@@ -1,5 +1,26 @@
 # PSCV0 v7 — Active AI work state and complete phase handoff
 
+## Active execution plan — accepted by the user (13 October 2026)
+
+Finish M1 first. Then interleave the two tracks: M2 with remaining feature A;
+M3 with B; M4 with C/D; measured M5 tooling/performance throughout and final E
+qualification. Do not wait for all M0–M5 infrastructure before implementing
+features, and do not add features ahead of their required shared mechanisms.
+
+**Current source under qualification:** `6138ccf434b04ab198626d7e80426416970fb898`,
+[Linux 38386217562](https://github.com/dwijayuda/pskernel/actions/runs/38386217562).
+The Array change includes checked logical definitions, lawful optional indexing,
+a typed sized builder for linear List-to-Array conversion, explicit Array-to-List
+conversion, and cross-target cases. This is **pending**, not a green checkpoint.
+The qualified checkpoint below remains the evidence boundary until current CI
+and reviewed registry drift qualification finish. After that, finish M1's
+remaining coherence/performance evidence before declaring M1 complete.
+
+Continue natively in portable Lean, checked by official Lean, via GitHub source
+operations and Linux CI. Preserve the branch and draft PR 109. No pskernel-core,
+self-hosting or C5 source migration. Wasm remains GC internally with linear
+memory only at explicit ABI boundaries.
+
 ## Current qualified checkpoint — M1 List/Fin indexing (13 October 2026)
 
 This section supersedes older checkpoint claims below.
@@ -27,8 +48,9 @@ Option and generic Fin adapters retain their qualified universe parameters.
 
 **M1 remains incomplete.** Next: checked Array logical model, genuine size-bound
 indexing, explicit linear-time logical/runtime conversions, alias/large-index
-coverage, and controlled representative performance comparisons. No full M2,
-C5, pskernel-core or self-hosting work is authorized by this checkpoint.
+coverage, and controlled representative performance comparisons. Full M2 starts
+after M1 acceptance, interleaved with feature A as the user requested. C5,
+pskernel-core and self-hosting remain excluded.
 
 ## Prior qualified checkpoint — M1 universes and bounded index proofs (13 October 2026)
 

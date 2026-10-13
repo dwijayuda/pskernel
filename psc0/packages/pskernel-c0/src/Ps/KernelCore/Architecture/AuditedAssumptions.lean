@@ -85,7 +85,7 @@ def psKernelC0AuditedSourceAdmit
       request work.allowedAxioms then
     throw "ordinary axiom was not explicitly approved for this source history"
   let next ← psKernelC0TrustedSourceAdmit fuel work.trusted request
-  let some checked ←
+  let some checked :=
       psKernelC0AuditTrustedSource next work.allowedAxioms
     | throw "checked admission would exceed explicit axiom allowance"
   return checked

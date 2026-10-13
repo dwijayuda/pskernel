@@ -147,7 +147,145 @@ def main : IO Unit := do
       throw (IO.userError "approved assumption bypassed full root checking")
   let _malformedStillApproved :=
     psKernelC0AuditedSourceAxiomsApproved malformed
+  -- Quot, unsafe/partial definitions, unsafe opaques, and unsafe
+  -- inductive families are distinct trust capabilities. The ordinary
+  -- axiom-name allowlist must NOT authorize any of them implicitly.
+  let unsafeName := c0AuditedName "ReviewedUnsafeDefinition"
+  let unsafeDefinition : PsKernelDefinitionInfo := {
+    base := {
+      name := unsafeName
+      levelParams := []
+      type := .sort (.succ .zero)
+    }
+    value := .sort .zero
+    hints := .abbrevHint
+    safety := .unsafeDef
+  }
+  let partialDefinition : PsKernelDefinitionInfo := {
+    unsafeDefinition with safety := .partialDef
+  }
+  let unsafeRequest : PsKernelC0ArchitectureDeclaration :=
+    .definition unsafeDefinition
+  let partialRequest : PsKernelC0ArchitectureDeclaration :=
+    .definition partialDefinition
+  if psKernelC0RequestCapabilitiesApproved unsafeRequest [] ||
+      psKernelC0RequestCapabilitiesApproved partialRequest [] ||
+      psKernelC0RequestCapabilitiesApproved .quotient [] then
+    throw (IO.userError "trust-bearing declaration was implicitly authorized")
+  let preciseAllowance : List PsKernelC0TrustCapability :=
+    [.unsafeDefinition unsafeName]
+  if !psKernelC0RequestCapabilitiesApproved unsafeRequest preciseAllowance ||
+      psKernelC0RequestCapabilitiesApproved partialRequest preciseAllowance then
+    throw (IO.userError "unsafe/partial declaration capabilities were conflated")
+  match psKernelC0AuditedSourceAdmit 4096 reviewed unsafeRequest with
+  | .error _ => pure ()
+  | .ok _ => throw (IO.userError "audited profile admitted unapproved unsafe definition")
+  let opaqueRequest : PsKernelC0ArchitectureDeclaration :=
+    .opaqueDecl {
+      base := {
+        name := c0AuditedName "UnreviewedOpaque"
+        levelParams := []
+        type := .sort (.succ .zero)
+      }
+      value := .sort .zero
+      isUnsafe := true
+    }
+  if psKernelC0RequestCapabilitiesApproved opaqueRequest [] then
+    throw (IO.userError "unsafe opaque escaped capability audit")
+  let unsafeInductive : PsKernelSimpleInductiveDecl := {
+    levelParams := []
+    name := c0AuditedName "UnreviewedInductive"
+    type := .sort .zero
+    ctors := []
+    isUnsafe := true
+    numParams := 0
+  }
+  if psKernelC0RequestCapabilitiesApproved
+      (.ordinaryInductive unsafeInductive) [] then
+    throw (IO.userError "unsafe ordinary inductive escaped capability audit")
+  let unsafeMutual : PsKernelSimpleMutualInductiveDecl := {
+    levelParams := []
+    numParams := 0
+    types := [{
+      name := c0AuditedName "UnreviewedMutual"
+      type := .sort .zero
+      ctors := []
+    }]
+    isUnsafe := true
+  }
+  if psKernelC0RequestCapabilitiesApproved
+      (.mutualInductive unsafeMutual) [] ||
+      psKernelC0RequestCapabilitiesApproved
+        (.nestedInductive unsafeMutual) [] then
+    throw (IO.userError "unsafe mutual/nested declaration escaped capability audit")
+
+  -- A real Eq followed by real quotient initialization requires an
+  -- explicit quotient capability *even with a fully valid source Eq*.
+  let univ := c0AuditedName "u"
+  let eqDecl : PsKernelSimpleInductiveDecl := {
+    levelParams := [univ]
+    name := psKernelEqName
+    type := psKernelExpectedEqType univ
+    ctors := [{
+      name := .str psKernelEqName "refl"
+      type := psKernelExpectedEqReflType univ
+    }]
+    isUnsafe := false
+    numParams := 2
+  }
+  let eqWork ← match psKernelC0AuditedSourceAdmit 32768 genesis
+      (.ordinaryInductive eqDecl) with
+    | .ok checked => pure checked
+    | .error e =>
+        throw (IO.userError ("checked Eq under audited genesis failed: " ++ e))
+  match psKernelC0AuditedSourceAdmit 32768 eqWork .quotient with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "valid Eq implicitly authorized Quot foundation")
+  let some allowedQuot := psKernelC0AuditTrustedSourceWithCapabilities
+      eqWork.trusted [] [.quotientBootstrap]
+    | throw (IO.userError "explicit quotient review could not be certified")
+  let quotWork ← match psKernelC0AuditedSourceAdmit
+      32768 allowedQuot .quotient with
+    | .ok checked => pure checked
+    | .error e =>
+        throw (IO.userError ("explicit checked Quot admission failed: " ++ e))
+  if !quotWork.trusted.certified.raw.checker.context.environment.quotInitialized then
+    throw (IO.userError "approved source quotient was not initialized")
+  match psKernelC0HistoryTrustCapabilities quotWork.trusted.history with
+  | [.quotientBootstrap] => pure ()
+  | _ => throw (IO.userError "checked history lost quotient trust event")
+  if (psKernelC0AuditTrustedSource quotWork.trusted []).isSome then
+    throw (IO.userError "approved Quot history was downgraded to no-capability audit")
+  let _quotApproved := psKernelC0AuditedSourceCapabilitiesApproved quotWork
+  let (quotChecked, afterQuotCheck) ← match psKernelC0AuditedSourceCheck
+      32768 quotWork (.sort .zero) with
+    | .ok checked => pure checked
+    | .error e => throw (IO.userError ("source check lost quotient history: " ++ e))
+  if !psKernelExprEqual quotChecked (.sort (.succ .zero)) then
+    throw (IO.userError "checked source Sort changed after quotient authorization")
+  let _quotStillApproved :=
+    psKernelC0AuditedSourceCapabilitiesApproved afterQuotCheck
+  let some stagedQuot := psKernelC0AuditedSourceStage
+      afterQuotCheck (.sort .zero)
+    | throw (IO.userError "quotient audited stage lost environment proof")
+  let _stagedQuotApproved :=
+    psKernelC0AuditedSourceCapabilitiesApproved stagedQuot
+  let (_, quotReceipts) ← match psKernelC0AuditedSourceCommitChecked
+      32768 stagedQuot with
+    | .ok completed => pure completed
+    | .error e =>
+        throw (IO.userError ("approved Quot checked publication failed: " ++ e))
+  match quotReceipts with
+  | [receipt] =>
+      let _checkedResult := psKernelC0SourceCheckedRootExact receipt
+      if !psKernelExprEqual receipt.checkedType (.sort (.succ .zero)) then
+        throw (IO.userError "approved Quot publication changed checked type")
+  | _ =>
+      throw (IO.userError "approved Quot publication lost checked root")
+
   IO.println "C0_AUDITED unapproved_axiom_blocked_atomically=pass"
   IO.println "C0_AUDITED authorized_source_assumptions_and_history=pass"
   IO.println "C0_AUDITED narrowed_policy_rejected_and_definitions_preserved=pass"
   IO.println "C0_AUDITED source_judgments_and_closed_publication=pass"
+  IO.println "C0_AUDITED quotient_and_unsafe_capability_history=pass"

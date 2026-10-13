@@ -2548,7 +2548,7 @@ def psEraseRuntimeExprWithFuelWorker
           -- RC4 Decidable is represented by its sole computational Bool
           -- field. The reflection field has no runtime projection.
           if psNameEq typeName psDecidableName then
-            if index == 0 then erase target
+            if index == 0 then smaller scope target
             else Except.error PsErasureError.unsupportedRuntimeTerm
           else match
               psErasureLookupStructure

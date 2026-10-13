@@ -728,10 +728,9 @@ private def application : String :=
   "instance positiveGet: GetElem(Positive, Nat, Nat, fun (_: Positive) => fun (_: Nat) => True) where {\n" ++
   "  getElem(xs: Positive, i: Nat, h: True): Nat := xs.value\n" ++
   "}\n" ++
-  -- The registered law is a proof of the selected derived dictionary,
+  -- The checked generic coherence lemma is an ordinary source-level theorem,
   -- not an axiom claiming arbitrary user-defined GetElem? instances lawful.
   "theorem decidableCoherence(P: Prop, left: Decidable P, right: Decidable P): left = right := PsStandard.decidableUnique(P, left, right)\n" ++
-  "theorem lawfulDerivedPositive: LawfulGetElem(Positive, Nat, Nat, fun (_: Positive) => fun (_: Nat) => True, optional := PsStandard.instGetElemOptionalDefault) := PsStandard.instLawfulGetElemOptionalDefault\n" ++
   "function opt(xs: Positive): Nat := Option.getD(xs[99]?, 0)\n" ++
   "function bang(xs: Positive): Nat := xs[99]!\n" ++
   "structure Negative where { value: Nat }\n" ++

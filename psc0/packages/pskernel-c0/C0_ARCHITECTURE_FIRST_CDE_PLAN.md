@@ -57,6 +57,12 @@ The architecture-first route has moved beyond planning. `Architecture/Execution.
 
 `Architecture/Delta.lean` extends the closure/spine candidate with one source-owned, safety-guarded delta step on precisely reified syntax at a stuck constant head. It reenters the lazy execution machine for subsequent β/ζ steps, preserving an explicit reduction and quotation budget; partial/unsafe definitions are declined, opaque constants remain neutral. `Architecture/Work.lean` exposes `psKernelC0ArchitecturePreviewDelta`, which always computes the authoritative checked WHNF **first** and never publishes the candidate result as a proof. The mandatory `C0ArchitectureDeltaRegression.lean` checks direct/chained and universe-parametric aliases, delta-to-lambda β, ζ, non-reducible opaque heads, malformed/unsafe policy and fuel exhaustion. This is still a **non-accepting partial evaluator**, not complete Lean WHNF or Phase D exit acceptance.
 
+## CDE-2 — lazy primitive Nat literal spine (implementation pending qualification)
+
+The source-authoritative `Execution`/ `Delta` pipeline now includes `Architecture/NatLiteral.lean`, a **candidate-only** operation family. On a stuck primitive Nat head, it reifies only required delayed numeral arguments and delegates arithmetic and size/count limits to the already existing source primitive functions. When no Nat primitive head is recognized, it does **not** quote unrelated neutral arguments. Candidate evaluation tries this family before δ as the source WHNF pipeline does. Nonliteral arguments, full recursive primitive WHNF, projections, Quot, recursors, and full local-context reductions remain outside this feature boundary.
+
+The mandatory delta regression was extended to all 14 binary primitive operation names, successor, captured β/ζ operands, neutral heads, explicit zero fuel and limited numeral size; a non-accepting result cannot enter checker admission. The code was pushed, but there is **no independently confirmed CDE-2 native CI success yet**: do not confuse the prior CDE-1 run 38412434965 with CDE-2 qualification. The next required gate is native compilation and successful source-differential/negative checks on the new HEAD. C, D and E remain incomplete.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

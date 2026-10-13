@@ -117,7 +117,7 @@ def main : IO Unit := do
   }
   if psKernelC0DemandStringReserve stringProjectionState != 48 then
     throw (IO.userError "String major reservation ignored UTF-8 byte size")
-  if psKernelC0DemandStringReserve initial != 0 then
+  if psKernelC0DemandStringReserve withContinuation != 0 then
     throw (IO.userError "non-String demand unexpectedly reserves expansion")
   let session := psKernelMkCheckerSession psKernelEnvironmentEmpty []
     .safe 4096 psKernelLeanNatMaxSizeDefault

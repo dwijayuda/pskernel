@@ -397,6 +397,52 @@ def main : IO Unit := do
     | some (.quotInfo _) => pure ()
     | _ =>
         throw (IO.userError "checked quotient constant was not published")
+  -- A fully checked Quot.mk/Quot.lift example: both α and the
+  -- quotient relation are source-admitted, and the lifting function is
+  -- accompanied by an Eq.refl proof of relation preservation.
+  let propTy : PsKernelExpr := .const c0TypedPropName []
+  let proof : PsKernelExpr := .const c0TypedPropCtor []
+  let relation : PsKernelExpr :=
+    .lam (c0TypedName "left") propTy
+      (.lam (c0TypedName "right") propTy propTy .default) .default
+  let boxTy : PsKernelExpr := .const c0TypedBoxName []
+  let boxValue : PsKernelExpr :=
+    psKernelApplyArgs (.const c0TypedBoxCtor []) [propTy, propTy]
+  let liftFunction : PsKernelExpr :=
+    .lam (c0TypedName "proof") propTy boxValue .default
+  let equalityRefl : PsKernelExpr :=
+    psKernelApplyArgs (.const c0TypedEqCtor [.succ .zero])
+      [boxTy, boxValue]
+  let liftRespectful : PsKernelExpr :=
+    .lam (c0TypedName "left") propTy
+      (.lam (c0TypedName "right") propTy
+        (.lam (c0TypedName "relProof") propTy equalityRefl .default)
+        .default) .default
+  let quotMajor : PsKernelExpr :=
+    psKernelApplyArgs (.const psKernelQuotMkName [.zero])
+      [propTy, relation, proof]
+  let quotLift : PsKernelExpr :=
+    psKernelApplyArgs (.const psKernelQuotLiftName [.zero, .succ .zero])
+      [propTy, relation, boxTy, liftFunction, liftRespectful, quotMajor]
+  match psKernelC0ArchitectureInferWork 32768 quotWork quotLift with
+  | .error reason =>
+      throw (IO.userError ("source rejected typed quotient lift: " ++ reason))
+  | .ok (resultTy, _) =>
+      if !psKernelExprEqual resultTy boxTy then
+        throw (IO.userError "typed Quot.lift had unexpected result type")
+  match psKernelC0ArchitectureWhnfWork 32768 quotWork quotLift with
+  | .error reason =>
+      throw (IO.userError ("source quotient computation failed: " ++ reason))
+  | .ok (value, _) =>
+      if !psKernelExprEqual value boxValue then
+        throw (IO.userError "checked Quot.lift did not reduce through Quot.mk")
+  match psKernelC0ArchitectureDefEqWork 32768 quotWork
+      quotLift boxValue with
+  | .error reason =>
+      throw (IO.userError ("source quotient DefEq failed: " ++ reason))
+  | .ok (equal, _) =>
+      if !equal then
+        throw (IO.userError "checked Quot.lift was not definitionally equal")
   -- Indexed K on a *source-admitted Eq*. The proof is a neutral local
   -- variable; only source type inference + DefEq of the candidate refl type
   -- may justify replacing it with Eq.refl.
@@ -481,5 +527,6 @@ def main : IO Unit := do
   IO.println "C0_TYPED checked_mutual_nested_source_admission=pass"
   IO.println "C0_TYPED checked_recursive_eta_exclusion=pass"
   IO.println "C0_TYPED checked_eq_quot_bootstrap_and_idempotence=pass"
+  IO.println "C0_TYPED source_checked_quot_lift_infer_whnf_defeq=pass"
   IO.println "C0_TYPED indexed_k_defeq_side_conditions=pass"
   IO.println "C0_TYPED checked_declaration_atomicity_and_source_authority=pass"

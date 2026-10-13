@@ -57,6 +57,24 @@ Mandatory `C0ArchitectureBudgetRegression.lean` includes:
 * Source WHNF agreement for metered β/ζ, safe δ and Nat primitives; quota-only declines must not change source checking.
 * The entire native CI continues to run official positive/negative export fixtures, kernel negative/semantics checks, microbenchmarks and comparison with an unchanged rebuilt original kernel.
 
+## 4A. Additional bypass checks closed in CDE-8A.4
+
+CDE-8A.4 closes four previously missed accounting cases: **blocked**
+recursor/Quot child resumption quotes its saved parent/function through the
+same metered readback helper as ordinary halted children; **nested Nat**
+primitive computation is preflighted at the *active* head before resuming
+any outer Nat frame; **polymorphic δ and ordinary iota** account for nested
+universe-substitution syntax and subsequent application construction; and
+**recursive names** spend their component cost before descending, stopping
+deep untrusted names at a finite quota.
+
+The budgeted result continues to charge newly generated intermediate syntax
+before the next transition and gives final readback only the remaining quota.
+These are regression-tested syntactic-work properties, not Lean-runtime peak
+heap/CPU guarantees. Executable commit `bf95088c`, native
+[CI 38459330291](https://github.com/dwijayuda/pskernel/actions/runs/38459330291)
+is the full qualification gate.
+
 ## 5. What remains for a stronger claim
 
 The **syntactic-work contract** covers the candidate transition families named above when entered through the opt-in metered runner. This is different from proving `allocated_bytes <= quota` for a concrete runtime.

@@ -11,8 +11,8 @@ size of the fully quoted substitutions, so duplication cannot bypass the
 quota. These are *candidate* limits, not kernel typing/acceptance decisions.
 
 Demand-step active syntax, retained continuation frames, delayed captured
-environments, String UTF-8 storage, pre-expansion String.ofList reservations, and final
-quotation now consume one quota. Intermediate primitive/delta/projection/recursor allocation remains
+environments, String UTF-8 storage, pre-expansion String.ofList reservations, source-delta and recursor-RHS
+preflight traversals, and final quotation now consume one quota. Intermediate primitive/delta/projection/recursor allocation remains
 outside complete accounting; this is a bounded *candidate work* foundation,
 not the final allocation/refinement contract.
 -/
@@ -169,6 +169,60 @@ def psKernelC0DemandStringReserve
       (String.utf8ByteSize value + 1) * 16
   | _, _ => 0
 
+/-- Before δ unfolds a source definition, reserve the syntax traversal
+    of its body and the application-spine construction. This is deliberately
+    conservative, so a too-small candidate quota declines before source
+    substitution or source-universe instantiation can allocate the result.
+    The accepting source checker is unaffected. -/
+def psKernelC0ReserveDeltaSyntax
+    (context : PsKernelCheckerContext)
+    (machine : PsKernelC0Machine)
+    (quota : Nat) : Option Nat := do
+  match machine.control with
+  | .mk (.const name _) _ =>
+      match psKernelEnvironmentFind context.environment name with
+      | some declaration =>
+          match psKernelConstantInfoDeltaValue declaration with
+          | none => some quota
+          | some body => do
+              let afterBody ← psKernelC0ChargeExpr body quota
+              if machine.arguments.length > afterBody then none
+              else some (afterBody - machine.arguments.length)
+      | none => some quota
+  | _ => some quota
+
+/-- Charge recursor RHS source syntax before the selected constructor-rule
+    computation. The rule is taken from the saved environment metadata and
+    is never guessed by constructor-name convention. This does not meter
+    every temporary allocation; it is an explicit candidate-only preflight
+    for the source RHS clone performed by the existing iota helper. -/
+def psKernelC0ReserveRecursorSyntax
+    (state : PsKernelC0DemandState)
+    (quota : Nat) : Option Nat := do
+  match state.frames with
+  | .recursor _ metadata _ :: _ =>
+      let ruleName ←
+        match state.machine.control with
+        | .mk (.const name _) _ => some name
+        | .mk (.lit (.nat 0)) _ => some psKernelNatZeroName
+        | .mk (.lit (.nat (_ + 1))) _ => some psKernelNatSuccName
+        | _ => none
+      match psKernelFindRecursorRule ruleName metadata.rules with
+      | some rule => psKernelC0ChargeExpr rule.rhs quota
+      | none => some quota
+  | _ => some quota
+
+/-- Resource preflight shares the operation quota between source-definition
+    body traversal and the selected recursor RHS. Both can only decline a
+    speculative candidate; neither can reject a source-checked declaration. -/
+def psKernelC0ReserveSourceRewrites
+    (context : PsKernelCheckerContext)
+    (state : PsKernelC0DemandState)
+    (quota : Nat) : Option Nat := do
+  let afterDelta ←
+    psKernelC0ReserveDeltaSyntax context state.machine quota
+  psKernelC0ReserveRecursorSyntax state afterDelta
+
 /-- One transition loop and one remaining quota. This delegates *all*
     reduction rules to the existing demand dispatcher and therefore cannot
     introduce separate candidate reduction semantics. -/
@@ -184,10 +238,13 @@ def psKernelC0DemandRunWithBudget :
       if reserve > rest then
         throw "candidate String expansion work quota exhausted"
       let afterReserve := rest - reserve
+      let some afterRewrites ←
+          psKernelC0ReserveSourceRewrites context state afterReserve
+        | throw "candidate source-rewrite work quota exhausted"
       match psKernelC0DemandTransition depth context state with
       | .next next =>
-          psKernelC0DemandRunWithBudget fuel depth afterReserve context next
-      | .halted => return (state, afterReserve)
+          psKernelC0DemandRunWithBudget fuel depth afterRewrites context next
+      | .halted => return (state, afterRewrites)
       | .declined reason => throw reason
 
 /-- Non-accepting, explicit-quota candidate bridge. The existing demand

@@ -924,6 +924,7 @@ def main (args : List String) : IO Unit := do
     ("C0OfficialOpaqueReject.ndjson", false),
     ("C0OfficialMixedAccept.ndjson", true),
     ("C0OfficialInitSubtypeAccept.ndjson", true),
+    ("C0OfficialInitSubtypeReject.ndjson", false),
     ("C0OfficialInitThreeInductivesAccept.ndjson", true),
     ("C0OfficialMixedReject.ndjson", false)
   ]

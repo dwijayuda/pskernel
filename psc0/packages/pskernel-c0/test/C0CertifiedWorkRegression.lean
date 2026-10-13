@@ -178,11 +178,16 @@ def main : IO Unit := do
       !psKernelC0ArchitectureWorkValid checkedPublished.raw then
     throw (IO.userError "checked publication lost canonical work validation")
   match typedRoots with
-  | [(root, ty)] =>
-      if !psKernelExprEqual root.expression (.sort .zero) ||
-          !psKernelExprEqual ty (.sort (.succ .zero)) then
-        throw (IO.userError "checked publication returned wrong root/type pair")
-  | _ => throw (IO.userError "checked publication lost selected root ordering")
+  | [checkedRoot] =>
+      let _verifiedCheckerResult :
+          psKernelCheckerCheck checkedRoot.fuel checkedRoot.context
+              checkedRoot.stateBefore checkedRoot.root.expression =
+            .ok (checkedRoot.checkedType, checkedRoot.stateAfter) :=
+        psKernelC0SourceCheckedRootExact checkedRoot
+      if !psKernelExprEqual checkedRoot.root.expression (.sort .zero) ||
+          !psKernelExprEqual checkedRoot.checkedType (.sort (.succ .zero)) then
+        throw (IO.userError "source-checked publication returned wrong root/type")
+  | _ => throw (IO.userError "source-checked publication lost selected root ordering")
   let some mixedFirst := psKernelC0CertifiedWorkStage initial (.sort .zero)
     | throw (IO.userError "mixed publication failed first stage")
   let some mixedSecond := psKernelC0CertifiedWorkStage mixedFirst (.bvar 0)

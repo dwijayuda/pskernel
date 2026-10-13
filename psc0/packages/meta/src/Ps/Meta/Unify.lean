@@ -88,6 +88,34 @@ def psUnifyLevelLists
             else
               psUnifyFailure context
 
+-- Lean's definitional equality identifies any two proofs of the same Prop.
+-- This is a *typed, closed* proof-irrelevance rule, never a Boolean shortcut:
+-- infer both proof types in the current context, require the propositions to
+-- be definitionally equal, and verify that the proposition has sort Prop.
+-- Defer when metavariables are unresolved instead of guessing assignments.
+-- The official Lean kernel remains the final checker of constructed terms.
+def psUnifyGroundProofIrrelevance
+    (environment : PsEnvironment)
+    (localContext : PsLocalContext)
+    (context : PsMetaContext)
+    (left right : PsExpr) : Bool :=
+  if psExprHasUnresolvedMeta left || psExprHasUnresolvedMeta right then false else
+  match psInferType environment context localContext left,
+        psInferType environment context localContext right with
+  | .ok leftType, .ok rightType =>
+    if psExprHasUnresolvedMeta leftType ||
+        psExprHasUnresolvedMeta rightType ||
+        !psDefEqReadOnlyWithEnv environment context localContext leftType rightType then
+      false
+    else
+      match psInferType environment context localContext leftType with
+      | .ok sort =>
+        match psWhnf environment context localContext sort with
+        | .sortE level => psLevelEquivalent level .zero
+        | _ => false
+      | .error _ => false
+  | _, _ => false
+
 def psUnifyWithFuelWorker
     (fuel : Nat) :
     PsEnvironment ->
@@ -123,6 +151,8 @@ def psUnifyWithFuelWorker
         let leftValue := psWhnf environment context localContext left;
         let rightValue := psWhnf environment context localContext right;
         if psExprAlphaEq leftValue rightValue then
+          psUnifySuccess context
+        else if psUnifyGroundProofIrrelevance environment localContext context leftValue rightValue then
           psUnifySuccess context
         else
           match leftValue with

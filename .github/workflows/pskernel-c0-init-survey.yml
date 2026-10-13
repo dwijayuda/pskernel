@@ -141,6 +141,22 @@ jobs:
           output.write_text(json.dumps(report, indent=2) + "\n")
           print(json.dumps(report, indent=2))
           PY
+      - name: C0 native streaming boundary diagnostic on real Init
+        shell: bash
+        run: |
+          set -euo pipefail
+          # This is not an acceptance gate: the current adapter deliberately
+          # declines unsupported declarations. A timeout/host failure must
+          # not be represented as a kernel rejection.
+          if timeout 180s bash -c 'cd "$1" && lake build PsKernelC0 && lake env lean --run test/C0OfficialNdjsonReplay.lean "$2"' _ \
+              "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" \
+              "$RUNNER_TEMP/Init-4.35.0.ndjson" \
+              > "$RUNNER_TEMP/c0-real-init-435-result.txt" 2>&1; then
+            cat "$RUNNER_TEMP/c0-real-init-435-result.txt"
+            grep -Fq "C0_REAL_EXPORT replay_outcome=" "$RUNNER_TEMP/c0-real-init-435-result.txt"
+          else
+            echo "C0_REAL_EXPORT diagnostic_process_failed_or_timed_out" | tee -a "$RUNNER_TEMP/c0-real-init-435-result.txt"
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -150,5 +166,6 @@ jobs:
             ${{ runner.temp }}/Init-first-inductive.ndjson
             ${{ runner.temp }}/first-inductive-official.txt
             ${{ runner.temp }}/leanchecker-result.txt
+            ${{ runner.temp }}/c0-real-init-435-result.txt
           if-no-files-found: warn
           retention-days: 14

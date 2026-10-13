@@ -1,6 +1,9 @@
 import Ps.KernelCore.Architecture.Typed
 import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Admission.Declaration.Admission
+import Ps.KernelCore.Admission.Inductive.Ordinary.Admission
+import Ps.KernelCore.Admission.Inductive.Mutual.Admission
+import Ps.KernelCore.Admission.Inductive.Nested.Admission
 
 /-!
 Architecture-first Phase C/E operation boundary.
@@ -164,15 +167,20 @@ def psKernelC0ArchitectureAbort
     (work : PsKernelC0ArchitectureWork) : PsKernelC0TermStore :=
   psKernelC0ScratchAbort work.scratch
 
-/-- A whole source declaration is the only authority for environment changes.
-    The candidate evaluator is deliberately absent from this data type. -/
+/-- Every supported source declaration family is checked atomically by its
+    existing source admission operation. Experimental candidate syntax never
+    becomes an admission request or proof receipt. -/
 inductive PsKernelC0ArchitectureDeclaration where
   | axiomDecl (info : PsKernelAxiomInfo)
   | definition (info : PsKernelDefinitionInfo)
   | theoremDecl (info : PsKernelTheoremInfo)
   | opaqueDecl (info : PsKernelOpaqueInfo)
+  | quotient
+  | ordinaryInductive (info : PsKernelSimpleInductiveDecl)
+  | mutualInductive (info : PsKernelSimpleMutualInductiveDecl)
+  | nestedInductive (info : PsKernelSimpleMutualInductiveDecl)
 
-/-- Atomic, checked declaration admission with mandatory cache invalidation.
+/-- Atomic, checked ordinary/mutual/nested/quotient and declaration admission with mandatory cache invalidation.
     It never publishes a partially checked environment: only existing source
     admission functions can return the next environment. Constructing a fresh
     checker session discards environment-dependent WHNF/DefEq/infer caches.
@@ -195,6 +203,17 @@ def psKernelC0ArchitectureAdmit
         psKernelAddTheorem fuel environment info prior.maxRecDepth prior.maxNatSize
     | .opaqueDecl info =>
         psKernelAddOpaque fuel environment info prior.maxRecDepth prior.maxNatSize
+    | .quotient =>
+        psKernelAddQuot environment
+    | .ordinaryInductive info =>
+        psKernelAddSimpleInductive fuel environment info
+          prior.maxRecDepth prior.maxNatSize
+    | .mutualInductive info =>
+        psKernelAddSimpleMutualInductive fuel environment info
+          prior.maxRecDepth prior.maxNatSize
+    | .nestedInductive info =>
+        psKernelAddSimpleNestedInductive fuel environment info
+          prior.maxRecDepth prior.maxNatSize
   let newSession := psKernelMkCheckerSession next
     prior.levelParams prior.safety prior.maxRecDepth prior.maxNatSize
   return { work with checker := newSession }

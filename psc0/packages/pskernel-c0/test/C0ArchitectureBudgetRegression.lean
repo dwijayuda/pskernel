@@ -78,6 +78,23 @@ def main : IO Unit := do
       if !observation.agrees ||
           !psKernelExprEqual observation.sourceValue v then
         throw (IO.userError "metered candidate/source WHNF divergence")
+  -- One quota is shared between visits to demand-machine syntax and
+  -- the final quotation, not reset for each transition.
+  let initial : PsKernelC0DemandState := {
+    machine := { control := .mk arg [] }
+  }
+  match psKernelC0DemandRunWithBudget 4096 4096 4096
+      session.context initial with
+  | .error reason =>
+      throw (IO.userError ("metered demand loop unexpectedly declined: " ++ reason))
+  | .ok (finished, left) =>
+      if finished.steps == 0 || left >= 4096 then
+        throw (IO.userError "demand transition did not consume quota")
+  match psKernelC0DemandRunWithBudget 4096 4096 2
+      session.context initial with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "demand traversal used fresh work quota")
   match psKernelC0ArchitectureObserveDemandMetered 4096 1 session arg with
   | .error reason =>
       throw (IO.userError ("candidate quota polluted source: " ++ reason))

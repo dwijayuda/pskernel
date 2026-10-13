@@ -213,6 +213,28 @@ def main : IO Unit := do
   match psKernelC0ReserveRecursorSyntax unknownState 10 with
   | some 10 => pure ()
   | _ => throw (IO.userError "nonmatching recursor major should stay neutral")
+  -- Universe instantiation can copy nested max/imax levels into multiple
+  -- occurrences of a source definition or recursor rule. It is explicitly
+  -- reserved BEFORE the source rewrite materializes the new expression.
+  let levelBody : PsKernelExpr := .sort (.param named)
+  if (psKernelC0ReserveLevelInstantiation levelBody [lvl] 12).isSome then
+    throw (IO.userError "universe substitution expansion was not reserved")
+  match psKernelC0ReserveLevelInstantiation levelBody [lvl] 1024 with
+  | none => throw (IO.userError "small universe substitution declined")
+  | some rest =>
+      if rest >= 1024 then
+        throw (IO.userError "universe substitution did not spend work")
+  let levelRecState : PsKernelC0DemandState := {
+    recState with
+    frames := [.recursor recParent recursor [lvl]]
+  }
+  if (psKernelC0ReserveRecursorSyntax levelRecState 32).isSome then
+    throw (IO.userError "iota universe expansion bypassed shared allowance")
+  match psKernelC0ReserveRecursorSyntax levelRecState 1024 with
+  | none => throw (IO.userError "iota universe work declined ample quota")
+  | some rest =>
+      if rest >= 1024 then
+        throw (IO.userError "iota-level instantiation spent zero quota")
   -- Intermediate quotation must not reset its allowance between
   -- declaration heads, projection scrutinees and saved recursor parents.
   let quoteState : PsKernelC0DemandState := {

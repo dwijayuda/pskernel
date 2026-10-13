@@ -191,6 +191,24 @@ not cross stores by pointer/number reinterpretation. See
 
 Initial implementation [`8bd68a06`](https://github.com/dwijayuda/pskernel/commit/8bd68a06f6f697814ddaca1a236c365ea94bf7d3) passed [CI 38472302759](https://github.com/dwijayuda/pskernel/actions/runs/38472302759); expanded negative/transfer/closed-check source `76fd5f88` requires [CI 38472570733](https://github.com/dwijayuda/pskernel/actions/runs/38472570733) before full bounded qualification. The mathematical StoreWF theorem, exact equality soundness, independent optimized accepting kernel and B/F/G exits remain OPEN.
 
+## CDE-9B — source-check proof receipts and measured replay reduction
+
+Checked root publication is now a proof-carrying **source computation record**:
+`PsKernelC0SourceCheckedRoot` stores owner-bound root syntax, active checking
+context, pre-state, fuel, reported type, post-state and an actual Lean equality
+proof that the *full* source checker returned that result. Every selected
+root undergoes no-FVar/no-MVar, allowed-level and full source checking; the
+batch returns no partial result on error. This must not be described as an
+independent optimized checker or a proof that source checking is sound.
+
+The native [certified-work microbenchmark](https://github.com/dwijayuda/pskernel/actions/runs/38473185917)
+reported 270ms for 36 identical source WHNF/DefEq queries with whole-store
+replay versus under 1ms timing resolution with reusable validated-work
+proof on a 101-node DAG. This is **validation overhead only**, not
+a whole-workload competition with Lean/con-leche/con-ron. The newer checked
+receipt source `2d55fd03` is under [CI 38473598945](https://github.com/dwijayuda/pskernel/actions/runs/38473598945);
+do not mark it green until the entire workflow succeeds.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

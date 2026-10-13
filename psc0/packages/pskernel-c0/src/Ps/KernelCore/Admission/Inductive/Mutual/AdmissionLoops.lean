@@ -95,16 +95,16 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                       fuel
                       closedSession
                       ctor.type with
-                | Except.error (psKernelMutualBudgetAt "constructor-type-check" error) =>
-                    Except.error error
+                | Except.error error =>
+                    Except.error (psKernelMutualBudgetAt "constructor-type-check" error)
                 | Except.ok ctorType =>
                     match
                         psKernelSessionEnsureSort
                           fuel
                           (Prod.snd ctorType)
                           (Prod.fst ctorType) with
-                    | Except.error (psKernelMutualBudgetAt "constructor-sort" error) =>
-                        Except.error error
+                    | Except.error error =>
+                        Except.error (psKernelMutualBudgetAt "constructor-sort" error)
                     | Except.ok _ =>
                         let ctorSession :=
                           psKernelSessionWithEnvironment
@@ -116,8 +116,8 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                               ctorSession
                               params
                               ctor.type with
-                        | Except.error (psKernelMutualBudgetAt "constructor-parameters" error) =>
-                            Except.error error
+                        | Except.error error =>
+                            Except.error (psKernelMutualBudgetAt "constructor-parameters" error)
                         | Except.ok afterParams =>
                             match
                                 psKernelOpenSimpleMutualConstructorFields
@@ -129,8 +129,8 @@ def psKernelAddSimpleMutualConstructorsForTypeWorker
                                   params
                                   resultLevel
                                   afterParams.result with
-                            | Except.error (psKernelMutualBudgetAt "constructor-fields" error) =>
-                                Except.error error
+                            | Except.error error =>
+                                Except.error (psKernelMutualBudgetAt "constructor-fields" error)
                             | Except.ok fieldsResult =>
                                 match
                                     psKernelSimpleMutualAppInfo

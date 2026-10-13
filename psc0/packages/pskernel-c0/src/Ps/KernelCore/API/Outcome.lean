@@ -88,6 +88,12 @@ def psKernelStripOneNestedAdmissionPrefix (message : String) : String :=
     message.replace "mutual-recursive-domain-with-target: " ""
   else if message.startsWith "mutual-recursive-domain-without-target: " then
     message.replace "mutual-recursive-domain-without-target: " ""
+  else if message.startsWith "mutual-recursive-domain-without-target-" then
+    -- The head kind is a diagnostic, not a semantic category. A bounded
+    -- prefix with a normal resource suffix retains the original fuel verdict.
+    match message.splitOn ": " with
+    | _ :: rest => String.intercalate ": " rest
+    | [] => message
   else
     message
 

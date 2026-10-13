@@ -145,7 +145,11 @@ def main : IO Unit := do
     "mutual-field-recursive-analysis: ",
     "mutual-recursive-domain-whnf: ",
     "mutual-recursive-domain-with-target: ",
-    "mutual-recursive-domain-without-target: "
+    "mutual-recursive-domain-without-target: ",
+    "mutual-recursive-domain-without-target-definition: ",
+    "mutual-recursive-domain-without-target-inductive: ",
+    "mutual-recursive-domain-without-target-local-let: ",
+    "mutual-recursive-domain-without-target-other: "
   ]
   for stage in stages do
     match psKernelErrorFromMessage

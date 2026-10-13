@@ -16,19 +16,23 @@ and independent proof obligations. A permitted axiom remains an explicit
 assumption, not a theorem the checker derived.
 -/
 
-/-- The source history contains the exact original admission request for
-    every step. Collect ordinary axiom declarations rather than inferring
-    trust from names currently present in the environment. -/
+/-- A checked request contributes zero or one ordinary axiom name.
+    This exact local projection supports efficient proof extension. -/
+def psKernelC0RequestOrdinaryAxioms :
+    PsKernelC0ArchitectureDeclaration → List PsKernelName
+  | .axiomDecl info => [info.base.name]
+  | _ => []
+
+/-- Reconstruct the exact immutable assumption ledger for explicit policy
+    (re-)audits. Normal admission extends the existing proof incrementally
+    instead of replaying all prior declarations. -/
 def psKernelC0HistoryOrdinaryAxioms :
     {env : PsKernelEnvironment} →
       PsKernelC0SourceEnvironmentHistory env → List PsKernelName
   | _, .genesis => []
   | _, .admitted earlier step =>
-      match step.request with
-      | .axiomDecl info =>
-          info.base.name :: psKernelC0HistoryOrdinaryAxioms earlier
-      | _ =>
-          psKernelC0HistoryOrdinaryAxioms earlier
+      psKernelC0RequestOrdinaryAxioms step.request ++
+        psKernelC0HistoryOrdinaryAxioms earlier
 
 /-- The entire finite history must satisfy *decidable structural*
     membership in the approved list. The result is a Lean proposition
@@ -182,13 +186,25 @@ def psKernelC0AuditedSourceBegin
 def psKernelC0OrdinaryAxiomRequestApproved
     (request : PsKernelC0ArchitectureDeclaration)
     (allowed : List PsKernelName) : Bool :=
-  match request with
-  | .axiomDecl info => decide (info.base.name ∈ allowed)
-  | _ => true
+  (psKernelC0RequestOrdinaryAxioms request).all
+    (fun name => decide (name ∈ allowed))
 
-/-- Verify the assumption policy BEFORE calling source admission, then
-    independently recheck the policy over the ENTIRE new history. This
-    cannot promote a candidate evaluation or bypass actual kernel checks. -/
+/-- Incremental all-of proof: a new event batch and the previously
+    certified entire history suffice to certify their concatenation.
+    Runtime audit work is proportional to this request, not history size. -/
+private theorem psKernelC0AllAppendTrue
+    {α : Type} (predicate : α → Bool)
+    (current previous : List α)
+    (currentOk : current.all predicate = true)
+    (previousOk : previous.all predicate = true) :
+    (current ++ previous).all predicate = true := by
+  simpa [List.all_append, currentOk, previousOk]
+
+/-- Preflight only the incoming trust events, then prove permission over
+    the *complete* resulting history by extending the previous certificate.
+    The source admission function remains the only accepting authority.
+    No whole-history O(n) rescans occur on steady-state admissions; an
+    explicit change of policy still validates the full history once. -/
 def psKernelC0AuditedSourceAdmit
     (fuel : Nat)
     (work : PsKernelC0AuditedSourceWork)
@@ -200,11 +216,52 @@ def psKernelC0AuditedSourceAdmit
   if !psKernelC0RequestCapabilitiesApproved
       request work.allowedCapabilities then
     throw "trust-bearing declaration capability requires explicit approval"
-  let next ← psKernelC0TrustedSourceAdmit fuel work.trusted request
-  let some checked := psKernelC0AuditTrustedSourceWithCapabilities
-      next work.allowedAxioms work.allowedCapabilities
-    | throw "checked admission would exceed explicit trust assumptions"
-  return checked
+  let step ← psKernelC0SourceAdmitWithProof
+    fuel work.trusted.certified request
+  -- An exact source-admission receipt owns the *actual* checked request.
+  -- Check that event again before extending the proof; no weaker
+  -- requested-name heuristic determines what may enter the history.
+  if hA : psKernelC0OrdinaryAxiomRequestApproved
+      step.request work.allowedAxioms = true then
+    if hC : psKernelC0RequestCapabilitiesApproved
+        step.request work.allowedCapabilities = true then
+      let next : PsKernelC0TrustedSourceWork := {
+        certified := step.result
+        history := .admitted work.trusted.history step
+      }
+      let completeAxioms :
+          psKernelC0HistoryAxiomsApproved
+            next.history work.allowedAxioms := by
+        unfold psKernelC0HistoryAxiomsApproved
+        change (psKernelC0RequestOrdinaryAxioms step.request ++
+            psKernelC0HistoryOrdinaryAxioms work.trusted.history).all
+          (fun name => decide (name ∈ work.allowedAxioms)) = true
+        exact psKernelC0AllAppendTrue _
+          (psKernelC0RequestOrdinaryAxioms step.request)
+          (psKernelC0HistoryOrdinaryAxioms work.trusted.history)
+          hA work.approved
+      let completeCapabilities :
+          psKernelC0HistoryCapabilitiesApproved
+            next.history work.allowedCapabilities := by
+        unfold psKernelC0HistoryCapabilitiesApproved
+        change (psKernelC0RequestTrustCapabilities step.request ++
+            psKernelC0HistoryTrustCapabilities work.trusted.history).all
+          (fun cap => decide (cap ∈ work.allowedCapabilities)) = true
+        exact psKernelC0AllAppendTrue _
+          (psKernelC0RequestTrustCapabilities step.request)
+          (psKernelC0HistoryTrustCapabilities work.trusted.history)
+          hC work.capabilitiesApproved
+      return {
+        trusted := next
+        allowedAxioms := work.allowedAxioms
+        allowedCapabilities := work.allowedCapabilities
+        approved := completeAxioms
+        capabilitiesApproved := completeCapabilities
+      }
+    else
+      throw "source admission returned a disallowed trust capability"
+  else
+    throw "source admission returned an unapproved ordinary axiom"
 
 theorem psKernelC0AuditedSourceAxiomsApproved
     (work : PsKernelC0AuditedSourceWork) :

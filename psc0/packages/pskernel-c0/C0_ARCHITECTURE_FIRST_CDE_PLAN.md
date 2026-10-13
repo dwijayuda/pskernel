@@ -93,6 +93,12 @@ Mandatory source-WHNF differentials exercise direct and β/ζ-major constructors
 
 **Executable qualification:** [`7917de8a`](https://github.com/dwijayuda/pskernel/commit/7917de8a0f9ad08a967f3399599bbaa665bcb4d7), full [native CI 38441627839](https://github.com/dwijayuda/pskernel/actions/runs/38441627839) **SUCCESS**, including original-vs-C0 checker comparison. These are bounded experimental source differentials with synthetic WHNF fixtures, **not** complete Phase D/E, real checked inductive-recursive conformance or formal soundness evidence. Next: coherent K/structure/String families and one globally metered closure/resource contract, followed by whole-checker integration without candidate acceptance shortcuts.
 
+## CDE-7 — String-literal projection and recursor majors (2026-10-14)
+
+`Architecture/Demand.lean` now routes both projection and non-K recursor String-literal majors through one `String.ofList` expansion helper. The intermediate syntax is evaluated with the **same** continuation frame and operation transition fuel, not a recursively reset source WHNF call; UTF-8 byte size is checked against the quotation bound *before expansion*. Source `String.ofList` declaration semantics remain environment-dependent; the candidate is observational, not accepting. A synthetic safe alias in tests exposes the intended constructor result to both the source oracle and candidate, including empty/ASCII/UTF-8, β-reduced major and oversized negative cases.
+
+**Full bounded executable qualification:** [`d4fb56e3`](https://github.com/dwijayuda/pskernel/commit/d4fb56e3b453f3a159f8441392642bb4429c3d34), [native CI 38443008075](https://github.com/dwijayuda/pskernel/actions/runs/38443008075) SUCCESS. The run covers native Lean 4.35 compilation, existing and new source differentials, official replay fixtures, negative/semantics/resource checks, microbenchmarks and independent original-checker comparison. This is not genuine String-library checked compatibility, full Phase D/E, or soundness proof. `C0_CDE8_TYPED_ELIMINATION_DESIGN.md` governs the next typed K/structure-eta and global resource work.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

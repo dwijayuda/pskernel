@@ -67,9 +67,12 @@ structure UniverseBox (α : Type u) where
 instance {α : Type u} : GetElem (UniverseBox α) Nat α (fun _ _ => True) where
   getElem xs _ _ := xs.value
 example {α : Type u} : LawfulGetElem (UniverseBox α) Nat α (fun _ _ => True) := inferInstance
-def bindUniverses {α : Type u} {β : Type v} (f : α → β) (xs : Option α) : Option β := do
+def bindUniverses {α : Type u} {β : Type v} (f : α → β) (xs : Option α) : Option β :=
+  xs.bind (fun x => some (f x))
+def doUniverse {α β : Type u} (f : α → β) (xs : Option α) : Option β := do
   let x ← xs
   return f x
+example : doUniverse (fun x : ULift.{1} Nat => x) (some ⟨373⟩) = some ⟨373⟩ := rfl
 example : bindUniverses (fun n : Nat => ULift.up.{1} n) (some 373) = some ⟨373⟩ := rfl
 example : (⟨ULift.up.{1} 359⟩ : UniverseBox (ULift.{1} Nat))[0]? = some ⟨359⟩ := rfl
 example {α : Type u} : (default : Option α) = none := rfl

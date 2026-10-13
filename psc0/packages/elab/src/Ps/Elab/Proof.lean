@@ -199,18 +199,18 @@ def psProofNatChain (context : PsElabContext) (fuel : Nat)
     (start target : PsExpr) (facts : List (PsExpr × PsExpr × PsExpr))
     (pending : List (PsExpr × PsExpr)) (visited : List PsExpr) : Option PsExpr := do
   let fuel + 1 := fuel | none
-  let (at, proof) :: rest := pending | none
-  if visited.any (psExprAlphaEq at) then
+  let (endpoint, proof) :: rest := pending | none
+  if visited.any (psExprAlphaEq endpoint) then
     psProofNatChain context fuel start target facts rest visited
   else
-    if let some tail := psProofNatBound context 64 at target then
-      return psProofNatCall "le_trans" [start, at, target, proof, tail]
+    if let some tail := psProofNatBound context 64 endpoint target then
+      return psProofNatCall "le_trans" [start, endpoint, target, proof, tail]
     let next := facts.filterMap fun (left, right, evidence) =>
       if visited.any (psExprAlphaEq right) then none else do
-        let reach ← psProofNatBound context 64 at left
-        let edge := psProofNatCall "le_trans" [at, left, right, reach, evidence]
-        return (right, psProofNatCall "le_trans" [start, at, right, proof, edge])
-    psProofNatChain context fuel start target facts (rest ++ next) (at :: visited)
+        let reach ← psProofNatBound context 64 endpoint left
+        let edge := psProofNatCall "le_trans" [endpoint, left, right, reach, evidence]
+        return (right, psProofNatCall "le_trans" [start, endpoint, right, proof, edge])
+    psProofNatChain context fuel start target facts (rest ++ next) (endpoint :: visited)
 
 def psProofNaturalBounds (state : PsProofState) : Except PsElabError PsProofState := do
   let (goal, context, target) ← psProofMain state

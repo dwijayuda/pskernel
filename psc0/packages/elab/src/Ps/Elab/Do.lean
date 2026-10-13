@@ -6,28 +6,27 @@ import Ps.Elab.Conditional
 -- Class-based effects can supply the same operations without changing control.
 inductive PsElabDoOps where
   | identity
-  | option
+  | option (level : PsLevel)
   | except (error : PsExpr)
 
--- Construct the effect type through ordinary universe constraints. A bind
--- may change element universe, so the Option universe belongs to each value
--- type, not to a hardcoded Type-0 operation or the surrounding return type.
+-- Construct effect types through ordinary universe constraints. Lean's
+-- Monad Option fixes one element universe across a do block. The explicit
+-- Option.bind library function can change universes; monadic do cannot.
 def psElabDoType (context : PsElabContext) (ops : PsElabDoOps)
     (type : PsExpr) : Except PsElabError PsElabTypeResult := do
   match ops with
   | .identity => return { context, type }
-  | .option =>
+  | .option optionLevel =>
     let sort ← psElabExpressionSort context type
-    let fresh := psMetaFreshLevel context.metaContext
-    let unified := psUnify context.environment context.localContext fresh.context
-      (.sortE sort) (.sortE (.succ fresh.level))
+    let unified := psUnify context.environment context.localContext context.metaContext
+      (.sortE sort) (.sortE (.succ optionLevel))
     if !unified.success then throw .typeMismatch
     return {
       context := psElabContextWithMeta context unified.context
       type := .app (.constE psOptionName
-        [psLevelInstantiate unified.context.levels fresh.level]) type }
+        [psLevelInstantiate unified.context.levels optionLevel]) type }
   | .except error =>
-    return { context
+    return { context := context
       type := psExprApplyMany (.constE (psRootName "Except") []) [error, type] }
 
 -- Expose aliases one head at a time, stopping before Id erases the effect
@@ -59,9 +58,11 @@ def psElabDoSelect (context : PsElabContext) (expected : Option PsExpr) :
   | .constE name _, [error, value] =>
     if psNameEq name (psRootName "Except") then return (.except error, value)
     return (.identity, type)
-  | .constE name _, [value] =>
+  | .constE name levels, [value] =>
     if psNameEq name (psRootName "Id") then return (.identity, value)
-    if psNameEq name psOptionName then return (.option, value)
+    if psNameEq name psOptionName then
+      let [level] := levels | throw (.invalidArgument "Option requires its element universe")
+      return (.option level, value)
     return (.identity, type)
   | .mvar _, _ => throw (.invalidArgument "do effect is not determined by its expected type")
   | _, _ => return (.identity, type)
@@ -71,7 +72,7 @@ def psElabDoPure (ops : PsElabDoOps) (context : PsElabContext)
   let wrapped ← psElabDoType context ops type
   let term := match ops with
     | .identity => value
-    | .option =>
+    | .option _ =>
       let levels := match (psExprAppView wrapped.type).head with
         | .constE _ levels => levels
         | _ => []
@@ -89,7 +90,7 @@ def psElabDoBind (ops : PsElabDoOps) (context : PsElabContext)
     (psExprLiftBVars 1 0 result.type) .explicit
   let term := match ops with
     | .identity => .app continuation action
-    | .option =>
+    | .option _ =>
       let sourceLevels := match (psExprAppView input.type).head with
         | .constE _ levels => levels
         | _ => []

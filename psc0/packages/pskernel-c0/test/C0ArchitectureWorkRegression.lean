@@ -135,6 +135,20 @@ def main : IO Unit := do
               !psKernelExprEqual observation.sourceValue (.lit (.nat 43)) then
             throw (IO.userError
               "metered candidate quota failure altered checked WHNF")
+      -- Typed K/eta observation is session-scoped and cannot repurpose a
+      -- definition name as recursor metadata or admit a candidate term.
+      match psKernelC0ArchitecturePreviewTypedMajor
+          4096 admitted aliasName (.sort .zero) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError
+            "typed-major preview accepted non-recursor metadata")
+      match psKernelC0ArchitectureCheckWork 4096 admitted
+          (.app (.sort .zero) (.sort .zero)) with
+      | .error _ => pure ()
+      | .ok _ =>
+          throw (IO.userError
+            "typed-major observation bypassed source checking")
       -- Re-admitting the same name must reject atomically.
       match psKernelC0ArchitectureAdmit 4096 admitted (.definition alias) with
       | .error _ => pure ()

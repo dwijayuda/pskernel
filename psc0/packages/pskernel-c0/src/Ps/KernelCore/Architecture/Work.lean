@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Delta
+import Ps.KernelCore.Architecture.Structural
 import Ps.KernelCore.Core.IndexedScratch
 import Ps.KernelCore.Admission.Declaration.Admission
 
@@ -76,6 +76,19 @@ def psKernelC0ArchitecturePreviewDelta
     throw "invalid candidate architecture transaction"
   let (observation, session) ←
     psKernelC0ArchitectureObserveDelta fuel work.checker expr
+  return (observation, { work with checker := session })
+
+/-- Source-authoritative structural candidate preview. This observation can
+    never populate source WHNF/DefEq caches or admit a declaration. -/
+def psKernelC0ArchitecturePreviewStructural
+    (fuel : Nat)
+    (work : PsKernelC0ArchitectureWork)
+    (expr : PsKernelExpr) :
+    Except String (PsKernelC0ExecutionObservation × PsKernelC0ArchitectureWork) := do
+  if !psKernelC0ArchitectureWorkValid work then
+    throw "invalid candidate architecture transaction"
+  let (observation, session) ←
+    psKernelC0ArchitectureObserveStructural fuel work.checker expr
   return (observation, { work with checker := session })
 
 /-- Phase E authority seam. On failure no next work exists: the caller retains

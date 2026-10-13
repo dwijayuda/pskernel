@@ -674,35 +674,71 @@ def c0ExportVerdictBatch (input : String) : C0ExportVerdict :=
       | .ok false => .rejected
       | .error error => c0ExportFromKernelError error
 
-/-- Decode source in order and admit each declaration immediately, rather
-    than materialising and retaining a separate list of *all* declarations.
-    Name, level and expression tables are still retained, and input is still
-    read into a String; this is not yet a bounded-memory streaming importer.
-    On the first invalid declaration, return rejected without admitting any
-    later record. Every unknown input form fails closed. -/
+/-- Shared, pure incremental checking state; only the official source
+    expression tables and admitted environment are retained. -/
+structure C0ExportOnlineState where
+  tables : C0ExportTables := {}
+  environment : PsKernelEnvironment := psKernelEnvironmentEmpty
+  checkedCount : Nat := 0
+
+/-- Parse exactly one record and apply at most one checked declaration
+    transaction. Unsupported records fail before any further admission. -/
+def c0ExportStep
+    (state : C0ExportOnlineState) (raw : String) (fuel : Nat) :
+    Except C0ExportVerdict C0ExportOnlineState := do
+  let record ← match Lean.Json.parse raw with
+    | .ok value => pure value
+    | .error _ => throw .malformed
+  let parsed ← match c0ExportParseRecord state.tables record with
+    | .ok next => pure next
+    | .error message => throw (c0ExportClassifyInputError message)
+  let mut env := state.environment
+  let mut checked := state.checkedCount
+  for declaration in parsed.declarations do
+    match c0ExportCheckOne env declaration fuel with
+    | .ok next =>
+        env := next
+        checked := checked + 1
+    | .error error => throw (c0ExportFromKernelError error)
+  return {
+    tables := { parsed with declarations := [] }
+    environment := env
+    checkedCount := checked
+  }
+
+def c0ExportFinish (state : C0ExportOnlineState) : C0ExportVerdict :=
+  if !state.tables.header || state.checkedCount == 0 then .malformed
+  else .accepted
+
+/-- In-memory regression entry point shares the exact same step semantics
+    as the true line-by-line file path below. -/
 def c0ExportVerdictOnline (input : String) (fuel : Nat := 4096) :
     C0ExportVerdict := Id.run do
-  let mut tables : C0ExportTables := {}
-  let mut env := psKernelEnvironmentEmpty
-  let mut checkedCount := 0
+  let mut state : C0ExportOnlineState := {}
   for line in input.splitOn "\n" do
     if line != "" then
-      let .ok record := Lean.Json.parse line
-        | return .malformed
-      match c0ExportParseRecord tables record with
-      | .error message => return c0ExportClassifyInputError message
-      | .ok parsed =>
-          -- The environment consumes declarations immediately, while indexed
-          -- names/levels/expressions remain for subsequent source references.
-          tables := { parsed with declarations := [] }
-          for declaration in parsed.declarations do
-            match c0ExportCheckOne env declaration fuel with
-            | .ok next =>
-                env := next
-                checkedCount := checkedCount + 1
-            | .error error => return c0ExportFromKernelError error
-  if !tables.header || checkedCount == 0 then .malformed
-  else .accepted
+      match c0ExportStep state line fuel with
+      | .error verdict => return verdict
+      | .ok next => state := next
+  return c0ExportFinish state
+
+/-- File-backed single-pass NDJSON consumption. Only one physical line is
+    read per iteration, so this does NOT retain the entire 345 MB input String.
+    Tables of decoded expressions/names/levels and the checked environment are
+    still retained and must be profiled on a real Init corpus. -/
+def c0ExportVerdictFromFile
+    (path : System.FilePath) (fuel : Nat := 4096) :
+    IO C0ExportVerdict := do
+  let handle ← IO.FS.Handle.mk path .read
+  let mut state : C0ExportOnlineState := {}
+  repeat
+    let line ← handle.getLine
+    if line.isEmpty then break
+    if line != "\n" then
+      match c0ExportStep state line fuel with
+      | .error verdict => return verdict
+      | .ok next => state := next
+  return c0ExportFinish state
 
 def c0ExportVerdictOf (input : String) : C0ExportVerdict :=
   c0ExportVerdictOnline input
@@ -818,6 +854,9 @@ def main : IO Unit := do
     let expected := if item.snd then C0ExportVerdict.accepted
       else C0ExportVerdict.rejected
     let actual := c0ExportVerdictOf input
+    let streamed ← c0ExportVerdictFromFile path
+    if streamed != actual then
+      throw (IO.userError s!"C0 streaming/file replay divergence {path}: {repr streamed}, {repr actual}")
     let reference := c0ExportVerdictBatch input
     if actual != reference then
       throw (IO.userError s!"C0 online/batch replay divergence {path}: {repr actual}, {repr reference}")

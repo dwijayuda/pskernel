@@ -43,12 +43,13 @@ def main : IO Unit := do
   match psKernelC0QuoteMachineMetered 64 2 machine with
   | none => pure ()
   | some _ => throw (IO.userError "spine reconstruction exceeded quota")
-  -- Exact node charge is global across siblings, not reset per branch.
-  match psKernelC0ChargeExpr (.app v v) 3 with
+  -- One application and two small Nat literals charge the AST nodes
+  -- plus their eight-byte source numeral storage, shared across siblings.
+  match psKernelC0ChargeExpr (.app v v) 19 with
   | some 0 => pure ()
-  | _ => throw (IO.userError "exact three-node charge changed")
-  if (psKernelC0ChargeExpr (.app v v) 2).isSome then
-    throw (IO.userError "wide expression reused sibling quota")
+  | _ => throw (IO.userError "Nat payload and node work charge changed")
+  if (psKernelC0ChargeExpr (.app v v) 18).isSome then
+    throw (IO.userError "Nat payload or sibling work bypassed quota")
   -- Repeated captures must reserve enough capacity for both copies of
   -- their quoted values before source substitution reconstructs syntax.
   let deepValue : PsKernelExpr := .app (.app neutral v) v

@@ -102,9 +102,9 @@ def psElabDeriveFinish (plan : PsElabDeriveContext) (suffix : String)
     throw (.data "derived declaration contains an unbound local")
   return .definitionDecl (psNameAppendStr plan.info.name suffix) plan.info.levelParams type value
 
-// Runtime fields must have homogeneous types in the parameter telescope.
-// Proof fields may depend on earlier values: they carry no comparison payload,
-// and DecidableEq transports them with the existing dependent-context machinery.
+-- Runtime fields must have homogeneous types in the parameter telescope.
+-- Proof fields may depend on earlier values: they carry no comparison payload,
+-- and DecidableEq transports them with the existing dependent-context machinery.
 structure PsElabDeriveFields where
   constructor : PsConstructorInfo
   cursor : PsExpr

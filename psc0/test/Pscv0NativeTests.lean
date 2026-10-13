@@ -732,7 +732,7 @@ private def application : String :=
   "instance flag: Convert Bool Nat where { run(value: Bool): Nat := if (value) { 292 } else { 293 } }\n" ++
   "class Lift(A: Type a, B: outParam(Type b)): Type (max a b) where { run: A -> B }\n" ++
   "instance lifted{A: Type a}{B: Type b}[Convert A B]: Lift A B where { run(value: A): B := Convert.run(value) }\n" ++
-  "function fromLocal{A: Type a}{B: Type b}[Convert A B](value: A): B := {\n  let converted := Convert.run(value)\n  converted\n}\n" ++
+  "function local{A: Type a}{B: Type b}[Convert A B](value: A): B := {\n  let converted := Convert.run(value)\n  converted\n}\n" ++
   "const inferred: Nat := {\n  let converted := Convert.run(290)\n  converted\n}\n" ++
   "const localAnswer: Nat := local(true)\n" ++
   "const flagAnswer: Nat := Convert.run(false)\n" ++

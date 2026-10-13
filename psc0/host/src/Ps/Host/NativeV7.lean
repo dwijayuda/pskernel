@@ -13,10 +13,10 @@ open Lean (toJson)
 namespace PsV7Native
 
 -- Shared by diagnostics and the executable version response.
-def profile : String := "pscv0-v7-native-bounded/52"
+def profile : String := "pscv0-v7-native-bounded/53"
 
-def leanVersion : String := "4.35.0-rc4"
-def leanCommit : String := "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+def leanVersion : String := "4.35.0"
+def leanCommit : String := "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
 
 structure Diagnostic where
   phase : String
@@ -205,7 +205,7 @@ def runBatch (requests : Array Request) : IO (Except Diagnostic Batch) := do
   match initial with
   | .error error =>
       -- Old provider diagnostics carry its old version label; do not reuse that
-      -- identity in this RC4 host. The error kind still identifies the boundary.
+      -- identity in this 4.35.0 host. The error kind still identifies the boundary.
       return .error { phase := "prelude", message := error.kind.code ++ ": " ++ error.message }
   | .ok prelude =>
       let results ← requests.mapM (fun request => (compile prelude request).run)

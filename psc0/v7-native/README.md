@@ -2,7 +2,7 @@
 
 Develop the portable compiler in `.lean` and run the current sources through the
 official Lean native compiler. The native host checks compiler-produced declarations
-with the official RC4 kernel and validates erased IR before emitting TypeScript or Rust. It does not use Lean's
+with the official 4.35.0 kernel and validates erased IR before emitting TypeScript or Rust. It does not use Lean's
 frontend as a fallback for unsupported PSCV0 syntax or semantics.
 
 ## Fast loop
@@ -49,7 +49,7 @@ their users in the original variable order; eligible instance variables are
 retained. A theorem proof cannot silently enlarge its public signature.
 Annotations and defaults are resolved at their declaration site.
 
-Explicit defaults use the checked `optParam` definition from Lean RC4's
+Explicit defaults use the checked `optParam` definition from Lean 4.35.0's
 `Init.Prelude`. The default is part of the Core parameter type, closed over prior
 binders; ordinary instantiation substitutes actual preceding arguments. Named,
 positional and empty calls use the same telescope engine. Expected function types
@@ -182,7 +182,7 @@ If-let requires else and limits pattern names to the success branch. Pattern-let
 uses the same coverage check as a one-row match. Inferred result types use a
 shared scoped constraint; branch-local types cannot escape. Single- and
 multiple-discriminant `nomatch` reuse empty alternatives and the same
-coverage/equality solver. The prelude includes the RC4 empty inductive `Empty`.
+coverage/equality solver. The prelude includes the 4.35.0 empty inductive `Empty`.
 User-defined empty families and impossible indexed families follow the ordinary
 recursor path; eliminating `False` uses proof erasure and typed unreachable IR.
 
@@ -211,7 +211,7 @@ pattern binders and insertion of omitted implicit lambda binders are also pendin
 - `host/src/Ps/Host/NativeV7.lean` owns native IO/timing and official kernel checks.
 - `packages/pskernel-core` is excluded from source resolution, CI checkout,
   targets and tests. `Ps.Core` remains the compiler's expression data model.
-- The separate RC4 toolchain does not change the parent 4.34 bootstrap pin or
+- The separate 4.35.0 toolchain does not change the parent 4.34 bootstrap pin or
   published provider identities. The historical provider's canonical decoder and
   prelude builder are reused as implementation code; its 4.34 metadata is not
   used as this host's identity.

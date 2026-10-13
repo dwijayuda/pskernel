@@ -8,17 +8,20 @@
     "revision": "v7",
     "repoPath": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
     "uploadedFilename": "ProofScript_PSCV0_Lean435rc4_Language_Reference_Consistency_Revision_v7_2026-10-11(2).md",
-    "source": "byte-identical user upload in psc0",
-    "bytes": 308462,
-    "physicalLines": 3201,
-    "sha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
-    "gitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
-    "verbatimCopyCommittedInThisReview": true,
-    "sourceAvailabilityRequirement": "Verify complete repo source SHA-256 and byte identity; old parser or reference is not a v7 fallback."
+    "source": "user-uploaded v7 with user-authorized stable Lean pin amendment on 2026-10-14",
+    "bytes": 309429,
+    "physicalLines": 3203,
+    "sha256": "07e505a93806c47faab5bd215e8fe2c76c2998ca48654dda86f0bb5f161ca389",
+    "gitBlobSha1": "25e1ef788794db175a2183679e37ff8c8e9b6a2e",
+    "verbatimCopyCommittedInThisReview": false,
+    "sourceAvailabilityRequirement": "Verify complete amended reference SHA-256 and byte identity. Original upload identity is retained separately; no older grammar fallback."
   },
   "referenceLeanPin": {
-    "tag": "v4.35.0-rc4",
-    "commit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364"
+    "tag": "v4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "amendedOn": "2026-10-14",
+    "authority": "explicit user request",
+    "migration": "psc0/docs/PSCV0_LEAN_435_PIN_2026-10-14.md"
   },
   "futureSourceCompatibility": {
     "oldProofScriptGrammarRequired": false,
@@ -55,7 +58,7 @@
   },
   "sourceErrataForReview": [
     "V7 settles earlier E1-E4, F01-F22, C01-C05 and v4-v7 document-only category/grammar corrections; examples and fixtures are not executed compiler conformance.",
-    "Full RC4 Standard environment manifest, exact module visibility and Std.WP contract/tactic/effect registration remain pending implementation evidence.",
+    "Full pinned Standard environment manifest, exact module visibility and Std.WP contract/tactic/effect registration remain pending implementation evidence.",
     "Prior 19-module bridge qualification is exact-source historical evidence under the older reference digest; never retag it as complete v7."
   ],
   "implementationPlan": "PSC0_PSCV0_SELFHOST_MIGRATION_REVIEW.md",
@@ -154,5 +157,18 @@
     "newC2C3CompilerFixedPoint": false,
     "kernelRegenerated": false,
     "fullV7Conformance": false
+  },
+  "originalV7Upload": {
+    "title": "Lean 4 ↔ ProofScript pscv0 — Lean-First Unified Language Features, Syntax, Grammar, and Examples",
+    "revision": "v7",
+    "repoPath": "psc0/PSCV0_LANGUAGE_REFERENCE.md",
+    "uploadedFilename": "ProofScript_PSCV0_Lean435rc4_Language_Reference_Consistency_Revision_v7_2026-10-11(2).md",
+    "source": "byte-identical user upload in psc0",
+    "bytes": 308462,
+    "physicalLines": 3201,
+    "sha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
+    "gitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
+    "verbatimCopyCommittedInThisReview": true,
+    "sourceAvailabilityRequirement": "Verify complete repo source SHA-256 and byte identity; old parser or reference is not a v7 fallback."
   }
 }

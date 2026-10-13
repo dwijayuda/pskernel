@@ -1,4 +1,4 @@
-name: PSC0 PSCV0 generated bridge RC4 reference replay
+name: PSC0 PSCV0 generated bridge 4.35.0 reference replay
 # Reference/metadata-only changes do not need another expensive bridge build.
 on:
   push:
@@ -60,11 +60,11 @@ jobs:
           use-mathlib-cache: false
       - name: Verify retained evidence, prove generated equality, and reject false equation
         run: node psc0/scripts/bridge-reference-replay.mjs
-      - name: Retain exact RC4 source, proof and reference qualification
+      - name: Retain exact 4.35.0 source, proof and reference qualification
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: pscv0-rc4-reference-${{ github.sha }}
+          name: pscv0-lean435-reference-${{ github.sha }}
           path: |
             psc0/dist/pscv0-bridge/reference*.lean
             psc0/dist/pscv0-bridge/reference*.json

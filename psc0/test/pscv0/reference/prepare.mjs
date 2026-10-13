@@ -1,4 +1,4 @@
-// Reuse successful generated bridge evidence for the RC4-only proof lane.
+// Reuse successful generated bridge evidence for the 4.35.0-only proof lane.
 // Do not execute downloaded JS, regenerate a compiler, or change the theorem.
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';

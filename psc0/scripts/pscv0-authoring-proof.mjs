@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const dir=path.resolve(process.argv[3]||path.join(root,'dist/pscv0-bridge/authoring'));
 const wanted=process.argv[2];
-assert(['4.34.0','4.35.0-rc4'].includes(wanted));
+assert(['4.34.0','4.35.0'].includes(wanted));
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const run=args=>{
   const r=spawnSync('lake',['env','lean',...args],{cwd:root,encoding:'utf8',timeout:120000,maxBuffer:4*1024*1024});
@@ -23,7 +23,7 @@ function axioms(output,name){
 }
 const version=run(['--version']).trim();
 assert(version.includes('version '+wanted+','));
-if(wanted==='4.35.0-rc4')assert(version.includes('c29b6dda4f7c20e3eeaa717c4e565663c5cfa364'));
+if(wanted==='4.35.0')assert(version.includes('eb6cafb7290e8bd5f2937522d8d804f58f02bafc'));
 const receipt=JSON.parse(await readFile(path.join(dir,'receipt.json'),'utf8'));
 assert.equal(receipt.sourceRevision,process.env.GITHUB_SHA);
 assert.equal(receipt.sourcePath,'packages/syntax/src-ps/Ps/Syntax/Translate.ps');

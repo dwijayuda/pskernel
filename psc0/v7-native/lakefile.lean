@@ -3,8 +3,8 @@ open Lake DSL
 
 package pscv0Native
 
--- The official RC4 toolchain compiles the shared sources directly.
--- The historical parent workspace/toolchain and portable closure are unchanged.
+-- The official 4.35.0 toolchain compiles the shared sources directly.
+-- The parent source workspace uses the same stable toolchain.
 require proofscriptSelfhost from ".."
 
 -- Host-only conversion and canonical decoder; no provider executable/kernel build.
@@ -22,7 +22,7 @@ lean_lib PsV7ParserChecks where
   srcDir := "../scripts"
   roots := #[`Pscv0M1Harness]
 
--- Independent official Lean RC4 GetElem source oracle. It is not part of
+-- Independent official Lean 4.35.0 GetElem source oracle. It is not part of
 -- the portable compiler, restored Standard environment or trusted checker.
 lean_lib PsV7GetElemOracle where
   srcDir := "../test"

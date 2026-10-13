@@ -1,4 +1,5 @@
 // Import-closure guard and source inventory, not a full v7 conformance claim.
+import {verifyPscv0Reference} from './pscv0-reference-identity.mjs';
 import assert from 'node:assert/strict';
 import {readFile, writeFile, mkdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -76,6 +77,7 @@ async function closure(roots, portable) {
   return [...visited.values()].sort((a,b) => a.module.localeCompare(b.module));
 }
 
+await verifyPscv0Reference();
 const portable = await closure(['Ps.Compiler.Pscv0', 'Ps.BackendTs.Readable', 'Ps.BackendRust.Module', 'Ps.BackendWasm.Module', 'Ps.BackendWasm.Natural', 'Ps.CompilerIr.Checked'], true);
 // New portable imports must be registered as Lake roots before CI compilation.
 // A transitive source file alone is insufficient for Lake's module scheduler.
@@ -86,7 +88,7 @@ for (const entry of portable) {
 }
 const native = await closure(['Ps.Host.NativeV7', 'Ps.Host.PrimitiveAudit'], false);
 const toolchain = (await readFile(path.join(root, 'v7-native/lean-toolchain'), 'utf8')).trim();
-assert.equal(toolchain, 'leanprover/lean4:v4.35.0-rc4');
+assert.equal(toolchain, 'leanprover/lean4:v4.35.0');
 const report = {
   schema: 'pscv0-native-source-profile/1', source: process.env.GITHUB_SHA ?? null, toolchain,
   portable, native,

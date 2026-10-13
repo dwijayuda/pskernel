@@ -1,5 +1,18 @@
 # PSCV0 — Native Compiler Architecture Redesign v1
 
+## Pinned Lean reference rule (14 October 2026)
+
+Current pin: **Lean 4.35.0**, `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+[Migration and source comparison](PSCV0_LEAN_435_PIN_2026-10-14.md).
+Before any feature design, implementation or redesign, study the corresponding
+official implementation and relevant tests at this pin. Record algorithms,
+data structures, semantics, invariants, optimizations and the comparison with
+PSC0; justify simplifications and validate against Lean where applicable.
+Retain licensing/attribution when adapting code. This applies to M0–M5,
+A–E, C5 and all future development; do not preserve obsolete internals merely
+for compatibility.
+
+
 **Current M2+A qualification:** `d7e28a3870cdc399eca3c63c6d305b10109d2eca`,
 [Linux 38418209663](https://github.com/dwijayuda/pskernel/actions/runs/38418209663),
 276 observations. [Equality/defaults design and evidence](PSCV0_M2_A_EQUALITY_DEFAULTS_2026-10-13.md)

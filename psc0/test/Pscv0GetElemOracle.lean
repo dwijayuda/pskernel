@@ -1,7 +1,7 @@
 import Init
 
 /-!
-  Independent Lean 4.35.0-rc4 source oracle for the selected PSCV0 GetElem
+  Independent Lean 4.35.0 source oracle for the selected PSCV0 GetElem
   foundation. This is compiled by the official Lean checker, not by the
   PSCV0 parser/elaborator, and is deliberately kept out of the selected
   Standard environment's TCB.

@@ -1,3 +1,9 @@
+/-
+Quoting rules adapted from Lean 4 Init/Data/Repr.lean.
+Copyright (c) 2016 Microsoft Corporation. All rights reserved.
+Author: Leonardo de Moura. Apache-2.0; see psc0/THIRD_PARTY_NOTICES.md.
+Modified: portable Core definitions and an input-bounded total string traversal.
+-/
 import Ps.Environment.StandardNatOrder
 
 -- The pinned quoting rules are definitions over the existing audited Unicode

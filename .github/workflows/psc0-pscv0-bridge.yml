@@ -194,24 +194,24 @@ jobs:
           test: false
           use-github-cache: false
           use-mathlib-cache: false
-      - name: RC4 checks the generated do fixture and all migrated translation APIs
+      - name: 4.35.0 checks the generated do fixture and all migrated translation APIs
         shell: bash
         working-directory: psc0
         env:
-          ELAN_TOOLCHAIN: leanprover/lean4:v4.35.0-rc4
+          ELAN_TOOLCHAIN: leanprover/lean4:v4.35.0
         run: |
           set -euo pipefail
           lean --version | tee dist/pscv0-bridge/lean-version.txt
-          grep -F '4.35.0-rc4' dist/pscv0-bridge/lean-version.txt
-          grep -F 'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364' dist/pscv0-bridge/lean-version.txt
+          grep -F '4.35.0' dist/pscv0-bridge/lean-version.txt
+          grep -F 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc' dist/pscv0-bridge/lean-version.txt
           lean dist/pscv0-bridge/reference.lean | tee dist/pscv0-bridge/reference-proof.txt
           grep -F "'pscv0_do_correspondence' does not depend on any axioms" dist/pscv0-bridge/reference-proof.txt
           lake build PsSyntax PsFoundation
-          node scripts/pscv0-authoring-proof.mjs 4.35.0-rc4
+          node scripts/pscv0-authoring-proof.mjs 4.35.0
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: pscv0-bridge-rc4-${{ github.sha }}
+          name: pscv0-bridge-lean435-${{ github.sha }}
           path: |
             psc0/dist/pscv0-bridge/reference.lean
             psc0/dist/pscv0-bridge/reference-proof.txt

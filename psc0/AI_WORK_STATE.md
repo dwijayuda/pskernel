@@ -1,5 +1,18 @@
 # PSCV0 v7 — Active work state
 
+## Pinned Lean reference rule (14 October 2026)
+
+Current pin: **Lean 4.35.0**, `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+[Migration and source comparison](docs/PSCV0_LEAN_435_PIN_2026-10-14.md).
+Before any feature design, implementation or redesign, study the corresponding
+official implementation and relevant tests at this pin. Record algorithms,
+data structures, semantics, invariants, optimizations and the comparison with
+PSC0; justify simplifications and validate against Lean where applicable.
+Retain licensing/attribution when adapting code. This applies to M0–M5,
+A–E, C5 and all future development; do not preserve obsolete internals merely
+for compatibility.
+
+
 ## Current qualified boundary — M2+A transparency (13 October 2026)
 
 Executable `35e239193e69cc466b81ac57282df1b1500f4927`;
@@ -37,8 +50,8 @@ integration validation. Preserve intended semantics, not obsolete internals.
   it and history. Check live HEAD, use expected-HEAD non-force updates.
 - GitHub connector source operations and Linux Actions only. No local checkout,
   build or Desktop Commander.
-- Native portable `.lean`, pinned official Lean `4.35.0-rc4`,
-  `c29b6dda4f7c20e3eeaa717c4e565663c5cfa364`.
+- Native portable `.lean`, pinned official Lean `4.35.0`,
+  `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
 - No pskernel-core, self-hosting or compiler-source `.ps` migration.
 - Wasm GC internally; linear memory only at explicit ABI boundaries.
 - No unchecked proof/kernel fallback, fabricated axioms, weakened acceptance,

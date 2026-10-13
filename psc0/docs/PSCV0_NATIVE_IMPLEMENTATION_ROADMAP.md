@@ -1,5 +1,18 @@
 # PSCV0 v7 native implementation roadmap
 
+## Pinned Lean reference rule (14 October 2026)
+
+Current pin: **Lean 4.35.0**, `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+[Migration and source comparison](PSCV0_LEAN_435_PIN_2026-10-14.md).
+Before any feature design, implementation or redesign, study the corresponding
+official implementation and relevant tests at this pin. Record algorithms,
+data structures, semantics, invariants, optimizations and the comparison with
+PSC0; justify simplifications and validate against Lean where applicable.
+Retain licensing/attribution when adapting code. This applies to M0–M5,
+A–E, C5 and all future development; do not preserve obsolete internals merely
+for compatibility.
+
+
 ## Current qualified boundary — M2+A transparency (13 October 2026)
 
 Executable `35e239193e69cc466b81ac57282df1b1500f4927`;

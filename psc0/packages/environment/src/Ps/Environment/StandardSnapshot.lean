@@ -6,7 +6,7 @@ import Ps.Environment.SelfHostProd
 -- kernel admission, audited primitive models and the full v7 assumption/
 -- effect closure remain separate gates.
 --
--- Scope: Lean 4.35.0-rc4 native selected prelude, including all installed
+-- Scope: Lean 4.35.0 native selected prelude, including all installed
 -- Core declarations, class parameters, priority-ordered instances and
 -- exported source aliases. Never hash the cached environment lookup index.
 def psStandardSnapshotField (value : String) : String :=
@@ -149,7 +149,7 @@ def psStandardSnapshotAlias (value : PsName × PsName) : String :=
 
 def psStandardSnapshotPayload (environment : PsEnvironment) : String :=
   psStandardSnapshotNode "PSCV0-STDENV-FNV64-v2" [
-    "Lean-4.35.0-rc4@c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+    "Lean-4.35.0@eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
     psStandardSnapshotList psStandardSnapshotDeclaration environment.declarations,
     psStandardSnapshotList psStandardSnapshotName environment.classes,
     psStandardSnapshotList psStandardSnapshotClassParameters

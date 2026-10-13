@@ -7,6 +7,10 @@ on:
       - 'psc0/packages/pskernel-lean/provider/**'
       - 'psc0/host/src/Ps/Host/*.lean'
       - 'psc0/v7-native/**'
+      - 'psc0/lean-toolchain'
+      - 'psc0/PSCV0_LANGUAGE_REFERENCE.md'
+      - 'psc0/docs/PSCV0_REFERENCE_ADOPTION.json'
+      - 'psc0/scripts/pscv0-reference-identity.mjs'
       - 'psc0/lakefile.lean'
       - 'psc0/scripts/Pscv0Native.lean'
       - 'psc0/scripts/Pscv0M1Harness.lean'
@@ -41,6 +45,8 @@ jobs:
             /psc0/lake-manifest.json
             /psc0/lean-toolchain
             /psc0/package.json
+            /psc0/PSCV0_LANGUAGE_REFERENCE.md
+            /psc0/docs/PSCV0_REFERENCE_ADOPTION.json
             /psc0/v7-native/
             /psc0/packages/foundation/src/
             /psc0/packages/syntax/src/
@@ -94,8 +100,8 @@ jobs:
         run: |
           set -euo pipefail
           lean --version | tee ../dist/pscv0-native/toolchain.txt
-          grep -F '4.35.0-rc4' ../dist/pscv0-native/toolchain.txt
-          grep -F 'c29b6dd' ../dist/pscv0-native/toolchain.txt
+          grep -F '4.35.0' ../dist/pscv0-native/toolchain.txt
+          grep -F 'eb6cafb' ../dist/pscv0-native/toolchain.txt
           START=$(date +%s%3N)
           lake build pscv0_native pscv0_native_checks pscv0_wasm_checks pscv0_m1_performance 2>&1 | tee ../dist/pscv0-native/build.log
           BUILT=$(date +%s%3N)

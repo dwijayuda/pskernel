@@ -3,7 +3,7 @@
   "status": "candidate-not-promoted",
   "language": "pscv0",
   "capability": "declaration-except-do/1",
-  "referenceSha256": "843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5",
+  "referenceSha256": "07e505a93806c47faab5bd215e8fe2c76c2998ca48654dda86f0bb5f161ca389",
   "sourceSelection": "explicit-module-map-no-fallback",
   "surfacePreparation": "current-portable-bootstrap-before-source-selection",
   "surfaceSeed": {
@@ -35,9 +35,9 @@
   "newFullSelfhostFixedPoint": false,
   "referenceRevision": "v7",
   "referenceDocumentPath": "PSCV0_LANGUAGE_REFERENCE.md",
-  "referenceBytes": 308462,
-  "referenceGitBlobSha1": "d9e9d7c21337881175b19ccc4c508a792a430195",
-  "referenceLeanCommit": "c29b6dda4f7c20e3eeaa717c4e565663c5cfa364",
+  "referenceBytes": 309429,
+  "referenceGitBlobSha1": "25e1ef788794db175a2183679e37ff8c8e9b6a2e",
+  "referenceLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
   "sourcePolicy": "pscv0-v7-only-no-legacy-fallback",
   "backwardCompatibilityRequired": false,
   "supersededLanguageReferenceAllowed": false

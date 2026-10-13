@@ -1,4 +1,4 @@
-// Check the exact byte-identical user language-design document. No compiler-conformance assertion.
+// Check the exact user language-design document with the authorized stable-pin amendment. No compiler-conformance assertion.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -10,18 +10,18 @@ const gitBlob=b=>createHash('sha1').update('blob '+b.length+'\0').update(b).dige
 export async function verifyPscv0Reference(){
   const bytes=await readFile(path.join(root,'PSCV0_LANGUAGE_REFERENCE.md'));
   const adoption=JSON.parse(await readFile(path.join(root,'docs/PSCV0_REFERENCE_ADOPTION.json'),'utf8'));
-  assert.equal(bytes.length,308462,'reference byte count');
-  assert.equal(hash(bytes),'843940bd7f6a9b286e80b01d8c891a7e01b8868a9de7b05833fce32d49be6cd5','reference SHA-256');
-  assert.equal(gitBlob(bytes),'d9e9d7c21337881175b19ccc4c508a792a430195','exact uploaded Git blob');
+  assert.equal(bytes.length,309429,'reference byte count');
+  assert.equal(hash(bytes),'07e505a93806c47faab5bd215e8fe2c76c2998ca48654dda86f0bb5f161ca389','reference SHA-256');
+  assert.equal(gitBlob(bytes),'25e1ef788794db175a2183679e37ff8c8e9b6a2e','exact amended Git blob');
   assert.equal(adoption.schema,'psc0-language-reference-adoption/2');
   assert.equal(adoption.reference.revision,'v7');
   assert.equal(adoption.reference.repoPath,'psc0/PSCV0_LANGUAGE_REFERENCE.md');
   assert.equal(adoption.reference.bytes,bytes.length);
   assert.equal(adoption.reference.sha256,hash(bytes));
   assert.equal(adoption.reference.gitBlobSha1,gitBlob(bytes));
-  assert.equal(adoption.referenceLeanPin.commit,'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364');
+  assert.equal(adoption.referenceLeanPin.commit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
   assert.equal(adoption.currentCandidate.newSelfhostFixedPoint,false);
-  return {revision:'v7',bytes:bytes.length,sha256:hash(bytes),gitBlobSha1:gitBlob(bytes),leanCommit:'c29b6dda4f7c20e3eeaa717c4e565663c5cfa364',designOnly:true};
+  return {revision:'v7',bytes:bytes.length,sha256:hash(bytes),gitBlobSha1:gitBlob(bytes),leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',designOnly:true};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))
   console.log('PSCV0_REFERENCE_V7_IDENTITY: PASS '+JSON.stringify(await verifyPscv0Reference()));

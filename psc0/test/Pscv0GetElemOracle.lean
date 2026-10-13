@@ -405,3 +405,55 @@ def pair (a b : Std.Format) := append a (append line b)
   unless isEmpty (tag 17 (append (text "") (align false))) && !isNil (text "") do
     throw (IO.userError "format empty/nil oracle mismatch")
 end Pscv0FormatOracle
+
+-- Same compact cases through the pinned upstream classes and deriving handler.
+namespace Display
+universe u
+structure Box (A : Type u) where
+  value : A
+deriving Repr
+structure Checked where
+  count : Nat
+  witness : count = count
+deriving Repr
+structure Types : Type 1 where
+  carrier : Type
+  witness : True
+deriving Repr
+inductive Event (A : Type u) where
+  | empty
+  | value (payload : A)
+deriving Repr
+inductive Hidden where
+  | item {secret : Nat} (value : Nat)
+deriving Repr
+inductive Void where
+deriving Repr
+#eval show IO Unit from do
+  let cases : List (String × String) := [
+    (reprStr "λ😀\n", "\"λ😀\\n\""),
+    ((reprArg (-17 : Int)).pretty, "(-17)"),
+    (reprStr (some (some (17 : Nat))), "some (some 17)"),
+    (reprStr (Box.mk "x"), "{ value := \"x\" }"),
+    (reprStr (Checked.mk 19 rfl), "{ count := 19, witness := _ }"),
+    (reprStr (Types.mk Nat True.intro), "{ carrier := _, witness := _ }"),
+    (reprStr (Event.value (some (23 : Nat))), "Display.Event.value (some 23)"),
+    ((reprArg (Event.empty : Event Nat)).pretty, "(Display.Event.empty)"),
+    (reprStr (Hidden.item (secret := 41) 43), "Display.Hidden.item 43"),
+    ((repr ([1, 2, 3, 4] : List Nat)).pretty 8, "[1, 2,\n 3, 4]"),
+    ((repr [some (1 : Nat), some 2, some 3]).pretty 18, "[some 1,\n some 2,\n some 3]"),
+    ((Std.format (Std.Format.group (Std.Format.append (Std.Format.text "a")
+      (Std.Format.append Std.Format.line (Std.Format.text "b"))))).pretty 3, "a b"),
+    ((Std.format (29 : Nat)).pretty, "29"),
+    ((Std.Format.joinSep ["a", "b", "c"] (Std.Format.text "|")).pretty, "a|b|c"),
+    ((Std.Format.prefixJoin (Std.Format.text ">") ["a", "b"]).pretty, ">a>b"),
+    ((Std.Format.joinSuffix ["a", "b"] (Std.Format.text "!")).pretty, "a!b!"),
+    (reprStr (Box.mk (Types.mk Nat True.intro)), "{ value := { carrier := _, witness := _ } }")]
+  for (actual, expected) in cases do
+    unless actual == expected do
+      throw (IO.userError s!"Repr/ToFormat oracle: {String.quote actual} != {String.quote expected}")
+-- Polymorphic collection operations retain independent input/output universes.
+example {A : Type u} (xs : List A) : List.map (fun x => x) xs = xs := by simp
+example {A : Type u} [Std.ToFormat A] : Std.Format :=
+  Std.Format.joinSep ([] : List A) Std.Format.line
+end Display

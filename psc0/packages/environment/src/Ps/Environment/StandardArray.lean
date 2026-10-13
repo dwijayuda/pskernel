@@ -56,7 +56,7 @@ def psStandardArrayListSetDeclaration : PsDeclaration :=
         (psSelfHostListConsOf alpha value tail)
         (psLogicLam 7 "previous" psOrderNat (psLogicLam 8 "_" list
           (psSelfHostListConsOf alpha head (.app ih previous)))) i))))
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor .zero)
     [alpha, psLogicLam 1 "xs" list result,
      psLogicLam 3 "i" psOrderNat (psSelfHostListNilOf alpha), step, xs]
   .definitionDecl (psDecisionName "$psc0Standard.arrayListSetWorker") []
@@ -86,9 +86,9 @@ def psStandardArrayPrimitiveDeclarations : List PsDeclaration :=
     (psLogicLam 3 "value" alpha (psStandardArrayMk alpha listSet)))
   let h := PsExpr.fvar 9
   let bound := psStandardArrayBound alpha xs i
-  let sliced := psOrderCall "List.take" [alpha,
+  let sliced := psStandardListCall "take" [alpha,
     psOrderCall "Nat.sub" [stop, start],
-    psOrderCall "List.drop" [alpha, start, list]]
+    psStandardListCall "drop" [alpha, start, list]]
   [ defn "Array.emptyWithCapacity" psPreludeArrayEmptyType
       (lams (psLogicLam 2 "capacity" psOrderNat
         (psStandardArrayMk alpha (psSelfHostListNilOf alpha)))),
@@ -96,7 +96,7 @@ def psStandardArrayPrimitiveDeclarations : List PsDeclaration :=
       (lams (psLogicLam 1 "xs" array (psListIndexLength alpha list))),
     defn "Array.push" psPreludeArrayPushType
       (lams (psLogicLam 1 "xs" array (psLogicLam 3 "value" alpha
-        (psStandardArrayMk alpha (psOrderCall "List.append" [alpha, list,
+        (psStandardArrayMk alpha (psStandardListCall "append" [alpha, list,
           psSelfHostListConsOf alpha value (psSelfHostListNilOf alpha)]))))),
     defn "Array.getD" psPreludeArrayGetDType
       (lams (psLogicLam 1 "xs" array (psLogicLam 2 "i" psOrderNat
@@ -119,14 +119,14 @@ def psStandardArrayPrimitiveDeclarations : List PsDeclaration :=
       (lams (psLogicLam 4 "β" psPreludeTypeType
         (psLogicLam 5 "f" (psLogicPi 10 "value" alpha beta)
           (psLogicLam 1 "xs" array
-            (psStandardArrayMk beta (psOrderCall "List.map" [alpha, beta, fn, list]))))
+            (psStandardArrayMk beta (psStandardListCall "map" [alpha, beta, fn, list] [.zero, .zero]))))
         .implicit)),
     defn "Array.foldl" psPreludeArrayFoldlType
       (lams (psLogicLam 4 "β" psPreludeTypeType
         (psLogicLam 5 "f" (psLogicPi 10 "acc" beta (psLogicPi 11 "value" alpha beta))
           (psLogicLam 6 "init" beta (psLogicLam 1 "xs" array
             (psLogicLam 7 "start" psOrderNat (psLogicLam 8 "stop" psOrderNat
-              (psOrderCall "List.foldl" [alpha, beta, fn, init, sliced]))))))
+              (psStandardListCall "foldl" [alpha, beta, fn, init, sliced] [.zero, .zero]))))))
         .implicit)) ]
 
 def psStandardArrayInstances : List PsDeclaration :=

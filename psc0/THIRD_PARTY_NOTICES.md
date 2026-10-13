@@ -31,3 +31,14 @@ Modifications: checked Core declaration builders, explicit Unicode prefix scan,
 pure work-state records, and total input-weight-bounded transitions in place of
 private partial worklists. Pure rendering ignores tags as upstream does; this
 does not implement or substitute for effectful MonadPrettyFormat callbacks.
+
+ToFormat/Repr classes, combinators and formatting rules in StandardFormatClass,
+StandardToFormat, StandardRepr and Elab/DerivingRepr adapt Lean 4.35.0
+Init/Data/Format/{Basic,Instances}.lean, Init/Data/Repr.lean,
+Init/Data/Int/Repr.lean and Lean/Elab/Deriving/Repr.lean.
+Copyright (c) Microsoft Corporation; author Leonardo de Moura. Apache-2.0.
+Modifications: portable checked Core definitions, shared dictionary registration,
+parameter/universe-aware deriving without host elaboration, and direct projections
+for structures. Recursive/indexed deriving remains in M3+B.
+List declarations and recursor-based algorithms follow Init/Prelude.lean and
+Init/Data/List/Basic.lean, with explicit independent element/result universes.

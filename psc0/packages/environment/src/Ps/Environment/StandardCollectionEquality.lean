@@ -16,7 +16,7 @@ def psStandardBEqListWorkerDeclaration : PsDeclaration :=
   let resultArrow := psLogicPi 19 "right" list bool
   let outerMotive := psLogicLam 20 "_" list resultArrow
   let innerMotive := psLogicLam 21 "_" list bool
-  let recursor := PsExpr.constE psSelfHostListRecName [.succ .zero]
+  let recursor := PsExpr.constE psSelfHostListRecName [.succ .zero, .zero]
   let innerConsNone := psLogicLam 11 "rightHead" alpha
     (psLogicLam 12 "rightTail" list
       (psLogicLam 13 "rightIH" bool (.constE psBoolFalseName [])))

@@ -1,5 +1,6 @@
 import Ps.Elab.DerivingInhabited
 import Ps.Elab.DerivingBEq
+import Ps.Elab.DerivingRepr
 import Ps.Elab.DerivingDecEq
 
 -- Handlers return ordinary Core definitions. The source command owns instance
@@ -10,5 +11,6 @@ def psElabDeriveHandler (environment : PsEnvironment)
   match handler.segments with
   | ["Inhabited"] => psElabDeriveInhabited environment origin
   | ["BEq"] => psElabDeriveBEq environment origin
+  | ["Repr"] => psElabDeriveRepr environment origin
   | ["DecidableEq"] => psElabDeriveDecEq environment origin
   | _ => .error (.data "deriving handler is selected but not yet implemented")

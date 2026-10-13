@@ -95,6 +95,9 @@ lean_lib PsEnvironment where
     `Ps.Environment.StandardFormatWork,
     `Ps.Environment.StandardFormatRender,
     `Ps.Environment.StandardFormat,
+    `Ps.Environment.StandardFormatClass,
+    `Ps.Environment.StandardToFormat,
+    `Ps.Environment.StandardRepr,
     `Ps.Environment.SelfHostProd,
     `Ps.Environment.StandardSnapshot
   ]
@@ -257,6 +260,7 @@ lean_lib PsElab where
     `Ps.Elab.DerivingInhabited,
     `Ps.Elab.DerivingBEq,
     `Ps.Elab.DerivingDecEq,
+    `Ps.Elab.DerivingRepr,
     `Ps.Elab.Deriving,
     `Ps.Elab.Scope,
     `Ps.Elab.Command

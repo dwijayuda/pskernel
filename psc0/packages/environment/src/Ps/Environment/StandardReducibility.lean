@@ -4,6 +4,9 @@ import Ps.Environment.Basic
 -- PrimitiveAudit. Portable helper identities default to semireducible; actual
 -- registered instance definitions receive the instance-command status.
 def psStandardReducibility : List (String × PsReducibility) := [
+  ("repr", .reducible),
+  ("reprArg", .reducible),
+  ("reprStr", .reducible),
   ("Int.toNat", .implicitReducible),
   ("Array.get!Internal", .implicitReducible),
   ("List.toArray", .reducible),

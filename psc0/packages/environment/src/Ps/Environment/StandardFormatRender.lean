@@ -17,7 +17,7 @@ def psFormatNewline (state indent : PsExpr) : PsExpr := psFormatPrivateCall "new
 -- A nonrecursive case over a checked List. The supplied tail hypothesis is
 -- deliberately unused; actual recursive traversal belongs to its named worker.
 def psFormatListCase (element result value nil : PsExpr) (offset : Nat) (cons : PsExpr) : PsExpr :=
-  psLogicApply psStandardListRecursor
+  psLogicApply (psStandardListRecursor .zero)
     [element, psLogicLam offset "_" (psSelfHostListOf element) result, nil,
      psLogicLam offset "head" element
        (psLogicLam (offset + 1) "tail" (psSelfHostListOf element)

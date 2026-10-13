@@ -4,7 +4,7 @@ import Ps.Environment.StandardFin
 -- Neither performs a length pass at runtime. Bounds exist only in the checked
 -- Core types; the optional worker stops at the requested cell or the list end.
 def psListIndexLength (alpha xs : PsExpr) : PsExpr :=
-  psOrderCall "List.length" [alpha, xs]
+  psStandardListCall "length" [alpha, xs]
 
 def psListIndexBound (alpha xs i : PsExpr) : PsExpr :=
   psOrderCall "Nat.lt" [i, psListIndexLength alpha xs]
@@ -16,7 +16,7 @@ def psListIndexProofGet (alpha xs i h : PsExpr) : PsExpr :=
   psLogicApply (.constE psListIndexProofName []) [alpha, xs, i, h]
 
 def psListIndexOptionalGet (alpha xs i : PsExpr) : PsExpr :=
-  psOrderCall "List.get?" [alpha, xs, i]
+  psStandardListCall "get?" [alpha, xs, i]
 
 def psListIndexFalseElim (level : PsLevel) (type proof : PsExpr) : PsExpr :=
   psLogicApply (.constE (psDecisionName "False.elim") [level]) [type, proof]
@@ -53,7 +53,7 @@ def psStandardListProofGetDeclaration : PsDeclaration :=
             (psLogicLam 2 "i" psOrderNat (atIndex i)) zeroCase succCase i))))
   -- The List-recursive result owns its changing index/proof arguments,
   -- just like listGetWorker.
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor .zero)
     [alpha, psLogicLam 1 "xs" list (result xs), nilCase, consCase, xs]
   .definitionDecl psListIndexProofName []
     (psLogicPi 0 "α" psPreludeTypeType (psLogicPi 1 "xs" list (result xs)) .implicit)
@@ -114,7 +114,7 @@ def psStandardListIndexBranchDeclaration (positive : Bool) : PsDeclaration :=
         (psLogicLam 2 "i" psOrderNat
           (psOrderNatRec .zero (psLogicLam 2 "i" psOrderNat (atIndex i))
             zeroCase succCase i))))
-  let body := psLogicApply (.constE psSelfHostListRecName [.zero])
+  let body := psLogicApply (.constE psSelfHostListRecName [.zero, .zero])
     [alpha, psLogicLam 1 "xs" list (result xs), nilCase, consCase, xs]
   .definitionDecl (psDecisionName
       (if positive then "PsStandard.listIndexPositive" else "PsStandard.listIndexNegative")) []
@@ -229,7 +229,7 @@ def psStandardListIndexInstances : List PsDeclaration :=
   let optionalDecl := .definitionDecl optionalName []
     (params (family psStandardGetElemOptionalName []))
     (lams (family (psDecisionName "GetElem?.mk")
-      [checked, .app (.constE (psDecisionName "List.get?") []) alpha,
+      [checked, .app (.constE (psDecisionName "List.get?") [.zero]) alpha,
        .app (.constE (psDecisionName "List.get!") []) alpha]))
   let proposition := psListIndexBound alpha xs i
   let get := psLogicLam 3 "h" proposition (psListIndexProofGet alpha xs i h)

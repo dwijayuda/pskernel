@@ -52,7 +52,7 @@ def psStandardInhabitedGround (suffix : String) (type value : PsExpr) :
 def psStandardInhabitedContainer (suffix : String) (typeName : PsName)
     (defaultValue : PsExpr → PsExpr) : PsDeclaration :=
   let alpha := PsExpr.fvar 0
-  let type := .app (.constE typeName []) alpha
+  let type := .app (.constE typeName (if psNameEq typeName psListName then [.zero] else [])) alpha
   let declarationType := psLogicPi 0 "α" psPreludeTypeType
     (psStandardInhabitedType type) .implicit
   let declarationValue := psLogicLam 0 "α" psPreludeTypeType
@@ -90,7 +90,7 @@ def psStandardInhabitedInstances : List PsDeclaration :=
       (.app (.constE psCharOfNatName []) (.lit (.natural 0))),
     psStandardInhabitedGround "Unit" unit (.constE psUnitUnitName []),
     psStandardInhabitedOption,
-    psStandardInhabitedContainer "List" psListName psSelfHostListNilOf,
+    psStandardInhabitedContainer "List" psListName (fun alpha => psSelfHostListNilOf alpha),
     psStandardInhabitedContainer "Array" psArrayName
       (fun alpha => psLogicApply (.constE psArrayEmptyWithCapacityName [])
         [alpha, .lit (.natural 0)]) ]

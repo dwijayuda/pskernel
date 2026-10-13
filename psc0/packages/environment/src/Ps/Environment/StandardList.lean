@@ -1,73 +1,81 @@
 import Ps.Environment.StandardOption
 import Ps.Core.Equality
 
--- Selected RC4 List operations, defined entirely with the checked List.rec
--- eliminator. The current portable Standard roster uses Type-0 parameters,
--- with no runtime axioms or special cases for these public functions.
-def psStandardListRecursor : PsExpr :=
-  .constE psSelfHostListRecName [.succ .zero]
+-- Lean 4.35.0 List.rec: result sort first, then element universe.
+def psStandardListRecursor (element : PsLevel := .zero)
+    (result : PsLevel := .succ .zero) : PsExpr :=
+  .constE psSelfHostListRecName [result, element]
+
+def psStandardListCall (suffix : String) (arguments : List PsExpr)
+    (levels : List PsLevel := [.zero]) : PsExpr :=
+  psLogicApply (.constE (psNameAppendStr psListName suffix) levels) arguments
 
 def psStandardListLengthDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let nat := PsExpr.constE psNatName []
   let motive := psLogicLam 2 "_" listAlpha nat
   let step := psLogicLam 3 "head" alpha
     (psLogicLam 4 "tail" listAlpha
       (psLogicLam 5 "ih" nat
         (.app (.constE psNatSuccName []) (.fvar 5))))
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "xs" listAlpha nat) .implicit
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor u (.succ .zero))
     [alpha, motive, .lit (.natural 0), step, .fvar 1]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "xs" listAlpha body) .implicit
-  .definitionDecl (psNameAppendStr psListName "length") [] type value
+  .definitionDecl (psNameAppendStr psListName "length") [psRootName "u"] type value
 
 def psStandardListMapDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
+  let v := PsLevel.param (psRootName "v")
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let listAlpha := psSelfHostListOf alpha
-  let listBeta := psSelfHostListOf beta
+  let listAlpha := psSelfHostListOf alpha u
+  let listBeta := psSelfHostListOf beta v
   let arrow := psLogicPi 5 "element" alpha beta
   let motive := psLogicLam 5 "_" listAlpha listBeta
   let step := psLogicLam 6 "head" alpha
     (psLogicLam 7 "tail" listAlpha
       (psLogicLam 8 "ih" listBeta
-        (psSelfHostListConsOf beta (.app (.fvar 2) (.fvar 6)) (.fvar 8))))
-  let type := psLogicPi 0 "α" psPreludeTypeType
-    (psLogicPi 1 "β" psPreludeTypeType
+        (psSelfHostListConsOf beta (.app (.fvar 2) (.fvar 6)) (.fvar 8) v)))
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
+    (psLogicPi 1 "β" (.sortE (.succ v))
       (psLogicPi 2 "f" arrow
         (psLogicPi 3 "xs" listAlpha listBeta)) .implicit) .implicit
-  let body := psLogicApply psStandardListRecursor
-    [alpha, motive, psSelfHostListNilOf beta, step, .fvar 3]
-  let value := psLogicLam 0 "α" psPreludeTypeType
-    (psLogicLam 1 "β" psPreludeTypeType
+  let body := psLogicApply (psStandardListRecursor u (.succ v))
+    [alpha, motive, psSelfHostListNilOf beta v, step, .fvar 3]
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
+    (psLogicLam 1 "β" (.sortE (.succ v))
       (psLogicLam 2 "f" arrow
         (psLogicLam 3 "xs" listAlpha body)) .implicit) .implicit
-  .definitionDecl (psNameAppendStr psListName "map") [] type value
+  .definitionDecl (psNameAppendStr psListName "map") [psRootName "u", psRootName "v"] type value
 
 def psStandardListAppendDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let motive := psLogicLam 6 "_" listAlpha listAlpha
   let step := psLogicLam 3 "head" alpha
     (psLogicLam 4 "tail" listAlpha
       (psLogicLam 5 "ih" listAlpha
-        (psSelfHostListConsOf alpha (.fvar 3) (.fvar 5))))
-  let type := psLogicPi 0 "α" psPreludeTypeType
+        (psSelfHostListConsOf alpha (.fvar 3) (.fvar 5) u)))
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "xs" listAlpha
       (psLogicPi 2 "ys" listAlpha listAlpha)) .implicit
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor u (.succ u))
     [alpha, motive, .fvar 2, step, .fvar 1]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "xs" listAlpha
       (psLogicLam 2 "ys" listAlpha body)) .implicit
-  .definitionDecl (psNameAppendStr psListName "append") [] type value
+  .definitionDecl (psNameAppendStr psListName "append") [psRootName "u"] type value
 
 def psStandardListFilterDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let bool := PsExpr.constE psBoolName []
   let predicate := psLogicPi 6 "value" alpha bool
   let motive := psLogicLam 6 "_" listAlpha listAlpha
@@ -75,18 +83,18 @@ def psStandardListFilterDeclaration : PsDeclaration :=
   let step := psLogicLam 3 "head" alpha
     (psLogicLam 4 "tail" listAlpha
       (psLogicLam 5 "ih" listAlpha
-        (psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ .zero])
-          [boolMotive, .fvar 5, psSelfHostListConsOf alpha (.fvar 3) (.fvar 5),
+        (psLogicApply (.constE (psNameAppendStr psBoolName "rec") [.succ u])
+          [boolMotive, .fvar 5, psSelfHostListConsOf alpha (.fvar 3) (.fvar 5) u,
            .app (.fvar 1) (.fvar 3)])))
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "p" predicate
       (psLogicPi 2 "xs" listAlpha listAlpha)) .implicit
-  let body := psLogicApply psStandardListRecursor
-    [alpha, motive, psSelfHostListNilOf alpha, step, .fvar 2]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let body := psLogicApply (psStandardListRecursor u (.succ u))
+    [alpha, motive, psSelfHostListNilOf alpha u, step, .fvar 2]
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "p" predicate
       (psLogicLam 2 "xs" listAlpha body)) .implicit
-  .definitionDecl (psNameAppendStr psListName "filter") [] type value
+  .definitionDecl (psNameAppendStr psListName "filter") [psRootName "u"] type value
 
 -- Structural recursion must own its decreasing major at the executable
 -- function boundary. A named worker whose result is β → β has precisely the
@@ -97,9 +105,11 @@ def psStandardListFoldlWorkerName : PsName :=
   psNameAppendStr (psRootName "$psc0Standard") "listFoldlWorker"
 
 def psStandardListFoldlWorkerDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
+  let v := PsLevel.param (psRootName "v")
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let functionType := psLogicPi 10 "acc" beta
     (psLogicPi 11 "item" alpha beta)
   let accumulatorType := psLogicPi 12 "acc" beta beta
@@ -111,37 +121,39 @@ def psStandardListFoldlWorkerDeclaration : PsDeclaration :=
         (psLogicLam 9 "acc" beta
           (.app (.fvar 8)
             (psLogicApply (.fvar 2) [.fvar 9, .fvar 6])))))
-  let type := psLogicPi 0 "α" psPreludeTypeType
-    (psLogicPi 1 "β" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
+    (psLogicPi 1 "β" (.sortE (.succ v))
       (psLogicPi 2 "f" functionType
         (psLogicPi 3 "xs" listAlpha accumulatorType)) .implicit) .implicit
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor u (.succ v))
     [alpha, motive, initial, step, .fvar 3]
-  let value := psLogicLam 0 "α" psPreludeTypeType
-    (psLogicLam 1 "β" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
+    (psLogicLam 1 "β" (.sortE (.succ v))
       (psLogicLam 2 "f" functionType
         (psLogicLam 3 "xs" listAlpha body)) .implicit) .implicit
-  .definitionDecl psStandardListFoldlWorkerName [] type value
+  .definitionDecl psStandardListFoldlWorkerName [psRootName "u", psRootName "v"] type value
 
 def psStandardListFoldlDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
+  let v := PsLevel.param (psRootName "v")
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let functionType := psLogicPi 10 "acc" beta
     (psLogicPi 11 "item" alpha beta)
-  let type := psLogicPi 0 "α" psPreludeTypeType
-    (psLogicPi 1 "β" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
+    (psLogicPi 1 "β" (.sortE (.succ v))
       (psLogicPi 2 "f" functionType
         (psLogicPi 3 "init" beta
           (psLogicPi 4 "xs" listAlpha beta))) .implicit) .implicit
-  let body := psLogicApply (.constE psStandardListFoldlWorkerName [])
+  let body := psLogicApply (.constE psStandardListFoldlWorkerName [u, v])
     [alpha, beta, .fvar 2, .fvar 4, .fvar 3]
-  let value := psLogicLam 0 "α" psPreludeTypeType
-    (psLogicLam 1 "β" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
+    (psLogicLam 1 "β" (.sortE (.succ v))
       (psLogicLam 2 "f" functionType
         (psLogicLam 3 "init" beta
           (psLogicLam 4 "xs" listAlpha body))) .implicit) .implicit
-  .definitionDecl (psNameAppendStr psListName "foldl") [] type value
+  .definitionDecl (psNameAppendStr psListName "foldl") [psRootName "u", psRootName "v"] type value
 
 -- The safe-indexing worker is total and has no validity-proof axiom.
 -- Its List-recursive hypothesis is itself a Nat → Option α function, so
@@ -151,46 +163,48 @@ def psStandardListGetWorkerName : PsName :=
   psNameAppendStr (psRootName "$psc0Standard") "listGetWorker"
 
 def psStandardListGetWorkerDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let nat := PsExpr.constE psNatName []
-  let optionAlpha := psSelfHostOptionOf alpha
+  let optionAlpha := psSelfHostOptionOf alpha u
   let resultArrow := psLogicPi 20 "index" nat optionAlpha
   let motive := psLogicLam 21 "_" listAlpha resultArrow
-  let nilBranch := psLogicLam 22 "index" nat (psSelfHostOptionNoneOf alpha)
+  let nilBranch := psLogicLam 22 "index" nat (psSelfHostOptionNoneOf alpha u)
   let natMotive := psLogicLam 23 "_" nat optionAlpha
   let consBranch := psLogicLam 5 "head" alpha
     (psLogicLam 6 "tail" listAlpha
       (psLogicLam 7 "ih" resultArrow
         (psLogicLam 8 "index" nat
-          (psLogicApply (.constE psNatRecName [.succ .zero])
+          (psLogicApply (.constE psNatRecName [.succ u])
             [natMotive,
-             psSelfHostOptionSomeOf alpha (.fvar 5),
+             psSelfHostOptionSomeOf alpha (.fvar 5) u,
              psLogicLam 9 "previous" nat
                (psLogicLam 10 "_" optionAlpha (.app (.fvar 7) (.fvar 9))),
              .fvar 8]))))
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "xs" listAlpha resultArrow) .implicit
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor u (.succ u))
     [alpha, motive, nilBranch, consBranch, .fvar 1]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "xs" listAlpha body) .implicit
-  .definitionDecl psStandardListGetWorkerName [] type value
+  .definitionDecl psStandardListGetWorkerName [psRootName "u"] type value
 
 def psStandardListGetQuestionDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let nat := PsExpr.constE psNatName []
-  let optionAlpha := psSelfHostOptionOf alpha
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let optionAlpha := psSelfHostOptionOf alpha u
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "xs" listAlpha
       (psLogicPi 2 "index" nat optionAlpha)) .implicit
-  let body := psLogicApply (.constE psStandardListGetWorkerName [])
+  let body := psLogicApply (.constE psStandardListGetWorkerName [u])
     [alpha, .fvar 1, .fvar 2]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "xs" listAlpha
       (psLogicLam 2 "index" nat body)) .implicit
-  .definitionDecl (psNameAppendStr psListName "get?") [] type value
+  .definitionDecl (psNameAppendStr psListName "get?") [psRootName "u"] type value
 
 -- Standard List.take/drop are entirely checked structural programs, sharing
 -- the List.rec / Nat.rec worker architecture used for the qualified List.get?.
@@ -204,58 +218,62 @@ def psStandardListDropWorkerName : PsName :=
   psNameAppendStr (psRootName "$psc0Standard") "listDropWorker"
 
 def psStandardListSliceWorkerDeclaration (take : Bool) : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let nat := PsExpr.constE psNatName []
   let resultArrow := psLogicPi 20 "count" nat listAlpha
   let motive := psLogicLam 21 "_" listAlpha resultArrow
-  let nilBranch := psLogicLam 22 "count" nat (psSelfHostListNilOf alpha)
+  let nilBranch := psLogicLam 22 "count" nat (psSelfHostListNilOf alpha u)
   let natMotive := psLogicLam 23 "_" nat listAlpha
   let consBranch := psLogicLam 5 "head" alpha
     (psLogicLam 6 "tail" listAlpha
       (psLogicLam 7 "ih" resultArrow
         (psLogicLam 8 "count" nat
-          (psLogicApply (.constE psNatRecName [.succ .zero])
+          (psLogicApply (.constE psNatRecName [.succ u])
             [natMotive,
-             if take then psSelfHostListNilOf alpha
-             else psSelfHostListConsOf alpha (.fvar 5) (.fvar 6),
+             if take then psSelfHostListNilOf alpha u
+             else psSelfHostListConsOf alpha (.fvar 5) (.fvar 6) u,
              psLogicLam 9 "previous" nat
                (psLogicLam 10 "_" listAlpha
                  (if take then
-                   psSelfHostListConsOf alpha (.fvar 5) (.app (.fvar 7) (.fvar 9))
+                   psSelfHostListConsOf alpha (.fvar 5) (.app (.fvar 7) (.fvar 9)) u
                  else .app (.fvar 7) (.fvar 9))),
              .fvar 8]))))
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "xs" listAlpha resultArrow) .implicit
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor u (.succ u))
     [alpha, motive, nilBranch, consBranch, .fvar 1]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "xs" listAlpha body) .implicit
   .definitionDecl
     (if take then psStandardListTakeWorkerName else psStandardListDropWorkerName)
-    [] type value
+    [psRootName "u"] type value
 
 def psStandardListSliceDeclaration (take : Bool) : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
   let nat := PsExpr.constE psNatName []
-  let listAlpha := psSelfHostListOf alpha
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let listAlpha := psSelfHostListOf alpha u
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "count" nat
       (psLogicPi 2 "xs" listAlpha listAlpha)) .implicit
   let worker := if take then psStandardListTakeWorkerName else
     psStandardListDropWorkerName
-  let body := psLogicApply (.constE worker []) [alpha, .fvar 2, .fvar 1]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+  let body := psLogicApply (.constE worker [u]) [alpha, .fvar 2, .fvar 1]
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "count" nat
       (psLogicLam 2 "xs" listAlpha body)) .implicit
   .definitionDecl
     (psNameAppendStr psListName (if take then "take" else "drop"))
-    [] type value
+    [psRootName "u"] type value
 
 def psStandardListFoldrDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
+  let v := PsLevel.param (psRootName "v")
   let alpha := PsExpr.fvar 0
   let beta := PsExpr.fvar 1
-  let listAlpha := psSelfHostListOf alpha
+  let listAlpha := psSelfHostListOf alpha u
   let functionType := psLogicPi 8 "head" alpha
     (psLogicPi 9 "acc" beta beta)
   let motive := psLogicLam 10 "_" listAlpha beta
@@ -263,36 +281,37 @@ def psStandardListFoldrDeclaration : PsDeclaration :=
     (psLogicLam 6 "tail" listAlpha
       (psLogicLam 7 "ih" beta
         (psLogicApply (.fvar 2) [.fvar 5, .fvar 7])))
-  let type := psLogicPi 0 "α" psPreludeTypeType
-    (psLogicPi 1 "β" psPreludeTypeType
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
+    (psLogicPi 1 "β" (.sortE (.succ v))
       (psLogicPi 2 "f" functionType
         (psLogicPi 3 "init" beta
           (psLogicPi 4 "xs" listAlpha beta))) .implicit) .implicit
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor u (.succ v))
     [alpha, motive, .fvar 3, step, .fvar 4]
-  let value := psLogicLam 0 "α" psPreludeTypeType
-    (psLogicLam 1 "β" psPreludeTypeType
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
+    (psLogicLam 1 "β" (.sortE (.succ v))
       (psLogicLam 2 "f" functionType
         (psLogicLam 3 "init" beta
           (psLogicLam 4 "xs" listAlpha body))) .implicit) .implicit
-  .definitionDecl (psNameAppendStr psListName "foldr") [] type value
+  .definitionDecl (psNameAppendStr psListName "foldr") [psRootName "u", psRootName "v"] type value
 
 -- Reverse is a checked specialization of the already qualified List.foldl.
 -- It runs in linear time, without introducing a second recursion primitive.
 def psStandardListReverseDeclaration : PsDeclaration :=
+  let u := PsLevel.param (psRootName "u")
   let alpha := PsExpr.fvar 0
-  let listAlpha := psSelfHostListOf alpha
-  let type := psLogicPi 0 "α" psPreludeTypeType
+  let listAlpha := psSelfHostListOf alpha u
+  let type := psLogicPi 0 "α" (.sortE (.succ u))
     (psLogicPi 1 "xs" listAlpha listAlpha) .implicit
   let accumulate := psLogicLam 2 "acc" listAlpha
     (psLogicLam 3 "head" alpha
-      (psSelfHostListConsOf alpha (.fvar 3) (.fvar 2)))
+      (psSelfHostListConsOf alpha (.fvar 3) (.fvar 2) u))
   let body := psLogicApply
-    (.constE (psNameAppendStr psListName "foldl") [])
-    [alpha, listAlpha, accumulate, psSelfHostListNilOf alpha, .fvar 1]
-  let value := psLogicLam 0 "α" psPreludeTypeType
+    (.constE (psNameAppendStr psListName "foldl") [u, u])
+    [alpha, listAlpha, accumulate, psSelfHostListNilOf alpha u, .fvar 1]
+  let value := psLogicLam 0 "α" (.sortE (.succ u))
     (psLogicLam 1 "xs" listAlpha body) .implicit
-  .definitionDecl (psNameAppendStr psListName "reverse") [] type value
+  .definitionDecl (psNameAppendStr psListName "reverse") [psRootName "u"] type value
 
 def psStandardListDeclarations : List PsDeclaration :=
   [psStandardListLengthDeclaration, psStandardListMapDeclaration,

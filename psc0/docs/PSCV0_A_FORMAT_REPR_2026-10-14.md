@@ -162,3 +162,46 @@ at `a2bcf0375c5f9acfa0d50847d44253657d5cd3cd`,
 [Linux 38443246672](https://github.com/dwijayuda/pskernel/actions/runs/38443246672).
 This is the newest qualified source/test boundary; 313 shared observations,
 394/18/54 Standard roster and both digests are unchanged.
+
+## ToFormat/Repr implementation phase (qualification pending)
+
+Reference: official Lean **4.35.0**, commit
+`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Studied [Format Basic](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Format/Basic.lean),
+[Format Instances](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Format/Instances.lean),
+[Repr](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Repr.lean),
+[Int Repr](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/Int/Repr.lean),
+[deriving Repr](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Lean/Elab/Deriving/Repr.lean),
+Init/Notation.lean (`max_prec = 1024`), Init/Prelude.lean and
+Init/Data/List/Basic.lean. Relevant tests: derivingRepr, repr, repr_empty,
+repr_issue, Format, formatHardLineBreaks and charQuote.
+
+The old Type-0 List declaration cannot implement the actual universe-polymorphic
+joinSep API. Replace its handwritten telescope with the same explicit-local
+builder used for Option; List.rec has levels [resultSort, elementUniverse].
+Promote the selected List operations, including independent map/fold input and
+output universes. Ground collection adapters explicitly instantiate zero.
+Proof-bearing List indexing and the Array/Prod model remain selected Type-0
+APIs and are not claimed to be promoted by this phase.
+
+Formatting dictionaries are ordinary one-field structures. Std.ToFormat's
+ToString fallback has priority 100; identity/structural instances have 1000.
+Join combinators reuse the shared checked List.foldl; no duplicate traversal
+or backend formatter is introduced. ReprAtom is an empty ordinary class and
+selects the later atomic-list instance at the same priority as Lean.
+
+Deriving plans each field printer once in the parameter context. Structures use
+projections and field labels; constructors print qualified names and explicit
+fields only. Proof/type values print underscores; constructor arguments use
+precedence 1024, including nullary constructors in application contexts.
+Formatting is a checked Format term, never a string-generation shortcut.
+Dependent runtime field types, recursive and indexed families stay with M3+B.
+Generated declarations retain the existing source-command origin machinery.
+
+Qualification: 17 compact observations, independently checked by native Lean,
+are added to the existing shared backend table. Repr missing-dictionary and
+recursive refusal cases extend the existing boundary group. Both Standard
+digest guards remain strict pending explicit review of the new roster.
+Remaining selected formatting APIs/instances, Hashable/numeric dependencies,
+broader M2 evidence and the Phase A manifest remain open; this is not M2+A
+completion.

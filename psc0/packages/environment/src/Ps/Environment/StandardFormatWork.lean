@@ -60,7 +60,7 @@ def psFormatMeasureItemsDeclaration : PsDeclaration :=
     [psFormatInt (psOrderCall "Nat.add" [width, col]), psFormatItemField 1 item]
   let measured := psFormatPrivateCall "spaceUptoLine"
     [psFormatItemField 0 item, flatten, margin, width]
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor .zero)
     [psFormatItemType, psLogicLam 20 "_" psFormatItemsType psFormatSpaceArrow,
      psLogicLam 3 "width" psOrderNat psFormatZeroSpace,
      psLogicLam 10 "item" psFormatItemType
@@ -79,7 +79,7 @@ def psFormatMeasureGroupsDeclaration : PsDeclaration :=
   let ih := PsExpr.fvar 12
   let measured := psFormatPrivateCall "measureItems"
     [psFormatShouldFlatten (psFormatGroupField 0 group), col, psFormatGroupField 2 group, width]
-  let body := psLogicApply psStandardListRecursor
+  let body := psLogicApply (psStandardListRecursor .zero)
     [psFormatGroupType, psLogicLam 20 "_" psFormatGroupsType psFormatSpaceArrow,
      psLogicLam 2 "width" psOrderNat psFormatZeroSpace,
      psLogicLam 10 "group" psFormatGroupType

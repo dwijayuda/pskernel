@@ -230,6 +230,35 @@ See [C0_TRUSTED_FOUNDATION_AUDIT.md](C0_TRUSTED_FOUNDATION_AUDIT.md).
 
 **Qualified:** [`e6900e27`](https://github.com/dwijayuda/pskernel/commit/e6900e2770437b6210ae19862adc7e6c6ec971dc), [native CI 38484702307](https://github.com/dwijayuda/pskernel/actions/runs/38484702307) SUCCESS, plus full green incremental and capability source runs. Later direct-membership/no-trust proof source `6979d7e9` awaits [CI 38485235073](https://github.com/dwijayuda/pskernel/actions/runs/38485235073). This does not finish the independent optimized accepting checker, full Lean Init/Std/Mathlib, real-workload performance or soundness refinement.
 
+## CDE-10B — approved exact axiom signatures and incremental source-history proofs
+
+The checked-environment history is now audited against *exact*
+`PsKernelAxiomInfo` signatures, not names. Quot initialization and every
+unsafe/partial declaration family have separately reviewed capabilities.
+Lean proofs guarantee all historically source-admitted signatures and
+capabilities are authorized. Empty permission lists prove those histories
+contain none of the corresponding admissions.
+
+Steady-state admissions extend permission proofs by checking only the
+new source-admitted request; unchanged-environment source WHNF/inference/
+checking/DefEq and syntax staging transport existing proofs through precise
+Lean ownership equality. Only explicit policy modifications reconstruct
+and re-audit the full immutable history.
+
+**Full native qualification:** [`572c99a7`](https://github.com/dwijayuda/pskernel/commit/572c99a78834bc1219fc462046b023fad1b762f5),
+[CI 38485620934](https://github.com/dwijayuda/pskernel/actions/runs/38485620934)
+**SUCCESS**. The matched audit microbenchmark used 96 safe declarations and
+112 identical source WHNF queries: proof transport 1ms, whole-history
+re-audit per query 3ms. This is narrow validation-overhead evidence, not
+a full-workload performance claim. See
+[C0_TRUSTED_FOUNDATION_AUDIT.md](C0_TRUSTED_FOUNDATION_AUDIT.md).
+
+**Beyond this bounded assurance slice:** finish mathematical and operational
+refinement of the complete optimized checker, full Lean library replay,
+resource semantics, matched whole-workload benchmarks and soundness/
+trusted-foundation metatheory. Do not promote the candidate evaluator's
+observations into accepting judgments merely because audit proofs hold.
+
 ## Milestone order and current first slice
 
 1. Freeze existing B acceptance evidence and the counterexample (done).

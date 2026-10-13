@@ -148,7 +148,7 @@ jobs:
           # This is not an acceptance gate: the current adapter deliberately
           # declines unsupported declarations. A timeout/host failure must
           # not be represented as a kernel rejection.
-          if timeout 180s bash -c 'cd "$1" && lake build PsKernelC0 && lake env lean --run test/C0OfficialNdjsonReplay.lean "$2"' _ \
+          if timeout 240s bash -c 'cd "$1" && lake build PsKernelC0 && lake env lean --run test/C0OfficialNdjsonReplay.lean "$2"' _ \
               "$GITHUB_WORKSPACE/psc0/packages/pskernel-c0" \
               "$RUNNER_TEMP/Init-4.35.0.ndjson" \
               > "$RUNNER_TEMP/c0-real-init-435-result.txt" 2>&1; then

@@ -1,4 +1,4 @@
-import Ps.KernelCore.Architecture.Demand
+import Ps.KernelCore.Architecture.Typed
 import Ps.KernelCore.Admission.Declaration.Admission
 
 def c0DeltaName (name : String) : PsKernelName :=
@@ -619,6 +619,39 @@ def main : IO Unit := do
   | .error _ => pure ()
   | .ok _ =>
       throw (IO.userError "C0 candidate did not decline unsafe recursor")
+  -- CDE-8B source-typed observer never manufactures K or eta judgments.
+  match psKernelC0ArchitectureObserveTypedMajor
+      4096 kRecSession recName (.sort .zero) with
+  | .error reason =>
+      throw (IO.userError ("typed K observer unexpectedly declined: " ++ reason))
+  | .ok (observation, _) =>
+      if observation.changed ||
+          !psKernelExprEqual observation.sourceResult (.sort .zero) then
+        throw (IO.userError "typed K observer synthesized constructor")
+  match psKernelC0ArchitectureObserveTypedMajor
+      4096 recSession recName pairValue with
+  | .error reason =>
+      throw (IO.userError ("source structure observer failed: " ++ reason))
+  | .ok (observation, _) =>
+      if observation.changed ||
+          !psKernelExprEqual observation.sourceResult pairValue then
+        throw (IO.userError "source structure observer changed constructor major")
+  match psKernelC0ArchitectureObserveTypedMajor
+      4096 kRecSession recName (.fvar (c0DeltaName "UnknownLocal")) with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "typed K observer bypassed source type inference")
+  match psKernelC0ArchitectureObserveTypedMajor
+      4096 unsafeRecSession recName pairValue with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "typed observer did not decline unsafe metadata")
+  match psKernelC0ArchitectureObserveTypedMajor
+      4096 recSession (c0DeltaName "UnknownRecursor") pairValue with
+  | .error _ => pure ()
+  | .ok _ =>
+      throw (IO.userError "typed observer accepted missing recursor metadata")
+  IO.println "C0_ARCHITECTURE source_typed_k_structure_observation=pass"
   match psKernelC0ArchitectureCandidateDemand 3 recSession.context
       (.app (.const recName []) (.app idRecord pairValue)) with
   | .error _ => pure ()

@@ -10,6 +10,15 @@ validate recursors, then commit the checked mutual bundle.
 Detailed setup and loops live in `Header.lean` and `AdmissionLoops.lean`.
 -/
 
+/-- Diagnostic-only attribution of exhausted reduction budgets.
+    The admission rules and limits do not change, and invalid declarations
+    retain their original messages. These labels locate the actual expensive
+    coherent subsystem before any WHNF architecture redesign. -/
+def psKernelMutualBudgetAt (stage message : String) : String :=
+  if message == "kernel reduction budget exhausted" then
+    "mutual-" ++ stage ++ ": " ++ message
+  else message
+
 def psKernelAddSimpleMutualInductive
     (fuel : Nat)
     (environment : PsKernelEnvironment)
@@ -48,7 +57,7 @@ def psKernelAddSimpleMutualInductive
           psKernelCheckFreshInductiveNames
             allNames
             environment with
-      | Except.error error =>
+      | Except.error (psKernelMutualBudgetAt "recursor-validation" error) =>
           Except.error error
       | Except.ok _ =>
           match
@@ -99,7 +108,7 @@ def psKernelAddSimpleMutualInductive
                                 fuel
                                 firstSession
                                 first.type with
-                          | Except.error error =>
+                          | Except.error (psKernelMutualBudgetAt "first-type-check" error) =>
                               Except.error error
                           | Except.ok firstTypeType =>
                               match
@@ -124,7 +133,7 @@ def psKernelAddSimpleMutualInductive
                                             fuel
                                             paramResult.session
                                             paramResult.result with
-                                      | Except.error error =>
+                                      | Except.error (psKernelMutualBudgetAt "header-indices" error) =>
                                           Except.error error
                                       | Except.ok firstIndices =>
                                           match firstIndices.result with
@@ -147,7 +156,7 @@ def psKernelAddSimpleMutualInductive
                                                     paramResult.session
                                                     params
                                                     resultLevel with
-                                              | Except.error error =>
+                                              | Except.error (psKernelMutualBudgetAt "remaining-types" error) =>
                                                   Except.error error
                                               | Except.ok tailShapes =>
                                                   let typeShapes :=
@@ -176,7 +185,7 @@ def psKernelAddSimpleMutualInductive
                                                         paramResult.session
                                                         work0
                                                         0 with
-                                                  | Except.error error =>
+                                                  | Except.error (psKernelMutualBudgetAt "constructor-family" error) =>
                                                       Except.error error
                                                   | Except.ok ctorResult =>
                                                       let ctorShapes :=

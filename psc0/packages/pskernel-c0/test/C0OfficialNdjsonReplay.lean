@@ -321,9 +321,6 @@ def c0ExportReadRecursor
     isUnsafe := isUnsafe
   }
 
-/-- A complete ordinary export block is reconstructed, never admitted by
-    trusting its precomputed recursor or constructor declarations.
-    Mutual/nested/safety variants remain explicit declines. -/
 /-- Exported Quot is four records, not four independent axioms. The
     official native kernel initializes the whole package once after Eq is
     checked. Each source record must agree with that generated environment. -/
@@ -678,13 +675,13 @@ def c0ExportCheckOne
           | .ok _ => .ok next
           | .error message => .error (.declinedUnsupported message)
       | .quotientGroup group =>
-          let matches := group.length == 4 && group.all (fun expected =>
+          let metadataAgrees := group.length == 4 && group.all (fun expected =>
             match psKernelEnvironmentFind next expected.base.name with
             | some (.quotInfo got) =>
                 c0ExportSameBase got.base expected.base &&
                   c0ExportSameQuotKind got.kind expected.kind
             | _ => false)
-          if matches then .ok next
+          if metadataAgrees then .ok next
           else .error (.declinedUnsupported
             "exported quotient package differs from generated checked Quot")
       | _ => .ok next

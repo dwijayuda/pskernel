@@ -336,14 +336,11 @@ def c0ExportReadOrdinaryInductive
       expectedCtors.any (fun c => c.isUnsafe) ||
       expectedRecs.any (fun c => c.isUnsafe) then
     throw "unsupported NDJSON unsafe inductive group"
-  if !c0ExportSameNames expectedType.all [expectedType.base.name] ||
-      expectedCtors.map (fun c => c.base.name) != expectedType.ctors then
-    -- Check exact names separately (Name need not expose BEq).
-    if !c0ExportSameNames
-        (expectedCtors.map (fun c => c.base.name)) expectedType.ctors then
-      throw "malformed NDJSON inductive constructor manifest"
-    if !c0ExportSameNames expectedType.all [expectedType.base.name] then
-      throw "unsupported NDJSON inductive all-names group"
+  if !c0ExportSameNames expectedType.all [expectedType.base.name] then
+    throw "unsupported NDJSON inductive all-names group"
+  if !c0ExportSameNames
+      (expectedCtors.map (fun c => c.base.name)) expectedType.ctors then
+    throw "malformed NDJSON inductive constructor manifest"
   for (c, i) in expectedCtors.zipIdx do
     if !psKernelNameEq c.induct expectedType.base.name ||
         c.cidx != i || c.numParams != expectedType.numParams ||

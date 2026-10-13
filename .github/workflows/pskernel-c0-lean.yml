@@ -13,6 +13,7 @@ on:
       - 'psc0/packages/pskernel-c0/test/C0IndexedStoreValidationRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0IndexedScratchRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkRegression.lean'
+      - 'psc0/packages/pskernel-c0/test/C0CertifiedWorkPerfMicrobench.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialReferenceRegression.lean'
       - 'psc0/packages/pskernel-c0/test/C0OfficialNdjsonReplay.lean'
       - 'psc0/packages/pskernel-c0/test/C0Official*.ndjson'
@@ -95,6 +96,9 @@ jobs:
       - name: C0 architecture-first bounded readback quota and source authority
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ArchitectureBudgetRegression.lean
+      - name: Matched validated-work versus replay-per-query source microbenchmark
+        working-directory: psc0/packages/pskernel-c0
+        run: lake env lean --run test/C0CertifiedWorkPerfMicrobench.lean
       - name: Negative kernel conformance (no self-host)
         working-directory: psc0/packages/pskernel-c0
         run: lake env lean --run test/C0ProofIrrelevanceRegression.lean

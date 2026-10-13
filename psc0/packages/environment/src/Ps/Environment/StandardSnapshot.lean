@@ -179,12 +179,12 @@ def psStandardSnapshotFingerprint (environment : PsEnvironment) : String :=
 -- This expected value is generated only from the qualified selected prelude
 -- and deliberately changes with every intentional registered semantic update.
 -- The official kernel is still the authority for checking its declarations.
--- Reviewed /58: checked ite wrapper and the kernel-replayed 102-declaration
--- Nat.mod_lt closure (101 new names, one Nat.mod axiom replacement), no new
--- axioms or instance registrations. Linux 38457886177 compiled the portable
--- asset, verified deterministic regeneration and audited its reducibility.
+-- Reviewed /59: 80 kernel-replayed unsigned foundation declarations,
+-- four UInt axiom replacements, four OfNat registrations; no new axiom.
+-- Native source/oracles, exact regeneration and signature/status audit passed
+-- at Linux 38462478718 before independently reporting both strict digests.
 def psStandardSnapshotExpected : String :=
-  "fnv1a64:6200500133443239461"
+  "fnv1a64:13920538106612433129"
 
 
 -- Portable SHA-256 of the *same* canonical UTF-8 payload used by the existing
@@ -357,7 +357,7 @@ def psStandardSnapshotSHA256Fingerprint (environment : PsEnvironment) : String :
 -- declaration, registration, assumption or primitive. Linux 38448085898
 -- independently compiled the source/oracles and reported both new values.
 def psStandardSnapshotExpectedSHA256 : String :=
-  "sha256:c40b99aa82ba0be17ae07354e65b731a99e95d2e5bf9b3708ef56cec0be599b1"
+  "sha256:0dfde0fc7fe625fcedadcb150bc41234fbf57fac8197a663229a867e0f221bb7"
 
 def psStandardSnapshotValidateCrypto (environment : PsEnvironment)
     (expected : String) : Except String Unit := do
